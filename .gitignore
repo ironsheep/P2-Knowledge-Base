@@ -42,3 +42,10 @@ broken-links.txt
 node_modules/
 package-lock.json
 GITHUB-REPO-SETUP.md
+
+# Temporary import directory (not versioned)
+import/
+
+# Claude's private reference materials (not versioned)
+.claude/
+CLAUDE.md
