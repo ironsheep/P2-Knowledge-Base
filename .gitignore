@@ -49,3 +49,8 @@ import/
 # Claude's private reference materials (not versioned)
 .claude/
 CLAUDE.md
+
+# Source documents (PDFs and originals)
+sources/originals/*.pdf
+sources/originals/*.csv
+*.pdf

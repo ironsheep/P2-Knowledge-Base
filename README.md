@@ -14,8 +14,18 @@ This repository serves as the authoritative source for:
 
 ## 🚀 Quick Start
 
-### For AI Systems & Tools
-Navigate to [`/ai-reference/`](./ai-reference/) for structured JSON specifications and comprehensive architectural documentation designed for machine parsing.
+### 🤖 For AI Systems & LLMs
+Navigate to [`/ai-reference/`](./ai-reference/) for structured JSON specifications designed for machine parsing:
+- **Latest Version**: [`/ai-reference/versions/v0.1.0/p2-reference-v0.1.0.json`](./ai-reference/versions/v0.1.0/p2-reference-v0.1.0.json)
+- **Format**: JSON with completeness metrics and confidence scores
+- **Coverage**: 65% complete (PASM2 assembly ready, SPIN2 coming in v0.2)
+- **Usage**: Load directly into your AI context for P2 code generation
+
+**Example Prompt for AI Tools:**
+```
+Load the P2 reference from https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base/ai-reference/versions/latest/p2-reference.json
+and generate code to blink an LED on pin 56
+```
 
 ### For New P2 Developers
 Start with [`/learning-paths/`](./learning-paths/) for guided tutorials progressing from basics to advanced concepts.
