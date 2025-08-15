@@ -8,6 +8,33 @@
 
 ---
 
+## CURRENT Directory Implementation (as of 2025-08-15)
+
+### **HIDDEN/NON-VERSIONED** (in .gitignore)
+```
+/import/                              # Source .docx/.xlsx files from Google Docs
+/.claude/                             # AI-specific guides and references
+/sources/extractions-v1-archived/     # Obsolete V1 PDF extractions (migrated to V2)
+*.pdf                                 # All PDF files excluded
+.DS_Store                             # macOS metadata
+```
+
+### **VERSIONED** (in git)
+```
+/sources/extractions/                 # V2 extractions (primary, was extractions-v2)
+/sources/analysis/                    # Analysis reports
+/.sprints/                            # Sprint documentation
+/documentation-standards/             # Style guides and templates
+```
+
+### **V2 Migration Status**
+- V1 extractions archived to `/sources/extractions-v1-archived/` (hidden)
+- V2 promoted from `/sources/extractions-v2/` to `/sources/extractions/`
+- 80% knowledge coverage achieved (was 55% in V1)
+- Source files documented but not committed (.docx/.xlsx from Google Docs)
+
+---
+
 ## Proposed Directory Strategy
 
 ### **VISIBLE - Main Workspace** (Current state, active work)

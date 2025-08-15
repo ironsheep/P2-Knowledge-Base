@@ -1,118 +1,171 @@
-# P2 Knowledge Base - Extraction Index
-*Master index of all extraction, analysis, and synthesis documents*
-*Last Updated: 2025-08-14*
+# Source Extraction Index
+*Master tracking of all source processing*
 
-## Document Categories
+## 📊 Overall Extraction Status
 
-### 📥 Source Documents (Raw Inputs)
-| Document | Location | Status | Purpose |
-|----------|----------|--------|---------|
-| P2 Instructions v35 Spreadsheet | `/sources/originals/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv` | ✅ Processed | PASM2 instruction set reference |
-| P2 Documentation v35 PDF | `/sources/originals/P2 Documentation v35 - Rev B_C Silicon.pdf` | ✅ Processed | Silicon documentation (Chip Gracey) |
-| P2 Documentation Text | `/sources/originals/p2-documentation.txt` | ✅ Extracted | PDF converted to text via pdftotext |
-| P1 deSilva Tutorial | `/sources/originals/P1 DeSilvaAssemblyTutorial.pdf` | ✅ Received | Style reference for P2-for-P1 documentation |
+| Source | Extracted | Screenshots Needed | Completion |
+|--------|-----------|-------------------|------------|
+| P2 Documentation v35 (Silicon) | 90% | Yes - Tables/Diagrams | 🟡 PARTIAL |
+| PASM2 Instructions Spreadsheet | 100% | No | 🟢 COMPLETE |
+| PASM2 Manual (partial) | 40% | Yes - Remaining pages | 🔴 INCOMPLETE |
+| Spin2 Documentation v51 | 65% | Yes - Critical tables | 🟡 PARTIAL |
+| Smart Pins Documentation | 95% | Minor diagrams | 🟢 NEARLY COMPLETE |
+| DeSilva P1 Tutorial | Style only | N/A | ✅ STYLE COMPLETE |
+| Spec Sheet | 0% | Document not found | ❓ MISSING |
+| Data Sheet | 0% | Document not found | ❓ MISSING |
 
-### 📊 Extraction Documents (Processed Knowledge)
-| Extraction Document | Location | Status | Source Document | Key Findings |
-|-------------------|----------|--------|-----------------|--------------|
-| Spreadsheet Extraction | `/sources/extractions/spreadsheet-pasm2-instructions.md` | ✅ Complete | `P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv` | 491 instructions, 14 categories, 60+ questions generated |
-| PDF Text Extraction | `/sources/extractions/p2-documentation-extraction.md` | ✅ 90% Complete | `p2-documentation.txt` (from PDF) | 16 sections extracted, ~45 questions answered |
+## 🚨 CRITICAL GAPS REQUIRING SCREENSHOTS
 
-### 🔍 Analysis Documents (Understanding)
-| Analysis Document | Location | Status | Analyzes | Key Findings |
-|------------------|----------|--------|----------|--------------|
-| Documentation Audit | `/sources/analysis/p2-documentation-audit.md` | ✅ Complete | `p2-documentation-extraction.md` | 90% coverage, 2 incomplete sections, no contradictions |
-| Knowledge Gaps Master | `/sources/analysis/p2-knowledge-gaps-master.md` | ✅ Complete | Both extractions above | 100+ questions, 25 visuals needed, 2 author sections |
-| Missing Content Requests | `/sources/analysis/missing-content-requests.md` | ✅ Complete | `P2 Documentation v35 PDF` | Pages 76-84 schematics, boot section incomplete |
+### Spin2 Documentation v51 (BLOCKS CODE GENERATION)
+**Without these, we can't generate proper Spin2 code:**
+1. **Operator Precedence Table** - Page ~10-15
+2. **Complete Operators List** - Page ~10-15
+3. **Control Flow Syntax** - IF/CASE/REPEAT sections
+4. **Built-in Methods Tables** - COG/Memory/Pin methods
+5. **Float Operators Table** - All floating-point ops
 
-### 🏗️ Infrastructure Documents (Project Management)
-| Document | Location | Status | Purpose |
-|----------|----------|--------|---------|
-| Project Structure | `/.claude/project-structure.md` | ✅ Active | Maps versioned vs non-versioned locations |
-| Attribution Template | `/.claude/attribution-template.md` | ✅ Active | Standard copyright and attribution block |
-| Extraction Index | `/import/p2/EXTRACTION-INDEX.md` | ✅ Active | THIS FILE - Master document tracking |
+### Silicon Documentation v35 (IMPROVES UNDERSTANDING)
+**These would help but aren't blocking:**
+1. **Boot Process Diagram** - If exists beyond text
+2. **Hub Timing Diagrams** - Egg-beater visualization
+3. **Event Routing Matrix** - If exists as table
+4. **Architecture Block Diagrams** - Overall P2 structure
 
-### 📝 Pending Synthesis Documents (To Be Created)
-| Document | Planned Location | Status | Purpose |
-|-----------------|-----------------|--------|---------|
-| P2 Knowledge Synthesis | `/ai-reference/pasm2-knowledge-synthesis.md` | ⏳ Pending | Merged knowledge from all sources |
-| Condition Codes Reference | `/ai-reference/condition-codes.md` | ⏳ Pending | Missing EEEE values 0000-1111 |
-| Smart Pin Complete Reference | `/ai-reference/smart-pins-complete.md` | ⏳ Pending | All 32 modes with X/Y/Z parameters |
-| Boot Process Complete | `/ai-reference/boot-process.md` | ⏳ Blocked | Waiting for Chip Gracey input |
+### PASM2 Manual (IF AVAILABLE)
+**Would provide instruction descriptions:**
+1. **Any instruction pages beyond Section 2**
+2. **Flag effects tables**
+3. **Condition codes table**
 
-## Knowledge Extraction Progress
+## 📈 KNOWLEDGE COVERAGE BY DOMAIN
 
-### ✅ What We Have Extracted
-- **Architecture**: COGs, memory, pipeline, hub interface (✓)
-- **Instructions**: 491 instructions categorized, patterns identified (✓)
-- **Smart Pins**: All 32 modes listed, basic parameters (✓)
-- **CORDIC**: 8 operations, timing, usage (✓)
-- **Events/Interrupts**: All 16 events, 3 interrupt levels (✓)
-- **Debug Features**: Hidden interrupt, register save/restore (✓)
-- **Locks**: 16 semaphores, atomic operations (✓)
+| Domain | Text Extracted | Tables/Diagrams | Overall |
+|--------|---------------|-----------------|---------|
+| **Architecture** | 95% | 50% | 85% |
+| **Instruction Syntax** | 100% | 100% | 100% |
+| **Instruction Semantics** | 36% | 0% | 36% |
+| **Spin2 Language** | 70% | 0% | 35% |
+| **Smart Pins** | 90% | 60% | 75% |
+| **Events/Interrupts** | 85% | 30% | 70% |
+| **CORDIC** | 90% | 50% | 80% |
+| **Boot Process** | 20% | 0% | 10% |
 
-### 📝 What We're Missing (Knowledge Gaps)
-- **Boot Process**: Only headers, no actual content (Chip must provide)
-- **Bytecode Execution**: Marked "to be completed" (Chip must provide)
-- **Condition Codes**: 16 EEEE values not documented anywhere
-- **Visual Content**: ~25 diagrams and schematics (pages 76-84)
-- **Timing Details**: Exact cycle counts for edge cases
-- **USB Implementation**: Mode %11011 details missing
-- **Individual Instructions**: Beyond spreadsheet basics
+## 🔴 INSTRUCTION SEMANTICS - THE REAL GAP
 
-## Source Document Processing Status
+**Current Status:**
+- Have syntax/encoding for 491 instructions ✅
+- Have descriptions for ~165 instructions (36%) ⚠️
+- Missing descriptions for ~290 instructions (64%) ❌
 
-### ✅ Fully Processed Sources
-- `P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv` → `spreadsheet-pasm2-instructions.md`
-- `P2 Documentation v35 - Rev B_C Silicon.pdf` → `p2-documentation.txt` → `p2-documentation-extraction.md`
+**Instructions Missing Descriptions by Category:**
+- COG Core Operations: ~60 missing
+- Branch/Flow Control: ~40 missing
+- Hub Memory Operations: ~20 missing
+- Smart Pin Operations: ~30 missing
+- Event System: ~50 missing
+- CORDIC Operations: ~15 missing
+- Specialized Hardware: ~40 missing
+- Register Alteration: ~20 missing
+- System Control: ~15 missing
 
-### ⏳ Awaiting Processing
-- Screenshots from PDF pages 76-84 (pin schematics)
-- Condition codes table (source unknown)
-- Boot process details (awaiting Chip Gracey)
-- Bytecode execution details (awaiting Chip Gracey)
+## ✅ COMPLETED EXTRACTIONS
 
-### 📝 Future Sources Expected
-- *List will grow as new documents are provided*
+### Fully Extracted Documents:
+1. **PASM2 Instructions Spreadsheet** (spreadsheet-pasm2-instructions.md)
+   - All 491 instructions with encoding
+   - Categories and groupings
+   - Timing information
 
-## Processing Workflow
+2. **Smart Pins Documentation** (95% complete)
+   - 32 modes documented
+   - Configuration methods
+   - Most examples included
 
-```
-1. RAW INPUT → 2. TEXT EXTRACTION → 3. KNOWLEDGE EXTRACTION → 4. GAP ANALYSIS → 5. SYNTHESIS
-     ↓              ↓                    ↓                        ↓               ↓
-   PDF/CSV      .txt file          .md extraction           gaps.md         final.md
-                                   answers questions      new questions    complete ref
-```
+### Style Guides Extracted:
+1. **DeSilva Tutorial Style** (desilva-style-guide.md)
+2. **Smart Pins Style** (smartpins-style-guide.md)
+3. **PASM2 Spreadsheet Style** (pasm2-spreadsheet-style-guide.md)
+4. **PASM2 Manual Style** (pasm2-manual-style-guide.md)
 
-## Current State Summary
-- **Extraction**: 90% complete from available text
-- **Questions Answered**: ~45 of 60 from spreadsheet
-- **New Questions Generated**: 100+ specific technical questions
-- **Visual Content Needed**: 25 items identified with page numbers
-- **Blocked Items**: 2 major sections need author input
+## 🟡 PARTIAL EXTRACTIONS NEEDING SCREENSHOTS
 
-## Next Actions
-1. ⏳ Process screenshots when provided (place in `/import/p2/`)
-2. ⏳ Get answers from Chip Gracey for boot/bytecode sections
-3. ⏳ Find condition codes table (may be in different document)
-4. ⏳ Create final synthesis document combining all knowledge
-5. ⏳ Move completed extractions to `/ai-reference/extractions/`
+### Spin2 Documentation (65% extracted)
+**Have:**
+- Language structure (CON/OBJ/VAR/PUB/PRI/DAT)
+- DEBUG system complete
+- Inline assembly basics
 
-## Quick Reference - Key Documents
+**Need Screenshots For:**
+- Operator precedence table (CRITICAL)
+- Complete operator list (CRITICAL)
+- Control flow syntax (CRITICAL)
+- Built-in methods (CRITICAL)
 
-### For Immediate Use:
-- Questions for Chip: `/import/p2/p2-knowledge-gaps-master.md` (Section 1)
-- Screenshots needed: `/import/p2/p2-knowledge-gaps-master.md` (Section 4)
-- Current knowledge: `/import/p2/p2-documentation-extraction.md`
+### Silicon Documentation (90% extracted)
+**Have:**
+- Architecture complete
+- Memory model complete
+- CORDIC description
+- Smart pins overview
+- Events/interrupts
 
-### For Development:
-- Instruction reference: `/ai-reference/extractions/spreadsheet-pasm2-instructions.md`
-- Architecture details: `/import/p2/p2-documentation-extraction.md`
+**Need Screenshots For:**
+- Boot process details (if available)
+- Timing diagrams
+- Block diagrams (helpful but not critical)
 
-## Version History
-- 2025-08-14: Initial index created
-- 2025-08-14: Completed text extraction from P2 Documentation v35
-- 2025-08-14: Identified 100+ knowledge gaps
+## 📋 ACTION ITEMS
+
+### Immediate (For v1.0):
+1. **Get Spin2 operator tables** - Screenshots critical
+2. **Get Spin2 control flow** - Screenshots critical
+3. **Get Spin2 built-in methods** - Screenshots critical
+
+### Important (Quality improvement):
+4. **Get Silicon boot process** - If more detail exists
+5. **Get timing diagrams** - For optimization
+6. **Complete PASM2 Manual** - If full document available
+
+### Long-term (Completeness):
+7. **Get instruction descriptions** - Need Chip's input for ~290 instructions
+8. **Find spec/data sheets** - If they exist
+9. **Extract remaining Smart Pin modes** - Minor gaps
+
+## 📊 METRICS SUMMARY
+
+**Documents Processed:** 6 of 8 expected
+**Text Extraction:** ~75% complete
+**Table Extraction:** ~20% complete (needs screenshots)
+**Overall Knowledge:** ~55% of P2 documented
+
+**For AI Code Generation:**
+- **Syntax Knowledge:** 100% ✅
+- **Semantic Knowledge:** 36% ⚠️
+- **Language Features:** 65% 🟡
+- **Hardware Understanding:** 85% 🟢
+
+## 🎯 BOTTOM LINE
+
+**We need screenshots to complete extraction of:**
+1. Spin2 operator/precedence tables (CRITICAL)
+2. Spin2 control flow syntax (CRITICAL)  
+3. Spin2 built-in methods (CRITICAL)
+4. Silicon boot/timing details (HELPFUL)
+
+**We need from Chip:**
+1. ~290 instruction descriptions (one sentence each)
+2. Confirmation on operator precedence
+3. Inline PASM2 rules/restrictions
+
+**With screenshots, we can reach:**
+- ~80% extraction completion
+- Full Spin2 language documentation
+- v1.0 release readiness
+
+**Without instruction descriptions, we're limited to:**
+- 36% instruction semantic coverage
+- Conservative code generation using known instructions
 
 ---
-*Note: This index is maintained in `/import/p2/` as it tracks working documents. When extraction is complete, consider moving to `/.claude/` for permanent reference.*
+
+*Last Updated: 2025-08-15*

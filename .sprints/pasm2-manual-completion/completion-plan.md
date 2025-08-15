@@ -83,35 +83,55 @@
 
 ### Who Uses PASM2 Documentation:
 
-#### 1. **Production Developers** (30%)
+#### 1. **Production Developers** (25%)
 - Writing commercial P2 products
 - Need absolute accuracy for shipping code
 - Care about edge cases and timing precision
 - Zero tolerance for errors
 
-#### 2. **Driver Writers** (25%)
+#### 2. **Driver Writers** (20%)
 - Creating Smart Pin drivers, communication protocols
 - Need complete flag documentation
 - Care about performance optimization
 - Want hardware interaction details
+- **Smart Pin Complexity**: Need to understand what's offloaded vs what remains
+- **Streamer Coordination**: How to use streamers with Smart Pins effectively
+- **Resource Conflicts**: Understanding commodity resources (streamers are limited)
 
-#### 3. **Learning Developers** (20%)
+#### 3. **Learning Developers** (15%)
 - Transitioning from Spin2 to PASM2
 - Need clear explanations
 - Want examples (even if minimal)
 - Appreciate "why" not just "what"
+- **How to Think**: Need mental models for parallel processing
+- **Coordination Patterns**: How to spread function across COGs
+- **Gateway Design**: Using COGs as sensor gateways
 
-#### 4. **Tool Developers** (15%)
+#### 4. **Tool Developers** (10%)
 - Building assemblers, compilers, debuggers
 - Need precise encoding specifications
 - Care about undocumented behaviors
 - Want complete instruction coverage
+- **SKIP Instruction**: Critical for emulator development
+- **Emulation Patterns**: P2 excels at emulating other architectures
+- **Advanced Features**: Only 3-4 people currently understand SKIP well enough
 
 #### 5. **P1 Veterans** (10%)
 - Know PASM, learning PASM2
 - Need P1→P2 differences highlighted
 - Want familiar concepts connected
 - Appreciate migration notes
+- **Major Friction**: Many say "P2 is too hard, too weird, too much"
+- **Product Manufacturers**: Eager to migrate but need smoothing
+- **Critical Needs**: Major features to learn first, not just similarities
+- **Migration Path**: What's different AND why it matters
+
+#### 6. **Parallel Processing Learners** (10%)
+- Educational community wanting to teach parallel processing
+- May know P1 basics from downloaded code
+- Need to understand P2 as "amazing parallel processing"
+- **Attraction Point**: Sell P2's unique parallel capabilities
+- **Educational Focus**: How to teach with P2
 
 ### How Different Audiences Will Navigate:
 
@@ -141,6 +161,31 @@
 - **Functional examples** always (intent must be clear)
 - **Graduated complexity** for concepts like Smart Pins
 - **Visual aids** where they reduce cognitive load
+- **Strong Pattern Recognition**: Consistent instruction format for easy navigation
+
+### Document Boundary Decisions:
+
+#### PASM2 Manual vs Smart Pins Document:
+- **In PASM2**: Essential Smart Pin instructions and basic usage
+- **In Smart Pins Doc**: Rich detail, all modes, complete patterns
+- **Strategy**: PASM2 gives quick start, references Smart Pins doc for depth
+
+#### PASM2 Manual vs DeSilva Guide:
+- **In PASM2**: Technical reference, minimal learning narrative
+- **In DeSilva**: Progressive learning, extensive examples
+- **Strategy**: PASM2 assumes knowledge, DeSilva builds it
+
+#### PASM2 Manual vs P1 Migration Guide:
+- **In PASM2**: Brief P1 notes where relevant
+- **In Migration Guide**: Complete transition strategy
+- **Strategy**: PASM2 focuses on P2, separate doc for migration
+
+#### PASM2 Manual vs Emulator Development Guide:
+- **In PASM2**: SKIP instruction documentation
+- **In Emulator Guide**: Complete emulation patterns and techniques
+- **Strategy**: Consider separate advanced guide for emulation
+
+**NOTE: Resume plan review at Section 3**
 
 ---
 

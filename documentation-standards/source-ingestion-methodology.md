@@ -139,12 +139,107 @@ When creating new documentation, choose style based on:
 - [ ] Add to style template library
 - [ ] Update style selection matrix
 - [ ] Document source lineage
+- [ ] **Cross-Source Q&A Audit** (NEW)
 
 ### Quality Questions:
 - Could someone replicate this style from our analysis?
 - Have we captured what makes this document effective?
 - Do we understand the author's choices?
 - Can we articulate when to use/avoid this style?
+- **Does this source answer questions from previous sources?**
+- **What new questions does this source raise?**
+
+---
+
+## 🔄 Cross-Source Q&A Audit (NEW)
+
+### Purpose
+Track how each new source document answers questions raised by previous sources, building trust in our data through cross-validation.
+
+### Process
+
+#### Step 1: Review Previous Questions
+For each new source, review all unanswered questions from:
+- Master gaps document
+- Previous source audit reports
+- Extraction documents
+- Sprint planning questions
+
+#### Step 2: Mark Answered Questions
+Document which questions this source answers:
+```markdown
+## Questions Answered by [Source Name]
+
+### From [Previous Source]:
+✅ **Question**: [Original question]
+   **Answer**: [Answer from new source with page/section reference]
+   **Confidence**: [High/Medium/Low]
+
+⚠️ **Question**: [Original question]
+   **Partial Answer**: [What was answered and what remains]
+   **Still Need**: [What information is still missing]
+```
+
+#### Step 3: Identify New Questions
+Document new questions raised by this source:
+```markdown
+## New Questions Raised
+
+### Technical Questions:
+1. [Question] - [Why this matters]
+2. [Question] - [Impact on understanding]
+
+### Implementation Questions:
+1. [Question] - [Practical importance]
+```
+
+#### Step 4: Track Conflicts
+Document any contradictions:
+```markdown
+## Conflicts Identified
+
+⚠️ **Conflict**: [Topic]
+- **Source A says**: [Statement with reference]
+- **Source B says**: [Conflicting statement with reference]
+- **Resolution**: [Which is authoritative and why]
+```
+
+#### Step 5: Update Master Tracking
+Maintain a master question status:
+```markdown
+## Question Status Summary
+
+### Fully Answered (Trust Level: HIGH)
+- [Question] - Answered by [Sources]
+- [Question] - Confirmed by [Multiple sources]
+
+### Partially Answered (Trust Level: MEDIUM)
+- [Question] - Partial in [Source], need [Detail]
+
+### Still Open (Trust Level: LOW)
+- [Question] - No source addresses this
+```
+
+### Trust Building Metrics
+
+**Data Trust Indicators**:
+- ✅ **High Trust**: Multiple sources confirm, no conflicts
+- ⚠️ **Medium Trust**: Single source, no conflicts
+- ❌ **Low Trust**: Conflicts exist or gaps remain
+
+**Source Completeness Score**:
+- Questions answered from previous sources: X/Y
+- New questions raised: Z
+- Conflicts introduced: N
+- Trust improvement: +X% (answered questions / total questions)
+
+### Benefits
+
+1. **Builds Confidence**: Know which data to trust
+2. **Identifies Gaps**: Clear view of what's still needed
+3. **Resolves Conflicts**: Systematic conflict resolution
+4. **Tracks Progress**: Measurable trust improvement
+5. **Guides Prioritization**: Focus on high-value gaps
 
 ---
 

@@ -18,7 +18,7 @@ This repository serves as the authoritative source for:
 Navigate to [`/ai-reference/`](./ai-reference/) for structured JSON specifications designed for machine parsing:
 - **Latest Version**: [`/ai-reference/versions/v0.1.0/p2-reference-v0.1.0.json`](./ai-reference/versions/v0.1.0/p2-reference-v0.1.0.json)
 - **Format**: JSON with completeness metrics and confidence scores
-- **Coverage**: 65% complete (PASM2 assembly ready, SPIN2 coming in v0.2)
+- **Coverage**: 80% complete (V2 extraction milestone achieved - PASM2 and SPIN2 operational)
 - **Usage**: Load directly into your AI context for P2 code generation
 
 **Example Prompt for AI Tools:**

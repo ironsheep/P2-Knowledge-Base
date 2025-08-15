@@ -26,7 +26,7 @@
 ### PASM2 Instruction Spreadsheet  
 - **Content Extraction**: ✅ Complete (491 instructions)
 - **Audit Status**: ⏳ Needs validation audit
-- **Style Guide**: N/A (spreadsheet format)
+- **Style Guide**: ✅ Extracted (reference style)
 - **Health**: 🟡 PARTIAL - Needs audit
 - **Priority**: 2 (complete audit)
 
@@ -56,25 +56,25 @@
 - **Priority**: 1 (new document, extract with style)
 
 ### P2 SmartPins Documentation
-- **Content Extraction**: ⏳ Not started
-- **Audit Status**: ⏳ Not started
-- **Style Guide**: ⏳ To be extracted with content
-- **Health**: ⏳ PENDING
-- **Priority**: 1 (new document, extract with style)
+- **Content Extraction**: ✅ Text extracted
+- **Audit Status**: ⏳ Needs completion audit
+- **Style Guide**: ✅ Extracted (Jon Titus style)
+- **Health**: 🟡 PARTIAL - Needs audit
+- **Priority**: 2 (complete audit)
 
 ### PASM2 Manual
 - **Content Extraction**: 🟡 9174 lines extracted
 - **Audit Status**: ⏳ Needs completion audit
-- **Style Guide**: 🔴 Not extracted
-- **Health**: 🟡 PARTIAL
-- **Priority**: 1 (complete extraction with style)
+- **Style Guide**: ✅ Extracted (technical reference style)
+- **Health**: 🟡 PARTIAL - Needs content completion
+- **Priority**: 1 (complete extraction)
 
 ### DeSilva P1 Tutorial
-- **Content Extraction**: ⏳ Not started (for style only)
+- **Content Extraction**: N/A (P1 content)
 - **Audit Status**: N/A
-- **Style Guide**: ⏳ Primary purpose is style extraction
-- **Health**: ⏳ PENDING
-- **Priority**: 1 (style extraction is main goal)
+- **Style Guide**: ✅ Extracted (teaching style)
+- **Health**: ✅ COMPLETE (style only)
+- **Priority**: Done
 
 ---
 
@@ -121,13 +121,13 @@
 | Document | Content | Audit | Style | Overall Health |
 |----------|---------|-------|-------|----------------|
 | Silicon Doc | ✅ 90% | ⏳ | 🔴 | 🟡 PARTIAL |
-| PASM2 Sheet | ✅ | ⏳ | N/A | 🟡 PARTIAL |
+| PASM2 Sheet | ✅ | ⏳ | ✅ | 🟡 PARTIAL |
 | Spin2 Doc | 🟡 | 🔴 | 🔴 | 🔴 INCOMPLETE |
-| PASM2 Manual | 🟡 | ⏳ | 🔴 | 🟡 PARTIAL |
-| DeSilva | ⏳ | N/A | ⏳ | ⏳ PENDING |
+| PASM2 Manual | 🟡 | ⏳ | ✅ | 🟡 PARTIAL |
+| DeSilva | N/A | N/A | ✅ | ✅ COMPLETE |
 | Spec Sheet | ⏳ | ⏳ | ⏳ | ⏳ PENDING |
 | Data Sheet | ⏳ | ⏳ | ⏳ | ⏳ PENDING |
-| SmartPins | ⏳ | ⏳ | ⏳ | ⏳ PENDING |
+| SmartPins | ✅ | ⏳ | ✅ | 🟡 PARTIAL |
 
 ---
 
@@ -136,6 +136,7 @@
 - **2025-08-14**: Initial health status created
 - **2025-08-14**: Added style guide tracking for all documents
 - **2025-08-14**: Established three-tier priority system
+- **2025-08-14**: Updated status - extracted style guides for PASM2 Sheet, PASM2 Manual, SmartPins, DeSilva
 
 ---
 

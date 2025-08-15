@@ -54,3 +54,6 @@ CLAUDE.md
 sources/originals/*.pdf
 sources/originals/*.csv
 *.pdf
+
+# Archived V1 extractions (superseded by V2)
+sources/extractions-v1-archived/
