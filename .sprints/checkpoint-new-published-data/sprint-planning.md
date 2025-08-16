@@ -8,10 +8,11 @@
 
 ## Current Release Context (v1.0)
 
-### What We Can Publish NOW
-Based on validated sources, we have sufficient content for **P2 AI Knowledge Base v1.0**:
+### What We Can Publish NOW - EXPANDED V1.0!
+Based on validated sources and focused extractions, we have sufficient content for **P2 Knowledge Base v1.0** with THREE major deliverables:
 
-#### 1. PASM2 Complete Instruction Set (491 instructions)
+#### DELIVERABLE 1: AI Knowledge Base
+**1a. PASM2 Complete Instruction Set (491 instructions)
 - Source: P2 Instructions v35 spreadsheet (fully extracted)
 - Source: P2 Documentation v35 PDF (silicon details)
 - Source: PASM2 Manual draft (partial but authoritative)
@@ -31,17 +32,33 @@ Based on validated sources, we have sufficient content for **P2 AI Knowledge Bas
 - Inline PASM2 capability
 - Built-in methods and operators
 
-#### 4. Initial Pattern Library
+**1d. Initial Pattern Library**
 - Common instruction sequences
 - Basic multi-cog coordination
 - Pin configuration templates
 - Memory access patterns
 
-### Trust Foundation
+#### DELIVERABLE 2: Terminal Window User's Manual
+- Complete DEBUG display documentation
+- SCOPE, PLOT, LOGIC, FFT windows
+- Practical examples and use cases
+- Window management strategies
+- Based on SPIN2 v51 focused extraction
+
+#### DELIVERABLE 3: Single-Step Debugger User's Manual
+- Complete PASM debugger documentation
+- Step-by-step debugging workflows
+- Multi-COG debugging strategies
+- Professional setup recommendations (3-monitor solution)
+- Based on SPIN2 v51 focused extraction
+
+### Trust Foundation & Impact
 - 7 official sources validated and extracted
 - Direct from Chip Gracey (P2 architect)
 - Cross-referenced between multiple sources
 - Known gaps documented transparently
+- **NEW**: Two practical user manuals that document features most P2 users don't know exist
+- **IMPACT**: From "no documentation" to "three deliverables" in days
 
 ## Sprint Phases
 

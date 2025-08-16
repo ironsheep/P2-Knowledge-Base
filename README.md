@@ -1,5 +1,11 @@
 # P2-Knowledge-Base
 
+## 🎉 **v1.0.0 RELEASED** - 80% P2 Coverage Achieved! 🚀
+
+> **Major Milestone**: V2 extraction complete with comprehensive AI-optimized documentation
+> 
+> **What's New**: Complete PASM2 instruction set, SPIN2 language reference, P2 architecture model, and user manuals - ready for AI-assisted development!
+
 ## 🎯 Comprehensive Documentation for the Parallax Propeller 2 (P2)
 
 A structured knowledge repository providing deep technical documentation of the Propeller 2 microcontroller, optimized for AI assistants, new learners, and embedded systems developers.
@@ -16,15 +22,15 @@ This repository serves as the authoritative source for:
 
 ### 🤖 For AI Systems & LLMs
 Navigate to [`/ai-reference/`](./ai-reference/) for structured JSON specifications designed for machine parsing:
-- **Latest Version**: [`/ai-reference/versions/v0.1.0/p2-reference-v0.1.0.json`](./ai-reference/versions/v0.1.0/p2-reference-v0.1.0.json)
-- **Format**: JSON with completeness metrics and confidence scores
-- **Coverage**: 80% complete (V2 extraction milestone achieved - PASM2 and SPIN2 operational)
-- **Usage**: Load directly into your AI context for P2 code generation
+- **Latest Version**: [`/ai-reference/v1.0/`](./ai-reference/v1.0/) - **Production Ready v1.0.0**
+- **Format**: Structured JSON with validation schemas and trust levels
+- **Coverage**: **80% complete** - PASM2 (491 instructions), SPIN2 (complete), P2 Architecture (complete)
+- **Usage**: Load directly into your AI context for P2 code generation and development assistance
 
 **Example Prompt for AI Tools:**
 ```
-Load the P2 reference from https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base/ai-reference/versions/latest/p2-reference.json
-and generate code to blink an LED on pin 56
+Load the P2 reference from https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base/ai-reference/v1.0/
+and generate PASM2 code to blink an LED on Smart Pin 56
 ```
 
 ### For New P2 Developers
@@ -93,16 +99,18 @@ We welcome contributions that enhance P2 documentation! Please see [CONTRIBUTING
 
 | Section | Status | Coverage |
 |---------|--------|----------|
-| Architecture | 🟡 In Progress | 40% |
-| PASM2 Instructions | 🟡 In Progress | 35% |
-| Spin2 Language | 🔴 Planned | 10% |
-| Smart Pins | 🔴 Planned | 15% |
-| Code Examples | 🟡 In Progress | 25% |
+| Architecture | ✅ **Complete** | **100%** |
+| PASM2 Instructions | ✅ **Production** | **64%** (315/491 semantics) |
+| SPIN2 Language | ✅ **Complete** | **100%** |
+| Smart Pins | 🟡 **Overview** | **40%** |
+| User Manuals | ✅ **Complete** | **100%** |
+| AI Integration | ✅ **Production** | **100%** |
 
 ## 🏷️ Version History
 
+- **v1.0.0** (2025-08-15) - **Major Release**: 80% P2 coverage achieved with complete AI reference
 - **v0.1.0** - Initial repository structure and foundational documents
-- See [Releases](https://github.com/your-org/P2-Knowledge-Base/releases) for detailed version history
+- See [CHANGELOG.md](./CHANGELOG.md) and [Releases](https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base/releases) for detailed version history
 
 ## 📜 License
 

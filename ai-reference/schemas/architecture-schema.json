@@ -1,0 +1,189 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ironsheepproductionsllc.github.io/P2-Knowledge-Base/schemas/architecture-schema.json",
+  "title": "P2 Architecture Schema",
+  "description": "JSON schema for Parallax Propeller 2 hardware architecture documentation",
+  "version": "1.0.0",
+  "type": "object",
+  "properties": {
+    "processor": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string"},
+        "revision": {"type": "string", "pattern": "^Rev [A-Z]$"},
+        "clockFrequency": {
+          "type": "object",
+          "properties": {
+            "internal": {"type": "integer", "description": "Internal RC oscillator frequency in Hz"},
+            "crystal": {"type": "integer", "description": "External crystal frequency in Hz"},
+            "maximum": {"type": "integer", "description": "Maximum safe frequency in Hz"}
+          }
+        },
+        "packageTypes": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Available package configurations"
+        }
+      },
+      "required": ["name", "revision", "clockFrequency"]
+    },
+    "cogs": {
+      "type": "object",
+      "properties": {
+        "count": {"type": "integer", "minimum": 1, "maximum": 8},
+        "architecture": {"type": "string", "enum": ["symmetric", "asymmetric"]},
+        "memory": {
+          "type": "object",
+          "properties": {
+            "cogRam": {"type": "integer", "description": "COG RAM size in bytes"},
+            "lutRam": {"type": "integer", "description": "LUT RAM size in bytes"},
+            "shared": {"type": "boolean", "description": "Whether LUT can be shared between COGs"}
+          }
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "List of COG capabilities"
+        }
+      },
+      "required": ["count", "architecture", "memory"]
+    },
+    "hubMemory": {
+      "type": "object",
+      "properties": {
+        "size": {"type": "integer", "description": "Total hub memory in bytes"},
+        "accessPattern": {"type": "string", "enum": ["round-robin", "arbitrated"]},
+        "bandwidth": {"type": "string", "description": "Memory bandwidth characteristics"},
+        "regions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "startAddress": {"type": "string", "pattern": "^0x[0-9A-Fa-f]+$"},
+              "endAddress": {"type": "string", "pattern": "^0x[0-9A-Fa-f]+$"},
+              "purpose": {"type": "string"},
+              "writable": {"type": "boolean"}
+            },
+            "required": ["name", "startAddress", "endAddress", "purpose"]
+          }
+        }
+      },
+      "required": ["size", "accessPattern"]
+    },
+    "smartPins": {
+      "type": "object",
+      "properties": {
+        "count": {"type": "integer", "minimum": 1, "maximum": 64},
+        "modes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "modeNumber": {"type": "integer", "minimum": 0, "maximum": 31},
+              "name": {"type": "string"},
+              "category": {"type": "string", "enum": ["digital", "analog", "serial", "pwm", "counter"]},
+              "description": {"type": "string"}
+            },
+            "required": ["modeNumber", "name", "category"]
+          }
+        },
+        "configuration": {
+          "type": "object",
+          "properties": {
+            "registers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "bits": {"type": "integer"},
+                  "purpose": {"type": "string"}
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": ["count", "modes"]
+    },
+    "peripherals": {
+      "type": "object",
+      "properties": {
+        "cordic": {
+          "type": "object",
+          "properties": {
+            "functions": {"type": "array", "items": {"type": "string"}},
+            "precision": {"type": "string"},
+            "performance": {"type": "string"}
+          }
+        },
+        "streamer": {
+          "type": "object",
+          "properties": {
+            "capabilities": {"type": "array", "items": {"type": "string"}},
+            "dataWidth": {"type": "integer"},
+            "modes": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "events": {
+          "type": "object",
+          "properties": {
+            "types": {"type": "array", "items": {"type": "string"}},
+            "sources": {"type": "array", "items": {"type": "string"}},
+            "polling": {"type": "boolean"},
+            "interrupts": {"type": "boolean"}
+          }
+        }
+      }
+    },
+    "bootProcess": {
+      "type": "object",
+      "properties": {
+        "modes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "pins": {"type": "array", "items": {"type": "integer"}},
+              "description": {"type": "string"},
+              "priority": {"type": "integer"}
+            }
+          }
+        },
+        "romContents": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Built-in ROM capabilities"
+        }
+      }
+    },
+    "powerManagement": {
+      "type": "object",
+      "properties": {
+        "voltageRange": {
+          "type": "object",
+          "properties": {
+            "minimum": {"type": "number"},
+            "maximum": {"type": "number"},
+            "typical": {"type": "number"}
+          }
+        },
+        "powerModes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "consumption": {"type": "string"},
+              "wakeupSources": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": ["processor", "cogs", "hubMemory", "smartPins", "peripherals"],
+  "additionalProperties": false
+}

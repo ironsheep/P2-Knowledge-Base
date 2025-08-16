@@ -54,6 +54,41 @@ Context switching kills productivity. When you pick up a task after days/weeks, 
 
 ---
 
+#### Autonomous Execution Defense Strategy
+**Critical for Independent Operation**: Protect against compaction/crashes during autonomous work
+
+**When to Update Context Keys**:
+- **New Understanding Achieved** - Store insights immediately
+- **Sub-step Completion** - Record progress milestones  
+- **Something Worth Investigating** - Note for later (even if not TodoWrite-worthy)
+- **Decision Points** - Document choices made and reasoning
+- **TodoWrite Changes** - Mirror critical state to persistent storage
+
+**Warning Signs to Watch For**:
+- TodoWrite list suddenly disappears (major crash indicator)
+- Thinking feels fuzzy about current task
+- Can't remember what I was just working on
+- Uncertainty about progress made
+
+**Recovery Protocol**:
+1. **STOP** immediately when something feels wrong
+2. Run `context_resume` to get full state
+3. Read most recent context keys
+4. Check for `todowrite_current_task_*` key
+5. Reconstruct TodoWrite from context if needed
+6. Resume from last known good state
+
+**Defensive Context Patterns**:
+- `todowrite_current_task_[id]` - Atomic TodoWrite backup
+- `current_understanding_[topic]` - Insights and discoveries
+- `progress_milestone_[task]` - Completion records
+- `investigation_queue` - Things to look at later
+- `decision_log_[context]` - Choices and reasoning
+
+**Benefits**: Enables true autonomous operation with crash resilience
+
+---
+
 ### Phase 4: Sprint Retrospective and Pattern Capture
 **Goal**: Improve future sprint planning with discovered insights
 
