@@ -39,6 +39,16 @@ Start with [`/learning-paths/`](./learning-paths/) for guided tutorials progress
 ### For Experienced Developers
 Jump to [`/developer-reference/`](./developer-reference/) for detailed technical specifications, timing characteristics, and optimization strategies.
 
+## 📊 Documentation Capability Status
+
+**Live Assessment**: [`PASM2-DOCUMENTATION-CAPABILITY-ASSESSMENT.md`](./PASM2-DOCUMENTATION-CAPABILITY-ASSESSMENT.md)
+**Sources Inventory**: [`INGESTED-SOURCES-CATALOG.md`](./sources/INGESTED-SOURCES-CATALOG.md)
+
+Current capability to generate comprehensive instruction documentation:
+- **✅ 64% Complete**: 315 instructions with full screenshot-level detail
+- **⚠️ 36% Basic**: 176 instructions with syntax and categories only  
+- **📈 Target**: 100% comprehensive coverage with timing and cross-references
+
 ## 📖 Documentation Structure
 
 ```
@@ -49,7 +59,8 @@ P2-Knowledge-Base/
 ├── /quick-reference/        # ⚡ Cheat sheets and tables
 ├── /code-examples/          # 💻 Working code samples
 ├── /migration-guides/       # 🔄 P1 to P2 transition
-└── /tools/                  # 🛠️ Documentation utilities
+├── /tools/                  # 🛠️ Documentation utilities
+└── PASM2-DOCUMENTATION-CAPABILITY-ASSESSMENT.md  # 📊 Live capability tracking
 ```
 
 ## 🎓 What You'll Find Here

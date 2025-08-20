@@ -12,6 +12,92 @@ Every document in our knowledge base has:
 - **Dependency chain**: What depends on this document
 - **Overall trust**: Combined assessment for user confidence
 
+## Precise Source Attribution
+
+### Import Source Files (Physical Sources)
+```
+📂 /import/
+├── p2/
+│   ├── pasm2-manual-extracted.txt
+│   │   ├── Origin: Propeller 2 Assembly Language (PASM2) Manual.docx
+│   │   ├── Date: November 1, 2022
+│   │   ├── Status: PRELIMINARY (Parallax)
+│   │   ├── Authority: Parallax Inc. official (incomplete)
+│   │   └── Size: 10,771 paragraphs, 219 tables
+│   │
+│   ├── spin2-v51-documentation.pdf (EXPECTED)
+│   │   ├── Origin: SPIN2 v51 Documentation Package
+│   │   ├── Date: 2025
+│   │   ├── Status: PRODUCTION RELEASE
+│   │   ├── Authority: Parallax Inc. official
+│   │   └── Contains: Debugger, Terminal Windows, Language Reference
+│   │
+│   └── p2-silicon-documentation.pdf (EXPECTED)
+│       ├── Origin: P2 Hardware Documentation
+│       ├── Date: Latest silicon revision
+│       ├── Status: PRODUCTION
+│       └── Authority: Parallax Inc. official
+│
+├── source-code/
+│   ├── spin-interpreter/v51/Spin2_interpreter.spin2
+│   │   ├── Origin: SPIN2 v51 Distribution
+│   │   ├── Authority: Parallax Inc. official production source
+│   │   ├── Analysis: /sources/extractions/spin-interpreter-v51-complete-analysis.md
+│   │   └── Trust: 🟢 GREEN SOURCE VALIDATED
+│   │
+│   ├── chip-flash-filesystem/flash_fs_v2.0.0.spin2
+│   │   ├── Origin: Chip Gracey's P2 Edge Module filesystem
+│   │   ├── Core System: Chip Gracey (P2 architect, flash algorithms)
+│   │   ├── Production Enhancements: Stephen M. Moraco (Iron Sheep Productions, LLC)
+│   │   │   ├── Full File System API wrapper
+│   │   │   ├── Multi-COG locking system implementation
+│   │   │   ├── Comprehensive unit testing framework (1000+ tests)
+│   │   │   └── System integration and robustness validation
+│   │   ├── Additional Contributors: Jon McPhalen
+│   │   ├── Analysis: /sources/extractions/chip-flash-filesystem-complete-analysis.md
+│   │   └── Trust: 🟢 GREEN SOURCE VALIDATED
+│   │
+│   ├── spin-debugger/v51/ (PENDING)
+│   └── spin-flash-loader/v51/ (PENDING)
+│
+└── screenshots/ (CRITICAL - IN PROGRESS)
+    ├── debugger-windows/ (Priority 1-6)
+    ├── terminal-windows/ (Priority 7-12)
+    ├── architecture-diagrams/ (Priority 13-18)
+    └── timing-diagrams/ (Priority 19-24)
+```
+
+### Source-to-Extraction Mapping
+```
+Source Attribution Chain:
+
+/import/p2/pasm2-manual-extracted.txt
+    ↓ extracted_to
+/sources/extractions/pasm2-manual-complete-extraction-audit.md
+    ↓ powers
+/ai-reference/v1.0/instructions/pasm2-instruction-reference.json (incomplete)
+    ↓ intended_for
+/documents/pasm2-user-manual/ (FUTURE)
+
+/import/source-code/spin-interpreter/v51/Spin2_interpreter.spin2
+    ↓ analyzed_with
+7-Phase Enhanced Source Code Ingestion Methodology v2.0
+    ↓ produced
+/sources/extractions/spin-interpreter-v51-complete-analysis.md
+    ↓ enables
+P2 Bytecode Specification Document (PIPELINE)
+    ↓ creates
+Binary Decoder Tool for PNut Term Integration
+
+/import/source-code/chip-flash-filesystem/flash_fs_v2.0.0.spin2
+    ↓ analyzed_with
+7-Phase Enhanced Source Code Ingestion Methodology v2.0
+    ↓ produced
+/sources/extractions/chip-flash-filesystem-complete-analysis.md
+    ↓ provides
+35+ Production P2 Patterns for Developer Reference
+```
+
 ## Primary Source Materials (Root Level)
 
 ### 🟢 **Official Parallax Documentation** (Trust: VERIFIED)
@@ -86,10 +172,14 @@ Every document in our knowledge base has:
 ### From PASM2 Manual
 ```
 📄 PASM2 Manual
-├── sources/extractions/pasm2-instructions-complete.md (✅ COMPLETE)
-│   ├── Trust: 🟢 VERIFIED (official source)
-│   ├── Completeness: 100% (all 491 instructions)
-│   └── Dependencies: → PASM2 Instruction JSON
+├── sources/extractions/pasm2-manual-complete-extraction-audit.md (🔴 SHALLOW)
+│   ├── Trust: 🔴 SEVERELY INCOMPLETE - Syntax-only documentation
+│   ├── Deep Documentation: 0.4% (1 of 272 instructions with deep explanatory content)
+│   ├── Syntax Coverage: 55% (272 of 491 instructions have basic syntax entries)
+│   ├── Source: Propeller 2 Assembly Language (PASM2) Manual, November 1, 2022 (PRELIMINARY)
+│   ├── Reality Check: Mostly basic syntax, lacks deep descriptive paragraphs
+│   ├── Gaps: 219 instructions missing entirely, 271 lack comprehensive explanation
+│   └── Dependencies: → PASM2 Instruction JSON (severely incomplete for AI use)
 │
 └── sources/extractions/pasm2-programming-patterns.md (🔴 PLANNED)
     ├── Trust: 🟢 VERIFIED (when complete)
@@ -116,11 +206,14 @@ Every document in our knowledge base has:
 ### JSON Schema References
 ```
 📄 AI Reference JSONs
-├── ai-reference/v1.0/instructions/pasm2-instructions.json (✅ COMPLETE)
-│   ├── Sources: pasm2-instructions-complete.md + P2 Instruction Spreadsheet
-│   ├── Trust: 🟢 VERIFIED (dual-source validation)
-│   ├── Completeness: 100% (all 491 instructions with metadata)
-│   └── Dependencies: → AI Code Generation Tools
+├── ai-reference/v1.0/instructions/pasm2-instruction-reference.json (🔴 INCOMPLETE)
+│   ├── Sources: pasm2-manual-complete-extraction-audit.md + P2 Instruction Spreadsheet
+│   ├── Trust: 🔴 INCOMPLETE (only 5 complete entries + category lists)
+│   ├── Completeness: ~1% (5 detailed instructions of 491, category summaries only)
+│   ├── Source Files: 
+│   │   ├── PASM2 Manual November 1, 2022 (PRELIMINARY) → 315 instructions
+│   │   └── P2 Instruction Spreadsheet → Encoding reference
+│   └── Dependencies: → AI Code Generation Tools (BLOCKED - insufficient data)
 │
 ├── ai-reference/v1.0/language/spin2-language.json (🟡 IN PROGRESS)  
 │   ├── Sources: spin2-language-core.md + SPIN2 v51 Documentation

@@ -1,0 +1,99 @@
+{
+  "title": "PASM2 Instruction Reference Test",
+  "subtitle": "Core Math and Logic Instructions",
+  "author": "P2 Knowledge Base System",
+  "date": "2025-08-18",
+  "description": "Test document for PASM2 PDF generation system featuring core arithmetic and logic instructions.",
+  "categories": [
+    {
+      "name": "Arithmetic Operations",
+      "description": "Basic arithmetic operations with carry and zero flag modifications.",
+      "instructions": [
+        {
+          "mnemonic": "ADD",
+          "syntax": "ADD D,S {WC,WZ}",
+          "description": "Add S to D, store result in D. Optionally update carry and zero flags.",
+          "encoding": "EEEE 0110000 CZI DDDDDDDDD SSSSSSSSS",
+          "timing": "2",
+          "flags": "C: MSB of result, Z: Result is zero",
+          "example": "ADD r1, #100    ' Add immediate 100 to r1\nADD r2, r3 WC   ' Add r3 to r2, update carry"
+        },
+        {
+          "mnemonic": "SUB",
+          "syntax": "SUB D,S {WC,WZ}",
+          "description": "Subtract S from D, store result in D. Optionally update carry and zero flags.",
+          "encoding": "EEEE 0110001 CZI DDDDDDDDD SSSSSSSSS",
+          "timing": "2",
+          "flags": "C: NOT borrow, Z: Result is zero",
+          "example": "SUB r1, #50     ' Subtract 50 from r1\nSUB r2, r3 WZ   ' Subtract r3 from r2, update zero"
+        },
+        {
+          "mnemonic": "MUL",
+          "syntax": "MUL D,S",
+          "description": "Multiply D by S (unsigned), store lower 32 bits in D.",
+          "encoding": "EEEE 1001001 0ZI DDDDDDDDD SSSSSSSSS",
+          "timing": "2",
+          "flags": "None",
+          "example": "MUL r1, #10     ' Multiply r1 by 10\nMUL r2, r3      ' Multiply r2 by r3"
+        }
+      ]
+    },
+    {
+      "name": "Logic Operations", 
+      "description": "Bitwise logical operations with flag modifications.",
+      "instructions": [
+        {
+          "mnemonic": "AND",
+          "syntax": "AND D,S {WC,WZ}",
+          "description": "Bitwise AND of D and S, store result in D.",
+          "encoding": "EEEE 0110010 CZI DDDDDDDDD SSSSSSSSS",
+          "timing": "2",
+          "flags": "C: Parity of result, Z: Result is zero",
+          "example": "AND r1, #$FF    ' Mask lower 8 bits\nAND r2, r3 WZ   ' AND with zero flag"
+        },
+        {
+          "mnemonic": "OR",
+          "syntax": "OR D,S {WC,WZ}",
+          "description": "Bitwise OR of D and S, store result in D.",
+          "encoding": "EEEE 0110011 CZI DDDDDDDDD SSSSSSSSS",
+          "timing": "2",
+          "flags": "C: Parity of result, Z: Result is zero",
+          "example": "OR r1, #%1111   ' Set lower 4 bits\nOR r2, r3       ' Combine bit patterns"
+        },
+        {
+          "mnemonic": "XOR",
+          "syntax": "XOR D,S {WC,WZ}",
+          "description": "Bitwise XOR of D and S, store result in D.",
+          "encoding": "EEEE 0110100 CZI DDDDDDDDD SSSSSSSSS",
+          "timing": "2",
+          "flags": "C: Parity of result, Z: Result is zero",
+          "example": "XOR r1, #$FFFF  ' Invert lower 16 bits\nXOR r2, r3 WC   ' XOR with carry flag"
+        }
+      ]
+    },
+    {
+      "name": "Bit Operations",
+      "description": "Individual bit manipulation and testing operations.",
+      "instructions": [
+        {
+          "mnemonic": "TESTB", 
+          "syntax": "TESTB D,S {WC,WZ}",
+          "description": "Test bit S of D, set carry to bit value.",
+          "encoding": "EEEE 1000100 CZI DDDDDDDDD SSSSSSSSS",
+          "timing": "2",
+          "flags": "C: Value of tested bit, Z: NOT C",
+          "example": "TESTB r1, #7 WC ' Test bit 7, result in carry\nTESTB r2, r3    ' Test bit number in r3"
+        },
+        {
+          "mnemonic": "BITL",
+          "syntax": "BITL D,S",
+          "description": "Set bit S of D to 0 (clear bit).",
+          "encoding": "EEEE 1000101 00I DDDDDDDDD SSSSSSSSS",
+          "timing": "2",
+          "flags": "None",
+          "example": "BITL r1, #15    ' Clear bit 15\nBITL r2, r3     ' Clear bit number in r3"
+        }
+      ]
+    }
+  ]
+}

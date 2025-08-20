@@ -29,6 +29,7 @@
 | **Spin Manual Draft 2024** | `spin-manual-draft-2024-complete-audit.md` | `P2 Spin Manual Draft 20240607.docx` | 2,001 | 20 | ✅ COMPLETE |
 | **Q&A Spreadsheet** | `qa-spreadsheet-complete-audit.md` | `Propeller 2 Questions & Answers.xlsx` | 206 | N/A | ✅ COMPLETE |
 | **Instructions CSV** | `csv-pasm2-instructions-v2.md` | `P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv` | 491 | N/A | ✅ COMPLETE |
+| **Flash Filesystem** | `chip-flash-filesystem-complete-analysis.md` | `flash_fs.spin2 v2.0.0` | 3,000+ | N/A | ✅ COMPLETE |
 
 ## 🏆 MAJOR V2 VICTORIES
 
@@ -45,6 +46,7 @@
 - PASM2 Manual 2022 (315 instructions!)
 - Spin Manual Draft 2024 (Tutorial!)
 - Q&A Spreadsheet (Community knowledge!)
+- **Flash Filesystem Source Code (Production patterns!)** ✨
 
 ## 📁 File Organization
 

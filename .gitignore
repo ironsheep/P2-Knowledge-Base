@@ -60,6 +60,12 @@ sources/extractions-v1-archived/
 
 # Sprint communications (private/not versioned)
 .sprints/*/communications/
+**/communications/
 
 # Personnel observations and private guidance
 .personnel-observations/
+
+# Temporary archives and exports
+ARCHIVE-*/
+CLAUDE-EXPORT.zip
+DOT-TODO-MCP/
