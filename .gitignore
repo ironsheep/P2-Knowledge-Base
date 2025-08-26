@@ -31,6 +31,10 @@ _build/
 *.backup
 .~*
 
+# Backup directories
+**/backups/
+backups/
+
 # Log files
 *.log
 
@@ -69,3 +73,35 @@ sources/extractions-v1-archived/
 ARCHIVE-*/
 CLAUDE-EXPORT.zip
 DOT-TODO-MCP/
+
+# Development workspace (not versioned)
+Scratchpad/
+
+# PDF generation workspace directories
+exports/pdf-generation/workspace/
+**/workspace/
+
+# Script temporary work areas
+tools/*.tmp
+tools/*.backup
+tools/temp/
+tools/work/
+*.backup.*
+*.tmp.*
+
+# Generated/formatted versions (keep only source)
+*-FORMATTED.md
+*-ESCAPED.md
+*-PASS[0-9].md
+*-FINAL.md
+*-unescaped.md
+
+# Test outputs
+*-TEST.pdf
+*-TEST.md
+test-request.json
+
+# Archive directories
+archive/
+archive-*/
+archive-old/

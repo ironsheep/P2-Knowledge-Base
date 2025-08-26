@@ -1,0 +1,133 @@
+% P2KB PASM2 Manual Template v1.3 - Simplified for compatibility
+% P2 Knowledge Base - Official PASM2 instruction documentation format
+% Matches Parallax official documentation style
+% Compatible with pandoc + doc-forge system
+
+\documentclass[11pt,letterpaper]{article}
+
+% Pandoc compatibility fixes (REQUIRED)
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\providecommand{\passthrough}[1]{#1}
+\providecommand{\euro}{\texteuro}
+\providecommand{\UrlFont}{\ttfamily}
+\providecommand{\footnotesize}{}
+\providecommand{\oldparagraph}{}
+\providecommand{\oldsubparagraph}{}
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% Essential packages only
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+% Page geometry - Parallax standard
+\geometry{
+  letterpaper,
+  margin=1in,
+  top=1.25in,
+  bottom=1in,
+  headheight=0.5in,
+  headsep=0.25in,
+  footskip=0.5in
+}
+
+% Parallax color scheme
+\definecolor{ParallaxBlue}{RGB}{0,102,204}
+\definecolor{ParallaxDarkBlue}{RGB}{0,51,102}
+\definecolor{InstructionGray}{RGB}{80,80,80}
+\definecolor{SyntaxGreen}{RGB}{0,128,0}
+\definecolor{CodeBackground}{RGB}{248,248,248}
+\definecolor{TableHeader}{RGB}{220,230,240}
+
+% Font setup
+\renewcommand{\familydefault}{\sfdefault}
+
+% Header and footer setup
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textcolor{ParallaxBlue}{\textbf{$title$}}}
+\fancyhead[R]{\textcolor{InstructionGray}{$version$}}
+\fancyfoot[L]{\textcolor{InstructionGray}{$company$}}
+\fancyfoot[C]{\textcolor{InstructionGray}{\thepage}}
+\fancyfoot[R]{\textcolor{InstructionGray}{$date$}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{0.5pt}
+\renewcommand{\headrule}{\color{ParallaxBlue}\hrule width\headwidth height\headrulewidth}
+\renewcommand{\footrule}{\color{InstructionGray}\hrule width\headwidth height\footrulewidth}
+
+% Title page formatting
+\makeatletter
+\renewcommand{\maketitle}{%
+  \thispagestyle{empty}
+  \begin{minipage}[t]{0.3\textwidth}
+    \vspace{0pt}
+    \textcolor{ParallaxDarkBlue}{\textbf{\Large P2}}
+    \\[0.2em]
+    \textcolor{ParallaxDarkBlue}{\small P2X8C4M64P}
+    \\[0.2em] 
+    \textcolor{ParallaxDarkBlue}{\tiny PARALLAX}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}[t]{0.65\textwidth}
+    \raggedleft
+    \vspace{0pt}
+    {\Large\textbf{PARALLA\textcolor{ParallaxBlue}{X}}}\par
+    \vspace{0.3em}
+    {\footnotesize www.parallax.com/P2 \textbullet\ sales@parallax.com \textbullet\ support@parallax.com \textbullet\ +1 888-512-1024}\par
+  \end{minipage}
+  
+  \vspace{3em}
+  
+  \begin{center}
+    \rule{\textwidth}{0.4pt}\par
+    \vspace{1.5em}
+    {\huge\bfseries $title$}\par
+    \vspace{1em}
+    {\large $date$}\par
+    \vspace{1.5em}
+    \rule{\textwidth}{0.4pt}\par
+  \end{center}
+  
+  \vfill
+}
+\makeatother
+
+% Hyperlink setup
+\hypersetup{
+  colorlinks=true,
+  linkcolor=ParallaxBlue,
+  urlcolor=ParallaxBlue,
+  citecolor=ParallaxBlue,
+  pdfauthor={$author$},
+  pdftitle={$title$},
+  pdfsubject={PASM2 Instruction Reference}
+}
+
+% Begin document
+\begin{document}
+
+% Title page
+\maketitle
+\thispagestyle{empty}
+
+% Main content
+$body$
+
+\end{document}
