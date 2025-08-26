@@ -1,0 +1,130 @@
+% User Guide LaTeX Template for Todo-MCP Documentation
+% Clean, accessible layout for end users
+
+\documentclass[11pt,letterpaper,oneside]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+% Font selection - choose one:
+% \usepackage{lmodern}              % Latin Modern (default, crisp)
+\usepackage{charter}                % Charter - very readable serif
+% \usepackage{crimson}              % Crimson Text - elegant, readable serif
+% \usepackage{libertinus}           % Libertinus Serif - modern, friendly
+% \usepackage{ebgaramond}           % EB Garamond - classic, beautiful
+\usepackage{microtype}
+\usepackage[margin=1.2in]{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{mdframed}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+
+% Colors
+\definecolor{primaryBlue}{RGB}{33,150,243}
+\definecolor{accentGreen}{RGB}{76,175,80}
+\definecolor{warningOrange}{RGB}{255,152,0}
+\definecolor{lightGray}{RGB}{248,249,250}
+
+% Code blocks
+\lstset{
+    backgroundcolor=\color{lightGray},
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=leftline,
+    framerule=3pt,
+    rulecolor=\color{primaryBlue},
+    xleftmargin=1em,
+    numbers=none
+}
+
+% Pandoc compatibility fixes
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\providecommand{\passthrough}[1]{#1}
+\providecommand{\euro}{\texteuro}
+\providecommand{\UrlFont}{\ttfamily}
+\providecommand{\footnotesize}{}
+\providecommand{\oldparagraph}{}
+\providecommand{\oldsubparagraph}{}
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% Custom boxes
+\newtcolorbox{tipbox}{
+    colback=accentGreen!10,
+    colframe=accentGreen,
+    title={\textbf{💡 Tip}},
+    fonttitle=\bfseries
+}
+
+\newtcolorbox{warningbox}{
+    colback=warningOrange!10,
+    colframe=warningOrange,
+    title={\textbf{⚠️ Important}},
+    fonttitle=\bfseries
+}
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage}
+\fancyhead[L]{Todo-MCP User Guide}
+\renewcommand{\headrulewidth}{0.5pt}
+
+% Title formatting
+\titleformat{\section}
+{\normalfont\Large\bfseries\color{primaryBlue}}
+{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\normalfont\large\bfseries\color{primaryBlue}}
+{\thesubsection}{1em}{}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primaryBlue,
+    urlcolor=primaryBlue,
+    citecolor=primaryBlue,
+    pdfauthor={Todo-MCP Team},
+    pdftitle={Todo-MCP User Guide v$version$},
+    pdfsubject={Todo-MCP User Documentation},
+    pdfkeywords={todo-mcp, claude, task management, user guide}
+}
+
+\begin{document}
+
+% Title
+\begin{center}
+    {\Huge\bfseries Todo-MCP User Guide\par}
+    \vspace{0.5cm}
+    {\Large Version $version$\par}
+    \vspace{0.3cm}
+    {\large $date$\par}
+    \vspace{1.5cm}
+    
+    % Company logo (subtle placement)
+    \IfFileExists{logo.eps}{\includegraphics[width=0.2\textwidth]{logo.eps}}{%
+    \IfFileExists{inbox/logo.eps}{\includegraphics[width=0.2\textwidth]{inbox/logo.eps}}{%
+    % Logo not found, skip it
+    }}\\[0.3cm]
+    {\small Iron Sheep Productions, LLC\par}
+    \vspace{1cm}
+\end{center}
+
+% Main content
+$body$
+
+\end{document}

@@ -1,0 +1,21 @@
+{
+  "documents": [
+    {
+      "input": "P2-Smart-Pins-Complete-Reference.md",
+      "output": "P2-Smart-Pins-Complete-Reference.pdf",
+      "template": "p2kb-smart-pins",
+      "pandoc_args": ["--top-level-division=part"],
+      "variables": {
+        "title": "P2 Smart Pins Complete Reference",
+        "subtitle": "Specifications and Implementation for All 32 Modes",
+        "author": "P2 Knowledge Base Team",
+        "footer": "Version 1.0 - Technical Review Draft"
+      }
+    }
+  ],
+  "options": {
+    "cleanup": true,
+    "archive": false,
+    "optimize": false
+  }
+}

@@ -1,0 +1,164 @@
+% P2KB Reference Manual Content Style Package  
+% Content layer for technical reference documents (Smart Pins, etc.)
+% Provides: Code styling, technical formatting, structured layout
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{reference-manual}[2025/08/25 P2KB Reference Manual Package v1.0]
+
+% ==================== COLORS FOR REFERENCE DOCS ====================
+% Clean, professional colors for technical documentation
+
+\definecolor{codebg}{RGB}{248,248,248}         % Light gray code background
+\definecolor{codeframe}{RGB}{204,204,204}       % Gray code frame
+\definecolor{commentcolor}{RGB}{0,128,0}        % Green comments
+\definecolor{keywordcolor}{RGB}{0,0,255}        % Blue keywords
+\definecolor{stringcolor}{RGB}{163,21,21}       % Dark red strings
+
+% ==================== CODE LISTING CONFIGURATION ====================
+% Technical reference code styling - clean and readable
+
+\lstset{
+  backgroundcolor=\color{codebg},
+  frame=single,
+  frameround=tttt,
+  rulecolor=\color{codeframe},
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\color{keywordcolor}\bfseries,
+  commentstyle=\color{commentcolor}\itshape,
+  stringstyle=\color{stringcolor}
+}
+
+% ==================== P2 LANGUAGE DEFINITIONS ====================
+% Spin2 and PASM2 syntax highlighting for reference docs
+
+% Define Spin2 language
+\lstdefinelanguage{spin2}{
+  keywords={CON, VAR, OBJ, PUB, PRI, DAT, repeat, if, else, elseif, case, 
+            while, until, from, to, step, return, abort, next, quit,
+            byte, word, long, res, file, org, end, fit},
+  sensitive=true,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]'
+}
+
+% Define PASM2 language
+\lstdefinelanguage{pasm2}{
+  keywords={org, res, long, word, byte, mov, add, sub, and, or, xor, not,
+            shl, shr, sar, rol, ror, rcl, rcr, test, cmp, jmp, call, ret,
+            djnz, tjz, tjnz, wrpin, wxpin, wypin, rdpin, rqpin, akpin, dirh,
+            dirl, testp, waitx, rep, nop},
+  sensitive=false,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]'
+}
+
+% ==================== CHAPTER FORMATTING ====================
+% Professional chapter styling for reference documents
+
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}
+  {\chaptertitlename\ \thechapter}
+  {20pt}
+  {\Huge}
+
+% ==================== SECTION FORMATTING ====================  
+% Clear section hierarchy for technical reference
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries}
+  {\thesection}
+  {1em}
+  {}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}  
+  {\thesubsection}
+  {1em}
+  {}
+
+% ==================== TECHNICAL BOXES ====================
+% Information boxes for technical content
+
+% Note: technote box provided by presentation layer (iron-sheep-tech-review.sty)
+
+% Specification box for technical specifications
+\newtcolorbox{specification}{
+  colback=blue!5,
+  colframe=blue!50,
+  boxrule=1pt,
+  title={\bfseries Specification},
+  fonttitle=\bfseries\color{black},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% ==================== TABLE ENHANCEMENTS ====================
+% Enhanced tables for technical specifications
+
+% Pin specification table formatting
+\newcommand{\pinheader}[3]{%
+  \textbf{#1} & \textbf{#2} & \textbf{#3} \\
+  \midrule
+}
+
+% Register bit table formatting  
+\newcommand{\bitheader}[3]{%
+  \textbf{Bit #1} & \textbf{#2} & \textbf{#3} \\
+  \midrule
+}
+
+% ==================== CODE EXAMPLES ====================
+% Standardized code example formatting
+
+% Inline code with gray background
+\newcommand{\code}[1]{%
+  \colorbox{codebg}{\strut\texttt{#1}}%
+}
+
+% Code example environment
+\lstnewenvironment{codeexample}[1][]
+  {\lstset{
+    title=#1,
+    frame=single,
+    backgroundcolor=\color{codebg}
+  }}
+  {}
+
+% ==================== TIMING DIAGRAMS ====================
+% Basic support for timing diagram formatting
+
+\newcommand{\timingheader}[1]{%
+  \vspace{10pt}
+  \noindent\textbf{Timing: #1}
+  \vspace{5pt}
+}
+
+% ==================== APPENDIX FORMATTING ====================
+% Reference manual appendix styling
+
+\let\oldappendix\appendix
+\renewcommand{\appendix}{
+  \oldappendix
+  \renewcommand{\chaptername}{Appendix}
+  \titleformat{\chapter}[display]
+    {\normalfont\huge\bfseries}
+    {\appendixname\ \thechapter}
+    {20pt}
+    {\Huge}
+}
+
+% ==================== CROSS-REFERENCE HELPERS ====================
+% Standardized cross-references for technical docs
+
+\newcommand{\seepin}[1]{(see Pin #1)}
+\newcommand{\seemode}[1]{(see Mode #1)}
+\newcommand{\seechapter}[1]{(see Chapter #1)}
+\newcommand{\seetable}[1]{(see Table #1)}
+\newcommand{\seefigure}[1]{(see Figure #1)}

@@ -1,0 +1,450 @@
+#!/usr/bin/env node
+/**
+ * PDF Forge Shared Workspace Monitor
+ * Enhanced by Claude for P2 Knowledge Base template development
+ * 
+ * Monitors /workspace/shared/ for test requests and processes them automatically
+ * Provides intelligent error analysis and auto-fix capabilities
+ */
+
+const fs = require('fs-extra');
+const path = require('path');
+const chalk = require('chalk');
+const chokidar = require('chokidar');
+const { execSync } = require('child_process');
+
+const SHARED_PATH = '/workspace/shared';
+const REQUESTS_PATH = path.join(SHARED_PATH, 'test-requests');
+const RESULTS_PATH = path.join(SHARED_PATH, 'test-results');
+const TEMPLATES_PATH = path.join(SHARED_PATH, 'templates');
+const TEST_DOCS_PATH = path.join(SHARED_PATH, 'test-documents');
+const OUTPUT_PDFS_PATH = path.join(SHARED_PATH, 'output-pdfs');
+const STATUS_PATH = path.join(SHARED_PATH, 'status');
+
+class SharedWorkspaceMonitor {
+  constructor() {
+    this.isProcessing = false;
+    this.setupEnvironment();
+    this.setupWatchers();
+    this.logActivity('🚀 PDF Forge Shared Workspace Monitor started');
+    this.signalReady();
+  }
+
+  async setupEnvironment() {
+    // Ensure all directories exist
+    await fs.ensureDir(REQUESTS_PATH);
+    await fs.ensureDir(RESULTS_PATH);
+    await fs.ensureDir(TEMPLATES_PATH);
+    await fs.ensureDir(TEST_DOCS_PATH);
+    await fs.ensureDir(OUTPUT_PDFS_PATH);
+    await fs.ensureDir(STATUS_PATH);
+    await fs.ensureDir(path.join(REQUESTS_PATH, 'processed'));
+  }
+
+  setupWatchers() {
+    // Watch for new test requests
+    const requestWatcher = chokidar.watch(path.join(REQUESTS_PATH, '*.json'), {
+      ignored: /processed/,
+      persistent: true,
+      awaitWriteFinish: {
+        stabilityThreshold: 1000,
+        pollInterval: 100
+      }
+    });
+
+    requestWatcher
+      .on('add', (filePath) => this.onNewRequest(filePath))
+      .on('change', (filePath) => this.onRequestModified(filePath))
+      .on('error', (error) => this.logError('Request watcher error:', error));
+
+    // Watch for template changes  
+    const templateWatcher = chokidar.watch(path.join(TEMPLATES_PATH, '*.latex'));
+    templateWatcher
+      .on('change', (filePath) => this.onTemplateChanged(filePath))
+      .on('error', (error) => this.logError('Template watcher error:', error));
+
+    this.logActivity('📡 File watchers initialized');
+  }
+
+  async onNewRequest(requestPath) {
+    if (this.isProcessing) {
+      this.logActivity('⏳ Request queued, processing in progress...');
+      return;
+    }
+
+    try {
+      this.isProcessing = true;
+      const requestFile = path.basename(requestPath);
+      this.logActivity(`📋 New test request: ${requestFile}`);
+
+      const request = await this.parseRequest(requestPath);
+      const results = await this.processTestRequest(request);
+      
+      await this.writeResults(request, results);
+      await this.archiveRequest(requestPath);
+      
+      this.logActivity(`✅ Test request completed: ${request.request_id}`);
+      
+    } catch (error) {
+      this.logError('Failed to process request:', error);
+      await this.writeErrorResult(requestPath, error);
+    } finally {
+      this.isProcessing = false;
+    }
+  }
+
+  async parseRequest(requestPath) {
+    try {
+      const content = await fs.readFile(requestPath, 'utf8');
+      const request = JSON.parse(content);
+      
+      // Validate required fields
+      if (!request.template) {
+        throw new Error('Missing required field: template');
+      }
+      
+      // Set defaults
+      request.request_id = request.request_id || path.basename(requestPath, '.json');
+      request.timestamp = request.timestamp || new Date().toISOString();
+      request.options = request.options || {};
+      request.tests = request.tests || [{ name: 'default', document: 'minimal.md' }];
+      
+      return request;
+    } catch (error) {
+      throw new Error(`Failed to parse request: ${error.message}`);
+    }
+  }
+
+  async processTestRequest(request) {
+    const startTime = Date.now();
+    const results = {
+      request_id: request.request_id,
+      status: 'in_progress',
+      timestamp: new Date().toISOString(),
+      forge_version: 'Enhanced by Claude v1.0',
+      template: request.template,
+      test_results: [],
+      performance: {},
+      overall_result: 'unknown'
+    };
+
+    try {
+      // Validate template exists
+      const templatePath = path.join(TEMPLATES_PATH, request.template);
+      if (!await fs.pathExists(templatePath)) {
+        throw new Error(`Template not found: ${request.template}`);
+      }
+
+      this.logActivity(`🔧 Testing template: ${request.template}`);
+
+      // Process each test
+      for (const test of request.tests) {
+        this.logActivity(`   Testing: ${test.name}`);
+        const testResult = await this.runSingleTest(templatePath, test, request.options);
+        results.test_results.push(testResult);
+      }
+
+      // Determine overall result
+      const failures = results.test_results.filter(t => t.status.includes('FAIL'));
+      results.overall_result = failures.length === 0 ? 'success' : 'partial_failure';
+      results.status = 'completed';
+
+      // Performance metrics
+      results.performance = {
+        total_duration_ms: Date.now() - startTime,
+        tests_run: request.tests.length,
+        failures: failures.length
+      };
+
+      this.logActivity(`📊 Overall result: ${results.overall_result} (${failures.length} failures)`);
+
+    } catch (error) {
+      results.status = 'failed';
+      results.error = error.message;
+      results.overall_result = 'error';
+      this.logError('Test processing failed:', error);
+    }
+
+    return results;
+  }
+
+  async runSingleTest(templatePath, test, options) {
+    const testStartTime = Date.now();
+    const testResult = {
+      name: test.name,
+      status: 'unknown',
+      duration_ms: 0,
+      error: null,
+      pdf_path: null,
+      auto_fix_attempted: false
+    };
+
+    try {
+      // Validate test document exists
+      const testDocPath = path.join(TEST_DOCS_PATH, test.document);
+      if (!await fs.pathExists(testDocPath)) {
+        throw new Error(`Test document not found: ${test.document}`);
+      }
+
+      // Generate unique output name
+      const outputName = `${test.name}-${Date.now()}`;
+      const outputPdf = path.join(OUTPUT_PDFS_PATH, `${outputName}.pdf`);
+      const outputTex = path.join(OUTPUT_PDFS_PATH, `${outputName}.tex`);
+
+      // Setup enhanced working directory with .sty file support
+      const workingEnv = await this.setupWorkingDirectory(templatePath, test.name);
+
+      // Build pandoc command with working directory
+      const pandocCmd = this.buildPandocCommand(testDocPath, outputPdf, workingEnv.templatePath, options, workingEnv.workDir);
+      
+      this.logActivity(`     Running: pandoc for ${test.name}`);
+      
+      // Execute pandoc
+      try {
+        // Generate .tex for debugging
+        const texCmd = pandocCmd.replace(outputPdf, outputTex).replace('--pdf-engine=xelatex', '');
+        execSync(texCmd, { stdio: 'pipe', cwd: workingEnv.workDir });
+        
+        // Generate PDF
+        execSync(pandocCmd, { stdio: 'pipe', cwd: workingEnv.workDir });
+        
+        testResult.status = '✅ PASS';
+        testResult.pdf_path = `output-pdfs/${outputName}.pdf`;
+        
+        // Validate output
+        if (await fs.pathExists(outputPdf)) {
+          const stats = await fs.stat(outputPdf);
+          testResult.pdf_size_bytes = stats.size;
+        }
+        
+      } catch (pandocError) {
+        // Always cleanup working directory
+        if (workingEnv.workDir) {
+          await fs.remove(workingEnv.workDir).catch(() => {});
+        }
+        const errorOutput = pandocError.stderr ? pandocError.stderr.toString() : pandocError.message;
+        testResult.status = '❌ FAIL';
+        testResult.error = errorOutput;
+        
+        // Attempt auto-fix if requested
+        if (options.auto_fix_attempt) {
+          const fixResult = await this.attemptAutoFix(templatePath, errorOutput, test);
+          if (fixResult.success) {
+            testResult.auto_fix_attempted = true;
+            testResult.auto_fix_result = fixResult;
+            testResult.status = '🔧 FIXED';
+          }
+        }
+        
+        // Analyze error for better reporting
+        testResult.error_analysis = this.analyzeError(errorOutput);
+      }
+
+    } catch (error) {
+      testResult.status = '❌ ERROR';
+      testResult.error = error.message;
+    }
+
+    testResult.duration_ms = Date.now() - testStartTime;
+    return testResult;
+  }
+
+  /**
+   * Enhanced working directory setup with .sty file management
+   * Solves LaTeX \usepackage dependency issues for layered templates
+   */
+  async setupWorkingDirectory(templatePath, testName) {
+    try {
+      // Create unique working directory
+      const workDir = path.join('/tmp', `pandoc-work-${testName}-${Date.now()}`);
+      await fs.ensureDir(workDir);
+      
+      // Copy template to working directory
+      const templateName = path.basename(templatePath);
+      const workTemplatePath = path.join(workDir, templateName);
+      await fs.copy(templatePath, workTemplatePath);
+      
+      this.logActivity(`       🔧 Working directory: ${workDir}`);
+      this.logActivity(`       📄 Template copied: ${templateName}`);
+      
+      // Find and copy ALL .sty files from templates directory
+      const templatesDirFiles = await fs.readdir(TEMPLATES_PATH);
+      const styFiles = templatesDirFiles.filter(file => file.endsWith('.sty'));
+      
+      if (styFiles.length > 0) {
+        this.logActivity(`       🎨 Copying ${styFiles.length} style files: ${styFiles.join(', ')}`);
+        
+        for (const styFile of styFiles) {
+          const srcPath = path.join(TEMPLATES_PATH, styFile);
+          const dstPath = path.join(workDir, styFile);
+          await fs.copy(srcPath, dstPath);
+        }
+      }
+      
+      return {
+        workDir: workDir,
+        templatePath: workTemplatePath
+      };
+      
+    } catch (error) {
+      this.logError('Failed to setup working directory:', error);
+      throw new Error(`Working directory setup failed: ${error.message}`);
+    }
+  }
+
+  buildPandocCommand(inputPath, outputPath, templatePath, options, workDir = null) {
+    const args = [
+      'pandoc',
+      `"${inputPath}"`,
+      `-o "${outputPath}"`,
+      `--template "${templatePath}"`,
+      '--pdf-engine=xelatex',
+      '--listings',
+      `--resource-path="/workspace/shared${workDir ? ':' + workDir : ''}"`,
+      '--variable title="Test Document"',
+      '--variable author="PDF Forge Test"',
+      '--variable date="2025"',
+      '--variable toc',
+      '--variable toc-depth="3"',
+      '--variable documentclass="book"',
+      '--variable fontsize="11pt"',
+      '--variable papersize="a4paper"',
+      '--variable mainfont="Latin Modern Roman"',
+      '--variable monofont="Latin Modern Mono"'
+    ];
+
+    return args.join(' ');
+  }
+
+  analyzeError(errorText) {
+    const errorPatterns = [
+      {
+        pattern: /Missing number, treated as zero/,
+        cause: 'Missing \\real{} command for table column calculations',
+        solution: 'Add \\newcommand*{\\real}[1]{#1} to template',
+        confidence: 0.95
+      },
+      {
+        pattern: /Paragraph ended before \\lstset@ was complete/,
+        cause: 'Unclosed lstset block in template',
+        solution: 'Add closing } to lstset configuration',
+        confidence: 0.90
+      },
+      {
+        pattern: /Undefined control sequence.*tightlist/,
+        cause: 'Missing \\tightlist command definition',
+        solution: 'Add \\providecommand{\\tightlist}{...} to template',
+        confidence: 0.85
+      }
+    ];
+
+    for (const errorPattern of errorPatterns) {
+      if (errorPattern.pattern.test(errorText)) {
+        return {
+          recognized: true,
+          cause: errorPattern.cause,
+          solution: errorPattern.solution,
+          confidence: errorPattern.confidence,
+          auto_fixable: errorPattern.confidence > 0.8
+        };
+      }
+    }
+
+    return {
+      recognized: false,
+      cause: 'Unknown error pattern',
+      solution: 'Manual investigation required',
+      confidence: 0.0,
+      auto_fixable: false
+    };
+  }
+
+  async attemptAutoFix(templatePath, errorText, test) {
+    // This would implement automatic fixes for known issues
+    // For now, return placeholder
+    return {
+      success: false,
+      attempted: true,
+      reason: 'Auto-fix engine not yet implemented'
+    };
+  }
+
+  async writeResults(request, results) {
+    const resultPath = path.join(RESULTS_PATH, `${request.request_id}-result.json`);
+    await fs.writeFile(resultPath, JSON.stringify(results, null, 2));
+    
+    // Write notification file if requested
+    if (request.notification && request.notification.status_file) {
+      const statusFile = path.join(STATUS_PATH, request.notification.status_file);
+      await fs.writeFile(statusFile, `Test completed: ${results.overall_result}\nTimestamp: ${results.timestamp}`);
+    }
+  }
+
+  async writeErrorResult(requestPath, error) {
+    const errorResult = {
+      request_id: path.basename(requestPath, '.json'),
+      status: 'error',
+      timestamp: new Date().toISOString(),
+      error: error.message,
+      overall_result: 'system_error'
+    };
+    
+    const resultPath = path.join(RESULTS_PATH, `${errorResult.request_id}-error.json`);
+    await fs.writeFile(resultPath, JSON.stringify(errorResult, null, 2));
+  }
+
+  async archiveRequest(requestPath) {
+    const processedPath = path.join(REQUESTS_PATH, 'processed', path.basename(requestPath));
+    await fs.move(requestPath, processedPath);
+  }
+
+  async onRequestModified(requestPath) {
+    this.logActivity(`📝 Request modified: ${path.basename(requestPath)}`);
+  }
+
+  async onTemplateChanged(templatePath) {
+    const templateName = path.basename(templatePath);
+    this.logActivity(`🔧 Template changed: ${templateName}`);
+    
+    // Could trigger automatic re-testing of affected templates
+  }
+
+  async signalReady() {
+    const readyFile = path.join(STATUS_PATH, 'forge-ready.txt');
+    await fs.writeFile(readyFile, `PDF Forge ready at ${new Date().toISOString()}\nMonitoring: ${REQUESTS_PATH}`);
+  }
+
+  logActivity(message) {
+    const timestamp = new Date().toISOString();
+    console.log(chalk.blue(`[${timestamp}]`) + ' ' + message);
+    
+    // Also log to file
+    const logFile = path.join(STATUS_PATH, 'activity.log');
+    fs.appendFile(logFile, `[${timestamp}] ${message}\n`).catch(() => {});
+  }
+
+  logError(message, error) {
+    const timestamp = new Date().toISOString();
+    const errorMsg = error ? ` - ${error.message}` : '';
+    console.error(chalk.red(`[${timestamp}] ERROR: ${message}${errorMsg}`));
+    
+    // Also log to file
+    const logFile = path.join(STATUS_PATH, 'errors.log');
+    fs.appendFile(logFile, `[${timestamp}] ERROR: ${message}${errorMsg}\n`).catch(() => {});
+  }
+}
+
+// Handle graceful shutdown
+process.on('SIGINT', () => {
+  console.log(chalk.yellow('\n🛑 Shutting down PDF Forge Monitor...'));
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  console.log(chalk.yellow('\n🛑 Shutting down PDF Forge Monitor...'));
+  process.exit(0);
+});
+
+// Start the monitor
+console.log(chalk.green('🚀 Starting PDF Forge Shared Workspace Monitor...'));
+new SharedWorkspaceMonitor();

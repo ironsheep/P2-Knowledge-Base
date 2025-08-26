@@ -1,0 +1,17 @@
+% Smart Pins Page Break Test Template
+\documentclass[11pt,a4paper,oneside,english]{book}
+
+\usepackage{p2kb-foundation-fixed}    % FIXED foundation with proper page break logic
+\usepackage{p2kb-smart-pins-content}   % Smart Pins content layer
+\usepackage{p2kb-tech-review}          % Technical review branding
+
+\begin{document}
+
+% Skip complex title page for this test
+\title{Page Break Test}
+\author{Test}
+\maketitle
+
+$body$
+
+\end{document}
