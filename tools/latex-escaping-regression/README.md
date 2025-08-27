@@ -5,14 +5,19 @@ Track and validate LaTeX special character escaping for P2 Assembly Manual gener
 
 ## Current Script Version
 - **Script**: `latex-escape-all.sh` + `latex_escape_processor.py`
-- **Last Modified**: 2025-08-27
+- **Last Modified**: 2025-08-27 (v2 - Image path protection added)
 - **Performance Target**: < 30 seconds for full document processing
-- **Current Status**: Working with known deferrals
+- **Current Status**: Working correctly - protects image paths, escapes P2 literals
 
 ## Test Coverage
 
 ### ✅ Currently Handled
-1. **Basic LaTeX Special Characters**
+1. **Markdown Image Paths** (NEW in v2)
+   - `![alt](path/with_underscores.png)` - NOT escaped
+   - `[link](file.ext)` - NOT escaped if contains extension
+   - Preserves spaces and underscores in paths
+
+2. **Basic LaTeX Special Characters**
    - `#` → `\#` (except in markdown headers)
    - `$` → `\$`
    - `%` → `\%`
@@ -45,21 +50,22 @@ Track and validate LaTeX special character escaping for P2 Assembly Manual gener
    - Decision: Wait to see if problematic
    - Rationale: May not need escaping in practice
 
-### 🔍 Known Issues to Monitor
-1. **URL-Encoded Image Paths**
-   - Symptom: `%20` in paths gets escaped to `\%20`
-   - Impact: Unknown - need to test with actual PDF generation
-   - Test Case: `test-url-encoded.md`
+### ✅ Fixed Issues (v2)
+1. **Image Path Protection**
+   - Previously: Underscores in image paths were escaped
+   - Now: Image paths are protected from all escaping
+   - Test Case: `test-image-paths-fixed.md`
 
-2. **Image Paths with Spaces**
-   - Current: Spaces preserved, underscores escaped
-   - Question: Does Pandoc URL-encode these automatically?
-   - Test Case: `test-image-paths.md`
+2. **P2 Literals Still Protected**
+   - Text with `#immediate`, `$hex`, `%binary` properly escaped
+   - Image paths remain clean for Pandoc
+   - Test Case: `test-p2-literals-escaped.md`
 
 ## Regression Test Files
 
 ### Basic Tests
-- `test-image-paths.md` - Various image path patterns
+- `test-image-paths.md` - Various image path patterns (v2: now protected)
+- `test-p2-literals.md` - P2 special characters in text (v2: still escaped)
 - `test-url-encoded.md` - Pre-encoded URL paths
 - `latex-escaping-test-cases-GOLD-STANDARD.md` - Comprehensive test suite
 
@@ -93,6 +99,12 @@ Track and validate LaTeX special character escaping for P2 Assembly Manual gener
    ```
 
 ## Decision Log
+
+### 2025-08-27: Version 2 Released
+- **Image Path Protection**: Added protection for markdown image/link syntax
+- **Script Enhancement**: Images and links with file extensions are not escaped
+- **Maintained**: P2 literals in text still properly escaped
+- **Performance**: Still < 1 second for test files
 
 ### 2025-08-27: Deferred Decisions
 - **Underscores in numerics**: Wait for PDF to show problems
