@@ -5,32 +5,32 @@ This file contains all the problematic patterns found in real P2 content that mu
 ## Assembly Code Patterns
 
 ### Immediate Values (\# characters)
-- Basic immediate: `mov x, \#42`
-- Double immediate: `waitx \#\#25\_000\_000`
-- Hex immediate: `mov x, \#\$FF`
-- Binary immediate: `mov x, \#\%1010\_0001`
+- Basic immediate: `mov x, #42`
+- Double immediate: `waitx ##25_000_000`
+- Hex immediate: `mov x, #$FF`
+- Binary immediate: `mov x, #%1010_0001`
 
 ### Register References (\$ patterns)
-- Hex values: `\$1\_0000\_0000 represents full circle`
-- Hub addresses: `wrlong data, \#\#\$1000`
-- Special registers: `rdlong pa, \#\$14`
+- Hex values: `$1_0000_0000 represents full circle`
+- Hub addresses: `wrlong data, ##$1000`
+- Special registers: `rdlong pa, #$14`
 
 ### Underscores in Code
-- Numeric separators: `25\_000\_000`
-- Hex with underscores: `\$FF\_AA\_BB\_CC`
-- Variable names: `hub\_address`
-- Labels: `main\_loop:`
+- Numeric separators: `25_000_000`
+- Hex with underscores: `$FF_AA_BB_CC`
+- Variable names: `hub_address`
+- Labels: `main_loop:`
 
 ### Mathematical Expressions
-- Powers: `2\^{}9 = 512`
-- Exponents: `e\^{}2 = 7.389`
-- Complex: `2\^{}32 addresses`
+- Powers: `2^9 = 512`
+- Exponents: `e^2 = 7.389`
+- Complex: `2^32 addresses`
 
 ### Special Characters in Context
 - Pin ranges: `pins 16-47 are safe`
 - Assembly comments: `' This is a comment`
-- Bit operations: `value \& mask`
-- Percentages: `80\% complete`
+- Bit operations: `value & mask`
+- Percentages: `80% complete`
 
 ## Markdown Headers (Should NOT be escaped)
 # Chapter 1: Assembly Basics
@@ -57,12 +57,12 @@ Hub memory starts at \$0000 and extends to \$7\_FFFF (512KB total).
 Pin \#16 connects to LED with 220Ω resistor for ~15mA current (3.3V / 220Ω).
 
 ## Edge Cases
-- Multiple patterns: `mov \#reg, \#\#\$FF\_AA \& mask`
-- Nested patterns: `2\^{}(n+1) where n=\#bits`
+- Multiple patterns: `mov #reg, ##$FF_AA & mask`
+- Nested patterns: `2^(n+1) where n=#bits`
 - Mixed quotes: "Use \#immediate" vs 'reg \#value'
-- URL-like: `http://example.com\#anchor`
+- URL-like: `http://example.com#anchor`
 - Email-like: `user@domain.com`
-- Temperature: `25°C \& 77°F`
+- Temperature: `25°C & 77°F`
 
 ## Tricky Boundaries
 - Start of line \#immediate

@@ -22,7 +22,8 @@ def process_latex_escaping(input_file, output_file):
         line = line.rstrip('\n')
         
         # Track code blocks (```pasm2, ```markdown, etc.)
-        if line.strip() == '```' or line.startswith('```'):
+        # Check the stripped line to handle indented code blocks
+        if line.strip().startswith('```'):
             in_code_block = not in_code_block
             output_lines.append(original_line)
             continue
@@ -86,6 +87,16 @@ def process_latex_escaping(input_file, output_file):
             
         # Process normal text lines - escape LaTeX special characters
         # BUT preserve valid LaTeX commands like \textbf{}, \textit{}, etc.
+        
+        # PROTECT INLINE CODE FIRST (backticks)
+        # Find and protect inline code `like this`
+        protected_inline_code = []
+        # Use negative lookbehind to avoid matching ``` code blocks
+        inline_code_pattern = r'(?<!`)(`[^`\n]+`)'  # Match `text` but not ```
+        for match in re.finditer(inline_code_pattern, line):
+            placeholder = f'XPROTECTINLINECODE{len(protected_inline_code)}X'
+            protected_inline_code.append(match.group(1))
+            line = line.replace(match.group(1), placeholder, 1)
         
         # First, protect valid LaTeX commands by replacing them with placeholders
         protected_commands = []
@@ -221,6 +232,11 @@ def process_latex_escaping(input_file, output_file):
         for i, cmd in enumerate(protected_commands):
             placeholder = f'XPROTECTLATEXCMD{i}X'
             line = line.replace(placeholder, cmd)
+        
+        # 6. Restore protected inline code (UNCHANGED - no escaping)
+        for i, code in enumerate(protected_inline_code):
+            placeholder = f'XPROTECTINLINECODE{i}X'
+            line = line.replace(placeholder, code)
         
         output_lines.append(line + '\n')
     
