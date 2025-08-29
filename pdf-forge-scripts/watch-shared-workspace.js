@@ -2,7 +2,7 @@
 /**
  * PDF Forge Shared Workspace Monitor
  * Enhanced by Claude for P2 Knowledge Base template development
- * 
+ *
  * Monitors /workspace/shared/ for test requests and processes them automatically
  * Provides intelligent error analysis and auto-fix capabilities
  */
@@ -48,8 +48,8 @@ class SharedWorkspaceMonitor {
       persistent: true,
       awaitWriteFinish: {
         stabilityThreshold: 1000,
-        pollInterval: 100
-      }
+        pollInterval: 100,
+      },
     });
 
     requestWatcher
@@ -57,8 +57,10 @@ class SharedWorkspaceMonitor {
       .on('change', (filePath) => this.onRequestModified(filePath))
       .on('error', (error) => this.logError('Request watcher error:', error));
 
-    // Watch for template changes  
-    const templateWatcher = chokidar.watch(path.join(TEMPLATES_PATH, '*.latex'));
+    // Watch for template changes
+    const templateWatcher = chokidar.watch(
+      path.join(TEMPLATES_PATH, '*.latex')
+    );
     templateWatcher
       .on('change', (filePath) => this.onTemplateChanged(filePath))
       .on('error', (error) => this.logError('Template watcher error:', error));
@@ -68,7 +70,9 @@ class SharedWorkspaceMonitor {
 
   async onNewRequest(requestPath) {
     if (this.isProcessing) {
-      this.logActivity('⏳ Request queued, processing in progress...');
+      this.logActivity(
+        `⏳ Request queued, processing in progress...${path.basename(requestPath)}`
+      );
       return;
     }
 
@@ -79,24 +83,30 @@ class SharedWorkspaceMonitor {
 
       const request = await this.parseRequest(requestPath);
       const results = await this.processTestRequest(request);
-      
+
       await this.writeResults(request, results);
       await this.archiveRequest(requestPath);
-      
+
       this.logActivity(`✅ Test request completed: ${request.request_id}`);
-      
     } catch (error) {
-      this.logError(`💥 CRITICAL ERROR processing ${path.basename(requestPath)}:`, error);
+      this.logError(
+        `💥 CRITICAL ERROR processing ${path.basename(requestPath)}:`,
+        error
+      );
       await this.writeErrorResult(requestPath, error);
-      
+
       // For parsing errors, make it very obvious and consider halting
       if (error.message.includes('Failed to parse request')) {
         console.error(chalk.red.bold('❌ TEST REJECTED ❌'));
         console.error(chalk.red.bold(`REASON: ${error.message}`));
         console.error(chalk.red(`FILE: ${path.basename(requestPath)}`));
-        console.error(chalk.yellow('EXPECTED FORMAT: {"template": "name.latex", "tests": [...]}'));
+        console.error(
+          chalk.yellow(
+            'EXPECTED FORMAT: {"template": "name.latex", "tests": [...]}'
+          )
+        );
         console.error('');
-        
+
         // Optionally exit on parse failures (uncomment to enable)
         // console.error(chalk.red('🛑 Exiting due to parse failure...'));
         // process.exit(1);
@@ -107,39 +117,56 @@ class SharedWorkspaceMonitor {
   }
 
   async parseRequest(requestPath) {
+    this.logActivity(`⏳ Parse...${path.basename(requestPath)}`);
+    if (!(await fs.pathExists(requestPath))) {
+      this.logError(`📁 Request file not found: ${path.basename(requestPath)}`);
+      throw new Error(`Request file not found: ${path.basename(requestPath)}`);
+    }
     try {
       const content = await fs.readFile(requestPath, 'utf8');
       const request = JSON.parse(content);
-      
+
       // Enhanced validation with detailed error messages
       if (!request.template) {
         const availableFields = Object.keys(request).join(', ');
-        throw new Error(`Missing required field: template. Found fields: [${availableFields}]. Expected format: {"template": "name.latex", "tests": [...]}`);
+        throw new Error(
+          `Missing required field: template. Found fields: [${availableFields}]. Expected format: {"template": "name.latex", "tests": [...]}`
+        );
       }
-      
+
       if (!request.tests && !request.documents) {
-        throw new Error(`Missing required field: tests (or legacy documents array). Expected format: {"template": "name.latex", "tests": [{"name": "test-name", "document": "file.md"}]}`);
+        throw new Error(
+          `Missing required field: tests (or legacy documents array). Expected format: {"template": "name.latex", "tests": [{"name": "test-name", "document": "file.md"}]}`
+        );
       }
-      
+
       // Set defaults
-      request.request_id = request.request_id || path.basename(requestPath, '.json');
+      request.request_id =
+        request.request_id || path.basename(requestPath, '.json');
       request.timestamp = request.timestamp || new Date().toISOString();
       request.options = request.options || {};
-      request.tests = request.tests || [{ name: 'default', document: 'minimal.md' }];
-      
+      request.tests = request.tests || [
+        { name: 'default', document: 'minimal.md' },
+      ];
+
       // Log successful parse
-      this.logActivity(`✓ Request parsed: template=${request.template}, tests=${request.tests.length}`);
-      
+      this.logActivity(
+        `✓ Request parsed: template=${request.template}, tests=${request.tests.length}`
+      );
+
       return request;
     } catch (error) {
       if (error instanceof SyntaxError) {
-        throw new Error(`Failed to parse request: Invalid JSON syntax - ${error.message}`);
+        throw new Error(
+          `Failed to parse request: Invalid JSON syntax - ${error.message}`
+        );
       }
       throw new Error(`Failed to parse request: ${error.message}`);
     }
   }
 
   async processTestRequest(request) {
+    this.logActivity(`⏳ Process Request...${request.request_id}`);
     const startTime = Date.now();
     const results = {
       request_id: request.request_id,
@@ -149,13 +176,13 @@ class SharedWorkspaceMonitor {
       template: request.template,
       test_results: [],
       performance: {},
-      overall_result: 'unknown'
+      overall_result: 'unknown',
     };
 
     try {
       // Validate template exists
       const templatePath = path.join(TEMPLATES_PATH, request.template);
-      if (!await fs.pathExists(templatePath)) {
+      if (!(await fs.pathExists(templatePath))) {
         throw new Error(`Template not found: ${request.template}`);
       }
 
@@ -164,24 +191,32 @@ class SharedWorkspaceMonitor {
       // Process each test
       for (const test of request.tests) {
         this.logActivity(`   Testing: ${test.name}`);
-        const testResult = await this.runSingleTest(templatePath, test, request.options);
+        const testResult = await this.runSingleTest(
+          templatePath,
+          test,
+          request.options
+        );
         results.test_results.push(testResult);
       }
 
       // Determine overall result
-      const failures = results.test_results.filter(t => t.status.includes('FAIL'));
-      results.overall_result = failures.length === 0 ? 'success' : 'partial_failure';
+      const failures = results.test_results.filter((t) =>
+        t.status.includes('FAIL')
+      );
+      results.overall_result =
+        failures.length === 0 ? 'success' : 'partial_failure';
       results.status = 'completed';
 
       // Performance metrics
       results.performance = {
         total_duration_ms: Date.now() - startTime,
         tests_run: request.tests.length,
-        failures: failures.length
+        failures: failures.length,
       };
 
-      this.logActivity(`📊 Overall result: ${results.overall_result} (${failures.length} failures)`);
-
+      this.logActivity(
+        `📊 Overall result: ${results.overall_result} (${failures.length} failures)`
+      );
     } catch (error) {
       results.status = 'failed';
       results.error = error.message;
@@ -200,13 +235,13 @@ class SharedWorkspaceMonitor {
       duration_ms: 0,
       error: null,
       pdf_path: null,
-      auto_fix_attempted: false
+      auto_fix_attempted: false,
     };
 
     try {
       // Validate test document exists
       const testDocPath = path.join(TEST_DOCS_PATH, test.document);
-      if (!await fs.pathExists(testDocPath)) {
+      if (!(await fs.pathExists(testDocPath))) {
         throw new Error(`Test document not found: ${test.document}`);
       }
 
@@ -217,77 +252,100 @@ class SharedWorkspaceMonitor {
       const resultTex = path.join(RESULTS_PATH, `${outputName}.tex`);
 
       // Setup enhanced working directory with .sty file support
-      const workingEnv = await this.setupWorkingDirectory(templatePath, test.name);
+      const workingEnv = await this.setupWorkingDirectory(
+        templatePath,
+        test.name
+      );
 
-      // Build pandoc command with working directory
-      const pandocCmd = this.buildPandocCommand(testDocPath, outputPdf, workingEnv.templatePath, options, workingEnv.workDir);
-      
+      // Build pandoc command with working directory and lua_filters
+      const pandocCmd = this.buildPandocCommand(
+        testDocPath,
+        outputPdf,
+        workingEnv.templatePath,
+        test,
+        options,
+        workingEnv.workDir
+      );
+
       this.logActivity(`     Running: pandoc for ${test.name}`);
-      
+
       // Execute pandoc
       try {
         // Generate .tex for debugging
-        const texCmd = pandocCmd.replace(outputPdf, outputTex).replace('--pdf-engine=xelatex', '');
-        
+        const texCmd = pandocCmd
+          .replace(`-o "${outputPdf}"`, `-o "${outputTex}"`)
+          .replace('--pdf-engine=xelatex', '');
+
         let texGenerated = false;
         try {
           execSync(texCmd, { stdio: 'pipe', cwd: workingEnv.workDir });
-          
+
           // Copy .tex file to results directory for debugging access
           if (await fs.pathExists(outputTex)) {
             await fs.copy(outputTex, resultTex);
             testResult.tex_path = `${path.basename(resultTex)}`;
             testResult.tex_available = true;
             texGenerated = true;
-            this.logActivity(`       📄 .tex file available: ${path.basename(resultTex)}`);
+            this.logActivity(
+              `       📄 .tex file available: ${path.basename(resultTex)}`
+            );
           }
         } catch (texError) {
           testResult.tex_available = false;
-          testResult.tex_error = texError.stderr ? texError.stderr.toString() : texError.message;
-          this.logActivity(`       ❌ .tex generation failed: ${testResult.tex_error.split('\n')[0]}`);
+          testResult.tex_error = texError.stderr
+            ? texError.stderr.toString()
+            : texError.message;
+          this.logActivity(
+            `       ❌ .tex generation failed: ${testResult.tex_error.split('\n')[0]}`
+          );
         }
-        
+
         // Generate PDF
         execSync(pandocCmd, { stdio: 'pipe', cwd: workingEnv.workDir });
-        
+
         testResult.status = '✅ PASS';
         testResult.pdf_path = `output-pdfs/${outputName}.pdf`;
-        
+
         // Validate output
         if (await fs.pathExists(outputPdf)) {
           const stats = await fs.stat(outputPdf);
           testResult.pdf_size_bytes = stats.size;
         }
-        
       } catch (pandocError) {
         // Always cleanup working directory
         if (workingEnv.workDir) {
           await fs.remove(workingEnv.workDir).catch(() => {});
         }
-        const errorOutput = pandocError.stderr ? pandocError.stderr.toString() : pandocError.message;
+        const errorOutput = pandocError.stderr
+          ? pandocError.stderr.toString()
+          : pandocError.message;
         testResult.status = '❌ FAIL';
         testResult.error = errorOutput;
-        
+
         // Ensure tex availability is noted even on failure
         if (!testResult.hasOwnProperty('tex_available')) {
           testResult.tex_available = false;
-          testResult.tex_error = 'PDF generation failed before .tex could be generated';
+          testResult.tex_error =
+            'PDF generation failed before .tex could be generated';
         }
-        
+
         // Attempt auto-fix if requested
         if (options.auto_fix_attempt) {
-          const fixResult = await this.attemptAutoFix(templatePath, errorOutput, test);
+          const fixResult = await this.attemptAutoFix(
+            templatePath,
+            errorOutput,
+            test
+          );
           if (fixResult.success) {
             testResult.auto_fix_attempted = true;
             testResult.auto_fix_result = fixResult;
             testResult.status = '🔧 FIXED';
           }
         }
-        
+
         // Analyze error for better reporting
         testResult.error_analysis = this.analyzeError(errorOutput);
       }
-
     } catch (error) {
       testResult.status = '❌ ERROR';
       testResult.error = error.message;
@@ -304,64 +362,105 @@ class SharedWorkspaceMonitor {
   async setupWorkingDirectory(templatePath, testName) {
     try {
       // Create unique working directory
-      const workDir = path.join('/tmp', `pandoc-work-${testName}-${Date.now()}`);
+      const workDir = path.join(
+        '/tmp',
+        `pandoc-work-${testName}-${Date.now()}`
+      );
       await fs.ensureDir(workDir);
-      
+
       // Copy template to working directory
       const templateName = path.basename(templatePath);
       const workTemplatePath = path.join(workDir, templateName);
       await fs.copy(templatePath, workTemplatePath);
-      
+
       this.logActivity(`       🔧 Working directory: ${workDir}`);
       this.logActivity(`       📄 Template copied: ${templateName}`);
-      
+
       // Find and copy ALL .sty files from templates directory
       const templatesDirFiles = await fs.readdir(TEMPLATES_PATH);
-      const styFiles = templatesDirFiles.filter(file => file.endsWith('.sty'));
-      
+      const styFiles = templatesDirFiles.filter((file) =>
+        file.endsWith('.sty')
+      );
+
       if (styFiles.length > 0) {
-        this.logActivity(`       🎨 Copying ${styFiles.length} style files: ${styFiles.join(', ')}`);
-        
+        this.logActivity(
+          `       🎨 Copying ${styFiles.length} style files: ${styFiles.join(', ')}`
+        );
+
         for (const styFile of styFiles) {
           const srcPath = path.join(TEMPLATES_PATH, styFile);
           const dstPath = path.join(workDir, styFile);
           await fs.copy(srcPath, dstPath);
         }
       }
-      
+
       return {
         workDir: workDir,
-        templatePath: workTemplatePath
+        templatePath: workTemplatePath,
       };
-      
     } catch (error) {
       this.logError('Failed to setup working directory:', error);
       throw new Error(`Working directory setup failed: ${error.message}`);
     }
   }
 
-  buildPandocCommand(inputPath, outputPath, templatePath, options, workDir = null) {
-    const args = [
-      'pandoc',
-      `"${inputPath}"`,
-      `-o "${outputPath}"`,
-      `--template "${templatePath}"`,
-      '--pdf-engine=xelatex',
-      '--listings',
-      `--resource-path="/workspace/shared${workDir ? ':' + workDir : ''}"`,
-      '--variable title="Test Document"',
-      '--variable author="PDF Forge Test"',
-      '--variable date="2025"',
-      '--variable toc',
-      '--variable toc-depth="3"',
-      '--variable documentclass="book"',
-      '--variable fontsize="11pt"',
-      '--variable papersize="a4paper"',
-      '--variable mainfont="Latin Modern Roman"',
-      '--variable monofont="Latin Modern Mono"'
-    ];
+  buildPandocCommand(
+    inputPath,
+    outputPath,
+    templatePath,
+    test,
+    options,
+    workDir = null
+  ) {
+    // Start with base pandoc command
+    let pandocCmd = `pandoc "${inputPath}" --template "${templatePath}"`;
 
-    return args.join(' ');
+    // NEW: Process lua_filters array if present
+    if (test.lua_filters && Array.isArray(test.lua_filters)) {
+      const filtersPath = path.join(SHARED_PATH, 'filters');
+      for (const filter of test.lua_filters) {
+        // Add .lua extension if not present
+        const filterName = filter.endsWith('.lua') ? filter : `${filter}.lua`;
+        const filterPath = path.join(filtersPath, filterName);
+        pandocCmd += ` --lua-filter="${filterPath}"`;
+      }
+    }
+
+    // Process pandoc_args if present
+    if (test.pandoc_args && Array.isArray(test.pandoc_args)) {
+      pandocCmd += ' ' + test.pandoc_args.join(' ');
+    }
+
+    // Add standard options
+    pandocCmd += ` --pdf-engine=xelatex`;
+    pandocCmd += ` --listings`;
+    pandocCmd += ` --resource-path="/workspace/shared${workDir ? ':' + workDir : ''}"`;
+
+    // Add variables (could come from test.variables or default)
+    const variables = test.variables || {
+      title: 'Test Document',
+      author: 'PDF Forge Test',
+      date: '2025',
+      toc: true,
+      'toc-depth': '3',
+      documentclass: 'book',
+      fontsize: '11pt',
+      papersize: 'a4paper',
+      mainfont: 'Latin Modern Roman',
+      monofont: 'Latin Modern Mono',
+    };
+
+    for (const [key, value] of Object.entries(variables)) {
+      if (typeof value === 'boolean') {
+        if (value) pandocCmd += ` --variable ${key}`;
+      } else {
+        pandocCmd += ` --variable ${key}="${value}"`;
+      }
+    }
+
+    pandocCmd += ` -o "${outputPath}"`;
+
+    return pandocCmd;
   }
 
   analyzeError(errorText) {
@@ -370,20 +469,20 @@ class SharedWorkspaceMonitor {
         pattern: /Missing number, treated as zero/,
         cause: 'Missing \\real{} command for table column calculations',
         solution: 'Add \\newcommand*{\\real}[1]{#1} to template',
-        confidence: 0.95
+        confidence: 0.95,
       },
       {
         pattern: /Paragraph ended before \\lstset@ was complete/,
         cause: 'Unclosed lstset block in template',
         solution: 'Add closing } to lstset configuration',
-        confidence: 0.90
+        confidence: 0.9,
       },
       {
         pattern: /Undefined control sequence.*tightlist/,
         cause: 'Missing \\tightlist command definition',
         solution: 'Add \\providecommand{\\tightlist}{...} to template',
-        confidence: 0.85
-      }
+        confidence: 0.85,
+      },
     ];
 
     for (const errorPattern of errorPatterns) {
@@ -393,7 +492,7 @@ class SharedWorkspaceMonitor {
           cause: errorPattern.cause,
           solution: errorPattern.solution,
           confidence: errorPattern.confidence,
-          auto_fixable: errorPattern.confidence > 0.8
+          auto_fixable: errorPattern.confidence > 0.8,
         };
       }
     }
@@ -403,7 +502,7 @@ class SharedWorkspaceMonitor {
       cause: 'Unknown error pattern',
       solution: 'Manual investigation required',
       confidence: 0.0,
-      auto_fixable: false
+      auto_fixable: false,
     };
   }
 
@@ -413,18 +512,28 @@ class SharedWorkspaceMonitor {
     return {
       success: false,
       attempted: true,
-      reason: 'Auto-fix engine not yet implemented'
+      reason: 'Auto-fix engine not yet implemented',
     };
   }
 
   async writeResults(request, results) {
-    const resultPath = path.join(RESULTS_PATH, `${request.request_id}-result.json`);
+    this.logActivity(`📝 Write Results: ${request.request_id}`);
+    const resultPath = path.join(
+      RESULTS_PATH,
+      `${request.request_id}-result.json`
+    );
     await fs.writeFile(resultPath, JSON.stringify(results, null, 2));
-    
+
     // Write notification file if requested
     if (request.notification && request.notification.status_file) {
-      const statusFile = path.join(STATUS_PATH, request.notification.status_file);
-      await fs.writeFile(statusFile, `Test completed: ${results.overall_result}\nTimestamp: ${results.timestamp}`);
+      const statusFile = path.join(
+        STATUS_PATH,
+        request.notification.status_file
+      );
+      await fs.writeFile(
+        statusFile,
+        `Test completed: ${results.overall_result}\nTimestamp: ${results.timestamp}`
+      );
     }
   }
 
@@ -434,15 +543,23 @@ class SharedWorkspaceMonitor {
       status: 'error',
       timestamp: new Date().toISOString(),
       error: error.message,
-      overall_result: 'system_error'
+      overall_result: 'system_error',
     };
-    
-    const resultPath = path.join(RESULTS_PATH, `${errorResult.request_id}-error.json`);
+
+    const resultPath = path.join(
+      RESULTS_PATH,
+      `${errorResult.request_id}-error.json`
+    );
     await fs.writeFile(resultPath, JSON.stringify(errorResult, null, 2));
   }
 
   async archiveRequest(requestPath) {
-    const processedPath = path.join(REQUESTS_PATH, 'processed', path.basename(requestPath));
+    this.logActivity(`📝 Archive Request: ${path.basename(requestPath)}`);
+    const processedPath = path.join(
+      REQUESTS_PATH,
+      'processed',
+      path.basename(requestPath)
+    );
     await fs.move(requestPath, processedPath);
   }
 
@@ -453,19 +570,22 @@ class SharedWorkspaceMonitor {
   async onTemplateChanged(templatePath) {
     const templateName = path.basename(templatePath);
     this.logActivity(`🔧 Template changed: ${templateName}`);
-    
+
     // Could trigger automatic re-testing of affected templates
   }
 
   async signalReady() {
     const readyFile = path.join(STATUS_PATH, 'forge-ready.txt');
-    await fs.writeFile(readyFile, `PDF Forge ready at ${new Date().toISOString()}\nMonitoring: ${REQUESTS_PATH}`);
+    await fs.writeFile(
+      readyFile,
+      `PDF Forge ready at ${new Date().toISOString()}\nMonitoring: ${REQUESTS_PATH}`
+    );
   }
 
   logActivity(message) {
     const timestamp = new Date().toISOString();
     console.log(chalk.blue(`[${timestamp}]`) + ' ' + message);
-    
+
     // Also log to file
     const logFile = path.join(STATUS_PATH, 'activity.log');
     fs.appendFile(logFile, `[${timestamp}] ${message}\n`).catch(() => {});
@@ -475,10 +595,13 @@ class SharedWorkspaceMonitor {
     const timestamp = new Date().toISOString();
     const errorMsg = error ? ` - ${error.message}` : '';
     console.error(chalk.red(`[${timestamp}] ERROR: ${message}${errorMsg}`));
-    
+
     // Also log to file
     const logFile = path.join(STATUS_PATH, 'errors.log');
-    fs.appendFile(logFile, `[${timestamp}] ERROR: ${message}${errorMsg}\n`).catch(() => {});
+    fs.appendFile(
+      logFile,
+      `[${timestamp}] ERROR: ${message}${errorMsg}\n`
+    ).catch(() => {});
   }
 }
 

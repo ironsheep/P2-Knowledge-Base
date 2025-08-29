@@ -77,9 +77,29 @@ DOT-TODO-MCP/
 # Development workspace (not versioned)
 Scratchpad/
 
-# PDF generation workspace directories
-exports/pdf-generation/workspace/
-**/workspace/
+# PDF generation workspace - NOW VERSIONED (critical working files)
+# But exclude backups and temporary versions
+*.backup.*
+*.bak
+*.bak[0-9]
+
+# Exclude suffixed test/temporary versions
+*-TEST.md
+*-test.md
+*-v[0-9].md
+*-v[0-9][0-9].md
+*-FINAL.md
+*-FINAL-*.md
+*-fixed.md
+*-FIXED.md
+*-ESCAPED.md
+*-FORMATTED.md
+*-NOBOLD.md
+*-CLEAN.md
+*-COMBINED.md
+*-PRODUCTION.md
+*-READY.md
+*-SOURCE.md
 
 # Script temporary work areas
 tools/*.tmp

@@ -66,6 +66,7 @@
 \RequirePackage[english]{babel}
 \RequirePackage[top=0.75in,bottom=1in,left=1in,right=1in]{geometry}
 \RequirePackage{tcolorbox}
+\RequirePackage{makeidx}  % For \printindex support
 \RequirePackage{calc}  % Mathematical calculations
 \RequirePackage{needspace}  % Ensure space for content blocks
 
@@ -104,6 +105,10 @@
 \pagestyle{fancy}
 \fancyhf{}
 % Note: Actual header/footer content defined in presentation layers
+
+% ==================== INDEX SETUP ====================
+% Standard index support
+\makeindex
 
 % ==================== HYPERREF SETUP ====================
 % Standard link formatting
@@ -177,38 +182,31 @@
 % Minimal chapter spacing for better page utilization
 \titlespacing*{\chapter}{0pt}{10pt}{20pt}
 
-% CONDITIONAL PAGE BREAKS: Parts set flag, chapters check flag
+% CONDITIONAL PAGE BREAKS: Chapters (Parts) set flag, sections (Chapters) check flag
+% NOTE: Pandoc maps # to \chapter{} and ## to \section{}
 \newif\ifafterpart
 \afterpartfalse
 
-% Chapter redefinition with conditional page breaks
-\let\oldchapter\chapter
-\renewcommand{\chapter}[2][]{%
+% Section redefinition with conditional page breaks (sections = our "chapters")
+\let\oldsection\section
+\renewcommand{\section}[1]{%
   \ifafterpart%
     \afterpartfalse% Reset flag after use
-    % No page break - let chapter flow after part
+    % No page break - let section flow after chapter
   \else%
-    \clearpage% Only break if not after part
+    \clearpage% Only break if not after chapter
   \fi%
-  \ifx&#1&%
-    \oldchapter{#2}%
-  \else%
-    \oldchapter[#1]{#2}%
-  \fi%
-  \thispagestyle{plain}%
+  \oldsection{#1}%
 }
 
-% Part redefinition sets flag for next chapter
-\let\oldpart\part  
-\renewcommand{\part}[2][]{%
+% Chapter redefinition sets flag for next section (chapters = our "parts")
+\let\oldchapter\chapter
+\renewcommand{\chapter}[1]{%
   \clearpage%
   \thispagestyle{empty}%
-  \ifx&#1&%
-    \oldpart{#2}%
-  \else%
-    \oldpart[#1]{#2}%
-  \fi%
-  \afterparttrue% Set flag for next chapter
+  \oldchapter{#1}%
+  \afterparttrue% Set flag for next section
+  \thispagestyle{plain}%
 }
 
 % Part formatting - no auto-numbering, headings contain numbers already

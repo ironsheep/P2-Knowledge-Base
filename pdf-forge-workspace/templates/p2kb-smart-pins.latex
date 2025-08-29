@@ -9,6 +9,7 @@
 
 \usepackage{p2kb-foundation}           % Pandoc compatibility, core packages
 \usepackage{p2kb-smart-pins-content}   % Smart Pins specific content layer
+\usepackage{p2kb-smart-pins-numbering}  % Hybrid numbering system fix
 \usepackage{p2kb-tech-review}          % Technical review branding (renamed)
 
 % ==================== DOCUMENT START ====================
