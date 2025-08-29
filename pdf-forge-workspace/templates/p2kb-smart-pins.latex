@@ -12,6 +12,10 @@
 \usepackage{p2kb-smart-pins-numbering}  % Hybrid numbering system fix
 \usepackage{p2kb-tech-review}          % Technical review branding (renamed)
 
+% ==================== PAGE BREAK BEHAVIOR ====================
+% Currently letting Lua filter handle page breaks
+% Removed chapter/section overrides to restore normal LaTeX formatting
+
 % ==================== DOCUMENT START ====================
 \begin{document}
 
@@ -51,8 +55,10 @@ The Parallax community for validation and feedback%
 }
 
 % Table of contents
+% Using foundation's tocdepth=2 (parts, chapters, sections)
 \tableofcontents
 \clearpage
+\markboth{}{}  % Clear the "Contents" mark so chapters can set their own
 
 % Main content will be inserted here by pandoc
 $body$

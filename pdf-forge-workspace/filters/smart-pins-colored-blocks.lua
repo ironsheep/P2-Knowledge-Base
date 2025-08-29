@@ -1,6 +1,19 @@
--- Smart Pins 4-Block Coloring System
+-- Smart Pins Colored Blocks System
 -- Maps markdown code block classes to colored tcolorbox environments
--- Configuration blocks (blue), Spin2 blocks (green), PASM2 blocks (yellow), Antipattern blocks (red)
+-- 
+-- Supported block types:
+--   Configuration blocks (blue):   ```{.configuration} or auto-detect WRPIN:
+--   Spin2 blocks (green):         ```spin2
+--   PASM2 blocks (yellow):        ```pasm2  
+--   Antipattern blocks (red):     ```{.antipattern}
+--   Default blocks (gray):        ``` (no class)
+--
+-- Also handles:
+--   - Decision tree flowchart boxes (start-box, decision-*, option groups)
+--   - Smart page breaks between Parts and Chapters
+--
+-- Version: 1.0 - Renamed from smart-pins-block-coloring.lua
+-- Date: 2025-08-29
 
 -- Handle Div elements for flowchart boxes
 function Div(div)
@@ -36,8 +49,51 @@ function Div(div)
   return div
 end
 
--- This filter handles ONLY code block coloring
--- Page breaks are handled by part-chapter-pagebreaks.lua
+-- Track if we just saw a Part header
+local just_saw_part = false
+
+-- Handle Header elements for page breaks
+function Header(header)
+  local title = pandoc.utils.stringify(header.content)
+  
+  -- Level 1 headers (Parts, Quick Reference, Index) always get page breaks
+  if header.level == 1 then
+    local pagebreak = pandoc.RawBlock('latex', '\\clearpage')
+    -- Mark that we just saw a Part
+    if title:match("^Part") then
+      just_saw_part = true
+    else
+      just_saw_part = false
+    end
+    return {pagebreak, header}
+  
+  -- Level 2 headers - check for specific patterns
+  elseif header.level == 2 then
+    -- Check if it's a chapter or appendix
+    if title:match("^Chapter") or title:match("^Appendix") then
+      -- Skip page break if this is the first chapter/appendix after a Part
+      if just_saw_part then
+        just_saw_part = false  -- Reset flag
+        return header  -- No page break
+      else
+        -- Normal chapter/appendix - gets page break
+        local pagebreak = pandoc.RawBlock('latex', '\\clearpage')
+        return {pagebreak, header}
+      end
+    -- Other level 2 headers that need page breaks
+    elseif title:match("^Part") or
+           title:match("Quick Reference") or
+           title:match("^Index") then
+      just_saw_part = false  -- Reset flag
+      local pagebreak = pandoc.RawBlock('latex', '\\clearpage')
+      return {pagebreak, header}
+    end
+  end
+  
+  -- Any other header type resets the flag
+  just_saw_part = false
+  return header
+end
 
 function CodeBlock(block)
   -- Check for class attributes
@@ -48,7 +104,7 @@ function CodeBlock(block)
   if classes and classes:includes("antipattern") then
     -- Return complete LaTeX block for antipattern styling
     local latex_block = '\\begin{AntipatternBlock}\n' ..
-                       '\\begin{Verbatim}[numbers=left,numbersep=10pt,xleftmargin=10pt]\n' ..
+                       '\\begin{Verbatim}[numbers=left,numbersep=5pt,xleftmargin=15pt]\n' ..
                        block.text .. '\n' ..
                        '\\end{Verbatim}\n' ..
                        '\\end{AntipatternBlock}'
@@ -79,12 +135,13 @@ function CodeBlock(block)
     
   -- PASM2 blocks: ```pasm2 language tag -> PASM2Block environment
   elseif block.attr and block.attr.classes and block.attr.classes:includes("pasm2") then
-    -- Return complete LaTeX block to bypass Shaded environment
-    -- Use Verbatim like the other blocks to avoid white background
+    -- Return complete LaTeX block with proper lstlisting settings
     local latex_block = '\\begin{PASM2Block}\n' ..
-                       '\\begin{Verbatim}[numbers=left,numbersep=5pt,xleftmargin=15pt]\n' ..
+                       '\\lstset{language=pasm2,basicstyle=\\ttfamily,keywordstyle=\\bfseries\\uppercase,' ..
+                       'numbers=left,numberstyle=\\tiny,xleftmargin=15pt,frame=none,backgroundcolor=\\color{white}}\n' ..
+                       '\\begin{lstlisting}\n' ..
                        block.text .. '\n' ..
-                       '\\end{Verbatim}\n' ..
+                       '\\end{lstlisting}\n' ..
                        '\\end{PASM2Block}'
     return pandoc.RawBlock('latex', latex_block)
   

@@ -1,0 +1,25 @@
+{
+  "documents": [{
+    "input": "P2-Smart-Pins-Complete-Reference.md",
+    "output": "P2-Smart-Pins-Complete-Reference.pdf",
+    "template": "p2kb-smart-pins",
+    "variables": {
+      "title": "P2 Smart Pins Complete Reference",
+      "subtitle": "Specifications and Implementation for All 32 Modes",
+      "author": "P2 Community", 
+      "footer": "Version 1.0 - Technical Review Draft"
+    },
+    "filters": [
+      "smart-pins-pagebreaks.lua",
+      "smart-pins-vertical-spacing.lua",
+      "smart-pins-block-coloring.lua",
+      "smart-pins-pasm-formatting.lua",
+      "smart-pins-index-formatting.lua"
+    ],
+    "pandoc_args": [
+      "--top-level-division=part", 
+      "--wrap=preserve"
+    ]
+  }],
+  "options": {"cleanup": true, "archive": false, "optimize": false}
+}

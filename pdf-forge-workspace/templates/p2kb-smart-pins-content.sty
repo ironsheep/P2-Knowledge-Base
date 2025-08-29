@@ -31,15 +31,15 @@
 % Configuration (blue), Spin2 (green), PASM2 (De Silva yellow)
 % Includes accessibility features: distinct borders and backgrounds
 
-% Define Smart Pins color palette (pastel + accessibility)
-\definecolor{smartpins-config-bg}{HTML}{E6F3FF}      % Light blue pastel
-\definecolor{smartpins-config-border}{HTML}{4A90E2}   % Blue border
-\definecolor{smartpins-spin2-bg}{HTML}{F0FFF0}       % Light green pastel  
-\definecolor{smartpins-spin2-border}{HTML}{5CB85C}    % Green border
-\definecolor{smartpins-pasm2-bg}{HTML}{FFFACD}       % De Silva yellow
-\definecolor{smartpins-pasm2-border}{HTML}{F0AD4E}    % Yellow/orange border
-\definecolor{smartpins-antipattern-bg}{HTML}{FFE6E6}  % Light red pastel
-\definecolor{smartpins-antipattern-border}{HTML}{D9534F} % Red border
+% Define Smart Pins color palette (muted pastels for less dominance)
+\definecolor{smartpins-config-bg}{HTML}{F5F9FC}      % Very soft blue-gray (was E6F3FF)
+\definecolor{smartpins-config-border}{HTML}{7FA8C9}   % Muted blue border (was 4A90E2)
+\definecolor{smartpins-spin2-bg}{HTML}{F8FCF8}       % Very soft green-gray (was F0FFF0)  
+\definecolor{smartpins-spin2-border}{HTML}{85B985}    % Muted green border (was 5CB85C)
+\definecolor{smartpins-pasm2-bg}{HTML}{FFFEF5}       % Very soft cream (was FFFACD)
+\definecolor{smartpins-pasm2-border}{HTML}{D4B896}    % Muted tan border (was F0AD4E)
+\definecolor{smartpins-antipattern-bg}{HTML}{FFF5F5}  % Very soft pink (was FFE6E6)
+\definecolor{smartpins-antipattern-border}{HTML}{C08080} % Muted rose border (was D9534F)
 
 % Configuration Block Environment (blue theme)
 \newtcolorbox{ConfigBlock}{%
@@ -51,7 +51,7 @@
   toprule=0.5pt,
   bottomrule=0.5pt,
   rounded corners,
-  left=30pt,               % Increased from 15pt to accommodate line numbers
+  left=10pt,               % Two-digit space from edge to line numbers
   right=10pt,
   top=8pt,
   bottom=8pt,
