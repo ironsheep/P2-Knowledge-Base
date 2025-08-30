@@ -60,20 +60,27 @@ grep -c 'ConfigBlock\|Spin2Block\|PASM2Block' \
 
 ### Deployment Workflow (EXACT SEQUENCE)
 1. **Edit markdown**: `workspace/smart-pins-manual/P2-Smart-Pins-Complete-Reference-WORKING.md`
-2. **Edit templates**: `workspace/manual-templates/*.sty`
+2. **Edit templates**: `workspace/manual-templates/*.sty` (IF NEEDED)
 3. **Edit scripts**: Fix scripts as needed (generate-pdf.js, watch-shared-workspace.js)
-4. **Escape markdown**: Run `./tools/latex-escape-all.sh WORKING.md → outbound/P2-Smart-Pins-Reference.md`
-5. **Deploy ALL to outbound**: 
-   - Templates: `cp workspace/manual-templates/*.sty → outbound/P2-Smart-Pins-Reference/`
-   - Scripts: `cp fixed-script.js → outbound/P2-Smart-Pins-Reference/scripts-from-forge/`
-   - Filters: `cp filter.lua → outbound/P2-Smart-Pins-Reference/`
-6. **User deploys**: Takes ALL files from outbound to PDF Forge (templates, scripts, filters)
+4. **Escape markdown**: ALWAYS run `./tools/latex-escape-all.sh WORKING.md → outbound/P2-Smart-Pins-Reference.md`
+5. **Deploy ONLY MODIFIED FILES to outbound**: 
+   - **⚠️ CRITICAL: ONLY COPY WHAT YOU MODIFIED - NEVER COPY EVERYTHING**
+   - If you edited templates: `cp [specific-modified.sty] → outbound/P2-Smart-Pins-Reference/`
+   - If you fixed scripts: `cp [specific-fixed.js] → outbound/P2-Smart-Pins-Reference/scripts-from-forge/`
+   - If you modified filters: `cp [specific-filter.lua] → outbound/P2-Smart-Pins-Reference/`
+   - **DEFAULT FOR TESTING**: Usually just escaped markdown + request.json
+6. **User deploys**: Takes ONLY the files you placed in outbound to PDF Forge
 
-### NEVER Edit These Directly
-- ❌ `/exports/pdf-generation/outbound/` - This is deployment staging only
+### ⛔️ NEVER Use Outbound as Reference Source ⛔️
+**CRITICAL**: Outbound is OUTPUT only, NEVER a reference!
+- ❌ `/exports/pdf-generation/outbound/` - Deployment staging ONLY
 - ❌ Escaped markdown files - Always edit WORKING.md then re-escape
 - ❌ Templates in outbound - Always edit in workspace/manual-templates first
-- ❌ Scripts in outbound - Always provide fixed versions for deployment
+
+**Information Hierarchy (USE THIS ORDER):**
+1. ✅ **Source of Truth FIRST**: `workspace/` directories
+2. ✅ **Documentation SECOND**: When source doesn't have info
+3. ❌ **NEVER outbound**: It's where we PUT files, not GET information
 
 ### Outbound Directory = Deployment Staging
 **CRITICAL**: The outbound directory is WHERE YOU DROP FILES FOR USER TO DEPLOY:

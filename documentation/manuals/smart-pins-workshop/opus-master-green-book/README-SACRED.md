@@ -25,16 +25,18 @@ This directory contains TWO sacred versions of the P2 Smart Pins Green Book Tuto
   - Historical reference
   - Baseline for comparisons
 
-### 📚🖼️ Version 2: P2-Smart-Pins-Green-Book-Tutorial-With-Images.md (Enhanced Visual)
+### 📚🖼️ Version 2: P2-Smart-Pins-Green-Book-Tutorial-With-Images.md (Enhanced Visual) ⭐ AUTHORITATIVE
 - **Type**: Green Book (Tutorial) - Visual enhanced version
 - **Generated**: 2025-08-30 by Opus 4.1 (base text)
-- **Enhanced**: 2025-08-30 by Opus 4.1 (images + examples)
-- **Size**: ~3,000+ lines with integrated visuals
+- **Enhanced**: 2025-08-30 16:04 by Opus 4.1 (images + examples)
+- **Size**: 70KB / 2,800 lines with integrated visuals
 - **Permissions**: 444 (read-only)
 - **Purpose**: Visual learning tutorial with diagrams
 - **Features**:
   - All original text PLUS:
-  - 20+ technical diagrams and timing charts
+  - 11 technical diagrams integrated
+  - 30 semantic gap markers (vs 6 in original)
+  - 75 Spin2 + 12 PASM2 code blocks with language tags
   - Smart Pin block architecture diagram
   - Mode-specific waveforms and signal flows
   - Complete example sets (Config + Spin2 + PASM2)
@@ -62,7 +64,7 @@ Original Text-Only (2,821 lines)
          ↓
     [Foundation]
          ↓
-Enhanced With Images (3,000+ lines)
+Enhanced With Images (2,800 lines)
     - Adds 20+ diagrams
     - Adds complete code examples
     - Maintains all original text
@@ -104,7 +106,7 @@ The enhanced version references these key images:
 
 Both files are committed to Git for permanent preservation:
 - Original Text-Only - Commit: d0616d6
-- Enhanced With Images - Commit: [pending]
+- Enhanced With Images - Commit: 33de948
 
 ### Emergency Recovery
 
