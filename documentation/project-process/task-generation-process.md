@@ -189,6 +189,32 @@ mcp__todo-mcp__todo_create content:"[full task]" priority:"high"
 - Not for primary organization
 - Document why sequencing was needed
 
+### Step 9: CRITICAL - Rework Analysis Pass
+
+**Purpose**: Prevent tasks from requiring rework due to execution order conflicts
+
+**Process**:
+1. **Trace execution flow**: "If I do these tasks in this exact order, what happens?"
+2. **Identify conflicts**: Look for tasks where later discoveries might invalidate earlier work
+3. **Check methodology dependencies**: Does one task establish approaches that another should use?
+4. **Fix ordering issues**:
+   - **Preferred**: Adjust task priorities to get natural ordering
+   - **Fallback**: Use sequencing within same priority
+   - **Last resort**: Add dependencies across priorities
+
+**Common Conflict Patterns**:
+- **Audit before execution**: Methodology audits should precede work using that methodology
+- **Standards before application**: Establishing approaches before using them
+- **Foundation before building**: Base knowledge before derived knowledge
+- **Discovery before utilization**: Finding information before applying it
+
+**Example from Sprint 005**:
+- **Problem**: Code extraction (#930) before methodology audit (#935)
+- **Risk**: Audit might reveal better extraction approaches, causing rework
+- **Solution**: Moved audit to same priority, natural ordering resolved conflict
+
+**Remember**: This analysis often reveals that tasks are mis-prioritized, not just mis-ordered
+
 ---
 
 ## Task Examples by Type
@@ -375,6 +401,9 @@ Before finalizing tasks, verify:
 - [ ] Could an agent execute this alone?
 - [ ] Priority levels assigned (critical/high/medium/low/backlog)
 - [ ] Advisory tags applied where helpful
+- [ ] **CRITICAL: Rework analysis completed**
+- [ ] Execution order conflicts identified and resolved
+- [ ] Task priorities adjusted if needed for optimal ordering
 
 ---
 
@@ -382,18 +411,25 @@ Before finalizing tasks, verify:
 
 **Before execution can begin**:
 
+### Final Quality Checks
+1. **Rework Analysis Complete**: Systematic review for execution order conflicts
+2. **Model Strategy Optimal**: Minimize switches, batch work appropriately
+3. **Dependencies Justified**: Any dependencies are truly necessary, not planning failures
+4. **Estimates Reasonable**: Total time within sprint guidelines (<24 hours)
+
 ### Iteration with Human
 1. Present complete task list with priorities and estimates
 2. Human reviews for:
-   - Correct prioritization
+   - Correct prioritization  
    - Reasonable estimates
-   - Proper ordering
+   - Proper ordering (no rework conflicts)
    - Model assignments
 3. Iterate until:
    - Both parties have no questions
    - Both agree it's the right set of tasks
    - Priorities are correct
    - Order minimizes rework
+   - Rework analysis confirms no conflicts
 
 **The final gate**: "We both like this task list and neither of us has questions"
 

@@ -5,139 +5,189 @@
 **Document**: P2-Smart-Pins-Green-Book-Tutorial.md  
 **Last Updated**: 2025-08-31
 
+## 🔴 CRITICAL: DIV-ONLY APPROACH
+
+**DECISION**: All code blocks MUST use div syntax (`:::: type`) for consistency and future maintainability. 
+- NO language tags (````spin2`, ````pasm2`)
+- NO mixed approaches
+- ALL code blocks wrapped in semantic divs
+- Lua filters will ONLY process div syntax
+
 ## Overview
-This guide documents minimal markdown changes required to make the Green Book work optimally with our stylesheets and Lua filters. Focus is on leveraging smart processing pipeline over manual markdown changes.
+This guide documents the REQUIRED markdown transformations to convert the Green Book to our standardized div-based syntax. All code blocks must be converted to div environments for proper LaTeX processing.
 
-## Analysis Status
-✅ **ANALYSIS COMPLETE** - Green Book v3 analyzed, minimal changes needed
+## Current State Analysis
 
-## Analysis Results
+### Source Document Assessment
+**Document**: P2-Smart-Pins-Green-Book-Tutorial (opus-master/COMPLETE-OPUS-MASTER.md)
+**Working File**: P2-Smart-Pins-Green-Book-Tutorial-working.md
 
-### Current State Assessment
-**Document**: P2-Smart-Pins-Green-Book-Tutorial-v3.md (25,040 tokens)
-**Status**: Already well-structured for LaTeX processing
+### Code Block Inventory
+**Found 88 code blocks** currently using language tags:
+- `spin2` blocks: 58 instances → MUST convert to `:::: spin2`
+- `pasm2` blocks: 30 instances → MUST convert to `:::: pasm2`
+- Mixed antipattern blocks: Several instances → MUST split and wrap
+- Configuration blocks with WRPIN: → Keep as `:::: spin2` (pedagogical decision)
 
-### Code Block Analysis
-**Found 87 code blocks** already properly tagged:
-- `spin2` blocks: 81 instances (ready for green coloring)
-- `pasm2` blocks: 6 instances (ready for yellow coloring) 
-- **Configuration blocks**: 0 instances with WRPIN: pattern (none needed)
-- **Antipattern blocks**: 0 instances with `.antipattern` class
+### Semantic Div Status
+**Found 26 semantic divs** already using correct syntax:
+- `needs-diagram`: 18 instances ✅
+- `needs-technical-review`: 1 instance ✅
+- `needs-examples`: 2 instances ✅
+- `needs-verification`: 2 instances ✅
+- `needs-code-review`: 1 instance ✅
+- `tip`: 2 instances ✅
+- `preliminary-content`: 2 instances ✅
 
-✅ **Result**: All code blocks properly formatted for 4-color system
+## Known Issues and Solutions
 
-### Semantic Div Analysis
-**Found 26 semantic divs** ready for LaTeX environments:
-- `needs-diagram`: 18 instances → gbdiagram environment
-- `needs-technical-review`: 1 instance → gbtechreview environment
-- `needs-examples`: 2 instances → gbexamples environment
-- `needs-verification`: 2 instances → gbverify environment
-- `needs-code-review`: 1 instance → gbcodereview environment
-- `tip`: 2 instances → gbtip environment
-- `preliminary-content`: 2 instances → gbpreliminary environment
+### LaTeX Image Float Problem
+**Issue**: LaTeX moves images to "optimize" page layout, causing them to appear at page tops instead of where referenced in narrative. This can split code blocks and break the tutorial flow.
 
-✅ **Result**: All semantic divs use proper `::::` syntax for Lua filter processing
+**Solution**: Use `non-floating-images.lua` filter to convert all images to non-floating, centered images that stay exactly where placed.
 
-## Proposed Changes
+**Design Decision - 85% Width**: 
+- Images default to 85% of text width for visual breathing room
+- Prevents images from dominating the narrative
+- Creates professional appearance with clear text/image hierarchy
+- Easily adjustable in the Lua filter if needed
+- Individual images can override with explicit width attributes
 
-### REQUIRED Markdown Changes Identified!
-
-🔍 **UPDATED ANALYSIS**: Green Book v3 needs specific transformations for optimal LaTeX processing
+**Implementation**: Add to pandoc args:
+```json
+"lua_filters": [
+  "smart-pins-div-blocks",
+  "non-floating-images",  // Keeps images in place
+  "part-chapter-pagebreaks"
+]
+```
 
 ## Required Transformations
 
 ### 1. Antipattern Code Block Splitting ⚠️ **CRITICAL**
 
-**Location**: "Making mistakes and learning from them" section
+**Location**: Throughout the tutorial, teaching moments
 **Pattern**: Single code blocks containing both failing and working code
-**Detection**: Comments like `// This won't work` and `// This works`
+**Detection**: Spin2 uses single tick marks for comments:
+- `' WRONG - [explanation]` followed by incorrect code
+- `' RIGHT - [explanation]` followed by correct code
+- `' This won't work` (if present)
+- `' This works` (if present)
 
 **Required Action**: Split each mixed code block into separate blocks:
-- Code before `// This works` → `:::: antipattern` div environment (red)
-- Code after `// This works` → `:::: spin2` div environment (green)
+- Code with `' WRONG` comments → `:::: antipattern` div environment (red)
+- Code with `' RIGHT` comments → `:::: spin2` div environment (green)
 
 **Example Transformation**:
 ```markdown
 <!-- BEFORE (current v3) -->
 ```spin2
-badcode here
-// This won't work  
-more badcode
-// This works
-goodcode here
+' WRONG - Pin won't output
+wrpin(P_TRANSITION, LED_PIN)
+
+' RIGHT - Include P_OE
+wrpin(P_TRANSITION | P_OE, LED_PIN)
 ```
 
 <!-- AFTER (required) -->
 :::: antipattern
 ```
-badcode here
-// This won't work
-more badcode  
+' WRONG - Pin won't output
+wrpin(P_TRANSITION, LED_PIN)
 ```
 ::::
 
 :::: spin2
 ```
-// This works
-goodcode here
+' RIGHT - Include P_OE
+wrpin(P_TRANSITION | P_OE, LED_PIN)
 ```
 ::::
 ```
 
+**Note**: Spin2 uses single tick marks (') for comments, not double slashes (//)
+
 ### 2. Code Block Environment Conversion 🔄 **REQUIRED**
 
-**Current**: Using ```spin2 and ```pasm2 language tags
-**Target**: Convert to div environments for better LaTeX control
+**MANDATORY**: ALL code blocks must use div-wrapped format. NO exceptions.
 
-**Transformations Needed**:
-- ````spin2` → `:::: spin2` div environments
-- ````pasm2` → `:::: pasm2` div environments  
-- Plain ``` → `:::: code` div environments (gray)
+**Language-Tagged Blocks (OLD - FORBIDDEN)**:
+```markdown
+```spin2
+code here
+```
+```
 
-**Why**: Div environments provide better LaTeX styling control than language tags
+**Div-Wrapped Blocks (NEW - REQUIRED)**:
+```markdown
+:::: spin2
+```
+code here
+```
+::::
+```
 
-## 4-Color Code Block System
+**Required Conversions**:
+- ALL `spin2` blocks → `:::: spin2` (including those with WRPIN:)
+- ALL `pasm2` blocks → `:::: pasm2`
+- Split antipattern blocks → `:::: antipattern` and `:::: spin2`
+- NO blocks remain with language tags
 
-### Current Implementation Status
-✅ **Green Book v3 is 100% compatible with 4-color system**
+## 3-Color Code Block System (Pedagogical Decision)
 
-### Color Mappings (smart-pins-colored-blocks.lua)
+### Color Mappings (AFTER div conversion)
 
-**🟢 GREEN - Spin2 Blocks** (81 instances ready)
-- Markdown: ```spin2
+**🟢 GREEN - Spin2 Blocks** (all Spin2 including config)
+- Markdown: `:::: spin2`
 - LaTeX Environment: `Spin2Block`
-- Detection: `block.attr.classes:includes("spin2")`
+- Lua Detection: Div with class "spin2"
+- **Includes**: Regular code AND configuration (WRPIN:/WXPIN:/WYPIN:)
 
-**🟡 YELLOW - PASM2 Blocks** (6 instances ready) 
-- Markdown: ```pasm2
+**🟡 YELLOW - PASM2 Blocks** (30 instances) 
+- Markdown: `:::: pasm2`
 - LaTeX Environment: `PASM2Block`
-- Detection: `block.attr.classes:includes("pasm2")`
+- Lua Detection: Div with class "pasm2"
 
-**🔵 BLUE - Configuration Blocks** (0 instances, none needed)
-- Markdown: ```{.configuration} OR auto-detect WRPIN:
-- LaTeX Environment: `ConfigBlock` 
-- Detection: `classes:includes("configuration")` OR `block.text:match("WRPIN:")`
-
-**🔴 RED - Antipattern Blocks** (0 instances, none needed)
-- Markdown: ```{.antipattern}
+**🔴 RED - Antipattern Blocks** (created from split blocks)
+- Markdown: `:::: antipattern`
 - LaTeX Environment: `AntipatternBlock`
-- Detection: `classes:includes("antipattern")`
+- Lua Detection: Div with class "antipattern"
 
-**⚪ GRAY - Default Blocks** (handles remaining untagged blocks)
-- Markdown: ``` (no language tag)
-- LaTeX: Standard Pandoc `Shaded` environment
-- Detection: No specific class or language
+### Pedagogical Rationale - A Conscious Decision
 
-### Requirements Verification
-✅ All 87 code blocks have proper language tags
-✅ No manual div wrapping needed - Lua filter handles everything
-✅ No configuration or antipattern blocks present
-✅ Clean separation between Spin2 (green) and PASM2 (yellow)
+**We considered creating a separate `:::: configuration` div for WRPIN: blocks** but decided AGAINST it:
+
+**Why we considered it:**
+- Would provide visual distinction between setup and action code
+- Could help pattern recognition for initialization
+- Matches the reference manual's 4-color system
+
+**Why we rejected it:**
+- **Tutorial flow** - Configuration IS part of the learning sequence
+- **Reduces complexity** - 3 colors (green/yellow/red) is cleaner than 4
+- **Natural learning** - Students should see config as normal code, not special
+- **Self-documenting** - WRPIN:/WXPIN:/WYPIN: patterns are obvious without color
+- **IDE reality** - Their editor won't color these differently
+
+**Decision**: Configuration blocks remain `:::: spin2` (green) for pedagogical clarity.
+
+### Verification Checklist
+- [ ] NO language-tagged blocks remain (no ````spin2`, ````pasm2`)
+- [ ] ALL code blocks use div syntax (`:::: type`)
+- [ ] Antipattern blocks properly split
+- [ ] Configuration blocks remain as `:::: spin2` (not separate)
 
 ## Semantic Environment Mappings
 
 ### Current Implementation Status
 ✅ **All 26 semantic divs properly formatted**
+
+### Lua Filter Requirements
+
+**CRITICAL**: Use `smart-pins-div-blocks.lua` instead of `smart-pins-colored-blocks.lua`
+- The new filter processes Div elements (:::: syntax)
+- The old filter processes CodeBlock elements (``` syntax) 
+- Both filters should NOT be used together
 
 ### Environment Mappings (green-book-semantic-blocks.lua)
 
@@ -218,35 +268,51 @@ The following templates must work with Green Book:
 
 **The Green Book v3 needs specific antipattern splitting and code block environment conversion for optimal LaTeX processing.**
 
-### Deployment Workflow (Zero Changes)
+### Deployment Workflow
 
-**Step 1: Direct Copy** ✅
+**Step 1: Apply ALL Transformations** 🔄
 ```bash
-# Copy v3 directly to workspace (no modifications needed)
-cp "P2-Smart-Pins-Green-Book-Tutorial-v3.md" \
-   "/exports/pdf-generation/workspace/smart-pins-manual/P2-Smart-Pins-Green-Book-Tutorial.md"
+# Start with master document
+cp opus-master/COMPLETE-OPUS-MASTER.md \
+   P2-Smart-Pins-Green-Book-Tutorial-working.md
+
+# Apply transformations (manual or scripted):
+# - Convert all language-tagged to div-wrapped
+# - Split antipattern blocks
+# - Identify and wrap configuration blocks
 ```
 
-**Step 2: LaTeX Escaping** ✅
+**Step 2: Verify Transformations** ✅
 ```bash
-# Apply standard LaTeX escaping
+# Should return 0 - no language tags remain
+grep -c '^```[sp]' P2-Smart-Pins-Green-Book-Tutorial-working.md
+
+# Should show div blocks
+grep -c '^::::' P2-Smart-Pins-Green-Book-Tutorial-working.md
+```
+
+**Step 3: LaTeX Escaping** 
+```bash
 ./tools/latex-escape-all.sh \
-  "P2-Smart-Pins-Green-Book-Tutorial.md" \
-  "P2-Smart-Pins-Green-Book-Tutorial-escaped.md"
+  P2-Smart-Pins-Green-Book-Tutorial-working.md \
+  P2-Smart-Pins-Green-Book-Tutorial-escaped.md
 ```
 
-**Step 3: PDF Generation Ready** ✅
+**Step 4: Deploy with Updated Filters**
 - Template: `p2kb-smart-pins.latex`
-- Lua Filters: `smart-pins-colored-blocks.lua`, `green-book-semantic-blocks.lua`, `part-chapter-pagebreaks.lua`
-- No additional processing required
+- Lua Filters: 
+  - `smart-pins-div-blocks.lua` - NEW filter for div-wrapped code blocks (replaces smart-pins-colored-blocks.lua)
+  - `green-book-semantic-blocks.lua` - Semantic div processing
+  - `part-chapter-pagebreaks.lua` - Page break handling
+- **IMPORTANT**: Do NOT use smart-pins-colored-blocks.lua with div-wrapped content
 
 ### Quality Assurance Checklist
 
 **Code Block Verification** ✅
-- [ ] 81 `spin2` blocks → green rendering
-- [ ] 6 `pasm2` blocks → yellow rendering  
-- [ ] 0 configuration blocks (none expected)
-- [ ] 0 antipattern blocks (none expected)
+- [ ] All `spin2` blocks → green rendering (including config)
+- [ ] 30 `pasm2` blocks → yellow rendering  
+- [ ] Split antipattern blocks → red rendering
+- [ ] NO separate configuration blocks (pedagogical choice)
 
 **Semantic Div Verification** ✅
 - [ ] 18 `needs-diagram` → gbdiagram environments
@@ -282,20 +348,26 @@ cp "P2-Smart-Pins-Green-Book-Tutorial-v3.md" \
 
 ### Success Metrics
 
-🎯 **Target**: 100% automated processing from v3 → PDF
+🎯 **Target**: Complete conversion to div-wrapped format
 
-✅ **Achieved**: 
-- **0 manual markdown edits required**
-- **100% Lua filter compatibility** 
-- **100% template system compatibility**
-- **87/87 code blocks ready for 4-color system**
-- **26/26 semantic divs ready for environment mapping**
+**Success Criteria**: 
+- ✅ 0 language-tagged blocks remaining
+- ✅ 100% div-wrapped code blocks
+- ✅ All antipattern blocks properly split
+- ✅ Lua filters handle ONLY div syntax
+- ✅ Clean, consistent markdown format
 
-### Historical Context
+### Summary of Required Changes
 
-**This represents a major achievement in our pipeline automation:**
-- v0: Manual markdown heavy-editing required
-- v2: Significant manual adjustments needed  
-- **v3: Zero manual transformations required** ⭐
+1. **Convert 88 code blocks** from language-tagged to div-wrapped
+2. **Split mixed antipattern blocks** into separate div blocks
+3. **Keep configuration blocks as spin2** (pedagogical decision - not separate)
+4. **Update Lua filter** to process Div elements instead of CodeBlock elements
+5. **NO language tags remain** - complete migration to div syntax
 
-**The Green Book v3 represents the first document in our knowledge base that achieves 100% automated LaTeX processing pipeline compatibility!**
+### Why This Matters
+
+- **Consistency**: Single format for all code blocks
+- **Maintainability**: Easier to update and extend
+- **Semantic clarity**: Div names clearly indicate content type
+- **Future-proof**: Aligns with Pandoc's semantic div approach

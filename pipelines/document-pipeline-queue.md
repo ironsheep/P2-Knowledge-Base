@@ -3,6 +3,21 @@
 ## Pipeline Strategy
 When reviewing sprints, we ask: "We're going breadth first, which one of these do we want to do next? What's next up in importance?"
 
+## Ingestion Analysis Tasks (Pre-Document Generation)
+
+### 1. Titus Smart Pins Narrative Extraction Validation
+**Purpose**: Ensure 100% capture of Jon Titus's pedagogical content before Green Book generation
+**Status**: Ready to execute
+**Instructions**: `/sources/extractions/smart-pins-complete-extraction-audit/NARRATIVE-EXTRACTION-VALIDATION.md`
+**Critical Focus**:
+- Verify ALL narrative explanations extracted (not just specs/code)
+- Check "why" explanations for configurations
+- Confirm tutorial progression preserved
+- Validate all 174 examples have context
+**Output**: `narrative-gaps-found.md` listing any missing content
+**Next Step**: Once validated, proceed to Green Book generation with Opus
+**Priority**: IMMEDIATE - Blocks Smart Pins Green Book generation
+
 ## Currently Queued Documents
 
 ### 1. Terminal Window User's Manual
