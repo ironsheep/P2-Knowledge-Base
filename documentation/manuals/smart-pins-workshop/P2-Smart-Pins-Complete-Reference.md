@@ -5,6 +5,7 @@
 ### Version 1.0 - Production Ready  
 ### August 2025
 
+---
 
 ## Executive Summary
 
@@ -13,7 +14,6 @@
 The Propeller 2's Smart Pin architecture represents a paradigm shift in microcontroller I/O handling. Instead of consuming precious COG cycles for routine I/O operations, Smart Pins provide 64 independent hardware units that operate autonomously, each capable of 32 different modes ranging from simple digital I/O to complex protocols like USB.
 
 **The Smart Pin Advantage:**
-
 - **Zero COG Overhead**: Once configured, Smart Pins run independently
 - **Deterministic Timing**: Hardware-guaranteed precision unaffected by code execution
 - **Massive Parallelism**: All 64 pins can operate simultaneously in different modes
@@ -33,7 +33,6 @@ The Propeller 2's Smart Pin architecture represents a paradigm shift in microcon
 ### When to Use Smart Pins
 
 **Always Use Smart Pins For:**
-
 - Serial communication (UART, SPI, I2C patterns)
 - PWM generation (motors, LEDs, power control)
 - Encoder reading (quadrature, incremental)
@@ -42,7 +41,6 @@ The Propeller 2's Smart Pin architecture represents a paradigm shift in microcon
 - Frequency generation
 
 **Consider COG-Driven I/O For:**
-
 - Complex protocols with conditional logic
 - Bit-banged interfaces needing data manipulation
 - Dynamic protocol changes mid-stream
@@ -51,7 +49,6 @@ The Propeller 2's Smart Pin architecture represents a paradigm shift in microcon
 ### Resource Planning Guide
 
 With 64 Smart Pins available, typical applications use:
-
 - **Robot Controller**: 4 PWM (motors) + 2 encoders + 4 ADC (sensors) + 2 UART = 12 pins
 - **Data Logger**: 8 ADC + 1 SPI + 1 UART + 1 I2C pattern = 20 pins  
 - **Motor Driver**: 6 PWM + 3 encoders + 6 current sense ADC = 15 pins
@@ -59,6 +56,7 @@ With 64 Smart Pins available, typical applications use:
 
 This leaves 50-75% of Smart Pins available for expansion, ensuring room for growth.
 
+---
 
 ## Quick Start Guide
 
@@ -110,37 +108,28 @@ PUB verify_smart_pin() | count
 ### Common Beginner Mistakes (and Solutions)
 
 #### Mistake 1: Forgetting Output Enable
-
-```{.antipattern}
+```spin2
 ' WRONG - Pin won't output
 pinstart(pin, P_TRANSITION, period, 0)
-```
 
-```spin2
 ' RIGHT - Include P_OE
 pinstart(pin, P_TRANSITION | P_OE, period, 0)
 ```
 
 #### Mistake 2: Wrong Period Calculation
-
-```{.antipattern}
+```spin2
 ' WRONG - This gives 500Hz, not 1kHz
 wxpin(pin, clkfreq / 1000)
-```
 
-```spin2
 ' RIGHT - Transitions are edges, need /2000 for 1kHz
 wxpin(pin, clkfreq / 2000)
 ```
 
 #### Mistake 3: Not Clearing Before Reconfigure
-
-```{.antipattern}
+```spin2
 ' WRONG - May retain old settings
 pinstart(pin, new_mode, x, y)
-```
 
-```spin2
 ' RIGHT - Clear first
 pinclear(pin)
 pinstart(pin, new_mode, x, y)
@@ -156,7 +145,6 @@ pinstart(pin, new_mode, x, y)
 ### Quick Mode Selection Checklist
 
 Ask yourself:
-
 1. **Digital or Analog?** → Narrows to ~half the modes
 2. **Input or Output?** → Narrows to ~quarter of modes
 3. **Continuous or Triggered?** → Narrows to 2-3 modes
@@ -164,7 +152,49 @@ Ask yourself:
 
 Example: Digital → Output → Continuous → Fast = NCO Frequency mode
 
+---
 
+## Table of Contents
+
+**Executive Summary**
+- Why Smart Pins Matter
+- Performance Impact
+- Resource Planning
+
+**Quick Start Guide**
+- First Smart Pin in 5 Minutes
+- Common Mistakes
+- Mode Selection
+
+**Part I: Smart Pin Fundamentals**
+- Chapter 1: Smart Pin Architecture
+- Chapter 2: Configuration Protocol  
+- Chapter 3: Programming Interface
+
+**Part II: Mode Reference**
+- Chapter 4: Digital I/O Modes
+- Chapter 5: DAC Output Modes
+- Chapter 6: Pulse and NCO Modes
+- Chapter 7: PWM Modes
+- Chapter 8: Encoder Modes
+- Chapter 9: Measurement Modes
+- Chapter 10: ADC Modes
+- Chapter 11: USB Mode
+- Chapter 12: Serial Modes
+
+**Part III: Application Guide**
+- Chapter 13: Common Implementations
+- Chapter 14: Multi-Pin Applications
+- Chapter 15: Optimization & Troubleshooting
+
+**Part IV: Quick Reference**
+- Appendix A: Mode Selection Guide with Comparison Matrix
+- Appendix B: Configuration Calculator
+- Appendix C: Register Reference
+- Appendix D: Electrical Specifications
+- Index
+
+---
 
 # Part I: Smart Pin Fundamentals
 
@@ -174,43 +204,11 @@ Example: Digital → Output → Continuous → Fast = NCO Frequency mode
 
 The Propeller 2 incorporates 64 Smart Pins, one for each I/O pin. Each Smart Pin contains independent hardware that can be configured to perform one of 32 specialized modes without COG intervention. Once configured, Smart Pins operate autonomously, freeing COG resources for other tasks.
 
-### Smart Pin Block Diagram
-
-![Smart Pin Block Diagram](assets/smart-pins-master-trimmed.png)
-
-**Figure 1.1: Smart Pin Block Diagram**  
-*Signal Path for Even/Odd Pin Pairs*  
-*Original design and diagram by Chip Gracey, Parallax Inc.*
-
-This comprehensive diagram reveals the sophisticated dual-pin architecture at the heart of P2's Smart Pin system. The diagram shows how even pins (0,2,4...62) and odd pins (1,3,5...63) are organized as pairs with shared resources.
-
-**Understanding This Architecture Diagram:**
-
-The density of this diagram is intentional—it captures every signal path and processing option available in the Smart Pin system. Three key insights emerge:
-
-1. **Pin Pairs Share Resources** - Even/odd pins (like 0-1, 2-3, etc.) share certain hardware blocks, which explains why some operations (like differential signaling) work best on pin pairs.
-
-2. **Three-Layer Processing Architecture**:
-
-   - **Analog Layer** (Yellow/left): Physical pin interface with DACs, ADCs, comparators—where real-world signals meet silicon
-   - **Digital Core** (Blue/right): The synthesized logic implementing the 32 operating modes
-   - **COG Interface** (Top): How all 8 COGs can stream data to any pin's DAC or exchange data with Smart Pin cores
-
-3. **Flexible Signal Routing** - The PinA/PinB routing system allows any Smart Pin to read from its neighbors (±3 pins), enabling complex multi-pin operations without COG involvement.
-
-**Practical Implications:**
-
-- **Differential Protocols**: Use adjacent pins for best performance
-- **Analog Feedback Loops**: Create between pins using internal routing
-- **Pin Monitoring**: One pin can watch another's output automatically
-- **COG Streaming**: Any COG can drive any pin's DAC directly
-
-This architecture enables capabilities like running USB on one pin pair while simultaneously sampling analog on another, all while a third pair generates precise PWM—with zero COG overhead after configuration.
+![Smart Pin Block Diagram](assets/P2 SmartPins-220809_page03_img01.png)
 
 ### Hardware Architecture
 
 Each Smart Pin consists of:
-
 - **Mode Control Logic**: Determines pin function based on 6-bit mode selection
 - **X Register**: 32-bit parameter register (mode-specific function)
 - **Y Register**: 32-bit parameter register (mode-specific function)  
@@ -221,7 +219,6 @@ Each Smart Pin consists of:
 ### Smart Pin Capabilities
 
 Smart Pins operate independently of COGs, providing:
-
 - Autonomous signal generation and measurement
 - Precise timing without COG overhead
 - Concurrent operation across all 64 pins
@@ -230,19 +227,20 @@ Smart Pins operate independently of COGs, providing:
 ### Pin Numbering and Access
 
 P2 I/O pins are numbered 0-63. Smart Pin instructions use 6-bit addressing:
-
-- **Pin 0-31**: Direct addressing in instruction
-- **Pin 32-63**: Direct addressing in instruction  
-- **Pin 0-63**: Indirect addressing via register
+```
+Pin 0-31:  Direct addressing in instruction
+Pin 32-63: Direct addressing in instruction  
+Pin 0-63:  Indirect addressing via register
+```
 
 ### Clock Domains
 
 Smart Pins operate in the system clock domain:
-
 - Maximum frequency: sysclock/2 for most modes
 - Synchronous updates with COG instructions
 - Independent timing from COG execution
 
+---
 
 ## Chapter 2: Configuration Protocol
 
@@ -275,7 +273,7 @@ Smart Pins require a specific configuration sequence:
    dirh    #pin            ' Enable Smart Pin
    ```
 
-![Configuration Flow Diagram](assets/P2 SmartPins-220809_page04_img01.png)
+![Configuration Flow Diagram](../../../sources/extractions/smart-pins-complete-extraction-audit/assets/images-20250824/P2 SmartPins-220809_page04_img01.png)
 
 ### Mode Register Structure (WRPIN)
 
@@ -291,7 +289,6 @@ Bits 5..0:   Smart Pin mode selection (%MMMMMM)
 ### X Register Functions (WXPIN)
 
 The X register function varies by mode:
-
 - **Timing modes**: Period or timeout value
 - **Counter modes**: Count limit or reset value
 - **PWM modes**: Base period
@@ -300,7 +297,6 @@ The X register function varies by mode:
 ### Y Register Functions (WYPIN)
 
 The Y register function varies by mode:
-
 - **Output modes**: Output value or duty cycle
 - **Counter modes**: Not used or count increment
 - **Measurement modes**: Measurement window
@@ -309,12 +305,10 @@ The Y register function varies by mode:
 ### Z Register Functions (RDPIN/RQPIN)
 
 The Z register always contains the Smart Pin result:
-
 - **RDPIN**: Read and acknowledge (clears IN flag)
 - **RQPIN**: Read without acknowledge (preserves IN flag)
 
 Result varies by mode:
-
 - **Counter modes**: Current count
 - **Measurement modes**: Measured value
 - **Serial modes**: Received data
@@ -336,6 +330,7 @@ Two methods to check Smart Pin status:
   if_nc jmp     #no_data        ' Jump if no data
 ```
 
+---
 
 ## Chapter 3: Programming Interface
 
@@ -371,7 +366,6 @@ TESTP   S/# {WC/WZ} ' Test pin state
 ### Multi-COG Coordination
 
 Smart Pins can be accessed by any COG:
-
 - Pin ownership is not exclusive
 - Multiple COGs can read results
 - Configuration should be coordinated
@@ -426,12 +420,13 @@ Common Smart Pin errors and recovery:
 - Symptom: Missed samples or events
 - Solution: Increase sampling rate or use buffering
 
+---
 
 # Part II: Mode Reference
 
 ## Chapter 4: Digital I/O Modes
 
-### Mode `%00000` - Smart Pin OFF (Default)
+### Mode %00000 - Smart Pin OFF (Default)
 
 **Specifications**
 - Function: Smart Pin disabled, normal I/O operation
@@ -440,7 +435,7 @@ Common Smart Pin errors and recovery:
 - Usage: Default state after reset
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: $00000000 (or simply 0)
 WXPIN: Not used
 WYPIN: Not used
@@ -484,8 +479,9 @@ normal_input
 - Reset Smart Pin to known state
 - Power-sensitive applications
 
+---
 
-### Mode `%00001` - Repository Mode
+### Mode %00001 - Repository Mode
 
 **Specifications**
 - Function: 32-bit read/write repository
@@ -494,7 +490,7 @@ normal_input
 - Power: Low consumption
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %00001 (P_REPOSITORY)
 WXPIN: Not used
 WYPIN: Value to store
@@ -554,8 +550,9 @@ result  long    0
 - No HUB bandwidth impact
 - Atomic 32-bit operations
 
+---
 
-### Mode `%00111` - Transition Output
+### Mode %00111 - Transition Output
 
 **Specifications**
 - Function: Output transitions on X-clock intervals
@@ -564,7 +561,7 @@ result  long    0
 - Applications: Clock generation, protocol signaling
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %00111 (P_TRANSITION)
 WXPIN: Clock period (sysclock cycles)
 WYPIN: Number of transitions
@@ -615,10 +612,11 @@ gen_burst
 - Protocol bit timing
 - Test signal generation
 
+---
 
 ## Chapter 5: DAC Output Modes
 
-### Mode `%00010` - DAC 124Ω, 3.3V Output
+### Mode %00010 - DAC 124Ω, 3.3V Output
 
 **Specifications**
 - Resolution: 16 bits
@@ -628,10 +626,10 @@ gen_burst
 - Settling time: <1µs to 0.1%
 - Current drive: 10mA maximum
 
-![DAC Output Characteristic](assets/P2 SmartPins-220809_page13_img01.png)
+![DAC Output Characteristic](../../../sources/extractions/smart-pins-complete-extraction-audit/assets/images-20250824/P2 SmartPins-220809_page13_img01.png)
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: P_DAC_124R_3V | P_OE
 WXPIN: Update period (0 = manual)
 WYPIN: 16-bit DAC value
@@ -695,8 +693,9 @@ dacval  long    0
 - Add RC filter for audio applications
 - Consider 75Ω mode for lower impedance
 
+---
 
-### Mode `%00011` - DAC 75Ω, 2.0V Output
+### Mode %00011 - DAC 75Ω, 2.0V Output
 
 **Specifications**
 - Resolution: 16 bits
@@ -707,7 +706,7 @@ dacval  long    0
 - Current drive: 15mA maximum
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: P_DAC_75R_2V | P_OE
 WXPIN: Update period (0 = manual)
 WYPIN: 16-bit DAC value
@@ -763,10 +762,11 @@ white_level
 - 75Ω transmission line driving
 - Precision analog signaling
 
+---
 
 ## Chapter 6: Pulse and NCO Modes
 
-### Mode `%00100` - Pulse/Cycle Output
+### Mode %00100 - Pulse/Cycle Output
 
 **Specifications**
 - Function: Generate pulses with programmable width
@@ -775,7 +775,7 @@ white_level
 - Range: 1 to 2^32 clocks
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %00100 (P_PULSE)
 WXPIN: Base period in clocks
 WYPIN: Pulse count/width
@@ -825,8 +825,9 @@ gen_pulse
 - Timing pulse generation
 - Trigger signal generation
 
+---
 
-### Mode `%00101` - NCO Frequency
+### Mode %00101 - NCO Frequency
 
 **Specifications**
 - Function: Numerically Controlled Oscillator
@@ -834,10 +835,10 @@ gen_pulse
 - Resolution: 32-bit frequency control
 - Jitter: < 1 clock period
 
-![NCO Frequency Generation](assets/P2 SmartPins-220809_page15_img01.png)
+![NCO Frequency Generation](../../../sources/extractions/smart-pins-complete-extraction-audit/assets/images-20250824/P2 SmartPins-220809_page15_img01.png)
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %00101 (P_NCO_FREQ)
 WXPIN: Base period (divider)
 WYPIN: Frequency value (32-bit)
@@ -894,8 +895,9 @@ set_1khz
 - DDS signal generation
 - Frequency sweeping
 
+---
 
-### Mode `%00110` - NCO Duty
+### Mode %00110 - NCO Duty
 
 **Specifications**
 - Function: NCO with programmable duty cycle
@@ -904,7 +906,7 @@ set_1khz
 - Duty range: 0% to 100%
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %00110 (P_NCO_DUTY)
 WXPIN: Base period
 WYPIN: [31:16] = Duty, [15:0] = Frequency
@@ -963,10 +965,11 @@ duty    long    0
 - Power control with fine resolution
 - LED dimming with no flicker
 
+---
 
 ## Chapter 7: PWM Modes
 
-### Mode `%01000` - PWM Sawtooth
+### Mode %01000 - PWM Sawtooth
 
 **Specifications**
 - Function: Edge-aligned PWM
@@ -974,10 +977,10 @@ duty    long    0
 - Frequency: sysclock / (2 × period)
 - Duty cycle: 0% to 100%
 
-![PWM Sawtooth Waveform](assets/P2 SmartPins-220809_page17_img01.png)
+![PWM Sawtooth Waveform](../../../sources/extractions/smart-pins-complete-extraction-audit/assets/images-20250824/P2 SmartPins-220809_page17_img01.png)
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %01000 (P_PWM_SAWTOOTH)
 WXPIN: Base period (16-bit)
 WYPIN: Duty value (16-bit)
@@ -1041,8 +1044,9 @@ duty    long    0
 - Audio amplifier control
 - Heater control
 
+---
 
-### Mode `%01001` - PWM Triangle
+### Mode %01001 - PWM Triangle
 
 **Specifications**
 - Function: Center-aligned PWM
@@ -1051,10 +1055,10 @@ duty    long    0
 - Duty cycle: 0% to 100%
 - Advantage: Reduced harmonics
 
-![PWM Triangle Waveform](assets/P2 SmartPins-220809_page17_img02.png)
+![PWM Triangle Waveform](../../../sources/extractions/smart-pins-complete-extraction-audit/assets/images-20250824/P2 SmartPins-220809_page17_img02.png)
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %01001 (P_PWM_TRIANGLE)
 WXPIN: Base period (16-bit)
 WYPIN: Duty value (16-bit)
@@ -1123,8 +1127,9 @@ complementary_drive
 - Inverter control
 - Precision power supplies
 
+---
 
-### Mode `%01010` - Periodic Pulse (SMPS)
+### Mode %01010 - Periodic Pulse (SMPS)
 
 **Specifications**
 - Function: Switch-mode power supply optimized
@@ -1134,7 +1139,7 @@ complementary_drive
 - Duty precision: Clock-cycle accurate
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %01010 (P_PERIODIC_PULSE)
 WXPIN: Total period
 WYPIN: ON time
@@ -1200,10 +1205,11 @@ adc_val long    0
 - Battery chargers
 - Motor drivers with current control
 
+---
 
 ## Chapter 8: Encoder Modes
 
-### Mode `%01011` - Quadrature Encoder
+### Mode %01011 - Quadrature Encoder
 
 **Specifications**
 - Function: A/B quadrature decoder
@@ -1211,10 +1217,10 @@ adc_val long    0
 - Speed: Up to sysclock/2
 - Counter: 32-bit signed
 
-![Quadrature Encoder Signals](assets/P2 SmartPins-220809_page19_img01.png)
+![Quadrature Encoder Signals](../../../sources/extractions/smart-pins-complete-extraction-audit/assets/images-20250824/P2 SmartPins-220809_page19_img01.png)
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %01011 (P_QUADRATURE_ENC)
 WXPIN: Not used
 WYPIN: Reset value (typically 0)
@@ -1277,8 +1283,9 @@ pos2    long    0
 - Closed-loop control systems
 - CNC machine positioning
 
+---
 
-### Mode `%01101` - A-B Encoder
+### Mode %01101 - A-B Encoder
 
 **Specifications**
 - Function: Separate A and B inputs
@@ -1287,7 +1294,7 @@ pos2    long    0
 - Counter: 32-bit signed
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %01101 (P_AB_ENCODER)
 WXPIN: Not used
 WYPIN: Reset value
@@ -1338,8 +1345,9 @@ diff    long    0
 - Frequency difference measurement
 - Direction sensing
 
+---
 
-### Mode `%01110` - Incremental Encoder
+### Mode %01110 - Incremental Encoder
 
 **Specifications**
 - Function: Single input pulse counter
@@ -1348,7 +1356,7 @@ diff    long    0
 - Counter: 32-bit unsigned
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %01110 (P_INC_ENCODER)
 WXPIN: Not used
 WYPIN: Reset value
@@ -1411,8 +1419,9 @@ count   long    0
 - Production counting
 - Flow meter input
 
+---
 
-### Mode `%01111` - Local/Global Comparator
+### Mode %01111 - Local/Global Comparator
 
 **Specifications**
 - Function: Pin state comparison
@@ -1421,7 +1430,7 @@ count   long    0
 - Speed: Single clock response
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %01111 (P_COMPARATOR)
 WXPIN: Input pin selection
 WYPIN: Comparison mode
@@ -1490,10 +1499,11 @@ current long    0
 - Threshold detection
 - Signal routing
 
+---
 
 ## Chapter 9: Measurement Modes
 
-### Mode `%10000`-%10011 - Time Accumulation
+### Mode %10000-%10011 - Time Accumulation
 
 **Specifications**
 - Function: Measure time in selected state
@@ -1502,7 +1512,7 @@ current long    0
 - Accumulator: 32-bit
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %10000-%10011 (P_TIME_ACC)
 WXPIN: Measurement period
 WYPIN: Not used
@@ -1510,7 +1520,6 @@ Z Result: Accumulated time
 ```
 
 **Mode Variants:**
-
 - %10000: Time high
 - %10001: Time low  
 - %10010: Time since change
@@ -1579,8 +1588,9 @@ period  long    0
 - Frequency measurement
 - Signal quality analysis
 
+---
 
-### Mode `%10100`-%10111 - State Measurement
+### Mode %10100-%10111 - State Measurement
 
 **Specifications**
 - Function: Count state occurrences
@@ -1588,17 +1598,16 @@ period  long    0
 - Counter: 32-bit
 - Speed: Up to sysclock/2
 
-![State Measurement Modes](assets/P2 SmartPins-220809_page29_img01.png)
+![State Measurement Modes](../../../sources/extractions/smart-pins-complete-extraction-audit/assets/images-20250824/P2 SmartPins-220809_page29_img01.png)
 
 **Mode Variants:**
-
 - %10100: Count rising edges
 - %10101: Count falling edges
 - %10110: Count any edge
 - %10111: Count high states
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %10100-%10111 (P_STATE_MEAS)
 WXPIN: Measurement window (0=continuous)
 WYPIN: Not used
@@ -1669,8 +1678,9 @@ freq    long    0
 - Signal activity detection
 - Pulse counting
 
+---
 
-### Mode `%11010` - Pin State Measurement
+### Mode %11010 - Pin State Measurement
 
 **Specifications**
 - Function: Measure pin state timing
@@ -1679,7 +1689,7 @@ freq    long    0
 - Range: 1 to 2^32 clocks
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %11010 (P_PIN_STATE)
 WXPIN: Timeout value
 WYPIN: Edge selection
@@ -1760,10 +1770,11 @@ timeout long    0
 - Glitch detection
 - Protocol timing verification
 
+---
 
 ## Chapter 10: ADC Modes
 
-### Mode `%11000` - ADC Sample/Filter/Capture (SINC2)
+### Mode %11000 - ADC Sample/Filter/Capture (SINC2)
 
 **Specifications**
 - Resolution: Up to 14 bits
@@ -1772,10 +1783,10 @@ timeout long    0
 - Input: Differential or single-ended
 - Range: 0V to 3.3V (VIO)
 
-![ADC SINC2 Filter Response](assets/P2 SmartPins-220809_page31_img01.png)
+![ADC SINC2 Filter Response](../../../sources/extractions/smart-pins-complete-extraction-audit/assets/images-20250824/P2 SmartPins-220809_page31_img01.png)
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %11000 (P_ADC_SINC2)
 WXPIN: Sample period
 WYPIN: Calibration value
@@ -1845,8 +1856,9 @@ buffer  res     100
 - Data acquisition
 - Process monitoring
 
+---
 
-### Mode `%11001` - ADC Scope with Trigger (SINC3)
+### Mode %11001 - ADC Scope with Trigger (SINC3)
 
 **Specifications**
 - Resolution: Up to 12 bits
@@ -1855,10 +1867,10 @@ buffer  res     100
 - Sample rate: sysclock / (64 × period)
 - Pre/post trigger capture
 
-![ADC Scope Mode](assets/P2 SmartPins-220809_page32_img01.png)
+![ADC Scope Mode](../../../sources/extractions/smart-pins-complete-extraction-audit/assets/images-20250824/P2 SmartPins-220809_page32_img01.png)
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %11001 (P_ADC_SCOPE)
 WXPIN: [31:16] = trigger level, [15:0] = period
 WYPIN: Trigger mode and position
@@ -1933,8 +1945,9 @@ buffer  res     100
 - Waveform analysis
 - Triggered data logging
 
+---
 
-### Mode `%11010` - ADC with Calibration
+### Mode %11010 - ADC with Calibration
 
 **Specifications**
 - Resolution: 8 to 14 bits
@@ -1944,7 +1957,7 @@ buffer  res     100
 - Accuracy: ±0.5% after calibration
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %11010 (P_ADC_CAL)
 WXPIN: Sample period
 WYPIN: Calibration values
@@ -2034,10 +2047,11 @@ raw     long    0
 - Production test systems
 - Scientific instruments
 
+---
 
 ## Chapter 11: USB Mode
 
-### Mode `%11011` - USB Host/Device (Preliminary)
+### Mode %11011 - USB Host/Device (Preliminary)
 
 **Specifications**
 - Function: USB 1.1 Low/Full Speed
@@ -2045,12 +2059,12 @@ raw     long    0
 - Mode: Host or Device
 - Status: Preliminary implementation
 
-![USB Signaling](assets/P2 SmartPins-220809_page34_img01.png)
+![USB Signaling](../../../sources/extractions/smart-pins-complete-extraction-audit/assets/images-20250824/P2 SmartPins-220809_page34_img01.png)
 
 **Note**: USB mode is preliminary. Consult latest silicon documentation for updates.
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %11011 (P_USB_MODE)
 WXPIN: USB configuration
 WYPIN: Data to transmit
@@ -2119,10 +2133,11 @@ received    long 0
 
 **Important**: Full USB implementation requires additional software stack. This mode provides low-level USB signaling only.
 
+---
 
 ## Chapter 12: Serial Modes
 
-### Mode `%11100` - Synchronous Serial Transmit
+### Mode %11100 - Synchronous Serial Transmit
 
 **Specifications**
 - Function: Clocked serial output
@@ -2131,10 +2146,10 @@ received    long 0
 - Speed: Up to sysclock/2
 - Bit order: MSB or LSB first
 
-![Synchronous Serial Timing](assets/P2 SmartPins-220809_page46_img01.png)
+![Synchronous Serial Timing](../../../sources/extractions/smart-pins-complete-extraction-audit/assets/images-20250824/P2 SmartPins-220809_page46_img01.png)
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %11100 (P_SYNC_TX)
 WXPIN: [31:16] = clock divider, [15:0] = bits-1
 WYPIN: Data to transmit
@@ -2206,8 +2221,9 @@ buffer  byte    $01,$02,$03,$04,$05,$06,$07,$08,$09,$0A
 - Display interfaces
 - DAC serial control
 
+---
 
-### Mode `%11101` - Synchronous Serial Receive
+### Mode %11101 - Synchronous Serial Receive
 
 **Specifications**
 - Function: Clocked serial input
@@ -2217,7 +2233,7 @@ buffer  byte    $01,$02,$03,$04,$05,$06,$07,$08,$09,$0A
 - Bit order: MSB or LSB first
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %11101 (P_SYNC_RX)
 WXPIN: [31:16] = clock divider, [15:0] = bits-1
 WYPIN: Not used
@@ -2270,8 +2286,9 @@ data    long    0
 - ADC serial interfaces
 - Sensor data collection
 
+---
 
-### Mode `%11110` - Asynchronous Serial Transmit
+### Mode %11110 - Asynchronous Serial Transmit
 
 **Specifications**
 - Function: UART transmit
@@ -2280,10 +2297,10 @@ data    long    0
 - Stop bits: 1-2
 - Parity: None, even, odd
 
-![Async Serial Format](assets/P2 SmartPins-220809_page52_img01.png)
+![Async Serial Format](../../../sources/extractions/smart-pins-complete-extraction-audit/assets/images-20250824/P2 SmartPins-220809_page52_img01.png)
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %11110 (P_ASYNC_TX)
 WXPIN: Bit period in clocks
 WYPIN: Data to transmit
@@ -2351,8 +2368,9 @@ message byte    "Hello P2!",13,10,0
 - Modem communication
 - GPS/sensor interfaces
 
+---
 
-### Mode `%11111` - Asynchronous Serial Receive
+### Mode %11111 - Asynchronous Serial Receive
 
 **Specifications**
 - Function: UART receive
@@ -2361,10 +2379,10 @@ message byte    "Hello P2!",13,10,0
 - Stop bits: 1-2
 - Parity: None, even, odd
 
-![Async Receive Timing](assets/P2 SmartPins-220809_page52_img02.png)
+![Async Receive Timing](../../../sources/extractions/smart-pins-complete-extraction-audit/assets/images-20250824/P2 SmartPins-220809_page52_img02.png)
 
 **Configuration**
-```{.configuration}
+```
 WRPIN: %11111 (P_ASYNC_RX)
 WXPIN: Bit period in clocks
 WYPIN: Not used
@@ -2445,6 +2463,7 @@ buffer  res     80
 - Sensor reading
 - GPS parsing
 
+---
 
 # Part III: Application Guide
 
@@ -2721,6 +2740,7 @@ PUB nanosecond_delay(delay_ns) | clocks
   repeat until pinr(TIMING_PIN)
 ```
 
+---
 
 ## Chapter 14: Multi-Pin Applications
 
@@ -2869,13 +2889,13 @@ PUB spectrum_display()
       wypin(LED_BASE + i, fft_bins[i] << 8)
 ```
 
+---
 
 ## Chapter 15: Optimization & Troubleshooting
 
 ### Performance Optimization
 
 #### Clock Distribution
-
 ```spin2
 PUB optimize_clock_distribution()
   ' Use NCO for multiple synchronized clocks
@@ -2888,7 +2908,6 @@ PUB optimize_clock_distribution()
 ```
 
 #### Power Management
-
 ```spin2
 PUB low_power_sampling()
   ' Use repository mode for infrequent updates
@@ -2957,7 +2976,6 @@ PUB calculate_baud_error(desired_baud) | actual_baud, divider, error_ppm
 ### Debugging Techniques
 
 #### Smart Pin State Monitor
-
 ```spin2
 PUB monitor_smart_pin(pin)
   debug("Pin ", udec(pin), " Status:")
@@ -2967,7 +2985,6 @@ PUB monitor_smart_pin(pin)
 ```
 
 #### Performance Profiling
-
 ```spin2
 PUB profile_smart_pin_timing(pin) | start, cycles
   start := cnt
@@ -2981,6 +2998,7 @@ PUB profile_smart_pin_timing(pin) | start, cycles
   debug("Time: ", udec(cycles * 1_000_000 / clkfreq), " microseconds")
 ```
 
+---
 
 # Part IV: Quick Reference
 
@@ -3090,58 +3108,61 @@ Start: What type of signal?
 | Scope | 12 | sysclock/64 | 3rd order | 74dB |
 | Calibrated | 14 | sysclock/8 | 2nd order | 86dB |
 
+---
 
 ## Appendix B: Configuration Calculator
 
 ### Common Configuration Values
 
 #### UART Baud Rate Settings (at 200MHz)
-
-| Baud Rate | WXPIN Value | Actual Baud | Error |
-|-----------|-------------|-------------|-------|
-| 300       | 666,667     | 300.0       | 0.00% |
-| 1,200     | 166,667     | 1,200.0     | 0.00% |
-| 2,400     | 83,333      | 2,400.0     | 0.00% |
-| 4,800     | 41,667      | 4,800.0     | 0.00% |
-| 9,600     | 20,833      | 9,600.0     | 0.00% |
-| 19,200    | 10,417      | 19,200.0    | 0.00% |
-| 38,400    | 5,208       | 38,400.0    | 0.00% |
-| 57,600    | 3,472       | 57,603.7    | 0.01% |
-| 115,200   | 1,736       | 115,207.4   | 0.01% |
-| 230,400   | 868         | 230,414.7   | 0.01% |
-| 460,800   | 434         | 460,829.5   | 0.01% |
-| 921,600   | 217         | 921,658.9   | 0.01% |
+```
+Baud Rate   WXPIN Value   Actual Baud   Error
+---------   -----------   -----------   -----
+300         666,667       300.0         0.00%
+1,200       166,667       1,200.0       0.00%
+2,400       83,333        2,400.0       0.00%
+4,800       41,667        4,800.0       0.00%
+9,600       20,833        9,600.0       0.00%
+19,200      10,417        19,200.0      0.00%
+38,400      5,208         38,400.0      0.00%
+57,600      3,472         57,603.7      0.01%
+115,200     1,736         115,207.4     0.01%
+230,400     868           230,414.7     0.01%
+460,800     434           460,829.5     0.01%
+921,600     217           921,658.9     0.01%
+```
 
 #### PWM Frequency Settings (at 200MHz)
-
-| Frequency | Period (WXPIN) | Resolution |
-|-----------|----------------|------------|
-| 100 Hz    | 2,000,000      | 24 bits    |
-| 1 kHz     | 200,000        | 20 bits    |
-| 10 kHz    | 20,000         | 16 bits    |
-| 20 kHz    | 10,000         | 15 bits    |
-| 50 kHz    | 4,000          | 13 bits    |
-| 100 kHz   | 2,000          | 12 bits    |
-| 200 kHz   | 1,000          | 11 bits    |
-| 500 kHz   | 400            | 10 bits    |
-| 1 MHz     | 200            | 9 bits     |
+```
+Frequency   Period (WXPIN)   Resolution
+---------   -------------   ----------
+100 Hz      2,000,000       24 bits
+1 kHz       200,000         20 bits
+10 kHz      20,000          16 bits
+20 kHz      10,000          15 bits
+50 kHz      4,000           13 bits
+100 kHz     2,000           12 bits
+200 kHz     1,000           11 bits
+500 kHz     400             10 bits
+1 MHz       200             9 bits
+```
 
 #### NCO Frequency Values (at 200MHz)
-
-| Frequency | WYPIN Value (hex) | Actual Freq  | Error  |
-|-----------|-------------------|--------------|--------|
-| 1 Hz      | `$00A7C5AC`       | 1.000 Hz     | 0.000% |
-| 10 Hz     | `$068DB8B`        | 10.000 Hz    | 0.000% |
-| 100 Hz    | `$418937A`        | 100.000 Hz   | 0.000% |
-| 1 kHz     | `$28F5C29`        | 1.000 kHz    | 0.000% |
-| 10 kHz    | `$1999999A`       | 10.000 kHz   | 0.000% |
-| 100 kHz   | `$FFFFFFFF`       | 100.000 kHz  | 0.000% |
-| 1 MHz     | `$0CCCCCCD`       | 1.000 MHz    | 0.000% |
+```
+Frequency   WYPIN Value (hex)   Actual Freq   Error
+---------   ----------------   -----------   -----
+1 Hz        0x00A7C5AC         1.000 Hz      0.000%
+10 Hz       0x068DB8B          10.000 Hz     0.000%
+100 Hz      0x418937A          100.000 Hz    0.000%
+1 kHz       0x28F5C29          1.000 kHz     0.000%
+10 kHz      0x1999999A         10.000 kHz    0.000%
+100 kHz     0xFFFFFFFF         100.000 kHz   0.000%
+1 MHz       0x0CCCCCCD         1.000 MHz     0.000%
+```
 
 ### Configuration Formulas
 
 #### Clock/Frequency Calculations
-
 ```spin2
 ' UART bit period
 bit_period = clkfreq / baud_rate
@@ -3158,7 +3179,6 @@ sample_rate = clkfreq / (64 * wxpin_value) ' SINC3
 ```
 
 #### Timing Calculations
-
 ```spin2
 ' Pulse width in microseconds
 wxpin_value = (pulse_us * clkfreq) / 1_000_000
@@ -3170,6 +3190,7 @@ frequency = clkfreq / measured_period
 duty_percent = (high_time * 100) / (high_time + low_time)
 ```
 
+---
 
 ## Appendix C: Register Reference
 
@@ -3249,6 +3270,7 @@ Bit 5..0: Smart Pin Mode
 | Serial TX | Status |
 | Serial RX | Received data |
 
+---
 
 ## Appendix D: Electrical Specifications
 
@@ -3310,6 +3332,7 @@ Bit 5..0: Smart Pin Mode
 | DAC | 40 | 1500 | µA |
 | USB | 100 | 5000 | µA |
 
+---
 
 ## Index
 
@@ -3457,6 +3480,7 @@ Bit 5..0: Smart Pin Mode
 **Z**
 - Z Register: 2-4, C-4
 
+---
 
 ## About This Reference
 
@@ -3469,7 +3493,6 @@ August 2025
 www.ironsheepproductions.com
 
 Special thanks to:
-
 - Jon Titus for the original Smart Pins documentation
 - Chip Gracey for the P2 architecture
 - The Parallax community for validation and feedback
@@ -3479,5 +3502,6 @@ All rights reserved.
 
 Propeller 2 and P2 are trademarks of Parallax Inc.
 
+---
 
 *End of P2 Smart Pins Complete Reference v1.0*

@@ -38,8 +38,14 @@ grep -c 'ConfigBlock\|Spin2Block\|PASM2Block' \
 #### 2. Required Reading
 **Always read these documents when starting Smart Pins visual work:**
 1. **THIS FILE FIRST** - Smart Pins specific protocols and source of truth
-2. `/documentation/pipelines/pdf-generation-format-guide.md` - PDF production workflow
-3. `/documentation/pdf-forge-system/layered-template-architecture.md` - Template system
+2. `/exports/pdf-generation/REQUEST-JSON-FORMAT-CRITICAL.md` - **CRITICAL**: "Always use arrays" rule
+3. `/documentation/pipelines/pdf-generation-format-guide.md` - PDF production workflow
+4. `/documentation/pdf-forge-system/layered-template-architecture.md` - Template system
+
+**🔴 CRITICAL**: Before creating any request.json, read REQUEST-JSON-FORMAT-CRITICAL.md!
+- **Golden Rule**: Arrays for everything, even single items
+- `"documents": []` - NEVER singular, NEVER string  
+- `"lua_filters": []` - NEVER pandoc_args, NEVER string
 
 
 
@@ -105,7 +111,7 @@ grep -c 'ConfigBlock\|Spin2Block\|PASM2Block' \
 - **Page breaks**: `\ifafterpart` logic
 - **Unnumbered**: `{.unnumbered}` in markdown
 - **Images**: `assets/filename.png` (NO SPACES)
-- **Lua filter**: `smart-pins-block-coloring.lua` for colors
+- **Smart Pins Visual Lua filters** (in order): `smart-pins-colored-blocks.lua`, `part-chapter-pagebreaks.lua`
 
 ## 🚨 CRITICAL RULES
 

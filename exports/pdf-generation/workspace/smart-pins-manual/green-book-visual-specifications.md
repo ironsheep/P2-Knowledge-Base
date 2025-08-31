@@ -96,7 +96,7 @@ Each marker has:
 
 ```latex
 % needs-diagram - Amber with dashed border
-\newtcolorbox{needsdiagram}{
+\newtcolorbox{gbdiagram}{  % ACTUAL NAME: gbdiagram (renamed to avoid conflicts)
     colback=yellow!5!white,        % #FFF8E1 - cream background
     colframe=orange!70!yellow,     % #FFB300 - amber border
     coltitle=white,
@@ -109,7 +109,7 @@ Each marker has:
 }
 
 % preliminary-content - Gray with dotted border
-\newtcolorbox{preliminarycontent}{
+\newtcolorbox{gbpreliminary}{  % ACTUAL NAME: gbpreliminary (renamed to avoid conflicts)
     colback=gray!5!white,          % #F5F5F5 - light gray
     colframe=gray!60!black,        % #757575 - dark gray
     coltitle=white,
@@ -122,7 +122,7 @@ Each marker has:
 }
 
 % needs-verification - Pale blue with dashed border
-\newtcolorbox{needsverification}{
+\newtcolorbox{gbverify}{  % ACTUAL NAME: gbverify (renamed to avoid conflicts)
     colback=cyan!5!white,          % #E3F7FF - pale blue
     colframe=cyan!50!blue,         % #4FC3F7 - sky blue
     coltitle=white,
@@ -135,7 +135,7 @@ Each marker has:
 }
 
 % needs-examples - Pale green with solid border
-\newtcolorbox{needsexamples}{
+\newtcolorbox{gbexamples}{  % ACTUAL NAME: gbexamples (renamed to avoid conflicts)
     colback=green!5!white,         % #F1F8E9 - pale green
     colframe=green!60!black,       % #8BC34A - leaf green
     coltitle=white,
@@ -147,7 +147,7 @@ Each marker has:
 }
 
 % needs-technical-review - Pale rose with dashed border
-\newtcolorbox{needstechreview}{
+\newtcolorbox{gbtechreview}{  % ACTUAL NAME: gbtechreview (renamed to avoid conflicts)
     colback=red!5!white,           % #FFE8E8 - pale rose
     colframe=red!40!white,         % #EF9A9A - rose
     coltitle=white,
@@ -160,7 +160,7 @@ Each marker has:
 }
 
 % needs-code-review - Pale orange with dotted border
-\newtcolorbox{needscodereview}{
+\newtcolorbox{gbcodereview}{  % ACTUAL NAME: gbcodereview (renamed to avoid conflicts)
     colback=orange!5!white,        % #FFF3E0 - pale orange
     colframe=orange!60!yellow,     % #FFB74D - orange
     coltitle=white,
@@ -173,7 +173,7 @@ Each marker has:
 }
 
 % tip - Mint green with solid rounded border
-\newtcolorbox{tipbox}{
+\newtcolorbox{gbtip}{  % ACTUAL NAME: gbtip (renamed to avoid conflicts)
     colback=green!5!white,         % #E8F5E9 - mint
     colframe=green!50!black,       % #66BB6A - green
     coltitle=white,
@@ -192,15 +192,15 @@ Each marker has:
 The Lua filter must convert markdown divs to these LaTeX environments:
 
 ```lua
--- Mapping table
+-- Mapping table (ACTUAL IMPLEMENTATION)
 local divMappings = {
-    ["needs-diagram"] = "needsdiagram",
-    ["preliminary-content"] = "preliminarycontent",
-    ["needs-verification"] = "needsverification",
-    ["needs-examples"] = "needsexamples",
-    ["needs-technical-review"] = "needstechreview",
-    ["needs-code-review"] = "needscodereview",
-    ["tip"] = "tipbox"
+    ["needs-diagram"] = "gbdiagram",         -- Renamed to avoid conflicts
+    ["preliminary-content"] = "gbpreliminary", -- Renamed to avoid conflicts
+    ["needs-verification"] = "gbverify",       -- Renamed to avoid conflicts
+    ["needs-examples"] = "gbexamples",        -- Renamed to avoid conflicts
+    ["needs-technical-review"] = "gbtechreview", -- Renamed to avoid conflicts
+    ["needs-code-review"] = "gbcodereview",    -- Renamed to avoid conflicts
+    ["tip"] = "gbtip"                        -- Renamed to avoid conflicts
 }
 
 function Div(el)
@@ -288,17 +288,17 @@ Use Smart Pins for hardware timing
 
 ### Expected LaTeX Output
 ```latex
-\begin{needsdiagram}
+\begin{gbdiagram}
 Timing diagram showing clock relationships
-\end{needsdiagram}
+\end{gbdiagram}
 
-\begin{preliminarycontent}
+\begin{gbpreliminary}
 This feature is under development
-\end{preliminarycontent}
+\end{gbpreliminary}
 
-\begin{tipbox}
+\begin{gbtip}
 Use Smart Pins for hardware timing
-\end{tipbox}
+\end{gbtip}
 ```
 
 ---
