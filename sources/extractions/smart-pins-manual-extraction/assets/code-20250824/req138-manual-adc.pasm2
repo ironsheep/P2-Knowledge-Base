@@ -1,0 +1,31 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+scope_init
+        mov     pa, ##P_ADC_SCOPE
+        wrpin   pa, #20         ' Configure scope mode
+        mov     pa, ##$8000_0064 ' Trigger mid, 100 samples
+        wxpin   pa, #20
+        dirh    #20
+        
+wait_trigger
+        wypin   zero, #20       ' Arm trigger
+.wait   testp   #20 wc          ' Check triggered
+  if_nc jmp     #.wait
+        
+read_samples
+        mov     count, #100
+.loop   rdpin   sample, #20     ' Read FIFO
+        wrlong  sample, ptr
+        add     ptr, #4
+        djnz    count, #.loop
+        
+zero    long    0
+count   long    0
+sample  long    0
+ptr     long    0

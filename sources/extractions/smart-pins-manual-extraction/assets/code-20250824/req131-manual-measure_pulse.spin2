@@ -1,0 +1,22 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  MEASURE_PIN = 20
+  HIGH_MODE = P_HIGH_TICKS
+
+PUB measure_pulse() : width_ns
+  pinstart(MEASURE_PIN, HIGH_MODE, 0, 0)
+  wypin(MEASURE_PIN, 0)       ' Arm measurement
+  
+  repeat until pinr(MEASURE_PIN) ' Wait for result
+  width_ns := (rdpin(MEASURE_PIN) * 1_000_000_000) / clkfreq
+  
+PUB measure_frequency() : freq
+  pinstart(MEASURE_PIN, P_PERIODS_TICKS, 10, 0)
+  wypin(MEASURE_PIN, 0)       ' Measure 10 periods
+  
+  repeat until pinr(MEASURE_PIN)
+  freq := (clkfreq * 10) / rdpin(MEASURE_PIN)

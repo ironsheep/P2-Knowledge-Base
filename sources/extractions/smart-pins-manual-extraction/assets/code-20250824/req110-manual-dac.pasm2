@@ -1,0 +1,24 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+dac_init
+        mov     pa, ##P_DAC_124R_3V | P_OE
+        wrpin   pa, #20         ' Configure DAC
+        dirh    #20             ' Enable output
+        
+set_voltage
+        mov     pa, ##$8000     ' Mid-scale (1.65V)
+        wypin   pa, #20         ' Output voltage
+        
+generate_ramp
+.loop   add     dacval, #$100   ' Increment
+        wypin   dacval, #20     ' Update DAC
+        waitx   ##1000          ' Delay
+        jmp     #.loop
+        
+dacval  long    0

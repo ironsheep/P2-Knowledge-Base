@@ -1,0 +1,8 @@
+' Source: P2 SmartPins-220809 (Page 46)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+WRPIN/WXPIN/WYPIN/RDPIN/AKPIN before IN can be raised again, to alert of the 
+next change in status. The receiver's status bits are as follows:
+[31:16] <unused> - $0000
+[15:8] byte - last byte received

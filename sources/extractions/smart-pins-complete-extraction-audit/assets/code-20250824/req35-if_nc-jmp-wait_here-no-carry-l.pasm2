@@ -1,0 +1,6 @@
+' Source: P2 SmartPins-220809 (Page 24)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+     if_nc   jmp   #.wait_here         'No carry? Loop
+             rqpin QuadEnc_data, #32   'Carry found, get total counts

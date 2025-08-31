@@ -1,0 +1,8 @@
+' Source: P2 SmartPins-220809 (Page 28)
+' Extracted: 2025-08-24
+' Language: Spin2 | Type: Snippet
+
+CON
+        clkout   = 40     'Pin P40     'Transmitter clock @ P31
+        txout    = 41     'Pin P41     'Transmitter data @ P30
+        A_in     = 53     'Pin P53     'Counter input

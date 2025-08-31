@@ -1,0 +1,7 @@
+' Source: P2 Spin2 Documentation v51-250425 (Page 20)
+' Extracted: 2025-08-24
+' Language: Spin2 | Type: Snippet
+
+PRI GetPattern() : Pattern
+RETURN DECOD(i++ & 7)
+In the above example, the following values are output in repeating sequence: $01, $02, $04, $08, $10, $20, $40, $80 (but inverted for LEDs)

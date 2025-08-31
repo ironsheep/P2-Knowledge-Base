@@ -1,0 +1,24 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  COUNT_PIN = 20
+  COUNT_MODE = P_COUNT_RISES
+
+PUB setup_counter()
+  pinstart(COUNT_PIN, COUNT_MODE, 0, 0)
+  
+PUB read_count() : count
+  count := rdpin(COUNT_PIN)
+  
+PUB measure_frequency() : freq_hz
+  wypin(COUNT_PIN, 0)          ' Reset counter
+  waitms(1000)                 ' Gate time
+  freq_hz := rdpin(COUNT_PIN)  ' Reads per second
+  
+PUB count_events(duration_ms) : total
+  wypin(COUNT_PIN, 0)          ' Reset
+  waitms(duration_ms)
+  total := rdpin(COUNT_PIN)

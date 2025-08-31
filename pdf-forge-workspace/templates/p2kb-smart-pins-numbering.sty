@@ -38,25 +38,21 @@
 }
 
 % ==================== CHAPTER/SECTION FORMAT WITH NUMBERS ====================
-% When numbering is on, format chapters and sections properly
-\RequirePackage{titlesec}
-
-% REMOVED: Chapter titleformat - markdown already has "Chapter N:" in text
-% LaTeX adding its own would create double numbering
-
-% Section format when numbered  
-\titleformat{\section}
-  {\normalfont\Large\bfseries}
-  {\thesection} % Section number (1.1, 1.2, etc.)
-  {1em}
-  {}
-
-% Subsection format when numbered
-\titleformat{\subsection}
-  {\normalfont\large\bfseries}
-  {\thesubsection} % Subsection number (1.1.1, 1.1.2, etc.)
-  {1em}
-  {}
+% COMMENTED OUT to preserve pagination logic from p2kb-foundation.sty
+% The titleformat commands override the section redefinition that handles page breaks
+% Since numbering is OFF anyway (secnumdepth=-1), these are not needed
+%
+% \RequirePackage{titlesec}
+% \titleformat{\section}
+%   {\normalfont\Large\bfseries}
+%   {\thesection}
+%   {1em}
+%   {}
+% \titleformat{\subsection}
+%   {\normalfont\large\bfseries}
+%   {\thesubsection}
+%   {1em}
+%   {}
 
 % ==================== TABLE OF CONTENTS ADJUSTMENTS ====================
 % Ensure TOC shows numbers when present, but doesn't add extra ones

@@ -1,0 +1,33 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+triangle_init
+        mov     pa, ##P_PWM_TRIANGLE | P_OE
+        wrpin   pa, #20         ' Configure triangle PWM
+        mov     pa, ##5000      ' Half-period
+        wxpin   pa, #20
+        dirh    #20
+        
+center_aligned
+        mov     pa, ##2500      ' 50% duty (center)
+        wypin   pa, #20
+        
+complementary
+        ' Set up complementary outputs
+        wrpin   pwm_mode, #20   ' Normal output
+        wrpin   pwm_mode_inv, #21 ' Inverted output
+        wxpin   period, #20
+        wxpin   period, #21
+        wypin   duty, #20
+        wypin   duty, #21
+        dirh    ##3<<20         ' Enable both
+        
+pwm_mode      long    P_PWM_TRIANGLE | P_OE
+pwm_mode_inv  long    P_PWM_TRIANGLE | P_OE | P_INVERT
+period        long    5000
+duty          long    2500

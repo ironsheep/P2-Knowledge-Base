@@ -1,0 +1,193 @@
+% P2KB Presentation Template v1.0
+% P2 Knowledge Base - Professional presentation and sponsor materials
+% Clean, modern design for AI documentation and sponsor presentations
+% Compatible with pandoc + doc-forge system
+
+\documentclass[11pt,letterpaper]{article}
+
+% Pandoc compatibility fixes (REQUIRED)
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\providecommand{\passthrough}[1]{#1}
+\providecommand{\euro}{\texteuro}
+\providecommand{\UrlFont}{\ttfamily}
+\providecommand{\footnotesize}{}
+\providecommand{\oldparagraph}{}
+\providecommand{\oldsubparagraph}{}
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% Essential packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+% Page geometry - Professional presentation layout
+\geometry{
+  letterpaper,
+  margin=1in,
+  top=1in,
+  bottom=1in,
+  headheight=0.5in,
+  headsep=0.25in,
+  footskip=0.5in
+}
+
+% Color scheme - Professional blue/gray palette
+\definecolor{PresentationBlue}{RGB}{41,84,144}
+\definecolor{AccentBlue}{RGB}{70,130,180}
+\definecolor{DarkGray}{RGB}{60,60,60}
+\definecolor{MidGray}{RGB}{100,100,100}
+\definecolor{LightGray}{RGB}{240,240,240}
+\definecolor{SuccessGreen}{RGB}{40,167,69}
+\definecolor{WarningOrange}{RGB}{255,133,27}
+
+% Font setup - professional, readable
+\renewcommand{\familydefault}{\sfdefault}
+
+% Header and footer setup - clean, minimal
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textcolor{PresentationBlue}{\textbf{$title$}}}
+\fancyhead[R]{\textcolor{MidGray}{$date$}}
+\fancyfoot[L]{\textcolor{MidGray}{$company$}}
+\fancyfoot[C]{\textcolor{MidGray}{\thepage}}
+\fancyfoot[R]{\textcolor{MidGray}{P2 Knowledge Base}}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{0.5pt}
+\renewcommand{\headrule}{\color{PresentationBlue}\hrule width\headwidth height\headrulewidth}
+\renewcommand{\footrule}{\color{MidGray}\hrule width\headwidth height\footrulewidth}
+
+% Title page formatting - modern, clean
+\makeatletter
+\renewcommand{\maketitle}{%
+  \thispagestyle{empty}
+  \begin{center}
+    \vspace{2cm}
+    
+    {\Huge\bfseries\textcolor{PresentationBlue}{$title$}\par}
+    \vspace{1em}
+    {\Large\textcolor{DarkGray}{$subtitle$}\par}
+    \vspace{2em}
+    
+    \rule{0.8\textwidth}{0.4pt}\par
+    \vspace{1.5em}
+    
+    {\large\textcolor{MidGray}{$author$}\par}
+    \vspace{0.5em}
+    {\normalsize\textcolor{MidGray}{$company$}\par}
+    \vspace{1em}
+    {\normalsize\textcolor{MidGray}{$date$}\par}
+    
+    \vspace{2em}
+    \rule{0.8\textwidth}{0.4pt}\par
+    
+    \vfill
+    
+    {\small\textcolor{MidGray}{P2 Knowledge Base Project}\par}
+    {\footnotesize\textcolor{MidGray}{Professional AI-Enhanced P2 Documentation}\par}
+  \end{center}
+}
+\makeatother
+
+% Section formatting - professional hierarchy
+\usepackage{titlesec}
+\titleformat{\section}
+  {\Large\bfseries\color{PresentationBlue}}
+  {\thesection}{1em}{}
+  [\color{AccentBlue}\titlerule]
+  
+\titleformat{\subsection}
+  {\large\bfseries\color{AccentBlue}}
+  {\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{DarkGray}}
+  {\thesubsubsection}{1em}{}
+
+% Fix paragraph conflicts
+\titleformat{\paragraph}
+  {\normalfont\normalsize\bfseries\color{DarkGray}}
+  {\theparagraph}{1em}{}
+\titlespacing*{\paragraph}{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+% Enhanced list formatting
+\setlist[itemize,1]{label=\textcolor{PresentationBlue}{\textbullet}, leftmargin=*}
+\setlist[itemize,2]{label=\textcolor{AccentBlue}{\textendash}, leftmargin=*}
+\setlist[enumerate,1]{label=\textcolor{PresentationBlue}{\arabic*.}, leftmargin=*}
+
+% Custom callout boxes
+\newcommand{\infobox}[1]{%
+  \par\vspace{0.5em}
+  \noindent\fcolorbox{AccentBlue}{LightGray}{\parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule\relax}{%
+    \textcolor{PresentationBlue}{\textbf{ℹ}} #1
+  }}%
+  \par\vspace{0.5em}
+}
+
+\newcommand{\warningbox}[1]{%
+  \par\vspace{0.5em}
+  \noindent\fcolorbox{WarningOrange}{LightGray}{\parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule\relax}{%
+    \textcolor{WarningOrange}{\textbf{⚠}} #1
+  }}%
+  \par\vspace{0.5em}
+}
+
+\newcommand{\successbox}[1]{%
+  \par\vspace{0.5em}
+  \noindent\fcolorbox{SuccessGreen}{LightGray}{\parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule\relax}{%
+    \textcolor{SuccessGreen}{\textbf{✓}} #1
+  }}%
+  \par\vspace{0.5em}
+}
+
+% Professional table formatting
+\renewcommand{\arraystretch}{1.3}
+\newcommand{\tableheader}[1]{\rowcolor{LightGray}\textbf{#1}}
+
+% Hyperlink setup - professional colors
+\hypersetup{
+  colorlinks=true,
+  linkcolor=PresentationBlue,
+  urlcolor=AccentBlue,
+  citecolor=PresentationBlue,
+  pdfauthor={$author$},
+  pdftitle={$title$},
+  pdfsubject={P2 Knowledge Base - AI Documentation},
+  pdfkeywords={Propeller 2, AI, Documentation, Privacy, Machine Learning}
+}
+
+% Begin document
+\begin{document}
+
+% Title page
+\maketitle
+\thispagestyle{empty}
+
+% Table of contents (if pandoc generates one)
+$if(toc)$
+\newpage
+\tableofcontents
+\newpage
+$endif$
+
+% Main content
+$body$
+
+\end{document}

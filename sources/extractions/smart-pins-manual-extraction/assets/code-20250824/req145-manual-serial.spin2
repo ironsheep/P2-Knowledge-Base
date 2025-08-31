@@ -1,0 +1,23 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  RX_PIN = 21
+  BAUD = 115_200
+  UART_RX_MODE = P_ASYNC_RX
+
+PUB setup_rx()
+  pinstart(RX_PIN, UART_RX_MODE, clkfreq/BAUD, 0)
+  
+PUB rx_byte() : b
+  repeat until pinr(RX_PIN)   ' Wait for data
+  b := rdpin(RX_PIN) & $FF    ' Get byte
+  
+PUB rx_check() : b | avail
+  avail := pinr(RX_PIN)
+  if avail
+    b := rdpin(RX_PIN) & $FF
+  else
+    b := -1                    ' No data

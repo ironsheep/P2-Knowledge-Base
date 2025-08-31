@@ -1,0 +1,14 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+PUB disable_smart_pin(pin)
+  pinclear(pin)        ' Disable Smart Pin
+  pinf(pin)           ' Float to high-Z
+  
+PUB use_as_normal_io(pin)
+  pinclear(pin)       ' Ensure Smart Pin OFF
+  pinh(pin)          ' Drive high
+  pinl(pin)          ' Drive low
+  result := pinr(pin) ' Read pin state

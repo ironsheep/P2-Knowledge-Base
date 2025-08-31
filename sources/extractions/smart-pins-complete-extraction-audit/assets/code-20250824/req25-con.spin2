@@ -1,0 +1,6 @@
+' Source: P2 SmartPins-220809 (Page 19)
+' Extracted: 2025-08-24
+' Language: Spin2 | Type: Snippet
+
+CON
+_clkfreq = 25_000_000               

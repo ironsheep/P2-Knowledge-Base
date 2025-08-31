@@ -13,8 +13,8 @@
 \usepackage{p2kb-tech-review}          % Technical review branding (renamed)
 
 % ==================== PAGE BREAK BEHAVIOR ====================
-% Currently letting Lua filter handle page breaks
-% Removed chapter/section overrides to restore normal LaTeX formatting
+% Hybrid approach: Common rules in p2kb-foundation.sty (lines 195-210)
+% Document-specific rules in Lua filter (front matter, Part II modes)
 
 % ==================== DOCUMENT START ====================
 \begin{document}

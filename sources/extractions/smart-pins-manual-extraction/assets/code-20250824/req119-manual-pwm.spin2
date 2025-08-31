@@ -1,0 +1,27 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  PWM_PIN = 20
+  PWM_MODE = P_PWM_SAWTOOTH | P_OE
+  PWM_FREQ = 20_000   ' 20kHz PWM
+
+PUB setup_pwm()
+  pinstart(PWM_PIN, PWM_MODE, clkfreq/PWM_FREQ, 0)
+  
+PUB set_duty(percent) | duty_val
+  duty_val := ((clkfreq/PWM_FREQ) * percent) / 100
+  wypin(PWM_PIN, duty_val)
+  
+PUB fade_led() | duty
+  repeat
+    ' Fade up
+    repeat duty from 0 to 100
+      set_duty(duty)
+      waitms(10)
+    ' Fade down  
+    repeat duty from 100 to 0
+      set_duty(duty)
+      waitms(10)

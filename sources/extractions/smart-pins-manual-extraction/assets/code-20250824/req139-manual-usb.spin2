@@ -1,0 +1,16 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  USB_DM = 20  ' D- pin
+  USB_DP = 21  ' D+ pin
+  USB_MODE = P_USB_PAIR
+
+PUB setup_usb_device()
+  pinstart(USB_DM, USB_MODE, 0, 0)
+  ' ⚠️ Complete USB stack implementation pending
+  
+PUB check_usb_status() : connected
+  connected := pinr(USB_DM) & $01

@@ -1,0 +1,28 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  PWM_PIN = 20
+  PWM_MODE = P_PWM_TRIANGLE | P_OE
+
+PUB setup_triangle_pwm(freq_hz)
+  pinstart(PWM_PIN, PWM_MODE, clkfreq/(freq_hz*2), 0)
+  
+PUB set_duty(percent) | compare
+  compare := ((clkfreq/(20_000*2)) * percent) / 100
+  wypin(PWM_PIN, compare)
+  
+PUB three_phase_pwm() | phase
+  ' Configure 3 pins for motor control
+  pinstart(20, PWM_MODE, clkfreq/40_000, 0)
+  pinstart(21, PWM_MODE, clkfreq/40_000, 0)
+  pinstart(22, PWM_MODE, clkfreq/40_000, 0)
+  
+  repeat
+    repeat phase from 0 to 359
+      wypin(20, $8000 + sin(phase, $7FFF))
+      wypin(21, $8000 + sin(phase+120, $7FFF))
+      wypin(22, $8000 + sin(phase+240, $7FFF))
+      waitus(100)

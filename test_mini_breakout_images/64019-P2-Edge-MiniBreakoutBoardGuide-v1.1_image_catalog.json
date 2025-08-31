@@ -1,0 +1,787 @@
+{
+  "source_pdf": "sources/originals/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+  "extraction_summary": {
+    "total_images": 16,
+    "total_pages": 10,
+    "output_directory": "test_mini_breakout_images"
+  },
+  "images": [
+    {
+      "filename": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page01_img01.png",
+      "source_pdf": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+      "page_number": 1,
+      "image_index": 1,
+      "dimensions": "904\u00d7152",
+      "width": 904,
+      "height": 152,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "test_mini_breakout_images/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page01_img01.png",
+      "xref": 48,
+      "extraction_status": "success",
+      "file_size_bytes": 86144,
+      "context": {
+        "caption": "Web Store: www.parallax.com",
+        "nearby_text": [
+          {
+            "text": "Web Store: www.parallax.com",
+            "distance": 3.0,
+            "position": "above"
+          },
+          {
+            "text": "Sales: (888) 512-1024",
+            "distance": 3.0,
+            "position": "above"
+          },
+          {
+            "text": "Tech Support: support@parallax.com",
+            "distance": 5.25,
+            "position": "below"
+          },
+          {
+            "text": "Fax: (916) 624-8003",
+            "distance": 5.25,
+            "position": "below"
+          },
+          {
+            "text": "Tutorials: learn.parallax.com",
+            "distance": 8.999984741210938,
+            "position": "right"
+          }
+        ],
+        "potential_captions": [
+          "Web Store: www.parallax.com",
+          "Tutorials: learn.parallax.com",
+          "Sales: sales@parallax.com"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram",
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page01_img02.png",
+      "source_pdf": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+      "page_number": 1,
+      "image_index": 2,
+      "dimensions": "1000\u00d71000",
+      "width": 1000,
+      "height": 1000,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "test_mini_breakout_images/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page01_img02.png",
+      "xref": 47,
+      "extraction_status": "success",
+      "file_size_bytes": 517816,
+      "context": {
+        "caption": "Web Store: www.parallax.com",
+        "nearby_text": [
+          {
+            "text": "Web Store: www.parallax.com",
+            "distance": 21.0,
+            "position": "right"
+          },
+          {
+            "text": "Sales: (888) 512-1024",
+            "distance": 21.0,
+            "position": "right"
+          },
+          {
+            "text": "Smart I/O pins P0\u2013P31 and P56\u2013P63 are available at pin headers. Pins P32\u2013P55 may be  accessed by adding jumper wires on the bottom side of the PCB to the mini prototyping  sections. There are two 0.1\u201d pitch 4x5 matrix prototyping sections on the board, positioned on  either side of the edge connector.",
+            "distance": 27.0,
+            "position": "below"
+          },
+          {
+            "text": "Tutorials: learn.parallax.com",
+            "distance": 36.0,
+            "position": "right"
+          },
+          {
+            "text": "Educator Hotline: (916) 701-8625",
+            "distance": 36.0,
+            "position": "right"
+          }
+        ],
+        "potential_captions": [
+          "Web Store: www.parallax.com",
+          "Tutorials: learn.parallax.com",
+          "Sales: (888) 512-1024"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page02_img01.png",
+      "source_pdf": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+      "page_number": 2,
+      "image_index": 1,
+      "dimensions": "1000\u00d71000",
+      "width": 1000,
+      "height": 1000,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "test_mini_breakout_images/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page02_img01.png",
+      "xref": 2,
+      "extraction_status": "success",
+      "file_size_bytes": 551593,
+      "context": {
+        "caption": "The P2 Edge Mini Breakout Board is compatible with a wide range of modules, adapters and  accessories. See the Propeller 2 page at www.parallax.com.",
+        "nearby_text": [
+          {
+            "text": "Orientation",
+            "distance": 10.10986328125,
+            "position": "above"
+          },
+          {
+            "text": "The P2 Edge Mini Breakout Board is compatible with a wide range of modules, adapters and  accessories. See the Propeller 2 page at www.parallax.com.",
+            "distance": 41.249969482421875,
+            "position": "above"
+          },
+          {
+            "text": "Copyright \u00a9 Parallax Inc.   P2 Edge Mini Breakout Board (#64019) v1.1  11/30/2020  Page 2 of 10",
+            "distance": 51.9730224609375,
+            "position": "right"
+          },
+          {
+            "text": "When connecting your P2 Edge Module to the P2 Edge Mini Breakout Board, ensure that the  module is inserted with the P0 and P38 edge pads closest to the P0 and P38 labels which are  marked on the breakout PCB, either side of the Edge Socket.  Correct module orientation is  shown in this image:",
+            "distance": 57.750030517578125,
+            "position": "right"
+          },
+          {
+            "text": "\u25cb Recommended minimum 100 mA  \u25cb Maximum according to customer application  \u25cf VIO Power Supplies: 3.3 V up to 300 mA per 8 I/O pins; requires P2 Edge Module  \u25cf USB programming: Serial up to 2 MBaud; requires Prop Plug (#32201) programming                        adapter  \u25cf Wireless programming: (up to 2 MBaud); requires P2 WX WiFi Adapter (#64007) and WX                            WiFi SIP module (#32420S)  \u25cf Operating temperature:  -40 to +185 \u00b0F (-40 to +85 \u00b0C)  \u25cf PCB Dimensions: 3.15 x 1.4 in  (80 x 35.5 mm)",
+            "distance": 80.24996948242188,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "The P2 Edge Mini Breakout Board is compatible with a wide range of modules, adapters and  accessories. See the Propeller 2 page at www.parallax.com.",
+          "Orientation"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page04_img01.png",
+      "source_pdf": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+      "page_number": 4,
+      "image_index": 1,
+      "dimensions": "954\u00d7423",
+      "width": 954,
+      "height": 423,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "test_mini_breakout_images/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page04_img01.png",
+      "xref": 7,
+      "extraction_status": "success",
+      "file_size_bytes": 546384,
+      "context": {
+        "caption": "Feature Descriptions",
+        "nearby_text": [
+          {
+            "text": "Read the full explanation of each labeled feature on the pages that follow this diagram.",
+            "distance": 13.500015258789062,
+            "position": "above"
+          },
+          {
+            "text": "1. Parallax P2 Edge Module Socket",
+            "distance": 21.38671875,
+            "position": "below"
+          },
+          {
+            "text": "Feature Descriptions",
+            "distance": 38.60991668701172,
+            "position": "above"
+          },
+          {
+            "text": "The P2 Edge Module socket is a 0.05 in (1.27 mm) pitch, 80-way vertical socket. Refer to Edge                                   Connector Pin Assignments in the P2 Edge Module product guide for full details.",
+            "distance": 48.0,
+            "position": "below"
+          },
+          {
+            "text": "2. Power Jack",
+            "distance": 81.21881103515625,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "Feature Descriptions",
+          "Read the full explanation of each labeled feature on the pages that follow this diagram.",
+          "1. Parallax P2 Edge Module Socket"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page04_img02.png",
+      "source_pdf": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+      "page_number": 4,
+      "image_index": 2,
+      "dimensions": "300\u00d7289",
+      "width": 300,
+      "height": 289,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "test_mini_breakout_images/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page04_img02.png",
+      "xref": 34,
+      "extraction_status": "success",
+      "file_size_bytes": 7872,
+      "context": {
+        "caption": "Feature Descriptions",
+        "nearby_text": [
+          {
+            "text": "CAUTION!  \u200b The P2 Edge Module power input pads have reverse polarity protection,                         but damage could occur from user circuits attached to the IO pins incorrectly, so                             care should always be taken to ensure correct orientation.",
+            "distance": 9.0,
+            "position": "right"
+          },
+          {
+            "text": "CAUTION! Always use a well-regulated power supply and do not exceed 5.5 VDC                          input!",
+            "distance": 9.0,
+            "position": "below"
+          },
+          {
+            "text": "The P2 Edge Module must be inserted with the component side facing the RESET Button. There                                 are silk-screen text markings beside the socket to indicate the positions of P0 and P38.",
+            "distance": 16.5,
+            "position": "above"
+          },
+          {
+            "text": "Feature Descriptions",
+            "distance": 37.5,
+            "position": "above"
+          },
+          {
+            "text": "Read the full explanation of each labeled feature on the pages that follow this diagram.",
+            "distance": 37.5,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "Feature Descriptions",
+          "Read the full explanation of each labeled feature on the pages that follow this diagram.",
+          "1. Parallax P2 Edge Module Socket"
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page05_img01.png",
+      "source_pdf": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+      "page_number": 5,
+      "image_index": 1,
+      "dimensions": "300\u00d7289",
+      "width": 300,
+      "height": 289,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "test_mini_breakout_images/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page05_img01.png",
+      "xref": 34,
+      "extraction_status": "success",
+      "file_size_bytes": 7872,
+      "context": {
+        "caption": "3. Prop Plug Programming Header",
+        "nearby_text": [
+          {
+            "text": "DO NOT APPLY VOLTAGE TO THE Vxx Pin; it is a voltage output!  \u200b Be aware that some                                I/O pins are also connected to other peripheral circuits; see the  \u200b Edge Connector Pin                             Assignments \u200b  section.",
+            "distance": 9.0,
+            "position": "right"
+          },
+          {
+            "text": "Each edge header provides two GND connections, a Vxx                  output pin supplying the voltage from the corresponding 3.3                   V LDO voltage regulator ( \u200b described here \u200b ), and optionally a 5                   V output, that is connected directly to the  \u200b Power Jack \u200b .",
+            "distance": 9.75,
+            "position": "above"
+          },
+          {
+            "text": "3. Prop Plug Programming Header",
+            "distance": 37.5,
+            "position": "above"
+          },
+          {
+            "text": "The P2 Edge Module is programmed by the Parallax Prop Plug programming tool (#32201). To                              accommodate the Prop Plug, there is a dedicated 4-pin programming and debugging header.                         The pins are  \u200b marked  \u200b \u25bd\u25b3 RES VSS, and correspond to the pin labelling on the Prop Plug                                     adapter.",
+            "distance": 37.5,
+            "position": "above"
+          },
+          {
+            "text": "Connect the Prop Plug to your computer with a suitable USB cable. Then, insert the Prop Plug                                  onto the header pins with the Prop Plug components facing upward. The upward orientation                             allows you to see the RX and TX activity LEDs on the Prop Plug while programming or debugging                                     data is being transmitted.",
+            "distance": 37.5,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "3. Prop Plug Programming Header",
+          "4. Reset Button",
+          "5. Protoboard Matrix"
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page05_img02.png",
+      "source_pdf": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+      "page_number": 5,
+      "image_index": 2,
+      "dimensions": "318\u00d7175",
+      "width": 318,
+      "height": 175,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "test_mini_breakout_images/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page05_img02.png",
+      "xref": 36,
+      "extraction_status": "success",
+      "file_size_bytes": 71298,
+      "context": {
+        "caption": "6. I/O Pin Accessory Headers (with 5V output)",
+        "nearby_text": [
+          {
+            "text": "Each edge header provides two GND connections, a Vxx                  output pin supplying the voltage from the corresponding 3.3                   V LDO voltage regulator ( \u200b described here \u200b ), and optionally a 5                   V output, that is connected directly to the  \u200b Power Jack \u200b .",
+            "distance": 6.428619384765625,
+            "position": "left"
+          },
+          {
+            "text": "With the P2 Edge Module plugged in, Each of the Propeller                       2's 64 smart I/O pins connect to an accessory header, in                       specific groups of eight.",
+            "distance": 6.780181884765625,
+            "position": "left"
+          },
+          {
+            "text": "6. I/O Pin Accessory Headers (with 5V output)",
+            "distance": 13.95703125,
+            "position": "above"
+          },
+          {
+            "text": "DO NOT APPLY VOLTAGE TO THE Vxx Pin; it is a voltage output!  \u200b Be aware that some                                I/O pins are also connected to other peripheral circuits; see the  \u200b Edge Connector Pin                             Assignments \u200b  section.",
+            "distance": 30.9140625,
+            "position": "below"
+          },
+          {
+            "text": "The protoboard areas are unconnected 4 x 5 hole matrices arranged in 2 areas, for a total of 40                                 holes. The hole spacing is 0.1\u201d. Use these to add components and access additional Smart I/O                                pins directly from the Edge connector.  \u200b Refer to the Edge Socket Pinout for details.",
+            "distance": 62.25,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "6. I/O Pin Accessory Headers (with 5V output)",
+          "With the P2 Edge Module plugged in, Each of the Propeller                       2's 64 smart I/O pins connect to an accessory header, in                       specific groups of eight."
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page06_img01.png",
+      "source_pdf": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+      "page_number": 6,
+      "image_index": 1,
+      "dimensions": "300\u00d7289",
+      "width": 300,
+      "height": 289,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "test_mini_breakout_images/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page06_img01.png",
+      "xref": 34,
+      "extraction_status": "success",
+      "file_size_bytes": 7872,
+      "context": {
+        "caption": "7. I/O Pin Breakout Edge Headers (without 5V output)",
+        "nearby_text": [
+          {
+            "text": "Warning: DO NOT join the Vxx pins together.  \u200b The voltage output is intended to                            provide logic level and low current supply only to the corresponding group of 8 I/Os                              (Maximum 30mA per pin, 300 mA total). If a larger current or common supply is                            required, use an alternative power source such as the Parallax Power Pal (#32133)",
+            "distance": 9.0,
+            "position": "right"
+          },
+          {
+            "text": "The two digits after the V refer to the first of 8 I/O pins that the LDO provides power to. For                                         example in the image, V48 would mean VIO voltage for I/O pins 48 to 55.",
+            "distance": 21.0,
+            "position": "above"
+          },
+          {
+            "text": "Copyright \u00a9 Parallax Inc.   P2 Edge Mini Breakout Board (#64019) v1.1  11/30/2020  Page 6 of 10",
+            "distance": 38.806640625,
+            "position": "below"
+          },
+          {
+            "text": "7. I/O Pin Breakout Edge Headers (without 5V output)",
+            "distance": 46.5,
+            "position": "above"
+          },
+          {
+            "text": "There are two edge headers that do not have 5V routed to                         them, one for P24-\u2013P31, and one for P56\u2013P63.",
+            "distance": 46.5,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "7. I/O Pin Breakout Edge Headers (without 5V output)",
+          "There are two edge headers that do not have 5V routed to                         them, one for P24-\u2013P31, and one for P56\u2013P63.",
+          "The P56\u2013P63 header accepts the the Parallax P2 WX Adapter  (#64007) with the Parallax ESP8266 SIP WiFi module  (#32420S) in order to program the Propeller 2 wirelessly."
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page06_img02.png",
+      "source_pdf": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+      "page_number": 6,
+      "image_index": 2,
+      "dimensions": "318\u00d7175",
+      "width": 318,
+      "height": 175,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "test_mini_breakout_images/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page06_img02.png",
+      "xref": 36,
+      "extraction_status": "success",
+      "file_size_bytes": 71298,
+      "context": {
+        "caption": "7. I/O Pin Breakout Edge Headers (without 5V output)",
+        "nearby_text": [
+          {
+            "text": "VIO 3.3V Power and Ground (GND) access",
+            "distance": 1.534271240234375,
+            "position": "above"
+          },
+          {
+            "text": "The positive 3.3 V supply sockets and ground sockets are                     positioned around the board at the 2x6 way P2 accessory                     headers. The headers are compatible with the Parallax P2                   accessory boards, or use jumper wires to connect the header                     pins to an external circuit- for example, to a breadboard.",
+            "distance": 6.709869384765625,
+            "position": "left"
+          },
+          {
+            "text": "The P24\u2013P31 header is marked with a white silk square for the                       pin beside the Vxx pin. This unlabelled pin is unconnected, but                      may be used for connecting a user signal or voltage to a user                         accessory board or prototype board.",
+            "distance": 7.307525634765625,
+            "position": "above"
+          },
+          {
+            "text": "The P56\u2013P63 header is marked with the RES pin label beside  the V56 pin. The RES pin is active low, and is connected to the  Propeller 2 microcontroller RESn circuit on the P2 Edge  Module. Momentarily set this pin low to reset the Propeller 2.",
+            "distance": 7.448150634765625,
+            "position": "above"
+          },
+          {
+            "text": "There are two edge headers that do not have 5V routed to                         them, one for P24-\u2013P31, and one for P56\u2013P63.",
+            "distance": 7.670806884765625,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "7. I/O Pin Breakout Edge Headers (without 5V output)",
+          "There are two edge headers that do not have 5V routed to                         them, one for P24-\u2013P31, and one for P56\u2013P63.",
+          "The P56\u2013P63 header accepts the the Parallax P2 WX Adapter  (#64007) with the Parallax ESP8266 SIP WiFi module  (#32420S) in order to program the Propeller 2 wirelessly."
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page06_img03.png",
+      "source_pdf": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+      "page_number": 6,
+      "image_index": 3,
+      "dimensions": "261\u00d7163",
+      "width": 261,
+      "height": 163,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "test_mini_breakout_images/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page06_img03.png",
+      "xref": 14,
+      "extraction_status": "success",
+      "file_size_bytes": 52733,
+      "context": {
+        "caption": "7. I/O Pin Breakout Edge Headers (without 5V output)",
+        "nearby_text": [
+          {
+            "text": "The positive 3.3 V supply sockets and ground sockets are                     positioned around the board at the 2x6 way P2 accessory                     headers. The headers are compatible with the Parallax P2                   accessory boards, or use jumper wires to connect the header                     pins to an external circuit- for example, to a breadboard.",
+            "distance": 5.959869384765625,
+            "position": "below"
+          },
+          {
+            "text": "The P56\u2013P63 header is marked with the RES pin label beside  the V56 pin. The RES pin is active low, and is connected to the  Propeller 2 microcontroller RESn circuit on the P2 Edge  Module. Momentarily set this pin low to reset the Propeller 2.",
+            "distance": 6.0,
+            "position": "below"
+          },
+          {
+            "text": "The P24\u2013P31 header is marked with a white silk square for the                       pin beside the Vxx pin. This unlabelled pin is unconnected, but                      may be used for connecting a user signal or voltage to a user                         accessory board or prototype board.",
+            "distance": 6.557525634765625,
+            "position": "left"
+          },
+          {
+            "text": "There are two edge headers that do not have 5V routed to                         them, one for P24-\u2013P31, and one for P56\u2013P63.",
+            "distance": 6.920806884765625,
+            "position": "left"
+          },
+          {
+            "text": "7. I/O Pin Breakout Edge Headers (without 5V output)",
+            "distance": 8.21868896484375,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "7. I/O Pin Breakout Edge Headers (without 5V output)",
+          "There are two edge headers that do not have 5V routed to                         them, one for P24-\u2013P31, and one for P56\u2013P63.",
+          "The P56\u2013P63 header accepts the the Parallax P2 WX Adapter  (#64007) with the Parallax ESP8266 SIP WiFi module  (#32420S) in order to program the Propeller 2 wirelessly."
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page06_img04.png",
+      "source_pdf": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+      "page_number": 6,
+      "image_index": 4,
+      "dimensions": "322\u00d7188",
+      "width": 322,
+      "height": 188,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "test_mini_breakout_images/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page06_img04.png",
+      "xref": 15,
+      "extraction_status": "success",
+      "file_size_bytes": 73302,
+      "context": {
+        "caption": "7. I/O Pin Breakout Edge Headers (without 5V output)",
+        "nearby_text": [
+          {
+            "text": "The positive 3.3 V supply sockets and ground sockets are                     positioned around the board at the 2x6 way P2 accessory                     headers. The headers are compatible with the Parallax P2                   accessory boards, or use jumper wires to connect the header                     pins to an external circuit- for example, to a breadboard.",
+            "distance": 5.959869384765625,
+            "position": "below"
+          },
+          {
+            "text": "The P24\u2013P31 header is marked with a white silk square for the                       pin beside the Vxx pin. This unlabelled pin is unconnected, but                      may be used for connecting a user signal or voltage to a user                         accessory board or prototype board.",
+            "distance": 6.557525634765625,
+            "position": "above"
+          },
+          {
+            "text": "The P56\u2013P63 header is marked with the RES pin label beside  the V56 pin. The RES pin is active low, and is connected to the  Propeller 2 microcontroller RESn circuit on the P2 Edge  Module. Momentarily set this pin low to reset the Propeller 2.",
+            "distance": 6.698150634765625,
+            "position": "left"
+          },
+          {
+            "text": "There are two edge headers that do not have 5V routed to                         them, one for P24-\u2013P31, and one for P56\u2013P63.",
+            "distance": 6.920806884765625,
+            "position": "above"
+          },
+          {
+            "text": "7. I/O Pin Breakout Edge Headers (without 5V output)",
+            "distance": 8.21868896484375,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "7. I/O Pin Breakout Edge Headers (without 5V output)",
+          "There are two edge headers that do not have 5V routed to                         them, one for P24-\u2013P31, and one for P56\u2013P63.",
+          "The P56\u2013P63 header accepts the the Parallax P2 WX Adapter  (#64007) with the Parallax ESP8266 SIP WiFi module  (#32420S) in order to program the Propeller 2 wirelessly."
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page07_img01.png",
+      "source_pdf": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+      "page_number": 7,
+      "image_index": 1,
+      "dimensions": "1527\u00d71513",
+      "width": 1527,
+      "height": 1513,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "test_mini_breakout_images/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page07_img01.png",
+      "xref": 18,
+      "extraction_status": "success",
+      "file_size_bytes": 963666,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "The Propeller 2 physical pins are shown below. See the Propeller 2 documentation at                             www.parallax.com  for more information about this device. Below, see the  \u200b Edge Connector Pin                           Assignments \u200b  section for details on how they are used on the P2 Edge Module.",
+            "distance": 6.749969482421875,
+            "position": "above"
+          },
+          {
+            "text": "Propeller 2 Physical Pins",
+            "distance": 71.60987091064453,
+            "position": "above"
+          },
+          {
+            "text": "Copyright \u00a9 Parallax Inc.   P2 Edge Mini Breakout Board (#64019) v1.1  11/30/2020  Page 7 of 10",
+            "distance": 98.056640625,
+            "position": "below"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page09_img01.png",
+      "source_pdf": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+      "page_number": 9,
+      "image_index": 1,
+      "dimensions": "1600\u00d7801",
+      "width": 1600,
+      "height": 801,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "test_mini_breakout_images/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page09_img01.png",
+      "xref": 25,
+      "extraction_status": "success",
+      "file_size_bytes": 750463,
+      "context": {
+        "caption": "P2 Edge Socket Pinout (PCB Bottom View)",
+        "nearby_text": [
+          {
+            "text": "P2 Edge Socket Pinout (PCB Bottom View)",
+            "distance": 11.284271240234375,
+            "position": "above"
+          },
+          {
+            "text": "Copyright \u00a9 Parallax Inc.   P2 Edge Mini Breakout Board (#64019) v1.1  11/30/2020  Page 9 of 10",
+            "distance": 52.306640625,
+            "position": "below"
+          },
+          {
+            "text": "RESn  Reset input, active low  3.3  3.6  V",
+            "distance": 75.88137817382812,
+            "position": "above"
+          },
+          {
+            "text": "P0 - P63  Any I/O Pin  3.3  3.6  V",
+            "distance": 91.63137817382812,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "P2 Edge Socket Pinout (PCB Bottom View)"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page09_img02.png",
+      "source_pdf": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+      "page_number": 9,
+      "image_index": 2,
+      "dimensions": "1600\u00d7584",
+      "width": 1600,
+      "height": 584,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "test_mini_breakout_images/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page09_img02.png",
+      "xref": 26,
+      "extraction_status": "success",
+      "file_size_bytes": 587228,
+      "context": {
+        "caption": "Copyright \u00a9 Parallax Inc.   P2 Edge Mini Breakout Board (#64019) v1.1  11/30/2020  Page 9 of 10",
+        "nearby_text": [
+          {
+            "text": "Copyright \u00a9 Parallax Inc.   P2 Edge Mini Breakout Board (#64019) v1.1  11/30/2020  Page 9 of 10",
+            "distance": 36.8138427734375,
+            "position": "below"
+          },
+          {
+            "text": "P2 Edge Socket Pinout (PCB Bottom View)",
+            "distance": 89.28427124023438,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "Copyright \u00a9 Parallax Inc.   P2 Edge Mini Breakout Board (#64019) v1.1  11/30/2020  Page 9 of 10"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page10_img01.png",
+      "source_pdf": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+      "page_number": 10,
+      "image_index": 1,
+      "dimensions": "1600\u00d7812",
+      "width": 1600,
+      "height": 812,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "test_mini_breakout_images/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page10_img01.png",
+      "xref": 29,
+      "extraction_status": "success",
+      "file_size_bytes": 1011141,
+      "context": {
+        "caption": "Board Dimensions",
+        "nearby_text": [
+          {
+            "text": "Board Dimensions",
+            "distance": 1.5342483520507812,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "Board Dimensions"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page10_img02.png",
+      "source_pdf": "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1.pdf",
+      "page_number": 10,
+      "image_index": 2,
+      "dimensions": "1600\u00d7829",
+      "width": 1600,
+      "height": 829,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "test_mini_breakout_images/64019-P2-Edge-MiniBreakoutBoardGuide-v1.1_page10_img02.png",
+      "xref": 30,
+      "extraction_status": "success",
+      "file_size_bytes": 1084456,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "Revision History",
+            "distance": 61.5806884765625,
+            "position": "below"
+          },
+          {
+            "text": "Version 1.0:\u200b  Original release. \u200b  Version 1.1: Pinout images updated.",
+            "distance": 88.24761962890625,
+            "position": "below"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "breakout-board"
+      ]
+    }
+  ]
+}

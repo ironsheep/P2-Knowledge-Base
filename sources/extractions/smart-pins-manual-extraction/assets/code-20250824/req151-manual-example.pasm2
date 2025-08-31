@@ -1,0 +1,30 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+diff_signal
+        ' Configure positive output
+        mov     pa, ##P_PWM_TRIANGLE | P_OE
+        wrpin   pa, #20
+        
+        ' Configure negative output (inverted)
+        or      pa, ##P_INVERT_OUTPUT
+        wrpin   pa, #21
+        
+        ' Same parameters for both
+        mov     pa, ##10000     ' Period
+        wxpin   pa, #20
+        wxpin   pa, #21
+        
+        mov     pa, ##5000      ' 50% duty
+        wypin   pa, #20
+        wypin   pa, #21
+        
+        ' Enable both simultaneously
+        mov     pa, #3
+        shl     pa, #20
+        dirh    pa              ' P20 and P21 enabled

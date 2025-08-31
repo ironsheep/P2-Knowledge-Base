@@ -1,0 +1,6 @@
+' Source: P2 SmartPins-220809 (Page 29)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Snippet
+
+        wrpin   clock_mode,    #clkout 'Set pin as transition mode
+        wxpin

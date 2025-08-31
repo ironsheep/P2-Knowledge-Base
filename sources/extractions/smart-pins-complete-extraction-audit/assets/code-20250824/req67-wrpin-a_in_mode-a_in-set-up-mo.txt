@@ -1,0 +1,6 @@
+' Source: P2 SmartPins-220809 (Page 34)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Snippet
+
+        wrpin  A_in_mode,   #A_in   'Set up mode for pin P53     
+        wxpin  ##$2,        #A_in   'Wait for 2 events

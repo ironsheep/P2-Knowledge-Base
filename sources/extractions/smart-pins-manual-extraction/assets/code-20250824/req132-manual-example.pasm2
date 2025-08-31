@@ -1,0 +1,28 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+time_init
+        mov     pa, ##P_HIGH_TICKS
+        wrpin   pa, #20         ' Time high states
+        dirh    #20
+        
+measure_pulse
+        wypin   zero, #20       ' Arm measurement
+.wait   testp   #20 wc          ' Check complete
+  if_nc jmp     #.wait
+        rdpin   width, #20      ' Get result
+        
+timeout_measure
+        mov     pa, ##P_HIGH_TICKS | P_MINUS1_A
+        wrpin   pa, #20         ' Add timeout
+        mov     pa, ##10_000_000 ' 50ms timeout
+        wxpin   pa, #20
+        wypin   zero, #20       ' Start
+        
+zero    long    0
+width   long    0

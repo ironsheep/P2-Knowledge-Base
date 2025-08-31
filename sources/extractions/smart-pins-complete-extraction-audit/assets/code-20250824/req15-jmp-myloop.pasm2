@@ -1,0 +1,8 @@
+' Source: P2 SmartPins-220809 (Page 14)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+          jmp    #.myloop
+'Do this loop again
+'PWM dither
+

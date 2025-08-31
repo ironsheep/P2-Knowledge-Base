@@ -1,0 +1,6 @@
+' Source: P2 SmartPins-220809 (Page 20)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Snippet
+
+      wrpin   NCO_Config,  #20  'Set configuration for PWM Triangle
+

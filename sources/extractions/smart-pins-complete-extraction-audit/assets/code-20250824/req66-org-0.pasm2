@@ -1,0 +1,6 @@
+' Source: P2 SmartPins-220809 (Page 34)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+        org 0      
+        dirl   #A_in                'Use A_in, pin 53

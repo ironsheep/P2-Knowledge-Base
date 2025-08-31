@@ -1,0 +1,25 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+pulse_init
+        mov     pa, ##P_PULSE | P_OE
+        wrpin   pa, #20         ' Configure pulse mode
+        
+one_shot
+        mov     pa, ##10000     ' 10,000 clock period
+        wxpin   pa, #20
+        mov     pa, ##$0001_1388 ' 1 pulse, 5000 wide
+        wypin   pa, #20
+        dirh    #20             ' Start pulse
+        
+continuous
+        mov     pa, ##1000      ' 1000 clock period
+        wxpin   pa, #20
+        mov     pa, ##500       ' 50% duty
+        wypin   pa, #20
+        dirh    #20             ' Start continuous

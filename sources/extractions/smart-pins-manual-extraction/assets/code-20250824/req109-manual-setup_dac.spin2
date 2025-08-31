@@ -1,0 +1,23 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  DAC_PIN = 20
+  DAC_MODE = P_DAC_124R_3V | P_OE
+
+PUB setup_dac()
+  pinstart(DAC_PIN, DAC_MODE, 0, 0)
+  
+PUB set_voltage(millivolts) | dacval
+  ' Convert millivolts (0-3300) to DAC value
+  dacval := (millivolts * $FFFF) / 3300
+  wypin(DAC_PIN, dacval)
+  
+PUB generate_sine(freq_hz) | angle, delay
+  delay := clkfreq / (freq_hz * 360)
+  repeat
+    repeat angle from 0 to 359
+      wypin(DAC_PIN, $8000 + sin(angle, $7FFF))
+      waitx(delay)

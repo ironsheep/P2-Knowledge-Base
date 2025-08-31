@@ -1,0 +1,29 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+adc_init
+        mov     pa, ##P_ADC_1X | P_ADC
+        wrpin   pa, #20         ' Configure ADC
+        dirh    #20
+        
+single_sample
+        wypin   one, #20        ' Trigger
+        waitx   ##20_000        ' Wait 100µs
+        rdpin   sample, #20     ' Read result
+        
+continuous
+.loop   wypin   one, #20        ' Trigger
+        waitx   ##20_000        ' 10ksps rate
+        rdpin   sample, #20     ' Read
+        wrlong  sample, ptr     ' Store
+        add     ptr, #4         ' Next location
+        jmp     #.loop
+        
+one     long    1
+sample  long    0
+ptr     long    0

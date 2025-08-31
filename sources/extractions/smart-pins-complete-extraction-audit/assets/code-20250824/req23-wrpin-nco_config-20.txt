@@ -1,0 +1,13 @@
+' Source: P2 SmartPins-220809 (Page 17)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Code Fragment
+
+      wrpin   NCO_Config, #20
+'Set configuration for NCO mode
+      wxpin   #1, #20         
+'Set divide-by-n to 1, 25-MHz;
+'  one system-clock period
+      dirh    #20
+'Finished setup
+      qfrac     ##123, ##_clkfreq   'Calc #of 25-MHz cycles for
+                                    '  8 msec period 

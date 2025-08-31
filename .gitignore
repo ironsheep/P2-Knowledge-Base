@@ -120,8 +120,17 @@ tools/work/
 *-TEST.pdf
 *-TEST.md
 test-request.json
+TEST-*.sty
+TEST-*.latex
+TEST-*.lua
 
 # Archive directories
 archive/
 archive-*/
 archive-old/
+/exports/pdf-generation/outbound
+/exports/pdf-generation/outbound
+/exports/pdf-generation/inbound
+/exports/pdf-generation/outbound
+/pdf-forge-workspace
+/pdf-forge-workspace

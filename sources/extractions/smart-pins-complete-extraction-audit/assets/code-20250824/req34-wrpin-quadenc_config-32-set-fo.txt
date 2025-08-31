@@ -1,0 +1,8 @@
+' Source: P2 SmartPins-220809 (Page 24)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Snippet
+
+      wrpin   QuadEnc_Config,  #32 'Set for Quad-Encoder mode
+      wxpin   X_RegData,       #32 'Set sample period in system-clock
+                                   '   periods
+      dirh       #32               'Finished setup       

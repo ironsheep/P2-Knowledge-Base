@@ -1,0 +1,6 @@
+' Source: P2 Spin2 Documentation v51-250425 (Page 12)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+JMP     #$
+'$ is the currentorigin, which steps by 4 with each hub-exec instruction

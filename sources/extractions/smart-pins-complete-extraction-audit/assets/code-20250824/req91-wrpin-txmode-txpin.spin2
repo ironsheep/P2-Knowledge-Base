@@ -1,0 +1,9 @@
+' Source: P2 SmartPins-220809 (Page 51)
+' Extracted: 2025-08-24
+' Language: Spin2 | Type: Code Fragment
+
+wrpin   ##txmode, #txpin 
+Next, a WXPIN instruction must set the bit rate (bits/sec) and the number of bits to 
+transmit:
+Register X bits X[31:16] set the number of system-clock periods in a bit period. In a 
+case where your calculated bit rate leaves bits X[31:26] are all zero, bits X[15:10] let 

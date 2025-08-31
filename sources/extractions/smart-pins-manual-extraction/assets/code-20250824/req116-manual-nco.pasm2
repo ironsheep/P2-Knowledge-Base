@@ -1,0 +1,27 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+nco_init
+        mov     pa, ##P_NCO_FREQ | P_OE
+        wrpin   pa, #20         ' Configure NCO
+        dirh    #20             ' Enable output
+        
+set_1khz
+        ' For 200MHz clock: 
+        ' 1kHz = (x * 200MHz) / 2^32
+        ' x = 21,474,836
+        mov     pa, ##21474836
+        wypin   pa, #20         ' Output 1kHz
+        
+freq_sweep
+.loop   add     freq, ##10000   ' Increment frequency
+        wypin   freq, #20       ' Update NCO
+        waitx   ##20000         ' Delay
+        jmp     #.loop
+        
+freq    long    21474836        ' Starting frequency

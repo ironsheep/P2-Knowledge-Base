@@ -1,0 +1,7 @@
+' Source: P2 SmartPins-220809 (Page 14)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Snippet
+
+        wrpin    DACconfig,    #20 'Set configuration
+        wxpin    DACperiod,    #20 'Set DAC voltage-update time
+        dirh     #20

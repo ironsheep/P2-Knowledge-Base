@@ -1,0 +1,7 @@
+' Source: P2 Spin2 Documentation v51-250425 (Page 25)
+' Extracted: 2025-08-24
+' Language: Spin2 | Type: Snippet
+
+PUB go() | p, k, i
+p := ^@k.[2..0]        'get a pointer to the three lowest bits of k
+repeat 10

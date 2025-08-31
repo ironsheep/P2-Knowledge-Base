@@ -1,0 +1,20 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  TX_PIN = 20
+  BAUD = 115_200
+  UART_MODE = P_ASYNC_TX | P_OE
+
+PUB setup_uart()
+  pinstart(TX_PIN, UART_MODE, clkfreq/BAUD, 0)
+  
+PUB tx_byte(b)
+  repeat until pinr(TX_PIN) == 0  ' Wait if busy
+  wypin(TX_PIN, b)
+  
+PUB tx_string(str) | c
+  repeat while c := byte[str++]
+    tx_byte(c)

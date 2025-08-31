@@ -1,0 +1,60 @@
+{
+  "source_pdf": "/Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/exports/pdf-generation/TEMP-SAVES/P2_Assembly_Manual_v1.0.pdf",
+  "extraction_summary": {
+    "total_code_blocks": 2,
+    "total_pages": 43,
+    "output_directory": "extracted_code"
+  },
+  "code_blocks": [
+    {
+      "page": 40,
+      "lines": [
+        "RDLONG - Read Long from Hub",
+        "Syntax :"
+      ],
+      "line_count": 2,
+      "start_line": 13,
+      "language": "PASM2",
+      "type": "Snippet",
+      "context": {
+        "before": [
+          "2−9 c l o c k s",
+          "21.2.3",
+          "RDLONG - Read Long from Hub"
+        ],
+        "after": [
+          "Operation : D = long",
+          "at hub [ S ]",
+          "Flags :"
+        ]
+      },
+      "source_pdf": "P2_Assembly_Manual_v1.0",
+      "extraction_status": "success"
+    },
+    {
+      "page": 40,
+      "lines": [
+        "RDLONG D, S/# {WZ/WC}",
+        "Operation : D = long"
+      ],
+      "line_count": 2,
+      "start_line": 15,
+      "language": "PASM2",
+      "type": "Snippet",
+      "context": {
+        "before": [
+          "RDLONG - Read Long from Hub",
+          "Syntax :",
+          "RDLONG D, S/# {WZ/WC}"
+        ],
+        "after": [
+          "Flags :",
+          "Z = (D == 0) , C = D[ 3 1 ]",
+          "Timing :"
+        ]
+      },
+      "source_pdf": "P2_Assembly_Manual_v1.0",
+      "extraction_status": "success"
+    }
+  ]
+}

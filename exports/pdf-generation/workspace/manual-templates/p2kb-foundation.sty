@@ -60,12 +60,13 @@
 \RequirePackage{xcolor}
 \RequirePackage{hyperref}
 \RequirePackage{fancyhdr}
-\RequirePackage{titlesec}
+% titlesec removed - using standard LaTeX for sectioning control
 \RequirePackage{tocloft}
 \RequirePackage{float}
 \RequirePackage[english]{babel}
 \RequirePackage[top=0.75in,bottom=1in,left=1in,right=1in]{geometry}
 \RequirePackage{tcolorbox}
+\RequirePackage{makeidx}  % For \printindex support
 \RequirePackage{calc}  % Mathematical calculations
 \RequirePackage{needspace}  % Ensure space for content blocks
 
@@ -104,6 +105,10 @@
 \pagestyle{fancy}
 \fancyhf{}
 % Note: Actual header/footer content defined in presentation layers
+
+% ==================== INDEX SETUP ====================
+% Standard index support
+\makeindex
 
 % ==================== HYPERREF SETUP ====================
 % Standard link formatting
@@ -146,9 +151,9 @@
   numbers=left,
   numberstyle=\tiny\color{gray},
   stepnumber=1,
-  numbersep=10pt,
-  xleftmargin=0pt,
-  framexleftmargin=25pt,
+  numbersep=5pt,           % Reduced from 10pt
+  xleftmargin=0pt,         % No extra margin
+  framexleftmargin=0pt,    % Reduced from 25pt - bring to left edge
   breaklines=true,
   breakatwhitespace=false,
   tabsize=2,
@@ -165,52 +170,68 @@
 }
 
 % ==================== CHAPTER FORMATTING BASE ====================
-% Basic chapter structure (specific formatting in content layers)
+% Basic chapter structure using standard LaTeX (no titlesec)
 
-% Chapter title formatting - no auto-numbering, headings contain numbers already
-\titleformat{\chapter}[display]
-  {\normalfont\huge\bfseries}
-  {}  % No chapter number prefix
-  {0pt}
-  {\Huge}
-
-% Minimal chapter spacing for better page utilization
-\titlespacing*{\chapter}{0pt}{10pt}{20pt}
+% Redefine chapter heading to remove numbering and set formatting
+\makeatletter
+\renewcommand{\@makechapterhead}[1]{%
+  \vspace*{10pt}% Space before chapter
+  {\parindent 0pt \normalfont\Huge\bfseries
+   #1\par\nobreak}% Chapter title
+  \vspace{20pt}% Space after chapter
+}
+% Also handle starred chapters
+\renewcommand{\@makeschapterhead}[1]{%
+  \vspace*{10pt}%
+  {\parindent 0pt \normalfont\Huge\bfseries
+   #1\par\nobreak}%
+  \vspace{20pt}%
+}
+\makeatother
 
 % CONDITIONAL PAGE BREAKS: Chapters (Parts) set flag, sections (Chapters) check flag
 % NOTE: Pandoc maps # to \chapter{} and ## to \section{}
 \newif\ifafterpart
 \afterpartfalse
 
-% Section redefinition with conditional page breaks (sections = our "chapters")
-\let\oldsection\section
-\renewcommand{\section}[1]{%
-  \ifafterpart%
-    \afterpartfalse% Reset flag after use
-    % No page break - let section flow after chapter
-  \else%
-    \clearpage% Only break if not after chapter
-  \fi%
-  \oldsection{#1}%
-}
-
-% Chapter redefinition sets flag for next section (chapters = our "parts")
-\let\oldchapter\chapter
-\renewcommand{\chapter}[1]{%
-  \clearpage%
-  \thispagestyle{empty}%
-  \oldchapter{#1}%
-  \afterparttrue% Set flag for next section
-  \thispagestyle{plain}%
+% Apply pagination hooks at document begin, after all packages are loaded
+\AtBeginDocument{%
+  % Save original commands
+  \let\origchapter\chapter
+  \let\origsection\section
+  
+  % Redefine \chapter to add page break and set flag (Parts)
+  \renewcommand{\chapter}[1]{%
+    \clearpage% Parts always start new page
+    \origchapter{#1}%
+    \afterparttrue% Set flag for next section
+  }
+  
+  % Redefine \section to add conditional page breaks (Chapters)
+  \renewcommand{\section}[1]{%
+    \ifafterpart%
+      \afterpartfalse% Reset flag after use
+      % No page break - let section flow after chapter
+    \else%
+      \clearpage% Only break if not after chapter
+    \fi%
+    \origsection{#1}%
+    \markboth{#1}{}% UPDATE: Ensure section (logical chapter) updates header
+  }
 }
 
 % Part formatting - no auto-numbering, headings contain numbers already
-\titleformat{\part}[display]
-  {\normalfont\LARGE\bfseries\centering}
-  {}  % No part number prefix
-  {0pt}
-  {\huge}
-\titlespacing*{\part}{0pt}{0pt}{40pt}
+% Using standard LaTeX
+\makeatletter
+\renewcommand{\@part}[1]{%
+  \cleardoublepage
+  \thispagestyle{empty}%
+  \vspace*{\fill}%
+  {\centering\normalfont\huge\bfseries #1\par}%
+  \vspace*{\fill}%
+  \cleardoublepage
+}
+\makeatother
 
 % ==================== HEADER CONFIGURATION ====================
 % Option C: Headers on chapter pages but not part pages

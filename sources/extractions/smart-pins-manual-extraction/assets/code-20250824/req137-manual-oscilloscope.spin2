@@ -1,0 +1,22 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  SCOPE_PIN = 20
+  SCOPE_MODE = P_ADC_SCOPE
+
+PUB oscilloscope(trigger_mv, samples, buffer) | i
+  pinstart(SCOPE_PIN, SCOPE_MODE, trigger_mv << 8, samples)
+  
+  repeat until pinr(SCOPE_PIN)  ' Wait for trigger
+  
+  repeat i from 0 to samples-1
+    long[buffer][i] := rdpin(SCOPE_PIN)
+    
+PUB auto_trigger() : triggered
+  wxpin(SCOPE_PIN, $8000)       ' Mid-scale trigger
+  wypin(SCOPE_PIN, 0)           ' Arm trigger
+  
+  triggered := pinr(SCOPE_PIN) <> 0

@@ -1,0 +1,321 @@
+{
+  "source_pdf": "sources/originals/P2-EC-Edge-Module-RevD-Product-Guide-3.0.pdf",
+  "extraction_summary": {
+    "total_images": 6,
+    "total_pages": 13,
+    "output_directory": "extracted_images_P2_EC"
+  },
+  "images": [
+    {
+      "filename": "P2-EC-Edge-Module-RevD-Product-Guide-3.0_page01_img01.png",
+      "source_pdf": "P2-EC-Edge-Module-RevD-Product-Guide-3.0.pdf",
+      "page_number": 1,
+      "image_index": 1,
+      "dimensions": "904\u00d7152",
+      "width": 904,
+      "height": 152,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_P2_EC/P2-EC-Edge-Module-RevD-Product-Guide-3.0_page01_img01.png",
+      "xref": 9,
+      "extraction_status": "success",
+      "file_size_bytes": 46163,
+      "context": {
+        "caption": "Web Store: www.parallax.com",
+        "nearby_text": [
+          {
+            "text": "Web Store: www.parallax.com",
+            "distance": 3.7350006103515625,
+            "position": "above"
+          },
+          {
+            "text": "Sales: (888) 512-1024",
+            "distance": 3.7350006103515625,
+            "position": "above"
+          },
+          {
+            "text": "Tech Support: support@parallax.com",
+            "distance": 4.5149993896484375,
+            "position": "below"
+          },
+          {
+            "text": "Fax: (916) 624-8003",
+            "distance": 4.5149993896484375,
+            "position": "below"
+          },
+          {
+            "text": "Tutorials: learn.parallax.com",
+            "distance": 9.0,
+            "position": "right"
+          }
+        ],
+        "potential_captions": [
+          "Web Store: www.parallax.com",
+          "Tutorials: learn.parallax.com",
+          "Sales: sales@parallax.com"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram",
+        "edge-module"
+      ]
+    },
+    {
+      "filename": "P2-EC-Edge-Module-RevD-Product-Guide-3.0_page01_img02.png",
+      "source_pdf": "P2-EC-Edge-Module-RevD-Product-Guide-3.0.pdf",
+      "page_number": 1,
+      "image_index": 2,
+      "dimensions": "1789\u00d71312",
+      "width": 1789,
+      "height": 1312,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_P2_EC/P2-EC-Edge-Module-RevD-Product-Guide-3.0_page01_img02.png",
+      "xref": 10,
+      "extraction_status": "success",
+      "file_size_bytes": 107918,
+      "context": {
+        "caption": "Web Store: www.parallax.com",
+        "nearby_text": [
+          {
+            "text": "The P2 Edge Module is a simple way to get started with the Propeller 2 multicore microcontroller. In addition to speeding development, this module provides an optimal P2 building block for system integrators and designers to include in their products.",
+            "distance": 5.519989013671875,
+            "position": "below"
+          },
+          {
+            "text": "P2 Edge Module Rev D (#P2-EC)",
+            "distance": 11.81170654296875,
+            "position": "above"
+          },
+          {
+            "text": "Web Store: www.parallax.com",
+            "distance": 44.25,
+            "position": "above"
+          },
+          {
+            "text": "Tutorials: learn.parallax.com",
+            "distance": 44.25,
+            "position": "above"
+          },
+          {
+            "text": "Sales: sales@parallax.com",
+            "distance": 44.25,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "Web Store: www.parallax.com",
+          "Tutorials: learn.parallax.com",
+          "Sales: sales@parallax.com"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "edge-module"
+      ]
+    },
+    {
+      "filename": "P2-EC-Edge-Module-RevD-Product-Guide-3.0_page01_img03.png",
+      "source_pdf": "P2-EC-Edge-Module-RevD-Product-Guide-3.0.pdf",
+      "page_number": 1,
+      "image_index": 3,
+      "dimensions": "1789\u00d71312",
+      "width": 1789,
+      "height": 1312,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_P2_EC/P2-EC-Edge-Module-RevD-Product-Guide-3.0_page01_img03.png",
+      "xref": 11,
+      "extraction_status": "success",
+      "file_size_bytes": 78140,
+      "context": {
+        "caption": "Tutorials: learn.parallax.com",
+        "nearby_text": [
+          {
+            "text": "The P2 Edge Module is a simple way to get started with the Propeller 2 multicore microcontroller. In addition to speeding development, this module provides an optimal P2 building block for system integrators and designers to include in their products.",
+            "distance": 5.519989013671875,
+            "position": "below"
+          },
+          {
+            "text": "P2 Edge Module Rev D (#P2-EC)",
+            "distance": 11.81170654296875,
+            "position": "above"
+          },
+          {
+            "text": "Sales: sales@parallax.com",
+            "distance": 40.640533447265625,
+            "position": "above"
+          },
+          {
+            "text": "Tutorials: learn.parallax.com",
+            "distance": 48.51116943359375,
+            "position": "above"
+          },
+          {
+            "text": "The Propeller 2 P2X8C4M64P chip contains over 32 million transistors and >70 mm 2   of custom silicon, 10x that of a typical microcontroller. The P2 is an 8-core 32 bit CPU with 32-bit timers, 64 -bit CORDIC math solver, and custom analog pad rings with Smart-pin functionality at all 64 I/O pins.  Each smart I/O pin is capable of many autonomous analog and digital functions, including ADC, DAC, PWM, USB, SERIAL, Waveform generation, SMPS, Comparator, SCHMITT and LOGIC modes.",
+            "distance": 54.01800537109375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "Tutorials: learn.parallax.com",
+          "Sales: sales@parallax.com",
+          "P2 Edge Module Rev D (#P2-EC)"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "edge-module"
+      ]
+    },
+    {
+      "filename": "P2-EC-Edge-Module-RevD-Product-Guide-3.0_page03_img01.png",
+      "source_pdf": "P2-EC-Edge-Module-RevD-Product-Guide-3.0.pdf",
+      "page_number": 3,
+      "image_index": 1,
+      "dimensions": "1664\u00d71202",
+      "width": 1664,
+      "height": 1202,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_P2_EC/P2-EC-Edge-Module-RevD-Product-Guide-3.0_page03_img01.png",
+      "xref": 17,
+      "extraction_status": "success",
+      "file_size_bytes": 421147,
+      "context": {
+        "caption": "Feature Descriptions",
+        "nearby_text": [
+          {
+            "text": "Read the full explanation of each labeled feature on the pages that follow this diagram.",
+            "distance": 13.230010986328125,
+            "position": "above"
+          },
+          {
+            "text": "1. Propeller 2 P2X8C4M64P",
+            "distance": 19.406707763671875,
+            "position": "below"
+          },
+          {
+            "text": "Feature Descriptions",
+            "distance": 38.24937438964844,
+            "position": "above"
+          },
+          {
+            "text": "The Propeller 2 has 8 independent processor cogs, 512 KB of shared hub RAM, and 64 Smart I/O pins. See the Propeller 2 documentation section of  www.parallax.com  for detailed information about this device. All I/O pins are brought out to the card edge pads; see  11. Edge connector .",
+            "distance": 46.02001953125,
+            "position": "below"
+          },
+          {
+            "text": "Note: There are a limited number of P2 RevC chips with the extended part number P2X8C4M64PES instead of P2X8C4M64P. Be aware that both are identical other than the part marking. The ES edition is a limited initial batch and the P2 Edge module will be sold with ES marked chips only while stocks last.",
+            "distance": 99.27001953125,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "Feature Descriptions",
+          "Read the full explanation of each labeled feature on the pages that follow this diagram.",
+          "1. Propeller 2 P2X8C4M64P"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "edge-module"
+      ]
+    },
+    {
+      "filename": "P2-EC-Edge-Module-RevD-Product-Guide-3.0_page09_img01.png",
+      "source_pdf": "P2-EC-Edge-Module-RevD-Product-Guide-3.0.pdf",
+      "page_number": 9,
+      "image_index": 1,
+      "dimensions": "1527\u00d71513",
+      "width": 1527,
+      "height": 1513,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_P2_EC/P2-EC-Edge-Module-RevD-Product-Guide-3.0_page09_img01.png",
+      "xref": 44,
+      "extraction_status": "success",
+      "file_size_bytes": 543043,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "This illustration identifies the physical pins on the Propeller 2. See the Propeller 2 documentation at  www.parallax.com  for detailed information about the device. In this document, see the  Edge Connector Pin Assignments  section for details on how they are used on the P2 Edge Module.",
+            "distance": 13.229995727539062,
+            "position": "above"
+          },
+          {
+            "text": "Copyright \u00a9 Parallax Inc. P2 Edge Module (#P2-EC) v3.0 6/3//2022  Page 9 of 13",
+            "distance": 85.87255859375,
+            "position": "below"
+          },
+          {
+            "text": "Propeller 2 Physical Pins",
+            "distance": 87.74937438964844,
+            "position": "above"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "edge-module"
+      ]
+    },
+    {
+      "filename": "P2-EC-Edge-Module-RevD-Product-Guide-3.0_page12_img01.png",
+      "source_pdf": "P2-EC-Edge-Module-RevD-Product-Guide-3.0.pdf",
+      "page_number": 12,
+      "image_index": 1,
+      "dimensions": "2048\u00d71642",
+      "width": 2048,
+      "height": 1642,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_P2_EC/P2-EC-Edge-Module-RevD-Product-Guide-3.0_page12_img01.png",
+      "xref": 54,
+      "extraction_status": "success",
+      "file_size_bytes": 191632,
+      "context": {
+        "caption": "Module Dimensions",
+        "nearby_text": [
+          {
+            "text": "Module Dimensions",
+            "distance": 13.59320068359375,
+            "position": "above"
+          },
+          {
+            "text": "Revision History",
+            "distance": 15.01617431640625,
+            "position": "below"
+          },
+          {
+            "text": "Version 1.0: original release.",
+            "distance": 43.27001953125,
+            "position": "below"
+          },
+          {
+            "text": "Version 1.5: Updated for RevB release.",
+            "distance": 68.02001953125,
+            "position": "below"
+          },
+          {
+            "text": "\u25cf Silk screen markings added/improved. \u25cf Narrow/adjust the edge pads to allow for thicker copper plating. \u25cf Increase copper plating from 1.5oz to 2oz. \u25cf On-board LEDs P56/P57; color changed to white (previous versions were green).",
+            "distance": 90.90673828125,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "Module Dimensions",
+          "Revision History",
+          "Version 1.0: original release."
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "edge-module"
+      ]
+    }
+  ]
+}

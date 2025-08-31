@@ -1,0 +1,1003 @@
+PDFForge Capability Discovery Report
+====================================
+Generated: Sat Aug 23 05:35:20 AM UTC 2025
+
+=== SYSTEM INFORMATION ===
+Linux aa15ad31eac9 6.10.14-linuxkit #1 SMP Sat May 17 08:28:57 UTC 2025 aarch64 GNU/Linux
+
+=== PANDOC VERSION ===
+pandoc 2.17.1.1
+Compiled with pandoc-types 1.22.2.1, texmath 0.12.4, skylighting 0.12.3.1,
+citeproc 0.6.0.1, ipynb 0.2
+User data directory: /home/node/.local/share/pandoc
+Copyright (C) 2006-2022 John MacFarlane. Web:  https://pandoc.org
+This is free software; see the source for copying conditions. There is no
+warranty, not even for merchantability or fitness for a particular purpose.
+
+=== PANDOC EXTENSIONS ===
+-abbreviations
++all_symbols_escapable
+-amuse
+-angle_brackets_escapable
+-ascii_identifiers
+-attributes
++auto_identifiers
+-autolink_bare_uris
++backtick_code_blocks
++blank_before_blockquote
++blank_before_header
++bracketed_spans
++citations
+-compact_definition_lists
++definition_lists
+-east_asian_line_breaks
+-element_citations
+-emoji
+-empty_paragraphs
+-epub_html_exts
++escaped_line_breaks
++example_lists
++fancy_lists
++fenced_code_attributes
++fenced_code_blocks
++fenced_divs
++footnotes
+-four_space_rule
+-gfm_auto_identifiers
++grid_tables
+-gutenberg
+-hard_line_breaks
++header_attributes
+-ignore_line_breaks
++implicit_figures
++implicit_header_references
++inline_code_attributes
++inline_notes
++intraword_underscores
++latex_macros
++line_blocks
++link_attributes
+-lists_without_preceding_blankline
+-literate_haskell
+-markdown_attribute
++markdown_in_html_blocks
+-mmd_header_identifiers
+-mmd_link_attributes
+-mmd_title_block
++multiline_tables
++native_divs
++native_spans
+-native_numbering
+-ntb
+-old_dashes
++pandoc_title_block
++pipe_tables
++raw_attribute
++raw_html
++raw_tex
+-raw_markdown
+-rebase_relative_paths
+-short_subsuperscripts
++shortcut_reference_links
++simple_tables
++smart
+-sourcepos
++space_in_atx_header
+-spaced_reference_links
++startnum
++strikeout
++subscript
++superscript
+-styles
++task_lists
++table_captions
++tex_math_dollars
+-tex_math_double_backslash
+-tex_math_single_backslash
+-xrefs_name
+-xrefs_number
++yaml_metadata_block
+
+=== PANDOC INPUT FORMATS ===
+biblatex
+bibtex
+commonmark
+commonmark_x
+creole
+csljson
+csv
+docbook
+docx
+dokuwiki
+epub
+fb2
+gfm
+haddock
+html
+ipynb
+jats
+jira
+json
+latex
+man
+markdown
+markdown_github
+markdown_mmd
+markdown_phpextra
+markdown_strict
+mediawiki
+muse
+native
+odt
+opml
+org
+rst
+rtf
+t2t
+textile
+tikiwiki
+twiki
+vimwiki
+
+=== PANDOC OUTPUT FORMATS ===
+asciidoc
+asciidoctor
+beamer
+biblatex
+bibtex
+commonmark
+commonmark_x
+context
+csljson
+docbook
+docbook4
+docbook5
+docx
+dokuwiki
+dzslides
+epub
+epub2
+epub3
+fb2
+gfm
+haddock
+html
+html4
+html5
+icml
+ipynb
+jats
+jats_archiving
+jats_articleauthoring
+jats_publishing
+jira
+json
+latex
+man
+markdown
+markdown_github
+markdown_mmd
+markdown_phpextra
+markdown_strict
+markua
+mediawiki
+ms
+muse
+native
+odt
+opendocument
+opml
+org
+pdf
+plain
+pptx
+revealjs
+rst
+rtf
+s5
+slideous
+slidy
+tei
+texinfo
+textile
+xwiki
+zimwiki
+
+=== PANDOC HIGHLIGHT LANGUAGES ===
+abc
+actionscript
+ada
+agda
+apache
+asn1
+asp
+ats
+awk
+bash
+bibtex
+boo
+c
+changelog
+clojure
+cmake
+coffee
+coldfusion
+comments
+commonlisp
+cpp
+cs
+css
+curry
+d
+default
+diff
+djangotemplate
+dockerfile
+dot
+doxygen
+doxygenlua
+dtd
+eiffel
+elixir
+elm
+email
+erlang
+fasm
+fortranfixed
+fortranfree
+fsharp
+gcc
+glsl
+gnuassembler
+go
+graphql
+groovy
+hamlet
+haskell
+haxe
+html
+idris
+ini
+isocpp
+j
+java
+javadoc
+javascript
+javascriptreact
+json
+jsp
+julia
+kotlin
+latex
+lex
+lilypond
+literatecurry
+literatehaskell
+llvm
+lua
+m4
+makefile
+mandoc
+markdown
+mathematica
+matlab
+maxima
+mediawiki
+metafont
+mips
+modelines
+modula2
+modula3
+monobasic
+mustache
+nasm
+nim
+nix
+noweb
+objectivec
+objectivecpp
+ocaml
+octave
+opencl
+orgmode
+pascal
+perl
+php
+pike
+postscript
+povray
+powershell
+prolog
+protobuf
+pure
+purebasic
+python
+qml
+r
+raku
+relaxng
+relaxngcompact
+rest
+rhtml
+roff
+ruby
+rust
+sass
+scala
+scheme
+sci
+scss
+sed
+sgml
+sml
+spdxcomments
+sql
+sqlmysql
+sqlpostgresql
+stan
+stata
+swift
+systemverilog
+tcl
+tcsh
+texinfo
+toml
+typescript
+verilog
+vhdl
+xml
+xorg
+xslt
+xul
+yacc
+yaml
+zsh
+
+=== PANDOC HIGHLIGHT STYLES ===
+pygments
+tango
+espresso
+zenburn
+kate
+monochrome
+breezedark
+haddock
+
+=== PANDOC DATA DIRECTORY ===
+
+=== LATEX VERSION ===
+pdfTeX 3.141592653-2.6-1.40.24 (TeX Live 2022/Debian)
+kpathsea version 6.3.4
+Copyright 2022 Han The Thanh (pdfTeX) et al.
+There is NO warranty.  Redistribution of this software is
+covered by the terms of both the pdfTeX copyright and
+the Lesser GNU General Public License.
+For more information about these matters, see the file
+named COPYING and the pdfTeX source.
+Primary author of pdfTeX: Han The Thanh (pdfTeX) et al.
+Compiled with libpng 1.6.39; using libpng 1.6.39
+Compiled with zlib 1.2.13; using zlib 1.2.13
+Compiled with xpdf version 4.04
+
+=== XELATEX VERSION ===
+XeTeX 3.141592653-2.6-0.999994 (TeX Live 2022/Debian)
+kpathsea version 6.3.4
+Copyright 2022 SIL International, Jonathan Kew and Khaled Hosny.
+There is NO warranty.  Redistribution of this software is
+covered by the terms of both the XeTeX copyright and
+
+=== LUALATEX VERSION ===
+This is LuaHBTeX, Version 1.15.0 (TeX Live 2022/Debian)
+Development id: 7509
+
+Execute  'luahbtex --credits'  for credits and version details.
+
+
+=== TEX PACKAGES INSTALLED (via tlmgr) ===
+Unknown option: installed
+Usage:
+    tlmgr [option...] action [option...] [operand...]
+
+
+=== CHECKING KEY LATEX PACKAGES ===
+Checking tcolorbox.sty: FOUND
+Checking mdframed.sty: FOUND
+Checking soul.sty: FOUND
+Checking fancyhdr.sty: FOUND
+Checking titlesec.sty: FOUND
+Checking xcolor.sty: FOUND
+Checking listings.sty: FOUND
+Checking hyperref.sty: FOUND
+Checking graphicx.sty: FOUND
+Checking array.sty: FOUND
+Checking calc.sty: FOUND
+Checking longtable.sty: FOUND
+Checking booktabs.sty: FOUND
+Checking multicol.sty: FOUND
+Checking makeidx.sty: FOUND
+Checking needspace.sty: FOUND
+Checking fancyvrb.sty: FOUND
+Checking tikz.sty: FOUND
+
+=== SYSTEM FONTS (for XeLaTeX/LuaLaTeX) ===
+Accanthis ADF Std
+Accanthis ADF Std No2
+Accanthis ADF Std No3
+Amiri
+Amiri Quran
+Amiri Quran Colored
+Andika
+Arimo
+AR PL KaitiM Big5,文鼎ＰＬ中楷
+AR PL KaitiM GB,文鼎ＰＬ简中楷
+AR PL Mingti2L Big5,文鼎ＰＬ細上海宋
+AR PL SungtiL GB,文鼎ＰＬ简报宋
+AR PL UMing CN
+AR PL UMing HK
+AR PL UMing TW
+AR PL UMing TW MBE
+Asana Math
+Baekmuk Batang,백묵 바탕
+Baekmuk Dotum,백묵 돋움
+Baekmuk Gulim,백묵 굴림
+Baekmuk Headline,백묵 헤드라인
+Berenis ADF Pro
+Berenis ADF Pro Math
+Bitstream Charter
+C059
+Cabin
+Caladea
+Cantarell
+Cantarell,Cantarell Extra Bold
+Cantarell,Cantarell Light
+Cantarell,Cantarell Thin
+Carlito
+Charis SIL
+Clear Sans
+Clear Sans Light
+Clear Sans Medium
+Clear Sans Thin
+Comfortaa
+Comfortaa,Comfortaa Light
+Comic Neue
+Comic Neue,Comic Neue Light
+Courier
+Cousine
+D050000L
+DejaVu Math TeX Gyre
+DejaVu Sans
+DejaVu Sans,DejaVu Sans Condensed
+DejaVu Sans,DejaVu Sans Light
+DejaVu Sans Mono
+DejaVu Serif
+DejaVu Serif,DejaVu Serif Condensed
+EB Garamond 12 All SC
+EB Garamond,EB Garamond 08
+EB Garamond,EB Garamond 12
+EB Garamond Initials
+EB Garamond Initials Fill1
+EB Garamond Initials Fill2
+EB Garamond SC,EB Garamond SC 08
+EB Garamond SC,EB Garamond SC 12
+Fira Code
+Fira Code,Fira Code Light
+Fira Code,Fira Code Medium
+Fira Code,Fira Code Retina
+Fira Code,Fira Code SemiBold
+FontAwesome
+FreeMono
+FreeSans
+FreeSerif
+Garuda
+Gentium
+GentiumAlt
+Gentium Basic
+Gentium Book Basic
+Gentium Book Plus
+Gentium Plus
+Gentium Plus Compact
+GFS Artemisia
+GFS Artemisia,GFS Didot
+GFS Baskerville
+GFS Complutum
+GFS Didot
+GFS Didot,GFS Didot Rg
+GFS Neohellenic,GFS Neohellenic Rg
+GFS Olga
+GFS Porson
+GFS Solomos
+Gillius ADF
+Gillius ADF,Gillius ADF Cond
+Gillius ADF No2
+Gillius ADF No2,Gillius ADF No2 Cond
+Go
+Go Medium
+Go Mono
+Go Smallcaps
+Inter
+Inter Display
+Inter Display,Inter Display Black
+Inter Display,Inter Display Extra Bold
+Inter Display,Inter Display Extra Light
+Inter Display,Inter Display Light
+Inter Display,Inter Display Medium
+Inter Display,Inter Display Semi Bold
+Inter Display,Inter Display Thin
+Inter,Inter Black
+Inter,Inter Extra Bold
+Inter,Inter Extra Light
+Inter,Inter Light
+Inter,Inter Medium
+Inter,Inter Semi Bold
+Inter,Inter Thin
+Junicode Two Beta
+Junicode Two Beta,Junicode Two Beta Condensed
+Junicode Two Beta,Junicode Two Beta Condensed Light
+Junicode Two Beta,Junicode Two Beta Condensed Medium
+Junicode Two Beta,Junicode Two Beta Expanded
+Junicode Two Beta,Junicode Two Beta Expanded Bold
+Junicode Two Beta,Junicode Two Beta Expanded Medium
+Junicode Two Beta,Junicode Two Beta Expanded Semibold
+Junicode Two Beta,Junicode Two Beta Light
+Junicode Two Beta,Junicode Two Beta Medium
+Junicode Two Beta,Junicode Two Beta Semibold
+Junicode Two Beta,Junicode Two Beta SemiCondensed
+Junicode Two Beta,Junicode Two Beta SemiCondensed Light
+Junicode Two Beta,Junicode Two Beta SemiCondensed Medium
+Junicode Two Beta,Junicode Two Beta SemiExpanded
+Junicode Two Beta,Junicode Two Beta SemiExpanded Bold
+Junicode Two Beta,Junicode Two Beta SemiExpanded Medium
+Junicode Two Beta,Junicode Two Beta SemiExpanded Semibold
+Kinnari
+Laksaman
+Latin Modern Math
+Latin Modern Mono Caps,LM Mono Caps 10
+Latin Modern Mono Light Cond,LM Mono Light Cond 10
+Latin Modern Mono Light,LM Mono Light 10
+Latin Modern Mono,LM Mono 10
+Latin Modern Mono,LM Mono 12
+Latin Modern Mono,LM Mono 8
+Latin Modern Mono,LM Mono 9
+Latin Modern Mono Prop Light,LM Mono Prop Light 10
+Latin Modern Mono Prop,LM Mono Prop 10
+Latin Modern Mono Slanted,LM Mono Slanted 10
+Latin Modern Roman Caps,LM Roman Caps 10
+Latin Modern Roman Demi,LM Roman Demi 10
+Latin Modern Roman Dunhill,LM Roman Dunhill 10
+Latin Modern Roman,LM Roman 10
+Latin Modern Roman,LM Roman 12
+Latin Modern Roman,LM Roman 17
+Latin Modern Roman,LM Roman 5
+Latin Modern Roman,LM Roman 6
+Latin Modern Roman,LM Roman 7
+Latin Modern Roman,LM Roman 8
+Latin Modern Roman,LM Roman 9
+Latin Modern Roman Slanted,LM Roman Slanted 10
+Latin Modern Roman Slanted,LM Roman Slanted 12
+Latin Modern Roman Slanted,LM Roman Slanted 17
+Latin Modern Roman Slanted,LM Roman Slanted 8
+Latin Modern Roman Slanted,LM Roman Slanted 9
+Latin Modern Roman Unslanted,LM Roman Unslanted 10
+Latin Modern Sans Demi Cond,LM Sans Demi Cond 10
+Latin Modern Sans,LM Sans 10
+Latin Modern Sans,LM Sans 12
+Latin Modern Sans,LM Sans 17
+Latin Modern Sans,LM Sans 8
+Latin Modern Sans,LM Sans 9
+Latin Modern Sans Quotation,LM Sans Quot 8
+Lato
+Lato,Lato Black
+Lato,Lato Hairline
+Lato,Lato Heavy
+Lato,Lato Light
+Lato,Lato Medium
+Lato,Lato Semibold
+Lato,Lato Thin
+Liberation Mono
+Liberation Sans
+Liberation Sans Narrow
+Liberation Serif
+Linux Biolinum Keyboard O
+Linux Biolinum O
+Linux Libertine Display O
+Linux Libertine Initials O
+Linux Libertine Mono O
+Linux Libertine O
+Lobster Two
+Loma
+Nimbus Mono PS
+Nimbus Roman
+Nimbus Sans
+Nimbus Sans Narrow
+Norasi
+Noto Color Emoji
+Noto Kufi Arabic
+Noto Looped Lao,Noto Looped Lao Bold
+Noto Looped Lao,Noto Looped Lao Regular
+Noto Looped Thai,Noto Looped Thai Bold
+Noto Looped Thai,Noto Looped Thai Regular
+Noto Mono
+Noto Music
+Noto Naskh Arabic
+Noto Nastaliq Urdu
+Noto Rashi Hebrew
+Noto Sans
+Noto Sans Adlam
+Noto Sans Adlam Unjoined
+Noto Sans Anatolian Hieroglyphs,Noto Sans AnatoHiero
+Noto Sans Arabic
+Noto Sans Armenian
+Noto Sans Avestan
+Noto Sans Balinese
+Noto Sans Bamum
+Noto Sans Bassa Vah
+Noto Sans Batak
+Noto Sans Bengali
+Noto Sans Bhaiksuki
+Noto Sans Brahmi
+Noto Sans Buginese
+Noto Sans Buhid
+Noto Sans Canadian Aboriginal,Noto Sans CanAborig
+Noto Sans Carian
+Noto Sans Caucasian Albanian,Noto Sans CaucAlban
+Noto Sans Chakma
+Noto Sans Cham
+Noto Sans Cherokee
+Noto Sans CJK HK
+Noto Sans CJK JP
+Noto Sans CJK KR
+Noto Sans CJK SC
+Noto Sans CJK TC
+Noto Sans Coptic
+Noto Sans Cuneiform
+Noto Sans Cypriot
+Noto Sans Deseret
+Noto Sans Devanagari
+Noto Sans Display
+Noto Sans Duployan
+Noto Sans Egyptian Hieroglyphs,Noto Sans EgyptHiero
+Noto Sans Elbasan
+Noto Sans Elymaic
+Noto Sans Ethiopic
+Noto Sans Georgian
+Noto Sans Glagolitic
+Noto Sans Gothic
+Noto Sans Grantha
+Noto Sans Gujarati
+Noto Sans Gunjala Gondi
+Noto Sans Gurmukhi
+Noto Sans Hanifi Rohingya
+Noto Sans Hanunoo
+Noto Sans Hatran
+Noto Sans Hebrew
+Noto Sans Imperial Aramaic,Noto Sans ImpAramaic
+Noto Sans Indic Siyaq Numbers
+Noto Sans Inscriptional Pahlavi,Noto Sans InsPahlavi
+Noto Sans Inscriptional Parthian,Noto Sans InsParthi
+Noto Sans Javanese
+Noto Sans Kaithi
+Noto Sans Kannada
+Noto Sans Kayah Li
+Noto Sans Kharoshthi
+Noto Sans Khmer
+Noto Sans Khojki
+Noto Sans Khudawadi
+Noto Sans Lao
+Noto Sans Lepcha
+Noto Sans Limbu
+Noto Sans Linear A
+Noto Sans Linear B
+Noto Sans Lisu
+Noto Sans Lycian
+Noto Sans Lydian
+Noto Sans Mahajani
+Noto Sans Malayalam
+Noto Sans Mandaic
+Noto Sans Manichaean
+Noto Sans Marchen
+Noto Sans Masaram Gondi
+Noto Sans Math
+Noto Sans Mayan Numerals
+Noto Sans Medefaidrin
+Noto Sans Meetei Mayek
+Noto Sans Mende Kikakui
+Noto Sans Meroitic
+Noto Sans Miao
+Noto Sans Modi
+Noto Sans Mongolian
+Noto Sans Mono
+Noto Sans Mono CJK HK
+Noto Sans Mono CJK JP
+Noto Sans Mono CJK KR
+Noto Sans Mono CJK SC
+Noto Sans Mono CJK TC
+Noto Sans Mro
+Noto Sans Multani
+Noto Sans Myanmar
+Noto Sans Nabataean
+Noto Sans Newa
+Noto Sans New Tai Lue
+Noto Sans NKo
+Noto Sans Nushu
+Noto Sans Ogham
+Noto Sans Ol Chiki
+Noto Sans Old Hungarian,Noto Sans OldHung
+Noto Sans Old Italic
+Noto Sans Old North Arabian,Noto Sans OldNorArab
+Noto Sans Old Permic
+Noto Sans Old Persian
+Noto Sans Old Sogdian
+Noto Sans Old South Arabian,Noto Sans OldSouArab
+Noto Sans Old Turkic
+Noto Sans Oriya
+Noto Sans Osage
+Noto Sans Osmanya
+Noto Sans Pahawh Hmong
+Noto Sans Palmyrene
+Noto Sans Pau Cin Hau
+Noto Sans PhagsPa
+Noto Sans Phoenician
+Noto Sans Psalter Pahlavi,Noto Sans PsaPahlavi
+Noto Sans Rejang
+Noto Sans Runic
+Noto Sans Samaritan
+Noto Sans Saurashtra
+Noto Sans Sharada
+Noto Sans Shavian
+Noto Sans Siddham
+Noto Sans SignWriting,Noto Sans SignWrit
+Noto Sans Sinhala
+Noto Sans Sogdian
+Noto Sans Sora Sompeng
+Noto Sans Soyombo
+Noto Sans Sundanese
+Noto Sans Syloti Nagri
+Noto Sans Symbols
+Noto Sans Symbols2
+Noto Sans Syriac
+Noto Sans Tagalog
+Noto Sans Tagbanwa
+Noto Sans Tai Le
+Noto Sans Tai Tham
+Noto Sans Tai Viet
+Noto Sans Takri
+Noto Sans Tamil
+Noto Sans Tamil Supplement
+Noto Sans Telugu
+Noto Sans Thaana
+Noto Sans Thai
+Noto Sans Tifinagh
+Noto Sans Tifinagh Adrar
+Noto Sans Tifinagh Agraw Imazighen
+Noto Sans Tifinagh Ahaggar
+Noto Sans Tifinagh Air
+Noto Sans Tifinagh APT
+Noto Sans Tifinagh Azawagh
+Noto Sans Tifinagh Ghat
+Noto Sans Tifinagh Hawad
+Noto Sans Tifinagh Rhissa Ixa
+Noto Sans Tifinagh SIL
+Noto Sans Tifinagh Tawellemmet
+Noto Sans Tirhuta
+Noto Sans Ugaritic
+Noto Sans Vai
+Noto Sans Wancho
+Noto Sans Warang Citi
+Noto Sans Yi
+Noto Sans Zanabazar Square,Noto Sans Zanabazar
+Noto Serif
+Noto Serif Ahom
+Noto Serif Armenian
+Noto Serif Balinese
+Noto Serif Bengali
+Noto Serif CJK HK
+Noto Serif CJK JP
+Noto Serif CJK KR
+Noto Serif CJK SC
+Noto Serif CJK TC
+Noto Serif Devanagari
+Noto Serif Display
+Noto Serif Dogra
+Noto Serif Ethiopic
+Noto Serif Georgian
+Noto Serif Grantha
+Noto Serif Gujarati
+Noto Serif Gurmukhi
+Noto Serif Hebrew
+Noto Serif Hmong Nyiakeng
+Noto Serif Kannada
+Noto Serif Khmer
+Noto Serif Khojki
+Noto Serif Lao
+Noto Serif Malayalam
+Noto Serif Myanmar
+Noto Serif Sinhala
+Noto Serif Tamil
+Noto Serif Tamil Slanted
+Noto Serif Tangut
+Noto Serif Telugu
+Noto Serif Thai
+Noto Serif Tibetan
+Noto Serif Yezidi
+Noto Traditional Nushu
+Open Sans
+Open Sans Condensed
+Open Sans,Open Sans Condensed Light
+Open Sans,Open Sans Extrabold
+Open Sans,Open Sans Light
+Open Sans,Open Sans Semibold
+P052
+Padauk
+Padauk Book
+PT Mono
+PT Sans
+PT Sans Caption
+PT Sans Narrow
+PT Serif
+PT Serif Caption
+Purisa
+Roboto
+Roboto Condensed
+Roboto Condensed,Roboto Condensed Light
+Roboto Condensed,Roboto Condensed Medium
+Roboto,Roboto Black
+Roboto,Roboto Light
+Roboto,Roboto Medium
+Roboto,Roboto Thin
+Roboto Slab
+Sawasdee
+Standard Symbols PS
+STIX
+STIXGeneral
+STIXIntegralsD
+STIXIntegralsSm
+STIXIntegralsUp
+STIXIntegralsUpD
+STIXIntegralsUpSm
+STIX Math
+STIXNonUnicode
+STIXSizeFiveSym
+STIXSizeFourSym
+STIXSizeOneSym
+STIXSizeThreeSym
+STIXSizeTwoSym
+STIXVariants
+TeXGyreAdventor
+TeXGyreBonum
+TeXGyreChorus
+TeXGyreCursor
+TeXGyreHeros
+TeXGyreHerosCondensed
+TeXGyrePagella
+TeXGyreSchola
+TeXGyreTermes
+Tinos
+Tlwg Mono
+Tlwg Typewriter
+Tlwg Typist
+Tlwg Typo
+Umpush
+UnBatang,은 바탕
+UnDinaru,은 디나루
+UnDotum,은 돋움
+UnGraphic,은 그래픽
+UnGungseo,은 궁서
+Universalis ADF Std
+Universalis ADF Std,Universalis ADF Std cond
+UnJamoBatang,은 자모 바탕
+UnJamoDotum,은 자모 돋움
+UnJamoNovel,은 자모 노벨
+UnJamoSora,은 자모 소라
+UnPen,은 펜
+UnPenheulim,은 펜흘림
+UnPilgi,은 필기
+UnPilgia,은 필기a
+UnShinmun,은 신문
+UnTaza,은 타자
+UnVada,은 바다
+UnYetgul,은 옛글
+URW Bookman
+URW Gothic
+Utopia
+Waree
+Z003
+
+=== PANDOC FILTERS AVAILABLE ===
+Checking for pandoc filters in PATH:
+-rwxr-xr-x 1 root root 218 Aug 23 05:32 /usr/local/bin/pandoc-include
+-rwxr-xr-x 1 root root 230 Aug 23 05:32 /usr/local/bin/pandoc-mustache
+-rwxr-xr-x 1 root root 221 Aug 23 05:32 /usr/local/bin/pandoc-plantuml
+
+Checking specific filters:
+pandoc-crossref: NOT FOUND
+pandoc-citeproc: NOT FOUND
+pandoc-include: FOUND at /usr/local/bin/pandoc-include
+pandoc-latex-environment: NOT FOUND
+
+=== PYTHON VERSION (for Pandoc filters) ===
+Python 3.11.2
+
+=== PYTHON PANDOC PACKAGES ===
+pandoc-include         1.4.3
+pandoc-mustache        0.1.0
+pandoc-plantuml-filter 0.1.5
+pandocfilters          1.5.1
+pypandoc               1.15
+
+=== IMAGEMAGICK/GRAPHICSMAGICK (for image conversion) ===
+Version: ImageMagick 6.9.11-60 Q16 aarch64 2021-01-25 https://imagemagick.org
+Copyright: (C) 1999-2021 ImageMagick Studio LLC
+License: https://imagemagick.org/script/license.php
+
+=== GHOSTSCRIPT (for PDF manipulation) ===
+10.00.0
+
+=== INKSCAPE (for SVG to PDF conversion) ===
+./pdfforge-discovery.sh: line 115: inkscape: command not found
+
+=== LIBRSVG (for SVG handling) ===
+rsvg-convert version 2.54.7
+
+=== DOCKERFILE CONTENTS ===
+No Dockerfile in current directory
+
+=== MAKEFILE CONTENTS (if exists) ===
+No Makefile in current directory
+
+=== PANDOC DEFAULT TEMPLATES ===
+LaTeX template location:
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode$for(hyperrefoptions)$,$hyperrefoptions$$endfor$}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+$if(colorlinks)$
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+$endif$
+$if(CJKmainfont)$
+\PassOptionsToPackage{space}{xeCJK}
+$endif$
+%
+\documentclass[
+$if(fontsize)$
+  $fontsize$,
+$endif$
+$if(papersize)$
+  $papersize$paper,
+$endif$
+$if(beamer)$
+  ignorenonframetext,
+$if(handout)$
+  handout,
+$endif$
+$if(aspectratio)$
+  aspectratio=$aspectratio$,
+$endif$
+$endif$
+$for(classoption)$
+  $classoption$$sep$,
+$endfor$
+]{$documentclass$}
+$if(beamer)$
+$if(background-image)$
+\usebackgroundtemplate{%
+  \includegraphics[width=\paperwidth]{$background-image$}%
+}
+$endif$
+\usepackage{pgfpages}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbols$if(navigation)$$navigation$$else$empty$endif$
+$for(beameroption)$
+\setbeameroption{$beameroption$}
+$endfor$
+% Prevent slide breaks in the middle of a paragraph
+\widowpenalties 1 10000
+\raggedbottom
+$if(section-titles)$
+\setbeamertemplate{part page}{
+  \centering
+... (first 50 lines shown)
+
+=== DISCOVERY COMPLETE ===
+Report generated successfully!
+File size: 20K

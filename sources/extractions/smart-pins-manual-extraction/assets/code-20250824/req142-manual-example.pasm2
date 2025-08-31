@@ -1,0 +1,23 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+sync_tx_init
+        mov     pa, ##P_SYNC_TX | P_OE
+        wrpin   pa, #21         ' Data pin
+        mov     pa, ##P_PULSE | P_OE
+        wrpin   pa, #20         ' Clock pin
+        
+spi_byte
+        mov     pa, ##$0008_0008 ' 8 bits, /8 clock
+        wxpin   pa, #21
+        mov     pa, ##$AA       ' Data byte
+        wypin   pa, #21
+        dirh    #21             ' Start transmission
+        
+.wait   testp   #21 wc          ' Wait complete
+  if_nc jmp     #.wait

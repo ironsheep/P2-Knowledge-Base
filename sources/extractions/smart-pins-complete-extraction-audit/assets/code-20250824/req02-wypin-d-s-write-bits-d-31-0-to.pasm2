@@ -1,0 +1,6 @@
+' Source: P2 SmartPins-220809 (Page 5)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+WYPIN D/#,S/#         Write bits D[31:0] to register Y for Smart Pin S[5:0], 
+                                    acknowledge Smart Pin.

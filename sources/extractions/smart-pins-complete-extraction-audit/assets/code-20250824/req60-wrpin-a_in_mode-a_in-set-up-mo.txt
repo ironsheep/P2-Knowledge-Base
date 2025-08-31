@@ -1,0 +1,7 @@
+' Source: P2 SmartPins-220809 (Page 31)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Snippet
+
+        wrpin  A_in_mode,  #A_in    'Set up mode for pin P53     
+        nop
+        dirh   #A_in                'Enable Smart Pin

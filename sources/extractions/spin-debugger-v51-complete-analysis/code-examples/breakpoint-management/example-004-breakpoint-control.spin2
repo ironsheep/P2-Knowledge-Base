@@ -1,0 +1,10 @@
+' Breakpoint Control System
+' Source: spin-debugger-v51-complete-analysis.md
+' Category: Breakpoint Management
+' Description: BRK_COND flags control breakpoint behavior
+
+' BRK_COND flags control breakpoint behavior:
+' - COGINIT: Break on COG initialization
+' - MAIN: Break on main program entry  
+' - DEBUG: Break on DEBUG instruction
+' - Custom conditions: Programmable breakpoint triggers

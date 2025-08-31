@@ -1,0 +1,22 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  SMPS_PIN = 20
+  SMPS_MODE = P_PERIODIC_PULSE | P_OE
+
+PUB setup_buck_converter()
+  pinstart(SMPS_PIN, SMPS_MODE, clkfreq/100_000, 0)
+  
+PUB regulate_voltage(target_mv) | feedback, duty
+  repeat
+    feedback := read_adc(FEEDBACK_PIN)
+    if feedback < target_mv
+      duty++
+    else
+      duty--
+    duty := 0 #> duty <# 900  ' Limit 0-90%
+    wypin(SMPS_PIN, duty)
+    waitus(10)

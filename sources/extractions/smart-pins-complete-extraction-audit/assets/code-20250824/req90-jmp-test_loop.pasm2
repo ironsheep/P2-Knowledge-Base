@@ -1,0 +1,8 @@
+' Source: P2 SmartPins-220809 (Page 50)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+jmp #.test_loop
+'Continue to rcv and display
+                                      ' data
+

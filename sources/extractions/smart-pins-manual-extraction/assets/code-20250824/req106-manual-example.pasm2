@@ -1,0 +1,20 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+disable_smart
+        dirl    #20             ' Disable pin (Smart Pin OFF)
+        
+normal_output
+        dirl    #20             ' Ensure disabled
+        or      outa, #(1<<20)  ' Prepare high
+        or      dira, #(1<<20)  ' Drive high
+        andn    outa, #(1<<20)  ' Drive low
+        
+normal_input  
+        andn    dira, #(1<<20)  ' Set as input
+        test    ina, #(1<<20) wc ' Read state into C

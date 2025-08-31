@@ -1,17 +1,29 @@
-# Context Hygiene Mastery: Key-Value Management for Todo MCP v0.6.8.1
+# Context Hygiene Mastery: Key-Value Management for Todo MCP
 
-## Authority and Critical Importance
+## Critical Understanding: Value Size > Key Count
 
-**Context system** is Todo MCP's persistent memory across sessions, crashes, and interruptions. Poor context hygiene causes:
-- Memory crashes and forced compaction
-- Lost work state during recovery
-- Performance degradation
-- Context bloat leading to system instability
+**The Real Challenge**: It's not about KEY COUNT - it's about VALUE SIZE
+- 10 keys with huge values = system stress and auto-compaction risk
+- 100 keys with tiny values = runs fine
+- Context system has no direct size measurement (yet)
 
-## 🔴 CRITICAL: Context Purpose Classification
+**Core Principle**: Context is for POINTERS, not PAYLOADS
+
+### Value Size Best Practices
+```bash
+✅ Brief markers: "✓Auth|→API|Tests|Deploy"
+❌ Full TodoWrite with detailed descriptions
+
+✅ Error type and line: "TypeError line 42"
+❌ Complete error messages and stack traces
+
+✅ File pointer: "See analysis in /docs/task-42.md"
+❌ Storing entire file contents or long analyses
+```
+
+## Context Purpose Classification
 
 ### Persistent Context (KEEP)
-**Purpose**: Long-term learning and system knowledge
 ```bash
 lesson_*         # Learning from mistakes and successes
 workaround_*     # Solutions to known tool limitations  
@@ -19,280 +31,170 @@ recovery_*       # Emergency procedures and backup info
 friction_*       # Tool improvement opportunities
 ```
 
-### Temporary Context (DELETE after use)  
-**Purpose**: Working memory for current tasks
+### Temporary Context (DELETE after use)
 ```bash
 temp_*           # Scratch calculations and temporary state
-current_*        # Active work status (delete when work complete)
-session_*        # Session-specific state (delete at session end)
-task_#N_*        # Task-specific tracking (delete when task complete)
+current_*        # Active work status
+session_*        # Session-specific state
+task_#N_*        # Task-specific tracking
 ```
 
-## 🎯 Managing Context Value Size (The Real Challenge)
+## Pattern Operations (v0.6.8.2)
 
-### The Actual Problem
-**It's not about KEY COUNT - it's about VALUE SIZE**
-- 10 keys with huge values = system stress
-- 100 keys with tiny values = runs fine
-- No direct size measurement available (yet)
-
-### Monitoring Without Size Visibility
+### ALWAYS Audit Before Delete
 ```bash
-# Regular health checks
+# Step 1: Audit what exists
+mcp__todo-mcp__context_get pattern:"temp_*"         # Review temp keys
+mcp__todo-mcp__context_get pattern:"task_#*_*"      # Check task keys
+
+# Step 2: Delete only after verification
+mcp__todo-mcp__context_delete pattern:"temp_*"      # Safe cleanup
+```
+
+### Temporal Filtering
+```bash
+# Find recently modified keys
+mcp__todo-mcp__context_get pattern:"temp_*" minutes_back:60     # Last hour
+mcp__todo-mcp__context_get pattern:"session_*" minutes_back:30   # Last 30 mins
+```
+
+### Pattern Types
+```bash
+# Glob patterns (simple)
+pattern:"lesson_*"        # All lessons
+pattern:"task_#*_*"       # All task contexts
+
+# Regex patterns (advanced)
+pattern:"/^session_\d{8}$/"     # Session_YYYYMMDD
+pattern:"/^task_#\d+_.*/"       # Task #N contexts
+```
+
+## Auto-Compaction Protection
+
+### During Active Work
+```bash
+# Save TodoWrite state frequently
+TodoWrite: ["✓Step1", "→Step2", "Step3", "Step4"]
+mcp__todo-mcp__context_set key:"task_#N_steps" value:"✓Step1|→Step2|Step3|Step4"
+
+# Use brief markers, pipes for separation, under 200 chars
+```
+
+### Essential Recovery Keys
+```bash
+session_focus_YYYYMMDD     # What you're working on today
+task_#N_steps              # Current TodoWrite state
+task_#N_progress           # Progress within current task
+recovery_next_action       # Exact next step to take
+```
+
+### Recovery After Auto-Compaction
+```bash
+# Step 1: ALWAYS run this first
+mcp__todo-mcp__context_resume
+
+# Step 2: If limited info shown, get full context
 mcp__todo-mcp__context_get_all
 
-# Warning signs to watch for:
-# - Output becoming unwieldy to read
-# - Individual values spanning many lines
-# - Context operations slowing down
-# - Difficulty finding specific keys in the output
+# Step 3: Reconstruct TodoWrite from task_#N_steps
+# Step 4: Continue work
+mcp__todo-mcp__todo_resume position_id:1
 ```
 
-### Value Size Best Practices
+## Context Resume Window Understanding
+
+**"N active from last 10 minute(s)"** means:
+- Shows keys updated within 10 minutes **BEFORE the most recent key**
+- It's a **relative window** from the newest key, NOT from current time
+- Helps identify the "hot zone" of activity when work stopped
+
+Example:
+- "0 active" = Session ended cleanly, no last-minute scramble
+- "5 active" = Active work in progress, these 5 keys are your best resume clues
+
+## Task Lifecycle Pattern
+
+### Task-Specific Context Bridge
 ```bash
-# Keep values CONCISE
-❌ Storing entire file contents or long analyses
-✅ Storing pointers: "See analysis in /docs/task-42.md"
-
-❌ Full TodoWrite with detailed descriptions
-✅ Brief markers: "✓Auth|→API|Tests|Deploy"
-
-❌ Complete error messages and stack traces
-✅ Error type and key diagnostic: "TypeError line 42"
-```
-
-**Principle: Context is for POINTERS, not PAYLOADS**
-
-## Context Lifecycle Management
-
-### Task-Specific Context Bridge Pattern
-```bash
-# When starting MCP task - create context bridge
+# Start task - create bridge
 mcp__todo-mcp__todo_start position_id:1
 mcp__todo-mcp__context_set key:"task_#N_steps" value:'["Step1","Step2","Step3"]'
 
-# During work - update bridge after changes
+# During work - update bridge
 mcp__todo-mcp__context_set key:"task_#N_steps" value:'["✓Step1","→Step2","Step3"]'
 
-# When completing task - review context needs
+# Complete task - audit then clean
+mcp__todo-mcp__context_get pattern:"task_#N_*"      # Review all
 mcp__todo-mcp__todo_complete position_id:1
-# Consider: Is task_#N_* context still useful for related work?
-# If not: mcp__todo-mcp__context_delete pattern:"task_#N_*"
+mcp__todo-mcp__context_delete pattern:"task_#N_*"   # Clean all
 ```
 
-### Session Handoff Management
-```bash
-# When pausing work for extended time
-mcp__todo-mcp__context_set key:"session_handoff_YYMMDD" value:"[current work state summary]"
+## Daily Hygiene Routine
 
-# When resuming (next day/session)
-mcp__todo-mcp__context_get key:"session_handoff_YYMMDD"
-# Use information, then delete
-mcp__todo-mcp__context_delete key:"session_handoff_YYMMDD"
+```bash
+# Session start
+mcp__todo-mcp__context_resume                              # Check state
+mcp__todo-mcp__context_get pattern:"temp_*" minutes_back:1440  # Yesterday's temp
+mcp__todo-mcp__context_delete pattern:"temp_*"             # Clean after audit
+
+# Session end  
+mcp__todo-mcp__context_get pattern:"current_*"             # Audit
+mcp__todo-mcp__context_delete pattern:"current_*"          # Clean
 ```
 
-## Context Review Opportunities
+## Emergency Procedures
 
-### Task Completion: Context Review Opportunity
-
-**Intent**: Task completion is a natural boundary to review and optimize your context storage.
-
-**Why this moment?**
-- You've just finished focused work and have perspective
-- You know what information was actually useful vs speculative
-- It's a clean break point before starting something new
-
-**Suggested Review Process**:
+### Context Bloat Crisis (>100 keys or performance issues)
 ```bash
-# 1. See what you've accumulated
-mcp__todo-mcp__context_get_all
+# Step 1: Backup everything
+mcp__todo-mcp__project_dump include_context:true
 
-# 2. Evaluate each key:
-# - Still needed for upcoming work?
-# - Contains insights worth preserving?
-# - Could be updated with better information?
-# - Should be externalized to documentation?
+# Step 2: Audit biggest offenders
+mcp__todo-mcp__context_get pattern:"temp_*"        # Usually largest
+mcp__todo-mcp__context_get pattern:"session_*"     # Often accumulates
 
-# 3. Take appropriate action:
-# Delete stale: context_delete pattern:"task_#N_*"  # If those tasks are truly done
-# Update: context_set key:"lesson_auth" value:"[refined insight]"
-# Externalize: Move valuable patterns to docs, then delete context
-# Keep: Leave keys that serve ongoing work
+# Step 3: Aggressive cleanup
+mcp__todo-mcp__context_delete pattern:"temp_*"
+mcp__todo-mcp__context_delete pattern:"session_*"
+
+# Step 4: Verify reduction
+mcp__todo-mcp__context_stats
 ```
 
-**Consider Externalizing When**:
-- Information has long-term value beyond current session
-- Pattern could help other instances or future work
-- Context value is getting large but information is important
-- Example: Moving accumulated lessons to a `LESSONS-LEARNED.md` file
+## Key Design Strategy
 
-**The Goal**: Keep context as **active working memory**, not an archive.
-
-### Daily Hygiene Routine
 ```bash
-# At session start
-mcp__todo-mcp__context_resume                    # Check recent activity
-mcp__todo-mcp__context_delete pattern:"temp_*"   # Clean scratch data
+# EXCELLENT - enables pattern operations
+temp_calculation_HHMMSS      # Clean: pattern:"temp_*"
+task_#42_progress           # Clean: pattern:"task_#42_*"  
+session_20250819_status     # Clean: pattern:"session_20250819_*"
 
-# During work
-# Clean as you go - delete temp keys immediately after use
-
-# At session end  
-mcp__todo-mcp__context_delete pattern:"current_*"  # Clean active state
-mcp__todo-mcp__context_delete pattern:"session_*"  # Clean session data
-```
-
-### Weekly Deep Clean
-```bash
-# Review persistent context for relevance
-mcp__todo-mcp__context_get_all
-
-# Questions to ask:
-# - Are lesson_* keys still valuable?
-# - Are workaround_* keys still needed?
-# - Can friction_* be documented and removed?
-# - Are recovery_* procedures up to date?
-
-# Archive valuable insights to documentation before deleting
-```
-
-## Pattern-Based Cleanup Excellence
-
-### Efficient Bulk Operations
-```bash
-# PREFER pattern deletion over individual keys
-mcp__todo-mcp__context_delete pattern:"temp_*"     # vs individual temp keys
-mcp__todo-mcp__context_delete pattern:"task_#N_*"  # vs manual task cleanup
-mcp__todo-mcp__context_delete pattern:"old_*"      # vs selecting old keys
-
-# Design keys for efficient cleanup from the start
-```
-
-### Context Key Design Strategy
-```bash
-# GOOD key design - enables pattern cleanup
-temp_calculation_HHMMSS      # Can clean all temp_* 
-task_#42_progress           # Can clean all task_#42_*
-session_20250819_status     # Can clean all session_YYYYMMDD_*
-
-# BAD key design - requires individual deletion
-calculation_temp            # No clear pattern
+# POOR - requires individual deletion
+calculation_temp            # No clear pattern prefix
 progress_for_task_42        # Mixed format
-status_today               # Ambiguous timeframe
+status_today               # Ambiguous, no timestamp
 ```
 
-## Context Purpose Discipline
+## Optional: Filesystem MCP Optimization
 
-### Before Storing Context - Purpose Check
+If `mcp__filesystem__` tools are available in your instance:
+
 ```bash
-PURPOSE CHECK:
-- "Is this for crash recovery?" → Use structured key with task/session ID
-- "Is this a lesson to remember?" → Use lesson_ prefix, consider documentation  
-- "Is this temporary calculation?" → Use temp_ prefix + immediate cleanup plan
-- "Is this session handoff?" → Use session_ prefix + expiry plan
+# Check availability
+mcp__filesystem__list_directory path:"."
 
-# Context is working memory, not permanent storage
-# If valuable long-term, document it instead of storing in context
+# If available, prefer for file operations:
+mcp__filesystem__read_text_file     # Instead of: cat, Read tool
+mcp__filesystem__write_file         # Instead of: echo, Write tool  
+mcp__filesystem__search_files       # Instead of: find, grep
+
+# Benefits: No approval interruptions, faster response, structured output
 ```
 
-### Quality Gates for Context Operations
-```bash
-# Before storing new context
-✓ Clear purpose defined (recovery, lesson, temp, handoff)
-✓ Appropriate prefix selected
-✓ Cleanup plan established (when will this be deleted?)
-✓ Not duplicating existing context
+## Success Metrics
 
-# Before deleting context
-✓ Valuable insights documented elsewhere if needed
-✓ No active dependencies on this context
-✓ Pattern deletion preferred over individual keys
-```
-
-## Recovery and Context Restoration
-
-### Post-Crash Context Assessment
-```bash
-# Step 1: Quick assessment
-mcp__todo-mcp__context_resume  # May show incomplete/empty
-
-# Step 2: Full verification (ALWAYS)
-mcp__todo-mcp__context_get_all  # Full verification of context state
-
-# Step 3: Identify recovery context
-# Look for: task_#N_*, session_*, recovery_* keys
-
-# Step 4: Reconstruct work state
-# Use context to rebuild TodoWrite and continue work
-```
-
-### Context Bridge Recovery Pattern
-```bash
-# Standard recovery flow
-steps = mcp__todo-mcp__context_get key:"task_#N_steps"
-if (steps_found) {
-    TodoWrite: [restore from context steps]
-    mcp__todo-mcp__todo_resume position_id:1  # Continue where left off
-} else {
-    # Examine todo_list for in_progress tasks
-    # Reconstruct work state from available information
-}
-```
-
-## Anti-Pattern Prevention
-
-### Critical Context Anti-Patterns
-```bash
-# 1. Context Value Bloat Crisis (large values, not key count)
-PREVENTION: Keep values concise, store pointers not payloads, monitor readability
-
-# 2. Manual Key-by-Key Cleanup  
-PREVENTION: Design keys for pattern cleanup, use bulk operations
-
-# 3. No Review After Task Completion
-PREVENTION: Use task boundaries as review opportunities, evaluate context relevance
-
-# 4. Storing Permanent Info in Context
-PREVENTION: Document valuable insights, use context for working memory only
-
-# 5. Trusting Empty Context Without Verification
-PREVENTION: Always run context_get_all after context_resume shows empty
-```
-
-## Integration with Dual System Strategy
-
-### Context as Communication Bridge
-**TodoWrite ↔ Context ↔ Future Sessions**
-- TodoWrite state saved to context for crash recovery
-- Context preserves work state across interruptions
-- Context enables perfect session handoffs
-
-### Context Workflow Integration
-```bash
-# Standard workflow with context hygiene
-1. Start MCP task → Create context bridge
-2. Work in TodoWrite → Update context bridge after changes  
-3. Complete MCP task → Clean task-specific context
-4. Archive completed tasks → Clean session context
-5. End session → Clean temporary context
-```
-
-## Summary: Context Excellence Formula
-
-**Context = Working Memory + Recovery Bridge + Learning Repository**
-
-**Key Principles:**
-1. **Proactive monitoring** - Check health before it becomes critical
-2. **Pattern-based cleanup** - Design for efficient bulk operations  
-3. **Purpose discipline** - Clear purpose for every key stored
-4. **Automated hygiene** - Systematic cleanup, not ad-hoc maintenance
-5. **Recovery readiness** - Context enables perfect work continuation
-
-**Success Metrics:**
-- Context readability: Output remains manageable and easy to navigate
-- Value sizes: Concise pointers rather than large payloads
-- Recovery time: <2 minutes from any interruption
-- Pattern-based cleanup rather than key-by-key
-- Perfect work state preservation across sessions
-
-Context hygiene is **crash prevention** and **productivity insurance** - invest in systematic maintenance for reliable, recoverable workflows.
+- **Value size**: Keep individual values under 500 chars
+- **Key count**: Target ≤40 keys (secondary to value size)
+- **Cleanup efficiency**: 90% pattern-based operations
+- **Recovery speed**: <30 seconds with context_resume
+- **Auto-compaction survival**: State preserved through TodoWrite bridging

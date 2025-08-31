@@ -174,13 +174,24 @@ async function processRequest() {
       const inputPath = `inbox/${doc.input}`;
       const outputPath = `output/${doc.output}`;
 
+      // Handle lua_filters array - convert to pandoc_args format
+      let processedPandocArgs = doc.pandoc_args || [];
+      if (doc.lua_filters && Array.isArray(doc.lua_filters)) {
+        const luaFilterArgs = doc.lua_filters.map(filter => {
+          const filterName = filter.endsWith('.lua') ? filter : `${filter}.lua`;
+          return `--lua-filter=filters/${filterName}`;
+        });
+        // Prepend lua filters to other pandoc_args
+        processedPandocArgs = [...luaFilterArgs, ...processedPandocArgs];
+      }
+
       // NEW: Use enhanced generatePDF with pandoc_args and metadata support
       const success = await generatePDF(
         inputPath,
         outputPath,
         doc.template || 'admin-manual',
         doc.variables || {},      // Backward compatibility
-        doc.pandoc_args || [],     // NEW: Pass pandoc_args
+        processedPandocArgs,       // Includes lua_filters
         doc.metadata || {}         // NEW: Pass metadata
       );
 

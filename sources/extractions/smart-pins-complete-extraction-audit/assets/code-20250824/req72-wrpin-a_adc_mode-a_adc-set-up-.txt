@@ -1,0 +1,7 @@
+' Source: P2 SmartPins-220809 (Page 38)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Snippet
+
+      wrpin     A_ADC_mode, #A_ADC    'Set up mode for ADC     
+      wxpin     #%00_0111, #A_ADC     '8-bit resolution
+      dirh      #A_ADC                'Enable Smart Pin

@@ -1,58 +1,79 @@
-# Todo MCP Mastery System
+# Todo MCP Mastery Documentation
 
-Complete mastery documentation for Todo MCP v0.6.8.1 with organized learning progression.
+## What This Is
 
-## 📚 Core Learning Sequence (mastery/)
+Definitive operational patterns for Todo MCP v0.6.8.2, refined through real-world usage across multiple Claude instances. These documents represent the synthesis of:
+- Original v0.6.8.2 features
+- Hard-won learnings from production usage
+- Critical bug workarounds and recovery procedures
+- Performance optimizations discovered through experience
 
-**Read in order for optimal learning progression:**
+## Document Structure
 
-1. **01_DUAL_SYSTEM_MASTERY_STRATEGY.md** - WHY and HOW the system works
-2. **02_CONTEXT_HYGIENE_MASTERY.md** - Key-value management excellence  
-3. **03_TODO_MCP_MASTERY_INTERFACE.md** - Complete technical reference
-4. **04_ANTI_PATTERN_ENFORCEMENT.md** - Quality protection mechanisms
-5. **05_PARAMETER_CONFUSION_ROOT_CAUSE_v0.6.8.1.md** - Technical analysis
+### Core Mastery Documents
 
-## 🔧 Setup & Configuration (setup/)
+1. **01_DUAL_SYSTEM_MASTERY_STRATEGY.md**
+   - The fundamental architecture of TodoWrite + Todo MCP
+   - The Iron Rule that prevents quality degradation
+   - Task lifecycle and recovery patterns
 
-- **CLAUDE_MASTERY_INSERT.md** - **START HERE** - Merge into CLAUDE.md for instant operation
-- **CLAUDE_INTEGRATION_COMMAND.md** - Automation instructions for tools
-- **MIGRATION_PLAYBOOK.md** - Transition guidance for existing instances
+2. **02_CONTEXT_HYGIENE_MASTERY.md**  
+   - Critical insight: Value size matters more than key count
+   - Pattern-based operations for efficiency
+   - Auto-compaction protection strategies
+   - Emergency recovery procedures
 
-## 📖 Reference Documentation (reference/)
+3. **03_TODO_MCP_MASTERY_INTERFACE.md**
+   - Complete command reference with v0.6.8.2 features
+   - Parameter patterns and data types
+   - Discovery workflows using pattern matching
+   - Session management excellence
 
-- **VERSION_TRANSITION_GUIDES.md** - User/admin guide additions
-- **FRICTION_LOG_v0.6.8.1.md** - Living document of friction points
+4. **04_ANTI_PATTERN_ENFORCEMENT.md**
+   - Critical mistakes that break everything
+   - Enforcement mechanisms and recovery
+   - Real costs from production failures
+   - Success metrics for compliance
 
-## 🚀 Quick Start
+## How to Use These Documents
 
-### New Projects
-1. **Merge** `setup/CLAUDE_MASTERY_INSERT.md` into your CLAUDE.md
-2. **Test** basic operations to verify integration
-3. **Begin** with dual-system workflow immediately
+### For New Instances
+1. Read documents 1-4 in order for complete understanding
+2. Focus on "Standard Workflow" sections for immediate productivity
+3. Reference anti-patterns to avoid common pitfalls
 
-### Existing Projects  
-1. **Follow** `setup/MIGRATION_PLAYBOOK.md` for smooth transition
-2. **Preserve** valuable existing patterns during migration
-3. **Validate** improvements before full commitment
+### For Existing Instances  
+1. Review anti-patterns first to identify current issues
+2. Implement context hygiene improvements
+3. Adopt pattern-based operations for efficiency
 
-### Deep Understanding
-Read `mastery/01-05` in sequence for comprehensive mastery
+### For CLAUDE.md Integration
+Use `/setup/CLAUDE_MASTERY_INSERT.md` for the consolidated version that goes directly into CLAUDE.md
 
-## 💡 System Benefits
+## Key Innovations in This Version
 
-- **Zero learning curve**: Instant mastery-level operation from first use
-- **Crash resilience**: 2-minute recovery from any interruption  
-- **Quality enforcement**: Built-in anti-pattern prevention mechanisms
-- **Process consistency**: Same standards whether user present or absent
-- **Context excellence**: Systematic hygiene prevents memory issues
+- **Value Size Principle**: "Context is for POINTERS, not PAYLOADS"
+- **Pattern Operations**: Glob and regex support for bulk management
+- **Temporal Filtering**: Find recently modified keys with minutes_back
+- **Auto-Recovery**: context_resume placement enables self-healing
+- **Filtered Workflows**: Priority and tag-based task management
 
-## 📁 Directory Structure
+## Three Learning Styles That Created This
 
-```
-.todo-mcp/
-├── mastery/           # 01-05 numbered learning documents
-├── setup/            # Installation and migration guides  
-└── reference/        # Supporting documentation and analysis
-```
+These documents synthesize discoveries from three instances with distinct approaches:
 
-**Philosophy**: Numbered documents for learning progression, setup folder for deployment, reference folder for ongoing consultation.
+1. **The Archivist** (p2kb): Documented everything, created tools for others
+2. **The Pragmatist** (pnut-term-ts): Aggressively simplified, found optimizations  
+3. **The Official** (todo-mcp): Maintained production docs, added new features
+
+## Success Metrics
+
+When properly implemented, these patterns deliver:
+- Recovery from auto-compaction in <30 seconds
+- 90% pattern-based operations (vs individual)
+- Zero data loss through proper bridging
+- Sustained productivity without degradation
+
+## Version Note
+
+These documents are for Todo MCP v0.6.8.2+ and include all features through that version. No version markers remain in the content - this is the definitive current truth.

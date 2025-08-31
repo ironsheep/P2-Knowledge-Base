@@ -115,6 +115,9 @@ debug_isr
 
 ### **Serial Communication Architecture**
 
+#### **Complete Protocol Documentation**
+📄 **FULL PROTOCOL SPECIFICATION**: [debugger-protocol-specification.md](spin-debugger-v51-complete-analysis/debugger-protocol-specification.md)
+
 #### **Hardware Setup**
 ```spin2
 ' Configure the tx pin so that it stays high
@@ -132,20 +135,41 @@ wxpin   _clkfreq_,@_rxpin_/4
 - **Baud Rate**: Configurable via DEBUG_BAUD symbol
 - **Protocol**: Custom debugging protocol for host communication
 
-#### **Host-Target Protocol**
-The debugger implements a sophisticated bidirectional communication protocol:
+#### **Host-Target Protocol Summary**
+
+**Initial Connection Sequence**:
+1. **COGINIT Message** (ASCII, 37 bytes): `"CogN  INIT XXXXXXXX XXXXXXXX [load|jump]\r\n"`
+   - COG-specific: N = 0-7 identifies the COG
+   - PTRA/PTRB values show stack/code pointers
+   - Fixed size per COG, differs only in COG number and pointer values
+
+2. **Breakpoint Packet** (Binary, 416 bytes):
+   - Status block: 40 bytes (COG ID, flags, stack, counters)
+   - CRC checksums: 128 bytes (register change detection)
+   - Hub checksums: 248 bytes (memory change detection)
+
+**Bidirectional Command System**:
 
 **Target → Host Messages**:
-- COG state information (registers, flags, PC)
-- Breakpoint notifications
-- DEBUG output data
-- Memory dumps and register contents
+- Initial COGINIT text (37 bytes ASCII)
+- Breakpoint packets (416 bytes binary)
+- Requested register values (4 bytes each)
+- Memory dumps (variable length)
+- Smart pin states (1 byte mask + 4 bytes per pin)
 
-**Host → Target Commands**:
-- Continue/Step/Break commands
-- Breakpoint set/clear operations
-- Memory read/write requests
-- COG control operations
+**Host → Target Commands** (52 bytes):
+- `cmd_regs`: Register read bitmap (8 bytes)
+- `cmd_sums`: Hub checksum requests (16 bytes)
+- `cmd_read`: Memory read addresses (20 bytes)
+- `cmd_cogbrk`: Remote COG break control (4 bytes)
+- `cmd_brk`: Breakpoint condition update (4 bytes)
+
+**Protocol Characteristics**:
+- **Mixed Format**: ASCII for init messages, binary for data
+- **COG Differentiation**: Each COG sends unique ID in messages
+- **18-bit Word Packing**: Optimized transmission format
+- **Multi-COG Support**: Can debug all 8 COGs simultaneously
+- **Remote Triggering**: COGs can trigger breaks in other COGs
 
 ### **Clock Management Integration**
 ```spin2

@@ -1,0 +1,384 @@
+% P2KB-PASM-deSilva-Eisvogel FULL Template
+% Purpose: Complete Eisvogel base with deSilva pedagogical customizations
+% Based on: Full Eisvogel template with ALL features preserved
+% Created: 2025-08-23
+% Status: PRODUCTION - All fixes integrated
+
+\documentclass[11pt]{book}
+
+% ==================== PACKAGES ====================
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}          % Latin Modern font (clean sans-serif option)
+\renewcommand{\familydefault}{\sfdefault}  % Use sans-serif as default
+\usepackage[sfdefault]{roboto}  % Or use Roboto for modern sans-serif
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{mdframed}
+\usepackage{soul}
+\usepackage{listings}
+\usepackage{multicol}
+\usepackage{makeidx}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage[margin=1in]{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{needspace}
+\usepackage{fancyvrb}        % For DefineVerbatimEnvironment
+\usepackage{graphicx}         % For includegraphics
+\usepackage{longtable}       % For tables
+\usepackage{booktabs}        % Better table formatting
+\usepackage{array}           % Enhanced table formatting
+\usepackage{calc}            % Mathematical calculations
+
+% ==================== CUSTOM COMMANDS ====================
+% Fix for table calculations (prevents \real command conflict)
+\newcommand{\real}[1]{#1}
+
+% ==================== COLORS ====================
+\definecolor{codegray}{HTML}{F5F5F5}
+\definecolor{inlineyellow}{HTML}{FFFACD}
+\definecolor{missingviolet}{HTML}{E6E6FA}
+\definecolor{revieworange}{HTML}{FFE4B5}
+\definecolor{diagramblue}{HTML}{E0F2FF}
+\definecolor{chaptergreen}{HTML}{F0FFF0}
+\definecolor{yourturncolor}{HTML}{E6F3FF}
+
+% ==================== TYPOGRAPHY ====================
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{10pt}
+\linespread{1.3}
+
+% ==================== CODE SETTINGS ====================
+\lstset{
+  basicstyle=\ttfamily,
+  backgroundcolor=\color{inlineyellow},  % Changed to yellow
+  frame=none,
+  showstringspaces=false,
+  columns=flexible,
+  keepspaces=true,
+  commentstyle=\color{gray}\itshape,
+  keywordstyle=\color{blue}\bfseries,
+  stringstyle=\color{red},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=4,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=5pt,
+  stepnumber=1,
+  xleftmargin=2em,  % Add margin to include numbers in background
+  framexleftmargin=2em,  % Extend background to cover numbers
+  literate={**}{}{0\bfseries},  % Start bold on **
+  moredelim=[is][\bfseries]{**}{**}  % Make text between ** bold
+}
+
+% ==================== CUSTOM ENVIRONMENTS ====================
+% Define each environment only ONCE
+
+% Sidetrack: Gray with dotted border
+\newtcolorbox{sidetrack}{
+  enhanced,
+  colback=codegray,
+  colframe=gray!50,
+  boxrule=0pt,
+  borderline={1pt}{0pt}{gray!50, dashed},
+  title={\textbf{Sidetrack}},
+  fonttitle=\bfseries\color{black},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Interlude: Gray without border
+\newtcolorbox{interlude}{
+  colback=codegray,
+  colframe=codegray,
+  boxrule=0pt,
+  title={\textbf{Interlude}},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Missing content: Violet with thick border
+\newtcolorbox{missing}{
+  colback=missingviolet,
+  colframe=violet!70,
+  boxrule=2pt,
+  title={🚧 \textbf{CONTENT MISSING}},
+  fonttitle=\large\bfseries\color{black},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Review needed: Orange with thick border
+\newtcolorbox{review}{
+  colback=revieworange,
+  colframe=orange!70,
+  boxrule=2pt,
+  title={🔍 \textbf{NEEDS REVIEW}},
+  fonttitle=\large\bfseries\color{black},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Diagram needed: Blue with border
+\newtcolorbox{diagram}{
+  colback=diagramblue,
+  colframe=blue!50,
+  boxrule=2pt,
+  title={🎨 \textbf{DIAGRAM NEEDED}},
+  fonttitle=\large\bfseries\color{black},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Your Turn: Light blue exercise box
+\newtcolorbox{yourturn}{
+  colback=yourturncolor,
+  colframe=blue!30,
+  boxrule=1pt,
+  title={\textbf{Your Turn}},
+  fonttitle=\bfseries\color{black},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Chapter ending: Green celebration with separator
+\newtcolorbox{chapterend}{
+  colback=chaptergreen,
+  colframe=chaptergreen,
+  boxrule=0pt,
+  width=0.8\textwidth,
+  center,
+  fontupper=\itshape,
+  left=20pt,right=20pt,top=15pt,bottom=15pt,
+  before skip=20pt,
+  after skip=20pt
+}
+
+% Command for chapter end separator line
+\newcommand{\chapterseparator}{\vspace{8pt}\hrule height 0.5pt width 0.6\linewidth\vspace{8pt}}
+
+% ==================== INLINE CODE ====================
+% CRITICAL FIX: #1 for inline code parameter
+\newcommand{\inlinecode}[1]{%
+  \colorbox{inlineyellow}{\strut\texttt{#1}}%
+}
+
+% ==================== HEADERS/FOOTERS ====================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\nouppercase{\leftmark}}  % Shows chapter name, not uppercase
+\fancyhead[R]{\thepage}
+\fancyfoot[C]{\small\itshape\color{red}DRAFT - $footer$}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+% Page headers show chapter name only (no "Chapter N:" prefix)
+% (Moved to chapter formatting section)
+
+% ==================== CHAPTER FORMATTING ====================
+% Number sections but NOT chapters (chapters get names only)
+\setcounter{secnumdepth}{3}  % Number sections, subsections, subsubsections
+\setcounter{tocdepth}{2}     % Show in TOC
+
+% Chapter formatting - NO NUMBER in heading, just name
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}
+  {}  % No number prefix
+  {0pt}
+  {\Huge}  % Size for title
+  [\vspace{20pt}]
+
+% Keep chapter counter but update page headers without number
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+
+% Section numbering starts from 1 within each chapter
+\titleformat{\section}
+  {\normalfont\Large\bfseries}
+  {\textbf{\arabic{section}}}  % Just "1", "2" etc within chapter
+  {1em}
+  {\bfseries}  % Bold title text
+
+% Subsection formatting with section.subsection numbering
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}
+  {\textbf{\arabic{section}.\arabic{subsection}}}  % "1.1", "1.2" etc
+  {1em}
+  {\bfseries}  % Bold title text
+
+% Ensure chapters start on new page and reset counters
+\let\oldchapter\chapter
+\renewcommand{\chapter}{%
+  \clearpage
+  \setcounter{section}{0}  % Reset section counter
+  \setcounter{subsection}{0}  % Reset subsection counter
+  \oldchapter
+}
+
+% ==================== INDEX SETUP ====================
+\makeindex
+\renewenvironment{theindex}{
+  \begin{multicols}{3}
+  \setlength{\parindent}{0pt}
+  \setlength{\parskip}{0pt plus 0.3pt}
+  \raggedright
+  \footnotesize
+}{\end{multicols}}
+
+% ==================== HYPERREF SETUP ====================
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  citecolor=blue,
+  pdftitle={$title$},
+  pdfauthor={$author$}
+}
+
+% ==================== PANDOC COMPATIBILITY ====================
+% These definitions help Pandoc's markdown conversion
+
+% Handle Pandoc's tightlist
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% Handle Pandoc's passthrough for raw content
+\newcommand{\passthrough}[1]{#1}
+
+% Code block environment for Pandoc - yellow background
+\newenvironment{Shaded}{\begin{tcolorbox}[colback=inlineyellow,boxrule=0pt]}{\end{tcolorbox}}
+
+% MINIMAL SYNTAX HIGHLIGHTING - Line numbers only, no color highlighting
+% We keep the Highlighting environment for line numbers but remove all *Tok commands
+
+% For Pandoc's line numbering - with yellow background
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{%
+  numbers=left,%
+  numberstyle=\tiny\color{gray},%
+  numbersep=5pt,%
+  frame=single,%
+  framesep=10pt,%
+  rulecolor=\color{inlineyellow},%
+  fillcolor=\color{inlineyellow},%
+  formatcom=\color{black},%
+  xleftmargin=2em,%
+  xrightmargin=0pt%
+}
+
+% Define all *Tok commands as no-ops (just pass through text without coloring)
+\newcommand{\AlertTok}[1]{#1}
+\newcommand{\AnnotationTok}[1]{#1}
+\newcommand{\AttributeTok}[1]{#1}
+\newcommand{\BaseNTok}[1]{#1}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{#1}
+\newcommand{\CommentTok}[1]{#1}
+\newcommand{\CommentVarTok}[1]{#1}
+\newcommand{\ConstantTok}[1]{#1}
+\newcommand{\ControlFlowTok}[1]{#1}
+\newcommand{\DataTypeTok}[1]{#1}
+\newcommand{\DecValTok}[1]{#1}
+\newcommand{\DocumentationTok}[1]{#1}
+\newcommand{\ErrorTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{#1}
+\newcommand{\FunctionTok}[1]{#1}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{#1}
+\newcommand{\KeywordTok}[1]{#1}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{#1}
+\newcommand{\OtherTok}[1]{#1}
+\newcommand{\PreprocessorTok}[1]{#1}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{#1}
+\newcommand{\SpecialStringTok}[1]{#1}
+\newcommand{\StringTok}[1]{#1}
+\newcommand{\VariableTok}[1]{#1}
+\newcommand{\VerbatimStringTok}[1]{#1}
+\newcommand{\WarningTok}[1]{#1}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}[1]{#1}
+
+% ==================== APPENDIX HANDLING ====================
+\let\oldappendix\appendix
+\renewcommand{\appendix}{
+  \oldappendix
+  \renewcommand{\chaptername}{Appendix}
+}
+
+% ==================== KEEP CODE TOGETHER ====================
+\newenvironment{keepcodeblock}[1][15]{
+  \needspace{#1\baselineskip}
+}{}
+
+% ==================== DOCUMENT START ====================
+\begin{document}
+
+% Set Pandoc to treat # as chapters in book class
+\setcounter{chapter}{0}
+
+% Title page - Professional Draft Warning Style
+\begin{titlepage}
+\centering
+\thispagestyle{empty}
+
+% Draft warning header
+\vspace*{0.5cm}
+{\fontsize{24}{28}\selectfont\bfseries\color{red}DRAFT - TECHNICAL REVIEW ONLY\par}
+\vspace{0.3cm}
+{\large\color{red}NOT FOR RELEASE OR DISTRIBUTION\par}
+
+% Main title section
+\vspace{2cm}
+{\fontsize{36}{43}\selectfont\bfseries $title$\par}
+\vspace{0.5cm}
+{\Large $subtitle$\par}
+\vspace{1.5cm}
+{\large $author$\par}
+\vspace{1cm}
+{\large\color{red}Version $version$\par}
+\vspace{0.3cm}
+{\large $date$\par}
+
+% Warning box about incomplete sections
+\vspace{1.5cm}
+\begin{tcolorbox}[
+  colback=yellow!10,
+  colframe=red!70,
+  boxrule=1.5pt,
+  width=0.85\textwidth,
+  center,
+  fontupper=\normalsize,
+  left=15pt,right=15pt,top=12pt,bottom=12pt
+]
+\centering
+\textbf{This document contains incomplete sections\\marked with colored flags:}\\[0.8em]
+Violet = Missing Content\\
+Orange = Needs Review\\
+Blue = Diagrams Needed
+\end{tcolorbox}
+
+\vfill
+{\itshape $footer$\par}
+\vspace{1cm}
+\end{titlepage}
+
+% Table of contents
+\tableofcontents
+\clearpage
+
+% Main content from Pandoc
+$body$
+
+% Index if it exists
+\printindex
+
+\end{document}

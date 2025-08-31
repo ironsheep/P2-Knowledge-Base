@@ -21,7 +21,9 @@
 % Required packages
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{lmodern}
+% Font selection for reduced cognitive load
+\usepackage{XCharter}  % Or charter - gentle serif for body and headings
+% Alternative: \usepackage{palatino}
 \usepackage{microtype}
 \usepackage{geometry}
 \usepackage{xcolor}
@@ -34,6 +36,7 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{listings}
+\usepackage{sourcecodepro}  % Modern code font, not typewriter-like
 
 % Page geometry
 \geometry{
@@ -43,6 +46,10 @@
   left=1in,
   right=1in
 }
+
+% Typography settings for readability
+\linespread{1.3}  % Better line spacing for reduced eye strain
+\setlength{\parskip}{0.5em}  % Slight paragraph spacing
 
 % Document variables from request.json
 \newcommand{\docTitle}{$title$}

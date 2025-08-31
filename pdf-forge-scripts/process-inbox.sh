@@ -88,10 +88,11 @@ if [ -f "$OUTPUT_DIR/generation.log" ]; then
     read -p "Archive processed files? (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        mkdir -p "$INBOX_DIR/processed/$(date +%Y%m%d)"
-        mv "$INBOX_DIR"/*.md "$INBOX_DIR/processed/$(date +%Y%m%d)/" 2>/dev/null || true
-        mv "$INBOX_DIR/request.json" "$INBOX_DIR/processed/$(date +%Y%m%d)/"
-        print_message "$GREEN" "✅ Files archived"
+        # Use YYMMDD_HHMM format to prevent overwrites on same day
+        mkdir -p "$INBOX_DIR/processed/$(date +%y%m%d_%H%M)"
+        mv "$INBOX_DIR"/*.md "$INBOX_DIR/processed/$(date +%y%m%d_%H%M)/" 2>/dev/null || true
+        mv "$INBOX_DIR/request.json" "$INBOX_DIR/processed/$(date +%y%m%d_%H%M)/"
+        print_message "$GREEN" "✅ Files archived to: processed/$(date +%y%m%d_%H%M)"
     fi
 else
     print_message "$RED" "❌ Generation failed - check logs"

@@ -1,0 +1,33 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  PWM_BASE = 20
+  PWM_COUNT = 8
+  PWM_FREQ = 20_000
+
+OBJ
+  pwm[PWM_COUNT] : "pwm_driver"
+
+PUB init_pwm_array() | i
+  repeat i from 0 to PWM_COUNT-1
+    pinstart(PWM_BASE+i, P_PWM_SAWTOOTH | P_OE, clkfreq/PWM_FREQ, 0)
+    
+PUB set_all_pwm(duty_array) | i
+  repeat i from 0 to PWM_COUNT-1
+    wypin(PWM_BASE+i, duty_array[i])
+    
+PUB fade_all(target_array, time_ms) | i, j, steps, current[8], delta[8]
+  steps := time_ms / 10
+  
+  repeat i from 0 to PWM_COUNT-1
+    current[i] := rdpin(PWM_BASE+i)
+    delta[i] := (target_array[i] - current[i]) / steps
+    
+  repeat j from 0 to steps-1
+    repeat i from 0 to PWM_COUNT-1
+      current[i] += delta[i]
+      wypin(PWM_BASE+i, current[i])
+    waitms(10)

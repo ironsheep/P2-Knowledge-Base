@@ -1,0 +1,24 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  ENC_A_PIN = 20
+  ENC_B_PIN = 21
+  QUAD_MODE = P_QUADRATURE_A | P_PLUS1_B
+
+PUB setup_encoder()
+  pinstart(ENC_A_PIN, QUAD_MODE, 0, 0)
+  
+PUB read_position() : position
+  position := rdpin(ENC_A_PIN)
+  
+PUB read_velocity() : velocity | pos1, pos2
+  pos1 := read_position()
+  waitms(10)
+  pos2 := read_position()
+  velocity := (pos2 - pos1) * 100  ' Counts per second
+  
+PUB zero_position()
+  wypin(ENC_A_PIN, 0)

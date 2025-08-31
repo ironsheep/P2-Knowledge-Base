@@ -1,0 +1,9 @@
+' Source: P2 SmartPins-220809 (Page 54)
+' Extracted: 2025-08-24
+' Language: Spin2 | Type: Code Fragment
+
+CON
+numb_bits = 8
+rx_pin  = 21                                       ' P21 serial input
+rxmode  = %0000_0000_000_0000000000000_00_11110_0  ' async rcvr mode
+bitper  = $3640_0007                               ' bit rate & bits

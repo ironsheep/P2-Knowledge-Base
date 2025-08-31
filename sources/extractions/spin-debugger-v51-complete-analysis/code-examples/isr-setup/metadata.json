@@ -1,0 +1,12 @@
+{
+  "category": "ISR Setup",
+  "source_file": "spin-debugger-v51-complete-analysis.md",
+  "examples": [
+    {
+      "filename": "example-001-debug-isr.spin2",
+      "description": "Debug ISR basic structure showing hardware constraints",
+      "line_reference": "Lines 92-95",
+      "concepts": ["ISR", "hardware constraints", "register limitations"]
+    }
+  ]
+}

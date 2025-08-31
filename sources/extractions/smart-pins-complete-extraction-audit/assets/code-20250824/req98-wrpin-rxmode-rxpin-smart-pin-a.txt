@@ -1,0 +1,8 @@
+' Source: P2 SmartPins-220809 (Page 54)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Snippet
+
+     wrpin   ##rxmode,  #rxpin    ' Smart Pin async receive mode
+     wxpin   ##_bitper, #_rxpin   ' receive period for 8 bits
+     dirh    #_rxpin              ' enable Smart Pin rcvr
+     nop

@@ -1,0 +1,63 @@
+{
+  "_description": "Optional add-ins for request.json files",
+  
+  "draft_mode": {
+    "_usage": "Add to metadata for draft versions",
+    "metadata": {
+      "draft": true,
+      "watermark": "DRAFT",
+      "version": "Draft v0.x"
+    }
+  },
+  
+  "tech_review_mode": {
+    "_usage": "Add to metadata for technical review",
+    "metadata": {
+      "version": "Technical Review Draft",
+      "review_areas": [
+        "Verify specifications",
+        "Check code examples",
+        "Validate timing diagrams"
+      ]
+    }
+  },
+  
+  "final_production": {
+    "_usage": "Settings for final production PDF",
+    "pandoc_options": {
+      "toc": true,
+      "toc-depth": 3,
+      "number-sections": true
+    },
+    "metadata": {
+      "version": "Version 1.0 - Final",
+      "copyright": "© 2025 Parallax Inc."
+    }
+  },
+  
+  "quick_test": {
+    "_usage": "Fast test generation without extras",
+    "options": {
+      "skip_toc": true,
+      "draft_mode": true
+    }
+  },
+  
+  "multi_format_output": {
+    "_usage": "Generate multiple output formats",
+    "documents": [
+      {
+        "_note": "Can specify multiple outputs per input",
+        "output": "document.pdf"
+      },
+      {
+        "output": "document-print.pdf",
+        "template": "p2kb-print-optimized"
+      },
+      {
+        "output": "document-web.pdf",
+        "template": "p2kb-web-optimized"
+      }
+    ]
+  }
+}

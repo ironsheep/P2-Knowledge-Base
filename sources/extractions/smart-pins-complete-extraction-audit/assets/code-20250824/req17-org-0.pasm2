@@ -1,0 +1,6 @@
+' Source: P2 SmartPins-220809 (Page 15)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+        org      0         
+        dirl     #20                 'Setup Smart Pin at P20

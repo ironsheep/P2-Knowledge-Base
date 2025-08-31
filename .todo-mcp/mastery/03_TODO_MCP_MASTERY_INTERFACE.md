@@ -1,289 +1,172 @@
-# Todo MCP v0.6.8.1 Mastery Interface Guide
+# Todo MCP Mastery Interface Reference
 
-## Authority and Scope
+## Core Functions Quick Reference
 
-This document represents the **complete synthesized knowledge** from three Claude instances' v0.6.8 usage patterns plus v0.6.8.1 interface exploration. It provides **immediate mastery-level operation** without learning friction.
-
-**Sources**: 
-- Interface analysis of all 25+ v0.6.8.1 MCP functions
-- todo-mcp instance: Dual-system foundation, crash recovery
-- p2kb instance: Defensive programming, model economics, strict discipline
-- pnut-term-ts instance: Context mastery, documentation architecture
-
-## 🔴 CRITICAL: The Parameter Patterns
-
-### Pattern 1: Dual-Parameter Functions
-**Accept EITHER `position_id` OR `task_id` with # string**
+### Task Management
 ```bash
-# By position (interactive work)
-mcp__todo-mcp__todo_complete position_id:1
-mcp__todo-mcp__todo_tag_add position_id:1 tags:["urgent"]
-mcp__todo-mcp__todo_tag_remove position_id:1 tags:["done"]
+# Create & Start
+mcp__todo-mcp__todo_create content:"Task" estimate_minutes:60 priority:"high"
+mcp__todo-mcp__todo_start position_id:1        # OR task_id:"#42"
 
-# By task ID (automation/scripts)
-mcp__todo-mcp__todo_complete task_id:"#22"
-mcp__todo-mcp__todo_tag_add task_id:"#22" tags:["urgent"]
-mcp__todo-mcp__todo_tag_remove task_id:"#22" tags:["done"]
+# State Changes  
+mcp__todo-mcp__todo_pause position_id:1 reason:"Blocked"
+mcp__todo-mcp__todo_resume position_id:1
+mcp__todo-mcp__todo_complete position_id:1     # OR task_id:"#42"
+
+# Smart Navigation
+mcp__todo-mcp__todo_next                       # Next recommended task
+mcp__todo-mcp__todo_next priority:"high"       # Filtered by priority
+mcp__todo-mcp__todo_next tags:["backend"]      # Filtered by tags
 ```
 
-### Pattern 2: Bulk Operations
-**Use arrays or filters, never individual IDs**
+### Context Operations (v0.6.8.2 Pattern Support)
 ```bash
-mcp__todo-mcp__todo_bulk operation:"set_priority" filters:{status:"created"} data:{priority:"high"}
-mcp__todo-mcp__todo_bulk operation:"add_tags" task_ids:[1,2,3] data:{tags:["sprint-1"]}
+# Pattern Discovery
+mcp__todo-mcp__context_get pattern:"temp_*"              # Glob pattern
+mcp__todo-mcp__context_get pattern:"/^task_#\d+_.*/"     # Regex pattern
+mcp__todo-mcp__context_get pattern:"temp_*" minutes_back:60  # Temporal
+
+# Bulk Operations
+mcp__todo-mcp__context_delete pattern:"temp_*"           # After audit
+mcp__todo-mcp__context_delete pattern:"task_#42_*"       # Specific task
+
+# Essential Commands
+mcp__todo-mcp__context_resume                            # WHERE WAS I?
+mcp__todo-mcp__context_stats                             # Health check
 ```
 
-## 🔴 CRITICAL: Task Lifecycle (Enforced)
-
-### Required Sequence
+### Project Operations
 ```bash
-# STEP 1: Must start before complete (enforced by system)
+# Maintenance
+mcp__todo-mcp__todo_archive                    # Archive completed tasks
+mcp__todo-mcp__project_status                  # Overall health
+
+# Backup & Recovery
+mcp__todo-mcp__project_dump include_context:true
+mcp__todo-mcp__project_restore file:"backup.json" mode:"replace"
+```
+
+## Parameter Patterns (v0.6.8.2)
+
+### Dual-Parameter Resolution
+Functions accepting BOTH position_id and task_id:
+- `todo_complete`
+- `todo_update`
+- `todo_delete`
+- `todo_tag_add`
+- `todo_tag_remove`
+
+```bash
+# Both work identically
+mcp__todo-mcp__todo_complete position_id:1      # By position
+mcp__todo-mcp__todo_complete task_id:"#42"      # By ID (preferred for automation)
+```
+
+### Critical Data Types
+```bash
+estimate_minutes:60        # Number (not "60")
+priority:"high"           # String, lowercase only
+force:true               # Boolean (not "true")
+tags:["urgent","bug"]    # Array of strings
+pattern:"temp_*"         # String (glob or regex)
+minutes_back:120         # Number for temporal filtering
+```
+
+## Discovery Workflows
+
+### Finding Lost Context
+```bash
+# Can't remember key names? Use patterns!
+mcp__todo-mcp__context_get pattern:"*pdf*"       # Find anything with pdf
+mcp__todo-mcp__context_get pattern:"lesson_*"    # All lessons
+mcp__todo-mcp__context_get pattern:"/escape.*/"  # Regex for complex search
+```
+
+### Temporal Context Analysis  
+```bash
+# What was I working on recently?
+mcp__todo-mcp__context_resume                    # Shows recent activity window
+mcp__todo-mcp__context_get pattern:"*" minutes_back:30  # Last 30 minutes
+```
+
+## Batch Operations (v0.6.8.2)
+
+### Bulk Task Management
+```bash
+# Create multiple tasks
+mcp__todo-mcp__todo_batch_create tasks:[
+  {content:"Task 1", estimate_minutes:30},
+  {content:"Task 2", estimate_minutes:45}
+]
+
+# Bulk operations
+mcp__todo-mcp__todo_bulk operation:"add_tags" data:{tags:["urgent"]} task_ids:["#12","#15"]
+mcp__todo-mcp__todo_bulk operation:"set_priority" data:{priority:"high"} position_ids:[1,2,3]
+```
+
+## Filtered Workflows (v0.6.8.2)
+
+### Working by Priority or Tags
+```bash
+# High-priority workflow
+mcp__todo-mcp__todo_list status:"created"       # See pending work
+mcp__todo-mcp__todo_next priority:"high"        # Get next high-priority
 mcp__todo-mcp__todo_start position_id:1
 
-# STEP 2: Can complete only after starting
-mcp__todo-mcp__todo_complete position_id:1  # or task_id:"#22"
-
-# WRONG - Will fail with error
-mcp__todo-mcp__todo_complete position_id:1  # Without starting first
+# Tag-based workflow (e.g., backend-only)
+mcp__todo-mcp__todo_next tags:["backend"]       # Backend tasks only
 ```
 
-### Single Active Task Rule
-- Only ONE task can be `in_progress` at a time
-- Starting new task automatically pauses current one
-- No exceptions to this rule
+### Cross-Boundary Protection
+If filtering shows no tasks but dependencies exist outside filter:
+- System prevents invalid recommendations
+- Alerts you to dependency conflicts
+- Maintains work integrity
 
-## 🔴 CRITICAL: Parameter Data Types (Exact Requirements)
+## Session Management Excellence
 
+### Perfect Session Start
 ```bash
-# CORRECT data types
-estimate_minutes:60        # Number, never string
-priority:"high"           # String: critical/high/medium/low/backlog
-status:"in_progress"      # String: created/in_progress/paused/completed
-force:true               # Boolean, never string
-include_context:true     # Boolean, never string
-
-# WRONG - These will fail
-estimate_minutes:"60"     # String not accepted
-priority:"HIGH"          # Must be lowercase
-force:"true"             # Must be boolean
+mcp__todo-mcp__context_resume    # ALWAYS FIRST
+mcp__todo-mcp__todo_list         # See current tasks
+mcp__todo-mcp__todo_next         # Get recommendation
 ```
 
-## 🟡 IMPORTANT: Tag Auto-Extraction Intelligence
-
-### Extraction Rules
-**Trailing tags removed completely:**
+### Clean Session End
 ```bash
-"Fix parser bug #urgent #backend"
-→ Content: "Fix parser bug"
-→ Tags: [urgent, backend]
-```
-
-**Inline tags keep word:**
-```bash
-"Fix the #bug in parser"
-→ Content: "Fix the bug in parser"  
-→ Tags: [bug]
-```
-
-**Special cases:**
-- Tags in quotes ignored: `"Error '#failed' in logs"` → No tags
-- Must have space before #: `"fix#bug"` → No extraction
-- Unicode supported: `"Fix #système"` → Tag: [système]
-
-## 🔴 CRITICAL: Always Verify Empty States
-
-**Pattern - Empty responses often incorrect:**
-```bash
-# WRONG - Trusting empty response
-mcp__todo-mcp__context_resume  # Shows "Working Memory: (empty)"
-# Assume no context exists
-
-# CORRECT - Always verify
-mcp__todo-mcp__context_resume  # Shows empty
-mcp__todo-mcp__context_get_all  # VERIFY - might have data!
-```
-
-**Apply to all operations:**
-- Context appears empty → Run `context_get_all`
-- Search returns nothing → Run unfiltered search
-- Archive reports nothing → Check completed task status
-
-## Multi-Line STF Display Format
-
-### Standard Task Display
-```
-N. [status] [priority] [content] [timing] «#ID»
-   🏷️ #tag1 #tag2 #tag3
-   ⛔ Blocked by: «#42» (future feature)
-```
-
-**Components:**
-- **Position**: Changes as tasks complete/reorder
-- **Status**: ○ (created) ◐ (in_progress) ⊘ (paused) ● (completed)
-- **Priority**: ⚡ (critical) 🔴 (high) 🟡 (medium) 🟢 (low) 🔵 (backlog)
-- **Task ID**: Permanent «#49» identifier
-- **Tags**: 3-space indented on line 2
-- **Dependencies**: When implemented
-
-## Core Recovery Command
-
-### Primary Recovery (Post-Crash/Compaction)
-```bash
-mcp__todo-mcp__context_resume
-```
-
-**Shows:**
-- Tasks in progress with elapsed time
-- Context organized by prefix with ages
-- Next recommended tasks
-- Summary statistics
-- Recent context keys (10-minute window in v0.6.8.1)
-
-### Complete System State
-```bash
-mcp__todo-mcp__todo_list               # All tasks
-mcp__todo-mcp__project_status          # System health
-mcp__todo-mcp__context_get_all         # Full context
-mcp__todo-mcp__session_summary         # Today's work
-```
-
-## Smart Task Selection
-
-### Intelligent Next Task
-```bash
-mcp__todo-mcp__todo_next
-```
-
-**Algorithm considers:**
-1. Dependencies (blocked tasks excluded)
-2. Priority (critical → backlog)
-3. Sequence (manual ordering)
-4. Age (older tasks preferred)
-
-## Data Safety Patterns
-
-### Archive vs Clear
-```bash
-# SAFE - Exports then clears with backup
-mcp__todo-mcp__todo_archive
-
-# RISKY - Just deletes data
-mcp__todo-mcp__todo_clear_completed  # Avoid this
-```
-
-### Complete Backup/Restore
-```bash
-# Full system backup
-mcp__todo-mcp__project_dump include_context:true
-# Returns: tasks/backups/project_dump_TIMESTAMP.json
-
-# Complete restore
-mcp__todo-mcp__project_restore file:"filename.json" mode:"replace" include_context:true
-
-# Modes: replace (clear+restore), merge (add to existing), append (add all)
-```
-
-## Export Capabilities
-
-### Available Formats
-```bash
-mcp__todo-mcp__todo_export format:"markdown"  # Human-readable
-mcp__todo-mcp__todo_export format:"json"      # Complete data
-mcp__todo-mcp__todo_export format:"csv"       # Spreadsheet
-mcp__todo-mcp__todo_export format:"org"       # Org-mode
-
-# Clean markdown for docs
-mcp__todo-mcp__export_markdown include_completed:true
-```
-
-## Search and Filter System
-
-### Comprehensive Search
-```bash
-# Searches content, tags, and IDs
-mcp__todo-mcp__todo_list search:"bug"
-
-# Combined filters
-mcp__todo-mcp__todo_list status:"created" priority:"high" search:"bug"
-
-# Sort options
-sort_by:"priority"   # By priority level
-sort_by:"created"    # By creation time  
-sort_by:"updated"    # By modification
-sort_by:"estimate"   # By time estimate
-sort_by:"sequence"   # By manual sequence
-```
-
-## Context System (Unrestricted)
-
-### Flexible Key Management
-**The context system has NO restrictions on key naming or content.**
-
-**Successful patterns observed:**
-```bash
-# Some projects used prefixes for organization
+mcp__todo-mcp__todo_pause position_id:1 reason:"EOD"
+mcp__todo-mcp__context_set key:"session_handoff_YYMMDD" value:"Status summary"
 mcp__todo-mcp__context_delete pattern:"temp_*"
-
-# Others used descriptive names without prefixes
-# Both approaches worked well
+mcp__todo-mcp__todo_archive      # If many completed
 ```
 
-**Key insight**: Use whatever naming helps YOUR workflow. System is completely flexible.
+## Error Recovery Patterns
 
-### Context Operations
+### After Auto-Compaction
 ```bash
-# Store any data
-mcp__todo-mcp__context_set key:"any_name" value:"any content"
-
-# Retrieve specific
-mcp__todo-mcp__context_get key:"any_name" 
-
-# Pattern deletion (if using prefixes)
-mcp__todo-mcp__context_delete pattern:"temp_*"
-
-# Full inventory
-mcp__todo-mcp__context_get_all
-
-# Statistics and health
-mcp__todo-mcp__context_stats
-
-# Emergency clear (requires force:true)
-mcp__todo-mcp__context_clear force:true
+mcp__todo-mcp__context_resume                   # Check what survived
+mcp__todo-mcp__context_get pattern:"task_#*_steps"  # Find TodoWrite state
+mcp__todo-mcp__todo_list                       # Verify tasks intact
 ```
 
-## Performance Expectations
-
-### Normal Operating Parameters
-- **100 tasks**: <100ms response
-- **1000 tasks**: Linear scaling, responsive
-- **Bulk operations**: Atomic but may take time
-- **Design target**: 100-200 tasks optimal
-
-### Atomic Operations
-**All bulk operations are all-or-nothing:**
+### Context Bloat Emergency
 ```bash
-# If ANY task ID invalid, ENTIRE operation rolls back
-mcp__todo-mcp__todo_bulk operation:"set_priority" task_ids:[1,999,3] data:{priority:"high"}
-# Task 999 doesn't exist → NO tasks updated
+mcp__todo-mcp__context_stats                    # Check severity
+mcp__todo-mcp__context_get pattern:"temp_*"     # Audit biggest offenders
+mcp__todo-mcp__context_delete pattern:"temp_*"  # Targeted cleanup
 ```
 
-## MCP Server Operating Rules
+## Performance Tips
 
-### Critical Requirements
-1. **ALWAYS test through MCP server** - Never isolated binaries
-2. **NO direct file access** - Everything through MCP methods  
-3. **Server controls validation** - Trust server responses
-4. **Server maintains state** - Context and task consistency
+- Use patterns instead of individual operations
+- Keep context values under 500 chars
+- Archive completed tasks regularly
+- Use position_id for interactive, task_id for automation
+- Audit before bulk delete operations
 
-## Summary: Todo MCP v0.6.8.1 Philosophy
+## Common Issues & Solutions
 
-1. **Verify Everything** - Never trust empty states
-2. **Atomic Safety** - All-or-nothing operations
-3. **Smart Automation** - Tag extraction, priority logic
-4. **Resilient Recovery** - context_resume after interruptions
-5. **Data Preservation** - Archive before delete
-6. **Enforced Workflow** - Start before complete
-7. **Single Focus** - One active task at a time
-8. **Flexible Context** - Use any keys that help your work
-
-This system enables sophisticated task management across multiple sessions with built-in intelligence, safety, and recovery capabilities.
+**"Empty" todo_list**: Run `todo_archive` to clear corrupted completed tasks  
+**Lost context keys**: Use pattern search instead of guessing names  
+**Slow operations**: Check context_stats, cleanup if >75 keys  
+**Parameter errors**: Verify data types (number vs string vs boolean)

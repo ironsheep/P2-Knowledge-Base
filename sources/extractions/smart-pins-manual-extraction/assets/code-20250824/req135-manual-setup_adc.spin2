@@ -1,0 +1,22 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  ADC_PIN = 20
+  ADC_MODE = P_ADC_1X | P_ADC
+
+PUB setup_adc()
+  pinstart(ADC_PIN, ADC_MODE, 0, 0)
+  
+PUB read_voltage() : millivolts
+  wypin(ADC_PIN, 1)           ' Trigger conversion
+  waitms(1)                   ' Conversion time
+  millivolts := (rdpin(ADC_PIN) * 3300) >> 14  ' 14-bit
+  
+PUB continuous_sample(samples, buffer_addr) | i
+  repeat i from 0 to samples-1
+    wypin(ADC_PIN, 1)
+    waitus(100)              ' 10ksps
+    long[buffer_addr][i] := rdpin(ADC_PIN)

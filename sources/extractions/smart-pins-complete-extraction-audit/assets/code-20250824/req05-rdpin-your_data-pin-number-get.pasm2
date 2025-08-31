@@ -1,0 +1,6 @@
+' Source: P2 SmartPins-220809 (Page 10)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+rdpin  your_data, #pin number     'get pin data
+Smart Pins use the IN flag to alert a cog, or cogs, to indicate that:

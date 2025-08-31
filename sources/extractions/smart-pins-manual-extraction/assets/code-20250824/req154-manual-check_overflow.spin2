@@ -1,0 +1,9 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+PUB check_overflow(pin) : overflow
+  overflow := rdpin(pin) == $FFFFFFFF or rdpin(pin) == 0
+  if overflow
+    wypin(pin, 0)     ' Reset counter

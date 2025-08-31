@@ -1,0 +1,49 @@
+{
+  "source_pdf": "sources/originals/P2 Documentation v35 - Rev B_C Silicon-Part3of5.pdf",
+  "extraction_summary": {
+    "total_images": 1,
+    "total_pages": 25,
+    "output_directory": "extracted_images_silicon_part3"
+  },
+  "images": [
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon-Part3of5_page15_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon-Part3of5.pdf",
+      "page_number": 15,
+      "image_index": 1,
+      "dimensions": "600\u00d7650",
+      "width": 600,
+      "height": 650,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_silicon_part3/P2 Documentation v35 - Rev B_C Silicon-Part3of5_page15_img01.png",
+      "xref": 61,
+      "extraction_status": "success",
+      "file_size_bytes": 35315,
+      "context": {
+        "caption": "62",
+        "nearby_text": [
+          {
+            "text": "When a cog wants to read or write the hub RAM, it must wait up to #cogs-1 clocks to access the initial RAM slice of interest.   Once that occurs, subsequent slices can be accessed on every clock, thereafter, for continuous reading or writing of 32-bit   longs.",
+            "distance": 4.2449951171875,
+            "position": "below"
+          },
+          {
+            "text": "62",
+            "distance": 42.48919677734375,
+            "position": "below"
+          },
+          {
+            "text": "To smooth out data flow for less than 32-bits-per-clock between hub RAM and the cog, each cog has a hub FIFO interface   which can be set for hub-RAM-read or hub-RAM-write operation. This FIFO interface allows hub RAM to be either sequentially   read or sequentially written in any combination of bytes, words, or longs, at any rate, up to one long per clock. No matter the   transfer frequency or the word size, the FIFO will ensure that the cog's reads or writes are all properly conducted from or to the   composite hub RAM.",
+            "distance": 55.2449951171875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "62"
+        ]
+      },
+      "suggested_tags": []
+    }
+  ]
+}

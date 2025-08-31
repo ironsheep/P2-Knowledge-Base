@@ -1,0 +1,6 @@
+' Source: P2 Spin2 Documentation v51-250425 (Page 29)
+' Extracted: 2025-08-24
+' Language: Spin2 | Type: Snippet
+
+PUB go() | i
+REPEAT i FROM 0 TO 9         'count from 0 to 9

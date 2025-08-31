@@ -1,0 +1,11 @@
+' Inline PASM for Performance-Critical Operations
+' Source: spin-interpreter-v51-complete-analysis.md
+' Category: PASM Integration
+' Description: Inline PASM integration pattern
+
+' Inline PASM for performance-critical operations
+org
+    mov    result, parameter1    ' Direct register operations
+    add    result, parameter2    ' No function call overhead  
+    ret                          ' Return to interpreter
+end

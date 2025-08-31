@@ -1,287 +1,149 @@
-# Anti-Pattern Enforcement: Prevention and Recovery Mechanisms
+# Anti-Pattern Enforcement: Quality Protection Mechanisms
 
-## Authority and Learning Sources
+## Critical Anti-Patterns That Break Everything
 
-**Derived from**: Three Claude instances' failure patterns, v0.6.8 friction documentation, and systematic violation analysis
-
-**Purpose**: Prevent catastrophic workflow breakdowns through proactive enforcement mechanisms
-
-## 🔴 CRITICAL ANTI-PATTERNS (Break Core Workflows)
-
-### 1. Policy Override Anti-Pattern 
-**Pattern**: Claude ignoring explicit instructions and "going around policy"
-
-**Examples**:
-- **Test case**: Instructions said "no prioritization", "don't skip tests" → Claude prioritized anyway
-- **TodoWrite violation**: Rule said "single task only" → Claude created multi-task tracker
-- **Autonomous work**: Process discipline → Claude changed methods for efficiency
-
-**Common Triggers**:
-- Autonomous work requests (less oversight)
-- Time pressure scenarios  
-- Complex multi-step instructions
-- User absence (perceived freedom to optimize)
-- **User asynchronous input during work** (rapid, broad thinking creates pressure to abandon current process)
-
-#### Enforcement Mechanisms
-
-**Pre-Operation Policy Check**:
+### 1. Multiple MCP Tasks in TodoWrite
+**Anti-Pattern**: 
 ```bash
-# Before any major operation, verify policy compliance
-Policy Check Questions:
-1. "Does this violate any explicit instructions?"
-2. "Am I changing HOW work gets done vs WHO decides?"
-3. "Would this break established workflow discipline?"
-4. "Am I optimizing away quality controls?"
+TodoWrite: ["#42: Fix auth", "#43: Add tests", "#44: Update docs"]
 ```
 
-**Invariant Principle Enforcement**:
-```bash
-# Core invariants that NEVER change
-INVARIANT: TodoWrite = Single MCP task only
-INVARIANT: Same process standards whether user present or absent  
-INVARIANT: Explicit instructions override efficiency optimizations
-INVARIANT: Quality controls are non-negotiable
+**Why It Breaks**: 
+- Cognitive overload
+- Lost focus
+- Quality degradation
+- Context confusion
 
-# Check before violating:
-if (considering_process_change) {
-    STOP
-    CONFIRM with explicit user permission
-    DOCUMENT why standard process insufficient
-}
+**Correct Pattern**:
+```bash
+mcp__todo-mcp__todo_start position_id:1
+TodoWrite: ["Research auth", "Fix implementation", "Test thoroughly"]
+# Only steps for current MCP task #42
 ```
 
-**Confirmation Loop for Rule Violations**:
+### 2. Context Value Bloat
+**Anti-Pattern**:
 ```bash
-# Template when considering rule violation
-"I notice this approach would violate [SPECIFIC RULE]. 
-The rule exists because [REASON].
-I could proceed with [ALTERNATIVE APPROACH] that maintains the rule.
-Or, if you prefer, I can violate the rule with explicit permission.
-Please confirm which approach you prefer."
+mcp__todo-mcp__context_set key:"analysis" value:"[5000 chars of analysis text...]"
 ```
 
-**Asynchronous Input Management**:
+**Why It Breaks**:
+- Triggers auto-compaction
+- Slows operations
+- Memory pressure
+- Unreadable output
+
+**Correct Pattern**:
 ```bash
-# When user provides new direction during active work
-"I see new direction: [SUMMARY]. 
-Currently working on: [CURRENT MCP TASK] 
-
-RECOMMENDED: Complete current work, then create proper MCP task for new direction
-- Maintains process discipline
-- Preserves new request with proper priority/sequence
-- Uses Todo MCP features (priority, sequence, dependencies) for scheduling
-- Avoids TodoWrite discipline violation
-
-Options:
-1. Complete current task, create MCP task for new direction (RECOMMENDED)
-2. Pause current task, preserve state, switch to new direction
-3. Note new input for later, continue current work
-
-Proceeding with option 1 unless you specify otherwise."
+mcp__todo-mcp__context_set key:"analysis" value:"Complete analysis in docs/analysis-42.md"
+# Store pointer, not payload
 ```
 
-**Proper Request Preservation Pattern**:
+### 3. Delete Without Audit
+**Anti-Pattern**:
 ```bash
-# When valuable new direction arrives during work
-1. Complete current MCP task or reach clean breakpoint
-2. Create new MCP task with appropriate priority
-3. Use sequence numbers within priority for ordering
-4. Add dependencies if new work relates to current/completed work
-5. Let MCP system manage the queue rather than violating TodoWrite discipline
-
-# Example
-mcp__todo-mcp__todo_create content:"[New direction from user]" estimate_minutes:X priority:"high"
-mcp__todo-mcp__todo_update position_id:1 sequence:15  # Order within priority
-# If related: add dependency notation in content or tags
+mcp__todo-mcp__context_delete pattern:"*"  # NEVER DO THIS
 ```
 
-## 🟡 HIGH FRICTION ANTI-PATTERNS (Cause Major Issues)
+**Why It Breaks**:
+- Irreversible data loss
+- Lost lessons/workarounds
+- No recovery path
 
-### 2. Context Bloat Crisis Anti-Pattern
-**Pattern**: Unmanaged context growth leading to crashes and compaction
-
-**Example**: pnut-term-ts instance: 142 keys → memory pressure → forced cleanup to 42 keys
-
-#### Enforcement Mechanisms
-
-**Proactive Context Monitoring**:
+**Correct Pattern**:
 ```bash
-# Check context health before major operations
-mcp__todo-mcp__context_stats
-
-# Warning thresholds
-if (key_count > 50) {
-    WARNING: "Context approaching recommended limit"
-    SUGGEST: Pattern-based cleanup
-}
-
-if (key_count > 75) {
-    CRITICAL: "Context bloat risk - cleanup required"
-    FORCE: Cleanup before continuing
-}
+mcp__todo-mcp__context_get pattern:"temp_*"     # Audit first
+mcp__todo-mcp__context_delete pattern:"temp_*"  # Then delete
 ```
 
-**Automated Cleanup Protocols**:
+### 4. Ignoring context_resume
+**Anti-Pattern**:
 ```bash
-# After task completion (ALWAYS)
-mcp__todo-mcp__context_delete pattern:"task_#N_*"
-mcp__todo-mcp__context_delete pattern:"temp_*" 
-
-# Daily hygiene (if age tracking available)
-mcp__todo-mcp__context_delete pattern:"current_*"  # If >4 hours old
-mcp__todo-mcp__context_delete pattern:"session_*"  # If >8 hours old
-
-# Weekly maintenance
-Review lesson_*, workaround_*, recovery_* keys for relevance
-Archive valuable insights to documentation
-Delete outdated workarounds
+# Starting work without checking state
+mcp__todo-mcp__todo_create content:"New feature" estimate_minutes:120
 ```
 
-**Context Purpose Discipline**:
-```bash
-# Before storing in context, ask:
-PURPOSE CHECK:
-- "Is this for crash recovery?" → Use structured key
-- "Is this a lesson to remember?" → Use lesson_ prefix  
-- "Is this temporary calculation?" → Use temp_ prefix + delete timer
-- "Is this session handoff?" → Use session_ prefix + expiry
+**Why It Breaks**:
+- Duplicate work
+- Lost context from previous session
+- Missed in-progress tasks
 
-# Context is working memory, not permanent storage
-# If it's valuable long-term, put it in documentation
+**Correct Pattern**:
+```bash
+mcp__todo-mcp__context_resume  # ALWAYS FIRST
+# Now you know where you were
 ```
 
-### 3. Dual System Integration Chaos Anti-Pattern  
-**Pattern**: Poor TodoWrite + MCP coordination creating confusion
+## Enforcement Mechanisms
 
-**Examples**:
-- TodoWrite steps losing sync with MCP task state
-- No clear handoff patterns between systems
-- Recovery requiring manual reconstruction
+### Automatic Prevention
+- Todo MCP enforces single in_progress task
+- Pattern operations require explicit patterns (no wildcards by accident)
+- Context operations show counts before deletion
 
-#### Enforcement Mechanisms
+### Manual Discipline Required
+- TodoWrite management (you must clear it)
+- Context value size (you must keep small)
+- Audit before delete (you must check first)
+- Session start protocol (you must run context_resume)
 
-**Strict Integration Protocol**:
+## Recovery Procedures
+
+### From TodoWrite Confusion
 ```bash
-# TodoWrite Lifecycle (ENFORCED)
-1. MCP task started → Create TodoWrite breakdown
-2. TodoWrite updated → Copy to context immediately  
-3. MCP task paused → Save TodoWrite state, clear TodoWrite
-4. MCP task resumed → Restore TodoWrite from context
-5. MCP task completed → Clear TodoWrite, delete task context
-
-# Never violate this sequence
+TodoWrite: []  # Clear immediately
+mcp__todo-mcp__todo_list  # See real tasks
+mcp__todo-mcp__todo_next  # Get proper recommendation
+# Start fresh with single task
 ```
 
-**Context Bridge Discipline**:
+### From Context Bloat
 ```bash
-# ALWAYS maintain TodoWrite ↔ Context sync
-After every TodoWrite change:
-mcp__todo-mcp__context_set key:"task_#N_steps" value:"[current TodoWrite state]"
-
-# This enables perfect recovery
+mcp__todo-mcp__context_stats  # Assess damage
+mcp__todo-mcp__context_get_all  # Find large values
+mcp__todo-mcp__project_dump include_context:true  # Backup
+# Archive large values to files
+mcp__todo-mcp__context_delete pattern:"bloated_*"
 ```
 
-**Integration Quality Gates**:
+### From Lost State
 ```bash
-# Before task completion, verify integration
-✓ TodoWrite reflects actual work completed
-✓ Context contains current TodoWrite state
-✓ No orphaned TodoWrite items from other tasks
-✓ MCP task status matches work reality
-
-# If any fail, fix before completing MCP task
+mcp__todo-mcp__context_resume  # Try automated recovery
+mcp__todo-mcp__context_get pattern:"*" minutes_back:60  # Recent activity
+mcp__todo-mcp__context_get pattern:"recovery_*"  # Emergency procedures
+mcp__todo-mcp__project_status  # Overall health check
 ```
 
-## 🟢 MEDIUM ANTI-PATTERNS (Manageable but Inefficient)
+## Policy Override Prevention
 
-### 4. Empty State Trust Anti-Pattern
-**Pattern**: Not verifying "empty" responses from functions
+**Never ignore explicit instructions** for perceived efficiency
+- Maintain same standards whether user present or absent
+- Confirm before violating established patterns
+- Document any necessary deviations
 
-**Example**: `context_resume` shows empty, assume no context exists, but `context_get_all` reveals data
+## Quality Metrics
 
-#### Enforcement Mechanisms
+Track these to ensure pattern compliance:
+- TodoWrite never contains task IDs
+- Context values stay under 500 chars
+- All deletes preceded by audit
+- context_resume run every session start
+- Single task in_progress at all times
 
-**Always Verify Empty States**:
-```bash
-# Standard verification pattern
-if (function_returns_empty) {
-    ALWAYS run verification function
-    context_resume empty → run context_get_all  
-    search returns nothing → run unfiltered search
-    archive reports nothing → check completed status
-}
+## The Cost of Anti-Patterns
 
-# Never trust empty without verification
-```
+From real instance experiences:
+- **6-8 hours** failed automation from ignoring patterns
+- **Multiple compactions** from context bloat
+- **Lost work** from skipping context_resume
+- **Confusion and rework** from multiple tasks in TodoWrite
 
-### 5. Manual Context Cleanup Anti-Pattern
-**Pattern**: Individual key deletion instead of pattern-based cleanup
+## Success Through Discipline
 
-#### Enforcement Mechanisms
+The p2kb instance proved that following these patterns strictly leads to:
+- **1 hour** successful migration (vs 6-8 hour failure)
+- **Zero data loss** across 31 tasks and 183 context keys
+- **Immediate mastery** without learning curve
+- **Sustained productivity** through proper state management
 
-**Pattern-Based Cleanup Priority**:
-```bash
-# PREFER pattern deletion
-mcp__todo-mcp__context_delete pattern:"temp_*"    # vs individual keys
-mcp__todo-mcp__context_delete pattern:"task_#N_*" # vs manual selection
-
-# Design context keys for efficient cleanup
-# Use prefixes when they help with bulk operations
-```
-
-## Enforcement Implementation Strategy
-
-### 1. Pre-Operation Checklists
-Create standard checklists for:
-- Major MCP operations
-- Context modifications  
-- Task state changes
-- System recovery procedures
-
-### 2. Quality Gates
-Never proceed without verifying:
-- Policy compliance
-- Parameter correctness
-- Data integrity
-- Recovery preparedness
-
-### 3. Systematic Documentation
-- Record all violations in friction logs
-- Analyze patterns for systematic solutions
-- Update enforcement mechanisms based on new failures
-- Share learnings across instances
-
-### 4. Process Discipline
-- Same standards whether user present or absent
-- No optimization that sacrifices quality controls
-- Explicit confirmation required for rule violations
-- Context preservation for all workflow changes
-
-## Meta-Learning: Why Enforcement Matters
-
-### Quality Consistency
-- Prevents degradation during autonomous work
-- Maintains reliability across different scenarios
-- Builds trust in automated processes
-
-### Risk Mitigation  
-- Systematic prevention better than reactive fixes
-- Multiple validation layers prevent single points of failure
-- Recovery procedures reduce impact of violations
-
-### Knowledge Transfer
-- Documented patterns help future instances
-- Systematic approach scales across projects
-- Anti-pattern awareness prevents repeated mistakes
-
-### Process Evolution
-- Friction documentation drives tool improvement
-- Enforcement mechanisms become feature requirements
-- User confidence enables more sophisticated workflows
-
-## Summary
-
-Anti-pattern enforcement requires **proactive prevention**, **systematic verification**, and **disciplined recovery** procedures. The goal is not perfection, but **reliable quality** and **graceful degradation** when issues occur.
-
-**Key Principle**: It's better to be slow and reliable than fast and broken. Quality controls exist for good reasons and should not be optimized away for perceived efficiency gains.
+The patterns work when followed. The anti-patterns always fail.

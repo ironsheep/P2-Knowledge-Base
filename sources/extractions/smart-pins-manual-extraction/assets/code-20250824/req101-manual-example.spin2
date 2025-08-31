@@ -1,0 +1,12 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+pinstart(pin, mode, x_value, y_value)  ' Configure and start
+pinclear(pin)                           ' Disable Smart Pin
+pinw(pin, value)                        ' Write to Y register
+pinr(pin)                               ' Read Z register
+pinfloat(pin)                          ' Float pin (high-Z)
+pinl(pin)                              ' Drive pin low
+pinh(pin)                              ' Drive pin high

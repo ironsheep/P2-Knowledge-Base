@@ -1,24 +1,37 @@
-# CLAUDE.md Mastery Insert: Todo MCP v0.6.8.1
+# Todo MCP Mastery Operations for CLAUDE.md
 
-## Deploy-Ready CLAUDE.md Section
+## DEPLOYMENT INSTRUCTIONS FOR CLAUDE
 
-**Purpose**: Immediate mastery-level operation, zero friction startup
+1. **FIRST**: Remove ALL existing Todo MCP content from CLAUDE.md:
+   - Delete any sections about Todo MCP v0.6.8, v0.6.8.1
+   - Remove all TodoWrite guidance
+   - Clear any context management patterns related to todo-mcp
+   - Keep only: Project info, build process, general rules
 
-**Installation**: Insert this section into any project's CLAUDE.md file
+2. **THEN**: Insert everything below the line into CLAUDE.md
+   - **CRITICAL PLACEMENT**: Insert IMMEDIATELY after project info
+   - **MUST BE EARLY**: Enables automatic recovery from auto-compaction
+   - This replaces all previous Todo MCP documentation
+   - Single source of truth, no version conflicts
+
+**WHY PLACEMENT MATTERS**: When Claude auto-compacts or conversation resets, having `context_resume` early in CLAUDE.md means Claude automatically recovers state without human intervention.
 
 ---
 
-## 🎯 Todo MCP v0.6.8.1 Mastery Operations
+## 🎯 CRITICAL: SESSION START PROTOCOL (EXECUTE IMMEDIATELY)
 
-### SESSION START PROTOCOL (ALWAYS FIRST)
+**MANDATORY ON SESSION START/RESUME:**
 ```bash
-mcp__todo-mcp__context_resume    # Primary recovery command
-mcp__todo-mcp__todo_list         # Current task state
-# Ready to continue with full context restoration
+mcp__todo-mcp__context_resume    # Primary recovery command - WHERE WAS I?
+# Provides: current tasks, context state, next recommendations
 ```
 
-### Dual System Strategy (IRON RULE)
-**MCP Tasks**: Persistent, session-spanning, permanent ID «#N»
+**ALWAYS execute this command FIRST before any other work.**
+
+## Todo MCP Mastery Operations
+
+### Dual System Strategy
+**MCP Tasks**: Persistent, session-spanning, permanent ID «#N»  
 **TodoWrite**: Current task breakdown only, cleared on completion
 
 ```bash
@@ -31,124 +44,76 @@ mcp__todo-mcp__todo_complete position_id:1
 TodoWrite: []  # Clear for next task
 ```
 
-**NEVER**: Multiple MCP task IDs in TodoWrite (quality degradation)
-
-### Core Parameter Patterns (v0.6.8.1)
+### Core Parameters
 ```bash
-# Most functions use position_id (interactive) or task_id (automation)
-mcp__todo-mcp__todo_start position_id:1
-mcp__todo-mcp__todo_pause position_id:1 reason:"Blocked"
-mcp__todo-mcp__todo_resume position_id:1
-
-# Dual-parameter functions (complete, tag_add, tag_remove)
-mcp__todo-mcp__todo_complete position_id:1       # OR task_id:"#22"
-mcp__todo-mcp__todo_tag_add position_id:1 tags:["urgent"]
+# Most functions use position_id OR task_id
+mcp__todo-mcp__todo_start position_id:1          # Interactive
+mcp__todo-mcp__todo_complete task_id:"#22"       # Automation
 
 # Critical data types
-estimate_minutes:60        # Number, never string
+estimate_minutes:60        # Number, not string
 priority:"high"           # lowercase: critical/high/medium/low/backlog
-force:true               # Boolean, never string
+force:true               # Boolean, not string
 ```
 
 ### Context Hygiene (40-Key Target)
+
+**VALUE SIZE matters more than key count**:
+- Keep values under 500 chars (pointers, not payloads)
+- Use patterns for bulk operations
+
 ```bash
-# Persistent context (KEEP)
-lesson_*, workaround_*, recovery_*, friction_*
+# Pattern-based cleanup (v0.6.8.2)
+mcp__todo-mcp__context_get pattern:"temp_*"        # Audit first
+mcp__todo-mcp__context_delete pattern:"temp_*"     # Then delete
 
-# Temporary context (DELETE after use)
-temp_*, current_*, session_*, task_#N_*
+# Temporal filtering
+mcp__todo-mcp__context_get pattern:"temp_*" minutes_back:60  # Last hour
 
-# Regular cleanup
-mcp__todo-mcp__context_delete pattern:"temp_*"
-mcp__todo-mcp__context_delete pattern:"task_#N_*"  # After task completion
+# Auto-compaction protection
+mcp__todo-mcp__context_set key:"task_#N_steps" value:"✓Step1|→Step2|Step3"
 ```
 
-### Data Safety (ALWAYS)
+### Quick Commands
 ```bash
-# SAFE archiving (preserves backup)
-mcp__todo-mcp__todo_archive
-
-# Complete backup before risky operations  
-mcp__todo-mcp__project_dump include_context:true
-
 # Recovery
-mcp__todo-mcp__project_restore file:"filename.json" mode:"replace"
-```
-
-### Anti-Pattern Prevention
-
-**Policy Override Prevention**:
-- Never ignore explicit instructions for perceived efficiency
-- Maintain same process standards whether user present or absent
-- Confirm before violating established workflow rules
-
-**TodoWrite Discipline**:
-- ONE MCP task breakdown only
-- Clear TodoWrite on task completion
-- Save TodoWrite state to context for crash recovery
-
-**Parameter Verification**:
-- Always verify function parameter requirements
-- Use correct data types (number vs string vs boolean)
-- Test new patterns before assuming they work
-
-### Quick Recovery Commands
-```bash
-mcp__todo-mcp__context_resume     # "I'm back" - primary recovery
+mcp__todo-mcp__context_resume     # "WHERE WAS I?"
 mcp__todo-mcp__todo_next          # Smart task recommendation
-mcp__todo-mcp__todo_archive       # Clean completed tasks
-mcp__todo-mcp__context_stats      # Context health check
+
+# Cleanup
+mcp__todo-mcp__todo_archive       # Archive completed tasks
+mcp__todo-mcp__context_delete pattern:"temp_*"    # Clean temporary
+
+# Backup
+mcp__todo-mcp__project_dump include_context:true  # Complete backup
 ```
 
-### Task Lifecycle (ENFORCED)
+### Task Lifecycle
 1. **Start** before work: `todo_start position_id:1`
 2. **Complete** after work: `todo_complete position_id:1`
 3. **Archive** when done: `todo_archive`
 4. Only ONE task `in_progress` at a time (auto-enforced)
 
-### Version Transition Protocol
-**Safe transition points** (preference order):
-1. Between sprints (optimal)
-2. After task completion + archive (safe)
-3. Between tasks (acceptable)
-4. Emergency with state preservation (risky)
+### Anti-Patterns to Avoid
+- ❌ Multiple MCP task IDs in TodoWrite
+- ❌ Large values in context (>500 chars)
+- ❌ Deleting without audit
+- ❌ Ignoring context_resume on start
 
-**Always backup before version changes**:
+### Optional: Filesystem MCP (If Available)
 ```bash
-mcp__todo-mcp__project_dump include_context:true
+# Check availability
+mcp__filesystem__list_directory path:"."
+
+# If available, prefer for file operations:
+mcp__filesystem__read_text_file     # Instead of cat
+mcp__filesystem__write_file         # Instead of echo
+# Benefits: No approval prompts, faster, structured output
 ```
 
----
-
-## Implementation Notes
-
-### For New Projects
-1. Install this section in CLAUDE.md
-2. Test basic operations
-3. Establish context hygiene routine
-4. Begin with dual-system workflow
-
-### For Existing Projects
-1. Archive existing todo-mcp content
-2. Preserve valuable existing patterns
-3. Gradually adopt new discipline
-4. Validate improvements before full commitment
-
 ### Deep Learning Resources
-For comprehensive understanding, study the mastery documentation:
-- `.todo-mcp/mastery/01_DUAL_SYSTEM_MASTERY_STRATEGY.md` - Complete workflow patterns
-- `.todo-mcp/mastery/02_CONTEXT_HYGIENE_MASTERY.md` - Context management excellence
-- `.todo-mcp/mastery/03_TODO_MCP_MASTERY_INTERFACE.md` - Complete technical reference
-- `.todo-mcp/mastery/04_ANTI_PATTERN_ENFORCEMENT.md` - Quality protection mechanisms
-- `.todo-mcp/mastery/05_PARAMETER_CONFUSION_ROOT_CAUSE_v0.6.8.1.md` - Technical analysis
-
-### Key Success Patterns
-- **Context bridge**: Save TodoWrite state to context for crash recovery
-- **Verification**: Always verify "empty" responses with context_get_all
-- **Process consistency**: Same quality standards under all conditions
-- **Recovery confidence**: Systematic procedures enable reliable workflows
-- **Pattern-based cleanup**: Use context_delete with patterns, not individual keys
-
----
-
-**This insert provides complete operational knowledge for immediate mastery-level Todo MCP usage. References above provide deep learning for comprehensive understanding.**
+Study `.todo-mcp/mastery/` documentation for comprehensive patterns:
+- `01_DUAL_SYSTEM_MASTERY_STRATEGY.md`
+- `02_CONTEXT_HYGIENE_MASTERY.md`
+- `03_TODO_MCP_MASTERY_INTERFACE.md`
+- `04_ANTI_PATTERN_ENFORCEMENT.md`

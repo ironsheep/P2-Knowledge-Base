@@ -1,0 +1,21 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  DUTY_PIN = 20
+  DUTY_MODE = P_NCO_DUTY | P_OE
+
+PUB setup_nco_duty()
+  pinstart(DUTY_PIN, DUTY_MODE, 0, 0)
+  
+PUB set_frequency_duty(freq_hz, duty_percent) | period, duty
+  period := clkfreq / freq_hz
+  duty := (duty_percent * $FFFF) / 100
+  wxpin(DUTY_PIN, period)
+  wypin(DUTY_PIN, duty << 16)
+  
+PUB phase_shift(degrees) | phase
+  phase := (degrees * $FFFF) / 360
+  wypin(DUTY_PIN, (rdpin(DUTY_PIN) & $FFFF0000) | phase)

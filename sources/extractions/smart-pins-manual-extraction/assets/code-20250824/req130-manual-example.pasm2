@@ -1,0 +1,23 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+state_init
+        mov     pa, ##P_STATE_TICKS
+        wrpin   pa, #20         ' Configure state counter
+        mov     pa, #1          ' Count high states
+        wxpin   pa, #20
+        dirh    #20
+        
+measure_high
+        wypin   zero, #20       ' Reset counter
+.wait   testp   #20 wc          ' Wait for state
+  if_nc jmp     #.wait
+        rdpin   high_time, #20  ' Read duration
+        
+zero    long    0
+high_time long  0

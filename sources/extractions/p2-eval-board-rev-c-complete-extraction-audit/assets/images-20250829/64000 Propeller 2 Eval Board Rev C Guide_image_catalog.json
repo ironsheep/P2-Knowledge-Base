@@ -1,0 +1,628 @@
+{
+  "source_pdf": "sources/originals/64000 Propeller 2 Eval Board Rev C Guide.pdf",
+  "extraction_summary": {
+    "total_images": 15,
+    "total_pages": 17,
+    "output_directory": "extracted_images_p2_eval_rev_c"
+  },
+  "images": [
+    {
+      "filename": "64000 Propeller 2 Eval Board Rev C Guide_page01_img01.png",
+      "source_pdf": "64000 Propeller 2 Eval Board Rev C Guide.pdf",
+      "page_number": 1,
+      "image_index": 1,
+      "dimensions": "760\u00d7760",
+      "width": 760,
+      "height": 760,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_p2_eval_rev_c/64000 Propeller 2 Eval Board Rev C Guide_page01_img01.png",
+      "xref": 15,
+      "extraction_status": "success",
+      "file_size_bytes": 942528,
+      "context": {
+        "caption": "Web  Store:  www.parallax.com",
+        "nearby_text": [
+          {
+            "text": "The  eight  I/O  Pin  Breakout  Edge  Headers  accommodate  the   \u00c3x\u00c7   pass-through  headers  on    eight  different  accessory  add-ons,  for  experimenting  with  HyperBus  memory,  audio,    video,  and  more.  See  the   Propeller   \u00c3   product  family  page   for  options.",
+            "distance": 21.0,
+            "position": "above"
+          },
+          {
+            "text": "Sales:  sales \u00b3par allax.com",
+            "distance": 32.9481201171875,
+            "position": "above"
+          },
+          {
+            "text": "Tutorials:  learn.parallax.com",
+            "distance": 40.811309814453125,
+            "position": "above"
+          },
+          {
+            "text": "Web  Store:  www.parallax.com",
+            "distance": 42.51129150390625,
+            "position": "above"
+          },
+          {
+            "text": "Tech  Support:  support \u00b3par allax.com",
+            "distance": 72.99102783203125,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "Web  Store:  www.parallax.com",
+          "Tutorials:  learn.parallax.com",
+          "Sales:  sales \u00b3par allax.com"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "64000 Propeller 2 Eval Board Rev C Guide_page01_img03.png",
+      "source_pdf": "64000 Propeller 2 Eval Board Rev C Guide.pdf",
+      "page_number": 1,
+      "image_index": 3,
+      "dimensions": "817\u00d7808",
+      "width": 817,
+      "height": 808,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_p2_eval_rev_c/64000 Propeller 2 Eval Board Rev C Guide_page01_img03.png",
+      "xref": 13,
+      "extraction_status": "success",
+      "file_size_bytes": 1372211,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "The  eight  I/O  Pin  Breakout  Edge  Headers  accommodate  the   \u00c3x\u00c7   pass-through  headers  on    eight  different  accessory  add-ons,  for  experimenting  with  HyperBus  memory,  audio,    video,  and  more.  See  the   Propeller   \u00c3   product  family  page   for  options.",
+            "distance": 21.0,
+            "position": "above"
+          },
+          {
+            "text": "Web  Store:  www.parallax.com",
+            "distance": 59.25,
+            "position": "above"
+          },
+          {
+            "text": "Tutorials:  learn.parallax.com",
+            "distance": 59.25,
+            "position": "above"
+          },
+          {
+            "text": "Sales:  sales \u00b3par allax.com",
+            "distance": 59.25,
+            "position": "above"
+          },
+          {
+            "text": "Tech  Support:  support \u00b3par allax.com",
+            "distance": 59.25,
+            "position": "above"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "64000 Propeller 2 Eval Board Rev C Guide_page04_img01.png",
+      "source_pdf": "64000 Propeller 2 Eval Board Rev C Guide.pdf",
+      "page_number": 4,
+      "image_index": 1,
+      "dimensions": "684\u00d7618",
+      "width": 684,
+      "height": 618,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_p2_eval_rev_c/64000 Propeller 2 Eval Board Rev C Guide_page04_img01.png",
+      "xref": 34,
+      "extraction_status": "success",
+      "file_size_bytes": 544562,
+      "context": {
+        "caption": "Fea WXU e  De V c U i SW i R n V      Read  the  full  explanation  of  each  labeled  feature  on  the  pages  that  follow  this  diagram.",
+        "nearby_text": [
+          {
+            "text": "Fea WXU e  De V c U i SW i R n V      Read  the  full  explanation  of  each  labeled  feature  on  the  pages  that  follow  this  diagram.",
+            "distance": 20.25,
+            "position": "above"
+          },
+          {
+            "text": "1.  P URSHOOHU   2  P2 ;8C4M64P   -  E QJLQHHULQJ    6DPSOH   (R HY   C   6LOLFRQ)      This  is  the   \u00c4r d  edition,  production-approved  Rev  C  Silicon  engineering  sample  of  the                            Propeller   \u00c3   microcontroller.  The  Propeller   \u00c3   has   \u00c9   cores,   \u00c6\u00c2\u00c3   KB  of  hub  RAM,  and   \u00c7\u00c5                                 Smart  I/O  pins.  See  the  draft   Propeller   \u00c3    \u00a5R ev  B/C  Silicon \u00a6   Google  Document   for  detailed                                information  about  this  device.  Be  aware  that  this  is  an  engineering  sample  and  not  a                               production  chip.         PNUT  P \u00c3   programming  software  version  v \u00c4\u00c5s   or  greater  recommended  :     https://drive.google.com/file/d/ \u00c2VBu\u00c6lolMkVPxPBr gwD \u00caMvG VzEslaYELu",
+            "distance": 22.1400146484375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "Fea WXU e  De V c U i SW i R n V      Read  the  full  explanation  of  each  labeled  feature  on  the  pages  that  follow  this  diagram."
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "64000 Propeller 2 Eval Board Rev C Guide_page05_img01.png",
+      "source_pdf": "64000 Propeller 2 Eval Board Rev C Guide.pdf",
+      "page_number": 5,
+      "image_index": 1,
+      "dimensions": "199\u00d7177",
+      "width": 199,
+      "height": 177,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_p2_eval_rev_c/64000 Propeller 2 Eval Board Rev C Guide_page05_img01.png",
+      "xref": 42,
+      "extraction_status": "success",
+      "file_size_bytes": 4975,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "3.  ACC  HDR   Male  Header      The   \u00c3-pin   ACC  HDR  power  breakout  header  is  used  to  connect  the  common    \u00c6V   USB  supply  directly  to  every   \u00c6V   pin  on  the  edge  expansion  headers.           The  P \u00c3-EV AL  board  is  supplied  with  the  jumper  located  on  the   \u00c6V   pin  only,    and  not  connected  to  the  ACC  HDR  pin.  This  is  the  \u201cOFF\u201d  position,  and    means  that  power  is  not  routed  from  the   \u00c6V   output  pin  to  each  of  the  edge    headers  via  the  ACC  HDR  pin.         To  enable  the   \u00c6V   supply  at  the  edge  headers,  move  the  jumper  across  both  pins  to  join    them  together.  Certain  accessory  boards  require  a   \u00c6V   supply,  such  as  the  USB  accessory    part-number   \u00c7\u00c5\u00c1\u00c1\u00c7-E S \u00a5b\u00a6.          For  experimentation,  the  jumper  could  be  removed  and  an  external  power  source  or    inline  current  meter  connected  here  instead.         N ]j e \u008f     If   \u00c6V    hkddls   i h    []j    g e fkig ed  a j    jhe   edge  heade gh\u008d    jhe   j kmdeg   ca [   be   g em ]p ed  f ]g     ha fe js\u0090",
+            "distance": 37.8900146484375,
+            "position": "below"
+          },
+          {
+            "text": "4.  PC   86B   P RUW        The  microUSB  PC  USB  port  can  perform  the  following  functions:     \u25cf Load  programs  from  a  computer  into  the  Propeller   \u00c3   microcontroller     \u25cf Support  serial-over-USB  communications  to  a  terminal  program  on  a  computer     \u25cf Supply   \u00c6   V  power  from  a  computer\u2019s  USB  port",
+            "distance": 47.8760986328125,
+            "position": "below"
+          },
+          {
+            "text": "2.  LDO   9IN   Male  Header      The   \u00c3-pin   LDO  VIN  power  breakout  header  is  used  to  connect  the  common   \u00c6V   USB  supply    to  the   \u00c4.\u00c4V   LDO  regulators  powering  VIO,  microSD  card,  and  flash  memory  chip.           In  normal  use  a  jumper  would  be  connected  across  the   \u00c3-pin   header.    For    experimentation,  the  jumper  could  be  removed  and  an  external  power    source  or  inline  current  meter  could  be  connected  here,  instead.         N ]j e \u008f   P ]q e g   MUST  be  c ][[ecj ed  a j    jhe   LDO  VIN  heade g   f ]g    jhe   P g]delleg                              P \u00c3    j]    ]deg a j e \u0090",
+            "distance": 59.51275634765625,
+            "position": "right"
+          },
+          {
+            "text": "During  active  development,  the  latest  version  and  history  of  PNUT  can  be  found  in  the   \u00c2s t                                  post  on  page  one  of  this  forum  thread  :   http://forums.parallax.com/discussion/ \u00c2\u00c8\u00c2\u00c2\u00ca\u00c7",
+            "distance": 60.79010009765625,
+            "position": "above"
+          },
+          {
+            "text": "Copyright   \u00b4   Parallax  Inc  .     Propeller   \u00c3   ES  Evaluation  Board  Rev  C   \u00a5\u00c7\u00c5\u00c1\u00c1\u00c1\u00a6      v \u00c3.\u00c1      \u00c3\u00ca/\u00c7/\u00c3\u00c1\u00c3\u00c1    Page   \u00c6   of   \u00c2\u00c8",
+            "distance": 66.98748779296875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "64000 Propeller 2 Eval Board Rev C Guide_page05_img02.png",
+      "source_pdf": "64000 Propeller 2 Eval Board Rev C Guide.pdf",
+      "page_number": 5,
+      "image_index": 2,
+      "dimensions": "198\u00d7177",
+      "width": 198,
+      "height": 177,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_p2_eval_rev_c/64000 Propeller 2 Eval Board Rev C Guide_page05_img02.png",
+      "xref": 44,
+      "extraction_status": "success",
+      "file_size_bytes": 5449,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "2.  LDO   9IN   Male  Header      The   \u00c3-pin   LDO  VIN  power  breakout  header  is  used  to  connect  the  common   \u00c6V   USB  supply    to  the   \u00c4.\u00c4V   LDO  regulators  powering  VIO,  microSD  card,  and  flash  memory  chip.           In  normal  use  a  jumper  would  be  connected  across  the   \u00c3-pin   header.    For    experimentation,  the  jumper  could  be  removed  and  an  external  power    source  or  inline  current  meter  could  be  connected  here,  instead.         N ]j e \u008f   P ]q e g   MUST  be  c ][[ecj ed  a j    jhe   LDO  VIN  heade g   f ]g    jhe   P g]delleg                              P \u00c3    j]    ]deg a j e \u0090",
+            "distance": 38.25,
+            "position": "above"
+          },
+          {
+            "text": "4.  PC   86B   P RUW        The  microUSB  PC  USB  port  can  perform  the  following  functions:     \u25cf Load  programs  from  a  computer  into  the  Propeller   \u00c3   microcontroller     \u25cf Support  serial-over-USB  communications  to  a  terminal  program  on  a  computer     \u25cf Supply   \u00c6   V  power  from  a  computer\u2019s  USB  port",
+            "distance": 47.8760986328125,
+            "position": "below"
+          },
+          {
+            "text": "3.  ACC  HDR   Male  Header      The   \u00c3-pin   ACC  HDR  power  breakout  header  is  used  to  connect  the  common    \u00c6V   USB  supply  directly  to  every   \u00c6V   pin  on  the  edge  expansion  headers.           The  P \u00c3-EV AL  board  is  supplied  with  the  jumper  located  on  the   \u00c6V   pin  only,    and  not  connected  to  the  ACC  HDR  pin.  This  is  the  \u201cOFF\u201d  position,  and    means  that  power  is  not  routed  from  the   \u00c6V   output  pin  to  each  of  the  edge    headers  via  the  ACC  HDR  pin.         To  enable  the   \u00c6V   supply  at  the  edge  headers,  move  the  jumper  across  both  pins  to  join    them  together.  Certain  accessory  boards  require  a   \u00c6V   supply,  such  as  the  USB  accessory    part-number   \u00c7\u00c5\u00c1\u00c1\u00c7-E S \u00a5b\u00a6.          For  experimentation,  the  jumper  could  be  removed  and  an  external  power  source  or    inline  current  meter  connected  here  instead.         N ]j e \u008f     If   \u00c6V    hkddls   i h    []j    g e fkig ed  a j    jhe   edge  heade gh\u008d    jhe   j kmdeg   ca [   be   g em ]p ed  f ]g     ha fe js\u0090",
+            "distance": 53.32525634765625,
+            "position": "right"
+          },
+          {
+            "text": "During  active  development,  the  latest  version  and  history  of  PNUT  can  be  found  in  the   \u00c2s t                                  post  on  page  one  of  this  forum  thread  :   http://forums.parallax.com/discussion/ \u00c2\u00c8\u00c2\u00c2\u00ca\u00c7",
+            "distance": 60.79010009765625,
+            "position": "above"
+          },
+          {
+            "text": "Copyright   \u00b4   Parallax  Inc  .     Propeller   \u00c3   ES  Evaluation  Board  Rev  C   \u00a5\u00c7\u00c5\u00c1\u00c1\u00c1\u00a6      v \u00c3.\u00c1      \u00c3\u00ca/\u00c7/\u00c3\u00c1\u00c3\u00c1    Page   \u00c6   of   \u00c2\u00c8",
+            "distance": 66.98748779296875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "64000 Propeller 2 Eval Board Rev C Guide_page07_img01.png",
+      "source_pdf": "64000 Propeller 2 Eval Board Rev C Guide.pdf",
+      "page_number": 7,
+      "image_index": 1,
+      "dimensions": "300\u00d7289",
+      "width": 300,
+      "height": 289,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_p2_eval_rev_c/64000 Propeller 2 Eval Board Rev C Guide_page07_img01.png",
+      "xref": 54,
+      "extraction_status": "success",
+      "file_size_bytes": 18679,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "Im d]gj a [j\u0089   I [   ca he    ]f   e rdegime[j a ji][    qijh    jhe   VDD   p]lj age  le p el   pia    jhe                            VDD  Male  Heade g    \u00a5erdlai[ed   bel ]q\u00a6\u008d    jhe   ab h]lkj e  ma rimkm    p]lj age   s]k                        hh]kld    hej    ]g   c ][[ecj    j]   P \u00c3   VDD  i h    \u00c3\u0090\u00c3V\u0090",
+            "distance": 9.0,
+            "position": "right"
+          },
+          {
+            "text": "this  case,  the  short-circuit  should  be  remedied,  and  then  the  power  supply  will  need  to                                 be  power-cycled  to  attempt  a  restart.  If  the  fault  remains,  then  the  VDD  regulator  will                               immediately  go  into  the  shut-down  and  locked  off  state  again.         The  VDD  power  supply  includes  Brown-out  Detection,  which  will  keep  the  P \u00c3   in  reset                               whilst  VDD  is  below  approximately   \u00c2.\u00c6V .",
+            "distance": 21.0,
+            "position": "above"
+          },
+          {
+            "text": "VDD  Male  Header     The   \u00c3-pin   VDD  male  header  is  used  to  connect  the  switching  regulator                          output  to  the  Propeller   \u00c3   VDD  input  pins.  In  normal  use  a  jumper  spans                             the   \u00c3-pin   VDD  header.    For  experimentation,  the  jumper  may  be                       removed  and  an  external  power  source  or  inline  current  meter                       connected  here  instead.   N ]j e \u008f   P ]q e g   MUST  be  c ][[ecj ed  a j    jhe   VDD                         heade g   f ]g    jhe   P g]delleg   P \u00c3    j]    ]deg a j e \u0090",
+            "distance": 29.799530029296875,
+            "position": "below"
+          },
+          {
+            "text": "Copyright   \u00b4   Parallax  Inc  .     Propeller   \u00c3   ES  Evaluation  Board  Rev  C   \u00a5\u00c7\u00c5\u00c1\u00c1\u00c1\u00a6      v \u00c3.\u00c1      \u00c3\u00ca/\u00c7/\u00c3\u00c1\u00c3\u00c1    Page   \u00c8   of   \u00c2\u00c8",
+            "distance": 57.0,
+            "position": "below"
+          },
+          {
+            "text": "7.  G URXQG    7HVW   P RVWV      The  four  ground  test  posts  are  suitable  for  test  clips  and  scope  probes;  one  is  positioned                                  at  each  edge  of  the  board.",
+            "distance": 57.75,
+            "position": "below"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "64000 Propeller 2 Eval Board Rev C Guide_page07_img02.png",
+      "source_pdf": "64000 Propeller 2 Eval Board Rev C Guide.pdf",
+      "page_number": 7,
+      "image_index": 2,
+      "dimensions": "241\u00d7160",
+      "width": 241,
+      "height": 160,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_p2_eval_rev_c/64000 Propeller 2 Eval Board Rev C Guide_page07_img02.png",
+      "xref": 56,
+      "extraction_status": "success",
+      "file_size_bytes": 5267,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "VDD  Male  Header     The   \u00c3-pin   VDD  male  header  is  used  to  connect  the  switching  regulator                          output  to  the  Propeller   \u00c3   VDD  input  pins.  In  normal  use  a  jumper  spans                             the   \u00c3-pin   VDD  header.    For  experimentation,  the  jumper  may  be                       removed  and  an  external  power  source  or  inline  current  meter                       connected  here  instead.   N ]j e \u008f   P ]q e g   MUST  be  c ][[ecj ed  a j    jhe   VDD                         heade g   f ]g    jhe   P g]delleg   P \u00c3    j]    ]deg a j e \u0090",
+            "distance": 3.674713134765625,
+            "position": "left"
+          },
+          {
+            "text": "Im d]gj a [j\u0089   I [   ca he    ]f   e rdegime[j a ji][    qijh    jhe   VDD   p]lj age  le p el   pia    jhe                            VDD  Male  Heade g    \u00a5erdlai[ed   bel ]q\u00a6\u008d    jhe   ab h]lkj e  ma rimkm    p]lj age   s]k                        hh]kld    hej    ]g   c ][[ecj    j]   P \u00c3   VDD  i h    \u00c3\u0090\u00c3V\u0090",
+            "distance": 33.0,
+            "position": "above"
+          },
+          {
+            "text": "7.  G URXQG    7HVW   P RVWV      The  four  ground  test  posts  are  suitable  for  test  clips  and  scope  probes;  one  is  positioned                                  at  each  edge  of  the  board.",
+            "distance": 51.3900146484375,
+            "position": "below"
+          },
+          {
+            "text": "The  pads  marked  XO  and  XI  above  the  oscillator  are  connected  directly  to  the  on-board                                oscillator  and  the  Propeller   \u00c3   XO   \u00a5X tal  Out,  physical  pin   \u00c6\u00c1\u00a6   and  XI   \u00a5X tal  In,  physical  pin   \u00c6\u00c2\u00a6",
+            "distance": 77.66510009765625,
+            "position": "below"
+          },
+          {
+            "text": "this  case,  the  short-circuit  should  be  remedied,  and  then  the  power  supply  will  need  to                                 be  power-cycled  to  attempt  a  restart.  If  the  fault  remains,  then  the  VDD  regulator  will                               immediately  go  into  the  shut-down  and  locked  off  state  again.         The  VDD  power  supply  includes  Brown-out  Detection,  which  will  keep  the  P \u00c3   in  reset                               whilst  VDD  is  below  approximately   \u00c2.\u00c6V .",
+            "distance": 77.9229736328125,
+            "position": "above"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "64000 Propeller 2 Eval Board Rev C Guide_page08_img01.png",
+      "source_pdf": "64000 Propeller 2 Eval Board Rev C Guide.pdf",
+      "page_number": 8,
+      "image_index": 1,
+      "dimensions": "300\u00d7289",
+      "width": 300,
+      "height": 289,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_p2_eval_rev_c/64000 Propeller 2 Eval Board Rev C Guide_page08_img01.png",
+      "xref": 64,
+      "extraction_status": "success",
+      "file_size_bytes": 18679,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "9.  A 8;   P RZHU   H HDGHU   P DGV    (C XVWRPHU   O SWLRQ)      Marked   \u00c6V   and  GND,  these   \u00c1.\u00c2\u201d   spaced  pads  connect  directly  to  the  AUX-USB   \u00c6V   power                                 rail  to  provide  a  convenient  power  source  for  an  external  fan  when  an   AUX-USB   power                                source  is  connected.         These  same   \u00c6V   and  GND  pads  could  also  be  used  to  connect  a  power  source  to  power  the                                      P \u00c3-EV AL  PCB,  instead  of  using  the   AUX-USB  port  .  In  this  case,  the  supply  voltage  range                                 can  be   \u00c5.\u00c6V   to   \u00c6.\u00c6V ,  and   MUST  NOT  e r ceed   \u00c6\u0090\u00c6V\u0089            When  used  to  provide  power  to  the  Eval  board,  the  Auxiliary  power  pads  are  protected                                 by  the  same   USB  protection  circuit   as  the  AUX  USB  Port;  refer  to  the   AUX  USB  Port                                      description  for  more  details.",
+            "distance": 9.0,
+            "position": "above"
+          },
+          {
+            "text": "Wa g[i[g\u0089   DO  NOT  c ][[ecj   a   d]q e g    h]kg ce   j]   b ]jh    jhe   USB   h]ck e j   a [d    \u00c6V                               dadh   a j    jhe    hame    jime\u0089   U hegh    q a [ji[g    j]    khe    jhih   f k[cji][alijs    hh]kld                            g efe g    j]    jhe   P \u00c3\u009fE S  E p al  B ]ag d   hchemajic   a [d    dg]ceed   a j    jheig    ]q[    gihk\u0090",
+            "distance": 9.0,
+            "position": "right"
+          },
+          {
+            "text": "10.  A 8;    86B   P RUW      The  microUSB  AUX  USB  Port  is  for  power  input  only,  and  is  provided  as  a  means  to  attach                                    a  high  current  power  supply  to  the  P \u00c3-EV AL  PCB.  A    \u00c3-Amp   rated  device  is  recommended.",
+            "distance": 27.3900146484375,
+            "position": "below"
+          },
+          {
+            "text": "Copyright   \u00b4   Parallax  Inc  .     Propeller   \u00c3   ES  Evaluation  Board  Rev  C   \u00a5\u00c7\u00c5\u00c1\u00c1\u00c1\u00a6      v \u00c3.\u00c1      \u00c3\u00ca/\u00c7/\u00c3\u00c1\u00c3\u00c1    Page   \u00c9   of   \u00c2\u00c8",
+            "distance": 62.25,
+            "position": "below"
+          },
+          {
+            "text": "pins.  Test  equipment  could  be  connected  to  these  pads,  or  an  alternative  clock  source                               connected  to  XI.  Note  that  the  P \u00c3-E S  Eval  board  has  a   \u00c3\u00c1   MHz  crystal,  and  the  clock                                    source  type  and  frequency  must  be  specified  in  the  user  code;  refer  to  the   Propeller   \u00c3                                   \u00a5R ev  B  Silicon \u00a6   Google  Document  .",
+            "distance": 63.0,
+            "position": "above"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "64000 Propeller 2 Eval Board Rev C Guide_page09_img01.png",
+      "source_pdf": "64000 Propeller 2 Eval Board Rev C Guide.pdf",
+      "page_number": 9,
+      "image_index": 1,
+      "dimensions": "510\u00d7397",
+      "width": 510,
+      "height": 397,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_p2_eval_rev_c/64000 Propeller 2 Eval Board Rev C Guide_page09_img01.png",
+      "xref": 77,
+      "extraction_status": "success",
+      "file_size_bytes": 17042,
+      "context": {
+        "caption": "Copyright   \u00b4   Parallax  Inc  .     Propeller   \u00c3   ES  Evaluation  Board  Rev  C   \u00a5\u00c7\u00c5\u00c1\u00c1\u00c1\u00a6      v \u00c3.\u00c1      \u00c3\u00ca/\u00c7/\u00c3\u00c1\u00c3\u00c1    Page   \u00ca   of   \u00c2\u00c8",
+        "nearby_text": [
+          {
+            "text": "11 D.   I/O  P LQ   B UHDNRXW   E GJH   H HDGHUV   ( ZLWKRXW   5 9                    RXWSXW)      There  are  two  edge  headers  which  do  not  have   \u00c6V   routed  to                           them.         The  header  for  P \u00c3\u00c5   to  P \u00c4\u00c2   is  shown  with  a  white  silk  square  for                             the  pin  beside  the  Vxxxx  pin.  This  unlabelled  pin  is                       unconnected,  but  could  be  used  for  connecting  a  user  signal  or                        voltage  to  a  user  accessory  board  or  prototype  board.",
+            "distance": 3.460693359375,
+            "position": "left"
+          },
+          {
+            "text": "11.  I/O  P LQ   B UHDNRXW   E GJH   H HDGHUV   ( ZLWK   5 9    RXWSXW)      Each  of  the   \u00c7\u00c5   smart  I/O  pins  is  connected  to  an  edge  header,                            in  specific  groups  of  eight.           Each  edge  header  also  provides  two  GND  connections,  a                    Vxxxx   output   pin   supplying   the   voltage   from   the                   corresponding   \u00c4.\u00c4   V  LDO  voltage  regulator,  described  above                  in   LDO  regulators  for  I/O  Pin  Voltage  ,  and  optionally  a   \u00c6   V                        output  connection   \u00a5c ontrolled  by  the   ACC  HDR  Male  Header  \u00a6.          There  are  two  special  usage  edge  header  banks  which  do  not                         supply  the   \u00c6V   output.  Refer  to  the  details  here:   \u00c2\u00c2a.   I/O  Pin                           Breakout  Edge  Headers   \u00a5without    \u00c6V   output \u00a6          DO  NOT  APPLY  VOLTAGE  TO  THE  V rrrr   Pi [\u008e   i j   i h   a   p]lj age   ]kjdkj\u0089   Be  a q a g e                              jhaj    h]me   I \u009bO    di[h   a g e  al h]   c ][[ecj ed   j]    ]jheg    degidheg al  ci g c kijh\u008e    hee    jhe                              I \u009bO   Pi [   A hhig[me[jh    hecji][\u0090",
+            "distance": 26.625,
+            "position": "above"
+          },
+          {
+            "text": "Copyright   \u00b4   Parallax  Inc  .     Propeller   \u00c3   ES  Evaluation  Board  Rev  C   \u00a5\u00c7\u00c5\u00c1\u00c1\u00c1\u00a6      v \u00c3.\u00c1      \u00c3\u00ca/\u00c7/\u00c3\u00c1\u00c3\u00c1    Page   \u00ca   of   \u00c2\u00c8",
+            "distance": 32.6248779296875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "Copyright   \u00b4   Parallax  Inc  .     Propeller   \u00c3   ES  Evaluation  Board  Rev  C   \u00a5\u00c7\u00c5\u00c1\u00c1\u00c1\u00a6      v \u00c3.\u00c1      \u00c3\u00ca/\u00c7/\u00c3\u00c1\u00c3\u00c1    Page   \u00ca   of   \u00c2\u00c8"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "64000 Propeller 2 Eval Board Rev C Guide_page09_img02.png",
+      "source_pdf": "64000 Propeller 2 Eval Board Rev C Guide.pdf",
+      "page_number": 9,
+      "image_index": 2,
+      "dimensions": "531\u00d7870",
+      "width": 531,
+      "height": 870,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_p2_eval_rev_c/64000 Propeller 2 Eval Board Rev C Guide_page09_img02.png",
+      "xref": 73,
+      "extraction_status": "success",
+      "file_size_bytes": 28667,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "11 D.   I/O  P LQ   B UHDNRXW   E GJH   H HDGHUV   ( ZLWKRXW   5 9                    RXWSXW)      There  are  two  edge  headers  which  do  not  have   \u00c6V   routed  to                           them.         The  header  for  P \u00c3\u00c5   to  P \u00c4\u00c2   is  shown  with  a  white  silk  square  for                             the  pin  beside  the  Vxxxx  pin.  This  unlabelled  pin  is                       unconnected,  but  could  be  used  for  connecting  a  user  signal  or                        voltage  to  a  user  accessory  board  or  prototype  board.",
+            "distance": 3.66412353515625,
+            "position": "below"
+          },
+          {
+            "text": "When  power  is  connected  to  AUX  USB,  this  will  automatically  take  priority  over  power                              from  the  lower  current  PC-USB  port.  The  AUX  USB  port  includes  protection  that  will                               disable  the  supply  if   \u00c3A   current  draw  is  exceeded.         When  a  short-circuit,  over-current  or  over-temperature  fault  condition  is  detected  by  the                         USB  protection  circuit  ,  power  will  be  disconnected \u00ab   and  the  corresponding  fault  LED,                           marked  by  a  warning  triangle  label,  will  light  until  the  fault  is  remedied.         \u00ab   N ]j e \u008f   P ]q e g   di hc][[ecji][    ]cckgh   a j    jhe   E p al  b ]ag d  USB   dg]j ec ji][   ci g c kij\u0090   The                             Auxiliary  power  header  pads   are  located  before  that  protection  circuit  because  they  are                             in  parallel  with  the  Aux  USB  Port  to  provide  both  a  power  input  and  output.  As  such,                                    when  power  disconnection  occurs  in  a  fault  condition,  the  Auxiliary  power  header  pads                            will  be  able  to  continue  sourcing  power.",
+            "distance": 24.0,
+            "position": "above"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "64000 Propeller 2 Eval Board Rev C Guide_page09_img03.png",
+      "source_pdf": "64000 Propeller 2 Eval Board Rev C Guide.pdf",
+      "page_number": 9,
+      "image_index": 3,
+      "dimensions": "300\u00d7289",
+      "width": 300,
+      "height": 289,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_p2_eval_rev_c/64000 Propeller 2 Eval Board Rev C Guide_page09_img03.png",
+      "xref": 75,
+      "extraction_status": "success",
+      "file_size_bytes": 18679,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "11 D.   I/O  P LQ   B UHDNRXW   E GJH   H HDGHUV   ( ZLWKRXW   5 9                    RXWSXW)      There  are  two  edge  headers  which  do  not  have   \u00c6V   routed  to                           them.         The  header  for  P \u00c3\u00c5   to  P \u00c4\u00c2   is  shown  with  a  white  silk  square  for                             the  pin  beside  the  Vxxxx  pin.  This  unlabelled  pin  is                       unconnected,  but  could  be  used  for  connecting  a  user  signal  or                        voltage  to  a  user  accessory  board  or  prototype  board.",
+            "distance": 31.1400146484375,
+            "position": "below"
+          },
+          {
+            "text": "11.  I/O  P LQ   B UHDNRXW   E GJH   H HDGHUV   ( ZLWK   5 9    RXWSXW)      Each  of  the   \u00c7\u00c5   smart  I/O  pins  is  connected  to  an  edge  header,                            in  specific  groups  of  eight.           Each  edge  header  also  provides  two  GND  connections,  a                    Vxxxx   output   pin   supplying   the   voltage   from   the                   corresponding   \u00c4.\u00c4   V  LDO  voltage  regulator,  described  above                  in   LDO  regulators  for  I/O  Pin  Voltage  ,  and  optionally  a   \u00c6   V                        output  connection   \u00a5c ontrolled  by  the   ACC  HDR  Male  Header  \u00a6.          There  are  two  special  usage  edge  header  banks  which  do  not                         supply  the   \u00c6V   output.  Refer  to  the  details  here:   \u00c2\u00c2a.   I/O  Pin                           Breakout  Edge  Headers   \u00a5without    \u00c6V   output \u00a6          DO  NOT  APPLY  VOLTAGE  TO  THE  V rrrr   Pi [\u008e   i j   i h   a   p]lj age   ]kjdkj\u0089   Be  a q a g e                              jhaj    h]me   I \u009bO    di[h   a g e  al h]   c ][[ecj ed   j]    ]jheg    degidheg al  ci g c kijh\u008e    hee    jhe                              I \u009bO   Pi [   A hhig[me[jh    hecji][\u0090",
+            "distance": 53.25,
+            "position": "right"
+          },
+          {
+            "text": "Copyright   \u00b4   Parallax  Inc  .     Propeller   \u00c3   ES  Evaluation  Board  Rev  C   \u00a5\u00c7\u00c5\u00c1\u00c1\u00c1\u00a6      v \u00c3.\u00c1      \u00c3\u00ca/\u00c7/\u00c3\u00c1\u00c3\u00c1    Page   \u00ca   of   \u00c2\u00c8",
+            "distance": 54.75,
+            "position": "below"
+          },
+          {
+            "text": "When  power  is  connected  to  AUX  USB,  this  will  automatically  take  priority  over  power                              from  the  lower  current  PC-USB  port.  The  AUX  USB  port  includes  protection  that  will                               disable  the  supply  if   \u00c3A   current  draw  is  exceeded.         When  a  short-circuit,  over-current  or  over-temperature  fault  condition  is  detected  by  the                         USB  protection  circuit  ,  power  will  be  disconnected \u00ab   and  the  corresponding  fault  LED,                           marked  by  a  warning  triangle  label,  will  light  until  the  fault  is  remedied.         \u00ab   N ]j e \u008f   P ]q e g   di hc][[ecji][    ]cckgh   a j    jhe   E p al  b ]ag d  USB   dg]j ec ji][   ci g c kij\u0090   The                             Auxiliary  power  header  pads   are  located  before  that  protection  circuit  because  they  are                             in  parallel  with  the  Aux  USB  Port  to  provide  both  a  power  input  and  output.  As  such,                                    when  power  disconnection  occurs  in  a  fault  condition,  the  Auxiliary  power  header  pads                            will  be  able  to  continue  sourcing  power.",
+            "distance": 55.5,
+            "position": "above"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "64000 Propeller 2 Eval Board Rev C Guide_page10_img01.png",
+      "source_pdf": "64000 Propeller 2 Eval Board Rev C Guide.pdf",
+      "page_number": 10,
+      "image_index": 1,
+      "dimensions": "543\u00d7417",
+      "width": 543,
+      "height": 417,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_p2_eval_rev_c/64000 Propeller 2 Eval Board Rev C Guide_page10_img01.png",
+      "xref": 85,
+      "extraction_status": "success",
+      "file_size_bytes": 19912,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "The  header  for  P \u00c6\u00c7   to  P \u00c7\u00c4   has  the  RES  pin  beside  the  V \u00c6\u00c7\u00c7\u00c4     pin.  The  RES  pin  is  active  low,  and  is  connected  to  the  Propeller    \u00c3   microcontroller  RESn  circuit.  Momentarily  set  this  pin  low  to    reset  the  Propeller.  This  header  is  ideal  for  connecting  to  a  WiFi    module   \u00a5such   as  the  Parallax  WX  Module  :    https://www.parallax.com/product/ \u00c4\u00c3\u00c5\u00c3\u00c1s  \u00a6,   in  order  to    program  the  Propeller   \u00c3   wirelessly.         Ti d\u008f   When  using  wireless  programming  it  is  recommended  to    switch  off  the  USB  Reset  \u201cUSB  RES\u201d  feature  at  the   Mode    Selection  Switch  Bank  .",
+            "distance": 5.198028564453125,
+            "position": "left"
+          },
+          {
+            "text": "12.  LED  B DQN      This  bank  of  eight  LEDs  is  connected  via  an   LED  Buffer   to  pins  P \u00c6\u00c7   through  P \u00c7\u00c4.   The                                     buffer  isolates  the  LEDs  so  they  will  not  influence  the  I/O  signals.  P \u00c6\u00c7-P\u00c7\u00c4   LEDs  are                                 connected  to  the  USB  data  and  P \u00c3   memory  signals   \u00a5see    I/O  Pin  Assignments  \u00a6   so  these                                 LEDs  will  be  especially  active  at  power-up  and  after  a  reset.         After  start-up,  some  of  the  LEDs  can  be  used  as  user-programmable  indicators.  For                             example,  P \u00c6\u00c7   and  P \u00c6\u00c8   are  free  by  default.",
+            "distance": 74.639892578125,
+            "position": "below"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "64000 Propeller 2 Eval Board Rev C Guide_page13_img01.png",
+      "source_pdf": "64000 Propeller 2 Eval Board Rev C Guide.pdf",
+      "page_number": 13,
+      "image_index": 1,
+      "dimensions": "414\u00d7340",
+      "width": 414,
+      "height": 340,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_p2_eval_rev_c/64000 Propeller 2 Eval Board Rev C Guide_page13_img01.png",
+      "xref": 103,
+      "extraction_status": "success",
+      "file_size_bytes": 47318,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "Power  for  the  microSD  card  socket  is  supplied  by  the   Common  LDO  regulator  ,  which  has                                an  optional  connection  to  P \u00c6\u00c8   that  would  allow  user  code  to  toggle  power  on/off.  Refer                                 to  the  Common  LDO  regulator  section  for  more  details.",
+            "distance": 30.75,
+            "position": "above"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "64000 Propeller 2 Eval Board Rev C Guide_page14_img01.png",
+      "source_pdf": "64000 Propeller 2 Eval Board Rev C Guide.pdf",
+      "page_number": 14,
+      "image_index": 1,
+      "dimensions": "1527\u00d71513",
+      "width": 1527,
+      "height": 1513,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_p2_eval_rev_c/64000 Propeller 2 Eval Board Rev C Guide_page14_img01.png",
+      "xref": 109,
+      "extraction_status": "success",
+      "file_size_bytes": 545684,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "This  illustration  identifies  the  physical  pins  on  the  Propeller   \u00c3.   See  the  draft   Propeller   \u00c3                                 \u00a5R ev  B/C  Silicon \u00a6   Google  Document   for  detailed  information  about  the  device.  In  this                             document,  see  the   I/O  Pin  Assignments   section  for  details  on  how  they  are  used  on  the                                   Propeller   \u00c3   ES  Evaluation  Board.",
+            "distance": 3.75,
+            "position": "above"
+          },
+          {
+            "text": "Copyright   \u00b4   Parallax  Inc  .     Propeller   \u00c3   ES  Evaluation  Board  Rev  C   \u00a5\u00c7\u00c5\u00c1\u00c1\u00c1\u00a6      v \u00c3.\u00c1      \u00c3\u00ca/\u00c7/\u00c3\u00c1\u00c3\u00c1    Page   \u00c2\u00c5   of   \u00c2\u00c8",
+            "distance": 82.5,
+            "position": "below"
+          },
+          {
+            "text": "P URS elle U   2  Ph \\V ical  Pin V",
+            "distance": 88.85852813720703,
+            "position": "above"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "64000 Propeller 2 Eval Board Rev C Guide_page17_img01.png",
+      "source_pdf": "64000 Propeller 2 Eval Board Rev C Guide.pdf",
+      "page_number": 17,
+      "image_index": 1,
+      "dimensions": "1565\u00d71600",
+      "width": 1565,
+      "height": 1600,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_p2_eval_rev_c/64000 Propeller 2 Eval Board Rev C Guide_page17_img01.png",
+      "xref": 125,
+      "extraction_status": "success",
+      "file_size_bytes": 580596,
+      "context": {
+        "caption": "PCB  Dimen V i R n V",
+        "nearby_text": [
+          {
+            "text": "PCB  Dimen V i R n V",
+            "distance": 20.60852813720703,
+            "position": "above"
+          },
+          {
+            "text": "Re Y i V i R n  Hi VWRU\\          Version   \u00c2.\u00c1:    Please  see  the  version   \u00c2.\u00c1   document  for  Rev  A  PCB  support  .       Version   \u00c3.\u00c1:   Supports  the  P \u00c3-E S  Rev  B  silicon  and  the  Eval  Board  Rev  B.     Version   \u00c4.\u00c1:   Supports  the  P \u00c3-E S  Rev  C  silicon  and  the  Eval  Board  Rev  C.",
+            "distance": 22.27227783203125,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "PCB  Dimen V i R n V"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    }
+  ]
+}

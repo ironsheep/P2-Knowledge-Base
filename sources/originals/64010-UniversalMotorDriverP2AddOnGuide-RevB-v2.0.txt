@@ -1,0 +1,808 @@
+Web Store: www.parallax.com
+
+Sales: (888) 512-1024
+
+Tutorials: learn.parallax.com
+
+Educator Hotline: (916) 701-8625
+
+Sales: sales@parallax.com
+
+Office: (916) 624-8333
+
+Tech Support: support@parallax.com
+
+Fax: (916) 624-8003
+
+Universal Motor Driver P2 Add-on Board (#64010)
+The Universal Motor Driver P2 Add-on Board from Parallax was designed as an accessory for the
+Parallax Propeller 2 8-core microcontroller. It is compatible with standard P2 dual-port accessory
+headers found on the Propeller 2 Evaluation Board (#64000) and P2 Edge Module Mini-Breakout
+(#64019) or Breadboard (#64020).
+This 4-phase motor driver add-on supports
+experimentation and development with many
+motor types, including brushed and brushless
+motors. For example, it could support a single
+brushless 3-phase Hub Brushless DC (BDLC)
+motor, a 4-phase stepper motor, two brushed
+bi-directional DC motors or four brushed
+uni-directional DC motors. With a 3-phase
+motor, both sinusoidal 180° and classic 120°
+drive techniques are supported.
+The open design and standard 0.1” connectors
+allow the Universal Motor Driver P2 Add-on
+Board to be used with other microcontrollers as
+well.
+
+Features
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+Universal 4-phase motor driver using four UCC27211D MOSFET drivers
+Phases can be controlled individually or in groups to support many motor types including
+single or 3-phase motors, single/dual DC motors or 4-phase stepper motors
+Sinusoidal 180° or classic 120° drive topology
+Each phase allows individual control of High and Low sides
+High and Low sides protected against simultaneous activation
+On-board Hall effect sensor connector for motor control feedback
+Common current feedback signal for motor control and over-current protection
+Independent voltage feedback signals for each phase, for motor control and
+over-voltage protection
+Under-voltage lockout protection built into MOSFET drivers
+High-current spring terminal connectors for quick and robust connections to high-current
+motors
+Two grounded 0.125 inch (3.2 mm) mounting holes
+
+Specifications
+●
+●
+●
+●
+
+Input voltage range: 6–40 VDC
+Maximum continuous supply current: 20A
+Maximum surge motor current: 60A
+P2 board connector: dual 2x6 pass-thru headers with 0.1" spacing
+
+Copyright © Parallax Inc.
+
+Universal Motor Driver P2 Add-on Board (#64010)
+
+v2.0 5/5/2022 Page 1 of 12
+
+●
+●
+●
+
+●
+●
+
+Power and motor cable connection method: Push-in spring connection, nominal 2.5 mm2
+Communication Interface: 3.3V TTL, PWM
+VIN and Output Channel Spring Terminal Blocks: 32A 400V rated
+○ Conductor cross section solid : 0.2 mm² ... 4 mm²
+○ Conductor cross section AWG : 24 ... 12
+○ Stripping length : 10 mm
+Operating temperature range: -40 to +185 °F (-40 to +85 °C)
+PCB dimensions: 2.75 x 2.75 in (70 x 70 mm)
+
+Quick Start Guide
+WARNING: Ensure the motor controller PCB is not installed on a
+conductive surface which may short out the high-current pins on the
+bottom of the board!
+WARNING: Use of an inline fuse close to the VIN terminal is highly
+recommended when operating from a power source without fault
+protection, such as from a battery pack!
+WARNING: Only connect to a power source that is capable of providing the
+current requirements of your motors! An overloaded power source might
+drop voltage in a way that risks damage to the motor MOSFETs or drivers.
+
+The P2 Edge Mini Breakout Board (#64019) is used in the simple wiring diagrams below. For
+projects that require more space, more headers for additional add-ons, or a breadboarding
+area, we recommend the P2 Edge Module Breadboard (#64020).
+
+Copyright © Parallax Inc.
+
+Universal Motor Driver P2 Add-on Board (#64010)
+
+v2.0 5/5/2022 Page 2 of 12
+
+Typical connections for Motor Mount and Wheel Kit - SKU 28962
+Parts required:
+●
+●
+●
+●
+●
+
+Motor Mount and Wheel Kit - Aluminum (#28962)
+Universal Motor Controller P2 Add-on Board (#64010)
+P2 Edge Mini Breakout Board (#64019)
+P2 Edge module (#P2-EC), not shown
+Prop Plug (#32201), not shown
+
+Diagram notes:
+●
+●
+●
+●
+●
+
+Fuse and power cables shown at VIN are not supplied.
+Fuse is optional, but recommended when operating the motor controller from a battery
+power source.
+P2 Edge module and P2 Edge Mini Breakout Board board power source not shown.
+A Prop Plug (not shown) is typically required for programming the P2 Edge module.
+Motors, motor power cables, motor encoders and encoder cables are included in the
+Motor Mount and Wheel Kit (#28962).
+
+Copyright © Parallax Inc.
+
+Universal Motor Driver P2 Add-on Board (#64010)
+
+v2.0 5/5/2022 Page 3 of 12
+
+Typical connections for 6.5" Hub Motor with Encoder - SKU 27860
+The following instructions are for a single Hub Motor. To operate two Hub Motors. add a second
+Universal Motor Driver P2 Add-on Board to the unused headers on the P2 Edge Mini Breakout
+Board.
+Parts Required:
+●
+●
+●
+●
+●
+
+6.5" Hub Motor with Encoder (#27860)
+Universal Motor Driver P2 Add-on Board (#64010)
+P2 Edge Mini Breakout Board (#64019)
+P2 Edge module (#P2-EC), not shown
+Prop Plug (#32201), not shown
+
+Diagram Notes:
+●
+●
+●
+●
+●
+
+Fuse and power cables shown at VIN are not supplied.
+Fuse is optional, but recommended when operating the motor controller from a battery
+power source.
+P2 Edge module and P2 Edge Mini Breakout Board board power source not shown.
+A Prop Plug (not shown) is typically required for programming the P2 Edge module.
+Hall sensor connector is included with the 6.5" Hub Motor with Encoder (#27860).
+
+Copyright © Parallax Inc.
+
+Universal Motor Driver P2 Add-on Board (#64010)
+
+v2.0 5/5/2022 Page 4 of 12
+
+Feature Descriptions
+
+1. Dual 2x6 way P2 Accessory Headers
+The 2x6 way accessory headers follow the standard P2 header pinout, and are ready to stack
+on top of the P2 Eval Board or any of the P2 Edge module breakout boards that include dual
+accessory header locations.
+The headers are standard 0.1” pitch, making this add-on board a convenient rapid solution for
+integration in custom user applications.
+
+Copyright © Parallax Inc.
+
+Universal Motor Driver P2 Add-on Board (#64010)
+
+v2.0 5/5/2022 Page 5 of 12
+
+3.3V
+
+VIO3V3
+
+5V
+
+Not Connected
+
+PWM_XH
+
+15
+
+14
+
+PWM_XL
+
+PWM_WH
+
+13
+
+12
+
+PWM_WL
+
+PWM_VH
+
+11
+
+10
+
+PWM_VL
+
+PWM_UH
+
+9
+
+8
+
+PWM_UL
+
+GND
+
+GND
+
+GND
+
+GND
+
+3.3V
+
+VIO3V3
+
+5V
+
+Not Connected
+
+HALL_W
+
+7
+
+6
+
+HALL_V
+
+HALL_U
+
+5
+
+4
+
+SENSE_COMMON
+
+SENSE_X
+
+3
+
+2
+
+SENSE_W
+
+SENSE_V
+
+1
+
+0
+
+SENSE_U
+
+GND
+
+GND
+
+GND
+
+GND
+
+2. 12 V Power Supply
+
+The 12 V power supply is based on a switching boost regulator and is capable of delivering up
+to 50 mA to the MOSFET driver circuits. Power to the boost circuit comes from the VIO3V3 pin
+on the upper P2 Accessory Header.
+
+3. 5 V Power Supply
+The 5 V power supply provides power to the HALL/INPUTS header, and is available for user
+attached sensors. This onboard power supply is based on a switching boost regulator and is
+capable of delivering up to 100 mA. Power to the boost circuit comes from the VIO3V3 pin on
+the lower P2 Accessory Header.
+
+4. MOSFET Drivers
+This board has four Half-Bridge MOSFET drivers, part number Texas Instruments UCC27211D.
+One driver controls each of the 4 output channels labeled: U, V, W, X.
+The drivers allow independent control of the high and low channels, and there is an added logic
+buffer before each MOSFET driver to ensure that the high side MOSFET can only be turned on
+when the low side MOSFET is turned off. The independent control ensures compatibility with a
+wide range of loads, including brushed and brushless motors.
+
+Copyright © Parallax Inc.
+
+Universal Motor Driver P2 Add-on Board (#64010)
+
+v2.0 5/5/2022 Page 6 of 12
+
+The UCC27211D MOSFET driver has internal protection against large negative spikes, at least
+down to -10V on the HS pin (high-side feedback). To further protect the MOSFET Drivers
+against negative voltage spikes there is a fast-acting reversed-biased diode between each
+common switching node and ground. The protection against large negative spikes makes this
+motor controller particularly suitable for driving large BLDC type hub motors.
+TIP: Even though the MOSFET Drivers feature a fast ~20ns propagation delay and typically
+7.2ns rise, 5.5ns fall time, the MOSFETs also require some time to respond to the control signal
+from the MOSFET Drivers. This means it is possible, for fractions of a second during fast
+switching, that both high and low MOSFETs might be partially on and causing momentary
+overcurrent. Therefore, the recommended minimum pause (deadtime) is 250 ns after switching
+off one MOSFET and before switching on the other MOSFET in the same channel. Using a
+deadtime pause is standard practice for Half-Bridge motor controllers, and ensures the highest
+efficiency and lowest power losses, including lower current-surge requirements from the power
+source and overall cooler operation of the motor controller PCB.
+
+5. MOSFETs
+Each of the four channels have two high-power N-Channel MOSFETs in a common Half-Bridge
+arrangement. The MOSFETs have large internal body diodes to provide maximum protection
+from back EMF. Refer to the manufacturer datasheet for full details, Micro Commercial
+MCAC85N06Y-TP.
+The MOSFETs are controlled by the MOSFET Drivers, typically with a PWM signal driving the
+high and low sides on/off alternately for a brushless motor, or asserting the MOSFETs either on
+or off when driving a brushed DC motor.
+Refer to the MOSFET Drivers Tip above about minimum deadtime when designing the code to
+run the motor controller.
+
+6. VIN and Motor Channel Connectors
+The large spring-operated terminal block connectors are convenient and quick to use. They
+have a nominal 32 A rating and accept solid or flexible conductors in the range 0.2 mm²–4mm²
+(24–12 AWG). Recommended conductor stripping length is 10 mm.
+WARNING: Use of an inline fuse close to the VIN terminal is highly
+recommended when operating from a power source without fault
+protection, such as from a battery pack !
+WARNING: Always use VIN and Motor channel cables that are rated for
+the maximum total power requirements of your installation.
+WARNING: Ensure your power source is capable of providing the
+maximum voltage and current requirements of your motors, including
+during startup and when under full load. Surge current requirements are
+significantly higher at start-up and when motors change direction!
+Copyright © Parallax Inc.
+
+Universal Motor Driver P2 Add-on Board (#64010)
+
+v2.0 5/5/2022 Page 7 of 12
+
+7. Hall Effect or General Purpose Feedback Inputs
+The HALL/INPUTS header is populated with a standard 5 way 0.1” male header, and is typically
+used to connect the Hall effect sensor cable of a 3-phase Hub (BDLC) type motor, such as our
+Hub Motor #27860.
+The 5V output is provided to power a low current hall sensor (or similar sensor up to 100 mA),
+and the three signal pins (U, V, W) are each pulled up to 3.3 V via a 3.9 kΩ resistor and are
+each connected to the P2 Accessory Header via a series 3.9 kΩ resistor to protect the
+microcontroller from 5 V signals.
+
+8. Current Sense Resistor with Amplifier
+Total MOSFET load current can be measured with the current sense resistor, and the data is
+typically used to determine system load and provide overcurrent protection.
+This board uses a low-side sensing technique with a 3 mΩ current sense resistor connected
+between common MOSFET GND and common system GND.
+A dedicated current sense amplifier beside the shunt resistor (INA180B2) boosts the signal with
+a gain of 50 V/V. Refer to the Texas Instruments INAx180 datasheet, and in particular the
+section “Precise Low-Side Current Sensing” to help with interpreting the current sense readings.
+In addition the same datasheet has an elaborated Typical Application for Low-Side Sensing in
+section 9.2.
+The voltage level can be measured across this sense resistor and converted to current with this
+formula:
+Vsense = 3mOhms * 50V/V gain = 150mV per Amp (mV/A)
+This can be simplified as: Isense = Vsense / 150
+Example: If the voltage measured at Sense Common (Vsense) = 1500mV then the MOSFET
+current would be 1500mV / 150 (mV/A) = 10 Amp.
+Refer to the schematic diagram available on the product page downloads for more information.
+
+9. Mounting Holes
+The two plated mounting holes are 3.2 mm in diameter and connected to the board GND
+(ground) plane.
+If desired, with the board plugged into a P2 Eval or P2 Edge breakout with rubber feet, use 3
+mm diameter standoffs with 8 mm or 9 mm length to provide support for the add-on board, or
+to mount it to a base.
+
+Copyright © Parallax Inc.
+
+Universal Motor Driver P2 Add-on Board (#64010)
+
+v2.0 5/5/2022 Page 8 of 12
+
+Resources and Downloads
+Check for the latest version of this document, free software, and example programs from the
+Universal Motor Driver P2 Add-on Board product page. Go to www.parallax.com and search
+64010.
+
+Specifications
+Symbol
+
+Quantity
+
+Minimum
+
+Typical
+
+Maximum
+
+Units
+
+VIN
+
+Supply Voltage
+
+6
+
+-
+
+40
+
+V
+
+Ic
+
+Continuous current all phases
+
+20
+
+A
+
+Is
+
+Surge current all phases
+
+Pmax*
+
+Continuous power all phases
+
+60
+
+A
+
+800
+
+W
+
+Icp
+
+Continuous current per phase
+
+20
+
+A
+
+Icpp
+
+Pulse current per phase
+
+60
+
+A
+
+IO+[0…15]
+
+Logic Voltage
+
+0
+
+3.3
+
+V
+
+PWM LO
+
+Low-Level Input Voltage
+
+-
+
+0.8
+
+V
+
+PWM HI
+
+High-Level Input Voltage
+
+2.2
+
+-
+
+-
+
+V
+
+PWM Q
+
+PWM Frequency
+
+20
+
+50
+
+kHz
+
+240
+
+-
+
+*Typical rating based on 50% duty cycle without external cooling. Maximum rating based on 50% duty cycle with external cooling.
+
+Absolute Maximum Ratings
+Symbol
+
+Quantity
+
+Maximum
+
+Units
+
+VIN
+
+Supply Voltage
+
+50
+
+V
+
+VIO3V3
+
+Logic Supply Voltage
+
+3.3
+
+V
+
+IO+[0…15]
+
+Logic Voltage
+
+3.3
+
+V
+
+Pin Definitions for the P2 Dual Accessory Header Block 15–8
+Pin
+Offset
+
+Pin
+Label
+
+15
+
+Pin Function
+
+Pin Description
+
+PWM_XH
+
+PWM input for X channel
+High-side MOSFET driver.
+
+14
+
+PWM_XL
+
+PWM input for X channel
+Low-side MOSFET driver.
+
+The PWM H (high) and PWM L (low) pins control the
+MOSFET drivers on each channel. Signal logic is
+active high.
+
+13
+
+PWM_WH
+
+PWM input for W channel
+High-side MOSFET driver.
+
+12
+
+PWM_WL
+
+PWM input for W channel
+Low-side MOSFET driver.
+
+11
+
+PWM_VH
+
+PWM input for V channel
+High-side MOSFET driver.
+
+Copyright © Parallax Inc.
+
+When both signals are driven high, PWM L has
+priority. PWM H will only operate the high MOSFET
+when PWM L is turned off (driven low).
+Both the H and L pins have pull-down resistors to
+keep the signal default state low and ensure the
+MOSFETs remain off if the PWM signal is
+unconnected or floating.
+
+Universal Motor Driver P2 Add-on Board (#64010)
+
+v2.0 5/5/2022 Page 9 of 12
+
+10
+
+PWM_VL
+
+PWM input for V channel
+Low-side MOSFET driver.
+
+9
+
+PWM_XH
+
+PWM input for X channel
+High-side MOSFET driver.
+
+8
+
+PWM_XL
+
+PWM input for X channel
+Low-side MOSFET driver.
+
+Refer to the schematic diagram and the Texas
+Instruments UCC27211D datasheet for further
+information.
+
+Pin Definitions for the P2 Dual Accessory Header Block 7–0
+Pin
+Offset
+
+Pin
+Label
+
+7
+
+Pin Function
+
+Pin Description
+
+HALL_W
+
+Output from the Hall Sensor
+Header, channel W.
+
+Typically used to connect to feedback
+sensors/encoders to determine position and direction
+of a motor, the Hall Sensor Header pins could also be
+repurposed as general Inputs or Outputs.
+
+6
+
+HALL_V
+
+Output from the Hall Sensor
+Header, channel V.
+
+5
+
+HALL_U
+
+Output from the Hall Sensor
+Header, channel U.
+
+Each of the three channel pins (U, V, W) has a series
+3.9 kΩ resistor for compatibility with 5 V sensors, and
+also a 3.9 kΩ pull-up to 3.3 V for compatibility with
+active-low open-drain sensors.
+Refer to the schematic diagram for further
+information.
+The common Sense signal is typically used to
+determine overall system load and provide
+overcurrent protection.
+
+4
+
+The common Sense feedback uses a low-side
+current sensing technique, and is connected to one
+side of a 3 mΩ current sense resistor in the common
+GND path of all channel low-side MOSFETS. A
+current sense amplifier (INA180B2) boosts the signal
+SENSE_ Current feedback from all four
+with a gain of 50 V/V.
+COMMON Channels (U, V, W, X).
+The voltage level measured across the current sense
+resistor can be converted to current with this formula:
+Isense = Vsense / 150
+Example: If the voltage measured at Sense Common
+(Vsense) = 1500mV then the MOSFET current would
+be 1500mV / 150 (mV/A) = 10 Amp.
+
+3
+
+SENSE_X
+
+2
+
+SENSE_W
+
+Output voltage feedback from The Sense signals are typically used to determine
+Channel X.
+motor position and provide over-voltage protection.
+Output voltage feedback
+from Channel W.
+
+Copyright © Parallax Inc.
+
+Sense feedback voltage is in the ratio 13.1:1 (± 5%)
+of the voltage at the motor output on each channel.
+
+Universal Motor Driver P2 Add-on Board (#64010)
+
+v2.0 5/5/2022 Page 10 of 12
+
+1
+
+SENSE_V
+
+Output voltage feedback
+from Channel V.
+
+0
+
+SENSE_U
+
+Output voltage feedback
+from Channel U.
+
+Example: If the motor voltage is 40 V, this feedback
+voltage will be 3.05 V ±5%.
+
+Pin Definitions for the Hall Sensor Header
+Hall Sensor Header
+HALL / INPUTS
+
+Pin Description
+
+5V
+
+5V output for external sensor, maximum 100 mA.
+
+W
+
+Typically used to connect to feedback sensors, hall sensors or encoders to
+determine the position and direction of a motor.
+
+V
+
+For compatibility with 5V sensors, each of the three channel inputs (U, V, W) has
+a series 3.9 kΩ resistor between the Hall Sensor Header and the corresponding
+HALL output pin on the P2 Accessory Header.
+Each channel also has a 3.9 kΩ pull-up resistor to 3.3 V for compatibility with
+active-low open-drain sensors.
+
+U
+Refer to the schematic diagram for further information.
+
+GND
+
+Copyright © Parallax Inc.
+
+Common GND
+
+Universal Motor Driver P2 Add-on Board (#64010)
+
+v2.0 5/5/2022 Page 11 of 12
+
+Module Dimensions
+
+Revision History
+Version 2.0: Product Guide update for RevB hardware release.
+● PCB size change from 80x64mm to 70x70mm
+● MOSFET drivers upgraded for improved reliability with hub wheel motors
+● Current sense amplifier added to low-side shunt resistor
+Version 1.0: Original RevA hardware release. v1.1: fixed typo in PCB dimensions.
+
+Copyright © Parallax Inc.
+
+Universal Motor Driver P2 Add-on Board (#64010)
+
+v2.0 5/5/2022 Page 12 of 12
+
+

@@ -1,0 +1,6 @@
+' Source: P2_Assembly_Manual_v1.0 (Page 40)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+RDLONG D, S/# {WZ/WC}
+Operation : D = long

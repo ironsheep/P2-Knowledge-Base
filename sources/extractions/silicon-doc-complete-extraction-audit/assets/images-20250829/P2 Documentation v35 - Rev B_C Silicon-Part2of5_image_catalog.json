@@ -1,0 +1,104 @@
+{
+  "source_pdf": "sources/originals/P2 Documentation v35 - Rev B_C Silicon-Part2of5.pdf",
+  "extraction_summary": {
+    "total_images": 2,
+    "total_pages": 25,
+    "output_directory": "extracted_images_silicon_part2"
+  },
+  "images": [
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon-Part2of5_page15_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon-Part2of5.pdf",
+      "page_number": 15,
+      "image_index": 1,
+      "dimensions": "528\u00d7359",
+      "width": 528,
+      "height": 359,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_silicon_part2/P2 Documentation v35 - Rev B_C Silicon-Part2of5_page15_img01.png",
+      "xref": 63,
+      "extraction_status": "success",
+      "file_size_bytes": 351190,
+      "context": {
+        "caption": "'Data",
+        "nearby_text": [
+          {
+            "text": "In the pictures that follow, you can see the program's DAC output pin while a function generator drives a 0-3.3V sine wave into   the ADC input pin, sweeping from 950-1050KHz over 12ms:",
+            "distance": 16.4520263671875,
+            "position": "above"
+          },
+          {
+            "text": "'Data",
+            "distance": 32.53589630126953,
+            "position": "above"
+          },
+          {
+            "text": "x               res     1   y               res     1   z               res     1   xdiff           res     1   ydiff           res     1",
+            "distance": 70.9215087890625,
+            "position": "above"
+          },
+          {
+            "text": "38",
+            "distance": 74.7449951171875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "'Data",
+          "In the pictures that follow, you can see the program's DAC output pin while a function generator drives a 0-3.3V sine wave into   the ADC input pin, sweeping from 950-1050KHz over 12ms:"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon-Part2of5_page16_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon-Part2of5.pdf",
+      "page_number": 16,
+      "image_index": 1,
+      "dimensions": "537\u00d7365",
+      "width": 537,
+      "height": 365,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_silicon_part2/P2 Documentation v35 - Rev B_C Silicon-Part2of5_page16_img01.png",
+      "xref": 67,
+      "extraction_status": "success",
+      "file_size_bytes": 345949,
+      "context": {
+        "caption": "%BBBBBBBB   gets encoded",
+        "nearby_text": [
+          {
+            "text": "%BBBBBBBB   gets encoded",
+            "distance": 6.72802734375,
+            "position": "below"
+          },
+          {
+            "text": "You can see that SINC2 mode has a higher Q than SINC1 mode. Due to rapid (X,Y) accumulator growth, SINC2 may require   the sine/cosine table to be reduced in amplitude to avoid (X,Y) accumulator overflow. This was done in the example program   above, where it was reduced from \u00b1127 for SINC1 to \u00b110 for SINC2.",
+            "distance": 16.9949951171875,
+            "position": "below"
+          },
+          {
+            "text": "Digital Video Output (DVI/HDMI)",
+            "distance": 75.75201416015625,
+            "position": "below"
+          },
+          {
+            "text": "%GGGGGGGG   gets encoded",
+            "distance": 83.27197265625,
+            "position": "below"
+          },
+          {
+            "text": "39",
+            "distance": 89.73919677734375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "%BBBBBBBB   gets encoded"
+        ]
+      },
+      "suggested_tags": []
+    }
+  ]
+}
