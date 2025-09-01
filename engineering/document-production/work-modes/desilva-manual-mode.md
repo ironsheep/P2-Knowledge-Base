@@ -24,7 +24,7 @@ mcp__todo-mcp__todo_next tags:["desilva_manual"]
 **Always read these documents when starting De Silva work:**
 1. `/documentation/pdf-forge-system/layered-template-architecture.md` - New vertical stack
 2. `/documentation/pipelines/pdf-generation-format-guide.md` - Production workflow  
-3. `/exports/pdf-generation/workspace/desilva-manual/DESILVA-STYLE-GUIDE.md` - Visual requirements
+3. `/engineering/document-production/workspace/p2-pasm-desilva-style/DESILVA-STYLE-GUIDE.md` - Visual requirements
 4. **This file** - De Silva specific protocols
 
 ### Context Keys Storage
@@ -45,7 +45,7 @@ mcp__todo-mcp__todo_next tags:["desilva_manual"]
 - `iron-sheep-tech-review.sty` - Presentation layer (branding)
 
 ### 2. Document Cleanup Workflow
-**Working Location**: `/exports/pdf-generation/workspace/desilva-manual/`
+**Working Location**: `/engineering/document-production/workspace/p2-pasm-desilva-style/`
 - Multi-part structure: Part1, Part2a, Part2b, Part2c, Appendices
 - Apply learnings from Smart Pins visual work
 - Test template changes with small sections first
@@ -78,7 +78,7 @@ mcp__todo-mcp__todo_next tags:["desilva_manual"]
 
 ```
 De Silva Working Environment:
-/exports/pdf-generation/workspace/desilva-manual/
+/engineering/document-production/workspace/p2-pasm-desilva-style/
 ├── editing/                                    # Current working copies
 │   ├── Part1-Getting-Started-WORKING.md  
 │   ├── Part2-Architecture-WORKING.md
@@ -89,7 +89,7 @@ De Silva Working Environment:
 │   └── iron-sheep-tech-review.sty
 └── DESILVA-STYLE-GUIDE.md                     # Visual requirements
 
-/exports/pdf-generation/outbound/P2-PASM-deSilva-Style/
+/engineering/document-production/outbound/p2-pasm-desilva-style/
 ├── [part-files].md                            # Escaped for PDF Forge
 ├── p2kb-*.sty                                 # Deployed templates  
 └── request.json                               # Generation config

@@ -1,6 +1,8 @@
 # P2 Assembly Manual Creation Guide
 *Based on DeSilva P1 Tutorial Voice Analysis and P2 Architecture*
 
+**Canonical Name:** `pasm2-reference-manual`
+
 ## Title Differentiation Strategy
 
 ### The Challenge

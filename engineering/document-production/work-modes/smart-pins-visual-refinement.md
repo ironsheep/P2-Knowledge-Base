@@ -26,7 +26,7 @@ mcp__todo-mcp__todo_next tags:["smart_pins_visual"]
 ```bash
 # Check markdown source has language markers
 grep -c '{.configuration}\|```spin2\|```pasm2' \
-  /exports/pdf-generation/workspace/smart-pins-manual/P2-Smart-Pins-Complete-Reference-WORKING.md
+  /engineering/document-production/workspace/p2-smart-pins-tutorial/P2-Smart-Pins-Complete-Reference-WORKING.md
 # Should show ~119 matches
 
 # Check template has color environments  
@@ -52,7 +52,7 @@ grep -c 'ConfigBlock\|Spin2Block\|PASM2Block' \
 ## 🔴 CRITICAL: SOURCE OF TRUTH LOCATIONS
 
 ### Markdown Source of Truth
-**ALWAYS EDIT HERE**: `/exports/pdf-generation/workspace/smart-pins-manual/P2-Smart-Pins-Complete-Reference-WORKING.md`
+**ALWAYS EDIT HERE**: `/engineering/document-production/workspace/p2-smart-pins-tutorial/P2-Smart-Pins-Complete-Reference-WORKING.md`
 - This file has all language markers: `{.configuration}`, ````spin2`, ````pasm2`
 - ALL markdown changes happen here FIRST
 - Never edit the escaped version in outbound
@@ -65,13 +65,13 @@ grep -c 'ConfigBlock\|Spin2Block\|PASM2Block' \
 - ALL template changes happen here FIRST
 
 ### Deployment Workflow (EXACT SEQUENCE)
-1. **Edit markdown**: `workspace/smart-pins-manual/P2-Smart-Pins-Complete-Reference-WORKING.md`
+1. **Edit markdown**: `workspace/p2-smart-pins-tutorial/P2-Smart-Pins-Complete-Reference-WORKING.md`
 2. **Edit templates**: `workspace/manual-templates/*.sty` (IF NEEDED)
 3. **Edit scripts**: Fix scripts as needed (generate-pdf.js, watch-shared-workspace.js)
-4. **Escape markdown**: ALWAYS run `./tools/latex-escape-all.sh WORKING.md → outbound/P2-Smart-Pins-Reference.md`
+4. **Escape markdown**: ALWAYS run `./tools/latex-escape-all.sh WORKING.md → outbound/p2-smart-pins-tutorial/P2-Smart-Pins-Tutorial.md`
 5. **Deploy ONLY MODIFIED FILES to outbound**: 
    - **⚠️ CRITICAL: ONLY COPY WHAT YOU MODIFIED - NEVER COPY EVERYTHING**
-   - If you edited templates: `cp [specific-modified.sty] → outbound/P2-Smart-Pins-Reference/`
+   - If you edited templates: `cp [specific-modified.sty] → outbound/p2-smart-pins-tutorial/`
    - If you fixed scripts: `cp [specific-fixed.js] → outbound/P2-Smart-Pins-Reference/scripts-from-forge/`
    - If you modified filters: `cp [specific-filter.lua] → outbound/P2-Smart-Pins-Reference/`
    - **DEFAULT FOR TESTING**: Usually just escaped markdown + request.json

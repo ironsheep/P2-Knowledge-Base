@@ -26,19 +26,19 @@ mcp__todo-mcp__todo_next tags:["desilva_visual"]
 #### 1. Verify Source of Truth Locations
 ```bash
 # Check working parts have visual fixes
-wc -l /exports/pdf-generation/workspace/desilva-manual/P2-PASM-deSilva-Style-FULL-Part1.md
+wc -l /engineering/document-production/workspace/p2-pasm-desilva-style/P2-PASM-deSilva-Style-FULL-Part1.md
 # Should show ~700+ lines
 
 # Check template has De Silva environments
 grep -c 'sidetrack\|interlude\|yourturn\|chapterend' \
-  /exports/pdf-generation/workspace/desilva-manual/templates/p2kb-pasm-desilva.latex
+  /exports/pdf-generation/workspace/p2-pasm-desilva-style/templates/p2kb-pasm-desilva.latex
 # Should show 4+ matches
 ```
 
 #### 2. Required Reading
 **Always read these documents when starting De Silva visual work:**
 1. **THIS FILE FIRST** - De Silva specific protocols and source of truth
-2. `/documentation/manuals/p2-pasm-desilva-style/creation-guide.md` - Pedagogical requirements
+2. `/engineering/document-production/manuals/p2-pasm-desilva-style/creation-guide.md` - Pedagogical requirements
 3. `/documentation/pipelines/pdf-generation-format-guide.md` - PDF production workflow
 4. `/exports/pdf-generation/workspace/desilva-manual/visual-fixes-tracking.md` - Current state
 
@@ -63,12 +63,12 @@ grep -c 'sidetrack\|interlude\|yourturn\|chapterend' \
 2. **Edit template**: workspace/desilva-manual/templates/p2kb-pasm-desilva.latex
 3. **Combine parts**: Cat all parts → COMBINED-FOR-ESCAPING.md
 4. **Escape combined**: `./tools/latex-escape-all.sh COMBINED → outbound/P2-PASM-deSilva-Style.md`
-5. **Deploy template**: `cp template → outbound/P2-PASM-deSilva-Style/`
+5. **Deploy template**: `cp template → outbound/p2-pasm-desilva-style/`
 6. **Clean temp**: `rm COMBINED-FOR-ESCAPING.md`
 7. **User deploys**: Takes ALL files from outbound to PDF Forge
 
 ### NEVER Edit These Directly
-- ❌ `/exports/pdf-generation/outbound/P2-PASM-deSilva-Style/` - Deployment staging only
+- ❌ `/engineering/document-production/outbound/p2-pasm-desilva-style/` - Deployment staging only
 - ❌ Escaped/combined markdown files - Always edit parts then re-combine
 - ❌ Templates in outbound - Always edit in workspace/desilva-manual/templates first
 

@@ -1,5 +1,7 @@
 # P2 Smart Pins Complete Reference - Creation Guide
 
+**Canonical Name:** `p2-smart-pins-tutorial`
+
 ## Document Identity - TWO BOOK STRATEGY
 
 ### The Two-Book Ecosystem (Updated 2025-08-30)
