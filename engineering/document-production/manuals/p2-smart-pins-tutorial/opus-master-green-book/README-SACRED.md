@@ -64,8 +64,9 @@ This directory contains FOUR sacred versions of the P2 Smart Pins Green Book Tut
 
 ### 📚📖 Version 4: P2-Smart-Pins-Green-Book-Tutorial-v4.md (Complete I/O Tutorial) ⭐ AUTHORITATIVE
 - **Type**: Green Book (Tutorial) - Complete P2 I/O coverage
-- **Generated**: 2025-09-01 by Opus 4.1 (I/O fundamentals + index)
-- **Size**: ~155 pages estimated
+- **Generated**: 2025-09-01 by Opus 4.1 (wrapper) + assembly process
+- **Assembled**: 2025-09-01 from v4-wrapper + v3 content + index
+- **Size**: 3,261 lines / 12,641 words / 99 code blocks
 - **Permissions**: 444 (read-only)
 - **Purpose**: Complete P2 I/O tutorial from basics to Smart Pins
 - **Features**:
@@ -74,11 +75,28 @@ This directory contains FOUR sacred versions of the P2 Smart Pins Green Book Tut
   - Basic I/O instructions as foundation
   - Comprehensive index of all topics/modes/instructions
   - Complete P2 I/O coverage, not just Smart Pins
+- **Assembly Note**: Opus 4.1 delivered v4 as a wrapper/template with placeholders.
+  We assembled the complete document by inserting v3 content at the marked locations.
+  The v4-wrapper.md file preserves the original template for reference.
 - **Use Cases**:
   - PRIMARY tutorial for PDF generation
   - Complete I/O learning path
   - Production reference manual
   - Comprehensive P2 I/O bible
+
+### 📄 Version 4 Wrapper: P2-Smart-Pins-Green-Book-Tutorial-v4-wrapper.md (Template)
+- **Type**: Template/wrapper file as delivered by Opus 4.1
+- **Generated**: 2025-09-01 by Opus 4.1
+- **Size**: 585 lines (partial)
+- **Permissions**: 444 (read-only)
+- **Purpose**: Historical record of how v4 was delivered
+- **Contains**:
+  - Front matter and version history
+  - Complete Chapter 0: P2 I/O Fundamentals
+  - Chapter 1 introduction with placeholders for v3 content
+  - Comprehensive index
+- **Note**: This file contains placeholders indicating where v3 content should be inserted.
+  The complete v4.md file is the result of that assembly process.
 
 ---
 
