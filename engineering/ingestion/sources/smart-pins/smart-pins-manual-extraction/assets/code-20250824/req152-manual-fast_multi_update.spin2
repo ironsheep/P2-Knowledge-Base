@@ -1,0 +1,17 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+PUB fast_multi_update(base_pin, count, values) | mask
+  ' Prepare mask for simultaneous enable
+  mask := ((1 << count) - 1) << base_pin
+  
+  ' Configure all pins while disabled
+  repeat i from 0 to count-1
+    wrpin(mode, base_pin + i)
+    wxpin(period, base_pin + i)
+    wypin(values[i], base_pin + i)
+    
+  ' Enable all at once
+  dirh(mask)

@@ -1,0 +1,31 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+encoder_task
+        mov     pa, ##P_QUADRATURE_A
+        wrpin   pa, #20         ' Encoder on P20/P21
+        dirh    #20
+        
+.loop   rdpin   new_pos, #20    ' Current position
+        sub     new_pos, old_pos ' Delta position
+        mov     velocity, new_pos
+        shl     velocity, #6    ' Scale to RPM
+        mov     old_pos, new_pos
+        
+        wrlong  position, pos_ptr
+        wrlong  velocity, vel_ptr
+        
+        waitx   ##2_000_000     ' 10ms sample rate
+        jmp     #.loop
+        
+position long   0
+velocity long   0
+old_pos  long   0
+new_pos  long   0
+pos_ptr  long   0
+vel_ptr  long   0

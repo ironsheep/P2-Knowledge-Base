@@ -1,0 +1,22 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+gated_init
+        mov     pa, ##P_HIGH_TICKS | P_PLUS1_B
+        wrpin   pa, #20         ' A=P20, B=P21
+        dirh    #20
+        
+gated_measure
+        wypin   zero, #20       ' Arm
+        or      outa, #(1<<21)  ' Gate high
+        waitx   ##1_000_000     ' Gate time
+        andn    outa, #(1<<21)  ' Gate low
+        rdpin   result, #20     ' Read gated count
+        
+zero    long    0
+result  long    0

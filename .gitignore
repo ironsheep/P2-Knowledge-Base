@@ -1,0 +1,146 @@
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+env/
+venv/
+.env
+
+# Build outputs
+build/
+dist/
+*.egg-info/
+
+# Documentation build
+_build/
+.doctrees/
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+.~*
+
+# Backup directories
+**/backups/
+backups/
+
+# Log files
+*.log
+
+# Tool outputs
+validation-report.txt
+broken-links.txt
+
+# Node (if using any JS tools)
+node_modules/
+package-lock.json
+GITHUB-REPO-SETUP.md
+
+# Temporary import directory (not versioned)
+import/
+
+# Claude's private reference materials (not versioned)
+.claude/
+CLAUDE.md
+
+# Source documents (PDFs and originals)
+sources/originals/*.pdf
+sources/originals/*.csv
+*.pdf
+
+# Archived V1 extractions (superseded by V2)
+sources/extractions-v1-archived/
+
+# Sprint communications (private/not versioned)
+.sprints/*/communications/
+**/communications/
+
+# Personnel observations and private guidance
+.personnel-observations/
+
+# Temporary archives and exports
+ARCHIVE-*/
+CLAUDE-EXPORT.zip
+DOT-TODO-MCP/
+
+# Development workspace (not versioned)
+Scratchpad/
+
+# PDF generation workspace - NOW VERSIONED (critical working files)
+# But exclude backups and temporary versions
+*.backup.*
+*.bak
+*.bak[0-9]
+
+# Exclude suffixed test/temporary versions
+*-TEST.md
+*-test.md
+*-v[0-9].md
+*-v[0-9][0-9].md
+*-FINAL.md
+*-FINAL-*.md
+*-fixed.md
+*-FIXED.md
+*-ESCAPED.md
+*-FORMATTED.md
+*-NOBOLD.md
+*-CLEAN.md
+*-COMBINED.md
+*-PRODUCTION.md
+*-READY.md
+*-SOURCE.md
+
+# Script temporary work areas
+tools/*.tmp
+tools/*.backup
+tools/temp/
+tools/work/
+*.backup.*
+*.tmp.*
+
+# Generated/formatted versions (keep only source)
+*-FORMATTED.md
+*-ESCAPED.md
+*-PASS[0-9].md
+*-FINAL.md
+*-unescaped.md
+
+# Test outputs
+*-TEST.pdf
+*-TEST.md
+test-request.json
+TEST-*.sty
+TEST-*.latex
+TEST-*.lua
+
+# Archive directories
+archive/
+archive-*/
+archive-old/
+/exports/pdf-generation/outbound
+/exports/pdf-generation/outbound
+/exports/pdf-generation/inbound
+/exports/pdf-generation/outbound
+/engineering/pdf-forge/interactive-testing
+
+# Todo MCP working directory
+tasks/
+
+# Human-managed directories (not versioned)
+for-human/
+human-todos/
+.strategic-commentary/
+
+# AI operational guides (not versioned)
+.todo-mcp/

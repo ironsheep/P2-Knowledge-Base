@@ -1,0 +1,20 @@
+{
+  "documents": [
+    {
+      "input": "P2-PASM-deSilva-Style.md",
+      "output": "P2-PASM-deSilva-Style-Part1.pdf",
+      "template": "p2kb-pasm-desilva",
+      "pandoc_args": [
+        "--lua-filter=div-to-environment"
+      ],
+      "variables": {
+        "title": "Discovering PASM2",
+        "subtitle": "P2 Assembly in the deSilva Tradition",
+        "author": "P2 Knowledge Base Project",
+        "date": "\\today",
+        "version": "1.0-DRAFT",
+        "footer": "P2 Knowledge Base - Part 1: Getting Started"
+      }
+    }
+  ]
+}

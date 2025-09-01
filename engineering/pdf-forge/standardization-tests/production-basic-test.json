@@ -1,0 +1,16 @@
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "test-document.md",
+      "output": "Test-Document.pdf",
+      "template": "p2kb-foundation"
+    }
+  ],
+  "metadata": {
+    "title": "Basic Production Test",
+    "author": "PDF Forge Test Suite",
+    "date": "2025",
+    "version": "v1.0"
+  }
+}

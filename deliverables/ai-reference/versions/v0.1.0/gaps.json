@@ -1,0 +1,93 @@
+{
+  "documentation_gaps": {
+    "critical": [
+      {
+        "topic": "SPIN2 Language",
+        "impact": "Cannot generate high-level P2 code",
+        "status": "Document available, awaiting delivery",
+        "owner": "Chip Gracey",
+        "workaround": "Use PASM2 assembly only"
+      },
+      {
+        "topic": "Boot Process",
+        "impact": "Cannot create bootable P2 applications",
+        "status": "Needs documentation from Chip Gracey",
+        "owner": "Chip Gracey",
+        "workaround": "Use serial boot for development"
+      },
+      {
+        "topic": "Smart Pins Complete",
+        "impact": "Cannot use 22 of 32 Smart Pin modes",
+        "status": "Documentation by Jon Titus pending",
+        "owner": "Jon Titus",
+        "workaround": "Use only documented modes"
+      }
+    ],
+    "important": [
+      {
+        "topic": "USB Support",
+        "impact": "Cannot implement USB communication",
+        "status": "Not documented",
+        "owner": "Parallax",
+        "workaround": "Use serial communication"
+      },
+      {
+        "topic": "Bytecode Interpreter",
+        "impact": "Cannot understand bytecode execution",
+        "status": "Needs documentation",
+        "owner": "Chip Gracey",
+        "workaround": "Use compiled code only"
+      },
+      {
+        "topic": "Complete Timing",
+        "impact": "Cannot optimize for performance",
+        "status": "Partial timing data only",
+        "owner": "Parallax",
+        "workaround": "Use conservative timing estimates"
+      }
+    ],
+    "minor": [
+      {
+        "topic": "Streamer/FIFO Details",
+        "impact": "Limited streaming capability",
+        "status": "Basic documentation only",
+        "owner": "Documentation team",
+        "workaround": "Use basic RDFAST/WRFAST"
+      },
+      {
+        "topic": "Debug Features",
+        "impact": "Limited debugging capability",
+        "status": "Partially documented",
+        "owner": "Parallax",
+        "workaround": "Use basic DEBUG commands"
+      }
+    ]
+  },
+  "visual_elements_needed": [
+    "Pin schematic diagrams (pages 76-84)",
+    "Timing diagrams for Smart Pins",
+    "Pipeline flow diagrams",
+    "Memory access timing charts",
+    "CORDIC pipeline visualization",
+    "Hub rotation 'Egg Beater' diagram"
+  ],
+  "questions_for_chip": {
+    "count": 60,
+    "document": "/sources/analysis/p2-knowledge-gaps-master.md",
+    "categories": [
+      "Boot process sequence",
+      "Bytecode interpreter details",
+      "USB implementation",
+      "Undocumented instructions",
+      "Silicon-specific behaviors"
+    ]
+  },
+  "completion_metrics": {
+    "architecture": 0.85,
+    "instructions": 0.65,
+    "smart_pins": 0.31,
+    "spin2": 0.0,
+    "examples": 0.25,
+    "overall": 0.41
+  }
+}

@@ -1,0 +1,9 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+PUB test_pattern(pin)
+  ' Generate known pattern for testing
+  pinstart(pin, P_PULSE | P_OE, 1000, $0000_01F4)
+  ' 500 clocks high, 500 low, continuous

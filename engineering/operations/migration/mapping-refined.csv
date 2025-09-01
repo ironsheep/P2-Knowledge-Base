@@ -1,0 +1,65 @@
+# Refined Mapping - Direct Original to Final Paths
+# Generated: 2025-09-01
+# Purpose: Simplified mapping showing direct path from original location to final destination
+# Format: OldPath,FinalPath,Type,Notes
+
+# Key Renamed Files
+engineering/pipelines/pdf-generation-workflow-v2.md,engineering/pipelines/pdf-generation-workflow.md,file,Renamed to remove version suffix
+engineering/pipelines/documentation-market-strategy.md,engineering/pipelines/pipeline-prioritization-market-strategy.md,file,Renamed for clarity
+
+# Key Deleted Files
+engineering/pipelines/pdf-generation-workflow-v1.md,DELETED,file,Obsolete version removed
+OPERATIONS-DASHBOARD.md,DELETED,file,Split into README.md and ABOUT.md files
+PROJECT-MASTER.md,DELETED,file,Split into README.md and ABOUT.md files
+
+# Major Directory Structure Changes
+.sprints/,engineering/history/sprints/,directory,Hidden directory made visible
+engineering/history/sprints/.sprints/,engineering/history/sprints/,directory,Contents moved up one level
+engineering/pdf-forge/scripts/pdf-forge-scripts/,engineering/pdf-forge/scripts/,directory,Flattened nesting
+engineering/ingestion/sources/sources/,engineering/ingestion/ingestion-metadata/,directory,Fixed double nesting
+
+# Assets Nesting Fixes
+engineering/ingestion/sources/*/assets/assets/,engineering/ingestion/sources/*/assets/,pattern,Fixed assets double-nesting in all source directories
+
+# Document Movements
+documents/terminal-window-manual,engineering/document-production/manuals/terminal-window-manual,directory,Moved to proper manual location
+engineering/workspace/documents/terminal-window-manual/,engineering/document-production/manuals/terminal-window-manual/,directory,Consolidated manual location
+engineering/workspace/documents/P2-MISSING-INSTRUCTIONS-ANALYSIS.md,engineering/ingestion/central-analysis/P2-MISSING-INSTRUCTIONS-ANALYSIS.md,file,Moved to central analysis
+
+# Analysis File Redistributions
+engineering/ingestion/sources/sources/analysis/*.md,engineering/ingestion/central-analysis/,pattern,Cross-ingestion analyses
+engineering/ingestion/sources/sources/analysis/PASM2-MANUAL-EXTRACTION-AUDIT.md,engineering/ingestion/sources/pasm2-manual/PASM2-MANUAL-EXTRACTION-AUDIT.md,file,Project-specific audit
+engineering/ingestion/sources/sources/analysis/silicon-extraction-audit.md,engineering/ingestion/sources/silicon-doc/silicon-extraction-audit.md,file,Project-specific audit
+engineering/ingestion/sources/sources/analysis/datasheet-audit-report.md,engineering/ingestion/sources/p2-datasheet/datasheet-audit-report.md,file,Project-specific audit
+engineering/ingestion/sources/sources/analysis/spec-sheet-audit-report.md,engineering/ingestion/sources/p2-spec-sheet/spec-sheet-audit-report.md,file,Project-specific audit
+
+# Knowledge Base Movements
+engineering/knowledge-base/PASM2-DOCUMENTATION-CAPABILITY-ASSESSMENT.md,engineering/knowledge-base/P2/PASM2-DOCUMENTATION-CAPABILITY-ASSESSMENT.md,file,Final location in P2 knowledge base
+engineering/ingestion/sources/sources/p1-master/,engineering/knowledge-base/P1/,directory,P1 knowledge base
+engineering/ingestion/sources/sources/pasm2-master/,engineering/knowledge-base/P2/,directory,P2 knowledge base
+
+# Work Mode and Methodology Movements
+documentation/work-mode-guides/,engineering/*/work-modes/,pattern,Distributed to relevant sections
+documentation/project-process/,engineering/operations/project-guidance/,directory,Process documentation
+documentation-standards/,engineering/standards/documentation-standards/,directory,Standards consolidation
+pipelines/*.md,engineering/pipelines/*.md,pattern,Pipeline documentation stays in pipelines
+
+# Tools Reorganization
+tools/,engineering/tools/*/,pattern,Tools organized by function (extraction/conversion/validation/automation)
+pdf-forge-scripts/,engineering/pdf-forge/scripts/,directory,PDF forge scripts consolidated
+
+# Archive and History
+releases/,engineering/history/releases/,directory,Release history
+tasks/archives/,engineering/history/task-archives/,directory,Task archives
+context-extractions/,engineering/history/sessions/context-extractions/,directory,Session extractions
+
+# Major Consolidations
+exports/pdf-generation/,engineering/document-production/ and engineering/pdf-forge/,split,Split between production and forge
+sources/,engineering/ingestion/sources/,directory,All ingestion sources
+import/,engineering/ingestion/external-inputs/,directory,External inputs (not in git)
+
+# Top-Level Audience Split
+ai-reference/,deliverables/ai-reference/,directory,User-facing AI reference
+learning-paths/,deliverables/learning-paths/,directory,User-facing learning materials
+developer-reference/,deliverables/reference/,directory,User-facing reference docs
+p2-claude-knowledge/,deliverables/ai-reference/p2-claude-knowledge/,directory,AI consumption materials

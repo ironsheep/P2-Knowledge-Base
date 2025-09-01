@@ -1,0 +1,6 @@
+' Source: P2 Spin2 Documentation v51-250425 (Page 12)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+ORGH    $1000
+'set hub-execmode, hub origin = $01000, origin limit = $100000 (default limit)

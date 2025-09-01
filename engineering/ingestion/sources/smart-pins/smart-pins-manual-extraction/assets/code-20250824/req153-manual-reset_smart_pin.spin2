@@ -1,0 +1,9 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+PUB reset_smart_pin(pin)
+  pinclear(pin)        ' Disable Smart Pin
+  waitms(1)           ' Allow settling
+  pinstart(pin, mode, x_val, y_val)  ' Reconfigure

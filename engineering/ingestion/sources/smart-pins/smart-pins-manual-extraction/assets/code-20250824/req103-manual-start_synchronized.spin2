@@ -1,0 +1,16 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+PUB start_synchronized(first_pin, last_pin, mode) | mask
+  mask := (1 << (last_pin - first_pin + 1)) - 1
+  mask <<= first_pin
+  
+  ' Configure all pins while disabled
+  repeat pin from first_pin to last_pin
+    pinstart(pin, mode, 0, 0)
+    pinclear(pin)
+    
+  ' Enable all simultaneously  
+  DIRH(mask)

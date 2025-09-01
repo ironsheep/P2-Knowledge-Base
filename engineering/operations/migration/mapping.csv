@@ -1,0 +1,269 @@
+OldPath,NewPath,FileType,DateMoved,Notes
+(new),deliverables/,directory,2025-08-31,Created new top-level directory
+(new),deliverables/ai-reference/,directory,2025-08-31,Created audience-focused subdirectory
+(new),deliverables/developer-docs/,directory,2025-08-31,Created audience-focused subdirectory
+(new),deliverables/learning-paths/,directory,2025-08-31,Created audience-focused subdirectory
+(new),deliverables/reference/,directory,2025-08-31,Created audience-focused subdirectory
+(new),engineering/,directory,2025-08-31,Created new top-level directory
+(new),engineering/knowledge-base/,directory,2025-08-31,Created knowledge management section
+(new),engineering/ingestion/,directory,2025-08-31,Created ingestion section
+(new),engineering/ingestion/sources/,directory,2025-08-31,Created for consolidated source materials
+(new),engineering/ingestion/extraction-matrices/,directory,2025-08-31,Created for extraction tracking
+(new),engineering/ingestion/pipeline/,directory,2025-08-31,Created for pipeline processes
+(new),engineering/ingestion/methodology/,directory,2025-08-31,Created for ingestion methodologies
+(new),engineering/ingestion/work-modes/,directory,2025-08-31,Created for ingestion work modes
+(new),engineering/document-production/,directory,2025-08-31,Created document production section
+(new),engineering/document-production/templates/,directory,2025-08-31,Created for document templates
+(new),engineering/document-production/workspace/,directory,2025-08-31,Created for active document work
+(new),engineering/document-production/outbound/,directory,2025-08-31,Created for PDF-ready documents
+(new),engineering/document-production/shared-assets/,directory,2025-08-31,Created for shared resources
+(new),engineering/document-production/shared-assets/templates/,directory,2025-08-31,Created for template library
+(new),engineering/document-production/methodology/,directory,2025-08-31,Created for production methodologies
+(new),engineering/document-production/work-modes/,directory,2025-08-31,Created for production work modes
+(new),engineering/pdf-forge/,directory,2025-08-31,Created PDF forge section
+(new),engineering/pdf-forge/scripts/,directory,2025-08-31,Created for forge scripts
+(new),engineering/pdf-forge/testing/,directory,2025-08-31,Created for forge testing
+(new),engineering/pdf-forge/forge-state/,directory,2025-08-31,Created for forge state tracking
+(new),engineering/pdf-forge/guides/,directory,2025-08-31,Created for forge documentation
+(new),engineering/tools/,directory,2025-08-31,Created tools section
+(new),engineering/operations/,directory,2025-08-31,Created operations section
+(new),engineering/operations/project-guidance/,directory,2025-08-31,Created for project guidance
+(new),engineering/operations/claude-guidance/,directory,2025-08-31,Created for AI guidance
+(new),engineering/operations/sponsors/,directory,2025-08-31,Created for sponsor materials
+(new),engineering/operations/standards/,directory,2025-08-31,Created for standards documentation
+(new),engineering/operations/planning/,directory,2025-08-31,Created for planning materials
+(new),engineering/operations/planning/strategic/,directory,2025-08-31,Created for strategic planning
+(new),engineering/operations/migration/,directory,2025-08-31,Created for migration tracking
+(new),engineering/operations/migration/uncertain/,directory,2025-08-31,Created for uncertain items
+(new),engineering/history/,directory,2025-08-31,Created history section
+(new),engineering/history/sprints/,directory,2025-08-31,Created for sprint archives
+(new),engineering/history/releases/,directory,2025-08-31,Created for release archives
+(new),engineering/history/sessions/,directory,2025-08-31,Created for session archives
+documentation/work-mode-guides/document-ingestion-focused.md,engineering/ingestion/work-modes/document-ingestion-focused.md,file,2025-08-31,Moved ingestion work mode guide
+documentation/work-mode-guides/desilva-manual-mode.md,engineering/document-production/work-modes/desilva-manual-mode.md,file,2025-08-31,Moved De Silva manual work mode
+documentation/work-mode-guides/smart-pins-visual-refinement.md,engineering/document-production/work-modes/smart-pins-visual-refinement.md,file,2025-08-31,Moved Smart Pins visual work mode
+documentation/work-mode-guides/desilva-visual-refinement.md,engineering/document-production/work-modes/desilva-visual-refinement.md,file,2025-08-31,Moved De Silva visual work mode
+documentation/work-mode-guides/pdf-generation-template-debugging.md,engineering/document-production/work-modes/pdf-generation-template-debugging.md,file,2025-08-31,Moved PDF generation debug mode
+documentation/work-mode-guides/automated-pdf-testing.md,engineering/pdf-forge/work-modes/automated-pdf-testing.md,file,2025-08-31,Moved automated PDF testing mode
+documentation/work-mode-guides/image-extraction-focused.md,engineering/ingestion/work-modes/image-extraction-focused.md,file,2025-08-31,Moved image extraction work mode
+documentation/work-mode-guides/latex-escape-script-management.md,engineering/document-production/work-modes/latex-escape-script-management.md,file,2025-08-31,Moved LaTeX escape management mode
+documentation/work-mode-guides/version-control-discipline.md,engineering/operations/standards/version-control-discipline.md,file,2025-08-31,Moved version control discipline to standards
+documentation/work-mode-guides/work-mode-lifecycle.md,engineering/operations/project-guidance/work-mode-lifecycle.md,file,2025-08-31,Moved work mode lifecycle to project guidance
+documentation/work-mode-guides/CRITICAL-GUIDANCE-ANALYSIS.md,engineering/operations/claude-guidance/CRITICAL-GUIDANCE-ANALYSIS.md,file,2025-08-31,Moved critical guidance to Claude guidance
+documentation/project-process/sprint-planning-methodology.md,engineering/operations/project-guidance/sprint-planning-methodology.md,file,2025-08-31,Moved sprint planning methodology
+tools/sprint-lifecycle-methodology.md,engineering/operations/project-guidance/sprint-lifecycle-methodology.md,file,2025-08-31,Moved sprint lifecycle methodology
+tools/sprint-execution-methodology.md,engineering/operations/project-guidance/sprint-execution-methodology.md,file,2025-08-31,Moved sprint execution methodology
+documentation-standards/source-ingestion-methodology.md,engineering/ingestion/methodology/source-ingestion-methodology.md,file,2025-08-31,Moved source ingestion methodology
+documentation-standards/plan-review-methodology.md,engineering/operations/project-guidance/plan-review-methodology.md,file,2025-08-31,Moved plan review methodology
+pipelines/source-code-extraction-methodology.md,engineering/ingestion/methodology/source-code-extraction-methodology.md,file,2025-08-31,Moved source code extraction methodology
+pipelines/enhanced-source-code-ingestion-methodology.md,engineering/ingestion/methodology/enhanced-source-code-ingestion-methodology.md,file,2025-08-31,Moved enhanced code ingestion methodology
+pipelines/image-extraction-methodology.md,engineering/ingestion/methodology/image-extraction-methodology.md,file,2025-08-31,Moved image extraction methodology
+pipelines/focused-extraction-methodology.md,engineering/ingestion/methodology/focused-extraction-methodology.md,file,2025-08-31,Moved focused extraction methodology
+pipelines/pasm2-instruction-clarification-methodology.md,engineering/ingestion/methodology/pasm2-instruction-clarification-methodology.md,file,2025-08-31,Moved PASM2 clarification methodology
+pipelines/pdf-generation-methodology.md,engineering/document-production/methodology/pdf-generation-methodology.md,file,2025-08-31,Moved PDF generation methodology
+sprint-candidates/sprint-selection-methodology.md,engineering/operations/planning/sprint-selection-methodology.md,file,2025-08-31,Moved sprint selection methodology
+ai-assisted-developer-workflow.md,engineering/operations/project-guidance/ai-assisted-developer-workflow.md,file,2025-08-31,Moved AI developer workflow
+documentation/project-process/sprint-execution-process.md,engineering/operations/project-guidance/sprint-execution-process.md,file,2025-08-31,Moved sprint execution process
+documentation/project-process/process-augmentation.md,engineering/operations/project-guidance/process-augmentation.md,file,2025-08-31,Moved process augmentation
+documentation/project-process/task-generation-process.md,engineering/operations/project-guidance/task-generation-process.md,file,2025-08-31,Moved task generation process
+documentation/pipelines/pdf-generation-workflow-guide.md,engineering/document-production/methodology/pdf-generation-workflow-guide.md,file,2025-08-31,Moved PDF generation workflow guide
+documentation/pipelines/p2kb-document-production-process.md,engineering/document-production/methodology/p2kb-document-production-process.md,file,2025-08-31,Moved document production process
+pipelines/human-ai-collaboration-process.md,engineering/operations/project-guidance/human-ai-collaboration-process.md,file,2025-08-31,Moved human-AI collaboration process
+pipelines/document-generation-process.md,engineering/document-production/methodology/document-generation-process.md,file,2025-08-31,Moved document generation process
+pipelines/release-workflow-v1.0.md,engineering/operations/project-guidance/release-workflow-v1.0.md,file,2025-08-31,Moved release workflow
+documentation-standards/forum-review-process.md,engineering/operations/standards/forum-review-process.md,file,2025-08-31,Moved forum review process
+documentation-standards/community-spot-review-process.md,engineering/operations/standards/community-spot-review-process.md,file,2025-08-31,Moved community review process
+documentation-standards/email-review-workflow.md,engineering/operations/standards/email-review-workflow.md,file,2025-08-31,Moved email review workflow
+tools/primary-source-processing-inventory.md,engineering/ingestion/methodology/primary-source-processing-inventory.md,file,2025-08-31,Moved primary source processing inventory
+documentation/collaboration-guides/claude-human-optimization-guide.md,engineering/operations/claude-guidance/claude-human-optimization-guide.md,file,2025-08-31,Moved Claude-human optimization guide
+documentation/collaboration-guides/multi-agent-architecture-design.md,engineering/operations/claude-guidance/multi-agent-architecture-design.md,file,2025-08-31,Moved multi-agent architecture design
+documentation/pipelines/pdf-generation-format-guide.md,engineering/document-production/methodology/pdf-generation-format-guide.md,file,2025-08-31,Moved PDF generation format guide
+documentation/compiler-tools/pnut_ts-usage-guide.md,engineering/tools/documentation/pnut_ts-usage-guide.md,file,2025-08-31,Moved pnut_ts usage guide
+documentation/compiler-tools/claude-p2-development-environment.md,engineering/tools/documentation/claude-p2-development-environment.md,file,2025-08-31,Moved Claude P2 development environment guideOPERATIONS-DASHBOARD.md,engineering/README.md,file,2025-08-31,Split into README.md and ABOUT.md for cognitive load reduction
+OPERATIONS-DASHBOARD.md,engineering/ABOUT.md,file,2025-08-31,Narrative content extracted to ABOUT.md
+INGESTED-SOURCES-CATALOG.md,engineering/ingestion/README.md,file,2025-08-31,Split into README.md and ABOUT.md for cognitive load reduction
+INGESTED-SOURCES-CATALOG.md,engineering/ingestion/ABOUT.md,file,2025-08-31,Narrative content extracted to ABOUT.md
+pipelines/document-production-pipeline.md,engineering/document-production/README.md,file,2025-08-31,Split into README.md and ABOUT.md for cognitive load reduction
+pipelines/document-production-pipeline.md,engineering/document-production/ABOUT.md,file,2025-08-31,Narrative content extracted to ABOUT.md
+PROJECT-MASTER.md,engineering/operations/README.md,file,2025-08-31,Split into README.md and ABOUT.md for cognitive load reduction
+PROJECT-MASTER.md,engineering/operations/ABOUT.md,file,2025-08-31,Narrative content extracted to ABOUT.md
+exports/pdf-generation/workspace/smart-pins-manual,engineering/document-production/workspace/smart-pins-manual,directory,2025-08-31,SWEEP 4 - Document production workspace organization
+exports/pdf-generation/workspace/desilva-manual,engineering/document-production/workspace/desilva-manual,directory,2025-08-31,SWEEP 4 - Document production workspace organization
+exports/pdf-generation/workspace/experiments,engineering/document-production/workspace/experiments,directory,2025-08-31,SWEEP 4 - Document production workspace organization
+exports/pdf-generation/workspace/manual-templates/*.latex,engineering/document-production/shared-assets/templates/,files,2025-08-31,SWEEP 4 - LaTeX templates consolidated
+exports/pdf-generation/workspace/manual-templates/*.sty,engineering/document-production/shared-assets/templates/,files,2025-08-31,SWEEP 4 - Style files consolidated
+exports/pdf-generation/workspace/manual-templates/*.lua,engineering/document-production/shared-assets/filters/,files,2025-08-31,SWEEP 4 - Lua filters consolidated
+exports/pdf-generation/workspace/manual-templates/*.md,engineering/document-production/shared-assets/test-files/,files,2025-08-31,SWEEP 4 - Test files consolidated
+exports/pdf-generation/workspace/manual-templates/*.tex,engineering/document-production/shared-assets/test-files/,files,2025-08-31,SWEEP 4 - Test files consolidated
+exports/pdf-generation/outbound/P2-PASM-deSilva-Style,engineering/document-production/outbound/P2-PASM-deSilva-Style,directory,2025-08-31,SWEEP 4 - Outbound directory migration
+exports/pdf-generation/outbound/P2-Smart-Pins-Green-Book,engineering/document-production/outbound/P2-Smart-Pins-Green-Book,directory,2025-08-31,SWEEP 4 - Outbound directory migration
+exports/pdf-generation/outbound/P2-Smart-Pins-Reference,engineering/document-production/outbound/P2-Smart-Pins-Reference,directory,2025-08-31,SWEEP 4 - Outbound directory migration
+exports/pdf-generation/outbound/ai-presentation-materials-v1,engineering/document-production/outbound/ai-presentation-materials-v1,directory,2025-08-31,SWEEP 4 - Outbound directory migration
+exports/pdf-generation/outbound/claude-human-collaboration-v1,engineering/document-production/outbound/claude-human-collaboration-v1,directory,2025-08-31,SWEEP 4 - Outbound directory migration
+exports/pdf-generation/outbound/coloring-system-test,engineering/document-production/outbound/coloring-system-test,directory,2025-08-31,SWEEP 4 - Outbound directory migration
+exports/pdf-generation/outbound/pasm2-instruction-test-v1,engineering/document-production/outbound/pasm2-instruction-test-v1,directory,2025-08-31,SWEEP 4 - Outbound directory migration
+exports/pdf-generation/outbound/pasm2-manual-v1,engineering/document-production/outbound/pasm2-manual-v1,directory,2025-08-31,SWEEP 4 - Outbound directory migration
+documents/ai-privacy-guide,engineering/document-production/workspace/ai-privacy-guide,directory,2025-08-31,SWEEP 4 - Document folders to workspace
+documents/da-silva-p2-manual,engineering/document-production/workspace/da-silva-p2-manual,directory,2025-08-31,SWEEP 4 - Document folders to workspace
+documents/debugger-manual,engineering/document-production/workspace/debugger-manual,directory,2025-08-31,SWEEP 4 - Document folders to workspace
+documents/p2-debug-window-system-manual,engineering/document-production/workspace/p2-debug-window-system-manual,directory,2025-08-31,SWEEP 4 - Document folders to workspace
+documents/pasm2-user-manual,engineering/document-production/workspace/pasm2-user-manual,directory,2025-08-31,SWEEP 4 - Document folders to workspace
+documents/spin2-user-manual,engineering/document-production/workspace/spin2-user-manual,directory,2025-08-31,SWEEP 4 - Document folders to workspace
+documents/terminal-window-manual,engineering/document-production/workspace/terminal-window-manual,directory,2025-08-31,SWEEP 4 - Document folders to workspace
+.sprints/,engineering/history/sprints/,directory,2025-08-31,SWEEP 5 - Sprint history archival
+releases/,engineering/history/releases/,directory,2025-08-31,SWEEP 5 - Release history archival
+SESSION-END-BACKUP-20250825.md,engineering/history/sessions/SESSION-END-BACKUP-20250825.md,file,2025-08-31,SWEEP 5 - Session backup archival
+SESSION-END-BACKUP-20250825-FINAL.md,engineering/history/sessions/SESSION-END-BACKUP-20250825-FINAL.md,file,2025-08-31,SWEEP 5 - Session backup archival
+context-extractions/,engineering/history/sessions/context-extractions/,directory,2025-08-31,SWEEP 5 - Context extraction archival
+tasks/archives/,engineering/history/task-archives/,directory,2025-08-31,SWEEP 5 - Task archive consolidation
+(new),engineering/knowledge-base/debt.md,file,2025-08-31,SWEEP 6 - Consolidated knowledge gap debt tracking
+(new),engineering/ingestion/debt.md,file,2025-08-31,SWEEP 6 - Consolidated extraction and ingestion debt tracking
+(new),engineering/document-production/debt.md,file,2025-08-31,SWEEP 6 - Consolidated template and visual asset debt tracking
+technical-debt/SPRINT-PLANNING-PROCESS.md,engineering/operations/planning/sprint-planning-debt-integration.md,file,2025-08-31,SWEEP 6 - Moved sprint planning debt integration
+technical-debt/,engineering/history/technical-debt-archived-2025-08-31/,directory,2025-08-31,SWEEP 6 - Archived technical debt directory
+analysis-debt/,engineering/history/analysis-debt-archived-2025-08-31/,directory,2025-08-31,SWEEP 6 - Archived analysis debt directory
+(new),engineering/tools/extraction/,directory,2025-08-31,SWEEP 7 - Created extraction tools directory
+(new),engineering/tools/conversion/,directory,2025-08-31,SWEEP 7 - Created conversion tools directory
+(new),engineering/tools/validation/,directory,2025-08-31,SWEEP 7 - Created validation tools directory
+(new),engineering/tools/automation/,directory,2025-08-31,SWEEP 7 - Created automation tools directory
+(new),engineering/tools/conversion/test-files/,directory,2025-08-31,SWEEP 7 - Created test files directory
+tools/extract-manual-examples.py,engineering/tools/extraction/extract-manual-examples.py,file,2025-08-31,SWEEP 7 - Moved extraction script
+tools/find-images-in-code.py,engineering/tools/extraction/find-images-in-code.py,file,2025-08-31,SWEEP 7 - Moved image finder script
+tools/pdf_image_extractor.py,engineering/tools/extraction/pdf_image_extractor.py,file,2025-08-31,SWEEP 7 - Moved PDF image extractor
+tools/source-code-extractor.py,engineering/tools/extraction/source-code-extractor.py,file,2025-08-31,SWEEP 7 - Moved source code extractor
+tools/generate-smartpin-diagrams.py,engineering/tools/extraction/generate-smartpin-diagrams.py,file,2025-08-31,SWEEP 7 - Moved smartpin diagram generator
+tools/format-pasm-instructions.py,engineering/tools/conversion/format-pasm-instructions.py,file,2025-08-31,SWEEP 7 - Moved PASM formatter
+tools/uppercase-instructions-latex.py,engineering/tools/conversion/uppercase-instructions-latex.py,file,2025-08-31,SWEEP 7 - Moved uppercase LaTeX converter
+tools/uppercase-instructions.py,engineering/tools/conversion/uppercase-instructions.py,file,2025-08-31,SWEEP 7 - Moved uppercase converter
+tools/latex_escape_processor.py,engineering/tools/conversion/latex_escape_processor.py,file,2025-08-31,SWEEP 7 - Moved LaTeX escape processor
+tools/latex-escape-all.sh,engineering/tools/conversion/latex-escape-all.sh,file,2025-08-31,SWEEP 7 - Moved LaTeX escape script
+tools/apply-coloring.sh,engineering/tools/conversion/apply-coloring.sh,file,2025-08-31,SWEEP 7 - Moved coloring script
+tools/convert-to-div-blocks.sh,engineering/tools/conversion/convert-to-div-blocks.sh,file,2025-08-31,SWEEP 7 - Moved div blocks converter
+tools/validate-pasm-code.sh,engineering/tools/validation/validate-pasm-code.sh,file,2025-08-31,SWEEP 7 - Moved PASM validator
+tools/create-request-json.sh,engineering/tools/automation/create-request-json.sh,file,2025-08-31,SWEEP 7 - Moved request JSON creator
+pdf-forge-scripts/,engineering/pdf-forge/scripts/,directory,2025-08-31,SWEEP 7 - Moved PDF forge scripts directory
+tools/test-comprehensive-p2.md,engineering/tools/conversion/test-files/test-comprehensive-p2.md,file,2025-08-31,SWEEP 7 - Moved test file
+tools/test-exact-output.md,engineering/tools/conversion/test-files/test-exact-output.md,file,2025-08-31,SWEEP 7 - Moved test file
+tools/test-exact.md,engineering/tools/conversion/test-files/test-exact.md,file,2025-08-31,SWEEP 7 - Moved test file
+tools/test-image-paths.md,engineering/tools/conversion/test-files/test-image-paths.md,file,2025-08-31,SWEEP 7 - Moved test file
+tools/test-p2-literals.md,engineering/tools/conversion/test-files/test-p2-literals.md,file,2025-08-31,SWEEP 7 - Moved test file
+tools/test-url-encoded.md,engineering/tools/conversion/test-files/test-url-encoded.md,file,2025-08-31,SWEEP 7 - Moved test file
+tools/latex-escaping-test-cases-GOLD-STANDARD.md,engineering/tools/conversion/test-files/latex-escaping-test-cases-GOLD-STANDARD.md,file,2025-08-31,SWEEP 7 - Moved test standard
+tools/latex-escaping-test-cases-SCRIPT-OUTPUT.md,engineering/tools/conversion/test-files/latex-escaping-test-cases-SCRIPT-OUTPUT.md,file,2025-08-31,SWEEP 7 - Moved test output
+tools/latex-escaping-test-cases.md,engineering/tools/conversion/test-files/latex-escaping-test-cases.md,file,2025-08-31,SWEEP 7 - Moved test cases
+tools/validation-sprint-pipeline.md,engineering/operations/project-guidance/validation-sprint-pipeline.md,file,2025-08-31,SWEEP 7 - Moved validation pipeline
+tools/mcp-sprint-a1-object-inventory.md,engineering/operations/project-guidance/mcp-sprint-a1-object-inventory.md,file,2025-08-31,SWEEP 7 - Moved MCP inventory
+tools/p2-knowledge-sprint-plan.md,engineering/operations/planning/p2-knowledge-sprint-plan.md,file,2025-08-31,SWEEP 7 - Moved sprint plan
+tools/p2-pattern-mining-plan.md,engineering/operations/planning/p2-pattern-mining-plan.md,file,2025-08-31,SWEEP 7 - Moved pattern mining plan
+tools/sprint-retrospective-template.md,engineering/operations/project-guidance/sprint-retrospective-template.md,file,2025-08-31,SWEEP 7 - Moved retrospective template
+tools/master-checklist-template.md,engineering/operations/project-guidance/master-checklist-template.md,file,2025-08-31,SWEEP 7 - Moved checklist template
+tools/document-creation-criteria.md,engineering/document-production/methodology/document-creation-criteria.md,file,2025-08-31,SWEEP 7 - Moved creation criteria
+tools/MARKDOWN-TRANSFORMS-REQUIRED.md,engineering/document-production/methodology/MARKDOWN-TRANSFORMS-REQUIRED.md,file,2025-08-31,SWEEP 7 - Moved markdown transforms
+tools/TOOL-REGRESSION-PATTERN.md,engineering/tools/documentation/TOOL-REGRESSION-PATTERN.md,file,2025-08-31,SWEEP 7 - Moved regression pattern
+(new),engineering/tools/README.md,file,2025-08-31,SWEEP 7 - Created comprehensive tools README
+(new),engineering/operations/project-guidance/methodology/,directory,2025-08-31,PHASE 2 - Created methodology directory
+TECHNICAL-CLIMBING-METHODOLOGY.md,engineering/operations/project-guidance/methodology/TECHNICAL-CLIMBING-METHODOLOGY.md,file,2025-08-31,PHASE 2 - Moved technical climbing methodology
+CRITICAL-NON-DESTRUCTIVE-PROTOCOLS.md,engineering/operations/project-guidance/methodology/CRITICAL-NON-DESTRUCTIVE-PROTOCOLS.md,file,2025-08-31,PHASE 2 - Moved non-destructive protocols
+BACKUP-STRATEGY.md,engineering/operations/project-guidance/methodology/BACKUP-STRATEGY.md,file,2025-08-31,PHASE 2 - Moved backup strategy
+PROJECT-GOALS.md,engineering/operations/planning/strategic/PROJECT-GOALS.md,file,2025-08-31,PHASE 2 - Moved project goals to strategic
+AI-DISCOVERY-STRATEGY.md,engineering/operations/planning/strategic/AI-DISCOVERY-STRATEGY.md,file,2025-08-31,PHASE 2 - Moved AI discovery strategy
+demand-driven-development-strategy.md,engineering/operations/planning/strategic/demand-driven-development-strategy.md,file,2025-08-31,PHASE 2 - Moved demand-driven strategy
+project-information-architecture.md,engineering/operations/planning/strategic/project-information-architecture.md,file,2025-08-31,PHASE 2 - Moved information architecture
+STARTUP-BY-WORK-TYPE.md,engineering/operations/claude-guidance/STARTUP-BY-WORK-TYPE.md,file,2025-08-31,PHASE 2 - Moved startup work type guide
+adaptive-mentoring-framework.md,engineering/operations/claude-guidance/adaptive-mentoring-framework.md,file,2025-08-31,PHASE 2 - Moved adaptive mentoring framework
+ai-assisted-developer-use-cases.md,engineering/operations/claude-guidance/ai-assisted-developer-use-cases.md,file,2025-08-31,PHASE 2 - Moved AI developer use cases
+PDF-FORGE-PERSPECTIVES.md,engineering/pdf-forge/guides/PDF-FORGE-PERSPECTIVES.md,file,2025-08-31,PHASE 2 - Moved PDF forge perspectives
+PDF-FORGE-WORKFLOW-THOUGHTS.md,engineering/pdf-forge/guides/PDF-FORGE-WORKFLOW-THOUGHTS.md,file,2025-08-31,PHASE 2 - Moved PDF forge workflow thoughts
+p1-to-p2-migration-framework.md,deliverables/learning-paths/p1-to-p2-migration-framework.md,file,2025-08-31,PHASE 2 - Moved P1 to P2 migration to learning paths
+DOCUMENT-LINEAGE.md,engineering/ingestion/DOCUMENT-LINEAGE.md,file,2025-08-31,PHASE 2 - Moved document lineage
+DOCUMENT-ROADMAP.md,engineering/operations/planning/DOCUMENT-ROADMAP.md,file,2025-08-31,PHASE 2 - Moved document roadmap
+REPOSITORY-STRUCTURE.md,engineering/operations/REPOSITORY-STRUCTURE.md,file,2025-08-31,PHASE 2 - Moved repository structure
+INDEX.md,engineering/operations/INDEX.md,file,2025-08-31,PHASE 2 - Moved index file
+VERSION-0.1-RELEASE.md,engineering/history/releases/VERSION-0.1-RELEASE.md,file,2025-08-31,PHASE 2 - Moved version release notes
+GITHUB-REPO-SETUP.md,engineering/operations/GITHUB-REPO-SETUP.md,file,2025-08-31,PHASE 2 - Moved GitHub setup guide
+P2-SOURCE-STUDY-COMPLETE-MAP.md,engineering/ingestion/P2-SOURCE-STUDY-COMPLETE-MAP.md,file,2025-08-31,PHASE 2 - Moved source study map
+PASM2-DOCUMENTATION-CAPABILITY-ASSESSMENT.md,engineering/knowledge-base/PASM2-DOCUMENTATION-CAPABILITY-ASSESSMENT.md,file,2025-08-31,PHASE 2 - Moved PASM2 capability assessment
+smart-pin-pedagogical-progression.md,engineering/document-production/smart-pin-pedagogical-progression.md,file,2025-08-31,PHASE 2 - Moved smart pin progression
+source-quality-matrix-3d.md,engineering/ingestion/source-quality-matrix-3d.md,file,2025-08-31,PHASE 2 - Moved source quality matrix
+test-escape-output.md,engineering/tools/conversion/test-files/test-escape-output.md,file,2025-08-31,PHASE 2 - Moved test escape output
+test-escape.md,engineering/tools/conversion/test-files/test-escape.md,file,2025-08-31,PHASE 2 - Moved test escape file
+test-escape.md.backup.20250828_231723,engineering/tools/conversion/test-files/test-escape.md.backup.20250828_231723,file,2025-08-31,PHASE 2 - Moved test escape backup
+(new),engineering/operations/migration/uncertain/,directory,2025-08-31,PHASE 2 - Created uncertain items directory
+smart-pins-list-fixes.md,engineering/operations/migration/uncertain/smart-pins-list-fixes.md,file,2025-08-31,PHASE 2 - Moved to uncertain for resolution
+(new),engineering/operations/migration/uncertain/CATALOG.md,file,2025-08-31,PHASE 2 - Created uncertain items catalog
+analyze_pasm2_instructions.py,engineering/tools/extraction/analyze_pasm2_instructions.py,file,2025-08-31,PHASE 2 - Moved PASM2 analysis script
+check_latex_braces.py,engineering/tools/validation/check_latex_braces.py,file,2025-08-31,PHASE 2 - Moved LaTeX validation script
+check-todo-mcp-signing.sh,engineering/tools/validation/check-todo-mcp-signing.sh,file,2025-08-31,PHASE 2 - Moved todo MCP check script
+test.sh,engineering/tools/validation/test.sh,file,2025-08-31,PHASE 2 - Moved test script
+(new),deliverables/developer-docs/,directory,2025-08-31,PHASE 3 - Created developer docs directory
+(new),deliverables/developer-docs/START-HERE.md,file,2025-08-31,PHASE 3 - Created developer start guide
+(new),deliverables/reference/,directory,2025-08-31,PHASE 3 - Created reference directory
+ai-reference/,deliverables/ai-reference/,directory,2025-08-31,PHASE 3 - Moved AI reference to deliverables
+learning-paths/01-fundamentals/,deliverables/learning-paths/01-fundamentals/,directory,2025-08-31,PHASE 3 - Moved fundamentals learning path
+developer-reference/architecture-overview.md,deliverables/reference/architecture-overview.md,file,2025-08-31,PHASE 3 - Moved architecture overview
+quick-reference/pasm2-essentials.md,deliverables/reference/pasm2-essentials.md,file,2025-08-31,PHASE 3 - Moved PASM2 essentials
+engineering/operations/migration/uncertain/smart-pins-list-fixes.md,engineering/history/work-notes/2025-08-28-smart-pins-list-fixes.md,file,2025-09-01,PHASE 7 - Resolved uncertain item to history
+documents/DOCUMENT-SPECIFICATION-GUIDE-TEMPLATE.md,engineering/document-production/templates/DOCUMENT-SPECIFICATION-GUIDE-TEMPLATE.md,file,2025-09-01,PHASE 1B - Moved document template
+documentation/best-practices/,engineering/operations/standards/best-practices/,directory,2025-09-01,PHASE 1B - Moved best practices
+documentation/guides/,engineering/operations/guides/,directory,2025-09-01,PHASE 1B - Moved guides
+documentation/manuals/,engineering/document-production/manuals/,directory,2025-09-01,PHASE 1B - Moved manuals
+documentation/pipelines/,engineering/document-production/pipelines/,directory,2025-09-01,PHASE 1B - Moved pipelines
+documents/,REMOVED,directory,2025-09-01,PHASE 1B - Removed empty folder
+documentation/,REMOVED,directory,2025-09-01,PHASE 1B - Removed after consolidation
+sources/,engineering/ingestion/sources/,directory,2025-09-01,PHASE 26 - Moved entire ingestion system
+import/,engineering/ingestion/external-inputs/,directory,2025-09-01,PHASE 27 - Moved external inputs (not in git)
+Scratchpad/,engineering/workspace/archived-work/,directory,2025-09-01,PHASE 28 - Distributed to archived work (not in git)
+exports/pdf-generation/outbound/,engineering/pdf-forge/production/,directory,2025-09-01,PHASE 29 - Renamed outbound to production
+exports/pdf-generation/workspace/,engineering/workspace/documents/,directory,2025-09-01,PHASE 29 - Moved workspace to documents
+exports/pdf-generation/inbound/,engineering/pdf-forge/inbound/,directory,2025-09-01,PHASE 29 - Moved inbound to pdf-forge
+exports/,engineering/workspace/documents/,directory,2025-09-01,PHASE 29 - Redistributed remaining exports
+engineering/ingestion/external-inputs/from-pdf-forge/,engineering/pdf-forge/reference/from-pdf-forge/,directory,2025-09-01,PHASE 29.5 - Consolidated PDF Forge references
+pipelines/,engineering/pipelines/,directory,2025-09-01,PHASE 30 - Moved pipelines to engineering
+p2-claude-knowledge/,deliverables/ai-reference/p2-claude-knowledge/,directory,2025-09-01,PHASE 31 - Moved AI reference material
+documentation-standards/,engineering/standards/documentation-standards/,directory,2025-09-01,PHASE 32 - Moved to standards
+markets/,engineering/planning/markets/,directory,2025-09-01,PHASE 33 - Moved to planning
+presentations/,engineering/planning/presentations/,directory,2025-09-01,PHASE 34 - Moved to planning
+sprint-candidates/,engineering/planning/sprint-candidates/,directory,2025-09-01,PHASE 35 - Moved to planning
+strategic-insights/,engineering/planning/strategic-insights/,directory,2025-09-01,PHASE 36 - Moved to planning
+extracted_code/,engineering/testing/extracted_code/,directory,2025-09-01,PHASE 37 - Moved to testing
+engineering/knowledge-base/PASM2-DOCUMENTATION-CAPABILITY-ASSESSMENT.md,engineering/document-production/analysis/,correction,2025-09-01,CORRECTION 1 - Moved to proper analysis location
+engineering/knowledge-base/debt.md,engineering/operations/technical-debt/,correction,2025-09-01,CORRECTION 1 - Moved to technical debt location
+engineering/ingestion/sources/sources/p1-master/,engineering/knowledge-base/P1/,correction,2025-09-01,CORRECTION 1 - Established P1 knowledge base
+engineering/ingestion/sources/sources/pasm2-master/,engineering/knowledge-base/P2/,correction,2025-09-01,CORRECTION 1 - Established P2 knowledge base
+engineering/document-production/analysis/PASM2-DOCUMENTATION-CAPABILITY-ASSESSMENT.md,engineering/knowledge-base/P2/,correction,2025-09-01,CORRECTION 2 - Moved to P2 knowledge base where it belongs
+engineering/ingestion/sources/sources/analysis/PASM2-MANUAL-EXTRACTION-AUDIT.md,engineering/ingestion/sources/pasm2-manual/,file,2025-09-01,PHASE 41 - Individual audit to project folder
+engineering/ingestion/sources/sources/analysis/silicon-extraction-audit.md,engineering/ingestion/sources/silicon-doc/,file,2025-09-01,PHASE 41 - Individual audit to project folder
+engineering/ingestion/sources/sources/analysis/spin2-extraction-audit.md,engineering/ingestion/sources/spin2-v51/,file,2025-09-01,PHASE 41 - Individual audit to project folder
+engineering/ingestion/sources/sources/analysis/pasm2-spreadsheet-audit.md,engineering/ingestion/sources/p2-instructions-csv/,file,2025-09-01,PHASE 41 - Individual audit to project folder
+engineering/ingestion/sources/sources/analysis/datasheet-audit-report.md,engineering/ingestion/sources/p2-datasheet/,file,2025-09-01,PHASE 41 - Individual audit to new project folder
+engineering/ingestion/sources/sources/analysis/spec-sheet-audit-report.md,engineering/ingestion/sources/p2-spec-sheet/,file,2025-09-01,PHASE 41 - Individual audit to new project folder
+engineering/ingestion/sources/sources/analysis/p2docs-validation-report.md,engineering/ingestion/sources/p2docs-github-io/,file,2025-09-01,PHASE 41 - Individual audit to new project folder
+engineering/ingestion/sources/sources/analysis/terminal-window-completeness-audit.md,engineering/ingestion/sources/spin2-v51/,file,2025-09-01,PHASE 41 - Terminal audit to spin2 folder
+engineering/ingestion/sources/sources/analysis/marketing-docs-knowledge-contributions.md,engineering/ingestion/sources/marketing-materials/,file,2025-09-01,PHASE 41 - Marketing audit to new folder
+engineering/ingestion/sources/sources/analysis/,engineering/ingestion/central-analysis/,directory,2025-09-01,PHASE 41 - Cross-ingestion analysis files
+engineering/ingestion/sources/sources/,engineering/ingestion/ingestion-metadata/,directory,2025-09-01,PHASE 41 - Ingestion metadata files
+engineering/ingestion/sources/sources/visual-assets/,engineering/ingestion/visual-assets-catalog/,directory,2025-09-01,PHASE 41 - Visual assets to catalog
+engineering/ingestion/sources/sources/pasm2-manual-development/,engineering/ingestion/sources/pasm2-manual-development/,directory,2025-09-01,PHASE 41 - Moved up one level
+engineering/ingestion/sources/sources/analysis/SILICON-DOC-V35-INTEGRATION-SUMMARY.md,engineering/ingestion/sources/silicon-doc/,file,2025-09-01,PHASE 41 - Silicon summary to project
+engineering/ingestion/sources/sources/analysis/datasheet-style-analysis.md,engineering/ingestion/sources/p2-datasheet/,file,2025-09-01,PHASE 41 - Style analysis to project
+engineering/ingestion/sources/sources/analysis/spec-sheet-style-analysis.md,engineering/ingestion/sources/p2-spec-sheet/,file,2025-09-01,PHASE 41 - Style analysis to project
+engineering/ingestion/sources/sources/analysis/work-session-summary-20250814.md,engineering/history/,file,2025-09-01,PHASE 41 - Work session to history
+engineering/ingestion/sources/sources/analysis/p2-market-applications.md,engineering/planning/markets/,file,2025-09-01,PHASE 41 - Market apps to planning
+engineering/ingestion/sources/sources/extractions-v1-archived/,engineering/history/extractions-v1-archived/,directory,2025-09-01,PHASE 41 - V1 archives to history
+engineering/ingestion/sources/sources/,REMOVED,directory,2025-09-01,PHASE 41 - Removed empty double-nested directory
+engineering/history/sprints/.sprints/,engineering/history/sprints/,directory,2025-09-01,PHASE 42 - Moved contents up from hidden directory
+engineering/pdf-forge/scripts/pdf-forge-scripts/,engineering/pdf-forge/scripts/,directory,2025-09-01,PHASE 43 - Flattened PDF Forge scripts structure
+engineering/ingestion/sources/edge-module-breadboard/assets/assets/,engineering/ingestion/sources/edge-module-breadboard/assets/,directory,2025-09-01,PHASE 44 - Fixed assets/assets nesting
+engineering/ingestion/sources/spin2-v51/assets/assets/,engineering/ingestion/sources/spin2-v51/assets/,directory,2025-09-01,PHASE 44 - Fixed assets/assets nesting
+engineering/ingestion/sources/pasm2-manual/assets/assets/,engineering/ingestion/sources/pasm2-manual/assets/,directory,2025-09-01,PHASE 44 - Fixed assets/assets nesting
+engineering/ingestion/sources/silicon-doc/assets/assets/,engineering/ingestion/sources/silicon-doc/assets/,directory,2025-09-01,PHASE 44 - Fixed assets/assets nesting
+engineering/ingestion/sources/p2-eval-board/assets/assets/,engineering/ingestion/sources/p2-eval-board/assets/,directory,2025-09-01,PHASE 44 - Fixed assets/assets nesting
+engineering/ingestion/sources/edge-breakout-board/assets/assets/,engineering/ingestion/sources/edge-breakout-board/assets/,directory,2025-09-01,PHASE 44 - Fixed assets/assets nesting
+engineering/ingestion/sources/edge-standard-module/assets/assets/,engineering/ingestion/sources/edge-standard-module/assets/,directory,2025-09-01,PHASE 44 - Fixed assets/assets nesting
+engineering/ingestion/sources/smart-pins/assets/assets/,engineering/ingestion/sources/smart-pins/assets/,directory,2025-09-01,PHASE 44 - Fixed assets/assets nesting
+engineering/ingestion/sources/edge-32mb-module/assets/assets/,engineering/ingestion/sources/edge-32mb-module/assets/,directory,2025-09-01,PHASE 44 - Fixed assets/assets nesting
+engineering/workspace/documents/terminal-window-manual/,engineering/document-production/manuals/terminal-window-manual/,directory,2025-09-01,PHASE 45 - Moved manual from workspace to production
+engineering/pipelines/pdf-generation-workflow-v1.md,DELETED,file,2025-09-01,PHASE 45 - Deleted obsolete workflow version
+engineering/pipelines/pdf-generation-workflow-v2.md,engineering/pipelines/pdf-generation-workflow.md,file,2025-09-01,PHASE 45 - Renamed to remove version suffix
+engineering/pipelines/documentation-market-strategy.md,engineering/pipelines/pipeline-prioritization-market-strategy.md,file,2025-09-01,PHASE 45 - Renamed for clarity
+engineering/workspace/documents/P2-MISSING-INSTRUCTIONS-ANALYSIS.md,engineering/ingestion/central-analysis/P2-MISSING-INSTRUCTIONS-ANALYSIS.md,file,2025-09-01,PHASE 45 - Moved analysis to central location

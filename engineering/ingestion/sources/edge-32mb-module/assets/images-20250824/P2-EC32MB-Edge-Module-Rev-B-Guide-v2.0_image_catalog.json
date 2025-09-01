@@ -1,0 +1,309 @@
+{
+  "source_pdf": "sources/originals/P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0.pdf",
+  "extraction_summary": {
+    "total_images": 6,
+    "total_pages": 13,
+    "output_directory": "extracted_images_P2_EC32MB"
+  },
+  "images": [
+    {
+      "filename": "P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0_page01_img01.png",
+      "source_pdf": "P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0.pdf",
+      "page_number": 1,
+      "image_index": 1,
+      "dimensions": "904\u00d7152",
+      "width": 904,
+      "height": 152,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_P2_EC32MB/P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0_page01_img01.png",
+      "xref": 10,
+      "extraction_status": "success",
+      "file_size_bytes": 46163,
+      "context": {
+        "caption": "Web Store: www.parallax.com",
+        "nearby_text": [
+          {
+            "text": "Web Store: www.parallax.com",
+            "distance": 3.7350006103515625,
+            "position": "above"
+          },
+          {
+            "text": "Sales: (888) 512-1024",
+            "distance": 3.7350006103515625,
+            "position": "above"
+          },
+          {
+            "text": "Tech Support: support@parallax.com",
+            "distance": 4.5149993896484375,
+            "position": "below"
+          },
+          {
+            "text": "Fax: (916) 624-8003",
+            "distance": 4.5149993896484375,
+            "position": "below"
+          },
+          {
+            "text": "Tutorials: learn.parallax.com",
+            "distance": 9.0,
+            "position": "right"
+          }
+        ],
+        "potential_captions": [
+          "Web Store: www.parallax.com",
+          "Tutorials: learn.parallax.com",
+          "Sales: sales@parallax.com"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram",
+        "edge-module"
+      ]
+    },
+    {
+      "filename": "P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0_page01_img02.png",
+      "source_pdf": "P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0.pdf",
+      "page_number": 1,
+      "image_index": 2,
+      "dimensions": "1356\u00d7995",
+      "width": 1356,
+      "height": 995,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_P2_EC32MB/P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0_page01_img02.png",
+      "xref": 11,
+      "extraction_status": "success",
+      "file_size_bytes": 72641,
+      "context": {
+        "caption": "Web Store: www.parallax.com",
+        "nearby_text": [
+          {
+            "text": "P2 Edge Module with 32MB RAM (#P2-EC32MB)",
+            "distance": 12.233627319335938,
+            "position": "above"
+          },
+          {
+            "text": "The P2 Edge Module with 32MB RAM is a simple way to get started with the Propeller 2 multicore microcontroller. In addition to speeding development, this module provides an optimal P2 building block for system integrators and designers to include in their products.",
+            "distance": 25.80462646484375,
+            "position": "below"
+          },
+          {
+            "text": "Web Store: www.parallax.com",
+            "distance": 44.25,
+            "position": "above"
+          },
+          {
+            "text": "Tutorials: learn.parallax.com",
+            "distance": 44.25,
+            "position": "above"
+          },
+          {
+            "text": "Sales: sales@parallax.com",
+            "distance": 44.25,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "Web Store: www.parallax.com",
+          "Tutorials: learn.parallax.com",
+          "Sales: sales@parallax.com"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "edge-module"
+      ]
+    },
+    {
+      "filename": "P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0_page01_img03.png",
+      "source_pdf": "P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0.pdf",
+      "page_number": 1,
+      "image_index": 3,
+      "dimensions": "1356\u00d7995",
+      "width": 1356,
+      "height": 995,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_P2_EC32MB/P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0_page01_img03.png",
+      "xref": 12,
+      "extraction_status": "success",
+      "file_size_bytes": 55846,
+      "context": {
+        "caption": "Tutorials: learn.parallax.com",
+        "nearby_text": [
+          {
+            "text": "P2 Edge Module with 32MB RAM (#P2-EC32MB)",
+            "distance": 12.233627319335938,
+            "position": "above"
+          },
+          {
+            "text": "The P2 Edge Module with 32MB RAM is a simple way to get started with the Propeller 2 multicore microcontroller. In addition to speeding development, this module provides an optimal P2 building block for system integrators and designers to include in their products.",
+            "distance": 25.80462646484375,
+            "position": "below"
+          },
+          {
+            "text": "Sales: sales@parallax.com",
+            "distance": 40.640533447265625,
+            "position": "above"
+          },
+          {
+            "text": "Tutorials: learn.parallax.com",
+            "distance": 48.51116943359375,
+            "position": "above"
+          },
+          {
+            "text": "Web Store: www.parallax.com",
+            "distance": 55.48089599609375,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "Tutorials: learn.parallax.com",
+          "Sales: sales@parallax.com",
+          "P2 Edge Module with 32MB RAM (#P2-EC32MB)"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "edge-module"
+      ]
+    },
+    {
+      "filename": "P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0_page03_img01.png",
+      "source_pdf": "P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0.pdf",
+      "page_number": 3,
+      "image_index": 1,
+      "dimensions": "1308\u00d7937",
+      "width": 1308,
+      "height": 937,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_P2_EC32MB/P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0_page03_img01.png",
+      "xref": 18,
+      "extraction_status": "success",
+      "file_size_bytes": 84217,
+      "context": {
+        "caption": "Feature Descriptions",
+        "nearby_text": [
+          {
+            "text": "Read the full explanation of each labeled feature on the pages that follow this diagram.",
+            "distance": 2.16802978515625,
+            "position": "above"
+          },
+          {
+            "text": "1. Propeller 2 P2X8C4M64P",
+            "distance": 19.406707763671875,
+            "position": "below"
+          },
+          {
+            "text": "Feature Descriptions",
+            "distance": 25.499374389648438,
+            "position": "above"
+          },
+          {
+            "text": "The Propeller 2 has 8 independent processor cogs, 512 KB of shared hub RAM, and 64 Smart I/O pins. See the Propeller 2 documentation section of  www.parallax.com  for detailed information about this device. 46 I/O pins are brought out to the card edge pads; see  11. Edge connector .",
+            "distance": 43.05462646484375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "Feature Descriptions",
+          "Read the full explanation of each labeled feature on the pages that follow this diagram.",
+          "1. Propeller 2 P2X8C4M64P"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "edge-module"
+      ]
+    },
+    {
+      "filename": "P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0_page09_img01.png",
+      "source_pdf": "P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0.pdf",
+      "page_number": 9,
+      "image_index": 1,
+      "dimensions": "1527\u00d71513",
+      "width": 1527,
+      "height": 1513,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_P2_EC32MB/P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0_page09_img01.png",
+      "xref": 48,
+      "extraction_status": "success",
+      "file_size_bytes": 543043,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "This illustration identifies the physical pins on the Propeller 2.  See the Propeller 2 documentation at  www.parallax.com  for detailed information about the device.  In this document, see the  Edge Connector Pin Assignments  section for details on how they are used on the P2 Edge Module.",
+            "distance": 14.16802978515625,
+            "position": "above"
+          },
+          {
+            "text": "Propeller 2 Physical Pins",
+            "distance": 82.49937438964844,
+            "position": "above"
+          },
+          {
+            "text": "Copyright \u00a9 Parallax Inc. P2 Edge Module (#P2-EC32MB) v2.0 5/23/2022  Page 9 of 13",
+            "distance": 91.12255859375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "edge-module"
+      ]
+    },
+    {
+      "filename": "P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0_page12_img01.png",
+      "source_pdf": "P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0.pdf",
+      "page_number": 12,
+      "image_index": 1,
+      "dimensions": "2048\u00d71645",
+      "width": 2048,
+      "height": 1645,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_P2_EC32MB/P2-EC32MB-Edge-Module-Rev-B-Guide-v2.0_page12_img01.png",
+      "xref": 58,
+      "extraction_status": "success",
+      "file_size_bytes": 215266,
+      "context": {
+        "caption": "Module Dimensions",
+        "nearby_text": [
+          {
+            "text": "Module Dimensions",
+            "distance": 13.59320068359375,
+            "position": "above"
+          },
+          {
+            "text": "RESn Reset input, active low 3.3 3.6 V",
+            "distance": 63.030853271484375,
+            "position": "above"
+          },
+          {
+            "text": "P0 - P63 Any I/O Pin 3.3 3.6 V",
+            "distance": 78.78085327148438,
+            "position": "above"
+          },
+          {
+            "text": "5-16 VIN DC Supply Voltage 5 16 V",
+            "distance": 94.53085327148438,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "Module Dimensions"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "edge-module"
+      ]
+    }
+  ]
+}

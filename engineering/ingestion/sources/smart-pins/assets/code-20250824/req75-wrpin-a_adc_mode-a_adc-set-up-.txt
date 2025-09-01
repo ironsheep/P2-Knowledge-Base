@@ -1,0 +1,9 @@
+' Source: P2 SmartPins-220809 (Page 39)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Code Fragment
+
+        wrpin     A_ADC_mode, #A_ADC   'Set up mode for ADC     
+        wxpin     #%01_0111, #A_ADC    '8-bit resolution
+        dirh      #A_ADC               'Enable Smart Pin
+        setse1    #%001<<6 + A_ADC     'Special event trigger
+                                       '  #1 on A_ADC high

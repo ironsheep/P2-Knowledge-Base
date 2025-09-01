@@ -1,0 +1,20 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+smps_init
+        mov     pa, ##P_PERIODIC_PULSE | P_OE
+        wrpin   pa, #20         ' Configure SMPS
+        mov     pa, ##2000      ' 100kHz @ 200MHz
+        wxpin   pa, #20
+        dirh    #20
+        
+buck_mode
+        mov     pa, ##1000      ' 50% initial duty
+        wypin   pa, #20
+        
+' ⚠️ Advanced SMPS patterns require external validation

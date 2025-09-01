@@ -1,0 +1,35 @@
+{
+  "format_type": "template_testing",
+  "template": "p2kb-smart-pins.latex",
+  "metadata": {
+    "title": "Comprehensive Template Testing Suite",
+    "author": "P2 Knowledge Base",
+    "documentclass": "book"
+  },
+  "tests": [
+    {
+      "name": "text-only",
+      "input": "text-sample.md"
+    },
+    {
+      "name": "code-blocks",
+      "input": "code-sample.md",
+      "lua_filters": ["div-to-env"],
+      "metadata": {
+        "title": "Code Block Test"
+      }
+    },
+    {
+      "name": "variable-override",
+      "input": "basic-sample.md",
+      "variables": {
+        "fontsize": "12pt",
+        "papersize": "letter"
+      }
+    }
+  ],
+  "options": {
+    "debug_tex": true,
+    "auto_fix_attempt": false
+  }
+}

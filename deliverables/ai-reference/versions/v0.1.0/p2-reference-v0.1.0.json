@@ -1,0 +1,182 @@
+{
+  "meta": {
+    "version": "0.1.0",
+    "release_date": "2025-08-14",
+    "completeness": 0.65,
+    "stable": false,
+    "breaking_changes_expected": true,
+    "sources": {
+      "primary": "P2 Documentation v35 - Rev B/C Silicon by Chip Gracey",
+      "instruction_set": "P2 Instructions v35 Spreadsheet",
+      "contributors": ["Chip Gracey (cgracey@parallax.com)", "Parallax Inc."]
+    }
+  },
+  
+  "architecture": {
+    "cogs": {
+      "count": 8,
+      "type": "symmetric",
+      "memory_per_cog": "512 longs (2KB) COG RAM",
+      "registers_per_cog": "$000-$1FF",
+      "execution": "2-clock instructions typical"
+    },
+    "hub": {
+      "memory_size": "512KB",
+      "access_method": "Egg Beater - 8-way interleaved",
+      "slice_rotation": "Every clock cycle",
+      "long_access": "Random: 9-16 clocks, Sequential: 2 clocks"
+    },
+    "smart_pins": {
+      "count": 64,
+      "modes": 32,
+      "status": "partial_documentation",
+      "note": "Complete documentation pending from Jon Titus"
+    },
+    "cordic": {
+      "pipeline_stages": 54,
+      "operations": ["rotate", "vector", "multiply", "divide", "sqrt", "log", "exp"],
+      "precision": "32-bit"
+    },
+    "clock": {
+      "internal_rc": "~24MHz",
+      "pll_range": "3.125MHz to 500MHz",
+      "xi_input": "DC to 200MHz",
+      "max_sysclock": "180MHz typical"
+    }
+  },
+  
+  "instructions": {
+    "total_count": 491,
+    "categories": {
+      "math_logic": {
+        "count": 73,
+        "complete": ["ADD", "SUB", "AND", "OR", "XOR", "NOT", "MUL", "DIV"],
+        "partial": ["MULS", "DIVS"],
+        "examples": true
+      },
+      "memory": {
+        "count": 45,
+        "complete": ["MOV", "RDLONG", "WRLONG", "RDBYTE", "WRBYTE"],
+        "partial": ["RDFAST", "WRFAST"],
+        "hub_timing_documented": true
+      },
+      "flow_control": {
+        "count": 38,
+        "complete": ["JMP", "CALL", "RET", "DJNZ", "IJNZ"],
+        "partial": ["CALLD", "RETD"],
+        "conditional_execution": true
+      },
+      "pin_control": {
+        "count": 35,
+        "complete": ["DRVL", "DRVH", "DRVNOT", "TESTP"],
+        "partial": ["WRPIN", "WXPIN", "WYPIN"],
+        "smart_pin_integration": "partial"
+      },
+      "cordic": {
+        "count": 8,
+        "complete": ["QROTATE", "QVECTOR"],
+        "partial": ["QMUL", "QDIV", "QSQRT"],
+        "timing": "55-58 clocks typical"
+      },
+      "interrupts": {
+        "count": 15,
+        "levels": 3,
+        "complete": ["SETINT1", "SETINT2", "SETINT3"],
+        "partial": ["TRGINT1", "NIXINT1"]
+      },
+      "special": {
+        "count": 42,
+        "complete": ["NOP", "HUBSET", "COGINIT"],
+        "partial": ["DEBUG", "STREAMER"],
+        "missing": ["USB"]
+      }
+    }
+  },
+  
+  "condition_codes": {
+    "supported": true,
+    "flags": ["C", "Z"],
+    "prefixes": {
+      "_RET_": "Execute if returning",
+      "IF_": "Execute conditionally",
+      "IF_C": "Execute if Carry set",
+      "IF_NC": "Execute if Carry clear",
+      "IF_Z": "Execute if Zero set",
+      "IF_NZ": "Execute if Zero clear"
+    }
+  },
+  
+  "memory_model": {
+    "cog_ram": {
+      "size": "512 longs",
+      "addressing": "$000-$1FF",
+      "special_registers": "$1F0-$1FF"
+    },
+    "lut_ram": {
+      "size": "512 longs",
+      "addressing": "$200-$3FF",
+      "shared_access": true
+    },
+    "hub_ram": {
+      "size": "512KB",
+      "addressing": "$00000-$7FFFF",
+      "byte_addressable": true
+    }
+  },
+  
+  "gaps": {
+    "boot_process": {
+      "status": "missing",
+      "workaround": "Use serial boot for development",
+      "needed_from": "Chip Gracey"
+    },
+    "usb_support": {
+      "status": "missing",
+      "workaround": "Use serial communication",
+      "needed_from": "Parallax"
+    },
+    "smart_pins_complete": {
+      "status": "partial",
+      "available_modes": 10,
+      "total_modes": 32,
+      "workaround": "Use documented modes only",
+      "pending_from": "Jon Titus documentation"
+    },
+    "bytecode_interpreter": {
+      "status": "missing",
+      "workaround": "Use PASM2 or external compiler",
+      "needed_from": "Chip Gracey"
+    },
+    "streamer_fifo": {
+      "status": "partial",
+      "workaround": "Use basic RDFAST/WRFAST",
+      "needed_from": "Documentation team"
+    }
+  },
+  
+  "discovery": {
+    "has_architecture": true,
+    "has_instruction_set": true,
+    "has_memory_model": true,
+    "has_pin_control": true,
+    "has_cordic": true,
+    "has_interrupts": true,
+    "has_boot_process": false,
+    "has_usb": false,
+    "has_complete_timing": false,
+    "has_all_smart_pins": false,
+    "has_bytecode": false
+  },
+  
+  "code_generation_ready": {
+    "basic_assembly": true,
+    "hub_memory_access": true,
+    "pin_control": true,
+    "cog_launching": true,
+    "cordic_math": true,
+    "smart_pins_basic": true,
+    "interrupts": false,
+    "usb": false,
+    "boot_configuration": false
+  }
+}

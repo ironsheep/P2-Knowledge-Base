@@ -1,0 +1,38 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  BUS_BASE = 20  ' P20-P27 for data
+  STROBE = 28    ' Strobe pin
+  
+PUB write_byte(data)
+  ' Set all pins as outputs
+  repeat pin from BUS_BASE to BUS_BASE+7
+    pinl(pin)
+    
+  ' Write data
+  repeat bit from 0 to 7
+    if data & (1 << bit)
+      pinh(BUS_BASE + bit)
+    else
+      pinl(BUS_BASE + bit)
+      
+  ' Strobe
+  pinh(STROBE)
+  waitus(1)
+  pinl(STROBE)
+  
+PUB read_byte() : data | pin
+  ' Set all pins as inputs
+  repeat pin from BUS_BASE to BUS_BASE+7
+    pinf(pin)
+    
+  ' Wait for strobe
+  repeat until pinr(STROBE)
+  
+  ' Read data
+  repeat bit from 0 to 7
+    if pinr(BUS_BASE + bit)
+      data |= (1 << bit)

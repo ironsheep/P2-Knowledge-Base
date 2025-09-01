@@ -1,0 +1,12 @@
+' Serial Communication Hardware Setup
+' Source: spin-debugger-v51-complete-analysis.md
+' Category: Hardware Setup
+' Description: Configure TX/RX pins for debug communication
+
+' Configure the tx pin so that it stays high
+wrpin   #%01_11110_0,@_txpin_/4
+
+' Configure the rx pin as a long repository to hold the clock frequency
+wrpin   #%00_00001_0,@_rxpin_/4
+dirh    @_rxpin_/4
+wxpin   _clkfreq_,@_rxpin_/4

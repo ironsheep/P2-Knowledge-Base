@@ -1,0 +1,22 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  REPO_PIN = 20
+  REPO_MODE = P_REPOSITORY | P_OE
+
+PUB setup_repository()
+  pinstart(REPO_PIN, REPO_MODE, 0, 0)
+
+PUB store_value(data)
+  wypin(REPO_PIN, data)       ' Store 32-bit value
+  
+PUB retrieve_value() : data
+  data := rdpin(REPO_PIN)     ' Read stored value
+  
+PUB share_between_cogs(value) | retrieved
+  store_value(value)          ' COG 1 stores
+  ' ... other COG can read ...
+  retrieved := retrieve_value() ' COG 2 reads

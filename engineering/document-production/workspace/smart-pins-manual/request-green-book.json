@@ -1,0 +1,135 @@
+{
+  "request_id": "green-book-smart-pins-tutorial",
+  "title": "P2 Smart Pins Green Book Tutorial",
+  "version": "2.0",
+  "document_type": "tutorial",
+  "template": "p2kb-smart-pins.latex",
+  "source_document": "P2-Smart-Pins-Complete-Reference.md",
+  "timestamp": "2025-08-30T18:50:00Z",
+  
+  "pandoc_args": [
+    "--lua-filter=smart-pins-colored-blocks.lua",
+    "--lua-filter=green-book-semantic-blocks.lua", 
+    "--lua-filter=part-chapter-pagebreaks.lua",
+    "--template=p2kb-smart-pins.latex",
+    "--pdf-engine=xelatex",
+    "--number-sections",
+    "--toc",
+    "--toc-depth=2"
+  ],
+
+  "document_class": {
+    "class": "book",
+    "options": ["11pt", "twoside", "openright"]
+  },
+
+  "template_variables": {
+    "book-type": "tutorial",
+    "document-style": "green-book",
+    "toc-depth": 2,
+    "number-sections": true,
+    "geometry": {
+      "paperwidth": "8.5in",
+      "paperheight": "11in", 
+      "top": "0.75in",
+      "bottom": "0.75in",
+      "outer": "0.75in",
+      "inner": "1.25in",
+      "bindingoffset": "0.25in"
+    },
+    "typography": {
+      "body-font-size": "11pt",
+      "line-spacing": "1.25",
+      "main-font": "Linux Libertine O",
+      "sans-font": "Calibri",
+      "mono-font": "Consolas"
+    }
+  },
+
+  "filters": {
+    "execution_order": [
+      "smart-pins-colored-blocks",
+      "green-book-semantic-blocks", 
+      "part-chapter-pagebreaks"
+    ],
+    "descriptions": {
+      "smart-pins-colored-blocks": "Applies 4-color system to code blocks (Config=blue, Spin2=green, PASM2=yellow, Antipattern=red)",
+      "green-book-semantic-blocks": "Converts tutorial semantic markers to tcolorbox environments (needs-diagram, tips, etc.)",
+      "part-chapter-pagebreaks": "Ensures proper page breaks between parts and chapters"
+    }
+  },
+
+  "required_files": [
+    "P2-Smart-Pins-Complete-Reference.md",
+    "p2kb-smart-pins.latex",
+    "p2kb-foundation.sty",
+    "p2kb-smart-pins-content.sty",
+    "p2kb-smart-pins-numbering.sty", 
+    "p2kb-tech-review.sty",
+    "smart-pins-colored-blocks.lua",
+    "green-book-semantic-blocks.lua",
+    "part-chapter-pagebreaks.lua"
+  ],
+
+  "output_settings": {
+    "filename": "P2-Smart-Pins-Green-Book-Tutorial-v2.pdf",
+    "quality": "high",
+    "optimization": "size",
+    "bookmarks": true,
+    "hyperlinks": true
+  },
+
+  "validation": {
+    "pre_generation": {
+      "check_filters_exist": true,
+      "check_templates_exist": true,
+      "validate_markdown_syntax": true,
+      "check_image_assets": true
+    },
+    "post_generation": {
+      "check_pdf_size": true,
+      "validate_bookmarks": true,
+      "check_page_count": true
+    }
+  },
+
+  "metadata": {
+    "author": "Iron Sheep Productions, LLC",
+    "subject": "P2 Smart Pins Complete Tutorial",
+    "keywords": ["Propeller 2", "Smart Pins", "Tutorial", "PASM2", "Spin2"],
+    "creator": "Pandoc with P2KB Template System",
+    "producer": "XeLaTeX PDF Engine",
+    "creation_date": "2025-08-30",
+    "modification_date": "auto"
+  },
+
+  "tutorial_features": {
+    "semantic_markers": {
+      "needs-diagram": "gbdiagram",
+      "preliminary-content": "gbpreliminary",
+      "needs-verification": "gbverify", 
+      "needs-examples": "gbexamples",
+      "needs-technical-review": "gbtechreview",
+      "needs-code-review": "gbcodereview",
+      "tip": "gbtip"
+    },
+    "interactive_elements": {
+      "exercise": "exercise",
+      "keytakeaway": "keytakeaway", 
+      "commonmistakes": "commonmistakes"
+    },
+    "code_coloring": {
+      "ConfigBlock": "Light blue with navy border",
+      "Spin2Block": "Light green with forest border",
+      "PASM2Block": "Light cream with golden border", 
+      "AntipatternBlock": "Light pink with rose border"
+    }
+  },
+
+  "notes": {
+    "filter_sequence": "Order is critical: code coloring → semantic blocks → page breaks",
+    "naming_resolution": "Semantic environments use 'gb*' prefix to avoid conflicts with existing commands",
+    "template_compatibility": "Compatible with existing p2kb-smart-pins.latex template system",
+    "testing_status": "All components validated through PDF Forge automated testing"
+  }
+}

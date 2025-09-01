@@ -1,0 +1,6 @@
+' Source: P2 Spin2 Documentation v51-250425 (Page 11)
+' Extracted: 2025-08-24
+' Language: Spin2 | Type: Snippet
+
+DAT
+'symbols without data take the size of the previous declaration

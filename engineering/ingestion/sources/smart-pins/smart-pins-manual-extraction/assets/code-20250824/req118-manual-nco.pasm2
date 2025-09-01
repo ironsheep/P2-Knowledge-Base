@@ -1,0 +1,26 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+duty_init
+        mov     pa, ##P_NCO_DUTY | P_OE
+        wrpin   pa, #20         ' Configure NCO duty
+        
+set_50_percent
+        mov     pa, ##10000     ' Period
+        wxpin   pa, #20
+        mov     pa, ##$8000_0000 ' 50% duty, 0 phase
+        wypin   pa, #20
+        dirh    #20             ' Start output
+        
+variable_duty
+.loop   add     duty, ##$100_0000 ' Increment duty
+        wypin   duty, #20       ' Update
+        waitx   ##100000        ' Delay
+        jmp     #.loop
+        
+duty    long    $1000_0000      ' Starting at 6.25%

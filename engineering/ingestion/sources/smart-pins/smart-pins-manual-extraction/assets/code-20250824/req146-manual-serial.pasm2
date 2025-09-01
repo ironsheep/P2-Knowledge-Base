@@ -1,0 +1,23 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+uart_rx_init
+        mov     pa, ##P_ASYNC_RX
+        wrpin   pa, #21         ' Configure RX
+        mov     pa, baud_div
+        wxpin   pa, #21
+        dirh    #21
+        
+rx_wait
+.wait   testp   #21 wc          ' Check data ready
+  if_nc jmp     #.wait
+        rdpin   rxdata, #21     ' Read byte
+        and     rxdata, #$FF    ' Mask to byte
+        
+baud_div long   200_000_000/115_200
+rxdata  long    0

@@ -1,0 +1,6 @@
+' Source: P2 Spin2 Documentation v51-250425 (Page 11)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+ADD     register,#1
+'in cog-execmode, instructions force alignment to cog/LUT registers

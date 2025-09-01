@@ -1,0 +1,83 @@
+{
+  "source_pdf": "import/p2/P2-Assembly-Language-PASM2-Manual-Draft-221117.pdf",
+  "extraction_summary": {
+    "total_images": 2,
+    "total_pages": 162,
+    "output_directory": "extracted_images_pasm2"
+  },
+  "images": [
+    {
+      "filename": "P2-Assembly-Language-PASM2-Manual-Draft-221117_page01_img01.png",
+      "source_pdf": "P2-Assembly-Language-PASM2-Manual-Draft-221117.pdf",
+      "page_number": 1,
+      "image_index": 1,
+      "dimensions": "904\u00d7152",
+      "width": 904,
+      "height": 152,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_pasm2/P2-Assembly-Language-PASM2-Manual-Draft-221117_page01_img01.png",
+      "xref": 11,
+      "extraction_status": "success",
+      "file_size_bytes": 46163,
+      "context": {
+        "caption": "www.parallax.com/P2    \u2b1d    sales@parallax.com    \u2b1d    support@parallax.com    \u2b1d    +1  888-512-1024   Propeller   2   Assembly   Language (PASM2) Manual",
+        "nearby_text": [
+          {
+            "text": "www.parallax.com/P2    \u2b1d    sales@parallax.com    \u2b1d    support@parallax.com    \u2b1d    +1  888-512-1024   Propeller   2   Assembly   Language (PASM2) Manual",
+            "distance": 18.75146484375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "www.parallax.com/P2    \u2b1d    sales@parallax.com    \u2b1d    support@parallax.com    \u2b1d    +1  888-512-1024   Propeller   2   Assembly   Language (PASM2) Manual"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2-Assembly-Language-PASM2-Manual-Draft-221117_page01_img02.png",
+      "source_pdf": "P2-Assembly-Language-PASM2-Manual-Draft-221117.pdf",
+      "page_number": 1,
+      "image_index": 2,
+      "dimensions": "1294\u00d71292",
+      "width": 1294,
+      "height": 1292,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_pasm2/P2-Assembly-Language-PASM2-Manual-Draft-221117_page01_img02.png",
+      "xref": 12,
+      "extraction_status": "success",
+      "file_size_bytes": 170134,
+      "context": {
+        "caption": "www.parallax.com/P2    \u2b1d    sales@parallax.com    \u2b1d    support@parallax.com    \u2b1d    +1  888-512-1024   Propeller   2   Assembly   Language (PASM2) Manual",
+        "nearby_text": [
+          {
+            "text": "www.parallax.com/P2    \u2b1d    sales@parallax.com    \u2b1d    support@parallax.com    \u2b1d    +1  888-512-1024   Propeller   2   Assembly   Language (PASM2) Manual",
+            "distance": 25.49853515625,
+            "position": "right"
+          },
+          {
+            "text": "Copyright \u00a9 Parallax Inc.  2022/11/01     \u25aa     Propeller 2 Assembly Language Manual      \u25aa      Page  1",
+            "distance": 50.26318359375,
+            "position": "below"
+          },
+          {
+            "text": "Nov 1, 2022 Release",
+            "distance": 61.04931640625,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "www.parallax.com/P2    \u2b1d    sales@parallax.com    \u2b1d    support@parallax.com    \u2b1d    +1  888-512-1024   Propeller   2   Assembly   Language (PASM2) Manual"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    }
+  ]
+}

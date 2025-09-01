@@ -1,0 +1,7 @@
+' Source: P2 SmartPins-220809 (Page 24)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+             jmp   #.myloop
+      'Program loops forever
+'Quad encoder mode, sets B as pin 32+1 (33)

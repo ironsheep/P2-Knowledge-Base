@@ -1,0 +1,150 @@
+% Admin Manual LaTeX Template for Todo-MCP Documentation
+% Professional layout with consistent formatting
+
+\documentclass[11pt,letterpaper,twoside]{book}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+% Font selection - choose one:
+% \usepackage{lmodern}              % Latin Modern (default, crisp)
+% \usepackage{charter}              % Charter - very readable serif
+\usepackage{crimson}                % Crimson Text - elegant, readable serif
+% \usepackage{libertinus}           % Libertinus Serif - modern, friendly
+% \usepackage{ebgaramond}           % EB Garamond - classic, beautiful
+% \usepackage{cormorantgaramond}    % Cormorant Garamond - stylish
+\usepackage{microtype}
+\usepackage[margin=1in]{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{mdframed}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{enumitem}
+
+% Colors
+\definecolor{todoBlue}{RGB}{0,102,204}
+\definecolor{codeGray}{RGB}{245,245,245}
+\definecolor{warningRed}{RGB}{220,53,69}
+\definecolor{successGreen}{RGB}{40,167,69}
+
+% Code formatting
+\lstset{
+    backgroundcolor=\color{codeGray},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    rulecolor=\color{gray!30},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    xleftmargin=2em,
+    framexleftmargin=1.5em
+}
+
+% Custom commands
+\newcommand{\todoVersion}{$version$}
+\newcommand{\buildDate}{$date$}
+
+% Pandoc compatibility fixes
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\providecommand{\passthrough}[1]{#1}
+\providecommand{\euro}{\texteuro}
+\providecommand{\UrlFont}{\ttfamily}
+\providecommand{\footnotesize}{}
+\providecommand{\oldparagraph}{}
+\providecommand{\oldsubparagraph}{}
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[LO]{\nouppercase{\rightmark}}
+\fancyhead[RE]{Todo-MCP Administrator Manual}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Title formatting
+\titleformat{\chapter}[display]
+{\normalfont\huge\bfseries\color{todoBlue}}
+{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+
+\titleformat{\section}
+{\normalfont\Large\bfseries\color{todoBlue}}
+{\thesection}{1em}{}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=todoBlue,
+    urlcolor=todoBlue,
+    citecolor=todoBlue,
+    pdfauthor={Todo-MCP Team},
+    pdftitle={Todo-MCP Administrator Manual v\todoVersion},
+    pdfsubject={Todo-MCP Administration Guide},
+    pdfkeywords={todo-mcp, claude, task management, administration}
+}
+
+% Document
+\begin{document}
+
+% Title page
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\Huge\bfseries Todo-MCP\\Administrator Manual\par}
+    \vspace{1cm}
+    {\Large Version \todoVersion\par}
+    \vspace{0.5cm}
+    {\large \buildDate\par}
+    
+    \vfill
+    
+    {\large Professional Task Management for Claude Code Environments\par}
+    
+    \vspace{2cm}
+    
+    \vfill
+    
+    % Company logo (subtle placement at bottom)
+    \IfFileExists{logo.eps}{\includegraphics[width=0.25\textwidth]{logo.eps}}{%
+    \IfFileExists{inbox/logo.eps}{\includegraphics[width=0.25\textwidth]{inbox/logo.eps}}{%
+    % Logo not found, skip it
+    }}\\[0.5cm]
+    {\large Iron Sheep Productions, LLC\par}
+\end{titlepage}
+
+% Copyright page
+\thispagestyle{empty}
+\vspace*{\fill}
+\noindent Copyright \copyright\ 2025 Iron Sheep Productions, LLC. All rights reserved.
+
+\noindent This manual is provided under the MIT License. See the LICENSE file for details.
+
+\noindent Todo-MCP Administrator Manual v\todoVersion
+
+\noindent Build Date: \buildDate
+
+\clearpage
+
+% Table of contents
+\tableofcontents
+\cleardoublepage
+
+% Main content starts here
+$body$
+
+\end{document}

@@ -1,0 +1,22 @@
+{
+  "documents": [
+    {
+      "input": "document.md",
+      "output": "document.pdf",
+      "template": "p2kb-pasm-desilva-enhanced",
+      "variables": {
+        "title": "P2KB Template Test",
+        "subtitle": "Verifying All Three Fixes",
+        "version": "Test Version",
+        "date": "August 2025",
+        "author": "P2 Knowledge Base Team",
+        "footer": "Template Test Document"
+      }
+    }
+  ],
+  "options": {
+    "cleanup": true,
+    "archive": false,
+    "optimize": true
+  }
+}

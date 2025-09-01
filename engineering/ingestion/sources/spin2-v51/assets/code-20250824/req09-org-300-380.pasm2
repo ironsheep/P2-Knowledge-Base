@@ -1,0 +1,6 @@
+' Source: P2 Spin2 Documentation v51-250425 (Page 11)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+ORG     $300,$380
+'set cog-execmode, cog address = $300, cog limit = $380 (LUT)

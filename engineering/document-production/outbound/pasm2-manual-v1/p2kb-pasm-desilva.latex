@@ -1,0 +1,333 @@
+% P2KB-PASM-deSilva Template
+% Purpose: Convert Markdown to PDF with deSilva pedagogical style
+% Created: 2025-08-20
+% Fixed: Removed duplicate environment definitions
+
+\documentclass[11pt]{book}
+
+% ==================== PACKAGES ====================
+\usepackage[utf8]{inputenc}
+\usepackage{charter}          % Primary font
+\usepackage{xcolor}
+\usepackage{tikz}            % Load tikz BEFORE tcolorbox
+\usepackage[most]{tcolorbox} % Load with most libraries including skins
+\usepackage{mdframed}
+\usepackage{soul}
+\usepackage{listings}
+\usepackage{multicol}
+\usepackage{makeidx}
+\usepackage{hyperref}
+\usepackage[margin=1in]{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{needspace}
+\usepackage{fancyvrb}        % For DefineVerbatimEnvironment
+\usepackage{graphicx}         % For includegraphics
+\usepackage{longtable}       % For tables
+\usepackage{booktabs}        % Better table formatting
+\usepackage{array}           % For table column formatting
+\usepackage{calc}            % For mathematical calculations in column widths
+
+% ==================== COLORS ====================
+\definecolor{codegray}{HTML}{F5F5F5}
+\definecolor{inlineyellow}{HTML}{FFFACD}
+\definecolor{missingviolet}{HTML}{E6E6FA}
+\definecolor{revieworange}{HTML}{FFE4B5}
+\definecolor{diagramblue}{HTML}{E0F2FF}
+\definecolor{chaptergreen}{HTML}{F0FFF0}
+\definecolor{yourturncolor}{HTML}{FFF8DC}
+
+% ==================== TYPOGRAPHY ====================
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{10pt}
+\linespread{1.3}
+
+% ==================== SEMANTIC MARKUP HANDLERS ====================
+% Code elements with yellow background per creation guide
+\newcommand{\pasm}[1]{\colorbox{inlineyellow}{\textbf{\texttt{#1}}}}
+\newcommand{\register}[1]{\colorbox{inlineyellow}{\textcolor{blue}{\texttt{#1}}}}
+\newcommand{\pin}[1]{\colorbox{inlineyellow}{\textcolor{purple}{\texttt{#1}}}}
+\newcommand{\immediatevalue}[1]{\colorbox{inlineyellow}{\textcolor{gray}{\texttt{#1}}}}
+\newcommand{\immediateprefix}[1]{\colorbox{inlineyellow}{\textcolor{gray}{\texttt{#1}}}}
+\newcommand{\memaddress}[1]{\colorbox{inlineyellow}{\texttt{#1}}}
+\newcommand{\codelabel}[1]{\colorbox{inlineyellow}{\textit{\texttt{#1}}}}
+\newcommand{\codevalue}[1]{\colorbox{inlineyellow}{\texttt{#1}}}
+\newcommand{\voltage}[1]{\colorbox{inlineyellow}{\textcolor{red}{\texttt{#1}}}}
+\newcommand{\frequency}[1]{\colorbox{inlineyellow}{\textcolor{orange}{\texttt{#1}}}}
+\newcommand{\calculation}[1]{\colorbox{inlineyellow}{\texttt{#1}}}
+
+% ==================== CODE SETTINGS ====================
+\lstset{
+  basicstyle=\ttfamily,
+  backgroundcolor=\color{codegray},
+  frame=none,
+  showstringspaces=false,
+  columns=flexible,
+  keepspaces=true,
+  commentstyle=\color{gray}\itshape,
+  keywordstyle=\color{blue}\bfseries,
+  stringstyle=\color{red},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=4
+}
+
+% ==================== CUSTOM ENVIRONMENTS ====================
+% Define each environment only ONCE
+
+% Sidetrack: Gray with dashed border
+\newtcolorbox{sidetrack}{
+  colback=codegray,
+  colframe=gray!50,
+  boxrule=0pt,
+  enhanced,
+  borderline={1pt}{0pt}{gray!50, dashed},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Interlude: Gray without border
+\newtcolorbox{interlude}{
+  colback=codegray,
+  colframe=codegray,
+  boxrule=0pt,
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Missing content: Violet with thick border
+\newtcolorbox{missing}{
+  colback=missingviolet,
+  colframe=violet!70,
+  boxrule=2pt,
+  title={🚧 \textbf{CONTENT MISSING - COMING SOON}},
+  fonttitle=\large\bfseries,
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Review needed: Orange with thick border
+\newtcolorbox{review}{
+  colback=revieworange,
+  colframe=orange!70,
+  boxrule=2pt,
+  title={🔍 \textbf{NEEDS TECHNICAL REVIEW}},
+  fonttitle=\large\bfseries,
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Diagram needed: Blue with border
+\newtcolorbox{diagram}{
+  colback=diagramblue,
+  colframe=blue!50,
+  boxrule=2pt,
+  title={🎨 \textbf{DIAGRAM NEEDED}},
+  fonttitle=\large\bfseries,
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Your Turn: Yellow tinted exercise box
+\newtcolorbox{yourturn}{
+  colback=yourturncolor,
+  colframe=yellow!50,
+  boxrule=1pt,
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Chapter ending: Green celebration with internal separator
+% Uses a custom drawing to add a subtle line between celebration and preview
+\newtcolorbox{chapterend}{
+  colback=chaptergreen,
+  colframe=chaptergreen,
+  boxrule=0pt,
+  width=0.8\textwidth,
+  center,
+  fontupper=\itshape,
+  left=20pt,right=20pt,top=15pt,bottom=15pt,
+  before skip=20pt,
+  after skip=20pt,
+  % Add subtle separator between celebration and preview
+  overlay={\draw[gray!40, line width=0.5pt] 
+    ([xshift=30pt]frame.west |- {$(frame.north)!0.6!(frame.south)$}) -- 
+    ([xshift=-30pt]frame.east |- {$(frame.north)!0.6!(frame.south)$});}
+}
+
+% ==================== INLINE CODE ====================
+\newcommand{\inlinecode}[1]{%
+  \colorbox{inlineyellow}{\strut\texttt{#1}}%
+}
+
+% Redefine \texttt to use yellow background and bold for ALL inline code
+% This ensures instructions (and all code) stand out clearly
+\let\oldtexttt\texttt
+\renewcommand{\texttt}[1]{\colorbox{inlineyellow}{\strut\textbf{\oldtexttt{#1}}}}
+
+% ==================== HEADERS/FOOTERS ====================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\nouppercase{\leftmark}}  % Shows chapter name, not uppercase
+\fancyhead[R]{\thepage}
+\fancyfoot[C]{\small\itshape\color{red}DRAFT - $footer$}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername~\thechapter:~#1}{}}
+
+% ==================== CHAPTER FORMATTING ====================
+% Start chapter numbering from 1
+\setcounter{chapter}{0}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}
+  {\chaptertitlename\ \thechapter}
+  {20pt}
+  {\Huge}
+\titlespacing*{\chapter}{0pt}{0pt}{40pt}
+
+% Force chapters to start on new page (CRITICAL for manual structure)
+\let\oldchapter\chapter
+\renewcommand{\chapter}{%
+  \cleardoublepage  % Even stronger than clearpage - ensures odd page in twoside
+  \oldchapter
+}
+
+% Ensure chapter numbers are sequential and visible
+\renewcommand{\thechapter}{\arabic{chapter}}
+
+% ==================== INDEX SETUP ====================
+\makeindex
+\renewenvironment{theindex}{
+  \begin{multicols}{3}
+  \setlength{\parindent}{0pt}
+  \setlength{\parskip}{0pt plus 0.3pt}
+  \raggedright
+  \footnotesize
+}{\end{multicols}}
+
+% ==================== HYPERREF SETUP ====================
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  citecolor=blue,
+  pdftitle={$title$},
+  pdfauthor={$author$}
+}
+
+% ==================== PANDOC COMPATIBILITY ====================
+% These definitions help Pandoc's markdown conversion
+
+% Handle Pandoc's tightlist
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% Handle Pandoc's passthrough for raw content
+\newcommand{\passthrough}[1]{#1}
+
+% Code block environment for Pandoc
+\newenvironment{Shaded}{\begin{tcolorbox}[colback=codegray,boxrule=0pt]}{\end{tcolorbox}}
+
+% For Pandoc's highlighting - WITH fancyvrb now loaded
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+
+% Color definitions for syntax highlighting
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+
+% ==================== APPENDIX HANDLING ====================
+\let\oldappendix\appendix
+\renewcommand{\appendix}{
+  \oldappendix
+  \renewcommand{\chaptername}{Appendix}
+}
+
+% ==================== KEEP CODE TOGETHER ====================
+\newenvironment{keepcodeblock}[1][15]{
+  \needspace{#1\baselineskip}
+}{}
+
+% ==================== DOCUMENT START ====================
+\begin{document}
+
+% Title page
+\begin{titlepage}
+\centering
+
+{\huge\bfseries\color{red}DRAFT - TECHNICAL REVIEW ONLY\par}
+\vspace{0.5cm}
+{\large\color{red}NOT FOR RELEASE OR DISTRIBUTION\par}
+\vspace{1cm}
+
+\vspace*{2cm}
+{\Huge\bfseries $title$\par}
+\vspace{0.5cm}
+{\Large\itshape $subtitle$\par}
+\vspace{2cm}
+{\large $author$\par}
+\vspace{1cm}
+{\large\color{red}Version $version$\par}
+\vspace{0.5cm}
+{\large $date$\par}
+\vspace{1cm}
+
+\begin{tcolorbox}[colback=yellow!20,colframe=red!50,boxrule=2pt]
+\centering\bfseries
+This document contains incomplete sections\\marked with colored flags:\\[0.5em]
+🚧 Violet = Missing Content\\  
+🔍 Orange = Needs Review\\
+🎨 Blue = Diagrams Needed
+\end{tcolorbox}
+
+\vfill
+{\small\itshape $footer$\par}
+\end{titlepage}
+
+% Table of contents
+\tableofcontents
+\clearpage
+
+% Main content from Pandoc
+$body$
+
+% Index if it exists
+\printindex
+
+\end{document}

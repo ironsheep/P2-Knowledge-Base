@@ -1,0 +1,6 @@
+' Source: P2 SmartPins-220809 (Page 40)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Snippet
+
+WRPIN ##%100011_00000000_00_11000_0,#adcpin    'configure ADC-and-
+                                               '  filter pin(s)

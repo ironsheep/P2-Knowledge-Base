@@ -1,0 +1,99 @@
+{
+  "source_pdf": "sources/originals/P2 Documentation v35 - Rev B_C Silicon-Part1of5.pdf",
+  "extraction_summary": {
+    "total_images": 2,
+    "total_pages": 24,
+    "output_directory": "extracted_images_silicon_part1"
+  },
+  "images": [
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon-Part1of5_page01_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon-Part1of5.pdf",
+      "page_number": 1,
+      "image_index": 1,
+      "dimensions": "1596\u00d71600",
+      "width": 1596,
+      "height": 1600,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_silicon_part1/P2 Documentation v35 - Rev B_C Silicon-Part1of5_page01_img01.png",
+      "xref": 11,
+      "extraction_status": "success",
+      "file_size_bytes": 468227,
+      "context": {
+        "caption": "NOTE: To avoid   accidentally   suggesting edits, switch  to   Viewing   mode in the upper right-hand corner, or via  the View menu.",
+        "nearby_text": [
+          {
+            "text": "Parallax Propeller 2",
+            "distance": 3.239990234375,
+            "position": "below"
+          },
+          {
+            "text": "1",
+            "distance": 6.24462890625,
+            "position": "below"
+          },
+          {
+            "text": "Documentation",
+            "distance": 27.989990234375,
+            "position": "below"
+          },
+          {
+            "text": "NOTE: To avoid   accidentally   suggesting edits, switch  to   Viewing   mode in the upper right-hand corner, or via  the View menu.",
+            "distance": 47.34306335449219,
+            "position": "above"
+          },
+          {
+            "text": "2021-05-18",
+            "distance": 57.989990234375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "NOTE: To avoid   accidentally   suggesting edits, switch  to   Viewing   mode in the upper right-hand corner, or via  the View menu.",
+          "Parallax Propeller 2",
+          "Documentation"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon-Part1of5_page09_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon-Part1of5.pdf",
+      "page_number": 9,
+      "image_index": 1,
+      "dimensions": "1590\u00d71600",
+      "width": 1590,
+      "height": 1600,
+      "colorspace": "ICCBased(RGB,sRGB IEC61966-2.1)",
+      "alpha": false,
+      "file_path": "extracted_images_silicon_part1/P2 Documentation v35 - Rev B_C Silicon-Part1of5_page09_img01.png",
+      "xref": 44,
+      "extraction_status": "success",
+      "file_size_bytes": 154609,
+      "context": {
+        "caption": "9",
+        "nearby_text": [
+          {
+            "text": "-   Clock input, can feed PLL   -   Fractional PLL with 1..64 crystal divider --> 1..1024 VCO multiplier --> optional (1..15)*2 VCO post-divider   -   Internal ~20 kHz RC oscillator for low-power operation (130 \u00b5A)   -   Clock can be stopped for lowest power until reset (100 \u00b5A, due to leakage)",
+            "distance": 3.7020034790039062,
+            "position": "above"
+          },
+          {
+            "text": "9",
+            "distance": 42.61962890625,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "9"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    }
+  ]
+}

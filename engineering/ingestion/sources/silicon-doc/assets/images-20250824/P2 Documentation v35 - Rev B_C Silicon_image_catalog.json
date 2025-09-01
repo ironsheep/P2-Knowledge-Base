@@ -1,0 +1,1201 @@
+{
+  "source_pdf": "sources/originals/P2 Documentation v35 - Rev B_C Silicon.pdf",
+  "extraction_summary": {
+    "total_images": 34,
+    "total_pages": 123,
+    "output_directory": "extracted_images_p2_silicon_v35"
+  },
+  "images": [
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page01_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 1,
+      "image_index": 1,
+      "dimensions": "1596\u00d71600",
+      "width": 1596,
+      "height": 1600,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page01_img01.png",
+      "xref": 10,
+      "extraction_status": "success",
+      "file_size_bytes": 465586,
+      "context": {
+        "caption": "NOTE: To avoid   accidentally   suggesting edits, switch  to   Viewing   mode in the upper right-hand corner, or via  the View menu.",
+        "nearby_text": [
+          {
+            "text": "Parallax Propeller 2",
+            "distance": 3.23504638671875,
+            "position": "below"
+          },
+          {
+            "text": "1",
+            "distance": 6.24462890625,
+            "position": "below"
+          },
+          {
+            "text": "Documentation",
+            "distance": 27.98504638671875,
+            "position": "below"
+          },
+          {
+            "text": "NOTE: To avoid   accidentally   suggesting edits, switch  to   Viewing   mode in the upper right-hand corner, or via  the View menu.",
+            "distance": 47.34426498413086,
+            "position": "above"
+          },
+          {
+            "text": "2021-05-18",
+            "distance": 57.98504638671875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "NOTE: To avoid   accidentally   suggesting edits, switch  to   Viewing   mode in the upper right-hand corner, or via  the View menu.",
+          "Parallax Propeller 2",
+          "Documentation"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page09_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 9,
+      "image_index": 1,
+      "dimensions": "1590\u00d71600",
+      "width": 1590,
+      "height": 1600,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page09_img01.png",
+      "xref": 158,
+      "extraction_status": "success",
+      "file_size_bytes": 151968,
+      "context": {
+        "caption": "9",
+        "nearby_text": [
+          {
+            "text": "-   Clock input, can feed PLL   -   Fractional PLL with 1..64 crystal divider --> 1..1024 VCO multiplier --> optional (1..15)*2 VCO post-divider   -   Internal ~20 kHz RC oscillator for low-power operation (130 \u00b5A)   -   Clock can be stopped for lowest power until reset (100 \u00b5A, due to leakage)",
+            "distance": 3.7027740478515625,
+            "position": "above"
+          },
+          {
+            "text": "9",
+            "distance": 42.619598388671875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "9"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page38_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 38,
+      "image_index": 1,
+      "dimensions": "528\u00d7359",
+      "width": 528,
+      "height": 359,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page38_img01.png",
+      "xref": 229,
+      "extraction_status": "success",
+      "file_size_bytes": 348549,
+      "context": {
+        "caption": "'Data",
+        "nearby_text": [
+          {
+            "text": "In the pictures that follow, you can see the program's DAC output pin while a function generator drives a 0-3.3V sine wave into   the ADC input pin, sweeping from 950-1050KHz over 12ms:",
+            "distance": 16.452789306640625,
+            "position": "above"
+          },
+          {
+            "text": "'Data",
+            "distance": 32.53587341308594,
+            "position": "above"
+          },
+          {
+            "text": "x               res     1   y               res     1   z               res     1   xdiff           res     1   ydiff           res     1",
+            "distance": 70.91915893554688,
+            "position": "above"
+          },
+          {
+            "text": "38",
+            "distance": 74.7425537109375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "'Data",
+          "In the pictures that follow, you can see the program's DAC output pin while a function generator drives a 0-3.3V sine wave into   the ADC input pin, sweeping from 950-1050KHz over 12ms:"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page39_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 39,
+      "image_index": 1,
+      "dimensions": "537\u00d7365",
+      "width": 537,
+      "height": 365,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page39_img01.png",
+      "xref": 232,
+      "extraction_status": "success",
+      "file_size_bytes": 343308,
+      "context": {
+        "caption": "%BBBBBBBB   gets encoded",
+        "nearby_text": [
+          {
+            "text": "%BBBBBBBB   gets encoded",
+            "distance": 6.72802734375,
+            "position": "below"
+          },
+          {
+            "text": "You can see that SINC2 mode has a higher Q than SINC1 mode. Due to rapid (X,Y) accumulator growth, SINC2 may require   the sine/cosine table to be reduced in amplitude to avoid (X,Y) accumulator overflow. This was done in the example program   above, where it was reduced from \u00b1127 for SINC1 to \u00b110 for SINC2.",
+            "distance": 16.992523193359375,
+            "position": "below"
+          },
+          {
+            "text": "Digital Video Output (DVI/HDMI)",
+            "distance": 75.75244140625,
+            "position": "below"
+          },
+          {
+            "text": "%GGGGGGGG   gets encoded",
+            "distance": 83.27197265625,
+            "position": "below"
+          },
+          {
+            "text": "39",
+            "distance": 89.7392578125,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "%BBBBBBBB   gets encoded"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page62_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 62,
+      "image_index": 1,
+      "dimensions": "600\u00d7650",
+      "width": 600,
+      "height": 650,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page62_img01.png",
+      "xref": 284,
+      "extraction_status": "success",
+      "file_size_bytes": 32674,
+      "context": {
+        "caption": "62",
+        "nearby_text": [
+          {
+            "text": "When a cog wants to read or write the hub RAM, it must wait up to #cogs-1 clocks to access the initial RAM slice of interest.   Once that occurs, subsequent slices can be accessed on every clock, thereafter, for continuous reading or writing of 32-bit   longs.",
+            "distance": 4.2425537109375,
+            "position": "below"
+          },
+          {
+            "text": "62",
+            "distance": 42.4892578125,
+            "position": "below"
+          },
+          {
+            "text": "To smooth out data flow for less than 32-bits-per-clock between hub RAM and the cog, each cog has a hub FIFO interface   which can be set for hub-RAM-read or hub-RAM-write operation. This FIFO interface allows hub RAM to be either sequentially   read or sequentially written in any combination of bytes, words, or longs, at any rate, up to one long per clock. No matter the   transfer frequency or the word size, the FIFO will ensure that the cog's reads or writes are all properly conducted from or to the   composite hub RAM.",
+            "distance": 55.2425537109375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "62"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page74_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 74,
+      "image_index": 1,
+      "dimensions": "1600\u00d7999",
+      "width": 1600,
+      "height": 999,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page74_img01.png",
+      "xref": 309,
+      "extraction_status": "success",
+      "file_size_bytes": 175112,
+      "context": {
+        "caption": "In the Spin2 documentation, there are many predefined labels documented, which cover these",
+        "nearby_text": [
+          {
+            "text": "74",
+            "distance": 11.5107421875,
+            "position": "below"
+          },
+          {
+            "text": "pin configurations, as well as the smart pin modes.",
+            "distance": 17.907363891601562,
+            "position": "above"
+          },
+          {
+            "text": "%TT:  pin DIR/OUT control (default = %00)",
+            "distance": 22.1473388671875,
+            "position": "below"
+          },
+          {
+            "text": "In the Spin2 documentation, there are many predefined labels documented, which cover these",
+            "distance": 32.65736389160156,
+            "position": "above"
+          },
+          {
+            "text": "for odd pins,  'OTHER' = even pin's NOT output state (diff source)",
+            "distance": 52.1473388671875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "In the Spin2 documentation, there are many predefined labels documented, which cover these",
+          "pin configurations, as well as the smart pin modes.",
+          "%TT:  pin DIR/OUT control (default = %00)"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page77_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 77,
+      "image_index": 1,
+      "dimensions": "995\u00d71600",
+      "width": 995,
+      "height": 1600,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page77_img01.png",
+      "xref": 316,
+      "extraction_status": "success",
+      "file_size_bytes": 4743,
+      "context": {
+        "caption": "Equivalent Schematics for Each Unique I/O Pin Configuration",
+        "nearby_text": [
+          {
+            "text": "Equivalent Schematics for Each Unique I/O Pin Configuration",
+            "distance": 26.7757568359375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "Equivalent Schematics for Each Unique I/O Pin Configuration"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page78_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 78,
+      "image_index": 1,
+      "dimensions": "1600\u00d7455",
+      "width": 1600,
+      "height": 455,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page78_img01.png",
+      "xref": 320,
+      "extraction_status": "success",
+      "file_size_bytes": 2244,
+      "context": {
+        "caption": "78",
+        "nearby_text": [
+          {
+            "text": "78",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "78"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page78_img02.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 78,
+      "image_index": 2,
+      "dimensions": "1600\u00d7505",
+      "width": 1600,
+      "height": 505,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page78_img02.png",
+      "xref": 322,
+      "extraction_status": "success",
+      "file_size_bytes": 2470,
+      "context": {
+        "caption": "78",
+        "nearby_text": [
+          {
+            "text": "78",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "78"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page78_img03.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 78,
+      "image_index": 3,
+      "dimensions": "1600\u00d7530",
+      "width": 1600,
+      "height": 530,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page78_img03.png",
+      "xref": 324,
+      "extraction_status": "success",
+      "file_size_bytes": 2580,
+      "context": {
+        "caption": "78",
+        "nearby_text": [
+          {
+            "text": "78",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "78"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page78_img04.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 78,
+      "image_index": 4,
+      "dimensions": "1600\u00d7530",
+      "width": 1600,
+      "height": 530,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page78_img04.png",
+      "xref": 326,
+      "extraction_status": "success",
+      "file_size_bytes": 2593,
+      "context": {
+        "caption": "78",
+        "nearby_text": [
+          {
+            "text": "78",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "78"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page79_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 79,
+      "image_index": 1,
+      "dimensions": "1600\u00d7530",
+      "width": 1600,
+      "height": 530,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page79_img01.png",
+      "xref": 330,
+      "extraction_status": "success",
+      "file_size_bytes": 2581,
+      "context": {
+        "caption": "79",
+        "nearby_text": [
+          {
+            "text": "79",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "79"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page79_img02.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 79,
+      "image_index": 2,
+      "dimensions": "1600\u00d7530",
+      "width": 1600,
+      "height": 530,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page79_img02.png",
+      "xref": 332,
+      "extraction_status": "success",
+      "file_size_bytes": 2576,
+      "context": {
+        "caption": "79",
+        "nearby_text": [
+          {
+            "text": "79",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "79"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page79_img03.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 79,
+      "image_index": 3,
+      "dimensions": "1600\u00d7455",
+      "width": 1600,
+      "height": 455,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page79_img03.png",
+      "xref": 334,
+      "extraction_status": "success",
+      "file_size_bytes": 2245,
+      "context": {
+        "caption": "79",
+        "nearby_text": [
+          {
+            "text": "79",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "79"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page79_img04.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 79,
+      "image_index": 4,
+      "dimensions": "1600\u00d7505",
+      "width": 1600,
+      "height": 505,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page79_img04.png",
+      "xref": 336,
+      "extraction_status": "success",
+      "file_size_bytes": 2461,
+      "context": {
+        "caption": "79",
+        "nearby_text": [
+          {
+            "text": "79",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "79"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page80_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 80,
+      "image_index": 1,
+      "dimensions": "1600\u00d7530",
+      "width": 1600,
+      "height": 530,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page80_img01.png",
+      "xref": 340,
+      "extraction_status": "success",
+      "file_size_bytes": 2567,
+      "context": {
+        "caption": "80",
+        "nearby_text": [
+          {
+            "text": "80",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "80"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page80_img02.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 80,
+      "image_index": 2,
+      "dimensions": "1600\u00d7530",
+      "width": 1600,
+      "height": 530,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page80_img02.png",
+      "xref": 342,
+      "extraction_status": "success",
+      "file_size_bytes": 2582,
+      "context": {
+        "caption": "80",
+        "nearby_text": [
+          {
+            "text": "80",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "80"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page80_img03.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 80,
+      "image_index": 3,
+      "dimensions": "1600\u00d7530",
+      "width": 1600,
+      "height": 530,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page80_img03.png",
+      "xref": 344,
+      "extraction_status": "success",
+      "file_size_bytes": 2591,
+      "context": {
+        "caption": "80",
+        "nearby_text": [
+          {
+            "text": "80",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "80"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page81_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 81,
+      "image_index": 1,
+      "dimensions": "1600\u00d7530",
+      "width": 1600,
+      "height": 530,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page81_img01.png",
+      "xref": 348,
+      "extraction_status": "success",
+      "file_size_bytes": 2586,
+      "context": {
+        "caption": "81",
+        "nearby_text": [
+          {
+            "text": "81",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "81"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page81_img02.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 81,
+      "image_index": 2,
+      "dimensions": "1600\u00d7554",
+      "width": 1600,
+      "height": 554,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page81_img02.png",
+      "xref": 350,
+      "extraction_status": "success",
+      "file_size_bytes": 2699,
+      "context": {
+        "caption": "81",
+        "nearby_text": [
+          {
+            "text": "81",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "81"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page81_img03.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 81,
+      "image_index": 3,
+      "dimensions": "1600\u00d7554",
+      "width": 1600,
+      "height": 554,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page81_img03.png",
+      "xref": 352,
+      "extraction_status": "success",
+      "file_size_bytes": 2678,
+      "context": {
+        "caption": "81",
+        "nearby_text": [
+          {
+            "text": "81",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "81"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page82_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 82,
+      "image_index": 1,
+      "dimensions": "1600\u00d7579",
+      "width": 1600,
+      "height": 579,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page82_img01.png",
+      "xref": 356,
+      "extraction_status": "success",
+      "file_size_bytes": 2801,
+      "context": {
+        "caption": "82",
+        "nearby_text": [
+          {
+            "text": "82",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "82"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page82_img02.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 82,
+      "image_index": 2,
+      "dimensions": "1600\u00d7579",
+      "width": 1600,
+      "height": 579,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page82_img02.png",
+      "xref": 358,
+      "extraction_status": "success",
+      "file_size_bytes": 2810,
+      "context": {
+        "caption": "82",
+        "nearby_text": [
+          {
+            "text": "82",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "82"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page82_img03.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 82,
+      "image_index": 3,
+      "dimensions": "1600\u00d7505",
+      "width": 1600,
+      "height": 505,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page82_img03.png",
+      "xref": 360,
+      "extraction_status": "success",
+      "file_size_bytes": 2456,
+      "context": {
+        "caption": "82",
+        "nearby_text": [
+          {
+            "text": "82",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "82"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page82_img04.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 82,
+      "image_index": 4,
+      "dimensions": "1600\u00d7430",
+      "width": 1600,
+      "height": 430,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page82_img04.png",
+      "xref": 362,
+      "extraction_status": "success",
+      "file_size_bytes": 2108,
+      "context": {
+        "caption": "82",
+        "nearby_text": [
+          {
+            "text": "82",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "82"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page83_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 83,
+      "image_index": 1,
+      "dimensions": "1600\u00d7604",
+      "width": 1600,
+      "height": 604,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page83_img01.png",
+      "xref": 366,
+      "extraction_status": "success",
+      "file_size_bytes": 2939,
+      "context": {
+        "caption": "83",
+        "nearby_text": [
+          {
+            "text": "83",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "83"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page83_img02.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 83,
+      "image_index": 2,
+      "dimensions": "1600\u00d7604",
+      "width": 1600,
+      "height": 604,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page83_img02.png",
+      "xref": 368,
+      "extraction_status": "success",
+      "file_size_bytes": 2920,
+      "context": {
+        "caption": "83",
+        "nearby_text": [
+          {
+            "text": "83",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "83"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page83_img03.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 83,
+      "image_index": 3,
+      "dimensions": "1600\u00d7604",
+      "width": 1600,
+      "height": 604,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page83_img03.png",
+      "xref": 370,
+      "extraction_status": "success",
+      "file_size_bytes": 2920,
+      "context": {
+        "caption": "83",
+        "nearby_text": [
+          {
+            "text": "83",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "83"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page84_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 84,
+      "image_index": 1,
+      "dimensions": "1600\u00d7604",
+      "width": 1600,
+      "height": 604,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page84_img01.png",
+      "xref": 374,
+      "extraction_status": "success",
+      "file_size_bytes": 2917,
+      "context": {
+        "caption": "84",
+        "nearby_text": [
+          {
+            "text": "84",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "84"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page84_img02.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 84,
+      "image_index": 2,
+      "dimensions": "1600\u00d7604",
+      "width": 1600,
+      "height": 604,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page84_img02.png",
+      "xref": 376,
+      "extraction_status": "success",
+      "file_size_bytes": 2917,
+      "context": {
+        "caption": "84",
+        "nearby_text": [
+          {
+            "text": "84",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "84"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page84_img03.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 84,
+      "image_index": 3,
+      "dimensions": "1600\u00d7603",
+      "width": 1600,
+      "height": 603,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page84_img03.png",
+      "xref": 378,
+      "extraction_status": "success",
+      "file_size_bytes": 2905,
+      "context": {
+        "caption": "84",
+        "nearby_text": [
+          {
+            "text": "84",
+            "distance": 11.5107421875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "84"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page99_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 99,
+      "image_index": 1,
+      "dimensions": "760\u00d7211",
+      "width": 760,
+      "height": 211,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page99_img01.png",
+      "xref": 410,
+      "extraction_status": "success",
+      "file_size_bytes": 6901,
+      "context": {
+        "caption": "ADC bit is shifted into a tap string and the weighted tap bits are summed together to produce the sample. The samples are",
+        "nearby_text": [
+          {
+            "text": "actual filter shapes and sizes:",
+            "distance": 5.9527740478515625,
+            "position": "above"
+          },
+          {
+            "text": "The scope trigger function is set by two 6-bit parameters, A and B, which MSB-justify to the 8-bit samples for comparison.",
+            "distance": 6.492523193359375,
+            "position": "below"
+          },
+          {
+            "text": "99",
+            "distance": 11.5107421875,
+            "position": "below"
+          },
+          {
+            "text": "normalized to 8 bits in size, but the DC dynamic range is ~5 to ~6 bits, depending on the filter length. These are plots of the",
+            "distance": 20.952774047851562,
+            "position": "above"
+          },
+          {
+            "text": "Triggering is a two-step process of arming and then triggering, which raises the IN signal and waits for a new arming event.",
+            "distance": 21.492523193359375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "ADC bit is shifted into a tap string and the weighted tap bits are summed together to produce the sample. The samples are",
+          "normalized to 8 bits in size, but the DC dynamic range is ~5 to ~6 bits, depending on the filter length. These are plots of the",
+          "actual filter shapes and sizes:"
+        ]
+      },
+      "suggested_tags": [
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page122_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 122,
+      "image_index": 1,
+      "dimensions": "1121\u00d7594",
+      "width": 1121,
+      "height": 594,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page122_img01.png",
+      "xref": 462,
+      "extraction_status": "success",
+      "file_size_bytes": 40778,
+      "context": {
+        "caption": "Boot ROM / Debug ROM",
+        "nearby_text": [
+          {
+            "text": "Boot ROM / Debug ROM",
+            "distance": 4.835868835449219,
+            "position": "above"
+          },
+          {
+            "text": "122",
+            "distance": 37.48388671875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "Boot ROM / Debug ROM",
+          "122"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Documentation v35 - Rev B_C Silicon_page123_img01.png",
+      "source_pdf": "P2 Documentation v35 - Rev B_C Silicon.pdf",
+      "page_number": 123,
+      "image_index": 1,
+      "dimensions": "1055\u00d71600",
+      "width": 1055,
+      "height": 1600,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_silicon_v35/P2 Documentation v35 - Rev B_C Silicon_page123_img01.png",
+      "xref": 465,
+      "extraction_status": "success",
+      "file_size_bytes": 227193,
+      "context": {
+        "caption": "Packaging",
+        "nearby_text": [
+          {
+            "text": "Packaging",
+            "distance": 4.835868835449219,
+            "position": "above"
+          },
+          {
+            "text": "123",
+            "distance": 16.2425537109375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "Packaging",
+          "123"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    }
+  ]
+}

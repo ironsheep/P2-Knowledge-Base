@@ -1,0 +1,8 @@
+' Per-COG Debug State Management
+' Source: spin-debugger-v51-complete-analysis.md
+' Category: Multi-COG Coordination
+' Description: Each COG maintains independent debug state
+
+' Each COG maintains independent debug state:
+' long[$C] = BRK condition (breakpoint triggers)
+' long[$D] = COGBRK flag (COG break status)

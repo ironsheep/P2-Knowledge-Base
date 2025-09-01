@@ -1,0 +1,125 @@
+'' Multi-COG Coordination Pattern Examples
+'' Extracted from Chip Gracey's Flash File System v2.0.0
+'' Demonstrates production-quality multi-COG resource sharing
+
+CON
+  ' Global lock for filesystem coordination
+  FS_LOCK = 0    ' Lock number for filesystem access
+
+VAR
+  ' Per-COG error tracking array  
+  LONG errorCode[8]    ' Error code for each COG (0-7)
+  LONG fsLock          ' Global filesystem lock
+
+PUB demonstrateGlobalLock() : result
+  '' Demonstrates global lock acquisition pattern from flash filesystem
+  '' Returns: true if operation completed, false if lock unavailable
+  
+  ' Pattern 1: Non-blocking lock acquisition with retry
+  repeat while locktry(fsLock) == 0
+    ' Could implement backoff strategy here
+    ' For now, just retry (as in original)
+    
+  ' Critical section - exclusive filesystem access
+  result := performFilesystemOperation()
+  
+  ' Always release lock
+  lockrel(fsLock)
+  
+PUB demonstratePerCOGErrors(errorValue)
+  '' Demonstrates per-COG error state management
+  '' Each COG maintains independent error state
+  
+  ' Set error specific to calling COG
+  LONG[@errorCode][cogid()] := errorValue
+  
+PUB getLastError() : error
+  '' Get error code for current COG
+  '' Returns: error code specific to calling COG
+  
+  return LONG[@errorCode][cogid()]
+
+PUB clearError()
+  '' Clear error for current COG only
+  
+  LONG[@errorCode][cogid()] := 0
+
+PUB safeFilesystemOperation() : result | startTime
+  '' Demonstrates complete safe operation pattern
+  '' Combines lock acquisition with error handling
+  
+  ' Clear any previous errors for this COG
+  clearError()
+  
+  ' Try to acquire lock with timeout (P2-optimized version)
+  startTime := CNT
+  repeat while locktry(fsLock) == 0
+    ' Check for timeout (1 second)
+    if (CNT - startTime) > clkfreq
+      LONG[@errorCode][cogid()] := ERROR_TIMEOUT
+      return false
+      
+  ' Perform operation in critical section
+  result := performFilesystemOperation()
+  
+  ' Set success/error state for this COG
+  if result
+    LONG[@errorCode][cogid()] := ERROR_NONE
+  else
+    LONG[@errorCode][cogid()] := ERROR_OPERATION_FAILED
+    
+  ' Always release lock
+  lockrel(fsLock)
+
+PRI performFilesystemOperation() : success
+  '' Placeholder for actual filesystem operation
+  '' In real implementation, this would be file I/O
+  
+  ' Simulate work
+  waitms(10)
+  return true
+
+CON
+  ' Error codes (from original flash filesystem)
+  ERROR_NONE = 0
+  ERROR_TIMEOUT = -1  
+  ERROR_OPERATION_FAILED = -2
+
+{
+  Pattern Analysis:
+  
+  1. Global Lock Pattern:
+     - Uses locktry() for non-blocking acquisition
+     - Retry loop until lock acquired
+     - Always paired with lockrel()
+     - Keeps critical sections short
+     
+  2. Per-COG Error Tracking:
+     - Uses cogid() as index into error array
+     - Each COG has independent error state
+     - Prevents COG interference in error handling
+     - Enables detailed error diagnosis
+     
+  3. Timeout Enhancement:
+     - P2-optimized timeout using CNT counter
+     - Prevents infinite blocking
+     - Graceful failure with error code
+     
+  Why This Pattern Works:
+  - Simple and reliable coordination
+  - No deadlock possibilities
+  - Independent error handling per COG
+  - Clear resource ownership
+  - P2-optimized implementation
+  
+  When to Use:
+  - Multi-COG applications with shared resources
+  - When resource conflicts must be avoided
+  - When simple coordination is preferred
+  - When deadlock prevention is critical
+  
+  P2-Specific Optimizations:
+  - CNT counter for precise timeouts
+  - cogid() for efficient COG identification
+  - Hardware lock instructions for atomicity
+}

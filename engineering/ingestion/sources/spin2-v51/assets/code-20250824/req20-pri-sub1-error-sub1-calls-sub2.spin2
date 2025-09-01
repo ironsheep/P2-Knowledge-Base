@@ -1,0 +1,6 @@
+' Source: P2 Spin2 Documentation v51-250425 (Page 18)
+' Extracted: 2025-08-24
+' Language: Mixed | Type: Snippet
+
+PRI Sub1() : Error    'Sub1 calls Sub2 with an ABORT trap
+Error := \Sub2()    '\ means call method and trap any ABORT

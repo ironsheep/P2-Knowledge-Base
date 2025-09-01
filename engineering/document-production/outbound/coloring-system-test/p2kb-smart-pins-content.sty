@@ -1,0 +1,319 @@
+% P2KB Smart Pins Content Layer
+% Smart Pin specific environments and code block styling
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-smart-pins-content}[2025/08/25 P2KB Smart Pins Content Layer v1.0]
+
+% Foundation layer already loaded by main template - don't reload
+% \RequirePackage{p2kb-foundation}  % DISABLED: Already loaded by p2kb-smart-pins.latex
+
+% ==================== PRESERVE FOUNDATION STRUCTURAL FIXES ====================
+% CRITICAL: These ensure proper part/chapter numbering and page breaks
+% The foundation layer provides these - we must not override them
+
+% Foundation provides:
+% - \thepart = \arabic{part} (shows "Part 1" not "0.2 Part I:")
+% - Chapter page breaks with \ifafterpart logic
+% - Part page breaks with chapter counter reset
+% - Proper section numbering depth (tocdepth=2, secnumdepth=2)
+% - Chapter header formatting without prefix issues
+
+% DO NOT override these foundation commands:
+% \renewcommand{\thepart}{...}     % Foundation handles this correctly
+% \renewcommand{\chapter}{...}     % Foundation handles page breaks
+% \renewcommand{\part}{...}        % Foundation handles counter reset
+% \titleformat{\chapter}{...}      % Foundation provides proper format
+
+% ==================== SMART PINS 3-BLOCK COLOR SYSTEM ====================
+% Replace foundation's generic Shaded environment with 3 specialized block types
+% Configuration (blue), Spin2 (green), PASM2 (De Silva yellow)
+% Includes accessibility features: distinct borders and backgrounds
+
+% Define Smart Pins color palette (pastel + accessibility)
+\definecolor{smartpins-config-bg}{HTML}{E6F3FF}      % Light blue pastel
+\definecolor{smartpins-config-border}{HTML}{4A90E2}   % Blue border
+\definecolor{smartpins-spin2-bg}{HTML}{F0FFF0}       % Light green pastel  
+\definecolor{smartpins-spin2-border}{HTML}{5CB85C}    % Green border
+\definecolor{smartpins-pasm2-bg}{HTML}{FFFACD}       % De Silva yellow
+\definecolor{smartpins-pasm2-border}{HTML}{F0AD4E}    % Yellow/orange border
+
+% Configuration Block Environment (blue theme)
+\newtcolorbox{ConfigBlock}{%
+  boxrule=2pt,
+  colback=smartpins-config-bg,
+  colframe=smartpins-config-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=15pt,
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Spin2 Block Environment (green theme)
+\newtcolorbox{Spin2Block}{%
+  boxrule=2pt,
+  colback=smartpins-spin2-bg,
+  colframe=smartpins-spin2-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=15pt,
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% PASM2 Block Environment (De Silva yellow theme)
+\newtcolorbox{PASM2Block}{%
+  boxrule=2pt,
+  colback=smartpins-pasm2-bg,
+  colframe=smartpins-pasm2-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=15pt,
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Default Shaded environment maps to PASM2 (most common case)
+\renewenvironment{Shaded}{%
+  \par\needspace{4\baselineskip}
+  \vspace{1.5\baselineskip}
+  \begin{PASM2Block}
+}{%
+  \end{PASM2Block}%
+  \par\vspace{\baselineskip}
+}
+
+% ==================== LEVEL-AWARE CODE BLOCKS ====================
+% Different indentation levels for hierarchical content
+
+\newtcolorbox{CodeLevel1}{
+  boxrule=1pt,
+  colback=blue!8,
+  colframe=blue!40,
+  rounded corners,
+  left=15pt,                % Base indentation
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+\newtcolorbox{CodeLevel2}{
+  boxrule=1pt,
+  colback=blue!6,           % Slightly lighter for sub-level
+  colframe=blue!35,
+  rounded corners,
+  left=30pt,                % Double indentation for subsections
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+\newtcolorbox{CodeLevel3}{
+  boxrule=1pt,
+  colback=blue!4,           % Even lighter for sub-sub-level
+  colframe=blue!30,
+  rounded corners,
+  left=45pt,                % Triple indentation for sub-subsections
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% ==================== LIST-AWARE CODE BLOCKS ====================
+% Code blocks that align with list content (not list markers)
+
+% Base environments with list indentation added
+\newtcolorbox{list-indent-1}{
+  boxrule=1pt,
+  colback=blue!8,
+  colframe=blue!40,
+  rounded corners,
+  left=40pt,                % Align with numbered list content (\parindent + list indent)
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+\newtcolorbox{list-indent-2}{
+  boxrule=1pt,
+  colback=blue!6,
+  colframe=blue!35,
+  rounded corners,
+  left=65pt,                % Nested list indentation (40pt + 25pt)
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Combined environments: heading level + list indentation
+\newtcolorbox{CodeLevel2.list-indent-1}{
+  boxrule=1pt,
+  colback=blue!6,           % Section level color
+  colframe=blue!35,
+  rounded corners,
+  left=55pt,                % Section indent (30pt) + list indent (25pt)
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+\newtcolorbox{CodeLevel3.list-indent-1}{
+  boxrule=1pt,
+  colback=blue!4,           % Subsection level color
+  colframe=blue!30,
+  rounded corners,
+  left=70pt,                % Subsection indent (45pt) + list indent (25pt)
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% ==================== P2 LANGUAGE DEFINITIONS ====================
+% CRITICAL: Must include P2 syntax highlighting from reference content layer
+
+% Define Spin2 language
+\lstdefinelanguage{spin2}{
+  keywords={CON, VAR, OBJ, PUB, PRI, DAT, repeat, if, else, elseif, case, 
+            while, until, from, to, step, return, abort, next, quit,
+            byte, word, long, res, file, org, end, fit},
+  sensitive=true,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]'
+}
+
+% Define PASM2 language
+\lstdefinelanguage{pasm2}{
+  keywords={org, res, long, word, byte, mov, add, sub, and, or, xor, not,
+            shl, shr, sar, rol, ror, rcl, rcr, test, cmp, jmp, call, ret,
+            djnz, tjz, tjnz, wrpin, wxpin, wypin, rdpin, rqpin, akpin, dirh,
+            dirl, testp, waitx, rep, nop},
+  sensitive=false,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]'
+}
+
+% ==================== SMART PIN SPECIFIC ENVIRONMENTS ====================
+
+% Try It Yourself boxes
+\newtcolorbox{tryityourself}{
+  title=Try It Yourself,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=green!60!black,
+  colback=green!5,
+  colframe=green!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Pin Configuration callouts
+\newtcolorbox{pinconfig}{
+  title=Pin Configuration,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=orange!70!black,
+  colback=orange!5,
+  colframe=orange!70!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Important Notes
+\newtcolorbox{smartnote}{
+  title=Important,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=red!70!black,
+  colback=red!5,
+  colframe=red!70!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Technical Specifications
+\newtcolorbox{techspec}{
+  title=Technical Specification,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=purple!70!black,
+  colback=purple!5,
+  colframe=purple!70!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}

@@ -1,0 +1,12 @@
+' Advanced Wear-Leveling Algorithm - Stage 1
+' Source: chip-flash-filesystem-complete-analysis.md
+' Category: Wear Leveling
+' Description: Two-stage wear-leveling process with random block selection
+
+' Stage 1: Random Block Selection
+block_address := abs getrnd() // BLOCKS    ' ±5% wear leveling
+
+' Stage 2: Make-Before-Break Relocation  
+if field[BlockState][block_address] <> B_FREE
+    ' Relocate existing content to random free location
+    ' Write new content to originally selected location

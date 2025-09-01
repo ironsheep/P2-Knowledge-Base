@@ -1,0 +1,10 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+PUB debug_smart_pin(pin)
+  debug("Pin ", udec(pin))
+  debug("  IN flag: ", udec(pinr(pin)))
+  debug("  Z value: ", uhex(rdpin(pin)))
+  debug("  Mode: ", uhex(pinread_mode(pin)))

@@ -1,0 +1,20 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  SIGNAL_PIN = 20
+  GATE_PIN = 21
+  GATED_MODE = P_HIGH_TICKS | P_PLUS1_B
+
+PUB gated_measurement() : result
+  pinstart(SIGNAL_PIN, GATED_MODE, 0, 0)
+  wypin(SIGNAL_PIN, 0)        ' Arm
+  
+  ' Activate gate
+  pinh(GATE_PIN)
+  waitms(100)                 ' Measurement window
+  pinl(GATE_PIN)
+  
+  result := rdpin(SIGNAL_PIN)

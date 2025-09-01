@@ -1,0 +1,11 @@
+' Source: P2 SmartPins-220809 (Page 21)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Code Fragment
+
+      wrpin    PWMsaw_Config,  #20
+'Set configuration for PWM
+                                      '   Sawtooth mode
+      wxpin    X_RegData,      #20
+'Set base period at 1 usec;
+                                      '   (25 MHz/#25)
+      dirh     #20                    'Finished setup       

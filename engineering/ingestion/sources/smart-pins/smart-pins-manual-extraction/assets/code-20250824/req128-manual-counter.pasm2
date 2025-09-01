@@ -1,0 +1,27 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+counter_init
+        mov     pa, ##P_COUNT_RISES
+        wrpin   pa, #20         ' Configure counter
+        dirh    #20             ' Enable
+        
+reset_count
+        mov     pa, #0
+        wypin   pa, #20         ' Reset to zero
+        
+freq_measure
+        wypin   zero, #20       ' Reset counter
+        getct   start_time
+        addct1  start_time, ##200_000_000 ' 1 second
+        waitct1                 ' Wait
+        rdpin   frequency, #20  ' Read count
+        
+zero    long    0
+start_time long 0
+frequency long  0

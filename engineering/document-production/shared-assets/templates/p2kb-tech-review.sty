@@ -1,0 +1,258 @@
+% P2KB Iron Sheep Technical Review Presentation Style Package
+% Presentation layer for Iron Sheep technical review documents
+% Provides: Branding, headers/footers, draft warnings, review styling
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{iron-sheep-tech-review}[2025/08/25 P2KB Iron Sheep Tech Review Package v1.0]
+
+% ==================== BRANDING COLORS ====================
+% Iron Sheep + Technical Review color scheme
+
+\definecolor{ironsheepred}{RGB}{220,20,60}        % Crimson red for warnings
+\definecolor{reviewblue}{RGB}{70,130,180}         % Steel blue for professional
+\definecolor{draftgray}{RGB}{128,128,128}         % Gray for draft elements
+
+% ==================== HEADERS AND FOOTERS ====================
+% Technical review branding with Iron Sheep attribution
+
+\fancyhead[L]{\nouppercase{\leftmark}}
+\fancyhead[R]{\small Iron Sheep Productions}
+\fancyfoot[L]{\small\color{ironsheepred}TECHNICAL REVIEW DRAFT}
+\fancyfoot[C]{\thepage}
+\fancyfoot[R]{\small\today}
+
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% Page headers handled by foundation layer (clean chapter titles only)
+
+% ==================== TITLE PAGE ====================
+% Professional technical review title page with warnings
+
+\newcommand{\technicalreviewtitlepage}[6]{%
+  \begin{titlepage}
+  \centering
+  \thispagestyle{empty}
+  
+  % Technical review warning header
+  \vspace*{0.5cm}
+  {\fontsize{24}{28}\selectfont\bfseries\color{ironsheepred}DRAFT - TECHNICAL REVIEW ONLY\par}
+  \vspace{0.3cm}
+  {\large\color{ironsheepred}NOT FOR RELEASE OR DISTRIBUTION\par}
+  
+  % Main title section
+  \vspace{2cm}
+  {\fontsize{36}{43}\selectfont\bfseries #1\par}     % Title
+  \vspace{0.5cm}
+  {\Large #2\par}                                     % Subtitle
+  \vspace{1.5cm}
+  {\large Iron Sheep Productions, LLC\par}
+  \vspace{1cm}
+  {\large\color{ironsheepred}#3\par}                  % Version
+  \vspace{0.3cm}
+  {\large #4\par}                                     % Date
+  
+  % Technical review focus box
+  \vspace{1.5cm}
+  \begin{tcolorbox}[
+    colback=yellow!10,
+    colframe=ironsheepred!70,
+    boxrule=1.5pt,
+    width=0.85\textwidth,
+    center,
+    fontupper=\normalsize,
+    title={\bfseries Technical Review Notice}
+  ]
+  This document is a DRAFT for technical review purposes only.
+  
+  \vspace{0.5cm}
+  \textbf{Review Focus Areas:}
+  #5                                                  % Custom review areas
+  
+  \vspace{0.5cm}
+  Please report issues to: techreview@ironsheepproductions.com
+  \end{tcolorbox}
+  
+  % Document statistics box
+  \vspace{1cm}
+  \begin{tcolorbox}[
+    colback=gray!5,
+    colframe=gray!50,
+    boxrule=0.5pt,
+    width=0.85\textwidth,
+    center,
+    fontupper=\small
+  ]
+  \textbf{Document Statistics:}
+  #6                                                  % Custom statistics
+  \end{tcolorbox}
+  
+  \end{titlepage}
+}%
+
+% ==================== COPYRIGHT PAGE ====================
+% Standard Iron Sheep copyright with technical review notices
+
+\newcommand{\technicalreviewcopyrightpage}[3]{%
+  \thispagestyle{empty}
+  \vspace*{\fill}
+  \begin{center}
+  \textbf{#1}\\                                       % Document title
+  Technical Review Draft - #2\\                       % Version
+  \vspace{1cm}
+  Copyright \textcopyright\ 2025 Iron Sheep Productions, LLC\\
+  All rights reserved.\\
+  \vspace{1cm}
+  Propeller 2 and P2 are trademarks of Parallax Inc.\\
+  \vspace{1cm}
+  \textbf{Special thanks to:}\\
+  #3                                                  % Custom acknowledgments
+  \vspace{2cm}
+  \textcolor{ironsheepred}{\textbf{CONFIDENTIAL - TECHNICAL REVIEW ONLY}}\\
+  \textcolor{ironsheepred}{This document contains preliminary information}\\
+  \textcolor{ironsheepred}{subject to change without notice.}
+  \end{center}
+  \vspace*{\fill}
+  \clearpage
+}%
+
+% ==================== DRAFT ELEMENTS ====================
+% Visual elements emphasizing draft/review status
+
+% Draft watermark (optional - can be resource intensive)
+\newcommand{\draftwatermark}{%
+  \RequirePackage{draftwatermark}
+  \SetWatermarkText{TECHNICAL REVIEW}
+  \SetWatermarkScale{0.8}
+  \SetWatermarkColor{gray!20}
+}
+
+% Review reminder boxes
+\newtcolorbox{reviewreminder}{
+  colback=yellow!10,
+  colframe=orange!70,
+  boxrule=1pt,
+  title={\textbf{⚠️ Review Reminder}},
+  fonttitle=\bfseries\color{black},
+  left=10pt,right=10pt,top=8pt,bottom=8pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Technical note boxes
+\newtcolorbox{technote}{
+  colback=blue!5,
+  colframe=reviewblue!70,
+  boxrule=1pt,
+  title={\textbf{📋 Technical Note}},
+  fonttitle=\bfseries\color{black},
+  left=10pt,right=10pt,top=8pt,bottom=8pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% ==================== REVIEW TRACKING ====================
+% Elements to support technical review process
+
+% Review comment placeholder
+\newcommand{\reviewcomment}[2][]{%
+  \marginpar{%
+    \small\color{ironsheepred}%
+    \textbf{Review:} #2%
+    \ifx\relax#1\relax\else\ (#1)\fi%
+  }%
+}
+
+% Version tracking
+\newcommand{\versionhistory}[1]{%
+  \begin{tcolorbox}[
+    colback=gray!5,
+    colframe=gray!40,
+    boxrule=0.5pt,
+    title={\textbf{Version History}},
+    fonttitle=\bfseries\small
+  ]
+  \small #1
+  \end{tcolorbox}
+}
+
+% ==================== LOGO INTEGRATION ====================
+% Iron Sheep logo placement (when logo file is available)
+
+\newcommand{\ironsheeplogo}[1][0.5]{%
+  % Placeholder for logo - update path when logo is available
+  % \includegraphics[scale=#1]{iron-sheep-logo}
+  \textbf{\color{draftgray}[Iron Sheep Logo]}
+}
+
+% Logo in footer (subtle branding)
+\newcommand{\footerlogo}{%
+  \fancyfoot[R]{\raisebox{-0.5\height}{\ironsheeplogo[0.2]}}
+}
+
+% ==================== TECHNICAL REVIEW HELPERS ====================
+% Commands to support technical review workflow
+
+% Highlight technical terms for review
+\newcommand{\reviewterm}[1]{\textbf{\color{reviewblue}#1}}
+
+% Mark specifications for validation
+\newcommand{\needsvalidation}[1]{\textbf{#1}\marginpar{\tiny\color{ironsheepred}VALIDATE}}
+
+% Mark calculations for verification
+\newcommand{\needsverification}[1]{\textbf{#1}\marginpar{\tiny\color{ironsheepred}VERIFY}}
+
+% ==================== DOCUMENT MATURITY INDICATORS ====================
+% Visual indicators of document completeness
+
+% Completeness indicator
+\newcommand{\completeness}[1]{%
+  \textcolor{draftgray}{\small[#1\% Complete]}%
+}
+
+% Quality indicator  
+\newcommand{\quality}[1]{%
+  \textcolor{draftgray}{\small[Quality: #1]}%
+}
+
+% ==================== PROFESSIONAL FORMATTING ====================
+% Clean, professional appearance for technical review
+
+% Enhanced table of contents for technical documents
+\renewcommand{\cftchapfont}{\bfseries\color{reviewblue}}
+\renewcommand{\cftsecfont}{\normalfont}
+\renewcommand{\cftsubsecfont}{\normalfont\small\color{draftgray}}
+
+% Professional section styling without titlesec
+% Redefine section formatting using standard LaTeX
+\makeatletter
+\renewcommand\section{%
+  \@startsection{section}{1}{\z@}%
+    {-3.5ex \@plus -1ex \@minus -.2ex}%  % space before
+    {2.3ex \@plus.2ex}%                   % space after
+    {\normalfont\Large\bfseries\color{reviewblue}}%  % format
+}
+\makeatother
+
+% ==================== REVIEW WORKFLOW INTEGRATION ====================
+% Support for iterative review process
+
+% Review iteration tracking
+\newcommand{\reviewiteration}[1]{%
+  \textcolor{draftgray}{\small Review Iteration: #1}%
+}
+
+% Feedback incorporation notes
+\newcommand{\feedbacknote}[1]{%
+  \begin{tcolorbox}[
+    colback=green!5,
+    colframe=green!40,
+    boxrule=0.5pt,
+    title={\textbf{✅ Feedback Incorporated}},
+    fonttitle=\bfseries\small
+  ]
+  \small #1
+  \end{tcolorbox}
+}

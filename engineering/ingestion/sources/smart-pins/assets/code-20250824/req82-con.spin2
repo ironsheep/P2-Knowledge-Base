@@ -1,0 +1,10 @@
+' Source: P2 SmartPins-220809 (Page 49)
+' Extracted: 2025-08-24
+' Language: Spin2 | Type: Code Fragment
+
+CON
+     clkout   = 40     ' Pin P40       'Xmtr clock out, P31
+     txout    = 41     ' Pin P41       'Xmtr data out, to P30
+     rxin     = 30     ' Pin P30       'Receiver data in
+     rxclkin  = 31     ' Pin P31       'Receiver clock in
+'Remember to connect these pins as noted!     

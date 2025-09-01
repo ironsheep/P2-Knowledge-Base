@@ -1,0 +1,22 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+uart_init
+        mov     pa, ##P_ASYNC_TX | P_OE
+        wrpin   pa, #20         ' Configure TX
+        mov     pa, baud_div
+        wxpin   pa, #20
+        dirh    #20
+        
+tx_char
+.wait   testp   #20 wc          ' Check busy
+  if_c  jmp     #.wait
+        wypin   char, #20       ' Send character
+        
+baud_div long   200_000_000/115_200
+char    long    "A"

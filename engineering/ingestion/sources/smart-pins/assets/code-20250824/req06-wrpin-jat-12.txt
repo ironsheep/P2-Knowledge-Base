@@ -1,0 +1,6 @@
+' Source: P2 SmartPins-220809 (Page 11)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Snippet
+
+wrpin  jat,   #12
+' Set repository mode for P12

@@ -1,0 +1,7 @@
+' Source: P2 SmartPins-220809 (Page 48)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+ wypin
+#$85,         #txout     '8-bit data to transmit:
+                                         ' 10100001 (LSB first)

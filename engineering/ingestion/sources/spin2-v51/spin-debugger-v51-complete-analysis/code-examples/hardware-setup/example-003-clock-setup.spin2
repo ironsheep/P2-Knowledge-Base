@@ -1,0 +1,9 @@
+' Clock Management Setup
+' Source: spin-debugger-v51-complete-analysis.md  
+' Category: Hardware Setup
+' Description: Clock mode configuration for debugging
+
+' Set clock mode
+hubset  _clkmode1_      'start external clock, remain in rcfast mode
+waitx   ##20_000_000 / 100   'allow 10ms for external clock to stabilize  
+hubset  _clkmode2_      'switch to external clock mode

@@ -1,0 +1,22 @@
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "manual-chapter1.md",
+      "output": "Manual-Chapter1-v1.pdf",
+      "template": "p2kb-foundation"
+    },
+    {
+      "input": "manual-chapter2.md",
+      "output": "Manual-Chapter2-v1.pdf",
+      "template": "p2kb-foundation"
+    }
+  ],
+  "lua_filters": ["basic-formatting"],
+  "metadata": {
+    "title": "Multi-Document Production Test",
+    "author": "P2 Knowledge Base",
+    "date": "September 2025",
+    "version": "v1.0"
+  }
+}

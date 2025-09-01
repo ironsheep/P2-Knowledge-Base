@@ -1,0 +1,6 @@
+{
+  "required_pandoc_args": ["--top-level-division=part"],
+  "reason": "Smart Pins uses Part/Chapter structure - # headers become \\part{}, ## headers become \\chapter{}",
+  "discovered": "2025-08-25",
+  "issue": "Without this, Pandoc defaults to chapter-level division and parts don't get page breaks"
+}

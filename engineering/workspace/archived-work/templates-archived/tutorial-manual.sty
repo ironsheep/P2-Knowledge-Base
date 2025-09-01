@@ -1,0 +1,241 @@
+% P2KB Tutorial Manual Content Style Package  
+% Content layer for pedagogical/tutorial documents (DeSilva style)
+% Provides: Educational environments, code styling, pedagogical structure
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{tutorial-manual}[2025/08/25 P2KB Tutorial Manual Package v1.0]
+
+% ==================== PEDAGOGICAL COLORS ====================
+% Colors designed for learning and engagement
+
+\definecolor{inlineyellow}{HTML}{FFFACD}      % Light yellow for code
+\definecolor{codegray}{HTML}{F5F5F5}          % Light gray for sidebars
+\definecolor{missingviolet}{HTML}{E6E6FA}     % Violet for missing content
+\definecolor{revieworange}{HTML}{FFE4B5}      % Orange for review needed
+\definecolor{diagramblue}{HTML}{E0F2FF}       % Light blue for diagrams
+\definecolor{chaptergreen}{HTML}{F0FFF0}      % Light green for chapter ends
+\definecolor{yourturncolor}{HTML}{E6F3FF}     % Light blue for exercises
+
+% ==================== CODE LISTING CONFIGURATION ====================
+% Educational code styling - emphasizes readability and learning
+
+\lstset{
+  backgroundcolor=\color{inlineyellow},        % Yellow background for visibility
+  frame=none,                                  % Clean, no frame distractions
+  basicstyle=\ttfamily,
+  showstringspaces=false,
+  columns=flexible,
+  keepspaces=true,
+  commentstyle=\color{gray}\itshape,
+  keywordstyle=\color{blue}\bfseries,
+  stringstyle=\color{red},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=4,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=5pt,
+  stepnumber=1,
+  xleftmargin=2em,                             % Include numbers in background
+  framexleftmargin=2em,
+  moredelim=[is][\bfseries]{**}{**}            % Bold text between **
+}
+
+% ==================== PEDAGOGICAL ENVIRONMENTS ====================
+% Educational boxes and environments for learning
+
+% Sidetrack: Gray with dashed border (interesting tangents)
+\newtcolorbox{sidetrack}{
+  enhanced,
+  colback=codegray,
+  colframe=gray!50,
+  boxrule=0pt,
+  borderline={1pt}{0pt}{gray!50, dashed},
+  title={\textbf{Sidetrack}},
+  fonttitle=\bfseries\color{black},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Interlude: Gray without border (brief breaks in narrative)
+\newtcolorbox{interlude}{
+  colback=codegray,
+  colframe=codegray,
+  boxrule=0pt,
+  title={\textbf{Interlude}},
+  fonttitle=\bfseries\color{black},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Missing content: Violet with thick border (development flags)
+\newtcolorbox{missing}{
+  colback=missingviolet,
+  colframe=violet!70,
+  boxrule=2pt,
+  title={🚧 \textbf{CONTENT MISSING}},
+  fonttitle=\large\bfseries\color{black},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Review needed: Orange with thick border (editorial flags)
+\newtcolorbox{review}{
+  colback=revieworange,
+  colframe=orange!70,
+  boxrule=2pt,
+  title={🔍 \textbf{NEEDS REVIEW}},
+  fonttitle=\large\bfseries\color{black},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Diagram needed: Blue with border (visual content flags)
+\newtcolorbox{diagram}{
+  colback=diagramblue,
+  colframe=blue!50,
+  boxrule=2pt,
+  title={🎨 \textbf{DIAGRAM NEEDED}},
+  fonttitle=\large\bfseries\color{black},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Your Turn: Light blue exercise box (hands-on learning)
+\newtcolorbox{yourturn}{
+  colback=yourturncolor,
+  colframe=blue!30,
+  boxrule=1pt,
+  title={\textbf{Your Turn}},
+  fonttitle=\bfseries\color{black},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Chapter ending: Green celebration box (completion)
+\newtcolorbox{chapterend}{
+  colback=chaptergreen,
+  colframe=chaptergreen,
+  boxrule=0pt,
+  width=0.8\textwidth,
+  center,
+  fontupper=\itshape,
+  left=20pt,right=20pt,top=15pt,bottom=15pt,
+  before skip=20pt,
+  after skip=20pt
+}
+
+% Command for chapter end separator line
+\newcommand{\chapterseparator}{\vspace{8pt}\hrule height 0.5pt width 0.6\linewidth\vspace{8pt}}
+
+% ==================== INLINE CODE ====================
+% Educational inline code with yellow highlighting
+
+\newcommand{\inlinecode}[1]{%
+  \colorbox{inlineyellow}{\strut\texttt{#1}}%
+}
+
+% ==================== CHAPTER FORMATTING ====================
+% Educational chapter structure - clear hierarchy
+
+% Chapter formatting with "Chapter N:" prefix for navigation
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}
+  {\chaptertitlename\ \thechapter:}
+  {0.5em}
+  {\Huge}
+  [\vspace{20pt}]
+
+% Only number chapters, not sections (reduces cognitive load)
+\setcounter{secnumdepth}{0}
+\setcounter{tocdepth}{1}
+
+% TOC formatting with "Chapter N:" prefix
+\RequirePackage{titletoc}
+\titlecontents{chapter}
+  [0pt]
+  {\vspace{1.5em}\bfseries}
+  {\chaptername\ \thecontentslabel:\ }
+  {}
+  {\titlerule*[1pc]{.}\contentspage}
+
+% Section formatting - NO NUMBERS (focus on content, not hierarchy)
+\titleformat{\section}
+  {\normalfont\Large\bfseries}
+  {}
+  {0pt}
+  {\bfseries}
+
+% Subsection formatting - NO NUMBERS
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}
+  {}
+  {0pt}
+  {\bfseries}
+
+% ==================== EDUCATIONAL HELPERS ====================
+% Commands to support pedagogical content
+
+% Key concept highlighting
+\newcommand{\concept}[1]{\textbf{\color{blue}#1}}
+
+% Important terms
+\newcommand{\term}[1]{\textbf{#1}}
+
+% Instructions for exercises
+\newcommand{\instruction}[1]{\textit{#1}}
+
+% Code references with context
+\newcommand{\coderef}[2]{\texttt{#1} \textcolor{gray}{(#2)}}
+
+% Learning objectives box
+\newtcolorbox{objectives}{
+  colback=blue!5,
+  colframe=blue!30,
+  boxrule=1pt,
+  title={\textbf{Learning Objectives}},
+  fonttitle=\bfseries\color{black},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Key takeaways box
+\newtcolorbox{takeaways}{
+  colback=green!5,
+  colframe=green!40,
+  boxrule=1pt,
+  title={\textbf{Key Takeaways}},
+  fonttitle=\bfseries\color{black},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% ==================== PANDOC INTEGRATION ====================
+% Enhanced Pandoc support for educational content
+
+% Code block environment with educational styling
+\renewenvironment{Shaded}{\begin{tcolorbox}[colback=inlineyellow,boxrule=0pt]}{\end{tcolorbox}}
+
+% Enhanced syntax highlighting environment for education
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{%
+  numbers=left,%
+  numberstyle=\tiny\color{gray},%
+  numbersep=5pt,%
+  frame=single,%
+  framesep=10pt,%
+  rulecolor=\color{inlineyellow},%
+  fillcolor=\color{inlineyellow},%
+  formatcom=\color{black},%
+  xleftmargin=2em,%
+  xrightmargin=0pt%
+}

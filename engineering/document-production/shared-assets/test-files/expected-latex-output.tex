@@ -1,0 +1,55 @@
+\section{Test Document for Semantic Blocks}
+
+This document tests all 7 semantic marker types.
+
+\subsection{Diagram Needs}
+
+\begin{needsdiagram}
+Timing diagram showing clock relationships between cog and hub memory access cycles.
+\end{needsdiagram}
+
+\subsection{Preliminary Content}
+
+\begin{preliminarycontent}
+This feature documentation is under development. The API may change.
+\end{preliminarycontent}
+
+\subsection{Verification Needed}
+
+\begin{needsverification}
+The frequency calculation formula needs hardware verification on actual P2 chips.
+\end{needsverification}
+
+\subsection{Examples Required}
+
+\begin{needsexamples}
+Code examples needed for ADC mode configuration with different sampling rates.
+\end{needsexamples}
+
+\subsection{Technical Review}
+
+\begin{needstechreview}
+Smart Pin transition mode behavior requires review by hardware engineering team.
+\end{needstechreview}
+
+\subsection{Code Review}
+
+\begin{needscodereview}
+This PASM2 routine needs optimization review for cycle count and register usage.
+
+\begin{verbatim}
+        rdpin   temp, #PIN_ADC
+        shr     temp, #16
+        mov     result, temp
+\end{verbatim}
+\end{needscodereview}
+
+\subsection{Tips}
+
+\begin{tipbox}
+Use Smart Pins for hardware timing whenever possible - they're more accurate than software delays.
+\end{tipbox}
+
+\subsection{Regular Content}
+
+This is normal paragraph text that should remain unchanged.

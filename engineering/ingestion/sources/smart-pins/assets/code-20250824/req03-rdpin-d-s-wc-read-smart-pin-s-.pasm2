@@ -1,0 +1,8 @@
+' Source: P2 SmartPins-220809 (Page 5)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+RDPIN D,S/# {WC} Read Smart Pin S[5:0] register Z[31:0], save result in D[31:0],
+                                    acknowledge Smart Pin. (Carry = mode result.)
+RQPIN D,S/# {WC}   Read Smart Pin S[5:0] register Z[31:0], save result in D[31:0],
+                                     flag into C, do not acknowledge.

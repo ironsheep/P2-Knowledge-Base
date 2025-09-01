@@ -1,0 +1,6 @@
+' Source: P2 Spin2 Documentation v51-250425 (Page 19)
+' Extracted: 2025-08-24
+' Language: Spin2 | Type: Snippet
+
+PRI Sub3()            'Sub3 ABORTs, returning to Sub1 with ErrorCode
+ABORT ErrorCode     'ABORT and return ErrorCode

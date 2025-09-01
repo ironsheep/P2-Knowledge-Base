@@ -1,0 +1,13 @@
+' Source: P2 SmartPins-220809 (Page 53)
+' Extracted: 2025-08-24
+' Language: Spin2 | Type: Code Fragment
+
+wrpin   ##rxmode, #rxpin 
+Next, a WXPIN instruction sets the bit rate and the number of bits to receive:
+Bits X[31:16] set the number of system-clock periods in a bit period. In a case where 
+bits X[31:26] are all zero, bits X[15:10] let you set a fraction of a system-clock period to 
+obtain an accurate bit-transmission rate. First calculate the bit-period value:
+system-clocks/bit = system-clock-frequency  /  bits-per-second
+For a 100-MHz system clock and 115,200 bps:
+100,000,000 / 115,200  =  868.1 system-clocks/bit
+

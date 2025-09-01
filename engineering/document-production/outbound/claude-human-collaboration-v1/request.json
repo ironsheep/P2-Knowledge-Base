@@ -1,0 +1,26 @@
+{
+  "documents": [
+    {
+      "input": "claude-human-collaboration.md",
+      "output": "claude-human-collaboration.pdf",
+      "template": "p2kb-professional-guide",
+      "variables": {
+        "title": "Optimizing Claude Code + Human Collaboration",
+        "subtitle": "A Field Guide to High-Quality AI-Assisted Work",
+        "author": "Claude & Stephen",
+        "company": "Iron Sheep Productions LLC",
+        "version": "Version 1.0",
+        "date": "August 2025",
+        "documentclass": "article",
+        "classoption": "11pt,letterpaper",
+        "mainfont": "Helvetica Neue",
+        "monofont": "Courier New",
+        "fontsize": "11pt",
+        "geometry": "margin=1in",
+        "toc": true,
+        "toc-depth": 2,
+        "highlight-style": "tango"
+      }
+    }
+  ]
+}

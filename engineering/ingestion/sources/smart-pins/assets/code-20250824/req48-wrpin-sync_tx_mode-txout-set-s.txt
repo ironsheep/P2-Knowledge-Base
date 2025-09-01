@@ -1,0 +1,6 @@
+' Source: P2 SmartPins-220809 (Page 28)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Snippet
+
+        wrpin   sync_tx_mode,  #txout  'Set sync tx mode for pin 41
+        wxpin

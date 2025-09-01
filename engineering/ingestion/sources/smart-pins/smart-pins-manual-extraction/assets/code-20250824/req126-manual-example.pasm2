@@ -1,0 +1,27 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+quad_init
+        mov     pa, ##P_QUADRATURE_A | P_PLUS1_B
+        wrpin   pa, #20         ' A input on P20, B on P21
+        dirh    #20             ' Enable decoder
+        
+read_position
+        rdpin   position, #20   ' Get current count
+        
+check_motion
+.loop   rdpin   old_pos, #20    ' Save position
+        waitx   ##2_000_000     ' Wait 10ms @ 200MHz
+        rdpin   new_pos, #20    ' Read again
+        sub     new_pos, old_pos ' Calculate delta
+        ' new_pos = counts in 10ms
+        jmp     #.loop
+        
+position long   0
+old_pos  long   0
+new_pos  long   0

@@ -1,0 +1,10 @@
+' Source: P2 SmartPins-220809 (Page 16)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Code Fragment
+
+        wrpin   TransConfig,    #20
+'Setup for Transition mode
+        wxpin   TransTiming,    #20
+'Set time between transitions
+        dirh    #20
+'Finished setup

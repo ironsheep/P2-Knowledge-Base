@@ -1,0 +1,42 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  TX_PIN = 30
+  RX_PIN = 31
+  BAUD = 921_600
+  BUFFER_SIZE = 256
+
+VAR
+  byte tx_buffer[BUFFER_SIZE]
+  byte rx_buffer[BUFFER_SIZE]
+  long tx_head, tx_tail
+  long rx_head, rx_tail
+
+PUB uart_init()
+  pinstart(TX_PIN, P_ASYNC_TX | P_OE, clkfreq/BAUD, 0)
+  pinstart(RX_PIN, P_ASYNC_RX, clkfreq/BAUD, 0)
+  
+PUB tx(b)
+  repeat until (tx_head + 1) & (BUFFER_SIZE-1) <> tx_tail
+  tx_buffer[tx_head] := b
+  tx_head := (tx_head + 1) & (BUFFER_SIZE-1)
+  
+PUB tx_process()
+  if tx_head <> tx_tail
+    if pinr(TX_PIN) == 0
+      wypin(TX_PIN, tx_buffer[tx_tail])
+      tx_tail := (tx_tail + 1) & (BUFFER_SIZE-1)
+      
+PUB rx() : b
+  repeat until rx_head <> rx_tail
+  b := rx_buffer[rx_tail]
+  rx_tail := (rx_tail + 1) & (BUFFER_SIZE-1)
+  
+PUB rx_process()
+  if pinr(RX_PIN)
+    if (rx_head + 1) & (BUFFER_SIZE-1) <> rx_tail
+      rx_buffer[rx_head] := rdpin(RX_PIN)
+      rx_head := (rx_head + 1) & (BUFFER_SIZE-1)

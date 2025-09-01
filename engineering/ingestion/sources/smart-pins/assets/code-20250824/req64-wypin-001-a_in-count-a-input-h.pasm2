@@ -1,0 +1,6 @@
+' Source: P2 SmartPins-220809 (Page 32)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+      wypin    ##%001,      #A_in    'Count A-input high states
+      dirh     #A_in                 'Enable Smart Pin

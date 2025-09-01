@@ -1,0 +1,6 @@
+' Source: P2 SmartPins-220809 (Page 24)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Snippet
+
+             sar   QuadEnc_data, #2    'Arithmetic shift right 2
+                                       '   (divide by 4)

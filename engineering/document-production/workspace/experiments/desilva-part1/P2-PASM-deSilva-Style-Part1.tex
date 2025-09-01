@@ -1,0 +1,1508 @@
+% P2KB-PASM-deSilva-Enhanced Template
+% Purpose: Convert Markdown to PDF with deSilva pedagogical style
+% Created: 2025-08-23
+% Enhanced: Fixed chapters, headers, numbering, and Pandoc compatibility
+
+\documentclass[11pt]{book}
+
+% ==================== PACKAGES ====================
+\usepackage[utf8]{inputenc}
+\usepackage{charter}          % Primary font
+\usepackage{xcolor}
+\usepackage{tikz}            % Load tikz BEFORE tcolorbox
+\usepackage[most]{tcolorbox} % Load with most libraries including skins
+\usepackage{mdframed}
+\usepackage{soul}
+\usepackage{listings}
+\usepackage{multicol}
+\usepackage{makeidx}
+\usepackage{hyperref}
+\usepackage[margin=1in]{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{needspace}
+\usepackage{fancyvrb}        % For DefineVerbatimEnvironment
+\usepackage{graphicx}         % For includegraphics
+\usepackage{longtable}       % For tables
+\usepackage{booktabs}        % Better table formatting
+\usepackage{array}           % For table column formatting
+\usepackage{calc}            % For mathematical calculations in column widths
+\usepackage{etoolbox}        % For \preto command
+
+% ==================== COLORS ====================
+\definecolor{codegray}{HTML}{F5F5F5}
+\definecolor{inlineyellow}{HTML}{FFFACD}
+\definecolor{missingviolet}{HTML}{E6E6FA}
+\definecolor{revieworange}{HTML}{FFE4B5}
+\definecolor{diagramblue}{HTML}{E0F2FF}
+\definecolor{chaptergreen}{HTML}{F0FFF0}
+\definecolor{yourturncolor}{HTML}{FFF8DC}
+
+% ==================== TYPOGRAPHY ====================
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{10pt}
+\linespread{1.3}
+
+% ==================== PANDOC COMPATIBILITY FIXES ====================
+% These are ESSENTIAL for Pandoc to work correctly
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% Fix for inline code and other pass-through content
+\providecommand{\passthrough}[1]{#1}
+
+% Additional Pandoc commands that might be needed
+\providecommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\providecommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\providecommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\providecommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\providecommand{\ImportTok}[1]{#1}
+\providecommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\providecommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\providecommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\providecommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\providecommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\providecommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\providecommand{\BuiltInTok}[1]{#1}
+\providecommand{\ExtensionTok}[1]{#1}
+\providecommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\providecommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\providecommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\providecommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+
+% Table rules (if using tables)
+\providecommand{\toprule}{\hline}
+\providecommand{\midrule}{\hline}
+\providecommand{\bottomrule}{\hline}
+
+% ==================== SEMANTIC MARKUP HANDLERS ====================
+% Code elements with yellow background per creation guide
+\newcommand{\pasm}[1]{\colorbox{inlineyellow}{\textbf{\texttt{#1}}}}
+\newcommand{\register}[1]{\colorbox{inlineyellow}{\textcolor{blue}{\texttt{#1}}}}
+\newcommand{\pin}[1]{\colorbox{inlineyellow}{\textcolor{purple}{\texttt{#1}}}}
+\newcommand{\immediatevalue}[1]{\colorbox{inlineyellow}{\textcolor{gray}{\texttt{#1}}}}
+\newcommand{\immediateprefix}[1]{\colorbox{inlineyellow}{\textcolor{gray}{\texttt{#1}}}}
+\newcommand{\memaddress}[1]{\colorbox{inlineyellow}{\texttt{#1}}}
+\newcommand{\codelabel}[1]{\colorbox{inlineyellow}{\textit{\texttt{#1}}}}
+\newcommand{\codevalue}[1]{\colorbox{inlineyellow}{\texttt{#1}}}
+\newcommand{\voltage}[1]{\colorbox{inlineyellow}{\textcolor{red}{\texttt{#1}}}}
+\newcommand{\frequency}[1]{\colorbox{inlineyellow}{\textcolor{orange}{\texttt{#1}}}}
+\newcommand{\calculation}[1]{\colorbox{inlineyellow}{\texttt{#1}}}
+
+% ==================== CODE SETTINGS ====================
+\lstset{
+  basicstyle=\ttfamily,
+  backgroundcolor=\color{codegray},
+  frame=none,
+  showstringspaces=false,
+  columns=flexible,
+  keepspaces=true,
+  commentstyle=\color{gray}\itshape,
+  keywordstyle=\color{blue}\bfseries,
+  stringstyle=\color{red},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=4
+}
+
+% ==================== CUSTOM ENVIRONMENTS ====================
+% Define each environment only ONCE
+
+% Sidetrack: Gray with dashed border
+\newtcolorbox{sidetrack}{
+  colback=codegray,
+  colframe=gray!50,
+  boxrule=0pt,
+  enhanced,
+  borderline={1pt}{0pt}{gray!50, dashed},
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Interlude: Gray without border
+\newtcolorbox{interlude}{
+  colback=codegray,
+  colframe=codegray,
+  boxrule=0pt,
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Missing content: Violet with thick border
+\newtcolorbox{missing}{
+  colback=missingviolet,
+  colframe=violet!70,
+  boxrule=2pt,
+  title={🚧 \textbf{CONTENT MISSING - COMING SOON}},
+  fonttitle=\large\bfseries,
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Review needed: Orange with thick border
+\newtcolorbox{review}{
+  colback=revieworange,
+  colframe=orange!70,
+  boxrule=2pt,
+  title={🔍 \textbf{NEEDS TECHNICAL REVIEW}},
+  fonttitle=\large\bfseries,
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Diagram needed: Blue with border
+\newtcolorbox{diagram}{
+  colback=diagramblue,
+  colframe=blue!50,
+  boxrule=2pt,
+  title={🎨 \textbf{DIAGRAM NEEDED}},
+  fonttitle=\large\bfseries,
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Your Turn: Yellow tinted exercise box
+\newtcolorbox{yourturn}{
+  colback=yourturncolor,
+  colframe=yellow!50,
+  boxrule=1pt,
+  left=10pt,right=10pt,top=10pt,bottom=10pt,
+  before skip=10pt,
+  after skip=10pt
+}
+
+% Chapter ending: Green celebration box
+\newtcolorbox{chapterend}{
+  colback=chaptergreen,
+  colframe=chaptergreen,
+  boxrule=0pt,
+  width=0.8\textwidth,
+  center,
+  fontupper=\itshape,
+  left=20pt,right=20pt,top=15pt,bottom=15pt,
+  before skip=20pt,
+  after skip=20pt
+}
+
+% ==================== INLINE CODE ====================
+\newcommand{\inlinecode}[1]{%
+  \colorbox{inlineyellow}{\strut\texttt{#1}}%
+}
+
+% Redefine \texttt to use yellow background and bold for ALL inline code
+% This ensures instructions (and all code) stand out clearly
+\let\oldtexttt\texttt
+\renewcommand{\texttt}[1]{\colorbox{inlineyellow}{\strut\textbf{\oldtexttt{#1}}}}
+
+% ==================== FIX 1: CHAPTERS START ON NEW PAGES ====================
+% Force chapters to start on new page using etoolbox
+\preto{\chapter}{\clearpage}
+
+% ==================== FIX 2: HEADERS SHOW CHAPTER NAMES ====================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\leftmark}  % Shows chapter name
+\fancyhead[R]{\thepage}
+\fancyfoot[C]{\small\itshape\color{red}DRAFT - P2 Knowledge Base Project}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+% This ensures headers show "Chapter X: Title" not "Contents"
+\renewcommand{\chaptermark}[1]{\markboth{Chapter \thechapter: #1}{}}
+
+% ==================== FIX 3: NO SECTION NUMBERING ====================
+% Disable section numbering as per creation guide
+\setcounter{secnumdepth}{-1}
+
+% ==================== CHAPTER FORMATTING ====================
+% Start chapter numbering from 1
+\setcounter{chapter}{0}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}
+  {\chaptertitlename\ \thechapter}
+  {20pt}
+  {\Huge}
+\titlespacing*{\chapter}{0pt}{0pt}{40pt}
+
+% ==================== PANDOC VARIABLES ====================
+% Document metadata from YAML front matter
+\title{Discovering P2 Assembly}
+\author{Stephen Moraco & Claude AI}
+\date{August 2025}
+
+% ==================== DOCUMENT START ====================
+\begin{document}
+
+% Title page if title exists
+\maketitle
+
+% Table of contents if requested
+\tableofcontents
+\clearpage
+
+% Main content
+\hypertarget{discovering-p2-assembly}{%
+\section{Discovering P2 Assembly}\label{discovering-p2-assembly}}
+
+\hypertarget{build-experiment-and-master-the-propeller-2}{%
+\subsection{Build, Experiment, and Master the Propeller
+2}\label{build-experiment-and-master-the-propeller-2}}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{dedication}{%
+\section{Dedication}\label{dedication}}
+
+To \textbf{Günter deSilva}, whose P1 tutorial opened the door to
+parallel thinking for thousands of programmers. Your gift of making the
+complex feel simple lives on in these pages.
+
+To \textbf{Chip Gracey}, for creating not just processors, but
+playgrounds for the mind. The P2 is your masterpiece---eight intelligent
+servants working in perfect harmony.
+
+To \textbf{the Parallax Community}---from forum moderators to example
+writers, from tool creators to beta testers. You've turned documentation
+into conversation, problems into teachable moments, and confusion into
+clarity.
+
+And to \textbf{every reader} picking up this manual: You're about to
+discover that parallel processing isn't scary---it's powerful, elegant,
+and surprisingly fun. The journey from blinking an LED to orchestrating
+eight cores is shorter than you think.
+
+Welcome to the P2. Let's build something amazing together.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{chapter-1-your-first-blink}{%
+\section{Chapter 1: Your First Blink}\label{chapter-1-your-first-blink}}
+
+Every programming journey starts with a single step. In the world of
+microcontrollers, that step is making an LED blink. It's our ``Hello,
+World!''---simple, satisfying, and secretly teaching us fundamental
+concepts we'll use forever.
+
+\hypertarget{the-hook-one-led-eight-cores-infinite-possibilities}{%
+\subsection{The Hook: One LED, Eight Cores, Infinite
+Possibilities}\label{the-hook-one-led-eight-cores-infinite-possibilities}}
+
+Here's something wild: The P2 has eight independent processors (we call
+them ``cogs''), and right now, we're going to use just one to blink an
+LED. It's like having an eight-lane highway and driving in just one
+lane---for now. But don't worry, by Chapter 16, you'll be orchestrating
+all eight like a maestro conducting a symphony.
+
+\hypertarget{lets-build-something}{%
+\subsection{Let's Build Something}\label{lets-build-something}}
+
+\begin{lstlisting}
+' Our first P2 program - Blink an LED on pin 16
+' Works on ALL P2 boards (pins 16-47 are universal)
+
+**ORG** 0' Start at beginning of cog RAM
+        
+blink **DRVH** #16' Drive pin 16 high (LED on)
+**WAITX** ##25_000_000' Wait ~0.5 seconds at 50MHz
+**DRVL** #16' Drive pin 16 low (LED off)  
+**WAITX** ##25_000_000' Wait ~0.5 seconds
+**JMP** #blink' Do it again forever!
+\end{lstlisting}
+
+\textbf{Try it!} Copy this code, save it as
+\passthrough{\lstinline!blink.pasm2!}, and load it onto your P2. Connect
+an LED (with a 220Ω resistor) to pin 16. Watch it blink!
+
+\begin{sidetrack}
+\textbf{Why Pin 16?}
+
+We're using pin 16 because it's in the "safe zone" (pins 16-47) that works identically on all P2 boards. Pins 56-63 are often connected to boot devices or special functions depending on your board. Pins 0-15 might have board-specific peripherals attached. Always check your board's documentation, but 16-47 are your universal playground!
+\end{sidetrack}
+
+\hypertarget{whats-really-happening}{%
+\subsection{What's Really Happening}\label{whats-really-happening}}
+
+Let's decode this magic line by line:
+
+\hypertarget{the-setup}{%
+\subsubsection{The Setup}\label{the-setup}}
+
+\begin{itemize}
+\tightlist
+\item
+  \passthrough{\lstinline!org 0!} - Tells the assembler ``start placing
+  code at address 0 in cog RAM''
+\item
+  Each cog has its own private 512 longs (2KB) of RAM
+\item
+  Instructions live here, along with your variables
+\end{itemize}
+
+\hypertarget{the-pin-commands}{%
+\subsubsection{The Pin Commands}\label{the-pin-commands}}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{DRVH} \passthrough{\lstinline!\\textbackslash\\\{\\\}\\\#16!}
+  - ``Drive High'' - Sets pin 16 to 3.3V (HIGH/ON)
+\item
+  \textbf{DRVL} \passthrough{\lstinline!\\textbackslash\\\{\\\}\\\#16!}
+  - ``Drive Low'' - Sets pin 16 to 0V (LOW/OFF)
+\item
+  The \passthrough{\lstinline!\\textbackslash\\\{\\\}\\\#!} means
+  ``immediate value'' - the actual number 16, not the contents of
+  register 16
+\end{itemize}
+
+\hypertarget{the-timing}{%
+\subsubsection{The Timing}\label{the-timing}}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{WAITX}
+  \passthrough{\lstinline!\\textbackslash\\\{\\\}\\\#\\textbackslash\\\{\\\}\\\#25\\textbackslash\\\{\\\}\\\_000\\textbackslash\\\{\\\}\\\_000!}
+  - Waits 25 million clock cycles
+\item
+  At the default 50MHz clock: 25,000,000 ÷ 50,000,000 = 0.5 seconds
+\item
+  The
+  \passthrough{\lstinline!\\textbackslash\\\{\\\}\\\#\\textbackslash\\\{\\\}\\\#!}
+  (double hash) means ``32-bit immediate value''
+\item
+  Single \passthrough{\lstinline!\\textbackslash\\\{\\\}\\\#!} fits in
+  the instruction (9 bits max = 511)
+\item
+  Double
+  \passthrough{\lstinline!\\textbackslash\\\{\\\}\\\#\\textbackslash\\\{\\\}\\\#!}
+  uses an extra long for big numbers
+\end{itemize}
+
+\hypertarget{the-loop}{%
+\subsubsection{The Loop}\label{the-loop}}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{JMP}
+  \passthrough{\lstinline!\\textbackslash\\\{\\\}\\\#blink!} - Jump back
+  to the label ``blink''
+\item
+  Creates an infinite loop - the heartbeat of embedded systems
+\item
+  The \passthrough{\lstinline!\\textbackslash\\\{\\\}\\\#!} means ``jump
+  to this absolute address''
+\end{itemize}
+
+\hypertarget{understanding-p2-timing}{%
+\subsection{Understanding P2 Timing}\label{understanding-p2-timing}}
+
+The P2's timing is beautifully predictable:
+
+\begin{lstlisting}
+' Different wait times at 50MHz system clock
+**WAITX** ##50' 1 microsecond (50 cycles)
+**WAITX** ##50_000' 1 millisecond (50,000 cycles)  
+**WAITX** ##50_000_000' 1 second (50,000,000 cycles)
+\end{lstlisting}
+
+\begin{interlude}
+\textbf{The Beauty of Deterministic Timing}
+
+Unlike modern CPUs with their caches and pipelines, the P2's timing is completely predictable. Every **WAITX** waits exactly the number of cycles you specify. No interrupts steal your time (unless you enable them). No cache misses throw off your rhythm. This determinism is why the P2 can generate video, communicate with precise protocols, and bit-bang interfaces that would require dedicated hardware elsewhere.
+\end{interlude}
+
+\hypertarget{common-beginner-mistakes-we-all-make-them}{%
+\subsection{Common Beginner Mistakes (We All Make
+Them!)}\label{common-beginner-mistakes-we-all-make-them}}
+
+\hypertarget{mistake-1-forgetting-the-for-immediate-values}{%
+\subsubsection{\texorpdfstring{Mistake 1: Forgetting the
+\textbackslash\{\}\# for Immediate
+Values}{Mistake 1: Forgetting the \{\}\# for Immediate Values}}\label{mistake-1-forgetting-the-for-immediate-values}}
+
+\begin{lstlisting}
+' WRONG - tries to use contents of register 16
+**DRVH** 16
+' RIGHT - uses the number 16
+**DRVH** #16```
+
+### Mistake 2: Using # When You Need ##
+```pasm2
+' WRONG - only waits 511 cycles (max for \textbackslash\{\}\#)
+**WAITX** \textbackslash\{\}\#25\textbackslash\{\}\_000\textbackslash\{\}\_000
+' RIGHT - waits full 25 million cycles
+**WAITX** \textbackslash\{\}\#\textbackslash\{\}\#25\textbackslash\{\}\_000\textbackslash\{\}\_000```
+
+### Mistake 3: Forgetting the Infinite Loop
+```pasm2
+' WRONG - falls through to random memory
+**DRVH** #16**WAITX** ##25_000_000**DRVL** #16        ' Program crashes here!
+
+' RIGHT - loops forever
+blink **DRVH** #16**WAITX** ##25_000_000**DRVL** #16**JMP** #blink```
+
+## Your Turn: Experiments in Blinking
+
+\begin{yourturn}
+\textbf{Challenge 1: Speed Control}
+Make your LED blink twice as fast. Then make it blink once every 2 seconds.
+
+\textbf{Challenge 2: Asymmetric Blinking}  
+Make the LED stay on for 1 second but off for only 0.1 seconds. This creates a "heartbeat" effect.
+
+\textbf{Challenge 3: Different Pin}
+Move your LED to pin 25 and update the code. Remember: pins 16-47 are all safe!
+
+\textbf{Challenge 4: Exact Timing}
+Can you make it blink exactly 60 times per minute? Like a visual metronome?
+
+\textbf{Challenge 5: SOS Pattern}
+Make your LED blink the SOS pattern: 3 short, 3 long, 3 short, then a pause.
+\end{yourturn}
+
+## Going Deeper: Clock Speed Magic
+
+The P2 can run at different speeds. Here's how timing changes:
+
+```pasm2
+' At 100MHz (2x faster clock):
+**WAITX** \textbackslash\{\}\#\textbackslash\{\}\#50\textbackslash\{\}\_000\textbackslash\{\}\_000' Now this is 0.5 seconds
+
+' At 200MHz (4x faster clock):  
+**WAITX** \textbackslash\{\}\#\textbackslash\{\}\#100\textbackslash\{\}\_000\textbackslash\{\}\_000' Now this is 0.5 seconds
+
+' At 25MHz (half speed):
+**WAITX** \textbackslash\{\}\#\textbackslash\{\}\#12\textbackslash\{\}\_500\textbackslash\{\}\_000' Now this is 0.5 seconds
+\end{lstlisting}
+
+But here's the beautiful part: you can ask the P2 for its clock speed!
+
+\begin{lstlisting}
+' Clock-independent half-second delay
+**RDLONG** pa, \textbackslash\{\}\#\textbackslash\{\}\$14' Read clock frequency from hub
+**SHR** pa, \textbackslash\{\}\#1' Divide by 2 for half second
+**WAITX** pa' Wait that many cycles
+\end{lstlisting}
+
+\begin{missing}
+Need to add:
+- System clock register explanation
+- HUBSET instruction for clock configuration  
+- Crystal vs RC oscillator modes
+- PLL settings and multipliers
+\end{missing}
+
+\hypertarget{the-power-of-starting-simple}{%
+\subsection{The Power of Starting
+Simple}\label{the-power-of-starting-simple}}
+
+You've just controlled electricity with code. That LED didn't blink by
+accident---you commanded it with precise timing. This simple program
+demonstrates core concepts:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Digital Output}: Converting code to physical voltage
+\item
+  \textbf{Timing Control}: Precise delays without timers
+\item
+  \textbf{Program Flow}: Infinite loops, the embedded standard
+\item
+  \textbf{Immediate Values}: Constants vs.~register contents
+\end{enumerate}
+
+These four concepts are the foundation of everything else we'll build.
+
+\begin{chapterend}
+✨ \textbf{You did it! You've commanded a P2 to bend light to your will.}
+
+You've learned: Pin control (**DRVH**/**DRVL**), timing (**WAITX**), and infinite loops (**JMP**).
+
+\chapterseparator
+
+Next up: Chapter 2 shows you the P2's architecture—8 cogs, smart pins, and the magical hub that connects everything.
+\end{chapterend}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{chapter-2-the-architecture-safari}{%
+\section{Chapter 2: The Architecture
+Safari}\label{chapter-2-the-architecture-safari}}
+
+Welcome to the P2 zoo! But instead of lions and tigers, we have cogs and
+smart pins. Let's take a safari through the P2's architecture, and I
+promise by the end, you'll see why this design is both brilliant and
+surprisingly intuitive.
+
+\hypertarget{the-hook-eight-brains-are-better-than-one}{%
+\subsection{The Hook: Eight Brains Are Better Than
+One}\label{the-hook-eight-brains-are-better-than-one}}
+
+Imagine you're planning a dinner party. You could do everything
+yourself---cook, serve, clean, entertain. Or you could have seven
+friends help, each handling one task perfectly. That's the P2: eight
+independent processors (cogs) that can work alone or together, each with
+their own memory, but sharing a common meeting place (the hub).
+
+\hypertarget{the-big-picture}{%
+\subsection{The Big Picture}\label{the-big-picture}}
+
+\begin{diagram}
+P2 Architecture Overview:
+- 8 Cogs arranged in a circle around the Hub
+- 512KB Hub RAM in the center
+- 64 Smart Pins on the periphery
+- CORDIC engine, Streamers shown as shared resources
+- Connection paths between all components
+\end{diagram}
+
+Here's what makes the P2 special:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{8 Cogs}: Independent 32-bit processors, each with 512 longs of
+  RAM
+\item
+  \textbf{512KB Hub RAM}: Shared memory accessible by all cogs
+\item
+  \textbf{64 Smart Pins}: Each pin has its own processor for I/O tasks
+\item
+  \textbf{CORDIC Engine}: Hardware math for rotations, trig, and more
+\item
+  \textbf{Streamers}: DMA-like channels for fast data movement
+\item
+  \textbf{Hardware Multiply}: 16×16 signed multiplication in 2 clocks
+\end{itemize}
+
+\hypertarget{meet-the-cogs}{%
+\subsection{Meet the Cogs}\label{meet-the-cogs}}
+
+Each cog is a complete processor with:
+
+\begin{sidetrack}
+\textbf{Cog Resources at a Glance}
+\begin{itemize}
+\item 512 longs (2KB) of cog RAM
+\item Can execute ~100 MIPS at 200MHz (typical P2 speed)
+\item Access to all 64 I/O pins
+\item Private access to CORDIC engine
+\item Round-robin hub access (1/8 slice)
+\end{itemize}
+\end{sidetrack}
+
+\hypertarget{starting-a-cog}{%
+\subsubsection{Starting a Cog}\label{starting-a-cog}}
+
+\begin{lstlisting}
+' Start cog 1 running code at "worker"
+**COGINIT** \textbackslash\{\}\#1, \textbackslash\{\}\#@worker' Specific cog number
+        
+' Or let the system pick a free cog
+**COGINIT** \textbackslash\{\}\#16, \textbackslash\{\}\#@worker' 16 = "next available"
+\end{lstlisting}
+
+\begin{sidetrack}
+\textbf{Why 512 Longs?}
+
+The magic number 512 comes from addressing. With 9 bits, you can address 2\^{}9 = 512 locations. This fits perfectly in P2 instruction encoding. It's enough for surprisingly complex programs, but small enough that all 8 cogs get their own private RAM without breaking the bank on silicon area.
+\end{sidetrack}
+
+\hypertarget{the-hub-grand-central-station}{%
+\subsection{The Hub: Grand Central
+Station}\label{the-hub-grand-central-station}}
+
+The hub is where cogs meet to share data:
+
+\begin{lstlisting}
+' Write data to hub for other cogs
+**WRLONG** value, \textbackslash\{\}\#\textbackslash\{\}\#\textbackslash\{\}\$1000' Write to hub address \textbackslash\{\}\$1000
+        
+' Read data from hub
+**RDLONG** result, \textbackslash\{\}\#\textbackslash\{\}\#\textbackslash\{\}\$1000' Read from hub address \textbackslash\{\}\$1000
+\end{lstlisting}
+
+\hypertarget{hub-timing-the-egg-beater}{%
+\subsubsection{Hub Timing: The Egg
+Beater}\label{hub-timing-the-egg-beater}}
+
+The P2 uses an ``egg beater'' hub access pattern. Don't let the silly
+name fool you---it's brilliant:
+
+\begin{itemize}
+\tightlist
+\item
+  Each cog gets a turn at the hub every 8 clocks
+\item
+  But! Each cog's window is staggered
+\item
+  Long operations get priority slots
+\item
+  It's deterministic---you can count on it
+\end{itemize}
+
+\begin{lstlisting}
+' Hub access is automatic and fair
+**RDLONG** pa, \textbackslash\{\}\#\textbackslash\{\}\#hubdata' Takes 9-16 clocks
+**RDLONG** pb, \textbackslash\{\}\#\textbackslash\{\}\#hubdata+4' Automatically scheduled
+\end{lstlisting}
+
+\hypertarget{smart-pins-your-64-assistants}{%
+\subsection{Smart Pins: Your 64
+Assistants}\label{smart-pins-your-64-assistants}}
+
+This is where the P2 gets really special. Each pin has its own processor
+that can:
+
+\begin{itemize}
+\tightlist
+\item
+  Generate PWM without CPU intervention
+\item
+  Count pulses and edges
+\item
+  Measure frequency and period
+\item
+  Implement serial protocols
+\item
+  Create precise timing
+\item
+  Generate analog output (DAC)
+\item
+  Read analog input (ADC)
+\end{itemize}
+
+\hypertarget{configuring-a-smart-pin-for-pwm}{%
+\subsubsection{Configuring a Smart Pin for
+PWM}\label{configuring-a-smart-pin-for-pwm}}
+
+\begin{lstlisting}
+' Set pin 16 as PWM output
+**WRPIN** \textbackslash\{\}\#\textbackslash\{\}\#P\textbackslash\{\}\_PWM\textbackslash\{\}\_TRIANGLE, \textbackslash\{\}\#16' Configure mode
+**WXPIN** \textbackslash\{\}\#\textbackslash\{\}\#\textbackslash\{\}\$00FF\textbackslash\{\}\_0080, \textbackslash\{\}\#16' Set period and duty
+**DIRH** \textbackslash\{\}\#16' Enable the pin
+        
+' Now it runs forever without CPU!
+\end{lstlisting}
+
+\begin{interlude}
+\textbf{The Smart Pin Revolution}
+
+Traditional microcontrollers make the CPU do everything. Want PWM? The CPU toggles pins. Need to count pulses? The CPU watches and counts. The P2 said "enough!" and gave each pin its own brain. Now your cogs can focus on real work while pins handle the tedious stuff. It's like having 64 dedicated peripherals that you can reconfigure on the fly.
+\end{interlude}
+
+\hypertarget{memory-map-where-everything-lives}{%
+\subsection{Memory Map: Where Everything
+Lives}\label{memory-map-where-everything-lives}}
+
+\begin{lstlisting}
+' P2 Memory Map (simplified)
+' \textbackslash\{\}\$00000-\textbackslash\{\}\$7FFFF : 512KB Hub RAM
+'   \textbackslash\{\}\$00000-\textbackslash\{\}\$003FF : Cog 0 initial load area
+'   \textbackslash\{\}\$00400-\textbackslash\{\}\$007FF : Cog 1 initial load area
+'   ... (continues for all 8 cogs)
+'   \textbackslash\{\}\$01000-\textbackslash\{\}\$7FFFF : General purpose hub RAM
+\end{lstlisting}
+
+\hypertarget{special-registers-in-cog-ram}{%
+\subsubsection{Special Registers in Cog
+RAM}\label{special-registers-in-cog-ram}}
+
+\begin{lstlisting}
+' Last 16 longs of cog RAM are special
+' \textbackslash\{\}\$1F0 : IJMP3 - Interrupt jump 3
+' \textbackslash\{\}\$1F1 : IRET3 - Interrupt return 3
+' \textbackslash\{\}\$1F2 : IJMP2 - Interrupt jump 2
+' \textbackslash\{\}\$1F3 : IRET2 - Interrupt return 2
+' \textbackslash\{\}\$1F4 : IJMP1 - Interrupt jump 1
+' \textbackslash\{\}\$1F5 : IRET1 - Interrupt return 1
+' \textbackslash\{\}\$1F6 : PA    - General purpose
+' \textbackslash\{\}\$1F7 : PB    - General purpose
+' \textbackslash\{\}\$1F8 : PTRA  - Pointer A (hub)
+' \textbackslash\{\}\$1F9 : PTRB  - Pointer B (hub)
+' \textbackslash\{\}\$1FA : DIRA  - Direction for pins 31-0
+' \textbackslash\{\}\$1FB : DIRB  - Direction for pins 63-32
+' \textbackslash\{\}\$1FC : OUTA  - Output for pins 31-0
+' \textbackslash\{\}\$1FD : OUTB  - Output for pins 63-32
+' \textbackslash\{\}\$1FE : INA   - Input for pins 31-0
+' \textbackslash\{\}\$1FF : INB   - Input for pins 63-32
+\end{lstlisting}
+
+\hypertarget{parallel-vs-sequential-a-simple-example}{%
+\subsection{Parallel vs Sequential: A Simple
+Example}\label{parallel-vs-sequential-a-simple-example}}
+
+Let's see the power of parallel processing:
+
+\hypertarget{sequential-approach-traditional-mcu}{%
+\subsubsection{Sequential Approach (Traditional
+MCU)}\label{sequential-approach-traditional-mcu}}
+
+\begin{lstlisting}
+' One processor doing three tasks
+loop **CALL** \textbackslash\{\}\#read\textbackslash\{\}\_sensor**CALL** \textbackslash\{\}\#process\textbackslash\{\}\_data**CALL** \textbackslash\{\}\#update\textbackslash\{\}\_display**JMP** \textbackslash\{\}\#loop' Total time: sum of all three tasks
+\end{lstlisting}
+
+\hypertarget{parallel-approach-p2-style}{%
+\subsubsection{Parallel Approach (P2
+Style)}\label{parallel-approach-p2-style}}
+
+\begin{lstlisting}
+' Cog 0: Read sensor continuously
+sensor **RDPIN** data, \textbackslash\{\}\#8' Read from pin 8
+**WRLONG** data, \textbackslash\{\}\#\textbackslash\{\}\#shared' Share via hub
+**JMP** \textbackslash\{\}\#sensor
+' Cog 1: Process data continuously  
+process **RDLONG** data, \textbackslash\{\}\#\textbackslash\{\}\#shared        ' ... process it ...
+**WRLONG** result, \textbackslash\{\}\#\textbackslash\{\}\#output**JMP** \textbackslash\{\}\#process        
+' Cog 2: Update display continuously
+display **RDLONG** result, \textbackslash\{\}\#\textbackslash\{\}\#output        ' ... update display ...
+**JMP** \textbackslash\{\}\#display        
+' All three run simultaneously!
+\end{lstlisting}
+
+\hypertarget{your-turn-multi-cog-magic}{%
+\subsection{Your Turn: Multi-Cog
+Magic}\label{your-turn-multi-cog-magic}}
+
+\begin{yourturn}
+\textbf{Challenge 1: Two Blinkers}
+Start two cogs, each blinking a different LED at different rates.
+
+\textbf{Challenge 2: Cog Communication}
+Have one cog count from 0 to 100, storing the value in hub. Have another cog read this value and display it on LEDs.
+
+\textbf{Challenge 3: Smart Pin PWM}
+Configure a smart pin for PWM and change its duty cycle from a cog.
+
+\textbf{Challenge 4: Round Robin}
+Start all 8 cogs, each blinking an LED in sequence, creating a "chase" effect.
+\end{yourturn}
+
+\hypertarget{common-architecture-gotchas}{%
+\subsection{Common Architecture
+Gotchas}\label{common-architecture-gotchas}}
+
+\hypertarget{gotcha-1-hub-timing-isnt-instant}{%
+\subsubsection{Gotcha 1: Hub Timing Isn't
+Instant}\label{gotcha-1-hub-timing-isnt-instant}}
+
+\begin{lstlisting}
+' This takes 9-16 clocks, not 1!
+**RDLONG** pa, \textbackslash\{\}\#\textbackslash\{\}\#hubaddr```
+
+### Gotcha 2: Cogs Don't Share Cog RAM
+```pasm2
+' Cog 0 CANNOT see Cog 1's variables
+' Use hub RAM for sharing
+\end{lstlisting}
+
+\hypertarget{gotcha-3-pin-conflicts}{%
+\subsubsection{Gotcha 3: Pin Conflicts}\label{gotcha-3-pin-conflicts}}
+
+\begin{lstlisting}
+' If two cogs drive the same pin...
+' The outputs are OR'd together!
+' Plan your pin assignments carefully
+\end{lstlisting}
+
+\begin{review}
+Verify:
+- Exact hub timing windows for each cog
+- OR-ing behavior of multiple cog outputs
+- Smart pin mode count (64 modes?)
+\end{review}
+
+\hypertarget{the-philosophy-of-parallel}{%
+\subsection{The Philosophy of
+Parallel}\label{the-philosophy-of-parallel}}
+
+The P2 isn't just about having 8 processors---it's about a different way
+of thinking:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Dedicate, Don't Time-Share}: Give each task its own cog
+\item
+  \textbf{Communicate Through Hub}: Clean, message-based design
+\item
+  \textbf{Let Smart Pins Handle I/O}: Free your cogs for real work
+\item
+  \textbf{Think in Parallel}: Multiple things CAN happen at once
+\end{enumerate}
+
+\begin{chapterend}
+✨ \textbf{You've completed your architecture safari!}
+
+You've discovered: 8 cogs working in harmony, 512KB of shared hub space, 64 smart pins with their own processors, and the egg beater that keeps it all synchronized.
+
+\chapterseparator
+
+Ready for Chapter 3? We'll dive deep into the memory dance—how cogs and hub work together!
+\end{chapterend}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{chapter-3-the-memory-dance}{%
+\section{Chapter 3: The Memory Dance}\label{chapter-3-the-memory-dance}}
+
+Memory in the P2 is like a well-choreographed dance. Cogs have their own
+private practice rooms (cog RAM), but they meet in the grand ballroom
+(hub RAM) to share their moves. Let's learn the steps!
+
+\hypertarget{the-hook-fast-and-private-vs.-big-and-shared}{%
+\subsection{The Hook: Fast and Private vs.~Big and
+Shared}\label{the-hook-fast-and-private-vs.-big-and-shared}}
+
+Here's the trillion-dollar question in computer architecture: Do you
+want memory that's fast or memory that's big? The P2 says ``both!'' Each
+cog gets 2KB of blazing-fast private RAM, and all cogs share 512KB of
+hub RAM. It's like having both a sports car and a truck---use each for
+what it does best.
+
+\hypertarget{cog-ram-your-private-workshop}{%
+\subsection{Cog RAM: Your Private
+Workshop}\label{cog-ram-your-private-workshop}}
+
+Each cog's 512 longs (2KB) is its private domain:
+
+\begin{lstlisting}
+**ORG** 0        
+' Your code lives here
+start **MOV** counter, #0' Initialize a variable
+loop **ADD** counter, #1' Increment it
+**CMP** counter, #100 WZ' Check if 100
+**IF_NZ** JMP #loop' Loop if not
+        
+' Your data lives here too
+counter long 0' This is IN cog RAM
+table long 1, 2, 3, 4' So is this
+\end{lstlisting}
+
+\hypertarget{the-register-file-secret}{%
+\subsubsection{The Register File
+Secret}\label{the-register-file-secret}}
+
+Here's something beautiful: In cog RAM, there's no difference between
+``memory'' and ``registers''---it's all the same 512 longs!
+
+\begin{lstlisting}
+' These are equivalent - just different ways to think
+**MOV** $1F6, #42' Use as register (PA)
+**MOV** pa, #42' Use special name
+        
+**MOV** $000, #42' Use as memory location 0
+**MOV** 0, #42' Same thing!
+\end{lstlisting}
+
+\begin{sidetrack}
+\textbf{Why No Separate Registers?}
+
+Most processors have a small set of registers (8, 16, 32) and separate memory. The P2 makes EVERYTHING a register. Any of the 512 longs can be a source or destination. This symmetry makes the architecture beautifully simple and incredibly flexible.
+\end{sidetrack}
+
+\hypertarget{hub-ram-the-meeting-place}{%
+\subsection{Hub RAM: The Meeting
+Place}\label{hub-ram-the-meeting-place}}
+
+Hub RAM is where cogs share data:
+
+\begin{lstlisting}
+' Write a message to hub
+**MOV** message, ##$DEADBEEF**WRLONG** message, ##$1000' Write to hub $1000
+        
+' Another cog reads it
+**RDLONG** received, ##$1000' Read from hub $1000
+**CMP** received, ##$DEADBEEF WZ**IF_Z** JMP #got_message```
+
+### Hub Operations and Timing
+
+| Operation | Clocks | Notes |
+|-----------|--------|-------|
+| RDLONG | 9-16 | Read 32 bits from hub |
+| WRLONG | 3-10 | Write 32 bits to hub |
+| RDWORD | 9-16 | Read 16 bits from hub |
+| WRWORD | 3-10 | Write 16 bits to hub |
+| RDBYTE | 9-16 | Read 8 bits from hub |
+| WRBYTE | 3-10 | Write 8 bits to hub |
+
+The variation in timing comes from the egg beater—you might catch your window immediately or wait up to 7 clocks.
+
+## The FIFO: Streaming Data Highway
+
+The P2 has a special FIFO (First In, First Out) for streaming data between cog and hub:
+
+```pasm2
+' Set up FIFO for reading from hub
+**RDFAST** \textbackslash\{\}\#0, \textbackslash\{\}\#\textbackslash\{\}\#hubstart' Start fast read
+        
+' Now read sequential longs quickly
+**RFLONG** data1' Read next long from FIFO
+**RFLONG** data2' Read next long
+**RFLONG** data3' These are FAST!
+\end{lstlisting}
+
+\begin{interlude}
+\textbf{The FIFO Magic}
+
+The FIFO pre-fetches hub data while you're processing. It's like having a assistant who hands you the next tool right when you need it. This makes sequential access nearly as fast as cog RAM—perfect for video, audio, or any streaming data.
+\end{interlude}
+
+\hypertarget{memory-addressing-modes}{%
+\subsection{Memory Addressing Modes}\label{memory-addressing-modes}}
+
+The P2 is incredibly flexible with addressing:
+
+\hypertarget{immediate-addressing}{%
+\subsubsection{Immediate Addressing}\label{immediate-addressing}}
+
+\begin{lstlisting}
+**MOV** pa, \textbackslash\{\}\#42' Load constant 42
+**ADD** pb, \textbackslash\{\}\#\textbackslash\{\}\#\textbackslash\{\}\$12345' Add large constant
+\end{lstlisting}
+
+\hypertarget{direct-addressing}{%
+\subsubsection{Direct Addressing}\label{direct-addressing}}
+
+\begin{lstlisting}
+**MOV** pa, counter' Copy from cog address
+**ADD** total, value' Add cog locations
+\end{lstlisting}
+
+\hypertarget{indirect-addressing}{%
+\subsubsection{Indirect Addressing}\label{indirect-addressing}}
+
+\begin{lstlisting}
+**MOV** pa, 0-0' Self-modifying placeholder
+        
+' Modify the instruction
+movs pa, \textbackslash\{\}\#counter' Change source field
+movd pa, \textbackslash\{\}\#result' Change destination field
+\end{lstlisting}
+
+\hypertarget{pointer-addressing}{%
+\subsubsection{Pointer Addressing}\label{pointer-addressing}}
+
+\begin{lstlisting}
+' PTRA and PTRB are special hub pointers
+**RDLONG** pa, ptra++' Read and increment
+**WRLONG** pb, --ptrb' Decrement and write
+**RDLONG** pc, ptra[4]' Indexed addressing
+\end{lstlisting}
+
+\hypertarget{alignment-the-hidden-speed-secret}{%
+\subsection{Alignment: The Hidden Speed
+Secret}\label{alignment-the-hidden-speed-secret}}
+
+The P2 loves aligned data:
+
+\begin{lstlisting}
+' Aligned access (FAST)
+**ORG** \textbackslash\{\}\$100value long \textbackslash\{\}\$12345678' Aligned to 4 bytes
+        
+' Reading is optimal
+**RDLONG** pa, \textbackslash\{\}\#\textbackslash\{\}\#value' Fast!
+        
+' Misaligned access (WORKS but slower)
+buffer byte 0, 0, 0' 3 bytes offset
+data long \textbackslash\{\}\$12345678' NOT aligned!
+\end{lstlisting}
+
+\begin{missing}
+🚧 \textbf{CONTENT MISSING - COMING SOON}
+
+Need to add:
+- LUT RAM explanation (second 512 longs)
+- Shared LUT between adjacent cogs
+- Block transfer operations
+- Memory barriers and synchronization
+\end{missing}
+
+\hypertarget{self-modifying-code-with-great-power}{%
+\subsection{Self-Modifying Code: With Great
+Power\ldots{}}\label{self-modifying-code-with-great-power}}
+
+The P2 allows self-modifying code since instructions are just data in
+cog RAM:
+
+\begin{lstlisting}
+' Change an instruction on the fly
+loop **MOV** pa, \textbackslash\{\}\#0' This 0 will change!
+**ADD** pa, \textbackslash\{\}\#1        
+' Modify the immediate value
+**ADD** loop, \textbackslash\{\}\#1' Increment the \textbackslash\{\}\#0
+        
+**CMP** pa, \textbackslash\{\}\#10 WZ**IF\textbackslash\{\}\_NZ** JMP \textbackslash\{\}\#loop```
+
+\begin{sidetrack}
+\textbf{When to Self-Modify}
+
+Self-modifying code is powerful but dangerous. Use it for:
+- Table lookups without pointers
+- Dynamic jump tables
+- Optimizing inner loops
+
+Avoid it for:
+- Normal programming (hard to debug!)
+- When learning (master basics first)
+\end{sidetrack}
+
+## Memory Patterns: Best Practices
+
+### Pattern 1: Circular Buffers
+```pasm2
+' Circular buffer in cog RAM
+buffer long 0[16]' 16-long buffer
+wrptr long 0rdptr long 0
+' Write to buffer
+write **MOV** 0-0, data' Placeholder
+movd write, wrptr' Set destination
+**INCMOD** wrptr, #15' Wrap at 16
+\end{lstlisting}
+
+\hypertarget{pattern-2-hub-mailboxes}{%
+\subsubsection{Pattern 2: Hub Mailboxes}\label{pattern-2-hub-mailboxes}}
+
+\begin{lstlisting}
+' Communication via hub
+MAILBOX = $1000
+' Sender
+**WRLONG** command, ##MAILBOX        
+' Receiver  
+poll **RDLONG** pa, ##MAILBOX WZ**IF_Z** JMP #poll' Wait for non-zero
+**WRLONG** #0, ##MAILBOX' Clear it
+\end{lstlisting}
+
+\hypertarget{pattern-3-fast-block-copy}{%
+\subsubsection{Pattern 3: Fast Block
+Copy}\label{pattern-3-fast-block-copy}}
+
+\begin{lstlisting}
+' Copy block using FIFO
+**RDFAST** #0, ##source**WRFAST** #0, ##dest        
+**REP** #2, ##256' Repeat 256 times
+**RFLONG** pa' Read from source
+**WFLONG** pa' Write to dest
+\end{lstlisting}
+
+\hypertarget{your-turn-memory-mastery}{%
+\subsection{Your Turn: Memory Mastery}\label{your-turn-memory-mastery}}
+
+\begin{yourturn}
+\textbf{Challenge 1: Cog-to-Cog Message}
+Create a mailbox system where one cog sends messages to another through hub RAM.
+
+\textbf{Challenge 2: Circular Buffer}
+Implement a 32-entry circular buffer in cog RAM with wrap-around.
+
+\textbf{Challenge 3: Fast Block Transfer}
+Copy 1KB of data from one hub location to another using the FIFO.
+
+\textbf{Challenge 4: Self-Modifying Loop}
+Create a loop that modifies its own delay value each iteration.
+
+\textbf{Challenge 5: Memory Speed Test}
+Measure the difference in speed between cog RAM and hub RAM access.
+\end{yourturn}
+
+\hypertarget{memory-gotchas-and-solutions}{%
+\subsection{Memory Gotchas and
+Solutions}\label{memory-gotchas-and-solutions}}
+
+\hypertarget{gotcha-1-hub-addresses-need}{%
+\subsubsection{\texorpdfstring{Gotcha 1: Hub Addresses Need
+\textbackslash\{\}\#\textbackslash\{\}\#}{Gotcha 1: Hub Addresses Need \{\}\#\{\}\#}}\label{gotcha-1-hub-addresses-need}}
+
+\begin{lstlisting}
+' WRONG - tries to use cog address
+**RDLONG** pa, #$1000        
+' RIGHT - hub address needs ##
+**RDLONG** pa, ##$1000```
+
+### Gotcha 2: Alignment Matters
+```pasm2
+' WRONG - misaligned long access
+**RDLONG** pa, \textbackslash\{\}\#\textbackslash\{\}\#\textbackslash\{\}\$1001' Not multiple of 4!
+        
+' RIGHT - aligned access
+**RDLONG** pa, \textbackslash\{\}\#\textbackslash\{\}\#\textbackslash\{\}\$1000' Multiple of 4
+\end{lstlisting}
+
+\hypertarget{gotcha-3-cog-ram-is-small}{%
+\subsubsection{Gotcha 3: Cog RAM Is
+Small}\label{gotcha-3-cog-ram-is-small}}
+
+\begin{lstlisting}
+' WRONG - too big for cog RAM!
+buffer long 0[256]' 1KB won't fit!
+
+' RIGHT - use hub for large data
+**RDLONG** pa, \textbackslash\{\}\#\textbackslash\{\}\#hugebuffer```
+
+\begin{chapterend}
+✨ \textbf{You've mastered the memory dance!}
+
+You've learned: Cog RAM (fast and private), Hub RAM (big and shared), the FIFO (streaming made easy), and memory patterns that make it all work.
+
+\chapterseparator
+
+Next: Chapter 4 explores the hub symphony—how eight cogs coordinate through shared memory!
+\end{chapterend}
+
+---
+
+# Chapter 4: The Hub Symphony
+
+Eight musicians can make noise, or they can make music. The difference? Coordination. The P2's hub is where eight independent cogs become a symphony. Let's learn to conduct!
+
+## The Hook: From Chaos to Coordination
+
+Imagine eight people trying to paint one picture. Without coordination, you get a mess. With simple rules—"you paint the sky, I'll do the trees"—you get art. The hub is where cogs coordinate, share data, and transform from eight soloists into an ensemble.
+
+## Hub Arbitration: The Egg Beater Explained
+
+The "egg beater" gives each cog fair access to the hub:
+
+\begin{diagram}
+🎨 \textbf{DIAGRAM NEEDED}
+
+Egg Beater Visualization:
+- 8 cogs arranged in circle
+- Hub in center with rotating access window
+- Show each cog's access slot timing
+- Demonstrate the 8-clock rotation
+\end{diagram}
+
+```pasm2
+' Each cog gets hub access every 8 clocks
+' But the windows are staggered:
+' 
+' Clock:  0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15
+' Cog 0:  *  -  -  -  -  -  -  -  *  -  -  -  -  -  -  -
+' Cog 1:  -  *  -  -  -  -  -  -  -  *  -  -  -  -  -  -
+' Cog 2:  -  -  *  -  -  -  -  -  -  -  *  -  -  -  -  -
+' ... and so on
+\end{lstlisting}
+
+This means: - Guaranteed access every 8 clocks - No cog can hog the hub
+- Predictable timing for real-time tasks
+
+\hypertarget{locks-traffic-control-for-shared-resources}{%
+\subsection{Locks: Traffic Control for Shared
+Resources}\label{locks-traffic-control-for-shared-resources}}
+
+When multiple cogs need exclusive access to something, use locks:
+
+\begin{lstlisting}
+' Get a lock (lock #0)
+trylock **LOCKTRY** #0 WC' Try to get lock 0
+**IF_C** JMP #trylock' Keep trying if busy
+
+' Critical section - we own the lock
+**RDLONG** pa, ##shared**ADD** pa, #1**WRLONG** pa, ##shared        
+' Release the lock
+**LOCKREL** #0' Release lock 0
+\end{lstlisting}
+
+\hypertarget{lock-patterns}{%
+\subsubsection{Lock Patterns}\label{lock-patterns}}
+
+\hypertarget{pattern-1-simple-mutex}{%
+\paragraph{Pattern 1: Simple Mutex}\label{pattern-1-simple-mutex}}
+
+\begin{lstlisting}
+' Safe increment of shared counter
+increment**LOCKTRY** #0 WC' Get lock
+**IF_C** JMP #increment' Retry if busy
+        
+**RDLONG** pa, ##counter' Read
+**ADD** pa, #1' Modify
+**WRLONG** pa, ##counter' Write
+        
+**LOCKREL** #0' Release
+\end{lstlisting}
+
+\hypertarget{pattern-2-producer-consumer}{%
+\paragraph{Pattern 2:
+Producer-Consumer}\label{pattern-2-producer-consumer}}
+
+\begin{lstlisting}
+' Producer cog
+produce **LOCKTRY** #1 WC**IF_C** JMP #produce        
+**WRLONG** data, ##buffer**ADD** bufptr, #4        
+**LOCKREL** #1
+' Consumer cog  
+consume **LOCKTRY** #1 WC**IF_C** JMP #consume        
+**RDLONG** data, ##buffer**ADD** bufptr, #4        
+**LOCKREL** #1```
+
+\begin{sidetrack}
+\textbf{Why Only 16 Locks?}
+
+The P2 has exactly 16 locks. Why not more? It's a sweet spot—enough for most applications, but few enough that the hardware stays simple and fast. If you need more, you can build software semaphores using the hardware locks as primitives.
+\end{sidetrack}
+
+## Mailboxes: Cog Communication Central
+
+The classic way cogs talk to each other:
+
+```pasm2
+' Define mailbox structure in hub
+orgh \textbackslash\{\}\$1000' Hub origin
+mailbox long 0' Command/status
+param1 long 0' Parameter 1
+param2 long 0' Parameter 2  
+result long 0' Result
+
+' Cog A: Send command
+**MOV** pa, \textbackslash\{\}\#CMD\textbackslash\{\}\_ADD**WRLONG** pa, \textbackslash\{\}\#\textbackslash\{\}\#mailbox**WRLONG** x, \textbackslash\{\}\#\textbackslash\{\}\#param1**WRLONG** y, \textbackslash\{\}\#\textbackslash\{\}\#param2        
+' Wait for completion
+wait **RDLONG** pa, \textbackslash\{\}\#\textbackslash\{\}\#mailbox WZ**IF\textbackslash\{\}\_NZ** JMP \textbackslash\{\}\#wait**RDLONG** sum, \textbackslash\{\}\#\textbackslash\{\}\#result
+' Cog B: Process commands
+poll **RDLONG** cmd, \textbackslash\{\}\#\textbackslash\{\}\#mailbox WZ**IF\textbackslash\{\}\_Z** JMP \textbackslash\{\}\#poll' No command
+        
+**RDLONG** pa, \textbackslash\{\}\#\textbackslash\{\}\#param1**RDLONG** pb, \textbackslash\{\}\#\textbackslash\{\}\#param2**ADD** pa, pb**WRLONG** pa, \textbackslash\{\}\#\textbackslash\{\}\#result        
+**WRLONG** \textbackslash\{\}\#0, \textbackslash\{\}\#\textbackslash\{\}\#mailbox' Signal done
+**JMP** \textbackslash\{\}\#poll```
+
+## Events: Instant Notifications
+
+Events let cogs signal each other instantly:
+
+```pasm2
+' Cog 0: Set up event
+setse1 #%01_000001' Event on pin 1 rise
+        
+' Wait for event
+waitse1' Sleep until event
+
+' Cog 1: Trigger event
+**DRVH** #1' This wakes Cog 0!
+\end{lstlisting}
+
+\hypertarget{event-types}{%
+\subsubsection{Event Types}\label{event-types}}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3590}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3846}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.2564}}@{}}
+\toprule
+\begin{minipage}[b]{\linewidth}\raggedright
+Event Source
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Configuration
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Use Case
+\end{minipage} \\
+\midrule
+\endhead
+Pin edge & SE1 = \textbackslash\{\}\%01\textbackslash\{\}\_pppppp &
+External triggers \\
+Pin state & SE1 = \textbackslash\{\}\%10\textbackslash\{\}\_pppppp &
+Level detection \\
+Cog attention & SE1 =
+\textbackslash\{\}\%11\textbackslash\{\}\_00\textbackslash\{\}\_cccc &
+Cog signaling \\
+Lock state & SE1 =
+\textbackslash\{\}\%11\textbackslash\{\}\_01\textbackslash\{\}\_llll &
+Lock available \\
+\bottomrule
+\end{longtable}
+
+\begin{interlude}
+\textbf{Events vs. Polling}
+
+Polling wastes power and cog cycles checking for something that might not happen. Events let a cog sleep until something interesting occurs. It's like the difference between constantly checking your mailbox versus getting a notification when mail arrives.
+\end{interlude}
+
+\hypertarget{hub-execution-breaking-the-2kb-barrier}{%
+\subsection{Hub Execution: Breaking the 2KB
+Barrier}\label{hub-execution-breaking-the-2kb-barrier}}
+
+Cogs can execute code directly from hub RAM:
+
+\begin{lstlisting}
+' Jump to hub code
+**JMP** ##hub_code        
+orgh $4000' Hub code starts here
+hub_code**MOV** pa, #1**ADD** pb, pa        ' ... much more code ...
+        ' Can be up to 512KB!
+\end{lstlisting}
+
+But there's a catch---hub execution is slower:
+
+\begin{longtable}[]{@{}lll@{}}
+\toprule
+Execution Mode & Speed & Size Limit \\
+\midrule
+\endhead
+Cog RAM & 2 clocks/instruction & 2KB \\
+Hub RAM & 4-11 clocks/instruction & 512KB \\
+Hub with FIFO & \textasciitilde3 clocks/instruction & 512KB \\
+\bottomrule
+\end{longtable}
+
+\hypertarget{shared-data-structures}{%
+\subsection{Shared Data Structures}\label{shared-data-structures}}
+
+\hypertarget{example-1-ring-buffer}{%
+\subsubsection{Example 1: Ring Buffer}\label{example-1-ring-buffer}}
+
+\begin{lstlisting}
+' Hub-based ring buffer for all cogs
+orgh $2000ring_buf long 0[256]' 256-entry buffer
+write_ptr long 0read_ptr long 0
+' Writer cog
+write_ring**RDLONG** ptr, ##write_ptr**SHL** ptr, #2' Convert to byte address
+**ADD** ptr, ##ring_buf**WRLONG** data, ptr        
+**RDLONG** ptr, ##write_ptr**INCMOD** ptr, #255' Wrap at 256
+**WRLONG** ptr, ##write_ptr```
+
+### Example 2: Task Queue
+```pasm2
+' Task queue in hub
+orgh \textbackslash\{\}\$3000task\textbackslash\{\}\_queuelong 0' Task type
+long 0' Parameter
+long 0' Status
+        ' ... more task slots ...
+\end{lstlisting}
+
+\begin{missing}
+🚧 \textbf{CONTENT MISSING - COMING SOON}
+
+Need to add:
+- Atomic operations using locks
+- COGATN instruction for cog attention
+- Hub FIFO for streaming between cogs
+- Synchronization patterns
+\end{missing}
+
+\hypertarget{your-turn-conducting-the-symphony}{%
+\subsection{Your Turn: Conducting the
+Symphony}\label{your-turn-conducting-the-symphony}}
+
+\begin{yourturn}
+\textbf{Challenge 1: Ping-Pong}
+Two cogs increment a shared counter, taking turns using a lock.
+
+\textbf{Challenge 2: Work Queue}
+One cog generates tasks, three cogs process them from a shared queue.
+
+\textbf{Challenge 3: Event Chain}
+Create a chain reaction where each cog triggers the next using events.
+
+\textbf{Challenge 4: Shared Buffer}
+Implement a producer-consumer pattern with a circular buffer in hub.
+
+\textbf{Challenge 5: Hub Speed Test}
+Compare hub execution speed with cog execution for the same code.
+\end{yourturn}
+
+\hypertarget{coordination-patterns}{%
+\subsection{Coordination Patterns}\label{coordination-patterns}}
+
+\hypertarget{pattern-1-master-worker}{%
+\subsubsection{Pattern 1: Master-Worker}\label{pattern-1-master-worker}}
+
+\begin{lstlisting}
+' Master distributes work
+master **RDLONG** work, \textbackslash\{\}\#\textbackslash\{\}\#work\textbackslash\{\}\_queue**WRLONG** work, \textbackslash\{\}\#\textbackslash\{\}\#cog1\textbackslash\{\}\_task**COGATN** \textbackslash\{\}\#1' Wake worker 1
+\end{lstlisting}
+
+\hypertarget{pattern-2-pipeline}{%
+\subsubsection{Pattern 2: Pipeline}\label{pattern-2-pipeline}}
+
+\begin{lstlisting}
+' Each cog processes and passes forward
+stage1 **RDLONG** data, \textbackslash\{\}\#\textbackslash\{\}\#input        ' Process...
+**WRLONG** result, \textbackslash\{\}\#\textbackslash\{\}\#pipe1to2**COGATN** \textbackslash\{\}\#2' Signal next stage
+\end{lstlisting}
+
+\hypertarget{pattern-3-broadcast}{%
+\subsubsection{Pattern 3: Broadcast}\label{pattern-3-broadcast}}
+
+\begin{lstlisting}
+' One cog signals all others
+broadcast**WRLONG** message, \textbackslash\{\}\#\textbackslash\{\}\#broadcast\textbackslash\{\}\_box**COGATN** \textbackslash\{\}\#\textbackslash\{\}\%11111110' Wake cogs 1-7
+\end{lstlisting}
+
+\hypertarget{common-hub-pitfalls}{%
+\subsection{Common Hub Pitfalls}\label{common-hub-pitfalls}}
+
+\hypertarget{pitfall-1-race-conditions}{%
+\subsubsection{Pitfall 1: Race
+Conditions}\label{pitfall-1-race-conditions}}
+
+\begin{lstlisting}
+' WRONG - not atomic!
+**RDLONG** pa, \textbackslash\{\}\#\textbackslash\{\}\#counter**ADD** pa, \textbackslash\{\}\#1**WRLONG** pa, \textbackslash\{\}\#\textbackslash\{\}\#counter' Another cog might interfere!
+        
+' RIGHT - use lock
+**LOCKTRY** \textbackslash\{\}\#0 WC**IF\textbackslash\{\}\_C** JMP \textbackslash\{\}\#\textbackslash\{\}\$-1**RDLONG** pa, \textbackslash\{\}\#\textbackslash\{\}\#counter**ADD** pa, \textbackslash\{\}\#1**WRLONG** pa, \textbackslash\{\}\#\textbackslash\{\}\#counter**LOCKREL** \textbackslash\{\}\#0```
+
+### Pitfall 2: Deadlock
+```pasm2
+' WRONG - potential deadlock
+' Cog A: lock 0 then lock 1
+' Cog B: lock 1 then lock 0
+' They can block each other!
+
+' RIGHT - always same order
+' Both: lock 0 then lock 1
+\end{lstlisting}
+
+\hypertarget{pitfall-3-hub-congestion}{%
+\subsubsection{Pitfall 3: Hub
+Congestion}\label{pitfall-3-hub-congestion}}
+
+\passthrough{\lstinline!pasm2 ' WRONG - all cogs hitting hub constantly loop **RDLONG** pa, \#\#data**JMP** \#loop         ' RIGHT - add delays or use events loop **RDLONG** pa, \#\#data**WAITX** \#\#100' Brief pause **JMP** \#loop!}
+
+\begin{review}
+Need to verify:
+- Exact event configuration bits
+- COGATN behavior with multiple targets
+- Lock fairness algorithm
+\end{review}
+
+\hypertarget{the-beauty-of-the-hub-design}{%
+\subsection{The Beauty of the Hub
+Design}\label{the-beauty-of-the-hub-design}}
+
+The hub isn't just shared memory---it's a carefully orchestrated system
+that:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Guarantees Fairness}: Every cog gets equal access
+\item
+  \textbf{Enables Cooperation}: Locks, events, and mailboxes
+\item
+  \textbf{Maintains Determinism}: Predictable timing always
+\item
+  \textbf{Scales Elegantly}: 1 to 8 cogs, same principles
+\end{enumerate}
+
+\begin{chapterend}
+✨ \textbf{Bravo! You've conducted your first hub symphony!}
+
+You've mastered: Hub arbitration (the egg beater), locks for exclusive access, events for instant signaling, and patterns for cog cooperation.
+
+\chapterseparator
+
+Ready for Part II? We'll unleash the P2's mathematical power with hardware multiply, divide, and the amazing CORDIC engine!
+\end{chapterend}
+
+\end{document}

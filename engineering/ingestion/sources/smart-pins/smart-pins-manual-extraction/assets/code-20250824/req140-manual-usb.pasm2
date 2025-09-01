@@ -1,0 +1,15 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+usb_init
+        mov     pa, ##P_USB_PAIR
+        wrpin   pa, #20         ' Configure USB pins
+        ' ⚠️ USB protocol implementation required
+        
+' Placeholder for USB operations
+' Full implementation pending silicon validation

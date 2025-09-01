@@ -1,0 +1,8 @@
+' Source: P2 SmartPins-220809 (Page 5)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Snippet
+
+WRPIN D/#,S/#        Write bits D[31:0] to Mode register for Smart Pin S[5:0],
+                acknowledge Smart Pin. 
+WXPIN D/#,S/#         Write bits D[31:0] to register X for Smart Pin S[5:0],
+                                    acknowledge Smart Pin.

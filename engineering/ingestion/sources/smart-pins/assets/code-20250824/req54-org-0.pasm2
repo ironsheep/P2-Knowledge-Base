@@ -1,0 +1,7 @@
+' Source: P2 SmartPins-220809 (Page 30)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+        org 0
+        dirl   #A_in
+                 'Count A-input highs mode

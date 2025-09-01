@@ -1,0 +1,11 @@
+' Debugger ISR Installation Across All COGs
+' Source: spin-debugger-v51-complete-analysis.md
+' Category: Multi-COG Coordination
+' Description: Install debug ISR in all 8 COGs
+
+' Debugger ISR installation across all COGs
+neg     t,#$40          'initial address of $FFFC0
+rep     #3,#8
+setq    #$00F-$000
+wrlong  @debug_isr/4,t
+sub     t,#$80

@@ -1,0 +1,89 @@
+---
+title: "{{title}}"
+subtitle: "{{subtitle}}"
+author: "{{author}}"
+date: "{{date}}"
+documentclass: article
+geometry: margin=1in
+colorlinks: true
+header-includes: |
+  \usepackage{booktabs}
+  \usepackage{longtabu}
+  \usepackage{xcolor}
+  \usepackage{listings}
+  \usepackage{fancyhdr}
+  \definecolor{opcodeblue}{RGB}{0,100,200}
+  \definecolor{syntaxgreen}{RGB}{0,150,50}
+  \definecolor{timingred}{RGB}{200,50,0}
+  \lstset{
+    language=[x86masm]Assembler,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{opcodeblue}\bfseries,
+    commentstyle=\color{syntaxgreen},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    breaklines=true,
+    frame=single
+  }
+  \pagestyle{fancy}
+  \fancyhf{}
+  \fancyhead[L]{ {{title}} }
+  \fancyhead[R]{\thepage}
+  \renewcommand{\headrulewidth}{0.4pt}
+---
+
+# {{title}}
+
+{{description}}
+
+## Instruction Reference
+
+{{#each categories}}
+### {{name}} Instructions
+
+{{#if description}}
+{{description}}
+{{/if}}
+
+{{#each instructions}}
+#### {{mnemonic}} - {{syntax}}
+
+**Description:** {{description}}
+
+**Encoding:** `{{encoding}}`
+
+**Timing:** {{#if timing}}{{timing}} cycles{{else}}2 cycles (typical){{/if}}
+
+**Flags:** {{#if flags}}{{flags}}{{else}}None modified{{/if}}
+
+{{#if example}}
+**Example:**
+```asm
+{{example}}
+```
+{{/if}}
+
+{{#unless @last}}\vspace{0.5em}{{/unless}}
+{{/each}}
+
+{{#unless @last}}\newpage{{/unless}}
+{{/each}}
+
+## Instruction Summary Table
+
+\begin{longtabu} to \textwidth {|X[l]|X[l]|X[c]|X[c]|}
+\hline
+\textbf{Mnemonic} & \textbf{Syntax} & \textbf{Timing} & \textbf{Flags} \\
+\hline
+{{#each categories}}
+{{#each instructions}}
+{{mnemonic}} & \texttt{ {{~syntax~}} } & {{#if timing}}{{timing}}{{else}}2{{/if}} & {{#if flags}}{{flags}}{{else}}-{{/if}} \\
+{{/each}}
+{{#unless @last}}\hline{{/unless}}
+{{/each}}
+\hline
+\end{longtabu}
+
+---
+
+*Generated on {{date}} from P2 official documentation*

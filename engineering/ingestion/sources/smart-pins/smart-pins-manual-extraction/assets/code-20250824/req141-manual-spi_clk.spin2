@@ -1,0 +1,20 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  SPI_CLK = 20
+  SPI_DATA = 21
+  SYNC_MODE = P_SYNC_TX | P_OE
+
+PUB spi_write(data, bits) | config
+  config := (2 << 16) | bits  ' 2 clocks/bit, N bits
+  pinstart(SPI_DATA, SYNC_MODE, config, data)
+  
+PUB spi_transfer(out_data) : in_data | i
+  repeat i from 31 to 0
+    pinh(SPI_CLK)
+    pinw(SPI_DATA, (out_data >> i) & 1)
+    in_data := (in_data << 1) | pinr(SPI_DATA+1)
+    pinl(SPI_CLK)

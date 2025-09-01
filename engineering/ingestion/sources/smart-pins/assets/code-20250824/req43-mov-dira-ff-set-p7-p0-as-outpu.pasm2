@@ -1,0 +1,6 @@
+' Source: P2 SmartPins-220809 (Page 27)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+       mov dira, ##$FF               'Set P7..P0 as outputs for LEDs
+       dirl   #A_in

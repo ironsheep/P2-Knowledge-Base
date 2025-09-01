@@ -1,0 +1,92 @@
+old_path,new_path,type,notes
+# Technical Debt Consolidation
+technical-debt/,engineering/knowledge-base/debt.md,consolidated,Multiple files merged into one
+analysis-debt/,engineering/ingestion/debt.md,consolidated,Multiple files merged into one
+technical-debt/TEMPLATE-COORDINATION-DEBT.md,engineering/document-production/debt.md,consolidated,Merged into document production debt
+technical-debt/VISUAL-ASSETS-DEBT.md,engineering/document-production/debt.md,consolidated,Merged into document production debt
+# Tools and Scripts
+tools/,engineering/tools/,directory,Reorganized by function
+pdf-forge-scripts/,engineering/pdf-forge/scripts/,directory,Moved to pdf-forge area
+tools/extract-manual-examples.py,engineering/tools/extraction/extract-manual-examples.py,file,Categorized by function
+tools/source-code-extractor.py,engineering/tools/extraction/source-code-extractor.py,file,Categorized by function
+tools/pdf_image_extractor.py,engineering/tools/extraction/pdf_image_extractor.py,file,Categorized by function
+tools/find-images-in-code.py,engineering/tools/extraction/find-images-in-code.py,file,Categorized by function
+tools/latex-escape-all.sh,engineering/tools/conversion/latex-escape-all.sh,file,Categorized by function
+tools/convert-to-div-blocks.sh,engineering/tools/conversion/convert-to-div-blocks.sh,file,Categorized by function
+tools/apply-coloring.sh,engineering/tools/conversion/apply-coloring.sh,file,Categorized by function
+tools/uppercase-instructions.py,engineering/tools/conversion/uppercase-instructions.py,file,Categorized by function
+tools/uppercase-instructions-latex.py,engineering/tools/conversion/uppercase-instructions-latex.py,file,Categorized by function
+tools/format-pasm-instructions.py,engineering/tools/conversion/format-pasm-instructions.py,file,Categorized by function
+tools/validate-pasm-code.sh,engineering/tools/validation/validate-pasm-code.sh,file,Categorized by function
+tools/create-request-json.sh,engineering/tools/automation/create-request-json.sh,file,Categorized by function
+tools/generate-smartpin-diagrams.py,engineering/tools/automation/generate-smartpin-diagrams.py,file,Categorized by function
+# Project Guidance and Methodology
+TECHNICAL-CLIMBING-METHODOLOGY.md,project-guidance/methodology/technical-climbing-methodology.md,file,Reorganized project guidance
+CRITICAL-NON-DESTRUCTIVE-PROTOCOLS.md,project-guidance/methodology/critical-non-destructive-protocols.md,file,Reorganized project guidance
+BACKUP-STRATEGY.md,project-guidance/methodology/backup-strategy.md,file,Reorganized project guidance
+source-quality-matrix-3d.md,project-guidance/methodology/source-quality-matrix-3d.md,file,Reorganized project guidance
+# Strategic Planning
+PROJECT-GOALS.md,planning/strategic/PROJECT-GOALS.md,file,Moved to planning area
+AI-DISCOVERY-STRATEGY.md,planning/strategic/AI-DISCOVERY-STRATEGY.md,file,Moved to planning area
+demand-driven-development-strategy.md,planning/strategic/demand-driven-development-strategy.md,file,Moved to planning area
+project-information-architecture.md,planning/strategic/project-information-architecture.md,file,Moved to planning area
+# Claude/AI Guidance
+STARTUP-BY-WORK-TYPE.md,claude-guidance/STARTUP-BY-WORK-TYPE.md,file,Centralized AI guidance
+adaptive-mentoring-framework.md,claude-guidance/adaptive-mentoring-framework.md,file,Centralized AI guidance
+ai-assisted-developer-use-cases.md,claude-guidance/ai-assisted-developer-use-cases.md,file,Centralized AI guidance
+CLAUDE.md,claude-guidance/CLAUDE.md,file,Primary AI guidance document
+# Public Deliverables
+ai-reference/,deliverables/ai-reference/,directory,Moved to deliverables
+learning-paths/,deliverables/learning-paths/,directory,Moved to deliverables
+developer-reference/architecture-overview.md,deliverables/reference/architecture-overview.md,file,Consolidated reference docs
+quick-reference/pasm2-essentials.md,deliverables/reference/pasm2-essentials.md,file,Consolidated reference docs
+p1-to-p2-migration-framework.md,deliverables/learning-paths/p1-to-p2-migration-framework.md,file,Moved to learning paths
+# Documentation Organization
+documentation/pdf-forge-system/,engineering/pdf-forge/documentation/,directory,Centralized PDF forge docs
+documentation/compiler-tools/,engineering/tools/compiler/,directory,Moved compiler documentation
+documentation/ingestion-pipeline/,engineering/ingestion/documentation/,directory,Moved ingestion docs
+documentation/lessons-learned/,engineering/operations/lessons-learned/,directory,Moved lessons learned
+documentation/work-mode-guides/,engineering/operations/work-mode-guides/,directory,Preserved work mode guides
+documentation/collaboration-guides/,engineering/operations/collaboration/,directory,Moved collaboration docs
+documentation/communication-strategy/,engineering/operations/communication/,directory,Moved communication docs
+documentation/best-practices/,engineering/operations/best-practices/,directory,Moved best practices
+# PDF Generation
+exports/pdf-generation/workspace/manual-templates/,engineering/pdf-forge/templates/,directory,Centralized templates
+exports/pdf-generation/workspace/,engineering/pdf-forge/workspace/,directory,Working area
+exports/pdf-generation/outbound/,deliverables/pdf-output/,directory,Public PDF outputs
+pipelines/templates/,engineering/pdf-forge/templates/,directory,Consolidated templates
+pdf-forge-workspace/templates/,engineering/pdf-forge/templates/,directory,Consolidated templates
+# Sources and Extractions
+sources/extractions/,engineering/ingestion/extractions/,directory,Moved to ingestion area
+sources/originals/,engineering/ingestion/sources/,directory,Moved source files
+sources/INGESTED-SOURCES-CATALOG.md,engineering/ingestion/SOURCES-CATALOG.md,file,Renamed and moved
+DOCUMENT-LINEAGE.md,engineering/ingestion/DOCUMENT-LINEAGE.md,file,Moved to ingestion area
+P2-SOURCE-STUDY-COMPLETE-MAP.md,engineering/ingestion/P2-SOURCE-STUDY-COMPLETE-MAP.md,file,Moved to ingestion
+# Operations and History
+VERSION-0.1-RELEASE.md,engineering/history/releases/VERSION-0.1-RELEASE.md,file,Moved version history
+GITHUB-REPO-SETUP.md,engineering/operations/GITHUB-REPO-SETUP.md,file,Moved GitHub setup
+REPOSITORY-STRUCTURE.md,engineering/operations/REPOSITORY-STRUCTURE.md,file,Moved repo structure
+INDEX.md,engineering/operations/INDEX.md,file,Moved index file
+DOCUMENT-ROADMAP.md,engineering/operations/planning/DOCUMENT-ROADMAP.md,file,Moved roadmap
+# Project Documentation
+PROJECT-MASTER.md,project-guidance/PROJECT-MASTER.md,file,Primary project document
+README.md,README.md,file,No change - stays at root
+# Sprint and Task Management
+.sprints/,engineering/history/sprints/,directory,Moved sprint history
+tasks/archives/,engineering/history/tasks/,directory,Moved task archives
+.todo-mcp/,engineering/operations/todo-mcp/,directory,Moved todo configuration
+# Context and Session Management
+context-extractions/,engineering/history/context/,directory,Moved context history
+SESSION-END-BACKUP-20250825.md,engineering/history/sessions/SESSION-END-BACKUP-20250825.md,file,Moved session backup
+# Document Production
+smart-pin-pedagogical-progression.md,engineering/document-production/smart-pin-pedagogical-progression.md,file,Moved to doc production
+documentation/manuals/,engineering/document-production/manuals/,directory,Moved manual sources
+documentation/pdf-templates-master/,engineering/pdf-forge/templates/master/,directory,Master templates
+# Knowledge Base Assessment
+PASM2-DOCUMENTATION-CAPABILITY-ASSESSMENT.md,engineering/knowledge-base/PASM2-DOCUMENTATION-CAPABILITY-ASSESSMENT.md,file,Moved assessment
+# Testing and Validation
+test-escape-output.md,engineering/tools/conversion/test-files/test-escape-output.md,file,Moved test files
+test-escape.md,engineering/tools/conversion/test-files/test-escape.md,file,Moved test files
+extracted_code/,engineering/tools/extraction/test-output/,directory,Test extraction output
+test_extraction/,engineering/tools/extraction/test-cases/,directory,Test cases
+test_mini_breakout_images/,engineering/tools/extraction/test-images/,directory,Test images

@@ -1,0 +1,7 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+rdpin   value, #pin wc  ' Read value, C = IN flag
+  if_nc jmp     #no_data        ' Jump if no data

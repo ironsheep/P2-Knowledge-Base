@@ -1,0 +1,6 @@
+' Source: P2 Spin2 Documentation v51-250425 (Page 17)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+PINSTART(PinField, Mode, Xval, Yval)
+Start PinField smart pin(s): DIR=0, then WRPIN=Mode, WXPIN=Xval, WYPIN=Yval, then DIR=1.

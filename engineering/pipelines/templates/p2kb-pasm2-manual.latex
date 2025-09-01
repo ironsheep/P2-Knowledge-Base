@@ -1,0 +1,164 @@
+\documentclass[11pt,letterpaper]{article}
+
+% Pandoc compatibility fixes (REQUIRED)
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\providecommand{\passthrough}[1]{#1}
+\providecommand{\euro}{\texteuro}
+\providecommand{\UrlFont}{\ttfamily}
+\providecommand{\footnotesize}{}
+\providecommand{\oldparagraph}{}
+\providecommand{\oldsubparagraph}{}
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% Required packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+% Font selection for reduced cognitive load
+\usepackage{XCharter}  % Or charter - gentle serif for body and headings
+% Alternative: \usepackage{palatino}
+\usepackage{microtype}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{listings}
+\usepackage{sourcecodepro}  % Modern code font, not typewriter-like
+
+% Page geometry
+\geometry{
+  letterpaper,
+  top=1in,
+  bottom=1in,
+  left=1in,
+  right=1in
+}
+
+% Typography settings for readability
+\linespread{1.3}  % Better line spacing for reduced eye strain
+\setlength{\parskip}{0.5em}  % Slight paragraph spacing
+
+% Document variables from request.json
+\newcommand{\docTitle}{$title$}
+\newcommand{\docVersion}{$version$}
+\newcommand{\docDate}{$date$}
+\newcommand{\docAuthor}{$author$}
+\newcommand{\docCompany}{$company$}
+
+% Colors for PASM manual style
+\definecolor{tablehdr}{gray}{0.9}
+\definecolor{linkblue}{rgb}{0.0,0.3,0.8}
+\definecolor{codegray}{gray}{0.95}
+
+% Header and footer setup
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\docTitle}
+\fancyhead[R]{Version \docVersion}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Hyperlink styling
+\hypersetup{
+    colorlinks=true,
+    linkcolor=linkblue,
+    urlcolor=linkblue,
+    citecolor=linkblue,
+    pdftitle={\docTitle},
+    pdfauthor={\docAuthor}
+}
+
+% Table styling for instruction encoding tables
+\newcommand{\instructiontable}[1]{%
+  \begingroup
+  \rowcolors{1}{tablehdr}{white}
+  \begin{longtable}{|c|c|c|c|c|c|c|c|c|}
+  \hline
+  \rowcolor{tablehdr}
+  \textbf{COND} & \textbf{INSTR} & \textbf{FX} & \textbf{DEST} & \textbf{SRC} & \textbf{Write} & \textbf{C Flag} & \textbf{Z Flag} & \textbf{Clocks} \\
+  \hline
+  #1
+  \hline
+  \end{longtable}
+  \endgroup
+}
+
+% Code block styling
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codegray},
+  frame=single,
+  framerule=0pt,
+  rulecolor=\color{codegray},
+  breaklines=true,
+  showstringspaces=false,
+  commentstyle=\color{gray},
+  keywordstyle=\color{blue},
+  stringstyle=\color{red}
+}
+
+% Instruction name formatting (large, bold)
+\newcommand{\instructionname}[1]{%
+  \section*{\Huge\textbf{#1}}
+  \addcontentsline{toc}{section}{#1}
+}
+
+% Category link formatting  
+\newcommand{\categorylink}[2]{%
+  \textcolor{linkblue}{\textbf{#1}} - #2
+}
+
+% Related instructions formatting
+\newcommand{\related}[1]{%
+  \textbf{Related:} #1
+}
+
+% Explanation section formatting
+\newcommand{\explanation}[1]{%
+  \textbf{Explanation:}\\
+  #1
+}
+
+% Title page
+\title{
+  {\Huge\bfseries \docTitle\par}
+  \vspace{1cm}
+  {\Large Version \docVersion\par}
+  \vspace{0.5cm}
+  {\large \docDate\par}
+  \vspace{1cm}
+  {\normalsize \docAuthor\par}
+  {\normalsize \docCompany\par}
+}
+
+\date{}
+
+\begin{document}
+
+% Title page
+\maketitle
+\thispagestyle{empty}
+\newpage
+
+% Table of contents
+\tableofcontents
+\newpage
+
+% Start main content
+$body$
+
+\end{document}

@@ -1,0 +1,10 @@
+# Generated output directory
+output/
+
+# Temporary test files
+test-*.md
+!input/test-*.md
+!golden/test-*.md
+
+# Backup files
+*.backup.*

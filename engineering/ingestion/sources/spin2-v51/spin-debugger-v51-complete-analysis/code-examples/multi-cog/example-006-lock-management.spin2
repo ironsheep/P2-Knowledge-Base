@@ -1,0 +1,12 @@
+' Lock Management for Debugger Resources
+' Source: spin-debugger-v51-complete-analysis.md
+' Category: Multi-COG Coordination
+' Description: Lock allocation for debugger resource coordination
+
+' Lock management for debugger resources
+rep     #1,#16          'allocate lock[0..15]
+locknew t
+
+mov     t,#14           'return lock[14..0], leaves lock[15] allocated
+.return lockret t
+djnf    t,#.return

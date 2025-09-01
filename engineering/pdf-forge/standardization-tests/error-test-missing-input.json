@@ -1,0 +1,14 @@
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "nonexistent-file.md",
+      "output": "Should-Fail.pdf",
+      "template": "p2kb-foundation"
+    }
+  ],
+  "metadata": {
+    "title": "Missing Input File Test",
+    "author": "Error Test Suite"
+  }
+}

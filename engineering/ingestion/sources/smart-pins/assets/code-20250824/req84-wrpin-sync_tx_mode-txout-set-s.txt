@@ -1,0 +1,7 @@
+' Source: P2 SmartPins-220809 (Page 50)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Snippet
+
+        wrpin   sync_tx_mode, #txout      'Set sync tx mode pin 41
+        wxpin   #%1_00111,    #txout     'Set up stop/start mode,
+                                          ' 8 bits (7 + 1)

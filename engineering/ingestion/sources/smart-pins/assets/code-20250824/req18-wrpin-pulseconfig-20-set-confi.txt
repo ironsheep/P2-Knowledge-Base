@@ -1,0 +1,8 @@
+' Source: P2 SmartPins-220809 (Page 15)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Snippet
+
+        wrpin    PulseConfig,  #20   'Set config for pulse/cycle
+        wxpin    PulseTiming,  #20   'Set cycle time and logic-0
+                                     '  period
+        dirh     #20                 'Finished setup

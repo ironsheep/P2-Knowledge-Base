@@ -1,0 +1,4579 @@
+SINC3 filtering is like SINC2, but employs an additional level of accumulation to increase sensitivity to dynamics in the input
+signal. SINC3 doubles the ENOB (effective number of bits) over simple bit-summing for fast signals, but it is only slightly better
+at DC measurements than SINC2 filtering at the same sample period. Because SINC3 takes more resources within the smart
+pin, it is limited to 512 samples per period, making it less practical than SINC2 for precision DC measurements, but quite ideal
+for tracking fast, dynamic signals. After starting SINC3 filtering, the filter will become accurate starting on the third period.
+Because the accumulators are 27 bits wide, 32-bit integer adds and subtracts in software will roll over incorrectly. There are
+two ways to handle this:
+You can either prescale the 27-bit values to 32-bit values:
+RDPIN
+
+x,#adcpin
+
+'get SINC2 accumulator
+
+SHL
+
+x,#5
+
+'prescale 27-bit to 32-bit
+
+SUB
+
+x,diff
+
+'compute sample
+
+ADD
+
+diff,x
+
+'update diff value
+
+Or you can post-trim then to 27-bit values:
+RDPIN
+
+x,#adcpin
+
+'get SINC2 accumulator
+
+SUB
+
+x,diff
+
+'compute sample
+
+ADD
+
+diff,x
+
+'update diff value
+
+ZEROX
+
+x,#26
+
+'trim to 27-bit
+
+SINC2 Sampling Mode (%00)
+This mode performs complete SINC2 conversions, updating the ADC output sample at the end of each period. Once this mode
+is enabled, it is only necessary to do a RDPIN/RQPIN to acquire the latest ADC sample. The limitation of this mode is that it
+only works at power-of-2 sample periods, since that stricture afforded efficient implementation within the smart pin, making
+complete conversions possible without software. There is an additional SINC2 filtering mode (%01) which allows
+non-power-of-2 sample periods, but you must perform the difference computation in software.
+To begin SINC2 sampling:
+WRPIN
+
+##%100011_0000000_00_11000_0,adcpin
+
+'configure ADC+sample pin(s)
+
+WXPIN
+
+#%00_0111,adcpin
+
+'SINC2 sampling at 8 bits
+
+DIRH
+
+adcpin
+
+'enable smart pin(s)
+
+NOTE: The variable 'adcpin' could enable multiple pins by having the additional number of pins in bits 10..6. For example, if
+'adcpin' held %00111_010000, pins 16 through 23 would have been simultaneously configured by the above code.
+To read the latest ADC sample, just do a RDPIN/RQPIN:
+RDPIN
+
+sample,adcpin
+
+'read sample at any time
+96
+
+SINC2 Filtering Mode (%01)
+This mode performs SINC2 filtering, which requires some software interaction in order to realize ADC samples.
+To begin SINC2 filtering:
+WRPIN
+
+##%100011_0000000_00_11000_0,#adcpin
+
+'configure ADC+filter pin(s)
+
+WXPIN
+
+#%01_0111,#adcpin
+
+'SINC2 filtering at 128 clocks
+
+DIRH
+
+#adcpin
+
+'enable smart pin(s)
+
+Pin interaction must occur after each sample period, so it may be good to set up an event to detect the pin's IN going high:
+SETSE1
+.loop
+
+#%001<<6 + adcpin
+
+WAITSE1
+
+'SE1 triggers on pin high
+'wait for sample period done
+
+RDPIN
+
+x,#adcpin
+
+'get SINC2 accumulator
+
+SUB
+
+x,diff
+
+'compute sample
+
+ADD
+
+diff,x
+
+'update diff value
+
+SHR
+
+x,#6
+
+'justify 8-bit sample
+
+ZEROX
+
+x,#7
+
+'trim 8-bit sample
+
+'use x here
+
+'use sample somehow
+
+JMP
+
+#.loop
+
+'loop for next period
+
+x
+
+RES
+
+1
+
+'sample value
+
+diff
+
+RES
+
+1
+
+'diff value
+
+Note that it is necessary to shift the computed sample right by some number of bits to leave the ENOBs intact. For SINC2
+filtering, you must shift right by LOG2(clocks per period)-1, which in this case is LOG2(128)-1 = 6.
+
+SINC3 Filtering Mode (%10)
+This mode performs SINC3 filtering, which requires some software interaction in order to realize ADC samples.
+To begin SINC3 filtering:
+WRPIN
+
+##%100011_0000000_00_11000_0,#adcpin
+
+'configure ADC+filter pin(s)
+
+WXPIN
+
+#%10_0111,#adcpin
+
+'SINC3 filtering at 128 clocks
+
+DIRH
+
+#adcpin
+
+'enable smart pin(s)
+
+Pin interaction must occur after each sample period, so it may be good to set up an event to detect the pin's IN going high:
+
+97
+
+SETSE1
+.loop
+
+#%001<<6 + adcpin
+
+'SE1 triggers on pin high
+
+RDPIN
+
+x,#adcpin
+
+'get SINC3 accumulator
+
+SUB
+
+x,diff1
+
+'compute sample
+
+ADD
+
+diff1,x
+
+'update diff1 value
+
+SUB
+
+x,diff2
+
+'compute sample
+
+ADD
+
+diff2,x
+
+'update diff2 value
+
+SHR
+
+x,#7
+
+'justify 14-bit sample
+
+ZEROX
+
+x,#13
+
+'trim 14-bit sample
+
+WAITSE1
+
+'wait for sample period done
+
+'use x here
+
+'use sample somehow
+
+JMP
+
+#.loop
+
+'loop for next period
+
+x
+
+RES
+
+1
+
+'sample value
+
+diff1
+
+RES
+
+1
+
+'diff1 value
+
+diff2
+
+RES
+
+1
+
+'diff2 value
+
+Note that it is necessary to shift the computed sample right by some number of bits to leave the ENOBs intact. For SINC3
+filtering, you must shift right by LOG2(clocks per period), which in this case is LOG2(128) = 7.
+
+Bitstream Capturing Mode (%11)
+This mode captures the raw bitstream coming from the ADC. It buffers 32 bits and is meant to be read once every 32 clocks, in
+order to get contiguous snapshots of the ADC bitstream. RDPIN/RQPIN is used to read the snapshots. Bit 31 of the data will
+be the most recent ADC bit, while bit 0 will be from 31 clocks earlier.
+To begin raw bitstream capturing:
+WRPIN
+
+##%100011_0000000_00_11000_0,adcpin
+
+'configure ADC+sample pin(s)
+
+WXPIN
+
+#%11_0101,adcpin
+
+'raw sampling every 32 clocks
+
+DIRH
+
+adcpin
+
+'enable smart pin(s)
+
+To get a snapshot of the latest 32 bits of the ADC bitstream, just do a RDPIN/RQPIN:
+RDPIN
+
+bitstream,adcpin
+
+'get snapshot of ADC bitstream
+
+This mode can be used for purposes other than capturing ADC bitstreams. It's really just capturing the A-input without regard
+to pin configuration.
+
+%11010 = ADC Scope with Trigger
+This mode calculates an 8-bit ADC sample and checks for hysteretic triggering on every clock, providing the basis of
+98
+
+oscilloscope functionality. Samples from blocks of up to four pins can be grouped into a 32-bit data pipe for recording by the
+streamer or reading by the GETSCP instruction (see 'SCOPE Data Pipe' below).
+There are three different windowed filter functions from which ADC samples can be computed. On each clock, the incoming
+ADC bit is shifted into a tap string and the weighted tap bits are summed together to produce the sample. The samples are
+normalized to 8 bits in size, but the DC dynamic range is ~5 to ~6 bits, depending on the filter length. These are plots of the
+actual filter shapes and sizes:
+
+The scope trigger function is set by two 6-bit parameters, A and B, which MSB-justify to the 8-bit samples for comparison.
+Triggering is a two-step process of arming and then triggering, which raises the IN signal and waits for a new arming event.
+The relationship between A and B determine the triggering pattern:
+
+A and B
+relationship
+
+Arming Event
+(initial / after trigger)
+
+Trigger Event
+(after arming)
+
+A>B
+
+sample[7:2] => A
+
+sample[7:2] < B
+
+A <= B
+
+sample[7:2] < A
+
+sample[7:2] => B
+
+WXPIN is used to configure this mode.
+X[15:10] sets the B trigger value.
+X[7:2] sets the A trigger value.
+X[1:0] selects the filter:
+%00 = 68-tap Tukey filter
+%01 = 45-tap Tukey filter
+%1x = 28-tap Hann filter
+RDPIN/RQPIN always returns the 8-bit sample, along with the 'armed' state in the C flag.
+When 'armed' and then 'triggered', IN is raised and the 'armed' state is cancelled.
+
+SCOPE Data Pipe
+Each cog has a 32-bit SCOPE data pipe which is intended to be used with smart pins configured to the 'scope' mode. The
+99
+
+SCOPE data pipe continuously aggregates the lower bytes of RDPIN values from a 4-pin block, so that the streamer can
+record up to four time-aligned 8-bit ADC samples per clock. They can also be read at once via the GETSCP instruction.
+The SETSCP instruction enables the SCOPE data pipe and selects the 4-pin block whose lower bytes of RDPIN values it will
+continuously carry:
+SETSCP
+
+{#}D
+
+'D[6] enables the SCOPE data pipe, D[5:2] selects the 4-pin block
+
+The GETSCP instruction gets the SCOPE data pipe's current four bytes:
+GETSCP
+
+D
+
+'Get the lower-byte RDPIN values of four pins into the bytes of D
+
+If the SCOPE data pipe didn't exist, the closest you could come to the GETSCP instruction would be this sequence, which
+would not have time-aligned samples:
+RQPIN
+
+x,#pinblock | 3
+
+'read pin3 long into x
+
+ROLBYTE y,x
+
+'rotate pin3 byte into y
+
+RQPIN
+
+'read pin2 long into x
+
+x,#pinblock | 2
+
+ROLBYTE y,x
+
+'rotate pin2 byte into y
+
+RQPIN
+
+'read pin1 long into x
+
+x,#pinblock | 1
+
+ROLBYTE y,x
+
+'rotate pin1 byte into y
+
+RQPIN
+
+'read pin0 long into x
+
+x,#pinblock | 0
+
+ROLBYTE y,x
+
+'rotate pin0 byte into y
+
+The SCOPE data pipe is generic in function and may find other uses than carrying just 'scope' data.
+
+%11011 = USB host/device
+This mode requires that two adjacent pins be configured together to form a USB pair, whose OUTs will be overridden to control
+their output states. These pins must be an even/odd pair, having only the LSB of their pin numbers different. For example: pins
+0 and 1, pins 2 and 3, and pins 4 and 5 can form USB pairs. They can be configured via WRPIN with identical D data of
+%1_11011_0. Using D data of %0_11011_0 will disable output drive and effectively create a USB 'sniffer'. A new WRPIN can
+be done to effect such a change without resetting the smart pin. NOTE: In Propeller 2 emulation on an FPGA, there are no
+built-in 1.5k and 15k resistors, like the ASIC smart pins have, so it is up to you to install these yourself on the DP and
+DM lines.
+WXPIN is used on the lower pin to establish the specific USB mode and set the baud rate. D[15] must be 1 for 'host' or 0 for
+'device'. D[14] must be 1 for 'full-speed' or 0 for 'low-speed'. D[13:0] sets the baud rate, which is a 16-bit fraction of the system
+clock, whose two MSBs must be 0, necessitating that the baud rate be less than 1/4th of the system clock frequency. For
+example, if the main clock is 80MHz and you want a 12MHz baud rate (full-speed), use 12,000,000 / 80,000,000 * $10000 =
+9830, or $2666. To use this baud rate and select 'host' mode and 'full-speed', you could do 'WXPIN ##$E666,lowerpin'.
+The upper (odd) pin is the DP pin. This pin's IN is raised whenever the output buffer empties, signalling that a new output byte
+can be written via WYPIN to the lower (even) pin. No WXPIN/WYPIN instructions are used for this pin.
+100
+
+The lower (even) pin is the DM pin. This pin's IN is raised whenever a change of status occurs in the receiver, at which point a
+RDPIN/RQPIN can be used on this pin to read the 16-bit status word. WXPIN is used on this pin to set the NCO baud rate.
+These DP/DM electrical designations can actually be switched by swapping low-speed and full-speed modes, due to USB's
+complementary line signalling.
+To start USB, clear the DIR bits of the intended two pins and configure them each via WRPIN. Use WXPIN on the lower pin to
+set the mode and baud rate. Then, set the pins' DIR bits. You are now ready to read the receiver status via RDPIN/RQPIN and
+set output states and send packets via WYPIN, both on the lower pin.
+To affect the line states or send a packet, use WYPIN on the lower pin. Here are its D values:
+0 = output IDLE
+
+- default state, float pins, except possible resistor(s) to 3.3V or GND
+
+1 = output SE0
+
+- drive both DP and DM low
+
+2 = output K
+
+- drive K state onto DP and DM (opposite)
+
+3 = output J
+
+- drive J state onto DP and DM (opposite), like IDLE, but driven
+
+4 = output EOP
+
+- output end-of-packet: SE0, SE0, J, then IDLE
+
+$80 = SOP
+
+- output start-of-packet, then bytes, automatic EOP when buffer runs out
+
+To send a packet, first do a 'WYPIN #$80,lowerpin'. Then, after each IN rise on the upper pin, do a 'WYPIN byte,lowerpin' to
+buffer the next byte. The transmitter will automatically send an EOP when you stop giving it bytes. To keep the output buffer
+from overflowing, you should always verify that the upper pin's IN was raised after each WYPIN, before issuing another
+WYPIN, even if you are just setting a state. The reason for this is that all output activity is timed to the baud generator and
+even state changes must wait for the next bit period before being implemented, at which time the output buffer empties.
+There are separate state machines for transmitting and receiving. Only the baud generator is common between them. The
+transmitter was just described above. Below, the receiver is detailed. Note that the receiver receives not just input from
+another host/device, but all local output, as well.
+At any time, a RDPIN/RQPIN can be executed on the lower pin to read the current 16-bit status of the receiver, with the error
+flag going into C. The lower pin's IN will be raised whenever a change occurs in the receiver's status. This will necessitate A
+WRPIN/WXPIN/WYPIN/RDPIN/AKPIN before IN can be raised again, to alert of the next change in status. The receiver's
+status bits are as follows:
+[31:16] <unused>
+
+- $0000
+
+[15:8]
+
+byte
+
+- last byte received
+
+[7]
+
+byte toggle
+
+- cleared on SOP, toggled on each byte received
+
+[6]
+
+error
+
+- cleared on SOP, set on bit-unstuff error, EOP SE0 > 3 bits, or SE1
+
+[5]
+
+EOP in
+
+- cleared on SOP or 7+ bits of J or K, set on EOP
+
+[4]
+
+SOP in
+
+- cleared on EOP or 7+ bits of J or K, set on SOP
+
+[3]
+
+SE1 in
+
+(illegal)
+
+- cleared on !SE1, set on 1+ bits of SE1
+
+[2]
+
+SE0 in
+
+(RESET)
+
+- cleared on !SE0, set on 1+ bits of SE0
+
+[1]
+
+K in
+
+(RESUME)
+
+- cleared on !K, set on 7+ bits of K
+
+[0]
+
+J in
+
+(IDLE)
+
+- cleared on !J, set on 7+ bits of J
+101
+
+The result of a RDPIN/RQPIN can be bit-tested for events of interest. It can also be shifted right by 8 bits to LSB-justify the last
+byte received and get the byte toggle bit into C, in order to determine if you have a new byte. Assume that 'flag' is initially zero:
+SHR
+
+D,#8
+
+WC
+
+'get byte into D, get toggle bit into C
+
+CMPX
+
+flag,#1 WZ
+
+'compare toggle bit to flag, new byte if Z
+
+IF_Z
+
+XOR
+
+flag,#1
+
+'if new byte, toggle flag
+
+IF_Z
+
+<use byte>
+
+'if new byte, do something with it
+
+%11100 = synchronous serial transmit
+This mode overrides OUT to control the pin output state.
+Words of 1 to 32 bits are shifted out on the pin, LSB first, with each new bit being output two internal clock cycles after
+registering a positive edge on the B input. For negative-edge clocking, the B input may be inverted by setting B[3] in WRPIN's
+D value.
+WXPIN is used to configure the update mode and word length.
+X[5] selects the update mode:
+X[5] = 0 sets continuous mode, where a first word is written via WYPIN during reset (DIR=0) to prime the shifter.
+Then, after reset (DIR=1), the second word is buffered via WYPIN and continuous clocking is started. Upon shifting
+each word, the buffered data written via WYPIN is advanced into the shifter and IN is raised, indicating that a new
+output word can be buffered via WYPIN. This mode allows steady data transmission with a continuous clock, as long
+as the WYPIN's after each IN-rise occur before the current word transmission is complete.
+X[5] = 1 sets start-stop mode, where the current output word can always be updated via WYPIN before the first clock,
+flowing right through the buffer into the shifter. Any WYPIN issued after the first clock will be buffered and loaded into
+the shifter after the last clock of the current output word, at which time it could be changed again via WYPIN. This
+mode is useful for setting up the output word before a stream of clocks are issued to shift it out.
+X[4:0] sets the number of bits, minus 1. For example, a value of 7 will set the word size to 8 bits.
+WYPIN is used to load the output words. The words first go into a single-stage buffer before being advanced to the shifter for
+output. Each time the buffer is advanced into the shifter, IN is raised, indicating that a new output word can be written via
+WYPIN. During reset, the buffer flows straight into the shifter.
+If you intend to send MSB-first data, you must first shift and then reverse it. For example, if you had a byte in D that you
+wanted to send MSB-first, you would do a 'SHL D,#32-8' and then a 'REV D'.
+During reset (DIR=0) the output is held low. Upon release of reset, the output will reflect the LSB of the output word written by
+any WYPIN during reset.
+
+102
+
+%11101 = synchronous serial receive
+Words of 1 to 32 bits are shifted in by sampling the A input around the positive edge of the B input. For negative-edge
+clocking, the B input may be inverted by setting B[3] in WRPIN's D value.
+WXPIN is used to configure the sampling and word length.
+X[5] selects the A input sample position relative to the B input edge:
+X[5] = 0 selects the A input sample just before the B input edge was registered. This requires no hold time on the part
+of the sender.
+X[5] = 1 selects the sample coincident with the B edge being registered. This is useful where transmitted data
+remains steady after the B edge for a brief time. In the synchronous serial transmit mode, the data is steady for two
+internal clocks after the B edge was registered, so employing this complementary feature would enable the fastest
+data transmission when receiving from another smart pin in synchronous serial transmit mode.
+X[4:0] sets the number of bits, minus 1. For example, a value of 7 will set the word size to 8 bits.
+When a word is received, IN is raised and the data can then be read via RDPIN/RQPIN. The data read will be MSB-justified.
+If you received LSB-first data, it will require right-shifting, unless the word size was 32 bits. For a word size of 8 bits, you would
+need to do a 'SHR D,#32-8' to get the data LSB-justified.
+If you received MSB-first data, it will need to be reversed and possibly masked, unless the word size was 32 bits. For example,
+if you received a 9-bit word, you would do 'REV D' + 'ZEROX D,#8' to get the data LSB-justified.
+
+%11110 = asynchronous serial transmit
+This mode overrides OUT to control the pin output state.
+Words from 1 to 32 bits are serially transmitted on the pin at a programmable baud rate, beginning with a low "start" bit and
+ending with a high "stop" bit.
+WXPIN is used to configure the baud rate and word length.
+X[31:16] establishes the number of clocks in a bit period, and in case X[31:26] is zero, X[15:10] establishes the number of
+fractional clocks in a bit period. The X bit period value can be simply computed as: (clocks * $1_0000) & $FFFFFC00. For
+example, 7.5 clocks would be $00078000, and 33.33 clocks would be $00215400.
+X[4:0] sets the number of bits, minus 1. For example, a value of 7 will set the word size to 8 bits.
+WYPIN is used to load the output words. The words first go into a single-stage buffer before being advanced to a shifter for
+output. This buffering mechanism makes it possible to keep the shifter constantly busy, so that gapless transmissions can be
+achieved. Any time a word is advanced from the buffer to the shifter, IN is raised, indicating that a new word can be loaded.
+103
+
+Here is the internal state sequence:
+1.
+
+Wait for an output word to be buffered via WYPIN, then set the 'buffer-full' and 'busy' flags.
+
+2.
+
+Move the word into the shifter, clear the 'buffer-full' flag, and raise IN.
+
+3.
+
+Output a low for one bit period (the START bit).
+
+4.
+
+Output the LSB of the shifter for one bit period, shift right, and repeat until all data bits are sent.
+
+5.
+
+Output a high for one bit period (the STOP bit).
+
+6.
+
+If the 'buffer-full' flag is set due to an intervening WYPIN, loop to (2). Otherwise, clear the 'busy' flag and loop to (1).
+
+RDPIN/RQPIN with WC always returns the 'busy' flag into C. This is useful for knowing when a transmission has completed.
+The busy flag can be polled starting three clocks after the WYPIN, which loads the output words:
+WYPIN
+
+x,#txpin
+
+'load output word
+
+WAITX
+
+#1
+
+'wait 2+1 clocks before polling busy
+
+wait
+
+RDPIN
+
+x,#txpin
+
+IF_C
+
+JMP
+
+#wait
+
+WC
+
+'get busy flag into C
+'loop until C = 0
+
+During reset (DIR=0) the output is held high.
+
+%11111 = asynchronous serial receive
+Words from 1 to 32 bits are serially received on the A input at a programmable baud rate.
+WXPIN is used to configure the baud rate and word length.
+X[31:16] establishes the number of clocks in a bit period, and in case X[31:26] is zero, X[15:10] establishes the number of
+fractional clocks in a bit period. The X bit period value can be simply computed as: (clocks * $1_0000) & $FFFFFC00. For
+example, 7.5 clocks would be $00078000, and 33.33 clocks would be $00215400.
+X[4:0] sets the number of bits, minus 1. For example, a value of 7 will set the word size to 8 bits.
+Here is the internal state sequence:
+1.
+
+Wait for the A input to go high (idle state).
+
+2.
+
+Wait for the A input to go low (START bit edge).
+
+3.
+
+Delay for half of a bit period.
+
+4.
+
+If the A input is no longer low, loop to (2).
+
+5.
+
+Delay for one bit period.
+
+6.
+
+Right-shift the A input into the shifter and delay for one bit period, repeat until all data bits are received.
+
+7.
+
+Capture the shifter into the Z register and raise IN.
+
+8.
+
+Loop to (1).
+
+RDPIN/RQPIN is used to read the received word. The word must be shifted right by 32 minus the word size. For example, to
+LSB-justify an 8-bit word received, you would do a 'SHR D,#32-8'.
+104
+
+BOOT PROCESS (needs more editing)
+Boot Pattern Set By Resistors
+
+P61
+
+P60
+
+P59
+
+Serial window of 60s, default.
+
+none
+
+none
+
+none
+
+Serial window of 60s, overrides SPI and SD.
+
+ignored
+
+ignored
+
+pull-up
+
+Serial window of 100ms, then SPI flash.
+If SPI flash fails then serial window of 60s.
+
+pull-up
+
+ignored
+
+none
+
+SPI flash only (fast boot), no serial window.
+If SPI flash fails then shutdown.
+
+pull-up
+
+ignored
+
+pull-down
+
+SD card with serial window on failure.
+If SD card fails then serial window of 60s.
+
+no pull-up
+
+pull-up
+(built into SD card)
+
+none
+
+SD card only, no serial window.
+If SD card fails then shutdown.
+
+no pull-up
+
+pull-up
+(built into SD card)
+
+pull-down
+
+Boot Serial
+
+P63 (input)
+
+P62 (output)
+
+Serial
+
+RX
+
+TX
+
+Boot Memory
+
+P61 (output)
+
+P60 (output)
+
+P59 (output)
+
+P58 (input)
+
+SPI flash
+
+CSn (input)
+
+CLK (input)
+
+DI (input)
+
+DO (output)
+
+SD card
+
+CLK (input)
+
+CSn (input)
+
+DI (input)
+
+DO (output)
+
+After a hardware reset, cog 0 loads and executes a booter program from an internal ROM. The booter program
+(ROM_Booter.spin2) performs the following steps:
+1)
+
+If an external pull-up resistor is sensed on P61 (SPI_CS), then attempt to boot from SPI:
+a)
+
+Load the first 1024 bytes (256 longs) from SPI into the hub starting at $00000.
+
+b)
+
+Compute the 32-bit sum of the 256 longs.
+
+c)
+
+If the sum is "Prop" ($706F7250):
+i)
+
+Copy the first 256 longs from hub into cog registers $000..$0FF.
+
+ii)
+
+If an external pull-up resistor is sensed on P60 (SPI_CK):
+(1) Execute 'JMP #$000' to run the SPI program. Done.
+
+iii)
+
+Begin waiting for serial command(s) on P63 (RX_PIN).
+
+iv)
+
+If 100ms elapsed and no command begun:
+
+v)
+
+If a program successfully loads serially within 60 seconds:
+
+(1) Execute 'JMP #$000' to run the SPI program. Done.
+(1) Execute 'COGINIT #0,#0' to relaunch cog 0 from $00000. Done.
+vi)
+
+Execute 'JMP #$000' to run the SPI program. Done.
+105
+
+2)
+
+Wait for serial command(s) on P63 (RX_PIN):
+a)
+
+If a program successfully loads serially within 60 seconds:
+
+b)
+
+Slow clock to 20kHz and stop cog 0. Done.
+
+i)
+
+Execute 'COGINIT #0,#0' to relaunch cog 0 from $00000. Done.
+
+SERIAL LOADING PROTOCOL
+The built-in serial loader allows Propeller 2 chips to be loaded via 8-N-1 asynchronous serial into P63, where START=low and
+STOP=high, at any rate the sender uses, between 9,600 baud and 2,000,000 baud.
+The loader automatically adapts to the sender's baud rate from every ">" character ($3E) it receives. It is necessary to initially
+send "> " ($3E, $20) before the first command, and then use ">" characters periodically throughout your data to keep the baud
+rate tightly calibrated to the internal RC oscillator that the loader uses during boot ROM execution. Received ">" characters are
+not passed to the command parser, so they can be placed anywhere.
+The loader's response messages are sent back serially over P62 at the same baud rate that the sender is using. P62 is
+normally driven continuously during the serial protocol, but will go into open-drain mode when either the INA or INB mask of a
+command is non-0 (masking is explained below).
+Unless preempted by a program in a SPI memory chip with a pull-up resistor on P60 (SPI_CK), the serial loader becomes
+active within 15ms of reset being released.
+Between command keywords and data, whitespace is required. The following characters, in any contiguous combination,
+constitute a single whitespace:
+$09
+$0A
+$0D
+$20
+$3D
+
+TAB
+LF
+CR
+SP
+"="
+
+(may be present in Base64 data)
+
+There are four commands which the sender can issue:
+1) Request Propeller type:
+Prop_Chk <INAmask> <INAdata> <INBmask> <INBdata>
+2) Change clock setting:
+Prop_Clk <INAmask> <INAdata> <INBmask> <INBdata> <HUBSETclocksetting>
+3) Load and execute hex data, with and without sum checking:
+Prop_Hex <INAmask> <INAdata> <INBmask> <INBdata> <hexdatabytes> ?
+Prop_Hex <INAmask> <INAdata> <INBmask> <INBdata> <hexdatabytes> ~
+4) Load and execute Base64 data, with and without sum checking:
+Prop_Txt <INAmask> <INAdata> <INBmask> <INBdata> <base64chrs> ?
+106
+
+Prop_Txt <INAmask> <INAdata> <INBmask> <INBdata> <base64chrs> ~
+
+Each command keyword is followed by four 32-bit hex values which allow selection of certain chips by their INA and INB
+states. If you wanted to talk to any and all chips that are connected, you would use zeroes for these values. In case multiple
+chips are being loaded from the same serial line, you would probably want to differentiate each download by unique INA and
+INB mask and data values. When the serial loader receives data and mask values which do not match its own INA and INB
+ports, it waits for another command. Note that you cannot use INA[1:0] for this purpose, since they are configured as smart
+pins used for automatic baud detection by the loader. Because the command keywords all contain an underscore ("_"), they
+cannot be mistaken by intervening data belonging to a command destined for another chip, while a new command is being
+waited for.
+If, at any time, a character is received which does not comport with expectations (i.e. an "x" is received when hex digits are
+expected), the loader aborts the current command and waits for a new command.
+
+Prop_Chk
+The Prop_Chk command returns CR+LF+"Prop_Ver"+SP+VerChr+CR+LF. VerChr is "A".."Z" and indicates the version of
+Propeller chip. The Rev B/C silicon responds with "G":
+Sender: "> Prop_Chk 0 0 0 0"+CR
+Loader: CR+LF+"Prop_Ver G"+CR+LF
+
+Prop_Clk
+The Prop_Clk command is used to update the chip's clock source, as if a HUBSET ##$0xxxxxxx instruction were being
+executed. For details (and caveats), see Configuring the Clock Generator. Upon receiving a valid Prop_Clk command, the
+loader immediately echoes a "." character and then performs the following steps:
+1.
+2.
+3.
+4.
+
+Switches to the internal 20MHz source.
+Sets the desired configuration (except mode).
+Waits ~5ms for the clock hardware to settle to the new configuration.
+Enables the desired clock mode.
+NOTE: After the command is sent, the sender should wait an ~10ms, then send "> " ($3E, $20) auto-baud sequence
+to adjust for the new clock configuration.
+NOTE: If an image is loaded (see Prop_Hex/Prop_Txt) after switching to a PLL clock mode that is different than the
+mode used by that image, the uploaded image may need to issue a "HUBSET #$F0" before switching to the desired
+clock mode. See the warning in Configuring the Clock Generator for more details. An alternative approach is to use
+the same clock configuration as used by the image. This means that the image's call to HUBSET will effectively be a
+NOP, but always safe to perform.
+NOTE TO FPGA USERS: The only supported clock-setting values are $00 for 20MHz and $FF for 80MHz. This
+value would be used instead of the 25-bit value for the regular instruction. Wait ~10ms before sending "> ".
+
+PLL Example
+To update the clock source per PLL Example:
+Sender: "> Prop_Clk 0 0 0 0 19D28F8"+CR
+Loader: "."
+Sender: (wait ~10ms)
+Sender: "> Prop_Clk 0 0 0 0 19D28FB"+CR
+Loader: "."
+
+107
+
+NOTE: An initial "Prop_Clk 0 0 0 0 F0" is not required since the clock circuit starts up in this mode.
+
+Reset to Boot Clock Configuration
+To return to the clock configuration on bootup:
+Sender: "> Prop_Clk 0 0 0 0 F0"+CR
+Loader: "."
+
+Prop_Hex
+The Prop_Hex command is used to load byte data into the hub, starting at $00000, and then execute them. Hex bytes must be
+separated by whitespaces. Only the bottom 8 bits of hex values are used as data.
+If the command is terminated with a "~" character, the loader will do a 'COGINIT #0,#0' to relaunch cog 0 (currently running the
+booter program) with the new program starting at $00000.
+If the command is terminated with a "?" character, the loader will send either a "." character to signify that the embedded
+checksum was correct, in which case it will run the program as "~" would have. Or, it will send a "!" character to signify that the
+checksum was incorrect, after which it will wait for a new command.
+To demonstrate hex loading, consider this small program:
+DAT
+.lp
+
+ORG
+not
+not
+waitx
+jmp
+
+dirb
+outb
+##20_000_000/4
+#.lp
+
+'all outputs
+'toggle states (blinks leds on Prop123 & P2 Eval boards)
+'wait ¼ second
+'loop
+
+It assembles to:
+00000- FB F7 23 F6 FD FB 23 F6 25 26 80 FF 1F 80 66 FD F0 FF 9F FD
+Here is how you would run this program from the serial loader:
+Sender: "> Prop_Hex 0 0 0 0 FB F7 23 F6 FD FB 23 F6 25 26 80 FF 1F 80 66 FD F0 FF 9F FD ~"
+In the case of our assembled program, there are 5 little-endian longs which sum to $E6CE9A2C. To generate an embedded
+checksum long, you would compute $706F7250 ("Prop") minus the sum $E6CE9A2C, which results in $89A0D824. Those four
+bytes could be appended to the data as follows. Note that it doesn't matter where your embedded checksum long is placed,
+only that it be long-aligned within your data:
+Sender: "> Prop_Hex 0 0 0 0 FB F7 23 F6 FD FB 23 F6 25 26 80 FF 1F 80 66 FD F0 FF 9F FD 24
+D8 A0 89 ?"
+Loader: "."
+It's a good idea to start each hex data line with a ">" character, to keep the baud rate tightly calibrated.
+
+Prop_Txt
+The Prop_Txt command is like Prop_Hex, but with one difference: Instead of hex bytes separated by whitespaces, it takes in
+Base64 data, which are text characters that convey six bits, each, and get assembled into bytes as they are received. This
+format is 2.25x denser than hex, and so minimizes transmission size and time.
+These are the characters that make up the Base64 alphabet:
+
+108
+
+"A".."Z"
+"a".."z"
+"0".."9"
+"+"
+"/"
+
+=
+=
+=
+=
+=
+
+$00..$19
+$1A..$33
+$34..$3D
+$3E
+$3F
+
+Whitespaces are ignored among Base64 characters.
+
+To load and run the program used in the Prop_Hex example:
+Sender: "> Prop_Txt 0 0 0 0 +/cj9v37I/YlJoD/H4Bm/fD/n/0 ~"
+To add the embedded checksum:
+Sender: "> Prop_Txt 0 0 0 0 +/cj9v37I/YlJoD/H4Bm/fD/n/0k2KCJ ?"
+Loader: "."
+It's a good idea to start each Base64 data line with a ">" character, to keep the baud rate tightly calibrated.
+
+SUMMARY
+It is possible to uniquely load many Propeller chips from the same serial signal by giving them each a different INA/INB
+signature and not connecting SPI memory chips or SD cards to P61..P58.
+To try out the serial loader, just open a terminal program on your PC with the Propeller 2 connected and type: "> Prop_Chk 0 0
+0 0"+CR. You can also cut and paste those Prop_Hex and Prop_Txt example lines to load the blinker program. A simple
+Propeller 2 development tool needs no special serial signalling, just simple text output that needn't worry about PC/Mac/Unix
+new-line differences, whitespace conventions, or generating non-standard characters.
+
+Assembly Language
+For a detailed list of assembly-language instructions, see this document:
+https://drive.google.com/open?id=1_vJk-Ad569UMwgXTKTdfJkHYHpc1rZwxB-DcIiAZNdk
+Below are the contents of the instructions.txt file which include assembly instructions and
+assembler directives.
+-----------------instruction timing
+-----------------clk
+_________------------____________------------____________------------____________------------____________------------____________------------____________|
+|
+rdRAM Ib |-------+
+|
+rdRAM Ic
+|
+|
+|
+latch Da |---+
++----> rdRAM Db |------------> latch Db
+latch Sa |---+
++----> rdRAM Sb |------------> latch Sb
+latch Ia |---+
++----> latch Ib |------------> latch Ib
+|
+|
+|
+|
++------------------ALU-----------> wrRAM Ra
+|
+|
+|
+| stall/done = 'gox'
+|
+'get'
+|
+done = 'go'
+
+|
+|
+|-------+
+|
+rdRAM Id
+|
+|
+|
+|---+
++----> rdRAM Dc |------------> latch Dc
+|---+
++----> rdRAM Sc |------------> latch Sc
+|---+
++----> latch Ic |------------> latch Ic
+|
+|
+|
+|
++------------------ALU-----------> wrRAM Rb
+|
+|
+|
+| stall/done = 'gox'
+|
+'get'
+|
+done = 'go'
+
+|
+|
+|-------+
+|
+rdRAM Ie
+|
+|
+|
+|---+
++----> rdRAM Dd |------------> latch Dd
+|---+
++----> rdRAM Sd |------------> latch Sd
+|---+
++----> latch Id |------------> latch Id
+|
+|
+|
+|
++------------------ALU-----------> wrRAM Rc
+|
+|
+|
+| stall/done = 'gox'
+|
+'get'
+|
+done = 'go'
+
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+
+109
+
+-----------instructions
+-----------EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+0000000
+0000001
+0000010
+0000011
+0000100
+0000101
+0000110
+0000111
+
+CZI
+CZI
+CZI
+CZI
+CZI
+CZI
+CZI
+CZI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+ROR
+ROL
+SHR
+SHL
+RCR
+RCL
+SAR
+SAL
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+0001000
+0001001
+0001010
+0001011
+
+CZI
+CZI
+CZI
+CZI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+ADD
+ADDX
+ADDS
+ADDSX
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+0001100
+0001101
+0001110
+0001111
+
+CZI
+CZI
+CZI
+CZI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+SUB
+SUBX
+SUBS
+SUBSX
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+0010000
+0010001
+0010010
+0010011
+
+CZI
+CZI
+CZI
+CZI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+CMP
+CMPX
+CMPS
+CMPSX
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+0010100
+0010101
+0010110
+0010111
+
+CZI
+CZI
+CZI
+CZI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+CMPR
+CMPM
+SUBR
+CMPSUB
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+0011000
+0011001
+0011010
+0011011
+
+CZI
+CZI
+CZI
+CZI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+FGE
+FLE
+FGES
+FLES
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+0011100
+0011101
+0011110
+0011111
+
+CZI
+CZI
+CZI
+CZI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+SUMC
+SUMNC
+SUMZ
+SUMNZ
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+0100000
+0100001
+0100010
+0100011
+0100100
+0100101
+0100110
+
+CZI
+CZI
+CZI
+CZI
+CZI
+CZI
+CZI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+TESTB
+TESTBN
+TESTB
+TESTBN
+TESTB
+TESTBN
+TESTB
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+WC/WZ
+WC/WZ
+ANDC/ANDZ
+ANDC/ANDZ
+ORC/ORZ
+ORC/ORZ
+XORC/XORZ
+110
+
+EEEE 0100111 CZI DDDDDDDDD SSSSSSSSS
+
+TESTBN
+
+D,S/#
+
+XORC/XORZ
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+0100000
+0100001
+0100010
+0100011
+0100100
+0100101
+0100110
+0100111
+
+CZI
+CZI
+CZI
+CZI
+CZI
+CZI
+CZI
+CZI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+BITL
+BITH
+BITC
+BITNC
+BITZ
+BITNZ
+BITRND
+BITNOT
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+0101000
+0101001
+0101010
+0101011
+
+CZI
+CZI
+CZI
+CZI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+AND
+ANDN
+OR
+XOR
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+0101100
+0101101
+0101110
+0101111
+
+CZI
+CZI
+CZI
+CZI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+MUXC
+MUXNC
+MUXZ
+MUXNZ
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+0110000
+0110001
+0110010
+0110011
+
+CZI
+CZI
+CZI
+CZI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+MOV
+NOT
+ABS
+NEG
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+0110100
+0110101
+0110110
+0110111
+
+CZI
+CZI
+CZI
+CZI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+NEGC
+NEGNC
+NEGZ
+NEGNZ
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+0111000
+0111001
+0111010
+0111011
+
+CZI
+CZI
+CZI
+CZI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+INCMOD
+DECMOD
+ZEROX
+SIGNX
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+0111100
+0111101
+0111110
+0111111
+
+CZI
+CZI
+CZI
+CZI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+ENCOD
+ONES
+TEST
+TESTN
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+100000N
+100001N
+100010N
+1000110
+1000111
+1001000
+1001001
+1001001
+1001010
+1001010
+1001010
+
+NNI
+NNI
+NNI
+NNI
+NNI
+NNI
+0NI
+1NI
+0NI
+10I
+11I
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+SETNIB
+GETNIB
+ROLNIB
+SETBYTE
+GETBYTE
+ROLBYTE
+SETWORD
+GETWORD
+ROLWORD
+ALTSN
+ALTGN
+
+D,S/#,#N
+D,S/#,#N
+D,S/#,#N
+D,S/#,#N
+D,S/#,#N
+D,S/#,#N
+D,S/#,#N
+D,S/#,#N
+D,S/#,#N
+D,S/#
+D,S/#
+111
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1001011
+1001011
+1001011
+1001011
+1001100
+1001100
+1001100
+1001100
+1001101
+1001101
+1001101
+1001101
+1001110
+1001110
+1001110
+1001110
+1001111
+1001111
+1001111
+1001111
+
+00I
+01I
+10I
+11I
+00I
+01I
+10I
+11I
+00I
+01I
+10I
+11I
+00I
+01I
+10I
+11I
+00I
+01I
+10I
+11I
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+ALTSB
+ALTGB
+ALTSW
+ALTGW
+ALTR
+ALTD
+ALTS
+ALTB
+ALTI
+SETR
+SETD
+SETS
+DECOD
+BMASK
+CRCBIT
+CRCNIB
+MUXNITS
+MUXNIBS
+MUXQ
+MOVBYTS
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+1010000
+1010000
+1010001
+1010001
+
+0ZI
+1ZI
+0ZI
+1ZI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+MUL
+MULS
+SCA
+SCAS
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+1010010
+1010010
+1010010
+1010010
+
+00I
+01I
+10I
+11I
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+ADDPIX
+MULPIX
+BLNPIX
+MIXPIX
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+1010011
+1010011
+1010011
+1010011
+
+00I
+01I
+10I
+11I
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+ADDCT1
+ADDCT2
+ADDCT3
+WMLONG
+
+D,S/#
+D,S/#
+D,S/#
+D,S/#/PTRx
+
+EEEE 1010100 C0I DDDDDDDDD SSSSSSSSS
+EEEE 1010100 C1I DDDDDDDDD SSSSSSSSS
+EEEE 1010101 CZI DDDDDDDDD SSSSSSSSS
+
+RQPIN
+RDPIN
+RDLUT
+
+D,S/#
+D,S/#
+D,S/#/PTRx
+
+{WC}
+{WC}
+{WC/WZ/WCZ}
+
+EEEE 1010110 CZI DDDDDDDDD SSSSSSSSS
+EEEE 1010111 CZI DDDDDDDDD SSSSSSSSS
+EEEE 1011000 CZI DDDDDDDDD SSSSSSSSS
+
+RDBYTE
+RDWORD
+RDLONG
+
+D,S/#/PTRx
+D,S/#/PTRx
+D,S/#/PTRx
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE 1011001 CZI DDDDDDDDD SSSSSSSSS
+
+CALLD
+
+D,S/#rel9
+
+{WC/WZ/WCZ}
+
+EEEE 1011010 0LI DDDDDDDDD SSSSSSSSS
+EEEE 1011010 1LI DDDDDDDDD SSSSSSSSS
+
+CALLPA
+CALLPB
+
+D/#,S/#rel9
+D/#,S/#rel9
+
+EEEE 1011011 00I DDDDDDDDD SSSSSSSSS
+EEEE 1011011 01I DDDDDDDDD SSSSSSSSS
+EEEE 1011011 10I DDDDDDDDD SSSSSSSSS
+
+DJZ
+DJNZ
+DJF
+
+D,S/#rel9
+D,S/#rel9
+D,S/#rel9
+
+{WZ}
+{WZ}
+{WZ}
+{WZ}
+
+112
+
+EEEE 1011011 11I DDDDDDDDD SSSSSSSSS
+
+DJNF
+
+D,S/#rel9
+
+EEEE 1011100 00I DDDDDDDDD SSSSSSSSS
+EEEE 1011100 01I DDDDDDDDD SSSSSSSSS
+
+IJZ
+IJNZ
+
+D,S/#rel9
+D,S/#rel9
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1011100
+1011100
+1011101
+1011101
+1011101
+1011101
+1011110
+
+10I
+11I
+00I
+01I
+10I
+11I
+00I
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+TJZ
+TJNZ
+TJF
+TJNF
+TJS
+TJNS
+TJV
+
+D,S/#rel9
+D,S/#rel9
+D,S/#rel9
+D,S/#rel9
+D,S/#rel9
+D,S/#rel9
+D,S/#rel9
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+
+000000000
+000000001
+000000010
+000000011
+000000100
+000000101
+000000110
+000000111
+000001000
+000001001
+000001010
+000001011
+000001100
+000001101
+000001110
+000001111
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+JINT
+JCT1
+JCT2
+JCT3
+JSE1
+JSE2
+JSE3
+JSE4
+JPAT
+JFBW
+JXMT
+JXFI
+JXRO
+JXRL
+JATN
+JQMT
+
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+1011110
+
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+01I
+
+000010000
+000010001
+000010010
+000010011
+000010100
+000010101
+000010110
+000010111
+000011000
+000011001
+000011010
+000011011
+000011100
+000011101
+000011110
+000011111
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+JNINT
+JNCT1
+JNCT2
+JNCT3
+JNSE1
+JNSE2
+JNSE3
+JNSE4
+JNPAT
+JNFBW
+JNXMT
+JNXFI
+JNXRO
+JNXRL
+JNATN
+JNQMT
+
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+S/#rel9
+
+EEEE 1011110 1LI DDDDDDDDD SSSSSSSSS
+EEEE 1011111 0LI DDDDDDDDD SSSSSSSSS
+
+<empty> D/#,S/#
+<empty> D/#,S/#
+
+EEEE 1011111 1LI DDDDDDDDD SSSSSSSSS
+
+SETPAT
+
+D/#,S/#
+
+113
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+1100000
+1100000
+1100001
+1100001
+
+0LI
+1LI
+0LI
+1LI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+WRPIN
+WXPIN
+WYPIN
+WRLUT
+
+D/#,S/#
+D/#,S/#
+D/#,S/#
+D/#,S/#/PTRx
+
+EEEE 1100010 0LI DDDDDDDDD SSSSSSSSS
+EEEE 1100010 1LI DDDDDDDDD SSSSSSSSS
+EEEE 1100011 0LI DDDDDDDDD SSSSSSSSS
+
+WRBYTE
+WRWORD
+WRLONG
+
+D/#,S/#/PTRx
+D/#,S/#/PTRx
+D/#,S/#/PTRx
+
+EEEE 1100011 1LI DDDDDDDDD SSSSSSSSS
+EEEE 1100100 0LI DDDDDDDDD SSSSSSSSS
+EEEE 1100100 1LI DDDDDDDDD SSSSSSSSS
+
+RDFAST
+WRFAST
+FBLOCK
+
+D/#,S/#
+D/#,S/#
+D/#,S/#
+
+EEEE 1100101 0LI DDDDDDDDD SSSSSSSSS
+EEEE 1100101 1LI DDDDDDDDD SSSSSSSSS
+EEEE 1100110 0LI DDDDDDDDD SSSSSSSSS
+
+XINIT
+XZERO
+XCONT
+
+D/#,S/#
+D/#,S/#
+D/#,S/#
+
+EEEE 1100110 1LI DDDDDDDDD SSSSSSSSS
+
+REP
+
+D/#,S/#
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1100111
+1101000
+1101000
+1101001
+1101001
+1101010
+1101010
+
+CLI
+0LI
+1LI
+0LI
+1LI
+0LI
+1LI
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+SSSSSSSSS
+
+COGINIT
+QMUL
+QDIV
+QFRAC
+QSQRT
+QROTATE
+QVECTOR
+
+D/#,S/#
+D/#,S/#
+D/#,S/#
+D/#,S/#
+D/#,S/#
+D/#,S/#
+D/#,S/#
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+
+00L
+C0L
+00L
+C00
+00L
+C0L
+00L
+00L
+00L
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+000000000
+000000001
+000000011
+000000100
+000000101
+000000110
+000000111
+000001110
+000001111
+
+HUBSET
+COGID
+COGSTOP
+LOCKNEW
+LOCKRET
+LOCKTRY
+LOCKREL
+QLOG
+QEXP
+
+D/#
+D/#
+D/#
+D
+D/#
+D/#
+D/#
+D/#
+D/#
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1101011
+1101011
+1101011
+1101011
+1101011
+
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+000010000
+000010001
+000010010
+000010011
+000010100
+
+RFBYTE
+RFWORD
+RFLONG
+RFVAR
+RFVARS
+
+D
+D
+D
+D
+D
+
+EEEE 1101011 00L DDDDDDDDD 000010101
+EEEE 1101011 00L DDDDDDDDD 000010110
+EEEE 1101011 00L DDDDDDDDD 000010111
+
+WFBYTE
+WFWORD
+WFLONG
+
+D/#
+D/#
+D/#
+
+EEEE 1101011 CZ0 DDDDDDDDD 000011000
+EEEE 1101011 CZ0 DDDDDDDDD 000011001
+
+GETQX
+GETQY
+
+D
+D
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE 1101011 C00 DDDDDDDDD 000011010
+EEEE 1101011 CZL DDDDDDDDD 000011011
+
+GETCT
+GETRND
+
+D
+{D}
+
+{WC}
+{WC/WZ/WCZ}
+
+{WC}
+
+{WC}
+{WC}
+{WC}
+{WC}
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+114
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+1101011
+1101011
+1101011
+1101011
+
+00L
+00L
+000
+CZL
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+000011100
+000011101
+000011110
+000011111
+
+SETDACS
+SETXFRQ
+GETXACC
+WAITX
+
+D/#
+D/#
+D
+D/#
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+1101011
+1101011
+1101011
+1101011
+
+00L
+00L
+00L
+00L
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+000100000
+000100001
+000100010
+000100011
+
+SETSE1
+SETSE2
+SETSE3
+SETSE4
+
+D/#
+D/#
+D/#
+D/#
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+
+000000000
+000000001
+000000010
+000000011
+000000100
+000000101
+000000110
+000000111
+000001000
+000001001
+000001010
+000001011
+000001100
+000001101
+000001110
+000001111
+
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+
+POLLINT
+POLLCT1
+POLLCT2
+POLLCT3
+POLLSE1
+POLLSE2
+POLLSE3
+POLLSE4
+POLLPAT
+POLLFBW
+POLLXMT
+POLLXFI
+POLLXRO
+POLLXRL
+POLLATN
+POLLQMT
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+CZ0
+
+000010000
+000010001
+000010010
+000010011
+000010100
+000010101
+000010110
+000010111
+000011000
+000011001
+000011010
+000011011
+000011100
+000011101
+000011110
+
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+000100100
+
+WAITINT
+WAITCT1
+WAITCT2
+WAITCT3
+WAITSE1
+WAITSE2
+WAITSE3
+WAITSE4
+WAITPAT
+WAITFBW
+WAITXMT
+WAITXFI
+WAITXRO
+WAITXRL
+WAITATN
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+EEEE 1101011 000 000100000 000100100
+EEEE 1101011 000 000100001 000100100
+
+ALLOWI
+STALLI
+
+EEEE 1101011 000 000100010 000100100
+EEEE 1101011 000 000100011 000100100
+EEEE 1101011 000 000100100 000100100
+
+TRGINT1
+TRGINT2
+TRGINT3
+
+EEEE 1101011 000 000100101 000100100
+
+NIXINT1
+
+{WC/WZ/WCZ}
+
+115
+
+EEEE 1101011 000 000100110 000100100
+EEEE 1101011 000 000100111 000100100
+
+NIXINT2
+NIXINT3
+
+EEEE 1101011 00L DDDDDDDDD 000100101
+EEEE 1101011 00L DDDDDDDDD 000100110
+EEEE 1101011 00L DDDDDDDDD 000100111
+
+SETINT1 D/#
+SETINT2 D/#
+SETINT3 D/#
+
+EEEE 1101011 00L DDDDDDDDD 000101000
+EEEE 1101011 00L DDDDDDDDD 000101001
+
+SETQ
+SETQ2
+
+D/#
+D/#
+
+EEEE 1101011 00L DDDDDDDDD 000101010
+EEEE 1101011 CZ0 DDDDDDDDD 000101011
+
+PUSH
+POP
+
+D/#
+D
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+
+CZ0
+CZ0
+CZ1
+CZ0
+CZ1
+CZ0
+CZ1
+
+DDDDDDDDD
+DDDDDDDDD
+000000000
+DDDDDDDDD
+000000000
+DDDDDDDDD
+000000000
+
+000101100
+000101101
+000101101
+000101110
+000101110
+000101111
+000101111
+
+JMP
+CALL
+RET
+CALLA
+RETA
+CALLB
+RETB
+
+D
+D
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+1101011
+1101011
+1101011
+1101011
+
+00L
+00L
+00L
+00L
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+000110000
+000110001
+000110010
+000110011
+
+JMPREL
+SKIP
+SKIPF
+EXECF
+
+D/#
+D/#
+D/#
+D/#
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1101011
+1101011
+1101011
+1101011
+1101011
+
+000
+CZ0
+00L
+00L
+00L
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+000110100
+000110101
+000110101
+000110110
+000110111
+
+GETPTR
+GETBRK
+COGBRK
+BRK
+SETLUTS
+
+D
+D
+D/#
+D/#
+D/#
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1101011
+1101011
+1101011
+1101011
+1101011
+
+00L
+00L
+00L
+00L
+00L
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+000111000
+000111001
+000111010
+000111011
+000111100
+
+SETCY
+SETCI
+SETCQ
+SETCFRQ
+SETCMOD
+
+D/#
+D/#
+D/#
+D/#
+D/#
+
+EEEE 1101011 00L DDDDDDDDD 000111101
+EEEE 1101011 00L DDDDDDDDD 000111110
+
+SETPIV
+SETPIX
+
+D/#
+D/#
+
+EEEE 1101011 00L DDDDDDDDD 000111111
+
+COGATN
+
+D/#
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+TESTP
+TESTPN
+TESTP
+TESTPN
+TESTP
+TESTPN
+TESTP
+TESTPN
+
+D/#
+D/#
+D/#
+D/#
+D/#
+D/#
+D/#
+D/#
+
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+
+CZL
+CZL
+CZL
+CZL
+CZL
+CZL
+CZL
+CZL
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+001000000
+001000001
+001000010
+001000011
+001000100
+001000101
+001000110
+001000111
+
+D
+D
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+WC/WZ/WCZ
+
+WC/WZ
+WC/WZ
+ANDC/ANDZ
+ANDC/ANDZ
+ORC/ORZ
+ORC/ORZ
+XORC/XORZ
+XORC/XORZ
+
+116
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+
+CZL
+CZL
+CZL
+CZL
+CZL
+CZL
+CZL
+CZL
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+001000000
+001000001
+001000010
+001000011
+001000100
+001000101
+001000110
+001000111
+
+DIRL
+DIRH
+DIRC
+DIRNC
+DIRZ
+DIRNZ
+DIRRND
+DIRNOT
+
+D/#
+D/#
+D/#
+D/#
+D/#
+D/#
+D/#
+D/#
+
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+
+CZL
+CZL
+CZL
+CZL
+CZL
+CZL
+CZL
+CZL
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+001001000
+001001001
+001001010
+001001011
+001001100
+001001101
+001001110
+001001111
+
+OUTL
+OUTH
+OUTC
+OUTNC
+OUTZ
+OUTNZ
+OUTRND
+OUTNOT
+
+D/#
+D/#
+D/#
+D/#
+D/#
+D/#
+D/#
+D/#
+
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+
+CZL
+CZL
+CZL
+CZL
+CZL
+CZL
+CZL
+CZL
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+001010000
+001010001
+001010010
+001010011
+001010100
+001010101
+001010110
+001010111
+
+FLTL
+FLTH
+FLTC
+FLTNC
+FLTZ
+FLTNZ
+FLTRND
+FLTNOT
+
+D/#
+D/#
+D/#
+D/#
+D/#
+D/#
+D/#
+D/#
+
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+
+CZL
+CZL
+CZL
+CZL
+CZL
+CZL
+CZL
+CZL
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+001011000
+001011001
+001011010
+001011011
+001011100
+001011101
+001011110
+001011111
+
+DRVL
+DRVH
+DRVC
+DRVNC
+DRVZ
+DRVNZ
+DRVRND
+DRVNOT
+
+D/#
+D/#
+D/#
+D/#
+D/#
+D/#
+D/#
+D/#
+
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+{WCZ}
+
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+EEEE
+
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+1101011
+
+000
+000
+000
+000
+000
+000
+000
+000
+000
+000
+CZ0
+CZ0
+000
+000
+000
+000
+
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+DDDDDDDDD
+
+001100000
+001100001
+001100010
+001100011
+001100100
+001100101
+001100110
+001100111
+001101000
+001101001
+001101010
+001101011
+001101100
+001101101
+001101110
+001101111
+
+SPLITB
+MERGEB
+SPLITW
+MERGEW
+SEUSSF
+SEUSSR
+RGBSQZ
+RGBEXP
+XORO32
+REV
+RCZR
+RCZL
+WRC
+WRNC
+WRZ
+WRNZ
+
+D
+D
+D
+D
+D
+D
+D
+D
+D
+D
+D
+D
+D
+D
+D
+D
+
+{WC/WZ/WCZ}
+{WC/WZ/WCZ}
+
+117
+
+EEEE 1101011 CZ1 0cccczzzz 001101111
+
+MODCZ
+
+c,z
+
+EEEE 1101011 00L DDDDDDDDD 001110000
+EEEE 1101011 000 DDDDDDDDD 001110001
+
+SETSCP
+GETSCP
+
+D/#
+D
+
+EEEE
+EEEE
+EEEE
+EEEE
+
+AAAAAAAAA
+AAAAAAAAA
+AAAAAAAAA
+AAAAAAAAA
+
+JMP
+CALL
+CALLA
+CALLB
+
+#{\}A
+#{\}A
+#{\}A
+#{\}A
+
+EEEE 11100WW RAA AAAAAAAAA AAAAAAAAA
+EEEE 11101WW RAA AAAAAAAAA AAAAAAAAA
+
+CALLD
+LOC
+
+register,#{\}A
+register,#{\}A
+
+EEEE 11110NN NNN NNNNNNNNN NNNNNNNNN
+EEEE 11111NN NNN NNNNNNNNN NNNNNNNNN
+
+AUGS
+AUGD
+
+#N
+#N
+
+1101100
+1101101
+1101110
+1101111
+
+RAA
+RAA
+RAA
+RAA
+
+AAAAAAAAA
+AAAAAAAAA
+AAAAAAAAA
+AAAAAAAAA
+
+{WC/WZ/WCZ}
+
+------------------instruction aliases
+------------------NOP
+
+=
+
+$00000000
+
+NOT
+ABS
+NEG
+NEGC
+NEGNC
+NEGZ
+NEGNZ
+ENCOD
+ONES
+TEST
+
+register
+register
+register
+register
+register
+register
+register
+register
+register
+register
+
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+
+NOT
+ABS
+NEG
+NEGC
+NEGNC
+NEGZ
+NEGNZ
+ENCOD
+ONES
+TEST
+
+register,register
+register,register
+register,register
+register,register
+register,register
+register,register
+register,register
+register,register
+register,register
+register,register
+
+SETNIB
+GETNIB
+ROLNIB
+
+register/#
+register
+register
+
+=
+=
+=
+
+SETNIB
+GETNIB
+ROLNIB
+
+0,register/#,#0
+register,0,#0
+register,0,#0
+
+(use after ALTSN)
+(use after ALTGN)
+(use after ALTGN)
+
+SETBYTE register/#
+GETBYTE register
+ROLBYTE register
+
+=
+=
+=
+
+SETBYTE 0,register/#,#0
+GETBYTE register,0,#0
+ROLBYTE register,0,#0
+
+(use after ALTSB)
+(use after ALTGB)
+(use after ALTGB)
+
+SETWORD register/#
+GETWORD register
+ROLWORD register
+
+=
+=
+=
+
+SETWORD 0,register/#,#0
+GETWORD register,0,#0
+ROLWORD register,0,#0
+
+(use after ALTSW)
+(use after ALTGW)
+(use after ALTGW)
+
+ALTSN
+ALTGN
+ALTSB
+ALTGB
+ALTSW
+ALTGW
+
+=
+=
+=
+=
+=
+=
+
+ALTSN
+ALTGN
+ALTSB
+ALTGB
+ALTSW
+ALTGW
+
+register
+register
+register
+register
+register
+register
+
+register,#0
+register,#0
+register,#0
+register,#0
+register,#0
+register,#0
+118
+
+ALTR
+register
+ALTD
+register
+ALTS
+register
+ALTB
+register
+ALTI
+register
+next instruction)
+
+=
+=
+=
+=
+=
+
+ALTR
+ALTD
+ALTS
+ALTB
+ALTI
+
+register,#0
+register,#0
+register,#0
+register,#0
+register,#%101_100_100 (substitute register for
+
+DECOD
+BMASK
+
+register
+register
+
+=
+=
+
+DECOD
+BMASK
+
+register,register
+register,register
+
+POPA
+POPB
+
+register
+register
+
+=
+=
+
+RDLONG
+RDLONG
+
+register,--PTRA
+register,--PTRB
+
+RESI3
+RESI2
+RESI1
+RESI0
+
+=
+=
+=
+=
+
+CALLD
+CALLD
+CALLD
+CALLD
+
+$1F0,$1F1
+$1F2,$1F3
+$1F4,$1F5
+INA,INB
+
+WCZ
+WCZ
+WCZ
+WCZ
+
+RETI3
+RETI2
+RETI1
+RETI0
+
+=
+=
+=
+=
+
+CALLD
+CALLD
+CALLD
+CALLD
+
+INB,$1F1
+INB,$1F3
+INB,$1F5
+INB,INB
+
+WCZ
+WCZ
+WCZ
+WCZ
+
+AKPIN
+
+register/#
+
+=
+
+WRPIN
+
+#1,register/#
+
+PUSHA
+PUSHB
+
+register/#
+register/#
+
+=
+=
+
+WRLONG
+WRLONG
+
+register/#,PTRA++
+register/#,PTRB++
+
+=
+
+XINIT
+
+#0,#0
+
+=
+=
+
+MODCZ
+MODCZ
+
+c,0
+0,z
+
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+
+%0000
+%0001
+%0001
+%0001
+%0010
+%0010
+%0011
+%0011
+%0100
+%0100
+%0101
+%0101
+%0110
+%0110
+
+XSTOP
+MODC
+MODZ
+
+c
+z
+
+{WC}
+{WZ}
+
+--------------MODCZ constants
+--------------_CLR
+_NC_AND_NZ
+_NZ_AND_NC
+_GT
+_NC_AND_Z
+_Z_AND_NC
+_NC
+_GE
+_C_AND_NZ
+_NZ_AND_C
+_NZ
+_NE
+_C_NE_Z
+_Z_NE_C
+
+119
+
+_NC_OR_NZ
+_NZ_OR_NC
+_C_AND_Z
+_Z_AND_C
+_C_EQ_Z
+_Z_EQ_C
+_Z
+_E
+_NC_OR_Z
+_Z_OR_NC
+_C
+_LT
+_C_OR_NZ
+_NZ_OR_C
+_C_OR_Z
+_Z_OR_C
+_LE
+_SET
+
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+=
+
+%0111
+%0111
+%1000
+%1000
+%1001
+%1001
+%1010
+%1010
+%1011
+%1011
+%1100
+%1100
+%1101
+%1101
+%1110
+%1110
+%1110
+%1111
+
+Examples:
+MODCZ
+MODCZ
+MODCZ
+
+_CLR, _Z_OR_C
+_NZ,0
+0,_SET
+
+WCZ
+WC
+WZ
+
+'C = 0, Z |= C
+'C = !Z
+'Z = 1
+
+MODC
+MODZ
+
+_NZ_AND_C
+_Z_NE_C
+
+WC
+WZ
+
+'C = !Z & C
+'Z = Z ^ C
+
+----notes
+----A symbol declared under ORGH will return its hub address when referenced.
+A symbol declared under ORG will return its cog address when referenced,
+but can return its hub address, instead, if preceded by '@':
+COGINIT #0,#@newcode
+
+For immediate-branch and LOC address operands, "#" is used before the
+address. In cases where there is an option between absolute and relative
+addressing, the assembler will choose absolute addressing when the branch
+crosses between cog and hub domains, or relative addressing when the
+branch stays in the same domain. Absolute addressing can be forced by
+following "#" with "\".
+CALLPA/CALLPB/DJZ..JNXRL/JNATN/JNQMT
+JMP/CALL/CALLA/CALLB/CALLD
+LOC
+
+- rel_imm9/ind_reg20
+- abs_imm20/rel_imm20/ind_reg20
+- abs_imm20/rel_imm20
+120
+
+If a constant larger than 9 bits is desired in an instruction, use "##",
+instead of "#" to invoke AUGS/AUGD:
+AND
+DJNZ
+
+address,##$FFFFF
+register,##far_away
+
+The following assembler directives exist:
+ORGH
+
+{hub_address}
+
+Set hub mode and an optional address to fill to with $00 bytes.
+
+ORG
+
+{cog_address {,cog_address_limit}}
+
+Set cog mode with optional cog address and limit. Defaults to $000,$200.
+If $200..$3FF used for cog address, LUT range selected. Doesn't generate
+any data.
+
+ORGF
+
+cog_address
+
+Fill to cog_address with $00 bytes. Must be in cog mode.
+
+RES
+
+cog_registers
+
+Reserve cog registers. Doesn't generate any data. Must be in cog mode.
+
+FIT
+
+cog_or_hub_address
+
+Make sure cog code fits within cog or hub address.
+
+ALIGNW/ALIGNL
+Align to next word/long in hub.
+
+BYTE
+WORD
+LONG
+
+data{[count]}{,data{[count]}...}
+data{[count]}{,data{[count]}...}
+data{[count]}{,data{[count]}...}
+
+Generate byte/word/long data with optional repeat count.
+
+121
+
+Boot ROM / Debug ROM
+
+122
+
+Packaging
+
+123
+
+

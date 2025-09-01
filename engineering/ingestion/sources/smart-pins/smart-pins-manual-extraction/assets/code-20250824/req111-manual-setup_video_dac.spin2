@@ -1,0 +1,25 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  VIDEO_PIN = 20
+  VIDEO_MODE = P_DAC_75R_2V | P_OE
+  
+PUB setup_video_dac()
+  pinstart(VIDEO_PIN, VIDEO_MODE, 0, 0)
+  
+PUB output_video_level(ire) | dacval
+  ' Convert IRE units (-40 to +100) to DAC
+  ' 0 IRE = 0.286V, 100 IRE = 1V
+  dacval := ((ire + 40) * $FFFF) / 180
+  wypin(VIDEO_PIN, dacval)
+  
+PUB generate_color_burst() | i
+  ' 3.58MHz color burst (NTSC)
+  repeat 9                    ' 9 cycles
+    wypin(VIDEO_PIN, $8000 + $2000) ' +burst
+    waitx(#7)                ' ~140ns at 200MHz
+    wypin(VIDEO_PIN, $8000 - $2000) ' -burst  
+    waitx(#7)

@@ -1,0 +1,14 @@
+{
+  "format_type": "template_testing",
+  "template": "p2kb-foundation.latex",
+  "metadata": {
+    "title": "Basic Template Test",
+    "author": "PDF Forge Test Suite"
+  },
+  "tests": [
+    {
+      "name": "basic-functionality",
+      "input": "minimal-test.md"
+    }
+  ]
+}

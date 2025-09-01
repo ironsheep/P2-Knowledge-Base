@@ -1,0 +1,8 @@
+' Source: P2 SmartPins-220809 (Page 53)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Snippet
+
+     wrpin   ##txmode,  #txpin       ' Smart Pin async transmit mode
+     wxpin   ##bitper,  #txpin       ' transmit period for 8 bits
+     dirh    #txpin                   ' enable Smart Pin tx 
+     nop

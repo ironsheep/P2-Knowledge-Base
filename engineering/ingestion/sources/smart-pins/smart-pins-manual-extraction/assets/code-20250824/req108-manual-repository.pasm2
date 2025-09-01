@@ -1,0 +1,22 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+repo_init
+        mov     pa, ##P_REPOSITORY | P_OE
+        wrpin   pa, #20         ' Configure as repository
+        dirh    #20             ' Enable repository
+        
+store_data
+        mov     pa, ##$12345678 ' Data to store
+        wypin   pa, #20         ' Write to repository
+        
+read_data
+        rdpin   result, #20     ' Read repository
+        ' result now contains stored value
+        
+result  long    0

@@ -1,0 +1,20 @@
+{
+  "documents": [
+    {
+      "input": "P2-Smart-Pins-Green-Book-Tutorial-escaped.md",
+      "output": "P2-Smart-Pins-Green-Book-Tutorial.pdf",
+      "template": "p2kb-smart-pins"
+    }
+  ],
+  "lua_filters": [
+    "green-book-semantic-blocks", 
+    "part-chapter-pagebreaks"
+  ],
+  "metadata": {
+    "title": "P2 Smart Pins Complete Tutorial",
+    "subtitle": "Green Book Learning Guide - Transformed Version",
+    "author": "Iron Sheep Productions, LLC",
+    "version": "Green Book v3.1 (Transformed)",
+    "date": "August 2025"
+  }
+}

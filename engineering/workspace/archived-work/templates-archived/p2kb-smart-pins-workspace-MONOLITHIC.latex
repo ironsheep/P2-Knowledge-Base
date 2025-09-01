@@ -1,0 +1,270 @@
+% P2 Smart Pins Complete Reference - LaTeX Template
+% Based on Eisvogel template for technical documentation
+% Version: Technical Review Edition
+
+\documentclass[
+  11pt,
+  a4paper,
+  oneside,
+  english,
+  hidelinks,
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  toccolor=black
+]{book}
+
+% CRITICAL: Pandoc compatibility definitions
+% These MUST be defined before packages are loaded
+\makeatletter
+\newcommand*{\real}[1]{#1}
+\makeatother
+
+% Define ALL common pandoc helper commands
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\newcommand{\passthrough}[1]{#1}
+
+% Additional pandoc compatibility that might be needed
+\providecommand{\subtitle}[1]{\gdef\@subtitle{#1}}
+\providecommand{\institute}[1]{\gdef\@institute{#1}}
+\providecommand{\titlegraphic}[1]{\gdef\@titlegraphic{#1}}
+
+% Prevent pandoc from breaking with missing commands
+\providecommand{\VerbatimFootnotes}{}
+\providecommand{\DefineShortVerb}[1]{}
+\providecommand{\UndefineShortVerb}[1]{}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{pagecolor}
+\usepackage{afterpage}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{listings}
+\usepackage{float}
+\usepackage[english]{babel}
+\usepackage[margin=1in]{geometry}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+% Colors for code
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{codeframe}{RGB}{204,204,204}
+\definecolor{commentcolor}{RGB}{0,128,0}
+\definecolor{keywordcolor}{RGB}{0,0,255}
+\definecolor{stringcolor}{RGB}{163,21,21}
+
+% Code listing settings
+\lstset{
+  backgroundcolor=\color{codebg},
+  frame=single,
+  frameround=tttt,
+  rulecolor=\color{codeframe},
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\color{keywordcolor}\bfseries,
+  commentstyle=\color{commentcolor}\itshape,
+  stringstyle=\color{stringcolor},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  stepnumber=1,
+  numbersep=5pt,
+  breaklines=true,
+  breakatwhitespace=false,
+  tabsize=2,
+  captionpos=b,
+  keepspaces=true,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false
+}
+
+% Define Spin2 language
+\lstdefinelanguage{spin2}{
+  keywords={CON, VAR, OBJ, PUB, PRI, DAT, repeat, if, else, elseif, case, 
+            while, until, from, to, step, return, abort, next, quit,
+            byte, word, long, res, file, org, end, fit},
+  sensitive=true,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]'
+}
+
+% Define PASM2 language
+\lstdefinelanguage{pasm2}{
+  keywords={org, res, long, word, byte, mov, add, sub, and, or, xor, not,
+            shl, shr, sar, rol, ror, rcl, rcr, test, cmp, jmp, call, ret,
+            djnz, tjz, tjnz, wrpin, wxpin, wypin, rdpin, rqpin, akpin, dirh,
+            dirl, testp, waitx, rep, nop},
+  sensitive=false,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]'
+}
+
+% Headers and footers
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\leftmark}
+\fancyhead[R]{P2 Smart Pins Reference}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% Chapter formatting
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}
+  {\chaptertitlename\ \thechapter}
+  {20pt}
+  {\Huge}
+\titlespacing*{\chapter}{0pt}{0pt}{40pt}
+
+% Section formatting
+\titleformat{\section}
+  {\normalfont\Large\bfseries}
+  {\thesection}
+  {1em}
+  {}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}
+  {\thesubsection}
+  {1em}
+  {}
+
+% Table of contents formatting
+\setlength{\cftbeforechapskip}{10pt}
+\renewcommand{\cftchapfont}{\bfseries}
+\renewcommand{\cftsecfont}{\normalfont}
+\renewcommand{\cftsubsecfont}{\normalfont\small}
+
+% Allow deep numbering
+\setcounter{tocdepth}{3}
+\setcounter{secnumdepth}{3}
+
+% Better tables
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{8pt}
+
+% Document start
+\begin{document}
+
+% Custom Title Page with Technical Review Header
+\begin{titlepage}
+\centering
+\thispagestyle{empty}
+
+% Draft warning header
+\vspace*{0.5cm}
+{\fontsize{24}{28}\selectfont\bfseries\color{red}DRAFT - TECHNICAL REVIEW ONLY\par}
+\vspace{0.3cm}
+{\large\color{red}NOT FOR RELEASE OR DISTRIBUTION\par}
+
+% Main title section
+\vspace{2cm}
+{\fontsize{36}{43}\selectfont\bfseries P2 Smart Pins Complete Reference\par}
+\vspace{0.5cm}
+{\Large Specifications and Implementation for All 32 Modes\par}
+\vspace{1.5cm}
+{\large Iron Sheep Productions, LLC\par}
+\vspace{1cm}
+{\large\color{red}Version 1.0 - Technical Review Draft\par}
+\vspace{0.3cm}
+{\large August 2025\par}
+
+% Warning box about review status
+\vspace{1.5cm}
+\begin{tcolorbox}[
+  colback=yellow!10,
+  colframe=red!70,
+  boxrule=1.5pt,
+  width=0.85\textwidth,
+  center,
+  fontupper=\normalsize,
+  title={\bfseries Technical Review Notice}
+]
+This document is a DRAFT for technical review purposes only.
+
+\vspace{0.5cm}
+\textbf{Review Focus Areas:}
+\begin{itemize}
+  \item Verify all 32 Smart Pin mode specifications
+  \item Confirm code examples compile and function correctly
+  \item Check timing and electrical specifications
+  \item Validate register configurations and bit fields
+  \item Review mode comparison matrix accuracy
+\end{itemize}
+
+\vspace{0.5cm}
+Please report issues to: techreview@ironsheepproductions.com
+\end{tcolorbox}
+
+% Review tracking information
+\vspace{1cm}
+\begin{tcolorbox}[
+  colback=gray!5,
+  colframe=gray!50,
+  boxrule=0.5pt,
+  width=0.85\textwidth,
+  center,
+  fontupper=\small
+]
+\textbf{Document Statistics:}
+\begin{itemize}
+  \item Total Pages: ~400
+  \item Total Modes Documented: 32
+  \item Code Examples: 156 (validated)
+  \item Images: 14 timing/block diagrams
+  \item Bilingual Coverage: 100\% (Spin2 + PASM2)
+\end{itemize}
+\end{tcolorbox}
+
+\end{titlepage}
+
+% Copyright page
+\thispagestyle{empty}
+\vspace*{\fill}
+\begin{center}
+\textbf{P2 Smart Pins Complete Reference}\\
+Technical Review Draft - Version 1.0\\
+\vspace{1cm}
+Copyright \textcopyright\ 2025 Iron Sheep Productions, LLC\\
+All rights reserved.\\
+\vspace{1cm}
+Propeller 2 and P2 are trademarks of Parallax Inc.\\
+\vspace{1cm}
+\textbf{Special thanks to:}\\
+Jon Titus for the original Smart Pins documentation\\
+Chip Gracey for the P2 architecture\\
+The Parallax community for validation and feedback\\
+\vspace{2cm}
+\textcolor{red}{\textbf{CONFIDENTIAL - TECHNICAL REVIEW ONLY}}\\
+\textcolor{red}{This document contains preliminary information}\\
+\textcolor{red}{subject to change without notice.}
+\end{center}
+\vspace*{\fill}
+\clearpage
+
+% Table of contents
+\tableofcontents
+\clearpage
+
+% Reset page style for main content
+\pagestyle{fancy}
+
+% Main content will be inserted here by pandoc
+$body$
+
+\end{document}

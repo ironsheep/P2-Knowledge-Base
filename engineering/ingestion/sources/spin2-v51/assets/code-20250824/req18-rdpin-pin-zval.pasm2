@@ -1,0 +1,8 @@
+' Source: P2 Spin2 Documentation v51-250425 (Page 17)
+' Extracted: 2025-08-24
+' Language: PASM2 | Type: Snippet
+
+RDPIN(Pin) : Zval
+Read Pin smart pin and acknowledge, Zval[31] = C flag from RDPIN, other bits are RDPIN data.
+RQPIN(Pin) : Zval
+Read Pin smart pin without acknowledge, Zval[31] = C flag from RQPIN, other bits are RQPIN data.

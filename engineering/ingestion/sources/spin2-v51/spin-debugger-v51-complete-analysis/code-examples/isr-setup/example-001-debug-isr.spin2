@@ -1,0 +1,8 @@
+' Debug ISR Setup Example
+' Source: spin-debugger-v51-complete-analysis.md
+' Category: ISR Setup
+' Description: Debug ISR must be located within $000..$00F registers
+
+debug_isr
+' Get ct and status data - routine must be located within $000..$00F
+' Hardware constraint: ISR must fit in first 16 registers

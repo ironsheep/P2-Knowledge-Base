@@ -1,0 +1,25 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+video_init
+        mov     pa, ##P_DAC_75R_2V | P_OE
+        wrpin   pa, #20         ' Configure for video
+        dirh    #20             ' Enable output
+        
+sync_pulse
+        mov     pa, #0          ' 0V (sync level)
+        wypin   pa, #20
+        waitx   ##940           ' 4.7µs sync
+        
+black_level  
+        mov     pa, ##$1C71     ' 0.286V (black)
+        wypin   pa, #20
+        
+white_level
+        mov     pa, ##$8000     ' 1.0V (white)
+        wypin   pa, #20

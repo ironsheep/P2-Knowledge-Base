@@ -1,0 +1,939 @@
+{
+  "source_pdf": "sources/originals/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+  "extraction_summary": {
+    "total_images": 18,
+    "total_pages": 11,
+    "output_directory": "extracted_images_64020"
+  },
+  "images": [
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page01_img01.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 1,
+      "image_index": 1,
+      "dimensions": "904\u00d7152",
+      "width": 904,
+      "height": 152,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page01_img01.png",
+      "xref": 8,
+      "extraction_status": "success",
+      "file_size_bytes": 46163,
+      "context": {
+        "caption": "Web Store: www.parallax.com",
+        "nearby_text": [
+          {
+            "text": "Web Store: www.parallax.com",
+            "distance": 3.7350006103515625,
+            "position": "above"
+          },
+          {
+            "text": "Sales: (888) 512-1024",
+            "distance": 3.7350006103515625,
+            "position": "above"
+          },
+          {
+            "text": "Tech Support: support@parallax.com",
+            "distance": 4.5149993896484375,
+            "position": "below"
+          },
+          {
+            "text": "Fax: (916) 624-8003",
+            "distance": 4.5149993896484375,
+            "position": "below"
+          },
+          {
+            "text": "Tutorials: learn.parallax.com",
+            "distance": 9.0,
+            "position": "right"
+          }
+        ],
+        "potential_captions": [
+          "Web Store: www.parallax.com",
+          "Tutorials: learn.parallax.com",
+          "Sales: sales@parallax.com"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram",
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page01_img02.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 1,
+      "image_index": 2,
+      "dimensions": "776\u00d7344",
+      "width": 776,
+      "height": 344,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page01_img02.png",
+      "xref": 9,
+      "extraction_status": "success",
+      "file_size_bytes": 600888,
+      "context": {
+        "caption": "P2 Edge Module Breadboard (#64020)",
+        "nearby_text": [
+          {
+            "text": "P2 Edge Module Breadboard (#64020)",
+            "distance": 11.81170654296875,
+            "position": "above"
+          },
+          {
+            "text": "The Propeller 2 Edge Module Breadboard provides a convenient rapid prototyping solution for experimenting and developing with the Propeller 2 microcontroller.",
+            "distance": 15.269989013671875,
+            "position": "below"
+          },
+          {
+            "text": "Multiple breakout headers, ground points and a large breadboard are included for simpler testing and interfacing with standard test equipment.",
+            "distance": 54.269989013671875,
+            "position": "below"
+          },
+          {
+            "text": "Tech Support: support@parallax.com",
+            "distance": 73.8599853515625,
+            "position": "above"
+          },
+          {
+            "text": "Fax: (916) 624-8003",
+            "distance": 73.8599853515625,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "P2 Edge Module Breadboard (#64020)",
+          "The Propeller 2 Edge Module Breadboard provides a convenient rapid prototyping solution for experimenting and developing with the Propeller 2 microcontroller."
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page02_img01.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 2,
+      "image_index": 1,
+      "dimensions": "778\u00d7346",
+      "width": 778,
+      "height": 346,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page02_img01.png",
+      "xref": 12,
+      "extraction_status": "success",
+      "file_size_bytes": 601379,
+      "context": {
+        "caption": "Feature Descriptions",
+        "nearby_text": [
+          {
+            "text": "Read the full explanation of each labeled feature on the pages that follow this diagram.",
+            "distance": 13.230010986328125,
+            "position": "above"
+          },
+          {
+            "text": "Feature Descriptions",
+            "distance": 38.2493896484375,
+            "position": "above"
+          },
+          {
+            "text": "Copyright \u00a9 Parallax Inc. P2 Edge Module Breadboard (#64020) v1.2  01/07/2021  Page 2 of 11",
+            "distance": 49.12255859375,
+            "position": "below"
+          },
+          {
+            "text": "Features",
+            "distance": 65.17880249023438,
+            "position": "above"
+          },
+          {
+            "text": "\u25cb Recommended minimum 100 mA \u25cb Typical 1000 mA \u25cb Maximum according to customer application \u25cf VIO Power Supplies: 3.3 V up to 300 mA per 8 I/O pins; requires P2-EC Edge Module \u25cf Programming: Serial up to 2 MBaud; requires Parallax Prop-Plug programming adapter \u25cf Operating temperature:  -40 to +185 \u00b0F (-40 to +85 \u00b0C) \u25cf PCB Dimensions: 3.5 x 8 in  (88.9 x 203.2 mm)",
+            "distance": 78.48001098632812,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "Feature Descriptions",
+          "Read the full explanation of each labeled feature on the pages that follow this diagram.",
+          "Copyright \u00a9 Parallax Inc. P2 Edge Module Breadboard (#64020) v1.2  01/07/2021  Page 2 of 11"
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page03_img01.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 3,
+      "image_index": 1,
+      "dimensions": "270\u00d7893",
+      "width": 270,
+      "height": 893,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page03_img01.png",
+      "xref": 18,
+      "extraction_status": "success",
+      "file_size_bytes": 12090,
+      "context": {
+        "caption": "1. Parallax P2 Edge Module Socket",
+        "nearby_text": [
+          {
+            "text": "1. Parallax P2 Edge Module Socket",
+            "distance": 3.1870269775390625,
+            "position": "above"
+          },
+          {
+            "text": "2. Power Jack",
+            "distance": 8.906707763671875,
+            "position": "below"
+          },
+          {
+            "text": "CAUTION! Use a well-regulated power supply and do not exceed 5.5 VDC!",
+            "distance": 8.91778564453125,
+            "position": "below"
+          },
+          {
+            "text": "The P2 Edge Module must be inserted with the component side facing the breadboard. There are silk-screen text markings beside the socket to indicate the positions of P0 and P38, and a circle printed at the top-right of the socket aligns with the orientation hole in the P2 Edge Module.",
+            "distance": 12.4808349609375,
+            "position": "left"
+          },
+          {
+            "text": "CAUTION! The P2 Edge Module power input pads have reverse polarity protection, but damage could occur from user circuits attached to the IO pins incorrectly, so care should always be taken to ensure correct orientation!",
+            "distance": 15.04205322265625,
+            "position": "left"
+          }
+        ],
+        "potential_captions": [
+          "1. Parallax P2 Edge Module Socket",
+          "2. Power Jack",
+          "The 2.1 mm center-positive DC power barrel jack socket accepts 5 VDC only."
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram",
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page03_img02.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 3,
+      "image_index": 2,
+      "dimensions": "300\u00d7289",
+      "width": 300,
+      "height": 289,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page03_img02.png",
+      "xref": 19,
+      "extraction_status": "success",
+      "file_size_bytes": 15367,
+      "context": {
+        "caption": "1. Parallax P2 Edge Module Socket",
+        "nearby_text": [
+          {
+            "text": "CAUTION! The P2 Edge Module power input pads have reverse polarity protection, but damage could occur from user circuits attached to the IO pins incorrectly, so care should always be taken to ensure correct orientation!",
+            "distance": 9.0,
+            "position": "right"
+          },
+          {
+            "text": "CAUTION! Use a well-regulated power supply and do not exceed 5.5 VDC!",
+            "distance": 9.0,
+            "position": "below"
+          },
+          {
+            "text": "The P2 Edge Module must be inserted with the component side facing the breadboard. There are silk-screen text markings beside the socket to indicate the positions of P0 and P38, and a circle printed at the top-right of the socket aligns with the orientation hole in the P2 Edge Module.",
+            "distance": 15.479995727539062,
+            "position": "above"
+          },
+          {
+            "text": "2. Power Jack",
+            "distance": 32.906707763671875,
+            "position": "below"
+          },
+          {
+            "text": "1. Parallax P2 Edge Module Socket",
+            "distance": 39.75,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "1. Parallax P2 Edge Module Socket",
+          "2. Power Jack",
+          "The 2.1 mm center-positive DC power barrel jack socket accepts 5 VDC only."
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page04_img01.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 4,
+      "image_index": 1,
+      "dimensions": "300\u00d7289",
+      "width": 300,
+      "height": 289,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page04_img01.png",
+      "xref": 19,
+      "extraction_status": "success",
+      "file_size_bytes": 15367,
+      "context": {
+        "caption": "NOTE: Unplug the Prop Plug If you are using the P2 WX Adapter (#64007) and Parallax ESP8266 WX WiFi Module SIP (#34020S) for wireless programming.",
+        "nearby_text": [
+          {
+            "text": "CAUTION! For servos and other high-current devices, ensure a quality high current external power supply is connected to the  Power Jack , such as the Parallax 5V 18W USB Power Adapter (#750-00001).",
+            "distance": 9.0,
+            "position": "right"
+          },
+          {
+            "text": "CAUTION! Do not attempt to drive servos or other high-current devices from computer-USB power. This may cause unexplained behavior, and could be detrimental to some computer systems.",
+            "distance": 9.0,
+            "position": "below"
+          },
+          {
+            "text": "The top pin connects to Ground (Black wire). The middle pin connects to 5V, directly from the DC Barrel Jack (Red wire). The bottom pin (White) is the signal pin, and connects via an onboard 1K series resistor to the corresponding pin socket below (marked with the arrow).",
+            "distance": 17.730010986328125,
+            "position": "above"
+          },
+          {
+            "text": "NOTE: Unplug the Prop Plug If you are using the P2 WX Adapter (#64007) and Parallax ESP8266 WX WiFi Module SIP (#34020S) for wireless programming.",
+            "distance": 46.5,
+            "position": "above"
+          },
+          {
+            "text": "4. Servo Headers",
+            "distance": 46.5,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "NOTE: Unplug the Prop Plug If you are using the P2 WX Adapter (#64007) and Parallax ESP8266 WX WiFi Module SIP (#34020S) for wireless programming.",
+          "4. Servo Headers",
+          "The servo ports connect servos and other 3-pin devices to the 0.1\u201d pin sockets positioned alongside each port, so that the signals can be jumpered to the breadboard or directly to a P2 Edge I/O pin."
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page04_img02.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 4,
+      "image_index": 2,
+      "dimensions": "334\u00d7240",
+      "width": 334,
+      "height": 240,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page04_img02.png",
+      "xref": 24,
+      "extraction_status": "success",
+      "file_size_bytes": 18761,
+      "context": {
+        "caption": "4. Servo Headers",
+        "nearby_text": [
+          {
+            "text": "The top pin connects to Ground (Black wire). The middle pin connects to 5V, directly from the DC Barrel Jack (Red wire). The bottom pin (White) is the signal pin, and connects via an onboard 1K series resistor to the corresponding pin socket below (marked with the arrow).",
+            "distance": 13.769989013671875,
+            "position": "below"
+          },
+          {
+            "text": "4. Servo Headers",
+            "distance": 15.187026977539062,
+            "position": "above"
+          },
+          {
+            "text": "The servo ports connect servos and other 3-pin devices to the 0.1\u201d pin sockets positioned alongside each port, so that the signals can be jumpered to the breadboard or directly to a P2 Edge I/O pin.",
+            "distance": 19.253875732421875,
+            "position": "left"
+          },
+          {
+            "text": "In the image example, we can see servo port 5 on the right. The pinout follows the Parallax standard BRW cable color scheme (Black-Red-White).",
+            "distance": 33.635711669921875,
+            "position": "left"
+          },
+          {
+            "text": "CAUTION! For servos and other high-current devices, ensure a quality high current external power supply is connected to the  Power Jack , such as the Parallax 5V 18W USB Power Adapter (#750-00001).",
+            "distance": 67.01998901367188,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "4. Servo Headers",
+          "The servo ports connect servos and other 3-pin devices to the 0.1\u201d pin sockets positioned alongside each port, so that the signals can be jumpered to the breadboard or directly to a P2 Edge I/O pin.",
+          "In the image example, we can see servo port 5 on the right. The pinout follows the Parallax standard BRW cable color scheme (Black-Red-White)."
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page04_img03.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 4,
+      "image_index": 3,
+      "dimensions": "1285\u00d7240",
+      "width": 1285,
+      "height": 240,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page04_img03.png",
+      "xref": 25,
+      "extraction_status": "success",
+      "file_size_bytes": 15173,
+      "context": {
+        "caption": "5. VIO 3.3V Power and GND Access",
+        "nearby_text": [
+          {
+            "text": "Each group of 8 smart I/O pins has its own 3.3 V low-noise regulator, with short-circuit and over-current protection.",
+            "distance": 13.97998046875,
+            "position": "above"
+          },
+          {
+            "text": "The two digits after the V refer to the first of 8 I/O pins that the LDO provides power to. For example in the image, V48 would mean VIO voltage for I/O pins 48 to 55.",
+            "distance": 17.52001953125,
+            "position": "below"
+          },
+          {
+            "text": "You may see this voltage referred to as VIO (Voltage for IO), and is labelled beside each group of I/O pins in the format Vxx.",
+            "distance": 32.14898681640625,
+            "position": "left"
+          },
+          {
+            "text": "5. VIO 3.3V Power and GND Access",
+            "distance": 41.29046630859375,
+            "position": "above"
+          },
+          {
+            "text": "The positive 3.3 V supply sockets and ground sockets are positioned around the breadboard, and also at the 2x6 way P2 accessory headers. Use jumper wires to connect these sockets to circuits you build on the breadboard.",
+            "distance": 56.72998046875,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "5. VIO 3.3V Power and GND Access",
+          "Each group of 8 smart I/O pins has its own 3.3 V low-noise regulator, with short-circuit and over-current protection.",
+          "You may see this voltage referred to as VIO (Voltage for IO), and is labelled beside each group of I/O pins in the format Vxx."
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram",
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page05_img01.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 5,
+      "image_index": 1,
+      "dimensions": "300\u00d7289",
+      "width": 300,
+      "height": 289,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page05_img01.png",
+      "xref": 19,
+      "extraction_status": "success",
+      "file_size_bytes": 15367,
+      "context": {
+        "caption": "6. P2 Edge I/O Pin Access",
+        "nearby_text": [
+          {
+            "text": "CAUTION! DO NOT join the Vxx pins together. The voltage output is for logic level and low current supply only to the corresponding group of 8 I/Os (30 mA per pin, 300 mA total). If a larger current common supply is required, add an alternative power source to the breadboard, such as the Parallax Power Pal (#32133).",
+            "distance": 9.0,
+            "position": "right"
+          },
+          {
+            "text": "6. P2 Edge I/O Pin Access",
+            "distance": 29.156723022460938,
+            "position": "below"
+          },
+          {
+            "text": "\u2022 0 \u2014 off \u2022 1 \u2014 on",
+            "distance": 35.593597412109375,
+            "position": "below"
+          },
+          {
+            "text": "Access to the P2 Edge Module smart I/O pins P0...P63. Use jumper wires to connect these I/O pins to circuits on the breadboard. In the above image, the I/O pins are labelled 48 to 55.",
+            "distance": 46.5,
+            "position": "below"
+          },
+          {
+            "text": "7. Breadboard",
+            "distance": 46.5,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "6. P2 Edge I/O Pin Access",
+          "Access to the P2 Edge Module smart I/O pins P0...P63. Use jumper wires to connect these I/O pins to circuits on the breadboard. In the above image, the I/O pins are labelled 48 to 55.",
+          "7. Breadboard"
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page05_img02.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 5,
+      "image_index": 2,
+      "dimensions": "396\u00d7423",
+      "width": 396,
+      "height": 423,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page05_img02.png",
+      "xref": 29,
+      "extraction_status": "success",
+      "file_size_bytes": 12720,
+      "context": {
+        "caption": "8. Power Switch and Power Indicator LED",
+        "nearby_text": [
+          {
+            "text": "The breadboard area has dual 30 x 5-socket rows arranged in 2 columns, for a total of 60 rows. The columns are separated by a valley in the middle. Any two wires plugged into the same 5-socket row become electrically connected. The socket spacing is 0.1\u201d",
+            "distance": 9.480010986328125,
+            "position": "above"
+          },
+          {
+            "text": "The 3-position 2mm pitch shunt headers allow the 5V output at the P2 accessory headers to be connected or disconnected from the DC Barrel Jack 5V supply. The 5V power supply is connected to the middle pin labeled 5V, so position the provided shunt jumper either upward or downward, connecting 5V to either the ON or OFF position as required.",
+            "distance": 9.955596923828125,
+            "position": "below"
+          },
+          {
+            "text": "8. Power Switch and Power Indicator LED",
+            "distance": 14.812957763671875,
+            "position": "left"
+          },
+          {
+            "text": "The white power indicator LED will light when the power switch is on. For Rev B, note that in the off position, the power switch connects the 5V power outputs to ground via a 10K resistor. This ensures that any residual current is discharged from the bulk capacitors included in the circuit.",
+            "distance": 18.269989013671875,
+            "position": "below"
+          },
+          {
+            "text": "\u2022 0 \u2014 off \u2022 1 \u2014 on",
+            "distance": 34.980010986328125,
+            "position": "left"
+          }
+        ],
+        "potential_captions": [
+          "8. Power Switch and Power Indicator LED",
+          "The power switch has 2 settings:",
+          "\u2022 0 \u2014 off \u2022 1 \u2014 on"
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page05_img03.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 5,
+      "image_index": 3,
+      "dimensions": "196\u00d7172",
+      "width": 196,
+      "height": 172,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page05_img03.png",
+      "xref": 30,
+      "extraction_status": "success",
+      "file_size_bytes": 8163,
+      "context": {
+        "caption": "10. ACC ON/OFF Header",
+        "nearby_text": [
+          {
+            "text": "The 3-position 2mm pitch shunt headers allow the 5V output at the P2 accessory headers to be connected or disconnected from the DC Barrel Jack 5V supply. The 5V power supply is connected to the middle pin labeled 5V, so position the provided shunt jumper either upward or downward, connecting 5V to either the ON or OFF position as required.",
+            "distance": 9.955596923828125,
+            "position": "left"
+          },
+          {
+            "text": "10. ACC ON/OFF Header",
+            "distance": 10.68701171875,
+            "position": "above"
+          },
+          {
+            "text": "11. Ground Test Posts",
+            "distance": 25.40673828125,
+            "position": "below"
+          },
+          {
+            "text": "Use this button to restart the Propeller 2 microcontroller\u2019s program running on the P2 Edge Module. Press and hold to keep the microcontroller in reset. Press and release to reset, load and run the program in EEPROM.",
+            "distance": 40.97998046875,
+            "position": "above"
+          },
+          {
+            "text": "The four ground test posts are suitable for test clips and scope probes; two are positioned at the top and bottom of the board.",
+            "distance": 52.02001953125,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "10. ACC ON/OFF Header",
+          "11. Ground Test Posts"
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page06_img01.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 6,
+      "image_index": 1,
+      "dimensions": "300\u00d7289",
+      "width": 300,
+      "height": 289,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page06_img01.png",
+      "xref": 19,
+      "extraction_status": "success",
+      "file_size_bytes": 15367,
+      "context": {
+        "caption": "12. I/O Pin Accessory Headers (with 5V output)",
+        "nearby_text": [
+          {
+            "text": "CAUTION! Do not apply voltage to the Vxx Pin; it is a voltage output! Be aware that some I/O pins are also connected to other peripheral circuits; see the  Edge Connector Pin Assignments  section.",
+            "distance": 9.0,
+            "position": "right"
+          },
+          {
+            "text": "There are two special usage edge header banks which do not supply the 5V output. Refer to the details here:  I/O Pin Breakout Edge Headers (without 5V output)",
+            "distance": 13.980010986328125,
+            "position": "above"
+          },
+          {
+            "text": "13. I/O Pin Breakout Edge Headers (without 5V output)",
+            "distance": 44.906707763671875,
+            "position": "below"
+          },
+          {
+            "text": "12. I/O Pin Accessory Headers (with 5V output)",
+            "distance": 46.5,
+            "position": "above"
+          },
+          {
+            "text": "Each of the 64 smart I/O pins is connected to an accessory header, in specific groups of eight.",
+            "distance": 46.5,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "12. I/O Pin Accessory Headers (with 5V output)",
+          "Each of the 64 smart I/O pins is connected to an accessory header, in specific groups of eight.",
+          "There are two special usage edge header banks which do not supply the 5V output. Refer to the details here:  I/O Pin Breakout Edge Headers (without 5V output)"
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page06_img02.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 6,
+      "image_index": 2,
+      "dimensions": "318\u00d7175",
+      "width": 318,
+      "height": 175,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page06_img02.png",
+      "xref": 33,
+      "extraction_status": "success",
+      "file_size_bytes": 13503,
+      "context": {
+        "caption": "12. I/O Pin Accessory Headers (with 5V output)",
+        "nearby_text": [
+          {
+            "text": "13. I/O Pin Breakout Edge Headers (without 5V output)",
+            "distance": 2.603973388671875,
+            "position": "below"
+          },
+          {
+            "text": "The header for P56 to P63 has the RES pin beside the V56 pin. The RES pin is active low, and is connected to the Propeller 2 microcontroller RESn circuit on the P2 Edge Module. Momentarily set this pin low to reset the Propeller.",
+            "distance": 11.43621826171875,
+            "position": "below"
+          },
+          {
+            "text": "This header is ideal for connecting to the Parallax P2 WX Adapter (#64007) with the Parallax ESP8266 SIP WiFi module (#32420S) in order to program the Propeller 2 wirelessly.",
+            "distance": 16.21905517578125,
+            "position": "below"
+          },
+          {
+            "text": "12. I/O Pin Accessory Headers (with 5V output)",
+            "distance": 17.437026977539062,
+            "position": "above"
+          },
+          {
+            "text": "Each edge header also provides two GND connections, a Vxx output pin supplying the voltage from the corresponding 3.3 V LDO voltage regulator, described above in  VIO 3.3V Power and GND Access , and optionally a 5 V output connection (controlled by the  ACC ON/OFF Header ).",
+            "distance": 18.1478271484375,
+            "position": "left"
+          }
+        ],
+        "potential_captions": [
+          "12. I/O Pin Accessory Headers (with 5V output)",
+          "Each of the 64 smart I/O pins is connected to an accessory header, in specific groups of eight.",
+          "There are two special usage edge header banks which do not supply the 5V output. Refer to the details here:  I/O Pin Breakout Edge Headers (without 5V output)"
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page06_img03.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 6,
+      "image_index": 3,
+      "dimensions": "261\u00d7163",
+      "width": 261,
+      "height": 163,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page06_img03.png",
+      "xref": 34,
+      "extraction_status": "success",
+      "file_size_bytes": 3124,
+      "context": {
+        "caption": "12. I/O Pin Accessory Headers (with 5V output)",
+        "nearby_text": [
+          {
+            "text": "13. I/O Pin Breakout Edge Headers (without 5V output)",
+            "distance": 4.853973388671875,
+            "position": "above"
+          },
+          {
+            "text": "The header for P56 to P63 has the RES pin beside the V56 pin. The RES pin is active low, and is connected to the Propeller 2 microcontroller RESn circuit on the P2 Edge Module. Momentarily set this pin low to reset the Propeller.",
+            "distance": 9.27001953125,
+            "position": "below"
+          },
+          {
+            "text": "This header is ideal for connecting to the Parallax P2 WX Adapter (#64007) with the Parallax ESP8266 SIP WiFi module (#32420S) in order to program the Propeller 2 wirelessly.",
+            "distance": 18.46905517578125,
+            "position": "below"
+          },
+          {
+            "text": "Each edge header also provides two GND connections, a Vxx output pin supplying the voltage from the corresponding 3.3 V LDO voltage regulator, described above in  VIO 3.3V Power and GND Access , and optionally a 5 V output connection (controlled by the  ACC ON/OFF Header ).",
+            "distance": 20.3978271484375,
+            "position": "above"
+          },
+          {
+            "text": "There are two edge headers which do not have 5V routed to them.",
+            "distance": 21.631072998046875,
+            "position": "left"
+          }
+        ],
+        "potential_captions": [
+          "12. I/O Pin Accessory Headers (with 5V output)",
+          "Each of the 64 smart I/O pins is connected to an accessory header, in specific groups of eight.",
+          "13. I/O Pin Breakout Edge Headers (without 5V output)"
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page06_img04.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 6,
+      "image_index": 4,
+      "dimensions": "322\u00d7188",
+      "width": 322,
+      "height": 188,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page06_img04.png",
+      "xref": 35,
+      "extraction_status": "success",
+      "file_size_bytes": 14597,
+      "context": {
+        "caption": "12. I/O Pin Accessory Headers (with 5V output)",
+        "nearby_text": [
+          {
+            "text": "13. I/O Pin Breakout Edge Headers (without 5V output)",
+            "distance": 4.853973388671875,
+            "position": "above"
+          },
+          {
+            "text": "The header for P56 to P63 has the RES pin beside the V56 pin. The RES pin is active low, and is connected to the Propeller 2 microcontroller RESn circuit on the P2 Edge Module. Momentarily set this pin low to reset the Propeller.",
+            "distance": 13.68621826171875,
+            "position": "left"
+          },
+          {
+            "text": "This header is ideal for connecting to the Parallax P2 WX Adapter (#64007) with the Parallax ESP8266 SIP WiFi module (#32420S) in order to program the Propeller 2 wirelessly.",
+            "distance": 18.46905517578125,
+            "position": "left"
+          },
+          {
+            "text": "Each edge header also provides two GND connections, a Vxx output pin supplying the voltage from the corresponding 3.3 V LDO voltage regulator, described above in  VIO 3.3V Power and GND Access , and optionally a 5 V output connection (controlled by the  ACC ON/OFF Header ).",
+            "distance": 20.3978271484375,
+            "position": "above"
+          },
+          {
+            "text": "There are two edge headers which do not have 5V routed to them.",
+            "distance": 21.631072998046875,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "12. I/O Pin Accessory Headers (with 5V output)",
+          "Each of the 64 smart I/O pins is connected to an accessory header, in specific groups of eight.",
+          "13. I/O Pin Breakout Edge Headers (without 5V output)"
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page07_img01.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 7,
+      "image_index": 1,
+      "dimensions": "1527\u00d71513",
+      "width": 1527,
+      "height": 1513,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page07_img01.png",
+      "xref": 45,
+      "extraction_status": "success",
+      "file_size_bytes": 543043,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "This illustration identifies the physical pins on the Propeller 2.  See the Propeller 2 documentation section of  www.parallax.com  for detailed information about the device.  In this document, see the  Edge Connector Pin Assignments  section for details on how they are used on the P2 Edge Module.",
+            "distance": 13.229995727539062,
+            "position": "above"
+          },
+          {
+            "text": "Copyright \u00a9 Parallax Inc. P2 Edge Module Breadboard (#64020) v1.2  01/07/2021  Page 7 of 11",
+            "distance": 77.62255859375,
+            "position": "below"
+          },
+          {
+            "text": "Propeller 2 Physical Pins",
+            "distance": 87.99937438964844,
+            "position": "above"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page10_img01.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 10,
+      "image_index": 1,
+      "dimensions": "2500\u00d71231",
+      "width": 2500,
+      "height": 1231,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page10_img01.png",
+      "xref": 54,
+      "extraction_status": "success",
+      "file_size_bytes": 396752,
+      "context": {
+        "caption": "Higher resolution board dimension drawings are packaged with the P2 Edge Module Breadboard schematics available for download from the 64020 product page at www.parallax.com .",
+        "nearby_text": [
+          {
+            "text": "Higher resolution board dimension drawings are packaged with the P2 Edge Module Breadboard schematics available for download from the 64020 product page at www.parallax.com .",
+            "distance": 40.230010986328125,
+            "position": "above"
+          },
+          {
+            "text": "Copyright \u00a9 Parallax Inc. P2 Edge Module Breadboard (#64020) v1.2  01/07/2021  Page 10 of 11",
+            "distance": 72.37255859375,
+            "position": "below"
+          },
+          {
+            "text": "Board Dimensions",
+            "distance": 93.34320068359375,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "Higher resolution board dimension drawings are packaged with the P2 Edge Module Breadboard schematics available for download from the 64020 product page at www.parallax.com ."
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "breakout-board"
+      ]
+    },
+    {
+      "filename": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page11_img01.png",
+      "source_pdf": "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB.pdf",
+      "page_number": 11,
+      "image_index": 1,
+      "dimensions": "615\u00d7630",
+      "width": 615,
+      "height": 630,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_64020/64020-P2-Edge-Module-Breadboard-Product-Guide-REVB_page11_img01.png",
+      "xref": 59,
+      "extraction_status": "success",
+      "file_size_bytes": 10395,
+      "context": {
+        "caption": "Mounting Holes Detail",
+        "nearby_text": [
+          {
+            "text": "Resources and Downloads",
+            "distance": 15.01617431640625,
+            "position": "below"
+          },
+          {
+            "text": "Mounting Holes Detail",
+            "distance": 35.34318542480469,
+            "position": "above"
+          },
+          {
+            "text": "Check for the latest version of this document, free software, and example programs from the P2 Edge Module Breadboard product page. Go to www.parallax.com and search 64020.",
+            "distance": 43.269989013671875,
+            "position": "below"
+          },
+          {
+            "text": "Revision History",
+            "distance": 82.51617431640625,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "Mounting Holes Detail",
+          "Resources and Downloads",
+          "Check for the latest version of this document, free software, and example programs from the P2 Edge Module Breadboard product page. Go to www.parallax.com and search 64020."
+        ]
+      },
+      "suggested_tags": [
+        "breakout-board"
+      ]
+    }
+  ]
+}

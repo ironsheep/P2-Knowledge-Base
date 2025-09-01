@@ -1,0 +1,11 @@
+' Source: P2 SmartPins-220809 (Page 50)
+' Extracted: 2025-08-24
+' Language: Unknown | Type: Code Fragment
+
+        wrpin sync_rx_mode, #rxin
+'Set sync receiver mode
+        wxpin #%1_00111, #rxin
+'Set receiver to sample on B-
+                                      ' input edge
+        dirh #rxin
+      'Enable Smart-Pin sync receiver

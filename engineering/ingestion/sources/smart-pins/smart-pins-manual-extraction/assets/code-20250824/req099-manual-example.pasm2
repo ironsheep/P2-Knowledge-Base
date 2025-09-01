@@ -1,0 +1,7 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+testp   #pin, wc        ' C = IN flag state
+  if_c  jmp     #data_ready     ' Jump if data ready

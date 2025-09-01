@@ -1,0 +1,17 @@
+' Source: P2 Spin2 Documentation v51-250425 (Page 18)
+' Extracted: 2025-08-24
+' Language: Spin2 | Type: Complete Program
+
+PRI SumPoints(x1, y1, x2, y2) : x, y
+RETURN x1+x2, y1+y2
+Multiple method results can be assigned to variables or ignored by using an underscore in lieu of a variable name::
+x,y := ROTXY(xin,yin,theta)
+'use both the x and y results
+_,y := ROTXY(xin,yin,theta)
+'use only the y result
+x,_ := ROTXY(xin,yin,theta)
+'use only the x result
+Assignments are very flexible. Assume these structures each have 5 longs in them:
+DataStruct1,  DataStruct2 := 5,4,1,7,3,8,2,0,6,9     'load DataStruct1 and DataStruct2
+_(DataStruct1), DataStruct2 := 5,4,1,7,3,8,2,0,6,9     'only load DataStruct2
+_(5), DataStruct2 := 5,4,1,7,3,8,2,0,6,9     'only load DataStruct2

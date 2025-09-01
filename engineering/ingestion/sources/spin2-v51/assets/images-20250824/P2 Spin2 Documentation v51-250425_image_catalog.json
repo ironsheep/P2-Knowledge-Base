@@ -1,0 +1,1184 @@
+{
+  "source_pdf": "sources/originals/P2 Spin2 Documentation v51-250425.pdf",
+  "extraction_summary": {
+    "total_images": 24,
+    "total_pages": 57,
+    "output_directory": "extracted_images_spin2"
+  },
+  "images": [
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page25_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 25,
+      "image_index": 1,
+      "dimensions": "572\u00d7304",
+      "width": 572,
+      "height": 304,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page25_img01.png",
+      "xref": 87,
+      "extraction_status": "success",
+      "file_size_bytes": 18663,
+      "context": {
+        "caption": "\u202drepeat 9\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202d00_11111_00000_00000000000rrrrrrrrr\u202c \u202d00_sssss_bbbbb_00000000000rrrrrrrrr\u202c",
+            "distance": 25.890380859375,
+            "position": "below"
+          },
+          {
+            "text": "\u202d01_00111_00000_aaaaaaaaaaaaaaaaaaaa\u202c \u202d01_sssss_bbbbb_aaaaaaaaaaaaaaaaaaaa\u202c",
+            "distance": 25.890380859375,
+            "position": "below"
+          },
+          {
+            "text": "\u202ddebug(ubin_long(k), udec(field[p]++))   'show k and three bits via p\u202c",
+            "distance": 29.79412841796875,
+            "position": "above"
+          },
+          {
+            "text": "\u202dHere is an example using indexing to affect successive bitfields.\u202c",
+            "distance": 36.99249267578125,
+            "position": "below"
+          },
+          {
+            "text": "\u202drepeat 9\u202c",
+            "distance": 40.29412841796875,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "\u202drepeat 9\u202c",
+          "\u202ddebug(ubin_long(k), udec(field[p]++))   'show k and three bits via p\u202c",
+          "\u202dHere is an example using indexing to affect successive bitfields.\u202c"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page25_img02.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 25,
+      "image_index": 2,
+      "dimensions": "445\u00d7321",
+      "width": 445,
+      "height": 321,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page25_img02.png",
+      "xref": 89,
+      "extraction_status": "success",
+      "file_size_bytes": 10950,
+      "context": {
+        "caption": "\u202drepeat 10\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dfield[p][i++]~~      'set three bits at a time, progressing upwards\u202c \u202ddebug(ubin_long(k))\u202c",
+            "distance": 19.7940673828125,
+            "position": "above"
+          },
+          {
+            "text": "\u202dAside from supporting optional bitfields, field pointers also differentiate between hub memory and registers. So, field pointers can reference both types of memory without any\u202c \u202dspecial syntax.\u202c",
+            "distance": 29.7425537109375,
+            "position": "below"
+          },
+          {
+            "text": "\u202drepeat 10\u202c",
+            "distance": 40.7940673828125,
+            "position": "above"
+          },
+          {
+            "text": "\u202dp := ^@k.[2..0]        'get a pointer to the three lowest bits of k\u202c",
+            "distance": 61.7940673828125,
+            "position": "above"
+          },
+          {
+            "text": "\u202dHere is how field pointers are encoded into 32-bit values:\u202c",
+            "distance": 67.9925537109375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "\u202drepeat 10\u202c",
+          "\u202dfield[p][i++]~~      'set three bits at a time, progressing upwards\u202c \u202ddebug(ubin_long(k))\u202c",
+          "\u202dAside from supporting optional bitfields, field pointers also differentiate between hub memory and registers. So, field pointers can reference both types of memory without any\u202c \u202dspecial syntax.\u202c"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page31_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 31,
+      "image_index": 1,
+      "dimensions": "1113\u00d7805",
+      "width": 1113,
+      "height": 805,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page31_img01.png",
+      "xref": 103,
+      "extraction_status": "success",
+      "file_size_bytes": 104060,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page31_img02.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 31,
+      "image_index": 2,
+      "dimensions": "1113\u00d7805",
+      "width": 1113,
+      "height": 805,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page31_img02.png",
+      "xref": 104,
+      "extraction_status": "success",
+      "file_size_bytes": 87211,
+      "context": {
+        "caption": "\u202dTo launch a debugger or force an update to an already-open debugger, you can insert a plain DEBUG command into your Spin2 or PASM code where you would like the\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dTo launch a debugger or force an update to an already-open debugger, you can insert a plain DEBUG command into your Spin2 or PASM code where you would like the\u202c",
+            "distance": 24.85791015625,
+            "position": "below"
+          },
+          {
+            "text": "\u202dupdate to occur. You can place any number of plain DEBUG commands throughout your application, since they all resolve to a 'BRK #0' instruction, whereas DEBUG()\u202c",
+            "distance": 41.35791015625,
+            "position": "below"
+          },
+          {
+            "text": "\u202dcommands resolve to unique 'BRK #1..255' instructions. For plain DEBUG commands to be subsequently registered by the debugger after pressing the 'Go' button, the\u202c",
+            "distance": 57.85791015625,
+            "position": "below"
+          },
+          {
+            "text": "\u202d'DEBUG' sensitivity button must be set. This will be the default sensitivity, unless either DEBUG_COGINIT or DEBUG_MAIN symbols were defined, which set the initial\u202c",
+            "distance": 74.35791015625,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "\u202dTo launch a debugger or force an update to an already-open debugger, you can insert a plain DEBUG command into your Spin2 or PASM code where you would like the\u202c",
+          "\u202dupdate to occur. You can place any number of plain DEBUG commands throughout your application, since they all resolve to a 'BRK #0' instruction, whereas DEBUG()\u202c"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page33_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 33,
+      "image_index": 1,
+      "dimensions": "731\u00d71600",
+      "width": 731,
+      "height": 1600,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page33_img01.png",
+      "xref": 109,
+      "extraction_status": "success",
+      "file_size_bytes": 171347,
+      "context": {
+        "caption": "\u202dParallax Spin2 Documentation Page\u202c\u202d33\u202c\u202dof\u202c\u202d57\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dParallax Spin2 Documentation Page\u202c\u202d33\u202c\u202dof\u202c\u202d57\u202c",
+            "distance": 41.8564453125,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "\u202dParallax Spin2 Documentation Page\u202c\u202d33\u202c\u202dof\u202c\u202d57\u202c"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page34_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 34,
+      "image_index": 1,
+      "dimensions": "667\u00d7448",
+      "width": 667,
+      "height": 448,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page34_img01.png",
+      "xref": 112,
+      "extraction_status": "success",
+      "file_size_bytes": 32856,
+      "context": {
+        "caption": "\u202dstack pointer.\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dThe\u202c\u202d'unique\u202c\u202dBRK\u202c\u202dcode'\u202c\u202dbyte\u202c\u202d(1..255)\u202c\u202dis\u202c\u202dused\u202c\u202das\u202c\u202dan\u202c\u202dindex\u202c\u202dto\u202c\u202dlook\u202c\u202dup\u202c\u202dthe\u202c\u202dspecific\u202c\u202drecord\u202c\u202din\u202c\u202dthe\u202c\u202dDEBUG()\u202c\u202ddatabase\u202c\u202dat\u202c\u202dthe\u202c\u202dtop\u202c\u202dof\u202c\u202dmemory,\u202c\u202dfrom\u202c\u202dwhich\u202c\u202dthe\u202c\u202ddebugging\u202c\u202dprogram\u202c\u202dreads\u202c",
+            "distance": 19.2425537109375,
+            "position": "below"
+          },
+          {
+            "text": "\u202dits commands.\u202c",
+            "distance": 35.7425537109375,
+            "position": "below"
+          },
+          {
+            "text": "\u202dstack pointer.\u202c",
+            "distance": 45.032318115234375,
+            "position": "above"
+          },
+          {
+            "text": "\u202dcase\u202c\u202dof\u202c\u202d'i',\u202c\u202donly,\u202c\u202dthe\u202c\u202dstack\u202c\u202dneeds\u202c\u202dto\u202c\u202ddrop\u202c\u202dby\u202c\u202dfour\u202c\u202dbytes\u202c\u202d(one\u202c\u202dlong).\u202c\u202dWhen\u202c\u202dthe\u202c\u202ddebugging\u202c\u202dprogram\u202c\u202dis\u202c\u202dinvoked,\u202c\u202dthe\u202c\u202dvalues\u202c\u202dit\u202c\u202dneeds\u202c\u202dwill\u202c\u202dbe\u202c\u202dordered\u202c\u202dright\u202c\u202dabove\u202c\u202dthe\u202c\u202dcurrent\u202c\u202dSpin2\u202c",
+            "distance": 65.2027587890625,
+            "position": "above"
+          },
+          {
+            "text": "\u202dIn\u202c \u202dthe\u202c \u202dcase\u202c \u202dwhere\u202c \u202ddebugging\u202c \u202dis\u202c \u202dactive,\u202c \u202dbut\u202c \u202da\u202c \u202dcog\u202c \u202dhas\u202c \u202dhad\u202c \u202dits\u202c \u202ddebug\u202c \u202dinterrupt\u202c \u202ddisabled\u202c \u202dvia\u202c \u202dthe\u202c\u202dDEBUG_COGS\u202c\u202dsymbol,\u202c\u202dSpin2\u202c\u202dDEBUG\u202c\u202dcommands\u202c\u202dwill\u202c\u202dnot\u202c\u202dtrigger\u202c\u202da\u202c\u202ddebug\u202c",
+            "distance": 68.7425537109375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "\u202dstack pointer.\u202c",
+          "\u202dits commands.\u202c"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page35_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 35,
+      "image_index": 1,
+      "dimensions": "553\u00d7152",
+      "width": 553,
+      "height": 152,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page35_img01.png",
+      "xref": 115,
+      "extraction_status": "success",
+      "file_size_bytes": 10971,
+      "context": {
+        "caption": "\u202dcause performance problems with your smart pin configurations.\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202d'escape' characters to allow normal or shorthand DEBUG() commands.\u202c",
+            "distance": 5.219970703125,
+            "position": "above"
+          },
+          {
+            "text": "\u202dTo bring this all together, let's show a sawtooth wave on a SCOPE display:\u202c",
+            "distance": 8.11810302734375,
+            "position": "above"
+          },
+          {
+            "text": "\u202dCON _clkfreq = 10_000_000\u202c",
+            "distance": 15.9559326171875,
+            "position": "left"
+          },
+          {
+            "text": "\u202ddebug(`MyScope `(i & 63))\u202c \u202di++\u202c \u202dwaitms(50)\u202c",
+            "distance": 23.0440673828125,
+            "position": "left"
+          },
+          {
+            "text": "\u202dcause performance problems with your smart pin configurations.\u202c",
+            "distance": 32.15704345703125,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "\u202dcause performance problems with your smart pin configurations.\u202c",
+          "\u202d'escape' characters to allow normal or shorthand DEBUG() commands.\u202c",
+          "\u202dTo bring this all together, let's show a sawtooth wave on a SCOPE display:\u202c"
+        ]
+      },
+      "suggested_tags": [
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page36_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 36,
+      "image_index": 1,
+      "dimensions": "326\u00d7149",
+      "width": 326,
+      "height": 149,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page36_img01.png",
+      "xref": 119,
+      "extraction_status": "success",
+      "file_size_bytes": 5411,
+      "context": {
+        "caption": "\u202dCurrently, the following graphical DEBUG() displays are implemented, but more will be added in the future:\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dMIDI\u202c \u202dPiano keyboard with 1..128 keys, velocity depiction, variable screen scale\u202c",
+            "distance": 13.12213134765625,
+            "position": "above"
+          },
+          {
+            "text": "\u202dCON _clkfreq\u202c \u202d= 10_000_000\u202c",
+            "distance": 15.95599365234375,
+            "position": "left"
+          },
+          {
+            "text": "\u202ddebug(`MyLogic `(i & 63))\u202c \u202di++\u202c \u202dwaitms(25)\u202c",
+            "distance": 20.79400634765625,
+            "position": "left"
+          },
+          {
+            "text": "\u202dLOGIC Display\u202c \u202dLogic analyzer with single and multi-bit\u202c\u202dlabels, 1..32 channels, can trigger on pattern\u202c",
+            "distance": 25.13232421875,
+            "position": "above"
+          },
+          {
+            "text": "\u202dLOGIC\u202c \u202dLogic analyzer with single and multi-bit labels, 1..32 channels, can trigger on pattern\u202c",
+            "distance": 28.40386962890625,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "\u202dCurrently, the following graphical DEBUG() displays are implemented, but more will be added in the future:\u202c",
+          "\u202dDisplay Types\u202c \u202dDescriptions\u202c",
+          "\u202dLOGIC\u202c \u202dLogic analyzer with single and multi-bit labels, 1..32 channels, can trigger on pattern\u202c"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page37_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 37,
+      "image_index": 1,
+      "dimensions": "433\u00d789",
+      "width": 433,
+      "height": 89,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page37_img01.png",
+      "xref": 122,
+      "extraction_status": "success",
+      "file_size_bytes": 4115,
+      "context": {
+        "caption": "\u202dgets\u202c\u202dfour\u202c\u202dtwo-bit\u202c\u202dsample\u202c\u202dsets,\u202c\u202dit\u202c\u202ddoes\u202c\u202dan\u202c\u202dRFBYTE\u202c\u202dto\u202c\u202dsave\u202c\u202dthem\u202c\u202dto\u202c\u202dhub\u202c\u202dRAM,\u202c\u202dforming\u202c\u202dcontiguous\u202c\u202dbytes,\u202c\u202dwords,\u202c\u202dand\u202c\u202dlongs.\u202c\u202dBy\u202c\u202dinvoking\u202c\u202dthe\u202c\u202dLONGS_2BIT\u202c\u202dpacked-data\u202c\u202dmode,\u202c\u202dwe\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dcan have the LOGIC display unpack the two-bit sample sets from longs, yielding 16 sets per long.\u202c",
+            "distance": 10.301910400390625,
+            "position": "above"
+          },
+          {
+            "text": "\u202dVAR buff[bufflongs]\u202c",
+            "distance": 13.7059326171875,
+            "position": "below"
+          },
+          {
+            "text": "\u202dCON _clkfreq  = 333_333_333  'go really fast, 3ns clock period\u202c",
+            "distance": 15.9559326171875,
+            "position": "left"
+          },
+          {
+            "text": "\u202ddebug(`logic Serial samples `(samps) spacing 12 'TX' 'IN' longs_2bit)\u202c \u202ddebug(`Serial trigger %10 %10 22)\u202c \u202dbuffaddr := @buff\u202c",
+            "distance": 25.728515625,
+            "position": "below"
+          },
+          {
+            "text": "\u202dPUB go() | i, buffaddr\u202c",
+            "distance": 34.7059326171875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "\u202dgets\u202c\u202dfour\u202c\u202dtwo-bit\u202c\u202dsample\u202c\u202dsets,\u202c\u202dit\u202c\u202ddoes\u202c\u202dan\u202c\u202dRFBYTE\u202c\u202dto\u202c\u202dsave\u202c\u202dthem\u202c\u202dto\u202c\u202dhub\u202c\u202dRAM,\u202c\u202dforming\u202c\u202dcontiguous\u202c\u202dbytes,\u202c\u202dwords,\u202c\u202dand\u202c\u202dlongs.\u202c\u202dBy\u202c\u202dinvoking\u202c\u202dthe\u202c\u202dLONGS_2BIT\u202c\u202dpacked-data\u202c\u202dmode,\u202c\u202dwe\u202c",
+          "\u202dcan have the LOGIC display unpack the two-bit sample sets from longs, yielding 16 sets per long.\u202c",
+          "\u202dCON _clkfreq  = 333_333_333  'go really fast, 3ns clock period\u202c"
+        ]
+      },
+      "suggested_tags": [
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page37_img02.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 37,
+      "image_index": 2,
+      "dimensions": "278\u00d7324",
+      "width": 278,
+      "height": 324,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page37_img02.png",
+      "xref": 123,
+      "extraction_status": "success",
+      "file_size_bytes": 10033,
+      "context": {
+        "caption": "\u202dcan have the LOGIC display unpack the two-bit sample sets from longs, yielding 16 sets per long.\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dcan have the LOGIC display unpack the two-bit sample sets from longs, yielding 16 sets per long.\u202c",
+            "distance": 5.073089599609375,
+            "position": "above"
+          },
+          {
+            "text": "\u202dCON _clkfreq\u202c \u202d= 100_000_000\u202c",
+            "distance": 15.95599365234375,
+            "position": "left"
+          },
+          {
+            "text": "\u202dSCOPE Display\u202c \u202dOscilloscope with 1..8 channels, can\u202c\u202dtrigger on level with hysteresis\u202c",
+            "distance": 25.13232421875,
+            "position": "above"
+          },
+          {
+            "text": "\u202dSCOPE Instantiation\u202c \u202dDescription\u202c \u202dDefault\u202c",
+            "distance": 30.24267578125,
+            "position": "below"
+          },
+          {
+            "text": "\u202dPUB go() | a, af, b, bf\u202c",
+            "distance": 36.95599365234375,
+            "position": "left"
+          }
+        ],
+        "potential_captions": [
+          "\u202dcan have the LOGIC display unpack the two-bit sample sets from longs, yielding 16 sets per long.\u202c",
+          "\u202ddebug(`logic Serial samples `(samps) spacing 12 'TX' 'IN' longs_2bit)\u202c \u202ddebug(`Serial trigger %10 %10 22)\u202c \u202dbuffaddr := @buff\u202c",
+          "\u202dSCOPE Display\u202c \u202dOscilloscope with 1..8 channels, can\u202c\u202dtrigger on level with hysteresis\u202c"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page38_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 38,
+      "image_index": 1,
+      "dimensions": "324\u00d7347",
+      "width": 324,
+      "height": 347,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page38_img01.png",
+      "xref": 126,
+      "extraction_status": "success",
+      "file_size_bytes": 14787,
+      "context": {
+        "caption": "\u202dfull, no legend,\u202c \u202ddefault color\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dfull, no legend,\u202c \u202ddefault color\u202c",
+            "distance": 5.25,
+            "position": "above"
+          },
+          {
+            "text": "\u202dauto, no legend,\u202c \u202ddefault color\u202c",
+            "distance": 5.25,
+            "position": "above"
+          },
+          {
+            "text": "\u202d-1, width / 2\u202c",
+            "distance": 5.25,
+            "position": "above"
+          },
+          {
+            "text": "\u202dCON _clkfreq = 100_000_000\u202c",
+            "distance": 15.95599365234375,
+            "position": "left"
+          },
+          {
+            "text": "\u202dSCOPE_XY Display\u202c \u202dXY oscilloscope with 1..8 channels,\u202c\u202dpersistence of 1..512 samples, polar mode, log scale mode\u202c",
+            "distance": 25.13232421875,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "\u202dfull, no legend,\u202c \u202ddefault color\u202c",
+          "\u202dauto, no legend,\u202c \u202ddefault color\u202c",
+          "\u202d-1, width / 2\u202c"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page39_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 39,
+      "image_index": 1,
+      "dimensions": "226\u00d7249",
+      "width": 226,
+      "height": 249,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page39_img01.png",
+      "xref": 129,
+      "extraction_status": "success",
+      "file_size_bytes": 6516,
+      "context": {
+        "caption": "\u202dis 8).\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dis 8).\u202c",
+            "distance": 28.0050048828125,
+            "position": "above"
+          },
+          {
+            "text": "\u202ddebug(`MyXY `(x,y))\u202c",
+            "distance": 28.044097900390625,
+            "position": "above"
+          },
+          {
+            "text": "\u202ddebug(`MyXY `(x,y))\u202c",
+            "distance": 28.044097900390625,
+            "position": "above"
+          },
+          {
+            "text": "\u202drepeat y from -8 to 8\u202c",
+            "distance": 38.544097900390625,
+            "position": "above"
+          },
+          {
+            "text": "\u202drepeat y from -8 to 8\u202c",
+            "distance": 38.544097900390625,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "\u202dis 8).\u202c",
+          "\u202ddebug(`SCOPE_XY MyXY SIZE 80 RANGE 8 SAMPLES 0 'Normal')\u202c \u202drepeat x from -8 to 8\u202c",
+          "\u202drepeat y from -8 to 8\u202c"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page39_img02.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 39,
+      "image_index": 2,
+      "dimensions": "226\u00d7249",
+      "width": 226,
+      "height": 249,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page39_img02.png",
+      "xref": 130,
+      "extraction_status": "success",
+      "file_size_bytes": 10993,
+      "context": {
+        "caption": "\u202ddebug(`SCOPE_XY MyXY SIZE 80 RANGE 8 SAMPLES 0 'Normal')\u202c \u202drepeat x from -8 to 8\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202d' Set up SCOPE\u202c \u202ddebug(`scope MyScope POS 300 0 SIZE 255 200 COLOR CYAN 4 CYAN 5)\u202c \u202ddebug(`MyScope 'Sine' -1000 1000 180 10 15 CYAN 12)\u202c \u202ddebug(`MyScope TRIGGER 0)\u202c",
+            "distance": 17.396484375,
+            "position": "below"
+          },
+          {
+            "text": "\u202ddebug(`MyXY `(x,y))\u202c",
+            "distance": 28.044097900390625,
+            "position": "above"
+          },
+          {
+            "text": "\u202ddebug(`MyXY `(x,y))\u202c",
+            "distance": 28.044097900390625,
+            "position": "above"
+          },
+          {
+            "text": "\u202ddebug(`SCOPE_XY MyXY SIZE 80 RANGE 8 SAMPLES 0 'Normal')\u202c \u202drepeat x from -8 to 8\u202c",
+            "distance": 28.95330810546875,
+            "position": "above"
+          },
+          {
+            "text": "\u202drepeat y from -8 to 8\u202c",
+            "distance": 38.544097900390625,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "\u202ddebug(`SCOPE_XY MyXY SIZE 80 RANGE 8 SAMPLES 0 'Normal')\u202c \u202drepeat x from -8 to 8\u202c",
+          "\u202drepeat y from -8 to 8\u202c",
+          "\u202ddebug(`MyXY `(x,y))\u202c"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page39_img03.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 39,
+      "image_index": 3,
+      "dimensions": "579\u00d7268",
+      "width": 579,
+      "height": 268,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page39_img03.png",
+      "xref": 131,
+      "extraction_status": "success",
+      "file_size_bytes": 14858,
+      "context": {
+        "caption": "\u202dPUB go() | x, y\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202ddebug(`MyXY `(x,y))\u202c",
+            "distance": 0.064544677734375,
+            "position": "above"
+          },
+          {
+            "text": "\u202drepeat y from -8 to 8\u202c",
+            "distance": 0.0680694580078125,
+            "position": "above"
+          },
+          {
+            "text": "\u202dCON _clkfreq = 100_000_000\u202c",
+            "distance": 11.775115966796875,
+            "position": "above"
+          },
+          {
+            "text": "\u202dPUB go() | i, j, k\u202c",
+            "distance": 27.824920654296875,
+            "position": "above"
+          },
+          {
+            "text": "\u202dj += 1550 + qsin(1300, i++, 31_000)\u202c \u202dk := qsin(1000, j, 50_000)\u202c \u202ddebug(`MyFFT MyScope `(k))\u202c \u202dwaitus(100)\u202c",
+            "distance": 28.0440673828125,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "\u202dPUB go() | x, y\u202c",
+          "\u202drepeat y from -8 to 8\u202c",
+          "\u202ddebug(`MyXY `(x,y))\u202c"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page40_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 40,
+      "image_index": 1,
+      "dimensions": "452\u00d7268",
+      "width": 452,
+      "height": 268,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page40_img01.png",
+      "xref": 135,
+      "extraction_status": "success",
+      "file_size_bytes": 29717,
+      "context": {
+        "caption": "\u202dCLEAR\u202c \u202dClear the sample buffer and display, wait for new data.\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202d* Color is ORANGE / BLUE / GREEN / CYAN / RED / MAGENTA / YELLOW / GRAY.\u202c",
+            "distance": 11.156982421875,
+            "position": "below"
+          },
+          {
+            "text": "\u202dCON _clkfreq = 100_000_000\u202c",
+            "distance": 15.3624267578125,
+            "position": "left"
+          },
+          {
+            "text": "\u202d' Set up SPECTRO\u202c \u202ddebug(`SPECTRO MySpectro SAMPLES 2048 0 236 RANGE 1000 LUMA8X GREEN)\u202c",
+            "distance": 20.507965087890625,
+            "position": "left"
+          },
+          {
+            "text": "\u202dSPECTRO Display\u202c \u202dSpectrograph with 4..2048-point FFT,\u202c\u202dphase-coloring, and log scale mode\u202c",
+            "distance": 24.189666748046875,
+            "position": "above"
+          },
+          {
+            "text": "\u202dSPECTRO  Instantiation\u202c \u202dDescription\u202c \u202dDefault\u202c",
+            "distance": 29.11553955078125,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "\u202dCLEAR\u202c \u202dClear the sample buffer and display, wait for new data.\u202c",
+          "\u202dSPECTRO Display\u202c \u202dSpectrograph with 4..2048-point FFT,\u202c\u202dphase-coloring, and log scale mode\u202c",
+          "\u202dCON _clkfreq = 100_000_000\u202c"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page41_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 41,
+      "image_index": 1,
+      "dimensions": "906\u00d7179",
+      "width": 906,
+      "height": 179,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page41_img01.png",
+      "xref": 138,
+      "extraction_status": "success",
+      "file_size_bytes": 72221,
+      "context": {
+        "caption": "\u202dour ears perceive speech:\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dour ears perceive speech:\u202c",
+            "distance": 23.952774047851562,
+            "position": "above"
+          },
+          {
+            "text": "\u202dleft\u202c\u202dand\u202c\u202dthe\u202c\u202d\"10\"\u202c\u202dis\u202c\u202don\u202c\u202dthe\u202c\u202dright.\u202c\u202dThe\u202c\u202dvertical\u202c\u202ddistance\u202c\u202dbetween\u202c\u202dhorizontal\u202c\u202dtrend\u202c\u202dlines\u202c\u202dis\u202c\u202dglottal\u202c\u202dpitch.\u202c\u202dThe\u202c\u202dlarger\u202c\u202dbrightness\u202c\u202dtrends\u202c\u202dare\u202c\u202dvocal\u202c\u202dformants.\u202c\u202dThis\u202c\u202dgives\u202c\u202dsome\u202c\u202didea\u202c\u202dof\u202c\u202dhow\u202c",
+            "distance": 40.45277404785156,
+            "position": "above"
+          },
+          {
+            "text": "\u202dj++\u202c \u202delse\u202c",
+            "distance": 44.989471435546875,
+            "position": "below"
+          },
+          {
+            "text": "\u202dBelow,\u202c\u202da\u202c\u202dSPECTRO\u202c\u202ddisplay\u202c\u202dwas\u202c\u202dfed\u202c\u202dADC\u202c\u202dsamples\u202c\u202dfrom\u202c\u202da\u202c\u202dpin\u202c\u202dattached\u202c\u202dto\u202c\u202da\u202c\u202dmicrophone.\u202c\u202dThis\u202c\u202dis\u202c\u202dwhat\u202c\u202dverbally\u202c\u202dcounting\u202c\u202dfrom\u202c\u202d\"1\"\u202c\u202dto\u202c\u202d\"10\"\u202c\u202dlooks\u202c\u202dlike,\u202c\u202dspectrally.\u202c\u202dThe\u202c\u202d\"1\"\u202c\u202dis\u202c\u202don\u202c\u202dthe\u202c",
+            "distance": 56.95277404785156,
+            "position": "above"
+          },
+          {
+            "text": "\u202dPUB go(): i, j, k\u202c",
+            "distance": 84.60008239746094,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "\u202dour ears perceive speech:\u202c",
+          "\u202dj++\u202c \u202delse\u202c"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page41_img02.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 41,
+      "image_index": 2,
+      "dimensions": "408\u00d7511",
+      "width": 408,
+      "height": 511,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page41_img02.png",
+      "xref": 139,
+      "extraction_status": "success",
+      "file_size_bytes": 23650,
+      "context": {
+        "caption": "\u202dPLOT Display\u202c \u202dGeneral-purpose plotter with cartesian\u202c\u202dand polar modes\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dCON _clkfreq = 10_000_000\u202c",
+            "distance": 15.955902099609375,
+            "position": "left"
+          },
+          {
+            "text": "\u202dPLOT Display\u202c \u202dGeneral-purpose plotter with cartesian\u202c\u202dand polar modes\u202c",
+            "distance": 25.13238525390625,
+            "position": "above"
+          },
+          {
+            "text": "\u202dPLOT  Instantiation\u202c \u202dDescription\u202c \u202dDefault\u202c",
+            "distance": 30.24249267578125,
+            "position": "below"
+          },
+          {
+            "text": "\u202dPUB go(): i, j, k\u202c",
+            "distance": 36.9559326171875,
+            "position": "left"
+          },
+          {
+            "text": "\u202ddebug(`myplot cyan 6 set 83 `(i*8-j) circle 43 text 14 '`(i)')\u202c \u202ddebug(`myplot cyan 4 set 83 `(i*8-j) circle 45 3)\u202c \u202ddebug(`myplot orange 6 set 150 `(i*8) circle 61 text 13 'Cog`(i)')\u202c \u202ddebug(`myplot orange 4 set 150 `(i*8) circle 63 3)\u202c",
+            "distance": 39.91058349609375,
+            "position": "left"
+          }
+        ],
+        "potential_captions": [
+          "\u202dPLOT Display\u202c \u202dGeneral-purpose plotter with cartesian\u202c\u202dand polar modes\u202c",
+          "\u202dCON _clkfreq = 10_000_000\u202c",
+          "\u202dPUB go(): i, j, k\u202c"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page42_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 42,
+      "image_index": 1,
+      "dimensions": "297\u00d7121",
+      "width": 297,
+      "height": 121,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page42_img01.png",
+      "xref": 143,
+      "extraction_status": "success",
+      "file_size_bytes": 4204,
+      "context": {
+        "caption": "\u202dCLEAR\u202c \u202dClear the plot to the background color.\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dTERM Display\u202c \u202dTerminal for displaying text\u202c",
+            "distance": 7.51751708984375,
+            "position": "above"
+          },
+          {
+            "text": "\u202ddebug(`MyTerm 1 'Temp = `(i)')\u202c \u202dwaitms(500)\u202c",
+            "distance": 10.29412841796875,
+            "position": "left"
+          },
+          {
+            "text": "\u202dCON _clkfreq = 10_000_000\u202c",
+            "distance": 15.95587158203125,
+            "position": "left"
+          },
+          {
+            "text": "\u202drepeat i from 50 to 60\u202c",
+            "distance": 20.79412841796875,
+            "position": "left"
+          },
+          {
+            "text": "\u202dPUB go() | i\u202c",
+            "distance": 36.95587158203125,
+            "position": "left"
+          }
+        ],
+        "potential_captions": [
+          "\u202dCLEAR\u202c \u202dClear the plot to the background color.\u202c",
+          "\u202dCLOSE\u202c \u202dClose the window.\u202c",
+          "\u202dTERM Display\u202c \u202dTerminal for displaying text\u202c"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page43_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 43,
+      "image_index": 1,
+      "dimensions": "267\u00d7161",
+      "width": 267,
+      "height": 161,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page43_img01.png",
+      "xref": 146,
+      "extraction_status": "success",
+      "file_size_bytes": 3114,
+      "context": {
+        "caption": "\u202dCLEAR\u202c \u202dClear the display to the background color.\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dflag\u202c \u202dlong\u202c \u202d%%3333333333333330\u202c \u202dlong\u202c \u202d%%0010101022222220\u202c \u202dlong\u202c \u202d%%0010101020202020\u202c \u202dlong\u202c \u202d%%0010101022222220\u202c \u202dlong\u202c \u202d%%0010101022020220\u202c \u202dlong\u202c \u202d%%0010101022222220\u202c \u202dlong\u202c \u202d%%0010101020202020\u202c \u202dlong\u202c \u202d%%0010101022222220\u202c \u202dlong\u202c \u202d%%0010101022020220\u202c \u202dlong\u202c \u202d%%0010101022222220\u202c \u202dlong\u202c \u202d%%0010101020202020\u202c \u202dlong\u202c \u202d%%0010101022222220\u202c \u202dlong\u202c \u202d%%0010101010101010\u202c \u202dlong\u202c \u202d%%0010101010101010\u202c \u202dlong\u202c \u202d%%0010101010101010\u202c \u202dlong\u202c \u202d%%0010101010101010\u202c \u202dlong\u202c \u202d%%0010101010101010\u202c \u202dlong\u202c \u202d%%0010101010101010\u202c \u202dlong\u202c \u202d%%0010101010101010\u202c \u202dlong\u202c \u202d%%0010101010101010\u202c \u202dlong\u202c \u202d%%0010101010101010\u202c \u202dlong\u202c \u202d%%0010101010101010\u202c \u202dlong\u202c \u202d%%0010101010101010\u202c \u202dlong\u202c \u202d%%0010101010101010\u202c \u202dlong\u202c \u202d%%0010101010101010\u202c \u202dlong\u202c \u202d%%0010101010101010\u202c \u202dlong\u202c \u202d%%0010101010101010\u202c \u202dlong\u202c \u202d%%0000000000000000\u202c \u202dlong\u202c \u202d%%0000000000000000\u202c \u202dlong\u202c \u202d%%0000000000000000\u202c \u202dlong\u202c \u202d%%0000000000000000\u202c \u202dlong\u202c \u202d%%0000000000000000\u202c",
+            "distance": 1.70599365234375,
+            "position": "below"
+          },
+          {
+            "text": "\u202dCON _clkfreq = 10_000_000\u202c",
+            "distance": 15.95599365234375,
+            "position": "left"
+          },
+          {
+            "text": "\u202dDAT\u202c",
+            "distance": 19.29400634765625,
+            "position": "left"
+          },
+          {
+            "text": "\u202dBITMAP Display\u202c \u202dPixel-driven bitmap\u202c",
+            "distance": 25.13232421875,
+            "position": "above"
+          },
+          {
+            "text": "\u202dcharacter\u202c \u202d0 = Clear terminal display and home cursor.\u202c \u202d1 = Home cursor.\u202c \u202d2 = Set column to next character value.\u202c \u202d3 = Set row to next character value.\u202c \u202d4 = Select color combo #0.\u202c \u202d5 = Select color combo #1.\u202c \u202d6 = Select color combo #2.\u202c \u202d7 = Select color combo #3.\u202c \u202d8 = Backspace.\u202c \u202d9 = Tab to next 8th column.\u202c \u202d13+10 or 13 or 10 = New line.\u202c \u202d32..255 = Printable character.\u202c",
+            "distance": 28.41204833984375,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "\u202dCLEAR\u202c \u202dClear the display to the background color.\u202c",
+          "\u202dBITMAP Display\u202c \u202dPixel-driven bitmap\u202c",
+          "\u202dCON _clkfreq = 10_000_000\u202c"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page44_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 44,
+      "image_index": 1,
+      "dimensions": "360\u00d7452",
+      "width": 360,
+      "height": 452,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page44_img01.png",
+      "xref": 149,
+      "extraction_status": "success",
+      "file_size_bytes": 13173,
+      "context": {
+        "caption": "\u202dTRACE modes\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dRate is set to 1 so that each pixel can be seen as it's loaded.\u202c",
+            "distance": 12.7027587890625,
+            "position": "above"
+          },
+          {
+            "text": "\u202dTRACE modes\u202c",
+            "distance": 33.7027587890625,
+            "position": "above"
+          },
+          {
+            "text": "\u202dColor\u202c \u202dMode\u202c",
+            "distance": 46.2425537109375,
+            "position": "below"
+          },
+          {
+            "text": "\u202dBits/\u202c \u202dPixel\u202c",
+            "distance": 46.2425537109375,
+            "position": "below"
+          },
+          {
+            "text": "\u202dDescription\u202c \u202dIntention\u202c",
+            "distance": 46.2425537109375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "\u202dTRACE modes\u202c",
+          "\u202dRate is set to 1 so that each pixel can be seen as it's loaded.\u202c",
+          "\u202dColor\u202c \u202dMode\u202c"
+        ]
+      },
+      "suggested_tags": []
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page45_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 45,
+      "image_index": 1,
+      "dimensions": "805\u00d7879",
+      "width": 805,
+      "height": 879,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page45_img01.png",
+      "xref": 152,
+      "extraction_status": "success",
+      "file_size_bytes": 346394,
+      "context": {
+        "caption": "\u202dRGB24\u202c \u202d24\u202c \u202d%RRRRRRRR_GGGGGGGG_BBBBBBBB\u202c \u202dFull RGB with 256 levels for red, green, and blue\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dCON _clkfreq = 100_000_000\u202c",
+            "distance": 20.7059326171875,
+            "position": "below"
+          },
+          {
+            "text": "\u202d* Color is ORANGE / BLUE / GREEN / CYAN / RED / MAGENTA / YELLOW / GRAY.\u202c",
+            "distance": 28.452789306640625,
+            "position": "above"
+          },
+          {
+            "text": "\u202dPUB go() | i\u202c",
+            "distance": 41.7059326171875,
+            "position": "below"
+          },
+          {
+            "text": "\u202dRGB24\u202c \u202d24\u202c \u202d%RRRRRRRR_GGGGGGGG_BBBBBBBB\u202c \u202dFull RGB with 256 levels for red, green, and blue\u202c",
+            "distance": 44.544097900390625,
+            "position": "above"
+          },
+          {
+            "text": "\u202ddebug(`bitmap a title 'LUT1'  pos 100 100 trace 2 lut1 longs_1bit alt)\u202c \u202ddebug(`bitmap b title 'LUT2'  pos 370 100 trace 2 lut2 longs_2bit alt)\u202c \u202ddebug(`bitmap c title 'LUT4'  pos 100 395 trace 2 lut4 longs_4bit alt)\u202c \u202ddebug(`bitmap d title 'LUT8'  pos 370 395 trace 2 lut8 longs_8bit)\u202c \u202ddebug(`bitmap e title 'RGB8'  pos 100 690 trace 2 rgb8)\u202c \u202ddebug(`bitmap f title 'RGB16' pos 370 690 trace 2 rgb16)\u202c \u202ddebug(`bitmap g title 'RGB24' pos 640 690 trace 2 rgb24)\u202c",
+            "distance": 52.2059326171875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "\u202dRGB24\u202c \u202d24\u202c \u202d%RRRRRRRR_GGGGGGGG_BBBBBBBB\u202c \u202dFull RGB with 256 levels for red, green, and blue\u202c",
+          "\u202d* Color is ORANGE / BLUE / GREEN / CYAN / RED / MAGENTA / YELLOW / GRAY.\u202c",
+          "\u202dCON _clkfreq = 100_000_000\u202c"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page47_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 47,
+      "image_index": 1,
+      "dimensions": "805\u00d71174",
+      "width": 805,
+      "height": 1174,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page47_img01.png",
+      "xref": 157,
+      "extraction_status": "success",
+      "file_size_bytes": 367554,
+      "context": {
+        "caption": "\u202dCON _clkfreq = 100_000_000\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dCON _clkfreq = 100_000_000\u202c",
+            "distance": 10.2059326171875,
+            "position": "below"
+          },
+          {
+            "text": "\u202dPUB go() | i\u202c",
+            "distance": 31.2059326171875,
+            "position": "below"
+          },
+          {
+            "text": "\u202ddebug(`bitmap a title 'LUMA8'  pos 100 100 size 1 256 dotsize 256 1 luma8  cyan)\u202c \u202ddebug(`bitmap b title 'LUMA8W' pos 370 100 size 1 256 dotsize 256 1 luma8w cyan)\u202c \u202ddebug(`bitmap c title 'LUMA8X' pos 640 100 size 1 256 dotsize 256 1 luma8x cyan)\u202c \u202ddebug(`bitmap d title 'RGBI8'  pos 100 395 size 8 32 dotsize 32 8 trace 4 rgbi8)\u202c \u202ddebug(`bitmap e title 'RGBI8W' pos 370 395 size 8 32 dotsize 32 8 trace 4 rgbi8w)\u202c \u202ddebug(`bitmap f title 'RGBI8X' pos 640 395 size 8 32 dotsize 32 8 trace 4 rgbi8x)\u202c \u202ddebug(`bitmap g title 'HSV8'   pos 100 690 size 16 16 trace 4 dotsize 16 hsv8)\u202c \u202ddebug(`bitmap h title 'HSV8W'  pos 370 690 size 16 16 trace 4 dotsize 16 hsv8w)\u202c \u202ddebug(`bitmap i title 'HSV8X'  pos 640 690 size 16 16 trace 4 dotsize 16 hsv8x)\u202c \u202ddebug(`bitmap j title 'HSV16'  pos 100 985 size 256 256 trace 4 hsv16)\u202c \u202ddebug(`bitmap k title 'HSV16W' pos 370 985 size 256 256 trace 4 hsv16w)\u202c \u202ddebug(`bitmap l title 'HSV16X' pos 640 985 size 256 256 trace 4 hsv16x)\u202c \u202dwaitms(1000)\u202c \u202drepeat i from 0 to 255\u202c \u202d'feed 8-bit displays\u202c \u202ddebug(`a b c d e f g h i `uhex_(i))\u202c \u202drepeat i from 0 to 65535\u202c \u202d'feed 16-bit displays\u202c \u202ddebug(`j k l `uhex_(i))\u202c",
+            "distance": 41.7059326171875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "\u202dCON _clkfreq = 100_000_000\u202c",
+          "\u202dPUB go() | i\u202c"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ]
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page48_img01.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 48,
+      "image_index": 1,
+      "dimensions": "594\u00d7154",
+      "width": 594,
+      "height": 154,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page48_img01.png",
+      "xref": 160,
+      "extraction_status": "success",
+      "file_size_bytes": 5437,
+      "context": {
+        "caption": "\u202dMIDI Display\u202c \u202dMIDI keyboard for viewing note-on/off\u202c\u202dstatus with velocity\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dCLEAR\u202c \u202dClear all notes.\u202c",
+            "distance": 3.27301025390625,
+            "position": "below"
+          },
+          {
+            "text": "\u202dDAT\u202c \u202dorg\u202c",
+            "distance": 7.800018310546875,
+            "position": "below"
+          },
+          {
+            "text": "\u202dCLOSE\u202c \u202dClose the window.\u202c",
+            "distance": 15.794036865234375,
+            "position": "below"
+          },
+          {
+            "text": "\u202dCON _clkfreq = 10_000_000\u202c",
+            "distance": 15.9559326171875,
+            "position": "left"
+          },
+          {
+            "text": "\u202dMIDI Display\u202c \u202dMIDI keyboard for viewing note-on/off\u202c\u202dstatus with velocity\u202c",
+            "distance": 25.132354736328125,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "\u202dMIDI Display\u202c \u202dMIDI keyboard for viewing note-on/off\u202c\u202dstatus with velocity\u202c",
+          "\u202dCON _clkfreq = 10_000_000\u202c",
+          "\u202dPUB go() | i\u202c"
+        ]
+      },
+      "suggested_tags": [
+        "diagram"
+      ]
+    },
+    {
+      "filename": "P2 Spin2 Documentation v51-250425_page48_img02.png",
+      "source_pdf": "P2 Spin2 Documentation v51-250425.pdf",
+      "page_number": 48,
+      "image_index": 2,
+      "dimensions": "846\u00d7131",
+      "width": 846,
+      "height": 131,
+      "colorspace": "ICCBased(RGB,Google/Skia/7C5FA2151397474A0486BBCC83733D59)",
+      "alpha": false,
+      "file_path": "extracted_images_spin2/P2 Spin2 Documentation v51-250425_page48_img02.png",
+      "xref": 161,
+      "extraction_status": "success",
+      "file_size_bytes": 8313,
+      "context": {
+        "caption": "\u202djmp\u202c \u202d#.wait\u202c",
+        "nearby_text": [
+          {
+            "text": "\u202dx\u202c \u202dres\u202c \u202d1\u202c",
+            "distance": 26.5440673828125,
+            "position": "above"
+          },
+          {
+            "text": "\u202djmp\u202c \u202d#.wait\u202c",
+            "distance": 47.5440673828125,
+            "position": "above"
+          },
+          {
+            "text": "\u202dPUB go() | i\u202c",
+            "distance": 60.60005187988281,
+            "position": "above"
+          },
+          {
+            "text": "\u202ddebug\u202c \u202d(\"`m \", uhex_byte_(x))\u202c",
+            "distance": 68.5440673828125,
+            "position": "above"
+          },
+          {
+            "text": "\u202dPacked-Data Modes\u202c",
+            "distance": 75.75244140625,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "\u202djmp\u202c \u202d#.wait\u202c",
+          "\u202dx\u202c \u202dres\u202c \u202d1\u202c"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ]
+    }
+  ]
+}

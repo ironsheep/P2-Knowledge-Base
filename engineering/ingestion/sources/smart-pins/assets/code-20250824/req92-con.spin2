@@ -1,0 +1,10 @@
+' Source: P2 SmartPins-220809 (Page 53)
+' Extracted: 2025-08-24
+' Language: Spin2 | Type: Code Fragment
+
+CON
+' Constants for serial-port control
+  txpin   = 20                             ' P20  serial out
+  bitper  = $3640_0007                     ' bit rate for tests
+  txmode  = %0000_0000_000_0000000000000_01_11110_0   'async tx mode
+  

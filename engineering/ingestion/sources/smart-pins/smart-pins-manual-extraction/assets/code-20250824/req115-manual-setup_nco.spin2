@@ -1,0 +1,26 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  NCO_PIN = 20
+  NCO_MODE = P_NCO_FREQ | P_OE
+
+PUB setup_nco()
+  pinstart(NCO_PIN, NCO_MODE, 0, 0)
+  
+PUB set_frequency(freq_hz) | freq_val
+  ' Calculate frequency value
+  ' freq = (freq_val * clkfreq) / 2^32
+  freq_val := (freq_hz << 32) / clkfreq
+  wypin(NCO_PIN, freq_val)
+  
+PUB sweep_frequency(start_hz, stop_hz, time_ms) | f, step
+  step := ((stop_hz - start_hz) << 16) / time_ms
+  f := start_hz << 16
+  
+  repeat time_ms
+    set_frequency(f >> 16)
+    f += step
+    waitus(1000)

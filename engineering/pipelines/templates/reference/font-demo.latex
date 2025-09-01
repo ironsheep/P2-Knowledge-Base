@@ -1,0 +1,184 @@
+\documentclass[11pt,letterpaper]{article}
+
+% Font packages for demonstration
+% Only one should be uncommented at a time for normal use
+% \usepackage{lmodern}              % Latin Modern (LaTeX default)
+% \usepackage{charter}              % Charter - very readable serif
+% \usepackage{crimson}              % Crimson Text - elegant, readable serif
+% \usepackage{libertinus}           % Libertinus Serif - modern, friendly
+% \usepackage{ebgaramond}           % EB Garamond - classic, beautiful
+% \usepackage{cormorantgaramond}    % Cormorant Garamond - stylish
+% \usepackage{palatino}             % Palatino - classic book font
+% \usepackage{utopia}               % Utopia - clean, readable
+% \usepackage{baskervald}           % Baskerville variant - traditional
+% \usepackage{newpxtext}            % Times variant - familiar, compact
+
+\usepackage{microtype}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{mdframed}
+
+% Define colors
+\definecolor{sectionBlue}{RGB}{70,130,180}
+\definecolor{codeGray}{RGB}{248,248,248}
+
+% Title formatting
+\usepackage{titlesec}
+\titleformat{\section}{\Large\bfseries\color{sectionBlue}}{}{0em}{}
+\titleformat{\subsection}{\large\bfseries}{}{0em}{}
+
+% Custom commands for font switching
+\newcommand{\demotext}{This paragraph demonstrates the font in action for business documentation. The quick brown fox jumps over the lazy dog. ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 1234567890. This font works well for technical writing, user guides, and professional communication.}
+
+\newcommand{\technicaltext}{Technical documentation requires clear, readable fonts that work well with code snippets and complex instructions. Consider readability at various sizes, especially for detailed procedures and troubleshooting guides.}
+
+\newcommand{\friendlytext}{User-facing content benefits from approachable, warm fonts that don't intimidate newcomers. This type of content includes tutorials, getting-started guides, and customer-facing documentation.}
+
+\begin{document}
+
+% Title
+\begin{center}
+    {\Huge\bfseries Font Comparison Guide\par}
+    \vspace{0.5cm}
+    {\Large For Business Documentation\par}
+    \vspace{0.3cm}
+    {\large August 16, 2025\par}
+    \vspace{1cm}
+\end{center}
+
+\section{Font Recommendations by Document Type}
+
+\begin{mdframed}[backgroundcolor=codeGray,linewidth=0pt]
+\textbf{Quick Reference:}
+\begin{itemize}[nosep]
+    \item \textbf{Technical Documentation:} Charter, Libertinus, Crimson
+    \item \textbf{User Guides:} Charter, Palatino, Utopia
+    \item \textbf{Training Materials:} Charter, Baskerville, Crimson
+    \item \textbf{Light Humor/Casual:} Libertinus, Utopia, Charter
+    \item \textbf{Deep Technical:} Latin Modern, Charter, Libertinus
+    \item \textbf{DIY Documentation:} Charter, Palatino, Utopia
+\end{itemize}
+\end{mdframed}
+
+\section{Font Samples}
+
+% We'll create samples by using font commands that work without package conflicts
+\subsection{Charter (Recommended Default)}
+{\fontfamily{bch}\selectfont
+\textbf{Character:} Professional, highly readable, designed for body text\\
+\textbf{Best for:} User manuals, technical docs, training materials\\
+
+\demotext
+
+\textit{Italic sample:} \technicaltext
+
+\textbf{Bold sample:} Key concepts and important warnings stand out clearly.
+}
+
+\subsection{Palatino (Classic Book Style)}
+{\fontfamily{ppl}\selectfont
+\textbf{Character:} Traditional, elegant, excellent for long-form reading\\
+\textbf{Best for:} Training materials, formal documents, detailed guides\\
+
+\demotext
+
+\textit{Italic sample:} \friendlytext
+
+\textbf{Bold sample:} Headings and emphasis work beautifully in this typeface.
+}
+
+\subsection{Computer Modern (LaTeX Default)}
+{\fontfamily{cmr}\selectfont
+\textbf{Character:} Technical, precise, familiar to academic readers\\
+\textbf{Best for:} Mathematical content, academic papers, technical references\\
+
+\demotext
+
+\textit{Italic sample:} \technicaltext
+
+\textbf{Bold sample:} Mathematical and technical content feels at home here.
+}
+
+\subsection{Times (Compact \& Familiar)}
+{\fontfamily{ptm}\selectfont
+\textbf{Character:} Compact, familiar, space-efficient\\
+\textbf{Best for:} Dense technical docs, formal reports, space-constrained layouts\\
+
+\demotext
+
+\textit{Italic sample:} \technicaltext
+
+\textbf{Bold sample:} Efficient use of space while maintaining readability.
+}
+
+\subsection{Utopia (Clean \& Modern)}
+{\fontfamily{put}\selectfont
+\textbf{Character:} Clean, modern, friendly yet professional\\
+\textbf{Best for:} User guides, tutorials, customer-facing documentation\\
+
+\demotext
+
+\textit{Italic sample:} \friendlytext
+
+\textbf{Bold sample:} Modern appearance appeals to contemporary readers.
+}
+
+\section{Advanced Font Options}
+
+\subsection{For Premium Documents}
+\begin{itemize}
+    \item \textbf{Crimson Text:} Elegant, inspired by old-style typefaces
+    \item \textbf{EB Garamond:} Beautiful Renaissance typeface
+    \item \textbf{Libertinus:} Modern serif with excellent Unicode support
+\end{itemize}
+
+\subsection{Code and Technical Elements}
+All fonts pair well with \texttt{monospace fonts} for code samples and technical elements.
+
+\begin{mdframed}[backgroundcolor=codeGray,linewidth=0pt]
+\texttt{// Code example in monospace}\\
+\texttt{function generatePDF(template, content) \{}\\
+\texttt{~~~~return processDocument(template, content);}\\
+\texttt{\}}
+\end{mdframed}
+
+\section{Selection Guidelines}
+
+\subsection{By Content Complexity}
+\begin{itemize}
+    \item \textbf{Simple tutorials:} Charter, Palatino
+    \item \textbf{Technical procedures:} Charter, Computer Modern
+    \item \textbf{Mixed content:} Charter (versatile for all scenarios)
+\end{itemize}
+
+\subsection{By Audience}
+\begin{itemize}
+    \item \textbf{Technical professionals:} Computer Modern, Charter
+    \item \textbf{General business users:} Charter, Palatino
+    \item \textbf{DIY enthusiasts:} Utopia, Charter
+    \item \textbf{Mixed audiences:} Charter (safe choice)
+\end{itemize}
+
+\section{Implementation}
+
+To use any of these fonts in your LaTeX templates, uncomment the appropriate line:
+
+\begin{mdframed}[backgroundcolor=codeGray,linewidth=0pt]
+\texttt{\% Charter (recommended default)}\\
+\texttt{\\usepackage\{charter\}}\\[0.3cm]
+\texttt{\% Palatino (classic book style)}\\
+\texttt{\\usepackage\{palatino\}}\\[0.3cm]
+\texttt{\% Computer Modern (LaTeX default - no package needed)}\\
+\texttt{\% \\usepackage\{lmodern\}}\\[0.3cm]
+\texttt{\% Times variant}\\
+\texttt{\\usepackage\{mathptmx\}}
+\end{mdframed}
+
+\vfill
+\begin{center}
+    {\small Iron Sheep Productions, LLC • Font Demo Document}
+\end{center}
+
+\end{document}

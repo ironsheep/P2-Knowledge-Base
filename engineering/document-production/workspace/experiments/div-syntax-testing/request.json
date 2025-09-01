@@ -1,0 +1,16 @@
+{
+  "documents": [
+    {
+      "input": "div-syntax-test.md",
+      "output": "div-syntax-test.pdf",
+      "template": "p2kb-pasm-desilva-eisvogel",
+      "pandoc_args": ["--to=latex", "--lua-filter=filters/div-to-environment.lua"],
+      "metadata": {
+        "title": "Div Syntax Test",
+        "subtitle": "Testing Different Div Notations",
+        "author": "Test",
+        "header-right": "TEST"
+      }
+    }
+  ]
+}

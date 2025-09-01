@@ -1,0 +1,29 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  STATE_PIN = 20
+  STATE_MODE = P_STATE_TICKS
+
+PUB measure_pulse_width() : width_us
+  pinstart(STATE_PIN, STATE_MODE, 1, 0) ' Count high state
+  wypin(STATE_PIN, 0)                   ' Reset
+  ' Wait for measurement
+  repeat until pinr(STATE_PIN) > 0
+  width_us := rdpin(STATE_PIN) / (clkfreq/1_000_000)
+  
+PUB duty_cycle() : percent | high, low
+  ' Measure high time
+  pinstart(STATE_PIN, STATE_MODE, 1, 0)
+  waitms(100)
+  high := rdpin(STATE_PIN)
+  
+  ' Measure low time
+  wxpin(STATE_PIN, 0)  ' Count low state
+  wypin(STATE_PIN, 0)  ' Reset
+  waitms(100)
+  low := rdpin(STATE_PIN)
+  
+  percent := (high * 100) / (high + low)

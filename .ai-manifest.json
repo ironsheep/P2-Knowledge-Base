@@ -1,0 +1,119 @@
+{
+  "name": "Parallax Propeller 2 Documentation",
+  "version": "0.1.0",
+  "type": "microcontroller-reference",
+  "description": "Comprehensive documentation for the Parallax Propeller 2 (P2) 8-core microcontroller, optimized for AI/LLM consumption",
+  "authors": [
+    {
+      "name": "Chip Gracey",
+      "email": "cgracey@parallax.com",
+      "role": "P2 Architect, SPIN2 Creator"
+    },
+    {
+      "name": "Jon Titus",
+      "role": "Smart Pins Documentation"
+    },
+    {
+      "name": "Parallax Inc.",
+      "url": "https://www.parallax.com"
+    }
+  ],
+  "formats": {
+    "json": {
+      "path": "/ai-reference/versions/v0.1.0/",
+      "files": [
+        "p2-reference-v0.1.0.json",
+        "gaps.json"
+      ]
+    },
+    "markdown": {
+      "path": "/developer-reference/",
+      "human_readable": true
+    }
+  },
+  "completeness": {
+    "overall": 0.41,
+    "breakdown": {
+      "architecture": 0.85,
+      "pasm2_instructions": 0.65,
+      "smart_pins": 0.31,
+      "spin2_language": 0.0,
+      "code_examples": 0.25,
+      "boot_process": 0.0
+    }
+  },
+  "capabilities": [
+    "architecture-reference",
+    "instruction-set-pasm2",
+    "memory-model",
+    "pin-control-basic",
+    "cog-management",
+    "cordic-operations",
+    "timing-control"
+  ],
+  "limitations": [
+    "spin2-not-included",
+    "smart-pins-partial",
+    "boot-process-missing",
+    "usb-not-documented"
+  ],
+  "code_generation": {
+    "supported": [
+      "pasm2-assembly",
+      "basic-pin-control",
+      "memory-operations",
+      "cog-launching",
+      "timing-loops"
+    ],
+    "not_supported": [
+      "spin2-high-level",
+      "advanced-smart-pins",
+      "usb-communication",
+      "boot-configuration"
+    ]
+  },
+  "usage": {
+    "direct_load": "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/ai-reference/versions/v0.1.0/p2-reference-v0.1.0.json",
+    "example_prompt": "Using the P2 reference, generate PASM2 code to blink an LED on pin 56 at 1Hz with a 180MHz clock",
+    "integration": {
+      "langchain": "from langchain.document_loaders import JSONLoader",
+      "openai": "Include URL in system prompt",
+      "claude": "Upload JSON directly or reference URL"
+    }
+  },
+  "updates": {
+    "feed": "https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base/releases.atom",
+    "changelog": "/ai-reference/versions/v0.1.0/changelog.md",
+    "roadmap": {
+      "v0.2.0": "Add SPIN2 language, complete Smart Pins",
+      "v0.3.0": "Add boot process, USB support",
+      "v1.0.0": "Complete documentation with all examples"
+    }
+  },
+  "feedback": {
+    "issues": "https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base/issues",
+    "email": "sgracey@parallax.com",
+    "corrections": "Please submit PRs for corrections"
+  },
+  "license": {
+    "type": "MIT",
+    "ai_training": "Explicitly permitted",
+    "commercial_use": "Allowed with attribution",
+    "attribution": "Based on Parallax P2 Documentation"
+  },
+  "keywords": [
+    "propeller2",
+    "p2",
+    "parallax",
+    "microcontroller",
+    "8-core",
+    "multicore",
+    "pasm2",
+    "spin2",
+    "embedded",
+    "real-time",
+    "parallel-processing",
+    "smart-pins",
+    "cordic"
+  ]
+}

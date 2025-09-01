@@ -1,0 +1,162 @@
+% P2KB De Silva Content Style Package  
+% Content layer for De Silva pedagogical tutorial documents
+% Provides: ONLY De Silva-specific pedagogical elements added to foundation
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-desilva-content}[2025/08/28 P2KB De Silva Content Package v1.0]
+
+% ==================== DE SILVA PEDAGOGICAL COLORS ====================
+% Colors specific to De Silva tutorial methodology (foundation has basic colors)
+
+\definecolor{inlineyellow}{HTML}{FFFACD}
+\definecolor{missingviolet}{HTML}{E6E6FA}
+\definecolor{revieworange}{HTML}{FFE4B5}
+\definecolor{diagramblue}{HTML}{E0F2FF}
+\definecolor{chaptergreen}{HTML}{F0FFF0}
+\definecolor{yourturncolor}{HTML}{E6F3FF}  % Updated from FFF8DC for distinction
+
+% ==================== DE SILVA SPECIFIC OVERRIDES ====================
+% Override foundation defaults with De Silva tutorial styling
+
+% Inline code should be BOLD without background (per creation guide)
+\renewcommand{\texttt}[1]{\textbf{\ttfamily #1}}
+
+% ==================== DE SILVA PEDAGOGICAL ENVIRONMENTS ====================
+% ONLY the specific environments De Silva tutorial adds beyond foundation
+
+% Sidetrack Environment - Gray with dashed border for technical asides
+\newtcolorbox{sidetrack}{
+  colback=gray!15,
+  colframe=gray!50,
+  boxrule=0pt,
+  borderline={1pt}{0pt}{gray!50, dashed},
+  width=0.9\textwidth,
+  center,
+  left=15pt,right=15pt,top=12pt,bottom=12pt,
+  before skip=15pt,
+  after skip=15pt,
+  fontupper=\small
+}
+
+% Interlude Environment - Gray background, no border for narrative breaks
+\newtcolorbox{interlude}{
+  colback=gray!10,
+  colframe=gray!10,
+  boxrule=0pt,
+  width=0.9\textwidth,
+  center,
+  left=20pt,right=20pt,top=15pt,bottom=15pt,
+  before skip=20pt,
+  after skip=20pt,
+  fontupper=\normalsize\itshape
+}
+
+% Your Turn Environment - Light blue for exercises and practice
+\newtcolorbox{yourturn}{
+  colback=yourturncolor,
+  colframe=blue!30,
+  boxrule=1pt,
+  rounded corners,
+  width=0.85\textwidth,
+  center,
+  left=15pt,right=15pt,top=12pt,bottom=12pt,
+  before skip=15pt,
+  after skip=15pt,
+  title={\textbf{Your Turn}},
+  fonttitle=\bfseries\large,
+  coltitle=black,
+  colbacktitle=yourturncolor
+}
+
+% Chapter End Environment - Green celebration box
+\newtcolorbox{chapterend}{
+  colback=chaptergreen,
+  colframe=chaptergreen,
+  boxrule=0pt,
+  width=0.8\textwidth,
+  center,
+  left=20pt,right=20pt,top=15pt,bottom=15pt,
+  before skip=20pt,
+  after skip=20pt,
+  overlay={\draw[gray!40, line width=0.5pt] 
+    ([xshift=30pt]frame.north west |- frame.center) -- 
+    ([xshift=-30pt]frame.north east |- frame.center);}
+}
+
+% Missing Content Environment - Violet for incomplete sections
+\newtcolorbox{missing}{
+  colback=missingviolet,
+  colframe=purple!50,
+  boxrule=2pt,
+  rounded corners,
+  width=0.9\textwidth,
+  center,
+  left=15pt,right=15pt,top=12pt,bottom=12pt,
+  before skip=15pt,
+  after skip=15pt,
+  title={\textbf{🚧 CONTENT MISSING - COMING SOON}},
+  fonttitle=\bfseries,
+  coltitle=black,
+  colbacktitle=missingviolet
+}
+
+% Review Environment - Orange for technical review needed
+\newtcolorbox{review}{
+  colback=revieworange,
+  colframe=orange!70,
+  boxrule=2pt,
+  rounded corners,
+  width=0.9\textwidth,
+  center,
+  left=15pt,right=15pt,top=12pt,bottom=12pt,
+  before skip=15pt,
+  after skip=15pt,
+  title={\textbf{🔍 NEEDS TECHNICAL REVIEW}},
+  fonttitle=\bfseries,
+  coltitle=black,
+  colbacktitle=revieworange
+}
+
+% Diagram Environment - Blue for diagram placeholders
+\newtcolorbox{diagram}{
+  colback=diagramblue,
+  colframe=blue!50,
+  boxrule=1pt,
+  rounded corners,
+  width=0.9\textwidth,
+  center,
+  left=15pt,right=15pt,top=12pt,bottom=12pt,
+  before skip=15pt,
+  after skip=15pt,
+  title={\textbf{🎨 DIAGRAM NEEDED}},
+  fonttitle=\bfseries,
+  coltitle=black,
+  colbacktitle=diagramblue
+}
+
+% ==================== DE SILVA FOUNDATION OVERRIDES ====================
+% Override foundation's basic Shaded environment with De Silva yellow
+\renewenvironment{Shaded}{%
+  \par\needspace{4\baselineskip}%
+  \vspace{1.5\baselineskip}%
+  \begin{tcolorbox}[
+    boxrule=0pt,
+    colback=inlineyellow,  % De Silva yellow instead of foundation gray
+    rounded corners,
+    left=10pt,
+    right=10pt,
+    top=8pt,
+    bottom=8pt,
+    before skip=15pt,
+    after skip=15pt
+  ]
+}{%
+  \end{tcolorbox}%
+  \par\vspace{\baselineskip}%
+}
+
+% ==================== PANDOC DIV INTEGRATION ====================
+% Environment names must match Pandoc div class names exactly
+% Foundation provides tcolorbox, we just define the specific styling

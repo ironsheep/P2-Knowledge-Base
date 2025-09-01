@@ -1,0 +1,35 @@
+{
+  "source_pdf": "/Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/exports/pdf-generation/TEMP-SAVES/P2-PASM-deSilva-Style.pdf",
+  "extraction_summary": {
+    "total_code_blocks": 1,
+    "total_pages": 14,
+    "output_directory": "extracted_code"
+  },
+  "code_blocks": [
+    {
+      "page": 10,
+      "lines": [
+        "RET",
+        "Return from subroutine"
+      ],
+      "line_count": 2,
+      "start_line": 53,
+      "language": "PASM2",
+      "type": "Snippet",
+      "context": {
+        "before": [
+          "Move S to D",
+          "MOV x, #42",
+          "RET"
+        ],
+        "after": [
+          "SHL",
+          "Shift left",
+          "SHL x, #1"
+        ]
+      },
+      "source_pdf": "P2-PASM-deSilva-Style",
+      "extraction_status": "success"
+    }
+  ]
+}

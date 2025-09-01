@@ -1,0 +1,17 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+mov     mask, #$FF      ' Pins P7..P0
+        shl     mask, #20       ' Pins P27..P20
+        
+        ' Configure while disabled
+        rep     #4, #8          ' 8 pins
+        wrpin   pwm_mode, pin
+        wxpin   period, pin
+        wypin   duty, pin
+        add     pin, #1
+        
+        ' Start synchronized
+        dirh    mask            ' Enable all PWM pins

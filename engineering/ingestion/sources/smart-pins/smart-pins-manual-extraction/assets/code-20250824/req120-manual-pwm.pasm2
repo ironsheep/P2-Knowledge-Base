@@ -1,0 +1,28 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+DAT
+        org     0
+        
+pwm_init
+        mov     pa, ##P_PWM_SAWTOOTH | P_OE
+        wrpin   pa, #20         ' Configure PWM
+        mov     pa, ##10000     ' Period (20kHz @ 200MHz)
+        wxpin   pa, #20
+        dirh    #20             ' Enable PWM
+        
+set_25_percent
+        mov     pa, ##2500      ' 25% of 10000
+        wypin   pa, #20
+        
+servo_control
+        ' 1-2ms pulse, 20ms period
+        mov     pa, ##4_000_000 ' 20ms @ 200MHz
+        wxpin   pa, #20
+.loop   
+        mov     pa, ##300_000   ' 1.5ms center
+        wypin   pa, #20
+        waitx   ##4_000_000     ' Wait one period
+        jmp     #.loop

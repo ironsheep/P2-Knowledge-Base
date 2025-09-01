@@ -1,0 +1,21 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: SPIN2
+' Type: Manual Example
+
+CON
+  PULSE_PIN = 20
+  PULSE_MODE = P_PULSE | P_OE
+
+PUB setup_pulse_generator()
+  pinstart(PULSE_PIN, PULSE_MODE, 0, 0)
+  
+PUB single_pulse(width_us)
+  wxpin(PULSE_PIN, clkfreq/1_000_000 * width_us)
+  wypin(PULSE_PIN, $0001_0000 | (clkfreq/1_000_000))
+  
+PUB pulse_train(freq_hz, duty_percent) | period, width
+  period := clkfreq / freq_hz
+  width := (period * duty_percent) / 100
+  wxpin(PULSE_PIN, period)
+  wypin(PULSE_PIN, $0000_0000 | width)  ' Continuous

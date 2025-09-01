@@ -1,0 +1,414 @@
+{
+  "$schema": "../schemas/spin2-schema.json",
+  "metadata": {
+    "title": "SPIN2 Language Reference",
+    "version": "1.0.0",
+    "description": "Complete reference for Parallax Propeller 2 SPIN2 high-level language",
+    "lastUpdated": "2025-08-15",
+    "author": "Chip Gracey",
+    "trustLevel": "verified"
+  },
+  "keywords": [
+    {
+      "name": "CON",
+      "category": "declaration",
+      "description": "Constants section declaration",
+      "syntax": "CON",
+      "examples": ["CON", "  _clkfreq = 80_000_000"]
+    },
+    {
+      "name": "VAR", 
+      "category": "declaration",
+      "description": "Variables section declaration",
+      "syntax": "VAR",
+      "examples": ["VAR", "  long counter", "  byte buffer[256]"]
+    },
+    {
+      "name": "OBJ",
+      "category": "declaration", 
+      "description": "Objects section declaration",
+      "syntax": "OBJ",
+      "examples": ["OBJ", "  serial : \"FullDuplexSerial\""]
+    },
+    {
+      "name": "PUB",
+      "category": "declaration",
+      "description": "Public method declaration",
+      "syntax": "PUB methodname(parameters) : returnvars | localvars",
+      "examples": ["PUB start(pin) : okay", "PUB main | x, y"]
+    },
+    {
+      "name": "PRI",
+      "category": "declaration",
+      "description": "Private method declaration", 
+      "syntax": "PRI methodname(parameters) : returnvars | localvars",
+      "examples": ["PRI helper(value)", "PRI calculate : result | temp"]
+    },
+    {
+      "name": "IF",
+      "category": "control",
+      "description": "Conditional execution",
+      "syntax": "IF condition",
+      "examples": ["IF x > 0", "IF flag"]
+    },
+    {
+      "name": "ELSE",
+      "category": "control", 
+      "description": "Alternative conditional path",
+      "syntax": "ELSE",
+      "examples": ["ELSE", "ELSEIF x < 0"]
+    },
+    {
+      "name": "REPEAT",
+      "category": "control",
+      "description": "Loop construct",
+      "syntax": "REPEAT [var FROM start TO end [STEP step]] [WHILE/UNTIL condition]",
+      "examples": ["REPEAT", "REPEAT i FROM 0 TO 9", "REPEAT WHILE running"]
+    },
+    {
+      "name": "CASE",
+      "category": "control",
+      "description": "Multi-way branch",
+      "syntax": "CASE expression",
+      "examples": ["CASE value", "  1: action1", "  2..5: action2"]
+    },
+    {
+      "name": "ORG",
+      "category": "directive",
+      "description": "Inline assembly block",
+      "syntax": "ORG [address]",
+      "examples": ["ORG", "  mov outa, #1", "END"]
+    }
+  ],
+  "operators": [
+    {
+      "symbol": ":=",
+      "name": "Assignment",
+      "precedence": 1,
+      "associativity": "right",
+      "operands": 2,
+      "category": "assignment"
+    },
+    {
+      "symbol": "OR",
+      "name": "Logical OR",
+      "precedence": 2,
+      "associativity": "left", 
+      "operands": 2,
+      "category": "logical"
+    },
+    {
+      "symbol": "AND",
+      "name": "Logical AND",
+      "precedence": 3,
+      "associativity": "left",
+      "operands": 2, 
+      "category": "logical"
+    },
+    {
+      "symbol": "==",
+      "name": "Equal",
+      "precedence": 4,
+      "associativity": "left",
+      "operands": 2,
+      "category": "comparison"
+    },
+    {
+      "symbol": "<>",
+      "name": "Not Equal", 
+      "precedence": 4,
+      "associativity": "left",
+      "operands": 2,
+      "category": "comparison"
+    },
+    {
+      "symbol": "<",
+      "name": "Less Than",
+      "precedence": 4,
+      "associativity": "left",
+      "operands": 2,
+      "category": "comparison"
+    },
+    {
+      "symbol": ">",
+      "name": "Greater Than",
+      "precedence": 4,
+      "associativity": "left", 
+      "operands": 2,
+      "category": "comparison"
+    },
+    {
+      "symbol": "<=",
+      "name": "Less Than or Equal",
+      "precedence": 4,
+      "associativity": "left",
+      "operands": 2,
+      "category": "comparison"
+    },
+    {
+      "symbol": ">=", 
+      "name": "Greater Than or Equal",
+      "precedence": 4,
+      "associativity": "left",
+      "operands": 2,
+      "category": "comparison"
+    },
+    {
+      "symbol": "|",
+      "name": "Bitwise OR",
+      "precedence": 5,
+      "associativity": "left",
+      "operands": 2,
+      "category": "bitwise"
+    },
+    {
+      "symbol": "&",
+      "name": "Bitwise AND",
+      "precedence": 6,
+      "associativity": "left",
+      "operands": 2,
+      "category": "bitwise"
+    },
+    {
+      "symbol": "^",
+      "name": "Bitwise XOR", 
+      "precedence": 6,
+      "associativity": "left",
+      "operands": 2,
+      "category": "bitwise"
+    },
+    {
+      "symbol": "<<",
+      "name": "Shift Left",
+      "precedence": 7,
+      "associativity": "left",
+      "operands": 2,
+      "category": "bitwise"
+    },
+    {
+      "symbol": ">>",
+      "name": "Shift Right",
+      "precedence": 7,
+      "associativity": "left",
+      "operands": 2,
+      "category": "bitwise"
+    },
+    {
+      "symbol": "+",
+      "name": "Addition",
+      "precedence": 8,
+      "associativity": "left",
+      "operands": 2,
+      "category": "arithmetic"
+    },
+    {
+      "symbol": "-",
+      "name": "Subtraction",
+      "precedence": 8,
+      "associativity": "left",
+      "operands": 2,
+      "category": "arithmetic"
+    },
+    {
+      "symbol": "*",
+      "name": "Multiplication",
+      "precedence": 9,
+      "associativity": "left",
+      "operands": 2,
+      "category": "arithmetic"
+    },
+    {
+      "symbol": "/",
+      "name": "Division",
+      "precedence": 9,
+      "associativity": "left",
+      "operands": 2,
+      "category": "arithmetic"
+    },
+    {
+      "symbol": "//",
+      "name": "Modulo",
+      "precedence": 9,
+      "associativity": "left",
+      "operands": 2,
+      "category": "arithmetic"
+    },
+    {
+      "symbol": "NOT",
+      "name": "Logical NOT",
+      "precedence": 10,
+      "associativity": "right",
+      "operands": 1,
+      "category": "logical"
+    },
+    {
+      "symbol": "!",
+      "name": "Bitwise NOT",
+      "precedence": 10,
+      "associativity": "right",
+      "operands": 1,
+      "category": "bitwise"
+    }
+  ],
+  "methods": [
+    {
+      "name": "COGNEW",
+      "returnType": "long",
+      "parameters": ["function", "parameter", "stack"],
+      "description": "Start new COG running specified function",
+      "category": "builtin"
+    },
+    {
+      "name": "COGSTOP",
+      "returnType": "void",
+      "parameters": ["cogid"],
+      "description": "Stop specified COG",
+      "category": "builtin"
+    },
+    {
+      "name": "WAITCNT",
+      "returnType": "void", 
+      "parameters": ["target_count"],
+      "description": "Wait until system counter reaches target",
+      "category": "builtin"
+    },
+    {
+      "name": "CNT",
+      "returnType": "long",
+      "parameters": [],
+      "description": "Read current system counter value",
+      "category": "builtin"
+    },
+    {
+      "name": "DIRA",
+      "returnType": "long",
+      "parameters": [],
+      "description": "Pin direction register A (pins 0-31)",
+      "category": "io"
+    },
+    {
+      "name": "OUTA",
+      "returnType": "long", 
+      "parameters": [],
+      "description": "Pin output register A (pins 0-31)",
+      "category": "io"
+    },
+    {
+      "name": "INA",
+      "returnType": "long",
+      "parameters": [],
+      "description": "Pin input register A (pins 0-31)",
+      "category": "io"
+    },
+    {
+      "name": "SQRT",
+      "returnType": "long",
+      "parameters": ["value"],
+      "description": "Calculate square root using CORDIC",
+      "category": "math"
+    },
+    {
+      "name": "SIN",
+      "returnType": "long",
+      "parameters": ["angle"],
+      "description": "Calculate sine using CORDIC",
+      "category": "math"
+    },
+    {
+      "name": "COS",
+      "returnType": "long",
+      "parameters": ["angle"], 
+      "description": "Calculate cosine using CORDIC",
+      "category": "math"
+    }
+  ],
+  "blocks": [
+    {
+      "name": "CON",
+      "purpose": "Define constants",
+      "syntax": "CON\\n  name = value",
+      "requiredSections": [],
+      "optionalSections": ["constants"]
+    },
+    {
+      "name": "VAR",
+      "purpose": "Declare variables",
+      "syntax": "VAR\\n  type name[size]",
+      "requiredSections": [],
+      "optionalSections": ["variables"]
+    },
+    {
+      "name": "OBJ",
+      "purpose": "Include other objects",
+      "syntax": "OBJ\\n  instance : \\\"filename\\\"",
+      "requiredSections": [],
+      "optionalSections": ["objects"]
+    },
+    {
+      "name": "PUB", 
+      "purpose": "Public methods",
+      "syntax": "PUB name(params) : returns | locals",
+      "requiredSections": ["method body"],
+      "optionalSections": ["parameters", "return variables", "local variables"]
+    },
+    {
+      "name": "PRI",
+      "purpose": "Private methods", 
+      "syntax": "PRI name(params) : returns | locals",
+      "requiredSections": ["method body"],
+      "optionalSections": ["parameters", "return variables", "local variables"]
+    }
+  ],
+  "precedenceTable": [
+    {
+      "level": 1,
+      "operators": [":="],
+      "associativity": "right"
+    },
+    {
+      "level": 2,
+      "operators": ["OR"],
+      "associativity": "left"
+    },
+    {
+      "level": 3,
+      "operators": ["AND"],
+      "associativity": "left"
+    },
+    {
+      "level": 4,
+      "operators": ["==", "<>", "<", ">", "<=", ">="],
+      "associativity": "left"
+    },
+    {
+      "level": 5,
+      "operators": ["|"],
+      "associativity": "left"
+    },
+    {
+      "level": 6,
+      "operators": ["&", "^"],
+      "associativity": "left"
+    },
+    {
+      "level": 7,
+      "operators": ["<<", ">>"],
+      "associativity": "left"
+    },
+    {
+      "level": 8,
+      "operators": ["+", "-"],
+      "associativity": "left"
+    },
+    {
+      "level": 9,
+      "operators": ["*", "/", "//"],
+      "associativity": "left"
+    },
+    {
+      "level": 10,
+      "operators": ["NOT", "!"],
+      "associativity": "right"
+    }
+  ]
+}

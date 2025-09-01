@@ -1,0 +1,11 @@
+' Source: P2 Smart Pins Complete Reference Manual
+' Extracted: 2025-08-24
+' Language: PASM2
+' Type: Manual Example
+
+WRPIN   D/#, S/#    ' Write mode configuration
+WXPIN   D/#, S/#    ' Write X parameter
+WYPIN   D/#, S/#    ' Write Y parameter  
+RDPIN   D, S/# {WC} ' Read Z result and acknowledge
+RQPIN   D, S/# {WC} ' Read Z result without acknowledge
+AKPIN   S/#         ' Acknowledge Smart Pin

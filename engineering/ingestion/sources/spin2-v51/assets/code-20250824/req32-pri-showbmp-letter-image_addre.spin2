@@ -1,0 +1,6 @@
+' Source: P2 Spin2 Documentation v51-250425 (Page 46)
+' Extracted: 2025-08-24
+' Language: Spin2 | Type: Snippet
+
+PRI showbmp(letter, image_address, lut_offset, lut_size, image_longs) | i
+image_address += lut_offset
