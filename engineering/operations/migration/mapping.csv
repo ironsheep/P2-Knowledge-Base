@@ -267,3 +267,14 @@ engineering/pipelines/pdf-generation-workflow-v1.md,DELETED,file,2025-09-01,PHAS
 engineering/pipelines/pdf-generation-workflow-v2.md,engineering/pipelines/pdf-generation-workflow.md,file,2025-09-01,PHASE 45 - Renamed to remove version suffix
 engineering/pipelines/documentation-market-strategy.md,engineering/pipelines/pipeline-prioritization-market-strategy.md,file,2025-09-01,PHASE 45 - Renamed for clarity
 engineering/workspace/documents/P2-MISSING-INSTRUCTIONS-ANALYSIS.md,engineering/ingestion/central-analysis/P2-MISSING-INSTRUCTIONS-ANALYSIS.md,file,2025-09-01,PHASE 45 - Moved analysis to central location
+engineering/document-production/workspace/desilva-manual,engineering/document-production/workspace/p2-pasm-desilva-style,directory,2025-09-01,Canonical naming standardization
+engineering/document-production/outbound/P2-PASM-deSilva-Style,engineering/document-production/outbound/p2-pasm-desilva-style,directory,2025-09-01,Canonical naming standardization
+engineering/document-production/manuals/smart-pins-workshop,engineering/document-production/manuals/p2-smart-pins-tutorial,directory,2025-09-01,Canonical naming standardization
+engineering/document-production/workspace/smart-pins-manual,engineering/document-production/workspace/p2-smart-pins-tutorial,directory,2025-09-01,Canonical naming standardization
+engineering/document-production/outbound/P2-Smart-Pins-Green-Book,engineering/document-production/outbound/p2-smart-pins-tutorial,directory,2025-09-01,Canonical naming standardization
+engineering/document-production/workspace/p2-debug-window-system-manual,engineering/document-production/workspace/p2-debug-terminal-manual,directory,2025-09-01,Canonical naming standardization
+engineering/document-production/workspace/debugger-manual,engineering/document-production/workspace/p2-single-step-debugger-manual,directory,2025-09-01,Canonical naming standardization
+engineering/document-production/manuals/pasm2-manual,engineering/document-production/manuals/pasm2-reference-manual,directory,2025-09-01,Canonical naming standardization
+engineering/document-production/workspace/pasm2-user-manual,engineering/document-production/workspace/pasm2-reference-manual,directory,2025-09-01,Canonical naming standardization
+engineering/document-production/outbound/pasm2-manual-v1,engineering/document-production/outbound/pasm2-reference-manual,directory,2025-09-01,Canonical naming standardization
+engineering/document-production/workspace/spin2-user-manual,engineering/document-production/workspace/spin2-reference-manual,directory,2025-09-01,Canonical naming standardization
