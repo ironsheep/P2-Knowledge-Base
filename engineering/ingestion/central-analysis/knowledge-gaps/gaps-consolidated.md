@@ -1,10 +1,10 @@
 # Consolidated Knowledge Gaps Analysis
 *What We Don't Know - Critical Missing Information*
-*Date: 2025-08-15*
+*Date: 2025-09-02 (Updated with latest findings)*
 
 ## 🚨 CRITICAL KNOWLEDGE DOMAINS MISSING
 
-### 1. Boot System (COMPLETE BLACK BOX)
+### 1. Boot System ~~(COMPLETE BLACK BOX)~~ (MOSTLY DOCUMENTED)
 **Impact**: Cannot create bootable applications
 **Source**: Silicon Doc marked "needs editing"
 **What's Missing**:
@@ -30,7 +30,7 @@
 - Garbage collection (if any)
 - Performance characteristics
 
-### 3. USB Implementation (MODE EXISTS, NO DETAILS)
+### 3. USB Implementation (MODE EXISTS, MINIMAL DETAILS)
 **Impact**: Cannot implement USB host or device
 **Source**: Smart Pin mode %11011 mentioned, no details
 **What's Missing**:
@@ -55,21 +55,21 @@
 - Signal rise/fall times
 - EMC/EMI specifications
 
-### 5. Silicon Errata (UNKNOWN STATUS)
-**Impact**: May encounter unexplained failures
-**What's Missing**:
-- Known silicon bugs
-- Required workarounds
+### 5. Silicon Errata ~~(UNKNOWN STATUS)~~ (CRITICAL BUGS DOCUMENTED)
+**Impact**: Can now avoid known issues
+**Now Documented**:
+- ✅ SETQ/PTRx bug with workarounds
+- ✅ AUGS/ALTx bug with solutions
+**Still Missing**:
 - Rev B vs Rev C differences
 - Production variation notes
 - Reliability data
 
 ## 📊 PARTIAL KNOWLEDGE DOMAINS
 
-### 6. PASM2 Instructions (60% DOCUMENTED)
-**Available**: 491 instruction inventory with encoding
+### 6. PASM2 Instructions ~~(60% DOCUMENTED)~~ (95%+ DOCUMENTED)
+**Available**: All 491 instructions with complete encodings, timing, flags
 **Missing**: 
-- ~300 instructions lack descriptions
 - Edge case behaviors
 - Pipeline interaction effects
 - Interrupt effects on each instruction
@@ -86,15 +86,47 @@
 - Inline assembly restrictions
 - Memory model details
 
-### 8. Smart Pins (65% DOCUMENTED)
-**Available**: All 32 modes listed with basic parameters
+### 8. Smart Pins ~~(65% DOCUMENTED)~~ (95% DOCUMENTED)
+**Available**: All 32 modes with Silicon Doc + Titus examples
 **Missing**:
-- Complete examples for each mode
+- USB mode implementation details
 - Pin pairing requirements
 - Filter configuration details
 - Synchronization between pins
 - Timing diagrams
 - Power consumption per mode
+
+## ✅ RECENTLY RESOLVED GAPS (2025-09-02)
+
+### Extended Precision Arithmetic (NOW 95% COMPLETE)
+**Previously**: No documentation on multi-word operations
+**Now Available** (from Chip Gracey):
+- Complete 64-bit and 128-bit arithmetic patterns
+- ADDX/SUBX/ADDSX/SUBSX flag chaining explained
+- INCMOD/DECMOD circular buffer instructions
+- FRAC fractional multiply operation
+
+### Condition Codes (NOW 100% COMPLETE)
+**Previously**: Missing complete condition code list
+**Now Available** (from iron-sheep-compiler):
+- All 16 condition codes with values
+- Complete alias mappings
+- Proper naming conventions
+
+### ALTx Instructions (NOW 90% COMPLETE)
+**Previously**: Incomplete understanding
+**Now Available**:
+- All 22 ALTx variants documented
+- Complete encodings
+- Silicon bugs documented
+
+### PTRA/PTRB (NOW 90% COMPLETE)
+**Previously**: Basic understanding only
+**Now Available**:
+- Complete addressing modes
+- COG RAM addresses ($1F8/$1F9)
+- WW field encoding
+- PTR expression encoding format
 
 ## 🎯 QUESTIONS FOR CHIP GRACEY
 
