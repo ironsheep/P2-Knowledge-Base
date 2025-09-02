@@ -323,6 +323,26 @@ OR
 - Update trust level distribution
 - Increment knowledge coverage percentage
 
+#### Step 10.5: Update Central Analysis Hub
+**LOCATION**: `/engineering/ingestion/central-analysis/`
+**CRITICAL UPDATES REQUIRED**:
+
+**Cross-Source Q&A**:
+- Add new questions to `cross-source-qa/questions-master.md`
+- Move answered questions from `cross-source-qa/questions-remaining.md` to answered section
+- Document conflicts in `cross-source-qa/conflicts-and-trust-zones.md`
+
+**Knowledge Gaps**:
+- Update `knowledge-gaps/gaps-consolidated.md` with filled/new gaps
+- Reorganize `knowledge-gaps/gaps-by-category.md` as needed
+
+**Instruction Analysis** (if applicable):
+- Update `instruction-analysis/instruction-completion-tracking.md`
+- Remove documented instructions from `instruction-analysis/missing-instructions.md`
+
+**Matrices**:
+- Add source to `matrices/source-quality-matrix.md` with trust assessment
+
 #### Step 11: Update Operations Dashboard
 **LOCATION**: `/engineering/README.md` (was OPERATIONS-DASHBOARD.md)
 **UPDATES REQUIRED**:

@@ -90,3 +90,16 @@ test-escape.md,engineering/tools/conversion/test-files/test-escape.md,file,Moved
 extracted_code/,engineering/tools/extraction/test-output/,directory,Test extraction output
 test_extraction/,engineering/tools/extraction/test-cases/,directory,Test cases
 test_mini_breakout_images/,engineering/tools/extraction/test-images/,directory,Test images
+# Ingestion Reorganization - 2025-09-02
+engineering/ingestion/central-analysis/comprehensive-questions-master.md,engineering/ingestion/central-analysis/cross-source-qa/questions-master.md,file,Reorganized to cross-source-qa
+engineering/ingestion/central-analysis/all-questions-with-sources-categorized.md,engineering/ingestion/central-analysis/cross-source-qa/questions-by-source.md,file,Reorganized to cross-source-qa
+engineering/ingestion/central-analysis/FINAL-REMAINING-QUESTIONS-CONSOLIDATED.md,engineering/ingestion/central-analysis/cross-source-qa/questions-remaining.md,file,Reorganized to cross-source-qa
+engineering/ingestion/central-analysis/source-conflicts-trust-zones.md,engineering/ingestion/central-analysis/cross-source-qa/conflicts-and-trust-zones.md,file,Reorganized to cross-source-qa
+engineering/ingestion/central-analysis/knowledge-gaps-consolidated.md,engineering/ingestion/central-analysis/knowledge-gaps/gaps-consolidated.md,file,Reorganized to knowledge-gaps
+engineering/ingestion/central-analysis/p2-knowledge-gaps-master.md,engineering/ingestion/central-analysis/knowledge-gaps/gaps-by-category.md,file,Reorganized to knowledge-gaps
+engineering/ingestion/central-analysis/INSTRUCTION-COMPLETION-MASTER-TRACKING.md,engineering/ingestion/central-analysis/instruction-analysis/instruction-completion-tracking.md,file,Reorganized to instruction-analysis
+engineering/ingestion/central-analysis/P2-MISSING-INSTRUCTIONS-ANALYSIS.md,engineering/ingestion/central-analysis/instruction-analysis/missing-instructions.md,file,Reorganized to instruction-analysis
+engineering/ingestion/source-quality-matrix-3d.md,engineering/ingestion/central-analysis/matrices/source-quality-matrix.md,file,Moved to matrices folder
+engineering/ingestion/extraction-matrices/hardware-manual-complete-extraction-audit.md,engineering/ingestion/sources/p2-eval-board/p2-hardware-manual-complete-extraction-audit.md,file,Moved to proper source directory
+engineering/ingestion/extraction-matrices/qa-spreadsheet-complete-audit.md,engineering/ingestion/sources/p2-qa-spreadsheet/qa-spreadsheet-complete-extraction-audit.md,file,Moved to new source directory
+engineering/ingestion/extraction-matrices/qa-spreadsheet-extraction.md,engineering/ingestion/sources/p2-qa-spreadsheet/qa-spreadsheet-extraction.md,file,Moved to new source directory
