@@ -7,6 +7,17 @@
 - **Document Type**: .docx (Word format)
 - **Extraction Method**: Python zipfile/XML parsing
 
+## 📁 EXTRACTED ASSETS
+
+### 🖼️ Enhanced Image Catalog
+**[DEBUG Display Catalog: assets/images-spin2-enhanced-20250901/P2_Spin2_Documentation_v51_spin2_catalog.md](assets/images-spin2-enhanced-20250901/P2_Spin2_Documentation_v51_spin2_catalog.md)**
+- **Total Images**: 24 DEBUG display windows
+- **Enhancement Date**: 2025-09-01 (Visual inspection and classification)
+- **Key Visual Assets**: DEBUG Output, Single-Step Debugger, SCOPE, SCOPE_XY, SPECTRO, LOGIC, TERM windows
+- **Enhancement**: All images classified by actual window content with visual inspection
+- **Features**: Global IDs (SPIN-IMG-XXX), window type classification, visual descriptions
+- **Usage**: DEBUG window reference, IDE configuration examples, AI-ready metadata
+
 ## 12-Point Comprehensive Audit
 
 ### 1. EXTRACTION STATISTICS

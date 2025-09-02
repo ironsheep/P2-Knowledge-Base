@@ -1,25 +1,36 @@
 {
-  "documents": [{
-    "input": "P2-Smart-Pins-Complete-Reference.md",
-    "output": "P2-Smart-Pins-Complete-Reference.pdf",
-    "template": "p2kb-smart-pins",
-    "variables": {
-      "title": "P2 Smart Pins Complete Reference",
-      "subtitle": "Specifications and Implementation for All 32 Modes",
-      "author": "P2 Community", 
-      "footer": "Version 1.0 - Technical Review Draft"
-    },
-    "filters": [
-      "smart-pins-pagebreaks.lua",
-      "smart-pins-vertical-spacing.lua",
-      "smart-pins-block-coloring.lua",
-      "smart-pins-pasm-formatting.lua",
-      "smart-pins-index-formatting.lua"
-    ],
-    "pandoc_args": [
-      "--top-level-division=part", 
-      "--wrap=preserve"
-    ]
-  }],
-  "options": {"cleanup": true, "archive": false, "optimize": false}
+  "request_id": "div-syntax-test",
+  "title": "Div Syntax Test - 3 vs 4 Colons",
+  "document": "div-syntax-test.md",
+  "template": "p2kb-smart-pins.latex",
+  
+  "pandoc_args": [
+    "--top-level-division=part",
+    "--lua-filter=smart-pins-div-blocks.lua",
+    "--lua-filter=part-chapter-pagebreaks.lua",
+    "--pdf-engine=xelatex",
+    "--number-sections",
+    "--toc",
+    "--toc-depth=2"
+  ],
+  
+  "filters": [
+    "smart-pins-div-blocks.lua",
+    "part-chapter-pagebreaks.lua"
+  ],
+  
+  "templates": [
+    "p2kb-foundation.sty",
+    "p2kb-smart-pins-content.sty",
+    "p2kb-tech-review.sty"
+  ],
+  
+  "metadata": {
+    "test_purpose": "Determine whether 3 or 4 colons work for div syntax",
+    "expected_results": {
+      "4_colons": "Green Spin2, Yellow PASM2, Red Antipattern",
+      "3_colons": "Green Spin2, Yellow PASM2, Red Antipattern",
+      "control": "Regular monospace, no color"
+    }
+  }
 }

@@ -20,7 +20,9 @@
 **Content**: Complete analysis and code examples (174 documented, 98 extracted)  
 **Assets**: 
 - Code examples: `/assets/code-20250824/` (98 files)
-- Images: `/assets/images-20250824/` (21 files + catalog)
+- Images: `/assets/images-smartpins-20250901/` (21 files + enhanced catalog with .docx context)
+  - **Enhancement**: All images now have narrative context, mode associations, instruction mappings
+  - **Previous**: `/assets/images-20250824/` (deprecated 2025-09-01, archived)
 
 ### 🚫 **DEPRECATED FILES** (Do Not Use - Cleanup Candidates)
 
@@ -45,7 +47,7 @@
 1. **For Complete Documentation**: Use the extraction audit (`smart-pins-complete-extraction-audit.md`)
 2. **For Original Source**: Reference the DOCX file (`/import/p2/Smart Pins rev 5.docx`)  
 3. **For Code Examples**: Use extracted assets (`/assets/code-20250824/`)
-4. **For Images**: Use extracted assets (`/assets/images-20250824/`)
+4. **For Images**: Use enhanced catalog (`/assets/images-smartpins-20250901/`)
 
 ### ❌ Never Reference:
 - Any `.txt` files in `/sources/originals/` for Smart Pins

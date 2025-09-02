@@ -72,8 +72,8 @@ grep -c 'ConfigBlock\|Spin2Block\|PASM2Block' \
 5. **Deploy ONLY MODIFIED FILES to outbound**: 
    - **⚠️ CRITICAL: ONLY COPY WHAT YOU MODIFIED - NEVER COPY EVERYTHING**
    - If you edited templates: `cp [specific-modified.sty] → outbound/p2-smart-pins-tutorial/`
-   - If you fixed scripts: `cp [specific-fixed.js] → outbound/P2-Smart-Pins-Reference/scripts-from-forge/`
-   - If you modified filters: `cp [specific-filter.lua] → outbound/P2-Smart-Pins-Reference/`
+   - If you fixed scripts: `cp [specific-fixed.js] → outbound/p2-smart-pins-tutorial/
+   - If you modified filters: `cp [specific-filter.lua] → outbound/p2-smart-pins-tutorial/`
    - **DEFAULT FOR TESTING**: Usually just escaped markdown + request.json
 6. **User deploys**: Takes ONLY the files you placed in outbound to PDF Forge
 

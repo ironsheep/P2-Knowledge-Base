@@ -1,0 +1,166 @@
+#### **Advanced Arithmetic**
+Missing mathematical operations:
+- **INCMOD** - Increment with modulo
+- **DECMOD** - Decrement with modulo
+- **FRAC** - Fractional multiply
+- **ADDSX** - Add with sign extension
+- **SUBSX** - Subtract with sign extension
+- **CMPSX** - Compare with sign extension
+
+
+'INCMOD D,{#}S {WC/WZ/WCZ}' is used to increment D with wrapping to 0 if D = S. If D = S then D = 0 and C flag = 1, else D = D + 1 and C flag = 0. The Z flag is set if the D result is 0.
+
+'DECMOD D,{#}S {WC/WZ/WCZ}' is used to decrement a number with wrapping to S if D = 0. If D = 0 then D = S and C flag = 1, else D = D - 1 and C flag = 0. The Z flag is set if the D result is 0.
+
+'x FRAC y' is a Spin2 operator which computes unsigned (x << 32) / y.
+
+
+ADDSX D,{#}S {WC/WZ/WCZ}
+Adds (S + C flag) into D, while returning the true sign of the result into C and ANDing Z with (D result == 0). This instruction is useful for capping multi-long ADDs, where C needs to reflect the true sign of the total result (that is, the bit above the MSB of the entire addition) and Z needs to reflect the total result equaling 0.
+
+SUBSX D,{#}S {WC/WZ/WCZ}
+Subtracts (S + C flag) from D, while returning the true sign of the result into C and ANDing Z with (D result == 0). This instruction is useful for capping multi-long SUBs, where C needs to reflect the true sign of the total result (that is, the bit above the MSB of the entire subtraction) and Z needs to reflect the total result equaling 0.
+
+CMPSX D,{#}S {WC/WZ/WCZ}
+Compares (S + C flag) to D, while returning the true sign of the comparison into C and ANDing Z with (D result == 0). This instruction is useful for capping multi-long CMPs, where C needs to reflect the true sign of the total result (that is, the bit above the MSB of the entire subtractive comparison) and Z needs to reflect the total equality.
+
+Overview of all ADDxx/SUBxx/CMPxx D,{#}S {WC/WZ/WCZ} Instructions
+
+ADD D,{#}S {WC/WZ/WCZ}
+D = D + S, C = carry, Z = (D result == 0).
+
+ADDX D,{#}S {WC/WZ/WCZ}
+D = D + S + C flag, C = carry, Z = Z AND (D result == 0).
+
+ADDS D,{#}S {WC/WZ/WCZ}
+D = D + S, C = true sign of D result, Z = (D result == 0).
+
+ADDSX D,{#}S {WC/WZ/WCZ}
+D = D + S + C flag, C = true sign of D result, Z = Z AND (D result == 0).
+
+
+SUB D,{#}S {WC/WZ/WCZ}
+D = D - S, C = borrow, Z = (D result == 0).
+
+SUBX D,{#}S {WC/WZ/WCZ}
+D = D - S - C flag, C = borrow, Z = Z AND (D result == 0).
+
+SUBS D,{#}S {WC/WZ/WCZ}
+D = D - S, C = true sign of D result, Z = (D result == 0).
+
+SUBSX D,{#}S {WC/WZ/WCZ}
+D = D - S - C flag, C = true sign of D result, Z = Z AND (D result == 0).
+
+
+CMP D,{#}S {WC/WZ/WCZ}
+X = D - S, C = borrow, Z = (X == 0).
+
+CMPX D,{#}S {WC/WZ/WCZ}
+X = D - S - C flag, C = borrow, Z = Z AND (X == 0).
+
+CMPS D,{#}S {WC/WZ/WCZ}
+X = D - S, C = true sign of X, Z = (X == 0).
+
+CMPSX D,{#}S {WC/WZ/WCZ}
+X = D - S - C flag, C = true sign of X, Z = Z AND (X == 0).
+
+
+For a 32-bit unsigned add, you would do:
+
+ADD     A0, B0     WCZ       'A0 = A0 + B0, C = carry, Z = (A0 result == 0)
+
+For a 64-bit unsigned add, you would do:
+
+ADD     A0, B0     WCZ       'A0 = A0 + B0, C = carry, Z = (A0 result == 0)
+ADDX    A1, B1     WCZ       'A1 = A1 + B1 + C, C = carry, Z = Z AND (A1 result == 0)
+
+For a 128-bit unsigned add, you would do:
+
+ADD     A0, B0     WCZ       'A0 = A0 + B0, C = carry, Z = (A0 result == 0)
+ADDX    A1, B1     WCZ       'A1 = A1 + B1 + C, C = carry, Z = Z AND (A1 result == 0)
+ADDX    A2, B2     WCZ       'A2 = A2 + B2 + C, C = carry, Z = Z AND (A2 result == 0)
+ADDX    A3, B3     WCZ       'A3 = A3 + (B3 + C), C = carry, Z = Z AND (A3 result == 0)
+
+
+For a 32-bit signed add, you would do:
+
+ADDS    A0, B0     WCZ       'A0 = A0 + B0, C = true sign of A0 result, Z = (A0 result == 0)
+
+For a 64-bit signed add, you would do:
+
+ADD     A0, B0     WCZ       'A0 = A0 + B0, C = carry, Z = (A0 result == 0)
+ADDSX   A1, B1     WCZ       'A1 = A1 + B1 + C, C = true sign of A1 result, Z = Z AND (A1 result == 0)
+
+For a 128-bit signed add, you would do:
+
+ADD     A0, B0     WCZ       'A0 = A0 + B0, C = carry, Z = (A0 result == 0)
+ADDX    A1, B1     WCZ       'A1 = A1 + B1 + C, C = carry, Z = Z AND (A1 result == 0)
+ADDX    A2, B2     WCZ       'A2 = A2 + B2 + C, C = carry, Z = Z AND (A2 result == 0)
+ADDSX   A3, B3     WCZ       'A3 = A3 + B3 + C, C = true sign of A3 result, Z = Z AND (A3 result == 0)
+
+
+For a 32-bit unsigned subtract, you would do:
+
+SUB     A0, B0     WCZ       'A0 = A0 - B0, C = borrow, Z = (A0 result == 0)
+
+For a 64-bit unsigned subtract, you would do:
+
+SUB     A0, B0     WCZ       'A0 = A0 - B0, C = borrow, Z = (A0 result == 0)
+SUBX    A1, B1     WCZ       'A1 = A1 - B1 - C, C = borrow, Z = Z AND (A1 result == 0)
+
+For a 128-bit unsigned subtract, you would do:
+
+SUB     A0, B0     WCZ       'A0 = A0 - B0, C = borrow, Z = (A0 result == 0)
+SUBX    A1, B1     WCZ       'A1 = A1 - B1 - C, C = borrow, Z = Z AND (A1 result == 0)
+SUBX    A2, B2     WCZ       'A2 = A2 - B2 - C, C = borrow, Z = Z AND (A2 result == 0)
+SUBX    A3, B3     WCZ       'A3 = A3 - B3 - C, C = borrow, Z = Z AND (A3 result == 0)
+
+
+For a 32-bit signed subtract, you would do:
+
+SUBS    A0, B0     WCZ       'A0 = A0 - B0, C = true sign of A0 result, Z = (A0 result == 0)
+
+For a 64-bit signed subtract, you would do:
+
+SUB     A0, B0     WCZ       'A0 = A0 - B0, C = borrow, Z = (A0 result == 0)
+SUBSX   A1, B1     WCZ       'A1 = A1 - B1 - C, C = true sign of A1 result, Z = Z AND (A1 result == 0)
+
+For a 128-bit signed subtract, you would do:
+
+SUB     A0, B0     WCZ       'A0 = A0 - B0, C = borrow, Z = (A0 result == 0)
+SUBX    A1, B1     WCZ       'A1 = A1 - B1 - C, C = borrow, Z = Z AND (A1 result == 0)
+SUBX    A2, B2     WCZ       'A2 = A2 - B2 - C, C = borrow, Z = Z AND (A2 result == 0)
+SUBSX   A3, B3     WCZ       'A3 = A3 - B3 - C, C = true sign of A3 result, Z = Z AND (A3 result == 0)
+
+
+For a 32-bit unsigned compare, you would do:
+
+CMP     A0, B0     WCZ       'X = A0 - B0, C = borrow, Z = (X == 0)
+
+For a 64-bit unsigned compare, you would do:
+
+CMP     A0, B0     WCZ       'X = A0 - B0, C = borrow, Z = (X == 0)
+CMPX    A1, B1     WCZ       'X = A1 - B1 - C, C = borrow, Z = Z AND (X == 0)
+
+For a 128-bit unsigned compare, you would do:
+
+CMP     A0, B0     WCZ       'X = A0 - B0, C = borrow, Z = (X == 0)
+CMPX    A1, B1     WCZ       'X = A1 - B1 - C, C = borrow, Z = Z AND (X == 0)
+CMPX    A2, B2     WCZ       'X = A2 - B2 - C, C = borrow, Z = Z AND (X == 0)
+CMPX    A3, B3     WCZ       'X = A3 - B3 - C, C = borrow, Z = Z AND (X == 0)
+
+For a 32-bit signed compare, you would do:
+
+CMPS    A0, B0     WCZ       'X = A0 - B0, C = true sign of X, Z = (X == 0)
+
+For a 64-bit signed compare, you would do:
+
+CMP     A0, B0     WCZ       'X = A0 - B0, C = borrow, Z = (X == 0)
+CMPSX   A1, B1     WCZ       'X = A1 - B1 - C, C = true sign of X, Z = Z AND (X == 0)
+
+For a 128-bit signed compare, you would do:
+
+CMP     A0, B0     WCZ       'X = A0 - B0, C = borrow, Z = (X == 0)
+CMPX    A1, B1     WCZ       'X = A1 - B1 - C, C = borrow, Z = Z AND (X == 0)
+CMPX    A2, B2     WCZ       'X = A2 - B2 - C, C = borrow, Z = Z AND (X == 0)
+CMPSX   A3, B3     WCZ       'X = A3 - B3 - C, C = true sign of X, Z = Z AND (X == 0)

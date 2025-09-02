@@ -1,0 +1,2080 @@
+{
+  "metadata": {
+    "source_pdf": "/Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/ingestion/sources/smart-pins/P2 SmartPins-220809.pdf",
+    "document_id": "SP",
+    "extraction_date": "2025-09-01T21:43:13.210993",
+    "total_images": 21,
+    "extractor_version": "3.0-smartpins"
+  },
+  "mode_mapping": {
+    "7": {
+      "mode": "%00000",
+      "mode_name": "repository",
+      "full_description": ""
+    },
+    "8": {
+      "mode": "%00000",
+      "mode_name": "repository",
+      "full_description": ""
+    },
+    "9": {
+      "mode": "%00000",
+      "mode_name": "repository",
+      "full_description": ""
+    },
+    "10": {
+      "mode": "%00000",
+      "mode_name": "repository",
+      "full_description": ""
+    },
+    "11": {
+      "mode": "%00011",
+      "mode_name": "Long Depository (when not in DAC mode)",
+      "full_description": "Long Depository (when not in DAC mode)"
+    },
+    "12": {
+      "mode": "%00010",
+      "mode_name": "DAC output with added pseudo-random dither",
+      "full_description": "DAC output with added pseudo-random dither"
+    },
+    "13": {
+      "mode": "%00011",
+      "mode_name": "DAC output with added PWM dither",
+      "full_description": "DAC output with added PWM dither"
+    },
+    "14": {
+      "mode": "%00011",
+      "mode_name": "DAC output with added PWM dither",
+      "full_description": "DAC output with added PWM dither"
+    },
+    "15": {
+      "mode": "%00100",
+      "mode_name": "Pulse/cycle output",
+      "full_description": "Pulse/cycle output"
+    },
+    "16": {
+      "mode": "%00101",
+      "mode_name": "Transition output",
+      "full_description": "Transition output"
+    },
+    "17": {
+      "mode": "%00101",
+      "mode_name": "Transition output",
+      "full_description": "Transition output"
+    },
+    "18": {
+      "mode": "%00111",
+      "mode_name": "Numerically Controlled Oscillator (NCO) Duty Cycle",
+      "full_description": "Numerically Controlled Oscillator (NCO) Duty Cycle"
+    },
+    "19": {
+      "mode": "%01000",
+      "mode_name": "pwm_triangle",
+      "full_description": "Numerically Controlled Oscillator (NCO) Duty Cycle"
+    },
+    "20": {
+      "mode": "%01000",
+      "mode_name": "pwm_triangle",
+      "full_description": "Numerically Controlled Oscillator (NCO) Duty Cycle"
+    },
+    "21": {
+      "mode": "%01001",
+      "mode_name": "PWM sawtooth",
+      "full_description": "PWM sawtooth"
+    },
+    "22": {
+      "mode": "%01011",
+      "mode_name": "A/B-input quadrature encoder",
+      "full_description": "A/B-input quadrature encoder"
+    },
+    "23": {
+      "mode": "%01011",
+      "mode_name": "A/B-input quadrature encoder",
+      "full_description": "A/B-input quadrature encoder"
+    },
+    "24": {
+      "mode": "%01011",
+      "mode_name": "A/B-input quadrature encoder",
+      "full_description": "A/B-input quadrature encoder"
+    },
+    "25": {
+      "mode": "%01100",
+      "mode_name": "periodic_polling_with_trigger",
+      "full_description": "A/B-input quadrature encoder"
+    },
+    "26": {
+      "mode": "%01101",
+      "mode_name": "time_accumulator",
+      "full_description": "A/B-input quadrature encoder"
+    },
+    "27": {
+      "mode": "%01110",
+      "mode_name": "time_accumulator_with_feedback",
+      "full_description": "A/B-input quadrature encoder"
+    },
+    "28": {
+      "mode": "%01111",
+      "mode_name": "time_gated_accumulator",
+      "full_description": "A/B-input quadrature encoder"
+    },
+    "29": {
+      "mode": "%10000",
+      "mode_name": "Time A-input states",
+      "full_description": "Time A-input states"
+    },
+    "30": {
+      "mode": "%10001",
+      "mode_name": "Time logic-1 states on A-input",
+      "full_description": "Time logic-1 states on A-input"
+    },
+    "31": {
+      "mode": "%10010",
+      "mode_name": "Time A-input highs, rises, or edges  (Y[2] = 0)",
+      "full_description": "Time A-input highs, rises, or edges  (Y[2] = 0)"
+    },
+    "32": {
+      "mode": "%10010",
+      "mode_name": "Detect missing A-input highs, rises or edge during",
+      "full_description": "Detect missing A-input highs, rises or edge during"
+    },
+    "33": {
+      "mode": "%10011",
+      "mode_name": "Measure time for X events to occur",
+      "full_description": "Measure time for X events to occur"
+    },
+    "34": {
+      "mode": "%10011",
+      "mode_name": "Measure time for X events to occur",
+      "full_description": "Measure time for X events to occur"
+    },
+    "35": {
+      "mode": "%10100",
+      "mode_name": "Sum pulse duration over X pulses",
+      "full_description": "Sum pulse duration over X pulses"
+    },
+    "36": {
+      "mode": "%11000",
+      "mode_name": "ADC sample, filter, convert, internally clock",
+      "full_description": "ADC sample, filter, convert, internally clock"
+    },
+    "37": {
+      "mode": "%11000",
+      "mode_name": "The Smart Pin samples the A-input analog signal at a",
+      "full_description": "The Smart Pin samples the A-input analog signal at a"
+    },
+    "38": {
+      "mode": "%11000",
+      "mode_name": "The Smart Pin samples the A-input analog signal at a",
+      "full_description": "The Smart Pin samples the A-input analog signal at a"
+    },
+    "39": {
+      "mode": "%11000",
+      "mode_name": "The Smart Pin samples the A-input analog signal at a",
+      "full_description": "The Smart Pin samples the A-input analog signal at a"
+    },
+    "40": {
+      "mode": "%11000",
+      "mode_name": "The Smart Pin samples the A-input analog signal at a",
+      "full_description": "The Smart Pin samples the A-input analog signal at a"
+    },
+    "41": {
+      "mode": "%11010",
+      "mode_name": "async_serial_duplex",
+      "full_description": "The Smart Pin samples the A-input analog signal at a"
+    },
+    "42": {
+      "mode": "%11010",
+      "mode_name": "async_serial_duplex",
+      "full_description": "The Smart Pin samples the A-input analog signal at a"
+    },
+    "43": {
+      "mode": "%11010",
+      "mode_name": "async_serial_duplex",
+      "full_description": "The Smart Pin samples the A-input analog signal at a"
+    },
+    "44": {
+      "mode": "%11011",
+      "mode_name": "sync_serial_duplex",
+      "full_description": "The Smart Pin samples the A-input analog signal at a"
+    },
+    "45": {
+      "mode": "%11011",
+      "mode_name": "sync_serial_duplex",
+      "full_description": "The Smart Pin samples the A-input analog signal at a"
+    },
+    "46": {
+      "mode": "%11100",
+      "mode_name": "Synchronous serial transmit (SST)",
+      "full_description": "Synchronous serial transmit (SST)"
+    },
+    "47": {
+      "mode": "%11100",
+      "mode_name": "Synchronous serial transmit (SST)",
+      "full_description": "Synchronous serial transmit (SST)"
+    },
+    "48": {
+      "mode": "%11101",
+      "mode_name": "Synchronous serial receive (SSR)",
+      "full_description": "Synchronous serial receive (SSR)"
+    },
+    "49": {
+      "mode": "%11101",
+      "mode_name": "Synchronous serial receive (SSR)",
+      "full_description": "Synchronous serial receive (SSR)"
+    },
+    "50": {
+      "mode": "%11101",
+      "mode_name": "Synchronous serial receive (SSR)",
+      "full_description": "Synchronous serial receive (SSR)"
+    },
+    "51": {
+      "mode": "%11110",
+      "mode_name": "Asynchronous serial transmit (AST)",
+      "full_description": "Asynchronous serial transmit (AST)"
+    },
+    "52": {
+      "mode": "%11110",
+      "mode_name": "Asynchronous serial transmit (AST)",
+      "full_description": "Asynchronous serial transmit (AST)"
+    },
+    "53": {
+      "mode": "%11111",
+      "mode_name": "Asynchronous serial receive (ASR)",
+      "full_description": "Asynchronous serial receive (ASR)"
+    },
+    "54": {
+      "mode": "%11111",
+      "mode_name": "Asynchronous serial receive (ASR)",
+      "full_description": "Asynchronous serial receive (ASR)"
+    }
+  },
+  "mode_descriptions": {
+    "%00011": "DAC output with added PWM dither",
+    "%00010": "DAC output with added pseudo-random dither",
+    "%00100": "Pulse/cycle output",
+    "%00101": "Transition output",
+    "%00111": "Numerically Controlled Oscillator (NCO) Duty Cycle",
+    "%01001": "PWM sawtooth",
+    "%01011": "A/B-input quadrature encoder",
+    "%10000": "Time A-input states",
+    "%10001": "Time logic-1 states on A-input",
+    "%10010": "Detect missing A-input highs, rises or edge during",
+    "%10011": "Measure time for X events to occur",
+    "%10100": "Sum pulse duration over X pulses",
+    "%11000": "The Smart Pin samples the A-input analog signal at a",
+    "%11100": "Synchronous serial transmit (SST)",
+    "%11101": "Synchronous serial receive (SSR)",
+    "%11110": "Asynchronous serial transmit (AST)",
+    "%11111": "Asynchronous serial receive (ASR)"
+  },
+  "images": [
+    {
+      "global_id": "SP-IMG-001",
+      "document_id": "SP",
+      "local_ref": "page03_img01",
+      "filename": "P2 SmartPins-220809_page03_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 3,
+      "image_index": 1,
+      "image_number_in_mode": 1,
+      "dimensions": {
+        "width": 1488,
+        "height": 322,
+        "display": "1488\u00d7322"
+      },
+      "smart_pin_context": {
+        "mode": null,
+        "mode_name": "",
+        "mode_description": "",
+        "instructions": [
+          "TESTP",
+          "DRVH",
+          "TESTPN"
+        ],
+        "technical_context": [
+          "Timing: Input-Output-Bit Timing",
+          "Timing: When an instruction changes a DIRx or OUTx bit, the processor needs three (3)  additional system-clo"
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "Input-Output-Bit Timing",
+            "type": "introduction"
+          }
+        ]
+      },
+      "semantic_type": "timing_diagram",
+      "caption": "Input-Output-Bit Timing",
+      "nearby_text": [
+        {
+          "text": "When an instruction changes a DIRx or OUTx bit, the processor needs three (3)  additional system-clock cycles  after the instruction  before the pin starts to transition to  its new state. The figure below shows the delay for a DRVH instruction:",
+          "distance": 23.2398681640625,
+          "position": "right"
+        },
+        {
+          "text": "Input-Output-Bit Timing",
+          "distance": 36.6175537109375,
+          "position": "above"
+        },
+        {
+          "text": "Example:  TESTP #10   ORZ 'Read P10 and or its state into Z.",
+          "distance": 100.6761474609375,
+          "position": "above"
+        },
+        {
+          "text": "TESTPN   {#}D   XORC/XORZ Get a pin's NOT-state and XOR it into the C or Z flag.",
+          "distance": 125.9739990234375,
+          "position": "above"
+        },
+        {
+          "text": "TESTPN   {#}D   ORC/ORZ Get a pin's NOT-state and OR it into the C or Z flag.",
+          "distance": 151.0838623046875,
+          "position": "above"
+        }
+      ],
+      "search_keywords": [
+        "bit",
+        "testp",
+        "testpn",
+        "drvh",
+        "input",
+        "no_mode",
+        "timing_diagram",
+        "output",
+        "timing"
+      ],
+      "consumption_hints": {
+        "ideal_size": "half_page",
+        "mode_specific": true,
+        "image_sequence": "1 of ? in no_mode"
+      }
+    },
+    {
+      "global_id": "SP-IMG-002",
+      "document_id": "SP",
+      "local_ref": "page04_img01",
+      "filename": "P2 SmartPins-220809_page04_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 4,
+      "image_index": 1,
+      "image_number_in_mode": 2,
+      "dimensions": {
+        "width": 1421,
+        "height": 268,
+        "display": "1421\u00d7268"
+      },
+      "smart_pin_context": {
+        "mode": null,
+        "mode_name": "",
+        "mode_description": "",
+        "instructions": [
+          "TESTPN",
+          "TESTP"
+        ],
+        "technical_context": [
+          "Timing: When an instruction reads the contents of the IN register associated with a pin, the  processor rece",
+          "Timing: When a program uses a TESTP or TESTPN instruction to read the state of a pin, the  processor receive"
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "Rev 5  06-11-2020 Jon Titus, Page 4 of",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "When a program uses a TESTP or TESTPN instruction to read the state of a pin, the  processor receives the state of the pins as they existed two (2) system-clock cycles  before  the start of the instru",
+            "type": "explanation"
+          }
+        ]
+      },
+      "semantic_type": "timing_diagram",
+      "caption": "",
+      "nearby_text": [
+        {
+          "text": "When a program uses a TESTP or TESTPN instruction to read the state of a pin, the  processor receives the state of the pins as they existed two (2) system-clock cycles  before  the start of the instruction. So, the TESTP and TESTPN gather \"fresher\" INx data  than is available via the INx registers. The figure below shows the timing for a TESTP  instruction:",
+          "distance": 12.392578125,
+          "position": "below"
+        },
+        {
+          "text": "When an instruction reads the contents of the IN register associated with a pin, the  processor receives the state of the pins as they existed three (3) system-clock cycles  before  the start of the instruction. The figure below shows the timing for a the TESTB  INA,#0 operation:",
+          "distance": 33.777679443359375,
+          "position": "right"
+        },
+        {
+          "text": "Rev 5  06-11-2020 Jon Titus, Page 4 of",
+          "distance": 59.717437744140625,
+          "position": "above"
+        },
+        {
+          "text": "Smart Pins",
+          "distance": 138.67584609985352,
+          "position": "below"
+        }
+      ],
+      "search_keywords": [
+        "no_mode",
+        "testpn",
+        "timing_diagram",
+        "testp"
+      ],
+      "consumption_hints": {
+        "ideal_size": "half_page",
+        "mode_specific": true,
+        "image_sequence": "2 of ? in no_mode"
+      }
+    },
+    {
+      "global_id": "SP-IMG-003",
+      "document_id": "SP",
+      "local_ref": "page04_img02",
+      "filename": "P2 SmartPins-220809_page04_img02.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 4,
+      "image_index": 2,
+      "image_number_in_mode": 3,
+      "dimensions": {
+        "width": 1244,
+        "height": 290,
+        "display": "1244\u00d7290"
+      },
+      "smart_pin_context": {
+        "mode": null,
+        "mode_name": "",
+        "mode_description": "",
+        "instructions": [
+          "TESTPN",
+          "TESTP"
+        ],
+        "technical_context": [
+          "Timing: When an instruction reads the contents of the IN register associated with a pin, the  processor rece",
+          "Timing: When a program uses a TESTP or TESTPN instruction to read the state of a pin, the  processor receive",
+          "Timing: Normally, a DIR bit controls an I/O pin's output enable, while the IN bit returns the pin's  state. "
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "When an instruction reads the contents of the IN register associated with a pin, the  processor receives the state of the pins as they existed three (3) system-clock cycles  before  the start of the i",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "Smart Pins",
+            "type": "explanation"
+          }
+        ]
+      },
+      "semantic_type": "timing_waveform",
+      "caption": "",
+      "nearby_text": [
+        {
+          "text": "When a program uses a TESTP or TESTPN instruction to read the state of a pin, the  processor receives the state of the pins as they existed two (2) system-clock cycles  before  the start of the instruction. So, the TESTP and TESTPN gather \"fresher\" INx data  than is available via the INx registers. The figure below shows the timing for a TESTP  instruction:",
+          "distance": 43.14091491699219,
+          "position": "right"
+        },
+        {
+          "text": "Smart Pins",
+          "distance": 50.584014892578125,
+          "position": "below"
+        },
+        {
+          "text": "When an instruction reads the contents of the IN register associated with a pin, the  processor receives the state of the pins as they existed three (3) system-clock cycles  before  the start of the instruction. The figure below shows the timing for a the TESTB  INA,#0 operation:",
+          "distance": 92.34019470214844,
+          "position": "above"
+        },
+        {
+          "text": "Each of the 64 I/O pins in a Propeller-2 microcontroller can operate as a Smart Pin. In  brief, every Smart Pin provides access to internal functions such as analog-to-digital  converters, digital-to-analog converters, signal generators, PWM controllers, and so on.  The Propeller-2 architecture lets these functions operate independent of the cogs so  they don't rely on software interactions to \"micromanagement\" their control and  operation.",
+          "distance": 97.58792114257812,
+          "position": "below"
+        },
+        {
+          "text": "Rev 5  06-11-2020 Jon Titus, Page 4 of",
+          "distance": 185.83531188964844,
+          "position": "above"
+        }
+      ],
+      "search_keywords": [
+        "no_mode",
+        "testpn",
+        "testp",
+        "timing_waveform"
+      ],
+      "consumption_hints": {
+        "ideal_size": "half_page",
+        "mode_specific": true,
+        "image_sequence": "3 of ? in no_mode"
+      }
+    },
+    {
+      "global_id": "SP-IMG-004",
+      "document_id": "SP",
+      "local_ref": "page13_img01",
+      "filename": "P2 SmartPins-220809_mode00011_page13_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 13,
+      "image_index": 1,
+      "image_number_in_mode": 1,
+      "dimensions": {
+        "width": 1758,
+        "height": 379,
+        "display": "1758\u00d7379"
+      },
+      "smart_pin_context": {
+        "mode": "%00011",
+        "mode_name": "DAC output with added PWM dither",
+        "mode_description": "DAC output with added PWM dither",
+        "instructions": [
+          "RQPIN",
+          "RDPIN"
+        ],
+        "technical_context": [
+          "In this mode, when you set the Smart Pin's OUT bit to logic-1, you enable the ADC and  can use the R",
+          "Timing: But,  proportionally averaging  some of the 3.083V and the 3.096 voltages lets the DAC  can get very",
+          "The pulse-width modulator will  add  a logic-1 to the DAC's 8-bit value for a preset portion  of the"
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "The pulse-width-modulation (PWM) dithering technique also extends the  resolution  of  an 8-bit digital-to-analog converter (DAC). The 8-bit DAC provides 256 steps of  approximately 12.9 mV/step. If y",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "The pulse-width modulator will  add  a logic-1 to the DAC's 8-bit value for a preset portion  of the DAC period set in the pin's X register, X[15:0].  The ratio of the logic-0 and logic-1  periods det",
+            "type": "explanation"
+          },
+          {
+            "position": "reference",
+            "text": "But,  proportionally averaging  some of the 3.083V and the 3.096 voltages lets the DAC  can get very close to 3.095V, as shown below for a 256-system-",
+            "type": "direct_reference"
+          }
+        ]
+      },
+      "semantic_type": "timing_diagram",
+      "caption": "But,  proportionally averaging  some of the 3.083V and the 3.096 voltages lets the DAC  can get very close to 3.095V, as shown below for a 256-system-clock period (DAC  period).",
+      "nearby_text": [
+        {
+          "text": "But,  proportionally averaging  some of the 3.083V and the 3.096 voltages lets the DAC  can get very close to 3.095V, as shown below for a 256-system-clock period (DAC  period).",
+          "distance": 15.32354736328125,
+          "position": "right"
+        },
+        {
+          "text": "The pulse-width modulator will  add  a logic-1 to the DAC's 8-bit value for a preset portion  of the DAC period set in the pin's X register, X[15:0].  The ratio of the logic-0 and logic-1  periods determines the voltage output between the 239 and 240 DAC inputs. You must  use a sample period equal to a multiple of 256 (bits X[7:0] = 0), so the PWM has an  integral number of 256 steps during which it dithers the DAC output between adjacent  8-bit levels.",
+          "distance": 26.19140625,
+          "position": "below"
+        },
+        {
+          "text": "The pulse-width-modulation (PWM) dithering technique also extends the  resolution  of  an 8-bit digital-to-analog converter (DAC). The 8-bit DAC provides 256 steps of  approximately 12.9 mV/step. If you want a DAC output of, say, 3.095 V you can have  either 3.083V at DAC input 239, or 3.096V at input 240.  There is no step \"239.9\" for an  8-bit DAC.",
+          "distance": 39.87176513671875,
+          "position": "above"
+        },
+        {
+          "text": "-------------------------------------------------------------- %00011:  DAC output with added PWM dither",
+          "distance": 122.66473388671875,
+          "position": "above"
+        },
+        {
+          "text": "In this mode, when you set the Smart Pin's OUT bit to logic-1, you enable the ADC and  can use the RDPIN or RQPIN instruction to capture the 16-bit ADC value from the  previous  sample period. (You might used this value to calculate current load on the  DAC pin.)   During reset (DIR=0), IN is low and Y[15:0] is captured.  Not sure what this  sentence means.  Do we need an additional example to show how this action works?",
+          "distance": 163.85614013671875,
+          "position": "above"
+        }
+      ],
+      "search_keywords": [
+        "lets",
+        "mode_00011",
+        "%00011",
+        "rdpin",
+        "averaging",
+        "dac_pwm_dither",
+        "and",
+        "proportionally",
+        "voltages",
+        "but",
+        "timing_diagram",
+        "the",
+        "some",
+        "rqpin"
+      ],
+      "consumption_hints": {
+        "ideal_size": "full_width",
+        "mode_specific": true,
+        "image_sequence": "1 of ? in %00011"
+      }
+    },
+    {
+      "global_id": "SP-IMG-005",
+      "document_id": "SP",
+      "local_ref": "page15_img01",
+      "filename": "P2 SmartPins-220809_mode00100_page15_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 15,
+      "image_index": 1,
+      "image_number_in_mode": 1,
+      "dimensions": {
+        "width": 2183,
+        "height": 765,
+        "display": "2183\u00d7765"
+      },
+      "smart_pin_context": {
+        "mode": "%00100",
+        "mode_name": "Pulse/cycle output",
+        "mode_description": "Pulse/cycle output",
+        "instructions": [
+          "wypin",
+          "wxpin",
+          "dirh",
+          "wrpin",
+          "dirl"
+        ],
+        "technical_context": [
+          "Timing: -------------------------------------------------------------- %00100:  Pulse/cycle output",
+          "This mode lets a Smart Pin produce a series of logic-1 pulses. (If you need logic-0  pulses you can ",
+          "Timing: This mode lets a Smart Pin produce a series of logic-1 pulses. (If you need logic-0  pulses you can "
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "-------------------------------------------------------------- %00100:  Pulse/cycle output",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "The following code example creates 16 logic-1 pulses:",
+            "type": "explanation"
+          },
+          {
+            "position": "reference",
+            "text": "This mode lets a Smart Pin produce a series of logic-1 pulses. (If you need logic-0  pulses you can invert the pin output.) Software sets the pulse pe",
+            "type": "direct_reference"
+          }
+        ]
+      },
+      "semantic_type": "timing_diagram",
+      "caption": "-------------------------------------------------------------- %00100:  Pulse/cycle output",
+      "nearby_text": [
+        {
+          "text": "The following code example creates 16 logic-1 pulses:",
+          "distance": 12.392608642578125,
+          "position": "below"
+        },
+        {
+          "text": "-------------------------------------------------------------- %00100:  Pulse/cycle output",
+          "distance": 34.850067138671875,
+          "position": "above"
+        },
+        {
+          "text": "CON            ' 25-MHz system clock frequency dat         org      0                  dirl     #20                 'Setup Smart Pin at P20         wrpin    PulseConfig,  #20   'Set config for pulse/cycle         wxpin    PulseTiming,  #20   'Set cycle time and logic-0                                      '  period         dirh     #20                 'Finished setup         wypin Cycles,     #20      'Pulse count to Y register         nop                          'Delay two clocks for IN to drop .myloop         jmp #.myloop             'Program waits forever",
+          "distance": 39.59771728515625,
+          "position": "below"
+        },
+        {
+          "text": "This mode lets a Smart Pin produce a series of logic-1 pulses. (If you need logic-0  pulses you can invert the pin output.) Software sets the pulse period, X[15:0], and the  length of the logic-0 state, X[31:16], as shown in the figure below.  These values  represent the number of  system-clock periods  in each pulse section.  Load the Y  register Y[31:0] with the number of pulses you need. The Y value decrements by 1 for  each pulse. When it decreases to 0, the Smart Pin raises its IN flag. This mode  overrides OUT, and controls the pin's output state.",
+          "distance": 75.54055786132812,
+          "position": "right"
+        },
+        {
+          "text": "DACconfig long %0000_0000_000_10100_00000000_01_00011_0 DACperiod long 256                      DACvolt1  long $F00F  'wypin bits Y15:Y0 for voltage DACvolt2 long $01F0",
+          "distance": 76.04147338867188,
+          "position": "above"
+        }
+      ],
+      "search_keywords": [
+        "output",
+        "wypin",
+        "wxpin",
+        "pulse_cycle_output",
+        "dirh",
+        "mode_00100",
+        "wrpin",
+        "pulse",
+        "dirl",
+        "%00100",
+        "timing_diagram",
+        "cycle"
+      ],
+      "consumption_hints": {
+        "ideal_size": "full_width",
+        "mode_specific": true,
+        "image_sequence": "1 of ? in %00100"
+      }
+    },
+    {
+      "global_id": "SP-IMG-006",
+      "document_id": "SP",
+      "local_ref": "page16_img01",
+      "filename": "P2 SmartPins-220809_mode00101_page16_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 16,
+      "image_index": 1,
+      "image_number_in_mode": 1,
+      "dimensions": {
+        "width": 1823,
+        "height": 797,
+        "display": "1823\u00d7797"
+      },
+      "smart_pin_context": {
+        "mode": "%00101",
+        "mode_name": "Transition output",
+        "mode_description": "Transition output",
+        "instructions": [
+          "wypin",
+          "wxpin",
+          "dirh",
+          "wrpin",
+          "dirl"
+        ],
+        "technical_context": [
+          "This command creates a series of pulses with equal logic-0 and logic-1 periods. The  value X15:0 set",
+          "Timing: This command creates a series of pulses with equal logic-0 and logic-1 periods. The  value X15:0 set",
+          "Timing: CON                dat         org     0                        dirl    #20 'Setup Smart Pin at P20 "
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "-------------------------------------------------------------- %00101:  Transition output",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "The code below creates eight logic transitions. If you choose an odd number of  transitions, the output remains a logic-1 when the Y-register value reaches 0.",
+            "type": "explanation"
+          }
+        ]
+      },
+      "semantic_type": "timing_diagram",
+      "caption": "-------------------------------------------------------------- %00101:  Transition output",
+      "nearby_text": [
+        {
+          "text": "The code below creates eight logic transitions. If you choose an odd number of  transitions, the output remains a logic-1 when the Y-register value reaches 0.",
+          "distance": 26.19140625,
+          "position": "below"
+        },
+        {
+          "text": "-------------------------------------------------------------- %00101:  Transition output",
+          "distance": 31.305252075195312,
+          "position": "above"
+        },
+        {
+          "text": "CON                dat         org     0                        dirl    #20 'Setup Smart Pin at P20         wrpin   TransConfig,    #20 'Setup for Transition mode         wxpin   TransTiming,    #20 'Set time between transitions         dirh    #20 'Finished setup         wypin   Cycles,       #20 'Send pulse count to Y register .myloop nop 'Delay two clocks for IN to drop         jmp #.myloop 'Program waits forever",
+          "distance": 65.857421875,
+          "position": "below"
+        },
+        {
+          "text": "This command creates a series of pulses with equal logic-0 and logic-1 periods. The  value X15:0 sets that period as a count of system-clock periods.  Use the Y register,  Y[31:0], to set the number of  transitions , or pulse edges, created. The Y value  decrements after each edge or transition. When the Y-register value reaches 0, the IN  flag gets set to a logic-1. During reset (DIR=0), IN is low, the output is low, and Y is set  to zero. The Smart Pin pin has a default output of logic-0 before it starts to put out logic  transitions.",
+          "distance": 78.88029479980469,
+          "position": "right"
+        },
+        {
+          "text": "Rev 5  06-11-2020 Jon Titus, Page 16 of",
+          "distance": 83.19880676269531,
+          "position": "above"
+        }
+      ],
+      "search_keywords": [
+        "wypin",
+        "transition_output",
+        "wxpin",
+        "transition",
+        "%00101",
+        "dirh",
+        "wrpin",
+        "dirl",
+        "timing_diagram",
+        "output",
+        "mode_00101"
+      ],
+      "consumption_hints": {
+        "ideal_size": "full_width",
+        "mode_specific": true,
+        "image_sequence": "1 of ? in %00101"
+      }
+    },
+    {
+      "global_id": "SP-IMG-007",
+      "document_id": "SP",
+      "local_ref": "page17_img01",
+      "filename": "P2 SmartPins-220809_mode00101_page17_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 17,
+      "image_index": 1,
+      "image_number_in_mode": 2,
+      "dimensions": {
+        "width": 2500,
+        "height": 903,
+        "display": "2500\u00d7903"
+      },
+      "smart_pin_context": {
+        "mode": "%00101",
+        "mode_name": "Transition output",
+        "mode_description": "Transition output",
+        "instructions": [],
+        "technical_context": [
+          "Timing: instruction executes.  The diagrams below show timing and a conceptual diagram of the  operations."
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "Rev 5  06-11-2020 Jon Titus, Page 17 of",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "CON",
+            "type": "explanation"
+          }
+        ]
+      },
+      "semantic_type": "timing_waveform",
+      "caption": "Rev 5  06-11-2020 Jon Titus, Page 17 of",
+      "nearby_text": [
+        {
+          "text": "CON",
+          "distance": 11.076606750488281,
+          "position": "below"
+        },
+        {
+          "text": "dat",
+          "distance": 11.076606750488281,
+          "position": "below"
+        },
+        {
+          "text": "The Pin output signal reflects the value of the Z31 bit.  The circuit raises the IN flag  whenever the Z register overflows (Z > 2 32 ).  During reset (DIR=0), IN equals logic-0, the  output is low, and Z is set to zero. This mode overrides OUT to control the pin output  state.",
+          "distance": 12.392608642578125,
+          "position": "below"
+        },
+        {
+          "text": "instruction executes.  The diagrams below show timing and a conceptual diagram of the  operations.",
+          "distance": 17.99774169921875,
+          "position": "right"
+        },
+        {
+          "text": "Rev 5  06-11-2020 Jon Titus, Page 17 of",
+          "distance": 34.10089111328125,
+          "position": "above"
+        }
+      ],
+      "search_keywords": [
+        "transition_output",
+        "jon",
+        "titus",
+        "%00101",
+        "page",
+        "rev",
+        "timing_waveform",
+        "mode_00101"
+      ],
+      "consumption_hints": {
+        "ideal_size": "full_width",
+        "mode_specific": true,
+        "image_sequence": "2 of ? in %00101"
+      }
+    },
+    {
+      "global_id": "SP-IMG-008",
+      "document_id": "SP",
+      "local_ref": "page17_img02",
+      "filename": "P2 SmartPins-220809_mode00101_page17_img02.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 17,
+      "image_index": 2,
+      "image_number_in_mode": 3,
+      "dimensions": {
+        "width": 2500,
+        "height": 815,
+        "display": "2500\u00d7815"
+      },
+      "smart_pin_context": {
+        "mode": "%00101",
+        "mode_name": "Transition output",
+        "mode_description": "Transition output",
+        "instructions": [
+          "wypin",
+          "wxpin",
+          "dirh",
+          "wrpin",
+          "dirl"
+        ],
+        "technical_context": [
+          "Timing: org     0                      dirl    #20 'Setup Smart Pin at P20       wrpin   NCO_Config, #20 'Se",
+          "Timing: qfrac     ##123, ##_clkfreq   'Calc #of 25-MHz cycles for                                     '  8 m"
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "dat",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "org     0                      dirl    #20 'Setup Smart Pin at P20       wrpin   NCO_Config, #20 'Set configuration for NCO mode       wxpin   #1, #20          'Set divide-by-n to 1, 25-MHz; '  one sy",
+            "type": "explanation"
+          }
+        ]
+      },
+      "semantic_type": "timing_waveform",
+      "caption": "CON",
+      "nearby_text": [
+        {
+          "text": "org     0                      dirl    #20 'Setup Smart Pin at P20       wrpin   NCO_Config, #20 'Set configuration for NCO mode       wxpin   #1, #20          'Set divide-by-n to 1, 25-MHz; '  one system-clock period       dirh    #20 'Finished setup",
+          "distance": 12.0,
+          "position": "below"
+        },
+        {
+          "text": "dat",
+          "distance": 13.841278076171875,
+          "position": "above"
+        },
+        {
+          "text": "CON",
+          "distance": 20.299835205078125,
+          "position": "above"
+        },
+        {
+          "text": "_clk_freq = 25_000_000",
+          "distance": 38.763153076171875,
+          "position": "above"
+        },
+        {
+          "text": "Example:",
+          "distance": 50.515846252441406,
+          "position": "above"
+        }
+      ],
+      "search_keywords": [
+        "wypin",
+        "transition_output",
+        "wxpin",
+        "%00101",
+        "dirh",
+        "wrpin",
+        "dirl",
+        "timing_waveform",
+        "con",
+        "mode_00101"
+      ],
+      "consumption_hints": {
+        "ideal_size": "full_width",
+        "mode_specific": true,
+        "image_sequence": "3 of ? in %00101"
+      }
+    },
+    {
+      "global_id": "SP-IMG-009",
+      "document_id": "SP",
+      "local_ref": "page19_img01",
+      "filename": "P2 SmartPins-220809_mode01000_page19_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 19,
+      "image_index": 1,
+      "image_number_in_mode": 1,
+      "dimensions": {
+        "width": 663,
+        "height": 423,
+        "display": "663\u00d7423"
+      },
+      "smart_pin_context": {
+        "mode": "%01000",
+        "mode_name": "pwm_triangle",
+        "mode_description": "Numerically Controlled Oscillator (NCO) Duty Cycle",
+        "instructions": [
+          "wypin",
+          "wxpin",
+          "dirh",
+          "wrpin",
+          "dirl"
+        ],
+        "technical_context": [
+          "This mode relies on an up-down counter to determine the length of logic-1 pulses. The  X-register va",
+          "Timing: This mode relies on an up-down counter to determine the length of logic-1 pulses. The  X-register va"
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "Y_RegData long $0E38_E38E ' 2^32 / 18",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "-------------------------------------------------------------- %01000 = Triangle-wave pulse-width modulation (PWM)",
+            "type": "explanation"
+          },
+          {
+            "position": "reference",
+            "text": "This mode relies on an up-down counter to determine the length of logic-1 pulses. The  X-register value X[15:0] acts as a divisor of the Propeller-2 s",
+            "type": "direct_reference"
+          }
+        ]
+      },
+      "semantic_type": "timing_waveform",
+      "caption": "Y_RegData long $0E38_E38E ' 2^32 / 18",
+      "nearby_text": [
+        {
+          "text": "This scope image shows the signal present at pin P20. The added arrows indicate time- measurement points",
+          "distance": 12.1324462890625,
+          "position": "right"
+        },
+        {
+          "text": "-------------------------------------------------------------- %01000 = Triangle-wave pulse-width modulation (PWM)",
+          "distance": 25.798828125,
+          "position": "below"
+        },
+        {
+          "text": "Y_RegData long $0E38_E38E ' 2^32 / 18",
+          "distance": 41.7249755859375,
+          "position": "above"
+        },
+        {
+          "text": "NCO_Config long %0000_0000_000_0000_000000000_01_00111_0",
+          "distance": 66.6468505859375,
+          "position": "above"
+        },
+        {
+          "text": "This mode relies on an up-down counter to determine the length of logic-1 pulses. The  X-register value X[15:0] acts as a divisor of the Propeller-2 system-clock frequency. The  divided frequency provides the PWM  base period . In the example below X[15:0] equals  1, so no division occurs. The 25-MHz system-clock period--40 nsec--becomes the base  period.",
+          "distance": 67.3828125,
+          "position": "below"
+        }
+      ],
+      "search_keywords": [
+        "wypin",
+        "wxpin",
+        "long",
+        "mode_01000",
+        "dirh",
+        "wrpin",
+        "dirl",
+        "timing_waveform",
+        "%01000",
+        "pwm_triangle"
+      ],
+      "consumption_hints": {
+        "ideal_size": "half_page",
+        "mode_specific": true,
+        "image_sequence": "1 of ? in %01000"
+      }
+    },
+    {
+      "global_id": "SP-IMG-010",
+      "document_id": "SP",
+      "local_ref": "page20_img01",
+      "filename": "P2 SmartPins-220809_mode01000_page20_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 20,
+      "image_index": 1,
+      "image_number_in_mode": 2,
+      "dimensions": {
+        "width": 2500,
+        "height": 1556,
+        "display": "2500\u00d71556"
+      },
+      "smart_pin_context": {
+        "mode": "%01000",
+        "mode_name": "pwm_triangle",
+        "mode_description": "Numerically Controlled Oscillator (NCO) Duty Cycle",
+        "instructions": [
+          "dirl",
+          "wrpin"
+        ],
+        "technical_context": [
+          "The X[31:16] bits sets the number of 40-nsec base periods you want in a  frame period ,  as shown in",
+          "The Y register value, Y[15:0], determines the logic-1 pulse width. In this example, Y =  $80 (128). ",
+          "This mode overrides OUT and controls the pin-output state.  During reset (DIR=0), IN  becomes logic "
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "and the PWM period equals 41.0 usec.",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "The Y register value, Y[15:0], determines the logic-1 pulse width. In this example, Y =  $80 (128). When the down-count value equals $80, the Smart Pin output becomes logic  1. The count continues to ",
+            "type": "explanation"
+          },
+          {
+            "position": "reference",
+            "text": "The X[31:16] bits sets the number of 40-nsec base periods you want in a  frame period ,  as shown in the diagram. In this mode, the PWM period is  twi",
+            "type": "direct_reference"
+          }
+        ]
+      },
+      "semantic_type": "timing_diagram",
+      "caption": "(40 * 10 -9  sec/base period) * 512 base periods = 20.48 * 10 -6  sec, or a 20.5-usec",
+      "nearby_text": [
+        {
+          "text": "and the PWM period equals 41.0 usec.",
+          "distance": 5.003997802734375,
+          "position": "above"
+        },
+        {
+          "text": "The Y register value, Y[15:0], determines the logic-1 pulse width. In this example, Y =  $80 (128). When the down-count value equals $80, the Smart Pin output becomes logic  1. The count continues to decrease to 1, at which time it starts to count up. For as long  as the count is less-then or equal to $80, the output remains a logic-1.",
+          "distance": 12.392608642578125,
+          "position": "below"
+        },
+        {
+          "text": "(40 * 10 -9  sec/base period) * 512 base periods = 20.48 * 10 -6  sec, or a 20.5-usec",
+          "distance": 32.601654052734375,
+          "position": "above"
+        },
+        {
+          "text": "The X[31:16] bits sets the number of 40-nsec base periods you want in a  frame period ,  as shown in the diagram. In this mode, the PWM period is  twice  the frame period. The  example sets X[31:16] to $200 (512), so the frame period equals:",
+          "distance": 60.199310302734375,
+          "position": "above"
+        },
+        {
+          "text": "Example",
+          "distance": 61.09984588623047,
+          "position": "below"
+        }
+      ],
+      "search_keywords": [
+        "timing_diagram",
+        "mode_01000",
+        "wrpin",
+        "period",
+        "periods",
+        "dirl",
+        "base",
+        "%01000",
+        "pwm_triangle",
+        "sec",
+        "usec"
+      ],
+      "consumption_hints": {
+        "ideal_size": "full_width",
+        "mode_specific": true,
+        "image_sequence": "2 of ? in %01000"
+      }
+    },
+    {
+      "global_id": "SP-IMG-011",
+      "document_id": "SP",
+      "local_ref": "page21_img01",
+      "filename": "P2 SmartPins-220809_mode01001_page21_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 21,
+      "image_index": 1,
+      "image_number_in_mode": 1,
+      "dimensions": {
+        "width": 2500,
+        "height": 1529,
+        "display": "2500\u00d71529"
+      },
+      "smart_pin_context": {
+        "mode": "%01001",
+        "mode_name": "PWM sawtooth",
+        "mode_description": "PWM sawtooth",
+        "instructions": [
+          "wypin",
+          "wxpin",
+          "dirh",
+          "wrpin",
+          "dirl"
+        ],
+        "technical_context": [
+          "Timing: NCO_Config long %0000_0000_000_00000_00000000_01_01000_0 Y_RegData long $0000_0080 X_RegData long $0",
+          "The X-register value X[15:0] acts as a divisor of the Propeller's system-clock frequency.  The divid",
+          "Timing: The X-register value X[15:0] acts as a divisor of the Propeller's system-clock frequency.  The divid"
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "Rev 5  06-11-2020 Jon Titus, Page 21 of",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "The X[31:16] bits sets the number of 40-nsec base periods you want in a  frame period ,  as shown in the diagram. In this mode, the frame period is the same as the PWM  period. The example sets X[31:1",
+            "type": "explanation"
+          },
+          {
+            "position": "reference",
+            "text": "The X[31:16] bits sets the number of 40-nsec base periods you want in a  frame period ,  as shown in the diagram. In this mode, the frame period is th",
+            "type": "direct_reference"
+          }
+        ]
+      },
+      "semantic_type": "timing_diagram",
+      "caption": "Rev 5  06-11-2020 Jon Titus, Page 21 of",
+      "nearby_text": [
+        {
+          "text": "Rev 5  06-11-2020 Jon Titus, Page 21 of",
+          "distance": 24.5009765625,
+          "position": "above"
+        },
+        {
+          "text": "The X[31:16] bits sets the number of 40-nsec base periods you want in a  frame period ,  as shown in the diagram. In this mode, the frame period is the same as the PWM  period. The example sets X[31:16] to $200 (512), so the frame period equals:",
+          "distance": 29.029815673828125,
+          "position": "below"
+        },
+        {
+          "text": "The X-register value X[15:0] acts as a divisor of the Propeller's system-clock frequency.  The divided frequency provides the PWM  base period . In the example below X[15:0]  equals 1, so no division occurs. The 25-MHz system-clock period--40 nsec--becomes  the base period.",
+          "distance": 39.964324951171875,
+          "position": "right"
+        },
+        {
+          "text": "wxpin   X_RegData,   #20  'Set base period at 1 usec, or                                 '   (25 MHz/#25)       dirh                 #20  'Finish setup              wypin   Y_RegData,   #20",
+          "distance": 49.84375,
+          "position": "right"
+        },
+        {
+          "text": "This mode operates in much the same way as the %01000 PWM Triangle mode  described above.  But it uses only an up counter that always starts with a count of 1.",
+          "distance": 81.36080932617188,
+          "position": "right"
+        }
+      ],
+      "search_keywords": [
+        "pwm_sawtooth",
+        "wypin",
+        "wxpin",
+        "jon",
+        "dirh",
+        "page",
+        "wrpin",
+        "dirl",
+        "rev",
+        "mode_01001",
+        "%01001",
+        "timing_diagram",
+        "titus"
+      ],
+      "consumption_hints": {
+        "ideal_size": "full_width",
+        "mode_specific": true,
+        "image_sequence": "1 of ? in %01001"
+      }
+    },
+    {
+      "global_id": "SP-IMG-012",
+      "document_id": "SP",
+      "local_ref": "page23_img01",
+      "filename": "P2 SmartPins-220809_mode01011_page23_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 23,
+      "image_index": 1,
+      "image_number_in_mode": 1,
+      "dimensions": {
+        "width": 2500,
+        "height": 868,
+        "display": "2500\u00d7868"
+      },
+      "smart_pin_context": {
+        "mode": "%01011",
+        "mode_name": "A/B-input quadrature encoder",
+        "mode_description": "A/B-input quadrature encoder",
+        "instructions": [
+          "RQPIN",
+          "RDPIN"
+        ],
+        "technical_context": [
+          "Periodic measurements : You set the X register pins X[31:0] for a measurement period  in terms of sy",
+          "Timing: Periodic measurements : You set the X register pins X[31:0] for a measurement period  in terms of sy"
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "In this mode, you connect a quadrature encoder to a Smart Pin and the pin's Z register  holds a 2's complement value that represents the  net total  encoder counts in one  direction minus the counts i",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "Periodic measurements : You set the X register pins X[31:0] for a measurement period  in terms of system-clock periods. At the end of that period the Z register holds a 32-bit  net value  that represe",
+            "type": "explanation"
+          }
+        ]
+      },
+      "semantic_type": "timing_waveform",
+      "caption": "",
+      "nearby_text": [
+        {
+          "text": "In this mode, you connect a quadrature encoder to a Smart Pin and the pin's Z register  holds a 2's complement value that represents the  net total  encoder counts in one  direction minus the counts in the opposite direction. Because an encoder provides two  signals, you now use the BBBB bits in the 32-bit mode-control value to select a nearby  pin for the second signal. Example programs use pins 32 and 33.",
+          "distance": 15.62725830078125,
+          "position": "above"
+        },
+        {
+          "text": "Periodic measurements : You set the X register pins X[31:0] for a measurement period  in terms of system-clock periods. At the end of that period the Z register holds a 32-bit  net value  that represents the final number of counts from the encoder. Four counts  clockwise (CW) and three counts counter clockwise (CCW) equals a net of one CW  count at the end of the period.",
+          "distance": 53.789031982421875,
+          "position": "below"
+        },
+        {
+          "text": "Rev 5  06-11-2020 Jon Titus, Page 23 of",
+          "distance": 109.12237548828125,
+          "position": "above"
+        },
+        {
+          "text": "Software can wait in a loop that tests the pin's IN flag. When detected, an RDPIN or  RQPIN instruction reads a value from the Z register. If a count occurs coincident with  the end of the sample period, it gets added to, or subtracted from, to the next period's  count. So the Smart Pin does not miss any counts.",
+          "distance": 136.58200073242188,
+          "position": "below"
+        }
+      ],
+      "search_keywords": [
+        "rdpin",
+        "%01011",
+        "mode_01011",
+        "periodic_polling",
+        "timing_waveform",
+        "rqpin"
+      ],
+      "consumption_hints": {
+        "ideal_size": "full_width",
+        "mode_specific": true,
+        "image_sequence": "1 of ? in %01011"
+      }
+    },
+    {
+      "global_id": "SP-IMG-013",
+      "document_id": "SP",
+      "local_ref": "page29_img01",
+      "filename": "P2 SmartPins-220809_mode10000_page29_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 29,
+      "image_index": 1,
+      "image_number_in_mode": 1,
+      "dimensions": {
+        "width": 1576,
+        "height": 570,
+        "display": "1576\u00d7570"
+      },
+      "smart_pin_context": {
+        "mode": "%10000",
+        "mode_name": "Time A-input states",
+        "mode_description": "Time A-input states",
+        "instructions": [
+          "RQPIN",
+          "testp",
+          "wypin",
+          "rdpin"
+        ],
+        "technical_context": [
+          "Timing: .test_loop nop         testp   #A_in  wc              'Get state of Carry flag         nop if_nc   j",
+          "Timing: A_in_mode     long  %0000_0001_000_0000000000000_00_01111_0 rcvd_data     long 0         'Positive-e",
+          "Timing: clock_mode    long  %0000_0000_000_000000_0_000000_01_00101_0"
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "%10000:  Time A-input states",
+            "type": "introduction"
+          }
+        ]
+      },
+      "semantic_type": "timing_diagram",
+      "caption": "%10000:  Time A-input states",
+      "nearby_text": [
+        {
+          "text": "%10000:  Time A-input states",
+          "distance": 34.529296875,
+          "position": "above"
+        },
+        {
+          "text": "--------------------------------------------------------------",
+          "distance": 62.126953125,
+          "position": "above"
+        },
+        {
+          "text": "clock_mode    long  %0000_0000_000_000000_0_000000_01_00101_0",
+          "distance": 88.181640625,
+          "position": "above"
+        },
+        {
+          "text": "This mode lets a Smart Pin  continuously  measure the time a pin is held in a logic-1 or a  logic-0 state. A measurement period ends when the logic state at the input changes. At  that time the carry flag indicates whether the measurement represents a logic-1 period,  C = 1, or a logic-0 period, C = 0.  Software can read the measurement  from the Z  register via an RQPIN instruction, which does not disturb the the IN, carry, or zero flags.   Period measurements use the system-clock period as the unit of time measurement.  The Z register has a maximum count of $8000_0000.  During reset (DIR=0), IN is low  and Z is set to $00000001. The diagram below shows the results for three  measurement periods.",
+          "distance": 103.458984375,
+          "position": "right"
+        },
+        {
+          "text": "A_in_mode     long  %0000_0001_000_0000000000000_00_01111_0 rcvd_data     long 0         'Positive-edge clock mode sync_tx_mode  long  %0000_1111_000_0000000000000_01_11100_0",
+          "distance": 113.103515625,
+          "position": "above"
+        }
+      ],
+      "search_keywords": [
+        "testp",
+        "wypin",
+        "%10000",
+        "rdpin",
+        "states",
+        "input",
+        "time",
+        "mode_10000",
+        "timing_diagram",
+        "continuous_adc_filter",
+        "rqpin"
+      ],
+      "consumption_hints": {
+        "ideal_size": "full_width",
+        "mode_specific": true,
+        "image_sequence": "1 of ? in %10000"
+      }
+    },
+    {
+      "global_id": "SP-IMG-014",
+      "document_id": "SP",
+      "local_ref": "page31_img01",
+      "filename": "P2 SmartPins-220809_mode10010_page31_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 31,
+      "image_index": 1,
+      "image_number_in_mode": 1,
+      "dimensions": {
+        "width": 1711,
+        "height": 559,
+        "display": "1711\u00d7559"
+      },
+      "smart_pin_context": {
+        "mode": "%10010",
+        "mode_name": "Time A-input highs, rises, or edges  (Y[2] = 0)",
+        "mode_description": "Time A-input highs, rises, or edges  (Y[2] = 0)",
+        "instructions": [],
+        "technical_context": [
+          "You can use this mode in three ways, depending on how you set Y-register bits Y[2:0].  In all cases,",
+          "Timing: You can use this mode in three ways, depending on how you set Y-register bits Y[2:0].  In all cases,",
+          "%001 =  Measure the period of X number of pulse widths starting on a logic-0 to logic-1  edges on an"
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "Example",
+            "type": "introduction"
+          }
+        ]
+      },
+      "semantic_type": "timing_diagram",
+      "caption": "Example",
+      "nearby_text": [
+        {
+          "text": "Example",
+          "distance": 17.82745361328125,
+          "position": "above"
+        },
+        {
+          "text": "%001 =  Measure the period of X number of pulse widths starting on a logic-0 to logic-1  edges on an A input.  The diagram below shows timing for X[31:0] = $9. At the end of  the 9th pulse, the C flag gets set and the period becomes available in the pin's Z  register. The diagram below illustrates the measurement period in terms of system- clock periods.",
+          "distance": 29.92425537109375,
+          "position": "above"
+        },
+        {
+          "text": "In this example, the pattern of three pulses repeats, so we choose 9, a multiple of three  for the number of pulses to count to provide an accurate measurement.  If you have  pulse widths that vary from measurement period to measurement period, the timing  values in the Z register will vary, too.  See Note below.",
+          "distance": 39.06988525390625,
+          "position": "right"
+        },
+        {
+          "text": "%000 =  A-input high (logic-1)    I have no idea what this mode measures. Or how to  explain it.",
+          "distance": 112.71722412109375,
+          "position": "above"
+        },
+        {
+          "text": "You can use this mode in three ways, depending on how you set Y-register bits Y[2:0].  In all cases, the Smart Pin uses the system-clock frequency to increment a counter, and  timing results go into the pin's Z register.",
+          "distance": 154.11370849609375,
+          "position": "above"
+        }
+      ],
+      "search_keywords": [
+        "example",
+        "mode_10010",
+        "adc_scope_trigger",
+        "%10010",
+        "timing_diagram"
+      ],
+      "consumption_hints": {
+        "ideal_size": "full_width",
+        "mode_specific": true,
+        "image_sequence": "1 of ? in %10010"
+      }
+    },
+    {
+      "global_id": "SP-IMG-015",
+      "document_id": "SP",
+      "local_ref": "page32_img01",
+      "filename": "P2 SmartPins-220809_mode10010_page32_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 32,
+      "image_index": 1,
+      "image_number_in_mode": 2,
+      "dimensions": {
+        "width": 1644,
+        "height": 597,
+        "display": "1644\u00d7597"
+      },
+      "smart_pin_context": {
+        "mode": "%10010",
+        "mode_name": "Detect missing A-input highs, rises or edge during",
+        "mode_description": "Detect missing A-input highs, rises or edge during",
+        "instructions": [
+          "RQPIN",
+          "wxpin",
+          "wypin",
+          "dirh",
+          "wrpin",
+          "RDPIN",
+          "dirl"
+        ],
+        "technical_context": [
+          "%01x =  Measure the period between X number of logic edges on an A input.  The  diagram below shows ",
+          "Timing: %01x =  Measure the period between X number of logic edges on an A input.  The  diagram below shows ",
+          "Timing: Note:   When the Smart Pin has detected the set number of your chosen event type it  raises the IN f"
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "Rev 5  06-11-2020 Jon Titus, Page 32 of",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "Example",
+            "type": "explanation"
+          }
+        ]
+      },
+      "semantic_type": "timing_diagram",
+      "caption": "Example",
+      "nearby_text": [
+        {
+          "text": "Example",
+          "distance": 11.368522644042969,
+          "position": "below"
+        },
+        {
+          "text": "Note:   When the Smart Pin has detected the set number of your chosen event type it  raises the IN flag. Your software can wait for the flag and then use an RDPIN or RQPIN  instruction to retrieve the number of time increments.  During reset (DIR = 0), IN goes to  logic-0 and the Z register gets set to $00000001.The Z register can count as many as  $80000000 system clock periods.",
+          "distance": 12.392593383789062,
+          "position": "below"
+        },
+        {
+          "text": "%01x =  Measure the period between X number of logic edges on an A input.  The  diagram below shows timing for six edges, X[31:0] = 6. At the end of the 6th edge, the C  flag gets set and the period measurement becomes available in the pin's Z register. The  diagram below illustrates the period timing. See Note below.",
+          "distance": 28.09649658203125,
+          "position": "right"
+        },
+        {
+          "text": "Rev 5  06-11-2020 Jon Titus, Page 32 of",
+          "distance": 65.39862060546875,
+          "position": "above"
+        },
+        {
+          "text": "CON       A_in     = 53      'Pin P53 dat       org 0             dirl     #A_in                 'Use A_in, pin 53       wrpin    A_in_mode,   #A_in    'Set up mode for pin P53            wxpin    ##$7,        #A_in    'Wait for $7 events       wypin    ##%001,      #A_in    'Count A-input high states       dirh     #A_in                 'Enable Smart Pin",
+          "distance": 121.05274963378906,
+          "position": "below"
+        }
+      ],
+      "search_keywords": [
+        "wxpin",
+        "wypin",
+        "rdpin",
+        "example",
+        "mode_10010",
+        "dirh",
+        "wrpin",
+        "adc_scope_trigger",
+        "dirl",
+        "%10010",
+        "timing_diagram",
+        "rqpin"
+      ],
+      "consumption_hints": {
+        "ideal_size": "full_width",
+        "mode_specific": true,
+        "image_sequence": "2 of ? in %10010"
+      }
+    },
+    {
+      "global_id": "SP-IMG-016",
+      "document_id": "SP",
+      "local_ref": "page33_img01",
+      "filename": "P2 SmartPins-220809_mode10011_page33_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 33,
+      "image_index": 1,
+      "image_number_in_mode": 1,
+      "dimensions": {
+        "width": 1549,
+        "height": 633,
+        "display": "1549\u00d7633"
+      },
+      "smart_pin_context": {
+        "mode": "%10011",
+        "mode_name": "Measure time for X events to occur",
+        "mode_description": "Measure time for X events to occur",
+        "instructions": [
+          "RQPIN",
+          "RDPIN"
+        ],
+        "technical_context": [
+          "Timing: %101 = Missing A-input rise (logic-0 to logic-1)",
+          "Timing: %11x = Missing A-input edge",
+          "When you initialize one of these modes, the clock starts and counts accumulate in the Z  register at"
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "%11x = Missing A-input edge",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "Example",
+            "type": "explanation"
+          }
+        ]
+      },
+      "semantic_type": "timing_diagram",
+      "caption": "%11x = Missing A-input edge",
+      "nearby_text": [
+        {
+          "text": "Example",
+          "distance": 22.34001922607422,
+          "position": "below"
+        },
+        {
+          "text": "If an event fails to occur during the period, the pin raises the IN flag and begins a new  timing period. Software may detect the raised IN flag and use an RDPIN or RQPIN to  read the Z-register value, which has an upper limit of $80000000 system-clock periods.  This register maintains a running count of how many clocks have elapsed since the last  A-input event.",
+          "distance": 26.191436767578125,
+          "position": "below"
+        },
+        {
+          "text": "%11x = Missing A-input edge",
+          "distance": 32.466522216796875,
+          "position": "above"
+        },
+        {
+          "text": "When you initialize one of these modes, the clock starts and counts accumulate in the Z  register at the system-clock frequency. If during this period the Smart Pin detects an  event, the timer gets reset to $00000001 and a new count starts. The IN flag remains  reset. The diagram below illustrates timing for the Y[2:0] = %100 setting.",
+          "distance": 36.527618408203125,
+          "position": "right"
+        },
+        {
+          "text": "%101 = Missing A-input rise (logic-0 to logic-1)",
+          "distance": 60.064178466796875,
+          "position": "above"
+        }
+      ],
+      "search_keywords": [
+        "edge",
+        "rdpin",
+        "missing",
+        "input",
+        "mode_10011",
+        "timing_diagram",
+        "adc_scope_trigger_plus",
+        "%10011",
+        "rqpin"
+      ],
+      "consumption_hints": {
+        "ideal_size": "full_width",
+        "mode_specific": true,
+        "image_sequence": "1 of ? in %10011"
+      }
+    },
+    {
+      "global_id": "SP-IMG-017",
+      "document_id": "SP",
+      "local_ref": "page34_img01",
+      "filename": "P2 SmartPins-220809_mode10011_page34_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 34,
+      "image_index": 1,
+      "image_number_in_mode": 2,
+      "dimensions": {
+        "width": 1161,
+        "height": 687,
+        "display": "1161\u00d7687"
+      },
+      "smart_pin_context": {
+        "mode": "%10011",
+        "mode_name": "Measure time for X events to occur",
+        "mode_description": "Measure time for X events to occur",
+        "instructions": [
+          "RQPIN",
+          "wxpin",
+          "wypin",
+          "dirh",
+          "wrpin",
+          "RDPIN",
+          "dirl"
+        ],
+        "technical_context": [
+          "Timing: %10 = A-input edge to B-input rise %11 = A-input edge to B-input edge",
+          "The value you put in the X register (X[31:0]) sets the number of A-input to B-input  events that mus",
+          "Timing: The  sum  of event these periods becomes available in the pin's Z register when the IN  flag becomes"
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "%10 = A-input edge to B-input rise %11 = A-input edge to B-input edge",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "Example",
+            "type": "explanation"
+          }
+        ]
+      },
+      "semantic_type": "timing_diagram",
+      "caption": "%10 = A-input edge to B-input rise %11 = A-input edge to B-input edge",
+      "nearby_text": [
+        {
+          "text": "Example",
+          "distance": 7.1221160888671875,
+          "position": "below"
+        },
+        {
+          "text": "The  sum  of event these periods becomes available in the pin's Z register when the IN  flag becomes a logic-1. You may use an RDPIN or RQPIN instruction to obtain the data.  A new set of two measurements starts on the rising edge of the IN flag. The Z register  has a limit of $80000000.  During reset (DIR=0), IN is low and Z is set to $00000000.",
+          "distance": 12.392547607421875,
+          "position": "below"
+        },
+        {
+          "text": "The value you put in the X register (X[31:0]) sets the number of A-input to B-input  events that must occur before you get a result. The diagram below shows the  measurements for  two events  (X[1:0] = %10) that yield period counts Q and R.",
+          "distance": 15.711044311523438,
+          "position": "right"
+        },
+        {
+          "text": "%10 = A-input edge to B-input rise %11 = A-input edge to B-input edge",
+          "distance": 39.48426818847656,
+          "position": "above"
+        },
+        {
+          "text": "Note: You may set the BBBB bits in the 32-bit mode-setting value to connect the B  portion of the Smart Pin to the A pin if you want single-cycle measurements.",
+          "distance": 81.38668823242188,
+          "position": "below"
+        }
+      ],
+      "search_keywords": [
+        "edge",
+        "wxpin",
+        "wypin",
+        "rdpin",
+        "dirh",
+        "wrpin",
+        "input",
+        "dirl",
+        "mode_10011",
+        "timing_diagram",
+        "adc_scope_trigger_plus",
+        "rise",
+        "%10011",
+        "rqpin"
+      ],
+      "consumption_hints": {
+        "ideal_size": "half_page",
+        "mode_specific": true,
+        "image_sequence": "2 of ? in %10011"
+      }
+    },
+    {
+      "global_id": "SP-IMG-018",
+      "document_id": "SP",
+      "local_ref": "page46_img01",
+      "filename": "P2 SmartPins-220809_mode11100_page46_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 46,
+      "image_index": 1,
+      "image_number_in_mode": 1,
+      "dimensions": {
+        "width": 1677,
+        "height": 666,
+        "display": "1677\u00d7666"
+      },
+      "smart_pin_context": {
+        "mode": "%11100",
+        "mode_name": "Synchronous serial transmit (SST)",
+        "mode_description": "Synchronous serial transmit (SST)",
+        "instructions": [
+          "RQPIN",
+          "RDPIN",
+          "AKPIN",
+          "WYPIN",
+          "WXPIN",
+          "WRPIN"
+        ],
+        "technical_context": [],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "Rev 5  06-11-2020 Jon Titus, Page 46 of",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "The result of a RDPIN/RQPIN can be bit-tested for events of interest. It can also be  shifted right by 8 bits to LSB-justify the last byte received and get the byte toggle bit into  C, in order to det",
+            "type": "explanation"
+          }
+        ]
+      },
+      "semantic_type": "pin_configuration",
+      "caption": "Rev 5  06-11-2020 Jon Titus, Page 46 of",
+      "nearby_text": [
+        {
+          "text": "WRPIN/WXPIN/WYPIN/RDPIN/AKPIN before IN can be raised again, to alert of the  next change in status. The receiver's status bits are as follows:",
+          "distance": 6.02545166015625,
+          "position": "right"
+        },
+        {
+          "text": "The result of a RDPIN/RQPIN can be bit-tested for events of interest. It can also be  shifted right by 8 bits to LSB-justify the last byte received and get the byte toggle bit into  C, in order to determine if you have a new byte. Assume that 'flag' is initially zero:",
+          "distance": 36.976165771484375,
+          "position": "below"
+        },
+        {
+          "text": "Rev 5  06-11-2020 Jon Titus, Page 46 of",
+          "distance": 46.07318115234375,
+          "position": "above"
+        },
+        {
+          "text": "SHR D,#8 WC 'get byte into D, get toggle bit into C CMPX flag,#1 WZ 'compare toggle bit to flag, new byte if Z IF_Z XOR flag,#1 'if new byte, toggle flag IF_Z <use byte> 'if new byte, do something with it",
+          "distance": 91.77890014648438,
+          "position": "below"
+        },
+        {
+          "text": "[31:16] <unused> - $0000 [15:8] byte - last byte received [7] byte toggle - cleared on SOP, toggled on each byte received [6] error - cleared on SOP, set on bit-unstuff error, EOP SE0 > 3 bits, or SE1 [5] EOP in - cleared on SOP or 7+ bits of J or K, set on EOP [4] SOP in - cleared on EOP or 7+ bits of J or K, set on SOP [3] SE1 in (illegal) - cleared on !SE1, set on 1+ bits of SE1 [2] SE0 in (RESET) - cleared on !SE0, set on 1+ bits of SE0 [1] K in (RESUME) - cleared on !K, set on 7+ bits of K [0] J in (IDLE) - cleared on !J, set on 7+ bits of J",
+          "distance": 114.81094360351562,
+          "position": "right"
+        }
+      ],
+      "search_keywords": [
+        "wypin",
+        "wxpin",
+        "rdpin",
+        "jon",
+        "pin_configuration",
+        "page",
+        "mode_11100",
+        "wrpin",
+        "%11100",
+        "akpin",
+        "rev",
+        "pulse_width_measurement",
+        "titus",
+        "rqpin"
+      ],
+      "consumption_hints": {
+        "ideal_size": "full_width",
+        "mode_specific": true,
+        "image_sequence": "1 of ? in %11100"
+      }
+    },
+    {
+      "global_id": "SP-IMG-019",
+      "document_id": "SP",
+      "local_ref": "page46_img02",
+      "filename": "P2 SmartPins-220809_mode11100_page46_img02.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 46,
+      "image_index": 2,
+      "image_number_in_mode": 2,
+      "dimensions": {
+        "width": 1571,
+        "height": 656,
+        "display": "1571\u00d7656"
+      },
+      "smart_pin_context": {
+        "mode": "%11100",
+        "mode_name": "Synchronous serial transmit (SST)",
+        "mode_description": "Synchronous serial transmit (SST)",
+        "instructions": [],
+        "technical_context": [
+          "Timing: Data from one bit to as many as 32 bits shift out a Smart Pin in this mode, synchronized  with a sep",
+          "Timing: The figures below shows timing for a synchronous serial transmission with positive- edge and negativ",
+          "Timing: Serial synchronous transmission with negative-edge clocking:"
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "Serial synchronous transmission with positive-edge clocking.",
+            "type": "introduction"
+          }
+        ]
+      },
+      "semantic_type": "timing_waveform",
+      "caption": "Serial synchronous transmission with positive-edge clocking.",
+      "nearby_text": [
+        {
+          "text": "Serial synchronous transmission with positive-edge clocking.",
+          "distance": 4.40106201171875,
+          "position": "above"
+        },
+        {
+          "text": "Serial synchronous transmission with negative-edge clocking:",
+          "distance": 73.39520263671875,
+          "position": "above"
+        },
+        {
+          "text": "The figures below shows timing for a synchronous serial transmission with positive- edge and negative-edge clocking. Software examples demonstrate both.",
+          "distance": 114.79168701171875,
+          "position": "above"
+        },
+        {
+          "text": "Data from one bit to as many as 32 bits shift out a Smart Pin in this mode, synchronized  with a separate clock signal. Setup involves configuring the A and B portions of a Smart  Pin circuit and use of two physical pins. Bits shift out one at a time, starting with the LSB  first.",
+          "distance": 156.18817138671875,
+          "position": "above"
+        },
+        {
+          "text": "%11100:  Synchronous serial transmit (SST)",
+          "distance": 191.64988708496094,
+          "position": "above"
+        }
+      ],
+      "search_keywords": [
+        "edge",
+        "synchronous",
+        "with",
+        "mode_11100",
+        "transmission",
+        "positive",
+        "%11100",
+        "clocking",
+        "serial",
+        "timing_waveform",
+        "pulse_width_measurement"
+      ],
+      "consumption_hints": {
+        "ideal_size": "full_width",
+        "mode_specific": true,
+        "image_sequence": "2 of ? in %11100"
+      }
+    },
+    {
+      "global_id": "SP-IMG-020",
+      "document_id": "SP",
+      "local_ref": "page52_img01",
+      "filename": "P2 SmartPins-220809_mode11110_page52_img01.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 52,
+      "image_index": 1,
+      "image_number_in_mode": 1,
+      "dimensions": {
+        "width": 524,
+        "height": 250,
+        "display": "524\u00d7250"
+      },
+      "smart_pin_context": {
+        "mode": "%11110",
+        "mode_name": "Asynchronous serial transmit (AST)",
+        "mode_description": "Asynchronous serial transmit (AST)",
+        "instructions": [],
+        "technical_context": [],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "Note 2 :  The Smart Pin produced a logic-0 output prior to its first transmission (below  left), which eliminates the logic-0 start bit.  To avoid that condition and start with a Smart  Pin logic-1 ou",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "Example",
+            "type": "explanation"
+          }
+        ]
+      },
+      "semantic_type": "mode_11110_diagram",
+      "caption": "Example",
+      "nearby_text": [
+        {
+          "text": "Note 2 :  The Smart Pin produced a logic-0 output prior to its first transmission (below  left), which eliminates the logic-0 start bit.  To avoid that condition and start with a Smart  Pin logic-1 output (below right), send data with all 1's, such as $FF to clear the shifter.   The following transmissions will all start from a logic-1 shifter.  The following  transmissions will all start from a logic-1 transmissions.",
+          "distance": 24.11468505859375,
+          "position": "above"
+        },
+        {
+          "text": "Example",
+          "distance": 26.19140625,
+          "position": "below"
+        },
+        {
+          "text": "The Carry flag indicates the parity.  How does Carry indicate parity?  1 = even?,  0 =  odd?",
+          "distance": 106.90765380859375,
+          "position": "above"
+        },
+        {
+          "text": "parity      = 0 my_data     = $3A2 OR my_data, #$1111111111  wc if_c mov parity, #1",
+          "distance": 148.30413818359375,
+          "position": "above"
+        }
+      ],
+      "search_keywords": [
+        "example",
+        "sensor_calibration",
+        "mode_11110",
+        "%11110",
+        "mode_11110_diagram"
+      ],
+      "consumption_hints": {
+        "ideal_size": "half_page",
+        "mode_specific": true,
+        "image_sequence": "1 of ? in %11110"
+      }
+    },
+    {
+      "global_id": "SP-IMG-021",
+      "document_id": "SP",
+      "local_ref": "page52_img02",
+      "filename": "P2 SmartPins-220809_mode11110_page52_img02.png",
+      "source_pdf": "P2 SmartPins-220809.pdf",
+      "page_number": 52,
+      "image_index": 2,
+      "image_number_in_mode": 2,
+      "dimensions": {
+        "width": 555,
+        "height": 253,
+        "display": "555\u00d7253"
+      },
+      "smart_pin_context": {
+        "mode": "%11110",
+        "mode_name": "Asynchronous serial transmit (AST)",
+        "mode_description": "Asynchronous serial transmit (AST)",
+        "instructions": [
+          "wxpin"
+        ],
+        "technical_context": [
+          "To transmit, load data into the Smart Pin's Y register.  Eight-bit data would go into bits  Y[7:0]; "
+        ],
+        "discussion_context": [
+          {
+            "position": "before",
+            "text": "Note 2 :  The Smart Pin produced a logic-0 output prior to its first transmission (below  left), which eliminates the logic-0 start bit.  To avoid that condition and start with a Smart  Pin logic-1 ou",
+            "type": "introduction"
+          },
+          {
+            "position": "after",
+            "text": "Example",
+            "type": "explanation"
+          }
+        ]
+      },
+      "semantic_type": "register_layout",
+      "caption": "bit_period = $3640_C00 7 wxpin   ##bit_period,  #txpin",
+      "nearby_text": [
+        {
+          "text": "Note 2 :  The Smart Pin produced a logic-0 output prior to its first transmission (below  left), which eliminates the logic-0 start bit.  To avoid that condition and start with a Smart  Pin logic-1 output (below right), send data with all 1's, such as $FF to clear the shifter.   The following transmissions will all start from a logic-1 shifter.  The following  transmissions will all start from a logic-1 transmissions.",
+          "distance": 17.6435546875,
+          "position": "above"
+        },
+        {
+          "text": "Example",
+          "distance": 26.19140625,
+          "position": "below"
+        },
+        {
+          "text": "bit_period = $3640_C00 7 wxpin   ##bit_period,  #txpin",
+          "distance": 32.09991455078125,
+          "position": "above"
+        },
+        {
+          "text": "parity      = 0 my_data     = $3A2 OR my_data, #$1111111111  wc if_c mov parity, #1",
+          "distance": 56.69989013671875,
+          "position": "above"
+        },
+        {
+          "text": "The Carry flag indicates the parity.  How does Carry indicate parity?  1 = even?,  0 =  odd?",
+          "distance": 100.4365234375,
+          "position": "above"
+        }
+      ],
+      "search_keywords": [
+        "wxpin",
+        "sensor_calibration",
+        "mode_11110",
+        "%11110",
+        "register_layout",
+        "txpin"
+      ],
+      "consumption_hints": {
+        "ideal_size": "half_page",
+        "mode_specific": true,
+        "image_sequence": "2 of ? in %11110"
+      }
+    }
+  ]
+}

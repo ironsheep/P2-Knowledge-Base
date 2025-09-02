@@ -67,7 +67,7 @@ cat /workspace/shared/status/forge-ready.txt
   "tests": [
     {
       "name": "list-formatting-test", 
-      "document": "smart-pins-test-sample.md"
+      "input": "smart-pins-test-sample.md"
     }
   ],
   "options": {
@@ -88,7 +88,7 @@ cat /workspace/shared/status/forge-ready.txt
   "tests": [
     {
       "name": "colored-code-blocks",
-      "document": "test-document.md",
+      "input": "test-document.md",
       "lua_filters": ["smart-pins-block-coloring"]  // ✅ CORRECT
     }
   ]
@@ -103,16 +103,16 @@ cat /workspace/shared/status/forge-ready.txt
   "tests": [
     {
       "name": "without-filters",
-      "document": "test-document.md"
+      "input": "test-document.md"
     },
     {
       "name": "with-color-filters",
-      "document": "test-document.md",
+      "input": "test-document.md",
       "lua_filters": ["smart-pins-colored-blocks"]
     },
     {
       "name": "with-multiple-filters",
-      "document": "test-document.md",
+      "input": "test-document.md",
       "lua_filters": ["smart-pins-colored-blocks", "part-chapter-pagebreaks"]
     }
   ]
@@ -208,12 +208,12 @@ cat /workspace/shared/status/forge-ready.txt
   "tests": [
     {
       "name": "colored-blocks-test",
-      "document": "smart-pins-test.md",
+      "input": "smart-pins-test.md",
       "lua_filters": ["smart-pins-block-coloring"]  // Applies color environments
     },
     {
       "name": "plain-test", 
-      "document": "smart-pins-test.md"  // No filters for comparison
+      "input": "smart-pins-test.md"  // No filters for comparison
     }
   ]
 }
@@ -229,11 +229,11 @@ cat /workspace/shared/status/forge-ready.txt
   "tests": [
     {
       "name": "minimal-doc",
-      "document": "minimal-smart-pins.md"
+      "input": "minimal-smart-pins.md"
     },
     {
       "name": "full-chapter",
-      "document": "full-smart-pins-chapter.md"
+      "input": "full-smart-pins-chapter.md"
     }
   ]
 }

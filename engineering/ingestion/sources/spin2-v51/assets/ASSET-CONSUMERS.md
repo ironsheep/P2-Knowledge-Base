@@ -1,6 +1,6 @@
 # Asset Consumer Registry
 **Primary Extraction**: SPIN2 v51 Complete Extraction Audit  
-**Asset Location**: `assets/images-20250815/` (and future import sessions)  
+**Asset Location**: `assets/images-spin2-enhanced-20250901/` (consolidated and enhanced)  
 **Registry Purpose**: Track all consumers for automated forwarding when new assets arrive
 
 ## Secondary Extractions (Immediate Updates)
@@ -8,7 +8,7 @@
 
 ### `/sources/extractions/spin2-terminal-windows/`
 - **Current Assets**: req01, req04, req06, bonus01
-- **Reference File**: `assets/images-20250815.md`
+- **Reference File**: `assets/images-spin2-enhanced-20250901/spin2_v51_catalog_improved.json`
 - **Focus**: Terminal display, debug output, oscilloscope features
 - **Auto-Forward**: All terminal-related screenshots (debug, scope, plot, FFT)
 
@@ -44,7 +44,7 @@
 For each secondary extraction in registry:
 1. Check asset relevance to extraction focus
 2. Update reference file with new relevant assets
-3. Maintain session history (images-20250815, images-20250820, etc.)
+3. Maintain consolidated catalog in images-spin2-enhanced-20250901/
 ```
 
 **Step 2: Technical Debt Updates (Documents)**
