@@ -79,7 +79,31 @@ This directory contains FOUR sacred versions of the P2 Smart Pins Green Book Tut
   We assembled the complete document by inserting v3 content at the marked locations.
   The v4-wrapper.md file preserves the original template for reference.
 - **Use Cases**:
+  - Foundation for V5 enhancements
+  - Historical reference
+  - Fallback if V5 has issues
+
+### 📚💎 Version 5: P2-Smart-Pins-Green-Book-Tutorial-v5.md (Balanced Language Coverage) ⭐ AUTHORITATIVE
+- **Type**: Green Book (Tutorial) - Dual-language Smart Pin reference
+- **Created**: 2025-09-01 from V4 + Titus PASM2 examples
+- **Enhanced**: Bottom-up insertion of 15 PASM2 examples
+- **Size**: 3,371 lines / 27 PASM2 blocks / 87 Spin2 blocks
+- **Permissions**: 444 (read-only)
+- **Purpose**: Balanced tutorial serving both Spin2 and PASM2 developers
+- **Enhancement Details**:
+  - Started with V4's 87 Spin2 and 12 PASM2 blocks (7.25:1 ratio)
+  - Added 15 PASM2 examples from Titus code files
+  - Fixed spacing on all 27 PASM2 blocks (100% compliance)
+  - Achieved 3.22:1 ratio (significant improvement)
+  - Modes now with PASM2: OFF, NCO Duty/Freq, Pulse, Count, Encoders, ADC, etc.
+- **Technical Process**:
+  - Bottom-up insertion to preserve line numbers
+  - Rigorous spacing verification (blank lines before all blocks)
+  - Source: `/engineering/ingestion/sources/smart-pins/assets/code-20250824/`
+  - All Titus examples are tested, production code
+- **Use Cases**:
   - PRIMARY tutorial for PDF generation
+  - Serves both Spin2 and PASM2 communities
   - Complete I/O learning path
   - Production reference manual
   - Comprehensive P2 I/O bible

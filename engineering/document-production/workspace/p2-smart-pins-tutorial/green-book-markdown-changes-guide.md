@@ -64,7 +64,22 @@ This guide documents the REQUIRED markdown transformations to convert the Green 
 
 ## Required Transformations
 
-### 1. Antipattern Code Block Splitting ⚠️ **CRITICAL**
+### 1. Automated Code Block Conversion 🚀 **USE SCRIPT**
+
+**Automated Tool**: `/engineering/tools/convert-to-div-syntax.py`
+```bash
+python3 /engineering/tools/convert-to-div-syntax.py input.md output.md
+```
+
+**What the script handles**:
+- ✅ Converts all `spin2` and `pasm2` blocks to div syntax
+- ✅ Automatically adds blank lines where needed (prevents colons showing in PDF)
+- ✅ Splits antipattern blocks (WRONG/RIGHT patterns)
+- ✅ Provides statistics on conversions and blank lines added
+
+**Critical blank line handling**: The script detects when text immediately precedes a code block and inserts a blank line before the div opener. This prevents the colons from appearing in the final PDF (a problem found in Master V3).
+
+### 1.1 Antipattern Code Block Splitting (handled by script) ⚠️ **CRITICAL**
 
 **Location**: Throughout the tutorial, teaching moments
 **Pattern**: Single code blocks containing both failing and working code
