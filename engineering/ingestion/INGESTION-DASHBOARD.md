@@ -7,7 +7,7 @@
 
 | Source | Original Doc | Images | Code | Audit Doc | Completeness |
 |--------|-------------|--------|------|-----------|--------------|
-| smart-pins | ✅ PDF | ✅ 22 images | ✅ 98 examples | ✅ Complete | 100% |
+| smart-pins | ✅ PDF | ✅ 21 images+context | ✅ 98 examples | ✅ Enhanced | 100% |
 | spin2-v51 | ✅ PDF | ✅ 25 images | ✅ 32 examples | ✅ Complete | 100% |
 | silicon-doc | ✅ Text | ✅ 2 dirs | ❓ Check | ✅ Complete | 95% |
 | pasm2-manual | ✅ In Dev | ✅ 1 dir | ❓ Check | ✅ Complete | 90% |
@@ -19,12 +19,13 @@
 
 ## Detailed Source Status
 
-### 1. **smart-pins/** ✅ COMPLETE
-- **Original**: `P2 SmartPins-220809.pdf`
-- **Images**: `assets/images-20250824/` (22 PNG files)
+### 1. **smart-pins/** ✅ ENHANCED & COMPLETE
+- **Original**: `P2 SmartPins-220809.pdf` + `.docx` for context
+- **Images**: `assets/images-smartpins-20250901/` (21 PNG files with rich metadata)
 - **Code**: `assets/code-20250824/` (98 examples)
 - **Audit**: `smart-pins-complete-extraction-audit.md`
-- **Status**: Fully extracted and validated
+- **Enhancement**: All images enriched with .docx narrative context, mode associations, instruction mappings
+- **Status**: Fully extracted, validated, and enhanced with superior context
 
 ### 2. **spin2-v51/** ✅ COMPLETE
 - **Original**: PDF present

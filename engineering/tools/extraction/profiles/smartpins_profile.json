@@ -1,0 +1,109 @@
+{
+  "document_type": "smart_pins",
+  "document_id": "SP",
+  "description": "Propeller 2 Smart Pins Documentation",
+  
+  "heading_patterns": {
+    "chapter": [
+      "^SMART PINS$",
+      "^STANDARD I/O PINS$",
+      "^PIN MODES$"
+    ],
+    "section": [
+      "^Smart Pin [Mm]odes?$",
+      "^Pin-.+ Instructions$",
+      "^Input-.+ Instructions$"
+    ],
+    "mode_heading": "^(%[01]{5})\\s*:\\s*(.+)$"
+  },
+  
+  "smart_pin_modes": {
+    "%00000": "Repository",
+    "%00001": "DAC Noise",
+    "%00010": "DAC 16-bit Dither",
+    "%00011": "DAC PWM Dither",
+    "%00100": "Pulse/Cycle Output",
+    "%00101": "Transition Output",
+    "%00110": "NCO Frequency",
+    "%00111": "NCO Duty",
+    "%01000": "PWM Triangle",
+    "%01001": "PWM Sawtooth", 
+    "%01010": "PWM SMPS",
+    "%01011": "Periodic Polling",
+    "%01100": "Periodic Polling with Trigger",
+    "%01101": "Time Accumulator",
+    "%01110": "Time Accumulator with Feedback",
+    "%01111": "Time Gated Accumulator",
+    "%10000": "Continuous ADC Filter",
+    "%10001": "Continuous ADC Scope",
+    "%10010": "ADC Scope Trigger",
+    "%10011": "ADC Scope Trigger Plus",
+    "%10100": "USB Host",
+    "%10101": "USB Device",
+    "%10110": "Synchronous Serial Transmit",
+    "%10111": "Synchronous Serial Receive",
+    "%11000": "Asynchronous Serial Transmit",
+    "%11001": "Asynchronous Serial Receive",
+    "%11010": "Asynchronous Serial Duplex",
+    "%11011": "Synchronous Serial Duplex",
+    "%11100": "Pulse Width Measurement",
+    "%11101": "Quadrature Decoder",
+    "%11110": "Sensor Calibration",
+    "%11111": "ADC Reader"
+  },
+  
+  "key_instructions": [
+    "WRPIN", "WXPIN", "WYPIN", "RDPIN", "RQPIN", "AKPIN",
+    "TESTP", "TESTPN", "DRVH", "DRVL", "FLTL", "FLTH",
+    "DIRH", "DIRL", "OUTH", "OUTL", "DIRNOT", "OUTNOT"
+  ],
+  
+  "image_classification_hints": {
+    "timing_diagram": ["timing", "clock", "cycle", "edge", "rise", "fall"],
+    "waveform": ["waveform", "signal", "trace", "oscilloscope"],
+    "register_layout": ["register", "[31:0]", "bit field", "D/#"],
+    "pin_configuration": ["WRPIN", "WXPIN", "WYPIN", "configuration"],
+    "state_machine": ["state", "machine", "transition", "FSM"],
+    "serial_timing": ["baud", "bit period", "start bit", "stop bit"],
+    "dac_output": ["DAC", "dither", "PWM", "analog"],
+    "quadrature": ["quadrature", "encoder", "A/B", "phase"]
+  },
+  
+  "extraction_rules": {
+    "track_mode_per_page": true,
+    "capture_discussion_context": true,
+    "expand_context_radius": 200,
+    "prioritize_mode_identification": true,
+    "include_instruction_references": true,
+    "capture_mode_descriptions": true
+  },
+  
+  "mode_description_patterns": [
+    "This mode (?:allows|enables|provides|implements)([^.]+)",
+    "Used for ([^.]+)",
+    "(?:Outputs?|Generates?|Creates?|Measures?)\\s+([^.]+)",
+    "The smart pin (?:will|can|does)([^.]+)"
+  ],
+  
+  "expected_structure": [
+    {
+      "section": "Introduction",
+      "pages": "1-2",
+      "expected_images": 0
+    },
+    {
+      "section": "Standard I/O Pins",
+      "pages": "3-6", 
+      "expected_images": 3,
+      "notes": "Basic pin timing diagrams"
+    },
+    {
+      "section": "Smart Pin Modes",
+      "pages": "7-54",
+      "expected_images": 18,
+      "notes": "1-2 diagrams per mode, mode-specific timing and configuration"
+    }
+  ],
+  
+  "notes": "Smart Pins document is organized by mode numbers (%xxxxx). Each mode section typically contains 1-2 diagrams showing configuration or timing. Mode identification is critical for proper cataloging."
+}

@@ -1,5 +1,7 @@
 # P2 PASM De Silva Style - Creation Guide
 
+**Canonical Name:** `p2-pasm-desilva-style`
+
 ## 🎯 Document Purpose
 Creating a pedagogical PASM2 manual that captures deSilva's teaching philosophy: approachable, hands-on, and genuinely enjoyable assembly language learning.
 

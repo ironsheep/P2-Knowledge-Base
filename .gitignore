@@ -144,3 +144,4 @@ human-todos/
 
 # AI operational guides (not versioned)
 .todo-mcp/
+*.zip
