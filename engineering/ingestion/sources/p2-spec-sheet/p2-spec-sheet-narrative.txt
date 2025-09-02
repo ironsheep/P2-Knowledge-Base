@@ -1,0 +1,112 @@
+www.parallax.com/P2 ⬝ sales@parallax.com ⬝ support@parallax.com ⬝
+
++1 888-512-1024
+
+Propeller P2X8C4M64P (P2) Multicore Microcontroller Spec Sheet
+The Propeller P2X8C4M64P (P2) is a multicore microcontroller with the performance of an MPU, excelling at
+real-time analog and digital applications. Designed to help engineers achieve the fastest time to market, the P2's
+highly flexible, deterministic hardware and development environment are free from the complication, expense and
+lead time associated with traditional FPGA-type development cycles.
+The P2 has 8 identical 32-bit processors each with 4 KB of dual-port RAM, a configurable clock up to 320 MHz
+(8x160 MIPs), 64 smart I/O pins, and a common hub with 512 KB of shared RAM and a CORDIC math solver.
+Each of the 64 smart I/Os can be accessed by every cog, and are independently able to execute hundreds of
+autonomous analog and digital functions. Each Smart Pin can support almost any protocol, with a growing list of
+objects including 1-WIRE, CANbus, DVI, HDMI, HDTV, HUB75, HyperFlash/RAM, I²C, QSPI/QSSI, RS485, SCI/SPI, SID,
+SD CARD, UART/USART, USB 2.0 HOST/SLAVE, VGA, XBEE. (For R&D only; end users must seek their own protocol
+licenses where needed.)
+External Flash or a removable SD card memory can be used to boot or store program code and data, which allows
+for simple product deployment, on-site updates and efficient, low-cost support.
+For complete Propeller 2 specifications, documentation, development kits and boards, programming tools,
+developers' forum, and other community resources, visit www.parallax.com/p2.
+
+Selected Specifications
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+Eight 32-bit cores each with 4 KB dual-port RAM
+512 KB shared RAM
+64 identical Smart I/O pins
+Power core @ 1.8 VDC, I/O pins @ 3.3 VDC
+Internal ~24 MHz and ~20 kHz RC oscillators
+Low-power operation mode @ ~130 µA
+External clock input with internal loading caps
+Fractional PLL, 3 stage
+Frequency 180 MHz typical, 320 MHz extended
+Hub access speed 720 MB/s/cog @180 MHz
+Max execution @ 180 MHz 720 MIPs (90 MIPs/cog)
+
+Physical Characteristics
+● Package: 14x14 mm exposed-pad 100-pin TQFP
+● Operating temperature range: -40 to +105°C
+● Moisture Sensitivity Level (MSL) 3 (168 hours)
+
+Compliance
+●
+●
+●
+●
+
+RoHS3 Compliant (EU 2011/65/EU)
+REACH Compliant (EU EC 1907/2006)
+ECCN 3A991A2 (EU EAR99)
+HTSUS 8542.31.0001
+
+Hardware Function Highlights
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+ADC: 64 x 14-bit
+ADC Modes: Delta-Sigma, SINC1/2/3, Scope
+Atomic Locks: 16 locks accessible by all cogs
+Comparator modes with feedback
+CORDIC math solver: 54 stage, 8 function
+Counter Modes: 28 per cog & 64-bit hub global
+Clock Modes: Six 32-bit
+DAC: 64 x 16-bit, 3 ns 75 ohm
+Debug interrupt: single-stepping & breakpoint
+Digital input filter
+Drive modes: 1.5k, 15k, 150k, 1mA, 100µA, 10µA
+Event & timer modes: 16 per cog
+Goertzel analysis: 4 ADC bit streams per cog
+Interrupts: 3 per cog, 16 event sources
+Math: SIN, LOG, TAN, ARC
+PWM: Triangle, Sawtooth, SMPS
+Quadrature Decoder
+USB 12 Mbps
+Analog Video: VGA/HDTV/NTSC/PAL
+Digital Video: HDMI 480p @60fps, 720p @24fps
+Xoroshiro128 (PRNG, noise-seeded)
+
+Parallax Inc. ▪ 599 Menlo Drive Suite 100 ▪ Rocklin, CA 95765 ▪ USA
+
+Copyright © Parallax Inc. 10/13/2021
+
+

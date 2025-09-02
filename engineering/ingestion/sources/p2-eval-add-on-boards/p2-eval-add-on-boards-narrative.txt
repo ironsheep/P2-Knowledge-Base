@@ -1,0 +1,689 @@
+Web Store: www.parallax.com
+
+Sales: (888) 512-1024
+
+Tutorials: learn.parallax.com
+
+Educator Hotline: (916) 701-8625
+
+Sales: sales@parallax.com
+
+Office: (916) 624-8333
+
+Tech Support: support@parallax.com
+
+Fax (916) 624-8003
+
+P2 Eval Add-on Boards
+Control (#64006A)
+Serial Host (#64006B)
+LED Matrix (#64006C)
+Digital Video Out (#64006D)
+Mini Prototyping (#64006E)
+Serial Device (#64006F)
+Goertzel (#64006G)
+AV Breakout (#64006H)
+Complete Accessory Set
+(#64006-ES)
+
+Speed your Propeller 2 project development with this line of Add-on Boards, sold separately or as a set.
+Each board features a 2x6 pass-through socket that is compatible with any Propeller 2 development
+boards with a 2x6 accessory header.
+Compatible development systems include the ​P2 Eval Board (#64000)​, and the ​P2 Edge Module
+Breadboard (#64020)​ or​ ​P2 Edge Mini Breakout Board (#64019)​ with a​ ​P2 Edge Module (#P2-EC)​.
+All eight boards can be connected to the P2 Eval Board at the same time as shown above, making it very
+convenient to fully explore the capabilities of the Propeller 2 multicore microcontroller.
+Note: It is strongly recommended to connect the auxiliary power supply to the P2-EVAL board P2-USB
+socket when experimenting with the accessory boards, as power requirements may exceed what is
+available from the PC-USB socket.
+Except for the Mini-Prototyping board, each accessory board has a mounting hole which is connected to
+GND, and is suitable for M3 (UNC 4- 40) hardware. The hole is 3.2 mm (126 mil) and the pad ring is 5
+mm (200 mil). This could be used to fit a 9.5 mm long standoff to act as a leg, and provide support when
+connected to the P2-EVAL board (#64000-ES).
+The boards come in three sizes; refer to the PCB Dimensions drawing for details. Two small modules, or
+one large and one small module, can fit side-by-side on each edge of the P2-EVAL Board.
+
+Copyright © Parallax Inc.
+
+P2 Eval Add-on Boards (#64006 Series)
+
+v2.0 1/12/2021 Page 1 of 12
+
+P2 Eval Control Add-on Board (#64006A)
+
+The Control accessory board includes four push-buttons and four blue LEDs.
+The push-buttons allow simple digital input control
+of other circuits or processes. Each active-high
+push-button has a 470 Ω series resistor to allow the
+I/O pin to be driven low while the button is
+asserted.
+The LEDs are active-high and positioned next to
+each button. Each LED is controlled by its own
+independent I/O pin for flexibility.
+I/O Pin
+
+Function
+
+0
+
+Blue LED with 470 Ω series resistor. Assert high to light. Use PWM for brightness control.
+
+1
+
+Blue LED with 470 Ω series resistor. Assert high to light. Use PWM for brightness control.
+
+2
+
+Blue LED with 470 Ω series resistor. Assert high to light. Use PWM for brightness control.
+
+3
+
+Blue LED with 470 Ω series resistor. Assert high to light. Use PWM for brightness control.
+
+4
+
+Tactile push switch with 470 Ω series resistor, active high.
+
+5
+
+Tactile push switch with 470 Ω series resistor, active high.
+
+6
+
+Tactile push switch with 470 Ω series resistor, active high.
+
+7
+
+Tactile push switch with 470 Ω series resistor, active high.
+
+Copyright © Parallax Inc.
+
+P2 Eval Add-on Boards (#64006 Series)
+
+v2.0 1/12/2021 Page 2 of 12
+
+P2 Eval Serial Host Add-on Board (#64006B)
+
+The Serial Host accessory board has twin USB-type A sockets, each protected with a current-limited load
+switch that allows up to 500 mA continuous current, subject to overall available system power. Additional
+protection includes reverse current blocking, short-circuit protection, over temperature protection and
+VBUS soft start.
+This accessory board allows two USB-type devices to be connected simultaneously, such as a keyboard
+and mouse. Two user controlled blue activity LEDs are located beside the USB-type A socket.
+To enable the Serial Host 5V power output on each channel, set the corresponding channel enable pin
+high. I/O pin 1 for channel 1, and I/O pin 5 for channel 2.
+Note that the Serial Host accessory board requires 5V to function.​ When used with the P2-ES
+Eval Board Rev B, the shunt jumper must connect that board's ACC HDR and 5V pins to supply 5V to its
+I/O Pin Breakout Edge Headers.
+I/O Pin
+
+Function
+
+0
+
+Blue LED with 1 kΩ series resistor. Assert high to light. Use PWM for brightness control.
+
+1
+
+Serial channel 1 : Enable, active high
+
+2
+
+Serial channel 1 : Data D-
+
+3
+
+Serial channel 1 : Data D+
+
+4
+
+Blue LED with 1 kΩ series resistor. Assert high to light. Use PWM for brightness control.
+
+5
+
+Serial channel 2 : Enable, active high
+
+6
+
+Serial channel 2 : Data D-
+
+7
+
+Serial channel 2 : Data D+
+
+Copyright © Parallax Inc.
+
+P2 Eval Add-on Boards (#64006 Series)
+
+v2.0 1/12/2021 Page 3 of 12
+
+P
+​ 2 Eval LED Matrix Add-on Board (#64006C)
+
+This board features an 8 x 7 grid of Charlieplexed green LEDs. It can be used to display text of graphics
+across 56 LEDs using only 8 I/O pins! The technique of Charlieplexing is described here:
+https://en.wikipedia.org/wiki/Charlieplexing​. Charlieplexing allows for control of more LEDs with fewer
+I/O pins by taking advantage of the one-way current flow properties of diodes (including Light Emitting
+Diodes), along with the tri-state properties of the Propeller 2 I/O pins.
+This lookup table shows the required state of the Propeller I/O pins to illuminate each LED. For example,
+to light the LED at Row 3 Col 6, the table shows 3 HIGH 0 LOW. In this case, we would set IO 3 HIGH
+and IO 0 LOW to light this LED. Set both IO pins to INPUT mode to turn the LED off.
+Col 1
+
+Col 2
+
+Col 3
+
+Col 4
+
+Col 5
+
+Col 6
+
+Col 7
+
+Col 8
+
+Row 1
+
+0 HIGH
+1 LOW
+
+0 HIGH
+2 LOW
+
+0 HIGH
+3 LOW
+
+0 HIGH
+4 LOW
+
+0 HIGH
+5 LOW
+
+0 HIGH
+6 LOW
+
+0 HIGH
+7 LOW
+
+1 HIGH
+0 LOW
+
+Row 2
+
+1 HIGH
+2 LOW
+
+1 HIGH
+3 LOW
+
+1 HIGH
+4 LOW
+
+1 HIGH
+5 LOW
+
+1 HIGH
+6 LOW
+
+1 HIGH
+7 LOW
+
+2 HIGH
+0 LOW
+
+2 HIGH
+1 LOW
+
+Row 3
+
+2 HIGH
+3 LOW
+
+2 HIGH
+4 LOW
+
+2 HIGH
+5 LOW
+
+2 HIGH
+6 LOW
+
+2 HIGH
+7 LOW
+
+3 HIGH
+0 LOW
+
+3 HIGH
+1 LOW
+
+3 HIGH
+2 LOW
+
+Row 4
+
+3 HIGH
+4 LOW
+
+3 HIGH
+5 LOW
+
+3 HIGH
+6 LOW
+
+3 HIGH
+7 LOW
+
+4 HIGH
+0 LOW
+
+4 HIGH
+1 LOW
+
+4 HIGH
+2 LOW
+
+4 HIGH
+3 LOW
+
+Row 5
+
+4 HIGH
+5 LOW
+
+4 HIGH
+6 LOW
+
+4 HIGH
+7 LOW
+
+5 HIGH
+0 LOW
+
+5 HIGH
+1 LOW
+
+5 HIGH
+2 LOW
+
+5 HIGH
+3 LOW
+
+5 HIGH
+4 LOW
+
+Row 6
+
+5 HIGH
+6 LOW
+
+5 HIGH
+7 LOW
+
+6 HIGH
+0 LOW
+
+6 HIGH
+1 LOW
+
+6 HIGH
+2 LOW
+
+6 HIGH
+3 LOW
+
+6 HIGH
+4 LOW
+
+6 HIGH
+5 LOW
+
+Row 7
+
+6 HIGH
+7 LOW
+
+7 HIGH
+0 LOW
+
+7 HIGH
+1 LOW
+
+7 HIGH
+2 LOW
+
+7 HIGH
+3 LOW
+
+7 HIGH
+4 LOW
+
+7 HIGH
+5 LOW
+
+7 HIGH
+6 LOW
+
+Copyright © Parallax Inc.
+
+P2 Eval Add-on Boards (#64006 Series)
+
+v2.0 1/12/2021 Page 4 of 12
+
+To light multiple LEDs, rely on the fast operating speed of the Propeller 2. While Charlieplexing doesn’t
+actually light the LEDs simultaneously, it switches them on and off fast enough to trick the human eye
+into believing they are on simultaneously.
+When Propeller 2 code switches each LED on and off at least 50 times a second (50 Hz), flickering should
+not be noticeable and the LEDs will appear to be permanently on. (For the Propeller 2 this switching
+speed is no problem as each I/O could switch faster than 180 MHz, which is plenty of time to turn on
+every LED if needed).
+Each LED consumes approximately 4 mA when lit. If all the LEDs were continuously powered on, they
+could consume 224 mA together. But, Charlieplexing needs only to light one LED at a time, so total
+current consumption at any instant in time remains only 4 mA!
+
+P2 Eval Digital Video Out Add-on Board (#64006D)
+
+The Digital Video Out Accessory Board provides an HDMI-type connector which can be used for
+experimenting with various video standards. The signal pins which are connected to the P2-EVAL header
+are shown in this table:
+I/O Pin
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+Function
+
+CLK -
+
+CLK +
+
+D0 -
+
+D0 +
+
+D1 -
+
+D1 +
+
+D2 -
+
+D2 +
+
+Unused signal pins from the video connector are labelled on the PCB next to an unpopulated 0.1” pitch
+row of 6 pads: CEC, RSVD, SCL, SDA, 5V▶, HPD.
+Beside the 5V▶ output pad is another pad labelled “ACC 5V”. That is the 5V supply from the accessory
+socket. Some video monitors require a 5V signal connecting to the 5V▶ pin, so these two pads with 0.1”
+spacing make that convenient. For example, a 0.1” pitch header could be soldered here, and a shunt plug
+used when 5V is required to the monitor.
+
+Copyright © Parallax Inc.
+
+P2 Eval Add-on Boards (#64006 Series)
+
+v2.0 1/12/2021 Page 5 of 12
+
+P2 Eval Mini Prototyping Add-on Board (#64006E)
+
+The Mini Prototyping Add-on Board provides an 8x12 grid of plated thru-holes.
+Ground holes are connected on both sides of the PCB, and marked on the top side by white silk blocks.
+Other holes that are joined are marked on the top side of the PCB with silk dashes or boxes. And they are
+linked on the bottom of the PCB with copper traces that are isolated clearly to enable easy cutting as
+required.
+Holes inside a white box are joined to the signal or power marked. Referring to the image, 5V, VIO and
+the I/O pins 0 thru 7 are highlighted with arrows. Holes joined by dashes are joined together, but are not
+joined to any signal. Referring to the image, these holes are highlighted with an orange box.
+There is one exposed ground strip on the bottom of the PCB (marked in orange below) to allow easy
+bridging of the neighboring thru-holes to Ground.
+
+Copyright © Parallax Inc.
+
+P2 Eval Add-on Boards (#64006 Series)
+
+v2.0 1/12/2021 Page 6 of 12
+
+P2 Eval Serial Device Add-on Board (#64006F)
+
+The Serial Device accessory board has two microUSB-type sockets, each with two activity LEDs.
+This accessory board allows the Propeller 2 to behave as up to two USB-type devices, connecting to a
+USB host such as a computer or other USB capable microcontroller.
+Two user controlled activity LEDs (red and blue) are located beside each microUSB-type socket.
+I/O Pin
+
+Function
+
+0
+
+Blue LED with 1 kΩ series resistor. Assert high to light.
+
+1
+
+Red LED with 1 kΩ series resistor. Assert high to light.
+
+2
+
+Serial channel 1 : Data D-
+
+3
+
+Serial channel 1 : Data D+
+
+4
+
+Serial channel 2 : Data D-
+
+5
+
+Serial channel 2 : Data D+
+
+6
+
+Blue LED with 1 kΩ series resistor. Assert high to light.
+
+7
+
+Red LED with 1 kΩ series resistor. Assert high to light.
+
+Copyright © Parallax Inc.
+
+P2 Eval Add-on Boards (#64006 Series)
+
+v2.0 1/12/2021 Page 7 of 12
+
+P2 Eval Goertzel Add-on Board (#64006G)
+
+The Goertzel experimenter board features (Rev B) pads for non-contact switching or position sensing.
+Pads 4, 5 and 6 are typically used as on/off (switch style) inputs, whereas 0,1,2,3 and 7 for a set of
+Goertzel input pads.
+I/O Pin
+
+Function
+
+0
+
+Goertzel E (3 O’Clock)
+
+1
+
+Goertzel W (9 O’Clock)
+
+2
+
+Goertzel N (12 O’Clock)
+
+3
+
+Goertzel S (6 O’Clock)
+
+4
+
+Switch pad (Left)
+
+5
+
+Switch pad (Right)
+
+6
+
+Switch pad common reference
+
+7
+
+Goertzel C (Center common pad)
+
+Copyright © Parallax Inc.
+
+P2 Eval Add-on Boards (#64006 Series)
+
+v2.0 1/12/2021 Page 8 of 12
+
+P2 Eval A/V Breakout Add-on Board (#64006H)
+
+The A/V Breakout Board board includes the following capabilities:
+Amplified Audio Out (80mW) / Headphone Socket (3.5 mm Stereo Jack)
+Audio Input / Microphone Socket (3.5 mm Mono Jack)
+Audio-to-RCA 4-band
+Component Video-to-RCA 4-band (Composite Sync, RGBS)
+Digital component video (RCA Socket)
+Composite Video (RCA Socket)
+VGA (15-pin VGA socket)
+
+●
+●
+●
+●
+●
+●
+●
+
+Some features share the same IO pins and sockets. The A/V board features a dip switch which allows
+switching the 4x RCA sockets from Audio to Video mode.
+Function 1
+Common connection
+regardless of dip switch
+setting
+
+Function 2
+Dip switch VIDEO
+selected
+
+Function 3
+Dip switch AUDIO
+selected
+
+0
+
+VGA 15-pin socket - HSync
+
+RCA Socket 0 (H - HSync)
+
+RCA Socket 0 via 22uF cap
+
+1
+
+VGA 15-pin socket - Blue
+
+RCA Socket 1 (B - Blue)
+
+RCA Socket 1 via 22uF cap
+
+2
+
+VGA 15-pin socket - Green
+
+RCA Socket 2 (G - Green)
+
+RCA Socket 2 via 22uF cap
+
+3
+
+VGA 15-pin socket - Red
+
+RCA Socket 3 (R - Red)
+
+RCA Socket 3 via 22uF cap
+
+4
+
+VGA 15-pin socket - VSync
+
+5
+
+Microphone socket via 1uF
+cap
+
+6
+
+Output to Audio amp (Left)
+
+7
+
+Output to Audio amp (Right)
+
+I/O Pin
+
+Tip: ​Always use the P2-EVAL 3
+​ .3V LDO​ Power selection
+when working with Audio!
+
+The two audio jack sockets are compatible with 3.5 mm jack plugs.
+Copyright © Parallax Inc.
+
+P2 Eval Add-on Boards (#64006 Series)
+
+v2.0 1/12/2021 Page 9 of 12
+
+The microphone socket is wired: Tip = signal, Sleeve = ground
+
+The audio output (headphone) socket is wired: Tip = left, Ring = right, Sleeve = ground
+
+Copyright © Parallax Inc.
+
+P2 Eval Add-on Boards (#64006 Series)
+
+v2.0 1/12/2021 Page 10 of 12
+
+PCB Dimensions
+There are three sizes for the accessory set boards:
+A/V module
+
+Goertzel module
+
+Copyright © Parallax Inc.
+
+P2 Eval Add-on Boards (#64006 Series)
+
+v2.0 1/12/2021 Page 11 of 12
+
+Small modules
+
+Revision History
+Version 1.0: original release as a Google Document visible to the public via a shared link with
+commenting enabled; edits tracked by the Google tools and not individually enumerated.
+Version 1.1: Updated for Propeller 2 ES Eval Board Rev B note regarding the need to connect the ACC
+HDR/5V pins with a shunt jumper to supply 5V power to the Serial Device board via the I/O Pin Breakout
+Edge Headers.
+Version 2.0: Updated images show revised Goertzel PCB which features touch switch pads instead of
+probe posts. Reflects that the boards are available individually and as a set.
+
+Copyright © Parallax Inc.
+
+P2 Eval Add-on Boards (#64006 Series)
+
+v2.0 1/12/2021 Page 12 of 12
+
+

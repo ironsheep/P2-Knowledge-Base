@@ -1,0 +1,251 @@
+Web Store: www.parallax.com
+
+Sales: (888) 512-1024
+
+Tutorials: learn.parallax.com
+
+Educator Hotline: (916) 701-8625
+
+Sales: sales@parallax.com
+
+Office: (916) 624-8333
+
+Tech Support: support@parallax.com
+
+Fax: (916) 624-8003
+
+P2 WX Adapter Add-on Board (#64007)
+
+This adapter provides a convenient way to add wireless programming and serial communication
+capabilities to the Parallax Propeller P2 microcontroller. The adapter connects a Parallax ESP8266 WX
+WiFi SIP module to any P2 development board with a standard 2x6 way accessory header.
+The WX adapter can be connected to any P2 accessory header for serial-over-WiFi communications. For
+wireless programming, look for the P56–P63 header marked with the “RES” logo.
+Serial-over-WiFi communications from any accessory header is available with any ESP8266 WiFi SIP
+module firmware version. To add the feature for programming the Propeller 2 wirelessly refer to the
+instructions for upgrading your ESP8266 WiFi SIP module firmware to the latest version. P2 WiFi firmware
+has a drag/drop P2 loader on its self-hosted web page, which will accept a P2 program binary file
+compiled in any language.
+
+Features
+●
+●
+●
+●
+●
+●
+
+Connects a Parallax WX WiFi ESP8266 SIP module to the Propeller 2 Accessory Header
+Allows wireless programming when used with an accessory header with the “RES” logo
+Load a binary file created in any P2 programming software to the Propeller 2 over WiFi
+Connect to any 2x6 way accessory header for serial-over-WiFi communication
+Unpopulated pads allow access to all the WiFi module SIP control signals, handy for attaching
+logic probes.
+Golden Egg shaped Access Point (AP) enable pads.
+
+Specifications
+●
+●
+●
+●
+●
+
+10-pin SIP socket with 0.1" spacing for the Parallax WX WiFi ESP8266 SIP Module (#32420S)
+Unpopulated 8-pin SIP through-hole pads with 0.1” spacing for access to the WiFi module PGM,
+DBG, ASC, CTS, RTS, DO, DI and RES control signals
+2x6 female socket with 0.1” spacing compatible with the standard Parallax P2 Accessory sockets
+PCB Dimensions: 1.2 x 1.0 in (30.48 x 25.4 mm)
+Operating temperature: -40 to +185 °F (-40 to +85 °C)
+
+Copyright © Parallax Inc.
+
+P2 WX Adapter Add-on Board (#64007)
+
+v1.0 11/12/2020 Page 1 of 7
+
+Wireless Programming Quick-Start Guide
+Items required
+●
+●
+●
+●
+●
+●
+
+Propeller 2 board with the 2x6 P56–P63 header showing the RES logo
+Parallax WX ESP8266 WiFi Module - SIP, #32420s
+Suitable power supply for your Propeller 2 board
+Computer with wireless network adapter
+Propeller 2 programming software that generates binary files, such as the Propeller Tool 2.3
+Latest P2 firmware and example binary, downloaded from the 64007 product page at
+www.parallax.com​. The file “LED57.binary” will blink an LED connected to P2 I/O pin P57.
+
+Connecting the Hardware
+First, connect the Parallax WX ESP8266 WiFi Module - SIP (#32420s) to
+the P2 WX Adapter (#64007) as shown. The WX Adapter has a white
+silkscreen marking beside the WiFi module socket which indicates the
+orientation of the metal can when the WiFi module is inserted.
+Then, plug the adapter into the 2x6 header marked RES on your P2
+development board. The header must also connect to P2 I/O pins
+P56–P63, power, and ground as shown below.
+
+Copyright © Parallax Inc.
+
+P2 WX Adapter Add-on Board (#64007)
+
+v1.0 11/12/2020 Page 2 of 7
+
+Update the WX WiFi Module Firmware
+A. Connect to the WiFi module
+1. Connect the Parallax WX ESP8266 WiFi Module to any available accessory header on your
+Propeller 2 board using the P2 WX Adapter Add-on Board.
+2. Power on your Propeller 2 board.
+3. Make sure the WiFi module's blue ASC LED starts to blink or light up.
+4. From your computer (could be a tablet, laptop or smartphone), search for available WiFi
+networks and connect to the Parallax WX ESP8266 WiFi module network. By default, the device
+name will be in this format: WX-123456.
+5. If the module is not found when searching for wireless networks, grab a paperclip or similar small
+metal object and touch 4 times quickly the golden egg on the P2 WX Adapter PCB (labelled AP).
+You want to short out the 2 pads of the egg 4 times in quick succession. When you are
+successful you should notice the behaviour of the blue “ASC” LED changes, and from your
+computer you will be able to search again for new wireless networks until you find the
+WX-123456 network.
+B. One time setup (Ignore this section if previously completed)
+1. Once connected to the WiFi module, open your web-browser (Chrome or Edge recommended)
+and visit this address: h
+​ ttp://192.168.4.1
+2. You should see the Parallax Wireless Module webpage, with various menus on the left. If the
+menus are not visible and you are using a small-display device, then you might need to rotate
+the display to landscape view.
+3. Click on the “Firmware” menu on the left-hand-side and upload the special P2 firmware file
+(P2_httpd_xxxx.ota) downloaded previously. Once completed the module will reboot; allow time
+for the module to reboot and re-connect your laptop WiFi connection if necessary.
+
+Copyright © Parallax Inc.
+
+P2 WX Adapter Add-on Board (#64007)
+
+v1.0 11/12/2020 Page 3 of 7
+
+4. Again, visit the webpage at : ​http://192.168.4.1​ and click on the “Settings” menu on the
+left-hand-side.
+
+5. The reset dropdown option should be set to “CTS”. (It might be DTR by default). Once set to
+“CTS”, then click the “SAVE” and “SAVE to FLASH” buttons at the bottom of the page.
+6. If your firmware update was successful, you will see a new menu on the left-hand-side “P2
+Loader”. If not, try holding SHIFT and pressing F5 to force your browser to clear its cache and
+refresh the page.
+
+C. Using the P2 Loader to wirelessly program your P2 microcontroller
+1. Ensure you have completed the steps in section A
+​ . Connect to the WiFi module​, and then
+ensure the WX Adapter is plugged into the appropriate accessory header of your Propeller 2
+development board for wireless programming. The appropriate accessory header to use for
+wireless programming is marked with a “RES” logo, as seen in the image in the above Items
+required section.
+2. Once connected to the WiFi module, open your web-browser (Chrome or Edge recommended)
+and visit this address: h
+​ ttp://192.168.4.1
+3. Click on the “P2 Drop Loader” menu on the left-hand-side..
+
+Copyright © Parallax Inc.
+
+P2 WX Adapter Add-on Board (#64007)
+
+v1.0 11/12/2020 Page 4 of 7
+
+4. Once the web-page has loaded (which may take a few seconds the first time), you will see a
+drag/drop area. To wirelessly program the connected P2 microcontroller, drag/drop P2 binary
+files to this area from a folder on your computer.
+5. The upload will happen very quickly, and when successful the webpage will report the status
+message “Done!”.
+
+Tip! I​ f uploading the LED blink demo, ensure you have the P2 Edge Module “LED” dip-switch turned on!
+
+Copyright © Parallax Inc.
+
+P2 WX Adapter Add-on Board (#64007)
+
+v1.0 11/12/2020 Page 5 of 7
+
+Pin Connections
+Accessory
+header pin
+
+WiFi
+Function
+module pin
+
+GND
+
+GND
+
+Common ground
+
+0
+
+RES
+
+WiFi module reset signal
+
+1
+
+PGM
+
+WiFi module configure (ESP IO0)
+
+2-5
+
+-
+
+6
+
+DI
+
+WiFi module RXD
+
+7
+
+DO
+
+WiFi module TXD
+
+RES
+
+CTS
+
+Target board reset signal for Propeller microprocessor (ESP
+IO13)
+
+VIO3V3
+
+3.3V
+
+Supply voltage to WiFi module
+
+Not Connected
+
+Pin connection diagram: Dark blue traces on top of PCB, light blue on bottom of PCB
+
+Copyright © Parallax Inc.
+
+P2 WX Adapter Add-on Board (#64007)
+
+v1.0 11/12/2020 Page 6 of 7
+
+Dimensions
+
+Resources and Downloads
+Check for the latest version of this document and the schematic diagram from the P2 WX Adapter
+product page. Go to www.parallax.com and search 64007.
+
+Revision History
+Version 1.0: Original release.
+
+Copyright © Parallax Inc.
+
+P2 WX Adapter Add-on Board (#64007)
+
+v1.0 11/12/2020 Page 7 of 7
+
+

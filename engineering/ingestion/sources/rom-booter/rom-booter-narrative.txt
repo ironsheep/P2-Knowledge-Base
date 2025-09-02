@@ -1,0 +1,86 @@
+P2 ROM Booter - Assembly Listing Documentation
+
+This source contains the ROM bootloader code for the Propeller 2 microcontroller, provided as assembly listing files (.lst format). These files represent the actual boot code burned into the P2's ROM during chip fabrication.
+
+Files Present:
+- ROM_Booter.lst: Primary ROM bootloader listing
+- rom_booter_v33_01j.lst: Version 33.01j of the ROM bootloader
+
+Content Overview:
+The ROM booter is the first code that executes when a P2 chip powers on or resets. It is responsible for:
+
+Boot Sequence Implementation:
+- Initial chip configuration and setup
+- Clock configuration and PLL initialization
+- Memory initialization
+- Boot source detection and prioritization
+- Loading user code from various sources
+
+Boot Source Support:
+The ROM booter implements support for multiple boot sources:
+- Serial boot (via P63/P62 pins)
+- SPI flash boot (various protocols)
+- SD card boot (FAT32 support)
+- Boot source selection based on pin states
+
+Key Features:
+- Autobaud detection for serial boot
+- Multiple SPI flash protocols supported
+- SD card file system navigation
+- Checksum verification of loaded code
+- Fallback boot options
+- Recovery mode support
+
+Protocol Implementation:
+- Serial communication protocols
+- SPI flash communication
+- SD card SPI mode interface
+- Data integrity checking
+- Timeout and retry mechanisms
+
+Technical Details:
+The listing files show:
+- Actual PASM2 assembly code
+- Memory addresses and opcodes
+- Symbol definitions and labels
+- Data structures used during boot
+- Register usage and allocation
+- Timing critical code sections
+
+Boot ROM Components:
+Beyond the bootloader, the ROM also contains:
+- Monitor/debugger code
+- TAQOZ Forth interpreter
+- Utility routines
+- Character font data
+- Math tables (sin/cos/log)
+
+Version Information:
+- Version 33 represents a mature, production bootloader
+- Revision 01j indicates minor updates
+- Code is optimized for size to fit in ROM
+
+Critical for Understanding:
+- How P2 boots from reset
+- Boot device priorities and selection
+- Communication protocols during boot
+- Recovery and fallback mechanisms
+- Low-level chip initialization
+- Interface to user applications
+
+Usage Notes:
+This is reference material showing the exact boot code in the chip. Developers typically don't modify this code but need to understand it for:
+- Implementing boot loaders for custom boards
+- Debugging boot issues
+- Understanding boot timing
+- Creating bootable images
+- Implementing recovery mechanisms
+
+The assembly listing format includes:
+- Address: Memory location
+- Opcode: Encoded instruction
+- Mnemonic: Assembly instruction
+- Operands: Instruction parameters
+- Comments: Explanatory text
+
+This source is authoritative for understanding P2 boot behavior as it represents the actual silicon implementation.

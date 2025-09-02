@@ -1,0 +1,559 @@
+Web Store: www.parallax.com
+
+Sales: (888) 512-1024
+
+Tutorials: learn.parallax.com
+
+Educator Hotline: (916) 701-8625
+
+Sales: sales@parallax.com
+
+Office: (916) 624-8333
+
+Tech Support: support@parallax.com
+
+Fax: (916) 624-8003
+
+P2 Edge Module Rev D (#P2-EC)
+
+The P2 Edge Module is a simple way to get started with the Propeller 2 multicore
+microcontroller. In addition to speeding development, this module provides an optimal P2
+building block for system integrators and designers to include in their products.
+The Propeller 2 P2X8C4M64P chip contains over 32 million transistors and >70 mm2 of custom
+silicon, 10x that of a typical microcontroller. The P2 is an 8-core 32 bit CPU with 32-bit timers, 64
+-bit CORDIC math solver, and custom analog pad rings with Smart-pin functionality at all 64 I/O
+pins. Each smart I/O pin is capable of many autonomous analog and digital functions, including
+ADC, DAC, PWM, USB, SERIAL, Waveform generation, SMPS, Comparator, SCHMITT and LOGIC
+modes.
+The P2 Edge Module includes the exposed-pad 100-pin TQFP P2X8C4M64P, core and I/O power
+regulators, power filtering capacitors, crystal, flash memory, boot configuration switches, and
+two user-configurable on-board LEDs to indicate system states. Rev C of the Edge module adds
+an SD Card socket and accepts a wide power supply range. The PCB's multi-layer design features
+solid thermal and signal reference planes isolating each signal layer. The design is optimized for
+low-noise analog and digital operation, and with low temperature rise even at high-speed
+operation.
+For development, the P2 Edge Module fits in the card edge socket of the spacious P2 Edge
+Module Breadboard, the compact P2 Edge Mini Breakout Board, or the bare-bones P2 Edge
+80-pin Adapter Kit. For product integration, several edge socket choices are available. This
+arrangement allows developers to integrate the Propeller 2 into products without the need for
+multi-layer cost or expertise. See the Propeller 2 section of www.parallax.com for options.
+The following features and specifications apply to the P2-EC3 Rev D; changes denoted with an
+asterisk. See the Revision History at the end of the document for additional details.
+
+Copyright © Parallax Inc.
+
+P2 Edge Module (#P2-EC)
+
+v3.0 6/3/2022 Page 1 of 13
+
+Features
+● Compact module with Propeller 2 P2X8C4M64P multicore microcontroller
+● 6-layer*, low noise, system-on-board module
+● Integrated thermal planes for low temperature rise characteristics at high speed
+operation
+● Double-sided 80 way 0.05” (1.27mm) edge connector
+● Orientation / module locking hole
+● Two mounting holes connected to the module ground planes
+● High precision 20 MHz TCXO oscillator (+/-0.5PPM)
+● Adjustable operating frequency; recommended maximum 180 MHz clock
+● Overclocking possible beyond 300 MHz
+● 16 MB SPI Flash memory and microSD card socket for flexible memory management
+● 64 Smart I/O pins brought out to the Edge Connector
+● Buffered LEDs on I/O pins P56 and P57, visible from both sides of the module PCB
+● Onboard LED feature enable/disable switch
+● Onboard 1.8 V 3-Amp* switching regulator with short-circuit, over-current fault and
+brownout detection protection for the P2 core (VDD)
+● Onboard 3.8 V, 3-amp* switching regulator with short-circuit and over-current fault
+protection to supply the low-noise IO regulators for maximum efficiency
+● Onboard low-noise LDO 3.3 V regulators for the P2 smart-pins (VIO), with short-circuit
+and over-current fault protection
+● Wide 5-16 VDC power supply input range with reverse polarity protection
+● Compatible with the Parallax Prop-Plug #32201 for system programming
+
+Key Specifications
+● Voltage input requirements: 5-16 VDC
+● Input Current requirements:
+○ Recommended minimum 100 mA
+○ Typical experimentation 500–1000 mA
+○ Maximum according to customer application
+● Voltage input protection: reverse voltage
+● Propeller 2 chip: P2X8C4M64P (8 cogs, 512 KB shared hub RAM, 64 smart pins)
+● Non-volatile Memory: 16 MB (128 Mb) SPI Flash
+● Oscillator: TCXO 20 MHz +/-0.5PPM
+● Smart I/O pins: 64 accessible, 56 fully free, grouped in 8 sets of 8 I/Os
+● Smart I/O pin logic voltage: 3.3 V
+● Internal VDD Power Supply: 1.8 V up to 3 A, 750 kHz nominal switching frequency
+● VIO Power Supplies: Low noise LDO 3.3V up to 300 mA per 8 I/O pins
+● Edge Connector: Double sided 80 way 0.05” (1.27mm) pitch edge slot
+● Programming: Serial up to 2 MBaud
+● Operating temperature: -40 to +185 °F (-40 to +85 °C)
+● PCB Dimensions: 1.45 in x 2.04 in (37mm x 51.7mm)
+Copyright © Parallax Inc.
+
+P2 Edge Module (#P2-EC)
+
+v3.0 6/3//2022 Page 2 of 13
+
+Feature Descriptions
+Read the full explanation of each labeled feature on the pages that follow this diagram.
+
+1. Propeller 2 P2X8C4M64P
+The Propeller 2 has 8 independent processor cogs, 512 KB of shared hub RAM, and 64 Smart I/O
+pins. See the Propeller 2 documentation section of www.parallax.com for detailed information
+about this device. All I/O pins are brought out to the card edge pads; see 11. Edge connector.
+Note: There are a limited number of P2 RevC chips with the extended part number
+P2X8C4M64PES instead of P2X8C4M64P. Be aware that both are identical other than the part
+marking. The ES edition is a limited initial batch and the P2 Edge module will be sold with ES
+marked chips only while stocks last.
+
+Copyright © Parallax Inc.
+
+P2 Edge Module (#P2-EC)
+
+v3.0 6/3//2022 Page 3 of 13
+
+2. VDD and Edge-VIN Power Supplies with Reverse Polarity Input Protection
+The VDD power supply is for the Propeller 2 core. This onboard power supply is based on a
+switching buck regulator, capable of delivering 3 A at 1.8 V. Short circuit, over-current,
+reverse-input polarity and brownout detection are also included.
+VDD is typically expected to be 1.8 V. This voltage powers the internal circuits of the P2
+microcontroller. In case of a prolonged short-circuit the VDD regulator will shut down for 20ms,
+then attempt to restart for 2.5ms. If the short-circuit remains the regulator will shut down again
+and repeat the cycle until the short-circuit has been remedied.
+The VDD power supply includes brown-out detection, which will keep the P2 in reset while VDD
+is below approximately 1.5V.
+Alongside the VDD power supply is an additional 3 A switcher that provides conditioned voltage
+to the LDO 3.3V VIO regulators. This allows the Edge module to support a wider power supply
+input voltage range of 5-16 VDC, and ensures the LDO regulators are operating at maximum
+efficiency with minimal heat dissipation.
+3. LDO regulators for I/O Pin Voltage
+The 8 LDO regulators are fixed 3.3 V low-noise regulators, which power the P2 I/O smart-pins.
+Each regulator has short-circuit and over-current protection. You may see this voltage referred
+to as VIO (Voltage for IO), or by group of I/O pins in the format Vxxxx or Vxx.
+At the actual microcontroller, the Propeller 2 Smart I/O pins are grouped such that each 4 I/O’s
+have a dedicated voltage supply connection. If you refer to the diagram Propeller 2 Physical Pins
+you will see the voltage supply connections labeled as V0003, V0407, V0811, etc.
+This allows pins that will be performing sensitive analog functions to use dedicated quiet, local
+3.3 V regulation.
+With the P2 Edge Module, the voltage supply connections have been brought out in groups of 8
+I/O pins each. Each group has a dedicated LDO regulator with the VIO output labeled Vxx at the
+edge connector. The two digits after the V refer to the first of 8 I/O pins that the LDO provides
+power to. For example, V08 would mean VIO voltage for I/O pins 8 to 15.
+Note: While it would be possible (and typical) to have a single larger regulator to power all the
+3.3 V I/O supplies, the distributed LDOs allow for better local regulation, higher current and
+isolation per I/O group, low noise, improved protection, less voltage drop under load, and
+better thermal characteristics. The distributed power scheme is not a requirement of the P2
+microprocessor; rather a design choice for this particular module.
+
+Copyright © Parallax Inc.
+
+P2 Edge Module (#P2-EC)
+
+v3.0 6/3//2022 Page 4 of 13
+
+4. TXCO Oscillator
+The P2 Edge Module is equipped with a high-precision 20 MHz temperature-compensated
+crystal oscillator. Operational frequency is adjustable; for full operating frequency configuration
+details, options, and limits, refer to the Propeller 2 documentation at www.parallax.com.
+The Propeller 2's on-chip crystal oscillator with internal 9 pF load capacitance drives the 20 MHz
+crystal to provide a base clock frequency for the Propeller 2. The actual operating frequency is
+selected in code, and can be almost any value or fractional value by using three special multiply
+and divide registers.
+Overclocking
+
+The clock frequency of Propeller 2 is defined by user code. It can be adjusted very precisely
+using three multiply and divide registers that set the actual operating frequency based on a
+function of the crystal oscillator frequency. The nominal maximum is 180 MHz, though many
+early users have been running the Propeller 2 overclocked at 320 MHz. Advice about
+overclocking can be found at https://forums.parallax.com.
+5. Flash Memory
+The flash memory can be used to store user code or data, and is selectable as the prefered Boot
+device, See the Boot Mode Selection section for the necessary switch settings.
+The device uses SPI protocol, with 16 MB (128 Mbit) capacity. Refer to the W25Q128JVSIM
+manufacturer datasheet for full details.
+6. Mode Selection Switch Bank
+This bank of dip switches controls the LED power and Boot Mode Selection functions. The dip
+switches are not set to any particular state on a new Edge module, although the four switches
+will all usually be set to the OFF position.
+LED Power Control (On board LEDs enable)
+
+This switch controls power to two onboard LEDs, labeled and connected to I/Os P56 and P57.
+Switch ON to enable the LEDs. Switch OFF to disable the LEDs.
+Boot Mode Selection
+
+Upon startup or after reset, the Propeller 2 will always proceed according to the boot mode
+selection table shown below. The three switches labeled Flash, △ and ▽ are used to select the
+Boot Mode, and the options include booting (loading code) from USB-Serial, SD card or SPI
+Flash memory.
+Copyright © Parallax Inc.
+
+P2 Edge Module (#P2-EC)
+
+v3.0 6/3//2022 Page 5 of 13
+
+Tip: △ and ▽ are both connected to the Propeller 2 I/O pin P59; one with a pull-up resistor to
+3.3V, and the other with a pull-down resistor to GND. You may see these boot mode selection
+pins referred to in other documentation as P59 up and P59 down.
+Important! To avoid inconsistent behavior, only switch one of the △ or ▽ dip-switches ON.
+FLASH
+
+△
+
+▽
+
+OFF
+
+OFF
+
+OFF
+
+ON or OFF
+
+ON
+
+OFF
+
+Serial window of 100 ms, then SPI flash.
+If SPI flash fails then serial window of 60 seconds.
+
+ON
+
+OFF
+
+OFF
+
+SPI flash only (fast boot), no serial window.
+If SPI flash fails then shutdown.
+
+ON
+
+OFF
+
+ON
+
+SD card with serial window on failure.
+If SD card fails then serial window of 60 seconds.
+
+OFF
+
+OFF
+
+OFF
+
+SD card only, no serial window.
+If SD card fails then shutdown.
+
+OFF
+
+OFF
+
+ON
+
+Boot Mode Selection
+Serial window of 60 seconds, default.
+(When SD card is NOT inserted)
+Serial window of 60 seconds, overrides SPI Flash and SD card.
+
+7. LED Buffer
+The LED buffer is a dual Schmitt-trigger buffer that has high impedance connections to the P2
+microprocessor I/Os P56 and P57, and drives the corresponding status LED ON when the P2 I/O
+signal line is high.
+All I/O signals from the P2 microcontroller are high impedance by default, which means the
+LEDs will be sensitive to objects moving close to the edge connector P56 and P57 pins. This
+design choice means that those 2 I/O pins are not impacted by the presence of the LEDs or
+external pull-up resistors by default, and are completely flexible and free for the user to use as
+required.
+In user code those pins could be driven high or low, or have I/O pin pull-ups activated, to control
+the LEDs without the high-impedance behavior.
+If the LEDs are not required, the P2 Edge Module dip-switch marked “LED” could be switched
+“OFF” to disable LED power.
+
+Copyright © Parallax Inc.
+
+P2 Edge Module (#P2-EC)
+
+v3.0 6/3//2022 Page 6 of 13
+
+8. LEDs P56 and P57
+These two LEDs are mounted so that they are visible from both sides of the P2 Edge Module
+PCB. They are connected via an LED Buffer to pins P56 and P57. The buffer isolates the LEDs so
+they will not influence the I/O signals.
+If the LEDs are not required, the P2 Edge Module dip-switch marked “LED” could be switched
+“OFF” to disable LED power.
+9. Mounting Holes
+The two plated mounting holes are attached to the ground plane. See the PCB Dimensions
+section for mounting hole spacing.
+10. Orientation Hole
+The single unplated orientation hole could be used by a customer application to fix the module
+in-place or ensure correct orientation. See the PCB Dimensions section for the hole position and
+dimensions.
+11. Edge connector
+The 0.05” (1.27 mm) pitch 8- way edge connector extends on both sides of the module, with 40
+connections on each side. Refer to Edge Connector Pin Assignment for full details.
+Suitable connectors are available from the Parallax webshop:
+● Card Edge Socket, Through Hole, Right Angle (#450-00308)
+● Card Edge Socket, Straight, SMT (#450-00309)
+● Card Edge Socket, Straight, Through Hole (#450-00310)
+12. microSD card socket
+The Rev C Edge Module adds a microSD socket. Your compatible removable microSD cards can
+store code which is run by the P2 when it starts up, provided the proper Boot Mode is selected.
+The same card can also be used to store (read or write) user data during run time. Uses include
+accessing large lookup tables, playing audio files, and data logging.
+Power for the microSD card socket is supplied by the VIO5663 LDO regulator, and the socket is
+hardwired to four Propeller 2 I/O pins:
+●
+●
+●
+●
+
+P58 - DAT0/MISO
+P59 - CMD/MOSI
+P60 - CD/DAT3/CS (active low chip select).
+P61 - CLK (clock)
+
+Copyright © Parallax Inc.
+
+P2 Edge Module (#P2-EC)
+
+v3.0 6/3//2022 Page 7 of 13
+
+Refer to the table printed on the back of the Edge module for the correct DipSwitch settings to
+enable microSD card boot mode. Alternatively refer to 6. Mode Selection Switch Bank
+The microSD card is NOT included with the P2 Edge Module; a suitable 8 GB microSDHC card
+(#32328) can be found at www.parallax.com.
+
+Copyright © Parallax Inc.
+
+P2 Edge Module (#P2-EC)
+
+v3.0 6/3//2022 Page 8 of 13
+
+Propeller 2 Physical Pins
+This illustration identifies the physical pins on the Propeller 2. See the Propeller 2
+documentation at www.parallax.com for detailed information about the device. In this
+document, see the Edge Connector Pin Assignments section for details on how they are used on
+the P2 Edge Module.
+
+Copyright © Parallax Inc.
+
+P2 Edge Module (#P2-EC)
+
+v3.0 6/3//2022 Page 9 of 13
+
+Edge Connector Pin Assignments
+Smart I/O pins P0–P55 are fully free; P56–P63 are routed to peripheral circuits and/or have
+special functions related to Propeller 2 boot sequence options. Each smart I/O pin is capable of
+many autonomous analog and digital functions. Examples include ADC, DAC, PWM, USB, SERIAL,
+Waveform generation, SMPS, Comparator, SCHMITT and LOGIC modes.
+See the Propeller 2 documentation at www.parallax.com for detailed information about the full
+capabilities of the Propeller 2 Smart I/O pins.
+I/O Pin
+
+Description
+
+P0-P7
+
+Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V00.
+
+P8-P15
+
+Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V08.
+
+P16-P23
+
+Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V16.
+Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V24.
+
+P24-P31
+Note: Avoid using these I/O pins for high speed digital functions where multiple pins are
+simultaneously switching together at near the system clock frequency.
+P32-P39
+
+Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V32.
+
+P40-P47
+
+Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V40.
+
+P48-P55
+
+Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300mA total, shared by this I/O pin group and edge connector pin V48.
+
+P56-P63
+
+Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V56.
+Alternative functions for P56-P63
+
+P56
+
+Buffered LED
+
+P57
+
+Buffered LED
+
+P58
+
+Flash SPI DO (MISO), microSD SPI DAT0 / MISO
+
+P59
+
+Flash SPI DI (MOSI), microSD SPI CMD / MOSI
+
+P60
+
+Flash SPI CLK, microSD SPI DAT3 / CS
+
+P61
+
+Flash SPI CS, microSD SPI CLK
+
+P62
+
+Prop-Plug RX (P2 TX)
+
+P63
+
+Prop-Plug TX (P2 RX)
+
+Copyright © Parallax Inc.
+
+P2 Edge Module (#P2-EC)
+
+v3.0 6/3//2022 Page 10 of 13
+
+Other
+Pins
+
+Description
+Internally pulled up to 3.3V with 10K resistor.
+
+RESn
+
+Propeller chip will reset when RESn is driven low; all cogs disabled and I/O pins floating.
+Propeller restarts 3 ms after RESn transitions from low to high.
+Power input pins for the Edge Module. Connect both edge connector pads to a good quality
+supply in the range of 5–16 VDC. The supply voltage MUST NOT exceed 16V!
+
+5-16 VIN
+
+GND
+NC
+
+Recommended minimum supply current 100mA, up to 3A depending on customer code and
+circuit. Factors contributing to current requirements include operating frequency, number of
+operating cogs, smart pin instruction types and external I/O circuitry.
+Provides common signal and supply voltage ground. Connection of all edge connector GND
+pads to a solid ground plane on an external layer recommended.
+Not Connected. Reserved for future use.
+Recommended “Do Not Connect” in customer designs.
+
+Programming Software
+Propeller Tool is our recommended tool for programming the P2 Edge Module in SPIN and PASM
+languages. Other programming languages are possible using third party tools, such as C, BASIC,
+Forth.
+You can find links to the latest tools at the P2 Edge Module product page. Visit
+https://www.parallax.com and search for “P2-EC.”
+
+Resources and Downloads
+Check for the latest version of this document, free software, and example programs from the P2
+Edge Module product page. Go to www.parallax.com and search P2-EC.
+
+Recommend and Absolute Maximum Ratings
+Symbol
+
+Quantity
+
+Recommended
+
+Maximum
+
+Units
+
+5-16 VIN
+
+DC Supply Voltage
+
+5
+
+16
+
+V
+
+P0 - P63
+
+Any I/O Pin
+
+3.3
+
+3.6
+
+V
+
+RESn
+
+Reset input, active low
+
+3.3
+
+3.6
+
+V
+
+Copyright © Parallax Inc.
+
+P2 Edge Module (#P2-EC)
+
+v3.0 6/3//2022 Page 11 of 13
+
+Module Dimensions
+
+Revision History
+Version 1.0: original release.
+Version 1.5: Updated for RevB release.
+●
+●
+●
+●
+
+Silk screen markings added/improved.
+Narrow/adjust the edge pads to allow for thicker copper plating.
+Increase copper plating from 1.5oz to 2oz.
+On-board LEDs P56/P57; color changed to white (previous versions were green).
+
+Version 1.6: Edge Connector Pin Assignments table entry for P24-P31 updated.
+Version 1.7: Edge Connector Pin Assignments table entry for P24-P31 updated.
+Version 2.0 Updated for RevC release.
+Copyright © Parallax Inc.
+
+P2 Edge Module (#P2-EC)
+
+v3.0 6/3//2022 Page 12 of 13
+
+● microSD card socket added.
+● Power supply VIN voltage maximum increased from 5.5V to 16V
+● On-board clock source changed from low precision crystal to high precision oscillator
+Version 3.0 Updated for RevD release.
+● On-board switching power supplies changed (supply issues)
+● On-board switching power supplies maximum output current ratings increased from 2
+Amp to 3 Amp
+● On-board switching power supplies switching frequency changed from 2.5 MHz (Rev C)
+to 750 kHz (Rev D)
+● Layer count increased from 4 layers (Rev C) to 6 layers (Rev D)
+● Additional thermal PCB layer for improved thermal performance
+
+Copyright © Parallax Inc.
+
+P2 Edge Module (#P2-EC)
+
+v3.0 6/3//2022 Page 13 of 13
+
+

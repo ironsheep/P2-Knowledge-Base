@@ -1,0 +1,72 @@
+PASM2 Manual Development - Working Materials and Format Analysis
+
+This source represents the development workspace for creating the official PASM2 instruction manual. Rather than being an existing document to ingest, this is a collection of materials, screenshots, and specifications gathered to produce a new PASM2 manual matching Parallax's official documentation format.
+
+Purpose and Scope:
+This directory serves as the central repository for all materials related to developing a professional PASM2 manual that adheres to Parallax's documentation standards. It contains reference materials, format specifications, and template development resources.
+
+Reference Materials:
+The directory includes several screenshots from the official Parallax PASM2 Manual that serve as format references:
+- Title page layout showing proper branding and typography
+- Body pages demonstrating table formatting and instruction layout
+- Table of contents structure and organization
+- Convention pages explaining notation and symbols used throughout
+
+Format Specifications Extracted:
+Through analysis of the reference screenshots, detailed format specifications have been documented:
+- Typography requirements (fonts, sizes, weights)
+- Color schemes (Parallax blue #0067A0, accent colors)
+- Layout specifications (margins, spacing, alignment)
+- Table formatting standards
+- Code presentation styles
+- Visual hierarchy principles
+
+Template Development Status:
+A LaTeX template (p2kb-pasm2-manual.latex) has been created to replicate the official format:
+- Implements Parallax visual identity
+- Provides instruction documentation structure
+- Includes proper table formatting
+- Supports code examples and diagrams
+- Maintains consistent styling throughout
+
+Materials Organization:
+The development materials are organized across several locations:
+- Template files in /pipelines/templates/p2kb-catalog/
+- Test generation in /engineering/pdf-forge/production/
+- Screenshot references in this directory
+- Format specifications documented in markdown
+
+Work Product Goals:
+The ultimate goal is to produce:
+- A complete PASM2 instruction reference manual
+- Professional PDF output matching Parallax standards
+- Comprehensive coverage of all P2 instructions
+- Clear examples and usage patterns
+- Proper indexing and cross-referencing
+
+Development Methodology:
+The approach involves:
+1. Analyzing official format through screenshots
+2. Extracting precise specifications
+3. Implementing in LaTeX template
+4. Testing with sample content
+5. Iterating based on output quality
+6. Finalizing with complete instruction set
+
+Current Status:
+- Format analysis: Complete
+- Basic template: Created
+- Test workflow: Established
+- Missing elements: ADD instruction table examples
+- Next phase: Template refinement and content population
+
+This is not a source document for ingestion but rather a workspace for creating new documentation. The materials here inform the production of the PASM2 manual rather than providing content to be extracted.
+
+Value for Knowledge Base:
+While not providing direct instruction information, this source is valuable for:
+- Understanding Parallax documentation standards
+- Replicating official format in new documents
+- Maintaining consistency across P2 documentation
+- Ensuring professional presentation quality
+
+The work here bridges the gap between raw instruction data (from CSVs and other sources) and professionally formatted documentation suitable for end users.

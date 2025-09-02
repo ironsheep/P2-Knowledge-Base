@@ -1,0 +1,62 @@
+P2 Instructions v35 - Rev B/C Silicon - Instruction Set Reference
+
+This CSV file contains the complete PASM2 instruction set reference for the Propeller 2 microcontroller, specifically for Revision B and C silicon. It represents a comprehensive tabular listing of all assembly language instructions available on the P2 processor.
+
+Structure and Content:
+The CSV is organized with the following key columns:
+- Order: Sequential instruction listing
+- Assembly Syntax: Shows the instruction mnemonic and operand format, including immediate (#S, #D) and register modes
+- Group: Categorizes instructions by functional area
+- Encoding: Binary encoding format for the instruction
+- Alias: Alternative instruction names or forms
+- Description: Detailed explanation of instruction operation, including flag effects and addressing modes
+- Interrupt Shielding: Indicates if the next instruction is protected from interrupts
+- Clock Cycles: Multiple columns showing cycle counts for different execution modes:
+  - Cog Exec Mode (8 cogs and 16 cogs)
+  - LUT Exec Mode
+  - Hub Exec Mode
+  - Additional cycles for hub long crossings
+
+Key Instruction Categories:
+The instruction set covers all fundamental P2 operations including:
+- Arithmetic and logical operations
+- Bit manipulation and testing
+- Memory access (COG, LUT, HUB)
+- Flow control and branching
+- CORDIC operations
+- Smart pin control
+- Event handling
+- Streamer operations
+- Special purpose instructions
+
+Notation Conventions:
+- S = source operand (register or immediate)
+- D = destination operand (register or immediate)
+- #S = immediate source value (when I=1)
+- #D = immediate destination value (when L=1)
+- Z flag = zero result indicator
+- C flag = carry/borrow indicator
+- WZ/WC = write zero/carry flag modifiers
+- PC = program counter adjustments for branches
+
+Execution Timing:
+The CSV provides detailed timing information critical for real-time applications:
+- Base instruction cycles vary by execution mode
+- Hub operations may add cycles for synchronization
+- LUT and COG execution have predictable timing
+- Hub execution timing depends on hub window alignment
+
+This reference is essential for:
+- Assembly language programmers
+- Compiler developers
+- Performance optimization
+- Understanding P2 architecture capabilities
+- Instruction encoding for tools and debuggers
+
+Version Information:
+- Version 35 of the instruction set
+- Applies to Rev B and Rev C silicon
+- Represents the production instruction set
+- Contains all documented PASM2 instructions
+
+The CSV format allows for programmatic parsing and integration into development tools, documentation generators, and instruction set simulators. Each row represents a complete instruction definition with all necessary information for both manual programming and automated tool development.

@@ -1,0 +1,516 @@
+Web Site: www.parallax.com
+
+Office: (916) 624-8333
+
+Forums: forums.parallax.com
+
+Fax: (916) 624-8003
+
+Sales: sales@parallax.com
+
+Sales: (888) 512-1024
+
+Technical: support@parallax.com
+
+Tech Support: (888) 997-8267
+
+Parallax WX ESP8266 Wi-Fi Modules
+DIP (#32420D), or SIP (#32420S)
+The Parallax WX Wi-Fi module offers a new way to add Wi-Fi connectivity to your your
+microcontroller projects. It can function as its own wireless access point (AP) or as a station
+(STA) on another Wi-Fi network, or even both for brief periods of time when joining another
+network. In either mode, it can serve its own configuration pages as well as user-created web
+pages that make it possible for devices to interact with a microcontroller through the Wi-Fi
+module. On Wi-Fi networks configured to allow it to access the Internet, it can also send and
+receive a variety TCP/IP messages for Internet of Things (IoT) projects. This module also
+serves its own firmware upgrade page that allows you to pick and upload the latest open source
+firmware revision, or even variations that support specific applications as they become
+available.
+
+Features
+●
+●
+
+32420S (right) - A breadboard-friendly, 5 and 3.3 V compatible 0.1 inch SIP package
+that works well with the BASIC Stamp, Arduino and Propeller
+32420D (left) - A 3.3 V, 2 mm DIP package designed to work with the socket on the
+Propeller Activity Board, both original 32910 and WX #32912. ​NOTE: These modules
+are not compatible with Parallax XBee adapter boards.
+
+Copyright © Parallax Inc.
+
+ESP8266 Wi-Fi Module (#32420)
+
+v1.0 05/12/2016 Page 1 of 12
+
+●
+●
+●
+●
+
+●
+●
+●
+●
+
+●
+
+●
+
+●
+
+Supports 2.4 GHz Wi-Fi access through the ESP8266-WROOM-02 module (FCC and
+CE approved)
+Transparent serial communication mode for wireless microcontroller programming and
+debugging (Activity Board WX)
+Command serial communication mode for exchanging information with the host
+microcontroller
+3 Wi-Fi modes: (AP) as access point that up to four devices can join, (STA) as a station
+on another Wi-Fi network, and (STA + AP) station plus access point for joining another
+Wi-Fi network.
+Micro web server allows other devices to access both configuration and user
+created/uploaded web pages in STA or AP mode.
+Approximately 1 MB of user file system for storing web pages and other content.
+Built-in configuration web pages for settings, networks, file uploads and over the air
+firmware updates.
+Over the air (OTA) web page uploads via a simple web interface. Upload one or more
+pages to the module’s user file system. The Wi-Fi module will serve those pages to
+computers and mobile devices that have joined its network (AP) or on the same network
+with it (STA). This will allow your microcontroller projects to interact with computers,
+tablets, cell phones, and other devices on the network.
+OTA firmware upgrades, also through a simple web interface. With this, your Wi-Fi
+module can always be ready for latest features and projects contributed by Parallax and
+the open source community.
+Supports HTTP (server), WebSocket (server), and TCP (client) connections.
+HTTP/WebSocket allows your Wi-Fi module to exchange data with other devices on the
+network through user-created web pages it serves. TCP enables connection to other
+devices for low-level communication, for example to build your own HTTP request to a
+page on the worldwide web.
+Power, Associate, Data In and Data Out LEDs visible from both sides of the pcb
+
+Application Ideas
+Set up your own pages for controlling and
+monitoring your robot or sensor projects. The
+module hosts and serves the pages over Wi-Fi
+and then acts as a simple serial intermediary
+between your microcontroller and HTTP or
+WebSocket clients accessing pages. Picture a
+Boe-Bot Robot reporting its Ping))) distance
+measurements and receiving control commands
+from a web page on a cell phone.’
+
+Copyright © Parallax Inc.
+
+ESP8266 Wi-Fi Module (#32420)
+
+v1.0 05/12/2016 Page 2 of 12
+
+Program the Propeller Activity Board WX
+over Wi-Fi with the DIP module, and see its
+remote sensor data display on your computer
+in real time. This is especially useful when
+preparing for robot contests because your
+ActivityBot can roam in a maze and transmit
+sensor data to the SimpleIDE Terminal
+without the USB tether. Reprogram it without
+ever removing it from the maze!
+Program your microcontroller to make TCP
+client connections with web pages on the
+Internet to get key pieces of information for
+your project. Send messages to pages
+hosted by services that can trigger emails,
+Twitter feeds, and more.
+
+Specifications
+●
+●
+●
+●
+●
+●
+
+●
+
+●
+●
+
+●
+●
+
+Wi-Fi Protocols: 802.11 b/g/n
+Network Protocols: IPv4, TCP/HTTP
+Security: WPA/WPA2
+Encryption: WEP/TKIP/AES
+Wi-Fi range: 30 meters LOS
+Voltage requirement options:
+○ +3.3 to +5 VDC supplied through the breadboard connection
+○ +3.3 VDC supplied through the WX (2 x 10 x 2 mm) connection
+Logic levels:
+○ SIP - output high (set by Vin voltage, either 3.3 or 5.0 V), low 0 V. Input high
+>Vin/2, input low <Vin/2,
+○ DIP - output high 3.3 V, low 0 V, input high > 1.5 V, input low < 1.5 V.
+Current requirements: ​Typical 75 mA, with Wi-Fi transmit peaks up to 360 mA
+Form factor:
+○ SIP: 0.1” (2.54mm) spaced row of 10 right angle pins
+○ DIP WX: 0.078” (2mm) spaced dual row of 10 straight pins
+PCB Dimensions: Approximately 1.0 x 1.5 in (26 x 37.5 mm)
+Operating temp range: +32 to +158 °F (0 to +70 °C)
+
+Copyright © Parallax Inc.
+
+ESP8266 Wi-Fi Module (#32420)
+
+v1.0 05/12/2016 Page 3 of 12
+
+Functional Description
+
+(1) ESP8266-WROOM-02 Wi-Fi Module
+The ESP-WROOM-02 is a low-power 32-bit MCU Wi-Fi module based on an ESP8266 chip,
+embedded with TCP/IP network stacks, integrated with 16 Mbits of SPI flash, and capable of
+operating in low power connectivity modes such as DTIM10 at 1.2mW. ESP-WROOM-02 is
+FCC, CE, KCC, TELEC, LCIE and IC certified with the best FCC results for IoT modules in the
+industry.
+(2) WX compatible headers
+The DIP version plugs straight into the Propeller Activity Board WX 2 x 10 x 2mm socket.
+(3) Linear 3.3V regulator
+The linear 3.3V LDO regulator provides power to the ESP8266 microcontroller, and is used to
+set the logic level voltage at the WX IO ports.
+
+Copyright © Parallax Inc.
+
+ESP8266 Wi-Fi Module (#32420)
+
+v1.0 05/12/2016 Page 4 of 12
+
+(4) Reverse Polarity Protection
+When the module is powered by the optional SIP (Breadboard) header, a P-Channel mosfet
+provides reverse polarity protection and almost zero voltage drop at VIN.
+(5) Power LED
+The power LED remains on whilst correct polarity voltage is supplied to either the WX/XBee
+socket, or the SIP (Breadboard) connector. LED’s are visible from both sides of the board.
+(6) ASC “Associate” LED
+In the description, bold is the wireless mode, small text indicates connectivity or lack thereof,
+and after hyphen (-) indicates LED behavior and the timing.
+●
+●
+●
+●
+●
+
+AP (has IP address) [Wirelessly accessible]* - ON constantly
+STA+AP (no IP on STA, IP on AP) [Wirelessly accessible]* - OFF 2000 ms, ON 2000
+ms
+STA+AP (has IP on STA and AP) [Wirelessly accessible]* - OFF 2000 ms, ON 25 ms,
+OFF 150 ms, ON 2000 ms
+STA (has IP address) [Wirelessly accessible] - OFF 4000 ms, ON 25 ms
+STA (no IP address) [Not wirelessly accessible] - OFF constantly
+
+(7) DI “Data-In” LED
+The data-in LED will blink whilst serial data is being received by the module at either the WX
+header, or the SIP header. LED’s are visible from both sides of the board.
+(8) DO “Data-Out” LED
+The data-out LED will blink whilst serial data is being transmitted by the module at either the WX
+header, or the SIP header. LED’s are visible from both sides of the board.
+(9) Level shifters and buffers
+To ensure maximum compatibility with a wide range of 3.3V and 5V microcontrollers and
+development boards, the Parallax Wi-Fi module includes voltage level shifters and buffers to
+ensure that the logic voltage levels at the SIP header are set by the VIN voltage level. If you
+supply 3.3V to VIN, then the IO pins logic voltage level will be 3.3V. If you supply 5V to VIN,
+then the IO pins logic voltage level will be 5V.
+(10) SIP “Breadboard” header
+The right-angled SIP header is a standard 0.1” spaced male header, suitable for plugging
+directly into a breadboard, or will accept a wide range of header cables (eg. 800-00048,
+751-00010). The four pins starting GND, RES, DI, DO are also compatible with the Parallax
+Prop Plug (#32201) for easy firmware re-programming and development.
+
+Copyright © Parallax Inc.
+
+ESP8266 Wi-Fi Module (#32420)
+
+v1.0 05/12/2016 Page 5 of 12
+
+Configuration Pages
+The Parallax WX Wi-Fi module comes pre-configured as a wireless access point (AP mode). To
+join its network, find the access point that starts with wx- followed by 6 alphanumeric characters.
+
+Later, if you have configured your Wi-Fi module to reside on another network, you can make it
+reappear as an access point by rapidly grounding and releasing the /PGM pin four times. If your
+Wi-Fi module is in an Activity Board WX, this can be done by pressing and releasing the RST
+button rapidly, four times. In a breadboard, a pushbutton with one terminal connected to GND
+and the other to /PGM is convenient.
+After your device (computer, phone, or tablet) has joined the Wi-Fi module’s network, you can
+go to its Configuration home page by navigating to http://192.168.4.1.
+
+Copyright © Parallax Inc.
+
+ESP8266 Wi-Fi Module (#32420)
+
+v1.0 05/12/2016 Page 6 of 12
+
+The Configuration home page has 4 sub-pages (try Chrome if your browser doesn’t support all
+of the features listed)
+● Networks: For setting the network mode and joining another network.
+● Files: For uploading web pages and other files for interacting with
+microcontroller/electronic/robotic applications. The pages can be accessed later through
+a computer or portable device.
+● Settings: For defining the the module’s name and serial communication settings for data
+exchange with the host microcontroller.
+● Firmware: For updating the firmware with newer releases that will be made available
+through the Wi-Fi module product page at www.parallax.com.
+To make the Wi-Fi module join another network, click the networks tab. Then, set the Wi-Fi
+mode to STA+AP. A network list should appear after a brief wait. To join the network, click the
+radio button next to the network, enter a password (if needed) and then click the Connect
+button.
+
+1. IMMEDIATELY​ make a note of the IP address the network assigned to your module.
+2. IMMEDIATELY GO BACK TO THE NETWORKS PAGE AND SET THE Wi-Fi MODE
+TO STA.​ Leaving it in STA+AP mode could introduce a security vulnerability to the
+network the Wi-Fi module joins. In this example, it’s 10.10.11.145, and in station mode,
+that should be used in place of 192.168.4.1, which works in AP mode.
+
+Copyright © Parallax Inc.
+
+ESP8266 Wi-Fi Module (#32420)
+
+v1.0 05/12/2016 Page 7 of 12
+
+The Files page makes it easy to upload custom web pages and other files that the wi-Fi module
+can serve. Just click the Choose File button, browse to the file you want to upload, and then
+double-click it. Tutorials for writing web pages that interact with your microcontroller through the
+Wi-Fi module are available, and example files are in a subfolder of the firmware zip file, both of
+which are available from the 32420S and 32420D product pages from w
+​ ww.parallax.com/​.
+
+Copyright © Parallax Inc.
+
+ESP8266 Wi-Fi Module (#32420)
+
+v1.0 05/12/2016 Page 8 of 12
+
+Assuming the file you uploaded is named web-page.html, you’ll be able to access it at
+http://192.168.4.1/files/web-page.html in AP mode, or
+http://TheIpAddressYouNoted/files/web-page.html in STA mode.
+It’s fine to repeatedly change a file and re-upload it. The system will always serve the most
+recently uploaded version of a file if more than one version has been uploaded. There is almost
+1 MB of file storage. The first version of this firmware does not feature a full file manager, but
+with 1 MB of storage and the ability to repeatedly upload any modifications to a file, even under
+the same name will support most prototyping endeavors. The Empty can also be used to clear
+the file system, and then files can be re-uploaded.
+The Settings page has a module name field, which can be used to give the module a custom
+and more recognizable name. The other settings pertain to serial communication and will vary
+by microcontroller host, and in some cases by application as well. The default settings are
+recommended for use with the Propeller Microcontroller in the Propeller Activity Board. These
+settings make it possible to also load programs from a computer into a Propeller in an Activity
+Board WX through the Wi-Fi module. Settings for the BASIC Stamp 2 are listed in the Getting
+Started Guide for that microcontroller, linked under the Additional Resources tab on the 32420S
+product page at www.parallax.com.
+
+Copyright © Parallax Inc.
+
+ESP8266 Wi-Fi Module (#32420)
+
+v1.0 05/12/2016 Page 9 of 12
+
+The Parallax Wi-Fi module is designed to support over the air (OTA) firmware upgrades. So
+let’s say you purchased the Wi-Fi module, and some time later, the firmware gets upgraded by
+Parallax or its community to support more cool applications. If you want your Wi-Fi module to
+support those applications too, all you have to do is download the firmware from the Parallax
+web site, unzip it, and then use this page to choose the file (with a .ota extension) and load it
+into the Wi-Fi module.
+
+Pin Map
+
+Copyright © Parallax Inc.
+
+ESP8266 Wi-Fi Module (#32420)
+
+v1.0 05/12/2016 Page 10 of 12
+
+Pin Descriptions
+Module
+Pin
+
+Direction
+
+SIP
+Pin
+
+DIP
+Pin
+
+VIN
+
+Power
+input
+
+1
+
+1
+
+/PGM
+
+Input
+
+2
+
+20
+
+IO0
+
+If held low during power up, ESP8266
+boots into a mode ready for serial
+firmware load. Can also be pulled low
+rapidly, 4 times in a row to put Wi-Fi
+module into AP+STA mode.
+
+DBG
+
+Output
+
+3
+
+9
+
+IO2
+
+Transmits information about exchanges
+with the host microcontroller.
+
+ASC
+
+Output
+
+4
+
+15
+
+IO5
+
+Associate - high/low patterns indicating
+Wi-Fi mode and connection
+
+/CTS
+
+Input /
+Output
+
+5
+
+12
+
+IO13
+
+User configurable pin
+
+/RTS
+
+Output
+
+6
+
+16
+
+IO15
+
+User configurable pin
+
+DO
+
+Output
+
+7
+
+2
+
+TXD
+
+Transmits serial data to microcontroller
+host
+
+DI
+
+Input
+
+8
+
+3
+
+RXD
+
+Receives serial data from
+microcontroller host
+
+/RES
+
+Input
+
+9
+
+5
+
+EN
+
+Active-low reset line
+
+GND
+
+Power
+input
+
+10
+
+10
+
+GND
+
+Ground
+
+PS
+
+Output
+
+7
+
+IO4
+
+May be used in the future to remotely
+switch a WX carrier board’s
+programming source from USB to Wi-Fi
+
+DTR
+
+Output
+
+18
+
+IO12
+
+Toggle’s microcontroller reset line in
+WX carrier board
+
+Copyright © Parallax Inc.
+
+ESP
+8266
+
+Function
+
+(SIP) 3.3 V or 5 V power input
+(DIP) 3.3 V power input
+
+ESP8266 Wi-Fi Module (#32420)
+
+v1.0 05/12/2016 Page 11 of 12
+
+PCB Dimensions
+
+Revision History
+Version 1.0: Original release
+
+Copyright © Parallax Inc.
+
+ESP8266 Wi-Fi Module (#32420)
+
+v1.0 05/12/2016 Page 12 of 12
+
+

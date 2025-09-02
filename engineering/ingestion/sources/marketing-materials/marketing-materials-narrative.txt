@@ -1,0 +1,89 @@
+Parallax Marketing Materials - P2 Product Information
+
+This source represents marketing and promotional materials from Parallax regarding the Propeller 2 microcontroller. These materials provide high-level product positioning, key features, and value propositions for the P2 platform.
+
+Content Type:
+Marketing materials typically include:
+- Product datasheets and brochures
+- Feature highlights and benefits
+- Application examples and use cases
+- Comparison charts with competitors
+- Technical specifications summaries
+- Target market descriptions
+
+Key Marketing Messages:
+The P2 is positioned as:
+- A multicore microcontroller with deterministic timing
+- Ideal for real-time applications
+- Featuring 8 identical 32-bit cores (COGs)
+- 64 Smart I/O pins with autonomous capabilities
+- Built-in CORDIC math solver
+- No interrupts needed due to parallel processing
+- Suitable for mixed signal processing
+
+Target Applications Highlighted:
+- Industrial automation and control
+- Robotics and motion control
+- Signal processing and data acquisition
+- Educational platforms
+- IoT and sensor networks
+- Audio/video processing
+- Motor control systems
+
+Unique Selling Points:
+- Deterministic execution timing
+- True parallel processing with 8 cores
+- Smart pins handle protocols autonomously
+- No OS required - bare metal programming
+- Symmetric multiprocessing architecture
+- Community-driven development
+- Extensive documentation and support
+
+Technical Highlights for Marketing:
+- 180-320 MHz clock speeds
+- 512KB shared RAM
+- 64 Smart I/O pins
+- Multiple boot options
+- Low power modes available
+- HDMI/VGA video generation
+- USB host/device support
+- Extensive peripheral support without dedicated hardware
+
+Educational Value Proposition:
+- Learn parallel processing concepts
+- Understand real-time systems
+- No abstraction layers hiding hardware
+- Direct hardware control
+- Ideal for teaching computer architecture
+- Progressive learning curve
+
+Competitive Positioning:
+Compared to traditional microcontrollers:
+- True parallel processing vs time-sliced multitasking
+- Deterministic timing vs interrupt-driven
+- Flexible I/O vs fixed peripherals
+- Software-defined peripherals vs hardware peripherals
+
+Market Segments:
+- Education and training
+- Hobbyist and maker community
+- Industrial automation
+- Research and development
+- Rapid prototyping
+- Small-scale production
+
+Support Ecosystem Mentioned:
+- Comprehensive documentation
+- Active user forums
+- Example code libraries
+- Development tools
+- Educational materials
+- Community contributions
+
+Product Family Context:
+- Evolution from Propeller 1 (P1)
+- Backward compatibility considerations
+- Enhanced capabilities over P1
+- Broader application potential
+
+Note: Specific marketing documents would need to be obtained from Parallax website or marketing department for detailed content. This narrative provides the typical scope and messaging found in P2 marketing materials based on public information.

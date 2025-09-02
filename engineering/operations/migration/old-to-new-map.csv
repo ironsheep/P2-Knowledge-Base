@@ -108,3 +108,7 @@ engineering/knowledge-base/P2/instruction-table.md,engineering/ingestion/central
 engineering/knowledge-base/P2/PASM2-DOCUMENTATION-CAPABILITY-ASSESSMENT.md,engineering/ingestion/central-analysis/instruction-analysis/pasm2-documentation-capability-assessment.md,file,Moved to central-analysis
 engineering/knowledge-base/P1/completion-matrix.md,engineering/ingestion/central-analysis/p1-p2-comparison/p1-knowledge-completion-matrix.md,file,Moved to P1-P2 comparison section
 engineering/knowledge-base/P1/instruction-table.md,engineering/ingestion/central-analysis/p1-p2-comparison/p1-instruction-reference-table.md,file,Moved to P1-P2 comparison section
+# Narrative Text File Recovery - 2025-09-02
+engineering/ingestion/external-inputs/p2/pasm2-manual-extracted.txt,engineering/ingestion/sources/pasm2-manual/pasm2-manual-narrative.txt,file,Recovered narrative text
+engineering/ingestion/external-inputs/archive/datasheet-extracted.txt,engineering/ingestion/sources/p2-datasheet/p2-datasheet-narrative.txt,file,Recovered narrative text
+engineering/ingestion/external-inputs/archive/spec-sheet-extracted.txt,engineering/ingestion/sources/p2-spec-sheet/p2-spec-sheet-narrative.txt,file,Recovered narrative text

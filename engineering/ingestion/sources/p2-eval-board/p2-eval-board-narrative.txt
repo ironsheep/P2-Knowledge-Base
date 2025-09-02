@@ -1,0 +1,1316 @@
+P
+
+Web Store: www.parallax.com
+
+Sales:
+
+-
+
+Tutorials: learn.parallax.com
+
+Educator Hotline:
+
+Sales: sales parallax.com
+
+Office:
+
+Tech Support: support parallax.com
+
+Fax:
+
+-
+
+-
+
+elle 2 E al B a d Re C (64000)
+
+Thi d c me
+he Re C PCB. Plea e ee e i
+e i
+f Re B PCB
+.
+
+f
+
+Re A PCB
+
+, or
+
+Note: commenting is enabled, so please feel free to request clarification on any point.
+The Propeller Eval Board is designed for experimentation and characterization of the
+Propeller multicore microcontroller. The Propeller features a user-code adjustable
+operating frequency, and has been designed to operate at a maximum recommended
+clock frequency of
+MHz.
+Multiple ground points, power supplies, and power enable breakout headers are
+included for simpler testing and interfacing with standard test equipment. The PCB is
+organized to keep each subsystem clearly defined in groups, and spaced well apart,
+making room for test probes to be attached.
+The eight I/O Pin Breakout Edge Headers accommodate the x pass-through headers on
+eight different accessory add-ons, for experimenting with HyperBus memory, audio,
+video, and more. See the Propeller product family page for options.
+
+Copyright
+
+Parallax Inc.
+
+Propeller Eval Board Rev C
+
+v .
+
+/ /
+
+Page of
+
+P2-ES E al B a d Fea
+
+e
+
+● Propeller multicore microcontroller engineering sample, Rev C silicon approved
+for production
+●
+MHz crystal
+● Adjustable operating frequency; recommended maximum
+MHz clock
+● Overclocking possible beyond
+MHz
+●
+MB SPI Flash memory
+●
+Smart I/O pins brought out to edge headers, with fully free
+● Buffered LEDs on top eight I/O pins
+● Onboard . V -Amp switching regulator with short-circuit and over-current fault
+protection for P VDD, and brownout detection connected to Propeller reset
+● Onboard LDO . V regulators for P VIOs
+● Power headers for current measurement and alternative voltage source injection
+● Dual power inputs via micro-USB sockets; suitable for USB charger not supplied
+or host computer USB port connection
+● Built-in FTDI to USB programming interface, with TX/RX activity indicator LED
+● USB current limiters with short-circuit and over-current fault protection
+● USB active and USB fault LEDs
+● MicroSD card socket with power-cycle function when reset button is pressed
+● WX Compatible for programming the P microcontroller over WiFi with the WX
+WiFi SIP Module
+S - not included
+
+Ke S ecifica i n
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+●
+
+Voltage input requirements: USB VDC, absolute maximum . VDC
+USB protection: current-limiter and short-circuit detection
+Propeller chip: P X C M PES cogs,
+KB hub RAM, smart pins
+Non-volatile Memory: MB
+Mb SPI Flash
+Crystal: MHz SMT
+Smart I/O pins: accessible, fully free, grouped in sets of via headers
+Smart I/O pin supply voltage: . V
+Core supply voltage: . V
+Input Current limits:
+○
+mA from PC USB port
+○
+mA from AUX USB port
+VDD Power Supply: . V up to A, MHz nominal switching frequency
+VIO Power Supplies: . V up to
+mA per I/O pins
+Programming: Serial over micro-USB
+USB programming and serial data speed: User selectable up to Mbps
+Operating temperature: - to
+F - to
+C
+PCB Dimensions: . ” x . ”
+x cm
+
+Copyright
+
+Parallax Inc .
+
+Propeller ES Evaluation Board Rev C
+
+v .
+
+/ /
+
+Page of
+
+Wha ' Ne
+
+f
+
+Re C?
+
+● Production-approved P X C M P Engineering Sample Rev C silicon
+● P –P and P –P are trace-length matched for high-speed data experiments
+such as HyperRAM .
+● BOD Brown Out Detection is removed from the dip switch and instead, Propeller
+RESn is permanently connected to the . V regulator PG Power Good signal,
+which will hold the P in reset if the regulator voltage drops below . V.
+● USB RES is on the dip switch, which enables the user to disconnect the USB reset
+DTR signal from the Propeller RESn pin.
+● The V pin which was next to P has been removed, and that pin is now
+unconnected.
+● The V pin which was next to P has been replaced with a RESET input to the
+Propeller RESn.
+● The unpopulated DTR/RESn pads which RevB had near the SD socket have been
+removed.
+● Improvements to the USB power circuit to improve protection from edge-case
+faults.
+WX WiFi Compatible —The P –P edge header works with the Parallax SIP WiFi
+module for wireless programming. More details will follow after the Rev C Eval
+board is released.
+
+Copyright
+
+Parallax Inc .
+
+Propeller ES Evaluation Board Rev C
+
+v .
+
+/ /
+
+Page of
+
+Fea
+
+e De c i i n
+
+Read the full explanation of each labeled feature on the pages that follow this diagram.
+
+1. P
+2 P2 8C4M64P - E
+(R C
+)
+This is the rd edition, production-approved Rev C Silicon engineering sample of the
+Propeller microcontroller. The Propeller has cores,
+KB of hub RAM, and
+Smart I/O pins. See the draft Propeller Rev B/C Silicon Google Document for detailed
+information about this device. Be aware that this is an engineering sample and not a
+production chip.
+PNUT P programming software version v s or greater recommended :
+https://drive.google.com/file/d/ VBu lolMkVPxPBrgwD MvGVzEslaYELu
+
+Copyright
+
+Parallax Inc .
+
+Propeller ES Evaluation Board Rev C
+
+v .
+
+/ /
+
+Page of
+
+During active development, the latest version and history of PNUT can be found in the st
+post on page one of this forum thread : http://forums.parallax.com/discussion/
+
+2. LDO IN Male Header
+The -pin LDO VIN power breakout header is used to connect the common V USB supply
+to the . V LDO regulators powering VIO, microSD card, and flash memory chip.
+In normal use a jumper would be connected across the -pin header. For
+experimentation, the jumper could be removed and an external power
+source or inline current meter could be connected here, instead.
+N e P e MUST be c
+P
+eae
+
+ec ed a he LDO VIN heade f
+
+he P
+
+elle
+
+3. ACC HDR Male Header
+The -pin ACC HDR power breakout header is used to connect the common
+V USB supply directly to every V pin on the edge expansion headers.
+The P -EVAL board is supplied with the jumper located on the V pin only,
+and not connected to the ACC HDR pin. This is the “OFF” position, and
+means that power is not routed from the V output pin to each of the edge
+headers via the ACC HDR pin.
+To enable the V supply at the edge headers, move the jumper across both pins to join
+them together. Certain accessory boards require a V supply, such as the USB accessory
+part-number
+-ES b .
+For experimentation, the jumper could be removed and an external power source or
+inline current meter connected here instead.
+N e If V
+afe
+
+l i
+
+e
+
+i ed a he edge heade
+
+he j m e ca be em ed f
+
+4. PC
+BP
+The microUSB PC USB port can perform the following functions:
+● Load programs from a computer into the Propeller microcontroller
+● Support serial-over-USB communications to a terminal program on a computer
+● Supply V power from a computer’s USB port
+
+Copyright
+
+Parallax Inc .
+
+Propeller ES Evaluation Board Rev C
+
+v .
+
+/ /
+
+Page of
+
+The PC-USB port includes protection that will disable the supply if
+mA current draw is
+exceeded. When using the Propeller with an external USB hub, be sure to use a
+powered hub.
+If an alternative power source is connected to the AUX USB Port, that port will take
+precedence and power from the PC USB socket will be disabled. However, the PC USB
+socket will continue to function as a serial connection to the computer, and the PC USB
+“ON” LED will remain lit while the PC USB port is connected to your computer and is
+active.
+While transmitting or receiving data, the ACT blue LED will blink to indicate your
+computer is communicating with the P -EVAL Board.
+When a short circuit, over-current, or over-temperature fault condition is detected by the
+USB protection circuit, power will be disconnected and the corresponding red fault LED,
+marked by a warning triangle label, will light until the fault is remedied.
+In the special case that the PC USB connection is suspended by your computer, the “ON”
+LED will go off, and the blue ACT LED may glow dimly. It would usually be necessary to
+unplug/reconnect the USB cable in this situation, so that the computer can renegotiate
+the USB connection.
+5.
+BL
+&P
+The USB Logic and Protection section is the bridge between the USB power sources and
+the common V rail which provides power to the LDO VIN header, ACC HDR and the VDD
+Power Supply.
+The USB power source is selected automatically, either from the PC USB socket or
+preferentially from the AUX USB port if a higher current power supply is connected. Each
+power source has its own current limit: PC-USB is
+mA, AUX-USB is
+mA.
+In case of over-current, short-circuit, or over-temperature, the USB Logic IC’s will shut
+down, disconnect power, and light the corresponding fault LED to indicate the problem.
+
+6. DD P
+The VDD power supply is for the Propeller core. This onboard power supply is based on
+a switching buck regulator, capable of delivering A at . V. Short circuit, over-current
+protection and brownout detection are also included.
+VDD is typically expected to be . V. This voltage powers the internal circuits of the P
+microcontroller. In case of a serious prolonged short-circuit or over-voltage condition, the
+VDD regulator will shutdown and remain locked off to prevent any serious damage. In
+
+Copyright
+
+Parallax Inc .
+
+Propeller ES Evaluation Board Rev C
+
+v .
+
+/ /
+
+Page of
+
+this case, the short-circuit should be remedied, and then the power supply will need to
+be power-cycled to attempt a restart. If the fault remains, then the VDD regulator will
+immediately go into the shut-down and locked off state again.
+The VDD power supply includes Brown-out Detection, which will keep the P in reset
+whilst VDD is below approximately . V.
+
+Im
+a I ca e f e e ime a i
+i h he VDD l age le el ia he
+VDD Male Heade e lai ed bel
+he ab l e ma im m l age
+h ld e
+c
+ec
+P VDD i
+V
+
+VDD Male Header
+
+The -pin VDD male header is used to connect the switching regulator
+output to the Propeller VDD input pins. In normal use a jumper spans
+the -pin VDD header. For experimentation, the jumper may be
+removed and an external power source or inline current meter
+connected here instead. N e P e MUST be c
+ec ed a he VDD
+heade f he P elle P
+eae
+
+7. G
+P
+The four ground test posts are suitable for test clips and scope probes; one is positioned
+at each edge of the board.
+
+8. C
+The P -ES Eval Board is equipped with a
+MHz crystal, as well as XO / XI pad
+connections. Operational frequency is adjustable; for full operating frequency
+configuration details, options, and limits, refer to the Propeller Rev B Silicon Google
+Document.
+The Propeller s on-chip crystal oscillator with internal pF load capacitance drives the
+MHz crystal to provide a base clock frequency for the Propeller. The actual operating
+frequency is selected in code, and can be almost any value or fractional value by using
+three special multiply and divide registers.
+XO / XI Pads
+
+The pads marked XO and XI above the oscillator are connected directly to the on-board
+oscillator and the Propeller XO Xtal Out, physical pin
+and XI Xtal In, physical pin
+Copyright
+
+Parallax Inc .
+
+Propeller ES Evaluation Board Rev C
+
+v .
+
+/ /
+
+Page of
+
+pins. Test equipment could be connected to these pads, or an alternative clock source
+connected to XI. Note that the P -ES Eval board has a
+MHz crystal, and the clock
+source type and frequency must be specified in the user code; refer to the Propeller
+Rev B Silicon Google Document.
+Overclocking
+
+The clock frequency of Propeller is defined by user code. It can be adjusted very
+precisely using three multiply and divide registers that set the actual operating frequency
+based on a function of the crystal oscillator frequency.
+All this means that overclocking is possible and early unsupported experiments have
+been running the Propeller overclocked at
+MHz without significant heat rise!
+While special cooling arrangements are not typically required when operating at the
+recommended maximum clock frequency of
+MHz, the Propeller ES Evaluation
+Board bottom layer features a continuous oz copper ground plane which is designed to
+remove heat from the Propeller . There are also four mounting holes spaced mm
+apart, which could accommodate a mm fan or heatsink.
+
+9. A
+P
+H
+P
+(C
+O
+)
+Marked V and GND, these . ” spaced pads connect directly to the AUX-USB V power
+rail to provide a convenient power source for an external fan when an AUX-USB power
+source is connected.
+These same V and GND pads could also be used to connect a power source to power the
+P -EVAL PCB, instead of using the AUX-USB port. In this case, the supply voltage range
+can be . V to . V, and MUST NOT e ceed
+V
+When used to provide power to the Eval board, the Auxiliary power pads are protected
+by the same USB protection circuit as the AUX USB Port; refer to the AUX USB Port
+description for more details.
+
+Wa i g DO NOT c
+ec a
+e
+ce b h he USB cke a d V
+ad a he ame ime U e
+a i g
+e hi f c i ali
+h ld
+efe
+he P ES E al B a d chema ic a d
+ceed a hei
+ik
+
+10. A
+BP
+The microUSB AUX USB Port is for power input only, and is provided as a means to attach
+a high current power supply to the P -EVAL PCB. A -Amp rated device is recommended.
+
+Copyright
+
+Parallax Inc .
+
+Propeller ES Evaluation Board Rev C
+
+v .
+
+/ /
+
+Page of
+
+When power is connected to AUX USB, this will automatically take priority over power
+from the lower current PC-USB port. The AUX USB port includes protection that will
+disable the supply if A current draw is exceeded.
+When a short-circuit, over-current or over-temperature fault condition is detected by the
+USB protection circuit, power will be disconnected and the corresponding fault LED,
+marked by a warning triangle label, will light until the fault is remedied.
+N e P e di c
+ec i
+cc
+a he E al b a d USB
+ec i
+ci c i The
+Auxiliary power header pads are located before that protection circuit because they are
+in parallel with the Aux USB Port to provide both a power input and output. As such,
+when power disconnection occurs in a fault condition, the Auxiliary power header pads
+will be able to continue sourcing power.
+11. I/O P B
+E
+H
+(
+5
+)
+Each of the
+smart I/O pins is connected to an edge header,
+in specific groups of eight.
+Each edge header also provides two GND connections, a
+Vxxxx output pin supplying the voltage from the
+corresponding . V LDO voltage regulator, described above
+in LDO regulators for I/O Pin Voltage, and optionally a V
+output connection controlled by the ACC HDR Male Header .
+There are two special usage edge header banks which do not
+supply the V output. Refer to the details here: a. I/O Pin
+Breakout Edge Headers without V output
+DO NOT APPLY VOLTAGE TO THE V
+Pi
+ha
+me I O i a e al c
+ec ed
+I O Pi A ig me
+ec i
+
+i i a l age
+Be a a e
+he e i he al ci c i
+ee he
+
+11 . I/O P
+B
+E
+H
+(
+5
+)
+There are two edge headers which do not have V routed to
+them.
+The header for P to P is shown with a white silk square for
+the pin beside the Vxxxx pin. This unlabelled pin is
+unconnected, but could be used for connecting a user signal or
+voltage to a user accessory board or prototype board.
+
+Copyright
+
+Parallax Inc .
+
+Propeller ES Evaluation Board Rev C
+
+v .
+
+/ /
+
+Page of
+
+The header for P to P has the RES pin beside the V
+pin. The RES pin is active low, and is connected to the Propeller
+microcontroller RESn circuit. Momentarily set this pin low to
+reset the Propeller. This header is ideal for connecting to a WiFi
+module such as the Parallax WX Module :
+https://www.parallax.com/product/
+s , in order to
+program the Propeller wirelessly.
+Ti When using wireless programming it is recommended to
+switch off the USB Reset “USB RES” feature at the Mode
+Selection Switch Bank.
+
+12. LED B
+This bank of eight LEDs is connected via an LED Buffer to pins P through P . The
+buffer isolates the LEDs so they will not influence the I/O signals. P -P LEDs are
+connected to the USB data and P memory signals see I/O Pin Assignments so these
+LEDs will be especially active at power-up and after a reset.
+After start-up, some of the LEDs can be used as user-programmable indicators. For
+example, P and P are free by default.
+
+13. R
+B
+Use the Reset button button to restart the Propeller microcontroller’s program and also
+power cycle the flash memory and microSD socket. Press and hold to keep the
+microcontroller in reset. Press and release to reset and execute the selected Propeller
+boot sequence; see the Boot Mode Selection for the necessary switch settings.
+
+14. LDO
+I/O P
+The LDO regulators are fixed . V low-noise regulators, which power the P I/O
+smart-pins. Each regulator has short-circuit and over-current protection. You may see this
+voltage referred to as VIO Voltage for IO , or by group of I/O pins in the format Vxxxx.
+At the actual microcontroller, the Propeller Smart I/O pins are grouped such that each
+I/O’s have a dedicated voltage supply connection. If you refer to the diagram Propeller
+Physical Pins you will see the voltage supply connections labelled as V
+, V
+,
+V
+, etc.
+
+Copyright
+
+Parallax Inc .
+
+Propeller ES Evaluation Board Rev C
+
+v .
+
+/ /
+
+Page
+
+of
+
+This allows pins that will be performing sensitive analog functions to use dedicated quiet,
+local . V regulation.
+With the P -EVAL PCB, the voltage supply connections have been brought out in groups
+of
+I/O pins each. Each group has a VIO output labelled Vxxxx at each of the
+corresponding I/O Pin Breakout Edge Headers, which describes the I/O range that the
+LDO supplies. For example, V
+would mean VIO voltage for I/O pins to .
+Note: While it would also be typical to have a single larger switching regulator to power
+all the . V I/O supplies, the distributed LDO’s allow for better local regulation, low
+noise, isolation of I/O groups, improved protection, less voltage drop under load, and
+better thermal characteristics.
+
+15. M
+H
+The four plated mounting holes are attached to the ground plane.
+Dimensions section for mounting hole spacing.
+
+See the PCB
+
+16. M
+B
+This bank of dip switches controls the USB Reset and Boot Mode Selection functions. The
+dip switches are not set to any particular state on a new Eval board, although the four
+switches will all usually be set to the OFF position.
+USB RES (USB Reset Connection)
+
+This switch controls the connection of the USB “DTR” Reset signal to the Propeller reset
+circuit. Switch ON to allow the PC-USB interface to reset the propeller by toggling the DTR
+signal as required for PC-USB programming . Switch OFF to disable that reset signal.
+This switch would usually be kept switched ON for programming via PC-USB cable, and
+switched OFF for programming via an external serial programmer or WiFi module
+connected to the top-left P /P
+edge header.
+
+Boot Mode Selection
+
+Upon startup or after reset, the Propeller will always proceed according to the boot
+mode selection table shown below. The three switches labelled Flash, P
+and P
+are used to select the Boot Mode, and the options include booting loading code from
+USB-Serial, SD card or SPI Flash memory.
+Im
+
+a
+
+Copyright
+
+T a id i c
+
+Parallax Inc .
+
+i e
+
+beha i
+
+l
+
+i ch
+
+Propeller ES Evaluation Board Rev C
+
+e f he P
+
+v .
+
+di
+
+i che ON
+
+/ /
+
+Page
+
+of
+
+Boot Mode Selection
+(
+
+D
+
+FLASH
+
+60
+NO
+
+,
+
+60
+
+,
+
+.
+
+P59
+
+OFF
+
+P59
+
+OFF
+
+OFF
+
+ON
+
+OFF
+
+ON
+
+OFF
+
+OFF
+
+ON
+
+OFF
+
+ON
+
+OFF
+
+OFF
+
+OFF
+
+OFF
+
+OFF
+
+ON
+
+)
+PI F
+
+D
+
+ON
+
+OFF
+
+.
+100
+I
+
+PI
+
+I
+
+PI
+PI
+
+(
+
+,
+
+PI
+
+),
+
+.
+.
+60
+
+D
+D
+
+I
+
+.
+
+.
+
+D
+I
+
+.
+60
+
+,
+
+.
+
+.
+.
+
+D
+
+N e A
+i ch i i he
+c e
+di g cb label
+
+ff
+
+ii
+
+he
+
+he ac a
+
+i
+
+i i g
+
+a d he
+
+17. F
+M
+The flash memory can be used to store user code or data, and is selectable as the
+prefered Boot device, See the Boot Mode Selection section for the necessary switch
+settings.
+The device uses SPI protocol, with
+MB
+Mbit capacity.
+W Q
+JVSIM manufacturer datasheet for full details.
+
+Refer to the
+
+18.
+DC
+A microSD card can be used to store the code which is run by the P when it starts up,
+provided the proper Boot Mode is selected. The same card can also be used to store
+read or write user data during run time. Uses include accessing large lookup tables,
+playing audio files, and data logging.
+
+This socket is hardwired to four Propeller I/O pins:
+● P - DI/CD data in and card detect
+● P - DO data out
+● P - /CS active low chip select .
+● P - CLK clock
+
+Copyright
+
+Parallax Inc .
+
+Propeller ES Evaluation Board Rev C
+
+v .
+
+/ /
+
+Page
+
+of
+
+Power for the microSD card socket is supplied by the Common LDO regulator, which has
+an optional connection to P that would allow user code to toggle power on/off. Refer
+to the Common LDO regulator section for more details.
+
+19. C
+LDO
+The Common LDO regulator is a fixed . V low-noise
+regulator. It powers the microSD card and SPI Flash memory
+chip, and also provides a common pull-up voltage for boot
+mode features.
+R
+is an unpopulated pad that would connect P to the
+Common LDO enable pin. This would allow the user to
+power-cycle the microSD card, perhaps for code
+development and experimentation.
+One option to use this feature would be to move R
+to R
+, and then install an
+kΩ resistor at R
+. It is not recommended to keep both R
+and R
+installed.
+Consult the schematic before making adjustments and proceed at your own risk!
+
+20. LED B
+The LED buffer is an octal line driver that has high impedance connections to P –P ,
+and drives the corresponding status LED in the LED Bank on when the P I/O signal line is
+low.
+All I/O signals from the P microcontroller are high impedance by default, which means
+the LEDs will be sensitive to objects moving close to the top-left edge header that
+provides access to the P –P pins.
+In user code those pins could be driven high or low, or have I/O pin pull-ups activated, to
+control the LEDs without the high-impedance behaviour. Another option is for the user
+application or breakout board to add pull-up resistors at the relevant edge header pins.
+This design choice means that those I/O pins are not impacted by the presence of the
+LEDs or external pull-up resistors by default, and are completely flexible and free for the
+user to use as required.
+
+Copyright
+
+Parallax Inc .
+
+Propeller ES Evaluation Board Rev C
+
+v .
+
+/ /
+
+Page
+
+of
+
+P
+
+elle 2 Ph
+
+ical Pin
+
+This illustration identifies the physical pins on the Propeller . See the draft Propeller
+Rev B/C Silicon Google Document for detailed information about the device. In this
+document, see the I/O Pin Assignments section for details on how they are used on the
+Propeller ES Evaluation Board.
+
+Copyright
+
+Parallax Inc .
+
+Propeller ES Evaluation Board Rev C
+
+v .
+
+/ /
+
+Page
+
+of
+
+I/O Pin A
+
+ignmen
+
+Smart I/O pins P –P are fully free; P –P are routed to peripheral circuits and/or
+have special functions related to Propeller boot sequence options. Each smart I/O pin
+is capable of many autonomous analog and digital functions. Examples include ADC, DAC,
+PWM, USB, SERIAL, Waveform generation, SMPS, Comparator, SCHMITT and LOGIC
+modes.
+See the draft Propeller
+Rev B/C Silicon Google Document for detailed information
+about the full capabilities of the Propeller Smart I/O pins. Refer to sections VDD - V
+Male Header and LDO VIN Male Header for instructions on applying power to enable the
+Smart I/O pins. This capability was added to the Eval PCB for evaluation and testing of
+the P ES engineering sample.
+I/O Pin
+
+Description
+
+P0-P7
+
+I/O
+, 3.3
+300 A
+
+,
+
+,
+
+P8-P15
+
+I/O
+, 3.3
+300 A
+
+,
+
+P16-P23
+
+I/O
+, 3.3
+300 A
+
+,
+
+P24-P31
+
+I/O
+, 3.3
+300 A
+
+,
+
+P32-P39
+
+I/O
+, 3.3
+300 A
+
+,
+
+P40-P47
+
+I/O
+, 3.3
+300 A
+
+,
+
+P48-P55
+
+I/O
+, 3.3
+300 A
+,
+
+,
+
+P56-P63
+
+I/O
+, 3.3
+300 A
+
+,
+
+30
+
+A
+
+I/O
+
+.O -
+
+LDO
+0007.
+
+30
+
+A
+
+I/O
+
+.O -
+
+LDO
+0815.
+
+30
+
+A
+
+I/O
+
+.O -
+
+LDO
+1623.
+
+30
+
+A
+
+I/O
+
+.O -
+
+LDO
+2431.
+
+30
+
+A
+
+I/O
+
+.O -
+
+LDO
+3239.
+
+30
+
+A
+
+I/O
+
+.O -
+
+LDO
+4047.
+
+30
+
+A
+
+I/O
+
+.O -
+
+LDO
+4855.
+
+30
+
+A
+
+I/O
+
+.O -
+
+LDO
+5663.
+
+I/O
+,
+I/O
+,
+I/O
+,
+I/O
+,
+I/O
+,
+I/O
+I/O
+
+,
+
+I/O
+
+Alternati e f nctions for P56-P63
+P56
+P57
+
+N
+C
+
+LDO
+
+(
+
+,
+
+)
+
+B
+
+LED
+
+B
+
+LED
+
+P58
+
+D MI O ( DO)
+
+F
+
+PI DO
+
+B
+
+LED
+
+P59
+
+D MO I ( DI)
+
+F
+
+PI DI
+
+B
+
+LED
+
+P60
+
+DC
+
+F
+
+PI CLK
+
+B
+
+LED
+
+P61
+
+D CLK
+
+F
+
+PI C
+
+B
+
+LED
+
+B
+
+LED
+
+P62
+
+Copyright
+
+PC-
+
+B
+
+Parallax Inc .
+
+D (P2
+
+D)
+
+Propeller ES Evaluation Board Rev C
+
+v .
+
+/ /
+
+Page
+
+of
+
+P63
+Other
+Pins
+E
+
+PC-
+
+B
+
+D (P2
+
+D)
+
+G
+
+O
+
+O
+
+I
+
+I
+
+GND
+
+LED
+
+O
+
+)
+
+Description
+M
+
+E
+
+B
+
+P2
+
+. (C
+
+20MH
+
+. (C
+
+M
+
+20MH
+
+,
+
+G
+P
+
+.
+
+10K
+
+I
+. P2
+
+)
+
+E
+
+,
+
+PCB
+
+.
+.
+
+,
+.C
+
+P2
+.
+
+Copyright
+
+Parallax Inc .
+
+Propeller ES Evaluation Board Rev C
+
+v .
+
+/ /
+
+Page
+
+of
+
+PCB Dimen i n
+
+Re i i n Hi
+Version . : Please see the version . document for Rev A PCB support.
+Version . : Supports the P -ES Rev B silicon and the Eval Board Rev B.
+Version . : Supports the P -ES Rev C silicon and the Eval Board Rev C.
+
+Copyright
+
+Parallax Inc .
+
+Propeller ES Evaluation Board Rev C
+
+v .
+
+/ /
+
+Page
+
+of
+
+

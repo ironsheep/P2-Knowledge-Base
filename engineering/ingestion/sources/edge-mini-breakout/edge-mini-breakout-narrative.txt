@@ -1,0 +1,420 @@
+Web Store: www.parallax.com
+
+Sales: (888) 512-1024
+
+Tutorials: learn.parallax.com
+
+Educator Hotline: (916) 701-8625
+
+Sales: sales@parallax.com
+
+Office: (916) 624-8333
+
+Tech Support: support@parallax.com
+
+Fax: (916) 624-8003
+
+P2 Edge Mini Breakout Board (#64019)
+
+The P2 Edge Mini Breakout Board provides a compact interface to the P2 Edge Module for
+experimenting and developing with the Propeller 2 microcontroller.
+The board accepts the P2 Edge Module (#P2-EC) and includes a supply voltage DC Jack socket,
+Parallax Prop Plug (#32201) programming header, and reset button. Forty of the P2 Edge Smart
+I/O pins are available at five 0.1” pin header sockets, compatible with both single and dual
+header Propeller 2 accessories. Four accessory headers are arranged to accept single or dual P2
+accessory boards, and the fifth single header breaks out the programming pins and is
+compatible with wireless programming using the P2 WX Adapter (#64007) with Parallax WX
+ESP8266 SIP module (#32420S).
+Smart I/O pins P0–P31 and P56–P63 are available at pin headers. Pins P32–P55 may be
+accessed by adding jumper wires on the bottom side of the PCB to the mini prototyping
+sections. There are two 0.1” pitch 4x5 matrix prototyping sections on the board, positioned on
+either side of the edge connector.
+
+Features
+●
+●
+●
+●
+●
+●
+
+Vertical socket for the Parallax P2 Edge Module (#P2-EC)
+Solder-free prototyping, header sockets for power, programming and I/O
+Center-positive 2.1 mm barrel jack for external 5 VDC power supply
+Convenient reset button
+40 Smart I/O pins brought out to 0.1” 2x6 way P2 accessory headers
+Dedicated Parallax Prop Plug (#32201) header, for system programming and debugging
+
+Copyright © Parallax Inc.
+
+P2 Edge Mini Breakout Board (#64019)
+
+v1.1 11/30/2020 Page 1 of 10
+
+Key Specifications
+● Voltage input requirements: 5 VDC, absolute maximum 5.5 VDC
+● Input Current requirements:
+○ Recommended minimum 100 mA
+○ Maximum according to customer application
+● VIO Power Supplies: 3.3 V up to 300 mA per 8 I/O pins; requires P2 Edge Module
+● USB programming: Serial up to 2 MBaud; requires Prop Plug (#32201) programming
+adapter
+● Wireless programming: (up to 2 MBaud); requires P2 WX WiFi Adapter (#64007) and WX
+WiFi SIP module (#32420S)
+● Operating temperature: -40 to +185 °F (-40 to +85 °C)
+● PCB Dimensions: 3.15 x 1.4 in (80 x 35.5 mm)
+The P2 Edge Mini Breakout Board is compatible with a wide range of modules, adapters and
+accessories. See the Propeller 2 page at www.parallax.com.
+
+Orientation
+When connecting your P2 Edge Module to the P2 Edge Mini Breakout Board, ensure that the
+module is inserted with the P0 and P38 edge pads closest to the P0 and P38 labels which are
+marked on the breakout PCB, either side of the Edge Socket. Correct module orientation is
+shown in this image:
+
+Copyright © Parallax Inc.
+
+P2 Edge Mini Breakout Board (#64019)
+
+v1.1 11/30/2020 Page 2 of 10
+
+Compatible Products
+See the Propeller 2 section of the Parallax web store for all of the products listed below.
+Recommended Parts for Getting Started
+●
+●
+●
+●
+●
+●
+●
+●
+
+P2 Edge Module (#P2-EC)
+P2 Edge Mini Breakout Board (#64019)
+Cable, USB A to DC 2.1mm Jack (#805-00019)
+Breadboard (#700-32023)
+200mm Jumper Wires, MF 40-piece Ribbon (#800-00064)
+100mm Jumper Wires, MM 40-piece Ribbon (#800-00065)
+Prop Plug programming tool (#32201)
+USB A to Micro B Cable (#805-00016)
+
+Add Wireless Programming & Serial Communication
+● P2 to WX Adapter (#64007)
+● Parallax WX ESP8266 WiFi Module - SIP (#32420S)
+
+Add Click / mikroBUS development
+The P2 to MicroBUS Click Adapter provides developers with connectivity to over 900 different
+mikroE Click modules for rapid development. Check out the Parallax webshop or your local
+distributor.
+● P2 to MicroBUS Click Adapter (#64008)
+
+Parallax Add-on Boards
+These boards fit directly on the 2x6 accessory headers with no need for additional adapters.
+● P2-ES Eval Board Accessory Set (#64006-ES). Set of eight, with pushbuttons, serial host,
+LED matrix, HDMI output, prototyping, serial device, Goertzel HID, and A/V breakout.
+● HyperRAM & HyperFLASH Add-On
+● Protoboard Add-on
+
+Copyright © Parallax Inc.
+
+P2 Edge Mini Breakout Board (#64019)
+
+v1.1 11/30/2020 Page 3 of 10
+
+Feature Descriptions
+Read the full explanation of each labeled feature on the pages that follow this diagram.
+
+1. Parallax P2 Edge Module Socket
+The P2 Edge Module socket is a 0.05 in (1.27 mm) pitch, 80-way vertical socket. Refer to Edge
+Connector Pin Assignments in the P2 Edge Module product guide for full details.
+The P2 Edge Module must be inserted with the component side facing the RESET Button. There
+are silk-screen text markings beside the socket to indicate the positions of P0 and P38.
+CAUTION! ​The P2 Edge Module power input pads have reverse polarity protection,
+but damage could occur from user circuits attached to the IO pins incorrectly, so
+care should always be taken to ensure correct orientation.
+
+2. Power Jack
+The 2.1 mm center-positive DC power barrel jack socket accepts 5 VDC only. To provide power
+we recommend the Parallax USB A to DC-Jack cable (#805-00019) This will allow you to power
+the P2 Edge Breadboard from a computer USB port or hub. For higher current applications,
+connect the same cable to the Parallax USB Mains Adapter (#750-00001).
+CAUTION! Always use a well-regulated power supply and do not exceed 5.5 VDC
+input!
+
+Copyright © Parallax Inc.
+
+P2 Edge Mini Breakout Board (#64019)
+
+v1.1 11/30/2020 Page 4 of 10
+
+3. Prop Plug Programming Header
+The P2 Edge Module is programmed by the Parallax Prop Plug programming tool (#32201). To
+accommodate the Prop Plug, there is a dedicated 4-pin programming and debugging header.
+The pins are ​marked ​▽ △ RES VSS, and correspond to the pin labelling on the Prop Plug
+adapter.
+Connect the Prop Plug to your computer with a suitable USB cable. Then, insert the Prop Plug
+onto the header pins with the Prop Plug components facing upward. The upward orientation
+allows you to see the RX and TX activity LEDs on the Prop Plug while programming or debugging
+data is being transmitted.
+
+4. Reset Button
+Use this button to restart the Propeller 2 microcontroller’s program running on the P2 Edge
+Module. Press and hold to keep the microcontroller in reset. Press and release to reset, load
+and run the program in EEPROM.
+
+5. Protoboard Matrix
+The protoboard areas are unconnected 4 x 5 hole matrices arranged in 2 areas, for a total of 40
+holes. The hole spacing is 0.1”. Use these to add components and access additional Smart I/O
+pins directly from the Edge connector. ​Refer to the Edge Socket Pinout for details.
+
+6. I/O Pin Accessory Headers (with 5V output)
+With the P2 Edge Module plugged in, Each of the Propeller
+2's 64 smart I/O pins connect to an accessory header, in
+specific groups of eight.
+Each edge header provides two GND connections, a Vxx
+output pin supplying the voltage from the corresponding 3.3
+V LDO voltage regulator (​described here​), and optionally a 5
+V output, that is connected directly to the ​Power Jack​.
+DO NOT APPLY VOLTAGE TO THE Vxx Pin; it is a voltage output! ​Be aware that some
+I/O pins are also connected to other peripheral circuits; see the ​Edge Connector Pin
+Assignments​ section.
+
+Copyright © Parallax Inc.
+
+P2 Edge Mini Breakout Board (#64019)
+
+v1.1 11/30/2020 Page 5 of 10
+
+7. I/O Pin Breakout Edge Headers (without 5V output)
+There are two edge headers that do not have 5V routed to
+them, one for P24-–P31, and one for P56–P63.
+The P24–P31 header is marked with a white silk square for the
+pin beside the Vxx pin. This unlabelled pin is unconnected, but
+may be used for connecting a user signal or voltage to a user
+accessory board or prototype board.
+The P56–P63 header is marked with the RES pin label beside
+the V56 pin. The RES pin is active low, and is connected to the
+Propeller 2 microcontroller RESn circuit on the P2 Edge
+Module. Momentarily set this pin low to reset the Propeller 2.
+The P56–P63 header accepts the the Parallax P2 WX Adapter
+(#64007) with the Parallax ESP8266 SIP WiFi module
+(#32420S) in order to program the Propeller 2 wirelessly.
+8. Mounting Holes
+The four plated mounting holes are attached to the ground plane. See the ​PCB Dimensions
+section for mounting hole dimensions and spacing.
+
+VIO 3.3V Power and Ground (GND) access
+The positive 3.3 V supply sockets and ground sockets are
+positioned around the board at the 2x6 way P2 accessory
+headers. The headers are compatible with the Parallax P2
+accessory boards, or use jumper wires to connect the header
+pins to an external circuit- for example, to a breadboard.
+Each group of 8 smart I/O pins has its own 3.3 V low-noise regulator, with short-circuit and
+over-current protection. You may see this voltage referred to as VIO (Voltage for IO), and is
+labelled beside each group of I/O pins in the format Vxx.
+The two digits after the V refer to the first of 8 I/O pins that the LDO provides power to. For
+example in the image, V48 would mean VIO voltage for I/O pins 48 to 55.
+Warning: DO NOT join the Vxx pins together. ​The voltage output is intended to
+provide logic level and low current supply only to the corresponding group of 8 I/Os
+(Maximum 30mA per pin, 300 mA total). If a larger current or common supply is
+required, use an alternative power source such as the Parallax Power Pal (#32133)
+
+Copyright © Parallax Inc.
+
+P2 Edge Mini Breakout Board (#64019)
+
+v1.1 11/30/2020 Page 6 of 10
+
+Propeller 2 Physical Pins
+The Propeller 2 physical pins are shown below. See the Propeller 2 documentation at
+www.parallax.com for more information about this device. Below, see the ​Edge Connector Pin
+Assignments​ section for details on how they are used on the P2 Edge Module.
+
+Copyright © Parallax Inc.
+
+P2 Edge Mini Breakout Board (#64019)
+
+v1.1 11/30/2020 Page 7 of 10
+
+Edge Connector Pin Assignments
+Smart I/O pins P0–P55 are fully free; P56–P63 are routed to peripheral circuits and/or have
+special P2 boot sequence related functions. See the Propeller 2 documentation at
+www.parallax.com​ for full details of P2 smart I/O pin capability.
+I/O Pin
+
+Description
+
+P0-P7
+
+Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V00.
+
+P8-P15
+
+Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V08.
+
+P16-P23
+
+Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V16.
+
+P24-P31
+
+Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V24.
+
+P32-P39
+
+Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V32.
+
+P40-P47
+
+Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V40.
+
+P48-P55
+
+Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300mA total, shared by this I/O pin group and edge connector pin V48.
+
+P56-P63
+
+Smart I/O pins, 3.3 V logic level, source or sink 30 mA per I/O pin. On-board LDO regulator
+supplies 300 mA total, shared by this I/O pin group and edge connector pin V56.
+Alternative functions for P56-P63
+
+P56
+
+Buffered LED
+
+P57
+
+Buffered LED
+
+P58
+
+Flash SPI DO (MISO)
+
+P59
+
+Flash SPI DI (MOSI)
+
+P60
+
+Flash SPI CLK
+
+P61
+
+Flash SPI CS
+
+P62
+
+Prop-Plug RXD (P2 TXD)
+
+P63
+
+Prop-Plug TXD (P2 RXD)
+
+Other
+
+Description
+
+RESn
+
+Internally pulled up to 3.3V with 10K resistor. P2 will reset when RESn driven low.
+
+5V
+
+Power input pins for the Edge Module. Connect both 5V edge connector pads to a good
+quality 5VDC supply. ​The supply voltage MUST NOT exceed 5.5V!
+Recommended minimum supply current 100mA, up to 3A for heavy load and multi-cog use.
+
+GND
+
+Provides common signal and supply voltage ground. Connection of all four edge connector
+GND pads to a solid ground plane on an external layer recommended.
+
+NC
+
+Not Connected, reserved for future use. Recommended “Do Not Connect” in designs.
+
+Copyright © Parallax Inc.
+
+P2 Edge Mini Breakout Board (#64019)
+
+v1.1 11/30/2020 Page 8 of 10
+
+Programming Software
+Propeller Tool is our recommended tool for programming the P2 Edge Module in SPIN and PASM
+languages. Other programming languages are possible using third party tools, such as C, BASIC, Forth.
+You can find links to the latest tools at the P2 Edge Module product page. Visit ​https://www.parallax.com
+and search for “P2-EC”
+
+Resources and Downloads
+Check for the latest version of this document, free software, and example programs from the P2 Edge
+Mini Breakout Board product page. Go to www.parallax.com and search 64019.
+
+Recommend and Absolute Maximum Ratings
+Symbol
+
+Quantity
+
+Recommended
+
+Maximum
+
+Units
+
+5 VDC
+
+DC Barrel Jack Supply Voltage †
+
+5
+
+5.5
+
+V
+
+P0 - P63
+
+Any I/O Pin
+
+3.3
+
+3.6
+
+V
+
+RESn
+
+Reset input, active low
+
+3.3
+
+3.6
+
+V
+
+P2 Edge Socket Pinout (PCB Bottom View)
+
+Copyright © Parallax Inc.
+
+P2 Edge Mini Breakout Board (#64019)
+
+v1.1 11/30/2020 Page 9 of 10
+
+Board Dimensions
+
+Revision History
+Version 1.0:​ Original release. ​ Version 1.1: Pinout images updated.
+
+Copyright © Parallax Inc.
+
+P2 Edge Mini Breakout Board (#64019)
+
+v1.1 11/30/2020 Page 10 of 10
+
+
