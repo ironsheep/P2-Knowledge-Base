@@ -20,8 +20,16 @@ Gap identification and prioritization:
 
 ### instruction-analysis/
 P2 instruction documentation tracking:
-- `instruction-completion-tracking.md` - Which instructions are fully documented
-- `missing-instructions.md` - Instructions needing documentation
+- `instruction-completion-tracking.md` - Which P2 instructions are fully documented
+- `instruction-completion-matrix.md` - P2 instruction question tracking across sources
+- `instruction-reference-table.md` - P2 instruction reference mapping
+- `missing-instructions.md` - P2 instructions needing documentation
+- `pasm2-documentation-capability-assessment.md` - PASM2 documentation assessment
+
+### p1-p2-comparison/
+P1 to P2 migration and comparison analysis:
+- `p1-knowledge-completion-matrix.md` - P1 knowledge gaps for comparison capability
+- `p1-instruction-reference-table.md` - P1 instruction reference for migration
 
 ### matrices/
 Cross-source comparison matrices:

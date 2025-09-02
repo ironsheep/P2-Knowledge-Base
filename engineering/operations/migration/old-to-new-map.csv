@@ -103,3 +103,8 @@ engineering/ingestion/source-quality-matrix-3d.md,engineering/ingestion/central-
 engineering/ingestion/extraction-matrices/hardware-manual-complete-extraction-audit.md,engineering/ingestion/sources/p2-eval-board/p2-hardware-manual-complete-extraction-audit.md,file,Moved to proper source directory
 engineering/ingestion/extraction-matrices/qa-spreadsheet-complete-audit.md,engineering/ingestion/sources/p2-qa-spreadsheet/qa-spreadsheet-complete-extraction-audit.md,file,Moved to new source directory
 engineering/ingestion/extraction-matrices/qa-spreadsheet-extraction.md,engineering/ingestion/sources/p2-qa-spreadsheet/qa-spreadsheet-extraction.md,file,Moved to new source directory
+engineering/knowledge-base/P2/completion-matrix.md,engineering/ingestion/central-analysis/instruction-analysis/instruction-completion-matrix.md,file,Moved to central-analysis
+engineering/knowledge-base/P2/instruction-table.md,engineering/ingestion/central-analysis/instruction-analysis/instruction-reference-table.md,file,Moved to central-analysis
+engineering/knowledge-base/P2/PASM2-DOCUMENTATION-CAPABILITY-ASSESSMENT.md,engineering/ingestion/central-analysis/instruction-analysis/pasm2-documentation-capability-assessment.md,file,Moved to central-analysis
+engineering/knowledge-base/P1/completion-matrix.md,engineering/ingestion/central-analysis/p1-p2-comparison/p1-knowledge-completion-matrix.md,file,Moved to P1-P2 comparison section
+engineering/knowledge-base/P1/instruction-table.md,engineering/ingestion/central-analysis/p1-p2-comparison/p1-instruction-reference-table.md,file,Moved to P1-P2 comparison section

@@ -1,6 +1,26 @@
-# Ingestion Catalog
+# Ingestion System Hub
 
-*Last Updated: 2025-08-29 | Status: 90% P2 Knowledge Coverage*
+## 📊 [LIVE AUDIT MATRIX](INGESTION-AUDIT-MATRIX.md) ← Primary Status Dashboard
+
+**Quick Status**: 72% Complete | 19/24 Sources Audited | 2 Sources Connected to Central Hub
+
+*Last Updated: 2025-09-02 | Knowledge Coverage: 70% P2 Architecture*
+
+---
+
+## 🎯 Navigation
+
+### Primary Dashboards
+- **[INGESTION-AUDIT-MATRIX.md](INGESTION-AUDIT-MATRIX.md)** - Live completion tracking
+- **[INGESTION-DASHBOARD.md](INGESTION-DASHBOARD.md)** - Source content status
+- **[Central Analysis Hub](central-analysis/)** - Cross-source intelligence
+
+### Methodology
+- **[Source Ingestion Methodology](methodology/source-ingestion-methodology.md)** - How to ingest
+- **[Document Ingestion Work Mode](work-modes/document-ingestion-focused.md)** - Step-by-step process
+- **[Ingestion Audit Protocol](methodology/ingestion-pipeline/ingestion-audit-protocol.md)** - Verification
+
+---
 
 ## Summary Statistics
 
