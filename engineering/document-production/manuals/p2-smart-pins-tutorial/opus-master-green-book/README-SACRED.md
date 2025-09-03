@@ -83,7 +83,7 @@ This directory contains FOUR sacred versions of the P2 Smart Pins Green Book Tut
   - Historical reference
   - Fallback if V5 has issues
 
-### 📚💎 Version 5: P2-Smart-Pins-Green-Book-Tutorial-v5.md (Balanced Language Coverage) ⭐ AUTHORITATIVE
+### 📚💎 Version 5: P2-Smart-Pins-Green-Book-Tutorial-v5.md (Balanced Language Coverage)
 - **Type**: Green Book (Tutorial) - Dual-language Smart Pin reference
 - **Created**: 2025-09-01 from V4 + Titus PASM2 examples
 - **Enhanced**: Bottom-up insertion of 15 PASM2 examples
@@ -107,6 +107,31 @@ This directory contains FOUR sacred versions of the P2 Smart Pins Green Book Tut
   - Complete I/O learning path
   - Production reference manual
   - Comprehensive P2 I/O bible
+
+### 📚🎯 Version 6: P2-Smart-Pins-Green-Book-Tutorial-v6.md (Corrected Image Assets) ⭐ AUTHORITATIVE
+- **Type**: Green Book (Tutorial) - Complete image refresh
+- **Created**: 2025-09-02 from V5 + corrected image mappings
+- **Enhanced**: Complete image asset reorganization and correction
+- **Size**: 3,371 lines / 16 corrected images / v6-assets folder
+- **Permissions**: 444 (read-only)
+- **Purpose**: Production-ready tutorial with all images properly matched
+- **Image Corrections**:
+  - Fixed all mode-specific image mappings (was using wrong page numbers)
+  - Added Chapter 0 timing diagrams (DRVH and input sampling)
+  - Corrected PWM Sawtooth/Triangle swapped images
+  - Fixed Sync Serial using quadrature encoder image
+  - Added smart-pins-master-trimmed.png block diagram
+  - Organized in version-specific v6-assets/ folder (22 images)
+- **Technical Process**:
+  - Started from pristine V5 master (not modified workspace version)
+  - Applied ONLY image corrections, no other changes
+  - Sourced from cleaned ingestion: `/engineering/ingestion/sources/smart-pins/assets/images-smartpins-20250901/`
+  - All images verified against mode-specific content
+- **Use Cases**:
+  - PRIMARY tutorial for PDF generation with correct visuals
+  - Ready for deployment to PDF Forge
+  - Baseline for future visual enhancements
+  - Production reference with accurate diagrams
 
 ### 📄 Version 4 Wrapper: P2-Smart-Pins-Green-Book-Tutorial-v4-wrapper.md (Template)
 - **Type**: Template/wrapper file as delivered by Opus 4.1
@@ -147,10 +172,21 @@ Further Enhanced v3 (~140 pages)
     - Adds 8 more diagrams (73% coverage)
     - Better visual integration
          ↓
-Complete I/O Tutorial v4 (~155 pages) ⭐ CURRENT
+Complete I/O Tutorial v4 (~155 pages)
     - Adds Chapter 0: I/O Fundamentals
     - Adds comprehensive index
     - Complete P2 I/O coverage
+         ↓
+Balanced Language v5 (3,371 lines)
+    - Adds 15 PASM2 examples
+    - Achieves 3.22:1 Spin2/PASM2 ratio
+    - Better serves both communities
+         ↓
+Corrected Images v6 (3,371 lines) ⭐ CURRENT
+    - Fixes ALL image mappings
+    - Adds Chapter 0 timing diagrams
+    - Version-specific v6-assets/ folder
+    - Production-ready visuals
 ```
 
 ### Working Copy Process
@@ -160,8 +196,9 @@ Complete I/O Tutorial v4 (~155 pages) ⭐ CURRENT
 To make changes:
 1. Copy to workspace: 
    ```bash
-   # Use v4 as the most complete version
-   cp P2-Smart-Pins-Green-Book-Tutorial-v4.md /engineering/pdf-forge/production/smart-pins-manual/
+   # Use v6 as the most complete and correct version
+   cp P2-Smart-Pins-Green-Book-Tutorial-v6.md /engineering/pdf-forge/production/smart-pins-manual/
+   cp -r v6-assets /engineering/pdf-forge/production/smart-pins-manual/assets/
    ```
 2. Work on the copy in workspace
 3. These masters remain unchanged as reference
@@ -213,4 +250,4 @@ chmod 444 P2-Smart-Pins-Green-Book-Tutorial-With-Images.md
 
 ✅ **VALIDATED**: Both versions have been reviewed and validated as complete, accurate, and production-ready.
 
-🎯 **PRIMARY USE**: Version 4 (Complete I/O Tutorial) should be used for PDF generation as it provides the most comprehensive coverage of P2 I/O capabilities.
+🎯 **PRIMARY USE**: Version 6 (Corrected Image Assets) should be used for PDF generation as it provides the most comprehensive coverage with properly matched images.
