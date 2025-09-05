@@ -1,0 +1,3674 @@
+‭Spin2 Language‬
+‭Comments‬
+‭Comments can occur anywhere in Spin2 or PASM code and take several forms:‬
+
+‭Comment‬
+
+‭Examples‬
+
+‭Descriptions‬
+
+‭To end of line‬
+
+a := 0
+‭
+
+'comment here‬
+
+‭●‬
+
+‭initiated by apostrophe, rest of line is ignored‬
+
+‭To end of line‬
+‭(documentation)‬
+
+b := 1
+‭
+
+''comment here‬
+
+‭‬
+●
+‭●‬
+
+i‭nitiated by two apostrophes, rest of line is ignored‬
+‭Comment text goes into the documentation file‬
+
+‭●‬
+
+‭Everything within braces is ignored, including end-of-lines‬
+
+‭‬
+●
+‭●‬
+
+‭ verything within double braces is ignored, including end-of-lines‬
+E
+‭Comment text goes into the documentation file‬
+
+‭‬
+●
+‭●‬
+
+I‭nitiated by three periods, rest of line is ignored‬
+‭parsing continues on next line, as if no end-of-line was encountered‬
+
+‭Intra-line‬
+‭or multi-line‬
+
+x := 4, {comment here} y := 5‬
+‭
+‭comment here‬
+{
+comment here}‬
+‭
+
+‭Intra-line‬
+‭ r multi-line‬
+o
+‭(documentation)‬
+‭Continue code‬
+‭on next line‬
+
+x := 4, {{comment here}} y := 5‬
+‭
+‭{comment here‬
+{
+comment here}}‬
+‭
+z := 100
+‭
+* x
+‭
+- w‬
+‭
+
+...
+...
+
+comment here‬
+comment here‬
+
+‭Constants‬
+‭Constants resolve to 32-bit values and can be expressed as follows:‬
+
+‭Constants‬
+‭Decimal‬
+
+‭Examples‬
+
+‭Descriptions‬
+
+‭‬
+1
+-150‬
+‭
+3_000_000‬
+‭
+
+‭‬
+●
+‭●‬
+
+‭ ecimal values use digits '0'..'9'‬
+D
+‭Underscores '_' are allowed after the first digit for placeholding‬
+
+‭Hexadecimal‬
+
+‭1B‬
+$
+$AA55‬
+‭
+$FFFF_FFFF‬
+‭
+
+‭‬
+●
+‭●‬
+
+‭ ex values start with '$' and use digits '0'..'9' and 'A'..'F'‬
+H
+‭Underscores '_' are allowed after the first digit for placeholding‬
+
+‭Double Binary‬
+
+‭%21‬
+%
+%%01_23‬
+‭
+%%3333_2222_1111_0000‬
+‭
+
+‭‬
+●
+‭●‬
+
+‭ ouble binary values start with '%%' and use digits '0'..'3'‬
+D
+‭Underscores '_' are allowed after the first digit for placeholding‬
+
+‭0110‬
+%
+%1_1111_1000‬
+‭
+%0001_0010_0011_0100‬
+‭
+
+‭‬
+●
+‭●‬
+
+‭ inary values start with '%' and use digits '0' and '1'‬
+B
+‭Underscores '_' are allowed after the first digit for placeholding‬
+
+‭Binary‬
+
+‭Parallax Spin2 Documentation Page‬‭12‬‭of‬‭57‬
+
+‭Float‬
+
+‭1.0‬
+1_250_000.0‬
+‭
+1e9‬
+‭
+5e+6‬
+‭
+-1.23456e-7‬
+‭
+
+‭‬
+●
+‭●‬
+‭●‬
+‭●‬
+
+‭ loat values use digits '0'..'9' and have a '.' and/or 'e' in them‬
+F
+‭Floats are encoded in IEEE-754 single-precision 32-bit format‬
+‭Underscores '_' are allowed after the first digit for placeholding‬
+‭Special floating-point operators (+. -. *. /.) treat long values as floats‬
+
+"H"‬
+‭
+
+‭‬
+●
+‭●‬
+
+‭ single character in quotes resolves to an 8-bit ASCII value‬
+A
+"A" → $41‬
+‭
+
+‭String‬
+
+"Hello"‬
+‭
+
+‭‬
+●
+‭●‬
+
+‭ ultiple characters in quotes resolve to 8-bit ASCII values separated by commas‬
+M
+"Hello" → $48, $65, $6C, $6C, $6F‬
+‭
+
+‭Packed Characters‬
+
+‭"ABCD"‬
+%
+%"123"‬
+‭
+
+‭‬
+●
+‭●‬
+‭●‬
+
+‭ p to four 8-bit ASCII values packed into a long, little-endian, zero-padded‬
+U
+%"ABCD" → $44_43_42_41‬
+‭
+%"123" → $00_33_32_31‬
+‭
+
+‭Character‬
+
+‭Variables‬
+‭In Spin2, there are both user-defined and permanent variables. The user-defined variable sources are listed below and the permanent variables are shown in the table.‬
+‭‬
+●
+‭●‬
+‭●‬
+‭●‬
+
+‭ AR variables (hub)‬
+V
+‭PUB/PRI parameters, return values, and local variables (hub)‬
+‭DAT symbols (hub)‬
+‭Cog registers‬
+
+‭Variables‬
+(‭ all LONG)‬
+
+‭Variable‬
+‭Name‬
+
+‭Address‬
+‭ r Offset‬
+o
+
+‭Hub Locations‬
+
+‭LKMODE‬
+C
+CLKFREQ‬
+‭
+
+‭00040‬
+$
+$00044‬
+‭
+
+‭Hub VAR‬
+
+VARBASE‬
+‭
+
+‭+0‬
+
+‭Cog Registers‬
+
+‭R0‬
+P
+PR1‬
+‭
+PR2‬
+‭
+PR3‬
+‭
+PR4‬
+‭
+PR5‬
+‭
+PR6‬
+‭
+PR7‬
+‭
+
+‭1D8‬
+$
+$1D9‬
+‭
+$1DA‬
+‭
+$1DB‬
+‭
+$1DC‬
+‭
+$1DD‬
+‭
+$1DE‬
+‭
+$1DF‬
+‭
+
+‭JMP3‬
+I
+IRET3‬
+‭
+IJMP2‬
+‭
+IRET2‬
+‭
+IJMP1‬
+‭
+IRET1‬
+‭
+
+‭Description‬
+
+‭Useful in‬
+‭Spin2‬
+
+‭Useful in‬
+‭Spin2-PASM‬
+
+‭Useful in‬
+‭PASM-Only‬
+
+‭ es‬
+Y
+‭Yes‬
+
+‭ es‬
+Y
+‭Yes‬
+
+‭ o‬
+N
+‭No‬
+
+‭Maybe‬
+
+‭No‬
+
+‭No‬
+
+‭Spin2 <-> PASM communication‬
+
+‭ es‬
+Y
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+
+‭ es‬
+Y
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+
+‭ o‬
+N
+‭No‬
+‭No‬
+‭No‬
+‭No‬
+‭No‬
+‭No‬
+‭No‬
+
+‭1F0‬
+$
+$1F1‬
+‭
+$1F2‬
+‭
+$1F3‬
+‭
+$1F4‬
+‭
+$1F5‬
+‭
+
+‭Interrupt JMP's and RET's‬
+
+‭ o‬
+N
+‭No‬
+‭No‬
+‭No‬
+‭No‬
+‭No‬
+
+‭ es‬
+Y
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+
+‭ es‬
+Y
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+
+‭A‬
+P
+PB‬
+‭
+PTRA‬
+‭
+PTRB‬
+‭
+
+‭1F6‬
+$
+$1F7‬
+‭
+$1F8‬
+‭
+$1F9‬
+‭
+
+‭Pointer registers‬
+‭ ata pointer passed from COGINIT‬
+D
+‭Code pointer passed from COGINIT‬
+
+‭ o‬
+N
+‭No‬
+‭No‬
+‭No‬
+
+‭ es‬
+Y
+‭Yes‬
+‭Yes‬
+‭Yes‬
+
+‭ es‬
+Y
+‭Yes‬
+‭Yes‬
+‭Yes‬
+
+‭IRA‬
+D
+DIRB‬
+‭
+OUTA‬
+‭
+OUTB‬
+‭
+INA‬
+‭
+INB‬
+‭
+
+‭1FA‬
+$
+$1FB‬
+‭
+$1FC‬
+‭
+$1FD‬
+‭
+$1FE‬
+‭
+$1FF‬
+‭
+
+‭ utput enables for P31..P0‬
+O
+‭Output enables for P63..P32‬
+‭Output states for P31..P0‬
+‭Output states for P63..P32‬
+‭Input states from P31..P0‬
+‭Input states from P63..P32‬
+
+‭ es‬
+Y
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+
+‭ es‬
+Y
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+
+‭ es‬
+Y
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+‭Yes‬
+
+‭ lock mode value‬
+C
+‭Clock frequency value‬
+‭ bject base pointer, @VARBASE is VAR‬
+O
+‭base, used by method-pointer calls‬
+
+‭In Spin2, all variables can be indexed and accessed as bitfields. Additionally, symbolic hub variables can have BYTE/WORD/LONG size overrides:‬
+
+‭Variable Usage‬
+‭Plain‬
+
+‭Example‬
+
+‭Description‬
+
+‭nyVar‬
+A
+HubVar.WORD‬
+‭
+BYTE[address]‬
+‭
+REG[register]‬
+‭
+
+‭ ub or permanent register variable‬
+H
+‭Hub variable with BYTE/WORD/LONG size override‬
+‭Hub BYTE/WORD/LONG by address‬
+‭Register, 'register' may be symbol declared in ORG section‬
+
+‭With Index‬
+
+‭nyVar[index]‬
+A
+HubVar.BYTE[index]‬
+‭
+LONG[address][index]‬
+‭
+REG[register][index]‬
+‭
+
+‭ ub or permanent register variable with index‬
+H
+‭Hub variable with size override and index‬
+‭Hub BYTE/WORD/LONG by address with index‬
+‭Register with index‬
+
+‭With Bitfield‬
+
+‭nyVar.[bitfield]‬
+A
+HubVar.LONG.[bitfield]‬
+‭
+WORD[address].[bitfield]‬
+‭
+REG[register].[bitfield]‬
+‭
+
+‭ ub or permanent register variable with bitfield‬
+H
+‭Hub variable with size override and bitfield‬
+‭Hub BYTE/WORD/LONG by address with bitfield‬
+‭Register with bitfield‬
+
+‭nyVar[index].[bitfield]‬
+A
+HubVar.BYTE[index].[bitfield]‬
+‭
+LONG[address][index].[bitfield]‬
+‭
+REG[register][index].[bitfield]‬
+‭
+
+‭ ub or permanent register variable with index and bitfield‬
+H
+‭Hub variable with size override, index, and bitfield‬
+‭Hub BYTE/WORD/LONG by address with index and bitfield‬
+‭Register with index and bitfield‬
+
+‭With Index and Bitfield‬
+
+‭A bitfield is a 10-bit value which contains a base-bit number in bits 4..0 and an additional-bits number in bits 9..5. Bitfields can be defined in a few different ways:‬
+
+‭Bitfield‬
+
+‭Bit Range‬
+
+‭Details‬
+
+‭Parallax Spin2 Documentation Page‬‭13‬‭of‬‭57‬
+
+.[%00000_00000]‬
+‭
+
+0‬
+‭
+
+‭0 additional bits above the base bit 0, a single-bit bitfield‬
+
+.[%00000_11111]‬
+‭
+
+31‬
+‭
+
+‭0 additional bits above the base bit 31, a single-bit bitfield‬
+
+.[%00010_01111]‬
+‭
+
+17..15‬
+‭
+
+‭2 additional bits above the base bit 15, a three-bit bitfield‬
+
+.[%11110_00000]‬
+‭
+
+30..0‬
+‭
+
+.[%11111_10000]‬
+‭
+
+15..0, 31..16‬
+‭
+
+.[%00001_11111]‬
+‭
+
+0, 31‬
+‭
+
+.[23]‬
+‭
+
+‭30 additional bits above the base bit 0, a 31-bit bitfield‬
+
+‭1 additional bit above the base bit 31, wraps around, a 2-bit bitfield‬
+‭Just the base bit, adds no extra bits‬
+
+23‬
+‭
+
+.[31..20]‬
+‭
+
+‭31 additional bits above the base bit 16, wraps around, a 32-bit bitfield‬
+
+‭'Top..Bottom' syntax allowed within '‬‭
+.[]‬
+‭', wraps if‬‭Top < Bottom‬
+
+31..20‬
+‭
+
+.[5 ADDBITS 7]‬
+‭
+
+12..5‬
+‭
+
+‭ADDBITS can be used to compute the bitfield‬
+
+.[BitfieldCon]‬
+‭
+
+13..9‬
+‭
+
+CON BitfieldCon = 9 ADDBITS 4
+‭
+
+'BitfieldCon useful in PASM, too‬
+
+.[BitfieldVar]‬
+‭
+
+?‬
+‭
+
+BitfieldVar := BaseBit ADDBITS ExtraBits
+‭
+
+'wraps if BaseBit + ExtraBits > 31‬
+
+I‭n addition to bitfields, there are also pinfields, which are used to select a range of I/O pins within the same 32-pin block (P63..P32 or P31..P0). Pinfields are 11-bit values which‬
+‭contain a base-pin number in bits 5..0 and an additional-pins number in bits 10..6. Pinfields are used by instructions which interface to pins.‬
+
+‭Pinfield‬
+
+‭Pin Range‬
+
+‭Details‬
+
+PINLOW(%00000_000000)‬
+‭
+
+0‬
+‭
+
+‭0 additional pins above the base pin 0, a single-pin pinfield‬
+
+PINLOW(%00000_111111)‬
+‭
+
+63‬
+‭
+
+‭0 additional pins above the base pin 63, a single-pin pinfield‬
+
+PINLOW(%00011_100000)‬
+‭
+
+35..32‬
+‭
+
+PINLOW(%11111_001000)‬
+‭
+
+7..0, 31..8‬
+‭
+
+PINLOW(19)‬
+‭
+
+‭3 additional pins above the base pin 32, a four-pin pinfield‬
+‭31 additional pins above the base pin 8, wraps around, a 32-pin pinfield‬
+‭Just the base pin, adds no extra pins‬
+
+19‬
+‭
+
+PINLOW(49..40)‬
+‭
+
+49..40‬
+‭
+
+‭'Top..Bottom' syntax allowed within '‬‭
+.[]‬
+‭', wraps if‬‭Top < Bottom‬
+
+PINLOW(11 ADDPINS 4)‬
+‭
+
+15..11‬
+‭
+
+‭ADDPINS can be used to compute the pinfield‬
+
+PINLOW(PinfieldCon)‬
+‭
+
+53..50‬
+‭
+
+CON PinfieldCon = 50 ADDPINS 3
+‭
+
+'PinfieldCon useful in PASM, too‬
+
+PINLOW(PinfieldVar)‬
+‭
+
+?‬
+‭
+
+PinfieldVar := BasePin ADDPINS ExtraPins
+‭
+
+'wraps if BasePin + ExtraPins > 31‬
+
+‭Expressions‬
+‭‬
+●
+‭●‬
+‭●‬
+
+‭ un-time expressions can incorporate constants, variables, and methods' return values‬
+R
+‭Compile-time expressions can use only constants.‬
+‭All expressions can use operators.‬
+
+‭Here are some examples of expressions:‬
+
+‭Expression‬
+
+‭Details‬
+
+BYTE[i++]‬
+‭
+
+‭Byte pointed to by 'i', post-increment 'i'‬
+
+(digit := value / place // 10) OR place == 1‬
+‭
+
+‭Boolean with buried 'digit' assignment‬
+
+place /= 10‬
+‭
+
+‭Divide 'place' by 10‬
+
+"0" + digit‬
+‭
+
+‭Get 'digit' character‬
+
+PINREAD(17..12)‬
+‭
+
+‭Read pins 17..12‬
+
+‭Operators‬
+‭Below is a table of all the operators available for use in Spin2. Compile-time expressions can use the unary, binary, ternary, and float operators.‬
+
+‭Var-Prefix‬
+‭ perators‬
+O
+
+‭Term‬
+‭(PUB/PRI only)‬
+
+‭Term‬
+‭Priority‬
+
+‭Assign‬
+‭(PUB/PRI only)‬
+
+‭Assign‬
+‭ riority‬
+P
+
+++ (pre)‬
+‭
+
+++var‬
+‭
+
+‭1‬
+
+++var‬
+‭
+
+‭1‬
+
+‭Pre-increment var, return var‬
+
+-- (pre)‬
+‭
+
+--var‬
+‭
+
+‭1‬
+
+--var‬
+‭
+
+‭1‬
+
+‭Pre-decrement var, return var‬
+
+?? (pre)‬
+‭
+
+??var‬
+‭
+
+‭1‬
+
+??var‬
+‭
+
+‭1‬
+
+‭Iterate long var per XORO32, return pseudo-random value‬
+
+‭Term‬
+‭(PUB/PRI only)‬
+
+‭Term‬
+‭Priority‬
+
+‭Assign‬
+‭(PUB/PRI only)‬
+
+‭Assign‬
+‭ riority‬
+P
+
+(post) ++‬
+‭
+
+var++‬
+‭
+
+‭1‬
+
+var++‬
+‭
+
+‭1‬
+
+‭Return var, post-increment var‬
+
+(post) --‬
+‭
+
+var--‬
+‭
+
+‭1‬
+
+var--‬
+‭
+
+‭1‬
+
+‭Return var, post-decrement var‬
+
+(post) !!‬
+‭
+
+var!!‬
+‭
+
+‭1‬
+
+var!!‬
+‭
+
+‭1‬
+
+‭Return var, post-logical-NOT var (0 → -1, non-0 → 0)‬
+
+(post) !‬
+‭
+
+var!‬
+‭
+
+‭1‬
+
+var!‬
+‭
+
+‭1‬
+
+‭Return var, post-bitwise-NOT var‬
+
+(post) \‬
+‭
+
+var\x‬
+‭
+
+‭1‬
+
+var\x‬
+‭
+
+‭1‬
+
+‭Return var, post-assign x to var‬
+
+‭ ar-Postfix‬
+V
+‭Operators‬
+
+‭Description‬
+
+‭Description‬
+
+‭Parallax Spin2 Documentation Page‬‭14‬‭of‬‭57‬
+
+var~‬
+‭
+
+‭1‬
+
+var~‬
+‭
+
+‭1‬
+
+‭Return var, post-clear all bits in var‬
+
+var~~‬
+‭
+
+‭1‬
+
+var~~‬
+‭
+
+‭1‬
+
+‭Return var, post-set all bits in var‬
+
+‭Address‬
+‭Operators‬
+
+‭Term‬
+‭(PUB/PRI only)‬
+
+‭Term‬
+‭Priority‬
+
+^@‬
+‭
+
+^@anyvar‬
+‭
+
+‭1‬
+
+‭Field pointer to any hub or register variable, including bitfield‬
+
+@‬
+‭
+
+@hubvar‬
+‭
+
+‭1‬
+
+‭Hub address of VAR/PUB/PRI/DAT variable‬
+
+@‬
+‭
+
+@method‬
+‭
+
+‭1‬
+
+‭Pointer to method, may be @object{[i]}.method‬
+
+@@‬
+‭
+
+@@x‬
+‭
+
+‭1‬
+
+‭Hub address of this object + x, 'DAT x long @dat_symbol'‬
+
+#‬
+‭
+
+#reg_symbol‬
+‭
+
+‭1‬
+
+‭Register address of cog/LUT symbol‬
+
+‭Unary‬
+‭Operators‬
+
+‭Term‬
+‭(All blocks)‬
+
+‭Term‬
+‭Priority‬
+
+‭Assign‬
+‭(PUB/PRI only)‬
+
+‭Assign‬
+‭ riority‬
+P
+
+!!, NOT‬
+‭
+
+!!x‬
+‭
+
+‭12‬
+
+!!= var‬
+‭
+
+‭1‬
+
+‭Logical NOT (0 → -1, non-0 → 0)‬
+
+!‬
+‭
+
+!x‬
+‭
+
+‭2‬
+
+!= var‬
+‭
+
+‭1‬
+
+‭Bitwise NOT (1's complement)‬
+
+-‬
+‭
+
+-x‬
+‭
+
+‭2‬
+
+-= var‬
+‭
+
+‭1‬
+
+‭Negate (2's complement)‬
+
+-.‬
+‭
+
+-.x‬
+‭
+
+‭2‬
+
+ABS‬
+‭
+
+ABS x‬
+‭
+
+‭2‬
+
+FABS‬
+‭
+
+FABS x‬
+‭
+
+‭2‬
+
+ENCOD‬
+‭
+
+ENCOD x‬
+‭
+
+‭2‬
+
+ENCOD= var‬
+‭
+
+‭1‬
+
+‭Encode MSB, 0..31‬
+
+DECOD‬
+‭
+
+DECOD x‬
+‭
+
+‭2‬
+
+DECOD= var‬
+‭
+
+‭1‬
+
+‭Decode, 1 << (x & $1F)‬
+
+BMASK‬
+‭
+
+BMASK x‬
+‭
+
+‭2‬
+
+BMASK= var‬
+‭
+
+‭1‬
+
+‭Bitmask, (2 << (x & $1F)) - 1‬
+
+ONES‬
+‭
+
+ONES x‬
+‭
+
+‭2‬
+
+ONES= var‬
+‭
+
+‭1‬
+
+‭Sum all '1' bits, 0..32‬
+
+SQRT‬
+‭
+
+SQRT x‬
+‭
+
+‭2‬
+
+SQRT= var‬
+‭
+
+‭1‬
+
+‭Square root of unsigned value‬
+
+FSQRT‬
+‭
+
+FSQRT x‬
+‭
+
+‭2‬
+
+QLOG‬
+‭
+
+QLOG x‬
+‭
+
+‭2‬
+
+QLOG= var‬
+‭
+
+‭1‬
+
+‭Unsigned value to logarithm {5'whole, 27'fraction}‬
+
+QEXP‬
+‭
+
+QEXP x‬
+‭
+
+‭2‬
+
+QEXP= var‬
+‭
+
+‭1‬
+
+‭Logarithm to unsigned value‬
+
+‭Binary‬
+‭Operators‬
+
+‭Term‬
+‭(All blocks)‬
+
+‭Term‬
+‭Priority‬
+
+‭Assign‬
+‭(PUB/PRI only)‬
+
+‭Assign‬
+‭ riority‬
+P
+
+>>‬
+‭
+
+x >> y‬
+‭
+
+‭3‬
+
+var >>= y‬
+‭
+
+‭17‬
+
+‭Shift x right by y bits, insert 0's‬
+
+<<‬
+‭
+
+x << y‬
+‭
+
+‭3‬
+
+var <<= y‬
+‭
+
+‭17‬
+
+‭Shift x left by y bits, insert 0's‬
+
+SAR‬
+‭
+
+x SAR y‬
+‭
+
+‭3‬
+
+var SAR= y‬
+‭
+
+‭17‬
+
+‭Shift x right by y bits, insert MSB's‬
+
+ROR‬
+‭
+
+x ROR y‬
+‭
+
+‭3‬
+
+var ROR= y‬
+‭
+
+‭17‬
+
+‭Rotate x right by y bits‬
+
+ROL‬
+‭
+
+x ROL y‬
+‭
+
+‭3‬
+
+var ROL= y‬
+‭
+
+‭17‬
+
+‭Rotate x left by y bits‬
+
+REV‬
+‭
+
+x REV y‬
+‭
+
+‭3‬
+
+var REV= y‬
+‭
+
+‭17‬
+
+‭Reverse order of bits 0..y of x and zero-extend‬
+
+ZEROX‬
+‭
+
+x ZEROX y‬
+‭
+
+‭3‬
+
+var ZEROX= y‬
+‭
+
+‭17‬
+
+‭Zero-extend above bit y‬
+
+SIGNX‬
+‭
+
+x SIGNX y‬
+‭
+
+‭3‬
+
+var SIGNX= y‬
+‭
+
+‭17‬
+
+‭Sign-extend from bit y‬
+
+&‬
+‭
+
+x & y‬
+‭
+
+‭4‬
+
+var &= y‬
+‭
+
+‭17‬
+
+‭Bitwise AND‬
+
+^‬
+‭
+
+x ^ y‬
+‭
+
+‭5‬
+
+var ^= y‬
+‭
+
+‭17‬
+
+‭Bitwise XOR‬
+
+|‬
+‭
+
+x | y‬
+‭
+
+‭6‬
+
+var |= y‬
+‭
+
+‭17‬
+
+‭Bitwise OR‬
+
+*‬
+‭
+
+x * y‬
+‭
+
+‭7‬
+
+var *= y‬
+‭
+
+‭17‬
+
+‭Signed multiply‬
+
+*.‬
+‭
+
+x *. y‬
+‭
+
+‭7‬
+
+/‬
+‭
+
+x / y‬
+‭
+
+‭7‬
+
+/.‬
+‭
+
+x /. y‬
+‭
+
+‭7‬
+
++/‬
+‭
+
+x +/ y‬
+‭
+
+‭7‬
+
+var +/= y‬
+‭
+
+‭17‬
+
+‭Unsigned divide, return quotient‬
+
+//‬
+‭
+
+x // 7‬
+‭
+
+‭7‬
+
+var //= y‬
+‭
+
+‭17‬
+
+‭Signed divide, return remainder‬
+
++//‬
+‭
+
+x +// y‬
+‭
+
+‭7‬
+
+var +//= y‬
+‭
+
+‭17‬
+
+‭Unsigned divide, return remainder‬
+
+SCA‬
+‭
+
+x SCA y‬
+‭
+
+‭7‬
+
+var SCA= y‬
+‭
+
+‭17‬
+
+‭Unsigned scale, (x * y) >> 32‬
+
+SCAS‬
+‭
+
+x SCAS y‬
+‭
+
+‭7‬
+
+var SCAS= y‬
+‭
+
+‭17‬
+
+‭Signed scale, (x * y) >> 30‬
+
+FRAC‬
+‭
+
+x FRAC y‬
+‭
+
+‭7‬
+
+var FRAC= y‬
+‭
+
+‭17‬
+
+‭Unsigned fraction, (x << 32) / y‬
+
++‬
+‭
+
+x + y‬
+‭
+
+‭8‬
+
+VAR += y‬
+‭
+
+‭17‬
+
+‭Add‬
+
++.‬
+‭
+
+x +. y‬
+‭
+
+‭8‬
+
+-‬
+‭
+
+x - y‬
+‭
+
+‭8‬
+
+-.‬
+‭
+
+x -. y‬
+‭
+
+‭8‬
+
+#>‬
+‭
+
+x #> y‬
+‭
+
+‭9‬
+
+var #>= y‬
+‭
+
+‭17‬
+
+‭Force x => y, signed‬
+
+‭CON only *‬
+
+<#‬
+‭
+
+x <# y‬
+‭
+
+‭9‬
+
+var <#= y‬
+‭
+
+‭17‬
+
+‭Force x <= y, signed‬
+
+‭CON only *‬
+
+ADDBITS‬
+‭
+
+x ADDBITS y‬
+‭
+
+‭10‬
+
+var ADDBITS= y‬
+‭
+
+‭17‬
+
+‭Make bitfield, (x & $1F) | (y & $1F) << 5‬
+
+ADDPINS‬
+‭
+
+x ADDPINS y‬
+‭
+
+‭10‬
+
+var ADDPINS= y‬
+‭
+
+‭17‬
+
+‭Make pinfield, (x & $3F) | (y & $1F) << 6‬
+
+<‬
+‭
+
+x < y‬
+‭
+
+‭11‬
+
+‭Signed less than (returns 0 or -1)‬
+
++<‬
+‭
+
+x +< y‬
+‭
+
+‭11‬
+
+‭Unsigned less than (returns 0 or -1)‬
+
+<.‬
+‭
+
+x <. y‬
+‭
+
+‭11‬
+
+‭Floating-point less than (returns 0 or -1)‬
+
+<=‬
+‭
+
+x <= y‬
+‭
+
+‭11‬
+
+‭Signed less than or equal (returns 0 or -1)‬
+
++<=‬
+‭
+
+x +<= y‬
+‭
+
+‭11‬
+
+‭Unsigned less than or equal (returns 0 or -1)‬
+
+<=.‬
+‭
+
+x <=. y‬
+‭
+
+‭11‬
+
+‭Floating-point less than or equal (returns 0 or -1)‬
+
+==‬
+‭
+
+x == y‬
+‭
+
+‭11‬
+
+‭Equal (returns 0 or -1)‬
+
+==.‬
+‭
+
+x ==. y‬
+‭
+
+‭11‬
+
+‭Floating-point equal (returns 0 or -1)‬
+
+<>‬
+‭
+
+x <> y‬
+‭
+
+‭11‬
+
+‭Not equal (returns 0 or -1)‬
+
+<>.‬
+‭
+
+x <>. y‬
+‭
+
+‭11‬
+
+‭Floating-point not equal (returns 0 or -1)‬
+
+>=‬
+‭
+
+x >= y‬
+‭
+
+‭11‬
+
+‭Signed greater than or equal (returns 0 or -1)‬
+
+(post) ~‬
+‭
+(post) ~~‬
+‭
+
+‭Description‬
+
+‭Description‬
+
+‭Floating-point negate (toggles MSB)‬
+ABS= var‬
+‭
+
+‭1‬
+
+‭Absolute value‬
+‭Floating-point absolute value (clears MSB)‬
+
+‭Floating-Point‬
+‭Operator‬
+
+‭CON only *‬
+‭All blocks‬
+‭CON only *‬
+‭All blocks‬
+
+‭Floating-point square root‬
+
+‭Description‬
+
+‭Floating-point multiply‬
+var /= y‬
+‭
+
+‭17‬
+
+‭Signed divide, return quotient‬
+‭Floating-point divide‬
+
+‭Floating-point add‬
+var -= y‬
+‭
+
+‭17‬
+
+‭Subtract‬
+‭Floating-point subtract‬
+
+‭Parallax Spin2 Documentation Page‬‭15‬‭of‬‭57‬
+
+‭Floating-Point‬
+‭Operator‬
+
+‭CON only *‬
+‭All blocks‬
+‭CON only *‬
+‭All blocks‬
+
+‭CON only *‬
+‭All blocks‬
+‭CON only *‬
+‭All blocks‬
+
+‭CON only **‬
+
+‭All blocks‬
+‭CON only **‬
+
+‭All blocks‬
+‭CON only **‬
+‭All blocks‬
+‭CON only **‬
+‭All blocks‬
+‭CON only **‬
+
++>=‬
+‭
+
+x +>= y‬
+‭
+
+‭11‬
+
+‭Unsigned greater than or equal (returns 0 or -1)‬
+
+>=.‬
+‭
+
+x >=. y‬
+‭
+
+‭11‬
+
+‭Floating-point greater than or equal (returns 0 or -1)‬
+
+>‬
+‭
+
+x > y‬
+‭
+
+‭11‬
+
+‭Signed greater than (returns 0 or -1)‬
+
++>‬
+‭
+
+x +> y‬
+‭
+
+‭11‬
+
+‭Unsigned greater than (returns 0 or -1)‬
+
+>.‬
+‭
+
+x >. y‬
+‭
+
+‭11‬
+
+‭Floating-point greater than (returns 0 or -1)‬
+
+<=>‬
+‭
+
+x <=> y‬
+‭
+
+‭11‬
+
+‭Signed comparison (<,=,> returns -1,0,1)‬
+
+&&, AND‬
+‭
+
+x && y‬
+‭
+
+‭13‬
+
+var &&= y‬
+‭
+
+‭17‬
+
+‭Logical AND (x <> 0 AND y <> 0, returns 0 or -1)‬
+
+^^, XOR‬
+‭
+
+x ^^ y‬
+‭
+
+‭14‬
+
+var ^^= y‬
+‭
+
+‭17‬
+
+‭Logical XOR (x <> 0 XOR y <> 0, returns 0 or -1)‬
+
+||, OR‬
+‭
+
+x || y‬
+‭
+
+‭15‬
+
+var ||= y‬
+‭
+
+‭17‬
+
+‭Logical OR (x <> 0 OR y <> 0, returns 0 or -1)‬
+
+‭Ternary‬
+‭Operator‬
+
+‭Term‬
+‭(All blocks)‬
+
+‭ riority‬
+P
+‭(term)‬
+
+? :‬
+‭
+
+x ? y : z‬
+‭
+
+‭16‬
+
+‭All blocks‬
+‭CON only **‬
+
+‭All blocks‬
+‭CON only ***‬
+
+‭Description‬
+‭If x <> 0 then return y, else return z‬
+
+‭Assign‬
+‭Operator‬
+
+‭Assign‬
+‭(PUB/PRI only)‬
+
+‭Priority‬
+
+:=‬
+‭
+
+var := x‬
+‭
+v1,v2 := x,y‬
+‭
+
+‭17‬
+
+‭Equate‬
+‭Operator‬
+
+‭Assign‬
+‭(CON only)‬
+
+‭Priority‬
+
+=‬
+‭
+
+symbol = x‬
+‭
+
+‭17‬
+
+‭Description‬
+‭ et var to x‬
+S
+‭Set v1 to x, set v2 to y, etc. ( '_' on left = ignore)‬
+‭Description‬
+‭Set symbol to x in CON block‬
+
+‭Float‬
+‭Conversions‬
+
+‭Term‬
+‭(All blocks)‬
+
+‭Description‬
+
+‭Floating-Point‬
+‭Operator‬
+
+FLOAT()‬
+‭
+
+FLOAT(x)‬
+‭
+
+‭Convert integer x to float‬
+
+‭All blocks‬
+
+ROUND()‬
+‭
+
+ROUND(x)‬
+‭
+
+‭Convert float x to rounded integer‬
+
+‭All blocks‬
+
+TRUNC()‬
+‭
+
+TRUNC(x)‬
+‭
+
+‭Convert float x to truncated integer‬
+
+‭All blocks‬
+
+*‭ ,**,***‬‭In CON blocks, this operator will take on‬‭floating-point functionality when applied to floating-point constants and symbols.‬
+‭** In CON blocks, relational operators (<, <=, ==, <>, >=, >) will return 1.0 or 0.0, instead of integer -1 or 0, when applied to floating-point constants and symbols.‬
+‭*** In CON blocks, the <=> operator will return -1.0, 0.0, or 1.0, instead of integer -1, 0, or 1, when applied to floating-point constants and symbols.‬
+
+‭Spin2 Version Selection‬
+‭To avoid namespace conflicts between future Spin2 keyword additions and user symbols, a means of gating new keywords was implemented starting in v43.‬
+‭ he compiler searches for a "{Spin2_v##}" comment before any code is expressed in the .spin2 file. ## is a two-digit number which selects the version of Spin2 for which its‬
+T
+‭and all subsequent versions' keywords will be enabled. If no {Spin2_v##} is found, the compiler will default to enabling all keywords used in v41.‬
+‭For example, to select v43, which would enable use of the LSTRING() method, you could place this comment at the top of your file:‬
+{Spin2_v43}‬
+‭
+‭ ersion numbers below 43 will be ignored, causing v41 to be used. If a version number found in code exceeds the current compiler's version, it will generate an error. Not every‬
+V
+‭future version of Spin2 will constitute a meaningful version number for version selection, since it might not contain any new keywords which need gating, but it might be helpful‬
+‭to the person working with the code to know what the author's expectation might have been regarding other aspects of the compiler.‬
+
+‭Built-In Methods‬
+‭Hub Methods‬
+
+‭Details‬
+
+HUBSET(Value)‬
+‭
+
+‭Execute HUBSET instruction using Value.‬
+
+CLKSET(NewCLKMODE, NewCLKFREQ)‬
+‭
+
+‭Safely establish new clock settings and update CLKMODE and CLKFREQ.‬
+
+COGSPIN(CogNum, Method({Pars}), StkAddr)‬
+‭
+
+‭Start Spin2 method in a cog, returns cog's ID if used as an expression element, -1 = no cog free.‬
+
+COGINIT(CogNum, PASMaddr, PTRAvalue)‬
+‭
+
+‭Start PASM code in a cog, returns cog's ID if used as an expression element, -1 = no cog free.‬
+
+COGSTOP(CogNum)‬
+‭
+
+‭Stop cog CogNum.‬
+
+COGID() : CogNum‬
+‭
+
+‭Get this cog's ID.‬
+
+COGCHK(CogNum) : Running‬
+‭
+
+‭Check if cog CogNum is running, returns -1 if running or 0 if not.‬
+
+LOCKNEW() : LockNum‬
+‭
+
+‭Check out a new LOCK from inventory, LockNum = 0..15 if successful or < 0 if no LOCK available.‬
+
+LOCKRET(LockNum)‬
+‭
+
+‭Return a certain LOCK to inventory.‬
+
+LOCKTRY(LockNum) : LockState‬
+‭
+
+‭Try to capture a certain LOCK, LockState = -1 if successful or 0 if another cog has captured the LOCK.‬
+
+LOCKREL(LockNum)‬
+‭
+
+‭Release a certain LOCK.‬
+
+LOCKCHK(LockNum) : LockState‬
+‭
+
+‭Check a certain LOCK's state, LockState[31] = captured, LockState[3:0] = current or last owner cog.‬
+
+COGATN(CogMask)‬
+‭
+
+‭Strobe ATN input(s) of cog(s) according to 16-bit CogMask.‬
+
+POLLATN() : AtnFlag‬
+‭
+
+‭Check if this cog has received an ATN strobe, AtnFlag = -1 if ATN strobed or 0 if not strobed.‬
+
+WAITATN()‬
+‭
+
+‭Wait for this cog to receive an ATN strobe.‬
+
+‭Pin Methods‬
+PINW | PINWRITE(PinField, Data)‬
+‭
+
+‭Details‬
+‭Drive PinField pin(s) with Data.‬
+
+‭Parallax Spin2 Documentation Page‬‭16‬‭of‬‭57‬
+
+PINL | PINLOW(PinField)‬
+‭
+
+‭Drive PinField pin(s) low.‬
+
+PINH | PINHIGH(PinField)‬
+‭
+
+‭Drive PinField pin(s) high.‬
+
+PINT | PINTOGGLE(PinField)‬
+‭
+
+‭Drive and toggle PinField pin(s).‬
+
+PINF | PINFLOAT(PinField)‬
+‭
+
+‭Float PinField pin(s).‬
+
+PINR | PINREAD(PinField) : PinStates‬
+‭
+
+‭Read PinField pin(s).‬
+
+PINSTART(PinField, Mode, Xval, Yval)‬
+‭
+
+‭Start PinField smart pin(s): DIR=0, then WRPIN=Mode, WXPIN=Xval, WYPIN=Yval, then DIR=1.‬
+
+PINCLEAR(PinField)‬
+‭
+
+‭Clear PinField smart pin(s): DIR=0, then WRPIN=0.‬
+
+WRPIN(PinField, Data)‬
+‭
+
+‭Write 'mode' register(s) of PinField smart pin(s) with Data.‬
+
+WXPIN(PinField, Data)‬
+‭
+
+‭Write 'X' register(s) of PinField smart pin(s) with Data.‬
+
+WYPIN(PinField, Data)‬
+‭
+
+‭Write 'Y' register(s) of PinField smart pin(s) with Data.‬
+
+AKPIN(PinField)‬
+‭
+
+‭Acknowledge PinField smart pin(s).‬
+
+RDPIN(Pin) : Zval‬
+‭
+
+‭Read Pin smart pin and acknowledge, Zval[31] = C flag from RDPIN, other bits are RDPIN data.‬
+
+RQPIN(Pin) : Zval‬
+‭
+
+‭Read Pin smart pin without acknowledge, Zval[31] = C flag from RQPIN, other bits are RQPIN data.‬
+
+‭Timing Methods‬
+
+‭Details‬
+
+GETCT() : Count‬
+‭
+
+‭Get 32-bit system counter.‬
+
+POLLCT(Tick) : Past‬
+‭
+
+‭Check if system counter has gone past 'Tick', returns -1 if past or 0 if not past.‬
+
+WAITCT(Tick)‬
+‭
+
+‭Wait for system counter to get past 'Tick'.‬
+
+WAITUS(Microseconds)‬
+‭
+
+‭Wait Microseconds, uses CLKFREQ, duration must not exceed $8000_0000 clocks.‬
+
+WAITMS(Milliseconds)‬
+‭
+
+‭Wait Milliseconds, uses CLKFREQ, duration must not exceed $8000_0000 clocks.‬
+
+GETSEC() : Seconds‬
+‭
+
+‭Get seconds since booting, uses 64-bit system counter and CLKFREQ, rolls over every 136 years.‬
+
+GETMS() : Milliseconds‬
+‭
+
+‭Get milliseconds since booting, uses 64-bit system counter and CLKFREQ, rolls over every 49.7 days.‬
+
+‭PASM interfacing‬
+
+‭Details‬
+
+CALL(RegisterOrHubAddr)‬
+‭
+
+‭CALL PASM code at Addr, PASM code should avoid registers $120..$1D7 and LUT $010..$1FF.‬
+
+REGEXEC(HubAddr)‬
+‭
+
+‭Load a self-defined chunk of PASM code at HubAddr into registers and CALL it. See REGEXEC description.‬
+
+REGLOAD(HubAddr)‬
+‭
+
+‭Load a self-defined chunk of PASM code or data at HubAddr into registers. See REGLOAD description.‬
+
+‭Math Methods‬
+
+‭Details‬
+
+ROTXY(x, y, angle32bit) : rotx, roty‬
+‭
+
+‭Rotate (x,y) by angle32bit and return rotated (x,y).‬
+
+POLXY(length, angle32bit) : x, y‬
+‭
+
+‭Convert (length,angle32bit) to (x,y).‬
+
+XYPOL(x, y) : length, angle32bit‬
+‭
+
+‭Convert (x,y) to (length,angle32bit).‬
+
+QSIN(length, step, stepsInCircle) : y‬
+‭
+
+‭ otate (length,0) by (step / stepsInCircle) * 2Pi and return y. Use 0 for stepsInCircle = $1_0000_0000.‬
+R
+‭stepsInCircle is unsigned.‬
+
+QCOS(length, step, stepsInCircle) : x‬
+‭
+
+‭ otate (length,0) by (step / stepsInCircle) * 2Pi and return x. Use 0 for stepsInCircle = $1_0000_0000.‬
+R
+‭stepsInCircle is unsigned.‬
+
+MULDIV64(mult1,mult2,divisor) : quotient‬
+‭
+
+‭Divide the 64-bit product of 'mult1' and 'mult2' by 'divisor', return quotient (unsigned operation).‬
+
+GETRND() : rnd‬
+‭
+
+‭Get random long (from xoroshiro128** PRNG, seeded on boot with thermal noise from ADC).‬
+
+NAN(float) : NotANumber‬
+‭
+
+‭Determine if a floating-point value is not a number, return true (-1) or false (0).‬
+
+‭Memory Methods‬
+
+‭Details‬
+
+GETREGS(HubAddr, CogAddr, Count)‬
+‭
+
+‭Move Count registers at CogAddr to longs at HubAddr.‬
+
+SETREGS(HubAddr, CogAddr, Count)‬
+‭
+
+‭Move Count longs at HubAddr to registers at CogAddr.‬
+
+BYTEFILL(Destination, Value, Count)‬
+‭
+
+‭Fill Count bytes starting at Destination with Value.‬
+
+WORDFILL(Destination, Value, Count)‬
+‭
+
+‭Fill Count words starting at Destination with Value.‬
+
+LONGFILL(Destination, Value, Count)‬
+‭
+
+‭Fill Count longs starting at Destination with Value.‬
+
+BYTEMOVE(Destination, Source, Count)‬
+‭
+
+‭Move Count bytes from Source to Destination.‬
+
+WORDMOVE(Destination, Source, Count)‬
+‭
+
+‭Move Count words from Source to Destination.‬
+
+LONGMOVE(Destination, Source, Count)‬
+‭
+
+‭Move Count longs from Source to Destination.‬
+
+BYTESWAP(AddrA, AddrB, Count)‬
+‭
+
+‭Swap Count bytes of data starting at AddrA and AddrB.‬
+
+WORDSWAP(AddrA, AddrB, Count)‬
+‭
+
+‭Swap Count words of data starting at AddrA and AddrB.‬
+
+LONGSWAP(AddrA, AddrB, Count)‬
+‭
+
+‭Swap Count longs of data starting at AddrA and AddrB.‬
+
+BYTECOMP(AddrA, AddrB, Count) : Match‬
+‭
+
+‭Compare Count bytes of data starting at AddrA and AddrB, return -1 if match or 0 if mismatch.‬
+
+‭Parallax Spin2 Documentation Page‬‭17‬‭of‬‭57‬
+
+WORDCOMP(AddrA, AddrB, Count) : Match‬
+‭
+
+‭Compare Count words of data starting at AddrA and AddrB, return -1 if match or 0 if mismatch.‬
+
+LONGCOMP(AddrA, AddrB, Count) : Match‬
+‭
+
+‭Compare Count longs of data starting at AddrA and AddrB, return -1 if match or 0 if mismatch.‬
+
+SIZEOF(Structure) : ByteCount‬
+‭
+
+‭ et the size of a Structure in bytes. Structure can be a structure variable, a structure pointer variable, or a‬
+G
+‭STRUCT name.‬
+
+‭String Methods‬
+
+‭Details‬
+
+STRSIZE(Addr) : Size‬
+‭
+
+‭Count bytes in zero-terminated string at Addr and return string size, not including the zero.‬
+
+STRCOMP(AddrA, AddrB) : Match‬
+‭
+
+‭Compare zero-terminated strings at AddrA and AddrB, return -1 if match or 0 if mismatch.‬
+
+STRCOPY(Destination, Source, Max)‬
+‭
+
+‭ opy a zero-terminated string of up to Max characters from Source to Destination. The copied string will‬
+C
+‭occupy up to Max+1 bytes, including the zero terminator.‬
+
+@"Text" : StringAddress‬
+‭
+
+‭Compose a zero-terminated string from text within quotes, return address of string.‬
+
+STRING("Text",13) : StringAddress‬
+‭
+
+‭Compose a zero-terminated string (quoted characters and values 1..255), return address of string.‬
+
+LSTRING("Hello",0,"Terve",0)‬
+‭
+
+‭Compose a length-headed string (quoted characters and values 0..255), return address of string.‬
+
+BYTE($80,$09,$77,WORD $1234,LONG -1)‬
+‭
+
+‭Compose a string of bytes, return address of string. WORD/LONG size overrides allowed.‬
+
+WORD(1_000,10_000,50_000,LONG $12345678)‬
+‭
+
+‭Compose a string of words, return address of string. BYTE/LONG size overrides allowed.‬
+
+LONG(1e-6,1e-3,1.0,1e3,1e6,-50,BYTE $FF)‬
+‭
+
+‭Compose a string of longs, return address of string. BYTE/WORD size overrides allowed.‬
+
+GETCRC(BytePtr, Poly, Count) : CRC‬
+‭
+
+‭Compute a CRC of Count bytes starting at BytePtr using a custom polynomial of up to 32 bits.‬
+
+‭Index
+
+↔️ Value Methods‬
+
+‭Details‬
+
+LOOKUP(Index: v1, v2..v3, etc) : Value‬
+‭
+
+‭Lookup value (values and ranges allowed) using 1-based index, return value (0 if index out of range).‬
+
+LOOKUPZ(Index: v1, v2..v3, etc) : Value‬
+‭
+
+‭Lookup value (values and ranges allowed) using 0-based index, return value (0 if index out of range).‬
+
+LOOKDOWN(Value: v1, v2..v3, etc) : Index‬
+‭
+
+‭Determine 1-based index of matching value (values and ranges allowed), return index (0 if no match).‬
+
+LOOKDOWNZ(Value: v1, v2..v3, etc) : Index‬
+‭
+
+‭Determine 0-based index of matching value (values and ranges allowed), return index (0 if no match).‬
+
+‭USING METHODS‬
+‭Methods that return single results can be used as terms in expressions:‬
+x := GETRND() +// 100‬
+‭
+
+'Get a random number between 0 and 99‬
+‭
+
+BYTEMOVE(ToStr, FromStr, STRSIZE(FromStr) + 1)‬
+‭
+‭Methods which return multiple results (like POLXY) can be used to supply multiple parameters to other methods:‬
+x,y := SumPoints(POLXY(rho1,theta1), POLXY(rho2,theta2))‬
+‭
+…where…‬
+‭
+PRI SumPoints(x1, y1, x2, y2) : x, y‬
+‭
+RETURN x1+x2, y1+y2‬
+‭
+‭Multiple method results can be assigned to variables or ignored by using an underscore in lieu of a variable name::‬
+‭,y := ROTXY(xin,yin,theta)‬
+x
+_,y := ROTXY(xin,yin,theta)‬
+‭
+x,_ := ROTXY(xin,yin,theta)‬
+‭
+
+‭use both the x and y results‬
+'
+'use only the y result‬
+‭
+'use only the x result‬
+‭
+
+‭Assignments are very flexible. Assume these structures each have 5 longs in them:‬
+DataStruct1, DataStruct2 := 5,4,1,7,3,8,2,0,6,9
+‭
+_(DataStruct1), DataStruct2 := 5,4,1,7,3,8,2,0,6,9
+‭
+_(5), DataStruct2 := 5,4,1,7,3,8,2,0,6,9
+‭
+
+'load DataStruct1 and DataStruct2‬
+'only load DataStruct2‬
+'only load DataStruct2‬
+
+‭ o ignore multiple values from the right-hand side of an assignment, you can use '_(?)' syntax on the left-hand side, where '?' is a constant, a STRUCT name, or a structure‬
+T
+‭variable/pointer.‬
+‭ ser-defined methods which return one or more results can also be used as instructions, where the return values are ignored. However, built-in methods such as STRSIZE,‬
+U
+‭which return results, can only be used as expression terms.‬
+
+‭ABORT‬
+‭ pin2 has an "abort" mechanism for instantly returning, from any depth of nested method calls, back to a base caller which used '\' before the method name. A single return‬
+S
+‭value can be conveyed from the abort point back to the base caller:‬
+PRI Sub1() : Error
+‭
+Error := \Sub2()
+‭
+\Sub2()
+‭
+
+'Sub1 calls Sub2 with an ABORT trap‬
+'\ means call method and trap any ABORT‬
+'in this case, the ABORT value is ignored‬
+
+PRI Sub2()
+‭
+Sub3()
+‭
+
+'Sub2 calls Sub3‬
+'Sub3 never returns here due to the ABORT‬
+
+‭Parallax Spin2 Documentation Page‬‭18‬‭of‬‭57‬
+
+PINHIGH(0)
+‭
+PRI Sub3()
+‭
+ABORT ErrorCode
+‭
+PINLOW(0)
+‭
+
+'PINHIGH never executes‬
+'Sub3 ABORTs, returning to Sub1 with ErrorCode‬
+'ABORT and return ErrorCode‬
+'PINLOW never executes‬
+
+‭ egardless of how many return values a particular method may have, when that method is called with a preceding "\", there will be only one return value, which may be‬
+R
+‭ignored.‬
+‭If no value is specified after ABORT, then zero will be returned.‬
+‭If a method is called with a preceding "\", but no ABORT occurs, then zero will be returned.‬
+‭If an ABORT executes without a "\" trap somewhere in the call chain, the cog returns past the top-level method and executes COGSTOP(COGID), shutting itself down.‬
+‭ he abort mechanism is intended as a means to return from a deeply nested subroutine where some error situation has developed, but it can be used for any purpose.‬
+T
+‭Basically, it's a way to return to a base caller without having to check for a condition to do so at every level of the call chain. It returns all the way back to the caller with the "\"‬
+‭abort trap, carrying the ABORT value. You can compose hierarchical levels of "\" abort traps and ABORT points.‬
+
+‭METHOD POINTERS‬
+‭Method pointers are LONG values which point to a method and are then used to call that method indirectly.‬
+‭To establish a method pointer, you can assign a long variable using "@" before the method name. Note that there are no parentheses after the method name:‬
+‭ongVar := @SomeMethod
+L
+LongVar := @SomeObject.SomeMethod
+‭
+LongVar := @SomeObject[index].SomeMethod
+‭
+
+'a method within the current object‬
+'a method within a child object‬
+'a method within an indexed child object‬
+
+‭Method pointers can be generated on-the-fly and passed as parameters:‬
+SetUpIO(@InMethod,@OutMethod)‬
+‭
+
+‭Method pointers are then used in the following ways to call methods:‬
+‭ongVar()
+L
+LongVar(Par1, Par2)
+‭
+Var := LongVar():1
+‭
+Var1,Var2 := LongVar(Par1):2
+‭
+Var1,Var2 := POLXY(LongVar(Par1,Par2,Par3):2)
+‭
+
+'no parameters and no return values‬
+'two parameters and no return values‬
+'no parameters and one return value‬
+'one parameters and two return values‬
+'three parameters and two return values‬
+
+‭ here is no compile-time awareness of how many parameters the method pointed to actually has. You need to code your method pointer usage such that you supply the proper‬
+T
+‭number of parameters and specify the proper number of return values after a colon ":", so that there is agreement with the method pointed to.‬
+‭ ethod pointers can be passed through object hierarchies to enable direct calling of any method from anywhere. They can also be used to dynamically point to different‬
+M
+‭methods which have the same numbers of parameters and return values.‬
+
+‭How Method Pointers Work‬
+‭An @method expression generates a 32-bit value which has two bitfields:‬
+‭[31..20] = Index of the method, relative to the method's object base. The index of the first method will be twice the number of objects instantiated‬
+‭[19..0] = Address of the method's VAR base. The method's VAR base, in turn, contains the address of the method's object base.‬
+‭ y putting the method's index and VAR base address together into the 32-bit value, and having the VAR base contain the method's object base address, a complete method‬
+B
+‭pointer is established in a single long, which can be treated as any other variable.‬
+‭ o accommodate method pointers, each object instance reserves the first long of its VAR space for the object base address. When an @method expression executes, that first‬
+T
+‭long is written with the object's base address.‬
+
+‭SEND‬
+‭ END is a special method pointer which is inherited from the calling method and, in turn, conveyed to all called methods. Its purpose is to provide an efficient output‬
+S
+‭mechanism for data.‬
+‭SEND can be assigned like a method pointer, but it must point to a method which takes one parameter and has no return values:‬
+SEND := @OutMethod‬
+‭
+
+‭When used as a method, SEND will pass all parameters, including any return values from called methods, to the method SEND points to:‬
+SEND("Hello! ", GetDigit()+"0", 13)‬
+‭
+
+‭Any methods called within the SEND parameters will inherit the SEND pointer, so that they can do SEND methods, too:‬
+PUB Go()‬
+‭
+SEND := @SetLED‬
+‭
+REPEAT‬
+‭
+SEND(Flash(),$01,$02,$04,$08,$10,$20,$40,$80)‬
+‭
+
+‭Parallax Spin2 Documentation Page‬‭19‬‭of‬‭57‬
+
+PRI Flash() : x‬
+‭
+REPEAT 2‬
+‭
+SEND($00,$FF,$00)‬
+‭
+RETURN $AA‬
+‭
+PRI SetLED(x)‬
+‭
+PINWRITE(56 ADDPINS 7, !x)‬
+‭
+WAITMS(125)‬
+‭
+
+‭In the above example, the following values are output in repeating sequence: $00, $FF, $00, $00, $FF, $00, $AA, $01, $02, $04, $08, $10, $20, $40, $80 (but inverted for LEDs)‬
+‭ hough a called method inherits the current SEND pointer, it may change it for its own purposes. Upon return from that method, the SEND pointer will be back to what it was‬
+T
+‭before the method was called. So, the SEND pointer value is propagated in method calls, but not in method returns.‬
+
+‭RECV‬
+‭ ECV, like SEND, is a special method pointer which is inherited from the calling method and, in turn, conveyed to all called methods. Its purpose is to provide an efficient input‬
+R
+‭mechanism for data.‬
+‭RECV can be assigned like a method pointer, but it must point to a method which takes no parameters and returns a single value:‬
+RECV := @InMethod‬
+‭
+
+‭An example of using RECV:‬
+VAR i‬
+‭
+PUB Go()‬
+‭
+RECV := @GetPattern‬
+‭
+REPEAT‬
+‭
+PINWRITE(56 ADDPINS 7, !RECV())‬
+‭
+WAITMS(125)‬
+‭
+PRI GetPattern() : Pattern‬
+‭
+RETURN DECOD(i++ & 7)‬
+‭
+‭In the above example, the following values are output in repeating sequence: $01, $02, $04, $08, $10, $20, $40, $80 (but inverted for LEDs)‬
+‭ hough a called method inherits the current RECV pointer, it may change it for its own purposes. Upon return from that method, the RECV pointer will be back to what it was‬
+T
+‭before the method was called. So, the RECV pointer value is propagated in method calls, but not in method returns.‬
+
+‭FLOW CONTROL‬
+‭Spin2 has three basic flow-control constructs:‬
+‭IF / IFNOT + ELSEIF / ELSEIFNOT + ELSE‬
+
+‭- Conditional execution with random decision logic‬
+
+‭CASE / CASE_FAST‬
+
+‭- Conditional execution with single target and multiple match tests‬
+
+‭REPEAT‬
+
+‭- Looped execution with various modes‬
+
+‭All these constructs use relative indentation to determine which code falls under their control:‬
+IF cog
+‭
+COGSTOP(cog-1)
+‭
+PINCLEAR(av_base_pin_ ADDPINS 4)
+‭
+
+'if cog <> 0‬
+'..then stop cog‬
+'..then clear pin mode(s)‬
+
+‭The flow-control constructs can be nested in any order:‬
+CASE flag‬
+‭
+0: CASE_FAST chr‬
+‭
+0:
+‭
+BYTEFILL(@screen, " ", screen_size)‬
+col := row := 0‬
+‭
+1:
+‭
+col := row := 0‬
+2..7: flag := chr‬
+‭
+RETURN‬
+‭
+8:
+‭
+IF col‬
+col--‬
+‭
+9:
+‭
+REPEAT‬
+out(" ")‬
+‭
+WHILE col & 7‬
+‭
+10:
+‭
+RETURN‬
+11:
+‭
+color := $00‬
+12:
+‭
+color := $80‬
+13:
+‭
+newline()‬
+OTHER: out(chr)‬
+‭
+‭:
+2
+col := chr // cols‬
+3:
+‭
+row := chr // rows‬
+4..7: background0_[flag-$04] := chr << 8‬
+‭
+
+‭Parallax Spin2 Documentation Page‬‭20‬‭of‬‭57‬
+
+flag := 0‬
+‭
+
+‭IF / IFNOT + ELSEIF / ELSEIFNOT + ELSE‬
+‭The IF construct begins with IF or IFNOT and optionally employs ELSEIF, ELSEIFNOT, and ELSE. To all be part of the same decision tree, these keywords must have the‬
+‭same level of indentation.‬
+
+‭The indented code under IF or ELSEIF executes if <condition> is not zero. The code under IFNOT or ELSEIFNOT executes if <condition> is zero. The code under ELSE‬
+‭executes if no other indented code executed:‬
+
+IF / IFNOT <condition>‬
+‭
+
+‭- Initial IF or IFNOT‬
+
+<indented code>‬
+‭
+ELSEIF / ELSEIFNOT <condition>‬
+‭
+
+‭- Optional ELSEIF‬‭or ELSEIFNOT‬
+
+<indented code>‬
+‭
+ELSE‬
+‭
+
+‭- Optional final ELSE‬
+
+<indented code>‬
+‭
+
+‭CASE / CASE_FAST‬
+‭The CASE construct sequentially compares a target value to a list of possible matches. When a match is found, the related code executes.‬
+
+‭Match values/ranges must be indented past the CASE keyword. Multiple match values/ranges can be expressed with comma separators. Any additional lines of code related to‬
+‭the match value/range must be indented past the match value/range:‬
+
+CASE target‬
+‭
+<match> : <code>‬
+‭
+
+‭- CASE with target value‬
+‭- match value and code‬
+
+<indented code>‬
+‭
+<match..match> : <code>‬
+‭
+
+‭- match range and code‬
+
+<indented code>‬
+‭
+<match>,<match..match> : <code>‬
+‭
+
+‭- match value,‬‭range, and code‬
+
+<indented code>‬
+‭
+OTHER : <code>‬
+‭
+
+‭- optional OTHER case, in case‬‭no match found‬
+
+<indented code>‬
+‭
+
+‭CASE_FAST is like CASE, but rather than sequentially comparing the target to a list of possible matches, it uses an indexed jump table of up to 256 entries to immediately‬
+‭branch to the appropriate code, saving time at a possible cost of larger compiled code. If there are only contiguous match values and no match ranges, the resulting code will‬
+‭actually be smaller than a normal CASE construct with more than several match values.‬
+
+‭For CASE_FAST to compile, the match values/ranges must be unique constants which are all within 255 of each other.‬
+
+‭See CASE_FAST example under "FLOW CONTROL" above.‬
+
+‭REPEAT‬
+‭All looping is achieved through REPEAT constructs, which have several forms:‬
+
+REPEAT‬
+‭
+
+‭- Repeat forever (useful for putting at‬‭end of program if you don't want the cog to stop and cease driving its I/O's)‬
+
+<indented code>‬
+‭
+
+REPEAT <count>‬
+‭
+
+‭- Repeat <count> times, if <count>‬‭is zero then <indented code> is skipped‬
+
+<indented code>‬
+‭
+
+REPEAT <positive_count> WITH <variable>‬
+‭
+<indented code>‬
+‭
+
+‭- Repeat <positive_count>‬‭times while iterating <variable> from 0 to <positive_count> - 1‬
+‭- After completion, <variable>‬‭= <positive_count>‬
+
+‭- Repeat‬‭while iterating <variable> from <first> to <last>, stepping by +/-1‬
+
+REPEAT <variable> FROM <first> TO <last>‬
+‭
+
+‭- After completion, <variable>‬‭= <last> +/- 1‬
+
+<indented code>‬
+‭
+
+REPEAT <variable> FROM <first> TO <last> STEP <delta>‬
+‭
+<indented code>‬
+‭
+
+REPEAT WHILE <condition>‬
+‭
+
+‭- Repeat while iterating <variable> from <first>‬‭to <last>, stepping by +/-<delta>‬
+‭- After completion, <variable>‬‭= <last> +/- <delta>‬
+
+‭- Repeat while <condition>‬‭is not zero, <condition> is evaluated before <indented code> executes‬
+
+<indented code>‬
+‭
+
+REPEAT UNTIL <condition>‬
+‭
+
+‭- Repeat until <condition>‬‭is not zero, <condition> is evaluated before <indented code> executes‬
+
+‭Parallax Spin2 Documentation Page‬‭21‬‭of‬‭57‬
+
+<indented code>‬
+‭
+
+‭- Repeat while <condition> is not zero,‬‭<condition> is evaluated after <indented code> executes‬
+
+REPEAT‬
+‭
+<indented code>‬
+‭
+WHILE <condition>‬
+‭
+
+‭- WHILE must have same indentation‬‭as REPEAT‬
+
+REPEAT‬
+‭
+
+‭- Repeat until <condition> is not zero,‬‭<condition> is evaluated after <indented code> executes‬
+
+<indented code>‬
+‭
+‭- UNTIL must have same indentation‬‭as REPEAT‬
+
+UNTIL <condition>‬
+‭
+
+‭Within REPEAT constructs, there are two special instructions which can be used to change the course of execution: NEXT and QUIT. NEXT will immediately branch to the point‬
+‭in the REPEAT construct where the decision to loop again is made, while QUIT will exit the REPEAT construct and continue after it. These instructions are usually used‬
+‭conditionally:‬
+
+REPEAT‬
+‭
+<indented code>‬
+‭
+‭- Optionally force the next iteration‬‭of the REPEAT‬
+
+IF <condition>‬
+‭
+NEXT‬
+‭
+<indented code>‬
+‭
+
+‭- Optionally quit the REPEAT‬
+
+IF <condition>‬
+‭
+QUIT‬
+‭
+<indented code>‬
+‭
+
+‭IN-LINE PASM CODE‬
+‭ pin2 methods can execute in-line PASM code by preceding the PASM code with an‬‭'ORG {start{, limit}‬‭' and terminating‬‭it with an‬‭END‬‭. 'Start' is the first register into‬‭which‬
+S
+‭your PASM code will be assembled and 'limit' is the upper register which must not be encroached upon. Defaults for 'start' and 'limit' are $000 and $120, respectively.‬
+
+PUB go() | x‬
+‭
+REPEAT‬
+‭
+ORG‬
+‭
+‭ETRND
+G
+RCL
+‭
+
+WC
+x,#1‬
+
+'rotate a random bit into x‬
+
+END‬
+‭
+‭INWRITE(56 ADDPINS 7, x)
+P
+WAITMS(100)‬
+‭
+
+'output x to the P2 Eval board's LEDs‬
+
+‭Your PASM code will be assembled with a RET instruction added at the end to ensure that it returns to Spin2, in case no early _RET_ or RET executes.‬
+‭Here's the internal Spin2 procedure for executing in-line PASM code:‬
+‭‬
+●
+‭●‬
+‭●‬
+‭●‬
+‭●‬
+‭●‬
+
+‭ ave the current streamer bytecode address for restoration after the PASM code executes.‬
+S
+‭Copy the method's first 16 long variables, including any parameters, return values, and local variables, from hub RAM to cog registers $1E0..$1EF.‬
+‭Copy the in-line PASM-code longs from hub RAM into cog registers, starting at the register address specified after the ORG (default is $000).‬
+‭CALL the PASM code. The PASM code returns when an intervening _RET_ or RET executes, or the appended RET executes.‬
+‭Restore the 16 longs in cog registers $1E0..$1EF back to hub RAM, in order to update any modified method variables.‬
+‭Restore the streamer address and resume Spin2 bytecode execution.‬
+
+‭Within your in-line PASM code, you can do all these things:‬
+‭●‬
+
+‭‬
+●
+‭●‬
+‭●‬
+‭●‬
+‭●‬
+‭●‬
+‭●‬
+‭●‬
+
+‭Read and write the following register areas:‬
+‭○‬ ‭$000..$11F, which your PASM code loads into. You can even load different PASM programs at different addresses within this range and CALL them from‬
+‭Spin2.‬
+‭○‬ ‭$1D8..$1DF, which are general-purpose registers, named PR0..PR7, available to both PASM and Spin2 code.‬
+‭○‬ ‭$1E0..$1EF, which contain the method's first 16 long hub RAM variables and are assigned the same symbolic names, for use in your PASM code.‬
+‭○‬ ‭$1F0..$1FF, which include IJMP3, IRET3, IJMP2, IRET2, IJMP1, IRET1, PA, PB, PTRA, PTRB, DIRA, DIRB, OUTA, OUTB, INA, and INB.‬
+‭○‬ ‭LUT $000..$00F, which are available for any use and ideal for streamer modes which use the LUT.‬
+‭○‬ ‭Avoid writing to $120..$1D7 and LUT RAM $010..$1FF, since the Spin2 interpreter occupies these areas. You can look in "Spin2_interpreter.spin2" to see the‬
+‭interpreter code.‬
+‭Use the FIFO temporarily by executing RDFAST/WRFAST and RFxxxx/WFxxxx instructions.‬
+‭Use the streamer, including LUT modes which utilize LUT $000..$00F.‬
+‭Use up to 5 levels of the hardware stack for nested CALLs, including CALLs to hub RAM.‬
+‭Declare and reference regular and local symbols. These symbols will not be accessible outside of your PASM code.‬
+‭Declare BYTE, WORD, and LONG data. BYTEFIT and WORDFIT are also allowed.‬
+‭Use the RES, ORGF, and FIT directives. The directives ORG, ORGH, ALIGNW, ALIGNL, and FILE are not allowed within in-line PASM code.‬
+‭Establish an interrupt which executes your code remaining in cog registers $000..$11F. Spin2 accommodates interrupts and only stalls them briefly.‬
+‭Return to Spin2, at any point, by executing an _RET_ or RET instruction.‬
+
+‭CALLING PASM FROM SPIN2‬
+‭You can do a‬‭CALL(address)‬‭in Spin2 to execute PASM‬‭code in either cog register space or hub RAM.‬
+
+PUB go()‬
+‭
+
+‭Parallax Spin2 Documentation Page‬‭22‬‭of‬‭57‬
+
+REPEAT‬
+‭
+CALL(@random)‬
+‭
+PINWRITE(56 ADDPINS 7, pr0)‬
+‭
+WAITMS(100)‬
+‭
+
+DAT
+‭
+
+ORGH
+
+'hub PASM program to rotate a random bit into x‬
+
+‭andom
+r
+_RET_
+‭
+
+GETRND
+RCL
+
+WC‬
+pr0,#1‬
+
+‭Here's the internal Spin2 procedure for executing a CALL:‬
+‭‬
+●
+‭●‬
+‭●‬
+
+‭ ave the current streamer bytecode address for restoration after the PASM code executes.‬
+S
+‭CALL the PASM code.‬
+‭Restore the streamer address and resume Spin2 bytecode execution.‬
+
+‭Within code which you CALL, you can do all these things:‬
+‭●‬
+
+‭‬
+●
+‭●‬
+‭●‬
+‭●‬
+‭●‬
+
+‭Read and write the following cog register and LUT areas:‬
+‭○‬ ‭$000..$11F, which may contain PASM code and/or data which you previously loaded.‬
+‭○‬ ‭$1D8..$1DF, which are general-purpose registers, named PR0..PR7, available to both PASM and Spin2 code.‬
+‭○‬ ‭$1E0..$1EF, which are available for scratchpad use, but will likely be rewritten when Spin2 resumes.‬
+‭○‬ ‭$1F0..$1FF, which include IJMP3, IRET3, IJMP2, IRET2, IJMP1, IRET1, PA, PB, PTRA, PTRB, DIRA, DIRB, OUTA, OUTB, INA, and INB.‬
+‭○‬ ‭LUT $000..$00F, which are available for any use and ideal for streamer modes which use the LUT.‬
+‭○‬ ‭Avoid writing to registers $120..$1D7 and LUT RAM $010..$1FF, since the Spin2 interpreter occupies these areas. You can look in "Spin2_interpreter.spin2"‬
+‭to see the interpreter code.‬
+‭Use the FIFO temporarily by executing RDFAST/WRFAST and RFxxxx/WFxxxx instructions.‬
+‭Use the streamer, including LUT modes which utilize LUT $000..$00F.‬
+‭Use up to 5 levels of the hardware stack for nested CALLs, including CALLs to hub RAM.‬
+‭Establish an interrupt which executes your code remaining in cog registers $000..$11F. Spin2 accommodates interrupts and only stalls them briefly.‬
+‭Return to Spin2, at any point, by executing an _RET_ or RET instruction.‬
+
+‭REGLOAD and REGEXEC‬
+‭ he Spin2 instructions‬‭REGLOAD(HubAddress)‬‭and‬‭REGEXEC(HubAddress)‬‭are used to load or load-and-execute PASM code and/or data chunks from hub RAM into cog‬
+T
+‭registers.‬
+‭The chunk of PASM code and/or data must be preceded with two words which provide the starting register and the number of registers (longs) to load, minus 1.‬
+
+PUB go()‬
+‭
+REGLOAD(@chunk)
+‭
+
+'load self-defined chunk from hub into registers‬
+
+REPEAT‬
+‭
+CALL(#start)
+‭
+WAITMS(100)‬
+‭
+
+'call program within chunk at register address‬
+
+DAT‬
+‭
+chunk
+‭
+
+WORD
+
+start,finish-start-1
+
+'define chunk start and size-1‬
+
+ORG
+‭
+
+$100
+
+'org can be $000..$120-size‬
+
+#0 ADDPINS 7‬
+#8
+
+'some code‬
+‭
+'more code + return‬
+
+‭tart
+s
+DRVRND
+_RET_ DRVNOT
+‭
+finish‬
+‭
+
+‭REGEXEC works like REGLOAD, but it also CALLs to the start register of the chunk after loading it.‬
+I‭n the example below, REGEXEC launches a chunk of code in upper register memory which sets up a timer interrupt and then returns to Spin2. Meanwhile, as the Spin2‬
+‭method repeatedly randomizes pins 60..63 every 100ms, the chunk of code loaded into upper register memory perpetuates the timer interrupt and toggles pins 56..59 every‬
+‭500ms. Note that registers $000..$117 are still free for other code chunks and interrupts 2 and 3 are still unused.‬
+
+PUB go()‬
+‭
+REGEXEC(@chunk)
+‭
+
+'load self-defined chunk and execute it‬
+'chunk starts timer interrupt and returns‬
+‭
+
+REPEAT‬
+‭
+PINWRITE(60 ADDPINS 3, GETRND())
+‭
+WAITMS(100)
+‭
+
+'randomize pins 60..63‬
+'pins 56..59 toggle via interrupt‬
+
+DAT‬
+‭
+chunk
+‭
+
+WORD
+‭RG
+O
+
+start,finish-start-1
+$118
+
+'define chunk start and size-1‬
+'org can be $000..$120-size‬
+
+start
+‭
+
+MOV
+‭ETINT1
+S
+GETCT
+‭
+ADDCT1
+
+IJMP1,#isr
+#1
+PR0
+PR0,bigwait
+
+'set
+'set
+'get
+'set
+
+DRVNOT
+‭DDCT1
+A
+RETI1
+‭
+
+#56 ADDPINS 3
+PR0,bigwait
+
+'interrupt service routine, toggle 56..59‬
+'set next ct1 target‬
+'return from interrupt‬
+
+20_000_000 / 2
+
+'500ms second on RCFAST‬
+
+_ret_
+‭
+isr
+‭
+
+‭igwait LONG
+b
+finish‬
+‭
+
+int1 vector‬
+int1 to ct-passed-ct1 event‬
+ct‬
+initial ct1 target, return to Spin2‬
+
+‭Parallax Spin2 Documentation Page‬‭23‬‭of‬‭57‬
+
+‭DATA STRUCTURES‬
+‭ ata structures make it easy to organize variables via encapsulation. A whole set of related variables can be declared and passed as a single parameter, either by value or‬
+D
+‭pointer.‬
+I‭n the example below, drawLines is passed '@Lines' which is the base address of an array of line structures. The address is received by drawLines as a structure pointer‬
+‭'pLine', where it gets used.‬
+
+{Spin2_v46}‬
+‭
+CON
+‭
+
+STRUCT sPoint(byte x, byte y)‬
+‭TRUCT sLine(sPoint a, sPoint b, byte color)‬
+S
+LineCount = 100‬
+‭
+
+VAR
+‭
+
+sLine Line[LineCount]
+
+'Line is an array of sLine structures‬
+
+PUB go() | i‬
+‭
+debug(`plot myplot size 256 256 hsv8x update)‬
+‭
+repeat‬
+‭
+repeat LineCount with i
+‭
+Line[i].a.x := getrnd()‬
+‭
+Line[i].a.y := getrnd()‬
+‭
+Line[i].b.x := getrnd()‬
+‭
+Line[i].b.y := getrnd()‬
+‭
+Line[i].color := getrnd()‬
+‭
+drawLines(@Line, LineCount)
+‭
+
+PRI drawLines(^sLine pLine, count) | i
+‭
+
+'set up random lines‬
+
+'draw them by passing Line base-structure address‬
+
+'pLine is a structure pointer of type sLine‬
+
+debug(`myplot clear linesize 2)‬
+‭
+repeat count with i‬
+‭
+debug(`myplot color `(pLine[i].color))‬
+‭
+debug(`myplot set `(pLine[i].a.x, pLine[i].a.y))‬
+‭
+debug(`myplot line `(pLine[i].b.x, pLine[i].b.y))‬
+‭
+debug(`myplot update)‬
+‭
+
+‭Small structures can be passed by value, as well as by address:‬
+‭●‬
+
+‭Structures that do not exceed 15 longs…‬
+‭‬
+○
+‭○‬
+‭○‬
+
+‭●‬
+
+c‭ an be passed by value as multi-long parameters and return values‬
+‭will have any unused upper bytes zero-padded within the last long‬
+‭can be used in multi-long assignments (structure := 1,2,3)‬
+
+‭Structures that do not exceed 1 long…‬
+‭‬
+○
+‭○‬
+
+c‭ an be passed by value as a single-long parameters and return values‬
+‭will have any unused upper bytes zero-padded within the long‬
+
+‭There are four special structure-assignment operations that work on structures of any size, aside from general arbitrary assignments for small structures:‬
+‭‬
+●
+‭●‬
+‭●‬
+‭●‬
+
+‭tructure~‬
+s
+structure~~‬
+‭
+structureA := structureB‬
+‭
+structureA :=: structureB‬
+‭
+
+‭fill
+'
+'fill
+‭
+'copy
+‭
+'swap
+‭
+
+‭●‬
+
+structure := 1,2,3‬
+‭
+
+'write arbitrary longs to a structure (15 longs, max)‬
+‭
+
+structure with $00's‬
+structure with $FF's‬
+structure's contents‬
+structures' contents‬
+
+‭There are two structure-comparison operations which resolve to single expression terms:‬
+‭‬
+●
+‭●‬
+
+‭tructureA == structureB‬ '
+s
+‭check structures' equality and return TRUE/FALSE‬
+structureA <> structureB‬ ‭
+‭
+'check structures' inequality and return TRUE/FALSE‬
+
+‭FIELD POINTERS‬
+‭Field pointers allow you to point to any hub byte/word/long location OR cog register, without making distinction as the field pointer is passed and used.‬
+‭ field pointer can be obtained for any hub or register variable. By specifying an optional bit range in the field pointer declaration, the field pointer can then be used to index into‬
+A
+‭an array of sub-variables of non-standard bit width.‬
+‭The ^@variable operator will return a 32-bit value which will fully define where the variable is located and what range of bits comprise it.‬
+‭Once this field pointer is obtained, it can be passed among methods and used to access the variable that it points to using FIELD[fieldpointer].‬
+I‭ndexing is also supported via FIELD[fieldpointer][index]. If the variable pointed to is two bits long, then the indexing will step by units of two bits. Non-power-of-two bitfield sizes‬
+‭also work, but you must be pointing to a WORD or LONG in hub memory, so that the base read/write address can move in byte increments, allowing upper bits to be read or‬
+‭written in the upper byte(s) of the WORD or LONG.‬
+
+‭Parallax Spin2 Documentation Page‬‭24‬‭of‬‭57‬
+
+‭ hen planning to index into an array of n-bitfields, make sure that you pick an adequately-large (BYTE/WORD/LONG) variable size for the array, so that indexed accesses will‬
+W
+‭always be within the BYTE/WORD/LONG boundary. For example, single-bitfields will always work within BYTE arrays, but three-bitfields can span two bytes, so they would‬
+‭require a WORD array. Anything ten bits or larger would require a LONG array, since they may span three bytes.‬
+‭ ere is an example program which uses a field pointer to access three bits within a long variable. Note that the pointer 'p' can be passed around in code and then used with‬
+H
+‭FIELD to read, write, or modify the data it points to.‬
+
+CON _clkfreq = 10_000_000‬
+‭
+PUB go() | p, k‬
+‭
+p := ^@k.[23..21]
+‭
+
+'get a pointer to three bits within k‬
+
+repeat 9‬
+‭
+debug(ubin_long(k), udec(field[p]++))
+‭
+
+'show k and three bits via p‬
+
+‭Here is an example using indexing to affect successive bitfields.‬
+
+CON _clkfreq = 10_000_000‬
+‭
+PUB go() | p, k, i‬
+‭
+p := ^@k.[2..0]
+‭
+
+'get a pointer to the three lowest bits of k‬
+
+repeat 10‬
+‭
+field[p][i++]~~
+‭
+'set three bits at a time, progressing upwards‬
+debug(ubin_long(k))‬
+‭
+
+‭ side from supporting optional bitfields, field pointers also differentiate between hub memory and registers. So, field pointers can reference both types of memory without any‬
+A
+‭special syntax.‬
+‭Here is how field pointers are encoded into 32-bit values:‬
+‭Variable Syntaxes‬
+register_name‬
+‭
+REG[address]‬
+‭
+byte_name‬
+‭
+BYTE[address]‬
+‭
+
+‭Field Pointer Declarations‬
+
+‭Field Pointer Encodings‬
+
+‭@register‬
+^
+^@register.[bbbbb addbits sssss]‬
+‭
+^@register.[msbit..lsbit]‬
+‭
+^@register.[bit]‬
+‭
+
+‭0_11111_00000_00000000000rrrrrrrrr‬
+0
+00_sssss_bbbbb_00000000000rrrrrrrrr‬
+‭
+
+‭@byte‬
+^
+^@byte.[bbbbb addbits sssss]‬
+‭
+^@byte.[msbit..lsbit]‬
+‭
+^@byte.[bit]‬
+‭
+
+‭1_00111_00000_aaaaaaaaaaaaaaaaaaaa‬
+0
+01_sssss_bbbbb_aaaaaaaaaaaaaaaaaaaa‬
+‭
+
+‭Parallax Spin2 Documentation Page‬‭25‬‭of‬‭57‬
+
+word_name‬
+‭
+WORD[address]‬
+‭
+long_name‬
+‭
+LONG[address]‬
+‭
+
+‭@word‬
+^
+^@word.[bbbbb addbits sssss]‬
+‭
+^@word.[msbit..lsbit]‬
+‭
+^@word.[bit]‬
+‭
+
+‭0_01111_00000_aaaaaaaaaaaaaaaaaaaa‬
+1
+10_sssss_bbbbb_aaaaaaaaaaaaaaaaaaaa‬
+‭
+
+‭@long‬
+^
+^@long.[bbbbb addbits sssss]‬
+‭
+^@long.[msbit..lsbit]‬
+‭
+^@long.[bit]‬
+‭
+
+‭1_11111_00000_aaaaaaaaaaaaaaaaaaaa‬
+1
+11_sssss_bbbbb_aaaaaaaaaaaaaaaaaaaa‬
+‭
+
+‭Note that since the bottom 20 bits of field pointers are base addresses, their values can be conveniently added to or subtracted from when used:‬
+‭IELD[fieldpointer + @record].‬
+F
+FIELD[fieldpointer + SectorBase(x)].‬
+‭
+FIELD[fieldpointer - 4].‬
+‭
+
+‭DEBUG‬
+‭The Spin2 compiler contains a stealthy debugging program that can be automatically downloaded with your application. It uses the last 16 KB of RAM plus a few bytes for each‬
+‭Spin2 DEBUG statement and one instruction for each PASM DEBUG statement. You can place DEBUG() statements in your application which contain output commands that‬
+‭will serially transmit the state of variables and equations as your application runs. Each time a DEBUG statement is encountered during execution, the debugging program is‬
+‭invoked and it outputs the message for that statement. There is also a single-stepping PASM debugger which can be invoked via plain DEBUG statements which do not contain‬
+‭any parameters within parentheses. Debugging is initiated in PNut by adding the Ctrl key to the usual F10 to 'run' or F11 to 'program', or in PropellerTool by enabling Debug‬
+‭Mode with Ctrl+D then using F10 or F11 as is normal. This compiles your application with all the DEBUG statements, adds the debugging program to the download, and then‬
+‭brings up the DEBUG Output window which begins receiving messages at the start of your application.‬
+
+‭Things to know about the DEBUG system‬
+‭●‬
+
+‭To use the debugger, you must configure at least a 10 MHz clock derived from a crystal or external input. You cannot use RCFAST or RCSLOW.‬
+
+‭●‬
+
+‭The debugging program occupies the top 16 KB of hub RAM, remapped to $FC000..$FFFFF and write-protected. The hub RAM at $7C000..$7FFFF will no longer be‬
+‭available.‬
+
+‭●‬
+
+‭Data defining each DEBUG() statement is stored within the debugger image in the top 16 KB of RAM, minimizing impact on your application code.‬
+
+‭●‬
+
+‭In Spin2, each DEBUG statement adds three bytes, plus any code needed to reference variables and resolve run-time expressions used in the DEBUG() statement.‬
+
+‭●‬
+
+‭In PASM, each DEBUG statement adds one instruction (long).‬
+
+‭●‬
+
+‭DEBUG statements are ignored by the compiler when not compiling for DEBUG mode, so you don't need to comment them out when debugging is not in use.‬
+
+‭●‬
+
+‭If no DEBUG statements exist in your application, you will still get notification messages when cogs are started, if you are running the debugging program.‬
+
+‭●‬
+

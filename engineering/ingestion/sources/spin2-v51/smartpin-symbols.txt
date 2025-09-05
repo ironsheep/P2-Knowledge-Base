@@ -1,0 +1,1032 @@
+‭Built-In Symbols for Smart Pin Configuration‬
+‭Smart Pin Symbol Value‬
+
+‭Symbol Name‬
+
+‭A Input Polarity‬
+
+‭(pick one)‬
+
+‭Details‬
+
+%0000_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_TRUE_A (default)‬
+‭
+
+‭True A input‬
+
+%1000_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_INVERT_A‬
+‭
+
+‭Invert A input‬
+
+‭A Input Selection‬
+
+‭(pick one)‬
+
+%0000_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_LOCAL_A (default)‬
+‭
+
+‭Select local pin for A input‬
+
+%0001_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_PLUS1_A‬
+‭
+
+‭Select pin+1 for A input‬
+
+%0010_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_PLUS2_A‬
+‭
+
+‭Select pin+2 for A input‬
+
+%0011_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_PLUS3_A‬
+‭
+
+‭Select pin+3 for A input‬
+
+%0100_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_OUTBIT_A‬
+‭
+
+‭Select OUT bit for A input‬
+
+%0101_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_MINUS3_A‬
+‭
+
+‭Select pin-3 for A input‬
+
+%0110_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_MINUS2_A‬
+‭
+
+‭Select pin-2 for A input‬
+
+%0111_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_MINUS1_A‬
+‭
+
+‭Select pin-1 for A input‬
+
+‭B Input Polarity‬
+
+‭(pick one)‬
+
+%0000_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_TRUE_B (default)‬
+‭
+
+‭True B input‬
+
+%0000_1000_000_0000000000000_00_00000_0‬
+‭
+
+P_INVERT_B‬
+‭
+
+‭Invert B input‬
+
+‭B Input Selection‬
+
+‭(pick one)‬
+
+%0000_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_LOCAL_B (default)‬
+‭
+
+‭Select local pin for B input‬
+
+%0000_0001_000_0000000000000_00_00000_0‬
+‭
+
+P_PLUS1_B‬
+‭
+
+‭Select pin+1 for B input‬
+
+%0000_0010_000_0000000000000_00_00000_0‬
+‭
+
+P_PLUS2_B‬
+‭
+
+‭Select pin+2 for B input‬
+
+%0000_0011_000_0000000000000_00_00000_0‬
+‭
+
+P_PLUS3_B‬
+‭
+
+‭Select pin+3 for B input‬
+
+%0000_0100_000_0000000000000_00_00000_0‬
+‭
+
+P_OUTBIT_B‬
+‭
+
+‭Select OUT bit for B input‬
+
+%0000_0101_000_0000000000000_00_00000_0‬
+‭
+
+P_MINUS3_B‬
+‭
+
+‭Select pin-3 for B input‬
+
+%0000_0110_000_0000000000000_00_00000_0‬
+‭
+
+P_MINUS2_B‬
+‭
+
+‭Select pin-2 for B input‬
+
+%0000_0111_000_0000000000000_00_00000_0‬
+‭
+
+P_MINUS1_B‬
+‭
+
+‭Select pin-1 for B input‬
+
+‭A, B Input Logic‬
+
+‭(pick one)‬
+
+‭Parallax Spin2 Documentation Page‬‭49‬‭of‬‭57‬
+
+%0000_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_PASS_AB (default)‬
+‭
+
+‭Select A, B‬
+
+%0000_0000_001_0000000000000_00_00000_0‬
+‭
+
+P_AND_AB‬
+‭
+
+‭Select A & B, B‬
+
+%0000_0000_010_0000000000000_00_00000_0‬
+‭
+
+P_OR_AB‬
+‭
+
+‭Select A | B, B‬
+
+%0000_0000_011_0000000000000_00_00000_0‬
+‭
+
+P_XOR_AB‬
+‭
+
+‭Select A ^ B, B‬
+
+%0000_0000_100_0000000000000_00_00000_0‬
+‭
+
+P_FILT0_AB‬
+‭
+
+‭Select FILT0 settings for A, B‬
+
+%0000_0000_101_0000000000000_00_00000_0‬
+‭
+
+P_FILT1_AB‬
+‭
+
+‭Select FILT1 settings for A, B‬
+
+%0000_0000_110_0000000000000_00_00000_0‬
+‭
+
+P_FILT2_AB‬
+‭
+
+‭Select FILT2 settings for A, B‬
+
+%0000_0000_111_0000000000000_00_00000_0‬
+‭
+
+P_FILT3_AB‬
+‭
+
+‭Select FILT3 settings for A, B‬
+
+‭Low-Level Pin Modes‬
+
+‭(pick one)‬
+
+‭Logic/Schmitt/Comparator Input Modes‬
+%0000_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_LOGIC_A (default)‬
+‭
+
+‭Logic level A → IN, output OUT‬
+
+%0000_0000_000_0001000000000_00_00000_0‬
+‭
+
+P_LOGIC_A_FB‬
+‭
+
+‭Logic level A → IN, output feedback‬
+
+%0000_0000_000_0010000000000_00_00000_0‬
+‭
+
+P_LOGIC_B_FB‬
+‭
+
+‭Logic level B → IN, output feedback‬
+
+%0000_0000_000_0011000000000_00_00000_0‬
+‭
+
+P_SCHMITT_A‬
+‭
+
+‭Schmitt trigger A → IN, output OUT‬
+
+%0000_0000_000_0100000000000_00_00000_0‬
+‭
+
+P_SCHMITT_A_FB‬
+‭
+
+‭Schmitt trigger A → IN, output feedback‬
+
+%0000_0000_000_0101000000000_00_00000_0‬
+‭
+
+P_SCHMITT_B_FB‬
+‭
+
+‭Schmitt trigger B → IN, output feedback‬
+
+%0000_0000_000_0110000000000_00_00000_0‬
+‭
+
+P_COMPARE_AB‬
+‭
+
+‭A > B → IN, output OUT‬
+
+%0000_0000_000_0111000000000_00_00000_0‬
+‭
+
+P_COMPARE_AB_FB‬
+‭
+
+‭A > B → IN, output feedback‬
+‭Sync mode, IN/output polarity, high/low drive‬
+
+%xxxx_xxxx_xxx_xxxxSIOHHHLLL_xx_xxxxx_x‬
+‭
+‭ADC Input Modes‬
+%0000_0000_000_1000000000000_00_00000_0‬
+‭
+
+P_ADC_GIO‬
+‭
+
+‭ADC GIO → IN, output OUT‬
+
+%0000_0000_000_1000010000000_00_00000_0‬
+‭
+
+P_ADC_VIO‬
+‭
+
+‭ADC VIO → IN, output OUT‬
+
+%0000_0000_000_1000100000000_00_00000_0‬
+‭
+
+P_ADC_FLOAT‬
+‭
+
+‭ADC FLOAT → IN, output OUT‬
+
+%0000_0000_000_1000110000000_00_00000_0‬
+‭
+
+P_ADC_1X‬
+‭
+
+‭ADC 1x → IN, output OUT‬
+
+%0000_0000_000_1001000000000_00_00000_0‬
+‭
+
+P_ADC_3X‬
+‭
+
+‭ADC 3.16x → IN, output OUT‬
+
+%0000_0000_000_1001010000000_00_00000_0‬
+‭
+
+P_ADC_10X‬
+‭
+
+‭ADC 10x → IN, output OUT‬
+
+%0000_0000_000_1001100000000_00_00000_0‬
+‭
+
+P_ADC_30X‬
+‭
+
+‭ADC 31.6x → IN, output OUT‬
+
+%0000_0000_000_1001110000000_00_00000_0‬
+‭
+
+P_ADC_100X‬
+‭
+
+‭ADC 100x → IN, output OUT‬
+‭O = output polarity, HHH/LLL = high/low drive‬
+
+%xxxx_xxxx_xxx_xxxxxxOHHHLLL_xx_xxxxx_x‬
+‭
+‭DAC Output Modes‬
+
+‭DIR enables output, OUT enables ADC‬
+
+%0000_0000_000_1010000000000_00_00000_0‬
+‭
+
+P_DAC_990R_3V‬
+‭
+
+‭DAC 990Ω, 3.3V peak, ADC 1x → IN‬
+
+%0000_0000_000_1010100000000_00_00000_0‬
+‭
+
+P_DAC_600R_2V‬
+‭
+
+‭DAC 600Ω, 2.0V peak, ADC 1x → IN‬
+
+%0000_0000_000_1011000000000_00_00000_0‬
+‭
+
+P_DAC_124R_3V‬
+‭
+
+‭DAC 123.75Ω, 3.3V peak, ADC 1x → IN‬
+
+%0000_0000_000_1011100000000_00_00000_0‬
+‭
+
+P_DAC_75R_2V‬
+‭
+
+‭DAC 75Ω, 2.0V peak, ADC 1x → IN‬
+‭DDDDDDDD = 8-bit DAC value‬
+
+%xxxx_xxxx_xxx_xxxxxDDDDDDDD_xx_xxxxx_x‬
+‭
+‭Level-Comparison Modes‬
+
+‭DIR enables output (1.5kΩ drive)‬
+
+%0000_0000_000_1100000000000_00_00000_0‬
+‭
+
+P_LEVEL_A‬
+‭
+
+‭A > Level → IN, output OUT‬
+
+%0000_0000_000_1101000000000_00_00000_0‬
+‭
+
+P_LEVEL_A_FBN‬
+‭
+
+‭A > Level → IN, output negative feedback‬
+
+%0000_0000_000_1110000000000_00_00000_0‬
+‭
+
+P_LEVEL_B_FBP‬
+‭
+
+‭B > Level → IN, output positive feedback‬
+
+%0000_0000_000_1111000000000_00_00000_0‬
+‭
+
+P_LEVEL_B_FBN‬
+‭
+
+‭B > Level → IN, output negative feedback‬
+‭S = Synchronous, LLLLLLLL = 8-bit Level‬
+
+%xxxx_xxxx_xxx_xxxxSLLLLLLLL_xx_xxxxx_x‬
+‭
+‭Low-Level Pin Sub-Modes‬
+‭Sync Mode‬
+
+‭(pick one)‬
+
+‭(for Logic/Schmitt/Comparator/Level modes)‬
+‭Sync mode bit‬
+
+%xxxx_xxxx_xxx_xxxxSxxxxxxxx_xx_xxxxx_x‬
+‭
+%0000_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_ASYNC_IO (default)‬
+‭
+
+‭Select asynchronous I/O‬
+
+%0000_0000_000_0000100000000_00_00000_0‬
+‭
+
+P_SYNC_IO‬
+‭
+
+‭Select synchronous I/O‬
+
+‭IN Polarity‬
+
+‭(pick one)‬
+
+‭(for Logic/Schmitt/Comparator modes)‬
+‭IN polarity bit‬
+
+%xxxx_xxxx_xxx_xxxxxIxxxxxxx_xx_xxxxx_x‬
+‭
+%0000_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_TRUE_IN (default)‬
+‭
+
+‭True IN bit‬
+
+%0000_0000_000_0000010000000_00_00000_0‬
+‭
+
+P_INVERT_IN‬
+‭
+
+‭Invert IN bit‬
+
+‭Output Polarity‬
+
+‭(pick one)‬
+
+‭(for Logic/Schmitt/Comparator/ADC modes)‬
+
+‭Parallax Spin2 Documentation Page‬‭50‬‭of‬‭57‬
+
+‭Output polarity bit‬
+
+%xxxx_xxxx_xxx_xxxxxxOxxxxxx_xx_xxxxx_x‬
+‭
+%0000_0000_000_0000000000000_00_00000_0‬
+‭
+
+‭_TRUE_OUTPUT (default)‬
+P
+P_TRUE_OUT (for brevity)‬
+‭
+
+‭Select true output‬
+
+%0000_0000_000_0000001000000_00_00000_0‬
+‭
+
+‭_INVERT_OUTPUT‬
+P
+P_INVERT_OUT (for brevity)‬
+‭
+
+‭Select inverted output‬
+
+‭Drive-High Strength‬
+
+‭(pick one)‬
+
+‭(for Logic/Schmitt/Comparator/ADC modes)‬
+‭Drive-high selector bits‬
+
+%xxxx_xxxx_xxx_xxxxxxxHHHxxx_xx_xxxxx_x‬
+‭
+%0000_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_HIGH_FAST (default)‬
+‭
+
+‭Drive high fast (30mA)‬
+
+%0000_0000_000_0000000001000_00_00000_0‬
+‭
+
+P_HIGH_1K5‬
+‭
+
+‭Drive high 1.5kΩ‬
+
+%0000_0000_000_0000000010000_00_00000_0‬
+‭
+
+P_HIGH_15K‬
+‭
+
+‭Drive high 15kΩ‬
+
+%0000_0000_000_0000000011000_00_00000_0‬
+‭
+
+P_HIGH_150K‬
+‭
+
+‭Drive high 150kΩ‬
+
+%0000_0000_000_0000000100000_00_00000_0‬
+‭
+
+P_HIGH_1MA‬
+‭
+
+‭Drive high 1mA‬
+
+%0000_0000_000_0000000101000_00_00000_0‬
+‭
+
+P_HIGH_100UA‬
+‭
+
+‭Drive high 100μA‬
+
+%0000_0000_000_0000000110000_00_00000_0‬
+‭
+
+P_HIGH_10UA‬
+‭
+
+‭Drive high 10μA‬
+
+%0000_0000_000_0000000111000_00_00000_0‬
+‭
+
+P_HIGH_FLOAT‬
+‭
+
+‭Float high‬
+
+‭Drive-Low Strength‬
+
+‭(pick one)‬
+
+‭(for Logic/Schmitt/Comparator/ADC modes)‬
+‭Drive-low selector bits‬
+
+%xxxx_xxxx_xxx_xxxxxxxxxxLLL_xx_xxxxx_x‬
+‭
+%0000_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_LOW_FAST (default)‬
+‭
+
+‭Drive low fast (30mA)‬
+
+%0000_0000_000_0000000000001_00_00000_0‬
+‭
+
+P_LOW_1K5‬
+‭
+
+‭Drive low 1.5kΩ‬
+
+%0000_0000_000_0000000000010_00_00000_0‬
+‭
+
+P_LOW_15K‬
+‭
+
+‭Drive low 15kΩ‬
+
+%0000_0000_000_0000000000011_00_00000_0‬
+‭
+
+P_LOW_150K‬
+‭
+
+‭Drive low 150kΩ‬
+
+%0000_0000_000_0000000000100_00_00000_0‬
+‭
+
+P_LOW_1MA‬
+‭
+
+‭Drive low 1mA‬
+
+%0000_0000_000_0000000000101_00_00000_0‬
+‭
+
+P_LOW_100UA‬
+‭
+
+‭Drive low 100μA‬
+
+%0000_0000_000_0000000000110_00_00000_0‬
+‭
+
+P_LOW_10UA‬
+‭
+
+‭Drive low 10μA‬
+
+%0000_0000_000_0000000000111_00_00000_0‬
+‭
+
+P_LOW_FLOAT‬
+‭
+
+‭Float low‬
+
+‭DIR/OUT Control‬
+
+‭(pick one)‬
+
+%0000_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_TT_00 (default)‬
+‭
+
+‭TT = %00‬
+
+%0000_0000_000_0000000000000_01_00000_0‬
+‭
+
+P_TT_01‬
+‭
+
+‭TT = %01‬
+
+%0000_0000_000_0000000000000_10_00000_0‬
+‭
+
+P_TT_10‬
+‭
+
+‭TT = %10‬
+
+%0000_0000_000_0000000000000_11_00000_0‬
+‭
+
+P_TT_11‬
+‭
+
+‭TT = %11‬
+
+%0000_0000_000_0000000000000_01_00000_0‬
+‭
+
+P_OE‬
+‭
+
+‭Enable output in smart pin mode, regardless of DIR‬
+
+%0000_0000_000_0000000000000_01_00000_0‬
+‭
+
+P_CHANNEL‬
+‭
+
+‭Enable DAC channel in non-smart pin DAC mode‬
+
+%0000_0000_000_0000000000000_10_00000_0‬
+‭
+
+P_BITDAC‬
+‭
+
+‭Enable BITDAC for non-smart pin DAC mode‬
+
+‭Smart Pin Modes‬
+
+‭(pick one)‬
+
+%0000_0000_000_0000000000000_00_00000_0‬
+‭
+
+P_NORMAL (default)‬
+‭
+
+‭Normal mode (not smart pin mode)‬
+
+%0000_0000_000_0000000000000_00_00001_0‬
+‭
+
+P_REPOSITORY‬
+‭
+
+‭Long repository (non-DAC mode)‬
+
+%0000_0000_000_0000000000000_00_00001_0‬
+‭
+
+P_DAC_NOISE‬
+‭
+
+‭DAC Noise (DAC mode)‬
+
+%0000_0000_000_0000000000000_00_00010_0‬
+‭
+
+P_DAC_DITHER_RND‬
+‭
+
+‭DAC 16-bit random dither (DAC mode)‬
+
+%0000_0000_000_0000000000000_00_00011_0‬
+‭
+
+P_DAC_DITHER_PWM‬
+‭
+
+‭DAC 16-bit PWM dither (DAC mode)‬
+
+%0000_0000_000_0000000000000_00_00100_0‬
+‭
+
+P_PULSE‬
+‭
+
+‭Pulse/cycle output‬
+
+%0000_0000_000_0000000000000_00_00101_0‬
+‭
+
+P_TRANSITION‬
+‭
+
+‭Transition output‬
+
+%0000_0000_000_0000000000000_00_00110_0‬
+‭
+
+P_NCO_FREQ‬
+‭
+
+‭NCO frequency output‬
+
+%0000_0000_000_0000000000000_00_00111_0‬
+‭
+
+P_NCO_DUTY‬
+‭
+
+‭NCO duty output‬
+
+%0000_0000_000_0000000000000_00_01000_0‬
+‭
+
+P_PWM_TRIANGLE‬
+‭
+
+‭PWM triangle output‬
+
+%0000_0000_000_0000000000000_00_01001_0‬
+‭
+
+P_PWM_SAWTOOTH‬
+‭
+
+‭PWM sawtooth output‬
+
+%0000_0000_000_0000000000000_00_01010_0‬
+‭
+
+P_PWM_SMPS‬
+‭
+
+‭PWM switch-mode power supply I/O‬
+
+%0000_0000_000_0000000000000_00_01011_0‬
+‭
+
+P_QUADRATURE‬
+‭
+
+‭A-B quadrature encoder input‬
+
+%0000_0000_000_0000000000000_00_01100_0‬
+‭
+
+P_REG_UP‬
+‭
+
+‭Inc on A-rise when B-high‬
+
+%0000_0000_000_0000000000000_00_01101_0‬
+‭
+
+P_REG_UP_DOWN‬
+‭
+
+‭Inc on A-rise when B-high, dec on A-rise when B-low‬
+
+%0000_0000_000_0000000000000_00_01110_0‬
+‭
+
+P_COUNT_RISES‬
+‭
+
+‭Inc on A-rise, optionally dec on B-rise‬
+
+%0000_0000_000_0000000000000_00_01111_0‬
+‭
+
+P_COUNT_HIGHS‬
+‭
+
+‭Inc on A-high, optionally dec on B-high‬
+
+%0000_0000_000_0000000000000_00_10000_0‬
+‭
+
+P_STATE_TICKS‬
+‭
+
+‭For A-low and A-high states, count ticks‬
+
+‭Parallax Spin2 Documentation Page‬‭51‬‭of‬‭57‬
+
+%0000_0000_000_0000000000000_00_10001_0‬
+‭
+
+P_HIGH_TICKS‬
+‭
+
+‭For A-high states, count ticks‬
+
+%0000_0000_000_0000000000000_00_10010_0‬
+‭
+
+P_EVENTS_TICKS‬
+‭
+
+‭ or X A-highs/rises/edges, count ticks /‬
+F
+‭Timeout on X ticks of no A-high/rise/edge‬
+
+%0000_0000_000_0000000000000_00_10011_0‬
+‭
+
+P_PERIODS_TICKS‬
+‭
+
+‭For X periods of A, count ticks‬
+
+%0000_0000_000_0000000000000_00_10100_0‬
+‭
+
+P_PERIODS_HIGHS‬
+‭
+
+‭For X periods of A, count highs‬
+
+%0000_0000_000_0000000000000_00_10101_0‬
+‭
+
+P_COUNTER_TICKS‬
+‭
+
+‭For periods of A in X+ ticks, count ticks‬
+
+%0000_0000_000_0000000000000_00_10110_0‬
+‭
+
+P_COUNTER_HIGHS‬
+‭
+
+‭For periods of A in X+ ticks, count highs‬
+
+%0000_0000_000_0000000000000_00_10111_0‬
+‭
+
+P_COUNTER_PERIODS‬
+‭
+
+‭For periods of A in X+ ticks, count periods‬
+
+%0000_0000_000_0000000000000_00_11000_0‬
+‭
+
+P_ADC‬
+‭
+
+‭ADC sample/filter/capture, internally clocked‬
+
+%0000_0000_000_0000000000000_00_11001_0‬
+‭
+
+P_ADC_EXT‬
+‭
+
+‭ADC sample/filter/capture, externally clocked‬
+
+%0000_0000_000_0000000000000_00_11010_0‬
+‭
+
+P_ADC_SCOPE‬
+‭
+
+‭ADC scope with trigger‬
+
+%0000_0000_000_0000000000000_00_11011_0‬
+‭
+
+P_USB_PAIR‬
+‭
+
+‭USB pin pair‬
+
+%0000_0000_000_0000000000000_00_11100_0‬
+‭
+
+P_SYNC_TX‬
+‭
+
+‭Synchronous serial transmit‬
+
+%0000_0000_000_0000000000000_00_11101_0‬
+‭
+
+P_SYNC_RX‬
+‭
+
+‭Synchronous serial receive‬
+
+%0000_0000_000_0000000000000_00_11110_0‬
+‭
+
+P_ASYNC_TX‬
+‭
+
+‭Asynchronous serial transmit‬
+
+%0000_0000_000_0000000000000_00_11111_0‬
+‭
+
+P_ASYNC_RX‬
+‭
+
+‭Asynchronous serial receive‬
+

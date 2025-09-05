@@ -1,0 +1,7 @@
+' Test 30-character symbol
+CON
+  ' Exactly 30 characters
+  a23456789_123456789_123456789_ = 30
+
+PUB main()
+  return a23456789_123456789_123456789_

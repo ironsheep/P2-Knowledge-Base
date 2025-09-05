@@ -1,0 +1,8 @@
+' Test if duplicate definition causes error
+CON
+  ' If compiler truncates to 32, these are the SAME symbol
+  abcdefghijklmnopqrstuvwxyz123456 = 100      ' 32 chars exactly
+  abcdefghijklmnopqrstuvwxyz123456 = 200      ' Same 32 chars - should error if detected
+  
+PUB main()
+  return abcdefghijklmnopqrstuvwxyz123456

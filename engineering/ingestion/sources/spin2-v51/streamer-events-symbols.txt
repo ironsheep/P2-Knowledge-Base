@@ -1,0 +1,1246 @@
+‭Built-In Symbols for Streamer Modes‬
+‭Streamer Symbol Value‬
+
+‭Symbol Name‬
+
+‭Immediate → LUT → Pins / DACs‬
+‭0000_0000_0000_0000 << 16‬
+%
+%0000_DDDD_EPPP_BBBB << 16‬
+‭
+
+X_IMM_32X1_LUT‬
+‭
+
+‭0001_0000_0000_0000 << 16‬
+%
+%0001_DDDD_EPPP_BBBB << 16‬
+‭
+
+X_IMM_16X2_LUT‬
+‭
+
+‭0010_0000_0000_0000 << 16‬
+%
+%0010_DDDD_EPPP_BBBB << 16‬
+‭
+
+X_IMM_8X4_LUT‬
+‭
+
+‭0011_0000_0000_0000 << 16‬
+%
+%0011_DDDD_EPPP_BBBB << 16‬
+‭
+
+X_IMM_4X8_LUT‬
+‭
+
+‭Immediate → Pins / DACs‬
+‭0100_0000_0000_0000 << 16‬
+%
+%0100_DDDD_EPPP_PPPA << 16‬
+‭
+
+X_IMM_32X1_1DAC1‬
+‭
+
+‭0101_0000_0000_0000 << 16‬
+%
+%0101_DDDD_EPPP_PP0A << 16‬
+‭
+
+X_IMM_16X2_2DAC1‬
+‭
+
+‭0101_0000_0000_0010 << 16‬
+%
+%0101_DDDD_EPPP_PP1A << 16‬
+‭
+
+X_IMM_16X2_1DAC2‬
+‭
+
+‭0110_0000_0000_0000 << 16‬
+%
+%0110_DDDD_EPPP_P00A << 16‬
+‭
+
+X_IMM_8X4_4DAC1‬
+‭
+
+‭0110_0000_0000_0010 << 16‬
+%
+%0110_DDDD_EPPP_P01A << 16‬
+‭
+
+X_IMM_8X4_2DAC2‬
+‭
+
+‭0110_0000_0000_0100 << 16‬
+%
+%0110_DDDD_EPPP_P10A << 16‬
+‭
+
+X_IMM_8X4_1DAC4‬
+‭
+
+‭0110_0000_0000_0110 << 16‬
+%
+%0110_DDDD_EPPP_0110 << 16‬
+‭
+
+X_IMM_4X8_4DAC2‬
+‭
+
+‭0110_0000_0000_0111 << 16‬
+%
+%0110_DDDD_EPPP_0111 << 16‬
+‭
+
+X_IMM_4X8_2DAC4‬
+‭
+
+‭0110_0000_0000_1110 << 16‬
+%
+%0110_DDDD_EPPP_1110 << 16‬
+‭
+
+X_IMM_4X8_1DAC8‬
+‭
+
+‭0110_0000_0000_1111 << 16‬
+%
+%0110_DDDD_EPPP_1111 << 16‬
+‭
+
+X_IMM_2X16_4DAC4‬
+‭
+
+‭0111_0000_0000_0000 << 16‬
+%
+%0111_DDDD_EPPP_0000 << 16‬
+‭
+
+X_IMM_2X16_2DAC8‬
+‭
+
+‭0111_0000_0000_0001 << 16‬
+%
+%0111_DDDD_EPPP_0001 << 16‬
+‭
+
+X_IMM_1X32_4DAC8‬
+‭
+
+‭RDFAST → LUT → Pins / DACs‬
+‭0111_0000_0000_0010 << 16‬
+%
+%0111_DDDD_EPPP_001A << 16‬
+‭
+
+X_RFLONG_32X1_LUT‬
+‭
+
+‭0111_0000_0000_0100 << 16‬
+%
+%0111_DDDD_EPPP_010A << 16‬
+‭
+
+X_RFLONG_16X2_LUT‬
+‭
+
+‭0111_0000_0000_0110 << 16‬
+%
+%0111_DDDD_EPPP_011A << 16‬
+‭
+
+X_RFLONG_8X4_LUT‬
+‭
+
+‭Parallax Spin2 Documentation Page‬‭52‬‭of‬‭57‬
+
+‭0111_0000_0000_1000 << 16‬
+%
+%0111_DDDD_EPPP_1000 << 16‬
+‭
+
+X_RFLONG_4X8_LUT‬
+‭
+
+‭RDFAST → Pins / DACs‬
+‭1000_0000_0000_0000 << 16‬
+%
+%1000_DDDD_EPPP_PPPA << 16‬
+‭
+
+X_RFBYTE_1P_1DAC1‬
+‭
+
+‭1001_0000_0000_0000 << 16‬
+%
+%1001_DDDD_EPPP_PP0A << 16‬
+‭
+
+X_RFBYTE_2P_2DAC1‬
+‭
+
+‭1001_0000_0000_0010 << 16‬
+%
+%1001_DDDD_EPPP_PP1A << 16‬
+‭
+
+X_RFBYTE_2P_1DAC2‬
+‭
+
+‭1010_0000_0000_0000 << 16‬
+%
+%1010_DDDD_EPPP_P00A << 16‬
+‭
+
+X_RFBYTE_4P_4DAC1‬
+‭
+
+‭1010_0000_0000_0010 << 16‬
+%
+%1010_DDDD_EPPP_P01A << 16‬
+‭
+
+X_RFBYTE_4P_2DAC2‬
+‭
+
+‭1010_0000_0000_0100 << 16‬
+%
+%1010_DDDD_EPPP_P10A << 16‬
+‭
+
+X_RFBYTE_4P_1DAC4‬
+‭
+
+‭1010_0000_0000_0110 << 16‬
+%
+%1010_DDDD_EPPP_0110 << 16‬
+‭
+
+X_RFBYTE_8P_4DAC2‬
+‭
+
+‭1010_0000_0000_0111 << 16‬
+%
+%1010_DDDD_EPPP_0111 << 16‬
+‭
+
+X_RFBYTE_8P_2DAC4‬
+‭
+
+‭1010_0000_0000_1110 << 16‬
+%
+%1010_DDDD_EPPP_1110 << 16‬
+‭
+
+X_RFBYTE_8P_1DAC8‬
+‭
+
+‭1010_0000_0000_1111 << 16‬
+%
+%1010_DDDD_EPPP_1111 << 16‬
+‭
+
+X_RFWORD_16P_4DAC4‬
+‭
+
+‭1011_0000_0000_0000 << 16‬
+%
+%1011_DDDD_EPPP_0000 << 16‬
+‭
+
+X_RFWORD_16P_2DAC8‬
+‭
+
+‭1011_0000_0000_0001 << 16‬
+%
+%1011_DDDD_EPPP_0001 << 16‬
+‭
+
+X_RFLONG_32P_4DAC8‬
+‭
+
+‭RDFAST → RGB → Pins / DACs‬
+‭1011_0000_0000_0010 << 16‬
+%
+%1011_DDDD_EPPP_0010 << 16‬
+‭
+
+X_RFBYTE_LUMA8‬
+‭
+
+‭1011_0000_0000_0011 << 16‬
+%
+%1011_DDDD_EPPP_0011 << 16‬
+‭
+
+X_RFBYTE_RGBI8‬
+‭
+
+‭1011_0000_0000_0100 << 16‬
+%
+%1011_DDDD_EPPP_0100 << 16‬
+‭
+
+X_RFBYTE_RGB8‬
+‭
+
+‭1011_0000_0000_0101 << 16‬
+%
+%1011_DDDD_EPPP_0101 << 16‬
+‭
+
+X_RFWORD_RGB16‬
+‭
+
+‭1011_0000_0000_0110 << 16‬
+%
+%1011_DDDD_EPPP_0110 << 16‬
+‭
+
+X_RFLONG_RGB24‬
+‭
+
+‭Pins → DACs / WRFAST‬
+‭1100_0000_0000_0000 << 16‬
+%
+%1100_DDDD_WPPP_PPPA << 16‬
+‭
+
+X_1P_1DAC1_WFBYTE‬
+‭
+
+‭1101_0000_0000_0000 << 16‬
+%
+%1101_DDDD_WPPP_PP0A << 16‬
+‭
+
+X_2P_2DAC1_WFBYTE‬
+‭
+
+‭1101_0000_0000_0010 << 16‬
+%
+%1101_DDDD_WPPP_PP1A << 16‬
+‭
+
+X_2P_1DAC2_WFBYTE‬
+‭
+
+‭1110_0000_0000_0000 << 16‬
+%
+%1110_DDDD_WPPP_P00A << 16‬
+‭
+
+X_4P_4DAC1_WFBYTE‬
+‭
+
+‭1110_0000_0000_0010 << 16‬
+%
+%1110_DDDD_WPPP_P01A << 16‬
+‭
+
+X_4P_2DAC2_WFBYTE‬
+‭
+
+‭1110_0000_0000_0100 << 16‬
+%
+%1110_DDDD_WPPP_P10A << 16‬
+‭
+
+X_4P_1DAC4_WFBYTE‬
+‭
+
+‭1110_0000_0000_0110 << 16‬
+%
+%1110_DDDD_WPPP_0110 << 16‬
+‭
+
+X_8P_4DAC2_WFBYTE‬
+‭
+
+‭1110_0000_0000_0111 << 16‬
+%
+%1110_DDDD_WPPP_0111 << 16‬
+‭
+
+X_8P_2DAC4_WFBYTE‬
+‭
+
+‭1110_0000_0000_1110 << 16‬
+%
+%1110_DDDD_WPPP_1110 << 16‬
+‭
+
+X_8P_1DAC8_WFBYTE‬
+‭
+
+‭1110_0000_0000_1111 << 16‬
+%
+%1110_DDDD_WPPP_1111 << 16‬
+‭
+
+X_16P_4DAC4_WFWORD‬
+‭
+
+‭1111_0000_0000_0000 << 16‬
+%
+%1111_DDDD_WPPP_0000 << 16‬
+‭
+
+X_16P_2DAC8_WFWORD‬
+‭
+
+‭1111_0000_0000_0001 << 16‬
+%
+%1111_DDDD_WPPP_0001 << 16‬
+‭
+
+X_32P_4DAC8_WFLONG‬
+‭
+
+‭ADCs / Pins → DACs / WRFAST‬
+‭1111_0000_0000_0010 << 16‬
+%
+%1111_DDDD_W000_0010 << 16‬
+‭
+
+X_1ADC8_0P_1DAC8_WFBYTE‬
+‭
+
+%1111_0000_0000_0011 << 16‬
+‭
+
+X_1ADC8_8P_2DAC8_WFWORD‬
+‭
+
+‭Parallax Spin2 Documentation Page‬‭53‬‭of‬‭57‬
+
+%1111_DDDD_WPPP_0011 << 16‬
+‭
+‭1111_0000_0000_0100 << 16‬
+%
+%1111_DDDD_W000_0100 << 16‬
+‭
+
+X_2ADC8_0P_2DAC8_WFWORD‬
+‭
+
+‭1111_0000_0000_0101 << 16‬
+%
+%1111_DDDD_WPPP_0101 << 16‬
+‭
+
+X_2ADC8_16P_4DAC8_WFLONG‬
+‭
+
+‭1111_0000_0000_0110 << 16‬
+%
+%1111_DDDD_W000_0110 << 16‬
+‭
+
+X_4ADC8_0P_4DAC8_WFLONG‬
+‭
+
+‭DDS / Goertzel‬
+‭1111_0000_0000_0111 << 16‬
+%
+%1111_DDDD_0PPP_P111 << 16‬
+‭
+
+X_DDS_GOERTZEL_SINC1‬
+‭
+
+‭1111_0000_1000_0111 << 16‬
+%
+%1111_DDDD_1PPP_P111 << 16‬
+‭
+
+X_DDS_GOERTZEL_SINC2‬
+‭
+
+‭Sub-Fields‬
+‭DAC Channel Outputs‬
+‭xxxx_DDDD_xxxx_xxxx
+%
+%0000_0000_0000_0000
+‭
+%0000_0001_0000_0000
+‭
+%0000_0010_0000_0000
+‭
+%0000_0011_0000_0000
+‭
+%0000_0100_0000_0000
+‭
+%0000_0101_0000_0000
+‭
+%0000_0110_0000_0000
+‭
+%0000_0111_0000_0000
+‭
+%0000_1000_0000_0000
+‭
+%0000_1001_0000_0000
+‭
+%0000_1010_0000_0000
+‭
+%0000_1011_0000_0000
+‭
+%0000_1100_0000_0000
+‭
+%0000_1101_0000_0000
+‭
+%0000_1110_0000_0000
+‭
+%0000_1111_0000_0000
+‭
+
+<<
+<<
+<<
+<<
+<<
+<<
+<<
+<<
+<<
+<<
+<<
+<<
+<<
+<<
+<<
+<<
+<<
+
+16‬
+16‬
+16‬
+16‬
+16‬
+16‬
+16‬
+16‬
+16‬
+16‬
+16‬
+16‬
+16‬
+16‬
+16‬
+16‬
+16‬
+
+‭_DACS_OFF (default)‬
+X
+X_DACS_0_0_0_0‬
+‭
+X_DACS_X_X_0_0‬
+‭
+X_DACS_0_0_X_X‬
+‭
+X_DACS_X_X_X_0‬
+‭
+X_DACS_X_X_0_X‬
+‭
+X_DACS_X_0_X_X‬
+‭
+X_DACS_0_X_X_X‬
+‭
+X_DACS_0N0_0N0‬
+‭
+X_DACS_X_X_0N0‬
+‭
+X_DACS_0N0_X_X‬
+‭
+X_DACS_1_0_1_0‬
+‭
+X_DACS_X_X_1_0‬
+‭
+X_DACS_1_0_X_X‬
+‭
+X_DACS_1N1_0N0‬
+‭
+X_DACS_3_2_1_0‬
+‭
+
+‭xxxx_xxxx_Exxx_xxxx << 16‬
+%
+%0000_0000_0000_0000 << 16‬
+‭
+%0000_0000_1000_0000 << 16‬
+‭
+
+‭_PINS_OFF (default)‬
+X
+X_PINS_ON‬
+‭
+
+‭Pin Output Control‬
+
+‭Write Control‬
+‭xxxx_xxxx_Wxxx_xxxx << 16‬
+%
+%0000_0000_0000_0000 << 16‬
+‭
+%0000_0000_1000_0000 << 16‬
+‭
+
+‭_WRITE_OFF (default)‬
+X
+X_WRITE_ON‬
+‭
+
+‭Alternate Order for 1/2/4 bits‬
+‭xxxx_xxxx_xxxx_xxxA << 16‬
+%
+%0000_0000_0000_0000 << 16‬
+‭
+%0000_0000_0000_0001 << 16‬
+‭
+
+‭_ALT_OFF (default)‬
+X
+X_ALT_ON‬
+‭
+
+‭Built-In Symbols for Events and Interrupt Sources (PASM only, see silicon doc)‬
+‭Symbol Value‬
+
+‭Symbol Name‬
+
+‭Details‬
+
+0‬
+‭
+
+EVENT_INT / INT_OFF‬
+‭
+
+‭Interrupt-occurred event or interrupts off‬
+
+1‬
+‭
+
+EVENT_CT1‬
+‭
+
+‭CT-passed-CT1 event‬
+
+2‬
+‭
+
+EVENT_CT2‬
+‭
+
+‭CT-passed-CT2 event‬
+
+3‬
+‭
+
+EVENT_CT3‬
+‭
+
+‭CT-passed-CT3 event‬
+
+4‬
+‭
+
+EVENT_SE1‬
+‭
+
+‭Selectable event 1‬
+
+5‬
+‭
+
+EVENT_SE2‬
+‭
+
+‭Selectable event 2‬
+
+6‬
+‭
+
+EVENT_SE3‬
+‭
+
+‭Selectable event 3‬
+
+7‬
+‭
+
+EVENT_SE4‬
+‭
+
+‭Selectable event 4‬
+
+8‬
+‭
+
+EVENT_PAT‬
+‭
+
+‭INA/INB pattern match/mismatch event‬
+
+9‬
+‭
+
+EVENT_FBW‬
+‭
+
+‭Hub FIFO block-wrap event‬
+
+10‬
+‭
+
+EVENT_XMT‬
+‭
+
+‭Streamer command-empty event‬
+
+11‬
+‭
+
+EVENT_XFI‬
+‭
+
+‭Streamer command-finished event‬
+
+12‬
+‭
+
+EVENT_XRO‬
+‭
+
+‭Streamer NCO-rollover event‬
+
+13‬
+‭
+
+EVENT_XRL‬
+‭
+
+‭Streamer-read-last-LUT-location event‬
+
+14‬
+‭
+
+EVENT_ATN‬
+‭
+
+‭Attention-requested event‬
+
+15‬
+‭
+
+EVENT_QMT‬
+‭
+
+‭GETQX/GETQY-on-empty event‬
+
+‭Parallax Spin2 Documentation Page‬‭54‬‭of‬‭57‬
+
+‭Built-In Symbols for COGINIT() Usage‬
+‭COGINIT Symbol Value‬
+
+‭Symbol Name‬
+
+‭Details‬
+
+%00_0000‬
+‭
+
+COGEXEC (default)‬
+‭
+
+‭Use "COGEXEC + CogNumber" to start a cog in cogexec mode‬
+
+%10_0000‬
+‭
+
+HUBEXEC‬
+‭
+
+‭Use "HUBEXEC + CogNumber" to start a cog in hubexec mode‬
+
+%01_0000‬
+‭
+
+COGEXEC_NEW‬
+‭
+
+‭Starts an available cog in cogexec mode‬
+
+%11_0000‬
+‭
+
+HUBEXEC_NEW‬
+‭
+
+‭Starts an available cog in hubexec mode‬
+
+%01_0001‬
+‭
+
+COGEXEC_NEW_PAIR‬
+‭
+
+‭Starts an available eve/odd pair of cogs in cogexec mode, useful for LUT sharing‬
+
+%11_0001‬
+‭
+
+HUBEXEC_NEW_PAIR‬
+‭
+
+‭Starts an available eve/odd pair of cogs in hubexec mode, useful for LUT sharing‬
+
+‭Built-In Symbol for COGSPIN() Usage‬
+‭COGSPIN Symbol Value‬
+%01_0000‬
+‭
+
+‭Symbol Name‬
+
+‭Details‬
+‭Starts an available cog‬
+
+NEWCOG‬
+‭
+
+‭Built-In Symbol for TASKSPIN() Usage‬
+‭TASKSPIN Symbol Value‬
+-1‬
+‭
+
+‭Symbol Name‬
+
+‭Details‬
+‭Starts an available task‬
+
+NEWTASK‬
+‭
+
+‭Built-In Symbol for TASKSTOP() and TASKHALT() Usage‬
+‭TASKSPIN Symbol Value‬
+-1‬
+‭
+
+‭Symbol Name‬
+
+‭Details‬
+‭Stops or halts this task‬
+
+THISTASK‬
+‭
+
+‭Built-In Numeric Symbols‬
+‭Symbol Value‬
+
+‭Symbol Name‬
+
+‭Details‬
+
+$0000_0000‬
+‭
+
+FALSE‬
+‭
+
+‭Same as 0‬
+
+$FFFF_FFFF‬
+‭
+
+TRUE‬
+‭
+
+‭Same as -1‬
+
+$8000_0000‬
+‭
+
+NEGX‬
+‭
+
+‭Negative-extreme integer, -2_147_483_648 ($8000_0000)‬
+
+$7FFF_FFFF‬
+‭
+
+POSX‬
+‭
+
+‭Positive-extreme integer, +2_147_483_647 ($7FFF_FFFF)‬
+
+$4049_0FDB‬
+‭
+
+PI‬
+‭
+
+‭Single-precision floating-point value of Pi, 3.14159265‬
+
+‭Command Line options for PNut.exe‬
+‭Command‬
+
+‭Compile‬
+‭with‬
+‭DEBUG‬
+
+‭Compile‬
+‭with‬
+‭Flash‬
+
+‭Compile‬
+‭ nd save‬
+a
+‭OBJ & BIN‬
+
+‭Download‬
+
+‭Start‬
+‭DEBUG‬
+
+‭Action‬
+
+‭ERROR.TXT file afterwards‬
+‭(file will contain one of these lines)‬
+
+pnut‬
+‭
+
+‭Start PNut.exe.‬
+
+pnut filename‬
+‭
+
+‭ oad source‬‭filename‬‭(.spin2 extension‬ ‭okay‬
+L
+‭is assumed, but not enforced).‬
+
+pnut filename -cd‬
+‭
+
+✔️
+
+‭ ‬
+
+pnut filename -cf‬
+‭
+
+pnut filename -cb‬
+‭
+
+pnut filename -ci‬
+‭
+
+✔️
+
+‭ ‬
+
+✔️
+‭ ‬
+✔️
+‭ ‬
+✔️
+‭ ‬
+✔️
+‭ ‬
+✔️
+‭ ‬
+
+pnut filename -c‬
+‭
+
+✔️
+‭ ‬
+✔️
+‭ ‬
+
+okay‬
+‭
+
+‭ oad source‬‭filename‬‭and compile,‬
+L
+‭then exit.‬
+
+‭kay‬
+o
+‭<filename_path>‬‭
+:‭<
+‬ line_number>‬‭
+:error:‬
+‭<error_message>‬
+
+‭ oad source‬‭filename‬‭and compile with‬
+L
+‭DEBUG, then exit.‬
+
+‭kay‬
+o
+‭<filename_path>‬‭
+:‭<
+‬ line_number>‬‭
+:error:‬
+‭<error_message>‬
+
+‭ oad source‬‭filename‬‭and compile with‬
+L
+‭flash loader, then exit.‬
+
+‭kay‬
+o
+‭<filename_path>‬‭
+:‭<
+‬ line_number>‬‭
+:error:‬
+‭<error_message>‬
+
+‭ oad source‬‭filename‬‭and compile with‬
+L
+‭both DEBUG and flash loader, then‬
+‭exit.‬
+
+‭kay‬
+o
+‭<filename_path>‬‭
+:‭<
+‬ line_number>‬‭
+:error:‬
+‭<error_message>‬
+
+‭ oad source‬‭filename,‬‭compile, and‬
+L
+‭save raw flash image file suitable for‬
+‭writing to flash chip, then exit.‬
+
+‭kay‬
+o
+‭<filename_path>‬‭
+:‭<
+‬ line_number>‬‭
+:error:‬
+‭<error_message>‬
+
+‭Parallax Spin2 Documentation Page‬‭55‬‭of‬‭57‬
+
+✔️
+‭ ‬
+✔️
+
+pnut filename -rd‬
+‭
+
+✔️
+
+‭ ‬
+
+✔️
+‭ ‬
+✔️
+
+✔️
+
+‭ ‬
+
+‭ ‬
+
+✔️
+‭ ‬
+✔️
+
+‭ ‬
+
+pnut filename -f‬
+‭
+
+pnut filename -fd‬
+‭
+
+✔️
+‭ ‬
+✔️
+✔️‭ ‬
+
+‭ ‬
+
+pnut filename -r‬
+‭
+
+✔️
+‭ ‬
+✔️
+✔️‭ ‬
+
+‭ ‬
+
+‭ ‬
+
+✔️
+‭ ‬
+✔️
+✔️ ‬
+‭
+✔️ ‬
+‭
+‭ ‬
+
+pnut filename -b‬
+‭
+
+pnut filename -bd‬
+‭
+
+‭nut -debug‬
+p
+{CommPort}‬
+‭
+{BaudRate}‬
+‭
+
+‭ oad source‬‭filename,‬‭compile,‬
+L
+‭download, then exit.‬
+
+‭ kay‬
+o
+‭<filename_path>‬‭
+:‭<
+‬ line_number>‬‭
+:error:‬
+‭<error_message>‬
+serial_error‬
+‭
+
+‭ oad source‬‭filename‬‭, compile with‬
+L
+‭DEBUG, download, start DEBUG, then‬
+‭exit when the DEBUG window is‬
+‭closed.‬
+
+‭kay‬
+o
+‭<filename_path>‬‭
+:‭<
+‬ line_number>‬‭
+:error:‬
+‭<error_message>‬
+serial_error‬
+‭
+
+‭ oad source‬‭filename‬‭, compile with‬
+L
+‭flash loader, download, then exit.‬
+
+‭kay‬
+o
+‭<filename_path>‬‭
+:‭<
+‬ line_number>‬‭
+:error:‬
+‭<error_message>‬
+serial_error‬
+‭
+
+‭ oad source‬‭filename‬‭, compile with‬
+L
+‭both DEBUG and flash loader,‬
+‭download, start DEBUG, then exit‬
+‭when the DEBUG window is closed.‬
+
+‭kay‬
+o
+‭<filename_path>‬‭
+:‭<
+‬ line_number>‬‭
+:error:‬
+‭<error_message>‬
+serial_error‬
+‭
+
+‭ oad binary‬‭filename.bin‬‭and‬
+L
+‭download.‬
+
+‭kay‬
+o
+serial_error‬
+‭
+
+‭ oad binary‬‭filename.bin,‬‭download,‬
+L
+‭start DEBUG, then exit when the‬
+‭DEBUG window is closed.‬
+
+‭kay‬
+o
+serial_error‬
+‭
+
+‭ pen CommPort (default = 1) at‬
+O
+‭BaudRate (default = 2_000_000), start‬
+‭DEBUG, then exit when the DEBUG‬
+‭window is closed.‬
+
+‭kay‬
+o
+serial_error‬
+‭
+
+‭Included Batch File to invoke PNut.exe and return status to STDOUT, STDERR, and ERRORLEVEL‬
+‭PNUT_SHELL.BAT File‬
+
+‭Batch File Line Descriptions‬
+
+‭echo off‬
+@
+set ERROR_FILE=error.txt‬
+‭
+if exist %ERROR_FILE% del /q /f %ERROR_FILE%‬
+‭
+if exist %1 set GOOD_SRC=1‬
+‭
+if exist %1.spin2 set GOOD_SRC=1‬
+‭
+if defined GOOD_SRC (‬
+‭
+pnut_v48 %1 %2 %3‬
+‭
+set pnuterror = %ERRORLEVEL%‬
+‭
+for /f "tokens=*" %%i in (%ERROR_FILE%) do echo %%i 1>&2‬
+‭
+) else (‬
+‭
+set pnuterror=-1‬
+‭
+echo "Error: File NOT found - %1" 1>&2‬
+‭
+)‬
+‭
+exit %pnuterror%‬
+‭
+
+‭ ancel echo to console.‬
+C
+‭Set ERROR.TXT filename.‬
+‭If ERROR.TXT exists, delete it.‬
+‭Check first parameter for a valid source file.‬
+‭Check first parameter for a valid .spin2 source file.‬
+‭IF source file exists‬
+‭...Invoke PNut with passed parameters. Example: pnut_shell filename -r‬
+‭...Capture ERRORLEVEL from PNut (0 = okay, 1 = error).‬
+‭...Copy ERROR.TXT file to STDOUT and STDERR.‬
+‭ELSE‬
+‭...Set file-not-found error.‬
+‭...Return file-not-found error message to STDOUT and STDERR.‬
+‭Return ERRORLEVEL. Change to 'exit /b %pnuterror%' to maintain the console window.‬
+

@@ -1,0 +1,375 @@
+‭Clock Setup‬
+‭ o establish the initial clock setup for your program, you can declare certain symbols which the compiler will look for to determine your setup. These symbols must be defined in‬
+T
+‭one of the following combinations:‬
+‭CON symbol declarations‬
+‭(numbers are for example, can vary)‬
+
+‭HUBSET‬
+‭%CC_SS **‬
+
+CON
+‭
+
+_clkfreq = 250_000_000‬
+‭errfreq = 0‬
+_
+
+‭ elects XI/XO-crystal-plus-PLL mode, assumes 20 MHz crystal.‬
+S
+‭The optimal PLL setting will be computed to achieve _clkfreq.‬
+‭Compilation fails if _clkfreq ± _errfreq is unachievable. *‬
+
+10_11‬
+‭
+
+CON
+‭
+
+_xtlfreq = 12_000_000‬
+‭clkfreq = 148_500_000‬
+_
+_errfreq =
+‭
+150_000‬
+
+‭ elects XI/XO-crystal-plus-PLL mode, along with frequencies.‬
+S
+‭The optimal PLL setting will be computed to achieve _clkfreq.‬
+‭Compilation fails if _clkfreq ± _errfreq is unachievable. *‬
+
+1x_11‬
+‭
+
+CON
+‭
+
+_xinfreq = 32_000_000‬
+‭clkfreq = 297_500_000‬
+_
+_errfreq =
+‭
+100_000‬
+
+‭ elects XI-input-plus-PLL mode, along with frequencies.‬
+S
+‭The optimal PLL setting will be computed to achieve _clkfreq.‬
+‭Compilation fails if _clkfreq ± _errfreq is unachievable. *‬
+
+01_11‬
+‭
+
+CON
+‭
+
+_xtlfreq =
+
+‭Selects XI/XO-crystal mode and frequency.‬
+
+1x_10‬
+‭
+
+CON
+‭
+
+_xinfreq = 100_000_000‬
+
+‭Selects XI-input mode and frequency.‬
+
+01_10‬
+‭
+
+CON
+‭
+
+_rcslow‬
+
+‭Selects internal RCSLOW oscillator which runs at ~20 KHz.‬
+
+00_01‬
+‭
+
+CON
+‭
+
+_rcfast‬
+
+‭Selects internal RCFAST oscillator which runs at 20 MHz+.‬
+
+00_00‬
+‭
+
+‭Selects internal RCFAST oscillator which runs at 20 MHz+.‬
+
+00_00‬
+‭
+
+‭Selects XI/XO-crystal mode and 20 MHz to facilitate DEBUG.‬
+
+10_10‬
+‭
+
+16_000_000‬
+
+No symbol and not DEBUG mode‬
+‭
+No symbol and DEBUG mode‬
+‭
+*‭ ‬
+‭**‬
+
+‭Effect‬
+
+‭ he _errfreq declaration is optional, since _errfreq defaults to 1_000_000.‬
+T
+‭If _xtlfreq >= 16_000_000 then x=0 for 15pF per XI/XO, else x=1 for 30pF per XI/XO.‬
+
+‭During compilation, two constant symbols are defined by the compiler, whose values reflect the compiled clock setup:‬
+‭Symbol‬
+clkmode_‬
+‭
+
+‭Description‬
+‭The compiled clock mode, settable via HUBSET.‬
+‭●‬
+
+‭For Spin2 programs, HUBSET will be invoked with 'clkmode_' before your program starts, in‬
+
+‭Parallax Spin2 Documentation Page‬‭56‬‭of‬‭57‬
+
+‭ rder to set the compiled clock mode. The 'clkmode_' value will also be stored in the hub‬
+o
+‭variable 'clkmode'.‬
+‭●‬
+
+‭ or pure PASM programs, 'clkmode_' can be used to set the clock mode away from its initial‬
+F
+‭RCFAST setting to any crystal/PLL compiled setting, as follows:‬
+‭UBSET
+H
+WAITX
+‭
+HUBSET
+‭
+
+‭●‬
+
+clkfreq_‬
+‭
+
+##clkmode_ & !3
+##20_000_000/100
+##clkmode_
+
+'start crystal/PLL, stay‬‭
+in RCFAST‬
+'wait 10ms‬
+'switch to crystal/PLL‬
+
+‭ he 'clkmode_' value may differ in each file of the application hierarchy. Files below the top-level‬
+T
+‭file do not inherit the top-level file's value.‬
+
+‭The compiled clock frequency.‬
+‭‬
+●
+‭●‬
+‭●‬
+
+‭ or Spin2 programs, the 'clkfreq_' value will be stored in the hub variable 'clkfreq'.‬
+F
+‭For pure PASM programs, 'clkfreq_' may be referenced only as a constant.‬
+‭The 'clkfreq_' value may differ in each file of the application hierarchy. Files below the top-level‬
+‭file do not inherit the top-level file's value.‬
+
+‭For Spin2 programs, two hub variables are maintained which reflect the current clock setup:‬
+‭Spin2 Variables‬
+
+‭Description‬
+
+clkmode‬
+‭
+
+‭The current clock mode, located at LONG[$40]. Initialized with the 'clkmode_' value.‬
+
+clkfreq‬
+‭
+
+‭The current clock frequency, located at LONG[$44]. Initialized with the 'clkfreq_' value.‬
+‭●‬
+
+‭For Spin2 methods, these variables can be read and written as 'clkmode' and 'clkfreq'.‬
+‭Rather than write these variables directly, it's much safer to use:‬
+CLKSET(new_clkmode, new_clkfreq)‬
+‭
+‭ his way, all other code sees a quick, parallel update to both 'clkmode' and 'clkfreq', and the‬
+T
+‭clock mode transition is done safely, employing the prior values, in order to avoid a potential‬
+‭clock glitch.‬
+
+‭●‬
+
+‭For PASM code running under Spin2, these variables can be read and written as follows:‬
+‭DLONG
+R
+WRLONG
+‭
+
+x,#@clkmode
+x,#@clkmode
+
+'read clkmode into x‬
+'write x to clkmode‬
+
+‭DLONG
+R
+WRLONG
+‭
+
+x,#@clkfreq
+x,#@clkfreq
+
+'read clkfreq into x‬
+'write x to clkfreq‬
+
+‭ETQ
+S
+RDLONG
+‭
+
+#2-1
+x,#@clkmode‬
+
+'read clkmode and clkfreq into x and x+1‬
+
+‭ETQ
+S
+WRLONG
+‭
+
+#2-1
+x,#@clkmode‬
+
+'write x and x+1 to clkmode and clkfreq‬
+
+‭ or PASM-only programs, there is a special instruction named ASMCLK which will set the clock mode specified by the clock setup symbols. ASMCLK has no operands, but‬
+F
+‭may be used with a conditional prefix. ASMCLK will assemble to one or six PASM instructions, depending upon the clock mode.‬
+‭ s of v35v, ASMCLK is no longer needed at the start of PASM-only programs, since a 16-long clock-setter program is automatically prepended to PASM-only programs which‬
+A
+‭use any non-RCFAST (default) clock mode. This clock-setter program sets the clock mode, moves your PASM program down by 16 longs, then executes it by doing a COGINIT‬
+‭#0,#0, to effect a normal start.‬
+I‭f you'd rather not have the clock-setter program prepended to your PASM-only program, you can inhibit it by declaring constant _AUTOCLK = 0. Then, your code will begin‬
+‭executing with the default RCFAST mode. If you want to switch to another clock mode, you will need to configure the clock manually in your code, perhaps opting to use the‬
+‭ASMCLK instruction.‬
+‭CON declarations‬
+‭(numbers are for example, can vary)‬
+
+‭HUBSET‬
+‭ CC_SS‬
+%
+
+CON
+‭
+
+_clkfreq = 250_000_000‬
+‭errfreq = 0‬
+_
+
+10_11‬
+‭
+
+CON
+‭
+
+_xtlfreq = 12_000_000‬
+‭clkfreq = 148_500_000‬
+_
+_errfreq =
+‭
+150_000‬
+
+1x_11‬
+‭
+
+CON
+‭
+
+_xinfreq = 32_000_000‬
+‭clkfreq = 297_500_000‬
+_
+_errfreq =
+‭
+100_000‬
+
+01_11‬
+‭
+
+CON
+‭
+
+_xtlfreq =
+
+16_000_000‬
+
+1x_10‬
+‭
+
+CON
+‭
+
+_xinfreq = 100_000_000‬
+
+01_10‬
+‭
+
+CON
+‭
+
+_rcslow‬
+
+CON
+‭
+
+_rcfast‬
+
+‭ASMCLK assembles to:‬
+
+‭UBSET
+H
+WAITX
+‭
+HUBSET
+‭
+
+##clkmode_ & !%11
+##20_000_000/100
+##clkmode_
+
+'start external clock, stay in RCFAST mode‬
+'allow 10ms for external clock to stabilize‬
+'switch to external clock mode‬
+
+00_01‬
+‭
+
+HUBSET
+‭
+
+#1
+
+'switch to RCSLOW mode‬
+
+00_00‬
+‭
+
+HUBSET
+‭
+
+#0
+
+'stay in RCFAST mode‬
+
+‭Parallax Spin2 Documentation Page‬‭57‬‭of‬‭57‬
+
+

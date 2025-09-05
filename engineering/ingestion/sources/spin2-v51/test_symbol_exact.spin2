@@ -1,0 +1,16 @@
+' Test exact symbol lengths
+CON
+  ' 20 chars: 12345678901234567890
+  twentycharacternames = 20  
+  
+  ' 25 chars: 1234567890123456789012345
+  twentyfivecharactername_ = 25
+  
+  ' 29 chars: 12345678901234567890123456789
+  twentyninecharacternameshere = 29
+  
+  ' 30 chars: 123456789012345678901234567890
+  thirtycharacternamesareherenow = 30
+
+PUB main()
+  return twentycharacternames

@@ -1,0 +1,7 @@
+' Test 31-character symbol
+CON
+  ' Exactly 31 characters
+  a23456789_123456789_123456789_1 = 31
+
+PUB main()
+  return a23456789_123456789_123456789_1

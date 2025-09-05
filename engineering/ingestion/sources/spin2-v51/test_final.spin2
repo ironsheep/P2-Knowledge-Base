@@ -1,0 +1,6 @@
+' Test symbol lengths
+CON
+  a = 1
+  
+PUB main()
+  return a

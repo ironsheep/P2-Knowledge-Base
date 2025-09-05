@@ -1,0 +1,4217 @@
+‭Debugging is invoked by holding CTRL (in PNut), or enabling debug with CTRL+D (in Propeller Tool), before the usual F9..F11 keys, to compile, download, and‬
+‭program to flash.‬
+
+‭●‬
+
+‭During execution, as DEBUG() statements are encountered, text messages are sent out serially on P62 at 2 Mbaud in 8-N-1 format.‬
+
+‭●‬
+
+‭DEBUG() messages always start with "CogN ", where N is the cog number, followed by two spaces, and they always end with CR+LF (new line).‬
+
+‭●‬
+
+‭Up to 255 DEBUG() statements can exist within your application, since the BRK instruction is used to interrupt and select the particular DEBUG() statement definition.‬
+
+‭●‬
+
+‭You can define several symbols to modify debugger behavior: DEBUG_COGS, DEBUG_DELAY, DEBUG_BAUD, DEBUG_PIN, DEBUG_TIMESTAMP, etc. See table.‬
+
+‭●‬
+
+‭Each time a debug-enabled cog is started, a debug message is output to indicate the cog number, code address (PTRB), parameter (PTRA), and 'load' or 'jump'‬
+‭mode.‬
+
+‭●‬
+
+‭For Spin2, DEBUG() statements can output expression and variable values, hub byte/word/long arrays, and register arrays.‬
+
+‭●‬
+
+‭For PASM, DEBUG() statements can output register values/arrays, hub byte/word/long arrays, C/Z flags, and constants. PASM syntax is used: implied register or‬
+‭#immediate.‬
+
+‭●‬
+
+‭DEBUG() output data can be displayed as floating-point, decimal, hex, or binary, and sized to byte, word, long, or auto. Hub character strings are also supported.‬
+
+‭●‬
+
+‭DEBUG() output commands show both the source and value: "DEBUG(UHEX(x))" might output "x = $ABC".‬
+
+‭●‬
+
+‭DEBUG() commands which output data can have multiple sets of parameters, separated by commas: SDEC(x,y,z) and LSTR(ptr1,size1,ptr2,size2)‬
+
+‭●‬
+
+‭Commas are automatically output between data: "DEBUG(UHEX_BYTE(d,e,f), SDEC(g))" might output "d = $45, e = $67, f = $89, g = -1_024".‬
+
+‭●‬
+
+‭All DEBUG() output commands have alternate versions, ending in "_" which output only the value: DEBUG(UHEX_BYTE_(d,e,f)) might output "$45, $67, $89".‬
+
+‭●‬
+
+‭DEBUG() statements can contain comma-separated strings and characters, aside from commands: DEBUG(‬‭
+"We got‬‭
+here! Oh, Nooooo...", 13, 13)‬
+
+‭●‬
+
+‭DEBUG() statements may contain IF() and IFNOT() commands to gate further output within the statement. An initial IF/IFNOT will gate the entire message.‬
+
+‭●‬
+
+‭DEBUG() statements may contain a final DLY(milliseconds) command to slow down a cog's messaging, since messages may stream at the rate of ~10,000 per‬
+‭second.‬
+
+‭●‬
+
+‭DEBUG() statements may contain PC_KEY() and PC_MOUSE() commands to get the state of the host's keyboard and mouse into DEBUG() Displays.‬
+
+‭●‬
+
+‭DEBUG() serial output can be redirected to a different pin, at a different baud rate, for displaying/logging elsewhere.‬
+
+‭●‬
+
+‭DEBUG without parentheses will invoke that cog's PASM-level debugger, from either Spin2 or PASM. There is no limit on the number of plain DEBUG commands.‬
+
+‭●‬
+
+‭By defining either the DEBUG_COGINIT or DEBUG_MAIN symbol, the PASM-level debugger will be started automatically for each cog upon its COGINIT.‬
+
+‭●‬
+
+‭LOCK[15] is allocated by the debugger and used among all cogs during their debug interrupts to time-share the DEBUG serial TX and RX pins, as well as some RAM.‬
+
+‭●‬
+
+‭P63 is configured in long-repository mode and holds the clock frequency value between debug interrupts. It must be updated when the clock frequency is altered.‬
+
+‭●‬
+
+‭Command-line supports DEBUG-only mode: PNut -debug {CommPort if not 1} {BaudRate if not 2_000_000}‬
+
+‭Commands for use within DEBUG() statements‬
+‭Conditionals‬
+
+‭Details‬
+
+‭Parallax Spin2 Documentation Page‬‭26‬‭of‬‭57‬
+
+IF(condition)‬
+‭
+
+I‭f condition <> 0 then continue at the next command within the DEBUG() statement, else skip all remaining commands and output‬
+‭CR+LF. If used as the first command in the DEBUG() statement, IF will gate ALL output for the statement, including the "CogN‬
+‭"+CR+LF. This way, DEBUG() messages can be entirely suppressed, so that you can filter what is important.‬
+
+IFNOT(condition)‬
+‭
+
+I‭f condition = 0 then continue at the next command within the DEBUG() statement, else skip all remaining commands and output‬
+‭CR+LF. If used as the first command in the DEBUG() statement, IFNOT will gate ALL output for the statement, including the "CogN‬
+‭"+CR+LF. This way, DEBUG() messages can be entirely suppressed, so that you can filter what is important.‬
+
+‭Boolean Output *‬
+BOOL(value)‬
+‭
+
+‭String Output *‬
+
+‭Details‬
+‭Output "TRUE" if value is not 0 or "FALSE" if 0.‬
+
+TRUE / FALSE‬
+‭
+
+‭Details‬
+
+ZSTR(hub_pointer)‬
+‭
+
+‭Output zero-terminated string at hub_pointer.‬
+
+LSTR(hub_pointer,size)‬
+‭
+
+‭Output 'size' characters of string at hub_pointer.‬
+
+‭Floating-Point Output *‬
+
+‭Output‬
+
+‭Details‬
+
+‭Output‬
+"Hello!"‬
+‭
+"Goodbye."‬
+‭
+
+‭Min Output‬
+
+‭Max Output‬
+
+FDEC(value)‬
+‭
+
+‭Output floating-point value.‬
+
+-3.4e+38‬
+‭
+
+3.4e+38‬
+‭
+
+FDEC_REG_ARRAY(reg_pointer,size)‬
+‭
+
+‭Output register array as floating-point values.‬
+
+-3.4e+38‬
+‭
+
+3.4e+38‬
+‭
+
+FDEC_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub long array as floating-point values.‬
+
+-3.4e+38‬
+‭
+
+3.4e+38‬
+‭
+
+‭Min Output‬
+
+‭Max Output‬
+
+‭Decimal Output, unsigned *‬
+
+‭Details‬
+
+UDEC(value)‬
+‭
+
+‭Output unsigned decimal value.‬
+
+0‬
+‭
+
+4_294_967_295‬
+‭
+
+UDEC_BYTE(value)‬
+‭
+
+‭Output byte-size unsigned decimal value.‬
+
+0‬
+‭
+
+255‬
+‭
+
+UDEC_WORD(value)‬
+‭
+
+‭Output word-size unsigned decimal value.‬
+
+0‬
+‭
+
+65_535‬
+‭
+
+UDEC_LONG(value)‬
+‭
+
+‭Output long-size unsigned decimal value.‬
+
+0‬
+‭
+
+4_294_967_295‬
+‭
+
+UDEC_REG_ARRAY(reg_pointer,size)‬
+‭
+
+‭Output register array as unsigned decimal values.‬
+
+0‬
+‭
+
+4_294_967_295‬
+‭
+
+UDEC_BYTE_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub byte array as unsigned decimal values.‬
+
+0‬
+‭
+
+255‬
+‭
+
+UDEC_WORD_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub word array as unsigned decimal values.‬
+
+0‬
+‭
+
+65_535‬
+‭
+
+UDEC_LONG_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub long array as unsigned decimal values.‬
+
+0‬
+‭
+
+4_294_967_295‬
+‭
+
+‭Decimal Output, signed *‬
+
+‭Details‬
+
+‭Min Output‬
+
+‭Max Output‬
+
+SDEC(value)‬
+‭
+
+‭Output signed decimal value.‬
+
+SDEC_BYTE(value)‬
+‭
+
+-2_147_483_648‬
+‭
+
+2_147_483_647‬
+‭
+
+‭Output byte-size signed decimal value.‬
+
+-128‬
+‭
+
+127‬
+‭
+
+SDEC_WORD(value)‬
+‭
+
+‭Output word-size signed decimal value.‬
+
+-32_768‬
+‭
+
+32_767‬
+‭
+
+SDEC_LONG(value)‬
+‭
+
+‭Output long-size signed decimal value.‬
+
+-2_147_483_648‬
+‭
+
+2_147_483_647‬
+‭
+
+SDEC_REG_ARRAY(reg_pointer,size)‬
+‭
+
+‭Output register array as signed decimal values.‬
+
+-2_147_483_648‬
+‭
+
+2_147_483_647‬
+‭
+
+SDEC_BYTE_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub byte array as signed decimal values.‬
+
+-128‬
+‭
+
+127‬
+‭
+
+SDEC_WORD_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub word array as signed decimal values.‬
+
+-32_768‬
+‭
+
+32_767‬
+‭
+
+SDEC_LONG_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub long array as signed decimal values.‬
+
+-2_147_483_648‬
+‭
+
+2_147_483_647‬
+‭
+
+‭Hexadecimal Output, unsigned *‬
+
+‭Details‬
+
+‭Min Output‬
+
+‭Max Output‬
+
+UHEX(value)‬
+‭
+
+‭Output auto-size unsigned hex value.‬
+
+$0‬
+‭
+
+$FFFF_FFFF‬
+‭
+
+UHEX_BYTE(value)‬
+‭
+
+‭Output byte-size unsigned hex value.‬
+
+$00‬
+‭
+
+$FF‬
+‭
+
+UHEX_WORD(value)‬
+‭
+
+‭Output word-size unsigned hex value.‬
+
+$0000‬
+‭
+
+$FFFF‬
+‭
+
+UHEX_LONG(value)‬
+‭
+
+‭Output long-size unsigned hex value.‬
+
+$0000_0000‬
+‭
+
+$FFFF_FFFF‬
+‭
+
+UHEX_REG_ARRAY(reg_pointer,size)‬
+‭
+
+‭Output register array as unsigned hex values.‬
+
+$0000_0000‬
+‭
+
+$FFFF_FFFF‬
+‭
+
+UHEX_BYTE_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub byte array as unsigned hex values.‬
+
+$00‬
+‭
+
+$FF‬
+‭
+
+UHEX_WORD_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub word array as unsigned hex values.‬
+
+$0000‬
+‭
+
+$FFFF‬
+‭
+
+UHEX_LONG_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub long array as unsigned hex values.‬
+
+$0000_0000‬
+‭
+
+$FFFF_FFFF‬
+‭
+
+‭Min Output‬
+
+‭Max Output‬
+
+‭Hexadecimal Output, signed *‬
+
+‭Details‬
+
+SHEX(value)‬
+‭
+
+‭Output auto-size signed hex value.‬
+
+-$8000_0000‬
+‭
+
+$7FFF_FFFF‬
+‭
+
+SHEX_BYTE(value)‬
+‭
+
+‭Output byte-size signed hex value.‬
+
+-$80‬
+‭
+
+$7F‬
+‭
+
+SHEX_WORD(value)‬
+‭
+
+‭Output word-size signed hex value.‬
+
+-$8000‬
+‭
+
+$7FFF‬
+‭
+
+SHEX_LONG(value)‬
+‭
+
+‭Output long-size signed hex value.‬
+
+-$8000_0000‬
+‭
+
+$7FFF_FFFF‬
+‭
+
+SHEX_REG_ARRAY(reg_pointer,size)‬
+‭
+
+‭Output register array as signed hex values.‬
+
+-$8000_0000‬
+‭
+
+$7FFF_FFFF‬
+‭
+
+SHEX_BYTE_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub byte array as signed hex values.‬
+
+-$80‬
+‭
+
+$7F‬
+‭
+
+‭Parallax Spin2 Documentation Page‬‭27‬‭of‬‭57‬
+
+SHEX_WORD_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub word array as signed hex values.‬
+
+-$8000‬
+‭
+
+$7FFF‬
+‭
+
+SHEX_LONG_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub long array as signed hex values.‬
+
+-$8000_0000‬
+‭
+
+$7FFF_FFFF‬
+‭
+
+‭Min Output‬
+
+‭Max Output‬
+
+‭Binary Output, unsigned *‬
+
+‭Details‬
+
+UBIN(value)‬
+‭
+
+‭Output auto-size unsigned binary value.‬
+
+%0‬
+‭
+
+%11111111_11111111_11111111_11111111‬
+‭
+
+UBIN_BYTE(value)‬
+‭
+
+‭Output byte-size unsigned binary value.‬
+
+%00000000‬
+‭
+
+%11111111‬
+‭
+
+UBIN_WORD(value)‬
+‭
+
+‭Output word-size unsigned binary value.‬
+
+%00000000_00000000‬
+‭
+
+%11111111_11111111‬
+‭
+
+UBIN_LONG(value)‬
+‭
+
+‭Output long-size unsigned binary value.‬
+
+%00000000_00000000_00000000_00000000‬
+‭
+
+%11111111_11111111_11111111_11111111‬
+‭
+
+UBIN_REG_ARRAY(reg_pointer,size)‬
+‭
+
+‭Output register array as unsigned binary values.‬
+
+%00000000_00000000_00000000_00000000‬
+‭
+
+%11111111_11111111_11111111_11111111‬
+‭
+
+UBIN_BYTE_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub byte array as unsigned binary values.‬
+
+%00000000‬
+‭
+
+%11111111‬
+‭
+
+UBIN_WORD_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub word array as unsigned binary values.‬
+
+%00000000_00000000‬
+‭
+
+%11111111_11111111‬
+‭
+
+UBIN_LONG_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub long array as unsigned binary values.‬
+
+%00000000_00000000_00000000_00000000‬
+‭
+
+%11111111_11111111_11111111_11111111‬
+‭
+
+‭Min Output‬
+
+‭Max Output‬
+
+‭Binary Output, signed *‬
+
+‭Details‬
+
+SBIN(value)‬
+‭
+
+‭Output auto-size signed binary value.‬
+
+-%10000000_00000000_00000000_00000000‬
+‭
+
+%01111111_11111111_11111111_11111111‬
+‭
+
+SBIN_BYTE(value)‬
+‭
+
+‭Output byte-size signed binary value.‬
+
+-%10000000‬
+‭
+
+%01111111‬
+‭
+
+SBIN_WORD(value)‬
+‭
+
+‭Output word-size signed binary value.‬
+
+-%10000000_00000000‬
+‭
+
+%01111111_11111111‬
+‭
+
+SBIN_LONG(value)‬
+‭
+
+‭Output long-size signed binary value.‬
+
+-%10000000_00000000_00000000_00000000‬
+‭
+
+%01111111_11111111_11111111_11111111‬
+‭
+
+SBIN_REG_ARRAY(reg_pointer,size)‬
+‭
+
+‭Output register array as signed binary values.‬
+
+-%10000000_00000000_00000000_00000000‬
+‭
+
+%01111111_11111111_11111111_11111111‬
+‭
+
+SBIN_BYTE_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub byte array as signed binary values.‬
+
+-%10000000‬
+‭
+
+%01111111‬
+‭
+
+SBIN_WORD_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub word array as signed binary values.‬
+
+-%10000000_00000000‬
+‭
+
+%01111111_11111111‬
+‭
+
+SBIN_LONG_ARRAY(hub_pointer,size)‬
+‭
+
+‭Output hub long array as signed binary values.‬
+
+-%10000000_00000000_00000000_00000000‬
+‭
+
+%01111111_11111111_11111111_11111111‬
+‭
+
+‭* These commands accept multiple parameters, or multiple sets of parameters. Alternate commands with the same names, but ending in "_", are also available for value-only‬
+‭output (i.e. BOOL_, ZSTR_, LSTR_, UDEC_).‬
+
+‭Miscellaneous‬
+
+‭Details‬
+
+DLY(milliseconds)‬
+‭
+
+‭ elay for some milliseconds to slow down continuous message outputs for this cog. DLY is only allowed as the last command‬
+D
+‭in a DEBUG() statement, since it releases LOCK[15] before the delay, permitting other cogs to capture LOCK[15] so that they‬
+‭may take control of the DEBUG() serial-transmit pin and output their own DEBUG() messages.‬
+
+PC_KEY(pointer_to_long)‬
+‭
+
+‭FOR USE IN GRAPHICAL DEBUG() DISPLAYS - Must be the last command in a DEBUG() statement.‬
+‭ eturns any new host-PC keypress that occurred within the last 100ms into a long inside the chip. The DEBUG() Display‬
+R
+‭must have focus for keypresses to be noticed.‬
+LONG key
+‭
+
+'Key long which receives keypresses (0 if no keypress)‬
+
+‭ = <no keypress>‬
+0
+‭1 = Left Arrow‬
+‭2 = Right Arrow‬
+‭3 = Up Arrow‬
+‭4 = Down Arrow‬
+‭5 = Home‬
+‭6 = End‬
+‭7 = Delete‬
+‭8 = Backspace‬
+‭9 = Tab‬
+‭10 = Insert‬
+‭11 = Page Up‬
+‭12 = Page Down‬
+‭13 = Enter‬
+‭27 = Esc‬
+‭32..126 = Space to "~", including all symbols, digits, and letters‬
+I‭f used in Spin2 code, the long must be in the hub (use @key as the pointer).‬
+‭If used in PASM code, the long must be a cog register (use #key as the pointer).‬
+PC_MOUSE(pointer_to_7_longs)‬
+‭
+
+‭FOR USE IN GRAPHICAL DEBUG() DISPLAYS - Must be the last command in a DEBUG() statement.‬
+‭Returns the current host-PC mouse status into a 7-long structure inside the chip, arranged as follows:‬
+‭ONG
+L
+LONG
+‭
+LONG
+‭
+LONG
+‭
+LONG
+‭
+LONG
+‭
+LONG
+‭
+
+xpos
+ypos
+wheeldelta
+lbutton
+mbutton
+rbutton
+pixel
+
+'X position within the DEBUG Display (xpos<0 and ypos<0 if mouse is outside)‬
+'Y position within the DEBUG Display‬
+'Scroll-wheel delta, 0 or +/-1 if changed (the DEBUG Display must have focus)‬
+'Left-button state, 0 or -1 if pressed‬
+'Middle-button state, 0 or -1 if pressed‬
+'Right-button state, 0 or -1 if pressed‬
+'Pixel color at mouse position, $00_RR_GG_BB or -1 if outside the DEBUG Display‬
+
+I‭f used in Spin2 code, the seven longs must be in the hub (use @xpos as the pointer).‬
+‭If used in PASM code, the seven longs must be cog registers (use #xpos as the pointer).‬
+‭Output the C and Z flags as "C=? Z=?". Useful in PASM code.‬
+
+C_Z‬
+‭
+
+‭Symbols you can define to modify DEBUG behavior‬
+‭CON Symbol‬
+
+‭Default‬
+
+‭Purpose‬
+
+‭Parallax Spin2 Documentation Page‬‭28‬‭of‬‭57‬
+
+DOWNLOAD_BAUD‬
+‭
+
+2_000_000‬
+‭
+
+‭Sets the download baud rate.‬
+
+DEBUG_COGS‬
+‭
+
+%11111111‬
+‭
+
+‭Selects which cogs have debug interrupts enabled. Bits 7..0 enable debugging interrupts in cogs 7..0.‬
+
+DEBUG_COGINIT‬
+‭
+
+undefined‬
+‭
+
+‭By declaring this symbol, each cog's PASM-level debugger will initially be invoked when a COGINIT occurs.‬
+
+DEBUG_MAIN‬
+‭
+
+undefined‬
+‭
+
+‭ y declaring this symbol, each cog's PASM-level debugger will initially be invoked when a COGINIT occurs, and it will be ready to‬
+B
+‭single-step through main (non-interrupt) code. In this case, DEBUG commands will be ignored, until you select "DEBUG"‬
+‭sensitivity in the debugger.‬
+
+DEBUG_DELAY‬
+‭
+
+0‬
+‭
+
+‭Sets a delay in milliseconds before your application runs and begins transmitting DEBUG messages.‬
+
+DEBUG_PIN_TX‬
+‭
+
+62‬
+‭
+
+‭Sets the DEBUG serial output pin. For DEBUG windows to open, DEBUG_PIN must be 62.‬
+
+DEBUG_PIN_RX‬
+‭
+
+63‬
+‭
+
+‭Sets the DEBUG serial input pin for interactivity with the host PC.‬
+
+DEBUG_BAUD‬
+‭
+
+DOWNLOAD_BAUD‬
+‭
+
+DEBUG_TIMESTAMP‬
+‭
+
+undefined‬
+‭
+
+DEBUG_LOG_SIZE‬
+‭
+
+0‬
+‭
+
+‭Sets the DEBUG baud rate. May be necessary to add DEBUG_DELAY if DEBUG_BAUD is less than DOWNLOAD_BAUD.‬
+‭By declaring this symbol, each DEBUG message will be time-stamped with the 64-bit CT value.‬
+‭ ets the maximum size in bytes of the 'DEBUG.log' file which will collect DEBUG messages. A value of 0 will inhibit log file‬
+S
+‭generation.‬
+
+DEBUG_LEFT‬
+‭
+
+(dynamic)‬
+‭
+
+‭Sets the left screen coordinate where the DEBUG message window will appear.‬
+
+DEBUG_TOP‬
+‭
+
+(dynamic)‬
+‭
+
+‭Sets the top screen coordinate where the DEBUG message window will appear.‬
+
+DEBUG_WIDTH‬
+‭
+
+(dynamic)‬
+‭
+
+‭Sets the width of the DEBUG message window.‬
+
+DEBUG_HEIGHT‬
+‭
+
+(dynamic)‬
+‭
+
+‭Sets the height of the DEBUG message window.‬
+
+DEBUG_DISPLAY_LEFT‬
+‭
+
+0‬
+‭
+
+‭Sets the overall left screen offset where any DEBUG displays will appear (adds to 'POS' x coordinate in each DEBUG display).‬
+
+DEBUG_DISPLAY_TOP‬
+‭
+
+0‬
+‭
+
+‭Sets the overall top screen offset where any DEBUG displays will appear (adds to 'POS' y coordinate in each DEBUG display).‬
+
+DEBUG_WINDOWS_OFF‬
+‭
+
+0‬
+‭
+
+‭Disables any DEBUG windows from opening after downloading, if set to a non-zero value.‬
+
+DEBUG_MASK‬
+‭
+
+undefined‬
+‭
+
+‭ ssigning a 32-bit mask value to this symbol allows individual DEBUG statements to be gated according to the state of a‬
+A
+‭particular mask bit. This is done by placing a mask bit number (0..31) in brackets, immediately after the DEBUG keyword and‬
+‭before any parameters:‬‭
+DEBUG[MaskBitNumber]{(parameters…)}‬
+‭.‬‭If the particular mask bit is high, the DEBUG will be‬
+‭compiled, otherwise it will be ignored.‬
+
+DEBUG_DISABLE‬
+‭
+
+undefined‬
+‭
+
+‭Assigning a non-0 value to this symbol will disable all DEBUG statements in the file/object.‬
+
+‭Simple DEBUG example in Spin2‬
+
+CON _clkfreq = 10_000_000
+‭
+
+'set 10 MHz clock (assumes 20 MHz crystal)‬
+
+PUB go() | i‬
+‭
+REPEAT i FROM 0 TO 9
+‭
+DEBUG(UDEC(i))
+‭
+
+'count from 0 to 9‬
+'debug, output i‬
+
+‭When run with Ctrl-F10, the Debug window opens and this is what appears:‬
+
+‭og0
+C
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+
+INIT $0000_0000 $0000_0000 load‬
+INIT $0000_0D6C $0000_10BC jump‬
+i = 0‬
+i = 1‬
+i = 2‬
+i = 3‬
+i = 4‬
+i = 5‬
+i = 6‬
+i = 7‬
+i = 8‬
+i = 9‬
+
+‭In the first line of the report, you see Cog0 loading the Spin2 set-up code from $00000. In the second line, the Spin2 interpreter is launched from $00D6C with its stack space‬
+‭starting at $010BC. After that, the Spin2 program is running and you see 'i' iterating from 0 to 9.‬
+
+‭If you change the "9" to "99" in the REPEAT, data will scroll too fast to read, but by adding a DLY command at the end of the DEBUG statement, you can slow down the output:‬
+debug(udec(i), dly(250))
+‭
+
+'debug, output i with a 250ms delay after each report‬
+
+‭Let's say you want to limit the messages being output, so that only odd values of 'i' are shown. You could use an IF at the start of your DEBUG statement to check the‬
+‭least-significant bit of 'i'. When the IF is false, no message will be output, causing only the odd values of i to be shown:‬
+
+debug(if(i & 1), udec(i), dly(250))
+‭
+
+'debug, output only odd i values with a 250ms delay after each report‬
+
+‭Simple DEBUG example in PASM‬
+
+CON _clkfreq = 10_000_000
+‭
+
+'set 10 MHz clock (assumes 20 MHz crystal)‬
+
+‭Parallax Spin2 Documentation Page‬‭29‬‭of‬‭57‬
+
+DAT
+‭
+
+ORG‬
+
+loop
+‭
+
+i
+‭
+
+‭OV
+M
+DEBUG
+DJNF
+‭
+JMP
+‭
+
+i,#9
+(UHEX_LONG(i))
+i,#loop
+#$
+
+'set i to 9‬
+'debug, output i in hex‬
+'decrement i and loop if not -1‬
+'don't go wandering off, stay here‬
+
+RES
+
+1
+
+'reserve one register as 'i'‬
+
+‭When run with Ctrl-F10, the Debug window opens and this is what appears:‬
+
+‭og0
+C
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+Cog0
+‭
+
+INIT $0000_0000 $0000_0000 load‬
+i = $0000_0009‬
+i = $0000_0008‬
+i = $0000_0007‬
+i = $0000_0006‬
+i = $0000_0005‬
+i = $0000_0004‬
+i = $0000_0003‬
+i = $0000_0002‬
+i = $0000_0001‬
+i = $0000_0000‬
+
+‭In the first line of the report, you see Cog0 loading our PASM program from $00000. After that, the program runs and you see 'i' iterating from 9 down to 0.‬
+
+‭If you change the "9" to "99" in the MOV instruction and you'd like to slow things down, add a DLY command to the DEBUG statement and be sure to express the milliseconds‬
+‭as #250, since a plain 250 would be understood as register 250:‬
+
+debug
+‭
+
+(uhex_long(i), dly(#250))
+
+'debug, output i in hex and delay for 250ms after each report‬
+
+‭PASM-Level Debugger‬
+
+CON _clkfreq = 200_000_000‬
+‭
+debug_main
+‭
+
+'run debugger(s) for all main code‬
+
+PUB go() | i‬
+‭
+coginit(newcog, @pasm, 0)
+‭
+
+'start another cog with a pasm program‬
+
+repeat
+‭
+i++‬
+‭
+
+'increment i‬
+
+DAT
+‭
+
+org‬
+
+pasm
+‭
+
+add
+‭dd
+a
+add
+‭
+add
+‭
+jmp
+‭
+
+$100,#1
+$101,#1‬
+$102,#1‬
+$103,#1‬
+#pasm
+
+'loop‬
+
+long
+‭
+
+0[11]
+
+'clear space after code for clarity‬
+
+'increment some registers‬
+
+‭In the example above, the DEBUG_MAIN symbol causes a debugger window to open for each cog when it is initially launched via COGINIT. The above example will launch‬
+‭TWO cogs and debuggers. Cog 0 will be running a Spin2 program that just increments the variable 'i' in a REPEAT loop, and Cog 1 will be running a PASM program that‬
+‭repeatedly adds one to registers $100 to $103.‬
+
+‭Once inside the debugger, you must confirm which break condition(s) you'd like and then click the 'Go' button to execute code to the next break. As you move the mouse‬
+‭around within the debugger window, hints are given on the bottom line which alert you of your options. The debugger is designed to be self-explanatory.‬
+
+‭Note that 'DEBUG' break sensitivity is exclusive to all but 'INIT' (COGINIT) sensitivity. This is because plain DEBUG commands can only be differentiated from DEBUG()‬
+‭commands if no other debug interrupt sources are enabled. The asynchronous 'BREAK', which is actually always enabled, is visually indicated by the absence of all other‬
+‭sensitivities, excepting 'INIT'. Because COGINITs can always be detected within debug interrupts, 'INIT' sensitivity is independent of all the others. To use the asynchronous‬
+‭break capability, you must have another cog that is frequently updating its own debugger, so that it can serve as the messenger to generate the asynchronous break for the cog‬
+‭of interest.‬
+
+‭Parallax Spin2 Documentation Page‬‭30‬‭of‬‭57‬
+
+‭To launch a debugger or force an update to an already-open debugger, you can insert a plain DEBUG command into your Spin2 or PASM code where you would like the‬
+‭update to occur. You can place any number of plain DEBUG commands throughout your application, since they all resolve to a 'BRK #0' instruction, whereas DEBUG()‬
+‭commands resolve to unique 'BRK #1..255' instructions. For plain DEBUG commands to be subsequently registered by the debugger after pressing the 'Go' button, the‬
+‭'DEBUG' sensitivity button must be set. This will be the default sensitivity, unless either DEBUG_COGINIT or DEBUG_MAIN symbols were defined, which set the initial‬
+
+‭Parallax Spin2 Documentation Page‬‭31‬‭of‬‭57‬
+
+‭sensitivity to either 'INIT' or 'MAIN'.‬
+
+‭For decent debugger performance, it is necessary to go into the Windows Device Manager and set the USB Serial Port's Latency Timer to 1 ms, instead of the default 16 ms.‬
+‭Here are the windows you need to navigate through to change the Latency Timer setting. Also be sure that the "USB Transfer Sizes" are both set to 4096:‬
+
+‭Parallax Spin2 Documentation Page‬‭32‬‭of‬‭57‬
+
+‭Parallax Spin2 Documentation Page‬‭33‬‭of‬‭57‬
+
+‭DEBUG dynamic clock frequency adaptation‬
+‭When‬‭DEBUG‬‭is‬‭enabled,‬‭the‬‭serial‬‭receive‬‭pin‬‭(P63)‬‭is‬‭configured‬‭as‬‭a‬‭long‬‭repository‬‭to‬‭hold‬‭the‬‭clock‬‭frequency‬‭value,‬‭so‬‭that‬‭the‬‭debugger‬‭can‬‭compute‬‭the‬‭proper‬‭baud‬
+‭rate during debug interrupts. This long-repository value must be updated whenever the clock frequency is changed, in order to keep the debugger communicating properly.‬
+
+‭Below is a code snippet which demonstrates how to do this.‬
+
+DAT
+‭
+
+org‬
+
+clock_change
+‭
+
+rep
+
+#99,#1
+
+'use REP to stall all interrupts (including debug)‬
+
+‭ndn
+a
+hubset
+‭
+
+old_mode,#%11
+old_mode‬
+
+'switch to 20 MHz while maintaining old pll/xtal settings‬
+
+‭ov
+m
+andn
+‭
+hubset
+‭
+
+old_mode,new_mode
+old_mode,#%11‬
+old_mode‬
+
+'establish new pll/xtal settings while staying at 20 MHz‬
+
+waitx
+‭
+
+##20_000_000/100
+
+'allow 10ms for new settings to stabilize‬
+
+‭ov
+m
+hubset
+‭
+
+old_mode,new_mode
+old_mode‬
+
+'switch to new settings‬
+
+‭irh
+d
+wxpin
+‭
+dirl
+
+#63
+new_freq,#63
+#63
+
+'must enable smart pin to update long repository‬
+'write new_freq to rx pin long repository‬
+'put smart pin back to sleep, REP cancels upon _ret_‬
+
+res
+res
+res
+
+1‬
+1‬
+1‬
+
+_ret_
+‭
+
+‭ld_mode
+o
+new_mode
+‭
+new_freq
+‭
+
+‭DEBUG() memory utilization‬
+‭Here‬‭is‬‭what‬‭the‬‭memory‬‭utilization‬‭looks‬‭like‬‭for‬‭a‬‭Spin2‬‭DEBUG()‬‭command.‬‭You‬‭can‬‭see,‬‭on‬‭the‬‭Spin2‬‭side,‬‭that‬‭a‬‭bytecode‬‭is‬‭needed‬‭to‬‭read‬‭the‬‭variable‬‭'i',‬‭and‬‭then‬‭three‬
+‭obligatory bytecodes make up the actual DEBUG() command.‬
+
+‭The‬‭'stack‬‭adjustment'‬‭byte‬‭tells‬‭the‬‭interpreter‬‭how‬‭far‬‭to‬‭drop‬‭the‬‭stack‬‭to‬‭effectively‬‭'pop'‬‭all‬‭the‬‭expressions‬‭that‬‭were‬‭pushed‬‭in‬‭preparation‬‭for‬‭the‬‭DEBUG()‬‭event.‬‭In‬‭this‬
+‭case‬‭of‬‭'i',‬‭only,‬‭the‬‭stack‬‭needs‬‭to‬‭drop‬‭by‬‭four‬‭bytes‬‭(one‬‭long).‬‭When‬‭the‬‭debugging‬‭program‬‭is‬‭invoked,‬‭the‬‭values‬‭it‬‭needs‬‭will‬‭be‬‭ordered‬‭right‬‭above‬‭the‬‭current‬‭Spin2‬
+‭stack pointer.‬
+
+‭The‬‭'unique‬‭BRK‬‭code'‬‭byte‬‭(1..255)‬‭is‬‭used‬‭as‬‭an‬‭index‬‭to‬‭look‬‭up‬‭the‬‭specific‬‭record‬‭in‬‭the‬‭DEBUG()‬‭database‬‭at‬‭the‬‭top‬‭of‬‭memory,‬‭from‬‭which‬‭the‬‭debugging‬‭program‬‭reads‬
+‭its commands.‬
+
+‭In‬ ‭the‬ ‭case‬ ‭where‬ ‭debugging‬ ‭is‬ ‭active,‬ ‭but‬ ‭a‬ ‭cog‬ ‭has‬ ‭had‬ ‭its‬ ‭debug‬ ‭interrupt‬ ‭disabled‬ ‭via‬ ‭the‬‭DEBUG_COGS‬‭symbol,‬‭Spin2‬‭DEBUG‬‭commands‬‭will‬‭not‬‭trigger‬‭a‬‭debug‬
+‭interrupt, but they do still pop any DEBUG-intended values from the stack, so these are harmless events.‬
+
+‭For‬‭PASM‬‭DEBUG‬‭commands,‬‭a‬‭'BRK‬‭#code'‬‭instruction‬‭is‬‭inserted‬‭where‬‭the‬‭DEBUG‬‭command‬‭was‬‭placed,‬‭and‬‭all‬‭related‬‭data‬‭resides‬‭in‬‭the‬‭DEBUG‬‭database.‬‭If‬‭a‬‭cog's‬
+‭debug interrupt is disabled, the 'BRK #code' instruction does nothing, taking two clocks.‬
+
+‭DEBUG and interrupts‬
+‭Interrupt‬ ‭requests‬ ‭received‬ ‭during‬ ‭a‬ ‭DEBUG‬ ‭command‬ ‭will‬ ‭execute‬ ‭after‬ ‭the‬ ‭DEBUG‬ ‭completes,‬‭but‬‭the‬‭response‬‭time‬‭may‬‭be‬‭so‬‭skewed‬‭that‬‭the‬‭retrigger‬‭setup‬‭for‬‭the‬
+‭interrupt‬‭won't‬‭happen‬‭properly.‬‭High-frequency‬‭cyclical‬‭smart‬‭pin‬‭interrupts‬‭are‬‭especially‬‭prone‬‭to‬‭this‬‭problem.‬‭Imagine‬‭you‬‭do‬‭an‬‭AKPIN‬‭instruction‬‭within‬‭your‬‭normal‬‭ISR‬
+‭(interrupt‬ ‭service‬‭routine)‬‭to‬‭drop‬‭the‬‭INA/INB‬‭signal‬‭so‬‭that‬‭the‬‭smart‬‭pin‬‭can‬‭make‬‭it‬‭go‬‭high‬‭again,‬‭triggering‬‭a‬‭new‬‭interrupt.‬‭Meanwhile,‬‭after‬‭the‬‭AKPIN‬‭and‬‭before‬‭the‬
+‭RETIx,‬‭the‬‭smart‬‭pin‬‭triggers,‬‭raising‬‭INA/INB‬‭high.‬‭This‬‭is‬‭only‬‭happening‬‭because‬‭your‬‭cycle-frame‬‭timing‬‭has‬‭become‬‭skewed‬‭from‬‭the‬‭DEBUG‬‭command.‬‭This‬‭interrupt‬
+
+‭Parallax Spin2 Documentation Page‬‭34‬‭of‬‭57‬
+
+‭won't‬‭be‬‭seen‬‭since‬‭it‬‭happened‬‭when‬‭the‬‭ISR‬‭was‬‭busy.‬‭This‬‭will‬‭cause‬‭the‬‭interrupt‬‭to‬‭cease‬‭cycling.‬‭CT‬‭interrupts‬‭are‬‭not‬‭prone‬‭to‬‭this‬‭problem,‬‭though,‬‭since‬‭they‬‭have‬
+‭$8000_0000‬‭clock‬‭cycles‬‭in‬‭which‬‭to‬‭be‬‭recognized.‬‭To‬‭remedy‬‭the‬‭smart-pin‬‭retrigger‬‭problem,‬‭you‬‭could‬‭trigger‬‭on‬‭INA/INB-high,‬‭as‬‭opposed‬‭to‬‭INA/INB-rise,‬‭but‬‭this‬‭could‬
+‭cause performance problems with your smart pin configurations.‬
+
+‭One‬ ‭fail-safe‬ ‭way‬ ‭to‬ ‭get‬ ‭around‬ ‭this‬ ‭DEBUG/interrupt‬ ‭dilemma‬ ‭is‬ ‭to‬‭only‬‭do‬‭DEBUG‬‭commands‬‭from‬‭cogs‬‭that‬‭are‬‭not‬‭executing‬‭ISRs‬‭in‬‭the‬‭background.‬‭If‬‭the‬‭ISRs‬‭can‬
+‭tolerate timing skew and there is no risk of hanging interrupt cycling, you can do DEBUG commands with some understood interrupt timing degradations.‬
+
+‭Graphical DEBUG Displays‬
+‭DEBUG()‬ ‭commands‬ ‭can‬ ‭invoke‬ ‭special‬ ‭graphical‬ ‭DEBUG‬ ‭displays‬ ‭which‬ ‭are‬ ‭built‬ ‭into‬ ‭the‬ ‭tool.‬ ‭These‬ ‭graphical‬ ‭displays‬ ‭each‬ ‭take‬ ‭the‬ ‭form‬‭of‬‭a‬‭unique‬‭window.‬‭Once‬
+‭instantiated,‬‭displays‬‭can‬‭be‬‭continuously‬‭fed‬‭data‬‭to‬‭generate‬‭animated‬‭visualizations.‬‭These‬‭displays‬‭are‬‭very‬‭handy‬‭for‬‭development‬‭and‬‭debugging,‬‭as‬‭various‬‭data‬‭types‬
+‭can be viewed in their proper contexts. Up to 32 graphical displays can be running simultaneously.‬
+
+‭When‬‭a‬‭DEBUG‬‭message‬‭contains‬‭a‬‭backtick‬‭(`)‬‭character‬‭(ASCII‬‭$60),‬‭a‬‭string,‬‭containing‬‭everything‬‭from‬‭the‬‭backtick‬‭to‬‭the‬‭end‬‭of‬‭the‬‭message,‬‭is‬‭sent‬‭to‬‭the‬‭graphical‬
+‭DEBUG display parser. The parser looks for several different element types, treating any commas as whitespace:‬
+
+‭Element Type‬
+
+‭Example‬
+
+‭Description‬
+
+display_type‬
+‭
+
+LOGIC, SCOPE, PLOT, BITMAP‬
+‭
+
+‭This is the formal name of the graphical DEBUG display type you wish to instantiate.‬
+
+unknown_symbol‬
+‭
+
+MyLogicDisplay‬
+‭
+
+‭Each graphical DEBUG display Instance must be given a unique symbolic name.‬
+
+instance_name‬
+‭
+
+MyLogicDisplay‬
+‭
+
+‭Once instantiated, a graphical DEBUG display instance is referenced by its symbolic name.‬
+
+keyword‬
+‭
+
+TITLE, POS, SIZE, SAMPLES‬
+‭
+
+‭Keywords are used to configure displays. They might be followed by numbers, strings, and other keywords.‬
+
+number‬
+‭
+
+1024, $FF, %1010‬
+‭
+
+‭Numbers can be expressed in decimal, hex ($), and binary (%).‬
+
+string‬
+‭
+
+'Here is a string'‬
+‭
+
+‭Strings are expressed within single-quotes.‬
+
+‭Before‬ ‭getting‬ ‭into‬ ‭how‬ ‭all‬ ‭this‬ ‭fits‬ ‭together,‬‭we‬‭need‬‭to‬‭go‬‭over‬‭some‬‭special‬‭DEBUG()-display‬‭syntax‬‭that‬‭can‬‭be‬‭used‬‭for‬‭displays.‬‭This‬‭syntax‬‭is‬‭invoked‬‭when‬‭the‬‭first‬
+‭character‬ ‭in‬ ‭the‬ ‭DEBUG()‬ ‭command‬ ‭is‬ ‭the‬‭backtick.‬‭This‬‭causes‬‭everything‬‭in‬‭the‬‭DEBUG()‬‭command‬‭to‬‭be‬‭viewed‬‭as‬‭a‬‭string,‬‭except‬‭when‬‭subsequent‬‭backticks‬‭act‬‭as‬
+‭'escape' characters to allow normal or shorthand DEBUG() commands.‬
+
+‭DEBUG Statement‬
+‭(v = 100, w = 1.0, bytes[a] = 1,2,3,4,5)‬
+
+‭DEBUG Message Output‬
+
+‭Note‬
+‭Regular DEBUG() syntax can drive DEBUG() displays, but it's verbose.‬
+
+DEBUG("`LOGIC MyLog SAMPLES ", SDEC_(v))‬
+‭
+
+Cog0
+‭
+
+`LOGIC MyLog SAMPLES 100‬
+
+DEBUG(`LOGIC MyLog SAMPLES 100)‬
+‭
+
+‭̀LOGIC MyLog SAMPLES 100‬
+
+‭DEBUG()-display syntax is simpler and 'CogN' is omitted in the output.‬
+
+DEBUG(`LOGIC MyLog SAMPLES `?(v))‬
+‭
+
+‭̀LOGIC MyLog SAMPLES TRUE‬
+
+‭Booleans are output using `?(value) notation. Short for BOOL_.‬
+
+DEBUG(`LOGIC MyLog SAMPLES `.(w))‬
+‭
+
+‭̀LOGIC MyLog SAMPLES 1.000000e+00‬
+
+‭Floating-point values are output using `.(value) notation. Short for FDEC_.‬
+
+DEBUG(`LOGIC MyLog SAMPLES `(v))‬
+‭
+
+‭̀LOGIC MyLog SAMPLES 100‬
+
+‭Decimal numbers are output using `(value) notation. Short for SDEC_.‬
+
+DEBUG(`LOGIC MyLog SAMPLES `$(v))‬
+‭
+
+‭̀LOGIC MyLog SAMPLES $64‬
+
+‭Hex numbers are output using `$(value) notation. Short for UHEX_.‬
+
+DEBUG(`LOGIC MyLog SAMPLES `%(v))‬
+‭
+
+‭̀LOGIC MyLog SAMPLES %1100100‬
+
+‭Binary numbers are output using `%(value) notation. Short for UBIN_.‬
+
+DEBUG(`LOGIC MyLog TITLE '`#(v)')‬
+‭
+
+‭̀LOGIC MyLog TITLE 'd'‬
+
+‭Characters are output using `#(value) notation.‬
+
+DEBUG(`MyLog `UDEC_BYTE_ARRAY_(@a,5))‬
+‭
+
+‭̀MyLog 1, 2, 3, 4, 5‬
+
+‭Regular DEBUG() commands can follow the backtick, as well.‬
+
+‭There are two steps to using graphical DEBUG() displays. First, they must be instantiated and, second, they must be fed:‬
+
+‭To Use a Display:‬
+
+‭1st‬
+
+‭2nd‬
+
+‭3rd‬
+
+‭First, instantiate it.‬
+
+‭̀‬
+
+‭display_type‬
+
+‭unknown_symbol‬
+
+‭Then, feed it.‬
+
+‭̀‬
+
+‭instance_name(s)‬
+
+‭keyword(s), number(s), string(s)‬
+
+‭4th‬
+‭keyword(s), number(s), string(s)‬
+
+‭To bring this all together, let's show a sawtooth wave on a SCOPE display:‬
+
+CON _clkfreq = 10_000_000‬
+‭
+PUB go() | i‬
+‭
+‭ebug(`SCOPE MyScope SIZE 254 84 SAMPLES 128)‬
+d
+debug(`MyScope 'Sawtooth' 0 63 64 10 %1111)‬
+‭
+repeat‬
+‭
+debug(`MyScope `(i & 63))‬
+‭
+i++‬
+‭
+waitms(50)‬
+‭
+
+‭Parallax Spin2 Documentation Page‬‭35‬‭of‬‭57‬
+
+‭Note‬
+‭Unknown_symbol becomes instance_name.‬
+‭Multiple displays can be fed the same data.‬
+
+‭In‬ ‭the‬ ‭example‬ ‭above,‬ ‭a‬ ‭SCOPE‬ ‭is‬ ‭instantiated‬‭called‬‭MyScope‬‭that‬‭is‬‭254‬‭x‬‭84‬‭pixels‬‭and‬‭shows‬‭128‬‭samples.‬‭A‬‭width‬‭of‬‭254‬‭was‬‭chosen‬‭since‬‭samples‬‭are‬‭numbered‬
+‭0..127‬ ‭and‬ ‭I‬ ‭wanted‬ ‭them‬ ‭to‬ ‭be‬ ‭spaced‬ ‭at‬ ‭a‬ ‭constant‬ ‭two-pixel‬ ‭pitch‬ ‭(127‬ ‭*‬ ‭2‬ ‭=‬ ‭254).‬ ‭A‬ ‭height‬ ‭of‬ ‭84‬ ‭was‬‭chosen‬‭so‬‭that‬‭there‬‭would‬‭be‬‭10‬‭pixels‬‭above‬‭and‬‭below‬‭the‬
+‭waveform,‬‭which‬‭will‬‭have‬‭a‬‭height‬‭of‬‭64‬‭pixels.‬‭A‬‭channel‬‭called‬‭"Sawtooth"‬‭is‬‭defined‬‭which,‬‭for‬‭the‬‭purpose‬‭of‬‭display,‬‭has‬‭a‬‭bottom‬‭value‬‭of‬‭0‬‭and‬‭a‬‭top‬‭value‬‭of‬‭63,‬‭is‬‭64‬
+‭pixels‬‭tall‬‭within‬‭that‬‭range,‬‭and‬‭is‬‭elevated‬‭10‬‭pixels‬‭off‬‭the‬‭bottom‬‭of‬‭the‬‭scope‬‭window.‬‭The‬‭%1111‬‭enables‬‭top‬‭and‬‭bottom‬‭legend‬‭values‬‭and‬‭top‬‭and‬‭bottom‬‭lines.‬‭Within‬
+‭the‬‭REPEAT‬‭block,‬‭the‬‭SCOPE‬‭is‬‭fed‬‭a‬‭repeating‬‭pattern‬‭of‬‭0..63‬‭which‬‭forms‬‭the‬‭sawtooth‬‭wave.‬‭The‬‭SCOPE‬‭updates‬‭its‬‭display‬‭each‬‭time‬‭it‬‭receives‬‭a‬‭value.‬‭If‬‭there‬‭were‬
+‭eight channels defined, instead of just one, it would update the display on every eighth value received, drawing all eight channels.‬
+
+‭Currently, the following graphical DEBUG() displays are implemented, but more will be added in the future:‬
+
+‭Display Types‬
+
+‭Descriptions‬
+
+LOGIC‬
+‭
+
+‭Logic analyzer with single and multi-bit labels, 1..32 channels, can trigger on pattern‬
+
+SCOPE‬
+‭
+
+‭Oscilloscope with 1..8 channels, can trigger on level with hysteresis‬
+
+SCOPE_XY‬
+‭
+
+‭XY oscilloscope with 1..8 channels, persistence of 0..512 samples, polar mode, log scale mode‬
+
+FFT‬
+‭
+
+‭Fast Fourier Transform with 1..8 channels, 4..2048 points, windowed results, log scale mode‬
+
+SPECTRO‬
+‭
+
+‭Spectrograph with 4..2048-point FFT, windowed results, phase-coloring, and log scale mode‬
+
+PLOT‬
+‭
+
+‭General-purpose plotter with cartesian and polar modes‬
+
+TERM‬
+‭
+
+‭Text terminal with up to 300 x 200 characters, 6..200 point font size, 4 simultaneous color schemes‬
+
+BITMAP‬
+‭
+
+‭Bitmap, 1..2048 x 1..2048 pixels, 1/2/4/8/16/32-bit pixels with 19 color systems, 15 direction/autoscroll modes, independent X and Y pixel size of 1..256‬
+
+MIDI‬
+‭
+
+‭Piano keyboard with 1..128 keys, velocity depiction, variable screen scale‬
+
+‭Following are elaborations of each DEBUG() display type.‬
+
+‭LOGIC Display‬
+
+‭Logic analyzer with single and multi-bit‬‭labels, 1..32 channels, can trigger on pattern‬
+
+CON _clkfreq‬ ‭
+‭
+= 10_000_000‬
+PUB go() | i‬
+‭
+‭ebug(`LOGIC MyLogic SAMPLES 32 'Low' 3 'Mid' 2 'High')‬
+d
+debug(`MyLogic TRIGGER $07 $04 HOLDOFF 2)‬
+‭
+repeat‬
+‭
+debug(`MyLogic `(i & 63))‬
+‭
+i++‬
+‭
+waitms(25)‬
+‭
+
+‭LOGIC Instantiation‬
+
+‭Description‬
+
+‭Default‬
+
+TITLE 'string'‬
+‭
+
+‭Set the window caption to 'string'.‬
+
+‭<none>‬
+
+POS left top‬
+‭
+
+‭Set the window position.‬
+
+‭0, 0‬
+
+SAMPLES 4_to_2048‬
+‭
+
+‭Set the number of samples to track and display.‬
+
+‭32‬
+
+SPACING 2_to_32‬
+‭
+
+‭Set the sample spacing. The width of the display will be SAMPLES * SPACING.‬
+
+‭8‬
+
+RATE 1_to_2048‬
+‭
+
+‭Set the number of samples (or triggers, if enabled) before each display update.‬
+
+‭1‬
+
+LINESIZE 1_to_7‬
+‭
+
+‭Set the line size.‬
+
+‭1‬
+
+TEXTSIZE 6_to_200‬
+‭
+
+‭Set the legend text size. Height of text determines height of logic levels.‬
+
+‭editor text size‬
+
+COLOR back_color {grid_color}‬
+‭
+
+‭Set the background and grid colors *.‬
+
+‭BLACK, GRAY 4‬
+
+'name' {1_to_32 {color}}‬
+‭
+
+‭ et the next channel or channel-group name, optional group bit count, optional color *. If‬ ‭1, default color‬
+S
+‭no names are given, a single group of 32 channels will be established.‬
+
+'name' 2_to_32 RANGE {color}‬
+‭
+
+‭Set the next channel-group name, to be drawn as a waveform, with optional color *.‬
+
+‭default color‬
+
+packed_data_mode‬
+‭
+
+‭Enable packed-data mode. See description at end of this section.‬
+
+‭<none>‬
+
+HIDEXY‬
+‭
+
+‭Hide the X,Y mouse coordinates from being displayed at the mouse pointer.‬
+
+‭not hidden‬
+
+‭LOGIC Feeding‬
+
+‭Description‬
+
+‭Default‬
+
+TRIGGER mask match sample_offset‬
+‭
+
+‭Trigger on (data & mask) = match. If mask = 0, trigger is disabled.‬
+
+‭0, 1, SAMPLES / 2‬
+
+HOLDOFF 2_to_2048‬
+‭
+
+‭Set the minimum number of samples required from trigger to trigger.‬
+
+‭SAMPLES‬
+
+data‬
+‭
+
+‭Numerical data is applied LSB-first to the channels.‬
+
+CLEAR‬
+‭
+
+‭Clear the sample buffer and display, wait for new data.‬
+
+SAVE {WINDOW} 'filename'‬
+‭
+
+‭Save a bitmap file (.bmp) of either the entire window or just the display area.‬
+
+‭Parallax Spin2 Documentation Page‬‭36‬‭of‬‭57‬
+
+‭Close the window.‬
+
+CLOSE‬
+‭
+
+‭*‬‭Color‬‭is‬‭rgb24‬‭value,‬‭else‬‭BLACK‬‭/‬‭WHITE‬‭or‬‭ORANGE‬‭/‬‭BLUE‬‭/‬‭GREEN‬‭/‬‭CYAN‬‭/‬‭RED‬‭/‬‭MAGENTA‬‭/‬‭YELLOW‬‭/‬‭GRAY‬‭followed‬‭by‬‭an‬‭optional‬‭0..15‬‭for‬‭brightness‬‭(default‬
+‭is 8).‬
+
+‭The‬‭LOGIC‬‭display‬‭can‬‭be‬‭used‬‭to‬‭display‬‭data‬‭that‬‭was‬‭captured‬‭at‬‭high‬‭speed.‬‭In‬‭the‬‭example‬‭below,‬‭the‬‭P2‬‭is‬‭generating‬‭8-N-1‬‭serial‬‭at‬‭333‬‭Mbaud‬‭using‬‭a‬‭smart‬‭pin.‬‭This‬
+‭bit‬‭stream‬‭can‬‭be‬‭captured‬‭by‬‭the‬‭streamer.‬‭On‬‭every‬‭clock,‬‭the‬‭streamer‬‭will‬‭record‬‭the‬‭smart‬‭pin's‬‭IN‬‭signal‬‭and‬‭its‬‭output‬‭state,‬‭as‬‭read‬‭from‬‭an‬‭adjacent‬‭pin.‬‭Every‬‭time‬‭it‬
+‭gets‬‭four‬‭two-bit‬‭sample‬‭sets,‬‭it‬‭does‬‭an‬‭RFBYTE‬‭to‬‭save‬‭them‬‭to‬‭hub‬‭RAM,‬‭forming‬‭contiguous‬‭bytes,‬‭words,‬‭and‬‭longs.‬‭By‬‭invoking‬‭the‬‭LONGS_2BIT‬‭packed-data‬‭mode,‬‭we‬
+‭can have the LOGIC display unpack the two-bit sample sets from longs, yielding 16 sets per long.‬
+
+CON _clkfreq
+‭
+rxpin
+‭
+txpin
+‭
+samps
+‭
+bufflongs
+‭
+xmode
+‭
+
+=
+=
+=
+=
+=
+=
+
+333_333_333 'go really fast, 3ns clock period‬
+24
+'even pin‬
+rxpin+1
+'odd pin‬
+32
+'multiple of 16 samples‬
+samps / 16
+'each long holds 16 2-bit samples‬
+$D0800000 + rxpin << 17 + samps
+'streamer mode‬
+
+VAR buff[bufflongs]‬
+‭
+PUB go() | i, buffaddr‬
+‭
+‭ebug(`logic Serial samples `(samps) spacing 12 'TX' 'IN' longs_2bit)‬
+d
+debug(`Serial trigger %10 %10 22)‬
+‭
+buffaddr := @buff‬
+‭
+repeat‬
+‭
+org‬
+‭
+wrpin‬
+‭
+
+##+1<<28,#rxpin
+‭
+
+'rxpin inputs txpin at rxpin+1‬
+
+‭rpin‬
+w
+wxpin‬
+‭
+dirh‬
+‭
+
+‭%01_11110_0,#txpin
+#
+##1<<16+8-1,#txpin
+‭
+#txpin
+‭
+
+'set async tx mode for txpin‬
+'set baud=sysclock/1 and size=8‬
+'enable smart pin‬
+
+‭rfast‬
+w
+xinit‬
+‭
+
+‭0,buffaddr
+#
+##xmode,#0
+‭
+
+'set write-fast at buff‬
+'start capturing 2-bit samples‬
+
+wypin‬
+‭
+
+i,#txpin
+‭
+
+'transmit serial byte‬
+
+‭aitxfi
+w
+end‬
+‭
+
+'wait for streamer capture done‬
+
+‭ebug(`Serial `uhex_long_array_(@buff, bufflongs))‬
+d
+i++‬
+‭
+waitms(20)‬
+‭
+
+‭SCOPE Display‬
+
+‭Oscilloscope with 1..8 channels, can‬‭trigger on level with hysteresis‬
+
+CON _clkfreq‬ ‭
+‭
+= 100_000_000‬
+PUB go() | a, af, b, bf‬
+‭
+‭ebug(`SCOPE MyScope)‬
+d
+debug(`MyScope 'FreqA' -1000 1000 100 136 15 MAGENTA)‬
+‭
+debug(`MyScope 'FreqB' -1000 1000 100 20 15 ORANGE)‬
+‭
+debug(`MyScope TRIGGER 0 HOLDOFF 2)‬
+‭
+repeat‬
+‭
+a := qsin(1000, af++, 200)‬
+‭
+b := qsin(1000, bf++, 99)‬
+‭
+debug(`MyScope `(a,b))‬
+‭
+waitus(200)‬
+‭
+
+‭SCOPE Instantiation‬
+
+‭Description‬
+
+‭Default‬
+
+TITLE 'string'‬
+‭
+
+‭Set the window caption to 'string'.‬
+
+‭<none>‬
+
+POS left top‬
+‭
+
+‭Set the window position.‬
+
+‭0, 0‬
+
+SIZE width height‬
+‭
+
+‭Set the display size (32..2048 x 32..2048)‬
+
+‭255, 256‬
+
+SAMPLES 16_to_2048‬
+‭
+
+‭Set the number of samples to track and display.‬
+
+‭256‬
+
+RATE 1_to_2048‬
+‭
+
+‭Set the number of samples (or triggers, if enabled) before each display update.‬
+
+‭1‬
+
+DOTSIZE 0_to_32‬
+‭
+
+‭Set the dot size in pixels for showing exact sample points.‬
+
+‭0‬
+
+LINESIZE 0_to_32‬
+‭
+
+‭Set the line size in half-pixels for connecting sample points.‬
+
+‭3‬
+
+TEXTSIZE 6_to_200‬
+‭
+
+‭Set the legend text size.‬
+
+‭editor text size‬
+
+COLOR back_color {grid_color}‬
+‭
+
+‭Set the background and grid colors *.‬
+
+‭BLACK, GRAY 4‬
+
+‭Parallax Spin2 Documentation Page‬‭37‬‭of‬‭57‬
+
+packed_data_mode‬
+‭
+
+‭Enable packed-data mode. See description at end of this section.‬
+
+‭<none>‬
+
+HIDEXY‬
+‭
+
+‭Hide the X,Y mouse coordinates from being displayed at the mouse pointer.‬
+
+‭not hidden‬
+
+‭SCOPE Feeding‬
+
+‭Description‬
+
+‭Default‬
+
+'name' {min {max {y_size {y_base {legend} {color}}}}}‬
+‭
+
+‭ et first/next channel name, min value, max value, y size, y base, legend, and color *.‬
+S
+‭Legend is %abcd, where %a to %d enable max legend, min legend, max line, min line.‬
+
+f‭ull, no legend,‬
+‭default color‬
+
+'name' AUTO {y_size {y_base {legend} {color}}}‬
+‭
+
+‭ et first/next channel name, auto-scale, y size, y base, legend, and color *. Legend is‬
+S
+‭%abcd, where %a to %d enable max legend, min legend, max line, min line.‬
+
+‭ uto, no legend,‬
+a
+‭default color‬
+
+TRIGGER channel {arm_level {trigger_level {offset}}}‬
+‭
+
+‭Set the trigger channel, arm level, trigger level, and right offset. If channel=-1, disabled.‬
+
+‭-1, -1, 0, width / 2‬
+
+TRIGGER channel AUTO {offset}‬
+‭
+
+‭ et the trigger channel, 33% arm level, 50% trigger level, and right offset. If channel=-1,‬
+S
+‭disabled.‬
+
+‭-1, width / 2‬
+
+HOLDOFF 2_to_2048‬
+‭
+
+‭Set the minimum number of samples required from trigger to trigger.‬
+
+‭SAMPLES‬
+
+data‬
+‭
+
+‭Numerical data is applied to the channels in ascending order.‬
+
+CLEAR‬
+‭
+
+‭Clear the sample buffer and display, wait for new data.‬
+
+SAVE {WINDOW} 'filename'‬
+‭
+
+‭Save a bitmap file (.bmp) of either the entire window or just the display area.‬
+
+CLOSE‬
+‭
+
+‭Close the window.‬
+
+‭*‬‭Color‬‭is‬‭rgb24‬‭value,‬‭else‬‭BLACK‬‭/‬‭WHITE‬‭or‬‭ORANGE‬‭/‬‭BLUE‬‭/‬‭GREEN‬‭/‬‭CYAN‬‭/‬‭RED‬‭/‬‭MAGENTA‬‭/‬‭YELLOW‬‭/‬‭GRAY‬‭followed‬‭by‬‭an‬‭optional‬‭0..15‬‭for‬‭brightness‬‭(default‬
+‭is 8).‬
+
+‭SCOPE_XY Display‬
+
+‭XY oscilloscope with 1..8 channels,‬‭persistence of 1..512 samples, polar mode, log scale mode‬
+
+CON _clkfreq = 100_000_000‬
+‭
+PUB go() | i‬
+‭
+debug(`SCOPE_XY MyXY RANGE 500 POLAR 360 'G' 'R' 'B')‬
+‭
+repeat‬
+‭
+repeat i from 0 to 500‬
+‭
+debug(`MyXY `(i, i, i, i+120, i, i+240))‬
+‭
+waitms(5)‬
+‭
+
+‭SCOPE_XY Instantiation‬
+
+‭Description‬
+
+‭Default‬
+
+TITLE 'string'‬
+‭
+
+‭Set the window caption to 'string'.‬
+
+‭<none>‬
+
+POS left top‬
+‭
+
+‭Set the window position.‬
+
+‭0, 0‬
+
+SIZE radius‬
+‭
+
+‭Set the display radius in pixels.‬
+
+‭128‬
+
+RANGE 1_to_7FFFFFFF‬
+‭
+
+‭Set the unit circle radius for incoming data‬
+
+‭$7FFFFFFF‬
+
+SAMPLES 0_to_512‬
+‭
+
+‭Set the number of samples to track and display with persistence. Use 0 for infinite persistence.‬
+
+‭256‬
+
+RATE 1_to_512‬
+‭
+
+‭Set the number of samples before each display update.‬
+
+‭1‬
+
+DOTSIZE 2_to_20‬
+‭
+
+‭Set the dot size in half-pixels for showing sample points.‬
+
+‭6‬
+
+TEXTSIZE 6_to_200‬
+‭
+
+‭Set the legend text size.‬
+
+‭editor text size‬
+
+COLOR back_color {grid_color}‬
+‭
+
+‭Set the background and grid colors *.‬
+
+‭BLACK, GRAY 4‬
+
+POLAR {twopi {offset}}‬
+‭
+
+‭Set polar mode, twopi value, and offset. For a twopi value of $100000000 or -$100000000, use 0 or -1.‬
+
+‭$100000000, 0‬
+
+LOGSCALE‬
+‭
+
+‭Set log-scale mode to magnify points within the unit circle.‬
+
+‭<off>‬
+
+'name' {color}‬
+‭
+
+‭Set the first/next channel name and optionally assign it a color *.‬
+
+‭default color‬
+
+packed_data_mode‬
+‭
+
+‭Enable packed-data mode. See description at end of this section.‬
+
+‭<none>‬
+
+HIDEXY‬
+‭
+
+‭Hide the X,Y mouse coordinates from being displayed at the mouse pointer.‬
+
+‭not hidden‬
+
+‭SCOPE_XY Feeding‬
+x y‬
+‭
+
+‭Description‬
+‭X-Y data pairs are applied to the channels in ascending order. In polar mode, x=length and y=angle.‬
+
+‭Parallax Spin2 Documentation Page‬‭38‬‭of‬‭57‬
+
+‭Default‬
+
+CLEAR‬
+‭
+
+‭Clear the sample buffer and display, wait for new data.‬
+
+SAVE {WINDOW} 'filename'‬
+‭
+
+‭Save a bitmap file (.bmp) of either the entire window or just the display area.‬
+
+CLOSE‬
+‭
+
+‭Close the window.‬
+
+‭*‬‭Color‬‭is‬‭rgb24‬‭value,‬‭else‬‭BLACK‬‭/‬‭WHITE‬‭or‬‭ORANGE‬‭/‬‭BLUE‬‭/‬‭GREEN‬‭/‬‭CYAN‬‭/‬‭RED‬‭/‬‭MAGENTA‬‭/‬‭YELLOW‬‭/‬‭GRAY‬‭followed‬‭by‬‭an‬‭optional‬‭0..15‬‭for‬‭brightness‬‭(default‬
+‭is 8).‬
+
+CON _clkfreq = 10_000_000
+‭
+
+'Normal mode‬
+
+CON _clkfreq = 10_000_000
+‭
+
+PUB go() | x, y‬
+‭
+debug(`SCOPE_XY MyXY SIZE 80 RANGE 8 SAMPLES 0 'Normal')‬
+‭
+repeat x from -8 to 8‬
+‭
+repeat y from -8 to 8‬
+‭
+debug(`MyXY `(x,y))‬
+‭
+
+‭FFT Display‬
+
+'LOGSCALE mode magnifies low-level details‬
+
+PUB go() | x, y‬
+‭
+debug(`SCOPE_XY MyXY SIZE 80 RANGE 8 SAMPLES 0 LOGSCALE 'Logscale')‬
+‭
+repeat x from -8 to 8‬
+‭
+repeat y from -8 to 8‬
+‭
+debug(`MyXY `(x,y))‬
+‭
+
+‭Fast Fourier Transform with 1..8 channels,‬‭4..2048 points, windowed results, log scale mode‬
+
+CON _clkfreq = 100_000_000‬
+‭
+PUB go() | i, j, k‬
+‭
+‭ Set up FFT‬
+'
+debug(`FFT MyFFT SIZE 250 200 SAMPLES 2048 0 127 RATE 256 LOGSCALE COLOR YELLOW 4 YELLOW 5)‬
+‭
+debug(`MyFFT 'FFT' 0 1000 180 10 15 YELLOW 12)‬
+‭
+‭ Set up SCOPE‬
+'
+debug(`scope MyScope POS 300 0 SIZE 255 200 COLOR CYAN 4 CYAN 5)‬
+‭
+debug(`MyScope 'Sine' -1000 1000 180 10 15 CYAN 12)‬
+‭
+debug(`MyScope TRIGGER 0)‬
+‭
+repeat‬
+‭
+j += 1550 + qsin(1300, i++, 31_000)‬
+‭
+k := qsin(1000, j, 50_000)‬
+‭
+debug(`MyFFT MyScope `(k))‬
+‭
+waitus(100)‬
+‭
+
+‭FFT Instantiation‬
+
+‭Description‬
+
+‭Default‬
+
+TITLE 'string'‬
+‭
+
+‭Set the window caption to 'string'.‬
+
+‭<none>‬
+
+POS left top‬
+‭
+
+‭Set the window position.‬
+
+‭0, 0‬
+
+SIZE width height‬
+‭
+
+‭Set the display size (32..2048 x 32..2048)‬
+
+‭256, 256‬
+
+SAMPLES 4_to_2048 {first {last}}‬
+‭
+
+‭Set the 2ⁿ number of FFT inputs points, plus the first and last result values to display.‬
+
+‭512, 0, 255‬
+
+RATE 1_to_2048‬
+‭
+
+‭Set the number of samples before each display update.‬
+
+‭SAMPLES‬
+
+‭Parallax Spin2 Documentation Page‬‭39‬‭of‬‭57‬
+
+DOTSIZE 0_to_32‬
+‭
+
+‭Set the dot size in pixels for showing exact sample points.‬
+
+‭0‬
+
+LINESIZE neg32_to_32‬
+‭
+
+‭Set the line size in half-pixels for connecting sample points. A negative line size will make isolated vertical lines.‬
+
+‭3‬
+
+TEXTSIZE 6_to_200‬
+‭
+
+‭Set the legend text size.‬
+
+‭editor text size‬
+
+COLOR back_color {grid_color}‬
+‭
+
+‭Set the background and grid colors *.‬
+
+‭BLACK, GRAY 4‬
+
+LOGSCALE‬
+‭
+
+‭Set log-scale mode to magnify low-level results.‬
+
+‭<off>‬
+
+packed_data_mode‬
+‭
+
+‭Enable packed-data mode. See description at end of this section.‬
+
+‭<none>‬
+
+HIDEXY‬
+‭
+
+‭Hide the X,Y mouse coordinates from being displayed at the mouse pointer.‬
+
+‭not hidden‬
+
+‭FFT Feeding‬
+
+‭Description‬
+
+‭name' {mag {max {y_size {y_base‬
+'
+{legend {color}}}}}}‬
+‭
+
+‭ et the first/next channel name, magnification factor (2ⁿ, n = 0..11), max amplitude, y size, y base, legend, and‬
+S
+‭color *. Legend is %abcd, where %a to %d enable max legend, min legend, max line, min line.‬
+
+data‬
+‭
+
+‭Numerical data is fed into the channels' sliding Hanning windows from which the FFT computes power levels.‬
+
+CLEAR‬
+‭
+
+‭Clear the sample buffer and display, wait for new data.‬
+
+SAVE {WINDOW} 'filename'‬
+‭
+
+‭Save a bitmap file (.bmp) of either the entire window or just the display area.‬
+
+CLOSE‬
+‭
+
+‭Close the window.‬
+
+‭Default‬
+f‭ull, no legend,‬
+‭default color‬
+
+‭*‬‭Color‬‭is‬‭rgb24‬‭value,‬‭else‬‭BLACK‬‭/‬‭WHITE‬‭or‬‭ORANGE‬‭/‬‭BLUE‬‭/‬‭GREEN‬‭/‬‭CYAN‬‭/‬‭RED‬‭/‬‭MAGENTA‬‭/‬‭YELLOW‬‭/‬‭GRAY‬‭followed‬‭by‬‭an‬‭optional‬‭0..15‬‭for‬‭brightness‬‭(default‬
+‭is 8).‬
+
+‭SPECTRO Display‬
+
+‭Spectrograph with 4..2048-point FFT,‬‭phase-coloring, and log scale mode‬
+
+CON _clkfreq = 100_000_000‬
+‭
+PUB go() | i, j, k‬
+‭
+‭ Set up SPECTRO‬
+'
+debug(`SPECTRO MySpectro SAMPLES 2048 0 236 RANGE 1000 LUMA8X GREEN)‬
+‭
+‭ Set up SCOPE‬
+'
+debug(`SCOPE MyScope POS 280 SIZE 150 200 COLOR GREEN 15 GREEN 12)‬
+‭
+debug(`MyScope 'Sine' -1000 1000 180 10 0 GREEN 6)‬
+‭
+debug(`MyScope TRIGGER 0)‬
+‭
+repeat‬
+‭
+j += 2850 + qsin(2500, i++, 30_000)‬
+‭
+k := qsin(1000, j, 50_000)‬
+‭
+debug(`MySpectro MyScope `(k))‬
+‭
+waitus(100)‬
+‭
+
+‭SPECTRO Instantiation‬
+
+‭Description‬
+
+‭Default‬
+
+TITLE 'string'‬
+‭
+
+‭Set the window caption to 'string'.‬
+
+‭<none>‬
+
+POS left top‬
+‭
+
+‭Set the window position.‬
+
+‭0, 0‬
+
+SAMPLES 4_to_2048 {first {last}}‬
+‭
+
+‭Set the 2ⁿ number of FFT input points, plus the first and last result values to display (defines display height).‬
+
+‭512, 0, 255‬
+
+DEPTH 1_to_2048‬
+‭
+
+‭Set the number of vertical-line FFT results to display (defines the display width).‬
+
+‭256‬
+
+MAG 0_to_11‬
+‭
+
+‭Set the magnification factor (2ⁿ, n = 0..11).‬
+
+‭0‬
+
+RANGE saturation_power‬
+‭
+
+‭Set the power level at which pixel brightness saturates.‬
+
+‭$7FFFFFFF‬
+
+RATE 1_to_2048‬
+‭
+
+‭Set the number of samples before each display update.‬
+
+‭SAMPLES / 8‬
+
+TRACE 0_to_15‬
+‭
+
+‭Set the trace pattern (see TRACE animation in BITMAP Display).‬
+
+‭15 (right, up, scroll)‬
+
+DOTSIZE width_and_height {height}‬
+‭
+
+‭Set the spectrograph pixel-width and pixel-height (1..16) together, or set them independently.‬
+
+‭1, 1‬
+
+luma_or_hsv {color_or_phase}‬
+‭
+
+‭Set the color scheme to LUMA8(W)(X) with color *, or HSV16(W)(X) with 0..255 phase-coloring offset.‬
+
+‭LUMA8X ORANGE‬
+
+LOGSCALE‬
+‭
+
+‭Set log-scale mode to magnify low-level results.‬
+
+‭<off>‬
+
+packed_data_mode‬
+‭
+
+‭Enable packed-data mode. See description at end of this section.‬
+
+‭<none>‬
+
+HIDEXY‬
+‭
+
+‭Hide the X,Y mouse coordinates from being displayed at the mouse pointer.‬
+
+‭not hidden‬
+
+‭SPECTRO Feeding‬
+
+‭Description‬
+
+data‬
+‭
+
+‭Numerical data is fed into a sliding Hanning window from which the FFT computes power and phase.‬
+
+CLEAR‬
+‭
+
+‭Clear the sample buffer and display, wait for new data.‬
+
+SAVE {WINDOW} 'filename'‬
+‭
+
+‭Save a bitmap file (.bmp) of either the entire window or just the display area.‬
+
+CLOSE‬
+‭
+
+‭Close the window.‬
+
+‭* Color is ORANGE / BLUE / GREEN / CYAN / RED / MAGENTA / YELLOW / GRAY.‬
+
+‭Parallax Spin2 Documentation Page‬‭40‬‭of‬‭57‬
+
+‭Default‬
+
+‭Below,‬‭a‬‭SPECTRO‬‭display‬‭was‬‭fed‬‭ADC‬‭samples‬‭from‬‭a‬‭pin‬‭attached‬‭to‬‭a‬‭microphone.‬‭This‬‭is‬‭what‬‭verbally‬‭counting‬‭from‬‭"1"‬‭to‬‭"10"‬‭looks‬‭like,‬‭spectrally.‬‭The‬‭"1"‬‭is‬‭on‬‭the‬
+‭left‬‭and‬‭the‬‭"10"‬‭is‬‭on‬‭the‬‭right.‬‭The‬‭vertical‬‭distance‬‭between‬‭horizontal‬‭trend‬‭lines‬‭is‬‭glottal‬‭pitch.‬‭The‬‭larger‬‭brightness‬‭trends‬‭are‬‭vocal‬‭formants.‬‭This‬‭gives‬‭some‬‭idea‬‭of‬‭how‬
+‭our ears perceive speech:‬
+
+‭PLOT Display‬
+
+‭General-purpose plotter with cartesian‬‭and polar modes‬
+
+CON _clkfreq = 10_000_000‬
+‭
+PUB go(): i, j, k‬
+‭
+‭ebug(`plot myplot size 400 480 backcolor white update)‬
+d
+debug(`myplot origin 200 200 polar -64 -16)‬
+‭
+k~‬
+‭
+repeat‬
+‭
+debug(`myplot clear)‬
+‭
+debug(`myplot set 240 0 cyan 3 text 24 3 'Hub RAM Interface')‬
+‭
+debug(`myplot set 210 0 text 11 3 'Cogs can r/w 32 bits per clock')‬
+‭
+if k & 8
+‭
+'move RAMs or draw spokes?‬
+j++‬
+‭
+else‬
+‭
+repeat i from 0 to 7‬
+‭
+debug(`myplot gray 12 set 83 `(i*8) line 150 `(i*8) 15)‬
+‭
+‭ebug(`myplot
+d
+debug(`myplot
+‭
+debug(`myplot
+‭
+debug(`myplot
+‭
+
+set
+set
+set
+set
+
+repeat i from 0
+‭
+debug(`myplot
+‭
+debug(`myplot
+‭
+debug(`myplot
+‭
+debug(`myplot
+‭
+
+0 0 cyan 4 circle 121 yellow 7 circle 117 3)‬
+20 0 white text 9 'Address LSBs')‬
+0 0 text 11 1 '8 Hub RAMs')‬
+20 32 text 9 '16K x 32' )‬
+
+to 7
+cyan 6
+cyan 4
+orange
+orange
+
+'draw RAMs and cogs‬
+set 83 `(i*8-j) circle 43 text 14 '`(i)')‬
+set 83 `(i*8-j) circle 45 3)‬
+6 set 150 `(i*8) circle 61 text 13 'Cog`(i)')‬
+4 set 150 `(i*8) circle 63 3)‬
+
+‭ebug(`myplot update `dly(30))‬
+d
+k++‬
+‭
+
+‭PLOT Instantiation‬
+
+‭Description‬
+
+‭Default‬
+
+TITLE 'string'‬
+‭
+
+‭Set the window caption to 'string'.‬
+
+‭<none>‬
+
+POS left top‬
+‭
+
+‭Set the window position.‬
+
+‭0, 0‬
+
+SIZE width height‬
+‭
+
+‭Set the display width (32..2048) and height (32..2048).‬
+
+‭256, 256‬
+
+DOTSIZE width_and_height {height}‬
+‭
+
+‭Set the display pixel-width and pixel-height (1..256) together, or set them independently.‬
+
+‭1, 1‬
+
+lut1_to_rgb24‬
+‭
+
+‭Set the color mode.‬
+
+‭RGB24‬
+
+LUTCOLORS rgb24 rgb24 ...‬
+‭
+
+‭For LUT1..LUT8 color modes, load the LUT with rgb24 colors. Use HEX_LONG_ARRAY_ to load colors.‬
+
+‭default colors 0..7‬
+
+BACKCOLOR color‬
+‭
+
+‭Set the background color according to the current color mode. *‬
+
+‭BLACK‬
+
+UPDATE‬
+‭
+
+‭Set UPDATE mode. The display will only be updated when fed an 'UPDATE' command.‬
+
+‭automatic update‬
+
+HIDEXY‬
+‭
+
+‭Hide the X,Y mouse coordinates from being displayed at the mouse pointer.‬
+
+‭not hidden‬
+
+‭PLOT Feeding‬
+
+‭Description‬
+
+‭Default‬
+
+lut1_to_rgb24‬
+‭
+
+‭Set color mode.‬
+
+‭rgb24‬
+
+LUTCOLORS rgb24 rgb24 ...‬
+‭
+
+‭For LUT1..LUT8 color modes, load the LUT with rgb24 colors. Use HEX_LONG_ARRAY_ to load values.‬
+
+‭default colors 0..7‬
+
+BACKCOLOR color‬
+‭
+
+‭Set the background color according to the current color mode. *‬
+
+‭BLACK‬
+
+COLOR color‬
+‭
+
+‭Set the drawing color according to the current color mode. Use just before TEXT to change text color. *‬
+
+‭CYAN‬
+
+BLACK/WHITE or ORANGE/BLUE/GREEN/CYAN/‬
+‭
+
+‭Set the drawing color and optional 0..15 brightness for ORANGE..GRAY colors (default is 8).‬
+
+‭CYAN‬
+
+RED/MAGENTA/YELLOW/GRAY {brightness}‬
+‭
+
+‭Parallax Spin2 Documentation Page‬‭41‬‭of‬‭57‬
+
+OPACITY level‬
+‭
+
+‭Set the opacity level for DOT, LINE, CIRCLE, OVAL, BOX, and OBOX drawing. 0..255 = clear..opaque.‬
+
+‭255‬
+
+PRECISE‬
+‭
+
+‭Toggle precise mode, where line size and (x,y) for DOT and LINE are expressed in 256ths of a pixel.‬
+
+‭disabled‬
+
+LINESIZE size‬
+‭
+
+‭Set the line size in pixels for DOT and LINE drawing.‬
+
+‭1‬
+
+ORIGIN {x_pos y_pos}‬
+‭
+
+‭Set the origin point to cartesian (x_pos, y_pos) or to the current (x, y) if no values are specified.‬
+
+‭0, 0‬
+
+SET x y‬
+‭
+
+‭Set the drawing position to (x, y). After LINE, the endpoint becomes the new drawing position.‬
+
+DOT {linesize {opacity}}‬
+‭
+
+‭Draw a dot at the current position with optional LINESIZE and OPACITY overrides.‬
+
+LINE x y {linesize {opacity}}‬
+‭
+
+‭Draw a line from the current position to (x,y) with optional LINESIZE and OPACITY overrides.‬
+
+CIRCLE diameter {linesize {opacity}}‬
+‭
+
+‭Draw a circle around the current position with optional line size (none/0 = solid) and OPACITY override.‬
+
+OVAL width height {linesize {opacity}}‬
+‭
+
+‭Draw an oval around the current position with optional line size (none/0 = solid) and OPACITY override.‬
+
+BOX width height {linesize {opacity}}‬
+‭
+
+‭Draw a box around the current position with optional line size (none/0 = solid) and OPACITY override..‬
+
+‭BOX width height x_radius y_radius‬
+O
+{linesize {opacity}}‬
+‭
+
+‭ raw a rounded box around the current position with width, height, x and y radii, and optional line size‬
+D
+‭(none/0 = solid) and OPACITY override.‬
+
+TEXTSIZE size‬
+‭
+
+‭Set the text size (6..200).‬
+
+‭10‬
+
+TEXTSTYLE style_YYXXUIWW‬
+‭
+
+‭ et the text style to %YYXXUIWW:‬
+S
+‭%YY is vertical justification: %00 = middle, %10 = bottom, %11 = top.‬
+‭%XX is horizontal justification: %00 = middle, %10 = right, %11 = left.‬
+‭%U is underline: %1 = underline.‬
+‭%I is italic: %1 = italic.‬
+‭%WW is weight: %00 = light, %01 = normal, %10 = bold, and %11 = heavy.‬
+
+‭%00000001‬
+
+TEXTANGLE angle‬
+‭
+
+‭Set the text angle. In cartesian mode, the angle is in degrees.‬
+
+‭0‬
+
+TEXT {size {style {angle}}} 'text'‬
+‭
+
+‭Draw text with overrides for size, style, and angle. To change text color, declare a color just before TEXT.‬
+
+LAYER layer 'filename.bmp'‬
+‭
+
+‭Load a bitmap image file into layer (1..8) for later copying into the plot via CROP.‬
+
+‭ROP layer {left_layer top_layer width‬
+C
+height {left_plot top_plot}}‬
+‭
+
+‭ opy a layer image into the plot. If no coordinates are given, the whole layer image will be copied to the‬
+C
+‭upper left corner of the plot (useful for backgrounds). If the first four coordinates are specified, that area of‬
+‭the layer image will be copied to the same area of the plot (useful for static overlays). If the last two‬
+‭coordinates are also specified, they will alter where in the plot the layer image area gets copied to (useful‬
+‭for dynamic overlays). The coordinates for this command are always (left-to-right, top-to-bottom).‬
+
+CROP layer AUTO left_plot top_plot‬
+‭
+
+‭Copy a whole layer image into the plot at specified coordinates (left-to-right, top-to-bottom).‬
+
+‭PRITEDEF id x_dim y_dim pixels…‬
+S
+colors…‬
+‭
+
+‭ efine a sprite. Unique ID must be 0..255. Dimensions must each be 1..32. Pixels are bytes which select‬
+D
+‭palette colors, ordered left-to-right, then top-to-bottom. Colors are longs which define the palette‬
+‭referenced by the pixel bytes; $AARRGGBB values specify alpha-blend, red, green, and blue.‬
+
+SPRITE id {orient {scale {opacity}}}‬
+‭
+
+‭ ender a sprite at the current position with orientation, scale, and OPACITY override. Orientation is 0..7,‬
+R
+‭per the first eight TRACE modes. Scale is 1..64. See the DEBUG_PLOT_Sprites.spin2 file.‬
+
+‭<id>, 0, 1, 255‬
+
+POLAR {twopi {offset}}‬
+‭
+
+‭ et polar mode, twopi value, and offset. For example, POLAR -12 -3 would be like a clock face.‬
+S
+‭For a twopi value of $100000000 or -$100000000, use 0 or -1.‬
+‭In polar mode, (x, y) coordinates are interpreted as (length, angle).‬
+
+‭$100000000, 0‬
+
+CARTESIAN {ydir {xdir}}‬
+‭
+
+‭ et cartesian mode and optionally set Y and X axis polarity. Cartesian mode is the default.‬
+S
+‭If ydir is 0, the Y axis points up. If ydir is non-0, the Y axis points down.‬
+‭If xdir is 0, the X axis points right. If xdir is non-0, the X axis points left.‬
+
+‭0, 0‬
+
+CLEAR‬
+‭
+
+‭Clear the plot to the background color.‬
+
+UPDATE‬
+‭
+
+‭Update the window with the current plot. Used in UPDATE mode.‬
+
+SAVE {WINDOW} 'filename'‬
+‭
+
+‭Save a bitmap file (.bmp) of either the entire window or just the display area.‬
+
+CLOSE‬
+‭
+
+‭Close the window.‬
+
+‭*‬ ‭Color‬ ‭is‬ ‭a‬ ‭modal‬ ‭value,‬ ‭else‬ ‭BLACK‬ ‭/‬ ‭WHITE‬‭or‬‭ORANGE‬‭/‬‭BLUE‬‭/‬‭GREEN‬‭/‬‭CYAN‬‭/‬‭RED‬‭/‬‭MAGENTA‬‭/‬‭YELLOW‬‭/‬‭GRAY‬‭followed‬‭by‬‭an‬‭optional‬‭0..15‬‭for‬‭brightness‬
+‭(default is 8).‬
+
+‭TERM Display‬
+
+‭Terminal for displaying text‬
+
+CON _clkfreq = 10_000_000‬
+‭
+PUB go() | i‬
+‭
+‭ebug(`TERM MyTerm SIZE 9 1 TEXTSIZE 40)‬
+d
+repeat‬
+‭
+repeat i from 50 to 60‬
+‭
+debug(`MyTerm 1 'Temp = `(i)')‬
+‭
+waitms(500)‬
+‭
+
+‭TERM Instantiation‬
+
+‭Description‬
+
+‭Default‬
+
+TITLE 'string'‬
+‭
+
+‭Set the window caption to 'string'.‬
+
+‭<none>‬
+
+POS left top‬
+‭
+
+‭Set the window position.‬
+
+‭0, 0‬
+
+SIZE columns rows‬
+‭
+
+‭Set the number of terminal columns (1..256) and terminal rows (1..256).‬
+
+‭40, 20‬
+
+‭Parallax Spin2 Documentation Page‬‭42‬‭of‬‭57‬
+
+TEXTSIZE size‬
+‭
+
+‭Set the terminal text size (6..200).‬
+
+‭editor text size‬
+
+COLOR text_color back_color ...‬
+‭
+
+‭Set text-color and background-color combos #0..#3. *‬
+
+‭default colors‬
+
+BACKCOLOR color‬
+‭
+
+‭Set the display background color. *‬
+
+‭BLACK‬
+
+UPDATE‬
+‭
+
+‭Set UPDATE mode. The display will only be updated when fed an 'UPDATE' command.‬
+
+‭automatic update‬
+
+HIDEXY‬
+‭
+
+‭Hide the X,Y mouse coordinates from being displayed at the mouse pointer.‬
+
+‭not hidden‬
+
+‭TERM Feeding‬
+
+‭Description‬
+
+character‬
+‭
+
+‭ = Clear terminal display and home cursor.‬
+0
+‭1 = Home cursor.‬
+‭2 = Set column to next character value.‬
+‭3 = Set row to next character value.‬
+‭4 = Select color combo #0.‬
+‭5 = Select color combo #1.‬
+‭6 = Select color combo #2.‬
+‭7 = Select color combo #3.‬
+‭8 = Backspace.‬
+‭9 = Tab to next 8th column.‬
+‭13+10 or 13 or 10 = New line.‬
+‭32..255 = Printable character.‬
+
+'string'‬
+‭
+
+‭Print string.‬
+
+CLEAR‬
+‭
+
+‭Clear the display to the background color.‬
+
+UPDATE‬
+‭
+
+‭Update the window with the current text screen. Used in UPDATE mode.‬
+
+SAVE {WINDOW} 'filename'‬
+‭
+
+‭Save a bitmap file (.bmp) of either the entire window or just the display area.‬
+
+CLOSE‬
+‭
+
+‭Close the window.‬
+
+‭Default‬
+
+‭*‬ ‭Color‬ ‭is‬ ‭a‬ ‭modal‬ ‭value,‬ ‭else‬ ‭BLACK‬ ‭/‬ ‭WHITE‬‭or‬‭ORANGE‬‭/‬‭BLUE‬‭/‬‭GREEN‬‭/‬‭CYAN‬‭/‬‭RED‬‭/‬‭MAGENTA‬‭/‬‭YELLOW‬‭/‬‭GRAY‬‭followed‬‭by‬‭an‬‭optional‬‭0..15‬‭for‬‭brightness‬
+‭(default is 8).‬
+
+‭BITMAP Display‬
+
+‭Pixel-driven bitmap‬
+
+CON _clkfreq = 10_000_000‬
+‭
+PUB go() | i‬
+‭
+‭ebug(`bitmap MyBitmap SIZE 32 16 DOTSIZE 8 LUT2 LONGS_2BIT)‬
+d
+debug(`MyBitmap TRACE 14 LUTCOLORS WHITE RED BLUE YELLOW 6)‬
+‭
+repeat‬
+‭
+debug(`MyBitmap `uhex_(flag[i++ & $1F]) `dly(100))‬
+‭
+DAT‬
+‭
+flag‬
+‭
+
+‭ong‬
+l
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+long‬
+‭
+
+‭%3333333333333330‬
+%
+%%0010101022222220‬
+‭
+%%0010101020202020‬
+‭
+%%0010101022222220‬
+‭
+%%0010101022020220‬
+‭
+%%0010101022222220‬
+‭
+%%0010101020202020‬
+‭
+%%0010101022222220‬
+‭
+%%0010101022020220‬
+‭
+%%0010101022222220‬
+‭
+%%0010101020202020‬
+‭
+%%0010101022222220‬
+‭
+%%0010101010101010‬
+‭
+%%0010101010101010‬
+‭
+%%0010101010101010‬
+‭
+%%0010101010101010‬
+‭
+%%0010101010101010‬
+‭
+%%0010101010101010‬
+‭
+%%0010101010101010‬
+‭
+%%0010101010101010‬
+‭
+%%0010101010101010‬
+‭
+%%0010101010101010‬
+‭
+%%0010101010101010‬
+‭
+%%0010101010101010‬
+‭
+%%0010101010101010‬
+‭
+%%0010101010101010‬
+‭
+%%0010101010101010‬
+‭
+%%0000000000000000‬
+‭
+%%0000000000000000‬
+‭
+%%0000000000000000‬
+‭
+%%0000000000000000‬
+‭
+%%0000000000000000‬
+‭
+
+‭BITMAP Instantiation‬
+
+‭Description‬
+
+‭Default‬
+
+TITLE 'string'‬
+‭
+
+‭Set the window caption to 'string'.‬
+
+‭<none>‬
+
+POS left top‬
+‭
+
+‭Set the window position.‬
+
+‭0, 0‬
+
+SIZE x_pixels y_pixels‬
+‭
+
+‭Set the number of pixels in the bitmap (1..2048 for both x and y).‬
+
+‭256, 256‬
+
+‭Parallax Spin2 Documentation Page‬‭43‬‭of‬‭57‬
+
+DOTSIZE width_and_height {height}‬
+‭
+
+‭Set the bitmap pixel-width and pixel-height (1..256) together, or set them independently.‬
+
+‭1, 1‬
+
+SPARSE color‬
+‭
+
+‭Show large round pixels against a colored background. DOTSIZE must be at least 4. *‬
+
+‭<off>‬
+
+lut1_to_rgb24‬
+‭
+
+‭Set the color mode. See images below.‬
+
+‭RGB24‬
+
+LUTCOLORS rgb24 rgb24 ...‬
+‭
+
+‭For LUT1..LUT8 color modes, load the LUT with RGB24 colors. Use HEX_LONG_ARRAY_ to load.‬
+
+‭default colors 0..7‬
+
+TRACE 0_to_15‬
+‭
+
+‭Set the pixel loading direction and whether to scroll after each line is filled. See animation below.‬
+
+‭0‬
+
+RATE pixels_per_update‬
+‭
+
+‭Set the number of pixels before each display update. 'RATE -1' sets the rate to the bitmap size.‬
+
+‭line size‬
+
+packed_data_mode‬
+‭
+
+‭Enable packed-data mode. See description at end of this section.‬
+
+‭<none>‬
+
+UPDATE‬
+‭
+
+‭Set UPDATE mode. The display will only be updated when fed an 'UPDATE' command.‬
+
+‭automatic update‬
+
+HIDEXY‬
+‭
+
+‭Hide the X,Y mouse coordinates from being displayed at the mouse pointer.‬
+
+‭not hidden‬
+
+‭BITMAP Feeding‬
+
+‭Description‬
+
+‭Default‬
+
+pixel‬
+‭
+
+‭Numerical pixel data that is fed into the bitmap.‬
+
+lut1_to_rgb24‬
+‭
+
+‭Change the color mode.‬
+
+‭RGB24‬
+
+LUTCOLORS rgb24 rgb24 ...‬
+‭
+
+‭For LUT1..LUT8 color modes, load the LUT with rgb24 colors. Use HEX_LONG_ARRAY_ to load colors.‬
+
+‭default colors 0..7‬
+
+TRACE 0_to_15‬
+‭
+
+‭Change the direction in which pixels are loaded into the bitmap. Sets the rate to the line size.‬
+
+‭0‬
+
+RATE pixels_per_update‬
+‭
+
+‭Set the number of pixels before each display update. 'RATE -1' sets the rate to the bitmap size.‬
+
+SET x_position {y_position}‬
+‭
+
+‭Set the current pixel-loading position. Cancels scroll mode by clearing bit 3 of TRACE.‬
+
+SCROLL x_scroll y_scroll‬
+‭
+
+‭Scroll the bitmap by some number of pixels. Negative/positive values determine the direction, 0 = none.‬
+
+CLEAR‬
+‭
+
+‭Clear the bitmap to zero-value pixels.‬
+
+UPDATE‬
+‭
+
+‭Update the window with the current bitmap. Used in UPDATE mode.‬
+
+SAVE {WINDOW} 'filename'‬
+‭
+
+‭Save a bitmap file (.bmp) of either the entire window or just the bitmap at 1x scale.‬
+
+CLOSE‬
+‭
+
+‭Close the window.‬
+
+‭* Color is ORANGE / BLUE / GREEN / CYAN / RED / MAGENTA / YELLOW / GRAY.‬
+
+‭TRACE modes‬
+‭Rate is set to 1 so that each pixel can be seen as it's loaded.‬
+
+‭ olor‬
+C
+‭Mode‬
+
+‭Bits/‬
+‭ ixel‬
+P
+
+‭Description‬
+
+‭Intention‬
+
+LUT1‬
+‭
+
+‭1‬
+
+‭Pixel indexes LUT colors 0..1‬
+
+‭Memory-efficient 2-color-palette graphics‬
+
+LUT2‬
+‭
+
+‭2‬
+
+‭Pixel indexes LUT colors 0..3‬
+
+‭Memory-efficient 4-color-palette graphics‬
+
+LUT4‬
+‭
+
+‭4‬
+
+‭Pixel indexes LUT colors 0..15‬
+
+‭Memory-efficient 16-color-palette graphics‬
+
+LUT8‬
+‭
+
+‭8‬
+
+‭Pixel indexes LUT colors 0..255‬
+
+‭Memory-efficient 256-color-palette graphics.‬
+
+LUMA8‬
+‭
+
+‭8‬
+
+‭From black to color *‬
+
+‭Instrumentation where luminance indicates level‬
+
+LUMA8W‬
+‭
+
+‭8‬
+
+‭From white to color *‬
+
+‭Instrumentation where saturation indicates level‬
+
+‭Parallax Spin2 Documentation Page‬‭44‬‭of‬‭57‬
+
+LUMA8X‬
+‭
+
+‭8‬
+
+‭From black to color * to white‬
+
+‭Instrumentation where luminance indicates level, peaking in white‬
+
+HSV8‬
+‭
+
+‭8‬
+
+‭From black to color: %HHHHSSSS‬
+
+‭16 hues with 16 luminance levels‬
+
+HSV8W‬
+‭
+
+‭8‬
+
+‭From white to color: %HHHHSSSS‬
+
+‭16 hues with 16 saturation levels, coming from white‬
+
+HSV8X‬
+‭
+
+‭8‬
+
+‭From black to color to white: %HHHHSSSS‬
+
+‭16 hues with 16 luminance levels, peaking in white‬
+
+RGBI8‬
+‭
+
+‭8‬
+
+‭From black to color: %RGBIIIII‬
+
+‭8 basic colors with 32 luminance levels‬
+
+RGBI8W‬
+‭
+
+‭8‬
+
+‭From white to color: %RGBIIIII‬
+
+‭8 basic colors with 32 saturation levels, coming from white‬
+
+RGBI8X‬
+‭
+
+‭8‬
+
+‭From black to color to white: %RGBIIIII‬
+
+‭8 basic colors with 32 luminance levels, peaking in white‬
+
+RGB8‬
+‭
+
+‭8‬
+
+‭%RRRGGGBB‬
+
+‭Byte-level RGB with 8 red, 8 green, and 4 blue levels‬
+
+HSV16‬
+‭
+
+‭16‬
+
+‭From black to color: %HHHHHHHH_SSSSSSSS‬
+
+‭256 hues with 256 luminance levels‬
+
+HSV16W‬
+‭
+
+‭16‬
+
+‭From white to color: %HHHHHHHH_SSSSSSSS‬
+
+‭256 hues with 256 saturation levels, coming from white‬
+
+HSV16X‬
+‭
+
+‭16‬
+
+‭From black to color to white: %HHHHHHHH_SSSSSSSS‬
+
+‭256 hues with 256 luminance levels, peaking in white‬
+
+RGB16‬
+‭
+
+‭16‬
+
+‭%RRRRRGGG_GGGBBBBB‬
+
+‭Word-level RGB with 32 red levels, 64 green levels, and 32 blue levels‬
+
+RGB24‬
+‭
+
+‭24‬
+
+‭%RRRRRRRR_GGGGGGGG_BBBBBBBB‬
+
+‭Full RGB with 256 levels for red, green, and blue‬
+
+‭* Color is ORANGE / BLUE / GREEN / CYAN / RED / MAGENTA / YELLOW / GRAY.‬
+
+CON _clkfreq = 100_000_000‬
+‭
+PUB go() | i‬
+‭
+debug(`bitmap
+‭
+debug(`bitmap
+‭
+debug(`bitmap
+‭
+debug(`bitmap
+‭
+debug(`bitmap
+‭
+debug(`bitmap
+‭
+debug(`bitmap
+‭
+
+a
+b
+c
+d
+e
+f
+g
+
+title
+title
+title
+title
+title
+title
+title
+
+'LUT1'
+'LUT2'
+'LUT4'
+'LUT8'
+'RGB8'
+'RGB16'
+'RGB24'
+
+pos
+pos
+pos
+pos
+pos
+pos
+pos
+
+100
+370
+100
+370
+100
+370
+640
+
+100
+100
+395
+395
+690
+690
+690
+
+trace
+trace
+trace
+trace
+trace
+trace
+trace
+
+2
+2
+2
+2
+2
+2
+2
+
+lut1 longs_1bit alt)‬
+lut2 longs_2bit alt)‬
+lut4 longs_4bit alt)‬
+lut8 longs_8bit)‬
+rgb8)‬
+rgb16)‬
+rgb24)‬
+
+‭Parallax Spin2 Documentation Page‬‭45‬‭of‬‭57‬
+
+waitms(1000)‬
+‭
+‭howbmp("a",
+s
+showbmp("b",
+‭
+showbmp("c",
+‭
+showbmp("d",
+‭
+
+@image1,
+@image2,
+@image3,
+@image4,
+
+$8A,
+2, $800)‬
+$36,
+4, $1000)‬
+$8A, 16, $2000)‬
+$36, 256, $4000)‬
+
+‭send
+'
+'send
+‭
+'send
+‭
+'send
+‭
+
+LUT1
+LUT2
+LUT4
+LUT8
+
+image‬
+image‬
+image‬
+image‬
+
+‭ := @image5 + $36‬ ‭
+i
+'send RGB8/RGB16/RGB24 images from the same 24-bpp file‬
+repeat $10000‬
+‭
+debug(`e `uhex_(byte[i+0] >> 6 + byte[i+1] >> 5 << 2 + byte[i+2] >> 5 << 5 ))‬
+‭
+debug(`f `uhex_(byte[i+0] >> 3 + byte[i+1] >> 2 << 5 + byte[i+2] >> 3 << 11))‬
+‭
+debug(`g `uhex_(byte[i+0]
+‭
++ byte[i+1] << 8
++ byte[i+2] << 16
+))‬
+i += 3‬
+‭
+PRI showbmp(letter, image_address, lut_offset, lut_size, image_longs) | i‬
+‭
+image_address += lut_offset‬
+‭
+debug(``#(letter) lutcolors `uhex_long_array_(image_address, lut_size))‬
+‭
+image_address += lut_size << 2 - 4‬
+‭
+repeat image_longs‬
+‭
+debug(``#(letter) `uhex_(long[image_address += 4]))‬
+‭
+‭AT‬
+D
+image1‬ ‭
+‭
+file
+image2‬ ‭
+‭
+file
+image3‬ ‭
+‭
+file
+image4‬ ‭
+‭
+file
+image5‬ ‭
+‭
+file
+
+"bird_lut1.bmp"‬
+"bird_lut2.bmp"‬
+"bird_lut4.bmp"‬
+"bird_lut8.bmp"‬
+"bird_rgb24.bmp"‬
+
+‭Parallax Spin2 Documentation Page‬‭46‬‭of‬‭57‬
+
+CON _clkfreq = 100_000_000‬
+‭
+PUB go() | i‬
+‭
+debug(`bitmap a title 'LUMA8' pos 100
+‭
+debug(`bitmap b title 'LUMA8W' pos 370
+‭
+debug(`bitmap c title 'LUMA8X' pos 640
+‭
+debug(`bitmap d title 'RGBI8' pos 100
+‭
+debug(`bitmap e title 'RGBI8W' pos 370
+‭
+debug(`bitmap f title 'RGBI8X' pos 640
+‭
+debug(`bitmap g title 'HSV8'
+‭
+pos 100
+debug(`bitmap h title 'HSV8W' pos 370
+‭
+debug(`bitmap i title 'HSV8X' pos 640
+‭
+debug(`bitmap j title 'HSV16' pos 100
+‭
+debug(`bitmap k title 'HSV16W' pos 370
+‭
+debug(`bitmap l title 'HSV16X' pos 640
+‭
+waitms(1000)‬
+‭
+repeat i from 0 to 255‬
+‭
+debug(`a b c d e f g h i `uhex_(i))‬
+‭
+repeat i from 0 to 65535‬
+‭
+debug(`j k l `uhex_(i))‬
+‭
+
+100
+100
+100
+395
+395
+395
+690
+690
+690
+985
+985
+985
+
+size
+size
+size
+size
+size
+size
+size
+size
+size
+size
+size
+size
+
+1 256 dotsize 256 1 luma8 cyan)‬
+1 256 dotsize 256 1 luma8w cyan)‬
+1 256 dotsize 256 1 luma8x cyan)‬
+8 32 dotsize 32 8 trace 4 rgbi8)‬
+8 32 dotsize 32 8 trace 4 rgbi8w)‬
+8 32 dotsize 32 8 trace 4 rgbi8x)‬
+16 16 trace 4 dotsize 16 hsv8)‬
+16 16 trace 4 dotsize 16 hsv8w)‬
+16 16 trace 4 dotsize 16 hsv8x)‬
+256 256 trace 4 hsv16)‬
+256 256 trace 4 hsv16w)‬
+256 256 trace 4 hsv16x)‬
+
+'feed 8-bit displays‬
+‭
+'feed 16-bit displays‬
+‭
+
+‭Parallax Spin2 Documentation Page‬‭47‬‭of‬‭57‬
+
+‭MIDI Display‬
+
+‭MIDI keyboard for viewing note-on/off‬‭status with velocity‬
+
+CON _clkfreq = 10_000_000‬
+‭
+PUB go() | i‬
+‭
+‭ebug(`midi MyMidi size 3 range 36 84)‬
+d
+repeat‬
+‭
+repeat i from 36 to 84‬
+‭
+debug(`MyMidi $90 `(i, getrnd() & $7F))‬
+‭
+waitms(150)‬
+‭
+debug(`MyMidi $80 `(i, 0))‬
+‭
+
+‭MIDI Instantiation‬
+
+‭Description‬
+
+‭Default‬
+
+TITLE 'string'‬
+‭
+
+‭Set the window caption to 'string'.‬
+
+‭<none>‬
+
+POS left top‬
+‭
+
+‭Set the window position.‬
+
+‭0, 0‬
+
+SIZE keyboard_size‬
+‭
+
+‭Set the size of the MIDI keyboard display (1..50).‬
+
+‭4‬
+
+RANGE first_key last_key‬
+‭
+
+‭Set the first and last MIDI key numbers (0..127).‬
+
+‭21, 108 (88 keys)‬
+
+CHANNEL channel_number‬
+‭
+
+‭Set the MIDI channel number to observe (0..15).‬
+
+‭0‬
+
+COLOR white_key black_key‬
+‭
+
+‭Set the 'ON' colors for white and black keys. *‬
+
+‭CYAN, MAGENTA‬
+
+‭MIDI Feeding‬
+
+‭Description‬
+
+byte‬
+‭
+
+I‭f ($90 + channel) then NOTE_ON mode, else if ($80 + channel) then NOTE_OFF mode.‬
+‭If NOTE_ON mode then receive a key ($00..$7F) and then its velocity ($00..$7F), update display.‬
+‭If NOTE_OFF mode then receive a key ($00..$7F) and then its velocity ($00..$7F), update display.‬
+
+CLEAR‬
+‭
+
+‭Clear all notes.‬
+
+SAVE {WINDOW} 'filename'‬
+‭
+
+‭Save a bitmap file (.bmp) of either the entire window or just the display area.‬
+
+CLOSE‬
+‭
+
+‭Close the window.‬
+
+‭Default‬
+
+‭* Color is BLACK / WHITE or ORANGE / BLUE / GREEN / CYAN / RED / MAGENTA / YELLOW / GRAY followed by an optional 0..15 for brightness (default is 8).‬
+
+‭Here is a PASM program which receives MIDI serial on P16 and sends it to the MIDI display:‬
+
+CON‬
+‭
+
+‭clkfreq‬
+_
+rxpin‬
+‭
+
+DAT‬
+‭
+
+org‬
+‭
+
+‭ 10_000_000‬
+=
+= 16‬
+‭
+
+debug‬ ‭
+‭
+(`midi m size 2)‬
+‭rpin‬ #
+w
+‭%11111_0,#rxpin‬
+wxpin‬ ‭
+‭
+##(clkfreq_/31250) << 16 + 8-1, #rxpin‬
+drvl‬ ‭
+‭
+#rxpin‬
+‭wait‬ ‭
+.
+testp‬ #
+‭rxpin‬ ‭
+wc‬
+if_nc‬ ‭
+‭
+jmp‬
+#.wait‬
+‭
+‭dpin‬ x
+r
+‭,#rxpin‬
+shr‬
+‭
+x,#32-8‬
+‭
+debug‬ ‭
+‭
+("`m ", uhex_byte_(x))‬
+
+x‬
+‭
+
+jmp‬
+‭
+
+#.wait‬
+‭
+
+res‬
+‭
+
+1‬
+‭
+
+‭Packed-Data Modes‬
+‭Packed-data‬‭modes‬‭are‬‭used‬‭to‬‭efficiently‬‭convey‬‭sub-byte‬‭data‬‭types,‬‭by‬‭having‬‭the‬‭host‬‭side‬‭unpack‬‭them‬‭from‬‭bytes,‬‭words,‬‭or‬‭longs‬‭it‬‭receives.‬‭As‬‭well,‬‭bytes‬‭can‬‭be‬‭sent‬
+‭within words and longs, and words can be sent within longs for some efficiency improvement.‬
+
+‭Parallax Spin2 Documentation Page‬‭48‬‭of‬‭57‬
+
+‭To establish packed-data operation, you must specify one of the modes listed below, followed by optional 'ALT' and 'SIGNED' keywords:‬
+
+packed_data_mode {ALT} {SIGNED}‬
+‭
+
+‭The‬‭ALT‬‭keyword‬‭will‬‭cause‬‭bits,‬‭double-bits,‬‭or‬‭nibbles,‬‭within‬‭each‬‭byte‬‭sent,‬‭to‬‭be‬‭reordered‬‭end-to-end‬‭on‬‭the‬‭host‬‭side,‬‭within‬‭each‬‭byte.‬‭This‬‭simplifies‬‭cases‬‭where‬‭the‬
+‭raw‬‭data‬‭you‬‭are‬‭sending‬‭has‬‭its‬‭bitfields‬‭out-of-order‬‭with‬‭respect‬‭to‬‭the‬‭DEBUG‬‭display‬‭you‬‭are‬‭using.‬‭This‬‭is‬‭most-likely‬‭to‬‭be‬‭needed‬‭for‬‭bitmap‬‭data‬‭that‬‭was‬‭composed‬‭in‬
+‭standard formats.‬
+
+‭The‬‭SIGNED‬‭keyword will cause all unpacked data values‬‭to be sign-extended on the host side.‬
+
+‭Packed-Data‬
+‭Modes‬
+
+‭Descriptions‬
+
+‭Final Values‬
+
+‭Final Values‬
+‭if SIGNED‬
+
+LONGS_1BIT‬
+‭
+
+‭Each value received is translated into 32 separate 1-bit values, starting from the LSB of the received value.‬
+
+‭0..1‬
+
+‭-1..0‬
+
+LONGS_2BIT‬
+‭
+
+‭Each value received is translated into 16 separate 2-bit values, starting from the LSBs of the received value.‬
+
+‭0..3‬
+
+‭-2..1‬
+
+LONGS_4BIT‬
+‭
+
+‭Each value received is translated into 8 separate 4-bit values, starting from the LSBs of the received value.‬
+
+‭0..15‬
+
+‭-8..7‬
+
+LONGS_8BIT‬
+‭
+
+‭Each value received is translated into 4 separate 8-bit values, starting from the LSBs of the received value.‬
+
+‭0..255‬
+
+‭-128..127‬
+
+LONGS_16BIT‬
+‭
+
+‭Each value received is translated into 2 separate 16-bit values, starting from the LSBs of the received value.‬
+
+‭0..65,535‬
+
+‭-32,768..32,767‬
+
+WORDS_1BIT‬
+‭
+
+‭Each value received is translated into 16 separate 1-bit values, starting from the LSB of the received value.‬
+
+‭0..1‬
+
+‭-1..0‬
+
+WORDS_2BIT‬
+‭
+
+‭Each value received is translated into 8 separate 2-bit values, starting from the LSBs of the received value.‬
+
+‭0..3‬
+
+‭-2..1‬
+
+WORDS_4BIT‬
+‭
+
+‭Each value received is translated into 4 separate 4-bit values, starting from the LSBs of the received value.‬
+
+‭0..15‬
+
+‭-8..7‬
+
+WORDS_8BIT‬
+‭
+
+‭Each value received is translated into 2 separate 8-bit values, starting from the LSBs of the received value.‬
+
+‭0..255‬
+
+‭-128..127‬
+
+BYTES_1BIT‬
+‭
+
+‭Each value received is translated into 8 separate 1-bit values, starting from the LSB of the received value.‬
+
+‭0..1‬
+
+‭-1..0‬
+
+BYTES_2BIT‬
+‭
+
+‭Each value received is translated into 4 separate 2-bit values, starting from the LSBs of the received value.‬
+
+‭0..3‬
+
+‭-2..1‬
+
+BYTES_4BIT‬
+‭
+
+‭Each value received is translated into 2 separate 4-bit values, starting from the LSBs of the received value.‬
+
+‭0..15‬
+
+‭-8..7‬
+
