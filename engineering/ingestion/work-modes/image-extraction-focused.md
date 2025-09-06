@@ -80,25 +80,12 @@ mcp__filesystem__read_text_file path:"/sources/visual-assets/INGESTION-IMAGE-EXT
 - Check PDF size and pages for extraction planning
 - Note: Extraction outputs both PNG files and JSON catalog
 
-#### Step 3: Enhanced Extraction Tool Preparation
-**🚨 NEW v3.0: Coordinate-Aware Rescue System**
+#### Step 3: v3.0 Coordinate-Aware Rescue System
+**Core Tools** (`/engineering/tools/extraction/`): `enhanced_pdf_extractor.py` | `simple_black_detector.py` | `replace_with_cropped.py` | `update_catalog_numbering.py`
 
-**Primary Tools** (in `/engineering/tools/extraction/`):
-- ✅ **enhanced_pdf_extractor.py** - Coordinate-aware extraction with bbox capture
-- ✅ **simple_black_detector.py** - Quality analysis and failed extraction detection
-- ✅ **replace_with_cropped.py** - Replace full-page images with rescued crops
-- ✅ **update_catalog_numbering.py** - Apply sequential numbering system
+**Key Capabilities**: Coordinate capture for rescue → Black image detection (brightness <10) → Coordinate-aware cropping → Sequential numbering ([PREFIX]-001) → Quality assurance pipeline
 
-**Enhanced Capabilities v3.0:**
-- ✅ **Coordinate capture** - Saves bounding boxes for rescue operations
-- ✅ **Black image detection** - Brightness analysis (threshold <10)
-- ✅ **Coordinate-aware rescue** - pdf2image + cropping using saved coordinates
-- ✅ **Sequential numbering** - [PREFIX]-001 format for easy reference
-- ✅ **Quality assurance** - Automated detection and replacement of failed extractions
-- ✅ **Browser cache handling** - Documentation for image display issues
-
-**Required Dependencies** (should be available):
-- PyMuPDF (`fitz`), pdf2image, PIL/Pillow
+**Dependencies**: PyMuPDF, pdf2image, PIL/Pillow
 
 ---
 
@@ -107,30 +94,19 @@ mcp__filesystem__read_text_file path:"/sources/visual-assets/INGESTION-IMAGE-EXT
 #### Step 4: Execute Enhanced Coordinate-Aware Extraction
 **🔄 v3.0 Enhanced Pipeline**:
 
-**Phase 1: Initial Extraction with Coordinate Capture**
+**Complete v3.0 Pipeline**:
 ```bash
-cd /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base
+cd /P2-Knowledge-Base
 
-# Step 1: Enhanced extraction with bounding box coordinates
+# 1. Coordinate-aware extraction
 python3 engineering/tools/extraction/enhanced_pdf_extractor.py "sources/[filename].pdf" -o "extracted_images_[doc-id]"
-```
 
-**Phase 2: Quality Analysis & Black Image Detection**
-```bash
-# Step 2: Analyze all extracted images for quality issues
+# 2. Quality analysis & rescue
 python3 engineering/tools/extraction/simple_black_detector.py "extracted_images_[doc-id]/"
-```
-
-**Phase 3: Coordinate-Aware Rescue System**
-```bash
-# Step 3: Apply rescue system to failed extractions (if any detected)
 python3 engineering/tools/extraction/replace_with_cropped.py "extracted_images_[doc-id]/" "sources/[filename].pdf"
-```
 
-**Phase 4: Sequential Numbering Application**
-```bash
-# Step 4: Apply sequential numbering system (e.g., P2DS-001, P2SD-001)
-python3 engineering/tools/extraction/update_catalog_numbering.py "extracted_images_[doc-id]/catalog.md" "[OLD-PREFIX]" "[DOC-PREFIX]"
+# 3. Sequential numbering (P2DS-001, P2SD-001, etc.)
+python3 engineering/tools/extraction/update_catalog_numbering.py "extracted_images_[doc-id]/catalog.md" "[OLD]" "[NEW]"
 ```
 
 **Monitor v3.0 Pipeline Output For**:
@@ -150,46 +126,19 @@ python3 engineering/tools/extraction/update_catalog_numbering.py "extracted_imag
 
 **Multi-Part Extraction Workflow**:
 
-1. **Extract Each Part with v3.0 Enhanced Pipeline**:
-```bash
-# Extract each part using coordinate-aware extraction
-python3 engineering/tools/extraction/enhanced_pdf_extractor.py "sources/Document-Part1of5.pdf" -o "extracted_images_[doc]_part1"
-python3 engineering/tools/extraction/enhanced_pdf_extractor.py "sources/Document-Part2of5.pdf" -o "extracted_images_[doc]_part2"
-# Continue for all parts...
+1. **Extract All Parts**: Run complete v3.0 pipeline on each part separately to temporary directories
 
-# Apply quality analysis and rescue to each part
-for part in part1 part2 part3 part4 part5; do
-  python3 engineering/tools/extraction/simple_black_detector.py "extracted_images_[doc]_${part}/"
-  python3 engineering/tools/extraction/replace_with_cropped.py "extracted_images_[doc]_${part}/" "sources/Document-${part^}of5.pdf"
-done
-```
-
-2. **Create Unified Directory Structure**:
+2. **Collision-Safe Combination** ⚠️ **PREVENTS DATA LOSS**:
 ```bash
-# Create final unified directory
-mcp__filesystem__create_directory path:"sources/extractions/[document-audit]/assets/images-[YYYYMMDD]"
-```
-
-3. **Combine Images with Collision Protection** ⚠️ **CRITICAL SAFETY PROTOCOL**:
-```bash
-# MANDATORY: Check for filename collisions before copying
+# Check for filename collisions, rename if needed: image.png → image_part2.png
 for part in 1 2 3 4 5; do
-  for file in extracted_images_[document]_part${part}/*.png; do
-    if [ -f "$file" ]; then
-      basename=$(basename "$file")
-      destination="sources/extractions/[document-audit]/assets/images-[YYYYMMDD]/$basename"
-      
-      # Check for collision
-      if [ -f "$destination" ]; then
-        # Collision detected - rename with part identifier
-        new_name="${basename%.png}_part${part}.png"
-        new_destination="sources/extractions/[document-audit]/assets/images-[YYYYMMDD]/$new_name"
-        cp "$file" "$new_destination"
-        echo "⚠️ COLLISION AVOIDED: $basename → $new_name (from Part $part)"
-      else
-        # No collision - copy normally
-        cp "$file" "$destination"
-      fi
+  for file in extracted_images_[doc]_part${part}/*.png; do
+    basename=$(basename "$file")
+    destination="final_directory/$basename"
+    if [ -f "$destination" ]; then
+      cp "$file" "final_directory/${basename%.png}_part${part}.png"  # Avoid collision
+    else
+      cp "$file" "$destination"  # Safe to copy
     fi
   done
 done
@@ -276,26 +225,7 @@ mcp__filesystem__read_text_file path:"sources/extractions/[document-audit]/asset
 - **File size validation** (suspicious images <5KB)
 - **Coordinate capture success** verification
 
-**v3.0 Quality Analysis Output**:
-```bash
-# Automated quality analysis from simple_black_detector.py:
-"🔍 Quality Analysis Results:"
-"  ✅ High quality: [N] images (brightness >50, size >10KB)"
-"  ⚠️  Suspicious: [N] images (brightness <50 or size <10KB)"
-"  ❌ Failed: [N] images (brightness <10, likely black)"
-"  📊 Overall success rate: [XX.X%]"
-
-# Coordinate-aware rescue results:
-"🛡️ Rescue Operations:"
-"  🎯 [N] failed images identified with coordinates"
-"  ✅ [N] successfully rescued using coordinate cropping"
-"  📏 Final images show actual cropped dimensions (not full-page)"
-```
-
-**Legacy Failure Patterns Still Monitored**:
-- **xref coordinate issues** - Now automatically rescued with coordinate-aware system
-- **PyMuPDF placeholders** - Detected via brightness analysis and replaced
-- **Full-page captures** - Identified by dimension analysis and replaced with crops
+**v3.0 Output Monitoring**: Quality analysis reports brightness scores, rescue operations, and final success rate. Legacy patterns (xref issues, placeholders, full-page captures) now automatically handled by coordinate-aware rescue.
 
 #### Step 8: Human Intervention Assessment  
 **For Each Failed Extraction:**
@@ -344,45 +274,7 @@ mcp__filesystem__read_text_file path:"sources/extractions/[document-audit]/asset
 **Extend Existing Catalog**: `/sources/visual-assets/P2-Edge-Master-Image-Catalog.md`
 **OR Create New Catalog**: `/sources/visual-assets/[Document-Family]-Master-Image-Catalog.md`
 
-**v3.0 Enhanced Markdown Catalog Structure**:
-```markdown
-# [Document Name] - Enhanced Visual Asset Catalog v3.0
-**Coordinate-Aware Extraction with Sequential Numbering**
-
-**Extraction Date**: YYYY-MM-DD  
-**Enhancement**: v3.0 coordinate-aware rescue system applied  
-**Total Images**: XX successfully extracted (XX original + XX rescued)  
-**Success Rate**: 100% (XX/XX after coordinate-aware rescue)  
-**Sequential Range**: [PREFIX]-001 through [PREFIX]-XXX  
-**Quality Assurance**: All images brightness >50, actual cropped dimensions  
-
----
-
-## 📋 **Complete Image Inventory with Sequential IDs**
-
-### **[PREFIX]-001** | Page XX - [Section Name] ⭐ **CROPPED**  
-**File**: `[filename].png`  
-**Dimensions**: XXX×XXX pixels (actual cropped size)  
-**Size**: XX.XKB | **Quality**: Brightness XX (excellent)  
-**Context**: [caption/nearby text]  
-**Content Type**: [technical diagram/schematic/photo]  
-**Usage**: Easy reference "Please update [PREFIX]-001 description"  
-![PREFIX-001: Description]([filename].png)
-
-### **[PREFIX]-002** | Page XX - [Section Name]  
-[Same enhanced format for all images...]
-
----
-
-## 📊 **v3.0 Quality Analysis**
-**Rescued Images**: [count] - Originally black/full-page, now properly cropped  
-**Brightness Distribution**: [count] >80 (excellent), [count] 50-80 (good), [count] <50 (acceptable)  
-**File Size Distribution**: [count] >50KB (detailed), [count] 10-50KB (standard), [count] <10KB (simple)  
-**Dimension Analysis**: All show actual content dimensions (no full-page 1700×2200)  
-
-## 🔄 **Browser Cache Advisory**
-**Important**: After extraction updates, refresh browser cache (Ctrl+F5) to see actual cropped images instead of cached full-page versions.
-```
+**Enhanced Catalog Structure**: Generate markdown with sequential IDs ([PREFIX]-001), quality metrics (brightness, dimensions), rescued image tracking, and browser cache advisory. Template shows actual cropped dimensions, not full-page sizes.
 
 **Master Catalog Structure** (Project-level aggregation):
 
@@ -568,131 +460,21 @@ mcp__todo-mcp__todo_create content:"Add [document-name] visual assets to technic
 - Maintains accurate project status reporting
 - Enables proper sprint planning with current asset availability
 
-#### Step 18: Generate Comprehensive Extraction Report
-**REQUIRED**: Always provide complete extraction summary:
-
-```markdown
-## Image Extraction Summary - [Document Name]
-
-### 🎯 **EXTRACTION COMPLETENESS STATUS**
-**Status**: ✅ **COMPLETE - Ready for Integration** / ⚠️ **REQUIRES HUMAN INTERVENTION** / ❌ **INCOMPLETE - Technical Issues**
-
-**Completeness Details**:
-- **Extraction Complete**: [Yes/No] - All expected images processed by pdf_image_extractor.py
-- **Manual Intervention Needed**: [Yes/No] - [N] images require manual capture from failed extractions
-- **Integration Ready**: [Yes/No] - All assets organized and ready for consumer distribution
-- **Human Action Required**: [None / Manual screenshot of [N] technical diagrams on pages [X,Y,Z] / Review and prioritize [N] failed extractions]
+#### Step 18: Generate Extraction Summary
+**Report Status**: Complete/Requires Intervention/Incomplete | **Success Rate**: XX.X% (after v3.0 rescue) | **Manual Action**: None/[N] failed extractions need manual capture | **Next Steps**: Consumer distribution + system updates
 
 ---
 
-### ✅ **Primary Extraction (Completed)**
-- **Source**: [filename] ([size], [pages])
-- **Tool**: pdf_image_extractor.py
-- **Output**: [N] images extracted to `extracted_images_[document-id]/`
-- **Success Rate**: [XX.X%] ([successful]/[total] images)
-- **Processing Time**: [duration]
+## 🔧 v3.0 TOOL MASTERY
+**Core Tools**: `enhanced_pdf_extractor.py` (coordinate capture) → `simple_black_detector.py` (quality analysis) → `replace_with_cropped.py` (rescue) → `update_catalog_numbering.py` (sequential IDs)
 
-### 📊 **Extraction Quality Analysis**
-**High-Resolution Assets**: [N] images ≥800 pixels (technical diagrams, detailed photos)
-**Standard Resolution**: [N] images <800 pixels (icons, simple graphics)
-**Context Detection**: [N] images with caption text identified
-**Technical Content**: [N] images tagged as technical diagrams/schematics
-**Marketing Content**: [N] images tagged as product photos/marketing
+**Key Innovation**: Coordinate-aware rescue system achieving 100% success rate through bbox-guided cropping
 
-### ❌ **Failed Extractions & Intervention**
-**Status**: [✅ All successful / ⚠️ [N] failures requiring manual capture]
-**Failure Pattern**: [xref ## coordinate issues / other specific pattern]
-**Manual Intervention Priority**: [High/Medium/Low based on content]
-**Rescue Attempts**: [N] attempted, [N] successful via pdf2image
-
-### 🔄 **Consumer Distribution & Planning**
-**Asset Ownership**: Primary extraction [name] owns [N] image assets
-**Secondary Extractions Updated**: [N] specialized extractions with new reference files
-**Document Enhancement Opportunities**: [N] manuals/guides identified for potential improvement
-**Consumer Registry Created**: ✅ ASSET-CONSUMERS.md with complete distribution mapping
-**Technical Debt Generated**: [N] document enhancement tasks queued in technical debt system
-**Bonus Images Distributed**: [N] additional valuable images automatically forwarded to relevant consumers
-
-### 📁 **Asset Organization**
-**Directory Created**: `extracted_images_[document-id]/`
-**Catalog Generated**: `[document-name]_image_catalog.json` with complete metadata
-**Master Catalog**: [Updated existing / Created new] at `sources/visual-assets/`
-**Search Tags Applied**: [list of primary content classification tags]
-
-### 🔄 **Pipeline Impact**  
-**Extraction Matrix Updated**: [Document status changed from PENDING to COMPLETE]
-**Expected Utilization**: [Manual creation / Technical reference / Educational materials]
-**Integration Opportunities**: [Specific manuals/guides that can use these assets]
-**Knowledge Base Value**: [How these assets fill gaps or enhance existing content]
-
-### 📈 **Next Actions**
-**Immediate**: [Manual capture tasks if needed] + [Consumer reference file updates]
-**Strategic**: [Document enhancement opportunities queued in technical debt]  
-**Future**: [Multi-session import planning if large document family]
-**Consumer Impact**: [N] extractions enhanced, [N] documents ready for strategic improvement
-```
-
----
-
-## 🔧 EXTRACTION TOOL MASTERY
-*Comprehensive guide to pdf_image_extractor.py usage*
-
-### Tool Location & Basic Usage
-**Path**: `/tools/pdf_image_extractor.py`
-**Dependencies**: PyMuPDF (fitz), pdf2image, PIL
-
-### Command Patterns
-
-#### Standard Extraction
-```bash
-python3 tools/pdf_image_extractor.py "path/to/document.pdf" -o "output_directory"
-```
-
-#### Test Mode (Quick Validation)
-```bash  
-python3 tools/pdf_image_extractor.py --test
-# Uses first P2 Edge PDF found in sources/originals/
-```
-
-#### Advanced Parameters
-```bash
-# Custom output directory
-python3 tools/pdf_image_extractor.py "document.pdf" --output "custom_dir_name"
-
-# The tool automatically handles:
-# - Size filtering (skips images <50x50 pixels)
-# - Format conversion (CMYK to RGB)
-# - Context extraction (surrounding text analysis)  
-# - Placeholder detection (PyMuPDF warning triangles)
-# - Rescue attempts (pdf2image fallback for failures)
-```
-
-### Understanding Tool Output
-
-#### Success Indicators
-```
-✅ Opened PDF: /path/to/document.pdf
-📄 Pages: 15
-📄 Page 1: Found 3 images
-  ✅ Extracted: document_page01_img01.png (1000×800)
-  ✅ Extracted: document_page01_img02.png (400×300)
-```
-
-#### Failure & Rescue Indicators  
-```
-  ⚠️  WARNING: Placeholder detected - document_page04_img02.png (extraction failed)
-    🔧 Attempting pdf2image rescue for document_page04_img02.png...
-    📍 Target: Page 4, Image 2, xref 34
-    🚀 RESCUE SUCCESS: document_page04_img02.png recovered with pdf2image!
-```
-
-#### Final Statistics
-```
-🎯 EXTRACTION COMPLETE:
-   📊 Total images extracted: 47
-   📁 Output directory: extracted_images_p2_silicon
-   📋 Catalog saved: P2_Silicon_v35_image_catalog.json
-```
+### Tool Output
+**Success**: Standard extraction progress with image counts and dimensions  
+**Quality Issues**: Brightness analysis identifies black/failed images  
+**Rescue Operations**: Coordinate-aware cropping recovers failed extractions  
+**Final Report**: Total images, success rate, sequential numbering applied
 
 ### JSON Catalog Structure
 **Generated File**: `[document-name]_image_catalog.json`
@@ -756,37 +538,9 @@ ls -la extracted_images_*/
 #### Step A1: Generate Core Extraction Tasks
 **CRITICAL**: All tasks MUST use tag `["image_extraction"]` to match this work mode's filter
 
-**Standard Single-PDF Tasks**:
-```bash
-# Create primary extraction sequence with proper tagging
-mcp__todo-mcp__todo_create content:"Phase 1: Setup extraction environment and locate source PDF for [document-name]" priority:"critical" estimate_minutes:10 tags:["image_extraction"] sequence:1
+**Task Sequence**: Create 6-phase extraction workflow with `tags:["image_extraction"]` - Setup → v3.0 Pipeline → Analysis → Catalogs → Consumer Distribution → System Updates
 
-mcp__todo-mcp__todo_create content:"Phase 2: Execute image extraction using pdf_image_extractor.py for [document-name]" priority:"critical" estimate_minutes:30 tags:["image_extraction"] sequence:2
-
-mcp__todo-mcp__todo_create content:"Phase 3: Analyze extraction results and identify failure patterns for [document-name]" priority:"critical" estimate_minutes:20 tags:["image_extraction"] sequence:3
-
-mcp__todo-mcp__todo_create content:"Phase 4: Create searchable asset catalog and organize visual assets for [document-name]" priority:"critical" estimate_minutes:25 tags:["image_extraction"] sequence:4
-
-mcp__todo-mcp__todo_create content:"Phase 5: Execute consumer distribution and completeness validation for [document-name]" priority:"critical" estimate_minutes:30 tags:["image_extraction"] sequence:5
-
-mcp__todo-mcp__todo_create content:"Phase 6: Update ALL tracking systems with extraction results for [document-name]" priority:"critical" estimate_minutes:25 tags:["image_extraction"] sequence:6
-```
-
-**Multi-Part PDF Tasks** (when document split into multiple parts):
-```bash
-# Create multi-part extraction sequence
-mcp__todo-mcp__todo_create content:"Phase 1: Setup [N]-part extraction environment for [document-name]" priority:"critical" estimate_minutes:15 tags:["image_extraction"] sequence:1
-
-mcp__todo-mcp__todo_create content:"Phase 2: Execute image extraction on all [N] parts of [document-name] using pdf_image_extractor.py" priority:"critical" estimate_minutes:60 tags:["image_extraction"] sequence:2
-
-mcp__todo-mcp__todo_create content:"Phase 3: Combine extracted images from [N] parts with collision protection" priority:"critical" estimate_minutes:30 tags:["image_extraction"] sequence:3
-
-mcp__todo-mcp__todo_create content:"Phase 4: Create comprehensive multi-part catalog and organize final assets" priority:"critical" estimate_minutes:40 tags:["image_extraction"] sequence:4
-
-mcp__todo-mcp__todo_create content:"Phase 5: Update all tracking systems with multi-part extraction results" priority:"critical" estimate_minutes:25 tags:["image_extraction"] sequence:5
-
-mcp__todo-mcp__todo_create content:"Phase 6: Clean up temporary directories after successful combination" priority:"critical" estimate_minutes:10 tags:["image_extraction"] sequence:6
-```
+**Multi-Part Tasks**: 6-phase workflow for split PDFs - Setup → Extract All Parts → Collision-Safe Combine → Multi-Part Catalog → System Updates → Cleanup
 
 #### Step A2: Set Context Tracking
 ```bash

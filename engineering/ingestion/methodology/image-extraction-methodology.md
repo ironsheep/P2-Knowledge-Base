@@ -15,113 +15,17 @@ Advanced systematic workflow for extracting, documenting, and enriching images f
 
 ### The Solution: Enhanced Extraction Pipeline
 
-#### 1. **Dual-Phase Extraction**
-```python
-# Phase 1: Standard PyMuPDF with coordinate capture
-def extract_images_with_coordinates(pdf_path, output_dir):
-    """Extract images AND save bounding box coordinates"""
-    for page_num, page in enumerate(pdf.pages()):
-        for img_index, img in enumerate(page.get_images()):
-            # Extract image
-            pix = fitz.Pixmap(pdf, img[0])
-            
-            # CRITICAL: Save coordinates for rescue
-            image_rects = page.get_image_rects(img[0])
-            if image_rects:
-                rect = image_rects[0]
-                bbox_coords = {
-                    "x0": rect.x0, "y0": rect.y0,
-                    "x1": rect.x1, "y1": rect.y1,
-                    "width": rect.width, "height": rect.height
-                }
-                # Save coordinates to JSON catalog
-```
+### Core Technical Components
 
-#### 2. **Black Image Detection**
-```python
-def analyze_image_quality(image_path):
-    """Detect failed extractions using brightness analysis"""
-    file_size_kb = os.path.getsize(image_path) / 1024
-    
-    with Image.open(image_path) as img:
-        gray = img.convert('L')
-        stat = ImageStat.Stat(gray)
-        mean_brightness = stat.mean[0]
-        
-        # Failed extraction indicators
-        is_likely_failed = (
-            mean_brightness < 10 or  # Black images
-            (file_size_kb < 5 and mean_brightness < 50)  # Tiny black images
-        )
-    
-    return {
-        'brightness': mean_brightness,
-        'file_size_kb': file_size_kb,
-        'likely_failed': is_likely_failed
-    }
-```
+**1. Coordinate Capture**: Save bounding box coordinates (`x0, y0, x1, y1`) during initial PyMuPDF extraction for rescue operations
 
-#### 3. **Coordinate-Aware Rescue System**
-```python
-def rescue_failed_images(pdf_path, failed_images, output_dir):
-    """Rescue failed extractions using saved coordinates"""
-    
-    for page_num, failed_items in failed_images.items():
-        # Convert PDF page to high-res image
-        page_image = convert_from_pdf(
-            pdf_path, 
-            first_page=page_num+1, 
-            last_page=page_num+1, 
-            dpi=200
-        )[0]
-        
-        for img_info in failed_items:
-            coords = img_info['bbox_coords']
-            
-            # Convert PDF coordinates to pixel coordinates
-            pdf_width, pdf_height = get_pdf_page_size(pdf_path, page_num)
-            page_width, page_height = page_image.size
-            
-            scale_x = page_width / pdf_width
-            scale_y = page_height / pdf_height
-            
-            # Crop using scaled coordinates
-            pixel_coords = (
-                int(coords['x0'] * scale_x),
-                int((pdf_height - coords['y1']) * scale_y),  # PDF uses bottom-origin
-                int(coords['x1'] * scale_x),
-                int((pdf_height - coords['y0']) * scale_y)
-            )
-            
-            cropped_image = page_image.crop(pixel_coords)
-            cropped_image.save(f"{output_dir}/{img_info['filename']}_RESCUED_CROPPED.png")
-```
+**2. Quality Analysis**: Brightness analysis (threshold <10) + file size validation (<5KB) identifies failed extractions  
 
-#### 4. **Quality Assurance Pipeline**
-```python
-def complete_extraction_pipeline(pdf_path, output_dir):
-    """Complete pipeline with quality assurance"""
-    
-    # Phase 1: Initial extraction with coordinates
-    extraction_results = extract_images_with_coordinates(pdf_path, output_dir)
-    
-    # Phase 2: Quality analysis
-    failed_images = {}
-    for img_path in glob.glob(f"{output_dir}/*.png"):
-        quality = analyze_image_quality(img_path)
-        if quality['likely_failed']:
-            # Mark for rescue
-            failed_images[...] = quality
-    
-    # Phase 3: Rescue failed extractions
-    if failed_images:
-        rescue_failed_images(pdf_path, failed_images, output_dir)
-    
-    # Phase 4: Replace failed with rescued
-    replace_failed_with_rescued(output_dir)
-    
-    return generate_final_catalog(output_dir)
-```
+**3. Coordinate-Aware Rescue**: Use pdf2image + saved coordinates for precise cropping of failed extractions
+
+**4. Rescue Process**: Convert PDF page to high-res image → Calculate coordinate scaling → Crop using bbox → Replace failed extraction
+
+**5. Complete Pipeline**: Initial extraction → Quality analysis → Rescue operations → Failed image replacement → Final catalog generation
 
 ## 📋 Complete Enhanced Process
 
@@ -138,25 +42,7 @@ def complete_extraction_pipeline(pdf_path, output_dir):
 4. **Replace failed extractions** with properly cropped rescued versions
 
 ### Phase 3: Catalog Generation with Quality Metrics
-```markdown
-# Document Image Catalog
-
-**Source Document**: filename.pdf  
-**Extraction Date**: YYYY-MM-DD  
-**Total Images**: X extracted images  
-**Success Rate**: 100% (X/X properly extracted)  
-**Rescued Images**: N images replaced with coordinate-aware cropped versions
-
-## Images
-
-### Page N - Section Title
-
-**filename.png**  
-*WxH pixels, XKB* ⭐ **CROPPED** *(if rescued)*
-![Description](filename.png)
-**Description**: What the image shows
-**Context**: Surrounding text context
-```
+**Generate**: Markdown catalog with sequential IDs, quality metrics, rescued image indicators, and browser cache advisories. Shows actual cropped dimensions, not full-page sizes.
 
 ### Phase 4: Quality Verification
 1. **Verify no full-page images** remain (check for 1700×2200 or similar)
@@ -165,42 +51,10 @@ def complete_extraction_pipeline(pdf_path, output_dir):
 4. **Clean up backup files** after verification
 
 ## 🛠️ Enhanced Toolchain
-
-### Core Scripts (in `/engineering/tools/extraction/`)
-
-#### `enhanced_pdf_extractor.py`
-- **Purpose**: Initial extraction with coordinate capture
-- **Key Feature**: Saves bounding box coordinates for rescue
-- **Output**: Images + coordinate JSON
-
-#### `simple_black_detector.py`
-- **Purpose**: Quality analysis and failed extraction detection
-- **Key Feature**: Brightness and file size analysis
-- **Output**: Quality assessment for each image
-
-#### `replace_with_cropped.py`
-- **Purpose**: Replace full-page images with cropped rescued versions
-- **Key Feature**: Dimension comparison and file replacement
-- **Output**: Properly cropped final image set
-
-#### `get_image_dimensions.py`
-- **Purpose**: Generate actual dimensions for catalog updating
-- **Key Feature**: Batch dimension analysis
-- **Output**: Dimension data for catalog
+**Core Scripts** (`/engineering/tools/extraction/`): `enhanced_pdf_extractor.py` (coordinate capture) → `simple_black_detector.py` (quality analysis) → `replace_with_cropped.py` (rescue replacement) → `update_catalog_numbering.py` (sequential IDs)
 
 ## 🎯 Critical Success Factors
-
-### 1. **Always Save Coordinates**
-The rescue system only works if you capture bounding box coordinates during initial extraction.
-
-### 2. **Quality Analysis is Essential** 
-Don't trust extraction success reports - always analyze brightness and file size.
-
-### 3. **Browser Cache Issues**
-After replacing images, users may see cached full-page versions. Always instruct to refresh browser cache.
-
-### 4. **Systematic Replacement**
-Use the replacement script to ensure only properly cropped images remain.
+**Essential Requirements**: (1) Save coordinates during extraction (2) Analyze brightness/file size (3) Handle browser cache issues (4) Use systematic replacement scripts
 
 ## 🔧 Implementation Checklist
 
