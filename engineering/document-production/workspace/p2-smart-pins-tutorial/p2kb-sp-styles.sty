@@ -1,0 +1,849 @@
+% P2KB Smart Pins Content Layer
+% Smart Pin specific environments and code block styling
+% Author: Iron Sheep Productions, LLC
+% Version: 1.2 - Advanced Tutorial Environments with Conditional Styling
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-smart-pins-content}[2025/08/30 P2KB Smart Pins Content Layer v1.2]
+
+% Foundation layer already loaded by main template - don't reload
+% \RequirePackage{p2kb-foundation}  % DISABLED: Already loaded by p2kb-smart-pins.latex
+
+% ==================== CONDITIONAL STYLING DETECTION ====================
+% Detect document type and adjust styling accordingly
+
+% Define document type detection variables
+\newif\ifbooktype@tutorial
+\newif\ifbooktype@reference
+\newif\ifdocstyle@greenbook
+
+% Set defaults
+\booktype@referencefalse
+\booktype@tutorialfalse
+\docstyle@greenbookfalse
+
+% Check for book-type variable from template
+\@ifundefined{booktype}{%
+  % No book-type specified, default to reference
+  \booktype@referencetrue
+}{%
+  % book-type variable exists, check its value
+  \def\temp@booktype{tutorial}%
+  \ifx\booktype\temp@booktype
+    \booktype@tutorialtrue
+  \else
+    \booktype@referencetrue
+  \fi
+}
+
+% Check for document-style variable  
+\@ifundefined{documentstyle}{}{%
+  \def\temp@docstyle{green-book}%
+  \ifx\documentstyle\temp@docstyle
+    \docstyle@greenbooktrue
+  \fi
+}
+
+% Alternative check using template variables that might be passed
+\@ifundefined{booktypestring}{}{%
+  \def\temp@tutorial{tutorial}%
+  \def\temp@greenbook{green-book}%
+  \ifx\booktypestring\temp@tutorial
+    \booktype@tutorialtrue
+    \booktype@referencefalse
+  \fi
+  \ifx\booktypestring\temp@greenbook
+    \docstyle@greenbooktrue
+    \booktype@tutorialtrue
+    \booktype@referencefalse
+  \fi
+}
+
+% ==================== PRESERVE FOUNDATION STRUCTURAL FIXES ====================
+% CRITICAL: These ensure proper part/chapter numbering and page breaks
+% The foundation layer provides these - we must not override them
+
+% Foundation provides:
+% - \thepart = \arabic{part} (shows "Part 1" not "0.2 Part I:")
+% - Chapter page breaks with \ifafterpart logic
+% - Part page breaks with chapter counter reset
+% - Proper section numbering depth (tocdepth=2, secnumdepth=2)
+% - Chapter header formatting without prefix issues
+
+% DO NOT override these foundation commands:
+% \renewcommand{\thepart}{...}     % Foundation handles this correctly
+% \renewcommand{\chapter}{...}     % Foundation handles page breaks
+% \renewcommand{\part}{...}        % Foundation handles counter reset
+% \titleformat{\chapter}{...}      % Foundation provides proper format
+
+% ==================== SMART PINS 3-BLOCK COLOR SYSTEM ====================
+% Replace foundation's generic Shaded environment with 3 specialized block types
+% Configuration (blue), Spin2 (green), PASM2 (De Silva yellow)
+% Includes accessibility features: distinct borders and backgrounds
+
+% Define Smart Pins color palette (muted pastels for less dominance)
+\definecolor{smartpins-config-bg}{HTML}{F5F9FC}      % Very soft blue-gray (was E6F3FF)
+\definecolor{smartpins-config-border}{HTML}{7FA8C9}   % Muted blue border (was 4A90E2)
+\definecolor{smartpins-spin2-bg}{HTML}{F8FCF8}       % Very soft green-gray (was F0FFF0)  
+\definecolor{smartpins-spin2-border}{HTML}{85B985}    % Muted green border (was 5CB85C)
+\definecolor{smartpins-pasm2-bg}{HTML}{FFFEF5}       % Very soft cream (was FFFACD)
+\definecolor{smartpins-pasm2-border}{HTML}{D4B896}    % Muted tan border (was F0AD4E)
+\definecolor{smartpins-antipattern-bg}{HTML}{FFF5F5}  % Very soft pink (was FFE6E6)
+\definecolor{smartpins-antipattern-border}{HTML}{C08080} % Muted rose border (was D9534F)
+
+% Configuration Block Environment (blue theme)
+\newtcolorbox{ConfigBlock}{%
+  boxrule=2pt,
+  colback=smartpins-config-bg,
+  colframe=smartpins-config-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=10pt,               % Two-digit space from edge to line numbers
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Spin2 Block Environment (green theme)
+\newtcolorbox{Spin2Block}{%
+  boxrule=2pt,
+  colback=smartpins-spin2-bg,
+  colframe=smartpins-spin2-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,               % Increased from 15pt to accommodate line numbers
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% PASM2 Block Environment (De Silva yellow theme)
+\newtcolorbox{PASM2Block}{%
+  boxrule=2pt,
+  colback=smartpins-pasm2-bg,
+  colframe=smartpins-pasm2-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,               % Increased from 15pt to accommodate line numbers
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Antipattern Block Environment (red theme for mistakes)
+\newtcolorbox{AntipatternBlock}{%
+  boxrule=2pt,
+  colback=smartpins-antipattern-bg,
+  colframe=smartpins-antipattern-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,               % Increased from 15pt to accommodate line numbers
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Default Shaded environment maps to PASM2 (most common case)
+\renewenvironment{Shaded}{%
+  \par\needspace{4\baselineskip}
+  \vspace{1.5\baselineskip}
+  \begin{PASM2Block}
+}{%
+  \end{PASM2Block}%
+  \par\vspace{\baselineskip}
+}
+
+% ==================== LEVEL-AWARE CODE BLOCKS ====================
+% Different indentation levels for hierarchical content
+
+\newtcolorbox{CodeLevel1}{
+  boxrule=1pt,
+  colback=blue!8,
+  colframe=blue!40,
+  rounded corners,
+  left=15pt,                % Base indentation
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+\newtcolorbox{CodeLevel2}{
+  boxrule=1pt,
+  colback=blue!6,           % Slightly lighter for sub-level
+  colframe=blue!35,
+  rounded corners,
+  left=30pt,                % Double indentation for subsections
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+\newtcolorbox{CodeLevel3}{
+  boxrule=1pt,
+  colback=blue!4,           % Even lighter for sub-sub-level
+  colframe=blue!30,
+  rounded corners,
+  left=45pt,                % Triple indentation for sub-subsections
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% ==================== LIST-AWARE CODE BLOCKS ====================
+% Code blocks that align with list content (not list markers)
+
+% Base environments with list indentation added
+\newtcolorbox{list-indent-1}{
+  boxrule=1pt,
+  colback=blue!8,
+  colframe=blue!40,
+  rounded corners,
+  left=40pt,                % Align with numbered list content (\parindent + list indent)
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+\newtcolorbox{list-indent-2}{
+  boxrule=1pt,
+  colback=blue!6,
+  colframe=blue!35,
+  rounded corners,
+  left=65pt,                % Nested list indentation (40pt + 25pt)
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Combined environments: heading level + list indentation
+\newtcolorbox{CodeLevel2.list-indent-1}{
+  boxrule=1pt,
+  colback=blue!6,           % Section level color
+  colframe=blue!35,
+  rounded corners,
+  left=55pt,                % Section indent (30pt) + list indent (25pt)
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+\newtcolorbox{CodeLevel3.list-indent-1}{
+  boxrule=1pt,
+  colback=blue!4,           % Subsection level color
+  colframe=blue!30,
+  rounded corners,
+  left=70pt,                % Subsection indent (45pt) + list indent (25pt)
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% ==================== P2 LANGUAGE DEFINITIONS ====================
+% CRITICAL: Must include P2 syntax highlighting from reference content layer
+
+% Define Spin2 language
+\lstdefinelanguage{spin2}{
+  keywords={CON, VAR, OBJ, PUB, PRI, DAT, repeat, if, else, elseif, case, 
+            while, until, from, to, step, return, abort, next, quit,
+            byte, word, long, res, file, org, end, fit},
+  sensitive=true,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]'
+}
+
+% Define PASM2 language
+\lstdefinelanguage{pasm2}{
+  keywords={org, res, long, word, byte, mov, add, sub, and, or, xor, not,
+            shl, shr, sar, rol, ror, rcl, rcr, test, cmp, jmp, call, ret,
+            djnz, tjz, tjnz, wrpin, wxpin, wypin, rdpin, rqpin, akpin, dirh,
+            dirl, testp, waitx, rep, nop},
+  sensitive=false,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]'
+}
+
+% ==================== SMART PIN SPECIFIC ENVIRONMENTS ====================
+
+% Try It Yourself boxes
+\newtcolorbox{tryityourself}{
+  title=Try It Yourself,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=green!60!black,
+  colback=green!5,
+  colframe=green!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Compatibility alias - avoids LaTeX command conflict with \seealso
+% Check if \seealso exists before trying to preserve it
+\ifdefined\seealso
+  \let\seealsoOld\seealso
+\fi
+% Create seealso environment that uses gbseealso
+% \newenvironment{seealso}{\begin{gbseealso}}{\end{gbseealso}} % Commented out - already defined
+
+% Pin Configuration callouts
+\newtcolorbox{pinconfig}{
+  title=Pin Configuration,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=orange!70!black,
+  colback=orange!5,
+  colframe=orange!70!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Important Notes
+\newtcolorbox{smartnote}{
+  title=Important,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=red!70!black,
+  colback=red!5,
+  colframe=red!70!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Technical Specifications
+\newtcolorbox{techspec}{
+  title=Technical Specification,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=purple!70!black,
+  colback=purple!5,
+  colframe=purple!70!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% ==================== DECISION TREE FLOWCHART STYLES ====================
+% For Appendix A mode selection guide - pedagogically optimized
+
+% Starting point box
+\newtcolorbox{startbox}{
+  colback=yellow!20,
+  colframe=orange!70!black,
+  boxrule=3pt,
+  rounded corners,
+  fontupper=\bfseries\large\centering,
+  width=0.5\textwidth,
+  center,
+  before skip=15pt,
+  after skip=15pt
+}
+
+% Decision category boxes (Digital Out, Digital In, etc.)
+\newtcolorbox{decisioncategory}{
+  colback=blue!10,
+  colframe=blue!60!black,
+  boxrule=2pt,
+  rounded corners,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=blue!60!black,
+  left=10pt,
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=10pt,
+  after skip=10pt,
+  breakable
+}
+
+% Question/decision boxes
+\newtcolorbox{questionbox}{
+  colback=green!5,
+  colframe=green!50!black,
+  boxrule=1.5pt,
+  rounded corners,
+  left=8pt,
+  right=8pt,
+  top=5pt,
+  bottom=5pt,
+  before skip=5pt,
+  after skip=5pt
+}
+
+% Mode answer boxes (highlighted)
+\newtcolorbox{modeanswer}{
+  colback=orange!15,
+  colframe=orange!60!black,
+  boxrule=1pt,
+  rounded corners,
+  left=5pt,
+  right=5pt,
+  top=3pt,
+  bottom=3pt,
+  before skip=3pt,
+  after skip=3pt,
+  fontupper=\ttfamily\bfseries
+}
+
+% Subset grouping (PWM options, Serial options, etc.)
+\newtcolorbox{optiongroup}{
+  colback=gray!5,
+  colframe=gray!40,
+  boxrule=0.5pt,
+  rounded corners,
+  left=10pt,
+  right=5pt,
+  top=5pt,
+  bottom=5pt,
+  before skip=5pt,
+  after skip=5pt
+}
+
+% ==================== GREEN BOOK SEMANTIC ENVIRONMENTS ====================
+% Tutorial gap marking environments for content development workflow
+% Each has distinct visual styling for accessibility and workflow clarity
+
+% needs-diagram - Amber with dashed border
+\newtcolorbox{gbdiagram}{
+  colback=yellow!5!white,        % #FFF8E1 - cream background
+  colframe=orange!70!yellow,     % #FFB300 - amber border
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Diagram Needed},
+  boxrule=1.5pt,
+  arc=2pt,
+  outer arc=2pt,
+  borderline={1.5pt}{0pt}{orange!70!yellow, dashed},
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable,
+  enhanced
+}
+
+% preliminary-content - Gray with dotted border
+\newtcolorbox{gbpreliminary}{
+  colback=gray!5!white,          % #F5F5F5 - light gray
+  colframe=gray!60!black,        % #757575 - dark gray
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Preliminary Content},
+  boxrule=1.5pt,
+  arc=2pt,
+  outer arc=2pt,
+  borderline={1.5pt}{0pt}{gray!60!black, dotted},
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable,
+  enhanced
+}
+
+% needs-verification - Pale blue with dashed border
+\newtcolorbox{gbverify}{
+  colback=cyan!5!white,          % #E3F7FF - pale blue
+  colframe=cyan!50!blue,         % #4FC3F7 - sky blue
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Needs Verification},
+  boxrule=1.5pt,
+  arc=2pt,
+  outer arc=2pt,
+  borderline={1.5pt}{0pt}{cyan!50!blue, dashed},
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable,
+  enhanced
+}
+
+% needs-examples - Pale green with solid border
+\newtcolorbox{gbexamples}{
+  colback=green!5!white,         % #F1F8E9 - pale green
+  colframe=green!60!black,       % #8BC34A - leaf green
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Examples Needed},
+  boxrule=1pt,
+  arc=2pt,
+  outer arc=2pt,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable,
+  enhanced
+}
+
+% needs-technical-review - Pale rose with dashed border
+\newtcolorbox{gbtechreview}{
+  colback=red!5!white,           % #FFE8E8 - pale rose
+  colframe=red!40!white,         % #EF9A9A - rose
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Technical Review Needed},
+  boxrule=1.5pt,
+  arc=2pt,
+  outer arc=2pt,
+  borderline={1.5pt}{0pt}{red!40!white, dashed},
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable,
+  enhanced
+}
+
+% needs-code-review - Pale orange with dotted border
+\newtcolorbox{gbcodereview}{
+  colback=orange!5!white,        % #FFF3E0 - pale orange
+  colframe=orange!60!yellow,     % #FFB74D - orange
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Code Review Needed},
+  boxrule=1.5pt,
+  arc=2pt,
+  outer arc=2pt,
+  borderline={1.5pt}{0pt}{orange!60!yellow, dotted},
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable,
+  enhanced
+}
+
+% tip - Mint green with solid rounded border
+\newtcolorbox{gbtip}{
+  colback=green!5!white,         % #E8F5E9 - mint
+  colframe=green!50!black,       % #66BB6A - green
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Tip},
+  boxrule=1.5pt,
+  arc=4pt,                       % More rounded
+  outer arc=4pt,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable,
+  enhanced
+}
+
+% ==================== GREEN BOOK TUTORIAL ENVIRONMENTS ====================
+% Tutorial-specific interactive elements
+
+% exercise - Blue background with Exercise title
+\newtcolorbox{exercise}{
+  colback=blue!8!white,          % Light blue background
+  colframe=blue!60!black,        % Blue border
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Exercise},
+  boxrule=2pt,
+  arc=3pt,
+  outer arc=3pt,
+  left=20pt,
+  right=20pt,
+  top=15pt,
+  bottom=15pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% keytakeaway - Green background with Key Takeaways title
+\newtcolorbox{keytakeaway}{
+  colback=green!8!white,         % Light green background
+  colframe=green!60!black,       % Green border
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Key Takeaways},
+  boxrule=2pt,
+  arc=3pt,
+  outer arc=3pt,
+  left=20pt,
+  right=20pt,
+  top=15pt,
+  bottom=15pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% common-mistakes - Red-tinted warning style
+\newtcolorbox{commonmistakes}{
+  colback=red!8!white,           % Light red background
+  colframe=red!60!black,         % Red border
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Common Mistakes},
+  boxrule=2pt,
+  arc=3pt,
+  outer arc=3pt,
+  left=20pt,
+  right=20pt,
+  top=15pt,
+  bottom=15pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% ==================== ADVANCED TUTORIAL ENVIRONMENTS ====================
+% Progressive "Try This" exercise variations and learning progression elements
+
+% Try This - Beginner Level (Light blue with "Try This" title)
+\newtcolorbox{trythis}{
+  colback=blue!6!white,          % Very light blue background
+  colframe=blue!40!black,        % Medium blue border
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Try This},
+  boxrule=2pt,
+  arc=3pt,
+  outer arc=3pt,
+  left=20pt,
+  right=20pt,
+  top=15pt,
+  bottom=15pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Try This - Intermediate Level (Medium blue with complexity indicator)
+\newtcolorbox{trythisplus}{
+  colback=blue!10!white,         % Slightly darker blue background
+  colframe=blue!60!black,        % Darker blue border
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Try This+ (Intermediate)},
+  boxrule=2pt,
+  arc=3pt,
+  outer arc=3pt,
+  left=20pt,
+  right=20pt,
+  top=15pt,
+  bottom=15pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Try This - Advanced Level (Darker blue with challenge indicator)
+\newtcolorbox{trythischallenge}{
+  colback=blue!15!white,         % Darker blue background
+  colframe=blue!80!black,        % Dark blue border
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Try This Challenge (Advanced)},
+  boxrule=2pt,
+  arc=3pt,
+  outer arc=3pt,
+  left=20pt,
+  right=20pt,
+  top=15pt,
+  bottom=15pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Learning Progress Indicators
+\newtcolorbox{checkpoint}{
+  colback=purple!8!white,        % Light purple background
+  colframe=purple!60!black,      % Purple border
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Checkpoint},
+  boxrule=2pt,
+  arc=3pt,
+  outer arc=3pt,
+  left=20pt,
+  right=20pt,
+  top=15pt,
+  bottom=15pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Cross-Reference Callouts
+\newtcolorbox{gbseealso}{
+  colback=teal!5!white,          % Very light teal background
+  colframe=teal!50!black,        % Teal border
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={See Also},
+  boxrule=1.5pt,
+  arc=2pt,
+  outer arc=2pt,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable,
+  enhanced
+}
+
+% Quick Reference Callouts  
+\newtcolorbox{quickref}{
+  colback=orange!5!white,        % Very light orange background
+  colframe=orange!50!black,      % Orange border
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Quick Reference},
+  boxrule=1.5pt,
+  arc=2pt,
+  outer arc=2pt,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable,
+  enhanced
+}
+
+% Progress Tracking
+\newtcolorbox{progressnote}{
+  colback=yellow!8!white,        % Light yellow background
+  colframe=yellow!60!black,      % Golden border
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Progress Note},
+  boxrule=1.5pt,
+  arc=2pt,
+  outer arc=2pt,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable,
+  enhanced
+}
+
+% Remember This - Memory aid callouts
+\newtcolorbox{remember}{
+  colback=violet!6!white,        % Light violet background
+  colframe=violet!50!black,      % Violet border
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Remember},
+  boxrule=1.5pt,
+  arc=2pt,
+  outer arc=2pt,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable,
+  enhanced
+}

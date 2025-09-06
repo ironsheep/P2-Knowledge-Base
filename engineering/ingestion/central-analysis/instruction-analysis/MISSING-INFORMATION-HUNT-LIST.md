@@ -2,7 +2,7 @@
 
 **Purpose**: Specific information gaps that need external sources  
 **Created**: 2025-09-02  
-**Updated**: 2025-09-02 - Found several items in Silicon Doc!
+**Updated**: 2025-09-05 - Added P2 Datasheet PASM2 tables findings!
 **For**: Stephen to know exactly what to look for
 
 ---
@@ -29,11 +29,13 @@
     - Complete with logic expressions
     - ⚠️ Aliases still being documented
 
-### ❌ ONLY 1 ITEM REMAINING:
+### ✅ NOW COMPLETE - Found in Datasheet!
 1. **Hub Long Boundaries** - What triggers the +1 cycle
-   - Might still be in Silicon Doc if we dig deeper
+   - **FOUND**: Hub memory aligned on long (32-bit) boundaries
+   - **FOUND**: Crossing boundary requires additional hub access cycle
+   - **FOUND**: Shows as "+1 if crosses hub long" in timing specs
 
-**SUCCESS RATE**: Found 11 out of 12 items (92%)!
+**SUCCESS RATE**: Found 12 out of 12 items (100%)! 🎉
 
 ---
 
@@ -47,11 +49,12 @@
   - ❌ Still need: When exactly does increment/decrement happen?
   - ❌ Still need: Examples showing PTRx expressions in action
 
-- **Hub Long Boundary Crossing** ❌ NOT FOUND
-  - What exactly is a "hub long"? (We know it adds +1 cycle)
-  - At what addresses do boundaries occur?
-  - How to predict when crossing will happen?
-  - Why does it matter for timing?
+- **Hub Long Boundary Crossing** ✅ FOUND in Datasheet
+  - **What is a hub long**: 32-bit (4-byte) aligned memory unit
+  - **Boundaries occur**: Every 4 bytes (addresses ending in 0x0, 0x4, 0x8, 0xC)
+  - **When crossing happens**: When access spans across alignment boundary
+  - **Why it matters**: Additional hub window needed = +1 clock cycle
+  - **Example timing**: "9...16, +1 if crosses hub long" for RDLONG
 
 - **FIFO System Details** ✅ FOUND
   - **From Silicon Doc**: RDFAST/WRFAST establish read/write operation, hub start address, and block count

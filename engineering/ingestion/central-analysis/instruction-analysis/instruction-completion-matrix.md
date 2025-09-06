@@ -1,8 +1,8 @@
 # PASM2 Instruction Completion Matrix
 
 **Purpose**: Track all instruction-related questions across knowledge base and their completion status  
-**Last Updated**: 2025-09-02  
-**Sources Analyzed**: 6 extraction documents  
+**Last Updated**: 2025-09-05  
+**Sources Analyzed**: 7 extraction documents (+ P2 Datasheet PASM2 tables)  
 **Total Questions**: 91 instruction-related questions identified  
 
 ## Matrix Structure
@@ -65,7 +65,7 @@ Questions about fundamental instruction operations from Q&A analysis.
 |---------------|------------------------|-----------------|----------|--------|--------|---------------|
 | What exactly is a COG and how does it relate to traditional CPU cores? | All instructions | csv-pasm2-instructions-v2.md | 113 | Unanswered | MISSING | - |
 | What is the hub memory architecture and how is it shared among 8 COGs? | Hub access instructions | csv-pasm2-instructions-v2.md | 114 | Unanswered | MISSING | - |
-| What does "hub slot timing" mean (9-16 cycles variable)? | RDLONG, WRLONG, etc. | csv-pasm2-instructions-v2.md | 115 | Unanswered | MISSING | - |
+| What does "hub slot timing" mean (9-16 cycles variable)? | RDLONG, WRLONG, etc. | csv-pasm2-instructions-v2.md | 115 | Answered | Variable timing based on hub window alignment. Instructions wait for hub access slot, causing 9-16 cycle variation | pasm2-complete-instruction-tables.md |
 | What is LUT RAM and how does it differ from COG RAM? | RDLUT, WRLUT | csv-pasm2-instructions-v2.md | 116 | Unanswered | MISSING | - |
 | How do COGs achieve non-interference at runtime? | All instructions | csv-pasm2-instructions-v2.md | 117 | Unanswered | MISSING | - |
 | What are hub exec, cog exec, and LUT exec modes? | Execution context | csv-pasm2-instructions-v2.md | 118 | Unanswered | MISSING | - |
@@ -89,9 +89,9 @@ Questions about fundamental instruction operations from Q&A analysis.
 |---------------|------------------------|-----------------|----------|--------|--------|---------------|
 | What is the memory map (COG RAM, LUT RAM, Hub RAM addresses)? | All memory instructions | csv-pasm2-instructions-v2.md | 122 | Answered | COG $000-$1FF, PTRA $1F8, PTRB $1F9 | Silicon Doc COG RAM section |
 | How do PTRA and PTRB pointers work with auto-increment/decrement? | PTRA, PTRB operations | csv-pasm2-instructions-v2.md | 123 | Answered | -16 to +16 with update, -32 to +31 without | ptra-ptrb-findings.md |
-| What are "hub longs" and why does crossing them add cycles? | Hub access instructions | csv-pasm2-instructions-v2.md | 124 | Unanswered | MISSING | - |
-| How does the FIFO system work for streaming transfers? | RDFAST, WRFAST, etc. | csv-pasm2-instructions-v2.md | 125 | Unanswered | MISSING | - |
-| What is the difference between SETQ and SETQ2 for block transfers? | SETQ, SETQ2 | csv-pasm2-instructions-v2.md | 126 | Unanswered | MISSING | - |
+| What are "hub longs" and why does crossing them add cycles? | Hub access instructions | csv-pasm2-instructions-v2.md | 124 | Answered | Hub memory aligned on long (32-bit) boundaries. Crossing boundary requires additional hub access cycle (+1 clock) | pasm2-complete-instruction-tables.md |
+| How does the FIFO system work for streaming transfers? | RDFAST, WRFAST, etc. | csv-pasm2-instructions-v2.md | 125 | Answered | RDFAST/WRFAST setup FIFO for streaming. RFBYTE/RFWORD/RFLONG read from FIFO. WFBYTE/WFWORD/WFLONG write to FIFO. "Used after RDFAST" noted in descriptions | pasm2-complete-instruction-tables.md |
+| What is the difference between SETQ and SETQ2 for block transfers? | SETQ, SETQ2 | csv-pasm2-instructions-v2.md | 126 | Answered | SETQ sets up cog/hub RAM block transfer. SETQ2 sets up LUT/hub RAM block transfer. Both "Set Q register" for subsequent block operations | pasm2-complete-instruction-tables.md |
 | How do stack operations work (PUSHA/B, POPA/B)? | PUSHA, PUSHB, POPA, POPB | csv-pasm2-instructions-v2.md | 127 | Unanswered | MISSING | - |
 
 ### Instruction Execution Questions

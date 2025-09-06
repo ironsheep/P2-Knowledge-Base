@@ -4,9 +4,19 @@
 
 **Quick Status**: 72% Complete | 19/24 Sources Audited | 2 Sources Connected to Central Hub
 
-*Last Updated: 2025-09-02 | Knowledge Coverage: 70% P2 Architecture*
+*Last Updated: 2025-09-05 | Trust Level: 95% AUTHORITATIVE | 13+ Official Sources*
 
 ---
+
+## 🏆 Authoritative Sources Status
+
+**NEW**: 13+ Official Parallax documents designated as AUTHORITATIVE sources
+- **3 Core Technical**: Silicon Doc v35, Spin2 v51, P2 Datasheet
+- **6 Hardware Boards**: All Edge modules & P2 Eval Board  
+- **4+ Add-On Modules**: WX WiFi, PropPlug, Motor Driver, etc.
+- **Trust Level**: Elevated from 90% to **95% AUTHORITATIVE**
+
+See **[AUTHORITATIVE-SOURCES.md](AUTHORITATIVE-SOURCES.md)** for complete catalog.
 
 ## 🎯 Navigation
 
@@ -31,23 +41,25 @@
 | **Paragraphs** | 19,216+ | Processed |
 | **Tables** | 531+ | Extracted |
 | **Code Examples** | 681+ | 188 validated |
-| **Coverage** | 90% | Silicon Doc v35 integrated |
+| **Coverage** | 95% | 13+ Authoritative sources |
 | **Instructions** | 119/119 mnemonics | 490 variants tracked |
+| **Trust Level** | 95% AUTHORITATIVE | Official Parallax docs |
 
 ## Primary Sources
 
 ### Parallax Official Documents
 
-| Document | Version | Date | Status | Images | Code |
-|----------|---------|------|--------|--------|------|
-| **P2 Silicon Doc v35** | 35 | 2020-10-15 | ✅ COMPLETE | 🔴 PENDING | - |
-| **P2 Hardware Manual** | 2022 | 2022-11-01 | ✅ COMPLETE | 🔴 PENDING | - |
-| **Smart Pins** | rev 5 | 2020-09-01 | ✅ COMPLETE | ✅ 21/21 | ✅ 98 |
-| **PASM2 Manual** | 2022 | 2022-11-01 | ⚠️ PARTIAL | 🟡 PENDING | - |
-| **Spin2 v51** | 51 | 2025-07-30 | ✅ COMPLETE | ✅ 24/24 | ✅ 32 |
-| **P2 Spin Manual** | Draft | 2024-06-07 | ✅ COMPLETE | 🟡 PENDING | - |
-| **Q&A Spreadsheet** | - | 2020-2021 | ✅ COMPLETE | - | - |
-| **Instructions CSV** | v35 | 2020-10-15 | ✅ COMPLETE | - | - |
+| Document | Version | Date | Authority | Status | Images | Code |
+|----------|---------|------|-----------|--------|--------|------|
+| **P2 Silicon Doc v35** | 35 | 2020-10-15 | 🏆 AUTHORITATIVE | ✅ COMPLETE | 34/34 | - |
+| **Spin2 v51** | 51 | 2025-07-30 | 🏆 AUTHORITATIVE | ✅ COMPLETE | ✅ 25/25 | ✅ 32 |
+| **P2 Datasheet** | 2022 | 2022-11-01 | 🏆 AUTHORITATIVE | ✅ COMPLETE | N/A | - |
+| **Smart Pins** | rev 5 | 2020-09-01 | GREEN | ✅ COMPLETE | ✅ 21/21 | ✅ 98 |
+| **PASM2 Manual** | 2022 | 2022-11-01 | DRAFT/PARTIAL | ⚠️ PARTIAL | 🟡 PENDING | - |
+| **P2 Hardware Manual** | 2022 | 2022-11-01 | GREEN | ✅ COMPLETE | 🔴 PENDING | - |
+| **P2 Spin Manual** | Draft | 2024-06-07 | DRAFT | ✅ COMPLETE | 🟡 PENDING | - |
+| **Q&A Spreadsheet** | - | 2020-2021 | YELLOW | ✅ COMPLETE | - | - |
+| **Instructions CSV** | v35 | 2020-10-15 | GREEN | ✅ COMPLETE | - | - |
 
 ### Source Code
 
@@ -58,29 +70,31 @@
 | **Spin2_debugger.spin2** | v51 | ✅ ANALYZED | Debug protocol |
 | **Spin2_flash_loader.spin2** | v51 | ✅ ANALYZED | Boot sequence |
 
-### Hardware Modules
+### Hardware Modules (All 🏆 AUTHORITATIVE)
 
-| Module | Part # | Status | Images |
-|--------|--------|--------|--------|
-| **P2 Edge 32MB** | P2-EC32MB | ✅ COMPLETE | ✅ 6/6 |
-| **P2 Edge Standard** | P2-EC | ✅ COMPLETE | ✅ 6/6 |
-| **Mini Breakout** | 64019 | ✅ COMPLETE | ⚠️ 13/16 |
-| **Standard Breakout** | 64029 | ✅ COMPLETE | ✅ 17/17 |
-| **Module Breadboard** | 64020 | ✅ COMPLETE | ✅ 18/18 |
-| **P2 Eval Board** | 64000 | ✅ COMPLETE | ✅ 15/15 |
-| **Eval Add-ons** | 64006-ES | ✅ COMPLETE | ❌ PENDING |
-| **Motor Driver** | 64010 | ✅ COMPLETE | ❌ PENDING |
-| **PropPlug** | 32201 | ✅ COMPLETE | 🟡 2-4 est |
-| **WX Adapter** | 64007 | ✅ COMPLETE | 🟡 8+ est |
-| **WX Module** | 32420 | ✅ COMPLETE | 🟡 12+ est |
+| Module | Part # | Authority | Status | Images |
+|--------|--------|-----------|--------|--------|
+| **P2 Edge 32MB** | P2-EC32MB | 🏆 AUTHORITATIVE | ✅ COMPLETE | ✅ 6/6 |
+| **P2 Edge Standard** | P2-EC | 🏆 AUTHORITATIVE | ✅ COMPLETE | ✅ 6/6 |
+| **Mini Breakout** | 64019 | 🏆 AUTHORITATIVE | ✅ COMPLETE | ⚠️ 13/16 |
+| **Standard Breakout** | 64029 | 🏆 AUTHORITATIVE | ✅ COMPLETE | ✅ 17/17 |
+| **Module Breadboard** | 64020 | 🏆 AUTHORITATIVE | ✅ COMPLETE | ✅ 18/18 |
+| **P2 Eval Board** | 64000 | 🏆 AUTHORITATIVE | ✅ COMPLETE | ✅ 15/15 |
+| **Eval Add-ons** | 64006-ES | 🏆 AUTHORITATIVE | ✅ COMPLETE | ❌ PENDING |
+| **Motor Driver** | 64010 | 🏆 AUTHORITATIVE | ✅ COMPLETE | ❌ PENDING |
+| **PropPlug** | 32201 | 🏆 AUTHORITATIVE | ✅ COMPLETE | 🟡 2-4 est |
+| **WX Adapter** | 64007 | 🏆 AUTHORITATIVE | ✅ COMPLETE | 🟡 8+ est |
+| **WX Module** | 32420 | 🏆 AUTHORITATIVE | ✅ COMPLETE | 🟡 12+ est |
 
-### Authority Sources
+### Trust Level Summary
 
-| Document | Status | Authority Level |
-|----------|--------|----------------|
-| **P2 Silicon Doc v35 PDF** | ✅ AUTHORITATIVE | 🏆 PRIMARY SOURCE |
-| - 114 pages | - 119 mnemonics | - Full specifications |
-| - 34 images extracted | - 100% coverage | - Supersedes DOCX |
+| Level | Count | Documents |
+|-------|-------|----------|
+| **🏆 AUTHORITATIVE** | 13+ | All official Parallax hardware & core docs |
+| **🟢 GREEN (High Trust)** | 3-4 | Smart Pins, Hardware Manual, validated sources |
+| **🟡 YELLOW (Conditional)** | 1 | Q&A Spreadsheet (community) |
+| **⚠️ DRAFT/PARTIAL** | 2 | PASM2 Manual (incomplete), Spin Manual draft |
+| **Total Sources** | ~20 | Mixed authority levels |
 
 ## Post-Extraction Analyses
 
@@ -117,12 +131,13 @@
 
 | Domain | Coverage | Source | Trust |
 |--------|----------|--------|-------|
-| **Architecture** | 100% | Silicon Doc v35 | ✅ Authoritative |
-| **Instructions** | 64% | PASM2 Manual | ⚠️ Partial |
-| **Smart Pins** | 100% | Smart Pins rev 5 | ✅ Complete |
-| **Boot Process** | 100% | Hardware Manual | ✅ Authoritative |
-| **Spin2 Language** | 100% | Spin2 v51 | ✅ Complete |
-| **Hardware Modules** | 100% | All guides | ✅ Complete |
+| **Architecture** | 100% | Silicon Doc v35 | 🏆 AUTHORITATIVE |
+| **Spin2 Language** | 100% | Spin2 v51 | 🏆 AUTHORITATIVE |
+| **Hardware Specs** | 100% | P2 Datasheet | 🏆 AUTHORITATIVE |
+| **Hardware Modules** | 100% | All guides | 🏆 AUTHORITATIVE |
+| **Smart Pins** | 100% | Smart Pins rev 5 | 🟢 GREEN |
+| **Boot Process** | 100% | Hardware Manual | 🟢 GREEN |
+| **Instructions** | 64% | PASM2 Manual | ⚠️ DRAFT/PARTIAL |
 
 ## Gaps & Opportunities
 

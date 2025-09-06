@@ -1,21 +1,34 @@
 # Ingestion Dashboard - Source Content Status
 
 **Generated**: 2025-09-01  
+**Updated**: 2025-09-05 - Added Authoritative Status Designations  
 **Purpose**: Track extraction status for all ingested sources (documents, images, code)
+
+## 🏆 Authoritative Sources Summary
+
+| Category | Count | Trust Level | Status |
+|----------|-------|-------------|--------|
+| **Core Technical** | 3 | 🏆 100% AUTHORITATIVE | Silicon Doc, Spin2 v51, P2 Datasheet |
+| **Hardware Boards** | 6 | 🏆 100% AUTHORITATIVE | All Edge modules & Eval Board |
+| **Add-On Modules** | 4+ | 🏆 100% AUTHORITATIVE | WiFi, PropPlug, Motor Driver, etc |
+| **Total Authoritative Sources** | **13+** | **🏆 AUTHORITATIVE** | All Official Parallax Documentation |
 
 ## Quick Status Summary
 
-| Source | Original Doc | Images | Code | Audit Doc | Completeness |
-|--------|-------------|--------|------|-----------|--------------|
-| smart-pins | ✅ PDF | ✅ 21 images+context | ✅ 98 examples | ✅ Enhanced | 100% |
-| spin2-v51 | ✅ PDF | ✅ 25 images | ✅ 32 examples | ✅ Complete | 100% |
-| silicon-doc | ✅ Text | ✅ 2 dirs | ❓ Check | ✅ Complete | 95% |
-| pasm2-manual | ✅ In Dev | ✅ 1 dir | ❓ Check | ✅ Complete | 90% |
-| edge-32mb-module | ✅ PDF | ✅ images | ❌ No code | ❓ Check | 70% |
-| edge-standard-module | ✅ PDF | ✅ images | ❌ No code | ❓ Check | 70% |
-| edge-breakout-board | ✅ PDF | ✅ images | ❌ No code | ❓ Check | 70% |
-| p2-eval-board | ✅ PDF | ✅ images | ❌ No code | ❓ Check | 70% |
-| Others | ... | ... | ... | ... | ... |
+| Source | Authority | Original Doc | Images | Code | Audit Doc | Completeness |
+|--------|-----------|-------------|--------|------|-----------|--------------|
+| silicon-doc | 🏆 AUTHORITATIVE | ✅ Text | ✅ 2 dirs | ❓ Check | ✅ Complete | 95% |
+| spin2-v51 | 🏆 AUTHORITATIVE | ✅ PDF | ✅ 25 images | ✅ 32 examples | ✅ Complete | 100% |
+| p2-datasheet | 🏆 AUTHORITATIVE | ✅ PDF | ✅ 40 images | N/A | ✅ Complete | 100% |
+| smart-pins | GREEN | ✅ PDF | ✅ 21 images+context | ✅ 98 examples | ✅ Enhanced | 100% |
+| pasm2-manual | DRAFT | ✅ In Dev | ✅ 1 dir | ❓ Check | ✅ Complete | 90% |
+| edge-32mb-module | 🏆 AUTHORITATIVE | ✅ PDF | ✅ images | N/A | ❓ Check | 70% |
+| edge-standard-module | 🏆 AUTHORITATIVE | ✅ PDF | ✅ images | N/A | ❓ Check | 70% |
+| edge-breakout-board | 🏆 AUTHORITATIVE | ✅ PDF | ✅ images | N/A | ❓ Check | 70% |
+| p2-eval-board | 🏆 AUTHORITATIVE | ✅ PDF | ✅ images | N/A | ❓ Check | 70% |
+| wx-wifi-module | 🏆 AUTHORITATIVE | ✅ PDF | ✅ images | N/A | ✅ Complete | 100% |
+| propplug-rev-e | 🏆 AUTHORITATIVE | ✅ PDF | ✅ images | N/A | ✅ Complete | 100% |
+| Others | Various | ... | ... | ... | ... | ... |
 
 ## Detailed Source Status
 
@@ -68,11 +81,12 @@ Includes:
 - **Code**: Not extracted (hardware doc)
 - **Audit**: Needs audit document
 
-### 7. **p2-datasheet/** ✅ REFERENCE DOC
-- **Original**: Datasheet PDF
+### 7. **p2-datasheet/** ✅ COMPLETE WITH IMAGES
+- **Original**: `Propeller2-P2X8C4M64P-Datasheet-20221101.pdf`
+- **Images**: `assets/images-20250906/` (40 PNG files - architecture, pinout, timing, electrical specs)
 - **Audit**: `datasheet-audit-report.md`
-- **Style**: `datasheet-style-analysis.md`
-- **Status**: Reference document, no code/images needed
+- **Style**: `datasheet-style-analysis.md` 
+- **Status**: Complete technical reference with visual assets extracted
 
 ### 8. **p2-spec-sheet/** ✅ REFERENCE DOC
 - **Original**: Spec sheet

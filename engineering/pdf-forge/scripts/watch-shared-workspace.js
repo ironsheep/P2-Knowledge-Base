@@ -349,7 +349,12 @@ class SharedWorkspaceMonitor {
 
         let texGenerated = false;
         try {
-          execSync(texCmd, { stdio: 'pipe', cwd: workingEnv.workDir, timeout: 300000 }); // 5 minute timeout
+          // Set TEXINPUTS to include /workspace/shared for finding assets
+          const envWithTexInputs = {
+            ...process.env,
+            TEXINPUTS: `/workspace/shared//:${workingEnv.workDir}//:${process.env.TEXINPUTS || ''}`
+          };
+          execSync(texCmd, { stdio: 'pipe', cwd: workingEnv.workDir, env: envWithTexInputs, timeout: 300000 }); // 5 minute timeout
 
           // Copy .tex file to results directory for debugging access
           if (await fs.pathExists(outputTex)) {
@@ -377,7 +382,12 @@ class SharedWorkspaceMonitor {
         }
 
         // Generate PDF
-        execSync(pandocCmd, { stdio: 'pipe', cwd: workingEnv.workDir, timeout: 600000 }); // 10 minute timeout
+        // Set TEXINPUTS to include /workspace/shared for finding assets
+        const envWithTexInputs = {
+          ...process.env,
+          TEXINPUTS: `/workspace/shared//:${workingEnv.workDir}//:${process.env.TEXINPUTS || ''}`
+        };
+        execSync(pandocCmd, { stdio: 'pipe', cwd: workingEnv.workDir, env: envWithTexInputs, timeout: 600000 }); // 10 minute timeout
 
         testResult.status = '✅ PASS';
         testResult.pdf_path = `output-pdfs/${outputName}.pdf`;

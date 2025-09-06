@@ -14,6 +14,31 @@
 
 **LESSON LEARNED**: Multiple failures due to incorrect JSON format. ALWAYS use arrays!
 
+## 🔴🔴🔴 STOP! CHECK request-requirements.json FIRST! 🔴🔴🔴
+
+**THIS IS NOT OPTIONAL - IT IS MANDATORY**
+
+**BEFORE creating any production request**, you MUST check for requirements:
+
+```bash
+# MANDATORY STEP 1 - DO NOT SKIP!
+cat /engineering/document-production/workspace/[document-name]/request-requirements.json
+```
+
+**If this file exists, FAILURE TO INCLUDE its pandoc_args will BREAK THE PDF!**
+
+```json
+// Example request-requirements.json
+{
+  "required_pandoc_args": ["--top-level-division=part"],
+  "reason": "Smart Pins uses Part/Chapter structure",
+  "discovered": "2025-08-25",
+  "issue": "Without this, parts don't get page breaks"
+}
+```
+
+**YOU MUST** add these arguments to your production request's `pandoc_args` array!
+
 ## 🎯 Production Format Rules
 
 ### ✅ CORRECT Production Request Format
@@ -24,16 +49,21 @@
     {
       "input": "P2-Smart-Pins-Complete-Reference.md",      // REQUIRED field!
       "output": "P2-Smart-Pins-Complete-Reference.pdf",     // REQUIRED field!
-      "template": "p2kb-smart-pins"                      // REQUIRED - Per document! (NO .latex extension!)
+      "template": "p2kb-smart-pins",                     // REQUIRED - Per document! (NO .latex extension!)
+      "pandoc_args": [                                    // OPTIONAL - Check request-requirements.json!
+        "--top-level-division=part",                     // From request-requirements.json if present
+        "--toc",
+        "--number-sections"
+      ],
+      "lua_filters": ["smart-pins-colored-blocks"],      // ARRAY! Even for single filter, PER DOCUMENT!
+      "metadata": {                                       // METADATA GOES HERE - PER DOCUMENT!
+        "title": "P2 Smart Pins Complete Reference",
+        "subtitle": "Specifications and Implementation for All 32 Modes",
+        "version": "Version 1.0",
+        "date": "August 2025"
+      }
     }
-  ],                                                         // ARRAY of OBJECTS!
-  "lua_filters": ["smart-pins-colored-blocks"],            // ARRAY! Even for single filter
-  "metadata": {
-    "title": "P2 Smart Pins Complete Reference",
-    "subtitle": "Specifications and Implementation for All 32 Modes",
-    "version": "Version 1.0",
-    "date": "August 2025"
-  }
+  ]                                                        // ARRAY of OBJECTS!
 }
 ```
 
@@ -43,6 +73,12 @@
 - **No top-level template**: Top-level template field ignored if present
 - **Default fallback**: Falls back to 'admin-manual' if template not specified
 - **Production focus**: Creates final deliverable PDFs with specific output names
+- **EVERYTHING IS PER-DOCUMENT**: The script ONLY reads from the documents array!
+  - ✅ `documents[0].metadata` - Script will use this
+  - ❌ Top-level `metadata` - Script IGNORES this completely
+  - ✅ `documents[0].lua_filters` - Script will use this
+  - ❌ Top-level `lua_filters` - Script IGNORES this completely
+  - This applies to ALL fields: metadata, pandoc_args, lua_filters, template
 
 ### ❌ WRONG Formats That Will FAIL
 ```json
@@ -85,16 +121,16 @@
     {
       "input": "P2-Smart-Pins-Complete-Reference.md",
       "output": "P2-Smart-Pins-Complete-Reference.pdf",
-      "template": "p2kb-smart-pins"        // Template PER DOCUMENT! (bare name, no extension!)
+      "template": "p2kb-smart-pins",        // Template PER DOCUMENT! (bare name, no extension!)
+      "lua_filters": ["smart-pins-colored-blocks"],  // Filters PER DOCUMENT!
+      "metadata": {                           // Metadata PER DOCUMENT - NOT at top level!
+        "title": "P2 Smart Pins Complete Reference",
+        "subtitle": "Specifications and Implementation for All 32 Modes",
+        "version": "Version 1.0 - Technical Review Draft",
+        "date": "August 2025"
+      }
     }
-  ],
-  "lua_filters": ["smart-pins-colored-blocks"],
-  "metadata": {
-    "title": "P2 Smart Pins Complete Reference",
-    "subtitle": "Specifications and Implementation for All 32 Modes",
-    "version": "Version 1.0 - Technical Review Draft",
-    "date": "August 2025"
-  }
+  ]
 }
 ```
 
@@ -106,16 +142,16 @@
     {
       "input": "P2-PASM-deSilva-Style.md",
       "output": "P2-PASM-deSilva-Style.pdf",
-      "template": "p2kb-pasm-desilva"        // Template PER DOCUMENT! (bare name, no extension!)
+      "template": "p2kb-pasm-desilva",        // Template PER DOCUMENT! (bare name, no extension!)
+      "lua_filters": ["desilva-div-to-environment"],  // Filters PER DOCUMENT!
+      "metadata": {                           // Metadata PER DOCUMENT - NOT at top level!
+        "title": "PASM2 Reference Manual",
+        "subtitle": "De Silva Style Format",
+        "version": "Version 1.0",
+        "date": "August 2025"
+      }
     }
-  ],
-  "lua_filters": ["desilva-div-to-environment"],
-  "metadata": {
-    "title": "PASM2 Reference Manual",
-    "subtitle": "De Silva Style Format",
-    "version": "Version 1.0",
-    "date": "August 2025"
-  }
+  ]
 }
 ```
 
@@ -125,6 +161,7 @@
 - 2025-08-28: Failed with `"document"` AGAIN
 - 2025-08-29: Failed with documents as array of strings instead of objects
 - 2025-08-29: Finally documented the correct format with input/output fields
+- 2025-09-04: Discovered metadata MUST be per-document, not at top level
 
 ## 🔍 Production Verification Checklist
 Before deploying to PDF Forge for final deliverable generation:

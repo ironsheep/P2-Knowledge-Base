@@ -1,0 +1,79 @@
+% Smart Pins Hybrid Numbering System
+% Fixes part numbering and implements conditional section numbering
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{smart-pins-numbering-fix}[2025/08/27 Smart Pins Numbering Fix v1.0]
+
+% ==================== FIX PART NUMBERING ====================
+% Remove Roman numerals, just use "Part 1", "Part 2", etc.
+\renewcommand{\thepart}{\arabic{part}}
+
+% ==================== HYBRID SECTION NUMBERING ====================
+% Parts I and III get numbered sections (1.1, 1.2, etc.)
+% Part II (Mode Reference) gets unnumbered sections
+
+% Track which part we're in
+\newcounter{currentpart}
+\setcounter{currentpart}{0}
+
+% Hook into part command to track current part
+\let\oldpart\part
+\renewcommand{\part}[2][]{%  % Optional parameter for TOC, required for title
+  \stepcounter{currentpart}%
+  % Keep numbering OFF for all parts - markdown already has numbers
+  % \setcounter{secnumdepth}{-1}% Already set, don't change
+  \ifx\relax#1\relax
+    \oldpart{#2}%  % No optional parameter, just pass title
+  \else
+    \oldpart[#1]{#2}%  % Pass both optional and required parameters
+  \fi
+}
+
+% ==================== FRONT MATTER HANDLING ====================
+% Ensure front matter (Executive Summary, Quick Start) stays unnumbered
+\AtBeginDocument{%
+  \setcounter{secnumdepth}{-1}% Keep ALL numbering off - markdown has the numbers
+  \renewcommand{\thepart}{}% Remove part numbers completely
+  \renewcommand{\thechapter}{}% Remove chapter numbers completely
+  \renewcommand{\thesection}{}% Remove section numbers completely
+  \renewcommand{\thesubsection}{}% Remove subsection numbers completely
+}
+
+% ==================== CHAPTER/SECTION FORMAT WITH NUMBERS ====================
+% When numbering is on, format chapters and sections properly
+\RequirePackage{titlesec}
+
+% REMOVED: Chapter titleformat - markdown already has "Chapter N:" in text
+% LaTeX adding its own would create double numbering
+
+% Section format when numbered  
+\titleformat{\section}
+  {\normalfont\Large\bfseries}
+  {\thesection} % Section number (1.1, 1.2, etc.)
+  {1em}
+  {}
+
+% Subsection format when numbered
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}
+  {\thesubsection} % Subsection number (1.1.1, 1.1.2, etc.)
+  {1em}
+  {}
+
+% ==================== TABLE OF CONTENTS ADJUSTMENTS ====================
+% Ensure TOC shows numbers when present, but doesn't add extra ones
+\RequirePackage{tocloft}
+\renewcommand{\cftchappresnum}{Chapter }
+\renewcommand{\cftchapaftersnum}{:}
+\setlength{\cftchapnumwidth}{5em}
+
+% ==================== DEBUG HELPERS ====================
+% Command to check current numbering state (for debugging)
+\newcommand{\shownumberingstate}{%
+  Current Part: \arabic{currentpart}, 
+  SecNumDepth: \arabic{secnumdepth}%
+}
+
+\endinput

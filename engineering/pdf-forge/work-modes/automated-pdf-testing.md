@@ -1,22 +1,26 @@
 # Automated PDF Testing System Usage Guide
 
-**DUAL PURPOSE**: 
+⚠️ **IMPORTANT**: Test patterns before trusting! This document contains patterns that have worked, but the system evolves. Always verify that a specific pattern (like `debug_tex: true`) actually works in the current system before relying on it.
+
+**DUAL PURPOSE**:
 1. **Rapid iteration testing** for PDF template development and visual refinement
 2. **Automatic template deployment** - Forge updates its permanent template library during testing
 
 ## System Architecture
 
 **CRITICAL CONNECTION:**
-- **My Local Access**: `/Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/pdf-forge-workspace`
+- **My Local Access**: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/pdf-forge/interactive-testing
 - **PDF Forge Shared Workspace**: `/workspace/shared/` (on PDF Forge system)
-- **Connection**: The local `pdf-forge-workspace/` directory maps directly to `/workspace/shared/` on Forge
+- **Connection**: The local `engineering/pdf-forge/interactive-testing/` directory maps directly to `/workspace/shared/` on Forgs
 
 **⚠️ CRITICAL MAPPING - AVOID CONFUSION:**
-- ✅ **CORRECT**: `pdf-forge-workspace/` → `/workspace/shared/` on Forge
-- ❌ **WRONG**: `pdf-forge-workspace/shared/` → `/workspace/shared/shared/` on Forge (nested confusion!)
-- **NEVER create a `shared/` subdirectory inside `pdf-forge-workspace/`**
+
+- ✅ **CORRECT**: engineering/pdf-forge/interactive-testing/` → `/workspace/shared/` on Forge
+- ❌ **WRONG**: `engineering/pdf-forge/interactive-testing/shared/` → `/workspace/shared/shared/` on Forge (nested confusion!)
+- **NEVER create a `shared/` subdirectory inside `engineering/pdf-forge/interactive-testing/`**
 
 **Monitoring Script**: `watch-shared-workspace.js` (Enhanced by Claude v1.0)
+
 - **Auto-detection**: Monitors for new test requests, processes them automatically
 - **Result Format**: JSON files with detailed analysis and error reporting
 - **🔴 CRITICAL**: Automatically updates Forge's permanent template collection with any .sty/.latex files from testing
@@ -30,6 +34,7 @@
 ├── test-results/           # JSON results appear here
 ├── templates/              # All .latex and .sty files
 ├── test-documents/         # Test markdown files
+├── assets/                # Images and other assets (PNG, JPG, etc.)
 ├── output-pdfs/           # Generated PDFs
 └── status/                # Activity logs, ready signals
     ├── activity.log       # Real-time monitoring log
@@ -51,12 +56,13 @@ cat /workspace/shared/status/forge-ready.txt
 
 ### 2. Create Test Request (Claude drops files locally)
 **Claude's Workflow:**
-- Drop test markdown files in: `pdf-forge-workspace/test-documents/`
-- **CRITICAL**: Drop request JSON in: `pdf-forge-workspace/test-requests/` (NOT in root!)
-- Read results from: `pdf-forge-workspace/test-results/`
-- Templates (.sty files) go in: `pdf-forge-workspace/templates/`
+- Drop test markdown files in: `engineering/pdf-forge/interactive-testing/test-documents/`
+- **CRITICAL**: Drop request JSON in: `engineering/pdf-forge/interactive-testing/test-requests/` (NOT in root!)
+- Read results from: `engineering/pdf-forge/interactive-testing/test-results/`
+- Templates (.sty files) go in: `engineering/pdf-forge/interactive-testing/templates/`
+- **ASSETS**: Images (PNG, JPG) go in: `engineering/pdf-forge/interactive-testing/assets/`
 
-**🔴 COMMON MISTAKE**: Creating a `shared/` subdirectory - remember `pdf-forge-workspace/` itself IS the shared workspace!
+**🔴 COMMON MISTAKE**: Creating a `shared/` subdirectory - remember `engineering/pdf-forge/interactive-testing/` itself IS the shared workspace!
 
 **Test Request Format** (`test-request-YYYYMMDD-HHMM.json`):
 ```json
@@ -66,7 +72,7 @@ cat /workspace/shared/status/forge-ready.txt
   "timestamp": "2025-08-26T12:34:56Z",
   "tests": [
     {
-      "name": "list-formatting-test", 
+      "name": "list-formatting-test",
       "input": "smart-pins-test-sample.md"
     }
   ],
@@ -119,6 +125,28 @@ cat /workspace/shared/status/forge-ready.txt
 }
 ```
 
+**Multi-Filter Success Pattern (De Silva Example):**
+```json
+{
+  "template": "p2kb-pasm-desilva.latex",
+  "tests": [{
+    "name": "combined-filters",
+    "input": "desilva-test.md",
+    "lua_filters": [
+      "part-chapter-pagebreaks",      // Page break control (runs first)
+      "desilva-div-to-environment"    // ::: sidetrack → \begin{sidetrack} (runs second)
+    ],
+    "pandoc_args": ["--top-level-division=part"],
+    "debug_tex": true  // Outputs .tex file for inspection
+  }]
+}
+```
+
+**Filter Processing Notes:**
+- Filters process in the specified sequence (order matters!)
+- Each filter can see the output of previous filters
+- Use `debug_tex: true` to get .tex files showing filter execution
+
 **❌ WRONG FORMAT (will fail):**
 ```json
 {
@@ -141,6 +169,7 @@ cat /workspace/shared/status/forge-ready.txt
 - `templates/` - All .latex templates and .sty files
 - `test-documents/` - Markdown test files
 - `test-requests/` - JSON request files
+- `assets/` - Image files referenced in markdown (PNG, JPG, etc.)
 
 ### 4. Monitor Results (Claude reads automatically)
 **Result File** (`smart-pins-list-test-001-result.json`):
@@ -171,10 +200,49 @@ cat /workspace/shared/status/forge-ready.txt
 }
 ```
 
+## Manual vs Automated Deployment
+
+### Why Automated Testing Solves Path Issues
+
+**Manual Deployment Problems:**
+- ❌ Deploy files to outbound/ with correct paths
+- ❌ Manage filter paths and dependencies manually
+- ❌ Debug each filter individually
+- ❌ Path resolution issues when filters can't be found
+
+**Automated Testing Solutions:**
+- ✅ System automatically finds filters in templates/ or filters/
+- ✅ Handles all path resolution internally
+- ✅ Tests multiple filters simultaneously
+- ✅ Proven pattern that "just works"
+
+**Key Insight:** Path resolution issues are often deployment problems, not filter problems. The automated system bypasses these issues entirely.
+
+## Debug Information Available
+
+When tests run, you get comprehensive debug information:
+
+### TEX File Output (with `debug_tex: true`)
+- Shows Lua filter debug comments
+- Displays actual LaTeX commands generated
+- Reveals filter processing sequence
+- Includes timing and execution markers
+
+### Filter Execution Tracking
+- Verify which filters ran and in what order
+- See the effects of each filter on the output
+- Identify transformation points in the pipeline
+
+### Error Isolation
+- Pinpoint which specific filter failed (if any)
+- See exact error messages from Pandoc
+- Get line numbers and context for LaTeX errors
+- Understand filter interaction issues
+
 ## Error Analysis Intelligence
 
 **Built-in Pattern Recognition:**
-- **Missing \\real{}**: LaTeX table calculations 
+- **Missing \\real{}**: LaTeX table calculations
 - **lstset blocks**: Unclosed code highlighting
 - **\\tightlist**: Missing Pandoc list command
 - **Template paths**: .sty file dependency issues
@@ -195,7 +263,7 @@ cat /workspace/shared/status/forge-ready.txt
 - ❌ **No .sty file management** - Forge already has corrected templates
 - ⚡ **Immediate PDF generation** - Human can generate full documents without template setup
 
-**Before this discovery**: Human managed .sty files manually  
+**Before this discovery**: Human managed .sty files manually
 **After this discovery**: Claude's testing auto-deploys templates, human gets content-only deliverables
 
 ## Integration with Visual Refinement
@@ -204,7 +272,7 @@ cat /workspace/shared/status/forge-ready.txt
 ```json
 {
   "request_id": "smart-pins-visual-v1",
-  "template": "p2kb-smart-pins.latex", 
+  "template": "p2kb-smart-pins.latex",
   "tests": [
     {
       "name": "colored-blocks-test",
@@ -212,7 +280,7 @@ cat /workspace/shared/status/forge-ready.txt
       "lua_filters": ["smart-pins-block-coloring"]  // Applies color environments
     },
     {
-      "name": "plain-test", 
+      "name": "plain-test",
       "input": "smart-pins-test.md"  // No filters for comparison
     }
   ]
@@ -248,21 +316,82 @@ cat /workspace/shared/status/forge-ready.txt
 2. **Working directory setup** automatically copies all .sty files for each test
 3. **Template paths** resolved automatically by monitoring script
 
-### Test Document Creation  
+### Test Document Creation
 1. **Small samples** - Focus on specific issues (list formatting, code blocks)
 2. **A/B testing** - Same content, different formatting approaches
 3. **Regression testing** - Minimal docs that must always work
 
 ### Result Processing
-1. **JSON parsing** - Claude reads results automatically 
+1. **JSON parsing** - Claude reads results automatically
 2. **PDF review** - You review visual output for approval
 3. **Iteration** - Quick cycle: change → test → review → repeat
+
+## Asset Handling for Images and Resources
+
+### 🔴 CRITICAL: How Assets Work with PDF Generation
+
+**The Two-Stage Process:**
+1. **Pandoc Stage**: Converts markdown → LaTeX using `--resource-path`
+2. **XeLaTeX Stage**: Converts LaTeX → PDF using `TEXINPUTS` environment variable
+
+**Asset Resolution:**
+- **Markdown references**: `![Image](assets/my-image.png)` 
+- **Pandoc finds it**: Via `--resource-path=/workspace/shared` 
+- **XeLaTeX finds it**: Via `TEXINPUTS=/workspace/shared//:...`
+
+**CRITICAL for Images with Spaces:**
+The monitoring script (`watch-shared-workspace.js`) now correctly sets the `TEXINPUTS` environment variable to handle images with spaces in filenames. This was fixed in version Enhanced by Claude v1.0.
+
+**Example with spaces in filename:**
+```markdown
+![Smart Pin Mode](assets/P2 SmartPins-220809_mode01001_page21_img01.png)
+```
+
+**This now works correctly** because:
+1. Pandoc handles the spaces during markdown→LaTeX conversion
+2. XeLaTeX finds the file via TEXINPUTS environment variable
+3. The Lua filter (if used) properly handles URL-encoded spaces (%20)
+
+### Asset Directory Best Practices
+
+1. **Always use `assets/` subfolder** for images
+2. **Reference from markdown** as `assets/filename.png`
+3. **Spaces in filenames** are now fully supported
+4. **Supported formats**: PNG, JPG, PDF, EPS
+5. **Path style**: Use forward slashes even on Windows
+
+### Testing Asset Handling
+
+**Test Request with Assets:**
+```json
+{
+  "request_id": "asset-test",
+  "template": "p2kb-smart-pins.latex",
+  "tests": [
+    {
+      "name": "images-with-spaces",
+      "input": "test-with-images.md"
+    }
+  ]
+}
+```
+
+**Test Markdown (`test-with-images.md`):**
+```markdown
+# Image Test
+
+## Image without spaces
+![Test](assets/simple-image.png)
+
+## Image with spaces in filename  
+![Test](assets/P2 SmartPins-220809_page21_img01.png)
+```
 
 ## Performance Characteristics
 
 **Typical Response Times:**
 - **Simple template test**: 2-5 seconds
-- **Complex document**: 10-15 seconds  
+- **Complex document**: 10-15 seconds
 - **Template with .sty dependencies**: 5-10 seconds
 - **Error analysis**: < 1 second additional
 
@@ -275,7 +404,7 @@ cat /workspace/shared/status/forge-ready.txt
 # Check if daemon is running
 cat /workspace/shared/status/forge-ready.txt
 
-# Monitor real-time activity  
+# Monitor real-time activity
 tail -f /workspace/shared/status/activity.log
 
 # Check recent errors
@@ -295,7 +424,7 @@ rm /workspace/shared/test-results/*-result.json
 
 **Perfect for:**
 - List formatting A/B testing
-- Template regression validation  
+- Template regression validation
 - Code block coloring experiments
 - Quick visual iteration cycles
 

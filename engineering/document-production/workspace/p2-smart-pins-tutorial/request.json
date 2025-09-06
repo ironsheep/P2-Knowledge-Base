@@ -1,36 +1,27 @@
 {
-  "request_id": "div-syntax-test",
-  "title": "Div Syntax Test - 3 vs 4 Colons",
-  "document": "div-syntax-test.md",
-  "template": "p2kb-smart-pins.latex",
-  
-  "pandoc_args": [
-    "--top-level-division=part",
-    "--lua-filter=smart-pins-div-blocks.lua",
-    "--lua-filter=part-chapter-pagebreaks.lua",
-    "--pdf-engine=xelatex",
-    "--number-sections",
-    "--toc",
-    "--toc-depth=2"
-  ],
-  
-  "filters": [
-    "smart-pins-div-blocks.lua",
-    "part-chapter-pagebreaks.lua"
-  ],
-  
-  "templates": [
-    "p2kb-foundation.sty",
-    "p2kb-smart-pins-content.sty",
-    "p2kb-tech-review.sty"
-  ],
-  
-  "metadata": {
-    "test_purpose": "Determine whether 3 or 4 colons work for div syntax",
-    "expected_results": {
-      "4_colons": "Green Spin2, Yellow PASM2, Red Antipattern",
-      "3_colons": "Green Spin2, Yellow PASM2, Red Antipattern",
-      "control": "Regular monospace, no color"
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2-Smart-Pins-Green-Book-Tutorial.md",
+      "output": "P2-Smart-Pins-Green-Book-Tutorial.pdf",
+      "template": "p2kb-sp-template",
+      "pandoc_args": [
+        "--top-level-division=part",
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=3"
+      ],
+      "lua_filters": [
+        "p2kb-sp-fix-hypertarget",
+        "p2kb-sp-fix-title-as-part",
+        "p2kb-sp-frontmatter",
+        "p2kb-sp-structure"
+      ],
+      "metadata": {
+        "title": "P2 Smart Pins \\& I/O Complete Tutorial",
+        "subtitle": "Master Every Aspect of P2 Input/Output Through Progressive Learning",
+        "version": "Version 6.0 - Green Book Edition"
+      }
     }
-  }
+  ]
 }

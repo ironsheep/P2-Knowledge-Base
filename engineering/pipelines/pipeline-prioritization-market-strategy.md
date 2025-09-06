@@ -111,3 +111,68 @@ Each document type enables a specific market segment. By strategically choosing 
 Good documentation → More users → More community content → More examples → More users...
 
 This virtuous cycle replaces the current vicious cycle of no docs → no users → no resources.
+
+## Magazine Article Strategy (Awareness Layer)
+
+### The Awareness Problem
+Technical documentation alone doesn't create market awareness. Magazine articles reach developers who don't know P2 exists.
+
+### Article Categories by Market Impact
+
+#### Category 1: Paradigm Shifters
+**Articles**: "Death of RTOS", "Variables in Registers"
+**Impact**: Challenge fundamental assumptions
+**Audience**: Senior embedded developers
+**Result**: Thought leadership → credibility
+
+#### Category 2: Migration Enablers  
+**Articles**: "Arduino×8", "Real-Time Pi"
+**Impact**: Show natural upgrade path
+**Audience**: Existing platform users
+**Result**: Platform switching consideration
+
+#### Category 3: Technical Showcases
+**Articles**: "Built-In Oscilloscope", "CORDIC in Silicon"
+**Impact**: Demonstrate unique capabilities
+**Audience**: Innovation seekers
+**Result**: "Wow factor" → investigation
+
+### Publication Strategy Aligned with Documentation
+
+| Documentation Phase | Magazine Articles | Purpose |
+|-------------------|------------------|----------|
+| Foundation (v1.0) | Blog posts on forums | Build community buzz |
+| Migration (v1.1) | "Arduino×8" series | Capture upgraders |
+| Professional (v1.2) | "Death of RTOS" | Enterprise attention |
+| Education (v2.0) | Make Magazine features | Student/hobbyist influx |
+
+### The Awareness-to-Revenue Funnel
+
+1. **Magazine Article** → Awareness
+2. **Blog/Forum Visit** → Interest  
+3. **Documentation Review** → Evaluation
+4. **Example Projects** → Trial
+5. **Purchase Decision** → Revenue
+
+Magazine articles feed the top of funnel; documentation converts interest to sales.
+
+### Measurement Framework
+
+**Leading Indicators**:
+- Article views/shares
+- Click-through to P2 resources
+- Forum registration spikes
+
+**Lagging Indicators**:
+- Sales correlation with article publication
+- New customer survey: "How did you hear about P2?"
+- Developer community growth rate
+
+### Content Reuse Efficiency
+
+Each technical document enables multiple articles:
+- **PASM2 Reference** → 3-4 technical deep-dives
+- **Smart Pins Complete** → 5-6 application articles
+- **Debug Manual** → 2-3 "wow factor" pieces
+
+This multiplies ROI on documentation investment.

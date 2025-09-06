@@ -129,7 +129,7 @@ Documents move to "In Production" when:
 6. **Visual assets assessed**: [Image extraction status](../sources/visual-assets/INGESTION-IMAGE-EXTRACTION-MATRIX.md) reviewed for enhancement opportunities
 
 ## Visual Asset Integration
-**Available Assets**: P2 Edge ecosystem (60 images), Smart Pins documentation (21 images), Spin2 v51 documentation (24 images), additional extractions pending  
+**Available Assets**: P2 Edge ecosystem (60 images), Smart Pins documentation (21 images), Spin2 v51 documentation (24 images), P2 Datasheet (40 images), additional extractions pending  
 **Enhancement Opportunities**: Documents can be improved with extracted images via [technical debt queue](../technical-debt/VISUAL-ASSETS-DEBT.md)  
 **Consumer Registry**: Each image extraction automatically identifies which documents could benefit
 

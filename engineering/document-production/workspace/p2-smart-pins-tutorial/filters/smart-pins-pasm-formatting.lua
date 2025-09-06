@@ -63,6 +63,7 @@ local pasm_instructions = {
   "wflong", "wfword", "wfbyte",
   
   -- Pin control
+  "dirl", "dirh", "dirnot", "dirc", "dirnc", "dirz", "dirnz",
   "drvl", "drvh", "drvnot", "drvc", "drvnc", "drvz", "drvnz",
   "outl", "outh", "outnot", "outc", "outnc", "outz", "outnz",
   "fltl", "flth", "fltnot", "fltc", "fltnc", "fltz", "fltnz",
@@ -128,7 +129,7 @@ function CodeBlock(block)
   
   -- Return as LaTeX block with colored environment
   local latex_block = '\\begin{PASM2Block}\n' ..
-                     '\\begin{Verbatim}[numbers=left,numbersep=5pt,xleftmargin=15pt]\n' ..
+                     '\\begin{Verbatim}[numbers=left,numbersep=10pt,xleftmargin=10pt]\n' ..
                      table.concat(lines, '\n') .. '\n' ..
                      '\\end{Verbatim}\n' ..
                      '\\end{PASM2Block}'
@@ -306,10 +307,10 @@ function parse_instruction(text)
   local has_ret = word_lower:match("_ret_$")
   
   if instruction_set[base_word] then
-    -- Format the instruction
-    local formatted = "\\textbf{" .. instruction_set[base_word] .. "}"
+    -- Just uppercase the instruction (can't use LaTeX commands in Verbatim)
+    local formatted = instruction_set[base_word]
     if has_ret then
-      formatted = formatted .. "\\_ret\\_"
+      formatted = formatted .. "_ret_"
     end
     return formatted .. rest
   end

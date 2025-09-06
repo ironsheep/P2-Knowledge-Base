@@ -49,13 +49,31 @@ class CodeBlockConverter:
     
     def detect_antipattern(self, lines, start_idx, end_idx):
         """
-        Check if this code block contains both WRONG and RIGHT patterns.
+        Check if this code block contains antipattern indicators.
         Returns True if this should be split into antipattern blocks.
         """
         block_content = '\n'.join(lines[start_idx+1:end_idx])
+        
+        # Pattern 1: WRONG/RIGHT or "won't work"/"works"
         has_wrong = "' WRONG" in block_content or "' This won't work" in block_content
         has_right = "' RIGHT" in block_content or "' This works" in block_content
-        return has_wrong and has_right
+        if has_wrong and has_right:
+            return True
+        
+        # Pattern 2: "blinks at X" followed by "blinks at Y correctly"
+        has_incorrect_timing = "' This blinks at" in block_content and "not" in block_content
+        has_correct_timing = "correctly" in block_content
+        if has_incorrect_timing and has_correct_timing:
+            return True
+            
+        # Pattern 3: "First configuration" / "Trying to change" / "Correct way"
+        has_first = "' First configuration" in block_content
+        has_trying = "' Trying to change" in block_content
+        has_correct_way = "' Correct way" in block_content
+        if has_first and has_trying and has_correct_way:
+            return True
+            
+        return False
     
     def split_antipattern_block(self, lines, start_idx, end_idx, language):
         """
@@ -63,44 +81,75 @@ class CodeBlockConverter:
         Returns the new lines to replace the original block.
         """
         result = []
-        wrong_lines = []
-        right_lines = []
-        
-        in_wrong = False
-        in_right = False
+        sections = []  # List of (type, lines) tuples
+        current_section = []
+        current_type = None
         
         for i in range(start_idx + 1, end_idx):
             line = lines[i]
+            
+            # Check for section markers
             if "' WRONG" in line or "' This won't work" in line:
-                in_wrong = True
-                in_right = False
-                wrong_lines.append(line)
+                if current_section:
+                    sections.append((current_type, current_section))
+                current_type = 'antipattern'
+                current_section = [line]
             elif "' RIGHT" in line or "' This works" in line:
-                in_right = True
-                in_wrong = False
-                right_lines.append(line)
-            elif in_wrong:
-                wrong_lines.append(line)
-            elif in_right:
-                right_lines.append(line)
+                if current_section:
+                    sections.append((current_type, current_section))
+                current_type = 'correct'
+                current_section = [line]
+            elif "' This blinks at" in line and ("not" in line or "Hz!" in line):
+                if current_section:
+                    sections.append((current_type, current_section))
+                current_type = 'antipattern'
+                current_section = [line]
+            elif "' This blinks at" in line and "correctly" in line:
+                if current_section:
+                    sections.append((current_type, current_section))
+                current_type = 'correct'
+                current_section = [line]
+            elif "' First configuration" in line:
+                if current_section:
+                    sections.append((current_type, current_section))
+                current_type = 'correct'  # First config is usually correct
+                current_section = [line]
+            elif "' Trying to change" in line:
+                if current_section:
+                    sections.append((current_type, current_section))
+                current_type = 'antipattern'  # This is the problematic approach
+                current_section = [line]
+            elif "' Correct way" in line:
+                if current_section:
+                    sections.append((current_type, current_section))
+                current_type = 'correct'
+                current_section = [line]
+            else:
+                current_section.append(line)
         
-        # Build the antipattern block (red)
-        if wrong_lines:
-            result.append(f"{self.colon_count} antipattern")
-            result.append("```")
-            result.extend(wrong_lines)
-            result.append("```")
-            result.append(self.colon_count)
-            result.append("")  # Blank line between blocks
-            self.stats['antipattern_found'] += 1
+        # Add the last section
+        if current_section:
+            sections.append((current_type, current_section))
         
-        # Build the correct pattern block (green for spin2)
-        if right_lines:
-            result.append(f"{self.colon_count} {language}")
-            result.append("```")
-            result.extend(right_lines)
-            result.append("```")
-            result.append(self.colon_count)
+        # Build div blocks for each section
+        for section_type, section_lines in sections:
+            if section_type == 'antipattern':
+                result.append(f"{self.colon_count} antipattern")
+                result.append("```")
+                result.extend(section_lines)
+                result.append("```")
+                result.append(self.colon_count)
+                self.stats['antipattern_found'] += 1
+            elif section_type == 'correct':
+                result.append(f"{self.colon_count} {language}")
+                result.append("```")
+                result.extend(section_lines)
+                result.append("```")
+                result.append(self.colon_count)
+            
+            # Add blank line between sections (except after last one)
+            if (section_type, section_lines) != sections[-1]:
+                result.append("")
         
         return result
     

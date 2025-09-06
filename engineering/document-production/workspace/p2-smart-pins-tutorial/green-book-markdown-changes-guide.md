@@ -41,7 +41,7 @@ This guide documents the REQUIRED markdown transformations to convert the Green 
 
 ## Known Issues and Solutions
 
-### LaTeX Image Float Problem
+### LaTeX Image Float Problem ✅ **IMPLEMENTED**
 **Issue**: LaTeX moves images to "optimize" page layout, causing them to appear at page tops instead of where referenced in narrative. This can split code blocks and break the tutorial flow.
 
 **Solution**: Use `non-floating-images.lua` filter to convert all images to non-floating, centered images that stay exactly where placed.
@@ -52,6 +52,11 @@ This guide documents the REQUIRED markdown transformations to convert the Green 
 - Creates professional appearance with clear text/image hierarchy
 - Easily adjustable in the Lua filter if needed
 - Individual images can override with explicit width attributes
+
+**Implementation Status**: ✅ **COMPLETED** (2025-09-02)
+- Filter copied to workspace/filters/non-floating-images.lua
+- Images already in correct format (simple markdown syntax)
+- Default 85% width pre-planned and confirmed
 
 **Implementation**: Add to pandoc args:
 ```json
@@ -81,13 +86,28 @@ python3 /engineering/tools/convert-to-div-syntax.py input.md output.md
 
 ### 1.1 Antipattern Code Block Splitting (handled by script) ⚠️ **CRITICAL**
 
-**Location**: Throughout the tutorial, teaching moments
+**Location**: Throughout the tutorial, teaching moments (3-4 occurrences expected)
 **Pattern**: Single code blocks containing both failing and working code
-**Detection**: Spin2 uses single tick marks for comments:
+**Detection**: Spin2 uses single tick marks for comments. Look for ALL these patterns:
 - `' WRONG - [explanation]` followed by incorrect code
 - `' RIGHT - [explanation]` followed by correct code
-- `' This won't work` (if present)
-- `' This works` (if present)
+- `' This won't work` followed by incorrect code
+- `' This works` followed by correct code
+- `' This blinks at [wrong rate]` followed by incorrect code
+- `' This blinks at [correct rate] correctly` followed by correct code
+- `' First configuration` followed by initial code
+- `' Trying to change` followed by problematic code  
+- `' Correct way` followed by working code
+
+**CRITICAL**: Search for sections titled **Mistake 1:**, **Mistake 2:**, **Mistake 3:** as these contain the antipattern blocks
+
+**Known Antipattern Blocks (typically 3 occurrences):**
+1. **Mistake 1: Forgetting Output Enable**
+   - Pattern: "This won't work" / "This works"
+2. **Mistake 2: Wrong Timing Calculation**
+   - Pattern: "This blinks at 0.5Hz" / "This blinks at 1Hz correctly"
+3. **Mistake 3: Not Clearing Before Reconfiguring**
+   - Pattern: "First configuration" / "Trying to change" / "Correct way"
 
 **Required Action**: Split each mixed code block into separate blocks:
 - Code with `' WRONG` comments → `:::: antipattern` div environment (red)
@@ -122,7 +142,35 @@ wrpin(P_TRANSITION | P_OE, LED_PIN)
 
 **Note**: Spin2 uses single tick marks (') for comments, not double slashes (//)
 
-### 2. Code Block Environment Conversion 🔄 **REQUIRED**
+### 2. Missing Image Placeholder Replacement 🖼️ **NEW REQUIREMENT**
+
+**Purpose**: Replace missing images with informative placeholder blocks so PDF generation doesn't fail
+
+**Process**: 
+1. Check each image reference against assets/ folder
+2. If image doesn't exist, replace with placeholder div block
+3. Preserve the description for future reference
+
+**Transformation**:
+```markdown
+<!-- BEFORE (missing image) -->
+![UART Frame Structure](assets/uart-frame-structure.png)
+
+<!-- AFTER (placeholder block) -->
+:::: needs-diagram
+Image showing "UART Frame Structure" is missing and should be added.
+Expected file: assets/uart-frame-structure.png
+::::
+```
+
+**Missing Images to Replace**:
+- `smps-timing-diagram.png` → "SMPS Timing Diagram"
+- `ab-encoder-timing.png` → "A-B Encoder Timing"
+- `comparator-operation.png` → "Comparator Operation"
+- `uart-frame-structure.png` → "UART Frame Structure"
+- `adc-operation-diagram.png` → "ADC Operation Diagram"
+
+### 3. Code Block Environment Conversion 🔄 **REQUIRED**
 
 **MANDATORY**: ALL code blocks must use div-wrapped format. NO exceptions.
 

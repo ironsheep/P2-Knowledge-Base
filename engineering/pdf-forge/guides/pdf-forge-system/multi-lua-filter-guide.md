@@ -13,26 +13,20 @@ The PDF Forge system supports multiple Lua filters for both manual PDF generatio
 ### Manual PDF Generation (request.json)
 ```json
 {
+  "format_type": "document_generation",
   "documents": [{
     "input": "document.md",
     "output": "document.pdf",
     "template": "p2kb-smart-pins",
-    "variables": {
-      "title": "Document Title",
-      "author": "Author Name"
-    },
     "pandoc_args": [
       "--top-level-division=part",
-      "--wrap=preserve",
-      "--lua-filter=filters/part-chapter-pagebreaks.lua",
-      "--lua-filter=filters/smart-pins-block-coloring.lua"
+      "--wrap=preserve"
+    ],
+    "lua_filters": [
+      "part-chapter-pagebreaks",
+      "smart-pins-block-coloring"
     ]
-  }],
-  "options": {
-    "cleanup": true,
-    "archive": false,
-    "optimize": false
-  }
+  }]
 }
 ```
 
@@ -65,15 +59,26 @@ The PDF Forge system supports multiple Lua filters for both manual PDF generatio
 ## Critical Pattern: Multiple Lua Filters
 
 ### The Pattern That Works
-Both systems accept multiple Lua filters in the `pandoc_args` array:
+**For production (document_generation):** Use `lua_filters` array in each document object:
 
 ```json
-"pandoc_args": [
-  "--lua-filter=filters/filter1.lua",
-  "--lua-filter=filters/filter2.lua",
-  "--lua-filter=filters/filter3.lua"
-]
+"documents": [{
+  "input": "document.md",
+  "output": "document.pdf",
+  "template": "template-name",
+  "lua_filters": [
+    "filter1",
+    "filter2", 
+    "filter3"
+  ]
+}]
 ```
+
+**IMPORTANT:** 
+- Filter names only (no path, no extension)
+- Filters execute in order specified
+- Per-document key inside documents array, NOT at top level
+- NOT in pandoc_args
 
 ### Filter Execution Order
 Filters are executed in the order specified:
@@ -82,15 +87,19 @@ Filters are executed in the order specified:
 3. And so on...
 
 ### Common P2KB Filter Stack
-For Smart Pins documents, the typical filter stack is:
+For Smart Pins documents, the typical configuration is:
 
 ```json
-"pandoc_args": [
-  "--top-level-division=part",
-  "--wrap=preserve",
-  "--lua-filter=filters/part-chapter-pagebreaks.lua",
-  "--lua-filter=filters/smart-pins-block-coloring.lua"
-]
+"documents": [{
+  "pandoc_args": [
+    "--top-level-division=part",
+    "--wrap=preserve"
+  ],
+  "lua_filters": [
+    "part-chapter-pagebreaks",
+    "smart-pins-block-coloring"
+  ]
+}]
 ```
 
 **Purpose of each:**
@@ -178,12 +187,16 @@ The watch script will automatically:
 ### For De Silva Manual
 The De Silva manual can use the same pattern:
 ```json
-"pandoc_args": [
-  "--top-level-division=part",
-  "--wrap=preserve",
-  "--lua-filter=filters/part-chapter-pagebreaks.lua",
-  "--lua-filter=filters/desilva-div-to-environment.lua"
-]
+"documents": [{
+  "pandoc_args": [
+    "--top-level-division=part",
+    "--wrap=preserve"
+  ],
+  "lua_filters": [
+    "part-chapter-pagebreaks",
+    "desilva-div-to-environment"
+  ]
+}]
 ```
 
 ### Creating New Filters

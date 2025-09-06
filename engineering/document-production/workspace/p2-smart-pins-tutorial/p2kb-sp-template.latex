@@ -1,0 +1,67 @@
+% P2KB General Purpose Template - Layered Architecture
+% Foundation + Content + Presentation layers
+% Version: Generic v1.0
+
+\documentclass[11pt,a4paper,oneside,english]{book}
+
+% ==================== LAYERED TEMPLATE STACK ====================
+% Each layer provides specific functionality without overlap
+
+\usepackage{p2kb-foundation}           % Pandoc compatibility, core packages
+\usepackage{p2kb-sp-styles}            % Document-specific styles
+\usepackage{p2kb-sp-numbering}         % Numbering system
+\usepackage{p2kb-tech-review}          % Technical review branding
+
+% ==================== DOCUMENT START ====================
+\begin{document}
+
+% Use metadata from Pandoc if provided
+$if(title)$
+\technicalreviewtitlepage%
+{$title$}%                                      % Title from metadata
+{$if(subtitle)$$subtitle$$else$~$endif$}%      % Subtitle if provided
+{$if(version)$$version$$else$Version 1.0$endif$}%  % Version if provided
+{$if(date)$$date$$else$\today$endif$}%         % Date if provided
+{% Review areas - generic
+\begin{itemize}
+  \item Technical accuracy and completeness
+  \item Code examples validation
+  \item Specification correctness
+  \item Documentation clarity
+\end{itemize}%
+}%
+{% Document statistics - generic
+\begin{itemize}
+  \item Document version for review
+  \item Content subject to change
+  \item Please provide feedback
+\end{itemize}%
+}
+
+% Copyright page
+\technicalreviewcopyrightpage%
+{$title$}%                                      % Title from metadata
+{$if(version)$$version$$else$Version 1.0$endif$}%  % Version
+{% Acknowledgments - generic
+$if(acknowledgments)$
+$acknowledgments$
+$else$
+Parallax Inc. and the P2 Community
+$endif$%
+}
+$else$
+% If no title metadata, skip formal title page
+$endif$
+
+% Start front matter (roman numerals)
+\frontmatter
+
+% Table of contents
+\tableofcontents
+% No clearpage here - let content flow after TOC
+\markboth{}{}  % Clear the "Contents" header mark
+
+% Main content will be inserted here by pandoc
+$body$
+
+\end{document}

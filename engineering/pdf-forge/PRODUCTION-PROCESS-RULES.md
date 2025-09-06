@@ -1,6 +1,43 @@
 # Production Process Rules for PDF Generation
 
+## 🚨 CRITICAL: Pandoc Version Distinction
+
+**WARNING: Local machine has ancient Pandoc 1.19 - DO NOT USE FOR TESTING!**
+
+### Environment Differences:
+- **Local Machine**: Pandoc 1.19.2.1 (pre-2016, NO Lua filter support)
+  - Found at: `/Users/stephen/anaconda3/bin/pandoc`
+  - **NEVER use this for PDF work** - it's misleading and incompatible
+  - Cannot test Lua filters locally
+  - Cannot generate proper PDFs locally
+  
+- **PDF Forge**: Pandoc 2.17.1.1 (modern version with full Lua filter support)
+  - This is where ALL actual PDF generation happens
+  - Supports all our Lua filters
+  - Has proper LaTeX integration
+  - This is the ONLY Pandoc that matters for our workflow
+
+### Key Implications:
+1. **Cannot test Lua filters locally** - they will fail with "unrecognized option"
+2. **All PDF testing must go through PDF Forge** - no local shortcuts
+3. **Local Pandoc output is NOT representative** - different version = different behavior
+4. **Filter errors only show up on PDF Forge** - that's where they actually run
+
+### Best Practice:
+- Prepare files locally (markdown, templates, filters)
+- Deploy to PDF Forge for ALL testing and production
+- Never trust local Pandoc output or errors
+- When debugging, remember: filters run on PDF Forge, not locally
+
 ## Directory Structure and Purpose
+
+### Workspace-to-Outbound Mapping
+**Parallel folder structure for easy navigation:**
+- `/workspace/p2-smart-pins-tutorial/` → `/outbound/p2-smart-pins-tutorial/`
+- `/workspace/p2-pasm-desilva-style/` → `/outbound/p2-pasm-desilva-style/`
+- `/workspace/pasm2-reference-manual/` → `/outbound/pasm2-reference-manual/`
+
+**The folders have identical names** - just swap "workspace" for "outbound" in the path.
 
 ### `/workspace/desilva-manual/` - DEVELOPMENT AREA
 **This is where ALL work happens:**
@@ -9,6 +46,7 @@
 - Test outputs with descriptive names
 - Templates being edited
 - Tracking documents
+- **request-requirements.json** - Special pandoc arguments needed for this document
 
 **Naming convention for iterations:**
 - `P2-PASM-deSilva-Style-Part1.md` - Source
@@ -22,9 +60,25 @@
 - One markdown file (properly named, no suffixes)
 - One LaTeX template 
 - One request.json
+- Modified .sty, .lua, or .latex files (when changed)
 - NO intermediate files
 - NO backups
 - NO test versions
+
+**CRITICAL: Template and Support File Persistence**
+- PDF Forge remembers the last copy of all .latex, .sty, and .lua files
+- These files persist across PDF generation sessions
+- Only copy modified files to outbound when you change them
+- The Knowledge Base repository is the source of truth for these files
+- User deploys modified files from outbound to PDF Forge to update production environment
+
+**🎯 IMPORTANT: Files Disappear from Outbound - This is NORMAL!**
+- User drags files from outbound to PDF Forge
+- **Files disappearing = successful deployment** (don't panic!)
+- Empty outbound folder means files are now on the Forge
+- Assets folder may remain as backup (intentional)
+- Workspace always contains the masters - you can re-copy if needed
+- During production iterations, keep copies in workspace to re-deploy quickly
 
 **Strict naming rules:**
 - Markdown: `[DocumentBaseName].md` (NO -FINAL, -COMPLETE, etc.)
@@ -51,7 +105,12 @@
 1. Copy ONLY the final files
 2. Use production names (no suffixes)
 3. Verify request.json format
-4. User moves to PDF Forge
+4. Copy ONLY modified template files:
+   - If you changed p2kb-smart-pins.latex → copy it
+   - If you changed p2kb-smart-pins-content.sty → copy it
+   - If you changed green-book-semantic-blocks.lua → copy it
+   - If files weren't changed → DON'T copy (Forge has them)
+5. User moves files from outbound to PDF Forge
 
 ## Process Tracking Requirements
 
@@ -75,6 +134,31 @@ workspace/desilva-manual/
 - **ESCAPED**: After LaTeX escaping
 - **REVIEWED**: After technical review
 - **FINAL**: Ready for production
+
+## Request Requirements Snippet Pattern
+
+### Purpose of request-requirements.json
+Each document workspace may contain a `request-requirements.json` file that specifies:
+- Critical pandoc arguments needed for proper rendering
+- The reason why these arguments are required
+- When the requirement was discovered
+- The issue that occurs without these arguments
+
+### Example request-requirements.json:
+```json
+{
+  "required_pandoc_args": ["--top-level-division=part"],
+  "reason": "Smart Pins uses Part/Chapter structure",
+  "discovered": "2025-08-25",
+  "issue": "Without this, parts don't get page breaks"
+}
+```
+
+### Using the Snippet
+When creating the production request.json:
+1. Check if workspace has request-requirements.json
+2. Add the `required_pandoc_args` to the document's `pandoc_args` array
+3. Include standard arguments like `--toc`, `--number-sections` as needed
 
 ## Critical Rules
 

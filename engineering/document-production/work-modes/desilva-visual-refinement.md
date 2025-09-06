@@ -313,6 +313,36 @@ rm workspace/desilva-manual/COMBINED-FOR-ESCAPING.md
 - [ ] Tutorial voice consistent throughout combined document
 - [ ] All pedagogical elements render correctly
 
+## Production PDF Generation Process
+
+### 🔴 MANDATORY: Check for Document Requirements
+
+**STEP 1: Check for requirements file**
+```bash
+cat /engineering/document-production/workspace/pasm2-desilva-tutorial/request-requirements.json
+```
+
+If this file exists, it contains MANDATORY pandoc arguments for this document.
+
+**STEP 2: Create production request**
+```json
+{
+  "format_type": "document_generation",
+  "documents": [{
+    "input": "document.md",
+    "output": "document.pdf",
+    "template": "template-name",
+    "pandoc_args": [...],  // Include args from request-requirements.json
+    "lua_filters": [...]    // Document-specific filters
+  }]
+}
+```
+
+**STEP 3: Deploy to outbound**
+- Place request.json in `/engineering/document-production/outbound/[document-name]/`
+- Copy markdown and assets to same location
+- User handles deployment to PDF Forge
+
 ## Current Status Tracking
 
 **Last working state**: [Update after each session]

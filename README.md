@@ -24,15 +24,31 @@ Structured tutorials progressing from fundamentals to expertise. Includes migrat
 **[→ Technical Reference](deliverables/reference/)**  
 Authoritative instruction set documentation, hardware specifications, and architectural details. The definitive source for P2 technical information.
 
+## About the Propeller 2
+
+The Propeller 2 (P2X8C4M64P) is a symmetric multicore microcontroller featuring **8 identical 32-bit processors** (COGs) that execute independently while sharing resources. Unlike traditional microcontrollers, the P2 provides true parallel processing with deterministic timing, making it ideal for real-time applications.
+
+### Core Architecture
+- **8 Independent COGs**: 90 MIPS each (720 MIPS total @ 180 MHz), true parallel execution
+- **Dual Memory Model**: Each COG has 4KB private RAM; all share 512KB Hub RAM
+- **Execute from Anywhere**: COGs can run code from COG RAM, LUT RAM, or Hub RAM
+- **No Resource Contention**: Each COG has dedicated registers, no cache misses or pipeline stalls
+
+### Smart Pin System  
+- **64 Autonomous I/O Pins**: Each pin independently handles complex operations
+- **Built-in Protocols**: UART, SPI, I²C, USB, quadrature decoding without CPU overhead
+- **Analog & Digital**: 14-bit ADC, 16-bit DAC, PWM, and video generation per pin
+- **Offload Everything**: Smart Pins run autonomously, freeing COGs for application logic
+
+### Developer Advantages
+- **Deterministic Timing**: Count cycles exactly, no interrupt latency
+- **Hardware Parallelism**: No RTOS needed - hardware handles multiprocessing
+- **CORDIC Math Engine**: Hardware multiply, divide, trig, and logarithms
+- **Mixed Languages**: Spin2 (high-level), PASM2 (assembly), C/C++, Python
+
 ## About This Project
 
-The P2 Knowledge Base provides comprehensive, AI-optimized documentation for the Propeller 2 microcontroller. Our goal is enabling both human developers and AI systems to effectively utilize the P2's unique parallel processing architecture.
-
-### Key Features
-- **8 Symmetric COGs**: True parallel processing with deterministic timing
-- **64 Smart Pins**: Autonomous I/O handling without CPU overhead  
-- **512KB Shared Hub RAM**: High-bandwidth memory accessible by all COGs
-- **CORDIC Solver**: Hardware acceleration for complex mathematics
+The P2 Knowledge Base provides comprehensive, AI-optimized documentation for the Propeller 2. Our goal is enabling both human developers and AI systems to effectively utilize the P2's unique parallel processing capabilities through accurate, structured documentation.
 
 ## Contributing
 
