@@ -1,0 +1,373 @@
+PIXEL OPERATIONS
+
+Each cog has a pixel mixer which can combine one pixel with another pixel in many different ways. A pixel consists of four
+byte fields within a 32-bit cog register. Pixel operations occur between each pair of D and S bytes, and they take seven clock
+cycles to complete:
+
+          ADDPIX     D,S/#                      'add bytes with saturation
+          MULPIX     D,S/#                      'multiply bytes ($FF = 1.0)
+          BLNPIX     D,S/#                      'alpha-blend bytes according to SETPIV value
+          MIXPIX     D,S/#                      'mix bytes according to SETPIX/SETPIV value
+
+
+
+There are two pixel mixer setup instructions:
+
+          SETPIV     D/#                        'set blend factor V[7:0] to D/#[7:0]
+          SETPIX     D/#                        'set MIXPIX mode M[5:0] to D/#[5:0]
+
+
+
+When a pixel mixer instruction executes, a sum-of-products-with-saturation computation is performed on each D and S byte
+pair:
+
+          D[31:24]    =    ((D[31:24]   *   DMIX   +   S[31:24]   *   SMIX   +   $FF)   >>   8)   max   $FF
+          D[23:16]    =    ((D[23:16]   *   DMIX   +   S[23:16]   *   SMIX   +   $FF)   >>   8)   max   $FF
+          D[15:08]    =    ((D[15:08]   *   DMIX   +   S[15:08]   *   SMIX   +   $FF)   >>   8)   max   $FF
+          D[07:00]    =    ((D[07:00]   *   DMIX   +   S[07:00]   *   SMIX   +   $FF)   >>   8)   max   $FF
+
+
+
+Here are the DMIX and SMIX terms, according to each instruction:
+
+
+                   DMIX                                SMIX
+
+ ADDPIX            $FF                                 $FF
+
+ MULPIX            S[byte]                             $00
+
+ BLNPIX            !V                                  V
+
+ MIXPIX            M[5:3] = %000 → $00                 M[2:0] = %000 → $00
+                   M[5:3] = %001 → $FF                 M[2:0] = %001 → $FF
+                   M[5:3] = %010 → V                   M[2:0] = %010 → V
+                   M[5:3] = %011 → !V                  M[2:0] = %011 → !V
+                   M[5:3] = %100 → S[byte]             M[2:0] = %100 → S[byte]
+                   M[5:3] = %101 → !S[byte]            M[2:0] = %101 → !S[byte]
+                   M[5:3] = %110 → D[byte]             M[2:0] = %110 → D[byte]
+                   M[5:3] = %111 → !D[byte]            M[2:0] = %111 → !D[byte]
+
+
+
+
+DACs
+
+Each cog outputs four 8-bit DAC channels that can directly drive the DACs within the pins. For this to work, the pins of interest
+will need to be configured for DAC-channel output.
+
+
+
+                                                                                                                               28
+         DAC0 can drive the DAC's of all pins numbered %XXXX00.
+         DAC1 can drive the DAC's of all pins numbered %XXXX01.
+         DAC2 can drive the DAC's of all pins numbered %XXXX10.
+         DAC3 can drive the DAC's of all pins numbered %XXXX11.
+
+
+
+The background state of these four 8-bit channels can be established by SETDACS:
+
+         SETDACS D/#                 - Write bytes 3/2/1/0 of D/# to DAC3/DAC2/DAC1/DAC0
+
+The DAC values established by SETDACS will be constantly output, except at times when the streamer and/or colorspace
+converter override them.
+
+
+
+
+STREAMER
+
+Each cog has a streamer which can automatically output timed state sequences to pins and DACs. It can also capture pin and
+ADC readings to hub RAM and perform Goertzel computations from smart pins configured as ADC's.
+
+
+There are five instructions directly associated with the streamer:
+
+         SETXFRQ     D/#             -   Set NCO frequency
+         XINIT       D/#,S/#         -   Issue command immediately, zeroing phase
+         XZERO       D/#,S/#         -   Issue command on final NCO rollover (waits), zeroing phase
+         XCONT       D/#,S/#         -   Issue command on final NCO rollover (waits), continuing phase
+         GETXACC     D               -   Get Goertzel X into D and Y into next S, clear X and Y
+
+
+
+The streamer uses a numerically-controlled oscillator (NCO) to time its operation. On every clock while the streamer is active,
+it adds a 32-bit frequency value into a 32-bit phase accumulator, while masking the MSB of the original phase. The NCO can
+be understood as such:
+
+         phase = (phase & $7FFF_FFFF) + frequency
+
+The MSB of the resultant phase value indicates NCO rollover and is used as a trigger to advance the state of the streamer.
+This is true for every mode except DDS/Goertzel, in which case the streamer runs continuously.
+
+The frequency of the streamer's NCO rollover is set by the 'SETXFRQ D/#' instruction, where D/# expresses a fractional 0-to-1
+multiplier for the system clock, which value must be multiplied by $8000_0000. Here are some system clock multipliers and the
+D/# values that realize them:
+
+         1                  $8000_0000 (default value on cog start)
+         1   /   2          $4000_0000
+         1   /   3          $2AAA_AAAA+1 *
+         1   /   4          $2000_0000
+         1   /   5          $1999_9999+1 *
+         1   /   6          $1555_5555+1 *
+         1   /   7          $1249_2492+1 *
+         1   /   8          $1000_0000
+
+         * For fractions with remainders, the computed D/# value should be incremented, in order to produce proper initial
+
+
+                                                                                                                             29
+         rollover behavior.
+
+The NCO frequency may also be set/changed via a 'SETQ D/#' instruction immediately preceding an XINIT/XZERO/XCONT
+instruction. When the streamer command executes, the new frequency will be set during the first clock of the command. If no
+SETQ is used before the instruction, the frequency will remain the same when the command executes.
+
+The streamer may be activated by a command from an XINIT/XZERO/XCONT instruction. For these instructions, D/#
+expresses the streamer mode and duration, while S/# supplies various data, or is ignored, depending upon the mode
+expressed in D/#.
+
+There is a single-level command buffer in the streamer, enabling you to give it two initial commands before it makes you wait
+for the first command to finish before accepting another. This command buffer enables you to coordinate streamer activity with
+smart pin activity. By executing an XINIT and then an XCONT, you get time during the XINIT command to instantiate a smart
+pin to perform some operation which will then correlate with the queued XCONT command. Think of tossing a ball up gently,
+so that you can then hit it with a bat.
+
+For the XINIT/XZERO/XCONT instructions, D/#[31:16] conveys the command, while D/#[15:0] conveys the number of NCO
+rollovers that the command will be active for. S/# is used to select sub-modes for some commands:
+
+D/#[31:16]
+Mode DACs Pins Misc         S/#          Description                        Pins       DAC Channels $X3_X2_X1_X0           .
+
+                                         Immediate ⇢ LUT ⇢ Pins/DACs
+
+0000   dddd   eppp   bbbb   <long>       imm   -> 32 x 1-bit LUT            32   out   %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba
+0001   dddd   eppp   bbbb   <long>       imm   -> 16 x 2-bit LUT            32   out   %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba
+0010   dddd   eppp   bbbb   <long>       imm   -> 8 x 4-bit LUT             32   out   %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba
+0011   dddd   eppp   bbbb   <long>       imm   -> 4 x 8-bit LUT             32   out   %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba
+
+                                         Immediate ⇢ Pins/DACs
+
+0100   dddd   eppp   pppa   <long>       imm 32 x 1    -> 1-pin + 1-DAC1     1   out   %00000000_00000000_00000000_aaaaaaaa
+0101   dddd   eppp   pp0a   <long>       imm 16 x 2    -> 2-pin + 2-DAC1     2   out   %00000000_00000000_bbbbbbbb_aaaaaaaa
+0101   dddd   eppp   pp1a   <long>       imm 16 x 2    -> 2-pin + 1-DAC2     2   out   %00000000_00000000_00000000_babababa
+0110   dddd   eppp   p00a   <long>       imm 8 x 4     -> 4-pin + 4-DAC1     4   out   %dddddddd_cccccccc_bbbbbbbb_aaaaaaaa
+0110   dddd   eppp   p01a   <long>       imm 8 x 4     -> 4-pin + 2-DAC2     4   out   %00000000_00000000_dcdcdcdc_babababa
+0110   dddd   eppp   p10a   <long>       imm 8 x 4     -> 4-pin + 1-DAC4     4   out   %00000000_00000000_00000000_dcbadcba
+0110   dddd   eppp   0110   <long>       imm 4 x 8     -> 8-pin + 4-DAC2     8   out   %hghghghg_fefefefe_dcdcdcdc_babababa
+0110   dddd   eppp   0111   <long>       imm 4 x 8     -> 8-pin + 2-DAC4     8   out   %00000000_00000000_hgfehgfe_dcbadcba
+0110   dddd   eppp   1110   <long>       imm 4 x 8     -> 8-pin + 1-DAC8     8   out   %00000000_00000000_00000000_hgfedcba
+0110   dddd   eppp   1111   <long>       imm 2 x 16    -> 16-pin + 4-DAC4   16   out   %ponmponm_lkjilkji_hgfehgfe_dcbadcba
+0111   dddd   eppp   0000   <long>       imm 2 x 16    -> 16-pin + 2-DAC8   16   out   %00000000_00000000_ponmlkji_hgfedcba
+0111   dddd   eppp   0001   <long>       imm 1 x 32    -> 32-pin + 4-DAC8   32   out   %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba
+
+                                         RDFAST ⇢ LUT ⇢ Pins/DACs
+
+0111   dddd   eppp   001a   bbbb         RFLONG   -> 32 x 1-bit LUT         32   out   %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba
+0111   dddd   eppp   010a   bbbb         RFLONG   -> 16 x 2-bit LUT         32   out   %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba
+0111   dddd   eppp   011a   bbbb         RFLONG   -> 8 x 4-bit LUT          32   out   %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba
+0111   dddd   eppp   1000   bbbb         RFLONG   -> 4 x 8-bit LUT          32   out   %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba
+
+                                         RDFAST ⇢ Pins/DACs
+
+1000   dddd   eppp   pppa   -      1/8   RFBYTE   -> 1-pin + 1-DAC1          1   out   %00000000_00000000_00000000_aaaaaaaa
+1001   dddd   eppp   pp0a   -      1/4   RFBYTE   -> 2-pin + 2-DAC1          2   out   %00000000_00000000_bbbbbbbb_aaaaaaaa
+1001   dddd   eppp   pp1a   -      1/4   RFBYTE   -> 2-pin + 1-DAC2          2   out   %00000000_00000000_00000000_babababa
+1010   dddd   eppp   p00a   -      1/2   RFBYTE   -> 4-pin + 4-DAC1          4   out   %dddddddd_cccccccc_bbbbbbbb_aaaaaaaa
+1010   dddd   eppp   p01a   -      1/2   RFBYTE   -> 4-pin + 2-DAC2          4   out   %00000000_00000000_dcdcdcdc_babababa
+1010   dddd   eppp   p10a   -      1/2   RFBYTE   -> 4-pin + 1-DAC4          4   out   %00000000_00000000_00000000_dcbadcba
+1010   dddd   eppp   0110   -            RFBYTE   -> 8-pin + 4-DAC2          8   out   %hghghghg_fefefefe_dcdcdcdc_babababa
+1010   dddd   eppp   0111   -            RFBYTE   -> 8-pin + 2-DAC4          8   out   %00000000_00000000_hgfehgfe_dcbadcba
+1010   dddd   eppp   1110   -            RFBYTE   -> 8-pin + 1-DAC8          8   out   %00000000_00000000_00000000_hgfedcba
+1010   dddd   eppp   1111   -            RFWORD   -> 16-pin + 4-DAC4        16   out   %ponmponm_lkjilkji_hgfehgfe_dcbadcba
+1011   dddd   eppp   0000   -            RFWORD   -> 16-pin + 2-DAC8        16   out   %00000000_00000000_ponmlkji_hgfedcba
+1011   dddd   eppp   0001   -            RFLONG   -> 32-pin + 4-DAC8        32   out   %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba
+
+                                         RDFAST ⇢ RGB ⇢ Pins/DACs
+
+                                                                                                                              30
+1011   dddd   eppp   0010   rgb        RFBYTE   ->   24-pin   +   LUMA8         32 out       %rrrrrrrr_gggggggg_bbbbbbbb_00000000
+1011   dddd   eppp   0011   -          RFBYTE   ->   24-pin   +   RGBI8         32 out       %rrrrrrrr_gggggggg_bbbbbbbb_00000000
+1011   dddd   eppp   0100   -          RFBYTE   ->   24-pin   +   RGB8 (3:3:2) 32 out        %rrrrrrrr_gggggggg_bbbbbbbb_00000000
+1011   dddd   eppp   0101   -          RFWORD   ->   24-pin   +   RGB16 (5:6:5) 32 out       %rrrrrrrr_gggggggg_bbbbbbbb_00000000
+1011   dddd   eppp   0110   -          RFLONG   ->   24-pin   +   RGB24 (8:8:8) 32 out       %rrrrrrrr_gggggggg_bbbbbbbb_00000000
+
+                                       Pins ⇢ DACs/WRFAST
+
+1100   dddd   wppp   pppa   -           1-pin   ->   1-DAC1   +   1/8 WFBYTE        1   in   %00000000_00000000_00000000_aaaaaaaa
+1101   dddd   wppp   pp0a   -           2-pin   ->   2-DAC1   +   1/4 WFBYTE        2   in   %00000000_00000000_bbbbbbbb_aaaaaaaa
+1101   dddd   wppp   pp1a   -           2-pin   ->   1-DAC2   +   1/4 WFBYTE        2   in   %00000000_00000000_00000000_babababa
+1110   dddd   wppp   p00a   -           4-pin   ->   4-DAC1   +   1/2 WFBYTE        4   in   %dddddddd_cccccccc_bbbbbbbb_aaaaaaaa
+1110   dddd   wppp   p01a   -           4-pin   ->   2-DAC2   +   1/2 WFBYTE        4   in   %00000000_00000000_dcdcdcdc_babababa
+1110   dddd   wppp   p10a   -           4-pin   ->   1-DAC4   +   1/2 WFBYTE        4   in   %00000000_00000000_00000000_dcbadcba
+1110   dddd   wppp   0110   -           8-pin   ->   4-DAC2   +   WFBYTE            8   in   %hghghghg_fefefefe_dcdcdcdc_babababa
+1110   dddd   wppp   0111   -           8-pin   ->   2-DAC4   +   WFBYTE            8   in   %00000000_00000000_hgfehgfe_dcbadcba
+1110   dddd   wppp   1110   -           8-pin   ->   1-DAC8   +   WFBYTE            8   in   %00000000_00000000_00000000_hgfedcba
+1110   dddd   wppp   1111   -          16-pin   ->   4-DAC4   +   WFWORD           16   in   %ponmponm_lkjilkji_hgfehgfe_dcbadcba
+1111   dddd   wppp   0000   -          16-pin   ->   2-DAC8   +   WFWORD           16   in   %00000000_00000000_ponmlkji_hgfedcba
+1111   dddd   wppp   0001   -          32-pin   ->   4-DAC8   +   WFLONG           32   in   %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba
+
+                                       ADCs/Pins ⇢ DACs/WRFAST
+
+1111   dddd   w---   0010   ss             1-ADC8     ->   1-DAC8   +   WFBYTE      8   in   %00000000_00000000_00000000_hgfedcba
+1111   dddd   wppp   0011   ss     1-ADC8 + 8-pin     ->   2-DAC8   +   WFWORD     16   in   %00000000_00000000_ponmlkji_hgfedcba
+1111   dddd   w---   0100   s-             2-ADC8     ->   2-DAC8   +   WFWORD     16   in   %00000000_00000000_ponmlkji_hgfedcba
+1111   dddd   wppp   0101   s-    2-ADC8 + 16-pin     ->   4-DAC8   +   WFLONG     32   in   %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba
+1111   dddd   w---   0110   --             4-ADC8     ->   4-DAC8   +   WFLONG     32   in   %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba
+
+                                       DDS/Goertzel
+
+1111 dddd 0ppp p111         <config>       DDS/Goertzel LUT SINC1 *              4 in ADC    %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba
+1111 dddd 1ppp p111         <config>       DDS/Goertzel LUT SINC2 *              4 in ADC    %PONMLKJI_HGFEDCBA_ponmlkji_hgfedcba
+
+
+
+Each of these modes requires explanation, but there are some overlapping matters that can be covered first.
+
+The 16-bit D[15:0] field expresses an initial counter value which will be decremented on each subsequent NCO rollover, with
+each rollover causing new streamer data to be output or input. When the counter equals 1 and the NCO is rolling over for the
+last time for the current command, a new command may be seamlessly begun by a buffered XZERO/XCONT instruction. If no
+XZERO/XCONT instruction is buffered, the counter goes to 0. When the counter reaches 0, or is set to 0, streamer operation
+stops and all streamer DAC overrides and streamer pin outputs cease.
+
+By setting the D[15:0] count to its maximal value of $FFFF, a streamer command will run perpetually.
+
+XINIT (re)starts the streamer, no matter what state it is in. 'XINIT #0,#0' will always stop the streamer immediately. XSTOP (no
+operands) is an alias for 'XINIT #0,#0'.
+
+XZERO and XCONT are used to maintain seamless streamer I/O, from command to command. They wait for the prior
+command's last clock cycle. If the streamer count has already run down to 0, there is no waiting. Also, if the prior command
+used $FFFF for its initial count, in which case the streamer is running perpetually without decrementing its counter, a new
+XZERO/XCONT command will only wait for the next NCO rollover, at which point the streamer will begin executing the new
+command.
+
+XZERO clears out the phase accumulator when it executes. This clearing is desirable when, say, pixels are being output at 1/3
+Fclk and and you don't want a 1-clock delay (glitch) every ~30 seconds, due to imperfect fractions like %5555_5555 = ~1/3. In
+such a case, it would be good to use XZERO to initiate the horizontal sync pulse, while using XCONT everywhere else. It may
+also be desirable to increment such frequency values by 1, so that the initial NCO rollover occurs on the Nth clock, and not on
+the Nth+1 clock.
+
+XCONT is like XZERO, but does not affect the phase accumulator. XCONT is useful in cases where NCO phase and
+frequency should be strictly maintained and streamer activity should ride along with it.
+
+                                                                                                                                    31
+The streamer has four DAC output channels, X0, X1, X2 and X3, which can selectively override the four SETDACS values on
+a per-DAC basis. To bring out the data as a voltage on a pin, that pin must be set to DAC mode with the COGID embedded,
+via WRPIN, and DIR must be set high.
+
+The %dddd field in D[27:24] selects which streamer DAC channels will override which SETDACS values during active
+streamer operation. In the table below, "--" indicates no-override and "!" indicates one's-complement:
+
+                 DAC Channel
+     dddd        3   2   1   0                description                                                           .
+
+     0000        --    -- --      --          no streamer DAC output
+     0001        X0    X0 X0      X0          output X0 on all four DAC channels
+     0010        --    -- X0      X0          output X0 on DAC channels 1 and 0
+     0011        X0    X0 --      --          output X0 on DAC channels 3 and 2
+     0100        --    -- --      X0          output X0 on DAC channel 0
+     0101        --    -- X0      --          output X0 on DAC channel 1
+     0110        --    X0 --      --          output X0 on DAC channel 2
+     0111        X0    -- --      --          output X0 on DAC channel 3
+     1000       !X0    X0 !X0     X0          output X0 diff pairs on all four DAC channels
+     1001        --    -- !X0     X0          output X0 diff pairs on DAC channels 1 and 0
+     1010       !X0    X0 --      --          output X0 diff pairs on DAC channels 3 and 2
+     1011        X1    X0 X1      X0          output X1, X0 pairs on all four DAC channels
+     1100        --    -- X1      X0          output X1, X0 on DAC channels 1 and 0
+     1101        X1    X0 --      --          output X1, X0 on DAC channels 3 and 2
+     1110       !X1    X1 !X0     X0          output X1, X0 diff pairs on all four DAC channels
+     1111        X3    X2 X1      X0          output X3, X2, X1, X0 on all four DAC channels
+
+
+
+Modes which can output to pins OR the streamer pin-output bus with {OUTB, OUTA} to produce the final 64 pin output states
+on each clock for the cog. For these modes, %e in D[23] must be '1' to enable pin output.
+
+Modes which input from pins read {INB, INA} and can optionally write the pin data to hub RAM. For these modes, %w in D[23]
+must be '1' to enable automatic WFBYTE/WFWORD/WFLONG operations.
+
+In every mode, the three %ppp bits in D[22:20] select the pin group, in 8-pin increments, which will be used as outputs or
+inputs, for up to 32-pin transfers. The selection wraps around:
+
+          %ppp : 000     =   select    pins   31..0
+                 001     =   select    pins   39..8
+                 010     =   select    pins   47..16
+                 011     =   select    pins   55..24
+                 100     =   select    pins   63..32
+                 101     =   select    pins   7..0, 63..40
+                 110     =   select    pins   15..0, 63..48
+                 111     =   select    pins   23..0, 63..56
+
+For modes which involve less than 8 pins, lower-order %p bit(s) in D[19:19..17] are used to further resolve the pin number(s).
+
+Modes which shift data use bits bottom-first, by default. Some of these modes have the %a bit in D[16] to reorder the data
+sequence within the individual bytes to top-first when %a = 1.
+
+
+
+                                                                                                                             32
+For RDFAST modes, it is necessary to do a RDFAST sometime beforehand, to ensure that the hub RAM FIFO is ready to
+deliver data.
+
+For WRFAST modes, it is necessary to do a WRFAST sometime beforehand, to ensure that the hub RAM FIFO is ready to
+receive data.
+
+
+
+Immediate ⇢ LUT ⇢ Pins/DACs
+
+S/# supplies 32 bits of data which form a set of 1/2/4/8-bit values that are shifted by 1/2/4/8 bits on each subsequent NCO
+rollover, with the last value repeating. Each value gets used as an offset address into lookup RAM, with the %bbbb bits in
+D[19:16] furnishing the base address of %bbbb00000. The resulting 32 bits of data read from lookup RAM (at %bbbb00000 +
+1/2/4/8-bit value) are output.
+
+
+
+Immediate ⇢ Pins/DACs
+
+S/# supplies 32 bits of data which form a set of 1/2/4/8/16-bit values that are shifted by 1/2/4/8/16/32 bits on each subsequent
+NCO rollover, with the last value repeating. Each value is output in sequence.
+
+
+
+RDFAST ⇢ LUT ⇢ Pins/DACs
+
+Automatic RFLONG operations are done to read 32 bits at a time from hub RAM. The data are treated as a set of 1/2/4/8-bit
+values that are shifted by 1/2/4/8 bits on each subsequent NCO rollover, with the last value triggering a new RFLONG. Each
+value gets used as an offset address into lookup RAM, with the %bbbb bits in S[3:0] furnishing the base address of
+%bbbb00000. The resultant 32 bits of data read from lookup RAM (at %bbbb00000 + 1/2/4/8-bit value) are output.
+
+
+
+RDFAST ⇢ Pins/DACs
+
+Automatic RFBYTE/RFWORD/RFLONG operations are done to read 8/16/32 bits at a time from hub RAM. The data are
+treated as a set of 1/2/4/8/16/32-bit values that are shifted by 1/2/4/8/16/32 bits on each subsequent NCO rollover, with the last
+value triggering a new RFBYTE/RFWORD/RFLONG. Each value is output in sequence.
+
+
+
+RDFAST ⇢ RGB ⇢ Pins/DACs
+
+RFBYTE/RFWORD/RFLONG operations, done initially and on each subsequent NCO rollover, read 8/16/32-bit pixel values
+from hub RAM. The pixel values P[31/15/7:0] are translated into {R[7:0], G[7:0], B[7:0], 8'b0} values and output to X3, X2, X1,
+and X0.
+
+LUMA8 mode uses three bits in S[2:0] as colors and the 8-bit pixels as luminance values:
+
+
+      S[2:0]            Color                X3                X2                 X1                X0
+
+      %000             Orange              P[7:0]          %0, P[7:1]            $00                $00
+
+      %001               Blue               $00                $00              P[7:0]              $00
+
+      %010              Green               $00              P[7:0]              $00                $00
+
+      %011               Cyan               $00              P[7:0]             P[7:0]              $00
+
+
+
+                                                                                                                               33
+

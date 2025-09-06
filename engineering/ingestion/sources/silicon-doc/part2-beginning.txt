@@ -1,0 +1,273 @@
+Clock
+
+Phase
+
+1
+
+go
+
+XBYTE Activity
+
+Description
+
+RFBYTE bytecode
+SKIPF #0
+
+Last clock of the RET/_RET_ to $1FF
+Fetch bytecode from FIFO (initialized via prior RDFAST).
+Cancel any SKIPF pattern in progress (from prior bytecode).
+
+2
+
+get
+
+MOV PA,bytecode
+RDLUT (per bytecode)
+
+1st clock of 1st canceled instruction
+Write bytecode to PA ($1F6).
+Read lookup-table RAM according to bytecode and mode.
+
+3
+
+go
+
+RDLUT (data → D)
+
+2nd clock of 1st canceled instruction
+Get lookup RAM long into D for EXECF.
+
+4
+
+get
+
+EXECF D (begin)
+
+1st clock of 2nd canceled instruction
+Execute EXECF.
+
+5
+
+go
+
+MOV PB,(GETPTR)
+MODCZ bit1,bit0 {WCZ}
+EXECF D (branch)
+
+2nd clock of 2nd canceled instruction
+Write FIFO pointer to PB ($1F7).
+Write C,Z with bit1,bit0 of RDLUT address, if enabled.
+Do EXECF branch.
+
+6
+
+get
+
+flush pipeline
+
+1st clock of 3rd canceled instruction
+
+7
+
+go
+
+reload pipeline
+
+2nd clock of 3rd canceled instruction
+
+8
+
+get
+
+<none>
+
+1st clock of 1st instruction of bytecode routine
+Loop to clock 1 if _RET_ or RET
+
+The bytecode translation table in LUT memory must consist of long data which EXECF would use, where the 10 LSBs are an
+address to jump to in cog/LUT RAM and the 22 MSBs are a SKIPF pattern to be applied.
+Starting XBYTE and establishing its operating mode is done all at once by a '_RET_ SETQ {#}D' instruction, with the top of
+the hardware stack holding $1FF.
+Additional '_RET_ SETQ {#}D' instructions can be executed to alter the XBYTE mode for subsequent bytecodes.
+To alter the XBYTE mode for the next bytecode, only, a '_RET_ SETQ2 {#}D' instruction can be executed. This is useful for
+engaging singular bytecodes from alternate sets, without having to restore the original XBYTE mode afterwards
+.
+
+Bits
+
+SETQ/SETQ2
+{#}D value
+
+LUT base
+address
+
+LUT index
+b = bytecode
+
+LUT EXECF
+address
+
+8
+
+%A000000xF
+
+%A00000000
+
+I = b[7:0]
+
+AIIIIIIII
+
+8
+
+%ABBBB00xF
+%BBBB > 0
+
+%A00000000
+
+if b[7:4] < %BBBB then I = b[7:0]
+if b[7:4] >= %BBBB then I = b[7:4] - %BBBB
+
+%AIIIIIIII
+%ABBBBIIII
+24
+
+7
+
+%AAxx0010F
+
+%AA0000000
+
+I = b[6:0]
+
+%AAIIIIIII
+
+7
+
+%AAxx0011F
+
+%AA0000000
+
+I = b[7:1]
+
+%AAIIIIIII
+
+6
+
+%AAAx1010F
+
+%AAA000000
+
+I = b[5:0]
+
+%AAAIIIIII
+
+6
+
+%AAAx1011F
+
+%AAA000000
+
+I = b[7:2]
+
+%AAAIIIIII
+
+5
+
+%AAAAx100F
+
+%AAAA00000
+
+I = b[4:0]
+
+%AAAAIIIII
+
+5
+
+%AAAAx101F
+
+%AAAA00000
+
+I = b[7:3]
+
+%AAAAIIIII
+
+4
+
+%AAAAA110F
+
+%AAAAA0000
+
+I = b[3:0]
+
+%AAAAAIIII
+
+4
+
+%AAAAA111F
+
+%AAAAA0000
+
+I = b[7:4]
+
+%AAAAAIIII
+
+The %ABBBB00xF setting allows sets of 16 bytecodes, which would use identical LUT values, to be represented by a single
+LUT value, effectively compressing blocks of 16 LUT values into single LUT values. This is useful when the bytecode, which is
+always written to PA, is used as an operand within the bytecode routine.
+The %F bit of the SETQ/SETQ2 {#}D value enables C and Z to receive bits 1 and 0 of the index field of the bytecode. This is
+useful for having the flags differentiate behavior within a bytecode routine, especially in cases of conditional looping, where a
+SKIPF pattern would have been insufficient, on its own:
+SETQ/SETQ2
+{#}D value
+
+Flag Writing
+
+%xxxxxxxx0
+
+Do not affect flags on XBYTE
+
+%xxxxxxxx1
+
+Write the bytecode's index LSBs to C and Z
+
+To start executing bytecodes, use the following instruction sequence, but with the appropriate SETQ operand:
+
+_RET_
+
+PUSH
+SETQ
+
+#$1FF
+#$100
+
+'push #$1FF onto the hardware stack
+'256-long EXECF table at LUT $100, start XBYTE
+
+con _clkfreq = 10_000_000
+'
+' ** XBYTE Demo **
+' Automatically executes bytecodes via RET/_RET_ to $1FF.
+' Overhead is 6 clocks, including _RET_ at the end of each bytecode routine.
+'
+dat
+org
+asmclk
+
+'set clock up
+
+setq2
+rdlong
+
+#$FF
+'load bytecode table into LUT $100..$1FF
+$100,#bytetable
+
+rdfast
+
+#0,#bytecodes
+
+'init fifo read at start of bytecodes
+
+25
+
+

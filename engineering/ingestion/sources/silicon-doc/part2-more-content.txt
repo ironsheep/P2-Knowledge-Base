@@ -1,0 +1,341 @@
+For RDFAST modes, it is necessary to do a RDFAST sometime beforehand, to ensure that the hub RAM FIFO is ready to
+deliver data.
+
+For WRFAST modes, it is necessary to do a WRFAST sometime beforehand, to ensure that the hub RAM FIFO is ready to
+receive data.
+
+
+
+Immediate ⇢ LUT ⇢ Pins/DACs
+
+S/# supplies 32 bits of data which form a set of 1/2/4/8-bit values that are shifted by 1/2/4/8 bits on each subsequent NCO
+rollover, with the last value repeating. Each value gets used as an offset address into lookup RAM, with the %bbbb bits in
+D[19:16] furnishing the base address of %bbbb00000. The resulting 32 bits of data read from lookup RAM (at %bbbb00000 +
+1/2/4/8-bit value) are output.
+
+
+
+Immediate ⇢ Pins/DACs
+
+S/# supplies 32 bits of data which form a set of 1/2/4/8/16-bit values that are shifted by 1/2/4/8/16/32 bits on each subsequent
+NCO rollover, with the last value repeating. Each value is output in sequence.
+
+
+
+RDFAST ⇢ LUT ⇢ Pins/DACs
+
+Automatic RFLONG operations are done to read 32 bits at a time from hub RAM. The data are treated as a set of 1/2/4/8-bit
+values that are shifted by 1/2/4/8 bits on each subsequent NCO rollover, with the last value triggering a new RFLONG. Each
+value gets used as an offset address into lookup RAM, with the %bbbb bits in S[3:0] furnishing the base address of
+%bbbb00000. The resultant 32 bits of data read from lookup RAM (at %bbbb00000 + 1/2/4/8-bit value) are output.
+
+
+
+RDFAST ⇢ Pins/DACs
+
+Automatic RFBYTE/RFWORD/RFLONG operations are done to read 8/16/32 bits at a time from hub RAM. The data are
+treated as a set of 1/2/4/8/16/32-bit values that are shifted by 1/2/4/8/16/32 bits on each subsequent NCO rollover, with the last
+value triggering a new RFBYTE/RFWORD/RFLONG. Each value is output in sequence.
+
+
+
+RDFAST ⇢ RGB ⇢ Pins/DACs
+
+RFBYTE/RFWORD/RFLONG operations, done initially and on each subsequent NCO rollover, read 8/16/32-bit pixel values
+from hub RAM. The pixel values P[31/15/7:0] are translated into {R[7:0], G[7:0], B[7:0], 8'b0} values and output to X3, X2, X1,
+and X0.
+
+LUMA8 mode uses three bits in S[2:0] as colors and the 8-bit pixels as luminance values:
+
+
+      S[2:0]            Color                X3                X2                 X1                X0
+
+      %000             Orange              P[7:0]          %0, P[7:1]            $00                $00
+
+      %001               Blue               $00                $00              P[7:0]              $00
+
+      %010              Green               $00              P[7:0]              $00                $00
+
+      %011               Cyan               $00              P[7:0]             P[7:0]              $00
+
+
+
+                                                                                                                               33
+      %100                Red                P[7:0]                 $00               $00                $00
+
+      %101              Magenta              P[7:0]                 $00              P[7:0]              $00
+
+      %110               Yellow              P[7:0]                P[7:0]             $00                $00
+
+      %111               White               P[7:0]                P[7:0]            P[7:0]              $00
+
+
+
+RGBI8 mode uses the top three bits of the 8-bit pixel values as colors and the bottom 5 bits as luminance values:
+
+
+      P[7:5]             Color                   X3                          X2                        X1             X0
+
+      %000              Orange           P[4,3,2,1,0,4,3,2]          %0, P[4,3,2,1,0,4,3]              $00           $00
+
+      %001                Blue                   $00                         $00                P[4,3,2,1,0,4,3,2]   $00
+
+      %010               Green                   $00                  P[4,3,2,1,0,4,3,2]               $00           $00
+
+      %011               Cyan                    $00                  P[4,3,2,1,0,4,3,2]        P[4,3,2,1,0,4,3,2]   $00
+
+      %100                Red            P[4,3,2,1,0,4,3,2]                  $00                       $00           $00
+
+      %101              Magenta          P[4,3,2,1,0,4,3,2]                  $00                P[4,3,2,1,0,4,3,2]   $00
+
+      %110               Yellow          P[4,3,2,1,0,4,3,2]           P[4,3,2,1,0,4,3,2]               $00           $00
+
+      %111               White           P[4,3,2,1,0,4,3,2]           P[4,3,2,1,0,4,3,2]        P[4,3,2,1,0,4,3,2]   $00
+
+
+
+RGB8 mode uses the top three bits of the 8-bit pixel values for red, the next three for green, and the last two for blue:
+
+
+          X3                        X2                        X1                           X0
+
+   P[7,6,5,7,6,5,7,6]       P[4,3,2,4,3,2,4,3]         P[1,0,1,0,1,0,1,0]              $00
+
+
+RGB16 mode uses the top five bits of the 16-bit pixel values for red, the next six for green, and the last five for blue:
+
+
+          X3                        X2                        X1                           X0
+
+  P[15:11], P[15:13]        P[10:5], P[10:9]             P[4:0], P[4:2]                $00
+
+
+RGB24 mode uses the top three bytes of the 32-bit pixel values for red, green, and blue:
+
+
+          X3                        X2                        X1                           X0
+
+       P[31:24]                   P[23:16]                  P[15:8]                    $00
+
+
+
+Pins ⇢ DACs/WRFAST
+
+Initially, and on each subsequent NCO rollover, 1/2/4/8/16/32 pins are read from {INB, INA} and X3, X2, X1, and X0 are
+updated using the read data. If the %w bit in D[23] is high, WFBYTE/WFWORD/WFLONG operations will be done
+automatically to record the pin data. In the case of 1/2/4-pin modes, a WFBYTE will be done each time 8 bits of pin data
+                                                                                                                            34
+accrue.
+
+
+
+ADCs/Pins ⇢ DACs/WRFAST
+
+This mode captures SCOPE channel data, along with optional pin data from {INB, INA}.
+
+It will be necessary to use the SETSCP instruction beforehand to select the block of four pins which will feed the four 8-bit
+SCOPE channels. Any pins, within that block of four, that will be used as the ADC8 input(s) for this mode, must be put into
+"ADC sample" or "ADC scope" smart pin mode and enabled.
+
+For the 1-ADC8 modes, where one of four SCOPE channels will be captured, the %ss bits in S[1:0] select the channel.
+
+For the 2-ADC8 modes, where two of four SCOPE channels will be captured, the %s bit in S[1] selects the upper two or lower
+two channels.
+
+For the 4-ADC8 mode, all four SCOPE channels will be captured.
+
+For modes which also capture pin data, the lower 8 or 16 pins of the 32 pins selected by the %ppp bits in D[22:20] will be
+captured and placed into the lower half of the word/long, while the one or two SCOPE channels will be placed into the upper
+half.
+
+Initially, and on each subsequent NCO rollover, SCOPE channel data and optional pin data are read and X3, X2, X1, and X0
+are updated. If the %w bit in D[23] is high, WFBYTE/WFWORD/WFLONG operations will be done automatically to record the
+ADC and optional pin data.
+
+
+
+DDS/Goertzel
+
+This mode is unique, in that it outputs and inputs on every clock in which the command is active. Its purpose is to perform
+direct digital synthesis (DDS) on up to four DAC channels and/or to perform simultaneous Goertzel analysis on up to four ADC
+bit streams summed together.
+
+On each clock, the upper bits of the NCO are used as an index to read a long containing four signed bytes from lookup RAM.
+The four bytes are output to X3, X2, X1, and X0 with their MSBs inverted, so that they may drive the unsigned DACs. The top
+two bytes from lookup RAM are also used as sine and cosine inputs to the Goertzel analyzer, where they are each multiplied
+by the sum of up to four ADC bitstreams and then separately accumulated.
+
+Goertzel analysis can be thought of as a single slice of a Fourier transform, in which energy of a single frequency is measured
+amid potential noise for some number of NCO cycles. Goertzel analysis returns sine and cosine accumulations which can be
+converted into polar coordinates using the QVECTOR instruction, yielding power and phase information.
+
+By incorporating DDS output with simultaneous Goertzel input, many interactive real-world measurements can be made to
+determine things like time-of-flight and resonance.
+
+The four-pin input block is selected by the %pppp bits in D/#[22:19], where %pppp*4 is the base pin. One to four of these pins
+should be configured for ADC mode, so that their IN signals are raw delta-sigma bit streams, with no smart pin mode selected.
+For IN bitstream summation, '0' values are treated as -1 and '1' values are treated as +1. For cases of two or four input
+channels summed together, the sum is always even, so it is shifted right by one bit to conserve multiplication and accumulator
+resources.
+
+S[19:0] supplies a 20-bit value which is used to configure the DDS/Goertzel mode. S[19:16] selects which of the four input pins
+are to be inverted, allowing for both addition and subtraction of particular input channels, while S[15:12] selects which of the
+
+
+                                                                                                                                35
+four pins are to be included in the summation:
+
+         S[19:12]           Effect
+
+         %xxxx_xxx0         Base pin +0 is ignored
+         %xxx0_xxx1         Base pin +0 is summed                            (0 ⇢ -1, 1 ⇢ +1)
+         %xxx1_xxx1         Base pin +0 is inverted and summed               (0 ⇢ +1, 1 ⇢ -1)
+
+         %xxxx_xx0x         Base pin +1 is ignored
+         %xx0x_xx1x         Base pin +1 is summed
+         %xx1x_xx1x         Base pin +1 is inverted and summed
+
+         %xxxx_x0xx         Base pin +2 is ignored
+         %x0xx_x1xx         Base pin +2 is summed
+         %x1xx_x1xx         Base pin +2 is inverted and summed
+
+         %xxxx_0xxx         Base pin +3 is ignored
+         %0xxx_1xxx         Base pin +3 is summed
+         %1xxx_1xxx         Base pin +3 is inverted and summed
+
+
+
+S[11:0] selects how much and what part of the lookup RAM will be used, along with an offset:
+
+         S[11:0]                     Loop Size        NCO Bits          LUT Range
+
+         %000_TTTTTTTTT              512              30..22            %000000000..%111111111
+         %001_ATTTTTTTT              256              30..23            %A00000000..%A11111111
+         %010_AATTTTTTT              128              30..24            %AA0000000..%AA1111111
+         %011_AAATTTTTT              64               30..25            %AAA000000..%AAA111111
+         %100_AAAATTTTT              32               30..26            %AAAA00000..%AAAA11111
+         %101_AAAAATTTT              16               30..27            %AAAAA0000..%AAAAA1111
+         %110_AAAAAATTT              8                30..28            %AAAAAA000..%AAAAAA111
+         %111_AAAAAAATT              4                30..29            %AAAAAAA00..%AAAAAAA11
+
+
+
+On each clock, the lookup RAM is read at the 9-bit location bound by the %A bits, with the lower bits being the sum of the %T
+bits and the topmost NCO bits. This allows you to set bounded areas within the LUT and to shift or modulate the phase of
+playback.
+
+The 8-bit sine (byte 3) and cosine (byte 2) values from the lookup RAM will each be multiplied by the bitstream sum (an integer
+from -3 to +3) and then added into their respective 32-bit accumulators.
+
+After some number of complete NCO cycles, both accumulators can be simultaneously captured into holding registers and
+cleared using the GETXACC instruction. GETXACC writes the captured cosine accumulation into D and places the captured
+sine accumulation into the next instruction's S value. Subsequent GETXACC instructions will return the same values until a
+new streamer command executes.
+
+D[23] selects between SINC1 and SINC2 accumulation modes:
+
+         D[23]      Mode             Accumulations (SIN_ACC/COS_ACC are read and cleared by GETXACC)
+
+         %0         SINC1            SIN_MUL = bitstream_sum * lookup_sin
+                                     COS_MUL = bitstream_sum * lookup_cos
+
+                                                                                                                             36
+                                   SIN_ACC += SIN_MUL
+                                   COS_ACC += COS_MUL
+
+          %1      SINC2            SIN_MUL   +=   bitstream_sum * lookup_sin
+                                   COS_MUL   +=   bitstream_sum * lookup_cos
+                                   SIN_ACC   +=   SIN_MUL
+                                   COS_ACC   +=   COS_MUL
+
+
+
+The program below demonstrates both SINC1 and SINC2 modes in a looped Goertzel measurement of 100 cycles of 1MHz,
+taking 100us per measurement. The 4th line of the program must be changed to "sinc2 = 1" to select SINC2 mode:
+
+
+ ' Goertzel input and display
+
+ con               adcpin    =   0
+                   dacpin    =   1
+                   cycles    =   100                   'number of cycles to measure
+                   sinc2     =   0                     '0 for SINC1, 1 for SINC2
+                   ampl      =   sinc2 ? 10 : 127      'small sin/cos amplitude for SINC2
+                   shifts    =   sinc2 ? 23 : 12       'more right-shifts for SINC2 acc's
+                  _clkfreq   =   250_000_000
+
+ ' Setup
+
+ dat               org
+
+                   asmclk                              'switch to 250MHz
+
+                   wrpin     adcmode,#adcpin           'init ADC pin
+                   dirh      #dacpin                   'enable DAC pin
+
+                   setxfrq freq                        'set streamer NCO frequency
+
+ ' Make sine and cosine tables in LUT bytes 3 and 2
+
+                   mov       z,#$1FF                   'make 512-sample sin/cos table in LUT
+ sincos            shl       z,#32-9                   'get angle into top 9 bits of z
+                   qrotate   #ampl,z                   'rotate (ampl,0) by z
+                   shr       z,#32-9                   'restore z
+                   getqy     y                         'get y
+                   getqx     x                         'get x
+                   shl       y,#24                     'y into byte3
+                   setbyte   y,x,#2                    'x into byte2
+                   wrlut     y,z                       'write sin:cos:0:0 into LUT
+                   djnf      z,#sincos                 'loop until 512 samples
+
+ ' Input Goertzel measurements from adcpin and output power level to dacpin
+
+ loop              xcont   dds_d,dds_s                 'issue Goertzel command
+                   getxacc x                           'get prior Goertzel acc's, cos first
+                   mov     y,0                         '..then sin
+
+                   modc      sinc2 * %1111     wc      'if SINC2, get differences
+           if_c    sub       x,xdiff
+           if_c    add       xdiff,x
+           if_c    sub       y,ydiff
+           if_c    add       ydiff,y
+
+
+
+                                                                                                                    37
+                    qvector x,y                            'convert (x,y) to (rho,theta)
+                    getqx   x                              'get rho (power measurement)
+
+                    shr     x,#shifts                      'shift power down to byte
+                    setbyte dacmode,x,#1                   'insert into dacmode
+                    wrpin   dacmode,#dacpin                'update DAC pin
+
+                    jmp       #loop                        'loop
+
+ 'Data
+
+ adcmode            long      %0000_0000_000_100011_0000000_00_00000_0                  'ADC mode
+ dacmode            long      %0000_0000_000_10110_00000000_00_00000_0                  'DAC mode
+
+ freq               long      round(1_000_000.0/250_000_000.0 * 65536.0 * 32768.0)                '1.000000 MHz
+
+ dds_d              long      %1111_0000_0000_0111<<16 + sinc2<<23 + cycles             'Goertzel mode, pin 0..3 in
+ dds_s              long      %0000_0001_000_000000000                                  'input on pin +0, 512 table
+
+ x                  res       1
+ y                  res       1
+ z                  res       1
+ xdiff              res       1
+ ydiff              res       1
+
+
+
+
+In the pictures that follow, you can see the program's DAC output pin while a function generator drives a 0-3.3V sine wave into
+the ADC input pin, sweeping from 950-1050KHz over 12ms:
+
+
+
+
+                                                                                                                             38
+

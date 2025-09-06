@@ -1,0 +1,245 @@
+ Clock     Phase     XBYTE Activity                  Description
+
+    1        go      RFBYTE bytecode                 Last clock of the RET/_RET_ to $1FF
+                     SKIPF #0                        Fetch bytecode from FIFO (initialized via prior RDFAST).
+                                                     Cancel any SKIPF pattern in progress (from prior bytecode).
+
+    2        get     MOV PA,bytecode                 1st clock of 1st canceled instruction
+                     RDLUT (per bytecode)            Write bytecode to PA ($1F6).
+                                                     Read lookup-table RAM according to bytecode and mode.
+
+    3        go      RDLUT (data → D)                2nd clock of 1st canceled instruction
+                                                     Get lookup RAM long into D for EXECF.
+
+    4        get     EXECF D (begin)                 1st clock of 2nd canceled instruction
+                                                     Execute EXECF.
+
+    5        go      MOV PB,(GETPTR)                 2nd clock of 2nd canceled instruction
+                     MODCZ bit1,bit0 {WCZ}           Write FIFO pointer to PB ($1F7).
+                     EXECF D (branch)                Write C,Z with bit1,bit0 of RDLUT address, if enabled.
+                                                     Do EXECF branch.
+
+    6        get     flush pipeline                  1st clock of 3rd canceled instruction
+
+    7        go      reload pipeline                 2nd clock of 3rd canceled instruction
+
+    8        get     <none>                          1st clock of 1st instruction of bytecode routine
+                                                     Loop to clock 1 if _RET_ or RET
+
+
+
+The bytecode translation table in LUT memory must consist of long data which EXECF would use, where the 10 LSBs are an
+address to jump to in cog/LUT RAM and the 22 MSBs are a SKIPF pattern to be applied.
+
+
+Starting XBYTE and establishing its operating mode is done all at once by a '_RET_ SETQ {#}D' instruction, with the top of
+the hardware stack holding $1FF.
+
+Additional '_RET_ SETQ {#}D' instructions can be executed to alter the XBYTE mode for subsequent bytecodes.
+
+To alter the XBYTE mode for the next bytecode, only, a '_RET_ SETQ2 {#}D' instruction can be executed. This is useful for
+engaging singular bytecodes from alternate sets, without having to restore the original XBYTE mode afterwards
+.
+
+
+
+ Bits     SETQ/SETQ2           LUT base                              LUT index                              LUT EXECF
+           {#}D value           address                             b = bytecode                             address
+
+   8      %A000000xF          %A00000000                            I = b[7:0]                              AIIIIIIII
+
+   8      %ABBBB00xF          %A00000000     if b[7:4] < %BBBB then I = b[7:0]                             %AIIIIIIII
+          %BBBB > 0                          if b[7:4] >= %BBBB then I = b[7:4] - %BBBB                    %ABBBBIIII
+
+
+                                                                                                                             24
+   7       %AAxx0010F         %AA0000000                               I = b[6:0]                               %AAIIIIIII
+
+   7       %AAxx0011F         %AA0000000                               I = b[7:1]                               %AAIIIIIII
+
+   6       %AAAx1010F         %AAA000000                               I = b[5:0]                               %AAAIIIIII
+
+   6       %AAAx1011F         %AAA000000                               I = b[7:2]                               %AAAIIIIII
+
+   5       %AAAAx100F         %AAAA00000                               I = b[4:0]                               %AAAAIIIII
+
+   5       %AAAAx101F         %AAAA00000                               I = b[7:3]                               %AAAAIIIII
+
+   4       %AAAAA110F         %AAAAA0000                               I = b[3:0]                               %AAAAAIIII
+
+   4       %AAAAA111F         %AAAAA0000                               I = b[7:4]                               %AAAAAIIII
+
+
+
+The %ABBBB00xF setting allows sets of 16 bytecodes, which would use identical LUT values, to be represented by a single
+LUT value, effectively compressing blocks of 16 LUT values into single LUT values. This is useful when the bytecode, which is
+always written to PA, is used as an operand within the bytecode routine.
+
+The %F bit of the SETQ/SETQ2 {#}D value enables C and Z to receive bits 1 and 0 of the index field of the bytecode. This is
+useful for having the flags differentiate behavior within a bytecode routine, especially in cases of conditional looping, where a
+SKIPF pattern would have been insufficient, on its own:
+
+
+   SETQ/SETQ2                                                 Flag Writing
+    {#}D value
+
+   %xxxxxxxx0         Do not affect flags on XBYTE
+
+   %xxxxxxxx1         Write the bytecode's index LSBs to C and Z
+
+
+
+
+To start executing bytecodes, use the following instruction sequence, but with the appropriate SETQ operand:
+
+
+                    PUSH       #$1FF                    'push #$1FF onto the hardware stack
+         _RET_      SETQ       #$100                    '256-long EXECF table at LUT $100, start XBYTE
+
+
+
+
+ con _clkfreq = 10_000_000
+ '
+ ' ** XBYTE Demo **
+ ' Automatically executes bytecodes via RET/_RET_ to $1FF.
+ ' Overhead is 6 clocks, including _RET_ at the end of each bytecode routine.
+ '
+ dat             org
+
+                     asmclk                         'set clock up
+
+                     setq2      #$FF            'load bytecode table into LUT $100..$1FF
+                     rdlong     $100,#bytetable
+
+                     rdfast     #0,#bytecodes       'init fifo read at start of bytecodes
+
+
+                                                                                                                                25
+                    push      #$1FF              'push $1FF for xbyte
+          _ret_     setq      #$100              'start xbyte with LUT base = $100, no stack pop
+ '
+ ' Bytecode routines
+ '
+ r0      _ret_   drvnot       #0                 'toggle pin 0
+
+ r1       _ret_     drvnot    #1                 'toggle pin 1
+
+ r2       _ret_     drvnot    #2                 'toggle pin 2
+
+ r3       _ret_     drvnot    #3                 'toggle pin 3
+
+ r4                 rfvars    pa                 'get offset
+                    add       pb,pa              'add offset
+         _ret_      rdfast    #0,pb              'init fifo read at new address
+ '
+ ' Bytecodes that form the XBYTE program in hub
+ '
+                 orgh
+
+ bytecodes          byte      0                            'toggle pin 0
+                    byte      1                            'toggle pin 1
+                    byte      2                            'toggle pin 2
+                    byte      3                            'toggle pin 3
+                    byte      4,(bytecodes-$) & $7F        'relative branch, loop to bytecodes
+ '
+ ' Bytecode EXECF data, moved into lut $100..$1FF (no SKIPF patterns are used in this example)
+ '
+ bytetable       long    r0                      '#0     toggle pin 0
+                 long    r1                      '#1     toggle pin 1
+                 long    r2                      '#2     toggle pin 2
+                 long    r3                      '#3     toggle pin 3
+                 long    r4                      '#4     relative branch
+
+ {
+ clock   phase   hidden                          description
+ -------------------------------------------------------------------------------------------------
+ 1       go      RFBYTE byte                     last clock of instruction which is executing a
+                                                 RET/_RET_ to $1FF
+
+ 2        get       RDLUT @byte, write byte to PA          1st   clock   of   1st   canceled   instruction
+ 3        go        LUT long --> next D                    2nd   clock   of   1st   canceled   instruction
+ 4        get       EXECF D,                               1st   clock   of   2nd   canceled   instruction
+ 5        go        EXECF D, write GETPTR to PB            2nd   clock   of   2nd   canceled   instruction
+ 6        get       flush pipe                             1st   clock   of   3rd   canceled   instruction
+ 7        go        flush pipe                             2nd   clock   of   3rd   canceled   instruction
+
+ 8        get                                              1st clock of 1st instruction of bytecode routine,
+                                                           loop to (clock) 1 if _RET_
+ }
+
+
+
+While developing XBYTE code, you may want to single-step the bytecode execution, in order to inspect what is happening. To
+do this, you must simulate normal XBYTE operation using a small program. Below is an example of how to do this for the
+simplest case of the full-8-bit mode which doesn't write the LSBs of the LUT address to C and Z.
+
+
+ ' Normal XBYTE or single-step bytecode executor (must run from registers or LUT)
+
+             rdfast      #0,bytecodes     'start FIFO read at bytecodes
+
+
+                                                                                                                        26
+ '                push      #$1FF             'start xbyte                              UNCOMMENT FOR NORMAL XBYTE
+ '    _ret_       setq      #$000             '(full 8-bit lookup at LUT $000)          UNCOMMENT FOR NORMAL XBYTE
+
+              rep          @.r,#8            'prepare to single-step by stuffing stack with byteloop address
+              push         ##byteloop        '(bottom stack value gets copied each _RET_ / RET)
+ .r
+ byteloop     nop                     '21-NOP landing strip for any trailing skip pattern
+              nop                     'that XBYTE would have canceled on _RET_ / RET
+              nop
+              nop
+              nop
+              nop
+              nop
+              nop
+              nop
+              nop
+              nop
+              nop
+              nop
+              nop
+              nop
+              nop
+              nop
+              nop
+              nop
+              nop
+              nop
+              rfbyte    pa                         'get next bytecode into pa
+              getptr    pb                         'get next bytecode address into pb
+              debug(uhex_byte(pa),uhex_long(pb))   'show bytecode and next bytecode address
+              rdlut     temp,pa                    'lookup EXECF long from LUT
+              execf     temp                       'do EXECF to execute bytecode, returns to byteloop
+
+
+
+SETQ CONSIDERATIONS
+
+The SETQ and SETQ2 instructions write to the Q register and are intended to precede a companion instruction. The value
+written to the Q register by SETQ/SETQ2 will persist until any of these events occur:
+
+              ●     XORO32 executes - Q is set to the XORO32 result.
+              ●     RDLUT executes - Q is set to the data read from the lookup RAM.
+              ●     GETXACC executes - Q is set to the Goertzel sine accumulator value.
+              ●     CRCNIB executes - Q gets shifted left by four bits.
+              ●     COGINIT/QDIV/QFRAC/QROTATE executes without a preceding SETQ instruction - Q is set to zero.
+
+CRCNIB is the only instruction which both inputs Q and outputs Q, requiring it to not be disrupted between the initial SETQ
+and subsequent CRCNIB(s). For that reason, CRCNIB sequences should be protected from interrupts by STALLI/ALLOWI
+instructions or by being placed within a REP block, which is automatically shielded from interrupts, including non-stallable
+debug interrupts.
+
+It is possible to retrieve the current Q value by the following sequence:
+
+                    MOV     qval,#0                     'reset qval
+                    MUXQ    qval,##$FFFFFFFF            'for each '1' bit in Q, set the same bit in qval
+
+SETQ/SETQ2 shields the next instruction from interruption to prevent an interrupt service routine from inadvertently altering Q
+before the intended instruction can utilize its value.
+
+
+                                                                                                                               27
+

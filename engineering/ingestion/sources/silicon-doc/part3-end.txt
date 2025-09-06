@@ -1,0 +1,580 @@
+When a cog wants to read or write the hub RAM, it must wait up to #cogs-1 clocks to access the initial RAM slice of interest.
+Once that occurs, subsequent slices can be accessed on every clock, thereafter, for continuous reading or writing of 32-bit
+longs.
+
+To smooth out data flow for less than 32-bits-per-clock between hub RAM and the cog, each cog has a hub FIFO interface
+which can be set for hub-RAM-read or hub-RAM-write operation. This FIFO interface allows hub RAM to be either sequentially
+read or sequentially written in any combination of bytes, words, or longs, at any rate, up to one long per clock. No matter the
+transfer frequency or the word size, the FIFO will ensure that the cog's reads or writes are all properly conducted from or to the
+composite hub RAM.
+
+Cogs can access hub RAM either via the sequential FIFO interface, or by waiting for RAM slices of interest, while yielding to
+the FIFO. If the FIFO is not busy, which is soon the case if data is not being read from or written to it, random accesses will
+have full opportunity to access the composite hub RAM.
+
+There are three ways the hub FIFO interface can be used, and it can only be used for one of these at a time:
+                                                                                                                                  62
+    -    Hub execution (when the PC is $00400..$FFFFF)
+    -    Streamer usage (background transfers from hub RAM → pins/DACs, or from pins/ADCs → hub RAM)
+    -    Software usage (fast sequential-reading or sequential-writing instructions)
+
+For streamer or software usage, FIFO operation must be established by a RDFAST or WRFAST instruction executed from cog
+RAM (register/lookup, $00000..$003FF). After that, and while remaining in cog RAM, the streamer can be enabled to begin
+moving data in the background, or the two-clock RFxxxx/WFxxxx instructions can be used to manually read and write
+sequential data.
+
+The FIFO contains (cogs+11) stages. When in read mode, the FIFO loads continuously whenever less than (cogs+7) stages
+are filled, after which point, up to 5 more longs may stream in, potentially filling all (cogs+11) stages. These metrics ensure that
+the FIFO never underflows, under all potential reading scenarios.
+
+
+
+
+FAST SEQUENTIAL FIFO INTERFACE
+
+To configure the hub FIFO interface for streamer or software usage, use the RDFAST and WRFAST instructions. These
+instructions establish read or write operation, the hub start address, and the block count. The block count determines how
+many 64-byte blocks will be read or written before wrapping to the original start address and reloading the original block count.
+If you intend to use wrapping, your hub start address must be long-aligned (address ends in %00), since there won't be an
+extra cycle in which to read/write a portion of a long in an extra hub RAM slice. In cases where you don't want wrapping, just
+use 0 for the block count, so that wrapping won't occur until the entire 1MB hub map is sequenced through.
+
+The FBLOCK instruction provides a way to set a new start address and a new 64-byte block count for when the current blocks
+are fully read or written and the FIFO interface would have otherwise wrapped back to the prior start address and reloaded the
+prior block count. FBLOCK can be executed after RDFAST, WRFAST, or a FIFO block wrap event. Coordinating FBLOCK
+instructions with streamer-FIFO activity enables dynamic and seamless streaming between hub RAM and pins/DACs.
+
+Here are the RDFAST, WRFAST, and FBLOCK instructions:
+
+EEEE 1100011 1LI DDDDDDDDD SSSSSSSSS                              RDFAST     D/#,S/#
+EEEE 1100100 0LI DDDDDDDDD SSSSSSSSS                              WRFAST     D/#,S/#
+EEEE 1100100 1LI DDDDDDDDD SSSSSSSSS                              FBLOCK     D/#,S/#
+
+For these instructions, the D/# operand provides the block count, while the S/# operand provides the hub RAM start address:
+
+  D/#    %xxxx_xxxx_xxxx_xxxx_xx00_0000_0000_0000 = block count for limited r/w
+         %xxxx_xxxx_xxxx_xxxx_xxBB_BBBB_BBBB_BBBB = block count for wrapping
+
+  S/#    %xxxx_xxxx_xxxx_AAAA_AAAA_AAAA_AAAA_AAAA = start address for limited r/w
+         %xxxx_xxxx_xxxx_AAAA_AAAA_AAAA_AAAA_AA00 = start address for wrapping (long-aligned)
+
+
+
+RDFAST and WRFAST each have two modes of operation.
+
+         If D[31] = 0, RDFAST/WRFAST will wait for any previous WRFAST to finish and then reconfigure the hub FIFO
+         interface for reading or writing. In the case of RDFAST, it will additionally wait until the FIFO has begun receiving hub
+         data, so that it can start being used in the next instruction.
+
+         If D[31] = 1, RDFAST/WRFAST will not wait for FIFO reconfiguration, taking only two clocks. In this case, your code
+         must allow a sufficient number of clocks before any attempt is made to read or write FIFO data.
+
+                                                                                                                                 63
+FBLOCK doesn't need to wait for anything, so it always takes two clocks.
+
+Once RDFAST has been used to configure the hub FIFO interface for reading, you can enable the streamer for any
+hub-reading modes or use the following instructions to manually read sequential data from the hub:
+
+EEEE   1101011    CZ0   DDDDDDDDD    000010000                   RFBYTE     D                {WC/WZ/WCZ}
+EEEE   1101011    CZ0   DDDDDDDDD    000010001                   RFWORD     D                {WC/WZ/WCZ}
+EEEE   1101011    CZ0   DDDDDDDDD    000010010                   RFLONG     D                {WC/WZ/WCZ}
+EEEE   1101011    CZ0   DDDDDDDDD    000010011                   RFVAR      D                {WC/WZ/WCZ}
+EEEE   1101011    CZ0   DDDDDDDDD    000010100                   RFVARS     D                {WC/WZ/WCZ}
+
+These instructions all take 2 clocks and read bytes, words, longs, and variable-length data from the hub into D, via the hub
+FIFO interface.
+
+If WC is expressed, the MSB of the byte, word, long, or variable-length data will be written to C.
+
+If WZ is expressed, Z will be set if the data read from the hub equaled zero, otherwise Z will be cleared.
+
+RFVAR and RFVARS read 1..4 bytes of data, depending upon the MSB of the first byte, and then subsequent bytes, waiting in
+the FIFO. While RFVAR returns zero-extended data, RFVARS returns sign-extended data. This mechanism is intended to
+provide a fast and memory-efficient means for bytecode interpreters to read numerical constants and offset addresses that
+were assembled at compile-time for efficient reading during run-time.
+
+This table shows the relationship between upcoming bytes in the FIFO and what RFVAR and RFVARS will return:
+
+
+    FIFO              FIFO             FIFO            FIFO                             RFVAR Returns
+   1st Byte         2nd Byte         3rd Byte        4th Byte                           RFVARS Returns
+
+  %0SAAAAAA             -                -               -              %00000000_00000000_00000000_0SAAAAAA
+                                                                        %SSSSSSSS_SSSSSSSS_SSSSSSSS_SSAAAAAA
+
+  %1AAAAAAA       %0SBBBBBB              -               -              %00000000_00000000_00SBBBBB_BAAAAAAA
+                                                                        %SSSSSSSS_SSSSSSSS_SSSBBBBB_BAAAAAAA
+
+  %1AAAAAAA       %1BBBBBBB        %0SCCCCCC             -              %00000000_000SCCCC_CCBBBBBB_BAAAAAAA
+                                                                        %SSSSSSSS_SSSSCCCC_CCBBBBBB_BAAAAAAA
+
+  %1AAAAAAA       %1BBBBBBB        %1CCCCCCC        %SDDDDDDD           %000SDDDD_DDDCCCCC_CCBBBBBB_BAAAAAAA
+                                                                        %SSSSDDDD_DDDCCCCC_CCBBBBBB_BAAAAAAA
+
+
+
+Once WRFAST has been used to configure the hub FIFO interface for writing, you can enable the streamer for any hub-writing
+modes or use the following instructions to manually write sequential data:
+
+EEEE 1101011 00L DDDDDDDDD 000010101                         WFBYTE     D/#
+EEEE 1101011 00L DDDDDDDDD 000010110                         WFWORD     D/#
+EEEE 1101011 00L DDDDDDDDD 000010111                         WFLONG     D/#
+
+These instructions all take 2 clocks and write byte, word, or long data in D into the hub via the hub FIFO interface.
+
+If a cog has been writing to the hub via WRFAST, and it wants to immediately COGSTOP itself, a 'WAITX #20' should be
+executed first, in order to allow time for any lingering FIFO data to be written to the hub.
+
+                                                                                                                               64
+RANDOM ACCESS INTERFACE
+
+Here are the random-access hub RAM read instructions:
+
+EEEE 1010110 CZI DDDDDDDDD SSSSSSSSS                         RDBYTE     D,S/#/PTRx       {WC/WZ/WCZ}
+EEEE 1010111 CZI DDDDDDDDD SSSSSSSSS                         RDWORD     D,S/#/PTRx       {WC/WZ/WCZ}
+EEEE 1011000 CZI DDDDDDDDD SSSSSSSSS                         RDLONG     D,S/#/PTRx       {WC/WZ/WCZ}
+
+For these instructions, the D operand is the register which will receive the data read from the hub.
+
+The S/#/PTRx operand supplies the hub address to read from.
+
+If WC is expressed, the MSB of the byte, word, or long read from the hub will be written to C.
+
+If WZ is expressed, Z will be set if the data read from the hub equaled zero, otherwise Z will be cleared.
+
+
+
+Here are the random-access hub RAM write instructions:
+
+EEEE    1100010   0LI   DDDDDDDDD    SSSSSSSSS               WRBYTE     D/#,S/#/PTRx
+EEEE    1100010   1LI   DDDDDDDDD    SSSSSSSSS               WRWORD     D/#,S/#/PTRx
+EEEE    1100011   0LI   DDDDDDDDD    SSSSSSSSS               WRLONG     D/#,S/#/PTRx
+EEEE    1010011   11I   DDDDDDDDD    SSSSSSSSS               WMLONG     D,S/#/PTRx
+
+For these instructions, the D/# operand supplies the data to be written to the hub.
+
+The S/#/PTRx operand supplies the hub address to write to.
+
+WMLONG writes longs, like WRLONG; however, it does not write any D byte fields whose data are $00. This is intended for
+things like sprite overlays, where $00 byte data represent transparent pixels.
+
+In the case of the 'S/#/PTRx' operand used by RDBYTE, RDWORD, RDLONG, WRBYTE, WRWORD, WRLONG, and
+WMLONG, there are five ways to express a hub address:
+
+       $000..$1FF                    - register whose 20 LSBs will be used as the hub address
+       #$00..$FF                     - 8-bit immediate hub address
+       ##$00000..$FFFFF              - 20-bit immediate hub address (invokes AUGS)
+       PTRx {[index5]}               - PTR expression with a 5-bit scaled index
+       PTRx {[##index20]}            - PTR expression with a 20-bit unscaled index (invokes AUGS)
+
+If AUGS is used to augment the #S value to 32 bits, the #S value will be interpreted differently:
+
+       #%0AAAAAAAA                                               - No AUGS, 8-bit immediate address
+       #%1SUPNNNNN                                               - No AUGS, PTR expression with a 5-bit scaled index
+       ##%000000000000AAAAAAAAAAA_AAAAAAAAA                      - AUGS, 20-bit immediate address
+       ##%000000001SUPNNNNNNNNNNN_NNNNNNNNN                      - AUGS, PTR expression with a 20-bit unscaled index
+
+
+
+PTRx expressions without AUGS:
+
+
+
+                                                                                                                          65
+     INDEX6 = -32..+31 for non-updating offsets
+     INDEX = 1..16 for ++'s and --'s
+     SCALE = 1 for RDBYTE/WRBYTE, 2 for RDWORD/WRWORD, 4 for RDLONG/WRLONG/WMLONG
+
+     S = 0 for PTRA, 1 for PTRB
+     U = 0 to keep PTRx same, 1 to update PTRx (PTRx += INDEX*SCALE)
+     P = 0 to use PTRx + INDEX*SCALE, 1 to use PTRx (post-modify)
+     IIIIII = INDEX6, uses %100000..%111111 for -32..-1 and %000000..%011111 for 0..31
+     NNNNN = INDEX, uses %00001..%01111 for 1..15 and %00000 for 16
+     nnnnn = -INDEX, uses %10000..%11111 for -16..-1
+
+     1SUPNNNNN     PTR expression
+     ------------------------------------------------------------------------------
+     100000000     PTRA              'use PTRA
+     110000000     PTRB              'use PTRB
+     100IIIIII     PTRA[INDEX6]      'use PTRA + INDEX6*SCALE
+     110IIIIII     PTRB[INDEX6]      'use PTRB + INDEX6*SCALE
+
+     101100001         PTRA++              'use   PTRA,                   PTRA   +=   SCALE
+     111100001         PTRB++              'use   PTRB,                   PTRB   +=   SCALE
+     101111111         PTRA--              'use   PTRA,                   PTRA   -=   SCALE
+     111111111         PTRB--              'use   PTRB,                   PTRB   -=   SCALE
+     101000001         ++PTRA              'use   PTRA +   SCALE,         PTRA   +=   SCALE
+     111000001         ++PTRB              'use   PTRB +   SCALE,         PTRB   +=   SCALE
+     101011111         --PTRA              'use   PTRA -   SCALE,         PTRA   -=   SCALE
+     111011111         --PTRB              'use   PTRB -   SCALE,         PTRB   -=   SCALE
+
+     1011NNNNN         PTRA++[INDEX]       'use   PTRA,                   PTRA   +=   INDEX*SCALE
+     1111NNNNN         PTRB++[INDEX]       'use   PTRB,                   PTRB   +=   INDEX*SCALE
+     1011nnnnn         PTRA--[INDEX]       'use   PTRA,                   PTRA   -=   INDEX*SCALE
+     1111nnnnn         PTRB--[INDEX]       'use   PTRB,                   PTRB   -=   INDEX*SCALE
+     1010NNNNN         ++PTRA[INDEX]       'use   PTRA +   INDEX*SCALE,   PTRA   +=   INDEX*SCALE
+     1110NNNNN         ++PTRB[INDEX]       'use   PTRB +   INDEX*SCALE,   PTRB   +=   INDEX*SCALE
+     1010nnnnn         --PTRA[INDEX]       'use   PTRA -   INDEX*SCALE,   PTRA   -=   INDEX*SCALE
+     1110nnnnn         --PTRB[INDEX]       'use   PTRB -   INDEX*SCALE,   PTRB   -=   INDEX*SCALE
+
+
+
+Examples:
+
+Read byte at PTRA into D
+
+     1111 1010110 001 DDDDDDDDD 100000000             RDBYTE    D,PTRA
+
+Write lower word in D to PTRB - 7*2
+
+     1111 1100010 101 DDDDDDDDD 110111001             WRWORD    D,PTRB[-7]
+
+Write long value 10 at PTRB, PTRB += 1*4
+
+     1111 1100011 011 000001010 111100001             WRLONG    #10,PTRB++
+
+Read word at PTRA into D, PTRA -= 1*2
+
+
+
+                                                                                                    66
+     1111 1010111 001 DDDDDDDDD 101111111                    RDWORD     D,PTRA--
+
+Write lower byte in D at PTRA - 1*1, PTRA -= 1*1
+
+     1111 1100010 001 DDDDDDDDD 101011111                    WRBYTE     D,--PTRA
+
+Read long at PTRB + 10*4 into D, PTRB += 10*4
+
+     1111 1011000 001 DDDDDDDDD 111001010                    RDLONG     D,++PTRB[10]
+
+Write lower byte in D to PTRA, PTRA += 15*1
+
+     1111 1100010 001 DDDDDDDDD 101101111                    WRBYTE     D,PTRA++[15]
+
+Read word at PTRB into D, PTRB += 16*2
+
+     1111 1010111 001 DDDDDDDDD 111100000                    RDWORD     D,PTRB++[16]
+
+
+
+PTRx expressions with AUGS:
+
+If "##" is used before the index value in a PTRx expression, the assembler will automatically insert an AUGS instruction and
+assemble the 20-bit index instruction pair:
+
+     RDBYTE     D,++PTRB[##$12345]
+
+...becomes...
+
+     1111 1111000 000 000111000 010010001                    AUGS       #$00E12345
+     1111 1010110 001 DDDDDDDDD 101000101                    RDBYTE     D,#$00E12345 & $1FF
+
+
+
+
+FAST BLOCK MOVES
+
+By preceding RDLONG with either SETQ or SETQ2, multiple hub RAM longs can be read into either cog register RAM or cog
+lookup RAM. This transfer happens at the rate of one long per clock, assuming the hub FIFO interface is not accessing the
+same hub RAM slice as RDLONG, on the same cycle, in which case the FIFO gets priority access and the block move must
+wait for the hub RAM slice to come around again. If WC/WZ/WCZ are used with RDLONG, the flags will be set according to
+the last long read in the sequence.
+
+Use SETQ+RDLONG to read multiple hub longs into cog register RAM:
+
+         SETQ      #x                                 'x = number of longs, minus 1, to read
+         RDLONG    first_reg,S/#/PTRx                 'read x+1 longs starting at first_reg
+
+Use SETQ2+RDLONG to read multiple hub longs into cog lookup RAM:
+
+         SETQ2     #x                                 'x = number of longs, minus 1, to read
+         RDLONG    first_lut,S/#/PTRx                 'read x+1 longs starting at first_lut
+
+Similarly, WRLONG and WMLONG can be preceded by either SETQ or SETQ2 to write either multiple register RAM longs or
+lookup RAM longs into hub RAM. When WRLONG/WMLONG‘s D field is an immediate, it instead writes that immediate value
+
+                                                                                                                               67
+to RAM, functioning as a memory filler.
+
+Use SETQ+WRLONG/WMLONG to write multiple register RAM longs into hub RAM:
+
+         SETQ       #x                                  'x = number of longs, minus 1, to write
+         WRLONG     first_reg,S/#/PTRx                  'write x+1 longs starting at first_reg
+
+Use SETQ2+WRLONG/WMLONG to write multiple lookup RAM longs into hub RAM:
+
+         SETQ2      #x                                  'x = number of longs, minus 1, to write
+         WRLONG     first_lut,S/#/PTRx                  'write x+1 longs starting at first_lut
+
+For fast block moves, PTRx expressions cannot have arbitrary index values, since the index will be overridden with the
+number of longs, with bit 4 of the encoded index value serving as the ++/-- indicator. In plain PTRA/PTRB cases, the index will
+be overridden with zero:
+
+         SETQ       #x                                  'x = number of longs, minus 1
+         RDLONG     first_reg,PTRA                      'read x+1 longs from PTRA
+
+         SETQ       #x                                  'x = number of longs, minus 1
+         RDLONG     first_reg,PTRA++                    'read x+1 longs from PTRA, PTRA += (x+1)*4
+
+         SETQ       #x                                  'x = number of longs, minus 1
+         RDLONG     first_reg,PTRA--                    'read x+1 longs from PTRA, PTRA -= (x+1)*4
+
+         SETQ       #x                                  'x = number of longs, minus 1
+         RDLONG     first_reg,++PTRA                    'read x+1 longs from PTRA+(x+1)*4, PTRA += (x+1)*4
+
+         SETQ       #x                                  'x = number of longs, minus 1
+         RDLONG     first_reg,--PTRA                    'read x+1 longs from PTRA-(x+1)*4, PTRA -= (x+1)*4
+
+Because these fast block moves yield to the hub FIFO interface, they can be used during hub execution.
+
+
+
+CORDIC Solver
+
+In the hub, there is a 54-stage pipelined CORDIC solver that can compute the following functions for all cogs:
+
+    ●    32 x 32 unsigned multiply with 64-bit product
+    ●    64 / 32 unsigned divide with 32-bit quotient and 32-bit remainder
+    ●    Square root of 64-bit unsigned value with 32-bit result
+    ●    32-bit signed (X,Y) rotation around (0,0) by a 32-bit angle with 32-bit signed (X,Y) results
+    ●    32-bit signed (X,Y) to 32-bit (length,angle) - cartesian to polar
+    ●    32-bit (length,angle) to 32-bit signed (X,Y) - polar to cartesian
+    ●    32-bit unsigned integer to 5:27-bit logarithm
+    ●    5:27-bit logarithm to 32-bit unsigned integer
+
+When a cog issues a CORDIC instruction, it must wait for its hub slot, which is zero to (cogs-1) clocks away, in order to hand
+off the command to the CORDIC solver. Fifty-five clocks later, results will be available via the GETQX and GETQY
+instructions, which will wait for the results, in case they haven't arrived yet.
+
+Because each cog's hub slot comes around every 1/2/4/8/16 clocks (8 clocks for the current P2X8C4M64P, since it has 8
+cogs) and the pipeline is 54 clocks long, it is possible to overlap CORDIC commands, where several commands are initially
+
+                                                                                                                             68
+given to the CORDIC solver, and then results are read and another command is given, indefinitely, until, at the end, the trailing
+results are read. You must not have interrupts enabled during such a juggle, or enough clocks could be stolen by the interrupt
+service routine that one or more of your results could be overwritten before you can read them. If you ever attempt to read
+results when none are available and none are in progress, GETQX/GETQY will only take two clock and the QMT (CORDIC
+empty) event flag will be set.
+
+
+
+
+MULTIPLY
+
+To multiply two unsigned 32-bit numbers together, use the QMUL instruction (CORDIC instructions wait for the hub slot):
+
+           QMUL       D/#,S/#                 - Multiply D by S
+
+To get the results (these instructions wait for the CORDIC results):
+
+           GETQX      lower_long
+           GETQY      upper_long
+
+
+
+
+DIVIDE
+
+For convenience, two different divide instructions exist, each with an optional SETQ prefix instruction which establishes a
+non-0 value for one 32-bit part of the 64-bit numerator:
+
+           QDIV       D/#,S,#                 - Divide {$00000000:D} by S
+...or...
+           SETQ       Q/#                     - Set top part of numerator
+           QDIV       D/#,S,#                 - Divide {Q:D} by S
+...or...
+           QFRAC      D/#,S,#                 - Divide {D:$00000000} by S
+...or...
+           SETQ       Q/#                     - Set bottom part of numerator
+           QFRAC      D/#,S,#                 - Divide {D:Q} by S
+
+To get the results:
+
+           GETQX      quotient
+           GETQY      remainder
+
+
+
+
+SQUARE ROOT
+
+To get the square root of a 64-bit integer:
+
+           QSQRT      D/#,S,#                 - Compute square root of {S:D}
+
+To get the result:
+
+           GETQX      root
+
+
+
+                                                                                                                               69
+(X,Y) ROTATION
+
+The rotation function inputs three terms: 32-bit signed X and Y values, and an unsigned 32-bit angle, where
+$00000000..$FFFFFFFF = 0..359.9999999 degrees. The Y term, if non-zero, is supplied via an optional SETQ prefix
+instruction:
+
+           SETQ    Q/#                        - Set Y
+           QROTATE D/#,S,#                    - Rotate (D,Q) by S
+...or...
+           QROTATE D/#,S,#                    - Rotate (D,$00000000) by S
+
+Notice that in the second example, a polar-to-cartesian conversion is taking place.
+
+To get the results:
+
+           GETQX      X
+           GETQY      Y
+
+
+
+
+(X,Y) VECTORING
+
+The vectoring function converts (X,Y) cartesian coordinates into (length,angle) polar coordinates:
+
+           QVECTOR D/#,S,#                    - (X=D,Y=S) cartesian into (length,angle) polar
+
+To get the results:
+
+           GETQX      length
+           GETQY      angle
+
+
+
+
+LOGARITHM
+
+To convert an unsigned 32-bit integer into a 5:27-bit logarithm, where the top 5 bits hold the whole part of the power-of-2
+exponent and the bottom 27 bits hold the fractional part:
+
+           QLOG       D/#                     - Compute log base 2 of D
+
+To get the result:
+
+           GETQX      logarithm
+
+
+
+
+EXPONENT
+
+To convert a 5:27-bit logarithm into a 32-bit unsigned integer:
+
+           QEXP       D/#                     - Compute 2 to the power of D
+
+
+                                                                                                                              70
+To get the result:
+
+             GETQX     integer
+
+
+
+LOCKS
+The hub contains a pool of 16 semaphore bits, called locks. Locks can be used by cogs to coordinate exclusive access of a
+shared resource. In order to use a lock, one cog must first allocate a lock with LOCKNEW. Once allocated, cooperative cogs
+use LOCKTRY and LOCKREL to respectively take or release the allocated lock. When the lock is no longer needed, it may be
+returned to the unallocated lock pool by executing LOCKRET.
+
+
+The LOCK instructions are:
+             LOCKNEW      D {WC}
+             LOCKRET {#}D
+             LOCKTRY {#}D {WC}
+             LOCKREL {#}D {WC}
+
+
+What a lock represents is completely up to the application using it. locks are just a means of allowing one cog at a time the
+exclusive status of 'owner'. All participant cogs must agree on a lock's number and its purpose for a lock to be useful.
+
+Allocating Locks
+LOCKNEW is used to allocate a lock from the hub lock pool. If an unallocated lock is available, that lock's number will be
+stored in the D register. If WC is set on the instruction, the C flag will indicate whether a lock was allocated. Zero (0) indicates
+success, while one (1) indicates that all locks are already allocated. A cog may allocate more than one lock. Once a lock has
+been allocated, the lock number may be shared with other cogs so that they can use LOCKTRY/LOCKREL.
+
+
+LOCKRET is used to return an allocated lock to the lock pool. Any cog can return an allocated lock, even if it wasn't the cog
+that allocated it with LOCKNEW.
+
+Using Locks
+A cog may attempt to take an allocated lock by executing LOCKTRY with the lock number. If WC is used with the instruction,
+the C flag will indicate afterwards whether the lock was successfully taken. Zero (0) indicates that the lock was not taken
+because either another cog is holding it or the lock is not allocated, while one (1) indicates that the lock was successfully taken
+(or is now "held" by this cog). While the lock is held, no other cog can take the lock until the cog that's holding the lock either
+executes LOCKREL with the lock number or it is stopped via COGSTOP or restarted via COGINIT.
+
+
+Because lock arbitration is performed by the hub in a round-robin fashion, any cog waiting in a loop to capture a lock will get its
+fair turn:
+
+
+             'Keep trying to capture lock until successful
+             .try                LOCKTRY write_lock WC
+                       IF_NC     JMP #.try
+
+
+When a cog is done with a held lock, it must execute LOCKREL to release it for other cogs to take. Only the cog that has
+taken the lock can release it.
+
+
+                                                                                                                                  71
+         NOTE: A lock will also be implicitly released if the cog that's holding the lock is stopped (COGSTOP) or restarted
+         (COGINIT), or if LOCKRET is executed for that lock.
+
+
+LOCKREL can also be used to query the current lock status. When LOCKREL is executed with WC, the C flag will indicate
+whether the lock is currently taken. Additionally, if the D field references a register (not an immediate value), the register will
+be written with the cog ID of the current owner (if held) or last owner (if released). If the cog executing LOCKREL is also the
+cog that is holding the lock, the normal LOCKREL behavior will still be performed (i.e. the lock will be released).
+
+
+
+
+SMART PINS
+Each I/O pin has a 'smart pin' circuit which, when enabled, performs some autonomous function on the pin. Smart pins free the
+cogs from needing to micro-manage many I/O operations by providing high-bandwidth concurrent hardware functions which
+cogs could not perform as well on their own by manipulating I/O pins via instructions.
+
+
+Normally, an I/O pin's output enable is controlled by its DIR bit and its output state is controlled by its OUT bit, while the IN bit
+returns the pin's read state. In smart pin modes, the DIR bit is used as an active-low reset signal to the smart pin circuitry,
+while the output enable state is controlled by a configuration bit. In some modes, the smart pin takes over driving the output
+state, in which case the OUT bit gets ignored. The IN bit serves as a flag to indicate to the cog(s) that the smart pin has
+completed some function or an event has occurred, and acknowledgment is perhaps needed.
+
+
+Smart pins have four 32-bit registers inside of them:
+
+
+         mode      - smart pin mode, as well as low-level I/O pin mode (write-only)
+         X         - mode-specific parameter (write-only)
+         Y         - mode-specific parameter (write-only)
+         Z         - mode-specific result (read-only)
+
+
+These four registers are written and read via the following 2-clock instructions, in which S/# is used to select the pin number
+(0..63) and D/# is the 32-bit data conduit:
+
+
+     WRPIN       D/#,S/#                - Set smart pin S/# mode to D/#, ack pin
+     WXPIN       D/#,S/#                - Set smart pin S/# parameter X to D/#, ack pin
+     WYPIN       D/#,S/#                - Set smart pin S/# parameter Y to D/#, ack pin
+     RDPIN       D,S/# {WC}             - Get smart pin S/# result Z into D, flag into C, ack pin
+     RQPIN       D,S/# {WC}             - Get smart pin S/# result Z into D, flag into C, don't ack pin
+     AKPIN       S/#                    - Acknowledge pin S/#
+
+
+
+Each cog has a 34-bit bus to each smart pin for write data and acknowledgment signalling. Each smart pin OR's all incoming
+34-bit buses from the cogs in the same way DIR and OUT bits are OR'd before going to the pins. Therefore, if you intend to
+have multiple cogs execute WRPIN / WXPIN / WYPIN / RDPIN / AKPIN instructions on the same smart pin, you must be sure
+that they do so at different times, in order to avoid clobbering each other's bus data. Any number of cogs can read a smart pin
+simultaneously, without bus conflict, though, by using RQPIN ('read quiet'), since it does not utilize the 34-bit cog-to-smart-pin
+bus for acknowledgement signalling, like RDPIN does.
+
+                                                                                                                                      72
+

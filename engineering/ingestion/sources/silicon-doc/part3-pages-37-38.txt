@@ -1,0 +1,122 @@
+                    1 = Debug interrupt is enabled for cog n
+
+
+Examples:
+
+            HUBSET      ##$2000_0001               'enable debug interrupt for cog 0
+
+            HUBSET      ##$2001_FFFF               'enable debug interrupts for cogs 15..0
+                                                   '..and write-protect the last 16KB of hub RAM
+
+            HUBSET      ##$2003_00FF               'enable debug interrupts for cogs 7..0
+                                                   '..and write-protect the last 16KB of hub RAM
+                                                   '..and disallow subsequent changes to this scheme
+
+
+See the DEBUG INTERRUPT section to learn how debug interrupts work.
+
+
+
+Configuring the Digital Filters for Smart Pins
+
+There are four global digital filter settings which can be used by each smart pin to low-pass filter its incoming pin states.
+
+
+Each filter setting includes a filter length and a timing tap. The filter length is 2, 3, 5, or 8 flipflops, selected by values 0..3. The
+flipflops shift pin state data at the timing tap rate and must be unanimously high or low to change the filter output to high or low.
+The timing tap is one of the lower 32 bits of CT (the free-running 64-bit global counter), selected by values 0..31. Each time the
+selected tap transitions, the current pin state is shifted into the flipflops and if the flipflops are all in agreement, the filter output
+goes to that state. The filter will be reflected in the INA/INB bits if no smart pin mode is selected, or the filter states will be used
+by the smart pin mode as its inputs.
+
+
+The D operand selects both the filter to configure and the data to configure it with:
+
+
+            HUBSET      ##$4000_0000        +    Length<<5   +   Tap         'set     filt0
+            HUBSET      ##$4000_0080        +    Length<<5   +   Tap         'set     filt1
+            HUBSET      ##$4000_0100        +    Length<<5   +   Tap         'set     filt2
+            HUBSET      ##$4000_0180        +    Length<<5   +   Tap         'set     filt3
+
+
+
+"Length" is 0..3 for 2, 3, 5, or 8 flipflops.
+
+
+"Tap" is 0..31 for every single clock, every 2nd clock, every 4th clock,... every 2,147,483,648th clock.
+
+
+The filters are set to the following defaults on reset:
+
+
+   Filter           Length                   Tap                   Low-pass time
+                  (flipflops)        (clocks per sample)          (at 6.25ns/clock)
+
+    filt0              0                          0                    12.5ns
+                 (2 flipflops)                  (1:1)              (6.25ns * 2 * 1)
+
+    filt1              1                          5                    600ns
+                 (3 flipflops)                  (32:1)            (6.25ns * 3 * 32)
+
+
+
+                                                                                                                                        59
+    filt2             2                     19                      16.4ms
+                (5 flipflops)            (512K:1)             (6.25ns * 5 * 512K)
+
+    filt3             3                     22                      210ms
+                (8 flipflops)             (4M:1)               (6.25ns * 8 * 4M)
+
+
+
+
+Seeding the Xoroshiro128** PRNG
+
+To seed 32 bits of state data into the 128-bit PRNG, use HUBSET with the MSB of D set. This will write {1'b1, D[30:0]} into 32
+bits of the PRNG, affecting 1/4th of its total state. The 1'b1 bit ensures that the overall state will not go to zero. Because the
+PRNG's 128 state bits rotate, shift, and XOR against each other, they are thoroughly spread around within a few clocks, so
+seeding from a fixed set of 32 bits should not pose a limitation on seeding quality.
+
+
+After reset, the boot ROM uses HUBSET to seed the Xoroshiro128** PRNG fifty times, each time with 31 bits of thermal noise
+gleaned from pin 63 while in ADC calibration mode. This establishes a very random seed which the PRNG iterates from,
+thereafter. There is no need to do this again, but here is how you would do it if 'x' contained a seed value:
+
+
+            SETB       x,#31      'set the MSB of x to make a PRNG seed command
+            HUBSET     x          'seed 32 bits of the Xoroshiro128** state
+
+
+The Xoroshiro128** PRNG iterates on every clock, generating 64 fresh bits which get spread among all cogs and smart pins.
+Each cog receives a unique set of 32 different bits, in a scrambled arrangement with some bits inverted, from the 64-bit pool.
+Each smart pin receives a similarly-unique set of 8 different bits. Cogs can sample these bits using the GETRND instruction
+and directly apply them using the BITRND and DRVRND instructions. Smart pins utilize their 8 bits as noise sources for DAC
+dithering and noise output.
+
+
+Rebooting the Chip
+
+HUBSET can be used to reset and reboot the chip:
+
+
+            HUBSET     ##$1000_0000          'generate an internal reset pulse to reboot
+
+
+
+HUB RAM
+
+The globally-accessible hub RAM can be read and written as bytes, words, and longs, in little-endian format. Hub addresses
+are always byte-oriented. There are no special alignment rules for words and longs in hub RAM. Cogs can read and write
+bytes, words, and longs at any hub address, as well as execute instruction longs from any hub address starting at $400 (see
+COGS > INSTRUCTION MODES > HUB EXECUTION).
+
+On hub RAM implementations of less than the full 1MB, the last 16KB of hub RAM is normally addressable at both its normal
+address range, as well as at $FC000..$FFFFF. This provides a stable address space for the 16KB of internal ROM which gets
+cached into the last 16KB of hub RAM on startup. This upper 16KB mapping is also used by the cog debugging scheme.
+
+The last 16KB of RAM can be hidden from its normal address range and made read-only at $FC000..$FFFFF. This is useful
+for making the last 16KB of RAM persistent, like ROM. It is also how debugging is realized, as the RAM mapped to
+$FC000..$FFFFF can still be written to from within debug interrupt service routines, permitting the otherwise-protected RAM to
+
+                                                                                                                                     60
+

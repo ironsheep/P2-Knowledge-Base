@@ -1,0 +1,588 @@
+    ●    Set whenever GETQX/GETQY executes without any CORDIC results available or in progress.
+    ●    Also cleared on POLLQMT/WAITQMT/JQMT/JNQMT.
+
+
+
+
+Example:           ADDCT1/WAITCT1
+
+         'ADDCT1 D,S/#' must be used to establish a CT target. This is done by first using 'GETCT D' to get the current CT
+         value into a register, and then using ADDCT1 to add into that register, thereby making a future CT target, which,
+         when passed, will trigger the CT-passed-CT1 event and set the related event flag.
+
+                    GETCT      x                     'get initial CT
+                    ADDCT1     x,#500                'make initial CT1 target
+
+           .loop    WAITCT1                          'wait for CT to pass CT1 target
+                    ADDCT1 x,#500                    'update CT1 target
+                    DRVNOT #0                        'toggle P0
+                    JMP     #.loop                   'loop to the WAITCT1
+
+
+
+         It doesn't matter what register is used to keep track of the CT1 target. Whenever ADDCT1 executes, S/# is added
+         into D, and the result gets copied into a dedicated CT1 target register that is compared to CT on every clock. When
+         CT passes the CT1 target, the event flag is set. ADDCT1 clears the CT-passed-CT1 event flag to help with
+         initialization and cycling.
+
+
+
+Selectable Events
+Each cog can track up to four selectable pin, LUT, or hub lock events. This is accomplished by using the SETSEn instruction,
+where "n" is 1, 2, 3, or 4. In order for user code to detect the occurrence of the selected event, the following options are
+available:
+
+    ●    The matched WAITSEn instruction will block until the event occurs
+    ●    The matched POLLSEn instruction will check for the event without blocking
+    ●    The matches JSEn and JNSEn branch instructions will branch according to the polled event state
+    ●    As an interrupt (see INTERRUPTS)
+
+Each selected event is set or cleared according to the following rules:
+
+    ●    SEn is set whenever the configured event occurs.
+    ●    SEn is cleared on matched POLLSEn / WAITSEn / JSEn / JNSEn.
+    ●    SEn is cleared when matched 'SETSEn D/#' is called.
+
+SETSEn D/# accepts the following configuration values:
+
+         %000_00_00AA = this cog reads LUT address %1111111AA
+         %000_00_01AA = this cog writes LUT address %1111111AA
+         %000_00_10AA = odd/even companion cog reads LUT address %1111111AA
+         %000_00_11AA = odd/even companion cog writes LUT address %1111111AA
+
+         %000_01_LLLL = hub lock %LLLL rises
+         %000_10_LLLL = hub lock %LLLL falls
+         %000_11_LLLL = hub lock %LLLL changes
+
+
+
+                                                                                                                               48
+         %001_PPPPPP = INA/INB bit of pin %PPPPPP rises
+         %010_PPPPPP = INA/INB bit of pin %PPPPPP falls
+         %011_PPPPPP = INA/INB bit of pin %PPPPPP changes
+
+         %10x_PPPPPP = INA/INB bit of pin %PPPPPP is low
+         %11x_PPPPPP = INA/INB bit of pin %PPPPPP is high
+
+
+
+INTERRUPTS
+
+Each cog has three interrupts: INT1, INT2, and INT3.
+
+INT1 has the highest priority and can interrupt INT2 and INT3.
+
+INT2 has the middle priority and can interrupt INT3.
+
+INT3 has the lowest priority and can only interrupt non-interrupt code.
+
+The STALLI instruction can be used to hold off INT1, INT2 and INT3 interrupt branches indefinitely, while the ALLOWI
+instruction allows those interrupt branches to occur. Critical blocks of code can, therefore, be protected from interruption by
+beginning with STALLI and ending with ALLOWI.
+
+There are 16 interrupt event sources, selected by a 4-bit pattern:
+
+         0         <off>, default on cog start for INT1/INT2/INT3 event sources
+         1         CT-passed-CT1, established by ADDCT1
+         2         CT-passed-CT2, established by ADDCT2
+         3         CT-passed-CT3, established by ADDCT3
+         4         SE1 event occurred, established by SETSE1
+         5         SE2 event occurred, established by SETSE2
+         6         SE3 event occurred, established by SETSE3
+         7         SE4 event occurred, established by SETSE4
+         8         Pin pattern match or mismatch occurred, established by SETPAT
+         9         Hub RAM FIFO interface wrapped and reloaded, established by RDFAST/WRFAST/FBLOCK
+         10        Streamer is ready for another command, established by XINIT/XZERO/ZCONT
+         11        Streamer ran out of commands, established by XINIT/XZERO/ZCONT
+         12        Streamer NCO rolled over, established by XINIT/XZERO/XCONT
+         13        Streamer read location $1FF of lookup RAM
+         14        Attention requested by other cog(s)
+         15        GETQX/GETQY executed without any CORDIC results available or in progress
+
+
+
+To set up an interrupt, you need to first point its IJMP register to your interrupt service routine (ISR). When the interrupt occurs,
+it will jump to where the IJMP register points and simultaneously store the C/Z flags and return address into the adjacent IRET
+register:
+
+         $1F0               RAM   /   IJMP3              interrupt     call      address    for   INT3
+         $1F1               RAM   /   IRET3              interrupt     return    address    for   INT3
+         $1F2               RAM   /   IJMP2              interrupt     call      address    for   INT2
+         $1F3               RAM   /   IRET2              interrupt     return    address    for   INT2
+         $1F4               RAM   /   IJMP1              interrupt     call      address    for   INT1
+         $1F5               RAM   /   IRET1              interrupt     return    address    for   INT1
+
+
+
+                                                                                                                                  49
+When your ISR is done, it can do a RETIx instruction to return to the interrupted code. The RETIx instructions are actually
+CALLD instructions:
+
+         RETI1                   =     CALLD INB,IRET1         WCZ
+         RETI2                   =     CALLD INB,IRET2         WCZ
+         RETI3                   =     CALLD INB,IRET3         WCZ
+
+
+
+The CALLD with D = <any register>, S = IRETx, and WCZ, signals the cog that the interrupt is complete. This causes the cog
+to clear its internal interrupt-busy flag for that interrupt, so that another interrupt can occur. INB (read-only) is used as D for
+RETIx instructions to effectively make the CALLD into a JMP back to the interrupted code.
+
+Instead of using RETIx, though, you could use RESIx to have your ISR resume at the next instruction when the next interrupt
+occurs:
+
+         RESI1                    =     CALLD IJMP1,IRET1         WCZ
+         RESI2                    =     CALLD IJMP2,IRET2         WCZ
+         RESI3                    =     CALLD IJMP3,IRET3         WCZ
+
+
+
+Once you've got the IJMPx register configured to point to your ISR, you can enable the interrupt. This is done using the
+SETINTx instruction:
+
+         SETINT1 D/#        Set INT1 event to 0..15 (see table above)
+         SETINT2 D/#        Set INT2 event to 0..15 (see table above)
+         SETINT3 D/#        Set INT3 event to 0..15 (see table above)
+
+
+
+Interrupts may be forced in software by the TRGINTx instructions:
+
+         TRGINT1            Trigger INT1
+         TRGINT2            Trigger INT2
+         TRGINT3            Trigger INT3
+
+
+
+Interrupts that have been triggered and are waiting to branch may be nixed in software by the NIXINTx instructions. These
+instructions are only useful in main code after STALLI executes or in an ISR which needs to stop a lower-level interrupt from
+executing after the current ISR exits:
+
+         NIXINT1            Nix INT1
+         NIXINT2            Nix INT2
+         NIXINT3            Nix INT3
+
+
+
+Interrupts can be stalled or allowed using the following instructions:
+
+         ALLOWI             Allow any stalled and future interrupt branches to occur indefinitely (default mode on cog start)
+         STALLI             Stall interrupt branches indefinitely until ALLOWI executes
+
+
+
+When an interrupt event occurs, certain conditions must be met during execution before the interrupt branch can happen:
+
+
+
+                                                                                                                                  50
+      ●    ALTxx / CRCNIB / SCA / SCAS / GETCT+WC / GETXACC / SETQ / SETQ2 / XORO32 / XBYTE must not be
+           executing
+      ●    AUGS must not be executing or waiting for a S/# instruction
+      ●    AUGD must not be executing or waiting for a D/# instruction
+      ●    REP must not be executing or active
+      ●    STALLI must not be executing or active
+      ●    The cog must not be stalled in any WAITx instruction
+
+
+
+Once these conditions are all met, any pending interrupt is allowed to branch, with priority given to INT1, then INT2, and then
+INT3.
+
+Interrupt branches are realized, internally, by inserting a 'CALLD IRETx,IJMPx WCZ' into the instruction pipeline while holding
+the program counter at its current value, so that the interrupt later returns to the address saved in IRETx.
+
+Interrupts loop through these three states:
+
+      1)   Waiting for interrupt event
+      2)   Waiting for interrupt branch
+      3)   Executing interrupt service routine
+
+During states 2 and 3, any intervening interrupt events at the same priority level are ignored. When state 1 is returned to, a
+new interrupt event will be waited for.
+
+
+
+Example:            Using INT1 as a CT1 interrupt
+
+            org
+
+start       mov        ijmp1,#isr1               'set int1 vector
+
+            setint1 #1                           'set int1 for ct-passed-ct1 event
+
+            getct      ct1                       'set initial ct1 target
+            addct1     ct1,#50
+
+                                                 'main program, gets interrupted
+loop        drvnot     #0                        'toggle p0
+            jmp        #loop                     'loop
+
+                                                 'int1 isr, runs once every 50 clocks
+isr1        drvnot     #1                        'toggle p1
+            addct1     ct1,#50                   'update ct1 target
+            reti1                                'return to main program
+
+ct1         res                                  'reserve long for ct1
+
+
+
+
+DEBUG INTERRUPT
+
+In addition to the three visible interrupts, there is a fourth "hidden" interrupt that has priority over all the others. It is the debug
+interrupt, and it is inaccessible to normal cog programs.
+
+                                                                                                                                       51
+Debug interrupts are enabled on a per-cog basis via HUBSET. Each debug-enabled cog will generate a debug interrupt on
+(re)start from each COGINIT exercised upon it. Within that initial debug ISR and within each subsequent debug ISR, multiple
+trigger conditions may be set for the next debug interrupt. If no trigger conditions are set before the debug ISR ends, no more
+debug interrupts will occur until the cog is restarted from another COGINIT.
+
+The last 16KB of hub RAM, which is also mapped to $FC000..$FFFFF, gets partially used as a buffer area for saving and
+restoring cog registers during debug ISR's. The initial debug ISR routines are also stored in this upper RAM. Once initialized
+with debug ISR code, this upper hub RAM can be write-protected, in which case it is mapped only to $FC000..$FFFFF and it is
+only writable from within debug ISR's.
+
+Each cog has an execute-only ROM in cog registers $1F8..$1FF which contains special debug-ISR-entry and -exit routines.
+These tiny routines perform seamless register-load and register-restore operations for your debugger program, which must be
+realized entirely within debug ISR's.
+
+
+
+                 Execute-only ROM in cog registers $1F8..$1FF
+                           (%cccc = !CogNumber)
+
+ Debug ISR Entry - IJMP0 is initialized to $1F8 on COGINIT
+
+ $1F8   -   SETQ       #$0F       'save registers $000..$00F
+ $1F9   -   WRLONG     0,*        '* = %1111_1111_1ccc_c000_0000
+ $1FA   -   SETQ       #$0F       'load program into $000..$00F
+ $1FB   -   RDLONG     0,*        '* = %1111_1111_1ccc_c100_0000
+ $1FC   -   JMP        #0         'jump to loaded program
+
+ Debug ISR Exit - Jump here to exit your debug ISR
+
+ $1FD -     SETQ       #$0F       'restore registers $000..$00F
+ $1FE -     RDLONG     0,*        '* = %1111_1111_1ccc_c000_0000
+ $1FF -     RETI0                 'CALLD IRET0,IRET0 WCZ
+
+
+
+During a debug ISR, INA and INB, normally read-only input-pin registers, become readable/writable RAM registers named
+IJMP0 and IRET0, and are used by the debug interrupt as jump and return addresses. On COGINIT, IJMP0 is initialized to
+$1F8 which is the debug-ISR-entry routine's address.
+
+When a debug interrupt occurs with IJMP0 pointing to $1F8, the following sequence happens:
+
+             -     Cog registers $000 to $00F are saved to hub RAM starting at ($FF800 + !CogNumber << 7), or
+                   %1111_1111_1ccc_c000_0000, where %cccc = !CogNumber.
+
+             -     Cog registers $000 to $00F are loaded from hub RAM starting at ($FF840 + !CogNumber << 7), or
+                   %1111_1111_1ccc_c100_0000, where %cccc = !CogNumber.
+
+             -     A "JMP #$000" executes to run the 16-instruction debugger program that was just loaded into registers $000
+                   to $00F.
+
+Your 16-instruction debugger program will likely want to determine if this debug interrupt was due to a COGINIT, in which case
+the debugger will probably want to note that a new program is now running in this cog. Depending on what the debugger must
+do next, it is likely that it will need to save more registers to the upper hub RAM and then load in more code from the upper
+hub RAM to facilitate more complex operations than the initial 16-instruction ISR can achieve. The ISR may then need to
+perform some communication between itself and a host system which may be serving as the debugger's user interface. It may
+be necessary to employ a LOCK to time-share P2-to-host communication channels among cogs, likely on P63 (serial Rx) and
+
+                                                                                                                              52
+P62 (serial Tx). This scenario is somewhat hypothetical, but illustrates the design intent behind the debug interrupt
+mechanism.
+
+When your debug ISR is complete, you can do a 'JMP #$1FD' to execute the debug-ISR-exit routine which does the following:
+
+             -    Original cog registers $000 to $00F are restored from hub RAM starting at ($FF800 + !CogNumber << 7), or
+                  %1111_1111_1ccc_c000_0000, where %cccc = !CogNumber.
+
+             -    A "RETI0" executes to return to the interrupted cog program.
+
+
+
+Here is a table of the hub RAM locations used by each cog for register save/restore and ISR images during the debug interrupt
+when the register ROM routines are used for ISR entry and exit:
+
+
+
+   Cog           Save/Restore in Hub RAM               ISR image in Hub RAM
+                  for Registers $000..$00F            for Registers $000..$00F
+
+     7               $FFC00..$FFC3F                       $FFC40..$FFC7F
+
+     6               $FFC80..$FFCBF                       $FFCC0..$FFCFF
+
+     5               $FFD00..$FFD3F                       $FFD40..$FFD7F
+
+     4               $FFD80..$FFDBF                       $FFDC0..$FFDFF
+
+     3               $FFE00..$FFE3F                       $FFE40..$FFE7F
+
+     2               $FFE80..$FFEBF                       $FFEC0..$FFEFF
+
+     1               $FFF00..$FFF3F                       $FFF40..$FFF7F
+
+     0               $FFF80..$FFFBF                       $FFFC0..$FFFFF
+
+
+
+Though the first debug interrupt upon cog (re)start will always use the debug-ISR-entry routine at $1F8, you may redirect
+IJMP0 during any debug ISR to point elsewhere for use by subsequent debug interrupts. This would mean that you would lose
+the initial register-saving function provided by the small ROM starting at $1F8, so you would have to use some cog registers
+for debugger-state storage that don't interfere with the cog program that is being debugged. If no register saving/restoring or
+host communications are required, your debug ISR may execute very quickly.
+
+What terminates a debug interrupt is not only RETI0 (CALLD INB,INB WCZ), but any D-register variant (CALLD anyreg,INB
+WCZ). For example RESI0 (CALLD INA,INB WCZ) may be used to resume next time from where this debug ISR left off, but
+this would imply that you are not using the debug-ISR-entry and -exit routines in the cog-register ROM and have, instead,
+permanently located debugger code into some cog registers, so that your debugger program is already present at the start of
+the debug interrupt.
+
+This debug interrupt scheme was designed to operate stealthily, without any cooperation from the cog program being
+debugged. All control has been placed within the debug ISR. This isolation from normal programming is intended to prevent, or
+at least discourage, programmers from making any aspect of the debug interrupt system part of their application, thereby
+rendering the debug interrupt compromised as a standard debugging mechanism. Also, by executing the ISR strictly in cog
+register space, this scheme does not interfere with the hub FIFO state, which would be impossible to reconstruct if disturbed
+by hub execution within the debug ISR.
+
+Below are the instructions which are used in the debugging mechanism:
+
+                                                                                                                             53
+BRK D/#
+
+During normal program execution, the BRK instruction is used to generate a debug interrupt with an 8-bit code which can be
+read within the debug ISR. The BRK instruction interrupt must be enabled from within a prior debug ISR for this to work.
+Regardless of the execution condition, the BRK instruction will trigger a debug interrupt, if enabled. The execution condition
+only gates the writing of the 8-bit code:
+
+  D/# = %BBBBBBBB: 8-bit BRK code
+
+
+
+During a debug ISR, the BRK instruction operates differently and is used to establish the next debug interrupt condition(s). It is
+also used to select INA/INB, instead of the IJMP0/IRET0 registers exposed during the ISR, so that the pins' inputs states may
+be read:
+
+  D/# = %aaaaaaaaaaaaaaaaeeee_LKJIHGFEDCBA
+
+     %aaaaaaaaaaaaaaaaeeee: 20-bit breakpoint address or 4-bit event code (%eeee)
+     %L: 1 = map INA/INB normally, 0 = map IJMP0/IRET0 at INA/INB (default during ISR) *
+     %K: 1 = enable interrupt on breakpoint address match
+     %J: 1 = enable interrupt on event %eeee
+     %I: 1 = enable interrupt on asynchronous breakpoint (via COGBRK on another cog)
+     %H: 1 = enable interrupt on INT3 ISR entry
+     %G: 1 = enable interrupt on INT2 ISR entry
+     %F: 1 = enable interrupt on INT1 ISR entry
+     %E: 1 = enable interrupt on BRK instruction
+     %D: 1 = enable interrupt on INT3 ISR code (single step)
+     %C: 1 = enable interrupt on INT2 ISR code (single step)
+     %B: 1 = enable interrupt on INT1 ISR code (single step)
+     %A: 1 = enable interrupt on non-ISR code (single step)
+
+     * If set to 1 by the debug ISR, %L must be reset to 0 before exiting the debug ISR, so
+       that the RETI0 instruction is able to see IJMP0 and IRET0.
+
+On debug ISR entry, bits L to A are cleared to '0'. If a subsequent debug interrupt is desired, a BRK instruction must be
+executed before exiting the debug ISR, in order to establish the next breakpoint condition(s).
+
+
+
+COGBRK D/#
+
+The COGBRK instruction can trigger an asynchronous breakpoint in another cog. For this to work, the cog executing the
+COGBRK instruction must be in its own debug ISR and the other cog must have its asynchronous breakpoint interrupt
+enabled:
+
+  D/# = %CCCC: the cog in which to trigger an asynchronous breakpoint
+
+
+
+GETBRK D WCZ
+
+During normal program execution, GETBRK with WCZ returns various data about the cog's internal status:
+
+  C = 1 if STALLI mode or 0 if ALLOWI mode (established by STALLI/ALLOWI)
+
+                                                                                                                                 54
+  Z = 1 if cog started in hubexec or 0 if cog started in cogexec
+
+  D[31:23] = 0
+  D[22] = 1 if colorspace converter is active
+  D[21] = 1 if streamer is active
+  D[20] = 1 if WRFAST mode or 0 if RDFAST mode
+  D[19:16] = INT3 selector, established by SETINT3
+  D[15:12] = INT2 selector, established by SETINT2
+  D[11:08] = INT1 selector, established by SETINT1
+  D[07:06] = INT3 state: %0x = idle, %10 = interrupt pending, %11 = ISR executing
+  D[05:04] = INT2 state: %0x = idle, %10 = interrupt pending, %11 = ISR executing
+  D[03:02] = INT1 state: %0x = idle, %10 = interrupt pending, %11 = ISR executing
+  D[01] = 1 if STALLI mode or 0 if ALLOWI mode (established by STALLI/ALLOWI)
+  D[00] = 1 if cog started in hubexec or 0 if cog started in cogexec
+
+
+
+During a debug ISR, GETBRK with WCZ returns additional data that is useful to a debugger:
+
+  C = 1 if debug interrupt was from a COGINIT, indicating that the cog was (re)started
+
+  D[31:24] = 8-bit break code from the last 'BRK #/D' during normal execution
+  D[23] = 1 if debug interrupt was from a COGINIT, indicating that the cog was (re)started
+
+
+
+
+GETBRK D WC
+
+GETBRK with WC always returns the following:
+
+  C = LSB of SKIP/SKIPF/EXECF/XBYTE pattern
+
+  D[31:28] = 4-bit CALL depth since SKIP/SKIPF/EXECF/XBYTE (skipping suspended if not %0000)
+  D[27] = 1 if SKIP mode or 0 if SKIPF/EXECF/XBYTE mode
+  D[26] = 1 if LUT sharing enabled (established by SETLUTS)
+  D[25] = 1 if top of stack = $001FF, indicating XBYTE will execute on next _RET_/RET
+  D[24:16] = 9-bit XBYTE mode, established by '_RET_ SETQ/SETQ2' when top of stack = $001FF
+  D[15:00] = 16 event-trap flags
+     D[15] = GETQX/GETQY executed without prior CORDIC command
+     D[14] = attention requested by cog(s)
+     D[13] = streamer read location $1FF of lookup RAM
+     D[12] = streamer NCO rolled over
+     D[11] = streamer finished, now idle
+     D[10] = streamer ready to accept new command
+     D[09] = hub RAM FIFO interface loaded block count and start address
+     D[08] = pin pattern match occurred
+     D[07] = SE4 event occurred
+     D[06] = SE3 event occurred
+     D[05] = SE2 event occurred
+     D[04] = SE1 event occurred
+     D[03] = CT-passed-CT1
+     D[02] = CT-passed-CT2
+     D[01] = CT-passed-CT3
+     D[00] = INT1, INT2, or INT3 occurred
+
+                                                                                             55
+GETBRK D WZ
+
+GETBRK with WZ always returns the following:
+
+  Z = 1 if no SKIP/SKIPF/EXECF/XBYTE pattern queued (D = 0) or 1 if pattern queued (D <> 0)
+
+  D = 32-bit SKIP/SKIPF/EXECF/XBYTE pattern, used LSB-first to skip instructions in main code
+
+
+
+
+HUB
+Configuration
+The hub contains several global circuits which are configured using the HUBSET instruction. HUBSET uses a single D
+operand to both select the circuit to be configured and to provide the configuration data:
+
+
+           HUBSET      {#}D        - Configure global circuit selected by MSBs
+
+
+           %0000_xxxE_DDDD_DDMM_MMMM_MMMM_PPPP_CCSS                        Set clock generator mode
+           %0001_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx                        Hard reset, reboots chip
+           %0010_xxxx_xxxx_xxLW_DDDD_DDDD_DDDD_DDDD                        Set write-protect and debug enables
+           %0100_xxxx_xxxx_xxxx_xxxx_xxxR_RLLT_TTTT                        Set filter R to length L and tap T
+           %1DDD_DDDD_DDDD_DDDD_DDDD_DDDD_DDDD_DDDD                        Seed Xoroshiro128** PRNG with D
+
+
+
+
+Configuring the Clock Generator
+
+The Prop2 can generate its system clock in several different ways.
+
+
+There are two separate internal RC clock oscillators that can be used, a 20MHz+ (RCFAST) and a ~20kHz (RCSLOW). The
+20MHz+ oscillator is designed to always run at least 20MHz, worst-case, in order to accommodate 2M baud serial loading
+during boot. The ~20kHz oscillator is intended for low-power operation.
+
+
+The XI and XO pins can also be used for clocking, with XI being an input and XO being a crystal-feedback output for
+10MHz-20MHz crystals. Internal loading caps can also be enabled on XI and XO for crystal impedance matching.
+
+
+If the XI pin is used as a clock input or crystal oscillator input, its frequency can be modified through an internal phase-locked
+loop (PLL). The PLL divides the XI pin frequency from 1 to 64, then multiplies the resulting frequency from 1 to 1024 in the
+VCO. The VCO frequency can be used directly, or divided by 2, 4, 6, ...30, to get the final PLL clock frequency which can be
+used as the system clock.
+
+
+The clock configuration setting consists of 25 bits. The four LSBs are all that are needed to switch among clock sources and
+select all but the PLL settings.
+
+
+           HUBSET      ##%0000_000E_DDDD_DDMM_MMMM_MMMM_PPPP_CCSS                        'set clock mode
+
+
+                                                                                                                                 56
+The tables below explain the various bit fields within the HUBSET operand:
+
+
+ PLL Setting               Value        Effect                 Notes
+
+ %E                        0/1          PLL off/on             XI input must be enabled by %CC. Allow 10ms for crystal+PLL to
+                                                               stabilize before switching over to PLL clock source.
+
+ %DDDDDD                   0..63        1..64 division of XI   This divided XI frequency feeds into the phase-frequency
+                                        pin frequency          comparator's 'reference' input.
+
+ %MMMMMMMMMM               0..1023      1..1024 division of    This divided VCO frequency feeds into the phase-frequency
+                                        VCO frequency          comparator's 'feedback' input. This frequency division has the
+                                                               effect of multiplying the divided XI frequency (per %DDDDDD)
+                                                               inside the VCO. The VCO frequency should be kept within 100
+                                                               MHz to 200 Mhz.
+
+ %PPPP                     0            VCO / 2                This divided VCO frequency is selectable as the system clock
+                           1            VCO / 4                when SS = %11.
+                           2            VCO / 6
+                           3            VCO / 8                For fastest overclocking, the PLL can be pushed to 350 MHz using
+                           4            VCO / 10               the 'VCO / 1' mode (%PPPP = 15).
+                           5            VCO / 12
+                           6            VCO / 14
+                           7            VCO / 16
+                           8            VCO / 18
+                           9            VCO / 20
+                           10           VCO / 22
+                           11           VCO / 24
+                           12           VCO / 26
+                           13           VCO / 28
+                           14           VCO / 30
+                           15           VCO / 1
+
+
+
+
+   %CC           XI status              XO status                XI / XO                XI / XO
+                                                               impedance             loading caps
+
+   %00           ignored                   float                   Hi-Z                   OFF
+
+   %01             input              600-ohm drive              1M-ohm                   OFF
+
+   %10             input              600-ohm drive              1M-ohm               15pF per pin
+
+   %11             input              600-ohm drive              1M-ohm               30pF per pin
+
+
+
+
+   %SS         Clock Source        Notes
+
+   %11             PLL             CC != %00 and E=1, allow 10ms for crystal+PLL to stabilize before switching to PLL
+
+   %10              XI             CC != %00, allow 5ms for crystal to stabilize before switching to XI pin
+
+   %01          RCSLOW             ~20 kHz, can be switched to at any time, low-power
+
+   %00           RCFAST            20 MHz+, can be switched to at any time, used on boot-up.
+
+
+                                                                                                                                57
+

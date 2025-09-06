@@ -1,0 +1,943 @@
+Each smart pin has an outgoing 33-bit bus which conveys its Z result and a special flag. RDPIN and RQPIN are used to
+multiplex and read these buses, so that a pin's Z result is read into D and its special flag can be read into C. C will be either a
+mode-related flag or the MSB of the Z result.
+
+
+For the WRPIN instruction, which establishes both the low-level and smart-pin configuration for each I/O pin, the D operand is
+composed as:
+
+
+D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
+
+
+ %AAAA:     'A' input selector
+                  0xxx = true (default)
+                  1xxx = inverted
+                  x000 = this pin's read state (default)
+                  x001 = relative +1 pin's read state
+                  x010 = relative +2 pin's read state
+                  x011 = relative +3 pin's read state
+                  x100 = this pin's OUT bit from cogs
+                  x101 = relative -3 pin's read state
+                  x110 = relative -2 pin's read state
+                  x111 = relative -1 pin's read state
+
+
+ %BBBB:     'B' input selector
+                  0xxx = true (default)
+                  1xxx = inverted
+                  x000 = this pin's read state (default)
+                  x001 = relative +1 pin's read state
+                  x010 = relative +2 pin's read state
+                  x011 = relative +3 pin's read state
+                  x100 = this pin's OUT bit from cogs
+                  x101 = relative -3 pin's read state
+                  x110 = relative -2 pin's read state
+                  x111 = relative -1 pin's read state
+
+
+  %FFF:     'A' and 'B' input logic/filtering (after 'A' and 'B' input selectors)
+                  000 = A, B (default)
+                  001 = A AND B, B
+                  010 = A OR       B, B
+                  011 = A XOR B, B
+                  100 = A, B, both filtered using global filt0 settings
+                  101 = A, B, both filtered using global filt1 settings
+                  110 = A, B, both filtered using global filt2 settings
+                  111 = A, B, both filtered using global filt3 settings
+
+
+                  The resultant 'A' will drive the IN signal in non-smart-pin modes.
+
+
+
+                                                                                                                                  73
+%M..M:   low-level pin control
+
+In the Spin2 documentation, there are many predefined labels documented, which cover these
+pin configurations, as well as the smart pin modes.
+
+
+
+
+  %TT:   pin DIR/OUT control (default = %00)
+
+
+         for odd pins,   'OTHER' = even pin's NOT output state (diff source)
+         for even pins, 'OTHER' = unique pseudo-random bit (noise source)
+         for all pins,   'SMART' = smart pin output which overrides OUT/OTHER
+         'DAC_MODE' is enabled when M[12:10] = %101
+         'BIT_DAC' outputs {2{M[7:4]}} for 'high' or {2{M[3:0]}} for 'low' in DAC_MODE
+
+
+         for smart pin mode off (%SSSSS = %00000):
+
+
+             DIR enables output
+
+
+             for non-DAC_MODE:
+                 0x = OUT drives output
+                 1x = OTHER drives output
+             for DAC_MODE:
+                 00 = OUT enables ADC, M[7:0] sets DAC level
+                 01 = OUT enables ADC, M[3:0] selects cog DAC channel
+
+
+                                                                                             74
+                   10 = OUT drives BIT_DAC
+                   11 = OTHER drives BIT_DAC
+
+
+          for all smart pin modes (%SSSSS > %00000):
+              x0 = output disabled, regardless of DIR
+              x1 = output enabled, regardless of DIR
+
+
+          for DAC smart pin modes (%SSSSS = %00001..%00011):
+              0x = OUT enables ADC in DAC_MODE, M[7:0] overridden
+              1x = OTHER enables ADC in DAC_MODE, M[7:0] overridden
+
+
+          for non-DAC smart pin modes (%SSSSS = %00100..%11111):
+              0x = SMART/OUT drives output or BIT_DAC if DAC_MODE
+              1x = SMART/OTHER drives output or BIT_DAC if DAC_MODE
+
+
+%SSSSS:   00000    = smart pin off (default)
+          00001    = long repository               (M[12:10] != %101)
+          00010    = long repository               (M[12:10] != %101)
+          00011    = long repository               (M[12:10] != %101)
+          00001    = DAC noise                     (M[12:10]   = %101)
+          00010    = DAC 16-bit dither, noise      (M[12:10]   = %101)
+          00011    = DAC 16-bit dither, PWM        (M[12:10]   = %101)
+          00100*   = pulse/cycle output
+          00101*   = transition output
+          00110*   = NCO frequency
+          00111*   = NCO duty
+          01000*   = PWM triangle
+          01001*   = PWM sawtooth
+          01010*   = PWM switch-mode power supply, V and I feedback
+          01011    = periodic/continuous: A-B quadrature encoder
+          01100    = periodic/continuous: inc on A-rise & B-high
+          01101    = periodic/continuous: inc on A-rise & B-high / dec on A-rise & B-low
+          01110    = periodic/continuous: inc on A-rise {/ dec on B-rise}
+          01111    = periodic/continuous: inc on A-high {/ dec on B-high}
+          10000    = time A-states
+          10001    = time A-highs
+          10010    = time X A-highs/rises/edges -or- timeout on X A-high/rise/edge
+          10011    = for X periods, count time
+          10100    = for X periods, count states
+          10101    = for periods in X+ clocks, count time
+          10110    = for periods in X+ clocks, count states
+          10111    = for periods in X+ clocks, count periods
+          11000    = ADC sample/filter/capture, internally clocked
+          11001    = ADC sample/filter/capture, externally clocked
+          11010    = ADC scope with trigger
+
+
+                                                                                           75
+             11011*     = USB host/device                            (even/odd pin pair = DM/DP)
+             11100*     = sync serial transmit                       (A-data, B-clock)
+             11101      = sync serial receive                        (A-data, B-clock)
+             11110*     = async serial transmit                      (baudrate)
+             11111      = async serial receive                       (baudrate)
+
+
+             * OUT signal overridden
+
+
+When a mode-related event occurs in a smart pin, it raises its IN signal to alert the cog(s) that new data is ready, new data can
+be loaded, or some process has finished. A cog acknowledges a smart pin whenever it does a WRPIN, WXPIN, WYPIN,
+RDPIN or AKPIN on it. This causes the smart pin to lower its IN signal so that it can be raised again on the next event. Note
+that since the RQPIN instruction (read quiet) does not do an acknowledge, it can be used by any number of cogs,
+concurrently, to read a pin without bus conflict.
+
+
+After WRPIN/WXPIN/WYPIN/RDPIN/AKPIN, it will take two clocks for IN to drop, before it can be polled again:
+
+
+          WRPIN/WXPIN/WYPIN/RDPIN/AKPIN                 'acknowledge smart pin, releases IN from high
+          NOP                                           'elapse 2 clocks (or more)
+          TESTP       pin        WC                     'IN can now be polled again
+
+
+
+A smart pin should be configured while its DIR bit is low, holding it in reset. During that time, WRPIN/WXPIN/WYPIN can be
+used to establish the mode and related parameters. Once configured, DIR can be raised high and the smart pin will begin
+operating. After that, depending on the mode, you may feed it new data via WXPIN/WYPIN or retrieve results using
+RDPIN/RQPIN. These activities are usually coordinated with the IN signal going high.
+
+
+Note that while a smart pin is configured, the %TT bits, explained above, will govern the pin's output enable, regardless of the
+DIR state.
+
+
+A smart pin can be reset at any time, without the need to reconfigure it, by clearing and then setting its DIR bit.
+
+
+To return a pin to normal mode, do a 'WRPIN #0,pin'.
+
+
+
+
+PIN CONFIGURATION MODES
+
+Each I/O pin has 13 configuration bits which determine the operation of its 3.3V circuit. The M[12:0] bits within the WRPIN
+instruction's D[20:8] operand go directly to these bits. In some smart pin modes, these bits are partially overwritten to set
+things like DAC values.
+
+Below is a diagram of a single I/O pin circuit. It is powered from its local 3.3V supply pin. It connects to its own pin, as well as
+its odd/even adjacent pin. Pins P0 and P1 see each other's pins as adjacent pins, as do P2 and P3, etc.
+
+
+
+
+                                                                                                                                   76
+Equivalent Schematics for Each Unique I/O Pin Configuration
+
+
+
+
+                                                              77
+78
+79
+80
+81
+82
+83
+84
+SMART PIN MODES
+
+Below is a list of all smart pin modes. These are set by the %SSSSS bits within the D[5:1] operand of the WRPIN instruction.
+
+
+
+%00000 = normal mode
+
+This mode is for normal operation, without any smart pin functionality.
+
+
+
+%00001..%00011 and not DAC_MODE = long repository
+
+This mode turns the smart pin into a long repository, where WXPIN writes the long and RDPIN/RQPIN can read the long.
+
+
+When active (DIR=1), WXPIN updates the long and raises IN.
+
+
+During reset (DIR=0), WXPIN instructions are ignored and IN is low.
+
+
+
+
+%00001 and DAC_MODE = DAC noise
+
+This mode overrides M[7:0] to feed the pin's 8-bit DAC pseudo-random data on every clock. M[12:10] must be set to %101 to
+configure the low-level pin for DAC output. Each pin in this mode receives a unique data pattern.
+
+
+X[15:0] can be set to a sample period, in clock cycles, in case you want to mark time with IN raising at each period completion.
+If a sample period is not wanted, set X[15:0] to zero (65,536 clocks), in order to maximize the unused sample period, thereby
+reducing switching power.
+
+
+RDPIN/RQPIN can be used to retrieve the 16-bit ADC accumulation from the last sample period.
+
+During reset (DIR=0), IN is low.
+
+
+
+
+%00010 and DAC_MODE = DAC 16-bit with pseudo-random dither
+
+This mode overrides M[7:0] to feed the pin's 8-bit DAC with pseudo-randomly-dithered data on every clock. M[12:10] must be
+set to %101 to configure the low-level pin for DAC output.
+
+
+X[15:0] establishes the sample period in clock cycles.
+
+
+Y[15:0] establishes the DAC output value which gets captured at each sample period and used for its duration.
+
+
+On completion of each sample period, Y[15:0] is captured for the next output value and IN is raised. Therefore, you would
+coordinate updating Y[15:0] with IN going high.
+
+
+Pseudo-random dithering does not require any kind of fixed period, as it randomly dithers the 8-bit DAC between adjacent
+
+                                                                                                                             85
+levels, in order to achieve 16-bit DAC output, averaged over time. So, if you would like to be able to update the output value at
+any time and have it take immediate effect, set X[15:0] to one (IN will stay high).
+
+
+If OUT is high, the ADC will be enabled and RDPIN/RQPIN can be used to retrieve the 16-bit ADC accumulation from the last
+sample period. This can be used to measure loading on the DAC pin.
+
+During reset (DIR=0), IN is low and Y[15:0] is captured.
+
+
+
+
+%00011 and DAC_MODE = DAC 16-bit with PWM dither
+
+This mode overrides M[7:0] to feed the pin's 8-bit DAC with PWM-dithered data on every clock. M[12:10] must be set to %101
+to configure the low-level pin for DAC output.
+
+
+X[15:0] establishes the sample period in clock cycles. The sample period must be a multiple of 256 (X[7:0]=0), so that an
+integral number of 256 steps are afforded the PWM, which dithers the DAC between adjacent 8-bit levels.
+
+
+Y[15:0] establishes the DAC output value which gets captured at each sample period and used for its duration.
+
+
+On completion of each sample period, Y[15:0] is captured for the next output value and IN is raised. Therefore, you would
+coordinate updating Y[15:0] with IN going high.
+
+
+PWM dithering will give better dynamic range than pseudo-random dithering, since a maximum of only two transitions occur
+for every 256 clocks. This means, though, that a frequency of Fclock/256 will be present in the output at -48dB.
+
+
+If OUT is high, the ADC will be enabled and RDPIN/RQPIN can be used to retrieve the 16-bit ADC accumulation from the last
+sample period. This can be used to measure loading on the DAC pin.
+
+During reset (DIR=0), IN is low and Y[15:0] is captured.
+
+
+
+
+%00100 = pulse/cycle output
+
+This mode overrides OUT to control the pin output state.
+
+
+X[15:0] establishes a base period in clock cycles which forms the empirical high-time and low-time units.
+
+
+X[31:16] establishes a value to which the base period counter will be compared to on each clock cycle, as it counts from
+X[15:0] down to 1, before starting over at X[15:0] if decremented Y > 0. On each clock, if the base period counter > X[31:16]
+and Y > 0, the output will be high (else low).
+
+
+Whenever Y[31:0] is written with a non-zero value, the pin will begin outputting a high pulse or cycles, starting at the next base
+period. After each pulse, Y is decremented by one, until it reaches zero, at which the output will remain low.
+
+
+Some examples:
+
+
+
+
+                                                                                                                                86
+         If X[31:16] is set to 0, the output will be high for the duration of Y > 0.
+
+
+         If X[15:0] is set to 3 and X[31:16] is set to 2, the output will be 0-0-1 (repeat) for the duration of Y > 0.
+
+
+IN will be raised and the pin will revert to low output when the pulse or cycles complete, meaning Y has been decremented to
+zero.
+
+
+During reset (DIR=0), IN is low, the output is low, and Y is set to zero.
+
+
+
+
+%00101 = transition output
+
+This mode overrides OUT to control the pin output state.
+
+
+X[15:0] establishes a base period in clock cycles which forms the empirical high-time and low-time units.
+
+
+Whenever Y[31:0] is written with a non-zero value, the pin will begin toggling for Y transitions at each base period, starting at
+the next base period.
+
+
+IN will be raised when the transitions complete, with the pin remaining in its current output state.
+
+
+During reset (DIR=0), IN is low, the output is low, and Y is set to zero.
+
+
+
+
+%00110 = NCO frequency
+
+This mode overrides OUT to control the pin output state.
+
+
+X[15:0] establishes a base period in clock cycles which forms the empirical high-time and low-time units.
+
+
+Upon WXPIN, X[31:16] is written to Z[31:16] to allow phase setting.
+
+
+Y[31:0] will be added into Z[31:0] at each base period.
+
+
+The pin output will reflect Z[31].
+
+
+IN will be raised whenever Z overflows.
+
+
+During reset (DIR=0), IN is low, the output is low, and Z is set to zero.
+
+
+
+
+%00111 = NCO duty
+
+This mode overrides OUT to control the pin output state.
+
+
+X[15:0] establishes a base period in clock cycles which forms the empirical high-time and low-time units.
+
+                                                                                                                                87
+Upon WXPIN, X[31:16] is written to Z[31:16] to allow phase setting.
+
+
+Y[31:0] will be added into Z[31:0] at each base period.
+
+
+The pin output will reflect Z overflow.
+
+
+IN will be raised whenever Z overflows.
+
+
+During reset (DIR=0), IN is low, the output is low, and Z is set to zero.
+
+
+
+
+%01000 = PWM triangle
+
+This mode overrides OUT to control the pin output state.
+
+
+X[15:0] establishes a base period in clock cycles which forms the empirical high-time and low-time units.
+
+
+X[31:16] establishes a PWM frame period in terms of base periods.
+
+
+Y[15:0] establishes the PWM output value which gets captured at each frame start and used for its duration. It should range
+from zero to the frame period (value specified in X[31:16]).
+
+
+A counter, updating at each base period, counts from the frame period down to one, then from one back up to the frame
+period. Then, Y[15:0] is captured, IN is raised, and the process repeats.
+
+
+Note that the overall update time is TWO frame periods times the base period.
+
+
+At each base period, the captured output value is compared to the counter. If it is equal or greater, a high is output. If it is less,
+a low is output. Therefore, a zero will always output a low and the frame period value will always output a high.
+
+
+During reset (DIR=0), IN is low, the output is low, and Y[15:0] is captured.
+
+
+
+
+%01001 = PWM sawtooth
+
+This mode overrides OUT to control the pin output state.
+
+
+X[15:0] establishes a base period in clock cycles which forms the empirical high-time and low-time units.
+
+
+X[31:16] establishes a PWM frame period in terms of base periods.
+
+
+Y[15:0] establishes the PWM output value which gets captured at each frame start and used for its duration. It should range
+from zero to the frame period.
+
+
+A counter, updating at each base period, counts from one up to the frame period. Then, Y[15:0] is captured, IN is raised, and
+the process repeats.
+
+                                                                                                                                    88
+At each base period, the captured output value is compared to the counter. If it is equal or greater, a high is output. If it is less,
+a low is output. Therefore, a zero will always output a low and the frame period value will always output a high.
+
+
+During reset (DIR=0), IN is low, the output is low, and Y[15:0] is captured.
+
+
+
+
+%01010 = PWM switch-mode power supply with voltage and current feedback
+
+This mode overrides OUT to control the pin output state.
+
+
+X[15:0] establishes a base period in clock cycles which forms the empirical high-time and low-time units.
+
+
+X[31:16] establishes a PWM frame period in terms of base periods.
+
+
+Y[15:0] establishes the PWM output value which gets captured at each frame start and used for its duration. It should range
+from zero to the frame period.
+
+
+A counter, updating at each base period, counts from one up to the frame period. Then, the 'A' input is sampled at each base
+period until it reads low. After 'A' reads low, Y[15:0] is captured, IN is raised, and the process repeats.
+
+
+At each base period, the captured output value is compared to the counter. If it is equal or greater, a high is output. If it is less,
+a low is output. If, at any time during the cycle, the 'B' input goes high, the output will be low for the rest of that cycle.
+
+
+Due to the nature of switch-mode power supplies, it may be appropriate to just set Y[15:0] once and let it repeat indefinitely.
+
+
+During reset (DIR=0), IN is low, the output is low, and Y[15:0] is captured.
+
+
+
+         WXPIN is used to set the base period (X[15:0]) and the PWM frame count (X[31:16]). The base period is the number
+         of clocks which makes a base unit of time. The frame count is the number of base units that make up a PWM cycle.
+
+         WYPIN is used to set the output value (Y[15:0]), which is internally captured at the start of every PWM frame and
+         compared to the frame counter upon completion of each base unit of time. If the output value is greater than or equal
+         to the frame counter, the pin outputs a high, else a low. This is intended to drive the gate of the switcher FET.
+
+         The "A" input is the voltage detector for the SMPS output. This could be an adjacent pin using the
+         internal-DAC-comparison mode to observe the center tap of a voltage divider which is fed by the final SMPS output.
+         When "A" is low, a PWM cycle is performed because the final output voltage has sagged below the requirement and
+         it's time to do another pulse.
+
+         The "B" input is the over-current detector which, if ever high during the PWM cycle, immediately forces the output low
+         for the rest of that PWM cycle. This could be an adjacent pin using the internal-DAC-comparison mode to observe a
+         shunt resistor between GND and the FET source. When the shunt voltage gets too high, too much current is flowing
+         (or the desired amount of current is flowing), so the output goes low to turn off the FET and allow the inductor
+         connected to its drain to shoot high, creating a power pulse to be captured by a diode and dumped into a cap, which
+         is the SMPS final output.
+
+
+                                                                                                                                    89
+%01011 = A/B-input quadrature encoder
+
+X[31:0] establishes a measurement period in clock cycles.
+
+
+If zero is used for the period, the measurement operation will not be periodic, but continuous, like a totalizer, and the current
+32-bit quadrature step count can always be read via RDPIN/RQPIN.
+
+
+If a non-zero value is used for the period, quadrature steps will be counted for that many clock cycles and then the result will
+be placed in Z while the accumulator will be set to the 0/1/-1 value that would have otherwise been added into it. This way, all
+quadrature steps get counted across measurements. At the end of each period, IN will be raised and RDPIN/RQPIN can be
+used to retrieve the last 32-bit measurement.
+
+
+It may be useful to configure both 'A' and 'B' smart pins to quadrature mode, with one being continuous (X=0) for absolute
+position tracking and the other being periodic (x<>0) for velocity measurement.
+
+
+The quadrature encoder can be "zeroed" by pulsing DIR low at any time. There is no need to do another WXPIN.
+
+
+During reset (DIR=0), IN is low and Z is set to the adder value (0/1/-1).
+
+
+
+
+%01100 = Count A-input positive edges when B-input is high
+
+X[31:0] establishes a measurement period in clock cycles.
+
+
+If zero is used for the period, the measurement operation will not be periodic, but continuous, like a totalizer, and the current
+32-bit high count can always be read via RDPIN/RQPIN.
+
+
+If a non-zero value is used for the period, events will be counted for that many clock cycles and then the result will be placed in
+Z, while the accumulator will be set to the 0/1 value that would have otherwise been added into it, beginning a new
+measurement. This way, all events get counted across measurements. At the end of each period, IN will be raised and
+RDPIN/RQPIN can be used to retrieve the 32-bit measurement.
+
+
+During reset (DIR=0), IN is low and Z is set to the adder value (0/1).
+
+
+
+
+%01101 = Accumulate A-input positive edges with B-input supplying increment (B=1) or
+decrement (B=0)
+
+X[31:0] establishes a measurement period in clock cycles.
+
+
+If zero is used for the period, the measurement operation will not be periodic, but continuous, like a totalizer, and the current
+32-bit high count can always be read via RDPIN/RQPIN.
+
+
+If a non-zero value is used for the period, events will be counted for that many clock cycles and then the result will be placed in
+
+                                                                                                                                    90
+Z, while the accumulator will be set to the 0/1/-1 value that would have otherwise been added into it, beginning a new
+measurement. This way, all events get counted across measurements. At the end of each period, IN will be raised and
+RDPIN/RQPIN can be used to retrieve the 32-bit measurement.
+
+
+During reset (DIR=0), IN is low and Z is set to the adder value (0/1/-1).
+
+
+
+
+%01110 AND !Y[0] = Count A-input positive edges
+
+%01110 AND Y[0] = Increment on A-input positive edge and decrement on B-input
+positive edge
+
+X[31:0] establishes a measurement period in clock cycles. Y[0] establishes whether to just count A-input positive edges (=0),
+or to increment on A-input positive edge and decrement on B-input positive edge (=1).
+
+
+If zero is used for the period, the measurement operation will not be periodic, but continuous, like a totalizer, and the current
+32-bit high count can always be read via RDPIN/RQPIN.
+
+
+If a non-zero value is used for the period, events will be counted for that many clock cycles and then the result will be placed in
+Z, while the accumulator will be set to the 0/1/-1 value that would have otherwise been added into it, beginning a new
+measurement. This way, all events get counted across measurements. At the end of each period, IN will be raised and
+RDPIN/RQPIN can be used to retrieve the 32-bit measurement.
+
+
+During reset (DIR=0), IN is low and Z is set to the adder value (0/1/-1).
+
+
+
+
+%01111 AND !Y[0] = Count A-input highs
+
+%01111 AND Y[0] = Increment on A-input high and decrement on B-input high
+
+X[31:0] establishes a measurement period in clock cycles. Y[0] establishes whether to just count A-input highs (=0), or to
+increment on A-input high and decrement on B-input high (=1).
+
+
+If zero is used for the period, the measurement operation will not be periodic, but continuous, like a totalizer, and the current
+32-bit high count can always be read via RDPIN/RQPIN.
+
+
+If a non-zero value is used for the period, events will be counted for that many clock cycles and then the result will be placed in
+Z, while the accumulator will be set to the 0/1/-1 value that would have otherwise been added into it, beginning a new
+measurement. This way, all events get counted across measurements. At the end of each period, IN will be raised and
+RDPIN/RQPIN can be used to retrieve the 32-bit measurement.
+
+
+During reset (DIR=0), IN is low and Z is set to the adder value (0/1/-1).
+
+
+
+
+                                                                                                                                    91
+%10000 = Time A-input states
+
+Continuous states are counted in clock cycles.
+
+
+Upon each state change, the prior state is placed in the C-flag buffer, the prior state's duration count is placed in Z, and IN is
+raised. RDPIN/RQPIN can then be used to retrieve the measurement. Z will be limited to $80000000.
+
+
+If states change faster than the cog is able to retrieve measurements, the measurements will effectively be lost, as old ones
+will be overwritten with new ones. This may be gotten around by using two smart pins to time highs, with one pin inverting its
+'A' input. Then, you could capture both states, as long as the sum of the states' durations didn't exceed the cog's ability to
+retrieve both results. This would help in cases where one of the states was very short in duration, but the other wasn't.
+
+
+During reset (DIR=0), IN is low and Z is set to $00000001.
+
+
+
+
+%10001 = Time A-input high states
+
+Continuous high states are counted in clock cycles.
+
+
+Upon each high-to-low transition, the previous high duration count is placed in Z, and IN is raised. RDPIN/RQPIN can then be
+used to retrieve the measurement. Z will be limited to $80000000.
+
+
+During reset (DIR=0), IN is low and Z is set to $00000001.
+
+
+
+
+%10010 AND !Y[2] = Time X A-input highs/rises/edges
+
+Time is measured until X A-input highs/rises/edges are accumulated.
+
+
+X[31:0] establishes how many A-input highs/rises/edges are to be accumulated.
+
+Y[1:0] establishes A-input high/rise/edge sensitivity:
+
+         %00 = A-input high
+         %01 = A-input rise
+         %1x = A-input edge
+
+Time is measured in clock cycles until X highs/rises/edges are accumulated from the A-input. The measurement is then placed
+in Z, and IN is raised. RDPIN/RQPIN can then be used to retrieve the measurement. Z will be limited to $80000000.
+
+During reset (DIR=0), IN is low and Z is set to $00000001.
+
+
+
+
+%10010 AND Y[2] = Timeout on X clocks of missing A-input high/rise/edge
+
+If no A-input high/rise/edge occurs within X clocks, IN is raised, a new timeout period of X clocks begins, and Z maintains a
+
+                                                                                                                                     92
+running count of how many clocks have elapsed since the last A-input high/rise/edge. Z will be limited to $80000000 and can
+be read any time via RDPIN/RQPIN.
+
+
+If an A-input high/rise/edge does occur within X clocks, a new timeout period of X clocks begins and Z is reset to $00000001.
+
+
+X[31:0] establishes how many clocks before a timeout due to no A-input high/rise/edge occurring.
+
+Y[1:0] establishes A-input high/rise/edge sensitivity:
+
+         %00 = A-input high
+         %01 = A-input rise
+         %1x = A-input edge
+
+During reset (DIR=0), IN is low and Z is set to $00000001.
+
+
+
+
+%10011 = For X periods, count time
+
+%10100 = For X periods, count states
+
+X[31:0] establishes how many A-input rise/edge to B-input rise/edge periods are to be measured.
+
+Y[1:0] establishes A-input and B-input rise/edge sensitivity:
+
+         %00 = A-input rise to B-input rise
+         %01 = A-input rise to B-input edge
+         %10 = A-input edge to B-input rise
+         %11 = A-input edge to B-input edge
+
+         Note: The B-input can be set to the same pin as the A-input for single-pin cycle measurement.
+
+Clock cycles or A-input trigger states are counted from each A-input rise/edge to each B-input rise/edge for X periods. If the
+A-input rise/edge is ever coincident with the B-input rise/edge at the end of the period, the start of the next period is registered.
+Upon completion of X periods, the measurement is placed in Z, IN is raised, and a new measurement begins. RDPIN/RQPIN
+can then be used to retrieve the completed measurement. Z will be limited to $80000000.
+
+
+The first mode is intended to be used as an oversampling period measurement, while the second mode is a complementary
+duty measurement.
+
+During reset (DIR=0), IN is low and Z is set to $00000000.
+
+
+
+
+%10101 = For periods in X+ clock cycles, count time
+
+%10110 = For periods in X+ clock cycles, count states
+
+%10111 = For periods in X+ clock cycles, count periods
+
+X[31:0] establishes the minimum number of clock cycles to track periods for. Periods are A-input rise/edge to B-input
+
+                                                                                                                                  93
+rise/edge.
+
+Y[1:0] establishes A-input and B-input rise/edge sensitivity:
+
+           %00 = A-input rise to B-input rise
+           %01 = A-input rise to B-input edge
+           %10 = A-input edge to B-input rise
+           %11 = A-input edge to B-input edge
+
+           Note: The B-input can be set to the same pin as the A-input for single-pin cycle measurement.
+
+A measurement is taken across some number of A-input rise/edge to B-input rise/edge periods, until X clock cycles elapse and
+then any period in progress completes. If the A-input rise/edge is ever coincident with the B-input rise/edge at the end of the
+period, the start of the next period is registered. Upon completion, the measurement is placed in Z, IN is raised, and a new
+measurement begins. RDPIN/RQPIN can then be used to retrieve the completed measurement. Z will be limited to
+$80000000.
+
+
+The first mode accumulates time within each period, for an oversampled period measurement.
+
+
+The second mode accumulates A-input trigger states within each period, for an oversampled duty measurement.
+
+
+The third mode counts the periods.
+
+
+Knowing how many clock cycles some number of complete periods took, and what the duty was, affords a very time-efficient
+and precise means of determining frequency and duty cycle. At least two of these measurements must be made concurrently
+to get useful results.
+
+
+During reset (DIR=0), IN is low and Z is set to $00000000.
+
+
+
+
+%11000 = ADC sample/filter/capture, internally clocked
+
+%11001 = ADC sample/filter/capture, externally clocked
+
+These modes facilitate sampling, SINC filtering, and raw capturing of ADC bitstream data.
+
+
+For the internally-clocked mode, the A-input will be sampled on every clock and should be a pin configured for ADC operation
+(M[12:10] = %100). In the externally-clocked mode, the A-input will be sampled on each B-input rise, so that an external
+delta-sigma ADC may be employed.
+
+
+WXPIN sets the mode to X[5:4] and the sample period to POWER(2, X[3:0]). Not all mode and period combinations are useful,
+or even functional:
+
+
+                  X[5:4] →               %00                   %01                   %10                      %11
+                  Mode →            SINC2 Sampling         SINC2 Filtering       SINC3 Filtering      Bitstream capturing
+
+  X[3:0]       Sample Period      Sample Resolution        Post-diff ENOB*      Post-diff ENOB*        (LSB = oldest bit)
+
+                                                                                                                                  94
+  %0000           1 clock              impractical             impractical           impractical              1 new bit
+
+  %0001          2 clocks                 2 bits               impractical           impractical              2 new bits
+
+  %0010          4 clocks                 3 bits               impractical           impractical              4 new bits
+
+  %0011          8 clocks                 4 bits                    4                impractical              8 new bits
+
+  %0100          16 clocks                5 bits                    5                     8                  16 new bits
+
+  %0101          32 clocks                6 bits                    6                     10                 32 new bits
+
+  %0110          64 clocks                7 bits                    7                     12                   overflow
+
+  %0111         128 clocks                8 bits                    8                     14                   overflow
+
+  %1000         256 clocks                9 bits                    9                     16                   overflow
+
+  %1001         512 clocks               10 bits                   10                     18                   overflow
+
+  %1010        1,024 clocks              11 bits                   11                 overflow                 overflow
+
+  %1011        2,048 clocks              12 bits                   12                 overflow                 overflow
+
+  %1100        4,096 clocks              13 bits                   13                 overflow                 overflow
+
+  %1101        8,192 clocks              14 bits                   14                 overflow                 overflow
+
+  %1110       16,384 clocks             overflow                overflow              overflow                 overflow
+
+  %1111       32,768 clocks             overflow                overflow              overflow                 overflow
+* ENOB = Effective Number of Bits, or the sample resolution
+
+
+For modes other than SINC2 Sampling (X[5:4] > %00), WYPIN may be used after WXPIN to override the initial period
+established by X[3:0] and replace it with the arbitrary value in Y[13:0]. For example, if you'd like to do SINC3 filtering with a
+period of 320 clocks, you could follow the WXPIN with a 'WYPIN #320,adcpin'. The smart pin accumulators are 27 bits wide.
+This allows up to 2^(27/3), or 512, clocks per decimation in SINC3 filtering mode and up to 2^(27/2), or 11,585, clocks in
+SINC2 filtering mode.
+
+
+Upon completion of each sample period, the measurement is placed in Z, IN is raised, and a new measurement begins.
+RDPIN/RQPIN can then be used to retrieve the completed measurement.
+
+
+
+
+About SINC2 and SINC3 filtering
+
+SINC2 filtering works by summing the input bit into an accumulator on each clock which, in turn, is summed into another
+accumulator, to create a double integration. At the end of each sampling period, the difference between the new and previous
+second accumulator's value is the conversion sample, and the 'previous' value is updated. This process has the pleasant
+effect of returning an extra bit of resolution over simple bit-summing, as well as filtering away rectangular-sampling-window
+effects. SINC2 filtering is best for DC measurements, where precision is important. Practical measurements of 14-bit resolution
+can be made every 8,192 clocks using SINC2 filtering. After starting SINC2 filtering, the filter will become accurate starting on
+the second period.
+
+
+                                                                                                                                    95
+SINC3 filtering is like SINC2, but employs an additional level of accumulation to increase sensitivity to dynamics in the input
+signal. SINC3 doubles the ENOB (effective number of bits) over simple bit-summing for fast signals, but it is only slightly better
+at DC measurements than SINC2 filtering at the same sample period. Because SINC3 takes more resources within the smart
+pin, it is limited to 512 samples per period, making it less practical than SINC2 for precision DC measurements, but quite ideal
+for tracking fast, dynamic signals. After starting SINC3 filtering, the filter will become accurate starting on the third period.
+
+
+Because the accumulators are 27 bits wide, 32-bit integer adds and subtracts in software will roll over incorrectly. There are
+two ways to handle this:
+
+
+         You can either prescale the 27-bit values to 32-bit values:
+
+
+                   RDPIN       x,#adcpin                        'get SINC2 accumulator
+                   SHL         x,#5                             'prescale 27-bit to 32-bit
+                   SUB         x,diff                           'compute sample
+                   ADD         diff,x                           'update diff value
+
+
+         Or you can post-trim then to 27-bit values:
+
+
+                   RDPIN       x,#adcpin                        'get SINC2 accumulator
+                   SUB         x,diff                           'compute sample
+                   ADD         diff,x                           'update diff value
+                   ZEROX       x,#26                            'trim to 27-bit
+
+
+
+SINC2 Sampling Mode (%00)
+
+This mode performs complete SINC2 conversions, updating the ADC output sample at the end of each period. Once this mode
+is enabled, it is only necessary to do a RDPIN/RQPIN to acquire the latest ADC sample. The limitation of this mode is that it
+only works at power-of-2 sample periods, since that stricture afforded efficient implementation within the smart pin, making
+complete conversions possible without software. There is an additional SINC2 filtering mode (%01) which allows
+non-power-of-2 sample periods, but you must perform the difference computation in software.
+
+
+To begin SINC2 sampling:
+
+
+                   WRPIN       ##%100011_0000000_00_11000_0,adcpin                      'configure ADC+sample pin(s)
+                   WXPIN       #%00_0111,adcpin                                         'SINC2 sampling at 8 bits
+                   DIRH        adcpin                                                   'enable smart pin(s)
+
+
+NOTE: The variable 'adcpin' could enable multiple pins by having the additional number of pins in bits 10..6. For example, if
+'adcpin' held %00111_010000, pins 16 through 23 would have been simultaneously configured by the above code.
+
+
+To read the latest ADC sample, just do a RDPIN/RQPIN:
+
+
+                   RDPIN       sample,adcpin                                            'read sample at any time
+
+
+                                                                                                                                    96
+

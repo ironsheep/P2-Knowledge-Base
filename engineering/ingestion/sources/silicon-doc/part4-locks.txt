@@ -1,0 +1,143 @@
+         NOTE: A lock will also be implicitly released if the cog that's holding the lock is stopped (COGSTOP) or restarted
+         (COGINIT), or if LOCKRET is executed for that lock.
+
+
+LOCKREL can also be used to query the current lock status. When LOCKREL is executed with WC, the C flag will indicate
+whether the lock is currently taken. Additionally, if the D field references a register (not an immediate value), the register will
+be written with the cog ID of the current owner (if held) or last owner (if released). If the cog executing LOCKREL is also the
+cog that is holding the lock, the normal LOCKREL behavior will still be performed (i.e. the lock will be released).
+
+
+
+
+SMART PINS
+Each I/O pin has a 'smart pin' circuit which, when enabled, performs some autonomous function on the pin. Smart pins free the
+cogs from needing to micro-manage many I/O operations by providing high-bandwidth concurrent hardware functions which
+cogs could not perform as well on their own by manipulating I/O pins via instructions.
+
+
+Normally, an I/O pin's output enable is controlled by its DIR bit and its output state is controlled by its OUT bit, while the IN bit
+returns the pin's read state. In smart pin modes, the DIR bit is used as an active-low reset signal to the smart pin circuitry,
+while the output enable state is controlled by a configuration bit. In some modes, the smart pin takes over driving the output
+state, in which case the OUT bit gets ignored. The IN bit serves as a flag to indicate to the cog(s) that the smart pin has
+completed some function or an event has occurred, and acknowledgment is perhaps needed.
+
+
+Smart pins have four 32-bit registers inside of them:
+
+
+         mode      - smart pin mode, as well as low-level I/O pin mode (write-only)
+         X         - mode-specific parameter (write-only)
+         Y         - mode-specific parameter (write-only)
+         Z         - mode-specific result (read-only)
+
+
+These four registers are written and read via the following 2-clock instructions, in which S/# is used to select the pin number
+(0..63) and D/# is the 32-bit data conduit:
+
+
+     WRPIN       D/#,S/#                - Set smart pin S/# mode to D/#, ack pin
+     WXPIN       D/#,S/#                - Set smart pin S/# parameter X to D/#, ack pin
+     WYPIN       D/#,S/#                - Set smart pin S/# parameter Y to D/#, ack pin
+     RDPIN       D,S/# {WC}             - Get smart pin S/# result Z into D, flag into C, ack pin
+     RQPIN       D,S/# {WC}             - Get smart pin S/# result Z into D, flag into C, don't ack pin
+     AKPIN       S/#                    - Acknowledge pin S/#
+
+
+
+Each cog has a 34-bit bus to each smart pin for write data and acknowledgment signalling. Each smart pin OR's all incoming
+34-bit buses from the cogs in the same way DIR and OUT bits are OR'd before going to the pins. Therefore, if you intend to
+have multiple cogs execute WRPIN / WXPIN / WYPIN / RDPIN / AKPIN instructions on the same smart pin, you must be sure
+that they do so at different times, in order to avoid clobbering each other's bus data. Any number of cogs can read a smart pin
+simultaneously, without bus conflict, though, by using RQPIN ('read quiet'), since it does not utilize the 34-bit cog-to-smart-pin
+bus for acknowledgement signalling, like RDPIN does.
+
+                                                                                                                                      72
+Each smart pin has an outgoing 33-bit bus which conveys its Z result and a special flag. RDPIN and RQPIN are used to
+multiplex and read these buses, so that a pin's Z result is read into D and its special flag can be read into C. C will be either a
+mode-related flag or the MSB of the Z result.
+
+
+For the WRPIN instruction, which establishes both the low-level and smart-pin configuration for each I/O pin, the D operand is
+composed as:
+
+
+D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
+
+
+ %AAAA:     'A' input selector
+                  0xxx = true (default)
+                  1xxx = inverted
+                  x000 = this pin's read state (default)
+                  x001 = relative +1 pin's read state
+                  x010 = relative +2 pin's read state
+                  x011 = relative +3 pin's read state
+                  x100 = this pin's OUT bit from cogs
+                  x101 = relative -3 pin's read state
+                  x110 = relative -2 pin's read state
+                  x111 = relative -1 pin's read state
+
+
+ %BBBB:     'B' input selector
+                  0xxx = true (default)
+                  1xxx = inverted
+                  x000 = this pin's read state (default)
+                  x001 = relative +1 pin's read state
+                  x010 = relative +2 pin's read state
+                  x011 = relative +3 pin's read state
+                  x100 = this pin's OUT bit from cogs
+                  x101 = relative -3 pin's read state
+                  x110 = relative -2 pin's read state
+                  x111 = relative -1 pin's read state
+
+
+  %FFF:     'A' and 'B' input logic/filtering (after 'A' and 'B' input selectors)
+                  000 = A, B (default)
+                  001 = A AND B, B
+                  010 = A OR       B, B
+                  011 = A XOR B, B
+                  100 = A, B, both filtered using global filt0 settings
+                  101 = A, B, both filtered using global filt1 settings
+                  110 = A, B, both filtered using global filt2 settings
+                  111 = A, B, both filtered using global filt3 settings
+
+
+                  The resultant 'A' will drive the IN signal in non-smart-pin modes.
+
+
+
+                                                                                                                                  73
+%M..M:   low-level pin control
+
+In the Spin2 documentation, there are many predefined labels documented, which cover these
+pin configurations, as well as the smart pin modes.
+
+
+
+
+  %TT:   pin DIR/OUT control (default = %00)
+
+
+         for odd pins,   'OTHER' = even pin's NOT output state (diff source)
+         for even pins, 'OTHER' = unique pseudo-random bit (noise source)
+         for all pins,   'SMART' = smart pin output which overrides OUT/OTHER
+         'DAC_MODE' is enabled when M[12:10] = %101
+         'BIT_DAC' outputs {2{M[7:4]}} for 'high' or {2{M[3:0]}} for 'low' in DAC_MODE
+
+
+         for smart pin mode off (%SSSSS = %00000):
+
+
+             DIR enables output
+
+
+             for non-DAC_MODE:
+                 0x = OUT drives output
+                 1x = OTHER drives output
+             for DAC_MODE:
+                 00 = OUT enables ADC, M[7:0] sets DAC level
+                 01 = OUT enables ADC, M[3:0] selects cog DAC channel
+
+
+                                                                                             74
+

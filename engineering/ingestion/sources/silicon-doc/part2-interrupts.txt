@@ -1,0 +1,122 @@
+   ●   Cleared on SETPAT
+   ●   Set whenever (INA & D) != S after 'SETPAT D/#,S/#' with C=0 and Z=0.
+   ●   Set whenever (INA & D) == S after 'SETPAT D/#,S/#' with C=0 and Z=1.
+   ●   Set whenever (INB & D) != S after 'SETPAT D/#,S/#' with C=1 and Z=0.
+   ●   Set whenever (INB & D) == S after 'SETPAT D/#,S/#' with C=1 and Z=1.
+   ●   Also cleared on POLLPAT/WAITPAT/JPAT/JNPAT.
+
+
+
+POLLFBW/WAITFBW event flag
+
+   ●   Cleared on RDFAST/WRFAST/FBLOCK.
+   ●   Set whenever the hub RAM FIFO interface exhausts its block count and reloads its 'block count' and 'start address'.
+   ●   Also cleared on POLLFBW/WAITFBW/JFBW/JNFBW.
+
+
+
+POLLXMT/WAITXMT event flag
+
+   ●   Cleared on XINIT/XZERO/XCONT.
+   ●   Set whenever the streamer is ready for a new command.
+   ●   Also cleared on POLLXMT/WAITXMT/JXMT/JNXMT.
+
+
+
+POLLXFI/WAITXFI event flag
+
+   ●   Cleared on XINIT/XZERO/XCONT.
+   ●   Set whenever the streamer runs out of commands.
+   ●   Also cleared on POLLXFI/WAITXFI/JXFI/JNXFI.
+
+
+
+POLLXRO/WAITXRO event flag
+
+   ●   Cleared on XINIT/XZERO/XCONT.
+   ●   Set whenever the the streamer NCO rolls over.
+   ●   Also cleared on POLLXRO/WAITXRO/JXRO/JNXRO.
+
+
+
+POLLXRL/WAITXRL event flag
+
+   ●   Cleared on cog start.
+   ●   Set whenever location $1FF of the lookup RAM is read by the streamer.
+   ●   Also cleared on POLLXRL/WAITXRL/JXRL/JNXRL.
+
+
+
+POLLATN/WAITATN event flag
+
+   ●   Cleared on cog start.
+   ●   Set whenever any cogs request attention.
+   ●   Also cleared on POLLATN/WAITATN/JATN/JNATN.
+
+
+
+POLLQMT event flag
+
+   ●   Cleared on cog start.
+
+                                                                                                                         47
+    ●    Set whenever GETQX/GETQY executes without any CORDIC results available or in progress.
+    ●    Also cleared on POLLQMT/WAITQMT/JQMT/JNQMT.
+
+
+
+
+Example:           ADDCT1/WAITCT1
+
+         'ADDCT1 D,S/#' must be used to establish a CT target. This is done by first using 'GETCT D' to get the current CT
+         value into a register, and then using ADDCT1 to add into that register, thereby making a future CT target, which,
+         when passed, will trigger the CT-passed-CT1 event and set the related event flag.
+
+                    GETCT      x                     'get initial CT
+                    ADDCT1     x,#500                'make initial CT1 target
+
+           .loop    WAITCT1                          'wait for CT to pass CT1 target
+                    ADDCT1 x,#500                    'update CT1 target
+                    DRVNOT #0                        'toggle P0
+                    JMP     #.loop                   'loop to the WAITCT1
+
+
+
+         It doesn't matter what register is used to keep track of the CT1 target. Whenever ADDCT1 executes, S/# is added
+         into D, and the result gets copied into a dedicated CT1 target register that is compared to CT on every clock. When
+         CT passes the CT1 target, the event flag is set. ADDCT1 clears the CT-passed-CT1 event flag to help with
+         initialization and cycling.
+
+
+
+Selectable Events
+Each cog can track up to four selectable pin, LUT, or hub lock events. This is accomplished by using the SETSEn instruction,
+where "n" is 1, 2, 3, or 4. In order for user code to detect the occurrence of the selected event, the following options are
+available:
+
+    ●    The matched WAITSEn instruction will block until the event occurs
+    ●    The matched POLLSEn instruction will check for the event without blocking
+    ●    The matches JSEn and JNSEn branch instructions will branch according to the polled event state
+    ●    As an interrupt (see INTERRUPTS)
+
+Each selected event is set or cleared according to the following rules:
+
+    ●    SEn is set whenever the configured event occurs.
+    ●    SEn is cleared on matched POLLSEn / WAITSEn / JSEn / JNSEn.
+    ●    SEn is cleared when matched 'SETSEn D/#' is called.
+
+SETSEn D/# accepts the following configuration values:
+
+         %000_00_00AA = this cog reads LUT address %1111111AA
+         %000_00_01AA = this cog writes LUT address %1111111AA
+         %000_00_10AA = odd/even companion cog reads LUT address %1111111AA
+         %000_00_11AA = odd/even companion cog writes LUT address %1111111AA
+
+         %000_01_LLLL = hub lock %LLLL rises
+         %000_10_LLLL = hub lock %LLLL falls
+         %000_11_LLLL = hub lock %LLLL changes
+
+
+
+                                                                                                                               48
+

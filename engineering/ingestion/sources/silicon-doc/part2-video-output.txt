@@ -1,0 +1,619 @@
+                    qvector x,y                            'convert (x,y) to (rho,theta)
+                    getqx   x                              'get rho (power measurement)
+
+                    shr     x,#shifts                      'shift power down to byte
+                    setbyte dacmode,x,#1                   'insert into dacmode
+                    wrpin   dacmode,#dacpin                'update DAC pin
+
+                    jmp       #loop                        'loop
+
+ 'Data
+
+ adcmode            long      %0000_0000_000_100011_0000000_00_00000_0                  'ADC mode
+ dacmode            long      %0000_0000_000_10110_00000000_00_00000_0                  'DAC mode
+
+ freq               long      round(1_000_000.0/250_000_000.0 * 65536.0 * 32768.0)                '1.000000 MHz
+
+ dds_d              long      %1111_0000_0000_0111<<16 + sinc2<<23 + cycles             'Goertzel mode, pin 0..3 in
+ dds_s              long      %0000_0001_000_000000000                                  'input on pin +0, 512 table
+
+ x                  res       1
+ y                  res       1
+ z                  res       1
+ xdiff              res       1
+ ydiff              res       1
+
+
+
+
+In the pictures that follow, you can see the program's DAC output pin while a function generator drives a 0-3.3V sine wave into
+the ADC input pin, sweeping from 950-1050KHz over 12ms:
+
+
+
+
+                                                                                                                             38
+You can see that SINC2 mode has a higher Q than SINC1 mode. Due to rapid (X,Y) accumulator growth, SINC2 may require
+the sine/cosine table to be reduced in amplitude to avoid (X,Y) accumulator overflow. This was done in the example program
+above, where it was reduced from ±127 for SINC1 to ±10 for SINC2.
+
+
+
+Digital Video Output (DVI/HDMI)
+
+The streamer can serialize its internal 32 pin output data P[31:0] into 8-pin/10-bit digital video format, where the 32-pin output
+becomes $000000xx with $xx being a reversible pattern of RED, GRN, BLU, and CLK differential pairs.
+
+The SETCMOD instruction is used to write bits 8:7 of the CMOD register to set digital video mode:
+
+
+  CMOD[8:7]         Mode         Pin +31:8   Pin +7     Pin +6     Pin +5     Pin +4      Pin +3     Pin +2     Pin +1    Pin +0
+
+     %0x           Normal         P[31:8]      P[7]      P[6]       P[5]       P[4]        P[3]       P[2]        P[1]        P[0]
+
+     %10           DVI fwd       $000000      RED+       RED-      GRN+       GRN-        BLU+       BLU-        CLK+         CLK-
+
+     %11           DVI rev       $000000      CLK-       CLK+       BLU-      BLU+        GRN-       GRN+        RED-        RED+
+
+
+
+Eight-bit red, green, and blue pixel data are encoded into 10-bit TMDS patterns for transmission, while control data, such as
+horizontal and vertical syncs, are transmitted literally. P[1] in the internal pin output data selects whether data will be
+TMDS-encoded or sent out literally:
+
+
+                       P[31:0]                              RED+/- serial          GRN+/- serial              BLU+/- serial
+
+  %RRRRRRRR_GGGGGGGG_BBBBBBBB_xxxxxx0x                       %RRRRRRRR                 %GGGGGGGG               %BBBBBBBB
+                                                            gets encoded              gets encoded            gets encoded
+
+
+
+                                                                                                                                     39
+  %rrrrrrrrrr_gggggggggg_bbbbbbbbbb_1x                   %rrrrrrrrrr            %gggggggggg            %bbbbbbbbbb
+                                                         is sent literally      is sent literally      is sent literally
+
+
+
+Digital video output mode requires that the P2 clock frequency be 10x the pixel rate. For 640x480 digital video, which has a
+pixel rate of 25MHz, the P2 chip must be clocked at 250MHz.
+
+The NCO frequency must be set to 1/10 of the main clock using the value $0CCCCCCC+1, where the +1 forces initial NCO
+rollover on the 10th clock.
+
+The following program displays a 16bpp image in 640x480 HDMI mode:
+
+
+ '********************************************
+ '* VGA 640 x 480 x 16bpp 5:6:5 RGB - HDMI *
+ '********************************************
+
+ CON                hdmi_base = 16               'must be a multiple of 8
+
+ DAT                org
+ '
+ '
+ ' Setup
+ '
+                    hubset    ##%1_000001_0000011000_1111_10_00                'config PLL, 20MHz/2*25*1 = 250MHz
+                    waitx     ##20_000_000 / 200                               'allow crystal+PLL 5ms to stabilize
+                    hubset    ##%1_000001_0000011000_1111_10_11                'switch to PLL
+
+                    rdfast    ##640*350*2/64,##$1000       'set rdfast to wrap on bitmap
+
+                    setxfrq ##$0CCCCCCC+1                  'set streamer freq to 1/10th clk
+
+                    setcmod #$100                          'enable HDMI mode
+
+                    drvl      #7<<6 + hdmi_base            'enable HDMI pins
+
+                    wrpin     ##%100100_00_00000_0,#7<<6 + hdmi_base           'set 1mA drive on HDMI pins
+ '
+ '
+ ' Field loop
+ '
+ field              mov       hsync0,sync_000              'vsync off
+                    mov       hsync1,sync_001
+
+                    callpa    #90,#blank                   'top blanks
+
+                    mov       x,#350                       'set visible lines
+ line               call      #hsync                       'do horizontal sync
+                    xcont     m_rf,#0                      'do visible line
+                    djnz      x,#line                      'another line?
+
+                    callpa    #83,#blank                   'bottom blanks
+
+                    mov       hsync0,sync_222              'vsync on
+                    mov       hsync1,sync_223
+
+                    callpa    #2,#blank                    'vertical sync blanks
+
+                    jmp       #field                       'loop
+ '
+ '
+ ' Subroutines
+ '
+ blank              call      #hsync                       'blank lines
+                    xcont     m_vi,hsync0
+
+
+                                                                                                                               40
+            _ret_    djnz     pa,#blank
+
+ hsync               xcont    m_bs,hsync0                   'horizontal sync
+                     xzero    m_sn,hsync1
+          _ret_      xcont    m_bv,hsync0
+ '
+ '
+ ' Initialized data
+ '
+ sync_000        long         %1101010100_1101010100_1101010100_10             '
+ sync_001        long         %1101010100_1101010100_0010101011_10             '        hsync
+ sync_222        long         %0101010100_0101010100_0101010100_10             'vsync
+ sync_223        long         %0101010100_0101010100_1010101011_10             'vsync + hsync
+
+ m_bs                long     $70810000    +   hdmi_base<<17   +   16          'before sync
+ m_sn                long     $70810000    +   hdmi_base<<17   +   96          'sync
+ m_bv                long     $70810000    +   hdmi_base<<17   +   48          'before visible
+ m_vi                long     $70810000    +   hdmi_base<<17   +   640         'visible
+
+ m_rf            long         $B0850000 + hdmi_base<<17 + 640                  'visible rfword rgb16 (5:6:5)
+ '
+ '
+ ' Uninitialized data
+ '
+ x               res          1
+
+ hsync0              res      1
+ hsync1              res      1
+ '
+ '
+ ' Bitmap
+ '
+                     orgh     $1000 - 70                    'justify pixels at $1000
+                     file     "birds_16bpp.bmp"             'rayman's picture (640 x 350)
+
+
+
+
+COLORSPACE CONVERTER
+
+Each cog has a colorspace converter which can perform ongoing matrix transformations and modulation of the cog's 8-bit DAC
+channels. The colorspace converter is intended primarily for baseband video modulation, but it can also be used as a
+general-purpose RF modulator.
+
+The colorspace converter is configured via the following instructions:
+
+         SETCY      {#}D             - Set colorspace converter CY parameter to D[31:0]
+         SETCI      {#}D             - Set colorspace converter CI parameter to D[31:0]
+         SETCQ      {#}D             - Set colorspace converter CQ parameter to D[31:0]
+         SETCFRQ {#}D                - Set colorspace converter CFRQ parameter to D[31:0]
+         SETCMOD {#}D                - Set colorspace converter CMOD parameter to D[8:0]
+
+
+It is intended that DAC3/DAC2/DAC1 serve as R/G/B channels. On each clock, new matrix and modulation calculations are
+performed through a pipeline. There is a group delay of five clocks from DAC-channel inputs to outputs when the colorspace
+converter is in use.
+
+For the following signed multiply-accumulate computations, CMOD[4] determines whether the CY/CI/CQ terms will be
+sign-extended (CMOD[4] = 1) or zero-extended (CMOD[4] = 0). If zero-extended, using 128 for a CY/CI/CQ term will result in
+no attenuation of the related DAC term:
+
+                                                                                                                             41
+        Y[7:0]            = (DAC3 * CY[31:24] + DAC2 * CY[23:16] + DAC1 * CY[15:8]) / 128
+        I[7:0]            = (DAC3 * CI[31:24] + DAC2 * CI[23:16] + DAC1 * CI[15:8]) / 128
+        Q[7:0]            = (DAC3 * CQ[31:24] + DAC2 * CQ[23:16] + DAC1 * CQ[15:8]) / 128
+
+
+The modulator works by subtracting CFRQ from PHS on each clock cycle, in order to get a clockwise angle rotation in the
+upper bits of PHS. PHS[31:24] is then used to rotate the coordinate pair (I, Q). The rotated Q coordinate becomes IQ.
+Because a 5-stage CORDIC rotator is used to perform the rotation, IQ gets scaled by 1.646. When using the modulator, this
+scaling will need to be taken into account when computing your CI/CQ terms, in order to avoid IQ overflow:
+
+        PHS[31:0]         = PHS[31:0] - CFRQ[31:0]
+        IQ[7:0]           = Q of (I,Q) after being rotated by PHS and multiplied by 1.646
+
+
+The formula for computing CFRQ for a desired modulation frequency is: $1_0000_0000 * desired_frequency /
+clock_frequency. For example, if you wanted 3.579545 MHz and your clock frequency was 80 MHz, you would compute:
+$1_0000_0000 * 3_579_545 / 80_000_000 = $0B74_5CFE, which you would set using the SETCFRQ instruction.
+
+The preliminary output terms are computed as follows:
+
+        FY[7:0]           = CY[7:0] + (DAC0 & {8{CMOD[3]}}) + Y[7:0]                    (VGA R / HDTV Y)
+        FI[7:0]           = CI[7:0] + (DAC0 & {8{CMOD[2]}}) + I[7:0]                    (VGA G / HDTV Pb)
+        FQ[7:0]           = CQ[7:0] + (DAC0 & {8{CMOD[1]}}) + Q[7:0]                    (VGA B / HDTV Pr)
+
+
+        FS[7:0]           = {8{DAC0[0] ^ CMOD[0]}}                                      (VGA H-Sync)
+
+
+        FIQ[7:0]          = CQ[7:0] + IQ[7:0]                                           (Chroma)
+
+
+        FYS[7:0]          = DAC0[1]         ?        8'b0                               (1x = Luma Sync)
+                          : DAC0[0]         ?        CI[7:0]                            (01 = Luma Blank/Burst)
+                                            :        CY[7:0] + Y[7:0]                   (00 = Luma Visible)
+
+
+        FYC[7:0]          = FYS[7:0] + IQ[7:0]                                          (Composite Luma+Chroma)
+
+
+
+
+The final output terms are selected by CMOD[6:5]:
+
+
+  CMOD[6:5]      Mode                                     DAC3           DAC2            DAC1            DAC0
+
+      00         <off>                                    DAC3           DAC2            DAC1            DAC0
+                                                         (bypass)       (bypass)        (bypass)        (bypass)
+
+      01         VGA (R-G-B) / HDTV (Y-Pb-Pr)               FY             FI              FQ              FS
+                                                          (R / Y)       (G / Pb)         (B / Pr)       (H-Sync)
+
+      10         NTSC/PAL Composite + S-Video              FYC           FYC             FIQ               FYS
+                                                        (Composite)   (Composite)      (Chroma)          (Luma)
+
+      11         NTSC/PAL Composite                        FYC           FYC             FYC             FYC
+                                                        (Composite)   (Composite)     (Composite)     (Composite)
+
+
+
+
+                                                                                                                            42
+I/O PIN TIMING
+
+I/O pins are controlled by cogs via the following cog registers:
+
+         DIRA     - output enable bits for P0..P31 (active high)
+         DIRB     - output enable bits for P32..P63 (active high)
+         OUTA     - output state bits for P0..P31 (corresponding DIRA bit must be high to enable output)
+         OUTB     - output state bits for P32..P63 (corresponding DIRB bit must be high to enable output)
+
+I/O pins are read by cogs via the following cog registers:
+
+         INA      - input state bits for P0..P31
+         INB      - input state bits for P32..P63
+
+Aside from general-purpose instructions which may operate on DIRA/DIRB/OUTA/OUTB, there are special pin instructions
+which operate on singular bits within these registers:
+
+         DIRL/DIRH/DIRC/DIRNC/DIRZ/DIRNZ/DIRRND/DIRNOT {#}D                          - affect pin D bit in DIRx
+         OUTL/OUTH/OUTC/OUTNC/OUTZ/OUTNZ/OUTRND/OUTNOT {#}D                          - affect pin D bit in OUTx
+         FLTL/FLTH/FLTC/FLTNC/FLTZ/FLTNZ/FLTRND/FLTNOT {#}D                          - affect pin D bit in OUTx, clear bit in DIRx
+         DRVL/DRVH/DRVC/DRVNC/DRVZ/DRVNZ/DRVRND/DRVNOT {#}D                          - affect pin D bit in OUTx, set bit in DIRx
+
+As well, aside from general-purpose instructions which may read INA/INB, there are special pin instructions which can read
+singular bits within these registers:
+
+         TESTP {#}D WC/WZ/ANDC/ANDZ/ORC/ORZ/XORC/XORZ                                - read pin D bit in INx and affect C or Z
+         TESTPN {#}D WC/WZ/ANDC/ANDZ/ORC/ORZ/XORC/XORZ                               - read pin D bit in !INx and affect C or Z
+
+When a DIRx/OUTx bit is changed by any instruction, it takes THREE additional clocks after the instruction before the pin
+starts transitioning to the new state. Here this delay is demonstrated using DRVH:
+
+                        ____0      ____1      ____2      ____3      ____4      ____5
+Clock:                /     \____/     \____/     \____/     \____/     \____/     \____/
+DIRA:                 |          | DIRA-->|      REG-->|    REG-->|    REG-->| P0 DRIV |
+OUTA:                 |          | OUTA-->|      REG-->|    REG-->|    REG-->| P0 HIGH |
+                      |                     |
+Instruction:          | DRVH #0             |
+
+
+When an INx register is read by an instruction, it will reflect the state of the pins registered THREE clocks before the start of
+the instruction. Here this delay is demonstrated using TESTB:
+
+                        ____0      ____1      ____2      ____3      ____4      ____5
+Clock:                /     \____/     \____/     \____/     \____/     \____/     \____/
+INA:                  | P0 IN-->|     REG-->|    REG-->|    REG-->|    ALU-->|    C/Z-->|
+                                                                  |                     |
+Instruction:                                                      | TESTB INA,#0        |
+
+When a TESTP/TESTPN instruction is used to read a pin, the value read will reflect the state of the pin registered TWO clocks
+before the start of the instruction. So, TESTP/TESTPN get fresher INx data than is available via the INx registers:
+
+                        ____0      ____1      ____2      ____3      ____4
+Clock:                /     \____/     \____/     \____/     \____/     \____/
+INA:                  | P0 IN-->|     REG-->|    REG-->|    REG-->|    C/Z-->|
+                                                                                                                                     43
+                                                               |                          |
+Instruction:                                                   | TESTP #0                 |
+
+
+
+COG ATTENTION
+
+Each cog can request the attention of other cogs by using the COGATN instruction:
+
+         COGATN     D/#                                         'get attention of cog(s), 2 clocks
+
+
+
+The D/# operand supplies a 16-bit value in which bits 0..15 represent cogs 0..15. For each set bit, the corresponding cog will
+be strobed, causing an 'attention' event for POLLATN/WAITATN and interrupt use. The 16 attention strobe outputs from all
+cogs are OR'd together to form a composite set of 16 strobes, from which each cog receives its particular strobe.
+
+         COGATN     #%0000_0000_1111_0000                       'request attention of cogs 4..7
+
+         POLLATN WC                                             'has attention been requested?
+
+         WAITATN                                                'wait for attention request
+
+         JATN       S/#                                         'jump to S/# if attention requested
+
+         JNATN      S/#                                         'jump to S/# if attention not requested
+
+
+
+In cases where multiple cogs may be requesting the attention of a single cog, some messaging structure may need to be
+implemented in hub RAM, in order to differentiate requests. In the main intended use case, the cog that is receiving an
+attention request knows which other cog is strobing it and how it is to respond.
+
+
+
+EVENTS
+
+Cogs monitor and track 16 different background events, numbered 0..15:
+
+             ●    Event 0 = An interrupt occurred
+             ●    Event 1 = CT passed CT1 (CT is the lower 32-bits of the free-running 64-bit global counter)
+             ●    Event 2 = CT passed CT2
+             ●    Event 3 = CT passed CT3
+             ●    Event 4 = Selectable event 1 occurred
+             ●    Event 5 = Selectable event 2 occurred
+             ●    Event 6 = Selectable event 3 occurred
+             ●    Event 7 = Selectable event 4 occurred
+             ●    Event 8 = A pattern match or mismatch occurred on either INA or INB
+             ●    Event 9 = Hub FIFO block-wrap occurred - a new start address and block count were loaded
+             ●    Event 10 = Streamer command buffer is empty - it's ready to accept a new command
+             ●    Event 11 = Streamer finished - it ran out of commands, now idle
+             ●    Event 12 = Streamer NCO rollover occurred
+             ●    Event 13 = Streamer read lookup RAM location $1FF
+             ●    Event 14 = Attention was requested by another cog or other cogs
+             ●    Event 15 = GETQX/GETQY executed without any CORDIC results available
+
+
+
+
+                                                                                                                             44
+Events are tracked and can be polled, waited for, and used as interrupt sources.
+
+Before explaining the details, consider the event-related instructions.
+
+First are the POLLxxx instructions which simultaneously return their event-occurred flag into C and/or Z, and clear their
+event-occurred flag (unless it's being set again by the event sensor):
+
+                                                                                     Interrupt source (0=off):
+POLLINT           Poll the interrupt-occurred event flag                             -
+POLLCT1           Poll the CT-passed-CT1 event flag                                  1
+POLLCT2           Poll the CT-passed-CT2 event flag                                  2
+POLLCT3           Poll the CT-passed-CT3 event flag                                  3
+POLLSE1           Poll the selectable-event-1 event flag                             4
+POLLSE2           Poll the selectable-event-2 event flag                             5
+POLLSE3           Poll the selectable-event-3 event flag                             6
+POLLSE4           Poll the selectable-event-4 event flag                             7
+POLLPAT           Poll the pin-pattern-detected event flag                           8
+POLLFBW           Poll the hub-FIFO-interface-block-wrap event flag                  9
+POLLXMT           Poll the streamer-empty event flag                                 10
+POLLXFI           Poll the streamer-finished event flag                              11
+POLLXRO           Poll the streamer-NCO-rollover event flag                          12
+POLLXRL           Poll the streamer-lookup-RAM-$1FF-read event flag                  13
+POLLATN           poll the attention-requested event flag                            14
+POLLQMT           Poll the CORDIC-read-but-no-results event flag                     15
+
+
+
+Next are the WAITxxx instructions, which will wait for their event-occurred flag to be set (in case it's not, already) and then
+clear their event-occurred flag (unless it's being set again by the event sensor), before resuming.
+
+By doing a SETQ right before one of these instructions, you can supply a future CT target value which will be used to end the
+wait prematurely, in case the event-occurred flag never went high before the CT target was reached. When using SETQ with
+'WAITxxx WC', C will be set if the timeout occurred before the event; otherwise, C will be cleared.
+
+WAITINT           Wait for an interrupt to occur, stalls the cog to save power
+WAITCT1           Wait for the CT-passed-CT1 event flag
+WAITCT2           Wait for the CT-passed-CT2 event flag
+WAITCT3           Wait for the CT-passed-CT3 event flag
+WAITSE1           Wait for the selectable-event-1 event flag
+WAITSE2           Wait for the selectable-event-2 event flag
+WAITSE3           Wait for the selectable-event-3 event flag
+WAITSE4           Wait for the selectable-event-4 event flag
+WAITPAT           Wait for the pin-pattern-detected event flag
+WAITFBW           Wait for the hub-FIFO-interface-block-wrap event flag
+WAITXMT           Wait for the streamer-empty event flag
+WAITXFI           Wait for the streamer-finished event flag
+WAITXRO           Wait for the streamer-NCO-rollover event flag
+WAITXRL           Wait for the streamer-lookup-RAM-$1FF-read event flag
+WAITATN           Wait for the attention-requested event flag
+
+There's no 'WAITQMT' because the event could not happen while waiting.
+
+Last are the 'Jxxx/JNxxx S/#' instructions, which each jump to S/# if their event-occurred flag is set (Jxxx) or clear (JNxxx).
+Whether or not a branch occurs, the event-occurred flag will be cleared, unless it's being set again by the event sensor.
+
+                                                                                                                                  45
+JINT/JNINT        Jump to S/# if the interrupt-occurred event flag is set/clear
+JCT1/JNCT1        Jump to S/# if the CT-passed-CT1 event flag is set/clear
+JCT2/JNCT2        Jump to S/# if the CT-passed-CT2 event flag is set/clear
+JCT3/JNCT3        Jump to S/# if the CT-passed-CT3 event flag is set/clear
+JSE1/JNSE1        Jump to S/# if the selectable-event-1 event flag is set/clear
+JSE2/JNSE2        Jump to S/# if the selectable-event-2 event flag is set/clear
+JSE3/JNSE3        Jump to S/# if the selectable-event-3 event flag is set/clear
+JSE4/JNSE4        Jump to S/# if the selectable-event-4 event flag is set/clear
+JPAT/JNPAT        Jump to S/# if the pin-pattern-detected event flag is set/clear
+JFBW/JNFBW        Jump to S/# if the hub-FIFO-interface-block-wrap event flag is set/clear
+JXMT/JNXMT        Jump to S/# if the streamer-empty event flag is set/clear
+JXFI/JNXFI        Jump to S/# if the streamer-finished event flag is set/clear
+JXRO/JNXRO        Jump to S/# if the streamer-NCO-rollover event flag is set/clear
+JXRL/JNXRL        Jump to S/# if the streamer-lookup-RAM-$1FF-read event flag is set/clear
+JATN/JNATN        Jump to S/# if the attention-requested event flag is set/clear
+JQMT/JNQMT        Jump to S/# if the CORDIC-read-but-no-results event flag is set/clear
+
+
+
+Here are detailed descriptions of each event flag. Understand that the 'set' events can also be used as interrupt sources
+(except in the case of the first flag which is set when an interrupt occurs):
+
+
+
+POLLINT/WAITINT event flag
+
+    ●    Cleared on cog start.
+    ●    Set whenever interrupt 1, 2, or 3 occurs (debug interrupts are ignored).
+    ●    Also cleared on POLLINT/WAITINT/JINT/JNINT.
+
+
+
+POLLCT1/WAITCT1 event flag
+
+    ●    Cleared on ADDCT1.
+    ●    Set whenever CT passes the result of the ADDCT1 (MSB of CT minus CT1 is 0).
+    ●    Also cleared on POLLCT1/WAITCT1/JCT1/JNCT1.
+
+
+
+POLLCT2/WAITCT2 event flag
+
+    ●    Cleared on ADDCT2.
+    ●    Set whenever CT passes the result of the ADDCT2 (MSB of CT minus CT2 is 0).
+    ●    Also cleared on POLLCT2/WAITCT2/JCT2/JNCT2.
+
+
+
+POLLCT3/WAITCT3 event flag
+
+    ●    Cleared on ADDCT3.
+    ●    Set whenever CT passes the result of the ADDCT3 (MSB of CT minus CT3 is 0).
+    ●    Also cleared on POLLCT3/WAITCT3/JCT3/JNCT3.
+
+
+
+POLLPAT/WAITPAT event flag
+
+
+
+                                                                                                                            46
+   ●   Cleared on SETPAT
+   ●   Set whenever (INA & D) != S after 'SETPAT D/#,S/#' with C=0 and Z=0.
+   ●   Set whenever (INA & D) == S after 'SETPAT D/#,S/#' with C=0 and Z=1.
+   ●   Set whenever (INB & D) != S after 'SETPAT D/#,S/#' with C=1 and Z=0.
+   ●   Set whenever (INB & D) == S after 'SETPAT D/#,S/#' with C=1 and Z=1.
+   ●   Also cleared on POLLPAT/WAITPAT/JPAT/JNPAT.
+
+
+
+POLLFBW/WAITFBW event flag
+
+   ●   Cleared on RDFAST/WRFAST/FBLOCK.
+   ●   Set whenever the hub RAM FIFO interface exhausts its block count and reloads its 'block count' and 'start address'.
+   ●   Also cleared on POLLFBW/WAITFBW/JFBW/JNFBW.
+
+
+
+POLLXMT/WAITXMT event flag
+
+   ●   Cleared on XINIT/XZERO/XCONT.
+   ●   Set whenever the streamer is ready for a new command.
+   ●   Also cleared on POLLXMT/WAITXMT/JXMT/JNXMT.
+
+
+
+POLLXFI/WAITXFI event flag
+
+   ●   Cleared on XINIT/XZERO/XCONT.
+   ●   Set whenever the streamer runs out of commands.
+   ●   Also cleared on POLLXFI/WAITXFI/JXFI/JNXFI.
+
+
+
+POLLXRO/WAITXRO event flag
+
+   ●   Cleared on XINIT/XZERO/XCONT.
+   ●   Set whenever the the streamer NCO rolls over.
+   ●   Also cleared on POLLXRO/WAITXRO/JXRO/JNXRO.
+
+
+
+POLLXRL/WAITXRL event flag
+
+   ●   Cleared on cog start.
+   ●   Set whenever location $1FF of the lookup RAM is read by the streamer.
+   ●   Also cleared on POLLXRL/WAITXRL/JXRL/JNXRL.
+
+
+
+POLLATN/WAITATN event flag
+
+   ●   Cleared on cog start.
+   ●   Set whenever any cogs request attention.
+   ●   Also cleared on POLLATN/WAITATN/JATN/JNATN.
+
+
+
+POLLQMT event flag
+
+   ●   Cleared on cog start.
+
+                                                                                                                         47
+    ●    Set whenever GETQX/GETQY executes without any CORDIC results available or in progress.
+    ●    Also cleared on POLLQMT/WAITQMT/JQMT/JNQMT.
+
+
+
+
+Example:           ADDCT1/WAITCT1
+
+         'ADDCT1 D,S/#' must be used to establish a CT target. This is done by first using 'GETCT D' to get the current CT
+         value into a register, and then using ADDCT1 to add into that register, thereby making a future CT target, which,
+         when passed, will trigger the CT-passed-CT1 event and set the related event flag.
+
+                    GETCT      x                     'get initial CT
+                    ADDCT1     x,#500                'make initial CT1 target
+
+           .loop    WAITCT1                          'wait for CT to pass CT1 target
+                    ADDCT1 x,#500                    'update CT1 target
+                    DRVNOT #0                        'toggle P0
+                    JMP     #.loop                   'loop to the WAITCT1
+
+
+
+         It doesn't matter what register is used to keep track of the CT1 target. Whenever ADDCT1 executes, S/# is added
+         into D, and the result gets copied into a dedicated CT1 target register that is compared to CT on every clock. When
+         CT passes the CT1 target, the event flag is set. ADDCT1 clears the CT-passed-CT1 event flag to help with
+         initialization and cycling.
+
+
+
+Selectable Events
+Each cog can track up to four selectable pin, LUT, or hub lock events. This is accomplished by using the SETSEn instruction,
+where "n" is 1, 2, 3, or 4. In order for user code to detect the occurrence of the selected event, the following options are
+available:
+
+    ●    The matched WAITSEn instruction will block until the event occurs
+    ●    The matched POLLSEn instruction will check for the event without blocking
+    ●    The matches JSEn and JNSEn branch instructions will branch according to the polled event state
+    ●    As an interrupt (see INTERRUPTS)
+
+Each selected event is set or cleared according to the following rules:
+
+    ●    SEn is set whenever the configured event occurs.
+    ●    SEn is cleared on matched POLLSEn / WAITSEn / JSEn / JNSEn.
+    ●    SEn is cleared when matched 'SETSEn D/#' is called.
+
+SETSEn D/# accepts the following configuration values:
+
+         %000_00_00AA = this cog reads LUT address %1111111AA
+         %000_00_01AA = this cog writes LUT address %1111111AA
+         %000_00_10AA = odd/even companion cog reads LUT address %1111111AA
+         %000_00_11AA = odd/even companion cog writes LUT address %1111111AA
+
+         %000_01_LLLL = hub lock %LLLL rises
+         %000_10_LLLL = hub lock %LLLL falls
+         %000_11_LLLL = hub lock %LLLL changes
+
+
+
+                                                                                                                               48
+
