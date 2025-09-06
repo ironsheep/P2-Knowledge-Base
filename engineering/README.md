@@ -59,10 +59,10 @@
 | Priority | Source | Trust | Extraction | Coverage |
 |----------|--------|-------|------------|----------|
 | 🔴 **1** | Code Examples | HIGH | 9% | TBD |
-| 🔴 **2** | Critical Images | HIGH | 0% | TBD |
+| 🔴 **2** | Critical Images | HIGH | 112 images | P2 Datasheet ✅ (39) + Silicon Doc ✅ (34) + P2 Edge ✅ (39) |
 | 🔴 **3** | P2 Edge 32MB | GREEN | 100% | 30% |
 | 🟡 **4** | PASM2 Manual | GREEN | 64% | TBD |
-| 🟡 **5** | Silicon Doc | GREEN | 45% | TBD |
+| 🟡 **5** | Silicon Doc | GREEN | 100% | ✅ COMPLETE |
 | 🟢 **6** | Smart Pins | GREEN | 100% | 100% |
 
 ## PDF Pipeline Status

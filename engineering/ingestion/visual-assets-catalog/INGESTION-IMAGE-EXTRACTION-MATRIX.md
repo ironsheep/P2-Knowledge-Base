@@ -11,7 +11,7 @@
 
 | Status | Count | Documents |
 |--------|-------|-----------|
-| ✅ **Extracted** | 8 | P2 Edge ecosystem + Smart Pins + Spin2 v51 + P2 Datasheet (complete) |
+| ✅ **Extracted** | 9 | P2 Edge ecosystem + Smart Pins + Spin2 v51 + P2 Datasheet + Silicon Doc v35 (complete) |
 | 🔄 **Extraction Ready** | 7 | Major DOCX/PDF documents with high image potential |
 | 📋 **Planned** | 2 | Additional PDFs identified |
 | ❌ **No Images** | 6 | Code files, CSV, XLSX (minimal visual content) |
@@ -65,9 +65,17 @@
 
 | Document | Source Type | Ingestion Status | Image Extraction | Images Found | Success Rate |
 |----------|-------------|------------------|------------------|--------------|-------------|
-| **P2 Datasheet (P2X8C4M64P-20221101)** | PDF | ✅ COMPLETE | ✅ **COMPLETE** | 40 images | 100% |
+| **P2 Datasheet (P2X8C4M64P-20221101)** | PDF | ✅ COMPLETE | ✅ **COMPLETE** | 39 images (P2DS-001 to P2DS-039) | 100% |
 
-**P2 Datasheet Total**: **40 images successfully extracted (100%)**
+**P2 Datasheet Total**: **39 images successfully extracted (100%) with coordinate-aware rescue system**
+
+### **COMPLETED - P2 Silicon Documentation v35** ✅
+
+| Document | Source Type | Ingestion Status | Image Extraction | Images Found | Success Rate |
+|----------|-------------|------------------|------------------|--------------|-------------|
+| **P2 Silicon Documentation v35 (Multi-part)** | PDF (5 parts) | ✅ COMPLETE | ✅ **COMPLETE** | 34 images (P2SD-001 to P2SD-034) | 100% |
+
+**Silicon Doc Total**: **34 images successfully extracted (100%) with coordinate-aware rescue system - 25 of 26 Part4 images rescued**
 
 ### **EVALUATION PLATFORMS** 
 
