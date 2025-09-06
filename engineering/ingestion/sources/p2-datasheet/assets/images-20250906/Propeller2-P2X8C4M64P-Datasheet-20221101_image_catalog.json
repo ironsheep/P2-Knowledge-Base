@@ -1,0 +1,1402 @@
+{
+  "source_pdf": "/Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/ingestion/external-inputs/archive/Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+  "extraction_summary": {
+    "total_images": 40,
+    "total_pages": 50,
+    "output_directory": "extracted_images_p2_datasheet"
+  },
+  "images": [
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page01_img01.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 1,
+      "image_index": 1,
+      "dimensions": "904\u00d7152",
+      "width": 904,
+      "height": 152,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page01_img01.png",
+      "xref": 10,
+      "extraction_status": "success",
+      "file_size_bytes": 46163,
+      "context": {
+        "caption": "www.parallax.com/P2  \u2b1d sales@parallax.com  \u2b1d support@parallax.com  \u2b1d +1 888-512-1024",
+        "nearby_text": [
+          {
+            "text": "www.parallax.com/P2  \u2b1d sales@parallax.com  \u2b1d support@parallax.com  \u2b1d +1 888-512-1024",
+            "distance": 19.040390014648438,
+            "position": "below"
+          },
+          {
+            "text": "Parallax Propeller 2 (P2X8C4M64P) Datasheet",
+            "distance": 57.274383544921875,
+            "position": "below"
+          },
+          {
+            "text": "FEATURES",
+            "distance": 59.14643859863281,
+            "position": "below"
+          },
+          {
+            "text": "Eight powerful 32-bit processors, each with:",
+            "distance": 66.46513366699219,
+            "position": "below"
+          },
+          {
+            "text": "The Propeller 2 is a multicore microcontroller for embedded systems that delivers high-speed parallel processing with low current consumption in a small package. The Propeller's multiple processors enjoy full command of I/O pins, the flexibility to change clock speed, the power to start and stop at will, and the ability to perform simultaneous tasks in an independent or cooperative manner.",
+            "distance": 95.57266235351562,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "www.parallax.com/P2  \u2b1d sales@parallax.com  \u2b1d support@parallax.com  \u2b1d +1 888-512-1024"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-001",
+      "document_prefix": "P2DS",
+      "sequence_number": 1
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page01_img02.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 1,
+      "image_index": 2,
+      "dimensions": "1294\u00d71292",
+      "width": 1294,
+      "height": 1292,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page01_img02.png",
+      "xref": 11,
+      "extraction_status": "success",
+      "file_size_bytes": 170134,
+      "context": {
+        "caption": "www.parallax.com/P2  \u2b1d sales@parallax.com  \u2b1d support@parallax.com  \u2b1d +1 888-512-1024",
+        "nearby_text": [
+          {
+            "text": "Propeller 2 (P2X8C4M64P) RAM Memory Configuration",
+            "distance": 0.6306610107421875,
+            "position": "below"
+          },
+          {
+            "text": "www.parallax.com/P2  \u2b1d sales@parallax.com  \u2b1d support@parallax.com  \u2b1d +1 888-512-1024",
+            "distance": 6.4785308837890625,
+            "position": "right"
+          },
+          {
+            "text": "Parallax Propeller 2 (P2X8C4M64P) Datasheet",
+            "distance": 13.024383544921875,
+            "position": "below"
+          },
+          {
+            "text": "The Propeller 2 is a multicore microcontroller for embedded systems that delivers high-speed parallel processing with low current consumption in a small package. The Propeller's multiple processors enjoy full command of I/O pins, the flexibility to change clock speed, the power to start and stop at will, and the ability to perform simultaneous tasks in an independent or cooperative manner.",
+            "distance": 51.322662353515625,
+            "position": "below"
+          },
+          {
+            "text": "P2X 8C 4M 64P",
+            "distance": 54.255615234375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "www.parallax.com/P2  \u2b1d sales@parallax.com  \u2b1d support@parallax.com  \u2b1d +1 888-512-1024",
+          "Parallax Propeller 2 (P2X8C4M64P) Datasheet",
+          "Propeller 2 (P2X8C4M64P) RAM Memory Configuration"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-002",
+      "document_prefix": "P2DS",
+      "sequence_number": 2
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page06_img01.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 6,
+      "image_index": 1,
+      "dimensions": "842\u00d7817",
+      "width": 842,
+      "height": 817,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page06_img01.png",
+      "xref": 115,
+      "extraction_status": "success",
+      "file_size_bytes": 70624,
+      "context": {
+        "caption": "Pin Descriptions",
+        "nearby_text": [
+          {
+            "text": "Pin Descriptions",
+            "distance": 25.35198974609375,
+            "position": "below"
+          },
+          {
+            "text": "Pin Name Direction V (typ) Description",
+            "distance": 46.9925537109375,
+            "position": "below"
+          },
+          {
+            "text": "GND - 0 Exposed Pad (underside of chip); ground for core and smart pins \u2013  internally connected to exposed pad. Connect to ground plane for thermal dissipation.",
+            "distance": 65.7425537109375,
+            "position": "below"
+          },
+          {
+            "text": "XO O -",
+            "distance": 68.99845886230469,
+            "position": "below"
+          },
+          {
+            "text": "XI I -",
+            "distance": 68.99845886230469,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "Pin Descriptions",
+          "Pin Name Direction V (typ) Description"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-003",
+      "document_prefix": "P2DS",
+      "sequence_number": 3
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page07_img01.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 7,
+      "image_index": 1,
+      "dimensions": "1496\u00d7866",
+      "width": 1496,
+      "height": 866,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page07_img01.png",
+      "xref": 120,
+      "extraction_status": "success",
+      "file_size_bytes": 37279,
+      "context": {
+        "caption": "Minimal Connections The Propeller 2 is programmed via four wires and may optionally include an external crystal, reset switch, SPI Flash and/or microSD memory.",
+        "nearby_text": [
+          {
+            "text": "Minimal Connections The Propeller 2 is programmed via four wires and may optionally include an external crystal, reset switch, SPI Flash and/or microSD memory.",
+            "distance": 13.458595275878906,
+            "position": "above"
+          },
+          {
+            "text": "Minimal Propeller 2 Connections",
+            "distance": 14.572662353515625,
+            "position": "below"
+          },
+          {
+            "text": "\u25cf All VDD pins must be connected to a single 1.8 V supply. \u25cf All Vxxyy pins must be connected to 3.3 V. The Vxxyy pins can share a common 3.3 V supply, or be split across multiple supplies. Typically those Vxxyy pins powering analog and digital functions would have different supplies. \u25cf All VDD and all Vxxyy pins must have closely-located bypass caps to GND (not shown). \u25cf The common GND (EP) pad under the chip is also used for thermal dissipation. It is recommended to connect the GND pad to a solid ground plane with multiple vias. \u25cf TEST pin must always be connected to GND. \u25cf RESN (reset) pin must always have a pullup resistor to 3.3 V (typically 10 K\u2126). \u25cf Programming and debugging is achieved with a serial interface, such as the Parallax PropPlug #32201. \u25cf Minimal connections assume no external clock source connected to XI/XO\u2013 the internal clock must be used ( adjust source code to match ). Refer to the  AC Characteristics  table for further information.",
+            "distance": 38.572662353515625,
+            "position": "below"
+          },
+          {
+            "text": "Hardware Connections",
+            "distance": 66.4378890991211,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "Minimal Connections The Propeller 2 is programmed via four wires and may optionally include an external crystal, reset switch, SPI Flash and/or microSD memory.",
+          "Minimal Propeller 2 Connections"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-004",
+      "document_prefix": "P2DS",
+      "sequence_number": 4
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page08_img01.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 8,
+      "image_index": 1,
+      "dimensions": "779\u00d7475",
+      "width": 779,
+      "height": 475,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page08_img01.png",
+      "xref": 124,
+      "extraction_status": "success",
+      "file_size_bytes": 14339,
+      "context": {
+        "caption": "Note that the RESN pin must always be pulled high (to 3.3 V) with an external resistor, which is shown in the  Minimal Connections  diagram.",
+        "nearby_text": [
+          {
+            "text": "SPI Flash Boot Memory",
+            "distance": 3.550323486328125,
+            "position": "above"
+          },
+          {
+            "text": "SPI Flash Boot Memory Connections",
+            "distance": 14.5726318359375,
+            "position": "below"
+          },
+          {
+            "text": "Note that the RESN pin must always be pulled high (to 3.3 V) with an external resistor, which is shown in the  Minimal Connections  diagram.",
+            "distance": 29.958587646484375,
+            "position": "above"
+          },
+          {
+            "text": "\u25cf Refer to all requirements and recommendations for  Minimal Connections \u25cf When the Propeller 2 starts up (or is reset) with this circuit, there will be a serial programming window of 100 ms, then automatic boot from SPI flash.  If SPI flash boot fails, then a further serial window of 60 seconds will be followed by shutdown. \u25cf Each Propeller 2 firmware image requires up to 512 KB. A single SPI Flash chip could hold multiple firmware images or code snippets, and/or be used for user data. The SPI Flash chip is fully available to the user program as a general memory area.",
+            "distance": 38.5726318359375,
+            "position": "below"
+          },
+          {
+            "text": "The switch drives the Propeller 2 reset pin (RESN) to ground, and while held low, the Propeller 2 remains in a dormant, low-power state.",
+            "distance": 67.45858764648438,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "Note that the RESN pin must always be pulled high (to 3.3 V) with an external resistor, which is shown in the  Minimal Connections  diagram.",
+          "SPI Flash Boot Memory",
+          "SPI Flash Boot Memory Connections"
+        ]
+      },
+      "suggested_tags": [],
+      "sequential_id": "P2DS-005",
+      "document_prefix": "P2DS",
+      "sequence_number": 5
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page08_img02.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 8,
+      "image_index": 2,
+      "dimensions": "363\u00d7440",
+      "width": 363,
+      "height": 440,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page08_img02.png",
+      "xref": 125,
+      "extraction_status": "success",
+      "file_size_bytes": 4630,
+      "context": {
+        "caption": "External Crystal The internal clock reference is good for very low power applications, but is also fairly low accuracy.",
+        "nearby_text": [
+          {
+            "text": "Typically a crystal would be connected between XI and XO, but an external clock source could also be connected to XI only, with common options including a clock source generator, oscillator, or MEMS resonator.",
+            "distance": 9.50347900390625,
+            "position": "left"
+          },
+          {
+            "text": "External Crystal The internal clock reference is good for very low power applications, but is also fairly low accuracy.",
+            "distance": 13.4564208984375,
+            "position": "left"
+          },
+          {
+            "text": "Reset Switch Reset Switch can be optionally included and is a convenient way to restart the Propeller 2 during development or in a final product.",
+            "distance": 14.612808227539062,
+            "position": "left"
+          },
+          {
+            "text": "For applications that require higher accuracy (ex: handling high speed data) an external clock source is connected to XI/XO.",
+            "distance": 15.896392822265625,
+            "position": "left"
+          },
+          {
+            "text": "Refer to the  AC Characteristics  table for further information.",
+            "distance": 38.677337646484375,
+            "position": "left"
+          }
+        ],
+        "potential_captions": [
+          "External Crystal The internal clock reference is good for very low power applications, but is also fairly low accuracy.",
+          "For applications that require higher accuracy (ex: handling high speed data) an external clock source is connected to XI/XO.",
+          "Refer to the  AC Characteristics  table for further information."
+        ]
+      },
+      "suggested_tags": [],
+      "sequential_id": "P2DS-006",
+      "document_prefix": "P2DS",
+      "sequence_number": 6
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page08_img03.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 8,
+      "image_index": 3,
+      "dimensions": "493\u00d7265",
+      "width": 493,
+      "height": 265,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page08_img03.png",
+      "xref": 126,
+      "extraction_status": "success",
+      "file_size_bytes": 4746,
+      "context": {
+        "caption": "External Crystal The internal clock reference is good for very low power applications, but is also fairly low accuracy.",
+        "nearby_text": [
+          {
+            "text": "SPI Flash Boot Memory",
+            "distance": 10.887176513671875,
+            "position": "below"
+          },
+          {
+            "text": "For applications that require higher accuracy (ex: handling high speed data) an external clock source is connected to XI/XO.",
+            "distance": 14.103607177734375,
+            "position": "above"
+          },
+          {
+            "text": "Reset Switch Reset Switch can be optionally included and is a convenient way to restart the Propeller 2 during development or in a final product.",
+            "distance": 15.041412353515625,
+            "position": "left"
+          },
+          {
+            "text": "External Crystal The internal clock reference is good for very low power applications, but is also fairly low accuracy.",
+            "distance": 16.5435791015625,
+            "position": "above"
+          },
+          {
+            "text": "Typically a crystal would be connected between XI and XO, but an external clock source could also be connected to XI only, with common options including a clock source generator, oscillator, or MEMS resonator.",
+            "distance": 20.49652099609375,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "External Crystal The internal clock reference is good for very low power applications, but is also fairly low accuracy.",
+          "For applications that require higher accuracy (ex: handling high speed data) an external clock source is connected to XI/XO.",
+          "Refer to the  AC Characteristics  table for further information."
+        ]
+      },
+      "suggested_tags": [],
+      "sequential_id": "P2DS-007",
+      "document_prefix": "P2DS",
+      "sequence_number": 7
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page09_img01.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 9,
+      "image_index": 1,
+      "dimensions": "558\u00d7528",
+      "width": 558,
+      "height": 528,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page09_img01.png",
+      "xref": 133,
+      "extraction_status": "success",
+      "file_size_bytes": 11916,
+      "context": {
+        "caption": "MicroSD Boot Memory",
+        "nearby_text": [
+          {
+            "text": "MicroSD Boot Memory Connections",
+            "distance": 5.072662353515625,
+            "position": "below"
+          },
+          {
+            "text": "MicroSD Boot Memory",
+            "distance": 11.550312042236328,
+            "position": "above"
+          },
+          {
+            "text": "\u25cf Refer to all requirements and recommendations for  Minimal Connections \u25cf When the Propeller 2 starts up (or is reset) with this circuit, it will automatically boot from firmware saved on the microSD card.  If microSD boot fails, a further serial window of 60 seconds will be followed by shutdown. \u25cf The microSD card must be formatted as FAT32, and the boot firmware file must be saved in the root of the microSD card with the special filename:  _BOOT_P2.BIX , or as second alternative  _BOOT_P2.BIY  if the .BIX file is not found. \u25cf Each Propeller 2 firmware image requires up to 512 KB. A single microSD card could hold multiple firmware images or code snippets, and/or be used for user data. The microSD card is fully available to the user program as a general memory area.",
+            "distance": 29.072662353515625,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "MicroSD Boot Memory",
+          "MicroSD Boot Memory Connections"
+        ]
+      },
+      "suggested_tags": [],
+      "sequential_id": "P2DS-008",
+      "document_prefix": "P2DS",
+      "sequence_number": 8
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page10_img01.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 10,
+      "image_index": 1,
+      "dimensions": "1482\u00d7727",
+      "width": 1482,
+      "height": 727,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page10_img01.png",
+      "xref": 137,
+      "extraction_status": "success",
+      "file_size_bytes": 29452,
+      "context": {
+        "caption": "Dual Boot Memory",
+        "nearby_text": [
+          {
+            "text": "Dual Boot Memory",
+            "distance": 3.5502967834472656,
+            "position": "above"
+          },
+          {
+            "text": "Dual Boot Memory Connections",
+            "distance": 14.572662353515625,
+            "position": "below"
+          },
+          {
+            "text": "\u25cf Refer to all requirements and recommendations for  Minimal Connections \u25cf The Boot Mode Selection switch determines the active boot device; either SPI Flash or microSD. \u25cf Switch closed (on) = SPI Flash boot mode : When the Propeller 2 starts up (or is reset) with this circuit, there will be a serial programming window of 100 ms, then automatic boot from firmware stored in the SPI flash memory. If SPI flash boot fails, a further serial window of 60 seconds will be followed by shutdown. \u25cf Switch open (off) = microSD boot mode : When the Propeller 2 starts up (or is reset) with this circuit, it will automatically boot from firmware saved on the microSD card.  If microSD boot fails then a further serial window of 60 seconds will be followed by shutdown.",
+            "distance": 38.572662353515625,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "Dual Boot Memory",
+          "Dual Boot Memory Connections"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-009",
+      "document_prefix": "P2DS",
+      "sequence_number": 9
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page13_img01.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 13,
+      "image_index": 1,
+      "dimensions": "2500\u00d71531",
+      "width": 2500,
+      "height": 1531,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page13_img01.png",
+      "xref": 149,
+      "extraction_status": "success",
+      "file_size_bytes": 241758,
+      "context": {
+        "caption": "Cogs",
+        "nearby_text": [
+          {
+            "text": "Cog RAM Each cog's RAM is made of two blocks of 512 longs (512 x 32), called Register RAM and Lookup RAM, organized as shown here.",
+            "distance": 13.458572387695312,
+            "position": "above"
+          },
+          {
+            "text": "Note that $1FE (INA) and $1FF (INB) are also the debug interrupt call address and return address, respectively.",
+            "distance": 14.572662353515625,
+            "position": "below"
+          },
+          {
+            "text": "$1F0 $1F1 $1F2 $1F3 $1F4 $1F5 $1F6 $1F7",
+            "distance": 26.870834350585938,
+            "position": "below"
+          },
+          {
+            "text": "Cogs",
+            "distance": 28.43999481201172,
+            "position": "above"
+          },
+          {
+            "text": "Register RAM Each cog's primary 512 x 32-bit dual-port Register RAM (Reg RAM for short) provides for code execution, fast direct register access, and special use.  It is read and written as longs (4 bytes) and contains general purpose, dual-purpose, and special-purpose registers.",
+            "distance": 38.637176513671875,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "Cogs",
+          "Cog RAM Each cog's RAM is made of two blocks of 512 longs (512 x 32), called Register RAM and Lookup RAM, organized as shown here.",
+          "Note that $1FE (INA) and $1FF (INB) are also the debug interrupt call address and return address, respectively."
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-010",
+      "document_prefix": "P2DS",
+      "sequence_number": 10
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page17_img01.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 17,
+      "image_index": 1,
+      "dimensions": "400\u00d7500",
+      "width": 400,
+      "height": 500,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page17_img01.png",
+      "xref": 158,
+      "extraction_status": "success",
+      "file_size_bytes": 14421,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "Cogs can access Hub RAM either via the sequential FIFO interface, or by waiting for RAM slices of interest, while yielding to the FIFO. If the FIFO is not busy (which is soon the case if data is not being read from or written to it) random accesses will have full opportunity to access the composite Hub RAM.",
+            "distance": 14.572662353515625,
+            "position": "below"
+          },
+          {
+            "text": "There are three ways the hub FIFO interface can be used, and it can only be used for one of these at a time:",
+            "distance": 65.57266235351562,
+            "position": "below"
+          },
+          {
+            "text": "\u25cf Hub execution (when the PC is $00400..$FFFFF) \u25cf Streamer usage (background transfers from Hub RAM  \u2192  pins/DACs, or from pins/ADCs  \u2192  Hub RAM) \u25cf Software usage (fast sequential-reading or sequential-writing instructions)",
+            "distance": 89.57266235351562,
+            "position": "below"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": [],
+      "sequential_id": "P2DS-011",
+      "document_prefix": "P2DS",
+      "sequence_number": 11
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page22_img02.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 22,
+      "image_index": 2,
+      "dimensions": "816\u00d7202",
+      "width": 816,
+      "height": 202,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page22_img02.png",
+      "xref": 182,
+      "extraction_status": "success",
+      "file_size_bytes": 11267,
+      "context": {
+        "caption": "When an  IN x register is read by an instruction, it will reflect the state of the pins registered  three  clocks before the start of the instruction.  Here this delay is demonstrated using  TESTB :",
+        "nearby_text": [
+          {
+            "text": "When an  IN x register is read by an instruction, it will reflect the state of the pins registered  three  clocks before the start of the instruction.  Here this delay is demonstrated using  TESTB :",
+            "distance": 2.690032958984375,
+            "position": "above"
+          },
+          {
+            "text": "When a  TESTP / TESTPN  instruction is used to read a pin, the value read will reflect the state of the pin registered two  clocks before the start of the instruction.  Effectively,  TESTP / TESTPN  get fresher  IN x data than is available via the  IN x registers:",
+            "distance": 3.621490478515625,
+            "position": "below"
+          },
+          {
+            "text": "Note that \"P0 OE\" and \"P0 HIGH\" begin their transition on the rising edge of clock 5; however, the duration until complete depends on clock frequency and circuit load. The I/O pads are asynchronous (not tied strictly to the clock) so with a slow operating frequency, the transition may complete within 1 clock, whereas with higher frequencies it may take multiple clocks to complete.",
+            "distance": 40.458587646484375,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "When an  IN x register is read by an instruction, it will reflect the state of the pins registered  three  clocks before the start of the instruction.  Here this delay is demonstrated using  TESTB :"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-012",
+      "document_prefix": "P2DS",
+      "sequence_number": 12
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page22_img03.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 22,
+      "image_index": 3,
+      "dimensions": "817\u00d7204",
+      "width": 817,
+      "height": 204,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page22_img03.png",
+      "xref": 184,
+      "extraction_status": "success",
+      "file_size_bytes": 9975,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "When a  TESTP / TESTPN  instruction is used to read a pin, the value read will reflect the state of the pin registered two  clocks before the start of the instruction.  Effectively,  TESTP / TESTPN  get fresher  IN x data than is available via the  IN x registers:",
+            "distance": 2.690032958984375,
+            "position": "above"
+          },
+          {
+            "text": "Pin Modes Each I/O pin has 13 low-level pin mode configuration bits which determine the mode of operation (1 of 24) for its 3.3 V circuit.  The pin mode is set using the  WRPIN  instruction, where the 13 'M' bits within the instruction's D operand specifies the pin mode configuration. Note that in some smart pin modes, the configuration bits are partially overwritten to set things like DAC values.",
+            "distance": 14.63720703125,
+            "position": "below"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-013",
+      "document_prefix": "P2DS",
+      "sequence_number": 13
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page26_img01.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 26,
+      "image_index": 1,
+      "dimensions": "1063\u00d71710",
+      "width": 1063,
+      "height": 1710,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page26_img01.png",
+      "xref": 195,
+      "extraction_status": "success",
+      "file_size_bytes": 5398,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "I/O Pin Circuit Below is a diagram of a single I/O pin circuit which is powered from its local 3.3V supply pin (Vxxyy).  It connects to its own physical pin (PIN), as well as its adjacent odd or even pin (ADJ).  I/O Pins P0 and P1 see each other as adjacent pins, as do P2 and P3, etc.",
+            "distance": 50.208595275878906,
+            "position": "above"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-014",
+      "document_prefix": "P2DS",
+      "sequence_number": 14
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page27_img01.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 27,
+      "image_index": 1,
+      "dimensions": "2048\u00d7582",
+      "width": 2048,
+      "height": 582,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page27_img01.png",
+      "xref": 199,
+      "extraction_status": "success",
+      "file_size_bytes": 3565,
+      "context": {
+        "caption": "Equivalent Schematics for Each Unique I/O Pin Configuration",
+        "nearby_text": [
+          {
+            "text": "Equivalent Schematics for Each Unique I/O Pin Configuration",
+            "distance": 3.800312042236328,
+            "position": "above"
+          }
+        ],
+        "potential_captions": [
+          "Equivalent Schematics for Each Unique I/O Pin Configuration"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-015",
+      "document_prefix": "P2DS",
+      "sequence_number": 15
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page27_img02.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 27,
+      "image_index": 2,
+      "dimensions": "2048\u00d7646",
+      "width": 2048,
+      "height": 646,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page27_img02.png",
+      "xref": 201,
+      "extraction_status": "success",
+      "file_size_bytes": 3947,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-016",
+      "document_prefix": "P2DS",
+      "sequence_number": 16
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page27_img03.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 27,
+      "image_index": 3,
+      "dimensions": "2048\u00d7676",
+      "width": 2048,
+      "height": 676,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page27_img03.png",
+      "xref": 203,
+      "extraction_status": "success",
+      "file_size_bytes": 4126,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-017",
+      "document_prefix": "P2DS",
+      "sequence_number": 17
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page27_img04.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 27,
+      "image_index": 4,
+      "dimensions": "2048\u00d7678",
+      "width": 2048,
+      "height": 678,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page27_img04.png",
+      "xref": 205,
+      "extraction_status": "success",
+      "file_size_bytes": 4138,
+      "context": {
+        "caption": "Copyright \u00a9 Parallax Inc.  2022/11/01 \u25aa     Parallax Propeller 2 (P2X8C4M64P) Datasheet      \u25aa      Page 27",
+        "nearby_text": [
+          {
+            "text": "Copyright \u00a9 Parallax Inc.  2022/11/01 \u25aa     Parallax Propeller 2 (P2X8C4M64P) Datasheet      \u25aa      Page 27",
+            "distance": 43.8226318359375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "Copyright \u00a9 Parallax Inc.  2022/11/01 \u25aa     Parallax Propeller 2 (P2X8C4M64P) Datasheet      \u25aa      Page 27"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-018",
+      "document_prefix": "P2DS",
+      "sequence_number": 18
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page28_img01.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 28,
+      "image_index": 1,
+      "dimensions": "2048\u00d7678",
+      "width": 2048,
+      "height": 678,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page28_img01.png",
+      "xref": 209,
+      "extraction_status": "success",
+      "file_size_bytes": 4138,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-019",
+      "document_prefix": "P2DS",
+      "sequence_number": 19
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page28_img02.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 28,
+      "image_index": 2,
+      "dimensions": "2048\u00d7676",
+      "width": 2048,
+      "height": 676,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page28_img02.png",
+      "xref": 211,
+      "extraction_status": "success",
+      "file_size_bytes": 4126,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-020",
+      "document_prefix": "P2DS",
+      "sequence_number": 20
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page28_img03.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 28,
+      "image_index": 3,
+      "dimensions": "2048\u00d7582",
+      "width": 2048,
+      "height": 582,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page28_img03.png",
+      "xref": 213,
+      "extraction_status": "success",
+      "file_size_bytes": 3565,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-021",
+      "document_prefix": "P2DS",
+      "sequence_number": 21
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page28_img04.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 28,
+      "image_index": 4,
+      "dimensions": "2048\u00d7646",
+      "width": 2048,
+      "height": 646,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page28_img04.png",
+      "xref": 215,
+      "extraction_status": "success",
+      "file_size_bytes": 3947,
+      "context": {
+        "caption": "",
+        "nearby_text": [
+          {
+            "text": "Copyright \u00a9 Parallax Inc.  2022/11/01 \u25aa     Parallax Propeller 2 (P2X8C4M64P) Datasheet      \u25aa      Page 28",
+            "distance": 70.8226318359375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-022",
+      "document_prefix": "P2DS",
+      "sequence_number": 22
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page29_img01.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 29,
+      "image_index": 1,
+      "dimensions": "2048\u00d7678",
+      "width": 2048,
+      "height": 678,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page29_img01.png",
+      "xref": 219,
+      "extraction_status": "success",
+      "file_size_bytes": 4138,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-023",
+      "document_prefix": "P2DS",
+      "sequence_number": 23
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page29_img02.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 29,
+      "image_index": 2,
+      "dimensions": "2048\u00d7676",
+      "width": 2048,
+      "height": 676,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page29_img02.png",
+      "xref": 221,
+      "extraction_status": "success",
+      "file_size_bytes": 4126,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-024",
+      "document_prefix": "P2DS",
+      "sequence_number": 24
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page29_img03.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 29,
+      "image_index": 3,
+      "dimensions": "2048\u00d7676",
+      "width": 2048,
+      "height": 676,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page29_img03.png",
+      "xref": 223,
+      "extraction_status": "success",
+      "file_size_bytes": 4126,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-025",
+      "document_prefix": "P2DS",
+      "sequence_number": 25
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page29_img04.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 29,
+      "image_index": 4,
+      "dimensions": "2048\u00d7678",
+      "width": 2048,
+      "height": 678,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page29_img04.png",
+      "xref": 225,
+      "extraction_status": "success",
+      "file_size_bytes": 4138,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-026",
+      "document_prefix": "P2DS",
+      "sequence_number": 26
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page30_img01.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 30,
+      "image_index": 1,
+      "dimensions": "2048\u00d7710",
+      "width": 2048,
+      "height": 710,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page30_img01.png",
+      "xref": 229,
+      "extraction_status": "success",
+      "file_size_bytes": 4341,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-027",
+      "document_prefix": "P2DS",
+      "sequence_number": 27
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page30_img02.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 30,
+      "image_index": 2,
+      "dimensions": "2048\u00d7706",
+      "width": 2048,
+      "height": 706,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page30_img02.png",
+      "xref": 231,
+      "extraction_status": "success",
+      "file_size_bytes": 4317,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-028",
+      "document_prefix": "P2DS",
+      "sequence_number": 28
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page30_img03.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 30,
+      "image_index": 3,
+      "dimensions": "2048\u00d7740",
+      "width": 2048,
+      "height": 740,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page30_img03.png",
+      "xref": 233,
+      "extraction_status": "success",
+      "file_size_bytes": 4520,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-029",
+      "document_prefix": "P2DS",
+      "sequence_number": 29
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page30_img04.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 30,
+      "image_index": 4,
+      "dimensions": "2048\u00d7737",
+      "width": 2048,
+      "height": 737,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page30_img04.png",
+      "xref": 235,
+      "extraction_status": "success",
+      "file_size_bytes": 4502,
+      "context": {
+        "caption": "Copyright \u00a9 Parallax Inc.  2022/11/01 \u25aa     Parallax Propeller 2 (P2X8C4M64P) Datasheet      \u25aa      Page 30",
+        "nearby_text": [
+          {
+            "text": "Copyright \u00a9 Parallax Inc.  2022/11/01 \u25aa     Parallax Propeller 2 (P2X8C4M64P) Datasheet      \u25aa      Page 30",
+            "distance": 43.0726318359375,
+            "position": "below"
+          }
+        ],
+        "potential_captions": [
+          "Copyright \u00a9 Parallax Inc.  2022/11/01 \u25aa     Parallax Propeller 2 (P2X8C4M64P) Datasheet      \u25aa      Page 30"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-030",
+      "document_prefix": "P2DS",
+      "sequence_number": 30
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page31_img01.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 31,
+      "image_index": 1,
+      "dimensions": "2048\u00d7645",
+      "width": 2048,
+      "height": 645,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page31_img01.png",
+      "xref": 239,
+      "extraction_status": "success",
+      "file_size_bytes": 3941,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-031",
+      "document_prefix": "P2DS",
+      "sequence_number": 31
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page31_img02.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 31,
+      "image_index": 2,
+      "dimensions": "2048\u00d7549",
+      "width": 2048,
+      "height": 549,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page31_img02.png",
+      "xref": 241,
+      "extraction_status": "success",
+      "file_size_bytes": 3369,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution",
+        "diagram"
+      ],
+      "sequential_id": "P2DS-032",
+      "document_prefix": "P2DS",
+      "sequence_number": 32
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page31_img03.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 31,
+      "image_index": 3,
+      "dimensions": "2048\u00d7773",
+      "width": 2048,
+      "height": 773,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page31_img03.png",
+      "xref": 243,
+      "extraction_status": "success",
+      "file_size_bytes": 4716,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-033",
+      "document_prefix": "P2DS",
+      "sequence_number": 33
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page31_img04.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 31,
+      "image_index": 4,
+      "dimensions": "2048\u00d7773",
+      "width": 2048,
+      "height": 773,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page31_img04.png",
+      "xref": 245,
+      "extraction_status": "success",
+      "file_size_bytes": 4716,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-034",
+      "document_prefix": "P2DS",
+      "sequence_number": 34
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page32_img01.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 32,
+      "image_index": 1,
+      "dimensions": "2048\u00d7773",
+      "width": 2048,
+      "height": 773,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page32_img01.png",
+      "xref": 249,
+      "extraction_status": "success",
+      "file_size_bytes": 4716,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-035",
+      "document_prefix": "P2DS",
+      "sequence_number": 35
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page32_img02.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 32,
+      "image_index": 2,
+      "dimensions": "2048\u00d7773",
+      "width": 2048,
+      "height": 773,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page32_img02.png",
+      "xref": 251,
+      "extraction_status": "success",
+      "file_size_bytes": 4716,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-036",
+      "document_prefix": "P2DS",
+      "sequence_number": 36
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page32_img03.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 32,
+      "image_index": 3,
+      "dimensions": "2048\u00d7773",
+      "width": 2048,
+      "height": 773,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page32_img03.png",
+      "xref": 253,
+      "extraction_status": "success",
+      "file_size_bytes": 4716,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-037",
+      "document_prefix": "P2DS",
+      "sequence_number": 37
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page32_img04.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 32,
+      "image_index": 4,
+      "dimensions": "2048\u00d7773",
+      "width": 2048,
+      "height": 773,
+      "colorspace": "DeviceRGB",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page32_img04.png",
+      "xref": 255,
+      "extraction_status": "success",
+      "file_size_bytes": 4716,
+      "context": {
+        "caption": "",
+        "nearby_text": [],
+        "potential_captions": []
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-038",
+      "document_prefix": "P2DS",
+      "sequence_number": 38
+    },
+    {
+      "filename": "Propeller2-P2X8C4M64P-Datasheet-20221101_page49_img01.png",
+      "source_pdf": "Propeller2-P2X8C4M64P-Datasheet-20221101.pdf",
+      "page_number": 49,
+      "image_index": 1,
+      "dimensions": "1451\u00d72201",
+      "width": 1451,
+      "height": 2201,
+      "colorspace": "DeviceGray",
+      "alpha": false,
+      "file_path": "extracted_images_p2_datasheet/Propeller2-P2X8C4M64P-Datasheet-20221101_page49_img01.png",
+      "xref": 292,
+      "extraction_status": "success",
+      "file_size_bytes": 406202,
+      "context": {
+        "caption": "Copyright \u00a9 Parallax Inc.  2022/11/01 \u25aa     Parallax Propeller 2 (P2X8C4M64P) Datasheet      \u25aa      Page 49",
+        "nearby_text": [
+          {
+            "text": "Copyright \u00a9 Parallax Inc.  2022/11/01 \u25aa     Parallax Propeller 2 (P2X8C4M64P) Datasheet      \u25aa      Page 49",
+            "distance": 38.2220458984375,
+            "position": "below"
+          },
+          {
+            "text": "PACKAGING",
+            "distance": 73.0259780883789,
+            "position": "right"
+          }
+        ],
+        "potential_captions": [
+          "Copyright \u00a9 Parallax Inc.  2022/11/01 \u25aa     Parallax Propeller 2 (P2X8C4M64P) Datasheet      \u25aa      Page 49"
+        ]
+      },
+      "suggested_tags": [
+        "high-resolution"
+      ],
+      "sequential_id": "P2DS-039",
+      "document_prefix": "P2DS",
+      "sequence_number": 39
+    }
+  ],
+  "metadata": {
+    "numbering_system": {
+      "document_prefix": "P2DS",
+      "sequential_format": "P2DS-###",
+      "total_images": 39,
+      "range": "P2DS-001 through P2DS-039"
+    }
+  }
+}
