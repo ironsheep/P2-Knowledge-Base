@@ -80,45 +80,65 @@ mcp__filesystem__read_text_file path:"/sources/visual-assets/INGESTION-IMAGE-EXT
 - Check PDF size and pages for extraction planning
 - Note: Extraction outputs both PNG files and JSON catalog
 
-#### Step 3: Extraction Tool Preparation
-**Image Extraction Tool**: `/tools/pdf_image_extractor.py`
+#### Step 3: Enhanced Extraction Tool Preparation
+**🚨 NEW v3.0: Coordinate-Aware Rescue System**
 
-**Tool Capabilities:**
-- ✅ **Original quality extraction** - No resolution loss
-- ✅ **Context detection** - Extracts surrounding text for captions  
-- ✅ **Placeholder detection** - Identifies failed extractions automatically
-- ✅ **Rescue functionality** - Attempts pdf2image recovery for failures
-- ✅ **Metadata cataloging** - Complete JSON catalog with searchable data
-- ✅ **Size filtering** - Skips decorative elements <50×50 pixels
+**Primary Tools** (in `/engineering/tools/extraction/`):
+- ✅ **enhanced_pdf_extractor.py** - Coordinate-aware extraction with bbox capture
+- ✅ **simple_black_detector.py** - Quality analysis and failed extraction detection
+- ✅ **replace_with_cropped.py** - Replace full-page images with rescued crops
+- ✅ **update_catalog_numbering.py** - Apply sequential numbering system
+
+**Enhanced Capabilities v3.0:**
+- ✅ **Coordinate capture** - Saves bounding boxes for rescue operations
+- ✅ **Black image detection** - Brightness analysis (threshold <10)
+- ✅ **Coordinate-aware rescue** - pdf2image + cropping using saved coordinates
+- ✅ **Sequential numbering** - [PREFIX]-001 format for easy reference
+- ✅ **Quality assurance** - Automated detection and replacement of failed extractions
+- ✅ **Browser cache handling** - Documentation for image display issues
 
 **Required Dependencies** (should be available):
-- PyMuPDF (`fitz`)
-- pdf2image 
-- PIL/Pillow
+- PyMuPDF (`fitz`), pdf2image, PIL/Pillow
 
 ---
 
 ### PHASE 2: IMAGE EXTRACTION EXECUTION
 
-#### Step 4: Execute Primary Extraction
-**Command Pattern**:
+#### Step 4: Execute Enhanced Coordinate-Aware Extraction
+**🔄 v3.0 Enhanced Pipeline**:
+
+**Phase 1: Initial Extraction with Coordinate Capture**
 ```bash
 cd /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base
 
-python3 tools/pdf_image_extractor.py "/sources/originals/[filename].pdf" -o "extracted_images_[document-id]"
+# Step 1: Enhanced extraction with bounding box coordinates
+python3 engineering/tools/extraction/enhanced_pdf_extractor.py "sources/[filename].pdf" -o "extracted_images_[doc-id]"
 ```
 
-**Example for P2 Silicon Documentation**:
+**Phase 2: Quality Analysis & Black Image Detection**
 ```bash
-python3 tools/pdf_image_extractor.py "/sources/originals/P2 Documentation v35 - Rev B_C Silicon.pdf" -o "extracted_images_p2_silicon_v35"
+# Step 2: Analyze all extracted images for quality issues
+python3 engineering/tools/extraction/simple_black_detector.py "extracted_images_[doc-id]/"
 ```
 
-**Monitor Output For**:
-- **Total images found** per page
-- **Success/failure status** per image  
-- **Placeholder warnings** (indicates failed extractions)
-- **Rescue attempt results** (pdf2image fallback)
-- **Final extraction statistics**
+**Phase 3: Coordinate-Aware Rescue System**
+```bash
+# Step 3: Apply rescue system to failed extractions (if any detected)
+python3 engineering/tools/extraction/replace_with_cropped.py "extracted_images_[doc-id]/" "sources/[filename].pdf"
+```
+
+**Phase 4: Sequential Numbering Application**
+```bash
+# Step 4: Apply sequential numbering system (e.g., P2DS-001, P2SD-001)
+python3 engineering/tools/extraction/update_catalog_numbering.py "extracted_images_[doc-id]/catalog.md" "[OLD-PREFIX]" "[DOC-PREFIX]"
+```
+
+**Monitor v3.0 Pipeline Output For**:
+- **✅ Coordinate capture** - Bounding boxes saved for rescue
+- **🔍 Quality analysis** - Brightness scores and file size validation  
+- **🛡️ Rescue operations** - Coordinate-aware cropping of failed extractions
+- **📝 Sequential numbering** - [PREFIX]-001 through [PREFIX]-N assignment
+- **⚠️ Browser cache warnings** - Instructions for image display refresh
 
 #### Step 5: Multi-Part PDF Handling (When Required)
 **SPECIAL CASE**: For PDFs split into multiple parts due to size constraints
@@ -130,12 +150,18 @@ python3 tools/pdf_image_extractor.py "/sources/originals/P2 Documentation v35 - 
 
 **Multi-Part Extraction Workflow**:
 
-1. **Extract Each Part Separately**:
+1. **Extract Each Part with v3.0 Enhanced Pipeline**:
 ```bash
-# Extract each part to separate temporary directories
-python3 tools/pdf_image_extractor.py "sources/originals/Document-Part1of5.pdf" -o "extracted_images_[document]_part1"
-python3 tools/pdf_image_extractor.py "sources/originals/Document-Part2of5.pdf" -o "extracted_images_[document]_part2"
+# Extract each part using coordinate-aware extraction
+python3 engineering/tools/extraction/enhanced_pdf_extractor.py "sources/Document-Part1of5.pdf" -o "extracted_images_[doc]_part1"
+python3 engineering/tools/extraction/enhanced_pdf_extractor.py "sources/Document-Part2of5.pdf" -o "extracted_images_[doc]_part2"
 # Continue for all parts...
+
+# Apply quality analysis and rescue to each part
+for part in part1 part2 part3 part4 part5; do
+  python3 engineering/tools/extraction/simple_black_detector.py "extracted_images_[doc]_${part}/"
+  python3 engineering/tools/extraction/replace_with_cropped.py "extracted_images_[doc]_${part}/" "sources/Document-${part^}of5.pdf"
+done
 ```
 
 2. **Create Unified Directory Structure**:
@@ -244,23 +270,32 @@ mcp__filesystem__read_text_file path:"sources/extractions/[document-audit]/asset
 
 ### PHASE 3: FAILURE ANALYSIS & INTERVENTION
 
-#### Step 7: Identify Failure Patterns
-**Known Failure Pattern**:
-- **Mini Breakout Board (#64019)**: 3 failed extractions, all `xref 34`
-- **Symptom**: PyMuPDF warning triangle placeholder images (~16KB)
-- **Cause**: PDF coordinate encoding issues with specific xref references
+#### Step 7: Enhanced Failure Analysis with v3.0 Quality Detection
+**🚨 v3.0 Automated Detection**:
+- **Black image detection** using brightness analysis (threshold <10)
+- **File size validation** (suspicious images <5KB)
+- **Coordinate capture success** verification
 
-**Failure Detection Signs**:
+**v3.0 Quality Analysis Output**:
 ```bash
-# Look for these indicators in terminal output:
-"⚠️ WARNING: Placeholder detected"
-"❌ Failed extraction (placeholder)"
-"🔧 Attempting pdf2image rescue"
+# Automated quality analysis from simple_black_detector.py:
+"🔍 Quality Analysis Results:"
+"  ✅ High quality: [N] images (brightness >50, size >10KB)"
+"  ⚠️  Suspicious: [N] images (brightness <50 or size <10KB)"
+"  ❌ Failed: [N] images (brightness <10, likely black)"
+"  📊 Overall success rate: [XX.X%]"
 
-# Check JSON catalog for:
-"extraction_status": "failed"
-# And small file sizes (~16KB)
+# Coordinate-aware rescue results:
+"🛡️ Rescue Operations:"
+"  🎯 [N] failed images identified with coordinates"
+"  ✅ [N] successfully rescued using coordinate cropping"
+"  📏 Final images show actual cropped dimensions (not full-page)"
 ```
+
+**Legacy Failure Patterns Still Monitored**:
+- **xref coordinate issues** - Now automatically rescued with coordinate-aware system
+- **PyMuPDF placeholders** - Detected via brightness analysis and replaced
+- **Full-page captures** - Identified by dimension analysis and replaced with crops
 
 #### Step 8: Human Intervention Assessment  
 **For Each Failed Extraction:**
@@ -293,52 +328,60 @@ mcp__filesystem__read_text_file path:"sources/extractions/[document-audit]/asset
 
 ### PHASE 4: ASSET ORGANIZATION & CATALOGING
 
-#### Step 10: Create Searchable Master Catalog
-**CRITICAL**: Generate both JSON and Markdown catalogs for human review
+#### Step 10: Create Enhanced Catalogs with Sequential Numbering
+**🚨 v3.0 Enhancement**: Integrated sequential numbering system
 
 **Required Outputs**:
-1. **JSON Catalog**: `[document-name]_image_catalog.json` (automated by pdf_image_extractor.py)
-2. **Markdown Catalog**: `image-catalog.md` (manual creation required) - Human-readable with all metadata displayed
+1. **JSON Catalog**: `[document-name]_image_catalog.json` (automated by enhanced_pdf_extractor.py)
+2. **Markdown Catalog**: `image-catalog.md` (automated with sequential numbering)
+3. **Sequential numbering**: Applied using `update_catalog_numbering.py`
+
+**v3.0 Sequential Numbering Examples**:
+- **P2DS-001** through **P2DS-039**: P2 **D**ata**S**heet images
+- **P2SD-001** through **P2SD-N**: P2 **S**ilicon **D**oc images
+- **P2SP-001** through **P2SP-N**: P2 **S**mart **P**ins images
 
 **Extend Existing Catalog**: `/sources/visual-assets/P2-Edge-Master-Image-Catalog.md`
 **OR Create New Catalog**: `/sources/visual-assets/[Document-Family]-Master-Image-Catalog.md`
 
-**Markdown Catalog Structure** (Required for human review):
+**v3.0 Enhanced Markdown Catalog Structure**:
 ```markdown
-# [Document Name] - Image Extraction Catalog
-**Human-Readable Metadata Display for Review**
+# [Document Name] - Enhanced Visual Asset Catalog v3.0
+**Coordinate-Aware Extraction with Sequential Numbering**
 
 **Extraction Date**: YYYY-MM-DD  
-**Source**: [PDF filename]  
-**Total Images**: XX successfully extracted  
-**Success Rate**: XX.X% (XX/XX images)  
-**Purpose**: Human review of extraction results with complete metadata
+**Enhancement**: v3.0 coordinate-aware rescue system applied  
+**Total Images**: XX successfully extracted (XX original + XX rescued)  
+**Success Rate**: 100% (XX/XX after coordinate-aware rescue)  
+**Sequential Range**: [PREFIX]-001 through [PREFIX]-XXX  
+**Quality Assurance**: All images brightness >50, actual cropped dimensions  
 
 ---
 
-## 📋 **Complete Image Inventory**
+## 📋 **Complete Image Inventory with Sequential IDs**
 
-### Image 1: [filename]
-**Page**: XX | **Dimensions**: XXXxXXX | **Size**: XX.XKB  
+### **[PREFIX]-001** | Page XX - [Section Name] ⭐ **CROPPED**  
+**File**: `[filename].png`  
+**Dimensions**: XXX×XXX pixels (actual cropped size)  
+**Size**: XX.XKB | **Quality**: Brightness XX (excellent)  
 **Context**: [caption/nearby text]  
-**Content Type**: [technical/reference/screenshot]  
-**Consumer Potential**: [which documents could use this]  
+**Content Type**: [technical diagram/schematic/photo]  
+**Usage**: Easy reference "Please update [PREFIX]-001 description"  
+![PREFIX-001: Description]([filename].png)
 
-### Image 2: [filename]
-[Same format for all images...]
+### **[PREFIX]-002** | Page XX - [Section Name]  
+[Same enhanced format for all images...]
 
 ---
 
-## 🔍 **Content Analysis**
-**Debug/Terminal Images**: [count] - [specific relevance]  
-**Technical Diagrams**: [count] - [types]  
-**IDE Screenshots**: [count] - [components shown]  
-**Reference Graphics**: [count] - [categories]
+## 📊 **v3.0 Quality Analysis**
+**Rescued Images**: [count] - Originally black/full-page, now properly cropped  
+**Brightness Distribution**: [count] >80 (excellent), [count] 50-80 (good), [count] <50 (acceptable)  
+**File Size Distribution**: [count] >50KB (detailed), [count] 10-50KB (standard), [count] <10KB (simple)  
+**Dimension Analysis**: All show actual content dimensions (no full-page 1700×2200)  
 
-## 🎯 **Consumer Opportunities**
-**Terminal Window User Guide**: [X images directly applicable]  
-**Development Tutorials**: [X images for IDE workflow]  
-**Language Reference**: [X images for syntax examples]  
+## 🔄 **Browser Cache Advisory**
+**Important**: After extraction updates, refresh browser cache (Ctrl+F5) to see actual cropped images instead of cached full-page versions.
 ```
 
 **Master Catalog Structure** (Project-level aggregation):

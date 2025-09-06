@@ -303,9 +303,192 @@ Use the replacement script to ensure only properly cropped images remain.
 4. **Update documentation references** if filenames change
 5. **Archive old versions** for reference
 
+## 🔄 Multi-Part PDF Handling
+
+### When PDFs Are Split Due to Size Constraints
+**Trigger**: Large PDFs split into `Document-Part1of5.pdf`, `Document-Part2of5.pdf`, etc.
+
+#### Multi-Part Extraction Protocol
+1. **Extract Each Part Separately**:
+```bash
+# Extract each part to separate temporary directories
+python3 tools/enhanced_pdf_extractor.py "Document-Part1of5.pdf" -o "extracted_images_doc_part1"
+python3 tools/enhanced_pdf_extractor.py "Document-Part2of5.pdf" -o "extracted_images_doc_part2"
+# Continue for all parts...
+```
+
+2. **Combine with Collision Protection** ⚠️ **CRITICAL SAFETY**:
+```bash
+# MANDATORY: Check for filename collisions before copying
+for part in 1 2 3 4 5; do
+  for file in extracted_images_doc_part${part}/*.png; do
+    basename=$(basename "$file")
+    destination="final_directory/$basename"
+    
+    # Check for collision
+    if [ -f "$destination" ]; then
+      # Rename with part identifier to avoid collision
+      new_name="${basename%.png}_part${part}.png"
+      cp "$file" "final_directory/$new_name"
+      echo "⚠️ COLLISION AVOIDED: $basename → $new_name"
+    else
+      cp "$file" "$destination"
+    fi
+  done
+done
+```
+
+3. **Verify Combination Success**:
+```bash
+# Verify total count matches expectation
+expected_total=34  # Sum from all parts
+actual_count=$(ls final_directory/*.png | wc -l)
+if [ "$actual_count" -eq "$expected_total" ]; then
+  echo "✅ SUCCESS: All $actual_count images combined"
+  # Safe to clean up temporary directories
+  rm -rf extracted_images_doc_part*
+else
+  echo "❌ ERROR: Expected $expected_total, got $actual_count"
+  # DO NOT clean up - investigate missing files
+fi
+```
+
+## 📋 Todo MCP Integration Pattern
+
+### Systematic Task Management
+**Primary Tag**: `["image_extraction"]` - Required for all extraction tasks
+
+#### Standard Task Sequence
+```bash
+# Create systematic extraction workflow
+mcp__todo-mcp__todo_create content:"Phase 1: Setup extraction environment for [document]" priority:"critical" estimate_minutes:10 tags:["image_extraction"] sequence:1
+
+mcp__todo-mcp__todo_create content:"Phase 2: Execute coordinate-aware extraction for [document]" priority:"critical" estimate_minutes:30 tags:["image_extraction"] sequence:2
+
+mcp__todo-mcp__todo_create content:"Phase 3: Analyze quality and apply rescue system" priority:"critical" estimate_minutes:20 tags:["image_extraction"] sequence:3
+
+mcp__todo-mcp__todo_create content:"Phase 4: Generate catalogs with sequential numbering" priority:"critical" estimate_minutes:25 tags:["image_extraction"] sequence:4
+
+mcp__todo-mcp__todo_create content:"Phase 5: Update ALL tracking systems" priority:"critical" estimate_minutes:25 tags:["image_extraction"] sequence:5
+```
+
+#### Progress Context Tracking
+```bash
+# Track extraction state
+mcp__todo-mcp__context_set key:"extraction_active_[doc]" value:"Started: [timestamp], Expected: [N] images, Tools: enhanced pipeline"
+
+# Mark completion with metrics
+mcp__todo-mcp__context_set key:"extraction_complete_[doc]" value:"SUCCESS: [N]/[total] images, [XX.X%] success, Sequential: [PREFIX]-001 to [PREFIX]-[N]"
+```
+
+## 🎯 Consumer Distribution System
+
+### Asset Distribution Philosophy
+**Primary Extraction**: Owns the physical image files and master catalog  
+**Secondary Extractions**: Reference primary assets with context-specific usage  
+**Documents**: Queue enhancement opportunities in technical debt system
+
+#### Consumer Distribution Workflow
+1. **Identify Consumers**:
+   - **Related extractions** that could use these images
+   - **Documents** that could be enhanced with visual assets
+   - **Technical debt opportunities** for systematic improvement
+
+2. **Create Distribution Plan**:
+   - **Tier 1 (Immediate)**: Secondary extraction reference files
+   - **Tier 2 (Deferred)**: Document enhancement opportunities
+   - **Tier 3 (Strategic)**: Cross-document visual consistency
+
+3. **Execute Distribution**:
+```bash
+# Update secondary extractions (immediate)
+mcp__todo-mcp__todo_create content:"Update [N] secondary extractions with [doc] visual asset references" priority:"high" estimate_minutes:[N*10] tags:["consumer_updates"]
+
+# Queue document enhancements (deferred)
+mcp__todo-mcp__todo_create content:"Add [doc] assets to technical debt for [N] document enhancement opportunities" priority:"low" estimate_minutes:15 tags:["technical_debt"]
+```
+
+## 📊 Mandatory System Updates
+
+### ALL Tracking Systems Must Be Updated
+**CRITICAL**: After every extraction, update these 5 systems in order:
+
+1. **Operations Dashboard** (`/engineering/README.md`)
+   - Update Asset Extraction Status metrics
+   - Update success rates and totals
+
+2. **Ingested Sources Catalog** (`/sources/INGESTED-SOURCES-CATALOG.md`)
+   - Change status from "PENDING" to "EXTRACTED" with statistics
+   - Update Visual Assets Extraction Status summary
+
+3. **Document Production Pipeline** (`/pipelines/document-production-pipeline.md`)
+   - Update Visual Asset Integration section
+   - Update Enhancement Opportunities
+
+4. **Technical Debt Registry** (`/technical-debt/VISUAL-ASSETS-DEBT.md`)
+   - Add new enhancement opportunities
+   - Update effort estimates with newly available assets
+
+5. **Project Master** (`/engineering/operations/README.md`)
+   - Update methodology improvements
+   - Update knowledge coverage metrics
+
+### Why System Updates Matter
+- **Prevents data inconsistency** across tracking systems
+- **Ensures extraction work visibility** in all relevant contexts
+- **Maintains accurate project status** reporting
+- **Enables proper sprint planning** with current asset availability
+
+## 🔧 Error Recovery Protocols
+
+### When Extraction Tools Fail
+```bash
+# Tool dependency issues
+if command -v python3 >/dev/null 2>&1; then
+    if python3 -c "import fitz, PIL" 2>/dev/null; then
+        echo "✅ Dependencies available"
+    else
+        echo "❌ Install missing: pip install PyMuPDF Pillow pdf2image"
+    fi
+else
+    echo "❌ Python3 not available"
+fi
+```
+
+### When Directory Issues Occur
+```bash
+# Create recovery tasks for asset organization
+mcp__todo-mcp__todo_create content:"Recovery: Reorganize [doc] extraction assets to proper directory structure" priority:"high" estimate_minutes:15 tags:["recovery"]
+```
+
+### When Manual Capture Needed
+```bash
+# Document exact requirements for human intervention
+mcp__todo-mcp__todo_create content:"Manual capture: [N] failed extractions from [doc] - pages [X,Y,Z] technical diagrams" priority:"medium" estimate_minutes:[N*5] tags:["manual_capture"]
+```
+
+## 📋 Quality Validation Framework
+
+### Completeness Checklist
+- [ ] **All expected images processed** by coordinate-aware extraction
+- [ ] **Failed extractions analyzed** with rescue system applied
+- [ ] **Sequential numbering assigned** ([PREFIX]-001 to [PREFIX]-N)
+- [ ] **Quality metrics validated** (brightness >50, file size >5KB)
+- [ ] **Catalogs generated** with actual cropped dimensions
+- [ ] **Consumer distribution planned** and executed
+- [ ] **ALL tracking systems updated** with extraction results
+- [ ] **Follow-up tasks created** for manual capture if needed
+
+### Success Rate Targets
+- **Initial Extraction**: 60-70% (typical PyMuPDF baseline)
+- **After Coordinate Rescue**: 95-100% (target with rescue system)
+- **Final Quality**: 100% properly cropped images
+- **System Integration**: 100% tracking systems updated
+
 ---
 
 **Version**: 3.0  
 **Status**: Production methodology validated on P2 Datasheet extraction  
 **Key Innovation**: Coordinate-aware rescue system achieving 100% success rate  
-**Next Application**: Silicon Dock re-extraction
+**Enhancement**: Integrated Todo MCP workflow and consumer distribution system  
+**Next Application**: Silicon Dock re-extraction with complete systematic approach
