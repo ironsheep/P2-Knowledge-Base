@@ -1,0 +1,236 @@
+concept: setq_block_operations
+title: SETQ/SETQ2 Block Operations
+category: memory_operations
+description: Hardware-accelerated block memory transfers and operations using SETQ/SETQ2 prefixes
+
+overview: |
+  SETQ and SETQ2 are prefix instructions that modify the next instruction to perform block operations.
+  They enable fast, hardware-accelerated transfers between hub and cog/LUT memory, block arithmetic,
+  and multi-long operations. These are essential for efficient data movement and initialization.
+
+setq_instructions:
+  SETQ:
+    function: "Set block count for cog RAM operations"
+    syntax: "SETQ #count-1"
+    range: "0-511 (transfer 1-512 longs)"
+    target: "Cog RAM ($000-$1FF)"
+    encoding: "9-bit immediate or register"
+    example: |
+      SETQ #15           ' Setup for 16 longs
+      RDLONG 0, PTRA     ' Read 16 longs from hub to cog[0..15]
+
+  SETQ2:
+    function: "Set block count for LUT RAM operations"
+    syntax: "SETQ2 #count-1"
+    range: "0-511 (transfer 1-512 longs)"
+    target: "LUT RAM ($200-$3FF)"
+    encoding: "9-bit immediate or register"
+    example: |
+      SETQ2 #255         ' Setup for 256 longs
+      RDLONG $200, PTRB  ' Read 256 longs from hub to LUT
+
+block_operations:
+  hub_to_cog_transfer:
+    instruction: "SETQ + RDLONG"
+    operation: "Read multiple longs from hub to cog"
+    syntax: |
+      SETQ #count-1
+      RDLONG first_cog_reg, hub_address
+    timing: "2 + count cycles"
+    example: |
+      SETQ #31           ' 32 longs
+      RDLONG buffer, ##source_data
+      ' Reads hub[source_data..source_data+127] to cog[buffer..buffer+31]
+
+  cog_to_hub_transfer:
+    instruction: "SETQ + WRLONG"
+    operation: "Write multiple longs from cog to hub"
+    syntax: |
+      SETQ #count-1
+      WRLONG first_cog_reg, hub_address
+    timing: "2 + count cycles"
+    example: |
+      SETQ #63           ' 64 longs
+      WRLONG results, PTRA
+      ' Writes cog[results..results+63] to hub[PTRA..PTRA+255]
+
+  hub_to_lut_transfer:
+    instruction: "SETQ2 + RDLONG"
+    operation: "Read multiple longs from hub to LUT"
+    syntax: |
+      SETQ2 #count-1
+      RDLONG $200+offset, hub_address
+    example: |
+      SETQ2 #511         ' Entire LUT (512 longs)
+      RDLONG $200, ##lut_data
+      ' Loads entire LUT from hub
+
+  lut_to_hub_transfer:
+    instruction: "SETQ2 + WRLONG"
+    operation: "Write multiple longs from LUT to hub"
+    syntax: |
+      SETQ2 #count-1
+      WRLONG $200+offset, hub_address
+    example: |
+      SETQ2 #127         ' 128 longs
+      WRLONG $200, PTRB++
+      ' Writes LUT[$200..$27F] to hub, updates PTRB
+
+special_operations:
+  block_math:
+    description: "SETQ modifies certain math operations"
+    operations:
+      MUXQ:
+        syntax: "SETQ mask + MUXQ dest, source"
+        operation: "dest = (dest & !mask) | (source & mask)"
+        use: "Masked merge operation"
+      
+      COGINIT:
+        syntax: "SETQ #ptra_ptrb + COGINIT #cog, #address"
+        operation: "Initialize cog with PTRA/PTRB values"
+        encoding: "PTRA[19:0] in bits 19:0, PTRB[19:0] in bits 39:20"
+
+  augmented_operations:
+    with_AUGS:
+      description: "AUGS + SETQ for 32-bit counts"
+      example: |
+        AUGS #>>1000      ' Upper bits
+        SETQ #1000 & $1FF ' Lower 9 bits
+        RDLONG 0, hub_ptr ' Read 1001 longs
+    
+    with_AUGD:
+      description: "AUGD + SETQ for special modes"
+      operation: "Enables alternate block modes"
+
+block_fill:
+  cog_fill:
+    instruction: "SETQ + WRLONG immediate"
+    operation: "Fill cog registers with value"
+    syntax: |
+      SETQ #count-1
+      WRLONG #value, #first_reg
+    example: |
+      SETQ #15
+      WRLONG #0, #buffer  ' Clear 16 cog registers
+
+  hub_fill:
+    instruction: "SETQ + WRLONG with immediate"
+    operation: "Fill hub memory with value"
+    syntax: |
+      SETQ #count-1
+      WRLONG value_reg, hub_address
+    note: "Use FBLOCK for faster hub fills"
+
+performance:
+  transfer_rates:
+    hub_to_cog: "1 long per cycle after 2-cycle setup"
+    cog_to_hub: "1 long per cycle after 2-cycle setup"
+    hub_to_lut: "1 long per cycle after 2-cycle setup"
+    lut_to_hub: "1 long per cycle after 2-cycle setup"
+
+  efficiency:
+    small_transfers: "2 + N cycles for N longs"
+    large_transfers: "Approaches 1 cycle per long"
+    vs_loop: "10-20x faster than RDLONG/WRLONG loop"
+
+  limitations:
+    - "Maximum 512 longs per operation"
+    - "Must be contiguous memory"
+    - "Cannot cross cog/LUT boundary"
+    - "Interrupts delayed during transfer"
+
+common_patterns:
+  array_copy:
+    code: |
+      SETQ #array_size-1
+      RDLONG dest_array, source_ptr
+    description: "Copy entire array"
+
+  buffer_clear:
+    code: |
+      SETQ #buffer_size-1
+      WRLONG #0, #buffer_start
+    description: "Clear buffer to zero"
+
+  context_save:
+    code: |
+      SETQ #31              ' Save 32 registers
+      WRLONG 0, context_ptr ' Save cog[0..31]
+    description: "Save register context"
+
+  context_restore:
+    code: |
+      SETQ #31              ' Restore 32 registers
+      RDLONG 0, context_ptr ' Restore cog[0..31]
+    description: "Restore register context"
+
+  lut_table_load:
+    code: |
+      SETQ2 #255            ' Half of LUT
+      RDLONG $200, ##sine_table
+    description: "Load lookup table"
+
+  fast_memcpy:
+    code: |
+      .copy_loop
+        SETQ #127           ' 128 longs = 512 bytes
+        RDLONG temp_buffer, src_ptr
+        ADD src_ptr, ##512
+        SETQ #127
+        WRLONG temp_buffer, dst_ptr
+        ADD dst_ptr, ##512
+        DJNZ count, #.copy_loop
+    description: "Fast memory copy routine"
+
+advanced_usage:
+  partial_transfers:
+    description: "Transfer subset of registers"
+    example: |
+      MOV count, actual_size
+      SUB count, #1
+      SETQ count          ' Dynamic count
+      RDLONG buffer, PTRA
+
+  strided_access:
+    description: "Cannot do strided - must be contiguous"
+    workaround: "Use multiple SETQ operations"
+    example: |
+      ' Copy every 4th long
+      MOV index, #0
+      .loop
+        RDLONG temp, source_ptr
+        ADD source_ptr, #16    ' Skip 3 longs
+        ALTD index, #buffer
+        MOV 0-0, temp
+        ADD index, #1
+        DJNZ count, #.loop
+
+  interrupt_blocking:
+    description: "Block transfers are atomic"
+    behavior: "Interrupts delayed until complete"
+    consideration: "Keep transfers small for responsiveness"
+
+debugging:
+  verification:
+    - "Check SETQ count is N-1, not N"
+    - "Verify address alignment"
+    - "Confirm no boundary crossing"
+    - "Test with small counts first"
+
+  common_errors:
+    off_by_one: "Using count instead of count-1"
+    boundary_cross: "Transfer across cog/LUT boundary"
+    wrong_prefix: "SETQ for LUT, SETQ2 for cog"
+
+best_practices:
+  - "Always use count-1 in SETQ"
+  - "Align transfers to long boundaries"
+  - "Use for initialization and bulk copies"
+  - "Consider interrupt latency impact"
+  - "Document transfer sizes clearly"
+  - "Test boundary conditions"
+
+references:
+  - silicon_doc: SETQ/SETQ2 block operations
+  - instruction_set: SETQ/SETQ2 encoding
+  - optimization_guide: Fast memory transfers

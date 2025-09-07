@@ -1,0 +1,282 @@
+concept: streamer_smartpin_control
+title: Streamer and Smart Pin Control
+category: peripheral_control
+description: Hardware streaming engine and autonomous Smart Pin configuration for high-speed I/O
+
+overview: |
+  The P2 includes a hardware streamer for high-bandwidth data movement and 64 Smart Pins capable of
+  autonomous operation. The streamer handles DMA-like transfers between hub memory and pins, while
+  Smart Pins implement various protocols and timing functions independently of the cog.
+
+streamer_system:
+  streamer_engine:
+    purpose: "High-speed data transfer hub↔pins"
+    bandwidth: "System clock rate"
+    modes:
+      - "Hub to pins (output)"
+      - "Pins to hub (input)"
+      - "LUT to pins (via colorspace)"
+      - "NCO frequency generation"
+    
+  streamer_commands:
+    XINIT:
+      syntax: "XINIT mode, count"
+      operation: "Initialize and start streamer"
+      parameters:
+        mode: "32-bit mode configuration"
+        count: "Transfer count"
+      example: |
+        XINIT ##STREAMER_MODE, ##byte_count
+    
+    XSTOP:
+      syntax: "XSTOP"
+      operation: "Stop streamer immediately"
+      use: "Abort streaming operation"
+    
+    XCONT:
+      syntax: "XCONT mode, count"
+      operation: "Continue streaming with new parameters"
+      use: "Chain streaming operations"
+    
+    XZERO:
+      syntax: "XZERO mode, count"
+      operation: "Stream zeros (no hub read)"
+      use: "Generate timing/clocks"
+
+  streamer_modes:
+    immediate_modes:
+      1_bit_output: "%0000_0000"
+      2_bit_output: "%0000_0001"
+      4_bit_output: "%0000_0010"
+      8_bit_output: "%0000_0011"
+      16_bit_output: "%0000_0100"
+      32_bit_output: "%0000_0101"
+      
+    lut_modes:
+      1_bit_lut: "%0001_0000"
+      2_bit_lut: "%0001_0001"
+      4_bit_lut: "%0001_0010"
+      8_bit_lut: "%0001_0011"
+      
+    rfbyte_modes:
+      rfbyte_fetch: "%0010_xxxx"
+      description: "Stream from FIFO"
+
+smart_pin_system:
+  configuration:
+    WRPIN:
+      syntax: "WRPIN config, #pin"
+      operation: "Configure Smart Pin mode and parameters"
+      config_bits:
+        31_24: "Filter/input selector"
+        23_16: "Low-level pin control"
+        15_8: "High-level pin control"
+        7_0: "Smart Pin mode"
+      example: |
+        WRPIN ##P_ASYNC_TX, #tx_pin  ' Configure for async serial
+    
+    WXPIN:
+      syntax: "WXPIN value, #pin"
+      operation: "Write X parameter to Smart Pin"
+      use: "Set baud rate, period, etc."
+      example: |
+        WXPIN baud_rate, #tx_pin
+    
+    WYPIN:
+      syntax: "WYPIN value, #pin"
+      operation: "Write Y parameter to Smart Pin"
+      use: "Send data, set count, etc."
+      example: |
+        WYPIN char, #tx_pin  ' Send character
+    
+    DIRH:
+      syntax: "DIRH #pin"
+      operation: "Enable Smart Pin (set DIR high)"
+      effect: "Smart Pin starts operating"
+    
+    DIRL:
+      syntax: "DIRL #pin"
+      operation: "Disable Smart Pin (set DIR low)"
+      effect: "Smart Pin stops, resets"
+
+  status_operations:
+    RDPIN:
+      syntax: "RDPIN result, #pin {WC}"
+      operation: "Read Smart Pin result"
+      flags: "WC sets C if new data available"
+      example: |
+        RDPIN data, #rx_pin WC
+        IF_C process_received_byte
+    
+    RQPIN:
+      syntax: "RQPIN result, #pin {WC}"
+      operation: "Read Smart Pin result without clearing"
+      use: "Peek at data without acknowledging"
+    
+    AKPIN:
+      syntax: "AKPIN #pin"
+      operation: "Acknowledge Smart Pin"
+      effect: "Clear IN flag, ready for next"
+    
+    TESTP:
+      syntax: "TESTP #pin {WC/WZ}"
+      operation: "Test pin state"
+      flags: "C = pin state, Z = !pin state"
+
+smart_pin_modes:
+  serial_modes:
+    async_tx:
+      mode: "P_ASYNC_TX"
+      x_param: "Baud rate timing"
+      y_param: "Character to send"
+      example: |
+        WRPIN ##P_ASYNC_TX, #pin
+        WXPIN baud_timing, #pin
+        DIRH #pin
+        WYPIN char, #pin
+    
+    async_rx:
+      mode: "P_ASYNC_RX"
+      x_param: "Baud rate timing"
+      result: "Received character"
+      example: |
+        WRPIN ##P_ASYNC_RX, #pin
+        WXPIN baud_timing, #pin
+        DIRH #pin
+        .wait
+          TESTP #pin WC
+          IF_NC JMP #.wait
+        RDPIN char, #pin
+
+  pulse_modes:
+    pulse_output:
+      mode: "P_PULSE"
+      x_param: "Base period"
+      y_param: "Pulse count"
+      
+    pwm_output:
+      mode: "P_PWM_TRIANGLE"
+      x_param: "Frame period"
+      y_param: "Duty cycle"
+      
+    nco_frequency:
+      mode: "P_NCO_FREQ"
+      x_param: "Frequency value"
+      y_param: "Enable/disable"
+
+  measurement_modes:
+    count_edges:
+      mode: "P_COUNT_RISES"
+      x_param: "Measurement period"
+      result: "Edge count"
+      
+    measure_period:
+      mode: "P_PERIODS_TICKS"
+      x_param: "Number of periods"
+      result: "Total ticks"
+      
+    time_states:
+      mode: "P_HIGH_TICKS"
+      x_param: "Measurement window"
+      result: "High time in ticks"
+
+common_patterns:
+  serial_transmit:
+    code: |
+      ' Configure for 115200 baud
+      MOV baud, ##7_500_000 / 115200
+      WRPIN ##P_ASYNC_TX, #tx_pin
+      WXPIN baud, #tx_pin
+      DIRH #tx_pin
+      
+      ' Send string
+      .send_loop
+        RDBYTE char, string_ptr++
+        CMP char, #0 WZ
+        IF_Z JMP #.done
+        .wait_ready
+          TESTP #tx_pin WC
+          IF_C JMP #.wait_ready
+        WYPIN char, #tx_pin
+        JMP #.send_loop
+      .done
+    description: "Async serial transmission"
+
+  video_output:
+    code: |
+      ' Setup streamer for video
+      WRFAST ##0, ##frame_buffer
+      XINIT ##STREAMER_MODE_32BIT, ##pixels_per_line
+      
+      ' Stream continues automatically
+      ' Streamer will signal when done
+    description: "Video pixel streaming"
+
+  frequency_generation:
+    code: |
+      ' Configure NCO mode
+      WRPIN ##P_NCO_FREQ, #clk_pin
+      WXPIN freq_value, #clk_pin
+      WYPIN #1, #clk_pin        ' Enable
+      DIRH #clk_pin
+    description: "Generate clock signal"
+
+  adc_sampling:
+    code: |
+      ' Configure ADC mode
+      WRPIN ##P_ADC_1X, #adc_pin
+      WXPIN #0, #adc_pin
+      DIRH #adc_pin
+      
+      ' Read samples
+      .sample
+        RDPIN sample, #adc_pin
+        ' Process sample
+    description: "Analog sampling"
+
+coordination:
+  streamer_smartpin:
+    - "Streamer can drive multiple Smart Pins"
+    - "Smart Pins can trigger streamer events"
+    - "Coordinate via events and interrupts"
+    
+  multi_pin_sync:
+    - "Configure pins in sequence"
+    - "Use DIR to start simultaneously"
+    - "Smart Pins run independently"
+
+performance:
+  streamer:
+    - "Full system clock rate"
+    - "No cog cycle consumption"
+    - "Automatic hub synchronization"
+    
+  smart_pins:
+    - "Independent of cog timing"
+    - "Sub-microsecond precision"
+    - "64 pins simultaneous operation"
+
+debugging:
+  monitoring:
+    - "Use RDPIN to check status"
+    - "TESTP for pin state"
+    - "Add LED indicators"
+    
+  common_issues:
+    - "Wrong mode configuration"
+    - "Incorrect X/Y parameters"
+    - "Forgetting DIRH to enable"
+    - "Not acknowledging with AKPIN"
+
+best_practices:
+  - "Configure mode before parameters"
+  - "Enable with DIRH after setup"
+  - "Check status before sending data"
+  - "Use events for async operation"
+  - "Document Smart Pin assignments"
+  - "Test timing with oscilloscope"
+
+references:
+  - silicon_doc: Streamer section
+  - silicon_doc: Smart Pins section
+  - app_notes: Smart Pin cookbook

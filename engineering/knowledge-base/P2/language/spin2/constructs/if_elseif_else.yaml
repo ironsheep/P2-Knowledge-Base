@@ -1,0 +1,228 @@
+# Spin2 Language Construct: IF/ELSEIF/ELSE
+# Source: Spin2 v51 documentation
+# Critical for: Conditional execution and branching
+
+construct: "IF/ELSEIF/ELSE"
+category: "control_flow"
+type: "conditional"
+
+metadata:
+  query_tags: ["if", "conditional", "branch", "elseif", "else", "decision", "test"]
+  complexity: "beginner"
+  use_cases: ["conditional_execution", "decision_trees", "value_testing", "state_checks"]
+  common_questions:
+    - "How do I make conditional decisions?"
+    - "How do I test multiple conditions?"
+    - "How do I chain IF statements?"
+
+syntax_forms:
+  - form: "simple_if"
+    syntax: "IF condition"
+    description: "Execute next statement/block if condition is true"
+    example: |
+      IF x > 10
+        handle_overflow()
+    
+  - form: "if_else"
+    syntax: |
+      IF condition
+        true_block
+      ELSE
+        false_block
+    description: "Execute one of two blocks based on condition"
+    example: |
+      IF sensor < threshold
+        LED.on()
+      ELSE
+        LED.off()
+    
+  - form: "if_elseif_chain"
+    syntax: |
+      IF condition1
+        block1
+      ELSEIF condition2
+        block2
+      ELSEIF condition3
+        block3
+      ELSE
+        default_block
+    description: "Test multiple conditions in sequence"
+    example: |
+      IF temperature > 100
+        state := TOO_HOT
+      ELSEIF temperature < 0
+        state := TOO_COLD
+      ELSEIF temperature > 80
+        state := WARM
+      ELSE
+        state := NORMAL
+    
+  - form: "inline_if"
+    syntax: "IF condition : single_statement"
+    description: "Single-line conditional execution"
+    example: |
+      IF button_pressed() : counter++
+
+block_syntax:
+  indentation_rules:
+    - "Blocks defined by indentation level"
+    - "All statements at same indent are part of block"
+    - "Block ends when indentation decreases"
+  
+  example: |
+    IF mode == ACTIVE
+      start_timer()        ' Part of IF block
+      enable_outputs()     ' Part of IF block
+      status := RUNNING    ' Part of IF block
+    update_display()       ' NOT part of IF block
+
+condition_expressions:
+  boolean_operators:
+    - operator: "AND"
+      description: "Logical AND"
+      example: "IF x > 0 AND x < 100"
+    
+    - operator: "OR"
+      description: "Logical OR"
+      example: "IF status == ERROR OR status == FAULT"
+    
+    - operator: "NOT"
+      description: "Logical NOT"
+      example: "IF NOT ready"
+    
+    - operator: "XOR"
+      description: "Logical XOR"
+      example: "IF switch1 XOR switch2"
+
+  comparison_operators:
+    - operator: "=="
+      description: "Equal to"
+    - operator: "<>"
+      description: "Not equal to"
+    - operator: "<"
+      description: "Less than"
+    - operator: ">"
+      description: "Greater than"
+    - operator: "<="
+      description: "Less than or equal"
+    - operator: ">="
+      description: "Greater than or equal"
+
+  special_comparisons:
+    - operator: "<<=>"
+      description: "Signed comparison result (-1, 0, 1)"
+      example: "IF x <<=> y == 1  ' x > y"
+
+common_patterns:
+  - pattern: "range_check"
+    description: "Test if value is within range"
+    code: |
+      IF value >= MIN_LIMIT AND value <= MAX_LIMIT
+        process_valid_value(value)
+    
+  - pattern: "state_machine"
+    description: "State-based execution"
+    code: |
+      IF state == IDLE
+        check_for_start()
+      ELSEIF state == RUNNING
+        process_data()
+      ELSEIF state == ERROR
+        handle_error()
+      ELSE
+        reset_system()
+    
+  - pattern: "null_check"
+    description: "Check for valid pointer/value"
+    code: |
+      IF ptr
+        use_pointer(ptr)
+      ELSE
+        handle_null()
+    
+  - pattern: "bit_test"
+    description: "Test specific bit"
+    code: |
+      IF flags & ENABLE_BIT
+        feature_enabled()
+    
+  - pattern: "nested_conditions"
+    description: "Complex nested logic"
+    code: |
+      IF mode == AUTO
+        IF sensor > threshold
+          IF NOT alarm_active
+            trigger_alarm()
+
+special_features:
+  - feature: "short_circuit_evaluation"
+    description: "AND/OR stop evaluating when result is known"
+    example: |
+      IF ptr AND ptr.value > 0   ' Won't access ptr.value if ptr is 0
+    
+  - feature: "assignment_in_condition"
+    description: "Can assign and test in same expression"
+    example: |
+      IF (value := read_sensor()) > limit
+        process_high_value(value)
+    
+  - feature: "method_call_conditions"
+    description: "Methods can return boolean results"
+    example: |
+      IF is_ready() AND has_data()
+        process()
+
+pitfalls:
+  - pitfall: "assignment_vs_comparison"
+    description: "Using = instead of == (Spin2 uses := for assignment)"
+    wrong: |
+      IF x = 10    ' This is comparison, not assignment!
+    correct: |
+      IF x == 10   ' Comparison
+      x := 10      ' Assignment
+    
+  - pitfall: "missing_else"
+    description: "Forgetting ELSE in ELSEIF chains"
+    consideration: "Always consider if final ELSE is needed"
+    
+  - pitfall: "indentation_errors"
+    description: "Wrong indentation changes block membership"
+    wrong: |
+      IF condition
+        statement1
+          statement2   ' Wrong indent - not in IF block!
+    correct: |
+      IF condition
+        statement1
+        statement2     ' Same indent - both in IF block
+
+performance:
+  evaluation_order: "Left to right with short-circuit"
+  overhead: "Minimal - translates to conditional jumps in PASM2"
+  optimization_tips:
+    - "Put most likely condition first in ELSEIF chains"
+    - "Use CASE for multiple equality tests on same variable"
+    - "Consider lookup tables for complex mappings"
+
+pasm_equivalent:
+  description: "IF generates conditional jump patterns"
+  example:
+    spin2: |
+      IF x > 10
+        y := 20
+      ELSE
+        y := 30
+    pasm2: |
+      CMP     x, #10 WC
+      IF_NC   MOV y, #30
+      IF_C    MOV y, #20
+
+related_constructs:
+  - "case.yaml"
+  - "repeat.yaml"
+  - "abort.yaml"
+  
+related_operators:
+  - "operators/comparison.yaml"
+  - "operators/logical.yaml"
+  - "operators/ternary.yaml"

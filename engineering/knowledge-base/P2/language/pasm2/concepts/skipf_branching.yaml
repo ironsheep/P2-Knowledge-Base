@@ -1,0 +1,214 @@
+concept: skipf_branching
+title: Special SKIPF Branching Rules
+category: control_flow
+description: Advanced SKIPF patterns that combine instruction skipping with automatic branching
+
+overview: |
+  SKIPF has special branching capabilities beyond simple instruction skipping. When specific patterns
+  are used, SKIPF can automatically branch after the skip pattern completes. This enables sophisticated
+  control flow without explicit branch instructions, reducing code size and eliminating branch penalties.
+
+skipf_branch_encoding:
+  format:
+    bits_31_22: "Skip pattern (10 bits used)"
+    bits_21_10: "Unused (must be 0)"
+    bits_9_0: "Branch target address"
+    encoding: "SKIPF ##(pattern << 22) | target"
+    
+  pattern_rules:
+    - "Only first 10 bits of pattern used"
+    - "Remaining bits must be zero"
+    - "Branch occurs after pattern exhausted"
+    - "Target is cog/LUT address (0-1023)"
+
+special_branching_modes:
+  call_mode:
+    trigger: "Pattern bit 31 = 1"
+    operation: "Acts like CALL instead of JMP"
+    return_storage: "Hardware stack"
+    syntax: |
+      SKIPF ##($80000000 | (pattern << 22) | target)
+    example: |
+      ' Skip pattern with call
+      SKIPF ##($80000000 | (%101 << 22) | subroutine)
+      ADD x, #1       ' Skipped
+      MOV y, #2       ' Executed
+      SUB z, #1       ' Skipped
+      ' Automatically calls subroutine
+    use_case: "Conditional operations before subroutine"
+
+  execf_mode:
+    instruction: "EXECF"
+    operation: "Dedicated instruction for skip+branch"
+    syntax: "EXECF ##(pattern << 10) | target"
+    advantages:
+      - "Clearer intent than SKIPF"
+      - "Compiler optimization friendly"
+      - "Same functionality, better readability"
+    example: |
+      EXECF ##(%1100110011 << 10) | next_phase
+      ' 10 instructions with pattern
+      ' Then jump to next_phase
+
+  zero_pattern:
+    pattern: "All zeros"
+    behavior: "Immediate branch, no skipping"
+    equivalent: "JMP target"
+    example: |
+      SKIPF ##target  ' Same as JMP #target
+    note: "Useful for computed branches"
+
+branch_timing:
+  pattern_execution:
+    - "Each instruction uses one pattern bit"
+    - "Skipped instructions take 0 cycles"
+    - "Executed instructions normal timing"
+    - "Branch occurs in same cycle as last pattern bit"
+    
+  pipeline_effects:
+    - "No flush for skipped instructions"
+    - "Branch at end has normal 2-cycle penalty"
+    - "Overall faster than conditional branches"
+
+  total_cycles:
+    formula: "executed_instructions + 2 (for branch)"
+    example: |
+      ' Pattern %10101010 (4 executed, 4 skipped)
+      ' Total: 4 + 2 = 6 cycles
+
+advanced_patterns:
+  conditional_return:
+    code: |
+      CMP value, limit WC
+      IF_C SKIPF ##(%1111111111 << 22) | 0
+        ' 10 instructions all skipped if C
+        ' Then implicit RET (branch to 0)
+    description: "Early return pattern"
+
+  multi_branch_table:
+    code: |
+      ALTS index, #branch_table
+      SKIPF 0-0               ' Load pattern+target from table
+      ' Execute pattern then branch
+      
+      branch_table
+        LONG (%1010101010 << 22) | handler_a
+        LONG (%1100110011 << 22) | handler_b
+        LONG (%1111000000 << 22) | handler_c
+    description: "Indexed pattern selection"
+
+  loop_with_exit:
+    code: |
+      .loop
+        SKIPF ##(%1111111100 << 22) | .continue
+        ' 8 conditional instructions
+        CMP counter, #0 WZ
+        IF_Z JMP #done        ' Early exit
+        .continue
+    description: "Loop with conditional termination"
+
+  state_machine:
+    code: |
+      ALTS state, #state_patterns
+      EXECF 0-0
+      ' Each state has unique pattern+target
+      
+      state_patterns
+        LONG (%0011001100 << 10) | state_0_next
+        LONG (%0101010101 << 10) | state_1_next
+        LONG (%1111000011 << 10) | state_2_next
+    description: "State-driven execution patterns"
+
+interaction_rules:
+  with_interrupts:
+    - "Pattern preserved across interrupt"
+    - "Branch delayed until pattern complete"
+    - "ISR can use own SKIPF"
+    
+  with_rep:
+    - "SKIPF works inside REP"
+    - "Pattern applies each iteration"
+    - "Branch only after REP completes"
+    
+  with_augs:
+    - "AUGS/AUGD must be in pattern"
+    - "Cannot skip prefix alone"
+    - "Both consume pattern bits"
+
+  nested_skipf:
+    - "Not allowed"
+    - "Second SKIPF skipped if in pattern"
+    - "Would not load new pattern"
+
+optimization_strategies:
+  pattern_design:
+    - "Group skipped instructions"
+    - "Minimize pattern changes"
+    - "Align to common cases"
+    
+  branch_placement:
+    - "Use for loop continuation"
+    - "Replace multi-way branches"
+    - "Implement dispatch tables"
+    
+  code_layout:
+    - "Place targets in cog/LUT"
+    - "Keep patterns in lookup tables"
+    - "Organize for pattern reuse"
+
+debugging_skipf_branches:
+  challenges:
+    - "Hidden branch in pattern"
+    - "Complex execution flow"
+    - "Pattern state invisible"
+    
+  techniques:
+    - "Use EXECF for clarity"
+    - "Document pattern meanings"
+    - "Test patterns in isolation"
+    - "Add trace markers"
+
+performance_comparison:
+  vs_conditional_jumps:
+    skipf: "N executed + 2 cycles"
+    jumps: "N instructions + 2×branches"
+    advantage: "Fewer branch penalties"
+    
+  vs_skip_plus_jump:
+    combined: "Single instruction setup"
+    separate: "Two instruction setup"
+    advantage: "Code density"
+    
+  vs_computed_goto:
+    skipf: "Pattern execution + branch"
+    computed: "Address calc + branch"
+    advantage: "Conditional work before branch"
+
+best_practices:
+  - "Use EXECF for clarity over SKIPF"
+  - "Document pattern bit meanings"
+  - "Keep patterns in named constants"
+  - "Test branch targets thoroughly"
+  - "Limit pattern complexity"
+  - "Place targets strategically"
+
+common_errors:
+  wrong_bit_position:
+    - "Pattern not at bits 31:22"
+    - "Target not at bits 9:0"
+    - "Middle bits not cleared"
+    
+  pattern_overflow:
+    - "Pattern exceeds 10 bits"
+    - "Corrupts branch address"
+    - "Unexpected targets"
+    
+  augmentation_issues:
+    - "AUGS affects SKIPF itself"
+    - "Not pattern contents"
+    - "Use ## for large patterns"
+
+references:
+  - silicon_doc: Special SKIPF Branching Rules section
+  - instruction_set: SKIPF/EXECF encoding
+  - optimization_guide: Advanced control flow

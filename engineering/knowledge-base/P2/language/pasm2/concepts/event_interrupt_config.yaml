@@ -1,0 +1,294 @@
+concept: event_interrupt_configuration
+title: Event and Interrupt Configuration
+category: event_handling
+description: Hardware event detection and interrupt handling with 4 interrupt levels and 16 event sources
+
+overview: |
+  P2 provides sophisticated event and interrupt handling with 16 selectable event sources per cog,
+  4 interrupt levels with dedicated vectors, and both polling and interrupt-driven responses.
+  Events can trigger interrupts, wake from WAIT, or be polled. Each cog has independent event configuration.
+
+interrupt_system:
+  interrupt_levels:
+    INT0:
+      priority: "Lowest"
+      vector: "IJMP0"
+      return: "RETI0 or RESI0"
+      
+    INT1:
+      priority: "Low"
+      vector: "IJMP1"
+      return: "RETI1 or RESI1"
+      
+    INT2:
+      priority: "High"
+      vector: "IJMP2"
+      return: "RETI2 or RESI2"
+      
+    INT3:
+      priority: "Highest"
+      vector: "IJMP3"
+      return: "RETI3 or RESI3"
+
+  interrupt_operations:
+    SETINT1:
+      syntax: "SETINT1 #event"
+      operation: "Configure INT1 event source"
+      example: "SETINT1 #1  ' INT1 triggered by event 1"
+      
+    SETINT2:
+      syntax: "SETINT2 #event"
+      operation: "Configure INT2 event source"
+      
+    SETINT3:
+      syntax: "SETINT3 #event"
+      operation: "Configure INT3 event source"
+      
+    STALLI:
+      syntax: "STALLI"
+      operation: "Stall interrupts (disable)"
+      use: "Critical sections"
+      
+    ALLOWI:
+      syntax: "ALLOWI"
+      operation: "Allow interrupts (enable)"
+      use: "Exit critical section"
+
+  return_instructions:
+    RETI0_3:
+      syntax: "RETI0/1/2/3 {WC/WZ/WCZ}"
+      operation: "Return from interrupt, restore C/Z if specified"
+      behavior: "Pop address from internal stack, restore flags"
+      example: "RETI1 WCZ  ' Return and restore both flags"
+      
+    RESI0_3:
+      syntax: "RESI0/1/2/3"
+      operation: "Resume from interrupt (continue interrupted code)"
+      behavior: "Like RETI but continues interrupted instruction"
+      use: "For interrupts that don't fully handle event"
+
+event_sources:
+  selectable_events:
+    0: "Never (disabled)"
+    1: "CT-passed-CT1 (CT >= CT1)"
+    2: "CT-passed-CT2 (CT >= CT2)"
+    3: "CT-passed-CT3 (CT >= CT3)"
+    4: "SE1 event occurred"
+    5: "SE2 event occurred"
+    6: "SE3 event occurred"
+    7: "SE4 event occurred"
+    8: "Pin pattern matched"
+    9: "Pin pattern not matched"
+    10: "Hub FIFO ready"
+    11: "Hub FIFO empty"
+    12: "ATN from other cog"
+    13: "LOCK acquired"
+    14: "LOCK lost"
+    15: "External event"
+
+  event_configuration:
+    SETSE1:
+      syntax: "SETSE1 #mode"
+      operation: "Configure selectable event 1"
+      modes: "Pin edge, state, Smart Pin ready, etc."
+      
+    SETSE2:
+      syntax: "SETSE2 #mode"
+      operation: "Configure selectable event 2"
+      
+    SETSE3:
+      syntax: "SETSE3 #mode"
+      operation: "Configure selectable event 3"
+      
+    SETSE4:
+      syntax: "SETSE4 #mode"
+      operation: "Configure selectable event 4"
+
+event_detection:
+  polling:
+    POLLINT:
+      syntax: "POLLINT {WC/WZ/WCZ}"
+      operation: "Poll interrupt events"
+      flags: "C = INT3 pending, Z = INT1 pending"
+      
+    POLLCT1:
+      syntax: "POLLCT1 {WC/WZ/WCZ}"
+      operation: "Poll if CT >= CT1"
+      clears: "Event flag if set"
+      
+    POLLCT2:
+      syntax: "POLLCT2 {WC/WZ/WCZ}"
+      operation: "Poll if CT >= CT2"
+      
+    POLLCT3:
+      syntax: "POLLCT3 {WC/WZ/WCZ}"
+      operation: "Poll if CT >= CT3"
+      
+    POLLPAT:
+      syntax: "POLLPAT {WC/WZ/WCZ}"
+      operation: "Poll pin pattern match"
+      
+    POLLSE1_4:
+      syntax: "POLLSEx {WC/WZ/WCZ}"
+      operation: "Poll selectable event x"
+      
+    POLLATN:
+      syntax: "POLLATN {WC/WZ/WCZ}"
+      operation: "Poll attention from any cog"
+      
+    POLLQMT:
+      syntax: "POLLQMT {WC/WZ/WCZ}"
+      operation: "Poll if CORDIC idle"
+
+  waiting:
+    WAITINT:
+      syntax: "WAITINT"
+      operation: "Wait for any interrupt"
+      
+    WAITCT1:
+      syntax: "WAITCT1"
+      operation: "Wait for CT >= CT1"
+      
+    WAITCT2:
+      syntax: "WAITCT2"
+      operation: "Wait for CT >= CT2"
+      
+    WAITCT3:
+      syntax: "WAITCT3"
+      operation: "Wait for CT >= CT3"
+      
+    WAITPAT:
+      syntax: "WAITPAT"
+      operation: "Wait for pin pattern"
+      
+    WAITSE1_4:
+      syntax: "WAITSEx"
+      operation: "Wait for selectable event x"
+      
+    WAITATN:
+      syntax: "WAITATN"
+      operation: "Wait for attention signal"
+
+interrupt_context:
+  saved_on_interrupt:
+    - "PC (program counter)"
+    - "C flag"
+    - "Z flag"
+    - "Execution mode (cog/LUT/hub)"
+    
+  not_saved:
+    - "General registers"
+    - "PTRA/PTRB"
+    - "Q register"
+    - "Must be saved by ISR if needed"
+
+  context_preservation:
+    code: |
+      isr1:
+        ' Save registers if needed
+        PUSHA work_reg
+        ' ISR body
+        POPA work_reg
+        RETI1 WCZ        ' Restore flags
+
+common_patterns:
+  timer_interrupt:
+    code: |
+      ' Setup timer interrupt
+      GETCT base_time
+      ADDCT1 base_time, ##period
+      MOV IJMP1, ##timer_isr
+      SETINT1 #1       ' CT >= CT1
+      
+      timer_isr:
+        ' Handle timer
+        ADDCT1 base_time, ##period  ' Next interval
+        ' Timer processing
+        RETI1
+    description: "Periodic timer interrupt"
+
+  pin_event:
+    code: |
+      ' Setup pin edge detection
+      SETSE1 #%01_000000 | pin  ' Rising edge on pin
+      MOV IJMP2, ##pin_handler
+      SETINT2 #4       ' SE1 event
+      
+      pin_handler:
+        ' Handle pin event
+        AKPIN pin        ' Acknowledge Smart Pin
+        RETI2
+    description: "Pin change interrupt"
+
+  attention_handler:
+    code: |
+      ' Setup attention interrupt
+      MOV IJMP3, ##atn_handler
+      SETINT3 #12      ' ATN event
+      
+      atn_handler:
+        ' Check which cog sent ATN
+        POLLATN WC
+        ' Process message
+        RETI3
+    description: "Inter-cog communication"
+
+  critical_section:
+    code: |
+      STALLI           ' Disable interrupts
+      ' Critical code that must not be interrupted
+      ' Access shared resources
+      ALLOWI           ' Re-enable interrupts
+    description: "Interrupt-safe code section"
+
+priority_and_nesting:
+  priority_rules:
+    - "INT3 highest priority, can interrupt INT2/1/0"
+    - "INT2 can interrupt INT1/0"
+    - "INT1 can interrupt INT0"
+    - "Same level cannot interrupt itself"
+    
+  nesting_depth:
+    - "Maximum 4 levels deep (one per interrupt)"
+    - "Each level has own return address"
+    - "Flags saved per level"
+
+  latency:
+    response_time: "3-4 cycles from event to ISR"
+    factors:
+      - "Current instruction completion"
+      - "Pipeline state"
+      - "Higher priority interrupts"
+
+best_practices:
+  interrupt_design:
+    - "Keep ISRs short and fast"
+    - "Save/restore only needed registers"
+    - "Use CALLA/CALLB in ISR for leaf functions"
+    - "Clear event sources in ISR"
+    - "Test with all interrupt combinations"
+    
+  event_selection:
+    - "Use polling for non-critical events"
+    - "Use interrupts for time-critical events"
+    - "Configure before enabling interrupts"
+    - "Document event assignments clearly"
+    
+  debugging:
+    - "Add markers at ISR entry/exit"
+    - "Track interrupt nesting depth"
+    - "Verify flag preservation"
+    - "Test maximum interrupt rate"
+
+limitations:
+  - "Only 4 interrupt levels"
+  - "16 event sources per cog"
+  - "No interrupt priority modification"
+  - "Cannot interrupt AUGS/AUGD pairs"
+  - "REP blocks delay interrupts"
+  - "SETQ blocks are atomic"
+
+references:
+  - silicon_doc: Events and Interrupts section
+  - instruction_set: Event/Interrupt instructions
+  - application_notes: Interrupt handling patterns

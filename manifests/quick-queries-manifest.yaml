@@ -1,0 +1,208 @@
+# Quick Queries Manifest
+# Part of P2 Knowledge Base manifest hierarchy
+
+version: "1.0"
+schema_version: "2024-12-30"
+last_updated: "2024-12-30T00:00:00Z"
+category: "quick_queries"
+base_path: "engineering/knowledge-base/P2/"
+total_entries: 50  # Growing collection
+
+description: |
+  Direct answers to common P2 programming questions.
+  Maps high-level questions to specific documentation and solutions.
+
+common_questions:
+  getting_started:
+    "how do I blink an LED":
+      patterns: ["patterns/blink-led.yaml"]
+      instructions: ["language/pasm2/drvh.yaml", "language/pasm2/drvl.yaml"]
+      methods: ["language/spin2/methods/pinhigh.yaml", "language/spin2/methods/pinlow.yaml"]
+      example: |
+        PUB blink()
+          REPEAT
+            PINHIGH(56)
+            WAITMS(500)
+            PINLOW(56)
+            WAITMS(500)
+    
+    "how do I read a button":
+      patterns: ["patterns/button-debounce.yaml"]
+      instructions: ["language/pasm2/testp.yaml"]
+      methods: ["language/spin2/methods/pinread.yaml"]
+      hardware: ["hardware/buttons_board.yaml"]
+      example: |
+        IF PINREAD(0)
+          ' Button pressed
+    
+    "how do I set up the clock":
+      patterns: ["patterns/clock-setup.yaml"]
+      architecture: ["architecture/clock_system.yaml"]
+      methods: ["language/spin2/methods/clkset.yaml"]
+      example: |
+        CON
+          _CLKFREQ = 200_000_000
+    
+    "how do I start another COG":
+      patterns: ["patterns/multi-cog.yaml"]
+      methods: ["language/spin2/methods/coginit.yaml", "language/spin2/methods/cogspin.yaml"]
+      architecture: ["architecture/cog.yaml"]
+      example: |
+        COGSPIN(NEWCOG, method(), @stack)
+
+  communication:
+    "how do I implement UART":
+      patterns: ["patterns/uart-smart-pin.yaml", "patterns/uart-bitbang.yaml"]
+      smart_pins: ["architecture/smart-pins/smart-pin-00111.yaml", "architecture/smart-pins/smart-pin-01000.yaml"]
+      hardware: ["hardware/addon-serial-host.yaml"]
+      complexity: "beginner"
+    
+    "how do I implement SPI":
+      patterns: ["patterns/spi-master.yaml", "patterns/spi-slave.yaml"]
+      smart_pins: ["architecture/smart-pins/smart-pin-00100.yaml", "architecture/smart-pins/smart-pin-00101.yaml"]
+      complexity: "intermediate"
+    
+    "how do I implement I2C":
+      patterns: ["patterns/i2c-master.yaml"]
+      instructions: ["language/pasm2/drvh.yaml", "language/pasm2/drvl.yaml", "language/pasm2/testp.yaml"]
+      complexity: "intermediate"
+    
+    "how do I implement USB":
+      smart_pins: ["architecture/smart-pins/smart-pin-10111.yaml"]
+      complexity: "advanced"
+
+  timing_control:
+    "how do I create a delay":
+      methods: ["language/spin2/methods/waitms.yaml", "language/spin2/methods/waitus.yaml"]
+      instructions: ["language/pasm2/waitx.yaml", "language/pasm2/waitct1.yaml"]
+      patterns: ["patterns/precise-delay.yaml"]
+    
+    "how do I measure a pulse":
+      patterns: ["patterns/pulse-measurement.yaml"]
+      smart_pins: ["architecture/smart-pins/smart-pin-10001.yaml", "architecture/smart-pins/smart-pin-10010.yaml"]
+      complexity: "intermediate"
+    
+    "how do I generate PWM":
+      patterns: ["patterns/pwm-generation.yaml"]
+      smart_pins: ["architecture/smart-pins/smart-pin-01000.yaml", "architecture/smart-pins/smart-pin-01001.yaml"]
+      hardware: ["hardware/addon-control-board.yaml"]
+    
+    "how do I read an encoder":
+      smart_pins: ["architecture/smart-pins/smart-pin-01011.yaml"]
+      patterns: ["patterns/rotary-encoder.yaml"]
+      complexity: "intermediate"
+
+  multi_cog_programming:
+    "how do COGs communicate":
+      patterns: ["patterns/mailbox-communication.yaml", "patterns/shared-buffer.yaml"]
+      architecture: ["architecture/hub.yaml", "architecture/cog_attention.yaml"]
+      complexity: "intermediate"
+    
+    "how do I synchronize COGs":
+      patterns: ["patterns/cog-synchronization.yaml"]
+      architecture: ["architecture/locks.yaml", "architecture/cog_attention.yaml"]
+      instructions: ["language/pasm2/locktry.yaml", "language/pasm2/lockrel.yaml"]
+    
+    "how do I share data between COGs":
+      patterns: ["patterns/shared-buffer.yaml", "patterns/producer-consumer.yaml"]
+      constructs: ["language/spin2/constructs/blocks.yaml"]
+      key_concept: "DAT vs VAR distinction"
+
+  hardware_setup:
+    "what board should I use":
+      hardware: ["hardware/p2-hardware-selection-guide.yaml"]
+      boards: [
+        "hardware/p2-eval-board.yaml",
+        "hardware/edge-standard-module.yaml",
+        "hardware/edge-mini-breakout.yaml"
+      ]
+    
+    "how do I connect addon boards":
+      hardware: ["hardware/hardware-compatibility-matrix.yaml"]
+      key_info: "Addon boards connect to specific headers with pin assignments"
+    
+    "what pins does the LED matrix use":
+      hardware: ["hardware/addon-led-matrix.yaml"]
+      pins: "P0-P7 with Charlieplexing"
+      connector: "2x6 header on P0-P7"
+    
+    "what pins are used for programming":
+      pins: "P62-P63 for serial programming"
+      hardware: ["hardware/p2-eval-board.yaml"]
+
+  optimization:
+    "how do I speed up my code":
+      patterns: ["patterns/optimization.yaml"]
+      constructs: ["language/spin2/constructs/inline_pasm.yaml"]
+      tip: "Use inline PASM for critical sections"
+    
+    "how do I reduce power consumption":
+      instructions: ["language/pasm2/waitct1.yaml", "language/pasm2/waitx.yaml"]
+      tip: "Use WAIT instructions to sleep COGs"
+    
+    "how do I use the CORDIC":
+      architecture: ["architecture/cordic.yaml"]
+      instructions: ["language/pasm2/qmul.yaml", "language/pasm2/qdiv.yaml"]
+      methods: ["language/spin2/methods/rotxy.yaml", "language/spin2/methods/polxy.yaml"]
+
+troubleshooting:
+  "why won't my COG start":
+    checklist:
+      - "Check stack size (minimum 32 longs)"
+      - "Verify COG code is in DAT section"
+      - "Check COGINIT return value"
+    references: ["language/spin2/constructs/blocks.yaml"]
+  
+  "why is my timing wrong":
+    checklist:
+      - "Verify _CLKFREQ setting"
+      - "Account for hub access timing"
+      - "Check for blocking operations"
+    references: ["architecture/clock_system.yaml", "architecture/hub.yaml"]
+  
+  "why is my serial communication not working":
+    checklist:
+      - "Verify baud rate calculation"
+      - "Check pin assignments"
+      - "Confirm smart pin configuration"
+    references: ["patterns/uart-smart-pin.yaml"]
+
+by_experience_level:
+  absolute_beginner:
+    start_here:
+      - "how do I blink an LED"
+      - "how do I read a button"
+      - "how do I create a delay"
+    next_steps:
+      - "how do I implement UART"
+      - "how do I start another COG"
+  
+  intermediate:
+    common_tasks:
+      - "how do I implement SPI"
+      - "how do COGs communicate"
+      - "how do I measure a pulse"
+      - "how do I generate PWM"
+  
+  advanced:
+    complex_systems:
+      - "how do I implement USB"
+      - "how do I use the CORDIC"
+      - "how do I optimize for speed"
+      - "how do I synchronize multiple COGs"
+
+search_index:
+  by_topic:
+    "gpio": ["blink", "button", "pin", "led"]
+    "serial": ["uart", "spi", "i2c", "usb"]
+    "timing": ["delay", "wait", "pulse", "pwm"]
+    "parallel": ["cog", "synchronize", "communicate", "share"]
+    "hardware": ["board", "addon", "connect", "pins"]
+    "debug": ["troubleshoot", "won't work", "problem", "error"]
+
+related_manifests:
+  - "patterns-manifest.yaml"  # Detailed implementations
+  - "pasm2-manifest.yaml"  # Instruction details
+  - "spin2-manifest.yaml"  # Language details
+  - "smart-pins-manifest.yaml"  # Hardware features
+  - "hardware-manifest.yaml"  # Board specifications

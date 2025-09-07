@@ -1,0 +1,206 @@
+concept: branch_addressing
+title: Branch Addressing in PASM2
+category: control_flow
+description: Branch and jump addressing modes including relative, absolute, and indirect branches
+
+overview: |
+  P2 provides comprehensive branch addressing modes for control flow. Branches can be relative or absolute,
+  immediate or register-based, and can target both cog and hub memory. Understanding branch addressing
+  is critical for control flow, subroutines, and cross-memory execution.
+
+addressing_modes:
+  relative_immediate:
+    syntax: "#@label"
+    encoding: "20-bit signed offset from PC"
+    range: "±1MB from current instruction"
+    instructions: ["JMP", "CALL", "CALLA", "CALLB", "CALLD"]
+    examples:
+      - JMP #@forward_label    # Jump to label (relative)
+      - CALL #@subroutine      # Call with relative address
+      - IF_Z JMP #@skip        # Conditional relative jump
+    notes: "Assembler converts label to PC-relative offset"
+
+  absolute_immediate:
+    syntax: "#\label or #label"
+    encoding: "20-bit absolute address"
+    range: "$00000-$FFFFF (entire hub space)"
+    instructions: ["JMP", "CALL", "CALLA", "CALLB", "CALLD"]
+    examples:
+      - JMP #\hub_routine      # Jump to absolute hub address
+      - CALL #\$10000          # Call absolute address
+      - JMP #cog_routine       # Jump within cog (absolute)
+    notes: "\ forces absolute, # alone is context-dependent"
+
+  register_indirect:
+    syntax: "register"
+    encoding: "Address from register contents"
+    range: "Full 20-bit addressing"
+    instructions: ["JMP", "CALL", "CALLA", "CALLB", "CALLD", "RET"]
+    examples:
+      - JMP vector             # Jump to address in vector
+      - CALL routine_ptr       # Call through pointer
+      - RET                    # Return using stack
+    notes: "Enables computed jumps and returns"
+
+branch_types:
+  JMP:
+    description: "Unconditional jump"
+    variants:
+      - "JMP #@label"          # Relative jump
+      - "JMP #\label"          # Absolute jump
+      - "JMP register"         # Indirect jump
+      - "JMP #register"        # Jump to cog address
+    pipeline: "2-cycle latency for all jumps"
+    
+  CALL:
+    description: "Call with return address on stack"
+    variants:
+      - "CALL #@label"         # Relative call
+      - "CALL #\label"         # Absolute call  
+      - "CALL register"        # Indirect call
+    stack: "Pushes 20-bit return address to internal stack"
+    depth: "8-level hardware stack"
+
+  CALLA/CALLB:
+    description: "Call with return in PTRA/PTRB"
+    operation: "PTRx = PC + 4, then jump"
+    examples:
+      - CALLA #@function       # Return address in PTRA
+      - CALLB #@function       # Return address in PTRB
+      - RETA                   # Return using PTRA
+      - RETB                   # Return using PTRB
+    use_case: "Leaf functions, no stack needed"
+
+  CALLD:
+    description: "Call with return in register"
+    syntax: "CALLD return_reg, #@label"
+    operation: "return_reg = PC + 4, then jump"
+    examples:
+      - CALLD link_reg, #@function
+      - JMP link_reg           # Return via jump
+    use_case: "Custom calling conventions"
+
+  EXECF:
+    description: "Execute fast - skip instructions then branch"
+    syntax: "EXECF skip_pattern"
+    operation: "Load skip pattern, execute, then branch"
+    example: |
+      EXECF ##%1010_1010_1010_1010__000000_000_111111
+      ' Skip pattern in bits 31:10, branch address in 9:0
+    use_case: "Conditional execution with branch"
+
+special_addressing:
+  hub_execution:
+    description: "Branches between cog and hub memory"
+    rules:
+      - "JMP to $000-$1FF stays in cog"
+      - "JMP to $200+ enters hub execution"
+      - "Return address indicates execution mode"
+    examples:
+      - JMP #\$400            # Enter hub execution
+      - CALL #@hub_function   # Call hub from cog
+      - RET                   # Return preserves mode
+
+  long_branches:
+    description: "Branches beyond ±1MB"
+    technique: "Use AUGS for extended range"
+    examples:
+      - |
+        AUGS #high_bits
+        JMP #@far_label       # Combined for 32-bit range
+
+  interrupt_vectors:
+    description: "Hardware interrupt branch addresses"
+    registers: ["IJMP0", "IJMP1", "IJMP2", "IJMP3"]
+    setup: |
+      MOV IJMP3, ##interrupt_handler
+      SETINT3 #event
+
+branch_optimization:
+  pipeline_effects:
+    - Branch taken: 2-cycle penalty
+    - Branch not taken: No penalty
+    - Indirect branch: Same 2-cycle penalty
+    - RET instruction: 2-cycle penalty
+
+  alignment:
+    - Cog branches: 4-byte aligned
+    - Hub branches: Can be unaligned
+    - Performance: Aligned branches preferred
+
+  prediction:
+    - No branch prediction hardware
+    - All branches have fixed latency
+    - Consider branch-free alternatives
+
+common_patterns:
+  table_dispatch:
+    code: |
+      CMP index, #MAX_INDEX WC
+      IF_NC JMP #default
+      ALTS index, #jump_table
+      JMP #0-0
+      jump_table
+        JMP #case_0
+        JMP #case_1
+        JMP #case_2
+    description: "Computed jump table"
+
+  loop_control:
+    code: |
+      .loop
+        ' Loop body
+        DJNZ counter, #@.loop   # Decrement and jump if not zero
+    description: "Efficient loop with counter"
+
+  subroutine_call:
+    code: |
+      CALL #@subroutine
+      ' Continue after return
+      subroutine
+        ' Function body
+        RET
+    description: "Standard subroutine pattern"
+
+  tail_call:
+    code: |
+      ' Instead of CALL + RET
+      JMP #@other_function    # Tail call optimization
+    description: "Optimize tail recursion"
+
+  conditional_call:
+    code: |
+      CMP value, threshold WC
+      IF_C CALL #@handle_low
+      IF_NC CALL #@handle_high
+    description: "Conditional subroutine calls"
+
+debugging_considerations:
+  return_stack:
+    - 8-level hardware stack
+    - No overflow detection
+    - Corruption hard to debug
+    - Consider stack depth carefully
+
+  mode_transitions:
+    - Track cog/hub execution mode
+    - Return addresses encode mode
+    - Mode affects instruction timing
+
+  branch_targets:
+    - Validate addresses at assembly
+    - Runtime validation for indirect
+    - Guard against invalid pointers
+
+best_practices:
+  - Use relative branches for position-independent code
+  - Prefer CALLA/CALLB for leaf functions
+  - Validate indirect branch targets
+  - Consider REP for small loops
+  - Use SKIPF for conditional sequences
+  - Align hot branch targets
+
+references:
+  - silicon_doc: Branch Addressing section
+  - instruction_set: Branch instruction encodings
+  - optimization_guide: Control flow optimization

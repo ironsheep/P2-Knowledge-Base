@@ -1,0 +1,217 @@
+# Spin2 Language Construct: CASE
+# Source: Spin2 v51 documentation  
+# Critical for: Multi-way branching and efficient decision trees
+
+construct: "CASE"
+category: "control_flow"
+type: "multi_way_branch"
+
+metadata:
+  query_tags: ["case", "switch", "multi_way", "branch", "select", "match"]
+  complexity: "intermediate"
+  use_cases: ["state_machines", "command_dispatch", "value_mapping", "menu_systems"]
+  common_questions:
+    - "How do I test one variable against multiple values?"
+    - "What's the Spin2 equivalent of switch/case?"
+    - "How do I handle multiple conditions efficiently?"
+
+design_philosophy: |
+  CASE in Spin2 is more powerful than traditional switch statements:
+  - Supports ranges and multiple values per condition
+  - No fall-through behavior (no break needed)
+  - Can use expressions, not just constants
+  - Optimizes to jump tables when possible
+
+syntax_forms:
+  - form: "basic_case"
+    syntax: |
+      CASE expression
+        match1: action1
+        match2: action2
+        OTHER: default_action
+    description: "Test expression against multiple values"
+    example: |
+      CASE command
+        "A": add_item()
+        "D": delete_item()
+        "Q": quit()
+        OTHER: show_error()
+    
+  - form: "range_matching"
+    syntax: |
+      CASE value
+        0..9: digit_handler()
+        10..99: two_digit_handler()
+        100..999: three_digit_handler()
+        OTHER: large_number_handler()
+    description: "Match against ranges of values"
+    
+  - form: "multiple_values"
+    syntax: |
+      CASE key
+        "Y", "y", 1: handle_yes()
+        "N", "n", 0: handle_no()
+        OTHER: handle_invalid()
+    description: "Multiple values map to same action"
+    
+  - form: "fast_case"
+    syntax: |
+      CASE_FAST expression
+        match1: action1
+        match2: action2
+    description: "Optimized for speed, requires compile-time constants"
+    note: "Generates jump table for O(1) dispatch"
+
+  - form: "inline_case"
+    syntax: "CASE x : 1: a(), 2: b(), OTHER: c()"
+    description: "Single-line case for simple dispatching"
+
+special_features:
+  - feature: "expression_matching"
+    description: "Can use full expressions in match conditions"
+    example: |
+      CASE TRUE
+        x > 100: handle_overflow()
+        x < 0: handle_underflow()
+        x == target: handle_match()
+        OTHER: handle_normal()
+    
+  - feature: "string_matching"
+    description: "Direct string comparison support"
+    example: |
+      CASE command_string
+        "START": begin_process()
+        "STOP": end_process()
+        "PAUSE": pause_process()
+    
+  - feature: "no_fall_through"
+    description: "Each case is independent, no break needed"
+    rationale: "Prevents common bugs from forgotten breaks"
+
+why_this_matters:
+  p2_specific: |
+    The P2's CASE implementation is optimized for common embedded patterns:
+    - State machines in COGs
+    - Command interpreters for serial protocols
+    - Sensor value categorization
+    - Pin multiplexing decisions
+  
+  efficiency: |
+    CASE_FAST generates jump tables in COG RAM, providing
+    constant-time dispatch regardless of case count.
+    This is critical for deterministic timing in real-time systems.
+
+common_patterns:
+  - pattern: "state_machine"
+    description: "Classic FSM implementation"
+    code: |
+      REPEAT
+        CASE state
+          IDLE:
+            IF trigger
+              state := ACTIVE
+          
+          ACTIVE:
+            process_data()
+            IF done
+              state := COMPLETE
+          
+          COMPLETE:
+            cleanup()
+            state := IDLE
+          
+          ERROR:
+            handle_error()
+            state := IDLE
+    
+  - pattern: "command_processor"
+    description: "UART command handler"
+    code: |
+      CASE UPPER(command)
+        "R": 
+          value := read_register(param)
+          
+        "W":
+          write_register(param, value)
+          
+        "S":
+          show_status()
+          
+        "?" , "H":
+          show_help()
+          
+        OTHER:
+          send_string("Unknown command")
+    
+  - pattern: "value_categorization"
+    description: "Categorize sensor readings"
+    code: |
+      CASE temperature
+        -273..-50: status := EXTREME_COLD
+        -49..0: status := FREEZING
+        1..15: status := COLD
+        16..25: status := COMFORTABLE
+        26..35: status := WARM
+        36..50: status := HOT
+        OTHER: status := EXTREME_HOT
+
+pitfalls:
+  - pitfall: "variable_in_range"
+    description: "Using variables in range definitions"
+    wrong: |
+      CASE x
+        0..max_value: process()  ' Won't work if max_value is variable
+    correct: |
+      IF x >= 0 AND x <= max_value
+        process()
+    
+  - pitfall: "forgetting_other"
+    description: "Not handling unexpected values"
+    recommendation: "Always include OTHER clause for robustness"
+    
+  - pitfall: "case_vs_case_fast"
+    description: "Using CASE when CASE_FAST would be better"
+    guideline: "Use CASE_FAST when all matches are constants"
+
+performance:
+  case_regular:
+    description: "Sequential comparison"
+    complexity: "O(n) where n is number of cases"
+    use_when: "Matching against variables or expressions"
+  
+  case_fast:
+    description: "Jump table dispatch"
+    complexity: "O(1) constant time"
+    use_when: "Matching against compile-time constants"
+    limitation: "Requires contiguous or near-contiguous values"
+
+pasm_equivalent:
+  regular_case: |
+    ' CASE x
+    '   1: action1()
+    '   2: action2()
+    CMP x, #1 WZ
+    IF_Z  JMP #action1
+    CMP x, #2 WZ
+    IF_Z  JMP #action2
+  
+  fast_case: |
+    ' CASE_FAST x (with jump table)
+    CMP x, #max_case WC
+    IF_NC JMP #case_other
+    ADD x, #jump_table
+    JMP x
+    
+    jump_table:
+    JMP #case_0
+    JMP #case_1
+    JMP #case_2
+
+related_constructs:
+  - "if_elseif_else.yaml"
+  - "repeat.yaml"
+  
+related_concepts:
+  - "Jump table optimization"
+  - "State machine patterns"
+  - "Command dispatch patterns"

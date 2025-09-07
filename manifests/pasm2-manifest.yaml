@@ -1,0 +1,206 @@
+# PASM2 Instructions Manifest
+# Part of P2 Knowledge Base manifest hierarchy
+
+version: "1.1"
+schema_version: "2024-12-30"
+last_updated: "2025-09-07T12:40:00Z"
+category: "pasm2_instructions"
+base_path: "engineering/knowledge-base/P2/language/pasm2/"
+total_entries: 357
+enriched_entries: 166
+minimal_entries: 188
+error_entries: 3
+
+description: |
+  Complete PASM2 instruction set reference with 357 instructions.
+  166 instructions have comprehensive documentation from PASM2 Manual.
+  188 instructions marked as needs_documentation for future enhancement.
+  Each instruction has unified field structure with single source of truth.
+
+by_category:
+  arithmetic:
+    basic:
+      - {name: "add", file: "add.yaml", desc: "Add S to D"}
+      - {name: "sub", file: "sub.yaml", desc: "Subtract S from D"}
+      - {name: "adds", file: "adds.yaml", desc: "Add signed S to D"}
+      - {name: "subs", file: "subs.yaml", desc: "Subtract signed S from D"}
+      - {name: "addx", file: "addx.yaml", desc: "Add with carry"}
+      - {name: "subx", file: "subx.yaml", desc: "Subtract with borrow"}
+    
+    multiply_divide:
+      - {name: "mul", file: "mul.yaml", desc: "Unsigned multiply"}
+      - {name: "muls", file: "muls.yaml", desc: "Signed multiply"}
+      - {name: "qdiv", file: "qdiv.yaml", desc: "Unsigned divide via CORDIC"}
+      - {name: "qfrac", file: "qfrac.yaml", desc: "Fraction via CORDIC"}
+    
+    special:
+      - {name: "abs", file: "abs.yaml", desc: "Absolute value"}
+      - {name: "neg", file: "neg.yaml", desc: "Negate"}
+      - {name: "mins", file: "mins.yaml", desc: "Signed minimum"}
+      - {name: "maxs", file: "maxs.yaml", desc: "Signed maximum"}
+  
+  control_flow:
+    jumps:
+      - {name: "jmp", file: "jmp.yaml", desc: "Jump to address"}
+      - {name: "call", file: "call.yaml", desc: "Call subroutine"}
+      - {name: "ret", file: "ret.yaml", desc: "Return from subroutine"}
+      - {name: "jmprel", file: "jmprel.yaml", desc: "Relative jump"}
+    
+    conditional:
+      - {name: "tjz", file: "tjz.yaml", desc: "Test and jump if zero"}
+      - {name: "tjnz", file: "tjnz.yaml", desc: "Test and jump if not zero"}
+      - {name: "djnz", file: "djnz.yaml", desc: "Decrement and jump if not zero"}
+      - {name: "ijnz", file: "ijnz.yaml", desc: "Increment and jump if not zero"}
+    
+    repeat:
+      - {name: "rep", file: "rep.yaml", desc: "Repeat block"}
+      - {name: "reps", file: "reps.yaml", desc: "Repeat block with setup"}
+  
+  memory_access:
+    byte_operations:
+      - {name: "rdbyte", file: "rdbyte.yaml", desc: "Read byte from hub"}
+      - {name: "wrbyte", file: "wrbyte.yaml", desc: "Write byte to hub"}
+      - {name: "rfbyte", file: "rfbyte.yaml", desc: "Read byte from FIFO"}
+      - {name: "wfbyte", file: "wfbyte.yaml", desc: "Write byte to FIFO"}
+    
+    word_operations:
+      - {name: "rdword", file: "rdword.yaml", desc: "Read word from hub"}
+      - {name: "wrword", file: "wrword.yaml", desc: "Write word to hub"}
+      - {name: "rfword", file: "rfword.yaml", desc: "Read word from FIFO"}
+      - {name: "wfword", file: "wfword.yaml", desc: "Write word to FIFO"}
+    
+    long_operations:
+      - {name: "rdlong", file: "rdlong.yaml", desc: "Read long from hub"}
+      - {name: "wrlong", file: "wrlong.yaml", desc: "Write long to hub"}
+      - {name: "rflong", file: "rflong.yaml", desc: "Read long from FIFO"}
+      - {name: "wflong", file: "wflong.yaml", desc: "Write long to FIFO"}
+  
+  bit_manipulation:
+    basic:
+      - {name: "and", file: "and.yaml", desc: "Bitwise AND"}
+      - {name: "or", file: "or.yaml", desc: "Bitwise OR"}
+      - {name: "xor", file: "xor.yaml", desc: "Bitwise XOR"}
+      - {name: "not", file: "not.yaml", desc: "Bitwise NOT"}
+    
+    shifts:
+      - {name: "shl", file: "shl.yaml", desc: "Shift left"}
+      - {name: "shr", file: "shr.yaml", desc: "Shift right"}
+      - {name: "sal", file: "sal.yaml", desc: "Shift arithmetic left"}
+      - {name: "sar", file: "sar.yaml", desc: "Shift arithmetic right"}
+      - {name: "rol", file: "rol.yaml", desc: "Rotate left"}
+      - {name: "ror", file: "ror.yaml", desc: "Rotate right"}
+  
+  pin_control:
+    basic:
+      - {name: "drvl", file: "drvl.yaml", desc: "Drive pin low"}
+      - {name: "drvh", file: "drvh.yaml", desc: "Drive pin high"}
+      - {name: "drvnot", file: "drvnot.yaml", desc: "Toggle pin"}
+      - {name: "fltl", file: "fltl.yaml", desc: "Float pin low"}
+      - {name: "flth", file: "flth.yaml", desc: "Float pin high"}
+    
+    smart_pins:
+      - {name: "wrpin", file: "wrpin.yaml", desc: "Configure smart pin mode"}
+      - {name: "wxpin", file: "wxpin.yaml", desc: "Write X parameter"}
+      - {name: "wypin", file: "wypin.yaml", desc: "Write Y parameter"}
+      - {name: "rdpin", file: "rdpin.yaml", desc: "Read pin result"}
+      - {name: "akpin", file: "akpin.yaml", desc: "Acknowledge pin"}
+  
+  cordic:
+    operations:
+      - {name: "qmul", file: "qmul.yaml", desc: "CORDIC multiply"}
+      - {name: "qdiv", file: "qdiv.yaml", desc: "CORDIC divide"}
+      - {name: "qrotate", file: "qrotate.yaml", desc: "CORDIC rotate"}
+      - {name: "qvector", file: "qvector.yaml", desc: "CORDIC vector"}
+    
+    results:
+      - {name: "getqx", file: "getqx.yaml", desc: "Get CORDIC X result"}
+      - {name: "getqy", file: "getqy.yaml", desc: "Get CORDIC Y result"}
+  
+  interrupts:
+    control:
+      - {name: "stalli", file: "stalli.yaml", desc: "Stall interrupts"}
+      - {name: "allowi", file: "allowi.yaml", desc: "Allow interrupts"}
+      - {name: "setint1", file: "setint1.yaml", desc: "Configure interrupt 1"}
+      - {name: "setint2", file: "setint2.yaml", desc: "Configure interrupt 2"}
+      - {name: "setint3", file: "setint3.yaml", desc: "Configure interrupt 3"}
+  
+  timing:
+    wait:
+      - {name: "waitx", file: "waitx.yaml", desc: "Wait X cycles"}
+      - {name: "waitct1", file: "waitct1.yaml", desc: "Wait for CT >= CT1"}
+      - {name: "waitct2", file: "waitct2.yaml", desc: "Wait for CT >= CT2"}
+      - {name: "waitct3", file: "waitct3.yaml", desc: "Wait for CT >= CT3"}
+    
+    counter:
+      - {name: "getct", file: "getct.yaml", desc: "Get system counter"}
+      - {name: "addct1", file: "addct1.yaml", desc: "Add to CT1"}
+      - {name: "addct2", file: "addct2.yaml", desc: "Add to CT2"}
+      - {name: "addct3", file: "addct3.yaml", desc: "Add to CT3"}
+
+by_function:
+  math: ["add", "sub", "mul", "div", "abs", "neg", "min", "max"]
+  logic: ["and", "or", "xor", "not", "test", "cmp"]
+  control: ["jmp", "call", "ret", "djnz", "tjz", "rep"]
+  memory: ["rdlong", "wrlong", "rdword", "wrword", "rdbyte", "wrbyte"]
+  pins: ["drvh", "drvl", "wrpin", "wxpin", "wypin", "rdpin"]
+  timing: ["waitx", "waitct1", "getct", "addct1"]
+  cordic: ["qmul", "qdiv", "qrotate", "getqx", "getqy"]
+
+by_complexity:
+  beginner:
+    - "mov"
+    - "add"
+    - "sub"
+    - "jmp"
+    - "call"
+    - "ret"
+    - "drvh"
+    - "drvl"
+  
+  intermediate:
+    - "mul"
+    - "djnz"
+    - "rdlong"
+    - "wrlong"
+    - "wrpin"
+    - "waitx"
+  
+  advanced:
+    - "qmul"
+    - "setq"
+    - "alti"
+    - "altd"
+    - "xbyte"
+    - "streamer"
+
+search_index:
+  keywords:
+    "arithmetic": ["add", "sub", "mul", "div", "abs"]
+    "bitwise": ["and", "or", "xor", "not", "shl", "shr"]
+    "branching": ["jmp", "call", "ret", "djnz", "tjz"]
+    "memory": ["rdlong", "wrlong", "rdbyte", "wrbyte"]
+    "timing": ["waitx", "waitct", "getct", "pollct"]
+    "pins": ["drvh", "drvl", "wrpin", "rdpin"]
+    "interrupts": ["setint1", "stalli", "allowi", "reti"]
+    "cordic": ["qmul", "qdiv", "qrotate", "getqx"]
+
+enrichment_status:
+  comprehensive:
+    description: "Instructions with full documentation from PASM2 Manual"
+    count: 166
+    fields: ["description", "category", "parameters", "related", "flags_affected"]
+  
+  minimal:
+    description: "Instructions needing additional documentation"
+    count: 188
+    marked_with: "needs_documentation: true"
+  
+  errors:
+    description: "Instructions with YAML parsing errors"
+    count: 3
+    instructions: ["EXECF", "NOT", "TJV"]
+
+related_manifests:
+  - "spin2-manifest.yaml"  # High-level language
+  - "patterns-manifest.yaml"  # Usage patterns
+  - "smart-pins-manifest.yaml"  # Pin configurations

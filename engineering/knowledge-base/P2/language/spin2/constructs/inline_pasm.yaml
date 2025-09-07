@@ -1,0 +1,260 @@
+# Spin2 Language Construct: Inline PASM2
+# Source: Spin2 v51 documentation  
+# Critical for: Performance optimization and hardware control
+
+construct: "Inline PASM2"
+category: "program_structure"
+type: "assembly_integration"
+
+metadata:
+  query_tags: ["org", "end", "pasm", "assembly", "inline", "performance", "optimization"]
+  complexity: "advanced"
+  use_cases: ["performance_critical", "hardware_control", "timing_precise", "driver_code"]
+  common_questions:
+    - "How do I embed assembly in Spin2?"
+    - "When should I use inline PASM?"
+    - "How do I share data between Spin2 and PASM?"
+
+fundamental_purpose: |
+  Inline PASM2 exists because the P2 philosophy embraces mixed-level programming:
+  - Spin2 for logic and control flow (easy to write/maintain)
+  - PASM2 for performance and precise timing (deterministic execution)
+  - Seamless integration between both levels
+  - Access to hardware features not exposed in Spin2
+
+syntax_forms:
+  - form: "basic_inline"
+    syntax: |
+      ORG
+        ' PASM2 code here
+      END
+    description: "Inline PASM2 that executes in-place"
+    execution: "Runs in hub-exec mode at current location"
+    
+  - form: "cog_code"
+    syntax: |
+      DAT
+        ORG   0          ' Start at COG address 0
+      cog_entry
+        ' PASM2 code for COG
+        JMP   #cog_entry
+      END
+    description: "PASM2 code to be loaded into COG"
+    execution: "Loaded via COGINIT, runs in COG"
+    
+  - form: "hub_exec"
+    syntax: |
+      DAT
+        ORGH             ' Align to hub execution
+      hub_code
+        ' PASM2 code for hub execution
+      END
+    description: "PASM2 code that runs from hub RAM"
+    execution: "Executes directly from hub memory"
+
+  - form: "mixed_method"
+    syntax: |
+      PUB fast_method(x, y) : result | temp
+        temp := x + y    ' Spin2 code
+        
+        ORG
+          SHL   temp, #2  ' PASM2 code
+          MOV   result, temp
+        END
+        
+        result += 100    ' Back to Spin2
+    description: "Mix Spin2 and PASM2 in same method"
+
+why_inline_pasm_matters:
+  performance: |
+    Spin2 bytecode: ~50-200 clocks per operation
+    PASM2: 2-8 clocks per operation
+    10-100x performance improvement possible
+  
+  determinism: |
+    PASM2 provides cycle-accurate timing:
+    - Exact delays for protocol timing
+    - Predictable interrupt response
+    - Jitter-free signal generation
+  
+  hardware_access: |
+    Direct access to P2 features:
+    - CORDIC operations
+    - Streamer control
+    - Smart pin configuration
+    - Special registers
+
+register_access:
+  method_interface: |
+    Method parameters and locals map to registers:
+    - First parameter → PR0
+    - Second parameter → PR1
+    - Return value → PR0 (or RESULT)
+    - Local variables → PR2, PR3, etc.
+  
+  example: |
+    PUB multiply(x, y) : product
+      ORG
+        MUL   x, y        ' x is PR0, y is PR1
+        GETQX product     ' product is PR0 (return)
+      END
+
+data_sharing_patterns:
+  - pattern: "register_passing"
+    description: "Use method parameters as registers"
+    code: |
+      PUB fast_add(a, b) : sum
+        ORG
+          ADD   a, b      ' a + b
+          MOV   sum, a    ' Result in sum
+        END
+    
+  - pattern: "hub_variables"
+    description: "Access VAR/DAT from PASM"
+    code: |
+      VAR
+        LONG shared_data
+      
+      PUB process()
+        ORG
+          MOV   PTRA, @shared_data
+          RDLONG PA, PTRA
+          ADD   PA, #1
+          WRLONG PA, PTRA
+        END
+    
+  - pattern: "inline_optimization"
+    description: "Optimize hot spots"
+    code: |
+      PUB checksum(buffer, size) : crc | ptr
+        ptr := buffer
+        crc := $FFFF_FFFF
+        
+        REPEAT size
+          ORG
+            RDBYTE PA, ptr
+            SETCRC crc, #$04C11DB7
+            CRC    PA, crc
+            ADD    ptr, #1
+          END
+        
+        crc ^= $FFFF_FFFF
+
+common_use_cases:
+  - use_case: "bit_manipulation"
+    description: "Fast bit operations"
+    code: |
+      PUB reverse_bits(value) : result
+        ORG
+          REV   value       ' Reverse all 32 bits
+          MOV   result, value
+        END
+  
+  - use_case: "cordic_operations"
+    description: "Hardware math acceleration"
+    code: |
+      PUB fast_multiply(x, y) : product
+        ORG
+          QMUL  x, y
+          GETQX product
+        END
+  
+  - use_case: "precise_timing"
+    description: "Cycle-accurate delays"
+    code: |
+      PUB pulse(pin, width)
+        ORG
+          DRVH  pin
+          WAITX width
+          DRVL  pin
+        END
+  
+  - use_case: "atomic_operations"
+    description: "Uninterruptible sequences"
+    code: |
+      PUB atomic_increment(address) : new_value
+        ORG
+          RDLONG new_value, address
+          ADD    new_value, #1
+          WRLONG new_value, address
+        END
+
+cog_loading:
+  basic_pattern: |
+    DAT
+      ORG   0
+    cog_code
+      ' PASM2 code here
+      
+    PUB start_cog()
+      COGINIT(COGEXEC_NEW, @cog_code, @parameters)
+  
+  with_communication: |
+    DAT
+      ' Mailbox in hub
+      command   LONG  0
+      param     LONG  0
+      result    LONG  0
+      
+      ' COG code
+      ORG   0
+    cog_loop
+      RDLONG temp, ##@command WZ
+      IF_Z  JMP #cog_loop        ' Wait for command
+      
+      ' Process command
+      WRLONG #0, ##@command      ' Clear command
+      JMP    #cog_loop
+
+debugging_considerations:
+  - consideration: "register_preservation"
+    description: "Inline PASM can modify registers"
+    solution: "Save/restore if needed"
+    
+  - consideration: "flag_states"
+    description: "C and Z flags affected by PASM"
+    solution: "Don't assume flag states after PASM"
+    
+  - consideration: "stack_usage"
+    description: "PASM doesn't use Spin2 stack"
+    solution: "Manual stack operations if needed"
+
+performance_guidelines:
+  when_to_use_inline:
+    - "Inner loops with simple operations"
+    - "Bit manipulation and testing"
+    - "Hardware interface timing"
+    - "CORDIC operations"
+    - "Interrupt handlers"
+  
+  when_not_to_use:
+    - "Complex logic (use Spin2)"
+    - "String manipulation (use Spin2)"
+    - "User interface code (use Spin2)"
+    - "Non-critical paths (use Spin2)"
+
+pitfalls:
+  - pitfall: "forgetting_org"
+    description: "PASM code without ORG directive"
+    consequence: "Code doesn't execute as PASM"
+    
+  - pitfall: "register_confusion"
+    description: "Not understanding parameter mapping"
+    solution: "Parameters are PR0, PR1, etc."
+    
+  - pitfall: "address_modes"
+    description: "Mixing COG and hub addresses"
+    solution: "Use @ for hub addresses, # for immediates"
+
+related_constructs:
+  - "method_definition.yaml"
+  - "blocks.yaml"
+  
+related_pasm:
+  - "language/pasm2/*.yaml"
+  
+related_concepts:
+  - "Hub execution model"
+  - "COG execution model"
+  - "Register mapping"
+  - "CORDIC operations"

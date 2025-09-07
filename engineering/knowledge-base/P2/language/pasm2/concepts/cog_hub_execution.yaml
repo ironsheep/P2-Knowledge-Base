@@ -1,0 +1,277 @@
+# COG vs HUB Execution Models
+# Source: Silicon Doc v35, P2 Architecture
+# Critical for: Understanding P2 execution modes and performance
+
+concept: "COG vs HUB Execution"
+category: "pasm2_core"
+importance: "fundamental"
+
+metadata:
+  query_tags: ["cogexec", "hubexec", "execution", "performance", "memory"]
+  complexity: "intermediate"
+  use_cases: ["performance_optimization", "memory_management", "code_organization"]
+  common_questions:
+    - "When should I use COG vs HUB execution?"
+    - "How fast is HUB execution compared to COG?"
+    - "How do I switch between execution modes?"
+    - "What are the limitations of each mode?"
+
+fundamental_concept: |
+  P2 supports two execution modes:
+  1. COGEXEC: Code runs from COG RAM (2 clock cycles per instruction)
+  2. HUBEXEC: Code runs from HUB RAM (variable timing, typically 4-16 clocks)
+  
+  Each mode has distinct advantages. COGEXEC is deterministic and fast but
+  limited to 512 longs. HUBEXEC can access all 512KB but with variable timing
+  due to the egg-beater memory architecture.
+
+cog_execution:
+  location: "COG RAM (addresses $000-$1FF)"
+  size: "512 longs (2KB)"
+  speed: "2 clock cycles per instruction (deterministic)"
+  
+  memory_map:
+    $000_$1FF: "496 longs available for code/data"
+    $1F0_$1FF: "16 special purpose registers"
+  
+  advantages:
+    - "Deterministic 2-clock execution"
+    - "Perfect for time-critical code"
+    - "No hub timing variations"
+    - "Fastest possible execution"
+    - "All instructions available"
+  
+  limitations:
+    - "Limited to 512 longs total"
+    - "Must share space with data"
+    - "Code must be loaded from hub first"
+    - "No direct hub data access during execution"
+
+hub_execution:
+  location: "HUB RAM (addresses $00000-$7FFFF)"
+  size: "512KB total"
+  speed: "Variable (4-16+ clocks per instruction)"
+  
+  timing_factors:
+    instruction_fetch: "Depends on hub window alignment"
+    data_access: "Additional delays for RD/WR instructions"
+    branches: "Can cause additional alignment delays"
+  
+  advantages:
+    - "Access to full 512KB"
+    - "No need to load code"
+    - "Can mix code and data freely"
+    - "Direct hub memory access"
+    - "Good for large programs"
+  
+  limitations:
+    - "Non-deterministic timing"
+    - "Slower than cogexec"
+    - "Some instructions not available"
+    - "Branch penalties possible"
+
+execution_control:
+  switching_modes:
+    cog_to_hub:
+      instruction: "JMP #hub_address"
+      example: |
+        ORG   0                  ' In COG
+        ' ... cog code ...
+        JMP   #hub_routine       ' Jump to hub
+        
+    hub_to_cog:
+      instruction: "JMP #cog_address"
+      requirement: "Code must already be in COG RAM"
+      example: |
+        ORGH  $400               ' In HUB
+        ' ... hub code ...
+        CALL  #load_cog_code     ' Load COG code first
+        JMP   #$000              ' Jump to COG
+  
+  program_counter:
+    cog_range: "$000-$1FF (9 bits)"
+    hub_range: "$00000-$7FFFF (20 bits)"
+    detection: "PC bit 9+ non-zero = hubexec"
+
+instruction_availability:
+  cogexec_only:
+    - "REP - Fast loop instruction"
+    - "ALTI - Modify next instruction"
+    - "Some self-modifying code patterns"
+  
+  both_modes:
+    - "Most arithmetic/logic instructions"
+    - "Memory access (RD/WR)"
+    - "Jumps and calls"
+    - "Conditional execution"
+  
+  hubexec_limitations:
+    rep_loops: "Not available in hubexec"
+    self_modify: "Limited compared to cogexec"
+
+performance_comparison:
+  tight_loop:
+    cogexec: |
+      ' 2 clocks per instruction
+      REP   #4, #100        ' REP available
+      ADD   x, y
+      SUB   a, b
+      XOR   c, d
+      ROL   e, #1
+      ' Total: 200 clocks for 100 iterations
+    
+    hubexec: |
+      ' 4-16 clocks per instruction
+      MOV   count, #100
+  .loop
+      ADD   x, y
+      SUB   a, b
+      XOR   c, d
+      ROL   e, #1
+      DJNZ  count, #.loop
+      ' Total: 2000+ clocks for 100 iterations
+  
+  memory_intensive:
+    cogexec: |
+      ' Must use hub instructions
+      RDLONG  value, ptr      ' 9-24 clocks
+      ADD     value, #1       ' 2 clocks
+      WRLONG  value, ptr      ' 3-12 clocks
+    
+    hubexec: |
+      ' Direct hub access
+      RDLONG  value, ptr      ' 9-24 clocks
+      ADD     value, #1       ' 4-16 clocks
+      WRLONG  value, ptr      ' 3-12 clocks
+
+code_organization:
+  hybrid_approach:
+    description: "Mix cogexec and hubexec for optimal performance"
+    strategy: |
+      1. Time-critical loops in COG
+      2. Large program logic in HUB
+      3. Interrupt handlers in COG
+      4. Data processing in appropriate mode
+    
+    example: |
+      DAT
+      ' HUB-based main program
+              ORGH
+      main    
+              CALL  #load_critical_code
+              ' Main program logic in hub
+              ' ...
+              CALL  #$000    ' Call COG routine
+              ' ...
+              
+      ' COG-based critical routine
+              ORG   0
+      critical_loop
+              REP   #4, #1000
+              RDLONG data, ptra++
+              ADD    sum, data
+              MAX    peak, data
+              MIN    valley, data
+              RET
+
+loading_strategies:
+  initial_load:
+    description: "Load COG code at startup"
+    code: |
+      COGINIT #16, #@cog_code, #@parameters
+  
+  dynamic_load:
+    description: "Load different COG code as needed"
+    code: |
+      SETQ2  #(cog_end-cog_start-1)
+      RDLONG $000, #@cog_start
+      JMP    #$000
+  
+  overlay_system:
+    description: "Swap COG code sections dynamically"
+    code: |
+      ' Load overlay 1
+      SETQ2  #127
+      RDLONG $100, #@overlay1
+      CALL   #$100
+      
+      ' Load overlay 2  
+      SETQ2  #127
+      RDLONG $100, #@overlay2
+      CALL   #$100
+
+fifo_and_streaming:
+  hubexec_advantage: "Direct FIFO control without hub window delays"
+  cogexec_limitation: "FIFO operations compete with instruction fetch"
+
+interrupt_considerations:
+  cogexec:
+    - "Interrupts immediate (2 clock response)"
+    - "ISR can be in COG RAM"
+    - "Deterministic interrupt timing"
+  
+  hubexec:
+    - "Interrupt response varies with hub timing"
+    - "ISR should be in COG for consistency"
+    - "May need to load ISR code first"
+
+best_practices:
+  use_cogexec_for:
+    - "Bit-banged protocols"
+    - "Time-critical loops"
+    - "Interrupt service routines"
+    - "Digital signal processing"
+    - "Deterministic timing requirements"
+  
+  use_hubexec_for:
+    - "Large programs"
+    - "Complex algorithms"
+    - "String/data processing"
+    - "User interface code"
+    - "Non-time-critical operations"
+  
+  optimization_tips:
+    - "Profile code to find hot spots"
+    - "Move critical loops to COG"
+    - "Use REP loops in COG"
+    - "Align hub code for better fetch"
+    - "Minimize mode switches"
+
+common_mistakes:
+  - mistake: "Using REP in hubexec"
+    wrong: |
+      ORGH
+      REP #4, #100    ' Won't work!
+    right: |
+      ORG
+      REP #4, #100    ' Works in cogexec
+  
+  - mistake: "Not loading COG code before jumping"
+    wrong: |
+      JMP #$000       ' COG RAM might be empty!
+    right: |
+      CALL #load_cog_code
+      JMP  #$000      ' Now safe to jump
+  
+  - mistake: "Assuming deterministic timing in hubexec"
+    wrong: "Hubexec bit-banged protocol"
+    right: "Move protocol to cogexec for timing"
+
+why_this_matters:
+  performance: |
+    Understanding execution modes is critical for P2 performance.
+    A 10x speed difference between modes can make or break
+    real-time requirements.
+  
+  architecture: |
+    The dual execution model gives P2 unique flexibility:
+    - Small, fast code in COG
+    - Large, complex code in HUB
+    - Best of both worlds with hybrid approach
+
+related_concepts:
+  - "../instructions/jmp.yaml"
+  - "../instructions/call.yaml"
+  - "../instructions/coginit.yaml"
+  - "special_registers.yaml"
+  - "rep_instruction.yaml"

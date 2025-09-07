@@ -1,0 +1,158 @@
+# P2 Hardware Ecosystem Manifest
+# Part of P2 Knowledge Base manifest hierarchy
+
+version: "1.0"
+schema_version: "2024-12-30"
+last_updated: "2024-12-30T00:00:00Z"
+category: "p2_hardware"
+base_path: "engineering/knowledge-base/P2/hardware/"
+total_entries: 30
+
+description: |
+  Complete P2 hardware ecosystem documentation including 4 evaluation boards,
+  2 P2 modules (Edge variants), breakout boards, and extensive addon ecosystem.
+
+by_category:
+  evaluation_boards:
+    boards:
+      - {name: "p2-eval-board", file: "p2-eval-board.yaml", desc: "P2 Evaluation Board (P2-EVAL) - Primary dev board"}
+      - {name: "p2_eval_board", file: "p2_eval_board.yaml", desc: "P2-EVAL alternate reference"}
+      # Note: Need to identify the other 2 evaluation boards mentioned
+  
+  p2_modules:
+    edge_variants:
+      - {name: "edge-standard-module", file: "edge-standard-module.yaml", desc: "P2 Edge Module with 16MB Flash + 16MB RAM"}
+      - {name: "edge-32mb-module", file: "edge-32mb-module.yaml", desc: "P2 Edge 32MB Flash variant"}
+      - {name: "p2_edge_module", file: "p2_edge_module.yaml", desc: "Edge module reference"}
+    
+  breakout_boards:
+    edge_carriers:
+      - {name: "edge-mini-breakout", file: "edge-mini-breakout.yaml", desc: "Compact Edge breakout board"}
+      - {name: "edge-standard-breakout", file: "edge-standard-breakout.yaml", desc: "Full-featured Edge breakout"}
+      - {name: "edge-breadboard-carrier", file: "edge-breadboard-carrier.yaml", desc: "Breadboard-friendly Edge carrier"}
+      - {name: "p2_edge_mini_breakout", file: "p2_edge_mini_breakout.yaml", desc: "Mini breakout reference"}
+      - {name: "p2_edge_breadboard_adapter", file: "p2_edge_breadboard_adapter.yaml", desc: "Breadboard adapter reference"}
+  
+  addon_boards:
+    communication:
+      - {name: "addon-serial-host", file: "addon-serial-host.yaml", desc: "USB serial host adapter"}
+      - {name: "addon-serial-device", file: "addon-serial-device.yaml", desc: "Serial device interface"}
+    
+    display_output:
+      - {name: "addon-digital-video-out", file: "addon-digital-video-out.yaml", desc: "Digital video output board"}
+      - {name: "addon-av-breakout", file: "addon-av-breakout.yaml", desc: "Audio/Video breakout board"}
+      - {name: "addon-led-matrix", file: "addon-led-matrix.yaml", desc: "LED matrix display board"}
+      - {name: "hub75_adapter", file: "hub75_adapter.yaml", desc: "HUB75 LED panel adapter"}
+      - {name: "7_segment_display", file: "7_segment_display.yaml", desc: "7-segment display module"}
+    
+    control_input:
+      - {name: "addon-control-board", file: "addon-control-board.yaml", desc: "Control interface board"}
+      - {name: "control_board", file: "control_board.yaml", desc: "Control board reference"}
+      - {name: "buttons_board", file: "buttons_board.yaml", desc: "Button input board"}
+      - {name: "switches_board", file: "switches_board.yaml", desc: "Switch input board"}
+      - {name: "switches_and_leds", file: "switches_and_leds.yaml", desc: "Combined switches and LEDs"}
+    
+    io_expansion:
+      - {name: "addon-digital-io-board", file: "addon-digital-io-board.yaml", desc: "Digital I/O expansion"}
+    
+    prototyping:
+      - {name: "addon-mini-prototyping", file: "addon-mini-prototyping.yaml", desc: "Mini prototyping board"}
+    
+    specialized:
+      - {name: "goertzel_board", file: "goertzel_board.yaml", desc: "Goertzel algorithm board"}
+  
+  reference_docs:
+    comparison:
+      - {name: "hardware-compatibility-matrix", file: "hardware-compatibility-matrix.yaml", desc: "Board compatibility matrix"}
+      - {name: "p2-hardware-feature-comparison", file: "p2-hardware-feature-comparison.yaml", desc: "Feature comparison table"}
+      - {name: "p2-hardware-selection-guide", file: "p2-hardware-selection-guide.yaml", desc: "Board selection guide"}
+
+hardware_summary:
+  p2_chips:
+    count: 6  # 4 eval boards + 2 modules
+    evaluation_boards: 4
+    modules: 2
+  
+  form_factors:
+    evaluation:
+      - "P2-EVAL: Full-featured development board"
+      - "3 additional eval board variants"
+    
+    modules:
+      - "Edge Standard: 16MB Flash + 16MB HyperRAM"
+      - "Edge 32MB: 32MB Flash variant"
+    
+    carriers:
+      - "Mini breakout: Compact form"
+      - "Standard breakout: Full featured"
+      - "Breadboard carrier: Prototype friendly"
+  
+  addon_categories:
+    count: 17
+    types:
+      - "Communication (2 boards)"
+      - "Display/Video (5 boards)"
+      - "Control/Input (5 boards)"
+      - "I/O Expansion (1 board)"
+      - "Prototyping (1 board)"
+      - "Specialized (1 board)"
+
+ecosystem_features:
+  modularity: "Edge modules work with multiple carriers"
+  expandability: "Extensive addon board ecosystem"
+  prototyping: "From breadboard to production"
+  compatibility: "Boards designed to work together"
+
+development_paths:
+  beginner:
+    start: "P2-EVAL board"
+    addons: ["buttons_board", "7_segment_display", "switches_and_leds"]
+    reason: "Complete platform with easy expansions"
+  
+  intermediate:
+    start: "Edge module + Standard breakout"
+    addons: ["addon-digital-io-board", "addon-serial-host", "addon-led-matrix"]
+    reason: "Modular development with reusability"
+  
+  advanced:
+    start: "Edge module direct integration"
+    addons: ["Custom carrier", "Application-specific boards"]
+    reason: "Production-ready embedded systems"
+  
+  specialized:
+    video: ["addon-digital-video-out", "addon-av-breakout", "hub75_adapter"]
+    communication: ["addon-serial-host", "addon-serial-device"]
+    control: ["addon-control-board", "buttons_board", "switches_board"]
+
+selection_criteria:
+  by_project_phase:
+    learning: "P2-EVAL - Everything onboard"
+    prototyping: "Edge + Breakout - Flexible"
+    production: "Edge Module - Embeddable"
+  
+  by_requirements:
+    need_everything: "P2-EVAL"
+    need_compact: "Edge + Mini breakout"
+    need_breadboard: "Edge + Breadboard carrier"
+    need_production: "Edge module (SMT)"
+
+search_index:
+  keywords:
+    "evaluation": ["p2-eval", "development", "learning"]
+    "module": ["edge", "production", "embedded"]
+    "breakout": ["carrier", "adapter", "breadboard"]
+    "display": ["led", "video", "7-segment", "matrix"]
+    "input": ["buttons", "switches", "control"]
+    "communication": ["serial", "usb", "host", "device"]
+    "expansion": ["addon", "io", "digital"]
+
+compatibility_notes:
+  voltage_levels: "All boards use 3.3V logic"
+  connectors: "Standardized headers for stacking"
+  power: "Consistent power requirements"
+  software: "All boards use same development tools"
+
+related_manifests:
+  - "architecture-manifest.yaml"  # Understand chip capabilities
+  - "smart-pins-manifest.yaml"  # Pin configuration for boards
+  - "patterns-manifest.yaml"  # Hardware usage examples

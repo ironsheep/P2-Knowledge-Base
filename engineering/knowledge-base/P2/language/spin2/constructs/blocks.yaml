@@ -1,0 +1,261 @@
+# Spin2 Language Construct: Block Types (CON/VAR/OBJ/DAT)
+# Source: Spin2 v51 documentation
+# Critical for: Program organization and memory management
+
+construct: "Block Types"
+category: "program_structure"
+type: "section_declaration"
+
+metadata:
+  query_tags: ["con", "var", "obj", "dat", "blocks", "sections", "memory", "constants", "variables", "data"]
+  complexity: "intermediate"
+  use_cases: ["program_organization", "memory_management", "object_composition", "data_storage"]
+  common_questions:
+    - "What's the difference between VAR and DAT?"
+    - "Where do I declare constants?"
+    - "How do I include other objects?"
+    - "Why use DAT instead of VAR?"
+
+philosophical_overview: |
+  Spin2's block system reflects the P2's architecture philosophy:
+  - CON: Compile-time constants - no runtime memory usage
+  - VAR: Instance variables - each object instance gets unique copy
+  - OBJ: Object composition - building complex systems from components
+  - DAT: Shared data/code - one copy for ALL instances (critical for COG code)
+  
+  This isn't arbitrary - it maps directly to how the P2 manages memory and
+  enables efficient multi-COG, multi-instance designs.
+
+block_types:
+  - block: "CON"
+    purpose: "Compile-time constants and enumerations"
+    memory_impact: "ZERO - resolved at compile time"
+    scope: "Public - accessible from parent objects"
+    
+    why_this_matters: |
+      CON blocks enable configuration without memory cost.
+      In embedded systems, every byte matters. CON lets you
+      parameterize code without runtime overhead.
+    
+    syntax: |
+      CON
+        BUFFER_SIZE = 256
+        TIMEOUT_MS = 1000
+        
+        ' Enumerations with auto-increment
+        #0, IDLE, RUNNING, ERROR    ' 0, 1, 2, 3
+        
+        ' Pin group definitions (P2-specific)
+        LED_PINS = 56 ADDPINS 7      ' Pins 56..63
+    
+    unique_features:
+      - "Can define structures (v44+)"
+      - "Parent can override child CON values"
+      - "Supports floating-point constants"
+      - "ADDPINS operator for pin ranges"
+    
+    example: |
+      CON
+        ' System configuration
+        _CLKFREQ = 200_000_000
+        
+        ' Pin assignments  
+        TX_PIN = 62
+        RX_PIN = 63
+        
+        ' Protocol timing
+        BAUD_RATE = 115_200
+        BIT_TIME = _CLKFREQ / BAUD_RATE
+
+  - block: "VAR"
+    purpose: "Instance variables - unique per object instance"
+    memory_impact: "Hub RAM - duplicated for each instance"
+    scope: "Private to object instance"
+    
+    why_this_matters: |
+      VAR enables true object-oriented design. Each instance of
+      an object gets its own VAR space. This is how you can have
+      multiple UART objects, each with their own buffers and state.
+    
+    syntax: |
+      VAR
+        LONG  counter, total, average
+        WORD  buffer[128]
+        BYTE  flags, state
+        
+        ' Alignment matters for performance
+        ALIGNL                    ' Align to long boundary
+        LONG  aligned_variable
+    
+    memory_allocation: |
+      - LONGs allocated first (4-byte aligned)
+      - WORDs allocated next (2-byte aligned)  
+      - BYTEs allocated last (1-byte aligned)
+      - Arrays are contiguous
+    
+    instance_example: |
+      OBJ
+        uart[4] : "serial"    ' 4 UART instances
+      
+      ' Each uart[0..3] has independent VAR space
+      ' uart[0]'s buffer is separate from uart[1]'s buffer
+
+  - block: "OBJ"
+    purpose: "Object composition - include and configure child objects"
+    memory_impact: "VAR space per instance, DAT shared"
+    scope: "Private to parent object"
+    
+    why_this_matters: |
+      OBJ is how you build complex systems from tested components.
+      The P2's architecture encourages modular design - each COG
+      can run different objects, communicating through hub RAM.
+    
+    syntax: |
+      OBJ
+        ser   : "serial"                          ' Single instance
+        gpio  : "parallel" | CLK_PIN = 10        ' With parameter override
+        comm[4] : "protocol"                      ' Array of 4 instances
+        
+        ' Conditional compilation (v44+)
+        #ifdef DEBUG
+          debug : "debugger"
+        #endif
+    
+    parameter_override: |
+      Child's CON values can be overridden:
+      sensor : "temp_sensor" | SAMPLES = 32, FILTER = TRUE
+    
+    object_arrays: |
+      ' Object arrays share DAT but have separate VAR
+      encoder[8] : "quadrature"
+      
+      ' Access: encoder[0].start(), encoder[1].start()
+
+  - block: "DAT"
+    purpose: "Shared data and PASM2 code - ONE copy for all instances"
+    memory_impact: "Hub RAM - single copy regardless of instances"
+    scope: "Shared across all instances of the object"
+    
+    why_this_matters: |
+      DAT is crucial for P2's multi-COG architecture:
+      1. PASM2 code MUST be in DAT (COGs load from hub)
+      2. Shared buffers save memory (mailboxes, queues)
+      3. Lookup tables used by multiple instances
+      4. Constants that need runtime address access
+    
+    syntax: |
+      DAT
+        ' PASM2 code for COG
+        ORG   0
+      entry
+        MOV   x, #0
+        ADD   x, #1
+        JMP   #entry
+      x     LONG  0
+        
+        ' Shared data structures
+        ALIGNL
+      mailbox
+        LONG  0[16]    ' 16-long mailbox
+        
+        ' String constants
+      message
+        BYTE  "Hello, P2!", 0
+        
+        ' Lookup tables
+      sine_table
+        WORD  $0000, $0C8B, $1917, $2590[252]
+
+memory_organization_example: |
+  ' Understanding VAR vs DAT is CRITICAL for P2 development
+  
+  OBJ
+    serial[2] : "uart"    ' Two UART instances
+  
+  VAR
+    LONG my_buffer[32]    ' Each parent instance gets own buffer
+  
+  DAT
+    shared_table          ' ALL instances share this table
+      LONG $100[256]      ' Only one copy in memory
+    
+    pasm_driver           ' COG code - MUST be in DAT
+      ORG 0
+      ' PASM2 code here
+  
+  ' Result: 
+  ' - Each serial[0] and serial[1] has independent VAR space
+  ' - Both share the same DAT section
+  ' - Parent's my_buffer is unique per parent instance
+  ' - shared_table and pasm_driver exist only once
+
+block_order_rules:
+  - "Blocks can appear in any order"
+  - "Multiple blocks of same type are concatenated"
+  - "At least one PUB required for main program"
+  - "Compiler processes all CON blocks first"
+
+common_patterns:
+  - pattern: "singleton_enforcement"
+    description: "Use DAT to ensure single instance"
+    code: |
+      DAT
+        initialized  BYTE  0
+      
+      PUB start()
+        IF initialized
+          RETURN FALSE    ' Already running
+        initialized := TRUE
+        ' Start singleton
+  
+  - pattern: "cog_communication"
+    description: "DAT mailbox for COG communication"
+    code: |
+      DAT
+        command  LONG  0
+        param1   LONG  0
+        param2   LONG  0
+        result   LONG  0
+      
+      PUB send_command(cmd, p1, p2)
+        param1 := p1
+        param2 := p2
+        command := cmd    ' Write command last
+        REPEAT WHILE command    ' Wait for completion
+        RETURN result
+  
+  - pattern: "shared_resources"
+    description: "DAT for resource pools"
+    code: |
+      DAT
+        lock_pool    BYTE  0[16]    ' 16 locks available
+        next_lock    BYTE  0
+      
+      PUB allocate_lock() : lock_id | i
+        REPEAT i FROM 0 TO 15
+          IF NOT lock_pool[i]
+            lock_pool[i] := TRUE
+            RETURN i
+        RETURN -1    ' No locks available
+
+performance_implications:
+  var_overhead: "Duplicated for each instance - watch memory usage"
+  dat_efficiency: "Shared - perfect for read-only data and COG code"
+  con_zero_cost: "No runtime memory - use liberally"
+  obj_consideration: "Each instance multiplies VAR usage"
+
+p2_specific_insights:
+  hub_memory: "All blocks allocate from 512KB hub RAM"
+  cog_loading: "COGs load PASM2 from DAT via COGINIT"
+  alignment_matters: "Long-aligned access is fastest"
+  object_limit: "512 unique objects maximum"
+
+related_constructs:
+  - "method_definition.yaml"
+  - "inline_pasm.yaml"
+  
+related_concepts:
+  - "Memory management"
+  - "Object-oriented design"
+  - "COG architecture"
+  - "Hub RAM organization"

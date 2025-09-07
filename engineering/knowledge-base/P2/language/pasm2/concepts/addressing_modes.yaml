@@ -1,0 +1,148 @@
+concept: addressing_modes
+title: PASM2 Addressing Modes
+category: instruction_encoding
+description: Methods for specifying operands in PASM2 instructions
+
+overview: |
+  PASM2 provides multiple addressing modes for flexible operand specification. Understanding these modes
+  is critical for efficient code generation. Each mode has specific use cases and encoding requirements.
+  The P2 automatically determines addressing mode based on operand syntax and range.
+
+modes:
+  immediate:
+    syntax: "#value"
+    encoding: S field contains literal value
+    range:
+      - 9-bit: #0 to #511 (most instructions)
+      - 20-bit: ##0 to ##$FFFFF (augmented with AUGS)
+      - 32-bit: ##$0 to ##$FFFFFFFF (augmented with AUGD)
+    examples:
+      - MOV reg, #42          ' 9-bit immediate
+      - MOV reg, ##1000       ' 20-bit immediate (AUGS prefix added)
+      - MOV reg, ##$12345678  ' 32-bit immediate (AUGD prefix added)
+    notes: "## automatically inserts AUGx instruction"
+
+  register_direct:
+    syntax: "register"
+    encoding: S or D field contains register address
+    range: $000-$1FF (cog RAM)
+    examples:
+      - MOV dest, source      ' Register to register
+      - ADD accumulator, value
+    notes: Most common mode for cog operations
+
+  register_indirect:
+    syntax: "[register]"
+    encoding: Special encoding with PTR registers
+    registers: PTRA, PTRB only
+    examples:
+      - RDLONG value, PTRA    ' Read from hub[PTRA]
+      - WRLONG value, PTRB    ' Write to hub[PTRB]
+    notes: Hub memory access only
+
+  indexed:
+    syntax: "[base_ptr + index]"
+    encoding: PTR with offset encoding
+    base: PTRA or PTRB
+    index_range: -32 to +31 (5-bit signed)
+    examples:
+      - RDLONG reg, PTRA[4]   ' Read from hub[PTRA + 16] (index scaled by 4)
+      - WRWORD reg, PTRB[-2]  ' Write to hub[PTRB - 4] (index scaled by 2)
+    scaling:
+      - RDBYTE/WRBYTE: index × 1
+      - RDWORD/WRWORD: index × 2
+      - RDLONG/WRLONG: index × 4
+    notes: Index scaling automatic based on operation size
+
+  auto_increment:
+    syntax: "PTRx++"
+    encoding: Special PTR encoding bits
+    behavior: Use current value, then increment
+    examples:
+      - RDLONG reg, PTRA++    ' Read from hub[PTRA], then PTRA += 4
+      - WRWORD reg, PTRB++    ' Write to hub[PTRB], then PTRB += 2
+    increment_amount: Based on operation size (1/2/4 bytes)
+
+  auto_decrement:
+    syntax: "--PTRx"
+    encoding: Special PTR encoding bits
+    behavior: Decrement first, then use new value
+    examples:
+      - RDLONG reg, --PTRA    ' PTRA -= 4, then read from hub[PTRA]
+      - PUSHB value           ' Implicit --PTRB operation
+    decrement_amount: Based on operation size (1/2/4 bytes)
+
+  post_modify:
+    syntax: "PTRx++[index]"
+    encoding: Combined PTR mode encoding
+    behavior: Use current value, then add scaled index
+    examples:
+      - RDLONG reg, PTRA++[8] ' Read from hub[PTRA], then PTRA += 32
+      - WRLONG reg, PTRB++[-1]' Write to hub[PTRB], then PTRB -= 4
+    notes: Index is scaled by operation size
+
+  absolute:
+    syntax: "##hub_address"
+    encoding: 20-bit immediate for hub operations
+    range: ##$00000 to ##$FFFFF
+    examples:
+      - RDLONG reg, ##$10000  ' Read from hub[$10000]
+      - WRLONG reg, ##buffer  ' Write to hub[buffer]
+    notes: Uses AUGS for 20-bit address
+
+  bit_addressing:
+    syntax: "register.bit" or "register.[bit_expr]"
+    encoding: Bit number in immediate field
+    range: Bit 0-31
+    examples:
+      - BITH flags, #7        ' Set bit 7 of flags
+      - BITL flags, #READY_BIT' Clear READY_BIT
+      - TESTB flags, #4 WC    ' Test bit 4, update C
+    notes: Bit operations only
+
+special_cases:
+  altx_modified:
+    description: ALTX instructions modify subsequent instruction's addressing
+    examples:
+      - ALTS index            ' Next S field = cog[index]
+      - ALTD index            ' Next D field = cog[index]
+      - ALTR index            ' Next result = cog[D + index]
+    notes: Enables computed addressing
+
+  setq_block:
+    description: SETQ/SETQ2 modify next hub operation for block transfer
+    examples:
+      - SETQ #15              ' Next RDLONG reads 16 longs
+      - RDLONG base, hub_ptr  ' Block read 16 longs
+    notes: Count is SETQ value + 1
+
+  rep_block:
+    description: REP creates zero-overhead loops
+    examples:
+      - REP #4, #10           ' Repeat next 4 instructions 10 times
+      - REP @end_label, count ' Repeat until end_label, count times
+    notes: Not addressing per se, but affects instruction flow
+
+encoding_selection:
+  automatic:
+    - Assembler chooses optimal encoding
+    - ## forces augmented encoding
+    - # forces immediate encoding
+    - No prefix forces register encoding
+
+  size_based:
+    - Values 0-511: Direct immediate
+    - Values 512-$FFFFF: AUGS augmented
+    - Values $100000+: AUGD augmented
+
+best_practices:
+  - Use immediate for constants known at compile time
+  - Use PTR registers for sequential hub access
+  - Use indexed mode for structure access
+  - Use ALTX for computed jumps and table access
+  - Prefer auto-increment for array processing
+
+references:
+  - silicon_doc: Addressing Modes section
+  - instruction_set: Encoding formats
+  - assembler_manual: Operand syntax

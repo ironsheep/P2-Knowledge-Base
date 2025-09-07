@@ -1,0 +1,209 @@
+concept: execution_modes
+title: P2 Execution Modes - Register, Lookup, and Hub
+category: core_architecture
+description: Three distinct memory spaces where code can execute with different performance characteristics
+
+overview: |
+  The P2 supports three execution modes based on where instructions are fetched from: Register (cog RAM),
+  Lookup (LUT RAM), and Hub (shared memory). Each mode has unique performance characteristics, capacity
+  limits, and use cases. Code can seamlessly transition between modes using branches and calls.
+
+execution_modes:
+  register_execution:
+    name: "Register Execution (cogexec)"
+    memory: "Cog RAM"
+    address_range: "$000-$1FF (0-511)"
+    capacity: "512 longs (2KB)"
+    performance:
+      - instruction_fetch: "1 cycle per instruction"
+      - deterministic: "Always single-cycle fetch"
+      - pipeline: "Full speed, no stalls"
+    characteristics:
+      - "Fastest execution mode"
+      - "Completely deterministic timing"
+      - "Limited to 512 instructions"
+      - "Private to each cog"
+      - "Can read/write itself as data"
+    typical_uses:
+      - "Time-critical drivers"
+      - "Interrupt handlers"
+      - "Inner loops"
+      - "Real-time control"
+    entry: "JMP/CALL to $000-$1FF"
+
+  lookup_execution:
+    name: "Lookup Execution (lutexec)"
+    memory: "LUT RAM"
+    address_range: "$200-$3FF (512-1023)"
+    capacity: "512 longs (2KB)"
+    performance:
+      - instruction_fetch: "1 cycle per instruction"
+      - deterministic: "Always single-cycle fetch"
+      - pipeline: "Full speed, no stalls"
+    characteristics:
+      - "Same speed as register execution"
+      - "Completely deterministic timing"
+      - "Additional 512 instructions"
+      - "Private to each cog"
+      - "Can be used as data lookup table"
+      - "Shared with streamer/colorspace operations"
+    typical_uses:
+      - "Extension of cog code space"
+      - "Lookup tables (when not executing)"
+      - "Fast subroutines"
+      - "Code that needs cog+LUT space"
+    entry: "JMP/CALL to $200-$3FF"
+
+  hub_execution:
+    name: "Hub Execution (hubexec)"
+    memory: "Hub RAM"
+    address_range: "$00400-$FFFFF (1024-1048575)"
+    capacity: "512KB total hub memory"
+    performance:
+      - instruction_fetch: "Variable timing"
+      - egg_beater: "8-cycle hub rotation"
+      - fifo_buffering: "16-long instruction cache"
+      - typical: "~1-2 cycles average with FIFO"
+    characteristics:
+      - "Large code space"
+      - "Shared between all cogs"
+      - "Non-deterministic timing"
+      - "FIFO reduces fetch latency"
+      - "Can execute very large programs"
+    typical_uses:
+      - "Application logic"
+      - "High-level code"
+      - "Large programs"
+      - "Non-timing-critical code"
+    entry: "JMP/CALL to $400+"
+
+mode_transitions:
+  cog_to_hub:
+    trigger: "JMP/CALL to address >= $400"
+    example: |
+      ' In cog execution
+      JMP #\$1000       ' Jump to hub execution
+      CALL #@hub_func   ' Call hub function
+    return: "RET with hub return address"
+
+  hub_to_cog:
+    trigger: "JMP/CALL to address < $400"
+    example: |
+      ' In hub execution
+      JMP #\$100        ' Jump to cog execution
+      CALL #@cog_func   ' Call cog function
+    return: "RET with cog return address"
+
+  lut_transitions:
+    to_lut: "JMP/CALL to $200-$3FF"
+    from_lut: "Same as cog transitions"
+    example: |
+      JMP #$200         ' Enter LUT execution
+      CALL #$300        ' Call LUT routine
+
+performance_comparison:
+  instruction_timing:
+    register_exec: "1 cycle guaranteed"
+    lookup_exec: "1 cycle guaranteed"
+    hub_exec: "1-17 cycles (avg ~1-2 with FIFO)"
+
+  branch_penalties:
+    within_cog: "2 cycles"
+    within_lut: "2 cycles"
+    within_hub: "2-19 cycles (FIFO reload)"
+    mode_crossing: "2-19 cycles"
+
+  determinism:
+    cog_lut: "100% deterministic"
+    hub: "Non-deterministic due to hub rotation"
+
+memory_organization:
+  address_space:
+    $000_$1FF: "Cog RAM (register execution)"
+    $200_$3FF: "LUT RAM (lookup execution)"
+    $400_$7FFFF: "Hub RAM (hub execution)"
+    $80000_$FFFFF: "Usually ROM/Boot (hub execution)"
+
+  overlapping_uses:
+    cog_ram:
+      - "Instructions (when executing)"
+      - "Data storage"
+      - "Self-modifying code"
+    lut_ram:
+      - "Instructions (when executing)"
+      - "Lookup tables"
+      - "Streamer data"
+      - "HDMI color tables"
+
+fifo_operation:
+  hub_execution_fifo:
+    purpose: "Prefetch hub instructions"
+    depth: "16 longs"
+    operation:
+      - "Automatically fills during hub execution"
+      - "Reduces average instruction fetch time"
+      - "Reloads on branches"
+    control:
+      - "RDFAST to configure"
+      - "WRFAST for hub writes"
+      - "FBLOCK for block operations"
+
+code_organization:
+  mixed_mode:
+    strategy: "Combine modes for optimal performance"
+    example: |
+      ' Hub execution for main logic
+      main_loop:
+        CALL #\critical_driver  ' Call cog routine
+        ' Non-critical processing
+        JMP #@main_loop
+      
+      ' Cog execution for timing-critical
+      ORG 0
+      critical_driver:
+        ' Deterministic code here
+        RET
+
+  loading_code:
+    to_cog: |
+      SETQ2 #511              ' Load 512 longs
+      RDLONG 0, hub_addr      ' Load cog RAM from hub
+    to_lut: |
+      SETQ2 #511              ' Load 512 longs  
+      RDLONG $200, hub_addr   ' Load LUT RAM from hub
+
+best_practices:
+  mode_selection:
+    - "Use cog/LUT for timing-critical code"
+    - "Use hub for large programs"
+    - "Keep interrupt handlers in cog"
+    - "Use LUT for fast lookup tables"
+
+  optimization:
+    - "Align hub code to long boundaries"
+    - "Group related hub code for FIFO efficiency"
+    - "Minimize mode transitions in hot paths"
+    - "Use REP loops in cog/LUT for speed"
+
+  memory_usage:
+    - "Reserve cog space for drivers"
+    - "Use LUT for extended cog code"
+    - "Keep frequently-called functions in cog/LUT"
+    - "Use hub for application logic"
+
+debugging:
+  mode_awareness:
+    - "PC indicates current mode"
+    - "$000-$3FF = cog/LUT execution"
+    - "$400+ = hub execution"
+    - "Return addresses encode mode"
+
+  timing_analysis:
+    - "Cog/LUT timing is predictable"
+    - "Hub timing varies with access patterns"
+    - "Use CT registers for measurements"
+
+references:
+  - silicon_doc: Instruction Modes section
+  - architecture_guide: Memory organization
+  - optimization_guide: Execution mode selection

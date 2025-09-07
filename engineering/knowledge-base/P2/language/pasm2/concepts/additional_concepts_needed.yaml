@@ -1,0 +1,162 @@
+concept: additional_concepts_needed
+title: Additional PASM2 Concepts for Complete Coverage
+category: planning
+description: Gap analysis of missing PASM2 concepts based on manual review
+
+overview: |
+  Based on the PASM2 manual's categorical organization and our current coverage,
+  these additional concept files would complete the knowledge base for AI code generation.
+
+critical_missing_concepts:
+  cordic_operations:
+    priority: HIGH
+    reason: "Hardware math coprocessor essential for DSP/math"
+    instructions: ["QROTATE", "QVECTOR", "QMUL", "QDIV", "QSQRT", "QLOG", "QEXP"]
+    topics:
+      - "64-stage pipeline operation"
+      - "Result retrieval with GETQX/GETQY"
+      - "Parallel operation with CPU"
+      - "Fixed-point math considerations"
+
+  hub_memory_sharing:
+    priority: HIGH
+    reason: "Inter-cog communication and synchronization"
+    instructions: ["LOCKNEW", "LOCKRET", "LOCKTRY", "LOCKREL", "COGATN", "POLLATN", "WAITATN"]
+    topics:
+      - "16 hardware locks"
+      - "Atomic hub operations"
+      - "Attention signaling between cogs"
+      - "Shared resource management"
+
+  cog_management:
+    priority: HIGH
+    reason: "Multi-core control essential for P2"
+    instructions: ["COGINIT", "COGSTOP", "COGID", "COGCHK", "HUBSET"]
+    topics:
+      - "Launching cogs with code/data"
+      - "Cog shutdown and resource cleanup"
+      - "Cog identification and status"
+      - "Clock configuration per cog"
+
+  fifo_operations:
+    priority: HIGH
+    reason: "High-speed hub memory streaming"
+    instructions: ["RDFAST", "WRFAST", "FBLOCK", "RFBYTE", "RFWORD", "RFLONG", "WFBYTE", "WFWORD", "WFLONG"]
+    topics:
+      - "FIFO configuration for streaming"
+      - "Automatic hub window synchronization"
+      - "Integration with streamer"
+      - "Block transfer optimization"
+
+important_missing_concepts:
+  multi_long_operations:
+    priority: MEDIUM
+    reason: "Extended precision arithmetic"
+    topics:
+      - "Multi-long ADD/SUB/CMP patterns"
+      - "Carry propagation with ADDX/SUBX"
+      - "64-bit and arbitrary precision math"
+    note: "Manual has dedicated section on this"
+
+  pin_field_operations:
+    priority: MEDIUM
+    reason: "Efficient multi-pin control"
+    instructions: ["PINWRITE", "PINREAD", "PINSETM", "PINCLEAR"]
+    topics:
+      - "32-bit pin field operations"
+      - "Pattern matching on pins"
+      - "Simultaneous multi-pin control"
+
+  color_manipulation:
+    priority: MEDIUM
+    reason: "Video/graphics support"
+    instructions: ["RGBSQZ", "RGBEXP", "XORO32", "MIXPIX", "BLNPIX", "MULPIX"]
+    topics:
+      - "RGB color space operations"
+      - "Pixel blending and mixing"
+      - "HDMI/VGA support"
+
+  math_operations_extended:
+    priority: MEDIUM
+    reason: "Complete math coverage"
+    instructions: ["MUL", "MULS", "SCA", "SCAS", "FRAC", "QFRAC"]
+    topics:
+      - "32x32 multiplication variants"
+      - "Scaling operations"
+      - "Fractional math"
+      - "Signed vs unsigned operations"
+
+nice_to_have_concepts:
+  debug_system:
+    priority: LOW
+    reason: "Development support"
+    instructions: ["BRK", "COGBRK", "GETBRK", "SETBRK"]
+    topics:
+      - "Hardware breakpoints"
+      - "Debug interrupt routing"
+      - "Single-step support"
+
+  boot_process:
+    priority: LOW
+    reason: "System initialization understanding"
+    topics:
+      - "Boot ROM sequence"
+      - "SPI flash boot"
+      - "Serial boot protocol"
+      - "Clock configuration at boot"
+
+  bit_manipulation_advanced:
+    priority: LOW
+    reason: "Specialized bit operations"
+    instructions: ["ENCOD", "DECOD", "BMASK", "MERGEB", "SPLITB", "REV", "MOVBYTS", "SEUSSF", "SEUSSR"]
+    topics:
+      - "Priority encoding"
+      - "Bit field extraction/insertion"
+      - "Byte shuffling"
+      - "Bit reversal"
+
+manual_organization_insights:
+  categorical_groupings:
+    - "Directives (assembly-time)"
+    - "Conditions (IF_xxx prefixes)"
+    - "Effects (WC/WZ/WCZ suffixes)"
+    - "Flag Modification (MODxx)"
+    - "Augmentation (AUGS/AUGD)"
+    - "Indirection (ALTx)"
+    - "Configuration (HUBSET, etc.)"
+    - "Hub Memory Access"
+    - "Math (extensive category)"
+    - "Timing"
+    - "Event Handling"
+    - "Color Manipulation"
+
+  instruction_count_estimate:
+    from_manual_toc: "~200+ instructions documented"
+    tables_found: 219
+    code_examples: 362
+    coverage: "Approximately 45% of total P2 instruction set"
+
+recommendations:
+  immediate_priorities:
+    1: "Create cordic_operations.yaml - Critical for math"
+    2: "Create hub_memory_sharing.yaml - Critical for multi-cog"
+    3: "Create cog_management.yaml - Critical for parallel processing"
+    4: "Create fifo_operations.yaml - Critical for streaming"
+
+  integration_needs:
+    - "Link CORDIC with Q register in special_registers.yaml"
+    - "Connect FIFO with streamer in streamer_smartpin_control.yaml"
+    - "Relate locks to hub memory operations"
+    - "Connect attention signals to event system"
+
+  documentation_strategy:
+    - "Focus on concepts that enable parallel processing"
+    - "Prioritize hardware-accelerated features"
+    - "Document patterns from manual's multi-long examples"
+    - "Include timing and synchronization considerations"
+
+status:
+  concepts_completed: 13
+  critical_gaps: 4
+  total_estimated_needed: 20-25
+  completion_percentage: "~60% of critical concepts"

@@ -1,0 +1,249 @@
+# Spin2 Language Construct: Method Definitions (PUB/PRI)
+# Source: Spin2 v51 documentation
+# Critical for: Program structure and code organization
+
+construct: "Method Definitions"
+category: "program_structure"
+type: "method_declaration"
+
+metadata:
+  query_tags: ["pub", "pri", "method", "function", "procedure", "subroutine", "parameters", "return"]
+  complexity: "beginner"
+  use_cases: ["code_organization", "modularity", "reusability", "encapsulation"]
+  common_questions:
+    - "How do I define a method in Spin2?"
+    - "What's the difference between PUB and PRI?"
+    - "How do I return values from methods?"
+    - "How do I pass parameters?"
+
+fundamental_concepts: |
+  Methods are the primary code organization unit in Spin2:
+  - PUB (public) methods are visible to other objects
+  - PRI (private) methods are only visible within the object
+  - First PUB method is the entry point when object runs standalone
+  - Methods can have parameters, return values, and local variables
+
+syntax:
+  basic_structure: |
+    PUB method_name()
+      ' Method body
+    
+    PRI helper_method()
+      ' Private helper
+
+  with_parameters: |
+    PUB method_name(param1, param2, param3)
+      ' Use parameters directly
+    
+  with_return_values: |
+    PUB calculate(x, y) : result
+      result := x + y
+    
+  with_multiple_returns: |
+    PUB divide(dividend, divisor) : quotient, remainder
+      quotient := dividend / divisor
+      remainder := dividend // divisor
+    
+  with_local_variables: |
+    PUB process(input) : output | temp1, temp2, temp3
+      temp1 := input * 2
+      temp2 := temp1 + 10
+      output := temp2 / 3
+    
+  complete_form: |
+    PUB method_name(param1, param2) : return1, return2 | local1, local2
+      ' Parameters: param1, param2
+      ' Return values: return1, return2 
+      ' Local variables: local1, local2
+
+special_behaviors:
+  - behavior: "entry_point"
+    description: "First PUB method in top file is program entry"
+    example: |
+      PUB main()    ' This executes when program starts
+        setup()
+        REPEAT
+          loop()
+    
+  - behavior: "null_method"
+    description: "Empty PUB prevents object from being main"
+    example: |
+      PUB null()    ' Prevents library from running standalone
+      
+  - behavior: "default_return"
+    description: "Methods without declared return values return 0"
+    
+  - behavior: "return_initialization"
+    description: "Return variables initialize to 0"
+    
+  - behavior: "parameter_passing"
+    description: "Parameters are passed by value (copies made)"
+    note: "Arrays and objects pass references"
+
+method_visibility:
+  pub_methods:
+    visibility: "Public - accessible from other objects"
+    use_for:
+      - "Object's public interface"
+      - "Entry points"
+      - "API methods"
+    example: |
+      PUB start(pin, baud)    ' Public initialization
+        initialize(pin, baud)
+  
+  pri_methods:
+    visibility: "Private - only accessible within object"
+    use_for:
+      - "Internal helpers"
+      - "Implementation details"
+      - "Code organization"
+    example: |
+      PRI initialize(pin, baud)    ' Private helper
+        configure_pin(pin)
+        set_baud_rate(baud)
+
+parameter_handling:
+  passing_mechanism: "By value (copy) for simple types"
+  
+  array_parameters: |
+    PUB clear_array(@array, size)    ' Pass array address
+      REPEAT size
+        LONG[array][0] := 0
+        array += 4
+  
+  default_values: |
+    ' Spin2 doesn't support default parameters directly
+    ' Use method overloading pattern:
+    PUB configure(pin, mode, pull)
+      ' Full configuration
+    
+    PUB configure_simple(pin)
+      configure(pin, OUTPUT, NO_PULL)    ' Call with defaults
+
+return_values:
+  single_return: |
+    PUB calculate(x) : result
+      result := x * x + 2 * x + 1
+  
+  multiple_returns: |
+    PUB get_coordinates() : x, y, z
+      x := read_x_sensor()
+      y := read_y_sensor()
+      z := read_z_sensor()
+  
+  early_return: |
+    PUB validate(value) : valid
+      IF value < 0
+        RETURN FALSE        ' Early return
+      IF value > MAX_VALUE
+        RETURN FALSE
+      RETURN TRUE          ' Explicit return
+  
+  implicit_return: |
+    PUB square(x) : result
+      result := x * x      ' Returns result implicitly
+
+local_variables:
+  declaration: "After return values, separated by |"
+  scope: "Exist only during method execution"
+  initialization: "Always initialized to 0"
+  
+  example: |
+    PUB calculate_average(a, b, c) : avg | sum, count
+      sum := a + b + c
+      count := 3
+      avg := sum / count
+
+stack_usage: |
+  Each method call uses stack space for:
+  - Return address
+  - Parameters
+  - Local variables
+  - Return values
+  
+  Stack is in hub RAM, default 256 longs per COG
+
+common_patterns:
+  - pattern: "initialization"
+    description: "Standard start/stop pattern"
+    code: |
+      VAR
+        LONG cog
+      
+      PUB start() : success
+        stop()
+        cog := COGINIT(COGEXEC_NEW, @pasm_code, @params) + 1
+        success := cog
+      
+      PUB stop()
+        IF cog
+          COGSTOP(cog - 1)
+          cog := 0
+  
+  - pattern: "getter_setter"
+    description: "Property access pattern"
+    code: |
+      VAR
+        LONG _value
+      
+      PUB set_value(v)
+        _value := v
+      
+      PUB get_value() : v
+        v := _value
+  
+  - pattern: "method_chaining"
+    description: "Return self for chaining"
+    code: |
+      PUB set_x(value) : self
+        x := value
+        self := @this    ' Return object reference
+      
+      ' Usage: obj.set_x(10).set_y(20).draw()
+
+pitfalls:
+  - pitfall: "forgetting_return_declaration"
+    description: "Using RETURN with value but no return declaration"
+    wrong: |
+      PUB calculate(x)
+        RETURN x * 2    ' Error - no return variable declared
+    correct: |
+      PUB calculate(x) : result
+        RETURN x * 2    ' Or: result := x * 2
+  
+  - pitfall: "variable_shadowing"
+    description: "Local variable shadows object variable"
+    example: |
+      VAR
+        LONG count
+      
+      PUB method() | count    ' Local 'count' shadows VAR 'count'
+        count := 10           ' Sets local, not VAR
+
+performance:
+  call_overhead: "~50 clock cycles for call/return"
+  stack_operations: "Hub RAM access for parameters/locals"
+  optimization_tips:
+    - "Inline small, frequently-called methods manually"
+    - "Minimize parameter count for hot paths"
+    - "Use registers in PASM2 for performance-critical code"
+
+pasm_integration: |
+  PUB methods can contain inline PASM2:
+  
+  PUB fast_multiply(x, y) : result
+    ORG
+      MUL x, y
+      GETQX result
+    END
+
+related_constructs:
+  - "blocks.yaml"
+  - "var_dat_con_obj.yaml"
+  - "inline_pasm.yaml"
+  
+related_concepts:
+  - "Object-oriented design"
+  - "Encapsulation"
+  - "Method signatures"
+  - "Stack frame management"

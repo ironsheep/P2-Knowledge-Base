@@ -1,0 +1,207 @@
+concept: instruction_skipping
+title: Instruction Skipping - SKIP and SKIPF
+category: control_flow
+description: Hardware-based instruction skipping for efficient conditional execution without branches
+
+overview: |
+  P2's SKIP and SKIPF instructions provide zero-overhead conditional execution by selectively skipping
+  instructions based on bit patterns. This eliminates branch penalties and enables complex conditional
+  sequences without jumps. Instructions are fetched but not executed when skipped, maintaining pipeline flow.
+
+skip_instructions:
+  SKIP:
+    description: "Skip instructions based on immediate bit pattern"
+    syntax: "SKIP #{#}pattern"
+    pattern_size: "Up to 32 bits"
+    operation: "Each 1 bit skips corresponding instruction"
+    examples:
+      - |
+        SKIP #%101      ' Skip 1st and 3rd instructions
+        ADD x, #1       ' Skipped
+        SUB y, #1       ' Executed  
+        MOV z, #0       ' Skipped
+    timing: "No cycle penalty for skipped instructions"
+
+  SKIPF:
+    description: "Skip instructions based on register pattern"
+    syntax: "SKIPF pattern_reg"
+    pattern_source: "32-bit pattern from register"
+    operation: "Allows dynamic skip patterns"
+    examples:
+      - |
+        MOV pattern, #%11001100
+        SKIPF pattern
+        ' Next 8 instructions follow pattern
+    use_case: "Runtime-determined conditionals"
+
+  EXECF:
+    description: "Skip with automatic branch after pattern"
+    syntax: "EXECF pattern_and_target"
+    encoding: "Pattern[31:10], Target[9:0]"
+    operation: "Execute pattern then jump"
+    examples:
+      - |
+        EXECF ##(%101 << 10) | target
+        ADD x, #1       ' Skipped
+        SUB y, #1       ' Executed
+        MOV z, #0       ' Skipped
+        ' Automatically jumps to target
+    use_case: "Conditional execution with exit"
+
+pattern_encoding:
+  bit_mapping:
+    - "Bit 0 → First instruction after SKIP"
+    - "Bit 1 → Second instruction"
+    - "Bit 31 → 32nd instruction"
+    - "1 = skip, 0 = execute"
+
+  pattern_size:
+    immediate: "1-32 bits via # or ##"
+    register: "Full 32 bits"
+    examples:
+      - "SKIP #%1"            # Skip next instruction
+      - "SKIP #%1111"         # Skip next 4 instructions
+      - "SKIP ##%1010101010101010_1010101010101010"  # 32-bit pattern
+
+  pattern_consumption:
+    - "Each instruction consumes one pattern bit"
+    - "Pattern shifts after each instruction"
+    - "Exhausted pattern = normal execution resumes"
+    - "Nested SKIP not allowed"
+
+skip_behavior:
+  instruction_handling:
+    skipped:
+      - "Instruction fetched but not executed"
+      - "No side effects (flags, writes, etc.)"
+      - "No cycle consumption"
+      - "PC advances normally"
+    
+    executed:
+      - "Normal instruction execution"
+      - "Full side effects"
+      - "Normal timing"
+
+  special_cases:
+    REP_interaction:
+      - "SKIP works within REP blocks"
+      - "Pattern applies to each iteration"
+      - "Careful pattern planning needed"
+    
+    AUGS_AUGD:
+      - "Augmentation prefixes cannot be skipped alone"
+      - "Skip pattern must include augmented instruction"
+      - "Both consume pattern bits"
+
+    branches:
+      - "Branches can be skipped"
+      - "Skipped branches don't redirect flow"
+      - "Pattern continues after skipped branch"
+
+    interrupts:
+      - "Skip pattern preserved across interrupts"
+      - "Pattern resumes after interrupt return"
+
+common_patterns:
+  conditional_block:
+    code: |
+      CMP value, threshold WC
+      IF_C SKIP #%1111        ' Skip next 4 if C set
+        ADD accumulator, value
+        SHL value, #1
+        OR flags, #PROCESSED
+        CALL #@process
+    description: "Multi-instruction conditional"
+
+  alternating_operations:
+    code: |
+      SKIP ##$AAAAAAAA       ' Pattern: 10101010...
+      REP #2, #16
+        ADD even_sum, value  ' Executed on even iterations
+        ADD odd_sum, value   ' Executed on odd iterations
+    description: "Alternate execution pattern"
+
+  sparse_execution:
+    code: |
+      SKIPF sparse_pattern
+      ' Up to 32 instructions with selective execution
+      ' Based on runtime pattern
+    description: "Runtime conditional pattern"
+
+  conditional_sequence:
+    code: |
+      TEST flags, #MODE_MASK WZ
+      IF_Z SKIP #%111000
+        MOV x, #1       ' Skipped if Z
+        MOV y, #2       ' Skipped if Z
+        MOV z, #3       ' Skipped if Z
+        MOV x, #10      ' Executed if Z
+        MOV y, #20      ' Executed if Z
+        MOV z, #30      ' Executed if Z
+    description: "Mode-based initialization"
+
+  early_termination:
+    code: |
+      SKIPF ##(%11111111_11111111_11111111_11111100 << 10) | exit_label
+      ' Process up to 30 items
+      ' Last 2 always execute then jump
+    description: "Process with guaranteed exit"
+
+skipf_branching:
+  concept: "SKIPF patterns can encode branch targets"
+  encoding: "Lower 10 bits = branch address"
+  behavior: "After pattern exhausted, branch taken"
+  examples:
+    - |
+      ' Skip pattern with branch
+      EXECF ##(%1010 << 10) | next_section
+      ' 4 instructions with pattern 1010
+      ' Then automatic branch to next_section
+
+optimization_benefits:
+  vs_branches:
+    - "No pipeline flush"
+    - "No branch prediction needed"
+    - "Deterministic timing"
+    - "Better for short conditionals"
+
+  vs_conditional_execution:
+    - "Multiple instructions per condition"
+    - "Complex patterns possible"
+    - "No repeated condition testing"
+
+  code_density:
+    - "Eliminates branch instructions"
+    - "Reduces jump targets"
+    - "Inline conditional logic"
+
+limitations:
+  - "Maximum 32 instructions per pattern"
+  - "Cannot nest SKIP instructions"
+  - "Pattern must be predetermined"
+  - "Augmentation prefixes complicate patterns"
+  - "Debug stepping through SKIP is complex"
+
+best_practices:
+  - "Use for short conditional sequences"
+  - "Document skip patterns clearly"
+  - "Test pattern alignment carefully"
+  - "Consider REP for uniform patterns"
+  - "Use SKIPF for runtime patterns"
+  - "Avoid complex patterns in critical paths"
+
+debugging:
+  challenges:
+    - "Skipped instructions appear to execute in debugger"
+    - "Pattern state not directly visible"
+    - "Hard to trace execution flow"
+
+  techniques:
+    - "Use NOP to visualize patterns"
+    - "Add markers before/after skip blocks"
+    - "Test patterns in isolation first"
+
+references:
+  - silicon_doc: Instruction Skipping section
+  - silicon_doc: Special SKIPF Branching Rules
+  - optimization_guide: Branch-free programming

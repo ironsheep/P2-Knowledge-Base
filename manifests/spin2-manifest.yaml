@@ -1,0 +1,158 @@
+# Spin2 Language Manifest
+# Part of P2 Knowledge Base manifest hierarchy
+
+version: "1.0"
+schema_version: "2024-12-30"
+last_updated: "2024-12-30T00:00:00Z"
+category: "spin2_language"
+base_path: "engineering/knowledge-base/P2/language/spin2/"
+total_entries: 135
+
+description: |
+  Complete Spin2 language reference including methods, operators, and constructs.
+  Covers both language syntax and built-in functionality.
+
+by_category:
+  constructs:
+    control_flow:
+      - {name: "repeat", file: "constructs/repeat.yaml", desc: "Loop constructs"}
+      - {name: "if_elseif_else", file: "constructs/if_elseif_else.yaml", desc: "Conditional execution"}
+      - {name: "case", file: "constructs/case.yaml", desc: "Multi-way branching"}
+      - {name: "abort", file: "constructs/abort.yaml", desc: "Exception handling"}
+      - {name: "quit", file: "constructs/quit.yaml", desc: "Loop exit"}
+      - {name: "next", file: "constructs/next.yaml", desc: "Loop continue"}
+    
+    program_structure:
+      - {name: "method_definition", file: "constructs/method_definition.yaml", desc: "PUB/PRI methods"}
+      - {name: "blocks", file: "constructs/blocks.yaml", desc: "CON/VAR/OBJ/DAT blocks"}
+      - {name: "inline_pasm", file: "constructs/inline_pasm.yaml", desc: "Embedded assembly"}
+  
+  methods:
+    pin_control:
+      - {name: "pinhigh", file: "methods/pinhigh.yaml", desc: "Set pin high"}
+      - {name: "pinlow", file: "methods/pinlow.yaml", desc: "Set pin low"}
+      - {name: "pintoggle", file: "methods/pintoggle.yaml", desc: "Toggle pin state"}
+      - {name: "pinread", file: "methods/pinread.yaml", desc: "Read pin state"}
+      - {name: "pinwrite", file: "methods/pinwrite.yaml", desc: "Write pin state"}
+      - {name: "pinfloat", file: "methods/pinfloat.yaml", desc: "Float pin"}
+    
+    timing:
+      - {name: "waitms", file: "methods/waitms.yaml", desc: "Wait milliseconds"}
+      - {name: "waitus", file: "methods/waitus.yaml", desc: "Wait microseconds"}
+      - {name: "waitct", file: "methods/waitct.yaml", desc: "Wait for counter"}
+      - {name: "getct", file: "methods/getct.yaml", desc: "Get system counter"}
+      - {name: "getms", file: "methods/getms.yaml", desc: "Get milliseconds"}
+      - {name: "getsec", file: "methods/getsec.yaml", desc: "Get seconds"}
+    
+    cog_control:
+      - {name: "coginit", file: "methods/coginit.yaml", desc: "Start COG"}
+      - {name: "cogstop", file: "methods/cogstop.yaml", desc: "Stop COG"}
+      - {name: "cogspin", file: "methods/cogspin.yaml", desc: "Start Spin2 in COG"}
+      - {name: "cogchk", file: "methods/cogchk.yaml", desc: "Check COG status"}
+      - {name: "cogid", file: "methods/cogid.yaml", desc: "Get current COG ID"}
+      - {name: "cogatn", file: "methods/cogatn.yaml", desc: "Signal attention"}
+    
+    memory:
+      - {name: "bytemove", file: "methods/bytemove.yaml", desc: "Copy bytes"}
+      - {name: "wordmove", file: "methods/wordmove.yaml", desc: "Copy words"}
+      - {name: "longmove", file: "methods/longmove.yaml", desc: "Copy longs"}
+      - {name: "bytefill", file: "methods/bytefill.yaml", desc: "Fill bytes"}
+      - {name: "wordfill", file: "methods/wordfill.yaml", desc: "Fill words"}
+      - {name: "longfill", file: "methods/longfill.yaml", desc: "Fill longs"}
+    
+    math:
+      - {name: "abs", file: "methods/abs.yaml", desc: "Absolute value"}
+      - {name: "sqrt", file: "methods/sqrt.yaml", desc: "Square root"}
+      - {name: "rotxy", file: "methods/rotxy.yaml", desc: "Rotate coordinates"}
+      - {name: "polxy", file: "methods/polxy.yaml", desc: "Polar to rectangular"}
+      - {name: "xypol", file: "methods/xypol.yaml", desc: "Rectangular to polar"}
+    
+    strings:
+      - {name: "strsize", file: "methods/strsize.yaml", desc: "String length"}
+      - {name: "strcomp", file: "methods/strcomp.yaml", desc: "String compare"}
+      - {name: "strcopy", file: "methods/strcopy.yaml", desc: "String copy"}
+    
+    smart_pins:
+      - {name: "wrpin", file: "methods/wrpin.yaml", desc: "Configure smart pin"}
+      - {name: "wxpin", file: "methods/wxpin.yaml", desc: "Write X parameter"}
+      - {name: "wypin", file: "methods/wypin.yaml", desc: "Write Y parameter"}
+      - {name: "rdpin", file: "methods/rdpin.yaml", desc: "Read pin result"}
+      - {name: "akpin", file: "methods/akpin.yaml", desc: "Acknowledge pin"}
+  
+  operators:
+    arithmetic:
+      - {name: "add", file: "operators/add.yaml", desc: "Addition (+)"}
+      - {name: "subtract", file: "operators/subtract.yaml", desc: "Subtraction (-)"}
+      - {name: "multiply", file: "operators/multiply.yaml", desc: "Multiplication (*)"}
+      - {name: "divide", file: "operators/divide.yaml", desc: "Division (/)"}
+      - {name: "modulo", file: "operators/modulo.yaml", desc: "Modulo (//)"}
+    
+    bitwise:
+      - {name: "and", file: "operators/and.yaml", desc: "Bitwise AND (&)"}
+      - {name: "or", file: "operators/or.yaml", desc: "Bitwise OR (|)"}
+      - {name: "xor", file: "operators/xor.yaml", desc: "Bitwise XOR (^)"}
+      - {name: "not", file: "operators/not.yaml", desc: "Bitwise NOT (!)"}
+      - {name: "shift_left", file: "operators/shift_left.yaml", desc: "Shift left (<<)"}
+      - {name: "shift_right", file: "operators/shift_right.yaml", desc: "Shift right (>>)"}
+    
+    comparison:
+      - {name: "equal", file: "operators/equal.yaml", desc: "Equal (==)"}
+      - {name: "not_equal", file: "operators/not_equal.yaml", desc: "Not equal (<>)"}
+      - {name: "less_than", file: "operators/less_than.yaml", desc: "Less than (<)"}
+      - {name: "greater_than", file: "operators/greater_than.yaml", desc: "Greater than (>)"}
+    
+    assignment:
+      - {name: "assign", file: "operators/assign.yaml", desc: "Assignment (:=)"}
+      - {name: "add_assign", file: "operators/add_assign.yaml", desc: "Add and assign (+=)"}
+      - {name: "sub_assign", file: "operators/sub_assign.yaml", desc: "Subtract and assign (-=)"}
+
+by_function:
+  control: ["repeat", "if", "case", "abort", "quit", "next"]
+  pins: ["pinhigh", "pinlow", "pintoggle", "pinread", "pinwrite"]
+  timing: ["waitms", "waitus", "waitct", "getct", "getms"]
+  cogs: ["coginit", "cogstop", "cogspin", "cogid", "cogatn"]
+  memory: ["bytemove", "longmove", "bytefill", "longfill"]
+  math: ["abs", "sqrt", "rotxy", "min", "max"]
+  strings: ["strsize", "strcomp", "strcopy"]
+
+by_complexity:
+  beginner:
+    - "pinhigh"
+    - "pinlow"
+    - "waitms"
+    - "repeat"
+    - "if"
+    - "pub/pri"
+  
+  intermediate:
+    - "case"
+    - "coginit"
+    - "wrpin"
+    - "bytemove"
+    - "abort"
+  
+  advanced:
+    - "inline_pasm"
+    - "cogspin"
+    - "rotxy"
+    - "lookup/lookdown"
+
+search_index:
+  keywords:
+    "gpio": ["pinhigh", "pinlow", "pintoggle", "pinread"]
+    "delay": ["waitms", "waitus", "waitct"]
+    "loop": ["repeat", "quit", "next"]
+    "conditional": ["if", "elseif", "else", "case"]
+    "parallel": ["coginit", "cogstop", "cogspin", "cogatn"]
+    "memory": ["bytemove", "longmove", "bytefill"]
+    "math": ["abs", "sqrt", "min", "max", "rotxy"]
+
+special_topics:
+  - {name: "operator_precedence", file: "operators/precedence.yaml", desc: "Operator precedence table"}
+  - {name: "builtin_symbols", file: "symbols/spin2-builtin-symbols-complete.yaml", desc: "Built-in constants"}
+  - {name: "integration", file: "integration/spin2-pasm2-integration.yaml", desc: "Spin2/PASM2 integration"}
+
+related_manifests:
+  - "pasm2-manifest.yaml"  # Assembly language
+  - "patterns-manifest.yaml"  # Code patterns
+  - "architecture-manifest.yaml"  # Hardware understanding

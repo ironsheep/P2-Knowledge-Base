@@ -1,0 +1,196 @@
+# Spin2 Language Construct: REPEAT
+# Source: Spin2 v51 documentation
+# Critical for: Loop control and iteration
+
+construct: "REPEAT"
+category: "control_flow"
+type: "loop"
+
+metadata:
+  query_tags: ["loop", "iteration", "repeat", "while", "until", "for_loop", "infinite_loop"]
+  complexity: "beginner"
+  use_cases: ["counting", "infinite_loops", "range_iteration", "conditional_loops", "timing_loops"]
+  common_questions:
+    - "How do I create a loop in Spin2?"
+    - "How do I repeat N times?"
+    - "How do I loop through a range?"
+    - "How do I create an infinite loop?"
+
+variants:
+  - variant: "infinite"
+    syntax: "REPEAT"
+    description: "Infinite loop - continues forever until QUIT or ABORT"
+    example: |
+      REPEAT
+        LED.toggle()
+        WAITMS(500)
+    
+  - variant: "count"
+    syntax: "REPEAT count"
+    description: "Repeat exactly 'count' times"
+    example: |
+      REPEAT 10
+        flash_led()
+        
+  - variant: "post_test_while"
+    syntax: "REPEAT WHILE condition"
+    description: "Continue while condition is true (test at end)"
+    example: |
+      REPEAT WHILE x < 100
+        x += increment
+        
+  - variant: "post_test_until"
+    syntax: "REPEAT UNTIL condition"
+    description: "Continue until condition becomes true (test at end)"
+    example: |
+      REPEAT UNTIL button_pressed()
+        scan_sensors()
+        
+  - variant: "pre_test_while"
+    syntax: "REPEAT count WHILE condition"
+    description: "Up to count times, while condition true"
+    example: |
+      REPEAT 1000 WHILE sensor < threshold
+        process_data()
+        
+  - variant: "pre_test_until"
+    syntax: "REPEAT count UNTIL condition"
+    description: "Up to count times, until condition true"
+    example: |
+      REPEAT timeout UNTIL data_ready()
+        WAITMS(1)
+        
+  - variant: "from_to"
+    syntax: "REPEAT variable FROM start TO end"
+    description: "Iterate variable from start to end (inclusive)"
+    example: |
+      REPEAT i FROM 0 TO 9
+        array[i] := 0
+        
+  - variant: "from_to_step"
+    syntax: "REPEAT variable FROM start TO end STEP increment"
+    description: "Iterate with custom step value (can be negative)"
+    example: |
+      REPEAT j FROM 100 TO 0 STEP -10
+        pwm_value := j
+
+control_keywords:
+  - keyword: "NEXT"
+    description: "Skip to next iteration (like continue)"
+    example: |
+      REPEAT i FROM 0 TO 99
+        IF array[i] == 0
+          NEXT              ' Skip zeros
+        process(array[i])
+    
+  - keyword: "QUIT"
+    description: "Exit current REPEAT loop (like break)"
+    example: |
+      REPEAT
+        value := read_sensor()
+        IF value > limit
+          QUIT              ' Exit loop
+        accumulate(value)
+    
+  - keyword: "QUITN"
+    syntax: "QUITN level"
+    description: "Exit N levels of nested loops"
+    example: |
+      REPEAT x FROM 0 TO 9
+        REPEAT y FROM 0 TO 9
+          IF grid[x][y] == target
+            QUITN 2         ' Exit both loops
+
+special_behaviors:
+  - behavior: "zero_count"
+    description: "REPEAT 0 skips the loop entirely"
+    
+  - behavior: "negative_count"
+    description: "Negative counts treated as large positive (2^32 + count)"
+    
+  - behavior: "variable_scope"
+    description: "Loop variable is local to the REPEAT block"
+    
+  - behavior: "step_direction"
+    description: "FROM/TO automatically determines direction, STEP can override"
+
+pasm_equivalent:
+  description: "REPEAT generates different PASM2 based on variant"
+  examples:
+    - spin2: "REPEAT 10"
+      pasm2: |
+        MOV     repeat_count, #10
+    .loop:
+        ' ... loop body ...
+        DJNZ    repeat_count, #.loop
+    
+    - spin2: "REPEAT i FROM 0 TO 9"
+      pasm2: |
+        MOV     i, #0
+    .loop:
+        ' ... loop body ...
+        ADD     i, #1
+        CMP     i, #10 WC
+        IF_C    JMP #.loop
+
+common_patterns:
+  - pattern: "delay_loop"
+    description: "Create precise timing delays"
+    code: |
+      REPEAT WAITMS(1) * 1000    ' Wait 1 second
+    
+  - pattern: "array_init"
+    description: "Initialize array elements"
+    code: |
+      REPEAT i FROM 0 TO ARRAY_SIZE-1
+        array[i] := initial_value
+    
+  - pattern: "polling_loop"
+    description: "Poll until condition met with timeout"
+    code: |
+      REPEAT 1000 UNTIL IN(pin)
+        WAITUS(100)
+    
+  - pattern: "infinite_main"
+    description: "Main program loop"
+    code: |
+      REPEAT
+        handle_inputs()
+        update_state()
+        generate_outputs()
+
+pitfalls:
+  - pitfall: "missing_quit"
+    description: "Forgetting QUIT in infinite loop with condition"
+    wrong: |
+      REPEAT
+        IF done
+          ' Forgot QUIT here!
+    correct: |
+      REPEAT
+        IF done
+          QUIT
+    
+  - pitfall: "wrong_step_direction"
+    description: "Using positive step when going backward"
+    wrong: |
+      REPEAT i FROM 10 TO 0 STEP 1    ' Never executes!
+    correct: |
+      REPEAT i FROM 10 TO 0 STEP -1   ' Or just FROM 10 TO 0
+
+performance:
+  overhead: "Minimal - typically 2-4 PASM2 instructions per iteration"
+  optimization_tips:
+    - "Use REPEAT count for known iterations (faster than WHILE)"
+    - "Place most likely QUIT condition first in nested IFs"
+    - "Consider unrolling small fixed loops"
+
+related_constructs:
+  - "if_elseif_else.yaml"
+  - "case.yaml"
+  - "abort.yaml"
+  
+related_methods:
+  - "language/spin2/methods/waitms.yaml"
+  - "language/spin2/methods/waitus.yaml"
+  - "language/spin2/methods/waitct.yaml"

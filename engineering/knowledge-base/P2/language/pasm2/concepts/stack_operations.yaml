@@ -1,0 +1,267 @@
+concept: stack_operations
+title: P2 Stack Operations
+category: memory_operations
+description: Hardware and software stack implementations using PTRA/PTRB and internal call stack
+
+overview: |
+  P2 provides multiple stack mechanisms: hardware-assisted stacks using PTRA/PTRB with auto-increment/decrement,
+  an internal 8-level hardware call stack, and software-managed stacks in hub memory. Understanding these
+  different stack types and their interactions is crucial for subroutine management and data structures.
+
+hardware_stacks:
+  ptra_stack:
+    pointer: "PTRA (Pointer A)"
+    purpose: "Primary data/address stack"
+    width: "20-bit pointer"
+    range: "Full hub memory access"
+    operations:
+      PUSHA:
+        syntax: "PUSHA value"
+        operation: "hub[--PTRA] = value"
+        timing: "3 cycles"
+        description: "Pre-decrement push"
+      
+      POPA:
+        syntax: "POPA dest"
+        operation: "dest = hub[PTRA++]"
+        timing: "9 cycles"
+        description: "Post-increment pop"
+      
+      manual:
+        push: |
+          WRLONG value, --PTRA
+        pop: |
+          RDLONG dest, PTRA++
+    
+  ptrb_stack:
+    pointer: "PTRB (Pointer B)"
+    purpose: "Secondary data/address stack"
+    width: "20-bit pointer"
+    operations:
+      PUSHB:
+        syntax: "PUSHB value"
+        operation: "hub[--PTRB] = value"
+        timing: "3 cycles"
+      
+      POPB:
+        syntax: "POPB dest"
+        operation: "dest = hub[PTRB++]"
+        timing: "9 cycles"
+
+  call_stack:
+    type: "Internal hardware stack"
+    depth: "8 levels"
+    width: "22 bits (20-bit address + 2 flags)"
+    operations:
+      CALL:
+        operation: "Push PC+4 and flags"
+        syntax: "CALL #address"
+        flags_saved: "C and Z"
+      
+      RET:
+        operation: "Pop PC and restore flags"
+        syntax: "RET {WC/WZ/WCZ}"
+        flag_restore: "Optional via WC/WZ/WCZ"
+      
+      CALLA:
+        operation: "Save return in PTRA, not stack"
+        syntax: "CALLA #address"
+        return: "Via RETA"
+      
+      CALLB:
+        operation: "Save return in PTRB, not stack"
+        syntax: "CALLB #address"
+        return: "Via RETB"
+      
+      CALLD:
+        operation: "Save return in register"
+        syntax: "CALLD reg, #address"
+        return: "Via JMP reg"
+
+stack_configurations:
+  ascending_stack:
+    growth: "Toward higher addresses"
+    push: "Write then increment"
+    pop: "Decrement then read"
+    example: |
+      ' Initialize ascending stack
+      MOV PTRA, ##stack_base
+      ' Push
+      WRLONG value, PTRA++
+      ' Pop
+      RDLONG dest, --PTRA
+
+  descending_stack:
+    growth: "Toward lower addresses"
+    push: "Decrement then write"
+    pop: "Read then increment"
+    example: |
+      ' Initialize descending stack
+      MOV PTRA, ##stack_top
+      ' Push (PUSHA does this)
+      WRLONG value, --PTRA
+      ' Pop (POPA does this)
+      RDLONG dest, PTRA++
+
+  circular_stack:
+    description: "Stack with wrap-around"
+    implementation: |
+      ' After each operation
+      AND PTRA, ##STACK_MASK  ' Wrap pointer
+
+auto_increment_modes:
+  post_increment:
+    syntax: "PTR++"
+    operation: "Use PTR, then PTR += scale"
+    scale: "1/2/4 based on operation size"
+    example: "RDLONG reg, PTRA++"
+
+  pre_decrement:
+    syntax: "--PTR"
+    operation: "PTR -= scale, then use PTR"
+    scale: "1/2/4 based on operation size"
+    example: "WRLONG reg, --PTRB"
+
+  indexed_post_modify:
+    syntax: "PTR++[index]"
+    operation: "Use PTR, then PTR += (index × scale)"
+    example: "RDLONG reg, PTRA++[2]  ' PTRA += 8"
+
+common_patterns:
+  function_prologue:
+    code: |
+      function:
+        PUSHA old_ptra      ' Save registers
+        PUSHA work_reg1
+        PUSHA work_reg2
+        ' Function body
+    description: "Save context on entry"
+
+  function_epilogue:
+    code: |
+        POPA work_reg2      ' Restore registers
+        POPA work_reg1
+        POPA old_ptra
+        RET
+    description: "Restore context and return"
+
+  parameter_passing:
+    code: |
+      ' Caller
+      PUSHA param3
+      PUSHA param2
+      PUSHA param1
+      CALL #function
+      ADD PTRA, #12       ' Clean up 3 parameters
+      
+      ' Callee
+      function:
+        RDLONG param1, PTRA[1]  ' Access parameters
+        RDLONG param2, PTRA[2]
+        RDLONG param3, PTRA[3]
+    description: "Stack-based parameters"
+
+  local_variables:
+    code: |
+      function:
+        SUB PTRA, #16       ' Allocate 4 locals
+        ' Use PTRA[0..3] for locals
+        ' Function body
+        ADD PTRA, #16       ' Deallocate locals
+        RET
+    description: "Stack frame for locals"
+
+  mixed_stacks:
+    code: |
+      ' PTRA for data stack
+      ' PTRB for return stack
+      ' Internal stack for leaf functions
+      
+      PUSHA data_value    ' Data on PTRA
+      CALLB #subroutine   ' Return on PTRB
+      CALL #leaf_function ' Return on internal
+    description: "Multiple stack usage"
+
+stack_operations_advanced:
+  block_push:
+    code: |
+      SUB PTRA, #64       ' Reserve 16 longs
+      SETQ #15
+      WRLONG first_reg, PTRA
+    description: "Push multiple registers"
+
+  block_pop:
+    code: |
+      SETQ #15
+      RDLONG first_reg, PTRA
+      ADD PTRA, #64       ' Restore pointer
+    description: "Pop multiple registers"
+
+  stack_check:
+    code: |
+      CMP PTRA, ##stack_limit WC
+      IF_C JMP #stack_overflow
+    description: "Overflow detection"
+
+  stack_trace:
+    code: |
+      MOV temp, PTRA
+      .trace
+        RDLONG value, temp++
+        ' Process stack entry
+        CMP temp, ##stack_base WZ
+        IF_NZ JMP #.trace
+    description: "Walk stack contents"
+
+interrupt_considerations:
+  context_save:
+    - "Interrupts use internal call stack"
+    - "Must save/restore PTRA/PTRB if used"
+    - "Consider stack depth limits"
+    
+  atomic_operations:
+    - "PUSHA/POPA are atomic"
+    - "Manual sequences may be interrupted"
+    - "Use STALLI/ALLOWI for critical sections"
+
+performance:
+  operation_cycles:
+    PUSHA: "3 cycles"
+    POPA: "9 cycles"
+    WRLONG_PTR: "3 cycles"
+    RDLONG_PTR: "9 cycles"
+    CALL: "4 cycles"
+    RET: "4 cycles"
+
+  optimization_tips:
+    - "Use CALLA/CALLB for leaf functions"
+    - "Batch pushes with SETQ"
+    - "Keep stacks aligned"
+    - "Monitor stack depth"
+
+debugging:
+  stack_problems:
+    overflow: "Stack grows beyond allocated space"
+    underflow: "Pop from empty stack"
+    corruption: "Incorrect push/pop balance"
+    alignment: "Misaligned stack operations"
+
+  diagnostic_tools:
+    - "Add stack canaries"
+    - "Track stack depth"
+    - "Verify push/pop pairs"
+    - "Check pointer bounds"
+
+best_practices:
+  - "Initialize stack pointers explicitly"
+  - "Use consistent push/pop conventions"
+  - "Document stack usage in functions"
+  - "Reserve adequate stack space"
+  - "Consider interrupt stack requirements"
+  - "Use hardware stacks when possible"
+  - "Implement overflow checking for critical systems"
+
+references:
+  - silicon_doc: Stack operations section
+  - instruction_set: PUSH/POP variants
+  - architecture_guide: Memory pointers

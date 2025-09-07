@@ -1,0 +1,189 @@
+concept: rep_instruction
+title: REP - Zero-Overhead Hardware Loops
+category: control_flow
+description: Hardware-accelerated looping without branch penalties or overhead
+
+overview: |
+  REP is P2's zero-overhead looping mechanism that executes a block of instructions multiple times
+  without branch penalties, counter management, or instruction overhead. The hardware automatically
+  handles loop counting and block repetition, making it ideal for DSP, data processing, and timing-critical code.
+
+syntax:
+  basic_form:
+    - instruction: "REP #block_size, #count"
+    - parameters:
+      - block_size: Number of instructions to repeat (1-64)
+      - count: Number of iterations (1-512)
+    - example: "REP #4, #10  ' Repeat next 4 instructions 10 times"
+
+  register_count:
+    - instruction: "REP #block_size, register"
+    - parameters:
+      - block_size: Immediate instruction count
+      - register: Contains iteration count
+    - example: "REP #3, loop_count  ' Repeat 3 instructions loop_count times"
+
+  label_form:
+    - instruction: "REP @end_label, #count"
+    - parameters:
+      - end_label: Label marking end of block
+      - count: Number of iterations
+    - example: |
+        REP @.loop_end, #100
+        ADD sum, value
+        SHL value, #1
+        .loop_end
+
+key_features:
+  zero_overhead:
+    - No branch instructions needed
+    - No counter decrements
+    - No condition checks
+    - Full pipeline efficiency maintained
+
+  hardware_managed:
+    - Dedicated loop counter (hidden)
+    - Automatic PC control
+    - No register usage for counting
+    - Cannot be interrupted mid-block
+
+  constraints:
+    - Maximum 64 instructions per block
+    - Maximum 512 iterations (immediate)
+    - No branches within REP block
+    - No REP nesting allowed
+    - Block must fit in cog RAM
+
+operational_details:
+  execution_flow:
+    - REP instruction sets up hardware loop
+    - Next N instructions form loop block
+    - Hardware repeats block automatically
+    - Execution continues after block when done
+
+  timing:
+    - First iteration: Normal timing
+    - Subsequent iterations: Zero overhead
+    - Total cycles: (block_cycles × count) + 2
+    - Completely deterministic
+
+  pipeline_behavior:
+    - No pipeline stalls
+    - No branch prediction needed
+    - Instructions fetched continuously
+    - Maximum throughput maintained
+
+restrictions:
+  cannot_contain:
+    - Branch instructions (JMP, CALL, RET)
+    - Another REP instruction
+    - Instructions that modify PC
+    - AUGS/AUGD (would affect wrong instruction)
+
+  special_cases:
+    - DJNZ in REP block: Works but exits REP early
+    - Interrupts: Disabled during REP block
+    - Debug: Cannot single-step through REP
+    - Hub execution: REP works in hubexec mode
+
+common_patterns:
+  array_sum:
+    code: |
+      MOV sum, #0
+      REP #2, count
+        RDLONG value, PTRA++
+        ADD sum, value
+    description: Sum array elements
+
+  bit_reversal:
+    code: |
+      REP #32, #32
+        SHR input, #1 WC
+        RCL output, #1
+    description: Reverse 32 bits
+
+  delay_loop:
+    code: |
+      REP #1, ##1000
+        NOP
+    description: Precise delay cycles
+
+  block_fill:
+    code: |
+      REP #1, #256
+        WRLONG pattern, PTRA++
+    description: Fill hub memory
+
+  multiply_accumulate:
+    code: |
+      REP #2, #16
+        RDLONG multiplicand, PTRA++
+        MUL multiplicand, coefficient
+        ADD accumulator, multiplicand
+    description: DSP MAC operation
+
+optimization_tips:
+  block_size:
+    - Keep blocks small for flexibility
+    - Align to instruction cache boundaries
+    - Consider unrolling vs REP trade-off
+
+  iteration_count:
+    - Use immediate for compile-time counts
+    - Use register for runtime counts
+    - Consider partial unrolling for large counts
+
+  performance:
+    - REP fastest for 2+ iterations
+    - Single iteration: Consider straight-line
+    - Saves 2 cycles per iteration vs DJNZ
+
+advanced_usage:
+  conditional_rep:
+    code: |
+      CMP count, #0 WZ
+      IF_NZ REP #4, count
+        ' Loop body executes only if count > 0
+    description: Conditional loop execution
+
+  early_exit:
+    code: |
+      REP @.end, #100
+        RDLONG value, PTRA++
+        CMP value, target WZ
+        IF_Z JMP #found    ' Exits REP block
+      .end
+    description: Search with early termination
+
+  computed_blocks:
+    code: |
+      ' Cannot compute block size, but can compute count
+      MOV iterations, array_size
+      SHR iterations, #2        ' Divide by 4
+      REP #4, iterations        ' Process 4 at a time
+    description: Runtime-computed iterations
+
+debugging:
+  limitations:
+    - Cannot single-step interior
+    - Breakpoints inside ignored
+    - Watch variables update in bursts
+
+  techniques:
+    - Add markers before/after REP
+    - Use straight-line code for debug
+    - Monitor results after completion
+
+comparison:
+  vs_djnz:
+    - REP: Zero overhead, fixed block
+    - DJNZ: 2-cycle overhead, flexible code
+
+  vs_unrolled:
+    - REP: Compact code, fixed overhead
+    - Unrolled: Larger code, fully flexible
+
+references:
+  - silicon_doc: REP instruction details
+  - optimization_guide: Loop optimization techniques
+  - timing_doc: Cycle-accurate execution

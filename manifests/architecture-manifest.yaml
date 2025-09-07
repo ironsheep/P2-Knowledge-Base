@@ -1,0 +1,152 @@
+# P2 Architecture Manifest
+# Part of P2 Knowledge Base manifest hierarchy
+
+version: "1.0"
+schema_version: "2024-12-30"
+last_updated: "2024-12-30T00:00:00Z"
+category: "p2_architecture"
+base_path: "engineering/knowledge-base/P2/architecture/"
+total_entries: 15
+
+description: |
+  Complete P2 hardware architecture documentation covering all major subsystems.
+  Essential for understanding P2's unique capabilities and design philosophy.
+
+by_category:
+  core_systems:
+    processors:
+      - {name: "cog", file: "cog.yaml", desc: "8 symmetric processor cores"}
+      - {name: "cog_attention", file: "cog_attention.yaml", desc: "Inter-COG signaling system"}
+      - {name: "lookup_ram", file: "lookup_ram.yaml", desc: "512-long LUT per COG"}
+    
+    memory:
+      - {name: "hub", file: "hub.yaml", desc: "512KB shared hub memory with egg-beater"}
+      - {name: "lookup_ram", file: "lookup_ram.yaml", desc: "2KB LUT RAM per COG"}
+    
+    execution:
+      - {name: "xbyte_engine", file: "xbyte_engine.yaml", desc: "Hardware bytecode interpreter"}
+      - {name: "serial_loader", file: "serial_loader.yaml", desc: "Boot loader and programming"}
+  
+  math_processing:
+    cordic:
+      - {name: "cordic", file: "cordic.yaml", desc: "54-stage pipelined math solver"}
+    
+  timing_control:
+    clock:
+      - {name: "clock_system", file: "clock_system.yaml", desc: "PLL, crystal, RC oscillators"}
+      - {name: "io_pin_timing", file: "io_pin_timing.yaml", desc: "Pin timing specifications"}
+    
+  interrupt_system:
+    interrupts:
+      - {name: "interrupts", file: "interrupts.yaml", desc: "3-level interrupt system"}
+      - {name: "debug_interrupt", file: "debug_interrupt.yaml", desc: "Debug and breakpoint system"}
+      - {name: "event_system", file: "event_system.yaml", desc: "Hardware event detection"}
+  
+  synchronization:
+    coordination:
+      - {name: "locks", file: "locks.yaml", desc: "16 hardware semaphores"}
+      - {name: "cog_attention", file: "cog_attention.yaml", desc: "Lightweight COG signaling"}
+      - {name: "event_system", file: "event_system.yaml", desc: "Event-driven programming"}
+  
+  io_subsystem:
+    smart_pins:
+      - {name: "smart_pins", file: "smart_pins.yaml", desc: "Overview of 64 smart pins"}
+      - {name: "smart_pins/*", pattern: "smart-pins/smart-pin-*.yaml", desc: "32 individual modes"}
+    
+    streaming:
+      - {name: "streamer", file: "streamer.yaml", desc: "DMA streaming engine"}
+    
+    timing:
+      - {name: "io_pin_timing", file: "io_pin_timing.yaml", desc: "I/O timing characteristics"}
+
+by_function:
+  computation:
+    - "cog"
+    - "cordic"
+    - "xbyte_engine"
+  
+  memory_management:
+    - "hub"
+    - "lookup_ram"
+  
+  communication:
+    - "cog_attention"
+    - "smart_pins"
+    - "streamer"
+  
+  synchronization:
+    - "locks"
+    - "interrupts"
+    - "event_system"
+  
+  system_control:
+    - "clock_system"
+    - "serial_loader"
+    - "debug_interrupt"
+
+by_complexity:
+  essential:
+    desc: "Core concepts for basic understanding"
+    items:
+      - "cog"
+      - "hub"
+      - "smart_pins"
+      - "clock_system"
+  
+  intermediate:
+    desc: "Important for effective P2 programming"
+    items:
+      - "interrupts"
+      - "locks"
+      - "cog_attention"
+      - "streamer"
+      - "cordic"
+  
+  advanced:
+    desc: "Deep architecture for optimization"
+    items:
+      - "xbyte_engine"
+      - "debug_interrupt"
+      - "lookup_ram"
+      - "event_system"
+      - "io_pin_timing"
+
+design_philosophy:
+  symmetric_multiprocessing: |
+    8 identical COGs provide true parallel processing.
+    No master/slave hierarchy - any COG can do anything.
+  
+  smart_peripherals: |
+    64 smart pins offload timing-critical I/O from COGs.
+    Each pin is a programmable state machine.
+  
+  shared_resources: |
+    Hub memory with deterministic round-robin access.
+    Hardware locks and events for coordination.
+  
+  hardware_acceleration: |
+    CORDIC for complex math without CPU cycles.
+    Streamer for DMA without CPU involvement.
+
+key_specifications:
+  - spec: "8 COGs @ 160-350MHz"
+  - spec: "512KB hub RAM"
+  - spec: "2KB LUT RAM per COG"
+  - spec: "64 smart I/O pins"
+  - spec: "54-stage CORDIC"
+  - spec: "16 hardware locks"
+  - spec: "3-level interrupts per COG"
+
+search_index:
+  keywords:
+    "parallel": ["cog", "locks", "cog_attention"]
+    "memory": ["hub", "lookup_ram", "egg-beater"]
+    "math": ["cordic", "multiply", "divide", "rotate"]
+    "timing": ["clock_system", "interrupts", "event_system"]
+    "io": ["smart_pins", "streamer", "io_pin_timing"]
+    "debug": ["debug_interrupt", "breakpoint", "single-step"]
+
+related_manifests:
+  - "smart-pins-manifest.yaml"  # Detailed smart pin modes
+  - "pasm2-manifest.yaml"  # Instructions that use architecture
+  - "patterns-manifest.yaml"  # How to leverage architecture

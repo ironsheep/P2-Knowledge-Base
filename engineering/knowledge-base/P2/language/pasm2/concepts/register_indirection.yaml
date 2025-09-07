@@ -1,0 +1,211 @@
+concept: register_indirection
+title: Register Indirection - ALTx Instructions
+category: advanced_addressing
+description: Dynamic runtime modification of instruction operands using ALTx prefix instructions
+
+overview: |
+  Register indirection in P2 allows instructions to use computed addresses for their source (S) and 
+  destination (D) operands. The ALTx instructions modify the next instruction's operand fields at 
+  runtime, enabling table lookups, computed jumps, and dynamic data access without self-modifying code.
+
+altx_instructions:
+  ALTS:
+    function: "Substitute S field of next instruction"
+    syntax: "ALTS index_reg, #base"
+    operation: "Next_S = base + index_reg[8:0]"
+    range: "9-bit result (0-511)"
+    examples:
+      - |
+        MOV index, #5
+        ALTS index, #table_base
+        MOV result, 0-0         ' Actually reads from table_base+5
+    use_cases:
+      - Table lookups
+      - Array indexing
+      - Switch/case implementation
+
+  ALTD:
+    function: "Substitute D field of next instruction"
+    syntax: "ALTD index_reg, #base"
+    operation: "Next_D = base + index_reg[8:0]"
+    range: "9-bit result (0-511)"
+    examples:
+      - |
+        MOV index, #10
+        ALTD index, #array_start
+        MOV 0-0, value          ' Actually writes to array_start+10
+    use_cases:
+      - Dynamic destination selection
+      - Array element assignment
+      - Scatter operations
+
+  ALTR:
+    function: "Substitute result destination"
+    syntax: "ALTR index_reg, #base"
+    operation: "Result_D = D + base + index_reg[8:0]"
+    range: "9-bit result (0-511)"
+    examples:
+      - |
+        MOV offset, #3
+        ALTR offset, #0
+        ADD base_reg, value     ' Result goes to base_reg+3
+    use_cases:
+      - Indexed result storage
+      - Relative addressing
+      - Structure field updates
+
+  ALTI:
+    function: "Substitute next instruction entirely"
+    syntax: "ALTI exec_reg"
+    operation: "Execute instruction from exec_reg"
+    behavior: "Next instruction slot executes exec_reg contents"
+    examples:
+      - |
+        MOV exec_reg, ##(ADD | (dst<<9) | src)
+        ALTI exec_reg
+        NOP                     ' This becomes ADD dst, src
+    use_cases:
+      - Computed operations
+      - Instruction synthesis
+      - Interpreters
+
+  ALTB:
+    function: "Modify bit field of next instruction"
+    syntax: "ALTB bit_reg, #base"
+    operation: "Next instruction's bit field = base + bit_reg[4:0]"
+    range: "5-bit result (0-31)"
+    examples:
+      - |
+        MOV bit_num, #7
+        ALTB bit_num, #0
+        BITH flags, #0-0        ' Actually sets bit 7
+    use_cases:
+      - Dynamic bit manipulation
+      - Bit array operations
+      - Flag management
+
+advanced_features:
+  increment_modes:
+    description: "ALTx can auto-increment/decrement index"
+    options:
+      - "No modification (default)"
+      - "Post-increment index"
+      - "Post-decrement index"
+    syntax_variants:
+      - "ALTS index"          # No modification
+      - "ALTS index++"        # Post-increment
+      - "ALTS index--"        # Post-decrement
+    examples:
+      - |
+        MOV index, #0
+        REP #4, #10
+          ALTS index++          ' Index increments after use
+          MOV sum, 0-0
+          ADD total, sum
+
+  combined_operations:
+    description: "Multiple ALTx can be combined"
+    examples:
+      - |
+        ' Copy with computed source and destination
+        ALTS src_index
+        ALTD dst_index
+        MOV 0-0, 0-0           ' Copies from computed to computed
+
+  conditional_execution:
+    description: "ALTx instructions can be conditional"
+    examples:
+      - |
+        CMP mode, #INDEXED WZ
+        IF_Z ALTS index, #table
+        MOV result, default_source  ' Uses indexed or default
+
+operational_details:
+  timing:
+    - ALTx takes 2 cycles
+    - Modified instruction executes normally
+    - No pipeline stall
+    - Back-to-back ALTx possible
+
+  scope:
+    - Affects ONLY the next instruction
+    - Cannot affect instructions after branches
+    - Works across conditional execution
+    - Works in hub execution mode
+
+  preservation:
+    - Original instruction unchanged
+    - Only execution affected
+    - No self-modifying code needed
+    - Thread-safe in multi-cog systems
+
+common_patterns:
+  table_lookup:
+    code: |
+      ALTS index, #lookup_table
+      MOV result, 0-0
+    description: "Index into lookup table"
+
+  computed_jump:
+    code: |
+      ALTS state, #jump_table
+      JMP #0-0
+    description: "State machine dispatch"
+
+  array_copy:
+    code: |
+      REP #2, count
+        ALTS src_ptr++
+        ALTD dst_ptr++
+        MOV 0-0, 0-0
+    description: "Memory-to-memory copy"
+
+  switch_case:
+    code: |
+      CMP value, #MAX_CASE WC
+      IF_C ALTS value, #case_table
+      IF_C JMP #0-0
+      JMP #default_case
+    description: "Efficient switch statement"
+
+  bit_scan:
+    code: |
+      MOV bit_pos, #0
+      .loop
+        ALTB bit_pos
+        TESTB flags, #0-0 WC
+        IF_C JMP #found
+        ADD bit_pos, #1
+        CMP bit_pos, #32 WZ
+        IF_NZ JMP #.loop
+    description: "Find first set bit"
+
+limitations:
+  - Cannot modify immediate values
+  - Limited to 9-bit address range (0-511)
+  - Cannot chain (each affects only next instruction)
+  - No effect on AUGS/AUGD augmentation
+  - Cannot modify ALTx instructions themselves
+
+best_practices:
+  - Use for table-driven code
+  - Prefer over self-modifying code
+  - Document computed addresses clearly
+  - Validate index bounds before use
+  - Consider REP for repeated operations
+
+debugging:
+  challenges:
+    - Actual addresses computed at runtime
+    - Disassembly shows placeholder values
+    - Single-stepping through ALTx complex
+
+  techniques:
+    - Add guards to check computed addresses
+    - Use fixed values during development
+    - Log computed addresses for verification
+
+references:
+  - silicon_doc: Register Indirection section
+  - instruction_set: ALTx instruction encodings
+  - optimization_guide: Table-driven techniques

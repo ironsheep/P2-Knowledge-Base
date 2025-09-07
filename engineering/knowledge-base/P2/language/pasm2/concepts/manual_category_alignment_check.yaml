@@ -1,0 +1,188 @@
+concept: manual_category_alignment_check
+title: Alignment Check - Manual Categories vs Our Concept Files
+category: validation
+description: Verification that our concept files align with the PASM2 manual's categorical organization
+
+overview: |
+  The PASM2 manual provides categorical groupings of instructions. This document verifies
+  that our concept files align with these categories and identifies any conflicts or gaps.
+
+manual_categories_vs_our_files:
+  flow_control:
+    manual_lists:
+      - "CALL, CALLA, CALLB, CALLD, CALLPA, CALLPB"
+      - "RET, RETA, RETB"
+      - "JMP, JMPREL"
+      - "DJZ, DJNZ, DJF, DJNF, IJZ, IJNZ"
+      - "TJZ, TJNZ, TJF, TJNF, TJS, TJNS, TJV"
+      - "REP, SKIP, SKIPF, EXECF"
+      - "RETI0-3, RESI0-3"
+    our_coverage:
+      branch_addressing.yaml: "✅ Covers JMP, CALL variants"
+      stack_operations.yaml: "✅ Covers CALL/RET with stack details"
+      rep_instruction.yaml: "✅ Dedicated REP coverage"
+      instruction_skipping.yaml: "✅ Covers SKIP, SKIPF"
+      skipf_branching.yaml: "✅ Covers EXECF and special SKIPF branching"
+      event_interrupt_config.yaml: "✅ Covers RETI0-3, RESI0-3"
+    alignment: "EXCELLENT - Full coverage across multiple files"
+    missing: "DJNZ family, TJx family test-and-jump instructions"
+
+  conditions:
+    manual_lists:
+      - "IF_E, IF_NE (equal/not equal)"
+      - "IF_A, IF_AE, IF_B, IF_BE (unsigned comparisons)"
+      - "IF_GT, IF_GE, IF_LT, IF_LE (signed comparisons)"
+      - "IF_C, IF_NC, IF_Z, IF_NZ (flag tests)"
+      - "IF_C_AND_Z, IF_C_OR_Z, etc. (complex combinations)"
+      - "_RET_ suffix for conditional return"
+    our_coverage:
+      conditional_execution.yaml: "✅ Comprehensive coverage of all conditions"
+    alignment: "PERFECT - Complete match"
+    notes: "Manual confirms all condition names we documented"
+
+  effects:
+    manual_lists:
+      - "WC, WZ, WCZ (write flags)"
+      - "ANDC, ANDZ, ORC, ORZ, XORC, XORZ (logical flag operations)"
+    our_coverage:
+      conditional_execution.yaml: "✅ Covers effects as orthogonal to conditions"
+    alignment: "PERFECT - Documented as part of conditional execution"
+
+  directives:
+    manual_lists:
+      - "ALIGNW, ALIGNL (alignment)"
+      - "BYTE, WORD, LONG (data insertion)"
+      - "ORG, ORGH, ORGF (code placement)"
+      - "FIT (validation)"
+      - "RES (reservation)"
+    our_coverage:
+      none: "❌ Not covered in concept files"
+    alignment: "GAP - Need directives.yaml"
+    priority: "MEDIUM - Assembly-time, not runtime"
+
+  flag_modification:
+    manual_lists:
+      - "MODC, MODZ, MODCZ with 32 modifiers"
+      - "_CLR, _SET, comparison results, logical operations"
+    our_coverage:
+      referenced_in_context: "Saved in context but no dedicated file"
+    alignment: "GAP - Could use flag_operations.yaml"
+    priority: "LOW - Covered indirectly"
+
+  indirection:
+    manual_lists:
+      - "ALTS, ALTD, ALTR, ALTI (register indirection)"
+      - "ALTB (bit indirection)"
+      - "ALTGB, ALTGN, ALTGW (get byte/nibble/word)"
+      - "ALTSB, ALTSN, ALTSW (set byte/nibble/word)"
+    our_coverage:
+      register_indirection.yaml: "✅ Covers main ALTx instructions"
+    alignment: "GOOD - Core functionality covered"
+    missing: "ALTGx/ALTSx byte/nibble/word variants"
+
+  hub_memory_access:
+    manual_category: "Extensive list of RD/WR operations"
+    our_coverage:
+      setq_block_ops.yaml: "✅ Covers block operations"
+      addressing_modes.yaml: "✅ Covers hub addressing"
+    alignment: "PARTIAL - Missing atomic operations, CMPX, etc."
+    gap: "Need hub_memory_operations.yaml for complete coverage"
+
+  streamer:
+    manual_category: "XINIT, XSTOP, XCONT, XZERO, etc."
+    our_coverage:
+      streamer_smartpin_control.yaml: "✅ Covers streamer operations"
+    alignment: "GOOD - Main operations covered"
+
+  io_pins:
+    manual_category: "Smart Pin operations, pin control"
+    our_coverage:
+      streamer_smartpin_control.yaml: "✅ Comprehensive Smart Pin coverage"
+    alignment: "EXCELLENT"
+
+  math:
+    manual_category: "EXTENSIVE - ADD, SUB, MUL, DIV, CORDIC, etc."
+    our_coverage:
+      none: "❌ Major gap - no math concept files"
+    missing:
+      - "Basic arithmetic (ADD, SUB, CMP)"
+      - "Multiplication/Division (MUL, DIV, MULS, DIVS)"
+      - "CORDIC operations (QROTATE, QVECTOR, etc.)"
+      - "Extended operations (SCA, FRAC, etc.)"
+    priority: "CRITICAL - Math is fundamental"
+
+  timing:
+    manual_category: "GETCT, WAITCT, ADDCT, POLLCT"
+    our_coverage:
+      special_registers.yaml: "✅ Covers CT register"
+      event_interrupt_config.yaml: "✅ Covers CT events"
+    alignment: "GOOD - Covered across files"
+
+  event_handling:
+    manual_category: "SETSEx, POLLxxx, WAITxxx"
+    our_coverage:
+      event_interrupt_config.yaml: "✅ Comprehensive event coverage"
+    alignment: "EXCELLENT"
+
+  interrupts:
+    manual_category: "SETINT, STALLI, ALLOWI, RETIx, RESIx"
+    our_coverage:
+      event_interrupt_config.yaml: "✅ Complete interrupt coverage"
+    alignment: "PERFECT"
+
+conflicts_found:
+  none_identified: "No conflicts between manual categories and our organization"
+  approach_difference: |
+    Manual uses functional categories (Flow Control, Math, I/O)
+    We use conceptual categories (execution modes, addressing, operations)
+    Both approaches are complementary, not conflicting
+
+critical_gaps_identified:
+  1_math_operations:
+    priority: "CRITICAL"
+    reason: "No coverage of basic arithmetic, multiplication, division"
+    action: "Need comprehensive math_operations.yaml"
+    
+  2_cordic_engine:
+    priority: "CRITICAL"
+    reason: "Hardware math coprocessor not documented"
+    action: "Need cordic_operations.yaml"
+    
+  3_test_and_jump:
+    priority: "HIGH"
+    reason: "DJZ, DJNZ, TJx family not covered"
+    action: "Add to branch_addressing.yaml or new test_and_jump.yaml"
+    
+  4_hub_atomics:
+    priority: "HIGH"
+    reason: "CMPX, atomic operations not covered"
+    action: "Need hub_memory_operations.yaml"
+
+alignment_summary:
+  excellent_alignment:
+    - "Conditions - Perfect match"
+    - "Effects - Perfect match"
+    - "Flow Control - Well distributed"
+    - "Events/Interrupts - Complete"
+    - "Streamer/Smart Pins - Comprehensive"
+    
+  good_alignment:
+    - "Indirection - Core covered"
+    - "Timing - Distributed coverage"
+    
+  gaps:
+    - "Math - Critical gap"
+    - "CORDIC - Not covered"
+    - "Directives - Not covered (lower priority)"
+    - "Hub atomics - Not covered"
+
+recommendations:
+  immediate_action:
+    1: "Create math_operations.yaml - Covers ADD/SUB/MUL/DIV/CMP"
+    2: "Create cordic_operations.yaml - Hardware math engine"
+    3: "Extend branch_addressing.yaml with test-and-jump operations"
+    
+  validation_result: |
+    Our concept organization is VALID and aligns well with the manual.
+    No conflicts found, only gaps in coverage.
+    The manual confirms our approach is sound.

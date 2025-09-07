@@ -1,0 +1,335 @@
+# PASM2 Conditional Execution System
+# Source: Silicon Doc v35, Spin2 v51 Manual
+# Critical for: Efficient branchless code and conditional operations
+
+concept: "Conditional Execution"
+category: "pasm2_core"
+importance: "fundamental"
+
+metadata:
+  query_tags: ["conditional", "if", "flags", "predicate", "branchless", "wcz"]
+  complexity: "intermediate"
+  use_cases: ["branchless_code", "conditional_operations", "flag_testing"]
+  common_questions:
+    - "How do I make instructions conditional?"
+    - "What are all the IF_ conditions?"
+    - "How do C and Z flags work?"
+    - "Can any instruction be conditional?"
+
+fundamental_concept: |
+  EVERY PASM2 instruction can optionally:
+  1. Be executed conditionally based on C and Z flags (IF_xxx prefix)
+  2. Conditionally update C and Z flags (WC, WZ, WCZ suffixes)
+  These are independent features - you can use either, both, or neither.
+  
+  This universal conditionality eliminates branch penalties and enables
+  extremely efficient, deterministic code. Unlike traditional processors
+  that require branches, P2 can conditionally execute ANY instruction in-place.
+
+flag_system:
+  c_flag:
+    name: "Carry Flag"
+    set_by: "Arithmetic operations (carry/borrow), shifts, comparisons"
+    meaning:
+      arithmetic: "Unsigned overflow/underflow"
+      shift: "Bit shifted out"
+      comparison: "Unsigned less than (after CMP)"
+  
+  z_flag:
+    name: "Zero Flag"
+    set_by: "Most operations that write a result"
+    meaning:
+      arithmetic: "Result is zero"
+      comparison: "Values are equal"
+      logical: "All bits are zero"
+
+condition_codes:
+  # All 32 condition codes with binary values and common aliases
+  # These are the LEGAL names that can be used in PASM2
+  
+  - value: "%0000"
+    primary: "_RET_"
+    aliases: []
+    condition: "Always + Return"
+    c_required: "X"
+    z_required: "X"
+    note: "Special: Always executes AND returns"
+    
+  - value: "%0001"
+    primary: "IF_NC_AND_NZ"
+    aliases: ["IF_NZ_AND_NC", "IF_A", "IF_GT"]
+    condition: "C=0 AND Z=0"
+    c_required: "0"
+    z_required: "0"
+    use: "Unsigned above, signed greater than"
+    
+  - value: "%0010"
+    primary: "IF_NC_AND_Z"
+    aliases: ["IF_Z_AND_NC"]
+    condition: "C=0 AND Z=1"
+    c_required: "0"
+    z_required: "1"
+    use: "Equal with no carry"
+    
+  - value: "%0011"
+    primary: "IF_NC"
+    aliases: ["IF_AE", "IF_GE"]
+    condition: "C=0"
+    c_required: "0"
+    z_required: "X"
+    use: "Unsigned above/equal, signed greater/equal"
+    
+  - value: "%0100"
+    primary: "IF_C_AND_NZ"
+    aliases: ["IF_NZ_AND_C"]
+    condition: "C=1 AND Z=0"
+    c_required: "1"
+    z_required: "0"
+    use: "Below but not equal"
+    
+  - value: "%0101"
+    primary: "IF_NZ"
+    aliases: ["IF_NE"]
+    condition: "Z=0"
+    c_required: "X"
+    z_required: "0"
+    use: "Not equal, not zero"
+    
+  - value: "%0110"
+    primary: "IF_C_NE_Z"
+    aliases: ["IF_DIFF"]
+    condition: "C≠Z"
+    c_required: "≠Z"
+    z_required: "≠C"
+    use: "C and Z differ"
+    
+  - value: "%0111"
+    primary: "IF_NC_OR_NZ"
+    aliases: ["IF_NZ_OR_NC"]
+    condition: "C=0 OR Z=0"
+    c_required: "0 OR"
+    z_required: "0 OR"
+    use: "Not (C=1 AND Z=1)"
+    
+  - value: "%1000"
+    primary: "IF_C_AND_Z"
+    aliases: ["IF_Z_AND_C"]
+    condition: "C=1 AND Z=1"
+    c_required: "1"
+    z_required: "1"
+    use: "Equal with carry"
+    
+  - value: "%1001"
+    primary: "IF_C_EQ_Z"
+    aliases: ["IF_SAME"]
+    condition: "C=Z"
+    c_required: "=Z"
+    z_required: "=C"
+    use: "C and Z same"
+    
+  - value: "%1010"
+    primary: "IF_Z"
+    aliases: ["IF_E"]
+    condition: "Z=1"
+    c_required: "X"
+    z_required: "1"
+    use: "Equal, zero"
+    
+  - value: "%1011"
+    primary: "IF_NC_OR_Z"
+    aliases: ["IF_Z_OR_NC", "IF_BE", "IF_LE"]
+    condition: "C=0 OR Z=1"
+    c_required: "0 OR"
+    z_required: "1 OR"
+    use: "Unsigned below/equal, signed less/equal"
+    
+  - value: "%1100"
+    primary: "IF_C"
+    aliases: ["IF_B", "IF_LT"]
+    condition: "C=1"
+    c_required: "1"
+    z_required: "X"
+    use: "Unsigned below, signed less than"
+    
+  - value: "%1101"
+    primary: "IF_C_OR_NZ"
+    aliases: ["IF_NZ_OR_C"]
+    condition: "C=1 OR Z=0"
+    c_required: "1 OR"
+    z_required: "0 OR"
+    use: "Not equal or carry"
+    
+  - value: "%1110"
+    primary: "IF_C_OR_Z"
+    aliases: ["IF_Z_OR_C", "IF_BE"]
+    condition: "C=1 OR Z=1"
+    c_required: "1 OR"
+    z_required: "1 OR"
+    use: "Below or equal"
+    
+  - value: "%1111"
+    primary: "IF_ALWAYS"
+    aliases: ["(no prefix)"]
+    condition: "Always"
+    c_required: "X"
+    z_required: "X"
+    use: "Unconditional (default)"
+
+syntax_rules:
+  condition_prefix:
+    position: "Before instruction mnemonic"
+    format: "condition_code instruction operands [WC] [WZ] [WCZ]"
+    examples:
+      - "IF_Z    MOV  x, y       ' Execute if Z=1"
+      - "IF_NC   ADD  x, #1 WC   ' Add if C=0, update C"
+      - "        MOV  x, y       ' Always execute (no prefix)"
+  
+  flag_suffixes:
+    wc: "Write result to Carry flag"
+    wz: "Write result to Zero flag"
+    wcz: "Write result to both flags"
+    none: "Don't update flags"
+    examples:
+      - "ADD  x, y WC      ' Update C with carry out"
+      - "SUB  x, y WZ      ' Update Z if result is zero"
+      - "CMP  x, y WCZ     ' Update both flags"
+
+usage_patterns:
+  any_instruction_conditional:
+    description: "ANY instruction can be conditional"
+    code: |
+      ' Arithmetic
+      IF_Z    ADD  x, #1
+      IF_NC   SUB  y, #10 WC
+      
+      ' Logic
+      IF_NZ   AND  mask, pattern WZ
+      IF_C    OR   flags, #$100
+      
+      ' Memory
+      IF_E    RDLONG value, ptr
+      IF_NE   WRLONG #0, address
+      
+      ' Jumps
+      IF_C    JMP  #error_handler
+      IF_Z    CALL #process_zero
+      
+      ' Even NOP!
+      IF_C    NOP
+  
+  branchless_min_max:
+    description: "Find minimum without branches"
+    code: |
+      CMP     a, b WC           ' Compare a to b
+      IF_C    MOV min_val, a    ' If a < b, min = a
+      IF_NC   MOV min_val, b    ' If a >= b, min = b
+  
+  conditional_accumulation:
+    description: "Conditionally add to sum"
+    code: |
+      TEST    value, #$80 WZ    ' Test sign bit
+      IF_Z    ADD sum, value    ' Add if positive
+  
+  multi_way_decision:
+    description: "Multiple conditions without branches"
+    code: |
+      CMP     state, #0 WZ
+      IF_Z    JMP #state0       ' State 0
+      CMP     state, #1 WZ
+      IF_Z    JMP #state1       ' State 1
+      CMP     state, #2 WZ
+      IF_Z    JMP #state2       ' State 2
+              JMP #default      ' Default case
+
+special_patterns:
+  return_conditions:
+    description: "Conditional returns using _RET_ prefix"
+    code: |
+      _RET_   CMP x, #0 WZ     ' Compare and return
+                                ' Return happens AFTER instruction
+      
+      ' Common pattern for conditional return
+      CMP     x, limit WC
+      IF_C    RET              ' Return if below limit
+  
+  conditional_flag_updates:
+    description: "Update flags only when needed"
+    code: |
+      ADD     x, y         ' No flag update
+      ADD     x, y WC      ' Update C only
+      ADD     x, y WZ      ' Update Z only  
+      ADD     x, y WCZ     ' Update both
+      
+      ' Conditional execution WITH conditional flag update
+      IF_NZ   ADD x, y WCZ  ' If Z=0, add and update both flags
+  
+  test_and_branch_alternative:
+    description: "Replace test-and-branch with conditional execution"
+    traditional: |
+      ' Traditional approach (2 instructions + pipeline flush)
+      TEST    flags, #READY_BIT WZ
+      IF_Z    JMP #wait_loop
+      ' continue...
+    
+    efficient: |
+      ' P2 approach (inline conditional)
+      TEST    flags, #READY_BIT WZ
+      IF_Z    JMP #$-1        ' Loop on this instruction
+      ' continue when ready
+
+performance_benefits:
+  no_pipeline_flush: "Conditional execution doesn't break pipeline"
+  constant_timing: "Same execution time regardless of condition"
+  code_density: "Fewer instructions than branch-based code"
+  predictability: "Deterministic timing for real-time code"
+  universal: "Works on ALL instructions, not just a subset"
+
+common_mistakes:
+  - mistake: "Using invalid condition names"
+    wrong: "IF_LT  ADD x, y    ' IF_LT not valid alone"
+    right: "IF_C   ADD x, y    ' Use IF_C for less than"
+    explanation: "IF_LT is an alias for IF_C in context"
+  
+  - mistake: "Forgetting WC/WZ on compare"
+    wrong: "CMP x, y          ' Doesn't update flags!"
+    right: "CMP x, y WCZ      ' Updates both flags"
+    explanation: "Compare without WC/WZ doesn't update flags"
+  
+  - mistake: "Wrong condition after CMP"
+    wrong: |
+      CMP  x, y WC     ' Unsigned compare
+      IF_C  ' x < y    ' OK for unsigned
+    right: |
+      CMPS x, y WC     ' Signed compare needed
+      IF_C  ' x < y    ' Now correct for signed
+  
+  - mistake: "Overwriting flags accidentally"
+    wrong: |
+      CMP x, y WZ
+      ADD temp, #1 WZ  ' Overwrites Z!
+      IF_Z  ...        ' Wrong Z flag!
+    right: |
+      CMP x, y WZ
+      ADD temp, #1     ' Don't update flags
+      IF_Z  ...        ' Correct Z flag
+
+why_this_matters:
+  p2_philosophy: |
+    Universal conditional execution is fundamental to P2's architecture.
+    EVERY instruction can be conditional and can conditionally set flags.
+    This enables writing highly efficient, deterministic code without
+    branch prediction penalties. This is especially important for
+    real-time systems and signal processing.
+  
+  vs_traditional: |
+    Traditional: Limited conditional instructions, most require branches
+    P2: ANY instruction conditional, no pipeline penalties
+    
+    Traditional: CMP + Branch (2+ instructions, pipeline penalty)
+    P2: CMP + Conditional execution (2 instructions, no penalty)
+
+related_concepts:
+  - "../instructions/cmp.yaml"
+  - "../instructions/test.yaml"
+  - "special_registers.yaml"
+  - "cog_hub_execution.yaml"

@@ -1,0 +1,178 @@
+# Smart Pins Manifest
+# Part of P2 Knowledge Base manifest hierarchy
+
+version: "1.0"
+schema_version: "2024-12-30"
+last_updated: "2024-12-30T00:00:00Z"
+category: "smart_pins"
+base_path: "engineering/knowledge-base/P2/architecture/"
+total_entries: 33
+
+description: |
+  Complete Smart Pin documentation - 32 configurable modes plus overview.
+  Each of the 64 I/O pins can be independently configured as a smart pin
+  with its own state machine for autonomous operation.
+
+overview:
+  - {name: "smart_pins", file: "smart_pins.yaml", desc: "Smart Pin system overview and concepts"}
+
+smart_pin_modes:
+  digital_io:
+    basic:
+      - {name: "00000", file: "smart-pins/smart-pin-00000-normal.yaml", desc: "Normal digital I/O (default)"}
+      - {name: "00001", file: "smart-pins/smart-pin-00001-long-repository.yaml", desc: "Long repository mode"}
+      - {name: "00010", file: "smart-pins/smart-pin-00010-adc-repository.yaml", desc: "ADC/count repository"}
+      - {name: "00011", file: "smart-pins/smart-pin-00011-adc-filter.yaml", desc: "ADC/count filter mode"}
+    
+  pulse_timing:
+    measurement:
+      - {name: "10001", file: "smart-pins/smart-pin-10001-time-a-highs.yaml", desc: "Time A-input high states"}
+      - {name: "10010", file: "smart-pins/smart-pin-10010-time-a-lows.yaml", desc: "Time A-input low states"}
+      - {name: "10011", file: "smart-pins/smart-pin-10011-time-until-b.yaml", desc: "Time until B-input edge"}
+      - {name: "10100", file: "smart-pins/smart-pin-10100-time-a-highs-and-lows.yaml", desc: "Time A high and low states"}
+      - {name: "10101", file: "smart-pins/smart-pin-10101-edge-timing.yaml", desc: "A-input edge timing"}
+      - {name: "10110", file: "smart-pins/smart-pin-10110-state-timing.yaml", desc: "A-input state timing"}
+    
+  counting:
+    edge_counters:
+      - {name: "01100", file: "smart-pins/smart-pin-01100-count-a-when-b-high.yaml", desc: "Count A positive edges when B high"}
+      - {name: "01101", file: "smart-pins/smart-pin-01101-count-a-b-inc-dec.yaml", desc: "Count A edges, B inc/dec"}
+      - {name: "01110", file: "smart-pins/smart-pin-01110-count-a-b-dec.yaml", desc: "Count A edges, B decrement"}
+      - {name: "01111", file: "smart-pins/smart-pin-01111-count-edges.yaml", desc: "Count A and B edges"}
+    
+    special_counters:
+      - {name: "01011", file: "smart-pins/smart-pin-01011-quadrature-encoder.yaml", desc: "A/B quadrature encoder"}
+      - {name: "10111", file: "smart-pins/smart-pin-10111-usb-mode.yaml", desc: "USB host/device mode"}
+  
+  serial_modes:
+    async_serial:
+      - {name: "00111", file: "smart-pins/smart-pin-00111-async-serial-tx.yaml", desc: "Async serial transmit"}
+      - {name: "01000", file: "smart-pins/smart-pin-01000-async-serial-rx.yaml", desc: "Async serial receive"}
+    
+    sync_serial:
+      - {name: "00100", file: "smart-pins/smart-pin-00100-sync-serial-tx.yaml", desc: "Sync serial transmit"}
+      - {name: "00101", file: "smart-pins/smart-pin-00101-sync-serial-rx.yaml", desc: "Sync serial receive"}
+    
+  pwm_modes:
+    pulse_generation:
+      - {name: "01000", file: "smart-pins/smart-pin-01000-pwm-triangle.yaml", desc: "PWM triangle wave"}
+      - {name: "01001", file: "smart-pins/smart-pin-01001-pwm-sawtooth.yaml", desc: "PWM sawtooth wave"}
+      - {name: "01010", file: "smart-pins/smart-pin-01010-pwm-smps.yaml", desc: "PWM switch-mode power"}
+    
+  frequency_generation:
+    nco_modes:
+      - {name: "00110", file: "smart-pins/smart-pin-00110-nco-frequency.yaml", desc: "NCO frequency mode"}
+      - {name: "11000", file: "smart-pins/smart-pin-11000-nco-duty.yaml", desc: "NCO duty mode"}
+    
+  analog_modes:
+    dac_adc:
+      - {name: "11001", file: "smart-pins/smart-pin-11001-dac-8bit.yaml", desc: "8-bit DAC mode"}
+      - {name: "11010", file: "smart-pins/smart-pin-11010-dac-16bit.yaml", desc: "16-bit dither DAC"}
+      - {name: "11011", file: "smart-pins/smart-pin-11011-adc-scope.yaml", desc: "ADC scope mode"}
+      - {name: "11100", file: "smart-pins/smart-pin-11100-adc-sinc2.yaml", desc: "ADC SINC2 sampling"}
+      - {name: "11101", file: "smart-pins/smart-pin-11101-adc-sinc2-filter.yaml", desc: "ADC SINC2 with filter"}
+      - {name: "11110", file: "smart-pins/smart-pin-11110-adc-sinc3.yaml", desc: "ADC SINC3 sampling"}
+    
+  special_modes:
+    comparison:
+      - {name: "11111", file: "smart-pins/smart-pin-11111-compare.yaml", desc: "Compare mode"}
+
+by_function:
+  digital_io: ["00000", "00001", "00010", "00011"]
+  serial_comm: ["00100", "00101", "00111", "01000"]
+  pwm_generation: ["01000", "01001", "01010"]
+  counting: ["01011", "01100", "01101", "01110", "01111"]
+  timing: ["10001", "10010", "10011", "10100", "10101", "10110"]
+  frequency: ["00110", "11000"]
+  analog: ["11001", "11010", "11011", "11100", "11101", "11110"]
+  special: ["10111", "11111"]
+
+by_complexity:
+  beginner:
+    desc: "Simple digital I/O and basic functions"
+    modes: ["00000", "00111", "01000", "01001", "00110"]
+    
+  intermediate:
+    desc: "Common peripherals and measurements"
+    modes: ["01011", "10001", "00100", "00101", "11001"]
+    
+  advanced:
+    desc: "Complex protocols and precision analog"
+    modes: ["10111", "11100", "11101", "11110", "01010"]
+
+common_applications:
+  uart_communication:
+    modes: ["00111", "01000"]
+    description: "Async serial for UART/RS232"
+    
+  spi_interface:
+    modes: ["00100", "00101"]
+    description: "Synchronous serial for SPI"
+    
+  pwm_control:
+    modes: ["01000", "01001", "01010"]
+    description: "Motor control, LED dimming, SMPS"
+    
+  encoder_input:
+    modes: ["01011"]
+    description: "Quadrature encoder for position"
+    
+  pulse_measurement:
+    modes: ["10001", "10010", "10100"]
+    description: "Pulse width and frequency measurement"
+    
+  analog_io:
+    modes: ["11001", "11010", "11100"]
+    description: "DAC output and ADC input"
+    
+  usb_interface:
+    modes: ["10111"]
+    description: "USB host or device mode"
+
+configuration_pattern:
+  wrpin: "Configure smart pin mode and parameters"
+  wxpin: "Set X parameter (mode-specific)"
+  wypin: "Set Y parameter (mode-specific)"
+  rdpin: "Read result Z register"
+  akpin: "Acknowledge and clear IN"
+
+key_features:
+  independence: "Each pin operates autonomously"
+  flexibility: "Any pin can be any mode"
+  no_cpu_overhead: "Runs without COG intervention"
+  event_generation: "Can trigger interrupts/events"
+  
+search_index:
+  keywords:
+    "serial": ["00111", "01000", "00100", "00101"]
+    "pwm": ["01000", "01001", "01010"]
+    "counter": ["01100", "01101", "01110", "01111"]
+    "timer": ["10001", "10010", "10011", "10100"]
+    "encoder": ["01011"]
+    "adc": ["11011", "11100", "11101", "11110"]
+    "dac": ["11001", "11010"]
+    "usb": ["10111"]
+    "frequency": ["00110", "11000"]
+
+mode_selection_guide:
+  by_protocol:
+    uart: "00111 (TX), 01000 (RX)"
+    spi: "00100 (TX), 00101 (RX)"
+    i2c: "Use normal I/O (00000) with bit-banging"
+    usb: "10111"
+    
+  by_measurement:
+    pulse_width: "10001 (high), 10010 (low)"
+    frequency: "01100, 01111"
+    position: "01011 (quadrature)"
+    analog_voltage: "11100, 11101, 11110"
+    
+  by_generation:
+    pwm: "01000 (triangle), 01001 (sawtooth)"
+    frequency: "00110 (NCO)"
+    analog_output: "11001 (8-bit), 11010 (16-bit)"
+
+related_manifests:
+  - "pasm2-manifest.yaml"  # Instructions for smart pin control
+  - "architecture-manifest.yaml"  # System architecture context
+  - "patterns-manifest.yaml"  # Smart pin usage patterns

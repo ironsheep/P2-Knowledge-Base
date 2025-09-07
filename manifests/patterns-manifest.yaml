@@ -1,0 +1,153 @@
+# P2 Code Patterns Manifest
+# Part of P2 Knowledge Base manifest hierarchy
+
+version: "1.0"
+schema_version: "2024-12-30"
+last_updated: "2024-12-30T00:00:00Z"
+category: "code_patterns"
+base_path: "engineering/knowledge-base/P2/patterns/"
+total_entries: 25  # Growing collection
+
+description: |
+  Code patterns and implementation strategies for common P2 programming tasks.
+  Shows multiple approaches leveraging P2's unique architecture.
+
+by_category:
+  communication:
+    serial:
+      - {name: "uart-smart-pin", file: "uart-smart-pin.yaml", desc: "UART using smart pins"}
+      - {name: "uart-bitbang", file: "uart-bitbang.yaml", desc: "Software UART implementation"}
+      - {name: "uart-multi-cog", file: "uart-multi-cog.yaml", desc: "Multiple UARTs using COGs"}
+    
+    spi:
+      - {name: "spi-master", file: "spi-master.yaml", desc: "SPI master using smart pins"}
+      - {name: "spi-slave", file: "spi-slave.yaml", desc: "SPI slave implementation"}
+      - {name: "spi-bitbang", file: "spi-bitbang.yaml", desc: "Software SPI"}
+    
+    i2c:
+      - {name: "i2c-master", file: "i2c-master.yaml", desc: "I2C master bit-banged"}
+      - {name: "i2c-multi-master", file: "i2c-multi-master.yaml", desc: "Multi-master I2C"}
+  
+  timing:
+    measurement:
+      - {name: "pulse-measurement", file: "pulse-measurement.yaml", desc: "Measure pulse widths"}
+      - {name: "frequency-counter", file: "frequency-counter.yaml", desc: "Frequency measurement"}
+      - {name: "precise-delay", file: "precise-delay.yaml", desc: "Cycle-accurate delays"}
+    
+    generation:
+      - {name: "pwm-generation", file: "pwm-generation.yaml", desc: "PWM output patterns"}
+      - {name: "servo-control", file: "servo-control.yaml", desc: "RC servo control"}
+      - {name: "stepper-motor", file: "stepper-motor.yaml", desc: "Stepper motor timing"}
+  
+  multi_cog:
+    coordination:
+      - {name: "mailbox-communication", file: "mailbox-communication.yaml", desc: "COG mailbox pattern"}
+      - {name: "producer-consumer", file: "producer-consumer.yaml", desc: "Producer/consumer queues"}
+      - {name: "parallel-processing", file: "parallel-processing.yaml", desc: "Parallel task distribution"}
+      - {name: "cog-synchronization", file: "cog-synchronization.yaml", desc: "Barrier synchronization"}
+    
+    resource_sharing:
+      - {name: "lock-usage", file: "lock-usage.yaml", desc: "Hardware lock patterns"}
+      - {name: "shared-buffer", file: "shared-buffer.yaml", desc: "Shared buffer management"}
+  
+  basic_io:
+    simple:
+      - {name: "blink-led", file: "blink-led.yaml", desc: "LED blinking patterns"}
+      - {name: "button-debounce", file: "button-debounce.yaml", desc: "Button input debouncing"}
+      - {name: "rotary-encoder", file: "rotary-encoder.yaml", desc: "Rotary encoder reading"}
+  
+  system:
+    initialization:
+      - {name: "system-startup", file: "system-startup.yaml", desc: "System initialization"}
+      - {name: "clock-setup", file: "clock-setup.yaml", desc: "Clock configuration"}
+
+by_difficulty:
+  beginner:
+    patterns:
+      - "blink-led"
+      - "button-debounce"
+      - "uart-smart-pin"
+      - "pwm-generation"
+    description: "Start here for P2 programming"
+  
+  intermediate:
+    patterns:
+      - "spi-master"
+      - "i2c-master"
+      - "mailbox-communication"
+      - "pulse-measurement"
+    description: "Common peripheral interfaces"
+  
+  advanced:
+    patterns:
+      - "parallel-processing"
+      - "producer-consumer"
+      - "multi-master-i2c"
+      - "cog-synchronization"
+    description: "Complex multi-COG systems"
+
+by_hardware_feature:
+  using_smart_pins:
+    - "uart-smart-pin"
+    - "spi-master"
+    - "pwm-generation"
+    - "pulse-measurement"
+    - "frequency-counter"
+  
+  using_multiple_cogs:
+    - "uart-multi-cog"
+    - "parallel-processing"
+    - "producer-consumer"
+    - "mailbox-communication"
+  
+  using_locks:
+    - "lock-usage"
+    - "shared-buffer"
+    - "cog-synchronization"
+  
+  using_interrupts:
+    - "precise-delay"
+    - "servo-control"
+
+problem_solutions:
+  "need_serial_communication":
+    solutions:
+      - {pattern: "uart-smart-pin", when: "Standard UART needed"}
+      - {pattern: "uart-bitbang", when: "Non-standard baud rates"}
+      - {pattern: "uart-multi-cog", when: "Many UARTs needed"}
+  
+  "need_precise_timing":
+    solutions:
+      - {pattern: "precise-delay", when: "Exact delays needed"}
+      - {pattern: "pulse-measurement", when: "Measuring external signals"}
+      - {pattern: "pwm-generation", when: "Generating timed outputs"}
+  
+  "need_parallel_processing":
+    solutions:
+      - {pattern: "parallel-processing", when: "Divide work across COGs"}
+      - {pattern: "producer-consumer", when: "Pipeline processing"}
+      - {pattern: "mailbox-communication", when: "COG coordination"}
+
+implementation_notes:
+  pattern_structure: |
+    Each pattern includes:
+    - Problem description
+    - Multiple solution approaches
+    - P2-specific optimizations
+    - Complete code examples
+    - Performance considerations
+    - When to use each approach
+
+search_index:
+  keywords:
+    "serial": ["uart", "rs232", "rs485", "async"]
+    "timing": ["pulse", "pwm", "delay", "frequency"]
+    "parallel": ["cog", "multicore", "concurrent"]
+    "communication": ["uart", "spi", "i2c", "mailbox"]
+    "motor": ["servo", "stepper", "pwm", "encoder"]
+
+related_manifests:
+  - "pasm2-manifest.yaml"  # Instructions used in patterns
+  - "spin2-manifest.yaml"  # Language constructs used
+  - "smart-pins-manifest.yaml"  # Hardware features leveraged
+  - "architecture-manifest.yaml"  # Understanding why patterns work

@@ -1,0 +1,131 @@
+# P2 Knowledge Base - Root Manifest
+# Entry point: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/p2-knowledge-root.yaml
+# Repository: https://github.com/ironsheep/P2-Knowledge-Base
+
+version: "1.0"
+schema_version: "2024-12-30"
+last_updated: "2024-12-30T00:00:00Z"
+description: "Propeller 2 Knowledge Base - AI-Optimized Documentation for Code Generation"
+
+metadata:
+  documentation_sources:
+    silicon_doc: "v35"
+    spin2_reference: "v51"
+    p2_datasheet: "v1.0"
+  total_entries: 600
+  repository: "https://github.com/ironsheep/P2-Knowledge-Base"
+  raw_base_url: "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/"
+  
+purpose: |
+  Comprehensive P2 documentation organized for AI code generation.
+  Enables both beginners and experienced developers to leverage
+  the P2's unique architecture effectively.
+
+manifests:
+  pasm2_instructions:
+    description: "PASM2 assembly language instruction reference"
+    url: "manifests/pasm2-manifest.yaml"
+    entry_count: 357
+    categories: ["arithmetic", "control", "memory", "special"]
+    
+  spin2_language:
+    description: "Spin2 high-level language constructs and methods"
+    url: "manifests/spin2-manifest.yaml"
+    entry_count: 135
+    categories: ["methods", "operators", "constructs", "blocks"]
+    
+  architecture:
+    description: "P2 hardware architecture and subsystems"
+    url: "manifests/architecture-manifest.yaml"
+    entry_count: 15
+    categories: ["cogs", "memory", "timing", "peripherals"]
+    
+  smart_pins:
+    description: "Smart Pin modes and configurations (32 modes)"
+    url: "manifests/smart-pins-manifest.yaml"
+    entry_count: 32
+    categories: ["digital_io", "analog", "serial", "timing"]
+    
+  patterns:
+    description: "Code patterns and implementation strategies"
+    url: "manifests/patterns-manifest.yaml"
+    entry_count: 25  # Growing
+    categories: ["communication", "timing", "coordination", "optimization"]
+    
+  quick_queries:
+    description: "Common questions with direct answers"
+    url: "manifests/quick-queries-manifest.yaml"
+    categories: ["how_to", "troubleshooting", "best_practices"]
+
+quick_start:
+  beginner_path:
+    - step: "Basic concepts"
+      manifest: "manifests/quick-queries-manifest.yaml"
+      query: "getting_started"
+    
+    - step: "First program"
+      manifest: "manifests/patterns-manifest.yaml"
+      query: "blink_led"
+    
+    - step: "Language basics"
+      manifest: "manifests/spin2-manifest.yaml"
+      query: "basic_constructs"
+  
+  experienced_path:
+    - step: "Architecture deep dive"
+      manifest: "manifests/architecture-manifest.yaml"
+      query: "all"
+    
+    - step: "Advanced patterns"
+      manifest: "manifests/patterns-manifest.yaml"
+      query: "advanced"
+    
+    - step: "Optimization techniques"
+      manifest: "manifests/pasm2-manifest.yaml"
+      query: "performance"
+
+usage_examples:
+  - example: "Find UART implementation"
+    steps:
+      - "GET this manifest"
+      - "GET manifests/quick-queries-manifest.yaml"
+      - "Find 'uart_implementation' entry"
+      - "GET referenced pattern files"
+  
+  - example: "Learn about specific instruction"
+    steps:
+      - "GET this manifest"
+      - "GET manifests/pasm2-manifest.yaml"
+      - "Find instruction in index"
+      - "GET engineering/knowledge-base/P2/language/pasm2/[instruction].yaml"
+  
+  - example: "Understand Smart Pins"
+    steps:
+      - "GET this manifest"
+      - "GET manifests/smart-pins-manifest.yaml"
+      - "Browse available modes"
+      - "GET specific mode documentation"
+
+ai_integration_notes: |
+  This manifest system is designed for AI systems (particularly Claude) to:
+  1. Discover available documentation progressively
+  2. Query specific topics efficiently
+  3. Navigate relationships between concepts
+  4. Access only needed information (token efficiency)
+  
+  The hierarchical structure minimizes requests while maximizing discovery.
+
+version_history:
+  - version: "1.0"
+    date: "2024-12-30"
+    changes: "Initial manifest system implementation"
+
+maintenance:
+  update_frequency: "As documentation expands"
+  backward_compatibility: "Maintained through versioning"
+  contact: "Via GitHub repository issues"
+
+related_documents:
+  methodology: "engineering/ingestion/methodology/download-on-demand-methodology.md"
+  readme: "README.md"
+  contribution: "CONTRIBUTING.md"

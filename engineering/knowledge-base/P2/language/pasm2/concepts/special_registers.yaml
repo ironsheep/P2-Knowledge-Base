@@ -1,0 +1,116 @@
+concept: special_registers
+title: PASM2 Special Purpose Registers
+category: core_architecture
+description: Hardware registers with dedicated functions accessible through specific instructions
+
+overview: |
+  Special registers in PASM2 provide access to critical hardware state and control. Unlike general-purpose 
+  registers (cog RAM $000-$1FF), special registers have fixed hardware functions and require specific 
+  instructions to access. They cannot be used as regular memory operands.
+
+registers:
+  program_counter:
+    - name: PC
+    - description: Program counter (20-bit)
+    - access: Read via GETPC, modified by jumps/calls
+    - range: $00000-$FFFFF (hub address space)
+    - notes: Auto-increments, wraps at hub boundary
+    
+  stack_pointers:
+    - name: PTRA/PTRB
+    - description: Hardware stack pointers with auto-increment/decrement
+    - access: Direct use in many instructions, explicit via GETPTR/SETPTR
+    - range: 20-bit hub addresses
+    - features:
+      - Auto-increment/decrement modes (++, --, ++)
+      - Indexed addressing [PTRx + offset]
+      - Stack operations (PUSHA/PUSHB, POPA/POPB)
+    
+  interrupt_vectors:
+    - name: IJMP0/IJMP1/IJMP2/IJMP3
+    - description: Interrupt jump vectors
+    - access: Via SETINT1/SETINT2/SETINT3
+    - usage: Hold interrupt handler addresses
+    
+  event_configuration:
+    - name: Internal event state
+    - description: Event detection and configuration
+    - access: Via SETSEx, GETSEx, POLLxxx, WAITxxx
+    - types: 16 selectable event sources per cog
+
+  q_register:
+    - name: Q
+    - description: Quotient/auxiliary register (32-bit)
+    - access: Via GETQX/GETQY after CORDIC, SETQ/SETQ2 for block ops
+    - uses:
+      - CORDIC result retrieval
+      - Block move/fill operations
+      - Extended math operations
+    
+  random_generator:
+    - name: RANDOM
+    - description: Hardware random number generator
+    - access: Via GETRND instruction
+    - features: True random based on thermal noise
+
+  ct_registers:
+    - name: CT (Current Time)
+    - description: System counter access
+    - access: Via GETCT, ADDCT1/2/3, WAITCT1/2/3
+    - resolution: System clock cycles
+    - width: 32-bit, free-running
+
+  flags:
+    - name: C and Z
+    - description: Carry and Zero flags
+    - access: Set by instructions with WC/WZ/WCZ, tested by conditionals
+    - persistence: Maintained until explicitly modified
+
+access_patterns:
+  explicit_access:
+    - method: Dedicated instructions
+    - examples:
+      - GETCT reg      ' Read system counter
+      - GETRND reg     ' Get random number
+      - GETQX  reg     ' Get CORDIC X result
+      - GETPTR reg     ' Read PTRA/PTRB value
+      
+  implicit_access:
+    - method: Automatic hardware use
+    - examples:
+      - PC increments after each instruction
+      - PTRA/PTRB auto-modify in indexed operations
+      - Flags update when WC/WZ specified
+      - Q receives quotient from DIV operations
+
+  block_operations:
+    - method: SETQ/SETQ2 + instruction
+    - examples:
+      - SETQ #15       ' Setup for 16 long transfer
+      - RDLONG 0, PTRA ' Read 16 longs from hub
+
+critical_behaviors:
+  - PC wraps at 20-bit boundary (hub memory limit)
+  - PTRA/PTRB modifications affect subsequent indexed operations
+  - Event state persists until explicitly cleared
+  - CORDIC results must be read before next CORDIC operation
+  - Random generator continuously generates new values
+  - CT register is global (same for all cogs reading simultaneously)
+
+common_patterns:
+  stack_operation:
+    - pattern: "PUSHA value / POPA value"
+    - description: Hardware stack using PTRA
+    
+  cordic_operation:
+    - pattern: "QROTATE / GETQX result / GETQY result"  
+    - description: CORDIC calculation and result retrieval
+    
+  timed_wait:
+    - pattern: "GETCT target / ADDCT1 target, ##delay / WAITCT1"
+    - description: Precise timing using CT register
+
+references:
+  - silicon_doc: Special Registers section
+  - instruction_set: GET/SET instruction group
+  - timing_doc: CT and timing registers
