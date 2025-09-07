@@ -145,3 +145,6 @@ human-todos/
 # AI operational guides (not versioned)
 .todo-mcp/
 *.zip
+
+# Test extraction directories (not versioned)
+extracted_images_enhanced_test/
