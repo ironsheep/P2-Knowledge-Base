@@ -25,8 +25,8 @@ class P2HealthAudit:
             "language/spin2/operators",
             "hardware",
             "architecture",
-            "documentation",
-            "examples"
+            "architecture/smart-pins",
+            "architecture/system-registers"
         ]
         
         for dir_path in required_dirs:
