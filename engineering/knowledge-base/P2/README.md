@@ -1,105 +1,63 @@
 # P2 Knowledge Base
 
-Central repository of Propeller 2 technical knowledge extracted from authoritative sources.
-
-## Overview
-
-This knowledge base contains structured YAML representations of P2 technical documentation, organized in a layered data model for progressive enhancement and AI consumption.
+Comprehensive Propeller 2 technical knowledge for AI and human consumption.
 
 ## Structure
 
 ```
 P2/
-├── instructions/pasm2/     # 440 PASM2 instruction definitions
-├── language/spin2/         # 119 Spin2 language elements
-├── hardware/               # 11 hardware specifications
-├── architecture/           # 8 architecture components
-├── extractors/             # Extraction scripts
-├── manifest.yaml           # Complete content index
-└── baseline-quality-report-v1.0.md
+├── language/              # Programming languages
+│   ├── pasm2/            # 357 PASM2 instructions
+│   └── spin2/            # Spin2 language
+│       ├── methods/      # 73 methods
+│       └── operators/    # 46 operators
+├── hardware/             # Physical hardware (boards, modules)
+└── architecture/         # P2 architecture components
+    ├── smart-pins/       # 64 Smart Pin modes
+    └── system-registers/ # System registers
 ```
 
-## Content Statistics
+## Quick Stats
 
-| Category | Count | Coverage |
-|----------|-------|----------|
-| PASM2 Instructions | 440 | 100% base encoding |
-| Layer 1 (CSV) | 440 | 100% complete |
-| Layer 2 (Timing) | 61 | 13.9% (available data) |
-| Layer 3 (Narratives) | 405 | 92.0% complete |
-| Layer 4 (Clarifications) | 12 | 2.7% (critical instructions) |
-| Spin2 Methods | 73 | Complete |
-| Spin2 Operators | 46 | Complete |
-| Hardware Specs | 11 | Major boards/modules |
-| Architecture | 8 | Core components |
-
-## Layered Data Model
-
-### PASM2 Instructions
-Each instruction file contains up to 4 layers of data:
-
-1. **Layer 1 - CSV Base**: Encoding, syntax, group (100% coverage)
-2. **Layer 2 - Datasheet**: Timing information where available
-3. **Layer 3 - Narrative**: Functional descriptions (92% coverage)
-4. **Layer 4 - Clarifications**: Expert insights from Chip Gracey
-
-### Example Structure
-```yaml
-name: ADD
-layer1_csv:
-  mnemonic: ADD
-  syntax: ADD D,{#}S {WC/WZ/WCZ}
-  encoding: EEEE 0001000 CZI DDDDDDDDD SSSSSSSSS
-layer2_datasheet:
-  timing_cog: 2
-layer3_narrative:
-  description: "Add S into D"
-```
-
-## Quality Metrics
-
-- **Total Files**: 578 YAML files
-- **Quality Score**: 94.7% (validation pass rate)
-- **Completeness**: All core P2 elements documented
-- **Format**: Consistent YAML structure
+- **357** PASM2 instructions (100% timing coverage)
+- **73** Spin2 methods
+- **46** Spin2 operators  
+- **64** Smart Pin modes
+- **Health Score: 100/100**
 
 ## Usage
 
-This knowledge base is designed for:
-- AI training and code generation
-- Documentation generation tools
-- IDE code completion
-- Instruction reference systems
-- Hardware compatibility checking
+```yaml
+# Example: Load ADD instruction
+Path: P2/language/pasm2/add.yaml
 
-## Sources
+instruction: ADD
+syntax: ADD D,{#}S {WC/WZ/WCZ}
+encoding: EEEE 0001000 CZI DDDDDDDDD SSSSSSSSS
+description: Add S into D
+timing: {cycles: 2, type: fixed}
+```
 
-| Source | Type | Authority |
-|--------|------|-----------|
-| P2 Instructions CSV v35 | Spreadsheet | Official |
-| P2 Datasheet | Document | Official |
-| Silicon Doc v35 | Manual | Official |
-| Spin2 Doc v51 | Manual | Official |
-| Chip Gracey Clarifications | Expert | Designer |
+## Key Features
 
-## Version
+- **Single source of truth** - One file per concept
+- **100% timing coverage** - All instructions have timing
+- **Clean YAML format** - Structured for AI parsing
+- **No conditionals** - Only real CPU instructions
 
-**Current Version**: 1.0.0  
-**Release Date**: 2025-09-07  
-**Tag**: v1.0.0
+## Maintenance
 
-## Future Improvements (v2.0)
+Support tools in separate `P2-support/` directory:
+- Sources, extractors, validators, scripts
+- Run health check: `python3 P2-support/scripts/health-audit.py`
 
-- Extended timing coverage
-- More instruction examples
-- Cross-reference system
-- Smart Pin mode details
-- Additional expert clarifications
+## Data Sources
 
-## License
-
-Part of the P2-Language-Study project. See main repository for license details.
+- P2 Instructions CSV v35
+- P2 Datasheet v35  
+- P2 Silicon Doc v35
+- Chip Gracey clarifications
 
 ---
 
-*P2 Knowledge Base - Enabling AI-powered Propeller 2 development*
+For technical architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md)

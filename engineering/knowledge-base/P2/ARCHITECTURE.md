@@ -1,45 +1,37 @@
 # P2 Knowledge Base Architecture
-*Version 1.2.0 - Clean Separation Structure*
-
-## Overview
-The P2 Knowledge Base provides comprehensive technical documentation for the Propeller 2 microcontroller, organized for optimal AI and human consumption.
 
 ## Directory Structure
 
 ```
-P2/                           # The Knowledge Base
-├── language/                # Programming Languages
-│   ├── pasm2/               # PASM2 assembly language (357 instructions)
+P2/                           # Knowledge Base
+├── language/                 # Programming Languages
+│   ├── pasm2/               # PASM2 assembly (357 instructions)
 │   └── spin2/               # Spin2 high-level language
-│       ├── methods/         # Built-in methods (73 files)
-│       ├── operators/       # Language operators (46 files)
-│       ├── symbols/         # Built-in symbols
-│       └── integration/     # PASM2 integration docs
-├── hardware/                # Hardware Specifications
-│   ├── smart-pins/          # Smart Pin documentation
-│   │   └── modes/          # Smart Pin modes (64 files)
-│   └── system-registers/    # System register specs
-├── architecture/            # Core Architecture (8 components)
-│   ├── cog.yaml            # COG processor details
-│   ├── hub.yaml            # Hub memory system
-│   ├── cordic.yaml         # CORDIC solver
-│   └── ...                 # Other components
-├── components/              # Detailed Component Docs
-│   ├── cordic/             # CORDIC implementation
-│   └── smart-pins/         # Smart Pin details
-├── documentation/           # User Documentation
-│   ├── clarifications/     # Chip Gracey clarifications
-│   └── meta-knowledge/     # Cross-cutting concepts
-└── examples/               # Code Examples
-    └── instruction-examples/
+│       ├── methods/         # 73 built-in methods
+│       └── operators/       # 46 operators
+├── hardware/                # Physical hardware specs
+└── architecture/            # P2 architecture components
+    ├── *.yaml              # Core components (COG, HUB, CORDIC)
+    ├── smart-pins/         # 64 Smart Pin modes
+    └── system-registers/   # System registers
+
+P2-support/                  # Maintenance (separate directory)
+├── sources/                # Multi-layer source files
+├── extractors/             # Extraction scripts
+├── validators/             # Validation tools
+└── scripts/               # Utility scripts
 ```
 
 ## Design Principles
 
-### 1. Single Source of Truth
-Each P2 element has exactly ONE authoritative file containing all essential information.
+1. **Clean Separation**: Knowledge (P2/) vs Tools (P2-support/)
+2. **Single Source of Truth**: One file per concept
+3. **Logical Organization**: Instructions are part of their language
+4. **No Maintenance Files**: Scripts/tools in P2-support only
 
-### 2. Clean YAML Format
+## YAML Schema
+
+### PASM2 Instruction
 ```yaml
 instruction: ADD
 syntax: ADD D,{#}S {WC/WZ/WCZ}
@@ -49,97 +41,24 @@ description: |
 timing:
   cycles: 2
   type: fixed
+group: Math and Logic
+flags_affected:
+  C: carry of (D + S)
 ```
-
-### 3. Separation of Concerns
-- **P2/**: Contains ONLY knowledge files
-- **P2-support/**: Contains ALL maintenance tools (separate directory)
-
-### 4. Optimized for AI
-- Structured data format
-- Consistent naming conventions
-- Complete timing and encoding information
-- Clear semantic relationships
-
-## File Counts
-
-| Category | Files | Description |
-|----------|-------|-------------|
-| PASM2 Instructions | 357 | Complete CPU instruction set |
-| Spin2 Methods | 73 | Built-in language methods |
-| Spin2 Operators | 46 | Language operators |
-| Hardware Specs | 11 | Board and module specifications |
-| Architecture | 8 | Core P2 components |
-| Smart Pin Modes | 64 | All Smart Pin configurations |
-| **Total** | **559+** | Complete P2 knowledge |
 
 ## Quality Guarantees
 
-### Coverage
-- ✅ 100% of real CPU instructions documented
-- ✅ 100% timing information for all instructions
-- ✅ Complete encoding for all instructions
-- ✅ All Smart Pin modes documented
-
-### Validation
-- Cross-referenced against P2 Silicon v35 documentation
-- Validated against official CSV instruction set
-- Chip Gracey clarifications incorporated
-- No conditional/pseudo instructions (cleaned)
-
-## Maintenance
-
-### Supporting Infrastructure
-The P2-support/ directory (parallel to P2/) contains:
-- Extraction scripts
-- Validation tools
-- Source files (multi-layer originals)
-- Quality reports
-- Update tracking
-
-### Update Process
-1. Sources updated in P2-support/sources/
-2. Converters regenerate production files
-3. Validators ensure quality
-4. Changes committed to P2/
-
-## Usage
-
-### For AI/Code Generation
-```python
-# Direct file access
-instruction = load("P2/language/pasm2/add.yaml")
-# Use instruction.syntax, instruction.timing, etc.
-```
-
-### For Documentation
-- Start with P2/README.md
-- Browse by category (language/pasm2/, language/spin2/, hardware/, etc.)
-- Check documentation/ for guides
-
-### For Maintenance
-- Use tools in P2-support/
-- Run health audit: `python3 P2-support/scripts/health-audit.py`
-- Validate quality: `python3 P2-support/validators/final-validation.py`
+- ✅ 357 real CPU instructions (no conditionals)
+- ✅ 100% timing coverage
+- ✅ 100% encoding coverage
+- ✅ Health score: 100/100
 
 ## Version History
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0.0 | 2025-09-06 | Initial extraction (440 files) |
-| 1.0.1 | 2025-09-07 | Removed 83 conditionals |
-| 1.1.0 | 2025-09-07 | Production/source separation |
-| 1.2.0 | 2025-09-07 | P2/P2-support clean separation |
-| 1.3.0 | 2025-09-07 | Restructured: instructions → language/pasm2 |
-
-## Key Benefits
-
-1. **Clarity**: Immediate understanding of what's knowledge vs tools
-2. **Usability**: Clean structure for AI consumption
-3. **Maintainability**: Clear separation of concerns
-4. **Quality**: Validated, complete coverage
-5. **Efficiency**: 50% smaller than source files
-
----
-
-*For maintenance documentation, see P2-support/README.md*
+| 1.0 | 2025-09-06 | Initial extraction |
+| 1.1 | 2025-09-07 | Removed conditionals |
+| 1.2 | 2025-09-07 | P2/P2-support separation |
+| 1.3 | 2025-09-07 | Instructions → language/pasm2 |
+| 2.0 | 2025-09-07 | Clean architecture, 100% timing |
