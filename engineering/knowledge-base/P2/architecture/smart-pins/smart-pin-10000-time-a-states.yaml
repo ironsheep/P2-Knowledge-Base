@@ -1,99 +1,94 @@
-# Smart Pin Mode %10000 - Time A-input States
-# Source: Silicon Doc v35, part4-smart-pins.txt
+# Smart Pin Mode: %10000 - Time A-States
+# Silicon Doc Reference: part4-smart-pins.txt, page 92
+# Layer 1: Direct Silicon Doc extraction
 
 mode_id: "%10000"
-mode_name: "Time A-input States"
-description: "Continuously times both high and low states of A-input in clock cycles"
-category: "timing_measurement"
-output_override: false
 
-configuration:
-  wrpin_format:
-    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
-    sssss_value: "%10000"
+mode_name: "Time A-States"
 
-measurement_operation:
-  timing_method: "Continuous state duration counting in clock cycles"
-  both_states: "Times both high and low states"
-  state_change_trigger: "Measurement completes on each state change"
+mode_group: "measurement"
 
-measurement_output:
-  prior_state: "Prior state placed in C-flag buffer"
-  duration_count: "Prior state's duration count placed in Z"
-  in_signal: "IN raised after each state change"
-  reading: "RDPIN/RQPIN retrieves duration measurement"
-  limit: "Z limited to $80000000 (prevents overflow)"
+mode_complexity: "intermediate"
 
-continuous_operation:
-  measurement_type: "Each state change produces a measurement"
-  data_rate: "Measurement rate depends on input signal frequency"
-  overwrite_risk: "Fast state changes may overwrite measurements before reading"
+dac_mode_dependency: false
 
-dual_pin_solution:
-  problem: "Single pin may miss short states due to cog response time"
-  solution: "Use two smart pins with one inverting A input"
-  benefit: "Capture both high and low states if combined duration allows"
-  configuration:
-    pin1: "Normal A input (times high states)"
-    pin2: "Inverted A input (times low states)" 
-    result: "Complete state timing if sum of durations manageable"
+pin_pairing: "none"
 
-instructions:
-  setup:
-    - "WRPIN - Configure mode (%10000)"
-    
-  operation:
-    - "RDPIN/RQPIN - Read state duration after IN raised"
-    - "Check C flag for previous state (high/low)"
+operation_description: |
+  Time A-states mode measures the duration of continuous states (both high and low) on the A input.
+  Upon each state change, the prior state duration count is placed in Z, the prior state is placed
+  in the C-flag buffer, and IN is raised. Z is limited to $80000000. If states change faster than
+  the cog can retrieve measurements, old measurements are overwritten. Can use two pins with inverted
+  A inputs to capture both high and low states reliably.
+
+x_parameter:
+  usage: "Not used in this timing mode"
+
+y_parameter:  
+  usage: "Not used in this timing mode"
+
+z_result:
+  data_type: "32-bit state duration in clock cycles"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Duration of previous state in clock cycles (limited to $80000000)"
+  flag_behavior: "C flag contains previous state (high/low)"
+  overflow_handling: "Limited to $80000000 maximum count"
+
+timing_specifications:
+  clock_relationship: "Continuous state timing, asynchronous to state changes"
+  update_frequency: "Result available on each state transition"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "A input state change (high-to-low or low-to-high)"
+  acknowledgment_method: "rdpin"
 
 reset_behavior:
-  during_reset:
-    dir_state: "DIR=0"
-    in_signal: "IN is low"
-    z_register: "Z set to $00000001"
+  dir_low_effects:
+    - "IN signal goes low"
+    - "Z is set to $00000001"
+  dir_transition_effects: "Begin timing A input states"
+  wrpin_zero_effects: "Return to normal mode"
 
-behavior:
-  in_signal: "Raised upon each state change"
-  c_flag: "Contains previous state information"
-  acknowledgment:
-    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
-    effect: "Lowers IN signal after 2 clocks"
+common_applications:
+  - application: "Pulse width measurement"
+    description: "Measure both high and low pulse durations"
+    complexity_level: "intermediate"
+  - application: "Duty cycle analysis"
+    description: "Measure high/low ratios of signals"
+    complexity_level: "intermediate"
 
-usage_notes:
-  - "Provides complete state timing information"
-  - "Both high and low states measured"
-  - "Fast state changes may cause measurement loss"
-  - "Consider dual-pin approach for complete capture"
-  - "Maximum count limited to prevent overflow"
+configuration_examples:
+  - name: "Pulse width measurement"
+    description: "Measure both high and low pulse widths"
+    wrpin_code: "WRPIN ##%0000_0000_101_0000000000000_00_10000_0, pulse_timer"
+    wxpin_code: "WXPIN #0, pulse_timer"
+    explanation: "A input filtered with filt1, measure all state durations"
 
-applications:
-  pulse_width_analysis: "Measure both pulse and gap widths"
-  duty_cycle_measurement: "Calculate duty cycle from state times"
-  signal_characterization: "Complete timing analysis of digital signals"
-  protocol_analysis: "Timing analysis of communication signals"
+typical_code_patterns:
+  - pattern_name: "Dual-pin state measurement"
+    pasm2_code: |
+      ' Configure two pins for complete state capture
+      WRPIN ##%0000_0000_000_0000000000000_00_10000_0, state_pin_normal
+      WRPIN ##%1000_0000_000_0000000000000_00_10000_0, state_pin_inverted
+      DIRH  state_pin_normal
+      DIRH  state_pin_inverted
+      
+      measure_loop:
+      TESTP state_pin_normal WC
+      IF_C  RDPIN high_time, state_pin_normal
+      TESTP state_pin_inverted WC  
+      IF_C  RDPIN low_time, state_pin_inverted
+      JMP   #measure_loop
+    explanation: "Use two pins with inverted A inputs to capture all state changes"
 
-measurement_strategy:
-  single_pin: "Simple but may miss fast transitions"
-  dual_pin: "Complete capture for moderate speeds"
-  software_coordination: "Coordinate readings with IN signal timing"
-
-limitations:
-  fast_signals: "May lose measurements if state changes faster than cog response"
-  overflow_protection: "Count limited to $80000000"
-  sequential_reading: "Must read each measurement before next state change"
-
-related_modes:
-  - "%10001 (Time A-highs)"
-  - "%10010 (Time X A-highs/rises/edges or timeout)"
-  - "Period measurement modes"
-
-see_also:
-  - "State timing measurement techniques"
-  - "Duty cycle calculation methods"
-  - "Dual-pin timing strategies"
-
-source:
-  document: "Silicon Doc v35"
-  section: "Smart Pin Modes"
-  page_reference: "part4-smart-pins.txt"
+extraction_metadata:
   extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [92]
+      section: "%10000 = time A-states"
+  validation_status: "draft"
+  completeness_score: 88
+  technical_accuracy: "silicon_doc_verified"

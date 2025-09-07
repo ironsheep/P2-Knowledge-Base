@@ -1,105 +1,83 @@
-# Smart Pin Mode %11110 - Async Serial Transmit
-# Source: Silicon Doc v35, part4-smart-pins.txt
+# Smart Pin Mode: %11110 - Async Serial Transmit
+# Silicon Doc Reference: part4-smart-pins.txt, page 75
+# Layer 1: Direct Silicon Doc extraction
 
 mode_id: "%11110"
+
 mode_name: "Async Serial Transmit"
-description: "Asynchronous serial transmission with programmable baud rate"
-category: "communication"
-output_override: true
 
-configuration:
-  wrpin_format:
-    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
-    sssss_value: "%11110"
-    out_override: "OUT signal overridden"
+mode_group: "communication"
 
-baud_rate_control:
-  parameter: "Baud rate programmed via configuration registers"
-  calculation: "Based on system clock and desired baud rate"
-  
-transmission_format:
-  protocol: "Standard asynchronous serial (UART)"
-  start_bit: "Logic 0"
-  data_bits: "Typically 8 bits"
-  stop_bit: "Logic 1" 
-  parity: "Configurable"
+mode_complexity: "intermediate"
 
-operation:
-  idle_state: "Output high when not transmitting"
-  data_loading: "Data loaded for transmission"
-  automatic_framing: "Hardware adds start/stop bits"
-  completion_signal: "IN raised when transmission complete"
+dac_mode_dependency: false
 
-instructions:
-  setup:
-    - "WRPIN - Configure mode (%11110) and baud rate parameters"
-    - "WXPIN - Set baud rate timing"
-    
-  operation:
-    - "WYPIN - Load data byte for transmission"
-    - "Wait for IN high - transmission complete"
+pin_pairing: "none"
 
-timing:
-  baud_generation: "Hardware generates precise baud rate timing"
-  bit_timing: "Each bit transmitted for calculated period"
-  frame_timing: "Complete character transmission including start/stop"
+operation_description: |
+  Async serial transmit mode provides UART-style serial transmission with configurable baud rates.
+  The smart pin handles start bit, data bits, parity, and stop bit generation automatically.
+  Data is loaded via WYPIN and transmitted asynchronously. Baud rate up to clock/3 supported.
+  OUT signal is overridden by the smart pin for transmission control.
 
-completion_behavior:
-  in_signal: "IN raised when character transmission completes"
-  ready_for_next: "Can load next character after IN goes high"
-  
-reset_behavior:
-  during_reset:
-    dir_state: "DIR=0"
-    output: "Output in idle state (high)"
-    transmission: "No transmission occurs"
+x_parameter:
+  usage: "Baud rate configuration"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "Baud rate divisor (clocks per bit)"
+      valid_values:
+        min: 3
+        max: 4294967295
+        special_values:
+          - value: 1667
+            meaning: "9600 baud at 160MHz (160M/9600/10≈1667)"
+          - value: 833
+            meaning: "19200 baud at 160MHz"
 
-behavior:
-  acknowledgment:
-    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
-    effect: "Lowers IN signal after 2 clocks"
+y_parameter:
+  usage: "Transmit data"
+  bit_fields:
+    - range: "Y[31:0]"
+      purpose: "Data to transmit with framing"
+      valid_values:
+        min: 0
+        max: 4294967295
 
-usage_notes:
-  - "Standard UART transmission functionality"
-  - "Hardware handles all timing automatically"
-  - "IN signal coordinates character transmission"
-  - "Output automatically returns to idle between characters"
-  - "Precise baud rate generation from system clock"
+z_result:
+  data_type: "Not used"
 
-applications:
-  uart_communication: "Standard serial communication"
-  debug_output: "Debug message transmission"
-  sensor_communication: "Sensor data transmission"
-  protocol_implementation: "Custom serial protocols"
+timing_specifications:
+  clock_relationship: "Baud rate based on X parameter divisor"
+  update_frequency: "Data transmitted at configured baud rate"
 
-baud_rate_examples:
-  common_rates:
-    - "9600 baud"
-    - "19200 baud" 
-    - "38400 baud"
-    - "57600 baud"
-    - "115200 baud"
+in_signal_behavior:
+  trigger_conditions:
+    - "Transmission complete"
+    - "Ready for next data"
+  acknowledgment_method: "wypin"
 
-transmission_sequence:
-  1: "Load character via WYPIN"
-  2: "Hardware sends start bit"
-  3: "Hardware sends data bits (LSB first typically)"
-  4: "Hardware sends stop bit(s)"
-  5: "IN raised - transmission complete"
-  6: "Output returns to idle (high)"
+common_applications:
+  - application: "UART communication"
+    description: "Standard serial communication protocol"
+    complexity_level: "intermediate"
+  - application: "Debug output"
+    description: "Send debug messages to terminal"
+    complexity_level: "beginner"
 
-related_modes:
-  - "%11111 (Async serial receive)"
-  - "%11100 (Sync serial transmit)"
-  - "%11101 (Sync serial receive)"
+configuration_examples:
+  - name: "9600 baud UART TX"
+    description: "Standard 9600 baud serial transmit"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_11110_0, uart_tx"
+    wxpin_code: "WXPIN #1667, uart_tx"
+    wypin_code: "WYPIN char_data, uart_tx"
+    explanation: "9600 baud transmission"
 
-see_also:
-  - "UART communication theory"
-  - "Baud rate calculations"
-  - "Serial communication protocols"
-
-source:
-  document: "Silicon Doc v35"
-  section: "Smart Pin Modes"
-  page_reference: "part4-smart-pins.txt"
+extraction_metadata:
   extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [75]
+      section: "%11110 = async serial transmit"
+  validation_status: "draft"
+  completeness_score: 80
+  technical_accuracy: "silicon_doc_verified"

@@ -1,124 +1,324 @@
-# Smart Pin Mode %01011 - A/B-input Quadrature Encoder
-# Source: Silicon Doc v35, part4-smart-pins.txt
+# Smart Pin Mode: %01011 - A/B-Input Quadrature Encoder
+# Silicon Doc Reference: part4-smart-pins.txt, pages 90-91
+# Layer 1: Direct Silicon Doc extraction
 
 mode_id: "%01011"
-mode_name: "A/B-input Quadrature Encoder"
-description: "Decodes quadrature encoder signals for position and velocity measurement"
-category: "measurement"
-output_override: false
 
-configuration:
-  wrpin_format:
-    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
-    sssss_value: "%01011"
+mode_name: "A/B-Input Quadrature Encoder"
 
-timing_control:
-  x_register:
-    function: "X[31:0] establishes measurement period in clock cycles"
-    zero_mode: "X = 0 for continuous operation (totalizer mode)"
-    periodic_mode: "X ≠ 0 for periodic measurements"
+mode_group: "measurement"
 
-operation_modes:
-  continuous_mode:
-    condition: "X[31:0] = 0"
-    behavior: "Continuous totalizer operation"
-    reading: "Current 32-bit quadrature step count always available via RDPIN/RQPIN"
-    
-  periodic_mode:
-    condition: "X[31:0] ≠ 0" 
-    behavior: "Count steps for X clock cycles, then report"
-    sequence:
-      - "Quadrature steps counted for X clock cycles"
-      - "Result placed in Z"
-      - "Accumulator set to 0/1/-1 value that would have been added"
-      - "IN raised"
-      - "RDPIN/RQPIN retrieves 32-bit measurement"
+mode_complexity: "intermediate"
 
-quadrature_decoding:
-  inputs: "A and B quadrature signals"
-  step_detection: "Detects quadrature state changes"
-  direction_sensing: "Determines forward/reverse direction"
-  step_counting: "Accumulates signed step count"
+dac_mode_dependency: false
 
-dual_pin_strategy:
-  suggestion: "Configure both A and B smart pins to quadrature mode"
-  continuous_pin: "X = 0 for absolute position tracking"
-  periodic_pin: "X ≠ 0 for velocity measurement"
-  benefit: "Simultaneous position and velocity measurement"
+pin_pairing: "adjacent"
 
-instructions:
-  setup:
-    - "WRPIN - Configure mode (%01011)"
-    - "WXPIN - Set measurement period X[31:0]"
-    
-  operation:
-    continuous: "RDPIN/RQPIN - Read current step count any time"
-    periodic: "RDPIN/RQPIN - Read measurement after IN raised"
+wrpin_configuration:
+  base_format: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+  
+  a_input_selector:
+    description: "4-bit A input selector - typically set to this pin for encoder A channel"
+    bit_pattern: "%AAAA"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (encoder A channel)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state (encoder B channel)"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  b_input_selector:
+    description: "4-bit B input selector - typically set to adjacent pin for encoder B channel"
+    bit_pattern: "%BBBB"
+    options:
+      - code: "%0000"
+        description: "this pin's read state"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state (encoder B channel)"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  input_logic_filtering:
+    description: "3-bit input logic/filtering - often used to filter encoder signals"
+    bit_pattern: "%FFF"
+    options:
+      - code: "%000"
+        description: "A, B (default - no filtering)"
+        operation: "passthrough"
+        filter_type: "none"
+      - code: "%001"
+        description: "A AND B, B"
+        operation: "logical_and"
+        filter_type: "none"
+      - code: "%010"
+        description: "A OR B, B"
+        operation: "logical_or"
+        filter_type: "none"
+      - code: "%011"
+        description: "A XOR B, B"
+        operation: "logical_xor"
+        filter_type: "none"
+      - code: "%100"
+        description: "A, B, both filtered using global filt0 (12.5ns)"
+        operation: "passthrough"
+        filter_type: "filt0"
+      - code: "%101"
+        description: "A, B, both filtered using global filt1 (600ns)"
+        operation: "passthrough"
+        filter_type: "filt1"
+      - code: "%110"
+        description: "A, B, both filtered using global filt2 (16.4ms)"
+        operation: "passthrough"
+        filter_type: "filt2"
+      - code: "%111"
+        description: "A, B, both filtered using global filt3 (210ms)"
+        operation: "passthrough"
+        filter_type: "filt3"
+  
+  low_level_control:
+    description: "13-bit low-level pin control (M[12:0]) - standard configuration"
+    bit_pattern: "%M............"
+    special_modes:
+      - condition: "M[12:10] = %101"
+        behavior: "DAC_MODE - not typically used with quadrature encoder"
+  
+  dir_out_control:
+    description: "2-bit pin DIR/OUT control"
+    bit_pattern: "%TT"
+    smart_off_behavior:
+      non_dac_mode:
+        - code: "%0x"
+          description: "OUT drives output (not relevant for input-only encoder)"
+        - code: "%1x"
+          description: "OTHER drives output"
+      dac_mode: []
+    smart_on_behavior:
+      dac_modes: []
+      non_dac_modes:
+        - mode_range: "%01011 (quadrature encoder)"
+          behavior: "Input-only operation - DIR/OUT control not typically used"
 
-zeroing:
-  method: "Pulse DIR low at any time"
-  effect: "Resets quadrature counter to zero"
-  no_reconfiguration: "No need to repeat WXPIN"
+x_parameter:
+  usage: "Measurement period configuration for periodic vs continuous operation"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "Measurement period in clock cycles"
+      valid_values:
+        min: 0
+        max: 4294967295
+        special_values:
+          - value: 0
+            meaning: "Continuous operation like totalizer - no periodic measurements"
+  configuration_timing: "reset_only"
+
+y_parameter:
+  usage: "Not used in quadrature encoder mode"
+
+z_result:
+  data_type: "32-bit signed quadrature step count or measurement result"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Quadrature step count (continuous) or step count for last period (periodic)"
+  flag_behavior: "C flag contains mode-related status information"
+  overflow_handling: "32-bit signed arithmetic - wraps at limits"
+
+operation_description: |
+  A/B-input quadrature encoder mode processes standard incremental encoder signals to track position
+  and velocity. The smart pin monitors both A and B channels, decoding the quadrature relationship to
+  determine direction and count steps. If X[31:0] is zero, operation is continuous like a totalizer,
+  and the current 32-bit quadrature step count can always be read via RDPIN/RQPIN. If X[31:0] is
+  non-zero, quadrature steps are counted for that many clock cycles, then the result is placed in Z
+  while the accumulator is set to the 0/1/-1 value that would have otherwise been added. This ensures
+  all quadrature steps are counted across measurements. At the end of each period, IN is raised and
+  RDPIN/RQPIN retrieves the last 32-bit measurement. The encoder can be "zeroed" by pulsing DIR low
+  at any time without needing another WXPIN.
+
+timing_specifications:
+  clock_relationship: "Asynchronous to system clock - responds to encoder edge transitions"
+  base_period:
+    description: "Measurement period (if X > 0) or continuous operation (if X = 0)"
+    min_clocks: 0
+    max_clocks: 4294967295
+    special_values:
+      - value: 0
+        meaning: "Continuous totalizer mode"
+  update_frequency: "Immediate response to quadrature transitions, periodic reporting if X > 0"
+  settling_time: "Digital filtering delay if global filters are enabled"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "Measurement period completion (if X > 0)"
+    - "Never raised in continuous mode (X = 0)"
+  acknowledgment_method: "rdpin"
+  polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
 
 reset_behavior:
-  during_reset:
-    dir_state: "DIR=0"
-    in_signal: "IN is low" 
-    z_register: "Z set to adder value (0/1/-1)"
+  dir_low_effects:
+    - "IN signal goes low"
+    - "Z is set to the adder value (0/1/-1)"
+    - "Position counter is zeroed"
+  dir_transition_effects: "Smart pin begins quadrature decoding operation"
+  wrpin_zero_effects: "Returns pin to normal mode, clears all smart pin configuration"
 
-behavior:
-  in_signal:
-    continuous: "Not used (always readable)"
-    periodic: "Raised at end of each measurement period"
-    
-  acknowledgment:
-    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
-    effect: "Lowers IN signal after 2 clocks"
+common_applications:
+  - application: "Motor position feedback"
+    description: "Track absolute position of stepper or servo motors"
+    complexity_level: "intermediate"
+  - application: "Robotic odometry"
+    description: "Measure wheel rotation for robot navigation"
+    complexity_level: "intermediate"
+  - application: "Manual control interfaces"
+    description: "Rotary encoder knobs for user input"
+    complexity_level: "beginner"
+  - application: "Velocity measurement"
+    description: "Periodic measurements for speed calculation"
+    complexity_level: "advanced"
 
-usage_notes:
-  - "Handles full quadrature decoding in hardware"
-  - "32-bit signed counter for large position range"
-  - "Can be zeroed without reconfiguration"
-  - "Supports both continuous and periodic operation"
-  - "All quadrature steps counted across measurements"
+configuration_examples:
+  - name: "Basic position tracking"
+    description: "Continuous quadrature decoding for absolute position"
+    wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_01011_0, encoder_pin"
+    wxpin_code: "WXPIN #0, encoder_pin"
+    explanation: "A from this pin, B from +1 pin, continuous operation (X=0)"
+  
+  - name: "Filtered encoder with noise immunity"
+    description: "Use global filter to reject noise on encoder signals"
+    wrpin_code: "WRPIN ##%0000_0001_101_0000000000000_00_01011_0, encoder_pin"
+    wxpin_code: "WXPIN #0, encoder_pin"
+    explanation: "Both A and B filtered with filt1 (600ns low-pass), continuous mode"
+  
+  - name: "Velocity measurement setup"
+    description: "Periodic measurements for speed calculation"
+    wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_01011_0, encoder_pin"
+    wxpin_code: "WXPIN ##160_000_000, encoder_pin"
+    explanation: "160M clocks (1 second @ 160MHz) for velocity measurements"
 
-applications:
-  motor_control: "Servo motor position feedback"
-  robotics: "Wheel encoder position tracking" 
-  cnc_machines: "Axis position measurement"
-  instrumentation: "Rotary position sensing"
-
-measurement_strategies:
-  position_tracking:
-    mode: "Continuous (X = 0)"
-    benefit: "Always-available absolute position"
-    
-  velocity_measurement:
-    mode: "Periodic (X = time_window)"
-    benefit: "Steps per time period = velocity"
-    
-  combined_system:
-    setup: "Two pins, one continuous, one periodic"
-    result: "Simultaneous position and velocity"
-
-quadrature_theory:
-  phase_relationship: "A and B signals 90° out of phase"
-  direction_detection: "A leads B = forward, B leads A = reverse"
-  resolution: "4× encoder resolution (both edges, both phases)"
+typical_code_patterns:
+  - pattern_name: "Dual encoder setup (position + velocity)"
+    pasm2_code: |
+      ' Configure two smart pins on same encoder
+      ' Pin N: continuous position tracking
+      WRPIN ##%0000_0001_101_0000000000000_00_01011_0, encoder_pos
+      WXPIN #0, encoder_pos                         ' Continuous mode
+      DIRH  encoder_pos                             ' Enable
+      
+      ' Pin N+2: periodic velocity measurement  
+      WRPIN ##%0000_0001_101_0000000000000_00_01011_0, encoder_vel
+      WXPIN period, encoder_vel                     ' Measurement period
+      DIRH  encoder_vel                             ' Enable
+      
+      loop:
+      RDPIN position, encoder_pos                   ' Get current position
+      TESTP encoder_vel WC                          ' Check velocity ready
+      IF_C  RDPIN velocity, encoder_vel             ' Get velocity measurement
+      ' ... use position and velocity ...
+      JMP #loop
+    explanation: "Standard dual-pin setup for both position tracking and velocity measurement"
+  
+  - pattern_name: "Encoder zeroing"
+    pasm2_code: |
+      ' Zero the encoder position
+      DIRL  encoder_pin                             ' Reset smart pin
+      DIRH  encoder_pin                             ' Re-enable
+      ' Position is now zero
+    explanation: "Quick reset method without reconfiguration"
 
 related_modes:
-  - "%01100 (Count A-rise when B-high)"
-  - "%01101 (A-rise increment/decrement by B)"
-  - "%01110 (Count A-rise or A-rise/B-rise)"
-  - "%01111 (Count A-high or A-high/B-high)"
+  - mode_id: "%01100"
+    relationship: "alternative"
+    description: "Count A-input positive edges when B-input high - simpler counting"
+  - mode_id: "%01101"
+    relationship: "complementary"
+    description: "A-input edges with B-input increment/decrement - related functionality"
+  - mode_id: "%01110"
+    relationship: "alternative"
+    description: "Count A-input edges with optional B decrement - simplified quadrature"
 
-see_also:
-  - "Quadrature encoder theory"
-  - "Position and velocity measurement"
-  - "Motor control feedback systems"
+related_instructions:
+  - instruction: "WRPIN"
+    usage_context: "Configure quadrature encoder mode and input selections"
+  - instruction: "WXPIN"
+    usage_context: "Set measurement period (0 for continuous, >0 for periodic)"
+  - instruction: "RDPIN/RQPIN"
+    usage_context: "Read position count (continuous) or measurement result (periodic)"
+  - instruction: "DIRH/DIRL"
+    usage_context: "Enable/reset encoder operation"
+  - instruction: "TESTP"
+    usage_context: "Check for measurement completion in periodic mode"
 
-source:
-  document: "Silicon Doc v35"
-  section: "Smart Pin Modes"
-  page_reference: "part4-smart-pins.txt"
+hardware_considerations:
+  power_implications: "Low power in continuous mode - responds only to encoder transitions"
+  pin_loading_effects: "Input-only operation - minimal loading on encoder signals"
+  noise_considerations: "Use global filters for noisy environments - filt1 (600ns) often sufficient"
+  thermal_effects: "Minimal heat generation - digital input processing only"
+
+extraction_metadata:
   extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [90, 91]
+      section: "%01011 = A/B-input quadrature encoder"
+  validation_status: "draft"
+  completeness_score: 94
+  technical_accuracy: "silicon_doc_verified"

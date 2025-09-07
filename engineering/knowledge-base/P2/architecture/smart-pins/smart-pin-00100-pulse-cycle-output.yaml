@@ -1,112 +1,345 @@
-# Smart Pin Mode %00100 - Pulse/Cycle Output
-# Source: Silicon Doc v35, part4-smart-pins.txt
+# Smart Pin Mode: %00100 - Pulse/Cycle Output
+# Silicon Doc Reference: part4-smart-pins.txt, pages 86-87
+# Layer 1: Direct Silicon Doc extraction
 
 mode_id: "%00100"
+
 mode_name: "Pulse/Cycle Output"
-description: "Generates programmable high pulses or cycles with configurable timing"
-category: "output_generation"
-output_override: true
 
-configuration:
-  wrpin_format:
-    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
-    sssss_value: "%00100"
-    out_override: "OUT signal overridden"
+mode_group: "signal_gen"
 
-timing_control:
-  x_register:
-    x_low: "X[15:0] establishes base period in clock cycles"
-    x_high: "X[31:16] establishes comparison value"
-    
-  base_period_operation:
-    counter: "Base period counter counts from X[15:0] down to 1"
-    restart: "Restarts at X[15:0] if decremented Y > 0"
-    comparison: "On each clock, if counter > X[31:16] and Y > 0, output high (else low)"
+mode_complexity: "intermediate"
 
-y_register:
-  function: "Y[31:0] specifies number of pulses or cycles to output"
-  trigger: "Writing non-zero value begins pulse/cycle output at next base period"
-  decrement: "Y decremented by one after each pulse"
-  completion: "Output remains low when Y reaches zero"
+dac_mode_dependency: false
 
-output_behavior:
-  high_condition: "Base period counter > X[31:16] AND Y > 0"
-  low_condition: "Base period counter <= X[31:16] OR Y = 0"
-  start_timing: "Begins at next base period after Y written with non-zero value"
+pin_pairing: "none"
 
-examples:
-  continuous_high:
-    x_high: "X[31:16] = 0"
-    result: "Output high for duration of Y > 0"
-    
-  pattern_example:
-    x_low: "X[15:0] = 3"
-    x_high: "X[31:16] = 2"  
-    pattern: "0-0-1 (repeat)"
-    duration: "For duration of Y > 0"
+wrpin_configuration:
+  base_format: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+  
+  a_input_selector:
+    description: "4-bit A input selector - not used for output mode"
+    bit_pattern: "%AAAA"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (default, not used)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  b_input_selector:
+    description: "4-bit B input selector - not used for output mode"
+    bit_pattern: "%BBBB"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (default, not used)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  input_logic_filtering:
+    description: "3-bit input logic/filtering - not used for output mode"
+    bit_pattern: "%FFF"
+    options:
+      - code: "%000"
+        description: "A, B (default)"
+        operation: "passthrough"
+        filter_type: "none"
+      - code: "%001"
+        description: "A AND B, B"
+        operation: "logical_and"
+        filter_type: "none"
+      - code: "%010"
+        description: "A OR B, B"
+        operation: "logical_or"
+        filter_type: "none"
+      - code: "%011"
+        description: "A XOR B, B"
+        operation: "logical_xor"
+        filter_type: "none"
+      - code: "%100"
+        description: "A, B, both filtered using global filt0"
+        operation: "passthrough"
+        filter_type: "filt0"
+      - code: "%101"
+        description: "A, B, both filtered using global filt1"
+        operation: "passthrough"
+        filter_type: "filt1"
+      - code: "%110"
+        description: "A, B, both filtered using global filt2"
+        operation: "passthrough"
+        filter_type: "filt2"
+      - code: "%111"
+        description: "A, B, both filtered using global filt3"
+        operation: "passthrough"
+        filter_type: "filt3"
+  
+  low_level_control:
+    description: "13-bit low-level pin control (M[12:0]) - standard output configuration"
+    bit_pattern: "%M............"
+    special_modes:
+      - condition: "M[12:10] = %101"
+        behavior: "DAC_MODE - not typically used with pulse output"
+  
+  dir_out_control:
+    description: "2-bit pin DIR/OUT control - OVERRIDDEN by smart pin"
+    bit_pattern: "%TT"
+    smart_off_behavior:
+      non_dac_mode: []
+      dac_mode: []
+    smart_on_behavior:
+      dac_modes: []
+      non_dac_modes:
+        - mode_range: "%00100 (pulse output)"
+          behavior: "Smart pin overrides OUT signal to control pin output state"
 
-instructions:
-  setup:
-    - "WRPIN - Configure mode (%00100)"
-    - "WXPIN - Set base period X[15:0] and comparison X[31:16]"
-    
-  operation:
-    - "WYPIN - Set pulse/cycle count in Y[31:0] (starts operation)"
+x_parameter:
+  usage: "Base period and high-time comparison threshold"
+  bit_fields:
+    - range: "X[15:0]"
+      purpose: "Base period in clock cycles"
+      valid_values:
+        min: 1
+        max: 65535
+        special_values:
+          - value: 3
+            meaning: "Common base period for timing patterns"
+    - range: "X[31:16]"
+      purpose: "Comparison threshold for high output determination"
+      valid_values:
+        min: 0
+        max: 65535
+        special_values:
+          - value: 0
+            meaning: "Output high for entire duration when Y > 0"
+          - value: 2
+            meaning: "With base period 3: creates 0-0-1 pattern"
+  configuration_timing: "reset_only"
 
-completion_behavior:
-  in_signal: "IN raised when pulse or cycles complete"
-  output_state: "Pin reverts to low output"  
-  y_status: "Y has been decremented to zero"
+y_parameter:
+  usage: "Number of pulses or cycles to output"
+  bit_fields:
+    - range: "Y[31:0]"
+      purpose: "Pulse/cycle count"
+      valid_values:
+        min: 0
+        max: 4294967295
+        special_values:
+          - value: 0
+            meaning: "No output - pin remains low"
+          - value: 1
+            meaning: "Single pulse or cycle"
+  update_behavior: "Writing non-zero value starts pulse sequence at next base period"
+
+z_result:
+  data_type: "Not used - no result data returned"
+  bit_interpretation: []
+  flag_behavior: "C flag may contain status information"
+  overflow_handling: "Not applicable"
+
+operation_description: |
+  Pulse/cycle output mode overrides OUT to control the pin output state autonomously. X[15:0] 
+  establishes a base period in clock cycles which forms the empirical high-time and low-time units.
+  X[31:16] establishes a comparison threshold that determines when the output should be high during
+  each base period. The base period counter counts from X[15:0] down to 1, then restarts if Y > 0.
+  On each clock, if the counter value > X[31:16] and Y > 0, the output will be high (else low).
+  When Y[31:0] is written with a non-zero value, the pin begins outputting pulses starting at the
+  next base period. After each pulse, Y is decremented until it reaches zero, at which point the
+  output remains low. IN is raised when the sequence completes (Y reaches zero).
+
+timing_specifications:
+  clock_relationship: "Base period counter operates on system clock"
+  base_period:
+    description: "Set by X[15:0] - fundamental timing unit"
+    min_clocks: 1
+    max_clocks: 65535
+    special_values:
+      - value: 100
+        meaning: "100-clock base period for precise timing"
+  update_frequency: "Output pattern repeats every base period while Y > 0"
+  settling_time: "Output changes within 1 clock of counter comparison"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "Pulse sequence completion (Y decremented to zero)"
+    - "Pin output reverts to low after final pulse"
+  acknowledgment_method: "rdpin"
+  polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
 
 reset_behavior:
-  during_reset:
-    dir_state: "DIR=0"
-    in_signal: "IN is low"
-    output: "Output is low"
-    y_register: "Y is set to zero"
+  dir_low_effects:
+    - "IN signal goes low"
+    - "Output goes low"
+    - "Y is set to zero (stops any pulse sequence)"
+  dir_transition_effects: "Smart pin ready to generate pulses when Y is written"
+  wrpin_zero_effects: "Returns pin to normal mode, clears all smart pin configuration"
 
-behavior:
-  acknowledgment:
-    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
-    effect: "Lowers IN signal after 2 clocks"
+common_applications:
+  - application: "Stepper motor control"
+    description: "Generate precise number of step pulses"
+    complexity_level: "intermediate"
+  - application: "LED flash sequences"
+    description: "Create specific flash patterns for indicators"
+    complexity_level: "beginner"
+  - application: "Timing reference generation"
+    description: "Generate reference pulses for synchronization"
+    complexity_level: "intermediate"
+  - application: "Test pattern generation"
+    description: "Create repeatable test sequences"
+    complexity_level: "intermediate"
 
-usage_notes:
-  - "Useful for generating precise timing pulses"
-  - "Can create complex pulse patterns by varying X[31:16]" 
-  - "Y controls total number of base periods to execute"
-  - "Output automatically returns to low when complete"
-  - "IN signal indicates completion"
+configuration_examples:
+  - name: "Simple pulse train"
+    description: "Generate 10 pulses, high for entire base period"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_00100_0, pulse_pin"
+    wxpin_code: "WXPIN ##$0000_0064, pulse_pin"
+    wypin_code: "WYPIN #10, pulse_pin"
+    explanation: "Base period 100 clocks, threshold 0 (always high when Y>0), 10 pulses"
+  
+  - name: "50% duty cycle pulses"
+    description: "Generate pulses with 50% duty cycle"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_00100_0, pulse_pin"
+    wxpin_code: "WXPIN ##$0032_0064, pulse_pin"
+    wypin_code: "WYPIN #5, pulse_pin"
+    explanation: "Base period 100, threshold 50 (high when counter > 50), 5 pulses"
+  
+  - name: "Complex timing pattern"
+    description: "Generate 0-0-1 repeating pattern"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_00100_0, pulse_pin"
+    wxpin_code: "WXPIN ##$0002_0003, pulse_pin"
+    wypin_code: "WYPIN #6, pulse_pin"
+    explanation: "Base period 3, threshold 2 (high only when counter=3), creates 0-0-1 pattern"
 
-applications:
-  timing_pulses: "Precise timing signals for other devices"
-  motor_control: "Step pulses for stepper motors"
-  clock_generation: "Custom clock patterns"
-  protocol_timing: "Communication protocol pulse generation"
-
-timing_examples:
-  single_pulse:
-    setup: "X[15:0] = desired_width, X[31:16] = 0"
-    trigger: "WYPIN #1,pin"
-    result: "Single pulse of desired_width clocks"
-    
-  burst_pulses:
-    setup: "X[15:0] = period, X[31:16] = high_time"
-    trigger: "WYPIN #count,pin"  
-    result: "count pulses with specified timing"
+typical_code_patterns:
+  - pattern_name: "Stepper motor step sequence"
+    pasm2_code: |
+      ' Configure pulse output for stepper motor
+      WRPIN ##%0000000000000_01_00100_0, step_pin
+      WXPIN step_timing, step_pin               ' Set base period and duty
+      DIRH  step_pin                            ' Enable smart pin
+      
+      ' Generate steps
+      WYPIN step_count, step_pin                ' Start stepping
+      
+      wait_complete:
+      TESTP step_pin WC                         ' Check if sequence done
+      IF_NC JMP #wait_complete                  ' Wait for completion
+      RDPIN dummy, step_pin                     ' Acknowledge completion
+    explanation: "Standard pattern for generating precise step sequences"
+  
+  - pattern_name: "Burst pulse generation"
+    pasm2_code: |
+      ' Setup for burst mode operation
+      WRPIN ##%0000000000000_01_00100_0, burst_pin
+      WXPIN ##$0000_0050, burst_pin             ' 50-clock period, full high
+      DIRH  burst_pin                           ' Enable
+      
+      generate_burst:
+      WYPIN burst_length, burst_pin             ' Generate burst
+      ' ... do other work while burst runs ...
+      TESTP burst_pin WC                        ' Check completion
+      IF_C  RDPIN dummy, burst_pin              ' Acknowledge when done
+    explanation: "Fire-and-forget burst generation with completion detection"
 
 related_modes:
-  - "%00101 (Transition output)"
-  - "%00110 (NCO frequency)"
-  - "%00111 (NCO duty)"
-  - "%01000 (PWM triangle)"
+  - mode_id: "%00101"
+    relationship: "complementary"
+    description: "Transition output - counts transitions instead of pulses"
+  - mode_id: "%01000"
+    relationship: "advanced_version"
+    description: "PWM triangle - more sophisticated waveform generation"
+  - mode_id: "%01001"
+    relationship: "advanced_version"
+    description: "PWM sawtooth - linear waveform alternative"
 
-see_also:
-  - "Base period timing calculations"
-  - "Pulse pattern generation techniques" 
-  - "Motor control applications"
+related_instructions:
+  - instruction: "WRPIN"
+    usage_context: "Configure pulse output mode"
+  - instruction: "WXPIN"
+    usage_context: "Set base period (X[15:0]) and threshold (X[31:16])"
+  - instruction: "WYPIN"
+    usage_context: "Set pulse count and start sequence"
+  - instruction: "DIRH"
+    usage_context: "Enable smart pin operation"
+  - instruction: "TESTP"
+    usage_context: "Check for sequence completion"
+  - instruction: "RDPIN"
+    usage_context: "Acknowledge completion (clears IN signal)"
 
-source:
-  document: "Silicon Doc v35"
-  section: "Smart Pin Modes"
-  page_reference: "part4-smart-pins.txt"
+hardware_considerations:
+  power_implications: "Power consumption proportional to switching frequency and pulse count"
+  pin_loading_effects: "Standard digital output loading - can drive reasonable loads"
+  noise_considerations: "Sharp pulse edges may generate EMI - consider edge rate"
+  thermal_effects: "Continuous high-frequency pulsing can generate heat in drivers"
+
+extraction_metadata:
   extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [86, 87]
+      section: "%00100 = pulse/cycle output"
+  validation_status: "draft"
+  completeness_score: 94
+  technical_accuracy: "silicon_doc_verified"

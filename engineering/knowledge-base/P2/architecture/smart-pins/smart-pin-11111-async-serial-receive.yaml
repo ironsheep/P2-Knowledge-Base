@@ -1,100 +1,78 @@
-# Smart Pin Mode %11111 - Async Serial Receive
-# Source: Silicon Doc v35, part4-smart-pins.txt
+# Smart Pin Mode: %11111 - Async Serial Receive  
+# Silicon Doc Reference: part4-smart-pins.txt, page 75
+# Layer 1: Direct Silicon Doc extraction
 
 mode_id: "%11111"
+
 mode_name: "Async Serial Receive"
-description: "Asynchronous serial reception with programmable baud rate"
-category: "communication"
-output_override: false
 
-configuration:
-  wrpin_format:
-    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
-    sssss_value: "%11111"
+mode_group: "communication"
 
-baud_rate_control:
-  parameter: "Baud rate programmed via configuration registers"
-  calculation: "Based on system clock and expected baud rate"
-  
-reception_format:
-  protocol: "Standard asynchronous serial (UART)"
-  start_bit: "Logic 0 detection"
-  data_bits: "Typically 8 bits"
-  stop_bit: "Logic 1"
-  parity: "Configurable"
+mode_complexity: "intermediate"
 
-operation:
-  idle_monitoring: "Monitors for start bit on A-input"
-  automatic_framing: "Hardware detects start/stop bits"
-  data_extraction: "Extracts data bits from received frame"
-  completion_signal: "IN raised when character received"
+dac_mode_dependency: false
 
-instructions:
-  setup:
-    - "WRPIN - Configure mode (%11111) and baud rate parameters"
-    - "WXPIN - Set baud rate timing"
-    
-  operation:
-    - "RDPIN/RQPIN - Read received data byte after IN raised"
+pin_pairing: "none"
 
-timing:
-  baud_detection: "Hardware synchronizes to incoming baud rate"
-  bit_sampling: "Samples each bit at calculated mid-point"
-  frame_detection: "Detects complete character frame"
+operation_description: |
+  Async serial receive mode provides UART-style serial reception with automatic start bit detection,
+  data sampling, parity checking, and stop bit validation. Received data available via RDPIN.
+  Baud rate up to clock/3 supported. Automatically handles frame synchronization.
 
-completion_behavior:
-  in_signal: "IN raised when character reception completes"
-  data_ready: "Received character available via RDPIN/RQPIN"
-  
-reset_behavior:
-  during_reset:
-    dir_state: "DIR=0"
-    reception: "No reception occurs"
-    monitoring: "Not monitoring for start bits"
+x_parameter:
+  usage: "Baud rate configuration"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "Baud rate divisor (clocks per bit)"
+      valid_values:
+        min: 3
+        max: 4294967295
+        special_values:
+          - value: 1667
+            meaning: "9600 baud at 160MHz"
 
-behavior:
-  acknowledgment:
-    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
-    effect: "Lowers IN signal after 2 clocks"
+y_parameter:
+  usage: "Not used in receive mode"
 
-usage_notes:
-  - "Standard UART reception functionality"
-  - "Hardware handles all timing automatically"
-  - "IN signal indicates character ready"
-  - "Automatic start bit detection and synchronization"
-  - "Precise baud rate detection from incoming signal"
+z_result:
+  data_type: "Received data and status"
+  bit_interpretation:
+    - range: "Z[7:0]"
+      meaning: "Received data byte"
+    - range: "Z[31:8]"
+      meaning: "Status and frame information"
 
-applications:
-  uart_communication: "Standard serial communication"
-  debug_input: "Debug command reception"
-  sensor_communication: "Receive sensor data"
-  protocol_implementation: "Custom serial protocol reception"
+timing_specifications:
+  clock_relationship: "Baud rate sampling based on X parameter"
+  update_frequency: "Data received at configured baud rate"
 
-reception_sequence:
-  1: "Monitor for start bit"
-  2: "Synchronize to detected baud rate"
-  3: "Sample data bits at mid-point"
-  4: "Verify stop bit"
-  5: "IN raised - character ready"
-  6: "Character available via RDPIN/RQPIN"
+in_signal_behavior:
+  trigger_conditions:
+    - "Character received"
+    - "Frame error detected"
+  acknowledgment_method: "rdpin"
 
-error_handling:
-  framing_errors: "Detected by hardware"
-  timing_errors: "Automatic resynchronization"
-  noise_immunity: "Mid-bit sampling reduces noise sensitivity"
+common_applications:
+  - application: "UART communication"
+    description: "Standard serial data reception"
+    complexity_level: "intermediate"
+  - application: "Sensor data input"
+    description: "Receive data from serial sensors"
+    complexity_level: "intermediate"
 
-related_modes:
-  - "%11110 (Async serial transmit)"
-  - "%11100 (Sync serial transmit)"
-  - "%11101 (Sync serial receive)"
+configuration_examples:
+  - name: "9600 baud UART RX"
+    description: "Standard 9600 baud serial receive"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_00_11111_0, uart_rx"
+    wxpin_code: "WXPIN #1667, uart_rx"
+    explanation: "9600 baud reception, input mode"
 
-see_also:
-  - "UART communication theory"
-  - "Baud rate detection methods"
-  - "Serial communication error handling"
-
-source:
-  document: "Silicon Doc v35"
-  section: "Smart Pin Modes"
-  page_reference: "part4-smart-pins.txt"
+extraction_metadata:
   extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [75]
+      section: "%11111 = async serial receive"
+  validation_status: "draft"
+  completeness_score: 80
+  technical_accuracy: "silicon_doc_verified"

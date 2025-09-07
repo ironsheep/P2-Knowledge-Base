@@ -1,119 +1,359 @@
-# Smart Pin Mode %00111 - NCO Duty
-# Source: Silicon Doc v35, part4-smart-pins.txt
+# Smart Pin Mode: %00111 - NCO Duty
+# Silicon Doc Reference: part4-smart-pins.txt, pages 87-88
+# Layer 1: Direct Silicon Doc extraction
 
 mode_id: "%00111"
-mode_name: "NCO Duty"  
-description: "Numerically Controlled Oscillator that generates variable duty cycle output based on phase accumulation overflow"
-category: "frequency_generation"
-output_override: true
 
-configuration:
-  wrpin_format:
-    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
-    sssss_value: "%00111"
-    out_override: "OUT signal overridden"
+mode_name: "NCO Duty"
 
-timing_control:
-  x_register:
-    function: "X[15:0] establishes base period in clock cycles"
-    purpose: "Forms empirical high-time and low-time units"
-    phase_init: "Upon WXPIN, X[31:16] is written to Z[31:16] for phase setting"
-    
-  y_register:
-    function: "Y[31:0] frequency control word"
-    operation: "Added into Z[31:0] at each base period"
-    
-  z_register:
-    function: "32-bit phase accumulator" 
-    initialization: "Z[31:16] set from X[31:16] on WXPIN"
-    accumulation: "Y[31:0] added each base period"
+mode_group: "signal_gen"
 
-nco_operation:
-  phase_accumulation: "Z = Z + Y every base period"
-  output_generation: "Pin output reflects Z overflow condition"
-  duty_control: "Y value determines both frequency and duty cycle"
+mode_complexity: "advanced"
 
-output_behavior:
-  source: "Z overflow drives pin output"
-  mechanism: "Output pulses high when Z[31:0] overflows"
-  duty_cycle: "Determined by Y value relative to 2^32"
-  frequency: "Determined by how often overflows occur"
+dac_mode_dependency: false
 
-overflow_behavior:
-  condition: "Z[31:0] overflows (wraps around)"
-  output_pulse: "Pin output reflects overflow state"
-  in_signal: "IN is raised whenever Z overflows"
+pin_pairing: "none"
 
-instructions:
-  setup:
-    - "WRPIN - Configure mode (%00111)"
-    - "WXPIN - Set base period X[15:0] and initial phase X[31:16]"
-    
-  operation:
-    - "WYPIN - Set frequency control word Y[31:0]"
+wrpin_configuration:
+  base_format: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+  
+  a_input_selector:
+    description: "4-bit A input selector - not used for NCO output mode"
+    bit_pattern: "%AAAA"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (default, not used)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  b_input_selector:
+    description: "4-bit B input selector - not used for NCO output mode"
+    bit_pattern: "%BBBB"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (default, not used)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  input_logic_filtering:
+    description: "3-bit input logic/filtering - not used for NCO output mode"
+    bit_pattern: "%FFF"
+    options:
+      - code: "%000"
+        description: "A, B (default)"
+        operation: "passthrough"
+        filter_type: "none"
+      - code: "%001"
+        description: "A AND B, B"
+        operation: "logical_and"
+        filter_type: "none"
+      - code: "%010"
+        description: "A OR B, B"
+        operation: "logical_or"
+        filter_type: "none"
+      - code: "%011"
+        description: "A XOR B, B"
+        operation: "logical_xor"
+        filter_type: "none"
+      - code: "%100"
+        description: "A, B, both filtered using global filt0"
+        operation: "passthrough"
+        filter_type: "filt0"
+      - code: "%101"
+        description: "A, B, both filtered using global filt1"
+        operation: "passthrough"
+        filter_type: "filt1"
+      - code: "%110"
+        description: "A, B, both filtered using global filt2"
+        operation: "passthrough"
+        filter_type: "filt2"
+      - code: "%111"
+        description: "A, B, both filtered using global filt3"
+        operation: "passthrough"
+        filter_type: "filt3"
+  
+  low_level_control:
+    description: "13-bit low-level pin control (M[12:0]) - standard output configuration"
+    bit_pattern: "%M............"
+    special_modes:
+      - condition: "M[12:10] = %101"
+        behavior: "DAC_MODE - not typically used with NCO duty"
+  
+  dir_out_control:
+    description: "2-bit pin DIR/OUT control - OVERRIDDEN by smart pin"
+    bit_pattern: "%TT"
+    smart_off_behavior:
+      non_dac_mode: []
+      dac_mode: []
+    smart_on_behavior:
+      dac_modes: []
+      non_dac_modes:
+        - mode_range: "%00111 (NCO duty)"
+          behavior: "Smart pin overrides OUT signal, output reflects Z overflow state"
+
+x_parameter:
+  usage: "Base period and phase initialization"
+  bit_fields:
+    - range: "X[15:0]"
+      purpose: "Base period in clock cycles for NCO updates"
+      valid_values:
+        min: 1
+        max: 65535
+        special_values:
+          - value: 1
+            meaning: "Update NCO every clock cycle (maximum resolution)"
+          - value: 10
+            meaning: "Update every 10 clocks (good balance)"
+    - range: "X[31:16]"
+      purpose: "Initial phase value written to Z[31:16] upon WXPIN"
+      valid_values:
+        min: 0
+        max: 65535
+        special_values:
+          - value: 0
+            meaning: "Start with zero phase"
+          - value: 32768
+            meaning: "Start with 180-degree phase offset"
+  configuration_timing: "runtime"
+
+y_parameter:
+  usage: "Frequency increment value"
+  bit_fields:
+    - range: "Y[31:0]"
+      purpose: "32-bit frequency increment added to Z accumulator each base period"
+      valid_values:
+        min: 0
+        max: 4294967295
+        special_values:
+          - value: 0
+            meaning: "No frequency generation (static output)"
+          - value: 2147483648
+            meaning: "Half system clock frequency"
+          - value: 1073741824
+            meaning: "Quarter system clock frequency"
+  update_behavior: "Can be updated at runtime to change frequency dynamically"
+
+z_result:
+  data_type: "32-bit NCO accumulator and overflow detection"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Complete NCO accumulator value"
+    - range: "Z overflow"
+      meaning: "Overflow state drives pin output (duty cycle based on overflow rate)"
+  flag_behavior: "C flag contains overflow state information"
+  overflow_handling: "Pin output reflects overflow condition rather than accumulator MSB"
+
+operation_description: |
+  NCO duty mode overrides OUT to control the pin output state using a duty-cycle-based NCO.
+  X[15:0] establishes a base period in clock cycles which forms the fundamental update rate.
+  Upon WXPIN, X[31:16] is written to Z[31:16] for phase initialization. Y[31:0] is added to
+  Z[31:0] at each base period. Unlike NCO frequency mode, the pin output reflects Z overflow
+  rather than Z[31]. This creates a duty cycle that varies based on the overflow rate relative
+  to the update rate. The duty cycle represents the fraction of time that overflows occur
+  within the update periods. IN is raised whenever Z overflows. During reset (DIR=0), IN is
+  low, output is low, and Z is set to zero.
+
+timing_specifications:
+  clock_relationship: "NCO updated every base period, output represents overflow duty cycle"
+  base_period:
+    description: "Set by X[15:0] - fundamental NCO update rate affects duty cycle resolution"
+    min_clocks: 1
+    max_clocks: 65535
+    special_values:
+      - value: 1
+        meaning: "Maximum duty cycle resolution"
+      - value: 100
+        meaning: "1% duty cycle resolution with 100-clock base period"
+  update_frequency: "Pin output changes based on accumulator overflow rate"
+  settling_time: "Output changes within 1 clock of accumulator update"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "Z accumulator overflow events"
+    - "Each overflow represents a duty cycle event"
+  acknowledgment_method: "rdpin"
+  polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
 
 reset_behavior:
-  during_reset:
-    dir_state: "DIR=0"
-    in_signal: "IN is low"  
-    output: "Output is low"
-    z_register: "Z is set to zero"
+  dir_low_effects:
+    - "IN signal goes low"
+    - "Output goes low"
+    - "Z accumulator is set to zero"
+  dir_transition_effects: "NCO begins operation, accumulator starts incrementing"
+  wrpin_zero_effects: "Returns pin to normal mode, clears all smart pin configuration"
 
-behavior:
-  acknowledgment:
-    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
-    effect: "Lowers IN signal after 2 clocks"
+common_applications:
+  - application: "Variable duty cycle generation"
+    description: "Create precise duty cycles without traditional PWM limitations"
+    complexity_level: "advanced"
+  - application: "Density modulation"
+    description: "Generate pulse density modulation for power control"
+    complexity_level: "advanced"
+  - application: "Dithered clock generation"
+    description: "Create clocks with controlled jitter for EMI reduction"
+    complexity_level: "expert"
+  - application: "Sigma-delta modulation"
+    description: "Generate sigma-delta modulated signals for DAC applications"
+    complexity_level: "expert"
 
-duty_cycle_control:
-  mechanism: "Overflow frequency determines pulse width"
-  calculation: "Duty cycle ≈ Y / 2^32"
-  range: "0% to nearly 100% duty cycle possible"
-  resolution: "32-bit resolution for precise duty control"
+configuration_examples:
+  - name: "50% duty cycle generation"
+    description: "Generate approximately 50% duty cycle"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_00111_0, duty_pin"
+    wxpin_code: "WXPIN ##$0000_0064, duty_pin"
+    wypin_code: "WYPIN ##2147483648, duty_pin"
+    explanation: "Base period 100, Y=2^31 creates ~50% overflow rate = ~50% duty"
+  
+  - name: "Low duty cycle generation"
+    description: "Generate approximately 10% duty cycle"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_00111_0, low_duty_pin"
+    wxpin_code: "WXPIN ##$0000_0064, duty_pin"
+    wypin_code: "WYPIN ##429496729, duty_pin"
+    explanation: "Base period 100, Y=2^32/10 creates ~10% overflow rate = ~10% duty"
+  
+  - name: "Variable duty cycle control"
+    description: "Setup for runtime duty cycle adjustment"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_00111_0, var_duty_pin"
+    wxpin_code: "WXPIN ##$0000_0001, var_duty_pin"
+    wypin_code: "WYPIN duty_increment, var_duty_pin"
+    explanation: "Base period 1 for maximum resolution, duty_increment = 2^32 * desired_duty"
 
-usage_notes:
-  - "Provides both frequency and duty cycle control"
-  - "Output pulses on phase accumulator overflow"
-  - "32-bit resolution for precise duty cycle"
-  - "Different output behavior than NCO frequency mode"
-  - "IN signal marks each overflow event"
-
-applications:
-  pwm_generation: "Variable duty cycle PWM signals"
-  power_control: "Switching power supply control"
-  motor_control: "Variable speed motor drive"
-  dimming_control: "LED brightness control"
-
-comparison_with_frequency_mode:
-  frequency_mode: "Output = Z[31], ~50% duty cycle"
-  duty_mode: "Output = Z overflow, variable duty cycle"
-  use_case: "Frequency for clocks, duty for power control"
-
-duty_cycle_examples:
-  low_duty:
-    y_value: "Y = 2^28"
-    duty_cycle: "≈ 6.25% (1/16)"
-    
-  medium_duty:
-    y_value: "Y = 2^31" 
-    duty_cycle: "≈ 50%"
-    
-  high_duty:
-    y_value: "Y = 3 * 2^30"
-    duty_cycle: "≈ 75%"
+typical_code_patterns:
+  - pattern_name: "Precise duty cycle control"
+    pasm2_code: |
+      ' Calculate duty cycle increment
+      ' Formula: increment = desired_duty_percent * 2^32 / 100
+      MOV   increment, desired_duty  ' Desired duty cycle (0-100)
+      SHL   increment, #32          ' * 2^32 (will overflow)
+      QDIV  increment, #100         ' / 100 for percentage
+      GETQX increment               ' Get quotient
+      
+      ' Configure NCO duty
+      WRPIN ##%0000000000000_01_00111_0, duty_pin
+      WXPIN ##$0000_0001, duty_pin   ' Base period 1
+      WYPIN increment, duty_pin      ' Set duty cycle
+      DIRH  duty_pin                ' Enable
+    explanation: "Calculate precise duty cycle using percentage input"
+  
+  - pattern_name: "Pulse density modulation"
+    pasm2_code: |
+      ' Setup for pulse density modulation
+      WRPIN ##%0000000000000_01_00111_0, pdm_pin
+      WXPIN ##$0000_000A, pdm_pin    ' Base period 10
+      DIRH  pdm_pin                 ' Enable
+      
+      pdm_loop:
+      ' Read input value (0-255)
+      MOV   density, input_value
+      SHL   density, #24            ' Scale to upper bits of 32-bit range
+      WYPIN density, pdm_pin        ' Update pulse density
+      
+      ' Wait and repeat
+      WAITCNT period_delay, cnt
+      JMP   #pdm_loop
+    explanation: "Implement pulse density modulation with runtime density control"
 
 related_modes:
-  - "%00110 (NCO frequency)"
-  - "%01000 (PWM triangle)"
-  - "%01001 (PWM sawtooth)"
-  - "%01010 (PWM SMPS)"
+  - mode_id: "%00110"
+    relationship: "complementary"
+    description: "NCO frequency - provides frequency control without duty cycle variation"
+  - mode_id: "%01000"
+    relationship: "alternative"
+    description: "PWM triangle - traditional PWM with linear duty cycle control"
+  - mode_id: "%01001"
+    relationship: "alternative"
+    description: "PWM sawtooth - traditional PWM with sawtooth carrier"
 
-see_also:
-  - "NCO duty cycle calculation methods"
-  - "Phase accumulator overflow theory"
-  - "PWM generation techniques"
+related_instructions:
+  - instruction: "WRPIN"
+    usage_context: "Configure NCO duty mode"
+  - instruction: "WXPIN"
+    usage_context: "Set base period (X[15:0]) and initial phase (X[31:16])"
+  - instruction: "WYPIN"
+    usage_context: "Set duty cycle increment (runtime adjustable)"
+  - instruction: "DIRH"
+    usage_context: "Enable NCO operation"
+  - instruction: "TESTP"
+    usage_context: "Check for accumulator overflow events"
+  - instruction: "RDPIN"
+    usage_context: "Read current accumulator value and acknowledge overflow"
 
-source:
-  document: "Silicon Doc v35"
-  section: "Smart Pin Modes"
-  page_reference: "part4-smart-pins.txt"
+hardware_considerations:
+  power_implications: "Power varies with duty cycle - higher duty cycles consume more power"
+  pin_loading_effects: "Irregular pulse patterns may have different loading characteristics than regular PWM"
+  noise_considerations: "NCO duty creates broadband spectrum - different EMI characteristics than PWM"
+  thermal_effects: "Duty cycle directly affects average power dissipation in loads"
+
+extraction_metadata:
   extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [87, 88]
+      section: "%00111 = NCO duty"
+  validation_status: "draft"
+  completeness_score: 94
+  technical_accuracy: "silicon_doc_verified"

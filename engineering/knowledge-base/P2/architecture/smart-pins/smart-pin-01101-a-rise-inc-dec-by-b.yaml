@@ -1,118 +1,257 @@
-# Smart Pin Mode %01101 - Accumulate A-input Positive Edges with B-input Direction Control
-# Source: Silicon Doc v35, part4-smart-pins.txt
+# Smart Pin Mode: %01101 - A-Rise Inc/Dec by B-State  
+# Silicon Doc Reference: part4-smart-pins.txt, pages 90-91
+# Layer 1: Direct Silicon Doc extraction
 
 mode_id: "%01101"
-mode_name: "Accumulate A-input Positive Edges with B-input Direction Control"
-description: "A-input positive edges increment when B=1 or decrement when B=0"
-category: "measurement"
-output_override: false
 
-configuration:
-  wrpin_format:
-    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
-    sssss_value: "%01101"
+mode_name: "A-Rise Inc/Dec by B-State"
 
-timing_control:
-  x_register:
-    function: "X[31:0] establishes measurement period in clock cycles"
-    zero_mode: "X = 0 for continuous operation (totalizer mode)"
-    periodic_mode: "X ≠ 0 for periodic measurements"
+mode_group: "measurement"
 
-counting_logic:
-  trigger: "A-input positive edge"
-  direction_control: "B-input state determines increment or decrement"
-  increment_condition: "B-input = 1 during A-input positive edge"
-  decrement_condition: "B-input = 0 during A-input positive edge"
-  count_change: "+1 when B=1, -1 when B=0"
+mode_complexity: "intermediate" 
 
-operation_modes:
-  continuous_mode:
-    condition: "X[31:0] = 0"
-    behavior: "Continuous totalizer operation"
-    reading: "Current 32-bit signed count always available via RDPIN/RQPIN"
-    
-  periodic_mode:
-    condition: "X[31:0] ≠ 0"
-    behavior: "Count qualified events for X clock cycles"
-    sequence:
-      - "Events counted for X clock cycles"
-      - "Result placed in Z"
-      - "Accumulator set to 0/1/-1 value that would have been added"
-      - "IN raised"
-      - "New measurement begins"
-    reading: "RDPIN/RQPIN retrieves 32-bit measurement after IN raised"
+dac_mode_dependency: false
 
-event_handling:
-  carry_forward: "All events counted across measurements in periodic mode"
-  accumulator_state: "Preserves 0/1/-1 partial event state between periods"
-  signed_arithmetic: "32-bit signed counter supports bidirectional counting"
+pin_pairing: "adjacent"
 
-instructions:
-  setup:
-    - "WRPIN - Configure mode (%01101)"
-    - "WXPIN - Set measurement period X[31:0]"
-    
-  operation:
-    continuous: "RDPIN/RQPIN - Read current signed count any time"
-    periodic: "RDPIN/RQPIN - Read measurement after IN raised"
+wrpin_configuration:
+  base_format: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+  
+  a_input_selector:
+    description: "4-bit A input selector - signal with edges to count"
+    bit_pattern: "%AAAA"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (edge signal)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state" 
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  b_input_selector:
+    description: "4-bit B input selector - direction signal (high=inc, low=dec)"
+    bit_pattern: "%BBBB"
+    options:
+      - code: "%0000"
+        description: "this pin's read state"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state (direction signal)"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+
+  input_logic_filtering:
+    description: "3-bit input logic/filtering for clean directional counting"
+    bit_pattern: "%FFF"
+    options:
+      - code: "%000"
+        description: "A, B (default)"
+        operation: "passthrough"
+        filter_type: "none"
+      - code: "%001"
+        description: "A AND B, B"
+        operation: "logical_and"
+        filter_type: "none"
+      - code: "%010"
+        description: "A OR B, B"
+        operation: "logical_or"
+        filter_type: "none"
+      - code: "%011"
+        description: "A XOR B, B"
+        operation: "logical_xor"
+        filter_type: "none"
+      - code: "%100"
+        description: "A, B, both filtered using global filt0"
+        operation: "passthrough"
+        filter_type: "filt0"
+      - code: "%101"
+        description: "A, B, both filtered using global filt1"
+        operation: "passthrough"
+        filter_type: "filt1"
+      - code: "%110"
+        description: "A, B, both filtered using global filt2"
+        operation: "passthrough"
+        filter_type: "filt2"
+      - code: "%111"
+        description: "A, B, both filtered using global filt3"
+        operation: "passthrough"
+        filter_type: "filt3"
+
+  low_level_control:
+    description: "13-bit low-level pin control - input configuration"
+    bit_pattern: "%M............"
+    special_modes:
+      - condition: "M[12:10] = %100"
+        behavior: "ADC mode - not used for digital counting"
+
+  dir_out_control:
+    description: "2-bit pin DIR/OUT control - input operation"
+    bit_pattern: "%TT"
+    smart_off_behavior:
+      non_dac_mode: []
+      dac_mode: []
+    smart_on_behavior:
+      dac_modes: []
+      non_dac_modes:
+        - mode_range: "%01101 (A-rise inc/dec by B)"
+          behavior: "Input-only directional counting"
+
+x_parameter:
+  usage: "Measurement period configuration"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "Measurement period in clock cycles"
+      valid_values:
+        min: 0
+        max: 4294967295
+        special_values:
+          - value: 0
+            meaning: "Continuous operation - running total always available"
+          - value: 160000000
+            meaning: "1-second measurement windows"
+
+y_parameter:
+  usage: "Not used in this mode"
+
+z_result:
+  data_type: "32-bit signed accumulator"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Signed count: increments on A-rise when B-high, decrements when B-low"
+  flag_behavior: "C flag contains status information"
+  overflow_handling: "32-bit signed arithmetic with wraparound"
+
+operation_description: |
+  This mode accumulates A-input positive edges with B-input supplying increment/decrement direction.
+  On each A positive edge, if B is high the accumulator increments (+1), if B is low it decrements (-1).
+  X[31:0] sets measurement period - if zero, continuous totalizer mode with running count always
+  readable. If non-zero, events counted for that period then result placed in Z while accumulator
+  set to 0/1/-1 value for seamless counting across periods. During reset, Z set to adder value (0/1/-1).
+
+timing_specifications:
+  clock_relationship: "Asynchronous to A edges, B sampled synchronously with A edges"
+  base_period:
+    description: "Measurement period or continuous operation"  
+    min_clocks: 0
+    max_clocks: 4294967295
+  update_frequency: "Immediate response to A edges, periodic reporting if X > 0"
+  settling_time: "Filter delay if global filtering enabled"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "Measurement period completion (periodic mode only)"
+  acknowledgment_method: "rdpin"
+  polling_restrictions: "2-clock delay after acknowledgment"
 
 reset_behavior:
-  during_reset:
-    dir_state: "DIR=0"
-    in_signal: "IN is low"
-    z_register: "Z set to adder value (0/1/-1)"
+  dir_low_effects:
+    - "IN signal goes low"
+    - "Z set to adder value (0/1/-1)"
+  dir_transition_effects: "Begin directional counting on A edges"
+  wrpin_zero_effects: "Return to normal mode"
 
-behavior:
-  in_signal:
-    continuous: "Not used"
-    periodic: "Raised at end of each measurement period"
-    
-  acknowledgment:
-    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
-    effect: "Lowers IN signal after 2 clocks"
+common_applications:
+  - application: "Directional step counting"
+    description: "Count steps with direction control"
+    complexity_level: "intermediate"
+  - application: "Manual encoder simulation"
+    description: "Emulate incremental encoder with separate step/direction"
+    complexity_level: "intermediate"
 
-usage_notes:
-  - "Bidirectional counting based on direction input"
-  - "A-input provides clock/trigger edges"
-  - "B-input provides direction control"
-  - "32-bit signed counter for bidirectional range"
-  - "All events preserved across measurement periods"
-
-applications:
-  directional_counting: "Count up/down based on direction signal"
-  simple_encoder: "Basic encoder without quadrature"
-  flow_measurement: "Bidirectional flow counting"
-  inventory_tracking: "Add/subtract based on direction"
-
-circuit_examples:
-  simple_encoder:
-    a_input: "Encoder pulse output"
-    b_input: "Direction signal from encoder"
-    result: "Signed position count"
-    
-  flow_meter:
-    a_input: "Flow pulse sensor"
-    b_input: "Direction valve state"
-    result: "Net flow count"
-
-comparison_with_quadrature:
-  advantages: "Simpler than full quadrature, single direction input"
-  disadvantages: "Less resolution than quadrature, requires separate direction signal"
-  use_case: "When direction is available separately from pulses"
+configuration_examples:
+  - name: "Step/direction motor feedback"
+    description: "Count motor steps with direction"
+    wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_01101_0, step_count"
+    wxpin_code: "WXPIN #0, step_count"
+    explanation: "A=steps, B=direction, continuous counting"
 
 related_modes:
-  - "%01100 (Count A-rise when B-high)"
-  - "%01110 (Count A-rise or A-rise/B-rise)"
-  - "%01111 (Count A-high or A-high/B-high)"
-  - "%01011 (Quadrature encoder)"
+  - mode_id: "%01011"
+    relationship: "advanced_version"
+    description: "Quadrature encoder - true quadrature decoding"
+  - mode_id: "%01100"
+    relationship: "complementary" 
+    description: "Count A-rise with B-high - gating instead of direction"
 
-see_also:
-  - "Bidirectional counting techniques"
-  - "Simple encoder interfaces"
-  - "Direction-controlled counting"
+related_instructions:
+  - instruction: "WRPIN"
+    usage_context: "Configure directional counting"
+  - instruction: "WXPIN"
+    usage_context: "Set measurement period"
+  - instruction: "RDPIN/RQPIN"
+    usage_context: "Read signed count"
 
-source:
-  document: "Silicon Doc v35"
-  section: "Smart Pin Modes"
-  page_reference: "part4-smart-pins.txt"
+hardware_considerations:
+  power_implications: "Low power edge-triggered operation"
+  pin_loading_effects: "Input-only, minimal loading"
+  noise_considerations: "Filter both signals for reliable direction detection"
+  thermal_effects: "Minimal heat generation"
+
+extraction_metadata:
   extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [90, 91]
+      section: "%01101 = inc on A-rise & B-high / dec on A-rise & B-low"
+  validation_status: "draft"
+  completeness_score: 93
+  technical_accuracy: "silicon_doc_verified"

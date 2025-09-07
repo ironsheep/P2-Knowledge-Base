@@ -1,120 +1,359 @@
-# Smart Pin Mode %11000 - ADC Sample/Filter/Capture, Internally Clocked
-# Source: Silicon Doc v35, part4-smart-pins.txt
+# Smart Pin Mode: %11000 - ADC Sample/Filter/Capture (Internal Clock)
+# Silicon Doc Reference: part4-smart-pins.txt, pages 94-97
+# Layer 1: Direct Silicon Doc extraction
 
 mode_id: "%11000"
-mode_name: "ADC Sample/Filter/Capture, Internally Clocked"
-description: "Internal clock-driven ADC with SINC2/SINC3 filtering and bitstream capture modes"
-category: "adc"
-output_override: false
 
-configuration:
-  wrpin_format:
-    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
-    sssss_value: "%11000"
+mode_name: "ADC Sample/Filter/Capture (Internal Clock)"
 
-sampling:
-  clock_source: "Internal system clock"
-  input_requirement: "A-input should be pin configured for ADC operation (M[12:10] = %100)"
-  sample_rate: "A-input sampled on every clock"
+mode_group: "adc"
 
-mode_configuration:
-  wxpin_setup: "WXPIN sets mode X[5:4] and sample period POWER(2, X[3:0])"
+mode_complexity: "advanced"
+
+dac_mode_dependency: false
+
+pin_pairing: "none"
+
+wrpin_configuration:
+  base_format: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
   
-  modes_available:
-    sinc2_sampling: "X[5:4] = %00"
-    sinc2_filtering: "X[5:4] = %01" 
-    sinc3_filtering: "X[5:4] = %10"
-    bitstream_capture: "X[5:4] = %11"
-
-sample_periods:
-  period_calculation: "Sample period = 2^X[3:0] clocks"
-  range: "X[3:0] from %0000 (1 clock) to %1111 (32,768 clocks)"
-
-mode_characteristics:
-  sinc2_sampling:
-    description: "Complete SINC2 conversions with automatic difference computation"
-    periods: "Power-of-2 periods only"
-    resolution: "2 to 13+ bits depending on period"
-    overflow: "14+ bits causes overflow"
-    
-  sinc2_filtering:
-    description: "Raw SINC2 accumulation, software difference computation required" 
-    periods: "Arbitrary periods via WYPIN override"
-    enob: "4 to 14 effective bits post-difference"
-    max_period: "11,585 clocks (2^(27/2))"
-    
-  sinc3_filtering:
-    description: "SINC3 accumulation for dynamic signals"
-    periods: "Arbitrary periods via WYPIN override"
-    enob: "8 to 18 effective bits post-difference"
-    max_period: "512 clocks (2^(27/3))"
-    
-  bitstream_capture:
-    description: "Raw bitstream data capture"
-    data_format: "LSB = oldest bit"
-    new_bits: "1 to 32 new bits per period"
-    overflow: "Periods > 32 bits cause overflow"
-
-period_override:
-  wypin_function: "WYPIN Y[13:0] overrides X[3:0] period (except SINC2 sampling)"
-  requirement: "Use after WXPIN for non-power-of-2 periods"
-  accumulator_limit: "27-bit accumulators limit maximum periods"
-
-instructions:
-  setup:
-    - "WRPIN - Configure ADC pin (M[12:10] = %100) and mode (%11000)"
-    - "WXPIN - Set mode X[5:4] and base period X[3:0]"
-    - "WYPIN - Override period with Y[13:0] (optional, except SINC2 sampling)"
-    - "DIRH - Enable smart pin"
-    
-  operation:
-    - "RDPIN/RQPIN - Read completed measurement after IN raised"
-
-completion_behavior:
-  sequence:
-    - "Sample period completes"
-    - "Measurement placed in Z"
-    - "IN raised"  
-    - "New measurement begins"
-
-sinc_filtering_details:
-  sinc2_theory: "Double integration, extra bit of resolution, filters sampling artifacts"
-  sinc3_theory: "Triple integration, doubles ENOB for fast signals, limited period"
-  accuracy_delay: "SINC2 accurate after 2nd period, SINC3 after 3rd period"
+  a_input_selector:
+    description: "4-bit A input selector - should be pin configured for ADC operation"
+    bit_pattern: "%AAAA"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (ADC input - recommended)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
   
-  overflow_handling:
-    prescale_method: "SHL x,#5 before SUB x,diff; ADD diff,x"
-    posttrim_method: "SUB x,diff; ADD diff,x; ZEROX x,#26"
+  b_input_selector:
+    description: "4-bit B input selector - not used in internal clock mode"
+    bit_pattern: "%BBBB"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (default, not used)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  input_logic_filtering:
+    description: "3-bit input logic/filtering - typically not used for ADC"
+    bit_pattern: "%FFF"
+    options:
+      - code: "%000"
+        description: "A, B (default - recommended for ADC)"
+        operation: "passthrough"
+        filter_type: "none"
+      - code: "%001"
+        description: "A AND B, B"
+        operation: "logical_and"
+        filter_type: "none"
+      - code: "%010"
+        description: "A OR B, B"
+        operation: "logical_or"
+        filter_type: "none"
+      - code: "%011"
+        description: "A XOR B, B"
+        operation: "logical_xor"
+        filter_type: "none"
+      - code: "%100"
+        description: "A, B, both filtered using global filt0"
+        operation: "passthrough"
+        filter_type: "filt0"
+      - code: "%101"
+        description: "A, B, both filtered using global filt1"
+        operation: "passthrough"
+        filter_type: "filt1"
+      - code: "%110"
+        description: "A, B, both filtered using global filt2"
+        operation: "passthrough"
+        filter_type: "filt2"
+      - code: "%111"
+        description: "A, B, both filtered using global filt3"
+        operation: "passthrough"
+        filter_type: "filt3"
+  
+  low_level_control:
+    description: "13-bit low-level pin control - RECOMMENDED: M[12:10] = %100 for ADC operation"
+    bit_pattern: "%100..........  (M[12:10] = %100 recommended)"
+    special_modes:
+      - condition: "M[12:10] = %100"
+        behavior: "ADC mode - pin configured for analog-to-digital conversion"
+      - condition: "M[12:10] = %101"
+        behavior: "DAC_MODE - not recommended for ADC input"
+  
+  dir_out_control:
+    description: "2-bit pin DIR/OUT control - input mode for ADC"
+    bit_pattern: "%TT"
+    smart_off_behavior:
+      non_dac_mode: []
+      dac_mode: []
+    smart_on_behavior:
+      dac_modes: []
+      non_dac_modes:
+        - mode_range: "%11000 (ADC internal)"
+          behavior: "Input-only operation for ADC sampling"
+
+x_parameter:
+  usage: "ADC mode and sample period configuration"
+  bit_fields:
+    - range: "X[5:4]"
+      purpose: "ADC mode selection"
+      valid_values:
+        min: 0
+        max: 3
+        special_values:
+          - value: 0
+            meaning: "%00 = SINC2 Sampling (complete conversions)"
+          - value: 1
+            meaning: "%01 = SINC2 Filtering (software difference required)"
+          - value: 2
+            meaning: "%10 = SINC3 Filtering (higher ENOB for dynamic signals)"
+          - value: 3
+            meaning: "%11 = Bitstream capturing (raw ADC bits)"
+    - range: "X[3:0]"
+      purpose: "Sample period as POWER(2, X[3:0])"
+      valid_values:
+        min: 0
+        max: 15
+        special_values:
+          - value: 0
+            meaning: "1 clock (impractical for most modes)"
+          - value: 7
+            meaning: "128 clocks (8 bits resolution)"
+          - value: 13
+            meaning: "8192 clocks (14 bits resolution)"
+          - value: 14
+            meaning: "16384 clocks (overflow risk)"
+  configuration_timing: "reset_only"
+
+y_parameter:
+  usage: "Override sample period for non-power-of-2 periods (modes %01, %10, %11 only)"
+  bit_fields:
+    - range: "Y[13:0]"
+      purpose: "Arbitrary sample period (overrides X[3:0] calculation)"
+      valid_values:
+        min: 1
+        max: 16383
+        special_values:
+          - value: 320
+            meaning: "Example: 320-clock SINC3 filtering period"
+          - value: 512
+            meaning: "Maximum for SINC3 mode (27-bit accumulator limit)"
+          - value: 11585
+            meaning: "Maximum for SINC2 mode (27-bit accumulator limit)"
+  update_behavior: "Use WYPIN after WXPIN to override period established by X[3:0]"
+
+z_result:
+  data_type: "ADC conversion result (format depends on mode)"
+  bit_interpretation:
+    - range: "Z[26:0]"
+      meaning: "27-bit ADC result (requires software handling for 32-bit operations)"
+  flag_behavior: "C flag contains mode-related information"
+  overflow_handling: "27-bit accumulator - requires special handling for 32-bit math"
+
+operation_description: |
+  ADC sample/filter/capture mode with internal clocking facilitates sampling, SINC filtering, and 
+  raw capturing of ADC bitstream data. The A-input is sampled on every clock and should be a pin 
+  configured for ADC operation (M[12:10] = %100). WXPIN sets the mode to X[5:4] and sample period 
+  to POWER(2, X[3:0]). Four modes are available: SINC2 Sampling (%00) performs complete conversions, 
+  SINC2 Filtering (%01) requires software difference computation, SINC3 Filtering (%10) provides 
+  higher ENOB for dynamic signals, and Bitstream capturing (%11) returns raw ADC bits. For modes 
+  other than SINC2 Sampling, WYPIN can override the period with arbitrary values. Smart pin 
+  accumulators are 27 bits wide, limiting SINC3 to 512 clocks and SINC2 to 11,585 clocks per period.
+
+timing_specifications:
+  clock_relationship: "Samples A-input on every system clock cycle"
+  base_period:
+    description: "Sample period determined by X[3:0] or Y[13:0]"
+    min_clocks: 1
+    max_clocks: 32768
+    special_values:
+      - value: 1
+        meaning: "1 clock (impractical except for bitstream mode)"
+      - value: 8192
+        meaning: "Practical maximum for precision measurements"
+  update_frequency: "Results available at sample period completion"
+  settling_time: "SINC2 accurate after 2nd period, SINC3 after 3rd period"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "Sample period completion for all modes"
+  acknowledgment_method: "rdpin"
+  polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
 
 reset_behavior:
-  during_reset:
-    dir_state: "DIR=0" 
-    sampling: "No sampling occurs"
+  dir_low_effects:
+    - "ADC sampling stops"
+    - "IN signal goes low"
+    - "Accumulator state preserved"
+  dir_transition_effects: "ADC sampling begins according to configured mode"
+  wrpin_zero_effects: "Returns pin to normal mode, clears all smart pin configuration"
 
-usage_notes:
-  - "SINC2 sampling provides complete conversions automatically"
-  - "SINC2/SINC3 filtering requires software difference computation"
-  - "27-bit accumulators require overflow handling"
-  - "Higher periods give better resolution but slower updates"
-  - "SINC3 best for dynamic signals, SINC2 for DC precision"
+common_applications:
+  - application: "Precision voltage measurement"
+    description: "High-resolution DC voltage measurements using SINC2 filtering"
+    complexity_level: "advanced"
+  - application: "Dynamic signal capture"
+    description: "Fast-changing analog signals using SINC3 filtering"
+    complexity_level: "expert"
+  - application: "Multi-channel ADC"
+    description: "Multiple pins sampling different analog inputs"
+    complexity_level: "expert"
+  - application: "Data acquisition system"
+    description: "Continuous sampling for data logging applications"
+    complexity_level: "advanced"
 
-applications:
-  dc_measurement: "SINC2 filtering with long periods for precision"
-  audio_sampling: "SINC2 sampling for audio digitization"
-  dynamic_signals: "SINC3 filtering for fast-changing signals"
-  bitstream_analysis: "Raw bitstream capture for custom processing"
+configuration_examples:
+  - name: "Basic 8-bit ADC sampling"
+    description: "Simple ADC conversion with automatic differencing"
+    wrpin_code: "WRPIN ##%0000_0000_000_0100000000000_00_11000_0, adc_pin"
+    wxpin_code: "WXPIN #%00_0111, adc_pin"
+    explanation: "ADC mode (%100), SINC2 sampling mode (%00), 128 clocks (8 bits)"
+  
+  - name: "High-precision 14-bit measurement"
+    description: "Maximum precision DC measurement"
+    wrpin_code: "WRPIN ##%0000_0000_000_0100000000000_00_11000_0, adc_pin"
+    wxpin_code: "WXPIN #%01_1101, adc_pin"
+    explanation: "SINC2 filtering (%01), 8192 clocks (14 bits) - requires software differencing"
+  
+  - name: "Custom period SINC3 filtering"
+    description: "Non-power-of-2 period for dynamic signals"
+    wrpin_code: "WRPIN ##%0000_0000_000_0100000000000_00_11000_0, adc_pin"
+    wxpin_code: "WXPIN #%10_0100, adc_pin"
+    wypin_code: "WYPIN #320, adc_pin"
+    explanation: "SINC3 mode (%10), override to 320-clock period for optimal dynamics"
+
+typical_code_patterns:
+  - pattern_name: "SINC2 sampling (complete conversions)"
+    pasm2_code: |
+      ' Configure for automatic 8-bit conversions
+      WRPIN ##%100000000000_00_11000_0, adc_pin
+      WXPIN #%00_0111, adc_pin                   ' SINC2 sampling, 128 clocks
+      DIRH  adc_pin                              ' Enable
+      
+      loop:
+      RDPIN sample, adc_pin                      ' Get latest sample anytime
+      ' ... process 8-bit sample ...
+      JMP #loop
+    explanation: "Simplest ADC pattern - complete conversions without software processing"
+  
+  - pattern_name: "SINC2 filtering with software differencing"
+    pasm2_code: |
+      ' Configure for 14-bit precision
+      WRPIN ##%100000000000_00_11000_0, adc_pin
+      WXPIN #%01_1101, adc_pin                   ' SINC2 filtering, 8192 clocks
+      DIRH  adc_pin                              ' Enable
+      MOV   diff, #0                             ' Initialize difference value
+      
+      loop:
+      TESTP adc_pin WC                           ' Check for new sample
+      IF_C  RDPIN x, adc_pin                     ' Get accumulator
+      IF_C  SHL x, #5                            ' Prescale 27-bit to 32-bit
+      IF_C  SUB x, diff                          ' Compute sample difference
+      IF_C  ADD diff, x                          ' Update diff for next time
+      IF_C  ZEROX x, #26                         ' Trim back to 27-bit
+      ' ... process 14-bit sample in x ...
+      JMP #loop
+    explanation: "High-precision pattern requiring software differencing for SINC2 filtering"
 
 related_modes:
-  - "%11001 (ADC externally clocked)"
-  - "%11010 (ADC scope with trigger)"
+  - mode_id: "%11001"
+    relationship: "complementary"
+    description: "ADC sample/filter/capture with external clock"
+  - mode_id: "%11010"
+    relationship: "advanced_version"
+    description: "ADC scope with trigger - more complex triggering capability"
 
-see_also:
-  - "SINC filter theory"
-  - "ADC pin configuration"
-  - "Delta-sigma ADC principles"
+related_instructions:
+  - instruction: "WRPIN"
+    usage_context: "Configure ADC mode with M[12:10] = %100 for ADC operation"
+  - instruction: "WXPIN"
+    usage_context: "Set ADC mode (X[5:4]) and sample period (X[3:0])"
+  - instruction: "WYPIN"
+    usage_context: "Override sample period for non-power-of-2 periods"
+  - instruction: "RDPIN/RQPIN"
+    usage_context: "Read ADC conversion results"
+  - instruction: "DIRH"
+    usage_context: "Enable ADC sampling operation"
+  - instruction: "TESTP"
+    usage_context: "Poll for sample completion"
 
-source:
-  document: "Silicon Doc v35"
-  section: "Smart Pin Modes"
-  page_reference: "part4-smart-pins.txt"
+hardware_considerations:
+  power_implications: "Continuous sampling consumes power - longer periods reduce consumption"
+  pin_loading_effects: "ADC input impedance affects accuracy - use appropriate source impedance"
+  noise_considerations: "SINC filtering provides excellent noise rejection - choose appropriate period"
+  thermal_effects: "ADC accuracy affected by temperature - consider calibration for precision work"
+
+extraction_metadata:
   extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [94, 95, 96, 97]
+      section: "%11000 = ADC sample/filter/capture, internally clocked"
+  validation_status: "draft"
+  completeness_score: 96
+  technical_accuracy: "silicon_doc_verified"

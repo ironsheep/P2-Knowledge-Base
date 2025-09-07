@@ -1,74 +1,77 @@
-# Smart Pin Mode %10001 - Time A-input High States
-# Source: Silicon Doc v35, part4-smart-pins.txt
+# Smart Pin Mode: %10001 - Time A-Highs
+# Silicon Doc Reference: part4-smart-pins.txt, page 92
+# Layer 1: Direct Silicon Doc extraction
 
 mode_id: "%10001"
-mode_name: "Time A-input High States"
-description: "Times duration of A-input high states in clock cycles"
-category: "timing_measurement"
-output_override: false
 
-configuration:
-  wrpin_format:
-    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
-    sssss_value: "%10001"
+mode_name: "Time A-Highs"
 
-measurement_operation:
-  timing_method: "Continuous high state duration counting in clock cycles"
-  trigger: "High-to-low transition completes measurement"
-  measurement_type: "High state duration only"
+mode_group: "measurement"
 
-measurement_output:
-  duration_count: "Previous high duration count placed in Z"
-  in_signal: "IN raised upon each high-to-low transition"
-  reading: "RDPIN/RQPIN retrieves high duration measurement"
-  limit: "Z limited to $80000000 (prevents overflow)"
+mode_complexity: "intermediate"
 
-operation:
-  counting_period: "From low-to-high until high-to-low transition"
-  clock_precision: "Duration measured in system clock cycles"
-  automatic_operation: "No configuration needed beyond mode setup"
+dac_mode_dependency: false
 
-instructions:
-  setup:
-    - "WRPIN - Configure mode (%10001)"
-    
-  operation:
-    - "RDPIN/RQPIN - Read high duration after IN raised"
+pin_pairing: "none"
+
+operation_description: |
+  Time A-highs mode measures the duration of continuous high states on the A input.
+  Upon each high-to-low transition, the previous high duration count is placed in Z
+  and IN is raised. Z is limited to $80000000. Only high states are measured -
+  low states are ignored. This provides selective pulse width measurement for
+  positive pulses only.
+
+x_parameter:
+  usage: "Not used in this timing mode"
+
+y_parameter:
+  usage: "Not used in this timing mode"
+
+z_result:
+  data_type: "32-bit high state duration in clock cycles"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Duration of previous high state in clock cycles"
+  flag_behavior: "C flag contains status information"
+  overflow_handling: "Limited to $80000000 maximum count"
+
+timing_specifications:
+  clock_relationship: "Continuous timing during high states"
+  update_frequency: "Result available on each high-to-low transition"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "High-to-low transition on A input"
+  acknowledgment_method: "rdpin"
 
 reset_behavior:
-  during_reset:
-    dir_state: "DIR=0"
-    in_signal: "IN is low"
-    z_register: "Z set to $00000001"
+  dir_low_effects:
+    - "IN signal goes low" 
+    - "Z is set to $00000001"
+  dir_transition_effects: "Begin timing A input high states"
+  wrpin_zero_effects: "Return to normal mode"
 
-behavior:
-  in_signal: "Raised upon each high-to-low transition"
-  acknowledgment:
-    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
-    effect: "Lowers IN signal after 2 clocks"
+common_applications:
+  - application: "Positive pulse width measurement"
+    description: "Measure only positive pulse durations"
+    complexity_level: "intermediate"
+  - application: "High-time duty cycle measurement"
+    description: "Measure high portion of duty cycle"
+    complexity_level: "intermediate"
 
-usage_notes:
-  - "Measures only high pulse widths"
-  - "Ignores low state durations"
-  - "Simpler than full state timing"
-  - "Maximum count limited to prevent overflow"
+configuration_examples:
+  - name: "Positive pulse measurement"
+    description: "Measure positive pulse widths only"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_00_10001_0, pulse_high"
+    wxpin_code: "WXPIN #0, pulse_high" 
+    explanation: "Measure high pulse durations on A input"
 
-applications:
-  pulse_width_measurement: "Measure positive pulse widths"
-  duty_cycle_analysis: "High time component of duty cycle"
-  signal_validation: "Verify minimum/maximum pulse widths"
-  timing_analysis: "Positive pulse characteristics"
-
-related_modes:
-  - "%10000 (Time A-states - both high and low)"
-  - "%10010 (Time X A-highs/rises/edges or timeout)"
-
-see_also:
-  - "Pulse width measurement techniques"
-  - "High state timing analysis"
-
-source:
-  document: "Silicon Doc v35"
-  section: "Smart Pin Modes"
-  page_reference: "part4-smart-pins.txt"
+extraction_metadata:
   extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [92]
+      section: "%10001 = time A-highs"
+  validation_status: "draft"
+  completeness_score: 85
+  technical_accuracy: "silicon_doc_verified"
