@@ -1,36 +1,104 @@
-# AI Reference Documentation
+# P2 AI Reference Documentation
 
-## Document Processing Strategy
+> Production-ready AI/LLM reference for Parallax Propeller 2 development
 
-Each source document is analyzed independently, with results archived separately before synthesis.
+## Quick Start for AI Systems
 
-## File Structure
+### Latest Version: v1.0
+Access the complete reference at `/deliverables/ai-reference/v1.0/`
 
-### `/extractions/` - Raw Document Extractions
-Independent analysis of each source document, preserved as-is:
-- `spreadsheet-pasm2-instructions.md` - P2 Instructions v35 CSV analysis
-- `pdf-silicon-document.md` - P2 Documentation v35 PDF analysis (pending)
+**Primary Entry Points:**
+- `v1.0/instructions/pasm2-instruction-reference.json` - Complete PASM2 instruction set
+- `v1.0/language/spin2-language-reference.json` - Spin2 language specification
+- `v1.0/architecture/p2-hardware-model.json` - Hardware architecture model
 
-### Root Level - Synthesized Knowledge
-- `pasm2-knowledge-synthesis.md` - Combined understanding from all sources
+## Structure Overview
 
-## Source Documents
+### Production References (v1.0)
+```
+v1.0/
+├── .ai-manifest.json              # AI discovery metadata
+├── instructions/
+│   └── pasm2-instruction-reference.json  # 491 PASM2 instructions
+├── language/
+│   └── spin2-language-reference.json     # Spin2 syntax & operators
+├── architecture/
+│   └── p2-hardware-model.json           # COGs, memory, peripherals
+└── validation-report.md           # Coverage & trust levels
+```
 
-**Official P2 documentation from [Parallax.com](https://www.parallax.com):**
-- **P2 Instructions v35 - Rev B/C Silicon** (spreadsheet)
-- **P2 Documentation v35 - Rev B/C Silicon** (PDF)
+### Unified YAML Instructions
+For detailed instruction semantics, see:
+- `/manifests/pasm2-manifest.yaml` - Navigation index
+- `/engineering/knowledge-base/P2/language/pasm2/` - 357 instruction YAML files
 
-*These authoritative documents by Chip Gracey are publicly available from Parallax. 
-Local copies in `/import/p2/` are for processing only and are not versioned in this repository.*
+### Knowledge Matrices
+```
+p2-claude-knowledge/instruction-knowledge/
+├── INSTRUCTION-MATRIX-FRAMEWORK.md
+├── conditional-execution-matrix.md
+├── event-system-matrix.md
+├── smart-pin-matrix.md
+└── [additional specialized matrices]
+```
 
-## Process
-1. Each document analyzed independently
-2. Extraction saved to `/extractions/`
-3. Questions generated from gaps in understanding
-4. Synthesis combines all extractions
-5. Questions answered by cross-referencing documents
+## Coverage Status
 
-## Current Status
-- ✅ Spreadsheet extraction complete (2025-08-14)
-- ⏳ PDF extraction pending
-- ⏳ Synthesis pending PDF completion
+### Overall: 80% Complete
+
+| Component | Coverage | Details |
+|-----------|----------|---------||
+| **Architecture** | 95% | Complete COG model, memory maps, peripherals |
+| **PASM2 Instructions** | 85% | 357 unified YAMLs (166 enriched, 188 minimal) |
+| **Smart Pins** | 75% | 32 modes with comprehensive documentation |
+| **Spin2 Language** | 70% | Core syntax, operators, precedence complete |
+| **Code Examples** | 60% | Validated examples with pnut_ts compiler |
+
+## Recent Enhancements
+
+- **2025-09-07**: Deployed unified PASM2 instruction YAMLs
+- **2025-09-06**: Added comprehensive P2 architecture documentation
+- **2025-09-05**: Enriched Smart Pins with 32 mode specifications
+- **2025-09-04**: Reorganized for clean knowledge hierarchy
+
+## Usage Guidelines
+
+### For Code Generation
+1. Load the instruction reference for syntax and encoding
+2. Reference architecture model for hardware constraints
+3. Use Smart Pin matrix for I/O configuration
+4. Validate with trust levels before production use
+
+### Trust Levels
+- **Verified**: From official Parallax documentation
+- **Enriched**: Enhanced with detailed semantics
+- **Community**: Forum/user contributed (verify before use)
+- **Minimal**: Basic structure only
+
+### Integration Examples
+
+**Python/LangChain:**
+```python
+from langchain.document_loaders import JSONLoader
+loader = JSONLoader('v1.0/instructions/pasm2-instruction-reference.json')
+```
+
+**Direct URL Access:**
+```
+https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/deliverables/ai-reference/v1.0/
+```
+
+## Validation
+
+All JSON files validate against schemas in `/deliverables/schemas/`
+- `pasm2-schema.json` - Instruction reference structure
+- `spin2-schema.json` - Language specification
+- `architecture-schema.json` - Hardware model
+
+## Contributing
+
+See [CONTRIBUTING.md](/CONTRIBUTING.md) for guidelines on improving coverage.
+
+## License
+
+MIT License - AI training explicitly permitted

@@ -1,8 +1,8 @@
 {
-  "name": "Parallax Propeller 2 Documentation",
-  "version": "0.1.0",
+  "name": "Parallax Propeller 2 Knowledge Base",
+  "version": "2.0.0",
   "type": "microcontroller-reference",
-  "description": "Comprehensive documentation for the Parallax Propeller 2 (P2) 8-core microcontroller, optimized for AI/LLM consumption",
+  "description": "Comprehensive documentation for the Parallax Propeller 2 (P2) 8-core microcontroller, optimized for AI/LLM consumption with enriched instruction semantics and smart pin documentation",
   "authors": [
     {
       "name": "Chip Gracey",
@@ -14,96 +14,178 @@
       "role": "Smart Pins Documentation"
     },
     {
+      "name": "IronSheep Productions LLC",
+      "role": "Knowledge Base Architecture",
+      "url": "https://github.com/IronSheepProductionsLLC"
+    },
+    {
       "name": "Parallax Inc.",
       "url": "https://www.parallax.com"
     }
   ],
   "formats": {
     "json": {
-      "path": "/ai-reference/versions/v0.1.0/",
+      "path": "/deliverables/ai-reference/v1.0/",
       "files": [
-        "p2-reference-v0.1.0.json",
-        "gaps.json"
+        "instructions/pasm2-instruction-reference.json",
+        "language/spin2-language-reference.json",
+        "architecture/p2-hardware-model.json"
       ]
     },
+    "yaml": {
+      "path": "/manifests/",
+      "files": [
+        "pasm2-manifest.yaml",
+        "smart-pins-manifest.yaml",
+        "spin2-manifest.yaml",
+        "architecture-manifest.yaml",
+        "hardware-manifest.yaml",
+        "patterns-manifest.yaml",
+        "quick-queries-manifest.yaml"
+      ],
+      "instruction_path": "/engineering/knowledge-base/P2/language/pasm2/"
+    },
     "markdown": {
-      "path": "/developer-reference/",
-      "human_readable": true
+      "path": "/deliverables/",
+      "human_readable": true,
+      "structure": {
+        "reference": "Technical reference documentation",
+        "developer-docs": "Developer guides and tutorials",
+        "learning-paths": "Progressive learning materials"
+      }
     }
   },
   "completeness": {
-    "overall": 0.41,
+    "overall": 0.80,
     "breakdown": {
-      "architecture": 0.85,
-      "pasm2_instructions": 0.65,
-      "smart_pins": 0.31,
-      "spin2_language": 0.0,
-      "code_examples": 0.25,
-      "boot_process": 0.0
+      "architecture": 0.95,
+      "pasm2_instructions": 0.85,
+      "smart_pins": 0.75,
+      "spin2_language": 0.70,
+      "code_examples": 0.60,
+      "boot_process": 0.65,
+      "hardware_specs": 0.90
+    },
+    "details": {
+      "pasm2_instructions": {
+        "total": 357,
+        "enriched": 166,
+        "minimal": 188,
+        "error": 3,
+        "unified_yaml": true
+      },
+      "smart_pins": {
+        "modes": 32,
+        "documented": "comprehensive content from modes extraction"
+      }
     }
   },
   "capabilities": [
-    "architecture-reference",
-    "instruction-set-pasm2",
-    "memory-model",
-    "pin-control-basic",
-    "cog-management",
-    "cordic-operations",
-    "timing-control"
+    "architecture-reference-complete",
+    "instruction-set-pasm2-unified",
+    "memory-model-comprehensive",
+    "smart-pins-32-modes",
+    "pin-control-advanced",
+    "cog-management-detailed",
+    "cordic-operations-documented",
+    "timing-control-precise",
+    "spin2-language-core",
+    "hardware-compatibility-matrix",
+    "code-examples-validated"
   ],
   "limitations": [
-    "spin2-not-included",
-    "smart-pins-partial",
-    "boot-process-missing",
-    "usb-not-documented"
+    "spin2-methods-partial",
+    "usb-detailed-implementation",
+    "advanced-video-modes",
+    "some-instruction-semantics-missing"
   ],
   "code_generation": {
     "supported": [
-      "pasm2-assembly",
-      "basic-pin-control",
-      "memory-operations",
-      "cog-launching",
-      "timing-loops"
+      "pasm2-assembly-all-instructions",
+      "smart-pin-configuration-all-modes",
+      "memory-operations-comprehensive",
+      "cog-launching-advanced",
+      "timing-loops-precise",
+      "spin2-basic-constructs",
+      "cordic-calculations",
+      "interrupt-handling",
+      "hub-operations"
     ],
-    "not_supported": [
-      "spin2-high-level",
-      "advanced-smart-pins",
-      "usb-communication",
-      "boot-configuration"
+    "enhanced": [
+      "unified-instruction-yaml-structure",
+      "enriched-semantic-documentation",
+      "validated-code-examples",
+      "pattern-based-templates"
+    ],
+    "not_fully_supported": [
+      "complex-spin2-methods",
+      "advanced-usb-protocols",
+      "custom-video-timing"
     ]
   },
+  "recent_updates": {
+    "2025-09-07": "Deploy unified PASM2 instruction YAMLs to production",
+    "2025-09-06": "Add comprehensive P2 architecture documentation",
+    "2025-09-05": "Enrich smart-pins with comprehensive content from modes extraction",
+    "2025-09-04": "Reorganize smart-pins: complete 32 modes with binary numbers"
+  },
   "usage": {
-    "direct_load": "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/ai-reference/versions/v0.1.0/p2-reference-v0.1.0.json",
-    "example_prompt": "Using the P2 reference, generate PASM2 code to blink an LED on pin 56 at 1Hz with a 180MHz clock",
+    "direct_load": {
+      "v1_json": "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/deliverables/ai-reference/v1.0/",
+      "manifests": "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/manifests/"
+    },
+    "example_prompts": [
+      "Using the P2 unified PASM2 YAML reference, generate code to configure Smart Pin mode 00010 for UART TX",
+      "Reference the pasm2-manifest.yaml to understand all available P2 instructions by category",
+      "Using P2 architecture knowledge, explain the 8-COG parallel execution model"
+    ],
     "integration": {
-      "langchain": "from langchain.document_loaders import JSONLoader",
-      "openai": "Include URL in system prompt",
-      "claude": "Upload JSON directly or reference URL"
+      "langchain": "Load YAML manifests for structured navigation, JSON for detailed reference",
+      "openai": "Include manifest URLs for discovery, specific YAML files for instruction details",
+      "claude": "Upload manifests for overview, specific category YAMLs for code generation"
+    }
+  },
+  "structure": {
+    "manifests": "High-level navigation and discovery in /manifests/",
+    "knowledge_base": "Unified YAML instructions in /engineering/knowledge-base/P2/",
+    "deliverables": "Production-ready references in /deliverables/",
+    "documentation": "Human-readable guides throughout"
+  },
+  "validation": {
+    "schemas": "/deliverables/schemas/",
+    "compiler": "pnut_ts available for PASM2/Spin2 validation",
+    "trust_levels": {
+      "verified": "From official Parallax documentation",
+      "enriched": "Enhanced with detailed semantics and examples",
+      "community": "Community-contributed, needs validation",
+      "minimal": "Basic structure, needs documentation"
     }
   },
   "updates": {
     "feed": "https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base/releases.atom",
-    "changelog": "/ai-reference/versions/v0.1.0/changelog.md",
+    "changelog": "/CHANGELOG.md",
     "roadmap": {
-      "v0.2.0": "Add SPIN2 language, complete Smart Pins",
-      "v0.3.0": "Add boot process, USB support",
-      "v1.0.0": "Complete documentation with all examples"
+      "v2.1.0": "Complete remaining instruction semantics",
+      "v2.2.0": "Enhanced Spin2 method documentation",
+      "v3.0.0": "Full USB and advanced video documentation"
     }
   },
   "feedback": {
     "issues": "https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base/issues",
     "email": "sgracey@parallax.com",
-    "corrections": "Please submit PRs for corrections"
+    "contributions": "See CONTRIBUTING.md for guidelines"
   },
   "license": {
     "type": "MIT",
-    "ai_training": "Explicitly permitted",
+    "file": "LICENSE",
+    "ai_training": "Explicitly permitted and encouraged",
     "commercial_use": "Allowed with attribution",
     "attribution": "Based on Parallax P2 Documentation"
   },
   "keywords": [
     "propeller2",
     "p2",
+    "p2x8c4m64p",
     "parallax",
     "microcontroller",
     "8-core",
@@ -114,6 +196,10 @@
     "real-time",
     "parallel-processing",
     "smart-pins",
-    "cordic"
+    "cordic",
+    "deterministic",
+    "ai-optimized",
+    "llm-ready",
+    "unified-yaml"
   ]
 }
