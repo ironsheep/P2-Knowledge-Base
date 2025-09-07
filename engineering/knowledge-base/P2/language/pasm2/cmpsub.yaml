@@ -1,11 +1,22 @@
 instruction: CMPSUB
 syntax: CMPSUB  D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0010111 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Compare and subtract S from D if D >= S
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'CMPSUB compares the unsigned values of Dest and Src, and if Src is less than or equal to
+  Dest then it is Result: Dest is decremented by Src unless it is less than Src, and the comparison results
+  are optionally written to the C and Z flags.'
+category: Math Instruction - Compare two unsigned values and subtract the second if it is lesser or equal.
 flags_affected:
-  C: 1, else D same and C = 0
+  C:
+    formula: 1, else D same and C = 0
+parameters:
+- Dest is the register containing the value to compare with Src and is the destination written to if a
+  subtraction is performed.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared with and possibly
+  subtracted from Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

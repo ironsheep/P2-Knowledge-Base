@@ -1,9 +1,12 @@
 instruction: SETINT3
 syntax: SETINT3 {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000100111
-description: |
-  Set INT3 source to D[3:0].
 timing:
   cycles: 2
   type: fixed
 group: Interrupts
+description: Set INT3 source to D[3:0].
+category: Interrupts
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

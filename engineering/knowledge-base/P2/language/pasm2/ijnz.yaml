@@ -1,9 +1,22 @@
 instruction: IJNZ
 syntax: IJNZ    D,{#}S
 encoding: EEEE 1011100 01I DDDDDDDDD SSSSSSSSS
-description: |
-  Increment D and jump to S** if result is not zero.
 timing:
   cycles: 2
   type: fixed
 group: Branch S - Mod & Test
+description: 'IJZ or IJNZ increments the value in Dest, writes the result, and jumps to the address described
+  by Src if the Result: Dest is incremented, and if the result is zero (or not zero in syntax 2), PC is
+  set to a new relative (#Src) or absolute (Src) address.'
+category: Flow Control Instruction - Increment value and jump if zero or not zero.
+flags_affected:
+  C:
+    when: D
+  Z:
+    when: and
+parameters:
+- Dest is a register whose value is incremented and tested for zero or not zero.
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

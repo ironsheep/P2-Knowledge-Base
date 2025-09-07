@@ -1,11 +1,15 @@
 instruction: POPB
 syntax: POPB    D        {WC/WZ/WCZ}
 encoding: EEEE 1011000 CZ1 DDDDDDDDD 111011111
-description: |
-  Read long from hub address --PTRB into D. C = MSB of long. *
 timing:
   cycles: 9
   type: fixed
 group: Hub RAM - Read
+description: C = MSB of long.
+category: Hub RAM - Read
 flags_affected:
-  C: MSB of long
+  C:
+    formula: MSB of long
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

@@ -1,9 +1,12 @@
 instruction: WRBYTE
 syntax: WRBYTE  {#}D,{#}S/P
 encoding: EEEE 1100010 0LI DDDDDDDDD SSSSSSSSS
-description: |
-  Write byte in D[7:0] to hub address {#}S/PTRx.
 timing:
   cycles: 3
   type: fixed
 group: Hub RAM - Write
+description: Write byte in D[7:0] to hub address {#}S/PTRx.
+category: Hub RAM - Write
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

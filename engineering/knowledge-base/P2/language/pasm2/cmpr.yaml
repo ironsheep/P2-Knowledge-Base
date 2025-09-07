@@ -1,12 +1,22 @@
 instruction: CMPR
 syntax: CMPR    D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0010100 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Compare S to D (reverse)
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'CMP compares the unsigned values of Dest and Src (by subtracting Dest from Src) and optionally
+  setting the C Result: Greater/lesser and equality status is optionally written to the C and Z flags.'
+category: Math Instruction - Compare two unsigned values (in reverse order to CMP).
 flags_affected:
-  C: borrow of (S - D)
-  Z: (D == S)
+  C:
+    formula: borrow of (S - D)
+  Z:
+    formula: (D == S)
+parameters:
+- Dest is the register containing the value to compare with that of Src.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
+related:
+- CMP
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

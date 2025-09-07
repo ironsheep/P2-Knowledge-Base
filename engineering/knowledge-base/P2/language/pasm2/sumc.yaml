@@ -1,11 +1,15 @@
 instruction: SUMC
 syntax: SUMC    D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0011100 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Sum +/-S into D by C
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: Sum +/-S into D by C.
+category: Math and Logic
 flags_affected:
-  C: 1 then D = D - S, else D = D + S
+  C:
+    formula: 1 then D = D - S, else D = D + S
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

@@ -1,11 +1,21 @@
 instruction: SHR
 syntax: SHR     D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0000010 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Shift right
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'SHR shifts Dest''s binary value right by Src places (0–31 bits) and sets the new MSBs to
+  0. This is useful for Result: The bits of Dest are shifted right by Src bits, inserting zeros (0) as
+  new leftmost bits.'
+category: Bit Operation / Math Instruction - Shift bits right; a.k.a. divide unsigned 32-bit integer by
+  power-of-two.
 flags_affected:
-  C: last bit shifted out if S[4:0] > 0, else D[0]
+  C:
+    formula: last bit shifted out if S[4:0] > 0, else D[0]
+parameters:
+- Dest is the register containing the value to right shift by Src bits.
+- Src is a register or 5-bit literal whose value indicates the number of bits to shift right.
+- WC, WZ, or WCZ are optional effects to update flags.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

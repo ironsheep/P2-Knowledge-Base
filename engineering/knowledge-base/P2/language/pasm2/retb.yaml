@@ -1,12 +1,17 @@
 instruction: RETB
 syntax: RETB             {WC/WZ/WCZ}
 encoding: EEEE 1101011 CZ1 000000000 000101111
-description: |
-  Return by reading hub long (L) at --PTRB. C = L[31], Z = L[30], PC = L[19:0].
 timing:
   cycles: 11
   type: fixed
 group: Branch Return
+description: C = L[31], Z = L[30], PC = L[19:0].
+category: Branch Return
 flags_affected:
-  C: L[31], Z = L[30], PC = L[19:0]
-  Z: L[30], PC = L[19:0]
+  C:
+    formula: L[31], Z = L[30], PC = L[19:0]
+  Z:
+    formula: L[30], PC = L[19:0]
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

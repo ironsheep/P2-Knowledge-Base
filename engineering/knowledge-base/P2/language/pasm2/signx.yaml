@@ -1,11 +1,24 @@
 instruction: SIGNX
 syntax: SIGNX   D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0111011 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Sign-extend D from bit S[4:0]. C = MSB of result. *
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'SIGNX fills the bits of Dest, above the bit indicated by Src[4:0], with the value of that
+  identified bit; i.e. Result: The Dest value is sign-extended above the bit indicated by Src and is stored
+  in Dest. Optionally the C and Z flags are updated to the resulting MSB and zero status. C = MSB of result.'
+category: Math Instruction - Sign-extend value beyond designated bit.
 flags_affected:
-  C: MSB of result
+  C:
+    formula: MSB of result
+parameters:
+- Dest is a register containing the value to sign-extend above bit Src[4:0] and is where the result is
+  written.
+- Src is a register or 9-bit literal whose value (lower 5 bits) identifies the bit of Dest to zero-extend
+  beyond.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- ZEROX
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

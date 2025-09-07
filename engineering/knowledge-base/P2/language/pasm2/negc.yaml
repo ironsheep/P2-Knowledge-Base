@@ -1,11 +1,26 @@
 instruction: NEGC
 syntax: NEGC    D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0110100 CZ0 DDDDDDDDD DDDDDDDDD
-description: |
-  Negate D by C
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'NEGC negates Src (syntax 1) or Dest (syntax 2) if C = 1 and stores the result in the Dest
+  register. If C = 0, the Src Result: The Src or Dest value, possibly negated according to C, is stored
+  into Dest and optionally the C and Z flags are updated to the resulting sign and zero status.'
+category: Math Instruction - Negate value according to C.
 flags_affected:
-  C: 1 then D = -D, else D = D
+  C:
+    formula: 1 then D = -D, else D = D
+parameters:
+- Dest is a register to receive the Src or -Src value (syntax 1), or contains the value to negate (syntax
+  2) according to C.
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value (if C=0) or negated
+  value (if C=1) is stored into Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- NEGNC
+- NEGZ
+- NEGNZ
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

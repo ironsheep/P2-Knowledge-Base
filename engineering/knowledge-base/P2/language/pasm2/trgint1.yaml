@@ -1,9 +1,12 @@
 instruction: TRGINT1
 syntax: TRGINT1
 encoding: EEEE 1101011 000 000100010 000100100
-description: |
-  Trigger INT1, regardless of STALLI mode.
 timing:
   cycles: 2
   type: fixed
 group: Interrupts
+description: Trigger INT1, regardless of STALLI mode.
+category: Interrupts
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

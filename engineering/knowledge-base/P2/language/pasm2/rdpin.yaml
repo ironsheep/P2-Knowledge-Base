@@ -1,11 +1,15 @@
 instruction: RDPIN
 syntax: RDPIN   D,{#}S          {WC}
 encoding: EEEE 1010100 C1I DDDDDDDDD SSSSSSSSS
-description: |
-  Read smart pin S[5:0] result \"Z\" into D, acknowledge smart pin. C = modal result.
 timing:
   cycles: 2
   type: fixed
 group: Smart Pins
+description: C = modal result.
+category: Smart Pins
 flags_affected:
-  C: modal result
+  C:
+    formula: modal result
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

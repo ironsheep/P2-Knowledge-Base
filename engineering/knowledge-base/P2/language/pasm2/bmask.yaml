@@ -1,9 +1,19 @@
 instruction: BMASK
 syntax: BMASK   D,{#}S
 encoding: EEEE 1001110 010 DDDDDDDDD DDDDDDDDD
-description: |
-  Get LSB-justified bit mask of size (D[4:0] + 1) into D
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'BMASK generates an LSB-justified bit mask (all ones) of Src+1 or Dest+1 length and stores
+  it in Dest. The size Result: Bit mask of size Src+1, or Dest+1 (1—32 bits) is stored into Dest.'
+category: Bit Operation Instruction - Get 1..32-bit mask into Dest.
+flags_affected:
+  C:
+    when: D
+parameters:
+- Dest is the register in which to store the generated bit mask and optionally begins by containing the
+  5-bit mask size it is requesting (syntax 2).
+- Src is an optional register or 5-bit literal whose value is the size of the bit mask to generate.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

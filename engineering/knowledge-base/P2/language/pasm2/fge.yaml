@@ -1,11 +1,26 @@
 instruction: FGE
 syntax: FGE     D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0011000 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Force D >= S
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'FGE sets unsigned Dest to unsigned Src if Dest is less than Src. This is also known as a
+  limit minimum function; Result: Unsigned Dest is set to unsigned Src if Dest was less than Src. Optionally
+  the C and Z flag indicates if the replacement happened and the zero status of the result.'
+category: Math Instruction - Force unsigned value to be greater than or equal to another.
 flags_affected:
-  C: 1, else D same and C = 0
+  C:
+    formula: 1, else D same and C = 0
+parameters:
+- Dest is a register containing the unsigned value to limit to a minimum of unsigned Src, and is where
+  the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose unsigned value is the lower limit
+  to force upon Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- FLE
+- FGES
+- FLES
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

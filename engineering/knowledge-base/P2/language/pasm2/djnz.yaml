@@ -1,9 +1,21 @@
 instruction: DJNZ
 syntax: DJNZ    D,{#}S
 encoding: EEEE 1011011 01I DDDDDDDDD SSSSSSSSS
-description: |
-  Decrement D and jump to S** if result is not zero.
 timing:
   cycles: 2
   type: fixed
 group: Branch S - Mod & Test
+description: 'DJZ or DJNZ decrements the value in Dest, writes the result, and jumps to the address described
+  by Src if the Result: Dest is decremented, and if the result is zero (or not zero in syntax 2), PC is
+  set to a new relative (#Src) or absolute (Src) address.'
+category: Flow Control Instruction - Decrement, jump if zero or not zero.
+flags_affected:
+  C:
+    when: D
+  Z:
+    when: and
+parameters:
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

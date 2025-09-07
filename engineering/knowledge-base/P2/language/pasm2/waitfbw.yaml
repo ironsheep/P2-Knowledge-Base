@@ -1,11 +1,25 @@
 instruction: WAITFBW
 syntax: WAITFBW          {WC/WZ/WCZ}
 encoding: EEEE 1101011 CZ0 000011001 000100100
-description: |
-  Wait for FBW event flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.
 timing:
   cycles: 2
   type: variable
 group: Events - Wait
+description: 'WAITFBW waits for a FIFO-interface-block-wrap event to occur (unless the event flag is already
+  set), then clears Result: Wait for FIFO-interface-block-wrap event, then clear the flag; optionally
+  aborting on timeout and setting C and/or Z on abort. Z = timeout.'
+category: Event Monitor Instruction - Wait for and clear FIFO-interface-block-wrap event flag.
 flags_affected:
-  Z: timeout
+  Z:
+    formula: timeout
+parameters:
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- RDFAST
+- WRFAST
+- FBLOCK
+- POLLFBW
+- JFBW
+- JNFBW
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

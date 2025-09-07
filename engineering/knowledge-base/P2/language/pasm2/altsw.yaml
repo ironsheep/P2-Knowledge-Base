@@ -1,9 +1,17 @@
 instruction: ALTSW
 syntax: ALTSW   D,{#}S
 encoding: EEEE 1001011 101 DDDDDDDDD 000000000
-description: |
-  Alter subsequent SETWORD instruction. Next D field = (D[9:1] + S) & $1FF, N field = D[0]. D += sign-extended S[17:9].
 timing:
   cycles: 2
   type: fixed
 group: Register Indirection
+description: 'ALTSW should be followed by SETWORD— it modifies the SETWORD instruction''s Dest and Num
+  values, enabling Result: The next instruction''s pipelined Dest and Num fields are altered to be (Src
+  + Dest[9:1]) & $1FF, or just Dest[9:1] for syntax 2, and Dest[0], respectively.'
+category: Indirection Instruction - Alter subsequent SETWORD instruction.
+parameters:
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base
+  long address (Src[8:0]; added to index (Dest[9:1]) for SETWORD) and also an optional auto-indexer value
+  (Src[17:9]; added to Dest at end of execution).
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

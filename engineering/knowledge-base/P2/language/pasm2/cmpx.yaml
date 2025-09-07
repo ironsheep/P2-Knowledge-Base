@@ -1,12 +1,25 @@
 instruction: CMPX
 syntax: CMPX    D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0010001 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Compare D to (S + C), extended
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'CMPX compares the unsigned values of Dest and Src plus C (by subtracting Src + C from Dest)
+  and optionally Result: Greater/lesser and equality status is optionally written to the C and Z flags.'
+category: Math Instruction - Compare two unsigned values plus carry flag.
 flags_affected:
-  C: borrow of (D - (S + C))
-  Z: Z AND (D == S + C)
+  C:
+    formula: borrow of (D - (S + C))
+  Z:
+    formula: Z AND (D == S + C)
+parameters:
+- Dest is a register containing the value to compare with that of Src plus C.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is compared to Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- CMP
+- CMPX
+- CMPSX
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

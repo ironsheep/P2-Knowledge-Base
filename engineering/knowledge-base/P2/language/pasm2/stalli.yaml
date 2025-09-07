@@ -1,9 +1,14 @@
 instruction: STALLI
 syntax: STALLI
 encoding: EEEE 1101011 000 000100001 000100100
-description: |
-  Stall Interrupts.
 timing:
   cycles: 2
   type: fixed
 group: Interrupts
+description: 'STALLI disables interrupt branching. STALLI is the complement of the ALLOWI instruction—
+  both are used to Result: All future interrupts are disallowed.'
+category: Interrupt Instruction - Prevent further interrupts.
+related:
+- ALLOWI
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

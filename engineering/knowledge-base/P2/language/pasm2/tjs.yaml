@@ -1,9 +1,12 @@
 instruction: TJS
 syntax: TJS     D,{#}S
 encoding: EEEE 1011101 10I DDDDDDDDD SSSSSSSSS
-description: |
-  Test D and jump to S** if D is signed (D[31] = 1).
 timing:
   cycles: 2
   type: fixed
 group: Branch S - Test
+description: Test D and jump to S** if D is signed (D[31] = 1).
+category: Branch S - Test
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

@@ -1,11 +1,25 @@
 instruction: FLES
 syntax: FLES    D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0011011 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Force D <= S, signed
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'FLES sets signed Dest to signed Src if Dest is greater than Src. This is also known as a
+  limit maximum function; Result: Signed Dest is set to signed Src if Dest was greater than Src. Optionally
+  the C and Z flag indicates if the replacement happened and the zero status of the result.'
+category: Math Instruction - Force signed value to be less than or equal to another.
 flags_affected:
-  C: 1, else D same and C = 0
+  C:
+    formula: 1, else D same and C = 0
+parameters:
+- Dest is a register containing the signed value to limit to a maximum of signed Src, and is where the
+  result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose signed value is the upper limit
+  to force upon Dest.
+related:
+- FGES
+- FLE
+- FGE
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

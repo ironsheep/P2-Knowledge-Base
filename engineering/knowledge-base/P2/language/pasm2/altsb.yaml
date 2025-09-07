@@ -1,9 +1,18 @@
 instruction: ALTSB
 syntax: ALTSB   D,{#}S
 encoding: EEEE 1001011 001 DDDDDDDDD 000000000
-description: |
-  Alter subsequent SETBYTE instruction. Next D field = (D[10:2] + S) & $1FF, N field = D[1:0]. D += sign-extended S[17:9].
 timing:
   cycles: 2
   type: fixed
 group: Register Indirection
+description: ALTSB should be followed by SETBYTE— it modifies the SETBYTE instruction's Dest and Num values,
+  enabling.
+category: Indirection Instruction - Alter subsequent SETBYTE instruction.
+parameters:
+- Dest is the register whose 11-bit value is the index, or the full byte address, for the SETBYTE instruction
+  to operate on.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base
+  long address (Src[8:0]; added to index (Dest[10:2]) for SETBYTE) and also an optional auto-indexer value
+  (Src[17:9]; added to Dest at end of execution).
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

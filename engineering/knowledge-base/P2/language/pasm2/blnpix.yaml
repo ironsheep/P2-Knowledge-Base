@@ -1,9 +1,12 @@
 instruction: BLNPIX
 syntax: BLNPIX  D,{#}S
 encoding: EEEE 1010010 10I DDDDDDDDD SSSSSSSSS
-description: |
-  Alpha-blend bytes of S into bytes of D, using SETPIV value.
 timing:
   cycles: 2
   type: fixed
 group: Pixel Mixer
+description: Alpha-blend bytes of S into bytes of D, using SETPIV value.
+category: Pixel Mixer
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

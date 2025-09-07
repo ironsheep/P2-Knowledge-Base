@@ -1,11 +1,15 @@
 instruction: MUXC
 syntax: MUXC    D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0101100 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Mux C into each D bit that is '1' in S
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: Mux C into each D bit that is '1' in S.
+category: Math and Logic
 flags_affected:
-  C: parity of result
+  C:
+    formula: parity of result
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

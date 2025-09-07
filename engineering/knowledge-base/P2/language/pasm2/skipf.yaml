@@ -1,9 +1,13 @@
 instruction: SKIPF
 syntax: SKIPF   {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000110010
-description: |
-  Skip cog/LUT instructions fast per D. Like SKIP, but instead of cancelling instructions, the PC leaps over them.
 timing:
   cycles: 2
   type: fixed
 group: Branch D - Jump+Skip
+description: Skip cog/LUT instructions fast per D. Like SKIP, but instead of cancelling instructions,
+  the PC leaps over them.
+category: Branch D - Jump+Skip
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

@@ -1,11 +1,24 @@
 instruction: TESTBN
 syntax: TESTBN  D,{#}S         WC/WZ
 encoding: EEEE 0100111 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Test bit S[4:0] of !D, XOR into C/Z. C/Z = C/Z XOR !D[S[4:0]].
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'TESTB or TESTBN reads the state (0/1) of a bit in Dest designated by Src, possibly inverts
+  that result, and either Result: The state of Dest''s bit Src is read, possibly inverted, and either
+  stored as-is, or bitwise ANDed, ORed, or XORed into C or Z. Z = C/Z XOR !D[S[4:0]].'
+category: Bit Operation Instruction - Test bit of D or !D and either store, AND, OR, or XOR the result
+  into flags.
 flags_affected:
-  Z: C/Z XOR !D[S[4:0]]
+  Z:
+    formula: C/Z XOR !D[S[4:0]]
+    when: IN[D[4:0]]
+parameters:
+- Dest is the register whose value will have a single bit tested.
+- Src is a register or 5-bit literal whose value identifies the bit (0–31) of Dest to test.
+related:
+- TESTP
+- TESTPN
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

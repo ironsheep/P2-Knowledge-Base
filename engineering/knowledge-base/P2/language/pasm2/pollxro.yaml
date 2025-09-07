@@ -1,9 +1,22 @@
 instruction: POLLXRO
 syntax: POLLXRO          {WC/WZ/WCZ}
 encoding: EEEE 1101011 CZ0 000001100 000100100
-description: |
-  Get XRO event flag into C/Z, then clear it.
 timing:
   cycles: 2
   type: fixed
 group: Events - Poll
+description: 'POLLXRO copies the state of the streamer NCO rollover event flag into C and/or Z and then
+  clears the flag (unless Result: Streamer-NCO-rollover event flag is optionally copied into C and/or
+  Z, then it is cleared.'
+category: Event Monitor Instruction - Retrieve and clear streamer-NCO-rollover event flag.
+parameters:
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- XINIT
+- XZERO
+- XCONT
+- WAITXRO
+- JXRO
+- JNXRO
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

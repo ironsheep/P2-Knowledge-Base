@@ -1,11 +1,21 @@
 instruction: FLTL
 syntax: FLTL    {#}D           {WCZ}
 encoding: EEEE 1101011 CZL DDDDDDDDD 001010000
-description: |
-  OUT bits of pins D[10:6]+D[5:0]..D[5:0] = 0. DIR bits = 0. Wraps within OUTA/OUTB. Prior SETQ overrides D[10:6]. C,Z = OUT bit.
 timing:
   cycles: 2
   type: fixed
 group: Pins
+description: 'FLTH or FLTL sets the I/O pin(s) designated by Dest to the input direction and to a high
+  or low output level; i.e. Result: The I/O pins described by Dest are set to the input direction and
+  to an output level of high or low; the rest are left as-is. Z = OUT bit.'
+category: I/O Pin Instruction - Set pin(s) direction to input and to an output level of high (1) or low
+  (0).
 flags_affected:
-  Z: OUT bit
+  Z:
+    formula: OUT bit
+parameters:
+- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s)
+  to set to input direction and output levels of high or low.
+- WCZ is an optional effect to update flags.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

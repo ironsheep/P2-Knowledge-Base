@@ -1,11 +1,23 @@
 instruction: ZEROX
 syntax: ZEROX   D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0111010 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Zero-extend D above bit S[4:0]. C = MSB of result. *
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: ZEROX fills the bits of Dest, above the bit indicated by Src[4:0], with zeros; i.e. zero-extending
+  the value. This is C = MSB of result.
+category: Math Instruction - Zero-extend value beyond designated bit.
 flags_affected:
-  C: MSB of result
+  C:
+    formula: MSB of result
+parameters:
+- Dest is a register containing the value to zero-extend above bit Src[4:0] and is where the result is
+  written.
+- Src is a register or 9-bit literal whose value (lower 5 bits) identifies the bit of Dest to zero-extend
+  beyond.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- SIGNX
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

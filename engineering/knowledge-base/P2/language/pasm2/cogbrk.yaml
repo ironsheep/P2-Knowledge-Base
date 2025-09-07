@@ -1,9 +1,14 @@
 instruction: COGBRK
 syntax: COGBRK  {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000110101
-description: |
-  If in debug ISR, trigger asynchronous breakpoint in cog D[3:0]. Cog D[3:0] must have asynchronous breakpoint enabled.
 timing:
   cycles: 2
   type: fixed
 group: Interrupts
+description: 'COGBRK triggers an asynchronous breakpoint in a designated cog. The COGBRK instruction must
+  be executed Result: If in the Debug ISR, trigger an asynchronous breakpoint in cog identified by Dest.'
+category: Interrupt Instruction - Trigger breakpoint in specified cog.
+parameters:
+- Dest is the register or 9-bit literal whose value (lower 3-bits) indicates which cog to trigger.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

@@ -1,11 +1,15 @@
 instruction: RDLUT
 syntax: RDLUT   D,{#}S/P {WC/WZ/WCZ}
 encoding: EEEE 1010101 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Read data from LUT address {#}S/PTRx into D. C = MSB of data. *
 timing:
   cycles: 3
   type: fixed
 group: Lookup Table
+description: C = MSB of data.
+category: Lookup Table
 flags_affected:
-  C: MSB of data
+  C:
+    formula: MSB of data
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

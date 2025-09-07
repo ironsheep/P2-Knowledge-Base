@@ -1,9 +1,12 @@
 instruction: RETI1
 syntax: RETI1
 encoding: EEEE 1011001 110 111111111 111110101
-description: |
-  Return from INT1. (CALLD $1FF,$1F5 WCZ)
 timing:
   cycles: 4
   type: fixed
 group: Branch S - Return
+description: Return from INT1. (CALLD $1FF,$1F5 WCZ).
+category: Branch S - Return
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

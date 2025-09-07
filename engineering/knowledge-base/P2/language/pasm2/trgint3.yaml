@@ -1,9 +1,12 @@
 instruction: TRGINT3
 syntax: TRGINT3
 encoding: EEEE 1101011 000 000100100 000100100
-description: |
-  Trigger INT3, regardless of STALLI mode.
 timing:
   cycles: 2
   type: fixed
 group: Interrupts
+description: Trigger INT3, regardless of STALLI mode.
+category: Interrupts
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

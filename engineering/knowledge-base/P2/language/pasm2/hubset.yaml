@@ -1,9 +1,12 @@
 instruction: HUBSET
 syntax: HUBSET  {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000000000
-description: |
-  Set hub configuration to D.
 timing:
   cycles: 2
   type: fixed
 group: Hub Control - Multi
+description: Set hub configuration to D.
+category: Hub Control - Multi
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

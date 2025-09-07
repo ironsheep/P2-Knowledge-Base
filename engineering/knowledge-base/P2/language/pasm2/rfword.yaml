@@ -1,11 +1,15 @@
 instruction: RFWORD
 syntax: RFWORD  D        {WC/WZ/WCZ}
 encoding: EEEE 1101011 CZ0 DDDDDDDDD 000010001
-description: |
-  Used after RDFAST. Read zero-extended word from FIFO into D. C = MSB of word. *
 timing:
   cycles: 2
   type: mode_dependent
 group: Hub FIFO - Read
+description: C = MSB of word.
+category: Hub FIFO - Read
 flags_affected:
-  C: MSB of word
+  C:
+    formula: MSB of word
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

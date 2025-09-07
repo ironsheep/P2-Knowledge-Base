@@ -1,9 +1,17 @@
 instruction: COGSTOP
 syntax: COGSTOP {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000000011
-description: |
-  Stop cog D[3:0].
 timing:
   cycles: 2
   type: fixed
 group: Hub Control - Cogs
+description: 'COGSTOP terminates the cog identified by Dest[2:0]. In this dormant state, the cog ceases
+  to execute code and Result: Cog indicated by Dest is terminated (stopped).'
+category: Cog Control Instruction - Stop a cog by ID.
+parameters:
+- Dest is the register or 9-bit literal indicating (in lowest 3 bits) which cog to stop.
+related:
+- COGINIT
+- COGSTOP
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

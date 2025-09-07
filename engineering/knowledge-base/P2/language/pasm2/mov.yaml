@@ -1,11 +1,19 @@
 instruction: MOV
 syntax: MOV     D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0110000 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Move S into D
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'Mov stores the Src value into Dest. Result: The Src value is stored in Dest and optionally
+  flags are updated with the sign bit and zero status.'
+category: Bit Operation Instruction - Set a value into a register.
 flags_affected:
-  C: S[31]
+  C:
+    formula: S[31]
+parameters:
+- Dest is the register to receive the Src value.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value will be stored into Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

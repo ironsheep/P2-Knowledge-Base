@@ -1,11 +1,15 @@
 instruction: RDLONG
 syntax: RDLONG  D,{#}S/P {WC/WZ/WCZ}
 encoding: EEEE 1011000 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Read long from hub address {#}S/PTRx into D. C = MSB of long. * Prior SETQ/SETQ2 invokes cog/LUT block transfer.
 timing:
   cycles: 9
   type: fixed
 group: Hub RAM - Read
+description: C = MSB of long.
+category: Hub RAM - Read
 flags_affected:
-  C: MSB of long
+  C:
+    formula: MSB of long
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

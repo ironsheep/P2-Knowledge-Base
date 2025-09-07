@@ -1,9 +1,12 @@
 instruction: RGBEXP
 syntax: RGBEXP  D
 encoding: EEEE 1101011 000 DDDDDDDDD 001100111
-description: |
-  Expand 5:6:5 RGB value in D[15:0] into 8:8:8 value in D[31:8]
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: Expand 5:6:5 RGB value in D[15:0] into 8:8:8 value in D[31:8].
+category: Math and Logic
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

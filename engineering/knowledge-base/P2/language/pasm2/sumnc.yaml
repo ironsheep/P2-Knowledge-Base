@@ -1,11 +1,25 @@
 instruction: SUMNC
 syntax: SUMNC   D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0011101 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Sum +/-S into D by !C
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'SUMC or SUMNC adjusts the signed Dest value by Src or -Src (depending on C or !C) and stores
+  the result into the Result: The sum of signed Dest and either Src or -Src (according to C) is stored
+  in Dest and optionally the C and Z flags are updated to the sign and zero status.'
+category: Math Instruction - Adjust signed value by other C-negated or !C-negated value.
 flags_affected:
-  C: 0 then D = D - S, else D = D + S
+  C:
+    formula: 0 then D = D - S, else D = D + S
+parameters:
+- Dest is a register containing the signed value to adjust by Src or -Src, and is where the result is
+  written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value (if C=0 or !C=0) or negated
+  value (if C=1 or !C=1) is added into Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- SUMZ
+- SUMNZ
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

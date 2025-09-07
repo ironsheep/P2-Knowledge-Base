@@ -1,9 +1,29 @@
 instruction: ALTI
 syntax: ALTI    D,{#}S
 encoding: EEEE 1001101 001 DDDDDDDDD 101100100
-description: |
-  Substitute next instruction's I/R/D/S fields with fields from D, per S. Modify D per S.
 timing:
   cycles: 2
   type: fixed
 group: Register Indirection
+description: 'ALTI substitutes fields from Dest for one or more of the next instruction''s pipelined Dest,
+  Src, Result, Instr, FX, Result: The next instruction''s pipelined field value values are substituted
+  from the Dest template, and Dest is modified per Src configuration (syntax 1), or the entire Dest opcode
+  (instruction) is executed in place of the next instruction (syntax 2).'
+category: Indirection Instruction - Substitute next instruction's field values from template, per configuration.
+flags_affected:
+  C:
+    when: D
+parameters:
+- Dest is the register whose value contains one or more of the next instruction's field substitutes or
+  an entire 32-bit opcode for full substitution.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value describes the substitutions
+  and Dest modifications to perform.
+related:
+- SETD
+- SETS
+- SETR
+- ALTD
+- ALTS
+- ALTR
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

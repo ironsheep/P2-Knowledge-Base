@@ -1,9 +1,12 @@
 instruction: RESI1
 syntax: RESI1
 encoding: EEEE 1011001 110 111110100 111110101
-description: |
-  Resume from INT1. (CALLD $1F4,$1F5 WCZ)
 timing:
   cycles: 4
   type: fixed
 group: Branch S - Resume
+description: Resume from INT1. (CALLD $1F4,$1F5 WCZ).
+category: Branch S - Resume
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

@@ -1,9 +1,19 @@
 instruction: COGATN
 syntax: COGATN  {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000111111
-description: |
-  Strobe \"attention\" of all cogs whose corresponging bits are high in D[15:0].
 timing:
   cycles: 2
   type: fixed
 group: Events - Attention
+description: 'COGATN strobes the attention signal for one or more cogs. Dest bit positions 7:0 represent
+  cogs 7 through 0; high Result: The attention signal of one or more cogs is strobed.'
+category: Event Handling Instruction - Get the attention of one or more other cogs.
+parameters:
+- Dest is the register or 9-bit literal whose value (lower 8-bit pattern) indicates which cogs to signal.
+related:
+- POLLATN
+- WAITATN
+- JATN
+- JNATN
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

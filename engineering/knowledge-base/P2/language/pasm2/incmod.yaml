@@ -1,11 +1,23 @@
 instruction: INCMOD
 syntax: INCMOD  D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0111000 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Increment with modulus
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'INCMOD compares Dest with Src— if not equal, it increments Dest; otherwise it sets Dest
+  equal to 0. If Dest Result: If Dest was not equal to Src, it is incremented by 1; otherwise Dest is
+  reset to 0. Optionally, C and Z are updated to indicate reset and zero result status.'
+category: Math Instruction - Increment with modulus.
 flags_affected:
-  C: 1, else D = D + 1 and C = 0
+  C:
+    formula: 1, else D = D + 1 and C = 0
+parameters:
+- Dest is a register containing the value to increment up to Src with modulus, and is where the result
+  is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is the modulus limit to apply
+  to Dest's increment operation.
+related:
+- DECMOD
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

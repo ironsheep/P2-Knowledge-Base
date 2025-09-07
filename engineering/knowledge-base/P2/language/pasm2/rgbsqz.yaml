@@ -1,9 +1,12 @@
 instruction: RGBSQZ
 syntax: RGBSQZ  D
 encoding: EEEE 1101011 000 DDDDDDDDD 001100110
-description: |
-  Squeeze 8:8:8 RGB value in D[31:8] into 5:6:5 value in D[15:0]
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: Squeeze 8:8:8 RGB value in D[31:8] into 5:6:5 value in D[15:0].
+category: Math and Logic
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

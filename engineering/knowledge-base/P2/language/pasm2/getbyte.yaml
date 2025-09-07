@@ -1,9 +1,31 @@
 instruction: GETBYTE
 syntax: GETBYTE D,{#}S,#N
 encoding: EEEE 1000111 000 DDDDDDDDD 000000000
-description: |
-  Get byte established by prior ALTGB instruction into D.
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'GETBYTE reads the byte identified by Num (0–3) from Src, or a byte from the source described
+  by a prior ALTGB Result: Byte Num (0–3) of Src, or a byte from a source described by prior ALTGB instruction,
+  is written to Dest.'
+category: Bit Operation Instruction - Get a byte from a value.
+flags_affected:
+  C:
+    when: D
+parameters:
+- Dest is the register in which to store the byte.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target byte to
+  read.
+- Num is a 2-bit literal identifying the byte ID (0–3) of Src to read.
+related:
+- ALTGB
+- GETNIB
+- GETWORD
+- SETNIB
+- SETBYTE
+- SETWORD
+- ROLNIB
+- ROLBYTE
+- ROLWORD
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

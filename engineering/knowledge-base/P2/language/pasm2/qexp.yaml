@@ -1,9 +1,12 @@
 instruction: QEXP
 syntax: QEXP    {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000001111
-description: |
-  Begin CORDIC logarithm-to-number conversion of D. GETQX retrieves number.
 timing:
   cycles: 2
   type: fixed
 group: CORDIC Solver
+description: Begin CORDIC logarithm-to-number conversion of D. GETQX retrieves number.
+category: CORDIC Solver
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

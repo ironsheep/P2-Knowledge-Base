@@ -1,12 +1,25 @@
 instruction: CMPSX
 syntax: CMPSX   D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0010011 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Compare D to (S + C), signed and extended
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'CMPSX compares the signed values of Dest and Src plus C (by subtracting Src + C from Dest)
+  and optionally Result: Greater/lesser and equality status is optionally written to the C and Z flags.'
+category: Math Instruction - Compare two signed values plus carry flag.
 flags_affected:
-  C: correct sign of (D - (S + C))
-  Z: Z AND (D == S + C)
+  C:
+    formula: correct sign of (D - (S + C))
+  Z:
+    formula: Z AND (D == S + C)
+parameters:
+- Dest is the register containing the value to compare with that of Src.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- CMP
+- CMPX
+- CMPSX
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

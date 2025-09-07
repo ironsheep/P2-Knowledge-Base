@@ -1,9 +1,12 @@
 instruction: QMUL
 syntax: QMUL    {#}D,{#}S
 encoding: EEEE 1101000 0LI DDDDDDDDD SSSSSSSSS
-description: |
-  Begin CORDIC unsigned multiplication of D * S. GETQX/GETQY retrieves lower/upper product.
 timing:
   cycles: 2
   type: fixed
 group: CORDIC Solver
+description: Begin CORDIC unsigned multiplication of D * S. GETQX/GETQY retrieves lower/upper product.
+category: CORDIC Solver
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

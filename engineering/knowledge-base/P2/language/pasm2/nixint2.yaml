@@ -1,9 +1,12 @@
 instruction: NIXINT2
 syntax: NIXINT2
 encoding: EEEE 1101011 000 000100110 000100100
-description: |
-  Cancel INT2.
 timing:
   cycles: 2
   type: fixed
 group: Interrupts
+description: Cancel INT2.
+category: Interrupts
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

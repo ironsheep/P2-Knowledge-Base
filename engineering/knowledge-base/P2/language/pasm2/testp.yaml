@@ -1,11 +1,15 @@
 instruction: TESTP
 syntax: TESTP   {#}D           WC/WZ
 encoding: EEEE 1101011 CZL DDDDDDDDD 001000110
-description: |
-  Test IN bit of pin D[5:0], XOR into C/Z. C/Z = C/Z XOR IN[D[5:0]].
 timing:
   cycles: 2
   type: fixed
 group: Pins
+description: Z = C/Z XOR IN[D[5:0]].
+category: Pins
 flags_affected:
-  Z: C/Z XOR IN[D[5:0]]
+  Z:
+    formula: C/Z XOR IN[D[5:0]]
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

@@ -1,12 +1,28 @@
 instruction: NEGZ
 syntax: NEGZ    D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0110110 CZ0 DDDDDDDDD DDDDDDDDD
-description: |
-  Negate D by Z
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'NEGZ negates Src (syntax 1) or Dest (syntax 2) if Z = 1 and stores the result in the Dest
+  register. If Z = 0, the Src or Result: The Src or Dest value, possibly negated according to Z, is stored
+  into Dest and optionally the C and Z flags are updated to the resulting sign and zero status.'
+category: Math Instruction - Negate value according to Z.
 flags_affected:
-  C: MSB of result
-  Z: 1 then D = -D, else D = D
+  C:
+    formula: MSB of result
+  Z:
+    formula: 1 then D = -D, else D = D
+parameters:
+- Dest is a register to receive the Src or -Src value (syntax 1), or contains the value to negate (syntax
+  2) according to Z.
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value (if Z=0) or negated
+  value (if Z=1) is stored into Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- NEGNZ
+- NEGC
+- NEGNC
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

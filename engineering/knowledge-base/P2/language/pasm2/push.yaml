@@ -1,9 +1,12 @@
 instruction: PUSH
 syntax: PUSH    {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000101010
-description: |
-  Push D onto stack.
 timing:
   cycles: 2
   type: fixed
 group: Miscellaneous
+description: Push D onto stack.
+category: Miscellaneous
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

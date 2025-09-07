@@ -1,9 +1,12 @@
 instruction: GETSCP
 syntax: GETSCP  D
 encoding: EEEE 1101011 000 DDDDDDDDD 001110001
-description: |
-  Get four-channel oscilloscope samples into D
 timing:
   cycles: 2
   type: fixed
 group: Smart Pins
+description: Get four-channel oscilloscope samples into D.
+category: Smart Pins
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

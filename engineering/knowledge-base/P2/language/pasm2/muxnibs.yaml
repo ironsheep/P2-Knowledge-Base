@@ -1,9 +1,20 @@
 instruction: MUXNIBS
 syntax: MUXNIBS D,{#}S
 encoding: EEEE 1001111 01I DDDDDDDDD SSSSSSSSS
-description: |
-  For each non-zero nibble in S, copy that nibble into the corresponding D nibble, else leave that D nibble the same.
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'MUXNIBS copies any non-zero nibbles from Src into the corresponding nibbles of Dest and
+  leaves the rest of Result: Dest nibbles corresponding to non-zero Src nibbles are set to those nibble
+  values; the rest are left as-is.'
+category: Bit Operation Instruction - Set discrete nibbles of a value to non-zero nibble states of another.
+flags_affected:
+  C:
+    when: D
+parameters:
+- Dest is a register whose value will be updated according to Src.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose non-zero nibbles will replace the
+  corresponding nibbles in Dest.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

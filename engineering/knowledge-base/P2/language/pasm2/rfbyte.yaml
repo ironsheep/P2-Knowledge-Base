@@ -1,11 +1,15 @@
 instruction: RFBYTE
 syntax: RFBYTE  D        {WC/WZ/WCZ}
 encoding: EEEE 1101011 CZ0 DDDDDDDDD 000010000
-description: |
-  Used after RDFAST. Read zero-extended byte from FIFO into D. C = MSB of byte. *
 timing:
   cycles: 2
   type: mode_dependent
 group: Hub FIFO - Read
+description: C = MSB of byte.
+category: Hub FIFO - Read
 flags_affected:
-  C: MSB of byte
+  C:
+    formula: MSB of byte
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

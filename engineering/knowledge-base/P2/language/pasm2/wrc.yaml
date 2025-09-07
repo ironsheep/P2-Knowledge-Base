@@ -1,9 +1,12 @@
 instruction: WRC
 syntax: WRC     D
 encoding: EEEE 1101011 000 DDDDDDDDD 001101100
-description: |
-  Write 0 or 1 to D, according to C
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: Write 0 or 1 to D, according to C.
+category: Math and Logic
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

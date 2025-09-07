@@ -1,11 +1,15 @@
 instruction: GETQY
 syntax: GETQY   D        {WC/WZ/WCZ}
 encoding: EEEE 1101011 CZ0 DDDDDDDDD 000011001
-description: |
-  Retrieve CORDIC result Y into D. Waits, in case result not ready. C = Y[31]. *
 timing:
   cycles: 2
   type: fixed
 group: CORDIC Solver
+description: C = Y[31].
+category: CORDIC Solver
 flags_affected:
-  C: Y[31]
+  C:
+    formula: Y[31]
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

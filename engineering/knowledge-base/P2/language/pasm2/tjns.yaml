@@ -1,9 +1,17 @@
 instruction: TJNS
 syntax: TJNS    D,{#}S
 encoding: EEEE 1011101 11I DDDDDDDDD SSSSSSSSS
-description: |
-  Test D and jump to S** if D is not signed (D[31] = 0).
 timing:
   cycles: 2
   type: fixed
 group: Branch S - Test
+description: 'TJS or TJNS tests the value in Dest and jumps to the address described by Src if the result
+  is signed (Dest[31] = 1) Result: Dest is tested and if it''s signed (or not signed in syntax 2), PC
+  is set to a new relative (#Src) or absolute (Src) address.'
+category: Flow Control Instruction - Test value and jump if signed or not signed.
+parameters:
+- Dest is a register whose value is tested for sign or no sign.
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

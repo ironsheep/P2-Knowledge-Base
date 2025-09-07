@@ -1,9 +1,19 @@
 instruction: MUXQ
 syntax: MUXQ    D,{#}S
 encoding: EEEE 1001111 10I DDDDDDDDD SSSSSSSSS
-description: |
-  Used after SETQ
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: MUXQ copies all bits from Src corresponding to high (1) bits of Q into the corresponding
+  bits of Dest. All other.
+category: Bit Operation Instruction - Set discrete bits of a value to that of another.
+flags_affected:
+  C:
+    when: D
+parameters:
+- Dest is a register whose bits will be updated according to Q and Src.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose select bits will replace the corresponding
+  bits in Dest.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

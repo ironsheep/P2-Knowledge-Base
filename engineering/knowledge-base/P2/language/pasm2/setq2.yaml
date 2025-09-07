@@ -1,9 +1,12 @@
 instruction: SETQ2
 syntax: SETQ2   {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000101001
-description: |
-  Set Q to D. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer.
 timing:
   cycles: 2
   type: fixed
 group: Miscellaneous
+description: Set Q to D. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer.
+category: Miscellaneous
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

@@ -1,9 +1,21 @@
 instruction: MUXNITS
 syntax: MUXNITS D,{#}S
 encoding: EEEE 1001111 00I DDDDDDDDD SSSSSSSSS
-description: |
-  For each non-zero bit pair in S, copy that bit pair into the corresponding D bits, else leave that D bit pair the same.
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'MUXNITS copies any non-zero bit pairs from Src into the corresponding bit pairs of Dest
+  and leaves the rest of Result: Dest bit pairs corresponding to non-zero Src bit pairs are set to those
+  bit values; the rest are left as-is.'
+category: Bit Operation Instruction - Set discrete bit pairs of a value to non-zero bit pair states of
+  another.
+flags_affected:
+  C:
+    when: D
+parameters:
+- Dest is a register whose value will be updated according to Src.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose non-zero bit pairs will replace
+  the corresponding bit pairs in Dest.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

@@ -1,9 +1,18 @@
 instruction: AUGS
-syntax: AUGS    #n
+syntax: AUGS
 encoding: EEEE 11110nn nnn nnnnnnnnn nnnnnnnnn
-description: |
-  Queue #n to be used as upper 23 bits for next #S occurrence, so that the next 9-bit #S will be augmented to 32 bits.
 timing:
   cycles: 2
   type: fixed
 group: Miscellaneous
+description: 'AUGS is an assistant instruction to aid with literal values that exceed 9 bits. Most PASM2
+  instructions have 9 bits Result: The 23-bit value formed from Src is queued to prefix the next literal
+  Src occurrence (#Src) to form a 32-bit literal for that instruction; interrupts are also temporarily
+  disabled.'
+category: Augmentation Instruction - Augment next literal Src to 32-bits.
+parameters:
+- Src is a 32-bit literal whose upper 23 bits are prepended to the next literal Src occurrence.
+related:
+- AUGD
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

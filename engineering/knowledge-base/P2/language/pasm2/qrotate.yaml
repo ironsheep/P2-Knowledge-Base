@@ -1,9 +1,13 @@
 instruction: QROTATE
 syntax: QROTATE {#}D,{#}S
 encoding: EEEE 1101010 0LI DDDDDDDDD SSSSSSSSS
-description: |
-  Begin CORDIC rotation of point (D, SETQ value or 32'b0) by angle S. GETQX/GETQY retrieves X/Y.
 timing:
   cycles: 2
   type: fixed
 group: CORDIC Solver
+description: Begin CORDIC rotation of point (D, SETQ value or 32'b0) by angle S. GETQX/GETQY retrieves
+  X/Y.
+category: CORDIC Solver
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

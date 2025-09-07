@@ -1,9 +1,14 @@
 instruction: ALLOWI
 syntax: ALLOWI
 encoding: EEEE 1101011 000 000100000 000100100
-description: |
-  Allow interrupts (default).
 timing:
   cycles: 2
   type: fixed
 group: Interrupts
+description: 'ALLOWI re-enables interrupt branching; the default on cog start. ALLOWI is the complement
+  of the STALLI Result: Any stalled and future interrupts are allowed.'
+category: Interrupt Instruction - Allow interrupts.
+related:
+- STALLI
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

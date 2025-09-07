@@ -1,11 +1,15 @@
 instruction: RFLONG
 syntax: RFLONG  D        {WC/WZ/WCZ}
 encoding: EEEE 1101011 CZ0 DDDDDDDDD 000010010
-description: |
-  Used after RDFAST. Read long from FIFO into D. C = MSB of long. *
 timing:
   cycles: 2
   type: mode_dependent
 group: Hub FIFO - Read
+description: C = MSB of long.
+category: Hub FIFO - Read
 flags_affected:
-  C: MSB of long
+  C:
+    formula: MSB of long
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

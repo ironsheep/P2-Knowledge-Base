@@ -1,9 +1,12 @@
 instruction: XSTOP
 syntax: XSTOP
 encoding: EEEE 1100101 011 000000000 000000000
-description: |
-  Stop streamer immediately.
 timing:
   cycles: 2
   type: fixed
 group: Streamer
+description: Stop streamer immediately.
+category: Streamer
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

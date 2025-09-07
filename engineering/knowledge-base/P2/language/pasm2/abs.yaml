@@ -1,11 +1,22 @@
 instruction: ABS
 syntax: ABS     D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0110010 CZ0 DDDDDDDDD DDDDDDDDD
-description: |
-  Get absolute value of D into D
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'ABS determines the absolute value of Src or Dest and writes the result into Dest. Result:
+  Absolute Src (or Dest) value is stored in Dest.'
+category: Math Instruction - Get the absolute value of a number.
 flags_affected:
-  C: D[31]
+  C:
+    formula: D[31]
+parameters:
+- Dest is the register in which to write the absolute value of Dest or Src.
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose absolute value is written
+  to Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- NEG
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

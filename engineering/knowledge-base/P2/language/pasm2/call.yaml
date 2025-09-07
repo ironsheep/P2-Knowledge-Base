@@ -1,11 +1,21 @@
 instruction: CALL
 syntax: CALL    D        {WC/WZ/WCZ}
 encoding: EEEE 1101101 RAA AAAAAAAAA AAAAAAAAA
-description: |
-  Call to A by pushing {C, Z, 10'b0, PC[19:0]} onto stack. If R = 1 then PC += A, else PC = A. "\" forces R = 0.
 timing:
   cycles: 4
   type: fixed
 group: Branch A - Call
+description: 'CALL records the current state of the C and Z flags and the address of the next instruction
+  (PC + 1 if Cog/LUT Result: Push current C and Z flags and address of the next instruction onto the hardware
+  stack, set PC to new relative or absolute address, and optionally update C and/or Z to new state. R
+  = 1 then PC += A, else PC = A.'
+category: Flow Control Instruction - Call a subroutine; store return context on the stack.
 flags_affected:
-  C: A
+  C:
+    formula: A
+parameters:
+- Addr is a symbolic reference to the target subroutine; the location to set PC to. Relative addressing
+  is the default; use '\' to force absolute addressing.
+- Dest is a register containing the 20-bit absolute address to set PC to and optional new C and Z states.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

@@ -1,9 +1,12 @@
 instruction: JNSE2
 syntax: JNSE2   {#}S
 encoding: EEEE 1011110 01I 000010101 SSSSSSSSS
-description: |
-  Jump to S** if SE2 event flag is clear.
 timing:
   cycles: 2
   type: fixed
 group: Events - Branch
+description: Jump to S** if SE2 event flag is clear.
+category: Events - Branch
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

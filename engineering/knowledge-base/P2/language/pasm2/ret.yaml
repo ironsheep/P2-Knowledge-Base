@@ -1,12 +1,17 @@
 instruction: RET
 syntax: RET              {WC/WZ/WCZ}
 encoding: EEEE 1101011 CZ1 000000000 000101101
-description: |
-  Return by popping stack (K). C = K[31], Z = K[30], PC = K[19:0].
 timing:
   cycles: 4
   type: fixed
 group: Branch Return
+description: C = K[31], Z = K[30], PC = K[19:0].
+category: Branch Return
 flags_affected:
-  C: K[31], Z = K[30], PC = K[19:0]
-  Z: K[30], PC = K[19:0]
+  C:
+    formula: K[31], Z = K[30], PC = K[19:0]
+  Z:
+    formula: K[30], PC = K[19:0]
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

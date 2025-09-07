@@ -1,9 +1,31 @@
 instruction: GETWORD
 syntax: GETWORD D,{#}S,#N
 encoding: EEEE 1001001 100 DDDDDDDDD 000000000
-description: |
-  Get word established by prior ALTGW instruction into D.
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'GETWORD reads the word identified by Num (0–1) from Src, or a word from the source described
+  by a prior ALTGW Result: Word Num (0–1) of Src, or a word from a source described by prior ALTGW instruction,
+  is written to Dest.'
+category: Bit Operation Instruction - Get a word from a value.
+flags_affected:
+  C:
+    when: D
+parameters:
+- Dest is the register in which to store the word.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target word to
+  read.
+- Num is a 1-bit literal identifying the word ID (0–1) of Src to read.
+related:
+- ALTGW
+- GETNIB
+- GETBYTE
+- SETNIB
+- SETBYTE
+- SETWORD
+- ROLNIB
+- ROLBYTE
+- ROLWORD
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

@@ -1,12 +1,22 @@
 instruction: RCZL
 syntax: RCZL    D        {WC/WZ/WCZ}
 encoding: EEEE 1101011 CZ0 DDDDDDDDD 001101011
-description: |
-  Rotate C,Z left through D
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'RCZL shifts Dest''s binary value left by two places and sets Dest[1] to C and Dest[0] to
+  Z. Result: The bits of Dest are shifted left by two places and C and Z are inserted as new LSBs.'
+category: Bit Operation Instruction - Rotate carry and zero flags left into value (2-bit rotate left).
 flags_affected:
-  C: D[31], Z = D[30]
-  Z: D[30]
+  C:
+    formula: D[31], Z = D[30]
+    when: D
+  Z:
+    formula: D[30]
+    when: D[31]
+parameters:
+- Dest is the register containing the value to rotate the carry and zero flags left into.
+- WC, WZ, or WCZ are optional effects to update flags.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

@@ -1,11 +1,26 @@
 instruction: FLE
 syntax: FLE     D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0011001 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Force D <= S
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'FLE sets unsigned Dest to unsigned Src if Dest is greater than Src. This is also known as
+  a limit maximum Result: Unsigned Dest is set to unsigned Src if Dest was greater than Src. Optionally
+  the C and Z flag indicates if the replacement happened and the zero status of the result.'
+category: Math Instruction - Force unsigned value to be less than or equal to another.
 flags_affected:
-  C: 1, else D same and C = 0
+  C:
+    formula: 1, else D same and C = 0
+parameters:
+- Dest is a register containing the unsigned value to limit to a maximum of unsigned Src, and is where
+  the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose unsigned value is the upper limit
+  to force upon Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- FGE
+- FLES
+- FGES
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

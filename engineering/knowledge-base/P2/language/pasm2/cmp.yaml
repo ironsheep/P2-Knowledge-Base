@@ -1,12 +1,25 @@
 instruction: CMP
 syntax: CMP     D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0010000 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Compare D to S
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'CMP compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally
+  setting the C Result: Greater/lesser and equality status is optionally written to the C and Z flags.'
+category: Math Instruction - Compare two unsigned values.
 flags_affected:
-  C: borrow of (D - S)
-  Z: (D == S)
+  C:
+    formula: borrow of (D - S)
+  Z:
+    formula: (D == S)
+parameters:
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- CMPR
+- CMPX
+- CMPS
+- CMPSX
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

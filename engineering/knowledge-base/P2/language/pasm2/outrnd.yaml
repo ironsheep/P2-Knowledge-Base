@@ -1,11 +1,20 @@
 instruction: OUTRND
 syntax: OUTRND  {#}D           {WCZ}
 encoding: EEEE 1101011 CZL DDDDDDDDD 001001110
-description: |
-  OUT bits of pins D[10:6]+D[5:0]..D[5:0] = RNDs. Wraps within OUTA/OUTB. Prior SETQ overrides D[10:6]. C,Z = OUT bit.
 timing:
   cycles: 2
   type: fixed
 group: Pins
+description: 'OUTRND alters the output level register''s bit(s) designated by Dest to be random low and
+  high, based on bit(s) Result: The I/O pin output level bit(s), described by Dest, are each set randomly
+  low or high; the rest are left as-is. Z = OUT bit.'
+category: I/O Pin Instruction - Set pin(s) output level to random low/high.
 flags_affected:
-  Z: OUT bit
+  Z:
+    formula: OUT bit
+parameters:
+- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the pins set
+  randomly to low or high.
+- WCZ is an optional effect to update flags.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

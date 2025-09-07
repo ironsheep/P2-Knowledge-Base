@@ -1,11 +1,24 @@
 instruction: ADD
 syntax: ADD     D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0001000 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Add S into D
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'ADD sums the two unsigned values of Dest and Src together and stores the result into the
+  Dest register. Result: Sum of unsigned Src and unsigned Dest is stored in Dest.'
+category: Math Instruction - Add two unsigned values.
 flags_affected:
-  C: carry of (D + S)
+  C:
+    formula: carry of (D + S)
+parameters:
+- Dest is a register containing the value to add Src to, and is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- ADDX
+- ADDS
+- ADDSX
+- SUB
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

@@ -1,9 +1,12 @@
 instruction: NIXINT3
 syntax: NIXINT3
 encoding: EEEE 1101011 000 000100111 000100100
-description: |
-  Cancel INT3.
 timing:
   cycles: 2
   type: fixed
 group: Interrupts
+description: Cancel INT3.
+category: Interrupts
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

@@ -1,11 +1,21 @@
 instruction: ONES
 syntax: ONES    D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0111101 CZ0 DDDDDDDDD DDDDDDDDD
-description: |
-  Get number of '1's in D into D
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'ONES tallies the number of high bits of Src, or Dest, and stores the count into Dest. Result:
+  The number of high bits in Src, or Dest, is stored in Dest.'
+category: Bit Operation Instruction - Get number of 1s from Dest or Src into Dest.
 flags_affected:
-  C: LSB of result
+  C:
+    formula: LSB of result
+parameters:
+- Dest is the register in which to store the number of high bits found and optionally it begins by containing
+  the value to check (syntax 2).
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value is to be checked
+  for ones.
+- WC, WZ, or WCZ are optional effects to update flags.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

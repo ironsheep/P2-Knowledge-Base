@@ -1,9 +1,12 @@
 instruction: SETQ
 syntax: SETQ    {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000101000
-description: |
-  Set Q to D. Use before RDLONG/WRLONG/WMLONG to set block transfer. Also used before MUXQ/COGINIT/QDIV/QFRAC/QROTATE/WAITxxx.
 timing:
   cycles: 2
   type: fixed
 group: Miscellaneous
+description: Set Q to D. Use before RDLONG/WRLONG/WMLONG to set block transfer. Also used before MUXQ/COGINIT/QDIV/QFRAC/QROTATE/WAITxxx.
+category: Miscellaneous
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

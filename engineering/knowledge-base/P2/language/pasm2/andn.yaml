@@ -1,11 +1,21 @@
 instruction: ANDN
 syntax: ANDN    D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0101001 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  AND !S into D
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'AND or ANDN performs a bitwise AND of the value in Src (or !Src) into that of Dest. Result:
+  Dest AND Src (or Dest AND !Src) is stored in Dest and flags are optionally updated with parity and zero
+  status.'
+category: Bit Operation Instruction - Bitwise AND a value with another, or with the NOT of another.
 flags_affected:
-  C: parity of result
+  C:
+    formula: parity of result
+parameters:
+- Dest is the register containing the value to bitwise AND with Src (or with !Src) and is the destination
+  in which to write the result.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value (or inverse value) will be
+  bitwise ANDed into Dest.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

@@ -1,9 +1,12 @@
 instruction: SETSE2
 syntax: SETSE2  {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000100001
-description: |
-  Set SE2 event configuration to D[8:0].
 timing:
   cycles: 2
   type: fixed
 group: Events - Configuration
+description: Set SE2 event configuration to D[8:0].
+category: Events - Configuration
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

@@ -1,9 +1,13 @@
 instruction: WRPIN
 syntax: WRPIN   {#}D,{#}S
 encoding: EEEE 1100000 0LI DDDDDDDDD SSSSSSSSS
-description: |
-  Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins. Wraps within A/B pins. Prior SETQ overrides S[10:6].
 timing:
   cycles: 2
   type: fixed
 group: Smart Pins
+description: Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins. Wraps within
+  A/B pins. Prior SETQ overrides S[10:6].
+category: Smart Pins
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

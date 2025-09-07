@@ -1,9 +1,19 @@
 instruction: POLLINT
 syntax: POLLINT          {WC/WZ/WCZ}
 encoding: EEEE 1101011 CZ0 000000000 000100100
-description: |
-  Get INT event flag into C/Z, then clear it.
 timing:
   cycles: 2
   type: fixed
 group: Events - Poll
+description: 'POLLINT copies the state of the interrupt-occurred event flag into C and/or Z and then clears
+  the flag (unless it''s Result: Interrupt-occurred event flag is optionally copied into C and/or Z, then
+  it is cleared.'
+category: Event Monitor Instruction - Retrieve and clear interrupt-occurred event flag.
+parameters:
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- WAITINT
+- JINT
+- JNINT
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

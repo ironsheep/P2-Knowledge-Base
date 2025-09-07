@@ -1,9 +1,12 @@
 instruction: QDIV
 syntax: QDIV    {#}D,{#}S
 encoding: EEEE 1101000 1LI DDDDDDDDD SSSSSSSSS
-description: |
-  Begin CORDIC unsigned division of {SETQ value or 32'b0, D} / S. GETQX/GETQY retrieves quotient/remainder.
 timing:
   cycles: 2
   type: fixed
 group: CORDIC Solver
+description: Begin CORDIC unsigned division of {SETQ value or 32'b0, D} / S. GETQX/GETQY retrieves quotient/remainder.
+category: CORDIC Solver
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

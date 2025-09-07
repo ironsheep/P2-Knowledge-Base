@@ -1,11 +1,27 @@
 instruction: MULS
 syntax: MULS    D,{#}S          {WZ}
 encoding: EEEE 1010000 1ZI DDDDDDDDD SSSSSSSSS
-description: |
-  D = signed (D[15:0] * S[15:0])
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'MULS multiplies the signed lower 16-bits of each of Dest and Src together and stores the
+  32-bit signed product Result: The 32-bit signed product of the signed 16-bit Dest and Src multiplication
+  is stored into Dest and optionally the Z flag is updated to the Dest or Src zero status. D = signed
+  (D[15:0] * S[15:0]).'
+category: Math Instruction - Multiply signed 16-bit x 16-bit values.
 flags_affected:
-  Z: (S == 0) | (D == 0)
+  Z:
+    formula: (S == 0) | (D == 0)
+parameters:
+- Dest is a register containing the signed 16-bit value to multiply with Src, and is where the result
+  is written.
+- Src is a register, 9-bit literal, or signed 16-bit augmented literal whose value is multiplied into
+  Dest.
+- WZ is an optional effect to update the Z flag.
+related:
+- MUL
+- SCA
+- QMUL
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

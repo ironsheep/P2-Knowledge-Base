@@ -1,11 +1,19 @@
 instruction: RCR
 syntax: RCR     D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0000100 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Rotate carry right
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'RCR shifts Dest''s binary value right by Src places (0–31 bits) and sets the new MSBs to
+  C. Result: The bits of Dest are shifted right by Src bits, inserting C as new MSBs.'
+category: Bit Operation Instruction - Rotate carry flag right into value.
 flags_affected:
-  C: last bit shifted out if S[4:0] > 0, else D[0]
+  C:
+    formula: last bit shifted out if S[4:0] > 0, else D[0]
+parameters:
+- Dest is the register containing the value to rotate carry right by Src bits.
+- Src is a register or 5-bit literal whose value indicates the number of bit positions to rotate.
+- WC, WZ, or WCZ are optional effects to update flags.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

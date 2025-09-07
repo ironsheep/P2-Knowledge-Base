@@ -1,9 +1,12 @@
 instruction: MOVBYTS
 syntax: MOVBYTS D,{#}S
 encoding: EEEE 1001111 11I DDDDDDDDD SSSSSSSSS
-description: |
-  Move bytes within D, per S
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: Move bytes within D, per S.
+category: Math and Logic
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

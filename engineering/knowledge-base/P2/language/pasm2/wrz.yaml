@@ -1,9 +1,12 @@
 instruction: WRZ
 syntax: WRZ     D
 encoding: EEEE 1101011 000 DDDDDDDDD 001101110
-description: |
-  Write 0 or 1 to D, according to Z
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: Write 0 or 1 to D, according to Z.
+category: Math and Logic
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

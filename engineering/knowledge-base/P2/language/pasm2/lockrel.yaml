@@ -1,9 +1,13 @@
 instruction: LOCKREL
 syntax: LOCKREL {#}D            {WC}
 encoding: EEEE 1101011 C0L DDDDDDDDD 000000111
-description: |
-  Release LOCK D[3:0]. If D is a register and WC, get current/last cog id of LOCK owner into D and LOCK status into C.
 timing:
   cycles: 2
   type: fixed
 group: Hub Control - Locks
+description: Release LOCK D[3:0]. If D is a register and WC, get current/last cog id of LOCK owner into
+  D and LOCK status into C.
+category: Hub Control - Locks
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

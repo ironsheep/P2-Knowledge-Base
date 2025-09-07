@@ -1,9 +1,12 @@
 instruction: DJF
 syntax: DJF     D,{#}S
 encoding: EEEE 1011011 10I DDDDDDDDD SSSSSSSSS
-description: |
-  Decrement D and jump to S** if result is $FFFF_FFFF.
 timing:
   cycles: 2
   type: fixed
 group: Branch S - Mod & Test
+description: Decrement D and jump to S** if result is $FFFF_FFFF.
+category: Branch S - Mod & Test
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

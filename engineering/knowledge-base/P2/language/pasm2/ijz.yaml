@@ -1,9 +1,12 @@
 instruction: IJZ
 syntax: IJZ     D,{#}S
 encoding: EEEE 1011100 00I DDDDDDDDD SSSSSSSSS
-description: |
-  Increment D and jump to S** if result is zero.
 timing:
   cycles: 2
   type: fixed
 group: Branch S - Mod & Test
+description: Increment D and jump to S** if result is zero.
+category: Branch S - Mod & Test
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

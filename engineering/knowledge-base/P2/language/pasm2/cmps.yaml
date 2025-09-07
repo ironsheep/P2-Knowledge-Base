@@ -1,12 +1,25 @@
 instruction: CMPS
 syntax: CMPS    D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0010010 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Compare D to S, signed
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'CMPS compares the signed values of Dest and Src (by subtracting Src from Dest) and optionally
+  setting the C and Result: Greater/lesser and equality status is optionally written to the C and Z flags.'
+category: Math Instruction - Compare two signed values.
 flags_affected:
-  C: correct sign of (D - S)
-  Z: (D == S)
+  C:
+    formula: correct sign of (D - S)
+  Z:
+    formula: (D == S)
+parameters:
+- Dest is the register containing the value to compare with that of Src.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- CMP
+- CMPX
+- CMPSX
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

@@ -1,9 +1,19 @@
 instruction: ALTS
 syntax: ALTS    D,{#}S
 encoding: EEEE 1001100 101 DDDDDDDDD 000000000
-description: |
-  Alter S field of next instruction to (D + S) & $1FF. D += sign-extended S[17:9].
 timing:
   cycles: 2
   type: fixed
 group: Register Indirection
+description: 'ALTS modifies the next instruction''s Src value to be (Src + Dest) & $1FF (for syntax 1),
+  or to Dest[8:0] (for syntax Result: The next instruction''s pipelined Src value is altered to be (Src
+  + Dest) & $1FF, or just Dest[8:0] in syntax 2.'
+category: Indirection Instruction - Alter S field of next instruction.
+parameters:
+- Dest is the register whose 9-bit value is the offset, or the full value, for the next instruction to
+  operate on.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base
+  (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value
+  (Src[17:9]; added to Dest at the end of execution).
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

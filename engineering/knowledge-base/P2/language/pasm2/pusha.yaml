@@ -1,9 +1,12 @@
 instruction: PUSHA
 syntax: PUSHA   {#}D
 encoding: EEEE 1100011 0L1 DDDDDDDDD 101100001
-description: |
-  Write long in D[31:0] to hub address PTRA++.
 timing:
   cycles: 3
   type: fixed
 group: Hub RAM - Write
+description: Write long in D[31:0] to hub address PTRA++.
+category: Hub RAM - Write
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

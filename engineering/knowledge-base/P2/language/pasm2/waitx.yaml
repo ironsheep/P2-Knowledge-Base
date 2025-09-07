@@ -1,11 +1,15 @@
 instruction: WAITX
 syntax: WAITX   {#}D     {WC/WZ/WCZ}
 encoding: EEEE 1101011 CZL DDDDDDDDD 000011111
-description: |
-  Wait 2 + D clocks if no WC/WZ/WCZ. If WC/WZ/WCZ, wait 2 + (D & RND) clocks. C/Z = 0.
 timing:
   cycles: 2
   type: variable
 group: Miscellaneous
+description: Z = 0.
+category: Miscellaneous
 flags_affected:
-  Z: 0
+  Z:
+    formula: 0
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

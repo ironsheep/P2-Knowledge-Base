@@ -1,11 +1,20 @@
 instruction: MUXNZ
 syntax: MUXNZ   D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0101111 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Mux !Z into each D bit that is '1' in S
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'MUXZ or MUXNZ alters the Dest bit(s) designated by Src (high bits) to equal the state, or
+  inverse state, of the Z flag. Result: Dest bit(s) described by Src are set to Z or !Z; the rest are
+  left as-is. Flags are optionally updated with parity and zero status of the result.'
+category: Bit Operation Instructions - Set discrete bits to Z or !Z
 flags_affected:
-  C: parity of result
+  C:
+    formula: parity of result
+parameters:
+- Dest is the register whose value will have one or more bits set to Z or !Z.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value identifies the bit(s) to modify.
+- WC, WZ, or WCZ is an optional effect to update flags.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

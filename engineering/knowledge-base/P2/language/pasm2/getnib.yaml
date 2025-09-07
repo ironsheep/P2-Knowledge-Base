@@ -1,9 +1,31 @@
 instruction: GETNIB
 syntax: GETNIB  D,{#}S,#N
 encoding: EEEE 1000010 000 DDDDDDDDD 000000000
-description: |
-  Get nibble established by prior ALTGN instruction into D.
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'GETNIB reads the nibble identified by Num (0–7) from Src, or a nibble from the source described
+  by a prior ALTGN Result: Nibble Num (0–7) of Src, or a nibble from a source described by prior ALTGN
+  instruction, is written to Dest.'
+category: Bit Operation Instruction - Get a nibble from a value.
+flags_affected:
+  C:
+    when: D
+parameters:
+- Dest is the register in which to store the nibble.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target nibble
+  to read.
+- Num is a 3-bit literal identifying the nibble ID (0–7) of Src to read.
+related:
+- ALTGN
+- GETBYTE
+- GETWORD
+- SETNIB
+- SETBYTE
+- SETWORD
+- ROLNIB
+- ROLBYTE
+- ROLWORD
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

@@ -1,11 +1,24 @@
 instruction: ADDS
 syntax: ADDS    D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0001010 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Add S into D, signed
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'ADDS sums the two signed values of Dest and Src together and stores the result into the
+  Dest register. If Src is a Result: Sum of signed Src and signed Dest is stored in Dest.'
+category: Math Instruction - Add two signed values.
 flags_affected:
-  C: correct sign of (D + S)
+  C:
+    formula: correct sign of (D + S)
+parameters:
+- Dest is a register containing the value to add Src to, and is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- ADD
+- ADDX
+- ADDSX
+- SUBS
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

@@ -1,9 +1,12 @@
 instruction: LOCKRET
 syntax: LOCKRET {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000000101
-description: |
-  Return LOCK D[3:0] for reallocation.
 timing:
   cycles: 2
   type: fixed
 group: Hub Control - Locks
+description: Return LOCK D[3:0] for reallocation.
+category: Hub Control - Locks
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

@@ -1,9 +1,20 @@
 instruction: POLLXFI
 syntax: POLLXFI          {WC/WZ/WCZ}
 encoding: EEEE 1101011 CZ0 000001011 000100100
-description: |
-  Get XFI event flag into C/Z, then clear it.
 timing:
   cycles: 2
   type: fixed
 group: Events - Poll
+description: Streamer-finished event flag is optionally copied into C and/or Z, then it is cleared.
+category: Event Monitor Instruction - Retrieve and clear streamer-finished event flag.
+parameters:
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- XINIT
+- XZERO
+- XCONT
+- WAITXFI
+- JXFI
+- JNXFI
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

@@ -1,11 +1,19 @@
 instruction: BITL
 syntax: BITL    D,{#}S         {WCZ}
 encoding: EEEE 0100000 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Bits D[S[9:5]+S[4:0]:S[4:0]] = 0. Other bits unaffected. Prior SETQ overrides S[9:5]. C,Z = original D[S[4:0]].
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'BITH or BITL alters the Dest bit(s) designated by Src to be high (1) or low (0). All other
+  bits are left unchanged. Result: Dest bit(s) described by Src are set high (1) or low (0); the rest
+  are left as-is. Z = original D[S[4:0]].'
+category: Bit Operation Instruction - Set bit(s) high (1) or low (0).
 flags_affected:
-  Z: original D[S[4:0]]
+  Z:
+    formula: original D[S[4:0]]
+parameters:
+- Dest is the register whose value will have one or more bits set high or low.
+- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

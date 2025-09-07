@@ -1,11 +1,27 @@
 instruction: NEG
 syntax: NEG     D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0110011 CZ0 DDDDDDDDD DDDDDDDDD
-description: |
-  Negate D
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'NEG negates Src (syntax 1) or Dest (syntax 2) and stores the result in the Dest register.
+  The negation flips the Result: The Src or Dest value is negated and stored into Dest and optionally
+  the C and Z flags are updated to the resulting sign and zero status.'
+category: Math Instruction - Negate a value.
 flags_affected:
-  C: MSB of result
+  C:
+    formula: MSB of result
+parameters:
+- Dest is a register to receive the -Src value (syntax 1), or contains the value to negate (syntax 2).
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose negated value is stored
+  into Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- ABS
+- NEGC
+- NEGNC
+- NEGZ
+- NEGNZ
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

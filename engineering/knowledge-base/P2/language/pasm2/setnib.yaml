@@ -1,9 +1,27 @@
 instruction: SETNIB
 syntax: SETNIB  D,{#}S,#N
 encoding: EEEE 1000000 00I 000000000 SSSSSSSSS
-description: |
-  Set S[3:0] into nibble established by prior ALTSN instruction.
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'SETNIB stores Src[3:0] into the nibble identified by Num within Dest, or the nibble and
+  register described by a prior Result: Src[3:0] is written to nibble Num (0–7) of Dest, or to another
+  register nibble described by prior ALTSN instruction.'
+category: Bit Operation Instruction - Set a nibble to new value.
+parameters:
+- Dest is the register in which to modify a nibble.
+- Src is a register or 4-bit literal whose bits [3:0] will be stored in the designated location.
+- Num is a 3-bit literal identifying the nibble ID (0–7) of Dest to modify.
+related:
+- ALTSN
+- SETBYTE
+- SETWORD
+- GETNIB
+- GETBYTE
+- GETWORD
+- ROLNIB
+- ROLBYTE
+- ROLWORD
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

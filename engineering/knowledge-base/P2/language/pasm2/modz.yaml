@@ -1,11 +1,15 @@
 instruction: MODZ
 syntax: MODZ    z               {WZ}
 encoding: EEEE 1101011 0Z1 00000zzzz 001101111
-description: |
-  Modify Z according to zzzz. Z = zzzz[{C,Z}].
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: Z = zzzz[{C,Z}].
+category: Math and Logic
 flags_affected:
-  Z: zzzz[{C,Z}]
+  Z:
+    formula: zzzz[{C,Z}]
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

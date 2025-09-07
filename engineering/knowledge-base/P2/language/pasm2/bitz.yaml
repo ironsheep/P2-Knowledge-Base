@@ -1,11 +1,15 @@
 instruction: BITZ
 syntax: BITZ    D,{#}S         {WCZ}
 encoding: EEEE 0100100 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Bits D[S[9:5]+S[4:0]:S[4:0]] = Z. Other bits unaffected. Prior SETQ overrides S[9:5]. C,Z = original D[S[4:0]].
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: Z = original D[S[4:0]].
+category: Math and Logic
 flags_affected:
-  Z: original D[S[4:0]]
+  Z:
+    formula: original D[S[4:0]]
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

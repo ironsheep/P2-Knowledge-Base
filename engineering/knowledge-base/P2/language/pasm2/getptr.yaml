@@ -1,9 +1,12 @@
 instruction: GETPTR
 syntax: GETPTR  D
 encoding: EEEE 1101011 000 DDDDDDDDD 000110100
-description: |
-  Get current FIFO hub pointer into D.
 timing:
   cycles: 2
   type: mode_dependent
 group: Hub FIFO
+description: Get current FIFO hub pointer into D.
+category: Hub FIFO
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

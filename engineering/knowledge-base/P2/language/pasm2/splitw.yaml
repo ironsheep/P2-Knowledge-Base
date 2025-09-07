@@ -1,9 +1,12 @@
 instruction: SPLITW
 syntax: SPLITW  D
 encoding: EEEE 1101011 000 DDDDDDDDD 001100010
-description: |
-  Split odd/even bits of D into words
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: Split odd/even bits of D into words.
+category: Math and Logic
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

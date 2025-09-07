@@ -1,11 +1,25 @@
 instruction: ENCOD
 syntax: ENCOD   D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0111100 CZ0 DDDDDDDDD DDDDDDDDD
-description: |
-  Get bit position of top-most '1' in D into D
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'ENCOD stores the bit position value (0—31) of the top-most high bit (1) of Src, or Dest,
+  into Dest. If the value to Result: The bit position value of the top-most high bit (1) in Src, or Dest,
+  is stored in Dest.'
+category: Bit Operation Instruction - Get bit position of top-most 1 of Src or Dest into Dest.
 flags_affected:
-  C: (S != 0)
+  C:
+    formula: (S != 0)
+    when: D
+  Z:
+    when: S
+parameters:
+- Dest is the register in which to store the encoded bit position value and optionally begins by containing
+  the 32-bit value it is encoding (syntax 2).
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value is to be encoded
+  into a bit position.
+- WC, WZ, or WCZ are optional effects to update flags.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

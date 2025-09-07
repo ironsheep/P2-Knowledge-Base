@@ -1,9 +1,12 @@
 instruction: SETPIV
 syntax: SETPIV  {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000111101
-description: |
-  Set BLNPIX/MIXPIX blend factor to D[7:0].
 timing:
   cycles: 2
   type: fixed
 group: Pixel Mixer
+description: Set BLNPIX/MIXPIX blend factor to D[7:0].
+category: Pixel Mixer
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

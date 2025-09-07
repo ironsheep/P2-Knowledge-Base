@@ -1,12 +1,27 @@
 instruction: SUBX
 syntax: SUBX    D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0001101 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Subtract (S + C) from D, extended
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'SUBX subtracts the unsigned value of Src plus C from the unsigned Dest and stores the result
+  into the Dest Result: Difference of unsigned Dest and unsigned Src (plus C) is stored in Dest and optionally
+  the C and Z flags are updated to the extended borrow and zero status.'
+category: Math Instruction - Subtract one unsigned extended value from another.
 flags_affected:
-  C: borrow of (D - (S + C))
-  Z: Z AND (result == 0)
+  C:
+    formula: borrow of (D - (S + C))
+  Z:
+    formula: Z AND (result == 0)
+parameters:
+- Dest is a register containing the value to subtract Src plus C from, and is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is subtracted from
+  Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- SUB
+- SUBSX
+- ADDX
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

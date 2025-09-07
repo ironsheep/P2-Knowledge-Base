@@ -1,11 +1,21 @@
 instruction: OR
 syntax: OR      D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0101010 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  OR S into D
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'OR performs a bitwise OR of the value in Src into that of Dest. Result: Dest OR Src is stored
+  in Dest and flags are optionally updated with parity and zero status.'
+category: Bit Operation Instruction - Bitwise OR a value with another.
 flags_affected:
-  C: parity of result
+  C:
+    formula: parity of result
+parameters:
+- Dest is the register containing the value to bitwise OR with Src and is the destination in which to
+  write the result.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value will be bitwise ORed into
+  Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

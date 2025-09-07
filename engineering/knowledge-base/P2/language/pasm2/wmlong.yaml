@@ -1,9 +1,13 @@
 instruction: WMLONG
 syntax: WMLONG  D,{#}S/P
 encoding: EEEE 1010011 11I DDDDDDDDD SSSSSSSSS
-description: |
-  Write only non-$00 bytes in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.
 timing:
   cycles: 3
   type: fixed
 group: Hub RAM - Write
+description: Write only non-$00 bytes in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2 invokes cog/LUT
+  block transfer.
+category: Hub RAM - Write
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

@@ -1,11 +1,22 @@
 instruction: SUBR
 syntax: SUBR    D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0010110 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Subtract D from S (reverse)
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'SUBR subtracts the unsigned Dest from the unsigned Src and stores the result into the Dest
+  register. This is the Result: Difference of unsigned Src and unsigned Dest is stored in Dest and optionally
+  the C and Z flags are updated to the borrow and zero status.'
+category: Math Instruction - Subtract one unsigned value from another (in reverse order to SUB).
 flags_affected:
-  C: borrow of (S - D)
+  C:
+    formula: borrow of (S - D)
+parameters:
+- Dest is a register containing the value to subtract from Src, and is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is subtracted by Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- SUB
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

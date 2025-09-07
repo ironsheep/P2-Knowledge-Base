@@ -1,11 +1,15 @@
 instruction: MODC
 syntax: MODC    c               {WC}
 encoding: EEEE 1101011 C01 0cccc0000 001101111
-description: |
-  Modify C according to cccc. C = cccc[{C,Z}].
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: C = cccc[{C,Z}].
+category: Math and Logic
 flags_affected:
-  C: cccc[{C,Z}]
+  C:
+    formula: cccc[{C,Z}]
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

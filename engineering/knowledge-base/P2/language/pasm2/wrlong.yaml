@@ -1,9 +1,12 @@
 instruction: WRLONG
 syntax: WRLONG  {#}D,{#}S/P
 encoding: EEEE 1100011 0LI DDDDDDDDD SSSSSSSSS
-description: |
-  Write long in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.
 timing:
   cycles: 3
   type: fixed
 group: Hub RAM - Write
+description: Write long in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.
+category: Hub RAM - Write
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

@@ -1,9 +1,12 @@
 instruction: SETDACS
 syntax: SETDACS {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000011100
-description: |
-  DAC3 = D[31:24], DAC2 = D[23:16], DAC1 = D[15:8], DAC0 = D[7:0].
 timing:
   cycles: 2
   type: fixed
 group: Smart Pins
+description: DAC3 = D[31:24], DAC2 = D[23:16], DAC1 = D[15:8], DAC0 = D[7:0].
+category: Smart Pins
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

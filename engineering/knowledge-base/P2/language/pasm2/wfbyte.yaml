@@ -1,9 +1,12 @@
 instruction: WFBYTE
 syntax: WFBYTE  {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000010101
-description: |
-  Used after WRFAST. Write byte in D[7:0] into FIFO.
 timing:
   cycles: 2
   type: mode_dependent
 group: Hub FIFO - Write
+description: Used after WRFAST. Write byte in D[7:0] into FIFO.
+category: Hub FIFO - Write
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

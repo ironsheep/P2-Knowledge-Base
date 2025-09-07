@@ -1,11 +1,27 @@
 instruction: DIRNC
 syntax: DIRNC   {#}D           {WCZ}
 encoding: EEEE 1101011 CZL DDDDDDDDD 001000011
-description: |
-  DIR bits of pins D[10:6]+D[5:0]..D[5:0] = !C. Wraps within DIRA/DIRB. Prior SETQ overrides D[10:6]. C,Z = DIR bit.
 timing:
   cycles: 2
   type: fixed
 group: Pins
+description: 'DIRC or DIRNC alters the direction register''s bit(s) designated by Dest to equal the state,
+  or inverse state, of the C Result: The I/O pin direction bit(s), described by Dest, are set to output/input
+  according to C or !C; the rest are left as-is. Z = DIR bit.'
+category: I/O Pin Instruction - Set pin(s) direction to input/output according to C or !C.
 flags_affected:
-  Z: DIR bit
+  Z:
+    formula: DIR bit
+parameters:
+- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s)
+  to set to output or input.
+- WCZ is an optional effect to update flags.
+related:
+- DIRZ
+- DIRNZ
+- DIRL
+- DIRH
+- DIRNOT
+- DIRRND
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

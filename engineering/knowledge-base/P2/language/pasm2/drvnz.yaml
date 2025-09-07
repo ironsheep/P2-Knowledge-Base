@@ -1,11 +1,20 @@
 instruction: DRVNZ
 syntax: DRVNZ   {#}D           {WCZ}
 encoding: EEEE 1101011 CZL DDDDDDDDD 001011101
-description: |
-  OUT bits of pins D[10:6]+D[5:0]..D[5:0] = !Z. DIR bits = 1. Wraps within OUTA/OUTB. Prior SETQ overrides D[10:6]. C,Z = OUT bit.
 timing:
   cycles: 2
   type: fixed
 group: Pins
+description: 'DRVZ or DRVNZ sets the I/O pin(s) designated by Dest to the output direction and to a low/high
+  output level Result: The I/O pins described by Dest are set to the output direction and to an output
+  level of low/high according to Z or !Z; the rest are left as-is. Z = OUT bit.'
+category: I/O Pin Instruction - Set pin(s) direction to output and output level to low/high according
+  to Z or !Z.
 flags_affected:
-  Z: OUT bit
+  Z:
+    formula: OUT bit
+parameters:
+- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s)
+  to set to output direction and output levels of low or high.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

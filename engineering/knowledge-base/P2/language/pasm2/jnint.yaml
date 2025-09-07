@@ -1,9 +1,16 @@
 instruction: JNINT
 syntax: JNINT   {#}S
 encoding: EEEE 1011110 01I 000010000 SSSSSSSSS
-description: |
-  Jump to S** if INT event flag is clear.
 timing:
   cycles: 2
   type: fixed
 group: Events - Branch
+description: 'JINT or JNINT checks the cog''s interrupt-occurred flag and jumps to the address described
+  by Src if the flag is Result: If interrupt-occurred event flag is set (or is clear in syntax 2), PC
+  is set to a new relative (#Src) or absolute (Src) address.'
+category: Event Branch Instruction - Jump if interrupt-occurred event flag is set or clear.
+parameters:
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

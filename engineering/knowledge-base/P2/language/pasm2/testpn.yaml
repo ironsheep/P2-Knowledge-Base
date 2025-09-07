@@ -1,11 +1,25 @@
 instruction: TESTPN
 syntax: TESTPN  {#}D           WC/WZ
 encoding: EEEE 1101011 CZL DDDDDDDDD 001000111
-description: |
-  Test !IN bit of pin D[5:0], XOR into C/Z. C/Z = C/Z XOR !IN[D[5:0]].
 timing:
   cycles: 2
   type: fixed
 group: Pins
+description: 'TESTP or TESTPN reads the state (0/1) of the I/O pin designated by Dest, possibly inverts
+  that result, and either Result: The state of the I/O pin described by Dest is read, possibly inverted,
+  and either stored as-is, or bitwise ANDed, ORed, or XORed into C or Z. Z = C/Z XOR !IN[D[5:0]].'
+category: I/O Pin Instruction - Test pin and either store, AND, OR, or XOR the result or inverse result
+  into C/Z.
 flags_affected:
-  Z: C/Z XOR !IN[D[5:0]]
+  Z:
+    formula: C/Z XOR !IN[D[5:0]]
+    when: IN[D[5:0]]
+parameters:
+- Dest is the register or 6-bit literal whose value identifies the I/O pin to test.
+- WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, and XORZ is a required effect to update or bitwise manipulate the
+  C or Z flag.
+related:
+- TESTB
+- TESTBN
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

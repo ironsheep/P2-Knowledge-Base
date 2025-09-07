@@ -1,9 +1,12 @@
 instruction: WRLUT
 syntax: WRLUT   {#}D,{#}S/P
 encoding: EEEE 1100001 1LI DDDDDDDDD SSSSSSSSS
-description: |
-  Write D to LUT address {#}S/PTRx.
 timing:
   cycles: 2
   type: fixed
 group: Lookup Table
+description: Write D to LUT address {#}S/PTRx.
+category: Lookup Table
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

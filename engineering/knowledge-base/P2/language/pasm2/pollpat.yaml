@@ -1,9 +1,20 @@
 instruction: POLLPAT
 syntax: POLLPAT          {WC/WZ/WCZ}
 encoding: EEEE 1101011 CZ0 000001000 000100100
-description: |
-  Get PAT event flag into C/Z, then clear it.
 timing:
   cycles: 2
   type: fixed
 group: Events - Poll
+description: 'POLLPAT copies the state of the pin-pattern-detected event flag into C and/or Z and then
+  clears the flag (unless Result: Pin-pattern-detected event flag is optionally copied into C and/or Z,
+  then it is cleared.'
+category: Event Monitor Instruction - Retrieve and clear pin-pattern-detected event flag.
+parameters:
+- WC, WZ, or WCZ are optional effects to update flags.
+related:
+- SETPAT
+- WAITPAT
+- JPAT
+- JNPAT
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

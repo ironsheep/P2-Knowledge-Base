@@ -1,9 +1,22 @@
 instruction: ALTB
 syntax: ALTB    D,{#}S
 encoding: EEEE 1001100 111 DDDDDDDDD 000000000
-description: |
-  Alter D field of next instruction to (D[13:5] + S) & $1FF. D += sign-extended S[17:9].
 timing:
   cycles: 2
   type: fixed
 group: Register Indirection
+description: 'ALTB should be followed by a BITxxx instruction— it modifies the BITxxx instruction''s Dest
+  value, enabling code Result: The next instruction''s pipelined Dest value is altered to be (Src + Dest[13:5])
+  & $1FF, or just Dest[13:5] for syntax 2.'
+category: Indirection Instruction - Alter subsequent BITxxx instruction.
+flags_affected:
+  C:
+    when: D1
+parameters:
+- Dest is the register whose 14-bit value is the index, or the full bit address, for the BITxxx instruction
+  to operate on.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base
+  long address (Src[8:0]; added to index (Dest[13:5]) for BITxxx) and also an optional auto-indexer value
+  (Src[17:9]; added to Dest at the end of execution).
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

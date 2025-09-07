@@ -1,9 +1,15 @@
 instruction: AKPIN
 syntax: AKPIN   {#}S
 encoding: EEEE 1100000 01I 000000001 SSSSSSSSS
-description: |
-  Acknowledge smart pins S[10:6]+S[5:0]..S[5:0]. Wraps within A/B pins. Prior SETQ overrides S[10:6].
 timing:
   cycles: 2
   type: fixed
 group: Smart Pins
+description: 'AKPIN acknowledges the Smart Pin(s) designated by Src. This lowers the corresponding IN
+  signal(s) so that Result: One or more Smart Pins is acknowledged; lowering their corresponding IN signal(s).'
+category: I/O Pin (Smart Logic) Instruction - Acknowledge smart pin(s).
+parameters:
+- Src is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the Smart Pin(s)
+  to acknowledge.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

@@ -1,11 +1,22 @@
 instruction: CALLB
 syntax: CALLB   D        {WC/WZ/WCZ}
 encoding: EEEE 1101111 RAA AAAAAAAAA AAAAAAAAA
-description: |
-  Call to A by writing {C, Z, 10'b0, PC[19:0]} to hub long at PTRB++. If R = 1 then PC += A, else PC = A. "\" forces R = 0.
 timing:
   cycles: 5
   type: fixed
 group: Branch A - Call
+description: Write current C and Z flags and address of the next instruction into the 4-byte Hub RAM location
+  at PTRA or PTRB, increment pointer, set PC to new relative or absolute address, and optionally update
+  C and/or Z to new state. R = 1 then PC += A, else PC = A.
+category: Flow Control Instruction - Call a subroutine; store return context in the Hub long at PTRA++
+  or PTRB++.
 flags_affected:
-  C: A
+  C:
+    formula: A
+parameters:
+- Addr is a symbolic reference to the target subroutine; the location to set PC to. Relative addressing
+  is the default; use '\' to force absolute addressing.
+- Dest is a register containing the 20-bit absolute address to set PC to and optional new C and Z states.
+- WC, WZ, or WCZ are optional effects to update the flags from Dest's upper bit states.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

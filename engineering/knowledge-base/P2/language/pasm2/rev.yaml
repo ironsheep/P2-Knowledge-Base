@@ -1,9 +1,16 @@
 instruction: REV
 syntax: REV     D
 encoding: EEEE 1101011 000 DDDDDDDDD 001101001
-description: |
-  Reverse D bits
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: The 32-bit pattern in Dest is reversed.
+category: Bit Operation Instruction - Reverse bits of value.
+flags_affected:
+  C:
+    when: D
+parameters:
+- Dest is the register containing the bit value to reverse.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

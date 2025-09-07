@@ -1,11 +1,15 @@
 instruction: WAITSE1
 syntax: WAITSE1          {WC/WZ/WCZ}
 encoding: EEEE 1101011 CZ0 000010100 000100100
-description: |
-  Wait for SE1 event flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.
 timing:
   cycles: 2
   type: variable
 group: Events - Wait
+description: Z = timeout.
+category: Events - Wait
 flags_affected:
-  Z: timeout
+  Z:
+    formula: timeout
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

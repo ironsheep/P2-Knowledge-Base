@@ -1,11 +1,15 @@
 instruction: LOCKNEW
 syntax: LOCKNEW D               {WC}
 encoding: EEEE 1101011 C00 DDDDDDDDD 000000100
-description: |
-  Request a LOCK. D will be written with the LOCK number (0 to 15). C = 1 if no LOCK available.
 timing:
   cycles: 4
   type: fixed
 group: Hub Control - Locks
+description: C = 1 if no LOCK available.
+category: Hub Control - Locks
 flags_affected:
-  C: 1 if no LOCK available
+  C:
+    formula: 1 if no LOCK available
+documentation_source: original
+documentation_level: minimal
+needs_documentation: true

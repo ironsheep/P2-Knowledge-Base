@@ -1,9 +1,22 @@
 instruction: SETD
 syntax: SETD    D,{#}S
 encoding: EEEE 1001101 10I DDDDDDDDD SSSSSSSSS
-description: |
-  Set D field of D to S[8:0]
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
+description: 'SETD copies Src[8:0] to the D field of the template, Dest, to be used with an ALTI instruction.
+  Bits outside the D Result: The D field [17:9] of template Dest is set to Src[8:0].'
+category: Indirection Instruction - Set template D field for ALTI.
+flags_affected:
+  C:
+    when: D
+parameters:
+- Dest is the register whose 32-bit value is a template for use with an ALTI instruction.
+- Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the D field of Dest.
+related:
+- SETS
+- SETR
+- ALTI
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive

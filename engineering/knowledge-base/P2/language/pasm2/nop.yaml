@@ -1,9 +1,12 @@
 instruction: NOP
 syntax: NOP
 encoding: 0000 0000000 000 000000000 000000000
-description: |
-  No operation.
 timing:
   cycles: 2
   type: fixed
 group: Miscellaneous
+description: 'NOP simply consumes two clock cycles; no other operation is performed. Result: Two clock
+  cycles are consumed.'
+category: Miscellaneous Instruction - No operation, just elapse two cycles.
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive
