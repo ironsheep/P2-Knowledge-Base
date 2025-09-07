@@ -1,0 +1,6 @@
+instruction: JPAT
+syntax: JPAT    {#}S
+encoding: EEEE 1011110 01I 000001000 SSSSSSSSS
+description: |
+  Jump to S** if PAT event flag is set.
+group: Events - Branch

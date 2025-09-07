@@ -1,0 +1,9 @@
+instruction: MUXQ
+syntax: MUXQ    D,{#}S
+encoding: EEEE 1001111 10I DDDDDDDDD SSSSSSSSS
+description: |
+  Used after SETQ
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

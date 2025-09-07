@@ -1,0 +1,11 @@
+instruction: MODZ
+syntax: MODZ    z               {WZ}
+encoding: EEEE 1101011 0Z1 00000zzzz 001101111
+description: |
+  Modify Z according to zzzz. Z = zzzz[{C,Z}].
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  Z: zzzz[{C,Z}]

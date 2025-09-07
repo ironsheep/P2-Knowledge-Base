@@ -1,0 +1,9 @@
+instruction: ADDCT1
+syntax: ADDCT1  D,{#}S
+encoding: EEEE 1010011 00I DDDDDDDDD SSSSSSSSS
+description: |
+  Set CT1 event to trigger on CT = D + S. Adds S into D.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Configuration

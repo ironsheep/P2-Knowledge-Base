@@ -1,0 +1,9 @@
+instruction: SETSE4
+syntax: SETSE4  {#}D
+encoding: EEEE 1101011 00L DDDDDDDDD 000100011
+description: |
+  Set SE4 event configuration to D[8:0].
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Configuration

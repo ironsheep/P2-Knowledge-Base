@@ -1,0 +1,9 @@
+instruction: GETXACC
+syntax: GETXACC D
+encoding: EEEE 1101011 000 DDDDDDDDD 000011110
+description: |
+  Get the streamer's Goertzel X accumulator into D and the Y accumulator into the next instruction's S, clear accumulators.
+timing:
+  cycles: 2
+  type: fixed
+group: Streamer

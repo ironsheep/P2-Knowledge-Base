@@ -1,0 +1,11 @@
+instruction: RFVAR
+syntax: RFVAR   D        {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ0 DDDDDDDDD 000010011
+description: |
+  Used after RDFAST. Read zero-extended 1..4-byte value from FIFO into D. C = 0. *
+timing:
+  cycles: 2
+  type: mode_dependent
+group: Hub FIFO - Read
+flags_affected:
+  C: 0

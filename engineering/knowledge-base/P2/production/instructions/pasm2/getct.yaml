@@ -1,0 +1,11 @@
+instruction: GETCT
+syntax: GETCT   D               {WC}
+encoding: EEEE 1101011 C00 DDDDDDDDD 000011010
+description: |
+  Get CT[31:0] or CT[63:32] if WC into D. GETCT WC + GETCT gets full CT. CT=0 on reset, CT++ on every clock. C = same.
+timing:
+  cycles: 2
+  type: fixed
+group: Miscellaneous
+flags_affected:
+  C: same

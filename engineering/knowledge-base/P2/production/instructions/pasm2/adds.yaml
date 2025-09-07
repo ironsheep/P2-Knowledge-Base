@@ -1,0 +1,11 @@
+instruction: ADDS
+syntax: ADDS    D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0001010 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Add S into D, signed
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: correct sign of (D + S)

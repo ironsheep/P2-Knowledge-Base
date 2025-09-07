@@ -1,0 +1,6 @@
+instruction: JXRL
+syntax: JXRL    {#}S
+encoding: EEEE 1011110 01I 000001101 SSSSSSSSS
+description: |
+  Jump to S** if XRL event flag is set.
+group: Events - Branch

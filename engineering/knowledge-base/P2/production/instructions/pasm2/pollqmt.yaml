@@ -1,0 +1,9 @@
+instruction: POLLQMT
+syntax: POLLQMT          {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ0 000001111 000100100
+description: |
+  Get QMT event flag into C/Z, then clear it.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Poll

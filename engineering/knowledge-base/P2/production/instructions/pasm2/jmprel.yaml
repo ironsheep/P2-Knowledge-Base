@@ -1,0 +1,6 @@
+instruction: JMPREL
+syntax: JMPREL  {#}D
+encoding: EEEE 1101011 00L DDDDDDDDD 000110000
+description: |
+  Jump ahead/back by D instructions. For cogex, PC += D[19:0]. For hubex, PC += D[17:0] << 2.
+group: Branch D - Jump

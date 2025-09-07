@@ -1,0 +1,9 @@
+instruction: POLLXRL
+syntax: POLLXRL          {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ0 000001101 000100100
+description: |
+  Get XRL event flag into C/Z, then clear it.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Poll

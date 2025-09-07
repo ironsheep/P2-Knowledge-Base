@@ -1,0 +1,6 @@
+instruction: PUSHA
+syntax: PUSHA   {#}D
+encoding: EEEE 1100011 0L1 DDDDDDDDD 101100001
+description: |
+  Write long in D[31:0] to hub address PTRA++.
+group: Hub RAM - Write

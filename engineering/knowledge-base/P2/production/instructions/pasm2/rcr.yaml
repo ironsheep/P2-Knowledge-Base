@@ -1,0 +1,11 @@
+instruction: RCR
+syntax: RCR     D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0000100 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Rotate carry right
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: last bit shifted out if S[4:0] > 0, else D[0]

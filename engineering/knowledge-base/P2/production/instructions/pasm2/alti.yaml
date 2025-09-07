@@ -1,0 +1,9 @@
+instruction: ALTI
+syntax: ALTI    D,{#}S
+encoding: EEEE 1001101 001 DDDDDDDDD 101100100
+description: |
+  Substitute next instruction's I/R/D/S fields with fields from D, per S. Modify D per S.
+timing:
+  cycles: 2
+  type: fixed
+group: Register Indirection

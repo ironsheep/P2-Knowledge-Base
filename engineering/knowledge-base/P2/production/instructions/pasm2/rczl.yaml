@@ -1,0 +1,12 @@
+instruction: RCZL
+syntax: RCZL    D        {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ0 DDDDDDDDD 001101011
+description: |
+  Rotate C,Z left through D
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: D[31], Z = D[30]
+  Z: D[30]

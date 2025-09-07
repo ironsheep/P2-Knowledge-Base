@@ -1,0 +1,11 @@
+instruction: FGE
+syntax: FGE     D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0011000 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Force D >= S
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: 1, else D same and C = 0

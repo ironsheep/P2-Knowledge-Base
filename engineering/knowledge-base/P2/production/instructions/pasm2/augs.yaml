@@ -1,0 +1,9 @@
+instruction: AUGS
+syntax: AUGS    #n
+encoding: EEEE 11110nn nnn nnnnnnnnn nnnnnnnnn
+description: |
+  Queue #n to be used as upper 23 bits for next #S occurrence, so that the next 9-bit #S will be augmented to 32 bits.
+timing:
+  cycles: 2
+  type: fixed
+group: Miscellaneous

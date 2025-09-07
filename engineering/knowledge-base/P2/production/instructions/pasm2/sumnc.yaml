@@ -1,0 +1,11 @@
+instruction: SUMNC
+syntax: SUMNC   D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0011101 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Sum +/-S into D by !C
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: 0 then D = D - S, else D = D + S

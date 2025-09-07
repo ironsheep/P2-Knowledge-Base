@@ -1,0 +1,9 @@
+instruction: ALTSN
+syntax: ALTSN   D,{#}S
+encoding: EEEE 1001010 101 DDDDDDDDD 000000000
+description: |
+  Alter subsequent SETNIB instruction. Next D field = (D[11:3] + S) & $1FF, N field = D[2:0]. D += sign-extended S[17:9].
+timing:
+  cycles: 2
+  type: fixed
+group: Register Indirection

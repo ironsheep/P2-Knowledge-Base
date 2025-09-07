@@ -1,0 +1,11 @@
+instruction: ENCOD
+syntax: ENCOD   D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0111100 CZ0 DDDDDDDDD DDDDDDDDD
+description: |
+  Get bit position of top-most '1' in D into D
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: (S != 0)

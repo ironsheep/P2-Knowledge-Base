@@ -1,0 +1,11 @@
+instruction: DRVNZ
+syntax: DRVNZ   {#}D           {WCZ}
+encoding: EEEE 1101011 CZL DDDDDDDDD 001011101
+description: |
+  OUT bits of pins D[10:6]+D[5:0]..D[5:0] = !Z. DIR bits = 1. Wraps within OUTA/OUTB. Prior SETQ overrides D[10:6]. C,Z = OUT bit.
+timing:
+  cycles: 2
+  type: fixed
+group: Pins
+flags_affected:
+  Z: OUT bit

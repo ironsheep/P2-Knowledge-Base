@@ -1,0 +1,11 @@
+instruction: ABS
+syntax: ABS     D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0110010 CZ0 DDDDDDDDD DDDDDDDDD
+description: |
+  Get absolute value of D into D
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: D[31]

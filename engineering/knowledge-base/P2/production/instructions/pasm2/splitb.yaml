@@ -1,0 +1,9 @@
+instruction: SPLITB
+syntax: SPLITB  D
+encoding: EEEE 1101011 000 DDDDDDDDD 001100000
+description: |
+  Split every 4th bit of D into bytes
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

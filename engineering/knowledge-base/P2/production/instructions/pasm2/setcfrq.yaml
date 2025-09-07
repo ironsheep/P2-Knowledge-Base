@@ -1,0 +1,9 @@
+instruction: SETCFRQ
+syntax: SETCFRQ {#}D
+encoding: EEEE 1101011 00L DDDDDDDDD 000111011
+description: |
+  Set the colorspace converter \"CFRQ\" parameter to D[31:0].
+timing:
+  cycles: 2
+  type: fixed
+group: Color Space Converter

@@ -1,0 +1,9 @@
+instruction: ALTB
+syntax: ALTB    D,{#}S
+encoding: EEEE 1001100 111 DDDDDDDDD 000000000
+description: |
+  Alter D field of next instruction to (D[13:5] + S) & $1FF. D += sign-extended S[17:9].
+timing:
+  cycles: 2
+  type: fixed
+group: Register Indirection

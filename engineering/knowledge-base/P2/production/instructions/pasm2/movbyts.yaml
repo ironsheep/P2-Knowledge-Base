@@ -1,0 +1,9 @@
+instruction: MOVBYTS
+syntax: MOVBYTS D,{#}S
+encoding: EEEE 1001111 11I DDDDDDDDD SSSSSSSSS
+description: |
+  Move bytes within D, per S
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

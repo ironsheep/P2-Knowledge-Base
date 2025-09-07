@@ -1,0 +1,9 @@
+instruction: SETR
+syntax: SETR    D,{#}S
+encoding: EEEE 1001101 01I DDDDDDDDD SSSSSSSSS
+description: |
+  Set R field of D to S[8:0]
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

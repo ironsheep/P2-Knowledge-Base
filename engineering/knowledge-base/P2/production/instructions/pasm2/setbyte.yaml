@@ -1,0 +1,9 @@
+instruction: SETBYTE
+syntax: SETBYTE D,{#}S,#N
+encoding: EEEE 1000110 00I 000000000 SSSSSSSSS
+description: |
+  Set S[7:0] into byte established by prior ALTSB instruction.
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

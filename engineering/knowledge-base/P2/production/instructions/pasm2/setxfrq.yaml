@@ -1,0 +1,9 @@
+instruction: SETXFRQ
+syntax: SETXFRQ {#}D
+encoding: EEEE 1101011 00L DDDDDDDDD 000011101
+description: |
+  Set streamer NCO frequency to D.
+timing:
+  cycles: 2
+  type: fixed
+group: Streamer

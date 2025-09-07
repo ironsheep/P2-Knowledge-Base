@@ -1,0 +1,9 @@
+instruction: ADDPIX
+syntax: ADDPIX  D,{#}S
+encoding: EEEE 1010010 00I DDDDDDDDD SSSSSSSSS
+description: |
+  Add bytes of S into bytes of D, with $FF saturation.
+timing:
+  cycles: 2
+  type: fixed
+group: Pixel Mixer

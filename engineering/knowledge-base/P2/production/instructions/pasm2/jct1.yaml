@@ -1,0 +1,6 @@
+instruction: JCT1
+syntax: JCT1    {#}S
+encoding: EEEE 1011110 01I 000000001 SSSSSSSSS
+description: |
+  Jump to S** if CT1 event flag is set.
+group: Events - Branch

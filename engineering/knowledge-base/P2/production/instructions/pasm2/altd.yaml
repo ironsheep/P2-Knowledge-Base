@@ -1,0 +1,9 @@
+instruction: ALTD
+syntax: ALTD    D,{#}S
+encoding: EEEE 1001100 011 DDDDDDDDD 000000000
+description: |
+  Alter D field of next instruction to (D + S) & $1FF. D += sign-extended S[17:9].
+timing:
+  cycles: 2
+  type: fixed
+group: Register Indirection

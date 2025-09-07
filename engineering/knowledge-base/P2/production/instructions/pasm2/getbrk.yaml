@@ -1,0 +1,9 @@
+instruction: GETBRK
+syntax: GETBRK  D          WC/WZ/WCZ
+encoding: EEEE 1101011 CZ0 DDDDDDDDD 000110101
+description: |
+  Get breakpoint/cog status into D according to WC/WZ/WCZ. See documentation for details.
+timing:
+  cycles: 2
+  type: fixed
+group: Interrupts

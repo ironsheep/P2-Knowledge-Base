@@ -1,0 +1,11 @@
+instruction: ONES
+syntax: ONES    D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0111101 CZ0 DDDDDDDDD DDDDDDDDD
+description: |
+  Get number of '1's in D into D
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: LSB of result

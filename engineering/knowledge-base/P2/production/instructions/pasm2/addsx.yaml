@@ -1,0 +1,12 @@
+instruction: ADDSX
+syntax: ADDSX   D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0001011 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Add (S + C) into D, signed and extended
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: correct sign of (D + S + C)
+  Z: Z AND (result == 0)

@@ -1,0 +1,6 @@
+instruction: RETI1
+syntax: RETI1
+encoding: EEEE 1011001 110 111111111 111110101
+description: |
+  Return from INT1. (CALLD $1FF,$1F5 WCZ)
+group: Branch S - Return

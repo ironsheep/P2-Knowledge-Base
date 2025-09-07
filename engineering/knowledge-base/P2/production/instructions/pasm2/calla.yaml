@@ -1,0 +1,8 @@
+instruction: CALLA
+syntax: CALLA   D        {WC/WZ/WCZ}
+encoding: EEEE 1101110 RAA AAAAAAAAA AAAAAAAAA
+description: |
+  Call to A by writing {C, Z, 10'b0, PC[19:0]} to hub long at PTRA++. If R = 1 then PC += A, else PC = A. "\" forces R = 0.
+group: Branch A - Call
+flags_affected:
+  C: A

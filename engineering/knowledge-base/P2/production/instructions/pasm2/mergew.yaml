@@ -1,0 +1,9 @@
+instruction: MERGEW
+syntax: MERGEW  D
+encoding: EEEE 1101011 000 DDDDDDDDD 001100011
+description: |
+  Merge bits of words in D
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

@@ -1,0 +1,6 @@
+instruction: RETI0
+syntax: RETI0
+encoding: EEEE 1011001 110 111111111 111111111
+description: |
+  Return from INT0. (CALLD $1FF,$1FF WCZ)
+group: Branch S - Return

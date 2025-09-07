@@ -1,0 +1,9 @@
+instruction: BMASK
+syntax: BMASK   D,{#}S
+encoding: EEEE 1001110 010 DDDDDDDDD DDDDDDDDD
+description: |
+  Get LSB-justified bit mask of size (D[4:0] + 1) into D
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

@@ -1,0 +1,9 @@
+instruction: POLLPAT
+syntax: POLLPAT          {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ0 000001000 000100100
+description: |
+  Get PAT event flag into C/Z, then clear it.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Poll

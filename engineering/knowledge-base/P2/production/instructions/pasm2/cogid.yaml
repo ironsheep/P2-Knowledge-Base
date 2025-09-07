@@ -1,0 +1,8 @@
+instruction: COGID
+syntax: COGID   {#}D            {WC}
+encoding: EEEE 1101011 C0L DDDDDDDDD 000000001
+description: |
+  If D is register and no WC, get cog ID (0 to 15) into D. If WC, check status of cog D[3:0], C = 1 if on.
+group: Hub Control - Cogs
+flags_affected:
+  C: 1 if on

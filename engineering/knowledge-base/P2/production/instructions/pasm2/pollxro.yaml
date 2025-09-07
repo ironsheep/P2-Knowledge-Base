@@ -1,0 +1,9 @@
+instruction: POLLXRO
+syntax: POLLXRO          {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ0 000001100 000100100
+description: |
+  Get XRO event flag into C/Z, then clear it.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Poll

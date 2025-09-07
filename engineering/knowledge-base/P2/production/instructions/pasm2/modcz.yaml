@@ -1,0 +1,12 @@
+instruction: MODCZ
+syntax: MODCZ   c,z      {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ1 0cccczzzz 001101111
+description: |
+  Modify C and Z according to cccc and zzzz. C = cccc[{C,Z}], Z = zzzz[{C,Z}].
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: cccc[{C,Z}], Z = zzzz[{C,Z}]
+  Z: zzzz[{C,Z}]

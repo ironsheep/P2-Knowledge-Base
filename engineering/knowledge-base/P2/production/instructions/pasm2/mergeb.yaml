@@ -1,0 +1,9 @@
+instruction: MERGEB
+syntax: MERGEB  D
+encoding: EEEE 1101011 000 DDDDDDDDD 001100001
+description: |
+  Merge bits of bytes in D
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

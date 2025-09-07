@@ -1,0 +1,12 @@
+instruction: SUMZ
+syntax: SUMZ    D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0011110 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Sum +/-S into D by Z
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: correct sign of (D +/- S)
+  Z: 1 then D = D - S, else D = D + S

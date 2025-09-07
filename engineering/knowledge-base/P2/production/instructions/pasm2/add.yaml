@@ -1,0 +1,11 @@
+instruction: ADD
+syntax: ADD     D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0001000 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Add S into D
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: carry of (D + S)

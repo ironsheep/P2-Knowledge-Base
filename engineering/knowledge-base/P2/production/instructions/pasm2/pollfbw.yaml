@@ -1,0 +1,9 @@
+instruction: POLLFBW
+syntax: POLLFBW          {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ0 000001001 000100100
+description: |
+  Get FBW event flag into C/Z, then clear it.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Poll

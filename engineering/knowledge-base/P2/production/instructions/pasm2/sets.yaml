@@ -1,0 +1,9 @@
+instruction: SETS
+syntax: SETS    D,{#}S
+encoding: EEEE 1001101 11I DDDDDDDDD SSSSSSSSS
+description: |
+  Set S field of D to S[8:0]
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

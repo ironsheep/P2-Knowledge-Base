@@ -1,0 +1,11 @@
+instruction: WAITCT2
+syntax: WAITCT2          {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ0 000010010 000100100
+description: |
+  Wait for CT2 event flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.
+timing:
+  cycles: 2
+  type: variable
+group: Events - Wait
+flags_affected:
+  Z: timeout

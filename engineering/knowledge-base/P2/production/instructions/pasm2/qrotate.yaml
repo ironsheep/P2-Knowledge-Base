@@ -1,0 +1,6 @@
+instruction: QROTATE
+syntax: QROTATE {#}D,{#}S
+encoding: EEEE 1101010 0LI DDDDDDDDD SSSSSSSSS
+description: |
+  Begin CORDIC rotation of point (D, SETQ value or 32'b0) by angle S. GETQX/GETQY retrieves X/Y.
+group: CORDIC Solver

@@ -1,0 +1,11 @@
+instruction: BITL
+syntax: BITL    D,{#}S         {WCZ}
+encoding: EEEE 0100000 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Bits D[S[9:5]+S[4:0]:S[4:0]] = 0. Other bits unaffected. Prior SETQ overrides S[9:5]. C,Z = original D[S[4:0]].
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  Z: original D[S[4:0]]

@@ -1,0 +1,8 @@
+instruction: LOCKTRY
+syntax: LOCKTRY {#}D            {WC}
+encoding: EEEE 1101011 C0L DDDDDDDDD 000000110
+description: |
+  Try to get LOCK D[3:0]. C = 1 if got LOCK. LOCKREL releases LOCK. LOCK is also released if owner cog stops or restarts.
+group: Hub Control - Locks
+flags_affected:
+  C: 1 if got LOCK

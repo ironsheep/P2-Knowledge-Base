@@ -1,0 +1,12 @@
+instruction: TESTN
+syntax: TESTN   D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0111111 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Test D with !S. C = parity of (D & !S). Z = ((D & !S) == 0).
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: parity of (D & !S)
+  Z: ((D & !S) == 0)

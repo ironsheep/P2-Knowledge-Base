@@ -1,0 +1,9 @@
+instruction: BRK
+syntax: BRK     {#}D
+encoding: EEEE 1101011 00L DDDDDDDDD 000110110
+description: |
+  If in debug ISR, set next break condition to D. Else, set BRK code to D[7:0] and unconditionally trigger BRK interrupt, if enabled.
+timing:
+  cycles: 2
+  type: fixed
+group: Interrupts

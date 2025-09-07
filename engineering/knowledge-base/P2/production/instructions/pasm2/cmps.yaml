@@ -1,0 +1,12 @@
+instruction: CMPS
+syntax: CMPS    D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0010010 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Compare D to S, signed
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: correct sign of (D - S)
+  Z: (D == S)

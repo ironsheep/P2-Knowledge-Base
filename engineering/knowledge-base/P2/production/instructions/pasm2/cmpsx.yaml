@@ -1,0 +1,12 @@
+instruction: CMPSX
+syntax: CMPSX   D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0010011 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Compare D to (S + C), signed and extended
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: correct sign of (D - (S + C))
+  Z: Z AND (D == S + C)

@@ -1,0 +1,9 @@
+instruction: AUGD
+syntax: AUGD    #n
+encoding: EEEE 11111nn nnn nnnnnnnnn nnnnnnnnn
+description: |
+  Queue #n to be used as upper 23 bits for next #D occurrence, so that the next 9-bit #D will be augmented to 32 bits.
+timing:
+  cycles: 2
+  type: fixed
+group: Miscellaneous

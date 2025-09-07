@@ -1,0 +1,9 @@
+instruction: NOP
+syntax: NOP
+encoding: 0000 0000000 000 000000000 000000000
+description: |
+  No operation.
+timing:
+  cycles: 2
+  type: fixed
+group: Miscellaneous

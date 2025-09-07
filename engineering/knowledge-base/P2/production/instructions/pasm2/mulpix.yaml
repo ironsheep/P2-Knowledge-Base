@@ -1,0 +1,9 @@
+instruction: MULPIX
+syntax: MULPIX  D,{#}S
+encoding: EEEE 1010010 01I DDDDDDDDD SSSSSSSSS
+description: |
+  Multiply bytes of S into bytes of D, where $FF = 1.0 and $00 = 0.0.
+timing:
+  cycles: 2
+  type: fixed
+group: Pixel Mixer

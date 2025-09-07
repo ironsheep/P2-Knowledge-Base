@@ -1,0 +1,6 @@
+instruction: JFBW
+syntax: JFBW    {#}S
+encoding: EEEE 1011110 01I 000001001 SSSSSSSSS
+description: |
+  Jump to S** if FBW event flag is set.
+group: Events - Branch

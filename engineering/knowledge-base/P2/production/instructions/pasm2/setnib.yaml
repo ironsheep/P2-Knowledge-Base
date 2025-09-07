@@ -1,0 +1,9 @@
+instruction: SETNIB
+syntax: SETNIB  D,{#}S,#N
+encoding: EEEE 1000000 00I 000000000 SSSSSSSSS
+description: |
+  Set S[3:0] into nibble established by prior ALTSN instruction.
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

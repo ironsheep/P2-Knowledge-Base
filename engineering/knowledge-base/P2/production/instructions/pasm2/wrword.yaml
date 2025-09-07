@@ -1,0 +1,6 @@
+instruction: WRWORD
+syntax: WRWORD  {#}D,{#}S/P
+encoding: EEEE 1100010 1LI DDDDDDDDD SSSSSSSSS
+description: |
+  Write word in D[15:0] to hub address {#}S/PTRx.
+group: Hub RAM - Write

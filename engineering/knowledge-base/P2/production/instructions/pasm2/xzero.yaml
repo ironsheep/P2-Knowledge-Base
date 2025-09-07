@@ -1,0 +1,9 @@
+instruction: XZERO
+syntax: XZERO   {#}D,{#}S
+encoding: EEEE 1100101 1LI DDDDDDDDD SSSSSSSSS
+description: |
+  Buffer new streamer command to be issued on final NCO rollover of current command, zeroing phase.
+timing:
+  cycles: 2
+  type: variable
+group: Streamer

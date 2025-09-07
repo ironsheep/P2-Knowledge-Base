@@ -1,0 +1,9 @@
+instruction: SETINT1
+syntax: SETINT1 {#}D
+encoding: EEEE 1101011 00L DDDDDDDDD 000100101
+description: |
+  Set INT1 source to D[3:0].
+timing:
+  cycles: 2
+  type: fixed
+group: Interrupts

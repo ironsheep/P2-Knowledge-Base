@@ -1,0 +1,9 @@
+instruction: SETPIX
+syntax: SETPIX  {#}D
+encoding: EEEE 1101011 00L DDDDDDDDD 000111110
+description: |
+  Set MIXPIX mode to D[5:0].
+timing:
+  cycles: 2
+  type: fixed
+group: Pixel Mixer

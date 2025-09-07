@@ -1,0 +1,11 @@
+instruction: TESTBN
+syntax: TESTBN  D,{#}S         WC/WZ
+encoding: EEEE 0100111 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Test bit S[4:0] of !D, XOR into C/Z. C/Z = C/Z XOR !D[S[4:0]].
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  Z: C/Z XOR !D[S[4:0]]

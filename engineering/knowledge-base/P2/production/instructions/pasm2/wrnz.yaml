@@ -1,0 +1,9 @@
+instruction: WRNZ
+syntax: WRNZ    D
+encoding: EEEE 1101011 000 DDDDDDDDD 001101111
+description: |
+  Write 0 or 1 to D, according to !Z
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

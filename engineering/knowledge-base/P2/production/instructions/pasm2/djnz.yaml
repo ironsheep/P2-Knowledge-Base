@@ -1,0 +1,6 @@
+instruction: DJNZ
+syntax: DJNZ    D,{#}S
+encoding: EEEE 1011011 01I DDDDDDDDD SSSSSSSSS
+description: |
+  Decrement D and jump to S** if result is not zero.
+group: Branch S - Mod & Test

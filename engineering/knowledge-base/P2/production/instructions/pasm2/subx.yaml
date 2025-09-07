@@ -1,0 +1,12 @@
+instruction: SUBX
+syntax: SUBX    D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0001101 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Subtract (S + C) from D, extended
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: borrow of (D - (S + C))
+  Z: Z AND (result == 0)

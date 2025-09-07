@@ -1,0 +1,9 @@
+instruction: SETCMOD
+syntax: SETCMOD {#}D
+encoding: EEEE 1101011 00L DDDDDDDDD 000111100
+description: |
+  Set the colorspace converter \"CMOD\" parameter to D[8:0].
+timing:
+  cycles: 2
+  type: fixed
+group: Color Space Converter

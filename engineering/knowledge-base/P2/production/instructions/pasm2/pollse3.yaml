@@ -1,0 +1,9 @@
+instruction: POLLSE3
+syntax: POLLSE3          {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ0 000000110 000100100
+description: |
+  Get SE3 event flag into C/Z, then clear it.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Poll

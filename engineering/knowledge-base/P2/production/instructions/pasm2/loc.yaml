@@ -1,0 +1,9 @@
+instruction: LOC
+syntax: LOC     PA/PB/PTRA/PTRB,#{\}A
+encoding: EEEE 11101WW RAA AAAAAAAAA AAAAAAAAA
+description: |
+  Get {12'b0, address[19:0]} into PA/PB/PTRA/PTRB (per W). If R = 1, address = PC + A, else address = A. \"\\" forces R = 0.
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

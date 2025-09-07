@@ -1,0 +1,11 @@
+instruction: FLES
+syntax: FLES    D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0011011 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Force D <= S, signed
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: 1, else D same and C = 0

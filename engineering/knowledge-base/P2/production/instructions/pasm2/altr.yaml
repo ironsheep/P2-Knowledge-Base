@@ -1,0 +1,9 @@
+instruction: ALTR
+syntax: ALTR    D,{#}S
+encoding: EEEE 1001100 001 DDDDDDDDD 000000000
+description: |
+  Alter result register address (normally D field) of next instruction to (D + S) & $1FF. D += sign-extended S[17:9].
+timing:
+  cycles: 2
+  type: fixed
+group: Register Indirection

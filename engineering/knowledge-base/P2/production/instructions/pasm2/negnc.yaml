@@ -1,0 +1,11 @@
+instruction: NEGNC
+syntax: NEGNC   D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0110101 CZ0 DDDDDDDDD DDDDDDDDD
+description: |
+  Negate D by !C
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: 0 then D = -D, else D = D

@@ -1,0 +1,11 @@
+instruction: ZEROX
+syntax: ZEROX   D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0111010 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Zero-extend D above bit S[4:0]. C = MSB of result. *
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: MSB of result

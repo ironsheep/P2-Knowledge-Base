@@ -1,0 +1,12 @@
+instruction: NEGNZ
+syntax: NEGNZ   D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0110111 CZ0 DDDDDDDDD DDDDDDDDD
+description: |
+  Negate D by !Z
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: MSB of result
+  Z: 0 then D = -D, else D = D

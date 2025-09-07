@@ -1,0 +1,11 @@
+instruction: ANDN
+syntax: ANDN    D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0101001 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  AND !S into D
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: parity of result

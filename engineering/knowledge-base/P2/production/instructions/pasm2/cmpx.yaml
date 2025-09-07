@@ -1,0 +1,12 @@
+instruction: CMPX
+syntax: CMPX    D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0010001 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Compare D to (S + C), extended
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: borrow of (D - (S + C))
+  Z: Z AND (D == S + C)

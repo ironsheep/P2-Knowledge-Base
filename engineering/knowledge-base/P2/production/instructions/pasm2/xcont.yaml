@@ -1,0 +1,9 @@
+instruction: XCONT
+syntax: XCONT   {#}D,{#}S
+encoding: EEEE 1100110 0LI DDDDDDDDD SSSSSSSSS
+description: |
+  Buffer new streamer command to be issued on final NCO rollover of current command, continuing phase.
+timing:
+  cycles: 2
+  type: variable
+group: Streamer

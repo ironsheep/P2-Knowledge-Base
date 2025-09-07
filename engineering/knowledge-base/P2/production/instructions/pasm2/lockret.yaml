@@ -1,0 +1,6 @@
+instruction: LOCKRET
+syntax: LOCKRET {#}D
+encoding: EEEE 1101011 00L DDDDDDDDD 000000101
+description: |
+  Return LOCK D[3:0] for reallocation.
+group: Hub Control - Locks

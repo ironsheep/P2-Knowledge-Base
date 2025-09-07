@@ -1,0 +1,11 @@
+instruction: MUL
+syntax: MUL     D,{#}S          {WZ}
+encoding: EEEE 1010000 0ZI DDDDDDDDD SSSSSSSSS
+description: |
+  D = unsigned (D[15:0] * S[15:0])
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  Z: (S == 0) | (D == 0)

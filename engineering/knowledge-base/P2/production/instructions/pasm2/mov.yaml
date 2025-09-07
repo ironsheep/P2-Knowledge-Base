@@ -1,0 +1,11 @@
+instruction: MOV
+syntax: MOV     D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0110000 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Move S into D
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: S[31]

@@ -1,0 +1,12 @@
+instruction: GETRND
+syntax: GETRND  D        {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ1 000000000 000011011
+description: |
+  Get RND into D/C/Z
+timing:
+  cycles: 2
+  type: fixed
+group: Miscellaneous
+flags_affected:
+  C: RND[31], Z = RND[30], unique per cog
+  Z: RND[30], unique per cog

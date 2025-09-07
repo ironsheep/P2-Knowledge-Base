@@ -1,0 +1,9 @@
+instruction: ROLWORD
+syntax: ROLWORD D,{#}S,#N
+encoding: EEEE 1001010 000 DDDDDDDDD 000000000
+description: |
+  Rotate-left word established by prior ALTGW instruction into D.
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

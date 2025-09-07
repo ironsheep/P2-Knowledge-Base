@@ -1,0 +1,9 @@
+instruction: COGATN
+syntax: COGATN  {#}D
+encoding: EEEE 1101011 00L DDDDDDDDD 000111111
+description: |
+  Strobe \"attention\" of all cogs whose corresponging bits are high in D[15:0].
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Attention

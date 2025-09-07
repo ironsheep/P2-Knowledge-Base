@@ -1,0 +1,11 @@
+instruction: SUB
+syntax: SUB     D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0001100 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Subtract S from D
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: borrow of (D - S)

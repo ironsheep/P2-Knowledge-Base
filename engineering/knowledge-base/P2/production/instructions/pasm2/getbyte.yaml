@@ -1,0 +1,9 @@
+instruction: GETBYTE
+syntax: GETBYTE D,{#}S,#N
+encoding: EEEE 1000111 000 DDDDDDDDD 000000000
+description: |
+  Get byte established by prior ALTGB instruction into D.
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

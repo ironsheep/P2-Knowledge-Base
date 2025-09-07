@@ -1,0 +1,9 @@
+instruction: SCA
+syntax: SCA     D,{#}S          {WZ}
+encoding: EEEE 1010001 0ZI DDDDDDDDD SSSSSSSSS
+description: |
+  Next instruction's S value = unsigned (D[15:0] * S[15:0]) >> 16. *
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

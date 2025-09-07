@@ -1,0 +1,9 @@
+instruction: COGBRK
+syntax: COGBRK  {#}D
+encoding: EEEE 1101011 00L DDDDDDDDD 000110101
+description: |
+  If in debug ISR, trigger asynchronous breakpoint in cog D[3:0]. Cog D[3:0] must have asynchronous breakpoint enabled.
+timing:
+  cycles: 2
+  type: fixed
+group: Interrupts

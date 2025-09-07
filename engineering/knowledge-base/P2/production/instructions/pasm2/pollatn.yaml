@@ -1,0 +1,9 @@
+instruction: POLLATN
+syntax: POLLATN          {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ0 000001110 000100100
+description: |
+  Get ATN event flag into C/Z, then clear it.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Poll

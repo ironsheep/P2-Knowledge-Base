@@ -1,0 +1,9 @@
+instruction: ROLNIB
+syntax: ROLNIB  D,{#}S,#N
+encoding: EEEE 1000100 000 DDDDDDDDD 000000000
+description: |
+  Rotate-left nibble established by prior ALTGN instruction into D.
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

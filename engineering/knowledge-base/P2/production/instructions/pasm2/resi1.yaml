@@ -1,0 +1,6 @@
+instruction: RESI1
+syntax: RESI1
+encoding: EEEE 1011001 110 111110100 111110101
+description: |
+  Resume from INT1. (CALLD $1F4,$1F5 WCZ)
+group: Branch S - Resume

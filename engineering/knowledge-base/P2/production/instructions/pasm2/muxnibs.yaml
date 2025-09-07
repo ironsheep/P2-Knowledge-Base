@@ -1,0 +1,9 @@
+instruction: MUXNIBS
+syntax: MUXNIBS D,{#}S
+encoding: EEEE 1001111 01I DDDDDDDDD SSSSSSSSS
+description: |
+  For each non-zero nibble in S, copy that nibble into the corresponding D nibble, else leave that D nibble the same.
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

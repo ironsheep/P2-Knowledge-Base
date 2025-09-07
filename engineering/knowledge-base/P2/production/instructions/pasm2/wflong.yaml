@@ -1,0 +1,9 @@
+instruction: WFLONG
+syntax: WFLONG  {#}D
+encoding: EEEE 1101011 00L DDDDDDDDD 000010111
+description: |
+  Used after WRFAST. Write long in D[31:0] into FIFO.
+timing:
+  cycles: 2
+  type: mode_dependent
+group: Hub FIFO - Write

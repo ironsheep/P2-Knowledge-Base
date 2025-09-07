@@ -1,0 +1,9 @@
+instruction: SETD
+syntax: SETD    D,{#}S
+encoding: EEEE 1001101 10I DDDDDDDDD SSSSSSSSS
+description: |
+  Set D field of D to S[8:0]
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

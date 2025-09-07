@@ -1,0 +1,9 @@
+instruction: ALTSB
+syntax: ALTSB   D,{#}S
+encoding: EEEE 1001011 001 DDDDDDDDD 000000000
+description: |
+  Alter subsequent SETBYTE instruction. Next D field = (D[10:2] + S) & $1FF, N field = D[1:0]. D += sign-extended S[17:9].
+timing:
+  cycles: 2
+  type: fixed
+group: Register Indirection

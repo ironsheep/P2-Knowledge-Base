@@ -1,0 +1,9 @@
+instruction: STALLI
+syntax: STALLI
+encoding: EEEE 1101011 000 000100001 000100100
+description: |
+  Stall Interrupts.
+timing:
+  cycles: 2
+  type: fixed
+group: Interrupts

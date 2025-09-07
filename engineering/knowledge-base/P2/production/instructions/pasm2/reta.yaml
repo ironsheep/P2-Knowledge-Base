@@ -1,0 +1,9 @@
+instruction: RETA
+syntax: RETA             {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ1 000000000 000101110
+description: |
+  Return by reading hub long (L) at --PTRA. C = L[31], Z = L[30], PC = L[19:0].
+group: Branch Return
+flags_affected:
+  C: L[31], Z = L[30], PC = L[19:0]
+  Z: L[30], PC = L[19:0]

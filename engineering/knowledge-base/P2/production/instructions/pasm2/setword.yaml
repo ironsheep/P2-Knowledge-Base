@@ -1,0 +1,9 @@
+instruction: SETWORD
+syntax: SETWORD D,{#}S,#N
+encoding: EEEE 1001001 00I 000000000 SSSSSSSSS
+description: |
+  Set S[15:0] into word established by prior ALTSW instruction.
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

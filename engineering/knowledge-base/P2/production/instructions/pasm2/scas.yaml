@@ -1,0 +1,9 @@
+instruction: SCAS
+syntax: SCAS    D,{#}S          {WZ}
+encoding: EEEE 1010001 1ZI DDDDDDDDD SSSSSSSSS
+description: |
+  Next instruction's S value = signed (D[15:0] * S[15:0]) >> 14. In this scheme, $4000 = 1.0 and $C000 = -1.0. *
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

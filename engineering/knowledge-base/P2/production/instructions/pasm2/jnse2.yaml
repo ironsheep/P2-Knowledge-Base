@@ -1,0 +1,6 @@
+instruction: JNSE2
+syntax: JNSE2   {#}S
+encoding: EEEE 1011110 01I 000010101 SSSSSSSSS
+description: |
+  Jump to S** if SE2 event flag is clear.
+group: Events - Branch

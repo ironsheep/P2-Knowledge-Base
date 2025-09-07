@@ -1,0 +1,12 @@
+instruction: CMPR
+syntax: CMPR    D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0010100 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Compare S to D (reverse)
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: borrow of (S - D)
+  Z: (D == S)

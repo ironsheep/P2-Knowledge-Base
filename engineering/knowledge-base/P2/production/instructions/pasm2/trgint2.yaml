@@ -1,0 +1,9 @@
+instruction: TRGINT2
+syntax: TRGINT2
+encoding: EEEE 1101011 000 000100011 000100100
+description: |
+  Trigger INT2, regardless of STALLI mode.
+timing:
+  cycles: 2
+  type: fixed
+group: Interrupts

@@ -1,0 +1,11 @@
+instruction: SUBR
+syntax: SUBR    D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0010110 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Subtract D from S (reverse)
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: borrow of (S - D)

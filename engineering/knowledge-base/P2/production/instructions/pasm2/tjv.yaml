@@ -1,0 +1,8 @@
+instruction: TJV
+syntax: TJV     D,{#}S
+encoding: EEEE 1011110 00I DDDDDDDDD SSSSSSSSS
+description: |
+  Test D and jump to S** if D overflowed (D[31] != C, C = 'correct sign' from last addition/subtraction).
+group: Branch S - Test
+flags_affected:
+  C: 'correct sign' from last addition/subtraction)

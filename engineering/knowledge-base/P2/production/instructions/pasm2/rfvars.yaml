@@ -1,0 +1,11 @@
+instruction: RFVARS
+syntax: RFVARS  D        {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ0 DDDDDDDDD 000010100
+description: |
+  Used after RDFAST. Read sign-extended 1..4-byte value from FIFO into D. C = MSB of value. *
+timing:
+  cycles: 2
+  type: mode_dependent
+group: Hub FIFO - Read
+flags_affected:
+  C: MSB of value

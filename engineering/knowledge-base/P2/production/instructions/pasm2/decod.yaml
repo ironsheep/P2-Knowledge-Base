@@ -1,0 +1,9 @@
+instruction: DECOD
+syntax: DECOD   D,{#}S
+encoding: EEEE 1001110 000 DDDDDDDDD DDDDDDDDD
+description: |
+  Decode D[4:0] into D
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

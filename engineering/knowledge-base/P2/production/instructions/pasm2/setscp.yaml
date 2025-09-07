@@ -1,0 +1,9 @@
+instruction: SETSCP
+syntax: SETSCP  {#}D
+encoding: EEEE 1101011 00L DDDDDDDDD 001110000
+description: |
+  Set four-channel oscilloscope enable to D[6] and set input pin base to D[5:2].
+timing:
+  cycles: 2
+  type: fixed
+group: Smart Pins

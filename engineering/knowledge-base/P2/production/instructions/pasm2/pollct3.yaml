@@ -1,0 +1,9 @@
+instruction: POLLCT3
+syntax: POLLCT3          {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ0 000000011 000100100
+description: |
+  Get CT3 event flag into C/Z, then clear it.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Poll

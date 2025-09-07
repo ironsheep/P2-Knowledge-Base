@@ -1,0 +1,9 @@
+instruction: REV
+syntax: REV     D
+encoding: EEEE 1101011 000 DDDDDDDDD 001101001
+description: |
+  Reverse D bits
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

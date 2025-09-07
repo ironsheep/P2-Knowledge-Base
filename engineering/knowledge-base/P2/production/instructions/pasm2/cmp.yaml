@@ -1,0 +1,12 @@
+instruction: CMP
+syntax: CMP     D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0010000 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Compare D to S
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: borrow of (D - S)
+  Z: (D == S)

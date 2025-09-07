@@ -1,0 +1,11 @@
+instruction: OUTNOT
+syntax: OUTNOT  {#}D           {WCZ}
+encoding: EEEE 1101011 CZL DDDDDDDDD 001001111
+description: |
+  Toggle OUT bits of pins D[10:6]+D[5:0]..D[5:0]. Wraps within OUTA/OUTB. Prior SETQ overrides D[10:6]. C,Z = OUT bit.
+timing:
+  cycles: 2
+  type: fixed
+group: Pins
+flags_affected:
+  Z: OUT bit

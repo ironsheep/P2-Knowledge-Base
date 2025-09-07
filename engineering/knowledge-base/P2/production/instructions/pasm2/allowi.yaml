@@ -1,0 +1,9 @@
+instruction: ALLOWI
+syntax: ALLOWI
+encoding: EEEE 1101011 000 000100000 000100100
+description: |
+  Allow interrupts (default).
+timing:
+  cycles: 2
+  type: fixed
+group: Interrupts

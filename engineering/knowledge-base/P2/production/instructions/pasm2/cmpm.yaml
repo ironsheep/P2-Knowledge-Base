@@ -1,0 +1,12 @@
+instruction: CMPM
+syntax: CMPM    D,{#}S   {WC/WZ/WCZ}
+encoding: EEEE 0010101 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Compare D to S, get MSB of difference into C
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic
+flags_affected:
+  C: MSB of (D - S)
+  Z: (D == S)

@@ -1,0 +1,9 @@
+instruction: XINIT
+syntax: XINIT   {#}D,{#}S
+encoding: EEEE 1100101 0LI DDDDDDDDD SSSSSSSSS
+description: |
+  Issue streamer command immediately, zeroing phase.
+timing:
+  cycles: 2
+  type: fixed
+group: Streamer

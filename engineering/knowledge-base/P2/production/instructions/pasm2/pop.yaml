@@ -1,0 +1,11 @@
+instruction: POP
+syntax: POP     D        {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ0 DDDDDDDDD 000101011
+description: |
+  Pop stack (K)
+timing:
+  cycles: 2
+  type: fixed
+group: Miscellaneous
+flags_affected:
+  C: K[31]

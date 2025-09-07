@@ -1,0 +1,6 @@
+instruction: JSE4
+syntax: JSE4    {#}S
+encoding: EEEE 1011110 01I 000000111 SSSSSSSSS
+description: |
+  Jump to S** if SE4 event flag is set.
+group: Events - Branch

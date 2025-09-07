@@ -1,0 +1,9 @@
+instruction: SEUSSR
+syntax: SEUSSR  D
+encoding: EEEE 1101011 000 DDDDDDDDD 001100101
+description: |
+  Relocate and periodically invert bits within D. Returns to original value on 32nd iteration. Reverse pattern.
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

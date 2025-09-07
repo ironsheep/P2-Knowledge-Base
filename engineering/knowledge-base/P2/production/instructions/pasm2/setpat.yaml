@@ -1,0 +1,9 @@
+instruction: SETPAT
+syntax: SETPAT  {#}D,{#}S
+encoding: EEEE 1011111 1LI DDDDDDDDD SSSSSSSSS
+description: |
+  Set pin pattern for PAT event. C selects INA/INB, Z selects =/!=, D provides mask value, S provides match value.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Configuration

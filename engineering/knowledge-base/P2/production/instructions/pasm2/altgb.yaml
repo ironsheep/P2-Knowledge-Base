@@ -1,0 +1,9 @@
+instruction: ALTGB
+syntax: ALTGB   D,{#}S
+encoding: EEEE 1001011 011 DDDDDDDDD 000000000
+description: |
+  Alter subsequent GETBYTE/ROLBYTE instruction. Next S field = (D[10:2] + S) & $1FF, N field = D[1:0]. D += sign-extended S[17:9].
+timing:
+  cycles: 2
+  type: fixed
+group: Register Indirection

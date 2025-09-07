@@ -1,0 +1,9 @@
+instruction: SETLUTS
+syntax: SETLUTS {#}D
+encoding: EEEE 1101011 00L DDDDDDDDD 000110111
+description: |
+  If D[0] = 1 then enable LUT sharing, where LUT writes within the adjacent odd/even companion cog are copied to this cog's LUT.
+timing:
+  cycles: 2
+  type: fixed
+group: Lookup Table

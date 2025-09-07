@@ -1,0 +1,9 @@
+instruction: MUXNITS
+syntax: MUXNITS D,{#}S
+encoding: EEEE 1001111 00I DDDDDDDDD SSSSSSSSS
+description: |
+  For each non-zero bit pair in S, copy that bit pair into the corresponding D bits, else leave that D bit pair the same.
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

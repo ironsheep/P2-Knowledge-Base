@@ -1,0 +1,6 @@
+instruction: JQMT
+syntax: JQMT    {#}S
+encoding: EEEE 1011110 01I 000001111 SSSSSSSSS
+description: |
+  Jump to S** if QMT event flag is set.
+group: Events - Branch

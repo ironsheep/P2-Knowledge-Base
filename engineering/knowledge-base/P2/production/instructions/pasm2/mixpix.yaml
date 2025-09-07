@@ -1,0 +1,9 @@
+instruction: MIXPIX
+syntax: MIXPIX  D,{#}S
+encoding: EEEE 1010010 11I DDDDDDDDD SSSSSSSSS
+description: |
+  Mix bytes of S into bytes of D, using SETPIX and SETPIV values.
+timing:
+  cycles: 2
+  type: fixed
+group: Pixel Mixer

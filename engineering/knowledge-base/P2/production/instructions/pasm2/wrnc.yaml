@@ -1,0 +1,9 @@
+instruction: WRNC
+syntax: WRNC    D
+encoding: EEEE 1101011 000 DDDDDDDDD 001101101
+description: |
+  Write 0 or 1 to D, according to !C
+timing:
+  cycles: 2
+  type: fixed
+group: Math and Logic

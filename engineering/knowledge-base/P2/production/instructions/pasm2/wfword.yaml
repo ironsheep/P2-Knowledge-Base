@@ -1,0 +1,9 @@
+instruction: WFWORD
+syntax: WFWORD  {#}D
+encoding: EEEE 1101011 00L DDDDDDDDD 000010110
+description: |
+  Used after WRFAST. Write word in D[15:0] into FIFO.
+timing:
+  cycles: 2
+  type: mode_dependent
+group: Hub FIFO - Write

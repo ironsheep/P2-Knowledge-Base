@@ -1,0 +1,11 @@
+instruction: DIRNC
+syntax: DIRNC   {#}D           {WCZ}
+encoding: EEEE 1101011 CZL DDDDDDDDD 001000011
+description: |
+  DIR bits of pins D[10:6]+D[5:0]..D[5:0] = !C. Wraps within DIRA/DIRB. Prior SETQ overrides D[10:6]. C,Z = DIR bit.
+timing:
+  cycles: 2
+  type: fixed
+group: Pins
+flags_affected:
+  Z: DIR bit
