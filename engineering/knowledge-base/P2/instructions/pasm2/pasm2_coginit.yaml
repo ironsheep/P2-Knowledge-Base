@@ -1,0 +1,47 @@
+metadata:
+  id: pasm2_coginit_d1ade2cf
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426964
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 235
+    type: csv
+    row: 235
+    type: csv
+    row: 235
+layer1_csv:
+  mnemonic: COGINIT
+  syntax: |
+    COGINIT {#}D,{#}S       {WC}
+  group: Hub Control - Cogs
+  encoding: EEEE 1100111 CLI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Start cog selected by D. S[19:0] sets hub startup address and PTRB of cog. Prior SETQ sets PTRA of cog.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.047554
+  narratives:
+    - source: silicon-doc-v35-facts-only.md
+      type: encoding_details
+      content: |
+        Start a cog. D[5]: 0=load from HUB, 1=direct start. D[4]: 0=specific COG, 1=find free. D[3:0]: COG ID when D[4]=0. D[0]: when D[4]=1, 0=single, 1=pair. SETQ value → PTRA, S/# address → PTRB.
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.311406
+  source: P2 Datasheet v35
+  timing:
+    raw: 2...9, +2 if result / same
+    type: variable
+    notes:
+      - Hub window alignment affects timing
+    min_cycles: 2
+    max_cycles: 9
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Start cog selected by D. S[19:0] sets hub startup address and PTRB of cog. Prior SETQ sets PTRA of cog."
+  syntax: "COGINIT {#}D,{#}S       {WC}"

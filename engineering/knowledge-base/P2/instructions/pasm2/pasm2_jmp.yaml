@@ -1,0 +1,46 @@
+metadata:
+  id: pasm2_jmp_c1cfce3a
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.429782
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 403
+    type: csv
+    row: 318
+    type: csv
+    row: 403
+    type: csv
+    row: 318
+    type: csv
+    row: 403
+layer1_csv:
+  mnemonic: JMP
+  syntax: |
+    JMP     #{\}A
+  group: Branch A - Jump
+  encoding: EEEE 1101100 RAA AAAAAAAAA AAAAAAAAA
+  alias: .
+  description: Jump to A.                                                                  If R = 1 then PC += A, else PC = A. "\" forces R = 0.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 4
+    cog_exec_16_cogs: 4
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.632814
+  source: P2 Datasheet v35
+  timing:
+    raw: 4 / 13...20
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.044169
+  narratives:
+    - source: INSTRUCTION-TIMING-AND-ENCODING.md
+      type: timing_note
+      content: |
+        Branch instruction flushes pipeline, causing next instruction to take 5+ clocks instead of 2.
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Jump to D.                                                              C = D[31], Z = D[30], PC = D[19:0]."
+  syntax: "JMP     D        {WC/WZ/WCZ}"

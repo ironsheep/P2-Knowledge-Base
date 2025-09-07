@@ -1,0 +1,6 @@
+name: LSTRING
+type: method
+category: String Creation
+signature: "LSTRING("Text")"
+description: "Create length-prefixed string"
+source: Spin2 Documentation v51

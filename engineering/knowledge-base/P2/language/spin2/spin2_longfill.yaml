@@ -1,0 +1,6 @@
+name: LONGFILL
+type: method
+category: Fill Operations
+signature: "LONGFILL(Destination, Value, Count)"
+description: "Fill memory with long value"
+source: Spin2 Documentation v51

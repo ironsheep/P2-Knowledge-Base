@@ -1,0 +1,6 @@
+name: PINCLEAR
+type: method
+category: SmartPin Operations
+signature: "PINCLEAR(PinField)"
+description: "Clear smart pins: DIR=0, WRPIN=0"
+source: Spin2 Documentation v51

@@ -1,0 +1,48 @@
+metadata:
+  id: pasm2_setluts_3084636c
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.428242
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 333
+    type: csv
+    row: 333
+    type: csv
+    row: 333
+layer1_csv:
+  mnemonic: SETLUTS
+  syntax: |
+    SETLUTS {#}D
+  group: Lookup Table
+  encoding: EEEE 1101011 00L DDDDDDDDD 000110111
+  alias: .
+  description: If D[0] = 1 then enable LUT sharing, where LUT writes within the adjacent odd/even companion cog are copied to this cog's LUT.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.032820
+  narratives:
+    - source: silicon-from-docx.md
+      type: enhancement
+      content: |
+        Enable/disable LUT RAM writes from adjacent cog. Now glitch-free in Rev B/C silicon.
+    - source: INSTRUCTION-TIMING-AND-ENCODING.md
+      type: functional_description
+      content: |
+        Enable/disable LUT RAM writes from adjacent cog. SETLUTS #0 disallows writes (default), SETLUTS #1 allows writes.
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.308652
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "If D[0] = 1 then enable LUT sharing, where LUT writes within the adjacent odd/even companion cog are copied to this cog's LUT."
+  syntax: "SETLUTS {#}D"

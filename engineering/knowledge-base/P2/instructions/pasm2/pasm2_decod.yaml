@@ -1,0 +1,41 @@
+metadata:
+  id: pasm2_decod_935f113e
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426222
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 128
+    type: csv
+    row: 128
+    type: csv
+    row: 129
+    type: csv
+    row: 128
+    type: csv
+    row: 129
+layer1_csv:
+  mnemonic: DECOD
+  syntax: |
+    DECOD   D
+  group: Math and Logic
+  encoding: EEEE 1001110 000 DDDDDDDDD DDDDDDDDD
+  alias: alias
+  description: Decode D[4:0] into D. D = 1 << D[4:0].
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.624754
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Decode S[4:0] into D. D = 1 << S[4:0]."
+  syntax: "DECOD   D,{#}S"

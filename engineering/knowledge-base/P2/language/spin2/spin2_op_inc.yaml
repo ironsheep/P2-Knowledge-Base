@@ -1,0 +1,6 @@
+name: "++"
+type: operator
+priority: 1
+category: Var-modify
+description: "Pre/post increment/decrement/random"
+source: Spin2 Documentation v51

@@ -1,0 +1,6 @@
+name: XYPOL
+type: method
+category: CORDIC Operations
+signature: "XYPOL(x, y) : length, angle32bit"
+description: "Convert Cartesian to polar"
+source: Spin2 Documentation v51

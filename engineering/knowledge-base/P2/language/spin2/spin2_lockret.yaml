@@ -1,0 +1,6 @@
+name: LOCKRET
+type: method
+category: Lock Management
+signature: "LOCKRET(LockNum)"
+description: "Return lock to inventory"
+source: Spin2 Documentation v51

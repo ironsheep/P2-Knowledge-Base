@@ -1,0 +1,46 @@
+metadata:
+  id: pasm2_wrfast_85bc1b35
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426870
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 228
+    type: csv
+    row: 228
+    type: csv
+    row: 228
+layer1_csv:
+  mnemonic: WRFAST
+  syntax: |
+    WRFAST  {#}D,{#}S
+  group: Hub FIFO - New Write
+  encoding: EEEE 1100100 0LI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Begin new fast hub write via FIFO. D[31] = no wait, D[13:0] = block size in 64-byte units (0 = max), S[19:0] = block start address.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.028863
+  narratives:
+    - source: architectural_context
+      type: architectural_note
+      content: |
+        Hub memory access uses egg-beater rotation. Each cog gets a turn every 8 clocks. Hub window alignment affects timing (13-20 clocks typical).
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.315524
+  source: P2 Datasheet v35
+  timing:
+    raw: 2 or WRFAST finish + 3 / FIFO IN USE
+    base_cycles: 2
+    type: conditional
+    notes:
+      - Conditional timing: 2 or 3 cycles
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Begin new fast hub write via FIFO. D[31] = no wait, D[13:0] = block size in 64-byte units (0 = max), S[19:0] = block start address."
+  syntax: "WRFAST  {#}D,{#}S"

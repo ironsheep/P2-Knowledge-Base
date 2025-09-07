@@ -1,0 +1,266 @@
+name: "P2 Hardware Selection Guide"
+category: "hardware_selection"
+version: "1.0"
+last_updated: "2025-09-06"
+
+description: "Comprehensive decision-making guide for selecting optimal P2 hardware configurations based on project requirements, budget constraints, experience level, and application domain."
+
+decision_tree:
+  primary_question: "What is your primary use case?"
+  branches:
+    learning_development:
+      question: "Are you new to P2 development?"
+      new_user:
+        recommendation: "P2 Eval Board + Control Board Add-on"
+        part_numbers: ["64000-ES", "64006A"]
+        rationale: "Complete development environment with programming, debugging, and simple I/O"
+        cost_estimate: "$150-200"
+        next_steps: "Add more add-on boards as needed"
+      experienced_user:
+        recommendation: "P2 Eval Board + Complete Add-on Set"
+        part_numbers: ["64000-ES", "64006-ES"]
+        rationale: "Full ecosystem access for comprehensive development"
+        cost_estimate: "$250-300"
+        next_steps: "Transition to breakout boards for production"
+        
+    prototyping_experimentation:
+      question: "Do you need integrated programming and debugging?"
+      integrated_needed:
+        recommendation: "P2 Eval Board"
+        part_numbers: ["64000-ES"]
+        rationale: "Built-in programming via USB-C, extensive prototyping area"
+        cost_estimate: "$100-150"
+        expansion_options: ["Add-on boards as needed", "Breadboard integration"]
+      external_programming_ok:
+        recommendation: "P2 Edge Standard Breakout + P2-EC"
+        part_numbers: ["P2-EVAL-STD-BREAKOUT", "P2-EC"]
+        rationale: "Lower cost, all pins accessible, breadboard compatible"
+        cost_estimate: "$60-80"
+        additional_needed: "PropPlug or similar programmer"
+        
+    embedded_systems:
+      question: "What are your size constraints?"
+      size_critical:
+        recommendation: "P2 Edge Mini Breakout + P2-EC"
+        part_numbers: ["P2-EVAL-MINI-BREAKOUT", "P2-EC"]
+        rationale: "Smallest possible footprint (38×25mm) with full P2 capability"
+        cost_estimate: "$50-70"
+        mounting: "Castellation mounting for surface mount integration"
+      size_moderate:
+        recommendation: "P2 Edge Standard Breakout + P2-EC"
+        part_numbers: ["P2-EVAL-STD-BREAKOUT", "P2-EC"]
+        rationale: "Larger but easier to work with, header pin access"
+        cost_estimate: "$60-80"
+        mounting: "Through-hole headers or breadboard mounting"
+        
+    production_ready:
+      question: "Do you need the extra flash memory?"
+      large_programs:
+        recommendation: "P2 Edge Mini Breakout + P2-EC32MB"
+        part_numbers: ["P2-EVAL-MINI-BREAKOUT", "P2-EC32MB"]
+        rationale: "Production-ready form factor with maximum memory"
+        cost_estimate: "$80-120"
+        memory: "32MB Flash for large applications"
+      standard_programs:
+        recommendation: "P2 Edge Mini Breakout + P2-EC"
+        part_numbers: ["P2-EVAL-MINI-BREAKOUT", "P2-EC"]
+        rationale: "Cost-effective production solution"
+        cost_estimate: "$50-70"
+        memory: "4MB Flash sufficient for most applications"
+
+application_specific_guides:
+  audio_video_projects:
+    primary_hardware: "P2 Eval Board"
+    required_addons: ["64006H - A/V Breakout Board"]
+    optional_addons: ["64006D - Digital Video Out", "64006C - LED Matrix"]
+    total_investment: "$200-350"
+    capabilities:
+      - "VGA video output up to 1024×768"
+      - "Stereo audio with multiple output formats"
+      - "Digital video experimentation"
+      - "LED matrix displays for graphics"
+    development_path:
+      1: "Start with built-in VGA and audio on Eval Board"
+      2: "Add A/V Breakout for multiple video standards"
+      3: "Add Digital Video Out for modern display interfaces"
+      4: "Add LED Matrix for supplementary displays"
+      
+  usb_communication_projects:
+    primary_hardware: "P2 Eval Board"
+    required_addons: ["64006B - Serial Host", "64006F - Serial Device"]
+    total_investment: "$250-350"
+    capabilities:
+      - "USB host for connecting peripherals"
+      - "USB device emulation (HID, CDC, custom)"
+      - "Dual-port configurations for complex scenarios"
+      - "Device enumeration and power management"
+    development_path:
+      1: "Start with basic USB programming via Eval Board USB-C"
+      2: "Add Serial Host for connecting USB devices"
+      3: "Add Serial Device for custom device emulation"
+      4: "Develop complex USB ecosystems"
+      
+  educational_curriculum:
+    beginner_level:
+      hardware: "P2 Eval Board + Control Board"
+      concepts: ["Basic I/O", "LED control", "Switch input", "Programming basics"]
+      cost: "$150-200"
+      duration: "4-6 weeks"
+    intermediate_level:
+      hardware: "Previous + LED Matrix + Mini Prototyping"
+      addons: ["64006C", "64006E"]
+      concepts: ["Matrix control", "Charlieplexing", "Custom circuits", "Advanced I/O"]
+      additional_cost: "$100-150"
+      duration: "6-8 weeks"
+    advanced_level:
+      hardware: "Previous + USB boards + A/V breakout"
+      addons: ["64006B", "64006F", "64006H"]
+      concepts: ["Communication protocols", "A/V interfaces", "System integration"]
+      additional_cost: "$200-300"
+      duration: "8-12 weeks"
+      
+  maker_hobbyist_projects:
+    starter_configuration:
+      hardware: "P2 Eval Board"
+      immediate_addons: ["64006A - Control", "64006E - Prototyping"]
+      rationale: "Maximum flexibility with simple I/O and custom circuit capability"
+      cost: "$200-250"
+    expansion_priority:
+      1: "64006C - LED Matrix (visual projects)"
+      2: "64006H - A/V Breakout (multimedia)"
+      3: "64006G - Digital I/O (interactive projects)"
+    long_term_path: "Transition to Standard Breakout for custom PCB integration"
+    
+  industrial_iot_development:
+    development_phase:
+      hardware: "P2 Eval Board"
+      focus: "Proof of concept, protocol development"
+      cost: "$150-200"
+    prototype_phase:
+      hardware: "P2 Edge Standard Breakout + P2-EC"
+      focus: "Custom circuit integration, field testing"
+      cost: "$60-80"
+    production_phase:
+      hardware: "P2 Edge Mini Breakout + P2-EC/32MB"
+      focus: "Size optimization, cost reduction"
+      cost: "$50-120"
+      
+budget_optimization_strategies:
+  ultra_budget_entry:
+    configuration: "P2 Edge Standard Breakout + P2-EC"
+    total_cost: "$60-80"
+    programming: "PropPlug programmer required (+$30)"
+    limitations: "No integrated development environment"
+    best_for: "Experienced developers, cost-critical projects"
+    
+  value_balanced:
+    configuration: "P2 Eval Board"
+    total_cost: "$100-150"
+    programming: "Integrated USB-C programming"
+    expansion: "Add specific add-on boards as needed"
+    best_for: "Most users, balanced cost/capability"
+    
+  capability_maximized:
+    configuration: "P2 Eval Board + Complete Add-on Set"
+    total_cost: "$300-400"
+    programming: "Full development environment"
+    expansion: "Complete P2 ecosystem access"
+    best_for: "Educational institutions, comprehensive development"
+
+memory_sizing_guide:
+  program_size_estimates:
+    simple_projects: "< 100KB - P2-EC (4MB) sufficient"
+    moderate_projects: "100KB - 1MB - P2-EC (4MB) sufficient"
+    complex_projects: "1MB - 4MB - P2-EC (4MB) adequate"
+    very_large_projects: "> 4MB - P2-EC32MB (32MB) required"
+    data_logging: "Heavy data storage - P2-EC32MB (32MB) recommended"
+    
+  memory_upgrade_decision:
+    cost_difference: "$30-50 between P2-EC and P2-EC32MB"
+    performance_impact: "None - same processing capability"
+    when_to_upgrade: "Large programs, data logging, future-proofing"
+    when_standard_sufficient: "Educational use, simple projects, cost optimization"
+
+development_workflow_optimization:
+  beginner_workflow:
+    1: "Start with P2 Eval Board for integrated development"
+    2: "Use built-in examples and tutorials"
+    3: "Add Control Board for hands-on I/O learning"
+    4: "Expand with additional add-on boards as skills develop"
+    
+  advanced_workflow:
+    1: "Prototype on P2 Eval Board with relevant add-ons"
+    2: "Validate concepts and develop code"
+    3: "Transition to Standard Breakout for custom hardware integration"
+    4: "Final implementation on Mini Breakout for production"
+    
+  production_workflow:
+    development: "P2 Eval Board (full featured development)"
+    integration: "Standard Breakout (custom hardware integration)"
+    production: "Mini Breakout (optimized size/cost)"
+    programming: "In-circuit via PropPlug or custom programmer"
+
+compatibility_considerations:
+  power_supply_requirements:
+    eval_board: "5V @ 1A minimum (USB-C or barrel jack)"
+    breakouts: "Regulated 3.3V or 5V depending on model"
+    addon_boards: "Additional current budget (50-500mA each)"
+    
+  programming_infrastructure:
+    eval_board: "No additional hardware required"
+    breakouts: "PropPlug or compatible programmer needed"
+    production: "In-circuit programming capability recommended"
+    
+  mechanical_integration:
+    eval_board: "Large form factor (127×89mm), not production-ready"
+    standard_breakout: "PCB-mount friendly (76×51mm)"
+    mini_breakout: "Compact integration (38×25mm)"
+    mounting: "Header pins vs castellation mounting options"
+
+common_mistakes_to_avoid:
+  overbuying_initially:
+    mistake: "Buying complete add-on set before understanding needs"
+    solution: "Start with core hardware, add specific boards as needed"
+    
+  underestimating_programming_needs:
+    mistake: "Choosing breakout without considering programming setup"
+    solution: "Factor in PropPlug cost and setup complexity"
+    
+  ignoring_form_factor_constraints:
+    mistake: "Choosing Eval Board for size-constrained applications"
+    solution: "Consider final application requirements from the start"
+    
+  memory_miscalculation:
+    mistake: "Choosing 4MB when application clearly needs more"
+    solution: "Estimate program size early, upgrade memory if uncertain"
+
+upgrade_and_expansion_paths:
+  natural_progression:
+    entry: "P2 Eval Board (learning and development)"
+    intermediate: "Add relevant add-on boards (capability expansion)"
+    advanced: "Standard Breakout (custom hardware integration)"
+    production: "Mini Breakout (optimized implementation)"
+    
+  expansion_priorities_by_domain:
+    general_purpose: ["Control Board", "Prototyping Board", "Digital I/O"]
+    multimedia: ["A/V Breakout", "LED Matrix", "Digital Video Out"]
+    communication: ["USB Host", "USB Device"]
+    education: ["Control Board", "LED Matrix", "Prototyping"]
+
+final_recommendations:
+  most_versatile: "P2 Eval Board - handles 90% of use cases effectively"
+  best_value: "P2 Edge Standard Breakout + P2-EC - minimal cost for full capability"
+  most_compact: "P2 Edge Mini Breakout + P2-EC - production-ready size"
+  educational_optimal: "P2 Eval Board + Control Board + Prototyping Board"
+  maker_ideal: "P2 Eval Board + selective add-on boards based on interests"
+  industrial_path: "Eval Board → Standard Breakout → Mini Breakout progression"
+  
+decision_summary:
+  key_questions:
+    1: "New to P2 development? → Choose P2 Eval Board"
+    2: "Need integrated programming? → Choose P2 Eval Board"
+    3: "Size/cost critical? → Choose appropriate breakout board"
+    4: "Large programs/data? → Choose P2-EC32MB memory option"
+    5: "Specific I/O needs? → Add relevant add-on boards"
+  
+  cannot_go_wrong_choice: "P2 Eval Board with P2-EC standard - provides complete development capability with expansion options and reasonable cost"

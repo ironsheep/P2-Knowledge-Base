@@ -1,0 +1,25 @@
+metadata:
+  id: pasm2__nc_or_nz_0a6fd8ff
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.430514
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 475
+    type: csv
+    row: 475
+    type: csv
+    row: 475
+layer1_csv:
+  mnemonic: _NC_OR_NZ
+  syntax: |
+    _NC_OR_NZ
+  group: MODCZ Operand
+  encoding: cccc or zzzz = 0111
+  alias: .
+  description: C/Z = !C OR !Z
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: null
+    cog_exec_16_cogs: null

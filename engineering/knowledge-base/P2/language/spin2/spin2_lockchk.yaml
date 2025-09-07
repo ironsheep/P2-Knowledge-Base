@@ -1,0 +1,6 @@
+name: LOCKCHK
+type: method
+category: Lock Management
+signature: "LOCKCHK(LockNum) : LockState"
+description: "Check lock state, bit 31 = captured, bits 3:0 = owner cog"
+source: Spin2 Documentation v51

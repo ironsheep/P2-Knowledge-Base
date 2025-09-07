@@ -1,0 +1,6 @@
+name: LOOKUPZ
+type: method
+category: String Creation
+signature: "LOOKUPZ(Index: v1, v2..v3, etc) : Value"
+description: "Look up value by 0-based index"
+source: Spin2 Documentation v51

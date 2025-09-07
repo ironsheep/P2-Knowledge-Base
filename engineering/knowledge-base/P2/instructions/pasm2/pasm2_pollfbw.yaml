@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_pollfbw_eddf2221
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.427587
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 281
+    type: csv
+    row: 281
+    type: csv
+    row: 281
+layer1_csv:
+  mnemonic: POLLFBW
+  syntax: |
+    POLLFBW          {WC/WZ/WCZ}
+  group: Events - Poll
+  encoding: EEEE 1101011 CZ0 000001001 000100100
+  alias: .
+  description: Get FBW event flag into C/Z, then clear it.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.611054
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Get FBW event flag into C/Z, then clear it."
+  syntax: "POLLFBW          {WC/WZ/WCZ}"

@@ -1,0 +1,6 @@
+name: GETSEC
+type: method
+category: Time Measurement
+signature: "GETSEC() : Seconds"
+description: "Get seconds since boot"
+source: Spin2 Documentation v51

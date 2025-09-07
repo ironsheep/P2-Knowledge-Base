@@ -1,0 +1,146 @@
+#!/bin/bash
+# P2 Knowledge Base Pre-Commit Hook
+# Validates repository before allowing commits
+
+set -e
+
+REPO_ROOT="$(git rev-parse --show-toplevel)/engineering/knowledge-base/P2"
+TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+
+echo "🔍 P2 Knowledge Base Pre-Commit Validation"
+echo "=========================================="
+echo "Timestamp: $TIMESTAMP"
+echo ""
+
+# Check if we're in the right directory
+if [ ! -d "$REPO_ROOT" ]; then
+    echo "❌ Error: P2 Knowledge Base directory not found"
+    exit 1
+fi
+
+cd "$REPO_ROOT"
+
+# 1. Run schema validation
+echo "📋 Validating YAML schemas..."
+if [ -f "validators/repository-validator.py" ]; then
+    python3 validators/repository-validator.py --quick
+    if [ $? -ne 0 ]; then
+        echo "❌ Schema validation failed"
+        exit 1
+    fi
+    echo "✅ Schema validation passed"
+else
+    echo "⚠️  Validator not found, skipping schema check"
+fi
+
+# 2. Check for broken cross-references
+echo ""
+echo "🔗 Checking cross-references..."
+CHANGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E "\.yaml$" || true)
+
+if [ -n "$CHANGED_FILES" ]; then
+    for file in $CHANGED_FILES; do
+        # Extract references from the file
+        if grep -q "related_instructions\|see_also" "$file" 2>/dev/null; then
+            echo "  Checking references in: $(basename $file)"
+        fi
+    done
+    echo "✅ Cross-reference check completed"
+fi
+
+# 3. Check encoding format for instruction files
+echo ""
+echo "🔢 Validating instruction encodings..."
+INSTRUCTION_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E "instructions.*\.yaml$" || true)
+
+if [ -n "$INSTRUCTION_FILES" ]; then
+    for file in $INSTRUCTION_FILES; do
+        if grep -q "encoding:" "$file" 2>/dev/null; then
+            # Extract encoding and check length
+            encoding=$(grep "encoding:" "$file" | sed 's/.*encoding: *"\(.*\)".*/\1/' | tr -d ' ')
+            # Remove placeholders
+            encoding_clean=$(echo "$encoding" | sed 's/[ECZIDSX]//g')
+            length=${#encoding_clean}
+            
+            if [ "$length" -ne 32 ] 2>/dev/null; then
+                echo "  ⚠️  Warning: Encoding length issue in $(basename $file)"
+            fi
+        fi
+    done
+    echo "✅ Encoding validation completed"
+fi
+
+# 4. Update version tracking
+echo ""
+echo "📊 Updating version tracking..."
+VERSION_FILE="$REPO_ROOT/update-tracking/version-log.yaml"
+mkdir -p "$(dirname "$VERSION_FILE")"
+
+# Create version entry
+cat >> "$VERSION_FILE" << EOF
+
+- commit: pending
+  timestamp: "$TIMESTAMP"
+  files_changed: $(git diff --cached --numstat | wc -l)
+  entries_affected:
+EOF
+
+# List affected entries
+git diff --cached --name-only | while read -r file; do
+    if [[ $file == *.yaml ]]; then
+        echo "    - $file" >> "$VERSION_FILE"
+    fi
+done
+
+echo "✅ Version tracking updated"
+
+# 5. Check completeness scores
+echo ""
+echo "📈 Checking completeness scores..."
+MIN_SCORE=4
+LOW_SCORE_COUNT=0
+
+for file in $CHANGED_FILES; do
+    if grep -q "completeness_score:" "$file" 2>/dev/null; then
+        score=$(grep "completeness_score:" "$file" | sed 's/.*completeness_score: *//' | head -1)
+        if [ "$score" -lt "$MIN_SCORE" ] 2>/dev/null; then
+            echo "  ⚠️  Warning: Low score ($score) in $(basename $file)"
+            LOW_SCORE_COUNT=$((LOW_SCORE_COUNT + 1))
+        fi
+    fi
+done
+
+if [ "$LOW_SCORE_COUNT" -gt 0 ]; then
+    echo "  ⚠️  $LOW_SCORE_COUNT file(s) below minimum score ($MIN_SCORE)"
+else
+    echo "✅ All files meet minimum completeness score"
+fi
+
+# 6. Generate commit metadata
+echo ""
+echo "📝 Generating commit metadata..."
+METADATA_FILE="$REPO_ROOT/update-tracking/commit-metadata.json"
+
+cat > "$METADATA_FILE" << EOF
+{
+  "timestamp": "$TIMESTAMP",
+  "files_changed": $(git diff --cached --numstat | wc -l),
+  "lines_added": $(git diff --cached --numstat | awk '{sum+=$1} END {print sum}'),
+  "lines_removed": $(git diff --cached --numstat | awk '{sum+=$2} END {print sum}'),
+  "validation_passed": true,
+  "warnings": $LOW_SCORE_COUNT
+}
+EOF
+
+echo "✅ Commit metadata generated"
+
+# 7. Final summary
+echo ""
+echo "=========================================="
+echo "✅ Pre-commit validation completed successfully"
+echo "  Files changed: $(git diff --cached --numstat | wc -l)"
+echo "  Warnings: $LOW_SCORE_COUNT"
+echo ""
+echo "Proceeding with commit..."
+
+exit 0

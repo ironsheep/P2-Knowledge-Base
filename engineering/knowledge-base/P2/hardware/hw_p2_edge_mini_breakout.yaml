@@ -1,0 +1,13 @@
+name: P2 Edge Mini Breakout
+part_number: 64019
+category: carrier_board
+description: "Minimal breakout for P2 Edge Module"
+features:
+  - P2 Edge socket
+  - USB-C programming port
+  - Reset and boot buttons
+  - Power LED
+  - All pins broken out to headers
+power: 5V via USB-C
+dimensions: 2.3" x 2.9"
+source: P2 Documentation Collection

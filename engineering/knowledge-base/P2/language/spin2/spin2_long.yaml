@@ -1,0 +1,6 @@
+name: LONG
+type: method
+category: String Creation
+signature: "LONG(val1, val2, ...)"
+description: "Create long data sequence"
+source: Spin2 Documentation v51

@@ -1,0 +1,44 @@
+metadata:
+  id: pasm2_bitnz_04f018ab
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425694
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 48
+    type: csv
+    row: 48
+    type: csv
+    row: 48
+layer1_csv:
+  mnemonic: BITNZ
+  syntax: |
+    BITNZ   D,{#}S         {WCZ}
+  group: Math and Logic
+  encoding: EEEE 0100101 CZI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Bits D[S[9:5]+S[4:0]:S[4:0]] = !Z.   Other bits unaffected. Prior SETQ overrides S[9:5]. C,Z = original D[S[4:0]].
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.608357
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.028424
+  narratives:
+    - source: silicon-from-docx.md
+      type: enhancement
+      content: |
+        Can work on bit spans. Prior SETQ overrides S[9:5] for span size.
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Bits D[S[9:5]+S[4:0]:S[4:0]] = !Z.   Other bits unaffected. Prior SETQ overrides S[9:5]. C,Z = original D[S[4:0]]."
+  syntax: "BITNZ   D,{#}S         {WCZ}"

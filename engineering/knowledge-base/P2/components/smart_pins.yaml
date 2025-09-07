@@ -1,0 +1,40 @@
+# P2 Architecture Component: Smart Pin System
+# Generated: 2025-09-06T14:50:17.440691
+
+metadata:
+  id: p2_component_smart_pins
+  name: Smart Pin System
+  category: io
+  version: 1.0
+  extraction_date: 2025-09-06T14:50:17.440200
+
+specifications:
+  count: 64
+  modes: Multiple configurable modes
+  adc_resolution: SINC2/SINC3 filtering
+  dac_resolution: 8-bit with dithering
+  max_frequency: System clock / 2
+
+modes:
+  - Digital I/O
+  - PWM generation
+  - Pulse/edge detection
+  - Quadrature decode
+  - Serial transmit/receive
+  - ADC with filtering
+  - DAC output
+  - USB (pins 62-63)
+  - Frequency measurement
+  - Time measurement
+
+programming_interface:
+  configure: WRPIN - Set pin mode
+  set_x: WXPIN - Set X parameter
+  set_y: WYPIN - Set Y parameter
+  read: RDPIN - Read pin result
+  check: RQPIN - Check pin status
+  acknowledge: AKPIN - Acknowledge pin
+
+relationships:
+  - cog
+  - events

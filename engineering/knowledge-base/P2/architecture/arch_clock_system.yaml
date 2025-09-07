@@ -1,0 +1,19 @@
+name: Clock_System
+category: timing
+description: "Flexible clock generation system"
+features:
+    sources:
+      - Internal RC (~24 MHz)
+      - Crystal oscillator
+      - External clock input
+      - Internal RC (~20 kHz low power)
+    pll:
+      divider: 1..64
+      multiplier: 1..1024
+      post_divider: (1..15)*2
+    switching: Glitch-free source switching
+    power_modes:
+      - Run
+      - Low power
+      - Stop
+source: P2 Silicon Documentation v35

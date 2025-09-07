@@ -1,0 +1,6 @@
+name: WYPIN
+type: method
+category: SmartPin Operations
+signature: "WYPIN(PinField, Data)"
+description: "Write Y register of smart pins"
+source: Spin2 Documentation v51

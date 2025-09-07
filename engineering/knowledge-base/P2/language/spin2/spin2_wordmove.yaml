@@ -1,0 +1,6 @@
+name: WORDMOVE
+type: method
+category: Block Operations
+signature: "WORDMOVE(Destination, Source, Count)"
+description: "Copy words"
+source: Spin2 Documentation v51

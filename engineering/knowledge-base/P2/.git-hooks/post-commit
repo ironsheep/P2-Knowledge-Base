@@ -1,0 +1,162 @@
+#!/bin/bash
+# P2 Knowledge Base Post-Commit Hook
+# Updates tracking and generates reports after successful commits
+
+set -e
+
+REPO_ROOT="$(git rev-parse --show-toplevel)/engineering/knowledge-base/P2"
+COMMIT_HASH=$(git rev-parse HEAD)
+COMMIT_MSG=$(git log -1 --pretty=%B)
+TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+
+echo "📦 P2 Knowledge Base Post-Commit Processing"
+echo "==========================================="
+echo "Commit: $COMMIT_HASH"
+echo "Time: $TIMESTAMP"
+echo ""
+
+cd "$REPO_ROOT"
+
+# 1. Update version log with actual commit hash
+echo "📊 Finalizing version tracking..."
+VERSION_FILE="$REPO_ROOT/update-tracking/version-log.yaml"
+
+if [ -f "$VERSION_FILE" ]; then
+    # Update the last "pending" entry with actual commit hash
+    sed -i.bak "s/commit: pending/commit: $COMMIT_HASH/" "$VERSION_FILE"
+    rm "${VERSION_FILE}.bak"
+    echo "✅ Version log updated with commit hash"
+fi
+
+# 2. Generate change report
+echo ""
+echo "📝 Generating change report..."
+REPORT_DIR="$REPO_ROOT/update-tracking/reports"
+mkdir -p "$REPORT_DIR"
+
+REPORT_FILE="$REPORT_DIR/changes-${COMMIT_HASH:0:8}.md"
+
+cat > "$REPORT_FILE" << EOF
+# Repository Change Report
+**Commit**: $COMMIT_HASH
+**Date**: $TIMESTAMP
+**Message**: $COMMIT_MSG
+
+## Files Changed
+EOF
+
+git diff-tree --no-commit-id --name-status -r "$COMMIT_HASH" | while read -r status file; do
+    case $status in
+        A) echo "- 🆕 Added: \`$file\`" >> "$REPORT_FILE" ;;
+        M) echo "- 📝 Modified: \`$file\`" >> "$REPORT_FILE" ;;
+        D) echo "- 🗑️ Deleted: \`$file\`" >> "$REPORT_FILE" ;;
+        R*) echo "- 🔄 Renamed: \`$file\`" >> "$REPORT_FILE" ;;
+    esac
+done
+
+echo "" >> "$REPORT_FILE"
+echo "## Statistics" >> "$REPORT_FILE"
+
+# Get statistics
+STATS=$(git diff --stat "$COMMIT_HASH^" "$COMMIT_HASH" 2>/dev/null || git diff --stat "$COMMIT_HASH" 2>/dev/null)
+echo "\`\`\`" >> "$REPORT_FILE"
+echo "$STATS" >> "$REPORT_FILE"
+echo "\`\`\`" >> "$REPORT_FILE"
+
+echo "✅ Change report generated: $(basename $REPORT_FILE)"
+
+# 3. Update affected entry audits
+echo ""
+echo "🔍 Updating affected entry audits..."
+CHANGED_ENTRIES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT_HASH" | grep -E "\.yaml$" | grep -v "audit\|tracking" || true)
+
+if [ -n "$CHANGED_ENTRIES" ]; then
+    AUDIT_UPDATE_FILE="$REPO_ROOT/quality-audits/audit-updates-${COMMIT_HASH:0:8}.yaml"
+    
+    echo "# Audit updates for commit $COMMIT_HASH" > "$AUDIT_UPDATE_FILE"
+    echo "commit: $COMMIT_HASH" >> "$AUDIT_UPDATE_FILE"
+    echo "timestamp: \"$TIMESTAMP\"" >> "$AUDIT_UPDATE_FILE"
+    echo "entries_requiring_audit:" >> "$AUDIT_UPDATE_FILE"
+    
+    for entry in $CHANGED_ENTRIES; do
+        echo "  - $entry" >> "$AUDIT_UPDATE_FILE"
+    done
+    
+    echo "✅ Audit update list created"
+fi
+
+# 4. Check if extraction sources were updated
+echo ""
+echo "🔄 Checking for source document updates..."
+SOURCE_DOCS=$(git diff-tree --no-commit-id --name-only -r "$COMMIT_HASH" | grep -E "P2-.*\.csv|.*datasheet.*\.md|silicon.*doc.*\.md" || true)
+
+if [ -n "$SOURCE_DOCS" ]; then
+    echo "⚠️  Source documents updated - re-extraction may be needed:"
+    echo "$SOURCE_DOCS" | while read -r doc; do
+        echo "   - $doc"
+    done
+    
+    # Create extraction trigger file
+    TRIGGER_FILE="$REPO_ROOT/update-tracking/extraction-needed.yaml"
+    echo "trigger_commit: $COMMIT_HASH" > "$TRIGGER_FILE"
+    echo "timestamp: \"$TIMESTAMP\"" >> "$TRIGGER_FILE"
+    echo "source_documents:" >> "$TRIGGER_FILE"
+    echo "$SOURCE_DOCS" | while read -r doc; do
+        echo "  - $doc" >> "$TRIGGER_FILE"
+    done
+    
+    echo "✅ Extraction trigger file created"
+fi
+
+# 5. Update repository statistics
+echo ""
+echo "📊 Updating repository statistics..."
+STATS_FILE="$REPO_ROOT/update-tracking/repository-stats.json"
+
+# Count entries
+TOTAL_ENTRIES=$(find "$REPO_ROOT/instructions" "$REPO_ROOT/components" "$REPO_ROOT/architecture" "$REPO_ROOT/hardware" -name "*.yaml" 2>/dev/null | wc -l)
+PASM2_COUNT=$(find "$REPO_ROOT/instructions/pasm2" -name "*.yaml" 2>/dev/null | wc -l)
+SPIN2_COUNT=$(find "$REPO_ROOT/instructions/spin2" -name "*.yaml" 2>/dev/null | wc -l)
+
+cat > "$STATS_FILE" << EOF
+{
+  "last_updated": "$TIMESTAMP",
+  "commit": "$COMMIT_HASH",
+  "statistics": {
+    "total_entries": $TOTAL_ENTRIES,
+    "pasm2_instructions": $PASM2_COUNT,
+    "spin2_constructs": $SPIN2_COUNT,
+    "last_commit_files": $(git diff-tree --no-commit-id --name-only -r "$COMMIT_HASH" | wc -l)
+  }
+}
+EOF
+
+echo "✅ Repository statistics updated"
+
+# 6. Tag significant commits
+echo ""
+echo "🏷️ Checking for significant changes..."
+FILES_CHANGED=$(git diff-tree --no-commit-id --name-only -r "$COMMIT_HASH" | wc -l)
+
+if [ "$FILES_CHANGED" -gt 50 ]; then
+    echo "  Major update detected ($FILES_CHANGED files changed)"
+    # Could auto-tag here if desired
+    echo "  Consider tagging this commit for milestone tracking"
+elif [ "$FILES_CHANGED" -gt 10 ]; then
+    echo "  Moderate update ($FILES_CHANGED files changed)"
+else
+    echo "  Minor update ($FILES_CHANGED files changed)"
+fi
+
+# 7. Final summary
+echo ""
+echo "==========================================="
+echo "✅ Post-commit processing completed"
+echo "  Change report: reports/changes-${COMMIT_HASH:0:8}.md"
+echo "  Files affected: $FILES_CHANGED"
+if [ -n "$SOURCE_DOCS" ]; then
+    echo "  ⚠️  Source documents updated - check extraction-needed.yaml"
+fi
+echo ""
+
+exit 0

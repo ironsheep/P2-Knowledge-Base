@@ -1,0 +1,13 @@
+name: P2 Edge Module
+part_number: P2-EC
+category: module
+description: "Compact P2 module with edge connector"
+features:
+  - 64 I/O pins via edge connector
+  - 32MB HyperRAM
+  - 8MB Flash
+  - Castellated edge for soldering
+  - Mini form factor
+power: 3.3V and 1.8V required
+dimensions: 1.0" x 2.0"
+source: P2 Documentation Collection

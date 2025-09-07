@@ -1,0 +1,420 @@
+# P2 Instruction YAML Schema Definition
+# Version: 1.0.0
+# Last Updated: 2025-01-06
+
+# This schema defines the structure for all P2 instruction YAML files
+# Supporting the 4-layer aggregation model:
+# Layer 1: P2 Instruction Set CSV (base definitions)
+# Layer 2: P2 Datasheet (timing and encoding details)
+# Layer 3: Silicon Doc (rich narratives and examples)
+# Layer 4: Forum clarifications (Chip's authoritative updates)
+
+schema_version: "1.0.0"
+schema_type: "instruction"
+
+# REQUIRED FIELDS - Must be present in all instruction files
+required_fields:
+  id:
+    type: string
+    pattern: "^[a-z0-9-]+$"
+    description: "Unique identifier for the instruction"
+    example: "add-instruction"
+    
+  mnemonic:
+    type: string
+    pattern: "^[A-Z][A-Z0-9]*$"
+    description: "Instruction mnemonic in uppercase"
+    example: "ADD"
+    
+  category:
+    type: string
+    enum:
+      - math
+      - logic
+      - branch
+      - memory
+      - smart-pin
+      - cordic
+      - special
+      - system
+      - interrupt
+      - event
+    description: "Functional category of the instruction"
+    
+  syntax:
+    type: string
+    description: "Syntax pattern showing operand format"
+    example: "ADD D,{#}S {WC,WZ,WCZ}"
+    
+  encoding:
+    type: string
+    pattern: "^[01ECZI DDDDDDDDD SSSSSSSSS]+$"
+    description: "32-bit instruction encoding pattern"
+    example: "EEEE 1000000 CZI DDDDDDDDD SSSSSSSSS"
+
+# TIMING FIELDS - Layer 2 data from datasheet
+timing_fields:
+  timing:
+    type: object
+    required: true
+    properties:
+      cycles:
+        type: [integer, string]
+        description: "Number of cycles or range"
+        examples:
+          - 2                    # Fixed cycle count
+          - "2-9"                # Range based on conditions
+          - "36-58"              # CORDIC operations
+          
+      conditions:
+        type: string
+        description: "Conditions affecting timing"
+        examples:
+          - "2 cycles in COG/LUT, +1 per long crossing"
+          - "2-9 cycles depending on hub alignment"
+          - "36 cycles for rotation, 58 for vector"
+          
+      pipeline_effects:
+        type: string
+        description: "Pipeline stalls or effects"
+        
+      hub_sync:
+        type: boolean
+        description: "Whether instruction requires hub sync"
+
+# DOCUMENTATION FIELDS - Layer 3 data from Silicon Doc
+documentation_fields:
+  description:
+    type: string
+    required: true
+    description: "Detailed behavioral description"
+    min_length: 50
+    
+  operation:
+    type: string
+    description: "Mathematical or logical operation performed"
+    example: "D := D + S, C := carry"
+    
+  usage_notes:
+    type: string
+    description: "Programming tips and common usage patterns"
+    
+  special_cases:
+    type: array
+    items:
+      type: object
+      properties:
+        condition: string
+        behavior: string
+    description: "Edge cases and special behaviors"
+
+# FLAG EFFECTS
+flag_effects:
+  affects_flags:
+    type: object
+    properties:
+      c:
+        type: [boolean, string]
+        description: "Effect on Carry flag"
+        examples:
+          - true              # Always affects
+          - false             # Never affects  
+          - "optional"        # With WC
+          - "carry out"       # Specific effect
+          
+      z:
+        type: [boolean, string]
+        description: "Effect on Zero flag"
+        examples:
+          - true
+          - false
+          - "optional"        # With WZ
+          - "result == 0"     # Specific condition
+
+# EXAMPLES - Critical for understanding
+examples_fields:
+  examples:
+    type: array
+    required: true
+    min_items: 1
+    items:
+      type: object
+      required: [code, explanation]
+      properties:
+        code:
+          type: string
+          description: "PASM2 code example"
+          
+        explanation:
+          type: string
+          description: "What the example demonstrates"
+          
+        context:
+          type: string
+          description: "When to use this pattern"
+          
+        result:
+          type: string
+          description: "Expected result or effect"
+
+# RELATIONSHIPS
+relationship_fields:
+  related_instructions:
+    type: array
+    items: string
+    description: "Related instruction mnemonics"
+    example: ["SUB", "ADDS", "ADDX", "ADDSX"]
+    
+  opposite_of:
+    type: string
+    description: "Inverse operation if applicable"
+    example: "SUB"
+    
+  see_also:
+    type: array
+    items: string
+    description: "Related concepts or documentation"
+    
+  aliases:
+    type: array
+    items: string
+    description: "Alternative names or forms"
+
+# MULTIPLE FORMS - Handle instructions with variants
+multiple_forms:
+  variants:
+    type: array
+    description: "For instructions with multiple forms"
+    items:
+      type: object
+      properties:
+        form:
+          type: string
+          description: "Variant identifier"
+          example: "immediate"
+          
+        syntax:
+          type: string
+          description: "Syntax for this form"
+          
+        encoding:
+          type: string
+          description: "Encoding for this form"
+          
+        timing:
+          type: object
+          description: "Timing specific to this form"
+          
+        description:
+          type: string
+          description: "Form-specific behavior"
+
+# CONDITIONAL BEHAVIOR
+conditional_behavior:
+  conditions:
+    type: array
+    description: "Different behaviors based on conditions"
+    items:
+      type: object
+      properties:
+        if:
+          type: string
+          description: "Condition description"
+          example: "S[31:9] == 0"
+          
+        then:
+          type: string
+          description: "Behavior when condition is true"
+          
+        cycles:
+          type: [integer, string]
+          description: "Cycle count for this condition"
+
+# SOURCE TRACKING - Which layers have been populated
+source_tracking:
+  source_layers:
+    type: object
+    required: true
+    properties:
+      csv:
+        type: boolean
+        description: "Layer 1: P2 Instruction Set CSV"
+        
+      datasheet:
+        type: boolean
+        description: "Layer 2: P2 Datasheet timing"
+        
+      silicon_doc:
+        type: boolean
+        description: "Layer 3: Silicon Doc narratives"
+        
+      forum_clarification:
+        type: boolean
+        description: "Layer 4: Chip's forum posts"
+        
+  source_references:
+    type: array
+    items:
+      type: object
+      properties:
+        document:
+          type: string
+          example: "P2-Datasheet-v35"
+          
+        section:
+          type: string
+          example: "6.2.1"
+          
+        page:
+          type: integer
+          example: 42
+          
+        notes:
+          type: string
+
+# QUALITY METRICS
+quality_metrics:
+  completeness_score:
+    type: integer
+    required: true
+    minimum: 0
+    maximum: 8
+    description: "Quality score based on populated fields"
+    calculation: |
+      1 point each for:
+      - CSV data present (basic definition)
+      - Datasheet timing data
+      - Silicon Doc narrative
+      - Forum clarifications
+      - Code examples
+      - Cross-references
+      - Usage patterns
+      - Meta-knowledge
+      
+  verification_status:
+    type: string
+    enum:
+      - unverified
+      - automated
+      - manual
+      - chip-verified
+    description: "Level of verification performed"
+    
+  confidence_level:
+    type: string
+    enum:
+      - low
+      - medium
+      - high
+      - authoritative
+    description: "Confidence in accuracy"
+
+# VERSION TRACKING
+version_tracking:
+  extraction_date:
+    type: date
+    required: true
+    format: "YYYY-MM-DD"
+    description: "When first extracted"
+    
+  last_updated:
+    type: datetime
+    required: true
+    format: "YYYY-MM-DDTHH:MM:SSZ"
+    description: "Last modification timestamp"
+    
+  last_verified:
+    type: date
+    format: "YYYY-MM-DD"
+    description: "Last manual verification"
+    
+  update_history:
+    type: array
+    items:
+      type: object
+      properties:
+        date: datetime
+        changes: string
+        source: string
+        
+  schema_version:
+    type: string
+    required: true
+    description: "Schema version this file conforms to"
+    example: "1.0.0"
+
+# VALIDATION RULES
+validation_rules:
+  - rule: "ID must be unique across all instructions"
+  - rule: "Mnemonic must match pattern in syntax field"
+  - rule: "If WC/WZ in syntax, affects_flags must reflect this"
+  - rule: "Completeness score must match actual populated fields"
+  - rule: "Related instructions must exist in repository"
+  - rule: "At least one example required for score >= 4"
+  - rule: "Encoding length must be exactly 32 bits"
+  - rule: "Category must be from predefined enum list"
+
+# EDGE CASES
+edge_case_handling:
+  dual_context:
+    description: "Instructions used in both PASM2 and Spin2"
+    approach: "Primary in PASM2, reference in Spin2"
+    
+  deprecated:
+    description: "Instructions that are deprecated"
+    approach: "Mark with deprecated: true field"
+    
+  undocumented:
+    description: "Instructions found but not documented"
+    approach: "Create with minimal fields, mark confidence: low"
+    
+  conflicting_sources:
+    description: "When sources disagree"
+    approach: "Document conflict in notes, use datasheet as authority"
+
+# EXAMPLE TEMPLATE
+example_template: |
+  # Example: add-instruction.yaml
+  id: add-instruction
+  mnemonic: ADD
+  category: math
+  syntax: "ADD D,{#}S {WC,WZ,WCZ}"
+  encoding: "EEEE 1000000 CZI DDDDDDDDD SSSSSSSSS"
+  
+  timing:
+    cycles: 2
+    conditions: "2 cycles in COG/LUT RAM"
+    hub_sync: false
+    
+  description: |
+    Adds source value S to destination D, storing the result in D.
+    Optional flags can be set based on the result.
+    
+  operation: "D := D + S"
+  
+  affects_flags:
+    c: "optional"  # Set to carry-out if WC specified
+    z: "optional"  # Set if result is zero if WZ specified
+    
+  examples:
+    - code: "ADD x, #1"
+      explanation: "Increment x by 1"
+    - code: "ADD sum, value WC"
+      explanation: "Add with carry flag update"
+      
+  related_instructions: ["SUB", "ADDS", "ADDX"]
+  opposite_of: "SUB"
+  
+  source_layers:
+    csv: true
+    datasheet: true
+    silicon_doc: true
+    forum_clarification: false
+    
+  completeness_score: 6
+  verification_status: automated
+  confidence_level: high
+  
+  extraction_date: "2025-01-06"
+  last_updated: "2025-01-06T10:30:00Z"
+  schema_version: "1.0.0"

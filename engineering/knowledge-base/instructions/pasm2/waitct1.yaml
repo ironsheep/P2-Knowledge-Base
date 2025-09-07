@@ -1,0 +1,107 @@
+mnemonic: "WAITCT1"
+syntax:
+  - "WAITCT1 {WC/WZ/WCZ}"
+  - "WAITCT1"
+  - "WAITCT1 WC"
+  - "WAITCT1 WZ"
+  - "WAITCT1 WCZ"
+group: "event"
+description: "Wait for CT1 event flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout."
+
+operation:
+  basic_operation: "Wait for CT1 event, then clear flag"
+  flag_effects:
+    carry_flag: "C = timeout occurred (if timeout enabled)"
+    zero_flag: "Z = timeout occurred (if timeout enabled)"
+  conditions:
+    - "Prior SETQ sets optional timeout value"
+    - "Waits until CT1 event flag is set"
+    - "Automatically clears CT1 event flag after trigger"
+    - "Returns immediately if flag already set"
+
+timing:
+  base_clocks: "2+"
+  cog_lut_timing: "2+"
+  hub_timing: "2+"
+  conditional_timing:
+    event_ready: 2
+    waiting_for_event: "Variable, depends on event timing"
+    timeout_enabled: "2+ with early exit on timeout"
+  timing_notes:
+    - "Minimum 2 clocks if event already pending"
+    - "Additional time depends on when event occurs"
+    - "Timeout can limit maximum wait time"
+
+flags:
+  affects_c: true
+  affects_z: true
+  flag_options: ["WC", "WZ", "WCZ"]
+  flag_meanings:
+    WC: "C = 1 if timeout occurred (requires SETQ timeout)"
+    WZ: "Z = 1 if timeout occurred (requires SETQ timeout)"
+    WCZ: "Both flags indicate timeout status"
+
+operands:
+  destination:
+    type: "none"
+    description: "No explicit operands - waits for CT1 event"
+  source:
+    type: "implicit"
+    description: "CT1 event configuration set by ADDCT1"
+
+variants:
+  - syntax: "WAITCT1 {WC/WZ/WCZ}"
+    description: "Wait for CT1 event with optional timeout indication"
+    specific_operation: "Wait for CT1, clear flag, indicate timeout status"
+
+examples:
+  - title: "Simple CT1 Wait"
+    description: "Wait for CT1 event without timeout"
+    code: |
+      ADDCT1 time_var, #1000  ' Set CT1 to trigger in 1000 clocks
+      WAITCT1                 ' Wait for the event
+    explanation: "Sets up CT1 timer and waits for it to expire"
+  - title: "CT1 Wait with Timeout"
+    description: "Wait for CT1 with timeout protection"
+    code: |
+      ADDCT1 time_var, #1000  ' Set CT1 event
+      SETQ #5000             ' Set timeout to 5000 clocks
+      WAITCT1 WC             ' Wait with timeout check
+      IF_C JMP #timeout_handler
+    explanation: "Waits for CT1 but times out after 5000 clocks if not triggered"
+  - title: "Periodic Timer Loop"
+    description: "Create regular timing intervals"
+    code: |
+      GETCT time_base         ' Get current time
+      loop:
+        ADDCT1 time_base, #20000  ' Next event in 20000 clocks
+        WAITCT1               ' Wait for interval
+        ' ... do periodic work ...
+        JMP #loop
+    explanation: "Creates precise 20000-clock intervals for periodic tasks"
+
+related_instructions:
+  - "ADDCT1"
+  - "POLLCT1"
+  - "JCT1"
+  - "JNCT1"
+  - "WAITCT2"
+  - "WAITCT3"
+  - "SETQ"
+
+special_behaviors:
+  - "Event flag automatically cleared after wait completes"
+  - "SETQ timeout is optional - omit for unlimited wait"
+  - "Multiple cogs can wait on same event type with different configurations"
+  - "CT1 events are based on system counter (CT) comparisons"
+
+notes:
+  - "Essential for precise timing in real-time applications"
+  - "CT1 provides one of three available counter-based timers"
+  - "Timeout capability prevents infinite waits in fault conditions"
+  - "More efficient than polling loops for timing delays"
+
+source_references:
+  datasheet_section: "6.6 Event Instructions"
+  page_references: ["Datasheet Event instruction table"]
+  extraction_notes: "Extracted from pasm2-complete-instruction-tables.md Event section"

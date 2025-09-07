@@ -1,0 +1,6 @@
+name: STRSIZE
+type: method
+category: Comparison
+signature: "STRSIZE(Addr) : Size"
+description: "Get string length (not including terminator)"
+source: Spin2 Documentation v51

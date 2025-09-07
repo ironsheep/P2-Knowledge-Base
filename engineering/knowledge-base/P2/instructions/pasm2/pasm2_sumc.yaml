@@ -1,0 +1,50 @@
+metadata:
+  id: pasm2_sumc_1e67118a
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425544
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 31
+    type: csv
+    row: 31
+    type: csv
+    row: 31
+layer1_csv:
+  mnemonic: SUMC
+  syntax: |
+    SUMC    D,{#}S   {WC/WZ/WCZ}
+  group: Math and Logic
+  encoding: EEEE 0011100 CZI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Sum +/-S into D by  C. If C = 1 then D = D - S, else D = D + S. C = correct sign of (D +/- S). *
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.628866
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Sum +/-S into D by  C. If C = 1 then D = D - S, else D = D + S. C = correct sign of (D +/- S). *"
+  syntax: "SUMC    D,{#}S   {WC/WZ/WCZ}"
+
+layer4_chip:
+  source: Chip Gracey Clarifications
+  title: "Sum with Carry, Modify C Flag"
+  syntax: "SUMC D, S"
+  function: "Sum with carry operation, modify C flag
+- Performs addition including carry input
+- Updates C flag based on result
+- Essential for multi-precision arithmetic"
+  use_cases: "- Extended precision arithmetic (64-bit, 128-bit, etc.)
+- Chained addition operations
+- Financial/scientific calculations requiring high precision"
+  date: "2025-08-18"

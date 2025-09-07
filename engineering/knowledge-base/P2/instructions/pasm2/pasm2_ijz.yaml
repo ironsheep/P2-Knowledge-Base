@@ -1,0 +1,35 @@
+metadata:
+  id: pasm2_ijz_00985346
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426532
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 173
+    type: csv
+    row: 173
+    type: csv
+    row: 173
+layer1_csv:
+  mnemonic: IJZ
+  syntax: |
+    IJZ     D,{#}S
+  group: Branch S - Mod & Test
+  encoding: EEEE 1011100 00I DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Increment D and jump to S** if result is zero.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.641027
+  source: P2 Datasheet v35
+  timing:
+    raw: 2 or 4 / 2 or 13...20
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Increment D and jump to S** if result is zero."
+  syntax: "IJZ     D,{#}S"

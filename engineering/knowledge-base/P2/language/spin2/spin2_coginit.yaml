@@ -1,0 +1,6 @@
+name: COGINIT
+type: method
+category: Cog Management
+signature: "COGINIT(CogNum, PASMaddr, PTRAvalue)"
+description: "Start PASM code in a cog, returns cog ID or -1 if no cog free"
+source: Spin2 Documentation v51

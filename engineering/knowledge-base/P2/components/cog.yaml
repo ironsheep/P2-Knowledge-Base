@@ -1,0 +1,40 @@
+# P2 Architecture Component: COG Processor
+# Generated: 2025-09-06T14:50:17.440301
+
+metadata:
+  id: p2_component_cog
+  name: COG Processor
+  category: processor
+  version: 1.0
+  extraction_date: 2025-09-06T14:50:17.440190
+
+specifications:
+  count: 8
+  architecture: 32-bit RISC
+  pipeline_stages: 5
+  clock_speed: Up to 180MHz per cog
+  memory:
+    cog_ram: 512 longs (2KB)
+    lut_ram: 512 longs (2KB)
+    special_registers: 16 hardware registers
+
+features:
+  - 2-clock instruction execution when pipeline full
+  - Independent program counter
+  - Dedicated ALU and shifter
+  - Access to shared Hub RAM
+  - FIFO for streaming operations
+  - Interrupt capability (3 levels)
+  - Debug support
+
+programming_interface:
+  start: COGINIT instruction
+  stop: COGSTOP instruction
+  id: COGID instruction
+  communication: Hub RAM for inter-cog data
+
+relationships:
+  - hub_memory
+  - smart_pins
+  - locks
+  - events

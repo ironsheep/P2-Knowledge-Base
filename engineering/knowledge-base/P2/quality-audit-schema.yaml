@@ -1,0 +1,492 @@
+# P2 Quality Audit Schema Definition
+# Version: 1.0.0
+# Last Updated: 2025-01-06
+
+# This schema defines the structure for quality audit YAML files
+# Used to track extraction coverage, completeness, and quality metrics
+
+schema_version: "1.0.0"
+schema_type: "quality-audit"
+
+# AUDIT ENTRY SCHEMA
+audit_entry:
+  # Required identification fields
+  entry_id:
+    type: string
+    required: true
+    description: "ID of the instruction/component being audited"
+    example: "add-instruction"
+    
+  entry_type:
+    type: string
+    required: true
+    enum:
+      - instruction-pasm2
+      - instruction-spin2
+      - component
+      - architecture
+      - hardware
+      - smart-pin-mode
+      - cordic-operation
+      - example
+    description: "Type of repository entry"
+    
+  entry_path:
+    type: string
+    required: true
+    description: "Path to the entry file"
+    example: "instructions/pasm2/add-instruction.yaml"
+
+# COMPLETENESS SCORING
+completeness:
+  score:
+    type: integer
+    required: true
+    minimum: 0
+    maximum: 8
+    description: "Overall completeness score"
+    
+  score_breakdown:
+    type: object
+    required: true
+    properties:
+      layer1_csv:
+        type: boolean
+        weight: 1
+        description: "Basic definition from CSV"
+        
+      layer2_datasheet:
+        type: boolean
+        weight: 1
+        description: "Timing and specifications"
+        
+      layer3_silicon_doc:
+        type: boolean
+        weight: 1
+        description: "Rich narrative description"
+        
+      layer4_forum:
+        type: boolean
+        weight: 1
+        description: "Authoritative clarifications"
+        
+      has_examples:
+        type: boolean
+        weight: 1
+        description: "Code examples present"
+        
+      has_cross_refs:
+        type: boolean
+        weight: 1
+        description: "Related items linked"
+        
+      has_usage_patterns:
+        type: boolean
+        weight: 1
+        description: "Common usage documented"
+        
+      has_meta_knowledge:
+        type: boolean
+        weight: 1
+        description: "Tips, gotchas, optimizations"
+        
+  confidence_level:
+    type: string
+    required: true
+    enum:
+      - low        # Score 0-2
+      - medium     # Score 3-5
+      - high       # Score 6-7
+      - complete   # Score 8
+    description: "Confidence in documentation completeness"
+
+# EXTRACTION TRACKING
+extraction:
+  extraction_date:
+    type: datetime
+    required: true
+    format: "YYYY-MM-DDTHH:MM:SSZ"
+    description: "When entry was first extracted"
+    
+  last_extraction_run:
+    type: datetime
+    required: true
+    format: "YYYY-MM-DDTHH:MM:SSZ"
+    description: "Most recent extraction attempt"
+    
+  extraction_attempts:
+    type: integer
+    required: true
+    description: "Number of extraction runs"
+    
+  extraction_method:
+    type: string
+    enum:
+      - automated
+      - manual
+      - hybrid
+      - walkthrough
+    description: "How extraction was performed"
+    
+  extraction_sources:
+    type: array
+    required: true
+    items:
+      type: object
+      properties:
+        document:
+          type: string
+          description: "Source document name"
+          
+        version:
+          type: string
+          description: "Document version"
+          
+        sections:
+          type: array
+          items: string
+          description: "Sections extracted from"
+          
+        success:
+          type: boolean
+          description: "Extraction successful"
+          
+        notes:
+          type: string
+          description: "Extraction notes"
+
+# VERIFICATION STATUS
+verification:
+  verification_status:
+    type: string
+    required: true
+    enum:
+      - unverified
+      - automated
+      - manual
+      - chip-verified
+      - community-verified
+    description: "Level of verification performed"
+    
+  last_verified:
+    type: date
+    format: "YYYY-MM-DD"
+    description: "Date of last verification"
+    
+  verified_by:
+    type: string
+    description: "Person or system that verified"
+    
+  verification_notes:
+    type: string
+    description: "Verification details"
+
+# KNOWN ISSUES AND GAPS
+issues:
+  known_gaps:
+    type: array
+    items:
+      type: object
+      properties:
+        gap_type:
+          type: string
+          enum:
+            - missing_timing
+            - incomplete_description
+            - no_examples
+            - conflicting_sources
+            - unclear_behavior
+            - missing_cross_refs
+          description: "Type of gap"
+          
+        description:
+          type: string
+          description: "Gap details"
+          
+        priority:
+          type: string
+          enum: [critical, high, medium, low]
+          description: "Fix priority"
+          
+        blocking:
+          type: boolean
+          description: "Blocks production use"
+          
+  conflicts:
+    type: array
+    items:
+      type: object
+      properties:
+        source1:
+          type: string
+          description: "First source"
+          
+        source2:
+          type: string
+          description: "Conflicting source"
+          
+        conflict_type:
+          type: string
+          description: "Nature of conflict"
+          
+        resolution:
+          type: string
+          description: "How resolved or pending"
+          
+  improvement_opportunities:
+    type: array
+    items:
+      type: object
+      properties:
+        improvement:
+          type: string
+          description: "Suggested improvement"
+          
+        impact:
+          type: string
+          enum: [major, moderate, minor]
+          description: "Impact on quality"
+          
+        effort:
+          type: string
+          enum: [trivial, small, medium, large]
+          description: "Implementation effort"
+
+# QUALITY METRICS
+metrics:
+  field_coverage:
+    type: object
+    properties:
+      required_fields_present:
+        type: integer
+        description: "Count of required fields"
+        
+      optional_fields_present:
+        type: integer
+        description: "Count of optional fields"
+        
+      total_possible_fields:
+        type: integer
+        description: "Maximum possible fields"
+        
+      coverage_percentage:
+        type: number
+        description: "Field coverage percent"
+        
+  content_quality:
+    type: object
+    properties:
+      description_length:
+        type: integer
+        description: "Description word count"
+        
+      example_count:
+        type: integer
+        description: "Number of examples"
+        
+      cross_ref_count:
+        type: integer
+        description: "Number of cross-references"
+        
+      has_usage_notes:
+        type: boolean
+        description: "Usage notes present"
+        
+  extraction_quality:
+    type: object
+    properties:
+      sources_attempted:
+        type: integer
+        description: "Sources tried to extract from"
+        
+      sources_successful:
+        type: integer
+        description: "Successful extractions"
+        
+      extraction_coverage:
+        type: number
+        description: "Percent of sources covered"
+
+# AUDIT METADATA
+metadata:
+  audit_version:
+    type: string
+    required: true
+    description: "Version of audit schema used"
+    
+  audit_date:
+    type: datetime
+    required: true
+    format: "YYYY-MM-DDTHH:MM:SSZ"
+    description: "When audit was performed"
+    
+  auditor:
+    type: string
+    description: "System or person performing audit"
+    
+  next_audit_due:
+    type: date
+    format: "YYYY-MM-DD"
+    description: "Scheduled next audit"
+    
+  priority_score:
+    type: integer
+    description: "Priority for improvement (1-100)"
+    calculation: |
+      Based on:
+      - Usage frequency
+      - Gap severity
+      - User requests
+      - Dependencies
+
+# AGGREGATED AUDIT SCHEMA (for category-level audits)
+aggregated_audit:
+  category_id:
+    type: string
+    required: true
+    description: "Category being audited"
+    example: "pasm2-instructions"
+    
+  total_entries:
+    type: integer
+    required: true
+    description: "Total entries in category"
+    
+  score_distribution:
+    type: object
+    required: true
+    properties:
+      score_0: integer
+      score_1: integer
+      score_2: integer
+      score_3: integer
+      score_4: integer
+      score_5: integer
+      score_6: integer
+      score_7: integer
+      score_8: integer
+      
+  average_score:
+    type: number
+    required: true
+    description: "Mean completeness score"
+    
+  production_ready:
+    type: integer
+    description: "Entries with score >= 6"
+    
+  needs_work:
+    type: integer
+    description: "Entries with score < 6"
+    
+  critical_gaps:
+    type: array
+    items:
+      type: object
+      properties:
+        entry_id: string
+        gap: string
+        impact: string
+        
+  extraction_coverage:
+    type: object
+    properties:
+      csv_coverage:
+        type: number
+        description: "Percent with CSV data"
+      datasheet_coverage:
+        type: number
+        description: "Percent with datasheet data"
+      silicon_doc_coverage:
+        type: number
+        description: "Percent with silicon doc"
+      forum_coverage:
+        type: number
+        description: "Percent with forum data"
+      
+  improvement_priority:
+    type: array
+    items:
+      type: object
+      properties:
+        entry_id: string
+        current_score: integer
+        target_score: integer
+        effort_estimate: string
+        impact: string
+
+# EXAMPLE AUDIT ENTRY
+example_audit_entry: |
+  # Example: add-instruction-audit.yaml
+  entry_id: add-instruction
+  entry_type: instruction-pasm2
+  entry_path: instructions/pasm2/add-instruction.yaml
+  
+  completeness:
+    score: 7
+    score_breakdown:
+      layer1_csv: true
+      layer2_datasheet: true
+      layer3_silicon_doc: true
+      layer4_forum: false
+      has_examples: true
+      has_cross_refs: true
+      has_usage_patterns: true
+      has_meta_knowledge: false
+    confidence_level: high
+    
+  extraction:
+    extraction_date: "2025-01-06T09:00:00Z"
+    last_extraction_run: "2025-01-06T10:30:00Z"
+    extraction_attempts: 2
+    extraction_method: automated
+    extraction_sources:
+      - document: "P2-Instruction-Set.csv"
+        version: "1.0"
+        sections: ["Math Operations"]
+        success: true
+        notes: "Clean extraction"
+      - document: "P2-Datasheet-v35"
+        version: "35"
+        sections: ["6.2.1"]
+        success: true
+        notes: "Timing data complete"
+        
+  verification:
+    verification_status: automated
+    last_verified: "2025-01-06"
+    verified_by: "extraction-pipeline-v1.0"
+    verification_notes: "Automated validation passed"
+    
+  issues:
+    known_gaps:
+      - gap_type: missing_timing
+        description: "No CORDIC interaction timing"
+        priority: low
+        blocking: false
+    improvement_opportunities:
+      - improvement: "Add forum clarifications"
+        impact: minor
+        effort: small
+      - improvement: "Add meta-knowledge section"
+        impact: moderate
+        effort: medium
+        
+  metrics:
+    field_coverage:
+      required_fields_present: 8
+      optional_fields_present: 12
+      total_possible_fields: 15
+      coverage_percentage: 80.0
+    content_quality:
+      description_length: 125
+      example_count: 4
+      cross_ref_count: 6
+      has_usage_notes: true
+      
+  metadata:
+    audit_version: "1.0.0"
+    audit_date: "2025-01-06T11:00:00Z"
+    auditor: "audit-system-v1.0"
+    next_audit_due: "2025-02-06"
+    priority_score: 25

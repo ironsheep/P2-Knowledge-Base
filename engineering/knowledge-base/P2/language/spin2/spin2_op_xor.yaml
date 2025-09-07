@@ -1,0 +1,6 @@
+name: "^"
+type: operator
+priority: 5
+category: Binary XOR
+description: "Bitwise exclusive OR"
+source: Spin2 Documentation v51

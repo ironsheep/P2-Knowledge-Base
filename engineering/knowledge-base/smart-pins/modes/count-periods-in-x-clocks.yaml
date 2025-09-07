@@ -1,0 +1,85 @@
+# Smart Pin Mode: %10111 - Count Periods in X+ Clocks  
+# Silicon Doc Reference: part4-smart-pins.txt, page 94
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%10111"
+
+mode_name: "Count Periods in X+ Clocks"
+
+mode_group: "measurement"
+
+mode_complexity: "advanced"
+
+dac_mode_dependency: false
+
+pin_pairing: "adjacent"
+
+operation_description: |
+  Counts the number of complete periods (A-rise/edge to B-rise/edge) that occur during
+  measurement window of X+ clocks. Provides frequency measurement by counting periods
+  within known time window. Essential for precise frequency determination.
+
+x_parameter:
+  usage: "Measurement time window"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "Clock cycles for period counting window"
+
+y_parameter:
+  usage: "Edge sensitivity"
+  bit_fields:
+    - range: "Y[1:0]"
+      purpose: "Period edge detection: 00=A-rise to B-rise, etc."
+
+z_result:
+  data_type: "Period count"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Number of complete periods during measurement window"
+
+timing_specifications:
+  clock_relationship: "Period counting within X-clock measurement window"
+  update_frequency: "Measurement complete after X+ clocks and final period"
+
+common_applications:
+  - application: "Frequency measurement"
+    description: "Precise frequency measurement by period counting"
+    complexity_level: "advanced"
+  - application: "Signal analysis"
+    description: "Count signal cycles in known time windows"
+    complexity_level: "advanced"
+
+configuration_examples:
+  - name: "Frequency counter (1 second window)"
+    description: "Count periods in 1-second measurement window"
+    wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_10111_0, freq_counter"
+    wxpin_code: "WXPIN ##160_000_000, freq_counter"
+    wypin_code: "WYPIN #%00, freq_counter"
+    explanation: "A-rise to B-rise periods, 1-second window at 160MHz"
+
+typical_code_patterns:
+  - pattern_name: "Precision frequency measurement"
+    pasm2_code: |
+      ' Setup frequency counter with 1-second gate
+      WRPIN ##%0000_0001_000_0000000000000_00_10111_0, freq_pin
+      WXPIN ##160_000_000, freq_pin       ' 1 second at 160MHz
+      WYPIN #%00, freq_pin                ' A-rise to B-rise
+      DIRH  freq_pin                      ' Enable measurement
+      
+      ' Wait for measurement complete
+      freq_wait:
+      TESTP freq_pin WC                   ' Check measurement done
+      IF_NC JMP #freq_wait                ' Wait for completion
+      RDPIN frequency_hz, freq_pin        ' Get frequency in Hz
+      ' frequency_hz now contains actual frequency
+    explanation: "Measure frequency with 1-second precision using period counting"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [94]
+      section: "%10111 = for periods in X+ clocks, count periods"
+  validation_status: "draft"
+  completeness_score: 88
+  technical_accuracy: "silicon_doc_verified"

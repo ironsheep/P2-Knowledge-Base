@@ -1,0 +1,260 @@
+# P2 Edge Module Breadboard - Hardware Specification
+# Part Number: 64020
+# Revision: Rev B
+# Documentation: 64020-P2-Edge-Module-Breadboard-Product-Guide-REVB
+
+hardware_type: "carrier_board"
+part_number: "64020"
+manufacturer: "Parallax Inc."
+revision: "Rev B"
+status: "active_production"
+
+basic_info:
+  name: "P2 Edge Module Breadboard"
+  description: "Professional prototyping platform with integrated breadboard and servo ports"
+  category: "carrier_board_professional"
+  form_factor: "breadboard_platform"
+  
+specifications:
+  requires_module: true
+  compatible_modules:
+    - "P2-EC (Standard Edge Module)"
+    - "P2-EC32MB (32MB Edge Module)"
+    
+  physical:
+    dimensions:
+      length: "8.0 inches"
+      width: "3.5 inches"  
+      height: "0.75 inches (with module)"
+    weight: "TBD"
+    mounting: "Multiple mounting options"
+    area: "28.0 square inches"
+    size_comparison: "6x larger than Mini Breakout"
+    
+  electrical:
+    supply_voltage: "6-9V external or USB powered"
+    module_supply: "3.3V regulated to module"
+    servo_power: "Separate 5V servo supply"
+    current_capability: "High current for complex projects"
+    
+pin_access:
+  total_accessible: 64
+  pin_range: "P0-P63 (all pins)"
+  header_configuration: "All pins + breadboard connections"
+  header_type: "Standard 0.1 inch pitch"
+  breadboard_ties: "Direct connections to breadboard"
+  
+connectivity:
+  programming:
+    - type: "USB"
+      connector: "USB connector onboard"
+      driver: "Built-in USB-to-serial"
+    - type: "Prop Plug"
+      connector: "4-pin header (backup)"
+  
+  headers:
+    pin_headers: "All 64 pins accessible"
+    power_headers: "Multiple voltage rails"
+    programming_header: "Prop Plug compatible"
+    breadboard_connections: "Direct pin access to breadboard"
+    
+  expansion:
+    breadboard: "Integrated full-size breadboard"
+    servo_ports: "8 dedicated servo connections"
+    addon_compatibility: "Limited - focus on breadboard"
+    
+specialized_features:
+  breadboard:
+    type: "Full-size solderless breadboard"
+    tie_points: "~830 tie points"
+    power_rails: "Dedicated +3.3V, +5V, GND"
+    pin_access: "Direct P2 pin connections"
+    
+  servo_system:
+    ports: 8
+    connector_type: "3-pin servo headers"
+    power_supply: "Separate 5V rail"
+    current_capability: "Adequate for 8 servos"
+    pin_assignment: "Configurable P2 pin mapping"
+    
+  power_management:
+    regulators: "Multiple onboard regulators"
+    voltage_rails: "3.3V, 5V servo, breadboard power"
+    current_monitoring: "Visual power indicators"
+    protection: "Overcurrent and reverse polarity"
+    
+module_compatibility:
+  excellent_pairing:
+    - module: "P2-EC"
+      efficiency: "Perfect - 100% pin utilization"
+      rating: "5_stars"
+      use_case: "Complex prototyping and education"
+    - module: "P2-EC32MB"
+      efficiency: "Professional memory platform"
+      rating: "5_stars"
+      use_case: "Advanced development with memory"
+      
+use_cases:
+  primary:
+    - "Advanced prototyping and R&D"
+    - "Educational and training environments"
+    - "Complex multi-system projects"
+    - "Servo-based robotics development"
+    - "Professional development workflows"
+  secondary:
+    - "Proof-of-concept development"
+    - "Integration testing platforms"
+    - "Component evaluation and testing"
+    
+advantages:
+  - "Complete prototyping platform"
+  - "Integrated full-size breadboard"
+  - "8 dedicated servo ports with power"
+  - "All 64 P2 pins accessible"
+  - "Professional power management"
+  - "Excellent for education and training"
+  - "Handles any project complexity"
+  - "Visual power and status indicators"
+  
+limitations:
+  - "Very large footprint (28 sq in)"
+  - "Highest cost in Edge ecosystem"
+  - "Not portable - stationary platform"
+  - "Overkill for simple projects"
+  - "Requires dedicated workspace"
+  - "External power supply recommended"
+  
+development_workflow:
+  - "Select appropriate Edge module"
+  - "Insert module into edge connector"
+  - "Connect external power supply"
+  - "Use breadboard for circuit prototyping"
+  - "Connect servos to dedicated ports"
+  - "Test complex multi-peripheral systems"
+  - "Transition to custom PCB when ready"
+  
+programming:
+  methods:
+    - "USB (primary - built-in)"
+    - "Prop Plug (professional backup)"
+  tools:
+    - "PropellerTool"
+    - "PNut"
+    - "VS Code with Spin2 extension"
+  languages:
+    - "Spin2"
+    - "PASM2"
+    - "C (via FlexProp)"
+    
+target_projects:
+  robotics:
+    - "Multi-servo robot platforms"
+    - "Autonomous vehicles"
+    - "Robotic arms and manipulators"
+  education:
+    - "University lab equipment"
+    - "Training platforms"
+    - "Demonstration systems"
+  professional:
+    - "Proof-of-concept development"
+    - "Integration testing"
+    - "Custom system development"
+  complex_systems:
+    - "Multi-sensor data acquisition"
+    - "Industrial automation prototypes"
+    - "Communication system development"
+    
+comparison_with_alternatives:
+  vs_standard_breakout:
+    prototyping: "Integrated breadboard vs headers only"
+    size: "Much larger vs standard"
+    cost: "Much higher vs moderate"
+    capabilities: "Professional vs basic"
+    
+  vs_mini_breakout:
+    size: "28 vs 4.41 square inches (6x larger)"
+    pins: "64 vs 40 accessible"
+    features: "Full platform vs minimal"
+    cost: "Professional vs budget"
+    
+  vs_eval_board:
+    flexibility: "Modular vs integrated"
+    prototyping: "Full breadboard vs basic proto area"
+    servos: "8 dedicated ports vs none"
+    upgrade_path: "Module replacement vs fixed board"
+    
+optimal_configurations:
+  educational_platform:
+    - module: "P2-EC"
+      use_case: "Complete learning environment"
+      advantages: "All P2 features + prototyping"
+      
+  memory_development:
+    - module: "P2-EC32MB"
+      use_case: "Advanced memory-intensive projects"
+      advantages: "32MB + full prototyping capability"
+      
+  robotics_development:
+    - module: "Either module"
+      use_case: "Servo-based robotics"
+      advantages: "8 servo ports + breadboard"
+      
+power_specifications:
+  input_options:
+    - "USB (limited current)"
+    - "6-9V barrel jack (recommended)"
+    - "External lab supply"
+  
+  output_rails:
+    - "3.3V regulated (P2 and logic)"
+    - "5V regulated (servos and sensors)"
+    - "Breadboard power distribution"
+    
+  current_budget:
+    p2_system: "Adequate for full P2 operation"
+    servos: "Up to 8 standard servos"
+    breadboard: "Moderate current for sensors/logic"
+    total: "Professional-grade power system"
+    
+educational_value:
+  learning_objectives:
+    - "P2 microcontroller programming"
+    - "Servo control and robotics"
+    - "Sensor integration techniques"
+    - "Power management concepts"
+    - "Professional development workflows"
+    
+  course_integration:
+    - "University embedded systems labs"
+    - "Robotics engineering courses"
+    - "Professional training programs"
+    - "Maker space platforms"
+    
+documentation:
+  primary: "64020-P2-Edge-Module-Breadboard-Product-Guide-REVB"
+  related:
+    - "Edge module documentation"
+    - "Servo control programming guides"
+    - "P2 Silicon Documentation"
+    - "Educational lab manuals"
+    
+availability:
+  vendor: "Parallax Inc."
+  website: "parallax.com"
+  part_lookup: "Search for 64020"
+  distributor_network: "Yes"
+  target_market: "Educational and professional"
+  
+quality_rating: "professional_platform"
+recommendation_score: 5
+educational_value: "excellent"
+production_readiness: "prototype_platform"
+size_class: "professional_platform"
+complexity_handling: "maximum"
+
+# Cross-references
+ecosystem_position: "professional_development_platform"
+hardware_family: "p2_edge"
+optimal_modules: "any_edge_module"
+pin_utilization: "maximum_with_prototyping"
+feature_class: "complete_development_system"

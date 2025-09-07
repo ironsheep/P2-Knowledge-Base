@@ -1,0 +1,6 @@
+name: RECV
+type: method
+category: String Creation
+signature: "RECV() : byte"
+description: "Receive byte from current input method"
+source: Spin2 Documentation v51

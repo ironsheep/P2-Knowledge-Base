@@ -1,0 +1,6 @@
+name: LOOKDOWN
+type: method
+category: String Creation
+signature: "LOOKDOWN(Value: v1, v2..v3, etc) : Index"
+description: "Find 1-based index of value"
+source: Spin2 Documentation v51

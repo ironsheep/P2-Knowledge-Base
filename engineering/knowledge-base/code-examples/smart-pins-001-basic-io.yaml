@@ -1,0 +1,100 @@
+# Code Example: Basic P2 I/O Operations
+# Extracted from Smart Pins Tutorial
+
+example_id: "smart-pins-001-basic-io"
+title: "Essential P2 I/O Instructions"
+description: "Demonstrates the four fundamental P2 I/O instructions for controlling pin direction and output state"
+
+source_metadata:
+  source_document: "P2-Smart-Pins-Green-Book-Tutorial.md"
+  source_section: "Chapter 0: P2 I/O Fundamentals"
+  source_page: null
+  extraction_context: "Introduction to basic I/O control before Smart Pins coverage"
+  extraction_date: "2025-09-07"
+
+code_content:
+  language: "spin2"
+  code_type: "method"
+  code: |
+    PUB the_essentials()
+      DIRL #56              ' Make P56 an input (Direction Low)
+      DIRH #56              ' Make P56 an output (Direction High)
+      OUTL #56              ' Set P56 output to 0 (Output Low)
+      OUTH #56              ' Set P56 output to 1 (Output High)
+  code_comments:
+    - line_number: 2
+      comment: "DIRL #56"
+      explanation: "Sets pin direction to input by clearing DIR bit for pin 56"
+    - line_number: 3
+      comment: "DIRH #56"  
+      explanation: "Sets pin direction to output by setting DIR bit for pin 56"
+    - line_number: 4
+      comment: "OUTL #56"
+      explanation: "Sets output value to low by clearing OUT bit for pin 56"
+    - line_number: 5
+      comment: "OUTH #56"
+      explanation: "Sets output value to high by setting OUT bit for pin 56"
+
+technical_analysis:
+  instructions_used:
+    - "DIRL"
+    - "DIRH" 
+    - "OUTL"
+    - "OUTH"
+  features_demonstrated:
+    - "Basic pin direction control"
+    - "Basic pin output control"
+    - "GPIO fundamentals"
+  programming_patterns:
+    - "Pin state manipulation"
+  difficulty_level: "beginner"
+  complexity_score: 2
+
+application_context:
+  domain: "general"
+  use_case: "LED control, basic GPIO operations"
+  hardware_requirements:
+    - "P2 microcontroller"
+    - "LED or output device on pin 56"
+
+validation_status:
+  syntax_validated: true
+  syntax_validation_date: "2025-09-07"
+  compilation_result: "success"
+  validation_notes: "Basic Spin2 syntax, no special requirements"
+  hardware_tested: false
+  test_platform: null
+
+cross_references:
+  related_instructions:
+    - "/engineering/knowledge-base/P2/instructions/DIRL.yaml"
+    - "/engineering/knowledge-base/P2/instructions/DIRH.yaml"
+    - "/engineering/knowledge-base/P2/instructions/OUTL.yaml"
+    - "/engineering/knowledge-base/P2/instructions/OUTH.yaml"
+  related_examples: []
+  see_also:
+    - "P2 I/O fundamentals"
+    - "GPIO basics"
+  builds_upon: []
+
+quality_metrics:
+  completeness_score: 8
+  clarity_score: 9
+  educational_value: 10
+  authority_level: "official"
+
+extraction_metadata:
+  extractor_version: "1.0.0"
+  extraction_method: "manual"
+  extracted_by: "Claude"
+  review_status: "unreviewed"
+  update_history:
+    - date: "2025-09-07T16:30:00Z"
+      changes: "Initial extraction from Smart Pins tutorial"
+      updated_by: "Claude"
+
+integration_targets:
+  instruction_database: true
+  tutorial_integration: true
+  reference_documentation: true
+  automated_testing: true

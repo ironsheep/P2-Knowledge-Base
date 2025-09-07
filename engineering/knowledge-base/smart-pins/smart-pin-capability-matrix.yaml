@@ -1,0 +1,334 @@
+# Smart Pin Capability Matrix and Decision Tree
+# Analysis based on Silicon Doc Smart Pin specifications
+# Version: 1.0.0
+
+capability_matrix:
+  version: "1.0.0"
+  analysis_date: "2025-09-06"
+  source: "Silicon Doc part4-smart-pins.txt comprehensive analysis"
+  
+  # Capability dimensions for Smart Pin mode selection
+  capabilities:
+    # Input/Output Capabilities
+    input_processing:
+      digital_input_monitoring: 
+        modes: ["%00000", "%01011", "%01100", "%01101", "%01110", "%01111", "%10000", "%10001", "%10010", "%10011", "%10100", "%10101", "%10110", "%10111"]
+        complexity: "basic_to_advanced"
+        description: "Monitor and process digital input signals"
+        
+      analog_input_sampling:
+        modes: ["%11000", "%11001", "%11010"]
+        complexity: "advanced_to_expert"
+        description: "Sample and convert analog input signals"
+        
+      encoder_decoding:
+        modes: ["%01011", "%01100", "%01101", "%01110", "%01111"]
+        complexity: "intermediate_to_advanced"
+        description: "Decode quadrature and incremental encoders"
+        
+      timing_measurement:
+        modes: ["%10000", "%10001", "%10010", "%10011", "%10100", "%10101", "%10110", "%10111"]
+        complexity: "intermediate_to_advanced"
+        description: "Measure pulse widths, periods, and timing"
+
+    output_generation:
+      digital_output_control:
+        modes: ["%00000"]
+        complexity: "basic"
+        description: "Direct digital output control"
+        
+      analog_output_generation:
+        modes: ["%00001", "%00010", "%00011"] 
+        complexity: "intermediate_to_advanced"
+        description: "DAC-based analog output with dithering"
+        requires_dac_mode: true
+        
+      pulse_generation:
+        modes: ["%00100", "%00101"]
+        complexity: "intermediate"
+        description: "Generate pulses and transition sequences"
+        
+      pwm_generation:
+        modes: ["%01000", "%01001", "%01010"]
+        complexity: "intermediate_to_advanced"
+        description: "PWM waveform generation with various profiles"
+        
+      frequency_synthesis:
+        modes: ["%00110", "%00111"]
+        complexity: "intermediate_to_advanced"
+        description: "NCO-based frequency and duty cycle generation"
+
+    communication:
+      serial_communication:
+        modes: ["%11100", "%11101", "%11110", "%11111"]
+        complexity: "intermediate_to_advanced"
+        description: "Synchronous and asynchronous serial protocols"
+        
+      usb_communication:
+        modes: ["%11011"]
+        complexity: "expert"
+        description: "USB host and device communication"
+        requires_pin_pairing: true
+
+    data_storage:
+      simple_repository:
+        modes: ["%00001", "%00010", "%00011"]
+        complexity: "basic"
+        description: "Store and retrieve 32-bit values"
+        dac_mode_dependent: true
+
+  # Feature Matrix - Which modes support which features
+  feature_support:
+    autonomous_operation:
+      supported_modes: ["%00001", "%00010", "%00011", "%00100", "%00101", "%00110", "%00111", "%01000", "%01001", "%01010", "%01011", "%01100", "%01101", "%01110", "%01111", "%10000", "%10001", "%10010", "%10011", "%10100", "%10101", "%10110", "%10111", "%11000", "%11001", "%11010", "%11011", "%11100", "%11101", "%11110", "%11111"]
+      description: "Operates independently without continuous cog intervention"
+      
+    pin_pairing_required:
+      differential_pairs: ["%11011"]  # USB DM/DP
+      adjacent_cooperation: ["%11100", "%11101"]  # Sync serial data/clock
+      description: "Requires coordination with adjacent pins"
+      
+    dac_mode_dependency:
+      conditional_behavior: ["%00001", "%00010", "%00011"]
+      description: "Behavior changes based on M[12:10] DAC_MODE setting"
+      
+    filtering_support:
+      global_filter_compatible: ["%00000", "%01011", "%01100", "%01101", "%01110", "%01111", "%10000", "%10001", "%10010", "%10011", "%10100", "%10101", "%10110", "%10111", "%11000", "%11001", "%11010", "%11100", "%11101", "%11110", "%11111"]
+      description: "Can use global digital filters (filt0-filt3)"
+      
+    in_signal_generation:
+      event_notification: ["%00001", "%00010", "%00011", "%00100", "%00101", "%00110", "%00111", "%01000", "%01001", "%01010", "%01011", "%01100", "%01101", "%01110", "%01111", "%10000", "%10001", "%10010", "%10011", "%10100", "%10101", "%10110", "%10111", "%11000", "%11001", "%11010", "%11011", "%11100", "%11101", "%11110", "%11111"]
+      description: "Raises IN signal on events for cog notification"
+      
+    out_signal_override:
+      overrides_cog_out: ["%00100", "%00101", "%00110", "%00111", "%01000", "%01001", "%01010", "%11011", "%11100", "%11110"]
+      description: "Smart pin controls output regardless of cog OUT bit"
+
+  # Power and Performance Characteristics
+  power_profiles:
+    low_power:
+      modes: ["%00000", "%00001", "%00010", "%00011", "%01011", "%01100", "%01101", "%01110", "%01111"]
+      characteristics: "Minimal continuous activity, event-driven operation"
+      
+    moderate_power:
+      modes: ["%10000", "%10001", "%10010", "%10011", "%10100", "%10101", "%10110", "%10111", "%11000", "%11001", "%11010", "%11101", "%11111"]
+      characteristics: "Periodic or conditional activity, manageable power consumption"
+      
+    high_power:
+      modes: ["%00100", "%00101", "%00110", "%00111", "%01000", "%01001", "%01010", "%11011", "%11100", "%11110"]
+      characteristics: "Continuous switching or high-frequency operation"
+
+  # Complexity and Learning Curve
+  complexity_analysis:
+    beginner_friendly:
+      modes: ["%00000", "%00001"]
+      requirements: "Basic P2 knowledge, simple configuration"
+      typical_applications: ["Digital I/O", "Simple data storage", "Basic noise generation"]
+      
+    intermediate_complexity:
+      modes: ["%00100", "%00101", "%00110", "%00111", "%01000", "%01001", "%01011", "%01100", "%01101", "%01110", "%01111", "%11110", "%11111"]
+      requirements: "Understanding of timing, PWM concepts, or serial protocols"
+      typical_applications: ["Motor control", "Signal generation", "Position feedback", "Serial communication"]
+      
+    advanced_complexity:
+      modes: ["%00010", "%00011", "%01010", "%10000", "%10001", "%10010", "%10011", "%10100", "%10101", "%10110", "%10111", "%11000", "%11001", "%11100", "%11101"]
+      requirements: "Deep timing understanding, analog concepts, or protocol knowledge"
+      typical_applications: ["Precision measurement", "Power supplies", "Data acquisition", "Sync protocols"]
+      
+    expert_level:
+      modes: ["%11010", "%11011"]
+      requirements: "Specialized knowledge of ADC triggers or USB protocols"
+      typical_applications: ["Oscilloscope functions", "USB host/device implementation"]
+
+# Decision Tree for Smart Pin Mode Selection
+decision_tree:
+  version: "1.0.0"
+  purpose: "Guide users to appropriate Smart Pin mode based on application needs"
+  
+  root_question: "What is your primary application goal?"
+  
+  branches:
+    basic_io:
+      question: "Do you need basic digital input/output without smart features?"
+      answer_yes:
+        recommendation: "%00000 - Normal Mode"
+        rationale: "Standard I/O with optional filtering capabilities"
+        complexity: "basic"
+        
+    data_storage:
+      question: "Do you need simple 32-bit data storage in the pin?"
+      answer_yes:
+        follow_up: "Do you also need DAC functionality?"
+        dac_yes:
+          options:
+            - mode: "%00001 - DAC Noise"
+              use_case: "Hardware noise generation"
+            - mode: "%00010 - DAC 16-bit Dither + Noise"
+              use_case: "Precise DAC with noise dithering"
+            - mode: "%00011 - DAC 16-bit PWM Dither"
+              use_case: "Precise DAC with PWM dithering"
+        dac_no:
+          recommendation: "%00001 - Long Repository"
+          rationale: "Simple data storage without DAC features"
+          
+    signal_generation:
+      question: "Do you need to generate output signals?"
+      answer_yes:
+        follow_up: "What type of signal do you need?"
+        signal_types:
+          pulse_sequences:
+            options:
+              - mode: "%00100 - Pulse/Cycle Output"
+                use_case: "Generate specific number of pulses"
+              - mode: "%00101 - Transition Output" 
+                use_case: "Generate specific number of transitions"
+                
+          pwm_signals:
+            options:
+              - mode: "%01000 - PWM Triangle"
+                use_case: "Triangle wave PWM for motor control"
+              - mode: "%01001 - PWM Sawtooth"
+                use_case: "Sawtooth PWM for linear applications"
+              - mode: "%01010 - PWM SMPS"
+                use_case: "Switch-mode power supply control"
+                
+          frequency_synthesis:
+            options:
+              - mode: "%00110 - NCO Frequency"
+                use_case: "Precise frequency generation"
+              - mode: "%00111 - NCO Duty"
+                use_case: "Frequency with duty cycle control"
+                
+    measurement:
+      question: "Do you need to measure input signals?"
+      answer_yes:
+        follow_up: "What type of measurement?"
+        measurement_types:
+          position_velocity:
+            question: "Do you have quadrature encoder signals?"
+            answer_yes:
+              recommendation: "%01011 - Quadrature Encoder"
+              rationale: "Optimal for incremental encoders with A/B channels"
+            answer_no:
+              options:
+                - mode: "%01100 - Count A-Rise with B-High"
+                  use_case: "Simple directional counting"
+                - mode: "%01101 - A-Rise Inc/Dec by B"
+                  use_case: "Up/down counting based on second signal"
+                - mode: "%01110 - Count/Inc-Dec A-Rise"
+                  use_case: "Edge counting with optional decrement"
+                - mode: "%01111 - Count/Inc-Dec A-High"
+                  use_case: "Level counting with optional decrement"
+                  
+          timing_analysis:
+            options:
+              - mode: "%10000 - Time A-States"
+                use_case: "Measure duration of both high and low states"
+              - mode: "%10001 - Time A-Highs"
+                use_case: "Measure duration of high states only"
+              - mode: "%10010 - Time/Timeout X A-Events"
+                use_case: "Measure multiple events or detect timeouts"
+              - mode: "%10011 - Count Time for X Periods"
+                use_case: "Oversampled period measurement"
+              - mode: "%10100 - Count States for X Periods"
+                use_case: "Duty cycle measurement over multiple periods"
+              - mode: "%10101 - Count Time in X+ Clocks"
+                use_case: "Time measurement with minimum duration"
+              - mode: "%10110 - Count States in X+ Clocks"
+                use_case: "Duty measurement with minimum duration"
+              - mode: "%10111 - Count Periods in X+ Clocks"
+                use_case: "Frequency measurement with minimum duration"
+                
+    analog_conversion:
+      question: "Do you need analog-to-digital conversion?"
+      answer_yes:
+        follow_up: "What is your clocking preference?"
+        clocking_options:
+          internal_clock:
+            recommendation: "%11000 - ADC Internal Clock"
+            rationale: "Self-clocked ADC with SINC filtering options"
+          external_clock:
+            recommendation: "%11001 - ADC External Clock"
+            rationale: "External delta-sigma ADC support"
+          triggered_capture:
+            recommendation: "%11010 - ADC Scope with Trigger"
+            rationale: "Oscilloscope-like triggered acquisition"
+            
+    communication:
+      question: "Do you need serial communication?"
+      answer_yes:
+        follow_up: "What type of communication?"
+        comm_types:
+          asynchronous:
+            options:
+              - mode: "%11110 - Async Serial Transmit"
+                use_case: "UART-style transmission"
+              - mode: "%11111 - Async Serial Receive" 
+                use_case: "UART-style reception"
+                
+          synchronous:
+            options:
+              - mode: "%11100 - Sync Serial Transmit"
+                use_case: "SPI-style transmission with separate clock"
+              - mode: "%11101 - Sync Serial Receive"
+                use_case: "SPI-style reception with separate clock"
+                
+          usb:
+            recommendation: "%11011 - USB Host/Device"
+            rationale: "USB protocol support with differential signaling"
+            requirements: "Requires even/odd pin pair for DM/DP signals"
+
+# Application-Specific Recommendations
+application_guide:
+  motor_control:
+    position_feedback: "%01011 - Quadrature Encoder"
+    pwm_drive: "%01000 - PWM Triangle or %01001 - PWM Sawtooth"
+    speed_measurement: "%01011 - Quadrature Encoder (periodic mode)"
+    
+  data_acquisition:
+    single_channel: "%11000 - ADC Internal Clock"
+    multi_channel: "Multiple %11000 pins with staggered timing"
+    triggered_scope: "%11010 - ADC Scope with Trigger"
+    
+  communication_systems:
+    uart_implementation: "%11110/%11111 - Async Serial TX/RX"
+    spi_implementation: "%11100/%11101 - Sync Serial TX/RX"
+    custom_protocols: "Combine measurement and generation modes"
+    
+  power_electronics:
+    smps_control: "%01010 - PWM SMPS"
+    precision_dac: "%00010/%00011 - DAC 16-bit Dithering"
+    feedback_measurement: "Combine ADC modes with PWM control"
+    
+  instrumentation:
+    frequency_counter: "%10111 - Count Periods in X+ Clocks"
+    duty_cycle_meter: "%10110 - Count States in X+ Clocks" 
+    pulse_width_analyzer: "%10000 - Time A-States"
+    
+  audio_applications:
+    noise_generation: "%00001 - DAC Noise"
+    pwm_audio: "%01001 - PWM Sawtooth"
+    audio_sampling: "%11000 - ADC Internal Clock"
+
+# Selection Optimization Guidelines
+optimization_guidelines:
+  power_optimization:
+    low_power_modes: ["%00000", "%01011", "%01100", "%01101", "%01110", "%01111"]
+    power_management_tips:
+      - "Use longer sample periods for ADC modes to reduce switching"
+      - "Configure X=0 for DAC noise mode to minimize switching power"
+      - "Prefer continuous modes over periodic for lower average power"
+      
+  performance_optimization:
+    high_speed_modes: ["%00110", "%00111", "%01000", "%01001", "%11000"]
+    performance_tips:
+      - "Use global filters only when needed - they add latency"
+      - "Choose appropriate ADC mode for speed vs. precision tradeoff"
+      - "Consider pin pairing requirements for maximum throughput"
+      
+  precision_optimization:
+    high_precision_modes: ["%00010", "%00011", "%11000", "%11001"]
+    precision_tips:
+      - "Use SINC filtering for ADC noise rejection"
+      - "Configure appropriate sample periods for desired resolution"
+      - "Consider PWM dithering over pseudo-random for better linearity"

@@ -1,0 +1,70 @@
+# Smart Pin Mode: %11100 - Sync Serial Transmit
+# Silicon Doc Reference: part4-smart-pins.txt, page 75
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%11100"
+
+mode_name: "Sync Serial Transmit"
+
+mode_group: "communication"
+
+mode_complexity: "advanced"
+
+dac_mode_dependency: false
+
+pin_pairing: "adjacent"
+
+operation_description: |
+  Sync serial transmit mode provides SPI-style synchronous serial transmission.
+  A-pin carries data, B-pin provides clock. Data transmitted synchronously with
+  clock generation. OUT signal overridden for transmission control.
+
+x_parameter:
+  usage: "Clock and data configuration"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "Clock period and data format configuration"
+
+y_parameter:
+  usage: "Transmit data"
+  bit_fields:
+    - range: "Y[31:0]"
+      purpose: "Data to transmit synchronously"
+
+z_result:
+  data_type: "Not used"
+
+timing_specifications:
+  clock_relationship: "Synchronous data/clock generation"
+  update_frequency: "Clock-synchronized transmission"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "Transmission complete"
+  acknowledgment_method: "wypin"
+
+common_applications:
+  - application: "SPI master transmit"
+    description: "SPI-style synchronous serial transmission"
+    complexity_level: "advanced"
+  - application: "Synchronous sensor communication"
+    description: "Clock-synchronized sensor data transmission"
+    complexity_level: "advanced"
+
+configuration_examples:
+  - name: "SPI master TX"
+    description: "SPI master transmission with clock"
+    wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_01_11100_0, spi_tx"
+    wxpin_code: "WXPIN clock_config, spi_tx"
+    wypin_code: "WYPIN spi_data, spi_tx"
+    explanation: "A=data pin, B=clock pin, synchronous transmission"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [75]
+      section: "%11100 = sync serial transmit"
+  validation_status: "draft"
+  completeness_score: 80
+  technical_accuracy: "silicon_doc_verified"

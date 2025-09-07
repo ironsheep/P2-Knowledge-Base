@@ -1,0 +1,183 @@
+# P2 Eval Board - Hardware Specification
+# Part Number: 64000
+# Revision: Rev C
+# Documentation: 64000 Propeller 2 Eval Board Rev C Guide
+
+hardware_type: "development_board"
+part_number: "64000"
+manufacturer: "Parallax Inc."
+revision: "Rev C"
+status: "active_production"
+
+basic_info:
+  name: "P2 Eval Board"
+  description: "Integrated P2 development platform with built-in peripherals"
+  category: "development_board_integrated"
+  form_factor: "all_in_one_board"
+  
+specifications:
+  microcontroller:
+    chip: "P2X8C4M64P"
+    revision: "Rev D"
+    architecture: "32-bit multi-cog"
+    clock_speed: "20MHz crystal, PLL to 320MHz"
+    cores: 8
+    io_pins: 64
+    smart_pins: 64
+    integration: "Soldered directly on board"
+    
+  memory:
+    flash_type: "SPI Flash"
+    flash_size: "TBD - check documentation"
+    flash_organization: "Boot partition + user space"
+    ram_hub: "512KB"
+    ram_cog: "2KB per cog (8 cogs)"
+    ram_lut: "16KB (2KB per cog)"
+    
+  physical:
+    dimensions:
+      length: "TBD"
+      width: "TBD"  
+      height: "TBD"
+    weight: "TBD"
+    mounting: "Standard PCB with mounting holes"
+    
+  electrical:
+    supply_voltage: "5V or USB powered"
+    core_voltage: "1.8V (onboard regulator)"
+    current_consumption: "TBD - depends on usage"
+    temperature_range: "Commercial grade"
+    
+built_in_peripherals:
+  leds:
+    quantity: 8
+    type: "User controllable"
+    pins: "TBD - check documentation"
+    purpose: "Debug indication, user interface"
+  switches:
+    reset_switch: "Hardware reset"
+    user_switches: "TBD quantity"
+    purpose: "User input, mode selection"
+  headers:
+    pin_access: "All 64 P2 pins accessible"
+    connector_type: "Standard 0.1 inch headers"
+    expansion: "Compatible with add-on boards"
+  proto_area:
+    breadboard_section: "Basic prototyping area"
+    size: "TBD"
+    
+connectivity:
+  programming:
+    - type: "USB"
+      connector: "USB-B or USB-C"
+      driver: "Built-in USB programming"
+    - type: "Prop Plug"
+      connector: "4-pin header"
+      part: "32201 (optional)"
+  expansion:
+    addon_boards: "Compatible with #64006 add-on kit"
+    headers: "Standard 2x6 expansion headers"
+    
+video_audio:
+  vga_support: "With resistor DACs"
+  hdmi_support: "With appropriate circuitry"
+  audio_output: "PWM or DAC-based"
+  
+use_cases:
+  primary:
+    - "P2 learning and education"
+    - "Quick prototyping and concept validation"
+    - "Built-in peripheral demonstrations"
+    - "Training and workshops"
+  secondary:
+    - "Integrated project development"
+    - "Multi-peripheral testing"
+    - "Educational lab equipment"
+    
+advantages:
+  - "Complete development solution in one board"
+  - "Built-in LEDs and switches for immediate feedback"
+  - "No module selection decisions needed"
+  - "USB programming included"
+  - "Add-on board ecosystem available"
+  - "Ideal for beginners and education"
+  
+limitations:
+  - "Fixed configuration cannot be changed"
+  - "P2 chip not replaceable/upgradeable"
+  - "Larger footprint than modular alternatives"
+  - "Built-in peripherals may conflict with projects"
+  - "Less flexible than Edge ecosystem"
+  
+development_workflow:
+  - "Connect USB cable for power and programming"
+  - "Install PropellerTool or development environment"
+  - "Use built-in LEDs/switches for initial programs"
+  - "Access all 64 pins via headers"
+  - "Add expansion boards as needed"
+  - "Prototype directly on board"
+  
+programming:
+  methods:
+    - "USB (primary method)"
+    - "Prop Plug (optional)"
+  tools:
+    - "PropellerTool"
+    - "PNut"
+    - "VS Code with Spin2 extension"
+  languages:
+    - "Spin2"
+    - "PASM2" 
+    - "C (via FlexProp)"
+    
+expansion_ecosystem:
+  addon_kit:
+    part: "64006"
+    contents: "8 different add-on boards"
+    compatibility: "Designed specifically for Eval Board"
+  individual_addons:
+    - "HyperRAM & HyperFLASH Add-On (64004-ES)"
+    - "microSD Add-on Board (64009)"
+    - "Universal Motor Driver (64010)"
+    - "RTC Add-on Board (64013)"
+    - "HD Audio Add-on Set (64014)"
+    - "HUB75 Adapter Board (64032)"
+    - "MicroBUS Click Adapter (64008)"
+    
+comparison_with_edge:
+  vs_edge_ecosystem:
+    integration: "All-in-one vs modular"
+    cost: "Single purchase vs module + carrier"
+    flexibility: "Fixed vs swappable components"
+    learning_curve: "Easier start vs more choices"
+    production_path: "Custom PCB vs module reuse"
+    
+target_audience:
+  beginners: "Ideal - no hardware selection needed"
+  educators: "Perfect - built-in teaching aids"
+  professionals: "Good for rapid prototyping"
+  production: "Not suitable - use Edge modules"
+  
+documentation:
+  primary: "64000 Propeller 2 Eval Board Rev C Guide"
+  related:
+    - "P2 Silicon Documentation"
+    - "Add-on board documentation (#64006)"
+    - "PASM2/Spin2 language references"
+    
+availability:
+  vendor: "Parallax Inc."
+  website: "parallax.com"
+  part_lookup: "Search for 64000 or P2 Eval Board"
+  distributor_network: "Yes"
+  bundle_options: "Often bundled with add-on kit"
+  
+quality_rating: "educational_excellent"
+recommendation_score: 5
+educational_value: "excellent"
+production_readiness: "not_applicable"
+
+# Cross-references
+ecosystem_position: "integrated_development_platform"
+hardware_family: "p2_eval"
+alternative_to: "edge_ecosystem"

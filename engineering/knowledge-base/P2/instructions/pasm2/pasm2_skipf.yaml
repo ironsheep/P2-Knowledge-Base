@@ -1,0 +1,35 @@
+metadata:
+  id: pasm2_skipf_7b48d719
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.428169
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 327
+    type: csv
+    row: 327
+    type: csv
+    row: 327
+layer1_csv:
+  mnemonic: SKIPF
+  syntax: |
+    SKIPF   {#}D
+  group: Branch D - Jump+Skip
+  encoding: EEEE 1101011 00L DDDDDDDDD 000110010
+  alias: .
+  description: Skip cog/LUT instructions fast per D. Like SKIP, but instead of cancelling instructions, the PC leaps over them.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.627557
+  source: P2 Datasheet v35
+  timing:
+    raw: 2 / ILLEGAL
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Skip cog/LUT instructions fast per D. Like SKIP, but instead of cancelling instructions, the PC leaps over them."
+  syntax: "SKIPF   {#}D"

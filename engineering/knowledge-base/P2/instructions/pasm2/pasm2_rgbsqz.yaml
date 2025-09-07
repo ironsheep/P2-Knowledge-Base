@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_rgbsqz_9e13bf84
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.429577
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 388
+    type: csv
+    row: 388
+    type: csv
+    row: 388
+layer1_csv:
+  mnemonic: RGBSQZ
+  syntax: |
+    RGBSQZ  D
+  group: Math and Logic
+  encoding: EEEE 1101011 000 DDDDDDDDD 001100110
+  alias: .
+  description: Squeeze 8:8:8 RGB value in D[31:8] into 5:6:5 value in D[15:0]. D = {15'b0, D[31:27], D[23:18], D[15:11]}.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.622028
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Squeeze 8:8:8 RGB value in D[31:8] into 5:6:5 value in D[15:0]. D = {15'b0, D[31:27], D[23:18], D[15:11]}."
+  syntax: "RGBSQZ  D"

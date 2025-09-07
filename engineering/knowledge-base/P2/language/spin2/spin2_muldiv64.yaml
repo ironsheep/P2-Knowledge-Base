@@ -1,0 +1,6 @@
+name: MULDIV64
+type: method
+category: Extended Math
+signature: "MULDIV64(mult1, mult2, divisor) : quotient"
+description: "64-bit intermediate multiply/divide"
+source: Spin2 Documentation v51

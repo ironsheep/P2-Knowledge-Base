@@ -1,0 +1,6 @@
+name: "?"
+type: operator
+priority: 16
+category: Ternary
+description: "Conditional selection"
+source: Spin2 Documentation v51

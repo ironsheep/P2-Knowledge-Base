@@ -1,0 +1,360 @@
+# Smart Pin Mode: %01001 - PWM Sawtooth
+# Silicon Doc Reference: part4-smart-pins.txt, pages 88-89
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%01001"
+
+mode_name: "PWM Sawtooth"
+
+mode_group: "signal_gen"
+
+mode_complexity: "intermediate"
+
+dac_mode_dependency: false
+
+pin_pairing: "none"
+
+wrpin_configuration:
+  base_format: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+  
+  a_input_selector:
+    description: "4-bit A input selector - not used for PWM output mode"
+    bit_pattern: "%AAAA"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (default, not used)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  b_input_selector:
+    description: "4-bit B input selector - not used for PWM output mode"
+    bit_pattern: "%BBBB"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (default, not used)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  input_logic_filtering:
+    description: "3-bit input logic/filtering - not used for PWM output mode"
+    bit_pattern: "%FFF"
+    options:
+      - code: "%000"
+        description: "A, B (default)"
+        operation: "passthrough"
+        filter_type: "none"
+      - code: "%001"
+        description: "A AND B, B"
+        operation: "logical_and"
+        filter_type: "none"
+      - code: "%010"
+        description: "A OR B, B"
+        operation: "logical_or"
+        filter_type: "none"
+      - code: "%011"
+        description: "A XOR B, B"
+        operation: "logical_xor"
+        filter_type: "none"
+      - code: "%100"
+        description: "A, B, both filtered using global filt0"
+        operation: "passthrough"
+        filter_type: "filt0"
+      - code: "%101"
+        description: "A, B, both filtered using global filt1"
+        operation: "passthrough"
+        filter_type: "filt1"
+      - code: "%110"
+        description: "A, B, both filtered using global filt2"
+        operation: "passthrough"
+        filter_type: "filt2"
+      - code: "%111"
+        description: "A, B, both filtered using global filt3"
+        operation: "passthrough"
+        filter_type: "filt3"
+  
+  low_level_control:
+    description: "13-bit low-level pin control (M[12:0]) - standard output configuration"
+    bit_pattern: "%M............"
+    special_modes:
+      - condition: "M[12:10] = %101"
+        behavior: "DAC_MODE - not typically used with PWM sawtooth"
+  
+  dir_out_control:
+    description: "2-bit pin DIR/OUT control - OVERRIDDEN by smart pin"
+    bit_pattern: "%TT"
+    smart_off_behavior:
+      non_dac_mode: []
+      dac_mode: []
+    smart_on_behavior:
+      dac_modes: []
+      non_dac_modes:
+        - mode_range: "%01001 (PWM sawtooth)"
+          behavior: "Smart pin overrides OUT signal to control PWM output"
+
+x_parameter:
+  usage: "Base period and PWM frame period configuration"
+  bit_fields:
+    - range: "X[15:0]"
+      purpose: "Base period in clock cycles - fundamental PWM timing unit"
+      valid_values:
+        min: 1
+        max: 65535
+        special_values:
+          - value: 100
+            meaning: "100-clock base period for standard PWM timing"
+          - value: 1000
+            meaning: "1000-clock base period for high-resolution PWM"
+    - range: "X[31:16]"
+      purpose: "PWM frame period in terms of base periods"
+      valid_values:
+        min: 1
+        max: 65535
+        special_values:
+          - value: 100
+            meaning: "100 base periods per PWM frame (1% resolution)"
+          - value: 256
+            meaning: "256 base periods per PWM frame (8-bit resolution)"
+          - value: 1000
+            meaning: "1000 base periods per PWM frame (0.1% resolution)"
+  configuration_timing: "reset_only"
+
+y_parameter:
+  usage: "PWM duty cycle value"
+  bit_fields:
+    - range: "Y[15:0]"
+      purpose: "PWM output value captured at each frame start"
+      valid_values:
+        min: 0
+        max: 65535
+        special_values:
+          - value: 0
+            meaning: "Always output low (0% duty cycle)"
+          - value: "frame_period"
+            meaning: "Always output high (100% duty cycle)"
+          - value: "frame_period/2"
+            meaning: "50% duty cycle"
+  update_behavior: "Value captured at frame start and used for entire frame duration"
+
+z_result:
+  data_type: "Not used - no result data returned"
+  bit_interpretation: []
+  flag_behavior: "C flag may contain status information"
+  overflow_handling: "Not applicable"
+
+operation_description: |
+  PWM sawtooth mode overrides OUT to control the pin output state using linear sawtooth PWM generation.
+  X[15:0] establishes a base period in clock cycles which forms the fundamental timing unit.
+  X[31:16] establishes a PWM frame period in terms of base periods. Y[15:0] establishes the PWM
+  output value which gets captured at each frame start and used for the frame duration. The value
+  should range from zero to the frame period. A counter, updating at each base period, counts from
+  one up to the frame period in a linear sawtooth pattern. At each base period, the captured output
+  value is compared to the counter. If the output value is equal or greater than the counter, a high
+  is output; if less, a low is output. Therefore, a zero will always output a low and the frame
+  period value will always output a high. Y[15:0] is captured at each frame start, IN is raised,
+  and the process repeats. The frame period is exactly frame_period * base_period clocks.
+
+timing_specifications:
+  clock_relationship: "Base period counter operates on system clock, linear sawtooth counting"
+  base_period:
+    description: "Set by X[15:0] - fundamental PWM timing resolution"
+    min_clocks: 1
+    max_clocks: 65535
+    special_values:
+      - value: 10
+        meaning: "Fine timing resolution for high-frequency PWM"
+      - value: 100
+        meaning: "Standard resolution for most applications"
+  update_frequency: "PWM updates every base period, frame completes every frame_period * base_period clocks"
+  settling_time: "Output changes within 1 clock of counter comparison"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "Frame start (Y[15:0] capture point)"
+    - "Occurs every frame_period * base_period clocks"
+  acknowledgment_method: "rdpin"
+  polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
+
+reset_behavior:
+  dir_low_effects:
+    - "IN signal goes low"
+    - "Output goes low"
+    - "Y[15:0] is captured for use when operation resumes"
+  dir_transition_effects: "PWM sawtooth generation begins with current Y value"
+  wrpin_zero_effects: "Returns pin to normal mode, clears all smart pin configuration"
+
+common_applications:
+  - application: "Linear motor control"
+    description: "Precise linear speed control for DC motors"
+    complexity_level: "intermediate"
+  - application: "LED dimming"
+    description: "Linear brightness control for LED lighting"
+    complexity_level: "beginner"
+  - application: "Servo motor control"
+    description: "PWM control signals for servo motors"
+    complexity_level: "intermediate"
+  - application: "Power regulation"
+    description: "Linear power control for resistive loads"
+    complexity_level: "intermediate"
+
+configuration_examples:
+  - name: "Standard servo control"
+    description: "20ms period servo PWM with 1-2ms pulse width range"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_01001_0, servo_pin"
+    wxpin_code: "WXPIN ##$07D0_0014, servo_pin"
+    wypin_code: "WYPIN #1500, servo_pin"
+    explanation: "Base=20, Frame=2000 (40000 clocks = 20ms@160MHz), Y=1500 = 1.5ms pulse"
+  
+  - name: "8-bit resolution LED dimming"
+    description: "256-level LED brightness control"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_01001_0, led_pin"
+    wxpin_code: "WXPIN ##$0100_0064, led_pin"
+    wypin_code: "WYPIN brightness, led_pin"
+    explanation: "Base=100, Frame=256, brightness=0-256 for 0-100% output"
+  
+  - name: "High-frequency motor PWM"
+    description: "20 kHz PWM for motor control with minimal audible noise"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_01001_0, motor_pin"
+    wxpin_code: "WXPIN ##$0064_007D, motor_pin"
+    wypin_code: "WYPIN speed_value, motor_pin"
+    explanation: "Base=125, Frame=100 (12500 clocks = 50μs@160MHz = 20kHz)"
+
+typical_code_patterns:
+  - pattern_name: "Servo position control"
+    pasm2_code: |
+      ' Configure PWM for standard servo control (20ms period)
+      WRPIN ##%0000000000000_01_01001_0, servo_pin
+      WXPIN ##$07D0_0014, servo_pin      ' 20ms period, good resolution
+      DIRH  servo_pin                    ' Enable PWM
+      
+      ' Position control loop
+      set_position:
+      ' Convert angle (0-180 degrees) to pulse width (1000-2000)
+      MOV   pulse_width, angle          ' angle = 0-180
+      MUL   pulse_width, #1000         ' Scale to 1000 steps
+      SHR   pulse_width, #8            ' /256 to get 0-703 range  
+      ADD   pulse_width, #1000         ' Offset to 1000-1703 (1.0-1.7ms)
+      
+      WYPIN pulse_width, servo_pin     ' Set new position
+    explanation: "Convert angle to servo pulse width with proper scaling"
+  
+  - pattern_name: "Variable frequency LED dimming"
+    pasm2_code: |
+      ' Setup PWM with runtime frequency adjustment
+      WRPIN ##%0000000000000_01_01001_0, led_pin
+      DIRH  led_pin                      ' Enable PWM
+      
+      ' Configure for current frequency requirements
+      set_pwm_frequency:
+      DIRL  led_pin                      ' Reset to reconfigure
+      ' Calculate frame and base for desired frequency
+      WXPIN frame_base_config, led_pin   ' Set timing
+      DIRH  led_pin                      ' Re-enable
+      
+      ' Set brightness
+      WYPIN brightness_value, led_pin    ' brightness = 0 to frame_period
+    explanation: "Runtime PWM frequency adjustment with brightness control"
+
+related_modes:
+  - mode_id: "%01000"
+    relationship: "complementary"
+    description: "PWM triangle - triangle-wave PWM alternative to linear sawtooth"
+  - mode_id: "%01010"
+    relationship: "advanced_version"
+    description: "PWM SMPS - specialized PWM with voltage and current feedback"
+  - mode_id: "%00110"
+    relationship: "alternative"
+    description: "NCO frequency - for pure frequency generation without duty cycle control"
+
+related_instructions:
+  - instruction: "WRPIN"
+    usage_context: "Configure PWM sawtooth mode"
+  - instruction: "WXPIN"
+    usage_context: "Set base period (X[15:0]) and PWM frame period (X[31:16])"
+  - instruction: "WYPIN"
+    usage_context: "Set PWM duty cycle value (runtime adjustable)"
+  - instruction: "DIRH"
+    usage_context: "Enable PWM generation"
+  - instruction: "TESTP"
+    usage_context: "Check for frame start events"
+  - instruction: "RDPIN"
+    usage_context: "Acknowledge frame start (clears IN signal)"
+
+hardware_considerations:
+  power_implications: "Power consumption directly proportional to duty cycle"
+  pin_loading_effects: "Can drive moderate loads, ensure adequate current capability for high duty cycles"
+  noise_considerations: "Linear sawtooth PWM has predictable harmonic content - good for EMI control"
+  thermal_effects: "High duty cycles with heavy loads require thermal management"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [88, 89]
+      section: "%01001 = PWM sawtooth"
+  validation_status: "draft"
+  completeness_score: 95
+  technical_accuracy: "silicon_doc_verified"

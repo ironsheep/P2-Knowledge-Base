@@ -1,0 +1,6 @@
+name: "+>="
+type: operator
+priority: 12
+category: Comparison
+description: "Signed/unsigned compare"
+source: Spin2 Documentation v51

@@ -1,0 +1,6 @@
+name: CLKSET
+type: method
+category: Clock Control
+signature: "CLKSET(NewCLKMODE, NewCLKFREQ)"
+description: "Safely set new clock mode and frequency"
+source: Spin2 Documentation v51

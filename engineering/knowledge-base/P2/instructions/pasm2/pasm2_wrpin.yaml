@@ -1,0 +1,44 @@
+metadata:
+  id: pasm2_wrpin_79d13bd9
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426789
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 218
+    type: csv
+    row: 218
+    type: csv
+    row: 218
+layer1_csv:
+  mnemonic: WRPIN
+  syntax: |
+    WRPIN   {#}D,{#}S
+  group: Smart Pins
+  encoding: EEEE 1100000 0LI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins. Wraps within A/B pins. Prior SETQ overrides S[10:6].
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.639652
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.047962
+  narratives:
+    - source: silicon-from-docx.md
+      type: enhancement
+      content: |
+        Can work on pin spans. Prior SETQ overrides S[10:6] for span size.
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins. Wraps within A/B pins. Prior SETQ overrides S[10:6]."
+  syntax: "WRPIN   {#}D,{#}S"

@@ -1,0 +1,209 @@
+# P2 Eval A/V Breakout Add-on Board - Hardware Specification  
+# Part Number: 64006H
+# Documentation: P2 Eval Add-on Boards (#64006 Series) v2.0
+
+hardware_type: "addon_board"
+part_number: "64006H"
+manufacturer: "Parallax Inc."
+series: "P2 Eval Add-on Boards"
+status: "active_production"
+
+basic_info:
+  name: "P2 Eval A/V Breakout Add-on Board"
+  description: "Comprehensive audio/video interface with VGA, RCA, and audio jacks"
+  category: "audio_video_interface"
+  form_factor: "large_addon"
+  
+specifications:
+  requires_host: true
+  compatible_hosts:
+    - "P2 Eval Board (64000)"
+    - "P2 Edge Module Breadboard (64020)"
+    - "P2 Edge Mini Breakout Board (64019) with P2 Edge Module"
+    
+  physical:
+    size: "Large module (A/V size)"
+    connector: "2x6 pass-through socket"
+    mounting: "Single M3 mounting hole connected to GND"
+    mounting_hardware: "M3 or UNC 4-40"
+    
+  electrical:
+    supply_voltage: "3.3V from host"
+    current_consumption: "Variable - depends on audio amplifier usage"
+    io_pins_used: 8
+    power_recommendation: "Use P2-EVAL 3.3V LDO power selection for audio"
+    
+audio_capabilities:
+  output:
+    amplifier: "80mW amplified audio output"
+    connector: "3.5mm stereo headphone jack"
+    wiring: "Tip=Left, Ring=Right, Sleeve=Ground"
+    channels: 2
+    pins: "P6 (Left), P7 (Right)"
+    
+  input:
+    microphone: "Microphone input via 1μF capacitor"
+    connector: "3.5mm mono microphone jack"
+    wiring: "Tip=Signal, Sleeve=Ground"
+    pin: "P5"
+    
+  rca_audio:
+    outputs: "4 RCA jacks (audio mode)"
+    coupling: "Via 22μF capacitors"
+    mode_control: "DIP switch selectable (AUDIO position)"
+    pins: "P0, P1, P2, P3"
+    
+video_capabilities:
+  vga_output:
+    connector: "15-pin VGA socket"
+    signals: "HSYNC, VSYNC, RGB"
+    pins:
+      hsync: "P0"
+      vsync: "P4"  
+      red: "P3"
+      green: "P2"
+      blue: "P1"
+      
+  rca_video:
+    outputs: "4 RCA jacks (video mode)"
+    mode_control: "DIP switch selectable (VIDEO position)"
+    signals: "RGBS (Red, Green, Blue, Sync)"
+    pins: "P0 (H-HSync), P1 (Blue), P2 (Green), P3 (Red)"
+    
+  composite_video:
+    connector: "RCA socket"
+    signal_type: "Composite video"
+    
+  component_video:
+    connector: "RCA socket"  
+    signal_type: "Digital component video"
+    
+pin_assignments:
+  P0: "VGA HSync / RCA Socket 0 (H-HSync or Audio via 22μF cap)"
+  P1: "VGA Blue / RCA Socket 1 (Blue or Audio via 22μF cap)"
+  P2: "VGA Green / RCA Socket 2 (Green or Audio via 22μF cap)"
+  P3: "VGA Red / RCA Socket 3 (Red or Audio via 22μF cap)"
+  P4: "VGA VSync"
+  P5: "Microphone input (via 1μF cap)"
+  P6: "Audio amplifier output (Left channel)"
+  P7: "Audio amplifier output (Right channel)"
+  
+mode_switching:
+  dip_switch:
+    function: "Switches 4×RCA sockets between Audio and Video modes"
+    video_mode: "RCA sockets carry RGB+Sync video signals"
+    audio_mode: "RCA sockets carry audio signals via coupling capacitors"
+    common_pins: "VGA connections remain active regardless of switch"
+    
+use_cases:
+  primary:
+    - "VGA video output for displays and monitors"
+    - "Audio playback through headphones or external speakers"
+    - "Microphone input for voice recording"
+    - "Component video output via RCA jacks"
+  secondary:
+    - "Educational A/V programming demonstrations"
+    - "Retro gaming video output"
+    - "Audio/video streaming applications"
+    - "Multimedia project development"
+    
+advantages:
+  - "Complete A/V interface in single add-on"
+  - "Multiple video output formats (VGA, RCA, composite)"
+  - "Stereo audio output with 80mW amplifier"
+  - "Microphone input for audio recording"
+  - "Mode switching between audio and video RCA functions"
+  - "Professional-grade connectors"
+  
+limitations:
+  - "Large form factor - takes significant space"
+  - "Some features share pins (RCA audio/video switching)"
+  - "Requires careful power management for audio quality"
+  - "Complex pin assignment may conflict with other add-ons"
+  - "VGA and RCA video signals share some pins"
+  
+development_workflow:
+  - "Connect to host board via 2x6 connector"
+  - "Select appropriate power mode (3.3V LDO for audio)"
+  - "Configure DIP switch for desired RCA mode"
+  - "Program P2 for desired A/V output format"
+  - "Test audio and video outputs separately"
+  - "Optimize for specific A/V application"
+  
+programming_considerations:
+  video_generation:
+    vga_timing: "Standard VGA timing requirements"
+    rgb_levels: "Proper voltage levels for color accuracy"
+    sync_signals: "Precise HSYNC and VSYNC timing"
+    
+  audio_generation:
+    sample_rates: "Standard audio sample rates"
+    amplifier_drive: "Appropriate signal levels for 80mW output"
+    stereo_separation: "Independent left/right channel control"
+    
+educational_value:
+  concepts_taught:
+    - "VGA video signal generation"
+    - "Audio DAC and amplification"
+    - "Composite and component video formats"
+    - "Analog signal processing"
+    - "Multi-format A/V interface design"
+    
+  advanced_applications:
+    - "Video game development"
+    - "Digital oscilloscope displays"
+    - "Audio synthesis and processing"
+    - "Multimedia streaming systems"
+    
+compatibility:
+  stacking:
+    position: "Large module - check physical clearance"
+    conflicts: "Uses all 8 pins - minimal compatibility with other add-ons"
+    power_requirements: "Higher power consumption than simple add-ons"
+    
+  mounting:
+    eval_board: "One large or two small modules per edge"
+    mechanical_support: "Standoff strongly recommended due to connector weight"
+    
+applications:
+  retro_computing:
+    - "Classic computer video output"
+    - "Retro game console emulation"
+    - "Vintage terminal displays"
+    
+  multimedia:
+    - "Digital picture frames"
+    - "Audio/video streaming devices"
+    - "Presentation systems"
+    
+  educational:
+    - "Video signal generation learning"
+    - "Audio processing demonstrations"
+    - "A/V system integration projects"
+    
+documentation:
+  primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"
+  related:
+    - "VGA timing specifications"
+    - "Audio amplifier design guidelines"
+    - "P2 DAC programming examples"
+    
+availability:
+  vendor: "Parallax Inc."
+  website: "parallax.com"
+  part_lookup: "Search for 64006H or A/V Breakout Add-on"
+  bundle_option: "Part of complete accessory set (64006-ES)"
+  individual_purchase: "Available separately"
+  
+quality_rating: "professional_interface"
+recommendation_score: 5
+educational_value: "very_high"
+complexity_level: "advanced"
+application_breadth: "multimedia_systems"
+
+# Cross-references
+ecosystem_position: "comprehensive_av_interface"
+hardware_family: "p2_eval_addons"
+addon_series: "64006_series"
+size_class: "large_addon"
+interface_type: "audio_video_multimedia"

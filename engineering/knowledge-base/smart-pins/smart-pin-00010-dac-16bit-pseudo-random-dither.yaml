@@ -1,0 +1,125 @@
+# Smart Pin Mode %00010 - DAC 16-bit with Pseudo-Random Dither
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%00010"
+mode_name: "DAC 16-bit with Pseudo-Random Dither"
+description: "Overrides M[7:0] to feed 8-bit DAC with pseudo-randomly-dithered data achieving 16-bit resolution"
+category: "dac"
+output_override: false
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%00010"
+    
+  requirements:
+    condition: "M[12:10] = %101" 
+    purpose: "Configure low-level pin for DAC output"
+    override: "Overrides M[7:0] for dithered DAC data"
+
+dac_operation:
+  resolution: "16-bit effective resolution from 8-bit DAC"
+  method: "Pseudo-random dithering between adjacent DAC levels"
+  update_rate: "Every clock cycle"
+  averaging: "16-bit resolution achieved over time through dithering"
+
+timing_control:
+  x_register:
+    function: "X[15:0] establishes sample period in clock cycles"
+    
+  y_register:
+    function: "Y[15:0] establishes DAC output value"
+    capture: "Captured at each sample period and used for its duration"
+    
+  period_completion:
+    sequence:
+      - "Y[15:0] captured for next output value"
+      - "IN is raised"
+      - "Coordinate updating Y[15:0] with IN going high"
+
+dithering_characteristics:
+  type: "Pseudo-random dithering"
+  advantage: "No fixed period requirement"
+  mechanism: "Randomly dithers 8-bit DAC between adjacent levels"
+  result: "16-bit DAC output averaged over time"
+  
+  immediate_update:
+    condition: "Set X[15:0] to one"
+    effect: "IN will stay high, output updates take immediate effect"
+
+adc_functionality:
+  condition: "OUT is high"
+  capability: "ADC will be enabled"
+  reading: "RDPIN/RQPIN retrieve 16-bit ADC accumulation from last sample period"
+  purpose: "Measure loading on the DAC pin"
+
+instructions:
+  setup:
+    - "WRPIN - Configure mode (%00010) with M[12:10] = %101"
+    - "WXPIN - Set sample period in X[15:0]"
+    
+  operation:
+    - "WYPIN - Set DAC output value in Y[15:0]"
+    - "RDPIN/RQPIN - Read ADC accumulation (if OUT high)"
+    
+timing_sequences:
+  normal_operation:
+    - "Sample period elapses (X[15:0] clocks)"
+    - "Y[15:0] captured for output"
+    - "IN raised"
+    - "Update Y[15:0] for next period"
+    
+  immediate_update:
+    - "Set X[15:0] to 1"
+    - "IN stays high"
+    - "Y[15:0] changes take immediate effect"
+
+behavior:
+  in_signal: "Raised on completion of each sample period"
+  output_capture: "Y[15:0] captured at sample period start"
+  
+  acknowledgment:
+    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
+    effect: "Lowers IN signal after 2 clocks"
+
+reset_behavior:
+  during_reset:
+    dir_state: "DIR=0"
+    in_signal: "IN is low"
+    capture: "Y[15:0] is captured"
+
+advantages:
+  vs_simple_dithering: "Random dithering eliminates fixed-period artifacts"
+  flexibility: "Can update output value at any time"
+  resolution: "True 16-bit resolution from 8-bit hardware"
+  
+disadvantages:
+  vs_pwm_dither: "Less dynamic range than PWM dithering method"
+
+usage_notes:
+  - "Excellent for applications requiring smooth analog output"
+  - "Random dithering reduces spectral artifacts"
+  - "Can monitor DAC loading via ADC when OUT high"
+  - "Coordinate Y[15:0] updates with IN signal"
+  - "For immediate response, set sample period to 1"
+
+applications:
+  - "Audio DAC with high resolution"
+  - "Motor control with smooth analog drive"
+  - "Instrumentation with precise analog output"
+  - "Power supply control with feedback"
+
+related_modes:
+  - "%00001 (DAC noise)"
+  - "%00011 (DAC 16-bit PWM dither)"
+
+see_also:
+  - "DAC pin configuration (M[12:10] = %101)"
+  - "ADC accumulation reading"
+  - "Smart pin timing coordination"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes" 
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"

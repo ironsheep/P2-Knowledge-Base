@@ -1,0 +1,53 @@
+# Smart Pin Mode: %10101 - Count Time in X+ Clocks
+# Silicon Doc Reference: part4-smart-pins.txt, pages 93-94
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%10101"
+
+mode_name: "Count Time in X+ Clocks"
+
+mode_group: "measurement"
+
+mode_complexity: "advanced"
+
+dac_mode_dependency: false
+
+pin_pairing: "adjacent"
+
+operation_description: |
+  Measures time across some number of A-rise/edge to B-rise/edge periods until X clocks
+  elapse, then completes any period in progress. Provides oversampled period measurement
+  with minimum duration constraint. Y[1:0] sets A/B sensitivity.
+
+x_parameter:
+  usage: "Minimum measurement duration"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "Minimum clock cycles for measurement"
+
+y_parameter:
+  usage: "Edge sensitivity"
+  bit_fields:
+    - range: "Y[1:0]"
+      purpose: "Period edge detection sensitivity"
+
+z_result:
+  data_type: "Accumulated time measurement"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Total time within periods during measurement window"
+
+common_applications:
+  - application: "Time-windowed period measurement"
+    description: "Period measurement with minimum sample time"
+    complexity_level: "expert"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt" 
+      pages: [93, 94]
+      section: "%10101 = for periods in X+ clocks, count time"
+  validation_status: "draft"
+  completeness_score: 75
+  technical_accuracy: "silicon_doc_verified"

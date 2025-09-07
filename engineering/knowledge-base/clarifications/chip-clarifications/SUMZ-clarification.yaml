@@ -1,0 +1,54 @@
+# Chip Gracey Clarification: SUMZ Instruction
+# Layer 4 Enrichment Data - ABSOLUTE Authority
+
+clarification_entry:
+  clarification_id: "chip_2025-08-18_SUMZ_006"
+  instruction: "SUMZ"
+  
+  source_metadata:
+    provider: "Chip Gracey"
+    provider_role: "P2 Designer"
+    date: "2025-08-18"
+    authority_verification: "CHIP_GRACEY_DIRECT"
+    trust_level: "GREEN_HIGHEST"
+    authority_level: "ABSOLUTE"
+    source_document: "chip-instruction-clarifications-2025-08-18.md"
+    extraction_method: "direct_expert_clarification"
+    
+  semantic_clarification:
+    function: "Sum with Zero, Modify Z Flag"
+    syntax: "SUMZ D, S"
+    
+    detailed_behavior:
+      - "Performs addition with zero-specific behavior"
+      - "Updates Z flag based on result"
+      - "Specialized for zero-detection arithmetic"
+      
+    use_cases:
+      - "Zero-aware arithmetic operations"
+      - "Accumulator operations with zero detection"
+      - "Custom arithmetic with flag management"
+      
+    significance: "Provides zero-specific arithmetic behavior"
+    
+  relationships:
+    instruction_family: "arithmetic_with_flag_control"
+    related_instructions:
+      - "SUMC"
+      - "SUMNC"
+      - "SUMNZ"
+    programming_pattern: "zero_detection_arithmetic"
+    
+  gap_impact:
+    previous_status: "semantics_missing"
+    clarification_impact: "complete_semantic_definition"
+    enables_analysis:
+      - "zero_detection_patterns"
+      - "arithmetic_flag_control_matrix"
+      - "accumulator_optimization_frameworks"
+
+  validation:
+    completeness_score: 95
+    authority_confirmed: true
+    integration_ready: true
+    cross_references_available: true

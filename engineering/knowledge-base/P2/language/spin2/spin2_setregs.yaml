@@ -1,0 +1,6 @@
+name: SETREGS
+type: method
+category: String Creation
+signature: "SETREGS(HubAddr, CogAddr, Count)"
+description: "Copy hub to cog registers"
+source: Spin2 Documentation v51

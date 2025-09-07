@@ -1,0 +1,35 @@
+metadata:
+  id: pasm2_jse3_02bf84be
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426618
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 188
+    type: csv
+    row: 188
+    type: csv
+    row: 188
+layer1_csv:
+  mnemonic: JSE3
+  syntax: |
+    JSE3    {#}S
+  group: Events - Branch
+  encoding: EEEE 1011110 01I 000000110 SSSSSSSSS
+  alias: .
+  description: Jump to S** if SE3 event flag is set.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.637105
+  source: P2 Datasheet v35
+  timing:
+    raw: 2 or 4 / 2 or 13...20
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Jump to S** if SE3 event flag is set."
+  syntax: "JSE3    {#}S"

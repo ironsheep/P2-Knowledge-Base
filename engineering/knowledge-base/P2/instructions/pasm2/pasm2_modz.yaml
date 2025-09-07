@@ -1,0 +1,50 @@
+metadata:
+  id: pasm2_modz_373af938
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.429744
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 400
+    type: csv
+    row: 400
+    type: csv
+    row: 400
+layer1_csv:
+  mnemonic: MODZ
+  syntax: |
+    MODZ    z               {WZ}
+  group: Math and Logic
+  encoding: EEEE 1101011 0Z1 00000zzzz 001101111
+  alias: alias
+  description: Modify Z according to zzzz. Z = zzzz[{C,Z}].
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.638958
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Modify Z according to zzzz. Z = zzzz[{C,Z}]."
+  syntax: "MODZ    z               {WZ}"
+
+layer4_chip:
+  source: Chip Gracey Clarifications
+  title: "Modify Z Flag Based on Operand Test"
+  syntax: "MODZ D, S"
+  function: "Modify Z flag based on operand test result
+- Tests operand value and sets/clears Z flag accordingly
+- Part of microcode-level flag control triad (MODC/MODZ/MODCZ)
+- Enables precise conditional execution setup"
+  use_cases: "- Zero-condition testing and flag preparation
+- Custom conditional logic implementation
+- Microcode-style processor state control"
+  date: "2025-08-18"

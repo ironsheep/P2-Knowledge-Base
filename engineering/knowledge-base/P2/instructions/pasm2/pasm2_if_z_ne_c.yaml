@@ -1,0 +1,30 @@
+metadata:
+  id: pasm2_if_z_ne_c_5610884e
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.430092
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 431
+    type: csv
+    row: 431
+    type: csv
+    row: 431
+layer1_csv:
+  mnemonic: IF_Z_NE_C
+  syntax: |
+    IF_Z_NE_C     <inst>  <ops>
+  group: Instruction Prefix
+  encoding: 0110 ------- --- --------- ---------
+  alias: alias
+  description: Execute <inst> if C != Z.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: null
+    cog_exec_16_cogs: null
+
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Execute <inst> if C != Z."
+  syntax: "IF_Z_NE_C     <inst>  <ops>"

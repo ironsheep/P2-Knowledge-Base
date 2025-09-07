@@ -1,0 +1,40 @@
+metadata:
+  id: pasm2_locktry_b1166194
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.427115
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 247
+    type: csv
+    row: 247
+    type: csv
+    row: 247
+layer1_csv:
+  mnemonic: LOCKTRY
+  syntax: |
+    LOCKTRY {#}D            {WC}
+  group: Hub Control - Locks
+  encoding: EEEE 1101011 C0L DDDDDDDDD 000000110
+  alias: .
+  description: Try to get LOCK D[3:0]. C = 1 if got LOCK. LOCKREL releases LOCK. LOCK is also released if owner cog stops or restarts.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.307531
+  source: P2 Datasheet v35
+  timing:
+    raw: 2...9, +2 if result / same
+    type: variable
+    notes:
+      - Hub window alignment affects timing
+    min_cycles: 2
+    max_cycles: 9
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Try to get LOCK D[3:0]. C = 1 if got LOCK. LOCKREL releases LOCK. LOCK is also released if owner cog stops or restarts."
+  syntax: "LOCKTRY {#}D            {WC}"

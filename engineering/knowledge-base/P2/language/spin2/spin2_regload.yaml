@@ -1,0 +1,6 @@
+name: REGLOAD
+type: method
+category: String Creation
+signature: "REGLOAD(HubAddr)"
+description: "Load registers from hub"
+source: Spin2 Documentation v51

@@ -1,0 +1,112 @@
+# Smart Pin Mode %00100 - Pulse/Cycle Output
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%00100"
+mode_name: "Pulse/Cycle Output"
+description: "Generates programmable high pulses or cycles with configurable timing"
+category: "output_generation"
+output_override: true
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%00100"
+    out_override: "OUT signal overridden"
+
+timing_control:
+  x_register:
+    x_low: "X[15:0] establishes base period in clock cycles"
+    x_high: "X[31:16] establishes comparison value"
+    
+  base_period_operation:
+    counter: "Base period counter counts from X[15:0] down to 1"
+    restart: "Restarts at X[15:0] if decremented Y > 0"
+    comparison: "On each clock, if counter > X[31:16] and Y > 0, output high (else low)"
+
+y_register:
+  function: "Y[31:0] specifies number of pulses or cycles to output"
+  trigger: "Writing non-zero value begins pulse/cycle output at next base period"
+  decrement: "Y decremented by one after each pulse"
+  completion: "Output remains low when Y reaches zero"
+
+output_behavior:
+  high_condition: "Base period counter > X[31:16] AND Y > 0"
+  low_condition: "Base period counter <= X[31:16] OR Y = 0"
+  start_timing: "Begins at next base period after Y written with non-zero value"
+
+examples:
+  continuous_high:
+    x_high: "X[31:16] = 0"
+    result: "Output high for duration of Y > 0"
+    
+  pattern_example:
+    x_low: "X[15:0] = 3"
+    x_high: "X[31:16] = 2"  
+    pattern: "0-0-1 (repeat)"
+    duration: "For duration of Y > 0"
+
+instructions:
+  setup:
+    - "WRPIN - Configure mode (%00100)"
+    - "WXPIN - Set base period X[15:0] and comparison X[31:16]"
+    
+  operation:
+    - "WYPIN - Set pulse/cycle count in Y[31:0] (starts operation)"
+
+completion_behavior:
+  in_signal: "IN raised when pulse or cycles complete"
+  output_state: "Pin reverts to low output"  
+  y_status: "Y has been decremented to zero"
+
+reset_behavior:
+  during_reset:
+    dir_state: "DIR=0"
+    in_signal: "IN is low"
+    output: "Output is low"
+    y_register: "Y is set to zero"
+
+behavior:
+  acknowledgment:
+    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
+    effect: "Lowers IN signal after 2 clocks"
+
+usage_notes:
+  - "Useful for generating precise timing pulses"
+  - "Can create complex pulse patterns by varying X[31:16]" 
+  - "Y controls total number of base periods to execute"
+  - "Output automatically returns to low when complete"
+  - "IN signal indicates completion"
+
+applications:
+  timing_pulses: "Precise timing signals for other devices"
+  motor_control: "Step pulses for stepper motors"
+  clock_generation: "Custom clock patterns"
+  protocol_timing: "Communication protocol pulse generation"
+
+timing_examples:
+  single_pulse:
+    setup: "X[15:0] = desired_width, X[31:16] = 0"
+    trigger: "WYPIN #1,pin"
+    result: "Single pulse of desired_width clocks"
+    
+  burst_pulses:
+    setup: "X[15:0] = period, X[31:16] = high_time"
+    trigger: "WYPIN #count,pin"  
+    result: "count pulses with specified timing"
+
+related_modes:
+  - "%00101 (Transition output)"
+  - "%00110 (NCO frequency)"
+  - "%00111 (NCO duty)"
+  - "%01000 (PWM triangle)"
+
+see_also:
+  - "Base period timing calculations"
+  - "Pulse pattern generation techniques" 
+  - "Motor control applications"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"

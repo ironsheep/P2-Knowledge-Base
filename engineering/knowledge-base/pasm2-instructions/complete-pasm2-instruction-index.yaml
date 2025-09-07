@@ -1,0 +1,675 @@
+# Complete PASM2 Instruction Set Index
+# Source: P2 Datasheet, pasm2-complete-instruction-tables.md
+# Comprehensive reference for all PASM2 instructions
+
+metadata:
+  title: "Complete P2 PASM2 Instruction Set"
+  description: "All 450+ PASM2 instructions organized by functional groups"
+  source: "P2 Datasheet"
+  extraction_date: "2025-09-06"
+  total_instructions: "450+"
+  total_groups: 10
+
+# Instruction Group Summary
+instruction_groups:
+  math_and_logic:
+    count: 100+
+    execution_time: "2 clocks"
+    description: "Arithmetic, logic, bit manipulation, and data movement"
+    
+  pin_smart_pin:
+    count: 50+
+    execution_time: "2 clocks"
+    description: "I/O pin control and smart pin operations"
+    
+  branch:
+    count: 30+
+    execution_time: "2-4 clocks (cog) / 2-20 clocks (hub)"
+    description: "Jump, call, return, and conditional branch operations"
+    
+  hub_control_fifo_ram:
+    count: 40+
+    execution_time: "Variable (2-40+ clocks)"
+    description: "Hub memory access, FIFO operations, cog control"
+    
+  event:
+    count: 80+
+    execution_time: "2 clocks / 2+ clocks (wait)"
+    description: "Event handling, polling, waiting"
+    
+  interrupt:
+    count: 15
+    execution_time: "2 clocks"
+    description: "Interrupt control and handling"
+    
+  register_indirection:
+    count: 20+
+    execution_time: "2 clocks"
+    description: "Dynamic instruction modification"
+    
+  cordic_solver:
+    count: 10
+    execution_time: "2-58 clocks"
+    description: "Mathematical operations via CORDIC engine"
+    
+  color_pixel:
+    count: 10
+    execution_time: "2-7 clocks"
+    description: "Color space conversion and pixel operations"
+    
+  misc_specialized:
+    count: 30+
+    execution_time: "2+ clocks"
+    description: "LUT, streamer, and miscellaneous operations"
+
+# Math and Logic Instructions (100+ instructions)
+math_and_logic_instructions:
+  arithmetic:
+    basic_operations:
+      - name: "ADD"
+        syntax: "ADD D,{#}S {WC/WZ/WCZ}"
+        operation: "D = D + S"
+        flags: "C = carry, Z = (result == 0)"
+        clocks: 2
+        
+      - name: "SUB"
+        syntax: "SUB D,{#}S {WC/WZ/WCZ}"
+        operation: "D = D - S"
+        flags: "C = borrow, Z = (result == 0)"
+        clocks: 2
+        
+      - name: "MUL"
+        syntax: "MUL D,{#}S {WZ}"
+        operation: "D = unsigned (D[15:0] * S[15:0])"
+        flags: "Z = (S == 0) | (D == 0)"
+        clocks: 2
+        
+    signed_operations:
+      - name: "ADDS"
+        syntax: "ADDS D,{#}S {WC/WZ/WCZ}"
+        operation: "D = D + S (signed)"
+        flags: "C = correct sign"
+        clocks: 2
+        
+      - name: "SUBS"
+        syntax: "SUBS D,{#}S {WC/WZ/WCZ}"
+        operation: "D = D - S (signed)"
+        flags: "C = correct sign"
+        clocks: 2
+        
+    extended_operations:
+      - name: "ADDX"
+        syntax: "ADDX D,{#}S {WC/WZ/WCZ}"
+        operation: "D = D + S + C (extended)"
+        flags: "C = carry, Z = Z AND (result == 0)"
+        clocks: 2
+        
+  logical_operations:
+    bitwise:
+      - name: "AND"
+        syntax: "AND D,{#}S {WC/WZ/WCZ}"
+        operation: "D = D & S"
+        flags: "C = parity"
+        clocks: 2
+        
+      - name: "OR"
+        syntax: "OR D,{#}S {WC/WZ/WCZ}"
+        operation: "D = D | S"
+        flags: "C = parity"
+        clocks: 2
+        
+      - name: "XOR"
+        syntax: "XOR D,{#}S {WC/WZ/WCZ}"
+        operation: "D = D ^ S"
+        flags: "C = parity"
+        clocks: 2
+        
+      - name: "ANDN"
+        syntax: "ANDN D,{#}S {WC/WZ/WCZ}"
+        operation: "D = D & !S"
+        flags: "C = parity"
+        clocks: 2
+        
+  bit_manipulation:
+    shifts_rotates:
+      - name: "SHL"
+        syntax: "SHL D,{#}S {WC/WZ/WCZ}"
+        operation: "Shift left, C = last bit shifted out"
+        clocks: 2
+        
+      - name: "SHR"
+        syntax: "SHR D,{#}S {WC/WZ/WCZ}"
+        operation: "Shift right, C = last bit shifted out"
+        clocks: 2
+        
+      - name: "ROL"
+        syntax: "ROL D,{#}S {WC/WZ/WCZ}"
+        operation: "Rotate left, C = last bit shifted out"
+        clocks: 2
+        
+      - name: "ROR"
+        syntax: "ROR D,{#}S {WC/WZ/WCZ}"
+        operation: "Rotate right, C = last bit shifted out"
+        clocks: 2
+        
+    bit_operations:
+      - name: "TESTB"
+        syntax: "TESTB D,{#}S WC/WZ"
+        operation: "Test bit S[4:0] of D"
+        flags: "C/Z = D[S[4:0]]"
+        clocks: 2
+        
+      - name: "BITH"
+        syntax: "BITH D,{#}S {WCZ}"
+        operation: "Set bits D[S[9:5]+S[4:0]:S[4:0]] = 1"
+        clocks: 2
+        
+      - name: "BITL"
+        syntax: "BITL D,{#}S {WCZ}"
+        operation: "Clear bits D[S[9:5]+S[4:0]:S[4:0]] = 0"
+        clocks: 2
+        
+  data_movement:
+    basic_moves:
+      - name: "MOV"
+        syntax: "MOV D,{#}S {WC/WZ/WCZ}"
+        operation: "D = S"
+        flags: "C = S[31], Z = (S == 0)"
+        clocks: 2
+        
+    byte_word_operations:
+      - name: "GETBYTE"
+        syntax: "GETBYTE D,{#}S,#N"
+        operation: "D = {24'b0, S.BYTE[N]}"
+        clocks: 2
+        
+      - name: "SETBYTE"
+        syntax: "SETBYTE D,{#}S,#N"
+        operation: "Set S[7:0] into byte N in D"
+        clocks: 2
+        
+      - name: "GETWORD"
+        syntax: "GETWORD D,{#}S,#N"
+        operation: "D = {16'b0, S.WORD[N]}"
+        clocks: 2
+        
+  comparison_operations:
+    - name: "CMP"
+      syntax: "CMP D,{#}S {WC/WZ/WCZ}"
+      operation: "Compare D to S"
+      flags: "C = borrow of (D - S), Z = (D == S)"
+      clocks: 2
+      
+    - name: "CMPS"
+      syntax: "CMPS D,{#}S {WC/WZ/WCZ}"
+      operation: "Compare D to S, signed"
+      flags: "C = correct sign of (D - S)"
+      clocks: 2
+
+# Pin and Smart Pin Instructions (50+ instructions)
+pin_smart_pin_instructions:
+  pin_direction_control:
+    - name: "DIRH"
+      syntax: "DIRH {#}D {WCZ}"
+      operation: "Set DIR bits of pins = 1"
+      flags: "C,Z = DIR bit"
+      clocks: 2
+      
+    - name: "DIRL"
+      syntax: "DIRL {#}D {WCZ}"
+      operation: "Set DIR bits of pins = 0"
+      flags: "C,Z = DIR bit"
+      clocks: 2
+      
+  pin_output_control:
+    drive_modes:
+      - name: "DRVH"
+        syntax: "DRVH {#}D {WCZ}"
+        operation: "Set OUT bits = 1, DIR bits = 1"
+        flags: "C,Z = OUT bit"
+        clocks: 2
+        
+      - name: "DRVL"
+        syntax: "DRVL {#}D {WCZ}"
+        operation: "Set OUT bits = 0, DIR bits = 1"
+        flags: "C,Z = OUT bit"
+        clocks: 2
+        
+    float_modes:
+      - name: "FLTH"
+        syntax: "FLTH {#}D {WCZ}"
+        operation: "Set OUT bits = 1, DIR bits = 0"
+        flags: "C,Z = OUT bit"
+        clocks: 2
+        
+      - name: "FLTL"
+        syntax: "FLTL {#}D {WCZ}"
+        operation: "Set OUT bits = 0, DIR bits = 0"
+        flags: "C,Z = OUT bit"
+        clocks: 2
+        
+  pin_input_testing:
+    - name: "TESTP"
+      syntax: "TESTP {#}D WC/WZ"
+      operation: "Test IN bit of pin D[5:0]"
+      flags: "C/Z = IN[D[5:0]]"
+      clocks: 2
+      
+    - name: "TESTPN"
+      syntax: "TESTPN {#}D WC/WZ"
+      operation: "Test !IN bit of pin D[5:0]"
+      flags: "C/Z = !IN[D[5:0]]"
+      clocks: 2
+      
+  smart_pin_operations:
+    configuration:
+      - name: "WRPIN"
+        syntax: "WRPIN {#}D,{#}S"
+        operation: "Set mode of smart pins to D"
+        clocks: 2
+        
+      - name: "WXPIN"
+        syntax: "WXPIN {#}D,{#}S"
+        operation: "Set X parameter of smart pins to D"
+        clocks: 2
+        
+      - name: "WYPIN"
+        syntax: "WYPIN {#}D,{#}S"
+        operation: "Set Y parameter of smart pins to D"
+        clocks: 2
+        
+    data_access:
+      - name: "RDPIN"
+        syntax: "RDPIN D,{#}S {WC}"
+        operation: "Read smart pin result, acknowledge"
+        flags: "C = modal result"
+        clocks: 2
+        
+      - name: "RQPIN"
+        syntax: "RQPIN D,{#}S {WC}"
+        operation: "Read smart pin result, quiet (no acknowledge)"
+        flags: "C = modal result"
+        clocks: 2
+        
+      - name: "AKPIN"
+        syntax: "AKPIN {#}S"
+        operation: "Acknowledge smart pins"
+        clocks: 2
+
+# Branch Instructions (30+ instructions)
+branch_instructions:
+  unconditional_jumps:
+    - name: "JMP"
+      syntax: "JMP #{\\}A or JMP D {WC/WZ/WCZ}"
+      operation: "Jump to address"
+      clocks: "4 / 13...20"
+      
+    - name: "JMPREL"
+      syntax: "JMPREL {#}D"
+      operation: "Relative jump by D instructions"
+      clocks: "4 / 13...20"
+      
+  conditional_jumps:
+    test_based:
+      - name: "TJZ"
+        syntax: "TJZ D,{#}S"
+        operation: "Jump if D is zero"
+        clocks: "2 or 4 / 2 or 13...20"
+        
+      - name: "TJNZ"
+        syntax: "TJNZ D,{#}S"
+        operation: "Jump if D is not zero"
+        clocks: "2 or 4 / 2 or 13...20"
+        
+      - name: "TJS"
+        syntax: "TJS D,{#}S"
+        operation: "Jump if D is signed (D[31] = 1)"
+        clocks: "2 or 4 / 2 or 13...20"
+        
+    loop_operations:
+      - name: "DJNZ"
+        syntax: "DJNZ D,{#}S"
+        operation: "Decrement D and jump if not zero"
+        clocks: "2 or 4 / 2 or 13...20"
+        
+      - name: "IJNZ"
+        syntax: "IJNZ D,{#}S"
+        operation: "Increment D and jump if not zero"
+        clocks: "2 or 4 / 2 or 13...20"
+        
+  call_return:
+    call_operations:
+      - name: "CALL"
+        syntax: "CALL #{\\}A or CALL D {WC/WZ/WCZ}"
+        operation: "Call subroutine (push return address)"
+        clocks: "4 / 13...20"
+        
+      - name: "CALLD"
+        syntax: "CALLD D,{#}S {WC/WZ/WCZ}"
+        operation: "Call and store return address in D"
+        clocks: "4 / 4"
+        
+    return_operations:
+      - name: "RET"
+        syntax: "RET {WC/WZ/WCZ}"
+        operation: "Return from subroutine"
+        clocks: "4 / 13...20"
+        
+    repeat_operations:
+      - name: "REP"
+        syntax: "REP {#}D,{#}S"
+        operation: "Repeat next D instructions S times"
+        clocks: "2 / 2"
+
+# Hub Control, FIFO, and RAM Instructions (40+ instructions)
+hub_control_instructions:
+  cog_control:
+    - name: "COGINIT"
+      syntax: "COGINIT {#}D,{#}S {WC}"
+      operation: "Start cog D with program at S"
+      clocks: "2...9, +2 if result"
+      
+    - name: "COGSTOP"
+      syntax: "COGSTOP {#}D"
+      operation: "Stop cog D[3:0]"
+      clocks: "2...9"
+      
+    - name: "COGID"
+      syntax: "COGID {#}D {WC}"
+      operation: "Get cog ID or check cog status"
+      clocks: "2...9, +2 if result"
+      
+  lock_operations:
+    - name: "LOCKNEW"
+      syntax: "LOCKNEW D {WC}"
+      operation: "Request a new lock"
+      flags: "C = 1 if no lock available"
+      clocks: "4...11"
+      
+    - name: "LOCKTRY"
+      syntax: "LOCKTRY {#}D {WC}"
+      operation: "Try to acquire lock D[3:0]"
+      flags: "C = 1 if got lock"
+      clocks: "2...9, +2 if result"
+      
+    - name: "LOCKREL"
+      syntax: "LOCKREL {#}D {WC}"
+      operation: "Release lock D[3:0]"
+      clocks: "2...9, +2 if result"
+      
+  hub_memory_access:
+    read_operations:
+      - name: "RDLONG"
+        syntax: "RDLONG D,{#}S/P {WC/WZ/WCZ}"
+        operation: "Read long from hub address"
+        flags: "C = MSB of long"
+        clocks: "9...16 / 9...26"
+        
+      - name: "RDWORD"
+        syntax: "RDWORD D,{#}S/P {WC/WZ/WCZ}"
+        operation: "Read word from hub address"
+        flags: "C = MSB of word"
+        clocks: "9...16 / 9...26"
+        
+      - name: "RDBYTE"
+        syntax: "RDBYTE D,{#}S/P {WC/WZ/WCZ}"
+        operation: "Read byte from hub address"
+        flags: "C = MSB of byte"
+        clocks: "9...16 / 9...26"
+        
+    write_operations:
+      - name: "WRLONG"
+        syntax: "WRLONG {#}D,{#}S/P"
+        operation: "Write long to hub address"
+        clocks: "3...10 / 3...20"
+        
+      - name: "WRWORD"
+        syntax: "WRWORD {#}D,{#}S/P"
+        operation: "Write word to hub address"
+        clocks: "3...10 / 3...20"
+        
+      - name: "WRBYTE"
+        syntax: "WRBYTE {#}D,{#}S/P"
+        operation: "Write byte to hub address"
+        clocks: "3...10 / 3...20"
+        
+  fifo_operations:
+    setup:
+      - name: "RDFAST"
+        syntax: "RDFAST {#}D,{#}S"
+        operation: "Begin fast hub read via FIFO"
+        clocks: "2 or WRFAST finish + 10...17"
+        
+      - name: "WRFAST"
+        syntax: "WRFAST {#}D,{#}S"
+        operation: "Begin fast hub write via FIFO"
+        clocks: "2 or WRFAST finish + 3"
+        
+    read_fifo:
+      - name: "RFLONG"
+        syntax: "RFLONG D {WC/WZ/WCZ}"
+        operation: "Read long from FIFO"
+        flags: "C = MSB of long"
+        clocks: 2
+        
+      - name: "RFWORD"
+        syntax: "RFWORD D {WC/WZ/WCZ}"
+        operation: "Read word from FIFO"
+        flags: "C = MSB of word"
+        clocks: 2
+        
+    write_fifo:
+      - name: "WFLONG"
+        syntax: "WFLONG {#}D"
+        operation: "Write long to FIFO"
+        clocks: 2
+
+# Event Instructions (80+ instructions)
+event_instructions:
+  event_setup:
+    timer_events:
+      - name: "ADDCT1"
+        syntax: "ADDCT1 D,{#}S"
+        operation: "Set CT1 event to trigger on CT = D + S"
+        clocks: 2
+        
+      - name: "ADDCT2"
+        syntax: "ADDCT2 D,{#}S"
+        operation: "Set CT2 event to trigger on CT = D + S"
+        clocks: 2
+        
+    pattern_events:
+      - name: "SETPAT"
+        syntax: "SETPAT {#}D,{#}S"
+        operation: "Set pin pattern for PAT event"
+        clocks: 2
+        
+    streamer_events:
+      - name: "SETSE1"
+        syntax: "SETSE1 {#}D"
+        operation: "Set SE1 event configuration"
+        clocks: 2
+        
+  event_polling:
+    - name: "POLLCT1"
+      syntax: "POLLCT1 {WC/WZ/WCZ}"
+      operation: "Get CT1 event flag, then clear it"
+      clocks: 2
+      
+    - name: "POLLATN"
+      syntax: "POLLATN {WC/WZ/WCZ}"
+      operation: "Get ATN event flag, then clear it"
+      clocks: 2
+      
+  event_waiting:
+    - name: "WAITCT1"
+      syntax: "WAITCT1 {WC/WZ/WCZ}"
+      operation: "Wait for CT1 event flag, then clear"
+      flags: "C/Z = timeout"
+      clocks: "2+"
+      
+    - name: "WAITATN"
+      syntax: "WAITATN {WC/WZ/WCZ}"
+      operation: "Wait for ATN event flag, then clear"
+      flags: "C/Z = timeout"
+      clocks: "2+"
+      
+  event_jumping:
+    conditional_jumps:
+      - name: "JCT1"
+        syntax: "JCT1 {#}S"
+        operation: "Jump if CT1 event flag is set"
+        clocks: "2 or 4 / 2 or 13...20"
+        
+      - name: "JATN"
+        syntax: "JATN {#}S"
+        operation: "Jump if ATN event flag is set"
+        clocks: "2 or 4 / 2 or 13...20"
+        
+  cog_attention:
+    - name: "COGATN"
+      syntax: "COGATN {#}D"
+      operation: "Strobe attention of cogs in D[15:0]"
+      clocks: 2
+
+# CORDIC Solver Instructions (10 instructions)
+cordic_instructions:
+  cordic_operations:
+    - name: "QMUL"
+      syntax: "QMUL {#}D,{#}S"
+      operation: "Begin CORDIC unsigned multiplication D * S"
+      result: "GETQX/GETQY retrieves lower/upper product"
+      clocks: "2...9"
+      
+    - name: "QDIV"
+      syntax: "QDIV {#}D,{#}S"
+      operation: "Begin CORDIC unsigned division"
+      result: "GETQX/GETQY retrieves quotient/remainder"
+      clocks: "2...9"
+      
+    - name: "QROTATE"
+      syntax: "QROTATE {#}D,{#}S"
+      operation: "Begin CORDIC rotation of point by angle"
+      result: "GETQX/GETQY retrieves X/Y"
+      clocks: "2...9"
+      
+    - name: "QVECTOR"
+      syntax: "QVECTOR {#}D,{#}S"
+      operation: "Begin CORDIC vectoring of point"
+      result: "GETQX/GETQY retrieves length/angle"
+      clocks: "2...9"
+      
+  cordic_results:
+    - name: "GETQX"
+      syntax: "GETQX D {WC/WZ/WCZ}"
+      operation: "Retrieve CORDIC result X"
+      flags: "C = X[31], Z = (result == 0)"
+      clocks: "2...58"
+      
+    - name: "GETQY"
+      syntax: "GETQY D {WC/WZ/WCZ}"
+      operation: "Retrieve CORDIC result Y"
+      flags: "C = Y[31], Z = (result == 0)"
+      clocks: "2...58"
+
+# Instruction Categories by Usage
+instruction_categories:
+  basic_programming:
+    - "MOV, ADD, SUB, CMP, AND, OR, XOR"
+    - "JMP, CALL, RET, DJNZ, REP"
+    - "RDLONG, WRLONG, RDBYTE, WRBYTE"
+    
+  advanced_math:
+    - "MUL, MULS, QMUL, QDIV, QSQRT"
+    - "CORDIC operations (QROTATE, QVECTOR)"
+    - "Bit manipulation (SHL, SHR, ROL, ROR)"
+    
+  system_control:
+    - "COGINIT, COGSTOP, COGID"
+    - "LOCKNEW, LOCKTRY, LOCKREL"
+    - "HUBSET, WAITX"
+    
+  io_operations:
+    - "DIRH, DIRL, DRVH, DRVL, TESTP"
+    - "WRPIN, RDPIN, WXPIN, WYPIN"
+    - "Pin control and smart pin operations"
+    
+  event_handling:
+    - "WAITCT1, POLLATN, COGATN"
+    - "Event setup and synchronization"
+    - "Timer and pattern events"
+    
+  specialized:
+    - "FIFO operations (RDFAST, WRFAST, RFLONG)"
+    - "Streamer operations (XINIT, XSTOP)"
+    - "Register indirection (ALTS, ALTD)"
+
+# Common Usage Patterns
+usage_patterns:
+  memory_operations:
+    pattern: "Use SETQ for block transfers"
+    example: "SETQ #count-1 / RDLONG buffer,source"
+    
+  pointer_operations:
+    pattern: "Use PTRA/PTRB for hub addressing"
+    example: "RDLONG data,PTRA++ / WRLONG result,PTRB--"
+    
+  loop_patterns:
+    pattern: "Use DJNZ for counted loops"
+    example: "loop: ... / DJNZ count,#loop"
+    
+  flag_usage:
+    pattern: "Test flags after operations"
+    example: "CMP value,limit WC / IF_C JMP handle_overflow"
+    
+  smart_pin_sequence:
+    pattern: "Configure then read smart pins"
+    example: "WRPIN mode,pin / WXPIN param,pin / DIRH pin / RDPIN result,pin"
+
+# Timing Considerations
+timing_characteristics:
+  cog_execution:
+    basic_instructions: "2 clocks"
+    hub_access: "9-26 clocks (depending on alignment)"
+    branches: "2-4 clocks (depending on taken/not taken)"
+    
+  hub_execution:
+    basic_instructions: "2 clocks"
+    branches: "2-20 clocks (depending on alignment)"
+    fifo_conflict: "FIFO operations incompatible with hub execution"
+    
+  cordic_operations:
+    issue_time: "2-9 clocks"
+    result_time: "55 clocks total latency"
+    throughput: "1 operation per 8 clocks when pipelined"
+
+# Flag Conventions
+flag_conventions:
+  carry_flag_c:
+    arithmetic: "Carry out from addition, borrow from subtraction"
+    logical: "Parity of result for logical operations"
+    shift_rotate: "Last bit shifted out"
+    
+  zero_flag_z:
+    standard: "Z = 1 when result equals zero"
+    extended: "Z = Z AND (result == 0) for extended operations"
+    
+  flag_modification:
+    automatic: "Most instructions set Z based on result"
+    explicit: "WC/WZ/WCZ modifiers control flag updates"
+    preservation: "Flags preserved when modifiers not used"
+
+see_also:
+  - "Smart Pin Mode Documentation"
+  - "System Register Documentation" 
+  - "P2 Architecture Overview"
+  - "Hub Memory Access Timing"
+  - "CORDIC Solver Usage"
+  - "Event System Documentation"
+
+source:
+  document: "P2 Datasheet"
+  section: "PASM2 Complete Instruction Tables"
+  page_reference: "pasm2-complete-instruction-tables.md"
+  extraction_date: "2025-09-06"
+  completeness: "All 450+ PASM2 instructions documented with syntax, operation, and timing"

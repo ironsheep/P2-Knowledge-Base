@@ -1,0 +1,197 @@
+# P2 Eval LED Matrix Add-on Board - Hardware Specification
+# Part Number: 64006C
+# Documentation: P2 Eval Add-on Boards (#64006 Series) v2.0
+
+hardware_type: "addon_board"
+part_number: "64006C"
+manufacturer: "Parallax Inc."
+series: "P2 Eval Add-on Boards"
+status: "active_production"
+
+basic_info:
+  name: "P2 Eval LED Matrix Add-on Board"
+  description: "8×7 grid of Charlieplexed green LEDs (56 LEDs total) using only 8 I/O pins"
+  category: "display"
+  form_factor: "small_addon"
+  
+specifications:
+  requires_host: true
+  compatible_hosts:
+    - "P2 Eval Board (64000)"
+    - "P2 Edge Module Breadboard (64020)"
+    - "P2 Edge Mini Breakout Board (64019) with P2 Edge Module"
+    
+  physical:
+    size: "Small module"
+    connector: "2x6 pass-through socket"
+    mounting: "Single M3 mounting hole connected to GND"
+    mounting_hardware: "M3 or UNC 4-40"
+    hole_diameter: "3.2mm (126 mil)"
+    pad_ring: "5mm (200 mil)"
+    standoff_recommendation: "9.5mm long standoff for support"
+    
+  electrical:
+    supply_voltage: "3.3V from host"
+    current_consumption: "4mA per LED (instantaneous), 4mA total (Charlieplexed)"
+    io_pins_used: 8
+    refresh_rate_minimum: "50Hz to avoid visible flickering"
+    
+display_specifications:
+  led_matrix:
+    dimensions: "8×7 LEDs"
+    total_leds: 56
+    led_color: "Green"
+    led_current: "4mA per LED"
+    control_method: "Charlieplexing"
+    pins_required: 8
+    simultaneous_operation: false
+    
+  charlieplexing:
+    principle: "Uses diode properties and tri-state I/O"
+    advantage: "More LEDs with fewer pins"
+    switching_speed: "Must be >50Hz for persistence of vision"
+    p2_capability: "Each I/O can switch >180MHz (more than adequate)"
+    maximum_current: "4mA at any instant (one LED at a time)"
+    
+pin_assignments:
+  P0: "Charlieplex matrix control line 0"
+  P1: "Charlieplex matrix control line 1"
+  P2: "Charlieplex matrix control line 2"
+  P3: "Charlieplex matrix control line 3"
+  P4: "Charlieplex matrix control line 4"
+  P5: "Charlieplex matrix control line 5"
+  P6: "Charlieplex matrix control line 6"
+  P7: "Charlieplex matrix control line 7"
+  
+charlieplex_lookup_table:
+  # Control matrix for LED activation
+  # Format: Row/Col -> "PIN_HIGH PIN_LOW"
+  row1_col1: "0_HIGH 1_LOW"
+  row1_col2: "0_HIGH 2_LOW"
+  row1_col3: "0_HIGH 3_LOW"
+  row1_col4: "0_HIGH 4_LOW"
+  row1_col5: "0_HIGH 5_LOW"
+  row1_col6: "0_HIGH 6_LOW"
+  row1_col7: "0_HIGH 7_LOW"
+  row1_col8: "1_HIGH 0_LOW"
+  # Additional rows follow same pattern - see documentation
+  
+use_cases:
+  primary:
+    - "Text and graphic display applications"
+    - "Educational demonstrations of Charlieplexing"
+    - "Status indicators and visual feedback"
+    - "Simple scrolling message displays"
+  secondary:
+    - "Game displays and scoring"
+    - "Data visualization"
+    - "Clock and timer displays"
+    - "Interactive learning projects"
+    
+advantages:
+  - "56 LEDs controlled with only 8 pins"
+  - "Efficient Charlieplexing implementation"
+  - "Low total current consumption (4mA)"
+  - "Excellent educational value for multiplexing concepts"
+  - "Fast P2 switching enables flicker-free operation"
+  - "Suitable for text and simple graphics"
+  
+limitations:
+  - "Only one LED can be lit at a time (requires multiplexing)"
+  - "Requires continuous refresh for multiple LED display"
+  - "Green LEDs only (not full color)"
+  - "Limited to 8×7 resolution"
+  - "Programming complexity higher than direct control"
+  
+programming_concepts:
+  charlieplexing_control:
+    method: "Set one pin HIGH, one pin LOW, others INPUT"
+    example: "To light Row 3 Col 6: P3=HIGH, P0=LOW, others=INPUT"
+    turn_off: "Set both control pins to INPUT mode"
+    
+  multiplexing_strategy:
+    refresh_rate: "Minimum 50Hz for flicker-free operation"
+    timing: "Switch between LEDs faster than eye can detect"
+    persistence: "Human eye integrates rapid switching"
+    
+  programming_examples: |
+    ' Light single LED at Row 3, Col 6
+    DIRL P0    ' Set P0 as output LOW
+    DIRH P3    ' Set P3 as output HIGH
+    ' Other pins remain as INPUT
+    
+    ' Turn off LED
+    DIRNOT P0  ' Set P0 as input
+    DIRNOT P3  ' Set P3 as input
+    
+development_workflow:
+  - "Connect to host board via 2x6 connector"
+  - "Understand Charlieplexing control matrix"
+  - "Implement LED control functions"
+  - "Create refresh loop for multiple LED display"
+  - "Design text or graphics display routines"
+  - "Optimize for flicker-free operation"
+  
+educational_value:
+  concepts_taught:
+    - "Charlieplexing multiplexing technique"
+    - "Tri-state I/O pin usage"
+    - "Persistence of vision principles"
+    - "Current limiting and LED control"
+    - "Matrix addressing schemes"
+    - "Refresh timing and flicker elimination"
+    
+  advanced_concepts:
+    - "Efficient multiplexing algorithms"
+    - "Display memory management"
+    - "Text rendering on LED matrix"
+    - "Graphics and animation programming"
+    
+compatibility:
+  stacking:
+    position: "Any 2x6 header position on host board"
+    conflicts: "Uses 8 pins - check with other add-ons"
+    power_sharing: "Very low power - compatible with multiple boards"
+    
+  performance_requirements:
+    cpu_usage: "Requires regular refresh interrupt or cog"
+    timing_critical: "50Hz minimum refresh rate"
+    p2_suitability: "P2 multi-cog architecture ideal for this application"
+    
+applications:
+  text_display:
+    characters: "Can display text characters in 8×7 matrix"
+    scrolling: "Horizontal scrolling messages possible"
+    fonts: "Custom font definition required"
+    
+  graphics:
+    resolution: "56 pixels (8×7)"
+    animation: "Simple animations possible"
+    patterns: "Custom patterns and designs"
+    
+documentation:
+  primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"
+  related:
+    - "Charlieplexing Wikipedia article (referenced)"
+    - "P2 Smart Pins I/O programming guide"
+    - "LED matrix programming examples"
+    
+availability:
+  vendor: "Parallax Inc."
+  website: "parallax.com"
+  part_lookup: "Search for 64006C or LED Matrix Add-on"
+  bundle_option: "Part of complete accessory set (64006-ES)"
+  individual_purchase: "Available separately"
+  
+quality_rating: "educational_excellent"
+recommendation_score: 5
+educational_value: "very_high"
+complexity_level: "intermediate"
+programming_challenge: "moderate_to_advanced"
+
+# Cross-references
+ecosystem_position: "display_demonstration"
+hardware_family: "p2_eval_addons"
+addon_series: "64006_series"
+size_class: "small_addon"
+multiplexing_technique: "charlieplexing"

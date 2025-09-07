@@ -1,0 +1,33 @@
+name: COG
+category: processor
+description: "Symmetric 32-bit processor core"
+count: 8
+features:
+    pipeline: 5-stage pipeline architecture
+    execution: 2-clock execution when pipeline full
+    memory:
+      register_ram: 512 longs (2KB)
+      lookup_ram: 512 longs (2KB)
+      dual_port: true
+    registers:
+      general_purpose: 496 registers ($000-$1EF)
+      dual_purpose: 8 registers ($1F0-$1F7)
+      special_purpose: 8 registers ($1F8-$1FF)
+    special_registers:
+      PTRA: HUB pointer A
+      PTRB: HUB pointer B
+      DIRA: Pin output enables (31:0)
+      DIRB: Pin output enables (63:32)
+      OUTA: Pin output states (31:0)
+      OUTB: Pin output states (63:32)
+      INA: Pin input states (31:0)
+      INB: Pin input states (63:32)
+    features:
+      - Independent execution
+      - Full I/O pin access
+      - Hardware stack (8 levels)
+      - Carry and Zero flags
+      - Interrupts (3 priority levels)
+      - Debug interrupt
+      - Event tracking (16 events)
+source: P2 Silicon Documentation v35

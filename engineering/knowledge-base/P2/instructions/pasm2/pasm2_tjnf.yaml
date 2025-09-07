@@ -1,0 +1,35 @@
+metadata:
+  id: pasm2_tjnf_f9950a63
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426561
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 178
+    type: csv
+    row: 178
+    type: csv
+    row: 178
+layer1_csv:
+  mnemonic: TJNF
+  syntax: |
+    TJNF    D,{#}S
+  group: Branch S - Test
+  encoding: EEEE 1011101 01I DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Test D and jump to S** if D is not full (D != $FFFF_FFFF).
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.619188
+  source: P2 Datasheet v35
+  timing:
+    raw: 2 or 4 / 2 or 13...20
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Test D and jump to S** if D is not full (D != $FFFF_FFFF)."
+  syntax: "TJNF    D,{#}S"

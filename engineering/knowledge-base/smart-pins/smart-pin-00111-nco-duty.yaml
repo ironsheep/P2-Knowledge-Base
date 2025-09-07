@@ -1,0 +1,119 @@
+# Smart Pin Mode %00111 - NCO Duty
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%00111"
+mode_name: "NCO Duty"  
+description: "Numerically Controlled Oscillator that generates variable duty cycle output based on phase accumulation overflow"
+category: "frequency_generation"
+output_override: true
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%00111"
+    out_override: "OUT signal overridden"
+
+timing_control:
+  x_register:
+    function: "X[15:0] establishes base period in clock cycles"
+    purpose: "Forms empirical high-time and low-time units"
+    phase_init: "Upon WXPIN, X[31:16] is written to Z[31:16] for phase setting"
+    
+  y_register:
+    function: "Y[31:0] frequency control word"
+    operation: "Added into Z[31:0] at each base period"
+    
+  z_register:
+    function: "32-bit phase accumulator" 
+    initialization: "Z[31:16] set from X[31:16] on WXPIN"
+    accumulation: "Y[31:0] added each base period"
+
+nco_operation:
+  phase_accumulation: "Z = Z + Y every base period"
+  output_generation: "Pin output reflects Z overflow condition"
+  duty_control: "Y value determines both frequency and duty cycle"
+
+output_behavior:
+  source: "Z overflow drives pin output"
+  mechanism: "Output pulses high when Z[31:0] overflows"
+  duty_cycle: "Determined by Y value relative to 2^32"
+  frequency: "Determined by how often overflows occur"
+
+overflow_behavior:
+  condition: "Z[31:0] overflows (wraps around)"
+  output_pulse: "Pin output reflects overflow state"
+  in_signal: "IN is raised whenever Z overflows"
+
+instructions:
+  setup:
+    - "WRPIN - Configure mode (%00111)"
+    - "WXPIN - Set base period X[15:0] and initial phase X[31:16]"
+    
+  operation:
+    - "WYPIN - Set frequency control word Y[31:0]"
+
+reset_behavior:
+  during_reset:
+    dir_state: "DIR=0"
+    in_signal: "IN is low"  
+    output: "Output is low"
+    z_register: "Z is set to zero"
+
+behavior:
+  acknowledgment:
+    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
+    effect: "Lowers IN signal after 2 clocks"
+
+duty_cycle_control:
+  mechanism: "Overflow frequency determines pulse width"
+  calculation: "Duty cycle ≈ Y / 2^32"
+  range: "0% to nearly 100% duty cycle possible"
+  resolution: "32-bit resolution for precise duty control"
+
+usage_notes:
+  - "Provides both frequency and duty cycle control"
+  - "Output pulses on phase accumulator overflow"
+  - "32-bit resolution for precise duty cycle"
+  - "Different output behavior than NCO frequency mode"
+  - "IN signal marks each overflow event"
+
+applications:
+  pwm_generation: "Variable duty cycle PWM signals"
+  power_control: "Switching power supply control"
+  motor_control: "Variable speed motor drive"
+  dimming_control: "LED brightness control"
+
+comparison_with_frequency_mode:
+  frequency_mode: "Output = Z[31], ~50% duty cycle"
+  duty_mode: "Output = Z overflow, variable duty cycle"
+  use_case: "Frequency for clocks, duty for power control"
+
+duty_cycle_examples:
+  low_duty:
+    y_value: "Y = 2^28"
+    duty_cycle: "≈ 6.25% (1/16)"
+    
+  medium_duty:
+    y_value: "Y = 2^31" 
+    duty_cycle: "≈ 50%"
+    
+  high_duty:
+    y_value: "Y = 3 * 2^30"
+    duty_cycle: "≈ 75%"
+
+related_modes:
+  - "%00110 (NCO frequency)"
+  - "%01000 (PWM triangle)"
+  - "%01001 (PWM sawtooth)"
+  - "%01010 (PWM SMPS)"
+
+see_also:
+  - "NCO duty cycle calculation methods"
+  - "Phase accumulator overflow theory"
+  - "PWM generation techniques"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"

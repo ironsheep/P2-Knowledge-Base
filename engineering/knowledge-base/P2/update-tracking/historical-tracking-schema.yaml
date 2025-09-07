@@ -1,0 +1,303 @@
+# Historical Tracking Schema for Repository Entries
+# Enhanced version history tracking building on existing infrastructure
+
+historical_tracking_schema:
+  version: "2.0.0"  
+  description: "Comprehensive evolution tracking for repository entries"
+  extends: "existing update-tracking and version-control infrastructure"
+  
+  core_tracking_fields:
+    entry_metadata:
+      entry_id:
+        type: "string"
+        required: true
+        format: "Unique identifier for the entry"
+        
+      entry_type:
+        type: "string"
+        required: true
+        enum: ["instruction", "component", "hardware", "documentation"]
+        
+      current_version:
+        type: "string"
+        required: true
+        format: "semver (major.minor.patch)"
+        
+      creation_metadata:
+        created_date:
+          type: "string"
+          format: "ISO-8601 timestamp"
+          required: true
+        initial_source:
+          type: "string"
+          description: "Primary source for initial creation"
+        extraction_method:
+          type: "string"
+          enum: ["automated", "manual", "hybrid"]
+        initial_completeness_score:
+          type: "integer"
+          range: [1, 10]
+          
+  version_history:
+    version_entries:
+      type: "array"
+      items:
+        version_number:
+          type: "string"
+          format: "semver"
+        timestamp:
+          type: "string"  
+          format: "ISO-8601"
+        change_type:
+          type: "string"
+          enum: ["creation", "enhancement", "correction", "source_update", "meta_knowledge_addition"]
+        trigger_source:
+          type: "string"
+          description: "What triggered this update"
+          examples: ["Silicon Doc v35 Part 3", "Chip clarification 2025-08-18", "Walkthrough analysis"]
+        changes_made:
+          type: "array"
+          items:
+            field: "string"
+            change_type: "string" # added, modified, removed
+            old_value: "string"
+            new_value: "string"
+            rationale: "string"
+        completeness_progression:
+          old_score: "integer"
+          new_score: "integer"
+          score_factors: "array[string]"
+        updated_by:
+          type: "string"
+          description: "Person or system making the change"
+        git_commit_hash:
+          type: "string"
+          description: "Associated Git commit for atomic tracking"
+          
+  source_attribution:
+    layer_contributions:
+      layer1_csv:
+        source_document: "string"
+        extraction_date: "string"
+        extraction_method: "string"  
+        coverage_percentage: "integer"
+        
+      layer2_datasheet:
+        source_document: "string"
+        sections_used: "array[string]"
+        extraction_date: "string"
+        coverage_percentage: "integer"
+        
+      layer3_silicon_doc:
+        source_document: "string"
+        parts_used: "array[string]"
+        extraction_date: "string"
+        narrative_coverage: "integer"
+        
+      layer4_clarifications:
+        source_posts: "array[object]"
+        clarification_date: "string"
+        authority_level: "string"
+        
+    source_evolution:
+      type: "array"
+      description: "Track how sources have changed over time"
+      items:
+        source_document: "string"
+        version: "string"
+        date_added: "string"
+        contribution_impact: "string"
+        affected_fields: "array[string]"
+        
+  quality_progression:
+    completeness_history:
+      type: "array"
+      items:
+        date: "string"
+        score: "integer"
+        factors: "array[string]"
+        triggering_update: "string"
+        
+    accuracy_tracking:
+      verification_history:
+        type: "array"
+        items:
+          date: "string"
+          verification_method: "string"
+          result: "string" # verified, issue_found, updated
+          details: "string"
+          
+    authority_progression:
+      type: "array"
+      items:
+        date: "string"
+        authority_level: "string"
+        confidence_score: "integer"
+        supporting_sources: "array[string]"
+        
+  issue_resolution_tracking:
+    identified_issues:
+      type: "array"
+      items:
+        issue_id: "string"
+        identified_date: "string"
+        issue_type: "string" # accuracy, completeness, conflict, outdated
+        description: "string"
+        severity: "string" # critical, high, medium, low
+        identified_by: "string"
+        affected_fields: "array[string]"
+        
+    resolution_history:
+      type: "array"  
+      items:
+        issue_id: "string"
+        resolution_date: "string"
+        resolution_method: "string"
+        changes_made: "array[object]"
+        resolved_by: "string"
+        verification_status: "string"
+        
+  cross_reference_evolution:
+    relationship_history:
+      type: "array"
+      description: "Track how relationships with other entries evolved"
+      items:
+        date: "string"
+        relationship_type: "string" # related, depends_on, conflicts_with, supersedes
+        target_entry: "string"
+        relationship_strength: "string" # strong, medium, weak
+        added_or_removed: "string"
+        rationale: "string"
+        
+  merge_and_split_tracking:
+    merge_history:
+      type: "array"
+      description: "Track when entries were merged from multiple sources"
+      items:
+        date: "string"
+        source_entries: "array[string]"
+        merge_strategy: "string"
+        conflicts_resolved: "array[object]"
+        final_authority: "string"
+        
+    split_history:
+      type: "array"
+      description: "Track when entries were split into multiple entries"
+      items:
+        date: "string"
+        reason: "string"
+        resulting_entries: "array[string]"
+        content_distribution: "object"
+        
+  rollback_checkpoints:
+    checkpoints:
+      type: "array"
+      items:
+        checkpoint_id: "string"
+        date: "string"
+        trigger: "string" # major_update, pre_merge, pre_split, manual
+        entry_state_snapshot: "object"
+        rollback_instructions: "string"
+        retention_period: "string"
+        
+  evolution_analytics:
+    update_frequency:
+      total_updates: "integer"
+      last_30_days: "integer"
+      average_days_between_updates: "float"
+      
+    source_diversity:
+      unique_sources_used: "integer"
+      primary_source_percentage: "float"
+      source_balance_score: "float"
+      
+    quality_trajectory:
+      initial_completeness: "integer"
+      current_completeness: "integer"
+      peak_completeness: "integer"
+      quality_trend: "string" # improving, stable, declining
+      
+    stability_metrics:
+      major_changes: "integer"
+      minor_changes: "integer"
+      stability_score: "float"
+      last_major_change: "string"
+
+# Enhanced Tracking Implementation
+
+implementation_strategy:
+  integration_with_existing:
+    leverage_current_tracking: "Build on existing update-tracking/*.yaml files"
+    enhance_git_integration: "Use existing change-detector.py and rollback-manager.py"
+    preserve_layer_structure: "Maintain layer1-4 extraction attribution"
+    
+  storage_architecture:
+    entry_level_history:
+      location: "Each instruction/component YAML file"
+      section: "historical_tracking"
+      approach: "Embedded history within entry"
+      
+    global_tracking:
+      location: "/update-tracking/global-history.yaml"
+      content: "Cross-entry analytics and system-wide metrics"
+      
+    checkpoint_storage:
+      location: "/update-tracking/checkpoints/"
+      format: "entry-snapshots organized by date"
+      
+  automation_integration:
+    trigger_points:
+      - "Source document updates detected"
+      - "Manual entry modifications"
+      - "Automated extraction runs"
+      - "Quality audit discoveries"
+      - "Conflict resolution actions"
+      
+    automated_tracking:
+      - "Git commit hash recording"
+      - "Timestamp generation"
+      - "Completeness score calculation"
+      - "Source attribution updates"
+      - "Cross-reference updates"
+
+  performance_considerations:
+    history_retention:
+      detailed_history: "2 years"
+      summary_metrics: "indefinite"
+      checkpoint_snapshots: "6 months"
+      
+    query_optimization:
+      indexes: ["date", "entry_type", "change_type", "source"]
+      caching: "Recent history frequently accessed"
+      
+visualization_requirements:
+  entry_timeline:
+    shows: "Chronological evolution of single entry"
+    features: ["version markers", "source additions", "quality progression"]
+    
+  cross_entry_relationships:
+    shows: "How entries relate and reference each other over time"
+    features: ["relationship strength changes", "dependency evolution"]
+    
+  source_impact_analysis:
+    shows: "How each source document affected repository entries"
+    features: ["coverage maps", "quality improvements", "conflict resolutions"]
+    
+  quality_progression_dashboard:
+    shows: "Repository-wide quality improvements over time"
+    features: ["completeness trends", "accuracy improvements", "coverage gaps"]
+
+quality_assurance:
+  validation_rules:
+    - "All version changes must have rationale"
+    - "Source attribution must be preserved"
+    - "Completeness scores must be justified"
+    - "Git commits must match tracking entries"
+    - "Rollback checkpoints must be viable"
+    
+  consistency_checks:
+    - "Version numbers follow semver"
+    - "Timestamps are chronological"
+    - "Cross-references are bidirectional"
+    - "Issue resolutions match identified issues"
+    - "Merge/split tracking is complete"

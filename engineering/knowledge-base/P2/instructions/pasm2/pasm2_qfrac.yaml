@@ -1,0 +1,47 @@
+metadata:
+  id: pasm2_qfrac_0f0d5fd5
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.427002
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 238
+    type: csv
+    row: 238
+    type: csv
+    row: 238
+layer1_csv:
+  mnemonic: QFRAC
+  syntax: |
+    QFRAC   {#}D,{#}S
+  group: CORDIC Solver
+  encoding: EEEE 1101001 0LI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Begin CORDIC unsigned division of {D, SETQ value or 32'b0} / S. GETQX/GETQY retrieves quotient/remainder.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.620169
+  source: P2 Datasheet v35
+  timing:
+    raw: 2...9
+    notes:
+      - Hub window alignment affects timing
+    min_cycles: 2
+    max_cycles: 9
+    type: variable
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.036743
+  narratives:
+    - source: architectural_context
+      type: architectural_note
+      content: |
+        CORDIC solver uses 54-stage pipeline. Results available after 54 clocks. Multiple operations can be pipelined.
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Begin CORDIC unsigned division of {D, SETQ value or 32'b0} / S. GETQX/GETQY retrieves quotient/remainder."
+  syntax: "QFRAC   {#}D,{#}S"

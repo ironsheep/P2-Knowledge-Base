@@ -1,0 +1,78 @@
+# Smart Pin Mode: %11011 - USB Host/Device
+# Silicon Doc Reference: part4-smart-pins.txt, page 75
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%11011"
+
+name: "USB Host/Device"
+
+mode_group: "communication"
+
+mode_complexity: "expert"
+
+dac_mode_dependency: false
+
+pin_pairing: "differential"
+
+operation_description: |
+  USB host/device mode provides USB communication protocol support using even/odd pin pairs
+  for differential signaling (DM/DP). Handles both USB host and device functionality with
+  support for low-speed (1.5 Mbps) and full-speed (12 Mbps) operation. OUT signal overridden
+  for USB protocol control.
+
+x_parameter:
+  usage: "USB configuration and timing"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "USB timing and protocol configuration"
+
+y_parameter:
+  usage: "USB data and control"
+  bit_fields:
+    - range: "Y[31:0]"
+      purpose: "USB packet data and control information"
+
+z_result:
+  data_type: "USB packet data and status"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Received USB data and protocol status"
+
+timing_specifications:
+  clock_relationship: "USB protocol timing (1.5 Mbps or 12 Mbps)"
+  update_frequency: "USB packet-based communication"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "USB packet received"
+    - "USB transaction complete"
+  acknowledgment_method: "rdpin"
+
+pin_pairing:
+  type: "differential"
+  requirement: "Even/odd pin pairs (P0/P1, P2/P3, etc.) for DM/DP signaling"
+
+common_applications:
+  - application: "USB device implementation"
+    description: "Create USB peripheral devices"
+    complexity_level: "expert"
+  - application: "USB host controller"
+    description: "Control USB devices from P2"
+    complexity_level: "expert"
+
+configuration_examples:
+  - name: "USB device setup"
+    description: "Configure USB device on even/odd pin pair"
+    wrpin_code: "WRPIN ##%0001_0000_000_0000000000000_01_11011_0, usb_dm"
+    wxpin_code: "WXPIN usb_timing, usb_dm"
+    explanation: "Even pin (DM), odd pin automatically becomes DP"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [75]
+      section: "%11011 = USB host/device"
+  validation_status: "draft"
+  completeness_score: 75
+  technical_accuracy: "silicon_doc_verified"

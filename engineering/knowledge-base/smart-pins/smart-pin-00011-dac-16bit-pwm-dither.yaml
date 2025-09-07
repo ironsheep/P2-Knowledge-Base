@@ -1,0 +1,129 @@
+# Smart Pin Mode %00011 - DAC 16-bit with PWM Dither  
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%00011"
+mode_name: "DAC 16-bit with PWM Dither"
+description: "Overrides M[7:0] to feed 8-bit DAC with PWM-dithered data achieving 16-bit resolution with better dynamic range"
+category: "dac"
+output_override: false
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%00011"
+    
+  requirements:
+    condition: "M[12:10] = %101"
+    purpose: "Configure low-level pin for DAC output" 
+    override: "Overrides M[7:0] for PWM-dithered DAC data"
+
+dac_operation:
+  resolution: "16-bit effective resolution from 8-bit DAC"
+  method: "PWM dithering between adjacent 8-bit DAC levels"
+  update_rate: "Every clock cycle"
+  averaging: "16-bit resolution achieved over time through PWM dithering"
+
+timing_control:
+  x_register:
+    function: "X[15:0] establishes sample period in clock cycles"
+    constraint: "Must be a multiple of 256 (X[7:0]=0)"
+    reason: "Affords integral number of 256 PWM steps"
+    
+  y_register:
+    function: "Y[15:0] establishes DAC output value"
+    capture: "Captured at each sample period and used for its duration"
+    
+  period_completion:
+    sequence:
+      - "Y[15:0] captured for next output value"
+      - "IN is raised"
+      - "Coordinate updating Y[15:0] with IN going high"
+
+pwm_dithering_characteristics:
+  cycle_length: "256 clocks per PWM cycle"
+  transitions: "Maximum of only two transitions per 256 clocks"
+  dynamic_range: "Better than pseudo-random dithering"
+  
+  frequency_artifact:
+    frequency: "Fclock/256"
+    level: "-48dB"
+    note: "Fixed frequency present in output"
+
+adc_functionality:
+  condition: "OUT is high" 
+  capability: "ADC will be enabled"
+  reading: "RDPIN/RQPIN retrieve 16-bit ADC accumulation from last sample period"
+  purpose: "Measure loading on the DAC pin"
+
+instructions:
+  setup:
+    - "WRPIN - Configure mode (%00011) with M[12:10] = %101"
+    - "WXPIN - Set sample period in X[15:0] (must be multiple of 256)"
+    
+  operation:
+    - "WYPIN - Set DAC output value in Y[15:0]"
+    - "RDPIN/RQPIN - Read ADC accumulation (if OUT high)"
+
+timing_requirements:
+  sample_period: "Must be multiple of 256 clocks"
+  validation: "X[7:0] must equal 0"
+  pwm_steps: "Exactly 256 PWM steps per period"
+
+behavior:
+  in_signal: "Raised on completion of each sample period"
+  output_capture: "Y[15:0] captured at sample period start"
+  
+  acknowledgment:
+    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
+    effect: "Lowers IN signal after 2 clocks"
+
+reset_behavior:
+  during_reset:
+    dir_state: "DIR=0" 
+    in_signal: "IN is low"
+    capture: "Y[15:0] is captured"
+
+advantages:
+  vs_pseudo_random: "Better dynamic range due to controlled transitions"
+  transition_control: "Maximum 2 transitions per 256 clocks reduces noise"
+  
+disadvantages:
+  frequency_artifact: "Fixed Fclock/256 frequency at -48dB"
+  timing_constraint: "Sample period must be multiple of 256"
+
+usage_notes:
+  - "Best dynamic range of the dithering modes"
+  - "Fixed frequency artifact may be acceptable for many applications"  
+  - "Sample period constraint requires planning"
+  - "Coordinate Y[15:0] updates with IN signal"
+  - "Monitor DAC loading via ADC when OUT high"
+
+applications:
+  - "High-fidelity audio DAC where -48dB artifact acceptable"
+  - "Precision instrumentation with controlled noise floor"
+  - "Motor control with smooth operation"
+  - "Power supply control with minimal switching artifacts"
+
+comparison:
+  vs_pseudo_random:
+    advantage: "Better dynamic range, fewer transitions"
+    disadvantage: "Fixed frequency artifact, timing constraints"
+    
+  vs_standard_pwm:
+    advantage: "16-bit resolution from 8-bit DAC"
+    disadvantage: "More complex timing requirements"
+
+related_modes:
+  - "%00001 (DAC noise)"
+  - "%00010 (DAC 16-bit pseudo-random dither)"
+
+see_also:
+  - "DAC pin configuration (M[12:10] = %101)"
+  - "PWM timing calculations"
+  - "Frequency domain considerations"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt" 
+  extraction_date: "2025-09-06"

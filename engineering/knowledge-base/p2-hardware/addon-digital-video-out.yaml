@@ -1,0 +1,251 @@
+# P2 Eval Digital Video Out Add-on Board - Hardware Specification
+# Part Number: 64006D
+# Documentation: P2 Eval Add-on Boards (#64006 Series) v2.0
+
+hardware_type: "addon_board"
+part_number: "64006D"
+manufacturer: "Parallax Inc."
+series: "P2 Eval Add-on Boards"
+status: "active_production"
+
+basic_info:
+  name: "P2 Eval Digital Video Out Add-on Board"
+  description: "HDMI-type connector for digital video experimentation and output"
+  category: "video_interface"
+  form_factor: "small_addon"
+  
+specifications:
+  requires_host: true
+  compatible_hosts:
+    - "P2 Eval Board (64000)"
+    - "P2 Edge Module Breadboard (64020)"
+    - "P2 Edge Mini Breakout Board (64019) with P2 Edge Module"
+    
+  physical:
+    size: "Small module"
+    connector: "2x6 pass-through socket"
+    mounting: "Single M3 mounting hole connected to GND"
+    mounting_hardware: "M3 or UNC 4-40"
+    hole_diameter: "3.2mm (126 mil)"
+    pad_ring: "5mm (200 mil)"
+    standoff_recommendation: "9.5mm long standoff for support"
+    
+  electrical:
+    supply_voltage: "3.3V from host"
+    current_consumption: "Signal-level only (very low power)"
+    io_pins_used: 8
+    
+video_interface:
+  connector:
+    type: "HDMI-type connector"
+    purpose: "Digital video signal experimentation"
+    standards: "Various video standards supported via software"
+    
+  differential_pairs:
+    clock_pair:
+      clk_negative: "P0 (CLK-)"
+      clk_positive: "P1 (CLK+)"
+      function: "Clock differential pair"
+      
+    data_pair_0:
+      d0_negative: "P2 (D0-)"
+      d0_positive: "P3 (D0+)"
+      function: "Data channel 0 differential pair"
+      
+    data_pair_1:
+      d1_negative: "P4 (D1-)"
+      d1_positive: "P5 (D1+)"
+      function: "Data channel 1 differential pair"
+      
+    data_pair_2:
+      d2_negative: "P6 (D2-)"
+      d2_positive: "P7 (D2+)"
+      function: "Data channel 2 differential pair"
+
+pin_assignments:
+  P0: "CLK- (Clock negative)"
+  P1: "CLK+ (Clock positive)"
+  P2: "D0- (Data 0 negative)"
+  P3: "D0+ (Data 0 positive)"
+  P4: "D1- (Data 1 negative)"
+  P5: "D1+ (Data 1 positive)"
+  P6: "D2- (Data 2 negative)"
+  P7: "D2+ (Data 2 positive)"
+  
+unused_hdmi_signals:
+  description: "Additional HDMI signals available but not connected to P2 pins"
+  signals:
+    - name: "CEC"
+      description: "Consumer Electronics Control"
+      pcb_location: "Unpopulated 0.1 inch pad"
+      
+    - name: "RSVD"
+      description: "Reserved signal"
+      pcb_location: "Unpopulated 0.1 inch pad"
+      
+    - name: "SCL"
+      description: "I2C Clock for DDC"
+      pcb_location: "Unpopulated 0.1 inch pad"
+      
+    - name: "SDA"
+      description: "I2C Data for DDC"
+      pcb_location: "Unpopulated 0.1 inch pad"
+      
+    - name: "5V►"
+      description: "5V output to monitor"
+      pcb_location: "Unpopulated 0.1 inch pad"
+      note: "Can be connected to ACC 5V if needed"
+      
+    - name: "HPD"
+      description: "Hot Plug Detect"
+      pcb_location: "Unpopulated 0.1 inch pad"
+
+power_connection:
+  monitor_5v_option:
+    description: "Optional 5V supply to connected monitor"
+    implementation: "Two 0.1 inch pads: 5V► and ACC 5V"
+    usage: "Solder header and use shunt jumper when monitor requires 5V"
+    note: "Some monitors require 5V on pin for proper operation"
+    
+use_cases:
+  primary:
+    - "Digital video standard experimentation"
+    - "Custom video protocol development"
+    - "HDMI signal generation learning"
+    - "Differential signaling education"
+  secondary:
+    - "Video output for embedded systems"
+    - "Digital display driving"
+    - "Video streaming applications"
+    - "Custom resolution and timing experiments"
+    
+advantages:
+  - "True HDMI-type connector for standard compatibility"
+  - "Differential pair implementation for signal integrity"
+  - "All critical video signals brought out to P2 pins"
+  - "Flexible video standard support via software"
+  - "Low power consumption (signal level only)"
+  - "Optional monitor power supply connection"
+  - "Educational value for digital video concepts"
+  
+limitations:
+  - "Requires complex video protocol implementation in software"
+  - "Only 3 data channels + clock (limited compared to full HDMI)"
+  - "Additional HDMI features (DDC, CEC) not directly accessible"
+  - "High-frequency signal integrity depends on PCB layout quality"
+  - "Monitor compatibility depends on supported video standards"
+  
+development_workflow:
+  - "Connect to host board via 2x6 connector"
+  - "Select target video standard/protocol"
+  - "Configure P2 pins for differential signaling"
+  - "Implement video timing generation"
+  - "Generate test patterns for verification"
+  - "Connect HDMI monitor or analyzer"
+  - "Debug signal integrity and timing"
+  
+programming_considerations:
+  differential_signaling:
+    requirement: "Must generate complementary signals on +/- pairs"
+    timing: "Critical timing relationships between clock and data"
+    voltage_levels: "Proper differential voltage levels required"
+    
+  video_standards:
+    examples:
+      - "Custom low-resolution standards"
+      - "VGA-compatible timings over HDMI"
+      - "Simple digital video protocols"
+    complexity: "Full HDMI requires extensive protocol implementation"
+    
+  p2_capabilities:
+    smart_pins: "Can use smart pin modes for precise timing"
+    cogs: "Multiple cogs may be needed for complex video generation"
+    streamer: "Streamer can assist with video data output"
+    
+programming_examples:
+  differential_output: |
+    ' Generate differential clock signals
+    DIRH P0, P1    ' Set clock pins as outputs
+    OUTH P1        ' Clock positive high
+    OUTL P0        ' Clock negative low
+    ' Toggle for clock generation
+    
+  video_data_setup: |
+    ' Configure data pins for differential output
+    DIRH P2, P3, P4, P5, P6, P7    ' All data pins as outputs
+    ' Generate complementary data on +/- pairs
+    ' P3 = !P2, P5 = !P4, P7 = !P6
+    
+educational_value:
+  concepts_taught:
+    - "Differential signaling principles"
+    - "Video timing generation and synchronization"
+    - "Digital video standards and protocols"
+    - "Signal integrity in high-frequency applications"
+    - "HDMI connector pinouts and functions"
+    - "Clock and data relationship in video systems"
+    
+  advanced_topics:
+    - "Video protocol implementation"
+    - "Custom resolution and refresh rate generation"
+    - "Signal integrity analysis and optimization"
+    - "Video compression and encoding concepts"
+    
+compatibility:
+  stacking:
+    position: "Any 2x6 header position on eval board"
+    conflicts: "Uses all 8 pins - check with other add-ons"
+    power_sharing: "Very low power - compatible with other boards"
+    
+  monitor_compatibility:
+    standard_monitors: "May work with simple video protocols"
+    hdmi_compliance: "Full HDMI compliance requires extensive software"
+    custom_protocols: "Best suited for custom video standards"
+    
+applications:
+  educational:
+    - "Video engineering coursework"
+    - "Digital signaling demonstrations"
+    - "Video protocol development learning"
+    - "Signal integrity case studies"
+    
+  development:
+    - "Custom video standard prototyping"
+    - "Embedded system video output"
+    - "Video timing generator development"
+    - "Digital display driver testing"
+    
+  research:
+    - "Video compression algorithm testing"
+    - "Custom video format development"
+    - "Video processing pipeline research"
+    - "Display technology experimentation"
+    
+documentation:
+  primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"
+  related:
+    - "HDMI specification documents"
+    - "Video timing standard references"
+    - "P2 Smart Pins high-frequency signaling guide"
+    - "Differential signaling design principles"
+    
+availability:
+  vendor: "Parallax Inc."
+  website: "parallax.com"
+  part_lookup: "Search for 64006D or Digital Video Out Add-on"
+  bundle_option: "Part of complete accessory set (64006-ES)"
+  individual_purchase: "Available separately"
+  
+quality_rating: "specialized_development"
+recommendation_score: 4
+educational_value: "high"
+complexity_level: "advanced"
+application_focus: "video_protocol_development"
+
+# Cross-references
+ecosystem_position: "digital_video_interface"
+hardware_family: "p2_eval_addons"
+addon_series: "64006_series"
+size_class: "small_addon"
+interface_type: "hdmi_differential_video"
+signal_type: "high_frequency_differential"

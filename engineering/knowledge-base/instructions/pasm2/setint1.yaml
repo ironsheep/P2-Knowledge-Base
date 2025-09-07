@@ -1,0 +1,100 @@
+mnemonic: "SETINT1"
+syntax:
+  - "SETINT1 {#}D"
+group: "interrupt"
+description: "Set INT1 source to D[3:0]."
+
+operation:
+  basic_operation: "Configure INT1 interrupt source"
+  flag_effects:
+    carry_flag: "Not affected"
+    zero_flag: "Not affected"
+  conditions:
+    - "D[3:0] specifies interrupt source (0-15)"
+    - "Only bits [3:0] of D are used"
+    - "Setting enables INT1 interrupt"
+
+timing:
+  base_clocks: 2
+  cog_lut_timing: 2
+  hub_timing: 2
+  timing_notes:
+    - "All Interrupt instructions execute in 2 clock cycles"
+
+flags:
+  affects_c: false
+  affects_z: false
+  flag_options: []
+  flag_meanings: {}
+
+operands:
+  destination:
+    type: "interrupt_source"
+    range: "0..15 (4-bit value in D[3:0])"
+    description: "Interrupt source selector"
+    
+variants:
+  - syntax: "SETINT1 {#}D"
+    description: "Set INT1 to trigger on source D[3:0]"
+    specific_operation: "INT1_SOURCE = D[3:0]"
+
+examples:
+  - title: "Set INT1 for CT1 Event"
+    description: "Configure INT1 to trigger on CT1 timer"
+    code: "SETINT1 #1"
+    explanation: "Sets INT1 to trigger when CT1 event occurs"
+  - title: "Set INT1 for Pin Pattern"
+    description: "Configure INT1 for pin pattern matching"
+    code: "SETINT1 #3"
+    explanation: "Sets INT1 to trigger on pin pattern (PAT) event"
+  - title: "Dynamic Interrupt Source"
+    description: "Set interrupt source from register"
+    code: |
+      MOV source_reg, #5    ' Smart pin SE1 event
+      SETINT1 source_reg    ' Configure INT1 for SE1
+    explanation: "Uses register value to configure interrupt source"
+
+related_instructions:
+  - "SETINT2"
+  - "SETINT3"
+  - "NIXINT1"
+  - "TRGINT1"
+  - "RETI1"
+  - "RESI1"
+  - "ALLOWI"
+  - "STALLI"
+
+special_behaviors:
+  - "Only D[3:0] bits are significant, upper bits ignored"
+  - "Setting interrupt source automatically enables that interrupt"
+  - "Interrupts must be globally enabled with ALLOWI"
+  - "STALLI can temporarily disable interrupts"
+
+notes:
+  - "Part of P2's flexible interrupt system"
+  - "INT1 has dedicated interrupt vector and handler"
+  - "Source numbers correspond to specific P2 event types"
+  - "Essential for responsive real-time programming"
+
+source_references:
+  datasheet_section: "6.7 Interrupt Instructions"
+  page_references: ["Datasheet Interrupt instruction table"]
+  extraction_notes: "Extracted from pasm2-complete-instruction-tables.md Interrupt section"
+
+interrupt_sources:
+  0: "CT1 event"
+  1: "CT2 event" 
+  2: "CT3 event"
+  3: "SE1 event (Smart pin)"
+  4: "SE2 event (Smart pin)"
+  5: "SE3 event (Smart pin)"
+  6: "SE4 event (Smart pin)"
+  7: "PAT event (Pin pattern)"
+  8: "FBW event (FIFO block wrap)"
+  9: "XMT event (Streamer)"
+  10: "XFI event (Streamer)"
+  11: "XRO event (Streamer)"
+  12: "XRL event (Streamer)"
+  13: "ATN event (Attention)"
+  14: "QMT event (FIFO)"
+  15: "INT event (Software interrupt)"

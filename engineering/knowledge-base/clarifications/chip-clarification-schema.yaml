@@ -1,0 +1,174 @@
+# Chip Gracey Clarification Schema - Layer 4 Enrichment Data
+# Authority Level: ABSOLUTE - Overrides all other sources
+# Schema version: 1.0.0
+
+chip_clarification_schema:
+  schema_version: "1.0.0"
+  schema_date: "2025-09-06" 
+  authority_level: "ABSOLUTE"
+  trust_level: "GREEN_HIGHEST"
+  
+  # Schema definition for layer 4 enrichment data
+  clarification_entry:
+    clarification_id:
+      type: "string"
+      description: "Unique identifier for clarification"
+      required: true
+      format: "chip_YYYY-MM-DD_instruction_sequence"
+      example: "chip_2025-08-18_modc_001"
+      
+    source_metadata:
+      date:
+        type: "string"
+        description: "Date of clarification"
+        required: true
+        format: "YYYY-MM-DD"
+      batch:
+        type: "string"
+        description: "Clarification batch identifier"
+        required: true
+      document:
+        type: "string"
+        description: "Source document filename"
+        required: true
+      authority_verification:
+        type: "string"
+        enum: ["CHIP_GRACEY_DIRECT", "CHIP_GRACEY_FORUM", "PARALLAX_OFFICIAL"]
+        description: "Verification of authority level"
+        required: true
+        
+    affected_instructions:
+      type: "array"
+      items:
+        instruction_mnemonic:
+          type: "string"
+          description: "PASM2 instruction mnemonic"
+          required: true
+        instruction_variants:
+          type: "array"
+          items:
+            type: "string"
+          description: "Specific variants affected (if applicable)"
+          required: false
+      required: true
+      
+    clarification_type:
+      type: "string"
+      enum: ["SEMANTIC_BEHAVIOR", "FLAG_BEHAVIOR", "TIMING_DETAILS", "USAGE_PATTERN", "BUG_WORKAROUND", "IMPLEMENTATION_DETAIL"]
+      description: "Category of clarification"
+      required: true
+      
+    clarification_content:
+      description:
+        type: "string"
+        description: "Clear explanation of the clarification"
+        required: true
+      technical_details:
+        type: "string"
+        description: "Detailed technical explanation"
+        required: false
+      examples:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            code:
+              type: "string"
+              description: "PASM2 code example"
+            explanation:
+              type: "string"
+              description: "What the example demonstrates"
+        required: false
+      patterns:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            pattern_name:
+              type: "string"
+            pattern_description:
+              type: "string"
+            code_template:
+              type: "string"
+        description: "Programming patterns revealed by clarification"
+        required: false
+        
+    impact_assessment:
+      instruction_understanding:
+        type: "string"
+        enum: ["CRITICAL", "MAJOR", "MODERATE", "MINOR"]
+        description: "Impact on instruction understanding"
+        required: true
+      gap_reduction:
+        type: "integer"
+        description: "Number of semantic gaps addressed"
+        required: false
+      conflicts_resolved:
+        type: "array"
+        items:
+          type: "string"
+        description: "Conflicts with other sources resolved"
+        required: false
+        
+    integration_notes:
+      overrides:
+        type: "array"
+        items:
+          type: "string"
+        description: "What this clarification overrides from other sources"
+        required: false
+      cross_references:
+        type: "array"
+        items:
+          type: "string"
+        description: "Related instructions or concepts affected"
+        required: false
+      validation_status:
+        type: "string"
+        enum: ["VERIFIED", "PENDING_VERIFICATION", "NEEDS_TESTING"]
+        description: "Validation status of clarification"
+        required: true
+        
+# Validation rules for clarifications
+validation_rules:
+  authority_precedence:
+    description: "Chip clarifications override all other sources"
+    rule: "authority_verification must be verified before integration"
+    
+  instruction_mapping:
+    description: "All clarifications must map to existing PASM2 instructions"
+    rule: "affected_instructions must exist in instruction database"
+    
+  impact_documentation:
+    description: "All clarifications must document their impact"
+    rule: "impact_assessment.instruction_understanding is required"
+    
+  conflict_resolution:
+    description: "Conflicts with existing sources must be documented"
+    rule: "When overriding existing data, conflicts_resolved must be specified"
+    
+# Integration process metadata
+integration_process:
+  layer_4_enrichment:
+    description: "These clarifications become layer 4 data in instruction YAML files"
+    target_location: "/engineering/knowledge-base/P2/instructions/pasm2/"
+    field_name: "chip_clarifications"
+    
+  precedence_rules:
+    hierarchy: "Chip clarifications > Silicon Doc > Datasheet > CSV"
+    conflict_resolution: "Chip clarifications always take precedence"
+    documentation: "All overrides must be documented in integration_notes"
+    
+  quality_impact:
+    completeness_scoring: "Clarifications can increase completeness scores significantly"
+    gap_reduction: "Each clarification can address multiple semantic gaps"
+    authority_bonus: "Chip clarifications receive highest authority weighting"
+
+# Extraction metadata
+extraction_metadata:
+  total_clarifications_available: 13
+  instruction_coverage:
+    batch_1: "7 instructions (2025-08-18)"
+    batch_2: "6 instructions (2025-09-02)" 
+    patterns: "Extended precision arithmetic patterns"
+  gap_impact: "Reduces 283 missing semantics by 13+ instructions"

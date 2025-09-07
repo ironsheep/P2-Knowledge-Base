@@ -1,0 +1,104 @@
+# PTRA Register - Pointer A to Hub RAM
+# Source: Silicon Doc v35, COG-RAM-REGISTER-MAP.md
+
+register_name: "PTRA"
+address: "$1F8"
+bit_width: 32
+category: "special_purpose"
+access_type: "read_write"
+
+description: "32-bit pointer register for addressing hub RAM with auto-increment/decrement capabilities"
+
+functionality:
+  primary_purpose: "Hub RAM pointer with arithmetic operations"
+  auto_increment: "Supports ++ operations in instructions"
+  auto_decrement: "Supports -- operations in instructions"
+  pointer_arithmetic: "Can be modified by instruction operands"
+
+initialization:
+  coginit_behavior:
+    ptra_source: "Gets SETQ value if SETQ was executed before COGINIT"
+    default_value: "Cleared to 0 if no SETQ"
+    ptrb_source: "Gets S operand of COGINIT (execution start address)"
+
+usage_patterns:
+  hub_memory_access:
+    read_operations: "RDLONG data, PTRA"
+    write_operations: "WRLONG value, PTRA"
+    auto_increment: "RDLONG data, PTRA++ (read then increment by 4)"
+    auto_decrement: "WRLONG value, PTRB-- (decrement by 4 then write)"
+    
+  pointer_manipulation:
+    direct_assignment: "MOV PTRA, ##$10000"
+    arithmetic: "ADD PTRA, #16"
+    comparison: "CMP PTRA, limit_value"
+
+instruction_compatibility:
+  rd_instructions: "All RDxxxx instructions support PTRA/PTRB"
+  wr_instructions: "All WRxxxx instructions support PTRA/PTRB"
+  ptr_expressions: "PTRA[index], PTRA++, PTRA--, ++PTRA, --PTRA"
+  addressing_modes: "Direct register access via $1F8"
+
+auto_increment_behavior:
+  byte_operations: "Increment by 1 (RDBYTE, WRBYTE)"
+  word_operations: "Increment by 2 (RDWORD, WRWORD)"  
+  long_operations: "Increment by 4 (RDLONG, WRLONG)"
+  pre_increment: "++PTRA increments before use"
+  post_increment: "PTRA++ increments after use"
+  pre_decrement: "--PTRA decrements before use"
+  post_decrement: "PTRA-- decrements after use"
+
+examples:
+  setup_example:
+    code: |
+      MOV     PTRA, ##hub_buffer    ' Point to hub buffer
+      MOV     count, #10            ' Set loop count
+      loop
+      RDLONG  data, PTRA++          ' Read long, increment by 4
+      ' Process data
+      DJNZ    count, #loop          ' Continue until done
+    description: "Basic buffer reading with auto-increment"
+    
+  parameter_passing:
+    code: |
+      ' In launching cog:
+      SETQ    ##param_block         ' This goes to new cog's PTRA
+      COGINIT #0, ##entry_point     ' entry_point goes to new cog's PTRB
+      
+      ' In new cog:
+      RDLONG  param1, PTRA++        ' Read first parameter
+      RDLONG  param2, PTRA++        ' Read second parameter
+    description: "Parameter passing via PTRA initialization"
+
+debug_considerations:
+  normal_operation: "PTRA accessible as special register"
+  debug_isr_mode: "PTRA overlaid by debug ROM routines"
+  debug_entry: "Debug ISR entry routine located at $1F8"
+  register_preservation: "Debug routines handle PTRA save/restore"
+
+optimization_tips:
+  register_reuse: "Can be used as general 32-bit register when not needed for pointers"
+  loop_optimization: "Auto-increment eliminates manual pointer arithmetic"
+  parameter_efficiency: "COGINIT initialization provides efficient parameter passing"
+  addressing_flexibility: "Both direct ($1F8) and symbolic (PTRA) access supported"
+
+related_registers:
+  ptrb: "$1F9 - Pointer B with identical functionality"
+  hub_access: "Works with all hub memory access instructions"
+  
+limitations:
+  cog_local_only: "Each cog has its own PTRA, not shared"
+  hub_addresses_only: "Intended for hub RAM addressing"
+  no_automatic_bounds: "No built-in bounds checking"
+
+see_also:
+  - "PTRB Register ($1F9)"
+  - "Hub memory access instructions (RDxxxx/WRxxxx)"
+  - "COGINIT parameter passing"
+  - "PTR expression syntax"
+
+source:
+  document: "Silicon Doc v35"
+  section: "COG RAM Register Map"
+  page_reference: "COG-RAM-REGISTER-MAP.md"
+  extraction_date: "2025-09-06"

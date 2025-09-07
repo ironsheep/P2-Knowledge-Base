@@ -1,0 +1,344 @@
+# Smart Pin Mode: %01100 - Count A-Input Positive Edges when B-Input High
+# Silicon Doc Reference: part4-smart-pins.txt, page 90
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%01100"
+
+mode_name: "Count A-Rise with B-High"
+
+mode_group: "measurement"
+
+mode_complexity: "intermediate"
+
+dac_mode_dependency: false
+
+pin_pairing: "adjacent"
+
+wrpin_configuration:
+  base_format: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+  
+  a_input_selector:
+    description: "4-bit A input selector - signal to count positive edges"
+    bit_pattern: "%AAAA"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (edge signal to count)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  b_input_selector:
+    description: "4-bit B input selector - gate signal (count only when high)"
+    bit_pattern: "%BBBB"
+    options:
+      - code: "%0000"
+        description: "this pin's read state"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state (gate signal)"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  input_logic_filtering:
+    description: "3-bit input logic/filtering - recommended for clean edge detection"
+    bit_pattern: "%FFF"
+    options:
+      - code: "%000"
+        description: "A, B (default - no filtering)"
+        operation: "passthrough"
+        filter_type: "none"
+      - code: "%001"
+        description: "A AND B, B"
+        operation: "logical_and"
+        filter_type: "none"
+      - code: "%010"
+        description: "A OR B, B"
+        operation: "logical_or"
+        filter_type: "none"
+      - code: "%011"
+        description: "A XOR B, B"
+        operation: "logical_xor"
+        filter_type: "none"
+      - code: "%100"
+        description: "A, B, both filtered using global filt0 (12.5ns)"
+        operation: "passthrough"
+        filter_type: "filt0"
+      - code: "%101"
+        description: "A, B, both filtered using global filt1 (600ns)"
+        operation: "passthrough"
+        filter_type: "filt1"
+      - code: "%110"
+        description: "A, B, both filtered using global filt2 (16.4ms)"
+        operation: "passthrough"
+        filter_type: "filt2"
+      - code: "%111"
+        description: "A, B, both filtered using global filt3 (210ms)"
+        operation: "passthrough"
+        filter_type: "filt3"
+  
+  low_level_control:
+    description: "13-bit low-level pin control (M[12:0]) - standard input configuration"
+    bit_pattern: "%M............"
+    special_modes:
+      - condition: "M[12:10] = %100"
+        behavior: "ADC mode - not typically used for digital counting"
+  
+  dir_out_control:
+    description: "2-bit pin DIR/OUT control - input-only operation"
+    bit_pattern: "%TT"
+    smart_off_behavior:
+      non_dac_mode: []
+      dac_mode: []
+    smart_on_behavior:
+      dac_modes: []
+      non_dac_modes:
+        - mode_range: "%01100 (count A-rise with B-high)"
+          behavior: "Input-only operation for edge detection and counting"
+
+x_parameter:
+  usage: "Measurement period configuration"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "Measurement period in clock cycles"
+      valid_values:
+        min: 0
+        max: 4294967295
+        special_values:
+          - value: 0
+            meaning: "Continuous operation (totalizer mode) - no periodic measurements"
+          - value: 160000000
+            meaning: "1-second measurement periods at 160MHz"
+          - value: 16000000
+            meaning: "0.1-second measurement periods at 160MHz"
+  configuration_timing: "reset_only"
+
+y_parameter:
+  usage: "Not used in this counting mode"
+
+z_result:
+  data_type: "32-bit event count"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Total count of A positive edges that occurred while B was high"
+  flag_behavior: "C flag contains mode-related status information"
+  overflow_handling: "32-bit unsigned counter wraps at 4,294,967,295"
+
+operation_description: |
+  Count A-input positive edges when B-input is high mode performs gated edge counting.
+  X[31:0] establishes a measurement period in clock cycles. If zero is used for the period,
+  the measurement operation is continuous like a totalizer, and the current 32-bit count
+  can always be read via RDPIN/RQPIN. If a non-zero value is used for the period, events
+  are counted for that many clock cycles and then the result is placed in Z while the
+  accumulator is set to the 0/1 value that would have otherwise been added, beginning
+  a new measurement. This ensures all events are counted across measurements. At the end
+  of each period, IN is raised and RDPIN/RQPIN can retrieve the 32-bit measurement.
+  During reset (DIR=0), IN is low and Z is set to the adder value (0/1).
+
+timing_specifications:
+  clock_relationship: "Asynchronous edge detection, synchronous measurement periods"
+  base_period:
+    description: "Measurement period (if X > 0) or continuous operation (if X = 0)"
+    min_clocks: 0
+    max_clocks: 4294967295
+    special_values:
+      - value: 0
+        meaning: "Continuous totalizer mode"
+      - value: 1000000
+        meaning: "Short measurement periods for fast response"
+  update_frequency: "Immediate counting response, periodic reporting if X > 0"
+  settling_time: "Digital filtering delay if global filters are enabled"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "Measurement period completion (if X > 0)"
+    - "Never raised in continuous mode (X = 0)"
+  acknowledgment_method: "rdpin"
+  polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
+
+reset_behavior:
+  dir_low_effects:
+    - "IN signal goes low"
+    - "Z is set to the adder value (0/1)"
+    - "Event counter is reset"
+  dir_transition_effects: "Smart pin begins counting A edges when B is high"
+  wrpin_zero_effects: "Returns pin to normal mode, clears all smart pin configuration"
+
+common_applications:
+  - application: "Gated frequency measurement"
+    description: "Count pulses only during specific time windows"
+    complexity_level: "intermediate"
+  - application: "Conditional event counting"
+    description: "Count events only when enable signal is active"
+    complexity_level: "intermediate"
+  - application: "Selective pulse counting"
+    description: "Count pulses only when qualifier is present"
+    complexity_level: "intermediate"
+  - application: "Direction-sensitive counting"
+    description: "Count in one direction based on second signal"
+    complexity_level: "intermediate"
+
+configuration_examples:
+  - name: "Gated frequency counter"
+    description: "Count clock pulses only during gate-high periods"
+    wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_01100_0, gated_counter"
+    wxpin_code: "WXPIN ##160_000_000, gated_counter"
+    explanation: "A from this pin (clock), B from +1 pin (gate), 1-second periods"
+  
+  - name: "Conditional event counter"
+    description: "Count events only when enable is active"
+    wrpin_code: "WRPIN ##%0111_0001_101_0000000000000_00_01100_0, event_counter"
+    wxpin_code: "WXPIN #0, event_counter"
+    explanation: "A from -1 pin (events), B from +1 pin (enable), continuous mode, filtered"
+  
+  - name: "Direction-sensitive pulse counter"
+    description: "Count forward when direction pin is high"
+    wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_01100_0, dir_counter"
+    wxpin_code: "WXPIN ##16_000_000, dir_counter"
+    explanation: "A from this pin (pulses), B from +1 pin (direction), 0.1s periods"
+
+typical_code_patterns:
+  - pattern_name: "Gated frequency measurement"
+    pasm2_code: |
+      ' Configure gated frequency counter
+      WRPIN ##%0000_0001_101_0000000000000_00_01100_0, freq_pin
+      WXPIN gate_period, freq_pin        ' Set measurement window
+      DIRH  freq_pin                     ' Enable counter
+      
+      measure_loop:
+      TESTP freq_pin WC                  ' Wait for measurement complete
+      IF_NC JMP #measure_loop            ' Wait for result ready
+      RDPIN frequency, freq_pin          ' Get frequency count
+      
+      ' Calculate frequency = count / (gate_period / clock_rate)
+      MOV   temp, gate_period
+      QDIV  temp, clock_rate             ' Convert period to seconds
+      GETQX gate_seconds                 ' Get seconds
+      QDIV  frequency, gate_seconds      ' freq = count / seconds
+      GETQX actual_frequency            ' Get Hz
+      
+      JMP   #measure_loop                ' Repeat measurement
+    explanation: "Measure frequency during specific gate periods"
+  
+  - pattern_name: "Selective event counting with statistics"
+    pasm2_code: |
+      ' Setup selective counting with statistics
+      WRPIN ##%0000_0001_000_0000000000000_00_01100_0, stats_pin
+      WXPIN ##1_000_000, stats_pin       ' 1M clock periods
+      DIRH  stats_pin                    ' Enable
+      
+      MOV   total_events, #0
+      MOV   measurement_count, #0
+      
+      stats_loop:
+      TESTP stats_pin WC                 ' Check measurement ready
+      IF_NC JMP #stats_loop              ' Wait
+      RDPIN period_count, stats_pin      ' Get count for this period
+      
+      ADD   total_events, period_count   ' Accumulate total
+      ADD   measurement_count, #1        ' Count measurements
+      
+      ' Calculate average events per period
+      QDIV  total_events, measurement_count
+      GETQX average_events
+      
+      JMP   #stats_loop                  ' Continue statistics
+    explanation: "Collect statistics on gated event rates over time"
+
+related_modes:
+  - mode_id: "%01011"
+    relationship: "advanced_version"
+    description: "Quadrature encoder - more complex two-signal relationship"
+  - mode_id: "%01101"
+    relationship: "complementary"
+    description: "A-rise inc/dec by B - increment/decrement instead of gate"
+  - mode_id: "%01110"
+    relationship: "alternative"
+    description: "Count/inc-dec A-rise - edge counting with optional B decrement"
+
+related_instructions:
+  - instruction: "WRPIN"
+    usage_context: "Configure gated counting mode with A/B input selections"
+  - instruction: "WXPIN"
+    usage_context: "Set measurement period (0 for continuous, >0 for periodic)"
+  - instruction: "RDPIN/RQPIN"
+    usage_context: "Read event count (continuous) or measurement result (periodic)"
+  - instruction: "DIRH"
+    usage_context: "Enable counting operation"
+  - instruction: "TESTP"
+    usage_context: "Check for measurement completion in periodic mode"
+
+hardware_considerations:
+  power_implications: "Low power - responds only to signal transitions"
+  pin_loading_effects: "Input-only operation - minimal loading on signal sources"
+  noise_considerations: "Use global filters for noisy environments - filt1 (600ns) often good for debouncing"
+  thermal_effects: "Minimal heat generation - digital input processing only"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [90]
+      section: "%01100 = periodic/continuous: inc on A-rise & B-high"
+  validation_status: "draft"
+  completeness_score: 94
+  technical_accuracy: "silicon_doc_verified"

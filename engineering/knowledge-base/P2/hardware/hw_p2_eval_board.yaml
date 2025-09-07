@@ -1,0 +1,15 @@
+name: P2 Eval Board
+part_number: 64000-ES
+category: development_board
+description: "Full-featured P2 development board with all pins exposed"
+features:
+  - 64 I/O pins accessible
+  - USB programming port
+  - MicroSD card slot
+  - VGA connector
+  - Audio jack
+  - Mini prototyping area
+  - Power LED and 8 user LEDs
+power: 5V via USB or barrel jack
+dimensions: 4.0" x 5.25"
+source: P2 Documentation Collection

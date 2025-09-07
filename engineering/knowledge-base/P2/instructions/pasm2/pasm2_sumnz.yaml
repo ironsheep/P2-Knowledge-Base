@@ -1,0 +1,50 @@
+metadata:
+  id: pasm2_sumnz_54a390c2
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425562
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 34
+    type: csv
+    row: 34
+    type: csv
+    row: 34
+layer1_csv:
+  mnemonic: SUMNZ
+  syntax: |
+    SUMNZ   D,{#}S   {WC/WZ/WCZ}
+  group: Math and Logic
+  encoding: EEEE 0011111 CZI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Sum +/-S into D by !Z. If Z = 0 then D = D - S, else D = D + S. C = correct sign of (D +/- S). *
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.612758
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Sum +/-S into D by !Z. If Z = 0 then D = D - S, else D = D + S. C = correct sign of (D +/- S). *"
+  syntax: "SUMNZ   D,{#}S   {WC/WZ/WCZ}"
+
+layer4_chip:
+  source: Chip Gracey Clarifications
+  title: "Sum with No Zero, Modify Z Flag"
+  syntax: "SUMNZ D, S"
+  function: "Sum operation ignoring zero conditions, modify Z flag
+- Performs addition with non-zero specific behavior
+- Updates Z flag based on result
+- Specialized for non-zero arithmetic chains"
+  use_cases: "- Non-zero accumulation operations
+- Conditional arithmetic with zero bypass
+- Custom arithmetic chains with flag control"
+  date: "2025-08-18"

@@ -1,0 +1,25 @@
+metadata:
+  id: pasm2__c_and_z_5c99df9d
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.430531
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 477
+    type: csv
+    row: 477
+    type: csv
+    row: 477
+layer1_csv:
+  mnemonic: _C_AND_Z
+  syntax: |
+    _C_AND_Z
+  group: MODCZ Operand
+  encoding: cccc or zzzz = 1000
+  alias: .
+  description: C/Z = C AND Z
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: null
+    cog_exec_16_cogs: null

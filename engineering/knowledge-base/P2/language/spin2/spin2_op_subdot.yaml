@@ -1,0 +1,6 @@
+name: "-."
+type: operator
+priority: 10
+category: Subtract
+description: "Integer/float subtraction"
+source: Spin2 Documentation v51

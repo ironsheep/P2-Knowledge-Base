@@ -1,0 +1,41 @@
+metadata:
+  id: pasm2_ones_c561ea58
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425888
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 80
+    type: csv
+    row: 80
+    type: csv
+    row: 81
+    type: csv
+    row: 80
+    type: csv
+    row: 81
+layer1_csv:
+  mnemonic: ONES
+  syntax: |
+    ONES    D        {WC/WZ/WCZ}
+  group: Math and Logic
+  encoding: EEEE 0111101 CZ0 DDDDDDDDD DDDDDDDDD
+  alias: alias
+  description: Get number of '1's in D into D. D = number of '1's in S (0..32). C = LSB of result. *
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.623209
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Get number of '1's in S into D. D = number of '1's in S (0..32). C = LSB of result. *"
+  syntax: "ONES    D,{#}S   {WC/WZ/WCZ}"

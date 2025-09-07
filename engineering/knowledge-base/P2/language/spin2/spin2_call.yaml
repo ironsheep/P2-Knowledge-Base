@@ -1,0 +1,6 @@
+name: CALL
+type: method
+category: String Creation
+signature: "CALL(RegisterOrHubAddr)"
+description: "Call PASM code"
+source: Spin2 Documentation v51

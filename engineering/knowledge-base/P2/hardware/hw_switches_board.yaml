@@ -1,0 +1,7 @@
+name: Switches Board
+part_number: 64027
+category: addon
+description: "8 DIP switches"
+pins_used: 8
+interface: 12-pin header
+source: P2 Documentation Collection

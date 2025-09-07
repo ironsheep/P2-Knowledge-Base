@@ -1,0 +1,6 @@
+name: BYTEMOVE
+type: method
+category: Block Operations
+signature: "BYTEMOVE(Destination, Source, Count)"
+description: "Copy bytes"
+source: Spin2 Documentation v51

@@ -1,0 +1,44 @@
+metadata:
+  id: pasm2_flth_4b36290f
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.428693
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 367
+    type: csv
+    row: 367
+    type: csv
+    row: 367
+layer1_csv:
+  mnemonic: FLTH
+  syntax: |
+    FLTH    {#}D           {WCZ}
+  group: Pins
+  encoding: EEEE 1101011 CZL DDDDDDDDD 001010001
+  alias: .
+  description: OUT bits of pins D[10:6]+D[5:0]..D[5:0] = 1.    DIR bits = 0. Wraps within OUTA/OUTB. Prior SETQ overrides D[10:6]. C,Z = OUT bit.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.620804
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.037238
+  narratives:
+    - source: silicon-from-docx.md
+      type: enhancement
+      content: |
+        Can work on pin spans. Prior SETQ overrides D[10:6] for span size.
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "OUT bits of pins D[10:6]+D[5:0]..D[5:0] = 1.    DIR bits = 0. Wraps within OUTA/OUTB. Prior SETQ overrides D[10:6]. C,Z = OUT bit."
+  syntax: "FLTH    {#}D           {WCZ}"

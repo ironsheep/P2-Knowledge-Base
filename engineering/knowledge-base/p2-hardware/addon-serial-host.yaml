@@ -1,0 +1,215 @@
+# P2 Eval Serial Host Add-on Board - Hardware Specification
+# Part Number: 64006B
+# Documentation: P2 Eval Add-on Boards (#64006 Series) v2.0
+
+hardware_type: "addon_board"
+part_number: "64006B"
+manufacturer: "Parallax Inc."
+series: "P2 Eval Add-on Boards"
+status: "active_production"
+
+basic_info:
+  name: "P2 Eval Serial Host Add-on Board"
+  description: "Dual USB-A host ports with current limiting and activity LEDs"
+  category: "usb_host_interface"
+  form_factor: "small_addon"
+  
+specifications:
+  requires_host: true
+  compatible_hosts:
+    - "P2 Eval Board (64000)"
+    - "P2 Edge Module Breadboard (64020)"
+    - "P2 Edge Mini Breakout Board (64019) with P2 Edge Module"
+    
+  physical:
+    size: "Small module"
+    connector: "2x6 pass-through socket"
+    mounting: "Single M3 mounting hole connected to GND"
+    mounting_hardware: "M3 or UNC 4-40"
+    hole_diameter: "3.2mm (126 mil)"
+    pad_ring: "5mm (200 mil)"
+    standoff_recommendation: "9.5mm long standoff for support"
+    
+  electrical:
+    supply_voltage: "5V required (critical requirement)"
+    current_per_port: "Up to 500mA continuous"
+    total_current: "Up to 1A for both ports"
+    io_pins_used: 8
+    power_configuration: "5V shunt jumper required on P2-ES Eval Board Rev B"
+    
+usb_host_capabilities:
+  ports:
+    quantity: 2
+    connector_type: "USB Type-A sockets"
+    simultaneous_devices: "2 devices can be connected at once"
+    examples: "Keyboard and mouse, or two storage devices"
+    
+  power_management:
+    current_limiting: "500mA per port (USB specification compliant)"
+    overcurrent_protection: "Automatic shutdown on overcurrent"
+    reverse_current_blocking: "Prevents damage from faulty devices"
+    short_circuit_protection: "Built-in protection circuitry"
+    thermal_protection: "Over-temperature protection"
+    vbus_soft_start: "Gradual power-up prevents inrush current"
+    
+  enable_control:
+    channel1_enable: "P1 (active high)"
+    channel2_enable: "P5 (active high)"
+    power_sequence: "Set enable pin high to activate USB power"
+    disable_capability: "Can disable ports via software control"
+    
+pin_assignments:
+  P0: "Channel 1 blue activity LED (1kΩ series resistor)"
+  P1: "Channel 1 enable (active high) - must be high for port power"
+  P2: "Channel 1 USB Data D- signal"
+  P3: "Channel 1 USB Data D+ signal"
+  P4: "Channel 2 blue activity LED (1kΩ series resistor)"
+  P5: "Channel 2 enable (active high) - must be high for port power"
+  P6: "Channel 2 USB Data D- signal"
+  P7: "Channel 2 USB Data D+ signal"
+  
+use_cases:
+  primary:
+    - "USB keyboard and mouse input"
+    - "USB storage device access"
+    - "USB sensor and measurement device interfaces"
+    - "Human interface device (HID) connectivity"
+  secondary:
+    - "USB-to-serial converter connections"
+    - "USB camera interfaces"
+    - "Educational USB protocol development"
+    - "USB device testing and validation"
+    
+advantages:
+  - "True USB host capability (not just device)"
+  - "Dual ports for multiple simultaneous devices"
+  - "Hardware current limiting prevents damage"
+  - "Individual port enable control"
+  - "Activity LEDs for visual feedback"
+  - "USB specification compliant power management"
+  - "Comprehensive protection circuitry"
+  
+limitations:
+  - "Requires 5V supply (critical - will not work on 3.3V only)"
+  - "500mA current limit per port (some devices need more)"
+  - "Uses all 8 available I/O pins"
+  - "Complex USB protocol implementation required in software"
+  - "P2-ES Eval Board Rev B requires shunt jumper configuration"
+  
+power_requirements:
+  critical_note: "5V supply absolutely required - board will not function without it"
+  eval_board_configuration:
+    board_type: "P2-ES Eval Board Rev B"
+    requirement: "Shunt jumper must connect ACC HDR and 5V pins"
+    purpose: "Supply 5V to I/O Pin Breakout Edge Headers"
+    consequence_if_missing: "USB host ports will not power up"
+    
+  current_budget:
+    per_port: "500mA maximum continuous"
+    both_ports: "1A total maximum"
+    led_current: "~2mA per LED when active"
+    control_logic: "Minimal additional current"
+    
+development_workflow:
+  - "Verify 5V power supply availability"
+  - "Configure shunt jumper if using P2-ES Eval Board Rev B"
+  - "Connect to host board via 2x6 connector"
+  - "Enable desired USB ports (set P1 and/or P5 high)"
+  - "Implement USB host protocol in software"
+  - "Monitor activity LEDs for device communication"
+  - "Handle device enumeration and data transfer"
+  
+programming_examples:
+  enable_both_ports: |
+    ' Enable both USB host ports
+    DIRH P1    ' Enable channel 1
+    DIRH P5    ' Enable channel 2  
+    OUTH P1    ' Power on channel 1
+    OUTH P5    ' Power on channel 2
+    
+  activity_led_control: |
+    ' Control activity LEDs
+    DIRH P0    ' Channel 1 LED output
+    DIRH P4    ' Channel 2 LED output
+    OUTH P0    ' Light channel 1 activity LED
+    OUTH P4    ' Light channel 2 activity LED
+    
+  usb_data_access: |
+    ' USB data pins (requires USB protocol implementation)
+    ' Channel 1: P2 (D-), P3 (D+)  
+    ' Channel 2: P6 (D-), P7 (D+)
+    ' Smart pin USB modes can be used
+    
+educational_value:
+  concepts_taught:
+    - "USB host vs device concepts"
+    - "USB power management and current limiting"
+    - "Device enumeration and protocol handling"
+    - "Human interface device (HID) programming"
+    - "USB data signaling (D+/D- differential pairs)"
+    - "Protection circuit design principles"
+    
+  advanced_topics:
+    - "USB protocol stack implementation"
+    - "Device driver development"
+    - "Power management optimization"
+    - "Multi-device arbitration"
+    
+compatibility:
+  stacking:
+    position: "Any 2x6 header position on eval board"
+    conflicts: "High power usage - check total system power budget"
+    power_sharing: "May limit number of other high-power add-ons"
+    
+  device_compatibility:
+    keyboard_mouse: "Standard HID devices supported"
+    storage_devices: "USB flash drives, external drives"
+    sensors: "USB measurement and sensor devices"
+    limitation: "Complex devices may require extensive software support"
+    
+applications:
+  human_interface:
+    - "Computer-style keyboard input"
+    - "Mouse and pointing device control"
+    - "Gaming controller interfaces"
+    - "Specialized input devices"
+    
+  data_acquisition:
+    - "USB sensor reading and logging"
+    - "Measurement device interfaces"
+    - "Test equipment connectivity"
+    - "Data collection from USB instruments"
+    
+  storage_access:
+    - "File system access via USB drives"
+    - "Data logging to external storage"
+    - "Firmware updates from USB media"
+    - "Configuration file loading"
+    
+documentation:
+  primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"
+  related:
+    - "USB specification documents"
+    - "P2 Smart Pins USB programming guide"
+    - "HID device programming examples"
+    
+availability:
+  vendor: "Parallax Inc."
+  website: "parallax.com"
+  part_lookup: "Search for 64006B or Serial Host Add-on"
+  bundle_option: "Part of complete accessory set (64006-ES)"
+  individual_purchase: "Available separately"
+  
+quality_rating: "professional_interface"
+recommendation_score: 4
+educational_value: "high"
+complexity_level: "advanced"
+power_requirements: "critical_5v_supply"
+
+# Cross-references
+ecosystem_position: "usb_host_interface"
+hardware_family: "p2_eval_addons"
+addon_series: "64006_series"
+size_class: "small_addon"
+interface_type: "usb_host"
+power_class: "high_power_5v_required"

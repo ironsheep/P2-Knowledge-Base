@@ -1,0 +1,192 @@
+name: "P2 Eval Add-on Board - Digital I/O"
+part_number: "64006G"
+category: "add_on_board"
+subcategory: "digital_interface"
+manufacturer: "Parallax Inc."
+form_factor: "p2_eval_addon"
+
+description: "Combination digital input/output board featuring 4 LEDs for status indication and 4 push-button switches for user input, designed for bi-directional I/O demonstrations and interactive applications."
+
+physical_specifications:
+  dimensions:
+    length_mm: 50.8
+    width_mm: 25.4
+    height_mm: 15.0
+  mounting: "2x6 header connector"
+  connector_type: "0.1 inch pitch male header"
+  pcb_layers: 2
+  component_count: 12
+
+electrical_specifications:
+  operating_voltage: "3.3V"
+  voltage_tolerance: "3.0V - 3.6V"
+  current_consumption:
+    idle_ma: 0
+    active_typical_ma: 40
+    active_maximum_ma: 50
+  input_voltage_range: "0V - 5V (switch inputs)"
+  output_drive_capability: "10mA per LED"
+
+pin_assignments:
+  header_connection: "P2 Eval Board A-side or B-side 2x6 header"
+  pin_mapping:
+    pin_1: 
+      signal: "LED1/SW1"
+      function: "LED output + Switch input (shared pin)"
+      electrical: "3.3V logic, 10mA drive, 10kΩ pull-up"
+    pin_2:
+      signal: "LED2/SW2" 
+      function: "LED output + Switch input (shared pin)"
+      electrical: "3.3V logic, 10mA drive, 10kΩ pull-up"
+    pin_3:
+      signal: "LED3/SW3"
+      function: "LED output + Switch input (shared pin)"
+      electrical: "3.3V logic, 10mA drive, 10kΩ pull-up"
+    pin_4:
+      signal: "LED4/SW4"
+      function: "LED output + Switch input (shared pin)"
+      electrical: "3.3V logic, 10mA drive, 10kΩ pull-up"
+    pin_5_8: "Not connected"
+    pin_9: "3.3V Power"
+    pin_10: "Ground"
+    pin_11: "5V Power (not used)"
+    pin_12: "Ground"
+
+components:
+  leds:
+    count: 4
+    type: "Standard red LEDs"
+    forward_voltage: "2.0V typical"
+    current_limiting_resistor: "330Ω"
+    calculated_current: "10mA @ 3.3V"
+    brightness_control: "PWM compatible"
+  switches:
+    count: 4
+    type: "Momentary push-button switches"
+    contact_type: "SPST normally open"
+    pull_up_resistor: "10kΩ to 3.3V"
+    debounce_capacitor: "100nF"
+    actuation_force: "2N typical"
+  isolation:
+    description: "LEDs and switches on same pins use separate circuits"
+    led_path: "P2_pin → 330Ω → LED → GND"
+    switch_path: "3.3V → 10kΩ → P2_pin ← Switch → GND"
+
+smart_pin_compatibility:
+  recommended_modes:
+    led_control: "PWM_OUTPUT"
+    switch_input: "DIGITAL_INPUT with edge detection"
+    bi_directional: "Switchable between input/output modes"
+  configuration_notes:
+    - "Can operate as input (switch) or output (LED) but not both simultaneously"
+    - "PWM mode enables LED brightness control and visual effects"
+    - "Edge detection mode provides debounced switch input"
+    - "Isolation allows safe mode switching without component damage"
+
+programming_examples:
+  led_control_pasm2: |
+    ' Configure pin for PWM LED control
+    DRVH    #pin_number           ' Set pin high (LED on)
+    DRVL    #pin_number           ' Set pin low (LED off)
+    WRPIN   #%0000_1110_0000_0000, #pin_number  ' PWM mode
+    WXPIN   #255, #pin_number     ' Set PWM period
+    WYPIN   #128, #pin_number     ' Set 50% duty cycle
+  
+  switch_input_pasm2: |
+    ' Configure pin for switch input
+    FLTL    #pin_number           ' Float pin low (enables pull-up)
+    WRPIN   #%0001_0101_0000_0000, #pin_number  ' Input with edge detect
+    TESTP   #pin_number     WC    ' Test pin state into carry
+    IF_C    JMP     #switch_pressed
+  
+  mode_switching_pasm2: |
+    ' Switch from LED mode to switch mode
+    DRVL    #pin_number           ' Ensure LED is off
+    FLTL    #pin_number           ' Switch to input mode
+    WRPIN   #%0001_0101_0000_0000, #pin_number  ' Configure for input
+
+use_cases:
+  educational:
+    - "Interactive I/O demonstrations"
+    - "State machine visualization with LEDs"
+    - "User interface prototyping"
+    - "Digital logic concept teaching"
+  development:
+    - "Status indication for debug/testing"
+    - "Simple user input interface"
+    - "LED pattern generation"
+    - "Switch-based mode selection"
+  applications:
+    - "Menu navigation systems"
+    - "Game controllers (4 buttons + status LEDs)"
+    - "Process control indicators"
+    - "Interactive displays"
+
+educational_value:
+  concepts_demonstrated:
+    - "Bi-directional I/O pin usage"
+    - "LED current limiting calculations"
+    - "Switch debouncing techniques"
+    - "Pull-up resistor operation"
+    - "PWM for brightness control"
+  skill_development:
+    - "Digital I/O programming"
+    - "Smart Pin mode configuration"
+    - "User interface design"
+    - "Hardware-software interaction"
+
+advantages:
+  - "Combines input and output on single board"
+  - "Electrical isolation prevents component conflicts"
+  - "Visual feedback for all I/O operations"
+  - "Compact 4-channel design"
+  - "Standard P2 Eval connector compatibility"
+
+limitations:
+  - "Cannot use LED and switch on same pin simultaneously"
+  - "Limited to 4 I/O channels"
+  - "Fixed LED colors (typically red)"
+  - "Manual mode switching required in software"
+
+compatibility:
+  main_boards:
+    - name: "P2 Eval Board"
+      compatibility: "perfect"
+      notes: "Connects to either A-side (P32-P39) or B-side (P24-P31) header"
+    - name: "P2 Edge Standard Breakout"
+      compatibility: "good"
+      notes: "Requires header adaptation"
+    - name: "P2 Edge Mini Breakout" 
+      compatibility: "good"
+      notes: "Requires header adaptation"
+    - name: "P2 Edge Breadboard Carrier"
+      compatibility: "excellent"
+      notes: "Direct connection via breadboard"
+
+cross_references:
+  related_hardware:
+    - "addon-control-board.yaml (64006A - LED-only version)"
+    - "addon-serial-host.yaml (64006B - Switch-only equivalent)"
+    - "p2-eval-board.yaml (main board compatibility)"
+  documentation:
+    - "P2 Smart Pins documentation (PWM and input modes)"
+    - "P2 I/O electrical specifications"
+    - "P2 Eval Add-on Boards Product Guide"
+
+part_availability:
+  status: "active"
+  distributor: "Parallax Inc."
+  individual_purchase: "Available as #64006G"
+  complete_set: "Included in #64006-ES complete add-on set"
+  
+technical_notes:
+  design_considerations:
+    - "330Ω resistors limit LED current to safe 10mA @ 3.3V"
+    - "10kΩ pull-ups ensure clean logic levels when used as inputs"
+    - "100nF debounce capacitors reduce switch bounce effects"
+    - "Circuit isolation allows safe bi-directional operation"
+  performance_characteristics:
+    - "LED rise/fall times: <100ns (suitable for PWM)"
+    - "Switch debounce time: ~10ms with capacitors"
+    - "Maximum switching frequency: 1kHz (limited by debounce)"
+    - "LED brightness range: 0-100% via PWM duty cycle"

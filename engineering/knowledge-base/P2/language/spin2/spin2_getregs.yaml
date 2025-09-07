@@ -1,0 +1,6 @@
+name: GETREGS
+type: method
+category: String Creation
+signature: "GETREGS(HubAddr, CogAddr, Count)"
+description: "Copy cog registers to hub"
+source: Spin2 Documentation v51

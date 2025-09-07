@@ -1,0 +1,30 @@
+metadata:
+  id: pasm2_if_c_and_nz_a4bbe0c3
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.430026
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 424
+    type: csv
+    row: 424
+    type: csv
+    row: 424
+layer1_csv:
+  mnemonic: IF_C_AND_NZ
+  syntax: |
+    IF_C_AND_NZ   <inst>  <ops>
+  group: Instruction Prefix
+  encoding: 0100 ------- --- --------- ---------
+  alias: .
+  description: Execute <inst> if C = 1 and Z = 0.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: null
+    cog_exec_16_cogs: null
+
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Execute <inst> if C = 1 and Z = 0."
+  syntax: "IF_C_AND_NZ   <inst>  <ops>"

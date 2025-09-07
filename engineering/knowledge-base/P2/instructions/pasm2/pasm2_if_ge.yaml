@@ -1,0 +1,30 @@
+metadata:
+  id: pasm2_if_ge_adc17f8f
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.429999
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 421
+    type: csv
+    row: 421
+    type: csv
+    row: 421
+layer1_csv:
+  mnemonic: IF_GE
+  syntax: |
+    IF_GE         <inst>  <ops>
+  group: Instruction Prefix
+  encoding: 0011 ------- --- --------- ---------
+  alias: alias
+  description: Execute <inst> if C = 0, or if 'greater than or equal' after a comparison/subtraction.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: null
+    cog_exec_16_cogs: null
+
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Execute <inst> if C = 0, or if 'greater than or equal' after a comparison/subtraction."
+  syntax: "IF_GE         <inst>  <ops>"

@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_pollse1_abc87a1e
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.427527
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 276
+    type: csv
+    row: 276
+    type: csv
+    row: 276
+layer1_csv:
+  mnemonic: POLLSE1
+  syntax: |
+    POLLSE1          {WC/WZ/WCZ}
+  group: Events - Poll
+  encoding: EEEE 1101011 CZ0 000000100 000100100
+  alias: .
+  description: Get SE1 event flag into C/Z, then clear it.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.618068
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Get SE1 event flag into C/Z, then clear it."
+  syntax: "POLLSE1          {WC/WZ/WCZ}"

@@ -1,0 +1,35 @@
+metadata:
+  id: pasm2_jxmt_65985e75
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426643
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 192
+    type: csv
+    row: 192
+    type: csv
+    row: 192
+layer1_csv:
+  mnemonic: JXMT
+  syntax: |
+    JXMT    {#}S
+  group: Events - Branch
+  encoding: EEEE 1011110 01I 000001010 SSSSSSSSS
+  alias: .
+  description: Jump to S** if XMT event flag is set.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.626517
+  source: P2 Datasheet v35
+  timing:
+    raw: 2 or 4 / 2 or 13...20
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Jump to S** if XMT event flag is set."
+  syntax: "JXMT    {#}S"

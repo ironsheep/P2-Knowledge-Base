@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_rczr_dc38fe88
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.429627
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 392
+    type: csv
+    row: 392
+    type: csv
+    row: 392
+layer1_csv:
+  mnemonic: RCZR
+  syntax: |
+    RCZR    D        {WC/WZ/WCZ}
+  group: Math and Logic
+  encoding: EEEE 1101011 CZ0 DDDDDDDDD 001101010
+  alias: .
+  description: Rotate C,Z right through D. D = {C, Z, D[31:2]}. C = D[1],  Z = D[0].
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.622450
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Rotate C,Z right through D. D = {C, Z, D[31:2]}. C = D[1],  Z = D[0]."
+  syntax: "RCZR    D        {WC/WZ/WCZ}"

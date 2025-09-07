@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_crcbit_75d480af
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426248
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 132
+    type: csv
+    row: 132
+    type: csv
+    row: 132
+layer1_csv:
+  mnemonic: CRCBIT
+  syntax: |
+    CRCBIT  D,{#}S
+  group: Math and Logic
+  encoding: EEEE 1001110 10I DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Iterate CRC value in D using C and polynomial in S. If (C XOR D[0]) then D = (D >> 1) XOR S, else D = (D >> 1).
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.635919
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Iterate CRC value in D using C and polynomial in S. If (C XOR D[0]) then D = (D >> 1) XOR S, else D = (D >> 1)."
+  syntax: "CRCBIT  D,{#}S"

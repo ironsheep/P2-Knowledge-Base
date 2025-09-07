@@ -1,0 +1,7 @@
+name: Goertzel Board
+part_number: 40004
+category: addon
+description: "Audio input/output with Goertzel"
+pins_used: 10
+interface: 12-pin header
+source: P2 Documentation Collection

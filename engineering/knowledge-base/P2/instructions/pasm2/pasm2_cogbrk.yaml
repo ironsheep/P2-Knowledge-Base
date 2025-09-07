@@ -1,0 +1,44 @@
+metadata:
+  id: pasm2_cogbrk_978e30d6
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.428217
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 331
+    type: csv
+    row: 331
+    type: csv
+    row: 331
+layer1_csv:
+  mnemonic: COGBRK
+  syntax: |
+    COGBRK  {#}D
+  group: Interrupts
+  encoding: EEEE 1101011 00L DDDDDDDDD 000110101
+  alias: .
+  description: If in debug ISR, trigger asynchronous breakpoint in cog D[3:0]. Cog D[3:0] must have asynchronous breakpoint enabled.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.610389
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.030425
+  narratives:
+    - source: INSTRUCTION-TIMING-AND-ENCODING.md
+      type: functional_description
+      content: |
+        Trigger asynchronous breakpoint in target cog. D/# contains %CCCC target cog ID.
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "If in debug ISR, trigger asynchronous breakpoint in cog D[3:0]. Cog D[3:0] must have asynchronous breakpoint enabled."
+  syntax: "COGBRK  {#}D"

@@ -1,0 +1,6 @@
+name: STRCOMP
+type: method
+category: Comparison
+signature: "STRCOMP(AddrA, AddrB) : Match"
+description: "Compare strings, -1 if match, 0 if different"
+source: Spin2 Documentation v51

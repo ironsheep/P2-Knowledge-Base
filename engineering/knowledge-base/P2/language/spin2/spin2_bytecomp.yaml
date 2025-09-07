@@ -1,0 +1,6 @@
+name: BYTECOMP
+type: method
+category: Comparison
+signature: "BYTECOMP(AddrA, AddrB, Count) : Match"
+description: "Compare bytes, returns -1 if match"
+source: Spin2 Documentation v51

@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_getscp_1a88b7f4
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.429768
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 402
+    type: csv
+    row: 402
+    type: csv
+    row: 402
+layer1_csv:
+  mnemonic: GETSCP
+  syntax: |
+    GETSCP  D
+  group: Smart Pins
+  encoding: EEEE 1101011 000 DDDDDDDDD 001110001
+  alias: .
+  description: Get four-channel oscilloscope samples into D. D = {ch3[7:0],ch2[7:0],ch1[7:0],ch0[7:0]}.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.627441
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Get four-channel oscilloscope samples into D. D = {ch3[7:0],ch2[7:0],ch1[7:0],ch0[7:0]}."
+  syntax: "GETSCP  D"

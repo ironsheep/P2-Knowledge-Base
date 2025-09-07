@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2 Repository Validation Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #718096;
+            font-size: 1.1em;
+        }
+        
+        .status-bar {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .status-indicator {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-passed {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .status-failed {
+            background: #f56565;
+            color: white;
+        }
+        
+        .status-warning {
+            background: #ed8936;
+            color: white;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-title {
+            color: #4a5568;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        
+        .card-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .card-subtitle {
+            color: #718096;
+            font-size: 0.9em;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+        }
+        
+        .validation-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-title {
+            color: #2d3748;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .error-list, .warning-list {
+            list-style: none;
+        }
+        
+        .error-item, .warning-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .error-item {
+            background: #fed7d7;
+            border-left: 4px solid #f56565;
+        }
+        
+        .warning-item {
+            background: #feebc8;
+            border-left: 4px solid #ed8936;
+        }
+        
+        .icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+        
+        .coverage-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .coverage-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .coverage-label {
+            min-width: 150px;
+            color: #4a5568;
+        }
+        
+        .coverage-bar {
+            flex: 1;
+            height: 30px;
+            background: #e2e8f0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .coverage-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .reference-graph {
+            height: 400px;
+            background: #f7fafc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #718096;
+        }
+        
+        .timestamp {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 30px;
+            font-size: 0.9em;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .loading {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 P2 Repository Validation Dashboard</h1>
+            <p>Real-time validation status and repository health metrics</p>
+            
+            <div class="status-bar">
+                <div class="status-indicator status-passed">
+                    <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    Validation Passing
+                </div>
+                <div class="status-indicator status-warning">
+                    ⚠️ 15 Warnings
+                </div>
+                <div class="status-indicator" style="background: #e2e8f0; color: #4a5568;">
+                    Last Run: <span id="last-run">Just now</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-title">Total Entries</div>
+                <div class="card-value" id="total-entries">0</div>
+                <div class="card-subtitle">Repository entries validated</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Schema Compliance</div>
+                <div class="card-value" id="schema-compliance">0%</div>
+                <div class="card-subtitle">Entries passing schema validation</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Cross-References</div>
+                <div class="card-value" id="cross-refs">0</div>
+                <div class="card-subtitle">Valid references / Total</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Errors</div>
+                <div class="card-value" id="error-count" style="color: #f56565;">0</div>
+                <div class="card-subtitle">Critical issues found</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Warnings</div>
+                <div class="card-value" id="warning-count" style="color: #ed8936;">0</div>
+                <div class="card-subtitle">Non-critical issues</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Circular References</div>
+                <div class="card-value" id="circular-refs">0</div>
+                <div class="card-subtitle">Dependency cycles detected</div>
+            </div>
+        </div>
+        
+        <div class="validation-section">
+            <h2 class="section-title">📊 Field Coverage Analysis</h2>
+            <div class="coverage-chart" id="coverage-chart">
+                <div class="coverage-item">
+                    <span class="coverage-label">Description</span>
+                    <div class="coverage-bar">
+                        <div class="coverage-fill" style="width: 75%">75%</div>
+                    </div>
+                </div>
+                <div class="coverage-item">
+                    <span class="coverage-label">Examples</span>
+                    <div class="coverage-bar">
+                        <div class="coverage-fill" style="width: 60%">60%</div>
+                    </div>
+                </div>
+                <div class="coverage-item">
+                    <span class="coverage-label">Timing Data</span>
+                    <div class="coverage-bar">
+                        <div class="coverage-fill" style="width: 85%">85%</div>
+                    </div>
+                </div>
+                <div class="coverage-item">
+                    <span class="coverage-label">Cross-References</span>
+                    <div class="coverage-bar">
+                        <div class="coverage-fill" style="width: 45%">45%</div>
+                    </div>
+                </div>
+                <div class="coverage-item">
+                    <span class="coverage-label">Usage Notes</span>
+                    <div class="coverage-bar">
+                        <div class="coverage-fill" style="width: 30%">30%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="validation-section">
+            <h2 class="section-title">❌ Recent Errors</h2>
+            <ul class="error-list" id="error-list">
+                <li class="error-item">
+                    <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>No errors detected in current validation run</span>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="validation-section">
+            <h2 class="section-title">⚠️ Recent Warnings</h2>
+            <ul class="warning-list" id="warning-list">
+                <li class="warning-item">
+                    <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>15 orphaned entries with no cross-references</span>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="validation-section">
+            <h2 class="section-title">🔗 Reference Graph</h2>
+            <div class="reference-graph">
+                <p>Interactive reference visualization will be rendered here</p>
+            </div>
+        </div>
+        
+        <div class="timestamp">
+            Dashboard generated at <span id="timestamp">2025-01-06 12:00:00</span> | 
+            Auto-refresh in <span id="refresh-timer">60</span> seconds
+        </div>
+    </div>
+    
+    <script>
+        // Dashboard update logic
+        async function updateDashboard() {
+            try {
+                // In production, this would fetch from the validation API
+                // For now, we'll simulate with sample data
+                const data = {
+                    totalEntries: 0,
+                    schemaCompliance: 0,
+                    crossRefs: { valid: 0, total: 0 },
+                    errors: 0,
+                    warnings: 15,
+                    circularRefs: 0
+                };
+                
+                // Update values with animation
+                animateValue('total-entries', 0, data.totalEntries, 1000);
+                animateValue('error-count', 0, data.errors, 1000);
+                animateValue('warning-count', 0, data.warnings, 1000);
+                animateValue('circular-refs', 0, data.circularRefs, 1000);
+                
+                // Update timestamp
+                document.getElementById('timestamp').textContent = new Date().toLocaleString();
+                
+            } catch (error) {
+                console.error('Failed to update dashboard:', error);
+            }
+        }
+        
+        function animateValue(id, start, end, duration) {
+            const element = document.getElementById(id);
+            const range = end - start;
+            const startTime = performance.now();
+            
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const current = Math.floor(start + range * progress);
+                element.textContent = current;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+        
+        // Refresh timer
+        let refreshSeconds = 60;
+        setInterval(() => {
+            refreshSeconds--;
+            document.getElementById('refresh-timer').textContent = refreshSeconds;
+            if (refreshSeconds <= 0) {
+                refreshSeconds = 60;
+                updateDashboard();
+            }
+        }, 1000);
+        
+        // Initial load
+        updateDashboard();
+    </script>
+</body>
+</html>

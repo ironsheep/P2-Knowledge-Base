@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_addct2_ac8c4c72
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426340
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 147
+    type: csv
+    row: 147
+    type: csv
+    row: 147
+layer1_csv:
+  mnemonic: ADDCT2
+  syntax: |
+    ADDCT2  D,{#}S
+  group: Events - Configuration
+  encoding: EEEE 1010011 01I DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Set CT2 event to trigger on CT = D + S. Adds S into D.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.619331
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Set CT2 event to trigger on CT = D + S. Adds S into D."
+  syntax: "ADDCT2  D,{#}S"

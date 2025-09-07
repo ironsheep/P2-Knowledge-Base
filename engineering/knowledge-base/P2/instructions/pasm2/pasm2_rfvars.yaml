@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_rfvars_2f1ff8b2
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.427220
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 255
+    type: csv
+    row: 255
+    type: csv
+    row: 255
+layer1_csv:
+  mnemonic: RFVARS
+  syntax: |
+    RFVARS  D        {WC/WZ/WCZ}
+  group: Hub FIFO - Read
+  encoding: EEEE 1101011 CZ0 DDDDDDDDD 000010100
+  alias: .
+  description: Used after RDFAST. Read sign-extended 1..4-byte value from FIFO into D. C = MSB of value. *
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.315417
+  source: P2 Datasheet v35
+  timing:
+    raw: 2 / FIFO IN USE
+    base_cycles: 2
+    type: mode_dependent
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Used after RDFAST. Read sign-extended 1..4-byte value from FIFO into D. C = MSB of value. *"
+  syntax: "RFVARS  D        {WC/WZ/WCZ}"

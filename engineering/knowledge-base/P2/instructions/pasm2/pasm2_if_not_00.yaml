@@ -1,0 +1,30 @@
+metadata:
+  id: pasm2_if_not_00_8fe6305d
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.430373
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 459
+    type: csv
+    row: 459
+    type: csv
+    row: 459
+layer1_csv:
+  mnemonic: IF_NOT_00
+  syntax: |
+    IF_NOT_00     <inst>  <ops>
+  group: Instruction Prefix
+  encoding: 1110 ------- --- --------- ---------
+  alias: alias
+  description: Execute <inst> if C = 1 or Z = 1.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: null
+    cog_exec_16_cogs: null
+
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Execute <inst> if C = 1 or Z = 1."
+  syntax: "IF_NOT_00     <inst>  <ops>"

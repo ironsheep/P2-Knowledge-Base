@@ -1,0 +1,6 @@
+name: HUBSET
+type: method
+category: Clock Control
+signature: "HUBSET(Value)"
+description: "Execute HUBSET instruction with value"
+source: Spin2 Documentation v51

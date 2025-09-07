@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_mulpix_623c41eb
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426317
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 143
+    type: csv
+    row: 143
+    type: csv
+    row: 143
+layer1_csv:
+  mnemonic: MULPIX
+  syntax: |
+    MULPIX  D,{#}S
+  group: Pixel Mixer
+  encoding: EEEE 1010010 01I DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Multiply bytes of S into bytes of D, where $FF = 1.0 and $00 = 0.0.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 7
+    cog_exec_16_cogs: 7
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.315229
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Multiply bytes of S into bytes of D, where $FF = 1.0 and $00 = 0.0."
+  syntax: "MULPIX  D,{#}S"

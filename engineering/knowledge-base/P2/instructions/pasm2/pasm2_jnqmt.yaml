@@ -1,0 +1,35 @@
+metadata:
+  id: pasm2_jnqmt_8dc5da6a
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426763
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 213
+    type: csv
+    row: 213
+    type: csv
+    row: 213
+layer1_csv:
+  mnemonic: JNQMT
+  syntax: |
+    JNQMT   {#}S
+  group: Events - Branch
+  encoding: EEEE 1011110 01I 000011111 SSSSSSSSS
+  alias: .
+  description: Jump to S** if QMT event flag is clear.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.624151
+  source: P2 Datasheet v35
+  timing:
+    raw: 2 or 4 / 2 or 13...20
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Jump to S** if QMT event flag is clear."
+  syntax: "JNQMT   {#}S"

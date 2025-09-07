@@ -1,0 +1,6 @@
+name: QLOG
+type: method
+category: CORDIC Operations
+signature: "QLOG(value)"
+description: "Logarithm via CORDIC"
+source: Spin2 Documentation v51

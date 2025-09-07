@@ -1,0 +1,6 @@
+name: QCOS
+type: method
+category: CORDIC Operations
+signature: "QCOS(length, step, stepsInCircle) : x"
+description: "Calculate cosine using CORDIC"
+source: Spin2 Documentation v51

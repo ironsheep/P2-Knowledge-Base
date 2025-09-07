@@ -1,0 +1,65 @@
+# Smart Pin Mode: %10011 - Count Time for X Periods
+# Silicon Doc Reference: part4-smart-pins.txt, page 93
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%10011"
+
+mode_name: "Count Time for X Periods"
+
+mode_group: "measurement"
+
+mode_complexity: "advanced"
+
+dac_mode_dependency: false
+
+pin_pairing: "adjacent"
+
+operation_description: |
+  Counts clock cycles from each A-input rise/edge to each B-input rise/edge for X periods.
+  Y[1:0] sets sensitivity (A-rise to B-rise/edge, A-edge to B-rise/edge). Oversampling
+  period measurement - accumulates time within X complete periods for precise average
+  period calculation.
+
+x_parameter:
+  usage: "Number of periods to measure"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "Period count to accumulate"
+
+y_parameter:
+  usage: "Edge sensitivity selection"
+  bit_fields:
+    - range: "Y[1:0]"
+      purpose: "00=A-rise to B-rise, 01=A-rise to B-edge, 10=A-edge to B-rise, 11=A-edge to B-edge"
+
+z_result:
+  data_type: "32-bit accumulated time"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Total time for X periods (limited to $80000000)"
+
+common_applications:
+  - application: "Precise period measurement"
+    description: "Oversampled period measurement for accuracy"
+    complexity_level: "advanced"
+  - application: "Frequency measurement"
+    description: "Measure frequency via period accumulation"
+    complexity_level: "advanced"
+
+configuration_examples:
+  - name: "10-period average"
+    description: "Average period over 10 cycles"
+    wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_10011_0, period_avg"
+    wxpin_code: "WXPIN #10, period_avg"
+    wypin_code: "WYPIN #%00, period_avg"
+    explanation: "A-rise to B-rise, 10 periods"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [93]
+      section: "%10011 = for X periods, count time"
+  validation_status: "draft"
+  completeness_score: 82
+  technical_accuracy: "silicon_doc_verified"

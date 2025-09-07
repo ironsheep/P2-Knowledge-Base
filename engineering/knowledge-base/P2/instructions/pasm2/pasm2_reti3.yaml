@@ -1,0 +1,35 @@
+metadata:
+  id: pasm2_reti3_1220e423
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426460
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 163
+    type: csv
+    row: 163
+    type: csv
+    row: 163
+layer1_csv:
+  mnemonic: RETI3
+  syntax: |
+    RETI3
+  group: Branch S - Return
+  encoding: EEEE 1011001 110 111111111 111110001
+  alias: alias
+  description: Return from INT3. (CALLD $1FF,$1F1 WCZ)
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 4
+    cog_exec_16_cogs: 4
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.628077
+  source: P2 Datasheet v35
+  timing:
+    raw: 4 / 13...20
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Return from INT3. (CALLD $1FF,$1F1 WCZ)"
+  syntax: "RETI3"

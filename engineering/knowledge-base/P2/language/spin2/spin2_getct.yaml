@@ -1,0 +1,6 @@
+name: GETCT
+type: method
+category: System Counter
+signature: "GETCT() : Count"
+description: "Get 32-bit system counter"
+source: Spin2 Documentation v51

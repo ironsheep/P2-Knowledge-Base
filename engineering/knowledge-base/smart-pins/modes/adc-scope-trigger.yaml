@@ -1,0 +1,75 @@
+# Smart Pin Mode: %11010 - ADC Scope with Trigger
+# Silicon Doc Reference: part4-smart-pins.txt, page 94
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%11010"
+
+mode_name: "ADC Scope with Trigger"
+
+mode_group: "adc"
+
+mode_complexity: "expert"
+
+dac_mode_dependency: false
+
+pin_pairing: "none"
+
+operation_description: |
+  ADC scope with trigger mode provides oscilloscope-like functionality for capturing
+  ADC data with triggering capability. Combines ADC sampling with trigger detection
+  for synchronized data acquisition. Advanced mode requiring deep understanding of
+  ADC operations and trigger configuration.
+
+x_parameter:
+  usage: "ADC and trigger configuration"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "ADC mode, sample rate, and trigger configuration"
+
+y_parameter:
+  usage: "Trigger level and parameters"
+  bit_fields:
+    - range: "Y[31:0]"
+      purpose: "Trigger threshold and control parameters"
+
+z_result:
+  data_type: "Captured ADC data with trigger information"
+  bit_interpretation:
+    - range: "Z[26:0]"
+      meaning: "ADC sample data and trigger status"
+
+timing_specifications:
+  clock_relationship: "Trigger-synchronized ADC sampling"
+  update_frequency: "Trigger-dependent data capture"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "Trigger condition met"
+    - "Capture buffer complete"
+  acknowledgment_method: "rdpin"
+
+common_applications:
+  - application: "Digital oscilloscope"
+    description: "Triggered waveform capture and analysis"
+    complexity_level: "expert"
+  - application: "Event-synchronized sampling"
+    description: "Capture ADC data synchronized to external events"
+    complexity_level: "expert"
+
+configuration_examples:
+  - name: "Basic triggered scope"
+    description: "Simple triggered ADC capture"
+    wrpin_code: "WRPIN ##%0000_0000_000_0100000000000_00_11010_0, scope_pin"
+    wxpin_code: "WXPIN trigger_config, scope_pin"
+    wypin_code: "WYPIN trigger_level, scope_pin"
+    explanation: "ADC pin with trigger configuration"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [94]
+      section: "%11010 = ADC scope with trigger"
+  validation_status: "draft"
+  completeness_score: 75
+  technical_accuracy: "silicon_doc_verified"

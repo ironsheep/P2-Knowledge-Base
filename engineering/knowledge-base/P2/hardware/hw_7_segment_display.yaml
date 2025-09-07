@@ -1,0 +1,7 @@
+name: 7-Segment Display
+part_number: 64026
+category: addon
+description: "6-digit 7-segment display"
+pins_used: 14
+interface: 12-pin header
+source: P2 Documentation Collection

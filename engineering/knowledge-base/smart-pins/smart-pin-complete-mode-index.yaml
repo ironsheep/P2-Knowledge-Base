@@ -1,0 +1,337 @@
+# Complete Smart Pin Mode Index - All 32 Modes
+# Source: Silicon Doc v35, part4-smart-pins.txt
+# Comprehensive reference for all P2 smart pin modes
+
+metadata:
+  title: "Complete P2 Smart Pin Mode Index"
+  description: "Comprehensive index of all 32 smart pin modes with key characteristics"
+  total_modes: 32
+  extraction_date: "2025-09-06"
+  coverage_status: "Complete extraction from Silicon Doc v35"
+
+# Complete Mode List with Key Characteristics
+smart_pin_modes:
+  basic_modes:
+    "%00000":
+      name: "Normal Mode"
+      description: "Standard I/O without smart pin functionality"
+      category: "basic"
+      yaml_file: "smart-pin-00000-normal-mode.yaml"
+      
+  storage_and_dac_modes:
+    "%00001":
+      name: "Long Repository or DAC Noise"
+      description: "32-bit storage OR DAC noise (depends on M[12:10])"
+      category: "storage_dac"
+      yaml_file: "smart-pin-00001-long-repository-or-dac-noise.yaml"
+      dual_function: true
+      
+    "%00002":
+      name: "Long Repository"
+      description: "32-bit data storage repository"
+      category: "storage_dac"
+      yaml_file: "smart-pin-00010-long-repository.yaml"
+      
+    "%00003":
+      name: "Long Repository"
+      description: "32-bit data storage repository"
+      category: "storage_dac"
+      yaml_file: "smart-pin-00011-long-repository.yaml"
+      
+  dac_modes:
+    "%00010":
+      name: "DAC 16-bit Pseudo-Random Dither"
+      description: "16-bit DAC via pseudo-random dithering"
+      category: "dac"
+      yaml_file: "smart-pin-00010-dac-16bit-pseudo-random-dither.yaml"
+      requires_dac_mode: true
+      
+    "%00011":
+      name: "DAC 16-bit PWM Dither"
+      description: "16-bit DAC via PWM dithering"
+      category: "dac"
+      yaml_file: "smart-pin-00011-dac-16bit-pwm-dither.yaml"
+      requires_dac_mode: true
+      
+  output_generation_modes:
+    "%00100":
+      name: "Pulse/Cycle Output"
+      description: "Programmable pulse and cycle generation"
+      category: "output_generation"
+      yaml_file: "smart-pin-00100-pulse-cycle-output.yaml"
+      output_override: true
+      
+    "%00101":
+      name: "Transition Output"
+      description: "Specified number of output transitions"
+      category: "output_generation"
+      yaml_file: "smart-pin-00101-transition-output.yaml"
+      output_override: true
+      
+  nco_modes:
+    "%00110":
+      name: "NCO Frequency"
+      description: "Numerically controlled oscillator - frequency output"
+      category: "frequency_generation"
+      yaml_file: "smart-pin-00110-nco-frequency.yaml"
+      output_override: true
+      
+    "%00111":
+      name: "NCO Duty"
+      description: "Numerically controlled oscillator - duty cycle output"
+      category: "frequency_generation"
+      yaml_file: "smart-pin-00111-nco-duty.yaml"
+      output_override: true
+      
+  pwm_modes:
+    "%01000":
+      name: "PWM Triangle"
+      description: "PWM with triangular wave comparison"
+      category: "pwm_generation"
+      yaml_file: "smart-pin-01000-pwm-triangle.yaml"
+      output_override: true
+      
+    "%01001":
+      name: "PWM Sawtooth"
+      description: "PWM with sawtooth wave comparison"
+      category: "pwm_generation"
+      yaml_file: "smart-pin-01001-pwm-sawtooth.yaml"
+      output_override: true
+      
+    "%01010":
+      name: "PWM Switch-Mode Power Supply"
+      description: "PWM with voltage and current feedback"
+      category: "power_control"
+      yaml_file: "smart-pin-01010-pwm-smps.yaml"
+      output_override: true
+      specialized: true
+      
+  encoder_counting_modes:
+    "%01011":
+      name: "A/B-input Quadrature Encoder"
+      description: "Standard quadrature encoder decoding"
+      category: "measurement"
+      yaml_file: "smart-pin-01011-quadrature-encoder.yaml"
+      dual_input: true
+      
+    "%01100":
+      name: "Count A-rise when B-high"
+      description: "Qualified edge counting"
+      category: "measurement"
+      yaml_file: "smart-pin-01100-count-a-rise-b-high.yaml"
+      dual_input: true
+      
+    "%01101":
+      name: "A-rise increment/decrement by B"
+      description: "Bidirectional counting with direction input"
+      category: "measurement"
+      yaml_file: "smart-pin-01101-a-rise-inc-dec-by-b.yaml"
+      dual_input: true
+      
+    "%01110":
+      name: "Count A-rise or A-rise/B-rise"
+      description: "Flexible edge counting (Y[0] selects mode)"
+      category: "measurement"
+      key_features:
+        - "Y[0]=0: Count A-rise only"
+        - "Y[0]=1: A-rise increment, B-rise decrement"
+      dual_input: true
+      
+    "%01111":
+      name: "Count A-high or A-high/B-high"
+      description: "Flexible level counting (Y[0] selects mode)"
+      category: "measurement"
+      key_features:
+        - "Y[0]=0: Count A-high states"
+        - "Y[0]=1: A-high increment, B-high decrement"
+      dual_input: true
+      
+  timing_measurement_modes:
+    "%10000":
+      name: "Time A-input States"
+      description: "Time both high and low states"
+      category: "timing_measurement"
+      yaml_file: "smart-pin-10000-time-a-states.yaml"
+      measures_both_states: true
+      
+    "%10001":
+      name: "Time A-input High States"
+      description: "Time high states only"
+      category: "timing_measurement"
+      yaml_file: "smart-pin-10001-time-a-highs.yaml"
+      measures_high_only: true
+      
+    "%10010":
+      name: "Time X A-highs/rises/edges or Timeout"
+      description: "Time N events or timeout detection (Y[2] selects)"
+      category: "timing_measurement"
+      key_features:
+        - "Y[2]=0: Time X events"
+        - "Y[2]=1: Timeout on missing events"
+        - "Y[1:0]: sensitivity (high/rise/edge)"
+      dual_mode: true
+      
+    "%10011":
+      name: "For X periods, count time"
+      description: "Time measurement across X periods"
+      category: "timing_measurement"
+      period_based: true
+      dual_input: true
+      
+    "%10100":
+      name: "For X periods, count states"
+      description: "State counting across X periods"
+      category: "timing_measurement"
+      period_based: true
+      dual_input: true
+      
+    "%10101":
+      name: "For periods in X+ clocks, count time"
+      description: "Time counting for periods within time window"
+      category: "timing_measurement"
+      time_windowed: true
+      dual_input: true
+      
+    "%10110":
+      name: "For periods in X+ clocks, count states"
+      description: "State counting for periods within time window"
+      category: "timing_measurement"
+      time_windowed: true
+      dual_input: true
+      
+    "%10111":
+      name: "For periods in X+ clocks, count periods"
+      description: "Period counting within time window"
+      category: "timing_measurement"
+      time_windowed: true
+      dual_input: true
+      
+  adc_modes:
+    "%11000":
+      name: "ADC Sample/Filter/Capture, Internally Clocked"
+      description: "Internal clock ADC with SINC filtering"
+      category: "adc"
+      yaml_file: "smart-pin-11000-adc-internal-clock.yaml"
+      filtering_modes: ["SINC2_sampling", "SINC2_filtering", "SINC3_filtering", "bitstream_capture"]
+      
+    "%11001":
+      name: "ADC Sample/Filter/Capture, Externally Clocked"
+      description: "External clock ADC with SINC filtering"
+      category: "adc"
+      yaml_file: "smart-pin-11001-adc-external-clock.yaml"
+      dual_input: true
+      filtering_modes: ["SINC2_sampling", "SINC2_filtering", "SINC3_filtering", "bitstream_capture"]
+      
+    "%11010":
+      name: "ADC Scope with Trigger"
+      description: "Oscilloscope-like ADC with trigger capability"
+      category: "adc"
+      specialized: true
+      trigger_based: true
+      
+  communication_modes:
+    "%11011":
+      name: "USB Host/Device"
+      description: "USB communication (even/odd pin pair = DM/DP)"
+      category: "communication"
+      output_override: true
+      pin_pairing_required: "even/odd pair"
+      specialized: true
+      
+    "%11100":
+      name: "Sync Serial Transmit"
+      description: "Synchronous serial transmission (A-data, B-clock)"
+      category: "communication"
+      output_override: true
+      dual_signal: true
+      
+    "%11101":
+      name: "Sync Serial Receive"
+      description: "Synchronous serial reception (A-data, B-clock)"
+      category: "communication"
+      dual_input: true
+      
+    "%11110":
+      name: "Async Serial Transmit"
+      description: "Asynchronous serial transmission (UART TX)"
+      category: "communication"
+      yaml_file: "smart-pin-11110-async-serial-transmit.yaml"
+      output_override: true
+      
+    "%11111":
+      name: "Async Serial Receive"
+      description: "Asynchronous serial reception (UART RX)"
+      category: "communication"
+      yaml_file: "smart-pin-11111-async-serial-receive.yaml"
+
+# Mode Categories Summary
+category_summary:
+  basic: 1
+  storage_dac: 3
+  dac: 2
+  output_generation: 2
+  frequency_generation: 2
+  pwm_generation: 2
+  power_control: 1
+  measurement: 5
+  timing_measurement: 8
+  adc: 3
+  communication: 5
+  total: 32
+
+# Key Features Matrix
+feature_matrix:
+  output_override_modes: ["%00100", "%00101", "%00110", "%00111", "%01000", "%01001", "%01010", "%11011", "%11100", "%11110"]
+  dual_input_modes: ["%01011", "%01100", "%01101", "%01110", "%01111", "%10010", "%10011", "%10100", "%10101", "%10110", "%10111", "%11001", "%11101"]
+  dac_mode_required: ["%00001", "%00010", "%00011"]
+  specialized_modes: ["%01010", "%11010", "%11011"]
+  pin_pairing_required: ["%11011"]
+  
+# Application Domain Mapping
+application_domains:
+  motor_control: ["%01011", "%01100", "%01101", "%01000", "%01001", "%00110", "%00111", "%11000"]
+  power_supply: ["%01010", "%01000", "%01001", "%11000", "%11001"]
+  communication: ["%11110", "%11111", "%11100", "%11101", "%11011"]
+  instrumentation: ["%11000", "%11001", "%11010", "%10000", "%10001", "%10010", "%10011", "%10100", "%10101", "%10110", "%10111"]
+  audio_video: ["%00010", "%00011", "%11000", "%11001", "%01000"]
+  timing_generation: ["%00100", "%00101", "%00110", "%00111"]
+
+# Configuration Complexity Levels
+complexity_levels:
+  simple: ["%00000", "%00001", "%00002", "%00003"]
+  moderate: ["%00100", "%00101", "%00110", "%00111", "%01000", "%01001", "%01011", "%01100", "%01101", "%10000", "%10001", "%11110", "%11111"]
+  complex: ["%00010", "%00011", "%01010", "%01110", "%01111", "%10010", "%10011", "%10100", "%10101", "%10110", "%10111", "%11000", "%11001"]
+  specialized: ["%11010", "%11011", "%11100", "%11101"]
+
+# Cross-Reference Guide
+cross_references:
+  encoder_applications:
+    primary: "%01011"
+    alternatives: ["%01100", "%01101", "%01110", "%01111"]
+    
+  pwm_applications:
+    basic: ["%01000", "%01001"]
+    advanced: ["%00110", "%00111"]
+    specialized: "%01010"
+    
+  timing_measurement:
+    simple: ["%10000", "%10001"]
+    event_based: "%10010"
+    period_based: ["%10011", "%10100", "%10101", "%10110", "%10111"]
+    
+  adc_applications:
+    standard: "%11000"
+    external: "%11001"
+    triggered: "%11010"
+    
+  serial_communication:
+    async: ["%11110", "%11111"]
+    sync: ["%11100", "%11101"]
+    usb: "%11011"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"
+  completeness: "All 32 modes documented with key characteristics"

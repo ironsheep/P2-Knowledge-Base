@@ -1,0 +1,100 @@
+# Smart Pin Mode %11111 - Async Serial Receive
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%11111"
+mode_name: "Async Serial Receive"
+description: "Asynchronous serial reception with programmable baud rate"
+category: "communication"
+output_override: false
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%11111"
+
+baud_rate_control:
+  parameter: "Baud rate programmed via configuration registers"
+  calculation: "Based on system clock and expected baud rate"
+  
+reception_format:
+  protocol: "Standard asynchronous serial (UART)"
+  start_bit: "Logic 0 detection"
+  data_bits: "Typically 8 bits"
+  stop_bit: "Logic 1"
+  parity: "Configurable"
+
+operation:
+  idle_monitoring: "Monitors for start bit on A-input"
+  automatic_framing: "Hardware detects start/stop bits"
+  data_extraction: "Extracts data bits from received frame"
+  completion_signal: "IN raised when character received"
+
+instructions:
+  setup:
+    - "WRPIN - Configure mode (%11111) and baud rate parameters"
+    - "WXPIN - Set baud rate timing"
+    
+  operation:
+    - "RDPIN/RQPIN - Read received data byte after IN raised"
+
+timing:
+  baud_detection: "Hardware synchronizes to incoming baud rate"
+  bit_sampling: "Samples each bit at calculated mid-point"
+  frame_detection: "Detects complete character frame"
+
+completion_behavior:
+  in_signal: "IN raised when character reception completes"
+  data_ready: "Received character available via RDPIN/RQPIN"
+  
+reset_behavior:
+  during_reset:
+    dir_state: "DIR=0"
+    reception: "No reception occurs"
+    monitoring: "Not monitoring for start bits"
+
+behavior:
+  acknowledgment:
+    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
+    effect: "Lowers IN signal after 2 clocks"
+
+usage_notes:
+  - "Standard UART reception functionality"
+  - "Hardware handles all timing automatically"
+  - "IN signal indicates character ready"
+  - "Automatic start bit detection and synchronization"
+  - "Precise baud rate detection from incoming signal"
+
+applications:
+  uart_communication: "Standard serial communication"
+  debug_input: "Debug command reception"
+  sensor_communication: "Receive sensor data"
+  protocol_implementation: "Custom serial protocol reception"
+
+reception_sequence:
+  1: "Monitor for start bit"
+  2: "Synchronize to detected baud rate"
+  3: "Sample data bits at mid-point"
+  4: "Verify stop bit"
+  5: "IN raised - character ready"
+  6: "Character available via RDPIN/RQPIN"
+
+error_handling:
+  framing_errors: "Detected by hardware"
+  timing_errors: "Automatic resynchronization"
+  noise_immunity: "Mid-bit sampling reduces noise sensitivity"
+
+related_modes:
+  - "%11110 (Async serial transmit)"
+  - "%11100 (Sync serial transmit)"
+  - "%11101 (Sync serial receive)"
+
+see_also:
+  - "UART communication theory"
+  - "Baud rate detection methods"
+  - "Serial communication error handling"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"

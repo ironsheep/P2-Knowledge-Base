@@ -1,0 +1,122 @@
+# Smart Pin Mode %01010 - PWM Switch-Mode Power Supply
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%01010"
+mode_name: "PWM Switch-Mode Power Supply" 
+description: "Specialized PWM mode with voltage and current feedback for switch-mode power supply control"
+category: "power_control"
+output_override: true
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%01010"
+    out_override: "OUT signal overridden"
+
+timing_control:
+  x_register:
+    x_low: "X[15:0] establishes base period in clock cycles"
+    x_high: "X[31:16] establishes PWM frame period in base periods"
+    
+  y_register:
+    function: "Y[15:0] establishes PWM output value"
+    range: "Should range from zero to frame period (X[31:16])"
+    capture: "Captured at each frame start and used for duration"
+
+pwm_operation:
+  counter_behavior: "Counter counts from 1 up to frame period"
+  a_input_sampling: "A input sampled at each base period until it reads low"
+  cycle_completion: "After A reads low, Y[15:0] captured, IN raised, process repeats"
+  comparison: "Captured output value compared to counter at each base period"
+
+output_logic:
+  normal_operation: "If captured value ≥ counter, output high; else low"
+  current_limit: "If B input goes high at any time during cycle, output forced low for rest of cycle"
+  
+feedback_inputs:
+  a_input:
+    function: "Voltage detector for SMPS output"
+    behavior: "Cycle continues until A reads low (voltage threshold reached)"
+    suggestion: "Adjacent pin using internal-DAC-comparison mode observing voltage divider"
+    
+  b_input: 
+    function: "Over-current detector"
+    behavior: "If high during PWM cycle, immediately forces output low"
+    suggestion: "Adjacent pin using internal-DAC-comparison mode observing shunt resistor"
+    circuit: "Between GND and FET source for current sensing"
+
+smps_theory:
+  voltage_control: "A input detects when output voltage sags below requirement"
+  current_protection: "B input detects overcurrent and immediately shuts off FET"
+  power_pulse: "When FET turns off, inductor creates power pulse captured by diode into capacitor"
+  
+typical_operation:
+  continuous_mode: "Set Y[15:0] once and let it repeat indefinitely"
+  demand_driven: "Only pulse when A input indicates voltage sag"
+  protection: "B input provides immediate current limiting"
+
+instructions:
+  setup:
+    - "WRPIN - Configure mode (%01010)"
+    - "WXPIN - Set base period X[15:0] and frame period X[31:16]"
+    
+  operation:
+    - "WYPIN - Set PWM value Y[15:0] (may set once for continuous operation)"
+
+reset_behavior:
+  during_reset:
+    dir_state: "DIR=0"
+    in_signal: "IN is low"
+    output: "Output is low"
+    capture: "Y[15:0] is captured"
+
+behavior:
+  acknowledgment:
+    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
+    effect: "Lowers IN signal after 2 clocks"
+
+usage_notes:
+  - "Designed specifically for switch-mode power supplies"
+  - "Voltage feedback via A input controls when to pulse"
+  - "Current feedback via B input provides protection"
+  - "May operate with single Y[15:0] setting"
+  - "Hardware implements complete SMPS control loop"
+
+applications:
+  smps_control: "Primary application - switching power supplies"
+  battery_charger: "Constant current/voltage charging"
+  motor_driver: "Current-limited motor control"
+  led_driver: "Current-regulated LED drivers"
+
+circuit_connections:
+  main_pin: "Drives switcher FET gate"
+  a_input_pin: "Voltage sense (center tap of output voltage divider)"
+  b_input_pin: "Current sense (shunt resistor voltage)"
+  
+smps_sequence:
+  1: "Output voltage sags, A input goes high"
+  2: "PWM cycle begins based on Y[15:0] value"
+  3: "If current too high, B input goes high, output immediately low"
+  4: "When A goes low (voltage restored), cycle completes"
+  5: "Inductor energy creates power pulse via diode to output cap"
+
+timing_considerations:
+  variable_cycle: "Cycle length depends on A input feedback"
+  immediate_shutoff: "B input acts within one base period"
+  efficiency: "Pulse only when needed based on voltage feedback"
+
+related_modes:
+  - "%01000 (PWM triangle)"
+  - "%01001 (PWM sawtooth)"
+  - "ADC modes for feedback sensing"
+
+see_also:
+  - "Switch-mode power supply theory"
+  - "Current sensing techniques"
+  - "Voltage regulation feedback"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"

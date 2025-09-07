@@ -1,0 +1,19 @@
+name: CORDIC
+category: math_engine
+description: "32-bit pipelined CORDIC solver"
+features:
+    pipeline_depth: 55
+    operations:
+      - 32x32 unsigned multiply → 64-bit result
+      - 64/32 unsigned divide → 32-bit quotient + remainder
+      - 64-bit → 32-bit square root
+      - Rotate (X,Y) by Theta
+      - Polar to Cartesian conversion
+      - Cartesian to Polar conversion
+      - Unsigned to logarithm (32 → 5.27)
+      - Logarithm to unsigned (5.27 → 32)
+    timing:
+      issue_rate: Every 8 clocks (8 cogs)
+      result_latency: 55 clocks
+      scale_correction: Automatic
+source: P2 Silicon Documentation v35

@@ -1,0 +1,6 @@
+name: AKPIN
+type: method
+category: SmartPin Operations
+signature: "AKPIN(PinField)"
+description: "Acknowledge smart pins"
+source: Spin2 Documentation v51

@@ -1,0 +1,6 @@
+name: WORD
+type: method
+category: String Creation
+signature: "WORD(val1, val2, ...)"
+description: "Create word data sequence"
+source: Spin2 Documentation v51

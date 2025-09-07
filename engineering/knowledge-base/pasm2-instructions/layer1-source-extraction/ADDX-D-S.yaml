@@ -1,0 +1,53 @@
+# PASM2 Instruction: ADDX D,{#}S {WC/WZ/WCZ}
+# Layer 1: Source Extraction
+
+instruction:
+  mnemonic: "ADDX"
+  operands: "D,{#}S {WC/WZ/WCZ}"
+  full_syntax: "ADDX D,{#}S {WC/WZ/WCZ}"
+  description: "Add (S + C) into D, extended. D = D + S + C. C = carry of (D + S + C). Z = Z AND (result == 0)."
+  
+source_extraction:
+  source_file: "/engineering/ingestion/sources/p2-datasheet/pasm2-complete-instruction-tables.md"
+  source_section: "Math and Logic Instructions"
+  table_row: 9
+  extraction_timestamp: "2025-09-06T14:31:00Z"
+  
+timing:
+  clock_cycles: 2
+  timing_group: "Math and Logic Instructions"
+  timing_note: "All Math and Logic instructions execute in 2 clock cycles"
+  
+operand_analysis:
+  destination:
+    field: "D"
+    type: "register"
+    description: "Destination register, also first source operand"
+  source:
+    field: "S"
+    type: "register_or_immediate"
+    immediate_prefix: "#"
+    description: "Second source operand, can be register or immediate value"
+  flags:
+    available: ["WC", "WZ", "WCZ"]
+    effect: "C = carry of (D + S + C), Z = Z AND (result == 0)"
+    
+instruction_category:
+  functional_group: "arithmetic"
+  operation_type: "extended_addition"
+  extended_variant: true
+  
+semantic_notes:
+  - "Extended precision unsigned addition"
+  - "Uses carry from previous operation as input"
+  - "Z flag is ANDed to support multi-precision zero detection"
+  - "Used in multi-precision unsigned arithmetic chains"
+  - "Unsigned counterpart to ADDSX"
+  
+quality_gate_layer1:
+  syntax_validation: "PASS"
+  completeness_check: "PASS"
+  source_lineage: "COMPLETE"
+  extraction_issues: "NONE"
+  
+status: "EXTRACTED"

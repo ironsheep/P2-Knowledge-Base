@@ -1,0 +1,6 @@
+name: "ROR"
+type: operator
+priority: 3
+category: Shift/Rotate
+description: "Bit manipulation"
+source: Spin2 Documentation v51

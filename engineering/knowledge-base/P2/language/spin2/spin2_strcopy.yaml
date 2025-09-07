@@ -1,0 +1,6 @@
+name: STRCOPY
+type: method
+category: Comparison
+signature: "STRCOPY(Destination, Source, Max)"
+description: "Copy string with maximum length"
+source: Spin2 Documentation v51

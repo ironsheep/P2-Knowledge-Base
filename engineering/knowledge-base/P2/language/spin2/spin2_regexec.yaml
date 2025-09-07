@@ -1,0 +1,6 @@
+name: REGEXEC
+type: method
+category: String Creation
+signature: "REGEXEC(HubAddr)"
+description: "Execute register code from hub"
+source: Spin2 Documentation v51

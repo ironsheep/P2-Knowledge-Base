@@ -1,0 +1,47 @@
+metadata:
+  id: pasm2_retb_8e9f4558
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.428127
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 324
+    type: csv
+    row: 324
+    type: csv
+    row: 324
+layer1_csv:
+  mnemonic: RETB
+  syntax: |
+    RETB             {WC/WZ/WCZ}
+  group: Branch Return
+  encoding: EEEE 1101011 CZ1 000000000 000101111
+  alias: .
+  description: Return by reading hub long (L) at --PTRB.                               C = L[31], Z = L[30], PC = L[19:0].
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 11
+    cog_exec_16_cogs: 11
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.634009
+  source: P2 Datasheet v35
+  timing:
+    raw: 11...18 / 20...40
+    notes:
+      - Hub window alignment affects timing
+    min_cycles: 11
+    max_cycles: 18
+    type: variable
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.044886
+  narratives:
+    - source: INSTRUCTION-TIMING-AND-ENCODING.md
+      type: timing_note
+      content: |
+        Branch instruction flushes pipeline, causing next instruction to take 5+ clocks instead of 2.
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Return by reading hub long (L) at --PTRB.                               C = L[31], Z = L[30], PC = L[19:0]."
+  syntax: "RETB             {WC/WZ/WCZ}"

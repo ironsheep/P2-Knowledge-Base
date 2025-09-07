@@ -1,0 +1,54 @@
+# Chip Gracey Clarification: SUMC Instruction
+# Layer 4 Enrichment Data - ABSOLUTE Authority
+
+clarification_entry:
+  clarification_id: "chip_2025-08-18_SUMC_004"
+  instruction: "SUMC"
+  
+  source_metadata:
+    provider: "Chip Gracey"
+    provider_role: "P2 Designer"
+    date: "2025-08-18"
+    authority_verification: "CHIP_GRACEY_DIRECT"
+    trust_level: "GREEN_HIGHEST"
+    authority_level: "ABSOLUTE"
+    source_document: "chip-instruction-clarifications-2025-08-18.md"
+    extraction_method: "direct_expert_clarification"
+    
+  semantic_clarification:
+    function: "Sum with Carry, Modify C Flag"
+    syntax: "SUMC D, S"
+    
+    detailed_behavior:
+      - "Performs addition including carry input"
+      - "Updates C flag based on result"
+      - "Essential for multi-precision arithmetic"
+      
+    use_cases:
+      - "Extended precision arithmetic (64-bit, 128-bit, etc.)"
+      - "Chained addition operations"
+      - "Financial/scientific calculations requiring high precision"
+      
+    significance: "Critical for multi-word arithmetic chains"
+    
+  relationships:
+    instruction_family: "arithmetic_with_flag_control"
+    related_instructions:
+      - "SUMNC"
+      - "SUMZ"
+      - "SUMNZ"
+    programming_pattern: "extended_precision_arithmetic"
+    
+  gap_impact:
+    previous_status: "semantics_missing"
+    clarification_impact: "complete_semantic_definition"
+    enables_analysis:
+      - "extended_precision_patterns"
+      - "arithmetic_flag_control_matrix"
+      - "multi_word_calculation_frameworks"
+
+  validation:
+    completeness_score: 95
+    authority_confirmed: true
+    integration_ready: true
+    cross_references_available: true

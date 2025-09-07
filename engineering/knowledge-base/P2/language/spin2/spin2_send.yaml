@@ -1,0 +1,6 @@
+name: SEND
+type: method
+category: String Creation
+signature: "SEND($00, $FF)"
+description: ""
+source: Spin2 Documentation v51

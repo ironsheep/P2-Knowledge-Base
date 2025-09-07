@@ -1,0 +1,50 @@
+metadata:
+  id: pasm2_incmod_35f1eb2b
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425851
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 74
+    type: csv
+    row: 74
+    type: csv
+    row: 74
+layer1_csv:
+  mnemonic: INCMOD
+  syntax: |
+    INCMOD  D,{#}S   {WC/WZ/WCZ}
+  group: Math and Logic
+  encoding: EEEE 0111000 CZI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Increment with modulus. If D = S then D = 0 and C = 1, else D = D + 1 and C = 0. *
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.630189
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Increment with modulus. If D = S then D = 0 and C = 1, else D = D + 1 and C = 0. *"
+  syntax: "INCMOD  D,{#}S   {WC/WZ/WCZ}"
+
+layer4_chip:
+  source: Chip Gracey Clarifications
+  title: "Increment with Modulo"
+  syntax: "INCMOD D,{#}S {WC/WZ/WCZ}"
+  function: "Increment D with wrapping to 0 if D = S
+- If D = S then D = 0 and C flag = 1
+- Else D = D + 1 and C flag = 0
+- Z flag is set if D result is 0"
+  use_cases: "- Circular buffer indexing
+- Counter with automatic reset
+- State machine cycling"
+  date: "2025-09-02"

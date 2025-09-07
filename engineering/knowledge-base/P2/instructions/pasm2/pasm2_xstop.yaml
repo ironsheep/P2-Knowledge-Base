@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_xstop_43d0f6de
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426910
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 231
+    type: csv
+    row: 231
+    type: csv
+    row: 231
+layer1_csv:
+  mnemonic: XSTOP
+  syntax: |
+    XSTOP
+  group: Streamer
+  encoding: EEEE 1100101 011 000000000 000000000
+  alias: alias
+  description: Stop streamer immediately.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.303087
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Stop streamer immediately."
+  syntax: "XSTOP"

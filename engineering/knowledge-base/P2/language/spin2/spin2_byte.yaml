@@ -1,0 +1,6 @@
+name: BYTE
+type: method
+category: String Creation
+signature: "BYTE(val1, val2, ...)"
+description: "Create byte data sequence"
+source: Spin2 Documentation v51

@@ -1,0 +1,6 @@
+name: WORDCOMP
+type: method
+category: Comparison
+signature: "WORDCOMP(AddrA, AddrB, Count) : Match"
+description: "Compare words, returns -1 if match"
+source: Spin2 Documentation v51

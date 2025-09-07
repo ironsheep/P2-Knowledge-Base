@@ -1,0 +1,51 @@
+# Chip Gracey Clarification: FRAC Instruction
+# Layer 4 Enrichment Data - ABSOLUTE Authority
+
+clarification_entry:
+  clarification_id: "chip_2025-09-02_FRAC_003"
+  instruction: "FRAC"
+  
+  source_metadata:
+    provider: "Chip Gracey"
+    provider_role: "P2 Designer"
+    date: "2025-09-02"
+    authority_verification: "CHIP_GRACEY_DIRECT"
+    trust_level: "GREEN_HIGHEST"
+    authority_level: "ABSOLUTE"
+    source_document: "chip-instruction-clarifications-2025-09-02.md"
+    extraction_method: "direct_expert_clarification"
+    
+  semantic_clarification:
+    function: "Fractional Multiply - computes unsigned (x << 32) / y"
+    syntax: "x FRAC y (Spin2 operator)"
+    
+    detailed_behavior:
+      - "Performs fractional multiplication"
+      - "Returns the fractional part of division"
+      - "Useful for scaling operations"
+      
+    use_cases:
+      - "Fixed-point arithmetic"
+      - "Scaling calculations"
+      - "Proportional computations"
+      
+    significance: "Enables efficient fixed-point arithmetic in Spin2"
+    
+  relationships:
+    instruction_family: "fractional_arithmetic"
+    language_context: "Spin2_operator"
+    programming_pattern: "fixed_point_math"
+    
+  gap_impact:
+    previous_status: "semantics_missing"
+    clarification_impact: "complete_semantic_definition"
+    enables_analysis:
+      - "fixed_point_arithmetic_patterns"
+      - "scaling_operation_matrix"
+      - "Spin2_operator_relationships"
+
+  validation:
+    completeness_score: 92
+    authority_confirmed: true
+    integration_ready: true
+    cross_references_available: true

@@ -1,0 +1,41 @@
+# PASM2 Instruction: ABS D,{#}S {WC/WZ/WCZ}
+# Layer 1: Source Extraction
+
+instruction:
+  mnemonic: "ABS"
+  operands: "D,{#}S {WC/WZ/WCZ}"
+  full_syntax: "ABS D,{#}S {WC/WZ/WCZ}"
+  description: "Get absolute value of S into D. D = ABS(S). C = S[31]. *"
+  
+source_extraction:
+  source_file: "/engineering/ingestion/sources/p2-datasheet/pasm2-complete-instruction-tables.md"
+  source_section: "Math and Logic Instructions"
+  table_row: 5
+  extraction_timestamp: "2025-09-06T14:30:00Z"
+  
+timing:
+  clock_cycles: 2
+  timing_group: "Math and Logic Instructions"
+  timing_note: "All Math and Logic instructions execute in 2 clock cycles"
+  
+operand_analysis:
+  destination:
+    field: "D"
+    type: "register"
+    description: "Destination register"
+  source:
+    field: "S"
+    type: "register_or_immediate"
+    immediate_prefix: "#"
+    description: "Source operand, can be register or immediate value"
+  flags:
+    available: ["WC", "WZ", "WCZ"]
+    effect: "C = S[31] (source sign bit), Z = (result == 0)"
+    
+quality_gate_layer1:
+  syntax_validation: "PASS"
+  completeness_check: "PASS"
+  source_lineage: "COMPLETE"
+  extraction_issues: "NONE"
+  
+status: "EXTRACTED"

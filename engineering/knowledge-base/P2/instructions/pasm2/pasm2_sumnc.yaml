@@ -1,0 +1,50 @@
+metadata:
+  id: pasm2_sumnc_2e06b546
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425550
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 32
+    type: csv
+    row: 32
+    type: csv
+    row: 32
+layer1_csv:
+  mnemonic: SUMNC
+  syntax: |
+    SUMNC   D,{#}S   {WC/WZ/WCZ}
+  group: Math and Logic
+  encoding: EEEE 0011101 CZI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Sum +/-S into D by !C. If C = 0 then D = D - S, else D = D + S. C = correct sign of (D +/- S). *
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.612379
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Sum +/-S into D by !C. If C = 0 then D = D - S, else D = D + S. C = correct sign of (D +/- S). *"
+  syntax: "SUMNC   D,{#}S   {WC/WZ/WCZ}"
+
+layer4_chip:
+  source: Chip Gracey Clarifications
+  title: "Sum with No Carry, Modify C Flag"
+  syntax: "SUMNC D, S"
+  function: "Sum without carry input, but modify C flag
+- Performs addition ignoring carry input
+- Updates C flag based on result
+- Useful for arithmetic chains with selective carry"
+  use_cases: "- Arithmetic operations where carry input should be ignored
+- Custom precision arithmetic control
+- Conditional arithmetic chains"
+  date: "2025-08-18"

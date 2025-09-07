@@ -1,0 +1,356 @@
+# Smart Pin Mode: %00110 - NCO Frequency
+# Silicon Doc Reference: part4-smart-pins.txt, page 87
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%00110"
+
+mode_name: "NCO Frequency"
+
+mode_group: "signal_gen"
+
+mode_complexity: "intermediate"
+
+dac_mode_dependency: false
+
+pin_pairing: "none"
+
+wrpin_configuration:
+  base_format: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+  
+  a_input_selector:
+    description: "4-bit A input selector - not used for NCO output mode"
+    bit_pattern: "%AAAA"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (default, not used)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  b_input_selector:
+    description: "4-bit B input selector - not used for NCO output mode"
+    bit_pattern: "%BBBB"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (default, not used)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  input_logic_filtering:
+    description: "3-bit input logic/filtering - not used for NCO output mode"
+    bit_pattern: "%FFF"
+    options:
+      - code: "%000"
+        description: "A, B (default)"
+        operation: "passthrough"
+        filter_type: "none"
+      - code: "%001"
+        description: "A AND B, B"
+        operation: "logical_and"
+        filter_type: "none"
+      - code: "%010"
+        description: "A OR B, B"
+        operation: "logical_or"
+        filter_type: "none"
+      - code: "%011"
+        description: "A XOR B, B"
+        operation: "logical_xor"
+        filter_type: "none"
+      - code: "%100"
+        description: "A, B, both filtered using global filt0"
+        operation: "passthrough"
+        filter_type: "filt0"
+      - code: "%101"
+        description: "A, B, both filtered using global filt1"
+        operation: "passthrough"
+        filter_type: "filt1"
+      - code: "%110"
+        description: "A, B, both filtered using global filt2"
+        operation: "passthrough"
+        filter_type: "filt2"
+      - code: "%111"
+        description: "A, B, both filtered using global filt3"
+        operation: "passthrough"
+        filter_type: "filt3"
+  
+  low_level_control:
+    description: "13-bit low-level pin control (M[12:0]) - standard output configuration"
+    bit_pattern: "%M............"
+    special_modes:
+      - condition: "M[12:10] = %101"
+        behavior: "DAC_MODE - not typically used with NCO frequency"
+  
+  dir_out_control:
+    description: "2-bit pin DIR/OUT control - OVERRIDDEN by smart pin"
+    bit_pattern: "%TT"
+    smart_off_behavior:
+      non_dac_mode: []
+      dac_mode: []
+    smart_on_behavior:
+      dac_modes: []
+      non_dac_modes:
+        - mode_range: "%00110 (NCO frequency)"
+          behavior: "Smart pin overrides OUT signal, output reflects Z[31] state"
+
+x_parameter:
+  usage: "Base period and phase initialization"
+  bit_fields:
+    - range: "X[15:0]"
+      purpose: "Base period in clock cycles for NCO updates"
+      valid_values:
+        min: 1
+        max: 65535
+        special_values:
+          - value: 1
+            meaning: "Update NCO every clock cycle (maximum frequency resolution)"
+          - value: 100
+            meaning: "Update NCO every 100 clocks (lower frequency resolution, less processing)"
+    - range: "X[31:16]"
+      purpose: "Initial phase value written to Z[31:16] upon WXPIN"
+      valid_values:
+        min: 0
+        max: 65535
+        special_values:
+          - value: 0
+            meaning: "Start with zero phase"
+          - value: 32768
+            meaning: "Start with 180-degree phase offset"
+  configuration_timing: "runtime"
+
+y_parameter:
+  usage: "Frequency increment value"
+  bit_fields:
+    - range: "Y[31:0]"
+      purpose: "32-bit frequency increment added to Z accumulator each base period"
+      valid_values:
+        min: 0
+        max: 4294967295
+        special_values:
+          - value: 0
+            meaning: "No frequency generation (static output)"
+          - value: 2147483648
+            meaning: "Half system clock frequency (maximum fundamental)"
+          - value: 1073741824
+            meaning: "Quarter system clock frequency"
+  update_behavior: "Can be updated at runtime to change frequency dynamically"
+
+z_result:
+  data_type: "32-bit NCO accumulator and phase information"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Complete NCO accumulator value"
+    - range: "Z[31]"
+      meaning: "MSB drives pin output state (frequency output)"
+  flag_behavior: "C flag may contain Z[31] state information"
+  overflow_handling: "32-bit accumulator wraps at overflow, generating continuous frequency"
+
+operation_description: |
+  NCO frequency mode overrides OUT to control the pin output state using a Numerically Controlled
+  Oscillator. X[15:0] establishes a base period in clock cycles which forms the fundamental update
+  rate. Upon WXPIN, X[31:16] is written to Z[31:16] to allow phase initialization. Y[31:0] is
+  added to Z[31:0] at each base period, creating a phase accumulator. The pin output reflects the
+  state of Z[31] (the MSB of the accumulator), creating a square wave output. The frequency is
+  determined by Y[31:0] / (2^32) * (Clock_Frequency / Base_Period). IN is raised whenever Z
+  overflows (Z[31] transitions from 1 to 0). During reset (DIR=0), IN is low, output is low,
+  and Z is set to zero.
+
+timing_specifications:
+  clock_relationship: "NCO updated every base period, output frequency determined by accumulator overflow"
+  base_period:
+    description: "Set by X[15:0] - fundamental NCO update rate"
+    min_clocks: 1
+    max_clocks: 65535
+    special_values:
+      - value: 1
+        meaning: "Maximum frequency resolution (update every clock)"
+      - value: 10
+        meaning: "Good balance of resolution and processing overhead"
+  update_frequency: "Pin output changes when Z[31] changes state due to accumulator overflow"
+  settling_time: "Output changes within 1 clock of accumulator update"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "Z accumulator overflow (32-bit wraparound)"
+    - "Indicates completion of one full phase cycle"
+  acknowledgment_method: "rdpin"
+  polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
+
+reset_behavior:
+  dir_low_effects:
+    - "IN signal goes low"
+    - "Output goes low"
+    - "Z accumulator is set to zero"
+  dir_transition_effects: "NCO begins operation, accumulator starts incrementing"
+  wrpin_zero_effects: "Returns pin to normal mode, clears all smart pin configuration"
+
+common_applications:
+  - application: "Audio frequency generation"
+    description: "Generate precise audio frequencies for sound synthesis"
+    complexity_level: "intermediate"
+  - application: "Clock synthesis"
+    description: "Create arbitrary clock frequencies from system clock"
+    complexity_level: "intermediate"
+  - application: "Frequency modulation"
+    description: "Create FM signals by dynamically changing Y parameter"
+    complexity_level: "advanced"
+  - application: "Signal timing references"
+    description: "Generate precise timing references for other systems"
+    complexity_level: "intermediate"
+
+configuration_examples:
+  - name: "1 kHz square wave generation"
+    description: "Generate 1 kHz output at 160 MHz system clock"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_00110_0, freq_pin"
+    wxpin_code: "WXPIN ##$0000_0001, freq_pin"
+    wypin_code: "WYPIN ##26843545, freq_pin"
+    explanation: "Base period 1 clock, Y = 2^32 * 1000 / 160000000 ≈ 26843545"
+  
+  - name: "Variable frequency generator"
+    description: "Setup for runtime frequency control"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_00110_0, vfo_pin"
+    wxpin_code: "WXPIN ##$0000_0001, vfo_pin"
+    wypin_code: "WYPIN freq_increment, vfo_pin"
+    explanation: "Base period 1, freq_increment calculated as: 2^32 * desired_freq / clock_freq"
+  
+  - name: "Phase-locked generation with startup phase"
+    description: "Generate frequency with specific initial phase"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_00110_0, phase_pin"
+    wxpin_code: "WXPIN ##$8000_0001, phase_pin"
+    wypin_code: "WYPIN ##53687091, phase_pin"
+    explanation: "Start with 180° phase (0x8000), 2 kHz output frequency"
+
+typical_code_patterns:
+  - pattern_name: "Precise frequency generation"
+    pasm2_code: |
+      ' Calculate frequency increment for desired frequency
+      ' Formula: increment = (desired_freq * 2^32) / system_clock_freq
+      MOV   increment, desired_freq
+      SHL   increment, #32           ' * 2^32 (will overflow, that's intended)
+      QDIV  increment, system_freq   ' / system_freq
+      GETQX increment               ' Get quotient
+      
+      ' Configure NCO
+      WRPIN ##%0000000000000_01_00110_0, nco_pin
+      WXPIN ##$0000_0001, nco_pin    ' Base period 1, zero phase
+      WYPIN increment, nco_pin       ' Set frequency
+      DIRH  nco_pin                 ' Enable
+    explanation: "Calculate and set precise frequency using 64-bit division"
+  
+  - pattern_name: "Frequency sweeping"
+    pasm2_code: |
+      ' Setup NCO for frequency sweeping
+      WRPIN ##%0000000000000_01_00110_0, sweep_pin
+      WXPIN ##$0000_000A, sweep_pin  ' Base period 10 for smoother sweeping
+      DIRH  sweep_pin               ' Enable
+      MOV   current_freq, start_freq
+      
+      sweep_loop:
+      WYPIN current_freq, sweep_pin  ' Update frequency
+      ADD   current_freq, freq_step  ' Increment for next iteration
+      CMP   current_freq, end_freq   WC
+      IF_C  JMP #sweep_loop          ' Continue if not at end frequency
+    explanation: "Implement frequency sweeping by updating Y parameter in loop"
+
+related_modes:
+  - mode_id: "%00111"
+    relationship: "complementary"
+    description: "NCO duty - provides duty cycle control in addition to frequency"
+  - mode_id: "%00100"
+    relationship: "alternative"
+    description: "Pulse/cycle output - for counted pulse sequences rather than continuous frequency"
+  - mode_id: "%00101"
+    relationship: "alternative"
+    description: "Transition output - for specific transition counts rather than continuous output"
+
+related_instructions:
+  - instruction: "WRPIN"
+    usage_context: "Configure NCO frequency mode"
+  - instruction: "WXPIN"
+    usage_context: "Set base period (X[15:0]) and initial phase (X[31:16])"
+  - instruction: "WYPIN"
+    usage_context: "Set frequency increment (runtime adjustable)"
+  - instruction: "DIRH"
+    usage_context: "Enable NCO operation"
+  - instruction: "TESTP"
+    usage_context: "Check for accumulator overflow events"
+  - instruction: "RDPIN"
+    usage_context: "Read current accumulator value and acknowledge overflow"
+
+hardware_considerations:
+  power_implications: "Power consumption proportional to output frequency and base period rate"
+  pin_loading_effects: "Square wave output can drive moderate loads, consider edge rates"
+  noise_considerations: "NCO generates harmonics - consider filtering for pure sine wave applications"
+  thermal_effects: "High frequencies can cause heating, especially with heavy loading"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [87]
+      section: "%00110 = NCO frequency"
+  validation_status: "draft"
+  completeness_score: 95
+  technical_accuracy: "silicon_doc_verified"

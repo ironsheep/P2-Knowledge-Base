@@ -1,0 +1,25 @@
+metadata:
+  id: pasm2__e_a14c0496
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.430571
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 482
+    type: csv
+    row: 482
+    type: csv
+    row: 482
+layer1_csv:
+  mnemonic: _E
+  syntax: |
+    _E
+  group: MODCZ Operand
+  encoding: cccc or zzzz = 1010
+  alias: alias
+  description: C/Z = Z, or 'equal' after a comparison/subtraction.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: null
+    cog_exec_16_cogs: null

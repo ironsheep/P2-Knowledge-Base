@@ -1,0 +1,6 @@
+name: WXPIN
+type: method
+category: SmartPin Operations
+signature: "WXPIN(PinField, Data)"
+description: "Write X register of smart pins"
+source: Spin2 Documentation v51

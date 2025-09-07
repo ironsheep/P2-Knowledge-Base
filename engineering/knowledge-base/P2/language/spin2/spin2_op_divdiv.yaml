@@ -1,0 +1,6 @@
+name: "//"
+type: operator
+priority: 8
+category: Divide
+description: "Divide/float/modulo/unsigned"
+source: Spin2 Documentation v51

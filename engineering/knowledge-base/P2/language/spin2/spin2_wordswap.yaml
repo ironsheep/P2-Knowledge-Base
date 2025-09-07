@@ -1,0 +1,6 @@
+name: WORDSWAP
+type: method
+category: Block Operations
+signature: "WORDSWAP(AddrA, AddrB, Count)"
+description: "Swap words between addresses"
+source: Spin2 Documentation v51

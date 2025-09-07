@@ -1,0 +1,19 @@
+name: Event_System
+category: synchronization
+description: "Hardware event tracking and interrupts"
+features:
+    event_sources: 16
+    event_types:
+      - Counter matches (CT1/CT2/CT3)
+      - Selectable events (SE1-SE4)
+      - Pattern match
+      - FIFO events
+      - Streamer events
+      - Pin events
+      - Attention signals
+    interrupt_levels: 3
+    operations:
+      - Poll
+      - Wait
+      - Interrupt trigger
+source: P2 Silicon Documentation v35

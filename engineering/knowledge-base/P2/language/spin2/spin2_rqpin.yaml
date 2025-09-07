@@ -1,0 +1,6 @@
+name: RQPIN
+type: method
+category: SmartPin Operations
+signature: "RQPIN(Pin) : Zval"
+description: "Read smart pin without acknowledge"
+source: Spin2 Documentation v51

@@ -1,0 +1,113 @@
+name: P2 Knowledge Base
+version: 1.0.0
+generated: 2025-09-07
+description: Central repository of P2 technical knowledge extracted from authoritative sources
+
+statistics:
+  total_instructions: 440
+  total_spin2_methods: 75
+  total_spin2_operators: 51
+  total_files: 566
+  
+layers:
+  layer1_csv:
+    source: P2 Instructions CSV v35
+    coverage: 491 instructions
+    status: complete
+    
+  layer2_datasheet:
+    source: P2 Datasheet timing tables
+    coverage: 61 instructions (42.4%)
+    status: complete
+    
+  layer3_narrative:
+    source: P2 Instructions CSV descriptions
+    coverage: 405 instructions
+    status: complete
+    
+  layer4_chip:
+    source: Chip Gracey clarifications
+    coverage: 12 instructions
+    status: complete
+
+content:
+  instructions:
+    path: /instructions/pasm2/
+    count: 440
+    format: YAML
+    naming: pasm2_{mnemonic}.yaml
+    
+  language:
+    spin2:
+      methods:
+        path: /language/spin2/
+        count: 75
+        format: YAML
+        naming: spin2_{method}.yaml
+      operators:
+        path: /language/spin2/
+        count: 51
+        format: YAML
+        naming: spin2_op_{operator}.yaml
+        
+  extractors:
+    path: /extractors/
+    scripts:
+      - csv-simple-extractor.py
+      - timing-simple-extractor.py
+      - narrative-csv-extractor.py
+      - chip-clarifications-extractor.py
+      - spin2-methods-extractor.py
+      - spin2-operators-extractor.py
+
+sources:
+  primary:
+    - name: P2 Instructions CSV v35
+      path: /engineering/ingestion/sources/p2-instructions-csv/
+      type: spreadsheet
+      authority: official
+      
+    - name: P2 Datasheet
+      path: /engineering/ingestion/sources/p2-datasheet/
+      type: document
+      authority: official
+      
+    - name: Silicon Documentation v35
+      path: /engineering/ingestion/sources/silicon-doc/
+      type: document
+      authority: official
+      
+    - name: Spin2 Documentation v51
+      path: /engineering/ingestion/sources/spin2-v51/
+      type: manual
+      authority: official
+      
+    - name: Chip Gracey Clarifications
+      path: /engineering/ingestion/sources/chip-gracey-clarifications/
+      type: expert
+      authority: designer
+
+quality_metrics:
+  pasm2_instructions:
+    total_unique: 440
+    layer1_coverage: 100%
+    layer2_coverage: 13.9%
+    layer3_coverage: 92.0%
+    layer4_coverage: 2.7%
+    
+  spin2_language:
+    methods_extracted: 75
+    operators_extracted: 51
+    total_language_elements: 126
+    
+  gaps:
+    missing_timing: 379 instructions
+    missing_narratives: 35 instructions
+    missing_clarifications: 428 instructions
+
+next_steps:
+  - Extract hardware specifications
+  - Extract architecture components
+  - Create quality baseline report
+  - Final validation pass
+  - Create v1.0 release tag

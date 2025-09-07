@@ -1,0 +1,108 @@
+mnemonic: "RDLONG"
+syntax:
+  - "RDLONG D,{#}S/P {WC/WZ/WCZ}"
+  - "RDLONG D,{#}S"  
+  - "RDLONG D,PTRA"
+  - "RDLONG D,PTRB"
+  - "RDLONG D,{#}S WC"
+  - "RDLONG D,{#}S WZ"
+  - "RDLONG D,{#}S WCZ"
+group: "hub_control_fifo_ram"
+description: "Read long from hub address {#}S/PTRx into D. C = MSB of long. Prior SETQ/SETQ2 invokes cog/LUT block transfer."
+
+operation:
+  basic_operation: "D = HUB_MEMORY[address]"
+  flag_effects:
+    carry_flag: "C = MSB of read data (bit 31)"
+    zero_flag: "Z = (read data == 0)"
+  conditions:
+    - "Prior SETQ invokes COG block transfer"
+    - "Prior SETQ2 invokes LUT block transfer" 
+    - "Additional +1 clock if instruction crosses hub long boundary"
+
+timing:
+  base_clocks: "9...16"
+  cog_lut_timing: "9...16"
+  hub_timing: "9...26"
+  conditional_timing:
+    cog_lut_execution: "9...16 clocks"
+    hub_execution: "9...26 clocks"
+    block_transfer: "Variable based on block size"
+  timing_notes:
+    - "Timing varies with hub window alignment"
+    - "Additional +1 clock if crosses hub long boundary"
+    - "Block transfer timing depends on SETQ/SETQ2 parameters"
+
+flags:
+  affects_c: true
+  affects_z: true
+  flag_options: ["WC", "WZ", "WCZ"]
+  flag_meanings:
+    WC: "C = MSB (bit 31) of data read from hub"
+    WZ: "Z = 1 if data read equals zero"
+    WCZ: "Both flags set based on data read"
+
+operands:
+  destination:
+    type: "register"
+    range: "0..511 for cog/LUT registers"
+    description: "Register that receives the data read from hub"
+  source:
+    type: "address_or_pointer"
+    immediate_range: "20-bit hub address (0..1048575)"
+    pointer_types: ["PTRA", "PTRB"]
+    description: "Hub memory address to read from"
+
+variants:
+  - syntax: "RDLONG D,{#}S {WC/WZ/WCZ}"
+    description: "Read long from immediate hub address"
+    specific_operation: "D = HUB[S], flags from data"
+  - syntax: "RDLONG D,PTRA {WC/WZ/WCZ}"
+    description: "Read long using pointer register"
+    specific_operation: "D = HUB[PTRA], flags from data"
+
+examples:
+  - title: "Basic Hub Read"
+    description: "Read long value from hub memory"
+    code: "RDLONG R1, #$1000"
+    explanation: "Reads 32-bit value from hub address $1000 into R1"
+  - title: "Pointer-Based Read"
+    description: "Read using pointer register"
+    code: "RDLONG R1, PTRA"
+    explanation: "Reads long from address in PTRA into R1"
+  - title: "Read with Status Check"
+    description: "Read data and check if negative"
+    code: "RDLONG R1, #data_addr WC"
+    explanation: "Reads data, C=1 if MSB set (negative in 2's complement)"
+  - title: "Block Transfer Read"
+    description: "Read multiple longs using block transfer"
+    code: |
+      SETQ #7             ' Set up for 8-long block transfer
+      RDLONG buffer, #source_addr
+    explanation: "Reads 8 consecutive longs starting at source_addr"
+
+related_instructions:
+  - "WRLONG"
+  - "RDBYTE"
+  - "RDWORD"  
+  - "WMLONG"
+  - "SETQ"
+  - "SETQ2"
+
+special_behaviors:
+  - "Can perform block transfers when preceded by SETQ/SETQ2"
+  - "SETQ enables COG memory as destination for block transfer"
+  - "SETQ2 enables LUT memory as destination for block transfer"
+  - "Hub window alignment affects access timing"
+  - "Crossing long boundaries adds timing penalty"
+
+notes:
+  - "Primary mechanism for reading hub memory"
+  - "Essential for accessing program data and variables"
+  - "Block transfer capability enables efficient memory copying"
+  - "Timing predictability depends on hub access patterns"
+
+source_references:
+  datasheet_section: "6.5 Hub Control, FIFO, & RAM Instructions - Hub RAM"
+  page_references: ["Datasheet Hub RAM instruction table"]
+  extraction_notes: "Extracted from pasm2-complete-instruction-tables.md Hub Control section"

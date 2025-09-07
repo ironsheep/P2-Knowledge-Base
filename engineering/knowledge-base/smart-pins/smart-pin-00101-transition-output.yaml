@@ -1,0 +1,105 @@
+# Smart Pin Mode %00101 - Transition Output
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%00101"
+mode_name: "Transition Output"
+description: "Generates a specified number of output transitions at regular intervals"
+category: "output_generation"
+output_override: true
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%00101"
+    out_override: "OUT signal overridden"
+
+timing_control:
+  x_register:
+    function: "X[15:0] establishes base period in clock cycles"
+    purpose: "Forms empirical high-time and low-time units"
+    
+  y_register:
+    function: "Y[31:0] specifies number of transitions to generate"
+    trigger: "Writing non-zero value begins transition sequence"
+    timing: "Transitions occur at each base period"
+
+operation:
+  start_condition: "Y[31:0] written with non-zero value"
+  start_timing: "Begins toggling at next base period"
+  transition_rate: "One toggle per base period"
+  duration: "Continues for Y transitions"
+
+output_behavior:
+  mechanism: "Pin toggles state every base period"
+  count: "Total number of state changes = Y"
+  final_state: "Remains in current state after completion"
+
+completion_behavior:
+  in_signal: "IN raised when transitions complete"
+  output_state: "Pin remains in its current output state"
+  sequence: "All Y transitions have been completed"
+
+instructions:
+  setup:
+    - "WRPIN - Configure mode (%00101)"
+    - "WXPIN - Set base period X[15:0]"
+    
+  operation:
+    - "WYPIN - Set transition count Y[31:0] (starts operation)"
+
+reset_behavior:
+  during_reset:
+    dir_state: "DIR=0"
+    in_signal: "IN is low"
+    output: "Output is low"
+    y_register: "Y is set to zero"
+
+behavior:
+  acknowledgment:
+    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
+    effect: "Lowers IN signal after 2 clocks"
+
+usage_notes:
+  - "Creates square wave bursts with precise transition count"
+  - "Final output state depends on initial state and transition count"
+  - "Even transition count returns to original state"
+  - "Odd transition count leaves output inverted"
+  - "Useful for protocols requiring specific edge counts"
+
+applications:
+  clock_bursts: "Generate N clock cycles for external devices"
+  communication: "Bit-banged protocols with precise edge timing"
+  test_patterns: "Generate test signals with known transition counts"
+  frequency_division: "Create divided clock signals"
+
+timing_examples:
+  clock_burst:
+    setup: "X[15:0] = half_period"
+    operation: "WYPIN #(2*cycles),pin"
+    result: "Generates cycles complete clock cycles"
+    
+  single_pulse:
+    setup: "X[15:0] = pulse_width" 
+    operation: "WYPIN #2,pin"
+    result: "One complete high-low pulse"
+
+comparison_with_pulse_mode:
+  transition_mode: "Counts state changes, flexible final state"
+  pulse_mode: "Counts periods with defined high/low timing"
+  use_case: "Transition mode for protocol edges, pulse mode for timing signals"
+
+related_modes:
+  - "%00100 (Pulse/cycle output)"
+  - "%00110 (NCO frequency)"
+  - "%00111 (NCO duty)"
+
+see_also:
+  - "Base period timing calculations"
+  - "Communication protocol edge generation"
+  - "Clock burst generation techniques"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"

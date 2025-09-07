@@ -1,0 +1,17 @@
+name: Streamer
+category: dma_engine
+description: "High-speed data streaming engine"
+features:
+    modes:
+      - Hub RAM to pins/DACs
+      - Pins/ADCs to Hub RAM
+      - LUT to pins/DACs
+      - Immediate to pins/DACs
+      - DDS/Goertzel operations
+      - HDMI/DVI video output
+    capabilities:
+      colorspace: 3x3 matrix conversion
+      pixel_ops: 8:8:8:8 blending
+      fifo: 19-stage buffer
+      bandwidth: Up to sysclock/2
+source: P2 Silicon Documentation v35

@@ -1,0 +1,41 @@
+metadata:
+  id: pasm2_rolword_8ec92869
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426030
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 101
+    type: csv
+    row: 101
+    type: csv
+    row: 102
+    type: csv
+    row: 101
+    type: csv
+    row: 102
+layer1_csv:
+  mnemonic: ROLWORD
+  syntax: |
+    ROLWORD D
+  group: Math and Logic
+  encoding: EEEE 1001010 000 DDDDDDDDD 000000000
+  alias: alias
+  description: Rotate-left word established by prior ALTGW instruction into D.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.614027
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Rotate-left word N of S into D. D = {D[15:0], S.WORD[N])."
+  syntax: "ROLWORD D,{#}S,#N"

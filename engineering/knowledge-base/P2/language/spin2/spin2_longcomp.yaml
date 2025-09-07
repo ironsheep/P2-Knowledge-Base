@@ -1,0 +1,6 @@
+name: LONGCOMP
+type: method
+category: Comparison
+signature: "LONGCOMP(AddrA, AddrB, Count) : Match"
+description: "Compare longs, returns -1 if match"
+source: Spin2 Documentation v51

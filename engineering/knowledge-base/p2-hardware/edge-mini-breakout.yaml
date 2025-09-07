@@ -1,0 +1,218 @@
+# P2 Edge Mini Breakout - Hardware Specification
+# Part Number: 64019
+# Revision: v1.1
+# Documentation: 64019-P2-Edge-MiniBreakoutBoardGuide-v1.1
+
+hardware_type: "carrier_board"
+part_number: "64019"
+manufacturer: "Parallax Inc."
+revision: "v1.1"
+status: "active_production"
+
+basic_info:
+  name: "P2 Edge Mini Breakout"
+  description: "Compact carrier board providing access to 40 P2 pins in minimal footprint"
+  category: "carrier_board_compact"
+  form_factor: "mini_breakout"
+  
+specifications:
+  requires_module: true
+  compatible_modules:
+    - "P2-EC (Standard Edge Module)"
+    - "P2-EC32MB (32MB Edge Module)"
+    
+  physical:
+    dimensions:
+      length: "3.15 inches"
+      width: "1.4 inches"  
+      height: "0.5 inches (with module)"
+    weight: "TBD"
+    mounting: "Standard PCB mounting holes"
+    area: "4.41 square inches"
+    
+  electrical:
+    supply_voltage: "5V or USB powered"
+    module_supply: "3.3V to module"
+    current_capability: "Adequate for 40-pin projects"
+    
+pin_access:
+  total_accessible: 40
+  pin_range: "P0-P31, P56-P63"
+  blocked_pins: "P32-P55 (not accessible)"
+  header_configuration: "40 pins broken out to headers"
+  header_type: "Standard 0.1 inch pitch"
+  pin_organization: "Logical grouping by availability"
+  
+connectivity:
+  programming:
+    - type: "USB"
+      connector: "USB connector onboard"
+      driver: "Built-in USB-to-serial"
+    - type: "Prop Plug"
+      connector: "4-pin header (optional)"
+  
+  headers:
+    pin_headers: "40 accessible pins"
+    power_headers: "3.3V, 5V, GND distribution"
+    programming_header: "Prop Plug compatible"
+    
+  expansion:
+    addon_compatibility: "Limited - not compatible with Eval add-ons"
+    breadboard_friendly: "Standard header spacing"
+    
+module_compatibility:
+  optimal_pairing:
+    - module: "P2-EC32MB"
+      efficiency: "Perfect - 87% pin utilization (40/46 available)"
+      rating: "5_stars"
+      use_case: "Compact memory-intensive projects"
+      size_match: "Ideal - no wasted board space"
+  
+  functional_pairing:
+    - module: "P2-EC" 
+      efficiency: "Pin limited - 62% utilization (40/64 available)"
+      rating: "2_stars"
+      use_case: "Simple projects with <40 pin requirement"
+      limitation: "Wastes standard module capability"
+      
+use_cases:
+  primary:
+    - "Compact P2 projects with memory needs (32MB module)"
+    - "Size-constrained embedded applications"
+    - "Cost-sensitive projects using 40 or fewer pins"
+    - "Portable/handheld device prototyping"
+  secondary:
+    - "Simple P2 learning projects"
+    - "IoT devices with space limitations"
+    - "Battery-powered applications"
+    
+advantages:
+  - "Minimal footprint (4.41 sq in)"
+  - "Perfect efficiency with 32MB module"
+  - "Lower cost than full breakout"
+  - "Portable and lightweight"
+  - "Adequate for many P2 projects"
+  - "USB programming integrated"
+  
+limitations:
+  - "Only 40 pins accessible (P32-P55 blocked)"
+  - "Not optimal for standard Edge module"
+  - "Limited expansion capability"
+  - "No built-in peripherals"
+  - "No prototyping area"
+  - "Requires bottom-side jumpers for P32-P55 access"
+  
+development_workflow:
+  - "Select 32MB module for optimal pairing"
+  - "Insert module into edge connector"
+  - "Connect USB for programming and power"
+  - "Access 40 pins via headers (P0-P31, P56-P63)"
+  - "Develop compact applications"
+  - "Focus on memory-intensive features"
+  
+programming:
+  methods:
+    - "USB (primary - built-in)"
+    - "Prop Plug (optional backup)"
+  tools:
+    - "PropellerTool"
+    - "PNut" 
+    - "VS Code with Spin2 extension"
+  languages:
+    - "Spin2"
+    - "PASM2"
+    - "C (via FlexProp)"
+    
+target_projects:
+  graphics:
+    - "LED matrix displays (with 32MB image storage)"
+    - "Compact VGA output devices"
+    - "Digital picture frames"
+  audio:
+    - "Music players with sample storage"
+    - "Audio effects processors"
+    - "Voice recorders"
+  embedded:
+    - "IoT sensors with data logging"
+    - "Portable measurement devices"
+    - "Battery-powered controllers"
+    
+pin_limitations:
+  blocked_section: "P32-P55"
+  workaround: "Bottom-side jumper connections possible"
+  practical_impact: "Most projects use <40 pins anyway"
+  design_consideration: "Plan pin usage for P0-P31, P56-P63"
+  
+comparison_with_alternatives:
+  vs_standard_breakout:
+    pin_access: "40 vs 64 pins"
+    size: "Compact vs standard"
+    cost: "Lower vs higher"
+    use_case: "Simple vs complex projects"
+    
+  vs_breadboard_carrier:
+    prototyping: "Headers only vs integrated breadboard"
+    size: "Small vs very large (6x larger)"
+    cost: "Much lower vs much higher"
+    use_case: "Focused vs experimental"
+    
+  vs_eval_board:
+    integration: "Modular vs all-in-one"
+    size: "Smaller vs larger"
+    peripherals: "None vs built-in LEDs/switches"
+    flexibility: "Module swappable vs fixed"
+    
+optimal_configurations:
+  perfect_match:
+    - module: "P2-EC32MB"
+      total_cost: "Most economical memory solution"
+      pin_efficiency: "87%"
+      use_case: "Compact PSRAM applications"
+      board_efficiency: "No wasted space"
+      
+  functional_but_limited:
+    - module: "P2-EC"
+      total_cost: "Lower cost entry point"
+      pin_efficiency: "62%"
+      use_case: "Simple projects only"
+      limitation: "Underutilizes standard module"
+      
+power_management:
+  input: "5V USB or external supply"
+  regulation: "Onboard 3.3V for module"
+  distribution: "Power headers for external circuits"
+  current_budget: "Adequate for 40-pin projects"
+  efficiency: "Lower power than 64-pin usage"
+  
+physical_advantages:
+  footprint: "Smallest carrier in Edge ecosystem"
+  portability: "Ideal for mobile/portable projects"
+  mounting: "Easy integration into small enclosures"
+  weight: "Minimal impact on battery-powered designs"
+  
+documentation:
+  primary: "64019-P2-Edge-MiniBreakoutBoardGuide-v1.1"
+  related:
+    - "32MB Edge module documentation (optimal pairing)"
+    - "P2 Silicon Documentation"  
+    - "Pin mapping and limitations guide"
+    
+availability:
+  vendor: "Parallax Inc."
+  website: "parallax.com"
+  part_lookup: "Search for 64019"
+  distributor_network: "Yes"
+  bundle_recommendations: "Often bundled with 32MB module"
+  
+quality_rating: "specialized_excellent"
+recommendation_score: 5
+educational_value: "good"
+production_readiness: "prototype_platform"
+size_class: "compact"
+
+# Cross-references
+ecosystem_position: "compact_carrier"
+hardware_family: "p2_edge"
+optimal_module: "P2-EC32MB"
+pin_utilization: "limited_by_design"
+size_advantage: "maximum_portability"

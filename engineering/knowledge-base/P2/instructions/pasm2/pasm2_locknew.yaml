@@ -1,0 +1,40 @@
+metadata:
+  id: pasm2_locknew_4a5852c2
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.427090
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 245
+    type: csv
+    row: 245
+    type: csv
+    row: 245
+layer1_csv:
+  mnemonic: LOCKNEW
+  syntax: |
+    LOCKNEW D               {WC}
+  group: Hub Control - Locks
+  encoding: EEEE 1101011 C00 DDDDDDDDD 000000100
+  alias: .
+  description: Request a LOCK. D will be written with the LOCK number (0 to 15). C = 1 if no LOCK available.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 4
+    cog_exec_16_cogs: 4
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.305778
+  source: P2 Datasheet v35
+  timing:
+    raw: 4...11 / same
+    type: variable
+    notes:
+      - Hub window alignment affects timing
+    min_cycles: 4
+    max_cycles: 11
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Request a LOCK. D will be written with the LOCK number (0 to 15). C = 1 if no LOCK available."
+  syntax: "LOCKNEW D               {WC}"

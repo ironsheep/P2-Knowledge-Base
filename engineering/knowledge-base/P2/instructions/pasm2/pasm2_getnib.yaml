@@ -1,0 +1,41 @@
+metadata:
+  id: pasm2_getnib_d9d6f8d0
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425946
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 87
+    type: csv
+    row: 87
+    type: csv
+    row: 88
+    type: csv
+    row: 87
+    type: csv
+    row: 88
+layer1_csv:
+  mnemonic: GETNIB
+  syntax: |
+    GETNIB  D
+  group: Math and Logic
+  encoding: EEEE 1000010 000 DDDDDDDDD 000000000
+  alias: alias
+  description: Get nibble established by prior ALTGN instruction into D.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.629928
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Get nibble N of S into D. D = {28'b0, S.NIBBLE[N])."
+  syntax: "GETNIB  D,{#}S,#N"

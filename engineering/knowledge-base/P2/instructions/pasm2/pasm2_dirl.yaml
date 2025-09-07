@@ -1,0 +1,44 @@
+metadata:
+  id: pasm2_dirl_e6999496
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.428454
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 350
+    type: csv
+    row: 350
+    type: csv
+    row: 350
+layer1_csv:
+  mnemonic: DIRL
+  syntax: |
+    DIRL    {#}D           {WCZ}
+  group: Pins
+  encoding: EEEE 1101011 CZL DDDDDDDDD 001000000
+  alias: .
+  description: DIR bits of pins D[10:6]+D[5:0]..D[5:0] = 0.                  Wraps within DIRA/DIRB. Prior SETQ overrides D[10:6]. C,Z = DIR bit.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.639747
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.048067
+  narratives:
+    - source: silicon-from-docx.md
+      type: enhancement
+      content: |
+        Can work on pin spans. Prior SETQ overrides D[10:6] for span size.
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "DIR bits of pins D[10:6]+D[5:0]..D[5:0] = 0.                  Wraps within DIRA/DIRB. Prior SETQ overrides D[10:6]. C,Z = DIR bit."
+  syntax: "DIRL    {#}D           {WCZ}"

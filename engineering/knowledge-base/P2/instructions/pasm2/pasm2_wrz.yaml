@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_wrz_7f4705aa
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.429695
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 396
+    type: csv
+    row: 396
+    type: csv
+    row: 396
+layer1_csv:
+  mnemonic: WRZ
+  syntax: |
+    WRZ     D
+  group: Math and Logic
+  encoding: EEEE 1101011 000 DDDDDDDDD 001101110
+  alias: .
+  description: Write 0 or 1 to D, according to  Z. D = {31'b0,  Z).
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.629777
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Write 0 or 1 to D, according to  Z. D = {31'b0,  Z)."
+  syntax: "WRZ     D"

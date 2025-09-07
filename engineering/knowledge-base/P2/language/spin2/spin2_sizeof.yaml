@@ -1,0 +1,6 @@
+name: SIZEOF
+type: method
+category: String Creation
+signature: "SIZEOF(Structure) : ByteCount"
+description: "Get size of structure in bytes"
+source: Spin2 Documentation v51

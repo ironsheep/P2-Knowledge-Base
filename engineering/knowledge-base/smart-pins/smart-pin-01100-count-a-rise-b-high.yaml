@@ -1,0 +1,108 @@
+# Smart Pin Mode %01100 - Count A-input Positive Edges when B-input is High
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%01100"
+mode_name: "Count A-input Positive Edges when B-input is High"
+description: "Counts positive edges on A-input only when B-input is high"
+category: "measurement"
+output_override: false
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%01100"
+
+timing_control:
+  x_register:
+    function: "X[31:0] establishes measurement period in clock cycles"
+    zero_mode: "X = 0 for continuous operation (totalizer mode)"
+    periodic_mode: "X ≠ 0 for periodic measurements"
+
+counting_logic:
+  trigger_condition: "A-input positive edge AND B-input high"
+  count_increment: "Counter incremented by 1 for each qualified edge"
+  qualification: "B-input must be high during A-input positive edge"
+
+operation_modes:
+  continuous_mode:
+    condition: "X[31:0] = 0"
+    behavior: "Continuous totalizer operation"
+    reading: "Current 32-bit count always available via RDPIN/RQPIN"
+    
+  periodic_mode:
+    condition: "X[31:0] ≠ 0"
+    behavior: "Count qualified events for X clock cycles"
+    sequence:
+      - "Events counted for X clock cycles"
+      - "Result placed in Z"
+      - "Accumulator set to 0/1 value that would have been added"
+      - "IN raised"
+      - "New measurement begins"
+    reading: "RDPIN/RQPIN retrieves 32-bit measurement after IN raised"
+
+event_handling:
+  carry_forward: "All events counted across measurements in periodic mode"
+  accumulator_state: "Preserves partial event state between periods"
+
+instructions:
+  setup:
+    - "WRPIN - Configure mode (%01100)"
+    - "WXPIN - Set measurement period X[31:0]"
+    
+  operation:
+    continuous: "RDPIN/RQPIN - Read current count any time"
+    periodic: "RDPIN/RQPIN - Read measurement after IN raised"
+
+reset_behavior:
+  during_reset:
+    dir_state: "DIR=0"
+    in_signal: "IN is low"
+    z_register: "Z set to adder value (0/1)"
+
+behavior:
+  in_signal:
+    continuous: "Not used"
+    periodic: "Raised at end of each measurement period"
+    
+  acknowledgment:
+    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
+    effect: "Lowers IN signal after 2 clocks"
+
+usage_notes:
+  - "Qualified edge counting with enable input"
+  - "B-input acts as enable/gate for A-input counting"
+  - "32-bit counter provides large count range"
+  - "Continuous mode for running totals"
+  - "Periodic mode for rate measurements"
+
+applications:
+  gated_counting: "Count pulses only when enabled"
+  conditional_events: "Event counting with qualification"
+  flow_measurement: "Count events during active periods"
+  protocol_analysis: "Count valid data edges"
+
+timing_examples:
+  pulse_counting:
+    setup: "A = pulse input, B = enable signal"
+    result: "Counts pulses only when enabled"
+    
+  qualified_events:
+    setup: "A = event signal, B = qualifier"
+    result: "Events counted only when qualified"
+
+related_modes:
+  - "%01101 (A-rise increment/decrement by B)"
+  - "%01110 (Count A-rise or A-rise/B-rise)"
+  - "%01111 (Count A-high or A-high/B-high)"
+  - "%01011 (Quadrature encoder)"
+
+see_also:
+  - "Qualified counting techniques"
+  - "Event gating methods"
+  - "Rate measurement applications"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"

@@ -1,0 +1,39 @@
+metadata:
+  id: pasm2_waitatn_4e06d02a
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.427843
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 302
+    type: csv
+    row: 302
+    type: csv
+    row: 302
+layer1_csv:
+  mnemonic: WAITATN
+  syntax: |
+    WAITATN          {WC/WZ/WCZ}
+  group: Events - Wait
+  encoding: EEEE 1101011 CZ0 000011110 000100100
+  alias: .
+  description: Wait for ATN event flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.630033
+  source: P2 Datasheet v35
+  timing:
+    raw: 2+
+    base_cycles: 2
+    notes:
+      - Plus wait condition
+    type: variable
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Wait for ATN event flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout."
+  syntax: "WAITATN          {WC/WZ/WCZ}"

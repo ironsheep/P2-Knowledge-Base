@@ -1,0 +1,35 @@
+metadata:
+  id: pasm2_resi2_60661824
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426441
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 160
+    type: csv
+    row: 160
+    type: csv
+    row: 160
+layer1_csv:
+  mnemonic: RESI2
+  syntax: |
+    RESI2
+  group: Branch S - Resume
+  encoding: EEEE 1011001 110 111110010 111110011
+  alias: alias
+  description: Resume from INT2. (CALLD $1F2,$1F3 WCZ)
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 4
+    cog_exec_16_cogs: 4
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.627654
+  source: P2 Datasheet v35
+  timing:
+    raw: 4 / 13...20
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Resume from INT2. (CALLD $1F2,$1F3 WCZ)"
+  syntax: "RESI2"

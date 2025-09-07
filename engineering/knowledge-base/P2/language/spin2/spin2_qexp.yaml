@@ -1,0 +1,6 @@
+name: QEXP
+type: method
+category: CORDIC Operations
+signature: "QEXP(value)"
+description: "Exponential via CORDIC"
+source: Spin2 Documentation v51

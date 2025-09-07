@@ -1,0 +1,6 @@
+name: WRPIN
+type: method
+category: SmartPin Operations
+signature: "WRPIN(PinField, Data)"
+description: "Write mode register of smart pins"
+source: Spin2 Documentation v51

@@ -1,0 +1,6 @@
+name: LOCKNEW
+type: method
+category: Lock Management
+signature: "LOCKNEW() : LockNum"
+description: "Check out new lock (0..15) or < 0 if none available"
+source: Spin2 Documentation v51

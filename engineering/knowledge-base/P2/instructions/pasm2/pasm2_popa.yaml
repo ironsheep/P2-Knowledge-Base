@@ -1,0 +1,40 @@
+metadata:
+  id: pasm2_popa_baa3e16f
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426416
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 156
+    type: csv
+    row: 156
+    type: csv
+    row: 156
+layer1_csv:
+  mnemonic: POPA
+  syntax: |
+    POPA    D        {WC/WZ/WCZ}
+  group: Hub RAM - Read
+  encoding: EEEE 1011000 CZ1 DDDDDDDDD 101011111
+  alias: alias
+  description: Read long from hub address --PTRA into D. C = MSB of long. *
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 9
+    cog_exec_16_cogs: 9
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.309959
+  source: P2 Datasheet v35
+  timing:
+    raw: 9...16 / 9...26
+    type: variable
+    notes:
+      - Hub window alignment affects timing
+    min_cycles: 9
+    max_cycles: 16
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Read long from hub address --PTRA into D. C = MSB of long. *"
+  syntax: "POPA    D        {WC/WZ/WCZ}"

@@ -1,0 +1,6 @@
+name: "<#"
+type: operator
+priority: 11
+category: Limit
+description: "Max/min limiting"
+source: Spin2 Documentation v51

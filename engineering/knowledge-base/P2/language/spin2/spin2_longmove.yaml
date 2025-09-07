@@ -1,0 +1,6 @@
+name: LONGMOVE
+type: method
+category: Block Operations
+signature: "LONGMOVE(Destination, Source, Count)"
+description: "Copy longs"
+source: Spin2 Documentation v51

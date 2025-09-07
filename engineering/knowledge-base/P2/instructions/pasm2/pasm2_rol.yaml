@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_rol_a329352a
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425374
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 4
+    type: csv
+    row: 4
+    type: csv
+    row: 4
+layer1_csv:
+  mnemonic: ROL
+  syntax: |
+    ROL     D,{#}S   {WC/WZ/WCZ}
+  group: Math and Logic
+  encoding: EEEE 0000001 CZI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Rotate left.            D = [63:32] of ({D[31:0], D[31:0]}     << S[4:0]). C = last bit shifted out if S[4:0] > 0, else D[31]. *
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.632685
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Rotate left.            D = [63:32] of ({D[31:0], D[31:0]}     << S[4:0]). C = last bit shifted out if S[4:0] > 0, else D[31]. *"
+  syntax: "ROL     D,{#}S   {WC/WZ/WCZ}"

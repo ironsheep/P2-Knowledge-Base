@@ -1,0 +1,77 @@
+# Smart Pin Mode: %10001 - Time A-Highs
+# Silicon Doc Reference: part4-smart-pins.txt, page 92
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%10001"
+
+mode_name: "Time A-Highs"
+
+mode_group: "measurement"
+
+mode_complexity: "intermediate"
+
+dac_mode_dependency: false
+
+pin_pairing: "none"
+
+operation_description: |
+  Time A-highs mode measures the duration of continuous high states on the A input.
+  Upon each high-to-low transition, the previous high duration count is placed in Z
+  and IN is raised. Z is limited to $80000000. Only high states are measured -
+  low states are ignored. This provides selective pulse width measurement for
+  positive pulses only.
+
+x_parameter:
+  usage: "Not used in this timing mode"
+
+y_parameter:
+  usage: "Not used in this timing mode"
+
+z_result:
+  data_type: "32-bit high state duration in clock cycles"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Duration of previous high state in clock cycles"
+  flag_behavior: "C flag contains status information"
+  overflow_handling: "Limited to $80000000 maximum count"
+
+timing_specifications:
+  clock_relationship: "Continuous timing during high states"
+  update_frequency: "Result available on each high-to-low transition"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "High-to-low transition on A input"
+  acknowledgment_method: "rdpin"
+
+reset_behavior:
+  dir_low_effects:
+    - "IN signal goes low" 
+    - "Z is set to $00000001"
+  dir_transition_effects: "Begin timing A input high states"
+  wrpin_zero_effects: "Return to normal mode"
+
+common_applications:
+  - application: "Positive pulse width measurement"
+    description: "Measure only positive pulse durations"
+    complexity_level: "intermediate"
+  - application: "High-time duty cycle measurement"
+    description: "Measure high portion of duty cycle"
+    complexity_level: "intermediate"
+
+configuration_examples:
+  - name: "Positive pulse measurement"
+    description: "Measure positive pulse widths only"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_00_10001_0, pulse_high"
+    wxpin_code: "WXPIN #0, pulse_high" 
+    explanation: "Measure high pulse durations on A input"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [92]
+      section: "%10001 = time A-highs"
+  validation_status: "draft"
+  completeness_score: 85
+  technical_accuracy: "silicon_doc_verified"

@@ -1,0 +1,65 @@
+# Smart Pin Mode: %01111 - Count A-Highs with Optional B-Decrement
+# Silicon Doc Reference: part4-smart-pins.txt, page 91
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%01111"
+
+mode_name: "Count A-Highs with Optional B-Decrement"
+
+mode_group: "measurement"
+
+mode_complexity: "intermediate"
+
+dac_mode_dependency: false
+
+pin_pairing: "adjacent"
+
+operation_description: |
+  Count A-highs mode with optional B-decrement provides level-based counting.
+  Y[0] selects operation: Y[0]=0 counts A-input highs only, Y[0]=1 increments
+  on A-input high and decrements on B-input high. X[31:0] sets measurement period
+  (0=continuous). Useful for level-based rather than edge-based counting.
+
+x_parameter:
+  usage: "Measurement period"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "Period in clocks (0=continuous)"
+
+y_parameter:
+  usage: "Mode selection"
+  bit_fields:
+    - range: "Y[0]"
+      purpose: "0=count A-highs, 1=A-inc/B-dec"
+
+z_result:
+  data_type: "32-bit count"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "High level count or differential count"
+
+common_applications:
+  - application: "Level monitoring"
+    description: "Count high levels over time"
+    complexity_level: "intermediate"
+  - application: "Differential level counting"
+    description: "Balance counting with two level signals"
+    complexity_level: "intermediate"
+
+configuration_examples:
+  - name: "Level counter"
+    description: "Count A-input high levels"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_00_01111_0, level_pin"
+    wxpin_code: "WXPIN #1000000, level_pin"
+    wypin_code: "WYPIN #0, level_pin"
+    explanation: "Count A-highs in 1M clock periods"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [91]
+      section: "%01111 = inc on A-high / dec on B-high"
+  validation_status: "draft"
+  completeness_score: 85
+  technical_accuracy: "silicon_doc_verified"

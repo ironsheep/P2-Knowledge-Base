@@ -1,0 +1,120 @@
+# Smart Pin Mode %01000 - PWM Triangle
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%01000"
+mode_name: "PWM Triangle"
+description: "Generates PWM output using triangular wave comparison for smooth analog-like output"
+category: "pwm_generation"
+output_override: true
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%01000"
+    out_override: "OUT signal overridden"
+
+timing_control:
+  x_register:
+    x_low: "X[15:0] establishes base period in clock cycles"
+    x_high: "X[31:16] establishes PWM frame period in base periods"
+    
+  y_register:
+    function: "Y[15:0] establishes PWM output value"
+    range: "Should range from zero to frame period (X[31:16])"
+    capture: "Captured at each frame start and used for duration"
+
+pwm_operation:
+  counter_behavior: "Counter counts from frame period down to 1, then from 1 back up to frame period"
+  total_cycle: "Complete cycle = TWO frame periods × base period"
+  comparison: "Captured output value compared to counter at each base period"
+  output_logic:
+    high: "If captured value ≥ counter"
+    low: "If captured value < counter"
+
+output_characteristics:
+  always_low: "Zero value always outputs low"
+  always_high: "Frame period value always outputs high"
+  triangle_wave: "Counter creates triangular reference wave"
+  smooth_output: "Triangle comparison reduces switching artifacts"
+
+frame_completion:
+  sequence:
+    - "Counter completes full triangle cycle (2 × frame period)"
+    - "Y[15:0] captured for next cycle"
+    - "IN is raised"
+    - "Process repeats"
+
+instructions:
+  setup:
+    - "WRPIN - Configure mode (%01000)"
+    - "WXPIN - Set base period X[15:0] and frame period X[31:16]"
+    
+  operation:
+    - "WYPIN - Set PWM value Y[15:0] (0 to frame period)"
+
+reset_behavior:
+  during_reset:
+    dir_state: "DIR=0"
+    in_signal: "IN is low"
+    output: "Output is low"
+    capture: "Y[15:0] is captured"
+
+behavior:
+  acknowledgment:
+    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
+    effect: "Lowers IN signal after 2 clocks"
+
+usage_notes:
+  - "Triangle wave comparison reduces harmonic content"
+  - "Smoother analog output compared to sawtooth PWM"
+  - "Update period is 2× frame period (full triangle cycle)"
+  - "Y[15:0] range: 0 to X[31:16] for full scale"
+  - "IN signal coordinates Y[15:0] updates"
+
+applications:
+  motor_control: "Smooth motor drive with reduced torque ripple"
+  audio_generation: "Low-distortion audio PWM output"
+  power_supplies: "Switching supplies with reduced EMI"
+  analog_synthesis: "Smooth analog signal generation"
+
+timing_calculations:
+  pwm_frequency: "f_pwm = f_clock / (base_period × frame_period × 2)"
+  update_rate: "f_update = f_clock / (base_period × frame_period × 2)"
+  resolution: "PWM steps = frame_period"
+
+example_configuration:
+  audio_pwm:
+    base_period: "X[15:0] = 1 (maximum PWM frequency)"
+    frame_period: "X[31:16] = 256 (8-bit resolution)"
+    pwm_freq: "f_clock / 512"
+    
+  motor_control:
+    base_period: "X[15:0] = 100 (lower switching frequency)"
+    frame_period: "X[31:16] = 1000 (fine resolution)"
+    pwm_freq: "f_clock / 200000"
+
+comparison_with_sawtooth:
+  triangle_advantages:
+    - "Lower harmonic distortion"
+    - "Smoother analog output"
+    - "Better for audio applications"
+  triangle_disadvantages:
+    - "2× longer update period"
+    - "More complex timing"
+
+related_modes:
+  - "%01001 (PWM sawtooth)"
+  - "%01010 (PWM SMPS)"
+  - "%00110 (NCO frequency)"
+  - "%00111 (NCO duty)"
+
+see_also:
+  - "PWM frequency calculations"
+  - "Triangle wave PWM theory"
+  - "Harmonic reduction techniques"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"

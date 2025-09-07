@@ -1,0 +1,69 @@
+# Smart Pin Mode: %11101 - Sync Serial Receive
+# Silicon Doc Reference: part4-smart-pins.txt, page 75
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%11101"
+
+mode_name: "Sync Serial Receive"
+
+group: "communication"
+
+mode_complexity: "advanced"
+
+dac_mode_dependency: false
+
+pin_pairing: "adjacent"
+
+operation_description: |
+  Sync serial receive mode provides SPI-style synchronous serial reception.
+  A-pin receives data, B-pin provides clock. Data received synchronously
+  with external clock. Received data available via RDPIN.
+
+x_parameter:
+  usage: "Clock and data configuration"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "Clock detection and data format configuration"
+
+y_parameter:
+  usage: "Not used in receive mode"
+
+z_result:
+  data_type: "Received data"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Synchronously received data"
+
+timing_specifications:
+  clock_relationship: "External clock-synchronized reception"
+  update_frequency: "Clock-dependent data reception"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "Data reception complete"
+  acknowledgment_method: "rdpin"
+
+common_applications:
+  - application: "SPI slave receive"
+    description: "SPI-style synchronous serial reception"
+    complexity_level: "advanced"
+  - application: "Synchronous sensor input"
+    description: "Clock-synchronized sensor data reception"
+    complexity_level: "advanced"
+
+configuration_examples:
+  - name: "SPI slave RX"
+    description: "SPI slave reception with external clock"
+    wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_11101_0, spi_rx"
+    wxpin_code: "WXPIN clock_config, spi_rx"
+    explanation: "A=data pin, B=clock pin, synchronous reception"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [75]
+      section: "%11101 = sync serial receive"
+  validation_status: "draft"
+  completeness_score: 80
+  technical_accuracy: "silicon_doc_verified"

@@ -1,0 +1,41 @@
+metadata:
+  id: pasm2_altgn_7d514a03
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426070
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 105
+    type: csv
+    row: 105
+    type: csv
+    row: 106
+    type: csv
+    row: 105
+    type: csv
+    row: 106
+layer1_csv:
+  mnemonic: ALTGN
+  syntax: |
+    ALTGN   D
+  group: Register Indirection
+  encoding: EEEE 1001010 111 DDDDDDDDD 000000000
+  alias: alias
+  description: Alter subsequent GETNIB/ROLNIB instruction. Next S field = D[11:3], N field = D[2:0].
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.633407
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Alter subsequent GETNIB/ROLNIB instruction. Next S field = (D[11:3] + S) & $1FF, N field = D[2:0].   D += sign-extended S[17:9]."
+  syntax: "ALTGN   D,{#}S"

@@ -1,0 +1,41 @@
+metadata:
+  id: pasm2_encod_096a2733
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425875
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 78
+    type: csv
+    row: 78
+    type: csv
+    row: 79
+    type: csv
+    row: 78
+    type: csv
+    row: 79
+layer1_csv:
+  mnemonic: ENCOD
+  syntax: |
+    ENCOD   D        {WC/WZ/WCZ}
+  group: Math and Logic
+  encoding: EEEE 0111100 CZ0 DDDDDDDDD DDDDDDDDD
+  alias: alias
+  description: Get bit position of top-most '1' in D into D. D = position of top '1' in S (0..31). C = (S != 0). *
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.616691
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Get bit position of top-most '1' in S into D. D = position of top '1' in S (0..31). C = (S != 0). *"
+  syntax: "ENCOD   D,{#}S   {WC/WZ/WCZ}"

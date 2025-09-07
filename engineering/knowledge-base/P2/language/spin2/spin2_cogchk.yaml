@@ -1,0 +1,6 @@
+name: COGCHK
+type: method
+category: Cog Management
+signature: "COGCHK(CogNum) : Running"
+description: "Check if cog is running, returns -1 if running or 0 if not"
+source: Spin2 Documentation v51

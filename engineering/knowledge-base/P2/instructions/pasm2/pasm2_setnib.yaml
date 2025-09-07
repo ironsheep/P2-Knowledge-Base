@@ -1,0 +1,41 @@
+metadata:
+  id: pasm2_setnib_38610201
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425940
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 86
+    type: csv
+    row: 85
+    type: csv
+    row: 86
+    type: csv
+    row: 85
+    type: csv
+    row: 86
+layer1_csv:
+  mnemonic: SETNIB
+  syntax: |
+    SETNIB  {#}S
+  group: Math and Logic
+  encoding: EEEE 1000000 00I 000000000 SSSSSSSSS
+  alias: alias
+  description: Set S[3:0] into nibble established by prior ALTSN instruction.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.623465
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Set S[3:0] into nibble N in D, keeping rest of D same."
+  syntax: "SETNIB  D,{#}S,#N"

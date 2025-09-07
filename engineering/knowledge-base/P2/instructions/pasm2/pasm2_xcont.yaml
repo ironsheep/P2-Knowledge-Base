@@ -1,0 +1,39 @@
+metadata:
+  id: pasm2_xcont_5328926f
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426935
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 233
+    type: csv
+    row: 233
+    type: csv
+    row: 233
+layer1_csv:
+  mnemonic: XCONT
+  syntax: |
+    XCONT   {#}D,{#}S
+  group: Streamer
+  encoding: EEEE 1100110 0LI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Buffer new streamer command to be issued on final NCO rollover of current command, continuing phase.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.309626
+  source: P2 Datasheet v35
+  timing:
+    raw: 2+
+    base_cycles: 2
+    type: variable
+    notes:
+      - Plus additional cycles based on condition
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Buffer new streamer command to be issued on final NCO rollover of current command, continuing phase."
+  syntax: "XCONT   {#}D,{#}S"

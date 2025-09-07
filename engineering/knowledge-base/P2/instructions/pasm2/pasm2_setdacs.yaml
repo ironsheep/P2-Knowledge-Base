@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_setdacs_1facc786
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.427354
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 264
+    type: csv
+    row: 264
+    type: csv
+    row: 264
+layer1_csv:
+  mnemonic: SETDACS
+  syntax: |
+    SETDACS {#}D
+  group: Smart Pins
+  encoding: EEEE 1101011 00L DDDDDDDDD 000011100
+  alias: .
+  description: DAC3 = D[31:24], DAC2 = D[23:16], DAC1 = D[15:8], DAC0 = D[7:0].
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.613699
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "DAC3 = D[31:24], DAC2 = D[23:16], DAC1 = D[15:8], DAC0 = D[7:0]."
+  syntax: "SETDACS {#}D"

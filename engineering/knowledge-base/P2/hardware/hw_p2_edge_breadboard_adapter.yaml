@@ -1,0 +1,12 @@
+name: P2 Edge Breadboard Adapter
+part_number: 64020
+category: adapter
+description: "Adapter for using P2 Edge on breadboards"
+features:
+  - P2 Edge socket
+  - Breadboard-friendly 0.6" spacing
+  - All pins accessible
+  - Power regulation onboard
+power: 5V external
+dimensions: 3.5" x 1.0"
+source: P2 Documentation Collection

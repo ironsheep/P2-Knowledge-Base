@@ -1,0 +1,46 @@
+metadata:
+  id: pasm2_calld_c4073b3a
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.429836
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 407
+    type: csv
+    row: 158
+    type: csv
+    row: 407
+    type: csv
+    row: 158
+    type: csv
+    row: 407
+layer1_csv:
+  mnemonic: CALLD
+  syntax: |
+    CALLD   PA/PB/PTRA/PTRB,#{\}A
+  group: Branch A - Call
+  encoding: EEEE 11100WW RAA AAAAAAAAA AAAAAAAAA
+  alias: .
+  description: Call to A by writing {C, Z, 10'b0, PC[19:0]} to PA/PB/PTRA/PTRB (per W).    If R = 1 then PC += A, else PC = A. "\" forces R = 0.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 4
+    cog_exec_16_cogs: 4
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.615406
+  source: P2 Datasheet v35
+  timing:
+    raw: 4 / 4
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.033586
+  narratives:
+    - source: INSTRUCTION-TIMING-AND-ENCODING.md
+      type: timing_note
+      content: |
+        Branch instruction flushes pipeline, causing next instruction to take 5+ clocks instead of 2.
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Call to S** by writing {C, Z, 10'b0, PC[19:0]} to D.                    C = S[31], Z = S[30]."
+  syntax: "CALLD   D,{#}S   {WC/WZ/WCZ}"

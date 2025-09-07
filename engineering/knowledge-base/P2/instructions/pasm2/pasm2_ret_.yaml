@@ -1,0 +1,25 @@
+metadata:
+  id: pasm2__ret__2e48ac18
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.429888
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 411
+    type: csv
+    row: 411
+    type: csv
+    row: 411
+layer1_csv:
+  mnemonic: _RET_
+  syntax: |
+    _RET_         <inst>  <ops>
+  group: Instruction Prefix
+  encoding: 0000 ------- --- --------- ---------
+  alias: .
+  description: Execute <inst> always and return if no branch. If <inst> is not branching then return by popping stack[19:0] into PC.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2

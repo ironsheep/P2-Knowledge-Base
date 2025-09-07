@@ -1,0 +1,140 @@
+# P2 Edge Standard Module - Hardware Specification
+# Part Number: P2-EC
+# Revision: Rev D
+# Documentation: P2-EC Edge Module Rev D Product Guide v3.0
+
+hardware_type: "edge_module"
+part_number: "P2-EC"
+manufacturer: "Parallax Inc."
+revision: "Rev D"
+status: "active_production"
+
+basic_info:
+  name: "P2 Edge Standard Module"
+  description: "Base P2 Edge module with standard 4MB flash configuration"
+  category: "microcontroller_module"
+  form_factor: "edge_connector_module"
+  
+specifications:
+  microcontroller:
+    chip: "P2X8C4M64P"
+    revision: "Rev D"
+    architecture: "32-bit multi-cog"
+    clock_speed: "20MHz crystal, PLL to 320MHz"
+    cores: 8
+    io_pins: 64
+    smart_pins: 64
+    
+  memory:
+    flash_type: "SPI Flash"
+    flash_part: "W25Q32"
+    flash_size: "4MB"
+    flash_organization: "Boot partition + user space"
+    ram_hub: "512KB"
+    ram_cog: "2KB per cog (8 cogs)"
+    ram_lut: "16KB (2KB per cog)"
+    
+  physical:
+    dimensions:
+      length: "2.7 inches"
+      width: "1.4 inches"  
+      height: "0.25 inches"
+    weight: "TBD"
+    connector: "80-pin edge connector"
+    mounting: "Via carrier boards"
+    
+  electrical:
+    supply_voltage: "3.3V"
+    core_voltage: "1.8V (onboard regulator)"
+    current_consumption: "TBD - depends on usage"
+    temperature_range: "Industrial grade"
+    
+pinout:
+  total_pins: 64
+  io_pins: "P0-P63 (all smart pins)"
+  power_pins: "3.3V, 1.8V, GND"
+  programming_pins: "Via carrier board USB/serial"
+  crystal_pins: "Internal 20MHz crystal"
+  
+compatibility:
+  carriers:
+    - part: "64029"
+      name: "P2 Edge Standard Breakout"
+      pin_access: "All 64 pins accessible"
+      form_factor: "Standard development"
+    - part: "64019" 
+      name: "P2 Edge Mini Breakout"
+      pin_access: "40 pins accessible"
+      form_factor: "Compact development"
+    - part: "64020"
+      name: "P2 Edge Module Breadboard"
+      pin_access: "All 64 pins + prototyping"
+      form_factor: "Educational/prototype"
+  
+  alternatives:
+    - part: "P2-EC32MB"
+      name: "P2 Edge 32MB Module"
+      difference: "32MB flash vs 4MB"
+      use_case: "Memory-intensive applications"
+      
+use_cases:
+  - "Standard P2 development platform"
+  - "Production deployment (with custom carrier)"
+  - "Educational and training platforms"
+  - "Prototyping and proof-of-concept"
+  - "Multi-peripheral projects requiring full pin access"
+  
+advantages:
+  - "Modular design - replaceable/upgradeable"
+  - "All 64 smart pins available"
+  - "Standard 4MB flash sufficient for most applications"
+  - "Production-ready form factor"
+  - "Compatible with multiple carrier options"
+  
+limitations:
+  - "Requires carrier board for development"
+  - "4MB flash may be insufficient for complex applications"
+  - "Cannot access pins without carrier"
+  - "Additional cost vs integrated solutions"
+  
+development_workflow:
+  - "Select appropriate carrier board"
+  - "Insert module into carrier"
+  - "Connect USB programming cable"
+  - "Develop using Spin2/PASM2"
+  - "Test with carrier peripherals"
+  - "Deploy to custom carrier for production"
+  
+programming:
+  methods:
+    - "USB via carrier board"
+    - "Prop Plug via carrier board"
+  tools:
+    - "PropellerTool"
+    - "PNut"
+    - "VS Code with Spin2 extension"
+  languages:
+    - "Spin2"
+    - "PASM2"
+    - "C (via FlexProp)"
+    
+documentation:
+  primary: "P2-EC Edge Module Rev D Product Guide v3.0"
+  related:
+    - "P2 Silicon Documentation"
+    - "Carrier board guides"
+    - "PASM2/Spin2 language references"
+    
+availability:
+  vendor: "Parallax Inc."
+  website: "parallax.com"
+  distributor_network: "Yes"
+  
+quality_rating: "production"
+recommendation_score: 5
+educational_value: "high"
+production_readiness: "excellent"
+
+# Cross-references
+ecosystem_position: "foundation_module"
+hardware_family: "p2_edge"

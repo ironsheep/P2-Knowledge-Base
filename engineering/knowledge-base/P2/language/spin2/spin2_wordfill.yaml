@@ -1,0 +1,6 @@
+name: WORDFILL
+type: method
+category: Fill Operations
+signature: "WORDFILL(Destination, Value, Count)"
+description: "Fill memory with word value"
+source: Spin2 Documentation v51

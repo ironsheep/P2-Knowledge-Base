@@ -1,0 +1,50 @@
+metadata:
+  id: pasm2_modcz_132bb0f9
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.429719
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 398
+    type: csv
+    row: 398
+    type: csv
+    row: 398
+layer1_csv:
+  mnemonic: MODCZ
+  syntax: |
+    MODCZ   c,z      {WC/WZ/WCZ}
+  group: Math and Logic
+  encoding: EEEE 1101011 CZ1 0cccczzzz 001101111
+  alias: .
+  description: Modify C and Z according to cccc and zzzz. C = cccc[{C,Z}], Z = zzzz[{C,Z}].
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.627298
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Modify C and Z according to cccc and zzzz. C = cccc[{C,Z}], Z = zzzz[{C,Z}]."
+  syntax: "MODCZ   c,z      {WC/WZ/WCZ}"
+
+layer4_chip:
+  source: Chip Gracey Clarifications
+  title: "Modify C and Z Flags Based on Operand Tests"
+  syntax: "MODCZ D, S"
+  function: "Modify both C and Z flags based on operand tests
+- Tests operand values and sets/clears both C and Z flags
+- Combined operation of MODC and MODZ
+- Most efficient when both flags need modification"
+  use_cases: "- Dual-condition testing preparation
+- Complex conditional logic setup
+- Efficient flag state management"
+  date: "2025-08-18"

@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_setscp_89ae0b06
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.429756
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 401
+    type: csv
+    row: 401
+    type: csv
+    row: 401
+layer1_csv:
+  mnemonic: SETSCP
+  syntax: |
+    SETSCP  {#}D
+  group: Smart Pins
+  encoding: EEEE 1101011 00L DDDDDDDDD 001110000
+  alias: .
+  description: Set four-channel oscilloscope enable to D[6] and set input pin base to D[5:2].
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.639875
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Set four-channel oscilloscope enable to D[6] and set input pin base to D[5:2]."
+  syntax: "SETSCP  {#}D"

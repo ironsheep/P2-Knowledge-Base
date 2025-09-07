@@ -1,0 +1,6 @@
+name: ROTXY
+type: method
+category: CORDIC Operations
+signature: "ROTXY(x, y, angle32bit) : rotx, roty"
+description: "Rotate X,Y by angle"
+source: Spin2 Documentation v51

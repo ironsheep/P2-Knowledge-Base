@@ -1,0 +1,40 @@
+metadata:
+  id: pasm2_getqx_ffbadb45
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.427271
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 259
+    type: csv
+    row: 259
+    type: csv
+    row: 259
+layer1_csv:
+  mnemonic: GETQX
+  syntax: |
+    GETQX   D        {WC/WZ/WCZ}
+  group: CORDIC Solver
+  encoding: EEEE 1101011 CZ0 DDDDDDDDD 000011000
+  alias: .
+  description: Retrieve CORDIC result X into D. Waits, in case result not ready. C = X[31]. *
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.638866
+  source: P2 Datasheet v35
+  timing:
+    raw: 2...58
+    notes:
+      - Hub window alignment affects timing
+    min_cycles: 2
+    max_cycles: 58
+    type: variable
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Retrieve CORDIC result X into D. Waits, in case result not ready. C = X[31]. *"
+  syntax: "GETQX   D        {WC/WZ/WCZ}"

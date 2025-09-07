@@ -1,0 +1,28 @@
+name: Smart_Pins
+category: io_system
+description: "Autonomous I/O pin processors"
+count: 64
+features:
+    modes: 32
+    mode_categories:
+      standard_io: Basic digital I/O
+      dac_modes: DAC with noise/dither options
+      pulse_modes: Pulse and NCO generation
+      pwm_modes: Triangle/sawtooth PWM
+      counter_modes: Counting and quadrature
+      timing_modes: Time measurement
+      adc_modes: ADC with SINC2/SINC3 filtering
+      scope_mode: Oscilloscope with trigger
+      usb_mode: USB host/device support
+      serial_modes: Sync/async serial
+    analog_features:
+      dac: 8-bit, 120-ohm and 1k-ohm modes
+      adc: Delta-sigma with 5 ranges
+      oversampling: 16-bit with noise shaping
+      calibration: VIO/GIO reference
+    digital_features:
+      filtering: 2/3/5/8-bit unanimous
+      relative_pins: Access -3 to +3 pins
+      feedback: Local positive/negative
+      comparator: Pin-to-pin and 8-bit level
+source: P2 Silicon Documentation v35

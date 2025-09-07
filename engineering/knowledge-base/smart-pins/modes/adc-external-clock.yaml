@@ -1,0 +1,88 @@
+# Smart Pin Mode: %11001 - ADC Sample/Filter/Capture (External Clock)
+# Silicon Doc Reference: part4-smart-pins.txt, page 94  
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%11001"
+
+mode_name: "ADC Sample/Filter/Capture (External Clock)"
+
+mode_group: "adc"
+
+mode_complexity: "advanced"
+
+dac_mode_dependency: false
+
+pin_pairing: "adjacent"
+
+operation_description: |
+  ADC sample/filter/capture with external clocking facilitates sampling, SINC filtering, and
+  raw capturing of external delta-sigma ADC bitstream data. A-input sampled on each B-input
+  rise, allowing external ADC integration. Same SINC2/SINC3 filtering modes as internal clock
+  version but triggered by external clock source.
+
+x_parameter:
+  usage: "ADC mode and sample period configuration"
+  bit_fields:
+    - range: "X[5:4]"
+      purpose: "ADC mode selection"
+      valid_values:
+        min: 0
+        max: 3
+        special_values:
+          - value: 0
+            meaning: "%00 = SINC2 Sampling"
+          - value: 1  
+            meaning: "%01 = SINC2 Filtering"
+          - value: 2
+            meaning: "%10 = SINC3 Filtering"
+          - value: 3
+            meaning: "%11 = Bitstream capturing"
+    - range: "X[3:0]"
+      purpose: "Sample period as POWER(2, X[3:0])"
+      valid_values:
+        min: 0
+        max: 15
+
+y_parameter:
+  usage: "Override sample period for non-power-of-2 periods"
+  bit_fields:
+    - range: "Y[13:0]"
+      purpose: "Arbitrary sample period override"
+      valid_values:
+        min: 1
+        max: 16383
+
+z_result:
+  data_type: "27-bit ADC result"
+  bit_interpretation:
+    - range: "Z[26:0]"
+      meaning: "ADC conversion result"
+
+timing_specifications:
+  clock_relationship: "A-input sampled on B-input rising edges"
+  update_frequency: "External clock dependent"
+
+common_applications:
+  - application: "External delta-sigma ADC"
+    description: "Interface to external ADC chips"
+    complexity_level: "expert"
+  - application: "Multi-channel ADC system"
+    description: "Synchronized external ADC sampling"
+    complexity_level: "expert"
+
+configuration_examples:
+  - name: "External ADC interface"
+    description: "Interface to external delta-sigma ADC"
+    wrpin_code: "WRPIN ##%0000_0001_000_0100000000000_00_11001_0, ext_adc"
+    wxpin_code: "WXPIN #%01_0111, ext_adc"
+    explanation: "A=ADC data, B=external clock, SINC2 filtering"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [94]
+      section: "%11001 = ADC sample/filter/capture, externally clocked"
+  validation_status: "draft"
+  completeness_score: 82
+  technical_accuracy: "silicon_doc_verified"

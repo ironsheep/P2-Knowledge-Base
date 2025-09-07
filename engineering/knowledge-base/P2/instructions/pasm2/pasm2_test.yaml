@@ -1,0 +1,41 @@
+metadata:
+  id: pasm2_test_1e352ac5
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425916
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 82
+    type: csv
+    row: 82
+    type: csv
+    row: 83
+    type: csv
+    row: 82
+    type: csv
+    row: 83
+layer1_csv:
+  mnemonic: TEST
+  syntax: |
+    TEST    D        {WC/WZ/WCZ}
+  group: Math and Logic
+  encoding: EEEE 0111110 CZ0 DDDDDDDDD DDDDDDDDD
+  alias: alias
+  description: Test D. C = parity of D. Z = (D == 0).
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.610613
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Test D with S. C = parity of (D & S). Z = ((D & S) == 0)."
+  syntax: "TEST    D,{#}S   {WC/WZ/WCZ}"

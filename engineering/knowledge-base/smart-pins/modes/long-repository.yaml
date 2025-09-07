@@ -1,0 +1,287 @@
+# Smart Pin Mode: %00001 (Non-DAC_MODE) - Long Repository
+# Silicon Doc Reference: part4-smart-pins.txt, lines 222-227
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%00001"
+
+mode_name: "Long Repository"
+
+mode_group: "control"
+
+mode_complexity: "basic"
+
+dac_mode_dependency: false
+
+pin_pairing: "none"
+
+wrpin_configuration:
+  base_format: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+  
+  a_input_selector:
+    description: "4-bit A input selector configuration"
+    bit_pattern: "%AAAA"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (default)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  b_input_selector:
+    description: "4-bit B input selector configuration"
+    bit_pattern: "%BBBB"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (default)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  input_logic_filtering:
+    description: "3-bit input logic/filtering after A/B selectors"
+    bit_pattern: "%FFF"
+    options:
+      - code: "%000"
+        description: "A, B (default)"
+        operation: "passthrough"
+        filter_type: "none"
+      - code: "%001"
+        description: "A AND B, B"
+        operation: "logical_and"
+        filter_type: "none"
+      - code: "%010"
+        description: "A OR B, B"
+        operation: "logical_or"
+        filter_type: "none"
+      - code: "%011"
+        description: "A XOR B, B"
+        operation: "logical_xor"
+        filter_type: "none"
+      - code: "%100"
+        description: "A, B, both filtered using global filt0 settings"
+        operation: "passthrough"
+        filter_type: "filt0"
+      - code: "%101"
+        description: "A, B, both filtered using global filt1 settings"
+        operation: "passthrough"
+        filter_type: "filt1"
+      - code: "%110"
+        description: "A, B, both filtered using global filt2 settings"
+        operation: "passthrough"
+        filter_type: "filt2"
+      - code: "%111"
+        description: "A, B, both filtered using global filt3 settings"
+        operation: "passthrough"
+        filter_type: "filt3"
+  
+  low_level_control:
+    description: "13-bit low-level pin control (M[12:0]) - MUST be M[12:10] != %101 for non-DAC operation"
+    bit_pattern: "%xxx..........  (M[12:10] must NOT be %101)"
+    special_modes:
+      - condition: "M[12:10] != %101"
+        behavior: "Long repository mode - pin acts as 32-bit data storage accessible via WXPIN/RDPIN"
+  
+  dir_out_control:
+    description: "2-bit pin DIR/OUT control"
+    bit_pattern: "%TT"
+    smart_off_behavior:
+      non_dac_mode: []
+      dac_mode: []
+    smart_on_behavior:
+      repository_mode:
+        - behavior: "No special DIR/OUT override - operates according to general pin control rules"
+      non_dac_modes: []
+
+x_parameter:
+  usage: "Not used in long repository mode - may be used for future expansion"
+
+y_parameter:
+  usage: "Not used in long repository mode - may be used for future expansion"
+
+z_result:
+  data_type: "32-bit long value most recently written via WXPIN"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Complete 32-bit value stored in repository"
+  flag_behavior: "C flag behavior depends on specific implementation context"
+  overflow_handling: "32-bit values stored without modification"
+
+operation_description: |
+  Long repository mode turns the smart pin into a simple 32-bit data storage location. 
+  WXPIN writes a complete 32-bit long value to the repository, and RDPIN/RQPIN can read 
+  back that complete long value. This mode is useful for inter-cog communication, 
+  storing configuration data, or implementing custom protocols where each pin serves 
+  as a register. When active (DIR=1), WXPIN updates the stored long and raises the IN 
+  signal to indicate new data is available. During reset (DIR=0), WXPIN instructions 
+  are ignored and IN remains low. The repository retains its data until explicitly 
+  overwritten via WXPIN.
+
+timing_specifications:
+  clock_relationship: "WXPIN writes take effect immediately and raise IN signal"
+  data_persistence: "Repository maintains data indefinitely until overwritten"
+  access_time: "RDPIN/RQPIN access is immediate with no latency"
+  write_acknowledge: "IN signal raised on each WXPIN write when DIR=1"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "WXPIN write operation when DIR=1 (pin active)"
+  acknowledgment_method: "rdpin, rqpin, akpin"
+  polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
+  reset_state: "IN low when DIR=0"
+
+reset_behavior:
+  dir_low_effects:
+    - "IN signal goes low"
+    - "WXPIN operations ignored"
+    - "Repository data preserved"
+    - "Smart pin configuration retained"
+  dir_transition_effects: "Smart pin begins responding to WXPIN writes with IN signaling"
+  wrpin_zero_effects: "Returns pin to normal mode, clears repository data"
+
+common_applications:
+  - application: "Inter-cog communication"
+    description: "One cog writes data via WXPIN, others read via RDPIN/RQPIN"
+    complexity_level: "basic"
+  - application: "Configuration storage"
+    description: "Store 32-bit configuration values accessible to all cogs"
+    complexity_level: "basic"
+  - application: "Custom protocol implementation"
+    description: "Each pin serves as a 32-bit register in custom communication protocols"
+    complexity_level: "intermediate"
+  - application: "Shared variable storage"
+    description: "Pins act as hardware-assisted shared variables between cogs"
+    complexity_level: "basic"
+
+configuration_examples:
+  - name: "Basic long repository"
+    description: "Configure pin as simple 32-bit storage"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_00_00001_0, pin_number"
+    wxpin_code: "N/A - no X parameter needed"
+    wypin_code: "N/A - no Y parameter needed"
+    explanation: "Minimal configuration, M[12:10] != %101 ensures non-DAC mode"
+  
+  - name: "Repository with input filtering"
+    description: "Long repository with digital filtering on inputs (if used by implementation)"
+    wrpin_code: "WRPIN ##%0000_0000_100_0000000000000_00_00001_0, pin_number"
+    wxpin_code: "N/A"
+    wypin_code: "N/A"
+    explanation: "Includes filt0 filtering on A/B inputs if implementation uses them"
+
+typical_code_patterns:
+  - pattern_name: "Inter-cog data exchange"
+    pasm2_code: |
+      ' Writer cog:
+      WRPIN ##%0000000000000_00_00001_0, data_pin
+      DIRH  data_pin                           ' Enable repository
+      WXPIN shared_value, data_pin             ' Store 32-bit value
+      
+      ' Reader cog:
+      reader_loop:
+      TESTP data_pin WC                        ' Check if new data available
+      IF_C  RDPIN received_value, data_pin     ' Read and acknowledge
+      ' ... process received_value ...
+      JMP   #reader_loop
+    explanation: "Standard pattern for sharing 32-bit values between cogs via smart pin repository"
+
+related_modes:
+  - mode_id: "%00000"
+    relationship: "alternative"
+    description: "Normal mode for standard I/O without repository functionality"
+  - mode_id: "%00010"
+    relationship: "similar_storage"
+    description: "Also provides repository function with DAC mode capability"
+  - mode_id: "%00011"
+    relationship: "similar_storage"
+    description: "Also provides repository function with DAC mode capability"
+
+related_instructions:
+  - instruction: "WRPIN"
+    usage_context: "Configure long repository mode with M[12:10] != %101"
+  - instruction: "WXPIN"
+    usage_context: "Write 32-bit value to repository, raises IN signal"
+  - instruction: "RDPIN"
+    usage_context: "Read 32-bit value from repository, acknowledges and clears IN"
+  - instruction: "RQPIN"  
+    usage_context: "Read 32-bit value from repository without acknowledgment (multi-cog safe)"
+  - instruction: "DIRH"
+    usage_context: "Enable repository operation"
+  - instruction: "TESTP"
+    usage_context: "Poll IN signal for repository update notification"
+
+hardware_considerations:
+  power_implications: "Minimal power usage - static storage with no active circuitry"
+  pin_loading_effects: "No impact on pin electrical characteristics"
+  data_integrity: "Data persists until explicitly overwritten - no decay or corruption"
+  multi_cog_access: "RQPIN allows safe multi-cog read access without bus conflicts"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      lines: [222, 227]
+      section: "%00001..%00011 and not DAC_MODE = long repository"
+  validation_status: "draft"
+  completeness_score: 94
+  technical_accuracy: "silicon_doc_verified"

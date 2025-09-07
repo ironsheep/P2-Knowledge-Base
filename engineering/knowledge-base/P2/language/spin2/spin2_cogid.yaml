@@ -1,0 +1,6 @@
+name: COGID
+type: method
+category: Cog Management
+signature: "COGID() : CogNum"
+description: "Get current cog's ID"
+source: Spin2 Documentation v51

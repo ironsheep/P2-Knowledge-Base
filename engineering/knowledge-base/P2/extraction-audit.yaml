@@ -1,0 +1,2959 @@
+metadata:
+  extraction_date: |
+    2025-09-06T14:31:46.475517
+  source_csv: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv
+  total_processed: 491
+  total_errors: 0
+log_entries:
+  -
+    timestamp: |
+      2025-09-06T14:31:46.430959
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_nop_1a004f5a.yaml
+    instruction: pasm2_nop_1a004f5a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.431094
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_ror_ab7d2c86.yaml
+    instruction: pasm2_ror_ab7d2c86
+  -
+    timestamp: |
+      2025-09-06T14:31:46.431175
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rol_a329352a.yaml
+    instruction: pasm2_rol_a329352a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.431252
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_shr_3fa34d82.yaml
+    instruction: pasm2_shr_3fa34d82
+  -
+    timestamp: |
+      2025-09-06T14:31:46.431329
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_shl_9f9c73fd.yaml
+    instruction: pasm2_shl_9f9c73fd
+  -
+    timestamp: |
+      2025-09-06T14:31:46.431413
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rcr_e9c91e9f.yaml
+    instruction: pasm2_rcr_e9c91e9f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.431492
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rcl_9f639ad9.yaml
+    instruction: pasm2_rcl_9f639ad9
+  -
+    timestamp: |
+      2025-09-06T14:31:46.431566
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_sar_8ccc7bd6.yaml
+    instruction: pasm2_sar_8ccc7bd6
+  -
+    timestamp: |
+      2025-09-06T14:31:46.431646
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_sal_2d248f1d.yaml
+    instruction: pasm2_sal_2d248f1d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.431723
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_add_e3441b45.yaml
+    instruction: pasm2_add_e3441b45
+  -
+    timestamp: |
+      2025-09-06T14:31:46.431796
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_addx_aed1d16e.yaml
+    instruction: pasm2_addx_aed1d16e
+  -
+    timestamp: |
+      2025-09-06T14:31:46.431868
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_adds_35ea15b6.yaml
+    instruction: pasm2_adds_35ea15b6
+  -
+    timestamp: |
+      2025-09-06T14:31:46.431941
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_addsx_8807fc44.yaml
+    instruction: pasm2_addsx_8807fc44
+  -
+    timestamp: |
+      2025-09-06T14:31:46.432018
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_sub_5117ffe2.yaml
+    instruction: pasm2_sub_5117ffe2
+  -
+    timestamp: |
+      2025-09-06T14:31:46.432093
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_subx_8b8ebb2d.yaml
+    instruction: pasm2_subx_8b8ebb2d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.432168
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_subs_afc35821.yaml
+    instruction: pasm2_subs_afc35821
+  -
+    timestamp: |
+      2025-09-06T14:31:46.432243
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_subsx_8c571d2c.yaml
+    instruction: pasm2_subsx_8c571d2c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.432329
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_cmp_08c6a6ad.yaml
+    instruction: pasm2_cmp_08c6a6ad
+  -
+    timestamp: |
+      2025-09-06T14:31:46.432404
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_cmpx_6c6a26a2.yaml
+    instruction: pasm2_cmpx_6c6a26a2
+  -
+    timestamp: |
+      2025-09-06T14:31:46.432477
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_cmps_593e6b5d.yaml
+    instruction: pasm2_cmps_593e6b5d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.432550
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_cmpsx_491b60bb.yaml
+    instruction: pasm2_cmpsx_491b60bb
+  -
+    timestamp: |
+      2025-09-06T14:31:46.432625
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_cmpr_eff9a2ce.yaml
+    instruction: pasm2_cmpr_eff9a2ce
+  -
+    timestamp: |
+      2025-09-06T14:31:46.432696
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_cmpm_f3dbee8e.yaml
+    instruction: pasm2_cmpm_f3dbee8e
+  -
+    timestamp: |
+      2025-09-06T14:31:46.432769
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_subr_4582ee81.yaml
+    instruction: pasm2_subr_4582ee81
+  -
+    timestamp: |
+      2025-09-06T14:31:46.432844
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_cmpsub_e711615c.yaml
+    instruction: pasm2_cmpsub_e711615c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.432917
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_fge_797de09e.yaml
+    instruction: pasm2_fge_797de09e
+  -
+    timestamp: |
+      2025-09-06T14:31:46.432999
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_fle_7eee5cf4.yaml
+    instruction: pasm2_fle_7eee5cf4
+  -
+    timestamp: |
+      2025-09-06T14:31:46.433082
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_fges_a8868d01.yaml
+    instruction: pasm2_fges_a8868d01
+  -
+    timestamp: |
+      2025-09-06T14:31:46.433155
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_fles_1278d23f.yaml
+    instruction: pasm2_fles_1278d23f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.433241
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_sumc_1e67118a.yaml
+    instruction: pasm2_sumc_1e67118a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.433320
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_sumnc_2e06b546.yaml
+    instruction: pasm2_sumnc_2e06b546
+  -
+    timestamp: |
+      2025-09-06T14:31:46.433397
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_sumz_704ea897.yaml
+    instruction: pasm2_sumz_704ea897
+  -
+    timestamp: |
+      2025-09-06T14:31:46.433471
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_sumnz_54a390c2.yaml
+    instruction: pasm2_sumnz_54a390c2
+  -
+    timestamp: |
+      2025-09-06T14:31:46.433547
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testb_c56566f1.yaml
+    instruction: pasm2_testb_c56566f1
+  -
+    timestamp: |
+      2025-09-06T14:31:46.433626
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testbn_99363f53.yaml
+    instruction: pasm2_testbn_99363f53
+  -
+    timestamp: |
+      2025-09-06T14:31:46.433703
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testb_250cdbba.yaml
+    instruction: pasm2_testb_250cdbba
+  -
+    timestamp: |
+      2025-09-06T14:31:46.433780
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testbn_db3e8821.yaml
+    instruction: pasm2_testbn_db3e8821
+  -
+    timestamp: |
+      2025-09-06T14:31:46.433852
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testb_7c003262.yaml
+    instruction: pasm2_testb_7c003262
+  -
+    timestamp: |
+      2025-09-06T14:31:46.433927
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testbn_5c570de1.yaml
+    instruction: pasm2_testbn_5c570de1
+  -
+    timestamp: |
+      2025-09-06T14:31:46.434000
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testb_94c724be.yaml
+    instruction: pasm2_testb_94c724be
+  -
+    timestamp: |
+      2025-09-06T14:31:46.434070
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testbn_d46f3457.yaml
+    instruction: pasm2_testbn_d46f3457
+  -
+    timestamp: |
+      2025-09-06T14:31:46.434142
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_bitl_3a24ae0a.yaml
+    instruction: pasm2_bitl_3a24ae0a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.434220
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_bith_5c6ffec3.yaml
+    instruction: pasm2_bith_5c6ffec3
+  -
+    timestamp: |
+      2025-09-06T14:31:46.434310
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_bitc_efbb19c2.yaml
+    instruction: pasm2_bitc_efbb19c2
+  -
+    timestamp: |
+      2025-09-06T14:31:46.434422
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_bitnc_d69c0598.yaml
+    instruction: pasm2_bitnc_d69c0598
+  -
+    timestamp: |
+      2025-09-06T14:31:46.434512
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_bitz_1d64b6e9.yaml
+    instruction: pasm2_bitz_1d64b6e9
+  -
+    timestamp: |
+      2025-09-06T14:31:46.434614
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_bitnz_04f018ab.yaml
+    instruction: pasm2_bitnz_04f018ab
+  -
+    timestamp: |
+      2025-09-06T14:31:46.434698
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_bitrnd_863412e9.yaml
+    instruction: pasm2_bitrnd_863412e9
+  -
+    timestamp: |
+      2025-09-06T14:31:46.434780
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_bitnot_b3de84c2.yaml
+    instruction: pasm2_bitnot_b3de84c2
+  -
+    timestamp: |
+      2025-09-06T14:31:46.434852
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_and_81e841df.yaml
+    instruction: pasm2_and_81e841df
+  -
+    timestamp: |
+      2025-09-06T14:31:46.434925
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_andn_6d7797aa.yaml
+    instruction: pasm2_andn_6d7797aa
+  -
+    timestamp: |
+      2025-09-06T14:31:46.435001
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_or_1935c956.yaml
+    instruction: pasm2_or_1935c956
+  -
+    timestamp: |
+      2025-09-06T14:31:46.435083
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_xor_d99b7f05.yaml
+    instruction: pasm2_xor_d99b7f05
+  -
+    timestamp: |
+      2025-09-06T14:31:46.435170
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_muxc_ca9eceec.yaml
+    instruction: pasm2_muxc_ca9eceec
+  -
+    timestamp: |
+      2025-09-06T14:31:46.435250
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_muxnc_42aa475c.yaml
+    instruction: pasm2_muxnc_42aa475c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.435325
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_muxz_8967fb64.yaml
+    instruction: pasm2_muxz_8967fb64
+  -
+    timestamp: |
+      2025-09-06T14:31:46.435405
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_muxnz_f54b5a62.yaml
+    instruction: pasm2_muxnz_f54b5a62
+  -
+    timestamp: |
+      2025-09-06T14:31:46.435483
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_mov_71105395.yaml
+    instruction: pasm2_mov_71105395
+  -
+    timestamp: |
+      2025-09-06T14:31:46.435562
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_not_433093bd.yaml
+    instruction: pasm2_not_433093bd
+  -
+    timestamp: |
+      2025-09-06T14:31:46.435636
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_not_0f7726bd.yaml
+    instruction: pasm2_not_0f7726bd
+  -
+    timestamp: |
+      2025-09-06T14:31:46.435709
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_abs_64931e15.yaml
+    instruction: pasm2_abs_64931e15
+  -
+    timestamp: |
+      2025-09-06T14:31:46.435787
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_abs_005cf774.yaml
+    instruction: pasm2_abs_005cf774
+  -
+    timestamp: |
+      2025-09-06T14:31:46.435862
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_neg_bf13f4df.yaml
+    instruction: pasm2_neg_bf13f4df
+  -
+    timestamp: |
+      2025-09-06T14:31:46.435940
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_neg_5697da29.yaml
+    instruction: pasm2_neg_5697da29
+  -
+    timestamp: |
+      2025-09-06T14:31:46.436014
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_negc_a241e027.yaml
+    instruction: pasm2_negc_a241e027
+  -
+    timestamp: |
+      2025-09-06T14:31:46.436089
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_negc_216f1c70.yaml
+    instruction: pasm2_negc_216f1c70
+  -
+    timestamp: |
+      2025-09-06T14:31:46.436171
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_negnc_241df6a8.yaml
+    instruction: pasm2_negnc_241df6a8
+  -
+    timestamp: |
+      2025-09-06T14:31:46.436246
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_negnc_4696bb2f.yaml
+    instruction: pasm2_negnc_4696bb2f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.436321
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_negz_a172f015.yaml
+    instruction: pasm2_negz_a172f015
+  -
+    timestamp: |
+      2025-09-06T14:31:46.436395
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_negz_e5cf16a2.yaml
+    instruction: pasm2_negz_e5cf16a2
+  -
+    timestamp: |
+      2025-09-06T14:31:46.436478
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_negnz_b44d5db3.yaml
+    instruction: pasm2_negnz_b44d5db3
+  -
+    timestamp: |
+      2025-09-06T14:31:46.436577
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_negnz_03fc3513.yaml
+    instruction: pasm2_negnz_03fc3513
+  -
+    timestamp: |
+      2025-09-06T14:31:46.436660
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_incmod_35f1eb2b.yaml
+    instruction: pasm2_incmod_35f1eb2b
+  -
+    timestamp: |
+      2025-09-06T14:31:46.436740
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_decmod_29fe1ad5.yaml
+    instruction: pasm2_decmod_29fe1ad5
+  -
+    timestamp: |
+      2025-09-06T14:31:46.436821
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_zerox_bd261e73.yaml
+    instruction: pasm2_zerox_bd261e73
+  -
+    timestamp: |
+      2025-09-06T14:31:46.436900
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_signx_f828d6bc.yaml
+    instruction: pasm2_signx_f828d6bc
+  -
+    timestamp: |
+      2025-09-06T14:31:46.436974
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_encod_096a2733.yaml
+    instruction: pasm2_encod_096a2733
+  -
+    timestamp: |
+      2025-09-06T14:31:46.437051
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_encod_7b99a0a2.yaml
+    instruction: pasm2_encod_7b99a0a2
+  -
+    timestamp: |
+      2025-09-06T14:31:46.437132
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_ones_c561ea58.yaml
+    instruction: pasm2_ones_c561ea58
+  -
+    timestamp: |
+      2025-09-06T14:31:46.437215
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_ones_69b8e343.yaml
+    instruction: pasm2_ones_69b8e343
+  -
+    timestamp: |
+      2025-09-06T14:31:46.437294
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_test_1e352ac5.yaml
+    instruction: pasm2_test_1e352ac5
+  -
+    timestamp: |
+      2025-09-06T14:31:46.437375
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_test_1c3c534a.yaml
+    instruction: pasm2_test_1c3c534a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.437449
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testn_07eb3b65.yaml
+    instruction: pasm2_testn_07eb3b65
+  -
+    timestamp: |
+      2025-09-06T14:31:46.437528
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setnib_3ea205ce.yaml
+    instruction: pasm2_setnib_3ea205ce
+  -
+    timestamp: |
+      2025-09-06T14:31:46.437606
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setnib_38610201.yaml
+    instruction: pasm2_setnib_38610201
+  -
+    timestamp: |
+      2025-09-06T14:31:46.437682
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_getnib_d9d6f8d0.yaml
+    instruction: pasm2_getnib_d9d6f8d0
+  -
+    timestamp: |
+      2025-09-06T14:31:46.437763
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_getnib_50aa5ce3.yaml
+    instruction: pasm2_getnib_50aa5ce3
+  -
+    timestamp: |
+      2025-09-06T14:31:46.437846
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rolnib_598e015d.yaml
+    instruction: pasm2_rolnib_598e015d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.437927
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rolnib_494d543f.yaml
+    instruction: pasm2_rolnib_494d543f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.438007
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setbyte_bcacab50.yaml
+    instruction: pasm2_setbyte_bcacab50
+  -
+    timestamp: |
+      2025-09-06T14:31:46.438090
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setbyte_731f2da1.yaml
+    instruction: pasm2_setbyte_731f2da1
+  -
+    timestamp: |
+      2025-09-06T14:31:46.438167
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_getbyte_8c93c58b.yaml
+    instruction: pasm2_getbyte_8c93c58b
+  -
+    timestamp: |
+      2025-09-06T14:31:46.438246
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_getbyte_1d852485.yaml
+    instruction: pasm2_getbyte_1d852485
+  -
+    timestamp: |
+      2025-09-06T14:31:46.438324
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rolbyte_133dd9c9.yaml
+    instruction: pasm2_rolbyte_133dd9c9
+  -
+    timestamp: |
+      2025-09-06T14:31:46.438398
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rolbyte_82d8bee9.yaml
+    instruction: pasm2_rolbyte_82d8bee9
+  -
+    timestamp: |
+      2025-09-06T14:31:46.438474
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setword_469c143c.yaml
+    instruction: pasm2_setword_469c143c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.438550
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setword_ff3e5949.yaml
+    instruction: pasm2_setword_ff3e5949
+  -
+    timestamp: |
+      2025-09-06T14:31:46.438630
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_getword_88777fa2.yaml
+    instruction: pasm2_getword_88777fa2
+  -
+    timestamp: |
+      2025-09-06T14:31:46.438708
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_getword_d11d7d35.yaml
+    instruction: pasm2_getword_d11d7d35
+  -
+    timestamp: |
+      2025-09-06T14:31:46.438794
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rolword_8ec92869.yaml
+    instruction: pasm2_rolword_8ec92869
+  -
+    timestamp: |
+      2025-09-06T14:31:46.438871
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rolword_179ca597.yaml
+    instruction: pasm2_rolword_179ca597
+  -
+    timestamp: |
+      2025-09-06T14:31:46.438956
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altsn_26e71793.yaml
+    instruction: pasm2_altsn_26e71793
+  -
+    timestamp: |
+      2025-09-06T14:31:46.439035
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altsn_38bee61d.yaml
+    instruction: pasm2_altsn_38bee61d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.439112
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altgn_7d514a03.yaml
+    instruction: pasm2_altgn_7d514a03
+  -
+    timestamp: |
+      2025-09-06T14:31:46.439188
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altgn_e33ec4df.yaml
+    instruction: pasm2_altgn_e33ec4df
+  -
+    timestamp: |
+      2025-09-06T14:31:46.439264
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altsb_3a154980.yaml
+    instruction: pasm2_altsb_3a154980
+  -
+    timestamp: |
+      2025-09-06T14:31:46.439345
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altsb_00abd529.yaml
+    instruction: pasm2_altsb_00abd529
+  -
+    timestamp: |
+      2025-09-06T14:31:46.439425
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altgb_5b52934d.yaml
+    instruction: pasm2_altgb_5b52934d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.439500
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altgb_3da95c45.yaml
+    instruction: pasm2_altgb_3da95c45
+  -
+    timestamp: |
+      2025-09-06T14:31:46.439578
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altsw_0d334358.yaml
+    instruction: pasm2_altsw_0d334358
+  -
+    timestamp: |
+      2025-09-06T14:31:46.439653
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altsw_92af3956.yaml
+    instruction: pasm2_altsw_92af3956
+  -
+    timestamp: |
+      2025-09-06T14:31:46.439728
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altgw_ae75398c.yaml
+    instruction: pasm2_altgw_ae75398c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.439808
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altgw_d4d63653.yaml
+    instruction: pasm2_altgw_d4d63653
+  -
+    timestamp: |
+      2025-09-06T14:31:46.439883
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altr_85719526.yaml
+    instruction: pasm2_altr_85719526
+  -
+    timestamp: |
+      2025-09-06T14:31:46.439962
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altr_30b515e2.yaml
+    instruction: pasm2_altr_30b515e2
+  -
+    timestamp: |
+      2025-09-06T14:31:46.440042
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altd_d2acb986.yaml
+    instruction: pasm2_altd_d2acb986
+  -
+    timestamp: |
+      2025-09-06T14:31:46.440119
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altd_a7f113b6.yaml
+    instruction: pasm2_altd_a7f113b6
+  -
+    timestamp: |
+      2025-09-06T14:31:46.440197
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_alts_0ff5a4b4.yaml
+    instruction: pasm2_alts_0ff5a4b4
+  -
+    timestamp: |
+      2025-09-06T14:31:46.440272
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_alts_25a79b17.yaml
+    instruction: pasm2_alts_25a79b17
+  -
+    timestamp: |
+      2025-09-06T14:31:46.440347
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altb_36198b56.yaml
+    instruction: pasm2_altb_36198b56
+  -
+    timestamp: |
+      2025-09-06T14:31:46.440421
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_altb_748a46b3.yaml
+    instruction: pasm2_altb_748a46b3
+  -
+    timestamp: |
+      2025-09-06T14:31:46.440496
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_alti_1536c5ca.yaml
+    instruction: pasm2_alti_1536c5ca
+  -
+    timestamp: |
+      2025-09-06T14:31:46.440571
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_alti_219ce769.yaml
+    instruction: pasm2_alti_219ce769
+  -
+    timestamp: |
+      2025-09-06T14:31:46.440657
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setr_2006ee5a.yaml
+    instruction: pasm2_setr_2006ee5a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.440774
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setd_556c5779.yaml
+    instruction: pasm2_setd_556c5779
+  -
+    timestamp: |
+      2025-09-06T14:31:46.440856
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_sets_54daaafc.yaml
+    instruction: pasm2_sets_54daaafc
+  -
+    timestamp: |
+      2025-09-06T14:31:46.440936
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_decod_935f113e.yaml
+    instruction: pasm2_decod_935f113e
+  -
+    timestamp: |
+      2025-09-06T14:31:46.441016
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_decod_ac98ecb0.yaml
+    instruction: pasm2_decod_ac98ecb0
+  -
+    timestamp: |
+      2025-09-06T14:31:46.441097
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_bmask_e686ee1a.yaml
+    instruction: pasm2_bmask_e686ee1a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.441215
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_bmask_3a884712.yaml
+    instruction: pasm2_bmask_3a884712
+  -
+    timestamp: |
+      2025-09-06T14:31:46.441317
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_crcbit_75d480af.yaml
+    instruction: pasm2_crcbit_75d480af
+  -
+    timestamp: |
+      2025-09-06T14:31:46.441401
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_crcnib_ae161873.yaml
+    instruction: pasm2_crcnib_ae161873
+  -
+    timestamp: |
+      2025-09-06T14:31:46.441488
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_muxnits_172f84ea.yaml
+    instruction: pasm2_muxnits_172f84ea
+  -
+    timestamp: |
+      2025-09-06T14:31:46.441589
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_muxnibs_d5eaa749.yaml
+    instruction: pasm2_muxnibs_d5eaa749
+  -
+    timestamp: |
+      2025-09-06T14:31:46.441722
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_muxq_45c91346.yaml
+    instruction: pasm2_muxq_45c91346
+  -
+    timestamp: |
+      2025-09-06T14:31:46.441844
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_movbyts_3c23d3d8.yaml
+    instruction: pasm2_movbyts_3c23d3d8
+  -
+    timestamp: |
+      2025-09-06T14:31:46.441966
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_mul_9a10286f.yaml
+    instruction: pasm2_mul_9a10286f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.442118
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_muls_ac3c2c3e.yaml
+    instruction: pasm2_muls_ac3c2c3e
+  -
+    timestamp: |
+      2025-09-06T14:31:46.442258
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_sca_4ca2e73d.yaml
+    instruction: pasm2_sca_4ca2e73d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.442358
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_scas_36cc0c8a.yaml
+    instruction: pasm2_scas_36cc0c8a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.442455
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_addpix_74023269.yaml
+    instruction: pasm2_addpix_74023269
+  -
+    timestamp: |
+      2025-09-06T14:31:46.442563
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_mulpix_623c41eb.yaml
+    instruction: pasm2_mulpix_623c41eb
+  -
+    timestamp: |
+      2025-09-06T14:31:46.442662
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_blnpix_44f99142.yaml
+    instruction: pasm2_blnpix_44f99142
+  -
+    timestamp: |
+      2025-09-06T14:31:46.442766
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_mixpix_53ec36ac.yaml
+    instruction: pasm2_mixpix_53ec36ac
+  -
+    timestamp: |
+      2025-09-06T14:31:46.442858
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_addct1_a077f725.yaml
+    instruction: pasm2_addct1_a077f725
+  -
+    timestamp: |
+      2025-09-06T14:31:46.442942
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_addct2_ac8c4c72.yaml
+    instruction: pasm2_addct2_ac8c4c72
+  -
+    timestamp: |
+      2025-09-06T14:31:46.443023
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_addct3_7872e759.yaml
+    instruction: pasm2_addct3_7872e759
+  -
+    timestamp: |
+      2025-09-06T14:31:46.443108
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_wmlong_4613f7b3.yaml
+    instruction: pasm2_wmlong_4613f7b3
+  -
+    timestamp: |
+      2025-09-06T14:31:46.443193
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rqpin_7bcc3d64.yaml
+    instruction: pasm2_rqpin_7bcc3d64
+  -
+    timestamp: |
+      2025-09-06T14:31:46.443284
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rdpin_eaff54cd.yaml
+    instruction: pasm2_rdpin_eaff54cd
+  -
+    timestamp: |
+      2025-09-06T14:31:46.443363
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rdlut_224decef.yaml
+    instruction: pasm2_rdlut_224decef
+  -
+    timestamp: |
+      2025-09-06T14:31:46.443446
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rdbyte_90a5d896.yaml
+    instruction: pasm2_rdbyte_90a5d896
+  -
+    timestamp: |
+      2025-09-06T14:31:46.443527
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rdword_c097957e.yaml
+    instruction: pasm2_rdword_c097957e
+  -
+    timestamp: |
+      2025-09-06T14:31:46.443627
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rdlong_097ef8f3.yaml
+    instruction: pasm2_rdlong_097ef8f3
+  -
+    timestamp: |
+      2025-09-06T14:31:46.443722
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_popa_baa3e16f.yaml
+    instruction: pasm2_popa_baa3e16f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.443821
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_popb_12ad4de6.yaml
+    instruction: pasm2_popb_12ad4de6
+  -
+    timestamp: |
+      2025-09-06T14:31:46.443933
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_calld_08bb9617.yaml
+    instruction: pasm2_calld_08bb9617
+  -
+    timestamp: |
+      2025-09-06T14:31:46.444047
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_resi3_4ae7b606.yaml
+    instruction: pasm2_resi3_4ae7b606
+  -
+    timestamp: |
+      2025-09-06T14:31:46.444138
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_resi2_60661824.yaml
+    instruction: pasm2_resi2_60661824
+  -
+    timestamp: |
+      2025-09-06T14:31:46.444243
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_resi1_7e0a4dcb.yaml
+    instruction: pasm2_resi1_7e0a4dcb
+  -
+    timestamp: |
+      2025-09-06T14:31:46.444332
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_resi0_a2a090d8.yaml
+    instruction: pasm2_resi0_a2a090d8
+  -
+    timestamp: |
+      2025-09-06T14:31:46.444413
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_reti3_1220e423.yaml
+    instruction: pasm2_reti3_1220e423
+  -
+    timestamp: |
+      2025-09-06T14:31:46.444495
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_reti2_a9a5d877.yaml
+    instruction: pasm2_reti2_a9a5d877
+  -
+    timestamp: |
+      2025-09-06T14:31:46.444575
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_reti1_ed1884b1.yaml
+    instruction: pasm2_reti1_ed1884b1
+  -
+    timestamp: |
+      2025-09-06T14:31:46.444654
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_reti0_df4db58a.yaml
+    instruction: pasm2_reti0_df4db58a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.444749
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_callpa_b3da3581.yaml
+    instruction: pasm2_callpa_b3da3581
+  -
+    timestamp: |
+      2025-09-06T14:31:46.444834
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_callpb_67850f6b.yaml
+    instruction: pasm2_callpb_67850f6b
+  -
+    timestamp: |
+      2025-09-06T14:31:46.444918
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_djz_e0850bde.yaml
+    instruction: pasm2_djz_e0850bde
+  -
+    timestamp: |
+      2025-09-06T14:31:46.445000
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_djnz_5214ce8e.yaml
+    instruction: pasm2_djnz_5214ce8e
+  -
+    timestamp: |
+      2025-09-06T14:31:46.445083
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_djf_3ca0fa40.yaml
+    instruction: pasm2_djf_3ca0fa40
+  -
+    timestamp: |
+      2025-09-06T14:31:46.445167
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_djnf_34584f0c.yaml
+    instruction: pasm2_djnf_34584f0c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.445255
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_ijz_00985346.yaml
+    instruction: pasm2_ijz_00985346
+  -
+    timestamp: |
+      2025-09-06T14:31:46.445337
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_ijnz_75700910.yaml
+    instruction: pasm2_ijnz_75700910
+  -
+    timestamp: |
+      2025-09-06T14:31:46.445434
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_tjz_caff3ed1.yaml
+    instruction: pasm2_tjz_caff3ed1
+  -
+    timestamp: |
+      2025-09-06T14:31:46.445545
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_tjnz_af2a403c.yaml
+    instruction: pasm2_tjnz_af2a403c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.445627
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_tjf_bd33283a.yaml
+    instruction: pasm2_tjf_bd33283a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.445720
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_tjnf_f9950a63.yaml
+    instruction: pasm2_tjnf_f9950a63
+  -
+    timestamp: |
+      2025-09-06T14:31:46.445813
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_tjs_c51cdb82.yaml
+    instruction: pasm2_tjs_c51cdb82
+  -
+    timestamp: |
+      2025-09-06T14:31:46.445896
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_tjns_356696fb.yaml
+    instruction: pasm2_tjns_356696fb
+  -
+    timestamp: |
+      2025-09-06T14:31:46.445974
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_tjv_4da15f9c.yaml
+    instruction: pasm2_tjv_4da15f9c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.446051
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jint_8139edd2.yaml
+    instruction: pasm2_jint_8139edd2
+  -
+    timestamp: |
+      2025-09-06T14:31:46.446125
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jct1_a376e11b.yaml
+    instruction: pasm2_jct1_a376e11b
+  -
+    timestamp: |
+      2025-09-06T14:31:46.446202
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jct2_bec14528.yaml
+    instruction: pasm2_jct2_bec14528
+  -
+    timestamp: |
+      2025-09-06T14:31:46.446285
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jct3_e5fe61d2.yaml
+    instruction: pasm2_jct3_e5fe61d2
+  -
+    timestamp: |
+      2025-09-06T14:31:46.446378
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jse1_d88032db.yaml
+    instruction: pasm2_jse1_d88032db
+  -
+    timestamp: |
+      2025-09-06T14:31:46.446521
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jse2_16460629.yaml
+    instruction: pasm2_jse2_16460629
+  -
+    timestamp: |
+      2025-09-06T14:31:46.446611
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jse3_02bf84be.yaml
+    instruction: pasm2_jse3_02bf84be
+  -
+    timestamp: |
+      2025-09-06T14:31:46.446690
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jse4_281ae42d.yaml
+    instruction: pasm2_jse4_281ae42d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.446768
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jpat_df6206c1.yaml
+    instruction: pasm2_jpat_df6206c1
+  -
+    timestamp: |
+      2025-09-06T14:31:46.446851
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jfbw_765c3815.yaml
+    instruction: pasm2_jfbw_765c3815
+  -
+    timestamp: |
+      2025-09-06T14:31:46.446935
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jxmt_65985e75.yaml
+    instruction: pasm2_jxmt_65985e75
+  -
+    timestamp: |
+      2025-09-06T14:31:46.447020
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jxfi_43dea20f.yaml
+    instruction: pasm2_jxfi_43dea20f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.447109
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jxro_42da3d05.yaml
+    instruction: pasm2_jxro_42da3d05
+  -
+    timestamp: |
+      2025-09-06T14:31:46.447203
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jxrl_d8965900.yaml
+    instruction: pasm2_jxrl_d8965900
+  -
+    timestamp: |
+      2025-09-06T14:31:46.447297
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jatn_b819f6b4.yaml
+    instruction: pasm2_jatn_b819f6b4
+  -
+    timestamp: |
+      2025-09-06T14:31:46.447389
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jqmt_411604d9.yaml
+    instruction: pasm2_jqmt_411604d9
+  -
+    timestamp: |
+      2025-09-06T14:31:46.447484
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jnint_5ab63f84.yaml
+    instruction: pasm2_jnint_5ab63f84
+  -
+    timestamp: |
+      2025-09-06T14:31:46.447565
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jnct1_1c0adb57.yaml
+    instruction: pasm2_jnct1_1c0adb57
+  -
+    timestamp: |
+      2025-09-06T14:31:46.447647
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jnct2_af51574d.yaml
+    instruction: pasm2_jnct2_af51574d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.447760
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jnct3_86c974d6.yaml
+    instruction: pasm2_jnct3_86c974d6
+  -
+    timestamp: |
+      2025-09-06T14:31:46.447849
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jnse1_825dd5a3.yaml
+    instruction: pasm2_jnse1_825dd5a3
+  -
+    timestamp: |
+      2025-09-06T14:31:46.447937
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jnse2_bf359a26.yaml
+    instruction: pasm2_jnse2_bf359a26
+  -
+    timestamp: |
+      2025-09-06T14:31:46.448039
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jnse3_e1bf7e29.yaml
+    instruction: pasm2_jnse3_e1bf7e29
+  -
+    timestamp: |
+      2025-09-06T14:31:46.448124
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jnse4_56ada847.yaml
+    instruction: pasm2_jnse4_56ada847
+  -
+    timestamp: |
+      2025-09-06T14:31:46.448207
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jnpat_e2238932.yaml
+    instruction: pasm2_jnpat_e2238932
+  -
+    timestamp: |
+      2025-09-06T14:31:46.448287
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jnfbw_33353dd1.yaml
+    instruction: pasm2_jnfbw_33353dd1
+  -
+    timestamp: |
+      2025-09-06T14:31:46.448364
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jnxmt_6a5e63f8.yaml
+    instruction: pasm2_jnxmt_6a5e63f8
+  -
+    timestamp: |
+      2025-09-06T14:31:46.448442
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jnxfi_0ec5cee1.yaml
+    instruction: pasm2_jnxfi_0ec5cee1
+  -
+    timestamp: |
+      2025-09-06T14:31:46.448529
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jnxro_0b878ec0.yaml
+    instruction: pasm2_jnxro_0b878ec0
+  -
+    timestamp: |
+      2025-09-06T14:31:46.448605
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jnxrl_090fd93c.yaml
+    instruction: pasm2_jnxrl_090fd93c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.448701
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jnatn_47f7b747.yaml
+    instruction: pasm2_jnatn_47f7b747
+  -
+    timestamp: |
+      2025-09-06T14:31:46.448799
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jnqmt_8dc5da6a.yaml
+    instruction: pasm2_jnqmt_8dc5da6a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.448883
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_empty_f2a1cd21.yaml
+    instruction: pasm2_empty_f2a1cd21
+  -
+    timestamp: |
+      2025-09-06T14:31:46.448960
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_empty_f2a1cd21.yaml
+    instruction: pasm2_empty_f2a1cd21
+  -
+    timestamp: |
+      2025-09-06T14:31:46.449048
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setpat_bb131035.yaml
+    instruction: pasm2_setpat_bb131035
+  -
+    timestamp: |
+      2025-09-06T14:31:46.449136
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_akpin_ede21b9d.yaml
+    instruction: pasm2_akpin_ede21b9d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.449215
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_wrpin_79d13bd9.yaml
+    instruction: pasm2_wrpin_79d13bd9
+  -
+    timestamp: |
+      2025-09-06T14:31:46.449298
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_wxpin_b8778d24.yaml
+    instruction: pasm2_wxpin_b8778d24
+  -
+    timestamp: |
+      2025-09-06T14:31:46.449387
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_wypin_bb83b762.yaml
+    instruction: pasm2_wypin_bb83b762
+  -
+    timestamp: |
+      2025-09-06T14:31:46.449471
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_wrlut_c22a80b7.yaml
+    instruction: pasm2_wrlut_c22a80b7
+  -
+    timestamp: |
+      2025-09-06T14:31:46.449560
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_wrbyte_472314ad.yaml
+    instruction: pasm2_wrbyte_472314ad
+  -
+    timestamp: |
+      2025-09-06T14:31:46.449649
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_wrword_7121eb23.yaml
+    instruction: pasm2_wrword_7121eb23
+  -
+    timestamp: |
+      2025-09-06T14:31:46.449735
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_wrlong_a6f7f585.yaml
+    instruction: pasm2_wrlong_a6f7f585
+  -
+    timestamp: |
+      2025-09-06T14:31:46.449824
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pusha_c9339dd4.yaml
+    instruction: pasm2_pusha_c9339dd4
+  -
+    timestamp: |
+      2025-09-06T14:31:46.449914
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pushb_ab3bd732.yaml
+    instruction: pasm2_pushb_ab3bd732
+  -
+    timestamp: |
+      2025-09-06T14:31:46.449999
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rdfast_bfe2b024.yaml
+    instruction: pasm2_rdfast_bfe2b024
+  -
+    timestamp: |
+      2025-09-06T14:31:46.450087
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_wrfast_85bc1b35.yaml
+    instruction: pasm2_wrfast_85bc1b35
+  -
+    timestamp: |
+      2025-09-06T14:31:46.450176
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_fblock_54928d88.yaml
+    instruction: pasm2_fblock_54928d88
+  -
+    timestamp: |
+      2025-09-06T14:31:46.450270
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_xinit_caa14944.yaml
+    instruction: pasm2_xinit_caa14944
+  -
+    timestamp: |
+      2025-09-06T14:31:46.450369
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_xstop_43d0f6de.yaml
+    instruction: pasm2_xstop_43d0f6de
+  -
+    timestamp: |
+      2025-09-06T14:31:46.450466
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_xzero_cd4f821a.yaml
+    instruction: pasm2_xzero_cd4f821a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.450555
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_xcont_5328926f.yaml
+    instruction: pasm2_xcont_5328926f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.450646
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rep_1d15aaba.yaml
+    instruction: pasm2_rep_1d15aaba
+  -
+    timestamp: |
+      2025-09-06T14:31:46.450739
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_coginit_d1ade2cf.yaml
+    instruction: pasm2_coginit_d1ade2cf
+  -
+    timestamp: |
+      2025-09-06T14:31:46.450834
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_qmul_789933d9.yaml
+    instruction: pasm2_qmul_789933d9
+  -
+    timestamp: |
+      2025-09-06T14:31:46.450931
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_qdiv_bf91dfce.yaml
+    instruction: pasm2_qdiv_bf91dfce
+  -
+    timestamp: |
+      2025-09-06T14:31:46.451026
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_qfrac_0f0d5fd5.yaml
+    instruction: pasm2_qfrac_0f0d5fd5
+  -
+    timestamp: |
+      2025-09-06T14:31:46.451135
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_qsqrt_8d96385f.yaml
+    instruction: pasm2_qsqrt_8d96385f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.451232
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_qrotate_e5533511.yaml
+    instruction: pasm2_qrotate_e5533511
+  -
+    timestamp: |
+      2025-09-06T14:31:46.451330
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_qvector_6b8b5d43.yaml
+    instruction: pasm2_qvector_6b8b5d43
+  -
+    timestamp: |
+      2025-09-06T14:31:46.451427
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_hubset_ac6d8120.yaml
+    instruction: pasm2_hubset_ac6d8120
+  -
+    timestamp: |
+      2025-09-06T14:31:46.451521
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_cogid_cd99cda1.yaml
+    instruction: pasm2_cogid_cd99cda1
+  -
+    timestamp: |
+      2025-09-06T14:31:46.451614
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_cogstop_dfe71962.yaml
+    instruction: pasm2_cogstop_dfe71962
+  -
+    timestamp: |
+      2025-09-06T14:31:46.451711
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_locknew_4a5852c2.yaml
+    instruction: pasm2_locknew_4a5852c2
+  -
+    timestamp: |
+      2025-09-06T14:31:46.451808
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_lockret_0537245d.yaml
+    instruction: pasm2_lockret_0537245d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.451909
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_locktry_b1166194.yaml
+    instruction: pasm2_locktry_b1166194
+  -
+    timestamp: |
+      2025-09-06T14:31:46.452005
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_lockrel_5d8b4a6f.yaml
+    instruction: pasm2_lockrel_5d8b4a6f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.452103
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_qlog_23c42322.yaml
+    instruction: pasm2_qlog_23c42322
+  -
+    timestamp: |
+      2025-09-06T14:31:46.452203
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_qexp_44d4a53e.yaml
+    instruction: pasm2_qexp_44d4a53e
+  -
+    timestamp: |
+      2025-09-06T14:31:46.452303
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rfbyte_dc5864f5.yaml
+    instruction: pasm2_rfbyte_dc5864f5
+  -
+    timestamp: |
+      2025-09-06T14:31:46.452406
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rfword_c1c2bc10.yaml
+    instruction: pasm2_rfword_c1c2bc10
+  -
+    timestamp: |
+      2025-09-06T14:31:46.452511
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rflong_818ab2c9.yaml
+    instruction: pasm2_rflong_818ab2c9
+  -
+    timestamp: |
+      2025-09-06T14:31:46.452610
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rfvar_1e05929b.yaml
+    instruction: pasm2_rfvar_1e05929b
+  -
+    timestamp: |
+      2025-09-06T14:31:46.452709
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rfvars_2f1ff8b2.yaml
+    instruction: pasm2_rfvars_2f1ff8b2
+  -
+    timestamp: |
+      2025-09-06T14:31:46.452806
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_wfbyte_0e893825.yaml
+    instruction: pasm2_wfbyte_0e893825
+  -
+    timestamp: |
+      2025-09-06T14:31:46.452897
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_wfword_fa695947.yaml
+    instruction: pasm2_wfword_fa695947
+  -
+    timestamp: |
+      2025-09-06T14:31:46.453014
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_wflong_50a8fd1f.yaml
+    instruction: pasm2_wflong_50a8fd1f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.453116
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_getqx_ffbadb45.yaml
+    instruction: pasm2_getqx_ffbadb45
+  -
+    timestamp: |
+      2025-09-06T14:31:46.453212
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_getqy_30e1f714.yaml
+    instruction: pasm2_getqy_30e1f714
+  -
+    timestamp: |
+      2025-09-06T14:31:46.453306
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_getct_0851efb8.yaml
+    instruction: pasm2_getct_0851efb8
+  -
+    timestamp: |
+      2025-09-06T14:31:46.453407
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_getrnd_3dcfa923.yaml
+    instruction: pasm2_getrnd_3dcfa923
+  -
+    timestamp: |
+      2025-09-06T14:31:46.453506
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_getrnd_da8be5b9.yaml
+    instruction: pasm2_getrnd_da8be5b9
+  -
+    timestamp: |
+      2025-09-06T14:31:46.453609
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setdacs_1facc786.yaml
+    instruction: pasm2_setdacs_1facc786
+  -
+    timestamp: |
+      2025-09-06T14:31:46.453714
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setxfrq_c628fa69.yaml
+    instruction: pasm2_setxfrq_c628fa69
+  -
+    timestamp: |
+      2025-09-06T14:31:46.453814
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_getxacc_bbfb64b9.yaml
+    instruction: pasm2_getxacc_bbfb64b9
+  -
+    timestamp: |
+      2025-09-06T14:31:46.453912
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_waitx_27ea9385.yaml
+    instruction: pasm2_waitx_27ea9385
+  -
+    timestamp: |
+      2025-09-06T14:31:46.454012
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setse1_70ecc016.yaml
+    instruction: pasm2_setse1_70ecc016
+  -
+    timestamp: |
+      2025-09-06T14:31:46.454128
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setse2_e4aeab9a.yaml
+    instruction: pasm2_setse2_e4aeab9a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.454227
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setse3_7df8a4d4.yaml
+    instruction: pasm2_setse3_7df8a4d4
+  -
+    timestamp: |
+      2025-09-06T14:31:46.454318
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setse4_d369d39e.yaml
+    instruction: pasm2_setse4_d369d39e
+  -
+    timestamp: |
+      2025-09-06T14:31:46.454408
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pollint_0a075979.yaml
+    instruction: pasm2_pollint_0a075979
+  -
+    timestamp: |
+      2025-09-06T14:31:46.454503
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pollct1_b413eca3.yaml
+    instruction: pasm2_pollct1_b413eca3
+  -
+    timestamp: |
+      2025-09-06T14:31:46.454607
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pollct2_838bf4db.yaml
+    instruction: pasm2_pollct2_838bf4db
+  -
+    timestamp: |
+      2025-09-06T14:31:46.454701
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pollct3_3f6f9fcb.yaml
+    instruction: pasm2_pollct3_3f6f9fcb
+  -
+    timestamp: |
+      2025-09-06T14:31:46.454797
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pollse1_abc87a1e.yaml
+    instruction: pasm2_pollse1_abc87a1e
+  -
+    timestamp: |
+      2025-09-06T14:31:46.454896
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pollse2_e2e7f9a7.yaml
+    instruction: pasm2_pollse2_e2e7f9a7
+  -
+    timestamp: |
+      2025-09-06T14:31:46.454988
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pollse3_aeb5c361.yaml
+    instruction: pasm2_pollse3_aeb5c361
+  -
+    timestamp: |
+      2025-09-06T14:31:46.455084
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pollse4_fc37b5cb.yaml
+    instruction: pasm2_pollse4_fc37b5cb
+  -
+    timestamp: |
+      2025-09-06T14:31:46.455171
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pollpat_b35130e9.yaml
+    instruction: pasm2_pollpat_b35130e9
+  -
+    timestamp: |
+      2025-09-06T14:31:46.455257
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pollfbw_eddf2221.yaml
+    instruction: pasm2_pollfbw_eddf2221
+  -
+    timestamp: |
+      2025-09-06T14:31:46.455339
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pollxmt_6a14c89b.yaml
+    instruction: pasm2_pollxmt_6a14c89b
+  -
+    timestamp: |
+      2025-09-06T14:31:46.455417
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pollxfi_c18f8b24.yaml
+    instruction: pasm2_pollxfi_c18f8b24
+  -
+    timestamp: |
+      2025-09-06T14:31:46.455505
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pollxro_a5b76f60.yaml
+    instruction: pasm2_pollxro_a5b76f60
+  -
+    timestamp: |
+      2025-09-06T14:31:46.455589
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pollxrl_a33bc90d.yaml
+    instruction: pasm2_pollxrl_a33bc90d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.455686
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pollatn_9fa8ce4f.yaml
+    instruction: pasm2_pollatn_9fa8ce4f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.455788
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pollqmt_ea7d7809.yaml
+    instruction: pasm2_pollqmt_ea7d7809
+  -
+    timestamp: |
+      2025-09-06T14:31:46.455881
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_waitint_30f4a998.yaml
+    instruction: pasm2_waitint_30f4a998
+  -
+    timestamp: |
+      2025-09-06T14:31:46.455978
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_waitct1_94c70c78.yaml
+    instruction: pasm2_waitct1_94c70c78
+  -
+    timestamp: |
+      2025-09-06T14:31:46.456068
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_waitct2_d3723480.yaml
+    instruction: pasm2_waitct2_d3723480
+  -
+    timestamp: |
+      2025-09-06T14:31:46.456160
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_waitct3_adfc1a78.yaml
+    instruction: pasm2_waitct3_adfc1a78
+  -
+    timestamp: |
+      2025-09-06T14:31:46.456255
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_waitse1_0910fb45.yaml
+    instruction: pasm2_waitse1_0910fb45
+  -
+    timestamp: |
+      2025-09-06T14:31:46.456344
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_waitse2_f9fab215.yaml
+    instruction: pasm2_waitse2_f9fab215
+  -
+    timestamp: |
+      2025-09-06T14:31:46.456430
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_waitse3_be083d0c.yaml
+    instruction: pasm2_waitse3_be083d0c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.456518
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_waitse4_642b44df.yaml
+    instruction: pasm2_waitse4_642b44df
+  -
+    timestamp: |
+      2025-09-06T14:31:46.456605
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_waitpat_42577f67.yaml
+    instruction: pasm2_waitpat_42577f67
+  -
+    timestamp: |
+      2025-09-06T14:31:46.456698
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_waitfbw_943c594d.yaml
+    instruction: pasm2_waitfbw_943c594d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.456794
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_waitxmt_8f1e4f61.yaml
+    instruction: pasm2_waitxmt_8f1e4f61
+  -
+    timestamp: |
+      2025-09-06T14:31:46.456877
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_waitxfi_e5272c1a.yaml
+    instruction: pasm2_waitxfi_e5272c1a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.456960
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_waitxro_77e3cbb7.yaml
+    instruction: pasm2_waitxro_77e3cbb7
+  -
+    timestamp: |
+      2025-09-06T14:31:46.457047
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_waitxrl_46ba7e0c.yaml
+    instruction: pasm2_waitxrl_46ba7e0c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.457125
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_waitatn_4e06d02a.yaml
+    instruction: pasm2_waitatn_4e06d02a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.457217
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_allowi_58d92ea6.yaml
+    instruction: pasm2_allowi_58d92ea6
+  -
+    timestamp: |
+      2025-09-06T14:31:46.457298
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_stalli_3f81a234.yaml
+    instruction: pasm2_stalli_3f81a234
+  -
+    timestamp: |
+      2025-09-06T14:31:46.457391
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_trgint1_84369493.yaml
+    instruction: pasm2_trgint1_84369493
+  -
+    timestamp: |
+      2025-09-06T14:31:46.457490
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_trgint2_ba1498dc.yaml
+    instruction: pasm2_trgint2_ba1498dc
+  -
+    timestamp: |
+      2025-09-06T14:31:46.457571
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_trgint3_15067088.yaml
+    instruction: pasm2_trgint3_15067088
+  -
+    timestamp: |
+      2025-09-06T14:31:46.457673
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_nixint1_a546d28f.yaml
+    instruction: pasm2_nixint1_a546d28f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.457760
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_nixint2_964f6f31.yaml
+    instruction: pasm2_nixint2_964f6f31
+  -
+    timestamp: |
+      2025-09-06T14:31:46.457858
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_nixint3_d9e022a3.yaml
+    instruction: pasm2_nixint3_d9e022a3
+  -
+    timestamp: |
+      2025-09-06T14:31:46.457947
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setint1_65e2bbeb.yaml
+    instruction: pasm2_setint1_65e2bbeb
+  -
+    timestamp: |
+      2025-09-06T14:31:46.458041
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setint2_9ab897a3.yaml
+    instruction: pasm2_setint2_9ab897a3
+  -
+    timestamp: |
+      2025-09-06T14:31:46.458123
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setint3_447d087c.yaml
+    instruction: pasm2_setint3_447d087c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.458204
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setq_2583ac65.yaml
+    instruction: pasm2_setq_2583ac65
+  -
+    timestamp: |
+      2025-09-06T14:31:46.458286
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setq2_ba79a5bb.yaml
+    instruction: pasm2_setq2_ba79a5bb
+  -
+    timestamp: |
+      2025-09-06T14:31:46.458365
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_push_2a328c4d.yaml
+    instruction: pasm2_push_2a328c4d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.458455
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_pop_a77b6bf7.yaml
+    instruction: pasm2_pop_a77b6bf7
+  -
+    timestamp: |
+      2025-09-06T14:31:46.458553
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jmp_e87da2f9.yaml
+    instruction: pasm2_jmp_e87da2f9
+  -
+    timestamp: |
+      2025-09-06T14:31:46.458643
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_call_f92d32cd.yaml
+    instruction: pasm2_call_f92d32cd
+  -
+    timestamp: |
+      2025-09-06T14:31:46.458732
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_ret_a5fccf48.yaml
+    instruction: pasm2_ret_a5fccf48
+  -
+    timestamp: |
+      2025-09-06T14:31:46.458858
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_calla_adaf0acc.yaml
+    instruction: pasm2_calla_adaf0acc
+  -
+    timestamp: |
+      2025-09-06T14:31:46.458940
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_reta_e3a3b03e.yaml
+    instruction: pasm2_reta_e3a3b03e
+  -
+    timestamp: |
+      2025-09-06T14:31:46.459018
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_callb_672953be.yaml
+    instruction: pasm2_callb_672953be
+  -
+    timestamp: |
+      2025-09-06T14:31:46.459097
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_retb_8e9f4558.yaml
+    instruction: pasm2_retb_8e9f4558
+  -
+    timestamp: |
+      2025-09-06T14:31:46.459178
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jmprel_0a247423.yaml
+    instruction: pasm2_jmprel_0a247423
+  -
+    timestamp: |
+      2025-09-06T14:31:46.459260
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_skip_56e239d3.yaml
+    instruction: pasm2_skip_56e239d3
+  -
+    timestamp: |
+      2025-09-06T14:31:46.459343
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_skipf_7b48d719.yaml
+    instruction: pasm2_skipf_7b48d719
+  -
+    timestamp: |
+      2025-09-06T14:31:46.459436
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_execf_e6bd8809.yaml
+    instruction: pasm2_execf_e6bd8809
+  -
+    timestamp: |
+      2025-09-06T14:31:46.459529
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_getptr_5e211fd6.yaml
+    instruction: pasm2_getptr_5e211fd6
+  -
+    timestamp: |
+      2025-09-06T14:31:46.459612
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_getbrk_4f7c6abb.yaml
+    instruction: pasm2_getbrk_4f7c6abb
+  -
+    timestamp: |
+      2025-09-06T14:31:46.459694
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_cogbrk_978e30d6.yaml
+    instruction: pasm2_cogbrk_978e30d6
+  -
+    timestamp: |
+      2025-09-06T14:31:46.459774
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_brk_77dd5ff1.yaml
+    instruction: pasm2_brk_77dd5ff1
+  -
+    timestamp: |
+      2025-09-06T14:31:46.459858
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setluts_3084636c.yaml
+    instruction: pasm2_setluts_3084636c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.459939
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setcy_2f907a65.yaml
+    instruction: pasm2_setcy_2f907a65
+  -
+    timestamp: |
+      2025-09-06T14:31:46.460016
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setci_f8db8b8d.yaml
+    instruction: pasm2_setci_f8db8b8d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.460095
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setcq_1d304b8b.yaml
+    instruction: pasm2_setcq_1d304b8b
+  -
+    timestamp: |
+      2025-09-06T14:31:46.460177
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setcfrq_eb16cdb2.yaml
+    instruction: pasm2_setcfrq_eb16cdb2
+  -
+    timestamp: |
+      2025-09-06T14:31:46.460259
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setcmod_af84d434.yaml
+    instruction: pasm2_setcmod_af84d434
+  -
+    timestamp: |
+      2025-09-06T14:31:46.460341
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setpiv_12995adc.yaml
+    instruction: pasm2_setpiv_12995adc
+  -
+    timestamp: |
+      2025-09-06T14:31:46.460440
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setpix_adaf17e2.yaml
+    instruction: pasm2_setpix_adaf17e2
+  -
+    timestamp: |
+      2025-09-06T14:31:46.460540
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_cogatn_d08e9e92.yaml
+    instruction: pasm2_cogatn_d08e9e92
+  -
+    timestamp: |
+      2025-09-06T14:31:46.460623
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testp_8641f303.yaml
+    instruction: pasm2_testp_8641f303
+  -
+    timestamp: |
+      2025-09-06T14:31:46.460702
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testpn_1f79b73d.yaml
+    instruction: pasm2_testpn_1f79b73d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.460787
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testp_031e4c2f.yaml
+    instruction: pasm2_testp_031e4c2f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.460880
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testpn_057198b1.yaml
+    instruction: pasm2_testpn_057198b1
+  -
+    timestamp: |
+      2025-09-06T14:31:46.460961
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testp_71aa4b13.yaml
+    instruction: pasm2_testp_71aa4b13
+  -
+    timestamp: |
+      2025-09-06T14:31:46.461038
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testpn_5359362d.yaml
+    instruction: pasm2_testpn_5359362d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.461123
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testp_92afc9c0.yaml
+    instruction: pasm2_testp_92afc9c0
+  -
+    timestamp: |
+      2025-09-06T14:31:46.461204
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_testpn_5edff037.yaml
+    instruction: pasm2_testpn_5edff037
+  -
+    timestamp: |
+      2025-09-06T14:31:46.461292
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_dirl_e6999496.yaml
+    instruction: pasm2_dirl_e6999496
+  -
+    timestamp: |
+      2025-09-06T14:31:46.461376
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_dirh_1ad1e54a.yaml
+    instruction: pasm2_dirh_1ad1e54a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.461455
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_dirc_f8fa2ee8.yaml
+    instruction: pasm2_dirc_f8fa2ee8
+  -
+    timestamp: |
+      2025-09-06T14:31:46.461553
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_dirnc_8c8d0a26.yaml
+    instruction: pasm2_dirnc_8c8d0a26
+  -
+    timestamp: |
+      2025-09-06T14:31:46.461642
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_dirz_dbe53c04.yaml
+    instruction: pasm2_dirz_dbe53c04
+  -
+    timestamp: |
+      2025-09-06T14:31:46.461728
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_dirnz_f23fa7b3.yaml
+    instruction: pasm2_dirnz_f23fa7b3
+  -
+    timestamp: |
+      2025-09-06T14:31:46.461814
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_dirrnd_384ab259.yaml
+    instruction: pasm2_dirrnd_384ab259
+  -
+    timestamp: |
+      2025-09-06T14:31:46.461899
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_dirnot_f52cb0fa.yaml
+    instruction: pasm2_dirnot_f52cb0fa
+  -
+    timestamp: |
+      2025-09-06T14:31:46.461983
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_outl_b18809a8.yaml
+    instruction: pasm2_outl_b18809a8
+  -
+    timestamp: |
+      2025-09-06T14:31:46.462065
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_outh_519a5bb5.yaml
+    instruction: pasm2_outh_519a5bb5
+  -
+    timestamp: |
+      2025-09-06T14:31:46.462145
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_outc_48669ab3.yaml
+    instruction: pasm2_outc_48669ab3
+  -
+    timestamp: |
+      2025-09-06T14:31:46.462229
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_outnc_1ece39bb.yaml
+    instruction: pasm2_outnc_1ece39bb
+  -
+    timestamp: |
+      2025-09-06T14:31:46.462309
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_outz_61151ea0.yaml
+    instruction: pasm2_outz_61151ea0
+  -
+    timestamp: |
+      2025-09-06T14:31:46.462401
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_outnz_0d66c162.yaml
+    instruction: pasm2_outnz_0d66c162
+  -
+    timestamp: |
+      2025-09-06T14:31:46.462495
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_outrnd_a88e2b35.yaml
+    instruction: pasm2_outrnd_a88e2b35
+  -
+    timestamp: |
+      2025-09-06T14:31:46.462590
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_outnot_59d6c188.yaml
+    instruction: pasm2_outnot_59d6c188
+  -
+    timestamp: |
+      2025-09-06T14:31:46.462696
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_fltl_70411164.yaml
+    instruction: pasm2_fltl_70411164
+  -
+    timestamp: |
+      2025-09-06T14:31:46.462793
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_flth_4b36290f.yaml
+    instruction: pasm2_flth_4b36290f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.462916
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_fltc_ee9bf87d.yaml
+    instruction: pasm2_fltc_ee9bf87d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.463010
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_fltnc_dfe13027.yaml
+    instruction: pasm2_fltnc_dfe13027
+  -
+    timestamp: |
+      2025-09-06T14:31:46.463112
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_fltz_c672b9fd.yaml
+    instruction: pasm2_fltz_c672b9fd
+  -
+    timestamp: |
+      2025-09-06T14:31:46.463210
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_fltnz_5e0a5a13.yaml
+    instruction: pasm2_fltnz_5e0a5a13
+  -
+    timestamp: |
+      2025-09-06T14:31:46.463307
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_fltrnd_d8e74d14.yaml
+    instruction: pasm2_fltrnd_d8e74d14
+  -
+    timestamp: |
+      2025-09-06T14:31:46.463392
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_fltnot_7942ab81.yaml
+    instruction: pasm2_fltnot_7942ab81
+  -
+    timestamp: |
+      2025-09-06T14:31:46.463478
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_drvl_17191d1f.yaml
+    instruction: pasm2_drvl_17191d1f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.463562
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_drvh_88909c62.yaml
+    instruction: pasm2_drvh_88909c62
+  -
+    timestamp: |
+      2025-09-06T14:31:46.463643
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_drvc_5c77af22.yaml
+    instruction: pasm2_drvc_5c77af22
+  -
+    timestamp: |
+      2025-09-06T14:31:46.463728
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_drvnc_81e1dbfa.yaml
+    instruction: pasm2_drvnc_81e1dbfa
+  -
+    timestamp: |
+      2025-09-06T14:31:46.463811
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_drvz_a20d2a95.yaml
+    instruction: pasm2_drvz_a20d2a95
+  -
+    timestamp: |
+      2025-09-06T14:31:46.463901
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_drvnz_55947bee.yaml
+    instruction: pasm2_drvnz_55947bee
+  -
+    timestamp: |
+      2025-09-06T14:31:46.464035
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_drvrnd_1514d280.yaml
+    instruction: pasm2_drvrnd_1514d280
+  -
+    timestamp: |
+      2025-09-06T14:31:46.464121
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_drvnot_5b99755d.yaml
+    instruction: pasm2_drvnot_5b99755d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.464228
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_splitb_d1d3c272.yaml
+    instruction: pasm2_splitb_d1d3c272
+  -
+    timestamp: |
+      2025-09-06T14:31:46.464341
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_mergeb_af19e7d7.yaml
+    instruction: pasm2_mergeb_af19e7d7
+  -
+    timestamp: |
+      2025-09-06T14:31:46.464429
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_splitw_45a6812b.yaml
+    instruction: pasm2_splitw_45a6812b
+  -
+    timestamp: |
+      2025-09-06T14:31:46.464525
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_mergew_64a442b3.yaml
+    instruction: pasm2_mergew_64a442b3
+  -
+    timestamp: |
+      2025-09-06T14:31:46.464623
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_seussf_6cffe856.yaml
+    instruction: pasm2_seussf_6cffe856
+  -
+    timestamp: |
+      2025-09-06T14:31:46.464710
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_seussr_cfd3de36.yaml
+    instruction: pasm2_seussr_cfd3de36
+  -
+    timestamp: |
+      2025-09-06T14:31:46.464797
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rgbsqz_9e13bf84.yaml
+    instruction: pasm2_rgbsqz_9e13bf84
+  -
+    timestamp: |
+      2025-09-06T14:31:46.464880
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rgbexp_c2fea1cb.yaml
+    instruction: pasm2_rgbexp_c2fea1cb
+  -
+    timestamp: |
+      2025-09-06T14:31:46.464964
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_xoro32_eff87f9c.yaml
+    instruction: pasm2_xoro32_eff87f9c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.465047
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rev_9cb93ac4.yaml
+    instruction: pasm2_rev_9cb93ac4
+  -
+    timestamp: |
+      2025-09-06T14:31:46.465135
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rczr_dc38fe88.yaml
+    instruction: pasm2_rczr_dc38fe88
+  -
+    timestamp: |
+      2025-09-06T14:31:46.465230
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_rczl_dc554ef5.yaml
+    instruction: pasm2_rczl_dc554ef5
+  -
+    timestamp: |
+      2025-09-06T14:31:46.465325
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_wrc_ada3ac4f.yaml
+    instruction: pasm2_wrc_ada3ac4f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.465416
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_wrnc_35debc0d.yaml
+    instruction: pasm2_wrnc_35debc0d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.465517
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_wrz_7f4705aa.yaml
+    instruction: pasm2_wrz_7f4705aa
+  -
+    timestamp: |
+      2025-09-06T14:31:46.465609
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_wrnz_020a8479.yaml
+    instruction: pasm2_wrnz_020a8479
+  -
+    timestamp: |
+      2025-09-06T14:31:46.465712
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_modcz_132bb0f9.yaml
+    instruction: pasm2_modcz_132bb0f9
+  -
+    timestamp: |
+      2025-09-06T14:31:46.465809
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_modc_eeb2b50a.yaml
+    instruction: pasm2_modc_eeb2b50a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.465897
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_modz_373af938.yaml
+    instruction: pasm2_modz_373af938
+  -
+    timestamp: |
+      2025-09-06T14:31:46.465981
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_setscp_89ae0b06.yaml
+    instruction: pasm2_setscp_89ae0b06
+  -
+    timestamp: |
+      2025-09-06T14:31:46.466070
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_getscp_1a88b7f4.yaml
+    instruction: pasm2_getscp_1a88b7f4
+  -
+    timestamp: |
+      2025-09-06T14:31:46.466174
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_jmp_c1cfce3a.yaml
+    instruction: pasm2_jmp_c1cfce3a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.466280
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_call_aef05e63.yaml
+    instruction: pasm2_call_aef05e63
+  -
+    timestamp: |
+      2025-09-06T14:31:46.466366
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_calla_d786f3a7.yaml
+    instruction: pasm2_calla_d786f3a7
+  -
+    timestamp: |
+      2025-09-06T14:31:46.466459
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_callb_b4099178.yaml
+    instruction: pasm2_callb_b4099178
+  -
+    timestamp: |
+      2025-09-06T14:31:46.466549
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_calld_c4073b3a.yaml
+    instruction: pasm2_calld_c4073b3a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.466632
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_loc_6219a0dd.yaml
+    instruction: pasm2_loc_6219a0dd
+  -
+    timestamp: |
+      2025-09-06T14:31:46.466721
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_augs_cdae6585.yaml
+    instruction: pasm2_augs_cdae6585
+  -
+    timestamp: |
+      2025-09-06T14:31:46.466811
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_augd_94533f9d.yaml
+    instruction: pasm2_augd_94533f9d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.466901
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__ret__2e48ac18.yaml
+    instruction: pasm2__ret__2e48ac18
+  -
+    timestamp: |
+      2025-09-06T14:31:46.466992
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_nc_and_nz_89c2d187.yaml
+    instruction: pasm2_if_nc_and_nz_89c2d187
+  -
+    timestamp: |
+      2025-09-06T14:31:46.467093
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_nz_and_nc_1d3b77d1.yaml
+    instruction: pasm2_if_nz_and_nc_1d3b77d1
+  -
+    timestamp: |
+      2025-09-06T14:31:46.467190
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_gt_a873acc4.yaml
+    instruction: pasm2_if_gt_a873acc4
+  -
+    timestamp: |
+      2025-09-06T14:31:46.467293
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_a_22723d32.yaml
+    instruction: pasm2_if_a_22723d32
+  -
+    timestamp: |
+      2025-09-06T14:31:46.467375
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_00_67049366.yaml
+    instruction: pasm2_if_00_67049366
+  -
+    timestamp: |
+      2025-09-06T14:31:46.467466
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_nc_and_z_db34ce40.yaml
+    instruction: pasm2_if_nc_and_z_db34ce40
+  -
+    timestamp: |
+      2025-09-06T14:31:46.467683
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_z_and_nc_2de65d8b.yaml
+    instruction: pasm2_if_z_and_nc_2de65d8b
+  -
+    timestamp: |
+      2025-09-06T14:31:46.467772
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_01_d36aef6f.yaml
+    instruction: pasm2_if_01_d36aef6f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.467862
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_nc_7d5aefa0.yaml
+    instruction: pasm2_if_nc_7d5aefa0
+  -
+    timestamp: |
+      2025-09-06T14:31:46.467948
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_ge_adc17f8f.yaml
+    instruction: pasm2_if_ge_adc17f8f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.468034
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_ae_a2f4263e.yaml
+    instruction: pasm2_if_ae_a2f4263e
+  -
+    timestamp: |
+      2025-09-06T14:31:46.468127
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_0x_fa1f4025.yaml
+    instruction: pasm2_if_0x_fa1f4025
+  -
+    timestamp: |
+      2025-09-06T14:31:46.468222
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_c_and_nz_a4bbe0c3.yaml
+    instruction: pasm2_if_c_and_nz_a4bbe0c3
+  -
+    timestamp: |
+      2025-09-06T14:31:46.468309
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_nz_and_c_1732fb48.yaml
+    instruction: pasm2_if_nz_and_c_1732fb48
+  -
+    timestamp: |
+      2025-09-06T14:31:46.468412
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_10_5ce4d47d.yaml
+    instruction: pasm2_if_10_5ce4d47d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.468507
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_nz_d49bcb6d.yaml
+    instruction: pasm2_if_nz_d49bcb6d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.468624
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_ne_951767ba.yaml
+    instruction: pasm2_if_ne_951767ba
+  -
+    timestamp: |
+      2025-09-06T14:31:46.468720
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_x0_1a3bcfb0.yaml
+    instruction: pasm2_if_x0_1a3bcfb0
+  -
+    timestamp: |
+      2025-09-06T14:31:46.468804
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_c_ne_z_adae3b0a.yaml
+    instruction: pasm2_if_c_ne_z_adae3b0a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.468890
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_z_ne_c_5610884e.yaml
+    instruction: pasm2_if_z_ne_c_5610884e
+  -
+    timestamp: |
+      2025-09-06T14:31:46.468994
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_diff_25df2480.yaml
+    instruction: pasm2_if_diff_25df2480
+  -
+    timestamp: |
+      2025-09-06T14:31:46.469094
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_nc_or_nz_c3a98184.yaml
+    instruction: pasm2_if_nc_or_nz_c3a98184
+  -
+    timestamp: |
+      2025-09-06T14:31:46.469182
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_nz_or_nc_85d14ae6.yaml
+    instruction: pasm2_if_nz_or_nc_85d14ae6
+  -
+    timestamp: |
+      2025-09-06T14:31:46.469266
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_not_11_4f9ee238.yaml
+    instruction: pasm2_if_not_11_4f9ee238
+  -
+    timestamp: |
+      2025-09-06T14:31:46.469350
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_c_and_z_bcd50ae1.yaml
+    instruction: pasm2_if_c_and_z_bcd50ae1
+  -
+    timestamp: |
+      2025-09-06T14:31:46.469440
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_z_and_c_c7a51ace.yaml
+    instruction: pasm2_if_z_and_c_c7a51ace
+  -
+    timestamp: |
+      2025-09-06T14:31:46.469527
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_11_f92042cc.yaml
+    instruction: pasm2_if_11_f92042cc
+  -
+    timestamp: |
+      2025-09-06T14:31:46.469614
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_c_eq_z_d01dc26a.yaml
+    instruction: pasm2_if_c_eq_z_d01dc26a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.469699
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_z_eq_c_764a87ee.yaml
+    instruction: pasm2_if_z_eq_c_764a87ee
+  -
+    timestamp: |
+      2025-09-06T14:31:46.469786
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_same_5a2552cc.yaml
+    instruction: pasm2_if_same_5a2552cc
+  -
+    timestamp: |
+      2025-09-06T14:31:46.469873
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_z_d358415a.yaml
+    instruction: pasm2_if_z_d358415a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.469960
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_e_96004c27.yaml
+    instruction: pasm2_if_e_96004c27
+  -
+    timestamp: |
+      2025-09-06T14:31:46.470045
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_x1_654600bd.yaml
+    instruction: pasm2_if_x1_654600bd
+  -
+    timestamp: |
+      2025-09-06T14:31:46.470129
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_nc_or_z_390c3547.yaml
+    instruction: pasm2_if_nc_or_z_390c3547
+  -
+    timestamp: |
+      2025-09-06T14:31:46.470213
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_z_or_nc_aa298cb1.yaml
+    instruction: pasm2_if_z_or_nc_aa298cb1
+  -
+    timestamp: |
+      2025-09-06T14:31:46.470301
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_not_10_a15e4f89.yaml
+    instruction: pasm2_if_not_10_a15e4f89
+  -
+    timestamp: |
+      2025-09-06T14:31:46.470382
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_c_474b45a0.yaml
+    instruction: pasm2_if_c_474b45a0
+  -
+    timestamp: |
+      2025-09-06T14:31:46.470462
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_lt_8ae3639c.yaml
+    instruction: pasm2_if_lt_8ae3639c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.470551
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_b_99ac205c.yaml
+    instruction: pasm2_if_b_99ac205c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.470634
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_1x_e1473d8a.yaml
+    instruction: pasm2_if_1x_e1473d8a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.470719
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_c_or_nz_6213b602.yaml
+    instruction: pasm2_if_c_or_nz_6213b602
+  -
+    timestamp: |
+      2025-09-06T14:31:46.470803
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_nz_or_c_b8f8b5da.yaml
+    instruction: pasm2_if_nz_or_c_b8f8b5da
+  -
+    timestamp: |
+      2025-09-06T14:31:46.470886
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_not_01_232ed843.yaml
+    instruction: pasm2_if_not_01_232ed843
+  -
+    timestamp: |
+      2025-09-06T14:31:46.470977
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_c_or_z_1d95b8e4.yaml
+    instruction: pasm2_if_c_or_z_1d95b8e4
+  -
+    timestamp: |
+      2025-09-06T14:31:46.471065
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_z_or_c_c5ceb4b3.yaml
+    instruction: pasm2_if_z_or_c_c5ceb4b3
+  -
+    timestamp: |
+      2025-09-06T14:31:46.471156
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_le_02938cb1.yaml
+    instruction: pasm2_if_le_02938cb1
+  -
+    timestamp: |
+      2025-09-06T14:31:46.471241
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_be_900eed5a.yaml
+    instruction: pasm2_if_be_900eed5a
+  -
+    timestamp: |
+      2025-09-06T14:31:46.471328
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_if_not_00_8fe6305d.yaml
+    instruction: pasm2_if_not_00_8fe6305d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.471419
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2_inst_8890f88c.yaml
+    instruction: pasm2_inst_8890f88c
+  -
+    timestamp: |
+      2025-09-06T14:31:46.471517
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__clr_f53f9361.yaml
+    instruction: pasm2__clr_f53f9361
+  -
+    timestamp: |
+      2025-09-06T14:31:46.471618
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__nc_and_nz_79223ac2.yaml
+    instruction: pasm2__nc_and_nz_79223ac2
+  -
+    timestamp: |
+      2025-09-06T14:31:46.471713
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__nz_and_nc_63453286.yaml
+    instruction: pasm2__nz_and_nc_63453286
+  -
+    timestamp: |
+      2025-09-06T14:31:46.471808
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__gt_c25d6fc5.yaml
+    instruction: pasm2__gt_c25d6fc5
+  -
+    timestamp: |
+      2025-09-06T14:31:46.471901
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__nc_and_z_5b4a5fa0.yaml
+    instruction: pasm2__nc_and_z_5b4a5fa0
+  -
+    timestamp: |
+      2025-09-06T14:31:46.471997
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__z_and_nc_3142e747.yaml
+    instruction: pasm2__z_and_nc_3142e747
+  -
+    timestamp: |
+      2025-09-06T14:31:46.472088
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__nc_fa3d165d.yaml
+    instruction: pasm2__nc_fa3d165d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.472180
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__ge_fb75139b.yaml
+    instruction: pasm2__ge_fb75139b
+  -
+    timestamp: |
+      2025-09-06T14:31:46.472277
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__c_and_nz_f52a4b7e.yaml
+    instruction: pasm2__c_and_nz_f52a4b7e
+  -
+    timestamp: |
+      2025-09-06T14:31:46.472383
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__nz_and_c_69c57c90.yaml
+    instruction: pasm2__nz_and_c_69c57c90
+  -
+    timestamp: |
+      2025-09-06T14:31:46.472487
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__nz_dc334ee5.yaml
+    instruction: pasm2__nz_dc334ee5
+  -
+    timestamp: |
+      2025-09-06T14:31:46.472583
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__ne_360c5375.yaml
+    instruction: pasm2__ne_360c5375
+  -
+    timestamp: |
+      2025-09-06T14:31:46.472684
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__c_ne_z_d639f316.yaml
+    instruction: pasm2__c_ne_z_d639f316
+  -
+    timestamp: |
+      2025-09-06T14:31:46.472782
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__z_ne_c_7d34b355.yaml
+    instruction: pasm2__z_ne_c_7d34b355
+  -
+    timestamp: |
+      2025-09-06T14:31:46.472885
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__nc_or_nz_0a6fd8ff.yaml
+    instruction: pasm2__nc_or_nz_0a6fd8ff
+  -
+    timestamp: |
+      2025-09-06T14:31:46.472984
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__nz_or_nc_48bc4309.yaml
+    instruction: pasm2__nz_or_nc_48bc4309
+  -
+    timestamp: |
+      2025-09-06T14:31:46.473085
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__c_and_z_5c99df9d.yaml
+    instruction: pasm2__c_and_z_5c99df9d
+  -
+    timestamp: |
+      2025-09-06T14:31:46.473190
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__z_and_c_4f2ba33e.yaml
+    instruction: pasm2__z_and_c_4f2ba33e
+  -
+    timestamp: |
+      2025-09-06T14:31:46.473285
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__c_eq_z_0690e582.yaml
+    instruction: pasm2__c_eq_z_0690e582
+  -
+    timestamp: |
+      2025-09-06T14:31:46.473396
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__z_eq_c_7a648ebb.yaml
+    instruction: pasm2__z_eq_c_7a648ebb
+  -
+    timestamp: |
+      2025-09-06T14:31:46.473499
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__z_6f92292e.yaml
+    instruction: pasm2__z_6f92292e
+  -
+    timestamp: |
+      2025-09-06T14:31:46.473605
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__e_a14c0496.yaml
+    instruction: pasm2__e_a14c0496
+  -
+    timestamp: |
+      2025-09-06T14:31:46.473709
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__nc_or_z_6b5d6556.yaml
+    instruction: pasm2__nc_or_z_6b5d6556
+  -
+    timestamp: |
+      2025-09-06T14:31:46.473805
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__z_or_nc_ac13c62f.yaml
+    instruction: pasm2__z_or_nc_ac13c62f
+  -
+    timestamp: |
+      2025-09-06T14:31:46.473901
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__c_18a10280.yaml
+    instruction: pasm2__c_18a10280
+  -
+    timestamp: |
+      2025-09-06T14:31:46.474005
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__lt_7b9cbb65.yaml
+    instruction: pasm2__lt_7b9cbb65
+  -
+    timestamp: |
+      2025-09-06T14:31:46.474104
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__c_or_nz_a8f0db27.yaml
+    instruction: pasm2__c_or_nz_a8f0db27
+  -
+    timestamp: |
+      2025-09-06T14:31:46.474199
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__nz_or_c_c38e01c8.yaml
+    instruction: pasm2__nz_or_c_c38e01c8
+  -
+    timestamp: |
+      2025-09-06T14:31:46.474300
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__c_or_z_eee42720.yaml
+    instruction: pasm2__c_or_z_eee42720
+  -
+    timestamp: |
+      2025-09-06T14:31:46.474396
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__z_or_c_4932b207.yaml
+    instruction: pasm2__z_or_c_4932b207
+  -
+    timestamp: |
+      2025-09-06T14:31:46.474499
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__le_7e4819eb.yaml
+    instruction: pasm2__le_7e4819eb
+  -
+    timestamp: |
+      2025-09-06T14:31:46.474585
+    action: created
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/instructions/pasm2/pasm2__set_c19a4ab1.yaml
+    instruction: pasm2__set_c19a4ab1
+  -
+    timestamp: |
+      2025-09-06T14:31:46.475401
+    action: created_mapping
+    file: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/csv-to-yaml-mapping.yaml
+    entries: 490

@@ -1,0 +1,35 @@
+metadata:
+  id: pasm2_execf_e6bd8809
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.428181
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 328
+    type: csv
+    row: 328
+    type: csv
+    row: 328
+layer1_csv:
+  mnemonic: EXECF
+  syntax: |
+    EXECF   {#}D
+  group: Branch D - Call+Skip
+  encoding: EEEE 1101011 00L DDDDDDDDD 000110011
+  alias: .
+  description: Jump to D[9:0] in cog/LUT and set SKIPF pattern to D[31:10]. PC = {10'b0, D[9:0]}.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 4
+    cog_exec_16_cogs: 4
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.607990
+  source: P2 Datasheet v35
+  timing:
+    raw: 4 / ILLEGAL
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Jump to D[9:0] in cog/LUT and set SKIPF pattern to D[31:10]. PC = {10'b0, D[9:0]}."
+  syntax: "EXECF   {#}D"

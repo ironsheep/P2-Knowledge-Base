@@ -1,0 +1,319 @@
+# Complete P2 System Registers Index
+# Source: Silicon Doc v35, COG-RAM-REGISTER-MAP.md
+# Comprehensive reference for all P2 system registers
+
+metadata:
+  title: "P2 System Registers Complete Index"
+  description: "All P2 system registers with addresses, functions, and key characteristics"
+  source: "Silicon Doc v35"
+  extraction_date: "2025-09-06"
+  total_registers: "16 special-purpose + 8 dual-purpose + 496 general-purpose"
+
+# Memory Map Overview
+memory_regions:
+  general_purpose:
+    address_range: "$000-$1EF"
+    count: 496
+    description: "General-purpose RAM for code and data"
+    access: "Standard RAM accessible by all instructions"
+    
+  dual_purpose:
+    address_range: "$1F0-$1F7"  
+    count: 8
+    description: "RAM that can also serve interrupt and call functions"
+    access: "Standard RAM unless special functions enabled"
+    
+  special_purpose:
+    address_range: "$1F8-$1FF"
+    count: 8
+    description: "Dedicated system registers with specific functions"
+    access: "Special register functionality, not standard RAM"
+
+# Dual-Purpose Registers ($1F0-$1F7)
+dual_purpose_registers:
+  "$1F0":
+    normal_use: "General-purpose RAM"
+    special_function: "IJMP3"
+    description: "Interrupt call address for INT3"
+    yaml_file: "dual-ijmp3-register.yaml"
+    
+  "$1F1":
+    normal_use: "General-purpose RAM"
+    special_function: "IRET3"
+    description: "Interrupt return address for INT3"
+    yaml_file: "dual-iret3-register.yaml"
+    
+  "$1F2":
+    normal_use: "General-purpose RAM"
+    special_function: "IJMP2"
+    description: "Interrupt call address for INT2"
+    yaml_file: "dual-ijmp2-register.yaml"
+    
+  "$1F3":
+    normal_use: "General-purpose RAM"
+    special_function: "IRET2"
+    description: "Interrupt return address for INT2"
+    yaml_file: "dual-iret2-register.yaml"
+    
+  "$1F4":
+    normal_use: "General-purpose RAM" 
+    special_function: "IJMP1"
+    description: "Interrupt call address for INT1"
+    yaml_file: "dual-ijmp1-register.yaml"
+    
+  "$1F5":
+    normal_use: "General-purpose RAM"
+    special_function: "IRET1"
+    description: "Interrupt return address for INT1"
+    yaml_file: "dual-iret1-register.yaml"
+    
+  "$1F6":
+    normal_use: "General-purpose RAM"
+    special_function: "PA"
+    description: "CALLD-imm parameter, or LOC address"
+    yaml_file: "dual-pa-register.yaml"
+    
+  "$1F7":
+    normal_use: "General-purpose RAM"
+    special_function: "PB" 
+    description: "CALLD-imm parameter, or LOC address"
+    yaml_file: "dual-pb-register.yaml"
+
+# Special-Purpose Registers ($1F8-$1FF)
+special_purpose_registers:
+  "$1F8":
+    name: "PTRA"
+    description: "Pointer A to hub RAM"
+    access: "Read/Write"
+    category: "hub_access"
+    yaml_file: "ptra-register.yaml"
+    key_features:
+      - "32-bit hub RAM pointer"
+      - "Auto-increment/decrement support"  
+      - "Initialized by COGINIT SETQ value"
+      - "Used with RDxxxx/WRxxxx instructions"
+      
+  "$1F9":
+    name: "PTRB"
+    description: "Pointer B to hub RAM"
+    access: "Read/Write"
+    category: "hub_access"
+    yaml_file: "ptrb-register.yaml"
+    key_features:
+      - "32-bit hub RAM pointer"
+      - "Auto-increment/decrement support"
+      - "Initialized by COGINIT S operand"
+      - "Used with RDxxxx/WRxxxx instructions"
+      
+  "$1FA":
+    name: "DIRA"
+    description: "Output enables for P31..P0"
+    access: "Read/Write"
+    category: "io_control"
+    yaml_file: "dira-dirb-registers.yaml"
+    key_features:
+      - "Controls output enable for pins P31-P0"
+      - "1=output enabled, 0=input/high-Z"
+      - "Interacts with smart pin configuration"
+      - "Cleared on reset and COGINIT"
+      
+  "$1FB":
+    name: "DIRB" 
+    description: "Output enables for P63..P32"
+    access: "Read/Write"
+    category: "io_control"
+    yaml_file: "dira-dirb-registers.yaml"
+    key_features:
+      - "Controls output enable for pins P63-P32"
+      - "1=output enabled, 0=input/high-Z"
+      - "Interacts with smart pin configuration"
+      - "Cleared on reset and COGINIT"
+      
+  "$1FC":
+    name: "OUTA"
+    description: "Output states for P31..P0"
+    access: "Read/Write"
+    category: "io_control"
+    yaml_file: "outa-outb-registers.yaml"
+    key_features:
+      - "Output logic levels for pins P31-P0"
+      - "1=high output, 0=low output"
+      - "Only effective when DIRA bits set"
+      - "Can be overridden by smart pins"
+      
+  "$1FD":
+    name: "OUTB"
+    description: "Output states for P63..P32"
+    access: "Read/Write" 
+    category: "io_control"
+    yaml_file: "outa-outb-registers.yaml"
+    key_features:
+      - "Output logic levels for pins P63-P32"
+      - "1=high output, 0=low output"  
+      - "Only effective when DIRB bits set"
+      - "Can be overridden by smart pins"
+      
+  "$1FE":
+    name: "INA"
+    description: "Input states for P31..P0"
+    access: "Read Only"
+    category: "io_status"
+    yaml_file: "ina-inb-registers.yaml"
+    special_mode: "Becomes IJMP0 (R/W) during debug ISR"
+    key_features:
+      - "Read actual pin states P31-P0"
+      - "Reflects pin voltage levels"
+      - "Updated continuously"
+      - "Debug ISR transforms to IJMP0"
+      
+  "$1FF":
+    name: "INB"
+    description: "Input states for P63..P32"
+    access: "Read Only"
+    category: "io_status"
+    yaml_file: "ina-inb-registers.yaml"
+    special_mode: "Becomes IRET0 (R/W) during debug ISR"
+    key_features:
+      - "Read actual pin states P63-P32"
+      - "Reflects pin voltage levels"
+      - "Updated continuously"
+      - "Debug ISR transforms to IRET0"
+
+# Register Categories
+register_categories:
+  hub_access:
+    description: "Registers for accessing hub RAM"
+    registers: ["PTRA", "PTRB"]
+    key_functions:
+      - "Hub memory addressing"
+      - "Auto-increment/decrement"
+      - "Parameter passing via COGINIT"
+      
+  io_control:
+    description: "Registers for controlling I/O pins"
+    registers: ["DIRA", "DIRB", "OUTA", "OUTB"]
+    key_functions:
+      - "Pin direction control"
+      - "Output state control"
+      - "Smart pin interaction"
+      
+  io_status:
+    description: "Registers for reading I/O pin states"
+    registers: ["INA", "INB"]
+    key_functions:
+      - "Pin state reading"
+      - "Input monitoring"
+      - "Debug ISR transformation"
+      
+  interrupt_support:
+    description: "Dual-purpose registers supporting interrupts"
+    registers: ["IJMP0-3", "IRET0-3"]
+    key_functions:
+      - "Interrupt vector storage"
+      - "Return address storage"
+      - "ISR context management"
+      
+  call_support:
+    description: "Dual-purpose registers supporting calls"
+    registers: ["PA", "PB"]
+    key_functions:
+      - "CALLD parameter passing"
+      - "LOC address storage"
+      - "Function call optimization"
+
+# Special Behaviors and Modes
+special_behaviors:
+  debug_isr_overlay:
+    affected_registers: ["INA", "INB"]
+    transformation:
+      ina_to_ijmp0: "INA ($1FE) becomes IJMP0 (R/W) for debug ISR jump address"
+      inb_to_iret0: "INB ($1FF) becomes IRET0 (R/W) for debug ISR return address"
+    initialization: "IJMP0 initialized to $1F8 on COGINIT (debug-ISR-entry routine)"
+    
+  execute_only_rom:
+    address_range: "$1F8-$1FF"
+    description: "Contains debug ISR entry/exit routines"
+    dual_purpose: "Same addresses serve as special registers AND ROM routines"
+    entry_point: "Debug entry routine at $1F8 performs register save/restore"
+    
+  coginit_initialization:
+    ptra_init: "Gets SETQ value if present, else cleared to 0"
+    ptrb_init: "Gets S operand of COGINIT (execution start address)"
+    dir_clear: "DIRA/DIRB cleared to 0 (all pins as inputs)"
+    out_preserved: "OUTA/OUTB values preserved from previous state"
+
+# Access Patterns and Usage
+access_patterns:
+  direct_addressing:
+    examples:
+      - "MOV $1F8, ##$3000  ; Same as MOV PTRA, ##$3000"
+      - "MOV result, $1FE   ; Same as MOV result, INA"
+    advantage: "Can use immediate addresses in calculated addressing"
+    
+  symbolic_addressing:
+    examples:
+      - "MOV PTRA, ##buffer_address"
+      - "MOV DIRA, ##pin_mask"
+    advantage: "More readable and maintainable code"
+    
+  bit_manipulation:
+    examples:
+      - "OR DIRA, ##%00001111     ; Set P3-P0 as outputs"
+      - "ANDN OUTB, ##%11110000   ; Clear P35-P32 outputs"
+    advantage: "Efficient multi-pin operations"
+
+# Register Interactions
+register_interactions:
+  dir_out_relationship:
+    dependency: "OUT register values only drive pins when corresponding DIR bit = 1"
+    floating: "When DIR = 0, pin is high impedance regardless of OUT value"
+    
+  smart_pin_override:
+    dir_override: "Smart pin %TT bits can override DIR control"
+    out_override: "Some smart pin modes override OUT signal"
+    coordination: "Configure smart pins while DIR = 0"
+    
+  ptr_instruction_synergy:
+    rd_instructions: "RDxxxx instructions use PTRA/PTRB for addressing"
+    wr_instructions: "WRxxxx instructions use PTRA/PTRB for addressing"
+    auto_increment: "Pointer arithmetic handled automatically"
+
+# Performance Considerations
+performance_notes:
+  register_access_speed: "All register access completes in single clock cycle"
+  hub_access_timing: "PTRA/PTRB hub access follows hub timing rules (0-7 clock delay)"
+  io_update_timing: "DIR/OUT changes take effect immediately"
+  in_read_timing: "IN register reflects pin states with minimal delay"
+
+# Common Usage Patterns
+usage_patterns:
+  memory_operations:
+    pattern: "PTRA/PTRB with auto-increment for buffer processing"
+    example: "RDLONG data, PTRA++  ; Read and advance pointer"
+    
+  io_initialization:
+    pattern: "Set DIR then OUT for output pins"
+    example: "MOV DIRA, pin_mask / MOV OUTA, initial_states"
+    
+  pin_manipulation:
+    pattern: "Use bit operations for selective pin control" 
+    example: "OR DIRA, pin_bit  ; Enable output for one pin"
+    
+  parameter_passing:
+    pattern: "SETQ before COGINIT for parameter block"
+    example: "SETQ ##params / COGINIT #cog, ##entry"
+
+see_also:
+  - "Hub Memory Access Instructions"
+  - "I/O Pin Control Instructions"
+  - "Interrupt System"
+  - "Smart Pin Configuration"
+  - "COGINIT Parameter Passing"
+  - "Debug ISR System"
+
+source:
+  document: "Silicon Doc v35"
+  section: "COG RAM Register Map"
+  page_reference: "COG-RAM-REGISTER-MAP.md"
+  extraction_date: "2025-09-06"
+  completeness: "All system registers documented with addresses and functions"

@@ -1,0 +1,47 @@
+metadata:
+  id: pasm2_qvector_6b8b5d43
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.427038
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 241
+    type: csv
+    row: 241
+    type: csv
+    row: 241
+layer1_csv:
+  mnemonic: QVECTOR
+  syntax: |
+    QVECTOR {#}D,{#}S
+  group: CORDIC Solver
+  encoding: EEEE 1101010 1LI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Begin CORDIC vectoring of point (D, S). GETQX/GETQY retrieves length/angle.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.627770
+  source: P2 Datasheet v35
+  timing:
+    raw: 2...9
+    notes:
+      - Hub window alignment affects timing
+    min_cycles: 2
+    max_cycles: 9
+    type: variable
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.041374
+  narratives:
+    - source: architectural_context
+      type: architectural_note
+      content: |
+        CORDIC solver uses 54-stage pipeline. Results available after 54 clocks. Multiple operations can be pipelined.
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Begin CORDIC vectoring of point (D, S). GETQX/GETQY retrieves length/angle."
+  syntax: "QVECTOR {#}D,{#}S"

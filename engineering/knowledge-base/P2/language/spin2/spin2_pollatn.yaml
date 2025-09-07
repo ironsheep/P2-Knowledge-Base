@@ -1,0 +1,6 @@
+name: POLLATN
+type: method
+category: Attention Signaling
+signature: "POLLATN() : AtnFlag"
+description: "Check for ATN strobe, -1 if strobed or 0 if not"
+source: Spin2 Documentation v51

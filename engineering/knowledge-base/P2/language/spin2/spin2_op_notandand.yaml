@@ -1,0 +1,6 @@
+name: "!&&"
+type: operator
+priority: 14
+category: Logical AND
+description: "Boolean AND/NAND"
+source: Spin2 Documentation v51

@@ -1,0 +1,44 @@
+metadata:
+  id: pasm2_getbrk_4f7c6abb
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.428206
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 330
+    type: csv
+    row: 330
+    type: csv
+    row: 330
+layer1_csv:
+  mnemonic: GETBRK
+  syntax: |
+    GETBRK  D          WC/WZ/WCZ
+  group: Interrupts
+  encoding: EEEE 1101011 CZ0 DDDDDDDDD 000110101
+  alias: .
+  description: Get breakpoint/cog status into D according to WC/WZ/WCZ. See documentation for details.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.620355
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.036967
+  narratives:
+    - source: INSTRUCTION-TIMING-AND-ENCODING.md
+      type: functional_description
+      content: |
+        Get break/debug status. Multiple forms: GETBRK D WCZ returns cog internal status; GETBRK D WC returns SKIP/SKIPF/EXECF/XBYTE pattern info; GETBRK D WZ returns pattern queue status.
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Get breakpoint/cog status into D according to WC/WZ/WCZ. See documentation for details."
+  syntax: "GETBRK  D          WC/WZ/WCZ"

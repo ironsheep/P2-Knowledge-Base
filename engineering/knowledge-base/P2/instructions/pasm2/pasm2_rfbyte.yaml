@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_rfbyte_dc5864f5
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.427166
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 251
+    type: csv
+    row: 251
+    type: csv
+    row: 251
+layer1_csv:
+  mnemonic: RFBYTE
+  syntax: |
+    RFBYTE  D        {WC/WZ/WCZ}
+  group: Hub FIFO - Read
+  encoding: EEEE 1101011 CZ0 DDDDDDDDD 000010000
+  alias: .
+  description: Used after RDFAST. Read zero-extended byte from FIFO into D. C = MSB of byte. *
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.302978
+  source: P2 Datasheet v35
+  timing:
+    raw: 2 / FIFO IN USE
+    base_cycles: 2
+    type: mode_dependent
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Used after RDFAST. Read zero-extended byte from FIFO into D. C = MSB of byte. *"
+  syntax: "RFBYTE  D        {WC/WZ/WCZ}"

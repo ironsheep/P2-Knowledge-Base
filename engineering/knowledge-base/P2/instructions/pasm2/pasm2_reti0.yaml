@@ -1,0 +1,35 @@
+metadata:
+  id: pasm2_reti0_df4db58a
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426477
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 166
+    type: csv
+    row: 166
+    type: csv
+    row: 166
+layer1_csv:
+  mnemonic: RETI0
+  syntax: |
+    RETI0
+  group: Branch S - Return
+  encoding: EEEE 1011001 110 111111111 111111111
+  alias: alias
+  description: Return from INT0. (CALLD $1FF,$1FF WCZ)
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 4
+    cog_exec_16_cogs: 4
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.611664
+  source: P2 Datasheet v35
+  timing:
+    raw: 4 / 13...20
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Return from INT0. (CALLD $1FF,$1FF WCZ)"
+  syntax: "RETI0"

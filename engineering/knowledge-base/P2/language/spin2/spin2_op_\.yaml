@@ -1,0 +1,6 @@
+name: "\"
+type: operator
+priority: 15
+category: \
+description: "` `OR` `XOR` `!\"
+source: Spin2 Documentation v51

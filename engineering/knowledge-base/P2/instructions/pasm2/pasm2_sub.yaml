@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_sub_5117ffe2
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425447
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 15
+    type: csv
+    row: 15
+    type: csv
+    row: 15
+layer1_csv:
+  mnemonic: SUB
+  syntax: |
+    SUB     D,{#}S   {WC/WZ/WCZ}
+  group: Math and Logic
+  encoding: EEEE 0001100 CZI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Subtract S from D.                             D = D - S.        C = borrow of (D - S).              *
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.617703
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Subtract S from D.                             D = D - S.        C = borrow of (D - S).              *"
+  syntax: "SUB     D,{#}S   {WC/WZ/WCZ}"

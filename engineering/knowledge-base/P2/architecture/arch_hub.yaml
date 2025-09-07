@@ -1,0 +1,21 @@
+name: HUB
+category: shared_memory
+description: "Central shared memory and resources"
+features:
+    memory:
+      size: 512KB (P2X8C4M64P)
+      max_size: 1MB addressable
+      width: 8 bits
+      access: 32-bits-per-clock sequential
+      format: Little-endian
+    access_method:
+      type: Egg-beater round-robin
+      timing: Every cog gets hub window every 8 clocks
+      bandwidth: 32 bits per clock per cog
+    special_features:
+      - Last 16KB write-protectable
+      - Boot ROM (16KB)
+      - FIFO for hub execution
+      - 64-bit system counter
+      - 16 semaphore locks
+source: P2 Silicon Documentation v35

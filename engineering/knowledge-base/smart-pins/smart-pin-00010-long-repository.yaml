@@ -1,0 +1,74 @@
+# Smart Pin Mode %00002 - Long Repository
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%00002"
+mode_name: "Long Repository"
+description: "Smart pin acts as a long repository for 32-bit data storage"
+category: "storage_dac"
+output_override: false
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%00002"
+    condition: "M[12:10] != %101"
+
+operation:
+  storage_function: "32-bit long repository accessible via WXPIN/RDPIN"
+  active_state: "DIR=1"
+  reset_state: "DIR=0"
+
+behavior:
+  during_active:
+    wxpin_effect: "WXPIN updates the long and raises IN"
+    read_access: "RDPIN/RQPIN can read the stored long"
+    
+  during_reset:
+    wxpin_effect: "WXPIN instructions are ignored"
+    in_signal: "IN is low"
+
+instructions:
+  setup:
+    - "WRPIN - Configure mode (%00002)"
+    
+  operation:
+    write: "WXPIN - Write 32-bit long value (raises IN when DIR=1)"
+    read: "RDPIN/RQPIN - Read stored long value"
+
+timing:
+  in_signal: "Raised when WXPIN updates long (DIR=1 only)"
+  acknowledgment:
+    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
+    effect: "Lowers IN signal after 2 clocks"
+
+reset_behavior:
+  during_reset:
+    dir_state: "DIR=0"
+    in_signal: "IN is low"
+    wxpin_response: "WXPIN instructions ignored"
+
+usage_notes:
+  - "Simple 32-bit data storage between cogs"
+  - "IN signal coordinates data updates"
+  - "Data preserved while smart pin is active"
+  - "Ignored during reset (DIR=0)"
+
+applications:
+  inter_cog_communication: "Pass 32-bit values between cogs"
+  mailbox_system: "Simple mailbox implementation"
+  parameter_passing: "Configuration parameter storage"
+  data_buffering: "Single 32-bit data buffer"
+
+related_modes:
+  - "%00001 (Long Repository or DAC Noise)"
+  - "%00003 (Long Repository)"
+
+see_also:
+  - "Inter-cog communication patterns"
+  - "Smart pin data storage"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"

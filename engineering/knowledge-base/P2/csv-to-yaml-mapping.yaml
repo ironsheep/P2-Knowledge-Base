@@ -1,0 +1,2252 @@
+metadata:
+  generated: |
+    2025-09-06T14:31:46.474591
+  source_csv: /Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/ingestion/sources/p2-instructions-csv/P2 Instructions v35 - Rev B_C Silicon - Sheet1.csv
+  total_instructions: 491
+mappings:
+  pasm2_nop_1a004f5a:
+    csv_row: 2
+    mnemonic: NOP
+    syntax: NOP
+  pasm2_ror_ab7d2c86:
+    csv_row: 3
+    mnemonic: ROR
+    syntax: |
+      ROR     D,{#}S   {WC/WZ/WCZ}
+  pasm2_rol_a329352a:
+    csv_row: 4
+    mnemonic: ROL
+    syntax: |
+      ROL     D,{#}S   {WC/WZ/WCZ}
+  pasm2_shr_3fa34d82:
+    csv_row: 5
+    mnemonic: SHR
+    syntax: |
+      SHR     D,{#}S   {WC/WZ/WCZ}
+  pasm2_shl_9f9c73fd:
+    csv_row: 6
+    mnemonic: SHL
+    syntax: |
+      SHL     D,{#}S   {WC/WZ/WCZ}
+  pasm2_rcr_e9c91e9f:
+    csv_row: 7
+    mnemonic: RCR
+    syntax: |
+      RCR     D,{#}S   {WC/WZ/WCZ}
+  pasm2_rcl_9f639ad9:
+    csv_row: 8
+    mnemonic: RCL
+    syntax: |
+      RCL     D,{#}S   {WC/WZ/WCZ}
+  pasm2_sar_8ccc7bd6:
+    csv_row: 9
+    mnemonic: SAR
+    syntax: |
+      SAR     D,{#}S   {WC/WZ/WCZ}
+  pasm2_sal_2d248f1d:
+    csv_row: 10
+    mnemonic: SAL
+    syntax: |
+      SAL     D,{#}S   {WC/WZ/WCZ}
+  pasm2_add_e3441b45:
+    csv_row: 11
+    mnemonic: ADD
+    syntax: |
+      ADD     D,{#}S   {WC/WZ/WCZ}
+  pasm2_addx_aed1d16e:
+    csv_row: 12
+    mnemonic: ADDX
+    syntax: |
+      ADDX    D,{#}S   {WC/WZ/WCZ}
+  pasm2_adds_35ea15b6:
+    csv_row: 13
+    mnemonic: ADDS
+    syntax: |
+      ADDS    D,{#}S   {WC/WZ/WCZ}
+  pasm2_addsx_8807fc44:
+    csv_row: 14
+    mnemonic: ADDSX
+    syntax: |
+      ADDSX   D,{#}S   {WC/WZ/WCZ}
+  pasm2_sub_5117ffe2:
+    csv_row: 15
+    mnemonic: SUB
+    syntax: |
+      SUB     D,{#}S   {WC/WZ/WCZ}
+  pasm2_subx_8b8ebb2d:
+    csv_row: 16
+    mnemonic: SUBX
+    syntax: |
+      SUBX    D,{#}S   {WC/WZ/WCZ}
+  pasm2_subs_afc35821:
+    csv_row: 17
+    mnemonic: SUBS
+    syntax: |
+      SUBS    D,{#}S   {WC/WZ/WCZ}
+  pasm2_subsx_8c571d2c:
+    csv_row: 18
+    mnemonic: SUBSX
+    syntax: |
+      SUBSX   D,{#}S   {WC/WZ/WCZ}
+  pasm2_cmp_08c6a6ad:
+    csv_row: 19
+    mnemonic: CMP
+    syntax: |
+      CMP     D,{#}S   {WC/WZ/WCZ}
+  pasm2_cmpx_6c6a26a2:
+    csv_row: 20
+    mnemonic: CMPX
+    syntax: |
+      CMPX    D,{#}S   {WC/WZ/WCZ}
+  pasm2_cmps_593e6b5d:
+    csv_row: 21
+    mnemonic: CMPS
+    syntax: |
+      CMPS    D,{#}S   {WC/WZ/WCZ}
+  pasm2_cmpsx_491b60bb:
+    csv_row: 22
+    mnemonic: CMPSX
+    syntax: |
+      CMPSX   D,{#}S   {WC/WZ/WCZ}
+  pasm2_cmpr_eff9a2ce:
+    csv_row: 23
+    mnemonic: CMPR
+    syntax: |
+      CMPR    D,{#}S   {WC/WZ/WCZ}
+  pasm2_cmpm_f3dbee8e:
+    csv_row: 24
+    mnemonic: CMPM
+    syntax: |
+      CMPM    D,{#}S   {WC/WZ/WCZ}
+  pasm2_subr_4582ee81:
+    csv_row: 25
+    mnemonic: SUBR
+    syntax: |
+      SUBR    D,{#}S   {WC/WZ/WCZ}
+  pasm2_cmpsub_e711615c:
+    csv_row: 26
+    mnemonic: CMPSUB
+    syntax: |
+      CMPSUB  D,{#}S   {WC/WZ/WCZ}
+  pasm2_fge_797de09e:
+    csv_row: 27
+    mnemonic: FGE
+    syntax: |
+      FGE     D,{#}S   {WC/WZ/WCZ}
+  pasm2_fle_7eee5cf4:
+    csv_row: 28
+    mnemonic: FLE
+    syntax: |
+      FLE     D,{#}S   {WC/WZ/WCZ}
+  pasm2_fges_a8868d01:
+    csv_row: 29
+    mnemonic: FGES
+    syntax: |
+      FGES    D,{#}S   {WC/WZ/WCZ}
+  pasm2_fles_1278d23f:
+    csv_row: 30
+    mnemonic: FLES
+    syntax: |
+      FLES    D,{#}S   {WC/WZ/WCZ}
+  pasm2_sumc_1e67118a:
+    csv_row: 31
+    mnemonic: SUMC
+    syntax: |
+      SUMC    D,{#}S   {WC/WZ/WCZ}
+  pasm2_sumnc_2e06b546:
+    csv_row: 32
+    mnemonic: SUMNC
+    syntax: |
+      SUMNC   D,{#}S   {WC/WZ/WCZ}
+  pasm2_sumz_704ea897:
+    csv_row: 33
+    mnemonic: SUMZ
+    syntax: |
+      SUMZ    D,{#}S   {WC/WZ/WCZ}
+  pasm2_sumnz_54a390c2:
+    csv_row: 34
+    mnemonic: SUMNZ
+    syntax: |
+      SUMNZ   D,{#}S   {WC/WZ/WCZ}
+  pasm2_testb_c56566f1:
+    csv_row: 35
+    mnemonic: TESTB
+    syntax: |
+      TESTB   D,{#}S         WC/WZ
+  pasm2_testbn_99363f53:
+    csv_row: 36
+    mnemonic: TESTBN
+    syntax: |
+      TESTBN  D,{#}S         WC/WZ
+  pasm2_testb_250cdbba:
+    csv_row: 37
+    mnemonic: TESTB
+    syntax: |
+      TESTB   D,{#}S     ANDC/ANDZ
+  pasm2_testbn_db3e8821:
+    csv_row: 38
+    mnemonic: TESTBN
+    syntax: |
+      TESTBN  D,{#}S     ANDC/ANDZ
+  pasm2_testb_7c003262:
+    csv_row: 39
+    mnemonic: TESTB
+    syntax: |
+      TESTB   D,{#}S       ORC/ORZ
+  pasm2_testbn_5c570de1:
+    csv_row: 40
+    mnemonic: TESTBN
+    syntax: |
+      TESTBN  D,{#}S       ORC/ORZ
+  pasm2_testb_94c724be:
+    csv_row: 41
+    mnemonic: TESTB
+    syntax: |
+      TESTB   D,{#}S     XORC/XORZ
+  pasm2_testbn_d46f3457:
+    csv_row: 42
+    mnemonic: TESTBN
+    syntax: |
+      TESTBN  D,{#}S     XORC/XORZ
+  pasm2_bitl_3a24ae0a:
+    csv_row: 43
+    mnemonic: BITL
+    syntax: |
+      BITL    D,{#}S         {WCZ}
+  pasm2_bith_5c6ffec3:
+    csv_row: 44
+    mnemonic: BITH
+    syntax: |
+      BITH    D,{#}S         {WCZ}
+  pasm2_bitc_efbb19c2:
+    csv_row: 45
+    mnemonic: BITC
+    syntax: |
+      BITC    D,{#}S         {WCZ}
+  pasm2_bitnc_d69c0598:
+    csv_row: 46
+    mnemonic: BITNC
+    syntax: |
+      BITNC   D,{#}S         {WCZ}
+  pasm2_bitz_1d64b6e9:
+    csv_row: 47
+    mnemonic: BITZ
+    syntax: |
+      BITZ    D,{#}S         {WCZ}
+  pasm2_bitnz_04f018ab:
+    csv_row: 48
+    mnemonic: BITNZ
+    syntax: |
+      BITNZ   D,{#}S         {WCZ}
+  pasm2_bitrnd_863412e9:
+    csv_row: 49
+    mnemonic: BITRND
+    syntax: |
+      BITRND  D,{#}S         {WCZ}
+  pasm2_bitnot_b3de84c2:
+    csv_row: 50
+    mnemonic: BITNOT
+    syntax: |
+      BITNOT  D,{#}S         {WCZ}
+  pasm2_and_81e841df:
+    csv_row: 51
+    mnemonic: AND
+    syntax: |
+      AND     D,{#}S   {WC/WZ/WCZ}
+  pasm2_andn_6d7797aa:
+    csv_row: 52
+    mnemonic: ANDN
+    syntax: |
+      ANDN    D,{#}S   {WC/WZ/WCZ}
+  pasm2_or_1935c956:
+    csv_row: 53
+    mnemonic: OR
+    syntax: |
+      OR      D,{#}S   {WC/WZ/WCZ}
+  pasm2_xor_d99b7f05:
+    csv_row: 54
+    mnemonic: XOR
+    syntax: |
+      XOR     D,{#}S   {WC/WZ/WCZ}
+  pasm2_muxc_ca9eceec:
+    csv_row: 55
+    mnemonic: MUXC
+    syntax: |
+      MUXC    D,{#}S   {WC/WZ/WCZ}
+  pasm2_muxnc_42aa475c:
+    csv_row: 56
+    mnemonic: MUXNC
+    syntax: |
+      MUXNC   D,{#}S   {WC/WZ/WCZ}
+  pasm2_muxz_8967fb64:
+    csv_row: 57
+    mnemonic: MUXZ
+    syntax: |
+      MUXZ    D,{#}S   {WC/WZ/WCZ}
+  pasm2_muxnz_f54b5a62:
+    csv_row: 58
+    mnemonic: MUXNZ
+    syntax: |
+      MUXNZ   D,{#}S   {WC/WZ/WCZ}
+  pasm2_mov_71105395:
+    csv_row: 59
+    mnemonic: MOV
+    syntax: |
+      MOV     D,{#}S   {WC/WZ/WCZ}
+  pasm2_not_433093bd:
+    csv_row: 60
+    mnemonic: NOT
+    syntax: |
+      NOT     D,{#}S   {WC/WZ/WCZ}
+  pasm2_not_0f7726bd:
+    csv_row: 61
+    mnemonic: NOT
+    syntax: NOT     D        {WC/WZ/WCZ}
+  pasm2_abs_64931e15:
+    csv_row: 62
+    mnemonic: ABS
+    syntax: |
+      ABS     D,{#}S   {WC/WZ/WCZ}
+  pasm2_abs_005cf774:
+    csv_row: 63
+    mnemonic: ABS
+    syntax: ABS     D        {WC/WZ/WCZ}
+  pasm2_neg_bf13f4df:
+    csv_row: 64
+    mnemonic: NEG
+    syntax: |
+      NEG     D,{#}S   {WC/WZ/WCZ}
+  pasm2_neg_5697da29:
+    csv_row: 65
+    mnemonic: NEG
+    syntax: NEG     D        {WC/WZ/WCZ}
+  pasm2_negc_a241e027:
+    csv_row: 66
+    mnemonic: NEGC
+    syntax: |
+      NEGC    D,{#}S   {WC/WZ/WCZ}
+  pasm2_negc_216f1c70:
+    csv_row: 67
+    mnemonic: NEGC
+    syntax: NEGC    D        {WC/WZ/WCZ}
+  pasm2_negnc_241df6a8:
+    csv_row: 68
+    mnemonic: NEGNC
+    syntax: |
+      NEGNC   D,{#}S   {WC/WZ/WCZ}
+  pasm2_negnc_4696bb2f:
+    csv_row: 69
+    mnemonic: NEGNC
+    syntax: NEGNC   D        {WC/WZ/WCZ}
+  pasm2_negz_a172f015:
+    csv_row: 70
+    mnemonic: NEGZ
+    syntax: |
+      NEGZ    D,{#}S   {WC/WZ/WCZ}
+  pasm2_negz_e5cf16a2:
+    csv_row: 71
+    mnemonic: NEGZ
+    syntax: NEGZ    D        {WC/WZ/WCZ}
+  pasm2_negnz_b44d5db3:
+    csv_row: 72
+    mnemonic: NEGNZ
+    syntax: |
+      NEGNZ   D,{#}S   {WC/WZ/WCZ}
+  pasm2_negnz_03fc3513:
+    csv_row: 73
+    mnemonic: NEGNZ
+    syntax: NEGNZ   D        {WC/WZ/WCZ}
+  pasm2_incmod_35f1eb2b:
+    csv_row: 74
+    mnemonic: INCMOD
+    syntax: |
+      INCMOD  D,{#}S   {WC/WZ/WCZ}
+  pasm2_decmod_29fe1ad5:
+    csv_row: 75
+    mnemonic: DECMOD
+    syntax: |
+      DECMOD  D,{#}S   {WC/WZ/WCZ}
+  pasm2_zerox_bd261e73:
+    csv_row: 76
+    mnemonic: ZEROX
+    syntax: |
+      ZEROX   D,{#}S   {WC/WZ/WCZ}
+  pasm2_signx_f828d6bc:
+    csv_row: 77
+    mnemonic: SIGNX
+    syntax: |
+      SIGNX   D,{#}S   {WC/WZ/WCZ}
+  pasm2_encod_096a2733:
+    csv_row: 78
+    mnemonic: ENCOD
+    syntax: |
+      ENCOD   D,{#}S   {WC/WZ/WCZ}
+  pasm2_encod_7b99a0a2:
+    csv_row: 79
+    mnemonic: ENCOD
+    syntax: ENCOD   D        {WC/WZ/WCZ}
+  pasm2_ones_c561ea58:
+    csv_row: 80
+    mnemonic: ONES
+    syntax: |
+      ONES    D,{#}S   {WC/WZ/WCZ}
+  pasm2_ones_69b8e343:
+    csv_row: 81
+    mnemonic: ONES
+    syntax: ONES    D        {WC/WZ/WCZ}
+  pasm2_test_1e352ac5:
+    csv_row: 82
+    mnemonic: TEST
+    syntax: |
+      TEST    D,{#}S   {WC/WZ/WCZ}
+  pasm2_test_1c3c534a:
+    csv_row: 83
+    mnemonic: TEST
+    syntax: TEST    D        {WC/WZ/WCZ}
+  pasm2_testn_07eb3b65:
+    csv_row: 84
+    mnemonic: TESTN
+    syntax: |
+      TESTN   D,{#}S   {WC/WZ/WCZ}
+  pasm2_setnib_3ea205ce:
+    csv_row: 85
+    mnemonic: SETNIB
+    syntax: |
+      SETNIB  D,{#}S,#N
+  pasm2_setnib_38610201:
+    csv_row: 86
+    mnemonic: SETNIB
+    syntax: |
+      SETNIB  {#}S
+  pasm2_getnib_d9d6f8d0:
+    csv_row: 87
+    mnemonic: GETNIB
+    syntax: |
+      GETNIB  D,{#}S,#N
+  pasm2_getnib_50aa5ce3:
+    csv_row: 88
+    mnemonic: GETNIB
+    syntax: GETNIB  D
+  pasm2_rolnib_598e015d:
+    csv_row: 89
+    mnemonic: ROLNIB
+    syntax: |
+      ROLNIB  D,{#}S,#N
+  pasm2_rolnib_494d543f:
+    csv_row: 90
+    mnemonic: ROLNIB
+    syntax: ROLNIB  D
+  pasm2_setbyte_bcacab50:
+    csv_row: 91
+    mnemonic: SETBYTE
+    syntax: |
+      SETBYTE D,{#}S,#N
+  pasm2_setbyte_731f2da1:
+    csv_row: 92
+    mnemonic: SETBYTE
+    syntax: |
+      SETBYTE {#}S
+  pasm2_getbyte_8c93c58b:
+    csv_row: 93
+    mnemonic: GETBYTE
+    syntax: |
+      GETBYTE D,{#}S,#N
+  pasm2_getbyte_1d852485:
+    csv_row: 94
+    mnemonic: GETBYTE
+    syntax: GETBYTE D
+  pasm2_rolbyte_133dd9c9:
+    csv_row: 95
+    mnemonic: ROLBYTE
+    syntax: |
+      ROLBYTE D,{#}S,#N
+  pasm2_rolbyte_82d8bee9:
+    csv_row: 96
+    mnemonic: ROLBYTE
+    syntax: ROLBYTE D
+  pasm2_setword_469c143c:
+    csv_row: 97
+    mnemonic: SETWORD
+    syntax: |
+      SETWORD D,{#}S,#N
+  pasm2_setword_ff3e5949:
+    csv_row: 98
+    mnemonic: SETWORD
+    syntax: |
+      SETWORD {#}S
+  pasm2_getword_88777fa2:
+    csv_row: 99
+    mnemonic: GETWORD
+    syntax: |
+      GETWORD D,{#}S,#N
+  pasm2_getword_d11d7d35:
+    csv_row: 100
+    mnemonic: GETWORD
+    syntax: GETWORD D
+  pasm2_rolword_8ec92869:
+    csv_row: 101
+    mnemonic: ROLWORD
+    syntax: |
+      ROLWORD D,{#}S,#N
+  pasm2_rolword_179ca597:
+    csv_row: 102
+    mnemonic: ROLWORD
+    syntax: ROLWORD D
+  pasm2_altsn_26e71793:
+    csv_row: 103
+    mnemonic: ALTSN
+    syntax: |
+      ALTSN   D,{#}S
+  pasm2_altsn_38bee61d:
+    csv_row: 104
+    mnemonic: ALTSN
+    syntax: ALTSN   D
+  pasm2_altgn_7d514a03:
+    csv_row: 105
+    mnemonic: ALTGN
+    syntax: |
+      ALTGN   D,{#}S
+  pasm2_altgn_e33ec4df:
+    csv_row: 106
+    mnemonic: ALTGN
+    syntax: ALTGN   D
+  pasm2_altsb_3a154980:
+    csv_row: 107
+    mnemonic: ALTSB
+    syntax: |
+      ALTSB   D,{#}S
+  pasm2_altsb_00abd529:
+    csv_row: 108
+    mnemonic: ALTSB
+    syntax: ALTSB   D
+  pasm2_altgb_5b52934d:
+    csv_row: 109
+    mnemonic: ALTGB
+    syntax: |
+      ALTGB   D,{#}S
+  pasm2_altgb_3da95c45:
+    csv_row: 110
+    mnemonic: ALTGB
+    syntax: ALTGB   D
+  pasm2_altsw_0d334358:
+    csv_row: 111
+    mnemonic: ALTSW
+    syntax: |
+      ALTSW   D,{#}S
+  pasm2_altsw_92af3956:
+    csv_row: 112
+    mnemonic: ALTSW
+    syntax: ALTSW   D
+  pasm2_altgw_ae75398c:
+    csv_row: 113
+    mnemonic: ALTGW
+    syntax: |
+      ALTGW   D,{#}S
+  pasm2_altgw_d4d63653:
+    csv_row: 114
+    mnemonic: ALTGW
+    syntax: ALTGW   D
+  pasm2_altr_85719526:
+    csv_row: 115
+    mnemonic: ALTR
+    syntax: |
+      ALTR    D,{#}S
+  pasm2_altr_30b515e2:
+    csv_row: 116
+    mnemonic: ALTR
+    syntax: ALTR    D
+  pasm2_altd_d2acb986:
+    csv_row: 117
+    mnemonic: ALTD
+    syntax: |
+      ALTD    D,{#}S
+  pasm2_altd_a7f113b6:
+    csv_row: 118
+    mnemonic: ALTD
+    syntax: ALTD    D
+  pasm2_alts_0ff5a4b4:
+    csv_row: 119
+    mnemonic: ALTS
+    syntax: |
+      ALTS    D,{#}S
+  pasm2_alts_25a79b17:
+    csv_row: 120
+    mnemonic: ALTS
+    syntax: ALTS    D
+  pasm2_altb_36198b56:
+    csv_row: 121
+    mnemonic: ALTB
+    syntax: |
+      ALTB    D,{#}S
+  pasm2_altb_748a46b3:
+    csv_row: 122
+    mnemonic: ALTB
+    syntax: ALTB    D
+  pasm2_alti_1536c5ca:
+    csv_row: 123
+    mnemonic: ALTI
+    syntax: |
+      ALTI    D,{#}S
+  pasm2_alti_219ce769:
+    csv_row: 124
+    mnemonic: ALTI
+    syntax: ALTI    D
+  pasm2_setr_2006ee5a:
+    csv_row: 125
+    mnemonic: SETR
+    syntax: |
+      SETR    D,{#}S
+  pasm2_setd_556c5779:
+    csv_row: 126
+    mnemonic: SETD
+    syntax: |
+      SETD    D,{#}S
+  pasm2_sets_54daaafc:
+    csv_row: 127
+    mnemonic: SETS
+    syntax: |
+      SETS    D,{#}S
+  pasm2_decod_935f113e:
+    csv_row: 128
+    mnemonic: DECOD
+    syntax: |
+      DECOD   D,{#}S
+  pasm2_decod_ac98ecb0:
+    csv_row: 129
+    mnemonic: DECOD
+    syntax: DECOD   D
+  pasm2_bmask_e686ee1a:
+    csv_row: 130
+    mnemonic: BMASK
+    syntax: |
+      BMASK   D,{#}S
+  pasm2_bmask_3a884712:
+    csv_row: 131
+    mnemonic: BMASK
+    syntax: BMASK   D
+  pasm2_crcbit_75d480af:
+    csv_row: 132
+    mnemonic: CRCBIT
+    syntax: |
+      CRCBIT  D,{#}S
+  pasm2_crcnib_ae161873:
+    csv_row: 133
+    mnemonic: CRCNIB
+    syntax: |
+      CRCNIB  D,{#}S
+  pasm2_muxnits_172f84ea:
+    csv_row: 134
+    mnemonic: MUXNITS
+    syntax: |
+      MUXNITS D,{#}S
+  pasm2_muxnibs_d5eaa749:
+    csv_row: 135
+    mnemonic: MUXNIBS
+    syntax: |
+      MUXNIBS D,{#}S
+  pasm2_muxq_45c91346:
+    csv_row: 136
+    mnemonic: MUXQ
+    syntax: |
+      MUXQ    D,{#}S
+  pasm2_movbyts_3c23d3d8:
+    csv_row: 137
+    mnemonic: MOVBYTS
+    syntax: |
+      MOVBYTS D,{#}S
+  pasm2_mul_9a10286f:
+    csv_row: 138
+    mnemonic: MUL
+    syntax: |
+      MUL     D,{#}S          {WZ}
+  pasm2_muls_ac3c2c3e:
+    csv_row: 139
+    mnemonic: MULS
+    syntax: |
+      MULS    D,{#}S          {WZ}
+  pasm2_sca_4ca2e73d:
+    csv_row: 140
+    mnemonic: SCA
+    syntax: |
+      SCA     D,{#}S          {WZ}
+  pasm2_scas_36cc0c8a:
+    csv_row: 141
+    mnemonic: SCAS
+    syntax: |
+      SCAS    D,{#}S          {WZ}
+  pasm2_addpix_74023269:
+    csv_row: 142
+    mnemonic: ADDPIX
+    syntax: |
+      ADDPIX  D,{#}S
+  pasm2_mulpix_623c41eb:
+    csv_row: 143
+    mnemonic: MULPIX
+    syntax: |
+      MULPIX  D,{#}S
+  pasm2_blnpix_44f99142:
+    csv_row: 144
+    mnemonic: BLNPIX
+    syntax: |
+      BLNPIX  D,{#}S
+  pasm2_mixpix_53ec36ac:
+    csv_row: 145
+    mnemonic: MIXPIX
+    syntax: |
+      MIXPIX  D,{#}S
+  pasm2_addct1_a077f725:
+    csv_row: 146
+    mnemonic: ADDCT1
+    syntax: |
+      ADDCT1  D,{#}S
+  pasm2_addct2_ac8c4c72:
+    csv_row: 147
+    mnemonic: ADDCT2
+    syntax: |
+      ADDCT2  D,{#}S
+  pasm2_addct3_7872e759:
+    csv_row: 148
+    mnemonic: ADDCT3
+    syntax: |
+      ADDCT3  D,{#}S
+  pasm2_wmlong_4613f7b3:
+    csv_row: 149
+    mnemonic: WMLONG
+    syntax: |
+      WMLONG  D,{#}S/P
+  pasm2_rqpin_7bcc3d64:
+    csv_row: 150
+    mnemonic: RQPIN
+    syntax: |
+      RQPIN   D,{#}S          {WC}
+  pasm2_rdpin_eaff54cd:
+    csv_row: 151
+    mnemonic: RDPIN
+    syntax: |
+      RDPIN   D,{#}S          {WC}
+  pasm2_rdlut_224decef:
+    csv_row: 152
+    mnemonic: RDLUT
+    syntax: |
+      RDLUT   D,{#}S/P {WC/WZ/WCZ}
+  pasm2_rdbyte_90a5d896:
+    csv_row: 153
+    mnemonic: RDBYTE
+    syntax: |
+      RDBYTE  D,{#}S/P {WC/WZ/WCZ}
+  pasm2_rdword_c097957e:
+    csv_row: 154
+    mnemonic: RDWORD
+    syntax: |
+      RDWORD  D,{#}S/P {WC/WZ/WCZ}
+  pasm2_rdlong_097ef8f3:
+    csv_row: 155
+    mnemonic: RDLONG
+    syntax: |
+      RDLONG  D,{#}S/P {WC/WZ/WCZ}
+  pasm2_popa_baa3e16f:
+    csv_row: 156
+    mnemonic: POPA
+    syntax: POPA    D        {WC/WZ/WCZ}
+  pasm2_popb_12ad4de6:
+    csv_row: 157
+    mnemonic: POPB
+    syntax: POPB    D        {WC/WZ/WCZ}
+  pasm2_calld_08bb9617:
+    csv_row: 158
+    mnemonic: CALLD
+    syntax: |
+      CALLD   D,{#}S   {WC/WZ/WCZ}
+  pasm2_resi3_4ae7b606:
+    csv_row: 159
+    mnemonic: RESI3
+    syntax: RESI3
+  pasm2_resi2_60661824:
+    csv_row: 160
+    mnemonic: RESI2
+    syntax: RESI2
+  pasm2_resi1_7e0a4dcb:
+    csv_row: 161
+    mnemonic: RESI1
+    syntax: RESI1
+  pasm2_resi0_a2a090d8:
+    csv_row: 162
+    mnemonic: RESI0
+    syntax: RESI0
+  pasm2_reti3_1220e423:
+    csv_row: 163
+    mnemonic: RETI3
+    syntax: RETI3
+  pasm2_reti2_a9a5d877:
+    csv_row: 164
+    mnemonic: RETI2
+    syntax: RETI2
+  pasm2_reti1_ed1884b1:
+    csv_row: 165
+    mnemonic: RETI1
+    syntax: RETI1
+  pasm2_reti0_df4db58a:
+    csv_row: 166
+    mnemonic: RETI0
+    syntax: RETI0
+  pasm2_callpa_b3da3581:
+    csv_row: 167
+    mnemonic: CALLPA
+    syntax: |
+      CALLPA  {#}D,{#}S
+  pasm2_callpb_67850f6b:
+    csv_row: 168
+    mnemonic: CALLPB
+    syntax: |
+      CALLPB  {#}D,{#}S
+  pasm2_djz_e0850bde:
+    csv_row: 169
+    mnemonic: DJZ
+    syntax: |
+      DJZ     D,{#}S
+  pasm2_djnz_5214ce8e:
+    csv_row: 170
+    mnemonic: DJNZ
+    syntax: |
+      DJNZ    D,{#}S
+  pasm2_djf_3ca0fa40:
+    csv_row: 171
+    mnemonic: DJF
+    syntax: |
+      DJF     D,{#}S
+  pasm2_djnf_34584f0c:
+    csv_row: 172
+    mnemonic: DJNF
+    syntax: |
+      DJNF    D,{#}S
+  pasm2_ijz_00985346:
+    csv_row: 173
+    mnemonic: IJZ
+    syntax: |
+      IJZ     D,{#}S
+  pasm2_ijnz_75700910:
+    csv_row: 174
+    mnemonic: IJNZ
+    syntax: |
+      IJNZ    D,{#}S
+  pasm2_tjz_caff3ed1:
+    csv_row: 175
+    mnemonic: TJZ
+    syntax: |
+      TJZ     D,{#}S
+  pasm2_tjnz_af2a403c:
+    csv_row: 176
+    mnemonic: TJNZ
+    syntax: |
+      TJNZ    D,{#}S
+  pasm2_tjf_bd33283a:
+    csv_row: 177
+    mnemonic: TJF
+    syntax: |
+      TJF     D,{#}S
+  pasm2_tjnf_f9950a63:
+    csv_row: 178
+    mnemonic: TJNF
+    syntax: |
+      TJNF    D,{#}S
+  pasm2_tjs_c51cdb82:
+    csv_row: 179
+    mnemonic: TJS
+    syntax: |
+      TJS     D,{#}S
+  pasm2_tjns_356696fb:
+    csv_row: 180
+    mnemonic: TJNS
+    syntax: |
+      TJNS    D,{#}S
+  pasm2_tjv_4da15f9c:
+    csv_row: 181
+    mnemonic: TJV
+    syntax: |
+      TJV     D,{#}S
+  pasm2_jint_8139edd2:
+    csv_row: 182
+    mnemonic: JINT
+    syntax: |
+      JINT    {#}S
+  pasm2_jct1_a376e11b:
+    csv_row: 183
+    mnemonic: JCT1
+    syntax: |
+      JCT1    {#}S
+  pasm2_jct2_bec14528:
+    csv_row: 184
+    mnemonic: JCT2
+    syntax: |
+      JCT2    {#}S
+  pasm2_jct3_e5fe61d2:
+    csv_row: 185
+    mnemonic: JCT3
+    syntax: |
+      JCT3    {#}S
+  pasm2_jse1_d88032db:
+    csv_row: 186
+    mnemonic: JSE1
+    syntax: |
+      JSE1    {#}S
+  pasm2_jse2_16460629:
+    csv_row: 187
+    mnemonic: JSE2
+    syntax: |
+      JSE2    {#}S
+  pasm2_jse3_02bf84be:
+    csv_row: 188
+    mnemonic: JSE3
+    syntax: |
+      JSE3    {#}S
+  pasm2_jse4_281ae42d:
+    csv_row: 189
+    mnemonic: JSE4
+    syntax: |
+      JSE4    {#}S
+  pasm2_jpat_df6206c1:
+    csv_row: 190
+    mnemonic: JPAT
+    syntax: |
+      JPAT    {#}S
+  pasm2_jfbw_765c3815:
+    csv_row: 191
+    mnemonic: JFBW
+    syntax: |
+      JFBW    {#}S
+  pasm2_jxmt_65985e75:
+    csv_row: 192
+    mnemonic: JXMT
+    syntax: |
+      JXMT    {#}S
+  pasm2_jxfi_43dea20f:
+    csv_row: 193
+    mnemonic: JXFI
+    syntax: |
+      JXFI    {#}S
+  pasm2_jxro_42da3d05:
+    csv_row: 194
+    mnemonic: JXRO
+    syntax: |
+      JXRO    {#}S
+  pasm2_jxrl_d8965900:
+    csv_row: 195
+    mnemonic: JXRL
+    syntax: |
+      JXRL    {#}S
+  pasm2_jatn_b819f6b4:
+    csv_row: 196
+    mnemonic: JATN
+    syntax: |
+      JATN    {#}S
+  pasm2_jqmt_411604d9:
+    csv_row: 197
+    mnemonic: JQMT
+    syntax: |
+      JQMT    {#}S
+  pasm2_jnint_5ab63f84:
+    csv_row: 198
+    mnemonic: JNINT
+    syntax: |
+      JNINT   {#}S
+  pasm2_jnct1_1c0adb57:
+    csv_row: 199
+    mnemonic: JNCT1
+    syntax: |
+      JNCT1   {#}S
+  pasm2_jnct2_af51574d:
+    csv_row: 200
+    mnemonic: JNCT2
+    syntax: |
+      JNCT2   {#}S
+  pasm2_jnct3_86c974d6:
+    csv_row: 201
+    mnemonic: JNCT3
+    syntax: |
+      JNCT3   {#}S
+  pasm2_jnse1_825dd5a3:
+    csv_row: 202
+    mnemonic: JNSE1
+    syntax: |
+      JNSE1   {#}S
+  pasm2_jnse2_bf359a26:
+    csv_row: 203
+    mnemonic: JNSE2
+    syntax: |
+      JNSE2   {#}S
+  pasm2_jnse3_e1bf7e29:
+    csv_row: 204
+    mnemonic: JNSE3
+    syntax: |
+      JNSE3   {#}S
+  pasm2_jnse4_56ada847:
+    csv_row: 205
+    mnemonic: JNSE4
+    syntax: |
+      JNSE4   {#}S
+  pasm2_jnpat_e2238932:
+    csv_row: 206
+    mnemonic: JNPAT
+    syntax: |
+      JNPAT   {#}S
+  pasm2_jnfbw_33353dd1:
+    csv_row: 207
+    mnemonic: JNFBW
+    syntax: |
+      JNFBW   {#}S
+  pasm2_jnxmt_6a5e63f8:
+    csv_row: 208
+    mnemonic: JNXMT
+    syntax: |
+      JNXMT   {#}S
+  pasm2_jnxfi_0ec5cee1:
+    csv_row: 209
+    mnemonic: JNXFI
+    syntax: |
+      JNXFI   {#}S
+  pasm2_jnxro_0b878ec0:
+    csv_row: 210
+    mnemonic: JNXRO
+    syntax: |
+      JNXRO   {#}S
+  pasm2_jnxrl_090fd93c:
+    csv_row: 211
+    mnemonic: JNXRL
+    syntax: |
+      JNXRL   {#}S
+  pasm2_jnatn_47f7b747:
+    csv_row: 212
+    mnemonic: JNATN
+    syntax: |
+      JNATN   {#}S
+  pasm2_jnqmt_8dc5da6a:
+    csv_row: 213
+    mnemonic: JNQMT
+    syntax: |
+      JNQMT   {#}S
+  pasm2_empty_f2a1cd21:
+    csv_row: 215
+    mnemonic: EMPTY
+    syntax: |
+      <empty> {#}D,{#}S
+  pasm2_setpat_bb131035:
+    csv_row: 216
+    mnemonic: SETPAT
+    syntax: |
+      SETPAT  {#}D,{#}S
+  pasm2_akpin_ede21b9d:
+    csv_row: 217
+    mnemonic: AKPIN
+    syntax: |
+      AKPIN   {#}S
+  pasm2_wrpin_79d13bd9:
+    csv_row: 218
+    mnemonic: WRPIN
+    syntax: |
+      WRPIN   {#}D,{#}S
+  pasm2_wxpin_b8778d24:
+    csv_row: 219
+    mnemonic: WXPIN
+    syntax: |
+      WXPIN   {#}D,{#}S
+  pasm2_wypin_bb83b762:
+    csv_row: 220
+    mnemonic: WYPIN
+    syntax: |
+      WYPIN   {#}D,{#}S
+  pasm2_wrlut_c22a80b7:
+    csv_row: 221
+    mnemonic: WRLUT
+    syntax: |
+      WRLUT   {#}D,{#}S/P
+  pasm2_wrbyte_472314ad:
+    csv_row: 222
+    mnemonic: WRBYTE
+    syntax: |
+      WRBYTE  {#}D,{#}S/P
+  pasm2_wrword_7121eb23:
+    csv_row: 223
+    mnemonic: WRWORD
+    syntax: |
+      WRWORD  {#}D,{#}S/P
+  pasm2_wrlong_a6f7f585:
+    csv_row: 224
+    mnemonic: WRLONG
+    syntax: |
+      WRLONG  {#}D,{#}S/P
+  pasm2_pusha_c9339dd4:
+    csv_row: 225
+    mnemonic: PUSHA
+    syntax: |
+      PUSHA   {#}D
+  pasm2_pushb_ab3bd732:
+    csv_row: 226
+    mnemonic: PUSHB
+    syntax: |
+      PUSHB   {#}D
+  pasm2_rdfast_bfe2b024:
+    csv_row: 227
+    mnemonic: RDFAST
+    syntax: |
+      RDFAST  {#}D,{#}S
+  pasm2_wrfast_85bc1b35:
+    csv_row: 228
+    mnemonic: WRFAST
+    syntax: |
+      WRFAST  {#}D,{#}S
+  pasm2_fblock_54928d88:
+    csv_row: 229
+    mnemonic: FBLOCK
+    syntax: |
+      FBLOCK  {#}D,{#}S
+  pasm2_xinit_caa14944:
+    csv_row: 230
+    mnemonic: XINIT
+    syntax: |
+      XINIT   {#}D,{#}S
+  pasm2_xstop_43d0f6de:
+    csv_row: 231
+    mnemonic: XSTOP
+    syntax: XSTOP
+  pasm2_xzero_cd4f821a:
+    csv_row: 232
+    mnemonic: XZERO
+    syntax: |
+      XZERO   {#}D,{#}S
+  pasm2_xcont_5328926f:
+    csv_row: 233
+    mnemonic: XCONT
+    syntax: |
+      XCONT   {#}D,{#}S
+  pasm2_rep_1d15aaba:
+    csv_row: 234
+    mnemonic: REP
+    syntax: |
+      REP     {#}D,{#}S
+  pasm2_coginit_d1ade2cf:
+    csv_row: 235
+    mnemonic: COGINIT
+    syntax: |
+      COGINIT {#}D,{#}S       {WC}
+  pasm2_qmul_789933d9:
+    csv_row: 236
+    mnemonic: QMUL
+    syntax: |
+      QMUL    {#}D,{#}S
+  pasm2_qdiv_bf91dfce:
+    csv_row: 237
+    mnemonic: QDIV
+    syntax: |
+      QDIV    {#}D,{#}S
+  pasm2_qfrac_0f0d5fd5:
+    csv_row: 238
+    mnemonic: QFRAC
+    syntax: |
+      QFRAC   {#}D,{#}S
+  pasm2_qsqrt_8d96385f:
+    csv_row: 239
+    mnemonic: QSQRT
+    syntax: |
+      QSQRT   {#}D,{#}S
+  pasm2_qrotate_e5533511:
+    csv_row: 240
+    mnemonic: QROTATE
+    syntax: |
+      QROTATE {#}D,{#}S
+  pasm2_qvector_6b8b5d43:
+    csv_row: 241
+    mnemonic: QVECTOR
+    syntax: |
+      QVECTOR {#}D,{#}S
+  pasm2_hubset_ac6d8120:
+    csv_row: 242
+    mnemonic: HUBSET
+    syntax: |
+      HUBSET  {#}D
+  pasm2_cogid_cd99cda1:
+    csv_row: 243
+    mnemonic: COGID
+    syntax: |
+      COGID   {#}D            {WC}
+  pasm2_cogstop_dfe71962:
+    csv_row: 244
+    mnemonic: COGSTOP
+    syntax: |
+      COGSTOP {#}D
+  pasm2_locknew_4a5852c2:
+    csv_row: 245
+    mnemonic: LOCKNEW
+    syntax: LOCKNEW D               {WC}
+  pasm2_lockret_0537245d:
+    csv_row: 246
+    mnemonic: LOCKRET
+    syntax: |
+      LOCKRET {#}D
+  pasm2_locktry_b1166194:
+    csv_row: 247
+    mnemonic: LOCKTRY
+    syntax: |
+      LOCKTRY {#}D            {WC}
+  pasm2_lockrel_5d8b4a6f:
+    csv_row: 248
+    mnemonic: LOCKREL
+    syntax: |
+      LOCKREL {#}D            {WC}
+  pasm2_qlog_23c42322:
+    csv_row: 249
+    mnemonic: QLOG
+    syntax: |
+      QLOG    {#}D
+  pasm2_qexp_44d4a53e:
+    csv_row: 250
+    mnemonic: QEXP
+    syntax: |
+      QEXP    {#}D
+  pasm2_rfbyte_dc5864f5:
+    csv_row: 251
+    mnemonic: RFBYTE
+    syntax: RFBYTE  D        {WC/WZ/WCZ}
+  pasm2_rfword_c1c2bc10:
+    csv_row: 252
+    mnemonic: RFWORD
+    syntax: RFWORD  D        {WC/WZ/WCZ}
+  pasm2_rflong_818ab2c9:
+    csv_row: 253
+    mnemonic: RFLONG
+    syntax: RFLONG  D        {WC/WZ/WCZ}
+  pasm2_rfvar_1e05929b:
+    csv_row: 254
+    mnemonic: RFVAR
+    syntax: RFVAR   D        {WC/WZ/WCZ}
+  pasm2_rfvars_2f1ff8b2:
+    csv_row: 255
+    mnemonic: RFVARS
+    syntax: RFVARS  D        {WC/WZ/WCZ}
+  pasm2_wfbyte_0e893825:
+    csv_row: 256
+    mnemonic: WFBYTE
+    syntax: |
+      WFBYTE  {#}D
+  pasm2_wfword_fa695947:
+    csv_row: 257
+    mnemonic: WFWORD
+    syntax: |
+      WFWORD  {#}D
+  pasm2_wflong_50a8fd1f:
+    csv_row: 258
+    mnemonic: WFLONG
+    syntax: |
+      WFLONG  {#}D
+  pasm2_getqx_ffbadb45:
+    csv_row: 259
+    mnemonic: GETQX
+    syntax: GETQX   D        {WC/WZ/WCZ}
+  pasm2_getqy_30e1f714:
+    csv_row: 260
+    mnemonic: GETQY
+    syntax: GETQY   D        {WC/WZ/WCZ}
+  pasm2_getct_0851efb8:
+    csv_row: 261
+    mnemonic: GETCT
+    syntax: GETCT   D               {WC}
+  pasm2_getrnd_3dcfa923:
+    csv_row: 262
+    mnemonic: GETRND
+    syntax: GETRND  D        {WC/WZ/WCZ}
+  pasm2_getrnd_da8be5b9:
+    csv_row: 263
+    mnemonic: GETRND
+    syntax: GETRND            WC/WZ/WCZ
+  pasm2_setdacs_1facc786:
+    csv_row: 264
+    mnemonic: SETDACS
+    syntax: |
+      SETDACS {#}D
+  pasm2_setxfrq_c628fa69:
+    csv_row: 265
+    mnemonic: SETXFRQ
+    syntax: |
+      SETXFRQ {#}D
+  pasm2_getxacc_bbfb64b9:
+    csv_row: 266
+    mnemonic: GETXACC
+    syntax: GETXACC D
+  pasm2_waitx_27ea9385:
+    csv_row: 267
+    mnemonic: WAITX
+    syntax: |
+      WAITX   {#}D     {WC/WZ/WCZ}
+  pasm2_setse1_70ecc016:
+    csv_row: 268
+    mnemonic: SETSE1
+    syntax: |
+      SETSE1  {#}D
+  pasm2_setse2_e4aeab9a:
+    csv_row: 269
+    mnemonic: SETSE2
+    syntax: |
+      SETSE2  {#}D
+  pasm2_setse3_7df8a4d4:
+    csv_row: 270
+    mnemonic: SETSE3
+    syntax: |
+      SETSE3  {#}D
+  pasm2_setse4_d369d39e:
+    csv_row: 271
+    mnemonic: SETSE4
+    syntax: |
+      SETSE4  {#}D
+  pasm2_pollint_0a075979:
+    csv_row: 272
+    mnemonic: POLLINT
+    syntax: POLLINT          {WC/WZ/WCZ}
+  pasm2_pollct1_b413eca3:
+    csv_row: 273
+    mnemonic: POLLCT1
+    syntax: POLLCT1          {WC/WZ/WCZ}
+  pasm2_pollct2_838bf4db:
+    csv_row: 274
+    mnemonic: POLLCT2
+    syntax: POLLCT2          {WC/WZ/WCZ}
+  pasm2_pollct3_3f6f9fcb:
+    csv_row: 275
+    mnemonic: POLLCT3
+    syntax: POLLCT3          {WC/WZ/WCZ}
+  pasm2_pollse1_abc87a1e:
+    csv_row: 276
+    mnemonic: POLLSE1
+    syntax: POLLSE1          {WC/WZ/WCZ}
+  pasm2_pollse2_e2e7f9a7:
+    csv_row: 277
+    mnemonic: POLLSE2
+    syntax: POLLSE2          {WC/WZ/WCZ}
+  pasm2_pollse3_aeb5c361:
+    csv_row: 278
+    mnemonic: POLLSE3
+    syntax: POLLSE3          {WC/WZ/WCZ}
+  pasm2_pollse4_fc37b5cb:
+    csv_row: 279
+    mnemonic: POLLSE4
+    syntax: POLLSE4          {WC/WZ/WCZ}
+  pasm2_pollpat_b35130e9:
+    csv_row: 280
+    mnemonic: POLLPAT
+    syntax: POLLPAT          {WC/WZ/WCZ}
+  pasm2_pollfbw_eddf2221:
+    csv_row: 281
+    mnemonic: POLLFBW
+    syntax: POLLFBW          {WC/WZ/WCZ}
+  pasm2_pollxmt_6a14c89b:
+    csv_row: 282
+    mnemonic: POLLXMT
+    syntax: POLLXMT          {WC/WZ/WCZ}
+  pasm2_pollxfi_c18f8b24:
+    csv_row: 283
+    mnemonic: POLLXFI
+    syntax: POLLXFI          {WC/WZ/WCZ}
+  pasm2_pollxro_a5b76f60:
+    csv_row: 284
+    mnemonic: POLLXRO
+    syntax: POLLXRO          {WC/WZ/WCZ}
+  pasm2_pollxrl_a33bc90d:
+    csv_row: 285
+    mnemonic: POLLXRL
+    syntax: POLLXRL          {WC/WZ/WCZ}
+  pasm2_pollatn_9fa8ce4f:
+    csv_row: 286
+    mnemonic: POLLATN
+    syntax: POLLATN          {WC/WZ/WCZ}
+  pasm2_pollqmt_ea7d7809:
+    csv_row: 287
+    mnemonic: POLLQMT
+    syntax: POLLQMT          {WC/WZ/WCZ}
+  pasm2_waitint_30f4a998:
+    csv_row: 288
+    mnemonic: WAITINT
+    syntax: WAITINT          {WC/WZ/WCZ}
+  pasm2_waitct1_94c70c78:
+    csv_row: 289
+    mnemonic: WAITCT1
+    syntax: WAITCT1          {WC/WZ/WCZ}
+  pasm2_waitct2_d3723480:
+    csv_row: 290
+    mnemonic: WAITCT2
+    syntax: WAITCT2          {WC/WZ/WCZ}
+  pasm2_waitct3_adfc1a78:
+    csv_row: 291
+    mnemonic: WAITCT3
+    syntax: WAITCT3          {WC/WZ/WCZ}
+  pasm2_waitse1_0910fb45:
+    csv_row: 292
+    mnemonic: WAITSE1
+    syntax: WAITSE1          {WC/WZ/WCZ}
+  pasm2_waitse2_f9fab215:
+    csv_row: 293
+    mnemonic: WAITSE2
+    syntax: WAITSE2          {WC/WZ/WCZ}
+  pasm2_waitse3_be083d0c:
+    csv_row: 294
+    mnemonic: WAITSE3
+    syntax: WAITSE3          {WC/WZ/WCZ}
+  pasm2_waitse4_642b44df:
+    csv_row: 295
+    mnemonic: WAITSE4
+    syntax: WAITSE4          {WC/WZ/WCZ}
+  pasm2_waitpat_42577f67:
+    csv_row: 296
+    mnemonic: WAITPAT
+    syntax: WAITPAT          {WC/WZ/WCZ}
+  pasm2_waitfbw_943c594d:
+    csv_row: 297
+    mnemonic: WAITFBW
+    syntax: WAITFBW          {WC/WZ/WCZ}
+  pasm2_waitxmt_8f1e4f61:
+    csv_row: 298
+    mnemonic: WAITXMT
+    syntax: WAITXMT          {WC/WZ/WCZ}
+  pasm2_waitxfi_e5272c1a:
+    csv_row: 299
+    mnemonic: WAITXFI
+    syntax: WAITXFI          {WC/WZ/WCZ}
+  pasm2_waitxro_77e3cbb7:
+    csv_row: 300
+    mnemonic: WAITXRO
+    syntax: WAITXRO          {WC/WZ/WCZ}
+  pasm2_waitxrl_46ba7e0c:
+    csv_row: 301
+    mnemonic: WAITXRL
+    syntax: WAITXRL          {WC/WZ/WCZ}
+  pasm2_waitatn_4e06d02a:
+    csv_row: 302
+    mnemonic: WAITATN
+    syntax: WAITATN          {WC/WZ/WCZ}
+  pasm2_allowi_58d92ea6:
+    csv_row: 303
+    mnemonic: ALLOWI
+    syntax: ALLOWI
+  pasm2_stalli_3f81a234:
+    csv_row: 304
+    mnemonic: STALLI
+    syntax: STALLI
+  pasm2_trgint1_84369493:
+    csv_row: 305
+    mnemonic: TRGINT1
+    syntax: TRGINT1
+  pasm2_trgint2_ba1498dc:
+    csv_row: 306
+    mnemonic: TRGINT2
+    syntax: TRGINT2
+  pasm2_trgint3_15067088:
+    csv_row: 307
+    mnemonic: TRGINT3
+    syntax: TRGINT3
+  pasm2_nixint1_a546d28f:
+    csv_row: 308
+    mnemonic: NIXINT1
+    syntax: NIXINT1
+  pasm2_nixint2_964f6f31:
+    csv_row: 309
+    mnemonic: NIXINT2
+    syntax: NIXINT2
+  pasm2_nixint3_d9e022a3:
+    csv_row: 310
+    mnemonic: NIXINT3
+    syntax: NIXINT3
+  pasm2_setint1_65e2bbeb:
+    csv_row: 311
+    mnemonic: SETINT1
+    syntax: |
+      SETINT1 {#}D
+  pasm2_setint2_9ab897a3:
+    csv_row: 312
+    mnemonic: SETINT2
+    syntax: |
+      SETINT2 {#}D
+  pasm2_setint3_447d087c:
+    csv_row: 313
+    mnemonic: SETINT3
+    syntax: |
+      SETINT3 {#}D
+  pasm2_setq_2583ac65:
+    csv_row: 314
+    mnemonic: SETQ
+    syntax: |
+      SETQ    {#}D
+  pasm2_setq2_ba79a5bb:
+    csv_row: 315
+    mnemonic: SETQ2
+    syntax: |
+      SETQ2   {#}D
+  pasm2_push_2a328c4d:
+    csv_row: 316
+    mnemonic: PUSH
+    syntax: |
+      PUSH    {#}D
+  pasm2_pop_a77b6bf7:
+    csv_row: 317
+    mnemonic: POP
+    syntax: POP     D        {WC/WZ/WCZ}
+  pasm2_jmp_e87da2f9:
+    csv_row: 318
+    mnemonic: JMP
+    syntax: JMP     D        {WC/WZ/WCZ}
+  pasm2_call_f92d32cd:
+    csv_row: 319
+    mnemonic: CALL
+    syntax: CALL    D        {WC/WZ/WCZ}
+  pasm2_ret_a5fccf48:
+    csv_row: 320
+    mnemonic: RET
+    syntax: RET              {WC/WZ/WCZ}
+  pasm2_calla_adaf0acc:
+    csv_row: 321
+    mnemonic: CALLA
+    syntax: CALLA   D        {WC/WZ/WCZ}
+  pasm2_reta_e3a3b03e:
+    csv_row: 322
+    mnemonic: RETA
+    syntax: RETA             {WC/WZ/WCZ}
+  pasm2_callb_672953be:
+    csv_row: 323
+    mnemonic: CALLB
+    syntax: CALLB   D        {WC/WZ/WCZ}
+  pasm2_retb_8e9f4558:
+    csv_row: 324
+    mnemonic: RETB
+    syntax: RETB             {WC/WZ/WCZ}
+  pasm2_jmprel_0a247423:
+    csv_row: 325
+    mnemonic: JMPREL
+    syntax: |
+      JMPREL  {#}D
+  pasm2_skip_56e239d3:
+    csv_row: 326
+    mnemonic: SKIP
+    syntax: |
+      SKIP    {#}D
+  pasm2_skipf_7b48d719:
+    csv_row: 327
+    mnemonic: SKIPF
+    syntax: |
+      SKIPF   {#}D
+  pasm2_execf_e6bd8809:
+    csv_row: 328
+    mnemonic: EXECF
+    syntax: |
+      EXECF   {#}D
+  pasm2_getptr_5e211fd6:
+    csv_row: 329
+    mnemonic: GETPTR
+    syntax: GETPTR  D
+  pasm2_getbrk_4f7c6abb:
+    csv_row: 330
+    mnemonic: GETBRK
+    syntax: GETBRK  D          WC/WZ/WCZ
+  pasm2_cogbrk_978e30d6:
+    csv_row: 331
+    mnemonic: COGBRK
+    syntax: |
+      COGBRK  {#}D
+  pasm2_brk_77dd5ff1:
+    csv_row: 332
+    mnemonic: BRK
+    syntax: |
+      BRK     {#}D
+  pasm2_setluts_3084636c:
+    csv_row: 333
+    mnemonic: SETLUTS
+    syntax: |
+      SETLUTS {#}D
+  pasm2_setcy_2f907a65:
+    csv_row: 334
+    mnemonic: SETCY
+    syntax: |
+      SETCY   {#}D
+  pasm2_setci_f8db8b8d:
+    csv_row: 335
+    mnemonic: SETCI
+    syntax: |
+      SETCI   {#}D
+  pasm2_setcq_1d304b8b:
+    csv_row: 336
+    mnemonic: SETCQ
+    syntax: |
+      SETCQ   {#}D
+  pasm2_setcfrq_eb16cdb2:
+    csv_row: 337
+    mnemonic: SETCFRQ
+    syntax: |
+      SETCFRQ {#}D
+  pasm2_setcmod_af84d434:
+    csv_row: 338
+    mnemonic: SETCMOD
+    syntax: |
+      SETCMOD {#}D
+  pasm2_setpiv_12995adc:
+    csv_row: 339
+    mnemonic: SETPIV
+    syntax: |
+      SETPIV  {#}D
+  pasm2_setpix_adaf17e2:
+    csv_row: 340
+    mnemonic: SETPIX
+    syntax: |
+      SETPIX  {#}D
+  pasm2_cogatn_d08e9e92:
+    csv_row: 341
+    mnemonic: COGATN
+    syntax: |
+      COGATN  {#}D
+  pasm2_testp_8641f303:
+    csv_row: 342
+    mnemonic: TESTP
+    syntax: |
+      TESTP   {#}D           WC/WZ
+  pasm2_testpn_1f79b73d:
+    csv_row: 343
+    mnemonic: TESTPN
+    syntax: |
+      TESTPN  {#}D           WC/WZ
+  pasm2_testp_031e4c2f:
+    csv_row: 344
+    mnemonic: TESTP
+    syntax: |
+      TESTP   {#}D       ANDC/ANDZ
+  pasm2_testpn_057198b1:
+    csv_row: 345
+    mnemonic: TESTPN
+    syntax: |
+      TESTPN  {#}D       ANDC/ANDZ
+  pasm2_testp_71aa4b13:
+    csv_row: 346
+    mnemonic: TESTP
+    syntax: |
+      TESTP   {#}D         ORC/ORZ
+  pasm2_testpn_5359362d:
+    csv_row: 347
+    mnemonic: TESTPN
+    syntax: |
+      TESTPN  {#}D         ORC/ORZ
+  pasm2_testp_92afc9c0:
+    csv_row: 348
+    mnemonic: TESTP
+    syntax: |
+      TESTP   {#}D       XORC/XORZ
+  pasm2_testpn_5edff037:
+    csv_row: 349
+    mnemonic: TESTPN
+    syntax: |
+      TESTPN  {#}D       XORC/XORZ
+  pasm2_dirl_e6999496:
+    csv_row: 350
+    mnemonic: DIRL
+    syntax: |
+      DIRL    {#}D           {WCZ}
+  pasm2_dirh_1ad1e54a:
+    csv_row: 351
+    mnemonic: DIRH
+    syntax: |
+      DIRH    {#}D           {WCZ}
+  pasm2_dirc_f8fa2ee8:
+    csv_row: 352
+    mnemonic: DIRC
+    syntax: |
+      DIRC    {#}D           {WCZ}
+  pasm2_dirnc_8c8d0a26:
+    csv_row: 353
+    mnemonic: DIRNC
+    syntax: |
+      DIRNC   {#}D           {WCZ}
+  pasm2_dirz_dbe53c04:
+    csv_row: 354
+    mnemonic: DIRZ
+    syntax: |
+      DIRZ    {#}D           {WCZ}
+  pasm2_dirnz_f23fa7b3:
+    csv_row: 355
+    mnemonic: DIRNZ
+    syntax: |
+      DIRNZ   {#}D           {WCZ}
+  pasm2_dirrnd_384ab259:
+    csv_row: 356
+    mnemonic: DIRRND
+    syntax: |
+      DIRRND  {#}D           {WCZ}
+  pasm2_dirnot_f52cb0fa:
+    csv_row: 357
+    mnemonic: DIRNOT
+    syntax: |
+      DIRNOT  {#}D           {WCZ}
+  pasm2_outl_b18809a8:
+    csv_row: 358
+    mnemonic: OUTL
+    syntax: |
+      OUTL    {#}D           {WCZ}
+  pasm2_outh_519a5bb5:
+    csv_row: 359
+    mnemonic: OUTH
+    syntax: |
+      OUTH    {#}D           {WCZ}
+  pasm2_outc_48669ab3:
+    csv_row: 360
+    mnemonic: OUTC
+    syntax: |
+      OUTC    {#}D           {WCZ}
+  pasm2_outnc_1ece39bb:
+    csv_row: 361
+    mnemonic: OUTNC
+    syntax: |
+      OUTNC   {#}D           {WCZ}
+  pasm2_outz_61151ea0:
+    csv_row: 362
+    mnemonic: OUTZ
+    syntax: |
+      OUTZ    {#}D           {WCZ}
+  pasm2_outnz_0d66c162:
+    csv_row: 363
+    mnemonic: OUTNZ
+    syntax: |
+      OUTNZ   {#}D           {WCZ}
+  pasm2_outrnd_a88e2b35:
+    csv_row: 364
+    mnemonic: OUTRND
+    syntax: |
+      OUTRND  {#}D           {WCZ}
+  pasm2_outnot_59d6c188:
+    csv_row: 365
+    mnemonic: OUTNOT
+    syntax: |
+      OUTNOT  {#}D           {WCZ}
+  pasm2_fltl_70411164:
+    csv_row: 366
+    mnemonic: FLTL
+    syntax: |
+      FLTL    {#}D           {WCZ}
+  pasm2_flth_4b36290f:
+    csv_row: 367
+    mnemonic: FLTH
+    syntax: |
+      FLTH    {#}D           {WCZ}
+  pasm2_fltc_ee9bf87d:
+    csv_row: 368
+    mnemonic: FLTC
+    syntax: |
+      FLTC    {#}D           {WCZ}
+  pasm2_fltnc_dfe13027:
+    csv_row: 369
+    mnemonic: FLTNC
+    syntax: |
+      FLTNC   {#}D           {WCZ}
+  pasm2_fltz_c672b9fd:
+    csv_row: 370
+    mnemonic: FLTZ
+    syntax: |
+      FLTZ    {#}D           {WCZ}
+  pasm2_fltnz_5e0a5a13:
+    csv_row: 371
+    mnemonic: FLTNZ
+    syntax: |
+      FLTNZ   {#}D           {WCZ}
+  pasm2_fltrnd_d8e74d14:
+    csv_row: 372
+    mnemonic: FLTRND
+    syntax: |
+      FLTRND  {#}D           {WCZ}
+  pasm2_fltnot_7942ab81:
+    csv_row: 373
+    mnemonic: FLTNOT
+    syntax: |
+      FLTNOT  {#}D           {WCZ}
+  pasm2_drvl_17191d1f:
+    csv_row: 374
+    mnemonic: DRVL
+    syntax: |
+      DRVL    {#}D           {WCZ}
+  pasm2_drvh_88909c62:
+    csv_row: 375
+    mnemonic: DRVH
+    syntax: |
+      DRVH    {#}D           {WCZ}
+  pasm2_drvc_5c77af22:
+    csv_row: 376
+    mnemonic: DRVC
+    syntax: |
+      DRVC    {#}D           {WCZ}
+  pasm2_drvnc_81e1dbfa:
+    csv_row: 377
+    mnemonic: DRVNC
+    syntax: |
+      DRVNC   {#}D           {WCZ}
+  pasm2_drvz_a20d2a95:
+    csv_row: 378
+    mnemonic: DRVZ
+    syntax: |
+      DRVZ    {#}D           {WCZ}
+  pasm2_drvnz_55947bee:
+    csv_row: 379
+    mnemonic: DRVNZ
+    syntax: |
+      DRVNZ   {#}D           {WCZ}
+  pasm2_drvrnd_1514d280:
+    csv_row: 380
+    mnemonic: DRVRND
+    syntax: |
+      DRVRND  {#}D           {WCZ}
+  pasm2_drvnot_5b99755d:
+    csv_row: 381
+    mnemonic: DRVNOT
+    syntax: |
+      DRVNOT  {#}D           {WCZ}
+  pasm2_splitb_d1d3c272:
+    csv_row: 382
+    mnemonic: SPLITB
+    syntax: SPLITB  D
+  pasm2_mergeb_af19e7d7:
+    csv_row: 383
+    mnemonic: MERGEB
+    syntax: MERGEB  D
+  pasm2_splitw_45a6812b:
+    csv_row: 384
+    mnemonic: SPLITW
+    syntax: SPLITW  D
+  pasm2_mergew_64a442b3:
+    csv_row: 385
+    mnemonic: MERGEW
+    syntax: MERGEW  D
+  pasm2_seussf_6cffe856:
+    csv_row: 386
+    mnemonic: SEUSSF
+    syntax: SEUSSF  D
+  pasm2_seussr_cfd3de36:
+    csv_row: 387
+    mnemonic: SEUSSR
+    syntax: SEUSSR  D
+  pasm2_rgbsqz_9e13bf84:
+    csv_row: 388
+    mnemonic: RGBSQZ
+    syntax: RGBSQZ  D
+  pasm2_rgbexp_c2fea1cb:
+    csv_row: 389
+    mnemonic: RGBEXP
+    syntax: RGBEXP  D
+  pasm2_xoro32_eff87f9c:
+    csv_row: 390
+    mnemonic: XORO32
+    syntax: XORO32  D
+  pasm2_rev_9cb93ac4:
+    csv_row: 391
+    mnemonic: REV
+    syntax: REV     D
+  pasm2_rczr_dc38fe88:
+    csv_row: 392
+    mnemonic: RCZR
+    syntax: RCZR    D        {WC/WZ/WCZ}
+  pasm2_rczl_dc554ef5:
+    csv_row: 393
+    mnemonic: RCZL
+    syntax: RCZL    D        {WC/WZ/WCZ}
+  pasm2_wrc_ada3ac4f:
+    csv_row: 394
+    mnemonic: WRC
+    syntax: WRC     D
+  pasm2_wrnc_35debc0d:
+    csv_row: 395
+    mnemonic: WRNC
+    syntax: WRNC    D
+  pasm2_wrz_7f4705aa:
+    csv_row: 396
+    mnemonic: WRZ
+    syntax: WRZ     D
+  pasm2_wrnz_020a8479:
+    csv_row: 397
+    mnemonic: WRNZ
+    syntax: WRNZ    D
+  pasm2_modcz_132bb0f9:
+    csv_row: 398
+    mnemonic: MODCZ
+    syntax: MODCZ   c,z      {WC/WZ/WCZ}
+  pasm2_modc_eeb2b50a:
+    csv_row: 399
+    mnemonic: MODC
+    syntax: MODC    c               {WC}
+  pasm2_modz_373af938:
+    csv_row: 400
+    mnemonic: MODZ
+    syntax: MODZ    z               {WZ}
+  pasm2_setscp_89ae0b06:
+    csv_row: 401
+    mnemonic: SETSCP
+    syntax: |
+      SETSCP  {#}D
+  pasm2_getscp_1a88b7f4:
+    csv_row: 402
+    mnemonic: GETSCP
+    syntax: GETSCP  D
+  pasm2_jmp_c1cfce3a:
+    csv_row: 403
+    mnemonic: JMP
+    syntax: |
+      JMP     #{\}A
+  pasm2_call_aef05e63:
+    csv_row: 404
+    mnemonic: CALL
+    syntax: |
+      CALL    #{\}A
+  pasm2_calla_d786f3a7:
+    csv_row: 405
+    mnemonic: CALLA
+    syntax: |
+      CALLA   #{\}A
+  pasm2_callb_b4099178:
+    csv_row: 406
+    mnemonic: CALLB
+    syntax: |
+      CALLB   #{\}A
+  pasm2_calld_c4073b3a:
+    csv_row: 407
+    mnemonic: CALLD
+    syntax: |
+      CALLD   PA/PB/PTRA/PTRB,#{\}A
+  pasm2_loc_6219a0dd:
+    csv_row: 408
+    mnemonic: LOC
+    syntax: |
+      LOC     PA/PB/PTRA/PTRB,#{\}A
+  pasm2_augs_cdae6585:
+    csv_row: 409
+    mnemonic: AUGS
+    syntax: |
+      AUGS    #n
+  pasm2_augd_94533f9d:
+    csv_row: 410
+    mnemonic: AUGD
+    syntax: |
+      AUGD    #n
+  pasm2__ret__2e48ac18:
+    csv_row: 411
+    mnemonic: _RET_
+    syntax: _RET_         <inst>  <ops>
+  pasm2_if_nc_and_nz_89c2d187:
+    csv_row: 412
+    mnemonic: IF_NC_AND_NZ
+    syntax: IF_NC_AND_NZ  <inst>  <ops>
+  pasm2_if_nz_and_nc_1d3b77d1:
+    csv_row: 413
+    mnemonic: IF_NZ_AND_NC
+    syntax: IF_NZ_AND_NC  <inst>  <ops>
+  pasm2_if_gt_a873acc4:
+    csv_row: 414
+    mnemonic: IF_GT
+    syntax: IF_GT         <inst>  <ops>
+  pasm2_if_a_22723d32:
+    csv_row: 415
+    mnemonic: IF_A
+    syntax: IF_A          <inst>  <ops>
+  pasm2_if_00_67049366:
+    csv_row: 416
+    mnemonic: IF_00
+    syntax: IF_00         <inst>  <ops>
+  pasm2_if_nc_and_z_db34ce40:
+    csv_row: 417
+    mnemonic: IF_NC_AND_Z
+    syntax: IF_NC_AND_Z   <inst>  <ops>
+  pasm2_if_z_and_nc_2de65d8b:
+    csv_row: 418
+    mnemonic: IF_Z_AND_NC
+    syntax: IF_Z_AND_NC   <inst>  <ops>
+  pasm2_if_01_d36aef6f:
+    csv_row: 419
+    mnemonic: IF_01
+    syntax: IF_01         <inst>  <ops>
+  pasm2_if_nc_7d5aefa0:
+    csv_row: 420
+    mnemonic: IF_NC
+    syntax: IF_NC         <inst>  <ops>
+  pasm2_if_ge_adc17f8f:
+    csv_row: 421
+    mnemonic: IF_GE
+    syntax: IF_GE         <inst>  <ops>
+  pasm2_if_ae_a2f4263e:
+    csv_row: 422
+    mnemonic: IF_AE
+    syntax: IF_AE         <inst>  <ops>
+  pasm2_if_0x_fa1f4025:
+    csv_row: 423
+    mnemonic: IF_0X
+    syntax: IF_0X         <inst>  <ops>
+  pasm2_if_c_and_nz_a4bbe0c3:
+    csv_row: 424
+    mnemonic: IF_C_AND_NZ
+    syntax: IF_C_AND_NZ   <inst>  <ops>
+  pasm2_if_nz_and_c_1732fb48:
+    csv_row: 425
+    mnemonic: IF_NZ_AND_C
+    syntax: IF_NZ_AND_C   <inst>  <ops>
+  pasm2_if_10_5ce4d47d:
+    csv_row: 426
+    mnemonic: IF_10
+    syntax: IF_10         <inst>  <ops>
+  pasm2_if_nz_d49bcb6d:
+    csv_row: 427
+    mnemonic: IF_NZ
+    syntax: IF_NZ         <inst>  <ops>
+  pasm2_if_ne_951767ba:
+    csv_row: 428
+    mnemonic: IF_NE
+    syntax: IF_NE         <inst>  <ops>
+  pasm2_if_x0_1a3bcfb0:
+    csv_row: 429
+    mnemonic: IF_X0
+    syntax: IF_X0         <inst>  <ops>
+  pasm2_if_c_ne_z_adae3b0a:
+    csv_row: 430
+    mnemonic: IF_C_NE_Z
+    syntax: IF_C_NE_Z     <inst>  <ops>
+  pasm2_if_z_ne_c_5610884e:
+    csv_row: 431
+    mnemonic: IF_Z_NE_C
+    syntax: IF_Z_NE_C     <inst>  <ops>
+  pasm2_if_diff_25df2480:
+    csv_row: 432
+    mnemonic: IF_DIFF
+    syntax: IF_DIFF       <inst>  <ops>
+  pasm2_if_nc_or_nz_c3a98184:
+    csv_row: 433
+    mnemonic: IF_NC_OR_NZ
+    syntax: IF_NC_OR_NZ   <inst>  <ops>
+  pasm2_if_nz_or_nc_85d14ae6:
+    csv_row: 434
+    mnemonic: IF_NZ_OR_NC
+    syntax: IF_NZ_OR_NC   <inst>  <ops>
+  pasm2_if_not_11_4f9ee238:
+    csv_row: 435
+    mnemonic: IF_NOT_11
+    syntax: IF_NOT_11     <inst>  <ops>
+  pasm2_if_c_and_z_bcd50ae1:
+    csv_row: 436
+    mnemonic: IF_C_AND_Z
+    syntax: IF_C_AND_Z    <inst>  <ops>
+  pasm2_if_z_and_c_c7a51ace:
+    csv_row: 437
+    mnemonic: IF_Z_AND_C
+    syntax: IF_Z_AND_C    <inst>  <ops>
+  pasm2_if_11_f92042cc:
+    csv_row: 438
+    mnemonic: IF_11
+    syntax: IF_11         <inst>  <ops>
+  pasm2_if_c_eq_z_d01dc26a:
+    csv_row: 439
+    mnemonic: IF_C_EQ_Z
+    syntax: IF_C_EQ_Z     <inst>  <ops>
+  pasm2_if_z_eq_c_764a87ee:
+    csv_row: 440
+    mnemonic: IF_Z_EQ_C
+    syntax: IF_Z_EQ_C     <inst>  <ops>
+  pasm2_if_same_5a2552cc:
+    csv_row: 441
+    mnemonic: IF_SAME
+    syntax: IF_SAME       <inst>  <ops>
+  pasm2_if_z_d358415a:
+    csv_row: 442
+    mnemonic: IF_Z
+    syntax: IF_Z          <inst>  <ops>
+  pasm2_if_e_96004c27:
+    csv_row: 443
+    mnemonic: IF_E
+    syntax: IF_E          <inst>  <ops>
+  pasm2_if_x1_654600bd:
+    csv_row: 444
+    mnemonic: IF_X1
+    syntax: IF_X1         <inst>  <ops>
+  pasm2_if_nc_or_z_390c3547:
+    csv_row: 445
+    mnemonic: IF_NC_OR_Z
+    syntax: IF_NC_OR_Z    <inst>  <ops>
+  pasm2_if_z_or_nc_aa298cb1:
+    csv_row: 446
+    mnemonic: IF_Z_OR_NC
+    syntax: IF_Z_OR_NC    <inst>  <ops>
+  pasm2_if_not_10_a15e4f89:
+    csv_row: 447
+    mnemonic: IF_NOT_10
+    syntax: IF_NOT_10     <inst>  <ops>
+  pasm2_if_c_474b45a0:
+    csv_row: 448
+    mnemonic: IF_C
+    syntax: IF_C          <inst>  <ops>
+  pasm2_if_lt_8ae3639c:
+    csv_row: 449
+    mnemonic: IF_LT
+    syntax: IF_LT         <inst>  <ops>
+  pasm2_if_b_99ac205c:
+    csv_row: 450
+    mnemonic: IF_B
+    syntax: IF_B          <inst>  <ops>
+  pasm2_if_1x_e1473d8a:
+    csv_row: 451
+    mnemonic: IF_1X
+    syntax: IF_1X         <inst>  <ops>
+  pasm2_if_c_or_nz_6213b602:
+    csv_row: 452
+    mnemonic: IF_C_OR_NZ
+    syntax: IF_C_OR_NZ    <inst>  <ops>
+  pasm2_if_nz_or_c_b8f8b5da:
+    csv_row: 453
+    mnemonic: IF_NZ_OR_C
+    syntax: IF_NZ_OR_C    <inst>  <ops>
+  pasm2_if_not_01_232ed843:
+    csv_row: 454
+    mnemonic: IF_NOT_01
+    syntax: IF_NOT_01     <inst>  <ops>
+  pasm2_if_c_or_z_1d95b8e4:
+    csv_row: 455
+    mnemonic: IF_C_OR_Z
+    syntax: IF_C_OR_Z     <inst>  <ops>
+  pasm2_if_z_or_c_c5ceb4b3:
+    csv_row: 456
+    mnemonic: IF_Z_OR_C
+    syntax: IF_Z_OR_C     <inst>  <ops>
+  pasm2_if_le_02938cb1:
+    csv_row: 457
+    mnemonic: IF_LE
+    syntax: IF_LE         <inst>  <ops>
+  pasm2_if_be_900eed5a:
+    csv_row: 458
+    mnemonic: IF_BE
+    syntax: IF_BE         <inst>  <ops>
+  pasm2_if_not_00_8fe6305d:
+    csv_row: 459
+    mnemonic: IF_NOT_00
+    syntax: IF_NOT_00     <inst>  <ops>
+  pasm2_inst_8890f88c:
+    csv_row: 460
+    mnemonic: INST
+    syntax: <inst>  <ops>
+  pasm2__clr_f53f9361:
+    csv_row: 461
+    mnemonic: _CLR
+    syntax: _CLR
+  pasm2__nc_and_nz_79223ac2:
+    csv_row: 462
+    mnemonic: _NC_AND_NZ
+    syntax: _NC_AND_NZ
+  pasm2__nz_and_nc_63453286:
+    csv_row: 463
+    mnemonic: _NZ_AND_NC
+    syntax: _NZ_AND_NC
+  pasm2__gt_c25d6fc5:
+    csv_row: 464
+    mnemonic: _GT
+    syntax: _GT
+  pasm2__nc_and_z_5b4a5fa0:
+    csv_row: 465
+    mnemonic: _NC_AND_Z
+    syntax: _NC_AND_Z
+  pasm2__z_and_nc_3142e747:
+    csv_row: 466
+    mnemonic: _Z_AND_NC
+    syntax: _Z_AND_NC
+  pasm2__nc_fa3d165d:
+    csv_row: 467
+    mnemonic: _NC
+    syntax: _NC
+  pasm2__ge_fb75139b:
+    csv_row: 468
+    mnemonic: _GE
+    syntax: _GE
+  pasm2__c_and_nz_f52a4b7e:
+    csv_row: 469
+    mnemonic: _C_AND_NZ
+    syntax: _C_AND_NZ
+  pasm2__nz_and_c_69c57c90:
+    csv_row: 470
+    mnemonic: _NZ_AND_C
+    syntax: _NZ_AND_C
+  pasm2__nz_dc334ee5:
+    csv_row: 471
+    mnemonic: _NZ
+    syntax: _NZ
+  pasm2__ne_360c5375:
+    csv_row: 472
+    mnemonic: _NE
+    syntax: _NE
+  pasm2__c_ne_z_d639f316:
+    csv_row: 473
+    mnemonic: _C_NE_Z
+    syntax: _C_NE_Z
+  pasm2__z_ne_c_7d34b355:
+    csv_row: 474
+    mnemonic: _Z_NE_C
+    syntax: _Z_NE_C
+  pasm2__nc_or_nz_0a6fd8ff:
+    csv_row: 475
+    mnemonic: _NC_OR_NZ
+    syntax: _NC_OR_NZ
+  pasm2__nz_or_nc_48bc4309:
+    csv_row: 476
+    mnemonic: _NZ_OR_NC
+    syntax: _NZ_OR_NC
+  pasm2__c_and_z_5c99df9d:
+    csv_row: 477
+    mnemonic: _C_AND_Z
+    syntax: _C_AND_Z
+  pasm2__z_and_c_4f2ba33e:
+    csv_row: 478
+    mnemonic: _Z_AND_C
+    syntax: _Z_AND_C
+  pasm2__c_eq_z_0690e582:
+    csv_row: 479
+    mnemonic: _C_EQ_Z
+    syntax: _C_EQ_Z
+  pasm2__z_eq_c_7a648ebb:
+    csv_row: 480
+    mnemonic: _Z_EQ_C
+    syntax: _Z_EQ_C
+  pasm2__z_6f92292e:
+    csv_row: 481
+    mnemonic: _Z
+    syntax: _Z
+  pasm2__e_a14c0496:
+    csv_row: 482
+    mnemonic: _E
+    syntax: _E
+  pasm2__nc_or_z_6b5d6556:
+    csv_row: 483
+    mnemonic: _NC_OR_Z
+    syntax: _NC_OR_Z
+  pasm2__z_or_nc_ac13c62f:
+    csv_row: 484
+    mnemonic: _Z_OR_NC
+    syntax: _Z_OR_NC
+  pasm2__c_18a10280:
+    csv_row: 485
+    mnemonic: _C
+    syntax: _C
+  pasm2__lt_7b9cbb65:
+    csv_row: 486
+    mnemonic: _LT
+    syntax: _LT
+  pasm2__c_or_nz_a8f0db27:
+    csv_row: 487
+    mnemonic: _C_OR_NZ
+    syntax: _C_OR_NZ
+  pasm2__nz_or_c_c38e01c8:
+    csv_row: 488
+    mnemonic: _NZ_OR_C
+    syntax: _NZ_OR_C
+  pasm2__c_or_z_eee42720:
+    csv_row: 489
+    mnemonic: _C_OR_Z
+    syntax: _C_OR_Z
+  pasm2__z_or_c_4932b207:
+    csv_row: 490
+    mnemonic: _Z_OR_C
+    syntax: _Z_OR_C
+  pasm2__le_7e4819eb:
+    csv_row: 491
+    mnemonic: _LE
+    syntax: _LE
+  pasm2__set_c19a4ab1:
+    csv_row: 492
+    mnemonic: _SET
+    syntax: _SET

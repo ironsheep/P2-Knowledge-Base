@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_splitb_d1d3c272
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.428888
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 382
+    type: csv
+    row: 382
+    type: csv
+    row: 382
+layer1_csv:
+  mnemonic: SPLITB
+  syntax: |
+    SPLITB  D
+  group: Math and Logic
+  encoding: EEEE 1101011 000 DDDDDDDDD 001100000
+  alias: .
+  description: Split every 4th bit of D into bytes. D = {D[31], D[27], D[23], D[19], ...D[12], D[8], D[4], D[0]}.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.617979
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Split every 4th bit of D into bytes. D = {D[31], D[27], D[23], D[19], ...D[12], D[8], D[4], D[0]}."
+  syntax: "SPLITB  D"

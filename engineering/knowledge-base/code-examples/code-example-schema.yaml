@@ -1,0 +1,330 @@
+# Code Example Schema for P2 Knowledge Base
+# Structured format for extracting, validating, and indexing code examples
+
+code_example_schema:
+  version: "1.0.0"
+  description: "Schema for structured P2 code examples with comprehensive metadata"
+  
+  core_fields:
+    example_id:
+      type: "string"
+      required: true
+      format: "[source]-[concept]-[sequence]"
+      description: "Unique identifier for the code example"
+      examples: ["smart-pins-pwm-001", "silicon-doc-cordic-002", "forum-multiword-003"]
+      
+    title:
+      type: "string"
+      required: true
+      max_length: 100
+      description: "Concise, descriptive title of the example"
+      
+    description:
+      type: "string"
+      required: true
+      max_length: 500
+      description: "Clear explanation of what the example demonstrates"
+      
+  source_metadata:
+    source_document:
+      type: "string"
+      required: true
+      description: "Original document containing the example"
+      examples: ["P2-Smart-Pins-Green-Book-Tutorial.md", "silicon-doc-v35-facts-only.md"]
+      
+    source_section:
+      type: "string"
+      required: false
+      description: "Specific section or chapter where example appears"
+      
+    source_page:
+      type: "integer"
+      required: false
+      description: "Page number in original document if applicable"
+      
+    extraction_context:
+      type: "string"
+      required: true
+      description: "Context around the example in original source"
+      max_length: 200
+      
+    extraction_date:
+      type: "string"
+      required: true
+      format: "YYYY-MM-DD"
+      description: "Date when example was extracted"
+      
+  code_content:
+    language:
+      type: "string"
+      required: true
+      enum: ["spin2", "pasm2", "mixed", "pseudo"]
+      description: "Primary programming language of the example"
+      
+    code_type:
+      type: "string"
+      required: true
+      enum: ["complete_program", "method", "snippet", "inline_assembly", "configuration"]
+      description: "Type/scope of code example"
+      
+    code:
+      type: "string"
+      required: true
+      description: "Complete code example with proper formatting"
+      format: "multiline"
+      
+    code_comments:
+      type: "array"
+      items:
+        type: "object"
+        properties:
+          line_number:
+            type: "integer"
+          comment:
+            type: "string"
+          explanation:
+            type: "string"
+      description: "Additional explanatory comments for complex lines"
+      
+  technical_analysis:
+    instructions_used:
+      type: "array"
+      items:
+        type: "string"
+      required: true
+      description: "List of P2 instructions demonstrated in the example"
+      examples: ["WRPIN", "WXPIN", "WYPIN", "MOV", "ADD"]
+      
+    features_demonstrated:
+      type: "array"
+      items:
+        type: "string"
+      required: true
+      description: "P2 features or concepts shown in the example"
+      examples: ["Smart pin PWM", "CORDIC rotation", "Multi-cog communication"]
+      
+    programming_patterns:
+      type: "array"
+      items:
+        type: "string"
+      required: false
+      description: "Higher-level programming patterns demonstrated"
+      examples: ["State machine", "Interrupt handler", "Buffer management"]
+      
+    difficulty_level:
+      type: "string"
+      required: true
+      enum: ["beginner", "intermediate", "advanced", "expert"]
+      description: "Skill level required to understand the example"
+      
+    complexity_score:
+      type: "integer"
+      required: true
+      range: [1, 10]
+      description: "Numerical complexity rating (1=simple, 10=very complex)"
+      
+  application_context:
+    domain:
+      type: "string"
+      required: true
+      enum: ["general", "motor_control", "sensors", "communication", "audio", "video", "math", "system"]
+      description: "Application domain or use case"
+      
+    use_case:
+      type: "string"
+      required: false
+      max_length: 200
+      description: "Specific use case or application scenario"
+      
+    hardware_requirements:
+      type: "array"
+      items:
+        type: "string"
+      required: false
+      description: "Specific hardware needed to run the example"
+      examples: ["P2 Eval Board", "Encoder", "LED strip", "ADC"]
+      
+  validation_status:
+    syntax_validated:
+      type: "boolean"
+      required: true
+      description: "Whether code has been validated with pnut_ts compiler"
+      
+    syntax_validation_date:
+      type: "string"
+      required: false
+      format: "YYYY-MM-DD"
+      description: "Date of last syntax validation"
+      
+    compilation_result:
+      type: "string"
+      required: false
+      enum: ["success", "warning", "error", "not_tested"]
+      description: "Result of compilation attempt"
+      
+    validation_notes:
+      type: "string"
+      required: false
+      max_length: 300
+      description: "Notes about validation process or issues"
+      
+    hardware_tested:
+      type: "boolean"
+      required: false
+      default: false
+      description: "Whether example has been tested on actual hardware"
+      
+    test_platform:
+      type: "string"
+      required: false
+      description: "Hardware platform used for testing"
+      
+  cross_references:
+    related_instructions:
+      type: "array"
+      items:
+        type: "string"
+      description: "Related instruction YAML files"
+      format: "file_path"
+      
+    related_examples:
+      type: "array"
+      items:
+        type: "string"
+      description: "Related code examples by ID"
+      
+    see_also:
+      type: "array"
+      items:
+        type: "string"
+      description: "Related knowledge base entries"
+      
+    builds_upon:
+      type: "array"
+      items:
+        type: "string"
+      description: "Prerequisites or foundational examples"
+      
+  quality_metrics:
+    completeness_score:
+      type: "integer"
+      required: true
+      range: [1, 10]
+      description: "How complete/comprehensive the example is"
+      
+    clarity_score:
+      type: "integer"
+      required: true
+      range: [1, 10]
+      description: "How clear and well-commented the example is"
+      
+    educational_value:
+      type: "integer"
+      required: true
+      range: [1, 10]
+      description: "How valuable for learning P2 programming"
+      
+    authority_level:
+      type: "string"
+      required: true
+      enum: ["official", "community_verified", "extracted", "unverified"]
+      description: "Authority/trustworthiness of the example"
+      
+  extraction_metadata:
+    extractor_version:
+      type: "string"
+      required: true
+      description: "Version of extraction tool/process used"
+      
+    extraction_method:
+      type: "string"
+      required: true
+      enum: ["manual", "automated", "hybrid"]
+      description: "Method used to extract the example"
+      
+    extracted_by:
+      type: "string"
+      required: false
+      description: "Person or system that extracted the example"
+      
+    review_status:
+      type: "string"
+      required: false
+      enum: ["unreviewed", "peer_reviewed", "expert_reviewed", "chip_verified"]
+      description: "Level of review the example has received"
+      
+    update_history:
+      type: "array"
+      items:
+        type: "object"
+        properties:
+          date:
+            type: "string"
+            format: "YYYY-MM-DDTHH:MM:SSZ"
+          changes:
+            type: "string"
+          updated_by:
+            type: "string"
+      description: "History of updates to the example"
+
+  integration_targets:
+    instruction_database:
+      type: "boolean"
+      description: "Whether example should be linked to instruction entries"
+      
+    tutorial_integration:
+      type: "boolean"
+      description: "Whether example is suitable for tutorial inclusion"
+      
+    reference_documentation:
+      type: "boolean"
+      description: "Whether example should appear in reference docs"
+      
+    automated_testing:
+      type: "boolean"
+      description: "Whether example should be included in automated test suite"
+
+# Example Categories for Organization
+categories:
+  by_complexity:
+    - "beginner"      # Basic concepts, single instructions
+    - "intermediate"  # Multi-instruction patterns, simple algorithms
+    - "advanced"      # Complex algorithms, multi-cog coordination
+    - "expert"        # System-level programming, optimization techniques
+    
+  by_domain:
+    - "general"         # Basic programming concepts
+    - "motor_control"   # Motors, encoders, servo control
+    - "sensors"         # ADC, sensor interfacing
+    - "communication"   # Serial, I2C, SPI, networking
+    - "audio"          # Sound generation, processing
+    - "video"          # Display control, graphics
+    - "math"           # CORDIC, fixed-point, DSP
+    - "system"         # Memory management, debugging, optimization
+    
+  by_feature:
+    - "smart_pins"      # Smart pin modes and configuration
+    - "cordic"         # CORDIC solver usage
+    - "interrupts"     # Interrupt handling
+    - "multi_cog"      # Inter-cog communication
+    - "hub_execution"  # Hub execution mode
+    - "streamer"       # Streamer functionality
+    - "debug"          # Debugging techniques
+
+# Validation Rules
+validation:
+  required_for_all:
+    - "example_id must be unique within knowledge base"
+    - "code must compile without errors (if syntax_validated=true)"
+    - "instructions_used must reference valid P2 instructions"
+    - "All cross-references must point to existing entries"
+    
+  quality_thresholds:
+    minimum_completeness: 6
+    minimum_clarity: 6
+    minimum_educational_value: 5
+    
+  authority_requirements:
+    official: "Must come from Parallax documentation"
+    community_verified: "Must have peer review"
+    chip_verified: "Must have Chip Gracey confirmation"

@@ -1,0 +1,6 @@
+name: "+."
+type: operator
+priority: 9
+category: Add
+description: "Integer/float addition"
+source: Spin2 Documentation v51

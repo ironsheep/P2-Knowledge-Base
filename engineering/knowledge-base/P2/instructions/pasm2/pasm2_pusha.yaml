@@ -1,0 +1,40 @@
+metadata:
+  id: pasm2_pusha_c9339dd4
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426842
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 225
+    type: csv
+    row: 225
+    type: csv
+    row: 225
+layer1_csv:
+  mnemonic: PUSHA
+  syntax: |
+    PUSHA   {#}D
+  group: Hub RAM - Write
+  encoding: EEEE 1100011 0L1 DDDDDDDDD 101100001
+  alias: alias
+  description: Write long in D[31:0] to hub address PTRA++.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 3
+    cog_exec_16_cogs: 3
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.305610
+  source: P2 Datasheet v35
+  timing:
+    raw: 3...10 / 3...20
+    type: variable
+    notes:
+      - Hub window alignment affects timing
+    min_cycles: 3
+    max_cycles: 10
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Write long in D[31:0] to hub address PTRA++."
+  syntax: "PUSHA   {#}D"

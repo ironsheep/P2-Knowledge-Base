@@ -1,0 +1,87 @@
+# Smart Pin Mode %11001 - ADC Sample/Filter/Capture, Externally Clocked
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%11001"
+mode_name: "ADC Sample/Filter/Capture, Externally Clocked"
+description: "External clock-driven ADC with SINC2/SINC3 filtering and bitstream capture modes"
+category: "adc"
+output_override: false
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%11001"
+
+sampling:
+  clock_source: "External clock via B-input"
+  trigger: "A-input sampled on each B-input rise"
+  application: "External delta-sigma ADC interface"
+
+mode_configuration:
+  wxpin_setup: "WXPIN sets mode X[5:4] and sample period POWER(2, X[3:0])"
+  
+  modes_available:
+    sinc2_sampling: "X[5:4] = %00"
+    sinc2_filtering: "X[5:4] = %01"
+    sinc3_filtering: "X[5:4] = %10"
+    bitstream_capture: "X[5:4] = %11"
+
+timing_control:
+  external_sync: "Synchronized to external clock via B-input"
+  sample_trigger: "Each B-input rising edge triggers A-input sample"
+  period_override: "WYPIN Y[13:0] can override base period (except SINC2 sampling)"
+
+operation:
+  similar_to_internal: "Same filtering modes as %11000"
+  key_difference: "Clock source is external B-input rather than internal"
+  accumulator_limits: "Same 27-bit accumulator constraints"
+
+instructions:
+  setup:
+    - "WRPIN - Configure mode (%11001)"
+    - "WXPIN - Set mode X[5:4] and base period X[3:0]"
+    - "WYPIN - Override period with Y[13:0] (optional)"
+    - "DIRH - Enable smart pin"
+    
+  operation:
+    - "RDPIN/RQPIN - Read completed measurement after IN raised"
+
+completion_behavior:
+  sequence:
+    - "Sample period completes (based on external clock)"
+    - "Measurement placed in Z"
+    - "IN raised"
+    - "New measurement begins"
+
+reset_behavior:
+  during_reset:
+    dir_state: "DIR=0"
+    sampling: "No sampling occurs"
+
+usage_notes:
+  - "Interfaces to external delta-sigma ADC"
+  - "B-input provides sample clock"
+  - "A-input receives ADC bitstream"
+  - "Same filtering capabilities as internal clock mode"
+  - "Synchronized to external timing"
+
+applications:
+  external_adc: "Interface to external delta-sigma converters"
+  synchronized_sampling: "Sample synchronized to external events"
+  multi_channel_adc: "Coordinate with external multiplexing"
+  precision_timing: "Sample at precisely controlled intervals"
+
+related_modes:
+  - "%11000 (ADC internally clocked)"
+  - "%11010 (ADC scope with trigger)"
+
+see_also:
+  - "External ADC interfacing"
+  - "Delta-sigma ADC principles"
+  - "Synchronized sampling techniques"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"

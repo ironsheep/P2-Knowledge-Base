@@ -1,0 +1,164 @@
+# P2 Eval Control Add-on Board - Hardware Specification
+# Part Number: 64006A
+# Documentation: P2 Eval Add-on Boards (#64006 Series) v2.0
+
+hardware_type: "addon_board"
+part_number: "64006A"
+manufacturer: "Parallax Inc."
+series: "P2 Eval Add-on Boards"
+status: "active_production"
+
+basic_info:
+  name: "P2 Eval Control Add-on Board"
+  description: "Four push-buttons and four blue LEDs for user interface control"
+  category: "user_interface"
+  form_factor: "small_addon"
+  
+specifications:
+  requires_host: true
+  compatible_hosts:
+    - "P2 Eval Board (64000)"
+    - "P2 Edge Module Breadboard (64020)"
+    - "P2 Edge Mini Breakout Board (64019) with P2 Edge Module"
+    
+  physical:
+    size: "Small module"
+    connector: "2x6 pass-through socket"
+    mounting: "Single M3 mounting hole connected to GND"
+    mounting_hardware: "M3 or UNC 4-40"
+    hole_diameter: "3.2mm (126 mil)"
+    pad_ring: "5mm (200 mil)"
+    standoff_recommendation: "9.5mm long standoff for support"
+    
+  electrical:
+    supply_voltage: "3.3V from host"
+    current_consumption: "Low - LEDs draw ~4mA each when lit"
+    io_pins_used: 8
+    
+components:
+  leds:
+    quantity: 4
+    type: "Blue LEDs"
+    control: "Active high"
+    series_resistor: "470Ω"
+    current: "~4mA each"
+    brightness_control: "PWM capable"
+    pins: "P0, P1, P2, P3"
+    
+  switches:
+    quantity: 4
+    type: "Tactile push switches"
+    control: "Active high"
+    series_resistor: "470Ω"
+    protection: "I/O pin can be driven low while button pressed"
+    pins: "P4, P5, P6, P7"
+    
+pin_assignments:
+  P0: "Blue LED with 470Ω series resistor (active high)"
+  P1: "Blue LED with 470Ω series resistor (active high)"
+  P2: "Blue LED with 470Ω series resistor (active high)"
+  P3: "Blue LED with 470Ω series resistor (active high)"
+  P4: "Tactile push switch with 470Ω series resistor (active high)"
+  P5: "Tactile push switch with 470Ω series resistor (active high)"
+  P6: "Tactile push switch with 470Ω series resistor (active high)"
+  P7: "Tactile push switch with 470Ω series resistor (active high)"
+  
+use_cases:
+  primary:
+    - "User interface control for embedded applications"
+    - "Button input and LED status indication"
+    - "Educational demonstrations of I/O concepts"
+    - "Menu navigation systems"
+  secondary:
+    - "Debug interface with status LEDs"
+    - "Game controller inputs"
+    - "Process control panels"
+    - "Interactive learning projects"
+    
+advantages:
+  - "Simple user interface in compact package"
+  - "LEDs positioned next to corresponding buttons"
+  - "Built-in current limiting resistors"
+  - "I/O pin protection during button presses"
+  - "PWM brightness control capable"
+  - "Low current consumption"
+  
+limitations:
+  - "Fixed button and LED positions"
+  - "Only 4 inputs and 4 outputs"
+  - "Requires P2 Eval Board or Edge system"
+  - "Blue LEDs only (not multi-color)"
+  
+programming_examples:
+  basic_led_control: |
+    ' Light LED on P0
+    DIRH P0
+    OUTH P0
+    
+  button_reading: |
+    ' Read button on P4
+    DIRNOT P4
+    IF INA.[P4]
+      ' Button is pressed
+    
+  pwm_brightness: |
+    ' PWM brightness control on LED P1
+    DIRH P1
+    ' Use smart pin PWM mode for brightness
+    
+development_workflow:
+  - "Connect to P2 Eval Board or Edge carrier"
+  - "Use pins P0-P7 for LED and button control"
+  - "Implement button debouncing in software"
+  - "Use PWM for LED brightness effects"
+  - "Can stack with other compatible add-on boards"
+  
+compatibility:
+  stacking:
+    position: "Any 2x6 header position on host board"
+    conflicts: "Check pin assignments with other add-ons"
+    power_sharing: "Low power - compatible with multiple boards"
+    
+  mounting:
+    eval_board: "Can mount all 8 add-on boards simultaneously"
+    edge_carriers: "Compatible with 2x6 headers"
+    standoff_support: "Recommended for mechanical stability"
+    
+educational_value:
+  concepts_taught:
+    - "Digital I/O control"
+    - "Button debouncing techniques"
+    - "LED current limiting"
+    - "Active high/low logic"
+    - "PWM brightness control"
+    
+  course_integration:
+    - "Embedded systems programming"
+    - "User interface design"
+    - "Digital logic concepts"
+    - "Interactive system development"
+    
+documentation:
+  primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"
+  related:
+    - "P2 Eval Board documentation"
+    - "Smart Pins PWM programming guide"
+    - "Digital I/O programming examples"
+    
+availability:
+  vendor: "Parallax Inc."
+  website: "parallax.com"
+  part_lookup: "Search for 64006A or Control Add-on"
+  bundle_option: "Part of complete accessory set (64006-ES)"
+  individual_purchase: "Available separately"
+  
+quality_rating: "educational_excellent"
+recommendation_score: 5
+educational_value: "high"
+complexity_level: "beginner_friendly"
+
+# Cross-references
+ecosystem_position: "basic_user_interface"
+hardware_family: "p2_eval_addons"
+addon_series: "64006_series"
+size_class: "small_addon"

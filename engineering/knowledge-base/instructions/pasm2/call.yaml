@@ -1,0 +1,108 @@
+mnemonic: "CALL"
+syntax:
+  - "CALL #{\\}A"
+  - "CALL D {WC/WZ/WCZ}"
+  - "CALL D"
+  - "CALL D WC"
+  - "CALL D WZ"
+  - "CALL D WCZ"
+group: "branch"
+description: "Call to address by pushing {C, Z, 10'b0, PC[19:0]} onto stack."
+
+operation:
+  basic_operation: "Push return address on stack and jump to target"
+  flag_effects:
+    carry_flag: "C = target[31] (for register form)"
+    zero_flag: "Z = target[30] (for register form)"
+  conditions:
+    - "For #{\\}A form: If R=1 then PC += A, else PC = A"
+    - "\\\\ prefix forces R=0 (absolute address)"
+    - "Stack stores {C, Z, 10'b0, PC[19:0]} for return"
+
+timing:
+  base_clocks: 4
+  cog_lut_timing: 4
+  hub_timing: "13...20"
+  conditional_timing:
+    cog_lut_execution: 4
+    hub_execution: "13...20"
+  timing_notes:
+    - "Timing depends on execution location (COG/LUT vs HUB)"
+    - "Hub timing varies with window alignment"
+
+flags:
+  affects_c: true
+  affects_z: true
+  flag_options: ["WC", "WZ", "WCZ"]
+  flag_meanings:
+    WC: "C = target address bit 31 (register form only)"
+    WZ: "Z = target address bit 30 (register form only)" 
+    WCZ: "Both flags set from target address bits"
+
+operands:
+  destination:
+    type: "address_or_register"
+    immediate_range: "20-bit address (0..1048575)"
+    register_range: "0..511 for cog/LUT registers"
+    description: "Target address for call"
+    
+variants:
+  - syntax: "CALL #{\\}A"
+    description: "Call to immediate address"
+    specific_operation: "Stack push, PC = A (absolute) or PC += A (relative)"
+    timing_override:
+      cog_lut_timing: 4
+      hub_timing: "13...20"
+  - syntax: "CALL D {WC/WZ/WCZ}"
+    description: "Call to address in register"
+    specific_operation: "Stack push, PC = D[19:0], flags from D[31:30]"
+
+examples:
+  - title: "Absolute Subroutine Call"
+    description: "Call subroutine at absolute address"
+    code: "CALL #\\subroutine"
+    explanation: "Pushes return address, jumps to subroutine label"
+  - title: "Relative Subroutine Call"  
+    description: "Call subroutine at relative offset"
+    code: "CALL #subroutine"
+    explanation: "Pushes return address, jumps PC + offset to subroutine"
+  - title: "Register Indirect Call"
+    description: "Call address stored in register"
+    code: "CALL R1 WCZ"
+    explanation: "Calls address in R1, loads flags from R1[31:30]"
+  - title: "Function Call Pattern"
+    description: "Typical function call and return sequence"
+    code: |
+      CALL #my_function    ' Call function
+      ' ... main code continues here after return
+      
+      my_function:
+      ' ... function code ...
+      RET                  ' Return to caller
+    explanation: "Standard call/return pattern using stack"
+
+related_instructions:
+  - "RET"
+  - "CALLA"
+  - "CALLB" 
+  - "CALLD"
+  - "CALLPA"
+  - "CALLPB"
+  - "JMP"
+
+special_behaviors:
+  - "Stack automatically manages return addresses"
+  - "Return address includes current C,Z flag state"
+  - "Hub execution has variable timing due to window alignment"
+  - "R bit in instruction encoding determines relative vs absolute addressing"
+
+notes:
+  - "Essential for structured programming and subroutines"
+  - "Stack depth is implementation-defined (typically 8 levels)"
+  - "RET instruction pops stack and restores PC and flags"
+  - "Can be used for both local and distant calls"
+
+source_references:
+  datasheet_section: "6.4 Branch Instructions"
+  page_references: ["Datasheet Branch instruction table"]
+  extraction_notes: "Extracted from pasm2-complete-instruction-tables.md Branch section"

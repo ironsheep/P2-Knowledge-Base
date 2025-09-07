@@ -1,0 +1,43 @@
+# P2 Architecture Component: FIFO System
+# Generated: 2025-09-06T14:50:17.440878
+
+metadata:
+  id: p2_component_fifo
+  name: FIFO System
+  category: buffer
+  version: 1.0
+  extraction_date: 2025-09-06T14:50:17.440203
+
+specifications:
+  depth: 16 longs
+  width: 32 bits
+  modes:
+    - Read FIFO
+    - Write FIFO
+  purpose: Hub memory streaming
+
+features:
+  - Automatic hub address increment
+  - Depth tracking
+  - Block wrapping support
+  - Fast hub access (1 long/clock)
+  - Shared with streamer
+
+programming_interface:
+  setup_read: RDFAST - Setup read FIFO
+  setup_write: WRFAST - Setup write FIFO
+  read:
+    - RFBYTE
+    - RFWORD
+    - RFLONG
+    - RFVAR
+  write:
+    - WFBYTE
+    - WFWORD
+    - WFLONG
+  block: FBLOCK - Set block size
+
+relationships:
+  - hub_memory
+  - streamer
+  - cog

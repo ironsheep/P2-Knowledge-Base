@@ -1,0 +1,54 @@
+# Chip Gracey Clarification: MODC Instruction
+# Layer 4 Enrichment Data - ABSOLUTE Authority
+
+clarification_entry:
+  clarification_id: "chip_2025-08-18_MODC_001"
+  instruction: "MODC"
+  
+  source_metadata:
+    provider: "Chip Gracey"
+    provider_role: "P2 Designer"
+    date: "2025-08-18"
+    authority_verification: "CHIP_GRACEY_DIRECT"
+    trust_level: "GREEN_HIGHEST"
+    authority_level: "ABSOLUTE"
+    source_document: "chip-instruction-clarifications-2025-08-18.md"
+    extraction_method: "direct_expert_clarification"
+    
+  semantic_clarification:
+    function: "Modify C flag based on operand test result"
+    syntax: "MODC D, S"
+    
+    detailed_behavior:
+      - "Tests operand value and sets/clears C flag accordingly"
+      - "Part of microcode-level flag control triad (MODC/MODZ/MODCZ)"
+      - "Enables precise conditional execution setup"
+      
+    use_cases:
+      - "Preparing flags for subsequent conditional operations"
+      - "Custom conditional logic implementation"
+      - "Microcode-style processor state control"
+      
+    significance: "Exposes microcode-level processor control for precise flag state manipulation"
+    
+  relationships:
+    instruction_family: "flag_modification"
+    related_instructions:
+      - "MODZ"
+      - "MODCZ"
+    programming_pattern: "microcode_level_control"
+    
+  gap_impact:
+    previous_status: "semantics_missing"
+    clarification_impact: "complete_semantic_definition"
+    enables_analysis:
+      - "state_setup_matrix"
+      - "instruction_sequence_matrix" 
+      - "flag_setting_reality_matrix"
+      - "microcode_philosophy_framework"
+
+  validation:
+    completeness_score: 95
+    authority_confirmed: true
+    integration_ready: true
+    cross_references_available: true

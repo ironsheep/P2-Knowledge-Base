@@ -1,0 +1,25 @@
+metadata:
+  id: pasm2__ge_fb75139b
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.430455
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 468
+    type: csv
+    row: 468
+    type: csv
+    row: 468
+layer1_csv:
+  mnemonic: _GE
+  syntax: |
+    _GE
+  group: MODCZ Operand
+  encoding: cccc or zzzz = 0011
+  alias: alias
+  description: C/Z = !C, or 'greater than or equal' after a comparison/subtraction.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: null
+    cog_exec_16_cogs: null

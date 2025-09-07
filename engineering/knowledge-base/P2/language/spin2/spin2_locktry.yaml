@@ -1,0 +1,6 @@
+name: LOCKTRY
+type: method
+category: Lock Management
+signature: "LOCKTRY(LockNum) : LockState"
+description: "Try to capture lock, -1 if successful or 0 if taken"
+source: Spin2 Documentation v51

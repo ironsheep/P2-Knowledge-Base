@@ -1,0 +1,42 @@
+metadata:
+  id: pasm2_jatn_b819f6b4
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426666
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 196
+    type: csv
+    row: 196
+    type: csv
+    row: 196
+layer1_csv:
+  mnemonic: JATN
+  syntax: |
+    JATN    {#}S
+  group: Events - Branch
+  encoding: EEEE 1011110 01I 000001110 SSSSSSSSS
+  alias: .
+  description: Jump to S** if ATN event flag is set.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.632926
+  source: P2 Datasheet v35
+  timing:
+    raw: 2 or 4 / 2 or 13...20
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.044264
+  narratives:
+    - source: INSTRUCTION-TIMING-AND-ENCODING.md
+      type: timing_note
+      content: |
+        Branch instruction flushes pipeline, causing next instruction to take 5+ clocks instead of 2.
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Jump to S** if ATN event flag is set."
+  syntax: "JATN    {#}S"

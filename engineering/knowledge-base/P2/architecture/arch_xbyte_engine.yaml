@@ -1,0 +1,12 @@
+name: XBYTE_Engine
+category: bytecode_executor
+description: "Hardware bytecode execution engine"
+features:
+    cycle_time: 6 clocks per bytecode
+    lut_lookup: Automatic bytecode translation
+    registers:
+      PA: Bytecode value
+      PB: FIFO pointer
+      FLAGS: Optional C/Z update
+    applications: Spin2 interpreter, custom VMs
+source: P2 Silicon Documentation v35

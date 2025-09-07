@@ -1,0 +1,49 @@
+metadata:
+  id: pasm2_testp_031e4c2f
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.428373
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 344
+    type: csv
+    row: 342
+    type: csv
+    row: 344
+    type: csv
+    row: 346
+    type: csv
+    row: 348
+    type: csv
+    row: 342
+    type: csv
+    row: 344
+    type: csv
+    row: 346
+    type: csv
+    row: 348
+layer1_csv:
+  mnemonic: TESTP
+  syntax: |
+    TESTP   {#}D       XORC/XORZ
+  group: Pins
+  encoding: EEEE 1101011 CZL DDDDDDDDD 001000110
+  alias: .
+  description: Test  IN bit of pin D[5:0], XOR into C/Z. C/Z = C/Z XOR  IN[D[5:0]].
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.622687
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Test  IN bit of pin D[5:0], write to C/Z. C/Z =          IN[D[5:0]]."
+  syntax: "TESTP   {#}D           WC/WZ"

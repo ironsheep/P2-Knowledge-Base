@@ -1,0 +1,127 @@
+# Smart Pin Mode %01001 - PWM Sawtooth
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%01001"
+mode_name: "PWM Sawtooth"
+description: "Generates PWM output using sawtooth wave comparison for standard PWM generation"
+category: "pwm_generation"
+output_override: true
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%01001"
+    out_override: "OUT signal overridden"
+
+timing_control:
+  x_register:
+    x_low: "X[15:0] establishes base period in clock cycles"
+    x_high: "X[31:16] establishes PWM frame period in base periods"
+    
+  y_register:
+    function: "Y[15:0] establishes PWM output value"
+    range: "Should range from zero to frame period (X[31:16])"
+    capture: "Captured at each frame start and used for duration"
+
+pwm_operation:
+  counter_behavior: "Counter counts from 1 up to frame period"
+  cycle_completion: "After reaching frame period, Y[15:0] captured and IN raised"
+  comparison: "Captured output value compared to counter at each base period"
+  output_logic:
+    high: "If captured value ≥ counter"
+    low: "If captured value < counter"
+
+output_characteristics:
+  always_low: "Zero value always outputs low"
+  always_high: "Frame period value always outputs high"
+  sawtooth_wave: "Counter creates sawtooth reference wave"
+  standard_pwm: "Traditional PWM timing behavior"
+
+frame_completion:
+  sequence:
+    - "Counter reaches frame period"
+    - "Y[15:0] captured for next cycle"
+    - "IN is raised"
+    - "Counter resets to 1, process repeats"
+
+instructions:
+  setup:
+    - "WRPIN - Configure mode (%01001)"
+    - "WXPIN - Set base period X[15:0] and frame period X[31:16]"
+    
+  operation:
+    - "WYPIN - Set PWM value Y[15:0] (0 to frame period)"
+
+reset_behavior:
+  during_reset:
+    dir_state: "DIR=0"
+    in_signal: "IN is low"
+    output: "Output is low"
+    capture: "Y[15:0] is captured"
+
+behavior:
+  acknowledgment:
+    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
+    effect: "Lowers IN signal after 2 clocks"
+
+usage_notes:
+  - "Standard PWM generation with sawtooth comparison"
+  - "Faster update rate than triangle PWM (1× frame period)"
+  - "Y[15:0] range: 0 to X[31:16] for full scale"
+  - "IN signal coordinates Y[15:0] updates"
+  - "More switching artifacts than triangle PWM"
+
+applications:
+  motor_control: "Standard motor speed control"
+  power_supplies: "Switching power supply control"
+  led_dimming: "LED brightness control"
+  heating_control: "Proportional heating control"
+
+timing_calculations:
+  pwm_frequency: "f_pwm = f_clock / (base_period × frame_period)"
+  update_rate: "f_update = f_clock / (base_period × frame_period)"
+  resolution: "PWM steps = frame_period"
+
+example_configuration:
+  led_dimming:
+    base_period: "X[15:0] = 10 (moderate switching frequency)"
+    frame_period: "X[31:16] = 100 (1% resolution)"
+    pwm_freq: "f_clock / 1000"
+    
+  motor_control:
+    base_period: "X[15:0] = 1 (high frequency)"
+    frame_period: "X[31:16] = 1024 (fine resolution)"
+    pwm_freq: "f_clock / 1024"
+
+comparison_with_triangle:
+  sawtooth_advantages:
+    - "Faster update rate (1× vs 2× frame period)"
+    - "Simpler timing calculations"
+    - "Lower resource usage"
+  sawtooth_disadvantages:
+    - "Higher harmonic content"
+    - "More switching artifacts"
+    - "Less smooth analog output"
+
+duty_cycle_calculation:
+  formula: "Duty cycle = Y[15:0] / X[31:16]"
+  minimum: "0% when Y[15:0] = 0"
+  maximum: "100% when Y[15:0] = X[31:16]"
+  resolution: "1/X[31:16] per step"
+
+related_modes:
+  - "%01000 (PWM triangle)"
+  - "%01010 (PWM SMPS)"
+  - "%00110 (NCO frequency)"
+  - "%00111 (NCO duty)"
+
+see_also:
+  - "PWM duty cycle calculations"
+  - "Sawtooth PWM theory"
+  - "Standard PWM generation"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"

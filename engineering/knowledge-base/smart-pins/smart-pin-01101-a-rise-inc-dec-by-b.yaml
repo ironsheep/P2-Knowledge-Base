@@ -1,0 +1,118 @@
+# Smart Pin Mode %01101 - Accumulate A-input Positive Edges with B-input Direction Control
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%01101"
+mode_name: "Accumulate A-input Positive Edges with B-input Direction Control"
+description: "A-input positive edges increment when B=1 or decrement when B=0"
+category: "measurement"
+output_override: false
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%01101"
+
+timing_control:
+  x_register:
+    function: "X[31:0] establishes measurement period in clock cycles"
+    zero_mode: "X = 0 for continuous operation (totalizer mode)"
+    periodic_mode: "X ≠ 0 for periodic measurements"
+
+counting_logic:
+  trigger: "A-input positive edge"
+  direction_control: "B-input state determines increment or decrement"
+  increment_condition: "B-input = 1 during A-input positive edge"
+  decrement_condition: "B-input = 0 during A-input positive edge"
+  count_change: "+1 when B=1, -1 when B=0"
+
+operation_modes:
+  continuous_mode:
+    condition: "X[31:0] = 0"
+    behavior: "Continuous totalizer operation"
+    reading: "Current 32-bit signed count always available via RDPIN/RQPIN"
+    
+  periodic_mode:
+    condition: "X[31:0] ≠ 0"
+    behavior: "Count qualified events for X clock cycles"
+    sequence:
+      - "Events counted for X clock cycles"
+      - "Result placed in Z"
+      - "Accumulator set to 0/1/-1 value that would have been added"
+      - "IN raised"
+      - "New measurement begins"
+    reading: "RDPIN/RQPIN retrieves 32-bit measurement after IN raised"
+
+event_handling:
+  carry_forward: "All events counted across measurements in periodic mode"
+  accumulator_state: "Preserves 0/1/-1 partial event state between periods"
+  signed_arithmetic: "32-bit signed counter supports bidirectional counting"
+
+instructions:
+  setup:
+    - "WRPIN - Configure mode (%01101)"
+    - "WXPIN - Set measurement period X[31:0]"
+    
+  operation:
+    continuous: "RDPIN/RQPIN - Read current signed count any time"
+    periodic: "RDPIN/RQPIN - Read measurement after IN raised"
+
+reset_behavior:
+  during_reset:
+    dir_state: "DIR=0"
+    in_signal: "IN is low"
+    z_register: "Z set to adder value (0/1/-1)"
+
+behavior:
+  in_signal:
+    continuous: "Not used"
+    periodic: "Raised at end of each measurement period"
+    
+  acknowledgment:
+    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
+    effect: "Lowers IN signal after 2 clocks"
+
+usage_notes:
+  - "Bidirectional counting based on direction input"
+  - "A-input provides clock/trigger edges"
+  - "B-input provides direction control"
+  - "32-bit signed counter for bidirectional range"
+  - "All events preserved across measurement periods"
+
+applications:
+  directional_counting: "Count up/down based on direction signal"
+  simple_encoder: "Basic encoder without quadrature"
+  flow_measurement: "Bidirectional flow counting"
+  inventory_tracking: "Add/subtract based on direction"
+
+circuit_examples:
+  simple_encoder:
+    a_input: "Encoder pulse output"
+    b_input: "Direction signal from encoder"
+    result: "Signed position count"
+    
+  flow_meter:
+    a_input: "Flow pulse sensor"
+    b_input: "Direction valve state"
+    result: "Net flow count"
+
+comparison_with_quadrature:
+  advantages: "Simpler than full quadrature, single direction input"
+  disadvantages: "Less resolution than quadrature, requires separate direction signal"
+  use_case: "When direction is available separately from pulses"
+
+related_modes:
+  - "%01100 (Count A-rise when B-high)"
+  - "%01110 (Count A-rise or A-rise/B-rise)"
+  - "%01111 (Count A-high or A-high/B-high)"
+  - "%01011 (Quadrature encoder)"
+
+see_also:
+  - "Bidirectional counting techniques"
+  - "Simple encoder interfaces"
+  - "Direction-controlled counting"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"

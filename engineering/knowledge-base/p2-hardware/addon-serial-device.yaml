@@ -1,0 +1,235 @@
+# P2 Eval Serial Device Add-on Board - Hardware Specification
+# Part Number: 64006F
+# Documentation: P2 Eval Add-on Boards (#64006 Series) v2.0
+
+hardware_type: "addon_board"
+part_number: "64006F"
+manufacturer: "Parallax Inc."
+series: "P2 Eval Add-on Boards"
+status: "active_production"
+
+basic_info:
+  name: "P2 Eval Serial Device Add-on Board"
+  description: "Dual micro-USB device ports with activity LEDs for USB device emulation"
+  category: "usb_device_interface"
+  form_factor: "small_addon"
+  
+specifications:
+  requires_host: true
+  compatible_hosts:
+    - "P2 Eval Board (64000)"
+    - "P2 Edge Module Breadboard (64020)"
+    - "P2 Edge Mini Breakout Board (64019) with P2 Edge Module"
+    
+  physical:
+    size: "Small module"
+    connector: "2x6 pass-through socket"
+    mounting: "Single M3 mounting hole connected to GND"
+    mounting_hardware: "M3 or UNC 4-40"
+    hole_diameter: "3.2mm (126 mil)"
+    pad_ring: "5mm (200 mil)"
+    standoff_recommendation: "9.5mm long standoff for support"
+    
+  electrical:
+    supply_voltage: "3.3V from host"
+    current_consumption: "Low power (USB device mode)"
+    io_pins_used: 8
+    
+usb_device_capabilities:
+  ports:
+    quantity: 2
+    connector_type: "Micro-USB sockets"
+    function: "USB device ports (not host)"
+    simultaneous_operation: "P2 can emulate 2 USB devices simultaneously"
+    
+  device_emulation:
+    capability: "P2 appears as USB devices to connected host"
+    host_connection: "Connect to PC, laptop, or other USB host"
+    device_types: "HID, CDC, custom device classes"
+    enumeration: "P2 handles USB device enumeration protocol"
+    
+activity_indicators:
+  channel_1_leds:
+    blue_led: "P0 (1kΩ series resistor)"
+    red_led: "P1 (1kΩ series resistor)"
+    location: "Beside micro-USB socket 1"
+    control: "User-controlled via P2 software"
+    
+  channel_2_leds:
+    blue_led: "P6 (1kΩ series resistor)"
+    red_led: "P7 (1kΩ series resistor)"
+    location: "Beside micro-USB socket 2"
+    control: "User-controlled via P2 software"
+    
+pin_assignments:
+  P0: "Channel 1 blue activity LED (1kΩ series resistor, active high)"
+  P1: "Channel 1 red activity LED (1kΩ series resistor, active high)"
+  P2: "Channel 1 USB Data D- signal"
+  P3: "Channel 1 USB Data D+ signal"
+  P4: "Channel 2 USB Data D- signal"
+  P5: "Channel 2 USB Data D+ signal"
+  P6: "Channel 2 blue activity LED (1kΩ series resistor, active high)"
+  P7: "Channel 2 red activity LED (1kΩ series resistor, active high)"
+  
+use_cases:
+  primary:
+    - "USB HID device emulation (keyboard, mouse, gamepad)"
+    - "USB CDC (serial port) device emulation"
+    - "Custom USB device development and testing"
+    - "USB communication protocol development"
+  secondary:
+    - "Data acquisition device emulation"
+    - "USB sensor interface development"
+    - "Educational USB protocol learning"
+    - "Multi-device USB testing scenarios"
+    
+advantages:
+  - "Dual independent USB device ports"
+  - "P2 can emulate multiple device types simultaneously"
+  - "Visual activity feedback with dual-color LEDs per port"
+  - "Standard micro-USB connectors"
+  - "No external power required (bus-powered)"
+  - "Flexible device class implementation in software"
+  - "Educational value for USB device development"
+  
+limitations:
+  - "Device mode only (not USB host)"
+  - "Requires complex USB device protocol implementation"
+  - "Limited by P2 processing power for high-speed USB"
+  - "Micro-USB connectors (not USB-C)"
+  - "Activity LEDs require manual control in software"
+  
+development_workflow:
+  - "Connect to host board via 2x6 connector"
+  - "Implement USB device protocol in P2 software"
+  - "Configure USB device descriptor and endpoints"
+  - "Connect micro-USB cable to PC or USB host"
+  - "Handle USB enumeration process"
+  - "Implement device-specific functionality"
+  - "Use activity LEDs to indicate communication status"
+  
+programming_examples:
+  activity_led_control: |
+    ' Control activity LEDs for visual feedback
+    DIRH P0, P1, P6, P7    ' Set LED pins as outputs
+    OUTH P0                ' Channel 1 blue LED on
+    OUTH P7                ' Channel 2 red LED on
+    OUTL P1, P6           ' Other LEDs off
+    
+  usb_data_setup: |
+    ' Configure USB data pins (requires USB stack implementation)
+    ' Channel 1: P2 (D-), P3 (D+)
+    ' Channel 2: P4 (D-), P5 (D+)  
+    ' Use P2 Smart Pin USB device modes
+    
+  dual_device_example: |
+    ' Example: Channel 1 as keyboard, Channel 2 as mouse
+    ' Implement separate USB device stacks
+    ' Handle enumeration for both devices
+    ' Process input and generate appropriate USB reports
+    
+device_emulation_examples:
+  hid_keyboard:
+    description: "Emulate USB keyboard"
+    implementation: "Send keyboard HID reports via USB"
+    use_case: "Custom input device development"
+    
+  hid_mouse:
+    description: "Emulate USB mouse or pointing device"
+    implementation: "Send mouse HID reports with movement/clicks"
+    use_case: "Custom pointing device development"
+    
+  cdc_serial:
+    description: "Emulate USB-to-serial adapter"
+    implementation: "CDC ACM device class implementation"
+    use_case: "Serial communication over USB"
+    
+  custom_device:
+    description: "Custom USB device class"
+    implementation: "Define custom descriptors and protocols"
+    use_case: "Proprietary device interfaces"
+    
+educational_value:
+  concepts_taught:
+    - "USB device enumeration process"
+    - "USB descriptor structure and configuration"
+    - "HID (Human Interface Device) protocols"
+    - "USB endpoint configuration and data transfer"
+    - "Device class specifications and compliance"
+    - "Multi-device USB system architecture"
+    
+  advanced_topics:
+    - "USB protocol stack implementation"
+    - "Custom device class development"
+    - "USB descriptor parsing and generation"
+    - "Real-time USB communication handling"
+    
+compatibility:
+  stacking:
+    position: "Any 2x6 header position on eval board"
+    conflicts: "Uses all 8 pins - check with other add-ons"
+    power_sharing: "Low power device - compatible with other add-ons"
+    
+  host_compatibility:
+    windows: "Standard USB device drivers"
+    mac_linux: "Standard USB device support"
+    embedded_hosts: "Any system with USB host capability"
+    
+applications:
+  hid_devices:
+    - "Custom keyboard layouts and macros"
+    - "Specialized input devices (game controllers)"
+    - "Accessibility input devices"
+    - "Industrial control interfaces"
+    
+  communication:
+    - "USB-based data logging devices"
+    - "Custom protocol communication"
+    - "Sensor data streaming to PC"
+    - "Remote control and monitoring systems"
+    
+  development_tools:
+    - "USB protocol testing and validation"
+    - "Device driver development support"
+    - "USB communication debugging"
+    - "Multi-device system testing"
+    
+led_usage_patterns:
+  status_indication:
+    blue_leds: "Typically indicate connection/ready status"
+    red_leds: "Typically indicate activity/error status"
+    patterns: "Blinking patterns can indicate different states"
+    
+  communication_feedback:
+    data_transfer: "Flash LEDs during USB data transfer"
+    enumeration: "Indicate USB enumeration success/failure"
+    error_states: "Show USB error conditions visually"
+    
+documentation:
+  primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"
+  related:
+    - "USB 2.0 specification documents"
+    - "USB HID specification"
+    - "USB CDC specification"
+    - "P2 Smart Pins USB programming guide"
+    
+availability:
+  vendor: "Parallax Inc."
+  website: "parallax.com"
+  part_lookup: "Search for 64006F or Serial Device Add-on"
+  bundle_option: "Part of complete accessory set (64006-ES)"
+  individual_purchase: "Available separately"
+  
+quality_rating: "development_interface"
+recommendation_score: 4
+educational_value: "very_high"
+complexity_level: "advanced"
+programming_requirements: "usb_protocol_stack"
+
+# Cross-references
+ecosystem_position: "usb_device_interface"
+hardware_family: "p2_eval_addons"
+addon_series: "64006_series"
+size_class: "small_addon"
+interface_type: "usb_device_dual_port"
+complement_to: "64006B_serial_host"

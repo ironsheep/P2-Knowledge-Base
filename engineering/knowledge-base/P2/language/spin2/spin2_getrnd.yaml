@@ -1,0 +1,6 @@
+name: GETRND
+type: method
+category: Extended Math
+signature: "GETRND() : rnd"
+description: "Get random number"
+source: Spin2 Documentation v51

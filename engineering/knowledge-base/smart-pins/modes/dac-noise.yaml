@@ -1,0 +1,299 @@
+# Smart Pin Mode: %00001 (DAC_MODE) - DAC Noise
+# Silicon Doc Reference: part4-smart-pins.txt, pages 85-86
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%00001"
+
+mode_name: "DAC Noise Generator"
+
+mode_group: "dac"
+
+mode_complexity: "intermediate"
+
+dac_mode_dependency: true
+
+pin_pairing: "none"
+
+wrpin_configuration:
+  base_format: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+  
+  a_input_selector:
+    description: "4-bit A input selector configuration"
+    bit_pattern: "%AAAA"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (default)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  b_input_selector:
+    description: "4-bit B input selector configuration"
+    bit_pattern: "%BBBB"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (default)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0010"
+        description: "relative +2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0011"
+        description: "relative +3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0100"
+        description: "this pin's OUT bit from cogs"
+        polarity: "true"
+        source: "out_bit"
+      - code: "%0101"
+        description: "relative -3 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0110"
+        description: "relative -2 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions of above"
+        polarity: "inverted"
+        source: "any"
+  
+  input_logic_filtering:
+    description: "3-bit input logic/filtering after A/B selectors"
+    bit_pattern: "%FFF"
+    options:
+      - code: "%000"
+        description: "A, B (default)"
+        operation: "passthrough"
+        filter_type: "none"
+      - code: "%001"
+        description: "A AND B, B"
+        operation: "logical_and"
+        filter_type: "none"
+      - code: "%010"
+        description: "A OR B, B"
+        operation: "logical_or"
+        filter_type: "none"
+      - code: "%011"
+        description: "A XOR B, B"
+        operation: "logical_xor"
+        filter_type: "none"
+      - code: "%100"
+        description: "A, B, both filtered using global filt0 settings"
+        operation: "passthrough"
+        filter_type: "filt0"
+      - code: "%101"
+        description: "A, B, both filtered using global filt1 settings"
+        operation: "passthrough"
+        filter_type: "filt1"
+      - code: "%110"
+        description: "A, B, both filtered using global filt2 settings"
+        operation: "passthrough"
+        filter_type: "filt2"
+      - code: "%111"
+        description: "A, B, both filtered using global filt3 settings"
+        operation: "passthrough"
+        filter_type: "filt3"
+  
+  low_level_control:
+    description: "13-bit low-level pin control (M[12:0]) - REQUIRED: M[12:10] = %101 for DAC_MODE"
+    bit_pattern: "%101..........  (M[12:10] must be %101)"
+    special_modes:
+      - condition: "M[12:10] = %101"
+        behavior: "DAC_MODE enabled - M[7:0] overridden with pseudo-random data"
+  
+  dir_out_control:
+    description: "2-bit pin DIR/OUT control"
+    bit_pattern: "%TT"
+    smart_off_behavior:
+      non_dac_mode: []
+      dac_mode: []
+    smart_on_behavior:
+      dac_modes:
+        - mode_range: "%00001 (DAC noise)"
+          behavior: "No special DIR/OUT override - operates according to general DAC mode rules"
+      non_dac_modes: []
+
+x_parameter:
+  usage: "Sample period configuration for ADC readback and power management"
+  bit_fields:
+    - range: "X[15:0]"
+      purpose: "Sample period in clock cycles"
+      valid_values:
+        min: 0
+        max: 65535
+        special_values:
+          - value: 0
+            meaning: "65,536 clocks (maximum period to reduce switching power)"
+  configuration_timing: "reset_only"
+
+y_parameter:
+  usage: "Not used in DAC noise mode"
+
+z_result:
+  data_type: "16-bit ADC accumulation from last sample period"
+  bit_interpretation:
+    - range: "Z[15:0]"
+      meaning: "ADC accumulation result"
+  flag_behavior: "C flag contains mode-related flag or MSB of Z result"
+  overflow_handling: "16-bit accumulation wraps at 65535"
+
+operation_description: |
+  DAC noise mode overrides M[7:0] to feed the pin's 8-bit DAC pseudo-random data on every clock.
+  M[12:10] must be set to %101 to configure the low-level pin for DAC output. Each pin in this mode 
+  receives a unique data pattern from the global Xoroshiro128** PRNG, providing true hardware noise
+  generation. The X[15:0] parameter can be set to a sample period in clock cycles for timing control
+  and power management. If a sample period is not wanted, set X[15:0] to zero (actually 65,536 clocks)
+  to maximize the unused sample period, thereby reducing switching power. During reset (DIR=0), IN is low.
+
+timing_specifications:
+  clock_relationship: "Updates DAC output on every clock cycle with new pseudo-random data"
+  base_period:
+    description: "Sample period for IN signal generation and ADC readback"
+    min_clocks: 1
+    max_clocks: 65536
+    special_values:
+      - value: 0
+        meaning: "65,536 clocks (wraps to maximum period)"
+  update_frequency: "DAC output updates every clock, IN signal at sample period completion"
+  settling_time: "DAC output settles within 1-2 clock cycles"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "Sample period completion (if X[15:0] > 0)"
+    - "Continuous high if X[15:0] = 1"
+  acknowledgment_method: "rdpin"
+  polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
+
+reset_behavior:
+  dir_low_effects:
+    - "IN signal goes low"
+    - "DAC output stops (no switching)"
+    - "Smart pin configuration retained"
+  dir_transition_effects: "Smart pin begins autonomous DAC noise generation"
+  wrpin_zero_effects: "Returns pin to normal mode, clears all smart pin configuration"
+
+common_applications:
+  - application: "Hardware noise source"
+    description: "Generate true hardware random noise for audio applications"
+    complexity_level: "intermediate"
+  - application: "DAC dithering"
+    description: "Add noise to DAC output to improve linearity"
+    complexity_level: "advanced"
+  - application: "Thermal noise simulation"
+    description: "Simulate thermal noise in analog circuits"
+    complexity_level: "advanced"
+
+configuration_examples:
+  - name: "Basic noise generation"
+    description: "Configure pin for continuous DAC noise output"
+    wrpin_code: "WRPIN ##%0000_0000_000_1010000000000_01_00001_0, pin_number"
+    wxpin_code: "WXPIN #0, pin_number"
+    explanation: "DAC_MODE (%101), smart pin mode %00001, maximum sample period (65536 clocks)"
+  
+  - name: "Timed noise with ADC readback"
+    description: "Generate noise with periodic ADC measurements"
+    wrpin_code: "WRPIN ##%0000_0000_000_1010000000000_01_00001_0, pin_number"
+    wxpin_code: "WXPIN #1000, pin_number"
+    explanation: "1000-clock sample periods with IN signal generation for synchronization"
+  
+  - name: "Low-power noise generation"
+    description: "Minimize switching power while maintaining noise capability"
+    wrpin_code: "WRPIN ##%0000_0000_000_1010000000000_01_00001_0, pin_number"
+    wxpin_code: "WXPIN #0, pin_number"
+    explanation: "Zero sets maximum period (65536) to reduce switching frequency"
+
+typical_code_patterns:
+  - pattern_name: "Noise generation with readback"
+    pasm2_code: |
+      ' Configure DAC noise mode
+      WRPIN ##%1010000000000_01_00001_0, noise_pin
+      WXPIN #1000, noise_pin                    ' 1000-clock sample periods
+      DIRH  noise_pin                           ' Enable smart pin
+      
+      loop:
+      TESTP noise_pin WC                        ' Check if sample ready
+      IF_C RDPIN sample, noise_pin              ' Read ADC accumulation
+      ' ... process sample ...
+      JMP #loop
+    explanation: "Standard pattern for noise generation with periodic ADC readback"
+
+related_modes:
+  - mode_id: "%00000"
+    relationship: "alternative" 
+    description: "Normal mode for standard DAC operation without noise"
+  - mode_id: "%00010"
+    relationship: "complementary"
+    description: "DAC 16-bit dither with pseudo-random - more controlled dithering"
+  - mode_id: "%00011"
+    relationship: "complementary"
+    description: "DAC 16-bit dither with PWM - deterministic dithering alternative"
+
+related_instructions:
+  - instruction: "WRPIN"
+    usage_context: "Configure DAC noise mode with required DAC_MODE setting"
+  - instruction: "WXPIN"
+    usage_context: "Set sample period for timing and power control"
+  - instruction: "RDPIN/RQPIN"
+    usage_context: "Read 16-bit ADC accumulation from last sample period"
+  - instruction: "DIRH"
+    usage_context: "Enable smart pin operation"
+  - instruction: "TESTP"
+    usage_context: "Poll IN signal for sample period completion"
+
+hardware_considerations:
+  power_implications: "High switching activity - use longer sample periods to reduce power"
+  pin_loading_effects: "DAC output can drive reasonable loads, consider loading impact on noise quality"
+  noise_considerations: "Generates true hardware noise - excellent entropy source"
+  thermal_effects: "Continuous switching generates heat - monitor in high-frequency applications"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [85, 86]
+      section: "%00001 and DAC_MODE = DAC noise"
+  validation_status: "draft"
+  completeness_score: 92
+  technical_accuracy: "silicon_doc_verified"

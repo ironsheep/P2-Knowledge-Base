@@ -1,0 +1,47 @@
+metadata:
+  id: pasm2_wrbyte_472314ad
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426814
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 222
+    type: csv
+    row: 222
+    type: csv
+    row: 222
+layer1_csv:
+  mnemonic: WRBYTE
+  syntax: |
+    WRBYTE  {#}D,{#}S/P
+  group: Hub RAM - Write
+  encoding: EEEE 1100010 0LI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Write byte in D[7:0] to hub address {#}S/PTRx.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 3
+    cog_exec_16_cogs: 3
+
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.040071
+  narratives:
+    - source: architectural_context
+      type: architectural_note
+      content: |
+        Hub memory access uses egg-beater rotation. Each cog gets a turn every 8 clocks. Hub window alignment affects timing (13-20 clocks typical).
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.314194
+  source: P2 Datasheet v35
+  timing:
+    raw: 3...10 / 3...20
+    type: variable
+    notes:
+      - Hub window alignment affects timing
+    min_cycles: 3
+    max_cycles: 10
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Write byte in D[7:0] to hub address {#}S/PTRx."
+  syntax: "WRBYTE  {#}D,{#}S/P"

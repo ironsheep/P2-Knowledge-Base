@@ -1,0 +1,47 @@
+metadata:
+  id: pasm2_wrlong_a6f7f585
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426836
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 224
+    type: csv
+    row: 224
+    type: csv
+    row: 224
+layer1_csv:
+  mnemonic: WRLONG
+  syntax: |
+    WRLONG  {#}D,{#}S/P
+  group: Hub RAM - Write
+  encoding: EEEE 1100011 0LI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Write long in D[31:0] to hub address {#}S/PTRx.                   Prior SETQ/SETQ2 invokes cog/LUT block transfer.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 3
+    cog_exec_16_cogs: 3
+
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.030918
+  narratives:
+    - source: architectural_context
+      type: architectural_note
+      content: |
+        Hub memory access uses egg-beater rotation. Each cog gets a turn every 8 clocks. Hub window alignment affects timing (13-20 clocks typical).
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.315090
+  source: P2 Datasheet v35
+  timing:
+    raw: 3...10 / 3...20
+    type: variable
+    notes:
+      - Hub window alignment affects timing
+    min_cycles: 3
+    max_cycles: 10
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Write long in D[31:0] to hub address {#}S/PTRx.                   Prior SETQ/SETQ2 invokes cog/LUT block transfer."
+  syntax: "WRLONG  {#}D,{#}S/P"

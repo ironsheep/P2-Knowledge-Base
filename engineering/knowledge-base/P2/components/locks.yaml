@@ -1,0 +1,30 @@
+# P2 Architecture Component: Lock System
+# Generated: 2025-09-06T14:50:17.441056
+
+metadata:
+  id: p2_component_locks
+  name: Lock System
+  category: synchronization
+  version: 1.0
+  extraction_date: 2025-09-06T14:50:17.440207
+
+specifications:
+  count: 16
+  type: Hardware semaphores
+  atomic: Atomic test-and-set
+
+features:
+  - Inter-cog synchronization
+  - Resource protection
+  - Atomic operations
+  - No busy-waiting required
+
+programming_interface:
+  new: LOCKNEW - Allocate new lock
+  try: LOCKTRY - Try to acquire lock
+  rel: LOCKREL - Release lock
+  ret: LOCKRET - Return lock to pool
+
+relationships:
+  - cog
+  - hub_memory

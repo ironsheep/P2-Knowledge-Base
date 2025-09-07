@@ -1,0 +1,6 @@
+name: NAN
+type: method
+category: Extended Math
+signature: "NAN(float) : NotANumber"
+description: "Check if float is NaN"
+source: Spin2 Documentation v51

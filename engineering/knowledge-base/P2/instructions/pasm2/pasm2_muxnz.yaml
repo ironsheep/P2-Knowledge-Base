@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_muxnz_f54b5a62
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425752
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 58
+    type: csv
+    row: 58
+    type: csv
+    row: 58
+layer1_csv:
+  mnemonic: MUXNZ
+  syntax: |
+    MUXNZ   D,{#}S   {WC/WZ/WCZ}
+  group: Math and Logic
+  encoding: EEEE 0101111 CZI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Mux !Z into each D bit that is '1' in S. D = (!S & D ) | (S & {32{!Z}}). C = parity of result. *
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.628184
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Mux !Z into each D bit that is '1' in S. D = (!S & D ) | (S & {32{!Z}}). C = parity of result. *"
+  syntax: "MUXNZ   D,{#}S   {WC/WZ/WCZ}"

@@ -1,0 +1,41 @@
+metadata:
+  id: pasm2_alts_0ff5a4b4
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426159
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 119
+    type: csv
+    row: 119
+    type: csv
+    row: 120
+    type: csv
+    row: 119
+    type: csv
+    row: 120
+layer1_csv:
+  mnemonic: ALTS
+  syntax: |
+    ALTS    D
+  group: Register Indirection
+  encoding: EEEE 1001100 101 DDDDDDDDD 000000000
+  alias: alias
+  description: Alter S field of next instruction to D[8:0].
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.614102
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Alter S field of next instruction to (D + S) & $1FF.                                                 D += sign-extended S[17:9]."
+  syntax: "ALTS    D,{#}S"

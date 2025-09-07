@@ -1,0 +1,48 @@
+metadata:
+  id: pasm2_cmpsx_491b60bb
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425489
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 22
+    type: csv
+    row: 22
+    type: csv
+    row: 22
+layer1_csv:
+  mnemonic: CMPSX
+  syntax: |
+    CMPSX   D,{#}S   {WC/WZ/WCZ}
+  group: Math and Logic
+  encoding: EEEE 0010011 CZI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Compare D to (S + C), signed and extended.                       C = correct sign of (D - (S + C)).  Z = Z AND (D == S + C).
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.638201
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Compare D to (S + C), signed and extended.                       C = correct sign of (D - (S + C)).  Z = Z AND (D == S + C)."
+  syntax: "CMPSX   D,{#}S   {WC/WZ/WCZ}"
+
+layer4_chip:
+  source: Chip Gracey Clarifications
+  title: "Compare with Sign Extension"
+  syntax: "CMPSX D,{#}S {WC/WZ/WCZ}"
+  function: "Compares D to (S + C flag) with true sign result
+- X = D - S - C flag (result not stored)
+- C = true sign of comparison
+- Z = Z AND (X == 0)"
+  use_cases: ""
+  date: "2025-09-02"

@@ -1,0 +1,46 @@
+# P2 Architecture Component: Hub RAM
+# Generated: 2025-09-06T14:50:17.440492
+
+metadata:
+  id: p2_component_hub_memory
+  name: Hub RAM
+  category: memory
+  version: 1.0
+  extraction_date: 2025-09-06T14:50:17.440197
+
+specifications:
+  size: 512KB (1MB address space)
+  width: 8-bit bytes, accessible as byte/word/long
+  access_method: Egg-beater rotation
+  timing:
+    window_size: 8 clocks
+    access_time: 13-20 clocks typical
+    burst_rate: 1 long per clock with FIFO
+
+features:
+  - Shared by all 8 cogs
+  - Egg-beater access ensures fairness
+  - FIFO streaming for predictable access
+  - Atomic read-modify-write operations
+  - Boot code storage
+
+programming_interface:
+  read:
+    - RDBYTE
+    - RDWORD
+    - RDLONG
+  write:
+    - WRBYTE
+    - WRWORD
+    - WRLONG
+  streaming:
+    - RDFAST
+    - WRFAST
+    - RFBYTE
+    - WFBYTE
+  block: SETQ + RD/WRLONG for block transfers
+
+relationships:
+  - cog
+  - fifo
+  - streamer

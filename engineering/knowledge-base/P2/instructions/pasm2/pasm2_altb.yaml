@@ -1,0 +1,41 @@
+metadata:
+  id: pasm2_altb_36198b56
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426170
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 121
+    type: csv
+    row: 121
+    type: csv
+    row: 122
+    type: csv
+    row: 121
+    type: csv
+    row: 122
+layer1_csv:
+  mnemonic: ALTB
+  syntax: |
+    ALTB    D
+  group: Register Indirection
+  encoding: EEEE 1001100 111 DDDDDDDDD 000000000
+  alias: alias
+  description: Alter D field of next instruction to D[13:5].
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.624405
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Alter D field of next instruction to (D[13:5] + S) & $1FF.                                           D += sign-extended S[17:9]."
+  syntax: "ALTB    D,{#}S"

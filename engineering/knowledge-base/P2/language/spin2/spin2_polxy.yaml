@@ -1,0 +1,6 @@
+name: POLXY
+type: method
+category: CORDIC Operations
+signature: "POLXY(length, angle32bit) : x, y"
+description: "Convert polar to Cartesian"
+source: Spin2 Documentation v51

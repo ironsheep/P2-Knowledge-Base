@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_rczl_dc554ef5
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.429639
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 393
+    type: csv
+    row: 393
+    type: csv
+    row: 393
+layer1_csv:
+  mnemonic: RCZL
+  syntax: |
+    RCZL    D        {WC/WZ/WCZ}
+  group: Math and Logic
+  encoding: EEEE 1101011 CZ0 DDDDDDDDD 001101011
+  alias: .
+  description: Rotate C,Z left through D.  D = {D[29:0], C, Z}. C = D[31], Z = D[30].
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.615093
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Rotate C,Z left through D.  D = {D[29:0], C, Z}. C = D[31], Z = D[30]."
+  syntax: "RCZL    D        {WC/WZ/WCZ}"

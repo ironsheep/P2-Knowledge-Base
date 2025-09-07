@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_or_1935c956
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425723
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 53
+    type: csv
+    row: 53
+    type: csv
+    row: 53
+layer1_csv:
+  mnemonic: OR
+  syntax: |
+    OR      D,{#}S   {WC/WZ/WCZ}
+  group: Math and Logic
+  encoding: EEEE 0101010 CZI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: OR S into D.     D = D | S.    C = parity of result. *
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.626941
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "OR S into D.     D = D | S.    C = parity of result. *"
+  syntax: "OR      D,{#}S   {WC/WZ/WCZ}"

@@ -1,0 +1,41 @@
+metadata:
+  id: pasm2_rolbyte_133dd9c9
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425994
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 95
+    type: csv
+    row: 95
+    type: csv
+    row: 96
+    type: csv
+    row: 95
+    type: csv
+    row: 96
+layer1_csv:
+  mnemonic: ROLBYTE
+  syntax: |
+    ROLBYTE D
+  group: Math and Logic
+  encoding: EEEE 1001000 000 DDDDDDDDD 000000000
+  alias: alias
+  description: Rotate-left byte established by prior ALTGB instruction into D.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.612832
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Rotate-left byte N of S into D. D = {D[23:0], S.BYTE[N])."
+  syntax: "ROLBYTE D,{#}S,#N"

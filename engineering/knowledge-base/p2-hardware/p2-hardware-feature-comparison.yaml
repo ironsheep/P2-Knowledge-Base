@@ -1,0 +1,347 @@
+name: "P2 Hardware Feature Comparison Table"
+category: "hardware_comparison"
+version: "1.0"
+last_updated: "2025-09-06"
+
+description: "Comprehensive feature comparison across all P2 hardware modules, development boards, and add-on accessories to facilitate optimal hardware selection for specific applications."
+
+comparison_categories:
+  - "basic_specifications"
+  - "processing_power" 
+  - "memory_resources"
+  - "io_capabilities"
+  - "connectivity"
+  - "power_requirements"
+  - "form_factors"
+  - "expansion_options"
+  - "educational_value"
+  - "cost_tier"
+
+edge_modules:
+  p2_ec_standard:
+    part_number: "P2-EC"
+    flash_memory: "4MB"
+    psram_memory: "0MB"
+    crystal_frequency: "20MHz"
+    voltage_regulation: "Integrated 3.3V"
+    dimensions: "27×40mm"
+    io_pins_total: 64
+    smart_pins: 64
+    form_factor: "Edge connector module"
+    carrier_compatibility: ["standard_breakout", "mini_breakout", "breadboard_carrier"]
+    cost_tier: "budget"
+    primary_applications: ["general_purpose", "education", "prototyping"]
+    educational_rating: "excellent"
+    
+  p2_ec_32mb:
+    part_number: "P2-EC32MB"
+    flash_memory: "32MB"
+    psram_memory: "0MB"
+    crystal_frequency: "20MHz"
+    voltage_regulation: "Integrated 3.3V"
+    dimensions: "27×40mm"
+    io_pins_total: 64
+    smart_pins: 64
+    form_factor: "Edge connector module"
+    carrier_compatibility: ["standard_breakout", "mini_breakout", "breadboard_carrier"]
+    cost_tier: "premium"
+    primary_applications: ["advanced_projects", "large_programs", "data_logging"]
+    educational_rating: "good"
+
+development_boards:
+  p2_eval_board:
+    part_number: "64000-ES"
+    flash_memory: "4MB (with P2-EC)"
+    psram_memory: "0MB"
+    crystal_frequency: "20MHz"
+    voltage_regulation: "Multiple rails (1.8V, 3.3V, 5V)"
+    dimensions: "127×89mm"
+    io_pins_total: 64
+    smart_pins: 64
+    usb_connectivity: "USB-C programming + micro-USB serial"
+    audio_capability: "Stereo DAC output"
+    video_capability: "VGA output"
+    sd_card_support: "microSD socket"
+    breadboard_area: "Large prototyping area"
+    addon_headers: "Two 2x6 headers for add-on boards"
+    form_factor: "Full development board"
+    expansion_options: ["addon_boards", "breadboard", "headers"]
+    cost_tier: "mid_range"
+    primary_applications: ["full_development", "education", "prototyping", "production"]
+    educational_rating: "excellent"
+    
+  standard_breakout:
+    part_number: "P2-EVAL-STD-BREAKOUT"
+    flash_memory: "Depends on edge module"
+    psram_memory: "Depends on edge module"
+    crystal_frequency: "20MHz"
+    voltage_regulation: "5V input, 3.3V regulated"
+    dimensions: "76×51mm"
+    io_pins_total: 64
+    smart_pins: 64
+    usb_connectivity: "None (requires external programming)"
+    pin_access: "All 64 pins broken out to headers"
+    breadboard_compatible: "Yes"
+    form_factor: "Breakout board"
+    expansion_options: ["breadboard", "wire_connections"]
+    cost_tier: "budget"
+    primary_applications: ["custom_circuits", "embedded_systems", "production"]
+    educational_rating: "good"
+    
+  mini_breakout:
+    part_number: "P2-EVAL-MINI-BREAKOUT"
+    flash_memory: "Depends on edge module"
+    psram_memory: "Depends on edge module"
+    crystal_frequency: "20MHz"
+    voltage_regulation: "3.3V input only"
+    dimensions: "38×25mm"
+    io_pins_total: 64
+    smart_pins: 64
+    usb_connectivity: "None (requires external programming)"
+    pin_access: "All 64 pins on edge castellations"
+    surface_mount: "Castellation mounting"
+    form_factor: "Compact breakout"
+    expansion_options: ["surface_mount", "wire_connections"]
+    cost_tier: "budget"
+    primary_applications: ["space_constrained", "embedded", "production"]
+    educational_rating: "fair"
+    
+  breadboard_carrier:
+    part_number: "P2-EVAL-BREADBOARD-CARRIER"
+    flash_memory: "Depends on edge module"
+    psram_memory: "Depends on edge module"
+    crystal_frequency: "20MHz"
+    voltage_regulation: "5V input, 3.3V regulated"
+    dimensions: "83×56mm"
+    io_pins_total: 64
+    smart_pins: 64
+    usb_connectivity: "None (requires external programming)"
+    breadboard_mounting: "Direct solderless breadboard mounting"
+    pin_access: "Selected pins brought to breadboard rails"
+    form_factor: "Breadboard-mounted carrier"
+    expansion_options: ["breadboard", "jumper_wires"]
+    cost_tier: "budget"
+    primary_applications: ["education", "rapid_prototyping", "learning"]
+    educational_rating: "excellent"
+
+addon_boards:
+  control_board:
+    part_number: "64006A"
+    component_type: "LEDs + Switches"
+    led_count: 4
+    switch_count: 4
+    analog_inputs: 0
+    digital_ios: 8
+    special_features: "Current limiting resistors, pull-up resistors"
+    power_consumption: "40mA maximum"
+    educational_concepts: ["Digital I/O", "LED control", "Switch input"]
+    primary_applications: ["basic_io", "education", "status_display"]
+    complexity_level: "beginner"
+    
+  serial_host:
+    part_number: "64006B"
+    component_type: "USB Host Ports"
+    usb_ports: 2
+    port_type: "USB-A female"
+    power_supply: "5V, 500mA per port"
+    led_indicators: 2
+    special_features: "Current limiting, device enumeration"
+    educational_concepts: ["USB host", "Device enumeration", "Power management"]
+    primary_applications: ["usb_host", "device_testing", "communication"]
+    complexity_level: "advanced"
+    
+  led_matrix:
+    part_number: "64006C"
+    component_type: "LED Matrix"
+    matrix_size: "8×7"
+    total_leds: 56
+    control_method: "Charlieplexing"
+    pins_required: 8
+    special_features: "Charlieplex lookup table, timing control"
+    educational_concepts: ["Charlieplexing", "Matrix control", "Multiplexing"]
+    primary_applications: ["displays", "graphics", "education"]
+    complexity_level: "intermediate"
+    
+  digital_video_out:
+    part_number: "64006D"
+    component_type: "Digital Video Interface"
+    connector_type: "HDMI-type"
+    signal_type: "Differential digital"
+    pins_required: 8
+    special_features: "Differential signaling, video protocols"
+    educational_concepts: ["Digital video", "Differential signals", "Protocols"]
+    primary_applications: ["video_output", "display_interface", "experimentation"]
+    complexity_level: "advanced"
+    
+  mini_prototyping:
+    part_number: "64006E"
+    component_type: "Prototyping Area"
+    grid_size: "8×12 tie points"
+    connections: "All pins accessible"
+    special_features: "PCB layout guides, connection groups"
+    educational_concepts: ["Circuit building", "Hardware design", "Connections"]
+    primary_applications: ["custom_circuits", "prototyping", "modification"]
+    complexity_level: "intermediate"
+    
+  serial_device:
+    part_number: "64006F"
+    component_type: "USB Device Ports"
+    usb_ports: 2
+    port_type: "micro-USB"
+    device_modes: ["HID", "CDC", "custom"]
+    led_indicators: 4
+    special_features: "Device emulation, activity indicators"
+    educational_concepts: ["USB device", "HID/CDC protocols", "Emulation"]
+    primary_applications: ["usb_device", "emulation", "communication"]
+    complexity_level: "advanced"
+    
+  digital_io_board:
+    part_number: "64006G"  
+    component_type: "Combined Digital I/O"
+    led_count: 4
+    switch_count: 4
+    shared_pins: 4
+    special_features: "Bi-directional I/O, electrical isolation"
+    educational_concepts: ["Bi-directional I/O", "Mode switching", "Isolation"]
+    primary_applications: ["interactive_io", "user_interface", "status_control"]
+    complexity_level: "intermediate"
+    
+  av_breakout:
+    part_number: "64006H"
+    component_type: "Audio/Video Interface"
+    vga_output: "15-pin D-sub"
+    rca_outputs: 3
+    audio_jacks: 2
+    pins_required: 16
+    special_features: "Multiple A/V standards, mode switching"
+    educational_concepts: ["A/V interfaces", "Signal generation", "Multiple standards"]
+    primary_applications: ["audio_video", "multimedia", "interface_testing"]
+    complexity_level: "advanced"
+
+feature_matrix:
+  processing_capability:
+    all_boards: "P2 8-COG multiprocessor @ 200MHz"
+    smart_pins: "64 Smart Pins on all platforms"
+    cordic_solver: "Available on all platforms"
+    
+  memory_comparison:
+    p2_ec_standard: "4MB Flash, 512KB RAM"
+    p2_ec_32mb: "32MB Flash, 512KB RAM"
+    note: "RAM is internal P2 specification"
+    
+  connectivity_options:
+    programming_interfaces:
+      eval_board: "USB-C + micro-USB + PropPlug header"
+      breakouts: "PropPlug header only"
+      note: "External programmer required for breakout boards"
+    expansion_interfaces:
+      eval_board: "2×6 add-on headers, breadboard area, general I/O"
+      breakouts: "Raw pin access, breadboard compatibility"
+      
+  power_specifications:
+    input_voltages:
+      eval_board: "5V USB or 6-15V barrel jack"
+      standard_breakout: "5V regulated input"
+      mini_breakout: "3.3V regulated input only"
+      breadboard_carrier: "5V regulated input"
+    power_consumption:
+      base_system: "200mA @ 3.3V typical"
+      with_addons: "Up to 500mA with high-power add-ons"
+      
+  educational_progression:
+    beginner_path: ["breadboard_carrier", "control_board", "mini_prototyping"]
+    intermediate_path: ["eval_board", "led_matrix", "digital_io_board"]
+    advanced_path: ["breakouts", "serial_host", "digital_video_out", "av_breakout"]
+    
+  application_domains:
+    education: ["eval_board", "breadboard_carrier", "control_board"]
+    prototyping: ["eval_board", "standard_breakout", "mini_prototyping"]
+    embedded_systems: ["mini_breakout", "standard_breakout"]
+    multimedia: ["eval_board", "av_breakout", "digital_video_out"]
+    communications: ["serial_host", "serial_device"]
+    user_interfaces: ["control_board", "digital_io_board", "led_matrix"]
+
+selection_criteria:
+  by_experience_level:
+    beginner:
+      recommended: ["P2 Eval Board + Control Board"]
+      rationale: "Complete development environment with simple I/O"
+      cost: "Mid-range investment"
+    intermediate:
+      recommended: ["Standard Breakout + selected add-ons"]
+      rationale: "More flexibility, custom circuit integration"
+      cost: "Budget-conscious with expansion options"
+    advanced:
+      recommended: ["Mini Breakout or custom carrier"]
+      rationale: "Maximum flexibility, production-ready form factors"
+      cost: "Minimal base cost, custom expansion"
+      
+  by_application_type:
+    learning_embedded_systems:
+      hardware: "P2 Eval Board"
+      addons: ["64006A (Control)", "64006E (Prototyping)"]
+      advantages: "Complete development environment"
+    space_constrained_projects:
+      hardware: "P2 Edge Mini Breakout" 
+      edge_module: "P2-EC standard (sufficient for most)"
+      advantages: "Smallest footprint, production-ready"
+    multimedia_projects:
+      hardware: "P2 Eval Board"
+      addons: ["64006H (A/V Breakout)", "64006D (Digital Video)"]
+      advantages: "Multiple A/V output options"
+    usb_development:
+      hardware: "P2 Eval Board"
+      addons: ["64006B (USB Host)", "64006F (USB Device)"]
+      advantages: "Complete USB ecosystem testing"
+    cost_sensitive_projects:
+      hardware: "P2 Edge Standard Breakout"
+      edge_module: "P2-EC standard"
+      advantages: "Minimum cost for full P2 capability"
+
+compatibility_matrix:
+  edge_module_carriers:
+    p2_ec_standard:
+      standard_breakout: "perfect"
+      mini_breakout: "perfect"
+      breadboard_carrier: "perfect"
+    p2_ec_32mb:
+      standard_breakout: "perfect"
+      mini_breakout: "optimal"
+      breadboard_carrier: "good"
+      
+  eval_board_addons:
+    simultaneous_connection: "Up to 2 add-on boards"
+    power_budget: "Total 500mA @ 5V for add-ons"
+    pin_allocation: "A-side (P32-P39) + B-side (P24-P31)"
+    
+  recommended_combinations:
+    education_starter:
+      main: "P2 Eval Board"
+      addons: ["64006A Control", "64006E Prototyping"]
+      cost_tier: "mid_range"
+    multimedia_developer:
+      main: "P2 Eval Board"
+      addons: ["64006H A/V Breakout", "64006C LED Matrix"]
+      cost_tier: "premium"
+    embedded_prototype:
+      main: "P2 Edge Standard Breakout"
+      module: "P2-EC standard"
+      cost_tier: "budget"
+    production_ready:
+      main: "P2 Edge Mini Breakout"
+      module: "P2-EC (size dependent)"
+      cost_tier: "minimal"
+
+summary_recommendations:
+  first_time_users: "P2 Eval Board with Control Board add-on - provides complete development environment with simple I/O for learning"
+  budget_conscious: "P2 Edge Standard Breakout with P2-EC - minimal cost for full P2 capability"
+  space_critical: "P2 Edge Mini Breakout with P2-EC - smallest footprint while maintaining full functionality"
+  multimedia_focus: "P2 Eval Board with A/V Breakout - comprehensive audio/video development platform"
+  production_transition: "Start with Eval Board for development, transition to appropriate breakout for production"
+  
+notes:
+  - "All configurations provide complete P2 functionality (8 COGs, 64 Smart Pins, CORDIC)"
+  - "Edge module choice (4MB vs 32MB) depends on program size requirements"
+  - "Add-on boards require P2 Eval Board for full functionality"
+  - "Breakout boards offer maximum flexibility but require external programming setup"
+  - "Educational progression: Eval Board → Standard Breakout → Mini Breakout → Custom carrier"

@@ -1,0 +1,35 @@
+metadata:
+  id: pasm2_jxro_42da3d05
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426655
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 194
+    type: csv
+    row: 194
+    type: csv
+    row: 194
+layer1_csv:
+  mnemonic: JXRO
+  syntax: |
+    JXRO    {#}S
+  group: Events - Branch
+  encoding: EEEE 1011110 01I 000001100 SSSSSSSSS
+  alias: .
+  description: Jump to S** if XRO event flag is set.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.623874
+  source: P2 Datasheet v35
+  timing:
+    raw: 2 or 4 / 2 or 13...20
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Jump to S** if XRO event flag is set."
+  syntax: "JXRO    {#}S"

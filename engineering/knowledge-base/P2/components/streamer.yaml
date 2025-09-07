@@ -1,0 +1,41 @@
+# P2 Architecture Component: Streamer
+# Generated: 2025-09-06T14:50:17.440794
+
+metadata:
+  id: p2_component_streamer
+  name: Streamer
+  category: dma
+  version: 1.0
+  extraction_date: 2025-09-06T14:50:17.440202
+
+specifications:
+  channels: 1
+  data_width: Configurable 1-32 bits
+  modes: Multiple streaming modes
+  max_rate: System clock rate
+
+features:
+  - Automatic hub addressing
+  - NCO for rate control
+  - Color space conversion
+  - HDMI encoding
+  - DMA without CPU intervention
+
+modes:
+  - Hub RAM to pins
+  - Pins to Hub RAM
+  - LUT to pins
+  - HDMI output mode
+  - ADC sampling with SINC filtering
+  - Goertzel mode for DSP
+
+programming_interface:
+  init: XINIT - Initialize streamer
+  start: XCONT - Continue streaming
+  stop: XSTOP - Stop streaming
+  config: XZERO - Zero streamer state
+
+relationships:
+  - hub_memory
+  - fifo
+  - smart_pins

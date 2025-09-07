@@ -1,0 +1,41 @@
+metadata:
+  id: pasm2_setword_ff3e5949
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426013
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 98
+    type: csv
+    row: 97
+    type: csv
+    row: 98
+    type: csv
+    row: 97
+    type: csv
+    row: 98
+layer1_csv:
+  mnemonic: SETWORD
+  syntax: |
+    SETWORD {#}S
+  group: Math and Logic
+  encoding: EEEE 1001001 00I 000000000 SSSSSSSSS
+  alias: alias
+  description: Set S[15:0] into word established by prior ALTSW instruction.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.624849
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Set S[15:0] into word N in D, keeping rest of D same."
+  syntax: "SETWORD D,{#}S,#N"

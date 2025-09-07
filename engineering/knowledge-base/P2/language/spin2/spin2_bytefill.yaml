@@ -1,0 +1,6 @@
+name: BYTEFILL
+type: method
+category: Fill Operations
+signature: "BYTEFILL(Destination, Value, Count)"
+description: "Fill memory with byte value"
+source: Spin2 Documentation v51

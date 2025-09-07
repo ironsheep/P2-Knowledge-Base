@@ -1,0 +1,124 @@
+# Smart Pin Mode %01011 - A/B-input Quadrature Encoder
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%01011"
+mode_name: "A/B-input Quadrature Encoder"
+description: "Decodes quadrature encoder signals for position and velocity measurement"
+category: "measurement"
+output_override: false
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%01011"
+
+timing_control:
+  x_register:
+    function: "X[31:0] establishes measurement period in clock cycles"
+    zero_mode: "X = 0 for continuous operation (totalizer mode)"
+    periodic_mode: "X ≠ 0 for periodic measurements"
+
+operation_modes:
+  continuous_mode:
+    condition: "X[31:0] = 0"
+    behavior: "Continuous totalizer operation"
+    reading: "Current 32-bit quadrature step count always available via RDPIN/RQPIN"
+    
+  periodic_mode:
+    condition: "X[31:0] ≠ 0" 
+    behavior: "Count steps for X clock cycles, then report"
+    sequence:
+      - "Quadrature steps counted for X clock cycles"
+      - "Result placed in Z"
+      - "Accumulator set to 0/1/-1 value that would have been added"
+      - "IN raised"
+      - "RDPIN/RQPIN retrieves 32-bit measurement"
+
+quadrature_decoding:
+  inputs: "A and B quadrature signals"
+  step_detection: "Detects quadrature state changes"
+  direction_sensing: "Determines forward/reverse direction"
+  step_counting: "Accumulates signed step count"
+
+dual_pin_strategy:
+  suggestion: "Configure both A and B smart pins to quadrature mode"
+  continuous_pin: "X = 0 for absolute position tracking"
+  periodic_pin: "X ≠ 0 for velocity measurement"
+  benefit: "Simultaneous position and velocity measurement"
+
+instructions:
+  setup:
+    - "WRPIN - Configure mode (%01011)"
+    - "WXPIN - Set measurement period X[31:0]"
+    
+  operation:
+    continuous: "RDPIN/RQPIN - Read current step count any time"
+    periodic: "RDPIN/RQPIN - Read measurement after IN raised"
+
+zeroing:
+  method: "Pulse DIR low at any time"
+  effect: "Resets quadrature counter to zero"
+  no_reconfiguration: "No need to repeat WXPIN"
+
+reset_behavior:
+  during_reset:
+    dir_state: "DIR=0"
+    in_signal: "IN is low" 
+    z_register: "Z set to adder value (0/1/-1)"
+
+behavior:
+  in_signal:
+    continuous: "Not used (always readable)"
+    periodic: "Raised at end of each measurement period"
+    
+  acknowledgment:
+    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
+    effect: "Lowers IN signal after 2 clocks"
+
+usage_notes:
+  - "Handles full quadrature decoding in hardware"
+  - "32-bit signed counter for large position range"
+  - "Can be zeroed without reconfiguration"
+  - "Supports both continuous and periodic operation"
+  - "All quadrature steps counted across measurements"
+
+applications:
+  motor_control: "Servo motor position feedback"
+  robotics: "Wheel encoder position tracking" 
+  cnc_machines: "Axis position measurement"
+  instrumentation: "Rotary position sensing"
+
+measurement_strategies:
+  position_tracking:
+    mode: "Continuous (X = 0)"
+    benefit: "Always-available absolute position"
+    
+  velocity_measurement:
+    mode: "Periodic (X = time_window)"
+    benefit: "Steps per time period = velocity"
+    
+  combined_system:
+    setup: "Two pins, one continuous, one periodic"
+    result: "Simultaneous position and velocity"
+
+quadrature_theory:
+  phase_relationship: "A and B signals 90° out of phase"
+  direction_detection: "A leads B = forward, B leads A = reverse"
+  resolution: "4× encoder resolution (both edges, both phases)"
+
+related_modes:
+  - "%01100 (Count A-rise when B-high)"
+  - "%01101 (A-rise increment/decrement by B)"
+  - "%01110 (Count A-rise or A-rise/B-rise)"
+  - "%01111 (Count A-high or A-high/B-high)"
+
+see_also:
+  - "Quadrature encoder theory"
+  - "Position and velocity measurement"
+  - "Motor control feedback systems"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"

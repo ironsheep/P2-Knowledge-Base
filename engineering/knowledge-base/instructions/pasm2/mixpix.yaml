@@ -1,0 +1,100 @@
+mnemonic: "MIXPIX"
+syntax:
+  - "MIXPIX D,{#}S"
+group: "color_space_pixel_mixer"
+description: "Mix bytes of S into bytes of D, using SETPIX and SETPIV values."
+
+operation:
+  basic_operation: "Complex pixel mixing using mode and blend settings"
+  flag_effects:
+    carry_flag: "Not affected"
+    zero_flag: "Not affected"
+  conditions:
+    - "SETPIX defines mixing mode (6-bit mode value)"
+    - "SETPIV defines blend factor (8-bit blend value)"
+    - "Operates on four bytes simultaneously"
+    - "Each byte treated as separate color channel"
+
+timing:
+  base_clocks: 7
+  cog_lut_timing: 7
+  hub_timing: 7
+  timing_notes:
+    - "All pixel mixer operations require 7 clock cycles"
+    - "More complex than basic arithmetic due to per-byte processing"
+
+flags:
+  affects_c: false
+  affects_z: false
+  flag_options: []
+  flag_meanings: {}
+
+operands:
+  destination:
+    type: "register"
+    range: "0..511 for cog/LUT registers"
+    description: "Destination containing four 8-bit pixel values"
+  source:
+    type: "register_or_immediate"
+    register_range: "0..511 for cog/LUT registers"
+    immediate_range: "32-bit packed pixel value"
+    description: "Source containing four 8-bit pixel values"
+
+variants:
+  - syntax: "MIXPIX D,{#}S"
+    description: "Mix source pixels into destination using SETPIX mode and SETPIV blend"
+    specific_operation: "D = complex_mix(D, S, SETPIX_mode, SETPIV_blend)"
+
+examples:
+  - title: "Alpha Blending Setup"
+    description: "Configure and perform alpha blend operation"
+    code: |
+      SETPIX #%001010        ' Set alpha blend mode
+      SETPIV #128           ' 50% blend factor (128/255)
+      MIXPIX dest_pixel, src_pixel
+    explanation: "Blends source into destination at 50% transparency"
+  - title: "Color Addition with Saturation"
+    description: "Add colors with overflow protection"
+    code: |
+      SETPIX #%000001        ' Additive blend mode
+      SETPIV #255           ' Full intensity
+      MIXPIX background, overlay
+    explanation: "Adds overlay to background with saturation at 255"
+  - title: "Custom Pixel Effect"
+    description: "Apply complex mixing effect to image data"
+    code: |
+      SETPIX #%101100        ' Custom effect mode
+      SETPIV effect_strength ' Variable effect intensity
+      MIXPIX image_pixel, effect_pixel
+    explanation: "Applies configurable effect based on SETPIX mode"
+
+related_instructions:
+  - "SETPIX"
+  - "SETPIV"
+  - "ADDPIX"
+  - "BLNPIX"
+  - "MULPIX"
+
+special_behaviors:
+  - "Requires prior SETPIX and SETPIV configuration"
+  - "Operates on packed pixel format (4 bytes per long)"
+  - "Each byte processed independently as color channel"
+  - "Supports various blend modes via SETPIX parameter"
+  - "SETPIV provides blend strength/alpha value"
+
+notes:
+  - "Designed for real-time graphics and image processing"
+  - "Enables sophisticated color blending operations"
+  - "More flexible than simple ADDPIX/MULPIX operations"
+  - "Essential for sprite rendering and visual effects"
+
+source_references:
+  datasheet_section: "6.10 Color Space Converter and Pixel Mixer Instructions - Pixel Mixer"
+  page_references: ["Datasheet Pixel Mixer instruction table"]
+  extraction_notes: "Extracted from pasm2-complete-instruction-tables.md Color Space Converter and Pixel Mixer section"
+
+pixel_formats:
+  packed_rgba: "Four 8-bit channels: R, G, B, A"
+  packed_argb: "Four 8-bit channels: A, R, G, B"
+  grayscale: "Four 8-bit intensity values"
+  yuv: "Luminance and chrominance components"

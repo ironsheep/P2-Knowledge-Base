@@ -1,0 +1,6 @@
+name: QSIN
+type: method
+category: CORDIC Operations
+signature: "QSIN(length, step, stepsInCircle) : y"
+description: "Calculate sine using CORDIC"
+source: Spin2 Documentation v51

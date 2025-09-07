@@ -1,0 +1,53 @@
+# Smart Pin Mode: %10110 - Count States in X+ Clocks
+# Silicon Doc Reference: part4-smart-pins.txt, page 94
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%10110"
+
+mode_name: "Count States in X+ Clocks"
+
+mode_group: "measurement"
+
+mode_complexity: "advanced"
+
+dac_mode_dependency: false
+
+pin_pairing: "adjacent"
+
+operation_description: |
+  Accumulates A-input trigger states within periods during measurement window of X+ clocks.
+  Complementary to %10101 - provides duty measurement with time-windowed sampling.
+  Measurement continues until X clocks elapse and current period completes.
+
+x_parameter:
+  usage: "Minimum measurement duration"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "Minimum clock cycles for measurement window"
+
+y_parameter:
+  usage: "Edge sensitivity"
+  bit_fields:
+    - range: "Y[1:0]"
+      purpose: "Period detection sensitivity"
+
+z_result:
+  data_type: "Accumulated states"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Total A-trigger states within periods during measurement"
+
+common_applications:
+  - application: "Time-windowed duty measurement"
+    description: "Duty cycle measurement with minimum sample time"
+    complexity_level: "expert"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [94]
+      section: "%10110 = for periods in X+ clocks, count states"
+  validation_status: "draft"
+  completeness_score: 75
+  technical_accuracy: "silicon_doc_verified"

@@ -1,0 +1,39 @@
+metadata:
+  id: pasm2_waitx_27ea9385
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.427392
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 267
+    type: csv
+    row: 267
+    type: csv
+    row: 267
+layer1_csv:
+  mnemonic: WAITX
+  syntax: |
+    WAITX   {#}D     {WC/WZ/WCZ}
+  group: Miscellaneous
+  encoding: EEEE 1101011 CZL DDDDDDDDD 000011111
+  alias: .
+  description: Wait 2 + D clocks if no WC/WZ/WCZ. If WC/WZ/WCZ, wait 2 + (D & RND) clocks. C/Z = 0.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.305547
+  source: P2 Datasheet v35
+  timing:
+    raw: 2+D
+    base_cycles: 2
+    type: variable
+    notes:
+      - Plus additional cycles based on condition
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Wait 2 + D clocks if no WC/WZ/WCZ. If WC/WZ/WCZ, wait 2 + (D & RND) clocks. C/Z = 0."
+  syntax: "WAITX   {#}D     {WC/WZ/WCZ}"

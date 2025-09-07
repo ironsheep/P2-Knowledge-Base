@@ -1,0 +1,39 @@
+metadata:
+  id: pasm2_waitct2_d3723480
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.427695
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 290
+    type: csv
+    row: 290
+    type: csv
+    row: 290
+layer1_csv:
+  mnemonic: WAITCT2
+  syntax: |
+    WAITCT2          {WC/WZ/WCZ}
+  group: Events - Wait
+  encoding: EEEE 1101011 CZ0 000010010 000100100
+  alias: .
+  description: Wait for CT2 event flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.614447
+  source: P2 Datasheet v35
+  timing:
+    raw: 2+
+    base_cycles: 2
+    notes:
+      - Plus wait condition
+    type: variable
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Wait for CT2 event flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout."
+  syntax: "WAITCT2          {WC/WZ/WCZ}"

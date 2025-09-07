@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_mixpix_53ec36ac
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426328
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 145
+    type: csv
+    row: 145
+    type: csv
+    row: 145
+layer1_csv:
+  mnemonic: MIXPIX
+  syntax: |
+    MIXPIX  D,{#}S
+  group: Pixel Mixer
+  encoding: EEEE 1010010 11I DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Mix bytes of S into bytes of D, using SETPIX and SETPIV values.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 7
+    cog_exec_16_cogs: 7
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.306679
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Mix bytes of S into bytes of D, using SETPIX and SETPIV values."
+  syntax: "MIXPIX  D,{#}S"

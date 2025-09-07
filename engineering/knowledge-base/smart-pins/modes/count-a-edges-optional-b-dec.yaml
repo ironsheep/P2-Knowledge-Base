@@ -1,0 +1,201 @@
+# Smart Pin Mode: %01110 - Count A-Edges with Optional B-Decrement
+# Silicon Doc Reference: part4-smart-pins.txt, page 91
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%01110"
+
+mode_name: "Count A-Edges with Optional B-Decrement"
+
+mode_group: "measurement"
+
+mode_complexity: "intermediate"
+
+dac_mode_dependency: false
+
+pin_pairing: "adjacent"
+
+wrpin_configuration:
+  base_format: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+  
+  a_input_selector:
+    description: "A input - signal to count positive edges"
+    bit_pattern: "%AAAA"
+    options:
+      - code: "%0000"
+        description: "this pin's read state (primary counting signal)"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%1xxx"
+        description: "inverted versions"
+        polarity: "inverted"
+        source: "any"
+
+  b_input_selector:
+    description: "B input - optional decrement signal"
+    bit_pattern: "%BBBB"
+    options:
+      - code: "%0000"
+        description: "this pin's read state"
+        polarity: "true"
+        source: "pin_read"
+      - code: "%0001"
+        description: "relative +1 pin's read state (decrement signal)"
+        polarity: "true"
+        source: "relative_pin"
+      - code: "%0111"
+        description: "relative -1 pin's read state"
+        polarity: "true"
+        source: "relative_pin"
+
+  input_logic_filtering:
+    description: "Input filtering for clean edge detection"
+    bit_pattern: "%FFF"
+    options:
+      - code: "%000"
+        description: "A, B (no filtering)"
+        operation: "passthrough"
+        filter_type: "none"
+      - code: "%101"
+        description: "A, B filtered with filt1"
+        operation: "passthrough"
+        filter_type: "filt1"
+
+  low_level_control:
+    description: "Standard input configuration"
+    bit_pattern: "%M............"
+    special_modes: []
+
+  dir_out_control:
+    description: "Input-only operation"
+    bit_pattern: "%TT"
+    smart_off_behavior:
+      non_dac_mode: []
+      dac_mode: []
+    smart_on_behavior:
+      dac_modes: []
+      non_dac_modes:
+        - mode_range: "%01110"
+          behavior: "Dual-input edge counting"
+
+x_parameter:
+  usage: "Measurement period"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "Measurement period in clocks (0=continuous)"
+      valid_values:
+        min: 0
+        max: 4294967295
+
+y_parameter:
+  usage: "Mode selection"
+  bit_fields:
+    - range: "Y[0]"
+      purpose: "Count mode selection"
+      valid_values:
+        min: 0
+        max: 1
+        special_values:
+          - value: 0
+            meaning: "Count A-input positive edges only"
+          - value: 1
+            meaning: "Inc on A-rise, dec on B-rise"
+
+z_result:
+  data_type: "32-bit signed counter"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Event count (signed if Y[0]=1)"
+  flag_behavior: "C flag status"
+  overflow_handling: "32-bit signed wraparound"
+
+operation_description: |
+  Mode %01110 provides flexible A-edge counting with optional B-decrement functionality.
+  Y[0] selects operation: Y[0]=0 counts only A positive edges, Y[0]=1 increments on
+  A positive edges and decrements on B positive edges. X[31:0] sets measurement period
+  (0=continuous). Perfect for applications needing simple counting or bidirectional
+  step tracking.
+
+timing_specifications:
+  clock_relationship: "Asynchronous edge detection"
+  base_period:
+    description: "Based on X parameter"
+    min_clocks: 0
+    max_clocks: 4294967295
+  update_frequency: "Edge-triggered response"
+  settling_time: "Filter-dependent"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "Measurement period completion (if X > 0)"
+  acknowledgment_method: "rdpin"
+  polling_restrictions: "Standard 2-clock delay"
+
+reset_behavior:
+  dir_low_effects:
+    - "Reset counter"
+    - "Clear IN signal"
+  dir_transition_effects: "Begin counting operation"
+  wrpin_zero_effects: "Return to normal mode"
+
+common_applications:
+  - application: "Simple event counting"
+    description: "Count events on single input"
+    complexity_level: "beginner"
+  - application: "Bidirectional step counting"
+    description: "Up/down counter with separate signals"
+    complexity_level: "intermediate"
+
+configuration_examples:
+  - name: "Simple pulse counter"
+    description: "Count pulses on A input only"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_00_01110_0, pulse_pin"
+    wxpin_code: "WXPIN #0, pulse_pin"
+    wypin_code: "WYPIN #0, pulse_pin"
+    explanation: "Y[0]=0 for A-only counting, continuous mode"
+
+  - name: "Up/down counter"
+    description: "Increment on A, decrement on B"
+    wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_01110_0, updown_pin"
+    wxpin_code: "WXPIN #0, updown_pin"
+    wypin_code: "WYPIN #1, updown_pin"
+    explanation: "Y[0]=1 for bidirectional counting"
+
+related_modes:
+  - mode_id: "%01011"
+    relationship: "advanced_version"
+    description: "Full quadrature encoder"
+  - mode_id: "%01101"
+    relationship: "alternative"
+    description: "A-rise with B-state direction"
+
+related_instructions:
+  - instruction: "WRPIN"
+    usage_context: "Configure counting mode"
+  - instruction: "WXPIN"
+    usage_context: "Set measurement period"
+  - instruction: "WYPIN"
+    usage_context: "Select Y[0] counting mode"
+
+hardware_considerations:
+  power_implications: "Low power edge detection"
+  pin_loading_effects: "Input-only operation"
+  noise_considerations: "Use filtering for noisy signals"
+  thermal_effects: "Minimal"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [91]
+      section: "%01110 = inc on A-rise / dec on B-rise"
+  validation_status: "draft"
+  completeness_score: 90
+  technical_accuracy: "silicon_doc_verified"

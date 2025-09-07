@@ -1,0 +1,83 @@
+# Smart Pin Mode: %10010 - Time X A-Events or Timeout
+# Silicon Doc Reference: part4-smart-pins.txt, pages 92-93
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%10010"
+
+mode_name: "Time X A-Events or Timeout"
+
+mode_group: "measurement"
+
+mode_complexity: "advanced"
+
+dac_mode_dependency: false
+
+pin_pairing: "none"
+
+operation_description: |
+  Mode %10010 provides dual functionality based on Y[2]. If Y[2]=0, measures time
+  until X A-input highs/rises/edges accumulate. If Y[2]=1, implements timeout
+  detection - if no A-input event occurs within X clocks, IN raises and Z counts
+  clocks since last event. Y[1:0] selects sensitivity (high/rise/edge).
+
+x_parameter:
+  usage: "Event count or timeout period"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "Number of events to accumulate OR timeout clock count"
+
+y_parameter:
+  usage: "Mode and sensitivity selection"
+  bit_fields:
+    - range: "Y[2]"
+      purpose: "0=count events, 1=timeout mode"
+    - range: "Y[1:0]"
+      purpose: "Event sensitivity: 00=high, 01=rise, 1x=edge"
+
+z_result:
+  data_type: "32-bit time measurement"
+  bit_interpretation:
+    - range: "Z[31:0]"
+      meaning: "Time in clocks (limited to $80000000)"
+
+timing_specifications:
+  clock_relationship: "Continuous timing measurement"
+  update_frequency: "Event-based or timeout-based"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "X events accumulated (Y[2]=0)"
+    - "Timeout occurred (Y[2]=1)"
+
+common_applications:
+  - application: "Multi-event timing"
+    description: "Measure time for multiple events"
+    complexity_level: "advanced"
+  - application: "Watchdog timing"
+    description: "Detect missing events with timeout"
+    complexity_level: "advanced"
+
+configuration_examples:
+  - name: "10-pulse timing"
+    description: "Measure time for 10 rising edges"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_00_10010_0, multi_timer"
+    wxpin_code: "WXPIN #10, multi_timer"
+    wypin_code: "WYPIN #%001, multi_timer"
+    explanation: "Time 10 A-input rises, Y[2]=0, Y[1:0]=%01"
+
+  - name: "Event timeout detector"
+    description: "Detect 1-second timeout without events"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_00_10010_0, timeout_pin"
+    wxpin_code: "WXPIN ##160_000_000, timeout_pin"
+    wypin_code: "WYPIN #%101, timeout_pin"
+    explanation: "1-second timeout, Y[2]=1, Y[1:0]=%01 for rises"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [92, 93]
+      section: "%10010 = time X A-events OR timeout"
+  validation_status: "draft"
+  completeness_score: 88
+  technical_accuracy: "silicon_doc_verified"

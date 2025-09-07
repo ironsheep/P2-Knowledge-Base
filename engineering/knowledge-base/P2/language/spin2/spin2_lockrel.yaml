@@ -1,0 +1,6 @@
+name: LOCKREL
+type: method
+category: Lock Management
+signature: "LOCKREL(LockNum)"
+description: "Release captured lock"
+source: Spin2 Documentation v51

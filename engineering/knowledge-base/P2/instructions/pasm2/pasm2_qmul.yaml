@@ -1,0 +1,47 @@
+metadata:
+  id: pasm2_qmul_789933d9
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426977
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 236
+    type: csv
+    row: 236
+    type: csv
+    row: 236
+layer1_csv:
+  mnemonic: QMUL
+  syntax: |
+    QMUL    {#}D,{#}S
+  group: CORDIC Solver
+  encoding: EEEE 1101000 0LI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Begin CORDIC unsigned multiplication of D * S. GETQX/GETQY retrieves lower/upper product.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.636375
+  source: P2 Datasheet v35
+  timing:
+    raw: 2...9
+    notes:
+      - Hub window alignment affects timing
+    min_cycles: 2
+    max_cycles: 9
+    type: variable
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.046018
+  narratives:
+    - source: architectural_context
+      type: architectural_note
+      content: |
+        CORDIC solver uses 54-stage pipeline. Results available after 54 clocks. Multiple operations can be pipelined.
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Begin CORDIC unsigned multiplication of D * S. GETQX/GETQY retrieves lower/upper product."
+  syntax: "QMUL    {#}D,{#}S"

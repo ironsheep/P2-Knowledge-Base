@@ -1,0 +1,372 @@
+# P2 Knowledge Base Conflict Resolution System
+# Comprehensive framework for handling source disagreements and version conflicts
+
+conflict_resolution_system:
+  version: "1.0.0"
+  description: "Systematic resolution of conflicts between sources, versions, and extraction runs"
+  
+  authority_hierarchy:
+    primary_precedence:
+      level_1_absolute:
+        authority: "ABSOLUTE"
+        sources: ["Chip Gracey direct clarifications"]
+        trust_level: "GREEN_HIGHEST"
+        override_capability: "all_lower_levels"
+        rationale: "P2 designer has ultimate authority on P2 behavior"
+        
+      level_2_silicon_doc:
+        authority: "SILICON_DOC_VERIFIED"
+        sources: ["Silicon Documentation v35", "Silicon Doc walkthrough analysis"]
+        trust_level: "GREEN_HIGH"
+        override_capability: "level_3_and_below"
+        rationale: "Most comprehensive technical documentation"
+        
+      level_3_datasheet:
+        authority: "DATASHEET_CONFIRMED"
+        sources: ["P2 Datasheet v35", "Datasheet walkthrough analysis"]
+        trust_level: "GREEN_MEDIUM"
+        override_capability: "level_4_and_below"
+        rationale: "Official specification document"
+        
+      level_4_csv:
+        authority: "CSV_EXTRACTED"
+        sources: ["P2 Instructions v35.csv"]
+        trust_level: "YELLOW_BASIC"
+        override_capability: "none"
+        rationale: "Basic reference data, often incomplete"
+        
+    temporal_precedence:
+      rule: "Within same authority level, newer information overwrites older"
+      exceptions:
+        - "Chip clarifications always take precedence regardless of date"
+        - "Corrections explicitly marked override temporal rule"
+        - "Documented regressions require manual review"
+        
+    content_specificity:
+      rule: "More specific information takes precedence over general"
+      examples:
+        - "Instruction-specific timing beats general timing rules"
+        - "Mode-specific behavior beats generic pin behavior"
+        - "Exception cases beat normal operation descriptions"
+
+  conflict_types:
+    direct_contradiction:
+      description: "Sources explicitly disagree on same fact"
+      examples:
+        - "CSV says 2 cycles, Datasheet says 2-9 cycles"
+        - "Silicon Doc describes different behavior than Datasheet"
+      resolution_strategy: "authority_hierarchy_primary"
+      
+    completeness_conflict:
+      description: "One source has information another lacks"
+      examples:
+        - "Datasheet has timing details not in CSV"
+        - "Silicon Doc has usage examples not in Datasheet"
+      resolution_strategy: "additive_enhancement"
+      
+    precision_conflict:
+      description: "Sources provide different levels of detail"
+      examples:
+        - "CSV: '2 cycles', Datasheet: '2-9 cycles (hub dependent)'"
+        - "Basic vs detailed instruction descriptions"
+      resolution_strategy: "precision_enhancement"
+      
+    context_conflict:
+      description: "Same information in different contexts suggests different meaning"
+      examples:
+        - "Instruction appears in different categories"
+        - "Different usage recommendations"
+      resolution_strategy: "context_analysis_required"
+      
+    version_conflict:
+      description: "Different versions of same source disagree"
+      examples:
+        - "Silicon Doc v34 vs v35 differences"
+        - "CSV updates with corrections"
+      resolution_strategy: "temporal_precedence_with_verification"
+
+  resolution_strategies:
+    authority_hierarchy_primary:
+      process:
+        1: "Identify authority level of each conflicting source"
+        2: "Apply highest authority source as resolution"
+        3: "Document overridden information as historical"
+        4: "Add resolution rationale to conflict log"
+      automated: true
+      human_review_required: false
+      
+    additive_enhancement:
+      process:
+        1: "Verify information is truly additive (no contradiction)"
+        2: "Merge information from all sources"
+        3: "Maintain source attribution for each piece"
+        4: "Update completeness score"
+      automated: true
+      human_review_required: false
+      
+    precision_enhancement:
+      process:
+        1: "Verify more precise information contains less precise"
+        2: "Replace less precise with more precise"
+        3: "Maintain backward compatibility notation"
+        4: "Update precision score"
+      automated: true
+      human_review_required: false
+      
+    context_analysis_required:
+      process:
+        1: "Flag for manual review"
+        2: "Analyze context of each conflicting piece"
+        3: "Determine if contexts are actually different"
+        4: "Apply appropriate resolution strategy"
+      automated: false
+      human_review_required: true
+      
+    temporal_precedence_with_verification:
+      process:
+        1: "Apply temporal precedence rule"
+        2: "Verify newer information is improvement not regression"
+        3: "Check for documented corrections or retractions"
+        4: "Apply resolution or escalate for manual review"
+      automated: "conditional"
+      human_review_required: "if_regression_detected"
+
+  conflict_detection:
+    automated_detection:
+      field_value_conflicts:
+        - "Same field, different values in different sources"
+        - "Numeric values with incompatible ranges"
+        - "Boolean conflicts (true vs false)"
+        
+      semantic_conflicts:
+        - "Contradictory descriptions of same behavior"
+        - "Mutually exclusive operational modes"
+        - "Incompatible usage recommendations"
+        
+      structural_conflicts:
+        - "Different instruction categorizations"
+        - "Conflicting relationship mappings"
+        - "Inconsistent encoding specifications"
+        
+    conflict_scoring:
+      severity_levels:
+        critical:
+          description: "Fundamental behavior disagreement"
+          examples: ["Instruction encoding conflicts", "Basic operation contradictions"]
+          resolution_priority: "immediate"
+          
+        high:
+          description: "Significant operational difference"
+          examples: ["Timing conflicts", "Flag behavior differences"]
+          resolution_priority: "within_24_hours"
+          
+        medium:
+          description: "Detail or context disagreement"
+          examples: ["Usage recommendation differences", "Example conflicts"]
+          resolution_priority: "within_week"
+          
+        low:
+          description: "Minor presentation or terminology difference"
+          examples: ["Wording variations", "Format differences"]
+          resolution_priority: "within_month"
+
+  manual_review_queue:
+    escalation_criteria:
+      - "Context analysis required conflicts"
+      - "Authority levels within 1 level (close authority)"
+      - "Regression detection in temporal precedence"
+      - "Critical severity conflicts without clear authority"
+      - "Cross-entry cascading conflicts"
+      
+    review_process:
+      queue_entry_format:
+        conflict_id: "string"
+        detected_date: "timestamp"
+        entry_affected: "string"
+        conflict_type: "string"
+        severity: "string"
+        conflicting_sources: "array"
+        automatic_resolution_attempted: "boolean"
+        escalation_reason: "string"
+        assigned_reviewer: "string"
+        review_deadline: "timestamp"
+        
+      reviewer_workflow:
+        1: "Analyze conflicting information in context"
+        2: "Research additional sources if needed"
+        3: "Apply domain expertise to determine resolution"
+        4: "Document resolution rationale"
+        5: "Update affected entries"
+        6: "Add learning to conflict resolution rules"
+        
+      resolution_tracking:
+        resolution_date: "timestamp"
+        resolution_method: "string"
+        resolution_rationale: "detailed_explanation"
+        confidence_level: "high|medium|low"
+        follow_up_required: "boolean"
+
+  conflict_documentation:
+    conflict_log_schema:
+      conflict_entry:
+        conflict_id: 
+          type: "string"
+          format: "CONF-YYYY-MM-DD-NNN"
+          description: "Unique conflict identifier"
+          
+        detection_metadata:
+          detected_date: "timestamp"
+          detection_method: "automated|manual|user_reported"
+          detector_version: "string"
+          
+        conflict_details:
+          affected_entry: "string"
+          conflict_type: "string"
+          severity: "critical|high|medium|low"
+          field_affected: "string"
+          conflicting_values: "array[object]"
+          
+        resolution_process:
+          resolution_strategy: "string"
+          resolution_date: "timestamp"
+          resolver: "automated|human_reviewer_id"
+          resolution_rationale: "string"
+          confidence_level: "high|medium|low"
+          
+        audit_trail:
+          decision_factors: "array[string]"
+          alternative_resolutions_considered: "array[string]"
+          documentation_updated: "array[string]"
+          verification_performed: "boolean"
+          
+    regeneration_capability:
+      decision_reversal:
+        conditions:
+          - "New higher-authority source discovered"
+          - "Resolution error identified"
+          - "Context understanding improved"
+          - "Manual review overrides automated decision"
+          
+        reversal_process:
+          1: "Create reversal conflict entry"
+          2: "Document reversal rationale"
+          3: "Restore previous state if appropriate"
+          4: "Apply new resolution"
+          5: "Update conflict log with reversal chain"
+          
+      batch_reprocessing:
+        triggers:
+          - "New conflict resolution rules added"
+          - "Authority hierarchy changes"
+          - "Source reliability updates"
+          - "Systematic error discovery"
+          
+        process:
+          1: "Identify affected historical conflicts"
+          2: "Queue for re-evaluation"
+          3: "Apply current resolution rules"
+          4: "Compare with previous resolutions"
+          5: "Update entries where resolution changed"
+
+  cascading_conflict_handling:
+    cross_entry_conflicts:
+      detection: "Changes to one entry create conflicts in related entries"
+      examples:
+        - "Instruction timing change affects related instruction relationships"
+        - "Category change affects instruction groupings"
+        - "Authority update affects multiple cross-referenced entries"
+        
+      resolution_approach:
+        1: "Identify all affected entries"
+        2: "Apply same resolution strategy consistently"
+        3: "Update all affected entries atomically"
+        4: "Verify cross-reference integrity maintained"
+        
+    dependency_conflicts:
+      description: "Conflicts that affect dependent information"
+      handling:
+        1: "Resolve root conflict first"
+        2: "Propagate resolution to dependent entries"
+        3: "Check for secondary conflicts created"
+        4: "Iterate until resolution stable"
+
+  integration_with_existing_systems:
+    version_control_integration:
+      git_integration: "All conflict resolutions tracked in Git commits"
+      atomic_updates: "Conflict resolution is single commit"
+      rollback_capability: "Git history enables conflict decision rollback"
+      
+    historical_tracking_integration:
+      conflict_in_version_history: "Conflicts recorded in entry version history"
+      resolution_as_version_event: "Each resolution creates new version"
+      audit_trail_preservation: "Full decision chain preserved"
+      
+    quality_assurance_integration:
+      completeness_score_impact: "Conflict resolution may affect completeness"
+      authority_level_updates: "Resolution may upgrade authority level"
+      verification_requirements: "Critical conflicts require verification"
+
+  automated_tools:
+    conflict_detector:
+      script: "conflict-detector.py"
+      schedule: "Run after each source update"
+      capabilities:
+        - "Compare field values across sources"
+        - "Detect semantic contradictions"
+        - "Score conflict severity"
+        - "Generate conflict queue entries"
+        
+    resolution_engine:
+      script: "conflict-resolver.py"
+      capabilities:
+        - "Apply automated resolution strategies"
+        - "Update entries with resolutions"
+        - "Generate conflict log entries"
+        - "Escalate unresolvable conflicts"
+        
+    conflict_browser:
+      script: "conflict-browser.py"
+      capabilities:
+        - "View conflict history"
+        - "Search conflicts by criteria"
+        - "Visualize conflict patterns"
+        - "Generate conflict reports"
+
+  quality_metrics:
+    conflict_resolution_kpis:
+      automated_resolution_rate: "Percentage of conflicts resolved automatically"
+      average_resolution_time: "Time from detection to resolution"
+      resolution_accuracy: "Percentage of resolutions not requiring reversal"
+      conflict_recurrence_rate: "Percentage of conflicts that reoccur"
+      
+    system_health_indicators:
+      total_unresolved_conflicts: "Current conflict queue size"
+      critical_conflicts_aging: "Time critical conflicts remain unresolved"
+      resolution_capacity: "Rate of manual review completion"
+      conflict_trend: "Are conflicts increasing or decreasing over time"
+
+validation_and_testing:
+  test_scenarios:
+    authority_hierarchy_tests:
+      - "Chip clarification overrides Silicon Doc"
+      - "Silicon Doc overrides Datasheet"
+      - "Datasheet overrides CSV"
+      - "Same authority level uses temporal precedence"
+      
+    resolution_strategy_tests:
+      - "Direct contradiction resolution"
+      - "Additive enhancement processing"  
+      - "Precision enhancement handling"
+      - "Manual review queue escalation"
+      
+    cascade_handling_tests:
+      - "Cross-entry conflict propagation"
+      - "Dependency conflict resolution"
+      - "Atomic update verification"
+      
+  validation_requirements:
+    - "All automated resolutions must be reversible"
+    - "Manual review decisions must be documented"
+    - "Conflict log must maintain complete audit trail"
+    - "Resolution must preserve data integrity"
+    - "Cross-references must remain consistent"

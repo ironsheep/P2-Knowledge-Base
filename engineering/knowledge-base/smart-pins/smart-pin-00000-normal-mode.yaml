@@ -1,0 +1,131 @@
+# Smart Pin Mode %00000 - Normal Mode
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%00000"
+mode_name: "Normal Mode"
+description: "Normal I/O operation without smart pin functionality"
+category: "basic"
+output_override: false
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%00000"
+    
+  pin_control:
+    dir_enables_output: true
+    dac_mode_condition: "M[12:10] = %101"
+    
+  modes:
+    non_dac_mode:
+      dir_control:
+        - "0x = OUT drives output" 
+        - "1x = OTHER drives output"
+    dac_mode:
+      dir_control:
+        - "00 = OUT enables ADC, M[7:0] sets DAC level"
+        - "01 = OUT enables ADC, M[3:0] selects cog DAC channel"
+        - "10 = OUT drives BIT_DAC"
+        - "11 = OTHER drives BIT_DAC"
+
+behavior:
+  smart_pin_active: false
+  in_signal: "Not used"
+  acknowledgment: "Not applicable"
+  
+input_selectors:
+  a_input:
+    description: "'A' input selector"
+    format: "%AAAA"
+    options:
+      inversion: 
+        - "0xxx = true (default)"
+        - "1xxx = inverted"
+      source:
+        - "x000 = this pin's read state (default)"
+        - "x001 = relative +1 pin's read state"
+        - "x010 = relative +2 pin's read state" 
+        - "x011 = relative +3 pin's read state"
+        - "x100 = this pin's OUT bit from cogs"
+        - "x101 = relative -3 pin's read state"
+        - "x110 = relative -2 pin's read state"
+        - "x111 = relative -1 pin's read state"
+        
+  b_input:
+    description: "'B' input selector"
+    format: "%BBBB"
+    options:
+      inversion:
+        - "0xxx = true (default)"
+        - "1xxx = inverted"
+      source:
+        - "x000 = this pin's read state (default)"
+        - "x001 = relative +1 pin's read state"
+        - "x010 = relative +2 pin's read state"
+        - "x011 = relative +3 pin's read state" 
+        - "x100 = this pin's OUT bit from cogs"
+        - "x101 = relative -3 pin's read state"
+        - "x110 = relative -2 pin's read state"
+        - "x111 = relative -1 pin's read state"
+
+input_logic:
+  description: "'A' and 'B' input logic/filtering"
+  format: "%FFF"
+  options:
+    - "000 = A, B (default)"
+    - "001 = A AND B, B"
+    - "010 = A OR B, B" 
+    - "011 = A XOR B, B"
+    - "100 = A, B, both filtered using global filt0 settings"
+    - "101 = A, B, both filtered using global filt1 settings"
+    - "110 = A, B, both filtered using global filt2 settings"
+    - "111 = A, B, both filtered using global filt3 settings"
+  note: "The resultant 'A' will drive the IN signal in non-smart-pin modes"
+
+low_level_pin_control:
+  description: "M[12:0] bits for low-level pin configuration"
+  format: "%M..M"
+  note: "See Spin2 documentation for predefined labels covering pin configurations"
+
+tt_control:
+  description: "Pin DIR/OUT control"
+  format: "%TT"
+  default: "%00"
+  definitions:
+    other_signal:
+      odd_pins: "OTHER = even pin's NOT output state (diff source)"
+      even_pins: "OTHER = unique pseudo-random bit (noise source)"
+    smart_override: "SMART = smart pin output which overrides OUT/OTHER"
+    dac_mode: "DAC_MODE is enabled when M[12:10] = %101"
+    bit_dac: "BIT_DAC outputs {2{M[7:4]}} for 'high' or {2{M[3:0]}} for 'low' in DAC_MODE"
+
+instructions:
+  setup:
+    - "WRPIN - Configure pin mode and parameters"
+  normal_operation:
+    - "Standard DIR/OUT control"
+    - "No smart pin specific instructions needed"
+  return_to_normal:
+    - "WRPIN #0,pin - Return any smart pin to normal mode"
+
+reset_behavior:
+  during_reset: "DIR=0, standard I/O behavior"
+  after_reset: "Normal I/O operation resumes"
+
+usage_notes:
+  - "This is the default mode for all pins at startup"
+  - "No smart pin functionality active"
+  - "Standard Propeller I/O behavior"
+  - "Use this mode for simple digital I/O"
+  - "To return any smart pin to normal operation: WRPIN #0,pin"
+
+related_modes: []
+see_also:
+  - "Low-level pin control documentation" 
+  - "Spin2 predefined pin configuration labels"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"

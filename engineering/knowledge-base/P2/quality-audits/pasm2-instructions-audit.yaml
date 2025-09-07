@@ -1,0 +1,173 @@
+# Aggregated Audit: PASM2 Instructions
+# Generated: 2025-01-06T11:15:00Z
+# Audit Version: 1.0.0
+
+category_id: pasm2-instructions
+category_path: instructions/pasm2/
+total_entries: 500  # Estimated total PASM2 instructions
+
+# Current extraction status (initial state)
+score_distribution:
+  score_0: 475  # Not yet extracted
+  score_1: 0    # Minimal data
+  score_2: 0    # Basic definition only
+  score_3: 0    # Definition + encoding
+  score_4: 0    # + Timing data
+  score_5: 0    # + Description
+  score_6: 0    # + Examples
+  score_7: 0    # + Cross-refs
+  score_8: 0    # Complete
+
+average_score: 0.0
+production_ready: 0    # Score >= 6
+needs_work: 500        # Score < 6
+
+extraction_status:
+  total_instructions: 500
+  extracted: 0
+  pending: 500
+  extraction_percentage: 0.0
+
+extraction_coverage:
+  csv_coverage: 0.0        # P2-Instruction-Set.csv
+  datasheet_coverage: 0.0  # P2-Datasheet-v35
+  silicon_doc_coverage: 0.0 # Silicon-Doc-v35
+  forum_coverage: 0.0      # Forum clarifications
+
+# Priority groups for extraction
+extraction_priorities:
+  critical:  # Essential instructions
+    - group: "Basic Math"
+      instructions: ["ADD", "SUB", "MUL", "DIV", "MOV"]
+      reason: "Fundamental operations"
+    - group: "Memory Access"
+      instructions: ["RDLONG", "WRLONG", "RDBYTE", "WRBYTE"]
+      reason: "Core memory operations"
+    - group: "Branching"
+      instructions: ["JMP", "CALL", "RET", "TJZ", "DJNZ"]
+      reason: "Program flow control"
+      
+  high:  # Important for most programs
+    - group: "Logic Operations"
+      instructions: ["AND", "OR", "XOR", "NOT", "TEST"]
+      reason: "Common logical operations"
+    - group: "Smart Pin Control"
+      instructions: ["WRPIN", "WXPIN", "WYPIN", "RDPIN"]
+      reason: "I/O configuration"
+    - group: "Shift Operations"
+      instructions: ["SHL", "SHR", "ROL", "ROR", "SAR"]
+      reason: "Bit manipulation"
+      
+  medium:  # Specialized but important
+    - group: "CORDIC Operations"
+      instructions: ["QROTATE", "QVECTOR", "QLOG", "QEXP"]
+      reason: "Hardware math acceleration"
+    - group: "Hub Operations"
+      instructions: ["COGINIT", "COGSTOP", "HUBSET", "LOCKNEW"]
+      reason: "System control"
+      
+  low:  # Rarely used or advanced
+    - group: "Special Functions"
+      instructions: ["XBYTE", "SKIP", "AUGD", "AUGS"]
+      reason: "Advanced features"
+
+# Systematic gaps identified
+systematic_gaps:
+  - gap_type: "Timing variations"
+    description: "Hub-dependent timing not fully documented"
+    affected_count: 150
+    impact: "Performance optimization difficult"
+    
+  - gap_type: "Flag effects"
+    description: "Optional flag updates not consistently documented"
+    affected_count: 200
+    impact: "Conditional logic unclear"
+    
+  - gap_type: "Pipeline effects"
+    description: "Instruction interaction effects missing"
+    affected_count: 75
+    impact: "Optimization opportunities missed"
+
+# Improvement roadmap
+improvement_plan:
+  phase1:
+    name: "Core Instruction Extraction"
+    target_date: "2025-01-10"
+    instructions_count: 50
+    target_score: 6
+    sources: ["CSV", "Datasheet"]
+    
+  phase2:
+    name: "Narrative Enhancement"
+    target_date: "2025-01-15"
+    instructions_count: 50
+    target_score: 7
+    sources: ["Silicon Doc"]
+    
+  phase3:
+    name: "Complete Coverage"
+    target_date: "2025-01-25"
+    instructions_count: 400
+    target_score: 6
+    sources: ["All available"]
+    
+  phase4:
+    name: "Quality Enhancement"
+    target_date: "2025-02-01"
+    instructions_count: 500
+    target_score: 7
+    sources: ["Forum clarifications"]
+
+# Quality targets
+quality_targets:
+  minimum_viable:
+    score: 4
+    description: "CSV + Datasheet minimum"
+    target_percentage: 100
+    
+  production_ready:
+    score: 6
+    description: "Includes examples and descriptions"
+    target_percentage: 80
+    
+  comprehensive:
+    score: 8
+    description: "All layers present"
+    target_percentage: 20
+
+# Audit metadata
+metadata:
+  audit_version: "1.0.0"
+  audit_date: "2025-01-06T11:15:00Z"
+  auditor: "audit-system-v1.0"
+  next_audit_due: "2025-01-07"
+  audit_frequency: "daily"
+  
+# Action items
+action_items:
+  immediate:
+    - action: "Begin CSV extraction for critical instructions"
+      assigned_to: "extraction-pipeline"
+      due_date: "2025-01-06"
+      
+    - action: "Set up automated audit runs"
+      assigned_to: "audit-system"
+      due_date: "2025-01-06"
+      
+  short_term:
+    - action: "Extract timing data from datasheet"
+      assigned_to: "extraction-pipeline"
+      due_date: "2025-01-08"
+      
+    - action: "Process Silicon Doc narratives"
+      assigned_to: "extraction-pipeline"
+      due_date: "2025-01-10"
+      
+  long_term:
+    - action: "Integrate forum clarifications"
+      assigned_to: "manual-review"
+      due_date: "2025-01-20"
+      
+    - action: "Achieve 80% production ready"
+      assigned_to: "team"
+      due_date: "2025-02-01"

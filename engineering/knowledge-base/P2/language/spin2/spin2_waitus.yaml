@@ -1,0 +1,6 @@
+name: WAITUS
+type: method
+category: Delays
+signature: "WAITUS(Microseconds)"
+description: "Delay for microseconds"
+source: Spin2 Documentation v51

@@ -1,0 +1,120 @@
+# Smart Pin Mode %11000 - ADC Sample/Filter/Capture, Internally Clocked
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%11000"
+mode_name: "ADC Sample/Filter/Capture, Internally Clocked"
+description: "Internal clock-driven ADC with SINC2/SINC3 filtering and bitstream capture modes"
+category: "adc"
+output_override: false
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%11000"
+
+sampling:
+  clock_source: "Internal system clock"
+  input_requirement: "A-input should be pin configured for ADC operation (M[12:10] = %100)"
+  sample_rate: "A-input sampled on every clock"
+
+mode_configuration:
+  wxpin_setup: "WXPIN sets mode X[5:4] and sample period POWER(2, X[3:0])"
+  
+  modes_available:
+    sinc2_sampling: "X[5:4] = %00"
+    sinc2_filtering: "X[5:4] = %01" 
+    sinc3_filtering: "X[5:4] = %10"
+    bitstream_capture: "X[5:4] = %11"
+
+sample_periods:
+  period_calculation: "Sample period = 2^X[3:0] clocks"
+  range: "X[3:0] from %0000 (1 clock) to %1111 (32,768 clocks)"
+
+mode_characteristics:
+  sinc2_sampling:
+    description: "Complete SINC2 conversions with automatic difference computation"
+    periods: "Power-of-2 periods only"
+    resolution: "2 to 13+ bits depending on period"
+    overflow: "14+ bits causes overflow"
+    
+  sinc2_filtering:
+    description: "Raw SINC2 accumulation, software difference computation required" 
+    periods: "Arbitrary periods via WYPIN override"
+    enob: "4 to 14 effective bits post-difference"
+    max_period: "11,585 clocks (2^(27/2))"
+    
+  sinc3_filtering:
+    description: "SINC3 accumulation for dynamic signals"
+    periods: "Arbitrary periods via WYPIN override"
+    enob: "8 to 18 effective bits post-difference"
+    max_period: "512 clocks (2^(27/3))"
+    
+  bitstream_capture:
+    description: "Raw bitstream data capture"
+    data_format: "LSB = oldest bit"
+    new_bits: "1 to 32 new bits per period"
+    overflow: "Periods > 32 bits cause overflow"
+
+period_override:
+  wypin_function: "WYPIN Y[13:0] overrides X[3:0] period (except SINC2 sampling)"
+  requirement: "Use after WXPIN for non-power-of-2 periods"
+  accumulator_limit: "27-bit accumulators limit maximum periods"
+
+instructions:
+  setup:
+    - "WRPIN - Configure ADC pin (M[12:10] = %100) and mode (%11000)"
+    - "WXPIN - Set mode X[5:4] and base period X[3:0]"
+    - "WYPIN - Override period with Y[13:0] (optional, except SINC2 sampling)"
+    - "DIRH - Enable smart pin"
+    
+  operation:
+    - "RDPIN/RQPIN - Read completed measurement after IN raised"
+
+completion_behavior:
+  sequence:
+    - "Sample period completes"
+    - "Measurement placed in Z"
+    - "IN raised"  
+    - "New measurement begins"
+
+sinc_filtering_details:
+  sinc2_theory: "Double integration, extra bit of resolution, filters sampling artifacts"
+  sinc3_theory: "Triple integration, doubles ENOB for fast signals, limited period"
+  accuracy_delay: "SINC2 accurate after 2nd period, SINC3 after 3rd period"
+  
+  overflow_handling:
+    prescale_method: "SHL x,#5 before SUB x,diff; ADD diff,x"
+    posttrim_method: "SUB x,diff; ADD diff,x; ZEROX x,#26"
+
+reset_behavior:
+  during_reset:
+    dir_state: "DIR=0" 
+    sampling: "No sampling occurs"
+
+usage_notes:
+  - "SINC2 sampling provides complete conversions automatically"
+  - "SINC2/SINC3 filtering requires software difference computation"
+  - "27-bit accumulators require overflow handling"
+  - "Higher periods give better resolution but slower updates"
+  - "SINC3 best for dynamic signals, SINC2 for DC precision"
+
+applications:
+  dc_measurement: "SINC2 filtering with long periods for precision"
+  audio_sampling: "SINC2 sampling for audio digitization"
+  dynamic_signals: "SINC3 filtering for fast-changing signals"
+  bitstream_analysis: "Raw bitstream capture for custom processing"
+
+related_modes:
+  - "%11001 (ADC externally clocked)"
+  - "%11010 (ADC scope with trigger)"
+
+see_also:
+  - "SINC filter theory"
+  - "ADC pin configuration"
+  - "Delta-sigma ADC principles"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"

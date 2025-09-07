@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_setpiv_12995adc
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.428314
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 339
+    type: csv
+    row: 339
+    type: csv
+    row: 339
+layer1_csv:
+  mnemonic: SETPIV
+  syntax: |
+    SETPIV  {#}D
+  group: Pixel Mixer
+  encoding: EEEE 1101011 00L DDDDDDDDD 000111101
+  alias: .
+  description: Set BLNPIX/MIXPIX blend factor to D[7:0].
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.305416
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Set BLNPIX/MIXPIX blend factor to D[7:0]."
+  syntax: "SETPIV  {#}D"

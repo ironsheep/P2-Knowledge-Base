@@ -1,0 +1,55 @@
+# Chip Gracey Clarification: MODCZ Instruction
+# Layer 4 Enrichment Data - ABSOLUTE Authority
+
+clarification_entry:
+  clarification_id: "chip_2025-08-18_MODCZ_003"
+  instruction: "MODCZ"
+  
+  source_metadata:
+    provider: "Chip Gracey"
+    provider_role: "P2 Designer"
+    date: "2025-08-18"
+    authority_verification: "CHIP_GRACEY_DIRECT"
+    trust_level: "GREEN_HIGHEST"
+    authority_level: "ABSOLUTE"
+    source_document: "chip-instruction-clarifications-2025-08-18.md"
+    extraction_method: "direct_expert_clarification"
+    
+  semantic_clarification:
+    function: "Modify both C and Z flags based on operand tests"
+    syntax: "MODCZ D, S"
+    
+    detailed_behavior:
+      - "Tests operand values and sets/clears both C and Z flags"
+      - "Combined operation of MODC and MODZ"
+      - "Most efficient when both flags need modification"
+      
+    use_cases:
+      - "Dual-condition testing preparation"
+      - "Complex conditional logic setup"
+      - "Efficient flag state management"
+      
+    significance: "Most efficient flag control when both C and Z need setting"
+    
+  relationships:
+    instruction_family: "flag_modification"
+    related_instructions:
+      - "MODC"
+      - "MODZ"
+    programming_pattern: "microcode_level_control"
+    efficiency: "combined_flag_operation"
+    
+  gap_impact:
+    previous_status: "semantics_missing"
+    clarification_impact: "complete_semantic_definition"
+    enables_analysis:
+      - "state_setup_matrix"
+      - "instruction_sequence_matrix" 
+      - "flag_setting_reality_matrix"
+      - "microcode_philosophy_framework"
+
+  validation:
+    completeness_score: 95
+    authority_confirmed: true
+    integration_ready: true
+    cross_references_available: true

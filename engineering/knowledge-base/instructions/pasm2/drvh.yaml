@@ -1,0 +1,91 @@
+mnemonic: "DRVH"
+syntax:
+  - "DRVH {#}D {WCZ}"
+  - "DRVH {#}D"
+  - "DRVH {#}D WC"
+  - "DRVH {#}D WZ"
+group: "pin_and_smart_pin"
+description: "OUT bits of pins D[10:6]+D[5:0]..D[5:0] = 1. DIR bits = 1. Wraps within OUTA/OUTB. Prior SETQ overrides D[10:6]. C,Z = OUT bit."
+
+operation:
+  basic_operation: "Set specified pin(s) to output high (1)"
+  flag_effects:
+    carry_flag: "C = original OUT bit value"
+    zero_flag: "Z = original OUT bit value"
+  conditions:
+    - "Prior SETQ overrides D[10:6] pin range"
+    - "Wraps within OUTA/OUTB boundaries"
+    - "Sets DIR bits to 1 (output mode)"
+    - "Sets OUT bits to 1 (high)"
+
+timing:
+  base_clocks: 2
+  cog_lut_timing: 2
+  hub_timing: 2
+  timing_notes:
+    - "All Pin & Smart Pin instructions execute in 2 clock cycles"
+
+flags:
+  affects_c: true
+  affects_z: true
+  flag_options: ["WC", "WZ", "WCZ"]
+  flag_meanings:
+    WC: "Write carry flag with original OUT bit state"
+    WZ: "Write zero flag with original OUT bit state"
+    WCZ: "Write both flags with original OUT bit state"
+
+operands:
+  destination:
+    type: "pin_specification"
+    range: "0..63 for individual pins"
+    description: "Pin number or pin range specification"
+    pin_encoding: "D[10:6] = pin range, D[5:0] = base pin"
+    
+variants:
+  - syntax: "DRVH {#}D {WCZ}"
+    description: "Drive pin(s) high with optional flag capture"
+    specific_operation: "OUT[pins] = 1, DIR[pins] = 1, flags = original OUT state"
+
+examples:
+  - title: "Drive Single Pin High"
+    description: "Set pin P16 to output high"
+    code: "DRVH #16"
+    explanation: "Sets pin 16 to output mode and drives it high"
+  - title: "Drive Pin Range High"
+    description: "Set pins P8-P15 to output high using SETQ"
+    code: |
+      SETQ #%1000_0000    ' Set range to 8 pins
+      DRVH #8             ' Base pin P8, drive P8-P15 high
+    explanation: "SETQ sets range, DRVH drives 8 pins starting from P8"
+  - title: "Drive Pin with Status"
+    description: "Drive pin high and capture previous state"
+    code: "DRVH #16 WC"
+    explanation: "Drives P16 high, C flag shows previous OUT state"
+
+related_instructions:
+  - "DRVL"
+  - "DRVC"
+  - "DRVNC"
+  - "DRVNOT"
+  - "DRVNZ"
+  - "DRVRND"
+  - "DRVZ"
+  - "DIRH"
+  - "OUTH"
+
+special_behaviors:
+  - "Automatically sets DIR bit to 1 (output mode) in addition to OUT bit"
+  - "SETQ instruction can modify pin range before execution"
+  - "Pin range wraps within 32-pin OUTA/OUTB boundaries"
+  - "Can operate on single pins or pin ranges up to 32 pins"
+
+notes:
+  - "Essential for driving LEDs, controlling devices, setting signal lines"
+  - "Part of the comprehensive pin control instruction family"
+  - "Combines direction setting (DIR=1) with output setting (OUT=1)"
+  - "More efficient than separate DIR and OUT operations"
+
+source_references:
+  datasheet_section: "6.3 Pin & Smart Pin Instructions" 
+  page_references: ["Datasheet Pin instruction table"]
+  extraction_notes: "Extracted from pasm2-complete-instruction-tables.md Pin & Smart Pin section"

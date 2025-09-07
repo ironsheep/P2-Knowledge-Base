@@ -1,0 +1,6 @@
+name: STRING
+type: method
+category: String Creation
+signature: "STRING("Text", 13) : StringAddress"
+description: "Create string constant, returns address"
+source: Spin2 Documentation v51

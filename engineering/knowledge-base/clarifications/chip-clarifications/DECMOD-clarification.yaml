@@ -1,0 +1,52 @@
+# Chip Gracey Clarification: DECMOD Instruction
+# Layer 4 Enrichment Data - ABSOLUTE Authority
+
+clarification_entry:
+  clarification_id: "chip_2025-09-02_DECMOD_002"
+  instruction: "DECMOD"
+  
+  source_metadata:
+    provider: "Chip Gracey"
+    provider_role: "P2 Designer"
+    date: "2025-09-02"
+    authority_verification: "CHIP_GRACEY_DIRECT"
+    trust_level: "GREEN_HIGHEST"
+    authority_level: "ABSOLUTE"
+    source_document: "chip-instruction-clarifications-2025-09-02.md"
+    extraction_method: "direct_expert_clarification"
+    
+  semantic_clarification:
+    function: "Decrement with Modulo - circular decrement with reload"
+    syntax: "DECMOD D,{#}S {WC/WZ/WCZ}"
+    
+    detailed_behavior:
+      - "If D = 0 then D = S and C flag = 1"
+      - "Else D = D - 1 and C flag = 0"
+      - "Z flag is set if D result is 0"
+      
+    use_cases:
+      - "Reverse circular buffer traversal"
+      - "Countdown with automatic reload"
+      - "Cyclic state machine reverse"
+      
+    significance: "Provides atomic circular decrement operation"
+    
+  relationships:
+    instruction_family: "modulo_arithmetic"
+    related_instructions:
+      - "INCMOD"
+    programming_pattern: "circular_operations"
+    
+  gap_impact:
+    previous_status: "semantics_missing"
+    clarification_impact: "complete_semantic_definition"
+    enables_analysis:
+      - "circular_buffer_patterns"
+      - "state_machine_frameworks"
+      - "counter_optimization_matrix"
+
+  validation:
+    completeness_score: 95
+    authority_confirmed: true
+    integration_ready: true
+    cross_references_available: true

@@ -1,0 +1,80 @@
+# Chip Gracey Clarification: ADDSX Instruction
+# Layer 4 Enrichment Data - ABSOLUTE Authority
+
+clarification_entry:
+  clarification_id: "chip_2025-09-02_ADDSX_001"
+  instruction: "ADDSX"
+  
+  source_metadata:
+    provider: "Chip Gracey"
+    provider_role: "P2 Designer"
+    date: "2025-09-02"
+    authority_verification: "CHIP_GRACEY_DIRECT"
+    trust_level: "GREEN_HIGHEST"
+    authority_level: "ABSOLUTE"
+    source_document: "chip-instruction-clarifications-2025-09-02.md"
+    extraction_method: "direct_expert_clarification"
+    
+  semantic_clarification:
+    function: "Add with Sign Extension - Critical for multi-word signed arithmetic"
+    syntax: "ADDSX D,{#}S {WC/WZ/WCZ}"
+    
+    detailed_behavior:
+      - "D = D + S + C flag"
+      - "C = true sign of D result (bit above MSB)"
+      - "Z = Z AND (D result == 0)"
+      
+    critical_usage:
+      pattern: "final_instruction_signed_multiword"
+      description: "Used as the FINAL instruction in multi-word signed add"
+      purpose: "Provides true sign of entire multi-word result"
+      maintains: "cumulative zero detection"
+      
+    technical_details:
+      c_flag_meaning: "true sign (bit above MSB), not carry"
+      z_flag_behavior: "cumulative AND operation"
+      position_in_chain: "terminal instruction only"
+      
+    use_cases:
+      - "Capping multi-long signed additions"
+      - "Extended precision signed arithmetic"
+      - "Multi-word calculation finalization"
+      
+  relationships:
+    instruction_family: "ADD_family_extended"
+    suffix_pattern:
+      S: "true sign instead of carry/borrow" 
+      X: "includes carry/borrow in operation"
+      SX: "both carry inclusion AND true sign result"
+      
+    related_instructions:
+      - "ADD"     # basic addition
+      - "ADDX"    # add with carry
+      - "ADDS"    # add with sign
+      - "SUBSX"   # subtract equivalent
+      - "CMPSX"   # compare equivalent
+      
+    programming_pattern: "signed_multiword_arithmetic"
+    family_overview: "comprehensive_ADD_SUB_CMP_matrix"
+    
+  programming_insights:
+    critical_pattern: "FINAL instruction in signed multi-word operations"
+    why_final: "Converts carry chain to true sign indication"
+    sign_vs_carry: "Returns actual mathematical sign, not hardware carry"
+    multiword_role: "Terminates extended precision signed calculations"
+    
+  gap_impact:
+    previous_status: "semantics_missing"
+    clarification_impact: "complete_semantic_definition_plus_patterns"
+    enables_analysis:
+      - "extended_precision_arithmetic_matrix"
+      - "signed_arithmetic_patterns"
+      - "multiword_calculation_frameworks"
+      - "ADD_SUB_CMP_family_relationships"
+
+  validation:
+    completeness_score: 98
+    authority_confirmed: true
+    integration_ready: true
+    cross_references_available: true
+    programming_patterns_included: true

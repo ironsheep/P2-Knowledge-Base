@@ -1,0 +1,48 @@
+metadata:
+  id: pasm2_subsx_8c571d2c
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.425465
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 18
+    type: csv
+    row: 18
+    type: csv
+    row: 18
+layer1_csv:
+  mnemonic: SUBSX
+  syntax: |
+    SUBSX   D,{#}S   {WC/WZ/WCZ}
+  group: Math and Logic
+  encoding: EEEE 0001111 CZI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Subtract (S + C) from D, signed and extended.  D = D - (S + C).  C = correct sign of (D - (S + C)).  Z = Z AND (result == 0).
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.631456
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Subtract (S + C) from D, signed and extended.  D = D - (S + C).  C = correct sign of (D - (S + C)).  Z = Z AND (result == 0)."
+  syntax: "SUBSX   D,{#}S   {WC/WZ/WCZ}"
+
+layer4_chip:
+  source: Chip Gracey Clarifications
+  title: "Subtract with Sign Extension"
+  syntax: "SUBSX D,{#}S {WC/WZ/WCZ}"
+  function: "Subtracts (S + C flag) from D with true sign result
+- D = D - S - C flag
+- C = true sign of D result (bit above MSB)
+- Z = Z AND (D result == 0)"
+  use_cases: ""
+  date: "2025-09-02"

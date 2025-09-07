@@ -1,0 +1,6 @@
+name: "<>>"
+type: operator
+priority: 13
+category: Equality
+description: "Equal/not equal (logical/bitwise)"
+source: Spin2 Documentation v51

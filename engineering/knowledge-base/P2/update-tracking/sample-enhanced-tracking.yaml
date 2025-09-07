@@ -1,0 +1,270 @@
+# Sample Enhanced Historical Tracking Implementation
+# Example: WRPIN instruction evolution over time
+
+entry_example:
+  entry_id: "wrpin-instruction"
+  entry_type: "instruction"
+  current_version: "2.1.3"
+  
+  creation_metadata:
+    created_date: "2025-01-06T10:45:00Z"
+    initial_source: "P2 Instructions v35.csv"
+    extraction_method: "automated"
+    initial_completeness_score: 3
+    created_by: "extraction-pipeline-v1.0"
+
+  version_history:
+    - version_number: "1.0.0"
+      timestamp: "2025-01-06T10:45:00Z"
+      change_type: "creation"
+      trigger_source: "Initial CSV extraction"
+      changes_made:
+        - field: "mnemonic"
+          change_type: "added"
+          old_value: null
+          new_value: "WRPIN"
+          rationale: "Base instruction definition from CSV"
+        - field: "encoding"
+          change_type: "added"
+          old_value: null
+          new_value: "EEEE 1100000 0LI DDDDDDDDD SSSSSSSSS"
+          rationale: "Encoding from CSV row 15"
+      completeness_progression:
+        old_score: 0
+        new_score: 3
+        score_factors: ["basic_definition", "encoding", "timing"]
+      updated_by: "extraction-pipeline-v1.0"
+      git_commit_hash: "a1b2c3d4"
+      
+    - version_number: "1.1.0"
+      timestamp: "2025-01-06T14:20:00Z"
+      change_type: "enhancement"
+      trigger_source: "P2 Datasheet v35 Section 6.4.3"
+      changes_made:
+        - field: "timing_details"
+          change_type: "added"
+          old_value: "2 cycles"
+          new_value: "2-9 cycles (hub sync dependent)"
+          rationale: "Detailed timing from datasheet walkthrough"
+        - field: "hub_sync"
+          change_type: "added"
+          old_value: null
+          new_value: true
+          rationale: "Hub synchronization requirement identified"
+      completeness_progression:
+        old_score: 3
+        new_score: 5
+        score_factors: ["detailed_timing", "hub_sync_behavior"]
+      updated_by: "datasheet-extractor-v1.1"
+      git_commit_hash: "e5f6g7h8"
+      
+    - version_number: "2.0.0"
+      timestamp: "2025-01-06T18:30:00Z"
+      change_type: "enhancement"
+      trigger_source: "Silicon Doc v35 Part 4 - Smart Pins complete"
+      changes_made:
+        - field: "description"
+          change_type: "modified"
+          old_value: "Writes smart pin configuration"
+          new_value: "Writes smart pin configuration to pin S or pins S[5:0]+A[5:0]. Configures autonomous I/O processing with 32+ hardware modes."
+          rationale: "Rich narrative description from Silicon Doc"
+        - field: "usage_patterns"
+          change_type: "added"
+          old_value: null
+          new_value: "Primary configuration instruction, must precede WXPIN/WYPIN"
+          rationale: "Programming pattern from Silicon Doc analysis"
+        - field: "examples"
+          change_type: "added"
+          old_value: null
+          new_value: ["PWM configuration", "UART setup", "ADC mode"]
+          rationale: "Practical examples from Silicon Doc"
+      completeness_progression:
+        old_score: 5
+        new_score: 8
+        score_factors: ["narrative_description", "usage_patterns", "examples"]
+      updated_by: "silicon-doc-extractor-v2.0"
+      git_commit_hash: "i9j0k1l2"
+      
+    - version_number: "2.1.0"
+      timestamp: "2025-08-18T16:45:00Z"
+      change_type: "source_update"
+      trigger_source: "Chip Gracey forum clarification 2025-08-18"
+      changes_made:
+        - field: "edge_cases"
+          change_type: "added"
+          old_value: null
+          new_value: "Hub window alignment affects exact cycle count"
+          rationale: "Chip clarification on timing variability"
+        - field: "authority_level"
+          change_type: "modified"
+          old_value: "silicon_doc_verified"
+          new_value: "chip_verified"
+          rationale: "Upgraded to highest authority level"
+      completeness_progression:
+        old_score: 8
+        new_score: 9
+        score_factors: ["chip_clarification", "edge_cases_documented"]
+      updated_by: "clarification-processor-v1.0"
+      git_commit_hash: "m3n4o5p6"
+      
+    - version_number: "2.1.3"
+      timestamp: "2025-09-07T16:20:00Z"
+      change_type: "meta_knowledge_addition"
+      trigger_source: "Two-tier extraction strategy - meta-knowledge enhancement"
+      changes_made:
+        - field: "performance_insights"
+          change_type: "added"
+          old_value: null
+          new_value: "Smart pin configuration enables autonomous operation - zero CPU overhead after setup"
+          rationale: "Meta-knowledge insight from architectural analysis"
+        - field: "optimization_hints"
+          change_type: "added"
+          old_value: null
+          new_value: ["Configure once, let pins run autonomously", "Use AKPIN for status acknowledgment"]
+          rationale: "Programming patterns from enhanced meta-knowledge"
+      completeness_progression:
+        old_score: 9
+        new_score: 9
+        score_factors: ["meta_knowledge_enhanced"]
+      updated_by: "meta-knowledge-integrator-v2.0"
+      git_commit_hash: "q7r8s9t0"
+
+  source_attribution:
+    layer_contributions:
+      layer1_csv:
+        source_document: "P2 Instructions v35.csv"
+        extraction_date: "2025-01-06T10:45:00Z"
+        extraction_method: "automated"
+        coverage_percentage: 40
+        
+      layer2_datasheet:
+        source_document: "P2 Datasheet v35"
+        sections_used: ["6.4.3 Smart Pin Instructions"]
+        extraction_date: "2025-01-06T14:20:00Z"
+        coverage_percentage: 25
+        
+      layer3_silicon_doc:
+        source_document: "Silicon Doc v35 Part 4"
+        parts_used: ["Smart Pin Operations", "Configuration Examples"]
+        extraction_date: "2025-01-06T18:30:00Z"
+        narrative_coverage: 80
+        
+      layer4_clarifications:
+        source_posts:
+          - post_id: "chip_2025-08-18_WRPIN_timing"
+            date: "2025-08-18"
+            authority: "Chip Gracey"
+        clarification_date: "2025-08-18T16:45:00Z"
+        authority_level: "ABSOLUTE"
+        
+      meta_knowledge_layer:
+        source: "Two-tier extraction strategy analysis"
+        extraction_date: "2025-09-07T16:20:00Z"
+        insights_added: ["autonomous_operation", "optimization_patterns"]
+
+  quality_progression:
+    completeness_history:
+      - date: "2025-01-06T10:45:00Z"
+        score: 3
+        factors: ["basic_definition", "encoding", "timing"]
+        triggering_update: "Initial CSV extraction"
+      - date: "2025-01-06T14:20:00Z"
+        score: 5
+        factors: ["detailed_timing", "hub_sync_behavior"]
+        triggering_update: "Datasheet enhancement"
+      - date: "2025-01-06T18:30:00Z"
+        score: 8
+        factors: ["narrative_description", "usage_patterns", "examples"]
+        triggering_update: "Silicon Doc integration"
+      - date: "2025-08-18T16:45:00Z"
+        score: 9
+        factors: ["chip_clarification", "edge_cases_documented"]
+        triggering_update: "Chip Gracey clarification"
+      - date: "2025-09-07T16:20:00Z"
+        score: 9
+        factors: ["meta_knowledge_enhanced"]
+        triggering_update: "Meta-knowledge integration"
+        
+    authority_progression:
+      - date: "2025-01-06T10:45:00Z"
+        authority_level: "csv_extracted"
+        confidence_score: 6
+        supporting_sources: ["P2 Instructions v35.csv"]
+      - date: "2025-01-06T18:30:00Z"
+        authority_level: "silicon_doc_verified"
+        confidence_score: 8
+        supporting_sources: ["CSV", "Datasheet", "Silicon Doc"]
+      - date: "2025-08-18T16:45:00Z"
+        authority_level: "chip_verified"
+        confidence_score: 10
+        supporting_sources: ["All layers + Chip clarification"]
+
+  issue_resolution_tracking:
+    identified_issues:
+      - issue_id: "wrpin_timing_ambiguity_001"
+        identified_date: "2025-01-06T12:30:00Z"
+        issue_type: "completeness"
+        description: "Timing specification too vague - says '2 cycles' but hub sync affects this"
+        severity: "medium"
+        identified_by: "datasheet-walkthrough-analysis"
+        affected_fields: ["timing"]
+        
+    resolution_history:
+      - issue_id: "wrpin_timing_ambiguity_001"
+        resolution_date: "2025-01-06T14:20:00Z"
+        resolution_method: "datasheet_enhancement"
+        changes_made:
+          - field: "timing"
+            change: "Updated to '2-9 cycles (hub sync dependent)'"
+        resolved_by: "datasheet-extractor-v1.1"
+        verification_status: "verified_by_chip_clarification"
+
+  cross_reference_evolution:
+    relationship_history:
+      - date: "2025-01-06T18:30:00Z"
+        relationship_type: "related"
+        target_entry: "WXPIN-instruction"
+        relationship_strength: "strong"
+        added_or_removed: "added"
+        rationale: "Configuration sequence dependency identified"
+      - date: "2025-01-06T18:30:00Z"
+        relationship_type: "related"
+        target_entry: "smart-pin-mode-07-pwm"
+        relationship_strength: "medium"
+        added_or_removed: "added"
+        rationale: "Example usage relationship"
+
+  rollback_checkpoints:
+    checkpoints:
+      - checkpoint_id: "wrpin_pre_silicon_doc"
+        date: "2025-01-06T18:00:00Z"
+        trigger: "major_update"
+        entry_state_snapshot:
+          version: "1.1.0"
+          completeness_score: 5
+          description: "Basic WRPIN definition with datasheet timing"
+        rollback_instructions: "Revert to pre-Silicon Doc state if narrative conflicts found"
+        retention_period: "6_months"
+
+  evolution_analytics:
+    update_frequency:
+      total_updates: 5
+      last_30_days: 1
+      average_days_between_updates: 48.6
+      
+    source_diversity:
+      unique_sources_used: 5
+      primary_source_percentage: 30
+      source_balance_score: 0.8
+      
+    quality_trajectory:
+      initial_completeness: 3
+      current_completeness: 9
+      peak_completeness: 9
+      quality_trend: "improving"
+      
+    stability_metrics:
+      major_changes: 2
+      minor_changes: 3
+      stability_score: 0.7
+      last_major_change: "2025-01-06T18:30:00Z"

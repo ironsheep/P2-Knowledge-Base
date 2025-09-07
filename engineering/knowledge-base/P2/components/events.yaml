@@ -1,0 +1,47 @@
+# P2 Architecture Component: Event System
+# Generated: 2025-09-06T14:50:17.440973
+
+metadata:
+  id: p2_component_events
+  name: Event System
+  category: interrupt
+  version: 1.0
+  extraction_date: 2025-09-06T14:50:17.440204
+
+specifications:
+  event_sources: 16
+  interrupt_levels: 3
+  polling_modes: Event polling without interrupts
+
+event_sources:
+  - Timer matches (CT1, CT2, CT3)
+  - Pin patterns
+  - Pin edges
+  - Hub FIFO levels
+  - Streamer ready
+  - ATN from other cogs
+  - Lock state changes
+  - CORDIC complete
+
+programming_interface:
+  setup:
+    - SETINT1
+    - SETINT2
+    - SETINT3
+  trigger:
+    - TRGINT1
+    - TRGINT2
+    - TRGINT3
+  poll:
+    - POLLINT
+    - POLLATN
+    - POLLCT1
+  wait:
+    - WAITINT
+    - WAITSE1
+    - WAITATN
+
+relationships:
+  - cog
+  - smart_pins
+  - cordic

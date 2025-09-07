@@ -1,0 +1,442 @@
+# Spin2 Language Schema - Comprehensive Structure for All Language Constructs
+# Layer 1: Direct extraction from Spin2 v51 documentation
+# Schema version: 1.0.0
+
+spin2_language_schema:
+  schema_version: "1.0.0"
+  schema_date: "2025-09-06"
+  source_documents:
+    - "complete-spin2-operators.md"
+    - "complete-spin2-methods.md" 
+    - "complete-builtin-symbols.md"
+    - "spin2-language-comprehensive.md"
+    - "spin2-pasm-integration-deep-dive.md"
+  
+  # Comprehensive schema definition for all Spin2 language constructs
+  language_constructs:
+    
+    operators:
+      schema_definition:
+        operator_id:
+          type: "string"
+          description: "Unique identifier for operator"
+          required: true
+          
+        symbol:
+          type: "string"
+          description: "Actual operator symbol(s)"
+          required: true
+          examples: ["++", "--", "+", "*", "&&", ":="]
+          
+        precedence_level:
+          type: "integer"
+          description: "Operator precedence (1=highest, 16=lowest)"
+          range: [1, 16]
+          required: true
+          
+        associativity:
+          type: "string"
+          enum: ["left", "right", "none"]
+          description: "Operator associativity"
+          required: true
+          
+        operand_count:
+          type: "integer"
+          enum: [1, 2, 3]
+          description: "Number of operands (unary, binary, ternary)"
+          required: true
+          
+        category:
+          type: "string"
+          enum: ["variable_modify", "unary", "shift_rotate", "bitwise", "arithmetic", 
+                 "comparison", "logical", "assignment", "ternary"]
+          description: "Operator functional category"
+          required: true
+          
+        data_types:
+          type: "array"
+          items:
+            enum: ["integer", "float", "boolean", "bitfield", "mixed"]
+          description: "Supported data types"
+          required: true
+          
+        block_usage:
+          type: "array"
+          items:
+            enum: ["CON", "VAR", "OBJ", "PUB", "PRI", "DAT"]
+          description: "Block types where operator is valid"
+          required: true
+          
+        description:
+          type: "string"
+          description: "Detailed operator description"
+          required: true
+          
+        syntax_patterns:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              pattern: 
+                type: "string"
+                description: "Syntax pattern"
+              example:
+                type: "string" 
+                description: "Usage example"
+              explanation:
+                type: "string"
+                description: "Pattern explanation"
+          required: true
+          
+        float_variant:
+          type: "boolean"
+          description: "Has floating-point variant"
+          required: false
+          
+        special_behaviors:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              condition:
+                type: "string"
+              behavior:
+                type: "string"
+          required: false
+
+    methods:
+      schema_definition:
+        method_id:
+          type: "string"
+          description: "Unique identifier for method"
+          required: true
+          
+        method_name:
+          type: "string"
+          description: "Official method name"
+          required: true
+          
+        aliases:
+          type: "array"
+          items:
+            type: "string"
+          description: "Alternative names/abbreviations"
+          required: false
+          
+        category:
+          type: "string"
+          enum: ["hub_control", "pin_control", "memory", "math", "string", 
+                 "cordic", "streamer", "debug", "timing", "system"]
+          description: "Method functional category"
+          required: true
+          
+        subcategory:
+          type: "string"
+          description: "More specific categorization"
+          required: false
+          
+        signature:
+          type: "object"
+          properties:
+            parameters:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  name:
+                    type: "string"
+                  type:
+                    type: "string"
+                  optional:
+                    type: "boolean"
+                  default_value:
+                    type: "string"
+                  description:
+                    type: "string"
+            return_value:
+              type: "object"
+              properties:
+                type:
+                  type: "string"
+                description:
+                  type: "string"
+          required: true
+          
+        block_usage:
+          type: "array"
+          items:
+            enum: ["CON", "VAR", "OBJ", "PUB", "PRI", "DAT"]
+          description: "Block types where method is valid"
+          required: true
+          
+        description:
+          type: "string"
+          description: "Detailed method description"
+          required: true
+          
+        syntax_examples:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              example:
+                type: "string"
+              explanation:
+                type: "string"
+          required: true
+          
+        related_pasm2:
+          type: "array"
+          items:
+            type: "string"
+          description: "Related PASM2 instructions"
+          required: false
+          
+        hardware_interaction:
+          type: "boolean"
+          description: "Directly interacts with hardware"
+          required: true
+          
+        cog_execution:
+          type: "string"
+          enum: ["any_cog", "specific_cog", "hub_only"]
+          description: "Cog execution requirements"
+          required: true
+
+    builtin_symbols:
+      schema_definition:
+        symbol_id:
+          type: "string"
+          description: "Unique identifier for symbol"
+          required: true
+          
+        symbol_name:
+          type: "string"
+          description: "Official symbol name"
+          required: true
+          
+        category:
+          type: "string"
+          enum: ["smartpin", "clock", "events", "streamer", "system", "math", "register"]
+          description: "Symbol functional category"
+          required: true
+          
+        subcategory:
+          type: "string"
+          description: "More specific categorization"
+          required: false
+          
+        value:
+          type: "string"
+          description: "Actual numeric value (hex/binary/decimal)"
+          required: true
+          
+        bit_pattern:
+          type: "string"
+          description: "Bit pattern representation"
+          required: false
+          
+        description:
+          type: "string"
+          description: "Symbol purpose and usage"
+          required: true
+          
+        usage_context:
+          type: "array"
+          items:
+            type: "string"
+          description: "Where/how symbol is typically used"
+          required: true
+          
+        related_symbols:
+          type: "array"
+          items:
+            type: "string"
+          description: "Related or complementary symbols"
+          required: false
+          
+        hardware_relationship:
+          type: "string"
+          description: "Hardware component or feature this symbol controls"
+          required: false
+
+    syntax_rules:
+      schema_definition:
+        rule_id:
+          type: "string"
+          description: "Unique identifier for syntax rule"
+          required: true
+          
+        rule_category:
+          type: "string"
+          enum: ["indentation", "comments", "constants", "variables", "methods", 
+                 "expressions", "statements", "blocks", "pasm_integration"]
+          description: "Category of syntax rule"
+          required: true
+          
+        rule_name:
+          type: "string"
+          description: "Descriptive name for rule"
+          required: true
+          
+        description:
+          type: "string"
+          description: "Detailed rule description"
+          required: true
+          
+        examples:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              valid_example:
+                type: "string"
+                description: "Valid syntax example"
+              invalid_example:
+                type: "string"
+                description: "Invalid syntax example (optional)"
+              explanation:
+                type: "string"
+                description: "Example explanation"
+          required: true
+          
+        exceptions:
+          type: "array"
+          items:
+            type: "string"
+          description: "Exceptions to the rule"
+          required: false
+          
+        related_rules:
+          type: "array"
+          items:
+            type: "string"
+          description: "Related syntax rules"
+          required: false
+
+    pasm2_integration:
+      schema_definition:
+        integration_id:
+          type: "string"
+          description: "Unique identifier for integration pattern"
+          required: true
+          
+        integration_type:
+          type: "string"
+          enum: ["inline_pasm", "method_calls", "register_access", "data_sharing", "cog_interface"]
+          description: "Type of Spin2-PASM2 integration"
+          required: true
+          
+        description:
+          type: "string"
+          description: "Integration pattern description"
+          required: true
+          
+        spin2_constructs:
+          type: "array"
+          items:
+            type: "string"
+          description: "Spin2 language constructs involved"
+          required: true
+          
+        pasm2_instructions:
+          type: "array"
+          items:
+            type: "string"
+          description: "PASM2 instructions involved"
+          required: true
+          
+        syntax_examples:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              spin2_code:
+                type: "string"
+              pasm2_code:
+                type: "string"
+              explanation:
+                type: "string"
+          required: true
+          
+        use_cases:
+          type: "array"
+          items:
+            type: "string"
+          description: "Common use cases for this integration pattern"
+          required: true
+
+    block_structures:
+      schema_definition:
+        block_id:
+          type: "string"
+          description: "Block type identifier"
+          required: true
+          
+        block_name:
+          type: "string"
+          enum: ["CON", "VAR", "OBJ", "PUB", "PRI", "DAT"]
+          description: "Official block name"
+          required: true
+          
+        purpose:
+          type: "string"
+          description: "Primary purpose of block"
+          required: true
+          
+        location:
+          type: "string"
+          enum: ["hub_ram", "cog_ram", "compile_time"]
+          description: "Where block data/code resides"
+          required: true
+          
+        visibility:
+          type: "string"
+          enum: ["public", "private", "instance", "shared"]
+          description: "Visibility scope"
+          required: true
+          
+        allowed_constructs:
+          type: "array"
+          items:
+            enum: ["constants", "variables", "methods", "objects", "data", "pasm2"]
+          description: "What can be declared in this block"
+          required: true
+          
+        syntax_rules:
+          type: "array"
+          items:
+            type: "string"
+          description: "Special syntax rules for this block"
+          required: true
+
+# Validation rules for completeness and consistency
+validation_rules:
+  operator_precedence:
+    description: "Verify operator precedence levels are unique and sequential"
+    requirement: "All precedence levels 1-16 must be assigned"
+    
+  method_coverage:
+    description: "Verify all documented methods are included"
+    requirement: "All 135+ methods from source documentation"
+    
+  symbol_completeness:
+    description: "Verify comprehensive symbol coverage"
+    requirement: "All SmartPin, Clock, Events, Streamer symbols included"
+    
+  cross_references:
+    description: "Verify cross-references are valid"
+    requirement: "All referenced operators/methods/symbols must exist"
+    
+  example_validity:
+    description: "Verify syntax examples are valid Spin2"
+    requirement: "All examples should compile successfully"
+
+# Metadata for extraction tracking
+extraction_metadata:
+  total_operators_expected: 52
+  total_methods_expected: 135
+  total_symbols_expected: 500
+  precedence_levels: 16
+  block_types: 6
+  integration_patterns: 15

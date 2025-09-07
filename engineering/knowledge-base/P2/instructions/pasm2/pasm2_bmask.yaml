@@ -1,0 +1,41 @@
+metadata:
+  id: pasm2_bmask_e686ee1a
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426234
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 130
+    type: csv
+    row: 130
+    type: csv
+    row: 131
+    type: csv
+    row: 130
+    type: csv
+    row: 131
+layer1_csv:
+  mnemonic: BMASK
+  syntax: |
+    BMASK   D
+  group: Math and Logic
+  encoding: EEEE 1001110 010 DDDDDDDDD DDDDDDDDD
+  alias: alias
+  description: Get LSB-justified bit mask of size (D[4:0] + 1) into D. D = ($0000_0002 << D[4:0]) - 1.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.639070
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Get LSB-justified bit mask of size (S[4:0] + 1) into D. D = ($0000_0002 << S[4:0]) - 1."
+  syntax: "BMASK   D,{#}S"

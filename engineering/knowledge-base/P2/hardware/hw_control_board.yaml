@@ -1,0 +1,7 @@
+name: Control Board
+part_number: 64025
+category: addon
+description: "8 LEDs add-on board"
+pins_used: 8
+interface: 12-pin header
+source: P2 Documentation Collection

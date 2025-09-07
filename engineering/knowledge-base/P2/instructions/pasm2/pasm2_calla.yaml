@@ -1,0 +1,51 @@
+metadata:
+  id: pasm2_calla_d786f3a7
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.429809
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 405
+    type: csv
+    row: 321
+    type: csv
+    row: 405
+    type: csv
+    row: 321
+    type: csv
+    row: 405
+layer1_csv:
+  mnemonic: CALLA
+  syntax: |
+    CALLA   #{\}A
+  group: Branch A - Call
+  encoding: EEEE 1101110 RAA AAAAAAAAA AAAAAAAAA
+  alias: .
+  description: Call to A by writing {C, Z, 10'b0, PC[19:0]} to hub long at PTRA++.         If R = 1 then PC += A, else PC = A. "\" forces R = 0.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 5
+    cog_exec_16_cogs: 5
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.623378
+  source: P2 Datasheet v35
+  timing:
+    raw: 5...12 / 14...32
+    notes:
+      - Hub window alignment affects timing
+    min_cycles: 5
+    max_cycles: 12
+    type: variable
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.039253
+  narratives:
+    - source: INSTRUCTION-TIMING-AND-ENCODING.md
+      type: timing_note
+      content: |
+        Branch instruction flushes pipeline, causing next instruction to take 5+ clocks instead of 2.
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Call to D by writing {C, Z, 10'b0, PC[19:0]} to hub long at PTRA++.     C = D[31], Z = D[30], PC = D[19:0]."
+  syntax: "CALLA   D        {WC/WZ/WCZ}"

@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_xoro32_eff87f9c
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.429602
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 390
+    type: csv
+    row: 390
+    type: csv
+    row: 390
+layer1_csv:
+  mnemonic: XORO32
+  syntax: |
+    XORO32  D
+  group: Math and Logic
+  encoding: EEEE 1101011 000 DDDDDDDDD 001101000
+  alias: .
+  description: Iterate D with xoroshiro32+ PRNG algorithm and put PRNG result into next instruction's S.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.611326
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Iterate D with xoroshiro32+ PRNG algorithm and put PRNG result into next instruction's S."
+  syntax: "XORO32  D"

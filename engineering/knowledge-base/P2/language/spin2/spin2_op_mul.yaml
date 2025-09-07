@@ -1,0 +1,6 @@
+name: "*"
+type: operator
+priority: 7
+category: Multiply
+description: "Integer/float multiply"
+source: Spin2 Documentation v51

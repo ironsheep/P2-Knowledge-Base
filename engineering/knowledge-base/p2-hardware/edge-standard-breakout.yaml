@@ -1,0 +1,190 @@
+# P2 Edge Standard Breakout - Hardware Specification
+# Part Number: 64029
+# Revision: Current
+# Documentation: 64029-P2-Edge-Breakout-Board-Guide
+
+hardware_type: "carrier_board"
+part_number: "64029"
+manufacturer: "Parallax Inc."
+revision: "Current"
+status: "active_production"
+
+basic_info:
+  name: "P2 Edge Standard Breakout"
+  description: "Full-featured carrier board providing access to all 64 P2 pins"
+  category: "carrier_board_full"
+  form_factor: "standard_breakout"
+  
+specifications:
+  requires_module: true
+  compatible_modules:
+    - "P2-EC (Standard Edge Module)"
+    - "P2-EC32MB (32MB Edge Module)"
+    
+  physical:
+    dimensions:
+      length: "4.0 inches"
+      width: "1.4 inches"  
+      height: "0.5 inches (with module)"
+    weight: "TBD"
+    mounting: "Standard PCB mounting holes"
+    
+  electrical:
+    supply_voltage: "5V or USB powered"
+    module_supply: "3.3V to module"
+    current_capability: "Adequate for full P2 usage"
+    
+pin_access:
+  total_accessible: 64
+  pin_range: "P0-P63"
+  header_configuration: "All pins broken out to headers"
+  header_type: "Standard 0.1 inch pitch"
+  pin_organization: "Logical grouping by function"
+  
+connectivity:
+  programming:
+    - type: "USB"
+      connector: "USB connector onboard"
+      driver: "Built-in USB-to-serial"
+    - type: "Prop Plug"
+      connector: "4-pin header (optional)"
+  
+  headers:
+    pin_headers: "All 64 pins accessible"
+    power_headers: "3.3V, 5V, GND distribution"
+    programming_header: "Prop Plug compatible"
+    
+  expansion:
+    addon_compatibility: "Limited - designed for Edge modules"
+    breadboard_friendly: "Standard header spacing"
+    
+module_compatibility:
+  optimal_pairing:
+    - module: "P2-EC"
+      efficiency: "Perfect - 100% pin utilization"
+      rating: "5_stars"
+      use_case: "Full P2 development"
+  
+  functional_pairing:
+    - module: "P2-EC32MB" 
+      efficiency: "Oversized - only 40 pins used effectively"
+      rating: "3_stars"
+      use_case: "When standard form factor required"
+      
+use_cases:
+  primary:
+    - "Professional P2 development"
+    - "Multi-peripheral projects requiring all 64 pins"
+    - "Standard form factor requirements"
+    - "Full P2 capability utilization"
+  secondary:
+    - "Educational platforms needing all pins"
+    - "Prototyping complex systems"
+    - "Custom carrier board development reference"
+    
+advantages:
+  - "Access to all 64 P2 smart pins"
+  - "Standard professional form factor"
+  - "Perfect match for P2-EC standard module"
+  - "Enhanced power distribution"
+  - "Proper pin organization and labeling"
+  - "USB programming integrated"
+  
+limitations:
+  - "Larger than necessary for 32MB module (40-pin usage)"
+  - "Requires Edge module (additional cost)"
+  - "No built-in peripherals (LEDs, switches)"
+  - "No prototyping area"
+  - "Standard size may be too large for some applications"
+  
+development_workflow:
+  - "Select appropriate Edge module (P2-EC recommended)"
+  - "Insert module into edge connector"
+  - "Connect USB for programming and power"
+  - "Access all 64 pins via labeled headers"
+  - "Develop using full P2 capabilities"
+  - "Test complex multi-peripheral designs"
+  
+programming:
+  methods:
+    - "USB (primary - built-in)"
+    - "Prop Plug (optional backup)"
+  tools:
+    - "PropellerTool"
+    - "PNut"
+    - "VS Code with Spin2 extension"
+  languages:
+    - "Spin2"
+    - "PASM2"
+    - "C (via FlexProp)"
+    
+target_projects:
+  - "IoT devices with multiple sensors"
+  - "Motor control systems"
+  - "Video/audio processing"
+  - "Industrial automation interfaces"
+  - "Multi-protocol communication hubs"
+  - "Advanced robotics platforms"
+  
+comparison_with_alternatives:
+  vs_mini_breakout:
+    pin_access: "64 vs 40 pins"
+    size: "Larger vs compact"
+    cost: "Higher vs lower"
+    use_case: "Complex vs simple projects"
+    
+  vs_breadboard_carrier:
+    prototyping: "Headers only vs integrated breadboard"
+    size: "Smaller vs much larger"
+    cost: "Lower vs higher"
+    use_case: "Final design vs experimentation"
+    
+  vs_eval_board:
+    integration: "Modular vs all-in-one"
+    peripherals: "None vs built-in LEDs/switches"
+    flexibility: "Module swappable vs fixed"
+    upgrade_path: "Module replacement vs new board"
+    
+optimal_configurations:
+  recommended:
+    - module: "P2-EC"
+      total_cost: "Module + Carrier"
+      pin_efficiency: "100%"
+      use_case: "Standard professional development"
+      
+  functional_but_suboptimal:
+    - module: "P2-EC32MB"
+      total_cost: "Higher cost, oversized"
+      pin_efficiency: "62% (40 pins used)"
+      use_case: "Standard form factor with memory needs"
+      
+power_management:
+  input: "5V USB or barrel jack"
+  regulation: "Onboard 3.3V for module"
+  distribution: "Power headers for external circuits"
+  current_budget: "Adequate for full P2 + moderate external loads"
+  
+documentation:
+  primary: "64029-P2-Edge-Breakout-Board-Guide"
+  related:
+    - "Edge module documentation"
+    - "P2 Silicon Documentation"
+    - "Pin mapping references"
+    
+availability:
+  vendor: "Parallax Inc."
+  website: "parallax.com"
+  part_lookup: "Search for 64029"
+  distributor_network: "Yes"
+  bundle_options: "Often sold with Edge modules"
+  
+quality_rating: "professional"
+recommendation_score: 5
+educational_value: "high"
+production_readiness: "prototype_platform"
+
+# Cross-references
+ecosystem_position: "full_featured_carrier"
+hardware_family: "p2_edge"
+optimal_module: "P2-EC"
+pin_utilization: "maximum"

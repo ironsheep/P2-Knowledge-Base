@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_rgbexp_c2fea1cb
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.429590
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 389
+    type: csv
+    row: 389
+    type: csv
+    row: 389
+layer1_csv:
+  mnemonic: RGBEXP
+  syntax: |
+    RGBEXP  D
+  group: Math and Logic
+  encoding: EEEE 1101011 000 DDDDDDDDD 001100111
+  alias: .
+  description: Expand 5:6:5 RGB value in D[15:0] into 8:8:8 value in D[31:8]. D = {D[15:11,15:13], D[10:5,10:9], D[4:0,4:2], 8'b0}.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T14:35:25.640647
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Expand 5:6:5 RGB value in D[15:0] into 8:8:8 value in D[31:8]. D = {D[15:11,15:13], D[10:5,10:9], D[4:0,4:2], 8'b0}."
+  syntax: "RGBEXP  D"

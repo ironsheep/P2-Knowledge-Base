@@ -1,0 +1,515 @@
+# Smart Pin Mode Documentation Schema
+# Version: 1.0.0
+# Purpose: Comprehensive YAML schema for P2 Smart Pin mode documentation
+# Layer 1: Core technical specifications from Silicon Doc
+
+# Schema Definition for Smart Pin Modes
+schema_info:
+  version: "1.0.0"
+  purpose: "P2 Smart Pin mode aggregation pipeline"
+  layers:
+    1: "Silicon Doc direct extraction"
+    2: "Datasheet cross-reference validation"
+    3: "Forum enrichment and clarifications"
+    4: "Human insight and usage patterns"
+  validation_rules:
+    - "All modes must specify complete SSSSS bit pattern"
+    - "Parameters must define X, Y, Z register usage"
+    - "Timing specifications required for all operational modes"
+    - "Pin pairing and interaction rules mandatory for applicable modes"
+
+# Top-level Smart Pin Mode Entry Structure
+smart_pin_mode:
+  # Core Identification
+  mode_id:
+    type: string
+    pattern: "^%[0-1]{5}$"
+    description: "5-bit mode identifier (e.g., %00001, %01011)"
+    required: true
+    examples:
+      - "%00000"  # Normal mode
+      - "%00001"  # Long repository or DAC noise
+      - "%01011"  # Quadrature encoder
+      - "%11000"  # ADC sample/filter (internal)
+  
+  mode_name:
+    type: string
+    description: "Canonical name for the Smart Pin mode"
+    required: true
+    max_length: 80
+    examples:
+      - "Normal Mode"
+      - "Long Repository"
+      - "DAC Noise Generator"
+      - "A/B-Input Quadrature Encoder"
+      - "ADC Sample/Filter/Capture (Internal Clock)"
+  
+  # Mode Classification
+  mode_group:
+    type: string
+    enum:
+      - "control"      # Normal, repository modes
+      - "dac"          # DAC-related modes
+      - "signal_gen"   # PWM, NCO, pulse generation
+      - "measurement"  # Timing, counting, encoding
+      - "adc"          # ADC sampling and filtering
+      - "communication" # Serial, USB modes
+    description: "Functional group classification"
+    required: true
+  
+  mode_complexity:
+    type: string
+    enum: ["basic", "intermediate", "advanced", "expert"]
+    description: "Usage complexity level"
+    required: true
+  
+  # Mode-Specific Dependencies
+  dac_mode_dependency:
+    type: boolean
+    description: "True if mode behavior depends on DAC_MODE (M[12:10] = %101)"
+    required: true
+    default: false
+  
+  pin_pairing:
+    type: string
+    enum: ["none", "adjacent", "differential", "group"]
+    description: "Pin interaction requirements"
+    required: true
+    examples:
+      none: "Single pin operation"
+      adjacent: "Uses adjacent pin for OTHER signal"
+      differential: "Even/odd pin pairs (P0/P1, P2/P3, etc.)"
+      group: "Multiple pins for complex operations"
+  
+  # Technical Specifications
+  wrpin_configuration:
+    type: object
+    properties:
+      base_format:
+        type: string
+        description: "WRPIN D operand bit field structure"
+        pattern: "^%[ABFM_TtSs0-9]+$"
+        required: true
+        example: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+      
+      a_input_selector:
+        type: object
+        properties:
+          description: "4-bit A input selector configuration"
+          bit_pattern: "%AAAA"
+          options:
+            type: array
+            items:
+              code: 
+                type: string
+                pattern: "^%[01x]{4}$"
+              description: string
+              polarity: 
+                type: string
+                enum: ["true", "inverted"]
+              source:
+                type: string
+                enum: ["pin_read", "relative_pin", "out_bit"]
+        required: true
+      
+      b_input_selector:
+        type: object
+        properties:
+          description: "4-bit B input selector configuration"
+          bit_pattern: "%BBBB"
+          options:
+            type: array
+            items:
+              code: 
+                type: string
+                pattern: "^%[01x]{4}$"
+              description: string
+              polarity:
+                type: string
+                enum: ["true", "inverted"]
+              source:
+                type: string
+                enum: ["pin_read", "relative_pin", "out_bit"]
+        required: true
+      
+      input_logic_filtering:
+        type: object
+        properties:
+          description: "3-bit input logic/filtering after A/B selectors"
+          bit_pattern: "%FFF"
+          options:
+            type: array
+            items:
+              code:
+                type: string
+                pattern: "^%[01]{3}$"
+              description: string
+              operation: string
+              filter_type:
+                type: string
+                enum: ["none", "filt0", "filt1", "filt2", "filt3"]
+        required: true
+      
+      low_level_control:
+        type: object
+        properties:
+          description: "13-bit low-level pin control (M[12:0])"
+          bit_pattern: "%M............"
+          special_modes:
+            type: array
+            items:
+              condition: string
+              behavior: string
+        required: true
+      
+      dir_out_control:
+        type: object
+        properties:
+          description: "2-bit pin DIR/OUT control"
+          bit_pattern: "%TT"
+          smart_off_behavior:
+            type: object
+            properties:
+              non_dac_mode: 
+                type: array
+                items:
+                  code: string
+                  description: string
+              dac_mode:
+                type: array
+                items:
+                  code: string
+                  description: string
+          smart_on_behavior:
+            type: object
+            properties:
+              dac_modes:
+                type: array
+                items:
+                  mode_range: string
+                  behavior: string
+              non_dac_modes:
+                type: array
+                items:
+                  mode_range: string
+                  behavior: string
+        required: true
+  
+  # Parameter Definitions
+  x_parameter:
+    type: object
+    properties:
+      usage:
+        type: string
+        description: "Purpose of X register in this mode"
+        max_length: 200
+      
+      bit_fields:
+        type: array
+        items:
+          range:
+            type: string
+            pattern: "^X\\[[0-9]+:[0-9]+\\]$"
+          purpose: string
+          valid_values:
+            type: object
+            properties:
+              min: integer
+              max: integer
+              special_values:
+                type: array
+                items:
+                  value: integer
+                  meaning: string
+      
+      configuration_timing:
+        type: string
+        enum: ["reset_only", "runtime", "periodic"]
+        description: "When X parameter can be modified"
+    required: false
+  
+  y_parameter:
+    type: object
+    properties:
+      usage:
+        type: string
+        description: "Purpose of Y register in this mode"
+        max_length: 200
+      
+      bit_fields:
+        type: array
+        items:
+          range:
+            type: string
+            pattern: "^Y\\[[0-9]+:[0-9]+\\]$"
+          purpose: string
+          valid_values:
+            type: object
+            properties:
+              min: integer
+              max: integer
+              special_values:
+                type: array
+                items:
+                  value: integer
+                  meaning: string
+      
+      update_behavior:
+        type: string
+        description: "How Y parameter updates affect operation"
+        max_length: 200
+    required: false
+  
+  z_result:
+    type: object
+    properties:
+      data_type:
+        type: string
+        description: "Type of data returned in Z register"
+        max_length: 100
+      
+      bit_interpretation:
+        type: array
+        items:
+          range:
+            type: string
+            pattern: "^Z\\[[0-9]+:[0-9]+\\]$"
+          meaning: string
+      
+      flag_behavior:
+        type: string
+        description: "How C flag relates to Z result"
+        max_length: 150
+      
+      overflow_handling:
+        type: string
+        description: "Behavior when Z result overflows"
+        max_length: 100
+    required: false
+  
+  # Operational Behavior
+  operation_description:
+    type: string
+    description: "Complete technical description of mode operation"
+    min_length: 100
+    max_length: 2000
+    required: true
+  
+  timing_specifications:
+    type: object
+    properties:
+      clock_relationship:
+        type: string
+        description: "How mode relates to system clock"
+        max_length: 200
+      
+      base_period:
+        type: object
+        properties:
+          description: string
+          min_clocks: integer
+          max_clocks: integer
+          special_values:
+            type: array
+            items:
+              value: integer
+              meaning: string
+      
+      update_frequency:
+        type: string
+        description: "How often results/outputs update"
+        max_length: 150
+      
+      settling_time:
+        type: string
+        description: "Time required for mode to stabilize"
+        max_length: 100
+    required: false
+  
+  in_signal_behavior:
+    type: object
+    properties:
+      trigger_conditions:
+        type: array
+        items: string
+        description: "Events that raise IN signal"
+      
+      acknowledgment_method:
+        type: string
+        enum: ["rdpin", "rqpin", "wxpin", "wypin", "wrpin", "akpin"]
+        description: "Instructions that acknowledge IN signal"
+      
+      polling_restrictions:
+        type: string
+        description: "Timing constraints for IN polling"
+        max_length: 200
+    required: true
+  
+  reset_behavior:
+    type: object
+    properties:
+      dir_low_effects:
+        type: array
+        items: string
+        description: "State changes when DIR=0"
+      
+      dir_transition_effects:
+        type: string
+        description: "Effects of DIR low-to-high transition"
+        max_length: 200
+      
+      wrpin_zero_effects:
+        type: string
+        description: "Effects of WRPIN #0,pin command"
+        max_length: 100
+    required: true
+  
+  # Usage Information
+  common_applications:
+    type: array
+    items:
+      application: string
+      description: string
+      complexity_level:
+        type: string
+        enum: ["beginner", "intermediate", "advanced"]
+    min_items: 1
+    required: true
+  
+  configuration_examples:
+    type: array
+    items:
+      name: string
+      description: string
+      wrpin_code: string
+      wxpin_code: 
+        type: string
+        required: false
+      wypin_code:
+        type: string
+        required: false
+      explanation: string
+    min_items: 1
+    required: true
+  
+  typical_code_patterns:
+    type: array
+    items:
+      pattern_name: string
+      pasm2_code: string
+      spin2_code:
+        type: string
+        required: false
+      explanation: string
+    required: false
+  
+  # Cross-references
+  related_modes:
+    type: array
+    items:
+      mode_id:
+        type: string
+        pattern: "^%[0-1]{5}$"
+      relationship:
+        type: string
+        enum: ["alternative", "complementary", "prerequisite", "advanced_version"]
+      description: string
+    required: false
+  
+  related_instructions:
+    type: array
+    items:
+      instruction: string
+      usage_context: string
+    required: true
+  
+  hardware_considerations:
+    type: object
+    properties:
+      power_implications:
+        type: string
+        max_length: 200
+      
+      pin_loading_effects:
+        type: string
+        max_length: 200
+      
+      noise_considerations:
+        type: string
+        max_length: 200
+      
+      thermal_effects:
+        type: string
+        max_length: 200
+    required: false
+  
+  # Quality Metadata
+  extraction_metadata:
+    type: object
+    properties:
+      extraction_date:
+        type: string
+        format: date
+      
+      source_documents:
+        type: array
+        items:
+          document: string
+          pages:
+            type: array
+            items: integer
+          section: string
+      
+      validation_status:
+        type: string
+        enum: ["draft", "reviewed", "validated", "production"]
+      
+      completeness_score:
+        type: integer
+        minimum: 0
+        maximum: 100
+        description: "Percentage of schema fields populated"
+      
+      technical_accuracy:
+        type: string
+        enum: ["unverified", "silicon_doc_verified", "datasheet_verified", "forum_verified", "hardware_tested"]
+    required: true
+
+# Validation Rules for Smart Pin Mode Documentation
+validation_constraints:
+  mode_id_uniqueness: "Each mode_id must be unique across all entries"
+  parameter_consistency: "X/Y parameter descriptions must match operational behavior"
+  timing_coherence: "Timing specifications must be self-consistent"
+  example_validity: "All code examples must be syntactically correct"
+  cross_reference_integrity: "All related_modes must reference valid mode_ids"
+  completeness_threshold: "Production entries must have completeness_score >= 85"
+
+# Mode Coverage Requirements
+required_coverage:
+  total_modes: 32
+  dac_mode_variants: 6
+  measurement_modes: 16
+  communication_modes: 4
+  signal_generation_modes: 6
+  
+# Quality Assurance Framework
+quality_framework:
+  layer_1_requirements:
+    - "Direct Silicon Doc extraction with page references"
+    - "Complete bit field specifications"
+    - "Operational behavior descriptions"
+    
+  layer_2_requirements:
+    - "Datasheet cross-reference validation"
+    - "Parameter range verification"
+    - "Timing specification confirmation"
+    
+  layer_3_requirements:
+    - "Forum clarification integration"
+    - "Usage pattern documentation"
+    - "Known issue tracking"
+    
+  layer_4_requirements:
+    - "Human insight and best practices"
+    - "Performance optimization notes"
+    - "Application-specific guidance"

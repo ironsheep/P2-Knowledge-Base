@@ -1,0 +1,40 @@
+metadata:
+  id: pasm2_lockrel_5d8b4a6f
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.427128
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 248
+    type: csv
+    row: 248
+    type: csv
+    row: 248
+layer1_csv:
+  mnemonic: LOCKREL
+  syntax: |
+    LOCKREL {#}D            {WC}
+  group: Hub Control - Locks
+  encoding: EEEE 1101011 C0L DDDDDDDDD 000000111
+  alias: .
+  description: Release LOCK D[3:0]. If D is a register and WC, get current/last cog id of LOCK owner into D and LOCK status into C.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.315174
+  source: P2 Datasheet v35
+  timing:
+    raw: 2...9, +2 if result / same
+    type: variable
+    notes:
+      - Hub window alignment affects timing
+    min_cycles: 2
+    max_cycles: 9
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Release LOCK D[3:0]. If D is a register and WC, get current/last cog id of LOCK owner into D and LOCK status into C."
+  syntax: "LOCKREL {#}D            {WC}"

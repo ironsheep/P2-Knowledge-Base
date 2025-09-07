@@ -1,0 +1,139 @@
+# DIRA/DIRB Registers - I/O Pin Direction Control
+# Source: Silicon Doc v35, COG-RAM-REGISTER-MAP.md
+
+registers:
+  dira:
+    name: "DIRA" 
+    address: "$1FA"
+    description: "Output enables for P31..P0"
+    pin_range: "P31 to P0 (32 pins)"
+    
+  dirb:
+    name: "DIRB"
+    address: "$1FB" 
+    description: "Output enables for P63..P32"
+    pin_range: "P63 to P32 (32 pins)"
+
+bit_width: 32
+category: "special_purpose"
+access_type: "read_write"
+
+description: "Direction control registers that enable/disable output drivers for all 64 I/O pins"
+
+functionality:
+  bit_mapping:
+    dira_bits: "Each bit controls one pin: bit 0 = P0, bit 1 = P1, ..., bit 31 = P31"
+    dirb_bits: "Each bit controls one pin: bit 0 = P32, bit 1 = P33, ..., bit 31 = P63"
+    
+  bit_states:
+    high_state: "1 = Output enabled (pin can drive)"
+    low_state: "0 = Input mode (pin in high impedance)"
+    
+  pin_control:
+    output_enable: "Set corresponding DIR bit to 1"
+    input_enable: "Set corresponding DIR bit to 0"
+    mixed_modes: "Different pins can have different directions simultaneously"
+
+smart_pin_interaction:
+  normal_pins: "DIR bit controls output enable normally" 
+  smart_pins: "Smart pin %TT bits can override DIR control"
+  smart_pin_modes: "Some smart pin modes ignore DIR state"
+  reset_requirement: "Smart pins should be configured while DIR=0"
+
+instruction_access:
+  direct_bit_ops:
+    set_output: "DRVH #pin_num (sets DIR bit and drives high)"
+    set_input: "DRVL #pin_num (sets DIR bit and drives low)"
+    float_pin: "FLTL #pin_num (clears DIR bit, high impedance)"
+    
+  register_ops:
+    read_dira: "MOV result, DIRA"
+    write_dira: "MOV DIRA, ##$FFFF_FFFF"
+    bit_operations: "ANDN DIRA, pin_mask (clear specific bits)"
+
+usage_patterns:
+  all_outputs:
+    code: |
+      MOV     DIRA, ##$FFFF_FFFF    ' All P31..P0 as outputs
+      MOV     DIRB, ##$FFFF_FFFF    ' All P63..P32 as outputs
+    description: "Configure all pins as outputs"
+    
+  selective_outputs:
+    code: |
+      MOV     DIRA, ##%00000111     ' P2, P1, P0 as outputs
+      MOV     DIRB, #0              ' All P63..P32 as inputs
+    description: "Mixed I/O configuration"
+    
+  pin_manipulation:
+    code: |
+      DRVH    #5                    ' Set P5 as output, drive high
+      DRVL    #10                   ' Set P10 as output, drive low  
+      FLTL    #15                   ' Set P15 as input (high-Z)
+    description: "Individual pin direction control"
+
+bit_operations:
+  set_multiple_outputs:
+    code: |
+      OR      DIRA, ##%11110000     ' Set P7..P4 as outputs
+    description: "Set specific pins as outputs"
+    
+  clear_multiple_outputs:
+    code: |
+      ANDN    DIRA, ##%11110000     ' Set P7..P4 as inputs
+    description: "Set specific pins as inputs"
+    
+  toggle_direction:
+    code: |
+      XOR     DIRA, ##%00000001     ' Toggle P0 direction
+    description: "Toggle pin direction"
+
+power_considerations:
+  input_mode: "High impedance, minimal power consumption"
+  output_mode: "Current consumption depends on load"
+  floating_inputs: "May consume power due to intermediate voltages"
+  pullup_pulldown: "Consider external resistors for unused inputs"
+
+initialization:
+  power_on_reset: "All DIR bits cleared (all pins inputs)"
+  cog_start: "DIR registers cleared on COGINIT"
+  recommended_practice: "Initialize DIR registers before use"
+
+debugging_tips:
+  read_back_verification: "Read DIRA/DIRB to verify configuration"
+  pin_conflict_detection: "Multiple cogs can conflict on same pins"
+  smart_pin_coordination: "Coordinate DIR with smart pin configuration"
+
+safety_considerations:
+  short_circuit_protection: "Avoid driving conflicting outputs"
+  power_supply_limits: "Consider total current when many outputs active"
+  esd_protection: "Floating inputs may be susceptible to ESD"
+
+examples:
+  led_control:
+    code: |
+      MOV     DIRA, ##%11111111     ' P7..P0 as outputs for LEDs
+      MOV     OUTA, ##%10101010     ' Set initial LED pattern
+    description: "LED array control"
+    
+  serial_communication:
+    code: |
+      OR      DIRA, ##%00000010     ' P1 (TX) as output
+      ANDN    DIRA, ##%00000001     ' P0 (RX) as input
+    description: "UART pin configuration"
+
+related_registers:
+  outa_outb: "Output state registers (what gets driven when DIR=1)"
+  ina_inb: "Input state registers (read pin states)"
+  smart_pin_config: "Smart pin configuration affects DIR behavior"
+
+see_also:
+  - "OUTA/OUTB Output State Registers"
+  - "INA/INB Input State Registers"
+  - "Smart Pin Configuration"
+  - "Pin driving instructions (DRVH/DRVL/FLTL)"
+
+source:
+  document: "Silicon Doc v35"
+  section: "COG RAM Register Map"  
+  page_reference: "COG-RAM-REGISTER-MAP.md"
+  extraction_date: "2025-09-06"

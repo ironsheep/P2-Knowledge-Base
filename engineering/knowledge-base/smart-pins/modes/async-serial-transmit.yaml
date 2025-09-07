@@ -1,0 +1,83 @@
+# Smart Pin Mode: %11110 - Async Serial Transmit
+# Silicon Doc Reference: part4-smart-pins.txt, page 75
+# Layer 1: Direct Silicon Doc extraction
+
+mode_id: "%11110"
+
+mode_name: "Async Serial Transmit"
+
+mode_group: "communication"
+
+mode_complexity: "intermediate"
+
+dac_mode_dependency: false
+
+pin_pairing: "none"
+
+operation_description: |
+  Async serial transmit mode provides UART-style serial transmission with configurable baud rates.
+  The smart pin handles start bit, data bits, parity, and stop bit generation automatically.
+  Data is loaded via WYPIN and transmitted asynchronously. Baud rate up to clock/3 supported.
+  OUT signal is overridden by the smart pin for transmission control.
+
+x_parameter:
+  usage: "Baud rate configuration"
+  bit_fields:
+    - range: "X[31:0]"
+      purpose: "Baud rate divisor (clocks per bit)"
+      valid_values:
+        min: 3
+        max: 4294967295
+        special_values:
+          - value: 1667
+            meaning: "9600 baud at 160MHz (160M/9600/10≈1667)"
+          - value: 833
+            meaning: "19200 baud at 160MHz"
+
+y_parameter:
+  usage: "Transmit data"
+  bit_fields:
+    - range: "Y[31:0]"
+      purpose: "Data to transmit with framing"
+      valid_values:
+        min: 0
+        max: 4294967295
+
+z_result:
+  data_type: "Not used"
+
+timing_specifications:
+  clock_relationship: "Baud rate based on X parameter divisor"
+  update_frequency: "Data transmitted at configured baud rate"
+
+in_signal_behavior:
+  trigger_conditions:
+    - "Transmission complete"
+    - "Ready for next data"
+  acknowledgment_method: "wypin"
+
+common_applications:
+  - application: "UART communication"
+    description: "Standard serial communication protocol"
+    complexity_level: "intermediate"
+  - application: "Debug output"
+    description: "Send debug messages to terminal"
+    complexity_level: "beginner"
+
+configuration_examples:
+  - name: "9600 baud UART TX"
+    description: "Standard 9600 baud serial transmit"
+    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_11110_0, uart_tx"
+    wxpin_code: "WXPIN #1667, uart_tx"
+    wypin_code: "WYPIN char_data, uart_tx"
+    explanation: "9600 baud transmission"
+
+extraction_metadata:
+  extraction_date: "2025-09-06"
+  source_documents:
+    - document: "Silicon Doc part4-smart-pins.txt"
+      pages: [75]
+      section: "%11110 = async serial transmit"
+  validation_status: "draft"
+  completeness_score: 80
+  technical_accuracy: "silicon_doc_verified"

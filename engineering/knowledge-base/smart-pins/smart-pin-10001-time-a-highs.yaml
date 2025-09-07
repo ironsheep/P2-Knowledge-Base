@@ -1,0 +1,74 @@
+# Smart Pin Mode %10001 - Time A-input High States
+# Source: Silicon Doc v35, part4-smart-pins.txt
+
+mode_id: "%10001"
+mode_name: "Time A-input High States"
+description: "Times duration of A-input high states in clock cycles"
+category: "timing_measurement"
+output_override: false
+
+configuration:
+  wrpin_format:
+    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+    sssss_value: "%10001"
+
+measurement_operation:
+  timing_method: "Continuous high state duration counting in clock cycles"
+  trigger: "High-to-low transition completes measurement"
+  measurement_type: "High state duration only"
+
+measurement_output:
+  duration_count: "Previous high duration count placed in Z"
+  in_signal: "IN raised upon each high-to-low transition"
+  reading: "RDPIN/RQPIN retrieves high duration measurement"
+  limit: "Z limited to $80000000 (prevents overflow)"
+
+operation:
+  counting_period: "From low-to-high until high-to-low transition"
+  clock_precision: "Duration measured in system clock cycles"
+  automatic_operation: "No configuration needed beyond mode setup"
+
+instructions:
+  setup:
+    - "WRPIN - Configure mode (%10001)"
+    
+  operation:
+    - "RDPIN/RQPIN - Read high duration after IN raised"
+
+reset_behavior:
+  during_reset:
+    dir_state: "DIR=0"
+    in_signal: "IN is low"
+    z_register: "Z set to $00000001"
+
+behavior:
+  in_signal: "Raised upon each high-to-low transition"
+  acknowledgment:
+    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
+    effect: "Lowers IN signal after 2 clocks"
+
+usage_notes:
+  - "Measures only high pulse widths"
+  - "Ignores low state durations"
+  - "Simpler than full state timing"
+  - "Maximum count limited to prevent overflow"
+
+applications:
+  pulse_width_measurement: "Measure positive pulse widths"
+  duty_cycle_analysis: "High time component of duty cycle"
+  signal_validation: "Verify minimum/maximum pulse widths"
+  timing_analysis: "Positive pulse characteristics"
+
+related_modes:
+  - "%10000 (Time A-states - both high and low)"
+  - "%10010 (Time X A-highs/rises/edges or timeout)"
+
+see_also:
+  - "Pulse width measurement techniques"
+  - "High state timing analysis"
+
+source:
+  document: "Silicon Doc v35"
+  section: "Smart Pin Modes"
+  page_reference: "part4-smart-pins.txt"
+  extraction_date: "2025-09-06"

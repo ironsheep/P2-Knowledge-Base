@@ -1,0 +1,236 @@
+# P2 Eval Mini Prototyping Add-on Board - Hardware Specification
+# Part Number: 64006E
+# Documentation: P2 Eval Add-on Boards (#64006 Series) v2.0
+
+hardware_type: "addon_board"
+part_number: "64006E"
+manufacturer: "Parallax Inc."
+series: "P2 Eval Add-on Boards"
+status: "active_production"
+
+basic_info:
+  name: "P2 Eval Mini Prototyping Add-on Board"
+  description: "8×12 grid of prototyping holes with power and signal connections"
+  category: "prototyping_platform"
+  form_factor: "small_addon"
+  
+specifications:
+  requires_host: true
+  compatible_hosts:
+    - "P2 Eval Board (64000)"
+    - "P2 Edge Module Breadboard (64020)"
+    - "P2 Edge Mini Breakout Board (64019) with P2 Edge Module"
+    
+  physical:
+    size: "Small module"
+    connector: "2x6 pass-through socket"
+    mounting: "No mounting hole (unique among add-on boards)"
+    note: "Only add-on board without mounting hole"
+    
+  electrical:
+    supply_voltage: "3.3V and 5V from host"
+    current_consumption: "User-defined (depends on prototyped circuits)"
+    io_pins_used: 8
+    
+prototyping_grid:
+  layout:
+    dimensions: "8×12 grid of plated through-holes"
+    total_holes: 96
+    hole_spacing: "0.1 inch (2.54mm) standard"
+    hole_plating: "Through-hole plated for reliable connections"
+    
+  power_distribution:
+    ground_connections:
+      marking: "White silk blocks on top side"
+      connectivity: "Connected on both sides of PCB"
+      purpose: "Easy ground access throughout the grid"
+      
+    power_rails:
+      vio_rail: "VIO (3.3V) with dedicated holes"
+      5v_rail: "5V supply with dedicated holes"  
+      marking: "Holes inside white boxes connected to marked supply"
+      
+  signal_connections:
+    p2_pins:
+      availability: "P0 through P7 accessible"
+      marking: "Holes inside white boxes connected to pin"
+      usage: "Direct connection to P2 I/O pins"
+      
+    interconnect_groups:
+      dash_connected: "Holes marked with dashes are connected together"
+      isolation: "Groups isolated from each other"
+      modification: "Copper traces can be cut if needed"
+      purpose: "Flexible connection groups for custom circuits"
+
+pcb_layout_details:
+  top_side:
+    power_markings: "5V, VIO, and P0-P7 marked with arrows"
+    group_markings: "White boxes show connected holes"
+    dash_markings: "Dashed lines show interconnected holes"
+    ground_markings: "White silk blocks indicate ground connections"
+    
+  bottom_side:
+    copper_traces: "Isolated copper traces connect hole groups"
+    ground_strip: "Exposed ground strip for easy bridging"
+    modification_friendly: "Traces can be cut for custom routing"
+    bridging_capability: "Easy to bridge neighboring holes to ground"
+    
+connection_types:
+  ground_holes:
+    identification: "White silk blocks on top side"
+    connectivity: "Connected on both PCB sides"
+    usage: "Distributed ground access points"
+    
+  power_holes:
+    vio_holes: "Connected to 3.3V supply (VIO)"
+    5v_holes: "Connected to 5V supply"
+    marking: "Inside white boxes with supply voltage labeled"
+    
+  signal_holes:
+    p2_connections: "P0-P7 each have dedicated connected holes"
+    marking: "Inside white boxes labeled with pin number"
+    
+  interconnect_holes:
+    dash_groups: "Holes connected by dashed lines"
+    isolation: "Each group isolated from others"
+    flexibility: "Can be modified by cutting traces"
+    
+use_cases:
+  primary:
+    - "Custom circuit prototyping and testing"
+    - "Sensor interface circuit development"
+    - "Analog circuit experimentation"
+    - "Component evaluation and characterization"
+  secondary:
+    - "Educational circuit construction projects"
+    - "Interface adapter creation"
+    - "Signal conditioning circuits"
+    - "Power supply filtering and regulation experiments"
+    
+advantages:
+  - "Flexible prototyping platform with organized connections"
+  - "All P2 I/O pins (P0-P7) directly accessible"
+  - "Both 3.3V and 5V power supplies available"
+  - "Ground connections distributed throughout grid"
+  - "Modifiable interconnections via trace cutting"
+  - "Standard 0.1 inch hole spacing"
+  - "No mounting hole allows flexible positioning"
+  
+limitations:
+  - "Limited to 8×12 grid (96 holes total)"
+  - "Requires soldering for permanent connections"
+  - "Pre-defined connection groups may not suit all circuits"
+  - "No mounting hole (unlike other add-on boards)"
+  - "Modification requires PCB trace cutting skills"
+  
+development_workflow:
+  - "Connect to host board via 2x6 connector"
+  - "Plan circuit layout using available connection groups"
+  - "Install components using through-hole mounting"
+  - "Solder connections following marked groups"
+  - "Test circuit functionality with P2 I/O pins"
+  - "Modify traces if custom routing needed"
+  - "Document working circuits for future reference"
+  
+circuit_examples:
+  sensor_interface: |
+    ' Example: Temperature sensor with pull-up resistor
+    ' Use P0 for sensor data, VIO for power, GND for return
+    ' Install pull-up resistor between VIO and P0 holes
+    ' Connect sensor between P0 and GND holes
+    
+  led_driver: |
+    ' Example: LED with current limiting resistor
+    ' Use P1 for control, install resistor in series with LED
+    ' Connect resistor between P1 hole and LED anode hole
+    ' Connect LED cathode to GND hole
+    
+  analog_filter: |
+    ' Example: RC filter circuit
+    ' Use interconnect groups for component placement
+    ' Install resistor and capacitor in series
+    ' Connect input to P2, output to P3, ground to GND holes
+    
+educational_value:
+  concepts_taught:
+    - "PCB layout and trace routing principles"
+    - "Component placement and orientation"
+    - "Power distribution design"
+    - "Signal integrity in prototype circuits"
+    - "Soldering techniques and best practices"
+    - "Circuit debugging and troubleshooting"
+    
+  practical_skills:
+    - "Through-hole component installation"
+    - "PCB trace modification techniques"
+    - "Circuit testing and validation"
+    - "Documentation of working designs"
+    
+compatibility:
+  stacking:
+    position: "Any 2x6 header position on eval board"
+    conflicts: "Check component height clearance with other add-ons"
+    mechanical: "No mounting hole - may need additional support"
+    
+  component_compatibility:
+    through_hole: "Standard 0.1 inch pitch components"
+    surface_mount: "Can be adapted with breakout techniques"
+    wire_connections: "Standard hookup wire fits holes"
+    
+applications:
+  educational:
+    - "Electronics lab exercises"
+    - "Component characterization experiments"
+    - "Circuit design and testing projects"
+    - "Analog and digital circuit construction"
+    
+  development:
+    - "Sensor interface prototyping"
+    - "Custom signal conditioning"
+    - "Power supply filtering experiments"
+    - "Component evaluation and testing"
+    
+  research:
+    - "Circuit topology exploration"
+    - "Component parameter measurement"
+    - "Interface adapter development"
+    - "Proof-of-concept implementations"
+    
+modification_techniques:
+  trace_cutting:
+    purpose: "Isolate connection groups for custom routing"
+    method: "Use craft knife to cut bottom-side copper traces"
+    location: "Between hole groups marked with dashes"
+    
+  bridging:
+    purpose: "Create custom connections between holes"
+    method: "Solder wire bridges on bottom side"
+    ground_strip: "Use exposed ground strip for easy ground connections"
+    
+documentation:
+  primary: "P2 Eval Add-on Boards (#64006 Series) v2.0"
+  related:
+    - "PCB prototyping best practices guides"
+    - "Soldering technique tutorials"
+    - "Component placement guidelines"
+    
+availability:
+  vendor: "Parallax Inc."
+  website: "parallax.com"
+  part_lookup: "Search for 64006E or Mini Prototyping Add-on"
+  bundle_option: "Part of complete accessory set (64006-ES)"
+  individual_purchase: "Available separately"
+  
+quality_rating: "prototyping_platform"
+recommendation_score: 5
+educational_value: "very_high"
+complexity_level: "intermediate"
+skill_requirements: "soldering_pcb_modification"
+
+# Cross-references
+ecosystem_position: "flexible_prototyping_platform"
+hardware_family: "p2_eval_addons"
+addon_series: "64006_series"
+size_class: "small_addon"
+interface_type: "custom_prototyping"
+unique_features: "no_mounting_hole_modifiable_traces"

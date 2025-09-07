@@ -1,0 +1,110 @@
+mnemonic: "RDLUT"
+syntax:
+  - "RDLUT D,{#}S/P {WC/WZ/WCZ}"
+  - "RDLUT D,{#}S"
+  - "RDLUT D,PTRA"
+  - "RDLUT D,PTRB"
+  - "RDLUT D,{#}S WC"
+  - "RDLUT D,{#}S WZ"
+  - "RDLUT D,{#}S WCZ"
+group: "lookup_table_streamer_misc"
+description: "Read data from LUT address {#}S/PTRx into D. C = MSB of data."
+
+operation:
+  basic_operation: "D = LUT_MEMORY[address]"
+  flag_effects:
+    carry_flag: "C = MSB of read data (bit 31)"
+    zero_flag: "Z = (read data == 0)"
+  conditions:
+    - "LUT address range is 0..511 ($1FF)"
+    - "LUT memory is dual-port (can be read while executing)"
+    - "Each cog has its own 512-long LUT"
+
+timing:
+  base_clocks: 3
+  cog_lut_timing: 3
+  hub_timing: "ILLEGAL from hub execution"
+  timing_notes:
+    - "LUT instructions only available during COG execution"
+    - "Hub execution cannot access LUT memory"
+    - "Slightly slower than cog register access"
+
+flags:
+  affects_c: true
+  affects_z: true
+  flag_options: ["WC", "WZ", "WCZ"]
+  flag_meanings:
+    WC: "C = MSB (bit 31) of data read from LUT"
+    WZ: "Z = 1 if data read equals zero"
+    WCZ: "Both flags set based on data read"
+
+operands:
+  destination:
+    type: "register"
+    range: "0..511 for cog registers"
+    description: "Register that receives the data read from LUT"
+  source:
+    type: "address_or_pointer"
+    immediate_range: "9-bit LUT address (0..511)"
+    pointer_types: ["PTRA", "PTRB"]
+    description: "LUT memory address to read from"
+
+variants:
+  - syntax: "RDLUT D,{#}S {WC/WZ/WCZ}"
+    description: "Read long from immediate LUT address"
+    specific_operation: "D = LUT[S], flags from data"
+  - syntax: "RDLUT D,PTRA {WC/WZ/WCZ}"
+    description: "Read long using pointer register"
+    specific_operation: "D = LUT[PTRA], flags from data"
+
+examples:
+  - title: "Basic LUT Read"
+    description: "Read value from LUT memory"
+    code: "RDLUT R1, #$100"
+    explanation: "Reads 32-bit value from LUT address $100 into R1"
+  - title: "LUT Table Lookup"
+    description: "Use LUT for fast table lookups"
+    code: |
+      MOV table_index, input_value
+      RDLUT result, table_index
+    explanation: "Uses input_value as index to read from LUT table"
+  - title: "Pointer-Based LUT Access"
+    description: "Read using pointer register"
+    code: "RDLUT data, PTRA"
+    explanation: "Reads from LUT address stored in PTRA"
+  - title: "LUT Data Processing Loop"
+    description: "Process array of data in LUT"
+    code: |
+      MOV lut_ptr, #lut_array_start
+      MOV count, #array_size
+      process_loop:
+        RDLUT data_item, lut_ptr WZ
+        IF_NZ CALL #process_item
+        ADD lut_ptr, #1
+        DJNZ count, #process_loop
+    explanation: "Reads and processes each non-zero item in LUT array"
+
+related_instructions:
+  - "WRLUT"
+  - "SETLUTS"
+  - "RDLONG"
+  - "RDWORD"
+  - "RDBYTE"
+
+special_behaviors:
+  - "Only available when executing from COG (not HUB)"
+  - "LUT sharing can be enabled with SETLUTS for adjacent cogs"
+  - "LUT memory persists across program runs"
+  - "Can be used for lookup tables, buffers, and fast access storage"
+  - "Each cog has independent 512×32-bit LUT space"
+
+notes:
+  - "Essential for high-speed table lookups and data buffering"
+  - "Faster than hub memory access for frequently used data"
+  - "LUT sharing enables inter-cog communication"
+  - "Useful for waveform tables, color palettes, and coefficients"
+
+source_references:
+  datasheet_section: "6.11 Lookup Table, Streamer, and Misc Instructions - Lookup Table"
+  page_references: ["Datasheet LUT instruction table"]
+  extraction_notes: "Extracted from pasm2-complete-instruction-tables.md Lookup Table section"

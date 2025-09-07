@@ -1,0 +1,6 @@
+name: LONGSWAP
+type: method
+category: Block Operations
+signature: "LONGSWAP(AddrA, AddrB, Count)"
+description: "Swap longs between addresses"
+source: Spin2 Documentation v51

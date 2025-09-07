@@ -1,0 +1,6 @@
+name: BYTESWAP
+type: method
+category: Block Operations
+signature: "BYTESWAP(AddrA, AddrB, Count)"
+description: "Swap bytes between addresses"
+source: Spin2 Documentation v51

@@ -1,0 +1,47 @@
+metadata:
+  id: pasm2_rdlong_097ef8f3
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.426409
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 155
+    type: csv
+    row: 155
+    type: csv
+    row: 155
+layer1_csv:
+  mnemonic: RDLONG
+  syntax: |
+    RDLONG  D,{#}S/P {WC/WZ/WCZ}
+  group: Hub RAM - Read
+  encoding: EEEE 1011000 CZI DDDDDDDDD SSSSSSSSS
+  alias: .
+  description: Read long from hub address {#}S/PTRx into D. C = MSB of long. *   Prior SETQ/SETQ2 invokes cog/LUT block transfer.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 9
+    cog_exec_16_cogs: 9
+
+layer3_silicon_doc:
+  extraction_date: 2025-09-06T14:38:48.030599
+  narratives:
+    - source: architectural_context
+      type: architectural_note
+      content: |
+        Hub memory access uses egg-beater rotation. Each cog gets a turn every 8 clocks. Hub window alignment affects timing (13-20 clocks typical).
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.310125
+  source: P2 Datasheet v35
+  timing:
+    raw: 9...16 / 9...26
+    type: variable
+    notes:
+      - Hub window alignment affects timing
+    min_cycles: 9
+    max_cycles: 16
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Read long from hub address {#}S/PTRx into D. C = MSB of long. *   Prior SETQ/SETQ2 invokes cog/LUT block transfer."
+  syntax: "RDLONG  D,{#}S/P {WC/WZ/WCZ}"

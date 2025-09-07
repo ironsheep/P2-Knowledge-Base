@@ -1,0 +1,6 @@
+name: COGATN
+type: method
+category: Attention Signaling
+signature: "COGATN(CogMask)"
+description: "Strobe ATN to cogs per 16-bit mask"
+source: Spin2 Documentation v51

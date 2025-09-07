@@ -1,0 +1,7 @@
+name: Switches & LEDs
+part_number: 64029
+category: addon
+description: "4 switches and 4 LEDs"
+pins_used: 12
+interface: 12-pin header
+source: P2 Documentation Collection

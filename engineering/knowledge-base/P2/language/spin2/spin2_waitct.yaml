@@ -1,0 +1,6 @@
+name: WAITCT
+type: method
+category: System Counter
+signature: "WAITCT(Tick)"
+description: "Wait until system counter reaches tick"
+source: Spin2 Documentation v51

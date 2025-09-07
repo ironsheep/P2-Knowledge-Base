@@ -1,0 +1,30 @@
+metadata:
+  id: pasm2_if_1x_e1473d8a
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.430301
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 451
+    type: csv
+    row: 451
+    type: csv
+    row: 451
+layer1_csv:
+  mnemonic: IF_1X
+  syntax: |
+    IF_1X         <inst>  <ops>
+  group: Instruction Prefix
+  encoding: 1100 ------- --- --------- ---------
+  alias: alias
+  description: Execute <inst> if C = 1.
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: null
+    cog_exec_16_cogs: null
+
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Execute <inst> if C = 1."
+  syntax: "IF_1X         <inst>  <ops>"

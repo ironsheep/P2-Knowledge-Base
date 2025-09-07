@@ -1,0 +1,6 @@
+name: COGSTOP
+type: method
+category: Cog Management
+signature: "COGSTOP(CogNum)"
+description: "Stop specified cog"
+source: Spin2 Documentation v51

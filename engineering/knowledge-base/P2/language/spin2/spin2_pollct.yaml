@@ -1,0 +1,6 @@
+name: POLLCT
+type: method
+category: System Counter
+signature: "POLLCT(Tick) : Past"
+description: "Check if tick value passed, -1 if yes"
+source: Spin2 Documentation v51

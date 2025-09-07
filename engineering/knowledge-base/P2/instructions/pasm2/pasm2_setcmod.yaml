@@ -1,0 +1,37 @@
+metadata:
+  id: pasm2_setcmod_af84d434
+  version: 1.0
+  extraction_date: |
+    2025-09-06T14:31:46.428302
+  source:
+    document: P2 Instructions v35
+    type: csv
+    row: 338
+    type: csv
+    row: 338
+    type: csv
+    row: 338
+layer1_csv:
+  mnemonic: SETCMOD
+  syntax: |
+    SETCMOD {#}D
+  group: Color Space Converter
+  encoding: EEEE 1101011 00L DDDDDDDDD 000111100
+  alias: .
+  description: Set the colorspace converter "CMOD" parameter to D[8:0].
+  interrupt_shield: false
+  timing:
+    cog_exec_8_cogs: 2
+    cog_exec_16_cogs: 2
+
+layer2_datasheet:
+  extraction_date: 2025-09-06T21:15:50.302116
+  source: P2 Datasheet v35
+  timing:
+    raw: 2
+    base_cycles: 2
+    type: fixed
+layer3_narrative:
+  source: P2 Instructions CSV v35
+  description: "Set the colorspace converter \"CMOD\" parameter to D[8:0]."
+  syntax: "SETCMOD {#}D"
