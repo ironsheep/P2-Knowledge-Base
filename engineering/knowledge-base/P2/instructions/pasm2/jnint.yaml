@@ -1,6 +1,0 @@
-instruction: JNINT
-syntax: JNINT   {#}S
-encoding: EEEE 1011110 01I 000010000 SSSSSSSSS
-description: |
-  Jump to S** if INT event flag is clear.
-group: Events - Branch

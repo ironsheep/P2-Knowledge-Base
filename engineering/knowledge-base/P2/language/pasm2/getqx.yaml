@@ -1,0 +1,11 @@
+instruction: GETQX
+syntax: GETQX   D        {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ0 DDDDDDDDD 000011000
+description: |
+  Retrieve CORDIC result X into D. Waits, in case result not ready. C = X[31]. *
+timing:
+  cycles: 2
+  type: fixed
+group: CORDIC Solver
+flags_affected:
+  C: X[31]

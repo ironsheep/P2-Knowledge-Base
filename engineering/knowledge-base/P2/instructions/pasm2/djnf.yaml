@@ -1,6 +1,0 @@
-instruction: DJNF
-syntax: DJNF    D,{#}S
-encoding: EEEE 1011011 11I DDDDDDDDD SSSSSSSSS
-description: |
-  Decrement D and jump to S** if result is not $FFFF_FFFF.
-group: Branch S - Mod & Test

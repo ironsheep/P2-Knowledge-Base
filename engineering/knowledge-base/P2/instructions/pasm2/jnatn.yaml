@@ -1,6 +1,0 @@
-instruction: JNATN
-syntax: JNATN   {#}S
-encoding: EEEE 1011110 01I 000011110 SSSSSSSSS
-description: |
-  Jump to S** if ATN event flag is clear.
-group: Events - Branch

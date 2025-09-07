@@ -1,8 +1,0 @@
-instruction: RDWORD
-syntax: RDWORD  D,{#}S/P {WC/WZ/WCZ}
-encoding: EEEE 1010111 CZI DDDDDDDDD SSSSSSSSS
-description: |
-  Read zero-extended word from hub address {#}S/PTRx into D. C = MSB of word. *
-group: Hub RAM - Read
-flags_affected:
-  C: MSB of word

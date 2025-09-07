@@ -1,0 +1,9 @@
+instruction: RESI0
+syntax: RESI0
+encoding: EEEE 1011001 110 111111110 111111111
+description: |
+  Resume from INT0. (CALLD $1FE,$1FF WCZ)
+timing:
+  cycles: 4
+  type: fixed
+group: Branch S - Resume

@@ -1,6 +1,0 @@
-instruction: RESI3
-syntax: RESI3
-encoding: EEEE 1011001 110 111110000 111110001
-description: |
-  Resume from INT3. (CALLD $1F0,$1F1 WCZ)
-group: Branch S - Resume

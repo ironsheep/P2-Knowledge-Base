@@ -1,6 +1,0 @@
-instruction: JNCT3
-syntax: JNCT3   {#}S
-encoding: EEEE 1011110 01I 000010011 SSSSSSSSS
-description: |
-  Jump to S** if CT3 event flag is clear.
-group: Events - Branch

@@ -1,0 +1,11 @@
+instruction: RDBYTE
+syntax: RDBYTE  D,{#}S/P {WC/WZ/WCZ}
+encoding: EEEE 1010110 CZI DDDDDDDDD SSSSSSSSS
+description: |
+  Read zero-extended byte from hub address {#}S/PTRx into D. C = MSB of byte. *
+timing:
+  cycles: 9
+  type: fixed
+group: Hub RAM - Read
+flags_affected:
+  C: MSB of byte

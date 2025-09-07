@@ -1,0 +1,11 @@
+instruction: JMP
+syntax: JMP     D        {WC/WZ/WCZ}
+encoding: EEEE 1101100 RAA AAAAAAAAA AAAAAAAAA
+description: |
+  Jump to A. If R = 1 then PC += A, else PC = A. "\" forces R = 0.
+timing:
+  cycles: 4
+  type: fixed
+group: Branch A - Jump
+flags_affected:
+  C: A

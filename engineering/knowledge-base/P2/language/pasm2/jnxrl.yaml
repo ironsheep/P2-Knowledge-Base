@@ -1,0 +1,9 @@
+instruction: JNXRL
+syntax: JNXRL   {#}S
+encoding: EEEE 1011110 01I 000011101 SSSSSSSSS
+description: |
+  Jump to S** if XRL event flag is clear.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Branch

@@ -1,6 +1,0 @@
-instruction: JNSE4
-syntax: JNSE4   {#}S
-encoding: EEEE 1011110 01I 000010111 SSSSSSSSS
-description: |
-  Jump to S** if SE4 event flag is clear.
-group: Events - Branch

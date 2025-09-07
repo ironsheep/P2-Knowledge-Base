@@ -1,6 +1,0 @@
-instruction: JNFBW
-syntax: JNFBW   {#}S
-encoding: EEEE 1011110 01I 000011001 SSSSSSSSS
-description: |
-  Jump to S** if FBW event flag is clear.
-group: Events - Branch

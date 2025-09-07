@@ -1,6 +1,0 @@
-instruction: QLOG
-syntax: QLOG    {#}D
-encoding: EEEE 1101011 00L DDDDDDDDD 000001110
-description: |
-  Begin CORDIC number-to-logarithm conversion of D. GETQX retrieves log {5'whole_exponent, 27'fractional_exponent}.
-group: CORDIC Solver

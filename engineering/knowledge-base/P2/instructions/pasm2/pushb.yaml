@@ -1,6 +1,0 @@
-instruction: PUSHB
-syntax: PUSHB   {#}D
-encoding: EEEE 1100011 0L1 DDDDDDDDD 111100001
-description: |
-  Write long in D[31:0] to hub address PTRB++.
-group: Hub RAM - Write

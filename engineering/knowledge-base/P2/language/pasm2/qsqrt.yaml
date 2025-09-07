@@ -1,0 +1,9 @@
+instruction: QSQRT
+syntax: QSQRT   {#}D,{#}S
+encoding: EEEE 1101001 1LI DDDDDDDDD SSSSSSSSS
+description: |
+  Begin CORDIC square root of {S, D}. GETQX retrieves root.
+timing:
+  cycles: 2
+  type: fixed
+group: CORDIC Solver

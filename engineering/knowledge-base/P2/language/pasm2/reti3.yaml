@@ -1,0 +1,9 @@
+instruction: RETI3
+syntax: RETI3
+encoding: EEEE 1011001 110 111111111 111110001
+description: |
+  Return from INT3. (CALLD $1FF,$1F1 WCZ)
+timing:
+  cycles: 4
+  type: fixed
+group: Branch S - Return

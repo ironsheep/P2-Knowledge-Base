@@ -1,0 +1,9 @@
+instruction: JINT
+syntax: JINT    {#}S
+encoding: EEEE 1011110 01I 000000000 SSSSSSSSS
+description: |
+  Jump to S** if INT event flag is set.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Branch

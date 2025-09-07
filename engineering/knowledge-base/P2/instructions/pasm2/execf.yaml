@@ -1,8 +1,0 @@
-instruction: EXECF
-syntax: EXECF   {#}D
-encoding: EEEE 1101011 00L DDDDDDDDD 000110011
-description: |
-  Jump to D[9:0] in cog/LUT and set SKIPF pattern to D[31:10]. PC = {10'b0, D[9:0]}.
-group: Branch D - Call+Skip
-flags_affected:
-  C: {10'b0, D[9:0]}

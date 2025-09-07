@@ -1,6 +1,0 @@
-instruction: JNXMT
-syntax: JNXMT   {#}S
-encoding: EEEE 1011110 01I 000011010 SSSSSSSSS
-description: |
-  Jump to S** if XMT event flag is clear.
-group: Events - Branch

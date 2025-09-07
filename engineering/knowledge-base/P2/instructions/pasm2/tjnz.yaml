@@ -1,6 +1,0 @@
-instruction: TJNZ
-syntax: TJNZ    D,{#}S
-encoding: EEEE 1011100 11I DDDDDDDDD SSSSSSSSS
-description: |
-  Test D and jump to S** if D is not zero.
-group: Branch S - Test

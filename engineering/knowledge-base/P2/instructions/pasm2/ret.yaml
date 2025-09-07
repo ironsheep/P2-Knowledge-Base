@@ -1,9 +1,0 @@
-instruction: RET
-syntax: RET              {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ1 000000000 000101101
-description: |
-  Return by popping stack (K). C = K[31], Z = K[30], PC = K[19:0].
-group: Branch Return
-flags_affected:
-  C: K[31], Z = K[30], PC = K[19:0]
-  Z: K[30], PC = K[19:0]

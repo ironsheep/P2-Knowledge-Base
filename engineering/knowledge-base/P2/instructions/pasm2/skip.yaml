@@ -1,6 +1,0 @@
-instruction: SKIP
-syntax: SKIP    {#}D
-encoding: EEEE 1101011 00L DDDDDDDDD 000110001
-description: |
-  Skip instructions per D. Subsequent instructions 0..31 get cancelled for each '1' bit in D[0]..D[31].
-group: Branch D - Skip

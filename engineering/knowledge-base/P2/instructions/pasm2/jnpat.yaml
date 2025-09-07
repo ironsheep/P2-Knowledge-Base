@@ -1,6 +1,0 @@
-instruction: JNPAT
-syntax: JNPAT   {#}S
-encoding: EEEE 1011110 01I 000011000 SSSSSSSSS
-description: |
-  Jump to S** if PAT event flag is clear.
-group: Events - Branch

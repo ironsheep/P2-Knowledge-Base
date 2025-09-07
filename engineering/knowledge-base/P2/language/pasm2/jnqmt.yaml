@@ -1,0 +1,9 @@
+instruction: JNQMT
+syntax: JNQMT   {#}S
+encoding: EEEE 1011110 01I 000011111 SSSSSSSSS
+description: |
+  Jump to S** if QMT event flag is clear.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Branch

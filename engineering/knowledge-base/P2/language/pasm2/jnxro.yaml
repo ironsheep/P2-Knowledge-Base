@@ -1,0 +1,9 @@
+instruction: JNXRO
+syntax: JNXRO   {#}S
+encoding: EEEE 1011110 01I 000011100 SSSSSSSSS
+description: |
+  Jump to S** if XRO event flag is clear.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Branch

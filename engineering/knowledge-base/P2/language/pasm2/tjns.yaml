@@ -1,0 +1,9 @@
+instruction: TJNS
+syntax: TJNS    D,{#}S
+encoding: EEEE 1011101 11I DDDDDDDDD SSSSSSSSS
+description: |
+  Test D and jump to S** if D is not signed (D[31] = 0).
+timing:
+  cycles: 2
+  type: fixed
+group: Branch S - Test

@@ -1,0 +1,9 @@
+instruction: RETI2
+syntax: RETI2
+encoding: EEEE 1011001 110 111111111 111110011
+description: |
+  Return from INT2. (CALLD $1FF,$1F3 WCZ)
+timing:
+  cycles: 4
+  type: fixed
+group: Branch S - Return

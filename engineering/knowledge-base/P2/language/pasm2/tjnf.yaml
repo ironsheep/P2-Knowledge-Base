@@ -1,0 +1,9 @@
+instruction: TJNF
+syntax: TJNF    D,{#}S
+encoding: EEEE 1011101 01I DDDDDDDDD SSSSSSSSS
+description: |
+  Test D and jump to S** if D is not full (D != $FFFF_FFFF).
+timing:
+  cycles: 2
+  type: fixed
+group: Branch S - Test

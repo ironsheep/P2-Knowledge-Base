@@ -1,0 +1,9 @@
+instruction: COGSTOP
+syntax: COGSTOP {#}D
+encoding: EEEE 1101011 00L DDDDDDDDD 000000011
+description: |
+  Stop cog D[3:0].
+timing:
+  cycles: 2
+  type: fixed
+group: Hub Control - Cogs

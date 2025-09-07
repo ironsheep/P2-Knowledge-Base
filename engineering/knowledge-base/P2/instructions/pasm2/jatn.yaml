@@ -1,6 +1,0 @@
-instruction: JATN
-syntax: JATN    {#}S
-encoding: EEEE 1011110 01I 000001110 SSSSSSSSS
-description: |
-  Jump to S** if ATN event flag is set.
-group: Events - Branch

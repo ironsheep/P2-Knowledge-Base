@@ -1,8 +1,0 @@
-instruction: CALL
-syntax: CALL    D        {WC/WZ/WCZ}
-encoding: EEEE 1101101 RAA AAAAAAAAA AAAAAAAAA
-description: |
-  Call to A by pushing {C, Z, 10'b0, PC[19:0]} onto stack. If R = 1 then PC += A, else PC = A. "\" forces R = 0.
-group: Branch A - Call
-flags_affected:
-  C: A

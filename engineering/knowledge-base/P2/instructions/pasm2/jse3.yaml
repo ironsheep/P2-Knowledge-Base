@@ -1,6 +1,0 @@
-instruction: JSE3
-syntax: JSE3    {#}S
-encoding: EEEE 1011110 01I 000000110 SSSSSSSSS
-description: |
-  Jump to S** if SE3 event flag is set.
-group: Events - Branch

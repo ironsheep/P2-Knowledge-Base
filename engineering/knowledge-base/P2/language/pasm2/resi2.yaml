@@ -1,0 +1,9 @@
+instruction: RESI2
+syntax: RESI2
+encoding: EEEE 1011001 110 111110010 111110011
+description: |
+  Resume from INT2. (CALLD $1F2,$1F3 WCZ)
+timing:
+  cycles: 4
+  type: fixed
+group: Branch S - Resume

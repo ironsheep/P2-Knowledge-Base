@@ -1,0 +1,9 @@
+instruction: JCT3
+syntax: JCT3    {#}S
+encoding: EEEE 1011110 01I 000000011 SSSSSSSSS
+description: |
+  Jump to S** if CT3 event flag is set.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Branch

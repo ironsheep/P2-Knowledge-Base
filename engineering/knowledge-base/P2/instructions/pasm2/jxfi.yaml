@@ -1,6 +1,0 @@
-instruction: JXFI
-syntax: JXFI    {#}S
-encoding: EEEE 1011110 01I 000001011 SSSSSSSSS
-description: |
-  Jump to S** if XFI event flag is set.
-group: Events - Branch

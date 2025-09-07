@@ -8,9 +8,8 @@ The P2 Knowledge Base provides comprehensive technical documentation for the Pro
 
 ```
 P2/                           # The Knowledge Base
-├── instructions/             # CPU Instructions (357 files)
-│   └── pasm2/               # PASM2 assembly instructions
 ├── language/                # Programming Languages
+│   ├── pasm2/               # PASM2 assembly language (357 instructions)
 │   └── spin2/               # Spin2 high-level language
 │       ├── methods/         # Built-in methods (73 files)
 │       ├── operators/       # Language operators (46 files)
@@ -109,13 +108,13 @@ The P2-support/ directory (parallel to P2/) contains:
 ### For AI/Code Generation
 ```python
 # Direct file access
-instruction = load("P2/instructions/pasm2/add.yaml")
+instruction = load("P2/language/pasm2/add.yaml")
 # Use instruction.syntax, instruction.timing, etc.
 ```
 
 ### For Documentation
 - Start with P2/README.md
-- Browse by category (instructions/, language/, etc.)
+- Browse by category (language/pasm2/, language/spin2/, hardware/, etc.)
 - Check documentation/ for guides
 
 ### For Maintenance
@@ -131,6 +130,7 @@ instruction = load("P2/instructions/pasm2/add.yaml")
 | 1.0.1 | 2025-09-07 | Removed 83 conditionals |
 | 1.1.0 | 2025-09-07 | Production/source separation |
 | 1.2.0 | 2025-09-07 | P2/P2-support clean separation |
+| 1.3.0 | 2025-09-07 | Restructured: instructions → language/pasm2 |
 
 ## Key Benefits
 

@@ -1,0 +1,9 @@
+instruction: JXMT
+syntax: JXMT    {#}S
+encoding: EEEE 1011110 01I 000001010 SSSSSSSSS
+description: |
+  Jump to S** if XMT event flag is set.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Branch

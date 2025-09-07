@@ -1,6 +1,0 @@
-instruction: JSE2
-syntax: JSE2    {#}S
-encoding: EEEE 1011110 01I 000000101 SSSSSSSSS
-description: |
-  Jump to S** if SE2 event flag is set.
-group: Events - Branch

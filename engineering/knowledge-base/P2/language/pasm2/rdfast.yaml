@@ -1,0 +1,9 @@
+instruction: RDFAST
+syntax: RDFAST  {#}D,{#}S
+encoding: EEEE 1100011 1LI DDDDDDDDD SSSSSSSSS
+description: |
+  Begin new fast hub read via FIFO. D[31] = no wait, D[13:0] = block size in 64-byte units (0 = max), S[19:0] = block start address.
+timing:
+  cycles: 2
+  type: fixed
+group: Hub FIFO - New Read

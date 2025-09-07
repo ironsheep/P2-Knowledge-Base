@@ -1,0 +1,9 @@
+instruction: TJNZ
+syntax: TJNZ    D,{#}S
+encoding: EEEE 1011100 11I DDDDDDDDD SSSSSSSSS
+description: |
+  Test D and jump to S** if D is not zero.
+timing:
+  cycles: 2
+  type: fixed
+group: Branch S - Test

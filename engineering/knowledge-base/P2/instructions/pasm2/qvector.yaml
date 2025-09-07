@@ -1,6 +1,0 @@
-instruction: QVECTOR
-syntax: QVECTOR {#}D,{#}S
-encoding: EEEE 1101010 1LI DDDDDDDDD SSSSSSSSS
-description: |
-  Begin CORDIC vectoring of point (D, S). GETQX/GETQY retrieves length/angle.
-group: CORDIC Solver

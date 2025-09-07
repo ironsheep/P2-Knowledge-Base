@@ -1,0 +1,9 @@
+instruction: JNXFI
+syntax: JNXFI   {#}S
+encoding: EEEE 1011110 01I 000011011 SSSSSSSSS
+description: |
+  Jump to S** if XFI event flag is clear.
+timing:
+  cycles: 2
+  type: fixed
+group: Events - Branch

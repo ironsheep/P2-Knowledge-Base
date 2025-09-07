@@ -1,0 +1,9 @@
+instruction: QFRAC
+syntax: QFRAC   {#}D,{#}S
+encoding: EEEE 1101001 0LI DDDDDDDDD SSSSSSSSS
+description: |
+  Begin CORDIC unsigned division of {D, SETQ value or 32'b0} / S. GETQX/GETQY retrieves quotient/remainder.
+timing:
+  cycles: 2
+  type: fixed
+group: CORDIC Solver

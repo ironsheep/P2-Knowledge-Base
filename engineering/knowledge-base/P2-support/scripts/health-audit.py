@@ -20,7 +20,7 @@ class P2HealthAudit:
         print("📁 Checking Directory Structure...")
         
         required_dirs = [
-            "instructions/pasm2",
+            "language/pasm2",
             "language/spin2/methods",
             "language/spin2/operators",
             "hardware",
@@ -40,7 +40,7 @@ class P2HealthAudit:
         """Check PASM2 instruction files"""
         print("\n📋 Checking PASM2 Instructions...")
         
-        pasm2_dir = self.base_dir / "instructions/pasm2"
+        pasm2_dir = self.base_dir / "language/pasm2"
         if not pasm2_dir.exists():
             self.issues.append("PASM2 directory missing!")
             return
@@ -107,7 +107,7 @@ class P2HealthAudit:
         print("\n✅ Checking Completeness...")
         
         # Check timing coverage
-        pasm2_dir = self.base_dir / "instructions/pasm2"
+        pasm2_dir = self.base_dir / "language/pasm2"
         if pasm2_dir.exists():
             files_with_timing = 0
             for file in pasm2_dir.glob("*.yaml"):

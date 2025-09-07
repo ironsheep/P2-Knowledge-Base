@@ -1,0 +1,9 @@
+instruction: IJNZ
+syntax: IJNZ    D,{#}S
+encoding: EEEE 1011100 01I DDDDDDDDD SSSSSSSSS
+description: |
+  Increment D and jump to S** if result is not zero.
+timing:
+  cycles: 2
+  type: fixed
+group: Branch S - Mod & Test

@@ -1,0 +1,9 @@
+instruction: CALLPB
+syntax: CALLPB  {#}D,{#}S
+encoding: EEEE 1011010 1LI DDDDDDDDD SSSSSSSSS
+description: |
+  Call to S** by pushing {C, Z, 10'b0, PC[19:0]} onto stack, copy D to PB.
+timing:
+  cycles: 4
+  type: fixed
+group: Branch S - Call

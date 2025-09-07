@@ -1,0 +1,9 @@
+instruction: COGINIT
+syntax: COGINIT {#}D,{#}S       {WC}
+encoding: EEEE 1100111 CLI DDDDDDDDD SSSSSSSSS
+description: |
+  Start cog selected by D. S[19:0] sets hub startup address and PTRB of cog. Prior SETQ sets PTRA of cog.
+timing:
+  cycles: 2
+  type: fixed
+group: Hub Control - Cogs
