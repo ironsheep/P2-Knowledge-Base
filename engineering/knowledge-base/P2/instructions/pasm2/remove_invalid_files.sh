@@ -1,0 +1,94 @@
+#!/bin/bash
+# Remove 86 files that don't match CSV instructions
+
+echo 'Removing 86 invalid files...'
+
+rm -f pasm2_c.yaml
+rm -f pasm2_c_and_nz.yaml
+rm -f pasm2_c_and_z.yaml
+rm -f pasm2_c_eq_z.yaml
+rm -f pasm2_c_ne_z.yaml
+rm -f pasm2_c_or_nz.yaml
+rm -f pasm2_c_or_z.yaml
+rm -f pasm2_clr.yaml
+rm -f pasm2_e.yaml
+rm -f pasm2_empty.yaml
+rm -f pasm2_ge.yaml
+rm -f pasm2_gt.yaml
+rm -f pasm2_if_00.yaml
+rm -f pasm2_if_01.yaml
+rm -f pasm2_if_0x.yaml
+rm -f pasm2_if_10.yaml
+rm -f pasm2_if_11.yaml
+rm -f pasm2_if_1x.yaml
+rm -f pasm2_if_a.yaml
+rm -f pasm2_if_ae.yaml
+rm -f pasm2_if_b.yaml
+rm -f pasm2_if_be.yaml
+rm -f pasm2_if_c.yaml
+rm -f pasm2_if_c_and_nz.yaml
+rm -f pasm2_if_c_and_z.yaml
+rm -f pasm2_if_c_eq_z.yaml
+rm -f pasm2_if_c_ne_z.yaml
+rm -f pasm2_if_c_or_nz.yaml
+rm -f pasm2_if_c_or_z.yaml
+rm -f pasm2_if_diff.yaml
+rm -f pasm2_if_e.yaml
+rm -f pasm2_if_ge.yaml
+rm -f pasm2_if_gt.yaml
+rm -f pasm2_if_le.yaml
+rm -f pasm2_if_lt.yaml
+rm -f pasm2_if_nc.yaml
+rm -f pasm2_if_nc_and_nz.yaml
+rm -f pasm2_if_nc_and_z.yaml
+rm -f pasm2_if_nc_or_nz.yaml
+rm -f pasm2_if_nc_or_z.yaml
+rm -f pasm2_if_ne.yaml
+rm -f pasm2_if_not_00.yaml
+rm -f pasm2_if_not_01.yaml
+rm -f pasm2_if_not_10.yaml
+rm -f pasm2_if_not_11.yaml
+rm -f pasm2_if_nz.yaml
+rm -f pasm2_if_nz_and_c.yaml
+rm -f pasm2_if_nz_and_nc.yaml
+rm -f pasm2_if_nz_or_c.yaml
+rm -f pasm2_if_nz_or_nc.yaml
+rm -f pasm2_if_same.yaml
+rm -f pasm2_if_x0.yaml
+rm -f pasm2_if_x1.yaml
+rm -f pasm2_if_z.yaml
+rm -f pasm2_if_z_and_c.yaml
+rm -f pasm2_if_z_and_nc.yaml
+rm -f pasm2_if_z_eq_c.yaml
+rm -f pasm2_if_z_ne_c.yaml
+rm -f pasm2_if_z_or_c.yaml
+rm -f pasm2_if_z_or_nc.yaml
+rm -f pasm2_inst.yaml
+rm -f pasm2_le.yaml
+rm -f pasm2_lt.yaml
+rm -f pasm2_modc.yaml
+rm -f pasm2_modcz.yaml
+rm -f pasm2_modz.yaml
+rm -f pasm2_nc.yaml
+rm -f pasm2_nc_and_nz.yaml
+rm -f pasm2_nc_and_z.yaml
+rm -f pasm2_nc_or_nz.yaml
+rm -f pasm2_nc_or_z.yaml
+rm -f pasm2_ne.yaml
+rm -f pasm2_nz.yaml
+rm -f pasm2_nz_and_c.yaml
+rm -f pasm2_nz_and_nc.yaml
+rm -f pasm2_nz_or_c.yaml
+rm -f pasm2_nz_or_nc.yaml
+rm -f pasm2_ret_.yaml
+rm -f pasm2_set.yaml
+rm -f pasm2_z.yaml
+rm -f pasm2_z_and_c.yaml
+rm -f pasm2_z_and_nc.yaml
+rm -f pasm2_z_eq_c.yaml
+rm -f pasm2_z_ne_c.yaml
+rm -f pasm2_z_or_c.yaml
+rm -f pasm2_z_or_nc.yaml
+
+echo 'Removed 86 files'
+echo 'Remaining valid instruction files: 388'

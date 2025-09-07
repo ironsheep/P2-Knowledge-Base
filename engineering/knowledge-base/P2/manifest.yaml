@@ -4,25 +4,25 @@ generated: 2025-09-07
 description: Central repository of P2 technical knowledge extracted from authoritative sources
 
 statistics:
-  total_instructions: 440
+  total_instructions: 357
   total_spin2_methods: 75
   total_spin2_operators: 51
-  total_files: 566
+  total_files: 483
   
 layers:
   layer1_csv:
     source: P2 Instructions CSV v35
-    coverage: 491 instructions
+    coverage: 357 instructions (real CPU instructions only)
     status: complete
     
   layer2_datasheet:
     source: P2 Datasheet timing tables
-    coverage: 61 instructions (42.4%)
+    coverage: 357 instructions (100% of real instructions)
     status: complete
     
   layer3_narrative:
     source: P2 Instructions CSV descriptions
-    coverage: 405 instructions
+    coverage: 357 instructions
     status: complete
     
   layer4_chip:
@@ -33,9 +33,10 @@ layers:
 content:
   instructions:
     path: /instructions/pasm2/
-    count: 440
+    count: 357
     format: YAML
     naming: pasm2_{mnemonic}.yaml
+    note: Removed 83 conditionals/pseudo-instructions (not real CPU ops)
     
   language:
     spin2:
