@@ -1,0 +1,5 @@
+method: LOCKCHK
+type: method
+description: |
+  Check lock state, bit 31 = captured, bits 3:0 = owner cog
+category: Lock Management

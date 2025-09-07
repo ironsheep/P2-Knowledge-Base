@@ -1,0 +1,5 @@
+method: COGSTOP
+type: method
+description: |
+  Stop specified cog
+category: Cog Management

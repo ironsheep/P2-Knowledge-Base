@@ -1,0 +1,5 @@
+method: REGLOAD
+type: method
+description: |
+  Load registers from hub
+category: String Creation

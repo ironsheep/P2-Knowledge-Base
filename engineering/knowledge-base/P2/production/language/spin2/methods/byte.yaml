@@ -1,0 +1,5 @@
+method: BYTE
+type: method
+description: |
+  Create byte data sequence
+category: String Creation

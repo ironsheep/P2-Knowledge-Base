@@ -1,0 +1,10 @@
+component: P2 Eval Board
+category: development_board
+description: |
+  Full-featured P2 development board with all pins exposed
+features:
+  - 64 I/O pins accessible
+  - USB programming port
+  - MicroSD card slot
+  - VGA connector
+  - Audio jack

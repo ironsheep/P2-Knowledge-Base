@@ -1,0 +1,5 @@
+operator: ">="
+type: operator
+description: |
+  Signed/unsigned compare
+category: Comparison

@@ -1,0 +1,5 @@
+method: BYTEFILL
+type: method
+description: |
+  Fill memory with byte value
+category: Fill Operations

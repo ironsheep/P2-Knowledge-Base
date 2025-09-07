@@ -1,0 +1,5 @@
+operator: "SIGNX"
+type: operator
+description: |
+  Bit manipulation
+category: Shift/Rotate

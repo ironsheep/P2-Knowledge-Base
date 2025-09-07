@@ -1,0 +1,5 @@
+method: COGSPIN
+type: method
+description: |
+  Start Spin2 method in a cog, returns cog ID or -1 if no cog free
+category: Cog Management

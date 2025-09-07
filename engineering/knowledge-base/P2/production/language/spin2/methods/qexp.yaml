@@ -1,0 +1,5 @@
+method: QEXP
+type: method
+description: |
+  Exponential via CORDIC
+category: CORDIC Operations

@@ -1,0 +1,5 @@
+method: REGEXEC
+type: method
+description: |
+  Execute register code from hub
+category: String Creation

@@ -1,0 +1,5 @@
+method: POLLCT
+type: method
+description: |
+  Check if tick value passed, -1 if yes
+category: System Counter

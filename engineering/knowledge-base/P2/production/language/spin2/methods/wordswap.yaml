@@ -1,0 +1,5 @@
+method: WORDSWAP
+type: method
+description: |
+  Swap words between addresses
+category: Block Operations

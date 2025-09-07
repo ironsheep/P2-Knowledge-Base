@@ -1,6 +1,0 @@
-' Test simple
-CON
-  a = 1
-  
-PUB main()
-  return a

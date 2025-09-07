@@ -1,0 +1,4 @@
+component: CORDIC
+category: math_engine
+description: |
+  32-bit pipelined CORDIC solver

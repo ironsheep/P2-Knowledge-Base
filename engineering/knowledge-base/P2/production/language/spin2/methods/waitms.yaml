@@ -1,0 +1,5 @@
+method: WAITMS
+type: method
+description: |
+  Delay for milliseconds
+category: Delays

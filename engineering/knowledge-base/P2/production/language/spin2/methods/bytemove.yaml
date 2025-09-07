@@ -1,0 +1,5 @@
+method: BYTEMOVE
+type: method
+description: |
+  Copy bytes
+category: Block Operations

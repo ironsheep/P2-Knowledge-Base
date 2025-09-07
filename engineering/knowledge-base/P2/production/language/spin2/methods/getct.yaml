@@ -1,0 +1,5 @@
+method: GETCT
+type: method
+description: |
+  Get 32-bit system counter
+category: System Counter

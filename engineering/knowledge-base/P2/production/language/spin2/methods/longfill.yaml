@@ -1,0 +1,5 @@
+method: LONGFILL
+type: method
+description: |
+  Fill memory with long value
+category: Fill Operations

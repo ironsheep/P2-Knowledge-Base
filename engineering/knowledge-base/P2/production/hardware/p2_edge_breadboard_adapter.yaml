@@ -1,0 +1,9 @@
+component: P2 Edge Breadboard Adapter
+category: adapter
+description: |
+  Adapter for using P2 Edge on breadboards
+features:
+  - P2 Edge socket
+  - Breadboard-friendly 0.6" spacing
+  - All pins accessible
+  - Power regulation onboard

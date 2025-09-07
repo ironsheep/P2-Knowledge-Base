@@ -1,0 +1,5 @@
+method: WAITATN
+type: method
+description: |
+  Wait for ATN strobe
+category: Attention Signaling

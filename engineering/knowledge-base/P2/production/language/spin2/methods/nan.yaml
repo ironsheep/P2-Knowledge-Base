@@ -1,0 +1,5 @@
+method: NAN
+type: method
+description: |
+  Check if float is NaN
+category: Extended Math

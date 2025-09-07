@@ -1,0 +1,5 @@
+method: COGCHK
+type: method
+description: |
+  Check if cog is running, returns -1 if running or 0 if not
+category: Cog Management

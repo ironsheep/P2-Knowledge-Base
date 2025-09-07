@@ -1,0 +1,5 @@
+method: LOOKDOWN
+type: method
+description: |
+  Find 1-based index of value
+category: String Creation

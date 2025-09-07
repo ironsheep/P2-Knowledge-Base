@@ -1,0 +1,5 @@
+method: LOCKRET
+type: method
+description: |
+  Return lock to inventory
+category: Lock Management

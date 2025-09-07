@@ -1,0 +1,5 @@
+method: POLXY
+type: method
+description: |
+  Convert polar to Cartesian
+category: CORDIC Operations

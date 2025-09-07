@@ -1,0 +1,5 @@
+method: WRPIN
+type: method
+description: |
+  Write mode register of smart pins
+category: SmartPin Operations

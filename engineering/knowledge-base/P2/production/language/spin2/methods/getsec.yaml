@@ -1,0 +1,5 @@
+method: GETSEC
+type: method
+description: |
+  Get seconds since boot
+category: Time Measurement

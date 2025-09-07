@@ -1,0 +1,4 @@
+component: Streamer
+category: dma_engine
+description: |
+  High-speed data streaming engine

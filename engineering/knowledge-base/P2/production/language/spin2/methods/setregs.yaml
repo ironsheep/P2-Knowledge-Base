@@ -1,0 +1,5 @@
+method: SETREGS
+type: method
+description: |
+  Copy hub to cog registers
+category: String Creation

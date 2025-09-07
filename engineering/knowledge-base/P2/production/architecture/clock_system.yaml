@@ -1,0 +1,4 @@
+component: Clock_System
+category: timing
+description: |
+  Flexible clock generation system

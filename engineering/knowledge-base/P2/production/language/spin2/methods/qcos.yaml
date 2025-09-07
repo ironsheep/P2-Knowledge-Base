@@ -1,0 +1,5 @@
+method: QCOS
+type: method
+description: |
+  Calculate cosine using CORDIC
+category: CORDIC Operations

@@ -1,0 +1,5 @@
+method: ROTXY
+type: method
+description: |
+  Rotate X,Y by angle
+category: CORDIC Operations

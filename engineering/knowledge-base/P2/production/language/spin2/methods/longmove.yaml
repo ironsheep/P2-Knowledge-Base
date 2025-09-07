@@ -1,0 +1,5 @@
+method: LONGMOVE
+type: method
+description: |
+  Copy longs
+category: Block Operations

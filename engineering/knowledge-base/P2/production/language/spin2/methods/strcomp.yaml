@@ -1,0 +1,5 @@
+method: STRCOMP
+type: method
+description: |
+  Compare strings, -1 if match, 0 if different
+category: Comparison

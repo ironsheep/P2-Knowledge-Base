@@ -1,0 +1,5 @@
+method: LOCKNEW
+type: method
+description: |
+  Check out new lock (0..15) or < 0 if none available
+category: Lock Management

@@ -1,0 +1,5 @@
+method: CLKSET
+type: method
+description: |
+  Safely set new clock mode and frequency
+category: Clock Control

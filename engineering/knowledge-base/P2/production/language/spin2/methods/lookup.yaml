@@ -1,0 +1,5 @@
+method: LOOKUP
+type: method
+description: |
+  Look up value by 1-based index
+category: String Creation

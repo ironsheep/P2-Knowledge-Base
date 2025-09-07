@@ -1,0 +1,5 @@
+operator: "NOT"
+type: operator
+description: |
+  ` `^^` `ENCOD` `DECOD` `ONES` `SQRT` `QLOG` `QEXP`
+category: \

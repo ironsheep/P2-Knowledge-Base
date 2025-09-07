@@ -1,0 +1,5 @@
+method: LONG
+type: method
+description: |
+  Create long data sequence
+category: String Creation

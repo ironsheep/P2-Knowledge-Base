@@ -1,0 +1,5 @@
+operator: "ROL"
+type: operator
+description: |
+  Bit manipulation
+category: Shift/Rotate

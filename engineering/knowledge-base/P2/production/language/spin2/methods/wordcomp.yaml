@@ -1,0 +1,5 @@
+method: WORDCOMP
+type: method
+description: |
+  Compare words, returns -1 if match
+category: Comparison

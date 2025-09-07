@@ -1,0 +1,5 @@
+method: BYTECOMP
+type: method
+description: |
+  Compare bytes, returns -1 if match
+category: Comparison

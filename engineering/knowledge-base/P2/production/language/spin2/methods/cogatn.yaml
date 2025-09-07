@@ -1,0 +1,5 @@
+method: COGATN
+type: method
+description: |
+  Strobe ATN to cogs per 16-bit mask
+category: Attention Signaling

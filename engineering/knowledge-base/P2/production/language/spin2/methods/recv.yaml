@@ -1,0 +1,5 @@
+method: RECV
+type: method
+description: |
+  Receive byte from current input method
+category: String Creation

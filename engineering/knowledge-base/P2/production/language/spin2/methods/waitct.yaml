@@ -1,0 +1,5 @@
+method: WAITCT
+type: method
+description: |
+  Wait until system counter reaches tick
+category: System Counter

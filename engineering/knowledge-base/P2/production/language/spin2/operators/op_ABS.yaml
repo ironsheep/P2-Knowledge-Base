@@ -1,0 +1,5 @@
+operator: "ABS"
+type: operator
+description: |
+  ` `^^` `ENCOD` `DECOD` `ONES` `SQRT` `QLOG` `QEXP`
+category: \

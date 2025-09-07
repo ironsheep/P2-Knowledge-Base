@@ -1,0 +1,4 @@
+component: XBYTE_Engine
+category: bytecode_executor
+description: |
+  Hardware bytecode execution engine

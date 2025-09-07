@@ -1,0 +1,5 @@
+method: LONGSWAP
+type: method
+description: |
+  Swap longs between addresses
+category: Block Operations

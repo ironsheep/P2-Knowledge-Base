@@ -1,0 +1,5 @@
+method: XYPOL
+type: method
+description: |
+  Convert Cartesian to polar
+category: CORDIC Operations

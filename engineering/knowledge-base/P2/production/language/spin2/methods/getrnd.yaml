@@ -1,0 +1,5 @@
+method: GETRND
+type: method
+description: |
+  Get random number
+category: Extended Math

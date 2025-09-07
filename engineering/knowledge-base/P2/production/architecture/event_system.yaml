@@ -1,0 +1,4 @@
+component: Event_System
+category: synchronization
+description: |
+  Hardware event tracking and interrupts

@@ -1,0 +1,5 @@
+method: PINCLEAR
+type: method
+description: |
+  Clear smart pins: DIR=0, WRPIN=0
+category: SmartPin Operations

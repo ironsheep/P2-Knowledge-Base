@@ -1,0 +1,5 @@
+operator: "^"
+type: operator
+description: |
+  Bitwise exclusive OR
+category: Binary XOR

@@ -1,0 +1,5 @@
+method: AKPIN
+type: method
+description: |
+  Acknowledge smart pins
+category: SmartPin Operations

@@ -1,0 +1,5 @@
+method: QLOG
+type: method
+description: |
+  Logarithm via CORDIC
+category: CORDIC Operations

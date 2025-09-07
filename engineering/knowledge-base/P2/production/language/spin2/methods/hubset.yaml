@@ -1,0 +1,5 @@
+method: HUBSET
+type: method
+description: |
+  Execute HUBSET instruction with value
+category: Clock Control

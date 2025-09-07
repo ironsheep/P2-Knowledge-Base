@@ -1,0 +1,10 @@
+component: P2 Edge Module
+category: module
+description: |
+  Compact P2 module with edge connector
+features:
+  - 64 I/O pins via edge connector
+  - 32MB HyperRAM
+  - 8MB Flash
+  - Castellated edge for soldering
+  - Mini form factor

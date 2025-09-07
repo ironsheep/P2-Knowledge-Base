@@ -1,0 +1,5 @@
+method: WAITUS
+type: method
+description: |
+  Delay for microseconds
+category: Delays

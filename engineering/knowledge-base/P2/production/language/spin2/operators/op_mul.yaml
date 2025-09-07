@@ -1,0 +1,5 @@
+operator: "*"
+type: operator
+description: |
+  Integer/float multiply
+category: Multiply

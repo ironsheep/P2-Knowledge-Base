@@ -1,0 +1,10 @@
+component: HUB
+category: shared_memory
+description: |
+  Central shared memory and resources
+features:
+  - Last 16KB write-protectable
+  - Boot ROM (16KB)
+  - FIFO for hub execution
+  - 64-bit system counter
+  - 16 semaphore locks

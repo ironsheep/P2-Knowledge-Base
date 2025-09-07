@@ -1,0 +1,5 @@
+method: WYPIN
+type: method
+description: |
+  Write Y register of smart pins
+category: SmartPin Operations

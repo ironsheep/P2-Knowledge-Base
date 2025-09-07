@@ -1,0 +1,5 @@
+method: GETMS
+type: method
+description: |
+  Get milliseconds since boot
+category: Time Measurement

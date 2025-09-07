@@ -1,0 +1,5 @@
+method: LSTRING
+type: method
+description: |
+  Create length-prefixed string
+category: String Creation

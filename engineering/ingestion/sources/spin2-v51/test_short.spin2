@@ -1,8 +1,0 @@
-' Test short symbols
-CON
-  a = 1
-  ab = 2
-  abc = 3
-  
-PUB main()
-  return a + ab + abc

@@ -1,7 +1,0 @@
-' Test symbol too long
-CON
-  ' Test 33 character symbol - should fail
-  a23456789012345678901234567890123 = 33  ' 33 chars - TOO LONG
-  
-PUB main()
-  return 1

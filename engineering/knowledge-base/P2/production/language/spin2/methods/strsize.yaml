@@ -1,0 +1,5 @@
+method: STRSIZE
+type: method
+description: |
+  Get string length (not including terminator)
+category: Comparison

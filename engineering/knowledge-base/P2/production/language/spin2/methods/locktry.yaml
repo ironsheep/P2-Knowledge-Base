@@ -1,0 +1,5 @@
+method: LOCKTRY
+type: method
+description: |
+  Try to capture lock, -1 if successful or 0 if taken
+category: Lock Management

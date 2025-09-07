@@ -1,0 +1,5 @@
+method: CALL
+type: method
+description: |
+  Call PASM code
+category: String Creation

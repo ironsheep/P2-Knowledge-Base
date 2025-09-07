@@ -1,0 +1,5 @@
+method: SIZEOF
+type: method
+description: |
+  Get size of structure in bytes
+category: String Creation

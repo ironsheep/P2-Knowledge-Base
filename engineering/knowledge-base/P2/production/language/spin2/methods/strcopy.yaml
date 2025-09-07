@@ -1,0 +1,5 @@
+method: STRCOPY
+type: method
+description: |
+  Copy string with maximum length
+category: Comparison

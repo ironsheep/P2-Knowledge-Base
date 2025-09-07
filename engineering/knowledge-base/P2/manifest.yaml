@@ -32,7 +32,7 @@ layers:
 
 content:
   instructions:
-    path: /instructions/pasm2/
+    path: /production/instructions/pasm2/
     count: 357
     format: YAML
     naming: pasm2_{mnemonic}.yaml
@@ -41,12 +41,12 @@ content:
   language:
     spin2:
       methods:
-        path: /language/spin2/
+        path: /production/language/spin2/
         count: 75
         format: YAML
         naming: spin2_{method}.yaml
       operators:
-        path: /language/spin2/
+        path: /production/language/spin2/
         count: 51
         format: YAML
         naming: spin2_op_{operator}.yaml

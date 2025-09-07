@@ -1,0 +1,5 @@
+method: BYTESWAP
+type: method
+description: |
+  Swap bytes between addresses
+category: Block Operations

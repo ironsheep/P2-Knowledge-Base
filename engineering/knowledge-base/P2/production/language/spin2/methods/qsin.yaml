@@ -1,0 +1,5 @@
+method: QSIN
+type: method
+description: |
+  Calculate sine using CORDIC
+category: CORDIC Operations

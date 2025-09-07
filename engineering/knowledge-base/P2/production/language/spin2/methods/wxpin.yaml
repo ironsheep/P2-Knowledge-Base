@@ -1,0 +1,5 @@
+method: WXPIN
+type: method
+description: |
+  Write X register of smart pins
+category: SmartPin Operations

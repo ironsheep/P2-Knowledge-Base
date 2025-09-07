@@ -1,0 +1,5 @@
+method: POLLATN
+type: method
+description: |
+  Check for ATN strobe, -1 if strobed or 0 if not
+category: Attention Signaling

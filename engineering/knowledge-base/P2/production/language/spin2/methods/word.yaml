@@ -1,0 +1,5 @@
+method: WORD
+type: method
+description: |
+  Create word data sequence
+category: String Creation

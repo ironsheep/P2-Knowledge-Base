@@ -1,0 +1,5 @@
+method: LOOKUPZ
+type: method
+description: |
+  Look up value by 0-based index
+category: String Creation

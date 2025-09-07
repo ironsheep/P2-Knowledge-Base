@@ -1,0 +1,5 @@
+method: STRING
+type: method
+description: |
+  Create string constant, returns address
+category: String Creation

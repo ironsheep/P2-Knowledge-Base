@@ -1,0 +1,5 @@
+method: MULDIV64
+type: method
+description: |
+  64-bit intermediate multiply/divide
+category: Extended Math

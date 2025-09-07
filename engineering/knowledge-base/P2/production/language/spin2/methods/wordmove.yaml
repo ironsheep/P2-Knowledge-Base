@@ -1,0 +1,5 @@
+method: WORDMOVE
+type: method
+description: |
+  Copy words
+category: Block Operations

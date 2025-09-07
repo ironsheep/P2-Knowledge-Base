@@ -1,0 +1,5 @@
+method: WORDFILL
+type: method
+description: |
+  Fill memory with word value
+category: Fill Operations

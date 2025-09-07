@@ -1,0 +1,5 @@
+method: LOCKREL
+type: method
+description: |
+  Release captured lock
+category: Lock Management

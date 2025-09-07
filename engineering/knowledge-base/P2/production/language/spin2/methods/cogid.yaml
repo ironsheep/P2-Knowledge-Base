@@ -1,0 +1,5 @@
+method: COGID
+type: method
+description: |
+  Get current cog's ID
+category: Cog Management

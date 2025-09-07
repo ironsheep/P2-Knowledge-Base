@@ -1,0 +1,5 @@
+method: RDPIN
+type: method
+description: |
+  Read and acknowledge smart pin, bit 31 = C flag
+category: SmartPin Operations

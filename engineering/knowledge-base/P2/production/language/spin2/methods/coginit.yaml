@@ -1,0 +1,5 @@
+method: COGINIT
+type: method
+description: |
+  Start PASM code in a cog, returns cog ID or -1 if no cog free
+category: Cog Management

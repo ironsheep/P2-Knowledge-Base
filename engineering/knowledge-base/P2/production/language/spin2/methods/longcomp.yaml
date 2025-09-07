@@ -1,0 +1,5 @@
+method: LONGCOMP
+type: method
+description: |
+  Compare longs, returns -1 if match
+category: Comparison

@@ -1,0 +1,5 @@
+method: GETCRC
+type: method
+description: |
+  Calculate CRC with specified polynomial
+category: String Creation

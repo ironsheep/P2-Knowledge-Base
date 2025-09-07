@@ -1,0 +1,5 @@
+method: PINSTART
+type: method
+description: |
+  Start smart pins: DIR=0, WRPIN=Mode, WXPIN=Xval, WYPIN=Yval, DIR=1
+category: SmartPin Operations

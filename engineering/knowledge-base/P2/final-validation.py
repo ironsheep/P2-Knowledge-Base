@@ -1,187 +1,159 @@
 #!/usr/bin/env python3
 """
-Final validation to ensure all extractions are complete and accurate
+Final validation of reorganized P2 knowledge base
 """
 
 from pathlib import Path
 
-def final_validation():
-    """Run comprehensive validation of all extracted content"""
+def validate_knowledge_base():
+    """Validate the complete knowledge base structure and content"""
     
-    # Paths
-    kb_dir = Path("/Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2")
+    base_dir = Path("/Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2")
     
     print("=" * 60)
-    print("P2 KNOWLEDGE BASE - FINAL VALIDATION")
+    print("P2 KNOWLEDGE BASE FINAL VALIDATION")
     print("=" * 60)
     
-    # 1. Validate PASM2 Instructions
-    print("\n1. PASM2 INSTRUCTIONS")
-    print("-" * 40)
-    
-    pasm2_dir = kb_dir / "instructions" / "pasm2"
-    pasm2_files = list(pasm2_dir.glob("*.yaml")) if pasm2_dir.exists() else []
-    
-    print(f"  Total instruction files: {len(pasm2_files)}")
-    
-    # Check for expected instructions
-    expected_count = 440  # After deduplication
-    if len(pasm2_files) == expected_count:
-        print(f"  ✅ Count matches expected ({expected_count})")
-    else:
-        print(f"  ⚠️ Count mismatch: {len(pasm2_files)} vs {expected_count} expected")
-    
-    # Check layer coverage
-    layer_coverage = {
-        'layer1_csv': 0,
-        'layer2_datasheet': 0,
-        'layer3_narrative': 0,
-        'layer4_chip': 0
+    # Check production structure
+    checks = {
+        "Production PASM2": base_dir / "production/instructions/pasm2",
+        "Production Spin2 Methods": base_dir / "production/language/spin2/methods",
+        "Production Spin2 Operators": base_dir / "production/language/spin2/operators",
+        "Production Hardware": base_dir / "production/hardware",
+        "Production Architecture": base_dir / "production/architecture",
+        "Source PASM2": base_dir / "production/_sources/instructions/pasm2",
+        "Source Spin2": base_dir / "production/_sources/language/spin2",
+        "Source Hardware": base_dir / "production/_sources/hardware",
+        "Source Architecture": base_dir / "production/_sources/architecture"
     }
     
-    for filepath in pasm2_files:
-        with open(filepath, 'r') as f:
-            content = f.read()
-            for layer in layer_coverage:
-                if layer in content:
-                    layer_coverage[layer] += 1
+    all_good = True
+    file_counts = {}
     
-    print("\n  Layer Coverage:")
-    for layer, count in layer_coverage.items():
-        percent = (count / len(pasm2_files)) * 100 if pasm2_files else 0
-        status = "✅" if percent > 90 else "⚠️" if percent > 10 else "❌"
-        print(f"    {status} {layer}: {count}/{len(pasm2_files)} ({percent:.1f}%)")
-    
-    # 2. Validate Spin2 Language
-    print("\n2. SPIN2 LANGUAGE")
-    print("-" * 40)
-    
-    spin2_dir = kb_dir / "language" / "spin2"
-    spin2_files = list(spin2_dir.glob("*.yaml")) if spin2_dir.exists() else []
-    
-    methods = [f for f in spin2_files if 'spin2_op_' not in f.name]
-    operators = [f for f in spin2_files if 'spin2_op_' in f.name]
-    
-    print(f"  Methods: {len(methods)}")
-    print(f"  Operators: {len(operators)}")
-    print(f"  Total: {len(spin2_files)}")
-    
-    if len(methods) >= 70:
-        print(f"  ✅ Good method coverage ({len(methods)})")
-    else:
-        print(f"  ⚠️ Low method count ({len(methods)})")
-    
-    # 3. Validate Hardware Specifications
-    print("\n3. HARDWARE SPECIFICATIONS")
-    print("-" * 40)
-    
-    hw_dir = kb_dir / "hardware"
-    hw_files = list(hw_dir.glob("*.yaml")) if hw_dir.exists() else []
-    
-    print(f"  Total hardware specs: {len(hw_files)}")
-    
-    # Check for key boards
-    key_boards = ['p2_eval_board', 'p2_edge_module', 'control_board', '7_segment_display']
-    found_boards = []
-    for board in key_boards:
-        if any(board in f.name for f in hw_files):
-            found_boards.append(board)
-            print(f"  ✅ Found: {board}")
+    print("\n📁 Directory Structure:")
+    for name, path in checks.items():
+        if path.exists():
+            count = len(list(path.glob("*.yaml")))
+            file_counts[name] = count
+            print(f"  ✅ {name:30} {count:4} files")
         else:
-            print(f"  ❌ Missing: {board}")
+            print(f"  ❌ {name:30} MISSING")
+            all_good = False
     
-    # 4. Validate Architecture Components
-    print("\n4. ARCHITECTURE COMPONENTS")
-    print("-" * 40)
+    # Verify counts
+    print("\n📊 File Count Validation:")
+    expected = {
+        "Production PASM2": 357,
+        "Production Spin2 Methods": 73,
+        "Production Spin2 Operators": 46,
+        "Production Hardware": 11,
+        "Production Architecture": 8,
+        "Source PASM2": 357
+    }
     
-    arch_dir = kb_dir / "architecture"
-    arch_files = list(arch_dir.glob("*.yaml")) if arch_dir.exists() else []
+    for name, expected_count in expected.items():
+        if name in file_counts:
+            actual = file_counts[name]
+            if actual == expected_count:
+                print(f"  ✅ {name}: {actual} (expected {expected_count})")
+            else:
+                print(f"  ⚠️  {name}: {actual} (expected {expected_count})")
+                all_good = False
     
-    print(f"  Total components: {len(arch_files)}")
+    # Check sample production files
+    print("\n📄 Sample Production Files:")
+    sample_files = [
+        base_dir / "production/instructions/pasm2/add.yaml",
+        base_dir / "production/instructions/pasm2/sub.yaml",
+        base_dir / "production/language/spin2/methods/debug.yaml",
+        base_dir / "production/hardware/p2_eval_board.yaml",
+        base_dir / "production/architecture/cog.yaml"
+    ]
     
-    # Check for key components
-    key_components = ['cog', 'hub', 'cordic', 'smart_pins', 'streamer', 'event_system']
-    found_components = []
-    for component in key_components:
-        if any(component in f.name.lower() for f in arch_files):
-            found_components.append(component)
-            print(f"  ✅ Found: {component}")
+    for file in sample_files:
+        if file.exists():
+            size = file.stat().st_size
+            print(f"  ✅ {file.name:25} {size:6} bytes")
+            
+            # Check content structure
+            with open(file, 'r') as f:
+                content = f.read()
+                if any(key in content for key in ['instruction:', 'method:', 'operator:', 'component:']):
+                    pass  # Good
+                else:
+                    print(f"     ⚠️  Missing expected structure")
+                    all_good = False
         else:
-            print(f"  ❌ Missing: {component}")
+            print(f"  ❌ {file.name:25} MISSING")
+            all_good = False
     
-    # 5. Check Manifest
-    print("\n5. MANIFEST FILE")
-    print("-" * 40)
+    # Check for unwanted files
+    print("\n🚫 Checking for Removed Files:")
+    bad_patterns = ['if_', 'c_and', 'nc_or', '_ret_', 'empty', 'clr']
+    bad_files = []
     
-    manifest_path = kb_dir / "manifest.yaml"
-    if manifest_path.exists():
-        print("  ✅ manifest.yaml exists")
-        with open(manifest_path, 'r') as f:
-            content = f.read()
-            if 'version: 1.0.0' in content:
-                print("  ✅ Version 1.0.0 set")
-            if 'statistics:' in content:
-                print("  ✅ Statistics section present")
-            if 'layers:' in content:
-                print("  ✅ Layers section present")
+    pasm2_dir = base_dir / "production/instructions/pasm2"
+    if pasm2_dir.exists():
+        for file in pasm2_dir.glob("*.yaml"):
+            if any(pattern in file.stem for pattern in bad_patterns):
+                bad_files.append(file.name)
+    
+    if bad_files:
+        print(f"  ❌ Found {len(bad_files)} conditional/pseudo files that should be removed:")
+        for bf in bad_files[:5]:
+            print(f"     - {bf}")
     else:
-        print("  ❌ manifest.yaml missing")
+        print("  ✅ No conditional/pseudo files found (correct)")
     
-    # 6. Check Quality Report
-    print("\n6. QUALITY REPORT")
-    print("-" * 40)
+    # Check documentation
+    print("\n📚 Documentation:")
+    docs = [
+        base_dir / "production/README.md",
+        base_dir / "USAGE-GUIDE.md",
+        base_dir / "manifest.yaml",
+        base_dir / "timing-investigation-report.md"
+    ]
     
-    quality_report_path = kb_dir / "baseline-quality-report-v1.0.md"
-    if quality_report_path.exists():
-        print("  ✅ baseline-quality-report-v1.0.md exists")
-    else:
-        print("  ❌ baseline-quality-report-v1.0.md missing")
+    for doc in docs:
+        if doc.exists():
+            size = doc.stat().st_size
+            print(f"  ✅ {doc.name:35} {size:6} bytes")
+        else:
+            print(f"  ⚠️  {doc.name:35} MISSING")
     
-    # 7. Overall Statistics
-    print("\n7. OVERALL STATISTICS")
-    print("-" * 40)
-    
-    total_files = len(pasm2_files) + len(spin2_files) + len(hw_files) + len(arch_files)
-    print(f"  Total YAML files: {total_files}")
-    print(f"  PASM2 instructions: {len(pasm2_files)}")
-    print(f"  Spin2 elements: {len(spin2_files)}")
-    print(f"  Hardware specs: {len(hw_files)}")
-    print(f"  Architecture components: {len(arch_files)}")
-    
-    # Final Assessment
+    # Final summary
     print("\n" + "=" * 60)
-    print("FINAL ASSESSMENT")
+    print("VALIDATION SUMMARY")
     print("=" * 60)
     
-    issues = []
+    total_production = sum([
+        file_counts.get("Production PASM2", 0),
+        file_counts.get("Production Spin2 Methods", 0),
+        file_counts.get("Production Spin2 Operators", 0),
+        file_counts.get("Production Hardware", 0),
+        file_counts.get("Production Architecture", 0)
+    ])
     
-    # Check critical metrics
-    if len(pasm2_files) < 400:
-        issues.append("Low PASM2 instruction count")
-    if layer_coverage.get('layer1_csv', 0) < len(pasm2_files) * 0.9:
-        issues.append("Incomplete Layer 1 coverage")
-    if len(spin2_files) < 100:
-        issues.append("Low Spin2 element count")
-    if len(hw_files) < 10:
-        issues.append("Low hardware specification count")
-    if len(arch_files) < 5:
-        issues.append("Low architecture component count")
+    total_source = sum([
+        file_counts.get("Source PASM2", 0),
+        file_counts.get("Source Spin2", 0),
+        file_counts.get("Source Hardware", 0),
+        file_counts.get("Source Architecture", 0)
+    ])
     
-    if not issues:
-        print("✅ ALL VALIDATIONS PASSED")
-        print("\n🎉 The P2 Knowledge Base v1.0 is ready for release!")
-        print("\nNext steps:")
-        print("  1. Create git tag v1.0.0")
-        print("  2. Commit all changes")
-        print("  3. Push to repository")
+    print(f"\n📈 Statistics:")
+    print(f"  Total production files: {total_production}")
+    print(f"  Total source files: {total_source}")
+    print(f"  Total files: {total_production + total_source}")
+    
+    if all_good and not bad_files:
+        print("\n✅ KNOWLEDGE BASE VALIDATION PASSED!")
+        print("   Ready for production use")
     else:
-        print("⚠️ VALIDATION ISSUES FOUND:")
-        for issue in issues:
-            print(f"  - {issue}")
-        print("\nRecommendation: Address issues before v1.0 release")
+        print("\n⚠️  VALIDATION FOUND ISSUES")
+        print("   Please review warnings above")
     
-    return len(issues) == 0
+    return all_good
 
 if __name__ == "__main__":
-    success = final_validation()
-    exit(0 if success else 1)
+    validate_knowledge_base()

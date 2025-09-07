@@ -1,0 +1,5 @@
+method: RQPIN
+type: method
+description: |
+  Read smart pin without acknowledge
+category: SmartPin Operations

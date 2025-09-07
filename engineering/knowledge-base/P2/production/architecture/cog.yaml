@@ -1,0 +1,10 @@
+component: COG
+category: processor
+description: |
+  Symmetric 32-bit processor core
+features:
+  - Independent execution
+  - Full I/O pin access
+  - Hardware stack (8 levels)
+  - Carry and Zero flags
+  - Interrupts (3 priority levels)

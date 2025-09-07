@@ -1,0 +1,5 @@
+method: LOOKDOWNZ
+type: method
+description: |
+  Find 0-based index of value
+category: String Creation
