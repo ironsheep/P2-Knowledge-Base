@@ -1,4 +1,216 @@
+# Clock System - Flexible Multi-Source Clock Generation
+# Source: Silicon Doc v35, P2 Datasheet
+
 component: Clock_System
 category: timing
 description: |
-  Flexible clock generation system
+  Flexible clock generation system supporting multiple clock sources with PLL
+  multiplication, programmable dividers, and automatic source switching. Provides
+  stable timing for CPU cores and peripherals.
+
+clock_sources:
+  rcfast:
+    description: "Internal RC oscillator - fast mode"
+    frequency: "~20-25 MHz (process/temperature dependent)"
+    guaranteed_min: "20 MHz"
+    stability: "±10% over temperature"
+    power: "Normal power consumption"
+    boot_default: true
+    
+  rcslow:
+    description: "Internal RC oscillator - slow mode"
+    frequency: "~20 kHz"
+    stability: "±50% over temperature"
+    power: "Ultra-low power"
+    usage: "Sleep modes, RTC applications"
+    
+  crystal:
+    description: "External crystal oscillator"
+    frequency_range: "10-20 MHz recommended"
+    xi_pin: "Crystal input"
+    xo_pin: "Crystal output"
+    loading_capacitors: "Internal, programmable"
+    
+  external:
+    description: "External clock input"
+    input_pin: "XI pin"
+    frequency_range: "DC to 350 MHz"
+    duty_cycle: "40-60% recommended"
+
+pll_system:
+  input_divider:
+    range: "1-64"
+    bits: "6 bits (PPPP field)"
+    
+  vco_multiplier:
+    range: "1-1024"
+    bits: "10 bits (MMMM_MMMMMM field)"
+    
+  vco_frequency:
+    nominal_range: "100-200 MHz"
+    overclock_max: "350 MHz"
+    equation: "f_vco = f_input / divider * multiplier"
+    
+  post_divider:
+    values: [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30]
+    bits: "4 bits (DDDD field)"
+    
+  output_frequency:
+    equation: "f_out = f_vco / post_divider"
+    max_recommended: "180 MHz"
+    max_overclock: "350 MHz"
+
+hubset_configuration:
+  instruction: "HUBSET {#}D"
+  immediate_mode: "HUBSET ##config"
+  
+  config_fields:
+    d31: "Reset request (write 1 to reset chip)"
+    d30_28: "Reserved"
+    d27_24: "XI divider for PLL (PPPP)"
+    d23_14: "VCO multiplier (MMMM_MMMMMM)"
+    d13_10: "Reserved"
+    d9: "PLL power enable"
+    d8: "Crystal oscillator enable"
+    d7_4: "Post divider selection (DDDD)"
+    d3_2: "Clock source select (SS)"
+    d1_0: "Crystal configuration (CC)"
+
+clock_modes:
+  crystal_config:
+    cc_field: "D[1:0]"
+    modes:
+      0b00: "XI/XO pins Hi-Z (oscillator off)"
+      0b01: "XI/XO with 1MΩ feedback, no caps"
+      0b10: "XI/XO with 1MΩ feedback, 15pF caps"
+      0b11: "XI/XO with 1MΩ feedback, 30pF caps"
+      
+  source_select:
+    ss_field: "D[3:2]"
+    modes:
+      0b00: "RCFAST (~20-25 MHz)"
+      0b01: "RCSLOW (~20 kHz)"
+      0b10: "Crystal/External on XI"
+      0b11: "PLL output"
+
+clock_switching:
+  glitch_free: true
+  automatic_fallback: "Falls back to RCFAST if PLL/crystal fails"
+  switching_time: "~5 microseconds typical"
+  
+  sequence:
+    - "Configure new clock source"
+    - "Enable source (crystal/PLL)"
+    - "Wait for stabilization"
+    - "Switch to new source"
+    - "Optional: Disable old source"
+
+stabilization_timing:
+  crystal: "~10 ms typical startup"
+  pll_lock: "~10 microseconds"
+  rcfast: "Immediate (always running)"
+  rcslow: "~100 microseconds"
+
+programming_examples:
+  basic_crystal_20mhz:
+    code: |
+      ' 20 MHz crystal, no PLL
+      HUBSET  ##%00_10      ' Crystal with 15pF caps
+      WAITX   ##20_000_000/100  ' Wait 10ms
+      HUBSET  ##%10_10      ' Switch to crystal
+      
+  pll_160mhz_from_20mhz_crystal:
+    code: |
+      ' 20 MHz crystal → 160 MHz via PLL
+      ' VCO = 20MHz * 16 = 320MHz
+      ' Output = 320MHz / 2 = 160MHz
+      HUBSET  ##%00_10                    ' Enable crystal
+      WAITX   ##20_000_000/100            ' Wait 10ms
+      HUBSET  ##%10_10                    ' Switch to crystal
+      HUBSET  ##%0001_0000_0000_00_10_10 ' PLL: /1 * 16 / 2
+      WAITX   ##20_000_000/10000          ' Wait 100µs
+      HUBSET  ##%0001_0000_0000_00_10_11 ' Switch to PLL
+      
+  overclock_250mhz:
+    code: |
+      ' 20 MHz crystal → 250 MHz (overclock)
+      ' VCO = 20MHz * 25 = 500MHz (overclock)
+      ' Output = 500MHz / 2 = 250MHz
+      HUBSET  ##%00_10                    ' Enable crystal
+      WAITX   ##20_000_000/100            ' Wait 10ms
+      HUBSET  ##%10_10                    ' Switch to crystal
+      HUBSET  ##%0001_1001_0000_00_10_10 ' PLL: /1 * 25 / 2
+      WAITX   ##20_000_000/10000          ' Wait 100µs
+      HUBSET  ##%0001_1001_0000_00_10_11 ' Switch to PLL
+
+clock_distribution:
+  system_clock: "Main clock for all COGs"
+  peripheral_clock: "Same as system clock"
+  smart_pin_clock: "Derived from system clock"
+  adc_clock: "System clock / 2"
+  
+  clock_domains:
+    - "COG execution units"
+    - "Hub memory and arbitration"
+    - "CORDIC pipeline"
+    - "Smart pins"
+    - "Streamer NCOs"
+    - "Video generation"
+
+power_management:
+  clock_gating: "Automatic for idle COGs"
+  
+  power_modes:
+    full_power: "All clocks active"
+    reduced_power: "Lower frequency operation"
+    sleep_mode: "RCSLOW with most circuits off"
+    
+  power_reduction:
+    - "Use lower clock frequencies when possible"
+    - "Stop unused COGs"
+    - "Disable PLL when not needed"
+    - "Use RCSLOW for standby"
+
+frequency_measurement:
+  getct_instruction: "Read 64-bit system counter"
+  counter_frequency: "Same as system clock"
+  
+  measuring_actual_frequency:
+    code: |
+      GETCT   start_count
+      WAITX   ##measure_time
+      GETCT   end_count
+      SUB     end_count, start_count
+      ' Frequency = end_count / (measure_time / nominal_freq)
+
+clock_specifications:
+  max_frequency:
+    recommended: "180 MHz"
+    typical_overclock: "250 MHz"
+    absolute_max: "350 MHz (may be unstable)"
+    
+  frequency_vs_voltage:
+    1v8_core: "180 MHz max recommended"
+    overvolting: "Not recommended"
+    
+  temperature_effects:
+    rcfast: "Frequency decreases with temperature"
+    crystal: "Depends on crystal specifications"
+    pll: "VCO frequency varies with temperature"
+
+related_systems:
+  counter_system: "64-bit free-running counter"
+  event_system: "CT events for timing"
+  smart_pins: "Clock-based timing modes"
+  video_generation: "Pixel clock derivation"
+
+debugging:
+  clock_output: "Can output clock on pins for measurement"
+  pll_lock_detection: "Check PLL stability before switching"
+  fallback_mode: "System always falls back to RCFAST if clock fails"
+
+see_also:
+  - "HUBSET instruction reference"
+  - "PLL configuration calculator"
+  - "Crystal selection guide"
+  - "Power optimization techniques"

@@ -1,4 +1,241 @@
+# Streamer - High-Speed NCO-Driven DMA Engine
+# Source: Silicon Doc v35, P2 Datasheet
+
 component: Streamer
 category: dma_engine
 description: |
-  High-speed data streaming engine
+  High-speed data streaming engine with NCO timing control for autonomous
+  data movement between hub memory, pins, DACs, and LUT. Operates independently
+  of COG execution for zero-overhead I/O operations.
+
+architecture:
+  per_cog: "Each COG has its own streamer"
+  nco_bits: 32
+  nco_frequency: "Phase accumulator with programmable frequency"
+  autonomous: true
+  zero_overhead: true
+
+core_instructions:
+  setxfrq:
+    syntax: "SETXFRQ {#}D"
+    operation: "Set NCO frequency (32-bit value)"
+    calculation: "Frequency = D * clock_freq / 2^32"
+    
+  xinit:
+    syntax: "XINIT {#}D,{#}S"
+    operation: "Start immediately with zero phase"
+    d_parameter: "Command and count"
+    s_parameter: "Hub/LUT address or immediate data"
+    
+  xzero:
+    syntax: "XZERO {#}D,{#}S"
+    operation: "Start on NCO rollover with zero phase"
+    synchronization: "Waits for NCO MSB transition"
+    
+  xcont:
+    syntax: "XCONT {#}D,{#}S"
+    operation: "Start on NCO rollover, continue phase"
+    chaining: "Seamless command sequencing"
+    
+  xstop:
+    syntax: "XSTOP"
+    operation: "Stop streamer immediately"
+    
+  getxacc:
+    syntax: "GETXACC D"
+    operation: "Get Goertzel accumulators"
+    result: "X accumulator → D, Y accumulator → next S"
+
+command_format:
+  d_register: |
+    D[31:16]: Command configuration
+    D[15:0]: Transfer count (1-65535, $FFFF=infinite)
+    
+  command_bits:
+    d31_28: "Mode (0-15, defines operation type)"
+    d27_24: "DAC channel mapping (%dddd)"
+    d23: "Enable bit (e=pin out, w=hub write)"
+    d22_20: "Pin group selection (%ppp)"
+    d19_16: "Mode-specific configuration"
+
+operating_modes:
+  immediate_to_lut_to_pins:
+    modes: [0]
+    description: "Immediate 32-bit data → LUT → pins/DACs"
+    data_flow: "S[31:0] → LUT → selected outputs"
+    
+  immediate_to_pins:
+    modes: [1]
+    description: "Immediate data directly to pins/DACs"
+    widths: "1/2/4/8/16/32 bits"
+    
+  hub_to_lut_to_pins:
+    modes: [2, 3]
+    description: "Hub FIFO → LUT → pins/DACs"
+    fifo_modes: "RFBYTE/RFWORD/RFLONG"
+    
+  hub_to_pins:
+    modes: [4, 5, 6, 7]
+    description: "Hub FIFO directly to pins/DACs"
+    widths: "1/2/4/8/16/32 bits"
+    bit_order: "LSB or MSB first options"
+    
+  rgb_modes:
+    modes: [8, 9, 10]
+    description: "Hub data with RGB format conversion"
+    formats:
+      - "LUMA8: 8-bit luminance"
+      - "RGBI8: 8-bit RGBI"
+      - "RGB8: 3:3:2 format"
+      - "RGB16: 5:6:5 format"
+      - "RGB24: 8:8:8 format"
+    output: "32-bit RRRRRRRR_GGGGGGGG_BBBBBBBB_00000000"
+    
+  pins_to_hub:
+    modes: [11, 12]
+    description: "Pin input capture to hub via FIFO"
+    widths: "1/2/4/8/16/32 bits"
+    synchronization: "Optional external clock"
+    
+  adc_to_hub:
+    modes: [13]
+    description: "ADC sampling to hub/LUT"
+    channels: "1-4 ADCs summed"
+    filtering: "SINC1 or SINC2"
+    
+  dds_goertzel:
+    modes: [14, 15]
+    description: "Direct Digital Synthesis / Goertzel analysis"
+    dds: "Waveform generation from LUT"
+    goertzel: "Single-frequency energy detection"
+
+nco_operation:
+  phase_accumulator: |
+    32-bit phase register
+    Phase = (phase & $7FFF_FFFF) + frequency
+    Rollover at MSB transition triggers transfer
+    
+  timing_control:
+    continuous: "Free-running at programmed frequency"
+    synchronized: "XZERO/XCONT for phase alignment"
+    external: "Pin-clocked modes available"
+
+dac_channel_mapping:
+  dddd_field: "D[27:24] controls DAC routing"
+  
+  mapping_table:
+    0b0000: "No DAC output"
+    0b0001: "X0 → all four DACs"
+    0b0010: "X1 → all four DACs"
+    0b0011: "X0 → DAC0/1, X1 → DAC2/3"
+    0b0100: "X2 → all four DACs"
+    0b0101: "X0 → DAC0, X2 → DAC1/2/3"
+    0b0110: "X1 → DAC0/1, X2 → DAC2/3"
+    0b0111: "X0 → DAC0, X1 → DAC1, X2 → DAC2/3"
+    0b1000: "X0 differential (X0→DAC0/2, !X0→DAC1/3)"
+    0b1111: "X3→DAC3, X2→DAC2, X1→DAC1, X0→DAC0"
+
+pin_group_selection:
+  ppp_field: "D[22:20] selects pin group"
+  groups:
+    - "Group 0: Pins 0-7"
+    - "Group 1: Pins 8-15"
+    - "Group 2: Pins 16-23"
+    - "Group 3: Pins 24-31"
+    - "Group 4: Pins 32-39"
+    - "Group 5: Pins 40-47"
+    - "Group 6: Pins 48-55"
+    - "Group 7: Pins 56-63"
+  wrapping: "Groups wrap around modulo 64"
+
+fifo_interface:
+  depth: "19-stage buffer"
+  hub_interface: "Automatic RFBYTE/RFWORD/RFLONG"
+  setup: "RDFAST/WRFAST instructions"
+  block_wrap: "Generates event on block boundary"
+
+events:
+  event_9: "Hub FIFO block wrap"
+  event_10: "Streamer empty (needs data)"
+  event_11: "Streamer finished"
+  event_12: "Streamer NCO rollover"
+  event_13: "Streamer read LUT $1FF"
+
+programming_patterns:
+  continuous_dac_output:
+    code: |
+      SETXFRQ ##$1000_0000      ' 1/16 clock rate
+      XINIT   ##$7000_FFFF, #0  ' Continuous DAC from LUT
+      
+  vga_output:
+    code: |
+      RDFAST  #0, frame_buffer  ' Setup FIFO
+      SETXFRQ ##pixel_freq       ' Set pixel clock
+      XINIT   ##mode_rgb8, #0   ' Start RGB output
+      
+  adc_capture:
+    code: |
+      WRFAST  #0, sample_buffer ' Setup write FIFO
+      SETXFRQ ##sample_rate      ' Set sample frequency
+      XINIT   ##mode_adc, #0     ' Start ADC capture
+      
+  command_chaining:
+    code: |
+      XINIT   ##cmd1, data1      ' Start first command
+      XZERO   ##cmd2, data2      ' Queue second (waits)
+      XCONT   ##cmd3, data3      ' Queue third (continues)
+
+special_features:
+  lut_sharing: |
+    Adjacent COG pairs can share LUT access
+    Allows double-buffered video
+    SETLUTS instruction enables sharing
+    
+  colorspace_converter: |
+    Real-time color format conversion
+    RGB to component video
+    NTSC/PAL encoding support
+    
+  dvi_hdmi_support: |
+    Hardware TMDS encoding
+    10-bit serialization
+    Differential pair output
+
+performance:
+  max_pin_rate: "Clock/2 for 1-bit mode"
+  max_hub_rate: "Clock/2 for long transfers"
+  latency: "2-3 clocks from command to output"
+  overhead: "Zero CPU overhead during streaming"
+
+applications:
+  video_generation:
+    - "VGA/HDMI output"
+    - "Composite video"
+    - "LCD panel driving"
+    
+  audio_processing:
+    - "I2S output"
+    - "PWM audio"
+    - "Multi-channel DAC"
+    
+  data_acquisition:
+    - "High-speed ADC capture"
+    - "Logic analyzer"
+    - "Oscilloscope frontend"
+    
+  communication:
+    - "High-speed serial"
+    - "Parallel bus interface"
+    - "Memory controller"
+
+related_components:
+  smart_pins: "Streamer can bypass smart pins for direct I/O"
+  cordic: "DDS/Goertzel modes use CORDIC"
+  hub_ram: "FIFO interface for hub access"
+  lut: "Can use as data source or buffer"
+
+see_also:
+  - "RDFAST/WRFAST FIFO setup"
+  - "Video generation guide"
+  - "DDS waveform synthesis"
+  - "High-speed I/O techniques"

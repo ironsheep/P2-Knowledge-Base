@@ -1,0 +1,217 @@
+# Serial Loader - Auto-baud ASCII Boot Protocol
+# Source: Silicon Doc v35, P2 Datasheet
+
+component: Serial_Loader
+category: boot_system
+description: |
+  Plain ASCII text-based serial boot loader with auto-baud detection supporting
+  9600 to 2 Mbaud. Provides terminal-friendly protocol for loading code and
+  configuring the P2 chip via serial connection.
+
+boot_sequence:
+  priority:
+    1: "Check P61 for pull-up (serial boot enable)"
+    2: "If P61 high: Enter serial loader"
+    3: "Otherwise check P60 (SPI flash)"
+    4: "Then check P59 (SD card)"
+    5: "Execute from hub $00000 when loaded"
+    
+  serial_pins:
+    p63: "Serial RX (input)"
+    p62: "Serial TX (output)"
+    p61: "Pull-up enables serial boot"
+    
+  timing:
+    initial_wait: "100ms for serial detection"
+    timeout: "60 seconds for first command"
+    activity_timeout: "None after first command"
+
+auto_baud_detection:
+  mechanism: "Measures bit timing from CR character"
+  trigger: "> " followed by space (0x3E, 0x20)"
+  
+  supported_rates:
+    minimum: "9600 baud"
+    maximum: "2 Mbaud"
+    common: [9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600, 1000000, 2000000]
+    
+  detection_sequence:
+    1: "Send '> ' prompt"
+    2: "Wait for CR (0x0D) or '>' character"
+    3: "Measure bit timing"
+    4: "Calculate baud divisor"
+    5: "Configure UART"
+
+protocol_commands:
+  prop_chk:
+    syntax: "Prop_Chk"
+    response: "'Prop_Ver Au' (version A silicon)"
+    purpose: "Validate communication"
+    encoding: "Plain ASCII"
+    
+  prop_clk:
+    syntax: "Prop_Clk P1 P2 P3"
+    parameters:
+      p1: "0=RCFAST, 1=RCSLOW, 2=XI/crystal"
+      p2: "Multiply factor (crystal mode)"
+      p3: "Divider (crystal mode)"
+    purpose: "Configure system clock"
+    example: "Prop_Clk 2 8 1 (crystal * 8 / 1)"
+    
+  prop_hex:
+    syntax: "Prop_Hex"
+    format: "Intel hex records"
+    purpose: "Load binary data in hex format"
+    
+    record_format: |
+      :LLAAAATTDD...CC
+      LL = byte count
+      AAAA = address
+      TT = type (00=data, 01=EOF)
+      DD = data bytes
+      CC = checksum
+      
+    example: ":10000000214601360121470136007EFE09D21940"
+    
+  prop_txt:
+    syntax: "Prop_Txt ~"
+    format: "Base64 encoded binary"
+    purpose: "Load binary data efficiently"
+    terminator: "~ character"
+    
+    encoding:
+      alphabet: "RFC 4648 standard Base64"
+      efficiency: "~75% vs 44% for hex"
+      padding: "= padding as needed"
+      
+    features:
+      - "Terminal-safe characters only"
+      - "More efficient than hex"
+      - "Supports whitespace"
+
+response_codes:
+  dot: "'.' - Processing/success"
+  question: "'?' - Error/invalid"
+  prompt: "'> ' - Ready for command"
+
+loading_process:
+  command_reception:
+    1: "Wait for command at prompt"
+    2: "Echo characters as received"
+    3: "Process on CR (0x0D)"
+    
+  data_reception:
+    hex_mode:
+      - "Process Intel hex records"
+      - "Validate checksums"
+      - "Write to hub memory"
+      - "Stop on EOF record"
+      
+    base64_mode:
+      - "Decode Base64 stream"
+      - "Write to hub memory"
+      - "Stop on '~' character"
+      
+  execution:
+    checksum: "Validate 'Prop' marker and checksum"
+    start_address: "$00000 in hub"
+    cog_start: "COG 0 loads and executes"
+
+multi_chip_support:
+  ina_masking:
+    description: "Use INA pattern to select specific chip"
+    pins: "P31-P0 state must match"
+    
+  inb_masking:
+    description: "Use INB pattern to select specific chip"
+    pins: "P63-P32 state must match"
+    
+  broadcast:
+    description: "No masking loads all chips"
+
+programming_examples:
+  basic_loader_session: |
+    > Prop_Chk
+    Prop_Ver Au
+    .
+    > Prop_Hex
+    :10000000506F72700400000000020000...
+    :00000001FF
+    .
+    (chip executes)
+    
+  base64_loading: |
+    > Prop_Txt ~
+    UHJvcAQAAAACAAAA...
+    ...base64 data...
+    ~
+    .
+    (chip executes)
+    
+  clock_configuration: |
+    > Prop_Clk 2 16 1
+    .
+    (now running at crystal * 16)
+
+error_handling:
+  invalid_command: "Returns '?'"
+  checksum_error: "Returns '?' and aborts"
+  timeout: "Returns to boot sequence"
+  
+  recovery:
+    - "Send CR to get new prompt"
+    - "Reset chip to restart"
+    - "Check baud rate"
+
+terminal_software:
+  requirements:
+    - "ASCII terminal mode"
+    - "No flow control"
+    - "8N1 format (8 bits, no parity, 1 stop)"
+    - "CR line endings"
+    
+  compatible_software:
+    - "PuTTY"
+    - "Tera Term"
+    - "minicom"
+    - "screen"
+    - "loadp2 utility"
+
+validation_format:
+  header_structure:
+    offset_0: "'Prop' marker (4 bytes)"
+    offset_4: "Checksum (4 bytes)"
+    offset_8: "Data length (4 bytes)"
+    
+  checksum_calculation:
+    algorithm: "Sum all longs, negate"
+    validation: "Sum of all longs = 0"
+
+special_features:
+  debug_friendly: "Plain text protocol"
+  human_readable: "Can type commands manually"
+  error_recovery: "Non-destructive errors"
+  clock_switching: "Can change frequency before loading"
+
+security_considerations:
+  no_authentication: "No password protection"
+  physical_access: "Requires serial connection"
+  disable_option: "Don't pull up P61"
+
+performance:
+  hex_loading: "~44% efficiency"
+  base64_loading: "~75% efficiency"
+  max_speed: "2 Mbaud = ~200KB/second"
+  typical_load_time: "< 3 seconds for 512KB"
+
+related_components:
+  boot_rom: "Contains serial loader code"
+  smart_pins: "Used for UART communication"
+  hub_memory: "Destination for loaded code"
+  clock_system: "Can be configured via loader"
+
+see_also:
+  - "Boot ROM source code"
+  - "loadp2 utility documentation"
+  - "Intel hex format specification"
+  - "Base64 encoding RFC 4648"

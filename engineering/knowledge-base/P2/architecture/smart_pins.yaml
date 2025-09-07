@@ -1,4 +1,224 @@
+# Smart Pins - 64 Autonomous I/O Processors
+# Source: Silicon Doc v35, P2 Datasheet
+
 component: Smart_Pins
 category: io_system
 description: |
-  Autonomous I/O pin processors
+  64 identical smart I/O pins, each with autonomous processing capabilities for
+  timing, counting, serial protocols, ADC/DAC operations, and more. Offloads
+  I/O processing from COGs for deterministic, high-performance operation.
+
+architecture:
+  pin_count: 64
+  pins_per_cog: "All 64 accessible by each COG"
+  independence: "Each pin operates autonomously"
+  configuration: "Per-pin 16-bit configuration"
+
+capabilities:
+  operating_modes: 32
+  input_routing: "±3 pins from any pin"
+  output_override: "Smart pin can control output"
+  adc_per_pin: "12-bit SAR ADC"
+  dac_per_pin: "8-bit DAC (16-bit with dithering)"
+
+operating_modes:
+  repository_modes:
+    00000: "Normal mode (pass-through)"
+    00001: "Long repository or DAC noise"
+    00010: "Long repository"
+    00011: "Long repository"
+    
+  pulse_nco_modes:
+    00100: "Pulse/cycle output"
+    00101: "Transition output"
+    00110: "NCO frequency"
+    00111: "NCO duty"
+    
+  pwm_modes:
+    01000: "PWM triangle"
+    01001: "PWM sawtooth"
+    01010: "PWM SMPS (switch-mode)"
+    
+  measurement_modes:
+    01011: "A/B quadrature encoder"
+    01100: "Count A-rise when B-high"
+    01101: "Count A-rise, inc/dec by B"
+    01110: "Count A-edges with optional B-dec"
+    01111: "Count A-high or A&B-high"
+    
+  timing_modes:
+    10000: "Time A-states"
+    10001: "Time A-high states"
+    10010: "Time X A-highs/rises/edges"
+    10011: "For X periods, count time"
+    10100: "For X periods, count states"
+    10101: "For X clocks, count periods"
+    10110: "For X clocks, count states"
+    10111: "For X clocks, count time"
+    
+  adc_modes:
+    11000: "ADC sample/filter, internal clock"
+    11001: "ADC sample/filter, external clock"
+    11010: "ADC scope with trigger"
+    
+  serial_modes:
+    11011: "USB host/device (pair mode)"
+    11100: "Synchronous serial receive"
+    11101: "Synchronous serial transmit"
+    11110: "Asynchronous serial transmit"
+    11111: "Asynchronous serial receive"
+
+pin_control_instructions:
+  configuration:
+    wrpin: "Configure smart pin mode and routing"
+    wxpin: "Write X parameter (mode-specific)"
+    wypin: "Write Y parameter (mode-specific)"
+    
+  operation:
+    dirh: "Enable smart pin (DIR high)"
+    dirl: "Disable smart pin (DIR low)"
+    
+  data_transfer:
+    rdpin: "Read smart pin result (clears IN)"
+    rqpin: "Read smart pin result (preserves IN)"
+    akpin: "Acknowledge smart pin (clears IN)"
+    
+  status:
+    testp: "Test smart pin IN flag"
+    testpn: "Test smart pin IN flag (not)"
+
+input_routing:
+  a_input:
+    selection: "4-bit field selects source"
+    options:
+      - "This pin's read state"
+      - "Relative ±1, ±2, ±3 pins"
+      - "This pin's OUT bit"
+      - "Inverted versions of above"
+      
+  b_input:
+    selection: "4-bit field selects source"
+    options: "Same as A input"
+    
+  input_filtering:
+    filt0: "12.5ns debounce"
+    filt1: "600ns debounce"
+    filt2: "16.4ms debounce"
+    filt3: "210ms debounce"
+
+configuration_format:
+  wrpin_d_parameter: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+  
+  fields:
+    aaaa: "A input selector (4 bits)"
+    bbbb: "B input selector (4 bits)"
+    fff: "Input logic/filtering (3 bits)"
+    m: "Low-level pin control (13 bits)"
+    tt: "Pin DIR/OUT control (2 bits)"
+    sssss: "Smart pin mode (5 bits)"
+
+x_y_z_registers:
+  x_register:
+    width: "32 bits"
+    usage: "Mode-specific configuration"
+    examples:
+      - "NCO frequency"
+      - "PWM period"
+      - "Measurement period"
+      
+  y_register:
+    width: "32 bits"
+    usage: "Mode-specific parameter"
+    examples:
+      - "PWM duty cycle"
+      - "Serial baud rate"
+      - "Count threshold"
+      
+  z_register:
+    width: "32 bits"
+    usage: "Result/accumulator"
+    read_via: "RDPIN/RQPIN instructions"
+
+in_flag:
+  purpose: "Signals operation complete"
+  setting: "Mode-specific conditions"
+  clearing:
+    - "RDPIN instruction"
+    - "AKPIN instruction"
+    - "Smart pin reset"
+    
+  events:
+    selectable: "Can trigger COG events"
+    interrupt: "Can trigger interrupts"
+
+adc_capabilities:
+  resolution: "12 bits"
+  type: "SAR (Successive Approximation)"
+  sampling_rate: "Up to 1 MSPS"
+  
+  modes:
+    single: "Single sample"
+    continuous: "Continuous sampling"
+    scope: "Triggered capture"
+    
+  filtering:
+    sinc1: "First-order sinc filter"
+    sinc2: "Second-order sinc filter"
+    sinc3: "Third-order sinc filter"
+
+dac_capabilities:
+  native_resolution: "8 bits"
+  dithered_resolution: "16 bits"
+  output_modes:
+    - "Direct 8-bit"
+    - "PWM dithered"
+    - "Pseudo-random dithered"
+    - "PDM (Pulse Density Modulation)"
+
+common_applications:
+  serial_communication:
+    - "UART (async serial)"
+    - "SPI (sync serial)"
+    - "I2C (with bit-banging)"
+    - "USB 1.1 low/full speed"
+    
+  motor_control:
+    - "Quadrature encoder input"
+    - "PWM motor drive"
+    - "Servo pulse generation"
+    - "Stepper motor control"
+    
+  measurement:
+    - "Frequency counting"
+    - "Pulse width measurement"
+    - "Period measurement"
+    - "Event counting"
+    
+  analog:
+    - "ADC sampling"
+    - "DAC output"
+    - "Analog comparator (via ADC)"
+    - "Sigma-delta modulation"
+
+performance:
+  max_toggle_rate: "Clock/2 (synchronous modes)"
+  async_serial: "Clock/16 (typical UART limit)"
+  adc_sample_rate: "1 MSPS maximum"
+  pwm_resolution: "Up to 16 bits at lower frequencies"
+
+pin_pairing:
+  usb_mode: "Even/odd pins for D-/D+"
+  differential: "Adjacent pins for differential signals"
+  quadrature: "Two pins for A/B encoder"
+
+related_components:
+  cogs: "Configure and control smart pins"
+  streamer: "Can bypass smart pins"
+  events: "Smart pin IN flags trigger events"
+  interrupts: "Can trigger COG interrupts"
+
+see_also:
+  - "Smart pin mode reference (modes/ directory)"
+  - "Serial protocol implementations"
+  - "PWM generation guide"
+  - "ADC/DAC applications"

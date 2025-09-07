@@ -1,0 +1,403 @@
+# P2 Interrupt System
+# Silicon Doc Reference: part1-cog.txt, pages 22-26
+# Datasheet Reference: pages 36-38, 71-72
+# Layer 1: Direct extraction from Silicon Doc v35 and P2 Datasheet
+
+component_name: "Interrupt System"
+
+component_type: "hardware_interrupt_controller"
+
+description: |
+  The P2 provides a sophisticated three-level interrupt system plus debug interrupt capability 
+  for each COG. Interrupts enable event-driven programming with automatic context switching,
+  allowing COGs to respond quickly to hardware events while preserving their execution state.
+  Each interrupt level has its own set of shadow registers for zero-overhead context switching.
+
+architecture:
+  interrupt_levels: 3
+  debug_interrupt: 1
+  
+  priority_scheme:
+    highest: "Debug interrupt (special)"
+    level_3: "Interrupt 3 (highest normal priority)"
+    level_2: "Interrupt 2 (medium priority)"
+    level_1: "Interrupt 1 (lowest priority)"
+    lowest: "Main code (non-interrupt)"
+  
+  shadow_registers:
+    description: "Each interrupt level has shadows of key registers"
+    shadowed:
+      - "IJMP3/2/1 - Interrupt jump addresses"
+      - "IRET3/2/1 - Interrupt return addresses"
+      - "PA/PB - Parameter registers"
+      - "PTRA/PTRB - Pointer registers"
+      - "Q - CORDIC result"
+      - "C/Z flags - Condition flags"
+    
+    context_switch_time: "0 clocks (automatic hardware swap)"
+  
+  interrupt_sources:
+    total_sources: 16
+    
+    source_types:
+      - type: "timer"
+        sources: ["CT-passed-CT1", "CT-passed-CT2", "CT-passed-CT3"]
+        description: "Counter timer comparisons"
+      
+      - type: "pattern_match"
+        sources: ["PAT-match", "PAT-mismatch"]
+        description: "Pin pattern detection"
+      
+      - type: "edge_detect"
+        sources: ["Any-edge-on-SELH", "POS-edge-on-SELH", "NEG-edge-on-SELH"]
+        description: "Pin edge detection on selected pins"
+      
+      - type: "hub_events"
+        sources: ["Hub-CORDIC-finished", "Streamer-finished", "Streamer-empty"]
+        description: "Hub subsystem completion events"
+      
+      - type: "pin_events"
+        sources: ["SE1-event", "SE2-event", "SE3-event", "SE4-event"]
+        description: "Smart pin events"
+      
+      - type: "attention"
+        sources: ["ATN-event"]
+        description: "Inter-COG attention signal"
+      
+      - type: "fifo"
+        sources: ["Hub-FIFO-interface"]
+        description: "Hub FIFO events"
+
+configuration_registers:
+  - register: "IJMP1"
+    address: "$1F0"
+    description: "Interrupt 1 jump address"
+    format: "20-bit address in hub or cog memory"
+  
+  - register: "IJMP2"
+    address: "$1F2"
+    description: "Interrupt 2 jump address"
+    format: "20-bit address in hub or cog memory"
+  
+  - register: "IJMP3"
+    address: "$1F4"
+    description: "Interrupt 3 jump address"
+    format: "20-bit address in hub or cog memory"
+  
+  - register: "IRET1"
+    address: "$1F1"
+    description: "Interrupt 1 return address (automatic)"
+    format: "20-bit address with C/Z flags in bits [31:30]"
+  
+  - register: "IRET2"
+    address: "$1F3"
+    description: "Interrupt 2 return address (automatic)"
+    format: "20-bit address with C/Z flags in bits [31:30]"
+  
+  - register: "IRET3"
+    address: "$1F5"
+    description: "Interrupt 3 return address (automatic)"
+    format: "20-bit address with C/Z flags in bits [31:30]"
+
+instructions:
+  - instruction: "STALLI"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 100100001"
+    description: "Stall interrupts to prevent triggering"
+    operation: |
+      Prevents any new interrupt from triggering
+      Currently executing interrupts continue
+      Interrupts remain pending but don't trigger
+    usage_example: |
+      STALLI                   ' Stop new interrupts
+      ' ... critical section ...
+      ALLOWI                   ' Re-enable interrupts
+  
+  - instruction: "ALLOWI"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 100100000"
+    description: "Allow interrupts to trigger"
+    operation: |
+      Enables interrupt triggering
+      Any pending interrupts trigger immediately
+    usage_example: |
+      ALLOWI                   ' Enable interrupts
+  
+  - instruction: "SETINT1"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 001000SSS"
+    description: "Configure interrupt 1 source"
+    operation: |
+      Set interrupt 1 to trigger from source S[3:0]
+      S = %0000: Disable interrupt 1
+      S = %0001-%1111: Select from 15 interrupt sources
+    usage_example: |
+      SETINT1 #%0001          ' INT1 from CT-passed-CT1
+  
+  - instruction: "SETINT2"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 001001SSS"
+    description: "Configure interrupt 2 source"
+    usage_example: |
+      SETINT2 #%0010          ' INT2 from CT-passed-CT2
+  
+  - instruction: "SETINT3"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 001010SSS"
+    description: "Configure interrupt 3 source"
+    usage_example: |
+      SETINT3 #%0011          ' INT3 from CT-passed-CT3
+  
+  - instruction: "TRGINT1"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 100101100"
+    description: "Trigger interrupt 1 by software"
+    operation: "Force interrupt 1 to trigger immediately"
+    usage_example: |
+      TRGINT1                 ' Software trigger INT1
+  
+  - instruction: "TRGINT2"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 100101101"
+    description: "Trigger interrupt 2 by software"
+  
+  - instruction: "TRGINT3"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 100101110"
+    description: "Trigger interrupt 3 by software"
+  
+  - instruction: "NIXINT1"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 100101111"
+    description: "Cancel pending interrupt 1"
+    operation: "Clear interrupt 1 pending flag"
+  
+  - instruction: "NIXINT2"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 100110000"
+    description: "Cancel pending interrupt 2"
+  
+  - instruction: "NIXINT3"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 100110001"
+    description: "Cancel pending interrupt 3"
+  
+  - instruction: "RETI0"
+    encoding: "EEEE 1101101 CZ1 111111111 000101101"
+    description: "Return from interrupt with flags restore"
+    operation: |
+      Pop from interrupt stack
+      Restore C/Z flags from IRET register
+      Continue main code execution
+    flags_affected: "C, Z (restored)"
+    usage_example: |
+      RETI0                   ' Return and restore flags
+  
+  - instruction: "RETI1"
+    encoding: "EEEE 1101101 CZ1 111111111 000101110"
+    description: "Return from interrupt 1"
+  
+  - instruction: "RETI2"
+    encoding: "EEEE 1101101 CZ1 111111111 000101111"
+    description: "Return from interrupt 2"
+  
+  - instruction: "RETI3"
+    encoding: "EEEE 1101101 CZ1 111111111 000110000"
+    description: "Return from interrupt 3"
+
+interrupt_sources_detail:
+  - source_id: "%0000"
+    name: "Disabled"
+    description: "Interrupt disabled"
+  
+  - source_id: "%0001"
+    name: "CT-passed-CT1"
+    description: "System counter >= CT1 register"
+    setup: |
+      ADDCT1  timeout, #0     ' Set CT1 to timeout value
+      SETINT1 #%0001          ' Enable INT1 on CT >= CT1
+  
+  - source_id: "%0010"
+    name: "CT-passed-CT2"
+    description: "System counter >= CT2 register"
+  
+  - source_id: "%0011"
+    name: "CT-passed-CT3"
+    description: "System counter >= CT3 register"
+  
+  - source_id: "%0100"
+    name: "SE1-event"
+    description: "Smart pin event 1 (IN rise on SELH pins)"
+  
+  - source_id: "%0101"
+    name: "SE2-event"
+    description: "Smart pin event 2"
+  
+  - source_id: "%0110"
+    name: "SE3-event"
+    description: "Smart pin event 3"
+  
+  - source_id: "%0111"
+    name: "SE4-event"
+    description: "Smart pin event 4"
+  
+  - source_id: "%1000"
+    name: "PAT-match"
+    description: "Pin pattern matches PAT register"
+  
+  - source_id: "%1001"
+    name: "PAT-mismatch"
+    description: "Pin pattern doesn't match PAT"
+  
+  - source_id: "%1010"
+    name: "FBW-wrap"
+    description: "Hub FIFO block wrap"
+  
+  - source_id: "%1011"
+    name: "XMT-empty"
+    description: "Streamer transmit buffer empty"
+  
+  - source_id: "%1100"
+    name: "Any-edge-SELH"
+    description: "Any edge on selected pins"
+  
+  - source_id: "%1101"
+    name: "POS-edge-SELH"
+    description: "Positive edge on selected pins"
+  
+  - source_id: "%1110"
+    name: "NEG-edge-SELH"
+    description: "Negative edge on selected pins"
+  
+  - source_id: "%1111"
+    name: "ATN-event"
+    description: "Attention from other COG"
+
+programming_patterns:
+  - pattern: "timer_interrupt"
+    description: "Periodic timer interrupt"
+    code: |
+      ' Setup 1ms timer interrupt
+              MOV     IJMP1, #timer_isr    ' Set ISR address
+              GETCT   timeout
+              ADDCT1  timeout, ##160_000   ' 1ms at 160MHz
+              SETINT1 #%0001               ' CT >= CT1
+              
+      timer_isr:
+              ' Interrupt code here
+              ADDCT1  timeout, ##160_000   ' Setup next interrupt
+              RETI1                        ' Return from interrupt
+  
+  - pattern: "pin_change_interrupt"
+    description: "Interrupt on pin state change"
+    code: |
+      ' Setup pin change interrupt
+              MOV     IJMP2, #pin_isr      ' Set ISR address
+              SETSE1  #%01_000000 | PIN    ' Positive edge on PIN
+              SETINT2 #%0100               ' SE1 event
+              
+      pin_isr:
+              ' Handle pin change
+              AKPIN   PIN                  ' Acknowledge smart pin
+              ' Process event
+              RETI2                        ' Return
+  
+  - pattern: "nested_interrupts"
+    description: "Multiple priority interrupts"
+    code: |
+      ' Setup three-level interrupts
+              MOV     IJMP1, #low_pri_isr
+              MOV     IJMP2, #med_pri_isr  
+              MOV     IJMP3, #high_pri_isr
+              
+              SETINT1 #%0001              ' Timer
+              SETINT2 #%0100              ' Pin event
+              SETINT3 #%1111              ' ATN event
+              
+      ' ISRs can interrupt each other based on priority
+      low_pri_isr:
+              ' Can be interrupted by INT2 or INT3
+              RETI1
+              
+      med_pri_isr:
+              ' Can be interrupted by INT3 only
+              RETI2
+              
+      high_pri_isr:
+              ' Cannot be interrupted
+              RETI3
+
+  - pattern: "critical_section"
+    description: "Atomic operations without interruption"
+    code: |
+      ' Critical section protection
+              STALLI                      ' Disable interrupts
+              ' ... atomic operations ...
+              ' Modify shared data structures
+              ' Access hardware resources
+              ALLOWI                      ' Re-enable interrupts
+
+best_practices:
+  - practice: "keep_isr_short"
+    description: "Minimize code in interrupt service routines"
+    rationale: "Reduces interrupt latency for other interrupts"
+  
+  - practice: "acknowledge_sources"
+    description: "Clear interrupt sources within ISR"
+    rationale: "Prevents immediate re-triggering"
+  
+  - practice: "save_registers"
+    description: "Only PA/PB/PTRA/PTRB/Q/C/Z are auto-saved"
+    rationale: "Must manually save other registers if needed"
+  
+  - practice: "avoid_hub_ops"
+    description: "Minimize hub operations in ISRs"
+    rationale: "Hub access is slower and blocks other COGs"
+
+performance_characteristics:
+  interrupt_latency:
+    best_case: "3 clock cycles"
+    worst_case: "8 clock cycles (if interrupting XBYTE)"
+    
+  context_switch_overhead: "0 clocks (hardware shadow registers)"
+  
+  interrupt_rate:
+    maximum: "System clock / 4 (one interrupt every 4 clocks)"
+    sustained: "Limited by ISR execution time"
+  
+  priority_preemption:
+    description: "Higher priority interrupts preempt lower"
+    nesting_depth: 3
+
+debugging_considerations:
+  - consideration: "interrupt_timing"
+    description: "Use CT registers to measure ISR execution time"
+    code: |
+      isr:
+          GETCT   start_time
+          ' ... ISR code ...
+          GETCT   end_time
+          SUB     end_time, start_time
+          ' end_time contains ISR duration
+  
+  - consideration: "interrupt_counting"
+    description: "Count interrupt occurrences for profiling"
+    
+  - consideration: "debug_interrupt"
+    description: "Use debug interrupt for breakpoints"
+    note: "Debug interrupt has highest priority"
+
+related_topics:
+  - topic: "events"
+    relationship: "Events can trigger interrupts"
+  
+  - topic: "smart_pins"
+    relationship: "Smart pin IN rising can trigger interrupts"
+  
+  - topic: "timers"
+    relationship: "CT timers primary interrupt source"
+  
+  - topic: "cog_attention"
+    relationship: "ATN signals can trigger interrupts"
+
+extraction_metadata:
+  source_documents:
+    - document: "Silicon Doc v35"
+      sections:
+        - "part1-cog.txt, Interrupt System"
+        - "Interrupt instructions and sources"
+    - document: "P2 Datasheet"
+      sections:
+        - "Pages 36-38: Interrupt instructions"
+        - "Pages 71-72: Interrupt architecture"
+  confidence: "high"
+  last_updated: "2024-12-30"

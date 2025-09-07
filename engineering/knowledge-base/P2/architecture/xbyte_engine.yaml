@@ -1,4 +1,254 @@
+# XBYTE - Hardware Bytecode Execution Engine
+# Source: Silicon Doc v35, P2 Datasheet
+
 component: XBYTE_Engine
-category: bytecode_executor
+category: bytecode_engine
 description: |
-  Hardware bytecode execution engine
+  Hardware bytecode execution engine providing efficient interpreted language support.
+  Executes bytecode routines from LUT with 6-clock overhead per bytecode, enabling
+  high-performance virtual machines and interpreters.
+
+architecture:
+  overhead: "6 clocks per bytecode + routine execution time"
+  bytecode_fetch: "Via FIFO from hub memory"
+  routine_storage: "LUT RAM (512 longs)"
+  hardware_acceleration: "Automatic bytecode dispatch"
+
+execution_cycle:
+  8_clock_sequence:
+    clock_1:
+      phase: "go"
+      operation: "RFBYTE bytecode, SKIPF #0"
+      description: "Fetch bytecode from FIFO, cancel any skip pattern"
+      
+    clock_2:
+      phase: "get"
+      operation: "MOV PA,bytecode, RDLUT"
+      description: "Write bytecode to PA ($1F6), start LUT read"
+      
+    clock_3:
+      phase: "go"
+      operation: "RDLUT (data → D)"
+      description: "Complete LUT read, get routine address/skip pattern"
+      
+    clock_4:
+      phase: "get"
+      operation: "EXECF D (begin)"
+      description: "Start EXECF with jump and optional skip pattern"
+      
+    clock_5:
+      phase: "go"
+      operation: "MOV PB,(GETPTR), MODCZ"
+      description: "Write FIFO pointer to PB, optionally set C,Z from bytecode"
+      
+    clock_6:
+      phase: "get"
+      operation: "flush pipeline"
+      description: "Pipeline flush for branch"
+      
+    clock_7:
+      phase: "go"
+      operation: "reload pipeline"
+      description: "Pipeline reload"
+      
+    clock_8:
+      phase: "get"
+      operation: "first instruction"
+      description: "First instruction of bytecode routine executes"
+
+starting_xbyte:
+  setup:
+    code: |
+      _RET_   SETQ    {#}D     ' Configure XBYTE mode
+    requirement: "$1FF must be on stack (from CALL)"
+    
+  configuration:
+    d_parameter: "32-bit configuration value"
+    stack_requirement: "Hardware stack must contain $1FF"
+    
+  automatic_start:
+    description: |
+      When RET executes with $1FF on stack after SETQ,
+      XBYTE mode begins automatically
+
+configuration_patterns:
+  full_256_bytecodes:
+    pattern: "%A000000xF"
+    lut_base: "%A00000000"
+    index_calc: "I = bytecode[7:0]"
+    bytecodes: 256
+    lut_usage: "256 longs"
+    
+  compressed_16_bytecodes:
+    pattern: "%ABBBB00xF"
+    lut_base: "%A00000000"
+    operation: |
+      If bytecode[7:4] < %BBBB: Use full bytecode as index
+      If bytecode[7:4] >= %BBBB: Use compressed index
+    compression: "16 primary + 240 extended bytecodes"
+    
+  128_bytecodes:
+    pattern: "%AAxx0010F"
+    lut_base: "%AA0000000"
+    index_calc: "I = bytecode[6:0]"
+    bytecodes: 128
+    
+  64_bytecodes:
+    pattern: "%AAAx1010F"
+    lut_base: "%AAA000000"
+    index_calc: "I = bytecode[5:0]"
+    bytecodes: 64
+    
+  32_bytecodes:
+    pattern: "%AAAAx100F"
+    lut_base: "%AAAA00000"
+    index_calc: "I = bytecode[4:0]"
+    bytecodes: 32
+    
+  16_bytecodes:
+    pattern: "%AAAAA110F"
+    lut_base: "%AAAAA0000"
+    index_calc: "I = bytecode[3:0]"
+    bytecodes: 16
+
+flag_control:
+  f_bit: "Configuration bit 0"
+  behavior:
+    f_0: "Flags unaffected by bytecode"
+    f_1: "Bytecode index LSBs written to C and Z"
+    
+  flag_mapping:
+    c_flag: "Bytecode index bit 1"
+    z_flag: "Bytecode index bit 0"
+    usage: "Can encode 4 states in flags for routine"
+
+lut_table_format:
+  entry_format: |
+    Each LUT entry contains:
+    [31:23] = Base routine address (9 bits)
+    [22:0] = SKIPF pattern (23 bits) or extended address
+    
+  execf_operation:
+    jump: "To bits [31:23] of LUT entry"
+    skipf: "Using bits [22:0] as skip pattern"
+    
+  routine_addressing:
+    cog_range: "$000-$1FF"
+    lut_range: "$200-$3FF"
+
+special_registers:
+  pa_register:
+    address: "$1F6"
+    contents: "Current bytecode value"
+    usage: "Available as immediate operand in routines"
+    
+  pb_register:
+    address: "$1F7"
+    contents: "FIFO read pointer"
+    usage: "Hub address tracking"
+
+bytecode_routines:
+  constraints:
+    location: "Must be in COG or LUT RAM"
+    exit: "Must end with RET or _RET_"
+    stack: "Hardware stack must not overflow"
+    
+  optimization:
+    inline_operations: "Use _RET_ prefix for single instructions"
+    skip_patterns: "Use SKIPF to create compact routines"
+    shared_code: "Multiple bytecodes can jump to same routine"
+
+programming_examples:
+  simple_interpreter:
+    code: |
+      ' Setup LUT with bytecode routines
+      SETQ2   #256-1
+      RDLONG  $000, bytecode_table
+      
+      ' Start FIFO for bytecode stream
+      RDFAST  #0, bytecode_ptr
+      
+      ' Start XBYTE engine
+      CALL    #xbyte_start
+      
+      xbyte_start:
+      _RET_   SETQ    #%00000001  ' 256 bytecodes, set flags
+      
+  bytecode_routine_example:
+    code: |
+      ' LUT entry: routine address | skip pattern
+      LONG    (@push_routine << 23) | 0
+      
+      push_routine:
+      RFLONG  data              ' Read inline parameter
+      WRLONG  data, stack_ptr   ' Push to stack
+      ADD     stack_ptr, #4     ' Adjust stack
+      _RET_   NOP              ' Return to XBYTE
+      
+  compressed_mode:
+    code: |
+      ' Configure for 16 primary + compressed
+      _RET_   SETQ    #%F_0000_00_1
+      ' F = base address (4 bits)
+      ' 0000 = compression threshold
+      ' 1 = set flags from bytecode
+
+performance:
+  overhead_per_bytecode: "6 clocks"
+  throughput: "At 160MHz: 26.7M bytecodes/second (overhead only)"
+  comparison:
+    software_dispatch: "~20-40 clocks overhead"
+    xbyte_dispatch: "6 clocks overhead"
+    improvement: "3-7x faster dispatch"
+
+applications:
+  virtual_machines:
+    - "Java bytecode interpreter"
+    - "Python bytecode"
+    - "Forth threaded interpreter"
+    - "Custom VM implementations"
+    
+  interpreters:
+    - "BASIC interpreter"
+    - "Scripting languages"
+    - "Command processors"
+    
+  compression:
+    - "Compressed instruction streams"
+    - "Token-based protocols"
+    - "Macro expansion"
+
+advanced_features:
+  interrupt_compatibility:
+    description: "XBYTE can be interrupted"
+    resume: "Automatically continues after interrupt"
+    
+  bytecode_as_parameter:
+    pa_register: "Bytecode available as immediate value"
+    inline_parameters: "Can follow bytecode with parameters"
+    
+  conditional_execution:
+    flag_setting: "F bit enables flag control"
+    conditional_routines: "Use flags for branching"
+
+debugging:
+  trace_mode: "Can single-step bytecodes"
+  breakpoints: "Insert special bytecode for breaks"
+  state_inspection: "PA/PB readable for debugging"
+
+limitations:
+  lut_space: "Reduces available LUT for other uses"
+  stack_depth: "Hardware stack limited to 8 levels"
+  hub_execution: "Cannot execute from hub in XBYTE routines"
+
+related_components:
+  fifo: "Bytecode stream from hub"
+  lut: "Routine storage"
+  skipf: "Instruction skipping for compact routines"
+  stack: "Hardware stack for returns"
+
+see_also:
+  - "LUT programming guide"
+  - "SKIPF instruction patterns"
+  - "Virtual machine design"
+  - "Bytecode optimization techniques"

@@ -1,4 +1,202 @@
+# CORDIC Solver - 54-Stage Pipelined Math Engine
+# Source: Silicon Doc v35, P2 Datasheet
+
 component: CORDIC
 category: math_engine
 description: |
-  32-bit pipelined CORDIC solver
+  54-stage pipelined CORDIC (COordinate Rotation DIgital Computer) solver providing
+  high-performance mathematical operations for all COGs. Fully pipelined for one
+  operation per clock with 54-clock latency.
+
+architecture:
+  pipeline_stages: 54
+  pipeline_type: "Fully pipelined"
+  throughput: "1 operation per clock"
+  latency: "54 clocks for result"
+  shared_resource: true
+  arbitration: "Round-robin between COGs"
+
+operations:
+  multiply:
+    instruction: "QMUL"
+    operation: "32×32 → 64-bit multiply"
+    signed: true
+    unsigned: true
+    setup: "QMUL D,S/# - multiply D by S"
+    result: "64-bit product in {X,Y}"
+    
+  divide:
+    instruction: "QDIV"
+    operation: "64÷32 → 32-bit quotient, 32-bit remainder"
+    setup: "SETQ {#}D then QDIV divisor,dividend"
+    result: "Quotient in X, remainder in Y"
+    notes: "SETQ provides upper 32 bits of 64-bit dividend"
+    
+  fractional_multiply:
+    instruction: "QFRAC"
+    operation: "32×32 → 32-bit fractional result"
+    setup: "QFRAC D,S/# - fractional multiply"
+    result: "Upper 32 bits of 64-bit product in X"
+    usage: "Fixed-point arithmetic"
+    
+  square_root:
+    instruction: "QSQRT"
+    operation: "32-bit → 16-bit square root"
+    setup: "QSQRT D,#0"
+    result: "16-bit root in X[15:0]"
+    
+  rotate:
+    instruction: "QROTATE"
+    operation: "2D vector rotation by angle"
+    setup: |
+      SETQ angle
+      QROTATE X,Y
+    result: "Rotated X in X result, rotated Y in Y result"
+    angle_format: "32-bit binary angle (0=$00000000, 90°=$40000000)"
+    
+  vector:
+    instruction: "QVECTOR"
+    operation: "Cartesian to polar conversion"
+    setup: "QVECTOR X,Y"
+    result: |
+      X result: Magnitude (length)
+      Y result: Angle (theta)
+    angle_format: "32-bit binary angle"
+    
+  logarithm:
+    instruction: "QLOG"
+    operation: "Natural logarithm (base e)"
+    setup: "QLOG D"
+    result: "ln(D) in X with 5.32 fixed-point format"
+    
+  exponential:
+    instruction: "QEXP"
+    operation: "Exponential (e^x)"
+    setup: "QEXP D"
+    input_format: "5.32 fixed-point"
+    result: "e^D in X"
+
+result_retrieval:
+  getqx:
+    instruction: "GETQX"
+    operation: "Retrieve X result from CORDIC"
+    behavior: "Stalls if result not ready"
+    timing: "0-54 clocks depending on pipeline state"
+    
+  getqy:
+    instruction: "GETQY"
+    operation: "Retrieve Y result from CORDIC"
+    behavior: "Stalls if result not ready"
+    timing: "0-54 clocks depending on pipeline state"
+    
+  pollqmt:
+    instruction: "POLLQMT"
+    operation: "Check if CORDIC pipeline empty"
+    flags: "C=1 if empty, C=0 if operations pending"
+    non_blocking: true
+
+pipeline_behavior:
+  multiple_operations: |
+    Multiple operations can be in flight simultaneously.
+    Each COG can have multiple operations pending.
+    Results retrieved in order submitted.
+    
+  stall_conditions:
+    - "GETQX/GETQY when result not ready"
+    - "New operation when pipeline full (rare)"
+    
+  event_generation:
+    event_15: "CORDIC read but empty"
+    usage: "Can trigger interrupt or be polled"
+
+programming_patterns:
+  basic_multiply:
+    code: |
+      QMUL    value1, value2    ' Start multiply
+      ' ... do other work ...
+      GETQX   result_low        ' Get lower 32 bits
+      GETQY   result_high       ' Get upper 32 bits
+      
+  divide_64_32:
+    code: |
+      SETQ    dividend_high     ' Upper 32 bits
+      QDIV    divisor, dividend_low
+      ' ... do other work ...
+      GETQX   quotient
+      GETQY   remainder
+      
+  vector_magnitude:
+    code: |
+      QVECTOR x_coord, y_coord
+      ' ... do other work ...
+      GETQX   magnitude         ' sqrt(x²+y²)
+      GETQY   angle            ' atan2(y,x)
+      
+  rotation_matrix:
+    code: |
+      SETQ    angle
+      QROTATE x, y
+      ' ... do other work ...
+      GETQX   new_x
+      GETQY   new_y
+
+accuracy:
+  multiply: "Exact 64-bit result"
+  divide: "Exact quotient and remainder"
+  square_root: "16-bit result, ±1 LSB"
+  trig_functions: "~28 bits of precision"
+  logarithm: "5.32 fixed-point precision"
+  exponential: "5.32 fixed-point precision"
+
+special_features:
+  parallel_operations: |
+    All 8 COGs can use CORDIC simultaneously.
+    Pipeline handles interleaved operations.
+    No COG monopolizes the resource.
+    
+  automatic_stalling: |
+    Hardware manages result synchronization.
+    COG stalls automatically if result not ready.
+    No polling required for single operations.
+    
+  event_system: |
+    Can generate event when CORDIC empty.
+    Useful for interrupt-driven computation.
+    Event 15 dedicated to CORDIC status.
+
+applications:
+  signal_processing:
+    - "FFT butterfly operations"
+    - "Digital filtering"
+    - "Goertzel algorithm support"
+    
+  graphics:
+    - "2D/3D transformations"
+    - "Rotation matrices"
+    - "Perspective calculations"
+    
+  control_systems:
+    - "PID calculations"
+    - "Motor control vectors"
+    - "Sensor fusion"
+    
+  communications:
+    - "Phase/frequency calculations"
+    - "Modulation/demodulation"
+    - "Error correction codes"
+
+performance:
+  throughput: "160 MOPS at 160MHz clock"
+  latency: "337.5ns at 160MHz (54 clocks)"
+  efficiency: "100% utilization possible with 54+ operations queued"
+
+related_components:
+  streamer: "Can use CORDIC results for DDS"
+  smart_pins: "CORDIC supports Goertzel mode calculations"
+  math_instructions: "Complements MUL/MULS/SCA/SCAS instructions"
+
+see_also:
+  - "QMUL instruction details"
+  - "Fixed-point arithmetic guide"
+  - "Vector math applications"
+  - "Pipeline optimization techniques"

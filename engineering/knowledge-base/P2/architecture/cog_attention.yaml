@@ -1,0 +1,351 @@
+# P2 COG Attention System
+# Silicon Doc Reference: part1-cog.txt, pages 19-20
+# Datasheet Reference: pages 35-36, 73
+# Layer 1: Direct extraction from Silicon Doc v35 and P2 Datasheet
+
+component_name: "COG Attention System"
+
+component_type: "inter_cog_signaling"
+
+description: |
+  The COG Attention (ATN) system provides a lightweight inter-COG signaling mechanism
+  that allows any COG to signal any combination of other COGs simultaneously. Each COG
+  has an attention flag that can be set by other COGs and monitored via polling, waiting,
+  or interrupt triggering. This creates an efficient broadcast or multicast signaling
+  system without consuming hub bandwidth.
+
+architecture:
+  signal_matrix: "8×8 (any COG to any COGs)"
+  
+  attention_flags:
+    per_cog: 1
+    states: ["clear", "set"]
+    
+  signaling_modes:
+    - mode: "unicast"
+      description: "Signal single specific COG"
+      example: "COG 0 signals COG 5"
+    
+    - mode: "multicast"
+      description: "Signal multiple specific COGs"
+      example: "COG 0 signals COGs 2, 4, and 6"
+    
+    - mode: "broadcast"
+      description: "Signal all other COGs"
+      example: "COG 0 signals COGs 1-7"
+    
+    - mode: "self_signal"
+      description: "COG can signal itself"
+      example: "COG 3 signals COG 3"
+  
+  response_methods:
+    - method: "polling"
+      description: "Check ATN flag periodically"
+      latency: "Depends on polling frequency"
+    
+    - method: "waiting"
+      description: "Wait for ATN flag to be set"
+      latency: "Immediate response"
+    
+    - method: "interrupt"
+      description: "Trigger interrupt on ATN"
+      latency: "3-8 clock interrupt latency"
+
+instructions:
+  - instruction: "COGATN"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 000001110"
+    description: "Signal attention to specified COG(s)"
+    operation: |
+      FOR each bit N in D[7:0]:
+        IF D[N] = 1 THEN
+          COG[N].attention := 1
+      Can signal multiple COGs simultaneously
+    timing: "2 clock cycles"
+    usage_example: |
+      COGATN  #%00000010      ' Signal COG 1
+      COGATN  #%11111110      ' Signal COGs 1-7
+      COGATN  cog_mask        ' Signal COGs in mask
+  
+  - instruction: "POLLATN"
+    encoding: "EEEE 1101011 000 000000000 000000000 WC"
+    description: "Poll own attention flag"
+    operation: |
+      C := attention_flag
+      IF (WC) THEN attention_flag := 0
+    flags_affected: "C = attention state"
+    timing: "2 clock cycles"
+    usage_example: |
+      POLLATN WC              ' Check and clear ATN
+      IF_C    JMP #handle_atn ' Jump if attention set
+  
+  - instruction: "WAITATN"
+    encoding: "EEEE 1101011 001 000000000 000000000"
+    description: "Wait for attention flag to be set"
+    operation: |
+      WHILE attention_flag = 0: wait
+      attention_flag := 0 (auto-clear)
+    timing: "2+ clocks (waits until ATN set)"
+    usage_example: |
+      WAITATN                 ' Wait for attention
+      ' Attention received, continue execution
+  
+  - instruction: "RDCOGID"
+    encoding: "EEEE 0000011 CZI DDDDDDDDD 000000001"
+    description: "Read COG ID (useful with attention)"
+    operation: |
+      D := this_cog_id (0-7)
+    flags_affected: "C, Z optionally"
+    timing: "2 clock cycles"
+    usage_example: |
+      COGID   my_id           ' Get own COG ID
+  
+  - instruction: "COGID"
+    encoding: "EEEE 0000011 CZI DDDDDDDDD 000000001"
+    description: "Alias for RDCOGID"
+    usage_example: |
+      COGID   pa WC           ' Get ID, C=0 always
+
+event_configuration:
+  attention_event:
+    event_number: 15
+    trigger: "ATN flag transitions from 0 to 1"
+    
+    setup_for_interrupt: |
+      ' Configure ATN to trigger interrupt
+      MOV     IJMP1, #atn_handler  ' Set ISR address
+      SETINT1 #%1111               ' ATN event (#15)
+      
+      atn_handler:
+          ' Handle attention signal
+          ' ATN flag auto-cleared by WAITATN
+          RETI1
+    
+    setup_for_event: |
+      ' Configure ATN as event source
+      SETSE1  #%11_111111          ' ATN event
+      WAITSE1                      ' Wait for ATN
+
+programming_patterns:
+  - pattern: "master_slave_coordination"
+    description: "Master COG coordinates slave COGs"
+    code: |
+      ' Master COG
+      master:
+          ' Signal all slaves to start
+          COGATN  #%11111110      ' Signal COGs 1-7
+          
+          ' Do master work...
+          
+          ' Signal specific slave
+          COGATN  #%00000100      ' Signal COG 2 only
+      
+      ' Slave COG
+      slave:
+          WAITATN                 ' Wait for start signal
+          ' Begin slave operation
+          
+      .loop:
+          ' Do work...
+          POLLATN WC              ' Check for new command
+          IF_C    JMP #new_command
+          JMP     #.loop
+  
+  - pattern: "broadcast_synchronization"
+    description: "Synchronize multiple COGs"
+    code: |
+      ' Synchronization point
+      sync_point:
+          COGID   my_id
+          ' All COGs signal readiness
+          MOV     mask, #1
+          SHL     mask, my_id
+          COGATN  #%11111111      ' Signal all COGs
+          
+          ' Wait for all COGs to be ready
+          MOV     count, #7       ' Wait for 7 signals
+      .wait_all:
+          WAITATN                 ' Wait for each COG
+          DJNZ    count, #.wait_all
+          
+          ' All COGs now synchronized
+  
+  - pattern: "producer_consumer_signaling"
+    description: "Producer signals consumer when data ready"
+    code: |
+      ' Producer COG
+      producer:
+          ' Produce data
+          WRLONG  data, buffer_ptr
+          ADD     buffer_ptr, #4
+          
+          ' Signal consumer
+          COGATN  consumer_mask   ' Signal consumer COG(s)
+      
+      ' Consumer COG
+      consumer:
+          WAITATN                 ' Wait for data signal
+          RDLONG  data, buffer_ptr
+          ADD     buffer_ptr, #4
+          ' Process data
+  
+  - pattern: "interrupt_driven_attention"
+    description: "Handle attention via interrupt"
+    code: |
+      ' Setup attention interrupt
+              MOV     IJMP3, #atn_isr
+              SETINT3 #%1111          ' ATN event
+              
+      ' Main code continues normally
+      main_loop:
+              ' Regular processing
+              JMP     #main_loop
+              
+      ' Attention handler
+      atn_isr:
+              ' High-priority attention handling
+              RDLONG  command, mailbox
+              ' Process command
+              WRLONG  result, mailbox+4
+              RETI3
+
+  - pattern: "selective_multicast"
+    description: "Signal specific group of COGs"
+    code: |
+      ' Define COG groups
+      GROUP_A = %00001111     ' COGs 0-3
+      GROUP_B = %11110000     ' COGs 4-7
+      ALL_COGS = %11111111    ' All COGs
+      
+      ' Signal specific group
+      signal_group:
+              COGATN  #GROUP_A        ' Signal group A
+              ' or
+              COGATN  #GROUP_B        ' Signal group B
+              ' or
+              COGATN  #ALL_COGS       ' Broadcast
+
+common_applications:
+  - application: "task_dispatch"
+    description: "Central dispatcher signals worker COGs"
+    complexity: "intermediate"
+    example: |
+      ' Dispatcher finds idle worker and assigns task
+      dispatcher:
+          RDLONG  task, task_queue
+          COGATN  idle_worker_mask
+  
+  - application: "barrier_synchronization"
+    description: "Multiple COGs reach synchronization barrier"
+    complexity: "intermediate"
+    example: |
+      ' Each COG signals when reaching barrier
+      ' Waits for all others before proceeding
+  
+  - application: "event_notification"
+    description: "Notify COGs of system events"
+    complexity: "beginner"
+    example: |
+      ' Any COG can signal system event
+      COGATN  #%11111111      ' Notify all COGs
+  
+  - application: "shutdown_coordination"
+    description: "Coordinate orderly system shutdown"
+    complexity: "advanced"
+    example: |
+      ' Master signals shutdown
+      ' Each COG acknowledges and cleans up
+
+best_practices:
+  - practice: "clear_after_check"
+    description: "Always use WC with POLLATN to auto-clear"
+    rationale: "Prevents missing subsequent signals"
+  
+  - practice: "avoid_polling_loops"
+    description: "Use WAITATN or interrupts instead of tight polling"
+    rationale: "Reduces power consumption and hub congestion"
+  
+  - practice: "document_signal_meanings"
+    description: "Clearly define what each ATN signal means"
+    rationale: "Prevents confusion in multi-COG systems"
+  
+  - practice: "use_with_mailboxes"
+    description: "Combine ATN with hub mailboxes for rich communication"
+    rationale: "ATN for notification, mailbox for data"
+
+performance_characteristics:
+  signaling_latency: "2 clock cycles to set flags"
+  
+  response_latency:
+    polling: "Varies with polling frequency"
+    waiting: "0 clocks after signal arrives"
+    interrupt: "3-8 clocks to enter ISR"
+  
+  bandwidth_impact: "Zero hub bandwidth consumed"
+  
+  scalability:
+    simultaneous_signals: "All 8 COGs can signal simultaneously"
+    no_collision: "Hardware manages all signals independently"
+
+comparison_to_alternatives:
+  vs_hub_polling:
+    attention: "No hub bandwidth, instant notification"
+    hub_polling: "Consumes hub slots, variable latency"
+  
+  vs_locks:
+    attention: "Signaling only, no mutual exclusion"
+    locks: "Mutual exclusion, heavier weight"
+  
+  vs_events:
+    attention: "Simple boolean flag per COG"
+    events: "Rich event types with parameters"
+
+limitations:
+  - limitation: "single_bit_signal"
+    description: "Only indicates attention needed, no data"
+    workaround: "Combine with hub mailbox for data transfer"
+  
+  - limitation: "no_queuing"
+    description: "Multiple signals merge into single flag"
+    workaround: "Use counter in hub memory if needed"
+  
+  - limitation: "no_source_identification"
+    description: "Cannot tell which COG sent signal"
+    workaround: "Use hub mailbox to identify sender"
+
+debugging_tips:
+  - tip: "trace_attention_signals"
+    description: "Log ATN signals to hub memory"
+    code: |
+      POLLATN WC
+      IF_C    WRLONG  cnt, atn_log_ptr
+      IF_C    ADD     atn_log_ptr, #4
+  
+  - tip: "verify_cog_masks"
+    description: "Test signal masks before deployment"
+    importance: "Ensures correct COG targeting"
+
+related_topics:
+  - topic: "interrupts"
+    relationship: "ATN can trigger interrupts via event system"
+  
+  - topic: "events"
+    relationship: "ATN is event source #15"
+  
+  - topic: "hub_mailboxes"
+    relationship: "Often paired with ATN for data transfer"
+  
+  - topic: "locks"
+    relationship: "Can use with locks for complex synchronization"
+
+extraction_metadata:
+  source_documents:
+    - document: "Silicon Doc v35"
+      sections:
+        - "part1-cog.txt, COG Attention System"
+        - "Attention instructions and signaling"
+    - document: "P2 Datasheet"
+      sections:
+        - "Pages 35-36: Attention instructions"
+        - "Page 73: Attention event configuration"
+  confidence: "high"
+  last_updated: "2024-12-30"

@@ -1,10 +1,233 @@
+# Hub - Central Shared Memory and Resources
+# Source: Silicon Doc v35, P2 Datasheet
+
 component: HUB
 category: shared_memory
 description: |
-  Central shared memory and resources
-features:
-  - Last 16KB write-protectable
-  - Boot ROM (16KB)
-  - FIFO for hub execution
-  - 64-bit system counter
-  - 16 semaphore locks
+  Central shared memory and resource hub providing RAM storage, boot ROM, inter-COG
+  communication, and the "Egg Beater" round-robin access mechanism for deterministic
+  memory timing.
+
+memory_organization:
+  hub_ram:
+    p2x8c4m64p: "512KB"
+    p2_full: "1MB maximum"
+    width: "8 bits (byte-addressable)"
+    long_aligned: "32-bit access on 4-byte boundaries"
+    address_range: "$00000-$7FFFF (512KB) or $00000-$FFFFF (1MB)"
+    
+  boot_rom:
+    size: "16KB"
+    location: "Mapped at $FC000-$FFFFF on boot"
+    contents:
+      - "Boot loader"
+      - "Serial loader protocol"
+      - "SD card boot support"
+      - "Flash boot support"
+      - "Debug ROM routines"
+      - "TAQOZ Forth interpreter"
+      
+  write_protection:
+    last_16kb: "Can be write-protected via HUBSET"
+    debug_area: "Upper 16KB used for debug state storage"
+    protection_bit: "Set via HUBSET D[2]"
+
+egg_beater_architecture:
+  description: |
+    Round-robin memory access system providing deterministic timing for all COGs.
+    Each COG gets a guaranteed access window every 8 clock cycles.
+    
+  timing:
+    rotation_period: "8 clocks"
+    cog_window: "1 clock per COG"
+    access_order: "COG 0→1→2→3→4→5→6→7→0..."
+    
+  slicing:
+    concept: |
+      Hub RAM is divided into 8 slices for parallel access.
+      Each slice corresponds to addresses where (address & 7) equals slice number.
+      All 8 slices can be accessed simultaneously by different COGs.
+      
+    slice_assignment:
+      slice_0: "Addresses ending in 000 binary"
+      slice_1: "Addresses ending in 001 binary"
+      slice_2: "Addresses ending in 010 binary"
+      slice_3: "Addresses ending in 011 binary"
+      slice_4: "Addresses ending in 100 binary"
+      slice_5: "Addresses ending in 101 binary"
+      slice_6: "Addresses ending in 110 binary"
+      slice_7: "Addresses ending in 111 binary"
+      
+  synchronization:
+    automatic: "Hardware handles all synchronization"
+    deterministic: "Exact timing predictable"
+    wait_states: "0-7 clocks depending on alignment"
+
+memory_instructions:
+  byte_access:
+    rdbyte: "Read byte from hub"
+    wrbyte: "Write byte to hub"
+    timing: "2-9 clocks"
+    
+  word_access:
+    rdword: "Read word (16-bit) from hub"
+    wrword: "Write word to hub"
+    alignment: "Must be word-aligned"
+    timing: "2-9 clocks"
+    
+  long_access:
+    rdlong: "Read long (32-bit) from hub"
+    wrlong: "Write long to hub"
+    alignment: "Must be long-aligned"
+    timing: "2-9 clocks"
+    
+  block_transfers:
+    setq_rdlong: "Block read using SETQ + RDLONG"
+    setq_wrlong: "Block write using SETQ + WRLONG"
+    transfer_rate: "1 long per clock after initial sync"
+    max_burst: "Up to 512 longs"
+
+fifo_interface:
+  description: |
+    19-stage FIFO buffer for streaming hub access during hub execution
+    and streamer operations.
+    
+  instructions:
+    rdfast: "Setup FIFO for reading"
+    wrfast: "Setup FIFO for writing"
+    rfbyte: "Read byte from FIFO"
+    rfword: "Read word from FIFO"
+    rflong: "Read long from FIFO"
+    wfbyte: "Write byte to FIFO"
+    wfword: "Write word to FIFO"
+    wflong: "Write long to FIFO"
+    
+  features:
+    depth: "19 longs"
+    prefetch: "Automatic prefetching for hub execution"
+    block_wrap: "Can wrap on power-of-2 boundaries"
+    event_generation: "Event on block wrap"
+
+shared_resources:
+  locks:
+    count: 16
+    operations:
+      locknew: "Allocate new lock"
+      lockret: "Return lock to pool"
+      locktry: "Try to acquire lock"
+      lockrel: "Release lock"
+      lockchk: "Check lock state"
+    atomic: "Test-and-set in single operation"
+    
+  attention_flags:
+    per_cog: "16-bit attention mask"
+    instruction: "COGATN"
+    polling: "Via POLLATN/WAITATN"
+    
+  system_counter:
+    width: "64 bits"
+    frequency: "Same as system clock"
+    read: "GETCT instruction"
+    events: "CT1/CT2/CT3 comparison events"
+
+hub_operations:
+  coginit:
+    description: "Start COG with hub code"
+    load_size: "496 longs from hub to COG"
+    parameters: "PTRA and PTRB initialized"
+    
+  hub_execution:
+    pc_range: "$400-$FFFFF"
+    instruction_fetch: "Via FIFO"
+    performance: "Nearly same as COG execution"
+    
+  cordic_results:
+    sharing: "CORDIC results through hub interface"
+    
+  smart_pin_data:
+    repository_modes: "Smart pins can access hub data"
+
+performance:
+  bandwidth:
+    theoretical: "Clock_freq / 2 bytes/second per COG"
+    sustained_read: "Clock_freq / 8 bytes/second per COG"
+    sustained_write: "Clock_freq / 8 bytes/second per COG"
+    burst: "4 bytes per clock during block transfer"
+    
+  latency:
+    best_case: "2 clocks"
+    worst_case: "9 clocks"
+    average: "5.5 clocks"
+    
+  optimization:
+    block_transfers: "Use SETQ + RD/WRLONG for efficiency"
+    fifo_streaming: "Use RDFAST/WRFAST for sequential access"
+    alignment: "Align data to long boundaries"
+
+programming_patterns:
+  hub_to_cog_transfer:
+    code: |
+      SETQ    #count-1          ' Transfer count - 1
+      RDLONG  start_addr, hub_addr
+      
+  cog_to_hub_transfer:
+    code: |
+      SETQ    #count-1          ' Transfer count - 1
+      WRLONG  start_addr, hub_addr
+      
+  fifo_streaming:
+    code: |
+      RDFAST  #0, hub_addr      ' Start FIFO read
+      REP     #2, #count
+      RFLONG  data              ' Read from FIFO
+      ' Process data
+      
+  circular_buffer:
+    code: |
+      RDFAST  mask, hub_addr    ' Mask sets wrap boundary
+      ' FIFO automatically wraps
+
+memory_map:
+  boot_time:
+    $00000_$7FFFF: "Hub RAM (512KB model)"
+    $FC000_$FFFFF: "Boot ROM (16KB)"
+    
+  runtime:
+    $00000_$7FFFF: "Hub RAM"
+    $80000_$FFFFF: "Reserved/unmapped (512KB model)"
+    
+  debug_mode:
+    $7F000_$7FFFF: "Debug state storage (optional)"
+
+special_features:
+  byte_addressing: |
+    All hub addresses are byte addresses.
+    Word access must be word-aligned (address & 1 = 0).
+    Long access must be long-aligned (address & 3 = 0).
+    
+  ptr_expressions:
+    ptra_ptrb: "Complex addressing modes"
+    auto_increment: "++/-- operators"
+    indexing: "Scaled index operations"
+    
+  cog_pairing:
+    lut_sharing: "Adjacent COGs can share LUT"
+    event_signaling: "Fast COG-to-COG events"
+
+debugging:
+  protected_area: "Last 16KB for debug state"
+  write_protect: "HUBSET can protect debug area"
+  state_preservation: "All COG states saved on debug entry"
+
+related_components:
+  cogs: "Eight processors sharing hub"
+  fifo: "Streaming interface to hub"
+  locks: "Synchronization primitives"
+  smart_pins: "Can access hub via repository modes"
+  streamer: "DMA to/from hub"
+
+see_also:
+  - "Egg beater timing diagrams"
+  - "FIFO programming guide"
+  - "Block transfer optimization"
+  - "Memory bandwidth calculations"

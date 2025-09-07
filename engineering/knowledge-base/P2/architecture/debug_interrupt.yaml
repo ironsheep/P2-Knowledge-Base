@@ -1,0 +1,324 @@
+# P2 Debug Interrupt System
+# Silicon Doc Reference: part1-cog.txt, pages 26-28
+# Datasheet Reference: pages 39-40
+# Layer 1: Direct extraction from Silicon Doc v35 and P2 Datasheet
+
+component_name: "Debug Interrupt"
+
+component_type: "hardware_debug_controller"
+
+description: |
+  The P2 debug interrupt system provides hardware debugging capabilities with single-stepping,
+  breakpoints, and interrupt-on-instruction features. It operates at the highest interrupt 
+  priority, allowing it to interrupt any code including other interrupt service routines.
+  The debug interrupt enables powerful debugging without external hardware debuggers.
+
+architecture:
+  priority: "Highest (above INT1/2/3)"
+  
+  trigger_modes:
+    - mode: "single_step"
+      description: "Interrupt after each instruction execution"
+      use_case: "Step through code instruction by instruction"
+    
+    - mode: "break_on_address"
+      description: "Interrupt when PC matches break address"
+      use_case: "Set breakpoints at specific code locations"
+    
+    - mode: "break_on_instruction"
+      description: "Interrupt before executing specific instruction"
+      use_case: "Break on specific operations like COGINIT"
+    
+    - mode: "async_trigger"
+      description: "External trigger via COGBRK instruction"
+      use_case: "Break from another COG or external event"
+  
+  shadow_registers:
+    description: "Debug has its own shadow register set"
+    registers:
+      - "IRET0 - Debug return address and flags"
+      - "PA/PB - Preserved parameter registers"
+      - "PTRA/PTRB - Preserved pointer registers"
+      - "C/Z flags - Preserved condition flags"
+
+configuration:
+  - register: "BRK"
+    description: "Breakpoint configuration register"
+    fields:
+      - bits: "[19:0]"
+        name: "break_address"
+        description: "20-bit address to break on"
+      - bits: "[31:20]"
+        name: "break_flags"
+        description: "Break condition flags"
+  
+  - register: "SKIP"
+    description: "Skip pattern for conditional execution"
+    usage: "Controls which instructions to skip during debug"
+  
+  - register: "SKIPF"
+    description: "Skip flags for instruction masking"
+    usage: "Fine control over instruction skipping"
+
+instructions:
+  - instruction: "BRK"
+    encoding: "EEEE 0110110 CZI DDDDDDDDD SSSSSSSSS"
+    description: "Configure debug break conditions"
+    operation: |
+      If D[20] = 1: Enable single-stepping mode
+      If D[20] = 0: Set breakpoint at address D[19:0]
+      Additional modes in D[31:21] for instruction matching
+    usage_example: |
+      BRK     #$100           ' Break at COG address $100
+      BRK     ##$1_00000      ' Enable single-stepping
+  
+  - instruction: "COGBRK"
+    encoding: "EEEE 0110101 CZI DDDDDDDDD SSSSSSSSS"
+    description: "Trigger debug interrupt in specified COG"
+    operation: |
+      Trigger debug interrupt in COG number D[2:0]
+      Can break any COG from any other COG
+    usage_example: |
+      COGBRK  #2              ' Break COG 2
+      COGBRK  cognum          ' Break COG in cognum variable
+  
+  - instruction: "GETBRK"
+    encoding: "EEEE 1101011 CZ1 DDDDDDDDD 0010101DD"
+    description: "Read break configuration"
+    operation: |
+      D := current break configuration
+      Returns address and mode bits
+    flags_affected: "C, Z optionally"
+    usage_example: |
+      GETBRK  break_config WC ' Get config, C = enabled
+  
+  - instruction: "SETBRK"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 000100110"
+    description: "Set break configuration"
+    operation: |
+      Set break address and conditions from D
+      Bits [19:0] = break address
+      Bits [31:20] = break mode and flags
+    usage_example: |
+      SETBRK  ##$1_00000      ' Enable single-step mode
+      SETBRK  #$200           ' Break at address $200
+  
+  - instruction: "NIXINT0"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 100110010"
+    description: "Cancel pending debug interrupt"
+    operation: "Clear debug interrupt pending flag"
+    usage_example: |
+      NIXINT0                 ' Cancel debug interrupt
+  
+  - instruction: "TRGINT0"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 100110011"
+    description: "Trigger debug interrupt by software"
+    operation: "Force debug interrupt immediately"
+    usage_example: |
+      TRGINT0                 ' Software debug break
+
+debug_modes:
+  - mode: "single_step"
+    configuration: |
+      SETBRK  ##$1_00000      ' Enable single-step
+      ALLOWI                  ' Allow interrupts
+    
+    handler: |
+      debug_isr:
+          ' Save any additional context
+          WRLONG  PC, trace_ptr
+          ADD     trace_ptr, #4
+          ' Optionally modify execution
+          RETI0               ' Continue execution
+    
+    use_cases:
+      - "Instruction tracing"
+      - "Register monitoring"
+      - "Execution flow analysis"
+  
+  - mode: "address_breakpoint"
+    configuration: |
+      SETBRK  #break_addr     ' Set break address
+      ALLOWI                  ' Allow interrupts
+    
+    handler: |
+      debug_isr:
+          ' Hit breakpoint
+          WRLONG  PC, break_log
+          ' Examine state
+          RDLONG  value, watch_addr
+          ' Continue or halt
+          RETI0
+    
+    use_cases:
+      - "Function entry/exit monitoring"
+      - "Loop iteration counting"
+      - "Conditional breakpoints"
+  
+  - mode: "instruction_break"
+    configuration: |
+      SETBRK  ##$2_00000 | instruction_pattern
+      ALLOWI
+    
+    handler: |
+      debug_isr:
+          ' Specific instruction intercepted
+          ' Can modify operation or log
+          RETI0
+    
+    use_cases:
+      - "System call interception"
+      - "Instruction profiling"
+      - "Operation validation"
+
+programming_patterns:
+  - pattern: "execution_tracer"
+    description: "Trace program execution to hub memory"
+    code: |
+      ' Setup execution trace
+              MOV     IJMP0, #trace_isr    ' Debug ISR
+              MOV     trace_ptr, ##TRACE_BUFFER
+              SETBRK  ##$1_00000           ' Single-step mode
+              ALLOWI                       ' Start tracing
+              
+      trace_isr:
+              WRLONG  IRET0, trace_ptr     ' Save PC
+              ADD     trace_ptr, #4
+              CMP     trace_ptr, ##TRACE_END WZ
+      IF_Z    MOV     trace_ptr, ##TRACE_BUFFER ' Wrap
+              RETI0                        ' Continue
+  
+  - pattern: "conditional_breakpoint"
+    description: "Break only when conditions are met"
+    code: |
+      ' Conditional breakpoint handler
+      debug_isr:
+              RDLONG  value, watch_var     ' Check variable
+              CMP     value, break_value WZ
+      IF_NZ   RETI0                        ' Continue if no match
+              
+              ' Condition met - handle break
+              COGID   pa                   ' Save COG ID
+              WRLONG  pa, debug_cog
+              WRLONG  value, debug_value
+              ' Could halt here or continue
+              RETI0
+  
+  - pattern: "profiler"
+    description: "Profile code execution timing"
+    code: |
+      ' Instruction profiler
+      profile_isr:
+              GETCT   current_time
+              SUB     current_time, last_time
+              ADD     total_time, current_time
+              ADD     instruction_count, #1
+              MOV     last_time, current_time
+              RETI0
+
+  - pattern: "remote_debugging"
+    description: "Debug COG from another COG"
+    code: |
+      ' Debugger COG
+      debug_control:
+              COGBRK  #target_cog          ' Break target
+              ' Wait for target to hit breakpoint
+              WAITX   ##1000
+              ' Read target's state from shared memory
+              RDLONG  target_pc, debug_data
+              
+      ' Target COG debug handler
+      target_debug_isr:
+              WRLONG  IRET0, debug_data    ' Share PC
+              WRLONG  some_var, debug_data+4
+              ' Wait for debugger commands
+              RETI0
+
+debugging_capabilities:
+  - capability: "non_intrusive_monitoring"
+    description: "Monitor without modifying execution timing"
+    implementation: "Use hub memory for trace buffer"
+  
+  - capability: "state_inspection"
+    description: "Examine all COG state at breakpoint"
+    accessible:
+      - "All COG RAM locations"
+      - "All special registers"
+      - "Flag states"
+      - "FIFO/Streamer status"
+  
+  - capability: "execution_modification"
+    description: "Modify execution flow from debug handler"
+    techniques:
+      - "Change IRET0 to alter return address"
+      - "Modify COG RAM before return"
+      - "Skip instructions using SKIPF"
+  
+  - capability: "cross_cog_debugging"
+    description: "Debug any COG from any other COG"
+    mechanism: "COGBRK instruction triggers remote debug"
+
+best_practices:
+  - practice: "minimal_debug_overhead"
+    description: "Keep debug ISR lightweight"
+    rationale: "Reduces impact on timing-sensitive code"
+  
+  - practice: "circular_trace_buffer"
+    description: "Use circular buffer for execution traces"
+    rationale: "Captures most recent execution history"
+  
+  - practice: "debug_communication"
+    description: "Use hub memory for debug data exchange"
+    rationale: "Allows debugger COG to examine state"
+  
+  - practice: "production_disable"
+    description: "Disable debug interrupts in production"
+    rationale: "Prevents security vulnerabilities"
+
+performance_impact:
+  single_step_overhead:
+    per_instruction: "~10 clocks for minimal ISR"
+    with_tracing: "~20-30 clocks including hub write"
+  
+  breakpoint_overhead:
+    on_hit: "ISR execution time only"
+    when_not_hit: "0 clocks"
+  
+  memory_usage:
+    trace_buffer: "Typically 4KB-16KB in hub"
+    debug_state: "~100 longs for full state capture"
+
+limitations:
+  - limitation: "single_debug_level"
+    description: "Cannot debug the debug ISR itself"
+    workaround: "Use alternative debugging techniques for debug ISR"
+  
+  - limitation: "hub_access_timing"
+    description: "Debug ISR hub access affects timing"
+    workaround: "Use COG RAM buffering when possible"
+  
+  - limitation: "streamer_interaction"
+    description: "Debug can disrupt streamer operations"
+    workaround: "Disable debug when using streamer"
+
+related_topics:
+  - topic: "interrupts"
+    relationship: "Debug is highest priority interrupt"
+  
+  - topic: "cog_operations"
+    relationship: "Can debug any COG from any COG"
+  
+  - topic: "development_tools"
+    relationship: "Basis for software debuggers"
+
+extraction_metadata:
+  source_documents:
+    - document: "Silicon Doc v35"
+      sections:
+        - "part1-cog.txt, Debug Interrupt System"
+        - "Debug instructions and modes"
+    - document: "P2 Datasheet"
+      sections:
+        - "Pages 39-40: Debug interrupt details"
+  confidence: "high"
+  last_updated: "2024-12-30"

@@ -1,0 +1,324 @@
+# P2 Lookup RAM (LUT)
+# Silicon Doc Reference: part1-cog.txt, pages 12-14
+# Datasheet Reference: pages 28-30, 67-68
+# Layer 1: Direct extraction from Silicon Doc v35 and P2 Datasheet
+
+component_name: "Lookup RAM (LUT)"
+
+component_type: "dual_port_memory"
+
+description: |
+  Each COG contains a 512-long (2KB) Lookup RAM (LUT) that serves as fast local storage
+  and enables special operations like LUTSON waveform generation, LUT sharing between
+  adjacent COG pairs, and use as extended COG register space. The LUT provides single-cycle
+  access for most operations and can be used for lookup tables, waveform data, FIFO buffers,
+  or general data storage.
+
+architecture:
+  size: "512 longs (2048 bytes)"
+  organization: "512 × 32 bits"
+  address_range: "$200-$3FF"
+  
+  access_modes:
+    - mode: "direct"
+      description: "Direct read/write via RDLUT/WRLUT instructions"
+      timing: "3 cycles for read, 2 cycles for write"
+    
+    - mode: "indirect"
+      description: "Indirect access through pointers"
+      timing: "3 cycles + address calculation"
+    
+    - mode: "shared"
+      description: "Read neighbor COG's LUT (even/odd pairs)"
+      timing: "3 cycles"
+    
+    - mode: "streamer"
+      description: "Streamer can read LUT for waveform output"
+      timing: "Automatic, no COG cycles"
+  
+  special_features:
+    - feature: "LUTSON"
+      description: "Stream LUT contents as waveform to DACs"
+      use_case: "Arbitrary waveform generation"
+    
+    - feature: "LUT_sharing"
+      description: "Even COG can read odd COG's LUT and vice versa"
+      pairs: [[0,1], [2,3], [4,5], [6,7]]
+    
+    - feature: "FIFO_mode"
+      description: "Can be used with hub FIFO for buffering"
+      use_case: "High-speed data streaming"
+
+instructions:
+  - instruction: "RDLUT"
+    encoding: "EEEE 1010101 CZI DDDDDDDDD SSSSSSSSS"
+    description: "Read long from LUT"
+    operation: |
+      D := LUT[S[8:0]]
+      S can be immediate #0-#511 or register
+    timing: "3 clock cycles"
+    flags_affected: "C = MSB, Z = (result == 0)"
+    usage_example: |
+      RDLUT   data, #100      ' Read LUT[100] into data
+      RDLUT   value, index    ' Read LUT[index] into value
+  
+  - instruction: "WRLUT"
+    encoding: "EEEE 1010110 0LI DDDDDDDDD SSSSSSSSS"
+    description: "Write long to LUT"
+    operation: |
+      LUT[D[8:0]] := S
+      D can be immediate #0-#511 or register
+    timing: "2 clock cycles"
+    usage_example: |
+      WRLUT   value, #100     ' Write value to LUT[100]
+      WRLUT   #$12345678, index ' Write immediate to LUT[index]
+  
+  - instruction: "RDLUTS"
+    encoding: "EEEE 1010100 CZI DDDDDDDDD SSSSSSSSS"
+    description: "Read shared LUT from adjacent COG"
+    operation: |
+      D := other_cog_LUT[S[8:0]]
+      Even COG reads odd COG's LUT, odd reads even's
+    timing: "3 clock cycles"
+    flags_affected: "C = MSB, Z = (result == 0)"
+    usage_example: |
+      RDLUTS  data, #50       ' Read neighbor's LUT[50]
+  
+  - instruction: "SETLUTS"
+    encoding: "EEEE 1001111 0LI DDDDDDDDD SSSSSSSSS"
+    description: "Setup LUT sharing mode"
+    operation: |
+      Configure LUT sharing between COG pairs
+      Enables RDLUTS instruction operation
+    usage_example: |
+      SETLUTS #1              ' Enable LUT sharing
+  
+  - instruction: "LUTSON"
+    encoding: "Special streamer configuration"
+    description: "Stream LUT contents to DAC pins"
+    operation: |
+      Configure streamer to read LUT sequentially
+      Output to DAC channels for waveform generation
+      LUT acts as waveform buffer
+    usage_example: |
+      ' Load waveform into LUT
+      SETQ2   #511            ' Load 512 longs
+      RDLONG  $200, waveform_ptr
+      
+      ' Configure streamer for LUT output
+      WRPIN   dac_mode, #0    ' Setup DAC on pin 0
+      WXPIN   #0, #0
+      WYPIN   #0, #0
+      DIRH    #0
+      
+      ' Start streaming from LUT
+      XINIT   lut_mode, #0    ' Begin LUT streaming
+
+memory_map:
+  lut_space:
+    start: "$200"
+    end: "$3FF"
+    size: "512 longs"
+    
+  special_regions:
+    - region: "$200-$27F"
+      description: "Often used for sine/cosine tables"
+      size: "128 longs"
+    
+    - region: "$280-$2FF"
+      description: "Common FIFO buffer area"
+      size: "128 longs"
+    
+    - region: "$300-$3FF"
+      description: "General data storage"
+      size: "256 longs"
+
+programming_patterns:
+  - pattern: "lookup_table"
+    description: "Classic lookup table implementation"
+    code: |
+      ' Load sine table into LUT
+              SETQ2   #127            ' Load 128 longs
+              RDLONG  $200, sine_table_ptr
+              
+      ' Use sine lookup
+      get_sine:
+              AND     angle, #$7F     ' 0-127 index
+              RDLUT   sine_val, angle ' Get sine value
+              RET
+  
+  - pattern: "waveform_generation"
+    description: "Generate waveform using LUTSON"
+    code: |
+      ' Fill LUT with waveform data
+              MOV     index, #0
+      .fill_loop:
+              MOV     value, index
+              SHL     value, #24      ' Scale to 32-bit
+              WRLUT   value, index
+              ADD     index, #1
+              CMP     index, #512 WZ
+      IF_NZ   JMP     #.fill_loop
+              
+      ' Configure for LUT streaming
+              WRPIN   ##P_DAC_124R_3V, #0  ' DAC mode
+              WXPIN   #512, #0             ' 512 samples
+              DIRH    #0                   ' Enable DAC
+              XINIT   lut_stream_mode, #0  ' Start streaming
+  
+  - pattern: "shared_data_exchange"
+    description: "Exchange data between COG pairs via LUT"
+    code: |
+      ' COG 0 (even) writes data
+      cog0_code:
+              WRLUT   message, #0     ' Write to own LUT
+              WRLUT   #1, #1          ' Set flag
+              
+      ' COG 1 (odd) reads data
+      cog1_code:
+              SETLUTS #1              ' Enable LUT sharing
+      .wait:
+              RDLUTS  flag, #1        ' Read COG 0's flag
+              CMP     flag, #1 WZ
+      IF_NZ   JMP     #.wait
+              RDLUTS  data, #0        ' Read COG 0's message
+  
+  - pattern: "fast_buffer"
+    description: "Use LUT as high-speed buffer"
+    code: |
+      ' Circular buffer in LUT
+      buffer_ptr    LONG    $200
+      buffer_end    LONG    $2FF
+      
+      write_buffer:
+              WRLUT   data, buffer_ptr
+              ADD     buffer_ptr, #1
+              CMP     buffer_ptr, buffer_end WZ
+      IF_Z    MOV     buffer_ptr, #$200    ' Wrap
+              RET
+              
+      read_buffer:
+              RDLUT   data, buffer_ptr
+              ADD     buffer_ptr, #1
+              CMP     buffer_ptr, buffer_end WZ
+      IF_Z    MOV     buffer_ptr, #$200    ' Wrap
+              RET
+
+  - pattern: "fast_stack"
+    description: "Implement stack in LUT for speed"
+    code: |
+      stack_ptr     LONG    $3FF    ' Start at top of LUT
+      
+      push:
+              WRLUT   value, stack_ptr
+              SUB     stack_ptr, #1
+              RET
+              
+      pop:
+              ADD     stack_ptr, #1
+              RDLUT   value, stack_ptr
+              RET
+
+common_applications:
+  - application: "sine_cosine_tables"
+    description: "Fast trigonometric lookups for DSP"
+    complexity: "intermediate"
+    benefits:
+      - "3-cycle access vs hub memory"
+      - "No hub bandwidth consumption"
+      - "Deterministic timing"
+  
+  - application: "waveform_synthesis"
+    description: "Arbitrary waveform generation via LUTSON"
+    complexity: "advanced"
+    benefits:
+      - "Hardware-driven output"
+      - "No COG cycles during playback"
+      - "Smooth, high-frequency waveforms"
+  
+  - application: "data_transformation"
+    description: "Fast data encoding/decoding tables"
+    complexity: "beginner"
+    benefits:
+      - "Single-cycle transforms"
+      - "Complex mappings simplified"
+  
+  - application: "inter_cog_communication"
+    description: "Fast data exchange between COG pairs"
+    complexity: "intermediate"
+    benefits:
+      - "No hub bandwidth needed"
+      - "Deterministic access timing"
+      - "512 longs of shared space"
+
+performance_characteristics:
+  access_timing:
+    read: "3 clock cycles"
+    write: "2 clock cycles"
+    shared_read: "3 clock cycles"
+  
+  bandwidth:
+    internal: "32 bits per 2-3 clocks"
+    streaming: "32 bits per clock (via streamer)"
+  
+  power_consumption:
+    active: "Similar to COG RAM access"
+    idle: "Static power only"
+  
+  comparison_to_hub:
+    lut_read: "3 clocks fixed"
+    hub_read: "9-16 clocks (egg-beater dependent)"
+    advantage: "3-5x faster, deterministic"
+
+limitations:
+  - limitation: "size"
+    description: "Limited to 512 longs per COG"
+    workaround: "Use hub memory for larger tables"
+  
+  - limitation: "sharing_pairs"
+    description: "Only adjacent even/odd COGs can share"
+    workaround: "Use hub memory for broader sharing"
+  
+  - limitation: "no_byte_access"
+    description: "Long-only access (32-bit)"
+    workaround: "Pack bytes/words, use shift/mask"
+
+debugging_considerations:
+  - tip: "lut_dump"
+    description: "Dump LUT contents to hub for examination"
+    code: |
+      SETQ2   #511            ' Dump all 512 longs
+      WRLONG  $200, dump_ptr  ' Write LUT to hub
+  
+  - tip: "verify_sharing"
+    description: "Test LUT sharing between COGs"
+    code: |
+      ' Write known pattern, verify from other COG
+      WRLUT   #$12345678, #0
+      ' Other COG: RDLUTS should return $12345678
+
+related_topics:
+  - topic: "streamer"
+    relationship: "Streamer can output LUT contents via LUTSON"
+  
+  - topic: "hub_fifo"
+    relationship: "LUT often used with hub FIFO for buffering"
+  
+  - topic: "cog_pairing"
+    relationship: "Even/odd COG pairs can share LUT access"
+  
+  - topic: "dac_operations"
+    relationship: "LUT-to-DAC streaming for waveform generation"
+
+extraction_metadata:
+  source_documents:
+    - document: "Silicon Doc v35"
+      sections:
+        - "part1-cog.txt, LUT Memory"
+        - "LUT instructions and sharing"
+    - document: "P2 Datasheet"
+      sections:
+        - "Pages 28-30: LUT architecture"
+        - "Pages 67-68: LUT instructions"
+  confidence: "high"
+  last_updated: "2024-12-30"

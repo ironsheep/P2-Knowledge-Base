@@ -1,10 +1,246 @@
+# COG - Symmetric 32-bit Processor Core
+# Source: Silicon Doc v35, P2 Datasheet
+
 component: COG
 category: processor
 description: |
-  Symmetric 32-bit processor core
-features:
-  - Independent execution
-  - Full I/O pin access
-  - Hardware stack (8 levels)
-  - Carry and Zero flags
-  - Interrupts (3 priority levels)
+  Symmetric 32-bit processor core with dedicated RAM, hardware stack, and full I/O access.
+  Eight identical COGs provide true parallel processing with deterministic timing.
+
+architecture:
+  data_width: 32
+  address_width: 20
+  pipeline_stages: 5
+  pipeline_type: "In-order scalar"
+  execution_time: "2 clocks when pipeline full"
+  branch_penalty: "5-8 clocks (pipeline flush)"
+
+memory:
+  cog_ram:
+    size: "512 longs (2KB)"
+    width: "32 bits"
+    addresses: "$000-$1FF"
+    access_time: "Single clock"
+    dual_use: "$1F0-$1F7 can be RAM or interrupt vectors"
+    
+  lut_ram:
+    size: "512 longs (2KB)"
+    width: "32 bits"
+    addresses: "$000-$1FF (via RDLUT/WRLUT)"
+    access_time: "Single clock"
+    special_features: "Streamer access, COG pair sharing"
+    
+  registers:
+    general_purpose: "$000-$1EF (496 registers)"
+    interrupt_vectors: "$1F0-$1F5 (dual-purpose)"
+    special_hardware: "$1F8-$1FF (not RAM)"
+
+special_registers:
+  ptr_registers:
+    ptra: "$1F8 - Hub pointer A"
+    ptrb: "$1F9 - Hub pointer B"
+    features:
+      - "20-bit hub addresses"
+      - "Auto-increment/decrement"
+      - "Complex indexing expressions"
+      - "Circular buffer support"
+      
+  io_registers:
+    dira: "$1FA - Direction control 31:0"
+    dirb: "$1FB - Direction control 63:32"
+    outa: "$1FC - Output state 31:0"
+    outb: "$1FD - Output state 63:32"
+    ina: "$1FE - Input state 31:0 (also IJMP0 in debug)"
+    inb: "$1FF - Input state 63:32 (also IRET0 in debug)"
+    
+  interrupt_vectors:
+    ijmp3: "$1F0 - INT3 jump address"
+    iret3: "$1F1 - INT3 return address"
+    ijmp2: "$1F2 - INT2 jump address"
+    iret2: "$1F3 - INT2 return address"
+    ijmp1: "$1F4 - INT1 jump address"
+    iret1: "$1F5 - INT1 return address"
+    
+  hidden_registers:
+    pa: "$1F6 - Parameter A (readable via MOV)"
+    pb: "$1F7 - Parameter B (readable via MOV)"
+    ptra: "$1F8 - Pointer A"
+    ptrb: "$1F9 - Pointer B"
+
+flags:
+  c_flag:
+    description: "Carry flag"
+    affected_by: "Arithmetic, shifts, tests"
+    used_by: "Conditional execution, branches"
+    
+  z_flag:
+    description: "Zero flag"
+    affected_by: "Most ALU operations"
+    used_by: "Conditional execution, branches"
+    
+  flag_writing:
+    wc: "Write carry flag"
+    wz: "Write zero flag"
+    wcz: "Write both flags"
+    
+  flag_preservation:
+    no_suffix: "Flags unchanged"
+    andc: "AND with carry"
+    andz: "AND with zero"
+    orc: "OR with carry"
+    orz: "OR with zero"
+    xorc: "XOR with carry"
+    xorz: "XOR with zero"
+
+stack:
+  hardware_stack:
+    depth: "8 levels"
+    width: "22 bits (20-bit address + C + Z)"
+    push_instructions: ["CALL", "CALLA", "CALLB", "CALLPA", "CALLPB", "CALLD"]
+    pop_instructions: ["RET", "RETA", "RETB"]
+    overflow: "Wraps around (circular buffer)"
+    
+  software_stack:
+    ptra_stack: "PUSHA/POPA use PTRA as stack pointer"
+    ptrb_stack: "PUSHB/POPB use PTRB as stack pointer"
+    operations: "32-bit push/pop to hub memory"
+
+execution_modes:
+  cog_execution:
+    pc_range: "$000-$1FF (COG RAM)"
+    instruction_fetch: "32-bit from COG RAM"
+    pc_increment: 1
+    timing: "2 clocks per instruction"
+    
+  lut_execution:
+    pc_range: "$200-$3FF (LUT RAM)"
+    instruction_fetch: "32-bit from LUT"
+    pc_increment: 1
+    timing: "2 clocks per instruction"
+    
+  hub_execution:
+    pc_range: "$400-$FFFFF"
+    instruction_fetch: "32-bit from hub via FIFO"
+    pc_increment: 4
+    timing: "2+ clocks (FIFO dependent)"
+    fifo_depth: 19
+
+interrupts:
+  levels:
+    int1: "Highest priority"
+    int2: "Middle priority"
+    int3: "Lowest priority"
+    debug: "Highest (invisible to normal code)"
+    
+  sources:
+    events: "Any of 16 hardware events"
+    software: "TRGINTx instructions"
+    
+  latency:
+    best_case: "3 clocks"
+    typical: "5-10 clocks"
+    worst_case: "Depends on interruptible boundary"
+    
+  nesting:
+    int1_can_interrupt: ["INT2", "INT3", "main"]
+    int2_can_interrupt: ["INT3", "main"]
+    int3_can_interrupt: ["main"]
+
+pipeline:
+  stages:
+    - "Instruction Fetch (IF)"
+    - "Instruction Decode (ID)"
+    - "Execute (EX)"
+    - "Memory Access (MA)"
+    - "Write Back (WB)"
+    
+  hazards:
+    data_hazards: "Hardware forwarding handles most cases"
+    control_hazards: "Branch prediction not implemented"
+    structural_hazards: "Hub access conflicts possible"
+    
+  stalls:
+    hub_window_miss: "0-7 clocks"
+    cordic_wait: "0-54 clocks"
+    instruction_modification: "ALTx instructions"
+
+starting_stopping:
+  coginit:
+    instruction: "COGINIT {#}D,{#}S"
+    d_parameter: |
+      D[31]: Start mode (0=stop/restart, 1=start)
+      D[30]: New COG (0) or COG pair (1)
+      D[20]: Load from hub (0) or jump to address (1)
+      D[19:0]: Hub address or COG address
+    s_parameter: "Parameter passed to new COG"
+    
+  cogstop:
+    instruction: "COGSTOP {#}D"
+    operation: "Stop specified COG"
+    
+  cogid:
+    instruction: "COGID D"
+    operation: "Get current COG number (0-7)"
+
+cog_communication:
+  shared_resources:
+    hub_ram: "512KB-1MB shared memory"
+    pins: "64 I/O pins"
+    locks: "16 hardware locks"
+    events: "Cross-COG signaling"
+    
+  cogatn:
+    instruction: "COGATN {#}D"
+    operation: "Signal attention to COG(s)"
+    d_parameter: "16-bit mask (2 bits per COG)"
+    
+  synchronization:
+    locks: "Atomic test-and-set"
+    events: "Hardware event flags"
+    polling: "Hub memory locations"
+    attention: "COGATN signaling"
+
+performance:
+  mips: "80 MIPS at 160MHz (2 clocks/instruction)"
+  deterministic: "Timing predictable for real-time"
+  parallel: "8 COGs = 640 MIPS total"
+  
+  instruction_timing:
+    alu_ops: "2 clocks"
+    branches: "5-8 clocks"
+    hub_ops: "2-9 clocks"
+    cordic_ops: "2-56 clocks"
+
+programming_model:
+  registers_as_memory: "All 496 registers are general purpose"
+  self_modifying_code: "Supported in COG RAM"
+  indirect_addressing: "Via ALTx instructions"
+  
+  calling_conventions:
+    pa_pb_parameters: "PA/PB for first two parameters"
+    ptra_stack: "PTRA typically used for stack"
+    
+  typical_usage:
+    - "Dedicated I/O processors"
+    - "Real-time control loops"
+    - "Protocol implementations"
+    - "Signal processing"
+
+debug_features:
+  hardware_debug: "Invisible debug interrupt"
+  breakpoints: "BRK instruction"
+  single_step: "Via debug interrupt"
+  register_inspection: "Through hub memory window"
+
+related_components:
+  hub: "Shared memory and resources"
+  smart_pins: "I/O processing offload"
+  streamer: "DMA for each COG"
+  cordic: "Shared math engine"
+  interrupts: "Event-driven processing"
+
+see_also:
+  - "COG memory map"
+  - "Pipeline optimization"
+  - "Multi-COG programming"
+  - "Interrupt handling"

@@ -1,0 +1,323 @@
+# P2 Hardware Locks System
+# Silicon Doc Reference: part1-cog.txt, pages 17-18
+# Datasheet Reference: pages 34-35, 82
+# Layer 1: Direct extraction from Silicon Doc v35 and P2 Datasheet
+
+component_name: "Hardware Locks"
+
+component_type: "hardware_semaphore"
+
+description: |
+  The P2 provides 16 hardware locks (semaphores) that enable atomic resource management across 
+  all 8 COGs. These locks provide guaranteed mutual exclusion for shared resources without the 
+  possibility of race conditions. Each lock can be in one of two states: available (free) or 
+  owned by a specific COG. The hardware ensures atomic test-and-set operations, preventing 
+  multiple COGs from simultaneously acquiring the same lock.
+
+architecture:
+  total_locks: 16
+  lock_numbering: "0-15"
+  state_bits: 4  # Per lock: 3 bits COG ID + 1 bit owned flag
+  
+  lock_states:
+    - state: "available"
+      description: "Lock is free and can be acquired by any COG"
+      owned_bit: 0
+      cog_id: "undefined"
+    
+    - state: "owned"
+      description: "Lock is held by a specific COG"
+      owned_bit: 1
+      cog_id: "0-7 (owning COG number)"
+  
+  atomic_operations:
+    - name: "test_and_set"
+      description: "Atomically check if lock is free and acquire if available"
+      guarantee: "Hardware ensures no race conditions between COGs"
+    
+    - name: "check_owner"
+      description: "Determine which COG owns a lock"
+      non_blocking: true
+    
+    - name: "release"
+      description: "Free a lock that current COG owns"
+      safety: "Only owning COG can release its lock"
+
+instructions:
+  - instruction: "LOCKTRY"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 0000LLLLL"
+    description: "Try to acquire lock L, result in D, C=success"
+    operation: |
+      IF lock[L] is available THEN
+        lock[L] := this_cog_id
+        D := this_cog_id
+        C := 1 (success)
+      ELSE
+        D := owning_cog_id
+        C := 0 (failure)
+    flags_affected: "C"
+    timing: "2 clock cycles"
+    usage_example: |
+      LOCKTRY lock_num         ' Try to get lock
+      IF_C    JMP #got_lock    ' Jump if successful
+      ' Lock was busy, owner ID is in lock_num
+  
+  - instruction: "LOCKREL"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 0001LLLLL"
+    description: "Release lock L if owned by this COG"
+    operation: |
+      IF lock[L] owner = this_cog_id THEN
+        lock[L] := available
+        D := this_cog_id
+        C := 1 (released)
+      ELSE
+        D := current_owner_id
+        C := 0 (not owner)
+    flags_affected: "C"
+    timing: "2 clock cycles"
+    usage_example: |
+      LOCKREL lock_num         ' Release lock
+      IF_NC   JMP #not_owner   ' Jump if we didn't own it
+  
+  - instruction: "LOCKNEW"
+    encoding: "EEEE 1101101 C0L DDDDDDDDD 000000000"
+    description: "Find and acquire first available lock"
+    operation: |
+      Search locks 0-15 for first available
+      IF found THEN
+        lock[n] := this_cog_id
+        D := n (lock number acquired)
+        C := 1 (success)
+      ELSE
+        D := $FFFFFFFF
+        C := 0 (no locks available)
+    flags_affected: "C"
+    timing: "2-18 clock cycles"
+    usage_example: |
+      LOCKNEW my_lock          ' Get any available lock
+      IF_NC   JMP #no_locks    ' Jump if none available
+      ' Lock number is in my_lock
+  
+  - instruction: "LOCKRET"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 0010LLLLL"
+    description: "Return (release) lock L unconditionally"
+    operation: |
+      lock[L] := available
+      D := previous_owner_id (or $FFFFFFFF if was free)
+    timing: "2 clock cycles"
+    usage_example: |
+      LOCKRET lock_num         ' Force release lock
+      ' Previous owner (if any) is returned in lock_num
+
+  - instruction: "LOCKTRY (WC mode)"
+    encoding: "EEEE 1101011 10L DDDDDDDDD 0000LLLLL"
+    description: "Check lock owner without trying to acquire"
+    operation: |
+      D := current_owner_id (or $FFFFFFFF if free)
+      C := 1 if free, 0 if owned
+    flags_affected: "C"
+    timing: "2 clock cycles"
+    usage_example: |
+      LOCKTRY lock_num WC      ' Just check lock status
+      IF_C    JMP #lock_free   ' Jump if lock is available
+
+programming_patterns:
+  - pattern: "basic_mutex"
+    description: "Standard mutual exclusion pattern"
+    code: |
+      ' Define lock number
+      LOCK_RESOURCE = 5
+      
+      ' Critical section entry
+      .retry_lock:
+          LOCKTRY #LOCK_RESOURCE WC
+          IF_NC   JMP #.retry_lock     ' Spin until acquired
+      
+      ' ... critical section code here ...
+      
+      ' Critical section exit
+          LOCKREL #LOCK_RESOURCE       ' Release the lock
+  
+  - pattern: "timeout_lock"
+    description: "Try lock with timeout"
+    code: |
+      ' Try to acquire lock with timeout
+          GETCT   timeout
+          ADD     timeout, ##1_000_000  ' 1 million clock timeout
+      
+      .try_loop:
+          LOCKTRY #LOCK_NUM WC
+          IF_C    JMP #.got_lock
+          GETCT   current
+          CMP     current, timeout WC
+          IF_C    JMP #.try_loop
+          JMP     #.timeout_error
+      
+      .got_lock:
+      ' ... protected code ...
+          LOCKREL #LOCK_NUM
+  
+  - pattern: "multi_lock"
+    description: "Acquire multiple locks in order to prevent deadlock"
+    code: |
+      ' Always acquire locks in ascending order
+          LOCKTRY #LOCK_A WC
+          IF_NC   JMP #$-1
+          LOCKTRY #LOCK_B WC
+          IF_NC   LOCKREL #LOCK_A     ' Release A if B fails
+          IF_NC   JMP #retry
+      
+      ' ... use both resources ...
+      
+          LOCKREL #LOCK_B              ' Release in any order
+          LOCKREL #LOCK_A
+
+  - pattern: "dynamic_lock_allocation"
+    description: "Allocate locks dynamically at runtime"
+    code: |
+      ' Allocate a new lock
+          LOCKNEW my_lock WC
+          IF_NC   JMP #no_locks_error
+          
+      ' Save lock number for later use
+          MOV     saved_lock, my_lock
+          
+      ' ... use lock for synchronization ...
+          
+      ' Return lock to pool when done
+          LOCKRET saved_lock
+
+common_applications:
+  - application: "shared_memory_protection"
+    description: "Protect hub RAM data structures accessed by multiple COGs"
+    complexity: "intermediate"
+    example: |
+      ' Protect shared buffer access
+      BUFFER_LOCK = 0
+      
+      ' Writer COG
+      .write_data:
+          LOCKTRY #BUFFER_LOCK WC
+          IF_NC   JMP #$-1
+          WRLONG  data, buffer_ptr
+          LOCKREL #BUFFER_LOCK
+  
+  - application: "resource_arbitration"
+    description: "Manage access to shared hardware resources like pins or CORDIC"
+    complexity: "intermediate"
+    example: |
+      ' CORDIC access control
+      CORDIC_LOCK = 1
+      
+      .use_cordic:
+          LOCKTRY #CORDIC_LOCK WC
+          IF_NC   JMP #$-1
+          QMUL    x, y          ' Use CORDIC
+          GETQX   result
+          LOCKREL #CORDIC_LOCK
+  
+  - application: "producer_consumer"
+    description: "Synchronize producer/consumer queues"
+    complexity: "advanced"
+    example: |
+      ' Queue lock for FIFO access
+      QUEUE_LOCK = 2
+      
+      ' Producer adds item
+      .produce:
+          LOCKTRY #QUEUE_LOCK WC
+          IF_NC   JMP #$-1
+          ' Add item to queue
+          WRLONG  item, queue_tail
+          ADD     queue_tail, #4
+          LOCKREL #QUEUE_LOCK
+
+  - application: "initialization_synchronization"
+    description: "Ensure single COG performs system initialization"
+    complexity: "beginner"
+    example: |
+      ' First COG to get lock does init
+      INIT_LOCK = 15
+      
+          LOCKTRY #INIT_LOCK WC
+          IF_C    CALL #do_initialization
+          ' All COGs continue here after init
+
+best_practices:
+  - practice: "ordered_acquisition"
+    description: "Always acquire multiple locks in the same order to prevent deadlock"
+    rationale: "Prevents circular wait conditions"
+  
+  - practice: "minimal_hold_time"
+    description: "Hold locks for the shortest time possible"
+    rationale: "Reduces contention and improves system throughput"
+  
+  - practice: "always_release"
+    description: "Ensure locks are released in all code paths including errors"
+    rationale: "Prevents permanent lock starvation"
+  
+  - practice: "document_lock_usage"
+    description: "Clearly document which locks protect which resources"
+    rationale: "Prevents misuse and conflicting lock assignments"
+
+performance_considerations:
+  lock_access_time: "2 clock cycles for all lock operations"
+  
+  contention_impact:
+    low_contention: "Minimal overhead, 2 clocks per lock operation"
+    high_contention: "COGs spin-waiting consume hub slots"
+    
+  hub_bandwidth:
+    description: "Lock operations use hub cycles like memory access"
+    optimization: "Minimize lock checking frequency in spin loops"
+  
+  scalability:
+    max_locks: 16
+    workaround: "Use locks to protect larger lock tables in hub RAM if needed"
+
+debugging_tips:
+  - tip: "lock_ownership_tracking"
+    description: "Use LOCKTRY with WC to check current lock owner"
+    code: |
+      LOCKTRY lock_num WC      ' Check who owns lock
+      ' lock_num now contains owner COG ID or -1 if free
+  
+  - tip: "deadlock_detection"
+    description: "Implement timeouts on lock acquisition"
+    importance: "Prevents system hangs from deadlock"
+  
+  - tip: "lock_usage_map"
+    description: "Document lock assignments in a central location"
+    example: |
+      ' System Lock Assignments:
+      ' Lock 0: Hub mailbox system
+      ' Lock 1: CORDIC engine
+      ' Lock 2: Serial port A
+      ' Lock 3: Shared buffer pool
+      ' Locks 4-15: Available for dynamic allocation
+
+related_topics:
+  - topic: "cog_synchronization"
+    relationship: "Locks are primary inter-COG synchronization mechanism"
+  
+  - topic: "hub_memory"
+    relationship: "Locks typically protect shared hub RAM structures"
+  
+  - topic: "events"
+    relationship: "Can combine locks with events for complex synchronization"
+  
+  - topic: "interrupts"
+    relationship: "Lock operations are atomic even with interrupts enabled"
+
+extraction_metadata:
+  source_documents:
+    - document: "Silicon Doc v35"
+      sections:
+        - "part1-cog.txt, Lock Instructions"
+        - "Hardware lock system details"
+    - document: "P2 Datasheet"
+      sections:
+        - "Pages 34-35: Lock instruction reference"
+        - "Page 82: Lock system architecture"
+  confidence: "high"
+  last_updated: "2024-12-30"

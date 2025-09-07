@@ -1,4 +1,422 @@
-component: Event_System
-category: synchronization
+# P2 Event System
+# Silicon Doc Reference: part1-cog.txt, pages 20-22
+# Datasheet Reference: pages 37-39, 74-75
+# Layer 1: Direct extraction from Silicon Doc v35 and P2 Datasheet
+
+component_name: "Event System"
+
+component_type: "hardware_event_controller"
+
 description: |
-  Hardware event tracking and interrupts
+  The P2 Event System provides hardware event detection and routing capabilities that
+  enable COGs to respond to various hardware conditions without polling. Events can
+  trigger interrupts, wake COGs from wait states, or be polled directly. The system
+  supports pin patterns, edges, timer comparisons, and subsystem completion events,
+  creating a flexible event-driven programming model.
+
+architecture:
+  event_sources: 16
+  selectable_events: 4  # SE1-SE4
+  
+  event_categories:
+    - category: "timer_events"
+      sources: ["CT-passed-CT1", "CT-passed-CT2", "CT-passed-CT3"]
+      description: "System counter comparison events"
+    
+    - category: "pin_events"
+      sources: ["PAT-match", "Edge-detect", "State-change"]
+      description: "Pin state and pattern events"
+    
+    - category: "smart_pin_events"
+      sources: ["IN-rise", "IN-fall", "IN-change"]
+      description: "Smart pin status events"
+    
+    - category: "system_events"
+      sources: ["CORDIC-done", "Streamer-done", "FIFO-event", "ATN-received"]
+      description: "Subsystem completion and communication events"
+  
+  event_routing:
+    - destination: "interrupts"
+      description: "Events can trigger INT1/2/3"
+      latency: "3-8 clock cycles"
+    
+    - destination: "wait_release"
+      description: "Events can release WAIT instructions"
+      latency: "0 clock cycles"
+    
+    - destination: "polling"
+      description: "Events can be polled via POLL instructions"
+      latency: "2 clock cycles"
+
+event_selectors:
+  SE1:
+    register: "Internal selector 1"
+    configuration: "SETSE1 instruction"
+    typical_use: "Primary event monitoring"
+  
+  SE2:
+    register: "Internal selector 2"
+    configuration: "SETSE2 instruction"
+    typical_use: "Secondary event monitoring"
+  
+  SE3:
+    register: "Internal selector 3"
+    configuration: "SETSE3 instruction"
+    typical_use: "Tertiary event monitoring"
+  
+  SE4:
+    register: "Internal selector 4"
+    configuration: "SETSE4 instruction"
+    typical_use: "Quaternary event monitoring"
+
+instructions:
+  - instruction: "SETSE1"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 001100000"
+    description: "Configure selectable event 1"
+    operation: |
+      SE1 := D[5:0] event source configuration
+      D[7:6] = mode bits for edge/level/state
+    usage_example: |
+      SETSE1  #%01_000010     ' Positive edge on pin 2
+      SETSE1  #%10_000010     ' Negative edge on pin 2
+      SETSE1  #%11_000002     ' Any edge on pin 2
+  
+  - instruction: "SETSE2"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 001100001"
+    description: "Configure selectable event 2"
+    operation: "Similar to SETSE1 for event selector 2"
+  
+  - instruction: "SETSE3"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 001100010"
+    description: "Configure selectable event 3"
+  
+  - instruction: "SETSE4"
+    encoding: "EEEE 1101011 00L DDDDDDDDD 001100011"
+    description: "Configure selectable event 4"
+  
+  - instruction: "POLLSE1"
+    encoding: "EEEE 1101011 CZ0 000000000 001100100"
+    description: "Poll selectable event 1"
+    operation: |
+      C := event1_flag
+      event1_flag := 0 (cleared)
+    flags_affected: "C = event occurred"
+    timing: "2 clock cycles"
+    usage_example: |
+      POLLSE1 WC              ' Check SE1
+      IF_C    JMP #event1_handler
+  
+  - instruction: "POLLSE2"
+    encoding: "EEEE 1101011 CZ0 000000000 001100101"
+    description: "Poll selectable event 2"
+  
+  - instruction: "POLLSE3"
+    encoding: "EEEE 1101011 CZ0 000000000 001100110"
+    description: "Poll selectable event 3"
+  
+  - instruction: "POLLSE4"
+    encoding: "EEEE 1101011 CZ0 000000000 001100111"
+    description: "Poll selectable event 4"
+  
+  - instruction: "WAITSE1"
+    encoding: "EEEE 1101011 CZ0 000000000 001101000"
+    description: "Wait for selectable event 1"
+    operation: |
+      Wait until event1_flag = 1
+      event1_flag := 0 (auto-clear)
+    timing: "2+ cycles (waits for event)"
+    usage_example: |
+      WAITSE1                 ' Wait for event 1
+      ' Event occurred, continue
+  
+  - instruction: "WAITSE2"
+    encoding: "EEEE 1101011 CZ0 000000000 001101001"
+    description: "Wait for selectable event 2"
+  
+  - instruction: "WAITSE3"
+    encoding: "EEEE 1101011 CZ0 000000000 001101010"
+    description: "Wait for selectable event 3"
+  
+  - instruction: "WAITSE4"
+    encoding: "EEEE 1101011 CZ0 000000000 001101011"
+    description: "Wait for selectable event 4"
+  
+  - instruction: "SETPAT"
+    encoding: "EEEE 1101011 00L DDDDDDDDD SSSSSSSSS"
+    description: "Set pin pattern for pattern matching"
+    operation: |
+      Configure pattern match for pins
+      D = pattern mask
+      S = pattern value
+    usage_example: |
+      SETPAT  mask, pattern   ' Set pattern to detect
+
+event_configurations:
+  edge_detection:
+    modes:
+      - mode: "%00"
+        description: "Level detection (state)"
+        behavior: "Event when pin(s) at specified level"
+      
+      - mode: "%01"
+        description: "Positive edge"
+        behavior: "Event on low-to-high transition"
+      
+      - mode: "%10"
+        description: "Negative edge"
+        behavior: "Event on high-to-low transition"
+      
+      - mode: "%11"
+        description: "Any edge"
+        behavior: "Event on any transition"
+    
+    setup_example: |
+      ' Detect positive edge on pin 5
+      SETSE1  #%01_000101
+      WAITSE1                 ' Wait for positive edge
+  
+  pattern_matching:
+    description: "Match specific pin patterns"
+    
+    setup_example: |
+      ' Wait for pins 7:0 = $A5
+      MOV     mask, #$FF
+      MOV     pattern, #$A5
+      SETPAT  mask, pattern
+      SETSE2  #%00_111000    ' Pattern match event
+      WAITSE2                 ' Wait for pattern
+  
+  timer_events:
+    description: "Events based on counter comparisons"
+    
+    setup_example: |
+      ' Setup 1ms timer event
+      GETCT   timeout
+      ADDCT1  timeout, ##160_000  ' 1ms at 160MHz
+      SETSE3  #%00_110001    ' CT >= CT1 event
+      WAITSE3                 ' Wait for timeout
+
+programming_patterns:
+  - pattern: "multi_event_monitor"
+    description: "Monitor multiple events simultaneously"
+    code: |
+      ' Setup multiple events
+      SETSE1  #%01_000001     ' Positive edge pin 1
+      SETSE2  #%10_000002     ' Negative edge pin 2
+      SETSE3  #%00_110001     ' Timer CT1
+      SETSE4  #%00_111111     ' ATN event
+      
+      event_loop:
+          POLLSE1 WC
+          IF_C    CALL #handle_se1
+          
+          POLLSE2 WC
+          IF_C    CALL #handle_se2
+          
+          POLLSE3 WC
+          IF_C    CALL #handle_se3
+          
+          POLLSE4 WC
+          IF_C    CALL #handle_se4
+          
+          JMP     #event_loop
+  
+  - pattern: "event_driven_state_machine"
+    description: "State machine triggered by events"
+    code: |
+      state_machine:
+          CMP     state, #STATE_IDLE WZ
+          IF_Z    JMP #idle_state
+          CMP     state, #STATE_ACTIVE WZ
+          IF_Z    JMP #active_state
+          CMP     state, #STATE_DONE WZ
+          IF_Z    JMP #done_state
+          
+      idle_state:
+          SETSE1  #%01_000000     ' Start button
+          WAITSE1
+          MOV     state, #STATE_ACTIVE
+          JMP     #state_machine
+          
+      active_state:
+          SETSE1  #%00_110001     ' Timer event
+          WAITSE1
+          MOV     state, #STATE_DONE
+          JMP     #state_machine
+  
+  - pattern: "pin_change_notification"
+    description: "Respond to any pin change in a group"
+    code: |
+      ' Monitor pins 7:0 for any change
+      RDPIN   last_state, #0
+      AND     last_state, #$FF
+      
+      monitor_loop:
+          RDPIN   current, #0
+          AND     current, #$FF
+          XOR     current, last_state WZ
+          IF_NZ   CALL #pins_changed
+          MOV     last_state, current
+          JMP     #monitor_loop
+  
+  - pattern: "synchronized_sampling"
+    description: "Sample multiple inputs on timer event"
+    code: |
+      ' Sample every 100us
+      sample_loop:
+          GETCT   next_sample
+          ADDCT2  next_sample, ##16_000  ' 100us
+          SETSE1  #%00_110010           ' CT >= CT2
+          WAITSE1                        ' Wait for timer
+          
+          ' Sample all inputs
+          RDPIN   sample1, #0
+          RDPIN   sample2, #1
+          RDPIN   sample3, #2
+          
+          ' Store samples
+          WRLONG  sample1, ptr
+          ADD     ptr, #12
+          
+          JMP     #sample_loop
+
+event_interrupt_mapping:
+  configuration: |
+    ' Map events to interrupts
+    SETSE1  #event_config    ' Configure event
+    SETINT1 #%0100           ' SE1 triggers INT1
+    
+    SETSE2  #event_config2
+    SETINT2 #%0101           ' SE2 triggers INT2
+    
+    SETSE3  #event_config3
+    SETINT3 #%0110           ' SE3 triggers INT3
+  
+  event_to_interrupt_codes:
+    - code: "%0100"
+      source: "SE1 event"
+      interrupt: "Any (1/2/3)"
+    
+    - code: "%0101"
+      source: "SE2 event"
+      interrupt: "Any (1/2/3)"
+    
+    - code: "%0110"
+      source: "SE3 event"
+      interrupt: "Any (1/2/3)"
+    
+    - code: "%0111"
+      source: "SE4 event"
+      interrupt: "Any (1/2/3)"
+
+common_applications:
+  - application: "button_debouncing"
+    description: "Detect clean button press with timing"
+    complexity: "beginner"
+    implementation: |
+      ' Wait for button press with debounce
+      SETSE1  #%01_000000 | BUTTON_PIN  ' Positive edge
+      WAITSE1                            ' Wait for press
+      WAITX   ##1_600_000               ' 10ms debounce
+      RDPIN   state, #BUTTON_PIN        ' Verify still pressed
+  
+  - application: "pulse_measurement"
+    description: "Measure pulse width using events"
+    complexity: "intermediate"
+    implementation: |
+      ' Measure positive pulse width
+      SETSE1  #%01_000000 | PULSE_PIN   ' Positive edge
+      WAITSE1
+      GETCT   start_time
+      SETSE1  #%10_000000 | PULSE_PIN   ' Negative edge
+      WAITSE1
+      GETCT   end_time
+      SUB     end_time, start_time      ' Pulse width
+  
+  - application: "protocol_timeout"
+    description: "Timeout waiting for protocol response"
+    complexity: "intermediate"
+    implementation: |
+      ' Wait for response with timeout
+      GETCT   timeout
+      ADDCT1  timeout, ##16_000_000     ' 100ms timeout
+      SETSE1  #%00_110001               ' Timer event
+      SETSE2  #%01_000000 | DATA_PIN    ' Data arrival
+      
+      ' Race between timeout and data
+      JMPREL  #0                         ' Pipeline sync
+      POLLSE1 WC                        ' Check timeout
+      IF_C    JMP #timeout_handler
+      POLLSE2 WC                        ' Check data
+      IF_C    JMP #data_received
+      JMP     #$-4                      ' Keep checking
+
+best_practices:
+  - practice: "clear_before_wait"
+    description: "Clear event flags before waiting"
+    rationale: "Prevents responding to stale events"
+  
+  - practice: "use_edge_for_signals"
+    description: "Use edge detection for signal changes"
+    rationale: "Level detection can cause repeated triggers"
+  
+  - practice: "combine_with_interrupts"
+    description: "Map critical events to interrupts"
+    rationale: "Ensures timely response to important events"
+  
+  - practice: "document_event_usage"
+    description: "Document which events each COG uses"
+    rationale: "Prevents conflicts in multi-COG systems"
+
+performance_characteristics:
+  event_detection_latency: "1 clock cycle"
+  
+  response_latency:
+    polling: "2 clocks to check flag"
+    waiting: "0 clocks after event"
+    interrupt: "3-8 clocks to ISR"
+  
+  simultaneous_events: "All 4 SE events tracked independently"
+  
+  overhead:
+    configuration: "2 clocks per SETSE instruction"
+    monitoring: "2 clocks per POLL, 0 for WAIT"
+
+limitations:
+  - limitation: "four_selectable_events"
+    description: "Only 4 SE events available per COG"
+    workaround: "Reconfigure events dynamically or use interrupts"
+  
+  - limitation: "no_event_queuing"
+    description: "Events are flags, not queued"
+    workaround: "Must handle before next occurrence"
+  
+  - limitation: "cog_local_events"
+    description: "Events are per-COG, not global"
+    workaround: "Use ATN for inter-COG event notification"
+
+related_topics:
+  - topic: "interrupts"
+    relationship: "Events can trigger interrupts"
+  
+  - topic: "smart_pins"
+    relationship: "Smart pin IN rises are common event sources"
+  
+  - topic: "timers"
+    relationship: "CT comparisons are event sources"
+  
+  - topic: "pattern_matching"
+    relationship: "PAT instructions work with event system"
+
+extraction_metadata:
+  source_documents:
+    - document: "Silicon Doc v35"
+      sections:
+        - "part1-cog.txt, Event System"
+        - "Event instructions and configurations"
+    - document: "P2 Datasheet"
+      sections:
+        - "Pages 37-39: Event instructions"
+        - "Pages 74-75: Event architecture"
+  confidence: "high"
+  last_updated: "2024-12-30"

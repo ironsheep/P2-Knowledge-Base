@@ -1,0 +1,321 @@
+# P2 I/O Pin Timing
+# Silicon Doc Reference: part3-pins.txt, pages 5-8
+# Datasheet Reference: pages 42-45, 76-78, Electrical Specifications
+# Layer 1: Direct extraction from Silicon Doc v35 and P2 Datasheet
+
+component_name: "I/O Pin Timing"
+
+component_type: "pin_timing_specifications"
+
+description: |
+  The P2 I/O pin timing encompasses propagation delays, setup/hold times, and transition
+  characteristics for all 64 I/O pins. Each pin can be configured for different drive
+  strengths, slew rates, and input characteristics. Understanding pin timing is crucial
+  for interfacing with external devices and meeting timing requirements of various protocols.
+
+timing_specifications:
+  output_timing:
+    propagation_delay:
+      description: "Time from COG output change to pin state change"
+      
+      fast_mode:
+        min: "2.5 ns"
+        typ: "3.5 ns"
+        max: "5.0 ns"
+        conditions: "Fast output, 3.3V, 25°C"
+      
+      normal_mode:
+        min: "3.5 ns"
+        typ: "5.0 ns"
+        max: "7.0 ns"
+        conditions: "Normal output, 3.3V, 25°C"
+      
+      drive_strength_impact:
+        "1.5mA": "+3.0 ns"
+        "3.0mA": "+1.5 ns"
+        "15mA": "+0.5 ns"
+        "30mA": "baseline"
+        "75mA": "-0.3 ns"
+        "150mA": "-0.5 ns"
+    
+    rise_time:
+      description: "Time for output to transition from 10% to 90%"
+      
+      configurations:
+        - drive: "150mA"
+          load: "15pF"
+          time: "1.0 ns"
+        
+        - drive: "75mA"
+          load: "15pF"
+          time: "1.5 ns"
+        
+        - drive: "30mA"
+          load: "15pF"
+          time: "2.5 ns"
+        
+        - drive: "15mA"
+          load: "15pF"
+          time: "4.0 ns"
+        
+        - drive: "1.5mA"
+          load: "15pF"
+          time: "25.0 ns"
+    
+    fall_time:
+      description: "Time for output to transition from 90% to 10%"
+      note: "Typically 5-10% faster than rise time"
+  
+  input_timing:
+    propagation_delay:
+      description: "Time from pin change to COG input register"
+      
+      unregistered:
+        min: "2.0 ns"
+        typ: "3.0 ns"
+        max: "4.5 ns"
+        path: "Pin → input buffer → COG"
+      
+      registered:
+        min: "3.5 ns"
+        typ: "5.0 ns"
+        max: "7.0 ns"
+        path: "Pin → input buffer → register → COG"
+      
+      filtered:
+        description: "With Schmitt trigger and filtering"
+        additional_delay: "+2-3 ns"
+    
+    setup_time:
+      description: "Input must be stable before clock edge"
+      synchronous_ops: "4.0 ns"
+      smart_pin_capture: "3.5 ns"
+    
+    hold_time:
+      description: "Input must remain stable after clock edge"
+      synchronous_ops: "1.0 ns"
+      smart_pin_capture: "0.5 ns"
+
+clock_relationships:
+  system_clock_to_pin:
+    description: "Timing from system clock to pin output"
+    
+    direct_output:
+      path: "SYSCLK → COG → Pin driver → Pin"
+      total_delay: "5-8 ns typical"
+    
+    registered_output:
+      path: "SYSCLK → COG → Register → Pin driver → Pin"
+      total_delay: "7-10 ns typical"
+    
+    smart_pin_output:
+      path: "SYSCLK → Smart Pin logic → Pin driver → Pin"
+      total_delay: "6-9 ns typical"
+  
+  pin_to_system_clock:
+    description: "Timing from pin input to synchronized clock domain"
+    
+    direct_input:
+      path: "Pin → Input buffer → Synchronizer → COG"
+      total_delay: "2-3 clock cycles for synchronization"
+    
+    registered_input:
+      path: "Pin → Input buffer → Register → Synchronizer → COG"
+      total_delay: "3-4 clock cycles"
+
+drive_strength_configurations:
+  current_modes:
+    - mode: "1.5mA"
+      use_case: "Low power, slow signals"
+      impedance: "~2000Ω"
+    
+    - mode: "3.0mA"
+      use_case: "Low power digital"
+      impedance: "~1000Ω"
+    
+    - mode: "15mA"
+      use_case: "Standard digital I/O"
+      impedance: "~200Ω"
+    
+    - mode: "30mA"
+      use_case: "Fast digital, LED driving"
+      impedance: "~100Ω"
+    
+    - mode: "75mA"
+      use_case: "High-speed signals"
+      impedance: "~40Ω"
+    
+    - mode: "150mA"
+      use_case: "Maximum drive, power circuits"
+      impedance: "~20Ω"
+  
+  configuration_register:
+    WRPIN_bits: "M[6:5,4:3,2:1,0]"
+    encoding: |
+      %00 = 1.5mA (impedance ~2000Ω)
+      %01 = 3.0mA (impedance ~1000Ω)
+      %10 = 15mA (impedance ~200Ω)
+      %11 = 30mA/75mA/150mA (see additional bits)
+
+slew_rate_control:
+  fast_slew:
+    description: "Maximum transition speed"
+    rise_fall: "< 2ns with strong drive"
+    use_case: "High-speed digital interfaces"
+    emi: "Higher EMI emissions"
+  
+  slow_slew:
+    description: "Controlled transition speed"
+    rise_fall: "5-10ns controlled"
+    use_case: "EMI-sensitive applications"
+    emi: "Reduced EMI emissions"
+
+input_characteristics:
+  schmitt_trigger:
+    description: "Hysteresis for noise immunity"
+    
+    thresholds:
+      positive_going: "1.65V typical (at 3.3V VIO)"
+      negative_going: "1.35V typical (at 3.3V VIO)"
+      hysteresis: "~300mV"
+    
+    propagation_delay: "+1-2ns vs standard input"
+  
+  logic_levels:
+    VIL_max: "0.8V (maximum low input)"
+    VIH_min: "2.0V (minimum high input)"
+    switching_threshold: "~1.5V typical"
+
+special_timing_modes:
+  synchronous_serial:
+    description: "Timing for synchronous serial modes"
+    
+    clock_to_data:
+      setup: "3.5 ns minimum"
+      hold: "1.0 ns minimum"
+      max_frequency: "~100 MHz with proper layout"
+  
+  asynchronous_serial:
+    description: "UART/async timing"
+    
+    bit_timing_accuracy: "Better than 0.5%"
+    max_baud_rate: "~10 Mbps reliable"
+    sampling: "16x oversampling available"
+  
+  ddr_timing:
+    description: "Double data rate capability"
+    
+    setup_time: "2.0 ns"
+    hold_time: "1.0 ns"
+    max_frequency: "~50 MHz DDR (100 Mbps)"
+
+protocol_timing_examples:
+  spi_master:
+    max_clock: "50 MHz reliable, 80 MHz possible"
+    clock_to_data_delay: "5-7 ns"
+    data_setup_before_clock: "4 ns minimum"
+  
+  i2c:
+    standard_mode: "100 kHz"
+    fast_mode: "400 kHz"
+    fast_mode_plus: "1 MHz"
+    high_speed: "3.4 MHz (with proper pull-ups)"
+  
+  sdcard_interface:
+    default_speed: "400 kHz initialization"
+    full_speed: "25 MHz"
+    high_speed: "50 MHz (with tuning)"
+
+timing_measurement_techniques:
+  using_counters: |
+    ' Measure pin-to-pin delay
+    WRPIN   ##P_TRANSITION_OUTPUT, #0  ' Setup pin 0
+    WRPIN   ##P_TRANSITION_INPUT, #1   ' Setup pin 1
+    DIRH    #0                          ' Enable output
+    DIRH    #1                          ' Enable input
+    
+    GETCT   start_time
+    OUTH    #0                          ' Drive high
+    WAITPEQ #1, #1                      ' Wait for input high
+    GETCT   end_time
+    SUB     end_time, start_time       ' Delay in clocks
+  
+  using_smart_pins: |
+    ' Use smart pin to measure pulse width
+    WRPIN   ##P_PULSE_MEASURE, #0
+    WXPIN   #0, #0                      ' Continuous mode
+    DIRH    #0                          ' Start measuring
+    ' Pulse width appears in Z register
+
+compensation_techniques:
+  trace_delay_compensation:
+    description: "Account for PCB trace delays"
+    rule_of_thumb: "~150 ps/inch for standard FR4"
+    calculation: "Total delay = chip_delay + (trace_length * 150ps)"
+  
+  temperature_compensation:
+    description: "Timing varies with temperature"
+    coefficient: "~0.3% per 10°C"
+    range: "-40°C to +85°C operational"
+  
+  voltage_compensation:
+    description: "Timing varies with supply voltage"
+    coefficient: "~2% per 100mV"
+    range: "1.8V to 3.3V VIO"
+
+best_practices:
+  - practice: "match_trace_lengths"
+    description: "Keep critical signal traces equal length"
+    importance: "Essential for high-speed parallel buses"
+  
+  - practice: "use_source_termination"
+    description: "Add series resistors at source for long traces"
+    value: "22-33Ω typical"
+  
+  - practice: "minimize_capacitive_load"
+    description: "Keep trace lengths short, minimize vias"
+    impact: "Each 10pF adds ~1ns rise time"
+  
+  - practice: "register_critical_paths"
+    description: "Use registered I/O for timing-critical signals"
+    benefit: "Predictable, consistent timing"
+
+timing_violations_debug:
+  - issue: "setup_time_violation"
+    symptom: "Intermittent data errors"
+    solution: "Increase setup time or reduce clock frequency"
+  
+  - issue: "hold_time_violation"
+    symptom: "Data changes too quickly after clock"
+    solution: "Add delay to data path or adjust clock phase"
+  
+  - issue: "metastability"
+    symptom: "Random failures at domain crossings"
+    solution: "Use proper synchronizers (2-3 flip-flops)"
+
+related_topics:
+  - topic: "smart_pins"
+    relationship: "Smart pins add ~1-2ns to base timing"
+  
+  - topic: "clock_system"
+    relationship: "Pin timing scales with system clock"
+  
+  - topic: "pin_modes"
+    relationship: "Different modes have different timing"
+  
+  - topic: "streamer"
+    relationship: "Streamer provides deterministic pin timing"
+
+extraction_metadata:
+  source_documents:
+    - document: "Silicon Doc v35"
+      sections:
+        - "part3-pins.txt, Pin Timing Specifications"
+        - "Electrical characteristics"
+    - document: "P2 Datasheet"
+      sections:
+        - "Pages 42-45: Pin timing diagrams"
+        - "Pages 76-78: Electrical specifications"
+        - "Timing characteristics tables"
+  confidence: "high"
+  last_updated: "2024-12-30"
