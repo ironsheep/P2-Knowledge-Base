@@ -21,7 +21,16 @@ Each file adds 200-500 lines to context. Performance degrades quickly.
 
 ### For Fresh Instance (No Local Files):
 ```
-Please use the P2 Knowledge Base directly from GitHub without cloning:
+First, create a CLAUDE.md file to remember the P2 Knowledge Base location:
+
+Create file CLAUDE.md with:
+---
+# CLAUDE.md
+Repository: https://github.com/ironsheep/P2-Knowledge-Base
+Raw files: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
+---
+
+Now use the P2 Knowledge Base directly from GitHub without cloning:
 https://github.com/ironsheep/P2-Knowledge-Base
 
 IMPORTANT: Use the raw.githubusercontent.com URLs to read files:
