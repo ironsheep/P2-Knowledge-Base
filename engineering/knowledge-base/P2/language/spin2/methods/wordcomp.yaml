@@ -1,5 +1,53 @@
 method: WORDCOMP
 type: method
 description: |
-  Compare words, returns -1 if match
-category: Comparison
+  Compare blocks of words in memory
+category: Memory Operations
+syntax: "result := WORDCOMP(Address1, Address2, Count)"
+parameters:
+  - name: "Address1"
+    type: "address"
+    description: "First hub RAM address for comparison (word-aligned)"
+  - name: "Address2"
+    type: "address"
+    description: "Second hub RAM address for comparison (word-aligned)"
+  - name: "Count"
+    type: "integer"
+    description: "Number of words to compare"
+returns:
+  type: "integer"
+  description: "TRUE (-1) if all words match, FALSE (0) if any words differ"
+examples:
+  - code: |
+      ' Compare two word arrays
+      if WORDCOMP(@array1, @array2, 100)
+        ' Arrays match (100 words)
+    description: "Compare word arrays"
+  - code: |
+      ' Verify sensor data
+      if WORDCOMP(@readings, @expected, 64)
+        ' All 64 sensor readings match expected
+    description: "Verify 16-bit sensor data"
+  - code: |
+      ' Check for word pattern
+      if WORDCOMP(@data[i], @signature, 4)
+        ' Found 4-word signature at position i
+    description: "Search for word pattern in data"
+notes:
+  - "Returns TRUE (-1) if all words match"
+  - "Returns FALSE (0) on first mismatch"
+  - "Count of 0 always returns TRUE"
+  - "Addresses should be word-aligned for best performance"
+  - "Each word is 16 bits (2 bytes)"
+  - "Efficient block comparison operation"
+timing:
+  description: "Varies based on count"
+  cycles: "~8 + (count * 2) clock cycles typical"
+related:
+  - BYTECOMP
+  - LONGCOMP
+  - WORDMOVE
+see_also:
+  - "Memory comparison"
+  - "Array operations"
+  - "Pattern matching"

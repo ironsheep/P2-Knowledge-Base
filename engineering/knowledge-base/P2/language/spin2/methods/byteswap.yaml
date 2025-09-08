@@ -1,5 +1,45 @@
 method: BYTESWAP
 type: method
 description: |
-  Swap bytes between addresses
-category: Block Operations
+  Swap byte values between two memory locations
+category: Memory Operations
+syntax: "BYTESWAP(Address1, Address2)"
+parameters:
+  - name: "Address1"
+    type: "address"
+    description: "First hub RAM address containing byte to swap"
+  - name: "Address2"
+    type: "address"
+    description: "Second hub RAM address containing byte to swap"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Swap two byte values
+      BYTESWAP(@value1, @value2)
+    description: "Exchange byte values between variables"
+  - code: |
+      ' Reverse byte order in array
+      repeat i from 0 to size/2-1
+        BYTESWAP(@array[i], @array[size-1-i])
+    description: "Reverse array using byte swapping"
+  - code: |
+      ' Swap bytes at specific hub addresses
+      BYTESWAP($1000, $2000)
+    description: "Exchange bytes at hub memory locations"
+notes:
+  - "Atomically exchanges the byte values"
+  - "Both addresses must be valid hub RAM locations"
+  - "No temporary variable needed for swap"
+  - "Efficient single-operation exchange"
+timing:
+  description: "Single hub operation"
+  cycles: "~8-16 clock cycles typical"
+related:
+  - WORDSWAP
+  - LONGSWAP
+  - BYTEMOVE
+see_also:
+  - "Memory operations"
+  - "Data manipulation"

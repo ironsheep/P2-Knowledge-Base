@@ -1,5 +1,60 @@
 method: CALL
 type: method
 description: |
-  Call PASM code
-category: String Creation
+  Call inline PASM2 code from Spin2
+category: Miscellaneous
+syntax: "result := CALL(PASMAddress)"
+parameters:
+  - name: "PASMAddress"
+    type: "address"
+    description: "Address of PASM2 code to execute"
+returns:
+  type: "long"
+  description: "Value returned in PASM result register"
+examples:
+  - code: |
+      ' Call inline PASM routine
+      result := CALL(@pasm_code)
+      
+      DAT
+      pasm_code
+        mov result1, #42
+        ret
+    description: "Call simple PASM routine"
+  - code: |
+      ' Pass parameters via PTRA/PTRB
+      PTRA := @input_data
+      PTRB := @output_buffer
+      CALL(@process_data)
+    description: "Call PASM with parameters"
+  - code: |
+      ' Fast calculation in PASM
+      value := CALL(@fast_multiply)
+      
+      DAT
+      fast_multiply
+        mov pa, ptra
+        mov pb, ptrb
+        mul pa, pb
+        mov result1, pa
+        ret
+    description: "PASM for fast math"
+notes:
+  - "Executes PASM2 code in current cog"
+  - "PASM must end with RET instruction"
+  - "Parameters passed via PTRA/PTRB registers"
+  - "Result returned in result1 register"
+  - "Preserves Spin2 interpreter state"
+  - "Useful for performance-critical code"
+  - "PASM code must be in DAT section"
+timing:
+  description: "PASM execution time + call overhead"
+  cycles: "~20 + PASM cycles"
+related:
+  - REGEXEC
+  - REGLOAD
+  - COGINIT
+see_also:
+  - "Inline assembly"
+  - "PASM2 programming"
+  - "Performance optimization"

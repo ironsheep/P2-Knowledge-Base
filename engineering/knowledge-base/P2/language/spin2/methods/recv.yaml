@@ -1,5 +1,51 @@
 method: RECV
 type: method
 description: |
-  Receive byte from current input method
-category: String Creation
+  Receive data byte using configured input method
+category: Miscellaneous
+syntax: "byte := RECV()"
+parameters: []
+returns:
+  type: "byte"
+  description: "Received byte value (0-255)"
+examples:
+  - code: |
+      ' Receive single byte
+      char := RECV()
+    description: "Receive one byte"
+  - code: |
+      ' Build string from input
+      repeat i from 0 to 79
+        buffer[i] := RECV()
+        if buffer[i] == 13  ' Enter key
+          buffer[i] := 0
+          quit
+    description: "Receive string until Enter"
+  - code: |
+      ' Echo received data
+      repeat
+        byte_in := RECV()
+        SEND(byte_in)
+    description: "Echo loop"
+  - code: |
+      ' Wait for specific character
+      repeat until RECV() == "!"
+      ' Got start character
+    description: "Wait for start marker"
+notes:
+  - "Input method must be configured first"
+  - "Typically used with serial drivers"
+  - "Blocking operation - waits for byte"
+  - "Returns single byte (0-255)"
+  - "Works with user-defined input methods"
+  - "Common for user input and data reception"
+timing:
+  description: "Depends on input method"
+  cycles: "Variable - blocks until data available"
+related:
+  - SEND
+  - DEBUG
+see_also:
+  - "Serial communication"
+  - "User input"
+  - "Data reception"

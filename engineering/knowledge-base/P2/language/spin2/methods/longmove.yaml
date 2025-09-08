@@ -1,5 +1,146 @@
-method: LONGMOVE
-type: method
+# Spin2 Method: LONGMOVE
+# Source: Spin2 v51 documentation
+# Purpose: Copy longs from source to destination
+
+method: "LONGMOVE"
+category: "memory_operations"
+type: "method"
 description: |
-  Copy longs
-category: Block Operations
+  Copy a specified number of longs (32-bit values) from source to destination in hub RAM.
+  Handles overlapping regions correctly with automatic direction detection.
+  More efficient than BYTEMOVE for long-aligned data.
+
+syntax: "LONGMOVE(Destination, Source, Count)"
+
+parameters:
+  - name: "Destination"
+    type: "address"
+    description: |
+      Hub RAM destination address.
+      Should be long-aligned for best performance.
+      Misalignment handled but slower.
+      
+  - name: "Source"
+    type: "address"
+    description: |
+      Hub RAM source address.
+      Should be long-aligned for best performance.
+      Misalignment handled but slower.
+      
+  - name: "Count"
+    type: "long"
+    description: |
+      Number of longs to copy (not bytes).
+      Each long is 4 bytes.
+      Can be 0 (no operation).
+
+returns: "none"
+
+timing:
+  aligned: "~8 + (count * 4) clock cycles"
+  misaligned: "Additional overhead for alignment"
+  optimization: "Uses 32-bit transfers when possible"
+
+examples:
+  - code: |
+      VAR
+        LONG data[100]
+        LONG backup[100]
+        
+      PUB save_data()
+        LONGMOVE(@backup, @data, 100)
+    description: "Backup array of longs"
+    
+  - code: |
+      ' Copy cog parameters
+      DAT
+        params    LONG  0[8]
+        
+      PUB setup_cog_params(src_params)
+        LONGMOVE(@params, src_params, 8)
+        COGINIT(NEWCOG, @cog_code, @params)
+    description: "Copy parameter block for cog"
+    
+  - code: |
+      ' Shift array elements
+      VAR
+        LONG array[50]
+        
+      PUB remove_first()
+        result := array[0]
+        LONGMOVE(@array[0], @array[1], 49)
+        array[49] := 0
+    description: "Remove first element, shift rest"
+    
+  - code: |
+      ' Copy structure
+      VAR
+        LONG config[10]
+        LONG default_config[10]
+        
+      PUB reset_config()
+        LONGMOVE(@config, @default_config, 10)
+    description: "Reset configuration to defaults"
+    
+  - code: |
+      ' Stack manipulation
+      VAR
+        LONG stack[64]
+        LONG stack_backup[64]
+        
+      PUB save_stack_state()
+        LONGMOVE(@stack_backup, @stack, 64)
+    description: "Save stack for debugging"
+
+common_uses:
+  - "Array copying"
+  - "Parameter block transfer"
+  - "Structure copying"
+  - "Stack operations"
+  - "Buffer management"
+  - "Data structure initialization"
+
+performance_benefits:
+  vs_bytemove: |
+    ' BYTEMOVE for 100 longs (400 bytes)
+    BYTEMOVE(@dest, @source, 400)  ' ~808 cycles
+    
+    ' LONGMOVE for 100 longs
+    LONGMOVE(@dest, @source, 100)  ' ~408 cycles
+    ' Nearly 2x faster for aligned data
+
+alignment_impact:
+  aligned: "Fastest - direct 32-bit transfers"
+  misaligned: "Works but requires byte-by-byte for edges"
+  recommendation: "Always align long data on 4-byte boundaries"
+
+related_methods:
+  - "BYTEMOVE - Copy bytes"
+  - "WORDMOVE - Copy words"
+  - "LONGFILL - Fill with long value"
+  - "LONGCOMP - Compare longs"
+  - "LONGSWAP - Swap long regions"
+
+notes:
+  - "Count is in longs, not bytes"
+  - "Safe for overlapping regions"
+  - "Direction chosen automatically"
+  - "Alignment affects performance only"
+  - "Works with any hub RAM location"
+
+conversion_note: |
+  Bytes to longs: divide by 4
+  100 bytes = 25 longs
+  BYTEMOVE(@dest, @src, 100) equals
+  LONGMOVE(@dest, @src, 25)
+
+warnings:
+  - "Count is LONGS not BYTES"
+  - "Ensure destination has enough space"
+  - "Misalignment degrades performance"
+  - "Cannot copy to/from cog or LUT RAM directly"
+
+see_also:
+  - "language/spin2/methods/bytemove.yaml"
+  - "language/spin2/methods/wordmove.yaml"
+  - "language/spin2/methods/longfill.yaml"

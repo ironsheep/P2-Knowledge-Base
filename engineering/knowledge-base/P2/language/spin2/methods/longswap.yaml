@@ -1,5 +1,47 @@
 method: LONGSWAP
 type: method
 description: |
-  Swap longs between addresses
-category: Block Operations
+  Swap long values between two memory locations
+category: Memory Operations
+syntax: "LONGSWAP(Address1, Address2)"
+parameters:
+  - name: "Address1"
+    type: "address"
+    description: "First hub RAM address containing long to swap"
+  - name: "Address2"
+    type: "address"
+    description: "Second hub RAM address containing long to swap"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Swap two long values
+      LONGSWAP(@value1, @value2)
+    description: "Exchange long values between variables"
+  - code: |
+      ' Reverse long order in array
+      repeat i from 0 to size/2-1
+        LONGSWAP(@array[i], @array[size-1-i])
+    description: "Reverse array using long swapping"
+  - code: |
+      ' Swap register values
+      LONGSWAP(@reg_a, @reg_b)
+    description: "Exchange 32-bit register values"
+notes:
+  - "Atomically exchanges the 32-bit long values"
+  - "Both addresses must be long-aligned (addresses divisible by 4)"
+  - "No temporary variable needed for swap"
+  - "Efficient single-operation exchange"
+  - "Each long is 4 bytes"
+timing:
+  description: "Single hub operation"
+  cycles: "~8-16 clock cycles typical"
+related:
+  - BYTESWAP
+  - WORDSWAP
+  - LONGMOVE
+see_also:
+  - "Memory operations"
+  - "Data manipulation"
+  - "Register operations"

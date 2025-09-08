@@ -1,5 +1,53 @@
 method: STRING
 type: method
 description: |
-  Create string constant, returns address
-category: String Creation
+  Create string constant and return its address
+category: String Operations
+syntax: "address := STRING(StringLiteral)"
+parameters:
+  - name: "StringLiteral"
+    type: "string_literal"
+    description: "String literal in quotes"
+returns:
+  type: "address"
+  description: "Hub RAM address of null-terminated string"
+examples:
+  - code: |
+      ' Get address of string constant
+      msg_addr := STRING("Hello, World!")
+    description: "Create string constant"
+  - code: |
+      ' Pass string to method
+      send_message(STRING("Error: File not found"))
+    description: "Pass string directly to method"
+  - code: |
+      ' Use in comparison
+      if STRCOMP(@input, STRING("YES"))
+        proceed()
+    description: "Compare with string constant"
+  - code: |
+      ' Build menu options
+      option1 := STRING("1. Start")
+      option2 := STRING("2. Settings")
+      option3 := STRING("3. Quit")
+    description: "Create menu strings"
+notes:
+  - "Creates null-terminated string in hub RAM"
+  - "String is stored in DAT section"
+  - "Returns starting address of string"
+  - "Automatically adds null terminator"
+  - "Escape sequences supported (\\n, \\t, etc.)"
+  - "Multiple identical strings may share storage"
+  - "Read-only string constant"
+timing:
+  description: "Immediate - compile time"
+  cycles: "2-9 clock cycles to load address"
+related:
+  - LSTRING
+  - STRCOMP
+  - STRCOPY
+  - BYTE
+see_also:
+  - "String constants"
+  - "String operations"
+  - "DAT section"

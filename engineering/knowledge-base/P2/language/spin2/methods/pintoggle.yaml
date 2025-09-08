@@ -1,0 +1,83 @@
+# Spin2 Method: PINTOGGLE
+# Source: Spin2 v51 documentation
+# Purpose: Toggle pin(s) state
+
+method: "PINTOGGLE"
+aliases: ["PINT"]
+category: "pin_control"
+type: "method"
+description: |
+  Drive and toggle specified pin(s).
+  First sets the direction bit(s) to output (DIR=1), then inverts the current output state (OUT^=1).
+  If pin was high, it becomes low. If pin was low, it becomes high.
+  This is equivalent to the PASM2 DRVNOT instruction.
+
+syntax: "PINTOGGLE(PinField)"
+
+parameters:
+  - name: "PinField"
+    type: "pin_field"
+    description: |
+      Specifies which pin(s) to toggle. Can be:
+      - Single pin number (0-63)
+      - Pin range using '..' operator (Bottom..Top)
+      - Multiple pins using ADDPINS operator
+      - Variable or expression that evaluates to a pin field
+
+returns: "none"
+
+timing:
+  execution: "2 clock cycles in cog execution"
+  hub_access: "8-19 clock cycles when executed from hub"
+
+examples:
+  - code: "PINTOGGLE(56)"
+    description: "Toggle pin 56 (LED will change state)"
+    
+  - code: |
+      REPEAT
+        PINTOGGLE(56)
+        WAITMS(500)
+    description: "Blink an LED at 1Hz"
+    
+  - code: "PINTOGGLE(0 ADDPINS 7)"
+    description: "Toggle pins 0 through 7 simultaneously"
+    
+  - code: |
+      VAR
+        LONG status_pins
+      PUB flash_status()
+        status_pins := 8 ADDPINS 3  ' Pins 8, 9, 10, 11
+        REPEAT 5
+          PINTOGGLE(status_pins)
+          WAITMS(100)
+    description: "Flash multiple status LEDs"
+
+underlying_pasm:
+  instruction: "DRVNOT"
+  description: "Internally uses DRVNOT instruction which sets DIR=1 and OUT^=1"
+  
+common_uses:
+  - "Blink LEDs without tracking state"
+  - "Generate square waves"
+  - "Toggle clock or strobe signals"
+  - "Create alternating patterns"
+  - "Debug output without state management"
+
+related_methods:
+  - "PINHIGH - Drive pin(s) high"
+  - "PINLOW - Drive pin(s) low"
+  - "PINFLOAT - Release pin to high-impedance"
+  - "PINWRITE - Write specific value to pins"
+
+notes:
+  - "Pin becomes an output if it wasn't already"
+  - "Overrides any smart pin mode on the pin"
+  - "No need to track current pin state"
+  - "Multiple pins toggle independently based on their current states"
+  - "If pin is floating (input), it will first read the input state then toggle from that"
+
+see_also:
+  - "language/pasm2/drvnot.yaml"
+  - "language/spin2/methods/pinhigh.yaml"
+  - "language/spin2/methods/pinlow.yaml"

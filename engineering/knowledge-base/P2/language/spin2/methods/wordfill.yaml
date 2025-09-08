@@ -1,5 +1,48 @@
 method: WORDFILL
 type: method
 description: |
-  Fill memory with word value
-category: Fill Operations
+  Fill memory with a repeated word value
+category: Memory Operations
+syntax: "WORDFILL(DestAddress, Value, Count)"
+parameters:
+  - name: "DestAddress"
+    type: "address"
+    description: "Hub RAM starting address to begin filling"
+  - name: "Value"
+    type: "word"
+    description: "16-bit word value to fill with"
+  - name: "Count"
+    type: "integer"
+    description: "Number of words to fill"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Clear a word array to zero
+      WORDFILL(@buffer, 0, 256)
+    description: "Clear 256 words to zero"
+  - code: |
+      ' Initialize array with pattern
+      WORDFILL(@data, $FFFF, 100)
+    description: "Fill 100 words with $FFFF"
+  - code: |
+      ' Set default values
+      WORDFILL(@settings, $1234, 50)
+    description: "Initialize settings array with default value"
+notes:
+  - "Fills memory efficiently using hub operations"
+  - "Each word is 2 bytes (16 bits)"
+  - "Address should be word-aligned for best performance"
+  - "Count of 0 fills no memory"
+  - "Only lower 16 bits of Value are used"
+timing:
+  description: "Varies based on count and hub timing"
+  cycles: "~8 + count clock cycles typical"
+related:
+  - BYTEFILL
+  - LONGFILL
+  - WORDMOVE
+see_also:
+  - "Memory initialization"
+  - "Hub RAM operations"

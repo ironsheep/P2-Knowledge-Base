@@ -1,5 +1,44 @@
 method: QEXP
 type: method
 description: |
-  Exponential via CORDIC
-category: CORDIC Operations
+  Calculate exponential (e^x) using hardware CORDIC
+category: Math/CORDIC Operations
+syntax: "result := QEXP(Exponent)"
+parameters:
+  - name: "Exponent"
+    type: "long"
+    description: "Exponent value in 5.27 fixed-point format"
+returns:
+  type: "long"
+  description: "e^x result (unsigned 32-bit)"
+examples:
+  - code: |
+      ' Calculate e^1
+      result := QEXP($0800_0000)  ' e^1 in 5.27 format
+      ' Result ≈ 2.71828...
+    description: "Basic exponential calculation"
+  - code: |
+      ' Calculate power of 10
+      power10 := QEXP(x * 22713 >> 13)  ' 10^x using e^(x*ln(10))
+    description: "Calculate powers of 10"
+  - code: |
+      ' Exponential growth/decay
+      value := initial * QEXP(rate * time >> 10) >> 22
+    description: "Model exponential growth"
+notes:
+  - "Uses P2's hardware CORDIC engine"
+  - "Input in 5.27 fixed-point format"
+  - "Input range: -2.77 to 0.69 (in 5.27 format)"
+  - "Result is e^exponent"
+  - "Output range: 0.0625 to 2.0"
+  - "38-clock cycle operation"
+timing:
+  description: "CORDIC operation"
+  cycles: "38 clock cycles"
+related:
+  - QLOG
+  - MULDIV64
+see_also:
+  - "CORDIC operations"
+  - "Exponential functions"
+  - "Fixed-point math"

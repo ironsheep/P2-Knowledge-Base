@@ -1,5 +1,44 @@
 method: WORDMOVE
 type: method
 description: |
-  Copy words
-category: Block Operations
+  Copy words from one memory location to another
+category: Memory Operations
+syntax: "WORDMOVE(DestAddress, SourceAddress, Count)"
+parameters:
+  - name: "DestAddress"
+    type: "address"
+    description: "Hub RAM destination starting address for word copy"
+  - name: "SourceAddress" 
+    type: "address"
+    description: "Hub RAM source starting address for word copy"
+  - name: "Count"
+    type: "integer"
+    description: "Number of words (16-bit values) to copy"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Copy 100 words from source to destination
+      WORDMOVE(@dest_array, @source_array, 100)
+    description: "Copy 100 words between arrays"
+  - code: |
+      ' Shift array elements up by one word
+      WORDMOVE(@array[1], @array[0], 99)
+    description: "Shift array elements with overlap handling"
+notes:
+  - "Automatically handles overlapping source and destination regions"
+  - "Copies in appropriate direction to preserve data integrity"
+  - "Each word is 2 bytes (16 bits)"
+  - "Addresses must be word-aligned for optimal performance"
+  - "Count of 0 copies no data"
+timing:
+  description: "Varies based on count and hub timing"
+  cycles: "~8 + (count * 2) clock cycles typical"
+related:
+  - BYTEMOVE
+  - LONGMOVE
+  - WORDFILL
+see_also:
+  - "Memory block operations"
+  - "Hub RAM access"

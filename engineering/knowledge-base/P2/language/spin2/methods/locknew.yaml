@@ -1,5 +1,51 @@
 method: LOCKNEW
 type: method
 description: |
-  Check out new lock (0..15) or < 0 if none available
-category: Lock Management
+  Allocate a new hardware lock for inter-cog synchronization
+category: Lock Operations
+syntax: "lock_id := LOCKNEW()"
+parameters: []
+returns:
+  type: "integer"
+  description: "Lock ID (0..15) if successful, negative if no locks available"
+examples:
+  - code: |
+      ' Allocate a new lock
+      lock := LOCKNEW()
+      if lock < 0
+        ' No locks available
+        abort
+    description: "Allocate lock with error checking"
+  - code: |
+      ' Initialize shared resource lock
+      VAR
+        long buffer_lock
+      
+      PUB init()
+        buffer_lock := LOCKNEW()
+    description: "Create lock for shared buffer"
+  - code: |
+      ' Multiple locks for different resources
+      spi_lock := LOCKNEW()
+      uart_lock := LOCKNEW()
+      i2c_lock := LOCKNEW()
+    description: "Allocate multiple resource locks"
+notes:
+  - "P2 has 16 hardware locks (0-15)"
+  - "Returns next available lock ID"
+  - "Returns negative value if all locks in use"
+  - "Lock is marked as allocated but not captured"
+  - "Must call LOCKRET when done to free lock"
+  - "Locks are shared across all cogs"
+timing:
+  description: "Hub operation"
+  cycles: "2-9 clock cycles"
+related:
+  - LOCKRET
+  - LOCKTRY
+  - LOCKREL
+  - LOCKCHK
+see_also:
+  - "Hardware locks"
+  - "Inter-cog synchronization"
+  - "Resource sharing"

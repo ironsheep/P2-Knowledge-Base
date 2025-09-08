@@ -1,5 +1,49 @@
 method: LOOKUPZ
 type: method
 description: |
-  Look up value by 0-based index
-category: String Creation
+  Look up value from list using 0-based index
+category: Lookup Operations
+syntax: "result := LOOKUPZ(Index : Value0, Value1, ..., ValueN)"
+parameters:
+  - name: "Index"
+    type: "integer"
+    description: "0-based index into value list"
+  - name: "Values"
+    type: "list"
+    description: "Comma-separated list of values or ranges"
+returns:
+  type: "long"
+  description: "Value at index position, or 0 if out of range"
+examples:
+  - code: |
+      ' Get value by index
+      value := LOOKUPZ(2 : 10, 20, 30, 40, 50)
+      ' Returns 30 (index 2 = 3rd item)
+    description: "Basic zero-indexed lookup"
+  - code: |
+      ' Array-style access
+      baud := LOOKUPZ(setting : 9600, 19200, 38400, 57600, 115200)
+    description: "Select baud rate by setting"
+  - code: |
+      ' Pin mapping table
+      pin := LOOKUPZ(channel : 16, 17, 18, 19, 24, 25, 26, 27)
+    description: "Map channel to pin number"
+  - code: |
+      ' Use with ranges
+      ascii := LOOKUPZ(code : "0".."9", "A".."F")
+    description: "Hex digit lookup table"
+notes:
+  - "Index is 0-based (0 = first item)"
+  - "Returns 0 if index < 0 or >= count"
+  - "Supports ranges with .. operator"
+  - "More common than LOOKUP for array-like access"
+  - "Values evaluated at compile time if possible"
+  - "Efficient for small lookup tables"
+related:
+  - LOOKUP
+  - LOOKDOWN
+  - LOOKDOWNZ
+see_also:
+  - "Table lookups"
+  - "Zero-based indexing"
+  - "Array simulation"

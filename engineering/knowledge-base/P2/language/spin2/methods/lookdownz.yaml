@@ -1,5 +1,52 @@
 method: LOOKDOWNZ
 type: method
 description: |
-  Find 0-based index of value
-category: String Creation
+  Find 0-based index of value in list
+category: Lookup Operations
+syntax: "index := LOOKDOWNZ(Value : Match0, Match1, ..., MatchN)"
+parameters:
+  - name: "Value"
+    type: "long"
+    description: "Value to search for"
+  - name: "Matches"
+    type: "list"
+    description: "Comma-separated list of values or ranges to match"
+returns:
+  type: "integer"
+  description: "0-based index of match, or -1 if not found"
+examples:
+  - code: |
+      ' Find value position
+      pos := LOOKDOWNZ(30 : 10, 20, 30, 40, 50)
+      ' Returns 2 (30 is at index 2)
+    description: "Find value in list"
+  - code: |
+      ' Menu option mapping
+      selection := LOOKDOWNZ(key : "Q", "S", "L", "H")
+      case selection
+        0: quit_program()
+        1: save_file()
+        2: load_file()
+        3: show_help()
+    description: "Map key to action"
+  - code: |
+      ' Validate input range
+      if LOOKDOWNZ(value : 0..9, 16..25, 32..47) >= 0
+        ' Value is in valid range
+        process_value(value)
+    description: "Check if value in valid ranges"
+notes:
+  - "Returns 0-based index (0 = first match)"
+  - "Returns -1 if value not found"
+  - "Supports ranges with .. operator"
+  - "Searches left to right, returns first match"
+  - "Inverse operation of LOOKUPZ"
+  - "More common than LOOKDOWN for array-style operations"
+related:
+  - LOOKDOWN
+  - LOOKUPZ
+  - LOOKUP
+see_also:
+  - "Value searching"
+  - "Zero-based indexing"
+  - "Input validation"

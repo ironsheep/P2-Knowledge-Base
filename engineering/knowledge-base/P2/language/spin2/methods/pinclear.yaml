@@ -1,5 +1,48 @@
 method: PINCLEAR
 type: method
 description: |
-  Clear smart pins: DIR=0, WRPIN=0
-category: SmartPin Operations
+  Clear smart pin configuration and disable pin
+category: Smart Pin Operations
+syntax: "PINCLEAR(PinField)"
+parameters:
+  - name: "PinField"
+    type: "pin_field"
+    description: "Pin number (0-63) or pin field expression"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Clear single smart pin
+      PINCLEAR(16)
+    description: "Reset pin 16 to default state"
+  - code: |
+      ' Clear range of smart pins
+      PINCLEAR(8 ADDPINS 7)  ' Clear pins 8-15
+    description: "Clear multiple contiguous pins"
+  - code: |
+      ' Reset smart pin before reconfiguration
+      PINCLEAR(adc_pin)
+      PINSTART(adc_pin, P_ADC, 0, 0)
+    description: "Clear before setting new mode"
+notes:
+  - "Sets DIR bit to 0 (disables pin output)"
+  - "Sets WRPIN mode register to 0 (disables smart pin mode)"
+  - "Resets pin to simple input state"
+  - "Clears all smart pin configuration"
+  - "Safe way to stop smart pin operation"
+  - "Should be called before reconfiguring a smart pin"
+operations:
+  - "DIR[pin] := 0 (disable output)"
+  - "WRPIN(pin, 0) (clear mode)"
+timing:
+  description: "Hub operation"
+  cycles: "4-18 clock cycles"
+related:
+  - PINSTART
+  - WRPIN
+  - PINFLOAT
+see_also:
+  - "Smart pin modes"
+  - "Pin initialization"
+  - "Pin state management"

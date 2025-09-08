@@ -1,5 +1,49 @@
 method: AKPIN
 type: method
 description: |
-  Acknowledge smart pins
-category: SmartPin Operations
+  Acknowledge smart pin by clearing its IN flag
+category: Smart Pin Operations
+syntax: "AKPIN(PinField)"
+parameters:
+  - name: "PinField"
+    type: "pin_field"
+    description: "Pin number (0-63) or pin field expression"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Acknowledge smart pin after processing
+      value := RQPIN(16)  ' Read without acknowledge
+      process(value)      ' Process the value
+      AKPIN(16)          ' Now acknowledge
+    description: "Separate read and acknowledge operations"
+  - code: |
+      ' Clear multiple smart pin flags
+      repeat pin from 0 to 7
+        AKPIN(pin)
+    description: "Acknowledge multiple smart pins"
+  - code: |
+      ' Reset smart pin for next measurement
+      if error_condition
+        AKPIN(sensor_pin)  ' Clear flag to restart
+    description: "Clear flag to reset measurement"
+notes:
+  - "Clears the smart pin's IN flag"
+  - "Allows smart pin to begin next measurement/operation"
+  - "Equivalent to the acknowledge part of RDPIN without reading"
+  - "Useful when you've already read with RQPIN"
+  - "Can acknowledge multiple pins using pin field ranges"
+  - "Smart pin must be configured and have IN flag set"
+timing:
+  description: "Hub operation"
+  cycles: "2-9 clock cycles"
+related:
+  - RDPIN
+  - RQPIN
+  - WRPIN
+  - PINREAD
+see_also:
+  - "Smart pin modes"
+  - "Smart pin acknowledgment"
+  - "Pin flag management"

@@ -1,5 +1,48 @@
 method: GETSEC
 type: method
 description: |
-  Get seconds since boot
-category: Time Measurement
+  Get seconds elapsed since system boot
+category: Timing Operations
+syntax: "seconds := GETSEC()"
+parameters: []
+returns:
+  type: "long"
+  description: "Seconds since boot (32-bit value)"
+examples:
+  - code: |
+      ' Display uptime in seconds
+      debug("System uptime: ", udec(GETSEC()), " seconds")
+    description: "Show system uptime"
+  - code: |
+      ' Long-running timer
+      start_sec := GETSEC()
+      ' ... much later ...
+      elapsed_sec := GETSEC() - start_sec
+      debug("Process ran for ", udec(elapsed_sec), " seconds")
+    description: "Measure long durations"
+  - code: |
+      ' Periodic task every 10 seconds
+      next_run := GETSEC() + 10
+      repeat
+        if GETSEC() >= next_run
+          do_periodic_task()
+          next_run += 10
+    description: "Schedule periodic tasks"
+notes:
+  - "Based on system counter divided by clkfreq"
+  - "32-bit value wraps after ~136 years"
+  - "1-second resolution"
+  - "Good for long-duration timing"
+  - "More convenient than GETMS for human-readable times"
+  - "Handles clock frequency changes automatically"
+timing:
+  description: "Immediate calculation"
+  cycles: "~20-30 clock cycles"
+related:
+  - GETMS
+  - GETCT
+  - WAITMS
+see_also:
+  - "Time measurement"
+  - "System uptime"
+  - "Long-duration timing"

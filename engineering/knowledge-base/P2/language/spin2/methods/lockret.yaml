@@ -1,5 +1,49 @@
 method: LOCKRET
 type: method
 description: |
-  Return lock to inventory
-category: Lock Management
+  Return allocated lock to available pool
+category: Lock Operations
+syntax: "LOCKRET(LockID)"
+parameters:
+  - name: "LockID"
+    type: "integer"
+    description: "Lock ID to return (0..15)"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Return lock when done
+      LOCKRET(lock_id)
+    description: "Free a lock"
+  - code: |
+      ' Cleanup in stop method
+      PUB stop()
+        if lock_id >= 0
+          LOCKRET(lock_id)
+          lock_id := -1
+    description: "Clean shutdown with lock release"
+  - code: |
+      ' Return multiple locks
+      repeat i from 0 to num_locks-1
+        LOCKRET(locks[i])
+    description: "Free multiple locks"
+notes:
+  - "Returns lock to available pool"
+  - "Lock must have been allocated with LOCKNEW"
+  - "Automatically releases lock if captured"
+  - "Safe to call even if lock not captured"
+  - "Important to return locks to prevent exhaustion"
+  - "No error if invalid lock ID"
+timing:
+  description: "Hub operation"
+  cycles: "2-9 clock cycles"
+related:
+  - LOCKNEW
+  - LOCKTRY
+  - LOCKREL
+  - LOCKCHK
+see_also:
+  - "Hardware locks"
+  - "Resource cleanup"
+  - "Lock management"

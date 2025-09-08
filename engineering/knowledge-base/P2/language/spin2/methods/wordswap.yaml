@@ -1,5 +1,47 @@
 method: WORDSWAP
 type: method
 description: |
-  Swap words between addresses
-category: Block Operations
+  Swap word values between two memory locations
+category: Memory Operations
+syntax: "WORDSWAP(Address1, Address2)"
+parameters:
+  - name: "Address1"
+    type: "address"
+    description: "First hub RAM address containing word to swap"
+  - name: "Address2"
+    type: "address"
+    description: "Second hub RAM address containing word to swap"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Swap two word values
+      WORDSWAP(@value1, @value2)
+    description: "Exchange word values between variables"
+  - code: |
+      ' Reverse word order in array
+      repeat i from 0 to size/2-1
+        WORDSWAP(@array[i], @array[size-1-i])
+    description: "Reverse array using word swapping"
+  - code: |
+      ' Swap words for endian conversion
+      WORDSWAP(@data[0], @data[1])
+    description: "Swap words for byte order conversion"
+notes:
+  - "Atomically exchanges the 16-bit word values"
+  - "Both addresses must be word-aligned (even addresses)"
+  - "No temporary variable needed for swap"
+  - "Efficient single-operation exchange"
+  - "Each word is 2 bytes"
+timing:
+  description: "Single hub operation"
+  cycles: "~8-16 clock cycles typical"
+related:
+  - BYTESWAP
+  - LONGSWAP
+  - WORDMOVE
+see_also:
+  - "Memory operations"
+  - "Data manipulation"
+  - "Endian conversion"

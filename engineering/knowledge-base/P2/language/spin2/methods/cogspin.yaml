@@ -1,5 +1,159 @@
-method: COGSPIN
-type: method
+# Spin2 Method: COGSPIN
+# Source: Spin2 v51 documentation
+# Purpose: Start Spin2 method in a cog
+
+method: "COGSPIN"
+category: "cog_management"
+type: "method"
 description: |
-  Start Spin2 method in a cog, returns cog ID or -1 if no cog free
-category: Cog Management
+  Start a Spin2 method in a specified or available cog.
+  Loads the Spin2 interpreter into the cog and begins executing the specified method.
+  Returns the cog number that was started, or -1 if no cog was available.
+  Essential for parallel Spin2 execution.
+
+syntax: "COGSPIN(CogNum, Method({Parameters}), StackAddress) : CogID"
+
+parameters:
+  - name: "CogNum"
+    type: "long"
+    description: |
+      Cog number to start:
+      - 0-7: Start specific cog (will stop if running)
+      - NEWCOG or -1: Start any available cog
+      
+  - name: "Method({Parameters})"
+    type: "method_call"
+    description: |
+      Spin2 method to execute with optional parameters.
+      Method name followed by parameters in parentheses.
+      Can be in current object or another object.
+      
+  - name: "StackAddress"
+    type: "address"
+    description: |
+      Hub address of stack space for the new cog.
+      Use @stack_array to get address.
+      Minimum 32 longs recommended, more for complex code.
+
+returns:
+  name: "CogID"
+  type: "long"
+  description: |
+    - 0-7: Successfully started cog number
+    - -1: Failed (no cog available when using NEWCOG)
+
+stack_requirements:
+  minimum: "32 longs (128 bytes)"
+  typical: "64-128 longs (256-512 bytes)"
+  factors:
+    - "Method call depth"
+    - "Local variable count"
+    - "Parameter count"
+    - "Expression complexity"
+
+examples:
+  - code: |
+      VAR
+        LONG stack[64]
+        LONG cog_id
+        
+      PUB main()
+        cog_id := COGSPIN(NEWCOG, worker(), @stack)
+        IF cog_id == -1
+          ' Failed to start
+          
+      PRI worker()
+        REPEAT
+          ' Do work in parallel
+          PINTOGGLE(56)
+          WAITMS(500)
+    description: "Start worker method in new cog"
+    
+  - code: |
+      VAR
+        LONG stack1[64], stack2[64]
+        LONG sensor_data
+        
+      PUB start_sensors()
+        COGSPIN(NEWCOG, read_sensor(0, @sensor_data), @stack1)
+        COGSPIN(NEWCOG, read_sensor(1, @sensor_data), @stack2)
+        
+      PRI read_sensor(pin, ptr)
+        REPEAT
+          LONG[ptr][pin] := read_adc(pin)
+          WAITMS(10)
+    description: "Multiple sensor readers with parameters"
+    
+  - code: |
+      OBJ
+        serial : "serial_driver"
+        
+      VAR
+        LONG serial_stack[128]
+        
+      PUB init()
+        ' Start serial driver in separate cog
+        COGSPIN(NEWCOG, serial.rx_handler(), @serial_stack)
+    description: "Start object method in new cog"
+    
+  - code: |
+      VAR
+        LONG cog_stacks[4][64]
+        
+      PUB parallel_process()
+        REPEAT i FROM 0 TO 3
+          COGSPIN(NEWCOG, process_chunk(i), @cog_stacks[i])
+    description: "Launch multiple parallel processors"
+
+method_execution:
+  interpreter: "Each cog gets its own Spin2 interpreter"
+  isolation: "Methods run independently"
+  variables:
+    - "VAR variables are shared between cogs"
+    - "Local variables are private to each cog"
+    - "DAT section is shared"
+  
+common_uses:
+  - "Parallel task execution"
+  - "Background monitoring"
+  - "Concurrent I/O handling"
+  - "Multi-threaded applications"
+  - "Separate UI and processing"
+  - "Real-time event handlers"
+
+related_methods:
+  - "COGINIT - Start PASM code in a cog"
+  - "COGSTOP - Stop a running cog"
+  - "COGID - Get current cog ID"
+  - "COGCHK - Check if cog is running"
+
+synchronization:
+  shared_variables: "Use locks for thread-safe access"
+  communication: "Use hub RAM for data exchange"
+  coordination: "Use COGATN/POLLATN for signaling"
+
+notes:
+  - "Method runs until it returns or cog is stopped"
+  - "Stack overflow causes undefined behavior"
+  - "Each cog has independent method call stack"
+  - "Parameters are passed by value"
+  - "Cannot share local variables between cogs"
+
+best_practices:
+  - "Always check return value for -1"
+  - "Size stack appropriately for method complexity"
+  - "Use locks for shared variable access"
+  - "Initialize shared data before starting cogs"
+  - "Stop cogs cleanly when done"
+
+warnings:
+  - "Stack overflow is not detected"
+  - "Insufficient stack causes crashes"
+  - "VAR variables need synchronization"
+  - "No automatic resource cleanup"
+
+see_also:
+  - "language/spin2/methods/coginit.yaml"
+  - "language/spin2/methods/cogstop.yaml"
+  - "language/spin2/methods/locknew.yaml"
+  - "language/spin2/constructs/method_definition.yaml"

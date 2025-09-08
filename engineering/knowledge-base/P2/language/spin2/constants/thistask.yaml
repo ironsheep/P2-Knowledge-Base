@@ -1,0 +1,37 @@
+constant: THISTASK
+type: constant
+description: |
+  Constant for referring to the current task
+category: Task Constants
+value: -1
+syntax: "TASKSTOP(THISTASK)"
+examples:
+  - code: |
+      ' Task stops itself
+      TASKSTOP(THISTASK)
+    description: "Self-termination"
+  - code: |
+      ' Task halts itself
+      if wait_condition
+        TASKHALT(THISTASK)
+    description: "Self-halt"
+  - code: |
+      ' Error handling
+      if error_occurred
+        debug("Task ", udec(TASKID()), " stopping")
+        TASKSTOP(THISTASK)
+    description: "Error self-termination"
+notes:
+  - "Value is -1"
+  - "Used with TASKSTOP/TASKHALT for current task"
+  - "Allows task to control itself"
+  - "Same value as NEWTASK but different context"
+  - "Part of v47+ task features"
+related:
+  - NEWTASK
+  - TASKSTOP
+  - TASKHALT
+  - TASKID
+see_also:
+  - "Task self-management"
+  - "Task constants"

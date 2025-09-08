@@ -1,0 +1,47 @@
+method: TASKWAIT
+type: method
+description: |
+  Wait for specific condition with task yielding
+category: Task Operations
+syntax: "TASKWAIT(Condition)"
+parameters:
+  - name: "Condition"
+    type: "expression"
+    description: "Boolean condition to wait for"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Wait for flag
+      TASKWAIT(ready_flag == TRUE)
+      ' Flag is now true
+    description: "Wait for flag to be set"
+  - code: |
+      ' Wait for buffer space
+      TASKWAIT(buffer_count < MAX_SIZE)
+      ' Can now add to buffer
+    description: "Wait for buffer availability"
+  - code: |
+      ' Wait for multiple conditions
+      TASKWAIT(data_ready AND not busy_flag)
+      ' Both conditions met
+    description: "Wait for complex condition"
+notes:
+  - "Yields to other tasks while waiting"
+  - "More efficient than busy waiting"
+  - "Condition checked between yields"
+  - "Returns when condition becomes true"
+  - "Prevents CPU hogging during waits"
+  - "Part of cooperative multitasking"
+timing:
+  description: "Depends on condition"
+  cycles: "Variable - yields while waiting"
+related:
+  - TASKNEXT
+  - WAITCT
+  - POLLCT
+see_also:
+  - "Conditional waiting"
+  - "Task synchronization"
+  - "Efficient polling"

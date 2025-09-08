@@ -1,5 +1,50 @@
 method: WAITATN
 type: method
 description: |
-  Wait for ATN strobe
-category: Attention Signaling
+  Wait for attention signal from another cog
+category: COG Management
+syntax: "WAITATN()"
+parameters: []
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Wait for signal from another cog
+      WAITATN()  ' Block until ATN received
+      ' Process the signal
+    description: "Simple cog synchronization"
+  - code: |
+      ' Worker cog waiting for commands
+      repeat
+        WAITATN()  ' Wait for command signal
+        command := shared_variable
+        process_command(command)
+    description: "Command-driven worker cog"
+  - code: |
+      ' Multi-stage synchronization
+      ' Stage 1
+      do_work_stage1()
+      signal_complete()  ' Tell master
+      WAITATN()         ' Wait for next stage
+      ' Stage 2
+      do_work_stage2()
+    description: "Multi-stage cog coordination"
+notes:
+  - "Blocks execution until ATN signal received"
+  - "ATN flag is cleared after WAITATN returns"
+  - "Another cog uses COGATN to send the signal"
+  - "Each cog has its own ATN flag"
+  - "More efficient than polling shared variables"
+  - "Use POLLATN for non-blocking check"
+timing:
+  description: "Waits until ATN signal received"
+  cycles: "Variable based on when signal arrives"
+related:
+  - COGATN
+  - POLLATN
+  - COGID
+see_also:
+  - "Cog communication"
+  - "Inter-cog signaling"
+  - "Synchronization"

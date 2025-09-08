@@ -1,0 +1,29 @@
+constant: NEWTASK
+type: constant
+description: |
+  Constant for auto-assigning next available task ID
+category: Task Constants
+value: -1
+syntax: "TASKSPIN(NEWTASK, method(), @stack)"
+examples:
+  - code: |
+      ' Start task with auto-assigned ID
+      TASKSPIN(NEWTASK, worker(), @worker_stack)
+    description: "Auto-assign task ID"
+  - code: |
+      ' Start multiple tasks
+      repeat 5
+        TASKSPIN(NEWTASK, handler(), @stacks[i])
+    description: "Start multiple tasks with auto IDs"
+notes:
+  - "Value is -1"
+  - "Used with TASKSPIN for automatic task ID assignment"
+  - "System finds next available task ID"
+  - "Convenient when specific ID not needed"
+  - "Part of v47+ task features"
+related:
+  - THISTASK
+  - TASKSPIN
+see_also:
+  - "Task creation"
+  - "Task constants"

@@ -1,3 +1,47 @@
 method: SEND
 type: method
-category: String Creation
+description: |
+  Send data bytes using configured output method
+category: Miscellaneous
+syntax: "SEND(DataItems...)"
+parameters:
+  - name: "DataItems"
+    type: "variable"
+    description: "One or more data items to send (bytes, strings, arrays)"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Send single byte
+      SEND($41)  ' Send 'A'
+    description: "Send single byte"
+  - code: |
+      ' Send string
+      SEND(STRING("Hello, World!"))
+    description: "Send string constant"
+  - code: |
+      ' Send multiple items
+      SEND($0D, $0A, STRING("Ready"), $0D, $0A)
+    description: "Send mixed data types"
+  - code: |
+      ' Send array data
+      SEND(BYTE[@buffer, 10])  ' Send 10 bytes from buffer
+    description: "Send array contents"
+notes:
+  - "Output method must be configured first"
+  - "Typically used with serial drivers"
+  - "Can send bytes, words, longs, strings, arrays"
+  - "Blocking operation - waits for each byte"
+  - "Works with user-defined output methods"
+  - "Common for debug output"
+timing:
+  description: "Depends on output method"
+  cycles: "Variable based on driver"
+related:
+  - RECV
+  - DEBUG
+see_also:
+  - "Serial communication"
+  - "Debug output"
+  - "Data transmission"

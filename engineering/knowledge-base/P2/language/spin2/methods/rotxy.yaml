@@ -1,5 +1,57 @@
 method: ROTXY
 type: method
 description: |
-  Rotate X,Y by angle
-category: CORDIC Operations
+  Rotate X,Y coordinates by specified angle using CORDIC
+category: Math/CORDIC Operations
+syntax: "X2, Y2 := ROTXY(X, Y, Angle)"
+parameters:
+  - name: "X"
+    type: "long"
+    description: "X coordinate to rotate (32-bit signed)"
+  - name: "Y"
+    type: "long"
+    description: "Y coordinate to rotate (32-bit signed)"
+  - name: "Angle"
+    type: "long"
+    description: "Rotation angle in P2 angle units (0..$FFFFFFFF = 0..360°)"
+returns:
+  type: "multiple"
+  description: "Returns rotated X2 and Y2 coordinates"
+examples:
+  - code: |
+      ' Rotate point 45 degrees
+      x2, y2 := ROTXY(100, 0, $2000_0000)  ' 45° = $20000000
+      ' Result: x2 ≈ 71, y2 ≈ 71
+    description: "Rotate point by 45 degrees"
+  - code: |
+      ' Animate rotating point
+      angle := 0
+      repeat
+        x2, y2 := ROTXY(radius, 0, angle)
+        plot(center_x + x2, center_y + y2)
+        angle += $0100_0000  ' Increment angle
+    description: "Animate point rotating around origin"
+  - code: |
+      ' Rotate sprite vertices
+      repeat i from 0 to num_vertices-1
+        vx[i], vy[i] := ROTXY(vx[i], vy[i], rotation)
+    description: "Rotate all vertices of a shape"
+notes:
+  - "Uses P2's hardware CORDIC engine"
+  - "Angle units: $0000_0000 = 0°, $4000_0000 = 90°, $8000_0000 = 180°, $C000_0000 = 270°"
+  - "Full 32-bit precision maintained"
+  - "Handles all quadrants correctly"
+  - "Result is scaled by CORDIC K factor (≈1.647)"
+  - "38-clock cycle operation"
+timing:
+  description: "CORDIC operation"
+  cycles: "38 clock cycles"
+related:
+  - POLXY
+  - XYPOL
+  - QSIN
+  - QCOS
+see_also:
+  - "CORDIC operations"
+  - "Coordinate rotation"
+  - "2D graphics"

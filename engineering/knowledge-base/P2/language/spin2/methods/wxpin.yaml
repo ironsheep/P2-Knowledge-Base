@@ -1,5 +1,152 @@
-method: WXPIN
-type: method
+# Spin2 Method: WXPIN
+# Source: Spin2 v51 documentation
+# Purpose: Write X parameter to smart pin
+
+method: "WXPIN"
+category: "smart_pin_operations"
+type: "method"
 description: |
-  Write X register of smart pins
-category: SmartPin Operations
+  Write the X parameter register of one or more smart pins.
+  The X register typically controls timing, frequency, or configuration parameters.
+  Meaning depends on the smart pin mode set by WRPIN.
+
+syntax: "WXPIN(PinField, XValue)"
+
+parameters:
+  - name: "PinField"
+    type: "pin_field"
+    description: |
+      Specifies which pin(s) to configure. Can be:
+      - Single pin number (0-63)
+      - Pin range using '..' operator (Bottom..Top)
+      - Multiple pins using ADDPINS operator
+      - Variable or expression that evaluates to a pin field
+      
+  - name: "XValue"
+    type: "long"
+    description: |
+      32-bit value for X register.
+      Interpretation depends on smart pin mode:
+      - Timing periods for serial modes
+      - Frequency values for NCO modes
+      - Configuration bits for special modes
+
+returns: "none"
+
+x_register_usage_by_mode:
+  serial_modes: |
+    Baud rate timing:
+    X = (CLKFREQ / baud_rate) - 1
+    
+  pwm_modes: |
+    PWM period:
+    X = period_in_clocks - 1
+    
+  nco_modes: |
+    Frequency value:
+    X = frequency * (2^32 / CLKFREQ)
+    
+  measurement: |
+    Measurement window:
+    X = measurement_period_clocks
+
+examples:
+  - code: |
+      ' Set UART baud rate to 115200
+      baud := 115200
+      x_val := CLKFREQ / baud - 1
+      WXPIN(30, x_val)
+    description: "Configure UART baud rate"
+    
+  - code: |
+      ' Set PWM period to 1000 clocks
+      WXPIN(56, 999)  ' 1000 - 1
+    description: "Set PWM period"
+    
+  - code: |
+      ' Configure 1MHz NCO frequency
+      freq := 1_000_000
+      x_val := freq * ($8000_0000 / (CLKFREQ / 2))
+      WXPIN(pin, x_val)
+    description: "Set NCO frequency"
+    
+  - code: |
+      ' Set measurement window to 1 second
+      WXPIN(pin, CLKFREQ)
+    description: "Configure measurement period"
+    
+  - code: |
+      ' Configure 16-bit SPI transfer
+      WXPIN(spi_pin, %1_00111)  ' 16 bits, MSB first
+    description: "SPI configuration"
+
+mode_specific_x_values:
+  P_ASYNC_TX: "Bit period for transmit"
+  P_ASYNC_RX: "Bit period for receive"
+  P_PULSE: "High time period"
+  P_TRANSITION: "Transition period"
+  P_NCO_FREQ: "Frequency value"
+  P_NCO_DUTY: "Base period"
+  P_PWM_TRIANGLE: "Frame period"
+  P_PWM_SAWTOOTH: "Frame period"
+  P_QUADRATURE: "Filter period"
+  P_COUNT_RISES: "Measurement period"
+  P_COUNT_HIGHS: "Measurement period"
+
+calculation_examples:
+  uart_baud: |
+    ' Calculate for any baud rate
+    PUB set_baud(pin, baud)
+      x := CLKFREQ / baud - 1
+      WXPIN(pin, x)
+      
+  pwm_frequency: |
+    ' Set PWM by frequency
+    PUB set_pwm_freq(pin, freq)
+      x := CLKFREQ / freq - 1
+      WXPIN(pin, x)
+      
+  measurement_time: |
+    ' Set measurement in milliseconds
+    PUB set_measure_ms(pin, ms)
+      x := CLKFREQ / 1000 * ms
+      WXPIN(pin, x)
+
+common_uses:
+  - "Setting baud rates"
+  - "Configuring PWM periods"
+  - "Setting NCO frequencies"
+  - "Defining measurement windows"
+  - "Protocol timing configuration"
+
+related_methods:
+  - "WRPIN - Set smart pin mode"
+  - "WYPIN - Set Y parameter"
+  - "RDPIN - Read and acknowledge"
+  - "RQPIN - Read without acknowledge"
+  - "PINSTART - Complete setup"
+
+timing_considerations:
+  - "X value takes effect on next period"
+  - "Can be changed while pin is active"
+  - "Some modes latch X at specific times"
+  - "Check mode documentation for specifics"
+
+notes:
+  - "X register is mode-dependent"
+  - "Usually represents timing or period"
+  - "32-bit value allows wide range"
+  - "Can be updated during operation"
+  - "Value interpretation varies by mode"
+
+warnings:
+  - "Must set correct mode first with WRPIN"
+  - "Zero may disable some functions"
+  - "Very small values may not work"
+  - "Check mode limits in documentation"
+
+see_also:
+  - "language/spin2/methods/wrpin.yaml"
+  - "language/spin2/methods/wypin.yaml"
+  - "language/spin2/methods/rdpin.yaml"
+  - "architecture/smart-pins/*.yaml"

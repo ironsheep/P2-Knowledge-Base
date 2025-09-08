@@ -1,0 +1,50 @@
+method: TASKSTOP
+type: method
+description: |
+  Stop and terminate a running task
+category: Task Operations
+syntax: "TASKSTOP(TaskID)"
+parameters:
+  - name: "TaskID"
+    type: "integer"
+    description: "Task ID to stop (0-31) or THISTASK (-1) for current"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Stop specific task
+      TASKSTOP(2)  ' Stop task ID 2
+    description: "Stop task by ID"
+  - code: |
+      ' Task stops itself
+      PUB background_task()
+        repeat
+          if shutdown_flag
+            TASKSTOP(THISTASK)  ' Stop self
+    description: "Task self-termination"
+  - code: |
+      ' Stop all tasks except main
+      repeat task_id from 1 to 31
+        if TASKCHK(task_id)
+          TASKSTOP(task_id)
+    description: "Stop all secondary tasks"
+notes:
+  - "Immediately terminates the task"
+  - "Task's stack space can be reused"
+  - "THISTASK (-1) stops current task"
+  - "Main task (ID 0) typically shouldn't stop"
+  - "No cleanup - task stops immediately"
+  - "Task ID becomes available for reuse"
+timing:
+  description: "Immediate"
+  cycles: "2-9 clock cycles"
+related:
+  - TASKSPIN
+  - TASKHALT
+  - TASKRESUME
+  - TASKCHK
+see_also:
+  - "Task termination"
+  - "Task management"
+  - "Resource cleanup"

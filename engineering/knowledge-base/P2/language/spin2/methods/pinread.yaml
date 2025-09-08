@@ -1,0 +1,103 @@
+# Spin2 Method: PINREAD
+# Source: Spin2 v51 documentation
+# Purpose: Read pin(s) state
+
+method: "PINREAD"
+aliases: ["PINR"]
+category: "pin_control"
+type: "method"
+description: |
+  Read the current state of specified pin(s).
+  Reads the input register (IN) for the specified pins regardless of their direction.
+  Returns the pin states as a value where each bit represents a pin's state.
+  For single pin: returns 0 or 1. For multiple pins: returns multi-bit value.
+
+syntax: "PINREAD(PinField) : PinStates"
+
+parameters:
+  - name: "PinField"
+    type: "pin_field"
+    description: |
+      Specifies which pin(s) to read. Can be:
+      - Single pin number (0-63)
+      - Pin range using '..' operator (Bottom..Top)
+      - Multiple pins using ADDPINS operator
+      - Variable or expression that evaluates to a pin field
+
+returns:
+  name: "PinStates"
+  type: "long"
+  description: |
+    Current state of the pin(s):
+    - Single pin: 0 (low) or 1 (high)
+    - Multiple pins: Each bit represents a pin
+    - Bit 0 = lowest numbered pin in field
+    - Bit n = nth pin in field
+
+timing:
+  execution: "2 clock cycles in cog execution"
+  hub_access: "8-19 clock cycles when executed from hub"
+
+examples:
+  - code: |
+      IF PINREAD(0)
+        ' Pin 0 is high
+      ELSE
+        ' Pin 0 is low
+    description: "Read single pin as boolean"
+    
+  - code: "buttons := PINREAD(0 ADDPINS 7)"
+    description: "Read 8 buttons into a byte"
+    
+  - code: |
+      ' Read 4-bit DIP switch
+      setting := PINREAD(12 ADDPINS 3)
+      ' Returns 0-15 based on switch positions
+    description: "Read multi-bit value from pins"
+    
+  - code: |
+      ' Wait for button press (active high)
+      REPEAT UNTIL PINREAD(8)
+      ' Button is now pressed
+    description: "Poll for pin state change"
+    
+  - code: |
+      ' Read and decode 3-bit address
+      address := PINREAD(5..3)
+      CASE address
+        0: handle_device_0()
+        1: handle_device_1()
+        2..7: handle_others()
+    description: "Read and decode pin pattern"
+
+underlying_pasm:
+  instruction: "TESTP"
+  description: "Internally uses TESTP or direct IN register read"
+  
+common_uses:
+  - "Read button and switch states"
+  - "Monitor sensor outputs"
+  - "Read parallel data input"
+  - "Check communication line states"
+  - "Decode address or selection pins"
+  - "Poll for signal changes"
+
+related_methods:
+  - "PINWRITE - Write data to pins"
+  - "PINFLOAT - Set pins to input mode"
+  - "AKPIN - Acknowledge smart pin"
+  - "RDPIN - Read smart pin result"
+
+notes:
+  - "Works regardless of pin direction (input or output)"
+  - "When reading output pins, returns the driven state"
+  - "Does not affect pin configuration"
+  - "Can read pins configured as smart pins"
+  - "Atomic read - all pins sampled simultaneously"
+  - "No debouncing - returns instantaneous state"
+
+see_also:
+  - "language/pasm2/testp.yaml"
+  - "language/spin2/methods/pinwrite.yaml"
+  - "language/spin2/methods/pinfloat.yaml"
+  - "language/spin2/methods/rdpin.yaml"

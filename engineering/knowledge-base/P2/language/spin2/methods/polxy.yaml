@@ -1,5 +1,56 @@
 method: POLXY
 type: method
 description: |
-  Convert polar to Cartesian
-category: CORDIC Operations
+  Convert polar coordinates to Cartesian using CORDIC
+category: Math/CORDIC Operations
+syntax: "X, Y := POLXY(Rho, Theta)"
+parameters:
+  - name: "Rho"
+    type: "long"
+    description: "Radius/magnitude (32-bit unsigned)"
+  - name: "Theta"
+    type: "long"
+    description: "Angle in P2 angle units (0..$FFFFFFFF = 0..360°)"
+returns:
+  type: "multiple"
+  description: "Returns X and Y Cartesian coordinates"
+examples:
+  - code: |
+      ' Convert polar to Cartesian
+      x, y := POLXY(100, $4000_0000)  ' r=100, θ=90°
+      ' Result: x ≈ 0, y ≈ 100
+    description: "Basic polar to Cartesian conversion"
+  - code: |
+      ' Draw circle using polar coordinates
+      radius := 50
+      repeat angle from 0 to $FFFF_FFFF step $0400_0000
+        x, y := POLXY(radius, angle)
+        plot(center_x + x, center_y + y)
+    description: "Draw circle using polar coordinates"
+  - code: |
+      ' Create spiral pattern
+      angle := 0
+      repeat radius from 10 to 100
+        x, y := POLXY(radius, angle)
+        plot(center_x + x, center_y + y)
+        angle += $0800_0000  ' Increment angle
+    description: "Generate spiral pattern"
+notes:
+  - "Uses P2's hardware CORDIC engine"
+  - "Angle units: $0000_0000 = 0°, $4000_0000 = 90°, $8000_0000 = 180°, $C000_0000 = 270°"
+  - "Full 32-bit precision maintained"
+  - "Rho (radius) is unsigned magnitude"
+  - "Result is scaled by CORDIC K factor (≈1.647)"
+  - "38-clock cycle operation"
+timing:
+  description: "CORDIC operation"
+  cycles: "38 clock cycles"
+related:
+  - XYPOL
+  - ROTXY
+  - QSIN
+  - QCOS
+see_also:
+  - "CORDIC operations"
+  - "Polar coordinates"
+  - "Coordinate conversion"

@@ -2,4 +2,50 @@ method: CLKSET
 type: method
 description: |
   Safely set new clock mode and frequency
-category: Clock Control
+category: Miscellaneous
+syntax: "CLKSET(Mode, Frequency)"
+parameters:
+  - name: "Mode"
+    type: "long"
+    description: "Clock mode configuration bits"
+  - name: "Frequency"
+    type: "long"
+    description: "New clock frequency in Hz"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Set to 200MHz with PLL
+      CLKSET(clkmode_pll, 200_000_000)
+    description: "Set high-speed PLL mode"
+  - code: |
+      ' Drop to RCFAST for low power
+      CLKSET(clkmode_rcfast, 20_000_000)
+    description: "Switch to internal RC oscillator"
+  - code: |
+      ' Dynamic frequency scaling
+      if battery_low
+        CLKSET(clkmode_pll, 80_000_000)  ' Reduce to 80MHz
+      else
+        CLKSET(clkmode_pll, 180_000_000)  ' Normal 180MHz
+    description: "Adjust clock for power management"
+notes:
+  - "Performs safe clock transition"
+  - "Updates clkfreq variable automatically"
+  - "Temporarily switches to RCFAST during transition"
+  - "Mode bits configure PLL, crystal, dividers"
+  - "Affects all timing-dependent operations"
+  - "Maximum frequency depends on chip specs"
+  - "Use predefined clkmode_ constants"
+timing:
+  description: "Clock stabilization delay"
+  cycles: "~10-20ms for PLL lock"
+related:
+  - HUBSET
+  - WAITMS
+  - GETCT
+see_also:
+  - "Clock configuration"
+  - "PLL setup"
+  - "Power management"

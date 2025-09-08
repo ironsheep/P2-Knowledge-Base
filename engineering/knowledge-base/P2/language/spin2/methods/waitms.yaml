@@ -1,5 +1,99 @@
-method: WAITMS
-type: method
+# Spin2 Method: WAITMS
+# Source: Spin2 v51 documentation
+# Purpose: Delay execution for specified milliseconds
+
+method: "WAITMS"
+category: "timing"
+type: "method"
 description: |
-  Delay for milliseconds
-category: Delays
+  Delay execution for a specified number of milliseconds.
+  Provides a simple timing delay that automatically accounts for the system clock frequency.
+  More convenient than WAITCT for simple delays as it handles the math internally.
+
+syntax: "WAITMS(Milliseconds)"
+
+parameters:
+  - name: "Milliseconds"
+    type: "long"
+    description: |
+      Number of milliseconds to delay (1-4,294,967 range).
+      Can be a constant, variable, or expression.
+      Value is treated as unsigned.
+
+returns: "none"
+
+timing:
+  accuracy: "Within one system clock tick"
+  resolution: "1 millisecond"
+  calculation: "Uses CLKFREQ/1000 internally"
+  overhead: "Minimal setup overhead (~10 cycles)"
+
+examples:
+  - code: "WAITMS(1000)"
+    description: "Delay for 1 second"
+    
+  - code: |
+      REPEAT
+        PINHIGH(56)
+        WAITMS(500)
+        PINLOW(56)
+        WAITMS(500)
+    description: "Blink LED at 1Hz"
+    
+  - code: |
+      VAR
+        LONG delay_time
+      PUB variable_delay()
+        delay_time := 100
+        REPEAT 10
+          PINTOGGLE(56)
+          WAITMS(delay_time)
+          delay_time += 50
+    description: "Variable delay that increases each iteration"
+    
+  - code: |
+      ' Debounce a button
+      IF PINREAD(0)
+        WAITMS(50)  ' Debounce delay
+        IF PINREAD(0)
+          ' Button really pressed
+    description: "Button debouncing"
+
+underlying_implementation:
+  description: |
+    Internally calculates: WAITX((CLKFREQ/1000) * milliseconds - 1)
+    Automatically adjusts for system clock frequency.
+  related_pasm: "WAITX instruction"
+
+common_uses:
+  - "LED blinking and indicators"
+  - "Button debouncing"
+  - "Timing between operations"
+  - "Simple animation delays"
+  - "Sensor reading intervals"
+  - "Communication protocol delays"
+
+related_methods:
+  - "WAITUS - Delay for microseconds"
+  - "WAITCT - Wait for specific system counter value"
+  - "GETCT - Get current system counter"
+  - "POLLCT - Check if counter value passed"
+
+notes:
+  - "Blocks execution - cog cannot do other work during delay"
+  - "Not suitable for precise timing critical operations"
+  - "Maximum delay ~4,294 seconds (71 minutes)"
+  - "For delays less than 1ms, use WAITUS"
+  - "For cycle-accurate timing, use WAITCT"
+  - "Delay is relative to call time, not absolute"
+
+limitations:
+  - "1ms minimum resolution"
+  - "Blocking operation"
+  - "Subject to small jitter from hub timing"
+
+see_also:
+  - "language/spin2/methods/waitus.yaml"
+  - "language/spin2/methods/waitct.yaml"
+  - "language/spin2/methods/getct.yaml"
+  - "language/pasm2/waitx.yaml"

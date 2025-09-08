@@ -1,5 +1,54 @@
 method: LOCKCHK
 type: method
 description: |
-  Check lock state, bit 31 = captured, bits 3:0 = owner cog
-category: Lock Management
+  Check lock state and ownership without affecting it
+category: Lock Operations
+syntax: "state := LOCKCHK(LockID)"
+parameters:
+  - name: "LockID"
+    type: "integer"
+    description: "Lock ID to check (0..15)"
+returns:
+  type: "long"
+  description: "Lock state: bit 31 = captured flag, bits 3:0 = owner cog ID"
+examples:
+  - code: |
+      ' Check if lock is free
+      state := LOCKCHK(lock_id)
+      if state < 0  ' Bit 31 set
+        ' Lock is captured
+        owner := state & $F  ' Get owner cog
+    description: "Check lock availability"
+  - code: |
+      ' Verify we own the lock
+      state := LOCKCHK(lock_id)
+      if (state & $F) == COGID()
+        ' We own this lock
+    description: "Verify lock ownership"
+  - code: |
+      ' Debug lock status
+      state := LOCKCHK(lock_id)
+      if state < 0
+        debug("Lock captured by cog ", udec(state & $F))
+      else
+        debug("Lock is free")
+    description: "Display lock status"
+notes:
+  - "Non-destructive read of lock state"
+  - "Bit 31: 1 = captured, 0 = free"
+  - "Bits 3:0: Cog ID of owner (if captured)"
+  - "Does not affect lock state"
+  - "Useful for debugging and monitoring"
+  - "Can check any lock without owning it"
+timing:
+  description: "Hub operation"
+  cycles: "2-9 clock cycles"
+related:
+  - LOCKTRY
+  - LOCKREL
+  - LOCKNEW
+  - COGID
+see_also:
+  - "Hardware locks"
+  - "Lock debugging"
+  - "Lock monitoring"

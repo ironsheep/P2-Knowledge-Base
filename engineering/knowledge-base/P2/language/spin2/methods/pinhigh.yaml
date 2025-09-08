@@ -1,0 +1,74 @@
+# Spin2 Method: PINHIGH
+# Source: Spin2 v51 documentation
+# Purpose: Drive pin(s) high
+
+method: "PINHIGH"
+aliases: ["PINH"]
+category: "pin_control"
+type: "method"
+description: |
+  Drive specified pin(s) high (output mode, logic 1).
+  Sets the direction bit(s) to output (DIR=1) and drives the pin(s) high (OUT=1).
+  This is equivalent to the PASM2 DIRH instruction.
+
+syntax: "PINHIGH(PinField)"
+
+parameters:
+  - name: "PinField"
+    type: "pin_field"
+    description: |
+      Specifies which pin(s) to drive high. Can be:
+      - Single pin number (0-63)
+      - Pin range using '..' operator (Bottom..Top)
+      - Multiple pins using ADDPINS operator
+      - Variable or expression that evaluates to a pin field
+
+returns: "none"
+
+timing:
+  execution: "2 clock cycles in cog execution"
+  hub_access: "8-19 clock cycles when executed from hub"
+
+examples:
+  - code: "PINHIGH(56)"
+    description: "Drive pin 56 high (typically an LED pin)"
+    
+  - code: "PINHIGH(0 ADDPINS 7)"
+    description: "Drive pins 0 through 7 high simultaneously"
+    
+  - code: "PINHIGH(15..8)"
+    description: "Drive pins 8 through 15 high (note: reverse range)"
+    
+  - code: |
+      CON
+        LED = 56
+      PUB main()
+        PINHIGH(LED)
+    description: "Use a constant for the pin number"
+
+underlying_pasm:
+  instruction: "DIRH"
+  description: "Internally uses DIRH instruction which sets DIR=1 and OUT=1"
+  
+common_uses:
+  - "Turn on LEDs"
+  - "Set control signals high"
+  - "Drive communication pins to idle state"
+  - "Activate chip select or enable lines"
+
+related_methods:
+  - "PINLOW - Drive pin(s) low"
+  - "PINTOGGLE - Toggle pin state"
+  - "PINFLOAT - Release pin to high-impedance"
+  - "PINWRITE - Write specific value to pins"
+
+notes:
+  - "Pin becomes an output if it wasn't already"
+  - "Overrides any smart pin mode on the pin"
+  - "Pin will remain high until explicitly changed"
+  - "Multiple pins can be controlled simultaneously"
+
+see_also:
+  - "language/pasm2/dirh.yaml"
+  - "language/spin2/methods/pinlow.yaml"
+  - "language/spin2/methods/pintoggle.yaml"

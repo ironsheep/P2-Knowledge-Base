@@ -1,5 +1,54 @@
 method: LOCKTRY
 type: method
 description: |
-  Try to capture lock, -1 if successful or 0 if taken
-category: Lock Management
+  Attempt to capture a lock without blocking
+category: Lock Operations
+syntax: "result := LOCKTRY(LockID)"
+parameters:
+  - name: "LockID"
+    type: "integer"
+    description: "Lock ID to try capturing (0..15)"
+returns:
+  type: "integer"
+  description: "TRUE (-1) if lock captured, FALSE (0) if already taken"
+examples:
+  - code: |
+      ' Try to get lock
+      if LOCKTRY(lock_id)
+        ' Got the lock, access resource
+        access_shared_resource()
+        LOCKREL(lock_id)
+    description: "Non-blocking lock attempt"
+  - code: |
+      ' Wait for lock with timeout
+      timeout := GETCT() + clkfreq  ' 1 second
+      repeat until LOCKTRY(lock_id) or POLLCT(timeout)
+      if not LOCKTRY(lock_id)
+        ' Timeout - couldn't get lock
+        abort
+    description: "Lock with timeout"
+  - code: |
+      ' Blocking lock acquisition
+      repeat until LOCKTRY(lock_id)
+      ' Critical section
+      LOCKREL(lock_id)
+    description: "Wait until lock available"
+notes:
+  - "Non-blocking operation"
+  - "Returns immediately with success/failure"
+  - "If successful, calling cog owns the lock"
+  - "Must call LOCKREL to release when done"
+  - "Can be used in polling loop for blocking behavior"
+  - "Lock must be allocated with LOCKNEW first"
+timing:
+  description: "Hub operation"
+  cycles: "2-9 clock cycles"
+related:
+  - LOCKREL
+  - LOCKNEW
+  - LOCKRET
+  - LOCKCHK
+see_also:
+  - "Hardware locks"
+  - "Mutual exclusion"
+  - "Critical sections"

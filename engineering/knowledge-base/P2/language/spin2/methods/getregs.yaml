@@ -1,5 +1,59 @@
 method: GETREGS
 type: method
 description: |
-  Copy cog registers to hub
-category: String Creation
+  Copy cog registers to hub RAM
+category: Miscellaneous
+syntax: "GETREGS(HubAddress, CogAddress, Count)"
+parameters:
+  - name: "HubAddress"
+    type: "address"
+    description: "Hub RAM destination address"
+  - name: "CogAddress"
+    type: "integer"
+    description: "Starting cog register address (0-511)"
+  - name: "Count"
+    type: "integer"
+    description: "Number of longs to copy"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Save cog registers
+      VAR
+        LONG saved_regs[16]
+      
+      GETREGS(@saved_regs, $1F0, 16)  ' Save $1F0-$1FF
+    description: "Save cog register state"
+  - code: |
+      ' Debug cog registers
+      VAR
+        LONG cog_dump[512]
+      
+      GETREGS(@cog_dump, 0, 512)  ' Dump entire cog
+    description: "Complete cog memory dump"
+  - code: |
+      ' Read PASM variables
+      VAR
+        LONG pasm_vars[10]
+      
+      GETREGS(@pasm_vars, $100, 10)  ' Get PASM data
+    description: "Read PASM variables from cog"
+notes:
+  - "Copies from cog RAM to hub RAM"
+  - "Cog addresses are 0-511 (2KB)"
+  - "Each register is 32 bits (1 long)"
+  - "Useful for debugging PASM code"
+  - "Can read interpreter registers"
+  - "Count must not exceed remaining registers"
+timing:
+  description: "Hub transfer operation"
+  cycles: "~8 + (count * 2) clock cycles"
+related:
+  - SETREGS
+  - REGLOAD
+  - REGEXEC
+see_also:
+  - "Cog memory access"
+  - "Register debugging"
+  - "PASM interaction"

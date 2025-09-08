@@ -1,5 +1,53 @@
 method: LOCKREL
 type: method
 description: |
-  Release captured lock
-category: Lock Management
+  Release a captured lock
+category: Lock Operations
+syntax: "LOCKREL(LockID)"
+parameters:
+  - name: "LockID"
+    type: "integer"
+    description: "Lock ID to release (0..15)"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Basic lock usage pattern
+      repeat until LOCKTRY(lock_id)
+      ' Critical section - exclusive access
+      modify_shared_data()
+      LOCKREL(lock_id)  ' Release for other cogs
+    description: "Standard lock/unlock pattern"
+  - code: |
+      ' Ensure lock release on error
+      if LOCKTRY(lock_id)
+        result := process_data()
+        LOCKREL(lock_id)
+        if result < 0
+          abort
+    description: "Release lock before error abort"
+  - code: |
+      ' Multiple lock management
+      LOCKREL(resource_a_lock)
+      LOCKREL(resource_b_lock)
+    description: "Release multiple locks"
+notes:
+  - "Releases lock for other cogs to capture"
+  - "Only the cog that captured can release"
+  - "Safe to call even if not owner (no-op)"
+  - "Critical to release locks to prevent deadlock"
+  - "Lock becomes immediately available"
+  - "Does not return lock to pool (use LOCKRET for that)"
+timing:
+  description: "Hub operation"
+  cycles: "2-9 clock cycles"
+related:
+  - LOCKTRY
+  - LOCKNEW
+  - LOCKRET
+  - LOCKCHK
+see_also:
+  - "Hardware locks"
+  - "Critical sections"
+  - "Resource sharing"

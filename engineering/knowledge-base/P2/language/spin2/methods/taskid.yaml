@@ -1,0 +1,47 @@
+method: TASKID
+type: method
+description: |
+  Get the current task's ID
+category: Task Operations
+syntax: "id := TASKID()"
+parameters: []
+returns:
+  type: "integer"
+  description: "Current task ID (0-31)"
+examples:
+  - code: |
+      ' Get current task ID
+      my_id := TASKID()
+      debug("Running as task ", udec(my_id))
+    description: "Display current task ID"
+  - code: |
+      ' Task-specific behavior
+      case TASKID()
+        0: main_task_work()
+        1: worker1_work()
+        2: worker2_work()
+    description: "Task-specific execution"
+  - code: |
+      ' Store task ID for later
+      VAR
+        LONG task_ids[32]
+      
+      task_ids[TASKID()] := GETCT()  ' Store start time
+    description: "Track task timing"
+notes:
+  - "Returns ID of currently executing task"
+  - "Main task is typically ID 0"
+  - "Useful for task-specific storage/behavior"
+  - "Each task has unique ID 0-31"
+  - "ID remains constant for task lifetime"
+timing:
+  description: "Immediate"
+  cycles: "2-9 clock cycles"
+related:
+  - TASKCHK
+  - TASKSPIN
+  - COGID
+see_also:
+  - "Task identification"
+  - "Task management"
+  - "Task-local storage"

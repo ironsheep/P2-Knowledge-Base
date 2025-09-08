@@ -1,5 +1,57 @@
 method: SIZEOF
 type: method
 description: |
-  Get size of structure in bytes
-category: String Creation
+  Get size of structure or data type in bytes
+category: Miscellaneous
+syntax: "size := SIZEOF(Structure)"
+parameters:
+  - name: "Structure"
+    type: "structure_name"
+    description: "Name of structure defined in CON section"
+returns:
+  type: "integer"
+  description: "Size in bytes of the structure"
+examples:
+  - code: |
+      CON
+        ' Define structure
+        POINT = LONG[2]  ' X, Y coordinates
+      
+      PUB main()
+        size := SIZEOF(POINT)  ' Returns 8 (2 longs * 4 bytes)
+    description: "Get structure size"
+  - code: |
+      CON
+        ' Complex structure
+        HEADER = LONG + WORD[4] + BYTE[16]
+      
+      VAR
+        BYTE buffer[SIZEOF(HEADER)]
+    description: "Allocate buffer for structure"
+  - code: |
+      CON
+        ' Nested structures
+        VECTOR3 = LONG[3]
+        MATRIX3 = VECTOR3[3]
+      
+      PUB get_size()
+        return SIZEOF(MATRIX3)  ' Returns 36 (9 longs * 4)
+    description: "Size of nested structure"
+notes:
+  - "Structures defined in CON section"
+  - "Returns total byte count"
+  - "Accounts for data type sizes (BYTE=1, WORD=2, LONG=4)"
+  - "Useful for buffer allocation"
+  - "Compile-time evaluation"
+  - "Works with arrays and nested structures"
+timing:
+  description: "Compile-time constant"
+  cycles: "N/A - resolved at compile time"
+related:
+  - BYTE
+  - WORD
+  - LONG
+see_also:
+  - "Structure definitions"
+  - "CON section"
+  - "Memory allocation"

@@ -1,5 +1,57 @@
 method: REGEXEC
 type: method
 description: |
-  Execute register code from hub
-category: String Creation
+  Load and execute PASM2 code from hub RAM
+category: Miscellaneous
+syntax: "result := REGEXEC(HubAddress)"
+parameters:
+  - name: "HubAddress"
+    type: "address"
+    description: "Hub address of PASM2 code to load and execute"
+returns:
+  type: "long"
+  description: "Value returned in result1 register"
+examples:
+  - code: |
+      ' Execute PASM from hub
+      result := REGEXEC(@hub_pasm_code)
+      
+      DAT
+      hub_pasm_code
+        ' PASM code here
+        mov result1, #123
+        ret
+    description: "Execute hub-based PASM code"
+  - code: |
+      ' Dynamic code execution
+      build_pasm_code(@buffer)  ' Generate code
+      result := REGEXEC(@buffer)  ' Execute it
+    description: "Execute dynamically generated code"
+  - code: |
+      ' Large PASM routine
+      result := REGEXEC(@big_routine)
+      
+      DAT
+      big_routine
+        ' Can be > 512 longs
+        ' Loaded and executed in chunks
+    description: "Execute large PASM routine"
+notes:
+  - "Loads PASM from hub to cog then executes"
+  - "Can execute code larger than cog RAM"
+  - "Preserves Spin2 interpreter"
+  - "Result in result1 register"
+  - "PASM must end with RET"
+  - "Parameters via PTRA/PTRB"
+  - "More flexible than CALL"
+timing:
+  description: "Load time + execution time"
+  cycles: "Variable based on code size"
+related:
+  - CALL
+  - REGLOAD
+  - SETREGS
+see_also:
+  - "Dynamic code execution"
+  - "PASM2 programming"
+  - "Hub execution"

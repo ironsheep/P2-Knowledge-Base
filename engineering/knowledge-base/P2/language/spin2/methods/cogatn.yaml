@@ -1,5 +1,157 @@
-method: COGATN
-type: method
+# Spin2 Method: COGATN
+# Source: Spin2 v51 documentation
+# Purpose: Signal attention to other cogs
+
+method: "COGATN"
+category: "cog_management"
+type: "method"
 description: |
-  Strobe ATN to cogs per 16-bit mask
-category: Attention Signaling
+  Strobe the attention signal to one or more cogs.
+  Sets attention flags that can be polled or waited on by target cogs.
+  Provides fast inter-cog signaling without using hub RAM.
+  Essential for event notification and synchronization.
+
+syntax: "COGATN(CogMask)"
+
+parameters:
+  - name: "CogMask"
+    type: "long"
+    description: |
+      16-bit mask specifying which cogs to signal:
+      - Bits 0-7: Target cog selection (1 = signal that cog)
+      - Bits 8-15: Must be zero
+      - Can signal multiple cogs simultaneously
+      - Use (1 << cog_num) to signal specific cog
+
+returns: "none"
+
+timing:
+  execution: "2 clock cycles"
+  signal_propagation: "Immediate to all specified cogs"
+  latency: "Target cog sees signal on next instruction"
+
+examples:
+  - code: |
+      ' Signal cog 3
+      COGATN(1 << 3)
+    description: "Signal single cog"
+    
+  - code: |
+      ' Signal cogs 0, 2, and 4
+      COGATN(%00010101)
+    description: "Signal multiple cogs"
+    
+  - code: |
+      ' Broadcast to all other cogs
+      COGATN($FF ^ (1 << COGID()))
+    description: "Signal all cogs except self"
+    
+  - code: |
+      VAR
+        LONG worker_cogs
+        
+      PUB signal_workers()
+        ' Signal all registered workers
+        COGATN(worker_cogs)
+        
+      PUB register_worker()
+        worker_cogs |= (1 << COGID())
+    description: "Dynamic cog group signaling"
+    
+  - code: |
+      ' Producer-consumer pattern
+      PUB producer()
+        REPEAT
+          produce_data()
+          COGATN(1 << consumer_cog)  ' Data ready
+          
+      PUB consumer()
+        REPEAT
+          WAITATN()  ' Wait for signal
+          process_data()
+    description: "Producer-consumer synchronization"
+
+signal_mechanism:
+  hardware: "Dedicated attention network between cogs"
+  persistence: "Signal is edge-triggered (strobe)"
+  clearing: "Automatically cleared when polled/waited"
+  queueing: "No queueing - multiple signals before check are seen as one"
+
+common_uses:
+  - "Event notification"
+  - "Work ready signals"
+  - "Synchronization barriers"
+  - "Interrupt simulation"
+  - "Wake sleeping cogs"
+  - "Broadcast communications"
+
+receiving_methods:
+  polling: |
+    IF POLLATN()
+      ' Attention was signaled
+      
+  waiting: |
+    WAITATN()  ' Block until signaled
+    
+  pasm: |
+    POLLATN WC  ' Check and clear
+    WAITATN     ' Wait for signal
+
+related_methods:
+  - "POLLATN - Check for attention signal"
+  - "WAITATN - Wait for attention signal"
+  - "COGID - Get current cog ID"
+  - "COGCHK - Check if cog is running"
+
+synchronization_patterns:
+  - pattern: "Barrier synchronization"
+    code: |
+      VAR
+        BYTE ready_count
+        
+      PUB barrier()
+        ready_count++
+        IF ready_count == 8
+          COGATN($FF)  ' Release all
+          ready_count := 0
+        ELSE
+          WAITATN()    ' Wait for release
+  
+  - pattern: "Request-response"
+    code: |
+      PUB request_service(cog)
+        COGATN(1 << cog)
+        WAITATN()  ' Wait for completion signal
+  
+  - pattern: "Round-robin scheduling"
+    code: |
+      PUB scheduler()
+        REPEAT cog FROM 0 TO 7
+          COGATN(1 << cog)  ' Give time slice
+          WAITMS(10)
+
+notes:
+  - "Cannot signal yourself (no effect)"
+  - "Signal doesn't queue - multiple signals merge"
+  - "No payload - just a signal"
+  - "Target cog must be running to receive"
+  - "More efficient than hub RAM polling"
+
+best_practices:
+  - "Use for time-critical signaling"
+  - "Combine with hub RAM for data passing"
+  - "Clear attention before waiting again"
+  - "Document signal meanings clearly"
+  - "Use masks for group operations"
+
+limitations:
+  - "No data payload"
+  - "No delivery guarantee if cog not waiting"
+  - "Single bit per cog - no message types"
+  - "No built-in acknowledgment"
+
+see_also:
+  - "language/spin2/methods/pollatn.yaml"
+  - "language/spin2/methods/waitatn.yaml"
+  - "language/pasm2/cogatn.yaml"
+  - "architecture/cog_attention.yaml"

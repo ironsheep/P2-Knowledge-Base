@@ -1,5 +1,114 @@
-method: COGSTOP
-type: method
+# Spin2 Method: COGSTOP
+# Source: Spin2 v51 documentation
+# Purpose: Stop a running cog
+
+method: "COGSTOP"
+category: "cog_management"
+type: "method"
 description: |
-  Stop specified cog
-category: Cog Management
+  Stop a specified cog immediately.
+  The cog stops executing and becomes available for reuse.
+  All pins controlled by the cog are released to float state.
+  No effect if the cog is already stopped.
+
+syntax: "COGSTOP(CogNum)"
+
+parameters:
+  - name: "CogNum"
+    type: "long"
+    description: |
+      Cog number to stop:
+      - 0-7: Stop specific cog
+      - Can use COGID() to stop current cog
+      - Invalid numbers have no effect
+
+returns: "none"
+
+timing:
+  execution: "Immediate"
+  effect: "Cog stops within 1-2 clock cycles"
+  cleanup: "Pins released immediately"
+
+examples:
+  - code: |
+      VAR
+        LONG driver_cog
+        
+      PUB stop_driver()
+        IF driver_cog => 0
+          COGSTOP(driver_cog)
+          driver_cog := -1
+    description: "Stop a driver cog and mark as stopped"
+    
+  - code: |
+      ' Emergency stop all other cogs
+      REPEAT cog FROM 0 TO 7
+        IF cog <> COGID()
+          COGSTOP(cog)
+    description: "Stop all cogs except current"
+    
+  - code: |
+      ' Self-termination
+      COGSTOP(COGID())
+      ' Code never reaches here
+    description: "Stop current cog (suicide)"
+    
+  - code: |
+      PUB restart_cog(n, code_addr, param)
+        COGSTOP(n)  ' Ensure stopped first
+        RETURN COGINIT(n, code_addr, param)
+    description: "Restart a specific cog with new code"
+
+effects:
+  immediate:
+    - "Cog execution halts"
+    - "Cog RAM contents preserved but inaccessible"
+    - "Cog becomes available for COGINIT"
+    
+  pin_control:
+    - "All DIR bits cleared (pins become inputs)"
+    - "Smart pin modes disabled"
+    - "Pin states float"
+    
+  resources:
+    - "Locks owned by cog are NOT released"
+    - "Hub RAM is NOT affected"
+    - "Other cogs continue running"
+
+common_uses:
+  - "Clean shutdown of drivers"
+  - "Resource management"
+  - "Error recovery"
+  - "Dynamic cog allocation"
+  - "Power saving (stopped cogs use less power)"
+
+related_methods:
+  - "COGINIT - Start a cog"
+  - "COGSPIN - Start Spin2 in a cog"
+  - "COGID - Get current cog number"
+  - "COGCHK - Check if cog is running"
+
+notes:
+  - "Safe to call on already-stopped cog"
+  - "Cannot stop cog -1 (no effect)"
+  - "Stopping current cog ends execution immediately"
+  - "No cleanup code runs in stopped cog"
+  - "Locks must be manually released before stopping"
+
+best_practices:
+  - "Track cog numbers in variables"
+  - "Set cog variable to -1 after stopping"
+  - "Release locks before stopping cog"
+  - "Stop dependent cogs in correct order"
+  - "Ensure pins are in safe state first"
+
+warnings:
+  - "Stopping a cog doesn't clean up its resources"
+  - "Pins float - may need pull-up/down resistors"
+  - "Cannot recover cog state after stopping"
+  - "No notification to other cogs"
+
+see_also:
+  - "language/spin2/methods/coginit.yaml"
+  - "language/spin2/methods/cogid.yaml"
+  - "language/spin2/methods/cogchk.yaml"

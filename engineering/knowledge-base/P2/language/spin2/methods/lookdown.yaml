@@ -1,5 +1,50 @@
 method: LOOKDOWN
 type: method
 description: |
-  Find 1-based index of value
-category: String Creation
+  Find 1-based index of value in list
+category: Lookup Operations
+syntax: "index := LOOKDOWN(Value : Match1, Match2, ..., MatchN)"
+parameters:
+  - name: "Value"
+    type: "long"
+    description: "Value to search for"
+  - name: "Matches"
+    type: "list"
+    description: "Comma-separated list of values or ranges to match"
+returns:
+  type: "integer"
+  description: "1-based index of match, or 0 if not found"
+examples:
+  - code: |
+      ' Find value position
+      pos := LOOKDOWN(30 : 10, 20, 30, 40, 50)
+      ' Returns 3 (30 is 3rd item)
+    description: "Find value in list"
+  - code: |
+      ' Character classification
+      type := LOOKDOWN(char : "A".."Z", "a".."z", "0".."9")
+      ' Returns 1 for uppercase, 2 for lowercase, 3 for digit
+    description: "Classify character type"
+  - code: |
+      ' Command parsing
+      cmd := LOOKDOWN(value : $01, $02, $04, $08, $10)
+      case cmd
+        1: handle_read()
+        2: handle_write()
+        3: handle_status()
+    description: "Map value to command index"
+notes:
+  - "Returns 1-based index (1 = first match)"
+  - "Returns 0 if value not found"
+  - "Supports ranges with .. operator"
+  - "Searches left to right, returns first match"
+  - "Inverse operation of LOOKUP"
+  - "Useful for classification and mapping"
+related:
+  - LOOKDOWNZ
+  - LOOKUP
+  - LOOKUPZ
+see_also:
+  - "Value searching"
+  - "Classification"
+  - "Reverse lookup"

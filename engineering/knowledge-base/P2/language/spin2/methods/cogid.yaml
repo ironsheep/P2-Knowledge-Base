@@ -1,5 +1,117 @@
-method: COGID
-type: method
+# Spin2 Method: COGID
+# Source: Spin2 v51 documentation
+# Purpose: Get current cog's ID number
+
+method: "COGID"
+category: "cog_management"
+type: "method"
 description: |
-  Get current cog's ID
-category: Cog Management
+  Get the ID number of the currently executing cog.
+  Returns a value from 0 to 7 identifying which cog is running this code.
+  Essential for cog self-identification and coordination.
+
+syntax: "COGID() : CogNum"
+
+parameters: "none"
+
+returns:
+  name: "CogNum"
+  type: "long"
+  description: |
+    Current cog's ID number (0-7).
+    Always returns valid cog number.
+
+timing:
+  execution: "2 clock cycles"
+  deterministic: "Yes - always same timing"
+
+examples:
+  - code: |
+      VAR
+        BYTE cog_status[8]
+        
+      PUB mark_ready()
+        cog_status[COGID()] := 1
+    description: "Mark current cog as ready in status array"
+    
+  - code: |
+      PUB self_stop()
+        ' Clean up resources
+        release_pins()
+        ' Stop myself
+        COGSTOP(COGID())
+    description: "Cog self-termination"
+    
+  - code: |
+      DAT
+        cog_mailbox LONG 0[8]
+        
+      PUB get_my_mailbox() : address
+        address := @cog_mailbox[COGID()]
+    description: "Get mailbox for current cog"
+    
+  - code: |
+      PUB debug_print()
+        SEND("Cog ", COGID(), " reporting", 13)
+    description: "Identify cog in debug output"
+    
+  - code: |
+      PUB stop_all_except_me()
+        REPEAT n FROM 0 TO 7
+          IF n <> COGID()
+            COGSTOP(n)
+    description: "Stop all other cogs"
+
+common_uses:
+  - "Cog self-identification"
+  - "Accessing cog-specific data"
+  - "Debug output identification"
+  - "Self-termination"
+  - "Cog coordination"
+  - "Resource allocation by cog"
+
+related_methods:
+  - "COGSTOP - Stop a cog"
+  - "COGCHK - Check if cog is running"
+  - "COGINIT - Start PASM in a cog"
+  - "COGSPIN - Start Spin2 in a cog"
+
+typical_patterns:
+  - pattern: "Per-cog data structures"
+    code: |
+      VAR
+        LONG cog_data[8][10]  ' 10 longs per cog
+        
+      PUB my_data() : ptr
+        ptr := @cog_data[COGID()]
+    
+  - pattern: "Cog-specific pin assignments"
+    code: |
+      PUB my_led_pin() : pin
+        pin := 56 + COGID()  ' Each cog gets unique LED
+    
+  - pattern: "Synchronized startup"
+    code: |
+      VAR
+        BYTE ready_flags
+        
+      PUB wait_all_ready()
+        ready_flags |= (1 << COGID())  ' Set my bit
+        REPEAT UNTIL ready_flags == $FF  ' Wait for all 8
+
+notes:
+  - "Always returns 0-7, never -1"
+  - "Cog 0 always starts first at boot"
+  - "Value doesn't change during cog's lifetime"
+  - "Can be called from PASM via Spin2"
+  - "Useful for multicore coordination"
+
+underlying_pasm:
+  instruction: "COGID"
+  description: "Direct register read of cog ID"
+
+see_also:
+  - "language/pasm2/cogid.yaml"
+  - "language/spin2/methods/cogstop.yaml"
+  - "language/spin2/methods/cogchk.yaml"
+  - "architecture/cog.yaml"

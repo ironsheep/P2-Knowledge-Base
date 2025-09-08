@@ -1,5 +1,53 @@
 method: POLLATN
 type: method
 description: |
-  Check for ATN strobe, -1 if strobed or 0 if not
-category: Attention Signaling
+  Check for attention signal without blocking
+category: COG Management
+syntax: "result := POLLATN()"
+parameters: []
+returns:
+  type: "integer"
+  description: "TRUE (-1) if ATN signal received, FALSE (0) if not"
+examples:
+  - code: |
+      ' Non-blocking check for signal
+      if POLLATN()
+        ' ATN signal received
+        process_signal()
+    description: "Check for signal without blocking"
+  - code: |
+      ' Main loop with signal handling
+      repeat
+        do_main_work()
+        if POLLATN()
+          handle_interrupt()
+    description: "Interruptible main loop"
+  - code: |
+      ' Timeout waiting for ATN
+      timeout := GETCT() + clkfreq
+      repeat
+        if POLLATN()
+          ' Got signal
+          quit
+        if POLLCT(timeout)
+          ' Timeout - no signal
+          return FALSE
+    description: "ATN wait with timeout"
+notes:
+  - "Non-blocking alternative to WAITATN"
+  - "Returns immediately with TRUE/FALSE"
+  - "Clears ATN flag if it was set"
+  - "Another cog uses COGATN to send the signal"
+  - "Useful for cooperative multitasking"
+  - "Can be used in main loop for interrupt-like behavior"
+timing:
+  description: "Immediate return"
+  cycles: "2-9 clock cycles"
+related:
+  - WAITATN
+  - COGATN
+  - POLLCT
+see_also:
+  - "Cog communication"
+  - "Non-blocking operations"
+  - "Inter-cog signaling"

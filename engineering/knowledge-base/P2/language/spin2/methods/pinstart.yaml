@@ -1,5 +1,64 @@
 method: PINSTART
 type: method
 description: |
-  Start smart pins: DIR=0, WRPIN=Mode, WXPIN=Xval, WYPIN=Yval, DIR=1
-category: SmartPin Operations
+  Configure and start smart pin with mode and parameters
+category: Smart Pin Operations
+syntax: "PINSTART(PinField, Mode, Xval, Yval)"
+parameters:
+  - name: "PinField"
+    type: "pin_field"
+    description: "Pin number (0-63) or pin field expression"
+  - name: "Mode"
+    type: "long"
+    description: "Smart pin mode configuration (P_* constants)"
+  - name: "Xval"
+    type: "long"
+    description: "X parameter for smart pin mode"
+  - name: "Yval"
+    type: "long"
+    description: "Y parameter for smart pin mode"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Start ADC on pin 16
+      PINSTART(16, P_ADC | P_ADC_1X, 0, 0)
+    description: "Configure pin as ADC input"
+  - code: |
+      ' Start PWM on pin 8
+      PINSTART(8, P_PWM_TRIANGLE, 1000, 500)
+    description: "Configure PWM with period=1000, duty=500"
+  - code: |
+      ' Start serial TX on pin 62
+      PINSTART(62, P_ASYNC_TX | P_OE, clkfreq/115200, 0)
+    description: "Configure asynchronous serial transmit"
+  - code: |
+      ' Start quadrature encoder on pins 32-33
+      PINSTART(32 ADDPINS 1, P_QUADRATURE_A, 0, 0)
+    description: "Configure quadrature encoder input"
+notes:
+  - "Complete smart pin initialization sequence"
+  - "Automatically performs: DIR=0, WRPIN, WXPIN, WYPIN, DIR=1"
+  - "Mode constants defined in Spin2 (P_ADC, P_PWM_TRIANGLE, etc.)"
+  - "X and Y parameters are mode-specific"
+  - "Pin starts operating immediately after DIR=1"
+  - "Use PINCLEAR to stop and reset smart pin"
+operations:
+  - "DIR[pin] := 0 (reset)"
+  - "WRPIN(pin, Mode) (set mode)"
+  - "WXPIN(pin, Xval) (set X parameter)"
+  - "WYPIN(pin, Yval) (set Y parameter)"
+  - "DIR[pin] := 1 (enable)"
+timing:
+  description: "Multiple hub operations"
+  cycles: "20-90 clock cycles"
+related:
+  - PINCLEAR
+  - WRPIN
+  - WXPIN
+  - WYPIN
+see_also:
+  - "Smart pin modes"
+  - "Smart pin configuration"
+  - "P2 smart pin constants"

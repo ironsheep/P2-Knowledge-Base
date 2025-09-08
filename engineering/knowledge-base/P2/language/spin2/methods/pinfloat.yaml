@@ -1,0 +1,82 @@
+# Spin2 Method: PINFLOAT
+# Source: Spin2 v51 documentation
+# Purpose: Float pin(s) to high-impedance state
+
+method: "PINFLOAT"
+aliases: ["PINF"]
+category: "pin_control"
+type: "method"
+description: |
+  Float specified pin(s) to high-impedance state (input mode).
+  Clears the direction bit(s) to input (DIR=0), releasing the pin from being driven.
+  The pin becomes an input and can be read or driven by external circuitry.
+  This is equivalent to the PASM2 FLTL instruction.
+
+syntax: "PINFLOAT(PinField)"
+
+parameters:
+  - name: "PinField"
+    type: "pin_field"
+    description: |
+      Specifies which pin(s) to float. Can be:
+      - Single pin number (0-63)
+      - Pin range using '..' operator (Bottom..Top)
+      - Multiple pins using ADDPINS operator
+      - Variable or expression that evaluates to a pin field
+
+returns: "none"
+
+timing:
+  execution: "2 clock cycles in cog execution"
+  hub_access: "8-19 clock cycles when executed from hub"
+
+examples:
+  - code: "PINFLOAT(0)"
+    description: "Float pin 0 to high-impedance"
+    
+  - code: "PINFLOAT(0 ADDPINS 7)"
+    description: "Float pins 0 through 7 (release bus)"
+    
+  - code: |
+      ' Charlieplexing example
+      PINFLOAT(0 ADDPINS 7)  ' Float all pins first
+      PINHIGH(3)             ' Drive one pin high
+      PINLOW(0)              ' Drive another low
+      ' Others remain floating
+    description: "Prepare pins for Charlieplexing LED matrix"
+    
+  - code: |
+      ' I2C bus release
+      PINFLOAT(28 ADDPINS 1)  ' Release SDA and SCL (pins 28, 29)
+    description: "Release I2C bus pins"
+
+underlying_pasm:
+  instruction: "FLTL"
+  description: "Internally uses FLTL instruction which sets DIR=0"
+  
+common_uses:
+  - "Release shared bus lines"
+  - "Configure pins as inputs"
+  - "Charlieplexing LED matrices"
+  - "Tri-state bus operations"
+  - "Allow pull-up/pull-down resistors to set level"
+  - "Switch from output to input mode"
+
+related_methods:
+  - "PINHIGH - Drive pin(s) high"
+  - "PINLOW - Drive pin(s) low"
+  - "PINTOGGLE - Toggle pin state"
+  - "PINREAD - Read floating pin state"
+
+notes:
+  - "Pin becomes an input and can be read with PINREAD"
+  - "External pull-up/pull-down resistors will determine the level"
+  - "Pin will not drive any current in this state"
+  - "Smart pin modes may still operate while DIR=0"
+  - "Essential for bidirectional communication protocols"
+  - "Multiple pins can be floated simultaneously"
+
+see_also:
+  - "language/pasm2/fltl.yaml"
+  - "language/spin2/methods/pinread.yaml"
+  - "language/spin2/methods/pinhigh.yaml"
