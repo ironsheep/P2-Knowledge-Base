@@ -43,18 +43,19 @@
 % ==================== IMAGE SCALING ====================
 % Automatic image scaling to fit within page margins
 
-% Set default scaling for all images
-\setkeys{Gin}{width=\linewidth,height=0.8\textheight,keepaspectratio}
+% Set default scaling for all images to 85% width
+\setkeys{Gin}{width=0.85\linewidth,height=0.8\textheight,keepaspectratio}
 
 % Override for specific sizing when needed
-\let\oldinclndegraphics\includegraphics
+\let\oldincludegraphics\includegraphics
 \renewcommand{\includegraphics}[2][]{%
   \begingroup
-  \setkeys{Gin}{width=\linewidth,height=0.8\textheight,keepaspectratio}%
+  \setkeys{Gin}{width=0.85\linewidth,height=0.8\textheight,keepaspectratio}%
   \setkeys{Gin}{#1}%
-  \oldinclndegraphics{#2}%
+  \oldincludegraphics{#2}%
   \endgroup
 }
+
 \RequirePackage{longtable}
 \RequirePackage{booktabs}
 \RequirePackage{array}
@@ -65,6 +66,11 @@
 % titlesec removed - using standard LaTeX for sectioning control
 \RequirePackage{tocloft}
 \RequirePackage{float}
+% Force ALL figures to use [H] placement (no floating)
+% This overrides Pandoc's default [htbp] placement
+\makeatletter
+\renewcommand{\fps@figure}{H}
+\makeatother
 \RequirePackage[english]{babel}
 \RequirePackage[top=0.75in,bottom=1in,left=1in,right=1in]{geometry}
 \RequirePackage{tcolorbox}

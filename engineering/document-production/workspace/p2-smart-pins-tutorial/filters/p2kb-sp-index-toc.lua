@@ -3,7 +3,7 @@
 -- 1. Convert "# Index" to chapter level so it appears in TOC
 -- 2. Prevent index letter sections (A, B, C...) from appearing in TOC
 --
--- Version: 1.0
+-- Version: 1.1
 -- Date: 2025-09-07
 
 local in_index = false
@@ -25,13 +25,9 @@ function Header(header)
   if in_index then
     -- Check for single letter headings (A, B, C, etc.)
     if header.level == 3 and title:match("^%u$") then
-      -- Keep as section but prevent from appearing in TOC
-      -- We do this by wrapping in raw LaTeX that suppresses TOC entry
-      return {
-        pandoc.RawBlock('latex', '\\addtocontents{toc}{\\protect\\setcounter{tocdepth}{1}}'),
-        header,
-        pandoc.RawBlock('latex', '\\addtocontents{toc}{\\protect\\setcounter{tocdepth}{2}}')
-      }
+      -- Convert to unnumbered section that won't appear in TOC
+      -- Use raw LaTeX to create a section* instead of section
+      return pandoc.RawBlock('latex', '\\section*{' .. title .. '}')
     end
   end
   

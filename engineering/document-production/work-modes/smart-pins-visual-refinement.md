@@ -7,21 +7,38 @@
 mcp__todo-mcp__todo_next tags:["smart_pins_visual"]
 ```
 
+## Directory Structure & Purpose
+**Understanding the three key directories:**
+- **`manuals/`**: Opus-created master documents (reference only, NEVER edit)
+  - Original documents with references like `v6-assets/`
+  - Gold masters that serve as source material
+- **`workspace/`**: Production working copies (ALL EDITING HAPPENS HERE)
+  - Clean versions prepared from masters
+  - Already has processed paths (e.g., `assets/` not `v6-assets/`)
+  - Maintain as clean, unescaped markdown
+  - This is your primary editing environment
+- **`outbound/`**: Deployment staging for PDF Forge
+  - LaTeX-escaped versions only
+  - Temporary staging area
+  - NEVER edit these directly
+
 ## Source of Truth Locations
-**Edit these, never outbound:**
+**Edit these in workspace, never in manuals or outbound:**
 - **Markdown**: `workspace/p2-smart-pins-tutorial/P2-Smart-Pins-Green-Book-Tutorial.md`
 - **Templates**: `workspace/p2-smart-pins-tutorial/p2kb-*.sty`
   - **TODO**: Templates scattered across multiple locations - needs consolidation
   - Currently: workspace, pdf-forge/interactive-testing/templates, etc.
 - **Lua Filters**: `workspace/p2-smart-pins-tutorial/filters/*.lua`
-- **Outbound**: Deployment staging only
 
 ## Workflow
-1. Edit source files in workspace
-2. Run: `./tools/latex-escape-all.sh input.md outbound/output.md`
-3. Copy ONLY modified files to outbound (templates, filters, markdown)
-4. Create request.json (check request-requirements.json)
-5. User deploys to PDF Forge
+1. Edit source files in workspace (maintain clean, unescaped state)
+2. Run: `/engineering/tools/conversion/latex-escape-all.sh workspace/input.md outbound/output.md`
+3. Copy ONLY modified files to outbound:
+   - Style files (.sty) - copy directly
+   - Lua filters (.lua) - copy directly to outbound (no filters/ subdirectory)
+   - Templates (.latex) - only if changed
+   - request.json - only if updated
+4. User deploys from outbound to PDF Forge
 
 ## Exchange Directory Protocol
 **Outbound = Two-way exchange point**

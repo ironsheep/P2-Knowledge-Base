@@ -1,0 +1,32 @@
+\documentclass{article}
+\usepackage{xparse}
+
+\begin{document}
+
+% Test basic xparse functionality
+\RenewDocumentCommand{\section}{s o m}{%
+  Test: star=#1, optional=#2, mandatory=#3%
+  
+  \IfBooleanTF{#1}{%
+    WITH STAR%
+  }{%
+    NO STAR%
+  }
+  
+  \IfValueTF{#2}{%
+    OPTIONAL: #2%
+  }{%
+    NO OPTIONAL%
+  }
+}
+
+% Test the commands
+\section{Test 1}
+
+\section*{Test 2}
+
+\section[opt]{Test 3}
+
+\section*[opt]{Test 4}
+
+\end{document}

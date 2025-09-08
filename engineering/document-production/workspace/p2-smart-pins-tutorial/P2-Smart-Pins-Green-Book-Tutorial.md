@@ -343,8 +343,6 @@ For your convenience, here's the complete basic I/O instruction set:
 
 > 💡 **Tip**: This table covers 90% of your basic I/O needs. The other variants (C, NC, Z, NZ, RND) are in Appendix F for when you need them.
 
----
-
 ## Chapter 1: The Smart Pin Revolution
 
 ### What Problem Do Smart Pins Solve?
@@ -445,11 +443,11 @@ The beauty is in the consistency. Whether you're setting up a DAC, configuring a
 Let's deliberately make some mistakes so you'll recognize them later:
 
 **Mistake 1: Forgetting Output Enable**
+
 ::: antipattern
 ```
 ' This won't work - no output!
 pinstart(LED, P_TRANSITION, clkfreq/2, 0)      ' Missing P_OE
-
 ```
 :::
 
@@ -463,11 +461,11 @@ pinstart(LED, P_TRANSITION | P_OE, clkfreq/2, 0)  ' P_OE included
 Why does this matter? Smart Pins can generate internal signals without driving the physical pin. Sometimes that's useful, but usually you want to see the output!
 
 **Mistake 2: Wrong Timing Calculation**
+
 ::: antipattern
 ```
 ' This blinks at 0.5Hz, not 1Hz!
 pinstart(LED, P_TRANSITION | P_OE, clkfreq, 0)    ' Period too long
-
 ```
 :::
 
@@ -481,25 +479,24 @@ pinstart(LED, P_TRANSITION | P_OE, clkfreq/2, 0)  ' Correct period
 Remember: Period is the time between transitions, not the full cycle time!
 
 **Mistake 3: Not Clearing Before Reconfiguring**
+
 ::: spin2
 ```
 ' First configuration
 pinstart(pin, P_PWM_SAWTOOTH | P_OE, 1000, 500)  ' 50% duty PWM
-
 ```
 :::
 
 ::: antipattern
 ```
-' Trying to change modes - might not work!
+' WRONG - Trying to change modes without clearing
 pinstart(pin, P_TRANSITION | P_OE, clkfreq/2, 0)  ' Old settings interfere
-
 ```
 :::
 
 ::: spin2
 ```
-' Correct way - clear first
+' RIGHT - Clear first, then reconfigure
 pinclear(pin)
 pinstart(pin, P_TRANSITION | P_OE, clkfreq/2, 0)  ' Clean configuration
 ```
@@ -534,8 +531,6 @@ Before we move on, let's cement the key concepts:
 5. **Any Pin Can Do Anything**: No dedicated pins for specific functions
 
 Ready to explore all 32 modes? Let's go!
-
----
 
 ## Chapter 2: The Smart Pin Configuration Protocol
 
@@ -898,8 +893,6 @@ Before we dive into specific modes, remember these golden rules:
 5. **Document Intent**: Comment what the configuration achieves
 
 Ready to explore all 32 modes? Let's start with the digital I/O modes!
-
----
 
 # Part II: Progressive Mode Tutorials
 
@@ -1540,8 +1533,6 @@ smps_setup
 ```
 :::
 
----
-
 ## Chapter 4: Measurement Modes - Precision Timing
 
 Now let's explore modes that measure external signals - these are your oscilloscope, frequency counter, and logic analyzer all rolled into Smart Pins.
@@ -2090,8 +2081,6 @@ PUB differential_adc(pos_pin, neg_pin) : diff
 ```
 :::
 
----
-
 ## Chapter 5: Advanced Techniques
 
 Now that we've covered all the modes, let's explore advanced techniques that combine modes and push Smart Pins to their limits.
@@ -2326,8 +2315,6 @@ PUB traffic_light_controller() | state, timer
         state := "R"
 ```
 :::
-
----
 
 ## Chapter 6: Multi-Pin Coordination
 
@@ -2600,8 +2587,6 @@ PUB synchronized_sampling() | trigger_time
 ```
 :::
 
----
-
 ## Chapter 7: Troubleshooting and Optimization
 
 Even experts encounter issues with Smart Pins. Here's how to diagnose and fix common problems.
@@ -2823,8 +2808,6 @@ PUB triggered_adc()
   pinclear(ADC_PIN)             ' Disable until next reading
 ```
 :::
-
----
 
 ## Chapter 8: Real-World Applications
 
@@ -3082,8 +3065,6 @@ PRI set_motor_speed(pwm_pin, dir_pin, speed)
 ```
 :::
 
----
-
 # Part III: System Integration
 
 ## Chapter 9: Building Complex Systems
@@ -3238,8 +3219,6 @@ PRI measure_response_latency() | start, latency
 ```
 :::
 
----
-
 # Part IV: Reference
 
 ## Appendix A: Complete Mode Reference
@@ -3383,8 +3362,6 @@ Each mode includes:
 3. **Test with Known Good Code**
 4. **Use Debug Output**
 5. **Scope the Signals**
-
----
 
 ## Conclusion: Your Smart Pin Journey
 

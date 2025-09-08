@@ -32,7 +32,7 @@ function Div(div)
     if code_block then
       -- Return complete LaTeX block for antipattern styling
       local latex_block = '\\begin{AntipatternBlock}\n' ..
-                         '\\begin{Verbatim}[numbers=left,numbersep=5pt,xleftmargin=15pt]\n' ..
+                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                          code_block.text .. '\n' ..
                          '\\end{Verbatim}\n' ..
                          '\\end{AntipatternBlock}'
@@ -54,7 +54,7 @@ function Div(div)
     if code_block then
       -- Return complete LaTeX block for Spin2 styling
       local latex_block = '\\begin{Spin2Block}\n' ..
-                         '\\begin{Verbatim}[numbers=left,numbersep=5pt,xleftmargin=15pt]\n' ..
+                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                          code_block.text .. '\n' ..
                          '\\end{Verbatim}\n' ..
                          '\\end{Spin2Block}'
@@ -76,7 +76,7 @@ function Div(div)
       -- Return complete LaTeX block with proper lstlisting settings
       local latex_block = '\\begin{PASM2Block}\n' ..
                          '\\lstset{language=pasm2,basicstyle=\\ttfamily,keywordstyle=\\bfseries\\uppercase,' ..
-                         'numbers=left,numberstyle=\\tiny,xleftmargin=15pt,frame=none,backgroundcolor=\\color{white}}\n' ..
+                         'numbers=left,numberstyle=\\tiny,numbersep=8pt,xleftmargin=-10pt,frame=none,backgroundcolor={}}\n' ..
                          '\\begin{lstlisting}\n' ..
                          code_block.text .. '\n' ..
                          '\\end{lstlisting}\n' ..

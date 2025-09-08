@@ -1,0 +1,41 @@
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "ai-privacy-guide-escaped.md",
+      "output": "P2KB_AI_Privacy_Guide_v1.0.pdf",
+      "template": "p2kb-presentation",
+      "pandoc_args": [
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=2"
+      ],
+      "metadata": {
+        "title": "AI Privacy Guide",
+        "subtitle": "P2 Knowledge Base AI Integration",
+        "version": "Version 1.0",
+        "date": "September 2025",
+        "author": "P2 Knowledge Base Team",
+        "company": "Iron Sheep Productions, LLC"
+      }
+    },
+    {
+      "input": "ai-implementation-strategy-escaped.md",
+      "output": "P2KB_AI_Implementation_Strategy_v1.0.pdf",
+      "template": "p2kb-presentation",
+      "pandoc_args": [
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=2"
+      ],
+      "metadata": {
+        "title": "AI Implementation Strategy",
+        "subtitle": "P2 Knowledge Base Technical Architecture",
+        "version": "Version 1.0",
+        "date": "September 2025",
+        "author": "P2 Knowledge Base Team",
+        "company": "Iron Sheep Productions, LLC"
+      }
+    }
+  ]
+}

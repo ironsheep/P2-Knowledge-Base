@@ -189,34 +189,91 @@
 }
 \makeatother
 
-% CONDITIONAL PAGE BREAKS: Chapters (Parts) set flag, sections (Chapters) check flag
-% NOTE: Pandoc maps # to \chapter{} and ## to \section{}
-\newif\ifafterpart
+% CONDITIONAL PAGE BREAKS: Track document structure for intelligent breaks
+% NOTE: With --top-level-division=part:
+%   # (markdown) → \part{} (LaTeX)
+%   ## (markdown) → \chapter{} (LaTeX) 
+%   ### (markdown) → \section{} (LaTeX)
+%   #### (markdown) → \subsection{} (LaTeX)
+%
+% PAGINATION RULES:
+% 1. Parts always start new page
+% 2. FIRST chapter in part stays on same page as part
+% 3. Subsequent chapters in part get own pages
+% 4. In Part II, sections (modes) behave like chapters
+% 5. In other parts, sections flow normally within chapters
+\newif\ifafterpart         % Just saw a \part
+\newif\ifafterchapter      % Just saw a \chapter  
+\newif\iffirstchapterinpart % This is the first chapter after a part
+\newif\iffirstsectioninchapter % This is the first section after a chapter
+\newcounter{currentpart}    % Track which part we're in
 \afterpartfalse
+\afterchapterfalse
+\firstchapterinpartfalse
+\firstsectioninchapterfalse
+\setcounter{currentpart}{0}
 
 % Apply pagination hooks at document begin, after all packages are loaded
 \AtBeginDocument{%
   % Save original commands
+  \let\origpart\part
   \let\origchapter\chapter
   \let\origsection\section
   
-  % Redefine \chapter to add page break and set flag (Parts)
-  \renewcommand{\chapter}[1]{%
-    \clearpage% Parts always start new page
-    \origchapter{#1}%
-    \afterparttrue% Set flag for next section
+  % Redefine \chapter to add conditional page breaks
+  \RenewDocumentCommand{\chapter}{s o m}{%
+    \iffirstchapterinpart%
+      % First chapter in part - NO page break (stays with part)
+      \firstchapterinpartfalse% Reset flag
+    \else%
+      % Subsequent chapters - add page break
+      \clearpage%
+    \fi%
+    \IfBooleanTF{#1}
+      {\origchapter*{#3}}% Starred version
+      {\IfNoValueTF{#2}
+        {\origchapter{#3}}% No optional argument
+        {\origchapter[#2]{#3}}}% With optional argument
+    \afterpartfalse% No longer directly after part
+    \afterchaptertrue% Now we're after a chapter
+    \firstsectioninchaptertrue% Next section will be first in this chapter
   }
   
-  % Redefine \section to add conditional page breaks (Chapters)
-  \renewcommand{\section}[1]{%
-    \ifafterpart%
-      \afterpartfalse% Reset flag after use
-      % No page break - let section flow after chapter
+  % Redefine \section to add conditional page breaks
+  \RenewDocumentCommand{\section}{s o m}{%
+    \ifnum\value{currentpart}=2\relax%
+      % Part II: sections (modes) behave like chapters
+      \iffirstsectioninchapter%
+        % First section/mode in chapter - NO page break
+        \firstsectioninchapterfalse% Reset flag
+      \else%
+        % Subsequent sections/modes - add page break
+        \clearpage%
+      \fi%
     \else%
-      \clearpage% Only break if not after chapter
+      % Other parts: sections flow normally within chapters
+      % No page breaks between sections
     \fi%
-    \origsection{#1}%
-    \markboth{#1}{}% UPDATE: Ensure section (logical chapter) updates header
+    \IfBooleanTF{#1}
+      {\origsection*{#3}\markboth{#3}{}}% Starred version
+      {\IfNoValueTF{#2}
+        {\origsection{#3}\markboth{#3}{}}% No optional argument
+        {\origsection[#2]{#3}\markboth{#3}{}}}% With optional argument
+  }
+  
+  % Redefine \part to reset all flags and track part number
+  \RenewDocumentCommand{\part}{s o m}{%
+    \clearpage% Parts always start new page
+    \stepcounter{currentpart}% Track which part we're in
+    \IfBooleanTF{#1}
+      {\origpart*{#3}}% Starred version
+      {\IfNoValueTF{#2}
+        {\origpart{#3}}% No optional argument
+        {\origpart[#2]{#3}}}% With optional argument
+    \afterparttrue% Now we're directly after a part
+    \afterchapterfalse% Not in a chapter anymore
+    \firstchapterinparttrue% Next chapter will be first in this part
+    \firstsectioninchapterfalse% Reset section flag
   }
 }
 

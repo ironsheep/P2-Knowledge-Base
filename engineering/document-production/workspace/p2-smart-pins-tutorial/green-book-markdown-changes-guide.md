@@ -2,12 +2,12 @@
 
 **Purpose**: Document all changes needed to transform Green Book Tutorial into production-ready document that works with our LaTeX template system
 
-**Document**: P2-Smart-Pins-Green-Book-Tutorial.md  
+**Document**: P2-Smart-Pins-Green-Book-Tutorial.md
 **Last Updated**: 2025-08-31
 
 ## 🔴 CRITICAL: DIV-ONLY APPROACH
 
-**DECISION**: All code blocks MUST use div syntax (`:::: type`) for consistency and future maintainability. 
+**DECISION**: All code blocks MUST use div syntax (`::: type`) for consistency and future maintainability.
 - NO language tags (````spin2`, ````pasm2`)
 - NO mixed approaches
 - ALL code blocks wrapped in semantic divs
@@ -24,10 +24,10 @@ This guide documents the REQUIRED markdown transformations to convert the Green 
 
 ### Code Block Inventory
 **Found 88 code blocks** currently using language tags:
-- `spin2` blocks: 58 instances → MUST convert to `:::: spin2`
-- `pasm2` blocks: 30 instances → MUST convert to `:::: pasm2`
+- `spin2` blocks: 58 instances → MUST convert to `::: spin2`
+- `pasm2` blocks: 30 instances → MUST convert to `::: pasm2`
 - Mixed antipattern blocks: Several instances → MUST split and wrap
-- Configuration blocks with WRPIN: → Keep as `:::: spin2` (pedagogical decision)
+- Configuration blocks with WRPIN: → Keep as `::: spin2` (pedagogical decision)
 
 ### Semantic Div Status
 **Found 26 semantic divs** already using correct syntax:
@@ -46,7 +46,7 @@ This guide documents the REQUIRED markdown transformations to convert the Green 
 
 **Solution**: Use `non-floating-images.lua` filter to convert all images to non-floating, centered images that stay exactly where placed.
 
-**Design Decision - 85% Width**: 
+**Design Decision - 85% Width**:
 - Images default to 85% of text width for visual breathing room
 - Prevents images from dominating the narrative
 - Creates professional appearance with clear text/image hierarchy
@@ -96,7 +96,7 @@ python3 /engineering/tools/convert-to-div-syntax.py input.md output.md
 - `' This blinks at [wrong rate]` followed by incorrect code
 - `' This blinks at [correct rate] correctly` followed by correct code
 - `' First configuration` followed by initial code
-- `' Trying to change` followed by problematic code  
+- `' Trying to change` followed by problematic code
 - `' Correct way` followed by working code
 
 **CRITICAL**: Search for sections titled **Mistake 1:**, **Mistake 2:**, **Mistake 3:** as these contain the antipattern blocks
@@ -110,8 +110,8 @@ python3 /engineering/tools/convert-to-div-syntax.py input.md output.md
    - Pattern: "First configuration" / "Trying to change" / "Correct way"
 
 **Required Action**: Split each mixed code block into separate blocks:
-- Code with `' WRONG` comments → `:::: antipattern` div environment (red)
-- Code with `' RIGHT` comments → `:::: spin2` div environment (green)
+- Code with `' WRONG` comments → `::: antipattern` div environment (red)
+- Code with `' RIGHT` comments → `::: spin2` div environment (green)
 
 **Example Transformation**:
 ```markdown
@@ -125,19 +125,19 @@ wrpin(P_TRANSITION | P_OE, LED_PIN)
 ```
 
 <!-- AFTER (required) -->
-:::: antipattern
+::: antipattern
 ```
 ' WRONG - Pin won't output
 wrpin(P_TRANSITION, LED_PIN)
 ```
-::::
+:::
 
-:::: spin2
+::: spin2
 ```
 ' RIGHT - Include P_OE
 wrpin(P_TRANSITION | P_OE, LED_PIN)
 ```
-::::
+:::
 ```
 
 **Note**: Spin2 uses single tick marks (') for comments, not double slashes (//)
@@ -146,7 +146,7 @@ wrpin(P_TRANSITION | P_OE, LED_PIN)
 
 **Purpose**: Replace missing images with informative placeholder blocks so PDF generation doesn't fail
 
-**Process**: 
+**Process**:
 1. Check each image reference against assets/ folder
 2. If image doesn't exist, replace with placeholder div block
 3. Preserve the description for future reference
@@ -157,10 +157,10 @@ wrpin(P_TRANSITION | P_OE, LED_PIN)
 ![UART Frame Structure](assets/uart-frame-structure.png)
 
 <!-- AFTER (placeholder block) -->
-:::: needs-diagram
+::: needs-diagram
 Image showing "UART Frame Structure" is missing and should be added.
 Expected file: assets/uart-frame-structure.png
-::::
+:::
 ```
 
 **Missing Images to Replace**:
@@ -183,17 +183,17 @@ code here
 
 **Div-Wrapped Blocks (NEW - REQUIRED)**:
 ```markdown
-:::: spin2
+::: spin2
 ```
 code here
 ```
-::::
+:::
 ```
 
 **Required Conversions**:
-- ALL `spin2` blocks → `:::: spin2` (including those with WRPIN:)
-- ALL `pasm2` blocks → `:::: pasm2`
-- Split antipattern blocks → `:::: antipattern` and `:::: spin2`
+- ALL `spin2` blocks → `::: spin2` (including those with WRPIN:)
+- ALL `pasm2` blocks → `::: pasm2`
+- Split antipattern blocks → `::: antipattern` and `::: spin2`
 - NO blocks remain with language tags
 
 ## 3-Color Code Block System (Pedagogical Decision)
@@ -201,24 +201,24 @@ code here
 ### Color Mappings (AFTER div conversion)
 
 **🟢 GREEN - Spin2 Blocks** (all Spin2 including config)
-- Markdown: `:::: spin2`
+- Markdown: `::: spin2`
 - LaTeX Environment: `Spin2Block`
 - Lua Detection: Div with class "spin2"
 - **Includes**: Regular code AND configuration (WRPIN:/WXPIN:/WYPIN:)
 
-**🟡 YELLOW - PASM2 Blocks** (30 instances) 
-- Markdown: `:::: pasm2`
+**🟡 YELLOW - PASM2 Blocks** (30 instances)
+- Markdown: `::: pasm2`
 - LaTeX Environment: `PASM2Block`
 - Lua Detection: Div with class "pasm2"
 
 **🔴 RED - Antipattern Blocks** (created from split blocks)
-- Markdown: `:::: antipattern`
+- Markdown: `::: antipattern`
 - LaTeX Environment: `AntipatternBlock`
 - Lua Detection: Div with class "antipattern"
 
 ### Pedagogical Rationale - A Conscious Decision
 
-**We considered creating a separate `:::: configuration` div for WRPIN: blocks** but decided AGAINST it:
+**We considered creating a separate `::: configuration` div for WRPIN: blocks** but decided AGAINST it:
 
 **Why we considered it:**
 - Would provide visual distinction between setup and action code
@@ -232,13 +232,13 @@ code here
 - **Self-documenting** - WRPIN:/WXPIN:/WYPIN: patterns are obvious without color
 - **IDE reality** - Their editor won't color these differently
 
-**Decision**: Configuration blocks remain `:::: spin2` (green) for pedagogical clarity.
+**Decision**: Configuration blocks remain `::: spin2` (green) for pedagogical clarity.
 
 ### Verification Checklist
 - [ ] NO language-tagged blocks remain (no ````spin2`, ````pasm2`)
-- [ ] ALL code blocks use div syntax (`:::: type`)
+- [ ] ALL code blocks use div syntax (`::: type`)
 - [ ] Antipattern blocks properly split
-- [ ] Configuration blocks remain as `:::: spin2` (not separate)
+- [ ] Configuration blocks remain as `::: spin2` (not separate)
 
 ## Semantic Environment Mappings
 
@@ -248,39 +248,39 @@ code here
 ### Lua Filter Requirements
 
 **CRITICAL**: Use `smart-pins-div-blocks.lua` instead of `smart-pins-colored-blocks.lua`
-- The new filter processes Div elements (:::: syntax)
-- The old filter processes CodeBlock elements (``` syntax) 
+- The new filter processes Div elements (::: syntax)
+- The old filter processes CodeBlock elements (``` syntax)
 - Both filters should NOT be used together
 
 ### Environment Mappings (green-book-semantic-blocks.lua)
 
 **🔵 gbdiagram** (18 instances)
-- Markdown: `:::: needs-diagram`
+- Markdown: `::: needs-diagram`
 - Purpose: Placeholder for missing technical diagrams
 - Status: 8 instances will be replaced with actual images in deployment
 
-**🟡 gbtip** (2 instances) 
-- Markdown: `:::: tip`
+**🟡 gbtip** (2 instances)
+- Markdown: `::: tip`
 - Purpose: Helpful tips and insights
 
 **🟠 gbexamples** (2 instances)
-- Markdown: `:::: needs-examples` 
+- Markdown: `::: needs-examples`
 - Purpose: Placeholder for additional code examples
 
 **🟣 gbverify** (2 instances)
-- Markdown: `:::: needs-verification`
+- Markdown: `::: needs-verification`
 - Purpose: Content requiring technical verification
 
 **🔴 gbtechreview** (1 instance)
-- Markdown: `:::: needs-technical-review`
+- Markdown: `::: needs-technical-review`
 - Purpose: Complex content needing expert review
 
-**🟢 gbcodereview** (1 instance) 
-- Markdown: `:::: needs-code-review`
+**🟢 gbcodereview** (1 instance)
+- Markdown: `::: needs-code-review`
 - Purpose: Code examples needing verification
 
 **⚪ gbpreliminary** (2 instances)
-- Markdown: `:::: preliminary-content`
+- Markdown: `::: preliminary-content`
 - Purpose: Draft content not yet finalized
 
 ## CRITICAL FILE NAMING RULES
@@ -351,10 +351,10 @@ cp opus-master/COMPLETE-OPUS-MASTER.md \
 grep -c '^```[sp]' P2-Smart-Pins-Green-Book-Tutorial-working.md
 
 # Should show div blocks
-grep -c '^::::' P2-Smart-Pins-Green-Book-Tutorial-working.md
+grep -c '^:::' P2-Smart-Pins-Green-Book-Tutorial-working.md
 ```
 
-**Step 3: LaTeX Escaping** 
+**Step 3: LaTeX Escaping**
 ```bash
 ./tools/latex-escape-all.sh \
   P2-Smart-Pins-Green-Book-Tutorial-working.md \
@@ -363,7 +363,7 @@ grep -c '^::::' P2-Smart-Pins-Green-Book-Tutorial-working.md
 
 **Step 4: Deploy with Updated Filters**
 - Template: `p2kb-smart-pins.latex`
-- Lua Filters: 
+- Lua Filters:
   - `smart-pins-div-blocks.lua` - NEW filter for div-wrapped code blocks (replaces smart-pins-colored-blocks.lua)
   - `green-book-semantic-blocks.lua` - Semantic div processing
   - `part-chapter-pagebreaks.lua` - Page break handling
@@ -373,7 +373,7 @@ grep -c '^::::' P2-Smart-Pins-Green-Book-Tutorial-working.md
 
 **Code Block Verification** ✅
 - [ ] All `spin2` blocks → green rendering (including config)
-- [ ] 30 `pasm2` blocks → yellow rendering  
+- [ ] 30 `pasm2` blocks → yellow rendering
 - [ ] Split antipattern blocks → red rendering
 - [ ] NO separate configuration blocks (pedagogical choice)
 
@@ -413,7 +413,7 @@ cp "P2-Smart-Pins-Green-Book-Tutorial-v3.md" \
 
 🎯 **Target**: Complete conversion to div-wrapped format
 
-**Success Criteria**: 
+**Success Criteria**:
 - ✅ 0 language-tagged blocks remaining
 - ✅ 100% div-wrapped code blocks
 - ✅ All antipattern blocks properly split

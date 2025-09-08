@@ -22,7 +22,16 @@
 
 **Date Identified**: 2025-09-07
 
-#### 3. Index Heading (Line ~3467)
+#### 3. Horizontal Rule Dividers
+**Issue**: Many chapters end with `---` horizontal rule dividers that are unnecessary with clear footers in the document layout.
+
+**Should be**: Remove all `---` dividers at chapter endings
+
+**Status**: To be fixed in workspace version
+
+**Date Identified**: 2025-09-07
+
+#### 4. Index Heading (Line ~3467)
 **Issue**: The final section heading incorrectly reads:
 ```
 *End of P2 Smart Pins Complete Tutorial - Green Book Edition with Enhanced Visual Coverage*
