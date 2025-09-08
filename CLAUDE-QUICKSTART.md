@@ -1,6 +1,22 @@
 # Claude Code Quick Start Card
 *Copy and paste these prompts to get started with the P2 Knowledge Base*
 
+## ⚠️ CRITICAL: Session Management for Performance
+
+**🔥 Clear conversation every 2-3 hours or 15-20 file reads!**
+
+Each file adds 200-500 lines to context. Performance degrades quickly.
+
+```
+# Before clearing:
+"Summarize findings about [topic] before we clear for performance"
+[Copy summary]
+[Clear conversation]
+
+# After clearing:
+"Continue from: [paste summary]. Now working on [next task]"
+```
+
 ## 🚀 Session Starter (Copy This First!)
 
 ```
