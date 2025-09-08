@@ -19,14 +19,33 @@ Each file adds 200-500 lines to context. Performance degrades quickly.
 
 ## 🚀 Session Starter (Copy This First!)
 
+### For Fresh Instance (No Local Files):
 ```
-I'm working with the Parallax Propeller 2 (P2) microcontroller. 
-Please load the P2 Knowledge Base from the current directory.
+Please use the P2 Knowledge Base directly from GitHub without cloning:
+https://github.com/ironsheep/P2-Knowledge-Base
+
+IMPORTANT: Use the raw.githubusercontent.com URLs to read files:
+- Base URL: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
+- Example: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/README.md
+
+Read these files directly from GitHub:
+1. First read AI-INTEGRATION.md for usage instructions
+2. Use manifests/ directory for navigation  
+3. Access detailed specs in engineering/knowledge-base/P2/
+
+DO NOT clone the repository. Just read files directly from GitHub using raw URLs.
+
+I need help with [YOUR TASK HERE].
+```
+
+### For Local Repository:
+```
+I have the P2 Knowledge Base repository in the current directory.
+Please read the AI-INTEGRATION.md file first.
 
 Key resources:
 - Manifests are in manifests/ for navigation
 - Detailed specs in engineering/knowledge-base/P2/
-- Code patterns in engineering/ingestion/external-inputs/source-code/external-projects/
 
 I need help with [YOUR TASK HERE].
 ```

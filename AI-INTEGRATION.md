@@ -1,6 +1,8 @@
 # AI Integration Guide for P2 Knowledge Base
 *How to use this knowledge base with Claude Code and other AI assistants*
 
+**Repository**: https://github.com/ironsheep/P2-Knowledge-Base
+
 ## Quick Start for Claude Code Users
 
 **🚀 [Jump to Copy-Paste Templates](CLAUDE-QUICKSTART.md)**  
@@ -9,18 +11,23 @@ For ready-to-use prompts and templates, see the CLAUDE-QUICKSTART.md file.
 ### 1. Clone or Reference the Repository
 
 #### Option A: Direct GitHub Reference (Recommended)
-When starting a new Claude Code conversation, simply reference this repository:
+When starting a new Claude Code conversation, reference this repository:
 ```
-Please load the P2 Knowledge Base from:
-https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base
+Please use the P2 Knowledge Base directly from GitHub:
+https://github.com/ironsheep/P2-Knowledge-Base
+
+IMPORTANT: Read files using raw.githubusercontent.com URLs:
+Base: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
 
 Focus on the manifests/ directory for navigation and 
 engineering/knowledge-base/P2/ for detailed specifications.
+
+DO NOT clone - just read files directly from GitHub.
 ```
 
 #### Option B: Local Clone
 ```bash
-git clone https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base.git
+git clone https://github.com/ironsheep/P2-Knowledge-Base.git
 cd P2-Knowledge-Base
 ```
 Then tell Claude: "I have the P2 Knowledge Base in my current directory"
