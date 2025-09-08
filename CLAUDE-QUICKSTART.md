@@ -21,12 +21,11 @@ Each file adds 200-500 lines to context. Performance degrades quickly.
 
 ### For Fresh Instance (No Local Files):
 ```
-First, create a CLAUDE.md file to remember the P2 Knowledge Base location:
+If you haven't already, run /init to create CLAUDE.md, then update it:
 
-Create file CLAUDE.md with:
+Add to CLAUDE.md:
 ---
-# CLAUDE.md
-Repository: https://github.com/ironsheep/P2-Knowledge-Base
+P2 Knowledge Base Repository: https://github.com/ironsheep/P2-Knowledge-Base
 Raw files: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
 ---
 
