@@ -1,0 +1,19 @@
+{
+  "name": "@p2kb/mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for P2 Knowledge Base",
+  "main": "index.js",
+  "bin": {
+    "p2kb-mcp": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "yaml": "^2.3.0",
+    "glob": "^10.3.0"
+  },
+  "keywords": ["mcp", "p2", "propeller2", "knowledge-base"],
+  "license": "MIT"
+}

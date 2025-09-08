@@ -10,7 +10,7 @@
 • 70 MHz maximum clock rate  
 • Dual 2×6 pass-through headers  
 • Compatible with all P2 development boards  
-• Optimized for P2 Streamer operation  
+• Optimized for high-speed bit-bang operation (no Streamer required)  
 
 ## Applications
 • LED matrix displays and video walls  
@@ -24,7 +24,7 @@
 
 ## Product Description
 
-The P2 Eval HUB75 Adapter Board provides a simple, reliable interface between Propeller 2 microcontroller development boards and industry-standard HUB75 RGB LED matrix panels. Designed by Iron Sheep Productions specifically for the P2's unique architecture, this adapter leverages the P2's parallel processing capabilities and Streamer module for high-performance LED panel control.
+The P2 Eval HUB75 Adapter Board provides a simple, reliable interface between Propeller 2 microcontroller development boards and industry-standard HUB75 RGB LED matrix panels. Designed by Iron Sheep Productions specifically for the P2's unique architecture, this adapter leverages the P2's parallel processing capabilities and PASM2 assembly language for high-performance LED panel control using an efficient bit-bang approach.
 
 The adapter includes robust 3.3V to 5V level shifting on all signals, ensuring reliable communication with HUB75 panels while protecting the P2's I/O pins. The pass-through header design allows stacking with other P2 accessories, maximizing system flexibility.
 
@@ -141,8 +141,9 @@ The adapter receives 5V power from the P2 development board through the pass-thr
 ### Signal Organization
 The pin mapping is optimized for P2 features:
 - **Control signals** (CLK, OE#, LAT, A-E) are grouped on consecutive pins for single-operation updates
-- **Color data** (R1, G1, B1, R2, G2, B2) are consecutive to leverage the P2 Streamer module
+- **Color data** (R1, G1, B1, R2, G2, B2) are consecutive for efficient parallel output using SETQ/MUXQ operations
 - **Base pin flexibility** allows remapping to any 16-pin group (P0-15, P16-31, P32-47, P48-63)
+- **Pin groups** leverage ADDPINS for simultaneous multi-pin control
 
 ---
 
@@ -190,30 +191,110 @@ PUB init_hub75()
 ### Using the ISP HUB75 Driver
 ```spin2
 OBJ
-  display : "isp_hub75_matrix"
+  display : "isp_hub75_display"
+  hub75Bffrs : "isp_hub75_hwBufferAccess"
   
-PUB main()
-  ' Start driver for 64×32 panel
-  display.start(HUB75_BASE_PIN, 64, 32)
+PUB main() | chainIndex
+  ' Configure adapter at P16-31, chip type, address lines
+  hub75Bffrs.configure(hub75Bffrs.HUB75_ADAPTER_1, 16, CHIP_TYPE, ADDR_LINES)
+  chainIndex := hub75Bffrs.indexForHub75ChainId(hub75Bffrs.HUB75_ADAPTER_1)
   
-  ' Draw text
+  ' Start driver (uses 1 COG per chain)
+  display.start(chainIndex)
+  
+  ' Draw operations
+  display.clearScreen()
   display.drawText(0, 0, string("Hello P2!"))
-  display.show()
+  display.commitScreenToPanelSet()  ' Update display
 ```
+
+### Driver Architecture
+
+#### Communication Pattern
+The driver uses a command mailbox pattern for Spin2 to PASM2 communication:
+
+```spin2
+' Command definitions
+#0, CMD_DONE, CMD_CLEAR, CMD_SHOW_BUFFER, CMD_FILL_COLOR, CMD_SHOW_PWM_BUFFER
+
+' Mailbox setup
+VAR
+  long ptrCommand, ptrArgument
+  long dvrCommand, dvrArgument
+  
+PUB sendCommand(cmd, arg)
+  dvrArgument := arg
+  dvrCommand := cmd
+  repeat while dvrCommand <> CMD_DONE  ' Wait for completion
+```
+
+#### PWM Generation via Binary Code Modulation (BCM)
+The driver implements PWM without hardware timers using BCM:
+- Multiple bit-plane buffers (one per bit of color depth)
+- Each plane displayed for exponentially increasing durations
+- Bit 0: displayed 1x, Bit 1: 2x, Bit 2: 4x, etc.
+- Provides 3-8 bit color depth (8-256 levels per channel)
+
+#### Subpage Buffering Strategy
+Large displays are handled via subpaging:
+- COG buffer limited to 512 bytes
+- Display divided into subpages that fit in COG RAM
+- Sequential processing with SETQ block transfers
+- Enables support for panels larger than COG memory
 
 ---
 
 ## Panel Compatibility
 
 ### Supported Panel Types
-| Panel Size | Scan Rate | Address Lines | Typical Use |
-|------------|-----------|---------------|-------------|
-| 16×32 | 1:8 | A,B,C | Small displays |
-| 32×16 | 1:8 | A,B,C | Wide format |
-| 32×32 | 1:16 | A,B,C,D | Square displays |
-| 64×32 | 1:16 | A,B,C,D | Standard size |
-| 64×64 | 1:32 | A,B,C,D,E | Large displays |
-| 128×64 | 1:32 | A,B,C,D,E | Video walls |
+| Panel Size | Scan Rate | Address Lines | Typical Use | Notes |
+|------------|-----------|---------------|-------------|--------|
+| 16×32 | 1:8 | A,B,C | Small displays | Basic configuration |
+| 32×16 | 1:8 | A,B,C | Wide format | Landscape orientation |
+| 32×32 | 1:16 | A,B,C,D | Square displays | Common indoor |
+| 64×32 | 1:16 | A,B,C,D | Standard size | Most popular |
+| 64×64 | 1:32 | A,B,C,D,E | Large displays | Requires E line |
+| 128×64 | 1:32 | A,B,C,D,E | Video walls | Multiple panels |
+| Special | 1:4 | A,B | High density | Requires driver mod |
+
+### LED Driver Chip Support
+
+#### Chips Requiring Initialization
+| Chip | Init Required | Special Features | Notes |
+|------|---------------|------------------|--------|
+| FM6126A | Yes | Control registers 11, 12 | Magic bit sequences, brightness control |
+| FM6124 | No | Enclosed latch | Standard timing |
+| MBI5124GP | Yes | Special reset | Different init sequence |
+| ICN2037 | No | Slow clock | Extended timing |
+| ICN2038S | No | Slow clock | Extended timing |
+| DP5125D | No | Standard | Common chip |
+| GS6238S | No | Standard | Common chip |
+
+#### Initialization Example (FM6126A)
+```spin2
+' FM6126A requires writing to control registers during init
+' Register 11: Brightness control (bit 0 low, rest high)
+' Register 12: Enable control (bit 9 high)
+PRI resetPanelFM6126() | columnIdx
+  org
+    drvh pinOE        ' Disable output
+    drvl pinLATCH
+    xor  columnIdx, columnIdx
+    rep  @.end11, maxColumns
+    mov  bitIdx, columnIdx
+    and  bitIdx, #$0F wz
+    if_z  drvl colorPins    ' Bit 0 = low
+    if_nz drvh colorPins    ' Bits 1-15 = high
+    ' Latch during last 11 columns for register 11
+    cmp  columnIdx, last11Cols wcz
+    if_nc_and_nz drvh pinLATCH
+    drvh pinCLK
+    waitx #511       ' Clock pulse width
+    drvl pinCLK
+.end11
+    drvl pinLATCH
+  end
+```
 
 ### Pixel Pitch Options
 | Pitch | Spacing | Viewing Distance | Application |
@@ -264,6 +345,56 @@ PUB main()
 | 64×64 | 4096 pixels | 5A | 20A | 5V 25A |
 
 **Important**: Always use a separate high-current 5V power supply for LED panels. Never attempt to power panels through the P2 board.
+
+---
+
+## Driver Implementation Details
+
+### PASM2 Output Technique
+The driver uses optimized bit-bang techniques instead of the P2 Streamer:
+
+```spin2
+DAT ' PASM2 driver code
+' Parallel output using SETQ/MUXQ
+outputColorBits
+    SETQ    maskRgb12           ' Load mask into Q register
+    MUXQ    OUTA, reg_value     ' Output masked bits in parallel
+    
+' Alternative using SETBYTE for byte-aligned data
+    altgb   byteOffset, pCogBffrIncr
+    getbyte colorByte, 0-0, #0-0
+    setbyte OUTA, colorByte, #3     ' Write to specific byte of OUTA
+```
+
+### HUB75 Protocol Timing
+```spin2
+DAT ' Scan line output sequence
+scanLine
+    drvh    pinOE               ' 1. Disable output during shift
+    
+    rep     @.endCols, columnCount
+    setbyte OUTA, colorByte, #3 ' 2. Output color data
+    drvl    pinCLK              ' 3. Clock low
+    waitx   #4                  ' 4. Setup time
+    drvh    pinCLK              ' 5. Clock high
+.endCols
+    
+    drvh    pinLATCH            ' 6. Latch pulse
+    waitx   #3
+    drvl    pinLATCH
+    
+    add     row_addr, #1        ' 7. Update row address
+    call    #emitAddr
+    
+    drvl    pinOE               ' 8. Enable output
+```
+
+### Multi-Panel Configuration
+The driver supports up to 3 adapter boards (chains) simultaneously:
+- Each chain runs in its own COG
+- Chains can have different panel configurations
+- Configuration tables define each chain's parameters
+- Runtime detection of panel types and LED driver chips
 
 ---
 

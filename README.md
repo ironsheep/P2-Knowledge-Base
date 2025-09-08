@@ -6,6 +6,11 @@
 [![Coverage](https://img.shields.io/badge/P2%20Coverage-80%25-green.svg)](deliverables/reference/)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 
+## 🤖 Using with AI Assistants (Claude, GPT, etc.)
+
+**[→ AI INTEGRATION GUIDE](AI-INTEGRATION.md)**  
+**Start here if you're using Claude Code, GitHub Copilot, or other AI assistants!** Complete guide on how to set up and use this knowledge base with AI systems, including example prompts and usage patterns.
+
 ## 🎯 Find What You Need
 
 ### For AI Systems & Code Generation

@@ -1,4 +1,211 @@
 component: HUB75 Adapter
+part_number: 64032
 category: addon
+manufacturer: Iron Sheep Productions, LLC
 description: |
-  RGB LED matrix adapter
+  RGB LED matrix adapter board providing 3.3V to 5V level shifting for driving HUB75 protocol LED panels.
+  Supports multiple panel configurations and LED driver chips.
+
+specifications:
+  electrical:
+    supply_voltage: 5V (from P2 board)
+    board_current_idle: 0.02mA
+    board_current_25mhz: 25mA typical
+    board_current_35mhz: 35mA typical
+    max_clock_frequency: 40MHz (35MHz reliable)
+    propagation_delay: 13ns typical
+    level_shifters: 2x 74HCT244 (octal buffer/line driver)
+    
+  physical:
+    dimensions: 48mm x 71mm (1.9" x 2.8")
+    pcb_thickness: 1.6mm
+    connectors:
+      - 2x 2x6 pin headers (pass-through)
+      - 1x 16-pin IDC HUB75 connector
+    weight: ~15g
+
+pin_configuration:
+  total_pins_used: 14
+  interface: Dual 8-pin headers (16 pins total, 14 used)
+  
+  # Pin mapping relative to base pin (configurable: 0, 16, 32, or 48)
+  pin_offsets:
+    CLK: 0   # Pixel clock
+    OE:  1   # Output enable (active low)
+    LAT: 2   # Latch signal
+    A:   3   # Row address bit 0
+    B:   4   # Row address bit 1  
+    C:   5   # Row address bit 2
+    D:   6   # Row address bit 3 (for 32+ row panels)
+    E:   7   # Row address bit 4 (for 64+ row panels)
+    R1:  8   # Red data, upper half
+    G1:  9   # Green data, upper half
+    B1:  10  # Blue data, upper half
+    R2:  11  # Red data, lower half
+    G2:  12  # Green data, lower half
+    B2:  13  # Blue data, lower half
+    
+  # Default base pin options for different P2 boards
+  base_pin_options:
+    - 0   # P0-P15
+    - 16  # P16-P31 (most common)
+    - 32  # P32-P47
+    - 48  # P48-P63
+
+supported_panels:
+  scan_rates:
+    - "1:8"   # 16x32, 32x16 panels
+    - "1:16"  # 32x32, 64x32 panels
+    - "1:32"  # 64x64, 128x64 panels
+    - "1:4"   # Special high-density panels
+    
+  resolutions:
+    - 16x32
+    - 32x16
+    - 32x32
+    - 64x32
+    - 64x64
+    - 128x64
+    
+  pixel_pitch:
+    - P1.25  # 1.25mm spacing
+    - P2     # 2mm spacing
+    - P3     # 3mm spacing
+    - P4     # 4mm spacing
+    - P5     # 5mm spacing
+    - P6-P10 # 6-10mm spacing
+
+led_driver_chips:
+  # Chips requiring special initialization
+  with_init:
+    FM6126A:
+      init_required: true
+      registers: [11, 12]
+      features:
+        - Magic bit sequence initialization
+        - Control register programming
+        - Brightness control
+        
+    FM6124:
+      init_required: false
+      latch_style: enclosed
+      
+    MBI5124GP:
+      init_required: true
+      features:
+        - Special reset sequence
+        
+  # Chips with timing variations
+  timing_variants:
+    ICN2037:
+      latch_style: enclosed
+      slow_clock: true
+      
+    ICN2038S:
+      latch_style: enclosed
+      slow_clock: true
+      
+    DP5125D:
+      latch_style: standard
+      
+    GS6238S:
+      latch_style: standard
+      
+  # Unknown/generic chips
+  generic:
+    UNK_LAT_END_ENCL:
+      latch_style: enclosed
+      
+    UNK_LAT_END_ENCL_SLO_CLK:
+      latch_style: enclosed
+      slow_clock: true
+
+software_features:
+  driver: isp_hub75_display
+  author: Stephen M Moraco (Iron Sheep Productions)
+  
+  capabilities:
+    - Multi-panel support (1-3 chains)
+    - PWM via Binary Code Modulation (BCM)
+    - 3-8 bit color depth (8-256 levels per channel)
+    - Runtime panel detection
+    - Chip-specific initialization
+    - RGB/RBG color swap handling
+    - Panel rotation (0°, 90°, 180°, 270°)
+    - Double buffering
+    - Subpage buffering for large displays
+    
+  architecture:
+    cog_usage: 1 COG per panel chain
+    communication: Command mailbox pattern
+    refresh_method: PASM2 bit-bang (no streamer)
+    buffer_strategy: Screen → PWM planes → COG subpages
+    
+  performance:
+    # Actual measured performance from driver
+    refresh_rates:
+      "32x32 @ 3-bit": 240Hz
+      "64x32 @ 3-bit": 120Hz
+      "64x64 @ 3-bit": 60Hz
+      "64x32 @ 8-bit": 15Hz
+      
+    timing:
+      clock_pulse_width: 15ns minimum
+      latch_pulse_width: 200ns typical
+      oe_pulse_width: 100ns minimum
+      
+  api_features:
+    - drawPixel(x, y, color)
+    - drawLine(x1, y1, x2, y2, color)
+    - drawBox(x, y, width, height, filled, color)
+    - drawCircle(x, y, radius, filled, color)
+    - drawText(x, y, string, font, color)
+    - drawBitmap(x, y, bitmap)
+    - fillScreen(color)
+    - clearScreen()
+    - commitScreenToPanelSet()
+    - setRotation(degrees)
+    
+  fonts_included:
+    - 5x7 basic
+    - 8x8 standard
+    - Custom font support
+
+compatibility:
+  p2_boards:
+    - P2 Eval Board (64000-ES)
+    - P2 Edge Module + Breadboard (64020)
+    - P2 Edge Mini Breakout (64019)
+    - Any P2 board with 16 consecutive I/O pins
+    
+  operating_systems:
+    - Standalone (no OS required)
+    - FlexProp compatible
+    - Propeller Tool compatible
+    - PNut compatible
+
+power_requirements:
+  adapter_board:
+    source: P2 development board 5V supply
+    current: 35mA typical @ 35MHz
+    
+  led_panels:
+    source: External 5V power supply (required)
+    current_per_panel:
+      "16x32": 1.5A typical, 4A peak
+      "32x32": 2.5A typical, 8A peak
+      "64x32": 3.5A typical, 12A peak
+      "64x64": 5A typical, 20A peak
+
+notes:
+  - Never power LED panels through P2 board
+  - Always use separate high-current 5V supply for panels
+  - Maximum 3 chains supported (3 adapter boards)
+  - Driver does not use P2 streamer (bit-bang approach)
+  - Supports panel-specific scan patterns (1/8, 1/16, 1/32)
+  - Automatic chip detection and configuration
+  
+source: P2 HUB75 LED Matrix Driver Study
+documentation:
+  - https://github.com/ironsheep/P2-HUB75-LED-Matrix-Driver
+  - P2 Object Exchange (OBEX)
