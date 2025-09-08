@@ -58,7 +58,7 @@ $endif$
 
 % Table of contents
 \tableofcontents
-% No clearpage here - let content flow after TOC
+\clearpage  % Start main content on new page after TOC
 \markboth{}{}  % Clear the "Contents" header mark
 
 % Main content will be inserted here by pandoc

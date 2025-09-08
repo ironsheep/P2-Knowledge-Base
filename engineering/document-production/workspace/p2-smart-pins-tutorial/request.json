@@ -15,7 +15,10 @@
         "p2kb-sp-fix-hypertarget",
         "p2kb-sp-fix-title-as-part",
         "p2kb-sp-frontmatter",
-        "p2kb-sp-structure"
+        "p2kb-sp-structure",
+        "p2kb-sp-index-toc",
+        "p2kb-sp-code-coloring",
+        "p2kb-sp-semantic"
       ],
       "metadata": {
         "title": "P2 Smart Pins \\& I/O Complete Tutorial",

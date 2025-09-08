@@ -1,0 +1,374 @@
+% P2KB Foundation Style Package
+% Common foundational elements for all P2 Knowledge Base documents
+% Provides: Pandoc compatibility, basic formatting, core functionality
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-foundation}[2025/08/25 P2KB Foundation Package v1.0]
+
+\RequirePackage{xparse}  % Required for \RenewDocumentCommand - load FIRST
+
+% ==================== PANDOC COMPATIBILITY ====================
+% CRITICAL: These MUST be defined before other packages are loaded
+
+\makeatletter
+\newcommand*{\real}[1]{#1}  % Fix for table calculations
+\makeatother
+
+% Define ALL common pandoc helper commands
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\newcommand{\passthrough}[1]{#1}
+
+% Additional pandoc compatibility that might be needed
+\providecommand{\subtitle}[1]{\gdef\@subtitle{#1}}
+\providecommand{\institute}[1]{\gdef\@institute{#1}}
+\providecommand{\titlegraphic}[1]{\gdef\@titlegraphic{#1}}
+
+% Prevent pandoc from breaking with missing commands
+\providecommand{\VerbatimFootnotes}{}
+\providecommand{\DefineShortVerb}[1]{}
+\providecommand{\UndefineShortVerb}[1]{}
+
+% ==================== CORE PACKAGES ====================
+% Essential packages needed by all P2KB documents
+
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{lmodern}
+\RequirePackage{microtype}
+\RequirePackage{graphicx}
+
+% ==================== IMAGE SCALING ====================
+% Automatic image scaling to fit within page margins
+
+% Set default scaling for all images
+\setkeys{Gin}{width=\linewidth,height=0.8\textheight,keepaspectratio}
+
+% Override for specific sizing when needed
+\let\oldinclndegraphics\includegraphics
+\renewcommand{\includegraphics}[2][]{%
+  \begingroup
+  \setkeys{Gin}{width=\linewidth,height=0.8\textheight,keepaspectratio}%
+  \setkeys{Gin}{#1}%
+  \oldinclndegraphics{#2}%
+  \endgroup
+}
+\RequirePackage{longtable}
+\RequirePackage{booktabs}
+\RequirePackage{array}
+\RequirePackage{multirow}
+\RequirePackage{xcolor}
+\RequirePackage{hyperref}
+\RequirePackage{fancyhdr}
+% titlesec removed - using standard LaTeX for sectioning control
+\RequirePackage{tocloft}
+\RequirePackage{float}
+\RequirePackage[english]{babel}
+\RequirePackage[top=0.75in,bottom=1in,left=1in,right=1in]{geometry}
+\RequirePackage{tcolorbox}
+\RequirePackage{makeidx}  % For \printindex support
+\RequirePackage{calc}  % Mathematical calculations
+\RequirePackage{needspace}  % Ensure space for content blocks
+
+% Load tcolorbox libraries
+\tcbuselibrary{skins,breakable}
+
+% ==================== BASIC TYPOGRAPHY ====================
+% Common typography settings for all documents
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{10pt}
+\linespread{1.3}
+
+% ==================== TABLE OF CONTENTS ====================
+% Standard TOC formatting for all documents
+
+\setlength{\cftbeforechapskip}{10pt}
+\renewcommand{\cftchapfont}{\bfseries}
+\renewcommand{\cftsecfont}{\normalfont}
+\renewcommand{\cftsubsecfont}{\normalfont\small}
+
+% TOC depth: show up to subsections
+\setcounter{tocdepth}{2}
+% Section numbering: DISABLE auto-numbering (headings already contain numbers)
+\setcounter{secnumdepth}{-1}
+
+% ==================== TABLE FORMATTING ====================
+% Better table defaults for all documents
+
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{8pt}
+
+% ==================== BASIC PAGE SETUP ====================
+% Standard headers and footers structure
+
+\pagestyle{fancy}
+\fancyhf{}
+% Note: Actual header/footer content defined in presentation layers
+
+% ==================== INDEX SETUP ====================
+% Standard index support
+\makeindex
+
+% ==================== HYPERREF SETUP ====================
+% Standard link formatting
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  citecolor=blue,
+  hidelinks=false
+}
+
+% ==================== CODE ENVIRONMENTS ====================
+% Basic code block support (styling defined in content layers)
+
+% Handle Pandoc's code blocks with proper spacing and rounded corners
+\newenvironment{Shaded}{%
+  \par\needspace{4\baselineskip}% Ensure space for code block
+  \vspace{1.5\baselineskip}% Extra space after headings
+  \begin{tcolorbox}[
+    boxrule=0pt,
+    colback=gray!10,
+    rounded corners,
+    left=10pt,
+    right=10pt,
+    top=8pt,
+    bottom=8pt,
+    before skip=15pt,
+    after skip=15pt
+  ]
+}{%
+  \end{tcolorbox}%
+  \par\vspace{\baselineskip}% Add space after code block
+}
+
+% Code listing basic setup (colors and languages defined in content layers)
+\RequirePackage{listings}
+\lstset{
+  basicstyle=\footnotesize\ttfamily,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  stepnumber=1,
+  numbersep=5pt,           % Reduced from 10pt
+  xleftmargin=0pt,         % No extra margin
+  framexleftmargin=0pt,    % Reduced from 25pt - bring to left edge
+  breaklines=true,
+  breakatwhitespace=false,
+  tabsize=2,
+  captionpos=b,
+  keepspaces=true,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+  frameround=tttt,
+  rulecolor=\color{gray!10},
+  framesep=0pt
+}
+
+% ==================== CHAPTER FORMATTING BASE ====================
+% Basic chapter structure using standard LaTeX (no titlesec)
+
+% Redefine chapter heading to remove numbering and set formatting
+\makeatletter
+\renewcommand{\@makechapterhead}[1]{%
+  \vspace*{6pt}% Space before chapter (minimal when on same page as Part)
+  {\parindent 0pt \normalfont\Huge\bfseries
+   #1\par\nobreak}% Chapter title - Huge (same as Part)
+  \vspace{12pt}% Space after chapter (about 1 line)
+}
+% Also handle starred chapters
+\renewcommand{\@makeschapterhead}[1]{%
+  \vspace*{6pt}%
+  {\parindent 0pt \normalfont\Huge\bfseries
+   #1\par\nobreak}%
+  \vspace{12pt}%
+}
+\makeatother
+
+% CONDITIONAL PAGE BREAKS: Track document structure for intelligent breaks
+% NOTE: With --top-level-division=part:
+%   # (markdown) → \part{} (LaTeX)
+%   ## (markdown) → \chapter{} (LaTeX) 
+%   ### (markdown) → \section{} (LaTeX)
+%   #### (markdown) → \subsection{} (LaTeX)
+%
+% PAGINATION RULES:
+% 1. Parts always start new page
+% 2. FIRST chapter in part stays on same page as part
+% 3. Subsequent chapters in part get own pages
+% 4. In Part II, sections (modes) behave like chapters
+% 5. In other parts, sections flow normally within chapters
+\newif\ifafterpart         % Just saw a \part
+\newif\ifafterchapter      % Just saw a \chapter  
+\newif\iffirstchapterinpart % This is the first chapter after a part
+\newif\iffirstsectioninchapter % This is the first section after a chapter
+\newcounter{currentpart}    % Track which part we're in
+\afterpartfalse
+\afterchapterfalse
+\firstchapterinpartfalse
+\firstsectioninchapterfalse
+\setcounter{currentpart}{0}
+
+% Apply pagination hooks at document begin, after all packages are loaded
+\makeatletter  % Need this for @ commands
+\AtBeginDocument{%
+  % Save original commands
+  \let\origpart\part
+  \let\origchapter\chapter
+  \let\origsection\section
+  
+  % Redefine \chapter to add conditional page breaks
+  \RenewDocumentCommand{\chapter}{s o m}{%
+    \iffirstchapterinpart%
+      % First chapter in part - bypass origchapter entirely to avoid its page break
+      \firstchapterinpartfalse% Reset flag
+      % Format chapter directly without page break
+      % Add TOC entry since we're bypassing origchapter which normally does this
+      \addcontentsline{toc}{chapter}{#3}%
+      \IfBooleanTF{#1}%
+        {\@makeschapterhead{#3}}% Starred version
+        {\@makechapterhead{#3}}% Regular version (we don't number anyway)
+      \chaptermark{#3}% Update header
+    \else%
+      % Subsequent chapters - use original command with its page break
+      \IfBooleanTF{#1}%
+        {\origchapter*{#3}}% Starred version
+        {\IfValueTF{#2}%
+          {\origchapter[#2]{#3}}% With optional argument
+          {\origchapter{#3}}}% No optional argument
+    \fi%
+    \afterpartfalse% No longer directly after part
+    \afterchaptertrue% Now we're after a chapter
+    \firstsectioninchaptertrue% Next section will be first in this chapter
+  }
+  
+  % Redefine \section to add conditional page breaks
+  \RenewDocumentCommand{\section}{s o m}{%
+    \ifnum\value{currentpart}=2\relax%
+      % Part II: sections (modes) behave like chapters
+      \iffirstsectioninchapter%
+        % First section/mode in chapter - NO page break
+        \firstsectioninchapterfalse% Reset flag
+      \else%
+        % Subsequent sections/modes - add page break
+        \clearpage%
+      \fi%
+    \else%
+      % Other parts: sections flow normally within chapters
+      % No page breaks between sections
+    \fi%
+    \IfBooleanTF{#1}%
+      {\origsection*{#3}\markboth{#3}{}}% Starred version
+      {\IfValueTF{#2}%
+        {\origsection[#2]{#3}\markboth{#3}{}}% With optional argument
+        {\origsection{#3}\markboth{#3}{}}}% No optional argument
+  }
+  
+  % Redefine \part to reset all flags and track part number  
+  % Bypass original \part entirely - go straight to formatting
+  \renewcommand{\part}[1]{%
+    \clearpage% Parts always start new page
+    \stepcounter{currentpart}% Track which part we're in
+    \@part{#1}% Call our formatting directly, skip original \part
+    \afterparttrue% Now we're directly after a part
+    \afterchapterfalse% Not in a chapter anymore  
+    \firstchapterinparttrue% Next chapter will be first in this part
+    \firstsectioninchapterfalse% Reset section flag
+  }
+}
+\makeatother  % End the makeatletter block
+
+% Part formatting - no auto-numbering, headings contain numbers already
+% Using standard LaTeX
+\makeatletter
+\renewcommand{\@part}[1]{%
+  % NO \cleardoublepage here - \clearpage already done in \part command
+  \thispagestyle{plain}%  % Show headers
+  \vspace*{12pt}%  % Modest space from top of page (about 1 line)
+  {\normalfont\Huge\bfseries #1\par}%  % Left-aligned, Huge font (same as chapter)
+  \vspace{18pt}%  % Space after part title before first chapter (1.5 lines)
+  % First chapter should follow on same page
+}
+\makeatother
+
+% ==================== HEADER CONFIGURATION ====================
+% Option C: Headers on chapter pages but not part pages
+% Fix header content to show clean chapter titles only
+
+% Custom page styles
+\fancypagestyle{plain}{%  % Used by chapters
+  \fancyhf{}%
+  \fancyhead[L]{\nouppercase{\leftmark}}%  % Left: chapter title
+  \fancyhead[R]{\thepage}%  % Right: page number
+  \renewcommand{\headrulewidth}{0.4pt}%
+}%
+
+\fancypagestyle{empty}{%  % Used by parts
+  \fancyhf{}%
+  \renewcommand{\headrulewidth}{0pt}%
+}%
+
+% Fix chapter mark to show clean titles (no prefixes)
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}  % Just the chapter title, no "Chapter X:"
+\renewcommand{\sectionmark}[1]{}  % Disable section marks to avoid conflicts
+
+% Handle missing commands gracefully
+% Note: needspace package now properly loaded above
+
+% ==================== PANDOC SYNTAX HIGHLIGHTING ====================
+% Minimal syntax highlighting support
+
+\RequirePackage{fancyvrb}
+
+% Define all *Tok commands as pass-through (no coloring by default)
+\providecommand{\AlertTok}[1]{#1}
+\providecommand{\AnnotationTok}[1]{#1}
+\providecommand{\AttributeTok}[1]{#1}
+\providecommand{\BaseNTok}[1]{#1}
+\providecommand{\BuiltInTok}[1]{#1}
+\providecommand{\CharTok}[1]{#1}
+\providecommand{\CommentTok}[1]{#1}
+\providecommand{\CommentVarTok}[1]{#1}
+\providecommand{\ConstantTok}[1]{#1}
+\providecommand{\ControlFlowTok}[1]{#1}
+\providecommand{\DataTypeTok}[1]{#1}
+\providecommand{\DecValTok}[1]{#1}
+\providecommand{\DocumentationTok}[1]{#1}
+\providecommand{\ErrorTok}[1]{#1}
+\providecommand{\ExtensionTok}[1]{#1}
+\providecommand{\FloatTok}[1]{#1}
+\providecommand{\FunctionTok}[1]{#1}
+\providecommand{\ImportTok}[1]{#1}
+\providecommand{\InformationTok}[1]{#1}
+\providecommand{\KeywordTok}[1]{#1}
+\providecommand{\NormalTok}[1]{#1}
+\providecommand{\OperatorTok}[1]{#1}
+\providecommand{\OtherTok}[1]{#1}
+\providecommand{\PreprocessorTok}[1]{#1}
+\providecommand{\RegionMarkerTok}[1]{#1}
+\providecommand{\SpecialCharTok}[1]{#1}
+\providecommand{\SpecialStringTok}[1]{#1}
+\providecommand{\StringTok}[1]{#1}
+\providecommand{\VariableTok}[1]{#1}
+\providecommand{\VerbatimStringTok}[1]{#1}
+\providecommand{\WarningTok}[1]{#1}
+\providecommand{\VerbBar}{|}
+\providecommand{\VERB}[1]{#1}
+
+% For Pandoc's line numbering
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{%
+  numbers=left,%
+  numberstyle=\tiny\color{gray},%
+  numbersep=5pt,%
+  frame=single,%
+  framesep=10pt,%
+  formatcom=\color{black},%
+  xleftmargin=2em,%
+  xrightmargin=0pt%
+}

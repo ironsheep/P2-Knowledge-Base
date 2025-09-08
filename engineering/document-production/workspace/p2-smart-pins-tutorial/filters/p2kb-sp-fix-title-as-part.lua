@@ -12,14 +12,15 @@ function Header(header)
   -- The first level 1 header is the document title
   if header.level == 1 and is_first_h1 then
     is_first_h1 = false
-    -- Demote to level 3 so it doesn't become a \part
-    header.level = 3
-    -- Add some formatting to make it look like a title
+    local title = pandoc.utils.stringify(header)
+    -- Escape LaTeX special characters
+    local escaped_title = title:gsub('&', '\\&')
+    -- Don't change the level, but replace with custom formatting
+    -- that doesn't trigger \part but adds a TOC entry like a chapter
     return {
+      pandoc.RawBlock('latex', '\\addcontentsline{toc}{chapter}{' .. escaped_title .. '}'),
       pandoc.RawBlock('latex', '\\begin{center}'),
-      pandoc.RawBlock('latex', '{\\Huge\\bfseries'),
-      header,
-      pandoc.RawBlock('latex', '}'),
+      pandoc.RawBlock('latex', '{\\Huge\\bfseries ' .. escaped_title .. '}'),
       pandoc.RawBlock('latex', '\\end{center}'),
       pandoc.RawBlock('latex', '\\vspace{1em}')
     }
