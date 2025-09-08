@@ -50,6 +50,9 @@ GITHUB-REPO-SETUP.md
 # Temporary import directory (not versioned)
 import/
 
+# External source code projects (not versioned)
+/engineering/ingestion/external-inputs/source-code/external-projects/
+
 # Claude's private reference materials (not versioned)
 .claude/
 CLAUDE.md
