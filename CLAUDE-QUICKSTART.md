@@ -3,59 +3,88 @@
 
 ## ⚠️ CRITICAL: Session Management for Performance
 
-**🔥 Clear conversation every 2-3 hours or 15-20 file reads!**
+**🔥 Clear conversation every 3-4 hours or 15-20 major file operations!**
 
-Each file adds 200-500 lines to context. Performance degrades quickly.
+Performance degrades as context accumulates. Watch for these warning signs:
+- Responses getting slower
+- Claude forgetting recent work
+- Repetitive questions about already-discussed topics
 
+### Session Management Best Practices
+
+**Before Clearing (Save Your Work):**
 ```
-# Before clearing:
-"Summarize findings about [topic] before we clear for performance"
-[Copy summary]
-[Clear conversation]
+Please summarize:
+1. What we've accomplished so far
+2. Key findings and decisions made
+3. Next steps we were planning
+4. Any important code or configurations
 
-# After clearing:
-"Continue from: [paste summary]. Now working on [next task]"
+Format this as a brief summary I can paste after clearing.
 ```
+
+**After Clearing (Resume Seamlessly):**
+```
+Continuing P2 development session. Previous summary:
+[Paste the summary here]
+
+The P2 Knowledge Base info should be in CLAUDE.md.
+Please continue with: [specific next task]
+```
+
+### Session Health Indicators
+- ✅ **Healthy (0-3 hours)**: Fast responses, perfect recall
+- ⚠️ **Warning (3-4 hours)**: Slightly slower, may need reminders
+- ❌ **Clear Now (4+ hours)**: Degraded performance, confusion
+
+### File Operations Impact
+- YAML manifests: ~100-200 lines each
+- Instruction specs: ~50-100 lines each  
+- Pattern files: ~200-500 lines each
+- After 15-20 files: Consider clearing
 
 ## 🚀 Session Starter (Copy This First!)
 
-### For Fresh Instance (No Local Files):
+### Step 1: Update CLAUDE.md
+Tell Claude to add this to CLAUDE.md:
+
 ```
-If you haven't already, run /init to create CLAUDE.md, then update it:
+Please add the following to CLAUDE.md:
 
-Add to CLAUDE.md:
----
+# P2 Knowledge Base Access
 P2 Knowledge Base Repository: https://github.com/ironsheep/P2-Knowledge-Base
-Raw files: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
----
+Raw files base: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
+Root manifest: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/p2-knowledge-root.yaml
 
-Now use the P2 Knowledge Base directly from GitHub without cloning:
+When working with P2 (Propeller 2) tasks:
+1. Start with p2-knowledge-root.yaml - it's the navigation index
+2. Use manifest files to discover available documentation
+3. Access files directly from GitHub using raw.githubusercontent.com URLs
+4. Navigate: Root manifest → Category manifests → Individual YAML specs
+5. DO NOT clone the repository - read files directly from GitHub
+```
+
+### Step 2: Start Your P2 Task
+After CLAUDE.md is updated, use this prompt:
+
+```
+I need help with P2 (Propeller 2) development. You should have the P2 Knowledge Base 
+repository information in CLAUDE.md.
+
+Please access the P2 Knowledge Base directly from GitHub:
 https://github.com/ironsheep/P2-Knowledge-Base
 
-IMPORTANT: Use the raw.githubusercontent.com URLs to read files:
-- Base URL: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
-- Example: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/README.md
+Start by reading the root manifest for navigation:
+https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/p2-knowledge-root.yaml
 
-Read these files directly from GitHub:
-1. First read AI-INTEGRATION.md for usage instructions
-2. Use manifests/ directory for navigation  
-3. Access detailed specs in engineering/knowledge-base/P2/
+This root manifest will guide you to:
+- PASM2 instructions (357 total)
+- Smart Pin modes (32 modes)
+- Spin2 language constructs
+- Architecture documentation
+- Code patterns and examples
 
-DO NOT clone the repository. Just read files directly from GitHub using raw URLs.
-
-I need help with [YOUR TASK HERE].
-```
-
-### For Local Repository:
-```
-I have the P2 Knowledge Base repository in the current directory.
-Please read the AI-INTEGRATION.md file first.
-
-Key resources:
-- Manifests are in manifests/ for navigation
-- Detailed specs in engineering/knowledge-base/P2/
-
-I need help with [YOUR TASK HERE].
+My specific task is: [YOUR TASK HERE]
 ```
 
 ## 📚 Common Task Templates

@@ -8,54 +8,52 @@
 **🚀 [Jump to Copy-Paste Templates](CLAUDE-QUICKSTART.md)**  
 For ready-to-use prompts and templates, see the CLAUDE-QUICKSTART.md file.
 
-### 1. Clone or Reference the Repository
+### 1. Access the Repository Directly from GitHub
 
-#### Option A: Direct GitHub Reference (Recommended)
 When starting a new Claude Code conversation, reference this repository:
 ```
 Please use the P2 Knowledge Base directly from GitHub:
 https://github.com/ironsheep/P2-Knowledge-Base
 
-IMPORTANT: Read files using raw.githubusercontent.com URLs:
-Base: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
+IMPORTANT: Start with the root manifest for navigation:
+https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/p2-knowledge-root.yaml
 
-Focus on the manifests/ directory for navigation and 
-engineering/knowledge-base/P2/ for detailed specifications.
+This manifest provides structured navigation to all documentation:
+- PASM2 instructions (357 total)
+- Smart Pin modes (32 modes)  
+- Spin2 language constructs
+- Architecture documentation
+- Code patterns and examples
 
-DO NOT clone - just read files directly from GitHub.
+DO NOT clone the repository - read files directly from GitHub using raw.githubusercontent.com URLs.
 ```
 
-#### Option B: Local Clone
-```bash
-git clone https://github.com/ironsheep/P2-Knowledge-Base.git
-cd P2-Knowledge-Base
+### 2. Navigate Using the Manifest System
+
+The knowledge base uses a hierarchical manifest system for efficient navigation:
+
+```yaml
+# Start here - the root manifest:
+manifests/p2-knowledge-root.yaml
+  ↓
+# Category manifests:
+manifests/pasm2-manifest.yaml         # 357 instructions
+manifests/smart-pins-manifest.yaml    # 32 pin modes
+manifests/spin2-manifest.yaml         # Language constructs
+manifests/architecture-manifest.yaml  # Hardware specs
+manifests/patterns-manifest.yaml      # Code examples
+  ↓
+# Individual specifications:
+engineering/knowledge-base/P2/language/pasm2/[category]/*.yaml
+engineering/knowledge-base/P2/hardware/smart-pins/modes/*.yaml
+engineering/knowledge-base/P2/language/spin2/methods/*.yaml
 ```
-Then tell Claude: "I have the P2 Knowledge Base in my current directory"
 
-### 2. Point Claude to Key Resources
-
-For best results, direct Claude to these specific areas based on your needs:
-
-```
-# For instruction reference:
-Look at manifests/pasm2-manifest.yaml for instruction categories
-Then reference engineering/knowledge-base/P2/language/pasm2/[category]/*.yaml
-
-# For Smart Pins:
-Start with manifests/smart-pins-manifest.yaml
-Then check engineering/knowledge-base/P2/hardware/smart-pins/modes/*.yaml
-
-# For Spin2 language:
-Review manifests/spin2-manifest.yaml
-Check engineering/knowledge-base/P2/language/spin2/methods/*.yaml
-
-# For architecture:
-Read manifests/architecture-manifest.yaml
-Study engineering/knowledge-base/P2/architecture/*.yaml
-
-# For code patterns:
-Review engineering/ingestion/external-inputs/source-code/external-projects/*/spin2-patterns-*.md
-```
+For best results, always start with `p2-knowledge-root.yaml` which provides:
+- Complete index of available documentation
+- Entry counts for each category
+- Direct URLs to category manifests
+- Usage examples and navigation patterns
 
 ## Typical Usage Patterns
 
@@ -114,18 +112,21 @@ Use: "Using the P2 PASM2 instruction set, write code to..."
 ### 3. Leverage the Structure
 The knowledge base is organized hierarchically:
 ```
-manifests/                  # Start here for navigation
-  ├── pasm2-manifest.yaml   # Instruction categories
-  ├── smart-pins-manifest.yaml
-  └── architecture-manifest.yaml
+manifests/
+  ├── p2-knowledge-root.yaml      # START HERE - Main navigation index
+  ├── pasm2-manifest.yaml         # 357 instruction categories
+  ├── smart-pins-manifest.yaml    # 32 pin modes
+  ├── spin2-manifest.yaml         # Language constructs
+  ├── architecture-manifest.yaml  # Hardware specs
+  └── patterns-manifest.yaml      # Code examples
   
-engineering/knowledge-base/P2/  # Detailed specs here
+engineering/knowledge-base/P2/     # Detailed specs here
   ├── language/
-  │   ├── pasm2/           # All 357 instructions
-  │   └── spin2/           # Spin2 methods
+  │   ├── pasm2/                  # All 357 instructions
+  │   └── spin2/                  # Spin2 methods
   ├── hardware/
-  │   └── smart-pins/      # 32 pin modes
-  └── architecture/        # System design
+  │   └── smart-pins/             # 32 pin modes
+  └── architecture/               # System design
 ```
 
 ### 4. Use Enriched Instructions
@@ -231,20 +232,20 @@ If you discover patterns, fix documentation, or add examples:
 
 ## Integration with Other Tools
 
-### VS Code
-- Open the knowledge base folder
-- Use Claude Code's file reading capabilities
-- Reference specific YAMLs in your prompts
+### VS Code with Claude Code
+- Reference the GitHub repository directly
+- Use Claude Code's WebFetch capabilities
+- Start with p2-knowledge-root.yaml manifest
 
 ### GitHub Copilot
-- Clone the repo locally
-- Copilot will index the YAML structures
-- Comments referencing the knowledge base help context
+- Reference raw.githubusercontent.com URLs in comments
+- Point to specific manifest files for context
+- Let Copilot fetch YAML structures as needed
 
 ### Custom GPTs
-- Upload key manifests as knowledge
-- Reference the GitHub URLs for detailed lookups
-- Use the .ai-manifest.json for capability descriptions
+- Upload p2-knowledge-root.yaml as primary knowledge
+- Configure with raw GitHub URLs for detailed lookups
+- Use manifest hierarchy for navigation
 
 ## Performance Tips
 
