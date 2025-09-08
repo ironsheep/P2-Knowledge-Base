@@ -151,3 +151,6 @@ human-todos/
 
 # Test extraction directories (not versioned)
 extracted_images_enhanced_test/
+
+# Future deliverables (staged for later release)
+engineering/future-deliverables/
