@@ -48,6 +48,30 @@ in_signal_behavior:
     - "Capture buffer complete"
   acknowledgment_method: "rdpin"
 
+
+initialization_requirement:
+  critical: true
+  description: "Smart pin MUST be reset before configuration"
+  requirement: |
+    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
+    This ensures the smart pin is in a known state and prevents configuration conflicts.
+  reset_sequence:
+    pasm2: |
+      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
+      WRPIN mode, pin   ' Configure mode
+      WXPIN x, pin      ' Set X parameter
+      WYPIN y, pin      ' Set Y parameter
+      DIRH  pin         ' Enable smart pin (DIR=1)
+    spin2: |
+      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
+      PINSTART(pin, mode, x, y)  ' Configure and enable
+      ' OR manually:
+      PINFLOAT(pin)              ' Ensure DIR=0
+      WRPIN(pin, mode)           ' Set mode
+      WXPIN(pin, x)              ' Set X parameter
+      WYPIN(pin, y)              ' Set Y parameter
+      PINHIGH(pin)               ' Enable (DIR=1)
+
 common_applications:
   - application: "Digital oscilloscope"
     description: "Triggered waveform capture and analysis"
@@ -59,6 +83,7 @@ common_applications:
 configuration_examples:
   - name: "Basic triggered scope"
     description: "Simple triggered ADC capture"
+    reset_code: "DIRL scope_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_000_0100000000000_00_11010_0, scope_pin"
     wxpin_code: "WXPIN trigger_config, scope_pin"
     wypin_code: "WYPIN trigger_level, scope_pin"

@@ -112,14 +112,26 @@ pin_field_operators:
       - "LED arrays"
       - "Sensor arrays"
       - "Multi-bit I/O"
+critical_requirement:
+  reset_before_configure: true
+  description: |
+    **CRITICAL**: PINSTART automatically resets the smart pin (DIR=0) before configuration.
+    This is REQUIRED to ensure proper smart pin operation. Never skip this reset step.
+  internal_sequence:
+    - "DIR[pin] := 0     ' AUTOMATIC: Reset smart pin (REQUIRED)"
+    - "WRPIN(pin, Mode)  ' Configure smart pin mode"
+    - "WXPIN(pin, Xval)  ' Set X parameter"
+    - "WYPIN(pin, Yval)  ' Set Y parameter"
+    - "DIR[pin] := 1     ' Enable smart pin"
 notes:
-  - "Complete smart pin initialization sequence"
-  - "Automatically performs: DIR=0, WRPIN, WXPIN, WYPIN, DIR=1"
+  - "**CRITICAL**: Automatically performs required DIR=0 reset before configuration"
+  - "Complete smart pin initialization sequence with proper reset"
   - "Mode constants defined in Spin2 (P_ADC, P_PWM_TRIANGLE, etc.)"
   - "X and Y parameters are mode-specific"
   - "Pin starts operating immediately after DIR=1"
-  - "Use PINCLEAR to stop and reset smart pin"
+  - "Use PINCLEAR to stop and reset smart pin before reconfiguration"
   - "ADDPINS allows configuring multiple pins with same mode"
+  - "NEVER configure a smart pin without first resetting it (DIR=0)"
 operations:
   - "DIR[pin] := 0 (reset)"
   - "WRPIN(pin, Mode) (set mode)"

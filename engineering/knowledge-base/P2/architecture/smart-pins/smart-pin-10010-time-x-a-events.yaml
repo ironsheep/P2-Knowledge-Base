@@ -49,6 +49,30 @@ in_signal_behavior:
     - "X events accumulated (Y[2]=0)"
     - "Timeout occurred (Y[2]=1)"
 
+
+initialization_requirement:
+  critical: true
+  description: "Smart pin MUST be reset before configuration"
+  requirement: |
+    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
+    This ensures the smart pin is in a known state and prevents configuration conflicts.
+  reset_sequence:
+    pasm2: |
+      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
+      WRPIN mode, pin   ' Configure mode
+      WXPIN x, pin      ' Set X parameter
+      WYPIN y, pin      ' Set Y parameter
+      DIRH  pin         ' Enable smart pin (DIR=1)
+    spin2: |
+      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
+      PINSTART(pin, mode, x, y)  ' Configure and enable
+      ' OR manually:
+      PINFLOAT(pin)              ' Ensure DIR=0
+      WRPIN(pin, mode)           ' Set mode
+      WXPIN(pin, x)              ' Set X parameter
+      WYPIN(pin, y)              ' Set Y parameter
+      PINHIGH(pin)               ' Enable (DIR=1)
+
 common_applications:
   - application: "Multi-event timing"
     description: "Measure time for multiple events"
@@ -60,6 +84,7 @@ common_applications:
 configuration_examples:
   - name: "10-pulse timing"
     description: "Measure time for 10 rising edges"
+    reset_code: "DIRL multi_timer                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_00_10010_0, multi_timer"
     wxpin_code: "WXPIN #10, multi_timer"
     wypin_code: "WYPIN #%001, multi_timer"
@@ -67,6 +92,7 @@ configuration_examples:
 
   - name: "Event timeout detector"
     description: "Detect 1-second timeout without events"
+    reset_code: "DIRL timeout_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_00_10010_0, timeout_pin"
     wxpin_code: "WXPIN ##160_000_000, timeout_pin"
     wypin_code: "WYPIN #%101, timeout_pin"

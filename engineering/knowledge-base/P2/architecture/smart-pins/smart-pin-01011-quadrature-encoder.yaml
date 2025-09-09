@@ -213,6 +213,30 @@ in_signal_behavior:
   acknowledgment_method: "rdpin"
   polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
 
+
+initialization_requirement:
+  critical: true
+  description: "Smart pin MUST be reset before configuration"
+  requirement: |
+    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
+    This ensures the smart pin is in a known state and prevents configuration conflicts.
+  reset_sequence:
+    pasm2: |
+      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
+      WRPIN mode, pin   ' Configure mode
+      WXPIN x, pin      ' Set X parameter
+      WYPIN y, pin      ' Set Y parameter
+      DIRH  pin         ' Enable smart pin (DIR=1)
+    spin2: |
+      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
+      PINSTART(pin, mode, x, y)  ' Configure and enable
+      ' OR manually:
+      PINFLOAT(pin)              ' Ensure DIR=0
+      WRPIN(pin, mode)           ' Set mode
+      WXPIN(pin, x)              ' Set X parameter
+      WYPIN(pin, y)              ' Set Y parameter
+      PINHIGH(pin)               ' Enable (DIR=1)
+
 reset_behavior:
   dir_low_effects:
     - "IN signal goes low"
@@ -220,6 +244,7 @@ reset_behavior:
     - "Position counter is zeroed"
   dir_transition_effects: "Smart pin begins quadrature decoding operation"
   wrpin_zero_effects: "Returns pin to normal mode, clears all smart pin configuration"
+  reset_requirement: "ALWAYS set DIR=0 before reconfiguring the smart pin"
 
 common_applications:
   - application: "Motor position feedback"
@@ -238,18 +263,21 @@ common_applications:
 configuration_examples:
   - name: "Basic position tracking"
     description: "Continuous quadrature decoding for absolute position"
+    reset_code: "DIRL encoder_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_01011_0, encoder_pin"
     wxpin_code: "WXPIN #0, encoder_pin"
     explanation: "A from this pin, B from +1 pin, continuous operation (X=0)"
   
   - name: "Filtered encoder with noise immunity"
     description: "Use global filter to reject noise on encoder signals"
+    reset_code: "DIRL encoder_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0001_101_0000000000000_00_01011_0, encoder_pin"
     wxpin_code: "WXPIN #0, encoder_pin"
     explanation: "Both A and B filtered with filt1 (600ns low-pass), continuous mode"
   
   - name: "Velocity measurement setup"
     description: "Periodic measurements for speed calculation"
+    reset_code: "DIRL encoder_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_01011_0, encoder_pin"
     wxpin_code: "WXPIN ##160_000_000, encoder_pin"
     explanation: "160M clocks (1 second @ 160MHz) for velocity measurements"

@@ -5,9 +5,46 @@ timing:
   cycles: 2
   type: fixed
 group: Smart Pins
-description: Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins. Wraps within
-  A/B pins. Prior SETQ overrides S[10:6].
+description: |
+  Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins. 
+  Wraps within A/B pins. Prior SETQ overrides S[10:6].
+  
+  **CRITICAL REQUIREMENT**: Smart pins MUST be reset (DIR=0) before configuring with WRPIN.
+  This ensures the smart pin is in a known state and prevents configuration conflicts.
 category: Smart Pins
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+critical_requirement:
+  reset_before_configure: true
+  description: "Smart pin MUST be reset (DIR=0) before any WRPIN configuration"
+  sequence:
+    - "DIRL pin       ' REQUIRED: Reset smart pin (DIR=0)"
+    - "WRPIN mode, pin ' Configure smart pin mode"
+    - "WXPIN x, pin    ' Set X parameter"
+    - "WYPIN y, pin    ' Set Y parameter"
+    - "DIRH pin       ' Enable smart pin (DIR=1)"
+  consequence_of_skipping: "Unpredictable behavior, configuration conflicts, or smart pin malfunction"
+usage_notes:
+  - "ALWAYS reset the smart pin with DIRL before WRPIN"
+  - "WRPIN #0, pin clears all smart pin configuration"
+  - "Smart pin begins operation when DIR is set high after configuration"
+  - "Use AKPIN to acknowledge smart pin IN flag without reading"
+examples:
+  - description: "Configure PWM output"
+    code: |
+      DIRL  #16                ' REQUIRED: Reset smart pin
+      WRPIN ##P_PWM_TRIANGLE, #16 ' Set PWM triangle mode
+      WXPIN ##$100_0100, #16   ' Set period and frame
+      WYPIN #50, #16           ' Set duty cycle
+      DIRH  #16                ' Enable smart pin
+  - description: "Clear smart pin configuration"
+    code: |
+      DIRL  #16                ' Reset smart pin
+      WRPIN #0, #16            ' Clear all configuration
+  - description: "Configure multiple pins with SETQ"
+    code: |
+      SETQ  #3                 ' Configure 4 pins (16-19)
+      DIRL  #16                ' Reset all 4 pins
+      SETQ  #3
+      WRPIN mode, #16          ' Configure all 4 pins
+documentation_source: enhanced
+documentation_level: comprehensive
+needs_documentation: false

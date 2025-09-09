@@ -138,12 +138,37 @@ in_signal_behavior:
   acknowledgment_method: "rdpin"
   polling_restrictions: "Standard 2-clock delay"
 
+
+initialization_requirement:
+  critical: true
+  description: "Smart pin MUST be reset before configuration"
+  requirement: |
+    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
+    This ensures the smart pin is in a known state and prevents configuration conflicts.
+  reset_sequence:
+    pasm2: |
+      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
+      WRPIN mode, pin   ' Configure mode
+      WXPIN x, pin      ' Set X parameter
+      WYPIN y, pin      ' Set Y parameter
+      DIRH  pin         ' Enable smart pin (DIR=1)
+    spin2: |
+      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
+      PINSTART(pin, mode, x, y)  ' Configure and enable
+      ' OR manually:
+      PINFLOAT(pin)              ' Ensure DIR=0
+      WRPIN(pin, mode)           ' Set mode
+      WXPIN(pin, x)              ' Set X parameter
+      WYPIN(pin, y)              ' Set Y parameter
+      PINHIGH(pin)               ' Enable (DIR=1)
+
 reset_behavior:
   dir_low_effects:
     - "Reset counter"
     - "Clear IN signal"
   dir_transition_effects: "Begin counting operation"
   wrpin_zero_effects: "Return to normal mode"
+  reset_requirement: "ALWAYS set DIR=0 before reconfiguring the smart pin"
 
 common_applications:
   - application: "Simple event counting"
@@ -156,6 +181,7 @@ common_applications:
 configuration_examples:
   - name: "Simple pulse counter"
     description: "Count pulses on A input only"
+    reset_code: "DIRL pulse_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_00_01110_0, pulse_pin"
     wxpin_code: "WXPIN #0, pulse_pin"
     wypin_code: "WYPIN #0, pulse_pin"
@@ -163,6 +189,7 @@ configuration_examples:
 
   - name: "Up/down counter"
     description: "Increment on A, decrement on B"
+    reset_code: "DIRL updown_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_01110_0, updown_pin"
     wxpin_code: "WXPIN #0, updown_pin"
     wypin_code: "WYPIN #1, updown_pin"

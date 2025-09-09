@@ -238,6 +238,30 @@ in_signal_behavior:
   acknowledgment_method: "rdpin"
   polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
 
+
+initialization_requirement:
+  critical: true
+  description: "Smart pin MUST be reset before configuration"
+  requirement: |
+    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
+    This ensures the smart pin is in a known state and prevents configuration conflicts.
+  reset_sequence:
+    pasm2: |
+      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
+      WRPIN mode, pin   ' Configure mode
+      WXPIN x, pin      ' Set X parameter
+      WYPIN y, pin      ' Set Y parameter
+      DIRH  pin         ' Enable smart pin (DIR=1)
+    spin2: |
+      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
+      PINSTART(pin, mode, x, y)  ' Configure and enable
+      ' OR manually:
+      PINFLOAT(pin)              ' Ensure DIR=0
+      WRPIN(pin, mode)           ' Set mode
+      WXPIN(pin, x)              ' Set X parameter
+      WYPIN(pin, y)              ' Set Y parameter
+      PINHIGH(pin)               ' Enable (DIR=1)
+
 reset_behavior:
   dir_low_effects:
     - "IN signal goes low"
@@ -245,6 +269,7 @@ reset_behavior:
     - "Y[15:0] is captured for use when operation resumes"
   dir_transition_effects: "PWM sawtooth generation begins with current Y value"
   wrpin_zero_effects: "Returns pin to normal mode, clears all smart pin configuration"
+  reset_requirement: "ALWAYS set DIR=0 before reconfiguring the smart pin"
 
 common_applications:
   - application: "Linear motor control"
@@ -263,6 +288,7 @@ common_applications:
 configuration_examples:
   - name: "Standard servo control"
     description: "20ms period servo PWM with 1-2ms pulse width range"
+    reset_code: "DIRL servo_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_01001_0, servo_pin"
     wxpin_code: "WXPIN ##$07D0_0014, servo_pin"
     wypin_code: "WYPIN #1500, servo_pin"
@@ -270,6 +296,7 @@ configuration_examples:
   
   - name: "8-bit resolution LED dimming"
     description: "256-level LED brightness control"
+    reset_code: "DIRL led_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_01001_0, led_pin"
     wxpin_code: "WXPIN ##$0100_0064, led_pin"
     wypin_code: "WYPIN brightness, led_pin"
@@ -277,6 +304,7 @@ configuration_examples:
   
   - name: "High-frequency motor PWM"
     description: "20 kHz PWM for motor control with minimal audible noise"
+    reset_code: "DIRL motor_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_01001_0, motor_pin"
     wxpin_code: "WXPIN ##$0064_007D, motor_pin"
     wypin_code: "WYPIN speed_value, motor_pin"

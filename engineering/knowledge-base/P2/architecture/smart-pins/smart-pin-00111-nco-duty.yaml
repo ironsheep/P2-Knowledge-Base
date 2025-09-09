@@ -238,6 +238,30 @@ in_signal_behavior:
   acknowledgment_method: "rdpin"
   polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
 
+
+initialization_requirement:
+  critical: true
+  description: "Smart pin MUST be reset before configuration"
+  requirement: |
+    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
+    This ensures the smart pin is in a known state and prevents configuration conflicts.
+  reset_sequence:
+    pasm2: |
+      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
+      WRPIN mode, pin   ' Configure mode
+      WXPIN x, pin      ' Set X parameter
+      WYPIN y, pin      ' Set Y parameter
+      DIRH  pin         ' Enable smart pin (DIR=1)
+    spin2: |
+      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
+      PINSTART(pin, mode, x, y)  ' Configure and enable
+      ' OR manually:
+      PINFLOAT(pin)              ' Ensure DIR=0
+      WRPIN(pin, mode)           ' Set mode
+      WXPIN(pin, x)              ' Set X parameter
+      WYPIN(pin, y)              ' Set Y parameter
+      PINHIGH(pin)               ' Enable (DIR=1)
+
 reset_behavior:
   dir_low_effects:
     - "IN signal goes low"
@@ -245,6 +269,7 @@ reset_behavior:
     - "Z accumulator is set to zero"
   dir_transition_effects: "NCO begins operation, accumulator starts incrementing"
   wrpin_zero_effects: "Returns pin to normal mode, clears all smart pin configuration"
+  reset_requirement: "ALWAYS set DIR=0 before reconfiguring the smart pin"
 
 common_applications:
   - application: "Variable duty cycle generation"
@@ -263,6 +288,7 @@ common_applications:
 configuration_examples:
   - name: "50% duty cycle generation"
     description: "Generate approximately 50% duty cycle"
+    reset_code: "DIRL duty_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_00111_0, duty_pin"
     wxpin_code: "WXPIN ##$0000_0064, duty_pin"
     wypin_code: "WYPIN ##2147483648, duty_pin"
@@ -270,6 +296,7 @@ configuration_examples:
   
   - name: "Low duty cycle generation"
     description: "Generate approximately 10% duty cycle"
+    reset_code: "DIRL low_duty_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_00111_0, low_duty_pin"
     wxpin_code: "WXPIN ##$0000_0064, duty_pin"
     wypin_code: "WYPIN ##429496729, duty_pin"
@@ -277,6 +304,7 @@ configuration_examples:
   
   - name: "Variable duty cycle control"
     description: "Setup for runtime duty cycle adjustment"
+    reset_code: "DIRL var_duty_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_00111_0, var_duty_pin"
     wxpin_code: "WXPIN ##$0000_0001, var_duty_pin"
     wypin_code: "WYPIN duty_increment, var_duty_pin"

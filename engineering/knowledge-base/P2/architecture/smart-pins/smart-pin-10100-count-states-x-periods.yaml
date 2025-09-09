@@ -37,6 +37,30 @@ z_result:
     - range: "Z[31:0]"
       meaning: "Total A-trigger states for X periods"
 
+
+initialization_requirement:
+  critical: true
+  description: "Smart pin MUST be reset before configuration"
+  requirement: |
+    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
+    This ensures the smart pin is in a known state and prevents configuration conflicts.
+  reset_sequence:
+    pasm2: |
+      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
+      WRPIN mode, pin   ' Configure mode
+      WXPIN x, pin      ' Set X parameter
+      WYPIN y, pin      ' Set Y parameter
+      DIRH  pin         ' Enable smart pin (DIR=1)
+    spin2: |
+      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
+      PINSTART(pin, mode, x, y)  ' Configure and enable
+      ' OR manually:
+      PINFLOAT(pin)              ' Ensure DIR=0
+      WRPIN(pin, mode)           ' Set mode
+      WXPIN(pin, x)              ' Set X parameter
+      WYPIN(pin, y)              ' Set Y parameter
+      PINHIGH(pin)               ' Enable (DIR=1)
+
 common_applications:
   - application: "Duty cycle measurement"
     description: "Oversampled duty cycle measurement"
@@ -48,6 +72,7 @@ common_applications:
 configuration_examples:
   - name: "Duty cycle over 10 periods"
     description: "Measure duty cycle across 10 periods"
+    reset_code: "DIRL duty_measure                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_10100_0, duty_measure"
     wxpin_code: "WXPIN #10, duty_measure"
     wypin_code: "WYPIN #%00, duty_measure"

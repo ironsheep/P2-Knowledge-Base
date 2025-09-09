@@ -238,6 +238,30 @@ in_signal_behavior:
   acknowledgment_method: "rdpin"
   polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
 
+
+initialization_requirement:
+  critical: true
+  description: "Smart pin MUST be reset before configuration"
+  requirement: |
+    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
+    This ensures the smart pin is in a known state and prevents configuration conflicts.
+  reset_sequence:
+    pasm2: |
+      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
+      WRPIN mode, pin   ' Configure mode
+      WXPIN x, pin      ' Set X parameter
+      WYPIN y, pin      ' Set Y parameter
+      DIRH  pin         ' Enable smart pin (DIR=1)
+    spin2: |
+      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
+      PINSTART(pin, mode, x, y)  ' Configure and enable
+      ' OR manually:
+      PINFLOAT(pin)              ' Ensure DIR=0
+      WRPIN(pin, mode)           ' Set mode
+      WXPIN(pin, x)              ' Set X parameter
+      WYPIN(pin, y)              ' Set Y parameter
+      PINHIGH(pin)               ' Enable (DIR=1)
+
 reset_behavior:
   dir_low_effects:
     - "IN signal goes low"
@@ -245,6 +269,7 @@ reset_behavior:
     - "Y[15:0] is captured for use when operation resumes"
   dir_transition_effects: "SMPS PWM begins operating with voltage/current feedback"
   wrpin_zero_effects: "Returns pin to normal mode, clears all smart pin configuration"
+  reset_requirement: "ALWAYS set DIR=0 before reconfiguring the smart pin"
 
 common_applications:
   - application: "Buck converter control"
@@ -263,6 +288,7 @@ common_applications:
 configuration_examples:
   - name: "Basic buck converter with feedback"
     description: "Step-down converter with voltage feedback on adjacent pin"
+    reset_code: "DIRL smps_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0111_0001_000_0100000000000_01_01010_0, smps_pin"
     wxpin_code: "WXPIN ##$0064_0010, smps_pin"
     wypin_code: "WYPIN #80, smps_pin"
@@ -270,6 +296,7 @@ configuration_examples:
   
   - name: "Current-limited power supply"
     description: "SMPS with both voltage regulation and current limiting"
+    reset_code: "DIRL protected_smps                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0111_0001_101_0100000000000_01_01010_0, protected_smps"
     wxpin_code: "WXPIN ##$00C8_0020, protected_smps"
     wypin_code: "WYPIN #150, protected_smps"
@@ -277,6 +304,7 @@ configuration_examples:
   
   - name: "High-frequency LED driver"
     description: "LED constant-current driver with over-current protection"
+    reset_code: "DIRL led_driver                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0001_100_0100000000000_01_01010_0, led_driver"
     wxpin_code: "WXPIN ##$0032_0008, led_driver"
     wypin_code: "WYPIN #25, led_driver"

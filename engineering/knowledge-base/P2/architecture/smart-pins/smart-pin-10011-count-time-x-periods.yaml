@@ -38,6 +38,30 @@ z_result:
     - range: "Z[31:0]"
       meaning: "Total time for X periods (limited to $80000000)"
 
+
+initialization_requirement:
+  critical: true
+  description: "Smart pin MUST be reset before configuration"
+  requirement: |
+    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
+    This ensures the smart pin is in a known state and prevents configuration conflicts.
+  reset_sequence:
+    pasm2: |
+      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
+      WRPIN mode, pin   ' Configure mode
+      WXPIN x, pin      ' Set X parameter
+      WYPIN y, pin      ' Set Y parameter
+      DIRH  pin         ' Enable smart pin (DIR=1)
+    spin2: |
+      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
+      PINSTART(pin, mode, x, y)  ' Configure and enable
+      ' OR manually:
+      PINFLOAT(pin)              ' Ensure DIR=0
+      WRPIN(pin, mode)           ' Set mode
+      WXPIN(pin, x)              ' Set X parameter
+      WYPIN(pin, y)              ' Set Y parameter
+      PINHIGH(pin)               ' Enable (DIR=1)
+
 common_applications:
   - application: "Precise period measurement"
     description: "Oversampled period measurement for accuracy"
@@ -49,6 +73,7 @@ common_applications:
 configuration_examples:
   - name: "10-period average"
     description: "Average period over 10 cycles"
+    reset_code: "DIRL period_avg                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_10011_0, period_avg"
     wxpin_code: "WXPIN #10, period_avg"
     wypin_code: "WYPIN #%00, period_avg"

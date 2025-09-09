@@ -202,12 +202,37 @@ in_signal_behavior:
   acknowledgment_method: "rdpin"
   polling_restrictions: "2-clock delay after acknowledgment"
 
+
+initialization_requirement:
+  critical: true
+  description: "Smart pin MUST be reset before configuration"
+  requirement: |
+    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
+    This ensures the smart pin is in a known state and prevents configuration conflicts.
+  reset_sequence:
+    pasm2: |
+      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
+      WRPIN mode, pin   ' Configure mode
+      WXPIN x, pin      ' Set X parameter
+      WYPIN y, pin      ' Set Y parameter
+      DIRH  pin         ' Enable smart pin (DIR=1)
+    spin2: |
+      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
+      PINSTART(pin, mode, x, y)  ' Configure and enable
+      ' OR manually:
+      PINFLOAT(pin)              ' Ensure DIR=0
+      WRPIN(pin, mode)           ' Set mode
+      WXPIN(pin, x)              ' Set X parameter
+      WYPIN(pin, y)              ' Set Y parameter
+      PINHIGH(pin)               ' Enable (DIR=1)
+
 reset_behavior:
   dir_low_effects:
     - "IN signal goes low"
     - "Z set to adder value (0/1/-1)"
   dir_transition_effects: "Begin directional counting on A edges"
   wrpin_zero_effects: "Return to normal mode"
+  reset_requirement: "ALWAYS set DIR=0 before reconfiguring the smart pin"
 
 common_applications:
   - application: "Directional step counting"
@@ -220,6 +245,7 @@ common_applications:
 configuration_examples:
   - name: "Step/direction motor feedback"
     description: "Count motor steps with direction"
+    reset_code: "DIRL step_count                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_01101_0, step_count"
     wxpin_code: "WXPIN #0, step_count"
     explanation: "A=steps, B=direction, continuous counting"

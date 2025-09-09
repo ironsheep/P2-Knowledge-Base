@@ -245,6 +245,30 @@ in_signal_behavior:
   acknowledgment_method: "rdpin"
   polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
 
+
+initialization_requirement:
+  critical: true
+  description: "Smart pin MUST be reset before configuration"
+  requirement: |
+    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
+    This ensures the smart pin is in a known state and prevents configuration conflicts.
+  reset_sequence:
+    pasm2: |
+      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
+      WRPIN mode, pin   ' Configure mode
+      WXPIN x, pin      ' Set X parameter
+      WYPIN y, pin      ' Set Y parameter
+      DIRH  pin         ' Enable smart pin (DIR=1)
+    spin2: |
+      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
+      PINSTART(pin, mode, x, y)  ' Configure and enable
+      ' OR manually:
+      PINFLOAT(pin)              ' Ensure DIR=0
+      WRPIN(pin, mode)           ' Set mode
+      WXPIN(pin, x)              ' Set X parameter
+      WYPIN(pin, y)              ' Set Y parameter
+      PINHIGH(pin)               ' Enable (DIR=1)
+
 reset_behavior:
   dir_low_effects:
     - "ADC sampling stops"
@@ -252,6 +276,7 @@ reset_behavior:
     - "Accumulator state preserved"
   dir_transition_effects: "ADC sampling begins according to configured mode"
   wrpin_zero_effects: "Returns pin to normal mode, clears all smart pin configuration"
+  reset_requirement: "ALWAYS set DIR=0 before reconfiguring the smart pin"
 
 common_applications:
   - application: "Precision voltage measurement"
@@ -270,18 +295,21 @@ common_applications:
 configuration_examples:
   - name: "Basic 8-bit ADC sampling"
     description: "Simple ADC conversion with automatic differencing"
+    reset_code: "DIRL adc_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_000_0100000000000_00_11000_0, adc_pin"
     wxpin_code: "WXPIN #%00_0111, adc_pin"
     explanation: "ADC mode (%100), SINC2 sampling mode (%00), 128 clocks (8 bits)"
   
   - name: "High-precision 14-bit measurement"
     description: "Maximum precision DC measurement"
+    reset_code: "DIRL adc_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_000_0100000000000_00_11000_0, adc_pin"
     wxpin_code: "WXPIN #%01_1101, adc_pin"
     explanation: "SINC2 filtering (%01), 8192 clocks (14 bits) - requires software differencing"
   
   - name: "Custom period SINC3 filtering"
     description: "Non-power-of-2 period for dynamic signals"
+    reset_code: "DIRL adc_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_000_0100000000000_00_11000_0, adc_pin"
     wxpin_code: "WXPIN #%10_0100, adc_pin"
     wypin_code: "WYPIN #320, adc_pin"

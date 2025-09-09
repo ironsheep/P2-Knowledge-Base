@@ -236,13 +236,38 @@ in_signal_behavior:
   acknowledgment_method: "rdpin"
   polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
 
+initialization_requirement:
+  critical: true
+  description: "Smart pin MUST be reset before configuration"
+  requirement: |
+    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
+    This ensures the smart pin is in a known state and prevents configuration conflicts.
+  reset_sequence:
+    pasm2: |
+      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
+      WRPIN mode, pin   ' Configure mode
+      WXPIN x, pin      ' Set X parameter
+      WYPIN y, pin      ' Set Y parameter
+      DIRH  pin         ' Enable smart pin (DIR=1)
+    spin2: |
+      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
+      PINSTART(pin, mode, x, y)  ' Configure and enable
+      ' OR manually:
+      PINFLOAT(pin)              ' Ensure DIR=0
+      WRPIN(pin, mode)           ' Set mode
+      WXPIN(pin, x)              ' Set X parameter
+      WYPIN(pin, y)              ' Set Y parameter
+      PINHIGH(pin)               ' Enable (DIR=1)
+
 reset_behavior:
   dir_low_effects:
     - "IN signal goes low"
     - "Output goes low"
     - "Y[15:0] is captured for use when operation resumes"
+    - "Smart pin stops operation but retains configuration"
   dir_transition_effects: "PWM triangle generation begins with current Y value"
   wrpin_zero_effects: "Returns pin to normal mode, clears all smart pin configuration"
+  reset_requirement: "ALWAYS set DIR=0 before reconfiguring the smart pin"
 
 common_applications:
   - application: "Motor speed control"
@@ -261,22 +286,29 @@ common_applications:
 configuration_examples:
   - name: "Basic motor control PWM"
     description: "100 Hz PWM with 1% resolution for motor control"
+    reset_code: "DIRL motor_pin                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_01000_0, motor_pin"
     wxpin_code: "WXPIN ##$0064_0100, motor_pin"
     wypin_code: "WYPIN #50, motor_pin"
+    enable_code: "DIRH motor_pin                  ' Enable after configuration"
     explanation: "Base period 256 clocks, frame 100 periods, duty=50/100=50% (160MHz/256/100/2=3.125Hz actual)"
   
   - name: "High-resolution LED dimming"
     description: "Fine control LED brightness with triangle PWM"
+    reset_code: "DIRL led_pin                    ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_01000_0, led_pin"
     wxpin_code: "WXPIN ##$03E8_000A, led_pin"
+    wypin_code: "WYPIN #0, led_pin                ' Start with LED off"
+    enable_code: "DIRH led_pin                    ' Enable after configuration"
     explanation: "Base period 10, frame 1000 periods, 0.1% resolution"
   
   - name: "Variable frequency PWM"
     description: "Adjustable PWM frequency with fixed resolution"
+    reset_code: "DIRL pwm_pin                    ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_01000_0, pwm_pin"
     wxpin_code: "WXPIN frame_config, pwm_pin"
     wypin_code: "WYPIN duty_value, pwm_pin"
+    enable_code: "DIRH pwm_pin                    ' Enable after configuration"
     explanation: "Runtime configurable frame_config and duty_value for flexible operation"
 
 typical_code_patterns:

@@ -215,6 +215,30 @@ in_signal_behavior:
   acknowledgment_method: "rdpin"
   polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
 
+
+initialization_requirement:
+  critical: true
+  description: "Smart pin MUST be reset before configuration"
+  requirement: |
+    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
+    This ensures the smart pin is in a known state and prevents configuration conflicts.
+  reset_sequence:
+    pasm2: |
+      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
+      WRPIN mode, pin   ' Configure mode
+      WXPIN x, pin      ' Set X parameter
+      WYPIN y, pin      ' Set Y parameter
+      DIRH  pin         ' Enable smart pin (DIR=1)
+    spin2: |
+      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
+      PINSTART(pin, mode, x, y)  ' Configure and enable
+      ' OR manually:
+      PINFLOAT(pin)              ' Ensure DIR=0
+      WRPIN(pin, mode)           ' Set mode
+      WXPIN(pin, x)              ' Set X parameter
+      WYPIN(pin, y)              ' Set Y parameter
+      PINHIGH(pin)               ' Enable (DIR=1)
+
 reset_behavior:
   dir_low_effects:
     - "IN signal goes low"
@@ -222,6 +246,7 @@ reset_behavior:
     - "Event counter is reset"
   dir_transition_effects: "Smart pin begins counting A edges when B is high"
   wrpin_zero_effects: "Returns pin to normal mode, clears all smart pin configuration"
+  reset_requirement: "ALWAYS set DIR=0 before reconfiguring the smart pin"
 
 common_applications:
   - application: "Gated frequency measurement"
@@ -240,18 +265,21 @@ common_applications:
 configuration_examples:
   - name: "Gated frequency counter"
     description: "Count clock pulses only during gate-high periods"
+    reset_code: "DIRL gated_counter                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_01100_0, gated_counter"
     wxpin_code: "WXPIN ##160_000_000, gated_counter"
     explanation: "A from this pin (clock), B from +1 pin (gate), 1-second periods"
   
   - name: "Conditional event counter"
     description: "Count events only when enable is active"
+    reset_code: "DIRL event_counter                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0111_0001_101_0000000000000_00_01100_0, event_counter"
     wxpin_code: "WXPIN #0, event_counter"
     explanation: "A from -1 pin (events), B from +1 pin (enable), continuous mode, filtered"
   
   - name: "Direction-sensitive pulse counter"
     description: "Count forward when direction pin is high"
+    reset_code: "DIRL dir_counter                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_01100_0, dir_counter"
     wxpin_code: "WXPIN ##16_000_000, dir_counter"
     explanation: "A from this pin (pulses), B from +1 pin (direction), 0.1s periods"

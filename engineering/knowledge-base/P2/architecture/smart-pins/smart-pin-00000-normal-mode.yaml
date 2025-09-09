@@ -188,12 +188,37 @@ in_signal_behavior:
   acknowledgment_method: "Not applicable"
   polling_restrictions: "IN signal reflects A input selector result only"
 
+
+initialization_requirement:
+  critical: true
+  description: "Smart pin MUST be reset before configuration"
+  requirement: |
+    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
+    This ensures the smart pin is in a known state and prevents configuration conflicts.
+  reset_sequence:
+    pasm2: |
+      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
+      WRPIN mode, pin   ' Configure mode
+      WXPIN x, pin      ' Set X parameter
+      WYPIN y, pin      ' Set Y parameter
+      DIRH  pin         ' Enable smart pin (DIR=1)
+    spin2: |
+      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
+      PINSTART(pin, mode, x, y)  ' Configure and enable
+      ' OR manually:
+      PINFLOAT(pin)              ' Ensure DIR=0
+      WRPIN(pin, mode)           ' Set mode
+      WXPIN(pin, x)              ' Set X parameter
+      WYPIN(pin, y)              ' Set Y parameter
+      PINHIGH(pin)               ' Enable (DIR=1)
+
 reset_behavior:
   dir_low_effects:
     - "Pin enters input mode"
     - "Smart pin configuration retained but inactive"
   dir_transition_effects: "Pin begins operating according to M[12:0] and %TT settings"
   wrpin_zero_effects: "Returns pin to normal mode, clearing all smart pin configuration"
+  reset_requirement: "ALWAYS set DIR=0 before reconfiguring the smart pin"
 
 common_applications:
   - application: "Standard digital I/O"
@@ -209,16 +234,19 @@ common_applications:
 configuration_examples:
   - name: "Basic digital I/O"
     description: "Configure pin for standard input/output operation"
+    reset_code: "DIRL pin_number                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN #0, pin_number"
     explanation: "Clears all smart pin configuration, returns to normal I/O mode"
   
   - name: "Filtered input"
     description: "Use global filter 1 for noise reduction"
+    reset_code: "DIRL pin_number                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0000_0000_101_0000000000000_00_00000_0, pin_number"
     explanation: "A and B inputs filtered with filt1, standard DIR/OUT control"
   
   - name: "Adjacent pin monitoring"
     description: "Monitor the next pin's state"
+    reset_code: "DIRL pin_number                  ' REQUIRED: Reset before configuration"
     wrpin_code: "WRPIN ##%0001_0000_000_0000000000000_00_00000_0, pin_number"
     explanation: "A input reads from relative +1 pin, B input from this pin"
 

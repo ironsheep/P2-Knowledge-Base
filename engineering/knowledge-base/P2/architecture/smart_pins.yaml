@@ -7,6 +7,9 @@ description: |
   64 identical smart I/O pins, each with autonomous processing capabilities for
   timing, counting, serial protocols, ADC/DAC operations, and more. Offloads
   I/O processing from COGs for deterministic, high-performance operation.
+  
+  **CRITICAL REQUIREMENT**: Smart pins MUST be reset (DIR=0) before configuration.
+  This ensures proper initialization and prevents configuration conflicts.
 
 architecture:
   pin_count: 64
@@ -68,15 +71,37 @@ operating_modes:
     11110: "Asynchronous serial transmit"
     11111: "Asynchronous serial receive"
 
+critical_requirements:
+  reset_before_configure:
+    mandatory: true
+    description: |
+      **CRITICAL**: Smart pins MUST be reset (DIR=0) before any configuration.
+      This ensures the smart pin is in a known state and prevents conflicts.
+    correct_sequence:
+      pasm2:
+        - "DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)"
+        - "WRPIN mode, pin   ' Configure smart pin mode"
+        - "WXPIN x, pin      ' Set X parameter"
+        - "WYPIN y, pin      ' Set Y parameter"
+        - "DIRH  pin         ' Enable smart pin (DIR=1)"
+      spin2:
+        - "PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)"
+        - "PINSTART(pin, mode, x, y)  ' Configure and enable (includes reset)"
+    consequences_of_skipping:
+      - "Unpredictable smart pin behavior"
+      - "Configuration conflicts between old and new settings"
+      - "Smart pin malfunction or incorrect operation"
+      - "Possible corruption of internal state machines"
+
 pin_control_instructions:
   configuration:
-    wrpin: "Configure smart pin mode and routing"
+    wrpin: "Configure smart pin mode and routing (MUST reset pin first with DIRL)"
     wxpin: "Write X parameter (mode-specific)"
     wypin: "Write Y parameter (mode-specific)"
     
   operation:
-    dirh: "Enable smart pin (DIR high)"
-    dirl: "Disable smart pin (DIR low)"
+    dirh: "Enable smart pin (DIR high) - do this AFTER configuration"
+    dirl: "Disable/reset smart pin (DIR low) - do this BEFORE configuration"
     
   data_transfer:
     rdpin: "Read smart pin result (clears IN)"
