@@ -1,20 +1,23 @@
 # COG vs HUB Execution Models
-# Source: Silicon Doc v35, P2 Architecture
-# Critical for: Understanding P2 execution modes and performance
+# Source: Silicon Doc v35, P2 Architecture, Production Code Analysis
+# Critical for: Understanding P2 execution modes, performance, and overlay systems
 
 concept: "COG vs HUB Execution"
 category: "pasm2_core"
 importance: "fundamental"
+documentation_source: enhanced
+documentation_level: comprehensive
 
 metadata:
-  query_tags: ["cogexec", "hubexec", "execution", "performance", "memory"]
+  query_tags: ["cogexec", "hubexec", "execution", "performance", "memory", "overlay"]
   complexity: "intermediate"
-  use_cases: ["performance_optimization", "memory_management", "code_organization"]
+  use_cases: ["performance_optimization", "memory_management", "code_organization", "debug_systems"]
   common_questions:
     - "When should I use COG vs HUB execution?"
     - "How fast is HUB execution compared to COG?"
     - "How do I switch between execution modes?"
     - "What are the limitations of each mode?"
+    - "How do I implement code overlays?"
 
 fundamental_concept: |
   P2 supports two execution modes:
@@ -24,6 +27,8 @@ fundamental_concept: |
   Each mode has distinct advantages. COGEXEC is deterministic and fast but
   limited to 512 longs. HUBEXEC can access all 512KB but with variable timing
   due to the egg-beater memory architecture.
+  
+  Advanced systems use dynamic overlays to maximize COG RAM utilization.
 
 cog_execution:
   location: "COG RAM (addresses $000-$1FF)"
@@ -70,6 +75,85 @@ hub_execution:
     - "Some instructions not available"
     - "Branch penalties possible"
 
+dynamic_overlay_system:
+  concept: "Load code segments on-demand to maximize COG RAM usage"
+  use_case: "Debug monitors, complex algorithms, multi-function systems"
+  
+  debug_overlay_implementation:
+    description: "Spin2 debugger uses overlays for debug commands"
+    architecture: |
+      ' Debug ISR with overlay loading
+      debug_isr
+              ' Determine which debug command needed
+              getbrk  cmd_code    wz
+              
+              ' Calculate overlay to load
+              shr     cmd_code, #4        ' Get overlay index
+              shl     cmd_code, #2        ' Convert to long offset
+              loc     ptra, #\overlay_table
+              add     ptra, cmd_code
+              rdlong  overlay_addr, ptra  ' Get overlay HUB address
+              
+              ' Load overlay to COG RAM
+              mov     ptra, overlay_addr
+              setq    #OVERLAY_SIZE-1     ' Load N longs
+              rdlong  overlay_base, ptra  ' Load to COG
+              
+              ' Execute overlay
+              call    #overlay_base
+              
+              ' Return from debug ISR
+              reti3   wcz
+    source: Spin2_debugger.spin2
+    
+  overlay_table_structure:
+    description: "HUB-based table of overlay addresses"
+    code: |
+      overlay_table
+              long    @trace_overlay      ' Overlay 0: Trace commands
+              long    @watch_overlay      ' Overlay 1: Watch commands
+              long    @break_overlay      ' Overlay 2: Breakpoint commands
+              long    @dump_overlay       ' Overlay 3: Memory dump
+              long    @step_overlay       ' Overlay 4: Single-step
+              ' ... more overlays ...
+      
+      ' Each overlay is self-contained code
+      trace_overlay
+              org     overlay_base        ' Same COG address
+              ' Trace implementation
+              ret
+              
+      watch_overlay
+              org     overlay_base        ' Reuse same space
+              ' Watch implementation
+              ret
+    
+  overlay_management:
+    allocation: |
+      ' Reserve COG space for overlays
+      overlay_base    res     32          ' 32 longs for overlay
+      overlay_stack   res     8           ' Local stack
+      overlay_data    res     16          ' Working data
+    
+    loading_pattern: |
+      load_overlay
+              ' PA = overlay number
+              shl     pa, #7              ' 128 longs per overlay
+              add     pa, overlay_hub_base
+              setq    #32-1               ' Load 32 longs
+              rdlong  overlay_base, pa
+              ret
+    
+    caching_strategy: |
+      ' Track loaded overlay to avoid reload
+      current_overlay long    -1
+      
+      smart_load
+              cmp     pa, current_overlay wz
+      if_z    ret                     ' Already loaded
+              mov     current_overlay, pa
+              jmp     #load_overlay
+
 execution_control:
   switching_modes:
     cog_to_hub:
@@ -99,32 +183,70 @@ instruction_availability:
     - "ALTI - Modify next instruction"
     - "Some self-modifying code patterns"
   
-  both_modes:
-    - "Most arithmetic/logic instructions"
-    - "Memory access (RD/WR)"
-    - "Jumps and calls"
-    - "Conditional execution"
+  hubexec_only:
+    - "None - all instructions work"
   
-  hubexec_limitations:
-    rep_loops: "Not available in hubexec"
-    self_modify: "Limited compared to cogexec"
+  performance_differences:
+    - "DJNZ: 2 clocks (cog) vs 4-16 (hub)"
+    - "CALL: 2 clocks (cog) vs 4-16 (hub)"
+    - "Math: 2 clocks (cog) vs 4-16 (hub)"
+
+practical_examples:
+  multi_stage_loader:
+    description: "Flash loader uses staged loading"
+    code: |
+      ' Stage 1: Minimal loader in COG
+      stage1  org     0
+              setq    #16-1           ' Load stage 2
+              rdlong  $100, ##stage2_hub
+              jmp     #$100
+              
+      ' Stage 2: Extended loader
+              org     $100
+              ' More complex loading logic
+              setq    #128-1          ' Load main app
+              rdlong  0, ##main_app
+              jmp     #0
+    source: flash_loader.spin2
+  
+  spi_driver_optimization:
+    description: "Critical SPI code in COG, management in HUB"
+    code: |
+      ' HUB: High-level SPI management
+      hub_spi_read
+              mov     cmd, #SPI_READ
+              mov     addr, pa
+              mov     count, pb
+              call    #load_spi_driver
+              call    #0              ' Call COG driver
+              ret
+              
+      ' COG: Time-critical SPI bit-banging
+      cog_spi_driver
+              org     0
+              rep     #4, count       ' Fast loop
+              rol     data, #1    wc
+              muxc    outa, spi_mosi_mask
+              xor     outa, spi_clk_mask
+              testp   spi_miso    wc
+              ret
+    source: flash_loader.spin2
 
 performance_comparison:
-  tight_loop:
+  timing_critical:
     cogexec: |
-      ' 2 clocks per instruction
-      REP   #4, #100        ' REP available
-      ADD   x, y
+      REP   #4, #100
+      ADD   a, b
       SUB   a, b
       XOR   c, d
       ROL   e, #1
       ' Total: 200 clocks for 100 iterations
     
     hubexec: |
-      ' 4-16 clocks per instruction
+      ' REP not available, must use DJNZ
       MOV   count, #100
-  .loop
-      ADD   x, y
+      .loop
+      ADD   a, b
       SUB   a, b
       XOR   c, d
       ROL   e, #1
@@ -152,6 +274,7 @@ code_organization:
       2. Large program logic in HUB
       3. Interrupt handlers in COG
       4. Data processing in appropriate mode
+      5. Overlays for complex COG operations
     
     example: |
       DAT
@@ -183,22 +306,31 @@ loading_strategies:
   dynamic_load:
     description: "Load different COG code as needed"
     code: |
-      SETQ2  #(cog_end-cog_start-1)
-      RDLONG $000, #@cog_start
+      SETQ  #(cog_end-cog_start-1)
+      RDLONG $000, ##@cog_start
       JMP    #$000
   
   overlay_system:
     description: "Swap COG code sections dynamically"
     code: |
       ' Load overlay 1
-      SETQ2  #127
-      RDLONG $100, #@overlay1
+      SETQ  #127
+      RDLONG $100, ##@overlay1
       CALL   #$100
       
       ' Load overlay 2  
-      SETQ2  #127
-      RDLONG $100, #@overlay2
+      SETQ  #127
+      RDLONG $100, ##@overlay2
       CALL   #$100
+  
+  demand_paging:
+    description: "Load code on-demand based on usage"
+    code: |
+      ' Check if function loaded
+      cmp     loaded_func, requested_func wz
+      if_nz   call    #load_function
+              call    #function_base
+    source: complex_systems
 
 fifo_and_streaming:
   hubexec_advantage: "Direct FIFO control without hub window delays"
@@ -214,6 +346,11 @@ interrupt_considerations:
     - "Interrupt response varies with hub timing"
     - "ISR should be in COG for consistency"
     - "May need to load ISR code first"
+  
+  debug_isr_requirement:
+    - "Must be in COG for reliability"
+    - "Uses overlays for complex operations"
+    - "Preserves all state including overlay area"
 
 best_practices:
   use_cogexec_for:
@@ -222,6 +359,7 @@ best_practices:
     - "Interrupt service routines"
     - "Digital signal processing"
     - "Deterministic timing requirements"
+    - "Debug monitor core"
   
   use_hubexec_for:
     - "Large programs"
@@ -229,6 +367,13 @@ best_practices:
     - "String/data processing"
     - "User interface code"
     - "Non-time-critical operations"
+    - "Overlay management code"
+  
+  use_overlays_for:
+    - "Debug command processors"
+    - "Multiple protocol handlers"
+    - "Complex state machines"
+    - "Memory-constrained systems"
   
   optimization_tips:
     - "Profile code to find hot spots"
@@ -236,6 +381,7 @@ best_practices:
     - "Use REP loops in COG"
     - "Align hub code for better fetch"
     - "Minimize mode switches"
+    - "Implement overlay system for complex COG code"
 
 common_mistakes:
   - mistake: "Using REP in hubexec"
@@ -256,6 +402,14 @@ common_mistakes:
   - mistake: "Assuming deterministic timing in hubexec"
     wrong: "Hubexec bit-banged protocol"
     right: "Move protocol to cogexec for timing"
+  
+  - mistake: "Overlay overwrites active code"
+    wrong: |
+      call    #overlay_base
+      ' Load new overlay over running code!
+    right: |
+      call    #overlay_base
+      ret                 ' Return before loading
 
 why_this_matters:
   performance: |
@@ -268,6 +422,12 @@ why_this_matters:
     - Small, fast code in COG
     - Large, complex code in HUB
     - Best of both worlds with hybrid approach
+    - Overlays extend COG capabilities dramatically
+  
+  debug_infrastructure: |
+    The overlay system enables sophisticated debug monitors
+    in limited COG RAM, supporting complex debugging operations
+    without consuming precious COG space permanently.
 
 related_concepts:
   - "../instructions/jmp.yaml"
@@ -275,3 +435,10 @@ related_concepts:
   - "../instructions/coginit.yaml"
   - "special_registers.yaml"
   - "rep_instruction.yaml"
+  - "event_interrupt_config.yaml"
+
+references:
+  - silicon_doc: Execution modes
+  - Spin2_debugger.spin2: Overlay implementation
+  - flash_loader.spin2: Multi-stage loading
+  - optimization_guide: Performance tuning

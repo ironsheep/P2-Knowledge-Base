@@ -1,0 +1,247 @@
+concept: inline_pasm2
+title: Inline PASM2 in Spin2 Methods
+category: hybrid_programming
+description: Embedding PASM2 assembly code directly within Spin2 methods for performance-critical operations
+documentation_source: production_code_analysis
+documentation_level: comprehensive
+created: 2025-09-09
+
+overview: |
+  Spin2 allows embedding PASM2 assembly code directly within methods using ORG/END blocks.
+  This provides high-performance code execution without the overhead of launching a separate COG.
+  Inline PASM2 is limited to 16 longs total (including parameters, results, and locals) and
+  executes in the calling COG's context.
+
+syntax:
+  basic_structure: |
+    PUB method_name(parameters) : result | locals
+      ' Spin2 code before
+      ORG
+        ' PASM2 assembly code
+        ' Can access parameters, result, locals
+        ' Limited to 16 longs total
+      END
+      ' Spin2 code after
+  
+  register_mapping:
+    description: "Parameters, result, and locals map to PASM2 registers"
+    mapping: |
+      ' First parameter  → PR0 (also just '0')
+      ' Second parameter → PR1 
+      ' Result variable  → PR0 (overlaps first param)
+      ' First local      → first available after params
+      ' Maximum total: 16 registers
+
+limitations:
+  size_limit: "16 longs maximum (params + result + locals)"
+  no_jumps_outside: "Cannot jump outside ORG/END block"
+  no_hub_exec: "Runs in COG RAM only"
+  no_calls: "Cannot CALL subroutines outside block"
+  local_labels: "Labels must start with dot (.label)"
+
+examples:
+  basic_pin_control:
+    description: "Fast pin manipulation"
+    code: |
+      PUB pulse_pin(pin, duration)
+        ORG
+          drvh    pin              ' Drive pin high
+          waitx   duration         ' Wait specified cycles
+          drvl    pin              ' Drive pin low
+        END
+    source: common_pattern
+    
+  return_value:
+    description: "Return value from PASM2"
+    code: |
+      PUB fast_multiply(a, b) : product
+        ORG
+          mul     a, b             ' Multiply parameters
+          ' Result already in 'a' which maps to 'product'
+        END
+        ' product now contains a * b
+    source: math_optimization
+    
+  bit_manipulation:
+    description: "Fast bit operations"
+    code: |
+      PUB reverse_bits(value) : result
+        ORG
+          rev     value            ' Reverse bits
+          ' value (PR0) overlaps with result
+        END
+    source: bit_operations
+    
+  hub75_rgb_output:
+    description: "Parallel RGB data output for LED panel"
+    code: |
+      PUB output_rgb(rgb_data, rgb_mask, clk_pin) | temp
+        ORG
+          setq    rgb_mask         ' Set Q register
+          muxq    outa, rgb_data   ' Output RGB bits
+          drvh    clk_pin          ' Clock high
+          waitx   #2               ' Hold time
+          drvl    clk_pin          ' Clock low
+          waitx   #2               ' Hold time
+        END
+    source: hub75_driver
+    
+  local_variables:
+    description: "Using locals for temporary storage"
+    code: |
+      PUB swap_nibbles(value) : result | temp
+        ORG
+          mov     temp, value      ' Copy to temp
+          shr     temp, #4         ' Upper nibble to lower
+          shl     value, #4        ' Lower nibble to upper
+          and     value, #$F0      ' Mask upper
+          and     temp, #$0F       ' Mask lower
+          or      value, temp      ' Combine
+          ' value (PR0) is also result
+        END
+    source: data_manipulation
+    
+  timing_critical_protocol:
+    description: "Bit-banged protocol with precise timing"
+    code: |
+      PUB send_bit(pin, bit_value) | mask
+        ORG
+          mov     mask, #1         ' Create pin mask
+          shl     mask, pin        ' Shift to pin position
+          
+          test    bit_value, #1 wc ' Check bit value
+          muxc    outa, mask       ' Set output based on C
+          
+          or      dira, mask       ' Enable output
+          waitx   #10              ' Bit time
+          andn    dira, mask       ' Disable output
+        END
+    source: bit_bang_protocol
+
+common_patterns:
+  fast_math:
+    description: "Use PASM2 for fast math operations"
+    operations:
+      - "MUL - 2-cycle multiply"
+      - "DIV - Fast division"
+      - "SQRT - Square root"
+      - "REV - Bit reversal"
+      - "ENCOD - Encode bit position"
+    
+  pin_control:
+    description: "Direct pin manipulation"
+    operations:
+      - "DRVH/DRVL - Drive high/low"
+      - "FLTL/FLTH - Float low/high"
+      - "TESTP - Test pin state"
+      - "PINTOGGLE - Toggle pin"
+    
+  timing_control:
+    description: "Precise timing operations"
+    operations:
+      - "WAITX - Wait specific cycles"
+      - "WAITCT - Wait for CT match"
+      - "GETCT - Get current time"
+      - "ADDCT - Add to CT value"
+
+accessing_spin_variables:
+  parameters:
+    description: "Parameters are passed in PR0, PR1, etc."
+    example: |
+      PUB test(a, b, c)
+        ORG
+          add     a, b       ' PR0 += PR1
+          add     a, c       ' PR0 += PR2
+          ' Result in PR0 (first param)
+        END
+        RETURN a           ' Return modified value
+    
+  hub_variables:
+    description: "Access Spin2 variables in hub"
+    example: |
+      VAR
+        LONG hub_data
+        
+      PUB update_hub() | ptr
+        ptr := @hub_data
+        ORG
+          wrlong  #42, ptr   ' Write to hub variable
+        END
+    
+  dat_access:
+    description: "Access DAT section data"
+    example: |
+      DAT
+        table   LONG  1, 2, 3, 4
+        
+      PUB lookup(index) : value | ptr
+        ptr := @table
+        ORG
+          shl     index, #2  ' Convert to byte offset
+          add     ptr, index ' Add offset
+          rdlong  value, ptr ' Read from table
+        END
+
+best_practices:
+  when_to_use:
+    - "Timing-critical operations (< 100 cycles)"
+    - "Bit manipulation and math"
+    - "Direct hardware control"
+    - "Small performance bottlenecks"
+    - "Protocol bit-banging"
+    
+  when_not_to_use:
+    - "Complex algorithms (> 16 longs)"
+    - "Extensive branching logic"
+    - "Operations requiring subroutines"
+    - "Code needing debugging"
+    
+  optimization_tips:
+    - "Keep code small and focused"
+    - "Use locals sparingly"
+    - "Minimize parameter count"
+    - "Consider COG driver for complex code"
+    - "Profile to verify performance gain"
+
+debugging:
+  challenges:
+    - "No single-stepping through PASM2"
+    - "Limited visibility of registers"
+    - "Hard to debug timing issues"
+    
+  techniques:
+    - "Use DEBUG statements before/after"
+    - "Toggle pins for timing verification"
+    - "Return intermediate values"
+    - "Test in separate PASM2 COG first"
+
+integration_with_spin2:
+  execution_flow:
+    - "Spin2 interpreter loads PASM2 to COG"
+    - "Jumps to PASM2 code"
+    - "PASM2 executes at full speed"
+    - "Returns to Spin2 after END"
+    
+  performance:
+    spin2_overhead: "~20 cycles to enter/exit"
+    pasm2_speed: "2 cycles per instruction"
+    typical_speedup: "10-100x for tight loops"
+
+limitations_workarounds:
+  size_limit_workaround:
+    problem: "Need more than 16 longs"
+    solution: "Launch PASM2 COG or chain ORG blocks"
+    
+  subroutine_workaround:
+    problem: "Need to call subroutines"
+    solution: "Use inline macros or separate COG"
+    
+  debugging_workaround:
+    problem: "Hard to debug PASM2"
+    solution: "Develop in separate COG first"
+
+references:
+  - spin2_manual: Inline PASM2 section
+  - hub75_driver: RGB panel output patterns
+  - flash_fs: Timing-critical operations
+  - optimization_guide: When to use inline PASM2

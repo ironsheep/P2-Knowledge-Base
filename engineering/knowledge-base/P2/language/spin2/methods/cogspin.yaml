@@ -1,5 +1,5 @@
 # Spin2 Method: COGSPIN
-# Source: Spin2 v51 documentation
+# Source: Spin2 v51 documentation, P2-FLASH-FS analysis
 # Purpose: Start Spin2 method in a cog
 
 method: "COGSPIN"
@@ -10,6 +10,8 @@ description: |
   Loads the Spin2 interpreter into the cog and begins executing the specified method.
   Returns the cog number that was started, or -1 if no cog was available.
   Essential for parallel Spin2 execution.
+documentation_source: enhanced
+documentation_level: comprehensive
 
 syntax: "COGSPIN(CogNum, Method({Parameters}), StackAddress) : CogID"
 
@@ -104,6 +106,52 @@ examples:
         REPEAT i FROM 0 TO 3
           COGSPIN(NEWCOG, process_chunk(i), @cog_stacks[i])
     description: "Launch multiple parallel processors"
+    
+  - code: |
+      ' Multi-COG Flash FS stress test pattern
+      CON
+        NUM_TESTER_COGS = 7
+        STACK_SIZE_LONGS = 64
+        
+      DAT
+        ' Per-COG stacks in DAT for persistence
+        stacks  LONG  0[NUM_TESTER_COGS * STACK_SIZE_LONGS]
+        results BYTE  0[8]  ' One per COG
+        lock    LONG  -1    ' Shared resource lock
+        
+      PUB stress_test() | idx
+        ' Initialize lock for file system access
+        lock := LOCKNEW()
+        
+        ' Launch test COGs with indexed stacks
+        REPEAT idx FROM 0 TO NUM_TESTER_COGS-1
+          COGSPIN(NEWCOG, fs_tester(idx), @stacks[idx * STACK_SIZE_LONGS])
+        
+        ' Monitor results
+        REPEAT
+          show_results()
+          WAITMS(1000)
+          
+      PRI fs_tester(cog_index) | handle
+        ' Each COG performs random file operations
+        REPEAT
+          ' Random delay to create contention
+          WAITMS(GETRND() & $FF)
+          
+          ' Acquire lock for file system access
+          REPEAT WHILE NOT LOCKTRY(lock)
+          
+          ' Perform file operation
+          handle := open("test.dat", "r")
+          IF handle >= 0
+            ' Read/write operations
+            results[cog_index]++
+            close(handle)
+          
+          ' Release lock
+          LOCKREL(lock)
+    description: "Multi-COG flash filesystem stress test"
+    source: P2-FLASH-FS
 
 method_execution:
   interpreter: "Each cog gets its own Spin2 interpreter"
@@ -120,17 +168,48 @@ common_uses:
   - "Multi-threaded applications"
   - "Separate UI and processing"
   - "Real-time event handlers"
+  - "Multi-COG stress testing"
+  - "Parallel file system access"
+
+production_patterns:
+  multi_cog_with_locks:
+    description: "Pattern for safe multi-COG resource access"
+    pattern: |
+      1. Allocate shared lock in DAT
+      2. Create per-COG stacks in DAT
+      3. Launch COGs with indexed stack addresses
+      4. Use LOCKTRY/LOCKREL for resource protection
+      5. Track per-COG results/status
+    source: P2-FLASH-FS
+    
+  indexed_stack_allocation:
+    description: "Efficient stack allocation for multiple COGs"
+    code: |
+      DAT
+        stacks LONG 0[NUM_COGS * STACK_SIZE]
+        
+      PUB start_cogs() | i
+        REPEAT i FROM 0 TO NUM_COGS-1
+          COGSPIN(NEWCOG, worker(i), @stacks[i * STACK_SIZE])
+    benefits:
+      - "Predictable memory layout"
+      - "Easy to adjust stack sizes"
+      - "Persistent across method calls"
 
 related_methods:
   - "COGINIT - Start PASM code in a cog"
   - "COGSTOP - Stop a running cog"
   - "COGID - Get current cog ID"
   - "COGCHK - Check if cog is running"
+  - "LOCKNEW - Allocate lock for synchronization"
+  - "LOCKTRY - Try to acquire lock"
+  - "LOCKREL - Release lock"
 
 synchronization:
   shared_variables: "Use locks for thread-safe access"
   communication: "Use hub RAM for data exchange"
   coordination: "Use COGATN/POLLATN for signaling"
+  file_system_access: "Must use locks for flash FS operations"
 
 notes:
   - "Method runs until it returns or cog is stopped"
@@ -138,6 +217,7 @@ notes:
   - "Each cog has independent method call stack"
   - "Parameters are passed by value"
   - "Cannot share local variables between cogs"
+  - "Flash FS requires lock protection for multi-COG access"
 
 best_practices:
   - "Always check return value for -1"
@@ -145,15 +225,19 @@ best_practices:
   - "Use locks for shared variable access"
   - "Initialize shared data before starting cogs"
   - "Stop cogs cleanly when done"
+  - "Use DAT for persistent stack allocation"
+  - "Implement proper lock cleanup on errors"
 
 warnings:
   - "Stack overflow is not detected"
   - "Insufficient stack causes crashes"
   - "VAR variables need synchronization"
   - "No automatic resource cleanup"
+  - "File system not thread-safe without locks"
 
 see_also:
   - "language/spin2/methods/coginit.yaml"
   - "language/spin2/methods/cogstop.yaml"
   - "language/spin2/methods/locknew.yaml"
   - "language/spin2/constructs/method_definition.yaml"
+  - "concepts/multi_cog_synchronization.yaml"

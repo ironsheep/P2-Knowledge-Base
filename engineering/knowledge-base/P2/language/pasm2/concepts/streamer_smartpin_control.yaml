@@ -2,11 +2,15 @@ concept: streamer_smartpin_control
 title: Streamer and Smart Pin Control
 category: peripheral_control
 description: Hardware streaming engine and autonomous Smart Pin configuration for high-speed I/O
+documentation_source: enhanced
+documentation_level: comprehensive
 
 overview: |
   The P2 includes a hardware streamer for high-bandwidth data movement and 64 Smart Pins capable of
   autonomous operation. The streamer handles DMA-like transfers between hub memory and pins, while
   Smart Pins implement various protocols and timing functions independently of the cog.
+  
+  CRITICAL: Proper initialization order is essential for reliable operation.
 
 streamer_system:
   streamer_engine:
@@ -25,8 +29,14 @@ streamer_system:
       parameters:
         mode: "32-bit mode configuration"
         count: "Transfer count"
-      example: |
-        XINIT ##STREAMER_MODE, ##byte_count
+      critical_timing: |
+        ' CRITICAL: Start Smart Pins BEFORE XINIT!
+        dirh    #SPI_CLK_PIN      ' Start clock first
+        dirh    #SPI_MOSI_PIN     ' Then MOSI
+        dirh    #SPI_MISO_PIN     ' Then MISO
+        xinit   xfer_config, #0   ' Finally start streamer
+        ' This order prevents data corruption
+      source: flash_loader.spin2
     
     XSTOP:
       syntax: "XSTOP"
@@ -78,16 +88,23 @@ smart_pin_system:
     WXPIN:
       syntax: "WXPIN value, #pin"
       operation: "Write X parameter to Smart Pin"
-      use: "Set baud rate, period, etc."
-      example: |
-        WXPIN baud_rate, #tx_pin
+      use: "Set baud rate, period, clock source, etc."
+      spi_clock_example: |
+        ' For SPI clock generation
+        wxpin   #1, #SPI_CLK_PIN  ' Timebase = sysclk/2
+      source: flash_loader.spin2
     
     WYPIN:
       syntax: "WYPIN value, #pin"
       operation: "Write Y parameter to Smart Pin"
-      use: "Send data, set count, etc."
-      example: |
-        WYPIN char, #tx_pin  ' Send character
+      use: "Send data, set count, trigger operations"
+      multiple_uses: |
+        ' Y register serves different purposes:
+        wypin   pwm_period, pwm_pin      ' PWM: Set base period
+        wypin   data_byte, spi_pin       ' SPI: Transmit data
+        wypin   #1, adc_pin              ' ADC: Trigger conversion
+        wypin   #0, any_pin              ' Universal: Acknowledge
+      source: isp_bldc_motor.spin2
     
     DIRH:
       syntax: "DIRH #pin"
@@ -122,6 +139,17 @@ smart_pin_system:
       syntax: "TESTP #pin {WC/WZ}"
       operation: "Test pin state"
       flags: "C = pin state, Z = !pin state"
+      hall_sensor_example: |
+        ' Build Hall sensor state for motor control
+        mov     hall_state, #0
+        testp   #HALL_A_PIN    wc
+        rcl     hall_state, #1
+        testp   #HALL_B_PIN    wc
+        rcl     hall_state, #1
+        testp   #HALL_C_PIN    wc
+        rcl     hall_state, #1
+        ' hall_state = 3-bit Hall pattern
+      source: isp_bldc_motor.spin2
 
 smart_pin_modes:
   serial_modes:
@@ -147,6 +175,29 @@ smart_pin_modes:
           TESTP #pin WC
           IF_NC JMP #.wait
         RDPIN char, #pin
+    
+    spi_modes:
+      transition_clock:
+        mode: "P_TRANSITION_OUTPUT"
+        description: "Generate continuous SPI clock"
+        code: |
+          wrpin   ##P_TRANSITION_OUTPUT | P_OE, #SPI_CLK_PIN
+          wxpin   #1, #SPI_CLK_PIN        ' sysclk/2
+          wypin   #0, #SPI_CLK_PIN        ' Start transitions
+          dirh    #SPI_CLK_PIN
+        source: flash_loader.spin2
+      
+      sync_tx:
+        mode: "P_SYNC_TX"
+        description: "SPI MOSI transmission"
+        x_param: "Clock pin<<24 | bit_count"
+        y_param: "Data to transmit"
+        
+      sync_rx:
+        mode: "P_SYNC_RX"
+        description: "SPI MISO reception"
+        x_param: "Clock pin<<24 | bit_count"
+        result: "Received data"
 
   pulse_modes:
     pulse_output:
@@ -158,6 +209,16 @@ smart_pin_modes:
       mode: "P_PWM_TRIANGLE"
       x_param: "Frame period"
       y_param: "Duty cycle"
+      
+    pwm_sawtooth:
+      mode: "P_PWM_SAWTOOTH"
+      description: "PWM for motor control"
+      dead_time_critical: |
+        ' CRITICAL: Dead-time prevents shoot-through
+        ' High-side and low-side must never overlap!
+        sub     high_duty, dead_time
+        add     low_start, dead_time
+      source: isp_bldc_motor.spin2
       
     nco_frequency:
       mode: "P_NCO_FREQ"
@@ -179,71 +240,107 @@ smart_pin_modes:
       mode: "P_HIGH_TICKS"
       x_param: "Measurement window"
       result: "High time in ticks"
+    
+    quadrature_decoder:
+      mode: "P_QUADRATURE"
+      description: "Hardware quadrature decoder"
+      code: |
+        wrpin   ##P_QUADRATURE, encoder_pin_a
+        wxpin   #0, encoder_pin_a
+        dirh    encoder_pin_a
+        rdpin   position, encoder_pin_a  ' Get count
+        wypin   #0, encoder_pin_a        ' Reset count
+      source: motor_encoder
+  
+  adc_modes:
+    calibrated_adc:
+      mode: "P_ADC_1X"
+      calibration_sequence: |
+        ' CRITICAL: Calibrate ADC for accuracy
+        wrpin   ##P_ADC_GIO, adc_pin    ' Ground cal
+        wxpin   #%10_0111, adc_pin      ' 128 samples
+        dirh    adc_pin
+        waitx   ##2000
+        rdpin   gnd_level, adc_pin
+        
+        wrpin   ##P_ADC_VIO, adc_pin    ' VIO cal
+        wypin   #0, adc_pin
+        waitx   ##2000
+        rdpin   vio_level, adc_pin
+        
+        ' Calculate scale factor
+        sub     vio_level, gnd_level
+      source: isp_bldc_motor.spin2
+  
+  repository_mode:
+    data_mailbox:
+      mode: "P_REPOSITORY"
+      description: "Inter-COG data sharing"
+      code: |
+        ' COG A writes
+        wrpin   ##P_REPOSITORY, repo_pin
+        dirh    repo_pin
+        wypin   data_value, repo_pin
+        
+        ' COG B reads
+        rdpin   received, repo_pin
+      source: multi_cog_pattern
 
 common_patterns:
-  serial_transmit:
+  spi_flash_access:
+    description: "Complete SPI flash read with streamer"
     code: |
-      ' Configure for 115200 baud
-      MOV baud, ##7_500_000 / 115200
-      WRPIN ##P_ASYNC_TX, #tx_pin
-      WXPIN baud, #tx_pin
-      DIRH #tx_pin
+      ' Setup pins (ORDER CRITICAL!)
+      wrpin   spi_ck_mode, #SPI_CK
+      wxpin   #1, #SPI_CK
+      wypin   #0, #SPI_CK
+      wrpin   spi_tx_mode, #SPI_TX
+      wxpin   x_config, #SPI_TX
+      wrpin   spi_rx_mode, #SPI_RX
+      wxpin   x_config, #SPI_RX
       
-      ' Send string
-      .send_loop
-        RDBYTE char, string_ptr++
-        CMP char, #0 WZ
-        IF_Z JMP #.done
-        .wait_ready
-          TESTP #tx_pin WC
-          IF_C JMP #.wait_ready
-        WYPIN char, #tx_pin
-        JMP #.send_loop
-      .done
-    description: "Async serial transmission"
-
-  video_output:
-    code: |
-      ' Setup streamer for video
-      WRFAST ##0, ##frame_buffer
-      XINIT ##STREAMER_MODE_32BIT, ##pixels_per_line
+      ' Start pins BEFORE streamer!
+      dirh    #SPI_CK
+      dirh    #SPI_TX
+      dirh    #SPI_RX
       
-      ' Stream continues automatically
-      ' Streamer will signal when done
-    description: "Video pixel streaming"
-
-  frequency_generation:
+      ' Now start streamer
+      xinit   xfer_config, #0
+    source: flash_loader.spin2
+  
+  motor_control_pwm:
+    description: "3-phase motor control with dead-time"
     code: |
-      ' Configure NCO mode
-      WRPIN ##P_NCO_FREQ, #clk_pin
-      WXPIN freq_value, #clk_pin
-      WYPIN #1, #clk_pin        ' Enable
-      DIRH #clk_pin
-    description: "Generate clock signal"
-
-  adc_sampling:
-    code: |
-      ' Configure ADC mode
-      WRPIN ##P_ADC_1X, #adc_pin
-      WXPIN #0, #adc_pin
-      DIRH #adc_pin
+      ' Setup PWM pins with dead-time
+      mov     pa, pwm_config
+      or      pa, #P_OE
+      wrpin   pa, #PWM_A_HIGH
+      wrpin   pa, #PWM_A_LOW
+      wrpin   pa, #PWM_B_HIGH
+      wrpin   pa, #PWM_B_LOW
+      wrpin   pa, #PWM_C_HIGH
+      wrpin   pa, #PWM_C_LOW
       
-      ' Read samples
-      .sample
-        RDPIN sample, #adc_pin
-        ' Process sample
-    description: "Analog sampling"
+      ' Set base period
+      wxpin   pwm_period, #PWM_A_HIGH
+      ' ... repeat for all pins ...
+      
+      ' Update with commutation pattern
+      wxpin   phase_a_duty, #PWM_A_HIGH
+      wypin   #1, #PWM_A_HIGH  ' Trigger update
+    source: isp_bldc_motor.spin2
 
 coordination:
   streamer_smartpin:
-    - "Streamer can drive multiple Smart Pins"
-    - "Smart Pins can trigger streamer events"
-    - "Coordinate via events and interrupts"
+    critical_order: "Smart Pins MUST start before XINIT"
+    reason: "Prevents data corruption and timing issues"
+    verified_in: "flash_loader.spin2"
     
   multi_pin_sync:
-    - "Configure pins in sequence"
-    - "Use DIR to start simultaneously"
+    - "Configure all pins first"
+    - "Use DIRH in sequence to start"
     - "Smart Pins run independently"
+    - "Use locks for multi-COG coordination"
 
 performance:
   streamer:
@@ -255,28 +352,36 @@ performance:
     - "Independent of cog timing"
     - "Sub-microsecond precision"
     - "64 pins simultaneous operation"
+    - "Single-cycle LUT access for tables"
 
 debugging:
   monitoring:
     - "Use RDPIN to check status"
     - "TESTP for pin state"
     - "Add LED indicators"
+    - "Use lock[15] for debug monitor"
     
   common_issues:
-    - "Wrong mode configuration"
+    - "Wrong initialization order (pins before streamer!)"
+    - "Missing ADC calibration"
     - "Incorrect X/Y parameters"
     - "Forgetting DIRH to enable"
-    - "Not acknowledging with AKPIN"
+    - "Not acknowledging with AKPIN or WYPIN"
+    - "Missing PWM dead-time (hardware damage!)"
 
 best_practices:
-  - "Configure mode before parameters"
-  - "Enable with DIRH after setup"
-  - "Check status before sending data"
-  - "Use events for async operation"
+  - "ALWAYS start Smart Pins before XINIT"
+  - "Calibrate ADC before measurements"
+  - "Include dead-time for motor control"
+  - "Use repository mode for COG communication"
+  - "Reserve lock[15] for debug"
   - "Document Smart Pin assignments"
   - "Test timing with oscilloscope"
+  - "Use LUT for lookup tables"
 
 references:
   - silicon_doc: Streamer section
   - silicon_doc: Smart Pins section
-  - app_notes: Smart Pin cookbook
+  - flash_loader.spin2: SPI coordination
+  - isp_bldc_motor.spin2: PWM and ADC patterns
+  - Spin2_debugger.spin2: Debug infrastructure

@@ -5,9 +5,117 @@ timing:
   cycles: 2
   type: fixed
 group: Hub Control - Locks
-description: Release LOCK D[3:0]. If D is a register and WC, get current/last cog id of LOCK owner into
+description: |
+  Release LOCK D[3:0]. If D is a register and WC, get current/last cog id of LOCK owner into
   D and LOCK status into C.
+  
+  Key features:
+  - Releases previously acquired lock
+  - Optional owner identification with WC
+  - Essential for proper resource cleanup
+  - Must balance with LOCKTRY calls
 category: Hub Control - Locks
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+documentation_source: enhanced
+documentation_level: comprehensive
+examples:
+  - name: Basic Lock Release
+    description: Release lock after resource access
+    code: |
+      ' Access protected resource
+      protected_access
+              locktry #DATA_LOCK         wc   ' Acquire lock
+      if_nc   ret                          ' Failed to get lock
+              
+              ' Access shared data
+              rdlong  data, shared_ptr
+              ' Process data...
+              wrlong  data, shared_ptr
+              
+              ' Always release lock
+              lockrel #DATA_LOCK               ' Release for others
+              ret
+    source: resource_protection
+    
+  - name: Debug Lock Management
+    description: Release debug lock with owner check
+    code: |
+      ' Release debug lock and check who had it
+      debug_cleanup
+              mov     lock_info, #15       ' Lock 15 (debug)
+              lockrel lock_info          wc   ' Release and get info
+              
+              ' lock_info now contains previous owner COG ID
+              ' C = 1 if lock was held
+      if_c    call    #log_debug_release   ' Log who released
+              ret
+    source: Spin2_debugger.spin2
+    
+  - name: Error Recovery
+    description: Release all locks on error
+    code: |
+      ' Emergency release of all held locks
+      emergency_release
+              mov     count, #16           ' 16 locks total
+              mov     lock_num, #0
+      .loop   lockrel lock_num             ' Release if we own it
+              add     lock_num, #1
+              djnz    count, #.loop
+              ret
+              
+      ' Called on fatal error before COG stop
+    source: error_handling
+    
+  - name: Lock Ownership Verification
+    description: Check lock owner before operations
+    code: |
+      ' Verify we own the lock before modifying
+      verify_ownership
+              cogid   my_cog               ' Get our COG ID
+              mov     lock_check, lock_num
+              lockrel lock_check         wc   ' Get owner info
+              
+              ' lock_check[3:0] = owner COG ID
+              ' C = 1 if lock was held
+              
+              and     lock_check, #$07     ' Mask to COG ID
+              cmp     lock_check, my_cog wz
+      if_nz   jmp     #not_owner           ' We don't own it
+              
+              ' Re-acquire since we released it
+              locktry lock_num           wc
+              ret
+    source: lock_validation
+    
+  - name: Scoped Lock Release
+    description: Automatic lock release pattern
+    code: |
+      ' Function with guaranteed lock release
+      safe_operation
+              locktry #CRITICAL_LOCK     wc
+      if_nc   ret                          ' Can't get lock
+              
+              ' Mark that we have lock
+              bith    flags, #HAVE_LOCK
+              
+              ' Do operation (may have multiple exit points)
+              call    #complex_operation
+              
+      .cleanup
+              ' Always release if we got it
+              testb   flags, #HAVE_LOCK  wc
+      if_c    lockrel #CRITICAL_LOCK
+              bitl    flags, #HAVE_LOCK
+              ret
+    source: structured_locking
+    
+related_instructions:
+  - LOCKTRY: Try to acquire lock
+  - LOCKNEW: Allocate new lock  
+  - LOCKRET: Return lock to pool
+  - COGID: Get current COG ID
+  
+notes:
+  - Always release locks when done
+  - WC option returns previous owner
+  - Releasing unheld lock is safe (no-op)
+  - Critical for preventing deadlocks

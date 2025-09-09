@@ -1,0 +1,424 @@
+concept: multi_cog_synchronization
+title: Multi-COG Synchronization and Coordination
+category: parallel_processing
+description: Hardware and software mechanisms for coordinating multiple COGs in P2
+documentation_source: production_code_analysis
+documentation_level: comprehensive
+created: 2025-09-09
+
+overview: |
+  P2 provides 8 independent COGs that can run in parallel. Effective multi-COG
+  programming requires understanding synchronization primitives: hardware locks,
+  attention signals, shared memory, and Smart Pin repositories. Production code
+  shows sophisticated patterns for resource protection, debug monitoring, and
+  parallel processing.
+
+hardware_primitives:
+  locks:
+    count: 16
+    numbers: "0-15"
+    atomic_operations: "Test-and-set via LOCKTRY"
+    traditional_usage:
+      lock_15: "Reserved for debug monitor"
+      lock_14: "Often used for serial console"
+      lock_0_13: "Application-specific"
+    
+    lock_operations:
+      LOCKTRY:
+        syntax: "LOCKTRY {#}lock_num {WC}"
+        operation: "Try to acquire lock (non-blocking)"
+        returns: "C=1 if acquired, C=0 if busy"
+        example: |
+          acquire_resource
+                  locktry #RESOURCE_LOCK  wc
+          if_nc   ret                     ' Failed
+                  ' Critical section
+                  ' ...
+                  lockrel #RESOURCE_LOCK
+                  ret
+        source: multi_cog_pattern
+      
+      LOCKREL:
+        syntax: "LOCKREL {#}lock_num {WC}"
+        operation: "Release lock"
+        with_wc: "Returns previous owner COG ID"
+        
+      LOCKNEW:
+        syntax: "LOCKNEW lock_reg {WC}"
+        operation: "Allocate unused lock"
+        returns: "Lock number in D, C=1 if none available"
+        
+      LOCKRET:
+        syntax: "LOCKRET {#}lock_num"
+        operation: "Return lock to pool"
+    
+  attention_signals:
+    mechanism: "COG-to-COG interrupt/event signaling"
+    operations:
+      COGATN:
+        syntax: "COGATN {#}cog_mask"
+        operation: "Signal attention to COG(s)"
+        example: |
+          ' Signal COG 3
+          cogatn  #%0000_1000
+          
+          ' Signal multiple COGs
+          cogatn  #%0000_1111     ' COGs 0-3
+      
+      POLLATN:
+        syntax: "POLLATN {WC}"
+        operation: "Check and clear attention"
+        returns: "C=1 if attention was set"
+        
+      WAITATN:
+        syntax: "WAITATN"
+        operation: "Wait for attention signal"
+        use: "Block until signaled"
+    
+  shared_memory:
+    hub_ram: "512KB shared by all COGs"
+    atomic_ops: "Single hub operations are atomic"
+    coordination_pattern: |
+      ' Mailbox pattern
+      mailbox_base    = $7F000
+      
+      ' COG A writes request
+      wrlong  request, ##mailbox_base
+      wrlong  #1, ##mailbox_base+4     ' Flag
+      
+      ' COG B polls for request
+      .wait   rdlong  flag, ##mailbox_base+4
+              tjz     flag, #.wait
+              rdlong  request, ##mailbox_base
+              ' Process request
+              wrlong  #0, ##mailbox_base+4     ' Clear flag
+
+debug_monitor_pattern:
+  description: "Singleton debug monitor using lock[15]"
+  implementation: |
+    ' Only one COG can be debug monitor
+    debug_init
+            locktry #15             wc   ' Try for debug lock
+    if_nc   jmp     #not_debug_cog       ' Another COG is monitor
+            
+            ' We are the debug monitor
+            loc     pa, #\debug_isr_code
+            setq    #255                 ' Load ISR
+            rdlong  0, pa
+            
+            mov     ijmp3, ##debug_isr
+            setint3 #BRK_EVENT           ' Enable debug interrupts
+            
+            ' Never release lock[15] - we own debug
+    
+    not_debug_cog
+            ' Regular COG operation
+            ' Can use BRK to trigger debug
+  source: Spin2_debugger.spin2
+  critical_aspects:
+    - "Lock[15] ensures single monitor"
+    - "First COG to acquire becomes monitor"
+    - "Other COGs become clients"
+    - "Monitor never releases lock"
+
+resource_protection_patterns:
+  simple_mutex:
+    description: "Basic mutual exclusion"
+    code: |
+      ' Define lock number
+      SPI_LOCK = 5
+      
+      spi_transaction
+              locktry #SPI_LOCK       wc
+      if_nc   jmp     #spi_transaction     ' Spin wait
+              
+              ' Exclusive SPI access
+              call    #spi_select
+              call    #spi_transfer
+              call    #spi_deselect
+              
+              lockrel #SPI_LOCK
+              ret
+    
+  timeout_mutex:
+    description: "Mutex with timeout"
+    code: |
+      acquire_with_timeout
+              mov     timeout, ##1_000_000
+      .retry  locktry #RESOURCE_LOCK  wc
+      if_c    ret                          ' Got it
+              djnz    timeout, #.retry
+              ' Timeout - handle error
+              neg     result, #1               ' Return error
+              ret
+    
+  multi_resource:
+    description: "Acquire multiple resources (avoid deadlock)"
+    code: |
+      ' Always acquire in same order!
+      acquire_all
+              locktry #LOCK_A        wc
+      if_nc   jmp     #acquire_all         ' Wait for A
+              
+              locktry #LOCK_B        wc
+      if_nc   lockrel #LOCK_A              ' Release A
+      if_nc   jmp     #acquire_all         ' Retry
+              
+              locktry #LOCK_C        wc
+      if_nc   lockrel #LOCK_B              ' Release B
+      if_nc   lockrel #LOCK_A              ' Release A
+      if_nc   jmp     #acquire_all         ' Retry
+              
+              ' Have all three locks
+              ret
+    
+  scoped_lock:
+    description: "RAII-style automatic release"
+    code: |
+      protected_operation
+              locktry lock_num       wc
+      if_nc   ret                          ' Can't proceed
+              
+              bith    flags, #HAVE_LOCK    ' Mark ownership
+              
+              ' Do work (may have multiple exits)
+              call    #complex_work
+              
+      .cleanup
+              testb   flags, #HAVE_LOCK   wc
+      if_c    lockrel lock_num
+              bitl    flags, #HAVE_LOCK
+              ret
+
+producer_consumer_patterns:
+  ring_buffer:
+    description: "Lock-free ring buffer"
+    code: |
+      ' Hub memory layout
+      ring_base       = $70000
+      ring_size       = 1024        ' Longs
+      ring_mask       = ring_size-1
+      head_ptr        = ring_base + (ring_size*4)
+      tail_ptr        = head_ptr + 4
+      
+      ' Producer (any COG)
+      produce_data
+              rdlong  head, ##head_ptr
+              mov     next_head, head
+              incmod  next_head, ring_mask
+              
+              ' Check if full
+              rdlong  tail, ##tail_ptr
+              cmp     next_head, tail    wz
+      if_z    ret                        ' Buffer full
+              
+              ' Write data
+              shl     head, #2
+              add     head, ##ring_base
+              wrlong  data, head
+              
+              ' Update head
+              wrlong  next_head, ##head_ptr
+              ret
+      
+      ' Consumer (any COG)
+      consume_data
+              rdlong  tail, ##tail_ptr
+              rdlong  head, ##head_ptr
+              cmp     tail, head         wz
+      if_z    ret                        ' Buffer empty
+              
+              ' Read data
+              mov     addr, tail
+              shl     addr, #2
+              add     addr, ##ring_base
+              rdlong  data, addr
+              
+              ' Update tail
+              incmod  tail, ring_mask
+              wrlong  tail, ##tail_ptr
+              ret
+    
+  mailbox_system:
+    description: "Multi-COG mailbox communication"
+    code: |
+      ' Each COG has mailbox
+      mailbox_size    = 16         ' Bytes per mailbox
+      mailbox_base    = $7F000
+      
+      ' Send message to COG
+      send_to_cog
+              ' PA = target COG, PB = message
+              shl     pa, #4          ' *16 for mailbox offset
+              add     pa, ##mailbox_base
+              wrlong  pb, pa          ' Write message
+              add     pa, #4
+              wrlong  #1, pa          ' Set flag
+              
+              ' Signal target COG
+              mov     mask, #1
+              shl     mask, target_cog
+              cogatn  mask
+              ret
+      
+      ' Check own mailbox
+      check_mailbox
+              cogid   pa
+              shl     pa, #4
+              add     pa, ##mailbox_base+4
+              rdlong  flag, pa
+              tjz     flag, #.no_message
+              
+              ' Get message
+              sub     pa, #4
+              rdlong  message, pa
+              add     pa, #4
+              wrlong  #0, pa          ' Clear flag
+              
+              ' Process message
+              call    #handle_message
+      .no_message
+              ret
+
+smart_pin_repository:
+  description: "Use Smart Pins for inter-COG data exchange"
+  benefits: "No hub access needed, very fast"
+  pattern: |
+    ' Configure repository pin
+    setup_repository
+            wrpin   ##P_REPOSITORY, #REPO_PIN
+            dirh    #REPO_PIN
+            ret
+    
+    ' COG A writes
+    write_shared_data
+            wypin   data_value, #REPO_PIN
+            ret
+    
+    ' COG B reads
+    read_shared_data
+            rdpin   data_value, #REPO_PIN
+            ret
+  use_cases:
+    - "Real-time data sharing"
+    - "Status flags"
+    - "Small mailboxes"
+    - "Semaphores"
+
+parallel_processing_patterns:
+  work_distribution:
+    description: "Distribute work among COGs"
+    code: |
+      ' Master COG
+      distribute_work
+              mov     work_index, #0
+              mov     cog_num, #1     ' Start with COG 1
+              
+      .loop   ' Assign work to each COG
+              shl     work_index, #16
+              or      work_index, cog_num
+              coginit cog_num, #worker_code, work_index
+              add     cog_num, #1
+              add     work_index, #WORK_CHUNK
+              cmp     cog_num, #8     wz
+      if_nz   jmp     #.loop
+              
+              ' Wait for completion
+              mov     mask, #$FE      ' COGs 1-7
+      .wait   cogatn  mask            ' Signal all
+              waitatn                 ' Wait for response
+              ' Check completion status...
+    
+  barrier_synchronization:
+    description: "All COGs wait at barrier"
+    code: |
+      ' Shared barrier counter
+      barrier_count   = $7FFF0
+      barrier_target  = 8
+      
+      barrier_wait
+              ' Increment counter atomically
+              loc     ptra, #\barrier_count
+      .inc    rdlong  old, ptra
+              add     old, #1
+              wrlong  new, ptra
+              rdlong  check, ptra
+              cmp     check, old      wz
+      if_nz   jmp     #.inc           ' Retry if changed
+              
+              ' Check if all arrived
+              cmp     new, #barrier_target wz
+      if_z    jmp     #.release
+              
+              ' Wait for release
+      .wait   rdlong  count, ptra
+              cmp     count, #0       wz
+      if_nz   jmp     #.wait
+              ret
+              
+      .release
+              ' Last COG releases all
+              wrlong  #0, ptra        ' Reset counter
+              cogatn  #$FF            ' Signal all COGs
+              ret
+
+synchronization_hazards:
+  race_conditions:
+    problem: "Multiple COGs accessing shared resource"
+    solution: "Always use locks for shared access"
+    
+  deadlock:
+    problem: "Circular lock dependencies"
+    solution: "Always acquire locks in same order"
+    example: |
+      ' WRONG - can deadlock
+      cog_a:  locktry #LOCK_1
+              locktry #LOCK_2
+      
+      cog_b:  locktry #LOCK_2    ' Different order!
+              locktry #LOCK_1
+      
+      ' RIGHT - consistent order
+      both:   locktry #LOCK_1
+              locktry #LOCK_2
+    
+  priority_inversion:
+    problem: "Low-priority COG holds lock needed by high-priority"
+    solution: "Keep critical sections short"
+    
+  memory_consistency:
+    problem: "Hub access not instantaneous"
+    solution: "Use locks or atomic operations"
+
+best_practices:
+  lock_usage:
+    - "Document lock assignments clearly"
+    - "Keep critical sections minimal"
+    - "Always release locks on all exit paths"
+    - "Use timeout to prevent infinite wait"
+    - "Reserve lock[15] for debug"
+    
+  communication:
+    - "Use mailboxes for complex messages"
+    - "Use attention for signaling"
+    - "Use repository pins for fast sharing"
+    - "Design lock-free algorithms when possible"
+    
+  debugging:
+    - "Add lock ownership tracking"
+    - "Log lock acquire/release"
+    - "Detect deadlocks with timeouts"
+    - "Use debug monitor for inspection"
+    
+  performance:
+    - "Minimize lock contention"
+    - "Use lock-free algorithms"
+    - "Batch operations under single lock"
+    - "Consider COG affinity for data"
+
+references:
+  - silicon_doc: Lock and COGATN instructions
+  - Spin2_debugger.spin2: Debug monitor pattern
+  - flash_loader.spin2: Resource protection
+  - isp_bldc_motor.spin2: Multi-COG coordination
+  - parallel_algorithms: Work distribution patterns

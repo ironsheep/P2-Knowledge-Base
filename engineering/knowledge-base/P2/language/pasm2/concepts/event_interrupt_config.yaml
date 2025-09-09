@@ -2,11 +2,15 @@ concept: event_interrupt_configuration
 title: Event and Interrupt Configuration
 category: event_handling
 description: Hardware event detection and interrupt handling with 4 interrupt levels and 16 event sources
+documentation_source: enhanced
+documentation_level: comprehensive
 
 overview: |
   P2 provides sophisticated event and interrupt handling with 16 selectable event sources per cog,
   4 interrupt levels with dedicated vectors, and both polling and interrupt-driven responses.
   Events can trigger interrupts, wake from WAIT, or be polled. Each cog has independent event configuration.
+  
+  Debug infrastructure uses interrupts extensively for breakpoints and single-stepping.
 
 interrupt_system:
   interrupt_levels:
@@ -19,16 +23,20 @@ interrupt_system:
       priority: "Low"
       vector: "IJMP1"
       return: "RETI1 or RESI1"
+      typical_use: "Timer interrupts"
       
     INT2:
       priority: "High"
       vector: "IJMP2"
       return: "RETI2 or RESI2"
+      typical_use: "Pin events, Smart Pin ready"
       
     INT3:
-      priority: "Highest"
+      priority: "Highest (Debug)"
       vector: "IJMP3"
       return: "RETI3 or RESI3"
+      reserved_use: "Debug monitor ISR"
+      critical_note: "Used by Spin2 debugger infrastructure"
 
   interrupt_operations:
     SETINT1:
@@ -43,6 +51,12 @@ interrupt_system:
     SETINT3:
       syntax: "SETINT3 #event"
       operation: "Configure INT3 event source"
+      debug_use: |
+        ' Debug monitor setup
+        setint3 #0              ' Disable initially
+        mov     ijmp3, ##debug_isr
+        setint3 #BRK_EVENT     ' Enable on BRK
+      source: Spin2_debugger.spin2
       
     STALLI:
       syntax: "STALLI"
@@ -53,6 +67,11 @@ interrupt_system:
       syntax: "ALLOWI"
       operation: "Allow interrupts (enable)"
       use: "Exit critical section"
+    
+    NIXINT1_3:
+      syntax: "NIXINT1/2/3"
+      operation: "Cancel pending interrupt"
+      debug_use: "Clear pending debug interrupts"
 
   return_instructions:
     RETI0_3:
@@ -66,6 +85,74 @@ interrupt_system:
       operation: "Resume from interrupt (continue interrupted code)"
       behavior: "Like RETI but continues interrupted instruction"
       use: "For interrupts that don't fully handle event"
+
+debug_isr_architecture:
+  complete_preservation:
+    description: "Debug ISR must preserve ALL state"
+    code: |
+      debug_isr
+              ' Save every single register (comprehensive)
+              setq    #$1F            ' Save 32 registers
+              wrlong  0, ptra++       ' Save $000-$01F
+              
+              ' Save special registers
+              mov     save_pa, pa
+              mov     save_pb, pb
+              mov     save_ptra, ptra
+              mov     save_ptrb, ptrb
+              
+              ' Save interrupt state
+              getbrk  save_brk   wcz  ' Get break info
+              
+              ' Debug processing...
+              
+              ' Restore everything in reverse
+              sub     ptra, #32*4
+              setq    #$1F
+              rdlong  0, ptra
+              
+              mov     pa, save_pa
+              mov     pb, save_pb
+              mov     ptra, save_ptra
+              mov     ptrb, save_ptrb
+              
+              reti3   wcz             ' Return with flags
+    source: Spin2_debugger.spin2
+  
+  breakpoint_handling:
+    description: "Process breakpoints and debug commands"
+    code: |
+      ' Identify breakpoint type
+              getbrk  brk_code   wz   ' Get breakpoint code
+              
+              ' Dispatch on code
+              cmp     brk_code, #BP_TRACE    wz
+      if_z    jmp     #handle_trace
+              cmp     brk_code, #BP_WATCH    wz
+      if_z    jmp     #handle_watch
+              cmp     brk_code, #BP_STEP     wz
+      if_z    jmp     #handle_step
+              
+              ' Default: halt for debugger
+              jmp     #debug_prompt
+    source: Spin2_debugger.spin2
+  
+  dynamic_code_overlay:
+    description: "Load debug commands dynamically"
+    challenge: "Limited COG RAM requires overlays"
+    solution: |
+      ' Load debug command handler overlay
+      load_debug_cmd
+              loc     ptra, #\debug_cmd_table
+              add     ptra, cmd_offset
+              setq    #16-1           ' Load 16 longs
+              rdlong  overlay_area, ptra
+              
+              ' Execute overlay
+              call    #overlay_area
+              
+              ' Return to main debug loop
+    source: Spin2_debugger.spin2
 
 event_sources:
   selectable_events:
@@ -85,6 +172,7 @@ event_sources:
     13: "LOCK acquired"
     14: "LOCK lost"
     15: "External event"
+    16_debug: "BRK instruction (INT3)"
 
   event_configuration:
     SETSE1:
@@ -104,41 +192,34 @@ event_sources:
       syntax: "SETSE4 #mode"
       operation: "Configure selectable event 4"
 
-event_detection:
+  pattern_detection:
+    SETPAT:
+      syntax: "SETPAT mask, match"
+      operation: "Configure pin pattern detection"
+      use: "Trigger on specific pin combinations"
+      
+    ADDCT1_3:
+      syntax: "ADDCT1/2/3 value, #delta"
+      operation: "Set timer compare value"
+      use: "Schedule future events"
+
+event_operations:
   polling:
-    POLLINT:
-      syntax: "POLLINT {WC/WZ/WCZ}"
-      operation: "Poll interrupt events"
-      flags: "C = INT3 pending, Z = INT1 pending"
+    POLLATN:
+      syntax: "POLLATN {WC}"
+      operation: "Poll for attention, clear if set"
       
-    POLLCT1:
-      syntax: "POLLCT1 {WC/WZ/WCZ}"
-      operation: "Poll if CT >= CT1"
-      clears: "Event flag if set"
-      
-    POLLCT2:
-      syntax: "POLLCT2 {WC/WZ/WCZ}"
-      operation: "Poll if CT >= CT2"
-      
-    POLLCT3:
-      syntax: "POLLCT3 {WC/WZ/WCZ}"
-      operation: "Poll if CT >= CT3"
+    POLLCT1_3:
+      syntax: "POLLCTx {WC}"
+      operation: "Poll for CT >= CTx"
       
     POLLPAT:
-      syntax: "POLLPAT {WC/WZ/WCZ}"
-      operation: "Poll pin pattern match"
+      syntax: "POLLPAT {WC}"
+      operation: "Poll for pin pattern"
       
     POLLSE1_4:
-      syntax: "POLLSEx {WC/WZ/WCZ}"
-      operation: "Poll selectable event x"
-      
-    POLLATN:
-      syntax: "POLLATN {WC/WZ/WCZ}"
-      operation: "Poll attention from any cog"
-      
-    POLLQMT:
-      syntax: "POLLQMT {WC/WZ/WCZ}"
-      operation: "Poll if CORDIC idle"
+      syntax: "POLLSEx {WC}"
+      operation: "Poll selectable event"
 
   waiting:
     WAITINT:
@@ -233,6 +314,25 @@ common_patterns:
         RETI3
     description: "Inter-cog communication"
 
+  debug_monitor:
+    description: "Complete debug monitor setup"
+    code: |
+      ' Claim debug lock
+      locktry #15         wc
+      if_nc   jmp #debug_in_use
+      
+      ' Setup debug ISR
+      loc     pa, #\debug_isr_hub
+      setq    #256-1
+      rdlong  debug_isr_cog, pa
+      
+      ' Configure INT3 for debug
+      mov     ijmp3, ##debug_isr_cog
+      setint3 #BRK_EVENT
+      
+      ' Debug monitor ready
+    source: Spin2_debugger.spin2
+
   critical_section:
     code: |
       STALLI           ' Disable interrupts
@@ -247,11 +347,13 @@ priority_and_nesting:
     - "INT2 can interrupt INT1/0"
     - "INT1 can interrupt INT0"
     - "Same level cannot interrupt itself"
+    - "Debug (INT3) can interrupt everything"
     
   nesting_depth:
     - "Maximum 4 levels deep (one per interrupt)"
     - "Each level has own return address"
     - "Flags saved per level"
+    - "Debug ISR must handle full nesting"
 
   latency:
     response_time: "3-4 cycles from event to ISR"
@@ -259,6 +361,7 @@ priority_and_nesting:
       - "Current instruction completion"
       - "Pipeline state"
       - "Higher priority interrupts"
+    debug_impact: "Debug ISR adds ~20 cycles overhead"
 
 best_practices:
   interrupt_design:
@@ -267,18 +370,21 @@ best_practices:
     - "Use CALLA/CALLB in ISR for leaf functions"
     - "Clear event sources in ISR"
     - "Test with all interrupt combinations"
+    - "Reserve INT3 for debug infrastructure"
     
   event_selection:
     - "Use polling for non-critical events"
     - "Use interrupts for time-critical events"
     - "Configure before enabling interrupts"
     - "Document event assignments clearly"
+    - "Use lock[15] with debug interrupts"
     
   debugging:
     - "Add markers at ISR entry/exit"
     - "Track interrupt nesting depth"
     - "Verify flag preservation"
     - "Test maximum interrupt rate"
+    - "Use GETBRK to identify debug context"
 
 limitations:
   - "Only 4 interrupt levels"
@@ -287,8 +393,10 @@ limitations:
   - "Cannot interrupt AUGS/AUGD pairs"
   - "REP blocks delay interrupts"
   - "SETQ blocks are atomic"
+  - "Debug ISR size limited by COG RAM"
 
 references:
   - silicon_doc: Events and Interrupts section
   - instruction_set: Event/Interrupt instructions
+  - Spin2_debugger.spin2: Complete debug ISR implementation
   - application_notes: Interrupt handling patterns

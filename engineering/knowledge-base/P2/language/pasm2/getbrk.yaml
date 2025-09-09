@@ -5,8 +5,76 @@ timing:
   cycles: 2
   type: fixed
 group: Interrupts
-description: Get breakpoint/cog status into D according to WC/WZ/WCZ. See documentation for details.
+description: |
+  Get breakpoint/cog status into D according to WC/WZ/WCZ.
+  
+  Flag modes determine what information is retrieved:
+  - WCZ: D = 32-bit ISR call address
+  - WC: D = 8-bit COG ID in D[7:0]
+  - WZ: D = 8-bit breakpoint code in D[7:0]
+  - No flags: D = 16-bit skip pattern in D[15:0]
+  
+  Essential for debug infrastructure and multi-COG coordination.
 category: Interrupts
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+documentation_source: enhanced
+documentation_level: comprehensive
+examples:
+  - name: Get Debug ISR Address
+    description: Retrieve current debug ISR entry point
+    code: |
+      ' Get address where debug ISR will resume
+              getbrk  isr_addr        wcz      ' Get full 32-bit address
+              
+              ' Save for later restoration
+              mov     saved_isr, isr_addr
+    source: Spin2_debugger.spin2
+    
+  - name: Identify Calling COG
+    description: Get ID of COG that triggered breakpoint
+    code: |
+      ' In debug ISR, identify which COG called us
+              getbrk  cog_id          wc       ' Get COG ID in D[7:0]
+              and     cog_id, #$07             ' Mask to COG number
+              
+              ' Use for COG-specific debug handling
+              alts    cog_id, #cog_debug_table
+              mov     debug_ptr, 0-0           ' Get COG's debug data pointer
+    source: Spin2_debugger.spin2
+    
+  - name: Get Breakpoint Code
+    description: Retrieve breakpoint code for conditional handling
+    code: |
+      ' Get breakpoint code to determine action
+              getbrk  brk_code        wz       ' Get code in D[7:0]
+              
+              ' Dispatch based on code
+              cmp     brk_code, #1    wz
+      if_z    jmp     #handle_trace
+              cmp     brk_code, #2    wz  
+      if_z    jmp     #handle_watch
+              cmp     brk_code, #3    wz
+      if_z    jmp     #handle_assert
+    source: debug_dispatcher
+    
+  - name: Get Skip Pattern
+    description: Retrieve instruction skip pattern for ISR
+    code: |
+      ' Get skip pattern for instruction skipping
+              getbrk  skip_pattern             ' Get 16-bit pattern
+              
+              ' Apply skip pattern to following instructions
+              skipf   skip_pattern             ' Skip instructions per pattern
+              ' Instructions that may be skipped...
+    source: conditional_execution
+    
+related_instructions:
+  - BRK: Trigger breakpoint with code
+  - COGBRK: Trigger breakpoint in another COG
+  - SETBRK: Configure breakpoint conditions
+  - NIXINT1/2/3: Disable interrupt sources
+  
+notes:
+  - Critical for debugger implementation
+  - Different flag combinations return different data
+  - Used in debug ISR to identify context
+  - Works with BRK instruction for debugging

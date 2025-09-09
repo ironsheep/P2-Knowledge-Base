@@ -1,0 +1,204 @@
+# Smart Pin Usage Patterns from Production Code
+# Enhanced from code study: flash_loader, debugger, BLDC motor control
+
+component: Smart_Pin_Patterns
+category: practical_patterns
+description: |
+  Production-proven patterns for Smart Pin usage, extracted from
+  Parallax official code and Iron Sheep Productions projects.
+  
+documentation_source: enhanced
+documentation_level: comprehensive
+
+spi_patterns:
+  spi_clock_generation:
+    description: Generate continuous SPI clock using transition mode
+    mode: P_TRANSITION_OUTPUT
+    setup: |
+      ' Configure SPI clock pin
+      wrpin   ##P_TRANSITION_OUTPUT | P_OE, #SPI_CLK_PIN
+      wxpin   #1, #SPI_CLK_PIN        ' Timebase = sysclk/2
+      wypin   #0, #SPI_CLK_PIN        ' Start transitions
+      dirh    #SPI_CLK_PIN             ' Enable smart pin
+    source: flash_loader.spin2
+    
+  spi_data_output:
+    description: SPI MOSI using synchronous serial transmit
+    mode: P_SYNC_TX
+    setup: |
+      ' Configure MOSI pin
+      wrpin   ##P_SYNC_TX | P_OE, #SPI_MOSI_PIN
+      wxpin   ##SCK_PIN<<24 | 8, #SPI_MOSI_PIN  ' Clock pin + 8 bits
+      dirh    #SPI_MOSI_PIN
+      
+      ' Send byte
+      wypin   data_byte, #SPI_MOSI_PIN
+      waitx   #16                      ' Wait for completion
+    source: flash_loader.spin2
+    
+  spi_data_input:
+    description: SPI MISO using synchronous serial receive
+    mode: P_SYNC_RX
+    setup: |
+      ' Configure MISO pin  
+      wrpin   ##P_SYNC_RX, #SPI_MISO_PIN
+      wxpin   ##SCK_PIN<<24 | 8, #SPI_MISO_PIN
+      dirh    #SPI_MISO_PIN
+      
+      ' Receive byte
+      wypin   #0, #SPI_MISO_PIN       ' Trigger receive
+      waitx   #16
+      rdpin   data_byte, #SPI_MISO_PIN
+    source: flash_loader.spin2
+
+pwm_patterns:
+  motor_pwm_with_deadtime:
+    description: PWM for motor control with dead-time insertion
+    mode: P_PWM_SAWTOOTH
+    setup: |
+      ' Configure PWM with base period
+      wrpin   ##P_PWM_SAWTOOTH | P_OE, pwm_pin
+      wxpin   pwm_frame_ticks, pwm_pin ' Frame period
+      wypin   #0, pwm_pin              ' Initial duty = 0
+      dirh    pwm_pin
+      
+      ' Update duty cycle
+      wxpin   duty_value, pwm_pin      ' New duty
+      wypin   #1, pwm_pin              ' Trigger update
+    dead_time_handling: |
+      ' Complementary outputs with dead-time
+      ' High-side and low-side must never overlap
+      sub     high_duty, dead_time     ' Reduce high-side
+      add     low_start, dead_time     ' Delay low-side
+    source: isp_bldc_motor.spin2
+    
+  dac_dithered_output:
+    description: 16-bit DAC using 8-bit DAC with dithering
+    mode: P_DAC_DITHER_PWM
+    setup: |
+      ' 16-bit resolution from 8-bit DAC
+      wrpin   ##P_DAC_DITHER_PWM, dac_pin
+      wxpin   #256, dac_pin            ' Dither period
+      wypin   value_16bit, dac_pin     ' 16-bit value
+      dirh    dac_pin
+    source: audio_output
+
+adc_patterns:
+  calibrated_adc_reading:
+    description: ADC with calibration sequence
+    mode: P_ADC_1X
+    calibration: |
+      ' Calibrate ADC (must be done once)
+      wrpin   ##P_ADC_GIO, adc_pin     ' Ground calibration
+      wxpin   #%10_0111, adc_pin       ' 128 samples
+      dirh    adc_pin
+      waitx   ##2000                   ' Wait for cal
+      rdpin   gnd_level, adc_pin       ' Read ground level
+      
+      wrpin   ##P_ADC_VIO, adc_pin     ' VIO calibration  
+      wypin   #0, adc_pin               ' Trigger
+      waitx   ##2000
+      rdpin   vio_level, adc_pin       ' Read VIO level
+      
+      ' Calculate scale factor
+      sub     vio_level, gnd_level
+      ' scale = vio_level - gnd_level
+    measurement: |
+      ' Normal ADC reading
+      wrpin   ##P_ADC_1X, adc_pin      ' Normal mode
+      wypin   #1, adc_pin              ' Trigger conversion
+      waitx   #100                     ' Conversion time
+      rdpin   raw_value, adc_pin
+      
+      ' Apply calibration
+      sub     raw_value, gnd_level
+      mul     raw_value, ##4096
+      div     raw_value, scale
+    source: isp_bldc_motor.spin2
+
+encoder_patterns:
+  quadrature_decoder:
+    description: Hardware quadrature decoder for encoders
+    mode: P_QUADRATURE
+    setup: |
+      ' A/B quadrature decoder
+      wrpin   ##P_QUADRATURE, encoder_pin_a
+      wxpin   #0, encoder_pin_a        ' No period
+      dirh    encoder_pin_a             ' Enable
+      
+      ' Read position
+      rdpin   position, encoder_pin_a  ' Get count
+      
+      ' Reset position
+      wypin   #0, encoder_pin_a        ' Clear counter
+    source: motor_control
+
+timing_patterns:
+  pulse_width_measurement:
+    description: Measure pulse width in clock cycles
+    mode: P_HIGH_TICKS
+    setup: |
+      ' Measure high pulse width
+      wrpin   ##P_HIGH_TICKS, input_pin
+      wxpin   #0, input_pin            ' Continuous mode
+      dirh    input_pin
+      
+      ' Wait for measurement
+      testp   input_pin           wc   ' Check if ready
+      if_c    rdpin   width, input_pin ' Read width
+              wypin   #0, input_pin     ' Acknowledge
+    source: servo_input
+    
+  frequency_measurement:
+    description: Measure input frequency
+    mode: P_COUNT_RISES
+    setup: |
+      ' Count rising edges in time window
+      wrpin   ##P_COUNT_RISES, freq_pin
+      wxpin   ##80_000_000, freq_pin  ' 1 second at 80MHz
+      wypin   #0, freq_pin             ' Start counting
+      dirh    freq_pin
+      
+      ' Read count after window
+      waitx   ##80_000_000
+      rdpin   frequency, freq_pin      ' Frequency in Hz
+    source: frequency_counter
+
+repository_patterns:
+  shared_data_repository:
+    description: Use smart pin as data mailbox between COGs
+    mode: P_REPOSITORY
+    setup: |
+      ' Setup repository mode
+      wrpin   ##P_REPOSITORY, repo_pin
+      dirh    repo_pin
+      
+      ' COG A writes data
+      wypin   data_value, repo_pin
+      
+      ' COG B reads data
+      rdpin   received, repo_pin
+    source: multi_cog_communication
+
+synchronization:
+  streamer_smartpin_sync:
+    description: Synchronize streamer with smart pin SPI
+    critical_pattern: |
+      ' Critical: Start smart pins BEFORE streamer
+      dirh    #SPI_CLK_PIN             ' Start clock
+      dirh    #SPI_MOSI_PIN            ' Start MOSI
+      dirh    #SPI_MISO_PIN            ' Start MISO
+      
+      ' Then start streamer
+      xinit   xfer_config, #0          ' Begin transfer
+      
+      ' This order prevents data corruption
+    source: flash_loader.spin2
+    
+notes:
+  - Smart pins offload timing-critical operations from COGs
+  - Each pin operates independently once configured
+  - Calibration essential for accurate ADC readings
+  - PWM dead-time critical for motor control safety
+  - Repository mode enables COG-to-COG communication
+  - Streamer-smartpin sync order is critical for SPI

@@ -2,11 +2,15 @@ concept: setq_block_operations
 title: SETQ/SETQ2 Block Operations
 category: memory_operations
 description: Hardware-accelerated block memory transfers and operations using SETQ/SETQ2 prefixes
+documentation_source: enhanced
+documentation_level: comprehensive
 
 overview: |
   SETQ and SETQ2 are prefix instructions that modify the next instruction to perform block operations.
   They enable fast, hardware-accelerated transfers between hub and cog/LUT memory, block arithmetic,
   and multi-long operations. These are essential for efficient data movement and initialization.
+  
+  Critical for waveform tables, debug state preservation, and high-speed data processing.
 
 setq_instructions:
   SETQ:
@@ -23,11 +27,13 @@ setq_instructions:
     function: "Set block count for LUT RAM operations"
     syntax: "SETQ2 #count-1"
     range: "0-511 (transfer 1-512 longs)"
-    target: "LUT RAM ($200-$3FF)"
+    target: "LUT RAM ($200-$3FF in logical space)"
     encoding: "9-bit immediate or register"
+    critical_note: "SETQ2 targets LUT, SETQ targets COG - don't confuse!"
     example: |
       SETQ2 #255         ' Setup for 256 longs
-      RDLONG $200, PTRB  ' Read 256 longs from hub to LUT
+      RDLONG 0, PTRB     ' Read 256 longs from hub to LUT[0..255]
+      ' Note: Use 0 for LUT start, not $200!
 
 block_operations:
   hub_to_cog_transfer:
@@ -41,6 +47,11 @@ block_operations:
       SETQ #31           ' 32 longs
       RDLONG buffer, ##source_data
       ' Reads hub[source_data..source_data+127] to cog[buffer..buffer+31]
+    debug_use: |
+      ' Save all COG registers for debug
+      setq    #$1F            ' 32 registers
+      wrlong  0, save_ptr     ' Save $000-$01F
+    source: Spin2_debugger.spin2
 
   cog_to_hub_transfer:
     instruction: "SETQ + WRLONG"
@@ -59,22 +70,127 @@ block_operations:
     operation: "Read multiple longs from hub to LUT"
     syntax: |
       SETQ2 #count-1
-      RDLONG $200+offset, hub_address
-    example: |
-      SETQ2 #511         ' Entire LUT (512 longs)
-      RDLONG $200, ##lut_data
-      ' Loads entire LUT from hub
+      RDLONG 0, hub_address  ' Use 0 for LUT start!
+    critical_pattern: |
+      ' Load complete waveform table to LUT
+      load_sine_table
+              mov     ptra, ##sine_table_hub
+              setq2   #512-1          ' Full LUT
+              rdlong  0, ptra         ' Load to LUT[0..511]
+              ret
+      
+      ' Later access via RDLUT
+              rdlut   value, phase    ' Single-cycle lookup
+    source: waveform_generation
 
   lut_to_hub_transfer:
     instruction: "SETQ2 + WRLONG"
     operation: "Write multiple longs from LUT to hub"
     syntax: |
       SETQ2 #count-1
-      WRLONG $200+offset, hub_address
-    example: |
-      SETQ2 #127         ' 128 longs
-      WRLONG $200, PTRB++
-      ' Writes LUT[$200..$27F] to hub, updates PTRB
+      WRLONG 0, hub_address  ' Use 0 for LUT start!
+    debug_pattern: |
+      ' Save debug trace from LUT to HUB
+      save_trace
+              setq2   #256-1          ' 256 trace entries
+              wrlong  0, trace_buffer ' LUT[0..255] to HUB
+              ret
+    source: Spin2_debugger.spin2
+
+production_patterns:
+  motor_commutation_tables:
+    description: "Load motor control patterns to LUT"
+    code: |
+      ' Load commutation patterns for BLDC motor
+      load_commutation
+              loc     ptra, #\motor_patterns
+              setq2   #64-1           ' 64 patterns
+              rdlong  0, ptra         ' Load to LUT[0..63]
+              
+      ' Access during motor control
+              shl     hall_state, #3  ' 8 bytes per state
+              rdlut   pattern, hall_state
+              
+              ' Apply pattern to PWM outputs
+              and     pattern, #$3F
+              call    #set_pwm_outputs
+    source: isp_bldc_motor.spin2
+    
+  debug_state_preservation:
+    description: "Complete COG state save/restore"
+    code: |
+      debug_save_state
+              ' Save first 32 registers
+              setq    #$1F
+              wrlong  0, ptra++
+              
+              ' Save next 32 registers  
+              setq    #$1F
+              wrlong  $20, ptra++
+              
+              ' Save special registers individually
+              wrlong  pa, ptra++
+              wrlong  pb, ptra++
+              wrlong  ptra_save, ptra++
+              wrlong  ptrb_save, ptra++
+              
+      debug_restore_state
+              ' Restore in reverse order
+              sub     ptra, #4*4      ' Back to specials
+              rdlong  ptrb_save, --ptra
+              rdlong  ptra_save, --ptra
+              rdlong  pb, --ptra
+              rdlong  pa, --ptra
+              
+              ' Restore main registers
+              sub     ptra, #64*4
+              setq    #$1F
+              rdlong  $20, ptra[32]
+              setq    #$1F
+              rdlong  0, ptra
+    source: Spin2_debugger.spin2
+    
+  waveform_buffer_management:
+    description: "Use LUT as waveform buffer"
+    code: |
+      ' Process audio/waveform data via LUT
+      process_waveform
+              ' Load samples to LUT for processing
+              setq2   #128-1
+              rdlong  0, sample_ptr
+              
+              ' Process in LUT (faster than HUB)
+              mov     index, #0
+      .loop   rdlut   sample, index
+              ' Apply DSP operations
+              sar     sample, #1      ' Volume control
+              add     sample, dc_offset
+              wrlut   sample, index
+              incmod  index, #127
+              tjnz    index, #.loop
+              
+              ' Write processed data back
+              setq2   #128-1
+              wrlong  0, output_ptr
+    source: audio_processing
+    
+  flash_loader_buffers:
+    description: "Fast flash programming buffers"
+    code: |
+      ' Load flash page to COG for programming
+      load_flash_page
+              setq    #128-1          ' 512 bytes = 128 longs
+              rdlong  page_buffer, data_ptr
+              
+              ' Program page to flash
+              call    #flash_write_enable
+              call    #flash_page_program
+              
+              ' Verify programming
+              setq    #128-1
+              rdlong  verify_buffer, data_ptr
+              ' Compare buffers...
+    source: flash_loader.spin2
 
 special_operations:
   block_math:
@@ -132,12 +248,14 @@ performance:
     small_transfers: "2 + N cycles for N longs"
     large_transfers: "Approaches 1 cycle per long"
     vs_loop: "10-20x faster than RDLONG/WRLONG loop"
+    lut_advantage: "LUT access is single-cycle after load"
 
   limitations:
     - "Maximum 512 longs per operation"
     - "Must be contiguous memory"
     - "Cannot cross cog/LUT boundary"
     - "Interrupts delayed during transfer"
+    - "LUT addressing starts at 0, not $200 for SETQ2"
 
 common_patterns:
   array_copy:
@@ -167,7 +285,7 @@ common_patterns:
   lut_table_load:
     code: |
       SETQ2 #255            ' Half of LUT
-      RDLONG $200, ##sine_table
+      RDLONG 0, ##sine_table ' Note: 0, not $200!
     description: "Load lookup table"
 
   fast_memcpy:
@@ -209,6 +327,7 @@ advanced_usage:
     description: "Block transfers are atomic"
     behavior: "Interrupts delayed until complete"
     consideration: "Keep transfers small for responsiveness"
+    debug_impact: "Debug ISR must wait for completion"
 
 debugging:
   verification:
@@ -216,21 +335,28 @@ debugging:
     - "Verify address alignment"
     - "Confirm no boundary crossing"
     - "Test with small counts first"
+    - "Remember: LUT uses 0, not $200 with SETQ2"
 
   common_errors:
     off_by_one: "Using count instead of count-1"
     boundary_cross: "Transfer across cog/LUT boundary"
     wrong_prefix: "SETQ for LUT, SETQ2 for cog"
+    lut_addressing: "Using $200 instead of 0 with SETQ2"
 
 best_practices:
-  - "Always use count-1 in SETQ"
+  - "Always use count-1 in SETQ/SETQ2"
   - "Align transfers to long boundaries"
   - "Use for initialization and bulk copies"
   - "Consider interrupt latency impact"
   - "Document transfer sizes clearly"
   - "Test boundary conditions"
+  - "Use LUT for frequently accessed tables"
+  - "Preserve debug state with SETQ blocks"
 
 references:
   - silicon_doc: SETQ/SETQ2 block operations
   - instruction_set: SETQ/SETQ2 encoding
+  - flash_loader.spin2: Buffer management
+  - Spin2_debugger.spin2: State preservation
+  - isp_bldc_motor.spin2: LUT table usage
   - optimization_guide: Fast memory transfers

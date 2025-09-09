@@ -1,13 +1,21 @@
 method: PINSTART
 type: method
 description: |
-  Configure and start smart pin with mode and parameters
+  Configure and start smart pin with mode and parameters.
+  Supports pin groups via ADDPINS operator for parallel operations.
 category: Smart Pin Operations
+documentation_source: enhanced
+documentation_level: comprehensive
 syntax: "PINSTART(PinField, Mode, Xval, Yval)"
 parameters:
   - name: "PinField"
     type: "pin_field"
-    description: "Pin number (0-63) or pin field expression"
+    description: |
+      Pin number (0-63) or pin field expression.
+      Use ADDPINS to specify multiple consecutive pins:
+      - Single pin: 16
+      - Pin range: 16 ADDPINS 3 (pins 16-19)
+      - Pin group: BASE_PIN ADDPINS (COUNT-1)
   - name: "Mode"
     type: "long"
     description: "Smart pin mode configuration (P_* constants)"
@@ -37,6 +45,73 @@ examples:
       ' Start quadrature encoder on pins 32-33
       PINSTART(32 ADDPINS 1, P_QUADRATURE_A, 0, 0)
     description: "Configure quadrature encoder input"
+  - code: |
+      ' HUB75 RGB pin groups for LED panel
+      CON
+        RGB_BASE = 16        ' Base pin for RGB data
+        RGB_COUNT = 6        ' 6 pins for RGB (2 per color)
+        CLK_PIN = 22
+        LAT_PIN = 23
+        OE_PIN = 24
+        
+      PUB setup_hub75()
+        ' Configure 6 RGB data pins as outputs
+        PINSTART(RGB_BASE ADDPINS (RGB_COUNT-1), P_HIGH_FAST | P_OE, 0, 0)
+        
+        ' Configure control pins
+        PINSTART(CLK_PIN, P_HIGH_FAST | P_OE, 0, 0)
+        PINSTART(LAT_PIN, P_HIGH_FAST | P_OE, 0, 0)
+        PINSTART(OE_PIN, P_HIGH_FAST | P_OE, 0, 0)
+    description: "Configure HUB75 LED panel pin groups"
+    source: hub75_driver
+  - code: |
+      ' Multi-pin ADC configuration for sensor array
+      CON
+        SENSOR_BASE = 8
+        SENSOR_COUNT = 8      ' 8 sensors
+        
+      PUB setup_sensors() | i
+        ' Configure 8 consecutive ADC pins
+        REPEAT i FROM 0 TO SENSOR_COUNT-1
+          PINSTART(SENSOR_BASE + i, P_ADC | P_ADC_1X, 0, 0)
+          
+        ' Or using ADDPINS for group config (same mode)
+        PINSTART(SENSOR_BASE ADDPINS (SENSOR_COUNT-1), P_HIGH_1K5, 0, 0)
+    description: "Configure sensor array pins"
+    source: sensor_array
+  - code: |
+      ' Flash FS SPI pin configuration
+      CON
+        SPI_CLK = 56
+        SPI_MOSI = 57
+        SPI_MISO = 58
+        SPI_CS = 59
+        
+      PUB setup_spi()
+        ' Configure SPI pins as group
+        PINSTART(SPI_CLK ADDPINS 3, P_HIGH_FAST | P_OE, 0, 0)
+        
+        ' Then set specific modes
+        PINSTART(SPI_CLK, P_TRANSITION_OUTPUT, 1, 0)
+        PINSTART(SPI_MOSI, P_SYNC_TX | P_OE, SPI_CLK<<24 | 8, 0)
+        PINSTART(SPI_MISO, P_SYNC_RX, SPI_CLK<<24 | 8, 0)
+    description: "Configure SPI pins for flash filesystem"
+    source: P2-FLASH-FS
+pin_field_operators:
+  ADDPINS:
+    syntax: "base_pin ADDPINS count"
+    description: |
+      Creates a pin field representing consecutive pins.
+      The count is 0-based (use n-1 for n pins).
+    examples:
+      - "16 ADDPINS 0  ' Single pin (16)"
+      - "16 ADDPINS 3  ' 4 pins (16-19)"
+      - "16 ADDPINS 7  ' 8 pins (16-23)"
+    use_cases:
+      - "Parallel data buses"
+      - "LED arrays"
+      - "Sensor arrays"
+      - "Multi-bit I/O"
 notes:
   - "Complete smart pin initialization sequence"
   - "Automatically performs: DIR=0, WRPIN, WXPIN, WYPIN, DIR=1"
@@ -44,6 +119,7 @@ notes:
   - "X and Y parameters are mode-specific"
   - "Pin starts operating immediately after DIR=1"
   - "Use PINCLEAR to stop and reset smart pin"
+  - "ADDPINS allows configuring multiple pins with same mode"
 operations:
   - "DIR[pin] := 0 (reset)"
   - "WRPIN(pin, Mode) (set mode)"
@@ -52,13 +128,32 @@ operations:
   - "DIR[pin] := 1 (enable)"
 timing:
   description: "Multiple hub operations"
-  cycles: "20-90 clock cycles"
+  cycles: "20-90 clock cycles per pin"
 related:
   - PINCLEAR
   - WRPIN
   - WXPIN
   - WYPIN
+  - PINWRITE
+  - PINREAD
+production_patterns:
+  hub75_panel:
+    description: "HUB75 RGB LED panel uses pin groups"
+    pattern: |
+      - 6 RGB data pins configured as group
+      - Control pins (CLK, LAT, OE) individual
+      - Use ADDPINS for efficient setup
+      - Parallel output via SETQ/MUXQ
+    source: hub75_driver
+  flash_filesystem:
+    description: "SPI pins for flash access"
+    pattern: |
+      - Configure pins as group first
+      - Then specialize each pin's mode
+      - Maintains pin locality
+    source: P2-FLASH-FS
 see_also:
   - "Smart pin modes"
   - "Smart pin configuration"
   - "P2 smart pin constants"
+  - "concepts/inline_pasm2.yaml"

@@ -5,9 +5,16 @@ timing:
   cycles: 2
   type: fixed
 group: Register Indirection
-description: 'ALTGB should be followed by GETBYTE or ROLBYTE— it modifies the GETBYTE / ROLBYTE instruction''s
-  Src and Result: The next instruction''s pipelined Src and Num fields are altered to be (Src + Dest[10:2])
-  & $1FF, or just Dest[10:2] for syntax 2, and Dest[1:0], respectively.'
+description: |
+  ALTGB should be followed by GETBYTE or ROLBYTE— it modifies the GETBYTE / ROLBYTE instruction's
+  Src and Result: The next instruction's pipelined Src and Num fields are altered to be (Src + Dest[10:2])
+  & $1FF, or just Dest[10:2] for syntax 2, and Dest[1:0], respectively.
+  
+  Perfect for:
+  - Table lookups (commutation tables, sine tables)
+  - String processing with auto-increment
+  - Byte array traversal
+  - Character mapping and translation
 category: Indirection Instruction - Alter subsequent GETBYTE / ROLBYTE instruction.
 parameters:
 - Dest is the register whose 11-bit value is the index, or the full byte address, for the GETBYTE / ROLBYTE
@@ -15,5 +22,89 @@ parameters:
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base
   long address (Src[8:0]; added to index (Dest[10:2]) for GETBYTE / ROLBYTE) and also an optional auto-indexer
   value (Src[17:9]; added to Dest at end of execution).
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: enhanced
 documentation_level: comprehensive
+examples:
+  - name: Motor Commutation Table Lookup
+    description: Use Hall sensor state to lookup commutation pattern
+    code: |
+      ' Commutation lookup table in COG RAM
+      commutation_table
+              long    $00_00_00_00    ' Invalid state 0
+              long    $00_14_10_04    ' State 1: Phase pattern
+              long    $00_04_14_10    ' State 2: Phase pattern
+              long    $00_10_04_14    ' State 3: Phase pattern
+              long    $00_10_14_04    ' State 4: Phase pattern  
+              long    $00_04_10_14    ' State 5: Phase pattern
+              long    $00_14_04_10    ' State 6: Phase pattern
+              long    $00_00_00_00    ' Invalid state 7
+              
+      ' Use Hall state as index
+              mov     index, hall_state        ' Hall state (0-7)
+              altgb   index, #commutation_table
+              getbyte phase_a, 0-0, #0         ' Get phase A pattern
+              add     index, #1
+              altgb   index, #commutation_table  
+              getbyte phase_b, 0-0, #0         ' Get phase B pattern
+              add     index, #1
+              altgb   index, #commutation_table
+              getbyte phase_c, 0-0, #0         ' Get phase C pattern
+    source: isp_bldc_motor.spin2
+    
+  - name: String Processing with Auto-Increment
+    description: Process string bytes with automatic pointer advance
+    code: |
+      ' Process null-terminated string
+      process_string
+              mov     ptr, string_addr         ' String start address
+      .loop   altgb   ptr, ##$100              ' Auto-increment by 1
+              getbyte char, 0-0, #0            ' Get next character
+              tjz     char, #.done             ' Check for null terminator
+              
+              ' Process character
+              call    #process_char
+              jmp     #.loop
+      .done   ret
+    source: common_pattern
+    
+  - name: Sine Table Lookup
+    description: Access sine lookup table for waveform generation
+    code: |
+      ' 256-entry sine table (0-255 degrees)
+      ' Each entry is a byte (0-255 amplitude)
+              mov     angle, phase             ' Current phase angle
+              and     angle, #$FF              ' Wrap to 0-255
+              altgb   angle, #sine_table       ' Point to table entry
+              getbyte amplitude, 0-0, #0       ' Get sine value
+              
+              ' Scale amplitude for PWM
+              mul     amplitude, max_duty
+              shr     amplitude, #8            ' Scale to duty range
+    source: waveform_generation
+    
+  - name: Character Translation Table
+    description: Translate characters using lookup table
+    code: |
+      ' ASCII to custom encoding table
+      xlate_table
+              byte    0,1,2,3,4,5,6,7          ' Control chars
+              byte    8,9,10,11,12,13,14,15    ' More control
+              ' ... rest of translation table ...
+              
+      ' Translate character
+              altgb   input_char, #xlate_table
+              getbyte output_char, 0-0, #0     ' Get translated value
+    source: protocol_conversion
+    
+related_instructions:
+  - GETBYTE: Get byte from long register
+  - ROLBYTE: Rotate byte from long register
+  - ALTGN: Alter subsequent GETNIB/ROLNIB
+  - ALTGW: Alter subsequent GETWORD/ROLWORD
+  - ALTI: General instruction alteration
+  
+notes:
+  - ALTGB must immediately precede GETBYTE/ROLBYTE
+  - Auto-increment feature useful for sequential access
+  - Efficient for table-driven algorithms
+  - Critical for motor control commutation tables
