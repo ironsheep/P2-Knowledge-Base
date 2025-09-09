@@ -1,0 +1,166 @@
+display_type: SCOPE
+category: DEBUG Display Types
+description: |
+  Oscilloscope display for visualizing analog signals and waveforms.
+  Provides multi-channel real-time signal visualization with triggering,
+  scaling, and measurement capabilities similar to a digital oscilloscope.
+documentation_source: Spin2 v51
+documentation_level: comprehensive
+
+syntax: "DEBUG(`SCOPE title, channel1, channel2, ...`)"
+
+capabilities:
+  - "Multi-channel display (up to 8 channels)"
+  - "Auto-scaling or manual scaling"
+  - "Trigger modes (auto, normal, single)"
+  - "Time base adjustment"
+  - "Vertical scaling per channel"
+  - "Channel colors and labels"
+  - "Cursors for measurements"
+  - "XY mode for phase plots"
+
+channel_configuration:
+  max_channels: 8
+  data_types:
+    - "Signed/unsigned integers"
+    - "Floating point values"
+    - "Scaled ADC readings"
+  sample_rates:
+    - "Automatic based on DEBUG call frequency"
+    - "Configurable buffer depth"
+
+display_modes:
+  YT_mode:
+    description: "Standard time-based display"
+    usage: "Voltage/value vs time"
+    
+  XY_mode:
+    description: "Phase/Lissajous display"
+    usage: "Channel 1 vs Channel 2"
+    
+  FFT_overlay:
+    description: "Frequency spectrum overlay"
+    usage: "Shows frequency components"
+
+examples:
+  - code: |
+      ' Single channel ADC display
+      PUB monitor_adc() | value
+        REPEAT
+          value := read_adc(0)
+          DEBUG(`SCOPE ADC_Input, value`)
+          WAITMS(1)
+    description: "Monitor ADC input"
+    
+  - code: |
+      ' Dual channel comparison
+      PUB compare_signals() | raw, filtered
+        REPEAT
+          raw := get_sensor()
+          filtered := apply_filter(raw)
+          DEBUG(`SCOPE Filter_Test, raw, filtered`)
+          WAITUS(100)
+    description: "Compare raw and filtered signals"
+    
+  - code: |
+      ' Multi-channel sensor array
+      PUB scan_sensors() | i, values[8]
+        REPEAT
+          REPEAT i FROM 0 TO 7
+            values[i] := read_sensor(i)
+          DEBUG(`SCOPE Sensors, values[0], values[1], values[2], values[3]`)
+          WAITMS(10)
+    description: "Display multiple sensor channels"
+    
+  - code: |
+      ' PWM duty cycle visualization
+      PUB pwm_test() | duty
+        REPEAT duty FROM 0 TO 100
+          set_pwm(duty)
+          DEBUG(`SCOPE PWM_Duty, duty`)
+          WAITMS(10)
+    description: "Visualize PWM sweep"
+    
+  - code: |
+      ' Sine wave generation
+      PUB sine_wave() | angle, value
+        REPEAT angle FROM 0 TO 359
+          value := SIN(angle, 1000)
+          DEBUG(`SCOPE Sine_Wave, value`)
+          WAITUS(100)
+    description: "Display generated sine wave"
+    
+  - code: |
+      ' XY mode for phase display
+      PUB phase_plot() | x, y, angle
+        REPEAT angle FROM 0 TO 359
+          x := COS(angle, 100)
+          y := SIN(angle, 100)
+          DEBUG(`SCOPE Phase_XY, x, y`)
+          WAITUS(100)
+    description: "Create Lissajous pattern"
+
+trigger_options:
+  modes:
+    - "Auto - Continuous update"
+    - "Normal - Wait for trigger condition"
+    - "Single - One-shot capture"
+  conditions:
+    - "Rising edge"
+    - "Falling edge"
+    - "Level crossing"
+    - "Window trigger"
+  sources:
+    - "Any displayed channel"
+    - "External trigger input"
+
+measurement_tools:
+  cursors:
+    - "Time cursors for period/frequency"
+    - "Voltage cursors for amplitude"
+    - "Delta measurements"
+  automatic:
+    - "Peak-to-peak voltage"
+    - "RMS value"
+    - "Frequency"
+    - "Period"
+    - "Duty cycle"
+    - "Rise/fall time"
+
+window_controls:
+  - "Play/Pause button"
+  - "Time base selector"
+  - "Vertical scale per channel"
+  - "Channel enable/disable"
+  - "Trigger settings"
+  - "Grid on/off"
+  - "Cursor controls"
+  - "Export data option"
+
+usage_notes:
+  - "Updates in real-time as DEBUG statements execute"
+  - "Buffer stores recent samples for review"
+  - "Can pause to examine waveforms"
+  - "Channel colors automatically assigned"
+  - "Scaling can be automatic or manual"
+  - "Good for analog signal analysis"
+
+best_practices:
+  - "Use consistent sample rates"
+  - "Scale signals appropriately"
+  - "Label channels clearly"
+  - "Set appropriate time base"
+  - "Use triggering for stable display"
+  - "Limit channels for clarity"
+
+performance:
+  - "Higher sample rates need faster DEBUG calls"
+  - "Multiple channels impact update rate"
+  - "Buffer depth affects memory usage"
+  - "Pause display to reduce CPU load"
+
+related:
+  - "DEBUG statement"
+  - "ADC operations"
+  - "Signal processing"
+  - "PLOT display type"

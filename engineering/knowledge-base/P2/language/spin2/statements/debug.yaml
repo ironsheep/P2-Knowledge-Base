@@ -1,0 +1,175 @@
+statement: DEBUG
+type: statement
+description: |
+  Interactive debugging statement that displays runtime data and visualizations.
+  Uses backtick syntax to display variables, expressions, and formatted output
+  in multiple display types including terminal, oscilloscope, logic analyzer, and more.
+category: Debugging
+documentation_source: Spin2 v51
+documentation_level: comprehensive
+
+syntax:
+  basic: "DEBUG(`display_type title, items...`)"
+  inline: "DEBUG(`items...`)  ' Uses default TERM display"
+  
+display_types:
+  - name: TERM
+    description: "Terminal/text display (default)"
+    usage: "DEBUG(`TERM title, variables...`)"
+    
+  - name: SCOPE
+    description: "Oscilloscope display for analog signals"
+    usage: "DEBUG(`SCOPE title, channel1, channel2...`)"
+    
+  - name: LOGIC
+    description: "Logic analyzer display for digital signals"
+    usage: "DEBUG(`LOGIC title, signals...`)"
+    
+  - name: PLOT
+    description: "Real-time plotting display"
+    usage: "DEBUG(`PLOT title, data_points...`)"
+    
+  - name: FFT
+    description: "Fast Fourier Transform display"
+    usage: "DEBUG(`FFT title, samples...`)"
+    
+  - name: SPECTRO
+    description: "Spectrogram display"
+    usage: "DEBUG(`SPECTRO title, frequency_data...`)"
+    
+  - name: BITMAP
+    description: "Bitmap/image display"
+    usage: "DEBUG(`BITMAP title, pixel_data...`)"
+    
+  - name: MIDI
+    description: "MIDI event display"
+    usage: "DEBUG(`MIDI title, midi_events...`)"
+
+formatting_functions:
+  numeric:
+    - "DEC(value) - Decimal display"
+    - "HEX(value) - Hexadecimal display"
+    - "BIN(value) - Binary display"
+    - "SDEC(value) - Signed decimal"
+    - "SHEX(value) - Signed hexadecimal"
+    - "SBIN(value) - Signed binary"
+    - "UDEC(value) - Unsigned decimal"
+    - "UHEX(value) - Unsigned hexadecimal"
+    - "UBIN(value) - Unsigned binary"
+    
+  string:
+    - "ZSTR(address) - Zero-terminated string"
+    - "LSTR(address, length) - Length-specified string"
+    - "STR(string_literal) - String literal"
+    
+  special:
+    - "DLONG(value) - Display long value"
+    - "DWORD(value) - Display word value"
+    - "DBYTE(value) - Display byte value"
+    
+control_characters:
+  - "13 - Carriage return (new line)"
+  - "9 - Tab"
+  - "10 - Line feed"
+  - "8 - Backspace"
+  - "12 - Form feed (clear screen)"
+
+examples:
+  - code: |
+      ' Basic terminal output
+      DEBUG(`"Hello World", 13`)
+    description: "Display string with newline"
+    
+  - code: |
+      ' Display variables with labels
+      DEBUG(`"X = ", DEC(x), "  Y = ", DEC(y), 13`)
+    description: "Show labeled variable values"
+    
+  - code: |
+      ' Oscilloscope display
+      DEBUG(`SCOPE MyScope, sensor_value, filtered_value`)
+    description: "Display two signals on oscilloscope"
+    
+  - code: |
+      ' Logic analyzer with multiple signals
+      DEBUG(`LOGIC Signals, clk, data, enable, ready`)
+    description: "Display digital signals"
+    
+  - code: |
+      ' Hexadecimal display with formatting
+      DEBUG(`"Register: $", UHEX(register_value, 8), 13`)
+    description: "Display hex value with fixed width"
+    
+  - code: |
+      ' Binary display with separators
+      DEBUG(`"Flags: %", UBIN(flags, 16), 13`)
+    description: "Display binary with 16 bits"
+    
+  - code: |
+      ' Multiple display types in program
+      PUB test() | value
+        value := 1000
+        DEBUG(`TERM Status, "Starting test...", 13`)
+        DEBUG(`SCOPE Waveform, value`)
+        DEBUG(`"Value = ", DEC(value), 13`)
+    description: "Using multiple DEBUG displays"
+    
+  - code: |
+      ' Conditional debugging
+      IF error_flag
+        DEBUG(`"ERROR: ", ZSTR(@error_message), 13`)
+    description: "Debug output based on condition"
+    
+  - code: |
+      ' Array display
+      REPEAT i FROM 0 TO 9
+        DEBUG(`"Array[", DEC(i), "] = ", DEC(array[i]), 13`)
+    description: "Display array contents"
+    
+  - code: |
+      ' Real-time plotting
+      REPEAT
+        sensor := read_sensor()
+        DEBUG(`PLOT Sensor, sensor`)
+        WAITMS(10)
+    description: "Continuous plotting of sensor data"
+
+features:
+  - "Non-blocking operation - doesn't halt program execution"
+  - "Multiple simultaneous display windows"
+  - "Real-time data visualization"
+  - "Conditional compilation - can be disabled for production"
+  - "Rich formatting options"
+  - "Backtick syntax prevents string interpretation issues"
+  - "Automatic type detection for variables"
+  - "Configurable display properties per window"
+
+usage_notes:
+  - "DEBUG statements are processed at compile time"
+  - "Each display type opens in its own window"
+  - "Windows persist across program runs until closed"
+  - "Use meaningful titles for multiple displays"
+  - "Backtick syntax required - regular quotes won't work"
+  - "Can be globally disabled with DEBUG_DISABLE directive"
+  - "Performance impact is minimal when disabled"
+  - "Useful for both development and field diagnostics"
+
+best_practices:
+  - "Use descriptive window titles"
+  - "Group related data in same display"
+  - "Remove or disable DEBUG statements in production code"
+  - "Use appropriate display type for data being shown"
+  - "Add newlines (13) for readable terminal output"
+  - "Use formatting functions for consistent display"
+  - "Consider performance impact of high-frequency DEBUG calls"
+
+related:
+  - "CON block constants"
+  - "Formatting functions"
+  - "Display types"
+  - "Conditional compilation"
+  
+see_also:
+  - "Spin2 Language Reference v51"
+  - "Debug Display Types"
+  - "Formatting Functions Reference"

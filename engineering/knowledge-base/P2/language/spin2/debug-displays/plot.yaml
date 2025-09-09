@@ -1,0 +1,209 @@
+display_type: PLOT
+category: DEBUG Display Types
+description: |
+  Real-time plotting display for data visualization and trending.
+  Provides line graphs, scatter plots, and bar charts for numeric data
+  with auto-scaling, multiple series, and statistical analysis.
+documentation_source: Spin2 v51
+documentation_level: comprehensive
+
+syntax: "DEBUG(`PLOT title, series1, series2, ...`)"
+
+capabilities:
+  - "Multiple data series (up to 8)"
+  - "Line, scatter, and bar chart modes"
+  - "Auto-scaling or fixed scales"
+  - "Rolling or accumulating display"
+  - "Statistical overlays"
+  - "Data point markers"
+  - "Legend display"
+  - "Grid and axis labels"
+
+plot_types:
+  line_plot:
+    description: "Connected data points"
+    usage: "Continuous data, trends"
+    
+  scatter_plot:
+    description: "Individual data points"
+    usage: "Discrete samples, correlations"
+    
+  bar_chart:
+    description: "Vertical or horizontal bars"
+    usage: "Categorical data, comparisons"
+    
+  area_plot:
+    description: "Filled area under line"
+    usage: "Cumulative values, ranges"
+
+data_modes:
+  rolling:
+    description: "Fixed window, old data scrolls off"
+    buffer_size: "Configurable (default 1000 points)"
+    
+  accumulating:
+    description: "All data points retained"
+    limitation: "Memory limited"
+    
+  triggered:
+    description: "Start/stop on condition"
+    usage: "Event-based capture"
+
+examples:
+  - code: |
+      ' Temperature monitoring
+      PUB temp_logger() | temp
+        REPEAT
+          temp := read_temperature()
+          DEBUG(`PLOT Temperature, temp`)
+          WAITMS(1000)
+    description: "Plot temperature over time"
+    
+  - code: |
+      ' Multiple sensor comparison
+      PUB compare_sensors() | s1, s2, s3
+        REPEAT
+          s1 := read_sensor(0)
+          s2 := read_sensor(1)
+          s3 := read_sensor(2)
+          DEBUG(`PLOT Sensors, s1, s2, s3`)
+          WAITMS(100)
+    description: "Compare three sensors"
+    
+  - code: |
+      ' PID controller visualization
+      PUB pid_debug() | setpoint, actual, error, output
+        REPEAT
+          setpoint := target_value
+          actual := read_process()
+          error := setpoint - actual
+          output := calculate_pid(error)
+          DEBUG(`PLOT PID_Control, setpoint, actual, output`)
+          WAITMS(10)
+    description: "Visualize PID control loop"
+    
+  - code: |
+      ' Performance metrics
+      PUB performance() | cpu_load, memory, latency
+        REPEAT
+          cpu_load := get_cpu_usage()
+          memory := get_memory_usage()
+          latency := measure_latency()
+          DEBUG(`PLOT Performance, cpu_load, memory, latency`)
+          WAITMS(100)
+    description: "System performance monitoring"
+    
+  - code: |
+      ' Statistical distribution
+      PUB histogram() | value, count[10], i
+        REPEAT 1000
+          value := random_value() / 10
+          count[value]++
+        REPEAT i FROM 0 TO 9
+          DEBUG(`PLOT Distribution, count[i]`)
+          WAITMS(50)
+    description: "Display value distribution"
+    
+  - code: |
+      ' Frequency response
+      PUB freq_sweep() | freq, response
+        REPEAT freq FROM 10 TO 10000 STEP 10
+          set_frequency(freq)
+          response := measure_response()
+          DEBUG(`PLOT Frequency_Response, response`)
+          WAITMS(10)
+    description: "Plot frequency response"
+
+axis_configuration:
+  x_axis:
+    - "Time-based (auto-incrementing)"
+    - "Sample number"
+    - "Custom values"
+    - "Logarithmic scale"
+    
+  y_axis:
+    - "Auto-scale to data"
+    - "Fixed range"
+    - "Logarithmic scale"
+    - "Multiple Y axes"
+
+display_options:
+  line_styles:
+    - "Solid"
+    - "Dashed"
+    - "Dotted"
+    - "None (points only)"
+    
+  point_markers:
+    - "Circle"
+    - "Square"
+    - "Triangle"
+    - "Cross"
+    - "None"
+    
+  colors:
+    - "Automatic assignment"
+    - "User selectable"
+    - "Series-specific"
+
+statistical_features:
+  overlays:
+    - "Moving average"
+    - "Min/max envelope"
+    - "Standard deviation"
+    - "Trend line"
+    
+  measurements:
+    - "Mean value"
+    - "Peak values"
+    - "RMS"
+    - "Rate of change"
+
+window_controls:
+  - "Play/Pause update"
+  - "Clear data"
+  - "Zoom controls"
+  - "Pan controls"
+  - "Series visibility toggle"
+  - "Scale mode selection"
+  - "Export data"
+  - "Snapshot image"
+  - "Statistics panel"
+
+data_export:
+  formats:
+    - "CSV file"
+    - "Text file"
+    - "Clipboard"
+  options:
+    - "All data points"
+    - "Visible range only"
+    - "Decimated data"
+
+usage_notes:
+  - "Updates with each DEBUG call"
+  - "Memory usage grows with data points"
+  - "Can pause to examine data"
+  - "Good for trend analysis"
+  - "Automatic legend from series order"
+  - "Export for further analysis"
+
+best_practices:
+  - "Use consistent sample intervals"
+  - "Label series meaningfully"
+  - "Choose appropriate plot type"
+  - "Set reasonable buffer sizes"
+  - "Use colors for clarity"
+  - "Include units in title"
+
+performance:
+  - "Large datasets impact rendering"
+  - "Multiple series increase overhead"
+  - "Consider decimation for long runs"
+  - "Pause when not viewing"
+
+related:
+  - "DEBUG statement"
+  - "Data logging"
+  - "SCOPE display type"
+  - "Statistical functions"

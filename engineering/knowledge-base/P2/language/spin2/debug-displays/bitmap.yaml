@@ -1,0 +1,97 @@
+display_type: BITMAP
+category: DEBUG Display Types
+description: |
+  Bitmap/image display for visualizing pixel data, framebuffers,
+  and 2D arrays. Supports various color formats and pixel organizations
+  for displaying graphics, image processing results, and memory maps.
+documentation_source: Spin2 v51
+documentation_level: comprehensive
+
+syntax: "DEBUG(`BITMAP title, width, height, pixel_data`)"
+
+capabilities:
+  - "Multiple color formats"
+  - "Scalable display"
+  - "Real-time updates"
+  - "Pixel grid overlay"
+  - "Zoom and pan"
+  - "Color palette support"
+  - "Animation playback"
+
+color_formats:
+  monochrome:
+    - "1-bit black/white"
+    - "8-bit grayscale"
+    
+  color:
+    - "8-bit palette"
+    - "RGB565 (16-bit)"
+    - "RGB888 (24-bit)"
+    - "RGBA8888 (32-bit)"
+
+examples:
+  - code: |
+      ' Display framebuffer
+      PUB show_framebuffer() | buffer[320*240]
+        render_frame(@buffer)
+        DEBUG(`BITMAP Screen, 320, 240, buffer`)
+    description: "Display graphics framebuffer"
+    
+  - code: |
+      ' Sensor heatmap
+      PUB sensor_map() | sensors[16*16], x, y
+        REPEAT y FROM 0 TO 15
+          REPEAT x FROM 0 TO 15
+            sensors[y*16+x] := read_sensor(x, y)
+        DEBUG(`BITMAP Sensor_Heatmap, 16, 16, sensors`)
+    description: "Display sensor array as heatmap"
+    
+  - code: |
+      ' Memory visualization
+      PUB memory_map() | mem[256*256]
+        REPEAT i FROM 0 TO 65535
+          mem[i] := BYTE[$00000+i]
+        DEBUG(`BITMAP Memory_Map, 256, 256, mem`)
+    description: "Visualize memory contents"
+    
+  - code: |
+      ' Character generator test
+      PUB font_test() | char_data[8*8], c
+        REPEAT c FROM 32 TO 126
+          get_char_bitmap(c, @char_data)
+          DEBUG(`BITMAP Char, 8, 8, char_data`)
+          WAITMS(100)
+    description: "Display font characters"
+
+pixel_organization:
+  row_major:
+    description: "Left-to-right, top-to-bottom"
+    formula: "pixel[y*width + x]"
+    
+  column_major:
+    description: "Top-to-bottom, left-to-right"
+    formula: "pixel[x*height + y]"
+    
+  packed:
+    description: "Multiple pixels per word"
+    usage: "Efficient memory use"
+
+display_controls:
+  - "Zoom in/out"
+  - "Fit to window"
+  - "1:1 pixel view"
+  - "Grid overlay toggle"
+  - "Color picker"
+  - "Histogram display"
+  - "Save snapshot"
+
+usage_notes:
+  - "Large images need more memory"
+  - "Updates can be partial"
+  - "Good for visualization"
+  - "Supports animation via updates"
+
+related:
+  - "Graphics operations"
+  - "Memory visualization"
+  - "Image processing"

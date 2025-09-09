@@ -1,0 +1,151 @@
+display_type: MIDI
+category: DEBUG Display Types
+description: |
+  MIDI event display for monitoring and debugging MIDI communications.
+  Shows note events, control changes, system messages, and timing in
+  both list and piano roll formats for music and MIDI applications.
+documentation_source: Spin2 v51
+documentation_level: comprehensive
+
+syntax: "DEBUG(`MIDI title, midi_event`)"
+
+capabilities:
+  - "Note on/off events"
+  - "Control change messages"
+  - "Program changes"
+  - "System exclusive data"
+  - "Timing clock"
+  - "Piano roll view"
+  - "Event list view"
+  - "Channel filtering"
+
+midi_messages:
+  channel_messages:
+    - "Note On (0x9n)"
+    - "Note Off (0x8n)"
+    - "Polyphonic Aftertouch (0xAn)"
+    - "Control Change (0xBn)"
+    - "Program Change (0xCn)"
+    - "Channel Aftertouch (0xDn)"
+    - "Pitch Bend (0xEn)"
+    
+  system_messages:
+    - "System Exclusive (0xF0)"
+    - "Time Code (0xF1)"
+    - "Song Position (0xF2)"
+    - "Song Select (0xF3)"
+    - "Tune Request (0xF6)"
+    - "End of SysEx (0xF7)"
+    - "Timing Clock (0xF8)"
+    - "Start/Stop/Continue (0xFA/FC/FB)"
+
+display_formats:
+  event_list:
+    columns:
+      - "Timestamp"
+      - "Channel"
+      - "Message type"
+      - "Data bytes"
+      - "Decoded meaning"
+      
+  piano_roll:
+    features:
+      - "Note visualization"
+      - "Velocity coloring"
+      - "Time grid"
+      - "Multi-channel"
+      
+  monitor:
+    features:
+      - "Raw byte display"
+      - "Running status"
+      - "Timing analysis"
+
+examples:
+  - code: |
+      ' MIDI input monitor
+      PUB midi_monitor() | byte1, byte2, byte3
+        REPEAT
+          IF midi_available()
+            byte1 := midi_read()
+            byte2 := midi_read()
+            byte3 := midi_read()
+            DEBUG(`MIDI Input_Monitor, byte1, byte2, byte3`)
+    description: "Monitor MIDI input stream"
+    
+  - code: |
+      ' Note event generator
+      PUB play_note(channel, note, velocity)
+        DEBUG(`MIDI Note_Event, $90 + channel, note, velocity`)
+        WAITMS(500)
+        DEBUG(`MIDI Note_Event, $80 + channel, note, 0`)
+    description: "Generate note on/off events"
+    
+  - code: |
+      ' Control change sweep
+      PUB cc_sweep(channel, controller) | value
+        REPEAT value FROM 0 TO 127
+          DEBUG(`MIDI Control, $B0 + channel, controller, value`)
+          WAITMS(10)
+    description: "Sweep control change value"
+    
+  - code: |
+      ' System exclusive dump
+      PUB sysex_dump(manufacturer, data_ptr, length) | i
+        DEBUG(`MIDI SysEx, $F0, manufacturer`)
+        REPEAT i FROM 0 TO length-1
+          DEBUG(`MIDI SysEx, BYTE[data_ptr][i]`)
+        DEBUG(`MIDI SysEx, $F7`)
+    description: "Send system exclusive data"
+    
+  - code: |
+      ' MIDI clock generator
+      PUB midi_clock(bpm) | period
+        period := 60_000 / (bpm * 24)  ' 24 clocks per quarter note
+        REPEAT
+          DEBUG(`MIDI Clock, $F8`)
+          WAITMS(period)
+    description: "Generate MIDI timing clock"
+
+analysis_features:
+  - "Note frequency histogram"
+  - "Velocity distribution"
+  - "Channel activity"
+  - "Message rate"
+  - "Timing accuracy"
+  - "Running status efficiency"
+
+filtering_options:
+  - "Channel selection"
+  - "Message type filter"
+  - "Note range filter"
+  - "Velocity threshold"
+  - "Controller filter"
+
+window_controls:
+  - "View mode selection"
+  - "Channel visibility"
+  - "Time scale"
+  - "Event filtering"
+  - "Clear events"
+  - "Export MIDI file"
+  - "Import MIDI file"
+
+usage_notes:
+  - "Timestamps events automatically"
+  - "Decodes standard MIDI messages"
+  - "Can handle high message rates"
+  - "Useful for MIDI debugging"
+  - "Supports both input and output monitoring"
+
+best_practices:
+  - "Filter unnecessary channels"
+  - "Use appropriate view for task"
+  - "Monitor timing for sync issues"
+  - "Check for stuck notes"
+  - "Verify control mappings"
+
+related:
+  - "Serial communication"
+  - "Music applications"
+  - "Timing and synchronization"

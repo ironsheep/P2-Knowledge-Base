@@ -1,0 +1,117 @@
+display_type: TERM
+category: DEBUG Display Types
+description: |
+  Terminal/text display for DEBUG output. Default display type when none specified.
+  Provides formatted text output similar to a serial terminal with support for
+  various numeric formats, strings, and control characters.
+documentation_source: Spin2 v51
+documentation_level: comprehensive
+
+syntax: "DEBUG(`TERM title, items...`)"
+default: true
+
+capabilities:
+  - "Text and numeric output"
+  - "Multiple number formats (DEC, HEX, BIN)"
+  - "String display (zero-terminated and length-specified)"
+  - "Control characters (newline, tab, clear screen)"
+  - "Colored text output"
+  - "Cursor positioning"
+  - "Scrolling text window"
+
+formatting_options:
+  numeric:
+    DEC: "Decimal format"
+    HEX: "Hexadecimal format"
+    BIN: "Binary format"
+    SDEC: "Signed decimal"
+    SHEX: "Signed hexadecimal"
+    SBIN: "Signed binary"
+    UDEC: "Unsigned decimal"
+    UHEX: "Unsigned hexadecimal"
+    UBIN: "Unsigned binary"
+    
+  string:
+    ZSTR: "Zero-terminated string from address"
+    LSTR: "Length-specified string from address"
+    STR: "String literal"
+    
+  control:
+    "13": "Carriage return (newline)"
+    "10": "Line feed"
+    "9": "Tab character"
+    "8": "Backspace"
+    "12": "Form feed (clear screen)"
+
+examples:
+  - code: |
+      ' Simple text output
+      DEBUG(`"System initialized", 13`)
+    description: "Basic message with newline"
+    
+  - code: |
+      ' Variable display with labels
+      DEBUG(`"Temperature: ", DEC(temp), "°C", 13`)
+    description: "Labeled numeric output"
+    
+  - code: |
+      ' Multiple values on one line
+      DEBUG(`"X=", DEC(x), " Y=", DEC(y), " Z=", DEC(z), 13`)
+    description: "Multiple values with labels"
+    
+  - code: |
+      ' Hexadecimal with fixed width
+      DEBUG(`"Address: $", UHEX(addr, 8), 13`)
+    description: "8-digit hex display"
+    
+  - code: |
+      ' Binary flags display
+      DEBUG(`"Status: %", UBIN(status, 8), 13`)
+    description: "8-bit binary display"
+    
+  - code: |
+      ' Clear screen and display
+      DEBUG(`12, "=== System Status ===", 13`)
+    description: "Clear terminal and show header"
+    
+  - code: |
+      ' Tabulated output
+      DEBUG(`"Name", 9, "Value", 9, "Units", 13`)
+      DEBUG(`"Temp", 9, DEC(temp), 9, "°C", 13`)
+    description: "Tabulated data display"
+    
+  - code: |
+      ' String from memory
+      DEBUG(`"Message: ", ZSTR(@buffer), 13`)
+    description: "Display zero-terminated string"
+
+window_properties:
+  - "Resizable window"
+  - "Scrollback buffer"
+  - "Copy/paste support"
+  - "Font selection"
+  - "Color themes"
+  - "Auto-scroll option"
+  - "Clear button"
+  - "Timestamp option"
+
+usage_notes:
+  - "Default display type if none specified"
+  - "Most versatile for general debugging"
+  - "Low overhead for simple text output"
+  - "Window persists between program runs"
+  - "Can handle high-speed output"
+  - "Supports ANSI color codes"
+
+best_practices:
+  - "Use clear, descriptive labels"
+  - "Add newlines for readability"
+  - "Group related outputs"
+  - "Use consistent formatting"
+  - "Clear screen for new sections"
+  - "Include units with measurements"
+
+related:
+  - "DEBUG statement"
+  - "Formatting functions"
+  - "Control characters"

@@ -1,0 +1,200 @@
+display_type: LOGIC
+category: DEBUG Display Types
+description: |
+  Logic analyzer display for visualizing digital signals and timing relationships.
+  Provides multi-channel digital signal visualization with protocol decoding,
+  timing measurements, and triggering capabilities similar to a logic analyzer.
+documentation_source: Spin2 v51
+documentation_level: comprehensive
+
+syntax: "DEBUG(`LOGIC title, signal1, signal2, ...`)"
+
+capabilities:
+  - "Multi-channel digital display (up to 32 channels)"
+  - "Timing measurements between edges"
+  - "Protocol decoding (I2C, SPI, UART, etc.)"
+  - "Complex triggering patterns"
+  - "Bus grouping and decoding"
+  - "State list view"
+  - "Timing diagram view"
+  - "Search for patterns"
+
+channel_configuration:
+  max_channels: 32
+  signal_types:
+    - "Single bit (0/1)"
+    - "Multi-bit buses (up to 32 bits)"
+    - "Decoded protocol data"
+  sample_modes:
+    - "State - sample on clock edge"
+    - "Timing - sample at fixed rate"
+
+display_formats:
+  timing_diagram:
+    description: "Traditional logic analyzer view"
+    features:
+      - "Signal transitions"
+      - "Bus values"
+      - "Timing markers"
+      
+  state_list:
+    description: "Tabular view of signal states"
+    features:
+      - "Sample number"
+      - "Timestamp"
+      - "Signal values"
+      
+  protocol_view:
+    description: "Decoded protocol transactions"
+    features:
+      - "Packet decoding"
+      - "Error detection"
+      - "Transaction timing"
+
+examples:
+  - code: |
+      ' Monitor SPI signals
+      PUB monitor_spi() | clk, mosi, miso, cs
+        REPEAT
+          clk := INA[SPI_CLK]
+          mosi := INA[SPI_MOSI]
+          miso := INA[SPI_MISO]
+          cs := INA[SPI_CS]
+          DEBUG(`LOGIC SPI_Bus, cs, clk, mosi, miso`)
+    description: "Display SPI bus signals"
+    
+  - code: |
+      ' I2C bus monitoring
+      PUB i2c_monitor() | sda, scl
+        REPEAT
+          sda := INA[I2C_SDA]
+          scl := INA[I2C_SCL]
+          DEBUG(`LOGIC I2C_Bus, scl, sda`)
+    description: "Monitor I2C communications"
+    
+  - code: |
+      ' 8-bit parallel bus
+      PUB bus_monitor() | data_bus, control
+        REPEAT
+          data_bus := INA[7..0]
+          control := INA[10..8]
+          DEBUG(`LOGIC Data_Bus, data_bus, control`)
+    description: "Monitor 8-bit data bus with control"
+    
+  - code: |
+      ' State machine debugging
+      PUB debug_fsm() | state, inputs, outputs
+        REPEAT
+          inputs := INA[15..12]
+          outputs := OUTA[11..8]
+          state := current_state
+          DEBUG(`LOGIC FSM_Debug, state, inputs, outputs`)
+    description: "Debug state machine operation"
+    
+  - code: |
+      ' UART signal decode
+      PUB uart_monitor() | rx, tx, rts, cts
+        REPEAT
+          rx := INA[UART_RX]
+          tx := INA[UART_TX]
+          rts := INA[UART_RTS]
+          cts := INA[UART_CTS]
+          DEBUG(`LOGIC UART_Signals, rx, tx, rts, cts`)
+    description: "Monitor UART with flow control"
+    
+  - code: |
+      ' Quadrature encoder signals
+      PUB encoder_debug() | a, b, index
+        REPEAT
+          a := INA[ENC_A]
+          b := INA[ENC_B]
+          index := INA[ENC_INDEX]
+          DEBUG(`LOGIC Encoder, a, b, index`)
+    description: "Debug quadrature encoder"
+
+trigger_configuration:
+  simple_triggers:
+    - "Rising edge on channel"
+    - "Falling edge on channel"
+    - "Either edge on channel"
+    - "High level"
+    - "Low level"
+    
+  complex_triggers:
+    - "Pattern match across channels"
+    - "Sequence of events"
+    - "Pulse width conditions"
+    - "Setup/hold time violations"
+    - "Glitch detection"
+
+protocol_decoders:
+  supported:
+    - "I2C - Address, data, ACK/NAK"
+    - "SPI - MOSI/MISO data bytes"
+    - "UART - Async serial with baud rate"
+    - "1-Wire - Commands and data"
+    - "CAN - Message ID and data"
+    - "Custom - User-defined protocols"
+    
+  features:
+    - "Automatic baud rate detection"
+    - "Error highlighting"
+    - "Packet boundaries"
+    - "Address filtering"
+
+measurement_tools:
+  timing:
+    - "Period measurement"
+    - "Pulse width"
+    - "Duty cycle"
+    - "Setup/hold time"
+    - "Propagation delay"
+    
+  counting:
+    - "Edge counting"
+    - "Pulse counting"
+    - "State duration"
+    
+  analysis:
+    - "Pattern search"
+    - "Glitch detection"
+    - "Bus utilization"
+
+window_controls:
+  - "Play/Pause capture"
+  - "Zoom in/out"
+  - "Channel labels"
+  - "Channel reordering"
+  - "Bus grouping"
+  - "Trigger setup"
+  - "Protocol decoder selection"
+  - "Export to file"
+  - "Search controls"
+
+usage_notes:
+  - "Samples taken each DEBUG call"
+  - "Buffer depth limited by memory"
+  - "Can combine with trigger for specific events"
+  - "Protocol decoding happens post-capture"
+  - "Good for debugging digital interfaces"
+  - "Can export for offline analysis"
+
+best_practices:
+  - "Group related signals together"
+  - "Use meaningful signal names"
+  - "Set appropriate sample rate"
+  - "Configure triggers for events of interest"
+  - "Use protocol decoders when available"
+  - "Limit channels to those being debugged"
+
+performance:
+  - "More channels require more memory"
+  - "High sample rates need frequent DEBUG calls"
+  - "Protocol decoding adds processing overhead"
+  - "Pause capture when not needed"
+
+related:
+  - "DEBUG statement"
+  - "Digital I/O operations"
+  - "Protocol implementations"
+  - "State machines"

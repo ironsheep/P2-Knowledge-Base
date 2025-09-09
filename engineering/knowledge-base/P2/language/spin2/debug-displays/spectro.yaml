@@ -1,0 +1,91 @@
+display_type: SPECTRO
+category: DEBUG Display Types
+description: |
+  Spectrogram display showing frequency content over time.
+  Creates a visual representation of spectrum changes using color
+  intensity to show magnitude at each frequency and time point.
+documentation_source: Spin2 v51
+documentation_level: comprehensive
+
+syntax: "DEBUG(`SPECTRO title, signal_data`)"
+
+capabilities:
+  - "Time-frequency visualization"
+  - "Color-mapped intensity"
+  - "Scrolling or static display"
+  - "Frequency zoom"
+  - "Time window adjustment"
+  - "Multiple color maps"
+  - "Persistence modes"
+
+display_parameters:
+  axes:
+    x_axis: "Time"
+    y_axis: "Frequency"
+    z_axis: "Magnitude (color)"
+    
+  color_maps:
+    - "Heat map (red/yellow/white)"
+    - "Cool (blue/green)"
+    - "Rainbow"
+    - "Grayscale"
+    - "High contrast"
+
+examples:
+  - code: |
+      ' Speech pattern analysis
+      PUB voice_spectro() | audio[256], i
+        REPEAT
+          REPEAT i FROM 0 TO 255
+            audio[i] := read_microphone()
+            WAITUS(125)  ' 8kHz sample rate
+          DEBUG(`SPECTRO Voice_Pattern, audio`)
+    description: "Visualize speech patterns"
+    
+  - code: |
+      ' Motor noise signature
+      PUB motor_spectro() | vibration[512]
+        REPEAT
+          capture_vibration(@vibration, 512)
+          DEBUG(`SPECTRO Motor_Signature, vibration`)
+          WAITMS(100)
+    description: "Monitor motor frequency signature"
+    
+  - code: |
+      ' RF spectrum monitoring
+      PUB rf_spectro() | rf_samples[1024]
+        REPEAT
+          capture_rf(@rf_samples, 1024)
+          DEBUG(`SPECTRO RF_Activity, rf_samples`)
+    description: "Display RF spectrum activity"
+
+display_modes:
+  scrolling:
+    description: "New data scrolls from right"
+    usage: "Real-time monitoring"
+    
+  static:
+    description: "Fixed time window"
+    usage: "Captured events"
+    
+  persistence:
+    description: "Accumulates multiple passes"
+    usage: "Intermittent signals"
+
+analysis_features:
+  - "Frequency tracking"
+  - "Harmonic identification"
+  - "Event detection"
+  - "Pattern recognition"
+  - "Time-frequency cursors"
+
+usage_notes:
+  - "Computationally intensive"
+  - "Good for non-stationary signals"
+  - "Shows frequency changes over time"
+  - "Buffer size affects resolution"
+
+related:
+  - "FFT display type"
+  - "SCOPE display type"
+  - "Audio processing"

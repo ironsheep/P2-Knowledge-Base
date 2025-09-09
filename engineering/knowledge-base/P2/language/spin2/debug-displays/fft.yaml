@@ -1,0 +1,98 @@
+display_type: FFT
+category: DEBUG Display Types
+description: |
+  Fast Fourier Transform display for frequency domain analysis.
+  Converts time-domain signals to frequency spectrum display showing
+  frequency components, harmonics, and spectral characteristics.
+documentation_source: Spin2 v51
+documentation_level: comprehensive
+
+syntax: "DEBUG(`FFT title, signal_data`)"
+
+capabilities:
+  - "Real-time frequency spectrum"
+  - "Magnitude and phase display"
+  - "Peak frequency detection"
+  - "Harmonic analysis"
+  - "Windowing functions"
+  - "Averaging modes"
+  - "Waterfall display"
+  - "Zoom and markers"
+
+fft_parameters:
+  sample_sizes:
+    - "256 points"
+    - "512 points"
+    - "1024 points"
+    - "2048 points"
+    - "4096 points"
+    
+  window_functions:
+    - "Rectangular (none)"
+    - "Hamming"
+    - "Hanning"
+    - "Blackman"
+    - "Kaiser"
+    
+  display_scales:
+    - "Linear magnitude"
+    - "Logarithmic (dB)"
+    - "Power spectral density"
+
+examples:
+  - code: |
+      ' Audio spectrum analyzer
+      PUB audio_spectrum() | samples[256], i
+        REPEAT
+          REPEAT i FROM 0 TO 255
+            samples[i] := read_adc()
+            WAITUS(50)  ' 20kHz sample rate
+          DEBUG(`FFT Audio_Spectrum, samples`)
+    description: "Display audio frequency spectrum"
+    
+  - code: |
+      ' Vibration analysis
+      PUB vibration_fft() | accel_data[512], i
+        REPEAT
+          REPEAT i FROM 0 TO 511
+            accel_data[i] := read_accelerometer()
+            WAITMS(1)
+          DEBUG(`FFT Vibration, accel_data`)
+    description: "Analyze mechanical vibration"
+    
+  - code: |
+      ' Signal quality check
+      PUB signal_analysis() | signal[1024], i
+        generate_test_signal(@signal)
+        add_noise(@signal)
+        DEBUG(`FFT Signal_Quality, signal`)
+    description: "Analyze signal harmonics"
+
+display_features:
+  spectrum_view:
+    - "Frequency on X-axis"
+    - "Magnitude on Y-axis"
+    - "Peak markers"
+    - "Cursor measurements"
+    
+  waterfall_view:
+    - "3D time-frequency display"
+    - "Color-coded magnitude"
+    - "History retention"
+    
+  measurements:
+    - "Peak frequency"
+    - "Total harmonic distortion"
+    - "Signal-to-noise ratio"
+    - "Bandwidth"
+
+usage_notes:
+  - "Requires buffer of samples"
+  - "Sample rate determines frequency range"
+  - "Window function affects accuracy"
+  - "Processing intensive for large FFTs"
+
+related:
+  - "SPECTRO display type"
+  - "SCOPE display type"
+  - "Signal processing"
