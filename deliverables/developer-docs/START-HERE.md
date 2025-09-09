@@ -51,6 +51,12 @@ This knowledge base is optimized for AI-assisted development:
 - Structured documentation enables accurate code generation
 - Complete instruction reference for PASM2 programming
 
+**📔 Privacy & Best Practices**
+- [Claude Code Privacy Guide for P2 Developers (PDF)](ai-development/Claude-Code-Privacy-Guide-for-P2-Developers.pdf) - Essential reading for AI-assisted development
+  - Protect your intellectual property while using AI tools
+  - Understand data handling and training policies
+  - Learn best practices for sharing code with AI assistants
+
 ## 📖 Core Documentation
 
 ### Architecture & Languages

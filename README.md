@@ -11,6 +11,9 @@
 **[→ AI INTEGRATION GUIDE](AI-INTEGRATION.md)**  
 **Start here if you're using Claude Code, GitHub Copilot, or other AI assistants!** Complete guide on how to set up and use this knowledge base with AI systems, including example prompts and usage patterns.
 
+**[→ PRIVACY GUIDE FOR DEVELOPERS](deliverables/developer-docs/ai-development/Claude-Code-Privacy-Guide-for-P2-Developers.pdf)** 📔  
+**Essential reading before using AI tools!** Learn how to protect your intellectual property, understand data handling policies, and follow best practices for AI-assisted P2 development.
+
 ## 🎯 Find What You Need
 
 ### For AI Systems & Code Generation

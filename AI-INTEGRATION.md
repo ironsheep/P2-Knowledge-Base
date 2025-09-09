@@ -8,6 +8,9 @@
 **🚀 [Jump to Copy-Paste Templates](CLAUDE-QUICKSTART.md)**  
 For ready-to-use prompts and templates, see the CLAUDE-QUICKSTART.md file.
 
+**🔒 [Privacy Guide for P2 Developers](deliverables/developer-docs/ai-development/Claude-Code-Privacy-Guide-for-P2-Developers.pdf)**  
+**Must read!** Learn how to protect your IP while using AI tools for P2 development.
+
 ### 1. Access the Repository Directly from GitHub
 
 When starting a new Claude Code conversation, reference this repository:
