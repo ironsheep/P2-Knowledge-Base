@@ -1,0 +1,253 @@
+concept: click_module_integration
+title: MikroElektronika Click Module Integration Patterns
+category: hardware_interface
+description: Standard patterns for integrating Click modules with P2 using offset-based pin mapping
+documentation_source: code_analysis
+documentation_level: comprehensive
+created: 2025-09-09
+
+overview: |
+  Click modules from MikroElektronika provide standardized hardware interfaces
+  that can be easily integrated with the P2. This concept covers the architectural
+  patterns for creating portable, reusable Click module drivers using offset-based
+  pin mapping and enum-based configuration APIs.
+
+click_standard:
+  description: "MikroBUS standard pinout used by all Click modules"
+  pinout: |
+    Left Side (top to bottom):
+      AN   - Analog input
+      RST  - Reset
+      CS   - SPI Chip Select  
+      SCK  - SPI Clock
+      MISO - SPI Data In
+      MOSI - SPI Data Out
+      3V3  - Power
+      GND  - Ground
+      
+    Right Side (top to bottom):
+      PWM - PWM output
+      INT - Interrupt
+      RX  - UART Receive (marked TX on Click)
+      TX  - UART Transmit (marked RX on Click)
+      SCL - I2C Clock
+      SDA - I2C Data
+      5V0 - Power (if needed)
+      GND - Ground
+
+p2_adapter_mapping:
+  description: "P2 Eval Click Adapter pin mapping pattern"
+  code: |
+    CON
+      ' Click module pin offsets from base pin
+      CLICK_OFST_MOSI = 11    ' Mikroe pin 6
+      CLICK_OFST_MISO = 10    ' Mikroe pin 5
+      CLICK_OFST_SCK  = 9     ' Mikroe pin 4
+      CLICK_OFST_CS   = 8     ' Mikroe pin 3
+      CLICK_OFST_RST  = 7     ' Mikroe pin 2
+      CLICK_OFST_AN   = 6     ' Mikroe pin 1
+      CLICK_OFST_PWM  = 5     ' Mikroe pin 16
+      CLICK_OFST_INT  = 4     ' Mikroe pin 15
+      CLICK_OFST_RX   = 3     ' Mikroe pin 14
+      CLICK_OFST_TX   = 2     ' Mikroe pin 13
+      CLICK_OFST_SCL  = 1     ' Mikroe pin 12
+      CLICK_OFST_SDA  = 0     ' Mikroe pin 11
+      
+      PIN_NOT_USED = -1
+  source: P2-Click-eInk
+
+implementation_patterns:
+  base_pin_configuration:
+    description: "Enum-based base pin selection for P2 Eval adapter slots"
+    code: |
+      CON
+        ' P2 Eval Click Adapter positions
+        #0[16], PINS_P0_P15, PINS_P16_P31, PINS_P32_P47
+        INVALID_PIN_BASE = -1
+      
+      PUB start(eClickBasePin) : ok | basePin
+        case eClickBasePin
+          PINS_P0_P15:   basePin := 0
+          PINS_P16_P31:  basePin := 16
+          PINS_P32_P47:  basePin := 32
+          other:
+            debug("Invalid base pin selection")
+            return INVALID_PIN_BASE
+            
+        ' Configure actual pins
+        csPin := basePin + CLICK_OFST_CS
+        sckPin := basePin + CLICK_OFST_SCK
+        mosiPin := basePin + CLICK_OFST_MOSI
+        misoPin := basePin + CLICK_OFST_MISO
+    source: P2-Click-eInk
+    
+  spi_click_pattern:
+    description: "Standard SPI Click module initialization"
+    code: |
+      PRI initializeSPI(basePin) | csPin, sckPin, mosiPin, misoPin
+        ' Calculate actual pins
+        csPin := basePin + CLICK_OFST_CS
+        sckPin := basePin + CLICK_OFST_SCK
+        mosiPin := basePin + CLICK_OFST_MOSI
+        misoPin := basePin + CLICK_OFST_MISO
+        
+        ' Initialize SPI driver
+        spi.start(sckPin, mosiPin, misoPin, SPI_MODE, SPI_CLK_MHZ)
+        
+        ' Set CS high (inactive)
+        pinh(csPin)
+        
+      PRI spiTransaction(data) | result
+        ' CS low - start transaction
+        pinl(csPin)
+        
+        ' Transfer data
+        result := spi.transfer(data)
+        
+        ' CS high - end transaction
+        pinh(csPin)
+        
+        return result
+    
+  i2c_click_pattern:
+    description: "Standard I2C Click module initialization"
+    code: |
+      PRI initializeI2C(basePin) | sclPin, sdaPin
+        ' Calculate actual pins
+        sclPin := basePin + CLICK_OFST_SCL
+        sdaPin := basePin + CLICK_OFST_SDA
+        
+        ' Initialize I2C driver (with pull-ups)
+        i2c.setup(sclPin, sdaPin, I2C_SPEED, I2C_PULLUP)
+    
+  uart_click_pattern:
+    description: "Standard UART Click module initialization"
+    code: |
+      PRI initializeUART(basePin) | rxPin, txPin
+        ' Calculate actual pins (note the swap!)
+        rxPin := basePin + CLICK_OFST_TX  ' TX on Click = RX on P2
+        txPin := basePin + CLICK_OFST_RX  ' RX on Click = TX on P2
+        
+        ' Initialize UART
+        serial.start(rxPin, txPin, MODE, BAUD)
+
+configuration_api_patterns:
+  enum_based_config:
+    description: "Type-safe configuration using enums"
+    code: |
+      CON
+        ' Device types with non-zero base
+        #$40, DEVICE_TYPE_A, DEVICE_TYPE_B, DEVICE_TYPE_C
+        
+        ' Operating modes
+        #$50, MODE_NORMAL, MODE_SLEEP, MODE_FAST
+        
+        ' Return values
+        INVALID_CONFIG = -1
+        
+      PUB configure(deviceType, mode) : ok
+        ' Validate enum values by range
+        if deviceType < DEVICE_TYPE_A or deviceType > DEVICE_TYPE_C
+          return INVALID_CONFIG
+          
+        if mode < MODE_NORMAL or mode > MODE_FAST
+          return INVALID_CONFIG
+          
+        ' Apply configuration...
+    source: P2-Click-eInk
+    
+  multi_device_support:
+    description: "Supporting multiple Click module variants"
+    code: |
+      CON
+        ' Different display types
+        #$40, DS_TYPE_A, DS_TYPE_B, DS_TYPE_C
+        
+        ' Display-specific parameters
+        TYPE_A_WIDTH = 128
+        TYPE_A_HEIGHT = 64
+        TYPE_B_WIDTH = 240
+        TYPE_B_HEIGHT = 320
+        
+      VAR
+        LONG displayWidth
+        LONG displayHeight
+        
+      PUB selectDisplay(displayType)
+        case displayType
+          DS_TYPE_A:
+            displayWidth := TYPE_A_WIDTH
+            displayHeight := TYPE_A_HEIGHT
+          DS_TYPE_B:
+            displayWidth := TYPE_B_WIDTH
+            displayHeight := TYPE_B_HEIGHT
+
+best_practices:
+  portability:
+    - Always use offset constants, never hardcode pins
+    - Support all three P2 Eval adapter positions
+    - Make base pin a runtime parameter
+    - Document Click module pin usage clearly
+    
+  error_handling:
+    - Validate base pin selection
+    - Check for PIN_NOT_USED before using pins
+    - Return error codes for invalid configurations
+    - Provide debug output for pin conflicts
+    
+  documentation:
+    - Include ASCII art of Click module pinout
+    - Document which pins are used/unused
+    - Note any pin swaps (like UART RX/TX)
+    - Specify voltage requirements (3.3V vs 5V)
+    
+  initialization:
+    - Reset Click module during init if RST pin available
+    - Configure all pins before enabling module
+    - Set safe default states for outputs
+    - Verify module presence if possible
+
+common_click_modules:
+  examples:
+    - eINK Click: SPI-based e-paper display
+    - OLED Click: I2C/SPI display
+    - WiFi Click: UART-based WiFi module
+    - RTC Click: I2C real-time clock
+    - ADC Click: SPI analog-to-digital converter
+    
+  integration_tips:
+    - Check module datasheet for timing requirements
+    - Some modules need specific reset sequences
+    - Power sequencing may be important
+    - Interrupt pins may need pull-ups
+
+debugging:
+  pin_verification: |
+    PUB verifyPins(basePin)
+      debug("Click module pin assignments:")
+      debug("  CS:   P", udec(basePin + CLICK_OFST_CS))
+      debug("  SCK:  P", udec(basePin + CLICK_OFST_SCK))
+      debug("  MOSI: P", udec(basePin + CLICK_OFST_MOSI))
+      debug("  MISO: P", udec(basePin + CLICK_OFST_MISO))
+      debug("  RST:  P", udec(basePin + CLICK_OFST_RST))
+  
+  connection_test: |
+    PUB testConnection(basePin) : ok
+      ' Try to read device ID or similar
+      ok := readDeviceID(basePin)
+      if ok
+        debug("Click module detected")
+      else
+        debug("No Click module found")
+
+related_concepts:
+  - spi_communication: SPI protocol for Click modules
+  - i2c_communication: I2C protocol for Click modules
+  - smart_pin_uart: UART for Click modules
+  - enum_based_apis: Type-safe configuration
+
+references:
+  - MikroElektronika Click board standard
+  - P2 Eval Click Adapter documentation
+  - P2-Click-eInk implementation
+  - Iron Sheep Productions Click drivers

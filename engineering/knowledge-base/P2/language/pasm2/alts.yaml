@@ -17,3 +17,67 @@ parameters:
   (Src[17:9]; added to Dest at the end of execution).
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+examples:
+  - name: Array Indexing Pattern
+    description: Index into array of longs in COG RAM
+    code: |
+      ' Access element portctr of rxpin array
+      alts    portctr, #rxpin     ' modify next instruction's source
+      mov     rxd, 0-0            ' 0-0 gets replaced with rxpin[portctr]
+      
+      ' Where:
+      ' portctr = index (0-7)
+      ' rxpin = base of array
+      ' rxd = destination for array element
+    source: P2-OctoSerial
+    
+  - name: Multi-Resource Management
+    description: Systematic access to multiple resource arrays
+    code: |
+      ' Service multiple ports in round-robin
+      loop
+              ' Get RX pin for current port
+              alts    portctr, #rxpin
+              mov     rxd, 0-0
+              
+              ' Get TX pin for current port
+              alts    portctr, #txpin
+              mov     txd, 0-0
+              
+              ' Service this port
+              testb   rxd, #31        wc  ' test for -1 (unused)
+      if_nc   call    #rx_service
+              
+              testb   txd, #31        wc
+      if_nc   call    #tx_service
+              
+              ' Next port
+              incmod  portctr, #7     wc
+      if_nc   jmp     #loop
+    source: P2-OctoSerial
+    
+  - name: Configuration Array Access
+    description: Access configuration parameters by index
+    code: |
+      ' Get buffer pointer for port
+      alts    portctr, #p_rxbuf
+      mov     buffer_ptr, 0-0
+      
+      ' Get head index pointer for port
+      alts    portctr, #p_rxhead
+      mov     head_ptr, 0-0
+      
+      ' Read head index from hub
+      rdlong  head_idx, head_ptr
+    source: P2-OctoSerial
+
+related_instructions:
+  - ALTD: Modify destination field
+  - ALTB: Modify bit field
+  - ALTI: Modify instruction
+  
+notes:
+  - The 0-0 pattern is a placeholder that gets modified
+  - Efficient for array access without loops
+  - Enables self-modifying code patterns
+  - Critical for multi-resource management in single COG

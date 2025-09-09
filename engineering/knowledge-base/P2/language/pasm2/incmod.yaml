@@ -21,3 +21,62 @@ related:
 - DECMOD
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+examples:
+  - name: Round-Robin Counter
+    description: Circular counter for resource scheduling
+    code: |
+      ' Round-robin through 8 ports (0-7)
+      main_loop
+              ' Service current port
+              ' ... port service code ...
+              
+              ' Move to next port
+              incmod  portctr, portnum    wc
+      if_nc   jmp     #main_loop          ' Continue if not wrapped
+              
+              ' We've serviced all ports, restart
+              jmp     #main_loop
+              
+      portctr res     1                   ' Current port (0-7)
+      portnum long    7                   ' Maximum port number
+    source: P2-OctoSerial
+    
+  - name: Circular Buffer Index
+    description: Increment buffer index with wrap-around
+    code: |
+      ' Increment tail index with modulo for circular buffer
+      ' Note: buffer size must be (modulus + 1)
+      incmod  tail_idx, #BUF_SIZE-1
+      
+      ' Check if buffer is full (tail caught up to head)
+      cmp     tail_idx, head_idx      wz
+      if_z    jmp     #buffer_full
+      
+      ' Safe to add data at tail
+      add     buffer_ptr, tail_idx
+      wrbyte  new_data, buffer_ptr
+    source: P2-OctoSerial
+    
+  - name: Multi-Resource Iterator
+    description: Iterate through active resources only
+    code: |
+      ' Service only active ports
+      .next_port
+              alts    portctr, #port_active
+              mov     is_active, 0-0      ' Get active flag
+              
+              tjz     is_active, #.skip   ' Skip if inactive
+              call    #service_port       ' Service this port
+              
+      .skip   incmod  portctr, #7         wc
+      if_nc   jmp     #.next_port         ' Continue loop
+              
+              ' All ports checked
+              ret
+    source: P2-OctoSerial
+
+notes:
+  - C flag indicates wrap-around (modulus reached)
+  - Perfect for round-robin scheduling
+  - Essential for circular buffer management
+  - More efficient than manual compare and reset

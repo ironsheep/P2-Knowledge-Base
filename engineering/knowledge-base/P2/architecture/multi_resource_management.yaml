@@ -1,0 +1,199 @@
+concept: multi_resource_management
+title: Single COG Managing Multiple Resources
+category: architectural_pattern
+description: Design pattern for a single COG efficiently managing multiple instances of the same resource type
+documentation_source: code_analysis
+documentation_level: comprehensive
+created: 2025-09-09
+
+overview: |
+  A powerful P2 architectural pattern where a single COG manages multiple instances of
+  the same resource type (e.g., 8 serial ports, multiple SPI devices, multiple PWM channels).
+  This pattern maximizes COG efficiency by amortizing overhead across multiple resources
+  and is commonly used in production P2 applications.
+
+architecture:
+  key_components:
+    - Resource configuration arrays
+    - Round-robin or priority-based scheduling
+    - Hub-COG communication structures
+    - Per-resource state tracking
+    - Circular buffer management
+    
+  memory_layout: |
+    HUB RAM:
+      - Configuration arrays (pins, modes, speeds)
+      - Buffer arrays (one per resource)
+      - Index/pointer arrays (head/tail for queues)
+      - Status/error arrays (overflow, ready flags)
+    
+    COG RAM:
+      - Cached configuration (block copied at start)
+      - Working variables (current resource index)
+      - Temporary buffers
+
+implementation_patterns:
+  configuration_structure:
+    description: "Array-based configuration for systematic resource handling"
+    code: |
+      CON
+        MAX_RESOURCES = 8
+        BUFFER_SIZE = 32
+      
+      VAR
+        ' Configuration arrays
+        LONG pinInput[MAX_RESOURCES]
+        LONG pinOutput[MAX_RESOURCES]
+        LONG configuration[MAX_RESOURCES]
+        
+        ' Buffer management
+        LONG pBuffers[MAX_RESOURCES]
+        LONG headIndex[MAX_RESOURCES]
+        LONG tailIndex[MAX_RESOURCES]
+        
+        ' Status tracking
+        LONG errorFlags[MAX_RESOURCES]
+        LONG activeCount
+    source: P2-OctoSerial
+    
+  round_robin_servicing:
+    description: "PASM2 round-robin resource polling"
+    code: |
+      DAT
+              org
+      main_loop
+              mov     index, #0
+      .next
+              ' Get resource configuration
+              alts    index, #pin_array
+              mov     current_pin, 0-0
+              
+              ' Check if resource needs service
+              testb   current_pin, #31    wc  ' -1 = not used
+      if_nc   call    #service_resource
+              
+              ' Next resource
+              incmod  index, max_index    wc
+      if_nc   jmp     #.next
+              
+              jmp     #main_loop
+    source: P2-OctoSerial
+    
+  hub_cog_transfer:
+    description: "Efficient block copy of configuration to COG"
+    code: |
+      PUB start() : ok
+        ' Copy configuration to COG RAM
+        ok := coginit(COGEXEC_NEW, @driver, @activeCount)
+      
+      DAT
+              org
+      driver
+              ' Block copy configuration from hub
+              rdlong  count, ptra++
+              setq    #CONFIG_LONGS-1
+              rdlong  config_start, ptra
+    source: P2-OctoSerial
+
+common_applications:
+  serial_port_multiplexer:
+    description: "8 UART ports managed by single COG"
+    example: |
+      OBJ
+        serial : "isp_octoport_serial"
+      
+      PUB main() | port1, port2
+        port1 := serial.addPort(RX1, TX1, MODE_NONE, 115200, PU_3K3)
+        port2 := serial.addPort(RX2, TX2, MODE_NONE, 9600, PU_3K3)
+        serial.start()
+        
+        serial.txStr(port1, string("Hello Port 1"))
+        serial.txStr(port2, string("Hello Port 2"))
+    
+  multi_spi_manager:
+    description: "Multiple SPI devices on shared bus"
+    example: |
+      ' Manage multiple chip selects
+      repeat device from 0 to MAX_DEVICES-1
+        if deviceActive[device]
+          drvl    chipSelect[device]
+          sendSPI(deviceData[device])
+          drvh    chipSelect[device]
+    
+  pwm_channel_controller:
+    description: "Multiple PWM channels with synchronized updates"
+    example: |
+      ' Update all PWM channels
+      repeat channel from 0 to MAX_CHANNELS-1
+        wypin   dutyCycle[channel], pwmPin[channel]
+
+best_practices:
+  initialization:
+    - Validate all resource configurations before starting COG
+    - Pre-calculate buffer addresses and store pointers
+    - Clear all buffers and indexes before operation
+    - Use block copy for efficient configuration transfer
+    
+  resource_scheduling:
+    - Use round-robin for fair resource allocation
+    - Implement priority levels if needed
+    - Skip inactive resources quickly
+    - Batch operations when possible
+    
+  error_handling:
+    - Track errors per resource, not globally
+    - Provide per-resource error clearing
+    - Continue operation of working resources
+    - Report errors through status arrays
+    
+  memory_management:
+    - Align buffers to long boundaries
+    - Pre-calculate all addresses during init
+    - Use pointer arrays for indirect access
+    - Minimize hub access in service loop
+
+performance_considerations:
+  advantages:
+    - Single COG overhead for multiple resources
+    - Efficient resource utilization
+    - Predictable timing behavior
+    - Scalable architecture
+    
+  limitations:
+    - Round-robin adds latency
+    - Shared COG limits individual throughput
+    - Fixed maximum resource count
+    - Memory usage scales with resource count
+    
+  optimization_tips:
+    - Use smart pins to offload timing
+    - Cache frequently accessed data in COG
+    - Batch hub operations when possible
+    - Skip inactive resources quickly
+
+debugging_techniques:
+  monitoring:
+    - Add per-resource activity counters
+    - Track service loop timing
+    - Monitor buffer fill levels
+    - Log error occurrences
+    
+  visualization: |
+    ' Debug output showing resource activity
+    PUB showStatus() | i
+      repeat i from 0 to activeCount-1
+        debug("Port ", udec(i), ": ")
+        debug("RX=", udec(rxCount[i]), " ")
+        debug("TX=", udec(txCount[i]), " ")
+        debug("Err=", uhex(errorFlags[i]))
+
+related_concepts:
+  - circular_buffers: Buffer management for each resource
+  - smart_pin_arrays: Hardware acceleration for I/O
+  - hub_cog_communication: Efficient data transfer
+  - round_robin_scheduling: Fair resource allocation
+
+references:
+  - P2-OctoSerial: 8-port UART implementation
+  - Production code patterns from Iron Sheep Productions
+  - P2 forum discussions on multi-resource management
