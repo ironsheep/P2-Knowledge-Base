@@ -82,6 +82,49 @@ python3 /engineering/tools/convert-to-div-syntax.py input.md output.md
 - ✅ Splits antipattern blocks (WRONG/RIGHT patterns)
 - ✅ Provides statistics on conversions and blank lines added
 
+**Post-script cleanup required**:
+
+1. **Remove extra blank lines in antipattern blocks**: The script may add an extra blank line before the closing ``` in antipattern blocks. These should be removed.
+   ```markdown
+   <!-- INCORRECT (script output) -->
+   ::: antipattern
+   ```
+   ' This won't work
+   code here
+   
+   ```
+   :::
+   
+   <!-- CORRECT (after cleanup) -->
+   ::: antipattern
+   ```
+   ' This won't work
+   code here
+   ```
+   :::
+   ```
+
+2. **Ensure blank lines before opening div blocks**: All opening div blocks (`::: type`) MUST have a blank line before them, otherwise the div marker gets absorbed into the previous line.
+   ```markdown
+   <!-- INCORRECT (no blank line) -->
+   **Section Heading**
+   ::: spin2
+   ```
+   code here
+   ```
+   :::
+   
+   <!-- CORRECT (with blank line) -->
+   **Section Heading**
+   
+   ::: spin2
+   ```
+   code here
+   ```
+   :::
+   ```
+   Common locations: After section headings like "**Mistake 1:**", "**Mistake 2:**", etc.
+
 **Critical blank line handling**: The script detects when text immediately precedes a code block and inserts a blank line before the div opener. This prevents the colons from appearing in the final PDF (a problem found in Master V3).
 
 ### 1.1 Antipattern Code Block Splitting (handled by script) ⚠️ **CRITICAL**
@@ -196,6 +239,22 @@ code here
 - Split antipattern blocks → `::: antipattern` and `::: spin2`
 - NO blocks remain with language tags
 
+### 4. Check Hex Notation Convention
+
+**Standard**: P2 uses `$` prefix for hex values
+**Verify**: 
+
+```bash
+grep -o '0x[0-9A-Fa-f]\+' P2-Smart-Pins-Green-Book-Tutorial.md
+# If found, convert to $ notation
+```
+
+**Convert if needed**:
+
+```bash
+sed -i.bak 's/0x\([0-9A-Fa-f]\+\)/$\1/g' P2-Smart-Pins-Green-Book-Tutorial.md
+```
+
 ## 3-Color Code Block System (Pedagogical Decision)
 
 ### Color Mappings (AFTER div conversion)
@@ -309,8 +368,7 @@ code here
 
 ## File Locations
 
-- **Green Book v0**: `/documentation/manuals/smart-pins-workshop/opus-master-green-book/P2-Smart-Pins-Green-Book-Tutorial-v0.md`
-- **Green Book v2**: `/documentation/manuals/smart-pins-workshop/opus-master-green-book/P2-Smart-Pins-Green-Book-Tutorial-v2.md`
+- **Green Book v7**: `/documentation/manuals/smart-pins-workshop/opus-master-green-book/P2-Smart-Pins-Green-Book-Tutorial-v7.md`
 - **Working Copy**: `/exports/pdf-generation/workspace/smart-pins-manual/P2-Smart-Pins-Green-Book-Tutorial-working.md`
 - **Escaped Copy**: `/exports/pdf-generation/workspace/smart-pins-manual/P2-Smart-Pins-Green-Book-Tutorial-escaped.md`
 - **Deployment**: `/exports/pdf-generation/outbound/P2-Smart-Pins-Reference/`
@@ -325,7 +383,7 @@ The following templates must work with Green Book:
 - `green-book-semantic-blocks.lua` - Semantic div processing
 - `part-chapter-pagebreaks.lua` - Page break handling
 
-## Systematic Transformation Guide: v3 → LaTeX-Ready
+## Systematic Transformation Guide: v7 → LaTeX-Ready
 
 ### 📋 EXECUTIVE SUMMARY: TARGETED TRANSFORMATIONS REQUIRED
 
@@ -336,7 +394,7 @@ The following templates must work with Green Book:
 **Step 1: Apply ALL Transformations** 🔄
 ```bash
 # Start with master document
-cp opus-master/COMPLETE-OPUS-MASTER.md \
+cp opus-master-green-book/P2-Smart-Pins-Green-Book-Tutorial-v7.md \
    P2-Smart-Pins-Green-Book-Tutorial-working.md
 
 # Apply transformations (manual or scripted):
@@ -375,6 +433,8 @@ grep -c '^:::' P2-Smart-Pins-Green-Book-Tutorial-working.md
 - [ ] All `spin2` blocks → green rendering (including config)
 - [ ] 30 `pasm2` blocks → yellow rendering
 - [ ] Split antipattern blocks → red rendering
+- [ ] Antipattern blocks have no extra blank lines before closing ```
+- [ ] All opening div blocks have blank lines before them
 - [ ] NO separate configuration blocks (pedagogical choice)
 
 **Semantic Div Verification** ✅
