@@ -38,7 +38,7 @@ The information in this manual is subject to change without notice. While every 
 
 *First Edition: August 2025*  
 *Manual Version: 1.0.0*  
-*Knowledge Base Coverage: 80%*
+*Knowledge Base Coverage: 80\%*
 
 ---
 
@@ -215,13 +215,13 @@ I know you're absolutely crazy to have your first instruction executed, so let's
 
 ```pasm2
 ' LED Blinker - Your first PASM2 program!
-        org     0               ' Start at COG address 0
+        **ORG**     0               ' Start at COG address 0
         
-        drvh    #56             ' Drive pin 56 high (LED on)
-        waitx   ##25_000_000    ' Wait ~0.25 seconds at 100MHz
-        drvl    #56             ' Drive pin 56 low (LED off)  
-        waitx   ##25_000_000    ' Wait ~0.25 seconds
-        jmp     #$-4            ' Jump back 4 instructions
+        **DRVH**    #56             ' Drive pin 56 high (LED on)
+        **WAITX**   ##25_000_000    ' Wait ~0.25 seconds at 100MHz
+        **DRVL**    #56             ' Drive pin 56 low (LED off)  
+        **WAITX**   ##25_000_000    ' Wait ~0.25 seconds
+        **JMP**     #$-4            ' Jump back 4 instructions
 ```
 
 That's it! Five instructions and you have a blinking LED. Load this into any COG and watch the magic happen.
@@ -234,13 +234,13 @@ Well, now that you've seen it work (you did try it, right?), let's talk about wh
 
 **`org 0`** - This tells the assembler to start placing code at COG address 0. Every COG has its own private 512 longs (2KB) of memory, and execution always starts at address 0 when a COG is loaded.
 
-**`drvh #56`** - This drives pin 56 high (3.3V). The 'h' means high. The '#' means we're using an immediate value (the actual number 56) rather than the contents of register 56. One instruction, and your LED is on!
+**`drvh \#56`** - This drives pin 56 high (3.3V). The 'h' means high. The '\#' means we're using an immediate value (the actual number 56) rather than the contents of register 56. One instruction, and your LED is on!
 
-**`waitx ##25_000_000`** - This waits for 25 million clock cycles. At the default 100MHz clock, that's 0.25 seconds. Notice the double '##'? That means this is a 32-bit immediate value. Single '#' only gives us 9 bits.
+**`waitx \#\#25\_000\_000`** - This waits for 25 million clock cycles. At the default 100MHz clock, that's 0.25 seconds. Notice the double '\#\#'? That means this is a 32-bit immediate value. Single '\#' only gives us 9 bits.
 
-**`drvl #56`** - Drive low. LED off. You get the pattern.
+**`drvl \#56`** - Drive low. LED off. You get the pattern.
 
-**`jmp #$-4`** - Jump back 4 instructions. The '$' means "current address", so '$-4' means "4 instructions back from here". Infinite loop achieved!
+**`jmp \#\$-4`** - Jump back 4 instructions. The '\$' means "current address", so '\$-4' means "4 instructions back from here". Infinite loop achieved!
 
 ### But Wait, There's More!
 
@@ -270,15 +270,15 @@ The `coginit` instruction loads your PASM2 code from hub memory into a fresh COG
 The blinker works, but it's a bit rigid, isn't it? What if we want to change the blink rate? Let's use a register:
 
 ```pasm2
-        org     0
+        **ORG**     0
         
-        mov     delay, ##25_000_000    ' Set delay to 0.25 seconds
+        **MOV**     delay, ##25_000_000    ' Set delay to 0.25 seconds
         
-blink   drvh    #56                    ' LED on
-        waitx   delay                  ' Wait
-        drvl    #56                    ' LED off
-        waitx   delay                  ' Wait
-        jmp     #blink                 ' Repeat forever
+blink   **DRVH**    #56                    ' LED on
+        **WAITX**   delay                  ' Wait
+        **DRVL**    #56                    ' LED off
+        **WAITX**   delay                  ' Wait
+        **JMP**     #blink                 ' Repeat forever
         
 delay   long    0                      ' Storage for our delay value
 ```
@@ -304,27 +304,27 @@ Now for the fun part. Try these modifications:
 Make the LED blink in a pattern: short-short-long (like SOS):
 
 ```pasm2
-        org     0
+        **ORG**     0
         
-        mov     short, ##10_000_000    ' 0.1 second
-        mov     long_d, ##30_000_000   ' 0.3 seconds
+        **MOV**     short, ##10_000_000    ' 0.1 second
+        **MOV**     long_d, ##30_000_000   ' 0.3 seconds
         
-pattern drvh    #56                    ' Short pulse 1
-        waitx   short
-        drvl    #56
-        waitx   short
+pattern **DRVH**    #56                    ' Short pulse 1
+        **WAITX**   short
+        **DRVL**    #56
+        **WAITX**   short
         
-        drvh    #56                    ' Short pulse 2
-        waitx   short
-        drvl    #56
-        waitx   short
+        **DRVH**    #56                    ' Short pulse 2
+        **WAITX**   short
+        **DRVL**    #56
+        **WAITX**   short
         
-        drvh    #56                    ' Long pulse
-        waitx   long_d
-        drvl    #56
-        waitx   long_d
+        **DRVH**    #56                    ' Long pulse
+        **WAITX**   long_d
+        **DRVL**    #56
+        **WAITX**   long_d
         
-        jmp     #pattern
+        **JMP**     #pattern
         
 short   long    0
 long_d  long    0
@@ -334,34 +334,34 @@ long_d  long    0
 Blink LEDs on pins 56 and 57 alternately:
 
 ```pasm2
-        org     0
+        **ORG**     0
         
-loop    drvh    #56                    ' LED 56 on
-        drvl    #57                    ' LED 57 off
-        waitx   ##25_000_000
+loop    **DRVH**    #56                    ' LED 56 on
+        **DRVL**    #57                    ' LED 57 off
+        **WAITX**   ##25_000_000
         
-        drvl    #56                    ' LED 56 off
-        drvh    #57                    ' LED 57 on
-        waitx   ##25_000_000
+        **DRVL**    #56                    ' LED 56 off
+        **DRVH**    #57                    ' LED 57 on
+        **WAITX**   ##25_000_000
         
-        jmp     #loop
+        **JMP**     #loop
 ```
 
 ### Experiment 3: Fading (Advanced)
 This one's a bit tricky - we'll use PWM to fade the LED:
 
 ```pasm2
-        org     0
+        **ORG**     0
         
-        wrpin   ##P_PWM_TRIANGLE, #56  ' Configure pin 56 for PWM
-        wxpin   ##$100, #56            ' Set period to 256
-        dirh    #56                    ' Enable the pin
+        **WRPIN**   ##P_PWM_TRIANGLE, #56  ' Configure pin 56 for PWM
+        **WXPIN**   ##$100, #56            ' Set period to 256
+        **DIRH**    #56                    ' Enable the pin
         
-fade    wypin   level, #56             ' Set duty cycle
-        waitx   ##100_000              ' Small delay
-        add     level, #1              ' Increment brightness
-        and     level, #$FF            ' Wrap at 256
-        jmp     #fade
+fade    **WYPIN**   level, #56             ' Set duty cycle
+        **WAITX**   ##100_000              ' Small delay
+        **ADD**     level, #1              ' Increment brightness
+        **AND**     level, #$FF            ' Wrap at 256
+        **JMP**     #fade
         
 level   long    0
 ```
@@ -374,9 +374,9 @@ Feeling overwhelmed? Here's the simplified prescription:
 
 **Minimum viable blinker** - Just 3 instructions:
 ```pasm2
-loop    drvnot  #56         ' Toggle pin 56
-        waitx   ##25_000_000 ' Wait
-        jmp     #loop       ' Repeat
+loop    **DRVNOT**  #56         ' Toggle pin 56
+        **WAITX**   ##25_000_000 ' Wait
+        **JMP**     #loop       ' Repeat
 ```
 
 The `drvnot` instruction toggles a pin - if it's high, make it low; if it's low, make it high. Sometimes simpler is better!
@@ -398,20 +398,20 @@ The last 16 longs (addresses 496-511) are special purpose registers (DIRA, OUTA,
 
 Before we move on, let me save you some debugging time:
 
-1. **Forgetting the ##** - Using `waitx #25_000_000` will NOT wait for 0.25 seconds! Single # only allows values up to 511.
+1. **Forgetting the \#\#** - Using `waitx \#25\_000\_000` will NOT wait for 0.25 seconds! Single \# only allows values up to 511.
 
 2. **Wrong pin number** - The P2 Eval board's LEDs are on pins 56-63. The P2 Edge module might have different assignments.
 
 3. **No clock setup** - We're assuming the default 100MHz clock. If someone's changed it, your timing will be off.
 
-4. **COG already running** - If you `coginit` to a specific COG that's already running something else, it will be stopped and replaced. Use `COGEXEC_NEW` to automatically find a free COG.
+4. **COG already running** - If you `coginit` to a specific COG that's already running something else, it will be stopped and replaced. Use `COGEXEC\_NEW` to automatically find a free COG.
 
 ## What We've Learned
 
 Let's celebrate what you've accomplished:
 - ✅ Written your first PASM2 program
 - ✅ Controlled hardware (LED) directly
-- ✅ Used immediate values (# and ##)
+- ✅ Used immediate values (\# and \#\#)
 - ✅ Created loops with JMP
 - ✅ Understood COG independence
 - ✅ Modified code for different patterns

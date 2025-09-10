@@ -42,10 +42,29 @@ grep -c 'sidetrack\|interlude\|yourturn\|chapterend' \
 3. `/documentation/pipelines/pdf-generation-format-guide.md` - PDF production workflow
 4. `/exports/pdf-generation/workspace/desilva-manual/visual-fixes-tracking.md` - Current state
 
-## 🔴 CRITICAL: SOURCE OF TRUTH LOCATIONS
+## 🔴 CRITICAL: DIRECTORY STRUCTURE & PURPOSE
+
+### Understanding the Three Key Directories:
+- **`manuals/`**: Opus-created master documents (reference only, NEVER edit)
+  - `/engineering/document-production/manuals/p2-pasm-desilva-style/opus-master/`
+  - Original documents with tutorial voice and structure
+  - Gold masters that serve as source material
+  - Protected by READ-ONLY-PROTECTION.md
+- **`workspace/`**: Production working copies (ALL EDITING HAPPENS HERE)
+  - `/engineering/document-production/workspace/p2-pasm-desilva-style/`
+  - Clean versions prepared from masters
+  - Maintain as clean, unescaped markdown
+  - This is your primary editing environment
+- **`outbound/`**: Deployment staging for PDF Forge
+  - `/engineering/document-production/outbound/p2-pasm-desilva-style/`
+  - LaTeX-escaped versions only
+  - Temporary staging area
+  - NEVER edit these directly
+
+## SOURCE OF TRUTH LOCATIONS
 
 ### Markdown Source of Truth
-**ALWAYS EDIT HERE**: `/exports/pdf-generation/workspace/desilva-manual/`
+**ALWAYS EDIT HERE**: `/engineering/document-production/workspace/p2-pasm-desilva-style/`
 - `P2-PASM-deSilva-Style-FULL-Part1.md` - Part 1 working copy
 - `P2-PASM-deSilva-Style-Part2a.md` - Part 2a working copy  
 - `P2-PASM-deSilva-Style-Part2b.md` - Part 2b working copy
@@ -54,39 +73,65 @@ grep -c 'sidetrack\|interlude\|yourturn\|chapterend' \
 - Never edit the escaped/combined version in outbound
 
 ### Template Source of Truth  
-**ALWAYS EDIT HERE**: `/exports/pdf-generation/workspace/desilva-manual/templates/`
+**ALWAYS EDIT HERE**: `/engineering/document-production/workspace/p2-pasm-desilva-style/templates/`
 - `p2kb-pasm-desilva.latex` - Master De Silva template
+- `p2kb-*.sty` - Style files (foundation, content, presentation)
 - ALL template changes happen here FIRST
-
-### Deployment Workflow (EXACT SEQUENCE)
-1. **Edit parts**: Individual part files in workspace/desilva-manual/
-2. **Edit template**: workspace/desilva-manual/templates/p2kb-pasm-desilva.latex
-3. **Combine parts**: Cat all parts → COMBINED-FOR-ESCAPING.md
-4. **Escape combined**: `./tools/latex-escape-all.sh COMBINED → outbound/P2-PASM-deSilva-Style.md`
-5. **Deploy template**: `cp template → outbound/p2-pasm-desilva-style/`
-6. **Clean temp**: `rm COMBINED-FOR-ESCAPING.md`
-7. **User deploys**: Takes ALL files from outbound to PDF Forge
+- **TODO**: Templates scattered across multiple locations - needs consolidation
 
 ### NEVER Edit These Directly
 - ❌ `/engineering/document-production/outbound/p2-pasm-desilva-style/` - Deployment staging only
 - ❌ Escaped/combined markdown files - Always edit parts then re-combine
-- ❌ Templates in outbound - Always edit in workspace/desilva-manual/templates first
+- ❌ Templates in outbound - Always edit in workspace templates first
 
-### Outbound Directory = Deployment Staging
-**CRITICAL**: The outbound directory is WHERE YOU DROP FILES FOR USER TO DEPLOY:
+## EXCHANGE DIRECTORY PROTOCOL
+
+### Outbound = Two-Way Exchange Point
+**CRITICAL**: The outbound directory serves as a bidirectional exchange:
+- **User → Claude**: User places files here for Claude to examine/use
+- **Claude → Workspace**: Claude retrieves them, removes after copying to workspace
+- **Claude → User**: Claude places deployment files here for user to take to PDF Forge
+- **Cleanliness**: Keeps outbound clean and purpose-clear
+
+**User handles deployment based on file type:**
 - Combined escaped markdown → User moves to PDF Forge inbox/
 - LaTeX template (.latex file) → User moves to PDF Forge templates/
+- Style files (.sty) → User moves to PDF Forge templates/
 - Request file (request.json) → User uses for PDF generation
 
-**User handles deployment based on file type**
+## DEPLOYMENT WORKFLOW (EXACT SEQUENCE)
+
+1. **Edit source files** in workspace (maintain clean, unescaped state)
+2. **Combine parts** if multi-part document:
+   ```bash
+   cat Part1.md Part2a.md Part2b.md Part2c.md > COMBINED-FOR-ESCAPING.md
+   ```
+3. **Run escape script**:
+   ```bash
+   /engineering/tools/conversion/latex-escape-all.sh \
+     workspace/p2-pasm-desilva-style/COMBINED-FOR-ESCAPING.md \
+     outbound/p2-pasm-desilva-style/P2-PASM-deSilva-Style.md
+   ```
+4. **Copy ONLY modified files** to outbound:
+   - Style files (.sty) - copy directly
+   - Templates (.latex) - only if changed
+   - request.json - only if updated
+5. **Clean temporary files**:
+   ```bash
+   rm workspace/p2-pasm-desilva-style/COMBINED-FOR-ESCAPING.md
+   ```
+6. **User deploys** from outbound to PDF Forge
 
 ## File Structure (Fixed Locations)
 
 ```
 DeSilva Working Environment:
-/exports/pdf-generation/workspace/desilva-manual/
+/engineering/document-production/workspace/p2-pasm-desilva-style/
 ├── templates/                                  # SOURCE OF TRUTH templates
 │   └── p2kb-pasm-desilva.latex               # Master De Silva template
+├── ready/                                      # Ready parts location
+│   └── Part1-READY.md                        # Part 1 ready version
+├── editing/                                    # Work in progress
 ├── P2-PASM-deSilva-Style-FULL-Part1.md       # Part 1 working copy
 ├── P2-PASM-deSilva-Style-Part2a.md           # Part 2a working copy  
 ├── P2-PASM-deSilva-Style-Part2b.md           # Part 2b working copy
@@ -94,7 +139,7 @@ DeSilva Working Environment:
 ├── visual-fixes-tracking.md                   # Current state tracking
 └── DESILVA-STYLE-GUIDE.md                    # Style requirements
 
-/exports/pdf-generation/outbound/P2-PASM-deSilva-Style/
+/engineering/document-production/outbound/p2-pasm-desilva-style/
 ├── P2-PASM-deSilva-Style.md                   # COMBINED & ESCAPED for PDF Forge
 ├── p2kb-pasm-desilva.latex                   # Template (copied from workspace)
 ├── request.json                               # PDF generation config
@@ -103,6 +148,34 @@ DeSilva Working Environment:
     ├── P2-PASM-deSilva-Style.md
     ├── p2kb-pasm-desilva.latex
     └── request.json
+```
+
+## PRODUCTION REQUEST
+
+### Always Check request-requirements.json First
+```bash
+cat /engineering/document-production/workspace/p2-pasm-desilva-style/request-requirements.json
+```
+
+If this file exists, it contains MANDATORY pandoc arguments for this document.
+
+### Standard Production Request Format:
+```json
+{
+  "documents": [{
+    "input": "P2-PASM-deSilva-Style.md",
+    "output": "P2-PASM-deSilva-Style.pdf",
+    "template": "p2kb-pasm-desilva",
+    "variables": {
+      "title": "Discovering P2 Assembly",
+      "subtitle": "Build, Experiment, and Master the Propeller 2", 
+      "author": "P2 Community",
+      "footer": "In the Spirit of deSilva's P1 Tutorial"
+    },
+    "pandoc_args": ["--wrap=preserve", "--top-level-division=part"]
+  }],
+  "options": {"cleanup": true, "archive": false, "optimize": false}
+}
 ```
 
 ## The Visual Refinement Workflow
@@ -353,6 +426,26 @@ If this file exists, it contains MANDATORY pandoc arguments for this document.
 - Part 2a: [status]  
 - Part 2b: [status]
 - Part 2c: [status]
+
+## QUICK REFERENCE
+
+### Common Commands
+- **Combine parts**: `cat Part1.md Part2a.md Part2b.md Part2c.md > COMBINED.md`
+- **Escape LaTeX**: `/engineering/tools/conversion/latex-escape-all.sh input.md output.md`
+- **Check requirements**: `cat workspace/p2-pasm-desilva-style/request-requirements.json`
+- **Deploy template**: `cp workspace/templates/*.latex outbound/p2-pasm-desilva-style/`
+
+### Key Fixes
+- **Sidetrack boxes**: Update template tcolorbox configuration
+- **Code highlighting**: P2 assembly syntax in template
+- **Chapter numbering**: Use `--top-level-division=part`
+- **Escaping issues**: Context-aware escape script handles # and _ in code
+
+### Critical Rules
+- NO file renaming (-fixed, -v2, -working)
+- Edit files in place
+- Always work in workspace/
+- Deploy from outbound/
 
 ---
 
