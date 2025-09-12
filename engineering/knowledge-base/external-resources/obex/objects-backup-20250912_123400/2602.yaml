@@ -1,0 +1,62 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Steven Messenger | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : DisplayLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: demos
+    description_full: This object grew out of a discussion with deSilva. It is an
+      extension of graphics.spin that allows for using the ROM font, Clemens font
+      and the standard vector font. It also has a new XOR mode and methods for switching
+      between XOR and standard mode. The demo was mostly coded by deSilva and shows
+      the smooth animation that can be achieved with only a single buffer in XOR mode.
+    description_short: This object grew out of a discussion with deSilva. It is an
+      extension of graphics.spin that allows f
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:08.361760'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:46:24.386187'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2602'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: SDM_graphics_XOR
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2602
+    forum_discussion: http://forums.parallax.com/forums/default.aspx?f=25&p=1&m=248864
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/sdm_graphics_xor/

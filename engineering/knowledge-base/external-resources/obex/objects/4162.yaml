@@ -1,0 +1,52 @@
+object_metadata:
+  author: Wuerfel_21
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: SEGA Mega Drive / Genesis emulator for Parallax P2 + memory
+      expansion.
+    description_short: SEGA Mega Drive / Genesis emulator for Parallax P2 + memory
+      expansion.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - driver
+    - motor
+    - led
+    - spi
+    - display
+  metadata:
+    discovery_date: '2025-09-12T12:44:10.850434'
+    extraction_status: author_extracted
+    kb_integration: none
+    last_author_extraction: '2025-09-12T13:20:29.889220'
+    last_verified: '2025-09-12T12:46:44.019736'
+    page_discovered: 13
+    quality_score: 5
+    last_author_deep_search: 2025-09-12T13:39:2
+    created_date: '2025-02-16 22:57:19'
+    last_created_date_fix: 2025-09-12T15:27:1
+  object_id: '4162'
+  technical_details:
+    file_format: ZIP
+    file_size: 5883 B
+    languages:
+    - SPIN2
+    - PASM2
+    microcontroller:
+    - P2
+    version: ''
+  title: MegaYume - Mega Drive emulator
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4162
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/megayume-mega-drive-emulator/

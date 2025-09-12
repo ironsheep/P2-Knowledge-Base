@@ -1,0 +1,97 @@
+manifest_metadata:
+  manifest_type: obex_community_root
+  version: '2.0'
+  generated: 2025-09-12T16:10:0
+  total_objects: 113
+  total_authors: 24
+  coverage_status: complete
+  quality_metrics:
+    author_coverage: 24/113 (21.2%)
+    p1_p2_separation: complete
+    reference_filtering: complete
+community_overview:
+  description: P2 (Propeller 2) community code objects from Parallax OBEX
+  source_url: https://obex.parallax.com/microcontroller/propeller-2/
+  extraction_methodology: Comprehensive discovery across 13 pages with P1/P2 filtering
+  last_extraction: '2025-09-12'
+  object_types: executable_code_only
+  filtering_applied:
+  - P1_objects_removed
+  - reference_materials_removed
+  - P2_PASM2_SPIN2_only
+statistics:
+  by_category:
+    drivers: 49
+    misc: 34
+    display: 7
+    demos: 5
+    audio: 5
+    motors: 5
+    communication: 4
+    sensors: 3
+    tools: 1
+  by_language:
+    SPIN2: 112
+    PASM2: 56
+    PASM: 1
+    UNKNOWN: 1
+  top_contributors:
+    Jon McPhalen (jonnymac): 44
+    Stephen M Moraco: 15
+    Wuerfel_21: 11
+    ersmith: 4
+    ManAtWork: 4
+    Chip Gracey: 4
+    Chris Gadd: 4
+    glapolla: 3
+    Ray Allen: 2
+    Greg LaPolla: 2
+sub_manifests:
+  by_category:
+    path: categories/
+    manifests:
+    - drivers-manifest.yaml
+    - misc-manifest.yaml
+    - demos-manifest.yaml
+    - communication-manifest.yaml
+    - audio-manifest.yaml
+    - display-manifest.yaml
+    - motors-manifest.yaml
+    - tools-manifest.yaml
+    - sensors-manifest.yaml
+  by_author:
+    path: authors/
+    manifests:
+    - jon_mcphalen_jonnymac-manifest.yaml
+    - ersmith-manifest.yaml
+    - stephen_m_moraco-manifest.yaml
+    - ray_allen-manifest.yaml
+    - wuerfel_21-manifest.yaml
+    - greg_lapolla-manifest.yaml
+    - magio2-manifest.yaml
+    - glapolla-manifest.yaml
+    - vonszarvas-manifest.yaml
+    - manatwork-manifest.yaml
+    - evanh-manifest.yaml
+    - terry_trapp-manifest.yaml
+    - m.k._borri-manifest.yaml
+    - charles_current-manifest.yaml
+    - jose_rullan-manifest.yaml
+    - chip_gracey-manifest.yaml
+    - mike_calyer-manifest.yaml
+    - chris_gadd-manifest.yaml
+    - bill_tuss-manifest.yaml
+    - johannes-manifest.yaml
+    - michael-manifest.yaml
+    - riley_august-manifest.yaml
+    - bryan_thomas-manifest.yaml
+    - phonoclese-manifest.yaml
+access_patterns:
+  individual_objects:
+    path: ../objects/
+    format: '{object_id}.yaml'
+    example: 5281.yaml
+  download_on_demand:
+    enabled: true
+    base_url: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB
+    format: '{base_url}{object_id}'

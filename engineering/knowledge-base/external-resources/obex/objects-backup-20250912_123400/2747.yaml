@@ -1,0 +1,61 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Keith Young | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : Human InputLicence : OtherTag : ADCContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: This object allows a highly functional human input device that
+      is normally USB driven to have functionality with Prop. By simply removing some
+      screws and unplugging a few wire plugs, you can connect the wires as shown to
+      a breadboard or PCB and make use of all motions and buttons.
+    description_short: This object allows a highly functional human input device that
+      is normally USB driven to have functi
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:41:53.303070'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:44:10.943874'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2747'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Logitech Extreme 3D Pro Driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2747
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/logitech-extreme-3d-pro-driver/

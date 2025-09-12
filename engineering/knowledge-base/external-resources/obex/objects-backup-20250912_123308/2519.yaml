@@ -1,0 +1,63 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Timothy D. Swieter | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : ProtocolLicence : OtherTag : SPIContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: An ASM driver for communicating with the Wiznet W5100 Ethernet
+      IC using Indirect/Parallel. This driver launches a COG that handles FAST reading
+      and writing to the W5100. There are routines in both ASM and SPIN for establishing
+      communication and transferring data and settings. See the file for further instructions
+      on usage.
+    description_short: An ASM driver for communicating with the Wiznet W5100 Ethernet
+      IC using Indirect/Parallel. This driv
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - serial
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:42:18.960876'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:48:02.252079'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2519'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Wiznet W5100 Indirect/Parallel Driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2519
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/wiznet-w5100-indirect-parallel-driver/

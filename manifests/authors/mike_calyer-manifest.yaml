@@ -1,0 +1,26 @@
+manifest_metadata:
+  manifest_type: obex_author
+  author: mike calyer
+  generated: 2025-09-12T16:10:0
+  object_count: 2
+author_info:
+  name: mike calyer
+  contribution_summary: 2 P2 objects contributed to OBEX
+  specialties:
+  - misc (1 objects)
+  - SPIN2 (2)
+objects:
+- object_id: '2815'
+  title: Cricket BME280
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2023-11-16 19:47:20'
+  yaml_path: ../objects/2815.yaml
+- object_id: '2836'
+  title: Cricket ESP32 AT
+  category: drivers
+  languages:
+  - SPIN2
+  created_date: '2021-06-20 12:00:00'
+  yaml_path: ../objects/2836.yaml

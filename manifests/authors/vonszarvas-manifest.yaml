@@ -1,0 +1,19 @@
+manifest_metadata:
+  manifest_type: obex_author
+  author: vonszarvas
+  generated: 2025-09-12T16:10:0
+  object_count: 1
+author_info:
+  name: vonszarvas
+  contribution_summary: 1 P2 objects contributed to OBEX
+  specialties:
+  - misc (1 objects)
+  - SPIN2 (1)
+objects:
+- object_id: '4271'
+  title: StrToFloat
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2024-03-15 18:49:42'
+  yaml_path: ../objects/4271.yaml

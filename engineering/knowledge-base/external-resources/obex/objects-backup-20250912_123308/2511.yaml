@@ -1,0 +1,60 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Colin Fox | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : SignalsLicence : OtherTag : PWMContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: led_pwm is a PWM driver for up to 32 leds, written in prop assembly.
+      It supports optional automatic decay, and 64 brightness levels for the LEDs.
+    description_short: 'led_pwm is a PWM driver for up to 32 leds, written in prop
+      assembly. It supports optional automatic '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:42:18.961031'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:48:08.623714'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2511'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: led_pwm
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2511
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/led_pwm/

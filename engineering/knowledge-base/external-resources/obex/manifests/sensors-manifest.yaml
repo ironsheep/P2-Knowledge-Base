@@ -1,0 +1,32 @@
+# OBEX P2 Sensors Manifest
+version: "1.0"
+last_updated: "2025-09-12"
+category: "sensors"
+description: "P2 sensor drivers and measurement interfaces from OBEX community"
+
+metadata:
+  total_objects: 11
+  quality_range: "6-9"
+  
+subcategories:
+  environmental:
+    description: "Temperature, humidity, pressure sensors"
+    object_count: 4
+    
+  motion_sensors:
+    description: "Accelerometers, gyroscopes, IMU interfaces"
+    object_count: 3
+    
+  proximity_distance:
+    description: "Ultrasonic, IR, laser distance sensors"
+    object_count: 2
+    
+  magnetic_compass:
+    description: "Magnetometer and compass interfaces"
+    object_count: 2
+
+objects: {}
+
+ai_usage_notes: |
+  Sensor drivers provide measurement and environmental data.
+  Focus on calibration requirements and data accuracy.

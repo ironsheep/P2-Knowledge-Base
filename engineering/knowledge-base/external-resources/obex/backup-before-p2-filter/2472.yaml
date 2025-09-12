@@ -1,0 +1,64 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'William Henning | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : SignalsLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: I've gotten my assembly language version of my ADS7822P driver
+      running this version will do up to approx. 100000 8 bit conversions per second
+      while meeting the minimum timing requirements of the data sheetOr if you need
+      more precision you can get approx. 75000 12 bit conversions per second.The object
+      can be used as- a pure spin object - much slower but does not tie up a cog-
+      an assembly language implementation - FASTThe documentation is in the spin files.
+    description_short: I've gotten my assembly language version of my ADS7822P driver
+      running this version will do up to ap
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - sensor
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:42:23.277065'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:48:48.591204'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2472'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: ADS7822P Object V2.0 - AD interface
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2472
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/ads7822p-object-v2-0-ad-interface/

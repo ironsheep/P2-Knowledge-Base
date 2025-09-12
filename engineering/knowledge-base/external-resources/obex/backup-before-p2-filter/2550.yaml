@@ -1,0 +1,60 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Cluso99 | added by ArchiverContent : CodeMicrocontroller : Propeller 1Languages
+    : PASM, SPINCategory : ProtocolLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: communication
+    description_full: FullDuplexSerial object v1.2 with modification to allow easy
+      resizing of buffers 8/16/32/64/128/256 by specifying size in CON section of
+      code only. (Does not do 512)
+    description_short: 'FullDuplexSerial object v1.2 with modification to allow easy
+      resizing of buffers 8/16/32/64/128/256 '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - serial
+  metadata:
+    discovery_date: '2025-09-12T11:42:14.722514'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:47:24.560917'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2550'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: FullDuplexSerial_rr004
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2550
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/fullduplexserial_rr004/

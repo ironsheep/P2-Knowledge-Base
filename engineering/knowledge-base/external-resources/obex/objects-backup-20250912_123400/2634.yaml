@@ -1,0 +1,61 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Aaron Rudolph | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : DisplayLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: Finally, a driver for HD44780 LCD Displays written in Assembly.
+      Limited as of now, but I plan to add more features soon. Currently, only writing
+      of data and raw instructions to the display is supported.
+    description_short: Finally, a driver for HD44780 LCD Displays written in Assembly.
+      Limited as of now, but I plan to add
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:42:06.235060'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:46:01.266226'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2634'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: HD44780 Driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2634
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/hd44780-driver/

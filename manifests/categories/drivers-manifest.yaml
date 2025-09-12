@@ -1,0 +1,433 @@
+manifest_metadata:
+  manifest_type: obex_category
+  category: drivers
+  generated: 2025-09-12T16:10:0
+  object_count: 49
+category_info:
+  name: drivers
+  description: Hardware interface and peripheral drivers for sensors, displays, and
+    communication modules
+  common_use_cases:
+  - Hardware interfacing
+  - Sensor integration
+  - Peripheral control
+objects:
+- object_id: '2817'
+  title: ISP P2 BH1750 I2C Ambient Light Object
+  author: Stephen M Moraco
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: Driver for BH1750 Ambient Light Sensor accessed via I2C - (uses
+    underlying jm_i2c object for I2C access)
+  yaml_path: ../objects/2817.yaml
+- object_id: '2818'
+  title: ISP P2 Click MPU 9DOF Driver
+  author: Stephen M Moraco
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: Driver for the MPU 9DOF Click module (uses underlying jm_i2c
+    driver for I2C access)
+  yaml_path: ../objects/2818.yaml
+- object_id: '2819'
+  title: Click 4-20 MA
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: Utility object for P2 development.
+  yaml_path: ../objects/2819.yaml
+- object_id: '2821'
+  title: DHTxx Temperature/Humidity Sensors
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: This object allows the P2 to interface with DHT11 and DHT22/CM2302
+    sensors for projects requiring the monitoring of temperature and relative humidity.
+  yaml_path: ../objects/2821.yaml
+- object_id: '2824'
+  title: NEC RX
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: Demonstration code displays the raw input, address, and command.
+  yaml_path: ../objects/2824.yaml
+- object_id: '2825'
+  title: NEC TX
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: This simple object enables the P2 to transmit codes corresponding
+    to the NEC IR transmission protoco
+  yaml_path: ../objects/2825.yaml
+- object_id: '2826'
+  title: MAX31855 Thermocouple Interface
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: Simple interface (Spin only) to the MAX31855 thermocouple-to-digital
+    converter. Provides access to thermocouple temperature, cold junction temperature,
+  yaml_path: ../objects/2826.yaml
+- object_id: '2833'
+  title: DMX TX
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: The object facilitates DMX signaling from the P2 using a simple,
+    half-duplex interface circuit. The object allows the user toset the universe size
+    for
+  yaml_path: ../objects/2833.yaml
+- object_id: '2835'
+  title: Sony IRCS Tx (infrared control system transmitter)
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: This object takes advantage of the P2 smart pins to modulate
+    an IR LED using the Sony IRCS command protocol.
+  yaml_path: ../objects/2835.yaml
+- object_id: '2836'
+  title: Cricket ESP32 AT
+  author: mike calyer
+  languages:
+  - SPIN2
+  description_short: Provides P2 to ESP32 AT Interface (esp_drv, esp_wifi, esp_tcp,
+    esp_logon)
+  yaml_path: ../objects/2836.yaml
+- object_id: '2837'
+  title: ESP32
+  author: Riley August
+  languages:
+  - SPIN2
+  description_short: This group of modular objects is designed to interface with an
+    ESP32 microcontroller using a 2 pin serial UART.
+  yaml_path: ../objects/2837.yaml
+- object_id: '2840'
+  title: Click RS485_3v3
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: Utility object for P2 development.
+  yaml_path: ../objects/2840.yaml
+- object_id: '2847'
+  title: VGA Text routines
+  author: ersmith
+  languages:
+  - SPIN2
+  description_short: The ansi.spin2 file provides a VGA text driver that supports
+    standard ANSI escape codes for text effects (like changing colors, flashing, etc.
+  yaml_path: ../objects/2847.yaml
+- object_id: '2848'
+  title: Graphics Display Driver Architecture
+  author: MagIO2
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: Currently it covers some functionality I'd call a 0.6 version
+    ;o) But it is already usable for projects.
+  yaml_path: ../objects/2848.yaml
+- object_id: '2849'
+  title: ILI9341_XPT2046
+  author: Greg LaPolla
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: Please change this object's language to Spin 2 instead of Generic.
+    I was looking for this object in the OBEX using the filtersand couldn't find it
+    under
+  yaml_path: ../objects/2849.yaml
+- object_id: '2850'
+  title: ISP Hub75 Matrix Driver
+  author: Stephen M Moraco
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: 'NOTE: This P2 HUB75 driver is built to work with the P2 Eval
+    HUB75 Adapter which is available from HUB75 at Parallax.com Store'
+  yaml_path: ../objects/2850.yaml
+- object_id: '2851'
+  title: TM1638 LED Display Driver
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: <Overviewn McPhalen.
+  yaml_path: ../objects/2851.yaml
+- object_id: '2852'
+  title: APA102C Smart Pixel Driver
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: This driver provides control of the APA102C smart pixel (2 wire,
+    data and clock) which is favored by some over the WS2812 due to higher communications
+    speed and faster internal PWM (this is especially popular in the film and television
+    business).
+  yaml_path: ../objects/2852.yaml
+- object_id: '2853'
+  title: EZ MAX7219
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: <Overviewn McPhalen.
+  yaml_path: ../objects/2853.yaml
+- object_id: '2855'
+  title: LPD8806 "Smart" Pixel Driver
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: This object allows the P2 to control LPD880x pixels. The output
+    is auto-updating which allows the programmer to manually manipulate the color
+    buffer for advanced applications.
+  yaml_path: ../objects/2855.yaml
+- object_id: '2857'
+  title: RGBX Pixel Driver
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: This driver provides control of the most popular single-wire
+    smart pixels (e.g., WS2812b) -- both 24
+  yaml_path: ../objects/2857.yaml
+- object_id: '2858'
+  title: MAX7219 Dot Matrix
+  author: Greg LaPolla
+  languages:
+  - SPIN2
+  description_short: MAX7219 Dot Matrix is a spin object that interfaces the MAX7219
+    chip with the Propeller 2 P2X8C4M64P
+  yaml_path: ../objects/2858.yaml
+- object_id: '2859'
+  title: nextion_ez
+  author: Charles Current
+  languages:
+  - SPIN2
+  description_short: A simple object for interfacing with Nextion HMI displays that
+    is compatible with the protocol and HMI code used by the Arduino Easy Nextion
+    Library.
+  yaml_path: ../objects/2859.yaml
+- object_id: '2869'
+  title: P2ES Control
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: Utility object for P2 development.
+  yaml_path: ../objects/2869.yaml
+- object_id: '2872'
+  title: Simple SPI flash driver
+  author: ManAtWork
+  languages:
+  - SPIN2
+  description_short: Very simple driver for SPI flash devices like the external boot
+    flash ROM of the P2. Can be used to store configuration or user data
+  yaml_path: ../objects/2872.yaml
+- object_id: '2873'
+  title: ISP PCA9685 16ch PWM Servo Driver
+  author: Stephen M Moraco
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: Driver for 16 channels of servo control via I2C using the PCA9685
+    16ch PWM chip (uses underlying singleton version adapted from jm_i2c driver for
+    I2C access).
+  yaml_path: ../objects/2873.yaml
+- object_id: '2874'
+  title: ISP BLDC Motor Control
+  author: Stephen M Moraco
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: BLDC Motor Driver with steering and position tracking
+  yaml_path: ../objects/2874.yaml
+- object_id: '2876'
+  title: Servo
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: Ramping and other slow motion behavior of the servo is controlled
+    by the parent application.
+  yaml_path: ../objects/2876.yaml
+- object_id: '2877'
+  title: Stepper Motor Driver Ver 2
+  author: Bill Tuss
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: 'This object implements a step motor driver.
+
+    The trajectory is sinusoidal, ramp up, a period at const'
+  yaml_path: ../objects/2877.yaml
+- object_id: '4198'
+  title: USBnew
+  author: Wuerfel_21
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: Allows reading keyboard, mouse and gamepads. MD for full usage
+    info. Also see the github page and associated wiki.
+  yaml_path: ../objects/4198.yaml
+- object_id: '4254'
+  title: ISP P2 eInk Driver
+  author: Stephen M Moraco
+  languages:
+  - SPIN2
+  description_short: A working driver for the P2 developed in spin2. It started as
+    a port of the C example code for the 2
+  yaml_path: ../objects/4254.yaml
+- object_id: '4257'
+  title: ISP high-speed 8-port serial subsystem
+  author: Stephen M Moraco
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: A single COG services from 1 to 8 Tx/Rx pairs of pins. The pins
+    are configured as smart pins, meanin
+  yaml_path: ../objects/4257.yaml
+- object_id: '4266'
+  title: Simplest Serial
+  author: Ray Allen
+  languages:
+  - SPIN2
+  description_short: This serial driver has a simple Begin() method with no parameters
+    that starts the serial driver usin
+  yaml_path: ../objects/4266.yaml
+- object_id: '4267'
+  title: Ethernet RMII driver
+  author: ManAtWork
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: This is the driver for the Ethernet accessory board with LAN8720
+    PHY chip. It can send and receive raw Ethernet packets with 100Mbit/s
+  yaml_path: ../objects/4267.yaml
+- object_id: '4269'
+  title: FAT32 SD card driver
+  author: Chris Gadd
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: Utility object for P2 development.
+  yaml_path: ../objects/4269.yaml
+- object_id: '4564'
+  title: ISP P2 VL53L5CX time of flight driver
+  author: Stephen M Moraco
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: P2 VL53L5CX Object - A Port of the VL53L5CX I/F library/downloader
+    to Spin2/Pasm2
+  yaml_path: ../objects/4564.yaml
+- object_id: '4616'
+  title: ISP P2 HUB75 Matrix - Morphing Digits
+  author: Stephen M Moraco
+  languages:
+  - SPIN2
+  description_short: 'I chose to implement this using table-driven animations, with
+    the table generated by a Python script using "segment adjacency" along with "segment
+    on/off changes from digit to digit" and using the types of animations that Hari
+    used. You''ll find all the code I created in the project repository. Video Demo:
+    This project in action Version: 1.'
+  yaml_path: ../objects/4616.yaml
+- object_id: '4701'
+  title: DC Motor Control
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: Accepts speed control in 0. 1% increments for high-resolution
+    control.
+  yaml_path: ../objects/4701.yaml
+- object_id: '4720'
+  title: P2GUI (Encoder Version)
+  author: Jose Rullan
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: "P2GUI is a framework for creating UI\u2019s based on TFT screens\
+    \ driven with ILI9341."
+  yaml_path: ../objects/4720.yaml
+- object_id: '4727'
+  title: USB Human-Interface-Device Driver
+  author: Chris Gadd
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: USB Human-Interface-Device (HID) driver with a demo and descriptors
+    for a mouse, keyboard, and joyst
+  yaml_path: ../objects/4727.yaml
+- object_id: '4746'
+  title: WizNet W5500 Driver
+  author: Chris Gadd
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: Compiled with PropTool v2.
+  yaml_path: ../objects/4746.yaml
+- object_id: '4758'
+  title: Waveshare 2.9" E-paper display driver
+  author: Chris Gadd
+  languages:
+  - SPIN2
+  description_short: 9" display sold in the Parallax store (SKU 28084).
+  yaml_path: ../objects/4758.yaml
+- object_id: '4889'
+  title: HostFS
+  author: Chip Gracey
+  languages:
+  - SPIN2
+  description_short: HOST FS - code for accessing the host filesystem via the 9P protocol
+  yaml_path: ../objects/4889.yaml
+- object_id: '4894'
+  title: FRSW and FAT32 for P2
+  author: Ray Allen
+  languages:
+  - SPIN2
+  - PASM
+  description_short: 'Here two uSD drivers that can both use your choice of three
+    low level drivers.
+
+    One is inline assembl'
+  yaml_path: ../objects/4894.yaml
+- object_id: '5246'
+  title: BMP390 driver
+  author: m.k. borri
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: Handles 2 if you got 2 on the bus. Uses JonyMac's i2c library.
+  yaml_path: ../objects/5246.yaml
+- object_id: '5252'
+  title: MAVLink Message Parser
+  author: Riley August
+  languages:
+  - SPIN2
+  description_short: 'This object supports the MAVLink 1.0 and 2.0 protocols for the
+    P2. It provides the following:'
+  yaml_path: ../objects/5252.yaml
+- object_id: '5274'
+  title: PING+ for PING))) and LaserPING
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: This object simplifies the use of PING))) and LaserPING sensors
+    with the P1. The interface works in classic pulse mode, and supports
+  yaml_path: ../objects/5274.yaml
+- object_id: '5278'
+  title: QMC5883L HMC5883 BMM150 compass drivers
+  author: m.k. borri
+  languages:
+  - SPIN2
+  description_short: this is a very simple compass driver for the prop2, not much
+    else to say about it. it works and it includes fastatan2 for getting compass heading.
+    You should be able to swap them at your leisure.
+  yaml_path: ../objects/5278.yaml
+- object_id: '5281'
+  title: Click Stepper-2 Demo
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: Utility object for P2 development.
+  yaml_path: ../objects/5281.yaml

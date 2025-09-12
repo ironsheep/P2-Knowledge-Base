@@ -1,0 +1,61 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Eric Ball | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Language : PASMCategory : DisplayLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: Inspired by PhiPi's one pin solution to "Minimal TV or VGA pins",
+      this is a driver which will output to a TV a simple two dimentional character
+      array using an 8x8 monochrome font using only a single pin and a single cog.
+      NTSC and PAL are supported.
+    description_short: Inspired by PhiPi's one pin solution to "Minimal TV or VGA
+      pins", this is a driver which will output
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:42:06.234932'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:45:57.020329'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2639'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: One Pin TV Text
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2639
+    forum_discussion: http://forums.parallax.com/forums/default.aspx?f=25&m=366805
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/one-pin-tv-text/

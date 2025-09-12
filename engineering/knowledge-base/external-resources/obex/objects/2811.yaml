@@ -1,0 +1,65 @@
+object_metadata:
+  author: ManAtWork
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: motors
+    description_full: 'The Park or d/q-transformation is useful when controlling AC
+      motors or brushless servo motors. It transforms currents or voltages from a
+      three phase system with stator reference into a rectangular coordinate system
+      that is referenced to the rotor. The output can be treated as if the motor was
+      a DC machine. After calculations (PID control) are done the values are transformed
+      back to the three phase system using the inverse Park transformation. The results
+      can then be output to a three phase power stage.
+
+      This is a small code snippet that demonstrates how the P2 CORDIC unit can be
+      used for the Park transformation and its inverse. It uses 16 bit signed format
+      for all current and voltage values. This should be sufficient for most applications.
+      The CORDIC even could do full 32 bit resolution, only the scaling had to use
+      32 bit multiplication instead of the SCAS instructions. The angle (theta) has
+      to be left adjusted.'
+    description_short: The Park or d/q-transformation is useful when controlling AC
+      motors or brushless servo motors. It transforms currents or voltages from
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - servo
+    - led
+    - motor
+    - adc
+    - spi
+  metadata:
+    discovery_date: '2025-09-12T12:44:10.850413'
+    extraction_status: author_extracted
+    kb_integration: none
+    last_author_extraction: '2025-09-12T13:23:19.663296'
+    last_verified: '2025-09-12T12:46:41.309748'
+    page_discovered: 13
+    quality_score: 5
+    last_author_deep_search: 2025-09-12T13:39:2
+    last_description_fix: 2025-09-12T14:20:1
+    created_date: '2020-05-09 12:00:00'
+    last_created_date_fix: 2025-09-12T15:32:2
+  object_id: '2811'
+  technical_details:
+    file_format: ZIP
+    file_size: 16 B
+    languages:
+    - SPIN2
+    - PASM2
+    microcontroller:
+    - P2
+    version: ''
+  title: Park transformation
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2811
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/park-transformation/

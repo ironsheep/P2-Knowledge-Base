@@ -1,0 +1,61 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Luke Haywas | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategories : Human Input, SensorLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: demos
+    description_full: Decodes a 2-bit rotary quadrature encoder and stores the encoder's
+      position as a variable in hub ram. This is a very simple object which can read
+      only one decoder at a time, but illustrates the concept well and should be easy
+      for beginners to understand. Includes demo program.
+    description_short: Decodes a 2-bit rotary quadrature encoder and stores the encoder's
+      position as a variable in hub ram
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:36.190303'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:50:55.369300'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2262'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Quadrature Decoder
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2262
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/quadrature-decoder/

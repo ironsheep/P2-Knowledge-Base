@@ -1,0 +1,28 @@
+# OBEX P2 Motors Manifest
+version: "1.0"
+last_updated: "2025-09-12"
+category: "motors"
+description: "P2 motor control and robotics drivers from OBEX community"
+
+metadata:
+  total_objects: 4
+  quality_range: "6-8"
+  
+subcategories:
+  servo_control:
+    description: "Servo motor positioning and control"
+    object_count: 2
+    
+  stepper_motors:
+    description: "Stepper motor drivers and positioning"
+    object_count: 1
+    
+  dc_motor_control:
+    description: "DC motor speed and direction control"
+    object_count: 1
+
+objects: {}
+
+ai_usage_notes: |
+  Motor drivers provide precise motion control capabilities.
+  Focus on timing accuracy, PWM resolution, and feedback systems.

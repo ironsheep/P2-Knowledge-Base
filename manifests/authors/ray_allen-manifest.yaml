@@ -1,0 +1,28 @@
+manifest_metadata:
+  manifest_type: obex_author
+  author: Ray Allen
+  generated: 2025-09-12T16:10:0
+  object_count: 2
+author_info:
+  name: Ray Allen
+  contribution_summary: 2 P2 objects contributed to OBEX
+  specialties:
+  - drivers (2 objects)
+  - SPIN2 (2)
+  - PASM (1)
+objects:
+- object_id: '4266'
+  title: Simplest Serial
+  category: drivers
+  languages:
+  - SPIN2
+  created_date: '2023-12-25 19:56:27'
+  yaml_path: ../objects/4266.yaml
+- object_id: '4894'
+  title: FRSW and FAT32 for P2
+  category: drivers
+  languages:
+  - SPIN2
+  - PASM
+  created_date: '2025-02-17 16:35:36'
+  yaml_path: ../objects/4894.yaml

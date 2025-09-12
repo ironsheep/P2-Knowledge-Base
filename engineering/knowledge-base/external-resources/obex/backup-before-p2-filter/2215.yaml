@@ -1,0 +1,61 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Alex Hajnal | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategories : Display, Fun, SignalsLicence : OtherTags :
+    I2C, PWMContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: Pulse width modulated LED driver with 24-channels, 8 bits (256
+      levels) of intensity per channel.
+    description_short: Pulse width modulated LED driver with 24-channels, 8 bits (256
+      levels) of intensity per channel.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:42:38.277248'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:51:29.047737'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2215'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: 24-channel LED driver with 8 bit per channel PWM
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2215
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/24-channel-led-driver-with-8-bit-per-channel-pwm/

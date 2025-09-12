@@ -1,0 +1,66 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Graham Stabler | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : SensorLicence : OtherTag : I2CContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: The Nintendo Wii's controller called the Wiimote contains a
+      small IR camera with I2C interface. This camera can track the position of 4
+      points of light (IR if filter is used, visible if removed.) This can be used
+      for many applications such as 3D scanning, head tracking, multi-touch screens,
+      robot targeting, range finding. The object runs in a cog and can be used using
+      simple helper functions, there are several demos and the main object is well
+      documented. All you need for hardware is the wiimote camera and a pull up resisitor.
+    description_short: The Nintendo Wii's controller called the Wiimote contains a
+      small IR camera with I2C interface. This
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+    - driver
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:34.066983'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:50:32.259735'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2317'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Wiimote IR blob tracking camera
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2317
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/wiimote-ir-blob-tracking-camera/

@@ -1,0 +1,59 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Stephen Moraco | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategories : Protocol, SensorLicence : OtherTag : SPIContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: MCP2515-specialized SPI Engine implementation for controller
+      Area Network (CAN) Bus control with schematic showing an approach to attaching
+      the MCP2515/MCP2551 to the Propeller chip
+    description_short: MCP2515-specialized SPI Engine implementation for controller
+      Area Network (CAN) Bus control with sch
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags: []
+  metadata:
+    discovery_date: '2025-09-12T11:42:25.367713'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:49:22.344844'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2435'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: MCP2515 Engine (custom SPI)
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2435
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/mcp2515-engine-custom-spi/

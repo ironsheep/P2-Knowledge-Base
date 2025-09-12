@@ -1,0 +1,60 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Micah Dowty | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : ProtocolLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: This is a simple USB and Bluetooth protocol stack. It implements
+      a full-speed (12 Mb/s) USB host by bit-banging, so it requires no external hardware
+      to interface USB devices to a Propeller.
+    description_short: 'This is a simple USB and Bluetooth protocol stack. It implements
+      a full-speed (12 Mb/s) USB host by '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:42:14.722576'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:47:26.618780'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2548'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: USB and Bluetooth Host Stack
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2548
+    forum_discussion: http://forums.parallax.com/forums/default.aspx?f=25&m=440787
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/usb-and-bluetooth-host-stack/

@@ -1,0 +1,64 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Thomas Doyle | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : Motor ControlLicence : OtherTag : PWMContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: display
+    description_full: The L298 chip is used for direction and PWM motor speed control.
+      The objects have been tested using two motors. A dedicated cog is used to maintain
+      the PWM stream. Speed and direction changes are ramped to maintain smooth operation.
+      If a change in direction is called for while the motor is running the motor
+      speed will ramp down to zero before the direction change is carried out.
+    description_short: 'The L298 chip is used for direction and PWM motor speed control.
+      The objects have been tested using '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+    - motor
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:41:51.133593'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:43:47.975599'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2782'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: L298 PWM Motor Control
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2782
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/l298-pwm-motor-control/

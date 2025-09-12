@@ -1,0 +1,60 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Martin Hodge | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : SensorLicence : OtherTags : ADC, DACContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: Driver object for the Microchip MCP3008 10-bit ADC. It is a
+      slightly modified version of Parallax's MCP3208 driver found in the object library.
+      It has the DAC output code stripped out as that has nothing to do with the MCP3008.
+    description_short: 'Driver object for the Microchip MCP3008 10-bit ADC. It is
+      a slightly modified version of Parallax''s '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:42:34.067338'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:50:44.874958'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2284'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: MCP3008 Driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2284
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/mcp3008-driver/

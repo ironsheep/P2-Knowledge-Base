@@ -1,0 +1,53 @@
+object_metadata:
+  author: Michael
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: demos
+    description_full: One method to check the pin state of an IO pin is to drive the
+      pin in either direction (high/low) using the P2 smart-pin weak drive feature,
+      and then test the signal level to determine if an external signal is pulling
+      the IO pin in either direction.
+    description_short: One method to check the pin state of an IO pin is to drive
+      the pin in either direction (high/low) using the P2 smart-pin weak
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - demo
+    - led
+    - driver
+    - spi
+  metadata:
+    discovery_date: '2025-09-12T12:43:56.829317'
+    extraction_status: author_extracted
+    kb_integration: none
+    last_author_extraction: '2025-09-12T13:22:40.118318'
+    last_verified: '2025-09-12T12:44:28.236317'
+    page_discovered: 3
+    quality_score: 5
+    last_author_deep_search: 2025-09-12T13:39:2
+    last_description_fix: 2025-09-12T14:20:1
+    created_date: '2025-02-17 11:24:28'
+    last_created_date_fix: 2025-09-12T15:28:0
+  object_id: '4911'
+  technical_details:
+    file_format: ZIP
+    file_size: 32MB
+    languages:
+    - SPIN2
+    microcontroller:
+    - P2
+    version: ''
+  title: IO Pin State Detection Demo
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4911
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/io-pin-state-detection-demo/

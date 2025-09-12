@@ -1,0 +1,60 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'MichaelContent : App NoteMicrocontroller : Propeller 1Languages : PASM,
+    SPINCategory : OtherLicence : MITContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: Determine the execution time of Spin or Propeller Assembly code
+      on the P8X32A by using the system counter, by toggling an I/O pin, or by counting
+      assembly instruction cycles. The techniques presented are vital for discovering
+      or verifying routine timing and tuning code to an application's needs.
+    description_short: Determine the execution time of Spin or Propeller Assembly
+      code on the P8X32A by using the system co
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags: []
+  metadata:
+    discovery_date: '2025-09-12T11:41:46.868852'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:43:03.654154'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '5146'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Code Execution Time on the P8X32A
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5146
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/code-execution-time-on-the-p8x32a/

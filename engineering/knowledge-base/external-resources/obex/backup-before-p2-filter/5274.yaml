@@ -1,0 +1,63 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Jon McPhalenContent : CodeMicrocontroller : Propeller 2Language : SPIN2Category
+    : SensorLicence : MITTags : jonnymac, LaserPING, PING))), Sensor, smart-pinContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: This object simplifies the use of PING))) and LaserPING sensors
+      with the P1. The interface works in classic pulse mode, and supports serial
+      mode for LaserPING and PING))) Rev E or later. Helpful object methods provide
+      the tools needed by applications.
+    description_short: 'This object simplifies the use of PING))) and LaserPING sensors
+      with the P1. The interface works in '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - serial
+    - sensor
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:41:33.179746'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:41:41.691674'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from spin2 category
+    integration_todo: []
+  object_id: '5274'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - SPIN2
+    microcontroller:
+    - P2
+    version: ''
+  title: PING+ for PING))) and LaserPING
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5274
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/ping-for-ping-and-laserping-2/

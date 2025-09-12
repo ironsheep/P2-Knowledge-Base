@@ -1,0 +1,60 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Benky aka MagIO2 | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Language : PASMCategory : DisplayLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: This is a PASM driver for HD44780 based text LCDs for 4 bit
+      mode. Of course text LCD itself is not time critical, but maybe your application
+      needs to write data fast to have enough time to do the important things ;o)
+    description_short: This is a PASM driver for HD44780 based text LCDs for 4 bit
+      mode. Of course text LCD itself is not t
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:41:59.748021'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:45:05.047962'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2690'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: HD44780 PASM driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2690
+    forum_discussion: http://forums.parallax.com/forums/default.aspx?f=25&m=396005
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/hd44780-pasm-driver/

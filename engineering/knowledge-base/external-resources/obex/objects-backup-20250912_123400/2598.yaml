@@ -1,0 +1,63 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Dave Hein | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : ProtocolLicence : OtherTag : I2CContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: Pasm I2C Driver - This is an assembly version of Mike Green's
+      Basic I2C Driver. This object uses the same calling interface so that it can
+      be used in any project that currently uses the Basic I2C Driver. It provides
+      a substantial improvement in speed over the Spin-only driver, and is usefull
+      for accessing EEPROMs at higher speed. The constant, DELAY_CYCLES should be
+      adjusted to provide the desired bus clocking speed.
+    description_short: Pasm I2C Driver - This is an assembly version of Mike Green's
+      Basic I2C Driver. This object uses the
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:42:08.361912'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:46:30.607213'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2598'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Pasm I2C Driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2598
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/pasm-i2c-driver/

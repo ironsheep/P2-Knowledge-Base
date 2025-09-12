@@ -1,0 +1,67 @@
+# OBEX P2 Master Object Index
+# Generated: 2025-09-11
+# Purpose: Comprehensive catalog of P2-compatible objects from Parallax OBEX
+
+metadata:
+  generated_date: "2025-09-11"
+  last_updated: "2025-09-11"
+  total_objects: 0
+  sources:
+    - "https://obex.parallax.com/code-language/spin2/"
+    - "https://obex.parallax.com/code-language/pasm/"
+  schema_version: "1.0"
+
+# Index of all P2-compatible OBEX objects
+objects:
+  # Example structure - will be populated by discovery scripts
+  # - object_id: "2842"
+  #   title: "Full Duplex Serial Driver"
+  #   author: "Jon McPhalen (jonnymac)"
+  #   url: "https://obex.parallax.com/obex/full-duplex-serial-2/"
+  #   download_url: "https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2842"
+  #   languages: ["SPIN2", "PASM2"]
+  #   microcontroller: ["P2"]
+  #   version: "1.0"
+  #   description: "High-performance serial communication driver"
+  #   tags: ["serial", "driver", "communication"]
+  #   category: "drivers"
+  #   hardware_support: ["UART", "serial"]
+  #   multi_cog: false
+  #   forum_links: []
+  #   github_links: []
+  #   date_added: "2025-09-11"
+
+# Quick lookup indices
+indices:
+  by_author: {}
+    # "Jon McPhalen (jonnymac)": ["2842", "2850"]
+    
+  by_category: {}
+    # "drivers": ["2842", "2850"]
+    # "sensors": ["2851"]
+    
+  by_hardware: {}
+    # "serial": ["2842"]
+    # "display": ["2850"]
+    
+  by_language: {}
+    # "SPIN2": ["2842", "2850"]
+    # "PASM2": ["2842"]
+
+# Statistics
+statistics:
+  objects_by_category: {}
+  objects_by_author: {}
+  objects_by_language: {}
+  most_active_authors: []
+  newest_objects: []
+  most_downloaded: []
+
+# Discovery status
+discovery_status:
+  categories_processed: []
+  pages_processed: 0
+  objects_discovered: 0
+  objects_validated: 0
+  errors_encountered: 0
+  last_discovery_run: null

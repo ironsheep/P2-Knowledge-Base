@@ -1,0 +1,54 @@
+object_metadata:
+  author: Wuerfel_21
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: Allows reading keyboard, mouse and gamepads. MD for full usage
+      info. Also see the github page and associated wiki.
+    description_short: Allows reading keyboard, mouse and gamepads. MD for full usage
+      info. Also see the github page and associated wiki.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - demo
+    - driver
+    - led
+    - spi
+  metadata:
+    created_date: '2024-03-28 16:13:28'
+    discovery_date: '2025-09-12T12:44:10.850424'
+    extraction_status: complete
+    kb_integration: none
+    last_author_cleanup: '2025-09-12T13:31:14.608046'
+    last_author_extraction: '2025-09-12T13:22:41.904872'
+    last_complete_extraction: '2025-09-12T13:30:07.136160'
+    last_verified: '2025-09-12T12:46:42.673452'
+    license: MITTag
+    page_discovered: 13
+    quality_score: 5
+    last_description_fix: 2025-09-12T14:20:1
+    last_html_corruption_fix: 2025-09-12T14:27:0
+  object_id: '4198'
+  technical_details:
+    file_format: ZIP
+    file_size: 5883 B
+    languages:
+    - SPIN2
+    - PASM2
+    microcontroller:
+    - P2
+    version: ''
+  title: USBnew
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4198
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/usbnew/

@@ -1,0 +1,58 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Brian Riley | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : Data StorageLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: SDLoader allows executables to be booted from SD card, or loaded
+      from SD card into upper 32K of a 512 EEPROM and executed, even to update itself.
+    description_short: SDLoader allows executables to be booted from SD card, or loaded
+      from SD card into upper 32K of a 51
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags: []
+  metadata:
+    discovery_date: '2025-09-12T11:41:53.302707'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:43:56.317983'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2767'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: SDLoader
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2767
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/sdloader/

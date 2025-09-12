@@ -1,0 +1,59 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Jeff Martin (Parallax)Content : CodeMicrocontroller : Propeller 1Languages
+    : PASM, SPINCategories : Motor Control, SensorLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: Reads 1 to 16 two-bit gray-code quadrature encoders and provides
+      32-bit absolute position values for each and optionally provides delta position
+      support (value since last read) for up to 16 encoders.
+    description_short: Reads 1 to 16 two-bit gray-code quadrature encoders and provides
+      32-bit absolute position values for
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags: []
+  metadata:
+    discovery_date: '2025-09-12T11:42:29.617861'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:49:53.651060'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2375'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Quadrature Encoder
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2375
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/quadrature-encoder/

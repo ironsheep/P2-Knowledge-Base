@@ -1,0 +1,62 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Ryan David | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Language : PASMCategory : SensorLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: display
+    description_full: GPS NMEA Parser. Has serial receive (based off of FullDuplexSerial)
+      and parsing rolled into one cog. Tested at 115200 baud, 10Hz position update
+      rate with GGA and RMC sentences.
+    description_short: GPS NMEA Parser. Has serial receive (based off of FullDuplexSerial)
+      and parsing rolled into one cog.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - serial
+    - display
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:29.617923'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:49:55.766706'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2373'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: GPS NMEA Parser
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2373
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/gps-nmea-parser/

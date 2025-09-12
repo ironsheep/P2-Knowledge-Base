@@ -1,0 +1,53 @@
+object_metadata:
+  author: Wuerfel_21
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: This is an emulation of the Yamaha "OPN2" YM2612 FM synth chip
+      that runs in one P2 cog.
+    description_short: This is an emulation of the Yamaha "OPN2" YM2612 FM synth chip
+      that runs in one P2 cog.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - example
+    - demo
+    - led
+    - driver
+    - spi
+  metadata:
+    discovery_date: '2025-09-12T12:44:03.844968'
+    extraction_status: complete
+    kb_integration: none
+    last_author_extraction: '2025-09-12T13:21:45.956872'
+    last_complete_extraction: '2025-09-12T13:30:07.045570'
+    last_verified: '2025-09-12T12:45:31.768309'
+    page_discovered: 8
+    quality_score: 5
+    last_author_re_extraction: 2025-09-12T14:04:1
+    created_date: '2024-03-13 21:12:44'
+    last_created_date_fix: 2025-09-12T15:26:2
+  object_id: '2862'
+  technical_details:
+    file_format: ZIP
+    file_size: 5883 B
+    languages:
+    - SPIN2
+    - PASM2
+    microcontroller:
+    - P2
+    version: ''
+  title: OPN2cog
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2862
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/opn2cog/

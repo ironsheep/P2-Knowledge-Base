@@ -1,0 +1,69 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Timothy D. Swieter | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : ProtocolLicence : OtherTag : DMXContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: "This program receives and parses a DMX-512A data stream. DMX\
+      \ is a protocol for controlling lighting equipment and accessories. This program\
+      \ is based on information gathered around the web related to ANSI E1.11 \u201A\
+      \xC4\xEC 2004: Entertainment Technology - USITT DMX512-A - Asynchronous Serial\
+      \ Digital Data Transmission Standard for Controlling Lighting Equipment and\
+      \ Accessories. This program captures all 513 slots of data (1 start byte and\
+      \ 512 data bytes) but also recognizes if a short packet is transmitted. This\
+      \ is an assembly language driver that is highly commented. The program runs\
+      \ in its own cog. Included is a simple demo file, but the demo code is not all\
+      \ that functional and rather short."
+    description_short: 'This program receives and parses a DMX-512A data stream. DMX
+      is a protocol for controlling lighting '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - serial
+    - driver
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:16.835629'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:47:45.456081'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2531'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: DMX-512A Receive Driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2531
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/dmx-512a-receive-driver/

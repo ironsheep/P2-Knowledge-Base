@@ -1,0 +1,66 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Jim Edwards | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : DisplayLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: "SW programming interface to the 4D Systems uOLED-160-G1SGC\
+      \ display and carrier board (latter supports a joystick and speaker). The software\
+      \ contained here for this display conforms to revision 4.0 (March 9, 2011) of\
+      \ the GOLDELOX-SGC Command Set Software Interface Specification. The PmmC firmware\
+      \ for the GOLDELOX-SGC graphics processor on the display board must be up to\
+      \ date in order to fully utilize all the software commands implemented here.\
+      \ Much of this code was adapted from the \xAC\xB5OLED-160-GMD1 object written\
+      \ by Steve McManus."
+    description_short: SW programming interface to the 4D Systems uOLED-160-G1SGC
+      display and carrier board (latter support
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:42:04.107200'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:45:40.309514'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2656'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: 4D-Systems-uOLED-160-G1SGC
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2656
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/4d-systems-uoled-160-g1sgc/

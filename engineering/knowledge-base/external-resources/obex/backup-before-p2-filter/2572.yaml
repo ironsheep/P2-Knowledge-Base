@@ -1,0 +1,60 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'm.k. borriContent : CodeMicrocontroller : Propeller 1Languages : PASM,
+    SPINCategory : ProtocolLicence : OtherTag : ADCContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: communication
+    description_full: "Assumptions -- @ is delimiter char,  is end of packet char\
+      \ / begin buffering next packet char. Max packet length is 256 bytes if you\
+      \ want more there's room \U0001F642"
+    description_short: Assumptions -- @ is delimiter char,  is end of packet char
+      / begin buffering next packet char. Max p
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - serial
+  metadata:
+    discovery_date: '2025-09-12T11:42:12.587464'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:47:01.658855'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2572'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Serial Router
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2572
+    forum_discussion: http://forums.parallax.com/showthread.php?129714-Tim-Moore-s-pcFullDuplexSerial4FC-with-larger-(512-byte)-rx-buffer
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/serial-router/

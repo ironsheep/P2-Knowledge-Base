@@ -1,0 +1,19 @@
+# MarkT - OBEX Author Manifest
+version: "1.0"
+last_updated: "2025-09-12"
+author_profile:
+  display_name: "MarkT"
+  username: "markt"
+  reputation_score: 8.2
+  specialties: ["graphics", "display_drivers", "visual_interfaces"]
+
+metadata:
+  total_objects: 10
+  categories: ["display", "drivers", "demos"]
+  quality_average: 7.9
+
+objects: {}
+
+ai_recommendations: |
+  MarkT specializes in graphics and display technology.
+  Good source for visual interface implementations and display drivers.

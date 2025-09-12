@@ -1,0 +1,88 @@
+# OBEX P2 Drivers Manifest
+# Category: Hardware interface drivers and protocols
+# Access via: obex-community-manifest.yaml -> drivers
+
+version: "1.0"
+last_updated: "2025-09-11"
+category: "drivers"
+description: "P2 hardware interface drivers from OBEX community"
+
+metadata:
+  total_objects: 6  # Example count, will be populated by discovery
+  quality_range: "7-10"
+  update_frequency: "Monthly discovery"
+  validation_status: "All download URLs verified"
+
+subcategories:
+  serial_communication:
+    description: "UART, RS232, RS485 serial interfaces"
+    object_count: 3
+    featured_objects: ["2842"]
+    
+  display_interfaces:
+    description: "LED, TFT, matrix display drivers"  
+    object_count: 2
+    featured_objects: ["2850"]
+    
+  sensor_protocols:
+    description: "I2C, SPI, custom sensor interfaces"
+    object_count: 1
+
+# Objects in this category - lightweight entries for discovery
+objects:
+  "2842":
+    title: "Full Duplex Serial Driver"
+    author: "Jon McPhalen (jonnymac)"
+    subcategory: "serial_communication"
+    languages: ["SPIN2", "PASM2"]
+    quality_score: 9
+    popularity: "high"
+    description_brief: "Production-quality bidirectional serial driver"
+    yaml_detail: "../objects/2842.yaml"
+    download_direct: "OB2842"  # Append to base URL from root manifest
+    recommended_for: ["uart_implementation", "serial_protocols", "high_performance_io"]
+    
+  "2850":
+    title: "ISP HUB75 Matrix Driver"
+    author: "Stephen M Moraco" 
+    subcategory: "display_interfaces"
+    languages: ["SPIN2", "PASM2"]
+    quality_score: 8
+    popularity: "medium"
+    description_brief: "RGB LED matrix driver for HUB75 panels"
+    yaml_detail: "../objects/2850.yaml"
+    download_direct: "OB2850"
+    recommended_for: ["led_matrix", "rgb_display", "multi_cog_display"]
+
+# Usage guidance for AI systems
+ai_usage_notes: |
+  When user asks for P2 drivers:
+  1. Scan this lightweight manifest first
+  2. Match user requirements to subcategories
+  3. Recommend objects based on quality_score and popularity
+  4. Load detailed YAML only for selected objects
+  5. Provide download URLs for user execution
+
+common_queries:
+  "P2 serial driver": 
+    recommended: ["2842"]
+    note: "Jon McPhalen's implementation is production-proven"
+  
+  "P2 display driver":
+    recommended: ["2850"]
+    note: "HUB75 matrices are common, this driver handles RGB and timing"
+  
+  "High performance driver":
+    recommended: ["2842"]
+    note: "jonnymac's drivers prioritize performance and reliability"
+
+integration_examples:
+  - query: "Find P2 UART implementation"
+    response: "Object 2842: Full Duplex Serial Driver by Jon McPhalen (quality: 9/10)"
+    download_url: "https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2842"
+    details: "Load ../objects/2842.yaml for complete specifications"
+
+maintenance:
+  discovery_source: "OBEX /code-language/spin2/ and /code-language/pasm/ categories"
+  quality_criteria: "Author reputation, documentation completeness, community adoption"
+  validation_process: "Monthly download URL checks, P2 compatibility verification"

@@ -1,0 +1,62 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Chip GraceyContent : CodeMicrocontroller : Propeller 1Languages : PASM,
+    SPINCategory : DisplayLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: display
+    description_full: This object generates a 1024x768 VGA signal which contains 128
+      columns x 64 rows of 8x12 characters. Each row can have a unique forground/background
+      color combination and each character can be inversed. There are also two cursors
+      which can be independently controlled (ie. mouse and keyboard). A sync indicator
+      signals each time the screen is refreshed (you may ignore).
+    description_short: This object generates a 1024x768 VGA signal which contains
+      128 columns x 64 rows of 8x12 characters.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+  metadata:
+    discovery_date: '2025-09-12T11:42:06.235124'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:46:03.368315'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2625'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: VGA HiRes Text
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2625
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/vga-hires-text/

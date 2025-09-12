@@ -1,0 +1,66 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Raymond Allen | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : DisplayLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: "Serial command interface and advanced driver for the uOled-96-Prop.\n\
+      This program gives the device a nearly identical serial interface as the \xAC\
+      \xB5OLED-128-GMD1. You may want to also download the two auxillary files that\
+      \ contain a Windows test program for the serial interface and example files\
+      \ to be stored on the uSD card."
+    description_short: 'Serial command interface and advanced driver for the uOled-96-Prop.
+
+      This program gives the device a '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - serial
+    - display
+    - driver
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:41:59.747857'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:44:58.705429'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2695'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: 'uOled-96-Prop: Serial Interface'
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2695
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/uoled-96-prop-serial-interface/

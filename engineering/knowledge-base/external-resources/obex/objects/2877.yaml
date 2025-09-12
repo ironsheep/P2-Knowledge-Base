@@ -1,0 +1,66 @@
+object_metadata:
+  author: Bill Tuss
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: 'This object implements a step motor driver.
+
+      The trajectory is sinusoidal, ramp up, a period at constant speed, ramp down.
+
+      A STOP input is monitored that will decelerate the motor to a stop in a controlled
+      fashion.
+
+      There are two versions. One for drivers that use step and direction inputs and
+      one for drivers with cw and ccw inputs.
+
+      A demo program in spin2 is included.'
+    description_short: 'This object implements a step motor driver.
+
+      The trajectory is sinusoidal, ramp up, a period at const'
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - demo
+    - driver
+    - motor
+    - led
+    - spi
+  metadata:
+    discovery_date: '2025-09-12T12:44:00.896213'
+    extraction_status: complete
+    kb_integration: none
+    last_author_extraction: '2025-09-12T13:21:55.059636'
+    last_complete_extraction: '2025-09-12T13:30:07.061112'
+    last_verified: '2025-09-12T12:45:11.296125'
+    page_discovered: 6
+    quality_score: 5
+    last_author_re_extraction: 2025-09-12T14:04:1
+    created_date: '2021-02-09 20:17:07'
+    last_created_date_fix: 2025-09-12T15:26:5
+    import_source: github_archiver
+    original_platform: github
+    last_archiver_fix: 2025-09-12T15:53:4
+  object_id: '2877'
+  technical_details:
+    file_format: ZIP
+    file_size: 5883 B
+    languages:
+    - SPIN2
+    - PASM2
+    microcontroller:
+    - P2
+    version: ''
+  title: Stepper Motor Driver Ver 2
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2877
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/stepper-motor-driver-ver-2/

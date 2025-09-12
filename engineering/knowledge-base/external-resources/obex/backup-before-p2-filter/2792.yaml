@@ -1,0 +1,62 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'DDS | added by ArchiverContent : CodeMicrocontroller : Propeller 1Languages
+    : PASM, SPINCategory : Motor ControlLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: This is a small stepper motor driver written in PASM. Step frequency
+      and step distance is set in the SPIN program and the variables are read and
+      executed by the PASM code. The PASM code allows very fast step rates. This program
+      uses a step & direction stepper driver.
+    description_short: This is a small stepper motor driver written in PASM. Step
+      frequency and step distance is set in the
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - motor
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:41:51.133322'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:43:37.484574'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2792'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Stepper Motor Driver (PASM)
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2792
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/stepper-motor-driver-pasm/

@@ -1,0 +1,55 @@
+manifest_metadata:
+  manifest_type: obex_category
+  category: demos
+  generated: 2025-09-12T16:10:0
+  object_count: 5
+category_info:
+  name: demos
+  description: Demonstration and example code showcasing P2 capabilities and techniques
+  common_use_cases:
+  - Learning P2 programming
+  - Feature exploration
+  - Proof of concept
+objects:
+- object_id: '2828'
+  title: Soft Timer
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: 'This object demonstrates an advanced feature of Spin2: the installation
+    of an ISR (interrupt service'
+  yaml_path: ../objects/2828.yaml
+- object_id: '4060'
+  title: FM Radio broadcasting
+  author: Wuerfel_21
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: Example of generating FM radio broadcasts (ab)using the P2's
+    color modulator unit.
+  yaml_path: ../objects/4060.yaml
+- object_id: '4070'
+  title: MFRC522
+  author: glapolla
+  languages:
+  - SPIN2
+  description_short: "The MFRC522\u2019s internal transmitter is able to drive a reader/writer\
+    \ antenna designed to\ncommunicate "
+  yaml_path: ../objects/4070.yaml
+- object_id: '4911'
+  title: IO Pin State Detection Demo
+  author: Michael
+  languages:
+  - SPIN2
+  description_short: One method to check the pin state of an IO pin is to drive the
+    pin in either direction (high/low) using the P2 smart-pin weak
+  yaml_path: ../objects/4911.yaml
+- object_id: '4926'
+  title: PNut/Spin2 Latest Version (v51)
+  author: Chip Gracey
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: 'Latest PNut Documentation: https://docs.'
+  yaml_path: ../objects/4926.yaml

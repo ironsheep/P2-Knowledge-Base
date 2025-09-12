@@ -1,0 +1,66 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Timothy D. Swieter | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategories : Display, FunLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: The enclosed programs include a demo and two drivers. The programs
+      are for use with the uOLED-96-PROP by 4D Systems. The demo program demonstrates
+      the use of the display driver (code that clocks Propeller memory to the OLED
+      GRAM). The display driver is written in ASM and is very fast (6ms per screen
+      update). The graphics driver (code the draws objects in the Propeller memory)
+      is written in SPIN and is a collection of routines to draw lines, circles, sprites
+      and text into the Propeller memory.
+    description_short: The enclosed programs include a demo and two drivers. The programs
+      are for use with the uOLED-96-PRO
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+    - driver
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:36.190673'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:51:10.101492'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2243'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: uOLED-96-PROP 8-bit display & graphics driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2243
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/uoled-96-prop-8-bit-display-graphics-driver/

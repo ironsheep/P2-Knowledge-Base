@@ -1,0 +1,58 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'tubular | added by ArchiverContent : CodeMicrocontroller : Propeller 1Language
+    : PASMCategory : SignalsLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: This object generates a Medium Frequency Sine Wave into an R2R
+      network using a "DDS precalculation" technique.
+    description_short: 'This object generates a Medium Frequency Sine Wave into an
+      R2R network using a "DDS precalculation" '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags: []
+  metadata:
+    discovery_date: '2025-09-12T11:42:25.367437'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:49:11.786614'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2448'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Medium Frequency R2R Sine Wave Generator 1.25 Mhz
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2448
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/medium-frequency-r2r-sine-wave-generator-1-25-mhz/

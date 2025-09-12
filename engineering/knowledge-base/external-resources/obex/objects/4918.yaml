@@ -1,0 +1,55 @@
+object_metadata:
+  author: ManAtWork
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: motors
+    description_full: 'Step/Dir signal generator for multiple axes, can be used to
+      drive stepper motor or servo drives
+
+      Supports:'
+    description_short: Step/Dir signal generator for multiple axes, can be used to
+      drive stepper motor or servo drives Supports:.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - servo
+    - driver
+    - motor
+    - led
+    - spi
+  metadata:
+    discovery_date: '2025-09-12T12:43:56.829290'
+    extraction_status: author_extracted
+    kb_integration: none
+    last_author_extraction: '2025-09-12T13:21:40.566172'
+    last_verified: '2025-09-12T12:44:25.512327'
+    page_discovered: 3
+    quality_score: 5
+    last_author_deep_search: 2025-09-12T13:39:2
+    last_description_fix: 2025-09-12T14:20:1
+    created_date: '2024-11-13 13:50:52'
+    last_created_date_fix: 2025-09-12T15:28:0
+  object_id: '4918'
+  technical_details:
+    file_format: ZIP
+    file_size: 5883 B
+    languages:
+    - SPIN2
+    - PASM2
+    microcontroller:
+    - P2
+    version: ''
+  title: Step/Dir signal generator
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4918
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/step-dir-signal-generator/

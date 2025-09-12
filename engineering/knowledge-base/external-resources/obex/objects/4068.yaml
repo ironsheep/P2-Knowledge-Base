@@ -1,0 +1,51 @@
+object_metadata:
+  author: glapolla
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: display
+    description_full: The  MAX30102  is  an  integrated  pulse  oximetry  and heart-rate  monitor  module.  It  includes  internal  LEDs,
+      photodetectors, optical elements, and low-noise electronics with  ambient  light  rejection.  The  MAX30102  provides  a
+      complete  system  solution  to  ease  the  design-in  process f
+    description_short: 'The  MAX30102  is  an  integrated  pulse  oximetry  and heart-rate  monitor  module.  It  includes  '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - led
+    - demo
+    - sensor
+    - driver
+    - spi
+  metadata:
+    discovery_date: '2025-09-12T12:44:12.247185'
+    extraction_status: author_extracted
+    kb_integration: none
+    last_author_extraction: '2025-09-12T13:23:12.586970'
+    last_verified: '2025-09-12T12:46:49.558648'
+    page_discovered: 14
+    quality_score: 5
+    last_author_deep_search: 2025-09-12T13:39:2
+    created_date: '2023-10-18 20:42:15'
+    last_created_date_fix: 2025-09-12T15:27:0
+  object_id: '4068'
+  technical_details:
+    file_format: ZIP
+    file_size: 5883 B
+    languages:
+    - SPIN2
+    microcontroller:
+    - P2
+    version: ''
+  title: MAX3010X
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4068
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/max3010x/

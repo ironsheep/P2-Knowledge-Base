@@ -1,0 +1,63 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Timothy D. Swieter | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : ProtocolLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: The TLC5940 is a 16 channel, 12 bit resolution, LED driver.
+      The TLC5940 is used in Brilldea's LED Painter project. This is a functional
+      TLC5940 driver but only uses the upper 8 bits of the 12 bit resolution. The
+      driver is written in SPIN and there is a seperate grey scale clock driver written
+      in assembly. This driver is not 1.0 as there is still room for improvement.
+    description_short: The TLC5940 is a 16 channel, 12 bit resolution, LED driver.
+      The TLC5940 is used in Brilldea's LED Pa
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:42:16.835684'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:47:47.571924'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2529'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: TLC5940 Driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2529
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/tlc5940-driver/

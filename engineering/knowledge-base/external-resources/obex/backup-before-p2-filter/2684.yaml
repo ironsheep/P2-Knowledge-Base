@@ -1,0 +1,62 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'MarkT | added by ArchiverContent : CodeMicrocontroller : Propeller 1Languages
+    : PASM, SPINCategory : DisplayLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: Preliminary driver for SSD1351 OLED controller in 8-bit parallel
+      8080 mode. Tested on Desnitron display module DD-128128FC-6A (order code 182-9707
+      from Farnell)
+    description_short: Preliminary driver for SSD1351 OLED controller in 8-bit parallel
+      8080 mode. Tested on Desnitron disp
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+    - driver
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:41:59.748173'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:45:11.252995'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2684'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: SSD1351 128x128 OLED parallel driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2684
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/ssd1351-128x128-oled-parallel-driver/

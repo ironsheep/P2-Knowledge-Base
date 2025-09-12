@@ -1,0 +1,63 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Benjamin Yaroch | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : ProtocolLicence : OtherTag : SPIContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: 'A driver for communicating with the Wiznet W5500 SPI Ethernet
+      Controller IC. This driver launches into its own COG then reads and writes to
+      the W5500. Routines are written in both ASM and SPIN to establish communication,
+      transfer data, and change settings. This is a direct port from the W5200_Driver:
+      http://obex.parallax.com/object/658'
+    description_short: A driver for communicating with the Wiznet W5500 SPI Ethernet
+      Controller IC. This driver launches in
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - serial
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:42:16.835572'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:47:43.323117'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2534'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Wiznet W5500 Driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2534
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/wiznet-w5500-driver/

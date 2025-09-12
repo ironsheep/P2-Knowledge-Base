@@ -1,0 +1,60 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Chris Cantrell | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : SensorLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: communication
+    description_full: My spin on an Infrared record/playback module. This uses a string-key
+      map collection to store samples. Samples can be recorded, played, and deleted
+      from the command line of the Propeller Serial Terminal.
+    description_short: My spin on an Infrared record/playback module. This uses a
+      string-key map collection to store sample
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - serial
+  metadata:
+    discovery_date: '2025-09-12T11:42:31.781375'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:50:30.094433'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2324'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: IRPlay_Record
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2324
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/irplay_record/

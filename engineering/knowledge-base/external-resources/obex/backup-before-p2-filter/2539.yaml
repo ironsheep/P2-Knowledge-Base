@@ -1,0 +1,59 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Chip GraceyContent : CodeMicrocontroller : Propeller 1Languages : PASM,
+    SPINCategory : ProtocolLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: communication
+    description_full: v1.2 - 5/7/2009 fixed bug in dec method causing largest negative
+      value (-2,147,483,648) to be output as -0.
+    description_short: v1.2 - 5/7/2009 fixed bug in dec method causing largest negative
+      value (-2,147,483,648) to be output
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - serial
+  metadata:
+    discovery_date: '2025-09-12T11:42:14.722835'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:47:34.992049'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2539'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Full Duplex Serial
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2539
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/full-duplex-serial/

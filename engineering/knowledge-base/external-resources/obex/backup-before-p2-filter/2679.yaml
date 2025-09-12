@@ -1,0 +1,68 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'DDS | added by ArchiverContent : CodeMicrocontroller : Propeller 1Languages
+    : PASM, SPINCategory : DisplayLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: This is a small driver for controlling / making a Triac based
+      light dimmer. Nothing exceptional but it works and is easy to work with - 1
+      variable. It uses the zero crossing signal from an opto-isolator and then delays
+      triggering the triac (also through an opto-isolator) until the proper amount
+      of time has elapsed. Allows setting the brightness of a light (or other resistive
+      load) from 0% to 100% in 256 steps. I have also included a small 120-Hz zero-crossing
+      simulator object so you can either simulate the hardware signal during development
+      or use it to dim LEDs or other Pulse Width Modulated devices not attached to
+      a 60-Hz power line.
+    description_short: 'This is a small driver for controlling / making a Triac based
+      light dimmer. Nothing exceptional but '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+    - sensor
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:42:01.886279'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:45:15.428903'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2679'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Light Dimmer / Triac Driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2679
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/light-dimmer-triac-driver/

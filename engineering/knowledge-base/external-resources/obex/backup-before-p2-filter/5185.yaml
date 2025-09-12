@@ -1,0 +1,60 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'MichaelContent : App NoteMicrocontroller : Propeller 1Languages : PASM,
+    SPINCategory : OtherLicence : MITContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: sensors
+    description_full: The multicore P8X32A does not require traditional interrupts
+      to manage multiple processes simultaneously; yet multi-tasking in a single core
+      is still a handy option.
+    description_short: The multicore P8X32A does not require traditional interrupts
+      to manage multiple processes simultaneo
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - sensor
+  metadata:
+    discovery_date: '2025-09-12T11:41:46.868763'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:43:01.453513'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '5185'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Coroutines in PASM (AN014)
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5185
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/coroutines-in-pasm-an014/

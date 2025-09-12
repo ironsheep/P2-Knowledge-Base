@@ -1,0 +1,53 @@
+object_metadata:
+  author: Jon McPhalen (jonnymac)
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: This [cogless] object allows the P2 to communicate with 1-Wire
+      devices. Using the P2 pin configuration modes, the P2 can provide the required
+      pullup if an external pull-up is not available.
+    description_short: This [cogless] object allows the P2 to communicate with 1-Wire
+      devices. Using the P2 pin configurati
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - led
+    - spi
+    - demo
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T12:44:06.662855'
+    extraction_status: author_extracted
+    kb_integration: none
+    last_author_extraction: '2025-09-12T13:21:13.623454'
+    last_verified: '2025-09-12T12:46:05.586789'
+    page_discovered: 10
+    quality_score: 5
+    last_author_deep_search: 2025-09-12T13:39:2
+    last_author_consolidation: 2025-09-12T14:06:0
+    created_date: '2020-07-02 12:00:00'
+    last_created_date_fix: 2025-09-12T15:33:0
+  object_id: '2838'
+  technical_details:
+    file_format: ZIP
+    file_size: 5883 B
+    languages:
+    - SPIN2
+    - PASM2
+    microcontroller:
+    - P2
+    version: ''
+  title: 1-Wire
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2838
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/1-wire/

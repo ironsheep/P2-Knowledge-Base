@@ -1,0 +1,57 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Walter Mosscrop | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategories : Protocol, SensorLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: sensors
+    description_full: Version 3, it should now support both DHT11 and DHT22 sensors.
+    description_short: Version 3, it should now support both DHT11 and DHT22 sensors.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - sensor
+  metadata:
+    discovery_date: '2025-09-12T11:42:29.618294'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:50:08.622550'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2348'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: DHT11/DHT22 Sensor
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2348
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/dht11-dht22-sensor/

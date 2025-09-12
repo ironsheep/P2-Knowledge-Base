@@ -1,0 +1,59 @@
+object_metadata:
+  author: mike calyer
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: Utility object for P2 development.
+    description_short: Utility object for P2 development.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - led
+    - demo
+    - sensor
+    - driver
+    - spi
+  metadata:
+    created_date: '2023-11-16 19:47:20'
+    discovery_date: '2025-09-12T12:44:10.850352'
+    extraction_status: complete
+    kb_integration: none
+    last_author_extraction: '2025-09-12T13:21:26.225985'
+    last_complete_extraction: '2025-09-12T13:30:07.010853'
+    last_verified: '2025-09-12T12:46:35.809936'
+    license: Other
+    page_discovered: 13
+    quality_score: 5
+    last_author_re_extraction: 2025-09-12T14:04:1
+    last_html_corruption_fix: 2025-09-12T14:32:2
+    last_license_corruption_fix: 2025-09-12T14:34:2
+    import_source: github_archiver
+    original_platform: github
+    last_archiver_fix: 2025-09-12T15:53:3
+    last_author_consolidation: 2025-09-12T16:06:1
+    original_archiver_name: mike calyer (mcalyer, mike.calyer@yahoo.com)
+  object_id: '2815'
+  technical_details:
+    file_format: ZIP
+    file_size: 5883 B
+    languages:
+    - SPIN2
+    languages_confirmed:
+    - SPIN2
+    microcontroller:
+    - P2
+    version: ''
+  title: Cricket BME280
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2815
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/cricket-bme280/

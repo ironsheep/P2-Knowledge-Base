@@ -1,0 +1,63 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Timothy D. Swieter | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : ProtocolLicence : OtherTag : SPIContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: This is a demo program (0.1) and driver (0.2) for the Brilldea
+      LM9033A Graphics LCD. This driver is an ASM driver requiring one cog. This driver
+      reads "video memory" of the hub ram for the data to be displayed. The "video
+      memory" is drawn in by the Parallax graphics.spin driver.
+    description_short: 'This is a demo program (0.1) and driver (0.2) for the Brilldea
+      LM9033A Graphics LCD. This driver is '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+    - driver
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:12.587684'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:47:16.187243'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2557'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: LM9033A 128x96 Graphics LCD driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2557
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/lm9033a-128x96-graphics-lcd-driver/

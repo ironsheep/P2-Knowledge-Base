@@ -1,0 +1,62 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: '3dogpottery | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : ProtocolLicence : OtherTag : SPIContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: The zipped file "SPI_Driver_For_UM6.zip" contains two files;
+      a Spin demo object "UM6 SPI Asm DEMO.Spin" and the assembly SPI driver "UM6_SPI_Asm.Spin"
+      The driver provides you with one function that allows you to communicate with
+      CH Robotics UM6 or UM6-LT via SPI protocol.
+    description_short: The zipped file "SPI_Driver_For_UM6.zip" contains two files;
+      a Spin demo object "UM6 SPI Asm DEMO.Sp
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - driver
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:12.587498'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:47:03.775022'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2571'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: SPI Driver for UM6 and UM6-LT UMI
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2571
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/spi-driver-for-um6-and-um6-lt-umi/

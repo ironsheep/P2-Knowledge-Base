@@ -1,0 +1,44 @@
+manifest_metadata:
+  manifest_type: obex_author
+  author: Chris Gadd
+  generated: 2025-09-12T16:10:0
+  object_count: 4
+author_info:
+  name: Chris Gadd
+  contribution_summary: 4 P2 objects contributed to OBEX
+  specialties:
+  - drivers (4 objects)
+  - SPIN2 (4)
+  - PASM2 (3)
+objects:
+- object_id: '4269'
+  title: FAT32 SD card driver
+  category: drivers
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2024-01-28 15:42:47'
+  yaml_path: ../objects/4269.yaml
+- object_id: '4727'
+  title: USB Human-Interface-Device Driver
+  category: drivers
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2024-09-10 16:40:27'
+  yaml_path: ../objects/4727.yaml
+- object_id: '4746'
+  title: WizNet W5500 Driver
+  category: drivers
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2024-09-17 20:01:08'
+  yaml_path: ../objects/4746.yaml
+- object_id: '4758'
+  title: Waveshare 2.9" E-paper display driver
+  category: drivers
+  languages:
+  - SPIN2
+  created_date: '2024-06-04 02:11:14'
+  yaml_path: ../objects/4758.yaml

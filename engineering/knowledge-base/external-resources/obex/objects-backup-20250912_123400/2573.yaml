@@ -1,0 +1,61 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Tom Crawford | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Language : PASMCategory : ProtocolLicence : OtherTag : SPIContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: demos
+    description_full: This PASM SPI Slave has been tested at 1.8 MHz.  Once started,
+      it will look for a LOW on the chip select pin and will accumulate up to 32 bits.  When
+      chip select goes HIGH, it will store the accumulated data and a bit count into
+      hub memory.
+    description_short: This PASM SPI Slave has been tested at 1.8 MHz.  Once started,
+      it will look for a LOW on the chip se
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:12.587418'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:46:59.600938'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2573'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: 1.8 MHz SPI Slave
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2573
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/1-8-mhz-spi-slave/

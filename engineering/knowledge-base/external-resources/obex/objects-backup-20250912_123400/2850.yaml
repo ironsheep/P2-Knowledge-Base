@@ -1,0 +1,63 @@
+# HUB75 Matrix Driver - Object ID 2850
+# Discovered from OBEX feasibility study
+
+object_metadata:
+  object_id: "2850"
+  title: "ISP HUB75 Matrix Driver"
+  author: "Stephen M Moraco"
+  author_username: "stephen_moraco"
+  
+  urls:
+    obex_page: "https://obex.parallax.com/obex/isp-hub75-matrix-driver/"
+    download_direct: "https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2850"
+    forum_discussion: ""
+    github_repo: ""
+    documentation: ""
+  
+  technical_details:
+    languages: ["SPIN2", "PASM2"]
+    microcontroller: ["P2"]
+    version: ""
+    file_format: "ZIP"
+    file_size: ""
+    
+  functionality:
+    category: "drivers"
+    subcategory: "display"
+    description_short: "RGB LED matrix driver for P2"
+    description_full: "HUB75 RGB LED matrix driver with PASM2/SPIN2 implementation"
+    tags: ["display", "driver", "hub75", "rgb", "led", "matrix"]
+    hardware_support: ["HUB75", "RGB_matrix"]
+    peripherals: ["smart_pins"]
+    
+  architecture:
+    multi_cog: true
+    cog_count: 2  # Estimated based on typical matrix drivers
+    memory_requirements:
+      hub_ram: ""
+      cog_ram: ""
+    performance_notes: "High performance display driver"
+    
+  compatibility:
+    p2_chip_versions: ["all"]
+    tested_platforms: []
+    known_issues: []
+    dependencies: []
+    
+  community:
+    forum_posts: []
+    user_reviews: []
+    modification_notes: []
+    related_objects: []
+    
+  metadata:
+    discovery_date: "2025-09-08"
+    last_verified: "2025-09-11"
+    extraction_status: "pending"
+    kb_integration: "none"
+    quality_score: 8  # Good quality display driver
+    
+  notes:
+    extraction_notes: "Discovered in feasibility study"
+    analysis_notes: "Complex display driver - good for pattern analysis"
+    integration_todo: ["Download and analyze code", "Study multi-COG architecture"]

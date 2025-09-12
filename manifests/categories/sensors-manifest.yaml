@@ -1,0 +1,39 @@
+manifest_metadata:
+  manifest_type: obex_category
+  category: sensors
+  generated: 2025-09-12T16:10:0
+  object_count: 3
+category_info:
+  name: sensors
+  description: Sensor interface drivers and data acquisition objects
+  common_use_cases:
+  - Data collection
+  - Environmental monitoring
+  - Measurement systems
+objects:
+- object_id: '4064'
+  title: ADS1118
+  author: glapolla
+  languages:
+  - SPIN2
+  description_short: The ADS1118 is a precision, low power, 16-bit analog-to-digital
+    converter (ADC) that provides all features necessary to measure themost common
+    sensor signals in
+  yaml_path: ../objects/4064.yaml
+- object_id: '4571'
+  title: "ISP P2 180\xB0 Field of View TOF Sensor"
+  author: Stephen M Moraco
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: "A collection of P2 Spin2 objects allows us to realize a 180\xB0\
+    \ field-of-view time-of-flight sensor by ganging 4 VL53L5CX TOF sensors"
+  yaml_path: ../objects/4571.yaml
+- object_id: '5259'
+  title: BNO08x IMU (9 DOF) (RVC Mode)
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: This object takes advantage of the BNO08x RVC (serial) output
+    to provide Yaw, Pitch, Roll, X acceler
+  yaml_path: ../objects/5259.yaml

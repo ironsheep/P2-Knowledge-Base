@@ -1,0 +1,64 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Eric R | added by ArchiverContent : CodeMicrocontroller : Propeller 1Languages
+    : PASM, SPINCategory : Motor ControlLicence : OtherTag : PWMContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: Motor driver using two IR2101 driver chips from International
+      Rectifier. These chips drive an H bridge made with MOSFETS or IGBTs. For driving
+      DC permanent magnet motor or other inductive DC load. After driver is started
+      writing a "duty cycle" value of -4000 to 4000 to a long variable creates nearly
+      full negative and nearly full positive voltage output. Duty cycle may be commanded
+      by a Spin or an Assembly program.
+    description_short: Motor driver using two IR2101 driver chips from International
+      Rectifier. These chips drive an H brid
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - motor
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:41:51.133222'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:43:33.312773'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2795'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: IR2101PWM
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2795
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/ir2101pwm/

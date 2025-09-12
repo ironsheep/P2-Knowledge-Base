@@ -1,0 +1,337 @@
+manifest_metadata:
+  manifest_type: obex_author
+  author: Jon McPhalen (jonnymac)
+  generated: 2025-09-12T16:10:0
+  object_count: 44
+author_info:
+  name: Jon McPhalen (jonnymac)
+  contribution_summary: 44 P2 objects contributed to OBEX
+  specialties:
+  - drivers (18 objects)
+  - SPIN2 (44)
+  - PASM2 (16)
+objects:
+- object_id: '2813'
+  title: Psuedo-random and random numbers
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2020-06-17 12:00:00'
+  yaml_path: ../objects/2813.yaml
+- object_id: '2819'
+  title: Click 4-20 MA
+  category: drivers
+  languages:
+  - SPIN2
+  created_date: '2020-10-04 12:00:00'
+  yaml_path: ../objects/2819.yaml
+- object_id: '2820'
+  title: Click RTC10
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2020-10-09 12:00:00'
+  yaml_path: ../objects/2820.yaml
+- object_id: '2821'
+  title: DHTxx Temperature/Humidity Sensors
+  category: drivers
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2021-01-14 12:00:00'
+  yaml_path: ../objects/2821.yaml
+- object_id: '2823'
+  title: EZ Analog
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2020-06-29 12:00:00'
+  yaml_path: ../objects/2823.yaml
+- object_id: '2824'
+  title: NEC RX
+  category: drivers
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2020-12-15 12:00:00'
+  yaml_path: ../objects/2824.yaml
+- object_id: '2825'
+  title: NEC TX
+  category: drivers
+  languages:
+  - SPIN2
+  created_date: '2020-12-15 12:00:00'
+  yaml_path: ../objects/2825.yaml
+- object_id: '2826'
+  title: MAX31855 Thermocouple Interface
+  category: drivers
+  languages:
+  - SPIN2
+  created_date: '2024-07-19 22:25:18'
+  yaml_path: ../objects/2826.yaml
+- object_id: '2827'
+  title: PIXY2
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2020-11-19 12:00:00'
+  yaml_path: ../objects/2827.yaml
+- object_id: '2828'
+  title: Soft Timer
+  category: demos
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2020-11-30 12:00:00'
+  yaml_path: ../objects/2828.yaml
+- object_id: '2829'
+  title: Quadrature Encoder
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2024-09-23 17:48:33'
+  yaml_path: ../objects/2829.yaml
+- object_id: '2830'
+  title: Sparkfun Qwiic Twist Encoder
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2020-12-18 12:00:00'
+  yaml_path: ../objects/2830.yaml
+- object_id: '2832'
+  title: Click Relay2
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2020-09-30 12:00:00'
+  yaml_path: ../objects/2832.yaml
+- object_id: '2833'
+  title: DMX TX
+  category: drivers
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2020-07-05 12:00:00'
+  yaml_path: ../objects/2833.yaml
+- object_id: '2834'
+  title: PWM
+  category: motors
+  languages:
+  - SPIN2
+  created_date: '2024-03-16 16:20:08'
+  yaml_path: ../objects/2834.yaml
+- object_id: '2835'
+  title: Sony IRCS Tx (infrared control system transmitter)
+  category: drivers
+  languages:
+  - SPIN2
+  created_date: '2020-07-22 12:00:00'
+  yaml_path: ../objects/2835.yaml
+- object_id: '2838'
+  title: 1-Wire
+  category: misc
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2020-07-02 12:00:00'
+  yaml_path: ../objects/2838.yaml
+- object_id: '2839'
+  title: Click DMX-TX
+  category: misc
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2020-10-26 12:00:00'
+  yaml_path: ../objects/2839.yaml
+- object_id: '2840'
+  title: Click RS485_3v3
+  category: drivers
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2020-10-27 12:00:00'
+  yaml_path: ../objects/2840.yaml
+- object_id: '2841'
+  title: EZ SPI
+  category: communication
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2020-09-01 12:00:00'
+  yaml_path: ../objects/2841.yaml
+- object_id: '2842'
+  title: Full Duplex Serial
+  category: communication
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2022-01-04 12:00:00'
+  yaml_path: ../objects/2842.yaml
+- object_id: '2843'
+  title: I2C
+  category: display
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2022-02-24 12:00:00'
+  yaml_path: ../objects/2843.yaml
+- object_id: '2844'
+  title: I2C Devices
+  category: display
+  languages:
+  - SPIN2
+  created_date: '2020-12-08 12:00:00'
+  yaml_path: ../objects/2844.yaml
+- object_id: '2845'
+  title: Serial
+  category: communication
+  languages:
+  - SPIN2
+  created_date: '2024-03-16 16:12:07'
+  yaml_path: ../objects/2845.yaml
+- object_id: '2846'
+  title: Sony IRCS Rx (infrared control system receiver)
+  category: misc
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2020-07-19 12:00:00'
+  yaml_path: ../objects/2846.yaml
+- object_id: '2851'
+  title: TM1638 LED Display Driver
+  category: drivers
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2020-09-06 12:00:00'
+  yaml_path: ../objects/2851.yaml
+- object_id: '2852'
+  title: APA102C Smart Pixel Driver
+  category: drivers
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2020-08-08 12:00:00'
+  yaml_path: ../objects/2852.yaml
+- object_id: '2853'
+  title: EZ MAX7219
+  category: drivers
+  languages:
+  - SPIN2
+  created_date: '2020-07-01 12:00:00'
+  yaml_path: ../objects/2853.yaml
+- object_id: '2854'
+  title: LCD PCF8574
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2020-06-30 12:00:00'
+  yaml_path: ../objects/2854.yaml
+- object_id: '2855'
+  title: LPD8806 "Smart" Pixel Driver
+  category: drivers
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2020-11-26 12:00:00'
+  yaml_path: ../objects/2855.yaml
+- object_id: '2856'
+  title: P2ES Matrix
+  category: display
+  languages:
+  - SPIN2
+  created_date: '2020-06-18 12:00:00'
+  yaml_path: ../objects/2856.yaml
+- object_id: '2857'
+  title: RGBX Pixel Driver
+  category: drivers
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2020-08-02 12:00:00'
+  yaml_path: ../objects/2857.yaml
+- object_id: '2860'
+  title: EZ Sound
+  category: audio
+  languages:
+  - SPIN2
+  created_date: '2020-06-30 12:00:00'
+  yaml_path: ../objects/2860.yaml
+- object_id: '2868'
+  title: EZ Button
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2020-06-29 12:00:00'
+  yaml_path: ../objects/2868.yaml
+- object_id: '2869'
+  title: P2ES Control
+  category: drivers
+  languages:
+  - SPIN2
+  created_date: '2020-06-16 12:00:00'
+  yaml_path: ../objects/2869.yaml
+- object_id: '2870'
+  title: Sony IRCS Rx (infrared control system receiver)
+  category: misc
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2020-07-19 12:00:00'
+  yaml_path: ../objects/2870.yaml
+- object_id: '2871'
+  title: AT24C32
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2020-12-09 12:00:00'
+  yaml_path: ../objects/2871.yaml
+- object_id: '2875'
+  title: DC Motor
+  category: motors
+  languages:
+  - SPIN2
+  created_date: '2020-07-05 12:00:00'
+  yaml_path: ../objects/2875.yaml
+- object_id: '2876'
+  title: Servo
+  category: drivers
+  languages:
+  - SPIN2
+  created_date: '2024-03-15 14:30:20'
+  yaml_path: ../objects/2876.yaml
+- object_id: '4701'
+  title: DC Motor Control
+  category: drivers
+  languages:
+  - SPIN2
+  created_date: '2024-03-16 16:46:37'
+  yaml_path: ../objects/4701.yaml
+- object_id: '4883'
+  title: P2 Pin Filter Configuration
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2025-03-25 17:51:10'
+  yaml_path: ../objects/4883.yaml
+- object_id: '5259'
+  title: BNO08x IMU (9 DOF) (RVC Mode)
+  category: sensors
+  languages:
+  - SPIN2
+  created_date: '2025-07-01 21:08:49'
+  yaml_path: ../objects/5259.yaml
+- object_id: '5274'
+  title: PING+ for PING))) and LaserPING
+  category: drivers
+  languages:
+  - SPIN2
+  created_date: '2025-07-04 01:58:49'
+  yaml_path: ../objects/5274.yaml
+- object_id: '5281'
+  title: Click Stepper-2 Demo
+  category: drivers
+  languages:
+  - SPIN2
+  created_date: '2025-08-20 18:38:30'
+  yaml_path: ../objects/5281.yaml

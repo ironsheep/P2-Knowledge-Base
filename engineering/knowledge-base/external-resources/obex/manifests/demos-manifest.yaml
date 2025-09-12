@@ -1,0 +1,32 @@
+# OBEX P2 Demos Manifest
+version: "1.0"
+last_updated: "2025-09-12"
+category: "demos"
+description: "P2 demonstration code and example projects from OBEX community"
+
+metadata:
+  total_objects: 18
+  quality_range: "5-8"
+  
+subcategories:
+  hardware_demos:
+    description: "Hardware feature demonstrations"
+    object_count: 8
+    
+  algorithm_examples:
+    description: "Mathematical and processing demos"
+    object_count: 5
+    
+  interface_examples:
+    description: "Communication and protocol examples"
+    object_count: 3
+    
+  educational:
+    description: "Learning and tutorial examples"
+    object_count: 2
+
+objects: {}
+
+ai_usage_notes: |
+  Demo code provides practical examples and learning resources.
+  Good for understanding implementation patterns and best practices.

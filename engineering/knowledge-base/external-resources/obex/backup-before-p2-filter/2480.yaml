@@ -1,0 +1,67 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Brandon Nimon | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategories : Signals, Speech and SoundLicence : OtherTag
+    : PWMContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: sensors
+    description_full: 'Frequency Synthesis/PWM X31:
+
+      This program grants the ability to output up to 31 frequencies at once using
+      the resources of only a single cog. With a clock speed of 80MHz, output can
+      stably reach as high as 320KHz. If more than one output is used (the main purpose
+      of this program), the maximum frequencies depend on the amount and combination
+      of frequencies. To approximate: Max-Hz = 4000 * MHz / channels.'
+    description_short: 'Frequency Synthesis/PWM X31:
+
+      This program grants the ability to output up to 31 frequencies at once '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - sensor
+    - audio
+  metadata:
+    discovery_date: '2025-09-12T11:42:21.121363'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:48:37.926225'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2480'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Frequency Synthesis/PWM X31
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2480
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/frequency-synthesis-pwm-x31/

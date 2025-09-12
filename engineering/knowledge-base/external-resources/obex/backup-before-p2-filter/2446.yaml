@@ -1,0 +1,63 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'frank freedman | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : SignalsLicence : OtherTag : ADCContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: display
+    description_full: This is a modular controller for 1 or more paralleled MCP3201
+      ADC chips. Currently sampling about 100Ksps, it is intended to run as many ADCs
+      as there are open cogs. On a single prop, that is N-2 for 6 parallel devices.
+      with some trickery and using the common timing from the initial clockgenmodule,
+      multiple props could be ganged together indefinitely using all 8 cogs in each.
+      (assuming the acqmod is replacing cog 0).
+    description_short: This is a modular controller for 1 or more paralleled MCP3201
+      ADC chips. Currently sampling about 10
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+  metadata:
+    discovery_date: '2025-09-12T11:42:25.367491'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:49:13.919888'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2446'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: MCP3201 Modular A/D system
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2446
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/mcp3201-modular-a-d-system/

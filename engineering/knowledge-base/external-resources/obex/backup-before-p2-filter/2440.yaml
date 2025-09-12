@@ -1,0 +1,65 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'DDS | added by ArchiverContent : CodeMicrocontroller : Propeller 1Languages
+    : PASM, SPINCategories : Data Storage, SignalsLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: demos
+    description_full: This PASM program constantly measures the pulse width of a 60-Hz
+      clipped signal from a power transformer. This transformer is used to power the
+      propeller circuit. In the event of a power loss (1st lost cycle) or simply turning
+      off the power, the brownout detector clears a variable to 0, signaling your
+      SPIN program to save it's variables to EEPROM memory before losing power. I
+      have included a small demo program to show how I use it. The revised program
+      returns the line frequency of the 60-hz power as a value close to 666_666 =
+      (80_000_000/120Hz)
+    description_short: This PASM program constantly measures the pulse width of a
+      60-Hz clipped signal from a power transfo
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:25.367542'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:49:16.026233'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2440'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Brownout Detector To Save Variables to EEPROM
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2440
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/brownout-detector-to-save-variables-to-eeprom/

@@ -1,0 +1,33 @@
+manifest_metadata:
+  manifest_type: obex_author
+  author: glapolla
+  generated: 2025-09-12T16:10:0
+  object_count: 3
+author_info:
+  name: glapolla
+  contribution_summary: 3 P2 objects contributed to OBEX
+  specialties:
+  - sensors (1 objects)
+  - SPIN2 (3)
+objects:
+- object_id: '4064'
+  title: ADS1118
+  category: sensors
+  languages:
+  - SPIN2
+  created_date: '2023-10-18 20:37:42'
+  yaml_path: ../objects/4064.yaml
+- object_id: '4068'
+  title: MAX3010X
+  category: display
+  languages:
+  - SPIN2
+  created_date: '2023-10-18 20:42:15'
+  yaml_path: ../objects/4068.yaml
+- object_id: '4070'
+  title: MFRC522
+  category: demos
+  languages:
+  - SPIN2
+  created_date: '2023-10-18 20:46:38'
+  yaml_path: ../objects/4070.yaml

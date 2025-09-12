@@ -1,0 +1,22 @@
+manifest_metadata:
+  manifest_type: obex_category
+  category: tools
+  generated: 2025-09-12T16:10:0
+  object_count: 1
+category_info:
+  name: tools
+  description: Development tools, utilities, and helper objects for P2 programming
+  common_use_cases:
+  - Development workflow
+  - Debugging
+  - Code generation
+objects:
+- object_id: '4261'
+  title: P2 FLASH Filesystem
+  author: Stephen M Moraco
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: A wear-leveling filesystem for the P2 Edge on-board flash chip.
+    Supports multi-cog access without consuming a Cog.
+  yaml_path: ../objects/4261.yaml

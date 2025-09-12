@@ -1,0 +1,64 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Phil Pilgrim (PhiPi) | added by ArchiverContent : CodeMicrocontroller :
+    Propeller 1Languages : PASM, SPINCategory : DisplayLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: communication
+    description_full: 'This object permits the overlay of characters upon a standard
+      NTSC video source, using the Propeller Backpack (#28327). It consists of the
+      overlay object proper, plus three top-level programs: a serial terminal program
+      and two demo programs. The documentation for this object is included in the
+      archive. Addenda pertaining to user-definable characters can be found as comments
+      in the overlya object.'
+    description_short: This object permits the overlay of characters upon a standard
+      NTSC video source, using the Propeller
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - serial
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:06.235233'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:46:07.729761'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2622'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Propeller Backpack TV Overlay
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2622
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/propeller-backpack-tv-overlay/

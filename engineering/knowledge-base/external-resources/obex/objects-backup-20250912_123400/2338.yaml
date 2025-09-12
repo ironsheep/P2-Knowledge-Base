@@ -1,0 +1,68 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Brandon Nimon | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategories : Sensor, Signals, Speech and SoundLicence :
+    OtherTag : ADCContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: Driver for MCP3X0X ADCs. Driver features include support for
+      Microchip ADCs with anywhere between 1 and 8 ADC input channels and resolutions
+      of 16 bits or less. Both single-ended and differential modes are supported.
+      The driver adds support for frequency reading on each of the channels and allows
+      the ADC to react as a programmable Schmitt trigger. Also available is gathering
+      of maximum and minimum or average values of the channels over time. The driver
+      can wait for a channel to achieve a specific state, or can even be put into
+      standby to save power. Channel values and states are available to multiple objects
+      if the driver is supplied with variables to store the information.
+    description_short: 'Driver for MCP3X0X ADCs. Driver features include support for
+      Microchip ADCs with anywhere between 1 '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - sensor
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:42:31.781276'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:50:21.601630'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2338'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: ADC Input Driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2338
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/adc-input-driver/

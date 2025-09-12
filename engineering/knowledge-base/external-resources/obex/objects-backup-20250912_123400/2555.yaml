@@ -1,0 +1,63 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Tim Moore | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategories : Data Storage, ProtocolLicence : OtherTag :
+    SPIContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: Driver for SPI-SRAM N256S0830HDA. 3 drivers in download for
+      1 bit, 2bit and 4 bit wide memory board. Download contains schematic and PCB
+      layout for a 4bit wide memory board. Driver is also a example of how to do SPI
+      using counters for SPI clock, allows SPI speeds upto 10MHz.
+    description_short: Driver for SPI-SRAM N256S0830HDA. 3 drivers in download for
+      1 bit, 2bit and 4 bit wide memory board.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - driver
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:14.722349'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:47:20.349462'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2555'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: N256S0830HDA SPI SRAM driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2555
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/n256s0830hda-spi-sram-driver/

@@ -1,0 +1,63 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Jim | added by ArchiverContent : CodeMicrocontroller : Propeller 1Languages
+    : PASM, SPINCategories : Protocol, SensorLicence : OtherTags : ADC, DACContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: Modified version of Chip's original MCP3208 code. Designed to
+      speed up the ADC process by doing all of the calculations in assembly code.
+      Use for single and average ADC samples. A 10 sample average of ADC samples is
+      six times faster than the original code. Same calling sequence as original code.
+      Used for single mode ADC only. Does not provide DAC output. Deterministic output
+      in the sense that it always takes the same number of clock cycles per sample(s).
+      License added 2/27/08.
+    description_short: 'Modified version of Chip''s original MCP3208 code. Designed
+      to speed up the ADC process by doing all '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags: []
+  metadata:
+    discovery_date: '2025-09-12T11:42:29.618237'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:50:06.508886'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2355'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: MCP3208 fast ADC 12 bit 8 channel
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2355
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/mcp3208-fast-adc-12-bit-8-channel/

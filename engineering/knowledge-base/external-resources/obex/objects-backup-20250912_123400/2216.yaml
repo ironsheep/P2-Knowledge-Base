@@ -1,0 +1,62 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Andre'' LaMothe | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategories : Display, FunLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: demos
+    description_full: Included within the HYDRA Demos Source Teaser are complete source
+      code to a number of demos/games that you will learn how to develop with the
+      HYDRA Game Development Kit and/or book. Included in this release are the complete
+      source to; Hydris, Parallaxaroids, Mars Lander, LockNChase, Physics Projectile
+      Demo, Sub Hunt, and 3D Color Rotation Trench.
+    description_short: Included within the HYDRA Demos Source Teaser are complete
+      source code to a number of demos/games th
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:38.277198'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:51:26.932954'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2216'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: HYDRA Source Code Teaser
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2216
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/hydra-source-code-teaser/

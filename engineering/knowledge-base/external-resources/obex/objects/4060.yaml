@@ -1,0 +1,52 @@
+object_metadata:
+  author: Wuerfel_21
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: demos
+    description_full: Example of generating FM radio broadcasts (ab)using the P2's
+      color modulator unit.
+    description_short: Example of generating FM radio broadcasts (ab)using the P2's
+      color modulator unit.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - example
+    - demo
+    - led
+    - adc
+    - spi
+  metadata:
+    discovery_date: '2025-09-12T12:44:12.247268'
+    extraction_status: author_extracted
+    kb_integration: none
+    last_author_extraction: '2025-09-12T13:21:38.789357'
+    last_verified: '2025-09-12T12:46:52.294788'
+    page_discovered: 14
+    quality_score: 5
+    last_author_deep_search: 2025-09-12T13:39:2
+    created_date: '2023-10-18 21:29:22'
+    last_created_date_fix: 2025-09-12T15:27:0
+  object_id: '4060'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - SPIN2
+    - PASM2
+    microcontroller:
+    - P2
+    version: ''
+  title: FM Radio broadcasting
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4060
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/fm-radio-broadcasting/

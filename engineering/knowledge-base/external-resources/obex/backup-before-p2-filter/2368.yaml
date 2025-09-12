@@ -1,0 +1,61 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Jim | added by ArchiverContent : CodeMicrocontroller : Propeller 1Languages
+    : PASM, SPINCategory : SensorLicence : OtherTag : ADCContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: See notes for "MCP3208_fast" object. Allows support of up to
+      24 ADC channels with one object. Supports up to three MCP3208 ADC chips with
+      fast access and fast averages to any one of the 24 ADC channels. All calculations
+      done in assembly code. Uses same fast algorithms as those coded in MCP3208_fast.
+      See code for description and calling sequence.
+    description_short: See notes for "MCP3208_fast" object. Allows support of up to
+      24 ADC channels with one object. Suppor
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags: []
+  metadata:
+    discovery_date: '2025-09-12T11:42:29.618078'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:49:59.951259'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2368'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: MCP3208 fast ADC 12 bit 24 chnl Multi-Chip
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2368
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/mcp3208-fast-adc-12-bit-24-chnl-multi-chip/

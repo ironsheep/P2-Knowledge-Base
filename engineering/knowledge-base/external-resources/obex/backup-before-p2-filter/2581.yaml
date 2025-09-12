@@ -1,0 +1,65 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'David Sloan | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : ProtocolLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: UART serial transceiver driver.  This object is capable of 1Mbuad
+      communication speeds in a single cog with simultaneous transmit and receive.  Examples
+      are provided for both spin and assembly control of the serial driver core.  This
+      is a fixed buad rate UART module intended for use with 80 MHz clocked propeller
+      chips.  If another clock frequency is chosen the baud rate with scale proportionally.
+    description_short: UART serial transceiver driver.  This object is capable of
+      1Mbuad communication speeds in a single c
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - serial
+    - sensor
+    - driver
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:10.477697'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:46:49.207887'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2581'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: 1Mbaud FullDuplexSerial (Fixed baud-rate)
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2581
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/1mbaud-fullduplexserial-fixed-baud-rate/

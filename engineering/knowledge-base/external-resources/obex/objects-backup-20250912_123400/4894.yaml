@@ -1,0 +1,66 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Ray AllenContent : CodeMicrocontroller : Propeller 2Languages : PASM, SPIN2Category
+    : Data StorageLicence : MITContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: 'Here two uSD drivers that can both use your choice of three
+      low level drivers.
+
+      One is inline assembly and doesn''t need a cog, one uses a cog, and the other
+      also uses a cog but adds audio output.'
+    description_short: 'Here two uSD drivers that can both use your choice of three
+      low level drivers.
+
+      One is inline assembl'
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - driver
+    - audio
+  metadata:
+    discovery_date: '2025-09-12T11:41:46.869027'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:43:07.958915'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '4894'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - SPIN2
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: FRSW and FAT32 for P2
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4894
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/frsw-and-fat32-for-p2/

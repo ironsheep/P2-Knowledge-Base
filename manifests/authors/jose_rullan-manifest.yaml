@@ -1,0 +1,28 @@
+manifest_metadata:
+  manifest_type: obex_author
+  author: Jose Rullan
+  generated: 2025-09-12T16:10:0
+  object_count: 2
+author_info:
+  name: Jose Rullan
+  contribution_summary: 2 P2 objects contributed to OBEX
+  specialties:
+  - misc (1 objects)
+  - SPIN2 (2)
+  - PASM2 (1)
+objects:
+- object_id: '4718'
+  title: Neotimer (Non-blocking timer)
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2024-04-06 12:26:19'
+  yaml_path: ../objects/4718.yaml
+- object_id: '4720'
+  title: P2GUI (Encoder Version)
+  category: drivers
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2024-04-08 03:34:06'
+  yaml_path: ../objects/4720.yaml

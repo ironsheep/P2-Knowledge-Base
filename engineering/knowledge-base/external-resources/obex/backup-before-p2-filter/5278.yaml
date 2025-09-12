@@ -1,0 +1,61 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'm.k. borriContent : CodeMicrocontroller : Propeller 2Language : SPIN2Category
+    : SensorLicence : MITTags : control, SensorContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: this is a very simple compass driver for the prop2, not much
+      else to say about it. it works and it includes fastatan2 for getting compass
+      heading. You should be able to swap them at your leisure.
+    description_short: this is a very simple compass driver for the prop2, not much
+      else to say about it. it works and it i
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - sensor
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:41:33.179668'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:41:39.566035'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from spin2 category
+    integration_todo: []
+  object_id: '5278'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - SPIN2
+    microcontroller:
+    - P2
+    version: ''
+  title: QMC5883L HMC5883 BMM150 compass drivers
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5278
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/qmc5883l-driver/

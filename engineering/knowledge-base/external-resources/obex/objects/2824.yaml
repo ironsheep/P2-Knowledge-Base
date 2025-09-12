@@ -1,0 +1,54 @@
+object_metadata:
+  author: Jon McPhalen (jonnymac)
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: Demonstration code displays the raw input, address, and command.
+    description_short: Demonstration code displays the raw input, address, and command.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - led
+    - spi
+    - demo
+    - sensor
+    - driver
+    - display
+  metadata:
+    discovery_date: '2025-09-12T12:44:09.461342'
+    extraction_status: complete
+    kb_integration: none
+    last_author_extraction: '2025-09-12T13:20:20.878088'
+    last_complete_extraction: '2025-09-12T13:30:06.912205'
+    last_verified: '2025-09-12T12:46:25.095679'
+    license: Other
+    page_discovered: 12
+    quality_score: 5
+    last_html_corruption_fix: 2025-09-12T14:32:2
+    last_license_corruption_fix: 2025-09-12T14:34:2
+    created_date: '2020-12-15 12:00:00'
+    last_created_date_fix: 2025-09-12T15:32:4
+  object_id: '2824'
+  technical_details:
+    file_format: ZIP
+    file_size: 5883 B
+    languages:
+    - SPIN2
+    - PASM2
+    microcontroller:
+    - P2
+    version: ''
+  title: NEC RX
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2824
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/nec-rx/

@@ -1,0 +1,40 @@
+manifest_metadata:
+  manifest_type: obex_author
+  author: ersmith
+  generated: 2025-09-12T16:10:0
+  object_count: 4
+author_info:
+  name: ersmith
+  contribution_summary: 4 P2 objects contributed to OBEX
+  specialties:
+  - misc (3 objects)
+  - SPIN2 (4)
+objects:
+- object_id: '2812'
+  title: Binary Floating Point Routines (IEEE-32 subset)
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2021-12-19 12:00:00'
+  yaml_path: ../objects/2812.yaml
+- object_id: '2814'
+  title: Simple formatted text routines
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2020-08-14 12:00:00'
+  yaml_path: ../objects/2814.yaml
+- object_id: '2847'
+  title: VGA Text routines
+  category: drivers
+  languages:
+  - SPIN2
+  created_date: '2020-08-14 12:00:00'
+  yaml_path: ../objects/2847.yaml
+- object_id: '4047'
+  title: DecFloat
+  category: misc
+  languages:
+  - SPIN2
+  created_date: '2023-10-18 20:20:44'
+  yaml_path: ../objects/4047.yaml

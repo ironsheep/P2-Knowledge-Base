@@ -1,0 +1,64 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'BR | added by ArchiverContent : CodeMicrocontroller : Propeller 1Languages
+    : PASM, SPINCategory : SensorLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: Demo of TAOS TSL230 light to frequency sensor driver with manual
+      and auto scaling capabilities. This driver uses the INTER-PULSE method to estimate
+      light intensity (i.e. counts ticks between falling edge-rising edge pairs in
+      TSL230 output pulse train). Yields highest possible update bandwidth (>1M samples/sec
+      in bright light) but also more susceptible to noise.
+    description_short: Demo of TAOS TSL230 light to frequency sensor driver with manual
+      and auto scaling capabilities. This
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - sensor
+    - driver
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:29.618013'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:49:57.830412'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2369'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: tsl230_ip_demo
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2369
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/tsl230_ip_demo/

@@ -1,0 +1,28 @@
+manifest_metadata:
+  manifest_type: obex_author
+  author: Greg LaPolla
+  generated: 2025-09-12T16:10:0
+  object_count: 2
+author_info:
+  name: Greg LaPolla
+  contribution_summary: 2 P2 objects contributed to OBEX
+  specialties:
+  - drivers (2 objects)
+  - SPIN2 (2)
+  - PASM2 (1)
+objects:
+- object_id: '2849'
+  title: ILI9341_XPT2046
+  category: drivers
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2023-11-16 20:02:29'
+  yaml_path: ../objects/2849.yaml
+- object_id: '2858'
+  title: MAX7219 Dot Matrix
+  category: drivers
+  languages:
+  - SPIN2
+  created_date: '2023-11-16 20:07:54'
+  yaml_path: ../objects/2858.yaml

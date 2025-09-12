@@ -1,0 +1,67 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'BR | added by ArchiverContent : CodeMicrocontroller : Propeller 1Languages
+    : PASM, SPINCategory : SignalsLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: audio
+    description_full: Infinite Impulse Response (IIR) Recursive filter, implemented
+      in PASM with floatmath. Starts a cog which continuously polls a memory location
+      looking for a data value. The design objective for this filter was to make a
+      reasonably high performance IIR filter with the greatest possible bandwidth
+      in a single cog. Typical filter bandwith (using ALL filter coefficients) is
+      4.8K samples/sec @ 80 MHz. No filter synthesis methods are provided with this
+      object (beyond a few demo filter kernels)--it is up to the user to roll their
+      own coefficients. The filter is set up to facilitate easy chaining of filters
+      if desired.
+    description_short: Infinite Impulse Response (IIR) Recursive filter, implemented
+      in PASM with floatmath. Starts a cog w
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - audio
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:23.277451'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:49:03.276240'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2454'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: 6-pole IIR Filter - Floatmath - pasm
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2454
+    forum_discussion: http://forums.parallax.com/showthread.php?t=118111
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/6-pole-iir-filter-floatmath-pasm/

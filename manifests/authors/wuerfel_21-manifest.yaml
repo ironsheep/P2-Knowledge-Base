@@ -1,0 +1,100 @@
+manifest_metadata:
+  manifest_type: obex_author
+  author: Wuerfel_21
+  generated: 2025-09-12T16:10:0
+  object_count: 11
+author_info:
+  name: Wuerfel_21
+  contribution_summary: 11 P2 objects contributed to OBEX
+  specialties:
+  - misc (6 objects)
+  - SPIN2 (10)
+  - PASM2 (10)
+objects:
+- object_id: '2862'
+  title: OPN2cog
+  category: misc
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2024-03-13 21:12:44'
+  yaml_path: ../objects/2862.yaml
+- object_id: '2863'
+  title: OPNAcog
+  category: misc
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2024-03-13 21:12:22'
+  yaml_path: ../objects/2863.yaml
+- object_id: '2864'
+  title: AYcog (P2 Port)
+  category: audio
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2024-03-13 21:12:03'
+  yaml_path: ../objects/2864.yaml
+- object_id: '2865'
+  title: SNEcog (P2 Port)
+  category: audio
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2024-03-13 21:11:38'
+  yaml_path: ../objects/2865.yaml
+- object_id: '2866'
+  title: SPCcog
+  category: audio
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2024-03-28 12:40:10'
+  yaml_path: ../objects/2866.yaml
+- object_id: '4012'
+  title: 3072 Sprites Proof-of-Concept
+  category: misc
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2023-10-18 19:57:19'
+  yaml_path: ../objects/4012.yaml
+- object_id: '4060'
+  title: FM Radio broadcasting
+  category: demos
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2023-10-18 21:29:22'
+  yaml_path: ../objects/4060.yaml
+- object_id: '4080'
+  title: Optimized JPEG Decoder
+  category: misc
+  languages:
+  - UNKNOWN
+  created_date: '2023-10-21 16:07:31'
+  yaml_path: ../objects/4080.yaml
+- object_id: '4087'
+  title: NeoYume - NeoGeo emulator
+  category: misc
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2025-02-16 19:33:59'
+  yaml_path: ../objects/4087.yaml
+- object_id: '4162'
+  title: MegaYume - Mega Drive emulator
+  category: misc
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2025-02-16 22:57:19'
+  yaml_path: ../objects/4162.yaml
+- object_id: '4198'
+  title: USBnew
+  category: drivers
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2024-03-28 16:13:28'
+  yaml_path: ../objects/4198.yaml

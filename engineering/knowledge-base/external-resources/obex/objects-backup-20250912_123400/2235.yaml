@@ -1,0 +1,64 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Grant Gysbers | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategories : Display, Fun, Speech and SoundLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: display
+    description_full: 'Demoboard Pixelmusic Mod v1.1
+
+      supporting 100MHz & 80MHz clocks. prior demoboard varients failed to function.
+
+      cx ggysbers on 012914'
+    description_short: 'Demoboard Pixelmusic Mod v1.1
+
+      supporting 100MHz & 80MHz clocks. prior demoboard varients failed to f'
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:38.276794'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:51:14.401388'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2235'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: pixelmusic 3000 for Demoboard
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2235
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/pixelmusic-3000-for-demoboard/

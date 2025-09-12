@@ -1,0 +1,59 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Gadget Gangster | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : SignalsLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: display
+    description_full: Magic IR stores & plays any arbitrary IR code, as received from
+      an IR receiver (like a Vishay TSOP4838) and played back with any common IR LED.
+    description_short: Magic IR stores & plays any arbitrary IR code, as received
+      from an IR receiver (like a Vishay TSOP48
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+  metadata:
+    discovery_date: '2025-09-12T11:42:23.277510'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:49:05.368892'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2453'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Magic IR
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2453
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/magic-ir/

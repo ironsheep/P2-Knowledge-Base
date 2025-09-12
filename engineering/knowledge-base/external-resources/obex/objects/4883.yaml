@@ -1,0 +1,53 @@
+object_metadata:
+  author: Jon McPhalen (jonnymac)
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: There are four global digital filter settings which can be used
+      by each smart pin to low-pass filter its incoming pin states.
+    description_short: There are four global digital filter settings which can be
+      used by each smart pin to low-pass filter its incoming pin states.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - led
+    - spi
+    - demo
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T12:43:58.182033'
+    extraction_status: complete
+    kb_integration: none
+    last_author_extraction: '2025-09-12T13:20:09.987344'
+    last_complete_extraction: '2025-09-12T13:30:06.892729'
+    last_verified: '2025-09-12T12:44:36.464353'
+    page_discovered: 4
+    quality_score: 5
+    last_author_re_extraction: 2025-09-12T14:04:1
+    last_author_consolidation: 2025-09-12T14:06:0
+    last_description_fix: 2025-09-12T14:20:1
+    created_date: '2025-03-25 17:51:10'
+    last_created_date_fix: 2025-09-12T15:27:5
+  object_id: '4883'
+  technical_details:
+    file_format: ZIP
+    file_size: 32 B
+    languages:
+    - SPIN2
+    microcontroller:
+    - P2
+    version: ''
+  title: P2 Pin Filter Configuration
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4883
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/p2-pin-filter-configuration/

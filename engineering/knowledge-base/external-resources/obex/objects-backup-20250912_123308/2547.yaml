@@ -1,0 +1,63 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Micah Dowty | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategories : Protocol, Speech and SoundLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: This is an object which encodes 16-bit stereo 44.1/48 KHz audio
+      into an SPDIF signal. SPDIF is the protocol used by TOSLINK (optical) and Coax
+      digital audio inputs on most home theater receivers and stereo systems. Some
+      PC sound cards also have SPDIF inputs. Play high-quality audio on your Prop
+      using only an LED!
+    description_short: This is an object which encodes 16-bit stereo 44.1/48 KHz audio
+      into an SPDIF signal. SPDIF is the p
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+    - audio
+  metadata:
+    discovery_date: '2025-09-12T11:42:14.722635'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:47:28.745009'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2547'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: SPDIF (digital audio) output
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2547
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/spdif-digital-audio-output/

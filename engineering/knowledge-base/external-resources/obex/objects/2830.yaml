@@ -1,0 +1,56 @@
+object_metadata:
+  author: Jon McPhalen (jonnymac)
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: This object is a C-to-Spin2 translation of the Qwiic Twist library
+      for  the Sparkfun Qwiic Twist encoder. This product connects via I2C which allows
+      multiple devices to share one set of pins (I2C bus). All functions in the original
+      library are supported in the Spin2 library (though naming conventions conform
+      to JM's Spin2 style guidelines).
+    description_short: This object is a C-to-Spin2 translation of the Qwiic Twist
+      library for the Sparkfun Qwiic Twist encoder.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - led
+    - i2c
+    - driver
+    - sensor
+    - spi
+  metadata:
+    discovery_date: '2025-09-12T12:44:08.056897'
+    extraction_status: author_extracted
+    kb_integration: none
+    last_author_extraction: '2025-09-12T13:22:52.763554'
+    last_verified: '2025-09-12T12:46:16.849357'
+    page_discovered: 11
+    quality_score: 5
+    last_author_deep_search: 2025-09-12T13:39:2
+    last_author_consolidation: 2025-09-12T14:06:0
+    last_description_fix: 2025-09-12T14:20:1
+    created_date: '2020-12-18 12:00:00'
+    last_created_date_fix: 2025-09-12T15:32:5
+  object_id: '2830'
+  technical_details:
+    file_format: ZIP
+    file_size: 5883 B
+    languages:
+    - SPIN2
+    microcontroller:
+    - P2
+    version: ''
+  title: Sparkfun Qwiic Twist Encoder
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2830
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/sparkfun-qwiic-twist-encoder/

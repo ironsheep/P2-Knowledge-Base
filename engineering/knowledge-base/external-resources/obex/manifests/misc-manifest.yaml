@@ -1,0 +1,32 @@
+# OBEX P2 Miscellaneous Manifest
+version: "1.0"
+last_updated: "2025-09-12"
+category: "misc"
+description: "P2 utility and miscellaneous code from OBEX community"
+
+metadata:
+  total_objects: 40
+  quality_range: "5-8"
+  
+subcategories:
+  utilities:
+    description: "General-purpose utilities and helpers"
+    object_count: 18
+    
+  math_libraries:
+    description: "Mathematical functions and algorithms"
+    object_count: 10
+    
+  data_structures:
+    description: "Lists, buffers, and data management"
+    object_count: 7
+    
+  system_tools:
+    description: "System diagnostics and configuration"
+    object_count: 5
+
+objects: {}
+
+ai_usage_notes: |
+  Miscellaneous category contains utilities and specialized functions.
+  Good source for reusable components and algorithm implementations.

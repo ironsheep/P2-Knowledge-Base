@@ -1,0 +1,67 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Chris GaddContent : CodeMicrocontroller : Propeller 1Languages : PASM,
+    SPINCategory : ProtocolLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: This object permits the Propeller to communicate with a vehicle's
+      on-board computer through CAN. Designed specifically for OBD-II, it communicates
+      at 500Kbps, send queries to the on-board computer and stores the response data
+      in a buffer for use by other methods. This object requires a CAN transceiver
+      chip such as the Microchip MCP2551 to perform level shifting and line driving,
+      all other aspects of the CAN protocol are handled by the Propeller. Includes
+      a demo routine, which uses a serial terminal to send commands to and display
+      responses from the main OBD object.
+    description_short: This object permits the Propeller to communicate with a vehicle's
+      on-board computer through CAN. Des
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - serial
+    - display
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:14.722959'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:47:39.145233'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2536'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Propeller-based OBD-II Terminal using CAN bus
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2536
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/propeller-based-obd-ii-terminal-using-can-bus/

@@ -1,0 +1,69 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Mike Christle | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Language : PASMCategory : ProtocolLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: 'between two or more Propeller chips. This interface is very
+
+      loosely based on the MIL-STD-1553 interface. One chip becomes the
+
+      Bus Controller (BC) and all others are Remote Terminals (RT).
+
+      The interface uses a single wire, bi-directional bus. The data
+
+      is transferred using Manchester encoding at a 1MBit data rate.
+
+      All data consist of 16 bit words.'
+    description_short: 'between two or more Propeller chips. This interface is very
+
+      loosely based on the MIL-STD-1553 interf'
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:42:16.835494'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:47:41.240552'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2535'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: PropBus, Single wire multi-propeller comm link
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2535
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/propbus-single-wire-multi-propeller-comm-link/

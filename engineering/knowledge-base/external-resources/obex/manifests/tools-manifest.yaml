@@ -1,0 +1,20 @@
+# OBEX P2 Tools Manifest
+version: "1.0"
+last_updated: "2025-09-12"
+category: "tools"
+description: "P2 development tools and utilities from OBEX community"
+
+metadata:
+  total_objects: 1
+  quality_range: "7-8"
+  
+subcategories:
+  development_tools:
+    description: "Development and debugging utilities"
+    object_count: 1
+
+objects: {}
+
+ai_usage_notes: |
+  Development tools support P2 programming and debugging.
+  Essential for workflow optimization and troubleshooting.

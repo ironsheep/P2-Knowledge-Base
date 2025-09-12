@@ -1,0 +1,29 @@
+# OBEX P2 Communication Manifest
+version: "1.0"
+last_updated: "2025-09-12"
+category: "communication"
+description: "P2 communication protocols and interfaces from OBEX community"
+
+metadata:
+  total_objects: 14
+  quality_range: "6-9"
+  
+subcategories:
+  serial_protocols:
+    description: "UART, RS232, RS485 communication"
+    object_count: 8
+    
+  network_interfaces:
+    description: "TCP/IP, WiFi, Ethernet protocols"
+    object_count: 4
+    
+  wireless_communication:
+    description: "RF, Bluetooth, radio communication"
+    object_count: 2
+
+# Placeholder - will be populated with actual discovered objects
+objects: {}
+
+ai_usage_notes: |
+  Communication drivers enable P2 networking and data exchange.
+  Focus on protocol compatibility and performance requirements.

@@ -1,0 +1,62 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Tom DingerContent : CodeMicrocontroller : Propeller 1Languages : PASM,
+    SPINCategories : Display, MathLicence : MITTags : gamma, HUB75, LEDContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: This project contains drivers for one or more daisy-chained
+      HUB75-based LED matrix displays, for the Propeller 1 chip, along with demo/test
+      programs.
+    description_short: This project contains drivers for one or more daisy-chained
+      HUB75-based LED matrix displays, for the
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+    - driver
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:41:49.037655'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:43:12.186039'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '4756'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: HUB75 display drivers and demos
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4756
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/hub75-display-drivers-and-demos/

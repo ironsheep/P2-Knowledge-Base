@@ -1,0 +1,66 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'MarkT | added by ArchiverContent : CodeMicrocontroller : Propeller 1Languages
+    : PASM, SPINCategory : DisplayLicence : OtherTag : SPIContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: '724:"
+
+      This is a simple little method that returns the lowest common multiple of two
+      numbers. For example, if I were to pass it the parameters (12,15), it would
+      return 60. I use it as part of a CNC controller. It can only handle positive
+      numbers.'
+    description_short: '724:"
+
+      This is a simple little method that returns the lowest common multiple of two
+      numbers. For exa'
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - driver
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:04.107386'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:45:48.745550'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2647'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: ILI9341 SPI driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2647
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/ili9341-spi-driver/

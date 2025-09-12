@@ -1,0 +1,61 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Graham Stabler | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : SensorLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: communication
+    description_full: An object to read an absolute magnetic encoder in serial mode.
+      Code can be used as is and launched in to a cog, modified to work for multiple
+      encoders or used as code to insert in to other assembly code. Read time for
+      the encoder is roughly 40us.
+    description_short: An object to read an absolute magnetic encoder in serial mode.
+      Code can be used as is and launched i
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - serial
+  metadata:
+    discovery_date: '2025-09-12T11:42:31.781325'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:50:25.811062'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2333'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Magnetic encoder, RLS AM256L (and similar)
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2333
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/magnetic-encoder-rls-am256l-and-similar/

@@ -1,0 +1,56 @@
+object_metadata:
+  author: Stephen M Moraco
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: A single COG services from 1 to 8 Tx/Rx pairs of pins. The pins
+      are configured as smart pins, meaning that the driver feeds bytes to transmit
+      pins when needed and gets bytes from receiving pins when bytes are available.
+      This backend driver is written in pasm2. The interface routines are written
+      in s
+    description_short: A single COG services from 1 to 8 Tx/Rx pairs of pins. The
+      pins are configured as smart pins, meanin
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - demo
+    - serial
+    - driver
+    - led
+    - spi
+  metadata:
+    discovery_date: '2025-09-12T12:44:00.896196'
+    extraction_status: complete
+    kb_integration: none
+    last_author_cleanup: '2025-09-12T13:31:14.520530'
+    last_author_extraction: '2025-09-12T13:21:28.005562'
+    last_complete_extraction: '2025-09-12T13:30:07.014526'
+    last_verified: '2025-09-12T12:45:08.535360'
+    page_discovered: 6
+    quality_score: 5
+    created_date: '2024-03-11 05:43:19'
+    last_created_date_fix: 2025-09-12T15:27:2
+  object_id: '4257'
+  technical_details:
+    file_format: ZIP
+    file_size: 2.9MB
+    languages:
+    - SPIN2
+    - PASM2
+    microcontroller:
+    - P2
+    version: ''
+  title: ISP high-speed 8-port serial subsystem
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4257
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/p2-high-speed-8-port-serial-subsystem/

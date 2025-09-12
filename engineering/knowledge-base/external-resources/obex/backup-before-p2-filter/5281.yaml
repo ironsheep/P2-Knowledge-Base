@@ -1,0 +1,59 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Jon McPhalenContent : CodeMicrocontroller : Propeller 2Language : SPIN2Category
+    : Motor ControlLicence : MITTags : Click, jonnymac, motor, stepperContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: Simple Spin2 demo for the Click Stepper-2 driver accessory.
+    description_short: Simple Spin2 demo for the Click Stepper-2 driver accessory.
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - motor
+    - driver
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:41:33.179556'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:41:37.486540'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from spin2 category
+    integration_todo: []
+  object_id: '5281'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - SPIN2
+    microcontroller:
+    - P2
+    version: ''
+  title: Click Stepper-2 Demo
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5281
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/click-stepper-2-demo/

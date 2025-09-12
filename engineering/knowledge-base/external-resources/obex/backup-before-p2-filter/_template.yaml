@@ -1,0 +1,63 @@
+# OBEX Object Metadata Template
+# Copy and customize for each discovered object
+
+object_metadata:
+  object_id: "XXXX"
+  title: ""
+  author: ""
+  author_username: ""
+  
+  urls:
+    obex_page: ""
+    download_direct: ""  # Constructed from object_id
+    forum_discussion: ""
+    github_repo: ""
+    documentation: ""
+  
+  technical_details:
+    languages: []  # ["SPIN2", "PASM2"]
+    microcontroller: ["P2"]  # Always P2 for our index
+    version: ""
+    file_format: ""  # ZIP, individual files, etc.
+    file_size: ""
+    
+  functionality:
+    category: ""  # drivers, sensors, communication, audio, tools, demos
+    subcategory: ""
+    description_short: ""
+    description_full: ""
+    tags: []
+    hardware_support: []
+    peripherals: []
+    
+  architecture:
+    multi_cog: false
+    cog_count: 1
+    memory_requirements:
+      hub_ram: ""
+      cog_ram: ""
+    performance_notes: ""
+    
+  compatibility:
+    p2_chip_versions: ["all"]  # ES, Rev A, Rev B, Rev C, etc.
+    tested_platforms: []
+    known_issues: []
+    dependencies: []
+    
+  community:
+    forum_posts: []
+    user_reviews: []
+    modification_notes: []
+    related_objects: []
+    
+  metadata:
+    discovery_date: ""
+    last_verified: ""
+    extraction_status: "pending"  # pending, extracted, analyzed
+    kb_integration: "none"  # none, referenced, integrated
+    quality_score: 0  # 1-10 based on documentation, testing, etc.
+    
+  notes:
+    extraction_notes: ""
+    analysis_notes: ""
+    integration_todo: []

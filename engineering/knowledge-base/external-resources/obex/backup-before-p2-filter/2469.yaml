@@ -1,0 +1,61 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Cluso99 | added by ArchiverContent : CodeMicrocontroller : Propeller 1Languages
+    : PASM, SPINCategory : SignalsLicence : OtherTag : PropToolContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: communication
+    description_full: Logs the Propeller pins using 4 interleaved cogs. Records 1880
+      samples at 12.5nS rates or slower and then dumps to the serial port for saving
+      and opening in PropTool to view as a timing diagram using PropTools special
+      font.
+    description_short: Logs the Propeller pins using 4 interleaved cogs. Records 1880
+      samples at 12.5nS rates or slower and
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - serial
+  metadata:
+    discovery_date: '2025-09-12T11:42:23.277174'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:48:52.756628'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2469'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: DataLoggerX4
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2469
+    forum_discussion: http://forums.parallax.com/forums/default.aspx?f=25&m=268880
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/dataloggerx4/

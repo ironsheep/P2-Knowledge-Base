@@ -1,0 +1,59 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'KPD237 | added by ArchiverContent : CodeMicrocontroller : Propeller 1Languages
+    : PASM, SPINCategory : FunLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: demos
+    description_full: 'For the Spineret Design Contest. Although, it was unfortunately
+      not finished in time, I plan on continuing work on this project:'
+    description_short: For the Spineret Design Contest. Although, it was unfortunately
+      not finished in time, I plan on cont
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:42:38.277081'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:51:22.786779'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2221'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Automated Home Security
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2221
+    forum_discussion: http://forums.parallax.com/showthread.php?131794-Contest-Entry-Automated-Home-Security-System
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/automated-home-security/

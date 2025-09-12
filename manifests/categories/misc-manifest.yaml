@@ -1,0 +1,286 @@
+manifest_metadata:
+  manifest_type: obex_category
+  category: misc
+  generated: 2025-09-12T16:10:0
+  object_count: 34
+category_info:
+  name: misc
+  description: Miscellaneous utilities and general-purpose code objects
+  common_use_cases:
+  - General utilities
+  - Helper functions
+  - Common algorithms
+objects:
+- object_id: '2812'
+  title: Binary Floating Point Routines (IEEE-32 subset)
+  author: ersmith
+  languages:
+  - SPIN2
+  description_short: These are functions for performing floating point math in Spin2.
+    To use, include a BinFloat object in your code, e.g.
+  yaml_path: ../objects/2812.yaml
+- object_id: '2813'
+  title: Psuedo-random and random numbers
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: Utility object for P2 development.
+  yaml_path: ../objects/2813.yaml
+- object_id: '2814'
+  title: Simple formatted text routines
+  author: ersmith
+  languages:
+  - SPIN2
+  description_short: These are routines intended to be used with the Spin2 SEND function
+    to transmit formatted numbers or text.
+  yaml_path: ../objects/2814.yaml
+- object_id: '2815'
+  title: Cricket BME280
+  author: mike calyer
+  languages:
+  - SPIN2
+  description_short: Utility object for P2 development.
+  yaml_path: ../objects/2815.yaml
+- object_id: '2820'
+  title: Click RTC10
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: Utility object for P2 development.
+  yaml_path: ../objects/2820.yaml
+- object_id: '2823'
+  title: EZ Analog
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: 3v analog input with a user-scalable output.
+  yaml_path: ../objects/2823.yaml
+- object_id: '2827'
+  title: PIXY2
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: Utility object for P2 development.
+  yaml_path: ../objects/2827.yaml
+- object_id: '2829'
+  title: Quadrature Encoder
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: This object configures a P2 smart pin for quadrature encoder
+    (value/position) mode. The object allow
+  yaml_path: ../objects/2829.yaml
+- object_id: '2830'
+  title: Sparkfun Qwiic Twist Encoder
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: This object is a C-to-Spin2 translation of the Qwiic Twist library
+    for the Sparkfun Qwiic Twist encoder.
+  yaml_path: ../objects/2830.yaml
+- object_id: '2831'
+  title: P2_rctime
+  author: phonoclese
+  languages:
+  - SPIN2
+  description_short: This object updates the rctime object from the P1 library for
+    the P2 processor.
+  yaml_path: ../objects/2831.yaml
+- object_id: '2832'
+  title: Click Relay2
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: Utility object for P2 development.
+  yaml_path: ../objects/2832.yaml
+- object_id: '2838'
+  title: 1-Wire
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: This [cogless] object allows the P2 to communicate with 1-Wire
+    devices. Using the P2 pin configurati
+  yaml_path: ../objects/2838.yaml
+- object_id: '2839'
+  title: Click DMX-TX
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: <Overviewn McPhalen.
+  yaml_path: ../objects/2839.yaml
+- object_id: '2846'
+  title: Sony IRCS Rx (infrared control system receiver)
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: <Overviewn McPhalen.
+  yaml_path: ../objects/2846.yaml
+- object_id: '2854'
+  title: LCD PCF8574
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: Utility object for P2 development.
+  yaml_path: ../objects/2854.yaml
+- object_id: '2862'
+  title: OPN2cog
+  author: Wuerfel_21
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: This is an emulation of the Yamaha "OPN2" YM2612 FM synth chip
+    that runs in one P2 cog.
+  yaml_path: ../objects/2862.yaml
+- object_id: '2863'
+  title: OPNAcog
+  author: Wuerfel_21
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: 'This is an emulation of the Yamaha "OPNA" YM2608 FM synth chip
+
+    (and by extension, also "OPN" YM2203)'
+  yaml_path: ../objects/2863.yaml
+- object_id: '2867'
+  title: Accessory Board Buttons
+  author: Bryan Thomas
+  languages:
+  - SPIN2
+  description_short: Utility object for P2 development.
+  yaml_path: ../objects/2867.yaml
+- object_id: '2868'
+  title: EZ Button
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: Allows for active-high or active-low, and provides methods for
+    direct read and debounced inputs.
+  yaml_path: ../objects/2868.yaml
+- object_id: '2870'
+  title: Sony IRCS Rx (infrared control system receiver)
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: Auto-detects 12-, 15-, and 20-bit control codes.
+  yaml_path: ../objects/2870.yaml
+- object_id: '2871'
+  title: AT24C32
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: Utility object for P2 development.
+  yaml_path: ../objects/2871.yaml
+- object_id: '3804'
+  title: Pllset
+  author: evanh
+  languages:
+  - SPIN2
+  description_short: pllset() Calculates appropriate clock mode component values to
+    set a requested clock frequency via clkset().
+  yaml_path: ../objects/3804.yaml
+- object_id: '4012'
+  title: 3072 Sprites Proof-of-Concept
+  author: Wuerfel_21
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: Draws 3072 16x16 sprites at 640x480 in 32bpp mode (using WMLONG-style
+    transparency) using 4 cogs at 252 MHz.
+  yaml_path: ../objects/4012.yaml
+- object_id: '4047'
+  title: DecFloat
+  author: ersmith
+  languages:
+  - SPIN2
+  description_short: This object provides decimal (base 10) floating point math routines.
+    The default Spin2 floating poin
+  yaml_path: ../objects/4047.yaml
+- object_id: '4080'
+  title: Optimized JPEG Decoder
+  author: Wuerfel_21
+  languages:
+  - UNKNOWN
+  description_short: Optimized/modified/bugfixed version of TJpgDec for FlexC on P2.
+  yaml_path: ../objects/4080.yaml
+- object_id: '4087'
+  title: NeoYume - NeoGeo emulator
+  author: Wuerfel_21
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: NeoGeo AES emulator for Parallax P2 + memory expansion.
+  yaml_path: ../objects/4087.yaml
+- object_id: '4162'
+  title: MegaYume - Mega Drive emulator
+  author: Wuerfel_21
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: SEGA Mega Drive / Genesis emulator for Parallax P2 + memory expansion.
+  yaml_path: ../objects/4162.yaml
+- object_id: '4271'
+  title: StrToFloat
+  author: vonszarvas
+  languages:
+  - SPIN2
+  description_short: Chip made a StrToFloat method using the built-in Spin2 floating-point
+    operators.
+  yaml_path: ../objects/4271.yaml
+- object_id: '4442'
+  title: 8-bit SAR ADC
+  author: evanh
+  languages:
+  - SPIN2
+  description_short: 'com/discussion/174441/measuring-floating-pin-voltage-adc-from-just-the-built-in-comparator/p1
+    pub sar_adc( pinnum ) : level | bit '' This routine makes use of the comparator''s
+    unloaded inputs '' to measure the floating voltage of the pin. '' Returns an unsigned
+    8-bit value in "level", GIO to VIO volts '' pinf( pinnum ) level := 0 repeat bit
+    from 7 to 0 wrpin( pinnum, P_LEVEL_A | ((level | (1<<bit)) <<'
+  yaml_path: ../objects/4442.yaml
+- object_id: '4570'
+  title: ISP P2 PCF8575 I2C I/O Expander Object
+  author: Stephen M Moraco
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: The PCF8575 provides general-purpose remote I/O expansion via
+    the two-line bidirectional bus (I2C-bus).
+  yaml_path: ../objects/4570.yaml
+- object_id: '4718'
+  title: Neotimer (Non-blocking timer)
+  author: Jose Rullan
+  languages:
+  - SPIN2
+  description_short: Implementation of a non-blocking timer utility for use in common
+    timing and delays use cases
+  yaml_path: ../objects/4718.yaml
+- object_id: '4800'
+  title: P2QR
+  author: Terry Trapp
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: This is a P2 QR Code generator based on the work of B.J. Guillot's
+    qr and Vzaa's C90 fork named qrwp
+  yaml_path: ../objects/4800.yaml
+- object_id: '4883'
+  title: P2 Pin Filter Configuration
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: There are four global digital filter settings which can be used
+    by each smart pin to low-pass filter its incoming pin states.
+  yaml_path: ../objects/4883.yaml
+- object_id: '5189'
+  title: 64/96/128-Bit Unsigned Integer Math
+  author: Chip Gracey
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: 'These three objects provide the following unsigned functions
+    for 64, 96, and 128-bit integers:'
+  yaml_path: ../objects/5189.yaml

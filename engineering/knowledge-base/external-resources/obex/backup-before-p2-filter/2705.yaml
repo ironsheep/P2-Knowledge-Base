@@ -1,0 +1,62 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'William Henning | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : DisplayLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: I wanted a high resolution graphics mode that would work on
+      my 8.4" TFT LCD monitor - which can only sync to 640x480. Since the propeller
+      does not have enough memory for a bitmap that size, I decided to modify the
+      512x384 driver to make a 640x240 bitmap mode.I also modified the color tiles
+      to be 32x16 so that the color blocks appear square on the monitor.
+    description_short: I wanted a high resolution graphics mode that would work on
+      my 8.4" TFT LCD monitor - which can only
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:41:57.558607'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:44:48.334681'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2705'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: VGA_640x240_Bitmap
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2705
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/vga_640x240_bitmap/

@@ -1,0 +1,65 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Tom Crawford | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : DisplayLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: This is a driver for MAX7219 8x8 LED matrixes arranged in a
+      linear stick.  It assumes the 7219's are wired so that a write to a data register
+      affects a COLUMN of LEDs.  It can be configured as to the number of matrixes
+      in the stick.  It can also be configured to swap the order of matrixes, swap
+      the order of columns in each matrix, and swap the order of bits in each columns.  It
+      starts a PASM cog for acceptable scroll speed. It includes a 7 x 5 plus descenders
+      font.
+    description_short: This is a driver for MAX7219 8x8 LED matrixes arranged in a
+      linear stick.  It assumes the 7219's are
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - display
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:41:59.747970'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:45:02.897499'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2692'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: Max7219 8x8 Column-oriented Stick with scrolling
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2692
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/max7219-8x8-column-oriented-stick-with-scrolling/

@@ -1,0 +1,99 @@
+# Jon McPhalen (jonnymac) - OBEX Author Manifest
+# Access via: obex-community-manifest.yaml -> featured_authors -> jonnymac
+
+version: "1.0"
+last_updated: "2025-09-11"
+author_profile:
+  display_name: "Jon McPhalen (jonnymac)"
+  username: "jonnymac"
+  reputation_score: 9.5
+  specialties: ["serial_communication", "real_time_drivers", "performance_optimization"]
+  community_standing: "veteran_contributor"
+
+metadata:
+  total_objects: 3  # Will be populated after full discovery
+  categories: ["drivers", "communication", "tools"]
+  quality_average: 9.2
+  most_popular: "2842"
+  latest_update: "2024-Q4"
+
+coding_characteristics:
+  architecture_preferences:
+    - "Single-COG efficiency"
+    - "Minimal hub RAM usage"
+    - "Interrupt-driven design"
+    - "Buffer management optimization"
+  
+  documentation_quality: "excellent"
+  code_style: "production_ready"
+  performance_focus: "high"
+  reliability_emphasis: "critical_systems"
+
+# Objects by this author - lightweight for discovery
+objects:
+  "2842":
+    title: "Full Duplex Serial Driver"
+    category: "drivers"
+    subcategory: "serial_communication"
+    quality_score: 9
+    popularity: "high"
+    description_brief: "Bidirectional serial with buffering and interrupt support"
+    yaml_detail: "../objects/2842.yaml"
+    download_direct: "OB2842"
+    recommended_for: ["production_serial", "high_reliability", "performance_critical"]
+    learning_value: "Driver architecture, interrupt handling, buffer management"
+
+expertise_areas:
+  serial_communication:
+    experience_level: "expert"
+    implementations: ["full_duplex", "buffered_io", "interrupt_driven"]
+    performance_notes: "Optimized for minimal CPU overhead"
+    
+  real_time_systems:
+    experience_level: "expert"  
+    focus: ["deterministic_timing", "interrupt_management", "resource_efficiency"]
+    
+  driver_architecture:
+    experience_level: "expert"
+    patterns: ["state_machine_design", "buffer_management", "error_handling"]
+
+# AI usage guidance for this author's work
+ai_recommendations: |
+  When referencing jonnymac's implementations:
+  1. Emphasize production-quality and reliability
+  2. Note performance optimization focus
+  3. Highlight real-time system suitability
+  4. Reference specific architectural patterns
+  5. Recommend for critical applications
+
+common_queries:
+  "reliable P2 serial driver":
+    recommended: "Object 2842"
+    rationale: "jonnymac's track record for production systems"
+  
+  "performance-optimized driver":
+    recommended: "Object 2842" 
+    rationale: "Minimal overhead, interrupt-driven design"
+  
+  "learn driver architecture":
+    recommended: "Object 2842"
+    rationale: "Excellent example of professional driver design patterns"
+
+code_generation_notes: |
+  When generating code in jonnymac's style:
+  - Prioritize efficiency and minimal resource usage
+  - Include comprehensive error handling
+  - Use interrupt-driven patterns for real-time response
+  - Document performance characteristics clearly
+  - Follow state machine patterns for complex drivers
+
+community_impact:
+  contributions: "High-quality drivers that set community standards"
+  influence: "Architectural patterns adopted by other developers"
+  support: "Active forum participation and user assistance"
+  legacy: "Established reliability benchmarks for P2 drivers"
+
+maintenance:
+  update_frequency: "Objects tracked monthly for new versions"
+  quality_monitoring: "Download URLs verified weekly"
+  community_feedback: "Forum activity and user reports monitored"

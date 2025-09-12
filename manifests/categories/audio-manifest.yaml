@@ -1,0 +1,58 @@
+manifest_metadata:
+  manifest_type: obex_category
+  category: audio
+  generated: 2025-09-12T16:10:0
+  object_count: 5
+category_info:
+  name: audio
+  description: Audio processing, sound generation, and audio interface drivers
+  common_use_cases:
+  - Sound synthesis
+  - Audio processing
+  - Music applications
+objects:
+- object_id: '2860'
+  title: EZ Sound
+  author: Jon McPhalen (jonnymac)
+  languages:
+  - SPIN2
+  description_short: Utility object for P2 development.
+  yaml_path: ../objects/2860.yaml
+- object_id: '2861'
+  title: reSound
+  author: Johannes
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: The reSound object can mix up to 32 audiostreams at once and
+    apply volume, panning, frequency control and different audio formats for each
+    channel independently.
+  yaml_path: ../objects/2861.yaml
+- object_id: '2864'
+  title: AYcog (P2 Port)
+  author: Wuerfel_21
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: An emulation of the AY-3-8910/YM-2149F programmable sound generator
+    running in a single cog.
+  yaml_path: ../objects/2864.yaml
+- object_id: '2865'
+  title: SNEcog (P2 Port)
+  author: Wuerfel_21
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: An emulation of the SN76489 programmable sound generator running
+    in a single cog.
+  yaml_path: ../objects/2865.yaml
+- object_id: '2866'
+  title: SPCcog
+  author: Wuerfel_21
+  languages:
+  - SPIN2
+  - PASM2
+  description_short: This is an emulation of the Nintendo/Sony sound module used in
+    the Super NES / Super Famicom (consisting of an SPC700 processor and a custom
+    audio DSP) that runs in one P2 cog.
+  yaml_path: ../objects/2866.yaml

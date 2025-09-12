@@ -1,0 +1,28 @@
+manifest_metadata:
+  manifest_type: obex_author
+  author: Michael
+  generated: 2025-09-12T16:10:0
+  object_count: 2
+author_info:
+  name: Michael
+  contribution_summary: 2 P2 objects contributed to OBEX
+  specialties:
+  - demos (1 objects)
+  - SPIN2 (2)
+  - PASM2 (1)
+objects:
+- object_id: '4911'
+  title: IO Pin State Detection Demo
+  category: demos
+  languages:
+  - SPIN2
+  created_date: '2025-02-17 11:24:28'
+  yaml_path: ../objects/4911.yaml
+- object_id: '4917'
+  title: Sharing variables with SPIN2 and PASM2
+  category: display
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2024-11-11 18:11:17'
+  yaml_path: ../objects/4917.yaml

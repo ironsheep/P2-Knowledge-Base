@@ -1,0 +1,28 @@
+manifest_metadata:
+  manifest_type: obex_author
+  author: m.k. borri
+  generated: 2025-09-12T16:10:0
+  object_count: 2
+author_info:
+  name: m.k. borri
+  contribution_summary: 2 P2 objects contributed to OBEX
+  specialties:
+  - drivers (2 objects)
+  - SPIN2 (2)
+  - PASM2 (1)
+objects:
+- object_id: '5246'
+  title: BMP390 driver
+  category: drivers
+  languages:
+  - SPIN2
+  - PASM2
+  created_date: '2025-05-30 06:33:41'
+  yaml_path: ../objects/5246.yaml
+- object_id: '5278'
+  title: QMC5883L HMC5883 BMM150 compass drivers
+  category: drivers
+  languages:
+  - SPIN2
+  created_date: '2025-07-24 20:04:32'
+  yaml_path: ../objects/5278.yaml

@@ -1,0 +1,38 @@
+# Jon McPhalen (jonnymac) - OBEX Author Profile
+
+author_profile:
+  display_name: "Jon McPhalen (jonnymac)"
+  username: "jonnymac"
+  forum_handle: "jonnymac"
+  
+  reputation:
+    status: "veteran"  # veteran, active, contributor, newcomer
+    quality_score: 9.5  # Based on community feedback and code quality
+    specialties: ["serial_communication", "drivers", "real_time"]
+    
+  objects_authored:
+    - object_id: "2842"
+      title: "Full Duplex Serial Driver"
+      category: "drivers"
+      quality_score: 9
+      
+  statistics:
+    total_objects: 1  # Will be updated as more objects discovered
+    categories: ["drivers"]
+    average_quality: 9.0
+    most_recent: "2842"
+    
+  patterns:
+    coding_style: []  # Will be populated after code analysis
+    architecture_preferences: []
+    documentation_quality: "excellent"
+    
+  community_standing:
+    forum_activity: "high"
+    helpfulness_rating: "excellent"
+    code_sharing: "frequent"
+    
+  notes:
+    analysis_priority: "high"  # High-value author for pattern extraction
+    extraction_notes: "Key contributor to P2 ecosystem"
+    study_recommendations: ["Serial communication patterns", "Driver architecture"]

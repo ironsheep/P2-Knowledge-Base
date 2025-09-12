@@ -1,0 +1,65 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Dennis Ferron | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Language : PASMCategories : Protocol, SignalsLicence : OtherTag : PWMContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: Easily control several 74HC595 shift registers in series. Now
+      includes a variation which leaves out the PWM feature and instead supports up
+      to 100 chips! Still also includes the multi-PWM driver, which allows you to
+      set PWM frequency and duty cycle for any or all of 32 outputs. The PWM driver
+      remembers whether you've set an output to PWM or a steady high or low value,
+      and manages the PWM outputs for you automatically. Also includes the version
+      1.0 Simple_74HC595 object for those who just want to understand how to shift
+      data out to the 74HC595 chip.
+    description_short: 'Easily control several 74HC595 shift registers in series.
+      Now includes a variation which leaves out '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T11:42:21.121114'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:48:29.435862'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2489'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: 74HC595 Regular and MultiPWM Shift Register Driver
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2489
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/74hc595-regular-and-multipwm-shift-register-driver/

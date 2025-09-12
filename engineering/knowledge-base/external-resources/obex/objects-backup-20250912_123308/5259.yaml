@@ -1,0 +1,42 @@
+object_metadata:
+  author: ''
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: sensors
+    description_full: Reads Yaw, Pitch, Roll, and X, Y, and Z acceleration using Smart
+      Pin serial (no cog)
+    description_short: Reads Yaw, Pitch, Roll, and X, Y, and Z acceleration using
+      Smart Pin serial (no cog)
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - serial
+  metadata:
+    discovery_date: '2025-09-12T12:29:31.812458'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T12:29:42.199564'
+    quality_score: 5
+  object_id: '5259'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - SPIN2
+    microcontroller:
+    - P2
+    version: ''
+  title: BNO08x IMU (9 DOF) (RVC Mode)
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB5259
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/bno08x-imu-9-dof-rvc-mode/

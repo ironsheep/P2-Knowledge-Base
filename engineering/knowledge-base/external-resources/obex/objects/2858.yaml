@@ -1,0 +1,51 @@
+object_metadata:
+  author: Greg LaPolla
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: MAX7219 Dot Matrix is a spin object that interfaces the MAX7219
+      chip with the Propeller 2 P2X8C4M64P
+    description_short: MAX7219 Dot Matrix is a spin object that interfaces the MAX7219
+      chip with the Propeller 2 P2X8C4M64P
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - pwm
+    - driver
+    - led
+    - spi
+    - display
+  metadata:
+    discovery_date: '2025-09-12T12:44:03.845001'
+    extraction_status: complete
+    kb_integration: none
+    last_author_extraction: '2025-09-12T13:21:36.987576'
+    last_complete_extraction: '2025-09-12T13:30:07.032461'
+    last_verified: '2025-09-12T12:45:37.376997'
+    page_discovered: 8
+    quality_score: 5
+    created_date: '2023-11-16 20:07:54'
+    last_created_date_fix: 2025-09-12T15:26:1
+  object_id: '2858'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - SPIN2
+    microcontroller:
+    - P2
+    version: ''
+  title: MAX7219 Dot Matrix
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2858
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/max7219-dot-matrix/

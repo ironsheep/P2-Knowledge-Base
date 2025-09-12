@@ -1,0 +1,65 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'BR | added by ArchiverContent : CodeMicrocontroller : Propeller 1Languages
+    : PASM, SPINCategory : SignalsLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: audio
+    description_full: Infinite Implulse Response (IIR) Recursive filter, implemented
+      in pasm, with recursion. Starts a cog which continuously polls a memory location
+      looking for a data value. The design objective for this filter was to make it
+      as fast as possible. It is implemented using fixed point math in a single cog
+      and is capable of 180K samples/sec @ 80 MHz with a simple high or low pass filter.
+      This object also contains a set of filter synthesis methods to facilitate filter
+      setup, though the user can also manually input filter coefficients if desired.
+      The filter is also constructed to facilitate easy chaining of filters.
+    description_short: Infinite Implulse Response (IIR) Recursive filter, implemented
+      in pasm, with recursion. Starts a cog
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - audio
+  metadata:
+    discovery_date: '2025-09-12T11:42:25.367302'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:49:07.563537'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2451'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: 4-pole IIR Filter - Fixed point math - pasm
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2451
+    forum_discussion: http://forums.parallax.com/showthread.php?t=118111
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/4-pole-iir-filter-fixed-point-math-pasm/

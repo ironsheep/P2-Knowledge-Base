@@ -1,0 +1,65 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Chris Cantrell | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : Human InputLicence : OtherContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: drivers
+    description_full: This PS2 Controller interface object allows the user to send
+      multi-byte commands to the controller for configuration. The user may put the
+      object in a polling-loop to continuously read the inputs. The test harness supplied
+      was tested against several controllers including a wireless GuitarHero controller.
+      The documentation contains schematics, protocol details, and URL links for more
+      information.
+    description_short: This PS2 Controller interface object allows the user to send
+      multi-byte commands to the controller f
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - driver
+    - wifi
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:41:55.418917'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:44:31.617211'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2724'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: PS2Controller
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2724
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/ps2controller/

@@ -1,0 +1,55 @@
+object_metadata:
+  author: evanh
+  author_username: ''
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: misc
+    description_full: 'pllset()
+
+      Calculates appropriate clock mode component values to set a requested clock
+      frequency via clkset().  Based heavily on Chip''s original Delphi code but with
+      added runtime determination of board crystal mode and frequency.  Relies on
+      compile time clock config correctly matching the actual boar'
+    description_short: pllset() Calculates appropriate clock mode component values
+      to set a requested clock frequency via clkset().
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - led
+    - spi
+    - demo
+    - driver
+  metadata:
+    discovery_date: '2025-09-12T12:44:12.247345'
+    extraction_status: author_extracted
+    kb_integration: none
+    last_author_extraction: '2025-09-12T13:20:53.601790'
+    last_verified: '2025-09-12T12:46:56.449964'
+    page_discovered: 14
+    quality_score: 5
+    last_author_deep_search: 2025-09-12T13:39:2
+    last_description_fix: 2025-09-12T14:20:1
+    created_date: '2024-03-06 07:31:45'
+    last_created_date_fix: 2025-09-12T15:26:5
+  object_id: '3804'
+  technical_details:
+    file_format: ZIP
+    file_size: 5883 B
+    languages:
+    - SPIN2
+    microcontroller:
+    - P2
+    version: ''
+  title: Pllset
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB3804
+    forum_discussion: ''
+    github_repo: ''
+    obex_page: https://obex.parallax.com/obex/pllset/

@@ -1,0 +1,61 @@
+object_metadata:
+  architecture:
+    cog_count: 1
+    memory_requirements:
+      cog_ram: ''
+      hub_ram: ''
+    multi_cog: false
+    performance_notes: ''
+  author: 'Cannibal Robot | added by ArchiverContent : CodeMicrocontroller : Propeller
+    1Languages : PASM, SPINCategory : Motor ControlLicence : OtherTags : PWM, ServoContent'
+  author_username: ''
+  community:
+    forum_posts: []
+    modification_notes: []
+    related_objects: []
+    user_reviews: []
+  compatibility:
+    dependencies: []
+    known_issues: []
+    p2_chip_versions:
+    - all
+    tested_platforms: []
+  functionality:
+    category: motors
+    description_full: Use one cog and 2 54HC595 SIPO's to create a 16 output PWM servo
+      drive using 5 prop ports. This app consists of a SPIN demo program which shows
+      how to start and use the ASM program which drives the servos.
+    description_short: 'Use one cog and 2 54HC595 SIPO''s to create a 16 output PWM
+      servo drive using 5 prop ports. This app '
+    hardware_support: []
+    peripherals: []
+    subcategory: ''
+    tags:
+    - motor
+    - demo
+  metadata:
+    discovery_date: '2025-09-12T11:41:49.037940'
+    extraction_status: discovered
+    kb_integration: none
+    last_verified: '2025-09-12T11:43:22.765341'
+    quality_score: 5
+  notes:
+    analysis_notes: ''
+    extraction_notes: Auto-discovered from pasm category
+    integration_todo: []
+  object_id: '2805'
+  technical_details:
+    file_format: ZIP
+    file_size: ''
+    languages:
+    - PASM
+    microcontroller:
+    - P2
+    version: ''
+  title: 74HC595 Servo Drive
+  urls:
+    documentation: ''
+    download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2805
+    forum_discussion: https://forums.parallax.com
+    github_repo: https://github.com/parallaxinc
+    obex_page: https://obex.parallax.com/obex/74hc595-servo-drive/

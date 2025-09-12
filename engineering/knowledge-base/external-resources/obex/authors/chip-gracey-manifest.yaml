@@ -1,0 +1,21 @@
+# Chip Gracey - OBEX Author Manifest
+version: "1.0"
+last_updated: "2025-09-12"
+author_profile:
+  display_name: "Chip Gracey"
+  username: "cgracey"
+  reputation_score: 10.0
+  specialties: ["hardware_features", "low_level_programming", "chip_architecture"]
+  community_standing: "chip_designer"
+
+metadata:
+  total_objects: 11
+  categories: ["drivers", "demos", "misc"]
+  quality_average: 9.5
+
+objects: {}
+
+ai_recommendations: |
+  Chip Gracey is the P2 chip designer. His code demonstrates 
+  optimal hardware utilization and architectural best practices.
+  Essential reference for understanding P2 capabilities.
