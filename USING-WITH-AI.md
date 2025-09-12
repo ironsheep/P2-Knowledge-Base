@@ -5,8 +5,11 @@
 
 ## Quick Start for Claude Code Users
 
-**🚀 [Jump to Copy-Paste Templates](CLAUDE-QUICKSTART.md)**  
-For ready-to-use prompts and templates, see the CLAUDE-QUICKSTART.md file.
+**🚀 [Essential Copy-Paste Templates](CLAUDE-QUICKSTART.md)**  
+5 essential templates to get started immediately.
+
+**📚 [Complete Prompt Pattern Library](AI-PROMPT-PATTERNS.md)**  
+Comprehensive interaction patterns for all P2 development scenarios.
 
 **🔒 [Privacy Guide for P2 Developers](deliverables/developer-docs/ai-development/Claude-Code-Privacy-Guide-for-P2-Developers.pdf)**  
 **Must read!** Learn how to protect your IP while using AI tools for P2 development.
@@ -45,11 +48,15 @@ manifests/smart-pins-manifest.yaml    # 32 pin modes
 manifests/spin2-manifest.yaml         # Language constructs
 manifests/architecture-manifest.yaml  # Hardware specs
 manifests/patterns-manifest.yaml      # Code examples
+manifests/obex-community-manifest.yaml # 113 community objects ✨ NEW!
   ↓
 # Individual specifications:
 engineering/knowledge-base/P2/language/pasm2/[category]/*.yaml
 engineering/knowledge-base/P2/hardware/smart-pins/modes/*.yaml
 engineering/knowledge-base/P2/language/spin2/methods/*.yaml
+# Community objects:
+manifests/categories/[category]-manifest.yaml  # Objects by function
+manifests/authors/[author]-manifest.yaml       # Objects by contributor
 ```
 
 For best results, always start with `p2-knowledge-root.yaml` which provides:
@@ -91,7 +98,18 @@ Claude will:
 3. Provide wiring diagram, initialization code, and usage examples
 ```
 
-### Pattern 4: Debugging Assistance
+### Pattern 4: Community Code Discovery
+```
+User: "Find me a P2 serial driver"
+
+Claude will:
+1. Check manifests/obex-community-manifest.yaml for community objects
+2. Find Jon McPhalen's Full Duplex Serial Driver (Object 2842)
+3. Provide direct download URL and implementation notes
+4. Reference proven community patterns and usage examples
+```
+
+### Pattern 5: Debugging Assistance
 ```
 User: "My Smart Pin isn't outputting data. Here's my configuration code..."
 
