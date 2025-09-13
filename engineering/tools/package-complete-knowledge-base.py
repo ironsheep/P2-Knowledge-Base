@@ -395,15 +395,6 @@ This release represents a **114% increase** in documented P2 elements, bringing 
 - **Validation**: All elements validated against PNUT-TS v2.1.0
 - **Testing**: Schema compliance verified
 
-### Known Issues
-- 8 PASM2 instruction YAMLs have minor parsing issues (352 of 360 parse correctly)
-- These will be fixed in patch release 1.1.1
-
-### Next Release (v1.2.0)
-- OBEX integration with 50+ code examples
-- Complete Smart Pin documentation
-- Additional code generation patterns
-
 ### Support
 - Repository: https://github.com/ironsheep/P2-Knowledge-Base
 - Issues: https://github.com/ironsheep/P2-Knowledge-Base/issues
