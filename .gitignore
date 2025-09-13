@@ -149,5 +149,8 @@ human-todos/
 .todo-mcp/
 *.zip
 
+# Forum posts (draft communications, not versioned)
+engineering/obex-integration/FORUM-POST-*.md
+
 # Test extraction directories (not versioned)
 extracted_images_enhanced_test/
