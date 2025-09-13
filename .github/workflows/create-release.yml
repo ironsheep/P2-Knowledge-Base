@@ -69,7 +69,7 @@ jobs:
       id: changelog
       run: |
         echo "📝 Generating changelog..."
-        cat > RELEASE_CHANGELOG.md << 'EOF'
+        cat > RELEASE_CHANGELOG.md << EOF
         ## P2 Knowledge Base v${{ env.VERSION }}
         
         ### Release Type: ${{ github.event.inputs.release_type }}
