@@ -130,7 +130,7 @@ class P2CompleteReferenceUpdater:
         """Build complete SPIN2 language section."""
         print("Collecting SPIN2 elements...")
         spin2 = {
-            "version": "2.1.0",
+            "version": "1.51.5",
             "source": "engineering/knowledge-base/P2/language/spin2/",
             "extraction_date": self.timestamp,
             "categories": {}
@@ -189,7 +189,7 @@ class P2CompleteReferenceUpdater:
         self.reference["meta"]["completeness"] = 0.95  # Updated from 0.85
         self.reference["meta"]["last_updated"] = self.timestamp
         self.reference["meta"]["sources"]["pasm2"] = "engineering/knowledge-base/P2/language/pasm2/"
-        self.reference["meta"]["sources"]["spin2"] = "engineering/knowledge-base/P2/language/spin2/"
+        self.reference["meta"]["sources"]["spin2"] = "engineering/knowledge-base/P2/language/spin2/ (PNUT-TS v1.51.5)"
         
     def save_updated_reference(self):
         """Save the updated reference JSON."""

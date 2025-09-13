@@ -171,7 +171,7 @@ spin2_language_complete_map:
     
   # Quality Metrics
   quality_assurance:
-    source_authority: "PNUT-TS compiler v2.1.0"
+    source_authority: "PNUT-TS compiler v1.51.5"
     validation_method: "Direct compiler extraction"
     consistency_check: "YAML syntax validated"
     cross_references: "Internal links verified"

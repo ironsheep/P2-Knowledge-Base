@@ -1,6 +1,6 @@
 instruction: CALL
 syntax: CALL    D        {WC/WZ/WCZ}
-compiler_syntax: CALL #S | D
+compiler_syntax: "CALL #S | D"
 encoding: EEEE 1101101 RAA AAAAAAAAA AAAAAAAAA
 compiler_encoding:
   bits: 32
@@ -29,7 +29,7 @@ documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_call
-  pattern: '#S | D'
+  pattern: "'#S | D'"
   description: Call: immediate address or register
   valueType: 19
 compiler_effects: []

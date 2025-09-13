@@ -61,7 +61,7 @@ class P2ReferenceUpdater:
     def build_spin2_section(self) -> Dict:
         """Build complete SPIN2 language section."""
         spin2 = {
-            "version": "2.1.0",  # PNUT-TS version we extracted from
+            "version": "1.51.5",  # PNUT-TS version we extracted from
             "source": "PNUT-TS Compiler Language Specification",
             "extraction_date": "2025-01-13",
             "categories": {}
@@ -234,7 +234,7 @@ class P2ReferenceUpdater:
         self.reference["meta"]["release_date"] = datetime.now().strftime("%Y-%m-%d")
         self.reference["meta"]["completeness"] = 0.85  # Updated from 0.65
         self.reference["meta"]["last_updated"] = self.timestamp
-        self.reference["meta"]["sources"]["spin2"] = "PNUT-TS Compiler v2.1.0 Language Specification"
+        self.reference["meta"]["sources"]["spin2"] = "PNUT-TS Compiler v1.51.5 Language Specification"
         
     def update_gaps_section(self):
         """Update gaps to reflect new additions."""
@@ -243,7 +243,7 @@ class P2ReferenceUpdater:
             if "language" in self.reference["gaps"]:
                 self.reference["gaps"]["language"] = {
                     "spin2": "Complete - 287 elements documented",
-                    "pnut_compatibility": "Validated with PNUT-TS v2.1.0"
+                    "pnut_compatibility": "Validated with PNUT-TS v1.51.5"
                 }
     
     def add_code_generation_guidance(self):
@@ -301,7 +301,7 @@ class P2ReferenceUpdater:
 ## Major Additions
 
 ### SPIN2 Language Specification (NEW)
-- Added complete SPIN2 language specification from PNUT-TS v2.1.0
+- Added complete SPIN2 language specification from PNUT-TS v1.51.5
 - Total SPIN2 elements added: {sum(self.stats.values())}
   - Keywords: {self.stats['keywords']}
   - Operators: {self.stats['operators']}
@@ -323,7 +323,7 @@ class P2ReferenceUpdater:
 - Added compiler implementation details for methods
 
 ## Source Updates
-- Integrated PNUT-TS Compiler v2.1.0 language specification
+- Integrated PNUT-TS Compiler v1.51.5 language specification
 - Validated all elements against compiler source
 
 ## Breaking Changes

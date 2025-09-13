@@ -8,4 +8,4 @@ timing:
   type: fixed
 group: Branch D - Call+Skip
 flags_affected:
-  C: {10'b0, D[9:0]}
+  C: "{10'b0, D[9:0]}"

@@ -8,4 +8,4 @@ timing:
   type: fixed
 group: Branch S - Test
 flags_affected:
-  C: 'correct sign' from last addition/subtraction)
+  C: "'correct sign' from last addition/subtraction"

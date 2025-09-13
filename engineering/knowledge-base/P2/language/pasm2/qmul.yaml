@@ -79,7 +79,7 @@ documentation_level: comprehensive
 needs_documentation: false
 compiler_operand_format:
   name: operand_ls
-  pattern: D/#,S/#
+  pattern: "D/#,S/#"
   description: Two operands: destination/immediate, source/immediate
   valueType: 13
 compiler_effects: []

@@ -1,6 +1,6 @@
 instruction: WRLONG
 syntax: WRLONG  {#}D,{#}S/P
-compiler_syntax: WRLONG D/#,S/#/PTRA/PTRB
+compiler_syntax: "WRLONG D/#,S/#/PTRA/PTRB"
 encoding: EEEE 1100011 0LI DDDDDDDDD SSSSSSSSS
 compiler_encoding:
   bits: 32
@@ -20,7 +20,7 @@ documentation_level: minimal
 needs_documentation: true
 compiler_operand_format:
   name: operand_lsp
-  pattern: D/#,S/#/PTRA/PTRB
+  pattern: "D/#,S/#/PTRA/PTRB"
   description: Write to memory: destination/immediate, source/immediate/pointer
   valueType: 16
 compiler_effects: []

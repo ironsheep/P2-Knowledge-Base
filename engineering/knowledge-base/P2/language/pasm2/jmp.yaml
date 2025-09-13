@@ -22,7 +22,7 @@ documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_jmp
-  pattern: '#S | D'
+  pattern: "'#S | D'"
   description: Jump: immediate address or register
   valueType: 18
 compiler_effects: []

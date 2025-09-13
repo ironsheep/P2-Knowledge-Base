@@ -8,4 +8,4 @@ timing:
   type: fixed
 group: Math and Logic
 flags_affected:
-  C: !D[31]
+  C: "!D[31]"

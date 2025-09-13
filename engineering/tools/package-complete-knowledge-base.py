@@ -392,7 +392,7 @@ This release represents a **114% increase** in documented P2 elements, bringing 
 
 ### Quality Metrics
 - **Coverage**: ~95% of P2 documentation
-- **Validation**: All elements validated against PNUT-TS v2.1.0
+- **Validation**: All elements validated against PNUT-TS v1.51.5
 - **Testing**: Schema compliance verified
 
 ### Support
