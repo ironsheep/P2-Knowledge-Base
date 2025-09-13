@@ -119,7 +119,7 @@ jobs:
         See full changelog in package or [compare versions](https://github.com/${{ github.repository }}/compare/v${{ env.PREVIOUS_VERSION }}...v${{ env.VERSION }})
         
         ---
-        *Generated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")*
+        *Generated: $(date +"%Y-%m-%d %H:%M:%S UTC")*
         EOF
     
     - name: List release artifacts
