@@ -20,6 +20,11 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: write  # Required for creating releases and tags
+  actions: read
+  checks: read
+
 jobs:
   create-release:
     runs-on: ubuntu-latest
