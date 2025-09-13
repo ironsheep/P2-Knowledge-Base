@@ -1,7 +1,7 @@
 name: AI Defect Report
 description: Report incorrect or problematic AI-generated P2 code or responses
 title: "[AI DEFECT] "
-labels: ["bug", "ai-generation", "triage"]
+labels: ["AI Issue", "ai-generation", "triage"]
 assignees: []
 
 body:
