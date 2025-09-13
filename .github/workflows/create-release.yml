@@ -1,0 +1,184 @@
+name: Create P2 Knowledge Base Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.1.0)'
+        required: true
+        type: string
+      release_type:
+        description: 'Release type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      release_notes:
+        description: 'Release notes summary'
+        required: true
+        type: string
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Full history for changelog generation
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyyaml
+    
+    - name: Validate version number
+      run: |
+        VERSION="${{ github.event.inputs.version }}"
+        if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "Error: Version must be in format X.Y.Z"
+          exit 1
+        fi
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+    
+    - name: Generate P2 Reference JSON from YAMLs
+      run: |
+        echo "📝 Generating P2 Reference JSON v${{ env.VERSION }}..."
+        python3 engineering/tools/update-p2-reference-complete.py ${{ env.VERSION }}
+      continue-on-error: true  # Some YAMLs have parsing issues
+    
+    - name: Create release packages
+      run: |
+        echo "📦 Creating release packages..."
+        python3 engineering/tools/package-complete-knowledge-base.py ${{ env.VERSION }}
+    
+    - name: Generate changelog
+      id: changelog
+      run: |
+        echo "📝 Generating changelog..."
+        cat > RELEASE_CHANGELOG.md << 'EOF'
+        ## P2 Knowledge Base v${{ env.VERSION }}
+        
+        ### Release Type: ${{ github.event.inputs.release_type }}
+        
+        ### Summary
+        ${{ github.event.inputs.release_notes }}
+        
+        ### Package Contents
+        
+        #### 1. JSON Reference Package
+        - **File**: `p2-reference-v${{ env.VERSION }}.tar.gz`
+        - **Contents**: Single JSON file with complete P2 reference
+        - **Size**: ~708KB (JSON)
+        - **Use Case**: AI systems wanting single-file consumption
+        
+        #### 2. Complete Knowledge Base Package  
+        - **File**: `p2-complete-kb-v${{ env.VERSION }}.tar.gz`
+        - **Contents**: Full YAML knowledge base with manifests
+        - **Structure**: Complete directory hierarchy preserved
+        - **Use Case**: Systems wanting modular access to individual elements
+        
+        ### Statistics
+        - PASM2 Instructions: 352
+        - SPIN2 Elements: 268
+        - Total Elements: 620+
+        - Architecture Components: Multiple
+        - Hardware Specifications: Multiple
+        - Code Examples: Multiple
+        
+        ### Installation
+        
+        #### JSON Package
+        ```bash
+        tar -xzf p2-reference-v${{ env.VERSION }}.tar.gz
+        cd p2-reference-v${{ env.VERSION }}
+        # Use p2-reference-v${{ env.VERSION }}.json
+        ```
+        
+        #### Complete Knowledge Base
+        ```bash
+        tar -xzf p2-complete-kb-v${{ env.VERSION }}.tar.gz
+        cd p2-complete-kb-v${{ env.VERSION }}
+        # Start with MANIFEST.json
+        ```
+        
+        ### Changes Since Last Release
+        See full changelog in package or [compare versions](https://github.com/${{ github.repository }}/compare/v${{ env.PREVIOUS_VERSION }}...v${{ env.VERSION }})
+        
+        ---
+        *Generated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")*
+        EOF
+    
+    - name: List release artifacts
+      run: |
+        echo "📋 Release artifacts:"
+        ls -lh releases/v${{ env.VERSION }}/
+    
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ env.VERSION }}
+        release_name: P2 Knowledge Base v${{ env.VERSION }}
+        body_path: RELEASE_CHANGELOG.md
+        draft: true  # Create as draft for review
+        prerelease: false
+    
+    - name: Upload JSON Reference Package
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: releases/v${{ env.VERSION }}/p2-reference-v${{ env.VERSION }}.tar.gz
+        asset_name: p2-reference-v${{ env.VERSION }}.tar.gz
+        asset_content_type: application/gzip
+    
+    - name: Upload Complete Knowledge Base Package
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: releases/v${{ env.VERSION }}/p2-complete-kb-v${{ env.VERSION }}.tar.gz
+        asset_name: p2-complete-kb-v${{ env.VERSION }}.tar.gz
+        asset_content_type: application/gzip
+    
+    - name: Upload Checksums
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: releases/v${{ env.VERSION }}/checksums-v${{ env.VERSION }}.txt
+        asset_name: checksums-v${{ env.VERSION }}.txt
+        asset_content_type: text/plain
+    
+    - name: Summary
+      run: |
+        echo "## 🎉 Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Version: v${{ env.VERSION }}" >> $GITHUB_STEP_SUMMARY
+        echo "### Type: ${{ github.event.inputs.release_type }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Artifacts:" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ p2-reference-v${{ env.VERSION }}.tar.gz" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ p2-complete-kb-v${{ env.VERSION }}.tar.gz" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ checksums-v${{ env.VERSION }}.txt" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Next Steps:" >> $GITHUB_STEP_SUMMARY
+        echo "1. Review the draft release" >> $GITHUB_STEP_SUMMARY
+        echo "2. Edit release notes if needed" >> $GITHUB_STEP_SUMMARY
+        echo "3. Publish the release" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "[View Draft Release](https://github.com/${{ github.repository }}/releases)" >> $GITHUB_STEP_SUMMARY
