@@ -23,7 +23,7 @@ documentation_level: comprehensive
 compiler_operand_format:
   name: operand_jmp
   pattern: "#S | D"
-  description: Jump: immediate address or register
+  description: "Jump: immediate address or register"
   valueType: 18
 compiler_effects: []
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13

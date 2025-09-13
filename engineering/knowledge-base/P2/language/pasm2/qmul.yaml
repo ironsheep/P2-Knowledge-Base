@@ -80,7 +80,7 @@ needs_documentation: false
 compiler_operand_format:
   name: operand_ls
   pattern: "D/#,S/#"
-  description: Two operands: destination/immediate, source/immediate
+  description: "Two operands: destination/immediate, source/immediate"
   valueType: 13
 compiler_effects: []
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13

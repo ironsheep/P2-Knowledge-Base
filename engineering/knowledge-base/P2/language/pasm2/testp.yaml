@@ -44,7 +44,7 @@ examples:
       if_nc_and_z  jmp #edge_detected  ' Was 0, now 1
       muxz    flag_reg, #1             ' Store current state
       
-edge_detected:
+      edge_detected:
       ' Handle rising edge event
     source: common_pattern
     

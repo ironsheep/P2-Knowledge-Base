@@ -21,7 +21,7 @@ needs_documentation: true
 compiler_operand_format:
   name: operand_lsp
   pattern: "D/#,S/#/PTRA/PTRB"
-  description: Write to memory: destination/immediate, source/immediate/pointer
+  description: "Write to memory: destination/immediate, source/immediate/pointer"
   valueType: 16
 compiler_effects: []
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13

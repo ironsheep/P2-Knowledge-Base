@@ -47,7 +47,7 @@ branch_types:
     description: "Unconditional jump"
     variants:
       - "JMP #@label"          # Relative jump
-      - "JMP #\label"          # Absolute jump
+      - "JMP #\\label"          # Absolute jump
       - "JMP register"         # Indirect jump
       - "JMP #register"        # Jump to cog address
     pipeline: "2-cycle latency for all jumps"
@@ -56,7 +56,7 @@ branch_types:
     description: "Call with return address on stack"
     variants:
       - "CALL #@label"         # Relative call
-      - "CALL #\label"         # Absolute call  
+      - "CALL #\\label"         # Absolute call  
       - "CALL register"        # Indirect call
     stack: "Pushes 20-bit return address to internal stack"
     depth: "8-level hardware stack"
@@ -97,7 +97,7 @@ special_addressing:
       - "JMP to $200+ enters hub execution"
       - "Return address indicates execution mode"
     examples:
-      - JMP #\$400            # Enter hub execution
+      - JMP #\\$400            # Enter hub execution
       - CALL #@hub_function   # Call hub from cog
       - RET                   # Return preserves mode
 
