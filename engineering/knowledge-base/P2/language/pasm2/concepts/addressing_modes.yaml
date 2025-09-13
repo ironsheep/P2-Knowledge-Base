@@ -91,7 +91,7 @@ modes:
     notes: Uses AUGS for 20-bit address
 
   bit_addressing:
-    syntax: "register.bit" or "register.[bit_expr]"
+    syntax: "register.bit or register.[bit_expr]"
     encoding: Bit number in immediate field
     range: Bit 0-31
     examples:

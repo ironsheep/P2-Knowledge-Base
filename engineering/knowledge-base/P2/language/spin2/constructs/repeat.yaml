@@ -120,14 +120,14 @@ pasm_equivalent:
     - spin2: "REPEAT 10"
       pasm2: |
         MOV     repeat_count, #10
-    .loop:
+        .loop:
         ' ... loop body ...
         DJNZ    repeat_count, #.loop
     
     - spin2: "REPEAT i FROM 0 TO 9"
       pasm2: |
         MOV     i, #0
-    .loop:
+        .loop:
         ' ... loop body ...
         ADD     i, #1
         CMP     i, #10 WC

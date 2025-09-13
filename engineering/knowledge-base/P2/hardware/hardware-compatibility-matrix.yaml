@@ -146,16 +146,18 @@ physical_stacking_constraints:
       
     size_constraints:
       small_modules:
-        - "64006A (Control)"
-        - "64006C (LED Matrix)"
-        - "64006D (Digital Video Out)"
-        - "64006E (Mini Prototyping)"
-        - "64006F (Serial Device)"
+        items:
+          - "64006A (Control)"
+          - "64006C (LED Matrix)"
+          - "64006D (Digital Video Out)"
+          - "64006E (Mini Prototyping)"
+          - "64006F (Serial Device)"
         stacking: "2 small modules per edge position"
         
       large_modules:
-        - "64006H (A/V Breakout)"
-        - "64006G (Goertzel)"
+        items:
+          - "64006H (A/V Breakout)"
+          - "64006G (Goertzel)"
         stacking: "1 large module OR 2 small modules per edge"
         
   mounting_specifications:

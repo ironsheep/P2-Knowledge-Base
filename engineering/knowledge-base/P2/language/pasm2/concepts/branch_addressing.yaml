@@ -21,15 +21,15 @@ addressing_modes:
     notes: "Assembler converts label to PC-relative offset"
 
   absolute_immediate:
-    syntax: "#\label or #label"
+    syntax: "#\\label or #label"
     encoding: "20-bit absolute address"
     range: "$00000-$FFFFF (entire hub space)"
     instructions: ["JMP", "CALL", "CALLA", "CALLB", "CALLD"]
     examples:
-      - JMP #\hub_routine      # Jump to absolute hub address
-      - CALL #\$10000          # Call absolute address
+      - JMP #\\hub_routine      # Jump to absolute hub address
+      - CALL #\\$10000          # Call absolute address
       - JMP #cog_routine       # Jump within cog (absolute)
-    notes: "\ forces absolute, # alone is context-dependent"
+    notes: "\\ forces absolute, # alone is context-dependent"
 
   register_indirect:
     syntax: "register"

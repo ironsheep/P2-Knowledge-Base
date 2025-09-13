@@ -28,7 +28,7 @@ boot_sequence:
 
 auto_baud_detection:
   mechanism: "Measures bit timing from CR character"
-  trigger: "> " followed by space (0x3E, 0x20)"
+  trigger: "'> ' followed by space (0x3E, 0x20)"
   
   supported_rates:
     minimum: "9600 baud"
