@@ -1,0 +1,10 @@
+            org
+
+start       mov        ijmp1,#isr1               'set int1 vector
+
+            setint1 #1                           'set int1 for ct-passed-ct1 event
+
+            getct      ct1                       'set initial ct1 target
+            addct1     ct1,#50
+
+                                                 'main program, gets interrupted

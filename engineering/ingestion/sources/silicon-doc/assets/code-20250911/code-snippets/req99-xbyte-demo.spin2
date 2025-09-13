@@ -1,0 +1,49 @@
+con _clkfreq = 10_000_000
+'
+' ** XBYTE Demo **
+' Automatically executes bytecodes via RET/_RET_ to $1FF.
+' Overhead is 6 clocks, including _RET_ at the end of each bytecode routine.
+'
+dat             org
+
+                    asmclk                         'set clock up
+
+                    setq2      #$FF            'load bytecode table into LUT $100..$1FF
+                    rdlong     $100,#bytetable
+
+                    rdfast     #0,#bytecodes       'init fifo read at start of bytecodes
+
+                    push      #$1FF              'push $1FF for xbyte
+          _ret_     setq      #$100              'start xbyte with LUT base = $100, no stack pop
+'
+' Bytecode routines
+'
+r0      _ret_   drvnot       #0                 'toggle pin 0
+
+r1       _ret_     drvnot    #1                 'toggle pin 1
+
+r2       _ret_     drvnot    #2                 'toggle pin 2
+
+r3       _ret_     drvnot    #3                 'toggle pin 3
+
+r4                 rfvars    pa                 'get offset
+                   add       pb,pa              'add offset
+        _ret_      rdfast    #0,pb              'init fifo read at new address
+'
+' Bytecodes that form the XBYTE program in hub
+'
+                orgh
+
+bytecodes          byte      0                            'toggle pin 0
+                   byte      1                            'toggle pin 1
+                   byte      2                            'toggle pin 2
+                   byte      3                            'toggle pin 3
+                   byte      4,(bytecodes-$) & $7F        'relative branch, loop to bytecodes
+'
+' Bytecode EXECF data, moved into lut $100..$1FF (no SKIPF patterns are used in this example)
+'
+bytetable       long    r0                      '#0     toggle pin 0
+                long    r1                      '#1     toggle pin 1
+                long    r2                      '#2     toggle pin 2
+                long    r3                      '#3     toggle pin 3
+                long    r4                      '#4     relative branch

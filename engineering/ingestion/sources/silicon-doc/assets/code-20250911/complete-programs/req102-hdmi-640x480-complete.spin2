@@ -1,0 +1,87 @@
+'********************************************
+'* VGA 640 x 480 x 16bpp 5:6:5 RGB - HDMI *
+'********************************************
+
+CON                hdmi_base = 16               'must be a multiple of 8
+
+DAT                org
+'
+'
+' Setup
+'
+                    hubset    ##%1_000001_0000011000_1111_10_00                'config PLL, 20MHz/2*25*1 = 250MHz
+                    waitx     ##20_000_000 / 200                               'allow crystal+PLL 5ms to stabilize
+                    hubset    ##%1_000001_0000011000_1111_10_11                'switch to PLL
+
+                    rdfast    ##640*350*2/64,##$1000       'set rdfast to wrap on bitmap
+
+                    setxfrq ##$0CCCCCCC+1                  'set streamer freq to 1/10th clk
+
+                    setcmod #$100                          'enable HDMI mode
+
+                    drvl      #7<<6 + hdmi_base            'enable HDMI pins
+
+                    wrpin     ##%100100_00_00000_0,#7<<6 + hdmi_base           'set 1mA drive on HDMI pins
+'
+'
+' Field loop
+'
+field              mov       hsync0,sync_000              'vsync off
+                   mov       hsync1,sync_001
+
+                   callpa    #90,#blank                   'top blanks
+
+                   mov       x,#350                       'set visible lines
+line               call      #hsync                       'do horizontal sync
+                   xcont     m_rf,#0                      'do visible line
+                   djnz      x,#line                      'another line?
+
+                   callpa    #83,#blank                   'bottom blanks
+
+                   mov       hsync0,sync_222              'vsync on
+                   mov       hsync1,sync_223
+
+                   callpa    #2,#blank                    'vertical sync blanks
+
+                   jmp       #field                       'loop
+'
+'
+' Subroutines
+'
+blank              call      #hsync                       'blank lines
+                   xcont     m_vi,hsync0
+
+        _ret_      djnz     pa,#blank
+
+hsync              xcont    m_bs,hsync0                   'horizontal sync
+                   xzero    m_sn,hsync1
+        _ret_      xcont    m_bv,hsync0
+'
+'
+' Initialized data
+'
+sync_000        long         %1101010100_1101010100_1101010100_10             '
+sync_001        long         %1101010100_1101010100_0010101011_10             '        hsync
+sync_222        long         %0101010100_0101010100_0101010100_10             'vsync
+sync_223        long         %0101010100_0101010100_1010101011_10             'vsync + hsync
+
+m_bs                long     $70810000    +   hdmi_base<<17   +   16          'before sync
+m_sn                long     $70810000    +   hdmi_base<<17   +   96          'sync
+m_bv                long     $70810000    +   hdmi_base<<17   +   48          'before visible
+m_vi                long     $70810000    +   hdmi_base<<17   +   640         'visible
+
+m_rf            long         $B0850000 + hdmi_base<<17 + 640                  'visible rfword rgb16 (5:6:5)
+'
+'
+' Uninitialized data
+'
+x               res          1
+
+hsync0              res      1
+hsync1              res      1
+'
+'
+' Bitmap
+'
+                     orgh     $1000 - 70                    'justify pixels at $1000
+                     file     "birds_16bpp.bmp"             'rayman's picture (640 x 350)

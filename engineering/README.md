@@ -9,7 +9,7 @@
 | **Coverage** | 95% verified | 100% |
 | **Authoritative Sources** | 🏆 13+ Official | - |
 | **Trust Level** | 95% AUTHORITATIVE | 100% |
-| **Code Examples** | 188 validated | 500+ |
+| **Code Examples** | 157 validated | 500+ |
 | **Hardware Docs** | 100% extracted | - |
 | **Smart Pins** | 100% complete | - |
 | **Sprint Velocity** | 2,200% efficiency gain | - |
@@ -58,7 +58,7 @@
 
 | Priority | Source | Trust | Extraction | Coverage |
 |----------|--------|-------|------------|----------|
-| 🔴 **1** | Code Examples | HIGH | 9% | TBD |
+| 🔴 **1** | Code Examples | HIGH | 25% | Smart Pins ✅, Spin2 ✅, Flash ✅, Silicon Doc ✅ |
 | 🔴 **2** | Critical Images | HIGH | 112 images | P2 Datasheet ✅ (39) + Silicon Doc ✅ (34) + P2 Edge ✅ (39) |
 | 🔴 **3** | P2 Edge 32MB | GREEN | 100% | 30% |
 | 🟡 **4** | PASM2 Manual | GREEN | 64% | TBD |

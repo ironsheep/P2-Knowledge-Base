@@ -3,7 +3,7 @@
 
 **Created**: 2025-08-24  
 **Purpose**: Track code example extraction status across all ingested P2 documents  
-**Status**: 1/16 documents with code extraction completed  
+**Status**: 3/16 documents with code extraction completed  
 
 ---
 
@@ -11,7 +11,7 @@
 
 | Status | Count | Documents |
 |--------|-------|-----------|
-| ✅ **Extracted** | 1 | Flash Filesystem (source code analysis) |
+| ✅ **Extracted** | 3 | Smart Pins (98), Spin2 v51 (32), Flash Filesystem (21) |
 | 🔄 **Extraction Ready** | 6 | Major PDF documents with high code potential |
 | 📋 **Planned** | 2 | Additional sources identified |
 | ❌ **No Code** | 7 | Hardware guides, CSV, specifications (minimal code content) |
@@ -33,7 +33,7 @@
 
 | Document | Source Format | Ingestion Status | Format Status | Code Extraction | Expected Content | Est. Examples |
 |----------|---------------|------------------|---------------|-----------------|------------------|---------------|
-| **P2 Silicon Documentation v35** | DOCX (2.8MB) | ✅ COMPLETE | 🟡 **NEED PDF** | ⏸️ **WAITING** | Low-level examples, register manipulation, system programming | 50-100 |
+| **P2 Silicon Documentation v35** | PDF (5-part) | ✅ COMPLETE | ✅ **PDF READY** | ✅ **COMPLETE** | Low-level examples, register manipulation, system programming | **6 extracted** |
 | **P2 Spin Manual Draft** | DOCX (1.4MB) | ✅ COMPLETE | 🟡 **NEED PDF** | ⏸️ **WAITING** | Tutorial progression, learning examples, project demos | 75-125 |
 | **P2 Hardware Manual** | DOCX (1.9MB) | ✅ COMPLETE | 🟡 **NEED PDF** | ⏸️ **WAITING** | Hardware initialization, peripheral control, boot sequences | 25-50 |
 
@@ -44,8 +44,11 @@
 | **Spin2 Documentation v51** | PDF (2.2MB) | 2025-08-24 | **32 examples** | 100% (16/16 Spin2 + 16/16 PASM2) | `/sources/extractions/spin2-v51.../assets/code-20250824/` |
 | **Smart Pins Documentation rev 5** | PDF (4.1MB) | 2025-08-24 | **98 examples** | 100% (17/17 Spin2 + 47 PASM2 + 34 config) | `/sources/extractions/smart-pins.../assets/code-20250824/` |
 | **Flash Filesystem Code** | SPIN2 | 2025-08-15 | **21 methods** | 100% (source code analysis) | `/sources/extractions/chip-flash-filesystem.../` |
+| **P2 Silicon Documentation v35** | Text extractions | 2025-09-11 | **6 examples** | 83% (1 complete program + 4 snippets + 1 failure) | `/sources/extractions/silicon-doc.../assets/code-20250911/` |
 
-**Total Extracted**: **151 validated code examples** across 3 documents
+**Total Extracted**: **157 validated code examples** across 4 documents
+
+**Breakdown**: Smart Pins (98) + Spin2 v51 (32) + Flash Filesystem (21) + Silicon Doc v35 (6) = 157 examples
 
 **Source Code Analysis Total**: **21 methods systematically analyzed and documented**
 
@@ -71,36 +74,34 @@
 
 ## 🎯 **CODE EXTRACTION BACKLOG BY PRIORITY**
 
-### **🔴 CRITICAL Priority (Immediate Developer Value)**
+### **✅ CRITICAL Priority (COMPLETED)**
 
-1. **Spin2 Documentation v51**
-   - **Why Critical**: Complete language reference with IDE usage examples
-   - **Expected Assets**: Method definitions, object usage, debugging techniques
-   - **Code Types**: Complete programs, library usage examples, development patterns
-   - **Source**: `sources/originals/P2 Spin2 Documentation v51-250425.pdf` (57 pages)
-   - **AI Impact**: Essential for enabling AI code generation in Spin2
+1. **Spin2 Documentation v51** ✅ **COMPLETE**
+   - **Status**: 32 examples extracted on 2025-08-24
+   - **Results**: 100% compilation success (16 Spin2 + 16 PASM2)
+   - **Location**: `/sources/extractions/spin2-v51.../assets/code-20250824/`
+   - **AI Impact**: ✅ Language reference examples ready for code generation
 
-2. **PASM2 Language Manual** 
-   - **Why Critical**: Assembly language instruction examples and patterns
-   - **Expected Assets**: Instruction usage, optimization techniques, timing examples
-   - **Code Types**: Instruction demos, register manipulation, performance patterns
-   - **Source**: `import/p2/P2-Assembly-Language-PASM2-Manual-Draft-221117.pdf` (162 pages)
-   - **AI Impact**: Core for low-level P2 programming assistance
+2. **Smart Pins Documentation rev 5** ✅ **COMPLETE**
+   - **Status**: 98 examples extracted on 2025-08-24  
+   - **Results**: 100% extraction success (17 Spin2 + 47 PASM2 + 34 config)
+   - **Location**: `/sources/extractions/smart-pins.../assets/code-20250824/`
+   - **AI Impact**: ✅ Pin configuration patterns ready for AI generation
 
-3. **Smart Pins Documentation rev 5**
-   - **Why Critical**: Pin configuration is essential for all P2 projects
-   - **Expected Assets**: Pin mode examples, configuration patterns, timing setups
-   - **Code Types**: Configuration snippets, mode demonstrations, practical examples
-   - **Source**: `sources/originals/P2 SmartPins-220809.pdf` (54 pages)
-   - **AI Impact**: Enables AI to generate correct pin configurations
+3. **Flash Filesystem Code** ✅ **COMPLETE**
+   - **Status**: 21 methods analyzed on 2025-08-15
+   - **Results**: 100% source code analysis completion
+   - **Location**: `/sources/extractions/chip-flash-filesystem.../`
+   - **AI Impact**: ✅ System programming patterns documented
 
-### **🟡 HIGH Priority (Significant Developer Value)**
+### **🔄 HIGH Priority (READY FOR EXTRACTION)**
 
-4. **P2 Silicon Documentation v35**
-   - **Why High**: Low-level system programming examples
+4. **P2 Silicon Documentation v35** 🔄 **READY**
+   - **Status**: PDF format available (5-part document)
    - **Expected Assets**: Register manipulation, system initialization, low-level patterns
    - **Code Types**: System programming examples, register access patterns
-   - **AI Impact**: Enables system-level code generation
+   - **Source**: `P2 Documentation v35 - Rev B_C Silicon-Part1of5.pdf` through Part5of5
+   - **AI Impact**: Will enable system-level code generation
 
 5. **P2 Spin Manual Draft**
    - **Why High**: Tutorial progression with educational examples  

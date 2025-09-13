@@ -1,0 +1,11 @@
+'ADDCT1 D,S/#' must be used to establish a CT target. This is done by first using 'GETCT D' to get the current CT
+'value into a register, and then using ADDCT1 to add into that register, thereby making a future CT target, which,
+'when passed, will trigger the CT-passed-CT1 event and set the related event flag.
+
+                   GETCT      x                     'get initial CT
+                   ADDCT1     x,#500                'make initial CT1 target
+
+          .loop    WAITCT1                          'wait for CT to pass CT1 target
+                   ADDCT1 x,#500                    'update CT1 target
+                   DRVNOT #0                        'toggle P0
+                   JMP     #.loop                   'loop to the WAITCT1

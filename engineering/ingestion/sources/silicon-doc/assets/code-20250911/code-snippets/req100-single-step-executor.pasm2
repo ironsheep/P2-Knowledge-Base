@@ -1,0 +1,36 @@
+' Normal XBYTE or single-step bytecode executor (must run from registers or LUT)
+
+            rdfast      #0,bytecodes     'start FIFO read at bytecodes
+
+'                push      #$1FF             'start xbyte                              UNCOMMENT FOR NORMAL XBYTE
+'    _ret_       setq      #$000             '(full 8-bit lookup at LUT $000)          UNCOMMENT FOR NORMAL XBYTE
+
+             rep          @.r,#8            'prepare to single-step by stuffing stack with byteloop address
+             push         ##byteloop        '(bottom stack value gets copied each _RET_ / RET)
+.r
+byteloop     nop                     '21-NOP landing strip for any trailing skip pattern
+             nop                     'that XBYTE would have canceled on _RET_ / RET
+             nop
+             nop
+             nop
+             nop
+             nop
+             nop
+             nop
+             nop
+             nop
+             nop
+             nop
+             nop
+             nop
+             nop
+             nop
+             nop
+             nop
+             nop
+             nop
+             rfbyte    pa                         'get next bytecode into pa
+             getptr    pb                         'get next bytecode address into pb
+             debug(uhex_byte(pa),uhex_long(pb))   'show bytecode and next bytecode address
+             rdlut     temp,pa                    'lookup EXECF long from LUT
+             execf     temp                       'do EXECF to execute bytecode, returns to byteloop

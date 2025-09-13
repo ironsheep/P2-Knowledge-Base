@@ -48,11 +48,50 @@ Systematic workflow for extracting, validating, and cataloging source code snipp
 - **Character-for-character accuracy** - no interpretation or "fixing"
 - **Complete block extraction** - include all visible code, comments, blank lines
 
+**🔴 CRITICAL: Complete Program Extraction Protocol**
+
+**Issue Identified**: Code programs may span multiple sections or have separated data definitions, leading to incomplete extraction and "Expected a unique name" compilation errors.
+
+**Prevention Strategy**:
+1. **Context Scanning**: When extracting any code block, scan ±5 pages for:
+   - Variable/constant definitions (`CON` sections)
+   - Data declarations (`DAT` sections with values)
+   - Method dependencies (referenced `PUB`/`PRI` methods)
+   - Include files or dependencies mentioned in comments
+
+2. **Completeness Verification**:
+   ```bash
+   # Before saving any extracted program:
+   # 1. Scan for undefined symbols in comments or error patterns
+   # 2. Check for referenced constants/variables not defined in extracted code
+   # 3. Look for method calls to undefined procedures
+   # 4. Search nearby pages for matching definitions
+   ```
+
+3. **Multi-Section Programs**:
+   - **CON sections**: Often separated from main program logic
+   - **DAT sections**: May contain lookup tables, sync patterns, streamer modes
+   - **Method definitions**: Supporting PUB/PRI methods may be on different pages
+   - **Assembly blocks**: PASM2 code may reference constants defined elsewhere
+
+4. **Documentation Patterns to Watch**:
+   - "Complete program is shown below" → expect all dependencies included
+   - "Add these constants" → separate CON section likely exists
+   - "Supporting data:" → separate DAT section with required values
+   - References to external files (`.bmp`, `.wav`) → note as data dependencies
+
+5. **Extraction Verification Questions**:
+   - [ ] Does this program compile without external dependencies?
+   - [ ] Are all referenced symbols defined within the extracted code?
+   - [ ] Have I captured complete CON/DAT/OBJ sections if present?
+   - [ ] Are there hints in surrounding text about missing components?
+
 **Context Capture**:
 - **Purpose**: Extract surrounding explanatory text
 - **Suggested Filenames**: Capture any filename references in documentation
 - **Page/Section Location**: Record source location for traceability
 - **Related Assets**: Note any associated images (oscilloscope traces, circuit diagrams)
+- **Completeness Indicators**: Note any references to "complete program" or "full listing"
 
 ### 2. Metadata & Context Documentation
 
