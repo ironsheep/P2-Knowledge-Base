@@ -1,0 +1,9 @@
+register: "IJMP3"
+type: register
+category: "Interrupt Vectors"
+description: |
+  Interrupt 3 jump vector
+examples:
+  - "IJMP3 := @interrupt3_handler"
+address: "496"
+access: "read_write"

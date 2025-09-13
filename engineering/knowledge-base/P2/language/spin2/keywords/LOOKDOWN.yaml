@@ -1,0 +1,8 @@
+keyword: "LOOKDOWN"
+type: keyword
+category: "Built-in Functions"
+description: |
+  Returns index of matching value in list
+syntax: "LOOKDOWN(value : list)"
+examples:
+  - "index := LOOKDOWN(day : \"Mon\", \"Tue\", \"Wed\")"

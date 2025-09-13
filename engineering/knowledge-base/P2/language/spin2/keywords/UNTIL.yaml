@@ -1,0 +1,12 @@
+keyword: "UNTIL"
+type: keyword
+category: "Control Flow"
+description: |
+  Loop condition - continue until condition becomes true
+syntax: |
+  REPEAT UNTIL condition
+    statements
+examples:
+  - |
+    REPEAT UNTIL sensor_triggered
+      check_sensor()

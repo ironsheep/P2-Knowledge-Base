@@ -1,0 +1,8 @@
+command: "SDEC"
+type: debug_command
+category: "Decimal Format"
+description: |
+  Signed decimal format
+syntax: "['SDEC(value)']"
+examples:
+  - "DEBUG(SDEC(temperature))"

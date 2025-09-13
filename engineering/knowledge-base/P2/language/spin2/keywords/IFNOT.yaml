@@ -1,0 +1,12 @@
+keyword: "IFNOT"
+type: keyword
+category: "Control Flow"
+description: |
+  Conditional execution with negated condition
+syntax: |
+  IFNOT condition
+    statements
+examples:
+  - |
+    IFNOT sensor_active
+      error_handler()

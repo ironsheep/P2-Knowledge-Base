@@ -1,0 +1,10 @@
+register: "PTRB"
+type: register
+category: "Special Function"
+description: |
+  Pointer B register
+examples:
+  - "PTRB := @array"
+  - "WRLONG data, PTRB++"
+address: "505"
+access: "read_write"

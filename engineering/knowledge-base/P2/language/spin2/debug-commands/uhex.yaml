@@ -1,0 +1,8 @@
+command: "UHEX"
+type: debug_command
+category: "Hexadecimal Format"
+description: |
+  Unsigned hexadecimal format
+syntax: "['UHEX(value)']"
+examples:
+  - "DEBUG(UHEX(address))"

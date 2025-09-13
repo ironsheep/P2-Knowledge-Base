@@ -1,0 +1,7 @@
+symbol: "^@"
+type: special_symbol
+category: "Special"
+description: |
+  Object address operator - address within object
+examples:
+  - "obj_addr := ^@method"

@@ -1,0 +1,8 @@
+symbol: "."
+type: special_symbol
+category: "Special"
+description: |
+  Decimal point or object method access
+examples:
+  - "float_val := 3.14"
+  - "obj.method()"

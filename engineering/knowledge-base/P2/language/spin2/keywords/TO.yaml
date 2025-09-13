@@ -1,0 +1,12 @@
+keyword: "TO"
+type: keyword
+category: "Control Flow"
+description: |
+  Ending value in REPEAT loop range
+syntax: |
+  REPEAT variable FROM start TO end
+    statements
+examples:
+  - |
+    REPEAT i FROM 1 TO 10
+      sum += i

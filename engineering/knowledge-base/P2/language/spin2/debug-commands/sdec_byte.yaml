@@ -1,0 +1,8 @@
+command: "SDEC_BYTE"
+type: debug_command
+category: "Decimal Format"
+description: |
+  Signed decimal byte format
+syntax: "['SDEC_BYTE(value)']"
+examples:
+  - "DEBUG(SDEC_BYTE(offset))"

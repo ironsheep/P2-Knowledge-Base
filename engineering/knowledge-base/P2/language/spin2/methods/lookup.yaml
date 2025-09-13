@@ -1,44 +1,50 @@
 method: LOOKUP
 type: method
-description: |
-  Look up value from list using 1-based index
+description: Look up value in table using 1-based indexing
 category: Lookup Operations
-syntax: "result := LOOKUP(Index : Value1, Value2, ..., ValueN)"
+syntax: 'result := LOOKUP(Index : Value1, Value2, ..., ValueN)'
 parameters:
-  - name: "Index"
-    type: "integer"
-    description: "1-based index into value list"
-  - name: "Values"
-    type: "list"
-    description: "Comma-separated list of values or ranges"
+- name: Index
+  type: integer
+  description: 1-based index into value list
+- name: Values
+  type: list
+  description: Comma-separated list of values or ranges
 returns:
-  type: "long"
-  description: "Value at index position, or 0 if out of range"
+  type: long
+  description: Value at index position, or 0 if out of range
 examples:
-  - code: |
-      ' Get value by index
-      value := LOOKUP(3 : 10, 20, 30, 40, 50)
-      ' Returns 30 (3rd item)
-    description: "Basic indexed lookup"
-  - code: |
-      ' Menu selection
-      address := LOOKUP(choice : @option1, @option2, @option3)
-    description: "Select address by menu choice"
-  - code: |
-      ' Use ranges
-      char := LOOKUP(index : "A".."Z", "0".."9")
-    description: "Lookup with character ranges"
+- code: ''' Get value by index
+
+    value := LOOKUP(3 : 10, 20, 30, 40, 50)
+
+    '' Returns 30 (3rd item)
+
+    '
+  description: Basic indexed lookup
+- code: ''' Menu selection
+
+    address := LOOKUP(choice : @option1, @option2, @option3)
+
+    '
+  description: Select address by menu choice
+- code: ''' Use ranges
+
+    char := LOOKUP(index : "A".."Z", "0".."9")
+
+    '
+  description: Lookup with character ranges
 notes:
-  - "Index is 1-based (1 = first item)"
-  - "Returns 0 if index < 1 or > count"
-  - "Supports ranges with .. operator"
-  - "Values evaluated at compile time if possible"
-  - "Efficient for small lookup tables"
+- Index is 1-based (1 = first item)
+- Returns 0 if index < 1 or > count
+- Supports ranges with .. operator
+- Values evaluated at compile time if possible
+- Efficient for small lookup tables
 related:
-  - LOOKUPZ
-  - LOOKDOWN
-  - LOOKDOWNZ
+- LOOKUPZ
+- LOOKDOWN
+- LOOKDOWNZ
 see_also:
-  - "Table lookups"
-  - "Indexed access"
-  - "Value selection"
+- Table lookups
+- Indexed access
+- Value selection

@@ -1,0 +1,8 @@
+keyword: "LOOKUPZ"
+type: keyword
+category: "Built-in Functions"
+description: |
+  Returns value from list at given zero-based index
+syntax: "LOOKUPZ(index : list)"
+examples:
+  - "color := LOOKUPZ(index : RED, GREEN, BLUE)"

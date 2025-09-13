@@ -1,0 +1,8 @@
+command: "PC_KEY"
+type: debug_command
+category: "Debug Control"
+description: |
+  PC keyboard input
+syntax: "['PC_KEY']"
+examples:
+  - "DEBUG(PC_KEY)"

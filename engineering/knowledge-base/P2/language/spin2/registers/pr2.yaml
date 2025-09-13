@@ -1,0 +1,9 @@
+register: "PR2"
+type: register
+category: "General Purpose"
+description: |
+  General purpose register 2
+examples:
+  - "PR2 := buffer_ptr"
+address: "498"
+access: "read_write"

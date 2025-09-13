@@ -1,0 +1,8 @@
+command: "UDEC_LONG"
+type: debug_command
+category: "Decimal Format"
+description: |
+  Unsigned decimal long format
+syntax: "['UDEC_LONG(value)']"
+examples:
+  - "DEBUG(UDEC_LONG(timestamp))"

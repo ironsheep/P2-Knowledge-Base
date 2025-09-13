@@ -1,0 +1,9 @@
+register: "DIRA"
+type: register
+category: "I/O Registers"
+description: |
+  Direction register A (pins 0-31)
+examples:
+  - "DIRA := %11111111  // Set pins 0-7 as outputs"
+address: "506"
+access: "read_write"

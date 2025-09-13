@@ -1,53 +1,46 @@
 method: BYTECOMP
 type: method
-description: |
-  Compare blocks of bytes in memory
+description: Complement bytes within a long value
 category: Memory Operations
-syntax: "result := BYTECOMP(Address1, Address2, Count)"
+syntax: result := BYTECOMP(Address1, Address2, Count)
 parameters:
-  - name: "Address1"
-    type: "address"
-    description: "First hub RAM address for comparison"
-  - name: "Address2"
-    type: "address"
-    description: "Second hub RAM address for comparison"
-  - name: "Count"
-    type: "integer"
-    description: "Number of bytes to compare"
+- name: Address1
+  type: address
+  description: First hub RAM address for comparison
+- name: Address2
+  type: address
+  description: Second hub RAM address for comparison
+- name: Count
+  type: integer
+  description: Number of bytes to compare
 returns:
-  type: "integer"
-  description: "TRUE (-1) if all bytes match, FALSE (0) if any bytes differ"
+  type: integer
+  description: TRUE (-1) if all bytes match, FALSE (0) if any bytes differ
 examples:
-  - code: |
-      ' Compare two strings
-      if BYTECOMP(@string1, @string2, 10)
-        ' First 10 bytes match
-    description: "Compare fixed-length byte sequences"
-  - code: |
-      ' Verify buffer contents
-      if BYTECOMP(@buffer, @expected, 256)
-        ' Buffer matches expected data
-    description: "Verify buffer against expected values"
-  - code: |
-      ' Check for pattern
-      if BYTECOMP(@data[offset], @pattern, 4)
-        ' Found 4-byte pattern at offset
-    description: "Search for byte pattern in data"
+- code: "' Compare two strings\nif BYTECOMP(@string1, @string2, 10)\n  ' First 10\
+    \ bytes match\n"
+  description: Compare fixed-length byte sequences
+- code: "' Verify buffer contents\nif BYTECOMP(@buffer, @expected, 256)\n  ' Buffer\
+    \ matches expected data\n"
+  description: Verify buffer against expected values
+- code: "' Check for pattern\nif BYTECOMP(@data[offset], @pattern, 4)\n  ' Found 4-byte\
+    \ pattern at offset\n"
+  description: Search for byte pattern in data
 notes:
-  - "Returns TRUE (-1) if all bytes match"
-  - "Returns FALSE (0) on first mismatch"
-  - "Count of 0 always returns TRUE"
-  - "Efficient block comparison operation"
-  - "Case-sensitive byte-by-byte comparison"
+- Returns TRUE (-1) if all bytes match
+- Returns FALSE (0) on first mismatch
+- Count of 0 always returns TRUE
+- Efficient block comparison operation
+- Case-sensitive byte-by-byte comparison
 timing:
-  description: "Varies based on count"
-  cycles: "~8 + count clock cycles typical"
+  description: Varies based on count
+  cycles: ~8 + count clock cycles typical
 related:
-  - WORDCOMP
-  - LONGCOMP
-  - STRCOMP
-  - BYTEMOVE
+- WORDCOMP
+- LONGCOMP
+- STRCOMP
+- BYTEMOVE
 see_also:
-  - "Memory comparison"
-  - "String operations"
-  - "Pattern matching"
+- Memory comparison
+- String operations
+- Pattern matching

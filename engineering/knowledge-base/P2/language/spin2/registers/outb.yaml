@@ -1,0 +1,9 @@
+register: "OUTB"
+type: register
+category: "I/O Registers"
+description: |
+  Output register B (pins 32-63)
+examples:
+  - "OUTB := high_pin_states"
+address: "509"
+access: "read_write"

@@ -1,0 +1,8 @@
+directive: "FIT"
+type: assembly_directive
+category: "Assembly"
+description: |
+  Ensure code fits in specified limit
+syntax: "['FIT limit']"
+examples:
+  - "FIT $1F0  // Must fit in COG space"

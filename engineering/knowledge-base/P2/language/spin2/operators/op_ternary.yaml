@@ -1,0 +1,7 @@
+operator: "? :"
+type: operator
+description: |
+  Ternary conditional operator
+category: Assignment
+examples:
+  - "result := condition ? true_value : false_value"

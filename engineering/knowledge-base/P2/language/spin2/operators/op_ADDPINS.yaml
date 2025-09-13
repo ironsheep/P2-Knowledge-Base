@@ -1,0 +1,7 @@
+operator: "ADDPINS"
+type: operator
+description: |
+  Add pin count to pin number
+category: Pin
+examples:
+  - "pin_range := start_pin ADDPINS pin_count"

@@ -1,0 +1,12 @@
+keyword: "PRI"
+type: keyword
+category: "Block Structure"
+description: |
+  Private method declaration - accessible only within object
+syntax: |
+  PRI method_name(parameters) : return_variables | local_variables
+    statements
+examples:
+  - |
+    PRI calculate_sum(a, b) : result
+      result := a + b

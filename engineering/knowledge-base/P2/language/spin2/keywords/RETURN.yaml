@@ -1,0 +1,9 @@
+keyword: "RETURN"
+type: keyword
+category: "Control Flow"
+description: |
+  Return from method with optional value
+syntax: "RETURN [value]"
+examples:
+  - "RETURN"
+  - "RETURN result"

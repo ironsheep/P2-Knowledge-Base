@@ -1,0 +1,10 @@
+register: "OUTA"
+type: register
+category: "I/O Registers"
+description: |
+  Output register A (pins 0-31)
+examples:
+  - "OUTA := led_pattern"
+  - "!OUTA[led_pin]"
+address: "508"
+access: "read_write"

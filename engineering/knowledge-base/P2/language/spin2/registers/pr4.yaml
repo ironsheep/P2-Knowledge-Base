@@ -1,0 +1,9 @@
+register: "PR4"
+type: register
+category: "General Purpose"
+description: |
+  General purpose register 4
+examples:
+  - "PR4 := data_length"
+address: "500"
+access: "read_write"

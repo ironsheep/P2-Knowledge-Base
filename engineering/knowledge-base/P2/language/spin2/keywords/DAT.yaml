@@ -1,0 +1,12 @@
+keyword: "DAT"
+type: keyword
+category: "Block Structure"
+description: |
+  Data section - contains data and inline assembly
+syntax: |
+  DAT
+    label type value
+examples:
+  - |
+    DAT
+      message BYTE "Hello World", 0

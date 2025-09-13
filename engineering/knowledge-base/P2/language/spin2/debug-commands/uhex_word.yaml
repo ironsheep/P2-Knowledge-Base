@@ -1,0 +1,8 @@
+command: "UHEX_WORD"
+type: debug_command
+category: "Hexadecimal Format"
+description: |
+  Unsigned hexadecimal word format
+syntax: "['UHEX_WORD(value)']"
+examples:
+  - "DEBUG(UHEX_WORD(port))"

@@ -1,0 +1,8 @@
+command: "BOOL"
+type: debug_command
+category: "Boolean Format"
+description: |
+  Boolean format (v44+)
+syntax: "['BOOL(value)']"
+examples:
+  - "DEBUG(BOOL(flag))"

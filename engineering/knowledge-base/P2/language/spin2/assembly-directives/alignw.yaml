@@ -1,0 +1,8 @@
+directive: "ALIGNW"
+type: assembly_directive
+category: "Assembly"
+description: |
+  Align to word boundary (2 bytes)
+syntax: "['ALIGNW']"
+examples:
+  - "ALIGNW  // Align to next word boundary"

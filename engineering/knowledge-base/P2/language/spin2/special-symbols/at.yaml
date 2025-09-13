@@ -1,0 +1,8 @@
+symbol: "@"
+type: special_symbol
+category: "Special"
+description: |
+  Address-of operator - get memory address
+examples:
+  - "ptr := @variable"
+  - "COGINIT(0, @assembly_code, @params)"

@@ -1,0 +1,12 @@
+keyword: "ELSE"
+type: keyword
+category: "Control Flow"
+description: |
+  Default case in IF statement
+syntax: |
+  ELSE
+    statements
+examples:
+  - |
+    ELSE
+      result := 0

@@ -1,0 +1,8 @@
+directive: "ALIGNL"
+type: assembly_directive
+category: "Assembly"
+description: |
+  Align to long boundary (4 bytes)
+syntax: "['ALIGNL']"
+examples:
+  - "ALIGNL  // Align to next long boundary"

@@ -1,0 +1,12 @@
+keyword: "WHILE"
+type: keyword
+category: "Control Flow"
+description: |
+  Loop condition - continue while condition remains true
+syntax: |
+  REPEAT WHILE condition
+    statements
+examples:
+  - |
+    REPEAT WHILE data_available
+      process_data()

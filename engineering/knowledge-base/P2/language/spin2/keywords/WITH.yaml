@@ -1,0 +1,10 @@
+keyword: "WITH"
+type: keyword
+category: "Control Flow"
+description: |
+  Object context specifier for method calls
+syntax: "WITH object"
+examples:
+  - |
+    WITH serial
+      str("Hello World")

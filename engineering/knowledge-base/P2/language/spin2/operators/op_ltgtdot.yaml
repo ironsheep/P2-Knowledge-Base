@@ -1,0 +1,7 @@
+operator: "<>."
+type: operator
+description: |
+  Floating point inequality comparison
+category: Float Compare
+examples:
+  - "IF result <>. 0.0\n  handle_error()"

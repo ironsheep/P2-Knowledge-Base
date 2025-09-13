@@ -1,0 +1,8 @@
+variable: "VARBASE"
+type: system_variable
+data_type: "Unknown"
+description: |
+  Base address of VAR section
+access: "read"
+examples:
+  - "var_start := VARBASE"

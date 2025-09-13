@@ -1,0 +1,12 @@
+keyword: "QUIT"
+type: keyword
+category: "Control Flow"
+description: |
+  Exit loop immediately
+syntax: "QUIT"
+examples:
+  - |
+    REPEAT
+      IF error_condition
+        QUIT
+      process_data()

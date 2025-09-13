@@ -1,0 +1,9 @@
+register: "PR5"
+type: register
+category: "General Purpose"
+description: |
+  General purpose register 5
+examples:
+  - "PR5 := loop_count"
+address: "501"
+access: "read_write"

@@ -1,0 +1,8 @@
+command: "ZSTR"
+type: debug_command
+category: "String Format"
+description: |
+  Zero-terminated string
+syntax: "['ZSTR(string_ptr)']"
+examples:
+  - "DEBUG(ZSTR(@message))"

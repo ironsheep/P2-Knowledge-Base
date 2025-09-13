@@ -1,0 +1,7 @@
+operator: "BMASK"
+type: operator
+description: |
+  Create bit mask from bit count (also PASM2 instruction)
+category: Unary
+examples:
+  - "mask := BMASK(8)  // Returns $FF"

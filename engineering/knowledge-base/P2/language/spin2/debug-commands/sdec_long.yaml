@@ -1,0 +1,8 @@
+command: "SDEC_LONG"
+type: debug_command
+category: "Decimal Format"
+description: |
+  Signed decimal long format
+syntax: "['SDEC_LONG(value)']"
+examples:
+  - "DEBUG(SDEC_LONG(position))"

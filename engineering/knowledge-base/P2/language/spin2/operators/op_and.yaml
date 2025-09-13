@@ -1,5 +1,7 @@
 operator: "AND"
 type: operator
 description: |
-  Boolean AND/NAND
-category: Logical AND
+  Logical AND (also PASM2 instruction)
+category: Unary
+examples:
+  - "IF ready AND enabled\n  start()"

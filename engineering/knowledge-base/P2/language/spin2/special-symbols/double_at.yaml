@@ -1,0 +1,7 @@
+symbol: "@@"
+type: special_symbol
+category: "Special"
+description: |
+  Absolute address operator - get absolute hub address
+examples:
+  - "hub_addr := @@variable"

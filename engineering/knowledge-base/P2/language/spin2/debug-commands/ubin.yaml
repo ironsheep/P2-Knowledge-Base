@@ -1,0 +1,8 @@
+command: "UBIN"
+type: debug_command
+category: "Binary Format"
+description: |
+  Unsigned binary format
+syntax: "['UBIN(value)']"
+examples:
+  - "DEBUG(UBIN(mask))"

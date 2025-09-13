@@ -1,0 +1,8 @@
+keyword: "FILE"
+type: keyword
+category: "Special"
+description: |
+  Compiler directive for file inclusion
+syntax: "FILE filename"
+examples:
+  - "FILE \"config.spin2\""

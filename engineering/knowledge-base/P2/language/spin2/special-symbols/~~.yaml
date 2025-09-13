@@ -1,0 +1,7 @@
+symbol: "~~"
+type: special_symbol
+category: "Special"
+description: |
+  Post-set operator - use value then set to -1
+examples:
+  - "value := ~~flag  // use flag then set to -1"

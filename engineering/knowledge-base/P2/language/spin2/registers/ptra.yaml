@@ -1,0 +1,10 @@
+register: "PTRA"
+type: register
+category: "Special Function"
+description: |
+  Pointer A register
+examples:
+  - "PTRA := @buffer"
+  - "RDLONG value, PTRA++"
+address: "504"
+access: "read_write"

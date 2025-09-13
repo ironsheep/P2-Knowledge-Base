@@ -1,0 +1,12 @@
+keyword: "ELSEIF"
+type: keyword
+category: "Control Flow"
+description: |
+  Additional conditional branch in IF statement
+syntax: |
+  ELSEIF condition
+    statements
+examples:
+  - |
+    ELSEIF x > 10
+      result := "high"

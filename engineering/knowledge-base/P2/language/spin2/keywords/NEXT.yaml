@@ -1,0 +1,12 @@
+keyword: "NEXT"
+type: keyword
+category: "Control Flow"
+description: |
+  Continue to next iteration of loop
+syntax: "NEXT"
+examples:
+  - |
+    REPEAT i FROM 1 TO 10
+      IF i == 5
+        NEXT
+      process(i)

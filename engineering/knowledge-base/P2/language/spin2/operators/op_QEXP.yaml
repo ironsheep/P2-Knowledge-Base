@@ -1,0 +1,7 @@
+operator: "QEXP"
+type: operator
+description: |
+  Quick exponential (also PASM2 instruction)
+category: Unary
+examples:
+  - "exp_val := QEXP(value)"

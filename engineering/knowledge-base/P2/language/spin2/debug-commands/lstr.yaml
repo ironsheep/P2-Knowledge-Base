@@ -1,0 +1,8 @@
+command: "LSTR"
+type: debug_command
+category: "String Format"
+description: |
+  Length-prefixed string
+syntax: "['LSTR(string_ptr)']"
+examples:
+  - "DEBUG(LSTR(@buffer))"

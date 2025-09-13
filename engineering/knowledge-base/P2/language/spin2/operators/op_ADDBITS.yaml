@@ -1,0 +1,7 @@
+operator: "ADDBITS"
+type: operator
+description: |
+  Add bit count to pin number
+category: Pin
+examples:
+  - "pin_range := start_pin ADDBITS bit_count"

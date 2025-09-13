@@ -1,0 +1,7 @@
+operator: "+//"
+type: operator
+description: |
+  Unsigned remainder (modulo)
+category: Arithmetic
+examples:
+  - "remainder := dividend +// divisor"

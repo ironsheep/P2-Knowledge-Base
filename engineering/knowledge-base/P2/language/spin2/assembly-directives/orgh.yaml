@@ -1,0 +1,8 @@
+directive: "ORGH"
+type: assembly_directive
+category: "Assembly"
+description: |
+  Set origin address for hub RAM
+syntax: "['ORGH address']"
+examples:
+  - "ORGH $400  // Start at hub address $400"

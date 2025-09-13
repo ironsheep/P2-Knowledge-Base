@@ -1,0 +1,8 @@
+symbol: "_"
+type: special_symbol
+category: "Special"
+description: |
+  Digit separator in numeric literals
+examples:
+  - "freq := 80_000_000"
+  - "mask := %1111_0000_1111_0000"

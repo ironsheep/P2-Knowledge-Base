@@ -1,0 +1,8 @@
+keyword: "LOOKDOWNZ"
+type: keyword
+category: "Built-in Functions"
+description: |
+  Returns zero-based index of matching value in list
+syntax: "LOOKDOWNZ(value : list)"
+examples:
+  - "index := LOOKDOWNZ(color : RED, GREEN, BLUE)"

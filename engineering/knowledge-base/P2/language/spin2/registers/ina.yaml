@@ -1,0 +1,9 @@
+register: "INA"
+type: register
+category: "I/O Registers"
+description: |
+  Input register A (pins 0-31)
+examples:
+  - "button_state := INA[button_pin]"
+address: "510"
+access: "read"

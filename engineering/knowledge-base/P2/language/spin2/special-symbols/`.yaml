@@ -1,0 +1,7 @@
+symbol: "`"
+type: special_symbol
+category: "Special"
+description: |
+  Tick operator for special formatting
+examples:
+  - "`expression"

@@ -1,0 +1,8 @@
+command: "UHEX_BYTE"
+type: debug_command
+category: "Hexadecimal Format"
+description: |
+  Unsigned hexadecimal byte format
+syntax: "['UHEX_BYTE(value)']"
+examples:
+  - "DEBUG(UHEX_BYTE(flags))"

@@ -1,0 +1,7 @@
+operator: "FABS"
+type: operator
+description: |
+  Floating point absolute value
+category: Math
+examples:
+  - "distance := FABS(float_difference)"

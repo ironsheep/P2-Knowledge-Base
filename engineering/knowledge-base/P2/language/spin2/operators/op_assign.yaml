@@ -1,0 +1,8 @@
+operator: ":="
+type: operator
+description: |
+  Assignment operator
+category: Assignment
+examples:
+  - "variable := value"
+  - "result := calculate(x, y)"

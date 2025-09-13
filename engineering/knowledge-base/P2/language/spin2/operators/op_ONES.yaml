@@ -1,0 +1,7 @@
+operator: "ONES"
+type: operator
+description: |
+  Count number of 1 bits (also PASM2 instruction)
+category: Unary
+examples:
+  - "count := ONES(%10110101)  // Returns 5"

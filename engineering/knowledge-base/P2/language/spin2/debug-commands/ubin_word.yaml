@@ -1,0 +1,8 @@
+command: "UBIN_WORD"
+type: debug_command
+category: "Binary Format"
+description: |
+  Unsigned binary word format
+syntax: "['UBIN_WORD(value)']"
+examples:
+  - "DEBUG(UBIN_WORD(config))"

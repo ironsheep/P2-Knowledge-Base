@@ -1,0 +1,8 @@
+symbol: "%"
+type: special_symbol
+category: "Special"
+description: |
+  Binary number prefix
+examples:
+  - "mask := %11110000"
+  - "pattern := %1010_1010"
