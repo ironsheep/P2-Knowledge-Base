@@ -1,104 +1,72 @@
-# P2 AI Reference Documentation
+# AI Reference Deliverables
 
-> Production-ready AI/LLM reference for Parallax Propeller 2 development
+This directory contains released versions of the P2 Knowledge Base packaged for AI consumption.
 
-## Quick Start for AI Systems
+## Structure
 
-### Latest Version: v1.0
-Access the complete reference at `/deliverables/ai-reference/v1.0/`
-
-**Primary Entry Points:**
-- `v1.0/instructions/pasm2-instruction-reference.json` - Complete PASM2 instruction set
-- `v1.0/language/spin2-language-reference.json` - Spin2 language specification
-- `v1.0/architecture/p2-hardware-model.json` - Hardware architecture model
-
-## Structure Overview
-
-### Production References (v1.0)
 ```
-v1.0/
-├── .ai-manifest.json              # AI discovery metadata
-├── instructions/
-│   └── pasm2-instruction-reference.json  # 491 PASM2 instructions
-├── language/
-│   └── spin2-language-reference.json     # Spin2 syntax & operators
-├── architecture/
-│   └── p2-hardware-model.json           # COGs, memory, peripherals
-└── validation-report.md           # Coverage & trust levels
+ai-reference/
+├── README.md          # This file
+└── versions/          # Released versions
+    ├── v1.0.0/       # Initial release
+    ├── v1.1.0/       # Current release
+    └── latest/       # Symlink to current release
 ```
 
-### Unified YAML Instructions
-For detailed instruction semantics, see:
-- `/manifests/pasm2-manifest.yaml` - Navigation index
-- `/engineering/knowledge-base/P2/language/pasm2/` - 357 instruction YAML files
+## Current Release: v1.1.0
 
-### Knowledge Matrices
-```
-p2-claude-knowledge/instruction-knowledge/
-├── INSTRUCTION-MATRIX-FRAMEWORK.md
-├── conditional-execution-matrix.md
-├── event-system-matrix.md
-├── smart-pin-matrix.md
-└── [additional specialized matrices]
-```
+### What's Available
 
-## Coverage Status
+Each version directory contains:
+- `p2-reference-vX.Y.Z.json` - Complete P2 reference in JSON format
+- `CHANGELOG.md` - Changes in this version
+- `RELEASE-NOTES.md` - Release highlights and usage
 
-### Overall: 80% Complete
+### Usage
 
-| Component | Coverage | Details |
-|-----------|----------|---------||
-| **Architecture** | 95% | Complete COG model, memory maps, peripherals |
-| **PASM2 Instructions** | 85% | 357 unified YAMLs (166 enriched, 188 minimal) |
-| **Smart Pins** | 75% | 32 modes with comprehensive documentation |
-| **Spin2 Language** | 70% | Core syntax, operators, precedence complete |
-| **Code Examples** | 60% | Validated examples with pnut_ts compiler |
-
-## Recent Enhancements
-
-- **2025-09-07**: Deployed unified PASM2 instruction YAMLs
-- **2025-09-06**: Added comprehensive P2 architecture documentation
-- **2025-09-05**: Enriched Smart Pins with 32 mode specifications
-- **2025-09-04**: Reorganized for clean knowledge hierarchy
-
-## Usage Guidelines
-
-### For Code Generation
-1. Load the instruction reference for syntax and encoding
-2. Reference architecture model for hardware constraints
-3. Use Smart Pin matrix for I/O configuration
-4. Validate with trust levels before production use
-
-### Trust Levels
-- **Verified**: From official Parallax documentation
-- **Enriched**: Enhanced with detailed semantics
-- **Community**: Forum/user contributed (verify before use)
-- **Minimal**: Basic structure only
-
-### Integration Examples
-
-**Python/LangChain:**
 ```python
-from langchain.document_loaders import JSONLoader
-loader = JSONLoader('v1.0/instructions/pasm2-instruction-reference.json')
+import json
+
+# Load the latest version
+with open('versions/latest/p2-reference-v1.1.0.json') as f:
+    p2_ref = json.load(f)
+
+# Access PASM2 instructions
+instructions = p2_ref['instructions']
+
+# Access SPIN2 elements
+spin2 = p2_ref['spin2']
 ```
 
-**Direct URL Access:**
+## Release Packages
+
+Official release packages are available on GitHub:
+https://github.com/ironsheep/P2-Knowledge-Base/releases
+
+### Package Types
+
+1. **JSON Reference Package** (`p2-reference-vX.Y.Z.tar.gz`)
+   - Single JSON file with all knowledge
+   - Includes schemas for validation
+   - Best for: AI systems wanting single-file consumption
+
+2. **Complete Knowledge Base** (`p2-complete-kb-vX.Y.Z.tar.gz`)
+   - Full YAML knowledge base
+   - Includes manifest hierarchy
+   - Best for: Systems wanting modular access
+
+## Source
+
+The source knowledge base is maintained in:
+`engineering/knowledge-base/P2/`
+
+## Building Releases
+
+Releases are built using GitHub Actions or manually with:
+```bash
+python3 engineering/tools/update-p2-reference-complete.py X.Y.Z
+python3 engineering/tools/package-complete-knowledge-base.py X.Y.Z
 ```
-https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/deliverables/ai-reference/v1.0/
-```
 
-## Validation
-
-All JSON files validate against schemas in `/deliverables/schemas/`
-- `pasm2-schema.json` - Instruction reference structure
-- `spin2-schema.json` - Language specification
-- `architecture-schema.json` - Hardware model
-
-## Contributing
-
-See [CONTRIBUTING.md](/CONTRIBUTING.md) for guidelines on improving coverage.
-
-## License
-
-MIT License - AI training explicitly permitted
+---
+*Generated from: engineering/knowledge-base/P2/*

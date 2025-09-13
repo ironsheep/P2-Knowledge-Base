@@ -1,0 +1,26 @@
+operator: "..."
+type: operator
+category: "Special"
+description: |
+  Line continuation operator - allows a single logical line to span multiple physical lines in SPIN2
+syntax: 
+  - "statement ... continuation"
+  - "expression part1 + part2 + ..."
+  - "          part3 + part4"
+examples:
+  - |
+    result := value1 + value2 + ...
+              value3 + value4
+  - |
+    IF condition1 AND condition2 AND ...
+       condition3 AND condition4
+      ' Execute if all conditions true
+  - |
+    REPEAT count FROM 1 TO 100 STEP ...
+                      increment_value
+notes:
+  - "The three dots must be the last non-comment item on the line"
+  - "The continuation appears on the next line with appropriate indentation"
+  - "Comments can appear after the ellipsis"
+documentation_source: "SPIN2 Language Reference"
+documentation_level: comprehensive
