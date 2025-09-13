@@ -127,47 +127,20 @@ jobs:
         echo "📋 Release artifacts:"
         ls -lh releases/v${{ env.VERSION }}/
     
-    - name: Create GitHub Release
-      id: create_release
-      uses: actions/create-release@v1
+    - name: Create GitHub Release with Assets
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ env.VERSION }}
-        release_name: P2 Knowledge Base v${{ env.VERSION }}
-        body_path: RELEASE_CHANGELOG.md
-        draft: true  # Create as draft for review
-        prerelease: false
-    
-    - name: Upload JSON Reference Package
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: releases/v${{ env.VERSION }}/p2-reference-v${{ env.VERSION }}.tar.gz
-        asset_name: p2-reference-v${{ env.VERSION }}.tar.gz
-        asset_content_type: application/gzip
-    
-    - name: Upload Complete Knowledge Base Package
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: releases/v${{ env.VERSION }}/p2-complete-kb-v${{ env.VERSION }}.tar.gz
-        asset_name: p2-complete-kb-v${{ env.VERSION }}.tar.gz
-        asset_content_type: application/gzip
-    
-    - name: Upload Checksums
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: releases/v${{ env.VERSION }}/checksums-v${{ env.VERSION }}.txt
-        asset_name: checksums-v${{ env.VERSION }}.txt
-        asset_content_type: text/plain
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Create the release as a draft
+        gh release create v${{ env.VERSION }} \
+          --title "P2 Knowledge Base v${{ env.VERSION }}" \
+          --notes-file RELEASE_CHANGELOG.md \
+          --draft \
+          --repo ${{ github.repository }} \
+          releases/v${{ env.VERSION }}/p2-reference-v${{ env.VERSION }}.tar.gz \
+          releases/v${{ env.VERSION }}/p2-complete-kb-v${{ env.VERSION }}.tar.gz \
+          releases/v${{ env.VERSION }}/checksums-v${{ env.VERSION }}.txt
     
     - name: Summary
       run: |
