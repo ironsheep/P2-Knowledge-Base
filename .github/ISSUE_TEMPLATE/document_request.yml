@@ -1,0 +1,134 @@
+name: Document Request
+description: Request new documentation or expanded coverage for P2 topics
+title: "[DOC REQUEST] "
+labels: ["documentation", "enhancement", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping identify gaps in the P2 Knowledge Base!
+        Your request helps prioritize what documentation to create next.
+
+  - type: textarea
+    id: document-type
+    attributes:
+      label: Document Type
+      description: Describe what type of documentation you're requesting
+      placeholder: |
+        For example:
+        - A tutorial on using Smart Pins for serial communication
+        - Reference documentation for CORDIC operations
+        - A guide to COG synchronization techniques
+        - Examples of efficient memory management
+    validations:
+      required: true
+
+  - type: input
+    id: topic
+    attributes:
+      label: Topic/Subject
+      description: What specific P2 topic needs documentation?
+      placeholder: "e.g., CORDIC operations, Smart Pin modes, COG synchronization"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-gap
+    attributes:
+      label: Current Gap
+      description: What information is currently missing or insufficient?
+      placeholder: |
+        Currently, there's no documentation about...
+        The existing docs don't explain how to...
+        AI struggles to generate code for...
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: Use Cases
+      description: How would this documentation help P2 development?
+      placeholder: |
+        This documentation would enable...
+        Common scenarios include...
+        Developers often need to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: specific-questions
+    attributes:
+      label: Specific Questions to Answer
+      description: What specific questions should this documentation address?
+      placeholder: |
+        - How do I configure...?
+        - What's the difference between X and Y?
+        - When should I use...?
+        - What are the timing constraints for...?
+    validations:
+      required: true
+
+  - type: textarea
+    id: example-scenario
+    attributes:
+      label: Example Scenario
+      description: Provide a concrete example where this documentation would help
+      placeholder: |
+        When trying to implement a UART using Smart Pins...
+        For a project that needs to synchronize multiple COGs...
+      render: markdown
+    validations:
+      required: false
+
+  - type: textarea
+    id: existing-sources
+    attributes:
+      label: Existing Sources
+      description: Are you aware of any existing documentation on this topic?
+      placeholder: |
+        - P2 Silicon Documentation v35, pages...
+        - Parallax Forums post: [link]
+        - Community example: [link]
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgently do you need this documentation?
+      options:
+        - Urgent - Blocking current project
+        - High - Needed within weeks
+        - Medium - Would be helpful soon
+        - Low - General improvement
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Can you help create this documentation?
+      options:
+        - label: I can provide technical details
+        - label: I can provide code examples
+        - label: I can review drafts
+        - label: I have P2 hardware for verification
+        - label: I can write initial draft
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other information about this documentation request
+      placeholder: |
+        Related to feature request #...
+        This complements existing docs on...
+    validations:
+      required: false

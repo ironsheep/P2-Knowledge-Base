@@ -1,0 +1,108 @@
+name: Feature Request
+description: Suggest an idea or enhancement for the P2 Knowledge Base
+title: "[FEATURE] "
+labels: ["enhancement", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest an enhancement to the P2 Knowledge Base!
+        
+  - type: dropdown
+    id: feature-area
+    attributes:
+      label: Feature Area
+      description: Which area of the knowledge base does this feature relate to?
+      options:
+        - AI Reference Documentation
+        - Language Specifications (PASM2/Spin2)
+        - Hardware Documentation
+        - Code Examples
+        - Learning Paths
+        - Development Tools
+        - Knowledge Base Infrastructure
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem Statement
+      description: What problem or limitation does this feature address?
+      placeholder: |
+        Currently, when trying to...
+        It would be helpful if...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the feature or enhancement you'd like to see
+      placeholder: |
+        I suggest adding...
+        This could work by...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: |
+        Another approach might be...
+        Currently I work around this by...
+    validations:
+      required: false
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: How would this feature improve your AI-assisted P2 development workflow?
+      placeholder: |
+        This would help when...
+        It would enable AI to...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to your workflow?
+      options:
+        - Critical - Blocking my work
+        - High - Significant improvement needed
+        - Medium - Would be helpful
+        - Low - Nice to have
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Are you willing to help implement this feature?
+      options:
+        - label: I can provide additional information or examples
+        - label: I can help test the implementation
+        - label: I can contribute documentation
+        - label: I can contribute code/content
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context, screenshots, or examples about the feature request
+      placeholder: |
+        Related issues...
+        External references...
+        Screenshots...
+    validations:
+      required: false

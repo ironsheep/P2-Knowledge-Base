@@ -1,0 +1,163 @@
+name: AI Defect Report
+description: Report incorrect or problematic AI-generated P2 code or responses
+title: "[AI DEFECT] "
+labels: ["bug", "ai-generation", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting an AI generation issue! This helps improve the knowledge base's effectiveness.
+        
+        **This template is for:** Issues with AI-generated code, incorrect AI responses, or AI misunderstanding P2 concepts
+        **Not for:** Documentation typos or missing content (use Documentation Defect instead)
+
+  - type: dropdown
+    id: ai-model
+    attributes:
+      label: AI Model Used
+      description: Which AI model exhibited the issue?
+      options:
+        - Claude 3.5 Sonnet
+        - Claude 3.5 Haiku
+        - Claude Opus
+        - GPT-4
+        - GPT-4 Turbo
+        - Other (specify in description)
+        - Multiple models tested
+    validations:
+      required: true
+
+  - type: dropdown
+    id: defect-category
+    attributes:
+      label: Defect Category
+      description: What type of AI generation issue is this?
+      options:
+        - Incorrect PASM2 assembly code
+        - Incorrect Spin2 code
+        - Wrong instruction syntax
+        - Incorrect register usage
+        - Bad timing/clock calculations
+        - Memory addressing errors
+        - Smart Pin configuration errors
+        - Incorrect COG interaction
+        - Misunderstood P2 architecture
+        - Other conceptual error
+    validations:
+      required: true
+
+  - type: textarea
+    id: prompt-used
+    attributes:
+      label: AI Prompt Used
+      description: What prompt or question did you give the AI?
+      placeholder: |
+        I asked the AI to...
+        My exact prompt was...
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: incorrect-output
+    attributes:
+      label: Incorrect AI Output
+      description: What incorrect code or response did the AI generate?
+      placeholder: |
+        The AI generated this code:
+        ```spin2
+        ' Incorrect code here
+        ```
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-output
+    attributes:
+      label: Expected/Correct Output
+      description: What should the AI have generated instead?
+      placeholder: |
+        The correct code should be:
+        ```spin2
+        ' Correct code here
+        ```
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-explanation
+    attributes:
+      label: Error Explanation
+      description: Explain why the AI output is incorrect and what P2 concept it misunderstood
+      placeholder: |
+        The AI misunderstood that...
+        This violates the P2 principle of...
+        The actual behavior should be...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this AI generation error?
+      options:
+        - Critical - Generates non-functional or dangerous code
+        - High - Generates code with significant bugs
+        - Medium - Works but inefficient or non-idiomatic
+        - Low - Minor issues or style problems
+    validations:
+      required: true
+
+  - type: textarea
+    id: knowledge-base-source
+    attributes:
+      label: Related Knowledge Base Content
+      description: Which knowledge base file(s) might be causing this confusion?
+      placeholder: |
+        I think this relates to:
+        - deliverables/ai-reference/instructions/PASM2/MOV.md
+        - The Smart Pins documentation seems unclear about...
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this AI generation issue?
+      placeholder: |
+        1. Ask the AI to...
+        2. Specify these constraints...
+        3. Notice that it generates...
+      render: markdown
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: verification
+    attributes:
+      label: Verification
+      description: Have you verified this issue?
+      options:
+        - label: I tested the incorrect code on actual P2 hardware
+        - label: I verified against the official P2 documentation
+        - label: I tested with multiple AI models
+        - label: I checked the current knowledge base content
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context about the AI generation problem
+      placeholder: |
+        This might be related to...
+        I've also noticed that...
+    validations:
+      required: false

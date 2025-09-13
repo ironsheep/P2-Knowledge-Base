@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: P2 Community Forum - AI Tools/Techniques Thread
+    url: https://forums.parallax.com/categories/ai-tools-and-techniques
+    about: Ask questions and discuss this P2 Knowledge Base along with AI tools and techniques
+  - name: OBEX (Propeller Object Exchange)
+    url: https://github.com/parallaxinc/propeller
+    about: Find and share P2 code objects and libraries

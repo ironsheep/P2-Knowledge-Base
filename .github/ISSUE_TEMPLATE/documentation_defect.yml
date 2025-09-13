@@ -1,0 +1,147 @@
+name: Documentation Defect
+description: Report errors, typos, or inaccuracies in the P2 Knowledge Base documentation
+title: "[DOC DEFECT] "
+labels: ["bug", "documentation", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve the P2 Knowledge Base documentation!
+        
+        **This template is for:** Typos, incorrect information, broken links, or missing content in documentation
+        **Not for:** AI generation issues (use AI Defect Report instead)
+
+  - type: dropdown
+    id: defect-type
+    attributes:
+      label: Defect Type
+      description: What type of documentation issue is this?
+      options:
+        - Incorrect technical information
+        - Typo or grammar error
+        - Broken link
+        - Missing information
+        - Outdated content
+        - Formatting issue
+        - Code example error
+        - Conflicting information
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: file-path
+    attributes:
+      label: File Path
+      description: Which file contains the defect?
+      placeholder: deliverables/ai-reference/instructions/PASM2/MOV.md
+    validations:
+      required: true
+
+  - type: input
+    id: line-number
+    attributes:
+      label: Line Number (if applicable)
+      description: Approximate line number where the issue occurs
+      placeholder: "Lines 45-50"
+    validations:
+      required: false
+
+  - type: textarea
+    id: current-content
+    attributes:
+      label: Current Content
+      description: Quote or describe the incorrect content
+      placeholder: |
+        The documentation currently states:
+        "The MOV instruction takes 3 operands..."
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: correct-content
+    attributes:
+      label: Correct Content
+      description: What should the documentation say instead?
+      placeholder: |
+        It should say:
+        "The MOV instruction takes 2 operands..."
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: source-reference
+    attributes:
+      label: Source Reference
+      description: What official P2 documentation supports this correction?
+      placeholder: |
+        According to the P2 Silicon Documentation v35, page 123...
+        The Parallax Forums post at [link] confirms...
+    validations:
+      required: false
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this documentation error?
+      options:
+        - Critical - Could cause hardware damage or major confusion
+        - High - Significantly misleading information
+        - Medium - Incorrect but obvious from context
+        - Low - Minor typo or formatting issue
+    validations:
+      required: true
+
+  - type: dropdown
+    id: user-impact
+    attributes:
+      label: User Impact
+      description: How does this error affect developers using the documentation?
+      options:
+        - "Critical - Could cause serious misunderstanding or errors"
+        - "High - Significantly misleading or confusing"
+        - "Medium - Noticeable but workable"
+        - "Low - Minor issue, easily understood from context"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: verification
+    attributes:
+      label: Verification
+      description: How have you verified this is an error?
+      options:
+        - label: Checked against official P2 documentation
+        - label: Tested on actual P2 hardware
+        - label: Confirmed with P2 community/forums
+        - label: Cross-referenced with other knowledge base files
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-files
+    attributes:
+      label: Other Affected Files
+      description: List any other files that may have the same error
+      placeholder: |
+        This same error appears in:
+        - deliverables/ai-reference/instructions/PASM2/MOVS.md
+        - engineering/knowledge-base/P2/instructions/...
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other context about the documentation issue
+      placeholder: |
+        This might affect...
+        Related to issue #...
+    validations:
+      required: false
