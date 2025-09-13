@@ -278,7 +278,7 @@ If you discover patterns, fix documentation, or add examples:
 
 ## Need Help?
 
-- **Issues**: https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base/issues
+- **Issues**: https://github.com/ironsheep/P2-Knowledge-Base/issues
 - **P2 Forums**: https://forums.parallax.com/categories/propeller-2
 - **Documentation**: Check README.md for human-readable guides
 
