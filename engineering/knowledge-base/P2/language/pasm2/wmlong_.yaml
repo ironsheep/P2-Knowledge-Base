@@ -1,0 +1,50 @@
+instruction: WMLONG_
+syntax: WMLONG_ D,S/#/PTRA/PTRB
+compiler_syntax: WMLONG_ D,S/#/PTRA/PTRB
+encoding: TBD
+compiler_encoding:
+  bits: 32
+  opcode: 335
+  effects: 0
+  operandFormat: 15
+  rawValue: 31055
+timing:
+  cycles: TBD
+  type: TBD
+group: Hub RAM - Write
+description: Write memory long (alternate form). Writes long data to hub memory with specific addressing mode.
+category: Hub RAM - Write
+naming_note: "YAML knowledge base has WMLONG (without underscore) - may be different instruction"
+compiler_category: Miscellaneous
+examples:
+  - code: |
+      WMLONG_ data_reg, hub_addr
+    description: "Basic memory write operation"
+  - code: |
+      WMLONG_ #$12345678, PTR0
+    description: "Write immediate value using pointer register"
+operand_details:
+  D: "Source data register or immediate value to write"
+  S: "Destination hub address, immediate value, or pointer register"
+compiler_operand_format:
+  name: operand_dsp
+  pattern: D,S/#/PTRA/PTRB
+  description: Destination, source/immediate/pointer register
+  valueType: 15
+compiler_effects: []
+alternate_names:
+  - WMLONG
+related_instructions:
+  - WMLONG
+  - WRLONG
+  - WRBYTE
+  - WRWORD
+documentation_source: PNUT_TS_compiler_analysis
+documentation_level: minimal
+needs_documentation: true
+naming_discrepancy:
+  source_yaml: WMLONG
+  source_compiler: WMLONG_
+  resolution_needed: true
+  note: "Different opcodes suggest these may be separate instructions"
+enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13

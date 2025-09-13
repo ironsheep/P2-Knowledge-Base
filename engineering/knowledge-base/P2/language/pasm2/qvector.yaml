@@ -5,8 +5,43 @@ timing:
   cycles: 2
   type: fixed
 group: CORDIC Solver
-description: Begin CORDIC vectoring of point (D, S). GETQX/GETQY retrieves length/angle.
+description: Convert cartesian coordinates (X, Y) to polar coordinates (length, angle). Takes X coordinate in D and Y coordinate in S as 32-bit signed values. Results retrieved via GETQX (length) and GETQY (angle) instructions 55 clocks later.
+long_description: |
+  The QVECTOR instruction performs cartesian to polar coordinate conversion using the P2's 54-stage pipelined CORDIC solver. It converts a 32-bit signed (X, Y) cartesian coordinate pair into a 32-bit (length, angle) polar coordinate pair.
+  
+  The instruction takes the X coordinate in the D operand and Y coordinate in the S operand, both as 32-bit signed values. After 55 clocks, the results can be retrieved using GETQX for the length and GETQY for the angle.
+  
+  The angle result uses P2's standard angle units where $00000000 = 0°, $40000000 = 90°, $80000000 = 180°, and $C0000000 = 270°.
+  
+  This operation is commonly used in signal processing, graphics, and mathematical calculations requiring coordinate system conversions.
 category: CORDIC Solver
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+examples:
+  - code: |
+      ' Convert point (100, 200) to polar coordinates
+      QVECTOR #100, #200     ' Begin conversion
+      ' Wait 55 clocks...
+      GETQX   length         ' Get polar length
+      GETQY   angle          ' Get polar angle
+    description: "Basic cartesian to polar conversion"
+  - code: |
+      ' Convert variable coordinates
+      QVECTOR x_coord, y_coord
+      ' ... other work for 55 clocks ...
+      GETQX   magnitude
+      GETQY   phase_angle
+    description: "Converting variable coordinates to polar form"
+related_instructions:
+  - GETQX
+  - GETQY
+  - QROTATE
+  - SETQ
+operand_details:
+  D: "X coordinate (32-bit signed)"
+  S: "Y coordinate (32-bit signed)"
+result_details:
+  GETQX: "Length/magnitude (32-bit unsigned)"
+  GETQY: "Angle in P2 angle units (32-bit unsigned)"
+timing_notes: "Result available 55 clocks after instruction issue. Each cog can issue one CORDIC instruction per hub window (every 8 clocks)."
+documentation_source: p2_datasheet
+documentation_level: comprehensive
+needs_documentation: false

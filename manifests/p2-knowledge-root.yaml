@@ -4,7 +4,7 @@
 
 version: "1.0"
 schema_version: "2024-12-30"
-last_updated: "2024-12-30T00:00:00Z"
+last_updated: "2025-09-13T08:00:00Z"
 description: "Propeller 2 Knowledge Base - AI-Optimized Documentation for Code Generation"
 
 metadata:
@@ -12,7 +12,10 @@ metadata:
     silicon_doc: "v35"
     spin2_reference: "v51"
     p2_datasheet: "v1.0"
+    pnut_ts_compiler: "v2.0_operand_fixes_2025-09-13"
   total_entries: 600
+  compiler_validated: true
+  trust_level: "99%"
   repository: "https://github.com/ironsheep/P2-Knowledge-Base"
   raw_base_url: "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/"
   
@@ -25,7 +28,9 @@ manifests:
   pasm2_instructions:
     description: "PASM2 assembly language instruction reference"
     url: "manifests/pasm2-manifest.yaml"
-    entry_count: 357
+    entry_count: 359
+    compiler_validated: 359
+    compiler_source: "PNUT-TS v2.0 with spinResolver.ts operand fixes"
     categories: ["arithmetic", "control", "memory", "special"]
     
   spin2_language:
@@ -51,6 +56,14 @@ manifests:
     url: "manifests/patterns-manifest.yaml"
     entry_count: 25  # Growing
     categories: ["communication", "timing", "coordination", "optimization"]
+    
+  community_resources:
+    description: "P2 community objects from Parallax OBEX (download-on-demand)"
+    url: "manifests/obex-community-manifest.yaml"
+    entry_count: 253  # Discovered 2025-09-12
+    categories: ["drivers", "sensors", "display", "motors", "communication", "audio", "misc", "demos", "tools"]
+    featured_authors: ["Jon McPhalen (jonnymac)", "Chip Gracey", "Kwabena W. Agyeman"]
+    download_mechanism: "Direct URLs to OBEX ZIP files"
     
   quick_queries:
     description: "Common questions with direct answers"

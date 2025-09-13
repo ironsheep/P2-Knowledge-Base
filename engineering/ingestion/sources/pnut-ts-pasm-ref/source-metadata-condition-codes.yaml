@@ -1,0 +1,57 @@
+source_name: "PNUT-TS PASM2 Condition Codes Analysis"
+source_type: "compiler_analysis"
+source_location: "engineering/ingestion/external-inputs/from-pnut-ts/PASM2-Condition-Codes.json"
+extraction_date: "2025-09-13"
+extractor: "Claude (AI Assistant)"
+original_source: "PNut-TS Compiler parseUtils.ts and types.ts"
+extraction_method: "AI analysis of TypeScript compiler source code"
+
+content_summary:
+  total_condition_codes: 16
+  total_effect_flags: 4
+  data_structure: "JSON with metadata, condition codes array, and effect flags"
+  file_size: "6KB"
+  extraction_timestamp: "2025-09-13T06:48:56.553Z"
+
+trust_level: "high"
+trust_reasoning: "Official P2 compiler source code analysis by AI"
+
+data_structure:
+  metadata:
+    - version
+    - extractedFrom
+    - extractedAt
+    - description
+    - totalConditionCodes
+    - totalEffectFlags
+  conditionCodes:
+    - name
+    - symbol
+    - value
+    - description
+    - aliases (array)
+    - binaryPattern
+    - category
+  effectFlags:
+    - name
+    - symbol
+    - value
+    - description
+    - category
+
+content_type: "condition_codes_and_effects"
+relation_to_first_file: "complementary"
+focus_area: "conditional execution and flag effects"
+
+validation_notes:
+  - "JSON structure validated"
+  - "16 condition codes matches metadata count"
+  - "4 effect flags matches metadata count"
+  - "Comprehensive aliases and binary patterns"
+  - "Categorized by functionality"
+
+ingestion_status: "source_acquired"
+next_steps:
+  - "Internal consistency validation"
+  - "Cross-validation against existing knowledge base"
+  - "Integration with instruction condition code usage"

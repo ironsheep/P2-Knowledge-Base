@@ -1,0 +1,33 @@
+instruction: ASMCLK
+syntax: ASMCLK
+compiler_syntax: ASMCLK 
+encoding: TBD
+compiler_encoding:
+  bits: 32
+  opcode: 0
+  effects: 0
+  operandFormat: 35
+  rawValue: 71680
+timing:
+  cycles: TBD
+  type: TBD
+group: System Control
+description: Assembly clock instruction. Controls assembly-time clock operations.
+category: System Control Instruction
+compiler_category: Miscellaneous
+examples:
+  - code: |
+      ASMCLK
+    description: "Basic assembly clock operation"
+operand_details:
+  none: "No operands required"
+compiler_operand_format:
+  name: operand_asmclk
+  pattern: ''
+  description: Assembly clock instruction
+  valueType: 35
+compiler_effects: []
+documentation_source: PNUT_TS_compiler_analysis
+documentation_level: minimal
+needs_documentation: true
+enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13

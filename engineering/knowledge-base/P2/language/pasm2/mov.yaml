@@ -1,6 +1,13 @@
 instruction: MOV
 syntax: MOV     D,{#}S   {WC/WZ/WCZ}
+compiler_syntax: MOV D,S/#
 encoding: EEEE 0110000 CZI DDDDDDDDD SSSSSSSSS
+compiler_encoding:
+  bits: 32
+  opcode: 192
+  effects: 3
+  operandFormat: 0
+  rawValue: 1728
 timing:
   cycles: 2
   type: fixed
@@ -8,12 +15,35 @@ group: Math and Logic
 description: 'Mov stores the Src value into Dest. Result: The Src value is stored in Dest and optionally
   flags are updated with the sign bit and zero status.'
 category: Bit Operation Instruction - Set a value into a register.
+compiler_category: Data Movement
 flags_affected:
   C:
     formula: S[31]
+compiler_effects:
+  - name: wc
+    symbol: WC
+    value: 1
+    description: Write Carry flag
+    bitPattern: "01"
+  - name: wz
+    symbol: WZ
+    value: 2
+    description: Write Zero flag
+    bitPattern: "10"
+  - name: wcz
+    symbol: WCZ
+    value: 3
+    description: Write Carry and Zero flags
+    bitPattern: "11"
 parameters:
 - Dest is the register to receive the Src value.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value will be stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13

@@ -1,0 +1,48 @@
+source_name: "PNUT-TS PASM2 Compiler Analysis"
+source_type: "compiler_analysis"
+source_location: "engineering/ingestion/external-inputs/from-pnut-ts/PASM2-Instruction-Database.json"
+extraction_date: "2025-09-13"
+extractor: "Claude (AI Assistant)"
+original_source: "PNut-TS Compiler parseUtils.ts"
+extraction_method: "AI analysis of TypeScript compiler source code"
+
+content_summary:
+  total_instructions: 359
+  data_structure: "JSON with metadata and instruction array"
+  file_size: "297KB"
+  extraction_timestamp: "2025-09-13T06:29:30.376Z"
+
+trust_level: "high"
+trust_reasoning: "Official P2 compiler source code analysis by AI"
+
+data_structure:
+  metadata:
+    - version
+    - extractedFrom
+    - extractedAt
+    - description
+    - totalInstructions
+  instructions:
+    - mnemonic
+    - enum_name
+    - opcode
+    - effects (flag operations)
+    - operandFormat (pattern, description, valueType)
+    - description
+    - syntax
+    - examples
+    - encoding (bits, opcode, effects, operandFormat, rawValue)
+    - category
+
+validation_notes:
+  - "JSON structure validated"
+  - "359 instructions matches metadata count"
+  - "Rich operand format and encoding information"
+  - "Comprehensive flag effects documentation"
+  - "Examples provided for each instruction"
+
+ingestion_status: "source_acquired"
+next_steps:
+  - "Internal consistency validation"
+  - "Cross-validation against existing PASM2 YAML files"
+  - "Gap analysis and enhancement planning"

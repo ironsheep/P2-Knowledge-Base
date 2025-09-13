@@ -1,0 +1,288 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "extractedFrom": "PNut-TS Compiler parseUtils.ts and types.ts",
+    "extractedAt": "2025-09-13T07:39:14.624Z",
+    "description": "Complete PASM2 condition codes and effect flags extracted from PNut-TS compiler",
+    "totalConditionCodes": 16,
+    "totalEffectFlags": 4
+  },
+  "conditionCodes": [
+    {
+      "name": "if_ret",
+      "symbol": "IF_RET",
+      "value": 0,
+      "description": "Never execute (return/clear condition)",
+      "aliases": [
+        "_CLR"
+      ],
+      "binaryPattern": "00",
+      "category": "Special"
+    },
+    {
+      "name": "if_nc_and_nz",
+      "symbol": "IF_NC_AND_NZ",
+      "value": 1,
+      "description": "Execute if not carry AND not zero (greater than)",
+      "aliases": [
+        "IF_00",
+        "IF_A",
+        "IF_GT",
+        "IF_NC_AND_NZ",
+        "IF_NZ_AND_NC",
+        "_GT",
+        "_NC_AND_NZ",
+        "_NZ_AND_NC"
+      ],
+      "binaryPattern": "01",
+      "category": "Comparison"
+    },
+    {
+      "name": "if_nc_and_z",
+      "symbol": "IF_NC_AND_Z",
+      "value": 2,
+      "description": "Execute if not carry AND zero",
+      "aliases": [
+        "IF_01",
+        "IF_NC_AND_Z",
+        "IF_Z_AND_NC",
+        "_NC_AND_Z",
+        "_Z_AND_NC"
+      ],
+      "binaryPattern": "10",
+      "category": "Logical"
+    },
+    {
+      "name": "if_nc",
+      "symbol": "IF_NC",
+      "value": 3,
+      "description": "Execute if not carry (greater or equal)",
+      "aliases": [
+        "IF_0X",
+        "IF_AE",
+        "IF_GE",
+        "IF_NC",
+        "_GE",
+        "_NC"
+      ],
+      "binaryPattern": "11",
+      "category": "Comparison"
+    },
+    {
+      "name": "if_c_and_nz",
+      "symbol": "IF_C_AND_NZ",
+      "value": 4,
+      "description": "Execute if carry AND not zero",
+      "aliases": [
+        "IF_10",
+        "IF_C_AND_NZ",
+        "IF_NZ_AND_C",
+        "_C_AND_NZ",
+        "_NZ_AND_C"
+      ],
+      "binaryPattern": "100",
+      "category": "Logical"
+    },
+    {
+      "name": "if_nz",
+      "symbol": "IF_NZ",
+      "value": 5,
+      "description": "Execute if not zero (not equal)",
+      "aliases": [
+        "IF_NE",
+        "IF_NZ",
+        "IF_X0",
+        "_NE",
+        "_NZ"
+      ],
+      "binaryPattern": "101",
+      "category": "Comparison"
+    },
+    {
+      "name": "if_c_ne_z",
+      "symbol": "IF_C_NE_Z",
+      "value": 6,
+      "description": "Execute if carry not equal to zero",
+      "aliases": [
+        "IF_C_NE_Z",
+        "IF_DIFF",
+        "IF_Z_NE_C",
+        "_C_NE_Z",
+        "_Z_NE_C"
+      ],
+      "binaryPattern": "110",
+      "category": "Logical"
+    },
+    {
+      "name": "if_nc_or_nz",
+      "symbol": "IF_NC_OR_NZ",
+      "value": 7,
+      "description": "Execute if not carry OR not zero",
+      "aliases": [
+        "IF_NC_OR_NZ",
+        "IF_NOT_11",
+        "IF_NZ_OR_NC",
+        "_NC_OR_NZ",
+        "_NZ_OR_NC"
+      ],
+      "binaryPattern": "111",
+      "category": "Logical"
+    },
+    {
+      "name": "if_c_and_z",
+      "symbol": "IF_C_AND_Z",
+      "value": 8,
+      "description": "Execute if carry AND zero",
+      "aliases": [
+        "IF_11",
+        "IF_C_AND_Z",
+        "IF_Z_AND_C",
+        "_C_AND_Z",
+        "_Z_AND_C"
+      ],
+      "binaryPattern": "1000",
+      "category": "Logical"
+    },
+    {
+      "name": "if_c_eq_z",
+      "symbol": "IF_C_EQ_Z",
+      "value": 9,
+      "description": "Execute if carry equal to zero",
+      "aliases": [
+        "IF_C_EQ_Z",
+        "IF_SAME",
+        "IF_Z_EQ_C",
+        "_C_EQ_Z",
+        "_Z_EQ_C"
+      ],
+      "binaryPattern": "1001",
+      "category": "Logical"
+    },
+    {
+      "name": "if_z",
+      "symbol": "IF_Z",
+      "value": 10,
+      "description": "Execute if zero (equal)",
+      "aliases": [
+        "IF_E",
+        "IF_X1",
+        "IF_Z",
+        "_E",
+        "_Z"
+      ],
+      "binaryPattern": "1010",
+      "category": "Comparison"
+    },
+    {
+      "name": "if_nc_or_z",
+      "symbol": "IF_NC_OR_Z",
+      "value": 11,
+      "description": "Execute if not carry OR zero (less or equal)",
+      "aliases": [
+        "IF_NC_OR_Z",
+        "IF_NOT_10",
+        "IF_Z_OR_NC",
+        "_NC_OR_Z",
+        "_Z_OR_NC"
+      ],
+      "binaryPattern": "1011",
+      "category": "Comparison"
+    },
+    {
+      "name": "if_c",
+      "symbol": "IF_C",
+      "value": 12,
+      "description": "Execute if carry (less than)",
+      "aliases": [
+        "IF_1X",
+        "IF_B",
+        "IF_C",
+        "IF_LT",
+        "_C",
+        "_LT"
+      ],
+      "binaryPattern": "1100",
+      "category": "Comparison"
+    },
+    {
+      "name": "if_c_or_nz",
+      "symbol": "IF_C_OR_NZ",
+      "value": 13,
+      "description": "Execute if carry OR not zero",
+      "aliases": [
+        "IF_C_OR_NZ",
+        "IF_NOT_01",
+        "IF_NZ_OR_C",
+        "_C_OR_NZ",
+        "_NZ_OR_C"
+      ],
+      "binaryPattern": "1101",
+      "category": "Logical"
+    },
+    {
+      "name": "if_c_or_z",
+      "symbol": "IF_C_OR_Z",
+      "value": 14,
+      "description": "Execute if carry OR zero (less or equal)",
+      "aliases": [
+        "IF_BE",
+        "IF_C_OR_Z",
+        "IF_LE",
+        "IF_NOT_00",
+        "IF_Z_OR_C",
+        "_C_OR_Z",
+        "_LE",
+        "_Z_OR_C"
+      ],
+      "binaryPattern": "1110",
+      "category": "Comparison"
+    },
+    {
+      "name": "if_always",
+      "symbol": "IF_ALWAYS",
+      "value": 15,
+      "description": "Always execute (unconditional)",
+      "aliases": [
+        "IF_ALWAYS",
+        "_SET"
+      ],
+      "binaryPattern": "1111",
+      "category": "Special"
+    }
+  ],
+  "effectFlags": [
+    {
+      "name": "none",
+      "symbol": "",
+      "value": 0,
+      "description": "No effect flags - instruction does not modify flags",
+      "bitPattern": "00"
+    },
+    {
+      "name": "wz",
+      "symbol": "WZ",
+      "value": 2,
+      "description": "Write Zero flag - update Z flag based on result",
+      "bitPattern": "10"
+    },
+    {
+      "name": "wc",
+      "symbol": "WC",
+      "value": 1,
+      "description": "Write Carry flag - update C flag based on result",
+      "bitPattern": "01"
+    },
+    {
+      "name": "wcz",
+      "symbol": "WCZ",
+      "value": 3,
+      "description": "Write Carry and Zero flags - update both C and Z flags",
+      "bitPattern": "11"
+    }
+  ],
+  "conditionCategories": [
+    "Comparison",
+    "Logical",
+    "Special"
+  ]
+}

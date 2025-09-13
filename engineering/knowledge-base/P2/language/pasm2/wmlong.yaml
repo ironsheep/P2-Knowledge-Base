@@ -8,6 +8,20 @@ group: Hub RAM - Write
 description: Write only non-$00 bytes in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2 invokes cog/LUT
   block transfer.
 category: Hub RAM - Write
+naming_note: "Compiler uses WMLONG_ (with underscore) - may be different instruction"
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+alternate_names:
+  - WMLONG_
+related_instructions:
+  - WMLONG_
+  - WRLONG
+  - WRBYTE
+  - WRWORD
+naming_discrepancy:
+  source_yaml: WMLONG
+  source_compiler: WMLONG_
+  resolution_needed: true
+  note: "Different opcodes suggest these may be separate instructions"
+enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13

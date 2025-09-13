@@ -5,8 +5,51 @@ timing:
   cycles: 2
   type: fixed
 group: CORDIC Solver
-description: Begin CORDIC logarithm-to-number conversion of D. GETQX retrieves number.
+description: Convert 5:27-bit logarithm to 32-bit unsigned integer. Takes logarithm in 5:27 format (5-bit whole exponent, 27-bit fractional exponent) in D operand. Result retrieved via GETQX instruction 55 clocks later.
+long_description: |
+  The QEXP instruction performs logarithm to integer conversion using the P2's 54-stage pipelined CORDIC solver. It converts a 5:27-bit logarithm format into a 32-bit unsigned integer, effectively computing the exponential (antilog) of the input.
+  
+  The instruction takes the logarithm value in the D operand, which must be in P2's 5:27 format where bits [31:27] contain the 5-bit whole exponent and bits [26:0] contain the 27-bit fractional exponent. After 55 clocks, the integer result can be retrieved using the GETQX instruction.
+  
+  This instruction is the complement of QLOG and is commonly used together with QLOG to perform power calculations, exponential functions, and other mathematical operations requiring logarithmic scaling.
+  
+  The high precision of the 5:27 format allows for accurate exponential calculations across a wide range of input values, making it suitable for signal processing, mathematical modeling, and scientific computations.
 category: CORDIC Solver
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+examples:
+  - code: |
+      ' Convert 5:27 logarithm back to integer
+      QEXP    log_value      ' Begin exponential conversion
+      ' Wait 55 clocks...
+      GETQX   integer_result ' Get 32-bit integer
+    description: "Basic logarithm to integer conversion"
+  - code: |
+      ' Calculate power using log/exp: result = base^exponent
+      QLOG    base          ' Convert base to log
+      ' ... wait 55 clocks ...
+      GETQX   log_base
+      QMUL    log_base, exponent  ' Multiply log by exponent
+      ' ... wait 55 clocks ...
+      GETQX   log_result
+      QEXP    log_result    ' Convert back to integer
+      ' ... wait 55 clocks ...
+      GETQX   power_result
+    description: "Power calculation using logarithmic scaling"
+  - code: |
+      ' Process variable logarithm
+      QEXP    logarithm
+      ' ... other work for 55 clocks ...
+      GETQX   exponential
+    description: "Variable exponential calculation"
+related_instructions:
+  - GETQX
+  - QLOG
+  - QMUL
+operand_details:
+  D: "5:27-bit logarithm (5-bit exponent in [31:27], 27-bit fractional in [26:0])"
+result_details:
+  GETQX: "32-bit unsigned integer (exponential result)"
+timing_notes: "Result available 55 clocks after instruction issue. Each cog can issue one CORDIC instruction per hub window (every 8 clocks)."
+format_notes: "Input must be in 5:27 logarithmic format as produced by QLOG. Complementary operation to QLOG."
+documentation_source: p2_datasheet
+documentation_level: comprehensive
+needs_documentation: false

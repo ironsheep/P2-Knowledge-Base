@@ -1,0 +1,33 @@
+instruction: DEBUG
+syntax: DEBUG
+compiler_syntax: DEBUG 
+encoding: TBD
+compiler_encoding:
+  bits: 32
+  opcode: 54
+  effects: 0
+  operandFormat: 37
+  rawValue: 75830
+timing:
+  cycles: TBD
+  type: TBD
+group: System Control
+description: Debug instruction. Provides debugging functionality during program execution.
+category: System Control Instruction
+compiler_category: Miscellaneous
+examples:
+  - code: |
+      DEBUG
+    description: "Basic debug operation"
+operand_details:
+  none: "No operands required"
+compiler_operand_format:
+  name: operand_debug
+  pattern: ''
+  description: Debug instruction - no operands
+  valueType: 37
+compiler_effects: []
+documentation_source: PNUT_TS_compiler_analysis
+documentation_level: minimal
+needs_documentation: true
+enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13

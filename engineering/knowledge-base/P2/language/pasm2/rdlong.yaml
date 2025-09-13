@@ -1,15 +1,45 @@
 instruction: RDLONG
 syntax: RDLONG  D,{#}S/P {WC/WZ/WCZ}
+compiler_syntax: RDLONG D,S/#/PTRA/PTRB
 encoding: EEEE 1011000 CZI DDDDDDDDD SSSSSSSSS
+compiler_encoding:
+  bits: 32
+  opcode: 352
+  effects: 3
+  operandFormat: 15
+  rawValue: 32608
 timing:
   cycles: 9
   type: fixed
 group: Hub RAM - Read
 description: C = MSB of long.
 category: Hub RAM - Read
+compiler_category: Memory and I/O
 flags_affected:
   C:
     formula: MSB of long
+compiler_effects:
+  - name: wc
+    symbol: WC
+    value: 1
+    description: Write Carry flag
+    bitPattern: "01"
+  - name: wz
+    symbol: WZ
+    value: 2
+    description: Write Zero flag
+    bitPattern: "10"
+  - name: wcz
+    symbol: WCZ
+    value: 3
+    description: Write Carry and Zero flags
+    bitPattern: "11"
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+compiler_operand_format:
+  name: operand_dsp
+  pattern: D,S/#/PTRA/PTRB
+  description: Destination, source/immediate/pointer register
+  valueType: 15
+enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13

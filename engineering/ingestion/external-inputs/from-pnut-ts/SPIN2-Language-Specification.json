@@ -1,0 +1,3373 @@
+{
+  "metadata": {
+    "version": "2.1.0",
+    "extractedFrom": "PNut-TS Compiler parseUtils.ts, types.ts - Complete Language Extraction with Special Symbols",
+    "extractedAt": "2025-09-13T07:31:49.190Z",
+    "description": "Complete SPIN2/PASM2 language specification with inline assembly and special symbols",
+    "totalKeywords": 36,
+    "totalOperators": 72,
+    "totalDataTypes": 3,
+    "totalBuiltinFunctions": 55,
+    "totalAssemblyDirectives": 8,
+    "totalRegisters": 25,
+    "totalDebugCommands": 23,
+    "totalSystemVariables": 3,
+    "totalSpecialSymbols": 12,
+    "totalLanguageElements": 234
+  },
+  "keywords": [
+    {
+      "keyword": "ABORT",
+      "elementType": 63,
+      "category": "Control Flow",
+      "description": "Abort method execution with optional error value",
+      "syntax": "ABORT [expression]",
+      "examples": [
+        "ABORT",
+        "ABORT error_code"
+      ]
+    },
+    {
+      "keyword": "BYTE",
+      "elementType": 39,
+      "category": "Data Types",
+      "description": "8-bit unsigned integer type (0-255)",
+      "syntax": "BYTE variable[count]",
+      "examples": [
+        "BYTE flag",
+        "BYTE buffer[128]"
+      ]
+    },
+    {
+      "keyword": "BYTEFIT",
+      "elementType": 40,
+      "category": "Data Types",
+      "description": "Expression that fits in a byte constant",
+      "examples": [
+        "CON\\n  SMALL_VALUE = BYTEFIT(200)"
+      ]
+    },
+    {
+      "keyword": "CASE",
+      "elementType": 48,
+      "category": "Control Flow",
+      "description": "Multi-way branch based on expression value",
+      "syntax": "CASE expression\\n  value1: statements\\n  value2: statements",
+      "examples": [
+        "CASE day\\n  1: month_name := \"January\"\\n  2: month_name := \"February\""
+      ]
+    },
+    {
+      "keyword": "CASE_FAST",
+      "elementType": 49,
+      "category": "Control Flow",
+      "description": "Optimized case statement for sequential values",
+      "syntax": "CASE_FAST expression\\n  value: statements",
+      "examples": [
+        "CASE_FAST status\\n  0: handle_ok()\\n  1: handle_error()"
+      ]
+    },
+    {
+      "keyword": "CON",
+      "elementType": 35,
+      "category": "Block Structure",
+      "description": "Constants section - defines named constant values",
+      "syntax": "CON\\n  identifier = expression",
+      "examples": [
+        "CON\\n  LED_PIN = 56\\n  BAUD_RATE = 115200"
+      ]
+    },
+    {
+      "keyword": "DAT",
+      "elementType": 35,
+      "category": "Block Structure",
+      "description": "Data section - contains data and inline assembly",
+      "syntax": "DAT\\n  label type value",
+      "examples": [
+        "DAT\\n  message BYTE \"Hello World\", 0"
+      ]
+    },
+    {
+      "keyword": "ELSE",
+      "elementType": 47,
+      "category": "Control Flow",
+      "description": "Default case in IF statement",
+      "syntax": "ELSE\\n  statements",
+      "examples": [
+        "ELSE\\n  result := 0"
+      ]
+    },
+    {
+      "keyword": "ELSEIF",
+      "elementType": 45,
+      "category": "Control Flow",
+      "description": "Additional condition in IF statement chain",
+      "syntax": "ELSEIF condition\\n  statements",
+      "examples": [
+        "ELSEIF x < 5\\n  result := x + 10"
+      ]
+    },
+    {
+      "keyword": "ELSEIFNOT",
+      "elementType": 46,
+      "category": "Control Flow",
+      "description": "Additional negative condition in IF statement chain",
+      "syntax": "ELSEIFNOT condition\\n  statements",
+      "examples": [
+        "ELSEIFNOT valid\\n  error := true"
+      ]
+    },
+    {
+      "keyword": "FILE",
+      "elementType": 42,
+      "category": "Special",
+      "description": "Include file contents as data",
+      "syntax": "FILE \"filename\"",
+      "examples": [
+        "DAT\\n  bitmap FILE \"image.bmp\""
+      ]
+    },
+    {
+      "keyword": "FROM",
+      "elementType": 57,
+      "category": "Control Flow",
+      "description": "Starting value for counted loop",
+      "examples": [
+        "REPEAT i FROM 1 TO 10\\n  sum += i"
+      ]
+    },
+    {
+      "keyword": "IF",
+      "elementType": 43,
+      "category": "Control Flow",
+      "description": "Conditional execution based on boolean expression",
+      "syntax": "IF condition\\n  statements",
+      "examples": [
+        "IF x > 10\\n  result := x * 2"
+      ]
+    },
+    {
+      "keyword": "IFNOT",
+      "elementType": 44,
+      "category": "Control Flow",
+      "description": "Conditional execution when condition is false",
+      "syntax": "IFNOT condition\\n  statements",
+      "examples": [
+        "IFNOT ready\\n  initialize()"
+      ]
+    },
+    {
+      "keyword": "LONG",
+      "elementType": 39,
+      "category": "Data Types",
+      "description": "32-bit signed integer type (-2147483648 to 2147483647)",
+      "syntax": "LONG variable[count]",
+      "examples": [
+        "LONG counter",
+        "LONG results[10]"
+      ]
+    },
+    {
+      "keyword": "LOOKDOWN",
+      "elementType": 64,
+      "category": "Built-in Functions",
+      "description": "Find index of value in table (1-based result)",
+      "syntax": "LOOKDOWN(value : item1, item2, ...)",
+      "examples": [
+        "index := LOOKDOWN(char : \"A\", \"B\", \"C\")"
+      ]
+    },
+    {
+      "keyword": "LOOKDOWNZ",
+      "elementType": 64,
+      "category": "Built-in Functions",
+      "description": "Find index of value in table (0-based result)",
+      "syntax": "LOOKDOWNZ(value : item1, item2, ...)",
+      "examples": [
+        "index := LOOKDOWNZ(day_name : \"Mon\", \"Tue\", \"Wed\")"
+      ]
+    },
+    {
+      "keyword": "LOOKUP",
+      "elementType": 64,
+      "category": "Built-in Functions",
+      "description": "Look up value in table (1-based indexing)",
+      "syntax": "LOOKUP(index : value1, value2, ...)",
+      "examples": [
+        "result := LOOKUP(day : \"Sun\", \"Mon\", \"Tue\", \"Wed\")"
+      ]
+    },
+    {
+      "keyword": "LOOKUPZ",
+      "elementType": 64,
+      "category": "Built-in Functions",
+      "description": "Look up value in table (0-based indexing)",
+      "syntax": "LOOKUPZ(index : value1, value2, ...)",
+      "examples": [
+        "result := LOOKUPZ(month : 31, 28, 31, 30)"
+      ]
+    },
+    {
+      "keyword": "NEXT",
+      "elementType": 61,
+      "category": "Control Flow",
+      "description": "Continue to next loop iteration",
+      "examples": [
+        "IF error\\n  NEXT"
+      ]
+    },
+    {
+      "keyword": "OBJ",
+      "elementType": 35,
+      "category": "Block Structure",
+      "description": "Object section - declares child objects",
+      "syntax": "OBJ\\n  name : \"filename\"",
+      "examples": [
+        "OBJ\\n  term : \"FullDuplexSerial\""
+      ]
+    },
+    {
+      "keyword": "OTHER",
+      "elementType": 50,
+      "category": "Control Flow",
+      "description": "Default case in CASE statement",
+      "syntax": "OTHER\\n  statements",
+      "examples": [
+        "OTHER\\n  unknown_command()"
+      ]
+    },
+    {
+      "keyword": "PRI",
+      "elementType": 35,
+      "category": "Block Structure",
+      "description": "Private method declaration - internal to object only",
+      "syntax": "PRI methodName(params) : returns | locals",
+      "examples": [
+        "PRI helper(value)",
+        "PRI process(data) : status | temp"
+      ]
+    },
+    {
+      "keyword": "PUB",
+      "elementType": 35,
+      "category": "Block Structure",
+      "description": "Public method declaration - visible to parent objects",
+      "syntax": "PUB methodName(params) : returns | locals",
+      "examples": [
+        "PUB start",
+        "PUB calculate(x, y) : result"
+      ]
+    },
+    {
+      "keyword": "QUIT",
+      "elementType": 61,
+      "category": "Control Flow",
+      "description": "Exit current loop",
+      "examples": [
+        "IF done\\n  QUIT"
+      ]
+    },
+    {
+      "keyword": "REPEAT",
+      "elementType": 51,
+      "category": "Control Flow",
+      "description": "Loop construct with various forms",
+      "syntax": "REPEAT [count] [FROM start TO end] [STEP increment] [WHILE/UNTIL condition]",
+      "examples": [
+        "REPEAT 10\\n  toggle_led()",
+        "REPEAT WHILE running\\n  process_data()"
+      ]
+    },
+    {
+      "keyword": "RETURN",
+      "elementType": 62,
+      "category": "Control Flow",
+      "description": "Return from method with optional value(s)",
+      "syntax": "RETURN [expression1, expression2, ...]",
+      "examples": [
+        "RETURN",
+        "RETURN result",
+        "RETURN status, count"
+      ]
+    },
+    {
+      "keyword": "STEP",
+      "elementType": 59,
+      "category": "Control Flow",
+      "description": "Increment value for counted loop",
+      "examples": [
+        "REPEAT i FROM 0 TO 100 STEP 5\\n  process(i)"
+      ]
+    },
+    {
+      "keyword": "STRING",
+      "elementType": 33,
+      "category": "Special",
+      "description": "String constant declaration",
+      "syntax": "STRING(\"text\")",
+      "examples": [
+        "message := STRING(\"Hello World\")"
+      ]
+    },
+    {
+      "keyword": "TO",
+      "elementType": 58,
+      "category": "Control Flow",
+      "description": "Ending value for counted loop",
+      "examples": [
+        "REPEAT i FROM 0 TO 255\\n  buffer[i] := 0"
+      ]
+    },
+    {
+      "keyword": "UNTIL",
+      "elementType": 56,
+      "category": "Control Flow",
+      "description": "Continue loop until condition becomes true",
+      "examples": [
+        "REPEAT UNTIL ready\\n  wait_ms(10)"
+      ]
+    },
+    {
+      "keyword": "VAR",
+      "elementType": 35,
+      "category": "Block Structure",
+      "description": "Variables section - declares variables for the object",
+      "syntax": "VAR\\n  type identifier[count]",
+      "examples": [
+        "VAR\\n  LONG counter\\n  BYTE buffer[256]"
+      ]
+    },
+    {
+      "keyword": "WHILE",
+      "elementType": 55,
+      "category": "Control Flow",
+      "description": "Continue loop while condition is true",
+      "examples": [
+        "REPEAT WHILE x < 100\\n  x += 1"
+      ]
+    },
+    {
+      "keyword": "WITH",
+      "elementType": 60,
+      "category": "Control Flow",
+      "description": "Loop variable declaration in REPEAT",
+      "examples": [
+        "REPEAT 10 WITH i\\n  array[i] := i * 2"
+      ]
+    },
+    {
+      "keyword": "WORD",
+      "elementType": 39,
+      "category": "Data Types",
+      "description": "16-bit unsigned integer type (0-65535)",
+      "syntax": "WORD variable[count]",
+      "examples": [
+        "WORD address",
+        "WORD values[32]"
+      ]
+    },
+    {
+      "keyword": "WORDFIT",
+      "elementType": 40,
+      "category": "Data Types",
+      "description": "Expression that fits in a word constant",
+      "examples": [
+        "CON\\n  MEDIUM_VALUE = WORDFIT(50000)"
+      ]
+    }
+  ],
+  "operators": [
+    {
+      "symbol": "-",
+      "name": "negate",
+      "type": "unary",
+      "precedence": 0,
+      "associativity": "right",
+      "description": "Arithmetic negation",
+      "examples": [
+        "negative := -positive",
+        "offset := -10"
+      ],
+      "floatVariant": "-."
+    },
+    {
+      "symbol": "--",
+      "name": "decrement",
+      "type": "unary",
+      "precedence": 0,
+      "associativity": "left",
+      "description": "Decrement by 1 (post-decrement)",
+      "examples": [
+        "counter--",
+        "remaining--"
+      ]
+    },
+    {
+      "symbol": "!",
+      "name": "bitwise_not",
+      "type": "unary",
+      "precedence": 0,
+      "associativity": "right",
+      "description": "Bitwise NOT - invert all bits",
+      "examples": [
+        "result := !value",
+        "mask := !0xFF"
+      ]
+    },
+    {
+      "symbol": "??",
+      "name": "random",
+      "type": "unary",
+      "precedence": 0,
+      "associativity": "right",
+      "description": "Random value operator",
+      "examples": [
+        "random_val := ??"
+      ]
+    },
+    {
+      "symbol": "++",
+      "name": "increment",
+      "type": "unary",
+      "precedence": 0,
+      "associativity": "left",
+      "description": "Increment by 1 (post-increment)",
+      "examples": [
+        "counter++",
+        "index++"
+      ]
+    },
+    {
+      "symbol": "ABS",
+      "name": "absolute",
+      "type": "unary",
+      "precedence": 0,
+      "associativity": "right",
+      "description": "Absolute value (also PASM2 instruction)",
+      "examples": [
+        "distance := ABS(x2 - x1)"
+      ],
+      "floatVariant": "FABS"
+    },
+    {
+      "symbol": "BMASK",
+      "name": "bit_mask",
+      "type": "unary",
+      "precedence": 0,
+      "associativity": "right",
+      "description": "Create bit mask from bit count (also PASM2 instruction)",
+      "examples": [
+        "mask := BMASK(8)  // Returns $FF"
+      ]
+    },
+    {
+      "symbol": "DECOD",
+      "name": "decode",
+      "type": "unary",
+      "precedence": 0,
+      "associativity": "right",
+      "description": "Decode bit position to mask (also PASM2 instruction)",
+      "examples": [
+        "mask := DECOD(5)  // Returns $20"
+      ]
+    },
+    {
+      "symbol": "ENCOD",
+      "name": "encode",
+      "type": "unary",
+      "precedence": 0,
+      "associativity": "right",
+      "description": "Encode highest bit position (also PASM2 instruction)",
+      "examples": [
+        "bit_pos := ENCOD(mask)"
+      ]
+    },
+    {
+      "symbol": "FABS",
+      "name": "float_absolute",
+      "type": "unary",
+      "precedence": 0,
+      "associativity": "right",
+      "description": "Floating point absolute value",
+      "examples": [
+        "distance := FABS(float_difference)"
+      ]
+    },
+    {
+      "symbol": "FSQRT",
+      "name": "float_square_root",
+      "type": "unary",
+      "precedence": 0,
+      "associativity": "right",
+      "description": "Floating point square root",
+      "examples": [
+        "side := FSQRT(float_area)"
+      ]
+    },
+    {
+      "symbol": "ONES",
+      "name": "count_ones",
+      "type": "unary",
+      "precedence": 0,
+      "associativity": "right",
+      "description": "Count number of 1 bits (also PASM2 instruction)",
+      "examples": [
+        "count := ONES(%10110101)  // Returns 5"
+      ]
+    },
+    {
+      "symbol": "QEXP",
+      "name": "quick_exp",
+      "type": "unary",
+      "precedence": 0,
+      "associativity": "right",
+      "description": "Quick exponential (also PASM2 instruction)",
+      "examples": [
+        "exp_val := QEXP(value)"
+      ]
+    },
+    {
+      "symbol": "QLOG",
+      "name": "quick_log",
+      "type": "unary",
+      "precedence": 0,
+      "associativity": "right",
+      "description": "Quick logarithm (also PASM2 instruction)",
+      "examples": [
+        "log_val := QLOG(value)"
+      ]
+    },
+    {
+      "symbol": "SQRT",
+      "name": "square_root",
+      "type": "unary",
+      "precedence": 0,
+      "associativity": "right",
+      "description": "Integer square root",
+      "examples": [
+        "side := SQRT(area)"
+      ]
+    },
+    {
+      "symbol": "<<",
+      "name": "shift_left",
+      "type": "binary",
+      "precedence": 1,
+      "associativity": "left",
+      "description": "Logical left shift",
+      "examples": [
+        "result := value << 3"
+      ]
+    },
+    {
+      "symbol": ">>",
+      "name": "shift_right",
+      "type": "binary",
+      "precedence": 1,
+      "associativity": "left",
+      "description": "Logical right shift",
+      "examples": [
+        "result := value >> 2"
+      ]
+    },
+    {
+      "symbol": "REV",
+      "name": "reverse_bits",
+      "type": "binary",
+      "precedence": 1,
+      "associativity": "left",
+      "description": "Reverse bits in specified width (also PASM2 instruction)",
+      "examples": [
+        "result := value REV 8"
+      ]
+    },
+    {
+      "symbol": "ROL",
+      "name": "rotate_left",
+      "type": "binary",
+      "precedence": 1,
+      "associativity": "left",
+      "description": "Rotate bits left (also PASM2 instruction)",
+      "examples": [
+        "result := value ROL 1"
+      ]
+    },
+    {
+      "symbol": "ROR",
+      "name": "rotate_right",
+      "type": "binary",
+      "precedence": 1,
+      "associativity": "left",
+      "description": "Rotate bits right (also PASM2 instruction)",
+      "examples": [
+        "result := value ROR 4"
+      ]
+    },
+    {
+      "symbol": "SAR",
+      "name": "arithmetic_shift_right",
+      "type": "binary",
+      "precedence": 1,
+      "associativity": "left",
+      "description": "Arithmetic right shift - sign extending (also PASM2 instruction)",
+      "examples": [
+        "result := value SAR 2"
+      ]
+    },
+    {
+      "symbol": "SIGNX",
+      "name": "sign_extend",
+      "type": "binary",
+      "precedence": 1,
+      "associativity": "left",
+      "description": "Sign extend to specified bit width (also PASM2 instruction)",
+      "examples": [
+        "result := value SIGNX 15"
+      ]
+    },
+    {
+      "symbol": "ZEROX",
+      "name": "zero_extend",
+      "type": "binary",
+      "precedence": 1,
+      "associativity": "left",
+      "description": "Zero extend to specified bit width (also PASM2 instruction)",
+      "examples": [
+        "result := value ZEROX 15"
+      ]
+    },
+    {
+      "symbol": "&",
+      "name": "bitwise_and",
+      "type": "binary",
+      "precedence": 2,
+      "associativity": "left",
+      "description": "Bitwise AND",
+      "examples": [
+        "masked := value & $FF"
+      ]
+    },
+    {
+      "symbol": "^",
+      "name": "bitwise_xor",
+      "type": "binary",
+      "precedence": 3,
+      "associativity": "left",
+      "description": "Bitwise XOR",
+      "examples": [
+        "toggled := value ^ mask"
+      ]
+    },
+    {
+      "symbol": "|",
+      "name": "bitwise_or",
+      "type": "binary",
+      "precedence": 4,
+      "associativity": "left",
+      "description": "Bitwise OR",
+      "examples": [
+        "combined := flags | new_flag"
+      ]
+    },
+    {
+      "symbol": "*",
+      "name": "multiply",
+      "type": "binary",
+      "precedence": 5,
+      "associativity": "left",
+      "description": "Integer multiplication",
+      "examples": [
+        "area := width * height"
+      ],
+      "floatVariant": "*."
+    },
+    {
+      "symbol": "*.",
+      "name": "float_multiply",
+      "type": "binary",
+      "precedence": 5,
+      "associativity": "left",
+      "description": "Floating point multiplication",
+      "examples": [
+        "area := width *. height"
+      ]
+    },
+    {
+      "symbol": "/",
+      "name": "divide",
+      "type": "binary",
+      "precedence": 5,
+      "associativity": "left",
+      "description": "Signed integer division",
+      "examples": [
+        "quotient := dividend / divisor"
+      ],
+      "floatVariant": "/."
+    },
+    {
+      "symbol": "/.",
+      "name": "float_divide",
+      "type": "binary",
+      "precedence": 5,
+      "associativity": "left",
+      "description": "Floating point division",
+      "examples": [
+        "quotient := dividend /. divisor"
+      ]
+    },
+    {
+      "symbol": "//",
+      "name": "remainder",
+      "type": "binary",
+      "precedence": 5,
+      "associativity": "left",
+      "description": "Signed remainder (modulo)",
+      "examples": [
+        "remainder := dividend // divisor"
+      ]
+    },
+    {
+      "symbol": "+/",
+      "name": "unsigned_divide",
+      "type": "binary",
+      "precedence": 5,
+      "associativity": "left",
+      "description": "Unsigned integer division",
+      "examples": [
+        "quotient := dividend +/ divisor"
+      ]
+    },
+    {
+      "symbol": "+//",
+      "name": "unsigned_remainder",
+      "type": "binary",
+      "precedence": 5,
+      "associativity": "left",
+      "description": "Unsigned remainder (modulo)",
+      "examples": [
+        "remainder := dividend +// divisor"
+      ]
+    },
+    {
+      "symbol": "FRAC",
+      "name": "fraction",
+      "type": "binary",
+      "precedence": 5,
+      "associativity": "left",
+      "description": "Calculate fraction",
+      "examples": [
+        "frac := dividend FRAC divisor"
+      ]
+    },
+    {
+      "symbol": "SCA",
+      "name": "scale",
+      "type": "binary",
+      "precedence": 5,
+      "associativity": "left",
+      "description": "Scale value (also PASM2 instruction)",
+      "examples": [
+        "scaled := value SCA factor"
+      ]
+    },
+    {
+      "symbol": "SCAS",
+      "name": "scale_signed",
+      "type": "binary",
+      "precedence": 5,
+      "associativity": "left",
+      "description": "Scale value signed (also PASM2 instruction)",
+      "examples": [
+        "scaled := value SCAS factor"
+      ]
+    },
+    {
+      "symbol": "-",
+      "name": "subtract",
+      "type": "binary",
+      "precedence": 6,
+      "associativity": "left",
+      "description": "Integer subtraction",
+      "examples": [
+        "difference := a - b"
+      ],
+      "floatVariant": "-."
+    },
+    {
+      "symbol": "-.",
+      "name": "float_subtract",
+      "type": "binary",
+      "precedence": 6,
+      "associativity": "left",
+      "description": "Floating point subtraction",
+      "examples": [
+        "difference := a -. b"
+      ]
+    },
+    {
+      "symbol": "+",
+      "name": "add",
+      "type": "binary",
+      "precedence": 6,
+      "associativity": "left",
+      "description": "Integer addition",
+      "examples": [
+        "sum := a + b"
+      ],
+      "floatVariant": "+."
+    },
+    {
+      "symbol": "+.",
+      "name": "float_add",
+      "type": "binary",
+      "precedence": 6,
+      "associativity": "left",
+      "description": "Floating point addition",
+      "examples": [
+        "sum := a +. b"
+      ]
+    },
+    {
+      "symbol": "#>",
+      "name": "force_greater",
+      "type": "binary",
+      "precedence": 7,
+      "associativity": "left",
+      "description": "Force value to be at least minimum",
+      "examples": [
+        "clamped := value #> min_value"
+      ]
+    },
+    {
+      "symbol": "<#",
+      "name": "force_lesser",
+      "type": "binary",
+      "precedence": 7,
+      "associativity": "left",
+      "description": "Force value to be at most maximum",
+      "examples": [
+        "clamped := value <# max_value"
+      ]
+    },
+    {
+      "symbol": "ADDBITS",
+      "name": "add_bits",
+      "type": "binary",
+      "precedence": 8,
+      "associativity": "left",
+      "description": "Add bit count to pin number",
+      "examples": [
+        "pin_range := start_pin ADDBITS bit_count"
+      ]
+    },
+    {
+      "symbol": "ADDPINS",
+      "name": "add_pins",
+      "type": "binary",
+      "precedence": 8,
+      "associativity": "left",
+      "description": "Add pin count to pin number",
+      "examples": [
+        "pin_range := start_pin ADDPINS pin_count"
+      ]
+    },
+    {
+      "symbol": "+<",
+      "name": "unsigned_less_than",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Unsigned less than comparison",
+      "examples": [
+        "IF x +< y\\n  smaller := x"
+      ]
+    },
+    {
+      "symbol": "+<=",
+      "name": "unsigned_less_equal",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Unsigned less than or equal comparison",
+      "examples": [
+        "IF count +<= limit\\n  continue()"
+      ]
+    },
+    {
+      "symbol": "+>",
+      "name": "unsigned_greater_than",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Unsigned greater than comparison",
+      "examples": [
+        "IF speed +> max_speed\\n  slow_down()"
+      ]
+    },
+    {
+      "symbol": "+>=",
+      "name": "unsigned_greater_equal",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Unsigned greater than or equal comparison",
+      "examples": [
+        "IF temp +>= threshold\\n  activate()"
+      ]
+    },
+    {
+      "symbol": "<",
+      "name": "less_than",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Signed less than comparison",
+      "examples": [
+        "IF x < y\\n  smaller := x"
+      ],
+      "floatVariant": "<."
+    },
+    {
+      "symbol": "<.",
+      "name": "float_less_than",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Floating point less than comparison",
+      "examples": [
+        "IF x <. y\\n  smaller := x"
+      ]
+    },
+    {
+      "symbol": "<=",
+      "name": "less_equal",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Signed less than or equal comparison",
+      "examples": [
+        "IF count <= limit\\n  continue()"
+      ],
+      "floatVariant": "<=."
+    },
+    {
+      "symbol": "<=.",
+      "name": "float_less_equal",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Floating point less than or equal comparison",
+      "examples": [
+        "IF count <=. limit\\n  continue()"
+      ]
+    },
+    {
+      "symbol": "<=>",
+      "name": "three_way_compare",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Three-way comparison (returns -1, 0, or 1)",
+      "examples": [
+        "result := a <=> b"
+      ]
+    },
+    {
+      "symbol": "<>",
+      "name": "not_equal",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Inequality comparison",
+      "examples": [
+        "IF result <> 0\\n  handle_error()"
+      ],
+      "floatVariant": "<>."
+    },
+    {
+      "symbol": "<>.",
+      "name": "float_not_equal",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Floating point inequality comparison",
+      "examples": [
+        "IF result <>. 0.0\\n  handle_error()"
+      ]
+    },
+    {
+      "symbol": "==",
+      "name": "equal",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Equality comparison",
+      "examples": [
+        "IF status == READY\\n  start()"
+      ],
+      "floatVariant": "==."
+    },
+    {
+      "symbol": "==.",
+      "name": "float_equal",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Floating point equality comparison",
+      "examples": [
+        "IF value ==. target\\n  found()"
+      ]
+    },
+    {
+      "symbol": ">",
+      "name": "greater_than",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Signed greater than comparison",
+      "examples": [
+        "IF speed > max_speed\\n  slow_down()"
+      ],
+      "floatVariant": ">."
+    },
+    {
+      "symbol": ">.",
+      "name": "float_greater_than",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Floating point greater than comparison",
+      "examples": [
+        "IF speed >. max_speed\\n  slow_down()"
+      ]
+    },
+    {
+      "symbol": ">=",
+      "name": "greater_equal",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Signed greater than or equal comparison",
+      "examples": [
+        "IF temp >= threshold\\n  activate()"
+      ],
+      "floatVariant": ">=."
+    },
+    {
+      "symbol": ">=.",
+      "name": "float_greater_equal",
+      "type": "binary",
+      "precedence": 9,
+      "associativity": "left",
+      "description": "Floating point greater than or equal comparison",
+      "examples": [
+        "IF temp >=. threshold\\n  activate()"
+      ]
+    },
+    {
+      "symbol": "!!",
+      "name": "logical_not_operator",
+      "type": "unary",
+      "precedence": 10,
+      "associativity": "right",
+      "description": "Logical NOT operator",
+      "examples": [
+        "IF !!value\\n  // if value is non-zero"
+      ]
+    },
+    {
+      "symbol": "NOT",
+      "name": "logical_not",
+      "type": "unary",
+      "precedence": 10,
+      "associativity": "right",
+      "description": "Logical NOT (also PASM2 instruction)",
+      "examples": [
+        "IF NOT ready\\n  wait()"
+      ]
+    },
+    {
+      "symbol": "&&",
+      "name": "logical_and_operator",
+      "type": "binary",
+      "precedence": 11,
+      "associativity": "left",
+      "description": "Logical AND operator",
+      "examples": [
+        "IF ready && enabled\\n  start()"
+      ]
+    },
+    {
+      "symbol": "AND",
+      "name": "logical_and",
+      "type": "binary",
+      "precedence": 11,
+      "associativity": "left",
+      "description": "Logical AND (also PASM2 instruction)",
+      "examples": [
+        "IF ready AND enabled\\n  start()"
+      ]
+    },
+    {
+      "symbol": "^^",
+      "name": "logical_xor_operator",
+      "type": "binary",
+      "precedence": 12,
+      "associativity": "left",
+      "description": "Logical XOR operator",
+      "examples": [
+        "IF state1 ^^ state2\\n  toggle()"
+      ]
+    },
+    {
+      "symbol": "XOR",
+      "name": "logical_xor",
+      "type": "binary",
+      "precedence": 12,
+      "associativity": "left",
+      "description": "Logical XOR (also PASM2 instruction)",
+      "examples": [
+        "IF state1 XOR state2\\n  toggle()"
+      ]
+    },
+    {
+      "symbol": "||",
+      "name": "logical_or_operator",
+      "type": "binary",
+      "precedence": 13,
+      "associativity": "left",
+      "description": "Logical OR operator",
+      "examples": [
+        "IF error || timeout\\n  abort()"
+      ]
+    },
+    {
+      "symbol": "OR",
+      "name": "logical_or",
+      "type": "binary",
+      "precedence": 13,
+      "associativity": "left",
+      "description": "Logical OR (also PASM2 instruction)",
+      "examples": [
+        "IF error OR timeout\\n  abort()"
+      ]
+    },
+    {
+      "symbol": "? :",
+      "name": "ternary",
+      "type": "ternary",
+      "precedence": 14,
+      "associativity": "right",
+      "description": "Ternary conditional operator",
+      "examples": [
+        "result := condition ? true_value : false_value"
+      ]
+    },
+    {
+      "symbol": ":=",
+      "name": "assign",
+      "type": "binary",
+      "precedence": 15,
+      "associativity": "right",
+      "description": "Assignment operator",
+      "examples": [
+        "variable := value",
+        "result := calculate(x, y)"
+      ]
+    },
+    {
+      "symbol": ":=:",
+      "name": "swap",
+      "type": "binary",
+      "precedence": 15,
+      "associativity": "right",
+      "description": "Swap operator",
+      "examples": [
+        "a :=: b  // swap values of a and b"
+      ]
+    }
+  ],
+  "blockStructures": [
+    {
+      "keyword": "CON",
+      "name": "Constants",
+      "description": "Constants section for named constant definitions",
+      "syntax": [
+        "CON",
+        "  identifier = expression",
+        "  #identifier                    // auto-incrementing"
+      ],
+      "allowedIn": [
+        "global"
+      ],
+      "examples": [
+        "CON\\n  LED_PIN = 56\\n  BAUD_RATE = 115200",
+        "CON\\n  #STATE_IDLE, STATE_RUNNING, STATE_ERROR"
+      ],
+      "elementType": 35
+    },
+    {
+      "keyword": "VAR",
+      "name": "Variables",
+      "description": "Variable declarations section",
+      "syntax": [
+        "VAR",
+        "  type identifier[count]",
+        "  type identifier, identifier2"
+      ],
+      "allowedIn": [
+        "global"
+      ],
+      "examples": [
+        "VAR\\n  LONG counter, status\\n  BYTE buffer[256]"
+      ],
+      "elementType": 35
+    },
+    {
+      "keyword": "DAT",
+      "name": "Data",
+      "description": "Data and inline assembly section",
+      "syntax": [
+        "DAT",
+        "  label    type    value",
+        "  label    assembly_instruction"
+      ],
+      "allowedIn": [
+        "global"
+      ],
+      "examples": [
+        "DAT\\n  message  BYTE    \"Hello\", 0\\n  values   LONG    1, 2, 3, 4"
+      ],
+      "elementType": 35
+    },
+    {
+      "keyword": "OBJ",
+      "name": "Objects",
+      "description": "Child object declarations section",
+      "syntax": [
+        "OBJ",
+        "  name : \"filename\"",
+        "  name[count] : \"filename\""
+      ],
+      "allowedIn": [
+        "global"
+      ],
+      "examples": [
+        "OBJ\\n  term : \"FullDuplexSerial\"\\n  led[8] : \"LEDDriver\""
+      ],
+      "elementType": 35
+    },
+    {
+      "keyword": "PUB",
+      "name": "Public Method",
+      "description": "Public method declaration - accessible from parent objects",
+      "syntax": [
+        "PUB methodName",
+        "PUB methodName(param1, param2)",
+        "PUB methodName(params) : return1, return2",
+        "PUB methodName(params) : returns | local1, local2"
+      ],
+      "allowedIn": [
+        "global"
+      ],
+      "examples": [
+        "PUB start\\n  initialize()",
+        "PUB calculate(x, y) : result\\n  result := x * y + 10"
+      ],
+      "elementType": 35
+    },
+    {
+      "keyword": "PRI",
+      "name": "Private Method",
+      "description": "Private method declaration - internal to this object only",
+      "syntax": [
+        "PRI methodName",
+        "PRI methodName(param1, param2)",
+        "PRI methodName(params) : return1, return2",
+        "PRI methodName(params) : returns | local1, local2"
+      ],
+      "allowedIn": [
+        "global"
+      ],
+      "examples": [
+        "PRI helper(value) | temp\\n  temp := value * 2\\n  RETURN temp + 1"
+      ],
+      "elementType": 35
+    }
+  ],
+  "dataTypes": [
+    {
+      "name": "BYTE",
+      "keyword": "BYTE",
+      "size": 1,
+      "description": "8-bit unsigned integer",
+      "range": {
+        "min": 0,
+        "max": 255
+      },
+      "alignment": 1,
+      "syntax": [
+        "BYTE variable",
+        "BYTE array[count]"
+      ],
+      "examples": [
+        "BYTE status",
+        "BYTE buffer[256]"
+      ],
+      "elementType": 39
+    },
+    {
+      "name": "WORD",
+      "keyword": "WORD",
+      "size": 2,
+      "description": "16-bit unsigned integer",
+      "range": {
+        "min": 0,
+        "max": 65535
+      },
+      "alignment": 2,
+      "syntax": [
+        "WORD variable",
+        "WORD array[count]"
+      ],
+      "examples": [
+        "WORD address",
+        "WORD samples[1000]"
+      ],
+      "elementType": 39
+    },
+    {
+      "name": "LONG",
+      "keyword": "LONG",
+      "size": 4,
+      "description": "32-bit signed integer",
+      "range": {
+        "min": -2147483648,
+        "max": 2147483647
+      },
+      "alignment": 4,
+      "syntax": [
+        "LONG variable",
+        "LONG array[count]"
+      ],
+      "examples": [
+        "LONG counter",
+        "LONG results[100]"
+      ],
+      "elementType": 39
+    }
+  ],
+  "controlFlow": [
+    {
+      "construct": "IF Statement",
+      "keywords": [
+        "IF",
+        "IFNOT",
+        "ELSEIF",
+        "ELSEIFNOT",
+        "ELSE"
+      ],
+      "syntax": [
+        "IF condition",
+        "  statements",
+        "ELSEIF condition",
+        "  statements",
+        "ELSE",
+        "  statements"
+      ],
+      "description": "Conditional execution based on boolean expressions",
+      "nesting": true,
+      "examples": [
+        "IF x > 10\\n  result := \"high\"\\nELSEIF x > 5\\n  result := \"medium\"\\nELSE\\n  result := \"low\""
+      ],
+      "elementTypes": [
+        43,
+        44,
+        45,
+        46,
+        47
+      ]
+    },
+    {
+      "construct": "CASE Statement",
+      "keywords": [
+        "CASE",
+        "CASE_FAST",
+        "OTHER"
+      ],
+      "syntax": [
+        "CASE expression",
+        "  value1, value2: statements",
+        "  value3..value6: statements",
+        "  OTHER: statements"
+      ],
+      "description": "Multi-way branch based on expression value",
+      "nesting": true,
+      "examples": [
+        "CASE day\\n  1: month := \"Jan\"\\n  2: month := \"Feb\"\\n  OTHER: month := \"Unknown\""
+      ],
+      "elementTypes": [
+        48,
+        49,
+        50
+      ]
+    },
+    {
+      "construct": "REPEAT Loop",
+      "keywords": [
+        "REPEAT",
+        "WHILE",
+        "UNTIL",
+        "FROM",
+        "TO",
+        "STEP",
+        "WITH",
+        "NEXT",
+        "QUIT"
+      ],
+      "syntax": [
+        "REPEAT                         // infinite loop",
+        "REPEAT count                   // counted loop",
+        "REPEAT variable FROM start TO end STEP increment",
+        "REPEAT WHILE condition",
+        "REPEAT UNTIL condition"
+      ],
+      "description": "Loop construct with multiple forms and control options",
+      "nesting": true,
+      "examples": [
+        "REPEAT 10\\n  toggle_led()",
+        "REPEAT i FROM 1 TO 100 STEP 2\\n  sum += i",
+        "REPEAT WHILE running\\n  process_data()\\n  IF error\\n    QUIT"
+      ],
+      "elementTypes": [
+        51,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61
+      ]
+    }
+  ],
+  "builtinFunctions": [
+    {
+      "name": "ABS",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Return absolute value of parameter",
+      "category": "Math",
+      "examples": [
+        "result := ABS(-42)  // returns 42"
+      ],
+      "elementType": 29
+    },
+    {
+      "name": "BYTECOMP",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Complement bytes within a long value",
+      "category": "Data Manipulation",
+      "examples": [
+        "result := BYTECOMP($12345678)"
+      ],
+      "elementType": 67,
+      "availableFrom": "v44"
+    },
+    {
+      "name": "BYTEFILL",
+      "parameters": [
+        {
+          "name": "dest",
+          "type": "LONG"
+        },
+        {
+          "name": "value",
+          "type": "LONG"
+        },
+        {
+          "name": "count",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Fill memory with byte value",
+      "category": "Memory",
+      "examples": [
+        "BYTEFILL(@buffer, 0, 256)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "BYTEMOVE",
+      "parameters": [
+        {
+          "name": "dest",
+          "type": "LONG"
+        },
+        {
+          "name": "src",
+          "type": "LONG"
+        },
+        {
+          "name": "count",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Copy bytes from source to destination",
+      "category": "Memory",
+      "examples": [
+        "BYTEMOVE(@dest_buffer, @src_buffer, 256)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "BYTESWAP",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Swap bytes within a long value",
+      "category": "Data Manipulation",
+      "examples": [
+        "result := BYTESWAP($12345678)  // returns $78563412"
+      ],
+      "elementType": 67,
+      "availableFrom": "v44"
+    },
+    {
+      "name": "COGID",
+      "parameters": [],
+      "returnType": "LONG",
+      "description": "Get current cog ID",
+      "category": "COG Management",
+      "examples": [
+        "my_cog := COGID()"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "COGINIT",
+      "parameters": [
+        {
+          "name": "cog",
+          "type": "LONG"
+        },
+        {
+          "name": "program",
+          "type": "LONG"
+        },
+        {
+          "name": "param",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Start a cog with specified program and parameter",
+      "category": "COG Management",
+      "examples": [
+        "cog_id := COGINIT(0, @program, @param)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "COGSTOP",
+      "parameters": [
+        {
+          "name": "cog",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Stop the specified cog",
+      "category": "COG Management",
+      "examples": [
+        "COGSTOP(cog_id)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "DECOD",
+      "parameters": [
+        {
+          "name": "position",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Decode bit position to bit mask",
+      "category": "Bit Manipulation",
+      "examples": [
+        "mask := DECOD(5)  // returns $20"
+      ],
+      "elementType": 29
+    },
+    {
+      "name": "ENCOD",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Encode highest bit position (32 if zero)",
+      "category": "Bit Manipulation",
+      "examples": [
+        "pos := ENCOD(%1000)  // returns 3"
+      ],
+      "elementType": 29
+    },
+    {
+      "name": "EXP",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "FLOAT"
+        }
+      ],
+      "returnType": "FLOAT",
+      "description": "e raised to the power of value",
+      "category": "Math",
+      "examples": [
+        "result := EXP(1.0)  // returns ~2.718281828"
+      ],
+      "elementType": 29,
+      "availableFrom": "v51"
+    },
+    {
+      "name": "EXP10",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "FLOAT"
+        }
+      ],
+      "returnType": "FLOAT",
+      "description": "10 raised to the power of value",
+      "category": "Math",
+      "examples": [
+        "result := EXP10(2.0)  // returns 100.0"
+      ],
+      "elementType": 29,
+      "availableFrom": "v51"
+    },
+    {
+      "name": "EXP2",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "FLOAT"
+        }
+      ],
+      "returnType": "FLOAT",
+      "description": "2 raised to the power of value",
+      "category": "Math",
+      "examples": [
+        "result := EXP2(3.0)  // returns 8.0"
+      ],
+      "elementType": 29,
+      "availableFrom": "v51"
+    },
+    {
+      "name": "FLOAT",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "FLOAT",
+      "description": "Convert integer to floating point",
+      "category": "Type Conversion",
+      "examples": [
+        "float_val := FLOAT(integer_val)"
+      ],
+      "elementType": 30
+    },
+    {
+      "name": "GETCT",
+      "parameters": [],
+      "returnType": "LONG",
+      "description": "Get current system counter value",
+      "category": "Timing",
+      "examples": [
+        "start_time := GETCT()"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "GETRND",
+      "parameters": [],
+      "returnType": "LONG",
+      "description": "Get random number from hardware generator",
+      "category": "Math",
+      "examples": [
+        "random_val := GETRND()"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "HUBSET",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Set hub configuration register",
+      "category": "System",
+      "examples": [
+        "HUBSET(clkmode_value)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "LOG",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "FLOAT"
+        }
+      ],
+      "returnType": "FLOAT",
+      "description": "Natural logarithm (base e)",
+      "category": "Math",
+      "examples": [
+        "result := LOG(2.718281828)  // returns ~1.0"
+      ],
+      "elementType": 29,
+      "availableFrom": "v51"
+    },
+    {
+      "name": "LOG10",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "FLOAT"
+        }
+      ],
+      "returnType": "FLOAT",
+      "description": "Base-10 logarithm",
+      "category": "Math",
+      "examples": [
+        "result := LOG10(100.0)  // returns 2.0"
+      ],
+      "elementType": 29,
+      "availableFrom": "v51"
+    },
+    {
+      "name": "LOG2",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "FLOAT"
+        }
+      ],
+      "returnType": "FLOAT",
+      "description": "Base-2 logarithm",
+      "category": "Math",
+      "examples": [
+        "result := LOG2(8.0)  // returns 3.0"
+      ],
+      "elementType": 29,
+      "availableFrom": "v51"
+    },
+    {
+      "name": "LONGCOMP",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Complement long value",
+      "category": "Data Manipulation",
+      "examples": [
+        "result := LONGCOMP($12345678)"
+      ],
+      "elementType": 67,
+      "availableFrom": "v44"
+    },
+    {
+      "name": "LONGFILL",
+      "parameters": [
+        {
+          "name": "dest",
+          "type": "LONG"
+        },
+        {
+          "name": "value",
+          "type": "LONG"
+        },
+        {
+          "name": "count",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Fill memory with long value",
+      "category": "Memory",
+      "examples": [
+        "LONGFILL(@array, 0, 100)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "LONGMOVE",
+      "parameters": [
+        {
+          "name": "dest",
+          "type": "LONG"
+        },
+        {
+          "name": "src",
+          "type": "LONG"
+        },
+        {
+          "name": "count",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Copy longs from source to destination",
+      "category": "Memory",
+      "examples": [
+        "LONGMOVE(@dest_longs, @src_longs, 25)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "LONGSWAP",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Swap long value byte order",
+      "category": "Data Manipulation",
+      "examples": [
+        "result := LONGSWAP($12345678)"
+      ],
+      "elementType": 67,
+      "availableFrom": "v44"
+    },
+    {
+      "name": "LOOKUP",
+      "parameters": [
+        {
+          "name": "index",
+          "type": "LONG"
+        },
+        {
+          "name": "values",
+          "type": "any...",
+          "optional": true
+        }
+      ],
+      "returnType": "any",
+      "description": "Look up value in table using 1-based indexing",
+      "category": "Lookup",
+      "examples": [
+        "day_name := LOOKUP(day : \"Sun\", \"Mon\", \"Tue\", \"Wed\")"
+      ],
+      "elementType": 64
+    },
+    {
+      "name": "LOOKUPZ",
+      "parameters": [
+        {
+          "name": "index",
+          "type": "LONG"
+        },
+        {
+          "name": "values",
+          "type": "any...",
+          "optional": true
+        }
+      ],
+      "returnType": "any",
+      "description": "Look up value in table using 0-based indexing",
+      "category": "Lookup",
+      "examples": [
+        "days_in_month := LOOKUPZ(month : 31, 28, 31, 30, 31)"
+      ],
+      "elementType": 64
+    },
+    {
+      "name": "ONES",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Count number of 1 bits in value",
+      "category": "Bit Manipulation",
+      "examples": [
+        "count := ONES(%10110101)  // returns 5"
+      ],
+      "elementType": 29
+    },
+    {
+      "name": "PINCLEAR",
+      "parameters": [
+        {
+          "name": "pin",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Clear smart pin configuration",
+      "category": "Pin I/O",
+      "examples": [
+        "PINCLEAR(PWM_PIN)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "PINHIGH",
+      "parameters": [
+        {
+          "name": "pin",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Set pin high (output 1)",
+      "category": "Pin I/O",
+      "examples": [
+        "PINHIGH(LED_PIN)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "PINLOW",
+      "parameters": [
+        {
+          "name": "pin",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Set pin low (output 0)",
+      "category": "Pin I/O",
+      "examples": [
+        "PINLOW(LED_PIN)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "PINREAD",
+      "parameters": [
+        {
+          "name": "pin",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Read value from pin",
+      "category": "Pin I/O",
+      "examples": [
+        "button_state := PINREAD(BUTTON_PIN)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "PINSTART",
+      "parameters": [
+        {
+          "name": "pin",
+          "type": "LONG"
+        },
+        {
+          "name": "mode",
+          "type": "LONG"
+        },
+        {
+          "name": "x_value",
+          "type": "LONG"
+        },
+        {
+          "name": "y_value",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Start smart pin with specified mode and parameters",
+      "category": "Pin I/O",
+      "examples": [
+        "PINSTART(PWM_PIN, P_PWM_SAWTOOTH, period, duty)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "PINTOGGLE",
+      "parameters": [
+        {
+          "name": "pin",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Toggle pin state",
+      "category": "Pin I/O",
+      "examples": [
+        "PINTOGGLE(LED_PIN)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "PINWRITE",
+      "parameters": [
+        {
+          "name": "pin",
+          "type": "LONG"
+        },
+        {
+          "name": "value",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Write value to pin",
+      "category": "Pin I/O",
+      "examples": [
+        "PINWRITE(LED_PIN, 1)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "POW",
+      "parameters": [
+        {
+          "name": "base",
+          "type": "FLOAT"
+        },
+        {
+          "name": "exponent",
+          "type": "FLOAT"
+        }
+      ],
+      "returnType": "FLOAT",
+      "description": "Raise base to the power of exponent",
+      "category": "Math",
+      "examples": [
+        "result := POW(2.0, 3.0)  // returns 8.0"
+      ],
+      "elementType": 29,
+      "availableFrom": "v51"
+    },
+    {
+      "name": "QCOS",
+      "parameters": [
+        {
+          "name": "angle",
+          "type": "LONG"
+        },
+        {
+          "name": "radius",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Quick cosine calculation",
+      "category": "Math",
+      "examples": [
+        "x := QCOS(angle, 1000)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "QSIN",
+      "parameters": [
+        {
+          "name": "angle",
+          "type": "LONG"
+        },
+        {
+          "name": "radius",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Quick sine calculation",
+      "category": "Math",
+      "examples": [
+        "y := QSIN(angle, 1000)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "ROUND",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "FLOAT"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Round floating point to nearest integer",
+      "category": "Type Conversion",
+      "examples": [
+        "rounded := ROUND(3.7)  // returns 4"
+      ],
+      "elementType": 31
+    },
+    {
+      "name": "SQRT",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Return square root of parameter",
+      "category": "Math",
+      "examples": [
+        "side := SQRT(100)  // returns 10"
+      ],
+      "elementType": 29
+    },
+    {
+      "name": "STRCOMP",
+      "parameters": [
+        {
+          "name": "str1_ptr",
+          "type": "LONG"
+        },
+        {
+          "name": "str2_ptr",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Compare two null-terminated strings",
+      "category": "String",
+      "examples": [
+        "IF STRCOMP(@name1, @name2)\n  // strings are equal"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "STRSIZE",
+      "parameters": [
+        {
+          "name": "string_ptr",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Get length of null-terminated string",
+      "category": "String",
+      "examples": [
+        "length := STRSIZE(@text)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "TASKCHK",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Check task status",
+      "category": "Task Management",
+      "examples": [
+        "status := TASKCHK(task_id)"
+      ],
+      "elementType": 67,
+      "availableFrom": "v47"
+    },
+    {
+      "name": "TASKCONT",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Continue a halted task",
+      "category": "Task Management",
+      "examples": [
+        "TASKCONT(task_id)"
+      ],
+      "elementType": 67,
+      "availableFrom": "v47"
+    },
+    {
+      "name": "TASKHALT",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Halt a running task",
+      "category": "Task Management",
+      "examples": [
+        "TASKHALT(task_id)"
+      ],
+      "elementType": 67,
+      "availableFrom": "v47"
+    },
+    {
+      "name": "TASKID",
+      "parameters": [],
+      "returnType": "LONG",
+      "description": "Get current task ID",
+      "category": "Task Management",
+      "examples": [
+        "current_task := TASKID()"
+      ],
+      "elementType": 67,
+      "availableFrom": "v47"
+    },
+    {
+      "name": "TASKNEXT",
+      "parameters": [],
+      "returnType": "LONG",
+      "description": "Get next available task ID",
+      "category": "Task Management",
+      "examples": [
+        "task_id := TASKNEXT()"
+      ],
+      "elementType": 67,
+      "availableFrom": "v47"
+    },
+    {
+      "name": "TASKSTOP",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Stop a running task",
+      "category": "Task Management",
+      "examples": [
+        "TASKSTOP(task_id)"
+      ],
+      "elementType": 67,
+      "availableFrom": "v47"
+    },
+    {
+      "name": "TRUNC",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "FLOAT"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Truncate floating point to integer",
+      "category": "Type Conversion",
+      "examples": [
+        "truncated := TRUNC(3.9)  // returns 3"
+      ],
+      "elementType": 32
+    },
+    {
+      "name": "WAITCT",
+      "parameters": [
+        {
+          "name": "count",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Wait until system counter reaches specified value",
+      "category": "Timing",
+      "examples": [
+        "WAITCT(CNT + clkfreq)  // wait 1 second"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "WAITMS",
+      "parameters": [
+        {
+          "name": "milliseconds",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Wait for specified milliseconds",
+      "category": "Timing",
+      "examples": [
+        "WAITMS(100)  // wait 100ms"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "WAITUS",
+      "parameters": [
+        {
+          "name": "microseconds",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Wait for specified microseconds",
+      "category": "Timing",
+      "examples": [
+        "WAITUS(50)   // wait 50μs"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "WORDCOMP",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Complement words within a long value",
+      "category": "Data Manipulation",
+      "examples": [
+        "result := WORDCOMP($12345678)"
+      ],
+      "elementType": 67,
+      "availableFrom": "v44"
+    },
+    {
+      "name": "WORDFILL",
+      "parameters": [
+        {
+          "name": "dest",
+          "type": "LONG"
+        },
+        {
+          "name": "value",
+          "type": "LONG"
+        },
+        {
+          "name": "count",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Fill memory with word value",
+      "category": "Memory",
+      "examples": [
+        "WORDFILL(@array, $FFFF, 50)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "WORDMOVE",
+      "parameters": [
+        {
+          "name": "dest",
+          "type": "LONG"
+        },
+        {
+          "name": "src",
+          "type": "LONG"
+        },
+        {
+          "name": "count",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "VOID",
+      "description": "Copy words from source to destination",
+      "category": "Memory",
+      "examples": [
+        "WORDMOVE(@dest_array, @src_array, 100)"
+      ],
+      "elementType": 67
+    },
+    {
+      "name": "WORDSWAP",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "LONG"
+        }
+      ],
+      "returnType": "LONG",
+      "description": "Swap words within a long value",
+      "category": "Data Manipulation",
+      "examples": [
+        "result := WORDSWAP($12345678)  // returns $56781234"
+      ],
+      "elementType": 67,
+      "availableFrom": "v44"
+    }
+  ],
+  "assemblyDirectives": [
+    {
+      "name": "ALIGNL",
+      "description": "Align to long boundary (4 bytes)",
+      "syntax": [
+        "ALIGNL"
+      ],
+      "examples": [
+        "ALIGNL  // Align to next long boundary"
+      ],
+      "elementType": 73,
+      "valueType": "dir_alignl",
+      "context": "both"
+    },
+    {
+      "name": "ALIGNW",
+      "description": "Align to word boundary (2 bytes)",
+      "syntax": [
+        "ALIGNW"
+      ],
+      "examples": [
+        "ALIGNW  // Align to next word boundary"
+      ],
+      "elementType": 73,
+      "valueType": "dir_alignw",
+      "context": "both"
+    },
+    {
+      "name": "DITTO",
+      "description": "Repeat last instruction (v50+)",
+      "syntax": [
+        "DITTO"
+      ],
+      "examples": [
+        "DITTO  // Repeat previous instruction"
+      ],
+      "elementType": 73,
+      "valueType": "dir_ditto",
+      "context": "both"
+    },
+    {
+      "name": "FIT",
+      "description": "Ensure code fits in specified limit",
+      "syntax": [
+        "FIT limit"
+      ],
+      "examples": [
+        "FIT $1F0  // Must fit in COG space"
+      ],
+      "elementType": 73,
+      "valueType": "dir_fit",
+      "context": "both"
+    },
+    {
+      "name": "ORG",
+      "description": "Set origin address for COG RAM",
+      "syntax": [
+        "ORG address"
+      ],
+      "examples": [
+        "ORG 0  // Start at COG address 0"
+      ],
+      "elementType": 73,
+      "valueType": "dir_org",
+      "context": "both"
+    },
+    {
+      "name": "ORGF",
+      "description": "Set origin address with forced alignment",
+      "syntax": [
+        "ORGF address"
+      ],
+      "examples": [
+        "ORGF $100  // Align to address $100"
+      ],
+      "elementType": 73,
+      "valueType": "dir_orgf",
+      "context": "both"
+    },
+    {
+      "name": "ORGH",
+      "description": "Set origin address for hub RAM",
+      "syntax": [
+        "ORGH address"
+      ],
+      "examples": [
+        "ORGH $400  // Start at hub address $400"
+      ],
+      "elementType": 73,
+      "valueType": "dir_orgh",
+      "context": "both"
+    },
+    {
+      "name": "RES",
+      "description": "Reserve space (advance origin)",
+      "syntax": [
+        "RES count"
+      ],
+      "examples": [
+        "RES 16  // Reserve 16 locations"
+      ],
+      "elementType": 73,
+      "valueType": "dir_res",
+      "context": "both"
+    }
+  ],
+  "registers": [
+    {
+      "name": "DIRA",
+      "address": 506,
+      "description": "Direction register A (pins 0-31)",
+      "category": "I/O Registers",
+      "access": "read_write",
+      "examples": [
+        "DIRA := %11111111  // Set pins 0-7 as outputs"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "DIRB",
+      "address": 507,
+      "description": "Direction register B (pins 32-63)",
+      "category": "I/O Registers",
+      "access": "read_write",
+      "examples": [
+        "DIRB := $FF000000  // Set pins 56-63 as outputs"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "IJMP1",
+      "address": 500,
+      "description": "Interrupt 1 jump vector",
+      "category": "Interrupt Vectors",
+      "access": "read_write",
+      "examples": [
+        "IJMP1 := @interrupt1_handler"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "IJMP2",
+      "address": 498,
+      "description": "Interrupt 2 jump vector",
+      "category": "Interrupt Vectors",
+      "access": "read_write",
+      "examples": [
+        "IJMP2 := @interrupt2_handler"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "IJMP3",
+      "address": 496,
+      "description": "Interrupt 3 jump vector",
+      "category": "Interrupt Vectors",
+      "access": "read_write",
+      "examples": [
+        "IJMP3 := @interrupt3_handler"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "INA",
+      "address": 510,
+      "description": "Input register A (pins 0-31)",
+      "category": "I/O Registers",
+      "access": "read",
+      "examples": [
+        "button_state := INA[button_pin]"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "INB",
+      "address": 511,
+      "description": "Input register B (pins 32-63)",
+      "category": "I/O Registers",
+      "access": "read",
+      "examples": [
+        "sensor_data := INB"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "IRET1",
+      "address": 501,
+      "description": "Interrupt 1 return vector",
+      "category": "Interrupt Vectors",
+      "access": "read_write",
+      "examples": [
+        "IRET1 := stored_pc"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "IRET2",
+      "address": 499,
+      "description": "Interrupt 2 return vector",
+      "category": "Interrupt Vectors",
+      "access": "read_write",
+      "examples": [
+        "IRET2 := return_point"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "IRET3",
+      "address": 497,
+      "description": "Interrupt 3 return vector",
+      "category": "Interrupt Vectors",
+      "access": "read_write",
+      "examples": [
+        "IRET3 := saved_address"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "OUTA",
+      "address": 508,
+      "description": "Output register A (pins 0-31)",
+      "category": "I/O Registers",
+      "access": "read_write",
+      "examples": [
+        "OUTA := led_pattern",
+        "!OUTA[led_pin]"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "OUTB",
+      "address": 509,
+      "description": "Output register B (pins 32-63)",
+      "category": "I/O Registers",
+      "access": "read_write",
+      "examples": [
+        "OUTB := high_pin_states"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "PA",
+      "address": 502,
+      "description": "Parameter A / call target",
+      "category": "Call Targets",
+      "access": "read_write",
+      "examples": [
+        "PA := @subroutine",
+        "CALL PA"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "PB",
+      "address": 503,
+      "description": "Parameter B / call target",
+      "category": "Call Targets",
+      "access": "read_write",
+      "examples": [
+        "PB := @function",
+        "CALL PB"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "PR0",
+      "address": 496,
+      "description": "General purpose register 0",
+      "category": "General Purpose",
+      "access": "read_write",
+      "examples": [
+        "PR0 := value",
+        "result := PR0"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "PR1",
+      "address": 497,
+      "description": "General purpose register 1",
+      "category": "General Purpose",
+      "access": "read_write",
+      "examples": [
+        "PR1 := counter",
+        "temp := PR1"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "PR2",
+      "address": 498,
+      "description": "General purpose register 2",
+      "category": "General Purpose",
+      "access": "read_write",
+      "examples": [
+        "PR2 := buffer_ptr"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "PR3",
+      "address": 499,
+      "description": "General purpose register 3",
+      "category": "General Purpose",
+      "access": "read_write",
+      "examples": [
+        "PR3 := status_flags"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "PR4",
+      "address": 500,
+      "description": "General purpose register 4",
+      "category": "General Purpose",
+      "access": "read_write",
+      "examples": [
+        "PR4 := data_length"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "PR5",
+      "address": 501,
+      "description": "General purpose register 5",
+      "category": "General Purpose",
+      "access": "read_write",
+      "examples": [
+        "PR5 := loop_count"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "PR6",
+      "address": 502,
+      "description": "General purpose register 6",
+      "category": "General Purpose",
+      "access": "read_write",
+      "examples": [
+        "PR6 := state_machine"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "PR7",
+      "address": 503,
+      "description": "General purpose register 7",
+      "category": "General Purpose",
+      "access": "read_write",
+      "examples": [
+        "PR7 := working_value"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "PTRA",
+      "address": 504,
+      "description": "Pointer A register",
+      "category": "Special Function",
+      "access": "read_write",
+      "examples": [
+        "PTRA := @buffer",
+        "RDLONG value, PTRA++"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "PTRB",
+      "address": 505,
+      "description": "Pointer B register",
+      "category": "Special Function",
+      "access": "read_write",
+      "examples": [
+        "PTRB := @array",
+        "WRLONG data, PTRB++"
+      ],
+      "elementType": 82
+    },
+    {
+      "name": "TASKHLT",
+      "address": 512,
+      "description": "Task halt register (v47+)",
+      "category": "Task Management",
+      "access": "read_write",
+      "examples": [
+        "TASKHLT := task_flags"
+      ],
+      "elementType": 82
+    }
+  ],
+  "debugCommands": [
+    {
+      "name": "BOOL",
+      "description": "Boolean format (v44+)",
+      "category": "Boolean Format",
+      "syntax": [
+        "BOOL(value)"
+      ],
+      "examples": [
+        "DEBUG(BOOL(flag))"
+      ],
+      "elementType": 71,
+      "formatType": "boolean"
+    },
+    {
+      "name": "DEBUG",
+      "description": "Debug output statement",
+      "category": "Debug Control",
+      "syntax": [
+        "DEBUG (expressions)"
+      ],
+      "examples": [
+        "DEBUG(\"Value:\", value)"
+      ],
+      "elementType": 70
+    },
+    {
+      "name": "DLY",
+      "description": "Debug delay command",
+      "category": "Debug Control",
+      "syntax": [
+        "DLY(milliseconds)"
+      ],
+      "examples": [
+        "DEBUG(DLY(100))"
+      ],
+      "elementType": 71,
+      "formatType": "control"
+    },
+    {
+      "name": "LSTR",
+      "description": "Length-prefixed string",
+      "category": "String Format",
+      "syntax": [
+        "LSTR(string_ptr)"
+      ],
+      "examples": [
+        "DEBUG(LSTR(@buffer))"
+      ],
+      "elementType": 71,
+      "formatType": "string"
+    },
+    {
+      "name": "PC_KEY",
+      "description": "PC keyboard input",
+      "category": "Debug Control",
+      "syntax": [
+        "PC_KEY"
+      ],
+      "examples": [
+        "DEBUG(PC_KEY)"
+      ],
+      "elementType": 71,
+      "formatType": "control"
+    },
+    {
+      "name": "PC_MOUSE",
+      "description": "PC mouse input",
+      "category": "Debug Control",
+      "syntax": [
+        "PC_MOUSE"
+      ],
+      "examples": [
+        "DEBUG(PC_MOUSE)"
+      ],
+      "elementType": 71,
+      "formatType": "control"
+    },
+    {
+      "name": "SDEC",
+      "description": "Signed decimal format",
+      "category": "Decimal Format",
+      "syntax": [
+        "SDEC(value)"
+      ],
+      "examples": [
+        "DEBUG(SDEC(temperature))"
+      ],
+      "elementType": 71,
+      "formatType": "decimal"
+    },
+    {
+      "name": "SDEC_BYTE",
+      "description": "Signed decimal byte format",
+      "category": "Decimal Format",
+      "syntax": [
+        "SDEC_BYTE(value)"
+      ],
+      "examples": [
+        "DEBUG(SDEC_BYTE(offset))"
+      ],
+      "elementType": 71,
+      "formatType": "decimal"
+    },
+    {
+      "name": "SDEC_LONG",
+      "description": "Signed decimal long format",
+      "category": "Decimal Format",
+      "syntax": [
+        "SDEC_LONG(value)"
+      ],
+      "examples": [
+        "DEBUG(SDEC_LONG(position))"
+      ],
+      "elementType": 71,
+      "formatType": "decimal"
+    },
+    {
+      "name": "SDEC_WORD",
+      "description": "Signed decimal word format",
+      "category": "Decimal Format",
+      "syntax": [
+        "SDEC_WORD(value)"
+      ],
+      "examples": [
+        "DEBUG(SDEC_WORD(delta))"
+      ],
+      "elementType": 71,
+      "formatType": "decimal"
+    },
+    {
+      "name": "UBIN",
+      "description": "Unsigned binary format",
+      "category": "Binary Format",
+      "syntax": [
+        "UBIN(value)"
+      ],
+      "examples": [
+        "DEBUG(UBIN(mask))"
+      ],
+      "elementType": 71,
+      "formatType": "binary"
+    },
+    {
+      "name": "UBIN_BYTE",
+      "description": "Unsigned binary byte format",
+      "category": "Binary Format",
+      "syntax": [
+        "UBIN_BYTE(value)"
+      ],
+      "examples": [
+        "DEBUG(UBIN_BYTE(pattern))"
+      ],
+      "elementType": 71,
+      "formatType": "binary"
+    },
+    {
+      "name": "UBIN_LONG",
+      "description": "Unsigned binary long format",
+      "category": "Binary Format",
+      "syntax": [
+        "UBIN_LONG(value)"
+      ],
+      "examples": [
+        "DEBUG(UBIN_LONG(bitfield))"
+      ],
+      "elementType": 71,
+      "formatType": "binary"
+    },
+    {
+      "name": "UBIN_WORD",
+      "description": "Unsigned binary word format",
+      "category": "Binary Format",
+      "syntax": [
+        "UBIN_WORD(value)"
+      ],
+      "examples": [
+        "DEBUG(UBIN_WORD(config))"
+      ],
+      "elementType": 71,
+      "formatType": "binary"
+    },
+    {
+      "name": "UDEC",
+      "description": "Unsigned decimal format",
+      "category": "Decimal Format",
+      "syntax": [
+        "UDEC(value)"
+      ],
+      "examples": [
+        "DEBUG(UDEC(counter))"
+      ],
+      "elementType": 71,
+      "formatType": "decimal"
+    },
+    {
+      "name": "UDEC_BYTE",
+      "description": "Unsigned decimal byte format",
+      "category": "Decimal Format",
+      "syntax": [
+        "UDEC_BYTE(value)"
+      ],
+      "examples": [
+        "DEBUG(UDEC_BYTE(status))"
+      ],
+      "elementType": 71,
+      "formatType": "decimal"
+    },
+    {
+      "name": "UDEC_LONG",
+      "description": "Unsigned decimal long format",
+      "category": "Decimal Format",
+      "syntax": [
+        "UDEC_LONG(value)"
+      ],
+      "examples": [
+        "DEBUG(UDEC_LONG(timestamp))"
+      ],
+      "elementType": 71,
+      "formatType": "decimal"
+    },
+    {
+      "name": "UDEC_WORD",
+      "description": "Unsigned decimal word format",
+      "category": "Decimal Format",
+      "syntax": [
+        "UDEC_WORD(value)"
+      ],
+      "examples": [
+        "DEBUG(UDEC_WORD(address))"
+      ],
+      "elementType": 71,
+      "formatType": "decimal"
+    },
+    {
+      "name": "UHEX",
+      "description": "Unsigned hexadecimal format",
+      "category": "Hexadecimal Format",
+      "syntax": [
+        "UHEX(value)"
+      ],
+      "examples": [
+        "DEBUG(UHEX(address))"
+      ],
+      "elementType": 71,
+      "formatType": "hexadecimal"
+    },
+    {
+      "name": "UHEX_BYTE",
+      "description": "Unsigned hexadecimal byte format",
+      "category": "Hexadecimal Format",
+      "syntax": [
+        "UHEX_BYTE(value)"
+      ],
+      "examples": [
+        "DEBUG(UHEX_BYTE(flags))"
+      ],
+      "elementType": 71,
+      "formatType": "hexadecimal"
+    },
+    {
+      "name": "UHEX_LONG",
+      "description": "Unsigned hexadecimal long format",
+      "category": "Hexadecimal Format",
+      "syntax": [
+        "UHEX_LONG(value)"
+      ],
+      "examples": [
+        "DEBUG(UHEX_LONG(register))"
+      ],
+      "elementType": 71,
+      "formatType": "hexadecimal"
+    },
+    {
+      "name": "UHEX_WORD",
+      "description": "Unsigned hexadecimal word format",
+      "category": "Hexadecimal Format",
+      "syntax": [
+        "UHEX_WORD(value)"
+      ],
+      "examples": [
+        "DEBUG(UHEX_WORD(port))"
+      ],
+      "elementType": 71,
+      "formatType": "hexadecimal"
+    },
+    {
+      "name": "ZSTR",
+      "description": "Zero-terminated string",
+      "category": "String Format",
+      "syntax": [
+        "ZSTR(string_ptr)"
+      ],
+      "examples": [
+        "DEBUG(ZSTR(@message))"
+      ],
+      "elementType": 71,
+      "formatType": "string"
+    }
+  ],
+  "systemVariables": [
+    {
+      "name": "CLKFREQ",
+      "address": 68,
+      "description": "System clock frequency in Hz",
+      "type": "hub_long",
+      "access": "read_write",
+      "examples": [
+        "CLKFREQ := 80_000_000  // 80MHz"
+      ],
+      "elementType": 114
+    },
+    {
+      "name": "CLKMODE",
+      "address": 64,
+      "description": "System clock mode configuration",
+      "type": "hub_long",
+      "access": "read_write",
+      "examples": [
+        "CLKMODE := %0_0000_01_101_111_1_1  // 80MHz"
+      ],
+      "elementType": 114
+    },
+    {
+      "name": "VARBASE",
+      "address": 0,
+      "description": "Base address of VAR section",
+      "type": "var_long",
+      "access": "read",
+      "examples": [
+        "var_start := VARBASE"
+      ],
+      "elementType": 97
+    }
+  ],
+  "specialSymbols": [
+    {
+      "symbol": "_",
+      "name": "underscore",
+      "description": "Digit separator in numeric literals",
+      "usage": [
+        "number_formatting"
+      ],
+      "examples": [
+        "freq := 80_000_000",
+        "mask := %1111_0000_1111_0000"
+      ],
+      "elementType": 12
+    },
+    {
+      "symbol": ".",
+      "name": "dot",
+      "description": "Decimal point or object method access",
+      "usage": [
+        "decimal_point",
+        "method_access"
+      ],
+      "examples": [
+        "float_val := 3.14",
+        "obj.method()"
+      ],
+      "elementType": 17
+    },
+    {
+      "symbol": "..",
+      "name": "range",
+      "description": "Range operator for CASE statements",
+      "usage": [
+        "case_range"
+      ],
+      "examples": [
+        "CASE value\\n  1..10: low_range()\\n  11..20: high_range()"
+      ],
+      "elementType": 18
+    },
+    {
+      "symbol": "@",
+      "name": "address_of",
+      "description": "Address-of operator - get memory address",
+      "usage": [
+        "variable_address",
+        "method_address",
+        "label_address"
+      ],
+      "examples": [
+        "ptr := @variable",
+        "COGINIT(0, @assembly_code, @params)"
+      ],
+      "elementType": 19
+    },
+    {
+      "symbol": "@@",
+      "name": "absolute_address",
+      "description": "Absolute address operator - get absolute hub address",
+      "usage": [
+        "absolute_addressing"
+      ],
+      "examples": [
+        "hub_addr := @@variable"
+      ],
+      "elementType": 20
+    },
+    {
+      "symbol": "%",
+      "name": "binary",
+      "description": "Binary number prefix",
+      "usage": [
+        "number_literal"
+      ],
+      "examples": [
+        "mask := %11110000",
+        "pattern := %1010_1010"
+      ],
+      "elementType": 16
+    },
+    {
+      "symbol": "`",
+      "name": "tick",
+      "description": "Tick operator for special formatting",
+      "usage": [
+        "special_formatting"
+      ],
+      "examples": [
+        "`expression"
+      ],
+      "elementType": 13
+    },
+    {
+      "symbol": "^@",
+      "name": "object_address",
+      "description": "Object address operator - address within object",
+      "usage": [
+        "object_addressing"
+      ],
+      "examples": [
+        "obj_addr := ^@method"
+      ],
+      "elementType": 21
+    },
+    {
+      "symbol": "~",
+      "name": "post_clear",
+      "description": "Post-clear operator - use value then clear",
+      "usage": [
+        "post_operation"
+      ],
+      "examples": [
+        "value := ~flag  // use flag then clear it"
+      ],
+      "elementType": 22
+    },
+    {
+      "symbol": "~~",
+      "name": "post_set",
+      "description": "Post-set operator - use value then set to -1",
+      "usage": [
+        "post_operation"
+      ],
+      "examples": [
+        "value := ~~flag  // use flag then set to -1"
+      ],
+      "elementType": 23
+    },
+    {
+      "symbol": "$",
+      "name": "hexadecimal",
+      "description": "Hexadecimal number prefix",
+      "usage": [
+        "number_literal"
+      ],
+      "examples": [
+        "value := $FF",
+        "address := $1000"
+      ],
+      "elementType": 14
+    },
+    {
+      "symbol": "$$",
+      "name": "current_address",
+      "description": "Current assembly address",
+      "usage": [
+        "assembly_addressing"
+      ],
+      "examples": [
+        "distance := target - $$"
+      ],
+      "elementType": 15
+    }
+  ],
+  "categories": {
+    "keywords": [
+      "Block Structure",
+      "Built-in Functions",
+      "Control Flow",
+      "Data Types",
+      "Special"
+    ],
+    "operators": [
+      "binary",
+      "ternary",
+      "unary"
+    ],
+    "functions": [
+      "Bit Manipulation",
+      "COG Management",
+      "Data Manipulation",
+      "Lookup",
+      "Math",
+      "Memory",
+      "Pin I/O",
+      "String",
+      "System",
+      "Task Management",
+      "Timing",
+      "Type Conversion"
+    ],
+    "assemblyDirectives": [
+      "both"
+    ],
+    "registers": [
+      "Call Targets",
+      "General Purpose",
+      "I/O Registers",
+      "Interrupt Vectors",
+      "Special Function",
+      "Task Management"
+    ],
+    "debugCommands": [
+      "Binary Format",
+      "Boolean Format",
+      "Debug Control",
+      "Decimal Format",
+      "Hexadecimal Format",
+      "String Format"
+    ],
+    "systemVariables": [
+      "hub_long",
+      "var_long"
+    ],
+    "specialSymbols": [
+      "absolute_addressing",
+      "assembly_addressing",
+      "case_range",
+      "decimal_point",
+      "label_address",
+      "method_access",
+      "method_address",
+      "number_formatting",
+      "number_literal",
+      "object_addressing",
+      "post_operation",
+      "special_formatting",
+      "variable_address"
+    ]
+  }
+}
