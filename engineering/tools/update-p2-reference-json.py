@@ -381,7 +381,10 @@ class P2ReferenceUpdater:
 
 
 if __name__ == "__main__":
-    updater = P2ReferenceUpdater(version="2.0.0")
+    import sys
+    # Get version from command line argument
+    version = sys.argv[1] if len(sys.argv) > 1 else "2.0.0"
+    updater = P2ReferenceUpdater(version=version)
     stats = updater.update()
     
     print("\n📊 Update Statistics:")
