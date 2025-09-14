@@ -85,5 +85,15 @@ YAML sources → generate-ai-reference-from-yaml.py → deliverables/ai-referenc
             releases/vX.Y.Z/RELEASE-NOTES.md ----→ GitHub release notes
 ```
 
+## Outstanding Decision
+**WORKFLOW MISMATCH (v1.3.0+)**: GitHub workflow generates its own changelog from manual input instead of using our centralized control files. This creates duplicate work and potential inconsistencies.
+
+**Options**:
+1. Update GitHub workflow to read centralized control files
+2. Deprecate centralized files and use GitHub workflow exclusively  
+3. Maintain both systems (current approach)
+
+**Impact**: For v1.2.0 we used existing workflow. Future releases need this resolved.
+
 ---
 *Updated: 2025-09-14*
