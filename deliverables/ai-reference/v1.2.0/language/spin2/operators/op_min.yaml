@@ -1,0 +1,5 @@
+operator: "<#"
+type: operator
+description: |
+  Max/min limiting
+category: Limit

@@ -5,16 +5,17 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'SETBYTE stores Src[7:0] into the byte identified by Num within Dest, or the byte and register
-  described by a prior Result: Src[7:0] is written to byte Num (0–3) of Dest, or to another register byte
-  described by prior ALTSB instruction.'
+description: 'SETBYTE stores Src[7:0] into the byte identified by Num within Dest,
+  or the byte and register described by a prior Result: Src[7:0] is written to byte
+  Num (0–3) of Dest, or to another register byte described by prior ALTSB instruction.'
 category: Bit Operation Instruction - Set a byte to new value.
 flags_affected:
   C:
     when: D
 parameters:
 - Dest is the register in which to modify a byte.
-- Src is a register or 8-bit literal whose bits [7:0] will be stored in the designated location.
+- Src is a register or 8-bit literal whose bits [7:0] will be stored in the designated
+  location.
 - Num is a 2-bit literal identifying the nibble ID (0–3) of Dest to modify.
 related:
 - ALTSB
@@ -28,3 +29,11 @@ related:
 - ROLWORD
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds2set
+  pattern: S/#{,D,#0..3}
+  description: 'Set byte: source/immediate, optional destination and byte index 0-3'
+  valueType: 8
+compiler_encoding:
+  operandFormat: 8
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

@@ -1,0 +1,115 @@
+# Spin2 Method: WAITUS
+# Source: Spin2 v51 documentation
+# Purpose: Delay execution for specified microseconds
+
+method: "WAITUS"
+category: "timing"
+type: "method"
+description: |
+  Delay execution for a specified number of microseconds.
+  Provides microsecond-resolution timing delay that automatically accounts for system clock frequency.
+  More precise than WAITMS for short delays.
+
+syntax: "WAITUS(Microseconds)"
+
+parameters:
+  - name: "Microseconds"
+    type: "long"
+    description: |
+      Number of microseconds to delay (1-4,294,967,295 range).
+      Can be a constant, variable, or expression.
+      Value is treated as unsigned.
+
+returns: "none"
+
+timing:
+  accuracy: "Within one system clock tick"
+  resolution: "1 microsecond (at frequencies >= 1MHz)"
+  calculation: "Uses CLKFREQ/1_000_000 internally"
+  overhead: "Minimal setup overhead (~10 cycles)"
+  minimum_useful: "~2 microseconds at 200MHz"
+
+examples:
+  - code: "WAITUS(10)"
+    description: "Delay for 10 microseconds"
+    
+  - code: |
+      ' Generate 50% duty cycle square wave
+      REPEAT
+        PINHIGH(0)
+        WAITUS(10)
+        PINLOW(0)
+        WAITUS(10)
+    description: "50kHz square wave (20µs period)"
+    
+  - code: |
+      ' Pulse width generation
+      PUB pulse(pin, width_us)
+        PINHIGH(pin)
+        WAITUS(width_us)
+        PINLOW(pin)
+    description: "Generate precise pulse width"
+    
+  - code: |
+      ' Bit-banged serial timing
+      PUB send_bit(value)
+        PINWRITE(TX_PIN, value)
+        WAITUS(104)  ' 9600 baud bit time
+    description: "Serial bit timing at 9600 baud"
+    
+  - code: |
+      ' I2C clock stretching
+      PINHIGH(SCL)
+      WAITUS(5)  ' Setup time
+      data := PINREAD(SDA)
+      WAITUS(5)  ' Hold time
+      PINLOW(SCL)
+    description: "I2C timing compliance"
+
+underlying_implementation:
+  description: |
+    Internally calculates: WAITX((CLKFREQ/1_000_000) * microseconds - 1)
+    Automatically adjusts for system clock frequency.
+    At lower frequencies, resolution degrades.
+  related_pasm: "WAITX instruction"
+
+common_uses:
+  - "Pulse width generation"
+  - "Bit-banged communication protocols"
+  - "Sensor timing requirements"
+  - "Setup and hold times"
+  - "Servo control pulses"
+  - "Ultrasonic sensor timing"
+  - "Fine-grained delays"
+
+related_methods:
+  - "WAITMS - Delay for milliseconds"
+  - "WAITCT - Wait for specific system counter value"
+  - "GETCT - Get current system counter"
+  - "POLLCT - Check if counter value passed"
+
+notes:
+  - "Blocks execution - cog cannot do other work during delay"
+  - "Resolution limited by clock frequency (1µs requires ≥1MHz clock)"
+  - "For delays > 1000µs, consider using WAITMS"
+  - "For cycle-accurate timing, use WAITCT"
+  - "Very short delays may be dominated by overhead"
+  - "Delay is relative to call time, not absolute"
+
+limitations:
+  - "1µs minimum resolution (at sufficient clock speed)"
+  - "Blocking operation"
+  - "Subject to small jitter from hub timing"
+  - "Resolution degrades at low clock frequencies"
+
+clock_frequency_impact:
+  - "200MHz: 1µs = 200 clocks (excellent resolution)"
+  - "80MHz: 1µs = 80 clocks (good resolution)"
+  - "20MHz: 1µs = 20 clocks (marginal resolution)"
+  - "1MHz: 1µs = 1 clock (poor resolution)"
+
+see_also:
+  - "language/spin2/methods/waitms.yaml"
+  - "language/spin2/methods/waitct.yaml"
+  - "language/spin2/methods/getct.yaml"
+  - "language/pasm2/waitx.yaml"

@@ -1,0 +1,9 @@
+keyword: "BYTEFIT"
+type: keyword
+category: "Data Types"
+description: |
+  Expression that fits in a byte constant
+examples:
+  - |
+    CON
+      SMALL_VALUE = BYTEFIT(200)

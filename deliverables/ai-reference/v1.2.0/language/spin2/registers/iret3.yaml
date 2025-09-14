@@ -1,0 +1,9 @@
+register: "IRET3"
+type: register
+category: "Interrupt Vectors"
+description: |
+  Interrupt 3 return vector
+examples:
+  - "IRET3 := saved_address"
+address: "497"
+access: "read_write"

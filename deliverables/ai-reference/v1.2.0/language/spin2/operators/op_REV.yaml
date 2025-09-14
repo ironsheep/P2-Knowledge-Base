@@ -1,0 +1,5 @@
+operator: "REV"
+type: operator
+description: |
+  Bit manipulation
+category: Shift/Rotate

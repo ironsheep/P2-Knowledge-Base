@@ -1,6 +1,6 @@
 instruction: JMP
 syntax: JMP     D        {WC/WZ/WCZ}
-compiler_syntax: JMP #S | D
+compiler_syntax: JMP
 encoding: EEEE 1101100 RAA AAAAAAAAA AAAAAAAAA
 compiler_encoding:
   bits: 32
@@ -22,8 +22,8 @@ documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_jmp
-  pattern: "#S | D"
-  description: "Jump: immediate address or register"
+  pattern: '#S | D'
+  description: 'Jump: immediate address or register'
   valueType: 18
 compiler_effects: []
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13

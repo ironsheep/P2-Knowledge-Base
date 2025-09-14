@@ -5,70 +5,125 @@ timing:
   cycles: 2
   type: fixed
 group: CORDIC Solver
-description: Perform 64÷32 unsigned division with 32-bit quotient and remainder. Numerator formed from {SETQ value or 32'b0, D}, divided by S. Results retrieved via GETQX (quotient) and GETQY (remainder) instructions 55 clocks later.
-long_description: |
-  The QDIV instruction performs high-precision unsigned division using the P2's 54-stage pipelined CORDIC solver. It divides a 64-bit numerator by a 32-bit denominator, producing both a 32-bit quotient and 32-bit remainder.
-  
-  The 64-bit numerator is formed by concatenating the SETQ value (or 32'b0 if SETQ not used) as the upper 32 bits with the D operand as the lower 32 bits. The denominator is specified in the S operand. After 55 clocks, the quotient can be retrieved using GETQX and the remainder using GETQY.
-  
-  This instruction is essential for precise arithmetic operations where full 64-bit precision is needed in the dividend, such as fixed-point mathematics, scaling operations, and algorithms requiring exact division results without precision loss.
-  
-  The optional SETQ instruction allows for true 64-bit division when high precision is required, while omitting SETQ effectively performs 32-bit division (equivalent to {0, D} / S).
+description: Perform 64÷32 unsigned division with 32-bit quotient and remainder. Numerator
+  formed from {SETQ value or 32'b0, D}, divided by S. Results retrieved via GETQX
+  (quotient) and GETQY (remainder) instructions 55 clocks later.
+long_description: 'The QDIV instruction performs high-precision unsigned division
+  using the P2''s 54-stage pipelined CORDIC solver. It divides a 64-bit numerator
+  by a 32-bit denominator, producing both a 32-bit quotient and 32-bit remainder.
+
+
+  The 64-bit numerator is formed by concatenating the SETQ value (or 32''b0 if SETQ
+  not used) as the upper 32 bits with the D operand as the lower 32 bits. The denominator
+  is specified in the S operand. After 55 clocks, the quotient can be retrieved using
+  GETQX and the remainder using GETQY.
+
+
+  This instruction is essential for precise arithmetic operations where full 64-bit
+  precision is needed in the dividend, such as fixed-point mathematics, scaling operations,
+  and algorithms requiring exact division results without precision loss.
+
+
+  The optional SETQ instruction allows for true 64-bit division when high precision
+  is required, while omitting SETQ effectively performs 32-bit division (equivalent
+  to {0, D} / S).
+
+  '
 category: CORDIC Solver
 examples:
-  - code: |
-      ' Simple 32-bit division: 1000000 ÷ 3 = 333333 remainder 1
-      QDIV    #1000000, #3   ' No SETQ, so {0, 1000000} / 3
-      ' Wait 55 clocks...
-      GETQX   quotient       ' Get 333333
-      GETQY   remainder      ' Get 1
-    description: "Basic 32-bit division"
-  - code: |
-      ' Full 64-bit division: {0x12345678, 0x9ABCDEF0} ÷ 1000
-      SETQ    #$12345678     ' Set upper 32 bits
-      QDIV    #$9ABCDEF0, #1000  ' {SETQ, D} / S
-      ' ... other work for 55 clocks ...
-      GETQX   big_quotient
-      GETQY   big_remainder
-    description: "64-bit precision division"
-  - code: |
-      ' Variable division with remainder checking
-      SETQ    dividend_high
-      QDIV    dividend_low, divisor
-      ' ... wait 55 clocks ...
-      GETQX   result_quotient
-      GETQY   result_remainder
-      CMP     result_remainder, #0 WZ  ' Check for exact division
-      IF_Z    JMP     #exact_division
-    description: "Division with remainder analysis"
-  - code: |
-      ' Fixed-point scaling: scale 32.32 fixed-point by integer
-      ' Example: scale value by 75% (multiply by 3, divide by 4)
-      QMUL    fixed_point_low, #3   ' First multiply by 3
-      ' ... wait 55 clocks ...
-      GETQX   scaled_low
-      GETQY   scaled_high
-      SETQ    scaled_high           ' Use high part in division
-      QDIV    scaled_low, #4        ' Then divide by 4
-      ' ... wait 55 clocks ...
-      GETQX   final_result
-    description: "Fixed-point arithmetic with scaling"
+- code: ''' Simple 32-bit division: 1000000 ÷ 3 = 333333 remainder 1
+
+    QDIV    #1000000, #3   '' No SETQ, so {0, 1000000} / 3
+
+    '' Wait 55 clocks...
+
+    GETQX   quotient       '' Get 333333
+
+    GETQY   remainder      '' Get 1
+
+    '
+  description: Basic 32-bit division
+- code: ''' Full 64-bit division: {0x12345678, 0x9ABCDEF0} ÷ 1000
+
+    SETQ    #$12345678     '' Set upper 32 bits
+
+    QDIV    #$9ABCDEF0, #1000  '' {SETQ, D} / S
+
+    '' ... other work for 55 clocks ...
+
+    GETQX   big_quotient
+
+    GETQY   big_remainder
+
+    '
+  description: 64-bit precision division
+- code: ''' Variable division with remainder checking
+
+    SETQ    dividend_high
+
+    QDIV    dividend_low, divisor
+
+    '' ... wait 55 clocks ...
+
+    GETQX   result_quotient
+
+    GETQY   result_remainder
+
+    CMP     result_remainder, #0 WZ  '' Check for exact division
+
+    IF_Z    JMP     #exact_division
+
+    '
+  description: Division with remainder analysis
+- code: ''' Fixed-point scaling: scale 32.32 fixed-point by integer
+
+    '' Example: scale value by 75% (multiply by 3, divide by 4)
+
+    QMUL    fixed_point_low, #3   '' First multiply by 3
+
+    '' ... wait 55 clocks ...
+
+    GETQX   scaled_low
+
+    GETQY   scaled_high
+
+    SETQ    scaled_high           '' Use high part in division
+
+    QDIV    scaled_low, #4        '' Then divide by 4
+
+    '' ... wait 55 clocks ...
+
+    GETQX   final_result
+
+    '
+  description: Fixed-point arithmetic with scaling
 related_instructions:
-  - GETQX
-  - GETQY
-  - SETQ
-  - QFRAC
-  - QMUL
+- GETQX
+- GETQY
+- SETQ
+- QFRAC
+- QMUL
 operand_details:
-  SETQ: "Upper 32 bits of 64-bit numerator (optional, defaults to 0)"
-  D: "Lower 32 bits of 64-bit numerator"
-  S: "32-bit denominator (divisor)"
+  SETQ: Upper 32 bits of 64-bit numerator (optional, defaults to 0)
+  D: Lower 32 bits of 64-bit numerator
+  S: 32-bit denominator (divisor)
 result_details:
-  GETQX: "32-bit quotient"
-  GETQY: "32-bit remainder"
-timing_notes: "Result available 55 clocks after instruction issue. Each cog can issue one CORDIC instruction per hub window (every 8 clocks)."
-usage_notes: "Use SETQ before QDIV to specify upper 32 bits of numerator. Without SETQ, upper 32 bits default to 0. Division by zero produces undefined results."
-applications: "High-precision arithmetic, fixed-point scaling, remainder calculations, algorithm implementations requiring exact division."
+  GETQX: 32-bit quotient
+  GETQY: 32-bit remainder
+timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
+  one CORDIC instruction per hub window (every 8 clocks).
+usage_notes: Use SETQ before QDIV to specify upper 32 bits of numerator. Without SETQ,
+  upper 32 bits default to 0. Division by zero produces undefined results.
+applications: High-precision arithmetic, fixed-point scaling, remainder calculations,
+  algorithm implementations requiring exact division.
 documentation_source: p2_datasheet
 documentation_level: comprehensive
 needs_documentation: false
+compiler_operand_format:
+  name: operand_ls
+  pattern: D/#,S/#
+  description: 'Two operands: destination/immediate, source/immediate'
+  valueType: 13
+compiler_encoding:
+  operandFormat: 13
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

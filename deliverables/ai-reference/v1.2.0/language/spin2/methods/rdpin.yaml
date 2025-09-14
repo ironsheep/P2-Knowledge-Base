@@ -1,0 +1,48 @@
+method: RDPIN
+type: method
+description: |
+  Read smart pin result and clear IN flag (acknowledge)
+category: Smart Pin Operations
+syntax: "result := RDPIN(PinField)"
+parameters:
+  - name: "PinField"
+    type: "pin_field"
+    description: "Pin number (0-63) or pin field expression"
+returns:
+  type: "long"
+  description: "32-bit result with bit 31 containing the pin's C flag state"
+examples:
+  - code: |
+      ' Read ADC result from pin 16
+      adc_value := RDPIN(16)
+    description: "Read ADC conversion result"
+  - code: |
+      ' Read pulse width measurement
+      width := RDPIN(8) & $7FFF_FFFF  ' Mask off C flag
+    description: "Read pulse width, remove C flag"
+  - code: |
+      ' Check C flag while reading
+      value := RDPIN(pin)
+      if value < 0  ' C flag was set (bit 31)
+        ' Handle C flag condition
+    description: "Read value and check C flag state"
+notes:
+  - "Clears the smart pin's IN flag after reading"
+  - "Bit 31 of result contains the pin's C flag state"
+  - "Lower 31 bits contain the smart pin measurement/result"
+  - "Reading acknowledges the smart pin, allowing next measurement"
+  - "Use RQPIN to read without acknowledging"
+  - "Smart pin must be configured with WRPIN/WXPIN/WYPIN first"
+timing:
+  description: "Hub operation"
+  cycles: "2-9 clock cycles"
+related:
+  - RQPIN
+  - AKPIN
+  - WRPIN
+  - WXPIN
+  - WYPIN
+see_also:
+  - "Smart pin modes"
+  - "Smart pin configuration"
+  - "Pin I/O operations"

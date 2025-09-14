@@ -5,16 +5,26 @@ timing:
   cycles: 2
   type: fixed
 group: Interrupts
-description: |
-  BRK triggers a breakpoint in the current cog and either defines a breakpoint code or the
-  next breakpoint Result: If debug interrupts are enabled, a debug interrupt is triggered in the current
-  cog and Dest's value becomes the debug code or the next debug condition.
-  
+description: 'BRK triggers a breakpoint in the current cog and either defines a breakpoint
+  code or the
+
+  next breakpoint Result: If debug interrupts are enabled, a debug interrupt is triggered
+  in the current
+
+  cog and Dest''s value becomes the debug code or the next debug condition.
+
+
   Key uses:
+
   - Software breakpoints for debugging
+
   - Conditional debug triggers
+
   - Communication with debug monitor
+
   - Assertion failures and error handling
+
+  '
 category: Interrupt Instruction - Trigger breakpoint in current cog.
 flags_affected:
   C:
@@ -22,69 +32,53 @@ flags_affected:
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:
-  - name: Software Breakpoint
-    description: Insert breakpoint for debugger
-    code: |
-      ' Hit breakpoint with specific code
-              brk     #1                       ' Breakpoint code 1
-              ' Execution stops here if debugger attached
-              ' Debugger can inspect state
-    source: Spin2_debugger.spin2
-    
-  - name: Conditional Breakpoint
-    description: Break only when condition met
-    code: |
-      ' Check condition and break if true
-              cmp     value, limit    wc       ' Check if over limit
-      if_c    brk     #LIMIT_EXCEEDED          ' Break with error code
-              
-              ' Continue normal execution
-    source: error_checking
-    
-  - name: Debug Communication
-    description: Pass data to debug monitor
-    code: |
-      ' Send value to debugger for logging
-              mov     debug_val, result        ' Value to report
-              brk     debug_val                ' Pass to debugger
-              
-              ' Debugger logs value and continues
-    source: debug_logging
-    
-  - name: Assert Implementation
-    description: Implement assertion that breaks on failure
-    code: |
-      ' Assert macro implementation
-      assert_not_zero
-              tjz     value, #.fail            ' Test assertion
-              ret                              ' Success - return
-      .fail   brk     #ASSERT_FAILED           ' Break with assert code
-              ' Debugger shows assertion failure
-    source: Spin2_debugger.spin2
-    
-  - name: Multi-Level Debug
-    description: Different debug levels with codes
-    code: |
-      ' Debug level codes
-      DEBUG_TRACE     = 1
-      DEBUG_INFO      = 2  
-      DEBUG_WARNING   = 3
-      DEBUG_ERROR     = 4
-      
-      ' Break with appropriate level
-              brk     #DEBUG_WARNING           ' Warning-level break
-              
-      ' Debugger filters based on level
-    source: debug_infrastructure
-    
+- name: Software Breakpoint
+  description: Insert breakpoint for debugger
+  code: "' Hit breakpoint with specific code\n        brk     #1                 \
+    \      ' Breakpoint code 1\n        ' Execution stops here if debugger attached\n\
+    \        ' Debugger can inspect state\n"
+  source: Spin2_debugger.spin2
+- name: Conditional Breakpoint
+  description: Break only when condition met
+  code: "' Check condition and break if true\n        cmp     value, limit    wc \
+    \      ' Check if over limit\nif_c    brk     #LIMIT_EXCEEDED          ' Break\
+    \ with error code\n        \n        ' Continue normal execution\n"
+  source: error_checking
+- name: Debug Communication
+  description: Pass data to debug monitor
+  code: "' Send value to debugger for logging\n        mov     debug_val, result \
+    \       ' Value to report\n        brk     debug_val                ' Pass to\
+    \ debugger\n        \n        ' Debugger logs value and continues\n"
+  source: debug_logging
+- name: Assert Implementation
+  description: Implement assertion that breaks on failure
+  code: "' Assert macro implementation\nassert_not_zero\n        tjz     value, #.fail\
+    \            ' Test assertion\n        ret                              ' Success\
+    \ - return\n.fail   brk     #ASSERT_FAILED           ' Break with assert code\n\
+    \        ' Debugger shows assertion failure\n"
+  source: Spin2_debugger.spin2
+- name: Multi-Level Debug
+  description: Different debug levels with codes
+  code: "' Debug level codes\nDEBUG_TRACE     = 1\nDEBUG_INFO      = 2  \nDEBUG_WARNING\
+    \   = 3\nDEBUG_ERROR     = 4\n\n' Break with appropriate level\n        brk  \
+    \   #DEBUG_WARNING           ' Warning-level break\n        \n' Debugger filters\
+    \ based on level\n"
+  source: debug_infrastructure
 related_instructions:
-  - GETBRK: Get breakpoint status/code
-  - COGBRK: Trigger breakpoint in another COG
-  - SETBRK: Configure breakpoint conditions
-  - NIXINT1/2/3: Disable interrupt sources
-  
+- GETBRK: Get breakpoint status/code
+- COGBRK: Trigger breakpoint in another COG
+- SETBRK: Configure breakpoint conditions
+- NIXINT1/2/3: Disable interrupt sources
 notes:
-  - Requires debug interrupts enabled to function
-  - Breakpoint code passed to debug ISR
-  - Zero code means unconditional break
-  - Essential for interactive debugging
+- Requires debug interrupts enabled to function
+- Breakpoint code passed to debug ISR
+- Zero code means unconditional break
+- Essential for interactive debugging
+compiler_operand_format:
+  name: operand_l
+  pattern: D/#0..511
+  description: Destination or immediate value 0-511
+  valueType: 26
+compiler_encoding:
+  operandFormat: 26
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

@@ -1,0 +1,7 @@
+symbol: "~"
+type: special_symbol
+category: "Special"
+description: |
+  Post-clear operator - use value then clear
+examples:
+  - "value := ~flag  // use flag then clear it"

@@ -1,0 +1,5 @@
+operator: "/"
+type: operator
+description: |
+  Divide/float/modulo/unsigned
+category: Divide

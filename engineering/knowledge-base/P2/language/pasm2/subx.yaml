@@ -5,9 +5,10 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'SUBX subtracts the unsigned value of Src plus C from the unsigned Dest and stores the result
-  into the Dest Result: Difference of unsigned Dest and unsigned Src (plus C) is stored in Dest and optionally
-  the C and Z flags are updated to the extended borrow and zero status.'
+description: 'SUBX subtracts the unsigned value of Src plus C from the unsigned Dest
+  and stores the result into the Dest Result: Difference of unsigned Dest and unsigned
+  Src (plus C) is stored in Dest and optionally the C and Z flags are updated to the
+  extended borrow and zero status.'
 category: Math Instruction - Subtract one unsigned extended value from another.
 flags_affected:
   C:
@@ -15,9 +16,10 @@ flags_affected:
   Z:
     formula: Z AND (result == 0)
 parameters:
-- Dest is a register containing the value to subtract Src plus C from, and is where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is subtracted from
-  Dest.
+- Dest is a register containing the value to subtract Src plus C from, and is where
+  the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C
+  is subtracted from Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 related:
 - SUB
@@ -25,3 +27,11 @@ related:
 - ADDX
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:
+  operandFormat: 0
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

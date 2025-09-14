@@ -1,6 +1,6 @@
 instruction: DEBUG
 syntax: DEBUG
-compiler_syntax: DEBUG 
+compiler_syntax: DEBUG
 encoding: TBD
 compiler_encoding:
   bits: 32
@@ -16,11 +16,12 @@ description: Debug instruction. Provides debugging functionality during program 
 category: System Control Instruction
 compiler_category: Miscellaneous
 examples:
-  - code: |
-      DEBUG
-    description: "Basic debug operation"
+- code: 'DEBUG
+
+    '
+  description: Basic debug operation
 operand_details:
-  none: "No operands required"
+  none: No operands required
 compiler_operand_format:
   name: operand_debug
   pattern: ''

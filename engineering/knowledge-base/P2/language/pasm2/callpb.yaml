@@ -5,14 +5,26 @@ timing:
   cycles: 4
   type: fixed
 group: Branch S - Call
-description: 'CALLPA and CALLPB records the current state of the C and Z flags and the address of the
-  next instruction (PC + 1 Result: Push current C and Z flags and address of the next instruction onto
-  the hardware stack, copy D to PA or PB, and set PC to new relative or absolute address.'
-category: Flow Control Instruction - Call a subroutine; store return context on the stack and copy D into
-  PA or PB.
+description: 'CALLPA and CALLPB records the current state of the C and Z flags and
+  the address of the next instruction (PC + 1 Result: Push current C and Z flags and
+  address of the next instruction onto the hardware stack, copy D to PA or PB, and
+  set PC to new relative or absolute address.'
+category: Flow Control Instruction - Call a subroutine; store return context on the
+  stack and copy D into PA or PB.
 parameters:
-- Dest is a register, 9-bit literal, or 32-bit augmented literal whose value is copied to PA or PB.
-- 'Src is a register, 9-bit literal, or 32-bit augmented literal that contains the relative or absolute
-  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+- Dest is a register, 9-bit literal, or 32-bit augmented literal whose value is copied
+  to PA or PB.
+- 'Src is a register, 9-bit literal, or 32-bit augmented literal that contains the
+  relative or absolute address to set PC to. Use # for relative addressing; omit #
+  for absolute addressing.'
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_lsj
+  pattern: D/#,S/@
+  description: 'Jump/call with immediate destination and relative source: destination/immediate,
+    relative address'
+  valueType: 14
+compiler_encoding:
+  operandFormat: 14
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

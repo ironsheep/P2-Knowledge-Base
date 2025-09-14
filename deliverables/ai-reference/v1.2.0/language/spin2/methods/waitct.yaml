@@ -1,0 +1,51 @@
+method: WAITCT
+type: method
+description: |
+  Wait until system counter reaches specified tick value
+category: Timing Operations
+syntax: "WAITCT(Tick)"
+parameters:
+  - name: "Tick"
+    type: "long"
+    description: "32-bit system counter target value"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Wait for specific time
+      target := GETCT() + clkfreq/10  ' 100ms from now
+      WAITCT(target)
+    description: "Wait for precise timing point"
+  - code: |
+      ' Create periodic loop
+      next_time := GETCT()
+      repeat
+        next_time += clkfreq/1000  ' 1ms period
+        WAITCT(next_time)
+        ' Do periodic task
+    description: "Precise periodic timing"
+  - code: |
+      ' Synchronize multiple cogs
+      sync_time := GETCT() + clkfreq
+      WAITCT(sync_time)  ' All cogs wait for same time
+    description: "Multi-cog synchronization"
+notes:
+  - "Blocks execution until system counter matches Tick value"
+  - "System counter wraps every ~53 seconds at 80MHz"
+  - "More precise than WAITMS/WAITUS for exact timing"
+  - "Handles counter wraparound correctly"
+  - "Use GETCT() to read current counter value"
+  - "Resolution is 1 system clock cycle"
+timing:
+  description: "Waits until exact counter match"
+  cycles: "Variable based on target tick"
+related:
+  - GETCT
+  - POLLCT
+  - WAITMS
+  - WAITUS
+see_also:
+  - "System counter"
+  - "Precise timing"
+  - "Synchronization"

@@ -5,11 +5,12 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'MODC, MODZ, or MODCZ sets or clears the C and/or Z flag based on the mode described by the
-  given Modifier Result: The C and/or Z flag is set or cleared according to the given Modifier and the
-  current state of the C and/or Z flags. C = cccc[{C,Z}], Z = zzzz[{C,Z}].'
-category: Flag Modification Instruction - Modify C and/or Z flag(s) according to modifier mode and current
-  state(s).
+description: 'MODC, MODZ, or MODCZ sets or clears the C and/or Z flag based on the
+  mode described by the given Modifier Result: The C and/or Z flag is set or cleared
+  according to the given Modifier and the current state of the C and/or Z flags. C
+  = cccc[{C,Z}], Z = zzzz[{C,Z}].'
+category: Flag Modification Instruction - Modify C and/or Z flag(s) according to modifier
+  mode and current state(s).
 flags_affected:
   C:
     formula: cccc[{C,Z}], Z = zzzz[{C,Z}]
@@ -21,3 +22,12 @@ parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_cz
+  pattern: '#C{,#Z}'
+  description: 'Modify condition flags: C flag value (4-bit), optional Z flag value
+    (4-bit)'
+  valueType: 27
+compiler_encoding:
+  operandFormat: 27
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

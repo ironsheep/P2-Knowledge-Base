@@ -1,0 +1,9 @@
+register: "PR3"
+type: register
+category: "General Purpose"
+description: |
+  General purpose register 3
+examples:
+  - "PR3 := status_flags"
+address: "499"
+access: "read_write"

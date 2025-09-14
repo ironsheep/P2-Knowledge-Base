@@ -5,47 +5,87 @@ timing:
   cycles: 2
   type: fixed
 group: CORDIC Solver
-description: Convert 32-bit unsigned integer to 5:27-bit logarithm format. Takes unsigned integer in D operand and produces logarithm with 5-bit whole exponent and 27-bit fractional exponent. Result retrieved via GETQX instruction 55 clocks later.
-long_description: |
-  The QLOG instruction performs integer to logarithm conversion using the P2's 54-stage pipelined CORDIC solver. It converts a 32-bit unsigned integer into a 5:27-bit logarithm format, where the result contains a 5-bit whole exponent in bits [31:27] and a 27-bit fractional exponent in bits [26:0].
-  
-  The instruction takes the unsigned integer value in the D operand. After 55 clocks, the logarithm result can be retrieved using the GETQX instruction.
-  
-  The logarithm result uses P2's fixed-point 5:27 format, which provides high precision for mathematical calculations. This format allows representing a wide range of logarithmic values while maintaining fractional precision.
-  
-  Common applications include signal processing algorithms, mathematical computations requiring logarithmic scaling, and implementations of exponential/power functions when combined with QEXP.
+description: Convert 32-bit unsigned integer to 5:27-bit logarithm format. Takes unsigned
+  integer in D operand and produces logarithm with 5-bit whole exponent and 27-bit
+  fractional exponent. Result retrieved via GETQX instruction 55 clocks later.
+long_description: 'The QLOG instruction performs integer to logarithm conversion using
+  the P2''s 54-stage pipelined CORDIC solver. It converts a 32-bit unsigned integer
+  into a 5:27-bit logarithm format, where the result contains a 5-bit whole exponent
+  in bits [31:27] and a 27-bit fractional exponent in bits [26:0].
+
+
+  The instruction takes the unsigned integer value in the D operand. After 55 clocks,
+  the logarithm result can be retrieved using the GETQX instruction.
+
+
+  The logarithm result uses P2''s fixed-point 5:27 format, which provides high precision
+  for mathematical calculations. This format allows representing a wide range of logarithmic
+  values while maintaining fractional precision.
+
+
+  Common applications include signal processing algorithms, mathematical computations
+  requiring logarithmic scaling, and implementations of exponential/power functions
+  when combined with QEXP.
+
+  '
 category: CORDIC Solver
 examples:
-  - code: |
-      ' Calculate logarithm of 1000
-      QLOG    #1000          ' Begin log conversion
-      ' Wait 55 clocks...
-      GETQX   log_result     ' Get 5:27 logarithm
-    description: "Basic logarithm calculation"
-  - code: |
-      ' Calculate logarithm of variable
-      QLOG    input_value
-      ' ... other work for 55 clocks ...
-      GETQX   logarithm
-    description: "Variable logarithm conversion"
-  - code: |
-      ' Extract exponent and mantissa parts
-      QLOG    number
-      ' ... wait 55 clocks ...
-      GETQX   log_result
-      SHR     log_result, #27 WZ  ' Extract 5-bit exponent
-      MOV     exponent, log_result
-      AND     mantissa, ##$07FFFFFF  ' Extract 27-bit mantissa
-    description: "Extracting logarithm components"
+- code: ''' Calculate logarithm of 1000
+
+    QLOG    #1000          '' Begin log conversion
+
+    '' Wait 55 clocks...
+
+    GETQX   log_result     '' Get 5:27 logarithm
+
+    '
+  description: Basic logarithm calculation
+- code: ''' Calculate logarithm of variable
+
+    QLOG    input_value
+
+    '' ... other work for 55 clocks ...
+
+    GETQX   logarithm
+
+    '
+  description: Variable logarithm conversion
+- code: ''' Extract exponent and mantissa parts
+
+    QLOG    number
+
+    '' ... wait 55 clocks ...
+
+    GETQX   log_result
+
+    SHR     log_result, #27 WZ  '' Extract 5-bit exponent
+
+    MOV     exponent, log_result
+
+    AND     mantissa, ##$07FFFFFF  '' Extract 27-bit mantissa
+
+    '
+  description: Extracting logarithm components
 related_instructions:
-  - GETQX
-  - QEXP
+- GETQX
+- QEXP
 operand_details:
-  D: "32-bit unsigned integer input"
+  D: 32-bit unsigned integer input
 result_details:
-  GETQX: "5:27-bit logarithm (5-bit whole exponent in [31:27], 27-bit fractional in [26:0])"
-timing_notes: "Result available 55 clocks after instruction issue. Each cog can issue one CORDIC instruction per hub window (every 8 clocks)."
-format_notes: "Result format: {5'whole_exponent, 27'fractional_exponent}. Use with QEXP for exponential operations."
+  GETQX: 5:27-bit logarithm (5-bit whole exponent in [31:27], 27-bit fractional in
+    [26:0])
+timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
+  one CORDIC instruction per hub window (every 8 clocks).
+format_notes: 'Result format: {5''whole_exponent, 27''fractional_exponent}. Use with
+  QEXP for exponential operations.'
 documentation_source: p2_datasheet
 documentation_level: comprehensive
 needs_documentation: false
+compiler_operand_format:
+  name: operand_l
+  pattern: D/#0..511
+  description: Destination or immediate value 0-511
+  valueType: 26
+compiler_encoding:
+  operandFormat: 26
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

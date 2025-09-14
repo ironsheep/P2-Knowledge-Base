@@ -5,21 +5,31 @@ timing:
   cycles: 2
   type: fixed
 group: Pins
-description: 'TESTP or TESTPN reads the state (0/1) of the I/O pin designated by Dest, possibly inverts
-  that result, and either Result: The state of the I/O pin described by Dest is read, possibly inverted,
-  and either stored as-is, or bitwise ANDed, ORed, or XORed into C or Z. Z = C/Z XOR !IN[D[5:0]].'
-category: I/O Pin Instruction - Test pin and either store, AND, OR, or XOR the result or inverse result
-  into C/Z.
+description: 'TESTP or TESTPN reads the state (0/1) of the I/O pin designated by Dest,
+  possibly inverts that result, and either Result: The state of the I/O pin described
+  by Dest is read, possibly inverted, and either stored as-is, or bitwise ANDed, ORed,
+  or XORed into C or Z. Z = C/Z XOR !IN[D[5:0]].'
+category: I/O Pin Instruction - Test pin and either store, AND, OR, or XOR the result
+  or inverse result into C/Z.
 flags_affected:
   Z:
     formula: C/Z XOR !IN[D[5:0]]
     when: IN[D[5:0]]
 parameters:
 - Dest is the register or 6-bit literal whose value identifies the I/O pin to test.
-- WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, and XORZ is a required effect to update or bitwise manipulate the
-  C or Z flag.
+- WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, and XORZ is a required effect to update or bitwise
+  manipulate the C or Z flag.
 related:
 - TESTB
 - TESTBN
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_testp
+  pattern: D/#0..511 WC/ANDC/ORC/XORC | WZ/ANDZ/ORZ/XORZ
+  description: 'Test pin: destination/immediate pin number 0-511 with REQUIRED logic
+    function'
+  valueType: 31
+compiler_encoding:
+  operandFormat: 31
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

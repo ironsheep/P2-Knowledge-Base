@@ -1,0 +1,56 @@
+method: TASKSPIN
+type: method
+description: |
+  Start a new Spin2 task within the current cog
+category: Task Operations
+syntax: "TASKSPIN(TaskID, Method({Parameters}), StackAddress)"
+parameters:
+  - name: "TaskID"
+    type: "integer"
+    description: "Task ID (0-31) or NEWTASK (-1) for next available"
+  - name: "Method"
+    type: "method"
+    description: "Spin2 method to run as task with optional parameters"
+  - name: "StackAddress"
+    type: "address"
+    description: "Address of stack space for the task"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Start a new task
+      VAR
+        LONG task_stack[64]
+      
+      TASKSPIN(NEWTASK, background_process(), @task_stack)
+    description: "Start background task"
+  - code: |
+      ' Start specific task ID
+      TASKSPIN(2, sensor_monitor(16, 1000), @sensor_stack)
+    description: "Start task with ID 2"
+  - code: |
+      ' Multiple tasks
+      TASKSPIN(NEWTASK, task1(), @stack1)
+      TASKSPIN(NEWTASK, task2(), @stack2)
+      TASKSPIN(NEWTASK, task3(), @stack3)
+    description: "Start multiple tasks"
+notes:
+  - "Up to 32 tasks per cog (v47+ feature)"
+  - "Tasks share cog but have separate stacks"
+  - "Cooperative multitasking within cog"
+  - "NEWTASK (-1) auto-assigns next available ID"
+  - "Stack size depends on task complexity"
+  - "Tasks run in round-robin fashion"
+timing:
+  description: "Task switching overhead"
+  cycles: "~20-40 clock cycles per switch"
+related:
+  - TASKSTOP
+  - TASKHALT
+  - TASKRESUME
+  - TASKCHK
+see_also:
+  - "Cooperative multitasking"
+  - "Task management"
+  - "Stack allocation"

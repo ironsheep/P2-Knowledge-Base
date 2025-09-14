@@ -5,17 +5,25 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'DECOD generates a 32-bit value with just one bit high, corresponding to the Src, or Dest,
-  value (0—31) and stores Result: A 32-bit value, with the bit position corresponding to Src, or Dest,
-  value (0—31) set high, is stored in Dest.'
+description: 'DECOD generates a 32-bit value with just one bit high, corresponding
+  to the Src, or Dest, value (0—31) and stores Result: A 32-bit value, with the bit
+  position corresponding to Src, or Dest, value (0—31) set high, is stored in Dest.'
 category: Bit Operation Instruction - Decode value (0—31) into single-high-bit long.
 flags_affected:
   C:
     when: D
 parameters:
-- Dest is the register in which to store the decoded value and optionally begins by containing the 5-bit
-  bit position value it is requesting (syntax 2).
+- Dest is the register in which to store the decoded value and optionally begins by
+  containing the 5-bit bit position value it is requesting (syntax 2).
 related:
 - ENCOD
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_du
+  pattern: D{,S/#}
+  description: Destination register, optional Source register or immediate (unary/binary)
+  valueType: 3
+compiler_encoding:
+  operandFormat: 3
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

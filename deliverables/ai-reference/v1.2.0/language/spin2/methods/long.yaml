@@ -1,0 +1,59 @@
+method: LONG
+type: method
+description: |
+  Declare long data or access long-sized memory
+category: Data Creation
+syntax: |
+  Declaration: LONG [Count]
+  Access: LONG[BaseAddress][Index]
+  Inline: LONG(Value1, Value2, ...)
+contexts:
+  - name: "DAT section declaration"
+    syntax: "Label LONG Value1 {, Value2, ...}"
+    description: "Declare long data in DAT section"
+  - name: "VAR section declaration"
+    syntax: "Name LONG [Count]"
+    description: "Declare long variable(s) in VAR section"
+  - name: "Memory access"
+    syntax: "LONG[Address][Index]"
+    description: "Access long at hub memory address"
+  - name: "Inline data"
+    syntax: "LONG(Value1, Value2, ...)"
+    description: "Create inline long sequence"
+examples:
+  - code: |
+      DAT
+        my_longs  LONG  $12345678, $DEADBEEF, 1_000_000
+    description: "Declare long data in DAT section"
+  - code: |
+      VAR
+        results  LONG[512]  ' 512-long array
+    description: "Declare long array in VAR section"
+  - code: |
+      ' Write long to hub memory
+      LONG[$4000] := $12345678
+      
+      ' Read long from hub memory  
+      value := LONG[$4000]
+    description: "Direct hub memory long access"
+  - code: |
+      ' Pass long sequence to method
+      calculate(LONG(100_000, 200_000, 300_000))
+    description: "Inline long data creation"
+notes:
+  - "LONG is 32 bits (full range of P2 native word size)"
+  - "Long addresses must be long-aligned (addresses divisible by 4)"
+  - "Arrays are zero-indexed"
+  - "Each array index represents 4 bytes in memory"
+  - "Can use @ operator to get address of long variable"
+  - "Default data type for most P2 operations"
+related:
+  - BYTE
+  - WORD
+  - LONGFILL
+  - LONGMOVE
+see_also:
+  - "Data types"
+  - "Memory organization"
+  - "DAT section"
+  - "VAR section"

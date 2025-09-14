@@ -1,0 +1,8 @@
+command: "DLY"
+type: debug_command
+category: "Debug Control"
+description: |
+  Debug delay command
+syntax: "['DLY(milliseconds)']"
+examples:
+  - "DEBUG(DLY(100))"

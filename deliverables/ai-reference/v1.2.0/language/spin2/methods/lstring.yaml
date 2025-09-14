@@ -1,0 +1,49 @@
+method: LSTRING
+type: method
+description: |
+  Create length-prefixed string constant
+category: String Operations
+syntax: "address := LSTRING(StringLiteral)"
+parameters:
+  - name: "StringLiteral"
+    type: "string_literal"
+    description: "String literal in quotes"
+returns:
+  type: "address"
+  description: "Hub RAM address of length-prefixed string"
+examples:
+  - code: |
+      ' Create length-prefixed string
+      lstr := LSTRING("Hello, World!")
+      ' First byte contains 13 (length)
+    description: "Create length-prefixed string"
+  - code: |
+      ' Read length-prefixed string
+      len := BYTE[lstr_addr]
+      repeat i from 1 to len
+        char := BYTE[lstr_addr][i]
+    description: "Process length-prefixed string"
+  - code: |
+      ' Send length-prefixed string
+      addr := LSTRING("Command")
+      send_bytes(addr, BYTE[addr] + 1)  ' Length + data
+    description: "Send with length byte"
+notes:
+  - "First byte contains string length"
+  - "String data follows length byte"
+  - "No null terminator added"
+  - "Maximum length is 255 characters"
+  - "Useful for binary protocols"
+  - "More efficient than null-terminated for known-length strings"
+  - "Stored in DAT section"
+timing:
+  description: "Immediate - compile time"
+  cycles: "2-9 clock cycles to load address"
+related:
+  - STRING
+  - BYTE
+  - STRSIZE
+see_also:
+  - "Length-prefixed strings"
+  - "Binary protocols"
+  - "String formats"

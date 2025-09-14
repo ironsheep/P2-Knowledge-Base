@@ -5,8 +5,9 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'SETS copies Src[8:0] to the S field of the template, Dest, to be used with an ALTI instruction.
-  Bits outside the S Result: The S field [8:0] of template Dest is set to Src[8:0].'
+description: 'SETS copies Src[8:0] to the S field of the template, Dest, to be used
+  with an ALTI instruction. Bits outside the S Result: The S field [8:0] of template
+  Dest is set to Src[8:0].'
 category: Indirection Instruction - Set template S field for ALTI.
 flags_affected:
   C:
@@ -19,3 +20,11 @@ related:
 - ALTI
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:
+  operandFormat: 0
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

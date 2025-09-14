@@ -1,11 +1,21 @@
 instruction: EXECF
 syntax: EXECF   {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000110011
-description: |
-  Jump to D[9:0] in cog/LUT and set SKIPF pattern to D[31:10]. PC = {10'b0, D[9:0]}.
+description: 'Jump to D[9:0] in cog/LUT and set SKIPF pattern to D[31:10]. PC = {10''b0,
+  D[9:0]}.
+
+  '
 timing:
   cycles: 4
   type: fixed
 group: Branch D - Call+Skip
 flags_affected:
-  C: "{10'b0, D[9:0]}"
+  C: '{10''b0, D[9:0]}'
+compiler_operand_format:
+  name: operand_l
+  pattern: D/#0..511
+  description: Destination or immediate value 0-511
+  valueType: 26
+compiler_encoding:
+  operandFormat: 26
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

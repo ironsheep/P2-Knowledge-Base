@@ -5,20 +5,30 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'TESTB or TESTBN reads the state (0/1) of a bit in Dest designated by Src, possibly inverts
-  that result, and either Result: The state of Dest''s bit Src is read, possibly inverted, and either
-  stored as-is, or bitwise ANDed, ORed, or XORed into C or Z. Z = C/Z XOR !D[S[4:0]].'
-category: Bit Operation Instruction - Test bit of D or !D and either store, AND, OR, or XOR the result
-  into flags.
+description: 'TESTB or TESTBN reads the state (0/1) of a bit in Dest designated by
+  Src, possibly inverts that result, and either Result: The state of Dest''s bit Src
+  is read, possibly inverted, and either stored as-is, or bitwise ANDed, ORed, or
+  XORed into C or Z. Z = C/Z XOR !D[S[4:0]].'
+category: Bit Operation Instruction - Test bit of D or !D and either store, AND, OR,
+  or XOR the result into flags.
 flags_affected:
   Z:
     formula: C/Z XOR !D[S[4:0]]
     when: IN[D[4:0]]
 parameters:
 - Dest is the register whose value will have a single bit tested.
-- Src is a register or 5-bit literal whose value identifies the bit (0–31) of Dest to test.
+- Src is a register or 5-bit literal whose value identifies the bit (0–31) of Dest
+  to test.
 related:
 - TESTP
 - TESTPN
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_testb
+  pattern: D,S/#
+  description: 'Test bit with logic function: Destination register, bit position'
+  valueType: 2
+compiler_encoding:
+  operandFormat: 2
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

@@ -1,0 +1,58 @@
+method: POLLCT
+type: method
+description: |
+  Check if system counter has passed specified tick value
+category: Timing Operations
+syntax: "result := POLLCT(Tick)"
+parameters:
+  - name: "Tick"
+    type: "long"
+    description: "32-bit system counter target value to check"
+returns:
+  type: "integer"
+  description: "TRUE (-1) if tick has passed, FALSE (0) if not yet"
+examples:
+  - code: |
+      ' Non-blocking timeout check
+      timeout := GETCT() + clkfreq  ' 1 second timeout
+      repeat
+        ' Do work...
+        if POLLCT(timeout)
+          ' Timeout occurred
+          quit
+    description: "Implement non-blocking timeout"
+  - code: |
+      ' Check if delay has elapsed
+      start_time := GETCT()
+      end_time := start_time + clkfreq/10
+      repeat while not POLLCT(end_time)
+        ' Do other work while waiting
+    description: "Non-blocking delay with work"
+  - code: |
+      ' Multiple timer management
+      repeat
+        if POLLCT(timer1)
+          handle_timer1()
+          timer1 += period1
+        if POLLCT(timer2)
+          handle_timer2()
+          timer2 += period2
+    description: "Manage multiple software timers"
+notes:
+  - "Non-blocking alternative to WAITCT"
+  - "Returns immediately with TRUE/FALSE result"
+  - "Handles counter wraparound correctly"
+  - "Useful for implementing timeouts"
+  - "Can check multiple timers in same loop"
+  - "TRUE means current counter >= target (accounting for wrap)"
+timing:
+  description: "Immediate return"
+  cycles: "2-9 clock cycles"
+related:
+  - WAITCT
+  - GETCT
+  - POLLATN
+see_also:
+  - "System counter"
+  - "Non-blocking timing"
+  - "Timeout handling"

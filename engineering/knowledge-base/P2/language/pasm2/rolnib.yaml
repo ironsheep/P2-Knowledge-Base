@@ -5,17 +5,18 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'ROLNIB reads the nibble identified by Num (0–7) from Src, or a nibble from the source described
-  by a prior ALTGN Result: Nibble Num (0–7) of Src, or a nibble from a source described by prior ALTGN
-  instruction, is rotated left into Dest.'
+description: 'ROLNIB reads the nibble identified by Num (0–7) from Src, or a nibble
+  from the source described by a prior ALTGN Result: Nibble Num (0–7) of Src, or a
+  nibble from a source described by prior ALTGN instruction, is rotated left into
+  Dest.'
 category: Bit Operation Instruction - Rotate a nibble left into a value.
 flags_affected:
   C:
     when: D
 parameters:
 - Dest is the register in which to rotate the nibble into.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target nibble
-  to read.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains
+  the target nibble to read.
 - Num is a 3-bit literal identifying the nibble ID (0–7) of Src to read.
 related:
 - ALTGN
@@ -29,3 +30,11 @@ related:
 - SETWORD
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds3get
+  pattern: D{,S/#,#0..7}
+  description: 'Get nibble: destination, optional source and nibble index 0-7'
+  valueType: 7
+compiler_encoding:
+  operandFormat: 7
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

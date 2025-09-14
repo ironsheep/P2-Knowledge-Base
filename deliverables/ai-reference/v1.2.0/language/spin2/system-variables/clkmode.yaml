@@ -1,0 +1,8 @@
+variable: "CLKMODE"
+type: system_variable
+data_type: "Unknown"
+description: |
+  System clock mode configuration
+access: "read_write"
+examples:
+  - "CLKMODE := %0_0000_01_101_111_1_1  // 80MHz"

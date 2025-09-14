@@ -1,0 +1,7 @@
+operator: "<=."
+type: operator
+description: |
+  Floating point less than or equal comparison
+category: Float Compare
+examples:
+  - "IF count <=. limit\n  continue()"

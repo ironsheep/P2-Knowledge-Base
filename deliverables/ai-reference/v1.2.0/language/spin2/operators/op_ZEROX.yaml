@@ -1,0 +1,5 @@
+operator: "ZEROX"
+type: operator
+description: |
+  Bit manipulation
+category: Shift/Rotate

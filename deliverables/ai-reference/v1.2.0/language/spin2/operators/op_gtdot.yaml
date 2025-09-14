@@ -1,0 +1,7 @@
+operator: ">."
+type: operator
+description: |
+  Floating point greater than comparison
+category: Float Compare
+examples:
+  - "IF speed >. max_speed\n  slow_down()"

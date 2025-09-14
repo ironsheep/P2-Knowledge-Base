@@ -1,0 +1,76 @@
+# Spin2 Method: PINLOW
+# Source: Spin2 v51 documentation
+# Purpose: Drive pin(s) low
+
+method: "PINLOW"
+aliases: ["PINL"]
+category: "pin_control"
+type: "method"
+description: |
+  Drive specified pin(s) low (output mode, logic 0).
+  Sets the direction bit(s) to output (DIR=1) and drives the pin(s) low (OUT=0).
+  This is equivalent to the PASM2 DIRL instruction.
+
+syntax: "PINLOW(PinField)"
+
+parameters:
+  - name: "PinField"
+    type: "pin_field"
+    description: |
+      Specifies which pin(s) to drive low. Can be:
+      - Single pin number (0-63)
+      - Pin range using '..' operator (Bottom..Top)
+      - Multiple pins using ADDPINS operator
+      - Variable or expression that evaluates to a pin field
+
+returns: "none"
+
+timing:
+  execution: "2 clock cycles in cog execution"
+  hub_access: "8-19 clock cycles when executed from hub"
+
+examples:
+  - code: "PINLOW(56)"
+    description: "Drive pin 56 low (turn off LED)"
+    
+  - code: "PINLOW(0 ADDPINS 7)"
+    description: "Drive pins 0 through 7 low simultaneously"
+    
+  - code: "PINLOW(49..40)"
+    description: "Drive pins 40 through 49 low (wraps if needed)"
+    
+  - code: |
+      VAR
+        LONG led_pin
+      PUB main()
+        led_pin := 56
+        PINLOW(led_pin)
+    description: "Use a variable for the pin number"
+
+underlying_pasm:
+  instruction: "DIRL"
+  description: "Internally uses DIRL instruction which sets DIR=1 and OUT=0"
+  
+common_uses:
+  - "Turn off LEDs"
+  - "Pull signals to ground"
+  - "Assert active-low control signals"
+  - "Create logic 0 for communication"
+
+related_methods:
+  - "PINHIGH - Drive pin(s) high"
+  - "PINTOGGLE - Toggle pin state"
+  - "PINFLOAT - Release pin to high-impedance"
+  - "PINWRITE - Write specific value to pins"
+
+notes:
+  - "Pin becomes an output if it wasn't already"
+  - "Overrides any smart pin mode on the pin"
+  - "Pin will remain low until explicitly changed"
+  - "Multiple pins can be controlled simultaneously"
+  - "Useful for Charlieplexing one side of LED matrix"
+
+see_also:
+  - "language/pasm2/dirl.yaml"
+  - "language/spin2/methods/pinhigh.yaml"
+  - "language/spin2/methods/pintoggle.yaml"

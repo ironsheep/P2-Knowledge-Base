@@ -1,0 +1,8 @@
+command: "UHEX_LONG"
+type: debug_command
+category: "Hexadecimal Format"
+description: |
+  Unsigned hexadecimal long format
+syntax: "['UHEX_LONG(value)']"
+examples:
+  - "DEBUG(UHEX_LONG(register))"

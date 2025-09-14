@@ -1,0 +1,5 @@
+operator: "SAR"
+type: operator
+description: |
+  Bit manipulation
+category: Shift/Rotate

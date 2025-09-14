@@ -5,12 +5,16 @@ timing:
   cycles: 2 + D
   type: variable
 group: Miscellaneous
-description: |
-  Wait for D+1 clock cycles. Stalls the cog for precise timing delays.
+description: 'Wait for D+1 clock cycles. Stalls the cog for precise timing delays.
+
   Z = 0 after completion.
-  
+
+
   Critical for bit-banging protocols, PWM generation, and timing-sensitive
+
   operations where precise delays are required.
+
+  '
 category: Miscellaneous
 flags_affected:
   Z:
@@ -18,97 +22,67 @@ flags_affected:
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:
-  - name: HUB75 RGB Panel Timing
-    description: Generate precise clock timing for RGB LED panel
-    code: |
-      ' HUB75 panel driver clock generation
-      rgb_clock_cycle
-              setq    rgb_mask         ' Set pin mask
-              muxq    outa, rgb_data   ' Output RGB data
-              drvh    clk_pin          ' Clock high
-              waitx   #2               ' Hold time (3 cycles total)
-              drvl    clk_pin          ' Clock low
-              waitx   #2               ' Hold time
-              ret
-              
-      ' Latch row data
-      latch_row
-              drvh    latch_pin        ' Latch high
-              waitx   #4               ' Latch pulse width
-              drvl    latch_pin        ' Latch low
-              waitx   #10              ' Inter-row delay
-              ret
-    source: hub75_driver
-    
-  - name: Inline PASM2 Timing
-    description: Precise timing in inline PASM2 code
-    code: |
-      PUB pulse_pin(pin, width) | x
-        ORG
-          drvh    pin              ' Drive pin high
-          waitx   width            ' Wait specified cycles
-          drvl    pin              ' Drive pin low
-        END
-    source: inline_pasm2_pattern
-    
-  - name: SPI Bit-Bang Timing
-    description: Software SPI with controlled timing
-    code: |
-      ' Software SPI with precise timing
-      spi_write_byte
-              mov     bit_count, #8
-      .loop   rol     data, #1    wc   ' Get MSB
-              muxc    outa, mosi_mask  ' Set MOSI
-              waitx   #4               ' Setup time
-              drvh    sck_pin          ' Clock high
-              waitx   #4               ' Clock high time
-              drvl    sck_pin          ' Clock low
-              waitx   #4               ' Clock low time
-              djnz    bit_count, #.loop
-              ret
-    source: bit_bang_spi
-    
-  - name: PWM Generation
-    description: Generate PWM without smart pins
-    code: |
-      ' Software PWM generation
-      pwm_loop
-              drvh    pwm_pin          ' Output high
-              waitx   high_time        ' High duration
-              drvl    pwm_pin          ' Output low
-              waitx   low_time         ' Low duration
-              jmp     #pwm_loop        ' Repeat
-              
-      ' For 1kHz PWM at 200MHz clock:
-      ' period = 200,000 cycles
-      ' 50% duty = 100,000 high, 100,000 low
-    source: software_pwm
-    
-  - name: Debounce Delay
-    description: Button debounce timing
-    code: |
-      ' Wait for button to stabilize
-      check_button
-              testp   button_pin  wc   ' Read button
-              if_nc   ret              ' Not pressed
-              waitx   ##20_000         ' 100us @ 200MHz
-              testp   button_pin  wc   ' Read again
-              if_nc   ret              ' Bounce - ignore
-              ' Button confirmed pressed
-              ret
-    source: input_debounce
-    
+- name: HUB75 RGB Panel Timing
+  description: Generate precise clock timing for RGB LED panel
+  code: "' HUB75 panel driver clock generation\nrgb_clock_cycle\n        setq    rgb_mask\
+    \         ' Set pin mask\n        muxq    outa, rgb_data   ' Output RGB data\n\
+    \        drvh    clk_pin          ' Clock high\n        waitx   #2           \
+    \    ' Hold time (3 cycles total)\n        drvl    clk_pin          ' Clock low\n\
+    \        waitx   #2               ' Hold time\n        ret\n        \n' Latch\
+    \ row data\nlatch_row\n        drvh    latch_pin        ' Latch high\n       \
+    \ waitx   #4               ' Latch pulse width\n        drvl    latch_pin    \
+    \    ' Latch low\n        waitx   #10              ' Inter-row delay\n       \
+    \ ret\n"
+  source: hub75_driver
+- name: Inline PASM2 Timing
+  description: Precise timing in inline PASM2 code
+  code: "PUB pulse_pin(pin, width) | x\n  ORG\n    drvh    pin              ' Drive\
+    \ pin high\n    waitx   width            ' Wait specified cycles\n    drvl   \
+    \ pin              ' Drive pin low\n  END\n"
+  source: inline_pasm2_pattern
+- name: SPI Bit-Bang Timing
+  description: Software SPI with controlled timing
+  code: "' Software SPI with precise timing\nspi_write_byte\n        mov     bit_count,\
+    \ #8\n.loop   rol     data, #1    wc   ' Get MSB\n        muxc    outa, mosi_mask\
+    \  ' Set MOSI\n        waitx   #4               ' Setup time\n        drvh   \
+    \ sck_pin          ' Clock high\n        waitx   #4               ' Clock high\
+    \ time\n        drvl    sck_pin          ' Clock low\n        waitx   #4     \
+    \          ' Clock low time\n        djnz    bit_count, #.loop\n        ret\n"
+  source: bit_bang_spi
+- name: PWM Generation
+  description: Generate PWM without smart pins
+  code: "' Software PWM generation\npwm_loop\n        drvh    pwm_pin          ' Output\
+    \ high\n        waitx   high_time        ' High duration\n        drvl    pwm_pin\
+    \          ' Output low\n        waitx   low_time         ' Low duration\n   \
+    \     jmp     #pwm_loop        ' Repeat\n        \n' For 1kHz PWM at 200MHz clock:\n\
+    ' period = 200,000 cycles\n' 50% duty = 100,000 high, 100,000 low\n"
+  source: software_pwm
+- name: Debounce Delay
+  description: Button debounce timing
+  code: "' Wait for button to stabilize\ncheck_button\n        testp   button_pin\
+    \  wc   ' Read button\n        if_nc   ret              ' Not pressed\n      \
+    \  waitx   ##20_000         ' 100us @ 200MHz\n        testp   button_pin  wc \
+    \  ' Read again\n        if_nc   ret              ' Bounce - ignore\n        '\
+    \ Button confirmed pressed\n        ret\n"
+  source: input_debounce
 related_instructions:
-  - WAITCT1/2/3: Wait for specific CT value
-  - WAITATN: Wait for attention signal
-  - WAITPAT: Wait for pin pattern
-  - WAITSE1-4: Wait for selectable event
-  - POLLCT1-3: Poll timer without waiting
-  
+- WAITCT1/2/3: Wait for specific CT value
+- WAITATN: Wait for attention signal
+- WAITPAT: Wait for pin pattern
+- WAITSE1-4: Wait for selectable event
+- POLLCT1-3: Poll timer without waiting
 notes:
-  - Actual wait is D+1 cycles minimum
-  - Blocks cog execution completely
-  - Use smart pins for continuous PWM
-  - For long delays, consider WAITCT
-  - Critical for bit-banged protocols
-  - Essential for HUB75 panel driving
+- Actual wait is D+1 cycles minimum
+- Blocks cog execution completely
+- Use smart pins for continuous PWM
+- For long delays, consider WAITCT
+- Critical for bit-banged protocols
+- Essential for HUB75 panel driving
+compiler_operand_format:
+  name: operand_l
+  pattern: D/#0..511
+  description: Destination or immediate value 0-511
+  valueType: 26
+compiler_encoding:
+  operandFormat: 26
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

@@ -5,18 +5,19 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'NEGNC negates Src (syntax 1) or Dest (syntax 2) if !C = 1 and stores the result in the Dest
-  register. If !C = 0, the Src Result: The Src or Dest value, possibly negated according to !C, is stored
-  into Dest and optionally the C and Z flags are updated to the resulting sign and zero status.'
+description: 'NEGNC negates Src (syntax 1) or Dest (syntax 2) if !C = 1 and stores
+  the result in the Dest register. If !C = 0, the Src Result: The Src or Dest value,
+  possibly negated according to !C, is stored into Dest and optionally the C and Z
+  flags are updated to the resulting sign and zero status.'
 category: Math Instruction - Negate value according to !C.
 flags_affected:
   C:
     formula: 0 then D = -D, else D = D
 parameters:
-- Dest is a register to receive the Src or -Src value (syntax 1), or contains the value to negate (syntax
-  2) according to !C.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value (if !C=0) or negated
-  value (if !C=1) is stored into Dest.
+- Dest is a register to receive the Src or -Src value (syntax 1), or contains the
+  value to negate (syntax 2) according to !C.
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value
+  (if !C=0) or negated value (if !C=1) is stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 related:
 - NEGC
@@ -24,3 +25,11 @@ related:
 - NEGNZ
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_du
+  pattern: D{,S/#}
+  description: Destination register, optional Source register or immediate (unary/binary)
+  valueType: 3
+compiler_encoding:
+  operandFormat: 3
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

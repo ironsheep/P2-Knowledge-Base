@@ -1,0 +1,8 @@
+command: "UBIN_BYTE"
+type: debug_command
+category: "Binary Format"
+description: |
+  Unsigned binary byte format
+syntax: "['UBIN_BYTE(value)']"
+examples:
+  - "DEBUG(UBIN_BYTE(pattern))"

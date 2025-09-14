@@ -1,0 +1,53 @@
+method: GETRND
+type: method
+description: Get random number from hardware generator
+category: Miscellaneous
+syntax: random := GETRND()
+parameters: []
+returns:
+  type: long
+  description: 32-bit hardware random number
+examples:
+- code: ''' Get random number
+
+    value := GETRND()
+
+    '
+  description: Get 32-bit random value
+- code: ''' Random number in range 0-99
+
+    dice := GETRND() +// 100
+
+    '
+  description: Random number with modulo
+- code: ''' Random delay
+
+    WAITMS(GETRND() +// 1000)  '' 0-999ms random delay
+
+    '
+  description: Random timing
+- code: ''' Seed other generators
+
+    seed := GETRND()
+
+    init_prng(seed)
+
+    '
+  description: Seed software PRNG
+notes:
+- Uses P2's hardware random number generator
+- True random based on thermal noise
+- Full 32-bit range
+- No seeding required
+- Each cog has independent access
+- Use +// operator for scaled ranges
+timing:
+  description: Immediate
+  cycles: 2-9 clock cycles
+related:
+- POLLCT
+- GETCT
+see_also:
+- Random number generation
+- Hardware RNG
+- Cryptographic operations

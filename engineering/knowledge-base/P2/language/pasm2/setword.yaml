@@ -5,17 +5,17 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'SETWORD stores Src[15:0] into the word identified by Num within Dest, or the word and register
-  described by a Result: Src[15:0] is written to word Num (0–1) of Dest, or to another register word described
-  by prior ALTSW instruction.'
+description: 'SETWORD stores Src[15:0] into the word identified by Num within Dest,
+  or the word and register described by a Result: Src[15:0] is written to word Num
+  (0–1) of Dest, or to another register word described by prior ALTSW instruction.'
 category: Bit Operation Instruction - Set a word to new value.
 flags_affected:
   C:
     when: D
 parameters:
 - Dest is the register in which to modify a word.
-- Src is a register, 9-bit literal, or 16-bit augmented literal whose bits [15:0] will be stored in the
-  designated location.
+- Src is a register, 9-bit literal, or 16-bit augmented literal whose bits [15:0]
+  will be stored in the designated location.
 - Num is a 1-bit literal identifying the word ID (0–1) of Dest to modify.
 related:
 - ALTSW
@@ -29,3 +29,11 @@ related:
 - ROLWORD
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds1set
+  pattern: S/#{,D,#0..1}
+  description: 'Set word: source/immediate, optional destination and word index 0-1'
+  valueType: 10
+compiler_encoding:
+  operandFormat: 10
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

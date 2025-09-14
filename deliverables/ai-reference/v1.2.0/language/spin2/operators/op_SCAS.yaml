@@ -1,0 +1,7 @@
+operator: "SCAS"
+type: operator
+description: |
+  Scale value signed (also PASM2 instruction)
+category: Unary
+examples:
+  - "scaled := value SCAS factor"

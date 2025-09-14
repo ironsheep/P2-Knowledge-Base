@@ -1,0 +1,7 @@
+operator: "SQRT"
+type: operator
+description: |
+  Integer square root
+category: Math
+examples:
+  - "side := SQRT(area)"

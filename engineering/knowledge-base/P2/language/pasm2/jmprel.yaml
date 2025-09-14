@@ -5,9 +5,17 @@ timing:
   cycles: 4
   type: fixed
 group: Branch D - Jump
-description: Jump ahead/back by D instructions. For cogex, PC += D[19:0]. For hubex, PC += D[17:0] <<
-  2.
+description: Jump ahead/back by D instructions. For cogex, PC += D[19:0]. For hubex,
+  PC += D[17:0] << 2.
 category: Branch D - Jump
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+compiler_operand_format:
+  name: operand_l
+  pattern: D/#0..511
+  description: Destination or immediate value 0-511
+  valueType: 26
+compiler_encoding:
+  operandFormat: 26
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

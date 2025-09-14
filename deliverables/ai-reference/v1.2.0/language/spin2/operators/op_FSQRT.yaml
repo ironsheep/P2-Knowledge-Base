@@ -1,0 +1,7 @@
+operator: "FSQRT"
+type: operator
+description: |
+  Floating point square root
+category: Math
+examples:
+  - "side := FSQRT(float_area)"

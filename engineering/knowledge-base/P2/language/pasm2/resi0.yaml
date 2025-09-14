@@ -10,3 +10,11 @@ category: Branch S - Resume
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+compiler_operand_format:
+  name: operand_xlat
+  pattern: ''
+  description: No operands - translated instruction (RET*/RESI*/XSTOP)
+  valueType: 33
+compiler_encoding:
+  operandFormat: 33
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

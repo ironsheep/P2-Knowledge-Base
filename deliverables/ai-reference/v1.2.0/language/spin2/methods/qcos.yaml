@@ -1,0 +1,50 @@
+method: QCOS
+type: method
+description: |
+  Calculate cosine of angle using hardware CORDIC
+category: Math/CORDIC Operations
+syntax: "cosine := QCOS(Angle, Length)"
+parameters:
+  - name: "Angle"
+    type: "long"
+    description: "Angle in P2 angle units (0..$FFFFFFFF = 0..360°)"
+  - name: "Length"
+    type: "long"
+    description: "Hypotenuse/radius length (scaling factor)"
+returns:
+  type: "long"
+  description: "Cosine value scaled by Length"
+examples:
+  - code: |
+      ' Calculate cosine of 60 degrees
+      cosine := QCOS($2AAA_AAAA, 1000)  ' 60° with scale 1000
+      ' Result: cosine ≈ 500
+    description: "Basic cosine calculation"
+  - code: |
+      ' Generate cosine wave
+      repeat angle from 0 to $FFFF_FFFF step $0100_0000
+        y := QCOS(angle, amplitude)
+        plot(x++, center_y + y)
+    description: "Generate cosine wave plot"
+  - code: |
+      ' Horizontal position for circular motion
+      x_pos := center_x + QCOS(angle, radius)
+    description: "Calculate X position on circle"
+notes:
+  - "Uses P2's hardware CORDIC engine"
+  - "Angle units: $0000_0000 = 0°, $4000_0000 = 90°, $8000_0000 = 180°"
+  - "Result = Length × cos(Angle)"
+  - "Full 32-bit precision"
+  - "38-clock cycle operation"
+  - "Handles all quadrants correctly"
+timing:
+  description: "CORDIC operation"
+  cycles: "38 clock cycles"
+related:
+  - QSIN
+  - ROTXY
+  - POLXY
+see_also:
+  - "CORDIC operations"
+  - "Trigonometric functions"
+  - "Waveform generation"

@@ -5,18 +5,27 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'FGES sets signed Dest to signed Src if Dest is less than Src. This is also known as a limit
-  minimum function; Result: Signed Dest is set to signed Src if Dest was less than Src. Optionally the
-  C and Z flag indicates if the replacement happened and the zero status of the result.'
+description: 'FGES sets signed Dest to signed Src if Dest is less than Src. This is
+  also known as a limit minimum function; Result: Signed Dest is set to signed Src
+  if Dest was less than Src. Optionally the C and Z flag indicates if the replacement
+  happened and the zero status of the result.'
 category: Math Instruction - Force signed value to be greater than or equal to another.
 flags_affected:
   C:
     formula: 1, else D same and C = 0
 parameters:
-- Dest is a register containing the signed value to limit to a minimum of signed Src, and is where the
-  result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose signed value is the lower limit
-  to force upon Dest.
+- Dest is a register containing the signed value to limit to a minimum of signed Src,
+  and is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose signed value
+  is the lower limit to force upon Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:
+  operandFormat: 0
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

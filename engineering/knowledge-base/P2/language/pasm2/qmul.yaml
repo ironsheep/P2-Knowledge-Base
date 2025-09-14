@@ -12,75 +12,122 @@ timing:
   cycles: 2
   type: fixed
 group: CORDIC Solver
-description: Perform 32×32 unsigned multiplication producing 64-bit result. Multiplies D operand by S operand. Results retrieved via GETQX (lower 32 bits) and GETQY (upper 32 bits) instructions 55 clocks later.
-long_description: |
-  The QMUL instruction performs high-precision unsigned multiplication using the P2's 54-stage pipelined CORDIC solver. It multiplies two 32-bit unsigned integers (D × S) and produces a full 64-bit product, avoiding the precision loss that would occur with standard 32-bit multiplication.
-  
-  The instruction takes the first multiplicand in the D operand and the second multiplicand in the S operand, both as 32-bit unsigned values. After 55 clocks, the 64-bit result can be retrieved using GETQX for the lower 32 bits and GETQY for the upper 32 bits.
-  
-  This full-precision multiplication is essential for applications requiring accurate large number arithmetic, such as DSP operations, cryptographic calculations, fixed-point mathematics, and multiply-accumulate operations where intermediate precision is critical.
-  
-  The pipelined nature allows for continuous multiply-accumulate operations by issuing new QMUL instructions every 8 clocks (hub window) while retrieving results from previous operations, enabling high-throughput mathematical processing.
+description: Perform 32×32 unsigned multiplication producing 64-bit result. Multiplies
+  D operand by S operand. Results retrieved via GETQX (lower 32 bits) and GETQY (upper
+  32 bits) instructions 55 clocks later.
+long_description: 'The QMUL instruction performs high-precision unsigned multiplication
+  using the P2''s 54-stage pipelined CORDIC solver. It multiplies two 32-bit unsigned
+  integers (D × S) and produces a full 64-bit product, avoiding the precision loss
+  that would occur with standard 32-bit multiplication.
+
+
+  The instruction takes the first multiplicand in the D operand and the second multiplicand
+  in the S operand, both as 32-bit unsigned values. After 55 clocks, the 64-bit result
+  can be retrieved using GETQX for the lower 32 bits and GETQY for the upper 32 bits.
+
+
+  This full-precision multiplication is essential for applications requiring accurate
+  large number arithmetic, such as DSP operations, cryptographic calculations, fixed-point
+  mathematics, and multiply-accumulate operations where intermediate precision is
+  critical.
+
+
+  The pipelined nature allows for continuous multiply-accumulate operations by issuing
+  new QMUL instructions every 8 clocks (hub window) while retrieving results from
+  previous operations, enabling high-throughput mathematical processing.
+
+  '
 category: CORDIC Solver
 compiler_category: Miscellaneous
 examples:
-  - code: |
-      ' Multiply 1000000 × 2000000 = 2000000000000
-      QMUL    #1000000, #2000000
-      ' Wait 55 clocks...
-      GETQX   lower_32       ' Get lower 32 bits
-      GETQY   upper_32       ' Get upper 32 bits
-    description: "Basic large number multiplication"
-  - code: |
-      ' Variable multiplication
-      QMUL    multiplicand, multiplier
-      ' ... other work for 55 clocks ...
-      GETQX   product_low
-      GETQY   product_high
-    description: "Variable unsigned multiplication"
-  - code: |
-      ' Multiply-accumulate pattern
-      MOV     acc_low, #0
-      MOV     acc_high, #0
-      QMUL    a1, b1          ' First multiplication
-      ' ... 55 clocks of other work ...
-      GETQX   prod_low
-      GETQY   prod_high
-      ADD     acc_low, prod_low
-      ADDX    acc_high, prod_high  ' Add with carry
-    description: "Multiply-accumulate operation"
-  - code: |
-      ' Pipelined multiplication for throughput
-      QMUL    a1, b1          ' Start first multiply
-      ' ... 8 clocks later ...
-      QMUL    a2, b2          ' Start second multiply
-      ' ... 47 clocks later ...
-      GETQX   result1_low     ' Get first result
-      GETQY   result1_high
-      ' ... 8 clocks later ...
-      GETQX   result2_low     ' Get second result
-      GETQY   result2_high
-    description: "Pipelined multiplications for high throughput"
+- code: ''' Multiply 1000000 × 2000000 = 2000000000000
+
+    QMUL    #1000000, #2000000
+
+    '' Wait 55 clocks...
+
+    GETQX   lower_32       '' Get lower 32 bits
+
+    GETQY   upper_32       '' Get upper 32 bits
+
+    '
+  description: Basic large number multiplication
+- code: ''' Variable multiplication
+
+    QMUL    multiplicand, multiplier
+
+    '' ... other work for 55 clocks ...
+
+    GETQX   product_low
+
+    GETQY   product_high
+
+    '
+  description: Variable unsigned multiplication
+- code: ''' Multiply-accumulate pattern
+
+    MOV     acc_low, #0
+
+    MOV     acc_high, #0
+
+    QMUL    a1, b1          '' First multiplication
+
+    '' ... 55 clocks of other work ...
+
+    GETQX   prod_low
+
+    GETQY   prod_high
+
+    ADD     acc_low, prod_low
+
+    ADDX    acc_high, prod_high  '' Add with carry
+
+    '
+  description: Multiply-accumulate operation
+- code: ''' Pipelined multiplication for throughput
+
+    QMUL    a1, b1          '' Start first multiply
+
+    '' ... 8 clocks later ...
+
+    QMUL    a2, b2          '' Start second multiply
+
+    '' ... 47 clocks later ...
+
+    GETQX   result1_low     '' Get first result
+
+    GETQY   result1_high
+
+    '' ... 8 clocks later ...
+
+    GETQX   result2_low     '' Get second result
+
+    GETQY   result2_high
+
+    '
+  description: Pipelined multiplications for high throughput
 related_instructions:
-  - GETQX
-  - GETQY
-  - QDIV
-  - QFRAC
+- GETQX
+- GETQY
+- QDIV
+- QFRAC
 operand_details:
-  D: "First multiplicand (32-bit unsigned)"
-  S: "Second multiplicand (32-bit unsigned)"
+  D: First multiplicand (32-bit unsigned)
+  S: Second multiplicand (32-bit unsigned)
 result_details:
-  GETQX: "Lower 32 bits of 64-bit product"
-  GETQY: "Upper 32 bits of 64-bit product"
-timing_notes: "Result available 55 clocks after instruction issue. Each cog can issue one CORDIC instruction per hub window (every 8 clocks)."
-applications: "DSP multiply-accumulate, fixed-point arithmetic, large integer calculations, cryptographic operations, precise mathematical computations."
+  GETQX: Lower 32 bits of 64-bit product
+  GETQY: Upper 32 bits of 64-bit product
+timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
+  one CORDIC instruction per hub window (every 8 clocks).
+applications: DSP multiply-accumulate, fixed-point arithmetic, large integer calculations,
+  cryptographic operations, precise mathematical computations.
 documentation_source: p2_datasheet
 documentation_level: comprehensive
 needs_documentation: false
 compiler_operand_format:
   name: operand_ls
-  pattern: "D/#,S/#"
-  description: "Two operands: destination/immediate, source/immediate"
+  pattern: D/#,S/#
+  description: 'Two operands: destination/immediate, source/immediate'
   valueType: 13
 compiler_effects: []
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13

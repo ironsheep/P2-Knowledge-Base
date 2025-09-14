@@ -1,0 +1,7 @@
+operator: "ENCOD"
+type: operator
+description: |
+  Encode highest bit position (also PASM2 instruction)
+category: Unary
+examples:
+  - "bit_pos := ENCOD(mask)"

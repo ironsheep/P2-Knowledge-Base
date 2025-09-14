@@ -5,78 +5,77 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'INCMOD compares Dest with Src— if not equal, it increments Dest; otherwise it sets Dest
-  equal to 0. If Dest Result: If Dest was not equal to Src, it is incremented by 1; otherwise Dest is
-  reset to 0. Optionally, C and Z are updated to indicate reset and zero result status.'
+description: 'INCMOD compares Dest with Src— if not equal, it increments Dest; otherwise
+  it sets Dest equal to 0. If Dest Result: If Dest was not equal to Src, it is incremented
+  by 1; otherwise Dest is reset to 0. Optionally, C and Z are updated to indicate
+  reset and zero result status.'
 category: Math Instruction - Increment with modulus.
 flags_affected:
   C:
     formula: 1, else D = D + 1 and C = 0
 parameters:
-- Dest is a register containing the value to increment up to Src with modulus, and is where the result
-  is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is the modulus limit to apply
-  to Dest's increment operation.
+- Dest is a register containing the value to increment up to Src with modulus, and
+  is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is the
+  modulus limit to apply to Dest's increment operation.
 related:
 - DECMOD
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 examples:
-  - name: Round-Robin Counter
-    description: Circular counter for resource scheduling
-    code: |
-      ' Round-robin through 8 ports (0-7)
-      main_loop
-              ' Service current port
-              ' ... port service code ...
-              
-              ' Move to next port
-              incmod  portctr, portnum    wc
-      if_nc   jmp     #main_loop          ' Continue if not wrapped
-              
-              ' We've serviced all ports, restart
-              jmp     #main_loop
-              
-      portctr res     1                   ' Current port (0-7)
-      portnum long    7                   ' Maximum port number
-    source: P2-OctoSerial
-    
-  - name: Circular Buffer Index
-    description: Increment buffer index with wrap-around
-    code: |
-      ' Increment tail index with modulo for circular buffer
-      ' Note: buffer size must be (modulus + 1)
-      incmod  tail_idx, #BUF_SIZE-1
-      
-      ' Check if buffer is full (tail caught up to head)
-      cmp     tail_idx, head_idx      wz
-      if_z    jmp     #buffer_full
-      
-      ' Safe to add data at tail
-      add     buffer_ptr, tail_idx
-      wrbyte  new_data, buffer_ptr
-    source: P2-OctoSerial
-    
-  - name: Multi-Resource Iterator
-    description: Iterate through active resources only
-    code: |
-      ' Service only active ports
-      .next_port
-              alts    portctr, #port_active
-              mov     is_active, 0-0      ' Get active flag
-              
-              tjz     is_active, #.skip   ' Skip if inactive
-              call    #service_port       ' Service this port
-              
-      .skip   incmod  portctr, #7         wc
-      if_nc   jmp     #.next_port         ' Continue loop
-              
-              ' All ports checked
-              ret
-    source: P2-OctoSerial
+- name: Round-Robin Counter
+  description: Circular counter for resource scheduling
+  code: "' Round-robin through 8 ports (0-7)\nmain_loop\n        ' Service current\
+    \ port\n        ' ... port service code ...\n        \n        ' Move to next\
+    \ port\n        incmod  portctr, portnum    wc\nif_nc   jmp     #main_loop   \
+    \       ' Continue if not wrapped\n        \n        ' We've serviced all ports,\
+    \ restart\n        jmp     #main_loop\n        \nportctr res     1           \
+    \        ' Current port (0-7)\nportnum long    7                   ' Maximum port\
+    \ number\n"
+  source: P2-OctoSerial
+- name: Circular Buffer Index
+  description: Increment buffer index with wrap-around
+  code: ''' Increment tail index with modulo for circular buffer
 
+    '' Note: buffer size must be (modulus + 1)
+
+    incmod  tail_idx, #BUF_SIZE-1
+
+
+    '' Check if buffer is full (tail caught up to head)
+
+    cmp     tail_idx, head_idx      wz
+
+    if_z    jmp     #buffer_full
+
+
+    '' Safe to add data at tail
+
+    add     buffer_ptr, tail_idx
+
+    wrbyte  new_data, buffer_ptr
+
+    '
+  source: P2-OctoSerial
+- name: Multi-Resource Iterator
+  description: Iterate through active resources only
+  code: "' Service only active ports\n.next_port\n        alts    portctr, #port_active\n\
+    \        mov     is_active, 0-0      ' Get active flag\n        \n        tjz\
+    \     is_active, #.skip   ' Skip if inactive\n        call    #service_port  \
+    \     ' Service this port\n        \n.skip   incmod  portctr, #7         wc\n\
+    if_nc   jmp     #.next_port         ' Continue loop\n        \n        ' All ports\
+    \ checked\n        ret\n"
+  source: P2-OctoSerial
 notes:
-  - C flag indicates wrap-around (modulus reached)
-  - Perfect for round-robin scheduling
-  - Essential for circular buffer management
-  - More efficient than manual compare and reset
+- C flag indicates wrap-around (modulus reached)
+- Perfect for round-robin scheduling
+- Essential for circular buffer management
+- More efficient than manual compare and reset
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:
+  operandFormat: 0
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

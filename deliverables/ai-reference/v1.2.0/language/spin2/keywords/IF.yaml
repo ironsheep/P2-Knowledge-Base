@@ -1,0 +1,12 @@
+keyword: "IF"
+type: keyword
+category: "Control Flow"
+description: |
+  Conditional execution based on expression
+syntax: |
+  IF condition
+    statements
+examples:
+  - |
+    IF temperature > 80
+      turn_on_fan()

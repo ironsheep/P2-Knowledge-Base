@@ -1,0 +1,7 @@
+operator: "==."
+type: operator
+description: |
+  Floating point equality comparison
+category: Float Compare
+examples:
+  - "IF value ==. target\n  found()"

@@ -5,15 +5,18 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'ADDS sums the two signed values of Dest and Src together and stores the result into the
-  Dest register. If Src is a Result: Sum of signed Src and signed Dest is stored in Dest.'
+description: 'ADDS sums the two signed values of Dest and Src together and stores
+  the result into the Dest register. If Src is a Result: Sum of signed Src and signed
+  Dest is stored in Dest.'
 category: Math Instruction - Add two signed values.
 flags_affected:
   C:
     formula: correct sign of (D + S)
 parameters:
-- Dest is a register containing the value to add Src to, and is where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
+- Dest is a register containing the value to add Src to, and is where the result is
+  written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added
+  into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 related:
 - ADD
@@ -22,3 +25,11 @@ related:
 - SUBS
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:
+  operandFormat: 0
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

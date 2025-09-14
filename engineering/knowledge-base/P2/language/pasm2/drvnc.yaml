@@ -5,17 +5,27 @@ timing:
   cycles: 2
   type: fixed
 group: Pins
-description: 'DRVC or DRVNC sets the I/O pin(s) designated by Dest to the output direction and to a low/high
-  output level Result: The I/O pins described by Dest are set to the output direction and to an output
-  level of low/high according to C or !C; the rest are left as-is. Z = OUT bit.'
-category: I/O Pin Instruction - Set pin(s) direction to output and output level to low/high according
-  to C or !C.
+description: 'DRVC or DRVNC sets the I/O pin(s) designated by Dest to the output direction
+  and to a low/high output level Result: The I/O pins described by Dest are set to
+  the output direction and to an output level of low/high according to C or !C; the
+  rest are left as-is. Z = OUT bit.'
+category: I/O Pin Instruction - Set pin(s) direction to output and output level to
+  low/high according to C or !C.
 flags_affected:
   Z:
     formula: OUT bit
 parameters:
-- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s)
-  to set to output direction and output levels of low or high.
+- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
+  the I/O pin(s) to set to output direction and output levels of low or high.
 - WCZ is an optional effect to update flags.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_pinop
+  pattern: D/#0..511 {WC/WZ}
+  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
+    flags'
+  valueType: 30
+compiler_encoding:
+  operandFormat: 30
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

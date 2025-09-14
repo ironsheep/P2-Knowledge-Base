@@ -1,0 +1,130 @@
+# Spin2 Method: COGCHK
+# Source: Spin2 v51 documentation
+# Purpose: Check if a cog is running
+
+method: "COGCHK"
+category: "cog_management"
+type: "method"
+description: |
+  Check if a specified cog is currently running.
+  Returns -1 if the cog is running, or 0 if it's stopped.
+  Non-invasive check that doesn't affect the cog's operation.
+
+syntax: "COGCHK(CogNum) : Running"
+
+parameters:
+  - name: "CogNum"
+    type: "long"
+    description: |
+      Cog number to check (0-7).
+      Values outside 0-7 return 0.
+
+returns:
+  name: "Running"
+  type: "long"
+  description: |
+    - -1 (TRUE): Cog is running
+    - 0 (FALSE): Cog is stopped or invalid number
+
+timing:
+  execution: "2-8 clock cycles"
+  non_blocking: "Yes - doesn't wait or stall"
+
+examples:
+  - code: |
+      VAR
+        LONG driver_cog
+        
+      PUB ensure_driver_running()
+        IF NOT COGCHK(driver_cog)
+          driver_cog := COGINIT(NEWCOG, @driver, 0)
+    description: "Restart driver if not running"
+    
+  - code: |
+      PUB wait_for_cog_stop(n)
+        REPEAT WHILE COGCHK(n)
+          WAITMS(10)
+    description: "Wait for cog to stop"
+    
+  - code: |
+      PUB count_running_cogs() : count
+        count := 0
+        REPEAT n FROM 0 TO 7
+          IF COGCHK(n)
+            count++
+    description: "Count how many cogs are running"
+    
+  - code: |
+      PUB find_free_cog() : cog_num
+        REPEAT cog_num FROM 0 TO 7
+          IF NOT COGCHK(cog_num)
+            RETURN
+        RETURN -1  ' All cogs busy
+    description: "Find first available cog"
+    
+  - code: |
+      PUB monitor_cog_health()
+        REPEAT
+          IF NOT COGCHK(critical_cog)
+            ' Critical cog crashed!
+            handle_error()
+            restart_critical_cog()
+          WAITMS(100)
+    description: "Monitor critical cog health"
+
+common_uses:
+  - "Health monitoring"
+  - "Resource availability checking"
+  - "Graceful shutdown verification"
+  - "Startup synchronization"
+  - "Error detection"
+  - "Dynamic cog allocation"
+
+return_value_usage:
+  as_boolean: |
+    IF COGCHK(n)      ' If running
+    IF NOT COGCHK(n)  ' If stopped
+    
+  in_expressions: |
+    running_count += COGCHK(n) & 1
+    status := COGCHK(n) ? "Running" : "Stopped"
+
+related_methods:
+  - "COGID - Get current cog ID"
+  - "COGSTOP - Stop a cog"
+  - "COGINIT - Start PASM in a cog"
+  - "COGSPIN - Start Spin2 in a cog"
+
+notes:
+  - "Non-invasive - doesn't affect checked cog"
+  - "Can check current cog (always returns -1)"
+  - "Invalid cog numbers return 0 (stopped)"
+  - "Cannot determine what cog is running"
+  - "Just checks running/stopped state"
+
+best_practices:
+  - "Check before stopping to avoid unnecessary operations"
+  - "Verify startup success after COGINIT/COGSPIN"
+  - "Monitor critical cogs periodically"
+  - "Use for graceful shutdown sequences"
+
+typical_patterns:
+  - pattern: "Safe cog stop"
+    code: |
+      IF COGCHK(n)
+        COGSTOP(n)
+    
+  - pattern: "Wait for startup"
+    code: |
+      cog := COGINIT(NEWCOG, @code, 0)
+      REPEAT UNTIL COGCHK(cog)
+    
+  - pattern: "Restart on failure"
+    code: |
+      IF NOT COGCHK(driver_cog)
+        driver_cog := restart_driver()
+
+see_also:
+  - "language/spin2/methods/cogid.yaml"
+  - "language/spin2/methods/cogstop.yaml"
+  - "language/spin2/methods/coginit.yaml"

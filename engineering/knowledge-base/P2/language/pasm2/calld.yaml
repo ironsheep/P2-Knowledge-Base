@@ -5,22 +5,33 @@ timing:
   cycles: 4
   type: fixed
 group: Branch A - Call
-description: 'CALLD records the current state of the C and Z flags and the address of the next instruction
-  (PC + 1 if Cog/LUT Result: Write current C and Z flags and address of the next instruction into either
-  PA, PB, PTRA, PTRB, or Dest, set PC to new relative or absolute address (in Addr or Src), and optionally
-  update C and/or Z to new state. R = 1 then PC += A, else PC = A.'
+description: 'CALLD records the current state of the C and Z flags and the address
+  of the next instruction (PC + 1 if Cog/LUT Result: Write current C and Z flags and
+  address of the next instruction into either PA, PB, PTRA, PTRB, or Dest, set PC
+  to new relative or absolute address (in Addr or Src), and optionally update C and/or
+  Z to new state. R = 1 then PC += A, else PC = A.'
 category: Flow Control Instruction - Call a subroutine; store return context in PA/PB/PTRA/PTRB/D.
 flags_affected:
   C:
     formula: A
 parameters:
-- PA|PB|PTRA|PTRB is the special register to store the current C and Z flags and next address into.
-- Addr is a symbolic reference to the target subroutine; the location to set PC to. Relative addressing
-  is the default; use '\' to force absolute addressing.
-- Dest is a register to write the current C and Z flags and the address of the next instruction into.
-- 'Src is a register, 9-bit literal, or 32-bit augmented literal that contains the relative or absolute
-  address to set PC to and optional new C and Z states. Use # for relative addressing; omit # for absolute
-  addressing.'
+- PA|PB|PTRA|PTRB is the special register to store the current C and Z flags and next
+  address into.
+- Addr is a symbolic reference to the target subroutine; the location to set PC to.
+  Relative addressing is the default; use '\' to force absolute addressing.
+- Dest is a register to write the current C and Z flags and the address of the next
+  instruction into.
+- 'Src is a register, 9-bit literal, or 32-bit augmented literal that contains the
+  relative or absolute address to set PC to and optional new C and Z states. Use #
+  for relative addressing; omit # for absolute addressing.'
 - WC, WZ, or WCZ are optional effects to update the flags from Src's upper bit states.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_calld
+  pattern: D,#S/{@}S | D,S/#
+  description: 'Call with return register: destination, address/relative/immediate'
+  valueType: 20
+compiler_encoding:
+  operandFormat: 20
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

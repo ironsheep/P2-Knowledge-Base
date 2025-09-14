@@ -5,8 +5,9 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'CMPS compares the signed values of Dest and Src (by subtracting Src from Dest) and optionally
-  setting the C and Result: Greater/lesser and equality status is optionally written to the C and Z flags.'
+description: 'CMPS compares the signed values of Dest and Src (by subtracting Src
+  from Dest) and optionally setting the C and Result: Greater/lesser and equality
+  status is optionally written to the C and Z flags.'
 category: Math Instruction - Compare two signed values.
 flags_affected:
   C:
@@ -15,7 +16,8 @@ flags_affected:
     formula: (D == S)
 parameters:
 - Dest is the register containing the value to compare with that of Src.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared
+  to Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 related:
 - CMP
@@ -23,3 +25,11 @@ related:
 - CMPSX
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:
+  operandFormat: 0
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

@@ -1,0 +1,8 @@
+command: "SDEC_WORD"
+type: debug_command
+category: "Decimal Format"
+description: |
+  Signed decimal word format
+syntax: "['SDEC_WORD(value)']"
+examples:
+  - "DEBUG(SDEC_WORD(delta))"

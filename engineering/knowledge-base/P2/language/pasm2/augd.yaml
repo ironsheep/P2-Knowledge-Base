@@ -5,14 +5,23 @@ timing:
   cycles: 2
   type: fixed
 group: Miscellaneous
-description: 'AUGD is an assistant instruction to aid with literal values that exceed 9 bits. Most PASM2
-  instructions have 9 bits Result: The 23-bit value formed from Dest is queued to prefix the next literal
-  Dest occurrence (#Dest) to form a 32-bit literal for that instruction; interrupts are also temporarily
-  disabled..'
+description: 'AUGD is an assistant instruction to aid with literal values that exceed
+  9 bits. Most PASM2 instructions have 9 bits Result: The 23-bit value formed from
+  Dest is queued to prefix the next literal Dest occurrence (#Dest) to form a 32-bit
+  literal for that instruction; interrupts are also temporarily disabled..'
 category: Augmentation Instruction - Augment next literal Dest to 32-bits.
 parameters:
-- Dest is a 32-bit literal whose upper 23 bits are prepended to the next literal Dest occurrence.
+- Dest is a 32-bit literal whose upper 23 bits are prepended to the next literal Dest
+  occurrence.
 related:
 - AUGS
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_aug
+  pattern: '#S'
+  description: 'Augment: immediate 23-bit value for AUGS/AUGD'
+  valueType: 23
+compiler_encoding:
+  operandFormat: 23
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

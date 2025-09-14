@@ -1,0 +1,13 @@
+keyword: "PUB"
+type: keyword
+category: "Block Structure"
+description: |
+  Public method declaration - accessible from other objects
+syntax: |
+  PUB method_name(parameters) : return_variables | local_variables
+    statements
+examples:
+  - |
+    PUB start(pin) : success
+      configure_pin(pin)
+      success := TRUE

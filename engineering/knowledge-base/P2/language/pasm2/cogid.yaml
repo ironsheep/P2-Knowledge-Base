@@ -5,19 +5,29 @@ timing:
   cycles: 2
   type: fixed
 group: Hub Control - Cogs
-description: 'COGID writes the current cog''s ID into Dest (if Dest is a register and WC is omitted) or
-  sets/clears the C flag Result: Current cog''s ID is written to Dest or C is set (1) or cleared (0) if
-  the Dest cog is running or stopped. C = 1 if on.'
+description: 'COGID writes the current cog''s ID into Dest (if Dest is a register
+  and WC is omitted) or sets/clears the C flag Result: Current cog''s ID is written
+  to Dest or C is set (1) or cleared (0) if the Dest cog is running or stopped. C
+  = 1 if on.'
 category: Cog Control Instruction - Get current cog’s ID or any cog's status by ID.
 flags_affected:
   C:
     formula: 1 if on
 parameters:
-- Dest is the register where the current cog's ID will be written, or is the register or 9-bit literal
-  whose value (lower 3-bits) indicates which cog to get the status for.
+- Dest is the register where the current cog's ID will be written, or is the register
+  or 9-bit literal whose value (lower 3-bits) indicates which cog to get the status
+  for.
 - WC is an optional effect to update the C flag with the Dest cog's running status.
 related:
 - COGINIT
 - COGSTOP
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_l
+  pattern: D/#0..511
+  description: Destination or immediate value 0-511
+  valueType: 26
+compiler_encoding:
+  operandFormat: 26
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

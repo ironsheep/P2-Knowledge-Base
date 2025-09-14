@@ -1,11 +1,20 @@
 instruction: NOT
 syntax: NOT     D,{#}S   {WC/WZ/WCZ}
 encoding: EEEE 0110001 CZ0 DDDDDDDDD DDDDDDDDD
-description: |
-  Get !D into D
+description: 'Get !D into D
+
+  '
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
 flags_affected:
-  C: "!D[31]"
+  C: '!D[31]'
+compiler_operand_format:
+  name: operand_du
+  pattern: D{,S/#}
+  description: Destination register, optional Source register or immediate (unary/binary)
+  valueType: 3
+compiler_encoding:
+  operandFormat: 3
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

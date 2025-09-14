@@ -5,14 +5,20 @@ timing:
   cycles: 2
   type: fixed
 group: Hub Control - Locks
-description: |
-  Try to acquire lock D[3:0]. C = 1 if got LOCK.
-  
+description: 'Try to acquire lock D[3:0]. C = 1 if got LOCK.
+
+
   P2 provides 16 hardware locks (0-15) for inter-COG synchronization:
+
   - Atomic test-and-set operation
+
   - Non-blocking (returns immediately)
+
   - Perfect for resource protection
+
   - Essential for multi-COG coordination
+
+  '
 category: Hub Control - Locks
 flags_affected:
   C:
@@ -20,87 +26,56 @@ flags_affected:
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:
-  - name: Resource Protection
-    description: Protect shared resource access
-    code: |
-      ' Try to acquire resource lock
-      acquire_resource
-              locktry #RESOURCE_LOCK     wc   ' Try to get lock
-      if_nc   ret                          ' Failed - return
-              
-              ' Got lock - access resource safely
-              rdlong  value, shared_addr
-              add     value, #1
-              wrlong  value, shared_addr
-              
-              ' Release lock when done
-              lockrel #RESOURCE_LOCK
-              ret
-    source: multi_cog_pattern
-    
-  - name: Debug Monitor Lock
-    description: Ensure single debugger instance
-    code: |
-      ' Lock[15] reserved for debug monitor
-      debug_init
-              locktry #15                 wc   ' Try to get debug lock
-      if_nc   jmp     #debug_already_running
-              
-              ' We are the debug monitor
-              call    #setup_debug_isr
-              ' Keep lock until shutdown
-    source: Spin2_debugger.spin2
-    
-  - name: Spin Lock Implementation
-    description: Wait until lock acquired
-    code: |
-      ' Spin until lock acquired
-      spin_lock
-              locktry lock_num           wc   ' Try to get lock
-      if_nc   jmp     #spin_lock           ' Keep trying
-              ret                          ' Got lock
-              
-      ' Alternative with timeout
-      spin_lock_timeout
-              mov     timeout, ##1000000
-      .loop   locktry lock_num           wc
-      if_c    ret                          ' Got lock
-              djnz    timeout, #.loop
-              ' Timeout - handle error
-    source: synchronization_pattern
-    
-  - name: Multi-Resource Manager
-    description: Manage multiple locks for complex operations
-    code: |
-      ' Acquire multiple locks in order (prevent deadlock)
-      acquire_multi
-              locktry #LOCK_A            wc
-      if_nc   jmp     #.fail
-              locktry #LOCK_B            wc
-      if_nc   jmp     #.release_a
-              locktry #LOCK_C            wc
-      if_nc   jmp     #.release_b
-              
-              ' Got all locks - proceed
-              setd    .result, #1          ' Success
-              ret
-              
-      .release_b
-              lockrel #LOCK_B
-      .release_a  
-              lockrel #LOCK_A
-      .fail   setd    .result, #0          ' Failed
-      .result ret
-    source: complex_synchronization
-    
+- name: Resource Protection
+  description: Protect shared resource access
+  code: "' Try to acquire resource lock\nacquire_resource\n        locktry #RESOURCE_LOCK\
+    \     wc   ' Try to get lock\nif_nc   ret                          ' Failed -\
+    \ return\n        \n        ' Got lock - access resource safely\n        rdlong\
+    \  value, shared_addr\n        add     value, #1\n        wrlong  value, shared_addr\n\
+    \        \n        ' Release lock when done\n        lockrel #RESOURCE_LOCK\n\
+    \        ret\n"
+  source: multi_cog_pattern
+- name: Debug Monitor Lock
+  description: Ensure single debugger instance
+  code: "' Lock[15] reserved for debug monitor\ndebug_init\n        locktry #15  \
+    \               wc   ' Try to get debug lock\nif_nc   jmp     #debug_already_running\n\
+    \        \n        ' We are the debug monitor\n        call    #setup_debug_isr\n\
+    \        ' Keep lock until shutdown\n"
+  source: Spin2_debugger.spin2
+- name: Spin Lock Implementation
+  description: Wait until lock acquired
+  code: "' Spin until lock acquired\nspin_lock\n        locktry lock_num         \
+    \  wc   ' Try to get lock\nif_nc   jmp     #spin_lock           ' Keep trying\n\
+    \        ret                          ' Got lock\n        \n' Alternative with\
+    \ timeout\nspin_lock_timeout\n        mov     timeout, ##1000000\n.loop   locktry\
+    \ lock_num           wc\nif_c    ret                          ' Got lock\n   \
+    \     djnz    timeout, #.loop\n        ' Timeout - handle error\n"
+  source: synchronization_pattern
+- name: Multi-Resource Manager
+  description: Manage multiple locks for complex operations
+  code: "' Acquire multiple locks in order (prevent deadlock)\nacquire_multi\n   \
+    \     locktry #LOCK_A            wc\nif_nc   jmp     #.fail\n        locktry #LOCK_B\
+    \            wc\nif_nc   jmp     #.release_a\n        locktry #LOCK_C        \
+    \    wc\nif_nc   jmp     #.release_b\n        \n        ' Got all locks - proceed\n\
+    \        setd    .result, #1          ' Success\n        ret\n        \n.release_b\n\
+    \        lockrel #LOCK_B\n.release_a  \n        lockrel #LOCK_A\n.fail   setd\
+    \    .result, #0          ' Failed\n.result ret\n"
+  source: complex_synchronization
 related_instructions:
-  - LOCKREL: Release lock
-  - LOCKNEW: Allocate new lock
-  - LOCKRET: Return lock to pool
-  - COGID: Get current COG ID
-  
+- LOCKREL: Release lock
+- LOCKNEW: Allocate new lock
+- LOCKRET: Return lock to pool
+- COGID: Get current COG ID
 notes:
-  - 16 locks available (0-15)
-  - Lock 15 traditionally used for debug
-  - Non-blocking - check C flag for success
-  - Always release locks when done
+- 16 locks available (0-15)
+- Lock 15 traditionally used for debug
+- Non-blocking - check C flag for success
+- Always release locks when done
+compiler_operand_format:
+  name: operand_l
+  pattern: D/#0..511
+  description: Destination or immediate value 0-511
+  valueType: 26
+compiler_encoding:
+  operandFormat: 26
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

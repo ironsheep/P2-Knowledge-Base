@@ -1,0 +1,9 @@
+register: "TASKHLT"
+type: register
+category: "Task Management"
+description: |
+  Task halt register (v47+)
+examples:
+  - "TASKHLT := task_flags"
+address: "512"
+access: "read_write"

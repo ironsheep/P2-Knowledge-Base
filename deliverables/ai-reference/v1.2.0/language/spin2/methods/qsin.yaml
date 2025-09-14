@@ -1,0 +1,50 @@
+method: QSIN
+type: method
+description: |
+  Calculate sine of angle using hardware CORDIC
+category: Math/CORDIC Operations
+syntax: "sine := QSIN(Angle, Length)"
+parameters:
+  - name: "Angle"
+    type: "long"
+    description: "Angle in P2 angle units (0..$FFFFFFFF = 0..360°)"
+  - name: "Length"
+    type: "long"
+    description: "Hypotenuse/radius length (scaling factor)"
+returns:
+  type: "long"
+  description: "Sine value scaled by Length"
+examples:
+  - code: |
+      ' Calculate sine of 30 degrees
+      sine := QSIN($1555_5555, 1000)  ' 30° with scale 1000
+      ' Result: sine ≈ 500
+    description: "Basic sine calculation"
+  - code: |
+      ' Generate sine wave
+      repeat angle from 0 to $FFFF_FFFF step $0100_0000
+        y := QSIN(angle, amplitude)
+        plot(x++, center_y + y)
+    description: "Generate sine wave plot"
+  - code: |
+      ' Vertical position for circular motion
+      y_pos := center_y + QSIN(angle, radius)
+    description: "Calculate Y position on circle"
+notes:
+  - "Uses P2's hardware CORDIC engine"
+  - "Angle units: $0000_0000 = 0°, $4000_0000 = 90°, $8000_0000 = 180°"
+  - "Result = Length × sin(Angle)"
+  - "Full 32-bit precision"
+  - "38-clock cycle operation"
+  - "Handles all quadrants correctly"
+timing:
+  description: "CORDIC operation"
+  cycles: "38 clock cycles"
+related:
+  - QCOS
+  - ROTXY
+  - POLXY
+see_also:
+  - "CORDIC operations"
+  - "Trigonometric functions"
+  - "Waveform generation"

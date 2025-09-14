@@ -1,0 +1,52 @@
+method: STRCOPY
+type: method
+description: |
+  Copy null-terminated string with length limit
+category: String Operations
+syntax: "STRCOPY(DestAddress, SourceAddress, MaxCount)"
+parameters:
+  - name: "DestAddress"
+    type: "address"
+    description: "Destination buffer address"
+  - name: "SourceAddress"
+    type: "address"
+    description: "Source string address (null-terminated)"
+  - name: "MaxCount"
+    type: "integer"
+    description: "Maximum characters to copy (including null)"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Copy string with buffer limit
+      STRCOPY(@buffer, @source, 80)  ' Max 79 chars + null
+    description: "Safe string copy with limit"
+  - code: |
+      ' Copy user input
+      STRCOPY(@name, @input, 32)  ' Limit name to 31 chars
+    description: "Copy with length protection"
+  - code: |
+      ' Build compound string
+      STRCOPY(@message, STRING("Error: "), 100)
+      ' Then append more...
+    description: "Start building message"
+notes:
+  - "Always null-terminates destination"
+  - "Stops at source null or MaxCount-1 characters"
+  - "MaxCount includes space for null terminator"
+  - "Prevents buffer overflow"
+  - "If MaxCount is 0, nothing is copied"
+  - "Destination buffer must be at least MaxCount bytes"
+timing:
+  description: "Varies with string length"
+  cycles: "~8 + (2 per character) clock cycles"
+related:
+  - STRCOMP
+  - STRSIZE
+  - BYTEMOVE
+  - STRING
+see_also:
+  - "String operations"
+  - "Buffer management"
+  - "Safe string handling"

@@ -1,0 +1,54 @@
+method: STRCOMP
+type: method
+description: |
+  Compare two null-terminated strings
+category: String Operations
+syntax: "result := STRCOMP(StringAddress1, StringAddress2)"
+parameters:
+  - name: "StringAddress1"
+    type: "address"
+    description: "Address of first null-terminated string"
+  - name: "StringAddress2"
+    type: "address"
+    description: "Address of second null-terminated string"
+returns:
+  type: "integer"
+  description: "TRUE (-1) if strings match, FALSE (0) if different"
+examples:
+  - code: |
+      ' Compare two strings
+      if STRCOMP(@input, STRING("hello"))
+        ' Strings match
+    description: "Basic string comparison"
+  - code: |
+      ' Command parsing
+      if STRCOMP(@command, STRING("QUIT"))
+        quit_program()
+      elseif STRCOMP(@command, STRING("HELP"))
+        show_help()
+    description: "Parse command strings"
+  - code: |
+      ' Password check
+      if STRCOMP(@entered_pass, @stored_pass)
+        ' Grant access
+        access_granted := TRUE
+    description: "Validate password"
+notes:
+  - "Case-sensitive comparison"
+  - "Stops at first null terminator (0)"
+  - "Returns TRUE (-1) for exact match"
+  - "Returns FALSE (0) for any difference"
+  - "Both strings must be null-terminated"
+  - "No length limit except available memory"
+timing:
+  description: "Varies with string length"
+  cycles: "~8 + (2 per character) clock cycles"
+related:
+  - STRCOPY
+  - STRSIZE
+  - STRING
+  - BYTECOMP
+see_also:
+  - "String operations"
+  - "String comparison"
+  - "Null-terminated strings"

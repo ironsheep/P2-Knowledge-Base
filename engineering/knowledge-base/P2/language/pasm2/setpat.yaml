@@ -5,9 +5,17 @@ timing:
   cycles: 2
   type: fixed
 group: Events - Configuration
-description: Set pin pattern for PAT event. C selects INA/INB, Z selects =/!=, D provides mask value,
-  S provides match value.
+description: Set pin pattern for PAT event. C selects INA/INB, Z selects =/!=, D provides
+  mask value, S provides match value.
 category: Events - Configuration
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+compiler_operand_format:
+  name: operand_ls
+  pattern: D/#,S/#
+  description: 'Two operands: destination/immediate, source/immediate'
+  valueType: 13
+compiler_encoding:
+  operandFormat: 13
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

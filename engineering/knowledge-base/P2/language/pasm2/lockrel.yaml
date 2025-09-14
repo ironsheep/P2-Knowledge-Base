@@ -5,117 +5,88 @@ timing:
   cycles: 2
   type: fixed
 group: Hub Control - Locks
-description: |
-  Release LOCK D[3:0]. If D is a register and WC, get current/last cog id of LOCK owner into
+description: 'Release LOCK D[3:0]. If D is a register and WC, get current/last cog
+  id of LOCK owner into
+
   D and LOCK status into C.
-  
+
+
   Key features:
+
   - Releases previously acquired lock
+
   - Optional owner identification with WC
+
   - Essential for proper resource cleanup
+
   - Must balance with LOCKTRY calls
+
+  '
 category: Hub Control - Locks
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:
-  - name: Basic Lock Release
-    description: Release lock after resource access
-    code: |
-      ' Access protected resource
-      protected_access
-              locktry #DATA_LOCK         wc   ' Acquire lock
-      if_nc   ret                          ' Failed to get lock
-              
-              ' Access shared data
-              rdlong  data, shared_ptr
-              ' Process data...
-              wrlong  data, shared_ptr
-              
-              ' Always release lock
-              lockrel #DATA_LOCK               ' Release for others
-              ret
-    source: resource_protection
-    
-  - name: Debug Lock Management
-    description: Release debug lock with owner check
-    code: |
-      ' Release debug lock and check who had it
-      debug_cleanup
-              mov     lock_info, #15       ' Lock 15 (debug)
-              lockrel lock_info          wc   ' Release and get info
-              
-              ' lock_info now contains previous owner COG ID
-              ' C = 1 if lock was held
-      if_c    call    #log_debug_release   ' Log who released
-              ret
-    source: Spin2_debugger.spin2
-    
-  - name: Error Recovery
-    description: Release all locks on error
-    code: |
-      ' Emergency release of all held locks
-      emergency_release
-              mov     count, #16           ' 16 locks total
-              mov     lock_num, #0
-      .loop   lockrel lock_num             ' Release if we own it
-              add     lock_num, #1
-              djnz    count, #.loop
-              ret
-              
-      ' Called on fatal error before COG stop
-    source: error_handling
-    
-  - name: Lock Ownership Verification
-    description: Check lock owner before operations
-    code: |
-      ' Verify we own the lock before modifying
-      verify_ownership
-              cogid   my_cog               ' Get our COG ID
-              mov     lock_check, lock_num
-              lockrel lock_check         wc   ' Get owner info
-              
-              ' lock_check[3:0] = owner COG ID
-              ' C = 1 if lock was held
-              
-              and     lock_check, #$07     ' Mask to COG ID
-              cmp     lock_check, my_cog wz
-      if_nz   jmp     #not_owner           ' We don't own it
-              
-              ' Re-acquire since we released it
-              locktry lock_num           wc
-              ret
-    source: lock_validation
-    
-  - name: Scoped Lock Release
-    description: Automatic lock release pattern
-    code: |
-      ' Function with guaranteed lock release
-      safe_operation
-              locktry #CRITICAL_LOCK     wc
-      if_nc   ret                          ' Can't get lock
-              
-              ' Mark that we have lock
-              bith    flags, #HAVE_LOCK
-              
-              ' Do operation (may have multiple exit points)
-              call    #complex_operation
-              
-      .cleanup
-              ' Always release if we got it
-              testb   flags, #HAVE_LOCK  wc
-      if_c    lockrel #CRITICAL_LOCK
-              bitl    flags, #HAVE_LOCK
-              ret
-    source: structured_locking
-    
+- name: Basic Lock Release
+  description: Release lock after resource access
+  code: "' Access protected resource\nprotected_access\n        locktry #DATA_LOCK\
+    \         wc   ' Acquire lock\nif_nc   ret                          ' Failed to\
+    \ get lock\n        \n        ' Access shared data\n        rdlong  data, shared_ptr\n\
+    \        ' Process data...\n        wrlong  data, shared_ptr\n        \n     \
+    \   ' Always release lock\n        lockrel #DATA_LOCK               ' Release\
+    \ for others\n        ret\n"
+  source: resource_protection
+- name: Debug Lock Management
+  description: Release debug lock with owner check
+  code: "' Release debug lock and check who had it\ndebug_cleanup\n        mov   \
+    \  lock_info, #15       ' Lock 15 (debug)\n        lockrel lock_info         \
+    \ wc   ' Release and get info\n        \n        ' lock_info now contains previous\
+    \ owner COG ID\n        ' C = 1 if lock was held\nif_c    call    #log_debug_release\
+    \   ' Log who released\n        ret\n"
+  source: Spin2_debugger.spin2
+- name: Error Recovery
+  description: Release all locks on error
+  code: "' Emergency release of all held locks\nemergency_release\n        mov   \
+    \  count, #16           ' 16 locks total\n        mov     lock_num, #0\n.loop\
+    \   lockrel lock_num             ' Release if we own it\n        add     lock_num,\
+    \ #1\n        djnz    count, #.loop\n        ret\n        \n' Called on fatal\
+    \ error before COG stop\n"
+  source: error_handling
+- name: Lock Ownership Verification
+  description: Check lock owner before operations
+  code: "' Verify we own the lock before modifying\nverify_ownership\n        cogid\
+    \   my_cog               ' Get our COG ID\n        mov     lock_check, lock_num\n\
+    \        lockrel lock_check         wc   ' Get owner info\n        \n        '\
+    \ lock_check[3:0] = owner COG ID\n        ' C = 1 if lock was held\n        \n\
+    \        and     lock_check, #$07     ' Mask to COG ID\n        cmp     lock_check,\
+    \ my_cog wz\nif_nz   jmp     #not_owner           ' We don't own it\n        \n\
+    \        ' Re-acquire since we released it\n        locktry lock_num         \
+    \  wc\n        ret\n"
+  source: lock_validation
+- name: Scoped Lock Release
+  description: Automatic lock release pattern
+  code: "' Function with guaranteed lock release\nsafe_operation\n        locktry\
+    \ #CRITICAL_LOCK     wc\nif_nc   ret                          ' Can't get lock\n\
+    \        \n        ' Mark that we have lock\n        bith    flags, #HAVE_LOCK\n\
+    \        \n        ' Do operation (may have multiple exit points)\n        call\
+    \    #complex_operation\n        \n.cleanup\n        ' Always release if we got\
+    \ it\n        testb   flags, #HAVE_LOCK  wc\nif_c    lockrel #CRITICAL_LOCK\n\
+    \        bitl    flags, #HAVE_LOCK\n        ret\n"
+  source: structured_locking
 related_instructions:
-  - LOCKTRY: Try to acquire lock
-  - LOCKNEW: Allocate new lock  
-  - LOCKRET: Return lock to pool
-  - COGID: Get current COG ID
-  
+- LOCKTRY: Try to acquire lock
+- LOCKNEW: Allocate new lock
+- LOCKRET: Return lock to pool
+- COGID: Get current COG ID
 notes:
-  - Always release locks when done
-  - WC option returns previous owner
-  - Releasing unheld lock is safe (no-op)
-  - Critical for preventing deadlocks
+- Always release locks when done
+- WC option returns previous owner
+- Releasing unheld lock is safe (no-op)
+- Critical for preventing deadlocks
+compiler_operand_format:
+  name: operand_l
+  pattern: D/#0..511
+  description: Destination or immediate value 0-511
+  valueType: 26
+compiler_encoding:
+  operandFormat: 26
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

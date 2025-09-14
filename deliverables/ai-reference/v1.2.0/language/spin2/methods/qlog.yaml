@@ -1,0 +1,44 @@
+method: QLOG
+type: method
+description: |
+  Calculate natural logarithm using hardware CORDIC
+category: Math/CORDIC Operations
+syntax: "result := QLOG(Value)"
+parameters:
+  - name: "Value"
+    type: "long"
+    description: "Input value (unsigned 32-bit)"
+returns:
+  type: "long"
+  description: "Natural logarithm in 5.27 fixed-point format"
+examples:
+  - code: |
+      ' Calculate natural log
+      ln_value := QLOG($1000_0000)  ' ln(0.0625)
+      ' Result in 5.27 fixed-point format
+    description: "Basic logarithm calculation"
+  - code: |
+      ' Calculate log base 10
+      log10_value := QLOG(value) * 39457 >> 17  ' Convert ln to log10
+    description: "Convert natural log to log base 10"
+  - code: |
+      ' Audio decibel calculation
+      db := QLOG(amplitude) * 1717 >> 12  ' 20*log10(amplitude)
+    description: "Calculate decibels from amplitude"
+notes:
+  - "Uses P2's hardware CORDIC engine"
+  - "Input range: 0.0625 to 2.0 (in unsigned 32-bit format)"
+  - "Result is natural logarithm (base e)"
+  - "Output in 5.27 fixed-point format"
+  - "38-clock cycle operation"
+  - "For values outside range, scale appropriately"
+timing:
+  description: "CORDIC operation"
+  cycles: "38 clock cycles"
+related:
+  - QEXP
+  - MULDIV64
+see_also:
+  - "CORDIC operations"
+  - "Logarithmic functions"
+  - "Fixed-point math"

@@ -1,0 +1,9 @@
+register: "PR7"
+type: register
+category: "General Purpose"
+description: |
+  General purpose register 7
+examples:
+  - "PR7 := working_value"
+address: "503"
+access: "read_write"

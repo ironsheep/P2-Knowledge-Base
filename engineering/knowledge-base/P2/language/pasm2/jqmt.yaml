@@ -10,3 +10,11 @@ category: Events - Branch
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+compiler_operand_format:
+  name: operand_jpoll
+  pattern: S/#
+  description: 'Poll jump: target address/immediate'
+  valueType: 21
+compiler_encoding:
+  operandFormat: 21
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

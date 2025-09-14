@@ -5,16 +5,25 @@ timing:
   cycles: 2
   type: fixed
 group: Pixel Mixer
-description: 'ADDPIX sums individual RGB (reg, green, blue) color values of Src into that of Dest and
-  stores the result in the Result: Src color value bytes are added into Dest color value bytes with full
-  saturation.'
+description: 'ADDPIX sums individual RGB (reg, green, blue) color values of Src into
+  that of Dest and stores the result in the Result: Src color value bytes are added
+  into Dest color value bytes with full saturation.'
 category: Color Manipulation Instruction - Add RGB colors with full saturation.
 flags_affected:
   C:
     when: D
 parameters:
-- Dest is a register containing the RGB color value to add Src to, and is where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose RGB color value bytes are added
-  into Dest.
+- Dest is a register containing the RGB color value to add Src to, and is where the
+  result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose RGB color value
+  bytes are added into Dest.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:
+  operandFormat: 0
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

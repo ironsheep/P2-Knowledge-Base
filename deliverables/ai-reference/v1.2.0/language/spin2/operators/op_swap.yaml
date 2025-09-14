@@ -1,0 +1,7 @@
+operator: ":=:"
+type: operator
+description: |
+  Swap operator
+category: Assignment
+examples:
+  - "a :=: b  // swap values of a and b"

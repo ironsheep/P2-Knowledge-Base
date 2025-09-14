@@ -5,9 +5,17 @@ timing:
   cycles: 2
   type: fixed
 group: Branch D - Skip
-description: Skip instructions per D. Subsequent instructions 0..31 get cancelled for each '1' bit in
-  D[0]..D[31].
+description: Skip instructions per D. Subsequent instructions 0..31 get cancelled
+  for each '1' bit in D[0]..D[31].
 category: Branch D - Skip
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+compiler_operand_format:
+  name: operand_l
+  pattern: D/#0..511
+  description: Destination or immediate value 0-511
+  valueType: 26
+compiler_encoding:
+  operandFormat: 26
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

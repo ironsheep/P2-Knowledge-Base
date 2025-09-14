@@ -1,0 +1,45 @@
+method: HUBSET
+type: method
+description: |
+  Execute HUBSET instruction for low-level hub configuration
+category: Miscellaneous
+syntax: "HUBSET(Value)"
+parameters:
+  - name: "Value"
+    type: "long"
+    description: "32-bit configuration value for hub"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Enable debug output
+      HUBSET($F0)  ' Enable debug pins
+    description: "Configure debug pins"
+  - code: |
+      ' Set clock mode bits
+      HUBSET(clkmode_bits)
+    description: "Direct clock configuration"
+  - code: |
+      ' Reset specific hub feature
+      HUBSET(config & !$100)  ' Clear bit 8
+    description: "Modify hub configuration"
+notes:
+  - "Low-level hub configuration"
+  - "Directly executes HUBSET instruction"
+  - "Affects global chip configuration"
+  - "Use CLKSET for safe clock changes"
+  - "Requires understanding of hub config bits"
+  - "Can affect all cogs"
+  - "Use with caution"
+timing:
+  description: "Hub operation"
+  cycles: "2-9 clock cycles"
+related:
+  - CLKSET
+  - COGSTOP
+  - COGINIT
+see_also:
+  - "Hub configuration"
+  - "Low-level control"
+  - "System configuration"

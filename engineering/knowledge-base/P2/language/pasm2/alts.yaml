@@ -5,79 +5,86 @@ timing:
   cycles: 2
   type: fixed
 group: Register Indirection
-description: 'ALTS modifies the next instruction''s Src value to be (Src + Dest) & $1FF (for syntax 1),
-  or to Dest[8:0] (for syntax Result: The next instruction''s pipelined Src value is altered to be (Src
-  + Dest) & $1FF, or just Dest[8:0] in syntax 2.'
+description: 'ALTS modifies the next instruction''s Src value to be (Src + Dest) &
+  $1FF (for syntax 1), or to Dest[8:0] (for syntax Result: The next instruction''s
+  pipelined Src value is altered to be (Src + Dest) & $1FF, or just Dest[8:0] in syntax
+  2.'
 category: Indirection Instruction - Alter S field of next instruction.
 parameters:
-- Dest is the register whose 9-bit value is the offset, or the full value, for the next instruction to
-  operate on.
-- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base
-  (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value
-  (Src[17:9]; added to Dest at the end of execution).
+- Dest is the register whose 9-bit value is the offset, or the full value, for the
+  next instruction to operate on.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value
+  contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and
+  also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 examples:
-  - name: Array Indexing Pattern
-    description: Index into array of longs in COG RAM
-    code: |
-      ' Access element portctr of rxpin array
-      alts    portctr, #rxpin     ' modify next instruction's source
-      mov     rxd, 0-0            ' 0-0 gets replaced with rxpin[portctr]
-      
-      ' Where:
-      ' portctr = index (0-7)
-      ' rxpin = base of array
-      ' rxd = destination for array element
-    source: P2-OctoSerial
-    
-  - name: Multi-Resource Management
-    description: Systematic access to multiple resource arrays
-    code: |
-      ' Service multiple ports in round-robin
-      loop
-              ' Get RX pin for current port
-              alts    portctr, #rxpin
-              mov     rxd, 0-0
-              
-              ' Get TX pin for current port
-              alts    portctr, #txpin
-              mov     txd, 0-0
-              
-              ' Service this port
-              testb   rxd, #31        wc  ' test for -1 (unused)
-      if_nc   call    #rx_service
-              
-              testb   txd, #31        wc
-      if_nc   call    #tx_service
-              
-              ' Next port
-              incmod  portctr, #7     wc
-      if_nc   jmp     #loop
-    source: P2-OctoSerial
-    
-  - name: Configuration Array Access
-    description: Access configuration parameters by index
-    code: |
-      ' Get buffer pointer for port
-      alts    portctr, #p_rxbuf
-      mov     buffer_ptr, 0-0
-      
-      ' Get head index pointer for port
-      alts    portctr, #p_rxhead
-      mov     head_ptr, 0-0
-      
-      ' Read head index from hub
-      rdlong  head_idx, head_ptr
-    source: P2-OctoSerial
+- name: Array Indexing Pattern
+  description: Index into array of longs in COG RAM
+  code: ''' Access element portctr of rxpin array
 
+    alts    portctr, #rxpin     '' modify next instruction''s source
+
+    mov     rxd, 0-0            '' 0-0 gets replaced with rxpin[portctr]
+
+
+    '' Where:
+
+    '' portctr = index (0-7)
+
+    '' rxpin = base of array
+
+    '' rxd = destination for array element
+
+    '
+  source: P2-OctoSerial
+- name: Multi-Resource Management
+  description: Systematic access to multiple resource arrays
+  code: "' Service multiple ports in round-robin\nloop\n        ' Get RX pin for current\
+    \ port\n        alts    portctr, #rxpin\n        mov     rxd, 0-0\n        \n\
+    \        ' Get TX pin for current port\n        alts    portctr, #txpin\n    \
+    \    mov     txd, 0-0\n        \n        ' Service this port\n        testb  \
+    \ rxd, #31        wc  ' test for -1 (unused)\nif_nc   call    #rx_service\n  \
+    \      \n        testb   txd, #31        wc\nif_nc   call    #tx_service\n   \
+    \     \n        ' Next port\n        incmod  portctr, #7     wc\nif_nc   jmp \
+    \    #loop\n"
+  source: P2-OctoSerial
+- name: Configuration Array Access
+  description: Access configuration parameters by index
+  code: ''' Get buffer pointer for port
+
+    alts    portctr, #p_rxbuf
+
+    mov     buffer_ptr, 0-0
+
+
+    '' Get head index pointer for port
+
+    alts    portctr, #p_rxhead
+
+    mov     head_ptr, 0-0
+
+
+    '' Read head index from hub
+
+    rdlong  head_idx, head_ptr
+
+    '
+  source: P2-OctoSerial
 related_instructions:
-  - ALTD: Modify destination field
-  - ALTB: Modify bit field
-  - ALTI: Modify instruction
-  
+- ALTD: Modify destination field
+- ALTB: Modify bit field
+- ALTI: Modify instruction
 notes:
-  - The 0-0 pattern is a placeholder that gets modified
-  - Efficient for array access without loops
-  - Enables self-modifying code patterns
-  - Critical for multi-resource management in single COG
+- The 0-0 pattern is a placeholder that gets modified
+- Efficient for array access without loops
+- Enables self-modifying code patterns
+- Critical for multi-resource management in single COG
+compiler_operand_format:
+  name: operand_duiz
+  pattern: D{,S/#}
+  description: Destination, optional source (immediate bit set if no source)
+  valueType: 5
+compiler_encoding:
+  operandFormat: 5
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

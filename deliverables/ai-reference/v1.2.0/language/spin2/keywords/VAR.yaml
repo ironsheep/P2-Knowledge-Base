@@ -1,0 +1,13 @@
+keyword: "VAR"
+type: keyword
+category: "Block Structure"
+description: |
+  Variables section - declares instance variables
+syntax: |
+  VAR
+    type variable[count]
+examples:
+  - |
+    VAR
+      LONG counter
+      BYTE buffer[256]

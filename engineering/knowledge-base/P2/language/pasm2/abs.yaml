@@ -5,18 +5,26 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'ABS determines the absolute value of Src or Dest and writes the result into Dest. Result:
-  Absolute Src (or Dest) value is stored in Dest.'
+description: 'ABS determines the absolute value of Src or Dest and writes the result
+  into Dest. Result: Absolute Src (or Dest) value is stored in Dest.'
 category: Math Instruction - Get the absolute value of a number.
 flags_affected:
   C:
     formula: D[31]
 parameters:
 - Dest is the register in which to write the absolute value of Dest or Src.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose absolute value is written
-  to Dest.
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose absolute
+  value is written to Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 related:
 - NEG
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_du
+  pattern: D{,S/#}
+  description: Destination register, optional Source register or immediate (unary/binary)
+  valueType: 3
+compiler_encoding:
+  operandFormat: 3
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

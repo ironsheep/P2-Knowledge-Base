@@ -1,0 +1,10 @@
+register: "PR0"
+type: register
+category: "General Purpose"
+description: |
+  General purpose register 0
+examples:
+  - "PR0 := value"
+  - "result := PR0"
+address: "496"
+access: "read_write"

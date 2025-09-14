@@ -1,0 +1,134 @@
+# Spin2 Method: COGINIT
+# Source: Spin2 v51 documentation
+# Purpose: Start PASM code in a cog
+
+method: "COGINIT"
+category: "cog_management"
+type: "method"
+description: |
+  Start PASM2 code in a specified or available cog.
+  Loads PASM2 code from hub RAM into cog RAM and begins execution.
+  Returns the cog number that was started, or -1 if no cog was available.
+  This is the primary method for launching parallel processing cores.
+
+syntax: "COGINIT(CogNum, PASMaddr, PTRAvalue) : CogID"
+
+parameters:
+  - name: "CogNum"
+    type: "long"
+    description: |
+      Cog number to start:
+      - 0-7: Start specific cog (will stop if running)
+      - COGEXEC_NEW or NEWCOG (-1): Start any available cog
+      - Bit 5 set: Execute from hub RAM (HUBEXEC mode)
+      
+  - name: "PASMaddr"
+    type: "address"
+    description: |
+      Hub address of PASM2 code to load and execute.
+      Use @ operator to get address of code label.
+      Must be long-aligned for cog execution.
+      
+  - name: "PTRAvalue"
+    type: "long"
+    description: |
+      Initial value for PTRA register in new cog.
+      Typically used to pass parameter block address.
+      Can be any 32-bit value.
+
+returns:
+  name: "CogID"
+  type: "long"
+  description: |
+    - 0-7: Successfully started cog number
+    - -1: Failed (no cog available when using COGEXEC_NEW)
+
+execution_modes:
+  cogexec: |
+    Default mode - code copied to cog RAM and executed there
+    Limited to 512 longs (2KB) of code/data
+    Fastest execution, deterministic timing
+    
+  hubexec: |
+    Set bit 5 of CogNum - code executes directly from hub RAM
+    Unlimited code size (512KB hub RAM)
+    Slightly slower, subject to hub timing variations
+
+examples:
+  - code: |
+      DAT
+        ORG 0
+      blink_code
+        DIRH  #56
+      .loop
+        OUTNOT #56
+        WAITX ##25_000_000
+        JMP   #.loop
+        
+      PUB start_blinker()
+        cog := COGINIT(COGEXEC_NEW, @blink_code, 0)
+        IF cog == -1
+          ' Failed to start
+    description: "Start PASM blinker in any available cog"
+    
+  - code: |
+      VAR
+        LONG params[4]
+        
+      PUB start_driver()
+        params[0] := @buffer
+        params[1] := buffer_size
+        params[2] := pin_number
+        params[3] := 0  ' command
+        
+        COGINIT(COGEXEC_NEW, @driver_code, @params)
+    description: "Start driver with parameter block"
+    
+  - code: |
+      ' Stop and restart cog 1 with new code
+      COGINIT(1, @new_code, @config)
+    description: "Start specific cog (stops if running)"
+    
+  - code: |
+      ' Start hub execution mode
+      COGINIT(COGEXEC_NEW_PAIR | HUBEXEC, @hub_code, @data)
+    description: "Start code in hub execution mode"
+
+common_uses:
+  - "Launch parallel processing tasks"
+  - "Start hardware drivers"
+  - "Create dedicated I/O handlers"
+  - "Implement real-time controllers"
+  - "Run timing-critical code"
+  - "Parallel data processing"
+
+related_methods:
+  - "COGSPIN - Start Spin2 code in a cog"
+  - "COGSTOP - Stop a running cog"
+  - "COGID - Get current cog ID"
+  - "COGCHK - Check if cog is running"
+
+memory_layout: |
+  Cog RAM after COGINIT:
+  $000-$1F7: Your PASM code/data (504 longs)
+  $1F8-$1FF: Special registers (PTRA, PTRB, etc.)
+
+notes:
+  - "Code must start with ORG 0 for cog execution"
+  - "PTRA is set before code starts executing"
+  - "All cog registers cleared except PTRA"
+  - "Cog starts at address 0"
+  - "Previous cog contents completely replaced"
+  - "Cannot start Spin2 code with COGINIT (use COGSPIN)"
+
+limitations:
+  - "Maximum 496 longs of code+data in COGEXEC mode"
+  - "Only 8 cogs available total"
+  - "Cannot determine which cog when using COGEXEC_NEW"
+  - "No automatic cleanup if cog crashes"
+
+see_also:
+  - "language/pasm2/org.yaml"
+  - "language/spin2/methods/cogspin.yaml"
+  - "language/spin2/methods/cogstop.yaml"
+  - "architecture/cog.yaml"

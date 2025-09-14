@@ -1,0 +1,9 @@
+register: "IJMP1"
+type: register
+category: "Interrupt Vectors"
+description: |
+  Interrupt 1 jump vector
+examples:
+  - "IJMP1 := @interrupt1_handler"
+address: "500"
+access: "read_write"

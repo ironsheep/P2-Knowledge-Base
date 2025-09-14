@@ -1,0 +1,50 @@
+method: REGLOAD
+type: method
+description: |
+  Load PASM2 code from hub to cog registers
+category: Miscellaneous
+syntax: "REGLOAD(HubAddress)"
+parameters:
+  - name: "HubAddress"
+    type: "address"
+    description: "Hub address of PASM2 code to load"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Load PASM code
+      REGLOAD(@pasm_routines)
+      ' Code now in cog, ready to CALL
+    description: "Load PASM for later execution"
+  - code: |
+      ' Update PASM code
+      modify_pasm(@buffer)  ' Modify code
+      REGLOAD(@buffer)      ' Reload it
+      result := CALL($100)  ' Execute at cog address
+    description: "Dynamic code modification"
+  - code: |
+      ' Load different routines
+      if mode == 1
+        REGLOAD(@fast_routines)
+      else
+        REGLOAD(@accurate_routines)
+    description: "Conditional code loading"
+notes:
+  - "Loads code but doesn't execute"
+  - "Use CALL to execute after loading"
+  - "Overwrites cog registers"
+  - "Preserves Spin2 interpreter area"
+  - "Maximum 496 longs can be loaded"
+  - "Useful for swapping PASM routines"
+timing:
+  description: "Hub to cog transfer"
+  cycles: "~8 + (size * 2) clock cycles"
+related:
+  - REGEXEC
+  - CALL
+  - SETREGS
+see_also:
+  - "Code loading"
+  - "PASM2 management"
+  - "Dynamic routines"

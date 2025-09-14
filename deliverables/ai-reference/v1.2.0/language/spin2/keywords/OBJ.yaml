@@ -1,0 +1,12 @@
+keyword: "OBJ"
+type: keyword
+category: "Block Structure"
+description: |
+  Object section - declares object instances
+syntax: |
+  OBJ
+    name : "filename"
+examples:
+  - |
+    OBJ
+      serial : "FullDuplexSerial"

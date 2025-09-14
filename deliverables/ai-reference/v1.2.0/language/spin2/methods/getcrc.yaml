@@ -1,0 +1,51 @@
+method: GETCRC
+type: method
+description: |
+  Calculate CRC using hardware CRC engine
+category: Miscellaneous
+syntax: "crc := GETCRC(DataAddress, Polynomial, Count)"
+parameters:
+  - name: "DataAddress"
+    type: "address"
+    description: "Address of data to calculate CRC for"
+  - name: "Polynomial"
+    type: "long"
+    description: "CRC polynomial to use"
+  - name: "Count"
+    type: "integer"
+    description: "Number of bytes to process"
+returns:
+  type: "long"
+  description: "Calculated CRC value"
+examples:
+  - code: |
+      ' Calculate CRC-32
+      crc32 := GETCRC(@data, $EDB88320, size)
+    description: "Calculate standard CRC-32"
+  - code: |
+      ' Calculate CRC-16
+      crc16 := GETCRC(@buffer, $8005, length) & $FFFF
+    description: "Calculate CRC-16"
+  - code: |
+      ' Verify data integrity
+      calculated := GETCRC(@packet, polynomial, packet_size)
+      if calculated == expected_crc
+        ' Data is valid
+    description: "Verify data with CRC"
+notes:
+  - "Uses P2's hardware CRC engine"
+  - "Common polynomials: CRC-32=$EDB88320, CRC-16=$8005"
+  - "Processes byte by byte"
+  - "Fast hardware implementation"
+  - "Initial CRC value is 0"
+  - "Result may need masking for < 32-bit CRCs"
+timing:
+  description: "Hardware accelerated"
+  cycles: "~8 + (count * 2) clock cycles"
+related:
+  - BYTEMOVE
+  - STRCOMP
+see_also:
+  - "CRC calculation"
+  - "Data integrity"
+  - "Error detection"

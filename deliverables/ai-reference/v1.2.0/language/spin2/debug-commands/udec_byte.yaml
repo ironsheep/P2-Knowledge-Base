@@ -1,0 +1,8 @@
+command: "UDEC_BYTE"
+type: debug_command
+category: "Decimal Format"
+description: |
+  Unsigned decimal byte format
+syntax: "['UDEC_BYTE(value)']"
+examples:
+  - "DEBUG(UDEC_BYTE(status))"

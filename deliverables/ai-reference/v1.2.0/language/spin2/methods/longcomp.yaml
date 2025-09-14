@@ -1,0 +1,54 @@
+method: LONGCOMP
+type: method
+description: |
+  Compare blocks of longs in memory
+category: Memory Operations
+syntax: "result := LONGCOMP(Address1, Address2, Count)"
+parameters:
+  - name: "Address1"
+    type: "address"
+    description: "First hub RAM address for comparison (long-aligned)"
+  - name: "Address2"
+    type: "address"
+    description: "Second hub RAM address for comparison (long-aligned)"
+  - name: "Count"
+    type: "integer"
+    description: "Number of longs to compare"
+returns:
+  type: "integer"
+  description: "TRUE (-1) if all longs match, FALSE (0) if any longs differ"
+examples:
+  - code: |
+      ' Compare two long arrays
+      if LONGCOMP(@results1, @results2, 256)
+        ' Arrays match (256 longs)
+    description: "Compare long arrays"
+  - code: |
+      ' Verify calculation results
+      if LONGCOMP(@computed, @expected, 32)
+        ' All 32 computed values match expected
+    description: "Verify 32-bit calculation results"
+  - code: |
+      ' Check for signature pattern
+      if LONGCOMP(@header, @valid_signature, 4)
+        ' Found valid 4-long signature
+    description: "Validate header signature"
+notes:
+  - "Returns TRUE (-1) if all longs match"
+  - "Returns FALSE (0) on first mismatch"
+  - "Count of 0 always returns TRUE"
+  - "Addresses should be long-aligned (divisible by 4) for best performance"
+  - "Each long is 32 bits (4 bytes)"
+  - "Efficient block comparison operation"
+  - "Native P2 word size for fastest comparison"
+timing:
+  description: "Varies based on count"
+  cycles: "~8 + (count * 2) clock cycles typical"
+related:
+  - BYTECOMP
+  - WORDCOMP
+  - LONGMOVE
+see_also:
+  - "Memory comparison"
+  - "Array operations"
+  - "Pattern matching"

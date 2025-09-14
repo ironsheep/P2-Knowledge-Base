@@ -5,16 +5,27 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'BITRND alters the Dest bit(s) designated by Src to each be an independent random low and
-  high value, based on Result: Dest bit(s) described by Src are each set randomly low or high; the rest
-  are left as-is. Z = original D[S[4:0]].'
+description: 'BITRND alters the Dest bit(s) designated by Src to each be an independent
+  random low and high value, based on Result: Dest bit(s) described by Src are each
+  set randomly low or high; the rest are left as-is. Z = original D[S[4:0]].'
 category: Bit Operation Instruction - Set bit(s) random low/high.
 flags_affected:
   Z:
     formula: original D[S[4:0]]
 parameters:
-- Dest is the register whose value will have one or more bits set randomly low or high.
-- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
+- Dest is the register whose value will have one or more bits set randomly low or
+  high.
+- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies
+  the bit(s) to modify.
 - WCZ is an optional effect to update flags.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_bitx
+  pattern: D,S/#
+  description: 'Bit manipulation with optional effect flags: Destination register,
+    bit position'
+  valueType: 1
+compiler_encoding:
+  operandFormat: 1
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

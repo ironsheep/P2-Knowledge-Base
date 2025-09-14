@@ -1,0 +1,9 @@
+register: "IRET2"
+type: register
+category: "Interrupt Vectors"
+description: |
+  Interrupt 2 return vector
+examples:
+  - "IRET2 := return_point"
+address: "499"
+access: "read_write"

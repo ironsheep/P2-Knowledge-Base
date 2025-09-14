@@ -1,11 +1,21 @@
 instruction: TJV
 syntax: TJV     D,{#}S
 encoding: EEEE 1011110 00I DDDDDDDDD SSSSSSSSS
-description: |
-  Test D and jump to S** if D overflowed (D[31] != C, C = 'correct sign' from last addition/subtraction).
+description: 'Test D and jump to S** if D overflowed (D[31] != C, C = ''correct sign''
+  from last addition/subtraction).
+
+  '
 timing:
   cycles: 2
   type: fixed
 group: Branch S - Test
 flags_affected:
-  C: "'correct sign' from last addition/subtraction"
+  C: '''correct sign'' from last addition/subtraction'
+compiler_operand_format:
+  name: operand_dsj
+  pattern: D,S/@
+  description: 'Jump with destination and relative address: register, relative address'
+  valueType: 12
+compiler_encoding:
+  operandFormat: 12
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

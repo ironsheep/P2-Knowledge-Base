@@ -1,0 +1,53 @@
+method: MULDIV64
+type: method
+description: |
+  Multiply then divide with 64-bit intermediate result
+category: Math/CORDIC Operations
+syntax: "result := MULDIV64(Multiplier, Multiplicand, Divisor)"
+parameters:
+  - name: "Multiplier"
+    type: "long"
+    description: "First value to multiply (32-bit signed)"
+  - name: "Multiplicand"
+    type: "long"
+    description: "Second value to multiply (32-bit signed)"
+  - name: "Divisor"
+    type: "long"
+    description: "Value to divide by (32-bit signed, non-zero)"
+returns:
+  type: "long"
+  description: "Result of (Multiplier × Multiplicand) ÷ Divisor"
+examples:
+  - code: |
+      ' Scale value without overflow
+      scaled := MULDIV64(value, 1000, 1024)  ' value*1000/1024
+    description: "Scale value precisely"
+  - code: |
+      ' Calculate percentage
+      percent := MULDIV64(part, 100, total)
+    description: "Calculate percentage without overflow"
+  - code: |
+      ' Frequency calculation
+      freq := MULDIV64(clkfreq, numerator, denominator)
+    description: "Calculate precise frequency"
+  - code: |
+      ' Fixed-point math
+      result := MULDIV64(a, b, $1_0000)  ' Multiply with 16.16 fixed point
+    description: "Fixed-point multiplication"
+notes:
+  - "Prevents overflow in intermediate calculation"
+  - "Uses 64-bit intermediate result"
+  - "All parameters are 32-bit signed"
+  - "Division by zero returns 0"
+  - "Useful for scaling and ratio calculations"
+  - "More precise than (a*b)/c for large values"
+timing:
+  description: "Multi-cycle operation"
+  cycles: "~50-60 clock cycles"
+related:
+  - QLOG
+  - QEXP
+see_also:
+  - "Extended precision math"
+  - "Scaling operations"
+  - "Fixed-point arithmetic"

@@ -5,16 +5,25 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'SCAS multiplies the lower, signed 16-bits of each of Dest and Src together, right shifts
-  the 32-bit product by 14 (to Result: The upper 18 bits of the signed product from the 16-bit Dest and
-  Src multiplication is substituted as the next instruction''s Src value and optionally the Z flag is
-  updated to the zero status.'
-category: Math Instruction - Create signed 18-bit scale value for next instruction's S value.
+description: 'SCAS multiplies the lower, signed 16-bits of each of Dest and Src together,
+  right shifts the 32-bit product by 14 (to Result: The upper 18 bits of the signed
+  product from the 16-bit Dest and Src multiplication is substituted as the next instruction''s
+  Src value and optionally the Z flag is updated to the zero status.'
+category: Math Instruction - Create signed 18-bit scale value for next instruction's
+  S value.
 parameters:
 - Dest is a register containing the signed 16-bit value to multiply with Src.
-- Src is a register, 9-bit literal, or signed 16-bit augmented literal whose value is multiplied with
-  Dest.
+- Src is a register, 9-bit literal, or signed 16-bit augmented literal whose value
+  is multiplied with Dest.
 related:
 - SCA
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:
+  operandFormat: 0
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

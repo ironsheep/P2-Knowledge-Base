@@ -5,11 +5,13 @@ timing:
   cycles: 2
   type: fixed
 group: Events - Attention
-description: 'COGATN strobes the attention signal for one or more cogs. Dest bit positions 7:0 represent
-  cogs 7 through 0; high Result: The attention signal of one or more cogs is strobed.'
+description: 'COGATN strobes the attention signal for one or more cogs. Dest bit positions
+  7:0 represent cogs 7 through 0; high Result: The attention signal of one or more
+  cogs is strobed.'
 category: Event Handling Instruction - Get the attention of one or more other cogs.
 parameters:
-- Dest is the register or 9-bit literal whose value (lower 8-bit pattern) indicates which cogs to signal.
+- Dest is the register or 9-bit literal whose value (lower 8-bit pattern) indicates
+  which cogs to signal.
 related:
 - POLLATN
 - WAITATN
@@ -17,3 +19,11 @@ related:
 - JNATN
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_l
+  pattern: D/#0..511
+  description: Destination or immediate value 0-511
+  valueType: 26
+compiler_encoding:
+  operandFormat: 26
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

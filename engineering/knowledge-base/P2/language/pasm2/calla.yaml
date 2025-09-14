@@ -13,3 +13,11 @@ flags_affected:
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+compiler_operand_format:
+  name: operand_call
+  pattern: '#S | D'
+  description: 'Call: immediate address or register'
+  valueType: 19
+compiler_encoding:
+  operandFormat: 19
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

@@ -1,0 +1,7 @@
+operator: "XOR"
+type: operator
+description: |
+  Logical XOR (also PASM2 instruction)
+category: Unary
+examples:
+  - "IF state1 XOR state2\n  toggle()"

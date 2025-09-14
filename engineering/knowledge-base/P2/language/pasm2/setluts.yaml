@@ -5,9 +5,17 @@ timing:
   cycles: 2
   type: fixed
 group: Lookup Table
-description: If D[0] = 1 then enable LUT sharing, where LUT writes within the adjacent odd/even companion
-  cog are copied to this cog's LUT.
+description: If D[0] = 1 then enable LUT sharing, where LUT writes within the adjacent
+  odd/even companion cog are copied to this cog's LUT.
 category: Lookup Table
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+compiler_operand_format:
+  name: operand_l
+  pattern: D/#0..511
+  description: Destination or immediate value 0-511
+  valueType: 26
+compiler_encoding:
+  operandFormat: 26
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

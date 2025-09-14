@@ -1,0 +1,129 @@
+operator: +//
+name: Unsigned Modulo Add
+category: arithmetic_operators
+description: Add with unsigned modulo (circular arithmetic)
+documentation_source: code_analysis
+documentation_level: comprehensive
+created: 2025-09-09
+
+overview: |
+  The +// operator performs addition with unsigned modulo, creating circular
+  arithmetic perfect for buffer management and wrap-around counters. This is
+  a key operator for implementing circular queues and ring buffers in Spin2.
+
+syntax:
+  format: "result := value +// modulus"
+  parameters:
+    value: The value to operate on
+    modulus: The wrap-around point (result will be 0 to modulus-1)
+  returns: Value modulo modulus
+
+operation:
+  description: |
+    Performs (value % modulus) where % is unsigned modulo.
+    Result ranges from 0 to (modulus - 1).
+    Equivalent to: value // modulus
+  
+  formula: "result = value MOD modulus (unsigned)"
+
+examples:
+  circular_buffer_increment:
+    description: Increment buffer index with wrap-around
+    code: |
+      VAR
+        LONG head, tail
+        BYTE buffer[32]
+      
+      PUB addByte(data)
+        ' Calculate next tail position
+        nextTail := (tail + 1) +// 32
+        
+        ' Check if buffer full
+        if nextTail == head
+          return FALSE  ' Buffer full
+          
+        ' Add data and update tail
+        buffer[tail] := data
+        tail := nextTail
+        return TRUE
+    source: P2-OctoSerial pattern
+    
+  modulo_arithmetic:
+    description: Various modulo operations
+    code: |
+      ' Simple wrap-around
+      index := (index + 1) +// BUFFER_SIZE
+      
+      ' Increment by N with wrap
+      position := (position + step) +// MAX_POSITION
+      
+      ' Calculate distance in circular buffer
+      distance := (head - tail) +// BUFFER_SIZE
+    
+  queue_management:
+    description: Circular queue push operation
+    code: |
+      PRI rxCheckInternal(portHandle) : nChar
+        nChar := NO_CHAR
+        if rxTailIdx[portHandle] <> rxHeadIdx[portHandle]
+          ' Increment with modulo
+          rxHeadIdx[portHandle] := (rxHeadIdx[portHandle] + 1) +// BUF_SIZE
+          ' Read from new head position
+          nChar := BYTE[pRxBuf[portHandle]][rxHeadIdx[portHandle]]
+    source: P2-OctoSerial
+
+common_patterns:
+  buffer_sizes:
+    - "Power of 2 not required (unlike & mask method)"
+    - "Any buffer size works: +// 30, +// 100, etc."
+    - "Typically used with constants for clarity"
+    
+  typical_usage:
+    - Circular buffer index management
+    - Ring buffer wrap-around
+    - Cyclic counter implementation
+    - Round-robin scheduling indexes
+
+comparison_with_alternatives:
+  and_mask_method:
+    description: "Alternative using AND mask (power of 2 only)"
+    code: |
+      ' Only works with power-of-2 sizes
+      index := (index + 1) & (BUFFER_SIZE - 1)  ' BUFFER_SIZE must be 2^n
+      
+      ' +// works with any size
+      index := (index + 1) +// BUFFER_SIZE      ' Any size works
+  
+  manual_method:
+    description: "Manual wrap-around check"
+    code: |
+      ' Manual method
+      index++
+      if index >= BUFFER_SIZE
+        index := 0
+        
+      ' Using +// operator
+      index := (index + 1) +// BUFFER_SIZE    ' One line, same result
+
+best_practices:
+  - Use parentheses for clarity with complex expressions
+  - Define buffer sizes as constants
+  - Remember result range is 0 to (modulus-1)
+  - Consider using for all circular arithmetic
+
+related_operators:
+  - "//": Unsigned divide remainder (modulo)
+  - "+/": Unsigned divide quotient
+  - "%%": Signed modulo
+  - "&": AND mask (alternative for power-of-2)
+
+notes:
+  - More flexible than AND mask method
+  - Works with any modulus value
+  - Essential for circular buffer implementation
+  - Commonly used in multi-port/multi-resource drivers
+
+references:
+  - P2-OctoSerial: Extensive use in circular buffers
+  - Spin2 documentation: Arithmetic operators
+  - Production code patterns from Iron Sheep Productions

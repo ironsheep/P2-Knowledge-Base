@@ -5,10 +5,11 @@ timing:
   cycles: 2
   type: fixed
 group: Events - Poll
-description: 'POLLXRO copies the state of the streamer NCO rollover event flag into C and/or Z and then
-  clears the flag (unless Result: Streamer-NCO-rollover event flag is optionally copied into C and/or
-  Z, then it is cleared.'
-category: Event Monitor Instruction - Retrieve and clear streamer-NCO-rollover event flag.
+description: 'POLLXRO copies the state of the streamer NCO rollover event flag into
+  C and/or Z and then clears the flag (unless Result: Streamer-NCO-rollover event
+  flag is optionally copied into C and/or Z, then it is cleared.'
+category: Event Monitor Instruction - Retrieve and clear streamer-NCO-rollover event
+  flag.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 related:
@@ -20,3 +21,11 @@ related:
 - JNXRO
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_pollwait
+  pattern: ''
+  description: No operands - poll/wait instruction (moves S to D, sets S to $024)
+  valueType: 28
+compiler_encoding:
+  operandFormat: 28
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

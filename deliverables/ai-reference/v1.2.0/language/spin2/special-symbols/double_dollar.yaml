@@ -1,0 +1,7 @@
+symbol: "$$"
+type: special_symbol
+category: "Special"
+description: |
+  Current assembly address
+examples:
+  - "distance := target - $$"

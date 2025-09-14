@@ -5,8 +5,17 @@ timing:
   cycles: 2
   type: fixed
 group: Smart Pins
-description: Set four-channel oscilloscope enable to D[6] and set input pin base to D[5:2].
+description: Set four-channel oscilloscope enable to D[6] and set input pin base to
+  D[5:2].
 category: Smart Pins
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+compiler_operand_format:
+  name: operand_l
+  pattern: D/#0..511
+  description: Destination or immediate value 0-511
+  valueType: 26
+compiler_encoding:
+  operandFormat: 26
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

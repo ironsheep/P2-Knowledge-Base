@@ -5,20 +5,29 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'DECMOD compares Dest with 0— if not equal, it decrements Dest; otherwise it sets Dest equal
-  to Src. If Dest Result: If Dest was not equal to 0, it is decremented by 1; otherwise Dest is reset
-  to Src. Optionally, C and Z are updated to indicate reset and zero result status.'
+description: 'DECMOD compares Dest with 0— if not equal, it decrements Dest; otherwise
+  it sets Dest equal to Src. If Dest Result: If Dest was not equal to 0, it is decremented
+  by 1; otherwise Dest is reset to Src. Optionally, C and Z are updated to indicate
+  reset and zero result status.'
 category: Math Instruction - Decrement with modulus.
 flags_affected:
   C:
     formula: 1, else D = D - 1 and C = 0
 parameters:
-- Dest is a register containing the value to decrement down to 0 with modulus, and is where the result
-  is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is the modulus limit to apply
-  to Dest's decrement operation.
+- Dest is a register containing the value to decrement down to 0 with modulus, and
+  is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is the
+  modulus limit to apply to Dest's decrement operation.
 - WC, WZ, or WCZ are optional effects to update flags.
 related:
 - INCMOD
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:
+  operandFormat: 0
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

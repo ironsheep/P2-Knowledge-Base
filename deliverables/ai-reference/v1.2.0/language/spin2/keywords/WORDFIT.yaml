@@ -1,0 +1,9 @@
+keyword: "WORDFIT"
+type: keyword
+category: "Data Types"
+description: |
+  Expression that fits in a word constant
+examples:
+  - |
+    CON
+      MID_VALUE = WORDFIT(32000)

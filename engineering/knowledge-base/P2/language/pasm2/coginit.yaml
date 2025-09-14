@@ -5,19 +5,28 @@ timing:
   cycles: 2
   type: fixed
 group: Hub Control - Cogs
-description: 'COGINIT starts a new (unused) cog, a new pair of cogs (that may share LUT memory), or a
-  specific cog by ID, to Result: Target cog is started, according to Dest, to execute code from Src. The
-  code pointer (Src) is written to the target Cog''s PTRB, and optionally a data pointer or user value
-  is written to its PTRA (if previous SETQ is provided).'
+description: 'COGINIT starts a new (unused) cog, a new pair of cogs (that may share
+  LUT memory), or a specific cog by ID, to Result: Target cog is started, according
+  to Dest, to execute code from Src. The code pointer (Src) is written to the target
+  Cog''s PTRB, and optionally a data pointer or user value is written to its PTRA
+  (if previous SETQ is provided).'
 category: Cog Control Instruction - Start an available cog, or restart a cog by ID.
 parameters:
-- Dest is the register or 9-bit literal describing the type of launch and possibly the ID of the desired
-  cog to launch. If Dest is a register and WC is given, Dest is also where the ID of the launched cog
-  will be written.
-- WC is an optional effect to update the C flag with the success (0) or fail (1) status and triggers Dest
-  to be overwritten with new cog's ID.
+- Dest is the register or 9-bit literal describing the type of launch and possibly
+  the ID of the desired cog to launch. If Dest is a register and WC is given, Dest
+  is also where the ID of the launched cog will be written.
+- WC is an optional effect to update the C flag with the success (0) or fail (1) status
+  and triggers Dest to be overwritten with new cog's ID.
 related:
 - COGID
 - COGSTOP
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ls
+  pattern: D/#,S/#
+  description: 'Two operands: destination/immediate, source/immediate'
+  valueType: 13
+compiler_encoding:
+  operandFormat: 13
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

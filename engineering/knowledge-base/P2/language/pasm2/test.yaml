@@ -5,9 +5,10 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'TEST determines the parity (number of high (1) bits) and the zero or non-zero state of Dest,
-  or of Dest bitwise Result: The parity and zero-state of Dest, or of Dest bitwise ANDed with Src, is
-  stored in the C and Z flags. C = parity of (D & S).'
+description: 'TEST determines the parity (number of high (1) bits) and the zero or
+  non-zero state of Dest, or of Dest bitwise Result: The parity and zero-state of
+  Dest, or of Dest bitwise ANDed with Src, is stored in the C and Z flags. C = parity
+  of (D & S).'
 category: Bit Operation Instruction - Test D, or bitwise AND D with S, to affect flags.
 flags_affected:
   C:
@@ -16,9 +17,18 @@ flags_affected:
     formula: ((D & S) == 0)
 parameters:
 - Dest is the register whose value will be tested.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value is ANDed with Dest.
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value
+  is ANDed with Dest.
 - WC, WZ, and WCZ are optional effects to update flags.
 related:
 - TESTN
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_du
+  pattern: D{,S/#}
+  description: Destination register, optional Source register or immediate (unary/binary)
+  valueType: 3
+compiler_encoding:
+  operandFormat: 3
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

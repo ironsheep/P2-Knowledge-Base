@@ -5,17 +5,25 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'SAL shifts Dest''s binary value left by Src places (0–31 bits) and sets the new LSBs to
-  that of the original Dest[0]. Result: The bits of Dest are shifted left by Src bits, extending Dest[0]
-  into new rightmost bits.'
+description: 'SAL shifts Dest''s binary value left by Src places (0–31 bits) and sets
+  the new LSBs to that of the original Dest[0]. Result: The bits of Dest are shifted
+  left by Src bits, extending Dest[0] into new rightmost bits.'
 category: Bit Operation Instruction - Shift bits left, extending the LSB.
 flags_affected:
   C:
     formula: last bit shifted out if S[4:0] > 0, else D[31]
 parameters:
 - Dest is the register containing the value to arithmetically left shift by Src bits.
-- Src is a register or 5-bit literal whose value indicates the number of bits to arithmetically shift
-  left.
+- Src is a register or 5-bit literal whose value indicates the number of bits to arithmetically
+  shift left.
 - WC, WZ, or WCZ are optional effects to update flags.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:
+  operandFormat: 0
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

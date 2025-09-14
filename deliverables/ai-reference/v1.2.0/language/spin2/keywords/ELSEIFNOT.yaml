@@ -1,0 +1,12 @@
+keyword: "ELSEIFNOT"
+type: keyword
+category: "Control Flow"
+description: |
+  Additional conditional branch with negated condition
+syntax: |
+  ELSEIFNOT condition
+    statements
+examples:
+  - |
+    ELSEIFNOT flag
+      result := "false case"

@@ -5,15 +5,25 @@ timing:
   cycles: 2
   type: fixed
 group: Register Indirection
-description: 'ALTSN should be followed by SETNIB— it modifies the SETNIB instruction''s Dest and Num values,
-  enabling code Result: The next instruction''s pipelined Dest and Num values are altered to be (Src +
-  Dest[11:3]) & $1FF, or just Dest[11:3] for syntax 2, and Dest[2:0], respectively.'
+description: 'ALTSN should be followed by SETNIB— it modifies the SETNIB instruction''s
+  Dest and Num values, enabling code Result: The next instruction''s pipelined Dest
+  and Num values are altered to be (Src + Dest[11:3]) & $1FF, or just Dest[11:3] for
+  syntax 2, and Dest[2:0], respectively.'
 category: Indirection Instruction - Alter subsequent SETNIB instruction.
 parameters:
-- Dest is the register whose 12-bit value is the index, or the full nibble address, for the SETNIB instruction
-  to operate on.
-- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base
-  long address (Src[8:0]; added to index (Dest[11:3]) for SETNIB) and also an optional auto-indexer value
-  (Src[17:9]; added to Dest at the end of execution).
+- Dest is the register whose 12-bit value is the index, or the full nibble address,
+  for the SETNIB instruction to operate on.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value
+  contains a base long address (Src[8:0]; added to index (Dest[11:3]) for SETNIB)
+  and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of
+  execution).
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_duiz
+  pattern: D{,S/#}
+  description: Destination, optional source (immediate bit set if no source)
+  valueType: 5
+compiler_encoding:
+  operandFormat: 5
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

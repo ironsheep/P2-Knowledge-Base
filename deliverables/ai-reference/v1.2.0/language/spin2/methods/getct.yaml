@@ -1,0 +1,120 @@
+# Spin2 Method: GETCT
+# Source: Spin2 v51 documentation
+# Purpose: Get current system counter value
+
+method: "GETCT"
+category: "timing"
+type: "method"
+description: |
+  Get the current 32-bit system counter value.
+  The system counter increments once per clock cycle continuously from boot.
+  Wraps around from $FFFF_FFFF to $0000_0000 approximately every 21 seconds at 200MHz.
+  Essential for precise timing measurements and delays.
+
+syntax: "GETCT() : Count"
+
+parameters: "none"
+
+returns:
+  name: "Count"
+  type: "long"
+  description: |
+    Current 32-bit system counter value.
+    Increments at system clock frequency.
+    Wraps from $FFFF_FFFF to $0000_0000.
+
+timing:
+  execution: "2 clock cycles"
+  precision: "Single clock cycle resolution"
+  wrap_time: "(2^32 / CLKFREQ) seconds"
+  examples:
+    - "200MHz: ~21.47 seconds"
+    - "180MHz: ~23.86 seconds"
+    - "160MHz: ~26.84 seconds"
+    - "80MHz: ~53.69 seconds"
+
+examples:
+  - code: |
+      start := GETCT()
+      ' ... do something ...
+      elapsed := GETCT() - start
+      ' elapsed now contains clock cycles
+    description: "Measure execution time"
+    
+  - code: |
+      ' Convert cycles to microseconds
+      start := GETCT()
+      process_data()
+      elapsed_us := (GETCT() - start) / (CLKFREQ / 1_000_000)
+    description: "Time measurement in microseconds"
+    
+  - code: |
+      ' Wait for exact 1 second
+      target := GETCT() + CLKFREQ
+      WAITCT(target)
+    description: "Precise 1-second delay"
+    
+  - code: |
+      ' Create 10Hz precise loop
+      next_time := GETCT()
+      REPEAT
+        next_time += CLKFREQ / 10
+        WAITCT(next_time)
+        do_10hz_task()
+    description: "Precise periodic execution"
+    
+  - code: |
+      ' Timeout pattern
+      timeout := GETCT() + (CLKFREQ / 1000) * 100  ' 100ms timeout
+      REPEAT WHILE (GETCT() - timeout) < 0
+        IF PINREAD(0)
+          ' Got response
+          QUIT
+      ' Timed out
+    description: "Implement timeout"
+
+underlying_pasm:
+  instruction: "GETCT"
+  description: "Direct access to CNT register"
+
+common_uses:
+  - "Execution time measurement"
+  - "Creating precise delays with WAITCT"
+  - "Timeout implementation"
+  - "Performance profiling"
+  - "Timestamp generation"
+  - "Periodic task scheduling"
+  - "Bit-rate timing generation"
+
+related_methods:
+  - "WAITCT - Wait for specific counter value"
+  - "POLLCT - Check if counter value passed"
+  - "WAITMS - Simple millisecond delay"
+  - "WAITUS - Simple microsecond delay"
+  - "GETMS - Get milliseconds since boot"
+  - "GETSEC - Get seconds since boot"
+
+notes:
+  - "Counter runs continuously from boot"
+  - "Wraps around every 2^32 clocks"
+  - "Subtraction handles wrap correctly"
+  - "All cogs see same counter value"
+  - "Not affected by cog start/stop"
+  - "Resolution equals clock period"
+
+wraparound_handling: |
+  The 32-bit subtraction naturally handles wraparound:
+  If end_time < start_time (wrapped), the result is still correct
+  Example: $0000_0010 - $FFFF_FFF0 = $20 (32 clocks elapsed)
+
+precision_considerations:
+  - "Single clock accuracy when reading"
+  - "Hub access may add 0-7 clock variance"
+  - "Use WAITCT for cycle-accurate delays"
+  - "GETCT itself takes 2 clocks to execute"
+
+see_also:
+  - "language/spin2/methods/waitct.yaml"
+  - "language/spin2/methods/pollct.yaml"
+  - "language/spin2/methods/getms.yaml"
+  - "language/pasm2/getct.yaml"

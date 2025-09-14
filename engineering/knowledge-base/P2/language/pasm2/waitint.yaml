@@ -5,10 +5,12 @@ timing:
   cycles: 2
   type: variable
 group: Events - Wait
-description: 'WAITINT waits for an interrupt-occurred event to occur (unless the event flag is already
-  set), then clears the event Result: Wait for interrupt-occurred event, then clear the flag; optionally
-  aborting on timeout and setting C and/or Z on abort. Z = timeout.'
-category: Event Monitor Instruction - Wait for and clear interrupt-occurred event flag.
+description: 'WAITINT waits for an interrupt-occurred event to occur (unless the event
+  flag is already set), then clears the event Result: Wait for interrupt-occurred
+  event, then clear the flag; optionally aborting on timeout and setting C and/or
+  Z on abort. Z = timeout.'
+category: Event Monitor Instruction - Wait for and clear interrupt-occurred event
+  flag.
 flags_affected:
   Z:
     formula: timeout
@@ -20,3 +22,11 @@ related:
 - JNINT
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_pollwait
+  pattern: ''
+  description: No operands - poll/wait instruction (moves S to D, sets S to $024)
+  valueType: 28
+compiler_encoding:
+  operandFormat: 28
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

@@ -1,0 +1,8 @@
+command: "UDEC_WORD"
+type: debug_command
+category: "Decimal Format"
+description: |
+  Unsigned decimal word format
+syntax: "['UDEC_WORD(value)']"
+examples:
+  - "DEBUG(UDEC_WORD(address))"

@@ -5,9 +5,17 @@ timing:
   cycles: 2
   type: fixed
 group: Branch D - Jump+Skip
-description: Skip cog/LUT instructions fast per D. Like SKIP, but instead of cancelling instructions,
-  the PC leaps over them.
+description: Skip cog/LUT instructions fast per D. Like SKIP, but instead of cancelling
+  instructions, the PC leaps over them.
 category: Branch D - Jump+Skip
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+compiler_operand_format:
+  name: operand_l
+  pattern: D/#0..511
+  description: Destination or immediate value 0-511
+  valueType: 26
+compiler_encoding:
+  operandFormat: 26
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

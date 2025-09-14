@@ -1,0 +1,48 @@
+method: TASKCHK
+type: method
+description: |
+  Check if a task is running
+category: Task Operations
+syntax: "result := TASKCHK(TaskID)"
+parameters:
+  - name: "TaskID"
+    type: "integer"
+    description: "Task ID to check (0-31)"
+returns:
+  type: "integer"
+  description: "TRUE (-1) if task is running, FALSE (0) if not"
+examples:
+  - code: |
+      ' Check if task is running
+      if TASKCHK(5)
+        ' Task 5 is active
+    description: "Check single task status"
+  - code: |
+      ' Count active tasks
+      count := 0
+      repeat task_id from 0 to 31
+        if TASKCHK(task_id)
+          count++
+    description: "Count running tasks"
+  - code: |
+      ' Wait for task to finish
+      repeat while TASKCHK(worker_task)
+        TASKNEXT()  ' Yield while waiting
+    description: "Wait for task completion"
+notes:
+  - "Non-destructive status check"
+  - "Returns TRUE for running or halted tasks"
+  - "Returns FALSE for stopped/unused tasks"
+  - "Useful for task monitoring"
+  - "Can check any task ID 0-31"
+timing:
+  description: "Immediate"
+  cycles: "2-9 clock cycles"
+related:
+  - TASKID
+  - TASKSPIN
+  - TASKSTOP
+see_also:
+  - "Task monitoring"
+  - "Task status"
+  - "Task management"

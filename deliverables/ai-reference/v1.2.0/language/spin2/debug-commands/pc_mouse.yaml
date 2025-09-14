@@ -1,0 +1,8 @@
+command: "PC_MOUSE"
+type: debug_command
+category: "Debug Control"
+description: |
+  PC mouse input
+syntax: "['PC_MOUSE']"
+examples:
+  - "DEBUG(PC_MOUSE)"

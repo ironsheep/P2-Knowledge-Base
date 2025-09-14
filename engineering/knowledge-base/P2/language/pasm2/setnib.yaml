@@ -5,13 +5,14 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'SETNIB stores Src[3:0] into the nibble identified by Num within Dest, or the nibble and
-  register described by a prior Result: Src[3:0] is written to nibble Num (0–7) of Dest, or to another
-  register nibble described by prior ALTSN instruction.'
+description: 'SETNIB stores Src[3:0] into the nibble identified by Num within Dest,
+  or the nibble and register described by a prior Result: Src[3:0] is written to nibble
+  Num (0–7) of Dest, or to another register nibble described by prior ALTSN instruction.'
 category: Bit Operation Instruction - Set a nibble to new value.
 parameters:
 - Dest is the register in which to modify a nibble.
-- Src is a register or 4-bit literal whose bits [3:0] will be stored in the designated location.
+- Src is a register or 4-bit literal whose bits [3:0] will be stored in the designated
+  location.
 - Num is a 3-bit literal identifying the nibble ID (0–7) of Dest to modify.
 related:
 - ALTSN
@@ -25,3 +26,12 @@ related:
 - ROLWORD
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds3set
+  pattern: S/#{,D,#0..7}
+  description: 'Set nibble: source/immediate, optional destination and nibble index
+    0-7'
+  valueType: 6
+compiler_encoding:
+  operandFormat: 6
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

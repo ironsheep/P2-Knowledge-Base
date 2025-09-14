@@ -1,0 +1,58 @@
+method: WORD
+type: method
+description: |
+  Declare word data or access word-sized memory
+category: Data Creation
+syntax: |
+  Declaration: WORD [Count]
+  Access: WORD[BaseAddress][Index]
+  Inline: WORD(Value1, Value2, ...)
+contexts:
+  - name: "DAT section declaration"
+    syntax: "Label WORD Value1 {, Value2, ...}"
+    description: "Declare word data in DAT section"
+  - name: "VAR section declaration"
+    syntax: "Name WORD [Count]"
+    description: "Declare word variable(s) in VAR section"
+  - name: "Memory access"
+    syntax: "WORD[Address][Index]"
+    description: "Access word at hub memory address"
+  - name: "Inline data"
+    syntax: "WORD(Value1, Value2, ...)"
+    description: "Create inline word sequence"
+examples:
+  - code: |
+      DAT
+        my_words  WORD  $1234, $5678, $ABCD
+    description: "Declare word data in DAT section"
+  - code: |
+      VAR
+        samples  WORD[1024]  ' 1024-word array
+    description: "Declare word array in VAR section"
+  - code: |
+      ' Write word to hub memory
+      WORD[$2000] := $1234
+      
+      ' Read word from hub memory  
+      value := WORD[$2000]
+    description: "Direct hub memory word access"
+  - code: |
+      ' Process word sequence
+      process(WORD($1000, $2000, $3000))
+    description: "Inline word data creation"
+notes:
+  - "WORD is 16 bits (0-65535 unsigned, -32768 to 32767 signed)"
+  - "Word addresses must be word-aligned (even addresses)"
+  - "Arrays are zero-indexed"
+  - "Each array index represents 2 bytes in memory"
+  - "Can use @ operator to get address of word variable"
+related:
+  - BYTE
+  - LONG
+  - WORDFILL
+  - WORDMOVE
+see_also:
+  - "Data types"
+  - "Memory organization"
+  - "DAT section"
+  - "VAR section"

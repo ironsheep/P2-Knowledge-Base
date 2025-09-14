@@ -5,17 +5,25 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'MUXNITS copies any non-zero bit pairs from Src into the corresponding bit pairs of Dest
-  and leaves the rest of Result: Dest bit pairs corresponding to non-zero Src bit pairs are set to those
-  bit values; the rest are left as-is.'
-category: Bit Operation Instruction - Set discrete bit pairs of a value to non-zero bit pair states of
-  another.
+description: 'MUXNITS copies any non-zero bit pairs from Src into the corresponding
+  bit pairs of Dest and leaves the rest of Result: Dest bit pairs corresponding to
+  non-zero Src bit pairs are set to those bit values; the rest are left as-is.'
+category: Bit Operation Instruction - Set discrete bit pairs of a value to non-zero
+  bit pair states of another.
 flags_affected:
   C:
     when: D
 parameters:
 - Dest is a register whose value will be updated according to Src.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose non-zero bit pairs will replace
-  the corresponding bit pairs in Dest.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose non-zero bit
+  pairs will replace the corresponding bit pairs in Dest.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:
+  operandFormat: 0
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

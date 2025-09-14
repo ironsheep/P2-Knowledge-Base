@@ -5,98 +5,84 @@ timing:
   cycles: 2
   type: fixed
 group: Hub FIFO - New Read
-description: |
-  Begin new fast hub read via FIFO. D[31] = no wait, D[13:0] = block size in 64-byte units
+description: 'Begin new fast hub read via FIFO. D[31] = no wait, D[13:0] = block size
+  in 64-byte units
+
   (0 = max), S[19:0] = block start address.
-  
+
+
   Key features:
+
   - Automatic sequential reading from HUB
+
   - Background FIFO refill
+
   - Perfect for streaming data processing
+
   - Essential for checksum/CRC calculations
+
   - Used with RFBYTE/RFWORD/RFLONG instructions
+
+  '
 category: Hub FIFO - New Read
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:
-  - name: Fast Checksum Calculation
-    description: Calculate checksum over HUB memory block
-    code: |
-      ' Calculate checksum over data block
-      calc_checksum
-              rdfast  #0, data_start           ' Start FIFO read, max size
-              mov     checksum, #0             ' Clear checksum
-              mov     count, data_size         ' Bytes to process
-              
-      .loop   rfbyte  byte_val                 ' Read next byte via FIFO
-              add     checksum, byte_val       ' Add to checksum
-              djnz    count, #.loop            ' Continue until done
-              
-              and     checksum, #$FF           ' Keep only low byte
-              ret
-    source: flash_loader.spin2
-    
-  - name: Data Stream Processing
-    description: Process continuous data stream from HUB
-    code: |
-      ' Process audio samples from HUB buffer
-              rdfast  ##$8000_0000|512, buffer_addr ' No-wait, 512*64 bytes
-              
-      .process
-              rflong  sample                   ' Get next sample
-              ' Apply DSP operations
-              sar     sample, #1               ' Reduce volume by half
-              add     sample, offset           ' DC offset correction
-              ' Output to DAC
-              wrpin   sample, dac_pin
-              jmp     #.process                ' Continue streaming
-    source: audio_processing
-    
-  - name: Block Copy with FIFO
-    description: Fast block copy using FIFO for reading
-    code: |
-      ' Copy block using FIFO read and sequential write
-              rdfast  #0, source_addr          ' Start FIFO read
-              mov     ptrb, dest_addr          ' Destination pointer
-              mov     count, block_size
-              
-      .copy   rflong  temp                     ' Read via FIFO
-              wrlong  temp, ptrb++             ' Write and increment
-              djnz    count, #.copy
-    source: memory_operations
-    
-  - name: CRC Calculation
-    description: Calculate CRC over memory region
-    code: |
-      ' CRC-16 calculation over data
-              rdfast  #0, data_addr            ' Start FIFO
-              mov     crc, ##$FFFF             ' Initial CRC value
-              mov     count, data_length
-              
-      .crc_loop
-              rfbyte  data                     ' Get next byte
-              xor     crc, data                ' XOR with CRC low byte
-              mov     bit_count, #8            ' Process 8 bits
-              
-      .bit_loop
-              shr     crc, #1             wc   ' Shift right, get bit
-      if_c    xor     crc, ##$A001             ' Apply polynomial if bit set
-              djnz    bit_count, #.bit_loop
-              djnz    count, #.crc_loop
-              
-              xor     crc, ##$FFFF             ' Final XOR
-              ret
-    source: data_integrity
-    
+- name: Fast Checksum Calculation
+  description: Calculate checksum over HUB memory block
+  code: "' Calculate checksum over data block\ncalc_checksum\n        rdfast  #0,\
+    \ data_start           ' Start FIFO read, max size\n        mov     checksum,\
+    \ #0             ' Clear checksum\n        mov     count, data_size         '\
+    \ Bytes to process\n        \n.loop   rfbyte  byte_val                 ' Read\
+    \ next byte via FIFO\n        add     checksum, byte_val       ' Add to checksum\n\
+    \        djnz    count, #.loop            ' Continue until done\n        \n  \
+    \      and     checksum, #$FF           ' Keep only low byte\n        ret\n"
+  source: flash_loader.spin2
+- name: Data Stream Processing
+  description: Process continuous data stream from HUB
+  code: "' Process audio samples from HUB buffer\n        rdfast  ##$8000_0000|512,\
+    \ buffer_addr ' No-wait, 512*64 bytes\n        \n.process\n        rflong  sample\
+    \                   ' Get next sample\n        ' Apply DSP operations\n      \
+    \  sar     sample, #1               ' Reduce volume by half\n        add     sample,\
+    \ offset           ' DC offset correction\n        ' Output to DAC\n        wrpin\
+    \   sample, dac_pin\n        jmp     #.process                ' Continue streaming\n"
+  source: audio_processing
+- name: Block Copy with FIFO
+  description: Fast block copy using FIFO for reading
+  code: "' Copy block using FIFO read and sequential write\n        rdfast  #0, source_addr\
+    \          ' Start FIFO read\n        mov     ptrb, dest_addr          ' Destination\
+    \ pointer\n        mov     count, block_size\n        \n.copy   rflong  temp \
+    \                    ' Read via FIFO\n        wrlong  temp, ptrb++           \
+    \  ' Write and increment\n        djnz    count, #.copy\n"
+  source: memory_operations
+- name: CRC Calculation
+  description: Calculate CRC over memory region
+  code: "' CRC-16 calculation over data\n        rdfast  #0, data_addr           \
+    \ ' Start FIFO\n        mov     crc, ##$FFFF             ' Initial CRC value\n\
+    \        mov     count, data_length\n        \n.crc_loop\n        rfbyte  data\
+    \                     ' Get next byte\n        xor     crc, data             \
+    \   ' XOR with CRC low byte\n        mov     bit_count, #8            ' Process\
+    \ 8 bits\n        \n.bit_loop\n        shr     crc, #1             wc   ' Shift\
+    \ right, get bit\nif_c    xor     crc, ##$A001             ' Apply polynomial\
+    \ if bit set\n        djnz    bit_count, #.bit_loop\n        djnz    count, #.crc_loop\n\
+    \        \n        xor     crc, ##$FFFF             ' Final XOR\n        ret\n"
+  source: data_integrity
 related_instructions:
-  - RFBYTE: Read byte via FIFO
-  - RFWORD: Read word via FIFO
-  - RFLONG: Read long via FIFO
-  - WRFAST: Begin fast hub write via FIFO
-  - FBLOCK: Wait for FIFO block wrap
-  
+- RFBYTE: Read byte via FIFO
+- RFWORD: Read word via FIFO
+- RFLONG: Read long via FIFO
+- WRFAST: Begin fast hub write via FIFO
+- FBLOCK: Wait for FIFO block wrap
 notes:
-  - D[31]=1 for no-wait mode (doesn't stall for FIFO fill)
-  - Block size 0 means maximum (16384 longs)
-  - FIFO automatically wraps at block boundary
-  - Critical for high-throughput data processing
+- D[31]=1 for no-wait mode (doesn't stall for FIFO fill)
+- Block size 0 means maximum (16384 longs)
+- FIFO automatically wraps at block boundary
+- Critical for high-throughput data processing
+compiler_operand_format:
+  name: operand_ls
+  pattern: D/#,S/#
+  description: 'Two operands: destination/immediate, source/immediate'
+  valueType: 13
+compiler_encoding:
+  operandFormat: 13
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

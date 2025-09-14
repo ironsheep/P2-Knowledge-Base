@@ -5,8 +5,9 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'ADDX sums the unsigned values of Dest and Src plus C together and stores the result into
-  the Dest register. The Result: Sum of unsigned Src plus C and unsigned Dest is stored in Dest.'
+description: 'ADDX sums the unsigned values of Dest and Src plus C together and stores
+  the result into the Dest register. The Result: Sum of unsigned Src plus C and unsigned
+  Dest is stored in Dest.'
 category: Math Instruction - Add two unsigned extended values.
 flags_affected:
   C:
@@ -14,8 +15,10 @@ flags_affected:
   Z:
     formula: Z AND (result == 0)
 parameters:
-- Dest is a register containing the value to add Src pluc C to, and is where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is added into Dest.
+- Dest is a register containing the value to add Src pluc C to, and is where the result
+  is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C
+  is added into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 related:
 - ADD
@@ -23,3 +26,11 @@ related:
 - SUBX
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:
+  operandFormat: 0
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

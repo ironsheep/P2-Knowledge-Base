@@ -1,0 +1,143 @@
+# Spin2 Method: BYTEMOVE
+# Source: Spin2 v51 documentation
+# Purpose: Copy bytes from source to destination
+
+method: "BYTEMOVE"
+category: "memory_operations"
+type: "method"
+description: |
+  Copy a specified number of bytes from source to destination in hub RAM.
+  Handles overlapping regions correctly (safe for moving data within same buffer).
+  Automatically determines forward or reverse copy direction to prevent data corruption.
+
+syntax: "BYTEMOVE(Destination, Source, Count)"
+
+parameters:
+  - name: "Destination"
+    type: "address"
+    description: |
+      Hub RAM destination address.
+      Can be any valid hub address (0-524287).
+      No alignment requirements.
+      
+  - name: "Source"
+    type: "address"
+    description: |
+      Hub RAM source address.
+      Can be any valid hub address (0-524287).
+      No alignment requirements.
+      
+  - name: "Count"
+    type: "long"
+    description: |
+      Number of bytes to copy.
+      Can be 0 (no operation).
+      Maximum practical limit is available hub RAM.
+
+returns: "none"
+
+timing:
+  small_copy: "~8 + (2 * count) clock cycles"
+  large_copy: "Optimized for larger transfers"
+  overlap_handling: "Automatic, no performance penalty"
+
+direction_logic:
+  forward_copy: "When Dest < Source or Dest >= Source + Count"
+  reverse_copy: "When Dest > Source and Dest < Source + Count"
+  purpose: "Prevents overwriting source data before it's copied"
+
+examples:
+  - code: |
+      VAR
+        BYTE buffer[100]
+        BYTE backup[100]
+        
+      PUB save_buffer()
+        BYTEMOVE(@backup, @buffer, 100)
+    description: "Create backup copy of buffer"
+    
+  - code: |
+      ' Shift array elements right by 1
+      VAR
+        BYTE array[50]
+        
+      PUB insert_at_beginning(value)
+        BYTEMOVE(@array[1], @array[0], 49)
+        array[0] := value
+    description: "Insert element at array beginning"
+    
+  - code: |
+      ' Copy string with length check
+      PUB safe_strcopy(dest, source, max_len)
+        len := STRSIZE(source) <# (max_len - 1)
+        BYTEMOVE(dest, source, len)
+        BYTE[dest][len] := 0  ' Null terminate
+    description: "Safe string copy with size limit"
+    
+  - code: |
+      ' Scroll buffer up one line (80 chars)
+      VAR
+        BYTE screen[25][80]
+        
+      PUB scroll_up()
+        BYTEMOVE(@screen[0], @screen[1], 24 * 80)
+        BYTEFILL(@screen[24], " ", 80)
+    description: "Scroll text display"
+    
+  - code: |
+      ' Extract substring
+      PUB substring(dest, source, start, length)
+        BYTEMOVE(dest, source + start, length)
+        BYTE[dest][length] := 0
+    description: "Extract portion of string"
+
+common_uses:
+  - "Buffer copying"
+  - "String manipulation"
+  - "Array operations"
+  - "Data structure copying"
+  - "Screen/display scrolling"
+  - "Ring buffer management"
+
+overlap_examples:
+  safe_right_shift: |
+    ' Move data 10 bytes to the right
+    BYTEMOVE(@buffer[10], @buffer[0], 90)
+    ' Copies in reverse to prevent corruption
+    
+  safe_left_shift: |
+    ' Move data 10 bytes to the left
+    BYTEMOVE(@buffer[0], @buffer[10], 90)
+    ' Copies forward, no overlap issue
+
+related_methods:
+  - "WORDMOVE - Copy words"
+  - "LONGMOVE - Copy longs"
+  - "BYTEFILL - Fill with byte value"
+  - "BYTECOMP - Compare bytes"
+  - "BYTESWAP - Swap byte regions"
+
+performance_notes:
+  - "Optimized for common cases"
+  - "Handles alignment automatically"
+  - "Bulk transfers use efficient hub operations"
+  - "Small copies have minimal overhead"
+
+notes:
+  - "Safe for overlapping regions"
+  - "Direction chosen automatically"
+  - "Count of 0 is safe (no operation)"
+  - "No bounds checking on addresses"
+  - "Works with any hub RAM location"
+
+warnings:
+  - "No automatic null termination for strings"
+  - "Ensure destination has enough space"
+  - "Address validation is programmer's responsibility"
+  - "Cannot copy to/from cog or LUT RAM"
+
+see_also:
+  - "language/spin2/methods/wordmove.yaml"
+  - "language/spin2/methods/longmove.yaml"
+  - "language/spin2/methods/bytefill.yaml"
+  - "language/spin2/methods/strsize.yaml"

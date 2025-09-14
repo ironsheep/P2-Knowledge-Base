@@ -5,16 +5,26 @@ timing:
   cycles: 2
   type: fixed
 group: Pins
-description: 'DIRRND alters the direction register''s bit(s) designated by Dest to be random low and high
-  (input and output), Result: The I/O pin direction bit(s), described by Dest, are each set randomly low
-  or high (input or output); the rest are left as-is. Z = DIR bit.'
+description: 'DIRRND alters the direction register''s bit(s) designated by Dest to
+  be random low and high (input and output), Result: The I/O pin direction bit(s),
+  described by Dest, are each set randomly low or high (input or output); the rest
+  are left as-is. Z = DIR bit.'
 category: I/O Pin Instruction - Set pin(s) direction to random input/output.
 flags_affected:
   Z:
     formula: DIR bit
 parameters:
-- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the pins set
-  randomly to inputs or outputs.
+- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
+  the pins set randomly to inputs or outputs.
 - WCZ is an optional effect to update flags.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_pinop
+  pattern: D/#0..511 {WC/WZ}
+  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
+    flags'
+  valueType: 30
+compiler_encoding:
+  operandFormat: 30
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

@@ -1,0 +1,14 @@
+keyword: "OTHER"
+type: keyword
+category: "Control Flow"
+description: |
+  Default case in CASE statement
+syntax: |
+  CASE expression
+    value1: statements
+    OTHER: statements
+examples:
+  - |
+    CASE status
+      0: handle_success()
+      OTHER: handle_error()

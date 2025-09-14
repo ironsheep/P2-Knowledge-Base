@@ -1,0 +1,8 @@
+directive: "ORG"
+type: assembly_directive
+category: "Assembly"
+description: |
+  Set origin address for COG RAM
+syntax: "['ORG address']"
+examples:
+  - "ORG 0  // Start at COG address 0"

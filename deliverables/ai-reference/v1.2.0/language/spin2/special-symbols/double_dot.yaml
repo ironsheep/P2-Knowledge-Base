@@ -1,0 +1,7 @@
+symbol: ".."
+type: special_symbol
+category: "Special"
+description: |
+  Range operator for CASE statements
+examples:
+  - "CASE value\n  1..10: low_range()\n  11..20: high_range()"

@@ -1,0 +1,9 @@
+keyword: "ABORT"
+type: keyword
+category: "Control Flow"
+description: |
+  Abort method execution with optional error value
+syntax: "ABORT [expression]"
+examples:
+  - "ABORT"
+  - "ABORT error_code"

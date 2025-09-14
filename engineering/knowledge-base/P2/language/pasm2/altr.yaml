@@ -5,15 +5,24 @@ timing:
   cycles: 2
   type: fixed
 group: Register Indirection
-description: 'ALTR modifies the next instruction''s Result address to be (Src + Dest) & $1FF (for syntax
-  1), or to Dest[8:0] (for Result: The next instruction''s pipelined Result address (Dest address by default)
-  is altered to be (Src + Dest) & $1FF, or just Dest[8:0] in syntax 2.'
+description: 'ALTR modifies the next instruction''s Result address to be (Src + Dest)
+  & $1FF (for syntax 1), or to Dest[8:0] (for Result: The next instruction''s pipelined
+  Result address (Dest address by default) is altered to be (Src + Dest) & $1FF, or
+  just Dest[8:0] in syntax 2.'
 category: Indirection Instruction - Alter Result register address of next instruction.
 parameters:
-- Dest is the register whose 9-bit value is the offset, or the full value, for the next instruction to
-  operate on.
-- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base
-  (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value
-  (Src[17:9]; added to Dest at the end of execution).
+- Dest is the register whose 9-bit value is the offset, or the full value, for the
+  next instruction to operate on.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value
+  contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and
+  also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_duiz
+  pattern: D{,S/#}
+  description: Destination, optional source (immediate bit set if no source)
+  valueType: 5
+compiler_encoding:
+  operandFormat: 5
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

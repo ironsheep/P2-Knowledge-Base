@@ -1,0 +1,7 @@
+operator: "QLOG"
+type: operator
+description: |
+  Quick logarithm (also PASM2 instruction)
+category: Unary
+examples:
+  - "log_val := QLOG(value)"

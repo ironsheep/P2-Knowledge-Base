@@ -5,15 +5,25 @@ timing:
   cycles: 2
   type: fixed
 group: Register Indirection
-description: 'ALTGW should be followed by GETWORD or ROLWORD— it modifies the GETWORD / ROLWORD instruction''s
-  Src and Result: The next instruction''s pipelined Src and Num fields are altered to be (Src + Dest[9:1])
-  & $1FF, or just Dest[9:1] for syntax 2, and Dest[0], respectively.'
+description: 'ALTGW should be followed by GETWORD or ROLWORD— it modifies the GETWORD
+  / ROLWORD instruction''s Src and Result: The next instruction''s pipelined Src and
+  Num fields are altered to be (Src + Dest[9:1]) & $1FF, or just Dest[9:1] for syntax
+  2, and Dest[0], respectively.'
 category: Indirection Instruction - Alter subsequent GETWORD / ROLWORD instruction.
 parameters:
-- Dest is the register whose 10-bit value is the index, or the full word address for the GETWORD / ROLWORD
-  instruction to read.
-- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base
-  long address (Src[8:0]; added to index (Dest[9:1]) for GETWORD / ROLWORD) and also an optional auto-indexer
-  value (Src[17:9]; added to Dest at end of execution).
+- Dest is the register whose 10-bit value is the index, or the full word address for
+  the GETWORD / ROLWORD instruction to read.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value
+  contains a base long address (Src[8:0]; added to index (Dest[9:1]) for GETWORD /
+  ROLWORD) and also an optional auto-indexer value (Src[17:9]; added to Dest at end
+  of execution).
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_duiz
+  pattern: D{,S/#}
+  description: Destination, optional source (immediate bit set if no source)
+  valueType: 5
+compiler_encoding:
+  operandFormat: 5
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

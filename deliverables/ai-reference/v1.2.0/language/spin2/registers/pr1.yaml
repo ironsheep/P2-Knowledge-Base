@@ -1,0 +1,10 @@
+register: "PR1"
+type: register
+category: "General Purpose"
+description: |
+  General purpose register 1
+examples:
+  - "PR1 := counter"
+  - "temp := PR1"
+address: "497"
+access: "read_write"

@@ -1,0 +1,144 @@
+# Spin2 Method: BYTEFILL
+# Source: Spin2 v51 documentation
+# Purpose: Fill memory region with byte value
+
+method: "BYTEFILL"
+category: "memory_operations"
+type: "method"
+description: |
+  Fill a specified region of hub RAM with a byte value.
+  Efficiently sets multiple consecutive bytes to the same value.
+  Commonly used for clearing buffers, initializing arrays, and drawing operations.
+
+syntax: "BYTEFILL(Destination, Value, Count)"
+
+parameters:
+  - name: "Destination"
+    type: "address"
+    description: |
+      Hub RAM destination address.
+      Starting address for the fill operation.
+      Can be any valid hub address (0-524287).
+      
+  - name: "Value"
+    type: "byte"
+    description: |
+      Byte value to fill with (0-255).
+      Higher bits are ignored if provided.
+      Common values: 0 (clear), 32 (space), 255 ($FF).
+      
+  - name: "Count"
+    type: "long"
+    description: |
+      Number of bytes to fill.
+      Can be 0 (no operation).
+      Maximum practical limit is available hub RAM.
+
+returns: "none"
+
+timing:
+  small_fill: "~8 + count clock cycles"
+  large_fill: "Optimized for larger regions"
+  performance: "Faster than loop for count > 4"
+
+examples:
+  - code: |
+      VAR
+        BYTE buffer[256]
+        
+      PUB clear_buffer()
+        BYTEFILL(@buffer, 0, 256)
+    description: "Clear buffer to zeros"
+    
+  - code: |
+      VAR
+        BYTE screen[80 * 25]
+        
+      PUB clear_screen()
+        BYTEFILL(@screen, " ", 80 * 25)
+    description: "Clear text screen with spaces"
+    
+  - code: |
+      VAR
+        BYTE line[100]
+        
+      PUB draw_horizontal_line(char)
+        BYTEFILL(@line, char, 100)
+    description: "Create line of characters"
+    
+  - code: |
+      ' Initialize lookup table
+      VAR
+        BYTE lookup[256]
+        
+      PUB init_table()
+        BYTEFILL(@lookup, $FF, 256)  ' All entries invalid
+        ' Then set specific valid entries
+        lookup[10] := 1
+        lookup[20] := 2
+    description: "Initialize lookup table"
+    
+  - code: |
+      ' Create test pattern
+      VAR
+        BYTE pattern[1000]
+        
+      PUB create_pattern()
+        BYTEFILL(@pattern[0], $AA, 500)
+        BYTEFILL(@pattern[500], $55, 500)
+    description: "Create alternating pattern"
+
+common_uses:
+  - "Buffer initialization"
+  - "Memory clearing"
+  - "Screen/display clearing"
+  - "Array initialization"
+  - "Pattern generation"
+  - "Padding operations"
+
+typical_values:
+  0: "Clear/zero memory"
+  32: "ASCII space for text"
+  255: "All bits set ($FF)"
+  $AA: "Alternating bits (10101010)"
+  $55: "Alternating bits (01010101)"
+
+related_methods:
+  - "WORDFILL - Fill with word value"
+  - "LONGFILL - Fill with long value"
+  - "BYTEMOVE - Copy bytes"
+  - "BYTECOMP - Compare bytes"
+
+performance_comparison:
+  manual_loop: |
+    ' Slower for large counts
+    REPEAT i FROM 0 TO count-1
+      BYTE[dest][i] := value
+      
+  bytefill: |
+    ' Optimized implementation
+    BYTEFILL(dest, value, count)
+    ' 3-10x faster for count > 10
+
+notes:
+  - "Only uses lower 8 bits of value"
+  - "Count of 0 is safe (no operation)"
+  - "No bounds checking on addresses"
+  - "Cannot fill cog or LUT RAM"
+  - "Sequential fill only"
+
+best_practices:
+  - "Use for initialization, not computation"
+  - "Clear sensitive data after use"
+  - "Initialize buffers before first use"
+  - "Use appropriate fill value for data type"
+
+warnings:
+  - "Ensure destination has enough space"
+  - "Address validation is programmer's responsibility"
+  - "Overwrites existing data without backup"
+
+see_also:
+  - "language/spin2/methods/wordfill.yaml"
+  - "language/spin2/methods/longfill.yaml"
+  - "language/spin2/methods/bytemove.yaml"

@@ -1,0 +1,13 @@
+keyword: "CON"
+type: keyword
+category: "Block Structure"
+description: |
+  Constants section - defines named constant values
+syntax: |
+  CON
+    identifier = expression
+examples:
+  - |
+    CON
+      LED_PIN = 56
+      BAUD_RATE = 115200

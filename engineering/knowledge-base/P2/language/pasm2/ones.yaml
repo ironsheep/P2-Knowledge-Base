@@ -5,17 +5,25 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'ONES tallies the number of high bits of Src, or Dest, and stores the count into Dest. Result:
-  The number of high bits in Src, or Dest, is stored in Dest.'
+description: 'ONES tallies the number of high bits of Src, or Dest, and stores the
+  count into Dest. Result: The number of high bits in Src, or Dest, is stored in Dest.'
 category: Bit Operation Instruction - Get number of 1s from Dest or Src into Dest.
 flags_affected:
   C:
     formula: LSB of result
 parameters:
-- Dest is the register in which to store the number of high bits found and optionally it begins by containing
-  the value to check (syntax 2).
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value is to be checked
-  for ones.
+- Dest is the register in which to store the number of high bits found and optionally
+  it begins by containing the value to check (syntax 2).
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value
+  is to be checked for ones.
 - WC, WZ, or WCZ are optional effects to update flags.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_du
+  pattern: D{,S/#}
+  description: Destination register, optional Source register or immediate (unary/binary)
+  valueType: 3
+compiler_encoding:
+  operandFormat: 3
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

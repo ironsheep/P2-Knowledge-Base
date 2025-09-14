@@ -1,0 +1,58 @@
+method: BYTE
+type: method
+description: |
+  Declare byte data or access byte-sized memory
+category: Data Creation
+syntax: |
+  Declaration: BYTE [Count]
+  Access: BYTE[BaseAddress][Index]
+  Inline: BYTE(Value1, Value2, ...)
+contexts:
+  - name: "DAT section declaration"
+    syntax: "Label BYTE Value1 {, Value2, ...}"
+    description: "Declare byte data in DAT section"
+  - name: "VAR section declaration"
+    syntax: "Name BYTE [Count]"
+    description: "Declare byte variable(s) in VAR section"
+  - name: "Memory access"
+    syntax: "BYTE[Address][Index]"
+    description: "Access byte at hub memory address"
+  - name: "Inline data"
+    syntax: "BYTE(Value1, Value2, ...)"
+    description: "Create inline byte sequence"
+examples:
+  - code: |
+      DAT
+        my_bytes  BYTE  $FF, $00, $55, $AA
+    description: "Declare byte data in DAT section"
+  - code: |
+      VAR
+        buffer  BYTE[256]  ' 256-byte array
+    description: "Declare byte array in VAR section"
+  - code: |
+      ' Write byte to hub memory
+      BYTE[$1000] := $42
+      
+      ' Read byte from hub memory  
+      value := BYTE[$1000]
+    description: "Direct hub memory byte access"
+  - code: |
+      ' Send byte sequence
+      send(BYTE($48, $65, $6C, $6C, $6F))  ' "Hello"
+    description: "Inline byte data creation"
+notes:
+  - "BYTE is 8 bits (0-255 unsigned, -128 to 127 signed)"
+  - "Hub memory is byte-addressable"
+  - "Arrays are zero-indexed"
+  - "Can use @ operator to get address of byte variable"
+  - "Alignment is automatic in VAR section"
+related:
+  - WORD
+  - LONG
+  - BYTEFILL
+  - BYTEMOVE
+see_also:
+  - "Data types"
+  - "Memory organization"
+  - "DAT section"
+  - "VAR section"

@@ -5,14 +5,20 @@ timing:
   cycles: 2
   type: fixed
 group: Pins
-description: |
-  Test pin state with optional XOR operation. Z = C/Z XOR IN[D[5:0]].
-  
+description: 'Test pin state with optional XOR operation. Z = C/Z XOR IN[D[5:0]].
+
+
   Common uses:
+
   - Test pin state and set flags
+
   - Hall sensor reading for motor control
+
   - Digital input edge detection
+
   - Pin state monitoring with conditional logic
+
+  '
 category: Pins
 flags_affected:
   Z:
@@ -20,69 +26,73 @@ flags_affected:
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:
-  - name: Hall Sensor Reading
-    description: Read Hall sensor state for BLDC motor commutation
-    code: |
-      ' Read all 3 Hall sensors and build state value
-      mov     hall_state, #0           ' Clear state register
-      testp   #HALL_A_PIN         wc   ' Test Hall A
-      rcl     hall_state, #1           ' Shift in bit
-      testp   #HALL_B_PIN         wc   ' Test Hall B  
-      rcl     hall_state, #1           ' Shift in bit
-      testp   #HALL_C_PIN         wc   ' Test Hall C
-      rcl     hall_state, #1           ' Shift in bit
-      
-      ' hall_state now contains 3-bit Hall pattern (0-7)
-      ' Use for commutation table lookup
-    source: isp_bldc_motor.spin2
-    
-  - name: Edge Detection
-    description: Detect rising edge on input pin
-    code: |
-      ' Detect rising edge (0->1 transition)
-      testp   input_pin           wc   ' Get current state
-      if_nc_and_z  jmp #edge_detected  ' Was 0, now 1
-      muxz    flag_reg, #1             ' Store current state
-      
-      edge_detected:
-      ' Handle rising edge event
-    source: common_pattern
-    
-  - name: Conditional Pin Test
-    description: Test pin based on condition flag
-    code: |
-      ' Test pin with XOR based on previous condition
-      testb   status, #FLAG_BIT   wc   ' Get condition flag
-      testp   sensor_pin          wz   ' Test pin, XOR with C
-      
-      ' Z now indicates: pin state XOR condition
-      ' Useful for conditional inversion
-    source: debugger_pattern
-    
-  - name: Multi-Pin State Check
-    description: Check multiple pin states efficiently
-    code: |
-      ' Check if all required pins are high
-      testp   #PIN_A              wc
-      if_nc   jmp #not_ready
-      testp   #PIN_B              wc  
-      if_nc   jmp #not_ready
-      testp   #PIN_C              wc
-      if_nc   jmp #not_ready
-      
-      ' All pins are high, proceed
-    source: common_pattern
-    
+- name: Hall Sensor Reading
+  description: Read Hall sensor state for BLDC motor commutation
+  code: "' Read all 3 Hall sensors and build state value\nmov     hall_state, #0 \
+    \          ' Clear state register\ntestp   #HALL_A_PIN         wc   ' Test Hall\
+    \ A\nrcl     hall_state, #1           ' Shift in bit\ntestp   #HALL_B_PIN    \
+    \     wc   ' Test Hall B  \nrcl     hall_state, #1           ' Shift in bit\n\
+    testp   #HALL_C_PIN         wc   ' Test Hall C\nrcl     hall_state, #1       \
+    \    ' Shift in bit\n\n' hall_state now contains 3-bit Hall pattern (0-7)\n' Use\
+    \ for commutation table lookup\n"
+  source: isp_bldc_motor.spin2
+- name: Edge Detection
+  description: Detect rising edge on input pin
+  code: ''' Detect rising edge (0->1 transition)
+
+    testp   input_pin           wc   '' Get current state
+
+    if_nc_and_z  jmp #edge_detected  '' Was 0, now 1
+
+    muxz    flag_reg, #1             '' Store current state
+
+
+    edge_detected:
+
+    '' Handle rising edge event
+
+    '
+  source: common_pattern
+- name: Conditional Pin Test
+  description: Test pin based on condition flag
+  code: ''' Test pin with XOR based on previous condition
+
+    testb   status, #FLAG_BIT   wc   '' Get condition flag
+
+    testp   sensor_pin          wz   '' Test pin, XOR with C
+
+
+    '' Z now indicates: pin state XOR condition
+
+    '' Useful for conditional inversion
+
+    '
+  source: debugger_pattern
+- name: Multi-Pin State Check
+  description: Check multiple pin states efficiently
+  code: "' Check if all required pins are high\ntestp   #PIN_A              wc\nif_nc\
+    \   jmp #not_ready\ntestp   #PIN_B              wc  \nif_nc   jmp #not_ready\n\
+    testp   #PIN_C              wc\nif_nc   jmp #not_ready\n\n' All pins are high,\
+    \ proceed\n"
+  source: common_pattern
 related_instructions:
-  - TESTB: Test bit in register
-  - TESTBN: Test bit not in register
-  - DRVL: Drive pin low
-  - DRVH: Drive pin high
-  - FLTL: Float pin low
-  - FLTH: Float pin high
-  
+- TESTB: Test bit in register
+- TESTBN: Test bit not in register
+- DRVL: Drive pin low
+- DRVH: Drive pin high
+- FLTL: Float pin low
+- FLTH: Float pin high
 notes:
-  - TESTP reads actual pin state, not output register
-  - XOR with C flag useful for conditional inversion
-  - Efficient for building multi-bit values from pins
-  - Critical for real-time sensor reading like Hall sensors
+- TESTP reads actual pin state, not output register
+- XOR with C flag useful for conditional inversion
+- Efficient for building multi-bit values from pins
+- Critical for real-time sensor reading like Hall sensors
+compiler_operand_format:
+  name: operand_testp
+  pattern: D/#0..511 WC/ANDC/ORC/XORC | WZ/ANDZ/ORZ/XORZ
+  description: 'Test pin: destination/immediate pin number 0-511 with REQUIRED logic
+    function'
+  valueType: 31
+compiler_encoding:
+  operandFormat: 31
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

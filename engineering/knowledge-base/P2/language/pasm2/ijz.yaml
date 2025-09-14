@@ -10,3 +10,11 @@ category: Branch S - Mod & Test
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+compiler_operand_format:
+  name: operand_dsj
+  pattern: D,S/@
+  description: 'Jump with destination and relative address: register, relative address'
+  valueType: 12
+compiler_encoding:
+  operandFormat: 12
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

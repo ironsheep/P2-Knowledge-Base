@@ -1,0 +1,13 @@
+keyword: "CASE_FAST"
+type: keyword
+category: "Control Flow"
+description: |
+  Optimized case statement for sequential values
+syntax: |
+  CASE_FAST expression
+    value: statements
+examples:
+  - |
+    CASE_FAST status
+      0: handle_ok()
+      1: handle_error()

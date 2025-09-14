@@ -5,15 +5,24 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: Dest bit(s) described by Src are set to C or !C; the rest are left as-is. Flags are optionally
-  updated with parity and zero status of the result.
+description: Dest bit(s) described by Src are set to C or !C; the rest are left as-is.
+  Flags are optionally updated with parity and zero status of the result.
 category: Bit Operation Instructions - Set discrete bits to C or !C
 flags_affected:
   C:
     formula: parity of result
 parameters:
 - Dest is the register whose value will have one or more bits set to C or !C.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value identifies the bit(s) to modify.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value identifies
+  the bit(s) to modify.
 - WC, WZ, or WCZ is an optional effect to update flags.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:
+  operandFormat: 0
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

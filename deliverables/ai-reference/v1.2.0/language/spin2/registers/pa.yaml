@@ -1,0 +1,10 @@
+register: "PA"
+type: register
+category: "Call Targets"
+description: |
+  Parameter A / call target
+examples:
+  - "PA := @subroutine"
+  - "CALL PA"
+address: "502"
+access: "read_write"

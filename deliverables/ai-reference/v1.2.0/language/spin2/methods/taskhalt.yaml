@@ -1,0 +1,54 @@
+method: TASKHALT
+type: method
+description: |
+  Pause/halt a running task temporarily
+category: Task Operations
+syntax: "TASKHALT(TaskID)"
+parameters:
+  - name: "TaskID"
+    type: "integer"
+    description: "Task ID to halt (0-31)"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Pause a task
+      TASKHALT(3)  ' Pause task 3
+      ' Do critical work...
+      TASKRESUME(3)  ' Resume task 3
+    description: "Pause and resume task"
+  - code: |
+      ' Pause all tasks for critical section
+      repeat task_id from 1 to 31
+        if TASKCHK(task_id)
+          TASKHALT(task_id)
+      ' Critical section
+      repeat task_id from 1 to 31
+        if TASKCHK(task_id)
+          TASKRESUME(task_id)
+    description: "Pause all tasks temporarily"
+  - code: |
+      ' Conditional task pause
+      if buffer_full
+        TASKHALT(producer_task)
+    description: "Pause producer when buffer full"
+notes:
+  - "Task is paused, not terminated"
+  - "State and stack preserved"
+  - "Use TASKRESUME to continue"
+  - "Task won't execute until resumed"
+  - "Useful for synchronization"
+  - "Different from TASKSTOP (which terminates)"
+timing:
+  description: "Immediate"
+  cycles: "2-9 clock cycles"
+related:
+  - TASKRESUME
+  - TASKSTOP
+  - TASKSPIN
+  - TASKCHK
+see_also:
+  - "Task synchronization"
+  - "Task pausing"
+  - "Critical sections"

@@ -12,32 +12,33 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'Mov stores the Src value into Dest. Result: The Src value is stored in Dest and optionally
-  flags are updated with the sign bit and zero status.'
+description: 'Mov stores the Src value into Dest. Result: The Src value is stored
+  in Dest and optionally flags are updated with the sign bit and zero status.'
 category: Bit Operation Instruction - Set a value into a register.
 compiler_category: Data Movement
 flags_affected:
   C:
     formula: S[31]
 compiler_effects:
-  - name: wc
-    symbol: WC
-    value: 1
-    description: Write Carry flag
-    bitPattern: "01"
-  - name: wz
-    symbol: WZ
-    value: 2
-    description: Write Zero flag
-    bitPattern: "10"
-  - name: wcz
-    symbol: WCZ
-    value: 3
-    description: Write Carry and Zero flags
-    bitPattern: "11"
+- name: wc
+  symbol: WC
+  value: 1
+  description: Write Carry flag
+  bitPattern: '01'
+- name: wz
+  symbol: WZ
+  value: 2
+  description: Write Zero flag
+  bitPattern: '10'
+- name: wcz
+  symbol: WCZ
+  value: 3
+  description: Write Carry and Zero flags
+  bitPattern: '11'
 parameters:
 - Dest is the register to receive the Src value.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value will be stored into Dest.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value will be
+  stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive

@@ -5,10 +5,18 @@ timing:
   cycles: 2
   type: fixed
 group: Interrupts
-description: 'STALLI disables interrupt branching. STALLI is the complement of the ALLOWI instruction—
-  both are used to Result: All future interrupts are disallowed.'
+description: 'STALLI disables interrupt branching. STALLI is the complement of the
+  ALLOWI instruction— both are used to Result: All future interrupts are disallowed.'
 category: Interrupt Instruction - Prevent further interrupts.
 related:
 - ALLOWI
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_pollwait
+  pattern: ''
+  description: No operands - poll/wait instruction (moves S to D, sets S to $024)
+  valueType: 28
+compiler_encoding:
+  operandFormat: 28
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

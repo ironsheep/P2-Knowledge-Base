@@ -5,13 +5,23 @@ timing:
   cycles: 2
   type: fixed
 group: Hub Control - Cogs
-description: 'COGSTOP terminates the cog identified by Dest[2:0]. In this dormant state, the cog ceases
-  to execute code and Result: Cog indicated by Dest is terminated (stopped).'
+description: 'COGSTOP terminates the cog identified by Dest[2:0]. In this dormant
+  state, the cog ceases to execute code and Result: Cog indicated by Dest is terminated
+  (stopped).'
 category: Cog Control Instruction - Stop a cog by ID.
 parameters:
-- Dest is the register or 9-bit literal indicating (in lowest 3 bits) which cog to stop.
+- Dest is the register or 9-bit literal indicating (in lowest 3 bits) which cog to
+  stop.
 related:
 - COGINIT
 - COGSTOP
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_l
+  pattern: D/#0..511
+  description: Destination or immediate value 0-511
+  valueType: 26
+compiler_encoding:
+  operandFormat: 26
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

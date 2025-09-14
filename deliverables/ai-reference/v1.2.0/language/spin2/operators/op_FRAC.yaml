@@ -1,0 +1,7 @@
+operator: "FRAC"
+type: operator
+description: |
+  Calculate fraction
+category: Math
+examples:
+  - "frac := dividend FRAC divisor"

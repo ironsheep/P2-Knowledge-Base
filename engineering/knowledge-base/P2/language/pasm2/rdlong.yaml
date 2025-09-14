@@ -19,21 +19,21 @@ flags_affected:
   C:
     formula: MSB of long
 compiler_effects:
-  - name: wc
-    symbol: WC
-    value: 1
-    description: Write Carry flag
-    bitPattern: "01"
-  - name: wz
-    symbol: WZ
-    value: 2
-    description: Write Zero flag
-    bitPattern: "10"
-  - name: wcz
-    symbol: WCZ
-    value: 3
-    description: Write Carry and Zero flags
-    bitPattern: "11"
+- name: wc
+  symbol: WC
+  value: 1
+  description: Write Carry flag
+  bitPattern: '01'
+- name: wz
+  symbol: WZ
+  value: 2
+  description: Write Zero flag
+  bitPattern: '10'
+- name: wcz
+  symbol: WCZ
+  value: 3
+  description: Write Carry and Zero flags
+  bitPattern: '11'
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true

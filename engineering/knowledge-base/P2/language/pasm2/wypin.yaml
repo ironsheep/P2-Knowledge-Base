@@ -5,71 +5,96 @@ timing:
   cycles: 2
   type: fixed
 group: Smart Pins
-description: |
-  Set "Y" register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins.
+description: 'Set "Y" register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge
+  smart pins.
+
   Wraps within A/B pins. Prior SETQ overrides S[10:6].
-  
+
+
   The Y register serves multiple purposes:
+
   - For PWM modes: Sets the base period
+
   - For SPI/serial: Controls data to transmit
+
   - For counter modes: Sets count value
+
   - For ADC modes: Initiates conversions
+
   - Writing Y also acknowledges pin completion
+
+  '
 category: Smart Pins
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:
-  - name: SPI Clock Generation
-    description: Generate continuous SPI clock using transition mode
-    code: |
-      ' Configure pin for transition output mode (P_TRANSITION_OUTPUT)
-      wrpin   ##P_TRANSITION_OUTPUT | P_OE, #SPI_CLK_PIN
-      wxpin   #1, #SPI_CLK_PIN        ' Set timebase to sysclk/2  
-      wypin   #0, #SPI_CLK_PIN        ' Start continuous transitions
-      dirh    #SPI_CLK_PIN             ' Enable smart pin
-    source: flash_loader.spin2
-    
-  - name: PWM with Base Period
-    description: Set PWM base period for motor control
-    code: |
-      ' Set PWM base period (determines frequency)
-      wypin   pwm_period, pwm_pin     ' Period in clock cycles
-      
-      ' Later, update duty cycle
-      wxpin   duty_value, pwm_pin     ' Duty cycle value
-      wypin   #1, pwm_pin              ' Trigger update and acknowledge
-    source: isp_bldc_motor.spin2
-    
-  - name: ADC Conversion Trigger
-    description: Initiate ADC conversion and acknowledge completion
-    code: |
-      ' Start ADC conversion
-      wypin   #1, adc_pin              ' Any non-zero triggers conversion
-      
-      ' Wait for completion and read result
-      waitx   #100                     ' Wait for conversion
-      rdpin   result, adc_pin          ' Read ADC value
-      wypin   #0, adc_pin              ' Acknowledge completion
-    source: isp_bldc_motor.spin2
-    
-  - name: SPI Data Transmission
-    description: Send byte via SPI using synchronous serial mode
-    code: |
-      ' Send data byte
-      wypin   data_byte, spi_mosi_pin  ' Load data to transmit
-      waitx   #16                      ' Wait for transmission
-      wypin   #0, spi_mosi_pin         ' Acknowledge completion
-    source: flash_loader.spin2
-    
+- name: SPI Clock Generation
+  description: Generate continuous SPI clock using transition mode
+  code: "' Configure pin for transition output mode (P_TRANSITION_OUTPUT)\nwrpin \
+    \  ##P_TRANSITION_OUTPUT | P_OE, #SPI_CLK_PIN\nwxpin   #1, #SPI_CLK_PIN      \
+    \  ' Set timebase to sysclk/2  \nwypin   #0, #SPI_CLK_PIN        ' Start continuous\
+    \ transitions\ndirh    #SPI_CLK_PIN             ' Enable smart pin\n"
+  source: flash_loader.spin2
+- name: PWM with Base Period
+  description: Set PWM base period for motor control
+  code: ''' Set PWM base period (determines frequency)
+
+    wypin   pwm_period, pwm_pin     '' Period in clock cycles
+
+
+    '' Later, update duty cycle
+
+    wxpin   duty_value, pwm_pin     '' Duty cycle value
+
+    wypin   #1, pwm_pin              '' Trigger update and acknowledge
+
+    '
+  source: isp_bldc_motor.spin2
+- name: ADC Conversion Trigger
+  description: Initiate ADC conversion and acknowledge completion
+  code: ''' Start ADC conversion
+
+    wypin   #1, adc_pin              '' Any non-zero triggers conversion
+
+
+    '' Wait for completion and read result
+
+    waitx   #100                     '' Wait for conversion
+
+    rdpin   result, adc_pin          '' Read ADC value
+
+    wypin   #0, adc_pin              '' Acknowledge completion
+
+    '
+  source: isp_bldc_motor.spin2
+- name: SPI Data Transmission
+  description: Send byte via SPI using synchronous serial mode
+  code: ''' Send data byte
+
+    wypin   data_byte, spi_mosi_pin  '' Load data to transmit
+
+    waitx   #16                      '' Wait for transmission
+
+    wypin   #0, spi_mosi_pin         '' Acknowledge completion
+
+    '
+  source: flash_loader.spin2
 related_instructions:
-  - WXPIN: Configure smart pin X parameter
-  - WRPIN: Configure smart pin mode
-  - RDPIN: Read smart pin result
-  - RQPIN: Read smart pin status
-  - AKPIN: Acknowledge smart pin
-  
+- WXPIN: Configure smart pin X parameter
+- WRPIN: Configure smart pin mode
+- RDPIN: Read smart pin result
+- RQPIN: Read smart pin status
+- AKPIN: Acknowledge smart pin
 notes:
-  - Writing Y register automatically acknowledges pin
-  - Y register meaning depends on smart pin mode
-  - For continuous operation modes, Y triggers/resets
-  - Essential for PWM, SPI, ADC, and counter operations
+- Writing Y register automatically acknowledges pin
+- Y register meaning depends on smart pin mode
+- For continuous operation modes, Y triggers/resets
+- Essential for PWM, SPI, ADC, and counter operations
+compiler_operand_format:
+  name: operand_ls
+  pattern: D/#,S/#
+  description: 'Two operands: destination/immediate, source/immediate'
+  valueType: 13
+compiler_encoding:
+  operandFormat: 13
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

@@ -12,8 +12,9 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'CMP compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally
-  setting the C Result: Greater/lesser and equality status is optionally written to the C and Z flags.'
+description: 'CMP compares the unsigned values of Dest and Src (by subtracting Src
+  from Dest) and optionally setting the C Result: Greater/lesser and equality status
+  is optionally written to the C and Z flags.'
 category: Math Instruction - Compare two unsigned values.
 compiler_category: Arithmetic
 flags_affected:
@@ -22,23 +23,24 @@ flags_affected:
   Z:
     formula: (D == S)
 compiler_effects:
-  - name: wc
-    symbol: WC
-    value: 1
-    description: Write Carry flag
-    bitPattern: "01"
-  - name: wz
-    symbol: WZ
-    value: 2
-    description: Write Zero flag
-    bitPattern: "10"
-  - name: wcz
-    symbol: WCZ
-    value: 3
-    description: Write Carry and Zero flags
-    bitPattern: "11"
+- name: wc
+  symbol: WC
+  value: 1
+  description: Write Carry flag
+  bitPattern: '01'
+- name: wz
+  symbol: WZ
+  value: 2
+  description: Write Zero flag
+  bitPattern: '10'
+- name: wcz
+  symbol: WCZ
+  value: 3
+  description: Write Carry and Zero flags
+  bitPattern: '11'
 parameters:
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared
+  to Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 related:
 - CMPR

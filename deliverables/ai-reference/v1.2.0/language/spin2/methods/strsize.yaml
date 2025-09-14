@@ -1,0 +1,46 @@
+method: STRSIZE
+type: method
+description: |
+  Get length of null-terminated string
+category: String Operations
+syntax: "length := STRSIZE(StringAddress)"
+parameters:
+  - name: "StringAddress"
+    type: "address"
+    description: "Address of null-terminated string"
+returns:
+  type: "integer"
+  description: "Number of characters (not including null terminator)"
+examples:
+  - code: |
+      ' Get string length
+      len := STRSIZE(@message)
+      debug("Message length: ", udec(len))
+    description: "Get string length"
+  - code: |
+      ' Check if string fits in buffer
+      if STRSIZE(@input) < buffer_size
+        STRCOPY(@buffer, @input, buffer_size)
+    description: "Validate before copying"
+  - code: |
+      ' Calculate total message size
+      total := STRSIZE(@part1) + STRSIZE(@part2) + 1
+    description: "Calculate combined length"
+notes:
+  - "Returns character count, not byte count"
+  - "Does not include null terminator in count"
+  - "Stops counting at first null (0) byte"
+  - "Returns 0 for empty string (immediate null)"
+  - "No maximum length limit"
+  - "Useful for buffer allocation"
+timing:
+  description: "Varies with string length"
+  cycles: "~8 + (1 per character) clock cycles"
+related:
+  - STRCOMP
+  - STRCOPY
+  - STRING
+see_also:
+  - "String operations"
+  - "String measurement"
+  - "Buffer sizing"

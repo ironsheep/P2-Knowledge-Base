@@ -1,0 +1,25 @@
+{
+  "version": "1.2.0",
+  "generated": "2025-09-13T22:27:15.011489",
+  "coverage": {
+    "pasm2_instructions": {
+      "documented": 0,
+      "estimated_total": 350,
+      "percentage": 0.0
+    },
+    "spin2_elements": {
+      "documented": 268,
+      "categories": {
+        "keywords": 36,
+        "operators": 74,
+        "methods": 87,
+        "registers": 25,
+        "assembly_directives": 8,
+        "debug_commands": 23,
+        "special_symbols": 12,
+        "system_variables": 3
+      }
+    },
+    "total_elements": 268
+  }
+}

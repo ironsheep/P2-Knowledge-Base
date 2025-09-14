@@ -1,6 +1,6 @@
 instruction: WRLONG
 syntax: WRLONG  {#}D,{#}S/P
-compiler_syntax: "WRLONG D/#,S/#/PTRA/PTRB"
+compiler_syntax: WRLONG D/#,S/#/PTRA/PTRB
 encoding: EEEE 1100011 0LI DDDDDDDDD SSSSSSSSS
 compiler_encoding:
   bits: 32
@@ -12,7 +12,8 @@ timing:
   cycles: 3
   type: fixed
 group: Hub RAM - Write
-description: Write long in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.
+description: Write long in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2 invokes
+  cog/LUT block transfer.
 category: Hub RAM - Write
 compiler_category: Memory and I/O
 documentation_source: original
@@ -20,8 +21,8 @@ documentation_level: minimal
 needs_documentation: true
 compiler_operand_format:
   name: operand_lsp
-  pattern: "D/#,S/#/PTRA/PTRB"
-  description: "Write to memory: destination/immediate, source/immediate/pointer"
+  pattern: D/#,S/#/PTRA/PTRB
+  description: 'Memory operation: destination/immediate, source/immediate/pointer'
   valueType: 16
 compiler_effects: []
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13

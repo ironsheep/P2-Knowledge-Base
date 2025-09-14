@@ -1,0 +1,51 @@
+method: GETMS
+type: method
+description: |
+  Get milliseconds elapsed since system boot
+category: Timing Operations
+syntax: "ms := GETMS()"
+parameters: []
+returns:
+  type: "long"
+  description: "Milliseconds since boot (32-bit value)"
+examples:
+  - code: |
+      ' Measure elapsed time
+      start_ms := GETMS()
+      ' Do some work...
+      elapsed := GETMS() - start_ms
+      debug("Elapsed: ", udec(elapsed), " ms")
+    description: "Measure operation duration"
+  - code: |
+      ' Simple timeout
+      timeout_ms := GETMS() + 5000  ' 5 second timeout
+      repeat while GETMS() < timeout_ms
+        if check_condition()
+          quit
+    description: "Implement millisecond timeout"
+  - code: |
+      ' Display uptime
+      ms := GETMS()
+      seconds := ms / 1000
+      minutes := seconds / 60
+      hours := minutes / 60
+      debug("Uptime: ", udec(hours), ":", udec(minutes//60), ":", udec(seconds//60))
+    description: "Calculate and display system uptime"
+notes:
+  - "Based on system counter divided by clkfreq/1000"
+  - "32-bit value wraps after ~49.7 days"
+  - "Resolution depends on clock frequency"
+  - "Less precise than GETCT for short intervals"
+  - "Good for human-scale timing (UI, timeouts)"
+  - "Handles clock frequency changes automatically"
+timing:
+  description: "Immediate calculation"
+  cycles: "~20-30 clock cycles"
+related:
+  - GETSEC
+  - GETCT
+  - WAITMS
+see_also:
+  - "Time measurement"
+  - "System uptime"
+  - "Millisecond timing"

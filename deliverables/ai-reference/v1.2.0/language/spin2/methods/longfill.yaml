@@ -1,0 +1,151 @@
+# Spin2 Method: LONGFILL
+# Source: Spin2 v51 documentation
+# Purpose: Fill memory region with long value
+
+method: "LONGFILL"
+category: "memory_operations"
+type: "method"
+description: |
+  Fill a specified region of hub RAM with a 32-bit long value.
+  Efficiently sets multiple consecutive longs to the same value.
+  Commonly used for clearing arrays, initializing data structures, and setting patterns.
+
+syntax: "LONGFILL(Destination, Value, Count)"
+
+parameters:
+  - name: "Destination"
+    type: "address"
+    description: |
+      Hub RAM destination address.
+      Should be long-aligned for correct operation.
+      Starting address for the fill operation.
+      
+  - name: "Value"
+    type: "long"
+    description: |
+      32-bit value to fill with.
+      Can be any long value.
+      Common values: 0 (clear), -1 ($FFFFFFFF), pointers, patterns.
+      
+  - name: "Count"
+    type: "long"
+    description: |
+      Number of longs to fill (not bytes).
+      Each long is 4 bytes.
+      Can be 0 (no operation).
+
+returns: "none"
+
+timing:
+  performance: "~8 + (count * 2) clock cycles"
+  optimization: "Uses efficient hub block operations"
+  vs_loop: "5-10x faster than manual loop"
+
+examples:
+  - code: |
+      VAR
+        LONG buffer[256]
+        
+      PUB clear_buffer()
+        LONGFILL(@buffer, 0, 256)
+    description: "Clear array of longs"
+    
+  - code: |
+      VAR
+        LONG stack[64]
+        
+      PUB init_stack()
+        LONGFILL(@stack, $DEAD_BEEF, 64)
+        ' Helps identify stack overflow
+    description: "Initialize stack with marker pattern"
+    
+  - code: |
+      VAR
+        LONG pointers[100]
+        
+      PUB init_pointers()
+        LONGFILL(@pointers, @default_handler, 100)
+    description: "Initialize function pointer table"
+    
+  - code: |
+      ' Initialize mailbox system
+      DAT
+        mailboxes LONG 0[8]
+        
+      PUB clear_mailboxes()
+        LONGFILL(@mailboxes, -1, 8)  ' -1 = empty
+    description: "Initialize inter-cog mailboxes"
+    
+  - code: |
+      ' Create test pattern
+      VAR
+        LONG pattern[1000]
+        
+      PUB create_patterns()
+        LONGFILL(@pattern[0], $12345678, 500)
+        LONGFILL(@pattern[500], $87654321, 500)
+    description: "Create diagnostic patterns"
+
+common_uses:
+  - "Array initialization"
+  - "Stack initialization"
+  - "Clearing data structures"
+  - "Setting default values"
+  - "Pattern generation"
+  - "Memory testing"
+
+typical_values:
+  0: "Clear/zero memory"
+  -1: "All bits set ($FFFFFFFF)"
+  $DEADBEEF: "Debug marker"
+  $BADC0DE: "Error marker"
+  pointer: "Function/data pointers"
+
+memory_patterns:
+  debug: |
+    LONGFILL(@memory, $DEADBEEF, count)
+    ' Easy to spot in debugger
+    
+  cleared: |
+    LONGFILL(@memory, 0, count)
+    ' Standard initialization
+    
+  invalid: |
+    LONGFILL(@memory, -1, count)
+    ' Mark as uninitialized
+
+related_methods:
+  - "BYTEFILL - Fill with byte value"
+  - "WORDFILL - Fill with word value"
+  - "LONGMOVE - Copy longs"
+  - "LONGCOMP - Compare longs"
+
+performance_notes:
+  - "Much faster than loops for large counts"
+  - "Optimized hub operations"
+  - "Alignment critical for correctness"
+  - "Count > 4 shows significant speedup"
+
+notes:
+  - "Count is in LONGS, not bytes"
+  - "Destination should be long-aligned"
+  - "Full 32-bit value is written"
+  - "Count of 0 is safe (no operation)"
+  - "Cannot fill cog or LUT RAM directly"
+
+alignment_requirement: |
+  CRITICAL: Destination must be long-aligned
+  Good: LONG buffer[100]  ' Aligned by declaration
+  Bad:  BYTE buffer[400]  ' May not be aligned
+  Fix:  LONG buffer[100]  ' Use proper type
+
+warnings:
+  - "Count is LONGS not BYTES"
+  - "Misalignment causes incorrect results"
+  - "Ensure destination has enough space"
+  - "Overwrites existing data"
+
+see_also:
+  - "language/spin2/methods/bytefill.yaml"
+  - "language/spin2/methods/wordfill.yaml"
+  - "language/spin2/methods/longmove.yaml"

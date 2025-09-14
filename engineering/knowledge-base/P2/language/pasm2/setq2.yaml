@@ -5,90 +5,76 @@ timing:
   cycles: 2
   type: fixed
 group: Miscellaneous
-description: |
-  Set Q to D. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer.
-  
+description: 'Set Q to D. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer.
+
+
   SETQ2 enables block transfers to/from LUT RAM instead of COG RAM:
+
   - SETQ2 + RDLONG: Block read from HUB to LUT
+
   - SETQ2 + WRLONG: Block write from LUT to HUB
+
   - Fast bulk data movement for lookup tables
+
   - Essential for waveform tables and large datasets
+
+  '
 category: Miscellaneous
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:
-  - name: Load Waveform Table to LUT
-    description: Load 512-long sine wave table from HUB to LUT
-    code: |
-      ' Load full sine wave table to LUT
-      load_sine_table
-              mov     ptra, ##sine_table_hub   ' HUB address of table
-              setq2   #512-1                   ' Transfer 512 longs
-              rdlong  0, ptra                  ' Load to LUT[0..511]
-              ret
-              
-      ' Later, read from LUT for waveform generation
-              rdlut   amplitude, phase         ' Direct LUT access
-    source: waveform_generation
-    
-  - name: Buffer Management
-    description: Use LUT as intermediate buffer for data processing
-    code: |
-      ' Copy data block from HUB to LUT for processing
-              setq2   #128-1                   ' 128 longs
-              rdlong  0, source_addr           ' Read to LUT[0..127]
-              
-      ' Process data in LUT (faster than HUB access)
-              mov     index, #0
-      .loop   rdlut   data, index              ' Read from LUT
-              ' Process data...
-              wrlut   data, index              ' Write back to LUT
-              incmod  index, #127              ' Next entry
-              tjnz    index, #.loop
-              
-      ' Write processed data back to HUB
-              setq2   #128-1                   ' 128 longs
-              wrlong  0, dest_addr             ' Write from LUT[0..127]
-    source: data_processing
-    
-  - name: Debug Data Capture
-    description: Use LUT as circular buffer for debug trace
-    code: |
-      ' Save debug trace to LUT then dump to HUB
-      save_trace
-              setq2   #256-1                   ' Save 256 samples
-              wrlong  0, trace_buffer          ' LUT[0..255] to HUB
-              ret
-              
-      ' During execution, write samples to LUT
-      trace_write
-              wrlut   sample, trace_index      ' Write to LUT
-              incmod  trace_index, #255        ' Circular buffer
-              ret
-    source: Spin2_debugger.spin2
-    
-  - name: Lookup Table Initialization
-    description: Initialize commutation lookup table in LUT
-    code: |
-      ' Load motor commutation patterns to LUT
-              loc     ptra, #\commutation_data ' HUB address
-              setq2   #64-1                    ' 64 patterns
-              rdlong  0, ptra                  ' Load to LUT[0..63]
-              
-      ' Access during motor control
-              shl     hall_state, #3           ' 8 bytes per state
-              rdlut   pattern, hall_state      ' Get pattern from LUT
-    source: motor_control
-    
+- name: Load Waveform Table to LUT
+  description: Load 512-long sine wave table from HUB to LUT
+  code: "' Load full sine wave table to LUT\nload_sine_table\n        mov     ptra,\
+    \ ##sine_table_hub   ' HUB address of table\n        setq2   #512-1          \
+    \         ' Transfer 512 longs\n        rdlong  0, ptra                  ' Load\
+    \ to LUT[0..511]\n        ret\n        \n' Later, read from LUT for waveform generation\n\
+    \        rdlut   amplitude, phase         ' Direct LUT access\n"
+  source: waveform_generation
+- name: Buffer Management
+  description: Use LUT as intermediate buffer for data processing
+  code: "' Copy data block from HUB to LUT for processing\n        setq2   #128-1\
+    \                   ' 128 longs\n        rdlong  0, source_addr           ' Read\
+    \ to LUT[0..127]\n        \n' Process data in LUT (faster than HUB access)\n \
+    \       mov     index, #0\n.loop   rdlut   data, index              ' Read from\
+    \ LUT\n        ' Process data...\n        wrlut   data, index              ' Write\
+    \ back to LUT\n        incmod  index, #127              ' Next entry\n       \
+    \ tjnz    index, #.loop\n        \n' Write processed data back to HUB\n      \
+    \  setq2   #128-1                   ' 128 longs\n        wrlong  0, dest_addr\
+    \             ' Write from LUT[0..127]\n"
+  source: data_processing
+- name: Debug Data Capture
+  description: Use LUT as circular buffer for debug trace
+  code: "' Save debug trace to LUT then dump to HUB\nsave_trace\n        setq2   #256-1\
+    \                   ' Save 256 samples\n        wrlong  0, trace_buffer      \
+    \    ' LUT[0..255] to HUB\n        ret\n        \n' During execution, write samples\
+    \ to LUT\ntrace_write\n        wrlut   sample, trace_index      ' Write to LUT\n\
+    \        incmod  trace_index, #255        ' Circular buffer\n        ret\n"
+  source: Spin2_debugger.spin2
+- name: Lookup Table Initialization
+  description: Initialize commutation lookup table in LUT
+  code: "' Load motor commutation patterns to LUT\n        loc     ptra, #\\commutation_data\
+    \ ' HUB address\n        setq2   #64-1                    ' 64 patterns\n    \
+    \    rdlong  0, ptra                  ' Load to LUT[0..63]\n        \n' Access\
+    \ during motor control\n        shl     hall_state, #3           ' 8 bytes per\
+    \ state\n        rdlut   pattern, hall_state      ' Get pattern from LUT\n"
+  source: motor_control
 related_instructions:
-  - SETQ: Set Q for COG RAM block transfers
-  - RDLONG: Read long(s) from HUB
-  - WRLONG: Write long(s) to HUB
-  - RDLUT: Read from LUT
-  - WRLUT: Write to LUT
-  
+- SETQ: Set Q for COG RAM block transfers
+- RDLONG: Read long(s) from HUB
+- WRLONG: Write long(s) to HUB
+- RDLUT: Read from LUT
+- WRLUT: Write to LUT
 notes:
-  - SETQ2 specifically targets LUT RAM (512 longs)
-  - SETQ targets COG RAM for block transfers
-  - Block transfers are significantly faster than loops
-  - LUT access is single-cycle, making it ideal for tables
+- SETQ2 specifically targets LUT RAM (512 longs)
+- SETQ targets COG RAM for block transfers
+- Block transfers are significantly faster than loops
+- LUT access is single-cycle, making it ideal for tables
+compiler_operand_format:
+  name: operand_l
+  pattern: D/#0..511
+  description: Destination or immediate value 0-511
+  valueType: 26
+compiler_encoding:
+  operandFormat: 26
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

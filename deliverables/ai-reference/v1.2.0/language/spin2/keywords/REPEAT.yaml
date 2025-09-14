@@ -1,0 +1,14 @@
+keyword: "REPEAT"
+type: keyword
+category: "Control Flow"
+description: |
+  Loop construct with various forms
+syntax: |
+  REPEAT [count]
+  REPEAT variable FROM start TO end [STEP increment]
+  REPEAT WHILE condition
+  REPEAT UNTIL condition
+examples:
+  - "REPEAT 10"
+  - "REPEAT i FROM 1 TO 100 STEP 2"
+  - "REPEAT WHILE sensor_active"

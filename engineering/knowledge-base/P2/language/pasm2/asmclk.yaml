@@ -1,6 +1,6 @@
 instruction: ASMCLK
 syntax: ASMCLK
-compiler_syntax: ASMCLK 
+compiler_syntax: ASMCLK
 encoding: TBD
 compiler_encoding:
   bits: 32
@@ -16,15 +16,16 @@ description: Assembly clock instruction. Controls assembly-time clock operations
 category: System Control Instruction
 compiler_category: Miscellaneous
 examples:
-  - code: |
-      ASMCLK
-    description: "Basic assembly clock operation"
+- code: 'ASMCLK
+
+    '
+  description: Basic assembly clock operation
 operand_details:
-  none: "No operands required"
+  none: No operands required
 compiler_operand_format:
   name: operand_asmclk
   pattern: ''
-  description: Assembly clock instruction
+  description: Assembly clock instruction - no operands
   valueType: 35
 compiler_effects: []
 documentation_source: PNUT_TS_compiler_analysis

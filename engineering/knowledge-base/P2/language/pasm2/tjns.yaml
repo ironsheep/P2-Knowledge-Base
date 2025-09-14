@@ -5,13 +5,23 @@ timing:
   cycles: 2
   type: fixed
 group: Branch S - Test
-description: 'TJS or TJNS tests the value in Dest and jumps to the address described by Src if the result
-  is signed (Dest[31] = 1) Result: Dest is tested and if it''s signed (or not signed in syntax 2), PC
-  is set to a new relative (#Src) or absolute (Src) address.'
+description: 'TJS or TJNS tests the value in Dest and jumps to the address described
+  by Src if the result is signed (Dest[31] = 1) Result: Dest is tested and if it''s
+  signed (or not signed in syntax 2), PC is set to a new relative (#Src) or absolute
+  (Src) address.'
 category: Flow Control Instruction - Test value and jump if signed or not signed.
 parameters:
 - Dest is a register whose value is tested for sign or no sign.
-- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
-  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
+  absolute or relative address to set PC to. Use # for relative addressing; omit #
+  for absolute addressing.'
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_dsj
+  pattern: D,S/@
+  description: 'Jump with destination and relative address: register, relative address'
+  valueType: 12
+compiler_encoding:
+  operandFormat: 12
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

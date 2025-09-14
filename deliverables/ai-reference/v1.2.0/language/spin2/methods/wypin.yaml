@@ -1,0 +1,155 @@
+# Spin2 Method: WYPIN
+# Source: Spin2 v51 documentation
+# Purpose: Write Y parameter to smart pin
+
+method: "WYPIN"
+category: "smart_pin_operations"
+type: "method"
+description: |
+  Write the Y parameter register of one or more smart pins.
+  The Y register typically holds data to transmit, duty cycle values, or count values.
+  Meaning depends on the smart pin mode set by WRPIN.
+
+syntax: "WYPIN(PinField, YValue)"
+
+parameters:
+  - name: "PinField"
+    type: "pin_field"
+    description: |
+      Specifies which pin(s) to write. Can be:
+      - Single pin number (0-63)
+      - Pin range using '..' operator (Bottom..Top)
+      - Multiple pins using ADDPINS operator
+      - Variable or expression that evaluates to a pin field
+      
+  - name: "YValue"
+    type: "long"
+    description: |
+      32-bit value for Y register.
+      Interpretation depends on smart pin mode:
+      - Data byte/word/long for serial modes
+      - Duty cycle for PWM modes
+      - Count value for pulse modes
+
+returns: "none"
+
+y_register_usage_by_mode:
+  serial_modes: |
+    Data to transmit:
+    Y[7:0] = byte to send (UART)
+    Y[15:0] = word to send (sync serial)
+    Y[31:0] = long to send (32-bit modes)
+    
+  pwm_modes: |
+    Duty cycle value:
+    Y = high_time (0 to X value)
+    
+  pulse_modes: |
+    Number of pulses/cycles:
+    Y = pulse count
+    
+  dac_modes: |
+    Output level:
+    Y[15:0] = 16-bit DAC value
+
+examples:
+  - code: |
+      ' Send byte via UART
+      WYPIN(30, "A")  ' Send character 'A'
+    description: "UART transmit character"
+    
+  - code: |
+      ' Set 50% PWM duty cycle
+      period := 1000
+      WXPIN(56, period - 1)
+      WYPIN(56, period / 2)  ' 50% duty
+    description: "Set PWM duty cycle"
+    
+  - code: |
+      ' Output 10 pulses
+      WYPIN(pin, 10)
+    description: "Generate pulse burst"
+    
+  - code: |
+      ' Set DAC to mid-level
+      WYPIN(dac_pin, $8000)  ' 16-bit mid-scale
+    description: "Set DAC output level"
+    
+  - code: |
+      ' Send 32-bit SPI data
+      WYPIN(spi_pin, data_long)
+    description: "SPI data transmission"
+
+mode_specific_y_values:
+  P_ASYNC_TX: "Byte to transmit (bits 7:0)"
+  P_ASYNC_RX: "Not used for receive"
+  P_PULSE: "Number of pulses"
+  P_TRANSITION: "Number of transitions"
+  P_NCO_FREQ: "Not used"
+  P_NCO_DUTY: "High time value"
+  P_PWM_TRIANGLE: "Duty cycle (0 to X)"
+  P_PWM_SAWTOOTH: "Duty cycle (0 to X)"
+  P_DAC_DITHER: "16-bit DAC value"
+  P_REPOSITORY: "32-bit value to store"
+
+data_transmission:
+  uart_send: |
+    PUB send_byte(pin, data)
+      WYPIN(pin, data)
+      REPEAT UNTIL RDPIN(pin) & $100  ' Wait for completion
+      
+  pwm_update: |
+    PUB set_duty_percent(pin, percent)
+      period := X_VALUE  ' Previously set with WXPIN
+      duty := period * percent / 100
+      WYPIN(pin, duty)
+      
+  burst_output: |
+    PUB send_burst(pin, count)
+      WYPIN(pin, count)
+      ' Pin outputs 'count' pulses
+
+common_uses:
+  - "Transmitting serial data"
+  - "Setting PWM duty cycles"
+  - "Controlling DAC output"
+  - "Generating pulse counts"
+  - "Updating output values"
+
+smart_pin_data_flow:
+  write: "WYPIN writes to Y register"
+  process: "Smart pin uses Y based on mode"
+  status: "Check completion with RDPIN"
+  next: "Write new value to Y for next operation"
+
+related_methods:
+  - "WRPIN - Set smart pin mode"
+  - "WXPIN - Set X parameter"
+  - "RDPIN - Read and acknowledge"
+  - "RQPIN - Read without acknowledge"
+  - "AKPIN - Acknowledge smart pin"
+
+notes:
+  - "Y register is mode-dependent"
+  - "Usually represents data or count"
+  - "Writing Y often triggers operation"
+  - "Can be updated during operation"
+  - "Some modes auto-reload from Y"
+
+timing_notes:
+  - "Write takes effect based on mode"
+  - "Serial modes: starts transmission"
+  - "PWM modes: updates on next cycle"
+  - "Pulse modes: starts immediately"
+
+warnings:
+  - "Must set correct mode first with WRPIN"
+  - "Writing Y may trigger immediate action"
+  - "Check if previous operation complete"
+  - "Some modes have Y value limits"
+
+see_also:
+  - "language/spin2/methods/wrpin.yaml"
+  - "language/spin2/methods/wxpin.yaml"
+  - "language/spin2/methods/rdpin.yaml"
+  - "architecture/smart-pins/*.yaml"

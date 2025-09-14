@@ -1,0 +1,50 @@
+method: TASKRESUME
+type: method
+description: |
+  Resume a halted task
+category: Task Operations
+syntax: "TASKRESUME(TaskID)"
+parameters:
+  - name: "TaskID"
+    type: "integer"
+    description: "Task ID to resume (0-31)"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Resume paused task
+      TASKRESUME(3)  ' Resume task 3
+    description: "Resume single task"
+  - code: |
+      ' Synchronized resume
+      TASKHALT(worker1)
+      TASKHALT(worker2)
+      prepare_data()
+      TASKRESUME(worker1)
+      TASKRESUME(worker2)
+    description: "Synchronized task resumption"
+  - code: |
+      ' Conditional resume
+      if not buffer_full
+        TASKRESUME(producer_task)
+    description: "Resume producer when buffer has space"
+notes:
+  - "Resumes task halted with TASKHALT"
+  - "Task continues from where it was halted"
+  - "All state preserved during halt"
+  - "No effect if task not halted"
+  - "Also called TASKCONT in some docs"
+  - "Part of cooperative multitasking"
+timing:
+  description: "Immediate"
+  cycles: "2-9 clock cycles"
+related:
+  - TASKHALT
+  - TASKSPIN
+  - TASKSTOP
+  - TASKCHK
+see_also:
+  - "Task synchronization"
+  - "Task resumption"
+  - "Cooperative multitasking"

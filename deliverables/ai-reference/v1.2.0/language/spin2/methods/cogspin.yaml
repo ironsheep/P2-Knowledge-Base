@@ -1,0 +1,243 @@
+# Spin2 Method: COGSPIN
+# Source: Spin2 v51 documentation, P2-FLASH-FS analysis
+# Purpose: Start Spin2 method in a cog
+
+method: "COGSPIN"
+category: "cog_management"
+type: "method"
+description: |
+  Start a Spin2 method in a specified or available cog.
+  Loads the Spin2 interpreter into the cog and begins executing the specified method.
+  Returns the cog number that was started, or -1 if no cog was available.
+  Essential for parallel Spin2 execution.
+documentation_source: enhanced
+documentation_level: comprehensive
+
+syntax: "COGSPIN(CogNum, Method({Parameters}), StackAddress) : CogID"
+
+parameters:
+  - name: "CogNum"
+    type: "long"
+    description: |
+      Cog number to start:
+      - 0-7: Start specific cog (will stop if running)
+      - NEWCOG or -1: Start any available cog
+      
+  - name: "Method({Parameters})"
+    type: "method_call"
+    description: |
+      Spin2 method to execute with optional parameters.
+      Method name followed by parameters in parentheses.
+      Can be in current object or another object.
+      
+  - name: "StackAddress"
+    type: "address"
+    description: |
+      Hub address of stack space for the new cog.
+      Use @stack_array to get address.
+      Minimum 32 longs recommended, more for complex code.
+
+returns:
+  name: "CogID"
+  type: "long"
+  description: |
+    - 0-7: Successfully started cog number
+    - -1: Failed (no cog available when using NEWCOG)
+
+stack_requirements:
+  minimum: "32 longs (128 bytes)"
+  typical: "64-128 longs (256-512 bytes)"
+  factors:
+    - "Method call depth"
+    - "Local variable count"
+    - "Parameter count"
+    - "Expression complexity"
+
+examples:
+  - code: |
+      VAR
+        LONG stack[64]
+        LONG cog_id
+        
+      PUB main()
+        cog_id := COGSPIN(NEWCOG, worker(), @stack)
+        IF cog_id == -1
+          ' Failed to start
+          
+      PRI worker()
+        REPEAT
+          ' Do work in parallel
+          PINTOGGLE(56)
+          WAITMS(500)
+    description: "Start worker method in new cog"
+    
+  - code: |
+      VAR
+        LONG stack1[64], stack2[64]
+        LONG sensor_data
+        
+      PUB start_sensors()
+        COGSPIN(NEWCOG, read_sensor(0, @sensor_data), @stack1)
+        COGSPIN(NEWCOG, read_sensor(1, @sensor_data), @stack2)
+        
+      PRI read_sensor(pin, ptr)
+        REPEAT
+          LONG[ptr][pin] := read_adc(pin)
+          WAITMS(10)
+    description: "Multiple sensor readers with parameters"
+    
+  - code: |
+      OBJ
+        serial : "serial_driver"
+        
+      VAR
+        LONG serial_stack[128]
+        
+      PUB init()
+        ' Start serial driver in separate cog
+        COGSPIN(NEWCOG, serial.rx_handler(), @serial_stack)
+    description: "Start object method in new cog"
+    
+  - code: |
+      VAR
+        LONG cog_stacks[4][64]
+        
+      PUB parallel_process()
+        REPEAT i FROM 0 TO 3
+          COGSPIN(NEWCOG, process_chunk(i), @cog_stacks[i])
+    description: "Launch multiple parallel processors"
+    
+  - code: |
+      ' Multi-COG Flash FS stress test pattern
+      CON
+        NUM_TESTER_COGS = 7
+        STACK_SIZE_LONGS = 64
+        
+      DAT
+        ' Per-COG stacks in DAT for persistence
+        stacks  LONG  0[NUM_TESTER_COGS * STACK_SIZE_LONGS]
+        results BYTE  0[8]  ' One per COG
+        lock    LONG  -1    ' Shared resource lock
+        
+      PUB stress_test() | idx
+        ' Initialize lock for file system access
+        lock := LOCKNEW()
+        
+        ' Launch test COGs with indexed stacks
+        REPEAT idx FROM 0 TO NUM_TESTER_COGS-1
+          COGSPIN(NEWCOG, fs_tester(idx), @stacks[idx * STACK_SIZE_LONGS])
+        
+        ' Monitor results
+        REPEAT
+          show_results()
+          WAITMS(1000)
+          
+      PRI fs_tester(cog_index) | handle
+        ' Each COG performs random file operations
+        REPEAT
+          ' Random delay to create contention
+          WAITMS(GETRND() & $FF)
+          
+          ' Acquire lock for file system access
+          REPEAT WHILE NOT LOCKTRY(lock)
+          
+          ' Perform file operation
+          handle := open("test.dat", "r")
+          IF handle >= 0
+            ' Read/write operations
+            results[cog_index]++
+            close(handle)
+          
+          ' Release lock
+          LOCKREL(lock)
+    description: "Multi-COG flash filesystem stress test"
+    source: P2-FLASH-FS
+
+method_execution:
+  interpreter: "Each cog gets its own Spin2 interpreter"
+  isolation: "Methods run independently"
+  variables:
+    - "VAR variables are shared between cogs"
+    - "Local variables are private to each cog"
+    - "DAT section is shared"
+  
+common_uses:
+  - "Parallel task execution"
+  - "Background monitoring"
+  - "Concurrent I/O handling"
+  - "Multi-threaded applications"
+  - "Separate UI and processing"
+  - "Real-time event handlers"
+  - "Multi-COG stress testing"
+  - "Parallel file system access"
+
+production_patterns:
+  multi_cog_with_locks:
+    description: "Pattern for safe multi-COG resource access"
+    pattern: |
+      1. Allocate shared lock in DAT
+      2. Create per-COG stacks in DAT
+      3. Launch COGs with indexed stack addresses
+      4. Use LOCKTRY/LOCKREL for resource protection
+      5. Track per-COG results/status
+    source: P2-FLASH-FS
+    
+  indexed_stack_allocation:
+    description: "Efficient stack allocation for multiple COGs"
+    code: |
+      DAT
+        stacks LONG 0[NUM_COGS * STACK_SIZE]
+        
+      PUB start_cogs() | i
+        REPEAT i FROM 0 TO NUM_COGS-1
+          COGSPIN(NEWCOG, worker(i), @stacks[i * STACK_SIZE])
+    benefits:
+      - "Predictable memory layout"
+      - "Easy to adjust stack sizes"
+      - "Persistent across method calls"
+
+related_methods:
+  - "COGINIT - Start PASM code in a cog"
+  - "COGSTOP - Stop a running cog"
+  - "COGID - Get current cog ID"
+  - "COGCHK - Check if cog is running"
+  - "LOCKNEW - Allocate lock for synchronization"
+  - "LOCKTRY - Try to acquire lock"
+  - "LOCKREL - Release lock"
+
+synchronization:
+  shared_variables: "Use locks for thread-safe access"
+  communication: "Use hub RAM for data exchange"
+  coordination: "Use COGATN/POLLATN for signaling"
+  file_system_access: "Must use locks for flash FS operations"
+
+notes:
+  - "Method runs until it returns or cog is stopped"
+  - "Stack overflow causes undefined behavior"
+  - "Each cog has independent method call stack"
+  - "Parameters are passed by value"
+  - "Cannot share local variables between cogs"
+  - "Flash FS requires lock protection for multi-COG access"
+
+best_practices:
+  - "Always check return value for -1"
+  - "Size stack appropriately for method complexity"
+  - "Use locks for shared variable access"
+  - "Initialize shared data before starting cogs"
+  - "Stop cogs cleanly when done"
+  - "Use DAT for persistent stack allocation"
+  - "Implement proper lock cleanup on errors"
+
+warnings:
+  - "Stack overflow is not detected"
+  - "Insufficient stack causes crashes"
+  - "VAR variables need synchronization"
+  - "No automatic resource cleanup"
+  - "File system not thread-safe without locks"
+
+see_also:
+  - "language/spin2/methods/coginit.yaml"
+  - "language/spin2/methods/cogstop.yaml"
+  - "language/spin2/methods/locknew.yaml"
+  - "language/spin2/constructs/method_definition.yaml"
+  - "concepts/multi_cog_synchronization.yaml"

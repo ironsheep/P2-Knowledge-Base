@@ -1,0 +1,9 @@
+register: "PR6"
+type: register
+category: "General Purpose"
+description: |
+  General purpose register 6
+examples:
+  - "PR6 := state_machine"
+address: "502"
+access: "read_write"

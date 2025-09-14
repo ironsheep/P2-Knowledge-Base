@@ -1,0 +1,9 @@
+register: "DIRB"
+type: register
+category: "I/O Registers"
+description: |
+  Direction register B (pins 32-63)
+examples:
+  - "DIRB := $FF000000  // Set pins 56-63 as outputs"
+address: "507"
+access: "read_write"

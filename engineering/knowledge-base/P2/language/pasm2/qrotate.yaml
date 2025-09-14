@@ -5,57 +5,103 @@ timing:
   cycles: 2
   type: fixed
 group: CORDIC Solver
-description: Rotate a 32-bit signed (X, Y) point around origin (0, 0) by a specified angle. X coordinate comes from D operand, Y coordinate from SETQ value (or 0 if SETQ not used). Angle specified in S operand. Results retrieved via GETQX (X) and GETQY (Y) instructions 55 clocks later.
-long_description: |
-  The QROTATE instruction performs point rotation using the P2's 54-stage pipelined CORDIC solver. It rotates a 32-bit signed (X, Y) coordinate pair around the origin (0, 0) by a specified angle, producing new 32-bit signed (X, Y) results.
-  
-  The instruction takes the X coordinate from the D operand and the Y coordinate from the SETQ value (or 32'b0 if SETQ was not used). The rotation angle is specified in the S operand using P2's standard angle units where $00000000 = 0°, $40000000 = 90°, $80000000 = 180°, and $C0000000 = 270°.
-  
-  After 55 clocks, the rotated coordinates can be retrieved using GETQX for the new X coordinate and GETQY for the new Y coordinate.
-  
-  This instruction can also be used for polar to cartesian conversion by setting the X coordinate (D) to the length, Y coordinate (SETQ) to 0, and the angle (S) to the desired angle.
-  
-  Common applications include graphics transformations, signal processing rotations, and coordinate system conversions.
+description: Rotate a 32-bit signed (X, Y) point around origin (0, 0) by a specified
+  angle. X coordinate comes from D operand, Y coordinate from SETQ value (or 0 if
+  SETQ not used). Angle specified in S operand. Results retrieved via GETQX (X) and
+  GETQY (Y) instructions 55 clocks later.
+long_description: 'The QROTATE instruction performs point rotation using the P2''s
+  54-stage pipelined CORDIC solver. It rotates a 32-bit signed (X, Y) coordinate pair
+  around the origin (0, 0) by a specified angle, producing new 32-bit signed (X, Y)
+  results.
+
+
+  The instruction takes the X coordinate from the D operand and the Y coordinate from
+  the SETQ value (or 32''b0 if SETQ was not used). The rotation angle is specified
+  in the S operand using P2''s standard angle units where $00000000 = 0°, $40000000
+  = 90°, $80000000 = 180°, and $C0000000 = 270°.
+
+
+  After 55 clocks, the rotated coordinates can be retrieved using GETQX for the new
+  X coordinate and GETQY for the new Y coordinate.
+
+
+  This instruction can also be used for polar to cartesian conversion by setting the
+  X coordinate (D) to the length, Y coordinate (SETQ) to 0, and the angle (S) to the
+  desired angle.
+
+
+  Common applications include graphics transformations, signal processing rotations,
+  and coordinate system conversions.
+
+  '
 category: CORDIC Solver
 examples:
-  - code: |
-      ' Rotate point (100, 200) by 45 degrees
-      SETQ    #200           ' Set Y coordinate
-      QROTATE #100, #$20000000  ' X=100, angle=45°
-      ' Wait 55 clocks...
-      GETQX   new_x          ' Get rotated X
-      GETQY   new_y          ' Get rotated Y
-    description: "Basic point rotation by 45 degrees"
-  - code: |
-      ' Polar to cartesian: length=500, angle=30°
-      SETQ    #0             ' Y coordinate = 0
-      QROTATE #500, #$15555555  ' X=length, angle=30°
-      ' ... other work for 55 clocks ...
-      GETQX   cart_x         ' Get cartesian X
-      GETQY   cart_y         ' Get cartesian Y
-    description: "Polar to cartesian conversion"
-  - code: |
-      ' Rotate with variable coordinates and angle
-      SETQ    y_coord
-      QROTATE x_coord, rotation_angle
-      ' ... wait 55 clocks ...
-      GETQX   result_x
-      GETQY   result_y
-    description: "Variable coordinate rotation"
+- code: ''' Rotate point (100, 200) by 45 degrees
+
+    SETQ    #200           '' Set Y coordinate
+
+    QROTATE #100, #$20000000  '' X=100, angle=45°
+
+    '' Wait 55 clocks...
+
+    GETQX   new_x          '' Get rotated X
+
+    GETQY   new_y          '' Get rotated Y
+
+    '
+  description: Basic point rotation by 45 degrees
+- code: ''' Polar to cartesian: length=500, angle=30°
+
+    SETQ    #0             '' Y coordinate = 0
+
+    QROTATE #500, #$15555555  '' X=length, angle=30°
+
+    '' ... other work for 55 clocks ...
+
+    GETQX   cart_x         '' Get cartesian X
+
+    GETQY   cart_y         '' Get cartesian Y
+
+    '
+  description: Polar to cartesian conversion
+- code: ''' Rotate with variable coordinates and angle
+
+    SETQ    y_coord
+
+    QROTATE x_coord, rotation_angle
+
+    '' ... wait 55 clocks ...
+
+    GETQX   result_x
+
+    GETQY   result_y
+
+    '
+  description: Variable coordinate rotation
 related_instructions:
-  - GETQX
-  - GETQY
-  - SETQ
-  - QVECTOR
+- GETQX
+- GETQY
+- SETQ
+- QVECTOR
 operand_details:
-  D: "X coordinate (32-bit signed)"
-  S: "Rotation angle in P2 angle units (32-bit unsigned)"
-  SETQ: "Y coordinate (32-bit signed, optional - defaults to 0)"
+  D: X coordinate (32-bit signed)
+  S: Rotation angle in P2 angle units (32-bit unsigned)
+  SETQ: Y coordinate (32-bit signed, optional - defaults to 0)
 result_details:
-  GETQX: "Rotated X coordinate (32-bit signed)"
-  GETQY: "Rotated Y coordinate (32-bit signed)"
-timing_notes: "Result available 55 clocks after instruction issue. Each cog can issue one CORDIC instruction per hub window (every 8 clocks)."
-usage_notes: "Use SETQ before QROTATE to specify Y coordinate. If SETQ is not used, Y defaults to 0. Can be used for polar to cartesian conversion."
+  GETQX: Rotated X coordinate (32-bit signed)
+  GETQY: Rotated Y coordinate (32-bit signed)
+timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
+  one CORDIC instruction per hub window (every 8 clocks).
+usage_notes: Use SETQ before QROTATE to specify Y coordinate. If SETQ is not used,
+  Y defaults to 0. Can be used for polar to cartesian conversion.
 documentation_source: p2_datasheet
 documentation_level: comprehensive
 needs_documentation: false
+compiler_operand_format:
+  name: operand_ls
+  pattern: D/#,S/#
+  description: 'Two operands: destination/immediate, source/immediate'
+  valueType: 13
+compiler_encoding:
+  operandFormat: 13
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

@@ -1,0 +1,7 @@
+operator: "OR"
+type: operator
+description: |
+  Logical OR (also PASM2 instruction)
+category: Unary
+examples:
+  - "IF error OR timeout\n  abort()"

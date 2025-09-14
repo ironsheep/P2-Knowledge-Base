@@ -1,0 +1,7 @@
+operator: ">=."
+type: operator
+description: |
+  Floating point greater than or equal comparison
+category: Float Compare
+examples:
+  - "IF temp >=. threshold\n  activate()"

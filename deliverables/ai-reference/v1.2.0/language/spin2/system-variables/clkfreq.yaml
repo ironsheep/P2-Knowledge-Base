@@ -1,0 +1,8 @@
+variable: "CLKFREQ"
+type: system_variable
+data_type: "Unknown"
+description: |
+  System clock frequency in Hz
+access: "read_write"
+examples:
+  - "CLKFREQ := 80_000_000  // 80MHz"

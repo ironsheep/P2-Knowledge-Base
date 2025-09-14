@@ -5,8 +5,18 @@ timing:
   cycles: 4
   type: fixed
 group: Branch S - Call
-description: Call to S** by pushing {C, Z, 10'b0, PC[19:0]} onto stack, copy D to PA.
+description: Call to S** by pushing {C, Z, 10'b0, PC[19:0]} onto stack, copy D to
+  PA.
 category: Branch S - Call
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+compiler_operand_format:
+  name: operand_lsj
+  pattern: D/#,S/@
+  description: 'Jump/call with immediate destination and relative source: destination/immediate,
+    relative address'
+  valueType: 14
+compiler_encoding:
+  operandFormat: 14
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

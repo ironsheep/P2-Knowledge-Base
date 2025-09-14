@@ -5,75 +5,136 @@ timing:
   cycles: 2
   type: fixed
 group: CORDIC Solver
-description: Calculate square root of 64-bit unsigned number formed from {S, D}. Takes upper 32 bits from S operand and lower 32 bits from D operand. Result retrieved via GETQX instruction 55 clocks later.
-long_description: |
-  The QSQRT instruction performs square root calculation using the P2's 54-stage pipelined CORDIC solver. It calculates the square root of a 64-bit unsigned value and produces a 32-bit result.
-  
-  The 64-bit input is formed by concatenating the S operand as the upper 32 bits with the D operand as the lower 32 bits, creating the value {S, D}. After 55 clocks, the 32-bit square root result can be retrieved using the GETQX instruction.
-  
-  This instruction is essential for mathematical calculations requiring precise square root operations on large values, such as distance calculations, RMS computations, geometric algorithms, and signal processing applications where maintaining precision across the full 64-bit range is important.
-  
-  The result is the largest integer whose square does not exceed the input value. For perfect squares, the result is exact; for non-perfect squares, the result is the floor of the true square root.
+description: Calculate square root of 64-bit unsigned number formed from {S, D}. Takes
+  upper 32 bits from S operand and lower 32 bits from D operand. Result retrieved
+  via GETQX instruction 55 clocks later.
+long_description: 'The QSQRT instruction performs square root calculation using the
+  P2''s 54-stage pipelined CORDIC solver. It calculates the square root of a 64-bit
+  unsigned value and produces a 32-bit result.
+
+
+  The 64-bit input is formed by concatenating the S operand as the upper 32 bits with
+  the D operand as the lower 32 bits, creating the value {S, D}. After 55 clocks,
+  the 32-bit square root result can be retrieved using the GETQX instruction.
+
+
+  This instruction is essential for mathematical calculations requiring precise square
+  root operations on large values, such as distance calculations, RMS computations,
+  geometric algorithms, and signal processing applications where maintaining precision
+  across the full 64-bit range is important.
+
+
+  The result is the largest integer whose square does not exceed the input value.
+  For perfect squares, the result is exact; for non-perfect squares, the result is
+  the floor of the true square root.
+
+  '
 category: CORDIC Solver
 examples:
-  - code: |
-      ' Calculate square root of 1000000 (simple 32-bit value)
-      QSQRT   #1000000, #0   ' √{0, 1000000} = √1000000 ≈ 1000
-      ' Wait 55 clocks...
-      GETQX   sqrt_result    ' Get 1000
-    description: "Basic square root of 32-bit number"
-  - code: |
-      ' Calculate square root of large 64-bit number
-      ' Example: √{0x12345678, 0x9ABCDEF0}
-      QSQRT   #$12345678, #$9ABCDEF0
-      ' ... other work for 55 clocks ...
-      GETQX   big_sqrt
-    description: "Square root of 64-bit number"
-  - code: |
-      ' Distance calculation: √(x² + y²)
-      QMUL    coord_x, coord_x    ' x²
-      ' ... wait 55 clocks ...
-      GETQX   x_squared_low
-      GETQY   x_squared_high
-      QMUL    coord_y, coord_y    ' y²
-      ' ... wait 55 clocks ...
-      GETQX   y_squared_low
-      GETQY   y_squared_high
-      ADD     sum_low, x_squared_low, y_squared_low    ' x² + y² (low)
-      ADDX    sum_high, x_squared_high, y_squared_high ' x² + y² (high)
-      QSQRT   sum_high, sum_low   ' √(x² + y²)
-      ' ... wait 55 clocks ...
-      GETQX   distance
-    description: "2D distance calculation using square root"
-  - code: |
-      ' RMS calculation for signal processing
-      ' Example: RMS of sum of squares stored in {high, low}
-      QSQRT   squares_high, squares_low
-      ' ... other processing for 55 clocks ...
-      GETQX   rms_value
-    description: "RMS calculation using CORDIC square root"
-  - code: |
-      ' Variable square root calculation
-      QSQRT   input_high, input_low
-      ' ... wait 55 clocks ...
-      GETQX   result
-      CMP     result, #0 WZ       ' Check for zero result
-      IF_Z    JMP     #zero_case
-    description: "Variable square root with result checking"
+- code: ''' Calculate square root of 1000000 (simple 32-bit value)
+
+    QSQRT   #1000000, #0   '' √{0, 1000000} = √1000000 ≈ 1000
+
+    '' Wait 55 clocks...
+
+    GETQX   sqrt_result    '' Get 1000
+
+    '
+  description: Basic square root of 32-bit number
+- code: ''' Calculate square root of large 64-bit number
+
+    '' Example: √{0x12345678, 0x9ABCDEF0}
+
+    QSQRT   #$12345678, #$9ABCDEF0
+
+    '' ... other work for 55 clocks ...
+
+    GETQX   big_sqrt
+
+    '
+  description: Square root of 64-bit number
+- code: ''' Distance calculation: √(x² + y²)
+
+    QMUL    coord_x, coord_x    '' x²
+
+    '' ... wait 55 clocks ...
+
+    GETQX   x_squared_low
+
+    GETQY   x_squared_high
+
+    QMUL    coord_y, coord_y    '' y²
+
+    '' ... wait 55 clocks ...
+
+    GETQX   y_squared_low
+
+    GETQY   y_squared_high
+
+    ADD     sum_low, x_squared_low, y_squared_low    '' x² + y² (low)
+
+    ADDX    sum_high, x_squared_high, y_squared_high '' x² + y² (high)
+
+    QSQRT   sum_high, sum_low   '' √(x² + y²)
+
+    '' ... wait 55 clocks ...
+
+    GETQX   distance
+
+    '
+  description: 2D distance calculation using square root
+- code: ''' RMS calculation for signal processing
+
+    '' Example: RMS of sum of squares stored in {high, low}
+
+    QSQRT   squares_high, squares_low
+
+    '' ... other processing for 55 clocks ...
+
+    GETQX   rms_value
+
+    '
+  description: RMS calculation using CORDIC square root
+- code: ''' Variable square root calculation
+
+    QSQRT   input_high, input_low
+
+    '' ... wait 55 clocks ...
+
+    GETQX   result
+
+    CMP     result, #0 WZ       '' Check for zero result
+
+    IF_Z    JMP     #zero_case
+
+    '
+  description: Variable square root with result checking
 related_instructions:
-  - GETQX
-  - QMUL
-  - ADD
-  - ADDX
+- GETQX
+- QMUL
+- ADD
+- ADDX
 operand_details:
-  S: "Upper 32 bits of 64-bit input value"
-  D: "Lower 32 bits of 64-bit input value"
+  S: Upper 32 bits of 64-bit input value
+  D: Lower 32 bits of 64-bit input value
 result_details:
-  GETQX: "32-bit square root result (floor of true square root)"
-timing_notes: "Result available 55 clocks after instruction issue. Each cog can issue one CORDIC instruction per hub window (every 8 clocks)."
-usage_notes: "Input formed as {S, D} where S contains upper 32 bits. For 32-bit square roots, use S=0. Result is floor(√input)."
-applications: "Distance calculations, RMS computations, geometric algorithms, signal processing, mathematical operations requiring high-precision square roots."
-mathematical_note: "Result R satisfies: R² ≤ input < (R+1)², making it the largest integer whose square doesn't exceed the input."
+  GETQX: 32-bit square root result (floor of true square root)
+timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
+  one CORDIC instruction per hub window (every 8 clocks).
+usage_notes: Input formed as {S, D} where S contains upper 32 bits. For 32-bit square
+  roots, use S=0. Result is floor(√input).
+applications: Distance calculations, RMS computations, geometric algorithms, signal
+  processing, mathematical operations requiring high-precision square roots.
+mathematical_note: 'Result R satisfies: R² ≤ input < (R+1)², making it the largest
+  integer whose square doesn''t exceed the input.'
 documentation_source: p2_datasheet
 documentation_level: comprehensive
 needs_documentation: false
+compiler_operand_format:
+  name: operand_ls
+  pattern: D/#,S/#
+  description: 'Two operands: destination/immediate, source/immediate'
+  valueType: 13
+compiler_encoding:
+  operandFormat: 13
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

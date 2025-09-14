@@ -5,9 +5,11 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: 'RCZR shifts Dest''s binary value right by two places and sets Dest[31] to C and Dest[30]
-  to Z. Result: The bits of Dest are shifted right by two places and C and Z are inserted as new MSBs.'
-category: Bit Operation Instruction - Rotate carry and zero flags right into value (2-bit rotate right).
+description: 'RCZR shifts Dest''s binary value right by two places and sets Dest[31]
+  to C and Dest[30] to Z. Result: The bits of Dest are shifted right by two places
+  and C and Z are inserted as new MSBs.'
+category: Bit Operation Instruction - Rotate carry and zero flags right into value
+  (2-bit rotate right).
 flags_affected:
   C:
     formula: D[1], Z = D[0]
@@ -16,7 +18,16 @@ flags_affected:
     formula: D[0]
     when: D[1]
 parameters:
-- Dest is the register containing the value to rotate the carry and zero flags right into.
+- Dest is the register containing the value to rotate the carry and zero flags right
+  into.
 - WC, WZ, or WCZ are optional effects to update flags.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_d
+  pattern: D
+  description: Destination register only
+  valueType: 24
+compiler_encoding:
+  operandFormat: 24
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

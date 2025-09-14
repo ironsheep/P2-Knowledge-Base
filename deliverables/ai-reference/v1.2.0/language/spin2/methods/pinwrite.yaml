@@ -1,0 +1,102 @@
+# Spin2 Method: PINWRITE
+# Source: Spin2 v51 documentation
+# Purpose: Write data to pin(s)
+
+method: "PINWRITE"
+aliases: ["PINW"]
+category: "pin_control"
+type: "method"
+description: |
+  Drive specified pin(s) with data pattern.
+  Sets the direction bit(s) to output (DIR=1) and writes the data pattern to the pins (OUT=data).
+  When multiple pins are specified, the data is written to them in parallel.
+  Lower bits of data correspond to lower-numbered pins in the field.
+
+syntax: "PINWRITE(PinField, Data)"
+
+parameters:
+  - name: "PinField"
+    type: "pin_field"
+    description: |
+      Specifies which pin(s) to write. Can be:
+      - Single pin number (0-63)
+      - Pin range using '..' operator (Bottom..Top)
+      - Multiple pins using ADDPINS operator
+      - Variable or expression that evaluates to a pin field
+      
+  - name: "Data"
+    type: "long"
+    description: |
+      Data to write to the pins:
+      - For single pin: 0 = low, non-zero = high
+      - For multiple pins: Each bit maps to a pin
+      - Bit 0 of data → lowest pin in field
+      - Bit n of data → nth pin in field
+
+returns: "none"
+
+timing:
+  execution: "2 clock cycles in cog execution"
+  hub_access: "8-19 clock cycles when executed from hub"
+
+examples:
+  - code: "PINWRITE(56, 1)"
+    description: "Write high to pin 56"
+    
+  - code: "PINWRITE(56, 0)"
+    description: "Write low to pin 56"
+    
+  - code: "PINWRITE(0 ADDPINS 7, %10101010)"
+    description: "Write alternating pattern to pins 0-7"
+    
+  - code: "PINWRITE(7..0, $FF)"
+    description: "Write all high to pins 0-7 (reversed range)"
+    
+  - code: |
+      VAR
+        BYTE pattern
+      PUB animate()
+        pattern := %00000001
+        REPEAT 8
+          PINWRITE(0 ADDPINS 7, pattern)
+          pattern <<= 1
+          WAITMS(100)
+    description: "Animate a moving bit pattern"
+    
+  - code: |
+      ' Write 4-bit value to pins 12-15
+      value := 9  ' Binary 1001
+      PINWRITE(12 ADDPINS 3, value)
+      ' Pin 12 = 1, Pin 13 = 0, Pin 14 = 0, Pin 15 = 1
+    description: "Write multi-bit value to pin group"
+
+underlying_pasm:
+  instructions: ["DIRH/DIRL", "OUTH/OUTL"]
+  description: "Sets direction bits and output bits based on data"
+  
+common_uses:
+  - "Parallel data output"
+  - "LED pattern displays"
+  - "Bus data transmission"
+  - "7-segment display control"
+  - "Setting multiple control lines simultaneously"
+  - "Binary counter displays"
+
+related_methods:
+  - "PINREAD - Read data from pins"
+  - "PINHIGH - Drive all specified pins high"
+  - "PINLOW - Drive all specified pins low"
+  - "PINTOGGLE - Toggle pin states"
+
+notes:
+  - "All specified pins become outputs"
+  - "Overrides any smart pin modes on the pins"
+  - "Data is masked to the number of pins in field"
+  - "Unspecified bits in data are ignored"
+  - "Atomic operation - all pins change simultaneously"
+  - "Pin field order matters for multi-pin operations"
+
+see_also:
+  - "language/spin2/methods/pinread.yaml"
+  - "language/spin2/methods/pinhigh.yaml"
+  - "language/spin2/methods/pinlow.yaml"

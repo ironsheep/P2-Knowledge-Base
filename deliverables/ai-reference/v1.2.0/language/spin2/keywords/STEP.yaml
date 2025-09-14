@@ -1,0 +1,12 @@
+keyword: "STEP"
+type: keyword
+category: "Control Flow"
+description: |
+  Increment value in REPEAT loop range
+syntax: |
+  REPEAT variable FROM start TO end STEP increment
+    statements
+examples:
+  - |
+    REPEAT i FROM 0 TO 100 STEP 5
+      process(i)

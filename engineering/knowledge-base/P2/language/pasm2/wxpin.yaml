@@ -5,9 +5,17 @@ timing:
   cycles: 2
   type: fixed
 group: Smart Pins
-description: Set \"X\" of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins. Wraps within
-  A/B pins. Prior SETQ overrides S[10:6].
+description: Set \"X\" of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart
+  pins. Wraps within A/B pins. Prior SETQ overrides S[10:6].
 category: Smart Pins
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+compiler_operand_format:
+  name: operand_ls
+  pattern: D/#,S/#
+  description: 'Two operands: destination/immediate, source/immediate'
+  valueType: 13
+compiler_encoding:
+  operandFormat: 13
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

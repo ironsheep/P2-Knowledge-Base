@@ -1,0 +1,152 @@
+# Spin2 Method: WRPIN
+# Source: Spin2 v51 documentation
+# Purpose: Configure smart pin mode
+
+method: "WRPIN"
+category: "smart_pin_operations"
+type: "method"
+description: |
+  Write the mode configuration register of one or more smart pins.
+  Sets up the smart pin operating mode, input sources, and output options.
+  This is the primary method for configuring smart pin functionality.
+
+syntax: "WRPIN(PinField, Mode)"
+
+parameters:
+  - name: "PinField"
+    type: "pin_field"
+    description: |
+      Specifies which pin(s) to configure. Can be:
+      - Single pin number (0-63)
+      - Pin range using '..' operator (Bottom..Top)
+      - Multiple pins using ADDPINS operator
+      - Variable or expression that evaluates to a pin field
+      
+  - name: "Mode"
+    type: "long"
+    description: |
+      32-bit mode configuration value:
+      - Bits 31-24: Filter/output options
+      - Bits 23-16: Input selector B
+      - Bits 15-8: Input selector A
+      - Bits 7-6: Low level control
+      - Bits 5-0: Smart pin mode (0-63)
+
+returns: "none"
+
+mode_register_format:
+  bits_31_24: |
+    Filter and output options:
+    - Bit 31: Enable digital filter
+    - Bit 30-28: Filter length
+    - Bit 27-26: Output drive options
+    
+  bits_23_16: |
+    Input B selector:
+    - Relative pin selection (-3 to +3)
+    - Special input sources
+    
+  bits_15_8: |
+    Input A selector:
+    - Relative pin selection (-3 to +3)
+    - Special input sources
+    
+  bits_5_0: |
+    Smart pin mode (0-63):
+    - 00000: OFF (normal I/O)
+    - 00001-11111: Various smart modes
+
+examples:
+  - code: |
+      ' Configure pin for UART TX (async serial)
+      mode := %0000_0000_000_0000000000000_01_00111
+      WRPIN(30, mode)
+    description: "Setup UART transmit mode"
+    
+  - code: |
+      ' Configure for PWM output
+      mode := %0000_0000_000_0000000000000_01_01001
+      WRPIN(56, mode)
+    description: "Setup PWM mode"
+    
+  - code: |
+      ' Configure quadrature encoder
+      mode := %0000_0001_000_0000000000000_00_01011
+      WRPIN(0, mode)
+    description: "Setup quadrature decoder"
+    
+  - code: |
+      ' Configure ADC mode
+      mode := %0000_0000_000_0000000000000_11_10011
+      WRPIN(pin, mode)
+    description: "Setup ADC conversion mode"
+    
+  - code: |
+      ' Reset to normal I/O
+      WRPIN(pin, 0)
+    description: "Disable smart pin mode"
+
+common_smart_modes:
+  P_NORMAL: "%00000 - Normal I/O"
+  P_REPOSITORY: "%00001 - Long repository"
+  P_DAC_NOISE: "%00010 - DAC noise"
+  P_DAC_DITHER: "%00011 - DAC with dither"
+  P_PULSE: "%00100 - Pulse/cycle output"
+  P_TRANSITION: "%00101 - Transition output"
+  P_NCO_FREQ: "%00110 - NCO frequency"
+  P_NCO_DUTY: "%00111 - NCO duty"
+  P_PWM_TRIANGLE: "%01000 - PWM triangle"
+  P_PWM_SAWTOOTH: "%01001 - PWM sawtooth"
+  P_ASYNC_TX: "%00111 - Async serial transmit"
+  P_ASYNC_RX: "%01000 - Async serial receive"
+  P_QUADRATURE: "%01011 - Quadrature decode"
+
+smart_pin_workflow:
+  1_configure: "WRPIN(pin, mode) - Set mode"
+  2_set_x: "WXPIN(pin, x_value) - Set timing/config"
+  3_set_y: "WYPIN(pin, y_value) - Set data/count"
+  4_enable: "DIRH(pin) - Enable smart pin"
+  5_operate: "Use RDPIN/RQPIN to read results"
+
+common_uses:
+  - "UART serial communication"
+  - "PWM generation"
+  - "Frequency synthesis"
+  - "Quadrature encoder reading"
+  - "ADC/DAC operations"
+  - "Pulse measurement"
+  - "Protocol generation"
+
+related_methods:
+  - "WXPIN - Set X parameter"
+  - "WYPIN - Set Y parameter"
+  - "RDPIN - Read and acknowledge pin"
+  - "RQPIN - Read without acknowledge"
+  - "AKPIN - Acknowledge smart pin"
+  - "PINSTART - Complete pin setup"
+  - "PINCLEAR - Clear smart pin mode"
+
+notes:
+  - "Pin direction must be set after WRPIN"
+  - "Mode change takes effect immediately"
+  - "Mode 0 returns pin to normal I/O"
+  - "Some modes require X and Y configuration"
+  - "Smart pins operate independently of cog"
+
+mode_persistence:
+  - "Mode remains until changed or cog stopped"
+  - "Survives DIR changes"
+  - "Not affected by OUT changes"
+  - "Cleared by PINCLEAR or mode 0"
+
+warnings:
+  - "Configure mode before setting DIR"
+  - "Some modes conflict with normal I/O"
+  - "Mode bits must be valid for hardware"
+  - "Incorrect mode can damage external circuits"
+
+see_also:
+  - "language/spin2/methods/wxpin.yaml"
+  - "language/spin2/methods/wypin.yaml"
+  - "language/spin2/methods/pinstart.yaml"
+  - "architecture/smart-pins/*.yaml"

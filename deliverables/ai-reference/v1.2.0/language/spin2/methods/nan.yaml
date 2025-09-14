@@ -1,0 +1,48 @@
+method: NAN
+type: method
+description: |
+  Check if floating-point value is Not-a-Number
+category: Miscellaneous
+syntax: "result := NAN(FloatValue)"
+parameters:
+  - name: "FloatValue"
+    type: "float"
+    description: "Floating-point value to check"
+returns:
+  type: "integer"
+  description: "TRUE (-1) if NaN, FALSE (0) otherwise"
+examples:
+  - code: |
+      ' Check for NaN
+      if NAN(result)
+        ' Handle invalid result
+        result := 0.0
+    description: "Check and handle NaN"
+  - code: |
+      ' Validate calculation
+      value := sqrt(-1.0)  ' Creates NaN
+      if NAN(value)
+        debug("Invalid operation")
+    description: "Detect invalid math operation"
+  - code: |
+      ' Filter NaN from data
+      repeat i from 0 to count-1
+        if not NAN(data[i])
+          process(data[i])
+    description: "Skip NaN values in processing"
+notes:
+  - "NaN results from invalid floating-point operations"
+  - "Examples: 0.0/0.0, sqrt(-1), inf-inf"
+  - "NaN != NaN in comparisons"
+  - "Any operation with NaN produces NaN"
+  - "IEEE 754 floating-point standard"
+  - "Important for robust float handling"
+timing:
+  description: "Immediate bit check"
+  cycles: "2-9 clock cycles"
+related:
+  - Float math operators
+see_also:
+  - "Floating-point operations"
+  - "IEEE 754 standard"
+  - "Error handling"

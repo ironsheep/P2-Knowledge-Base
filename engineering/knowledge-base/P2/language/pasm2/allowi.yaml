@@ -5,10 +5,18 @@ timing:
   cycles: 2
   type: fixed
 group: Interrupts
-description: 'ALLOWI re-enables interrupt branching; the default on cog start. ALLOWI is the complement
-  of the STALLI Result: Any stalled and future interrupts are allowed.'
+description: 'ALLOWI re-enables interrupt branching; the default on cog start. ALLOWI
+  is the complement of the STALLI Result: Any stalled and future interrupts are allowed.'
 category: Interrupt Instruction - Allow interrupts.
 related:
 - STALLI
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_pollwait
+  pattern: ''
+  description: No operands - poll/wait instruction (moves S to D, sets S to $024)
+  valueType: 28
+compiler_encoding:
+  operandFormat: 28
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

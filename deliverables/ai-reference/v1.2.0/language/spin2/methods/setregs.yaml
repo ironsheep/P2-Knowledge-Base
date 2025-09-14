@@ -1,0 +1,58 @@
+method: SETREGS
+type: method
+description: |
+  Copy hub RAM to cog registers
+category: Miscellaneous
+syntax: "SETREGS(HubAddress, CogAddress, Count)"
+parameters:
+  - name: "HubAddress"
+    type: "address"
+    description: "Hub RAM source address"
+  - name: "CogAddress"
+    type: "integer"
+    description: "Starting cog register address (0-511)"
+  - name: "Count"
+    type: "integer"
+    description: "Number of longs to copy"
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Load PASM code into cog
+      SETREGS(@pasm_code, $100, 50)  ' Load 50 longs
+    description: "Load PASM code to cog RAM"
+  - code: |
+      ' Restore saved registers
+      VAR
+        LONG saved_regs[16]
+      
+      SETREGS(@saved_regs, $1F0, 16)  ' Restore $1F0-$1FF
+    description: "Restore cog register state"
+  - code: |
+      ' Initialize PASM variables
+      VAR
+        LONG init_data[10]
+      
+      repeat i from 0 to 9
+        init_data[i] := i * 100
+      SETREGS(@init_data, $100, 10)
+    description: "Set PASM variables in cog"
+notes:
+  - "Copies from hub RAM to cog RAM"
+  - "Cog addresses are 0-511 (2KB)"
+  - "Each register is 32 bits (1 long)"
+  - "Can overwrite running code - use caution"
+  - "Useful for loading PASM code/data"
+  - "Count must not exceed remaining registers"
+timing:
+  description: "Hub transfer operation"
+  cycles: "~8 + (count * 2) clock cycles"
+related:
+  - GETREGS
+  - REGLOAD
+  - REGEXEC
+see_also:
+  - "Cog memory access"
+  - "PASM loading"
+  - "Dynamic code loading"

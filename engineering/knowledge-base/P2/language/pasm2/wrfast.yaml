@@ -5,9 +5,17 @@ timing:
   cycles: 2
   type: conditional
 group: Hub FIFO - New Write
-description: Begin new fast hub write via FIFO. D[31] = no wait, D[13:0] = block size in 64-byte units
-  (0 = max), S[19:0] = block start address.
+description: Begin new fast hub write via FIFO. D[31] = no wait, D[13:0] = block size
+  in 64-byte units (0 = max), S[19:0] = block start address.
 category: Hub FIFO - New Write
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+compiler_operand_format:
+  name: operand_ls
+  pattern: D/#,S/#
+  description: 'Two operands: destination/immediate, source/immediate'
+  valueType: 13
+compiler_encoding:
+  operandFormat: 13
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

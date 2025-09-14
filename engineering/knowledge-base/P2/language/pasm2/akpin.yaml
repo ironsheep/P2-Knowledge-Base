@@ -5,11 +5,20 @@ timing:
   cycles: 2
   type: fixed
 group: Smart Pins
-description: 'AKPIN acknowledges the Smart Pin(s) designated by Src. This lowers the corresponding IN
-  signal(s) so that Result: One or more Smart Pins is acknowledged; lowering their corresponding IN signal(s).'
+description: 'AKPIN acknowledges the Smart Pin(s) designated by Src. This lowers the
+  corresponding IN signal(s) so that Result: One or more Smart Pins is acknowledged;
+  lowering their corresponding IN signal(s).'
 category: I/O Pin (Smart Logic) Instruction - Acknowledge smart pin(s).
 parameters:
-- Src is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the Smart Pin(s)
-  to acknowledge.
+- Src is a register, 9-bit literal, or 11-bit augmented literal whose value identifies
+  the Smart Pin(s) to acknowledge.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_akpin
+  pattern: S/#
+  description: 'Acknowledge pin: pin number/immediate'
+  valueType: 34
+compiler_encoding:
+  operandFormat: 34
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

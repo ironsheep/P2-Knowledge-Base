@@ -1,0 +1,8 @@
+directive: "RES"
+type: assembly_directive
+category: "Assembly"
+description: |
+  Reserve space (advance origin)
+syntax: "['RES count']"
+examples:
+  - "RES 16  // Reserve 16 locations"

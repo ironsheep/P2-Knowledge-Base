@@ -1,0 +1,10 @@
+register: "PB"
+type: register
+category: "Call Targets"
+description: |
+  Parameter B / call target
+examples:
+  - "PB := @function"
+  - "CALL PB"
+address: "503"
+access: "read_write"

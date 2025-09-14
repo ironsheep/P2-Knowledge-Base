@@ -1,0 +1,55 @@
+method: XYPOL
+type: method
+description: |
+  Convert Cartesian coordinates to polar using CORDIC
+category: Math/CORDIC Operations
+syntax: "Rho, Theta := XYPOL(X, Y)"
+parameters:
+  - name: "X"
+    type: "long"
+    description: "X coordinate (32-bit signed)"
+  - name: "Y"
+    type: "long"
+    description: "Y coordinate (32-bit signed)"
+returns:
+  type: "multiple"
+  description: "Returns Rho (radius) and Theta (angle)"
+examples:
+  - code: |
+      ' Convert Cartesian to polar
+      rho, theta := XYPOL(100, 100)  
+      ' Result: rho ≈ 141, theta ≈ $2000_0000 (45°)
+    description: "Basic Cartesian to polar conversion"
+  - code: |
+      ' Calculate distance and angle to target
+      dx := target_x - current_x
+      dy := target_y - current_y
+      distance, angle := XYPOL(dx, dy)
+    description: "Find distance and direction to target"
+  - code: |
+      ' Convert joystick X,Y to magnitude and direction
+      magnitude, direction := XYPOL(joy_x - 128, joy_y - 128)
+      if magnitude > threshold
+        move_player(direction, magnitude)
+    description: "Process joystick input"
+notes:
+  - "Uses P2's hardware CORDIC engine"
+  - "Angle units: $0000_0000 = 0°, $4000_0000 = 90°, $8000_0000 = 180°, $C000_0000 = 270°"
+  - "Rho (radius) is always positive"
+  - "Theta covers full 360° range based on quadrant"
+  - "Handles all four quadrants correctly"
+  - "Result is scaled by CORDIC K factor (≈1.647)"
+  - "38-clock cycle operation"
+timing:
+  description: "CORDIC operation"
+  cycles: "38 clock cycles"
+related:
+  - POLXY
+  - ROTXY
+  - QSIN
+  - QCOS
+see_also:
+  - "CORDIC operations"
+  - "Polar coordinates"
+  - "Coordinate conversion"
+  - "Distance calculation"

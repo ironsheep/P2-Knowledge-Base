@@ -5,20 +5,28 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign bit) into new
-  leftmost bits.
-category: Math Instruction - Divide signed 32-bit integer by power-of-two; a.k.a shift bits right, extending
-  the MSB.
+description: The bits of Dest are shifted right by Src bits, extending Dest[31] (the
+  sign bit) into new leftmost bits.
+category: Math Instruction - Divide signed 32-bit integer by power-of-two; a.k.a shift
+  bits right, extending the MSB.
 flags_affected:
   C:
     formula: last bit shifted out if S[4:0] > 0, else D[0]
 parameters:
 - Dest is the register containing the value to arithmetically right shift by Src bits.
-- Src is a register or 5-bit literal whose value indicates the number of bits to arithmetically shift
-  right.
+- Src is a register or 5-bit literal whose value indicates the number of bits to arithmetically
+  shift right.
 - WC, WZ, or WCZ are optional effects to update flags.
 related:
 - SHR
 - SH
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:
+  operandFormat: 0
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

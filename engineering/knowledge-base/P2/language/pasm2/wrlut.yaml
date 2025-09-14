@@ -10,3 +10,11 @@ category: Lookup Table
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+compiler_operand_format:
+  name: operand_lsp
+  pattern: D/#,S/#/PTRA/PTRB
+  description: 'Memory operation: destination/immediate, source/immediate/pointer'
+  valueType: 16
+compiler_encoding:
+  operandFormat: 16
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

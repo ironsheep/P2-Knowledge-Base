@@ -5,19 +5,21 @@ timing:
   cycles: 2
   type: fixed
 group: Register Indirection
-description: 'ALTI substitutes fields from Dest for one or more of the next instruction''s pipelined Dest,
-  Src, Result, Instr, FX, Result: The next instruction''s pipelined field value values are substituted
-  from the Dest template, and Dest is modified per Src configuration (syntax 1), or the entire Dest opcode
-  (instruction) is executed in place of the next instruction (syntax 2).'
-category: Indirection Instruction - Substitute next instruction's field values from template, per configuration.
+description: 'ALTI substitutes fields from Dest for one or more of the next instruction''s
+  pipelined Dest, Src, Result, Instr, FX, Result: The next instruction''s pipelined
+  field value values are substituted from the Dest template, and Dest is modified
+  per Src configuration (syntax 1), or the entire Dest opcode (instruction) is executed
+  in place of the next instruction (syntax 2).'
+category: Indirection Instruction - Substitute next instruction's field values from
+  template, per configuration.
 flags_affected:
   C:
     when: D
 parameters:
-- Dest is the register whose value contains one or more of the next instruction's field substitutes or
-  an entire 32-bit opcode for full substitution.
-- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value describes the substitutions
-  and Dest modifications to perform.
+- Dest is the register whose value contains one or more of the next instruction's
+  field substitutes or an entire 32-bit opcode for full substitution.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value
+  describes the substitutions and Dest modifications to perform.
 related:
 - SETD
 - SETS
@@ -27,3 +29,11 @@ related:
 - ALTR
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_duii
+  pattern: D{,S/#}
+  description: Destination, optional source (ALTI instruction modifier)
+  valueType: 4
+compiler_encoding:
+  operandFormat: 4
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

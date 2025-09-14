@@ -10,66 +10,98 @@ category: Streamer
 documentation_source: enhanced_from_code_study
 documentation_level: comprehensive
 needs_documentation: false
-
 examples:
-  - context: SPI Flash Programming with Smart Pin Coordination
-    code: |
-      ' Streamer + Smart Pin parallel operation for max throughput
-      xinit   rmode, pa        ' Start streamer outputting 256*8 bits
-      wypin   tranp, #spi_ck   ' Start 256*8*2 clock transitions
-      waitxfi                  ' Wait for streamer completion
-      
-      ' Where:
-      ' rmode = $8081_0800 + spi_di<<17  ' 1-pin output, bytes-msb-first, 256 bytes from hub
-      ' tranp = 256 * 8 * 2              ' Number of clock transitions
-    source: flash_loader.spin2
-    
-  - context: SPI Command Transmission
-    code: |
-      ' Single byte command
-      xinit   bmode, pa        ' Start outputting 8 bits to spi_di
-      wypin   #16, #spi_ck     ' Start 16 spi_ck transitions
-      waitxfi                  ' Wait for streamer to finish
-      
-      ' Where:
-      ' bmode = $4081_0008 + spi_di<<17  ' 1-pin output, bytes-msb-first, 1 byte from S
-    source: flash_loader.spin2
-    
-  - context: High-Speed Data Reception
-    code: |
-      ' Receive data from SPI flash to hub
-      wypin   x, #spi_ck       ' Start spi_ck transitions
-      waitx   #3               ' Align spi_ck with spi_do sampling
-      xinit   wmode, #0        ' Start inputting spi_do bits to hub
-      waitxfi                  ' Wait for streamer to finish
-      
-      ' Where:
-      ' wmode = $C081_0000 + spi_do<<17  ' 1-pin input, bytes-msb-first, to hub
-    source: flash_loader.spin2
+- context: SPI Flash Programming with Smart Pin Coordination
+  code: ''' Streamer + Smart Pin parallel operation for max throughput
 
+    xinit   rmode, pa        '' Start streamer outputting 256*8 bits
+
+    wypin   tranp, #spi_ck   '' Start 256*8*2 clock transitions
+
+    waitxfi                  '' Wait for streamer completion
+
+
+    '' Where:
+
+    '' rmode = $8081_0800 + spi_di<<17  '' 1-pin output, bytes-msb-first, 256 bytes
+    from hub
+
+    '' tranp = 256 * 8 * 2              '' Number of clock transitions
+
+    '
+  source: flash_loader.spin2
+- context: SPI Command Transmission
+  code: ''' Single byte command
+
+    xinit   bmode, pa        '' Start outputting 8 bits to spi_di
+
+    wypin   #16, #spi_ck     '' Start 16 spi_ck transitions
+
+    waitxfi                  '' Wait for streamer to finish
+
+
+    '' Where:
+
+    '' bmode = $4081_0008 + spi_di<<17  '' 1-pin output, bytes-msb-first, 1 byte from
+    S
+
+    '
+  source: flash_loader.spin2
+- context: High-Speed Data Reception
+  code: ''' Receive data from SPI flash to hub
+
+    wypin   x, #spi_ck       '' Start spi_ck transitions
+
+    waitx   #3               '' Align spi_ck with spi_do sampling
+
+    xinit   wmode, #0        '' Start inputting spi_do bits to hub
+
+    waitxfi                  '' Wait for streamer to finish
+
+
+    '' Where:
+
+    '' wmode = $C081_0000 + spi_do<<17  '' 1-pin input, bytes-msb-first, to hub
+
+    '
+  source: flash_loader.spin2
 patterns:
-  - name: Streamer-SmartPin Synchronization
-    description: |
-      Combines streamer for data transfer with smart pin for clock generation,
-      enabling parallel operation without CPU intervention.
-    implementation: |
-      ' Pattern: Start both streamer and smart pin simultaneously
-      xinit   mode, data       ' Start data transfer
-      wypin   count, #clk_pin  ' Start clock generation
-      waitxfi                  ' Wait for completion
-      
-      ' This achieves maximum throughput by offloading both
-      ' data movement and clock generation to hardware.
+- name: Streamer-SmartPin Synchronization
+  description: 'Combines streamer for data transfer with smart pin for clock generation,
 
+    enabling parallel operation without CPU intervention.
+
+    '
+  implementation: ''' Pattern: Start both streamer and smart pin simultaneously
+
+    xinit   mode, data       '' Start data transfer
+
+    wypin   count, #clk_pin  '' Start clock generation
+
+    waitxfi                  '' Wait for completion
+
+
+    '' This achieves maximum throughput by offloading both
+
+    '' data movement and clock generation to hardware.
+
+    '
 related_instructions:
-  - XSTOP: Stop streamer immediately
-  - XCONT: Continue streamer from current phase
-  - WAITXFI: Wait for streamer to finish
-  - WYPIN: Set smart pin Y parameter (clock count)
-  - SETXFRQ: Set streamer frequency
-
+- XSTOP: Stop streamer immediately
+- XCONT: Continue streamer from current phase
+- WAITXFI: Wait for streamer to finish
+- WYPIN: Set smart pin Y parameter (clock count)
+- SETXFRQ: Set streamer frequency
 notes:
-  - XINIT zeros the phase accumulator, starting fresh
-  - Streamer and smart pins can work in parallel for maximum efficiency
-  - Mode word in D configures transfer direction, pin count, and data format
-  - Source in S typically contains data or hub address
+- XINIT zeros the phase accumulator, starting fresh
+- Streamer and smart pins can work in parallel for maximum efficiency
+- Mode word in D configures transfer direction, pin count, and data format
+- Source in S typically contains data or hub address
+compiler_operand_format:
+  name: operand_ls
+  pattern: D/#,S/#
+  description: 'Two operands: destination/immediate, source/immediate'
+  valueType: 13
+compiler_encoding:
+  operandFormat: 13
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

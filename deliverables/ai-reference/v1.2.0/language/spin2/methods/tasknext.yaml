@@ -1,0 +1,49 @@
+method: TASKNEXT
+type: method
+description: |
+  Yield control to next task in round-robin schedule
+category: Task Operations
+syntax: "TASKNEXT()"
+parameters: []
+returns:
+  type: "void"
+  description: "No return value"
+examples:
+  - code: |
+      ' Cooperative yield
+      repeat
+        do_work_chunk()
+        TASKNEXT()  ' Let other tasks run
+    description: "Yield after work chunk"
+  - code: |
+      ' Polling with yield
+      repeat
+        if data_ready
+          process_data()
+        TASKNEXT()  ' Don't hog CPU
+    description: "Polling with cooperation"
+  - code: |
+      ' Long computation with yields
+      repeat i from 0 to 1000
+        calculate_step(i)
+        if i // 10 == 0
+          TASKNEXT()  ' Yield every 10 iterations
+    description: "Periodic yielding in long loop"
+notes:
+  - "Voluntary context switch"
+  - "Enables cooperative multitasking"
+  - "Current task pauses, next task runs"
+  - "Returns when task gets control again"
+  - "Essential for task cooperation"
+  - "Prevents task starvation"
+timing:
+  description: "Context switch time"
+  cycles: "~20-40 clock cycles"
+related:
+  - TASKWAIT
+  - TASKSPIN
+  - TASKHALT
+see_also:
+  - "Cooperative multitasking"
+  - "Task scheduling"
+  - "Context switching"

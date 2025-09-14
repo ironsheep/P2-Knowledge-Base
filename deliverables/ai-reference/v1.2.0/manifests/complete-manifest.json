@@ -1,0 +1,1395 @@
+{
+  "version": "1.2.0",
+  "generated": "2025-09-13T22:27:15.011489",
+  "statistics": {
+    "instructions": 0,
+    "keywords": 36,
+    "operators": 74,
+    "methods": 87,
+    "registers": 25,
+    "assembly_directives": 8,
+    "debug_commands": 23,
+    "special_symbols": 12,
+    "system_variables": 3,
+    "total_elements": 268
+  },
+  "categories": {
+    "keywords": {
+      "count": 36,
+      "elements": [
+        {
+          "name": "LOOKDOWNZ",
+          "description": "Returns zero-based index of matching value in list\n",
+          "category": "Built-in Functions"
+        },
+        {
+          "name": "FROM",
+          "description": "Starting value in REPEAT loop range\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "STEP",
+          "description": "Increment value in REPEAT loop range\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "RETURN",
+          "description": "Return from method with optional value\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "ELSEIFNOT",
+          "description": "Additional conditional branch with negated condition\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "IF",
+          "description": "Conditional execution based on expression\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "IFNOT",
+          "description": "Conditional execution with negated condition\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "ELSEIF",
+          "description": "Additional conditional branch in IF statement\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "OBJ",
+          "description": "Object section - declares object instances\n",
+          "category": "Block Structure"
+        },
+        {
+          "name": "CON",
+          "description": "Constants section - defines named constant values\n",
+          "category": "Block Structure"
+        },
+        {
+          "name": "OTHER",
+          "description": "Default case in CASE statement\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "NEXT",
+          "description": "Continue to next iteration of loop\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "FILE",
+          "description": "Compiler directive for file inclusion\n",
+          "category": "Special"
+        },
+        {
+          "name": "QUIT",
+          "description": "Exit loop immediately\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "BYTE",
+          "description": "8-bit unsigned integer type (0-255)\n",
+          "category": "Data Types"
+        },
+        {
+          "name": "ABORT",
+          "description": "Abort method execution with optional error value\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "REPEAT",
+          "description": "Loop construct with various forms\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "CASE_FAST",
+          "description": "Optimized case statement for sequential values\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "TO",
+          "description": "Ending value in REPEAT loop range\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "DAT",
+          "description": "Data section - contains data and inline assembly\n",
+          "category": "Block Structure"
+        },
+        {
+          "name": "VAR",
+          "description": "Variables section - declares instance variables\n",
+          "category": "Block Structure"
+        },
+        {
+          "name": "STRING",
+          "description": "Convert expression to string representation\n",
+          "category": "Built-in Functions"
+        },
+        {
+          "name": "WORD",
+          "description": "16-bit unsigned integer type (0-65535)\n",
+          "category": "Data Types"
+        },
+        {
+          "name": "BYTEFIT",
+          "description": "Expression that fits in a byte constant\n",
+          "category": "Data Types"
+        },
+        {
+          "name": "LONG",
+          "description": "32-bit signed integer type\n",
+          "category": "Data Types"
+        },
+        {
+          "name": "LOOKDOWN",
+          "description": "Returns index of matching value in list\n",
+          "category": "Built-in Functions"
+        },
+        {
+          "name": "UNTIL",
+          "description": "Loop condition - continue until condition becomes true\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "WITH",
+          "description": "Object context specifier for method calls\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "CASE",
+          "description": "Multi-way branch based on expression value\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "LOOKUP",
+          "description": "Returns value from list at given index\n",
+          "category": "Built-in Functions"
+        },
+        {
+          "name": "PRI",
+          "description": "Private method declaration - accessible only within object\n",
+          "category": "Block Structure"
+        },
+        {
+          "name": "LOOKUPZ",
+          "description": "Returns value from list at given zero-based index\n",
+          "category": "Built-in Functions"
+        },
+        {
+          "name": "WORDFIT",
+          "description": "Expression that fits in a word constant\n",
+          "category": "Data Types"
+        },
+        {
+          "name": "WHILE",
+          "description": "Loop condition - continue while condition remains true\n",
+          "category": "Control Flow"
+        },
+        {
+          "name": "PUB",
+          "description": "Public method declaration - accessible from other objects\n",
+          "category": "Block Structure"
+        },
+        {
+          "name": "ELSE",
+          "description": "Default case in IF statement\n",
+          "category": "Control Flow"
+        }
+      ]
+    },
+    "operators": {
+      "count": 74,
+      "elements": [
+        {
+          "name": "^^",
+          "description": "Logical XOR operator\n",
+          "category": "Bitwise"
+        },
+        {
+          "name": "?",
+          "description": "Conditional selection\n",
+          "category": "Ternary"
+        },
+        {
+          "name": "FRAC",
+          "description": "Calculate fraction\n",
+          "category": "Math"
+        },
+        {
+          "name": ":",
+          "description": "Conditional selection\n",
+          "category": "Ternary"
+        },
+        {
+          "name": "!&&",
+          "description": "Boolean AND/NAND\n",
+          "category": "Logical AND"
+        },
+        {
+          "name": "+<",
+          "description": "Signed/unsigned compare\n",
+          "category": "Comparison"
+        },
+        {
+          "name": "ROR",
+          "description": "Bit manipulation\n",
+          "category": "Shift/Rotate"
+        },
+        {
+          "name": "-.",
+          "description": "Integer/float subtraction\n",
+          "category": "Subtract"
+        },
+        {
+          "name": ">=",
+          "description": "Signed/unsigned compare\n",
+          "category": "Comparison"
+        },
+        {
+          "name": "/.",
+          "description": "Divide/float/modulo/unsigned\n",
+          "category": "Divide"
+        },
+        {
+          "name": "SCA",
+          "description": "Scale value (also PASM2 instruction)\n",
+          "category": "Unary"
+        },
+        {
+          "name": "+.",
+          "description": "Integer/float addition\n",
+          "category": "Add"
+        },
+        {
+          "name": "SIGNX",
+          "description": "Bit manipulation\n",
+          "category": "Shift/Rotate"
+        },
+        {
+          "name": "NOT",
+          "description": "Logical NOT (also PASM2 instruction)\n",
+          "category": "Unary"
+        },
+        {
+          "name": "+>=",
+          "description": "Signed/unsigned compare\n",
+          "category": "Comparison"
+        },
+        {
+          "name": "&&",
+          "description": "Boolean AND/NAND\n",
+          "category": "Logical AND"
+        },
+        {
+          "name": ">",
+          "description": "Signed/unsigned compare\n",
+          "category": "Comparison"
+        },
+        {
+          "name": "+<=>",
+          "description": "Signed/unsigned compare\n",
+          "category": "Comparison"
+        },
+        {
+          "name": "??",
+          "description": "Pre/post increment/decrement/random\n",
+          "category": "Var-modify"
+        },
+        {
+          "name": "ADDBITS",
+          "description": "Add bit count to pin number\n",
+          "category": "Pin"
+        },
+        {
+          "name": "BMASK",
+          "description": "Create bit mask from bit count (also PASM2 instruction)\n",
+          "category": "Unary"
+        },
+        {
+          "name": "FABS",
+          "description": "Floating point absolute value\n",
+          "category": "Math"
+        },
+        {
+          "name": "XOR",
+          "description": "Logical XOR (also PASM2 instruction)\n",
+          "category": "Unary"
+        },
+        {
+          "name": "ABS",
+          "description": "` `^^` `ENCOD` `DECOD` `ONES` `SQRT` `QLOG` `QEXP`\n",
+          "category": "\\"
+        },
+        {
+          "name": "SCAS",
+          "description": "Scale value signed (also PASM2 instruction)\n",
+          "category": "Unary"
+        },
+        {
+          "name": "<#",
+          "description": "Max/min limiting\n",
+          "category": "Limit"
+        },
+        {
+          "name": "<=",
+          "description": "Signed/unsigned compare\n",
+          "category": "Comparison"
+        },
+        {
+          "name": ">=.",
+          "description": "Floating point greater than or equal comparison\n",
+          "category": "Float Compare"
+        },
+        {
+          "name": "REV",
+          "description": "Bit manipulation\n",
+          "category": "Shift/Rotate"
+        },
+        {
+          "name": "QLOG",
+          "description": "Quick logarithm (also PASM2 instruction)\n",
+          "category": "Unary"
+        },
+        {
+          "name": "<>>",
+          "description": "Equal/not equal (logical/bitwise)\n",
+          "category": "Equality"
+        },
+        {
+          "name": "+<=",
+          "description": "Signed/unsigned compare\n",
+          "category": "Comparison"
+        },
+        {
+          "name": ":=",
+          "description": "Assignment operator\n",
+          "category": "Assignment"
+        },
+        {
+          "name": "SAR",
+          "description": "Bit manipulation\n",
+          "category": "Shift/Rotate"
+        },
+        {
+          "name": "--",
+          "description": "Pre/post increment/decrement/random\n",
+          "category": "Var-modify"
+        },
+        {
+          "name": "ROL",
+          "description": "Bit manipulation\n",
+          "category": "Shift/Rotate"
+        },
+        {
+          "name": "#>",
+          "description": "Max/min limiting\n",
+          "category": "Limit"
+        },
+        {
+          "name": "||",
+          "description": "Logical OR operator\n",
+          "category": "Bitwise"
+        },
+        {
+          "name": "++",
+          "description": "Pre/post increment/decrement/random\n",
+          "category": "Var-modify"
+        },
+        {
+          "name": "AND",
+          "description": "Logical AND (also PASM2 instruction)\n",
+          "category": "Unary"
+        },
+        {
+          "name": "===",
+          "description": "Equal/not equal (logical/bitwise)\n",
+          "category": "Equality"
+        },
+        {
+          "name": "-",
+          "description": "Integer/float subtraction\n",
+          "category": "Subtract"
+        },
+        {
+          "name": "...",
+          "description": "Line continuation operator - allows a single logical line to span multiple physical lines in SPIN2\n",
+          "category": "Special"
+        },
+        {
+          "name": "<<",
+          "description": "Bit manipulation\n",
+          "category": "Shift/Rotate"
+        },
+        {
+          "name": "+>",
+          "description": "Signed/unsigned compare\n",
+          "category": "Comparison"
+        },
+        {
+          "name": "QEXP",
+          "description": "Quick exponential (also PASM2 instruction)\n",
+          "category": "Unary"
+        },
+        {
+          "name": "+//",
+          "description": "Unsigned remainder (modulo)\n",
+          "category": "Arithmetic"
+        },
+        {
+          "name": "/",
+          "description": "Divide/float/modulo/unsigned\n",
+          "category": "Divide"
+        },
+        {
+          "name": "<=.",
+          "description": "Floating point less than or equal comparison\n",
+          "category": "Float Compare"
+        },
+        {
+          "name": "OR",
+          "description": "Logical OR (also PASM2 instruction)\n",
+          "category": "Unary"
+        },
+        {
+          "name": "<=>",
+          "description": "Signed/unsigned compare\n",
+          "category": "Comparison"
+        },
+        {
+          "name": "*.",
+          "description": "Integer/float multiply\n",
+          "category": "Multiply"
+        },
+        {
+          "name": "ZEROX",
+          "description": "Bit manipulation\n",
+          "category": "Shift/Rotate"
+        },
+        {
+          "name": "+",
+          "description": "Integer/float addition\n",
+          "category": "Add"
+        },
+        {
+          "name": "Unsigned Modulo Add",
+          "description": "Add with unsigned modulo (circular arithmetic)",
+          "category": "arithmetic_operators"
+        },
+        {
+          "name": "ENCOD",
+          "description": "Encode highest bit position (also PASM2 instruction)\n",
+          "category": "Unary"
+        },
+        {
+          "name": "==",
+          "description": "Equal/not equal (logical/bitwise)\n",
+          "category": "Equality"
+        },
+        {
+          "name": "<",
+          "description": "Signed/unsigned compare\n",
+          "category": "Comparison"
+        },
+        {
+          "name": ":=:",
+          "description": "Swap operator\n",
+          "category": "Assignment"
+        },
+        {
+          "name": "SQRT",
+          "description": "Integer square root\n",
+          "category": "Math"
+        },
+        {
+          "name": "+/",
+          "description": "Divide/float/modulo/unsigned\n",
+          "category": "Divide"
+        },
+        {
+          "name": "? :",
+          "description": "Ternary conditional operator\n",
+          "category": "Assignment"
+        },
+        {
+          "name": "//",
+          "description": "Divide/float/modulo/unsigned\n",
+          "category": "Divide"
+        },
+        {
+          "name": ">.",
+          "description": "Floating point greater than comparison\n",
+          "category": "Float Compare"
+        },
+        {
+          "name": "<>.",
+          "description": "Floating point inequality comparison\n",
+          "category": "Float Compare"
+        },
+        {
+          "name": "<.",
+          "description": "Floating point less than comparison\n",
+          "category": "Float Compare"
+        },
+        {
+          "name": "DECOD",
+          "description": "Decode bit position to mask (also PASM2 instruction)\n",
+          "category": "Unary"
+        },
+        {
+          "name": "FSQRT",
+          "description": "Floating point square root\n",
+          "category": "Math"
+        },
+        {
+          "name": "<>",
+          "description": "Equal/not equal (logical/bitwise)\n",
+          "category": "Equality"
+        },
+        {
+          "name": "ONES",
+          "description": "Count number of 1 bits (also PASM2 instruction)\n",
+          "category": "Unary"
+        },
+        {
+          "name": "*",
+          "description": "Integer/float multiply\n",
+          "category": "Multiply"
+        },
+        {
+          "name": "ADDPINS",
+          "description": "Add pin count to pin number\n",
+          "category": "Pin"
+        },
+        {
+          "name": ">>",
+          "description": "Bit manipulation\n",
+          "category": "Shift/Rotate"
+        },
+        {
+          "name": "==.",
+          "description": "Floating point equality comparison\n",
+          "category": "Float Compare"
+        }
+      ]
+    },
+    "methods": {
+      "count": 87,
+      "elements": [
+        {
+          "name": "GETCRC",
+          "description": "Calculate CRC using hardware CRC engine\n",
+          "category": "Miscellaneous"
+        },
+        {
+          "name": "LONGFILL",
+          "description": "Fill a specified region of hub RAM with a 32-bit long value.\nEfficiently sets multiple consecutive l...",
+          "category": "memory_operations"
+        },
+        {
+          "name": "LOOKDOWNZ",
+          "description": "Find 0-based index of value in list\n",
+          "category": "Lookup Operations"
+        },
+        {
+          "name": "GETCT",
+          "description": "Get the current 32-bit system counter value.\nThe system counter increments once per clock cycle cont...",
+          "category": "timing"
+        },
+        {
+          "name": "NAN",
+          "description": "Check if floating-point value is Not-a-Number\n",
+          "category": "Miscellaneous"
+        },
+        {
+          "name": "SETREGS",
+          "description": "Copy hub RAM to cog registers\n",
+          "category": "Miscellaneous"
+        },
+        {
+          "name": "COGINIT",
+          "description": "Start PASM2 code in a specified or available cog.\nLoads PASM2 code from hub RAM into cog RAM and beg...",
+          "category": "cog_management"
+        },
+        {
+          "name": "COGSPIN",
+          "description": "Start a Spin2 method in a specified or available cog.\nLoads the Spin2 interpreter into the cog and b...",
+          "category": "cog_management"
+        },
+        {
+          "name": "CLKSET",
+          "description": "Safely set new clock mode and frequency\n",
+          "category": "Miscellaneous"
+        },
+        {
+          "name": "PINHIGH",
+          "description": "Drive specified pin(s) high (output mode, logic 1).\nSets the direction bit(s) to output (DIR=1) and ...",
+          "category": "pin_control"
+        },
+        {
+          "name": "WAITATN",
+          "description": "Wait for attention signal from another cog\n",
+          "category": "COG Management"
+        },
+        {
+          "name": "COGATN",
+          "description": "Strobe the attention signal to one or more cogs.\nSets attention flags that can be polled or waited o...",
+          "category": "cog_management"
+        },
+        {
+          "name": "COGSTOP",
+          "description": "Stop a specified cog immediately.\nThe cog stops executing and becomes available for reuse.\nAll pins ...",
+          "category": "cog_management"
+        },
+        {
+          "name": "BYTEMOVE",
+          "description": "Copy a specified number of bytes from source to destination in hub RAM.\nHandles overlapping regions ...",
+          "category": "memory_operations"
+        },
+        {
+          "name": "WAITMS",
+          "description": "Delay execution for a specified number of milliseconds.\nProvides a simple timing delay that automati...",
+          "category": "timing"
+        },
+        {
+          "name": "COGID",
+          "description": "Get the ID number of the currently executing cog.\nReturns a value from 0 to 7 identifying which cog ...",
+          "category": "cog_management"
+        },
+        {
+          "name": "PINFLOAT",
+          "description": "Float specified pin(s) to high-impedance state (input mode).\nClears the direction bit(s) to input (D...",
+          "category": "pin_control"
+        },
+        {
+          "name": "PINSTART",
+          "description": "Configure and start smart pin with mode and parameters.\nSupports pin groups via ADDPINS operator for...",
+          "category": "Smart Pin Operations"
+        },
+        {
+          "name": "TASKNEXT",
+          "description": "Yield control to next task in round-robin schedule\n",
+          "category": "Task Operations"
+        },
+        {
+          "name": "STRSIZE",
+          "description": "Get length of null-terminated string\n",
+          "category": "String Operations"
+        },
+        {
+          "name": "QSIN",
+          "description": "Calculate sine of angle using hardware CORDIC\n",
+          "category": "Math/CORDIC Operations"
+        },
+        {
+          "name": "REGLOAD",
+          "description": "Load PASM2 code from hub to cog registers\n",
+          "category": "Miscellaneous"
+        },
+        {
+          "name": "LONGSWAP",
+          "description": "Swap long values between two memory locations\n",
+          "category": "Memory Operations"
+        },
+        {
+          "name": "WORDMOVE",
+          "description": "Copy words from one memory location to another\n",
+          "category": "Memory Operations"
+        },
+        {
+          "name": "LOCKREL",
+          "description": "Release a captured lock\n",
+          "category": "Lock Operations"
+        },
+        {
+          "name": "PINTOGGLE",
+          "description": "Drive and toggle specified pin(s).\nFirst sets the direction bit(s) to output (DIR=1), then inverts t...",
+          "category": "pin_control"
+        },
+        {
+          "name": "TASKHALT",
+          "description": "Pause/halt a running task temporarily\n",
+          "category": "Task Operations"
+        },
+        {
+          "name": "LONGCOMP",
+          "description": "Compare blocks of longs in memory\n",
+          "category": "Memory Operations"
+        },
+        {
+          "name": "RDPIN",
+          "description": "Read smart pin result and clear IN flag (acknowledge)\n",
+          "category": "Smart Pin Operations"
+        },
+        {
+          "name": "ROTXY",
+          "description": "Rotate X,Y coordinates by specified angle using CORDIC\n",
+          "category": "Math/CORDIC Operations"
+        },
+        {
+          "name": "SEND",
+          "description": "Send data bytes using configured output method\n",
+          "category": "Miscellaneous"
+        },
+        {
+          "name": "CALL",
+          "description": "Call inline PASM2 code from Spin2\n",
+          "category": "Miscellaneous"
+        },
+        {
+          "name": "RQPIN",
+          "description": "Read smart pin result without clearing IN flag\n",
+          "category": "Smart Pin Operations"
+        },
+        {
+          "name": "WAITUS",
+          "description": "Delay execution for a specified number of microseconds.\nProvides microsecond-resolution timing delay...",
+          "category": "timing"
+        },
+        {
+          "name": "TASKWAIT",
+          "description": "Wait for specific condition with task yielding\n",
+          "category": "Task Operations"
+        },
+        {
+          "name": "QLOG",
+          "description": "Calculate natural logarithm using hardware CORDIC\n",
+          "category": "Math/CORDIC Operations"
+        },
+        {
+          "name": "STRCOMP",
+          "description": "Compare two null-terminated strings\n",
+          "category": "String Operations"
+        },
+        {
+          "name": "HUBSET",
+          "description": "Execute HUBSET instruction for low-level hub configuration\n",
+          "category": "Miscellaneous"
+        },
+        {
+          "name": "SIZEOF",
+          "description": "Get size of structure or data type in bytes\n",
+          "category": "Miscellaneous"
+        },
+        {
+          "name": "LOCKRET",
+          "description": "Return allocated lock to available pool\n",
+          "category": "Lock Operations"
+        },
+        {
+          "name": "TASKID",
+          "description": "Get the current task's ID\n",
+          "category": "Task Operations"
+        },
+        {
+          "name": "LOCKCHK",
+          "description": "Check lock state and ownership without affecting it\n",
+          "category": "Lock Operations"
+        },
+        {
+          "name": "GETREGS",
+          "description": "Copy cog registers to hub RAM\n",
+          "category": "Miscellaneous"
+        },
+        {
+          "name": "TASKCHK",
+          "description": "Check if a task is running\n",
+          "category": "Task Operations"
+        },
+        {
+          "name": "TASKSTOP",
+          "description": "Stop and terminate a running task\n",
+          "category": "Task Operations"
+        },
+        {
+          "name": "WORDFILL",
+          "description": "Fill memory with a repeated word value\n",
+          "category": "Memory Operations"
+        },
+        {
+          "name": "POLLATN",
+          "description": "Check for attention signal without blocking\n",
+          "category": "COG Management"
+        },
+        {
+          "name": "XYPOL",
+          "description": "Convert Cartesian coordinates to polar using CORDIC\n",
+          "category": "Math/CORDIC Operations"
+        },
+        {
+          "name": "BYTE",
+          "description": "Declare byte data or access byte-sized memory\n",
+          "category": "Data Creation"
+        },
+        {
+          "name": "WXPIN",
+          "description": "Write the X parameter register of one or more smart pins.\nThe X register typically controls timing, ...",
+          "category": "smart_pin_operations"
+        },
+        {
+          "name": "TASKRESUME",
+          "description": "Resume a halted task\n",
+          "category": "Task Operations"
+        },
+        {
+          "name": "PINWRITE",
+          "description": "Drive specified pin(s) with data pattern.\nSets the direction bit(s) to output (DIR=1) and writes the...",
+          "category": "pin_control"
+        },
+        {
+          "name": "GETMS",
+          "description": "Get milliseconds elapsed since system boot\n",
+          "category": "Timing Operations"
+        },
+        {
+          "name": "GETSEC",
+          "description": "Get seconds elapsed since system boot\n",
+          "category": "Timing Operations"
+        },
+        {
+          "name": "BYTECOMP",
+          "description": "Complement bytes within a long value",
+          "category": "Memory Operations"
+        },
+        {
+          "name": "WYPIN",
+          "description": "Write the Y parameter register of one or more smart pins.\nThe Y register typically holds data to tra...",
+          "category": "smart_pin_operations"
+        },
+        {
+          "name": "AKPIN",
+          "description": "Acknowledge smart pin by clearing its IN flag\n",
+          "category": "Smart Pin Operations"
+        },
+        {
+          "name": "WAITCT",
+          "description": "Wait until system counter reaches specified tick value\n",
+          "category": "Timing Operations"
+        },
+        {
+          "name": "QEXP",
+          "description": "Calculate exponential (e^x) using hardware CORDIC\n",
+          "category": "Math/CORDIC Operations"
+        },
+        {
+          "name": "STRING",
+          "description": "Create string constant and return its address\n",
+          "category": "String Operations"
+        },
+        {
+          "name": "PINREAD",
+          "description": "Read the current state of specified pin(s).\nReads the input register (IN) for the specified pins reg...",
+          "category": "pin_control"
+        },
+        {
+          "name": "BYTESWAP",
+          "description": "Swap byte values between two memory locations\n",
+          "category": "Memory Operations"
+        },
+        {
+          "name": "RECV",
+          "description": "Receive data byte using configured input method\n",
+          "category": "Miscellaneous"
+        },
+        {
+          "name": "WORD",
+          "description": "Declare word data or access word-sized memory\n",
+          "category": "Data Creation"
+        },
+        {
+          "name": "TASKSPIN",
+          "description": "Start a new Spin2 task within the current cog\n",
+          "category": "Task Operations"
+        },
+        {
+          "name": "LONG",
+          "description": "Declare long data or access long-sized memory\n",
+          "category": "Data Creation"
+        },
+        {
+          "name": "WORDCOMP",
+          "description": "Complement words within a long value",
+          "category": "Memory Operations"
+        },
+        {
+          "name": "COGCHK",
+          "description": "Check if a specified cog is currently running.\nReturns -1 if the cog is running, or 0 if it's stoppe...",
+          "category": "cog_management"
+        },
+        {
+          "name": "LOOKDOWN",
+          "description": "Find 1-based index of value in list\n",
+          "category": "Lookup Operations"
+        },
+        {
+          "name": "LONGMOVE",
+          "description": "Copy a specified number of longs (32-bit values) from source to destination in hub RAM.\nHandles over...",
+          "category": "memory_operations"
+        },
+        {
+          "name": "WORDSWAP",
+          "description": "Swap word values between two memory locations\n",
+          "category": "Memory Operations"
+        },
+        {
+          "name": "LSTRING",
+          "description": "Create length-prefixed string constant\n",
+          "category": "String Operations"
+        },
+        {
+          "name": "WRPIN",
+          "description": "Write the mode configuration register of one or more smart pins.\nSets up the smart pin operating mod...",
+          "category": "smart_pin_operations"
+        },
+        {
+          "name": "REGEXEC",
+          "description": "Load and execute PASM2 code from hub RAM\n",
+          "category": "Miscellaneous"
+        },
+        {
+          "name": "LOOKUP",
+          "description": "Look up value in table using 1-based indexing",
+          "category": "Lookup Operations"
+        },
+        {
+          "name": "PINCLEAR",
+          "description": "Clear smart pin configuration and disable pin\n",
+          "category": "Smart Pin Operations"
+        },
+        {
+          "name": "LOCKTRY",
+          "description": "Attempt to capture a lock without blocking\n",
+          "category": "Lock Operations"
+        },
+        {
+          "name": "GETRND",
+          "description": "Get random number from hardware generator",
+          "category": "Miscellaneous"
+        },
+        {
+          "name": "LOOKUPZ",
+          "description": "Look up value in table using 0-based indexing",
+          "category": "Lookup Operations"
+        },
+        {
+          "name": "POLXY",
+          "description": "Convert polar coordinates to Cartesian using CORDIC\n",
+          "category": "Math/CORDIC Operations"
+        },
+        {
+          "name": "BYTEFILL",
+          "description": "Fill a specified region of hub RAM with a byte value.\nEfficiently sets multiple consecutive bytes to...",
+          "category": "memory_operations"
+        },
+        {
+          "name": "PINLOW",
+          "description": "Drive specified pin(s) low (output mode, logic 0).\nSets the direction bit(s) to output (DIR=1) and d...",
+          "category": "pin_control"
+        },
+        {
+          "name": "MULDIV64",
+          "description": "Multiply then divide with 64-bit intermediate result\n",
+          "category": "Math/CORDIC Operations"
+        },
+        {
+          "name": "POLLCT",
+          "description": "Check if system counter has passed specified tick value\n",
+          "category": "Timing Operations"
+        },
+        {
+          "name": "STRCOPY",
+          "description": "Copy null-terminated string with length limit\n",
+          "category": "String Operations"
+        },
+        {
+          "name": "LOCKNEW",
+          "description": "Allocate a new hardware lock for inter-cog synchronization\n",
+          "category": "Lock Operations"
+        },
+        {
+          "name": "QCOS",
+          "description": "Calculate cosine of angle using hardware CORDIC\n",
+          "category": "Math/CORDIC Operations"
+        }
+      ]
+    },
+    "registers": {
+      "count": 25,
+      "elements": [
+        {
+          "name": "IRET3",
+          "description": "Interrupt 3 return vector\n",
+          "category": "Interrupt Vectors"
+        },
+        {
+          "name": "DIRB",
+          "description": "Direction register B (pins 32-63)\n",
+          "category": "I/O Registers"
+        },
+        {
+          "name": "PR1",
+          "description": "General purpose register 1\n",
+          "category": "General Purpose"
+        },
+        {
+          "name": "OUTB",
+          "description": "Output register B (pins 32-63)\n",
+          "category": "I/O Registers"
+        },
+        {
+          "name": "PR0",
+          "description": "General purpose register 0\n",
+          "category": "General Purpose"
+        },
+        {
+          "name": "PTRA",
+          "description": "Pointer A register\n",
+          "category": "Special Function"
+        },
+        {
+          "name": "TASKHLT",
+          "description": "Task halt register (v47+)\n",
+          "category": "Task Management"
+        },
+        {
+          "name": "IRET2",
+          "description": "Interrupt 2 return vector\n",
+          "category": "Interrupt Vectors"
+        },
+        {
+          "name": "PR7",
+          "description": "General purpose register 7\n",
+          "category": "General Purpose"
+        },
+        {
+          "name": "PA",
+          "description": "Parameter A / call target\n",
+          "category": "Call Targets"
+        },
+        {
+          "name": "IJMP1",
+          "description": "Interrupt 1 jump vector\n",
+          "category": "Interrupt Vectors"
+        },
+        {
+          "name": "PR6",
+          "description": "General purpose register 6\n",
+          "category": "General Purpose"
+        },
+        {
+          "name": "INB",
+          "description": "Input register B (pins 32-63)\n",
+          "category": "I/O Registers"
+        },
+        {
+          "name": "IJMP3",
+          "description": "Interrupt 3 jump vector\n",
+          "category": "Interrupt Vectors"
+        },
+        {
+          "name": "PR5",
+          "description": "General purpose register 5\n",
+          "category": "General Purpose"
+        },
+        {
+          "name": "INA",
+          "description": "Input register A (pins 0-31)\n",
+          "category": "I/O Registers"
+        },
+        {
+          "name": "PR4",
+          "description": "General purpose register 4\n",
+          "category": "General Purpose"
+        },
+        {
+          "name": "PB",
+          "description": "Parameter B / call target\n",
+          "category": "Call Targets"
+        },
+        {
+          "name": "IJMP2",
+          "description": "Interrupt 2 jump vector\n",
+          "category": "Interrupt Vectors"
+        },
+        {
+          "name": "IRET1",
+          "description": "Interrupt 1 return vector\n",
+          "category": "Interrupt Vectors"
+        },
+        {
+          "name": "OUTA",
+          "description": "Output register A (pins 0-31)\n",
+          "category": "I/O Registers"
+        },
+        {
+          "name": "PR3",
+          "description": "General purpose register 3\n",
+          "category": "General Purpose"
+        },
+        {
+          "name": "PTRB",
+          "description": "Pointer B register\n",
+          "category": "Special Function"
+        },
+        {
+          "name": "DIRA",
+          "description": "Direction register A (pins 0-31)\n",
+          "category": "I/O Registers"
+        },
+        {
+          "name": "PR2",
+          "description": "General purpose register 2\n",
+          "category": "General Purpose"
+        }
+      ]
+    },
+    "assembly_directives": {
+      "count": 8,
+      "elements": [
+        {
+          "name": "ALIGNL",
+          "description": "Align to long boundary (4 bytes)\n",
+          "category": "Assembly"
+        },
+        {
+          "name": "FIT",
+          "description": "Ensure code fits in specified limit\n",
+          "category": "Assembly"
+        },
+        {
+          "name": "ORGH",
+          "description": "Set origin address for hub RAM\n",
+          "category": "Assembly"
+        },
+        {
+          "name": "DITTO",
+          "description": "Repeat last instruction (v50+)\n",
+          "category": "Assembly"
+        },
+        {
+          "name": "ALIGNW",
+          "description": "Align to word boundary (2 bytes)\n",
+          "category": "Assembly"
+        },
+        {
+          "name": "ORGF",
+          "description": "Set origin address with forced alignment\n",
+          "category": "Assembly"
+        },
+        {
+          "name": "RES",
+          "description": "Reserve space (advance origin)\n",
+          "category": "Assembly"
+        },
+        {
+          "name": "ORG",
+          "description": "Set origin address for COG RAM\n",
+          "category": "Assembly"
+        }
+      ]
+    },
+    "debug_commands": {
+      "count": 23,
+      "elements": [
+        {
+          "name": "SDEC_BYTE",
+          "description": "Signed decimal byte format\n",
+          "category": "Decimal Format"
+        },
+        {
+          "name": "UDEC_LONG",
+          "description": "Unsigned decimal long format\n",
+          "category": "Decimal Format"
+        },
+        {
+          "name": "UDEC_WORD",
+          "description": "Unsigned decimal word format\n",
+          "category": "Decimal Format"
+        },
+        {
+          "name": "UBIN",
+          "description": "Unsigned binary format\n",
+          "category": "Binary Format"
+        },
+        {
+          "name": "PC_KEY",
+          "description": "PC keyboard input\n",
+          "category": "Debug Control"
+        },
+        {
+          "name": "BOOL",
+          "description": "Boolean format (v44+)\n",
+          "category": "Boolean Format"
+        },
+        {
+          "name": "SDEC_WORD",
+          "description": "Signed decimal word format\n",
+          "category": "Decimal Format"
+        },
+        {
+          "name": "UDEC_BYTE",
+          "description": "Unsigned decimal byte format\n",
+          "category": "Decimal Format"
+        },
+        {
+          "name": "DLY",
+          "description": "Debug delay command\n",
+          "category": "Debug Control"
+        },
+        {
+          "name": "SDEC",
+          "description": "Signed decimal format\n",
+          "category": "Decimal Format"
+        },
+        {
+          "name": "SDEC_LONG",
+          "description": "Signed decimal long format\n",
+          "category": "Decimal Format"
+        },
+        {
+          "name": "UHEX",
+          "description": "Unsigned hexadecimal format\n",
+          "category": "Hexadecimal Format"
+        },
+        {
+          "name": "PC_MOUSE",
+          "description": "PC mouse input\n",
+          "category": "Debug Control"
+        },
+        {
+          "name": "DEBUG",
+          "description": "Debug output statement\n",
+          "category": "Debug Control"
+        },
+        {
+          "name": "UDEC",
+          "description": "Unsigned decimal format\n",
+          "category": "Decimal Format"
+        },
+        {
+          "name": "LSTR",
+          "description": "Length-prefixed string\n",
+          "category": "String Format"
+        },
+        {
+          "name": "UBIN_BYTE",
+          "description": "Unsigned binary byte format\n",
+          "category": "Binary Format"
+        },
+        {
+          "name": "ZSTR",
+          "description": "Zero-terminated string\n",
+          "category": "String Format"
+        },
+        {
+          "name": "UHEX_BYTE",
+          "description": "Unsigned hexadecimal byte format\n",
+          "category": "Hexadecimal Format"
+        },
+        {
+          "name": "UBIN_WORD",
+          "description": "Unsigned binary word format\n",
+          "category": "Binary Format"
+        },
+        {
+          "name": "UBIN_LONG",
+          "description": "Unsigned binary long format\n",
+          "category": "Binary Format"
+        },
+        {
+          "name": "UHEX_LONG",
+          "description": "Unsigned hexadecimal long format\n",
+          "category": "Hexadecimal Format"
+        },
+        {
+          "name": "UHEX_WORD",
+          "description": "Unsigned hexadecimal word format\n",
+          "category": "Hexadecimal Format"
+        }
+      ]
+    },
+    "special_symbols": {
+      "count": 12,
+      "elements": [
+        {
+          "name": ".",
+          "description": "Decimal point or object method access\n",
+          "category": "Special"
+        },
+        {
+          "name": "`",
+          "description": "Tick operator for special formatting\n",
+          "category": "Special"
+        },
+        {
+          "name": "@@",
+          "description": "Absolute address operator - get absolute hub address\n",
+          "category": "Special"
+        },
+        {
+          "name": "..",
+          "description": "Range operator for CASE statements\n",
+          "category": "Special"
+        },
+        {
+          "name": "^@",
+          "description": "Object address operator - address within object\n",
+          "category": "Special"
+        },
+        {
+          "name": "~",
+          "description": "Post-clear operator - use value then clear\n",
+          "category": "Special"
+        },
+        {
+          "name": "@",
+          "description": "Address-of operator - get memory address\n",
+          "category": "Special"
+        },
+        {
+          "name": "%",
+          "description": "Binary number prefix\n",
+          "category": "Special"
+        },
+        {
+          "name": "_",
+          "description": "Digit separator in numeric literals\n",
+          "category": "Special"
+        },
+        {
+          "name": "$$",
+          "description": "Current assembly address\n",
+          "category": "Special"
+        },
+        {
+          "name": "~~",
+          "description": "Post-set operator - use value then set to -1\n",
+          "category": "Special"
+        },
+        {
+          "name": "$",
+          "description": "Hexadecimal number prefix\n",
+          "category": "Special"
+        }
+      ]
+    },
+    "system_variables": {
+      "count": 3,
+      "elements": [
+        {
+          "name": "CLKFREQ",
+          "description": "System clock frequency in Hz\n"
+        },
+        {
+          "name": "VARBASE",
+          "description": "Base address of VAR section\n"
+        },
+        {
+          "name": "CLKMODE",
+          "description": "System clock mode configuration\n"
+        }
+      ]
+    }
+  }
+}

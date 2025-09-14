@@ -5,9 +5,17 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: Relocate and periodically invert bits within D. Returns to original value on 32nd iteration.
-  Reverse pattern.
+description: Relocate and periodically invert bits within D. Returns to original value
+  on 32nd iteration. Reverse pattern.
 category: Math and Logic
 documentation_source: original
 documentation_level: minimal
 needs_documentation: true
+compiler_operand_format:
+  name: operand_d
+  pattern: D
+  description: Destination register only
+  valueType: 24
+compiler_encoding:
+  operandFormat: 24
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13

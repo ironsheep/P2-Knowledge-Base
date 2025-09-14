@@ -1,0 +1,9 @@
+keyword: "WORD"
+type: keyword
+category: "Data Types"
+description: |
+  16-bit unsigned integer type (0-65535)
+syntax: "WORD variable[count]"
+examples:
+  - "WORD address"
+  - "WORD lookup_table[128]"
