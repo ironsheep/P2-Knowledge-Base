@@ -2,9 +2,9 @@
 # Entry point: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/p2-knowledge-root.yaml
 # Repository: https://github.com/ironsheep/P2-Knowledge-Base
 
-version: "1.0"
+version: "1.1"
 schema_version: "2024-12-30"
-last_updated: "2025-09-13T08:00:00Z"
+last_updated: "2025-09-16T00:00:00Z"
 description: "Propeller 2 Knowledge Base - AI-Optimized Documentation for Code Generation"
 
 metadata:
@@ -26,18 +26,20 @@ purpose: |
 
 manifests:
   pasm2_instructions:
-    description: "PASM2 assembly language instruction reference"
+    description: "PASM2 assembly language instruction reference with idioms"
     url: "manifests/pasm2-manifest.yaml"
-    entry_count: 359
+    entry_count: 362  # 357 instructions + 5 idiom categories
     compiler_validated: 359
     compiler_source: "PNUT-TS v2.0 with spinResolver.ts operand fixes"
     categories: ["arithmetic", "control", "memory", "special"]
+    idioms: "19 patterns extracted from 730 source files (4,441 occurrences)"
     
   spin2_language:
-    description: "Spin2 high-level language constructs and methods"
+    description: "Spin2 high-level language constructs, methods, and idioms"
     url: "manifests/spin2-manifest.yaml"
-    entry_count: 135
+    entry_count: 141  # 135 language elements + 6 idiom categories
     categories: ["methods", "operators", "constructs", "blocks"]
+    idioms: "25 patterns extracted from 730 source files (24,715 occurrences)"
     
   architecture:
     description: "P2 hardware architecture and subsystems"

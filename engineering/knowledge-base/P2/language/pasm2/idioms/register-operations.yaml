@@ -1,0 +1,63 @@
+name: Register Operation Idioms
+description: Common PASM2 register manipulation patterns
+category: register_ops
+frequency: very_high
+
+idioms:
+  - name: register_move
+    pattern: "mov {dest}, {src}"
+    description: Copy value between registers
+    usage_count: 1774
+    examples:
+      - "mov char_cnt, text_cols"
+      - "mov strikethru_line, font_height"
+      - "mov stride, text_cols"
+    context: Most fundamental PASM2 operation
+
+  - name: register_add
+    pattern: "add {dest}, {src}"
+    description: Add source to destination
+    usage_count: 495
+    examples:
+      - "add sine_phase, sine_freq"
+      - "add toggle_phase, toggle_freq"
+      - "add sample, centerfreq"
+    context: Accumulation and arithmetic
+
+  - name: register_sub
+    pattern: "sub {dest}, {src}"
+    description: Subtract source from destination
+    usage_count: 186
+    examples:
+      - "sub fSum, nVel"
+      - "sub nVel, oPos"
+      - "sub nVel, cor"
+    context: Difference calculations
+
+  - name: register_or
+    pattern: "or {dest}, {src}"
+    description: Logical OR operation
+    usage_count: 192
+    examples:
+      - "or dacmode_s, mycogid"
+      - "or dacmode_c, mycogid"
+      - "or curchar, mask_ffff"
+    context: Set bits or combine values
+
+  - name: register_and
+    pattern: "and {dest}, {src}"
+    description: Logical AND operation
+    usage_count: 42
+    examples:
+      - "and line_effects, field_effects"
+      - "and cureff, line_effects"
+    context: Mask bits or test conditions
+
+  - name: register_xor
+    pattern: "xor {dest}, {src}"
+    description: Logical XOR operation
+    usage_count: 36
+    examples:
+      - "xor curchar, mask_ffff"
+      - "xor data, pattern"
+    context: Toggle bits or compare values

@@ -1,0 +1,52 @@
+name: Memory Access Idioms
+description: Common patterns for memory addressing and access in Spin2
+category: memory
+frequency: very_high
+
+idioms:
+  - name: address_of
+    pattern: "@{variable}"
+    description: Get address of variable in hub memory
+    usage_count: 16845
+    examples:
+      - "@buffer"
+      - "@started"
+      - "@gmail"
+    context: Most common memory operation - getting pointer to data
+
+  - name: long_array_access
+    pattern: "LONG[@{base}][{index}]"
+    description: Access long array element via base address
+    usage_count: 1667
+    examples:
+      - "LONG[@rxHeadIdx][portHandle]"
+      - "LONG[@txHeadIdx][portHandle]"
+      - "LONG[@rxTailIdx][portHandle]"
+    context: Indexed access to 32-bit array elements
+
+  - name: byte_array_access
+    pattern: "BYTE[@{base}][{index}]"
+    description: Access byte array element via base address
+    usage_count: 406
+    examples:
+      - "BYTE[@rxbuf][portHandle * BUF_SIZE]"
+      - "BYTE[@txbuf][portHandle * BUF_SIZE]"
+      - "BYTE[@strBuffer][nPortHandle * BUF_SIZE]"
+    context: Indexed access to 8-bit array elements
+
+  - name: word_array_access
+    pattern: "WORD[@{base}][{index}]"
+    description: Access word array element via base address
+    usage_count: 57
+    examples:
+      - "WORD[@mask_info][mask_number]"
+      - "WORD[@hidpad_report+dev*HIDPAD_REPORT_SIZE][4+axnum]"
+    context: Indexed access to 16-bit array elements
+
+  - name: absolute_address
+    pattern: "@@{variable}"
+    description: Get absolute hub address
+    examples:
+      - "@@buffer"
+      - "@@code_start"
+    context: Used when absolute addressing is needed

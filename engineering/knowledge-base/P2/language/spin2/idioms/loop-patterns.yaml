@@ -1,0 +1,54 @@
+name: Loop Control Idioms
+description: Common looping patterns in Spin2
+category: control_flow
+frequency: very_high
+
+idioms:
+  - name: repeat_for
+    pattern: "repeat {var} from {start} to {end}"
+    description: Counted loop with index variable
+    usage_count: 1117
+    examples:
+      - "repeat i from 0 to BUF_SIZE"
+      - "repeat i from 0 to 15"
+      - "repeat ch from 0 to 5"
+    context: Standard for-loop pattern
+
+  - name: repeat_forever
+    pattern: "repeat"
+    description: Infinite loop
+    usage_count: 908
+    examples:
+      - "repeat"
+      - "repeat  ' main loop"
+    context: Main program loop or continuous operation
+
+  - name: repeat_while
+    pattern: "repeat while {condition}"
+    description: Loop while condition is true
+    usage_count: 673
+    examples:
+      - "repeat while (c := byte[x++]) <> 0"
+      - "repeat while (rxtail == rxhead)"
+      - "repeat while (rxcheck() >= 0)"
+    context: Conditional loop with test at start
+
+  - name: repeat_until
+    pattern: "repeat until {condition}"
+    description: Loop until condition becomes true
+    usage_count: 249
+    examples:
+      - "repeat until (pinread(rxp))"
+      - "repeat until ((b := rxcheck()) >= 0)"
+      - "repeat until done"
+    context: Loop with exit condition
+
+  - name: repeat_count
+    pattern: "repeat {count}"
+    description: Loop specific number of times
+    usage_count: 202
+    examples:
+      - "repeat 10"
+      - "repeat 12"
+      - "repeat samples"
+    context: Simple counted loop without index

@@ -36,7 +36,7 @@ DEBUG(`SCOPE MyScope TITLE 'Waveform Analysis' POS 100 50 SIZE 800 600 SAMPLES 1
 
 ### **Data Display**
 
-The SCOPE window displays waveforms visually but does not provide automatic measurements or analysis commands. For measurements, developers must visually interpret the display or implement their own measurement algorithms in code.
+The SCOPE window displays waveforms visually. It does not provide automatic measurements, analysis commands, or measurement overlay features. All analysis must be done through visual interpretation of the displayed waveform.
 
 ---
 
@@ -50,56 +50,53 @@ The SCOPE window displays waveforms visually but does not provide automatic meas
 
 ### **Voltage and Time Measurements Without Cursors**
 
-#### **Direct Voltage Reading**
+#### **Visual Signal Observation**
 ```spin2
-PUB measure_signal_levels()
+PUB observe_signal()
   ' Display waveform on scope
-  DEBUG(`SCOPE Waveform SIZE 800 600 TITLE 'Signal Analysis')
+  DEBUG(`SCOPE Waveform SIZE 800 600 TITLE 'Signal Display')
   
-  ' User workflow:
-  ' 1. Hover over waveform peak
-  ' 2. Read Y coordinate for voltage
-  ' 3. Hover over trough
-  ' 4. Read Y coordinate for minimum
-  ' 5. Peak-to-peak = max - min
-  ' No cursors needed - instant measurements!
+  ' Visual observation:
+  ' 1. Look for signal peaks
+  ' 2. Note general amplitude
+  ' 3. Observe signal shape
+  ' 4. Check for distortion
+  ' Visual assessment only - no precise measurements
 ```
 
-#### **Time Interval Measurements**
+#### **Pulse Visual Assessment**
 ```spin2
-PUB measure_pulse_timing()
+PUB observe_pulses()
   ' Display digital pulse
-  ' Hover measurements:
-  ' - Rising edge at X=120 (1.2ms)
-  ' - Falling edge at X=370 (3.7ms)
-  ' - Pulse width = 3.7 - 1.2 = 2.5ms
-  ' - Next rising at X=620 (6.2ms)
-  ' - Period = 6.2 - 1.2 = 5.0ms
-  ' All from hover, no cursor setup!
+  ' Visual observation:
+  ' - Note rising edges
+  ' - Note falling edges
+  ' - Estimate pulse width visually
+  ' - Count pulses for rough frequency
+  ' Visual estimation only
 ```
 
-### **Compensating for Lack of Automatic Measurements**
+### **Manual Visual Assessment**
 
-While SCOPE lacks automatic measurements (Vpp, frequency, rise time), hover provides manual precision:
+The SCOPE window does not include automatic measurement capabilities. Visual assessment only:
 
-1. **Peak-to-Peak**: Hover on max and min, subtract
-2. **Frequency**: Measure period between edges, calculate 1/T
-3. **Rise Time**: Hover at 10% and 90% points, measure time
-4. **DC Offset**: Hover on flat portions for DC level
-5. **RMS Estimate**: Sample multiple points, calculate
+1. **Peak Observation**: Visually identify signal extremes
+2. **Period Counting**: Count visible cycles for rough frequency
+3. **Edge Quality**: Visually assess transition sharpness
+4. **Level Comparison**: Compare signal levels by eye
+5. **Pattern Recognition**: Identify waveform anomalies
 
 ### **Waveform Analysis Techniques**
 
-#### **Rise/Fall Time Measurement**
+#### **Edge Quality Observation**
 ```spin2
-PUB measure_rise_time()
-  ' For rise time measurement:
-  ' 1. Note baseline voltage (hover on low level)
-  ' 2. Note high level voltage (hover on high level)
-  ' 3. Calculate 10% point: baseline + 0.1*(high-low)
-  ' 4. Calculate 90% point: baseline + 0.9*(high-low)
-  ' 5. Hover at these voltage levels on rising edge
-  ' 6. Rise time = time_90% - time_10%
+PUB observe_edges()
+  ' Visual edge assessment:
+  ' 1. Look for clean transitions
+  ' 2. Check for visible overshoot
+  ' 3. Note any ringing patterns
+  ' 4. Observe transition sharpness
+  ' Visual observation only - no precise measurements
 ```
 
 #### **Overshoot and Ringing**
@@ -112,33 +109,35 @@ PUB check_signal_integrity()
   ' - Ringing frequency: measure peak spacing
 ```
 
-### **Using Hover as a Measurement Probe**
+### **Using Hover for Visual Reference**
 
 - **Non-invasive**: Display remains clean
-- **Multi-point**: Sample many points quickly
-- **Comparative**: A/B measurements easy
-- **Precise**: Pixel-accurate positioning
-- **Fast**: No setup time
+- **Visual aid**: Helps identify points of interest
+- **Comparative**: Compare relative positions
+- **Interactive**: Mouse-driven exploration
+- **Simple**: No setup required
 
 ### **Advanced Measurement Examples**
 
-#### **Phase Measurement Between Channels**
+#### **Channel Comparison**
 ```spin2
-PUB measure_phase_delay()
+PUB compare_channels()
   ' Display two channels
-  ' Channel 1 zero crossing at X=100
-  ' Channel 2 zero crossing at X=125
-  ' Time delay = 25 pixels * timebase
-  ' Phase = (delay/period) * 360°
+  ' Visual comparison:
+  ' - Note relative timing
+  ' - Observe phase relationship
+  ' - Check signal alignment
+  ' Visual comparison only
 ```
 
-#### **Duty Cycle Calculation**
+#### **PWM Visual Assessment**
 ```spin2
-PUB measure_duty_cycle()
-  ' Hover measurements on PWM signal:
-  ' High duration: X=150 to X=220 (70 units)
-  ' Period: X=150 to X=350 (200 units)
-  ' Duty cycle = 70/200 = 35%
+PUB observe_pwm()
+  ' Visual PWM observation:
+  ' - Compare high vs low time visually
+  ' - Note general duty cycle appearance
+  ' - Check for consistent pulses
+  ' Rough visual estimation only
 ```
 
 ### **Best Practices for SCOPE Hover**

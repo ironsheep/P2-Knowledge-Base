@@ -1,0 +1,55 @@
+name: Hub Memory Access Idioms
+description: Common patterns for accessing hub memory from PASM2
+category: hub_memory
+frequency: high
+
+idioms:
+  - name: hub_read_long
+    pattern: "rdlong {dest}, {ptr}"
+    description: Read 32-bit value from hub
+    usage_count: 215
+    examples:
+      - "rdlong basepin_val, ptra"
+      - "rdlong buffer_base, ptra"
+      - "rdlong text_cols, ptra"
+    context: Fetch parameters or data from hub
+
+  - name: hub_write_long
+    pattern: "wrlong {src}, {ptr}"
+    description: Write 32-bit value to hub
+    usage_count: 140
+    examples:
+      - "wrlong pb, ptra"
+      - "wrlong timeCnt, adrTime"
+      - "wrlong nVel, ptrb"
+    context: Store results or status to hub
+
+  - name: hub_read_byte
+    pattern: "rdbyte {dest}, {ptr}"
+    description: Read 8-bit value from hub
+    usage_count: 1
+    examples:
+      - "rdbyte PR0, PR3"
+    context: Read character or small data
+
+  - name: hub_write_byte
+    pattern: "wrbyte {src}, {ptr}"
+    description: Write 8-bit value to hub
+    usage_count: 1
+    examples:
+      - "wrbyte PR0, PR3"
+    context: Store character or small data
+
+  - name: hub_read_word
+    pattern: "rdword {dest}, {ptr}"
+    description: Read 16-bit value from hub
+    examples:
+      - "rdword value, ptra"
+    context: Read 16-bit data
+
+  - name: hub_write_word
+    pattern: "wrword {src}, {ptr}"
+    description: Write 16-bit value to hub
+    examples:
+      - "wrword value, ptra"
+    context: Store 16-bit data

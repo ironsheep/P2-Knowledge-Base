@@ -1,0 +1,62 @@
+name: Pin Operations Idioms
+description: Common patterns for P2 pin manipulation in Spin2
+category: pin_operations
+frequency: very_high
+
+idioms:
+  - name: pin_low
+    pattern: "pinlow({pin})"
+    description: Drive pin to low state
+    usage_count: 133
+    examples:
+      - "pinlow(TEST_PIN_SNS_LOOP)"
+      - "pinlow(apin)"
+      - "pinlow(16)"
+    context: Used for setting pin to logic 0
+
+  - name: pin_high
+    pattern: "pinhigh({pin})"
+    description: Drive pin to high state
+    usage_count: 116
+    examples:
+      - "pinhigh(MTX_LED_PIN_OE)"
+      - "pinhigh(MTX_COLOR_PINS)"
+      - "pinhigh(16)"
+    context: Used for setting pin to logic 1
+
+  - name: pin_float
+    pattern: "pinfloat({pin})"
+    description: Set pin to high-impedance state
+    usage_count: 48
+    examples:
+      - "pinfloat(apin)"
+      - "pinfloat(pin_rst)"
+      - "pinfloat(0)"
+    context: Release pin to floating state
+
+  - name: smart_pin_start
+    pattern: "pinstart({pin}, {mode}, {x}, {y})"
+    description: Configure and start smart pin
+    usage_count: 99
+    examples:
+      - "pinstart(rxp, p_async_rx, bitmode, 0)"
+      - "pinstart(rxp, spmode, baudcfg, 0)"
+      - "pinstart(txp, spmode, baudcfg, 0)"
+    context: Initialize smart pin with specific mode and parameters
+
+  - name: pin_range_access
+    pattern: "pin[hla][{start}..{end}]"
+    description: Access range of pins
+    examples:
+      - "pina[0..7]"
+      - "pinl[8..15]"
+      - "pinh[16..31]"
+    context: Read or write multiple pins simultaneously
+
+  - name: pin_toggle
+    pattern: "pin[hla][{pin}] ^^"
+    description: Toggle pin state
+    examples:
+      - "pina[16] ^^"
+      - "pinl[LED_PIN] ^^"
+    context: Invert current pin state

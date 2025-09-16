@@ -1,0 +1,45 @@
+name: Conditional Execution Idioms
+description: PASM2 conditional instruction execution patterns
+category: conditionals
+frequency: very_high
+
+idioms:
+  - name: if_z
+    pattern: "if_z {instruction}"
+    description: Execute if Z flag is set
+    usage_count: 641
+    examples:
+      - "if_z shl"
+      - "if_z or"
+      - "if_z mov"
+    context: Zero result or equality test
+
+  - name: if_nz
+    pattern: "if_nz {instruction}"
+    description: Execute if Z flag is clear
+    usage_count: 621
+    examples:
+      - "if_nz mov"
+      - "if_nz or"
+      - "if_nz add"
+    context: Non-zero result test
+
+  - name: if_c
+    pattern: "if_c {instruction}"
+    description: Execute if C flag is set
+    usage_count: 476
+    examples:
+      - "if_c add"
+      - "if_c sub"
+      - "if_c sumz"
+    context: Carry or unsigned comparison
+
+  - name: if_nc
+    pattern: "if_nc {instruction}"
+    description: Execute if C flag is clear
+    usage_count: 342
+    examples:
+      - "if_nc jmp"
+      - "if_nc add"
+      - "if_nc sub"
+    context: No carry or unsigned comparison

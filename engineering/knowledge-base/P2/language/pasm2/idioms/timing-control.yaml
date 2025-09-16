@@ -1,0 +1,49 @@
+name: Timing Control Idioms
+description: PASM2 timing and synchronization patterns
+category: timing
+frequency: medium
+
+idioms:
+  - name: wait_cycles
+    pattern: "waitx {cycles}"
+    description: Wait for specified clock cycles
+    usage_count: 44
+    examples:
+      - "waitx c"
+      - "waitx #16"
+      - "waitx delay"
+    context: Precise timing delays
+
+  - name: pin_drive_high
+    pattern: "drvh #{pin}"
+    description: Drive pin high
+    usage_count: 4
+    examples:
+      - "drvh #56"
+      - "drvh #16"
+    context: Set output pin to high
+
+  - name: pin_drive_low
+    pattern: "drvl #{pin}"
+    description: Drive pin low
+    usage_count: 4
+    examples:
+      - "drvl #56"
+      - "drvl #16"
+    context: Set output pin to low
+
+  - name: pin_float
+    pattern: "fltl #{pin}"
+    description: Float pin (high impedance)
+    examples:
+      - "fltl #16"
+      - "fltl #56"
+    context: Release pin to floating state
+
+  - name: pin_test
+    pattern: "testp #{pin} wc"
+    description: Test pin state into C flag
+    examples:
+      - "testp #16 wc"
+      - "testp #0 wc"
+    context: Read pin state for conditional execution

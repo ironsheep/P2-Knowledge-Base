@@ -1,0 +1,43 @@
+name: Cog Management Idioms
+description: Common patterns for managing P2 cogs
+category: cog_management
+frequency: high
+
+idioms:
+  - name: get_cog_id
+    pattern: "cogid()"
+    description: Get current cog ID
+    usage_count: 1252
+    examples:
+      - "cogid()"
+      - "mycog := cogid()"
+      - "if cogid() == 0"
+    context: Identify which cog is executing current code
+
+  - name: stop_cog
+    pattern: "cogstop({cog_id})"
+    description: Stop specified cog
+    usage_count: 102
+    examples:
+      - "cogstop(cog-1)"
+      - "cogstop(mycog)"
+      - "cogstop(0)"
+    context: Terminate cog execution, often in cleanup
+
+  - name: init_cog
+    pattern: "coginit({mode}, @{code}, @{params})"
+    description: Initialize cog with code and parameters
+    usage_count: 91
+    examples:
+      - "coginit(COGEXEC_NEW, @uart_mgr, @rxp)"
+      - "coginit(cogexec_new, @uart_mgr, @rxp)"
+      - "coginit(16, @entry, @stack)"
+    context: Start cog with specific code and data
+
+  - name: new_cog
+    pattern: "cognew(@{code}, @{params})"
+    description: Start new cog with code
+    examples:
+      - "cognew(@driver, @params)"
+      - "cognew(@pasm_code, @mailbox)"
+    context: Launch code in next available cog

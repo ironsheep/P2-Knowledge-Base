@@ -3,10 +3,10 @@
 
 version: "1.0"
 schema_version: "2024-12-30"
-last_updated: "2024-12-30T00:00:00Z"
+last_updated: "2025-09-16T00:00:00Z"
 category: "spin2_language"
 base_path: "engineering/knowledge-base/P2/language/spin2/"
-total_entries: 135
+total_entries: 141
 
 description: |
   Complete Spin2 language reference including methods, operators, and constructs.
@@ -78,6 +78,27 @@ by_category:
       - {name: "wypin", file: "methods/wypin.yaml", desc: "Write Y parameter"}
       - {name: "rdpin", file: "methods/rdpin.yaml", desc: "Read pin result"}
       - {name: "akpin", file: "methods/akpin.yaml", desc: "Acknowledge pin"}
+  
+  idioms:
+    description: "Common micro-patterns extracted from 730 source files"
+    memory_operations:
+      - {name: "address_of", file: "idioms/memory-access.yaml", desc: "@ operator (16,845 occurrences)"}
+      - {name: "memory_access", file: "idioms/memory-access.yaml", desc: "Array access patterns"}
+    
+    loop_patterns:
+      - {name: "loop_idioms", file: "idioms/loop-patterns.yaml", desc: "Common loop constructs (3,149 occurrences)"}
+    
+    pin_control_patterns:
+      - {name: "pin_operations", file: "idioms/pin-operations.yaml", desc: "Pin manipulation patterns"}
+    
+    timing_patterns:
+      - {name: "timing_delays", file: "idioms/timing-delays.yaml", desc: "Common delay patterns"}
+    
+    cog_management_patterns:
+      - {name: "cog_operations", file: "idioms/cog-operations.yaml", desc: "Cog control patterns (1,445 occurrences)"}
+    
+    bit_manipulation_patterns:
+      - {name: "bit_operations", file: "idioms/bit-manipulation.yaml", desc: "Bit-level operations (988 occurrences)"}
   
   operators:
     arithmetic:

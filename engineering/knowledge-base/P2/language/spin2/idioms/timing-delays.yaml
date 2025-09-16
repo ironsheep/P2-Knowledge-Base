@@ -1,0 +1,35 @@
+name: Timing and Delay Idioms
+description: Common timing control patterns in Spin2
+category: timing
+frequency: very_high
+
+idioms:
+  - name: delay_milliseconds
+    pattern: "waitms({ms})"
+    description: Delay execution for specified milliseconds
+    usage_count: 661
+    examples:
+      - "waitms(1)"
+      - "waitms(10)"
+      - "waitms(100)"
+    context: Simple time delay, blocks execution
+
+  - name: delay_microseconds
+    pattern: "waitus({us})"
+    description: Delay execution for specified microseconds
+    usage_count: 82
+    examples:
+      - "waitus(1)"
+      - "waitus(10)"
+      - "waitus(100)"
+    context: Fine-grained timing delay
+
+  - name: wait_clock_ticks
+    pattern: "waitct({target})"
+    description: Wait until system counter reaches target
+    usage_count: 87
+    examples:
+      - "waitct(t += (100 * MS_001))"
+      - "waitct(0)"
+      - "waitct(getct() + delay)"
+    context: Precise timing based on system clock

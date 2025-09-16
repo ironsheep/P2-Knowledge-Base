@@ -1,0 +1,43 @@
+name: Loop Control Idioms
+description: Common PASM2 loop patterns
+category: loops
+frequency: high
+
+idioms:
+  - name: rep_loop
+    pattern: "rep #{iterations}, #{instructions}"
+    description: Hardware repeat loop
+    usage_count: 109
+    examples:
+      - "rep #5, #80"
+      - "rep #2, #8"
+      - "rep #2, #2"
+    context: Fast zero-overhead loops
+
+  - name: djnz_loop
+    pattern: "djnz {counter}, #{label}"
+    description: Decrement and jump if not zero
+    usage_count: 39
+    examples:
+      - "djnz y, #line"
+      - "_ret_ djnz y, #blank"
+      - "djnz a, #pinloop"
+    context: Counted loops with automatic decrement
+
+  - name: loop_instruction
+    pattern: "loop"
+    description: Loop instruction marker
+    usage_count: 166
+    examples:
+      - "sample_cy loop"
+      - "Field loop"
+      - "main loop"
+    context: Loop end marker for REP instruction
+
+  - name: jmp_loop
+    pattern: "jmp #{label}"
+    description: Unconditional jump for loops
+    examples:
+      - "jmp #main_loop"
+      - "jmp #start"
+    context: Create infinite or conditional loops

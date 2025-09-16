@@ -1,0 +1,63 @@
+name: Bit Manipulation Idioms
+description: Common bit-level operations in Spin2
+category: bit_operations
+frequency: high
+
+idioms:
+  - name: bit_mask_hex
+    pattern: "{value} & ${hex}"
+    description: Apply hexadecimal bit mask
+    usage_count: 988
+    examples:
+      - "r5 & $0F"
+      - "r5 & $F0"
+      - "value & $FF"
+    context: Extract or clear specific bits
+
+  - name: bit_set_shift
+    pattern: "{var} | (1 << {bit})"
+    description: Set specific bit using shift
+    examples:
+      - "flags | (1 << 4)"
+      - "register | (1 << bit_num)"
+    context: Set single bit to 1
+
+  - name: bit_clear_shift
+    pattern: "{var} & ~(1 << {bit})"
+    description: Clear specific bit using shift
+    examples:
+      - "flags & ~(1 << 4)"
+      - "register & ~(1 << bit_num)"
+    context: Clear single bit to 0
+
+  - name: bit_extract
+    pattern: "{value} >> {shift} & ${mask}"
+    description: Extract bit field
+    examples:
+      - "value >> 4 & $0F"
+      - "data >> 8 & $FF"
+    context: Shift and mask to extract bit field
+
+  - name: bit_rotate_left
+    pattern: "{value} ROL {count}"
+    description: Rotate bits left
+    examples:
+      - "data ROL 4"
+      - "value ROL 1"
+    context: Circular shift left
+
+  - name: bit_rotate_right
+    pattern: "{value} ROR {count}"
+    description: Rotate bits right
+    examples:
+      - "data ROR 4"
+      - "value ROR 1"
+    context: Circular shift right
+
+  - name: bit_reverse
+    pattern: "{value} REV {bits}"
+    description: Reverse bit order
+    examples:
+      - "data REV 8"
+      - "value REV 32"
+    context: Mirror bits within specified range
