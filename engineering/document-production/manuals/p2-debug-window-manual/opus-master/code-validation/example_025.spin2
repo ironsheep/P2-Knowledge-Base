@@ -1,0 +1,16 @@
+PUB traditional_update()
+  ' Redraw entire 800×600 display - SLOW
+  clear_screen()
+  draw_background()
+  draw_grid()
+  draw_data()
+  draw_overlays()
+  draw_text()
+  ' Total: 50ms per frame
+
+PUB optimized_layer_update()
+  ' Update only changed layer - FAST
+  DEBUG(`PLOT MyPlot LAYER 3)  ' Select data layer
+  DEBUG(`MyPlot CROP 100 200 50 50)  ' Update small region
+  update_data_region()
+  ' Total: 2ms per update - 25× faster!

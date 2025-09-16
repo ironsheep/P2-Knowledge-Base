@@ -1,0 +1,23 @@
+PUB diagnostic_terminal() | error_count
+  DEBUG(`TERM DiagWindow SIZE 80 30 TITLE "Diagnostics")
+  
+  ' Status line at top
+  DEBUG(`DiagWindow HOME COLOR WHITE ON BLUE)
+  DEBUG(`DiagWindow "DIAGNOSTIC MODE - Press ESC to exit")
+  DEBUG(`DiagWindow COLOR WHITE ON BLACK)
+  
+  error_count := 0
+  
+  repeat
+    if test_failed()
+      error_count++
+      DEBUG(`DiagWindow COLOR RED)
+      DEBUG(`DiagWindow TIMESTAMP "ERROR #", udec(error_count))
+      DEBUG(`DiagWindow ": ", get_error_description(), 13)
+      DEBUG(`DiagWindow COLOR WHITE)
+      
+      ' Log error details
+      log_error_state()
+    
+    if key_pressed(ESC)
+      quit

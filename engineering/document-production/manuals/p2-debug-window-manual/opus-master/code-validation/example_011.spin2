@@ -1,0 +1,19 @@
+PUB multi_terminal_system()
+  ' Create specialized terminals
+  DEBUG(`TERM LogWindow SIZE 80 20 POS 0 0 TITLE "System Log")
+  DEBUG(`TERM DataWindow SIZE 40 20 POS 0 300 TITLE "Data")
+  DEBUG(`TERM ErrorWindow SIZE 40 20 POS 400 300 TITLE "Errors")
+  
+  repeat
+    ' System events to log window
+    DEBUG(`LogWindow TIMESTAMP "[", time_string(), "] ")
+    DEBUG(`LogWindow "System event", 13)
+    
+    ' Data to data window
+    DEBUG(`DataWindow "Sensor: ", udec(read_sensor()), 13)
+    
+    ' Errors to error window with highlighting
+    if error_detected()
+      DEBUG(`ErrorWindow COLOR RED BLINK)
+      DEBUG(`ErrorWindow "ERROR: ", error_string(), 13)
+      DEBUG(`ErrorWindow COLOR WHITE)

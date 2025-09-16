@@ -1,0 +1,10 @@
+PUB waterfall_display()
+  DEBUG(`SPECTRO Waterfall SIZE 800 600)
+  DEBUG(`Waterfall BINS 256)
+  DEBUG(`Waterfall SCROLL DOWN)
+  
+  repeat
+    ' New spectrum line
+    capture_and_fft(@spectrum_line)
+    DEBUG(`Waterfall LINE @spectrum_line)
+    waitms(100)

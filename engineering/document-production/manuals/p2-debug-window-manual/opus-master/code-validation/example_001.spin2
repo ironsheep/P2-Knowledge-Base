@@ -1,0 +1,7 @@
+PUB test_example_1()
+' What most developers use:
+DEBUG("Value: ", udec(sensor_reading))
+
+' What's actually possible:
+DEBUG(`SCOPE MyScope SIZE 800 400 RANGE -5000 5000 TRIGGER RISING 2500)
+DEBUG(`MyScope SAMPLES 1024 RATE 1000000 'sensor_input')

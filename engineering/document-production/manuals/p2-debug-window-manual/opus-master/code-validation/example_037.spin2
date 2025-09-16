@@ -1,0 +1,27 @@
+VAR
+  long drag_active, drag_item
+  long drag_offset_x, drag_offset_y
+
+PUB drag_drop_system() | mx, my, click
+  repeat
+    mx, my, click := PC_MOUSE()
+    
+    if click & MOUSE_LEFT
+      if !drag_active
+        ' Start drag
+        drag_item := find_item_at(mx, my)
+        if drag_item => 0
+          drag_active := true
+          drag_offset_x := mx - item_x[drag_item]
+          drag_offset_y := my - item_y[drag_item]
+      else
+        ' Continue drag
+        if drag_active
+          item_x[drag_item] := mx - drag_offset_x
+          item_y[drag_item] := my - drag_offset_y
+          redraw_item(drag_item)
+    else
+      ' End drag
+      if drag_active
+        drag_active := false
+        snap_to_grid(drag_item)

@@ -1,0 +1,21 @@
+PUB layer_effects()
+  DEBUG(`PLOT Scope SIZE 800 600 LAYERS 4)
+  
+  ' Background layer for persistence effect
+  DEBUG(`Scope LAYER 0)  ' Static background
+  
+  ' Main trace layer
+  DEBUG(`Scope LAYER 1)
+  
+  ' Grid overlay layer
+  DEBUG(`Scope LAYER 2)
+  
+  ' Text layer
+  DEBUG(`Scope LAYER 3)
+  
+  repeat
+    ' New data adds to persistence
+    DEBUG(`Scope LAYER 1)
+    draw_waveform()
+    
+    ' Persistence layer automatically fades

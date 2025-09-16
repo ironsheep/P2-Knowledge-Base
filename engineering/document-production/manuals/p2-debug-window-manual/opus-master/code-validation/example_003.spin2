@@ -1,0 +1,3 @@
+PUB basic_debug()
+  DEBUG("Starting program...", 13)
+  DEBUG("Value: ", udec(42), 13)

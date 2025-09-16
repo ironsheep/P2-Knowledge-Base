@@ -1,0 +1,8 @@
+DAT
+  org
+debug_loop
+  mov   x, #0
+  DEBUG(`TERM "X register: " udec_(x))
+  add   x, #1
+  DEBUG(`SCOPE SAMPLE x)  ' Plot register value
+  djnz  count, #debug_loop

@@ -1,0 +1,13 @@
+PUB optimized_display() | buffer[256]
+  DEBUG(`BITMAP Display SIZE 512 384 BUFFER)  ' Buffered mode
+  
+  repeat
+    ' Update buffer in memory
+    update_display_buffer(@buffer)
+    
+    ' Single transfer to display
+    DEBUG(`Display WRITE 0 0 512 384 @buffer)
+    
+    ' Or use dirty rectangles
+    if region_changed(x, y, w, h)
+      DEBUG(`Display WRITE 'x' 'y' 'w' 'h' @buffer['offset'])

@@ -1,0 +1,26 @@
+PUB thermal_imager() | x, y, temp
+  DEBUG(`BITMAP Thermal SIZE 320 240 PALETTE THERMAL)
+  
+  ' Define thermal palette (blue->green->yellow->red->white)
+  set_thermal_palette()
+  
+  repeat
+    ' Read thermal sensor array
+    repeat y from 0 to 23
+      repeat x from 0 to 31
+        temp := read_thermal_pixel(x, y)
+        
+        ' Map temperature to color
+        color := temp_to_color(temp)
+        
+        ' Draw 10×10 pixel block for each sensor
+        DEBUG(`Thermal FILL 'x*10' 'y*10' 10 10 'color')
+    
+    ' Show temperature scale
+    draw_temperature_scale()
+    
+    ' Mark hotspots
+    find_and_mark_hotspots()
+    
+    ' Display max/min/avg
+    show_thermal_statistics()

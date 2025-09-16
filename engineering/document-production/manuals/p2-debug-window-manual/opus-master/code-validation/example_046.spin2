@@ -1,0 +1,19 @@
+PUB spectrum_display() | fft_bins[512]
+  DEBUG(`FFT Spectrum SIZE 800 400 BINS 512)
+  DEBUG(`FFT RANGE 0 100000)  ' 0-100kHz
+  DEBUG(`FFT SCALE LOG)        ' Logarithmic scale
+  
+  repeat
+    ' Capture time-domain samples
+    capture_samples(@time_samples, 1024, SAMPLE_RATE)
+    
+    ' Perform FFT (using P2's CORDIC)
+    fft_transform(@time_samples, @fft_bins, 512)
+    
+    ' Display spectrum
+    DEBUG(`Spectrum CLEAR)
+    DEBUG(`Spectrum BARS @fft_bins 512)
+    
+    ' Visual inspection shows frequency content
+    ' Peaks indicate dominant frequencies
+    ' Width shows bandwidth

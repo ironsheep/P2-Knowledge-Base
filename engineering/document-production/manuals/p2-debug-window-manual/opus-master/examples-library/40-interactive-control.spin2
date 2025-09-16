@@ -1,0 +1,60 @@
+'' 40-interactive-control.spin2
+'' Interactive debug with PC input - Keyboard and mouse control
+
+CON
+  _clkfreq = 180_000_000
+  
+VAR
+  long x_pos, y_pos
+  long color
+  long drawing
+  
+PUB main() | key, mx, my, buttons
+  ' Create interactive drawing canvas
+  DEBUG(`BITMAP Canvas SIZE 640 480 TITLE "Interactive Drawing - Click to draw, Space to clear")
+  
+  x_pos := 320
+  y_pos := 240
+  color := $FF0000  ' Red
+  
+  repeat
+    ' Check keyboard
+    key := PC_KEY()
+    if key
+      handle_keyboard(key)
+      
+    ' Check mouse
+    buttons := PC_MOUSE(@mx, @my)
+    if mx <> x_pos or my <> y_pos or buttons
+      handle_mouse(mx, my, buttons)
+      
+    waitms(10)
+    
+PRI handle_keyboard(key)
+  case key
+    " ": ' Space - clear screen
+      DEBUG(`Canvas CLEAR)
+      
+    "r", "R": ' Red
+      color := $FF0000
+      
+    "g", "G": ' Green  
+      color := $00FF00
+      
+    "b", "B": ' Blue
+      color := $0000FF
+      
+    "w", "W": ' White
+      color := $FFFFFF
+      
+PRI handle_mouse(mx, my, buttons)
+  x_pos := mx
+  y_pos := my
+  
+  if buttons & 1  ' Left button pressed
+    if not drawing
+      drawing := true
+      DEBUG(`Canvas COLOR `(color))
+    DEBUG(`Canvas PIXEL `(x_pos) `(y_pos))
+  else
+    drawing := false

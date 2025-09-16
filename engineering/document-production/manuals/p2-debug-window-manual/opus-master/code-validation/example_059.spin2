@@ -1,0 +1,8 @@
+PUB timing_measurement() | edge1, edge2, delta
+  ' Capture edges for timing
+  edge1 := detect_rising_edge(SIGNAL_A)
+  edge2 := detect_rising_edge(SIGNAL_B)
+  delta := edge2 - edge1
+  
+  ' Display timing relationship
+  DEBUG(`TERM "Phase delay: " udec_(delta / 80) " ns")

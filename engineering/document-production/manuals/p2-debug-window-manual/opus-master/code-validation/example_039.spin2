@@ -1,0 +1,19 @@
+PUB menu_system() | selection, mx, my, click
+  display_menu()
+  
+  repeat
+    ' Keyboard navigation
+    key := PC_KEY()
+    case key
+      UP_ARROW:    selection := (selection - 1) #> 0
+      DOWN_ARROW:  selection := (selection + 1) <# (menu_items - 1)
+      ENTER:       execute_menu_item(selection)
+    
+    ' Mouse navigation
+    mx, my, click := PC_MOUSE()
+    if my => menu_top & my =< menu_bottom
+      selection := (my - menu_top) / item_height
+      highlight_menu_item(selection)
+      
+      if click & MOUSE_LEFT
+        execute_menu_item(selection)

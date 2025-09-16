@@ -1,0 +1,31 @@
+PUB interactive_debug() | command, value
+  DEBUG(`TERM CLEAR)
+  DEBUG("Interactive Debug Mode", 13)
+  DEBUG("Commands: R=read, W=write, D=dump, Q=quit", 13)
+  
+  repeat
+    DEBUG("> ")
+    command := debug_getkey()  ' Read from terminal
+    
+    case command
+      "R", "r":
+        DEBUG("Address: ")
+        value := debug_get_hex()
+        DEBUG("Value at ", hex(value), ": ", hex(long[value]), 13)
+        
+      "W", "w":
+        DEBUG("Address: ")
+        addr := debug_get_hex()
+        DEBUG("Value: ")
+        value := debug_get_hex()
+        long[addr] := value
+        DEBUG("Written", 13)
+        
+      "D", "d":
+        DEBUG("Start address: ")
+        addr := debug_get_hex()
+        dump_memory(addr, 256)
+        
+      "Q", "q":
+        DEBUG("Exiting", 13)
+        quit

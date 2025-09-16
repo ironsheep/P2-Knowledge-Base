@@ -1,0 +1,14 @@
+PUB continuous_waveform() | samples[256]
+  ' Configure for continuous streaming
+  DEBUG(`SCOPE Stream MODE CONTINUOUS)
+  DEBUG(`Stream CHANNELS 2)
+  DEBUG(`Stream RATE 1000000)  ' 1MHz sample rate
+  
+  repeat
+    ' Capture burst of samples
+    repeat i from 0 to 255
+      samples[i] := read_adc(0)
+      waitus(1)
+    
+    ' Send to scope
+    DEBUG(`Stream PACK16 256 @samples)

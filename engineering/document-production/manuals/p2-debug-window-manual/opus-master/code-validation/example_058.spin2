@@ -1,0 +1,11 @@
+PUB logic_analyzer_basics()
+  ' Create LOGIC window with configuration
+  DEBUG(`LOGIC Analyzer SIZE 800 400 POS 100 100)
+  DEBUG(`Analyzer CHANNELS 8)                    ' Monitor 8 signals
+  DEBUG(`Analyzer LABELS "CLK" "DATA" "CS" "MOSI" "MISO" "INT" "RST" "ERR")
+  DEBUG(`Analyzer SAMPLE_RATE 10000000)          ' 10MHz sampling
+  DEBUG(`Analyzer TRIGGER PATTERN %00010000)     ' Trigger on bit 4 high
+  
+  ' Capture and display
+  capture_logic_state()
+  analyze_timing_relationships()

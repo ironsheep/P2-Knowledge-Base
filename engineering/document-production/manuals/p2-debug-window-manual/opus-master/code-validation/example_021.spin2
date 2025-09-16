@@ -1,0 +1,13 @@
+PUB color_mode_selection()
+  ' 1-bit monochrome - minimal memory
+  DEBUG(`BITMAP Mono SIZE 1024 768 BW)
+  
+  ' 8-bit indexed color - balanced
+  DEBUG(`BITMAP Indexed SIZE 640 480 PAL8)
+  DEBUG(`Indexed PALETTE @my_palette)  ' Custom palette
+  
+  ' 16-bit RGB - good color
+  DEBUG(`BITMAP Hicolor SIZE 512 384 RGB565)
+  
+  ' 24-bit true color - best quality
+  DEBUG(`BITMAP Truecolor SIZE 320 240 RGB888)

@@ -1,0 +1,47 @@
+'' 02-terminal-dashboard.spin2
+'' Terminal window dashboard example - Status display with colors
+
+CON
+  _clkfreq = 180_000_000
+  
+VAR
+  long counter
+  long status
+  
+PUB main()
+  ' Create a terminal dashboard
+  DEBUG(`TERM Dashboard SIZE 60 20 TITLE "System Monitor")
+  
+  setup_dashboard()
+  
+  repeat
+    update_dashboard()
+    waitms(100)
+    counter++
+
+PRI setup_dashboard()
+  ' Clear and setup the dashboard layout
+  DEBUG(`Dashboard CLS)
+  DEBUG(`Dashboard GOTOXY 20 1 COLOR GREEN15 "SYSTEM MONITOR")
+  DEBUG(`Dashboard GOTOXY 2 3 COLOR WHITE "Status:")
+  DEBUG(`Dashboard GOTOXY 2 4 COLOR WHITE "Counter:")
+  DEBUG(`Dashboard GOTOXY 2 5 COLOR WHITE "Uptime:")
+  DEBUG(`Dashboard GOTOXY 2 7 COLOR CYAN "Performance Metrics")
+  
+PRI update_dashboard()
+  ' Update dynamic values
+  status := counter & 3
+  
+  ' Update status with color coding
+  DEBUG(`Dashboard GOTOXY 10 3)
+  case status
+    0: DEBUG(`Dashboard COLOR GREEN "OK     ")
+    1: DEBUG(`Dashboard COLOR YELLOW "WARNING")
+    2: DEBUG(`Dashboard COLOR RED "ERROR  ")
+    3: DEBUG(`Dashboard COLOR CYAN "BUSY   ")
+    
+  ' Update counter
+  DEBUG(`Dashboard GOTOXY 10 4 COLOR WHITE udec_(counter))
+  
+  ' Update uptime
+  DEBUG(`Dashboard GOTOXY 10 5 COLOR WHITE udec_(counter/10) "." udec_(counter//10) " seconds")

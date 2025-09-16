@@ -1,0 +1,10 @@
+PUB state_machine_monitor() | current_state
+  DEBUG(`LOGIC States SIZE 800 300)
+  DEBUG(`States CHANNELS 4 LABELS "S0" "S1" "S2" "S3")
+  
+  repeat
+    current_state := ina[3..0]
+    DEBUG(`States SAMPLE 'current_state')
+    
+    ' Visual pattern shows state progression
+    ' User identifies state sequence and anomalies

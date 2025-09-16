@@ -1,0 +1,16 @@
+PUB traditional_debugging()
+  repeat
+    value := read_sensor()
+    if value > threshold
+      DEBUG("Over threshold: ", udec(value))  ' Disrupts timing
+    process_value(value)
+
+PUB visual_debugging()
+  ' Setup once
+  DEBUG(`PLOT Monitor SIZE 400 200 RANGE 0 4000)
+  DEBUG(`Monitor REFERENCE 'threshold' RED)
+  
+  repeat
+    value := read_sensor()
+    DEBUG(`Monitor POINT 'value')  ' No timing disruption
+    process_value(value)

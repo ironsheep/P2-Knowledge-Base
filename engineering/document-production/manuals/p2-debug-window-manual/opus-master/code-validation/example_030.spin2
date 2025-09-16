@@ -1,0 +1,34 @@
+VAR
+  long dirty_x1, dirty_y1, dirty_x2, dirty_y2
+  long dirty_flag
+
+PUB dirty_rectangle_system()
+  repeat
+    if dirty_flag
+      ' Update only the dirty region
+      width := dirty_x2 - dirty_x1
+      height := dirty_y2 - dirty_y1
+      
+      DEBUG(`Display LAYER LAYER_DATA)
+      DEBUG(`Display CROP 'dirty_x1' 'dirty_y1' 'width' 'height')
+      
+      ' Redraw just this region
+      redraw_region(dirty_x1, dirty_y1, width, height)
+      
+      ' Clear dirty flag
+      dirty_flag := 0
+
+PRI mark_dirty(x, y, w, h)
+  if dirty_flag
+    ' Expand dirty region
+    dirty_x1 := dirty_x1 <# x
+    dirty_y1 := dirty_y1 <# y
+    dirty_x2 := dirty_x2 #> (x + w)
+    dirty_y2 := dirty_y2 #> (y + h)
+  else
+    ' Set initial dirty region
+    dirty_x1 := x
+    dirty_y1 := y
+    dirty_x2 := x + w
+    dirty_y2 := y + h
+    dirty_flag := 1

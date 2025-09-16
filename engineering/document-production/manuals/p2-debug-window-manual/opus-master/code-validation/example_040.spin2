@@ -1,0 +1,16 @@
+PUB parameter_control() | param, mx, my, click, dragging
+  create_sliders()
+  
+  repeat
+    mx, my, click := PC_MOUSE()
+    
+    repeat param from 0 to num_params
+      if mouse_over_slider(mx, my, param)
+        if click & MOUSE_LEFT
+          ' Adjust parameter based on mouse position
+          new_value := scale_mouse_to_value(mx, param)
+          set_parameter(param, new_value)
+          update_slider_display(param, new_value)
+          
+          ' Apply change immediately
+          apply_parameter_change(param)

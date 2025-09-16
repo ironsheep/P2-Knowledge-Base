@@ -1,0 +1,12 @@
+PUB multi_window_debug() | i
+  ' Text window for values
+  DEBUG(`TERM Data SIZE 40 10 POS 0 0)
+  ' Graph window for visualization  
+  DEBUG(`PLOT Graph SIZE 400 300 POS 0 150)
+  
+  repeat i from 0 to 359
+    ' Show value as text
+    DEBUG(`Data "Angle: ", udec(i), 13)
+    ' Show value as graph
+    DEBUG(`Graph POINT `(i, sin(i, 100)))
+    waitms(10)

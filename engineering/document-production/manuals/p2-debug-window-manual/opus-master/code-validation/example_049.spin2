@@ -1,0 +1,30 @@
+PUB network_analyzer() | packet_count, error_count
+  DEBUG(`TERM Protocol SIZE 100 40 TITLE "Network Monitor")
+  DEBUG(`LOGIC Timing SIZE 800 200 TITLE "Packet Timing")
+  
+  packet_count := 0
+  error_count := 0
+  
+  repeat
+    if packet_received()
+      packet_count++
+      
+      ' Analyze packet (user-implemented)
+      analyze_packet(@packet_buffer)
+      
+      ' Display packet info
+      DEBUG(`Protocol HOME)
+      DEBUG(`Protocol "Packets: " 'packet_count')
+      DEBUG(`Protocol " Errors: " 'error_count')
+      DEBUG(`Protocol " CRC OK: " 'crc_status', 13)
+      
+      ' Show packet contents
+      display_packet_hex(@packet_buffer, packet_length)
+      
+      ' Timing diagram
+      show_packet_timing()
+      
+      ' Check for errors
+      if !crc_valid(@packet_buffer)
+        error_count++
+        highlight_error()

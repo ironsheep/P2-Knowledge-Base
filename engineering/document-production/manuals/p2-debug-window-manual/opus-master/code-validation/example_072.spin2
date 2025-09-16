@@ -1,0 +1,8 @@
+PUB field_diagnostic_mode()
+  ' Customer-facing diagnostic interface
+  DEBUG(`TERM Status SIZE 60 20 TITLE "System Diagnostics")
+  DEBUG(`PLOT Performance SIZE 400 200 TITLE "Performance Metrics")
+  
+  ' Professional presentation
+  show_system_health()
+  monitor_performance()

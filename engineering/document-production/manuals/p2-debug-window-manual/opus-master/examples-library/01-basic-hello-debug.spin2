@@ -1,0 +1,18 @@
+'' 01-basic-hello-debug.spin2
+'' Basic DEBUG window example - Hello World for P2 Debug System
+
+CON
+  _clkfreq = 180_000_000
+  
+PUB main()
+  ' Most basic debug output
+  DEBUG("Hello, P2 Debug World!")
+  
+  ' Show a value
+  DEBUG("Clock frequency: ", udec(_clkfreq), " Hz")
+  
+  ' Multiple values
+  DEBUG("Values: ", sdec(-123), " ", hex($DEAD), " ", bin(%10101010))
+  
+  ' Keep program running
+  repeat

@@ -1,0 +1,28 @@
+PUB create_gauge() | angle, value
+  DEBUG(`BITMAP Gauge SIZE 300 300 RGB8)
+  
+  ' Draw gauge background
+  DEBUG(`Gauge CIRCLE 150 150 100 WHITE)
+  DEBUG(`Gauge ARC 150 150 100 -45 225 GREEN)
+  
+  ' Draw scale marks
+  repeat angle from -45 to 225 step 15
+    x1 := 150 + cos(angle) * 90
+    y1 := 150 + sin(angle) * 90
+    x2 := 150 + cos(angle) * 100
+    y2 := 150 + sin(angle) * 100
+    DEBUG(`Gauge LINE 'x1' 'y1' 'x2' 'y2' WHITE)
+  
+  ' Animate needle
+  repeat
+    value := read_sensor()
+    angle := -45 + value * 270 / max_value
+    
+    ' Erase old needle
+    DEBUG(`Gauge FILL_CIRCLE 150 150 85 BLACK)
+    
+    ' Draw new needle
+    x := 150 + cos(angle) * 80
+    y := 150 + sin(angle) * 80
+    DEBUG(`Gauge LINE 150 150 'x' 'y' RED 3)  ' Width 3
+    DEBUG(`Gauge FILL_CIRCLE 150 150 10 RED)

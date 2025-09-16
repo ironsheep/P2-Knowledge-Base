@@ -1,0 +1,9 @@
+PUB terminal_capabilities()
+  ' Traditional approach - limited
+  serial.str(string("Status: OK"))
+  
+  ' DEBUG terminal - rich features
+  DEBUG(`TERM StatusWindow SIZE 80 40 TITLE "System Monitor")
+  DEBUG(`StatusWindow COLOR GREEN "Status: OK")
+  DEBUG(`StatusWindow POS 10 5 COLOR RED BLINK "WARNING")
+  DEBUG(`StatusWindow GETKEY 'key')  ' Read keyboard input!

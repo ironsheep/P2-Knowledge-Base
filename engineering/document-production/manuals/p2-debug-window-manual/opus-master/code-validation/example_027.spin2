@@ -1,0 +1,24 @@
+PUB crop_techniques() | old_value, new_value
+  ' Setup display with static elements
+  create_dashboard()
+  
+  ' Update only the changing number display
+  old_value := 0
+  
+  repeat
+    new_value := read_sensor()
+    
+    if new_value <> old_value
+      ' CROP to exact region of number
+      DEBUG(`Dashboard LAYER LAYER_DATA)
+      DEBUG(`Dashboard CROP 300 250 100 40)  ' x,y,w,h
+      
+      ' Clear just this region
+      DEBUG(`Dashboard FILL BLACK)
+      
+      ' Draw new value
+      DEBUG(`Dashboard TEXT 10 10 FONT_LARGE 'new_value')
+      
+      old_value := new_value
+    
+    ' Rest of display untouched - massive performance gain

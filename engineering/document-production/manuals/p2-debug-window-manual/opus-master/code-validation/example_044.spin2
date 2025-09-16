@@ -1,0 +1,24 @@
+PUB digital_oscilloscope() | trigger_level, time_div
+  ' Initialize scope display
+  DEBUG(`SCOPE MainScope SIZE 800 600)
+  
+  ' Control variables
+  trigger_level := 2048  ' Mid-scale
+  time_div := 1000       ' 1ms/div
+  
+  repeat
+    ' Capture samples
+    capture_samples(@samples, 1024, time_div)
+    
+    ' Display waveform with trigger
+    DEBUG(`MainScope TRIGGER 'trigger_level')
+    DEBUG(`MainScope SAMPLES @samples)
+    
+    ' Visual inspection allows:
+    ' - Signal presence/absence
+    ' - Approximate frequency (count cycles)
+    ' - Amplitude (vertical extent)
+    ' - Waveform shape
+    
+    ' Handle controls
+    process_scope_controls()

@@ -1,0 +1,23 @@
+PUB logic_analyzer() | i
+  DEBUG(`LOGIC Analyzer SIZE 1024 400 CHANNELS 16)
+  
+  ' Setup channel labels
+  repeat i from 0 to 15
+    DEBUG(`Analyzer LABEL 'i' "D" 'i')
+  
+  repeat
+    ' Capture logic samples
+    capture_logic_samples(@logic_buffer, 8192)
+    
+    ' Display digital signals
+    DEBUG(`Analyzer SAMPLES @logic_buffer)
+    
+    ' Visual inspection shows:
+    ' - Signal timing relationships
+    ' - Bus activity patterns
+    ' - State changes
+    ' - Glitches or anomalies
+    
+    ' User can visually decode protocols by
+    ' observing signal patterns (start bits,
+    ' clock edges, data transitions)

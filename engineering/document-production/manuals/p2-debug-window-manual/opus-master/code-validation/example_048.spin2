@@ -1,0 +1,29 @@
+PUB audio_visualizer() | left, right, peak_left, peak_right
+  DEBUG(`BITMAP VUMeter SIZE 400 300)
+  draw_vu_meter_face()
+  
+  peak_left := 0
+  peak_right := 0
+  
+  repeat
+    ' Read audio levels
+    left := get_audio_level(LEFT_CHANNEL)
+    right := get_audio_level(RIGHT_CHANNEL)
+    
+    ' Update peaks with decay
+    peak_left := peak_left #> left
+    peak_right := peak_right #> right
+    
+    ' Draw analog-style needles
+    draw_vu_needle(LEFT_METER, left, peak_left)
+    draw_vu_needle(RIGHT_METER, right, peak_right)
+    
+    ' LED bar graph
+    draw_led_bars(left, right)
+    
+    ' Spectrum display
+    update_spectrum_display()
+    
+    ' Peak decay
+    peak_left := (peak_left * 250) / 256
+    peak_right := (peak_right * 250) / 256

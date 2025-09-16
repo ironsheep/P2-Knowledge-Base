@@ -1,0 +1,18 @@
+PUB xy_oscilloscope() | x, y, i
+  DEBUG(`SCOPE_XY Lissajous SIZE 600 600)
+  
+  repeat
+    ' Capture X and Y channels
+    capture_xy_samples(@x_samples, @y_samples, 1024)
+    
+    ' Plot Lissajous pattern
+    repeat i from 0 to 1023
+      x := x_samples[i]
+      y := y_samples[i]
+      DEBUG(`Lissajous POINT 'x' 'y' GREEN)
+    
+    ' Visual patterns indicate:
+    ' - Circle: 90° phase shift
+    ' - Line: 0° or 180° phase
+    ' - Ellipse: Other phase relationships
+    ' - Figure-8: Frequency ratio 2:1

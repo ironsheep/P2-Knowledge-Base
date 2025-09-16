@@ -1,0 +1,15 @@
+PUB optimized_terminal_output() | buffer[32], index
+  ' Batch updates instead of character-by-character
+  index := 0
+  
+  repeat i from 0 to 99
+    ' Build string in buffer
+    index += sprintf(@buffer[index], "Value %d ", i)
+    
+    if index > 24  ' Output when buffer is full
+      DEBUG(`TERM WRITE @buffer 'index')
+      index := 0
+  
+  ' Output remaining
+  if index
+    DEBUG(`TERM WRITE @buffer 'index')

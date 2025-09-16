@@ -1,0 +1,26 @@
+CON
+  ' PLOT window capabilities
+  MAX_POINTS = 16384        ' Maximum points per trace
+  MAX_TRACES = 8            ' Simultaneous traces
+  UPDATE_MODES = 4          ' Strip, Scope, XY, Polar
+  
+VAR
+  long plot_buffer[1024]
+  long x_position
+  byte auto_scale
+  
+PUB plot_fundamentals()
+  ' Create a PLOT window with all options
+  DEBUG(`PLOT MyData SIZE 800 400 POS 100 100)
+  DEBUG(`MyData GRID 10 10)                      ' Grid divisions
+  DEBUG(`MyData RANGE -1000 1000)                ' Y-axis range
+  DEBUG(`MyData TRACES 3)                        ' Multiple traces
+  DEBUG(`MyData COLORS RED GREEN BLUE)           ' Trace colors
+  DEBUG(`MyData STYLE LINES)                     ' Line plot
+  DEBUG(`MyData TITLE "System Performance")      ' Window title
+  
+  ' Send data multiple ways
+  single_point_plotting()
+  array_plotting()
+  continuous_streaming()
+  xy_plotting()

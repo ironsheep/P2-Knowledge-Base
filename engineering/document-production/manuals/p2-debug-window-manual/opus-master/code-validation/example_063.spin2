@@ -1,0 +1,5 @@
+PUB triggered_capture()
+  ' Configure triggered mode
+  DEBUG(`SCOPE OneShot MODE SINGLE)
+  DEBUG(`OneShot TRIGGER CH1 RISING 2048)
+  DEBUG(`OneShot PRETRIGGER 50)  ' 50% pre-trigger

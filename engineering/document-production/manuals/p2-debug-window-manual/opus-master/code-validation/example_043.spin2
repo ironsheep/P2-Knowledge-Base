@@ -1,0 +1,28 @@
+VAR
+  long event_queue[256]
+  long event_head, event_tail
+
+PUB event_driven_system()
+  ' Start input monitoring cog
+  cognew(@input_monitor, @event_queue)
+  
+  repeat
+    if event_available()
+      event := get_next_event()
+      
+      case event.type
+        EVENT_KEY:     handle_key(event.data)
+        EVENT_MOUSE:   handle_mouse(event.x, event.y, event.buttons)
+        EVENT_TIMER:   handle_timer(event.id)
+        EVENT_CUSTOM:  handle_custom(event.data)
+
+PRI input_monitor()
+  repeat
+    ' Check all input sources
+    key := PC_KEY()
+    if key
+      queue_event(EVENT_KEY, key)
+    
+    mx, my, buttons := PC_MOUSE()
+    if buttons
+      queue_event(EVENT_MOUSE, mx, my, buttons)

@@ -1,0 +1,25 @@
+PUB keyboard_controlled_scope() | key, trigger_level, time_base
+  setup_scope_display()
+  
+  trigger_level := 2048
+  time_base := 1000
+  
+  repeat
+    ' Check for keyboard commands
+    key := PC_KEY()  ' Non-blocking
+    
+    case key
+      "+", "=": trigger_level := (trigger_level + 100) <# 4095
+      "-", "_": trigger_level := (trigger_level - 100) #> 0
+      "f", "F": time_base := (time_base >> 1) #> 10
+      "s", "S": time_base := (time_base << 1) <# 100000
+      "r", "R": run_mode := true
+      "p", "P": run_mode := false
+      "t", "T": single_trigger()
+      " ":      capture_screenshot()
+      ESC:      quit
+    
+    if run_mode
+      capture_and_display()
+    
+    update_status(trigger_level, time_base)

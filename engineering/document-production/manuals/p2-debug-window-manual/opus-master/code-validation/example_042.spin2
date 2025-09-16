@@ -1,0 +1,28 @@
+CON
+  ' Control key combinations
+  CTRL_S = $13  ' Save
+  CTRL_O = $0F  ' Open
+  CTRL_Z = $1A  ' Undo
+  CTRL_C = $03  ' Copy
+  CTRL_V = $16  ' Paste
+
+PUB hotkey_system() | key, shift, ctrl, alt
+  repeat
+    key := PC_KEY()  ' Basic key input
+    ' Note: Modifier keys require additional handling
+    
+    if ctrl
+      case key
+        "s", "S": save_configuration()
+        "o", "O": load_configuration()
+        "z", "Z": undo_last_action()
+        "c", "C": copy_selection()
+        "v", "V": paste_clipboard()
+    
+    elseif alt
+      case key
+        "1".."9": switch_to_window(key - "0")
+    
+    else
+      ' Normal key processing
+      process_regular_key(key)

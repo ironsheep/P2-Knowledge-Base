@@ -1,0 +1,20 @@
+PUB benchmark_graphics() | start, frames
+  DEBUG(`BITMAP Bench SIZE 640 480 RGB16)
+  
+  start := cnt
+  frames := 0
+  
+  repeat 1000
+    ' Full screen clear
+    DEBUG(`Bench CLEAR BLACK)
+    
+    ' Draw test pattern
+    repeat i from 0 to 99
+      DEBUG(`Bench CIRCLE RANDOM RANDOM 50 RANDOM)
+    
+    frames++
+  
+  elapsed := cnt - start
+  fps := frames * clkfreq / elapsed
+  
+  DEBUG(`TERM "FPS: ", udec(fps))

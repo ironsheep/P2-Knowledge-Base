@@ -1,0 +1,12 @@
+PUB spectrum_analyzer() | samples[1024], fft_result[512]
+  ' Capture time-domain data
+  repeat i from 0 to 1023
+    samples[i] := read_adc()
+  
+  ' Perform FFT using CORDIC
+  fft_transform(@samples, @fft_result, 512)
+  
+  ' Display spectrum
+  DEBUG(`FFT Spectrum SIZE 800 400)
+  DEBUG(`Spectrum BINS 512)
+  DEBUG(`Spectrum DATA @fft_result)

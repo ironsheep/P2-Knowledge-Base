@@ -1,0 +1,18 @@
+PUB advanced_formatting() | value, buffer[16]
+  value := -12345
+  
+  ' Multiple number formats simultaneously
+  DEBUG("Decimal: ", sdec(value))
+  DEBUG(" Hex: $", hex(value, 8))
+  DEBUG(" Binary: %", bin(value, 16))
+  DEBUG(" Unsigned: ", udec(value))
+  
+  ' Aligned columns
+  repeat i from 0 to 9
+    DEBUG(`TERM POS 0 'i' udec_(i, 3))     ' Right-aligned
+    DEBUG(`TERM POS 5 'i' hex_(i, 4))      ' Hex with width
+    DEBUG(`TERM POS 12 'i' bin_(i, 8))     ' Binary format
+  
+  ' Memory dumps with formatting
+  DEBUG(`TERM DUMP @buffer 64 HEX)  ' Hex dump
+  DEBUG(`TERM DUMP @buffer 64 ASCII)  ' ASCII display

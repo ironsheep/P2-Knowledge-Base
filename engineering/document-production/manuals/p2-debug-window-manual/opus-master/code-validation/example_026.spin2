@@ -1,0 +1,27 @@
+CON
+  LAYER_BACKGROUND = 0
+  LAYER_GRID = 1
+  LAYER_DATA = 2
+  LAYER_OVERLAY = 3
+  LAYER_TEXT = 4
+
+PUB setup_layered_display()
+  DEBUG(`PLOT Instrument SIZE 800 600 LAYERS 5)
+  
+  ' Static background - drawn once
+  DEBUG(`Instrument LAYER LAYER_BACKGROUND)
+  draw_instrument_face()
+  
+  ' Grid layer - rarely changes
+  DEBUG(`Instrument LAYER LAYER_GRID)
+  draw_measurement_grid()
+  
+  ' Data layer - frequent updates
+  DEBUG(`Instrument LAYER LAYER_DATA)
+  ' This layer uses CROP for fast updates
+  
+  ' Overlay layer - annotations
+  DEBUG(`Instrument LAYER LAYER_OVERLAY)
+  
+  ' Text layer - always on top
+  DEBUG(`Instrument LAYER LAYER_TEXT)

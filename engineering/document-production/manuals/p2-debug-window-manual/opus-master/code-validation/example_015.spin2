@@ -1,0 +1,15 @@
+PUB text_vs_graphics()
+  ' Text approach - abstract
+  repeat i from 0 to 99
+    DEBUG("Sensor: ", udec(sensor[i]), " ")
+    if i // 10 == 9
+      DEBUG(13)
+  
+  ' Graphics approach - intuitive
+  DEBUG(`BITMAP Waveform SIZE 512 256 RGB8)
+  repeat i from 0 to 511
+    y := 128 + sensor[i] * 100 / max_value
+    DEBUG(`Waveform PIXEL 'i' 'y' GREEN)
+    if i > 0
+      DEBUG(`Waveform LINE 'i-1' 'old_y' 'i' 'y' GREEN)
+    old_y := y

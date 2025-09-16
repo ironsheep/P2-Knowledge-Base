@@ -1,0 +1,32 @@
+PUB status_dashboard() | temp, pressure, humidity
+  DEBUG(`TERM CLEAR)
+  DEBUG(`TERM HOME)
+  
+  ' Header
+  DEBUG(`TERM COLOR WHITE ON BLUE)
+  DEBUG(`TERM "==== SENSOR DASHBOARD ====")
+  DEBUG(`TERM COLOR WHITE ON BLACK)
+  
+  repeat
+    temp := read_temperature()
+    pressure := read_pressure()
+    humidity := read_humidity()
+    
+    ' Update values with color coding
+    DEBUG(`TERM POS 0 2)
+    DEBUG("Temperature: ")
+    if temp > 30
+      DEBUG(`TERM COLOR RED)
+    elseif temp < 10
+      DEBUG(`TERM COLOR BLUE)
+    else
+      DEBUG(`TERM COLOR GREEN)
+    DEBUG(sdec(temp), "°C ")
+    
+    DEBUG(`TERM COLOR WHITE POS 0 3)
+    DEBUG("Pressure: ", udec(pressure), " hPa")
+    
+    DEBUG(`TERM POS 0 4)
+    DEBUG("Humidity: ", udec(humidity), "%")
+    
+    waitms(100)

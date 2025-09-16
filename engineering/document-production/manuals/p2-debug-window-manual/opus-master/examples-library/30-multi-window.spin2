@@ -1,0 +1,61 @@
+'' 30-multi-window.spin2
+'' Multi-window coordination - Dashboard with multiple debug windows
+
+CON
+  _clkfreq = 180_000_000
+  
+VAR
+  long temperature, pressure, humidity
+  long system_state
+  
+PUB main()
+  ' Create multiple coordinated windows
+  setup_windows()
+  
+  repeat
+    ' Update simulated sensors
+    update_sensors()
+    
+    ' Update all displays
+    update_terminal()
+    update_plot()
+    update_scope()
+    
+    waitms(100)
+    
+PRI setup_windows()
+  ' Terminal for status
+  DEBUG(`TERM Status SIZE 40 10 POS 0 0 TITLE "System Status")
+  DEBUG(`Status CLS)
+  DEBUG(`Status "Multi-Window Dashboard Running...")
+  
+  ' Plot for trends
+  DEBUG(`PLOT Trends SIZE 400 200 POS 0 200 TITLE "Sensor Trends")
+  DEBUG(`Trends AXIS 0 100 0 100)
+  
+  ' Scope for waveforms  
+  DEBUG(`SCOPE Signals SIZE 400 200 POS 400 200 TITLE "Live Signals")
+  
+PRI update_sensors()
+  ' Simulate sensor readings
+  temperature := 20 + (getrnd() & $F)
+  pressure := 1000 + (getrnd() & $3F) - 32
+  humidity := 50 + (getrnd() & $1F) - 16
+  
+  ' Update state
+  system_state++
+  
+PRI update_terminal()
+  DEBUG(`Status HOME)
+  DEBUG(`Status "State: " udec_(system_state) "    ")
+  DEBUG(`Status CR LF "Temp:  " udec_(temperature) "°C  ")
+  DEBUG(`Status CR LF "Press: " udec_(pressure) " mbar  ")
+  DEBUG(`Status CR LF "Humid: " udec_(humidity) "%   ")
+  
+PRI update_plot()
+  ' Plot sensor values
+  DEBUG(`Trends POINT `(system_state // 100) `(temperature))
+  
+PRI update_scope()
+  ' Send waveform data
+  DEBUG(`Signals SAMPLE `(sin(system_state * 3600) ~> 16))

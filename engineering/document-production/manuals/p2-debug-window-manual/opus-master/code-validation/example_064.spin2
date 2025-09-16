@@ -1,0 +1,7 @@
+PUB xy_mode() | x, y
+  DEBUG(`SCOPE_XY Lissajous SIZE 600 600)
+  
+  repeat i from 0 to 1023
+    x := sin(i * 360 / 1024) * 1000
+    y := sin((i * 360 / 1024) + 90) * 1000  ' 90° phase
+    DEBUG(`Lissajous POINT 'x' 'y')

@@ -1,0 +1,34 @@
+CON
+  ' Packed format compression ratios
+  PACK1_RATIO = 32   ' 1 bit per sample - digital signals
+  PACK2_RATIO = 16   ' 2 bits per sample - 4-state logic
+  PACK4_RATIO = 8    ' 4 bits per sample - hex digits
+  PACK8_RATIO = 4    ' 8 bits per sample - bytes
+  PACK16_RATIO = 2   ' 16 bits per sample - words
+  PACK32_RATIO = 1   ' 32 bits per sample - longs (no compression)
+  
+VAR
+  long waveform[1024]
+  byte digital_samples[128]  ' 1024 bits packed
+
+PUB compression_demonstration() | start_time, text_time, packed_time
+  ' Generate test waveform
+  repeat i from 0 to 1023
+    waveform[i] := 2048 + 1000 * sin(i * 360 / 64)
+  
+  ' Method 1: Traditional text transmission (SLOW)
+  start_time := cnt
+  repeat i from 0 to 1023
+    DEBUG(udec(waveform[i]), " ")
+  text_time := cnt - start_time
+  
+  ' Method 2: Packed binary transmission (FAST)
+  start_time := cnt
+  DEBUG(`PLOT Waveform PACK16 1024 @waveform)
+  packed_time := cnt - start_time
+  
+  ' Display performance improvement
+  DEBUG(`TERM Results)
+  DEBUG("Text transmission: ", udec(text_time / 80_000), "ms")
+  DEBUG("Packed transmission: ", udec(packed_time / 80_000), "ms")
+  DEBUG("Speedup: ", udec(text_time / packed_time), "x faster")

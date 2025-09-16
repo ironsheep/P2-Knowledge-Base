@@ -1,0 +1,6 @@
+PUB test_example_74()
+' Digital signals - 32× compression
+DEBUG(`LOGIC Digital PACK1 1024 @buffer)
+
+' Analog waveforms - 2× compression
+DEBUG(`SCOPE Waveform PACK16 512 @samples)

@@ -1,0 +1,26 @@
+PUB visual_memory_debug() | addr, value
+  DEBUG(`BITMAP MemView SIZE 256 256 RGB8)
+  
+  ' Display memory as pixels
+  repeat addr from 0 to 65535
+    value := byte[addr]
+    x := addr & 255
+    y := addr >> 8
+    
+    ' Color based on value patterns
+    if value == 0
+      color := BLACK
+    elseif value == $FF
+      color := WHITE
+    elseif value & $80
+      color := RED
+    else
+      color := GREEN
+    
+    DEBUG(`MemView PIXEL 'x' 'y' 'color')
+  
+  ' Patterns reveal:
+  ' - Uninitialized memory (random)
+  ' - Buffer overflows (unexpected patterns)
+  ' - Memory leaks (growing colored regions)
+  ' - Alignment issues (misaligned patterns)

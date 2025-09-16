@@ -1,0 +1,53 @@
+'' 20-scope-waveform.spin2
+'' Oscilloscope display - Generate and display waveforms
+
+CON
+  _clkfreq = 180_000_000
+  SAMPLES = 256
+  
+VAR
+  long waveform[SAMPLES]
+  long phase
+  
+PUB main() | i
+  ' Create scope window
+  DEBUG(`SCOPE Waveform SIZE 640 480 TITLE "Signal Generator")
+  DEBUG(`Waveform SAMPLES 256 RATE 10000)
+  
+  repeat
+    ' Generate different waveforms
+    case phase >> 8 & 3
+      0: generate_sine()
+      1: generate_square()
+      2: generate_triangle()
+      3: generate_sawtooth()
+      
+    ' Display waveform
+    DEBUG(`Waveform TRIGGER LEVEL 0)
+    repeat i from 0 to SAMPLES-1
+      DEBUG(`Waveform SAMPLE `(waveform[i]))
+      
+    phase++
+    waitms(2000)  ' Show each waveform for 2 seconds
+    
+PRI generate_sine() | i
+  repeat i from 0 to SAMPLES-1
+    waveform[i] := lookupz(i >> 2 & 63: 0,3196,6392,9555,12684,15768,18794,21750,24636,27435,30145,32757,35264,37665,39952,42125,44177,46105,47904,49570,51102,52495,53748,54857,55823,56642,57314,57837,58212,58437,58514,58442,58222,57856,57346,56694,55903,54975,53913,52721,51402,49959,48398,46722,44935,43042,41047,38955,36771,34500,32146,29714,27211,24640,22008,19318,16577,13788,10958,8090,5189,2260,0,-2260)
+    
+PRI generate_square() | i
+  repeat i from 0 to SAMPLES-1
+    if i < SAMPLES/2
+      waveform[i] := 32767
+    else
+      waveform[i] := -32768
+      
+PRI generate_triangle() | i
+  repeat i from 0 to SAMPLES-1
+    if i < SAMPLES/2
+      waveform[i] := (i * 65536 / SAMPLES) - 32768
+    else
+      waveform[i] := 32767 - ((i - SAMPLES/2) * 65536 / SAMPLES)
+      
+PRI generate_sawtooth() | i
+  repeat i from 0 to SAMPLES-1
+    waveform[i] := (i * 65536 / SAMPLES) - 32768

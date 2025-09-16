@@ -1,0 +1,17 @@
+PUB bidirectional_debug() | key, mouse_x, mouse_y, click
+  DEBUG(`TERM Control SIZE 80 25 TITLE "Interactive Debug")
+  DEBUG(`BITMAP Canvas SIZE 640 480 TITLE "Click to Interact")
+  
+  repeat
+    ' Read keyboard input
+    key := PC_KEY()  ' Returns 0 if no key pressed
+    if key
+      process_keyboard(key)
+    
+    ' Read mouse input
+    mouse_x, mouse_y, click := PC_MOUSE()
+    if click
+      process_click(mouse_x, mouse_y)
+    
+    ' Update based on input
+    update_display()

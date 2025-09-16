@@ -1,0 +1,602 @@
+[
+  {
+    "index": 1,
+    "filename": "example_001.spin2",
+    "success": true,
+    "lines": 6,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 2,
+    "filename": "example_002.spin2",
+    "success": true,
+    "lines": 16,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 3,
+    "filename": "example_003.spin2",
+    "success": true,
+    "lines": 3,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 4,
+    "filename": "example_004.spin2",
+    "success": true,
+    "lines": 4,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 5,
+    "filename": "example_005.spin2",
+    "success": true,
+    "lines": 8,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 6,
+    "filename": "example_006.spin2",
+    "success": true,
+    "lines": 12,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 7,
+    "filename": "example_007.spin2",
+    "success": true,
+    "lines": 9,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 8,
+    "filename": "example_008.spin2",
+    "success": true,
+    "lines": 18,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 9,
+    "filename": "example_009.spin2",
+    "success": true,
+    "lines": 32,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 10,
+    "filename": "example_010.spin2",
+    "success": true,
+    "lines": 31,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 11,
+    "filename": "example_011.spin2",
+    "success": true,
+    "lines": 19,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 12,
+    "filename": "example_012.spin2",
+    "success": true,
+    "lines": 15,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 13,
+    "filename": "example_013.spin2",
+    "success": true,
+    "lines": 22,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 14,
+    "filename": "example_014.spin2",
+    "success": true,
+    "lines": 23,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 15,
+    "filename": "example_015.spin2",
+    "success": true,
+    "lines": 15,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 16,
+    "filename": "example_016.spin2",
+    "success": true,
+    "lines": 19,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 17,
+    "filename": "example_017.spin2",
+    "success": true,
+    "lines": 28,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 18,
+    "filename": "example_018.spin2",
+    "success": true,
+    "lines": 13,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 19,
+    "filename": "example_019.spin2",
+    "success": true,
+    "lines": 17,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 20,
+    "filename": "example_020.spin2",
+    "success": true,
+    "lines": 19,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 21,
+    "filename": "example_021.spin2",
+    "success": true,
+    "lines": 13,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 22,
+    "filename": "example_022.spin2",
+    "success": true,
+    "lines": 20,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 23,
+    "filename": "example_023.spin2",
+    "success": true,
+    "lines": 26,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 24,
+    "filename": "example_024.spin2",
+    "success": true,
+    "lines": 20,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 25,
+    "filename": "example_025.spin2",
+    "success": true,
+    "lines": 16,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 26,
+    "filename": "example_026.spin2",
+    "success": true,
+    "lines": 27,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 27,
+    "filename": "example_027.spin2",
+    "success": true,
+    "lines": 24,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 28,
+    "filename": "example_028.spin2",
+    "success": true,
+    "lines": 32,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 29,
+    "filename": "example_029.spin2",
+    "success": true,
+    "lines": 15,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 30,
+    "filename": "example_030.spin2",
+    "success": true,
+    "lines": 34,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 31,
+    "filename": "example_031.spin2",
+    "success": true,
+    "lines": 21,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 32,
+    "filename": "example_032.spin2",
+    "success": true,
+    "lines": 24,
+    "error": null,
+    "has_debug": false
+  },
+  {
+    "index": 33,
+    "filename": "example_033.spin2",
+    "success": true,
+    "lines": 24,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 34,
+    "filename": "example_034.spin2",
+    "success": true,
+    "lines": 17,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 35,
+    "filename": "example_035.spin2",
+    "success": true,
+    "lines": 25,
+    "error": null,
+    "has_debug": false
+  },
+  {
+    "index": 36,
+    "filename": "example_036.spin2",
+    "success": true,
+    "lines": 25,
+    "error": null,
+    "has_debug": false
+  },
+  {
+    "index": 37,
+    "filename": "example_037.spin2",
+    "success": true,
+    "lines": 27,
+    "error": null,
+    "has_debug": false
+  },
+  {
+    "index": 38,
+    "filename": "example_038.spin2",
+    "success": true,
+    "lines": 27,
+    "error": null,
+    "has_debug": false
+  },
+  {
+    "index": 39,
+    "filename": "example_039.spin2",
+    "success": true,
+    "lines": 19,
+    "error": null,
+    "has_debug": false
+  },
+  {
+    "index": 40,
+    "filename": "example_040.spin2",
+    "success": true,
+    "lines": 16,
+    "error": null,
+    "has_debug": false
+  },
+  {
+    "index": 41,
+    "filename": "example_041.spin2",
+    "success": true,
+    "lines": 26,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 42,
+    "filename": "example_042.spin2",
+    "success": true,
+    "lines": 28,
+    "error": null,
+    "has_debug": false
+  },
+  {
+    "index": 43,
+    "filename": "example_043.spin2",
+    "success": true,
+    "lines": 28,
+    "error": null,
+    "has_debug": false
+  },
+  {
+    "index": 44,
+    "filename": "example_044.spin2",
+    "success": true,
+    "lines": 24,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 45,
+    "filename": "example_045.spin2",
+    "success": true,
+    "lines": 23,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 46,
+    "filename": "example_046.spin2",
+    "success": true,
+    "lines": 19,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 47,
+    "filename": "example_047.spin2",
+    "success": true,
+    "lines": 25,
+    "error": null,
+    "has_debug": false
+  },
+  {
+    "index": 48,
+    "filename": "example_048.spin2",
+    "success": true,
+    "lines": 29,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 49,
+    "filename": "example_049.spin2",
+    "success": true,
+    "lines": 30,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 50,
+    "filename": "example_050.spin2",
+    "success": true,
+    "lines": 24,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 51,
+    "filename": "example_051.spin2",
+    "success": true,
+    "lines": 26,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 52,
+    "filename": "example_052.spin2",
+    "success": true,
+    "lines": 18,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 53,
+    "filename": "example_053.spin2",
+    "success": true,
+    "lines": 34,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 54,
+    "filename": "example_054.spin2",
+    "success": true,
+    "lines": 26,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 55,
+    "filename": "example_055.spin2",
+    "success": true,
+    "lines": 13,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 56,
+    "filename": "example_056.spin2",
+    "success": true,
+    "lines": 14,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 57,
+    "filename": "example_057.spin2",
+    "success": true,
+    "lines": 12,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 58,
+    "filename": "example_058.spin2",
+    "success": true,
+    "lines": 11,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 59,
+    "filename": "example_059.spin2",
+    "success": true,
+    "lines": 8,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 60,
+    "filename": "example_060.spin2",
+    "success": true,
+    "lines": 10,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 61,
+    "filename": "example_061.spin2",
+    "success": true,
+    "lines": 10,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 62,
+    "filename": "example_062.spin2",
+    "success": true,
+    "lines": 14,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 63,
+    "filename": "example_063.spin2",
+    "success": true,
+    "lines": 5,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 64,
+    "filename": "example_064.spin2",
+    "success": true,
+    "lines": 7,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 65,
+    "filename": "example_065.spin2",
+    "success": true,
+    "lines": 7,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 66,
+    "filename": "example_066.spin2",
+    "success": true,
+    "lines": 12,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 67,
+    "filename": "example_067.spin2",
+    "success": true,
+    "lines": 10,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 68,
+    "filename": "example_068.spin2",
+    "success": true,
+    "lines": 10,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 69,
+    "filename": "example_069.spin2",
+    "success": true,
+    "lines": 4,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 70,
+    "filename": "example_070.spin2",
+    "success": true,
+    "lines": 8,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 71,
+    "filename": "example_071.spin2",
+    "success": true,
+    "lines": 3,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 72,
+    "filename": "example_072.spin2",
+    "success": true,
+    "lines": 8,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 73,
+    "filename": "example_073.spin2",
+    "success": true,
+    "lines": 5,
+    "error": null,
+    "has_debug": false
+  },
+  {
+    "index": 74,
+    "filename": "example_074.spin2",
+    "success": true,
+    "lines": 5,
+    "error": null,
+    "has_debug": true
+  },
+  {
+    "index": 75,
+    "filename": "example_075.spin2",
+    "success": true,
+    "lines": 8,
+    "error": null,
+    "has_debug": true
+  }
+]

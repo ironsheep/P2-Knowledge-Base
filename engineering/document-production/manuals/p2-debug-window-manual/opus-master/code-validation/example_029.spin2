@@ -1,0 +1,15 @@
+PUB resolution_optimization()
+  ' High-res background - drawn once
+  DEBUG(`BITMAP Background SIZE 1920 1080 LAYER 0)
+  draw_detailed_background()
+  
+  ' Medium-res data layer - updated frequently
+  DEBUG(`BITMAP DataLayer SIZE 960 540 LAYER 1)
+  ' 4× fewer pixels to update
+  
+  ' Low-res effects layer - updated every frame
+  DEBUG(`BITMAP Effects SIZE 480 270 LAYER 2)
+  ' 16× fewer pixels for smooth animation
+  
+  ' Composite layers automatically scaled
+  DEBUG(`COMPOSITE SCALE`)

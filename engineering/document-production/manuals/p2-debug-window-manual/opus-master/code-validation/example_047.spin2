@@ -1,0 +1,25 @@
+PUB signal_generator() | waveform, frequency, amplitude, offset
+  create_generator_interface()
+  
+  waveform := SINE
+  frequency := 1000
+  amplitude := 2048
+  offset := 2048
+  
+  repeat
+    ' Generate waveform
+    case waveform
+      SINE:     generate_sine(frequency, amplitude, offset)
+      SQUARE:   generate_square(frequency, amplitude, offset)
+      TRIANGLE: generate_triangle(frequency, amplitude, offset)
+      SAWTOOTH: generate_sawtooth(frequency, amplitude, offset)
+      NOISE:    generate_noise(amplitude, offset)
+    
+    ' Display waveform preview
+    show_waveform_preview()
+    
+    ' Output to DAC
+    output_to_dac(@waveform_buffer, 1024)
+    
+    ' Handle control adjustments
+    handle_generator_controls()

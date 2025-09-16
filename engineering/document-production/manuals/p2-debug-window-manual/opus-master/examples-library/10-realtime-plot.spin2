@@ -1,0 +1,36 @@
+'' 10-realtime-plot.spin2
+'' Real-time data plotting - Simulated sensor with noise
+
+CON
+  _clkfreq = 180_000_000
+  SAMPLES = 100
+  
+VAR
+  long data_buffer[SAMPLES]
+  long index
+  
+PUB main() | value, noise
+  ' Create plot window
+  DEBUG(`PLOT Sensor SIZE 640 400 TITLE "Real-Time Sensor Data")
+  DEBUG(`Sensor AXIS 0 100 -100 100)  ' X: 0-100, Y: -100 to 100
+  DEBUG(`Sensor GRID ON)
+  
+  repeat
+    ' Generate simulated sensor data with noise
+    value := (index * 100 / SAMPLES) - 50  ' Sawtooth wave for simplicity
+    noise := (getrnd() & $FF) - 128 >> 3        ' Random noise
+    data_buffer[index // SAMPLES] := value + noise
+    
+    ' Plot the data
+    plot_data()
+    
+    index++
+    waitms(50)
+    
+PRI plot_data() | i
+  ' Clear and redraw plot
+  DEBUG(`Sensor CLEAR)
+  
+  ' Plot all samples
+  repeat i from 0 to SAMPLES-1
+    DEBUG(`Sensor POINT `(i) `(data_buffer[i]))

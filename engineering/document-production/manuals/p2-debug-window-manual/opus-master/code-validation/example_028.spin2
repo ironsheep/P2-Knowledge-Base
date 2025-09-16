@@ -1,0 +1,32 @@
+VAR
+  long sprite_x[16]
+  long sprite_y[16]
+  long sprite_old_x[16]
+  long sprite_old_y[16]
+
+PUB sprite_system() | sprite
+  DEBUG(`BITMAP Display SIZE 1024 768 LAYERS 3)
+  
+  ' Background layer
+  DEBUG(`Display LAYER 0)
+  draw_background()
+  
+  ' Sprite layer
+  DEBUG(`Display LAYER 1)
+  
+  repeat
+    repeat sprite from 0 to 15
+      ' Erase old position using CROP
+      DEBUG(`Display CROP 'sprite_old_x[sprite]' 'sprite_old_y[sprite]' 32 32)
+      DEBUG(`Display CLEAR)  ' Transparent
+      
+      ' Draw at new position
+      DEBUG(`Display CROP 'sprite_x[sprite]' 'sprite_y[sprite]' 32 32)
+      draw_sprite(sprite)
+      
+      ' Save position for next erase
+      sprite_old_x[sprite] := sprite_x[sprite]
+      sprite_old_y[sprite] := sprite_y[sprite]
+      
+      ' Update position
+      update_sprite_position(sprite)

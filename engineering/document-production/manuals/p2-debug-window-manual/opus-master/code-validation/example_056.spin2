@@ -1,0 +1,14 @@
+PUB xy_mode_example() | x, y, angle
+  ' Configure XY mode
+  DEBUG(`PLOT XY MODE XY)
+  DEBUG(`XY RANGE -1000 1000 -1000 1000)  ' X and Y ranges
+  DEBUG(`XY POINTS 1000)  ' Trail length
+  DEBUG(`XY PERSIST 500)  ' Persistence ms
+  
+  ' Lissajous pattern
+  repeat angle from 0 to 359
+    x := 500 * sin(angle)
+    y := 500 * sin(angle + 90)  ' 90-degree phase
+    
+    DEBUG(`XY `(x, y))
+    waitms(10)

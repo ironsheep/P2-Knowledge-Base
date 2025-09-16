@@ -1,0 +1,27 @@
+PUB interactive_scope() | mx, my, click, cursor1_x, cursor2_x
+  display_waveform()
+  
+  repeat
+    mx, my, click := PC_MOUSE()
+    
+    if click & MOUSE_LEFT
+      ' Place first cursor
+      cursor1_x := mx
+      draw_cursor(cursor1_x, GREEN)
+      
+    elseif click & MOUSE_RIGHT
+      ' Place second cursor
+      cursor2_x := mx
+      draw_cursor(cursor2_x, RED)
+      
+      ' Calculate measurements
+      time_diff := abs(cursor2_x - cursor1_x) * time_base
+      v1 := get_value_at(cursor1_x)
+      v2 := get_value_at(cursor2_x)
+      
+      ' Display measurements
+      show_measurements(time_diff, v1, v2)
+    
+    elseif click & MOUSE_MIDDLE
+      ' Zoom to selection
+      zoom_range(cursor1_x, cursor2_x)

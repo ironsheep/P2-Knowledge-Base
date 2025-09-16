@@ -1,0 +1,4 @@
+PUB first_window()
+  ' Create a named debug window
+  DEBUG(`TERM MyWindow SIZE 40 10 TITLE "My Debug")
+  DEBUG(`MyWindow "Hello from my window!", 13)

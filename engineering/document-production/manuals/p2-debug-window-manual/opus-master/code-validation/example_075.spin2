@@ -1,0 +1,8 @@
+PUB measure_spi_clock()
+  debug(`LOGIC MyLogic TITLE "SPI Clock")
+  
+  ' User workflow:
+  ' 1. Hover over rising edge #1: note time
+  ' 2. Hover over rising edge #2: note time
+  ' 3. Calculate period from difference
+  ' No cursors or clicks required!

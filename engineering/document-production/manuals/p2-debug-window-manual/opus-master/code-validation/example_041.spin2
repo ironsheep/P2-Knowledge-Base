@@ -1,0 +1,26 @@
+VAR
+  long gesture_points[100]
+  long gesture_index
+
+PUB gesture_recognition() | mx, my, click, gesture
+  repeat
+    DEBUG(`Canvas GETMOUSE 'mx' 'my' 'click')
+    
+    if click & MOUSE_LEFT
+      ' Record gesture points
+      gesture_points[gesture_index++] := (mx << 16) | my
+      
+      if gesture_index => 100
+        gesture_index := 0
+    else
+      if gesture_index > 10
+        ' Recognize gesture
+        gesture := recognize_gesture(@gesture_points, gesture_index)
+        
+        case gesture
+          GESTURE_CIRCLE:   zoom_in()
+          GESTURE_LINE_UP:  scroll_up()
+          GESTURE_LINE_DOWN: scroll_down()
+          GESTURE_X:         clear_display()
+        
+        gesture_index := 0

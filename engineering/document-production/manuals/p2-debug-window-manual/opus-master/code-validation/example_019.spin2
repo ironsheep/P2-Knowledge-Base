@@ -1,0 +1,17 @@
+PUB annotated_scope() | sample
+  DEBUG(`BITMAP Scope SIZE 640 480 RGB8)
+  
+  ' Draw grid
+  draw_grid()
+  
+  ' Draw waveform
+  repeat x from 0 to 639
+    sample := get_sample(x)
+    y := 240 + sample * 200 / max_value
+    DEBUG(`Scope PIXEL 'x' 'y' GREEN)
+  
+  ' Add text labels (values determined by visual inspection)
+  DEBUG(`Scope TEXT 10 10 "Signal Display" WHITE)
+  DEBUG(`Scope TEXT 10 25 "Trigger: ON" WHITE)
+  
+  ' Visual inspection of waveform for patterns

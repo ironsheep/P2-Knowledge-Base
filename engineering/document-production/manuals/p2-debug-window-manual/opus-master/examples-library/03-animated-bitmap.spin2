@@ -1,0 +1,46 @@
+'' 03-animated-bitmap.spin2
+'' Animated graphics in BITMAP window - Bouncing ball
+
+CON
+  _clkfreq = 180_000_000
+  SCREEN_WIDTH = 320
+  SCREEN_HEIGHT = 240
+  BALL_SIZE = 10
+  
+VAR
+  long ball_x, ball_y
+  long vel_x, vel_y
+  
+PUB main()
+  ' Create bitmap window for animation
+  DEBUG(`BITMAP Display SIZE 320 240 TITLE "Bouncing Ball")
+  
+  ' Initialize ball position and velocity
+  ball_x := SCREEN_WIDTH / 2
+  ball_y := SCREEN_HEIGHT / 2
+  vel_x := 3
+  vel_y := 2
+  
+  repeat
+    update_animation()
+    waitms(20)  ' 50 FPS
+    
+PRI update_animation()
+  ' Clear previous ball position
+  DEBUG(`Display COLOR BLACK)
+  DEBUG(`Display CIRCLE `(ball_x) `(ball_y) `(BALL_SIZE+1))
+  
+  ' Update position
+  ball_x += vel_x
+  ball_y += vel_y
+  
+  ' Check boundaries and bounce
+  if ball_x <= BALL_SIZE or ball_x >= SCREEN_WIDTH - BALL_SIZE
+    vel_x := -vel_x
+    
+  if ball_y <= BALL_SIZE or ball_y >= SCREEN_HEIGHT - BALL_SIZE
+    vel_y := -vel_y
+    
+  ' Draw ball at new position
+  DEBUG(`Display COLOR RED)
+  DEBUG(`Display CIRCLE `(ball_x) `(ball_y) `(BALL_SIZE))

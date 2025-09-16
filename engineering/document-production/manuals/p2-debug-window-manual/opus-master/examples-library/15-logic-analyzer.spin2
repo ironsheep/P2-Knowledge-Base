@@ -1,0 +1,59 @@
+'' 15-logic-analyzer.spin2
+'' Logic analyzer example - Monitor digital signals
+
+CON
+  _clkfreq = 180_000_000
+  
+  ' Pin definitions
+  SPI_CLK = 0
+  SPI_MOSI = 1
+  SPI_MISO = 2
+  SPI_CS = 3
+  
+VAR
+  long data_byte
+  
+PUB main()
+  ' Setup logic analyzer window
+  DEBUG(`LOGIC SPI_Monitor SIZE 800 400 TITLE "SPI Bus Monitor")
+  DEBUG(`SPI_Monitor CHANNELS 4)
+  DEBUG(`SPI_Monitor LABELS "CLK" "MOSI" "MISO" "CS")
+  
+  ' Configure pins
+  pinl(SPI_CS)   ' CS high (inactive)
+  pinl(SPI_CLK)  ' Clock low
+  
+  repeat
+    ' Simulate SPI transaction
+    spi_write($A5)
+    waitms(100)
+    spi_write($5A)
+    waitms(100)
+    
+PRI spi_write(value) | bit
+  data_byte := value
+  
+  ' Assert CS
+  pinh(SPI_CS)
+  DEBUG(`SPI_Monitor SAMPLE)
+  waitus(10)
+  
+  ' Clock out 8 bits
+  repeat bit from 7 to 0
+    ' Set MOSI
+    if data_byte & (1 << bit)
+      pinh(SPI_MOSI)
+    else
+      pinl(SPI_MOSI)
+      
+    ' Clock pulse
+    pinh(SPI_CLK)
+    DEBUG(`SPI_Monitor SAMPLE)
+    waitus(10)
+    pinl(SPI_CLK)
+    DEBUG(`SPI_Monitor SAMPLE)
+    waitus(10)
+    
+  ' Deassert CS
+  pinl(SPI_CS)
+  DEBUG(`SPI_Monitor SAMPLE)

@@ -1,0 +1,25 @@
+VAR
+  long button_x[10], button_y[10], button_w[10], button_h[10]
+  long button_state[10]
+
+PUB mouse_interface() | mx, my, click, button
+  create_button_panel()
+  
+  repeat
+    ' Get mouse state
+    mx, my, click := PC_MOUSE()
+    
+    ' Check button interactions
+    repeat button from 0 to 9
+      if in_button(mx, my, button)
+        if click & MOUSE_LEFT
+          button_state[button] := !button_state[button]
+          draw_button(button)
+          execute_button_action(button)
+        
+        ' Hover effect
+        highlight_button(button)
+
+PRI in_button(x, y, button) : result
+  result := (x => button_x[button]) & (x =< button_x[button] + button_w[button]) &
+            (y => button_y[button]) & (y =< button_y[button] + button_h[button])

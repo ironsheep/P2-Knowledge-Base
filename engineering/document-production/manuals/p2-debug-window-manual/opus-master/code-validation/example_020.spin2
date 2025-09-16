@@ -1,0 +1,19 @@
+PUB smooth_animation() | frame, buffer_index
+  ' Create two buffers
+  DEBUG(`BITMAP Anim SIZE 400 400 BUFFER DOUBLE)
+  
+  buffer_index := 0
+  
+  repeat frame from 0 to 359
+    ' Draw to back buffer
+    DEBUG(`Anim BUFFER 'buffer_index')
+    DEBUG(`Anim CLEAR BLACK)
+    
+    ' Draw rotating object
+    draw_rotating_cube(frame)
+    
+    ' Flip buffers
+    DEBUG(`Anim FLIP)
+    buffer_index ^= 1
+    
+    waitms(16)  ' ~60 FPS

@@ -1,0 +1,24 @@
+PUB optimized_dashboard() | value, old_value[8], channel
+  ' Setup multi-channel dashboard
+  setup_dashboard_layers()
+  
+  repeat
+    repeat channel from 0 to 7
+      value := read_channel(channel)
+      
+      if value <> old_value[channel]
+        ' Update only this channel's display
+        x := 100 + (channel & 3) * 200
+        y := 50 + (channel >> 2) * 250
+        
+        ' CROP to channel's region
+        DEBUG(`Dashboard LAYER LAYER_DATA)
+        DEBUG(`Dashboard CROP 'x' 'y' 180 200)
+        
+        ' Update just this channel
+        draw_channel_display(channel, value)
+        
+        old_value[channel] := value
+    
+    ' Entire dashboard appears smooth and responsive
+    ' Despite updating 8 channels continuously

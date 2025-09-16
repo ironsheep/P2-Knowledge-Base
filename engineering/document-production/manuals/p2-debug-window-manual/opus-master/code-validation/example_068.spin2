@@ -1,0 +1,10 @@
+PUB multi_window_dashboard()
+  ' Create coordinated display
+  DEBUG(`SCOPE Waveform SIZE 400 300 POS 0 0)
+  DEBUG(`FFT Spectrum SIZE 400 300 POS 400 0)
+  DEBUG(`LOGIC Digital SIZE 800 200 POS 0 300)
+  
+  repeat
+    ' Synchronized capture
+    capture_all_signals()
+    update_all_windows()

@@ -1,0 +1,24 @@
+PUB frequency_display() | count, freq
+  DEBUG(`TERM Counter SIZE 60 20 TITLE "Frequency Display")
+  
+  ' Configure Smart Pin for frequency counting
+  pinstart(INPUT_PIN, P_COUNT_RISES, 0, 0)
+  
+  repeat
+    ' Count edges for 1 second
+    waitms(1000)
+    count := pinread(INPUT_PIN)
+    pinwrite(INPUT_PIN, 0)  ' Reset counter
+    
+    freq := count  ' Frequency in Hz
+    
+    ' Display frequency
+    DEBUG(`Counter HOME)
+    DEBUG(`Counter "Frequency: ")
+    if freq => 1_000_000
+      DEBUG(`Counter udec_(freq/1_000_000) "." udec_(freq//1_000_000/1000) " MHz")
+    elseif freq => 1_000  
+      DEBUG(`Counter udec_(freq/1_000) "." udec_(freq//1_000) " kHz")
+    else
+      DEBUG(`Counter udec_(freq) " Hz")
+    DEBUG(`Counter CR)

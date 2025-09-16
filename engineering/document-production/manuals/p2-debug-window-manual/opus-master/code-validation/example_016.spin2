@@ -1,0 +1,19 @@
+PUB draw_heat_map() | x, y, value, color
+  DEBUG(`BITMAP HeatMap SIZE 256 256 RGB332)
+  
+  repeat y from 0 to 255
+    repeat x from 0 to 255
+      value := read_sensor_grid(x, y)
+      color := heat_color(value)
+      DEBUG(`HeatMap PIXEL 'x' 'y' 'color')
+  
+PRI heat_color(value) : color
+  ' Map value to heat gradient
+  if value < 25
+    color := BLUE
+  elseif value < 50
+    color := GREEN
+  elseif value < 75
+    color := YELLOW
+  else
+    color := RED

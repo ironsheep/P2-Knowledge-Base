@@ -1,0 +1,10 @@
+PUB visual_uart_analysis()
+  ' Display UART signal for visual analysis
+  DEBUG(`LOGIC UART SIZE 800 200)
+  DEBUG(`UART CHANNEL 1 LABEL "TX")
+  
+  ' User visually identifies:
+  ' - Start bits (falling edge)
+  ' - Data bits (8 sequential samples)
+  ' - Stop bits (high level)
+  ' - Baud rate (bit width)

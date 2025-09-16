@@ -1,0 +1,13 @@
+PUB strip_chart_example() | value, time_stamp
+  ' Configure as strip chart
+  DEBUG(`PLOT Strip SIZE 800 300)
+  DEBUG(`Strip MODE STRIP)
+  DEBUG(`Strip POINTS 500)  ' Visible history
+  
+  repeat
+    ' Single value advances X automatically
+    value := read_sensor()
+    DEBUG(`Strip `(value))
+    
+    ' Auto-scrolling when edge reached
+    waitms(100)  ' 10Hz update rate

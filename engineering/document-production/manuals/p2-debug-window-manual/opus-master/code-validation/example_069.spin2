@@ -1,0 +1,4 @@
+PUB cross_trigger()
+  ' SCOPE triggers LOGIC capture
+  DEBUG(`SCOPE Master TRIGGER RISING 2048)
+  DEBUG(`LOGIC Slave TRIGGER_SOURCE SCOPE)

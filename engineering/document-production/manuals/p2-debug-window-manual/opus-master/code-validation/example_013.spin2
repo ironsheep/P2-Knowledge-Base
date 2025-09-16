@@ -1,0 +1,22 @@
+PUB terminal_secrets()
+  ' Terminal control (implementation varies by terminal)
+  ' Some terminals support scrolling regions via ANSI sequences
+  
+  ' Save/restore cursor position (if supported)
+  ' Note: Standard ANSI escape sequences can be used
+  DEBUG(`TERM POS 10 10 "Temporary message")
+  
+  ' Box drawing using ASCII characters
+  ' Draw borders manually with -, |, and + characters
+  
+  ' Progress bars
+  repeat percent from 0 to 100
+    DEBUG(`TERM POS 10 15)
+    DEBUG("[")
+    repeat i from 0 to 39
+      if i < (percent * 40 / 100)
+        DEBUG("=")
+      else
+        DEBUG(" ")
+    DEBUG("] ", udec(percent), "%")
+    waitms(50)

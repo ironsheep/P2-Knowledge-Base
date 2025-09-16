@@ -1,0 +1,7 @@
+PUB dual_channel() | ch1, ch2
+  DEBUG(`SCOPE Dual CHANNELS 2)
+  
+  repeat
+    ch1 := read_input()
+    ch2 := read_output()
+    DEBUG(`Dual SAMPLES 'ch1' 'ch2')
