@@ -1,0 +1,24 @@
+pattern_id: "cog_management"
+when_use:
+  - "Multi-cog coordination"
+  - "Parallel processing"
+implementation: |
+  VAR
+    long cog_id
+    long stack[64]
+    
+  PUB start() : success
+    stop()
+    cog_id := coginit(COGEXEC_NEW, @worker, @stack)
+    return cog_id <> -1
+    
+  PUB stop()
+    if cog_id > -1
+      cogstop(cog_id)
+      cog_id := -1
+resources:
+  cogs: "1+"
+  stack: "64+ longs per cog"
+combines_with:
+  - "shared_memory"
+  - "mailbox_communication"

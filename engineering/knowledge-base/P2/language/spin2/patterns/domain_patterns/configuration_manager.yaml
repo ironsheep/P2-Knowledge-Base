@@ -1,0 +1,23 @@
+pattern_id: "configuration_manager"
+when_use:
+  - "System settings storage"
+  - "Runtime configuration"
+implementation: |
+  DAT
+    config_data
+      long DEFAULT_BAUD
+      long DEFAULT_PINS
+      byte "DeviceName", 0
+      
+  PUB load_config(addr) : success
+    longmove(@config_data, addr, 32)
+    success := validate_config()
+    
+  PUB get_setting(index) : value
+    value := long[@config_data][index]
+resources:
+  memory: "128+ bytes"
+  storage: "EEPROM/Flash"
+combines_with:
+  - "data_logger"
+  - "error_handling"

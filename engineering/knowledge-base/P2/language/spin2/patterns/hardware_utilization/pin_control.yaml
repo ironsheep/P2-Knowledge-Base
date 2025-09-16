@@ -1,0 +1,19 @@
+pattern_id: "pin_control"
+when_use:
+  - "Direct GPIO manipulation"
+  - "Smart pin configuration"
+implementation: |
+  PUB setup_smartpin(pin, mode) 
+    wrpin(mode, pin)
+    wxpin($1000, pin)
+    wypin(0, pin)
+    pinl(pin)
+    
+  PUB toggle(pin)
+    pintoggle(pin)
+resources:
+  pins: "varies"
+  smart_pins: "0-64"
+combines_with:
+  - "timing_control"
+  - "state_machine"

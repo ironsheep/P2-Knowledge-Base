@@ -1,0 +1,24 @@
+pattern_id: "communication_handler"
+when_use:
+  - "Serial/network protocols"
+  - "Device-to-device messaging"
+implementation: |
+  CON
+    BAUD = 115_200
+    
+  PUB tx_string(str) | char
+    repeat while char := byte[str++]
+      tx_char(char)
+      
+  PUB rx_line(buffer, max) : len
+    repeat while len < max
+      buffer[len] := rx_char()
+      if buffer[len] == 13
+        quit
+      len++
+resources:
+  pins: "2 (RX/TX)"
+  buffers: "256+ bytes"
+combines_with:
+  - "buffer_management"
+  - "protocol_implementation"

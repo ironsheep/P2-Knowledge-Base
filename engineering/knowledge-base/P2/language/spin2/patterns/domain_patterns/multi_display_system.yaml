@@ -1,0 +1,100 @@
+pattern_id: "multi_display_system"
+category: "domain_patterns"
+usage_frequency: "5.9%"
+file_count: 43
+
+selection_criteria:
+  use_when:
+    - Managing multiple screens or display panels
+    - Building digital signage networks
+    - Creating multi-monitor control systems
+    - Implementing dashboard displays
+    - Developing information kiosks
+  avoid_when:
+    - Single display is sufficient
+    - Display content is static
+    - Memory constraints prevent multiple buffers
+    - Simple text output meets requirements
+
+structural_signature:
+  display_management:
+    - "Multiple display driver objects"
+    - "Display-specific buffer management"
+    - "Content distribution logic"
+  content_coordination:
+    - "Synchronized content updates"
+    - "Per-display content customization"
+    - "Layout management systems"
+  resource_allocation:
+    - "Memory pool for multiple framebuffers"
+    - "Processing time distribution"
+    - "Update priority systems"
+
+implementation_template: |
+  CON
+    MAX_DISPLAYS = 4
+    DISPLAY_WIDTH = 320
+    DISPLAY_HEIGHT = 240
+    
+  OBJ
+    displays[MAX_DISPLAYS] : "lcd_driver"
+    graphics : "graphics_engine"
+    
+  VAR
+    long display_buffers[MAX_DISPLAYS * DISPLAY_WIDTH * DISPLAY_HEIGHT / 4]
+    long display_states[MAX_DISPLAYS]
+    long update_flags[MAX_DISPLAYS]
+    long current_content[MAX_DISPLAYS]
+    
+  PUB main()
+    initialize_display_system()
+    
+    repeat
+      ' Check for content updates
+      check_content_changes()
+      
+      ' Update displays that need refreshing
+      update_modified_displays()
+      
+      ' Handle display-specific events
+      process_display_events()
+      
+      ' Manage power and resources
+      optimize_display_power()
+      
+  PUB update_modified_displays() | display_id
+    repeat display_id from 0 to MAX_DISPLAYS-1
+      if update_flags[display_id]
+        refresh_display_content(display_id)
+        update_flags[display_id] := FALSE
+        
+  PUB refresh_display_content(display_id) | buffer_offset
+    ' Calculate buffer offset for this display
+    buffer_offset := display_id * DISPLAY_WIDTH * DISPLAY_HEIGHT / 4
+    
+    case current_content[display_id]
+      CONTENT_DASHBOARD:
+        render_dashboard_to_buffer(@display_buffers[buffer_offset])
+      CONTENT_STATUS:
+        render_status_to_buffer(@display_buffers[buffer_offset])
+      CONTENT_MENU:
+        render_menu_to_buffer(@display_buffers[buffer_offset])
+      CONTENT_GRAPH:
+        render_graph_to_buffer(@display_buffers[buffer_offset])
+        
+    ' Send buffer to physical display
+    displays[display_id].update_screen(@display_buffers[buffer_offset])
+    
+  PUB set_display_content(display_id, content_type)
+    if display_id < MAX_DISPLAYS
+      current_content[display_id] := content_type
+      update_flags[display_id] := TRUE
+      
+  PUB synchronized_update_all(content_array)
+    ' Update all displays simultaneously
+    repeat display_id from 0 to MAX_DISPLAYS-1
+      current_content[display_id] := content_array[display_id]
+      update_flags[display_id] := TRUE
+      
+    ' Wait for all updates to complete
+    repeat until all_displays_updated()

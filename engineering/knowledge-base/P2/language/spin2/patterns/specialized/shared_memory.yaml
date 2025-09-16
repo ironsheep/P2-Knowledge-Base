@@ -1,0 +1,24 @@
+pattern_id: "shared_memory"
+when_use:
+  - "Inter-cog data exchange"
+  - "Global state management"
+implementation: |
+  VAR
+    long shared_data[16]
+    long lock_id
+    
+  PUB write_shared(index, value)
+    repeat while lockset(lock_id)
+    shared_data[index] := value
+    lockclr(lock_id)
+    
+  PUB read_shared(index) : value
+    repeat while lockset(lock_id)
+    value := shared_data[index]
+    lockclr(lock_id)
+resources:
+  locks: "1 per resource"
+  memory: "shared hub RAM"
+combines_with:
+  - "cog_management"
+  - "mailbox_communication"

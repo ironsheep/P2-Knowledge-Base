@@ -1,0 +1,24 @@
+pattern_id: "test_harness"
+when_use:
+  - "Hardware validation"
+  - "Automated testing"
+implementation: |
+  PUB run_tests() : passed | total
+    total := 0
+    passed := 0
+    
+    if test_gpio()
+      passed++
+    total++
+    
+    if test_uart()  
+      passed++
+    total++
+    
+    report(passed, total)
+resources:
+  memory: "test vectors"
+  pins: "varies by test"
+combines_with:
+  - "diagnostic_output"
+  - "error_handling"

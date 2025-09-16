@@ -1,0 +1,24 @@
+pattern_id: "framework_pattern"
+when_use:
+  - "8+ objects with hierarchy"
+  - "Full application framework"
+implementation: |
+  OBJ
+    core    : "app_core"
+    ui      : "ui_manager"
+    storage : "storage_system"
+    network : "network_stack"
+    drivers[4] : "device_driver"
+    
+  PUB main() | sys_config
+    sys_config := core.initialize()
+    ui.setup(sys_config)
+    storage.mount()
+    network.connect()
+    core.run()
+resources:
+  dependencies: "8+"
+  cogs: "4-8 (all cogs utilized)"
+combines_with:
+  - "layered_architecture"
+  - "plugin_system"

@@ -1,0 +1,20 @@
+pattern_id: "memory_allocation"
+when_use:
+  - "Dynamic data structures"
+  - "Hub RAM management"
+implementation: |
+  VAR
+    long heap[1024]
+    long heap_ptr
+    
+  PUB alloc(size) : ptr
+    ptr := @heap + heap_ptr
+    heap_ptr += size
+    if heap_ptr > 1024
+      return 0
+resources:
+  hub_ram: "varies"
+  overhead: "pointer tracking"
+combines_with:
+  - "buffer_management"
+  - "resource_pool"

@@ -1,0 +1,99 @@
+pattern_id: "robotics"
+category: "domain_patterns"
+usage_frequency: "12.3%"
+file_count: 90
+
+selection_criteria:
+  use_when:
+    - Building autonomous mobile robots
+    - Creating robotic manipulation systems
+    - Implementing servo/motor control systems
+    - Developing sensor fusion for navigation
+    - Building multi-degree-of-freedom systems
+  avoid_when:
+    - Simple single-motor applications
+    - No feedback control required
+    - Static positioning systems
+    - Manual control only
+
+structural_signature:
+  motion_control:
+    - "Multi-motor coordination"
+    - "Servo positioning systems"
+    - "Speed and acceleration control"
+  sensor_integration:
+    - "Encoder feedback processing"
+    - "IMU data fusion"
+    - "Vision/distance sensors"
+  behavior_systems:
+    - "State machine behaviors"
+    - "Path planning algorithms"
+    - "Obstacle avoidance logic"
+
+implementation_template: |
+  OBJ
+    motors       : "motor_controller"
+    encoders     : "encoder_reader"
+    imu          : "imu_sensor"
+    sonar        : "ultrasonic_sensor"
+    
+  VAR
+    long robot_state
+    long target_position[3]  ' x, y, theta
+    long current_position[3]
+    long motor_speeds[4]
+    
+  PUB main()
+    initialize_robot_systems()
+    robot_state := STATE_IDLE
+    
+    repeat
+      ' Update sensor readings
+      update_position_estimate()
+      scan_environment()
+      
+      ' Execute current behavior
+      case robot_state
+        STATE_IDLE:
+          idle_behavior()
+        STATE_MOVING:
+          movement_behavior()
+        STATE_TURNING:
+          turning_behavior()
+        STATE_AVOIDING:
+          obstacle_avoidance()
+          
+      ' Update motor outputs
+      apply_motor_commands()
+      
+      waitms(CONTROL_LOOP_MS)
+      
+  PUB movement_behavior() | distance_error, angle_error
+    ' Calculate position error
+    distance_error := calculate_distance_to_target()
+    angle_error := calculate_angle_error()
+    
+    ' Simple proportional control
+    if distance_error < POSITION_TOLERANCE
+      robot_state := STATE_IDLE
+      stop_all_motors()
+    else
+      ' Calculate motor speeds for differential drive
+      base_speed := distance_error * KP_DISTANCE
+      turn_correction := angle_error * KP_ANGLE
+      
+      motor_speeds[LEFT] := base_speed - turn_correction
+      motor_speeds[RIGHT] := base_speed + turn_correction
+      
+      ' Limit speeds
+      limit_motor_speeds()
+      
+  PUB obstacle_avoidance() | obstacle_distance
+    obstacle_distance := sonar.read_distance()
+    
+    if obstacle_distance > SAFE_DISTANCE
+      robot_state := STATE_MOVING  ' Resume normal movement
+    else
+      ' Turn away from obstacle
+      motor_speeds[LEFT] := -TURN_SPEED
+      motor_speeds[RIGHT] := TURN_SPEED

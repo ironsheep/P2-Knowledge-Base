@@ -1,0 +1,20 @@
+pattern_id: "few_objects"
+when_use:
+  - "2-3 coordinated components"
+  - "Minimal inter-object communication"
+implementation: |
+  OBJ
+    display : "p2_oled_driver"
+    sensor  : "p2_temp_sensor"
+    
+  PUB main()
+    display.init()
+    sensor.start()
+    repeat
+      display.show_value(sensor.read_temp())
+resources:
+  dependencies: "2-3"
+  cogs: "1-3 typical"
+combines_with:
+  - "state_machine for coordination"
+  - "buffer_management for data flow"

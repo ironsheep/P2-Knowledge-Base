@@ -1,0 +1,24 @@
+pattern_id: "audio_processor"
+when_use:
+  - "Sound generation/playback"
+  - "Audio signal processing"
+implementation: |
+  CON
+    SAMPLE_RATE = 44_100
+    
+  VAR
+    word audio_buffer[256]
+    
+  PUB play_tone(freq, duration) | t, step
+    step := freq * $1_0000 / SAMPLE_RATE
+    t := 0
+    repeat duration * SAMPLE_RATE / 1000
+      audio_buffer[0] := sin(t) >> 16 + $8000
+      t += step
+      waitcnt(clkfreq/SAMPLE_RATE + cnt)
+resources:
+  pins: "1-2 DAC outputs"
+  memory: "512+ bytes buffer"
+combines_with:
+  - "buffer_management"
+  - "timing_control"

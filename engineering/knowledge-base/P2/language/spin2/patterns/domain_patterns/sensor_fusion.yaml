@@ -1,0 +1,136 @@
+pattern_id: "sensor_fusion"
+category: "domain_patterns"
+usage_frequency: "11.0%"
+file_count: 80
+
+selection_criteria:
+  use_when:
+    - Combining multiple sensor types for accuracy
+    - Building navigation and positioning systems
+    - Creating robust measurement systems
+    - Implementing fault-tolerant sensing
+    - Developing autonomous systems
+  avoid_when:
+    - Single sensor provides sufficient accuracy
+    - Computational overhead is prohibitive
+    - Simple threshold-based decisions sufficient
+    - Sensors measure unrelated parameters
+
+structural_signature:
+  sensor_integration:
+    - "Multiple sensor driver coordination"
+    - "Data synchronization and timestamping"
+    - "Sensor calibration management"
+  fusion_algorithms:
+    - "Kalman filter implementations"
+    - "Weighted averaging techniques"
+    - "Complementary filter designs"
+  output_processing:
+    - "Fused data validation"
+    - "Confidence estimation"
+    - "Error detection and handling"
+
+implementation_template: |
+  OBJ
+    imu          : "imu_sensor"
+    gps          : "gps_receiver"
+    magnetometer : "compass_sensor"
+    barometer    : "pressure_sensor"
+    filter       : "kalman_filter"
+    
+  VAR
+    long sensor_data[16]     ' Raw sensor readings
+    long fused_state[8]      ' Position, velocity, orientation
+    long sensor_weights[4]   ' Trust factors for each sensor
+    long last_update_time
+    long fusion_confidence
+    
+  PUB main()
+    initialize_sensor_fusion()
+    
+    repeat
+      ' Collect sensor data
+      collect_all_sensor_data()
+      
+      ' Perform sensor fusion
+      execute_fusion_algorithm()
+      
+      ' Validate and output results
+      validate_fused_data()
+      
+      ' Adapt fusion parameters
+      adapt_fusion_weights()
+      
+      waitms(FUSION_UPDATE_RATE)
+      
+  PUB collect_all_sensor_data() | timestamp
+    timestamp := getms()
+    
+    ' IMU data (accelerometer, gyroscope)
+    sensor_data[IMU_ACCEL_X] := imu.read_accel_x()
+    sensor_data[IMU_ACCEL_Y] := imu.read_accel_y()
+    sensor_data[IMU_ACCEL_Z] := imu.read_accel_z()
+    sensor_data[IMU_GYRO_X] := imu.read_gyro_x()
+    sensor_data[IMU_GYRO_Y] := imu.read_gyro_y()
+    sensor_data[IMU_GYRO_Z] := imu.read_gyro_z()
+    
+    ' GPS data
+    if gps.has_fix()
+      sensor_data[GPS_LAT] := gps.read_latitude()
+      sensor_data[GPS_LON] := gps.read_longitude()
+      sensor_data[GPS_ALT] := gps.read_altitude()
+      sensor_weights[GPS_SENSOR] := calculate_gps_confidence()
+    else
+      sensor_weights[GPS_SENSOR] := 0
+      
+    ' Magnetometer
+    sensor_data[MAG_HEADING] := magnetometer.read_heading()
+    
+    ' Barometric altitude
+    sensor_data[BARO_ALT] := barometer.read_altitude()
+    
+  PUB execute_fusion_algorithm()
+    ' Predict step (based on IMU integration)
+    predict_state_from_imu()
+    
+    ' Update step (correct with other sensors)
+    if sensor_weights[GPS_SENSOR] > GPS_MIN_CONFIDENCE
+      filter.update_position(sensor_data[GPS_LAT], sensor_data[GPS_LON])
+      
+    if sensor_weights[MAG_SENSOR] > MAG_MIN_CONFIDENCE
+      filter.update_heading(sensor_data[MAG_HEADING])
+      
+    ' Altitude fusion (GPS + barometer)
+    fused_altitude := fuse_altitude_sources()
+    filter.update_altitude(fused_altitude)
+    
+    ' Extract fused state
+    filter.get_state(@fused_state)
+    
+  PUB fuse_altitude_sources() : altitude | gps_alt, baro_alt, gps_weight, baro_weight
+    gps_alt := sensor_data[GPS_ALT]
+    baro_alt := sensor_data[BARO_ALT]
+    
+    ' Weight based on GPS accuracy and barometer stability
+    gps_weight := sensor_weights[GPS_SENSOR] * 0.3
+    baro_weight := sensor_weights[BARO_SENSOR] * 0.7
+    
+    ' Normalize weights
+    total_weight := gps_weight + baro_weight
+    if total_weight > 0
+      altitude := (gps_alt * gps_weight + baro_alt * baro_weight) / total_weight
+    else
+      altitude := baro_alt  ' Fallback to barometer
+      
+  PUB calculate_gps_confidence() : confidence
+    ' Calculate GPS confidence based on satellite count and HDOP
+    sat_count := gps.get_satellite_count()
+    hdop := gps.get_hdop()
+    
+    confidence := 100
+    if sat_count < 6
+      confidence := confidence * sat_count / 6
+    if hdop > 200  ' 2.0 HDOP
+      confidence := confidence * 200 / hdop
+      
+    return confidence #> 0 <# 100

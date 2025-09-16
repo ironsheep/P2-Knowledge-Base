@@ -1,0 +1,80 @@
+# No Objects Pattern
+pattern_id: "no_objects"
+category: "object_composition"
+usage_frequency: "51.0%"
+file_count: 372
+
+selection_criteria:
+  use_when:
+    - "Creating utility libraries"
+    - "Mathematical functions"
+    - "Self-contained algorithms"
+    - "Low-level hardware access"
+    - "No external dependencies needed"
+  
+  avoid_when:
+    - "Need serial communication (use single_object)"
+    - "Need multiple services (use few_objects)"
+
+structural_signature:
+  required_sections:
+    CON: "Constants and configuration"
+    VAR: "State variables (optional)"
+    PUB: "Public methods"
+    PRI: "Private methods (optional)"
+    DAT: "Data/Assembly (optional)"
+  
+  no_obj_section: true
+  
+implementation_template: |
+  '' Self-contained utility/library
+  '' No external dependencies
+  
+  CON
+    MAX_VALUE = 1000
+    DEFAULT_TIMEOUT = 100
+  
+  VAR
+    long internal_state
+    byte buffer[256]
+  
+  PUB calculate(value) : result
+    ' Pure computation - no dependencies
+    result := value * 2 + internal_state
+    
+  PUB process_data(ptr, len) : status
+    ' Direct memory operations
+    repeat len
+      byte[ptr++] := byte[ptr] ^ $FF
+    return true
+    
+  PRI helper_function(param)
+    ' Internal processing
+    internal_state := param << 2
+
+resource_profile:
+  dependencies: 0
+  typical_size: "100-500 longs"
+  cog_usage: 0
+  self_contained: true
+
+composition_rules:
+  can_be_used_by:
+    - "Any pattern as a utility"
+    - "Often used by single_object patterns"
+  
+  benefits:
+    - "No dependency management"
+    - "Easy to test"
+    - "Highly reusable"
+    - "Minimal resource usage"
+
+real_examples:
+  - "math_int64.spin2"
+  - "jm_nstr.spin2"
+  - "string_utilities.spin2"
+
+statistics:
+  prevalence: "372 of 730 files"
+  percentage: "51.0%"
+  trend: "Stable - utility code always needed"

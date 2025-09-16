@@ -1,0 +1,25 @@
+# No Objects Pattern - MINIMAL
+pattern_id: "no_objects"
+
+when_use:
+  - "Self-contained utility/library"
+  - "No external dependencies"
+  - "Mathematical functions"
+
+implementation: |
+  '' No OBJ section needed
+  CON
+    CONFIG = 1000
+  VAR
+    long state
+  PUB calculate(value) : result
+    result := value * 2 + state
+  PRI helper(param)
+    state := param << 2
+
+resources:
+  dependencies: 0
+  cogs: 0
+  
+combines_with:
+  - "Any pattern as utility"

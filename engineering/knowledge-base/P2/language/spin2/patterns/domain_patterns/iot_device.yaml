@@ -1,0 +1,82 @@
+pattern_id: "iot_device"
+category: "domain_patterns"
+usage_frequency: "6.8%"
+file_count: 50
+
+selection_criteria:
+  use_when:
+    - Building connected devices for IoT networks
+    - Implementing cloud-connected sensors
+    - Creating smart home devices
+    - Developing remote monitoring solutions
+    - Building edge computing devices
+  avoid_when:
+    - Device operates in isolated environment
+    - Network connectivity is unreliable
+    - Power consumption must be minimized
+    - Security requirements are minimal
+
+structural_signature:
+  connectivity:
+    - "WiFi, cellular, or LoRa communication"
+    - "Protocol stack implementation (HTTP, MQTT, CoAP)"
+    - "Connection management and recovery"
+  data_processing:
+    - "Local sensor data aggregation"
+    - "Edge computing capabilities"
+    - "Data compression before transmission"
+  cloud_integration:
+    - "Cloud service API integration"
+    - "Device registration and authentication"
+    - "Over-the-air update capability"
+
+implementation_template: |
+  OBJ
+    wifi         : "wifi_module"
+    sensors      : "sensor_array"
+    crypto       : "security_module"
+    storage      : "flash_storage"
+    
+  VAR
+    long device_id
+    long cloud_endpoint[20]
+    long last_upload_time
+    
+  PUB main()
+    initialize_iot_device()
+    
+    repeat
+      ' Collect and process sensor data
+      sensor_data := sensors.read_all()
+      processed_data := process_locally(sensor_data)
+      
+      ' Store locally if needed
+      if should_cache_data()
+        storage.save_data(processed_data)
+        
+      ' Upload to cloud
+      if time_to_upload() and wifi.is_connected()
+        upload_status := send_to_cloud(processed_data)
+        handle_upload_response(upload_status)
+      else
+        queue_for_later_upload(processed_data)
+        
+      ' Handle incoming commands
+      if wifi.has_message()
+        process_cloud_command(wifi.get_message())
+        
+      power_management_sleep()
+      
+  PUB send_to_cloud(data) : status
+    ' Prepare secure payload
+    encrypted_data := crypto.encrypt(data)
+    
+    ' Send via HTTPS/MQTT
+    status := wifi.post_data(cloud_endpoint, encrypted_data)
+    
+    ' Handle response
+    if status == SUCCESS
+      last_upload_time := getms()
+      clear_cached_data()
+    else
+      increment_retry_counter()

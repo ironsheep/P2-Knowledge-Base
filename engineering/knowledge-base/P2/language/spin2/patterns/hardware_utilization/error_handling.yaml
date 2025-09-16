@@ -1,0 +1,18 @@
+pattern_id: "error_handling"
+when_use:
+  - "Robust communication"
+  - "Fault tolerance needed"
+implementation: |
+  PUB safe_read(addr) : value | attempts
+    repeat attempts from 1 to 3
+      value := try_read(addr)
+      if value <> ERROR
+        return value
+      waitus(100)
+    return DEFAULT_VALUE
+resources:
+  memory: "minimal"
+  overhead: "retry loops"
+combines_with:
+  - "protocol_implementation"
+  - "diagnostic_output"

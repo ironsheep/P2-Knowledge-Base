@@ -1,0 +1,147 @@
+pattern_id: "single_communication"
+category: "domain_patterns"
+usage_frequency: "18.5%"
+file_count: 135
+
+selection_criteria:
+  use_when:
+    - Device communicates with one external system
+    - Simple point-to-point communication needed
+    - Single protocol interface sufficient
+    - Communication overhead must be minimized
+    - Direct device-to-host connection
+  avoid_when:
+    - Multiple communication channels needed
+    - Network or multi-point communication required
+    - Complex protocol switching needed
+    - Redundant communication paths required
+
+structural_signature:
+  single_interface:
+    - "One primary communication object"
+    - "Single protocol implementation"
+    - "Direct message handling"
+  message_processing:
+    - "Command parsing and response"
+    - "Simple message queuing"
+    - "Error handling and recovery"
+  connection_management:
+    - "Connection establishment"
+    - "Keep-alive mechanisms"
+    - "Reconnection logic"
+
+implementation_template: |
+  OBJ
+    comm : "serial_communication"  ' Single communication channel
+    
+  VAR
+    long comm_buffer[64]
+    long connection_state
+    long last_message_time
+    long message_queue[16]
+    long queue_head, queue_tail
+    
+  PUB main()
+    initialize_communication()
+    
+    repeat
+      ' Maintain single communication channel
+      manage_connection()
+      
+      ' Process incoming messages
+      handle_incoming_data()
+      
+      ' Send queued outgoing messages
+      process_outgoing_queue()
+      
+      ' Handle communication timeouts
+      check_communication_timeout()
+      
+      waitms(10)
+      
+  PUB initialize_communication()
+    connection_state := DISCONNECTED
+    queue_head := 0
+    queue_tail := 0
+    
+    ' Configure single communication interface
+    comm.start(BAUD_RATE, TX_PIN, RX_PIN)
+    
+    ' Attempt initial connection
+    attempt_connection()
+    
+  PUB handle_incoming_data() | message_available, message_type
+    if comm.rx_ready()
+      message_available := comm.receive_message(@comm_buffer)
+      
+      if message_available
+        message_type := parse_message_type(@comm_buffer)
+        last_message_time := getms()
+        
+        case message_type
+          MSG_COMMAND:
+            process_command_message(@comm_buffer)
+          MSG_REQUEST:
+            process_request_message(@comm_buffer)
+          MSG_KEEPALIVE:
+            process_keepalive_message()
+          other:
+            send_error_response(ERROR_UNKNOWN_MESSAGE)
+            
+  PUB process_command_message(msg_ptr) | command, param1, param2, result
+    command := get_command_from_message(msg_ptr)
+    param1 := get_parameter_1(msg_ptr)
+    param2 := get_parameter_2(msg_ptr)
+    
+    case command
+      CMD_SET_VALUE:
+        result := set_device_value(param1, param2)
+        send_response(CMD_SET_VALUE, result)
+      CMD_GET_VALUE:
+        result := get_device_value(param1)
+        send_response(CMD_GET_VALUE, result)
+      CMD_RESET:
+        perform_device_reset()
+        send_response(CMD_RESET, SUCCESS)
+      other:
+        send_error_response(ERROR_UNKNOWN_COMMAND)
+        
+  PUB send_response(command, data)
+    ' Queue response message for transmission
+    if queue_space_available()
+      message := build_response_message(command, data)
+      add_to_queue(message)
+    else
+      ' Queue full - send error
+      comm.send_immediate_error(ERROR_QUEUE_FULL)
+      
+  PUB process_outgoing_queue()
+    if queue_has_messages() and comm.tx_ready()
+      message := get_from_queue()
+      comm.send_message(message)
+      
+  PUB manage_connection()
+    case connection_state
+      DISCONNECTED:
+        attempt_connection()
+      CONNECTED:
+        if comm.is_connected()
+          ' Send periodic keep-alive
+          if time_for_keepalive()
+            send_keepalive()
+        else
+          connection_state := DISCONNECTED
+          
+  PUB attempt_connection() : success
+    if comm.attempt_connect()
+      connection_state := CONNECTED
+      send_connection_established()
+      return TRUE
+    else
+      return FALSE
+      
+  PUB check_communication_timeout()
+    if connection_state == CONNECTED
+      if (getms() - last_message_time) > COMMUNICATION_TIMEOUT
+        connection_state := DISCONNECTED
+        handle_communication_loss()

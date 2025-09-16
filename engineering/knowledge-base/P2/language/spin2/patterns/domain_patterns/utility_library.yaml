@@ -1,0 +1,18 @@
+pattern_id: "utility_library"
+when_use:
+  - "Common helper functions"
+  - "Reusable algorithms"
+implementation: |
+  PUB min(a, b) : result
+    result := a < b ? a : b
+    
+  PUB constrain(val, low, high) : result
+    result := min(max(val, low), high)
+    
+  PUB map(val, in_min, in_max, out_min, out_max) : result
+    result := (val-in_min)*(out_max-out_min)/(in_max-in_min)+out_min
+resources:
+  memory: "minimal"
+  cogs: 0
+combines_with:
+  - "any pattern"

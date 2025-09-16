@@ -1,0 +1,20 @@
+pattern_id: "diagnostic_output"
+when_use:
+  - "Debug information display"
+  - "System status reporting"
+implementation: |
+  PUB debug_hex(value, digits) | i
+    repeat i from digits-1 to 0
+      tx(lookup((value>>i*4)&$F:"0".."9","A".."F"))
+      
+  PUB debug_msg(str, value)
+    tx_string(str)
+    tx_string(": ")
+    debug_hex(value, 8)
+    tx(13)
+resources:
+  pins: "2 (serial TX)"
+  memory: "minimal"
+combines_with:
+  - "test_harness"
+  - "error_handling"

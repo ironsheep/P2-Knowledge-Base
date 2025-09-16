@@ -1,0 +1,21 @@
+pattern_id: "mailbox_communication"
+when_use:
+  - "Cog-to-cog messaging"
+  - "Command/response patterns"
+implementation: |
+  VAR
+    long mailbox_cmd
+    long mailbox_data
+    long mailbox_result
+    
+  PUB send_command(cmd, data) : result
+    mailbox_data := data
+    mailbox_cmd := cmd
+    repeat while mailbox_cmd
+    result := mailbox_result
+resources:
+  memory: "12+ bytes per mailbox"
+  locks: "optional"
+combines_with:
+  - "cog_management"
+  - "shared_memory"

@@ -1,0 +1,19 @@
+pattern_id: "buffer_management"
+when_use:
+  - "Data streaming between cogs"
+  - "UART/SPI/I2C communication"
+implementation: |
+  VAR
+    long rx_buffer[64]
+    long rx_head, rx_tail
+    
+  PUB rx_check() : char | ptr
+    if rx_head <> rx_tail
+      char := rx_buffer[rx_tail]
+      rx_tail := (rx_tail + 1) & 63
+resources:
+  memory: "256+ bytes typical"
+  cogs: 0
+combines_with:
+  - "protocol_implementation"
+  - "timing_control"

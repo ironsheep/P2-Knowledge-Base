@@ -1,0 +1,23 @@
+pattern_id: "plugin_system"
+when_use:
+  - "Extensible functionality"
+  - "Runtime module loading"
+implementation: |
+  VAR
+    long plugin_table[8]
+    byte plugin_count
+    
+  PUB register_plugin(interface)
+    if plugin_count < 8
+      plugin_table[plugin_count++] := interface
+      
+  PUB call_plugins(method) | i
+    repeat i from 0 to plugin_count-1
+      if plugin_table[i]
+        plugin_table[i].call(method)
+resources:
+  memory: "table + plugin code"
+  flexibility: "runtime extension"
+combines_with:
+  - "framework_pattern"
+  - "event_dispatcher"

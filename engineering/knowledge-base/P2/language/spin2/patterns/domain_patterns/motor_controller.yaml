@@ -1,0 +1,23 @@
+pattern_id: "motor_controller"
+when_use:
+  - "Servo/stepper/DC motor control"
+  - "Motion control systems"
+implementation: |
+  CON
+    PWM_FREQ = 20_000
+    
+  PUB set_servo_angle(pin, angle)
+    angle := 1000 + (angle * 1000 / 180)
+    wypin(angle * clkfreq / 1_000_000, pin)
+    
+  PUB step_motor(steps, delay)
+    repeat steps
+      outa[STEP_PIN]~~
+      waitus(delay)
+      outa[STEP_PIN]~
+resources:
+  pins: "2-4 per motor"
+  smart_pins: "PWM mode"
+combines_with:
+  - "pin_control"
+  - "timing_control"

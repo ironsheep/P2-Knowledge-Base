@@ -1,0 +1,24 @@
+pattern_id: "event_dispatcher"
+when_use:
+  - "Event-driven architecture"
+  - "Callback management"
+implementation: |
+  VAR
+    long event_queue[32]
+    byte queue_head, queue_tail
+    
+  PUB post_event(event_type, data)
+    event_queue[queue_head] := event_type<<16 | data
+    queue_head := (queue_head + 1) & 31
+    
+  PUB process_events() | event
+    if queue_head <> queue_tail
+      event := event_queue[queue_tail]
+      queue_tail := (queue_tail + 1) & 31
+      handle_event(event>>16, event&$FFFF)
+resources:
+  memory: "128+ bytes queue"
+  overhead: "polling loop"
+combines_with:
+  - "state_machine"
+  - "several_objects"

@@ -1,0 +1,146 @@
+pattern_id: "multi_instance_coordination"
+category: "domain_patterns"
+usage_frequency: "7.1%"
+file_count: 52
+
+selection_criteria:
+  use_when:
+    - Multiple identical devices need coordination
+    - Building distributed systems with similar nodes
+    - Creating redundant backup systems
+    - Implementing load-balanced processing
+    - Developing synchronized multi-unit operations
+  avoid_when:
+    - Single instance is sufficient
+    - Instances operate completely independently
+    - Coordination overhead exceeds benefits
+    - Simple master-slave relationship adequate
+
+structural_signature:
+  instance_management:
+    - "Instance discovery and registration"
+    - "Dynamic instance allocation"
+    - "Instance health monitoring"
+  coordination_protocols:
+    - "Leader election algorithms"
+    - "Consensus mechanisms"
+    - "Distributed task assignment"
+  synchronization:
+    - "Clock synchronization"
+    - "State synchronization"
+    - "Event coordination"
+
+implementation_template: |
+  CON
+    MAX_INSTANCES = 8
+    INSTANCE_TIMEOUT = 5000  ' 5 seconds
+    
+  OBJ
+    comm : "instance_communication"
+    sync : "synchronization"
+    
+  VAR
+    long instance_id
+    long known_instances[MAX_INSTANCES]
+    long instance_states[MAX_INSTANCES]
+    long instance_last_seen[MAX_INSTANCES]
+    long leader_instance
+    long coordination_state
+    
+  PUB main()
+    initialize_instance()
+    discover_other_instances()
+    
+    repeat
+      ' Maintain instance registry
+      update_instance_registry()
+      
+      ' Handle coordination based on role
+      if instance_id == leader_instance
+        perform_leader_duties()
+      else
+        perform_follower_duties()
+        
+      ' Participate in distributed operations
+      handle_coordinated_tasks()
+      
+      waitms(COORDINATION_CYCLE_MS)
+      
+  PUB discover_other_instances() | response, candidate_id
+    known_instances[0] := instance_id
+    instance_count := 1
+    
+    ' Broadcast discovery message
+    comm.broadcast_discovery(instance_id)
+    
+    ' Listen for responses
+    repeat 10  ' Discovery timeout
+      response := comm.wait_for_response(100)
+      if response
+        candidate_id := comm.get_sender_id(response)
+        add_instance_to_registry(candidate_id)
+      waitms(100)
+      
+    ' Elect initial leader
+    elect_leader()
+    
+  PUB perform_leader_duties() | task_available, best_instance
+    ' Assign tasks to available instances
+    if has_pending_tasks()
+      task_available := get_next_task()
+      best_instance := find_best_instance_for_task(task_available)
+      
+      if best_instance <> -1
+        assign_task_to_instance(best_instance, task_available)
+        
+    ' Monitor instance health
+    check_instance_health()
+    
+    ' Coordinate synchronized operations
+    if time_for_sync_operation()
+      initiate_synchronized_operation()
+      
+  PUB perform_follower_duties() | task_assignment, sync_command
+    ' Check for task assignments
+    task_assignment := comm.check_for_assignment()
+    if task_assignment
+      execute_assigned_task(task_assignment)
+      report_task_completion(task_assignment)
+      
+    ' Respond to synchronization commands
+    sync_command := comm.check_for_sync_command()
+    if sync_command
+      participate_in_sync_operation(sync_command)
+      
+    ' Send heartbeat to leader
+    send_heartbeat_to_leader()
+    
+  PUB elect_leader() | highest_id, instance_idx
+    highest_id := 0
+    
+    ' Simple election: highest instance ID becomes leader
+    repeat instance_idx from 0 to instance_count-1
+      if known_instances[instance_idx] > highest_id
+        highest_id := known_instances[instance_idx]
+        
+    leader_instance := highest_id
+    
+    ' Announce new leader
+    comm.broadcast_leader_announcement(leader_instance)
+    
+  PUB initiate_synchronized_operation() | sync_id, response_count
+    sync_id := get_unique_sync_id()
+    
+    ' Send sync command to all instances
+    comm.broadcast_sync_command(sync_id, SYNC_START_OPERATION)
+    
+    ' Wait for acknowledgments
+    response_count := wait_for_sync_responses(sync_id)
+    
+    if response_count == instance_count - 1  ' All except leader
+      ' Execute synchronized operation
+      comm.broadcast_sync_command(sync_id, SYNC_EXECUTE)
+      perform_local_sync_operation()
+    else
+      ' Abort if not all instances ready
+      comm.broadcast_sync_command(sync_id, SYNC_ABORT)

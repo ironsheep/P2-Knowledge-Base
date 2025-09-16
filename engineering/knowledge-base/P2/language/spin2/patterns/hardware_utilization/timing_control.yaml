@@ -1,0 +1,20 @@
+pattern_id: "timing_control"
+when_use:
+  - "Precise timing requirements"
+  - "Real-time operations"
+implementation: |
+  PUB wait_ms(ms) | t
+    t := getct()
+    repeat ms
+      waitct(t += clkfreq/1000)
+      
+  PUB pulse_us(pin, us)
+    pinh(pin)
+    waitus(us)
+    pinl(pin)
+resources:
+  cogs: 0
+  timing_precision: "sub-microsecond"
+combines_with:
+  - "state_machine"
+  - "pin_control"

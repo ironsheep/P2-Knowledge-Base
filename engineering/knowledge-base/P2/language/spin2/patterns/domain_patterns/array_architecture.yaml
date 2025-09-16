@@ -1,0 +1,103 @@
+pattern_id: "array_architecture"
+category: "domain_patterns"
+usage_frequency: "8.7%"
+file_count: 64
+
+selection_criteria:
+  use_when:
+    - Building scalable sensor networks
+    - Creating modular control systems
+    - Implementing distributed processing
+    - Developing expandable hardware arrays
+    - Building redundant fault-tolerant systems
+  avoid_when:
+    - Fixed single-unit systems
+    - Simple point-to-point connections
+    - Non-scalable applications
+    - Systems without modularity requirements
+
+structural_signature:
+  array_management:
+    - "Dynamic array size detection"
+    - "Node enumeration and addressing"
+    - "Array topology mapping"
+  communication_fabric:
+    - "Bus-based communication protocols"
+    - "Message routing between nodes"
+    - "Broadcast and multicast support"
+  fault_tolerance:
+    - "Node failure detection"
+    - "Automatic reconfiguration"
+    - "Redundancy management"
+
+implementation_template: |
+  CON
+    MAX_ARRAY_SIZE = 16
+    NODE_ADDRESS_BASE = $100
+    
+  OBJ
+    comm_bus : "array_communication"
+    node_mgr : "node_manager"
+    
+  VAR
+    long array_nodes[MAX_ARRAY_SIZE]
+    long node_count
+    long array_topology
+    long fault_status[MAX_ARRAY_SIZE]
+    
+  PUB main()
+    discover_array_topology()
+    initialize_array_communication()
+    
+    repeat
+      ' Monitor array health
+      check_node_status()
+      
+      ' Process array operations
+      handle_array_commands()
+      
+      ' Manage fault recovery
+      handle_fault_conditions()
+      
+      ' Optimize array performance
+      balance_array_load()
+      
+  PUB discover_array_topology() | node_id, response
+    node_count := 0
+    
+    ' Scan for active nodes
+    repeat node_id from 0 to MAX_ARRAY_SIZE-1
+      response := comm_bus.ping_node(NODE_ADDRESS_BASE + node_id)
+      if response == ACK
+        array_nodes[node_count] := NODE_ADDRESS_BASE + node_id
+        fault_status[node_count] := NODE_HEALTHY
+        node_count++
+        
+    ' Determine optimal topology
+    array_topology := calculate_optimal_topology(node_count)
+    
+  PUB distribute_task(task_data) | node_id, chunk_size
+    ' Divide task among available nodes
+    chunk_size := task_data.size / node_count
+    
+    repeat node_id from 0 to node_count-1
+      if fault_status[node_id] == NODE_HEALTHY
+        task_chunk := extract_chunk(task_data, node_id * chunk_size, chunk_size)
+        comm_bus.send_task(array_nodes[node_id], task_chunk)
+        
+  PUB collect_results() : combined_result | node_id, partial_result
+    ' Gather results from all nodes
+    repeat node_id from 0 to node_count-1
+      if fault_status[node_id] == NODE_HEALTHY
+        partial_result := comm_bus.get_result(array_nodes[node_id])
+        combine_result(@combined_result, partial_result)
+        
+  PUB handle_fault_conditions() | node_id
+    repeat node_id from 0 to node_count-1
+      if fault_status[node_id] == NODE_FAILED
+        ' Attempt recovery
+        if comm_bus.ping_node(array_nodes[node_id]) == ACK
+          fault_status[node_id] := NODE_HEALTHY
+        else
+          ' Redistribute failed node's tasks
+          redistribute_failed_tasks(node_id)

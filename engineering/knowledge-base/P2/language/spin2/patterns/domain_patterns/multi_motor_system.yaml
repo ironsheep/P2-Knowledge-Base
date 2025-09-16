@@ -1,0 +1,104 @@
+pattern_id: "multi_motor_system"
+category: "domain_patterns"
+usage_frequency: "10.1%"
+file_count: 74
+
+selection_criteria:
+  use_when:
+    - Controlling multiple motors simultaneously
+    - Building CNC/3D printer systems
+    - Creating robotic arms with multiple joints
+    - Implementing conveyor systems
+    - Developing multi-axis positioning systems
+  avoid_when:
+    - Single motor applications
+    - Motors operate independently
+    - Simple on/off control is sufficient
+    - No coordination between motors needed
+
+structural_signature:
+  motor_coordination:
+    - "Synchronized motor control"
+    - "Multi-axis movement planning"
+    - "Coordinated acceleration/deceleration"
+  feedback_systems:
+    - "Encoder feedback for each motor"
+    - "Position/velocity monitoring"
+    - "Error detection and correction"
+  motion_planning:
+    - "Trajectory generation"
+    - "Speed ramping algorithms"
+    - "Collision avoidance"
+
+implementation_template: |
+  CON
+    MAX_MOTORS = 6
+    
+  OBJ
+    motors[MAX_MOTORS] : "stepper_motor"
+    encoders[MAX_MOTORS] : "encoder"
+    planner : "motion_planner"
+    
+  VAR
+    long motor_positions[MAX_MOTORS]
+    long target_positions[MAX_MOTORS]
+    long motor_speeds[MAX_MOTORS]
+    long motion_state
+    
+  PUB main()
+    initialize_motor_system()
+    
+    repeat
+      case motion_state
+        MOTION_IDLE:
+          check_for_new_commands()
+        MOTION_PLANNING:
+          calculate_motion_profile()
+        MOTION_EXECUTING:
+          execute_coordinated_motion()
+        MOTION_HOMING:
+          perform_homing_sequence()
+          
+      update_motor_positions()
+      monitor_motion_errors()
+      
+  PUB execute_coordinated_motion() | motor_id, steps_remaining
+    steps_remaining := 0
+    
+    ' Update each motor
+    repeat motor_id from 0 to MAX_MOTORS-1
+      if motor_positions[motor_id] <> target_positions[motor_id]
+        ' Calculate next step
+        next_step := planner.get_next_step(motor_id)
+        motors[motor_id].step(next_step)
+        motor_positions[motor_id] += next_step
+        steps_remaining++
+        
+    ' Check if motion complete
+    if steps_remaining == 0
+      motion_state := MOTION_IDLE
+      signal_motion_complete()
+      
+  PUB move_to_position(new_positions) | motor_id
+    ' Set new target positions
+    repeat motor_id from 0 to MAX_MOTORS-1
+      target_positions[motor_id] := new_positions[motor_id]
+      
+    ' Plan coordinated motion
+    planner.calculate_trajectory(@motor_positions, @target_positions)
+    motion_state := MOTION_EXECUTING
+    
+  PUB perform_homing_sequence() | motor_id
+    ' Home each motor to find reference position
+    repeat motor_id from 0 to MAX_MOTORS-1
+      motors[motor_id].start_homing()
+      
+    ' Wait for all motors to complete homing
+    repeat until all_motors_homed()
+      waitms(10)
+      
+    ' Set all positions to zero
+    repeat motor_id from 0 to MAX_MOTORS-1
+      motor_positions[motor_id] := 0
+      
+    motion_state := MOTION_IDLE

@@ -1,0 +1,69 @@
+pattern_id: "monitoring_device"
+category: "domain_patterns"
+usage_frequency: "8.2%"
+file_count: 60
+
+selection_criteria:
+  use_when:
+    - Building data acquisition systems
+    - Creating environmental monitoring stations
+    - Implementing security monitoring systems
+    - Developing process control monitoring
+    - Building health monitoring devices
+  avoid_when:
+    - Simple single-sensor reading is sufficient
+    - Real-time control is more important than monitoring
+    - Data storage/logging is not required
+
+structural_signature:
+  sensor_management:
+    - "Multiple sensor objects coordinated"
+    - "Scheduled sensor reading routines"
+    - "Data validation and conditioning"
+  data_handling:
+    - "Data logging to storage"
+    - "Real-time data streaming"
+    - "Alert/alarm threshold checking"
+  communication:
+    - "Status reporting to external systems"
+    - "Remote monitoring interfaces"
+    - "Data upload/synchronization"
+
+implementation_template: |
+  OBJ
+    temp_sensor  : "temperature_sensor"
+    humidity     : "humidity_sensor"
+    pressure     : "pressure_sensor"
+    storage      : "data_logger"
+    comm         : "wireless_comm"
+    
+  VAR
+    long sensor_data[10]
+    long alert_thresholds[6]
+    
+  PUB main() | temp, humid, press
+    setup_monitoring_system()
+    
+    repeat
+      ' Collect sensor data
+      temp := temp_sensor.read_celsius()
+      humid := humidity.read_percent()
+      press := pressure.read_pascals()
+      
+      ' Store and validate data
+      log_sensor_reading(temp, humid, press)
+      check_alert_conditions(temp, humid, press)
+      
+      ' Report status
+      if should_transmit()
+        comm.send_status_update()
+        
+      waitms(MONITORING_INTERVAL)
+      
+  PUB check_alert_conditions(temp, humid, press)
+    if temp > alert_thresholds[TEMP_HIGH] or temp < alert_thresholds[TEMP_LOW]
+      trigger_temperature_alert(temp)
+    if humid > alert_thresholds[HUMID_HIGH]
+      trigger_humidity_alert(humid)
+    if press < alert_thresholds[PRESS_LOW]
+      trigger_pressure_alert(press)

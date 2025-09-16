@@ -1,0 +1,22 @@
+pattern_id: "sensor_reader"
+when_use:
+  - "ADC/temperature/proximity sensing"
+  - "Continuous data acquisition"
+implementation: |
+  VAR
+    long sensor_value
+    long avg_buffer[16]
+    byte avg_index
+    
+  PUB read_averaged() : result | i
+    avg_buffer[avg_index++] := read_raw()
+    avg_index &= 15
+    repeat i from 0 to 15
+      result += avg_buffer[i]
+    result >>= 4
+resources:
+  pins: "1-4 analog/digital"
+  memory: "64+ bytes buffering"
+combines_with:
+  - "timing_control"
+  - "error_handling"

@@ -1,0 +1,19 @@
+pattern_id: "protocol_implementation"
+when_use:
+  - "SPI/I2C/UART communication"
+  - "Custom protocol needs"
+implementation: |
+  PUB spi_transfer(data) : result | i
+    outa[CS] := 0
+    repeat i from 7 to 0
+      outa[MOSI] := (data >> i) & 1
+      outa[CLK] := 1
+      result := (result << 1) | ina[MISO]
+      outa[CLK] := 0
+    outa[CS] := 1
+resources:
+  pins: "3-4 per protocol"
+  cogs: "0-1"
+combines_with:
+  - "buffer_management"
+  - "error_handling"

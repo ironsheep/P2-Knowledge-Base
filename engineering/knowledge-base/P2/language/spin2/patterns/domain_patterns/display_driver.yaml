@@ -1,0 +1,23 @@
+pattern_id: "display_driver"
+when_use:
+  - "LCD/OLED/LED matrix control"
+  - "Video output generation"
+implementation: |
+  CON
+    WIDTH  = 128
+    HEIGHT = 64
+    
+  VAR
+    byte framebuffer[WIDTH*HEIGHT/8]
+    
+  PUB draw_pixel(x, y, color)
+    if color
+      framebuffer[y>>3*WIDTH+x] |= 1<<(y&7)
+    else
+      framebuffer[y>>3*WIDTH+x] &= !(1<<(y&7))
+resources:
+  memory: "1KB+ framebuffer"
+  cogs: "1 for refresh"
+combines_with:
+  - "buffer_management"
+  - "timing_control"

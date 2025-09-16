@@ -1,0 +1,21 @@
+pattern_id: "data_logger"
+when_use:
+  - "SD card/EEPROM storage"
+  - "Event recording"
+implementation: |
+  VAR
+    long log_position
+    byte log_buffer[512]
+    
+  PUB log_event(timestamp, event_type, data)
+    long[@log_buffer][0] := timestamp
+    byte[@log_buffer][4] := event_type
+    long[@log_buffer][5] := data
+    write_block(@log_buffer, log_position)
+    log_position += 512
+resources:
+  memory: "512+ byte sectors"
+  storage: "SD/Flash/EEPROM"
+combines_with:
+  - "memory_allocation"
+  - "error_handling"

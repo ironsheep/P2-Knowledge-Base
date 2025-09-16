@@ -1,0 +1,23 @@
+pattern_id: "layered_architecture"
+when_use:
+  - "Complex system organization"
+  - "Clear abstraction levels"
+implementation: |
+  OBJ
+    '' Hardware Abstraction Layer
+    hal : "hardware_layer"
+    '' Service Layer  
+    svc : "service_layer"
+    '' Application Layer
+    app : "application"
+    
+  PUB main()
+    hal.initialize()
+    svc.configure(hal.get_interface())
+    app.run(svc.get_services())
+resources:
+  memory: "per layer overhead"
+  cogs: "distributed by layer"
+combines_with:
+  - "framework_pattern"
+  - "plugin_system"

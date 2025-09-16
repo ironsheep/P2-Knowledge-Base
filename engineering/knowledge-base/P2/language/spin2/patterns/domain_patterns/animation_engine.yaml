@@ -1,0 +1,125 @@
+pattern_id: "animation_engine"
+category: "domain_patterns"
+usage_frequency: "4.8%"
+file_count: 35
+
+selection_criteria:
+  use_when:
+    - Creating dynamic visual displays
+    - Building LED matrix animations
+    - Implementing smooth transitions
+    - Developing game graphics
+    - Creating interactive visual feedback
+  avoid_when:
+    - Static display content only
+    - Memory too limited for frame buffering
+    - Real-time control has priority over visuals
+    - Simple on/off indicators sufficient
+
+structural_signature:
+  animation_framework:
+    - "Frame-based animation system"
+    - "Timing and interpolation engines"
+    - "Animation state management"
+  rendering_pipeline:
+    - "Double-buffered rendering"
+    - "Sprite and object management"
+    - "Effects and transitions"
+  control_systems:
+    - "Animation scripting"
+    - "Event-triggered animations"
+    - "Interactive animation control"
+
+implementation_template: |
+  CON
+    MAX_ANIMATIONS = 8
+    FRAME_RATE = 30
+    FRAME_TIME_MS = 1000 / FRAME_RATE
+    
+  OBJ
+    display : "graphics_display"
+    timer : "precise_timer"
+    
+  VAR
+    long animation_objects[MAX_ANIMATIONS * 8]  ' x, y, vx, vy, state, frame, type, data
+    long active_animations
+    long frame_buffer_a[76800]  ' 320x240 display
+    long frame_buffer_b[76800]
+    long current_buffer
+    long last_frame_time
+    
+  PUB main()
+    initialize_animation_engine()
+    
+    repeat
+      current_time := getms()
+      
+      if current_time - last_frame_time >= FRAME_TIME_MS
+        ' Update animation logic
+        update_all_animations()
+        
+        ' Render frame
+        render_frame()
+        
+        ' Swap buffers
+        display.show_buffer(get_current_buffer())
+        swap_buffers()
+        
+        last_frame_time := current_time
+        
+  PUB update_all_animations() | anim_id, anim_ptr
+    repeat anim_id from 0 to active_animations-1
+      anim_ptr := @animation_objects[anim_id * 8]
+      
+      case long[anim_ptr][TYPE]
+        ANIM_LINEAR_MOVE:
+          update_linear_movement(anim_ptr)
+        ANIM_BOUNCE:
+          update_bounce_animation(anim_ptr)
+        ANIM_FADE:
+          update_fade_animation(anim_ptr)
+        ANIM_ROTATE:
+          update_rotation_animation(anim_ptr)
+        ANIM_SPRITE:
+          update_sprite_animation(anim_ptr)
+          
+  PUB update_linear_movement(anim_ptr)
+    ' Update position based on velocity
+    long[anim_ptr][X] += long[anim_ptr][VX]
+    long[anim_ptr][Y] += long[anim_ptr][VY]
+    
+    ' Check boundaries
+    if long[anim_ptr][X] < 0 or long[anim_ptr][X] > DISPLAY_WIDTH
+      long[anim_ptr][STATE] := ANIM_COMPLETE
+    if long[anim_ptr][Y] < 0 or long[anim_ptr][Y] > DISPLAY_HEIGHT
+      long[anim_ptr][STATE] := ANIM_COMPLETE
+      
+  PUB create_animation(type, x, y, vx, vy, data) : anim_id
+    if active_animations < MAX_ANIMATIONS
+      anim_id := active_animations
+      anim_ptr := @animation_objects[anim_id * 8]
+      
+      long[anim_ptr][X] := x
+      long[anim_ptr][Y] := y
+      long[anim_ptr][VX] := vx
+      long[anim_ptr][VY] := vy
+      long[anim_ptr][STATE] := ANIM_ACTIVE
+      long[anim_ptr][FRAME] := 0
+      long[anim_ptr][TYPE] := type
+      long[anim_ptr][DATA] := data
+      
+      active_animations++
+    else
+      return -1  ' No slots available
+      
+  PUB render_frame() | buffer_ptr
+    buffer_ptr := get_render_buffer()
+    
+    ' Clear buffer
+    clear_buffer(buffer_ptr)
+    
+    ' Render all active animations
+    repeat anim_id from 0 to active_animations-1
+      anim_ptr := @animation_objects[anim_id * 8]
+      if long[anim_ptr][STATE] == ANIM_ACTIVE
+        render_animation_object(buffer_ptr, anim_ptr)

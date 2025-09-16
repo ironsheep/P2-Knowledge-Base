@@ -1,0 +1,129 @@
+pattern_id: "hardware_specific_app"
+category: "domain_patterns"
+usage_frequency: "13.7%"
+file_count: 100
+
+selection_criteria:
+  use_when:
+    - Building applications for specific hardware platforms
+    - Creating board-specific demonstration code
+    - Implementing custom hardware interfaces
+    - Developing specialized measurement instruments
+    - Building hardware validation tools
+  avoid_when:
+    - Portability across platforms is required
+    - Generic hardware abstraction is needed
+    - Multiple hardware variants must be supported
+    - Hardware details should be hidden from application
+
+structural_signature:
+  hardware_abstraction:
+    - "Direct hardware register access"
+    - "Board-specific pin assignments"
+    - "Custom peripheral configurations"
+  platform_optimization:
+    - "Hardware-specific optimizations"
+    - "Timing calibrated for specific oscillator"
+    - "Memory layout optimized for platform"
+  board_services:
+    - "On-board device drivers"
+    - "Platform-specific utilities"
+    - "Hardware test and validation"
+
+implementation_template: |
+  CON
+    ' Hardware-specific constants for target board
+    CRYSTAL_FREQ = 20_000_000
+    CPU_FREQ = 200_000_000
+    
+    ' Board-specific pin assignments
+    LED_PIN = 56
+    BUTTON_PIN = 57
+    UART_TX_PIN = 62
+    UART_RX_PIN = 63
+    
+    ' Custom hardware addresses
+    CUSTOM_PERIPHERAL_BASE = $1000
+    SENSOR_INTERFACE_ADDR = $1100
+    
+  OBJ
+    board_leds : "board_led_driver"
+    board_uart : "board_uart_driver"
+    custom_hw  : "custom_hardware_driver"
+    
+  VAR
+    long board_config[16]
+    long hardware_revision
+    long calibration_data[32]
+    
+  PUB main()
+    ' Initialize hardware-specific systems
+    detect_hardware_revision()
+    load_calibration_data()
+    configure_board_peripherals()
+    
+    ' Run hardware-specific application
+    run_board_application()
+    
+  PUB detect_hardware_revision() | id_pins
+    ' Read hardware ID pins specific to this board
+    dira[59..58] := %00  ' Set as inputs
+    id_pins := ina[59..58]
+    
+    case id_pins
+      %00: hardware_revision := BOARD_REV_A
+      %01: hardware_revision := BOARD_REV_B
+      %10: hardware_revision := BOARD_REV_C
+      %11: hardware_revision := BOARD_REV_D
+      
+    ' Configure based on detected revision
+    configure_for_revision(hardware_revision)
+    
+  PUB configure_board_peripherals()
+    ' Configure board-specific features
+    board_leds.initialize(LED_PIN, hardware_revision)
+    board_uart.initialize(UART_TX_PIN, UART_RX_PIN, 115200)
+    
+    ' Initialize custom hardware
+    custom_hw.initialize(CUSTOM_PERIPHERAL_BASE)
+    
+    ' Board-specific timing setup
+    setup_board_clocking()
+    
+  PUB run_board_application() | sensor_value, button_state
+    board_leds.show_startup_pattern()
+    board_uart.print_string(string("Board application started\r\n"))
+    
+    repeat
+      ' Read board-specific sensors
+      sensor_value := custom_hw.read_sensor(SENSOR_INTERFACE_ADDR)
+      
+      ' Process with hardware-specific calibration
+      calibrated_value := apply_board_calibration(sensor_value)
+      
+      ' Update board indicators
+      board_leds.set_level(calibrated_value)
+      
+      ' Check board button
+      button_state := ina[BUTTON_PIN]
+      if button_state == 0  ' Pressed
+        handle_board_button_press()
+        
+      ' Send data via board UART
+      board_uart.send_sensor_data(calibrated_value)
+      
+      waitms(100)
+      
+  PUB apply_board_calibration(raw_value) : calibrated
+    ' Use board-specific calibration data
+    offset := calibration_data[SENSOR_OFFSET]
+    scale := calibration_data[SENSOR_SCALE]
+    
+    calibrated := (raw_value - offset) * scale / 1000
+    
+  PUB setup_board_clocking()
+    ' Configure clocking specific to this board's crystal
+    clkset(CRYSTAL_FREQ, CPU_FREQ)
+    
+    ' Setup board-specific timing references
+    custom_hw.configure_timing(CPU_FREQ)

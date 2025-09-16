@@ -1,0 +1,170 @@
+pattern_id: "dual_communication"
+category: "domain_patterns"
+usage_frequency: "6.3%"
+file_count: 46
+
+selection_criteria:
+  use_when:
+    - Need redundant communication paths
+    - Different protocols for different purposes
+    - Primary/backup communication required
+    - Separate control and data channels needed
+    - Local and remote communication interfaces
+  avoid_when:
+    - Single communication channel sufficient
+    - Communication overhead is critical
+    - Simple point-to-point connection adequate
+    - Resource constraints prevent dual interfaces
+
+structural_signature:
+  dual_interfaces:
+    - "Two independent communication objects"
+    - "Primary and secondary channel management"
+    - "Protocol-specific handling"
+  channel_coordination:
+    - "Channel selection logic"
+    - "Failover mechanisms"
+    - "Load balancing between channels"
+  message_routing:
+    - "Message type routing decisions"
+    - "Priority-based channel selection"
+    - "Redundant transmission handling"
+
+implementation_template: |
+  OBJ
+    primary_comm   : "wireless_communication"
+    secondary_comm : "serial_communication"
+    
+  VAR
+    long primary_state
+    long secondary_state
+    long active_channel
+    long message_routing_table[16]
+    long channel_priorities[8]
+    long failover_enabled
+    
+  PUB main()
+    initialize_dual_communication()
+    
+    repeat
+      ' Maintain both communication channels
+      manage_primary_channel()
+      manage_secondary_channel()
+      
+      ' Route incoming messages
+      handle_dual_channel_input()
+      
+      ' Manage channel selection
+      update_channel_selection()
+      
+      ' Process outgoing messages
+      route_outgoing_messages()
+      
+      waitms(10)
+      
+  PUB initialize_dual_communication()
+    ' Initialize primary channel (wireless)
+    primary_comm.start(WIFI_SSID, WIFI_PASSWORD)
+    primary_state := CHANNEL_INITIALIZING
+    
+    ' Initialize secondary channel (serial)
+    secondary_comm.start(115200, SERIAL_TX, SERIAL_RX)
+    secondary_state := CHANNEL_READY
+    
+    ' Set initial active channel
+    active_channel := SECONDARY_CHANNEL
+    failover_enabled := TRUE
+    
+    ' Configure message routing
+    setup_message_routing()
+    
+  PUB setup_message_routing()
+    ' Route different message types to appropriate channels
+    message_routing_table[MSG_TELEMETRY] := PRIMARY_PREFERRED
+    message_routing_table[MSG_COMMAND] := BOTH_CHANNELS
+    message_routing_table[MSG_DEBUG] := SECONDARY_ONLY
+    message_routing_table[MSG_EMERGENCY] := BOTH_CHANNELS
+    message_routing_table[MSG_FILE_TRANSFER] := PRIMARY_ONLY
+    
+  PUB handle_dual_channel_input() | primary_msg, secondary_msg
+    ' Check primary channel
+    if primary_state == CHANNEL_READY and primary_comm.has_message()
+      primary_msg := primary_comm.receive_message()
+      process_incoming_message(primary_msg, PRIMARY_CHANNEL)
+      
+    ' Check secondary channel
+    if secondary_state == CHANNEL_READY and secondary_comm.has_message()
+      secondary_msg := secondary_comm.receive_message()
+      process_incoming_message(secondary_msg, SECONDARY_CHANNEL)
+      
+  PUB route_outgoing_messages() | msg_type, routing_rule, channel_mask
+    if has_outgoing_message()
+      message := get_next_outgoing_message()
+      msg_type := get_message_type(message)
+      routing_rule := message_routing_table[msg_type]
+      
+      case routing_rule
+        PRIMARY_ONLY:
+          send_on_channel(message, PRIMARY_CHANNEL)
+        SECONDARY_ONLY:
+          send_on_channel(message, SECONDARY_CHANNEL)
+        PRIMARY_PREFERRED:
+          if primary_state == CHANNEL_READY
+            send_on_channel(message, PRIMARY_CHANNEL)
+          elseif secondary_state == CHANNEL_READY
+            send_on_channel(message, SECONDARY_CHANNEL)
+        BOTH_CHANNELS:
+          send_redundant_message(message)
+          
+  PUB send_redundant_message(message) | primary_sent, secondary_sent
+    primary_sent := FALSE
+    secondary_sent := FALSE
+    
+    ' Attempt to send on both channels
+    if primary_state == CHANNEL_READY
+      primary_sent := send_on_channel(message, PRIMARY_CHANNEL)
+      
+    if secondary_state == CHANNEL_READY
+      secondary_sent := send_on_channel(message, SECONDARY_CHANNEL)
+      
+    ' Log transmission status
+    log_redundant_transmission(message, primary_sent, secondary_sent)
+    
+  PUB update_channel_selection() | primary_quality, secondary_quality
+    ' Assess channel quality
+    primary_quality := assess_channel_quality(PRIMARY_CHANNEL)
+    secondary_quality := assess_channel_quality(SECONDARY_CHANNEL)
+    
+    ' Update active channel based on quality and availability
+    if primary_state == CHANNEL_READY and primary_quality > QUALITY_THRESHOLD
+      active_channel := PRIMARY_CHANNEL
+    elseif secondary_state == CHANNEL_READY
+      active_channel := SECONDARY_CHANNEL
+      if failover_enabled
+        log_failover_event("Primary channel degraded, using secondary")
+    else
+      active_channel := NO_CHANNEL
+      handle_communication_loss()
+      
+  PUB manage_primary_channel()
+    case primary_state
+      CHANNEL_INITIALIZING:
+        if primary_comm.is_connected()
+          primary_state := CHANNEL_READY
+        elseif primary_comm.connection_failed()
+          primary_state := CHANNEL_FAILED
+          attempt_primary_recovery()
+      CHANNEL_READY:
+        if not primary_comm.is_connected()
+          primary_state := CHANNEL_FAILED
+      CHANNEL_FAILED:
+        attempt_primary_recovery()
+        
+  PUB assess_channel_quality(channel) : quality
+    case channel
+      PRIMARY_CHANNEL:
+        quality := primary_comm.get_signal_strength()
+      SECONDARY_CHANNEL:
+        quality := secondary_comm.get_connection_quality()
+      other:
+        quality := 0

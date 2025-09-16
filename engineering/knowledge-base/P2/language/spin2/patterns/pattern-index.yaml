@@ -1,0 +1,53 @@
+manifest_type: "pattern_index"
+description: "P2 Spin2 code patterns for AI code generation"
+pattern_categories:
+  object_composition:
+    description: "Object dependency patterns"
+    patterns:
+      - no_objects.yaml
+      - single_object.yaml
+      - few_objects.yaml
+      - several_objects.yaml
+      - framework_pattern.yaml
+      
+  hardware_utilization:
+    description: "Hardware resource patterns"
+    patterns:
+      - buffer_management.yaml
+      - timing_control.yaml
+      - protocol_implementation.yaml
+      - pin_control.yaml
+      - state_machine.yaml
+      - error_handling.yaml
+      - memory_allocation.yaml
+      - cog_management.yaml
+      
+  domain_patterns:
+    description: "Domain-specific patterns"
+    patterns:
+      - display_driver.yaml
+      - sensor_reader.yaml
+      - motor_controller.yaml
+      - communication_handler.yaml
+      - data_logger.yaml
+      - audio_processor.yaml
+      - test_harness.yaml
+      - configuration_manager.yaml
+      - utility_library.yaml
+      
+  specialized:
+    description: "Advanced architectural patterns"
+    patterns:
+      - shared_memory.yaml
+      - diagnostic_output.yaml
+      - event_dispatcher.yaml
+      - resource_pool.yaml
+      - mailbox_communication.yaml
+      - layered_architecture.yaml
+      - plugin_system.yaml
+
+selection_guide: |
+  Start with object_composition to determine structure
+  Add hardware_utilization based on resource needs
+  Select domain_patterns for application type
+  Apply specialized patterns for advanced features

@@ -1,0 +1,95 @@
+pattern_id: "multimedia_device"
+category: "domain_patterns"
+usage_frequency: "7.4%"
+file_count: 54
+
+selection_criteria:
+  use_when:
+    - Building audio/video playback systems
+    - Creating digital signage displays
+    - Implementing media streaming devices
+    - Developing interactive multimedia systems
+    - Building audio processing applications
+  avoid_when:
+    - Simple text display is sufficient
+    - Audio/video quality requirements are minimal
+    - Memory constraints prevent media buffering
+    - Real-time media processing isn't needed
+
+structural_signature:
+  media_processing:
+    - "Audio codec integration"
+    - "Video frame processing"
+    - "Media format decoding"
+  buffer_management:
+    - "Streaming buffer systems"
+    - "Multi-level buffering"
+    - "Memory pool management"
+  output_control:
+    - "Display driver coordination"
+    - "Audio output management"
+    - "Synchronization systems"
+
+implementation_template: |
+  OBJ
+    audio        : "audio_codec"
+    display      : "video_display"
+    storage      : "media_storage"
+    decoder      : "media_decoder"
+    
+  VAR
+    long audio_buffer[2048]
+    long video_buffer[4096]
+    long playback_state
+    long current_media_file
+    
+  PUB main()
+    initialize_multimedia_system()
+    
+    repeat
+      case playback_state
+        STATE_STOPPED:
+          handle_media_selection()
+        STATE_LOADING:
+          load_media_buffers()
+        STATE_PLAYING:
+          process_media_playback()
+        STATE_PAUSED:
+          maintain_pause_state()
+          
+      handle_user_input()
+      
+  PUB process_media_playback() | audio_chunk, video_frame
+    ' Check buffer levels
+    if audio_buffer_low()
+      audio_chunk := decoder.get_next_audio()
+      if audio_chunk
+        add_to_audio_buffer(audio_chunk)
+      else
+        playback_state := STATE_STOPPED  ' End of media
+        
+    if video_buffer_low()
+      video_frame := decoder.get_next_frame()
+      if video_frame
+        add_to_video_buffer(video_frame)
+        
+    ' Output synchronized media
+    if time_for_next_frame()
+      display.show_frame(get_current_video_frame())
+      
+    if time_for_audio_chunk()
+      audio.play_chunk(get_current_audio_chunk())
+      
+  PUB load_media_buffers() : success
+    ' Pre-load buffers before playback
+    repeat while not audio_buffer_full() and not video_buffer_full()
+      if decoder.has_data()
+        if not audio_buffer_full()
+          add_to_audio_buffer(decoder.get_next_audio())
+        if not video_buffer_full()
+          add_to_video_buffer(decoder.get_next_frame())
+      else
+        return FALSE  ' No more data
+        
+    playback_state := STATE_PLAYING
+    return TRUE

@@ -1,16 +1,37 @@
 # P2 Code Patterns Manifest
 # Part of P2 Knowledge Base manifest hierarchy
 
-version: "1.0"
+version: "1.1"
 schema_version: "2024-12-30"
-last_updated: "2024-12-30T00:00:00Z"
+last_updated: "2025-01-16T00:00:00Z"
 category: "code_patterns"
 base_path: "engineering/knowledge-base/P2/patterns/"
-total_entries: 25  # Growing collection
+total_entries: 53  # 25 implementation + 28 architectural patterns
 
 description: |
-  Code patterns and implementation strategies for common P2 programming tasks.
-  Shows multiple approaches leveraging P2's unique architecture.
+  Two complementary pattern types for P2 development:
+  1. Implementation patterns - How to implement specific functionality
+  2. Architectural patterns - How P2 developers structure their code
+  Both are essential for effective AI code generation.
+
+pattern_types:
+  implementation:
+    description: "Task-specific implementation patterns"
+    base_path: "engineering/knowledge-base/P2/patterns/"
+    count: 25
+    purpose: "Shows how to implement specific features (UART, SPI, PWM, etc.)"
+    
+  architectural:
+    description: "Code structure and organization patterns from 730 analyzed files"
+    base_path: "engineering/knowledge-base/P2/language/spin2/patterns/"
+    manifest: "engineering/knowledge-base/P2/language/spin2/patterns/pattern-index.yaml"
+    count: 28
+    purpose: "Shows how P2 developers organize and structure their code"
+    categories:
+      - object_composition: "How objects are used (none, single, few, several, framework)"
+      - hardware_utilization: "Common hardware resource patterns"
+      - domain_patterns: "Application-specific patterns"
+      - specialized: "Advanced architectural patterns"
 
 by_category:
   communication:
@@ -146,8 +167,42 @@ search_index:
     "communication": ["uart", "spi", "i2c", "mailbox"]
     "motor": ["servo", "stepper", "pwm", "encoder"]
 
+architectural_patterns:
+  object_composition:
+    description: "How P2 developers structure object dependencies"
+    patterns:
+      - {name: "no_objects", usage: "51%", desc: "Self-contained, no dependencies"}
+      - {name: "single_object", usage: "21%", desc: "One external dependency"}
+      - {name: "few_objects", usage: "21%", desc: "2-3 coordinated objects"}
+      - {name: "several_objects", usage: "6%", desc: "4-7 objects"}
+      - {name: "framework_pattern", usage: "1%", desc: "8+ objects, full framework"}
+    
+  hardware_utilization:
+    description: "Common hardware resource management patterns"
+    patterns:
+      - {name: "buffer_management", usage: "82%", desc: "Circular buffers, FIFOs"}
+      - {name: "timing_control", usage: "77%", desc: "Precise timing operations"}
+      - {name: "protocol_implementation", usage: "75%", desc: "SPI/I2C/UART protocols"}
+      - {name: "pin_control", usage: "68%", desc: "Smart pin configuration"}
+      - {name: "state_machine", usage: "45%", desc: "State management"}
+      - {name: "error_handling", usage: "35%", desc: "Robust error recovery"}
+      - {name: "memory_allocation", usage: "28%", desc: "Dynamic memory management"}
+      - {name: "cog_management", usage: "42%", desc: "Multi-cog coordination"}
+
+pattern_selection_guide: |
+  For AI code generation:
+  1. First determine architectural pattern based on requirements
+  2. Then apply specific implementation patterns for functionality
+  3. Combine patterns as needed - they're designed to compose
+  
+  Example: A sensor monitoring system might use:
+  - Architectural: "few_objects" pattern for structure
+  - Implementation: "i2c-master" for sensor communication
+  - Implementation: "mailbox-communication" for cog coordination
+
 related_manifests:
   - "pasm2-manifest.yaml"  # Instructions used in patterns
   - "spin2-manifest.yaml"  # Language constructs used
   - "smart-pins-manifest.yaml"  # Hardware features leveraged
   - "architecture-manifest.yaml"  # Understanding why patterns work
+  - "engineering/knowledge-base/P2/language/spin2/patterns/pattern-index.yaml"  # Architectural patterns detail

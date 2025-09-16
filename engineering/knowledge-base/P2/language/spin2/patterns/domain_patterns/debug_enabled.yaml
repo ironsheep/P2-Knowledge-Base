@@ -1,0 +1,116 @@
+pattern_id: "debug_enabled"
+category: "domain_patterns"
+usage_frequency: "15.2%"
+file_count: 111
+
+selection_criteria:
+  use_when:
+    - Developing complex systems requiring diagnostics
+    - Building production systems with maintenance needs
+    - Creating systems for educational/learning purposes
+    - Implementing field-serviceable devices
+    - Developing systems with remote monitoring
+  avoid_when:
+    - Simple single-function devices
+    - Memory/code space is extremely limited
+    - Security requires minimal attack surface
+    - Debug overhead affects critical timing
+
+structural_signature:
+  debug_infrastructure:
+    - "Debug output channels (serial, display, LEDs)"
+    - "Runtime state monitoring"
+    - "Performance measurement capabilities"
+  diagnostic_features:
+    - "Self-test routines"
+    - "Error logging and reporting"
+    - "Component health monitoring"
+  development_aids:
+    - "Interactive command interfaces"
+    - "Memory/register inspection"
+    - "Trace and logging systems"
+
+implementation_template: |
+  CON
+    DEBUG_LEVEL_OFF = 0
+    DEBUG_LEVEL_ERROR = 1
+    DEBUG_LEVEL_WARN = 2
+    DEBUG_LEVEL_INFO = 3
+    DEBUG_LEVEL_VERBOSE = 4
+    
+  OBJ
+    debug_out : "debug_terminal"
+    logger : "debug_logger"
+    monitor : "system_monitor"
+    
+  VAR
+    long debug_level
+    long debug_enabled
+    long error_count
+    long debug_buffer[256]
+    
+  PUB main()
+    setup_debug_system()
+    
+    ' Main application loop with debug integration
+    repeat
+      ' Normal operation with debug checkpoints
+      if debug_enabled
+        debug_checkpoint("main_loop_start")
+        
+      perform_main_operations()
+      
+      if debug_enabled
+        monitor_system_health()
+        debug_checkpoint("main_loop_end")
+        
+  PUB debug_print(level, message) | timestamp
+    if debug_enabled and level =< debug_level
+      timestamp := getms()
+      debug_out.printf("[%d] %s: %s\n", timestamp, level_name(level), message)
+      
+      ' Also log to persistent storage
+      if level =< DEBUG_LEVEL_WARN
+        logger.log_message(timestamp, level, message)
+        
+  PUB debug_checkpoint(checkpoint_name) | memory_free, cpu_usage
+    if debug_level >= DEBUG_LEVEL_VERBOSE
+      memory_free := get_free_memory()
+      cpu_usage := monitor.get_cpu_usage()
+      
+      debug_print(DEBUG_LEVEL_VERBOSE, string("CHECKPOINT: ", checkpoint_name))
+      debug_print(DEBUG_LEVEL_VERBOSE, string("Memory free: ", dec(memory_free)))
+      debug_print(DEBUG_LEVEL_VERBOSE, string("CPU usage: ", dec(cpu_usage), "%"))
+      
+  PUB debug_dump_state()
+    if debug_enabled
+      debug_print(DEBUG_LEVEL_INFO, "=== SYSTEM STATE DUMP ===")
+      dump_variable_states()
+      dump_object_states()
+      dump_hardware_states()
+      debug_print(DEBUG_LEVEL_INFO, "=== END STATE DUMP ===")
+      
+  PUB self_test() : result
+    debug_print(DEBUG_LEVEL_INFO, "Starting self-test sequence")
+    
+    result := TRUE
+    
+    ' Test each subsystem
+    if not test_memory_system()
+      debug_print(DEBUG_LEVEL_ERROR, "Memory system test FAILED")
+      result := FALSE
+      
+    if not test_communication()
+      debug_print(DEBUG_LEVEL_ERROR, "Communication test FAILED")
+      result := FALSE
+      
+    if not test_sensors()
+      debug_print(DEBUG_LEVEL_ERROR, "Sensor test FAILED")
+      result := FALSE
+      
+    if result
+      debug_print(DEBUG_LEVEL_INFO, "Self-test PASSED")
+    else
+      debug_print(DEBUG_LEVEL_ERROR, "Self-test FAILED")
+      
+    return result

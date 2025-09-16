@@ -1,0 +1,25 @@
+pattern_id: "state_machine"
+when_use:
+  - "Complex control flow"
+  - "Protocol state tracking"
+implementation: |
+  VAR
+    long state
+    
+  PUB process() | next_state
+    case state
+      IDLE:    
+        if trigger
+          state := ACTIVE
+      ACTIVE:  
+        if complete
+          state := DONE
+      DONE:    
+        cleanup()
+        state := IDLE
+resources:
+  memory: "minimal"
+  cogs: 0
+combines_with:
+  - "event_dispatcher"
+  - "timing_control"
