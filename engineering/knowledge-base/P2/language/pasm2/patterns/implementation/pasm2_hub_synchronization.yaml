@@ -1,0 +1,27 @@
+pattern_id: "pasm2_hub_synchronization"
+when_use:
+  - "Multi-COG data sharing"
+  - "Hub memory access"
+  - "Inter-COG synchronization"
+implementation: |
+  ' Hub synchronization pattern
+  hub_write
+          wrlong  value, hub_ptr          ' Write to hub
+          add     hub_ptr, #4             ' Advance pointer
+          
+  hub_read
+          rdlong  value, hub_ptr  wc      ' Read from hub, set C if non-zero
+    if_c  jmp     #process_data           ' Process if data present
+          
+  ' Wait for hub slot
+  wait_hub
+          waitx   ##20-2                  ' Wait for hub window
+          
+  value   long    0
+  hub_ptr long    $4000                   ' Hub address
+resources:
+  hub_memory: "Variable"
+  timing: "Hub window dependent"
+combines_with:
+  - "pasm2_cog_communication"
+  - "pasm2_interrupt_handling"

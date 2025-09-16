@@ -8,6 +8,7 @@ knowledge_domains:
     path: "language/"
     manifests:
       - "language/pasm2/instruction_manifest.yaml"
+      - "language/pasm2/patterns/pattern_manifest.yaml"
       - "language/spin2/method_manifest.yaml"
       - "language/spin2/patterns/pattern-index.yaml"
     
@@ -25,9 +26,11 @@ knowledge_domains:
       - "architecture/system-registers/register_manifest.yaml"
 
 quick_access:
-  patterns: "language/spin2/patterns/pattern-index.yaml"
+  spin2_patterns: "language/spin2/patterns/pattern-index.yaml"
+  pasm2_patterns: "language/pasm2/patterns/pattern_manifest.yaml"
   instructions: "language/pasm2/instruction_manifest.yaml"
   smart_pins: "architecture/smart-pins/smartpin_manifest.yaml"
+  pattern_analysis: "architecture/patterns-analysis/"
 
 statistics:
   total_files: 730

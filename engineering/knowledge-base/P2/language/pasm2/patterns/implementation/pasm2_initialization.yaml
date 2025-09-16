@@ -1,0 +1,26 @@
+pattern_id: "pasm2_initialization"
+when_use:
+  - "COG startup sequence"
+  - "Register initialization"
+  - "Memory setup"
+implementation: |
+  ' Standard COG initialization
+  org     0
+  
+  init    mov     dira, ##$FF_00_00_00    ' Set upper byte pins as outputs
+          mov     outa, #0                 ' Clear all outputs
+          mov     counter, #0              ' Initialize counter
+          cogid   cog_id                   ' Get current COG ID
+          
+  main    ' Main loop starts here
+          ...
+          
+  ' Variables
+  counter long    0
+  cog_id  long    0
+resources:
+  cogs: 1
+  memory: "COG RAM only"
+combines_with:
+  - "pasm2_hub_synchronization"
+  - "pasm2_cog_communication"

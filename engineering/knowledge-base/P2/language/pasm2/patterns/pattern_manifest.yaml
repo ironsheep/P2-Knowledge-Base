@@ -1,0 +1,24 @@
+manifest_type: "pattern_index"
+description: "P2 PASM2 assembly patterns for code generation"
+pattern_categories:
+  implementation:
+    description: "PASM2 implementation patterns"
+    patterns:
+      - pasm2_initialization.yaml
+      - pasm2_hub_synchronization.yaml
+      - pasm2_interrupt_handling.yaml
+      - pasm2_cordic_usage.yaml
+      - pasm2_loop_optimization.yaml
+      - pasm2_cog_communication.yaml
+
+selection_guide: |
+  PASM2 patterns focus on low-level implementation techniques
+  for assembly programming on the P2 processor.
+  These patterns complement the Spin2 patterns by providing
+  assembly-level solutions for performance-critical code.
+
+notes: |
+  PASM2 patterns are extracted from analysis of 730 source files
+  where inline assembly and pure PASM2 code was identified.
+  These patterns represent common assembly programming techniques
+  specific to the P2 architecture.

@@ -1,8 +1,8 @@
 manifest_type: "pattern_index"
 description: "P2 Spin2 code patterns for AI code generation"
 pattern_categories:
-  object_composition:
-    description: "Object dependency patterns"
+  structural:
+    description: "Object structure and composition patterns"
     patterns:
       - no_objects.yaml
       - single_object.yaml
@@ -10,20 +10,27 @@ pattern_categories:
       - several_objects.yaml
       - framework_pattern.yaml
       
-  hardware_utilization:
-    description: "Hardware resource patterns"
+  implementation:
+    description: "Spin2 implementation patterns"
     patterns:
-      - buffer_management.yaml
-      - timing_control.yaml
-      - protocol_implementation.yaml
-      - pin_control.yaml
-      - state_machine.yaml
-      - error_handling.yaml
-      - memory_allocation.yaml
-      - cog_management.yaml
+      - spin2_buffer_management.yaml
+      - spin2_timing_control.yaml
+      - spin2_protocol_implementation.yaml
+      - spin2_pin_control.yaml
+      - spin2_state_machine.yaml
+      - spin2_error_handling.yaml
+      - spin2_memory_allocation.yaml
+      - spin2_cog_management.yaml
+      - spin2_diagnostic_output.yaml
+      - spin2_event_dispatcher.yaml
+      - spin2_layered_architecture.yaml
+      - spin2_mailbox_communication.yaml
+      - spin2_plugin_system.yaml
+      - spin2_resource_pool.yaml
+      - spin2_shared_memory.yaml
       
-  domain_patterns:
-    description: "Domain-specific patterns"
+  applications:
+    description: "Application-level patterns"
     patterns:
       - display_driver.yaml
       - sensor_reader.yaml
@@ -35,19 +42,7 @@ pattern_categories:
       - configuration_manager.yaml
       - utility_library.yaml
       
-  specialized:
-    description: "Advanced architectural patterns"
-    patterns:
-      - shared_memory.yaml
-      - diagnostic_output.yaml
-      - event_dispatcher.yaml
-      - resource_pool.yaml
-      - mailbox_communication.yaml
-      - layered_architecture.yaml
-      - plugin_system.yaml
-
 selection_guide: |
-  Start with object_composition to determine structure
-  Add hardware_utilization based on resource needs
-  Select domain_patterns for application type
-  Apply specialized patterns for advanced features
+  Start with structural patterns to determine object organization,
+  then select implementation patterns for specific functionality,
+  and finally choose application patterns for domain-specific needs
