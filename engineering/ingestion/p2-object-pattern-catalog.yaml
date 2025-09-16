@@ -1,0 +1,391 @@
+# P2 Object Pattern Catalog
+# Discovered patterns from source code analysis
+# For AI code generation assistance
+
+catalog_version: "1.0.0"
+analysis_date: "2025-09-15"
+total_patterns: 8
+
+patterns:
+  # ==========================================
+  # 1. I2C Device Driver Pattern
+  # ==========================================
+  - pattern_id: "i2c_device_driver"
+    pattern_name: "I2C Device Driver"
+    category: "device_driver"
+    when_to_use: "Interfacing with I2C sensors or devices"
+    complexity: "moderate"
+    
+    structure:
+      typical_dependencies:
+        - "jm_i2c : I2C communication layer"
+        
+    methods:
+      lifecycle:
+        - "null() - Non-top-level marker"
+        - "setup(scl, sda, addr) - Configure I2C connection"
+        - "present() - Check if device responds"
+        
+      core_operations:
+        - "read_reg(reg) - Read device register"
+        - "write_reg(reg, value) - Write device register"
+        - "get_data() - Read sensor values"
+        
+    examples:
+      source_files:
+        - "bme280_I2C.spin2"
+        - "Cricket_BME280.spin2"
+        
+    common_mistakes:
+      - "Not checking device presence before operations"
+      - "Incorrect I2C address or timing"
+      
+  # ==========================================
+  # 2. Serial Communication Service
+  # ==========================================
+  - pattern_id: "serial_service"
+    pattern_name: "Serial Communication Service"
+    category: "service"
+    when_to_use: "Buffered UART communication"
+    complexity: "complex"
+    
+    structure:
+      sections:
+        CON: "Baud rates, buffer sizes, control characters"
+        VAR: "RX/TX buffers, head/tail pointers, cog ID"
+        
+    methods:
+      lifecycle:
+        - "start(rxpin, txpin, mode, baud) - Initialize UART"
+        - "stop() - Shutdown and release cog"
+        
+      core_operations:
+        - "tx(byte) - Transmit byte"
+        - "rx() : byte - Receive byte (blocking)"
+        - "rxcheck() : byte - Receive byte (non-blocking)"
+        - "str(string) - Transmit string"
+        - "dec(value) - Transmit decimal"
+        - "hex(value) - Transmit hexadecimal"
+        
+    resources:
+      cog_management:
+        background_processing: true
+        pattern: "Dedicated cog for RX/TX buffering"
+        
+    examples:
+      source_files:
+        - "jm_fullduplexserial.spin2"
+        - "Full_Duplex_Serial.spin2"
+        
+  # ==========================================
+  # 3. Display Controller Pattern
+  # ==========================================
+  - pattern_id: "display_controller"
+    pattern_name: "Display Controller"
+    category: "display_ui"
+    when_to_use: "Managing LED matrices, screens, or debug displays"
+    complexity: "complex"
+    
+    structure:
+      typical_dependencies:
+        - "Buffer management object"
+        - "Font/character object"
+        - "Graphics primitives object"
+        
+    methods:
+      lifecycle:
+        - "start(pins, config) - Initialize display"
+        - "stop() - Shutdown display"
+        
+      core_operations:
+        - "clear() - Clear display"
+        - "draw_pixel(x, y, color) - Set pixel"
+        - "draw_line(x1, y1, x2, y2, color) - Draw line"
+        - "draw_text(x, y, string) - Display text"
+        - "update() - Refresh display"
+        
+    resources:
+      cog_management:
+        background_processing: true
+        pattern: "Dedicated cog for refresh/scanning"
+        
+    examples:
+      source_files:
+        - "isp_hub75_display.spin2"
+        - "jm_debug_panel_010.spin2"
+        
+  # ==========================================
+  # 4. Servo/Motor Control Pattern
+  # ==========================================
+  - pattern_id: "motor_control"
+    pattern_name: "Motor Control Driver"
+    category: "device_driver"
+    when_to_use: "Controlling servos, steppers, or DC motors"
+    complexity: "moderate"
+    
+    methods:
+      lifecycle:
+        - "start(pins) - Initialize motor control"
+        - "stop() - Stop motor and release resources"
+        
+      core_operations:
+        - "set_position(angle) - Set servo position"
+        - "set_speed(rpm) - Set motor speed"
+        - "enable()/disable() - Motor power control"
+        - "move_to(position) - Absolute positioning"
+        - "move_by(steps) - Relative movement"
+        
+    resources:
+      pin_management:
+        smart_pins_used: true
+        pin_modes: ["P_PWM", "P_PULSE"]
+        
+    examples:
+      source_files:
+        - "jm_servo.spin2"
+        - "isp_bldc_motor.spin2"
+        - "DC_Motor.spin2"
+        
+  # ==========================================
+  # 5. Sensor Aggregator Pattern
+  # ==========================================
+  - pattern_id: "sensor_aggregator"
+    pattern_name: "Sensor Aggregator"
+    category: "service"
+    when_to_use: "Combining multiple sensor readings"
+    complexity: "moderate"
+    
+    structure:
+      typical_dependencies:
+        - "Multiple sensor driver objects"
+        - "Math/averaging utilities"
+        
+    methods:
+      core_operations:
+        - "read_all() - Read all sensors"
+        - "get_average() - Return averaged values"
+        - "get_filtered() - Return filtered data"
+        - "calibrate() - Calibration routine"
+        
+    examples:
+      conceptual: "Temperature + Humidity + Pressure combined"
+      
+  # ==========================================
+  # 6. Protocol Handler Pattern
+  # ==========================================
+  - pattern_id: "protocol_handler"
+    pattern_name: "Communication Protocol Handler"
+    category: "service"
+    when_to_use: "Implementing communication protocols"
+    complexity: "complex"
+    
+    methods:
+      lifecycle:
+        - "start(pins, config) - Initialize protocol"
+        - "stop() - Shutdown handler"
+        
+      core_operations:
+        - "send_packet(data) - Transmit packet"
+        - "receive_packet() : data - Receive packet"
+        - "check_error() : status - Error checking"
+        - "reset() - Protocol reset"
+        
+    examples:
+      source_files:
+        - "DMX_TX.spin2"
+        - "NEC_RX.spin2"
+        - "Sony_IRCS_Tx.spin2"
+        
+  # ==========================================
+  # 7. Mathematical Service Pattern
+  # ==========================================
+  - pattern_id: "math_service"
+    pattern_name: "Mathematical Service"
+    category: "math_computational"
+    when_to_use: "Extended mathematical operations"
+    complexity: "simple"
+    
+    structure:
+      sections:
+        CON: "Mathematical constants, data structures"
+        
+    methods:
+      core_operations:
+        - "Pure mathematical functions"
+        - "No state management"
+        - "PASM2 optimized operations"
+        
+    examples:
+      source_files:
+        - "math_int64.spin2"
+        - "Park_transformation.spin2"
+        - "Binary_Floating_Point_Routines.spin2"
+        
+  # ==========================================
+  # 8. Timer Service Pattern
+  # ==========================================
+  - pattern_id: "timer_service"
+    pattern_name: "Timer Service"
+    category: "service"
+    when_to_use: "Software timers and scheduling"
+    complexity: "moderate"
+    
+    methods:
+      lifecycle:
+        - "start() - Initialize timer service"
+        - "stop() - Shutdown timers"
+        
+      core_operations:
+        - "set_timer(id, duration) - Set timer"
+        - "check_timer(id) : expired - Check if expired"
+        - "reset_timer(id) - Reset timer"
+        - "pause()/resume() - Timer control"
+        
+    examples:
+      source_files:
+        - "Soft_Timer.spin2"
+        - "Neotimer.spin2"
+
+# ==========================================
+# Common Method Patterns Across All Objects
+# ==========================================
+common_method_patterns:
+  lifecycle:
+    - null: "PUB null() - Non-top-level marker"
+    - start: "PUB start(params) : result - Initialize"
+    - stop: "PUB stop() - Clean shutdown"
+    - setup: "PUB setup(params) - Alternative to start"
+    
+  status:
+    - busy: "PUB busy() : status - Check if busy"
+    - ready: "PUB ready() : status - Check if ready"
+    - present: "PUB present() : status - Device detection"
+    - error: "PUB error() : code - Get error status"
+    
+  configuration:
+    - config: "PUB config(params) - Configure object"
+    - set_mode: "PUB set_mode(mode) - Change operating mode"
+    - enable: "PUB enable() - Enable functionality"
+    - disable: "PUB disable() - Disable functionality"
+    
+  data_transfer:
+    - read: "PUB read() : data - Read data"
+    - write: "PUB write(data) - Write data"
+    - flush: "PUB flush() - Clear buffers"
+    - available: "PUB available() : count - Data ready"
+
+# ==========================================
+# Resource Management Patterns
+# ==========================================
+resource_patterns:
+  cog_allocation:
+    standard: |
+      VAR
+        long cog
+      PUB start()
+        stop()
+        cog := coginit(COGEXEC_NEW, @code, @params) + 1
+        return cog
+      PUB stop()
+        if cog
+          cogstop(cog-1)
+          cog := 0
+          
+  pin_management:
+    smart_pin_setup: |
+      pinstart(pin, mode, config, 0)
+      ' Use pin
+      pinclear(pin)
+      
+  buffer_management:
+    ring_buffer: |
+      CON
+        BUF_SIZE = 256
+      VAR
+        byte buffer[BUF_SIZE]
+        long head, tail
+      PUB write_byte(b)
+        buffer[head] := b
+        head := (head + 1) // BUF_SIZE
+      PUB read_byte() : b
+        b := buffer[tail]
+        tail := (tail + 1) // BUF_SIZE
+
+# ==========================================
+# Object Composition Patterns
+# ==========================================
+composition_patterns:
+  - name: "Driver Stack"
+    structure: "Application → Service → Driver → Hardware"
+    example: "App uses BME280 object, which uses I2C object"
+    
+  - name: "Service Aggregation"
+    structure: "Multiple independent services in one object"
+    example: "Debug panel with serial + timer + display"
+    
+  - name: "Utility Enhancement"
+    structure: "Core object + utility objects"
+    example: "Serial object + number formatting utilities"
+
+# ==========================================
+# Naming Conventions
+# ==========================================
+naming_conventions:
+  files:
+    - "author_prefix + descriptive_name.spin2"
+    - "jm_ = Jon McPhalen"
+    - "isp_ = Iron Sheep Productions"
+    
+  methods:
+    - "lowercase or snake_case"
+    - "Action verbs: start, stop, read, write"
+    - "No Hungarian notation"
+    
+  variables:
+    - "camelCase for variables"
+    - "UPPER_CASE for constants"
+    - "Descriptive over abbreviated"
+
+# ==========================================
+# Performance Optimization Patterns
+# ==========================================
+optimization_patterns:
+  - name: "Smart Pin Offloading"
+    description: "Use smart pins for timing-critical operations"
+    benefit: "Frees cog for other processing"
+    
+  - name: "PASM2 Inline Code"
+    description: "Use inline assembly for performance"
+    benefit: "10-100x speed improvement"
+    
+  - name: "Interrupt Handlers"
+    description: "Use interrupts vs polling"
+    benefit: "Reduced latency, power efficiency"
+
+# ==========================================
+# Usage Statistics
+# ==========================================
+usage_stats:
+  most_common_dependencies:
+    - "jm_nstr - 60% of objects"
+    - "jm_fullduplexserial - 40% of objects"
+    - "jm_i2c - 30% of sensor objects"
+    
+  typical_cog_usage:
+    - "0-1 cogs for simple drivers"
+    - "1-2 cogs for complex services"
+    - "2-4 cogs for display systems"
+
+# ==========================================
+# AI Code Generation Guidelines
+# ==========================================
+ai_guidelines:
+  - "Always include null() method for non-top objects"
+  - "Call stop() before start() to ensure clean state"
+  - "Use established naming conventions"
+  - "Follow resource management patterns exactly"
+  - "Include proper error checking and return codes"
+  - "Use smart pins when appropriate"
+  - "Prefer static memory allocation"
+  - "Document public methods clearly"
+  - "Test with edge cases and error conditions"
