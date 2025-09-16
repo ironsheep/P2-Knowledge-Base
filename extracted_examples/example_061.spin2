@@ -1,0 +1,5 @@
+orgh    $400            ' Code in hub memory
+        org     0               ' But executes like COG code!
+hub_code
+        ' Your code can be megabytes!
+        ' No more 512 instruction limit!

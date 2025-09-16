@@ -1,0 +1,11 @@
+{
+' Generated test program for example_066
+        org     0
+        
+' Block transfers are FAST
+        setq    #16-1
+        rdlong  buffer, hubaddr ' 16 longs in one go!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

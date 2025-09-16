@@ -1,0 +1,13 @@
+{
+' Generated test program for example_051
+        org     0
+        
+' Rotate a point
+        setq    y                ' Set Y coordinate
+        qrotate x, angle        ' Rotate X,Y by angle
+        getqx   new_x           ' Get rotated X
+        getqy   new_y           ' Get rotated Y
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

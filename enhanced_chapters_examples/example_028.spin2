@@ -1,0 +1,22 @@
+{
+' Generated test program for example_028
+        org     0
+        
+' Debounced button reader
+read_button
+        mov     debounce, #0
+check_button
+        testp   #BUTTON_PIN wc
+   if_c add     debounce, #1    ' Count high readings
+  if_nc mov     debounce, #0    ' Reset on any low
+        cmp     debounce, #10 wcz ' Need 10 consecutive highs
+  if_ae jmp     #button_confirmed
+        waitx   ##100_000        ' Wait 1ms
+        jmp     #check_button
+button_confirmed
+        ' Button definitely pressed
+        drvh    #LED_PIN
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

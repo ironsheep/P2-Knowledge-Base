@@ -1,0 +1,36 @@
+{
+' Generated test program for example_006
+        org     0
+        
+' Rotate sprite vertices around center
+rotate_sprite
+        mov     vertex_ptr, ##sprite_data
+        mov     vertex_count, #4        ' 4 corners
+next_vertex
+        rdlong  x, vertex_ptr++        ' Get X coordinate
+        rdlong  y, vertex_ptr++        ' Get Y coordinate
+        ' Center sprite at origin
+        sub     x, center_x
+        sub     y, center_y
+        ' Rotate by current angle
+        setq    y
+        qrotate x, rotation_angle
+        ' While waiting, we can prepare
+        mov     temp_x, center_x
+        mov     temp_y, center_y
+        ' Get rotated coordinates
+        getqx   x
+        getqy   y
+        ' Translate back to position
+        add     x, temp_x
+        add     y, temp_y
+        ' Store rotated vertex
+        wrlong  x, vertex_ptr++
+        wrlong  y, vertex_ptr++
+        djnz    vertex_count, #next_vertex
+        ' Increment rotation for animation
+        add     rotation_angle, ##$0100_0000  ' ~5.6 degrees
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

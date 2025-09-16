@@ -1,0 +1,12 @@
+{
+' Generated test program for example_050
+        org     0
+        
+qrotate angle, ##$7FFF_FFFF  ' Start rotation
+        getqx   cosine               ' Get cosine (55 clocks later)
+        getqy   sine                 ' Get sine
+        ' Hardware trigonometry!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

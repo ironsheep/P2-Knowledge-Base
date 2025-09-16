@@ -1,0 +1,10 @@
+{
+' Generated test program for example_085
+        org     0
+        
+rep     #1, count
+        add     sum, ptra++
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

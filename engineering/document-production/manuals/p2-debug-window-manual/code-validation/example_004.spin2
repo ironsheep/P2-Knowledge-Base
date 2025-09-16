@@ -1,0 +1,13 @@
+PUB continuous_data_stream() | buffer_index
+  DEBUG(`PLOT Stream SIZE 1024 400 SCROLL)
+  
+  buffer_index := 0
+  
+  repeat
+    ' Add new sample to circular buffer
+    buffer[buffer_index] := read_sensor()
+    
+    ' Stream update - only send new data
+    DEBUG(`Stream APPEND `(buffer[buffer_index]))
+    
+    buffer_index := (buffer_index + 1) & 1023

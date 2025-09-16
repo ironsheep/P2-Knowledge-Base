@@ -1,0 +1,19 @@
+{
+' Generated test program for example_018
+        org     0
+        
+' Basic move
+        mov     dest, source    ' dest = source
+        mov     x, #42         ' x = 42 (immediate)
+        mov     x, ##70000     ' x = 70000 (32-bit immediate)
+' But wait, there's more!
+        mvn     dest, source    ' dest = NOT source (inverted)
+        abs     dest, source    ' dest = |source|
+        neg     dest, source    ' dest = -source
+' And the mind-blowing ones
+        altd    dest, source    ' Modify NEXT instruction's dest field!
+        alts    dest, source    ' Modify NEXT instruction's source field!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

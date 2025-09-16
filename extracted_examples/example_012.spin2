@@ -1,0 +1,25 @@
+{
+' Generated test program for example_012
+        org     0
+        
+' Each COG runs this with different parameters
+sensor_reader
+        rdlong  sensor_pin, ptra[0]    ' Get pin assignment
+        rdlong  hub_addr, ptra[1]       ' Where to store results
+read_loop
+        ' Read sensor (simplified - real sensors need protocols)
+        testp   sensor_pin wc
+        rcl     value, #1               ' Accumulate bits
+        ' Every 32 reads, store to hub
+        incmod  counter, #31 wc
+   if_c wrlong  value, hub_addr
+   if_c add     hub_addr, #4
+        jmp     #read_loop
+sensor_pin long 0
+hub_addr   long 0
+value      long 0
+counter    long 0
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

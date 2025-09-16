@@ -1,0 +1,17 @@
+{
+' Generated test program for example_052
+        org     0
+        
+' Calculate distance (Pythagorean theorem)
+        setq    y
+        qvector x, #0           ' Start vector calculation
+        getqx   distance        ' sqrt(x² + y²)
+        getqy   angle          ' atan2(y, x)
+' Generate sine wave
+        qrotate angle, ##AMPLITUDE
+        getqy   sample         ' Sine wave sample
+        add     angle, ##FREQUENCY
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

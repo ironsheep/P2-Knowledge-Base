@@ -1,0 +1,11 @@
+{
+' Generated test program for example_059
+        org     0
+        
+setq    ##1000-1         ' Transfer 1000 longs
+        rdlong  buffer, source   ' Happens at maximum speed!
+        ' 4KB moved in microseconds!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

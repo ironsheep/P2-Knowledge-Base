@@ -1,0 +1,9 @@
+org     0
+        ' Turn on LED after random delay
+        getrnd  delay
+        and     delay, ##$3FFF_FFFF  ' Limit range
+        waitx   delay
+        drvh    #LED_PIN
+        getct   start_time
+        ' Your code: wait for button press
+        ' Calculate reaction time

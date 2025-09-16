@@ -1,0 +1,11 @@
+PUB uart_timing_analysis()
+  DEBUG(`LOGIC UART SIZE 800 200 SAMPLES 4096)
+  DEBUG(`UART TIMEBASE 1us)
+  
+  ' Monitor TX and RX simultaneously
+  DEBUG(`UART CHANNELS @tx_pin @rx_pin)
+  
+  ' Measure bit timing
+  DEBUG(`UART MEASURE FREQUENCY)
+  DEBUG(`UART MEASURE DUTY)
+  DEBUG(`UART MEASURE PULSE_WIDTH)

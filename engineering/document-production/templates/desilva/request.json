@@ -1,0 +1,26 @@
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2-PASM-deSilva-Style.md",
+      "output": "P2-PASM-deSilva-Style.pdf",
+      "template": "p2kb-desilva",
+      "pandoc_args": [
+        "--top-level-division=part",
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=3"
+      ],
+      "lua_filters": [
+        "p2kb-desilva-code-coloring",
+        "p2kb-desilva-semantic",
+        "p2kb-desilva-pagination"
+      ],
+      "metadata": {
+        "title": "P2 Assembly Programming in the Style of deSilva",
+        "subtitle": "A Human-Centered Approach to Parallel Processing",
+        "version": "Version 1.0 - deSilva Style Edition"
+      }
+    }
+  ]
+}

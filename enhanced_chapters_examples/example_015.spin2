@@ -1,0 +1,14 @@
+{
+' Generated test program for example_015
+        org     0
+        
+' Natural logarithm
+        qlog    value
+        getqx   result          ' ln(value) in 5.27 fixed point
+' Exponential
+        qexp    value
+        getqx   result          ' e^value
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

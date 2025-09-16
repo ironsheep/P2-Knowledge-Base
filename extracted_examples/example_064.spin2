@@ -1,0 +1,17 @@
+{
+' Generated test program for example_064
+        org     0
+        
+' Before: 8 clocks
+        rdlong  x, hubaddr
+        add     x, #1
+        wrlong  x, hubaddr
+' After: 4 clocks
+        rdlong  x, ptra++
+        add     x, #1
+        wrlong  x, --ptra
+        ' PTRA magic saves cycles!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

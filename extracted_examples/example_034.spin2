@@ -1,0 +1,19 @@
+{
+' Generated test program for example_034
+        org     0
+        
+' Method 1: Hardware multiply
+        getct   start_time
+        mul     x, y
+        getct   end_time
+        sub     end_time, start_time
+        ' Result: 2 clocks!
+' Method 2: Shift and add (old school)
+        getct   start_time
+        ' ... shift/add loop here
+        getct   end_time
+        ' Result: Many more clocks!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

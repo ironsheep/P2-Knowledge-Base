@@ -1,0 +1,16 @@
+{
+' Generated test program for example_093
+        org     0
+        
+' Hardware UART - so much easier!
+        wrpin   ##P_ASYNC_TX, #TX_PIN   ' Configure as UART
+        wxpin   ##BAUD_RATE, #TX_PIN    ' Set baud rate
+        dirh    #TX_PIN                 ' Enable
+send_char
+        testp   #TX_PIN wc              ' Check if ready
+   if_c wypin   char, #TX_PIN           ' Send character
+        ' Hardware handles start bit, data, stop bit!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

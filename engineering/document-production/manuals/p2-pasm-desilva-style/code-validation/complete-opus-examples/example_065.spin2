@@ -1,0 +1,12 @@
+{
+' Generated test program for example_065
+        org     0
+        
+' These can overlap
+        mul     x, y           ' Starts multiply
+        add     a, b           ' Executes while multiply runs
+        getmulh result         ' Gets multiply result
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

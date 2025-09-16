@@ -1,0 +1,12 @@
+{
+' Generated test program for example_060
+        org     0
+        
+rdfast  #0, hubaddr     ' Start FIFO read
+loop    rflong  data           ' Read from FIFO (no waiting!)
+        ' Process data
+        djnz    count, #loop
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

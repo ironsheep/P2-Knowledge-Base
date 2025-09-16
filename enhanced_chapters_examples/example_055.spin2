@@ -1,0 +1,10 @@
+org     0               ' Start in COG
+cog_code
+        ' This runs from COG RAM
+        call    #hub_function   ' Call into hub
+        ' Back in COG mode here
+        orgh    $1000          ' Switch to hub addresses
+hub_function
+        ' This runs from hub RAM via FIFO
+        ' Can be huge!
+        ret                    ' Returns to COG code

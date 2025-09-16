@@ -1,0 +1,21 @@
+{
+' Generated test program for example_003
+        org     0
+        
+' Generate sine wave samples rapid-fire
+        mov     angle, #0
+        mov     count, #256
+generate
+        qrotate angle, ##$7FFF_FFFF  ' Start calculation
+        add     angle, ##$0100_0000   ' Increment angle (don't wait!)
+        ' Do other work while CORDIC calculates
+        add     sample_ptr, #4
+        sub     count, #1
+        getqy   sample               ' Get sine result
+        wrlong  sample, sample_ptr   ' Store it
+        tjnz    count, #generate     ' Test-jump-not-zero
+        ' Generated 256 samples with perfect overlap!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

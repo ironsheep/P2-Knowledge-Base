@@ -1,0 +1,16 @@
+{
+' Generated test program for example_101
+        org     0
+        
+' Atomic increment using lock
+atomic_increment
+        locktry #COUNTER_LOCK wc
+   if_c jmp     #atomic_increment     ' Retry if busy
+        rdlong  value, ##COUNTER
+        add     value, #1
+        wrlong  value, ##COUNTER
+        lockrel #COUNTER_LOCK
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

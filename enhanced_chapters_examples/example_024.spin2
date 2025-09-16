@@ -1,0 +1,15 @@
+{
+' Generated test program for example_024
+        org     0
+        
+' Read 8 pins at once (pins 0-7)
+        mov     mask, #$FF     ' Pins 0-7
+        testb   ina, #0 wc     ' Test pin 0
+        rcl     result, #1     ' Rotate C into result
+        testb   ina, #1 wc     ' Test pin 1
+        rcl     result, #1
+        ' ... continue for all 8 pins
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

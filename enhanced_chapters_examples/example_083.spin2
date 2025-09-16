@@ -1,0 +1,13 @@
+{
+' Generated test program for example_083
+        org     0
+        
+' Slow
+        rdlong  x, addr
+        add     addr, #4
+' Fast
+        rdlong  x, ptra++
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

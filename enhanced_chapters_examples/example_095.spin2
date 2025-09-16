@@ -1,0 +1,16 @@
+{
+' Generated test program for example_095
+        org     0
+        
+' Simple low-pass filter using CORDIC
+filter_sample
+        rdpin   sample, #ADC_PIN        ' Read ADC
+        ' Apply filter using CORDIC rotation
+        setq    filtered
+        qrotate sample, ##FILTER_COEFF
+        getqy   filtered                ' Filtered output!
+        wypin   filtered, #DAC_PIN      ' Output to DAC
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

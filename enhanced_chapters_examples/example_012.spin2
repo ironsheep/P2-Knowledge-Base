@@ -1,0 +1,35 @@
+{
+' Generated test program for example_012
+        org     0
+        
+' Process multiple points while calculating
+process_points
+        mov     count, #16
+        mov     ptra, ##point_array
+        ' Start first calculation
+        rdlong  x, ptra++
+        rdlong  y, ptra++
+        setq    y
+        qrotate x, angle
+process_loop
+        ' Start next calculation immediately
+        rdlong  x, ptra++ wz    ' Z flag tells us if done
+   if_nz rdlong  y, ptra++
+   if_nz setq    y
+   if_nz qrotate x, angle        ' New calculation starts
+        ' Get previous result
+        getqx   prev_x
+        getqy   prev_y
+        ' Store previous result
+        wrlong  prev_x, ptrb++
+        wrlong  prev_y, ptrb++
+        djnz    count, #process_loop
+        ' Don't forget last result!
+        getqx   prev_x
+        getqy   prev_y
+        wrlong  prev_x, ptrb++
+        wrlong  prev_y, ptrb++
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

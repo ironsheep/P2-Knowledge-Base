@@ -1,0 +1,15 @@
+{
+' Generated test program for example_090
+        org     0
+        
+' Time your code
+        getct   start_time
+        ' Code to measure
+        call    #function_to_test
+        getct   end_time
+        sub     end_time, start_time
+        ' end_time now contains exact clock cycles
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

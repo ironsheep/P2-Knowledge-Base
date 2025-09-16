@@ -1,0 +1,20 @@
+{
+' Generated test program for example_078
+        org     0
+        
+' Traditional: multiple jumps
+        cmp     x, #5 wcz
+if_a    jmp     #greater
+if_b    jmp     #less
+        jmp     #equal
+' With SKIP: no jumps!
+        cmp     x, #5 wcz
+        skip    ##%11000        ' Skip pattern based on flags
+        mov     result, #1      ' Execute if equal
+        mov     result, #2      ' Execute if less
+        mov     result, #3      ' Execute if greater
+        ' No pipeline stalls from jumps!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

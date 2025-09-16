@@ -1,0 +1,15 @@
+{
+' Generated test program for example_028
+        org     0
+        
+rep     #4, #5         ' Repeat next 4 instructions 5 times
+        add     x, #1
+        sub     y, #1
+        rol     z, #1
+        ror     w, #1
+        ' These 4 instructions execute 5 times total
+        ' No loop overhead!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

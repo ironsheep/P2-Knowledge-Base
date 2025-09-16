@@ -1,0 +1,21 @@
+{
+' Generated test program for example_038
+        org     0
+        
+' Standard servo control (1-2ms pulse every 20ms)
+servo_control
+        mov     position, ##150_000    ' 1.5ms = center
+servo_loop
+        drvh    #SERVO_PIN
+        waitx   position              ' 1-2ms high pulse
+        drvl    #SERVO_PIN
+        waitx   ##2_000_000          ' Rest of 20ms period
+        ' Adjust position as needed
+        rdlong  position, ##position_addr
+        fle     position, ##100_000   ' Limit to 1ms min
+        fge     position, ##200_000   ' Limit to 2ms max
+        jmp     #servo_loop
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

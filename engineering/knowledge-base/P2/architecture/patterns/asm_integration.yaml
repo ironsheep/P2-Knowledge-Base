@@ -1,0 +1,84 @@
+pattern_id: "asm_integration"
+category: "architecture"
+usage_frequency: "28.8%"
+file_count: 210
+
+selection_criteria:
+  use_when:
+    - Need maximum performance for critical operations
+    - Implementing time-critical real-time functions
+    - Direct hardware control requirements
+    - Optimizing bottleneck operations
+    - Custom instruction sequences needed
+    - Precise timing control required
+  avoid_when:
+    - High-level logic is sufficient
+    - Code maintainability is primary concern
+    - Development time is critical
+    - Team lacks assembly expertise
+
+structural_signature:
+  inline_assembly:
+    - "asm...endasm blocks within Spin2 functions"
+    - "Direct register manipulation"
+    - "Custom instruction sequences"
+  asm_functions:
+    - "Pure assembly methods in Spin2 objects"
+    - "PASM2 cog programs"
+    - "Hybrid Spin2/PASM2 approaches"
+  data_interface:
+    - "Parameter passing via registers"
+    - "Hub memory data exchange"
+    - "Return value handling"
+
+implementation_template: |
+  PUB fast_operation(value1, value2) : result
+    ' High-level setup in Spin2
+    setup_parameters(value1, value2)
+    
+    ' Critical section in assembly
+    asm
+      mov     pa, ptra            ' Get first parameter
+      mov     pb, ptrb            ' Get second parameter
+      add     pa, pb              ' Fast addition
+      shl     pa, #2              ' Shift operation
+      mov     result, pa          ' Return result
+    endasm
+    
+    ' High-level cleanup in Spin2
+    return cleanup_result(result)
+    
+  PUB timing_critical_task()
+    asm
+      ' Precise timing control
+      waitx   ##20_000_000        ' Exact delay
+      drvh    #PIN_OUTPUT         ' Immediate pin control
+      waitx   ##1_000_000         ' Short pulse
+      drvl    #PIN_OUTPUT         ' Pin low
+    endasm
+
+resource_profile:
+  memory_usage: "Minimal additional overhead"
+  performance: "Maximum speed for critical sections"
+  timing: "Predictable, precise timing control"
+  complexity: "Higher development and maintenance cost"
+
+composition_rules:
+  combines_with:
+    - "timing_control: Assembly provides precise timing"
+    - "smart_pin_usage: Direct Smart Pin configuration"
+    - "cog_management: Assembly cog programs"
+  conflicts_with:
+    - "High-level abstraction patterns"
+    - "Rapid prototyping approaches"
+
+real_examples:
+  - "Signal processing kernels"
+  - "Communication protocol bit manipulation"
+  - "Real-time control loops"
+  - "Custom math operations"
+  - "Hardware interface drivers"
+
+statistics:
+  prevalence: "210 of 730 files"
+  percentage: "28.8%"

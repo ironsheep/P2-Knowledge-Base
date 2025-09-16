@@ -1,0 +1,24 @@
+{
+' Generated test program for example_014
+        org     0
+        
+rdlong  value, ##$1000  ' Reads from hub byte address $1000
+   mov     value, $1000    ' Moves from COG long address $1000
+   ```
+4. **PTRA/PTRB are your friends** - These special registers make hub access much easier
+5. **COGs are truly independent** - Stopping one COG doesn't affect others (unless they're waiting for it)
+## What We've Learned
+Look at what you now understand:
+- ✅ Why eight processors is simpler than one with interrupts
+- ✅ How COGs are structured and limited
+- ✅ The hub memory system and egg beater access
+- ✅ Multiple ways for COGs to communicate
+- ✅ Why interrupts are usually unnecessary
+- ✅ How to think in parallel
+## Your Turn: Experiments
+### Experiment 1: COG Counter
+Start 8 COGs, each incrementing a different hub location. Watch them count in parallel:
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

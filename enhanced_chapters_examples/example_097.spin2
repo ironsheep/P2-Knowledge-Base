@@ -1,0 +1,27 @@
+{
+' Generated test program for example_097
+        org     0
+        
+' Main orchestrator (COG 0)
+main_orchestrator
+        ' Launch the orchestra
+        coginit #1, @sensor_cog, @sensor_params
+        coginit #2, @motor_cog, @motor_params
+        coginit #3, @comms_cog, @comms_params
+        coginit #4, @display_cog, @display_params
+        coginit #5, @safety_cog, @safety_params
+        coginit #6, @logger_cog, @logger_params
+        coginit #7, @debug_cog, @debug_params
+        ' Now coordinate them all
+orchestrate
+        rdlong  sensor_data, ##SENSOR_MAILBOX wz
+   if_nz call   #process_sensor_data
+        rdlong  command, ##COMMAND_MAILBOX wz
+   if_nz call   #execute_command
+        call    #update_system_state
+        wrlong  state, ##STATE_MAILBOX
+        jmp     #orchestrate
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

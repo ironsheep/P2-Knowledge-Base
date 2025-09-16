@@ -1,0 +1,17 @@
+org     0
+        jmp     #calculator    ' Jump to hub code
+        orgh    $1000
+calculator
+        ' Your code here:
+        ' 1. Display menu
+        ' 2. Get operation choice
+        ' 3. Get two numbers
+        ' 4. Call appropriate function
+        ' 5. Display result
+add_function
+        ' Addition code
+        ret
+subtract_function
+        ' Subtraction code
+        ret
+' Add more functions - no size limit!

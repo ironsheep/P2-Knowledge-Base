@@ -1,0 +1,10 @@
+{
+' Generated test program for example_084
+        org     0
+        
+alignl          ' Force long alignment
+data    long    $12345678
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

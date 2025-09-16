@@ -8,12 +8,21 @@ P2/                           # Knowledge Base
 │   ├── pasm2/               # PASM2 assembly (357 instructions)
 │   └── spin2/               # Spin2 high-level language
 │       ├── methods/         # 73 built-in methods
-│       └── operators/       # 46 operators
+│       ├── operators/       # 46 operators
+│       └── patterns/        # Code patterns (28+ discovered)
+│           ├── object_composition/  # 5 patterns (NO_OBJECTS, SINGLE_OBJECT, etc.)
+│           ├── domain_patterns/     # 9+ patterns (IoT, Robotics, etc.)
+│           └── pattern_selection_guide.yaml  # AI decision tree
 ├── hardware/                # Physical hardware specs
 └── architecture/            # P2 architecture components
     ├── *.yaml              # Core components (COG, HUB, CORDIC)
     ├── smart-pins/         # 64 Smart Pin modes
-    └── system-registers/   # System registers
+    ├── system-registers/   # System registers
+    └── patterns/           # Hardware utilization patterns
+        ├── timing_control.yaml       # 77.4% of code uses
+        ├── buffer_management.yaml    # 82.0% of code uses
+        ├── cog_management.yaml       # 38.5% of code uses
+        └── smart_pin_usage.yaml      # 14.7% of code uses
 
 P2-support/                  # Maintenance (separate directory)
 ├── sources/                # Multi-layer source files
@@ -52,6 +61,8 @@ flags_affected:
 - ✅ 100% timing coverage
 - ✅ 100% encoding coverage
 - ✅ Health score: 100/100
+- ✅ 28+ code patterns discovered (from 730 .spin2 files analyzed)
+- ✅ Pattern coverage: Object composition, Hardware utilization, Domain-specific
 
 ## Version History
 
@@ -62,3 +73,4 @@ flags_affected:
 | 1.2 | 2025-09-07 | P2/P2-support separation |
 | 1.3 | 2025-09-07 | Instructions → language/pasm2 |
 | 2.0 | 2025-09-07 | Clean architecture, 100% timing |
+| 2.1 | 2025-09-15 | Added 28+ code patterns from source analysis |

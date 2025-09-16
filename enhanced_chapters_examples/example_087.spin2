@@ -1,0 +1,14 @@
+{
+' Generated test program for example_087
+        org     0
+        
+' AUGS + instruction = extended immediate
+        augs    #$12345000
+        mov     x, #$678        ' x = $12345678
+' ALTD + instruction = indirect addressing
+        altd    index, #array
+        mov     0-0, value      ' Stores to array[index]
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

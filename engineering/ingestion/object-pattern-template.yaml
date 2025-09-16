@@ -1,0 +1,202 @@
+# P2 Object Pattern Template
+# This template defines the structure for documenting P2 object patterns
+# for AI code generation assistance
+
+pattern_id: "pattern_unique_id"
+pattern_name: "Human-readable pattern name"
+category: "device_driver|service|display_ui|math_computational|application|utility"
+when_to_use: "Description of when this pattern should be applied"
+complexity: "simple|moderate|complex"
+
+# Structural components of the pattern
+structure:
+  sections:
+    - CON:  # Constants section
+        purpose: "Define configuration constants, pins, timing"
+        typical_content:
+          - "Pin definitions"
+          - "Timing constants"
+          - "Buffer sizes"
+          - "Mode enumerations"
+    
+    - VAR:  # Variables section
+        purpose: "Object state and buffers"
+        typical_content:
+          - "Cog tracking variable"
+          - "Pin state variables"
+          - "Data buffers"
+          - "Status flags"
+    
+    - OBJ:  # Object dependencies
+        purpose: "Required child objects"
+        typical_dependencies:
+          - name: "dependency_name"
+            type: "driver|service|utility"
+            purpose: "Why this dependency is needed"
+
+# Method patterns for this object type
+methods:
+  lifecycle:
+    - name: "null"
+      signature: "PUB null()"
+      purpose: "Marker for non-top-level object"
+      required: true
+      
+    - name: "start"
+      signature: "PUB start(params...) : result"
+      purpose: "Initialize and start the object"
+      required: true
+      typical_params:
+        - "pins"
+        - "configuration"
+        - "mode"
+      returns: "cog ID or success/failure"
+      
+    - name: "stop"
+      signature: "PUB stop()"
+      purpose: "Clean shutdown and resource release"
+      required: true
+      
+  core_operations:
+    - name: "operation_name"
+      signature: "PUB operation(params) : result"
+      purpose: "Core functionality description"
+      typical_implementation: |
+        ' Pseudo-code or pattern description
+        
+  utility_methods:
+    - name: "helper_name"
+      signature: "PUB/PRI helper(params)"
+      purpose: "Supporting functionality"
+
+# Resource management patterns
+resources:
+  cog_management:
+    allocation_pattern: |
+      stop()  ' Ensure clean state
+      cog := coginit(COGEXEC_NEW, @code, @params) + 1
+    deallocation_pattern: |
+      if cog
+        cogstop(cog-1)
+        cog := 0
+    background_processing: false
+    
+  pin_management:
+    smart_pins_used: true
+    pin_modes: ["P_ASYNC_TX", "P_ASYNC_RX", "P_PWM"]
+    cleanup_pattern: |
+      pinclear(pins)
+      pinfloat(pins)
+      
+  memory_management:
+    allocation_type: "static|dynamic"
+    buffer_type: "ring|linear|none"
+    typical_size: "256-1024 bytes"
+
+# Code examples
+examples:
+  spin2_skeleton: |
+    ' Object skeleton following this pattern
+    CON
+      ' Configuration constants
+      
+    VAR
+      long cog
+      ' State variables
+      
+    OBJ
+      ' Dependencies
+      
+    PUB null()
+      ' Non-top-level marker
+      
+    PUB start(params) : result
+      stop()
+      ' Initialization code
+      return cog
+      
+    PUB stop()
+      ' Cleanup code
+      
+  usage_example: |
+    ' How to use this object pattern
+    OBJ
+      instance : "object_name"
+      
+    PUB main()
+      instance.start(params)
+      ' Use object
+      instance.stop()
+      
+  pasm2_component: |
+    DAT
+      org
+    asm_code
+      ' PASM2 code pattern if applicable
+      
+# Common patterns and idioms
+idioms:
+  - name: "Pattern name"
+    description: "What this idiom does"
+    code: |
+      ' Code demonstrating the idiom
+      
+# Common mistakes to avoid
+common_mistakes:
+  - mistake: "Not calling stop() before start()"
+    consequence: "Resource leak, multiple cog allocation"
+    correct_approach: "Always call stop() in start() method"
+    
+  - mistake: "Not checking return values"
+    consequence: "Silent failures"
+    correct_approach: "Check and handle return codes"
+
+# Performance considerations
+performance:
+  timing_critical: false
+  typical_latency: "microseconds|milliseconds"
+  throughput: "bytes/second or operations/second"
+  optimization_tips:
+    - "Use smart pins for timing-critical operations"
+    - "Minimize hub accesses in tight loops"
+
+# Related patterns
+related_patterns:
+  - pattern_id: "related_pattern_1"
+    relationship: "uses|extends|alternative"
+    when_to_prefer: "Conditions for choosing this over related pattern"
+
+# Author attribution (when known)
+attribution:
+  author: "Author name"
+  source_files: 
+    - "example_file.spin2"
+  documentation: "URL or reference"
+
+# Version compatibility
+compatibility:
+  p2_revision: "Rev B/C"
+  spin2_version: "v35+"
+  pnut_version: "v35+"
+
+# Tags for searchability
+tags:
+  - "driver"
+  - "i2c"
+  - "sensor"
+  - "communication"
+
+# Validation criteria
+validation:
+  must_have_methods: ["null", "start", "stop"]
+  must_follow_conventions:
+    - "Variable naming (camelCase or snake_case)"
+    - "Method naming (lowercase)"
+    - "File naming (descriptive_name.spin2)"
+
+# AI generation hints
+ai_hints:
+  preferred_structure: "standard|complex|minimal"
+  error_handling: "return_codes|exceptions|silent"
+  debug_support: "none|basic|extensive"
+  documentation_style: "inline|header|both"

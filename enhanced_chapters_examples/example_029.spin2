@@ -1,0 +1,22 @@
+{
+' Generated test program for example_029
+        org     0
+        
+' Bit-bang serial transmit at 115200 baud
+tx_byte
+        or      data, ##$100    ' Add stop bit
+        shl     data, #1        ' Add start bit (0)
+        mov     bits, #10       ' 1 start + 8 data + 1 stop
+        getct   time            ' Get current time
+tx_loop
+        shr     data, #1 wc     ' Get next bit into C
+        drvc    #TX_PIN         ' Output bit
+        addct1  time, bit_time  ' Next bit time
+        waitct1                 ' Wait for it
+        djnz    bits, #tx_loop
+        ret
+bit_time long   100_000_000 / 115200  ' Clock cycles per bit
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

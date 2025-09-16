@@ -1,0 +1,17 @@
+PUB automated_test_sequence()
+  setup_test_windows()
+  
+  repeat test from 1 to num_tests
+    ' Configure test
+    setup_test(test)
+    
+    ' Run and monitor
+    start_test()
+    
+    repeat while test_running()
+      update_all_windows()
+      check_pass_fail()
+    
+    ' Document results
+    capture_screenshots(test)
+    log_results(test)

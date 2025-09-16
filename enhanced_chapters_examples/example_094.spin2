@@ -1,0 +1,19 @@
+{
+' Generated test program for example_094
+        org     0
+        
+' Basic SPI transfer (bit-bang style)
+spi_byte
+        mov     bits, #8
+spi_loop
+        shl     mosi_data, #1 wc
+        drvc    #MOSI_PIN       ' Output bit
+        drvh    #SCK_PIN        ' Clock high
+        testp   #MISO_PIN wc    ' Read MISO
+        rcl     miso_data, #1   ' Store bit
+        drvl    #SCK_PIN        ' Clock low
+        djnz    bits, #spi_loop
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

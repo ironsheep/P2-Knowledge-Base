@@ -1,0 +1,11 @@
+{
+' Generated test program for example_106
+        org     0
+        
+' Fixed hub addresses for communication
+MAILBOX_1 = $1000
+MAILBOX_2 = $1004
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

@@ -1,0 +1,16 @@
+{
+' Generated test program for example_089
+        org     0
+        
+' Looped version
+        rep     #1, #4
+        add     sum, ptra++
+' Unrolled version (faster for small counts)
+        add     sum, ptra++
+        add     sum, ptra++
+        add     sum, ptra++
+        add     sum, ptra++
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

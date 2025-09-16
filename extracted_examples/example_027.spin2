@@ -1,0 +1,15 @@
+{
+' Generated test program for example_027
+        org     0
+        
+skip    ##%11010000    ' Skip pattern (1=skip, 0=execute)
+        add     x, #1         ' Skipped!
+        add     y, #1         ' Skipped!
+        add     z, #1         ' Executed
+        sub     a, #1         ' Skipped!
+        sub     b, #1         ' Executed
+        ' ... pattern continues
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

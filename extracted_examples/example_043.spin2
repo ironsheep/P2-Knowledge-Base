@@ -1,0 +1,16 @@
+{
+' Generated test program for example_043
+        org     0
+        
+' Start division
+        qdiv    dividend, divisor ' Start the operation
+' Get results (takes 30 clocks)
+        getqx   quotient         ' Get quotient
+        getqy   remainder        ' Get remainder
+' Fractional division
+        qfrac   numerator, denominator
+        getqx   fraction         ' 32-bit fraction
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

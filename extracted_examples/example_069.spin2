@@ -1,0 +1,12 @@
+{
+' Generated test program for example_069
+        org     0
+        
+' SPI using Smart Pins
+        wrpin   ##P_SYNC_TX, #MOSI_PIN
+        wrpin   ##P_SYNC_RX, #MISO_PIN
+        ' Clock and data handled in hardware!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

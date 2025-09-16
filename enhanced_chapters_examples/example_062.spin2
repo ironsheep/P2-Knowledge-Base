@@ -1,0 +1,16 @@
+{
+' Generated test program for example_062
+        org     0
+        
+orgh    $1000
+hub_code
+        rdlong  value, ##hub_data  ' Read hub data
+        add     value, #1
+        wrlong  value, ##hub_data  ' Write back
+        orgh    $8000
+hub_data
+        long    $12345678
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

@@ -1,0 +1,13 @@
+{
+' Generated test program for example_061
+        org     0
+        
+' Jump to distant hub code
+        jmp     ##far_away     ' ## forces 32-bit immediate
+        orgh    $40000        ' Far away in hub
+far_away
+        ' Code here
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

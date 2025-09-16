@@ -1,0 +1,14 @@
+{
+' Generated test program for example_063
+        org     0
+        
+setint1 #INT_PINRISE, #BUTTON_PIN  ' Setup interrupt
+        ' Your code runs normally...
+        ' Until button is pressed!
+int1_handler
+        ' Interrupt code here
+        reti1                               ' Return from interrupt
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

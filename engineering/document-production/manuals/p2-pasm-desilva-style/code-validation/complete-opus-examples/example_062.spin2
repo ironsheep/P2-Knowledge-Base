@@ -1,0 +1,11 @@
+{
+' Generated test program for example_062
+        org     0
+        
+call    #hub_function   ' Call hub code from COG
+        jmp     #cog_code      ' Jump back to COG
+        ' Mix and match as needed!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

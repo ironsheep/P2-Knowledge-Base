@@ -1,0 +1,17 @@
+{
+' Generated test program for example_072
+        org     0
+        
+' Configure event to watch pin
+        setse1  #%01_000000 | BUTTON_PIN  ' Rising edge event
+' Main code runs normally
+main_loop
+        ' Do work...
+        pollse1 wc              ' Check if event occurred
+   if_c call    #handle_button  ' Handle when convenient
+        ' Continue work...
+        jmp     #main_loop
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

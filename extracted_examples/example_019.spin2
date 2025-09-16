@@ -1,0 +1,20 @@
+{
+' Generated test program for example_019
+        org     0
+        
+' Addition and subtraction
+        add     x, y           ' x = x + y
+        sub     x, y           ' x = x - y
+        adds    x, y           ' Signed add
+        subs    x, y           ' Signed subtract
+' The revolution: hardware multiply!
+        mul     x, y           ' x = x * y (low 32 bits)
+        muls    x, y           ' Signed multiply
+' And hardware divide!
+        qdiv    x, y           ' Start division x/y
+        getqx   result         ' Get quotient
+        getqy   remainder      ' Get remainder
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

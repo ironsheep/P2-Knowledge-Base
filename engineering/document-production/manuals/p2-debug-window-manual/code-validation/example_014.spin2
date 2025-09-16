@@ -1,0 +1,13 @@
+PUB document_test_run() | step
+  repeat step from 1 to total_steps
+    ' Execute test step
+    execute_step(step)
+    
+    ' Capture state
+    DEBUG(`CAPTURE "step_" udec(step) ".png")
+    
+    ' Log results
+    log_step_results(step)
+    
+  ' Generate report
+  create_html_report()

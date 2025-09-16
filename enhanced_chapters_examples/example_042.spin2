@@ -1,0 +1,17 @@
+{
+' Generated test program for example_042
+        org     0
+        
+' Start FIFO writing
+        wrfast  #0, ##dest_buffer
+' Stream data out
+write_loop
+        ' Generate or process data
+        mov     value, calculation
+        wflong  value            ' Write to FIFO
+        djnz    count, #write_loop
+' Data streams to hub automatically
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

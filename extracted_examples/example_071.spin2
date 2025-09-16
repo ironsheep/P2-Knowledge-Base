@@ -1,0 +1,11 @@
+{
+' Generated test program for example_071
+        org     0
+        
+' Simple low-pass filter
+        qrotate sample, ##FILTER_COEFF
+        getqy   filtered
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

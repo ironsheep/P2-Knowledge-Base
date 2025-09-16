@@ -1,0 +1,15 @@
+{
+' Generated test program for example_036
+        org     0
+        
+rdbyte  value, hubaddr    ' Read 1 byte
+        rdword  value, hubaddr    ' Read 2 bytes (word)
+        rdlong  value, hubaddr    ' Read 4 bytes (long)
+' With PTRA/PTRB magic
+        rdlong  value, ptra++     ' Read and increment pointer
+        rdlong  value, ++ptra     ' Increment then read
+        rdlong  value, ptra[5]    ' Read from ptra + 5*4
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

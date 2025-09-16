@@ -1,0 +1,14 @@
+{
+' Generated test program for example_040
+        org     0
+        
+' Basic block read
+        setq    #16-1           ' Transfer 16 longs (minus 1!)
+        rdlong  buffer, hubaddr ' Reads 16 consecutive longs
+' Basic block write
+        setq    #16-1           ' Transfer 16 longs
+        wrlong  buffer, hubaddr ' Writes 16 consecutive longs
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

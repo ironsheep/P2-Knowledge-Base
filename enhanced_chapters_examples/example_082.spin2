@@ -1,0 +1,29 @@
+{
+' Generated test program for example_082
+        org     0
+        
+' Version 1: Basic (slow)
+copy_basic
+        rdlong  temp, source
+        wrlong  temp, dest
+        add     source, #4
+        add     dest, #4
+        djnz    count, #copy_basic
+        ' ~13 clocks per long
+' Version 2: Better pointers
+copy_better
+        rdlong  temp, ptra++
+        wrlong  temp, ptrb++
+        djnz    count, #copy_better
+        ' ~8 clocks per long
+' Version 3: Block transfer (ultimate)
+copy_ultimate
+        setq    count           ' Setup block transfer
+        rdlong  buffer, source  ' Read all at once
+        setq    count
+        wrlong  buffer, dest    ' Write all at once
+        ' <1 clock per long for large blocks!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

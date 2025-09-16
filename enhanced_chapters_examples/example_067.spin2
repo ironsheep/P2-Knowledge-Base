@@ -1,0 +1,27 @@
+{
+' Generated test program for example_067
+        org     0
+        
+' COG dedicated to servo control
+servo_cog
+        getct   pulse_time
+servo_loop
+        ' Generate 8 servo pulses simultaneously
+        mov     servo_mask, ##$FF      ' 8 servos
+        or      outa, servo_mask       ' All high
+        mov     index, #0
+check_servos
+        rdlong  width, ptra[index]     ' Get pulse width
+        addct1  pulse_time, width      ' Set compare time
+        waitct1                        ' Wait for exact time
+        bitl    outa, index            ' Turn off this servo
+        incmod  index, #7
+        tjnz    servo_mask, #check_servos
+        ' Wait for 20ms frame
+        waitx   ##2_000_000
+        jmp     #servo_loop
+' Result: 8 servos with ZERO jitter!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

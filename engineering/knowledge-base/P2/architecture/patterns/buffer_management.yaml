@@ -1,0 +1,270 @@
+# Buffer Management Pattern
+# Pattern for managing data buffers, queues, and memory in P2 applications
+
+pattern_id: "buffer_management"
+pattern_name: "Buffer Management Pattern"
+category: "hardware_utilization"
+prevalence: 82.0  # 598 of 730 files (82.0%)
+
+selection_criteria:
+  description: "Use this pattern when your application handles data streams, requires buffering for performance, or manages memory resources"
+  indicators:
+    - "Data streaming or continuous data processing"
+    - "Need to decouple producers and consumers"
+    - "Variable data rates requiring buffering"
+    - "Memory management for dynamic data"
+    - "Inter-COG communication with data transfer"
+  decision_factors:
+    - "Data rates exceed processing capability"
+    - "Asynchronous data flow between components"
+    - "Memory efficiency requirements"
+    - "Need for data integrity during transfer"
+
+structural_signature:
+  characteristics:
+    - "Circular buffers for continuous data streams"
+    - "FIFO/LIFO queue implementations"
+    - "Buffer pointers and size management"
+    - "Memory allocation and deallocation strategies"
+    - "Buffer overflow and underflow protection"
+  code_patterns:
+    - "Circular buffer with head/tail pointers"
+    - "Buffer size calculations and wraparound logic"
+    - "Producer/consumer synchronization"
+    - "Memory copy operations with proper bounds checking"
+    - "Buffer status monitoring (full, empty, available space)"
+
+implementation_template: |
+  CON
+    BUFFER_SIZE = 256
+    
+  VAR
+    byte buffer[BUFFER_SIZE]
+    long head_ptr, tail_ptr, count
+    
+  PUB buffer_init()
+    head_ptr := 0
+    tail_ptr := 0
+    count := 0
+    
+  PUB buffer_put(data) : success
+    if count < BUFFER_SIZE
+      buffer[head_ptr] := data
+      head_ptr := (head_ptr + 1) // BUFFER_SIZE
+      count++
+      return TRUE
+    return FALSE  ' Buffer full
+    
+  PUB buffer_get() : data
+    if count > 0
+      data := buffer[tail_ptr]
+      tail_ptr := (tail_ptr + 1) // BUFFER_SIZE
+      count--
+      return data
+    return -1  ' Buffer empty
+    
+  PUB buffer_available() : space
+    return BUFFER_SIZE - count
+    
+  PUB buffer_count() : items
+    return count
+
+resource_profile:
+  memory_usage:
+    code_size: "moderate (buffer management functions)"
+    variable_space: "significant (buffer arrays and management variables)"
+    stack_depth: "minimal (efficient buffer operations)"
+  performance:
+    execution_speed: "high (optimized memory operations)"
+    throughput: "excellent for streaming data"
+    latency: "low (direct memory access)"
+  complexity:
+    implementation: "moderate (pointer arithmetic and wraparound logic)"
+    maintainability: "good when buffer abstractions are used"
+    testability: "good (clear input/output behavior)"
+
+composition_rules:
+  compatible_patterns:
+    - "timing_control" (for timed buffer operations)
+    - "protocol_implementation" (for protocol data buffering)
+    - "cog_management" (for inter-COG buffering)
+    - "state_machine" (for buffered state transitions)
+  incompatible_patterns:
+    - None (buffering is broadly applicable)
+  synergies:
+    - "Essential for high-speed data acquisition"
+    - "Critical for multi-COG communication"
+    - "Enables efficient protocol implementations"
+
+buffer_types:
+  circular_buffers:
+    description: "Continuous ring buffers for streaming data"
+    characteristics:
+      - "Fixed size with wraparound pointers"
+      - "Efficient for continuous data streams"
+      - "Automatic overwrite of old data when full"
+    use_cases: "Audio streaming, sensor data, communication"
+    
+  fifo_queues:
+    description: "First-in-first-out data queues"
+    characteristics:
+      - "Ordered data processing"
+      - "No data loss unless buffer overflows"
+      - "Clear producer/consumer semantics"
+    use_cases: "Event queues, command processing, message passing"
+    
+  ping_pong_buffers:
+    description: "Double buffering for seamless data processing"
+    characteristics:
+      - "Two buffers alternating roles"
+      - "One fills while other is processed"
+      - "Enables real-time processing"
+    use_cases: "Display frame buffers, data acquisition, protocol handling"
+
+real_examples:
+  typical_applications:
+    - "Serial communication with receive/transmit buffers"
+    - "Audio processing with sample buffers"
+    - "Sensor data collection and processing"
+    - "Display systems with frame buffers"
+    - "Network communication with packet buffers"
+    - "Data logging systems with temporary storage"
+  buffer_sizes:
+    - "Small buffers: 16-64 bytes for simple queues"
+    - "Medium buffers: 256-1024 bytes for communication"
+    - "Large buffers: 2KB+ for audio/video data"
+
+statistics:
+  total_files: 598
+  percentage_of_codebase: 82.0
+  buffer_implementation_types:
+    circular_buffer: 401    # ~67% of buffer management files
+    fifo_queue: 298        # ~50% of buffer management files
+    ping_pong: 134         # ~22% of buffer management files
+    custom_buffer: 187     # ~31% of buffer management files
+
+pattern_variations:
+  simple_buffering:
+    description: "Basic buffer operations for straightforward data flow"
+    characteristics:
+      - "Single buffer with simple put/get operations"
+      - "Basic overflow/underflow checking"
+      - "Minimal synchronization requirements"
+    
+  multi_buffer_systems:
+    description: "Complex buffering with multiple buffer types"
+    characteristics:
+      - "Different buffer types for different data streams"
+      - "Buffer coordination and synchronization"
+      - "Hierarchical buffer management"
+    
+  zero_copy_buffering:
+    description: "Efficient buffering without data copying"
+    characteristics:
+      - "Pointer-based buffer management"
+      - "In-place data processing"
+      - "Memory-efficient operations"
+
+synchronization_strategies:
+  single_cog:
+    description: "Buffer operations within single COG"
+    characteristics:
+      - "No synchronization required"
+      - "Simple pointer manipulation"
+      - "Deterministic behavior"
+    
+  multi_cog_safe:
+    description: "Thread-safe buffer operations"
+    characteristics:
+      - "Atomic operations for pointer updates"
+      - "Memory barriers where needed"
+      - "Lock-free algorithms preferred"
+    
+  interrupt_safe:
+    description: "Buffer operations safe from interrupt context"
+    characteristics:
+      - "Interrupt disable during critical sections"
+      - "Atomic pointer updates"
+      - "Minimal critical section duration"
+
+memory_management:
+  static_allocation:
+    description: "Fixed-size buffers allocated at compile time"
+    pros: "Predictable memory usage, no allocation overhead"
+    cons: "Fixed size, potential memory waste"
+    
+  dynamic_allocation:
+    description: "Runtime buffer allocation and resizing"
+    pros: "Flexible memory usage, optimal sizing"
+    cons: "Allocation overhead, fragmentation risk"
+    
+  pool_allocation:
+    description: "Pre-allocated buffer pools for dynamic use"
+    pros: "Predictable allocation, reduced fragmentation"
+    cons: "Pool size planning required"
+
+performance_optimization:
+  alignment_considerations:
+    description: "Memory alignment for optimal access"
+    techniques:
+      - "Align buffers to long boundaries"
+      - "Use long-sized operations where possible"
+      - "Consider cache line alignment"
+    
+  copy_optimization:
+    description: "Efficient data copying strategies"
+    techniques:
+      - "Block copy operations"
+      - "DMA where available"
+      - "Zero-copy pointer passing"
+    
+  size_optimization:
+    description: "Optimal buffer sizing strategies"
+    techniques:
+      - "Power-of-2 buffer sizes for efficient modulo"
+      - "Size based on data rates and processing times"
+      - "Balance memory usage vs. performance"
+
+anti_patterns:
+  common_mistakes:
+    - "Buffer overflow without proper bounds checking"
+    - "Race conditions in multi-COG buffer access"
+    - "Inefficient buffer sizes (too small or too large)"
+    - "Memory leaks in dynamic allocation"
+    - "Ignoring buffer status in producer/consumer logic"
+  warning_signs:
+    - "Frequent buffer overflows or underflows"
+    - "High CPU usage in buffer management"
+    - "Memory fragmentation issues"
+    - "Data corruption in buffer operations"
+    - "Poor performance due to buffer size mismatches"
+
+buffer_monitoring:
+  status_tracking:
+    description: "Monitoring buffer health and performance"
+    metrics:
+      - "Buffer fill levels (current, maximum, average)"
+      - "Overflow/underflow events"
+      - "Throughput measurements"
+      - "Memory usage statistics"
+    
+  debugging_support:
+    description: "Tools and techniques for buffer debugging"
+    techniques:
+      - "Buffer state visualization"
+      - "Access pattern logging"
+      - "Performance profiling"
+      - "Memory corruption detection"
+
+evolution_pressure:
+  increasing_data_rates:
+    description: "Higher data throughput requirements"
+    solutions: "Larger buffers, more efficient algorithms, hardware assistance"
+    
+  complex_data_flows:
+    description: "More sophisticated data routing and processing"
+    solutions: "Multi-level buffering, specialized buffer types, buffer hierarchies"
+    
+  memory_constraints:
+    description: "Tighter memory usage requirements"
+    solutions: "Adaptive buffer sizing, memory pooling, compression techniques"

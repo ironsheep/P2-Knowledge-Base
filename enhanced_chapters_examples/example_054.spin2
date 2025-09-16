@@ -1,0 +1,20 @@
+{
+' Generated test program for example_054
+        org     0
+        
+orgh    $400            ' Place code in hub memory
+        ' This can be thousands of instructions!
+main    mov     x, #0
+        mov     y, #0
+        call    #huge_function  ' Can be massive
+        call    #another_big_one
+        call    #yet_another
+        ' Keep going... no limit!
+huge_function
+        ' 1000 instructions? No problem!
+        ' 10000 instructions? Still fine!
+        ret
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

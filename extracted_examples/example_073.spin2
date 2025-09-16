@@ -1,0 +1,14 @@
+{
+' Generated test program for example_073
+        org     0
+        
+' Producer COG
+        wrlong  data, ##mailbox
+' Consumer COG
+poll    rdlong  data, ##mailbox wz
+   if_z jmp     #poll
+        wrlong  #0, ##mailbox    ' Clear
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

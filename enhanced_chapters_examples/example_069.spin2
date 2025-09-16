@@ -1,0 +1,12 @@
+{
+' Generated test program for example_069
+        org     0
+        
+' Dedicated COG responds in 2 clocks
+watcher
+        waitpeq pattern, mask  ' Hardware wait
+        drvh    #RESPONSE_PIN  ' Instant response!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

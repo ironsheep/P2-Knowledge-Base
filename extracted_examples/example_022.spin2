@@ -1,0 +1,18 @@
+{
+' Generated test program for example_022
+        org     0
+        
+shl     x, #3          ' Shift left 3 bits
+        shr     x, #3          ' Shift right 3 bits
+        sar     x, #3          ' Arithmetic shift right (sign-extend)
+        rol     x, #3          ' Rotate left 3 bits
+        ror     x, #3          ' Rotate right 3 bits
+' Variable shifts (amount in register)
+        shl     x, y           ' Shift x left by y bits
+' Fancy ones
+        rev     x              ' Reverse bit order (!!)
+        mergeb  x              ' Merge bytes (AABBCCDD -> ABCDABCD)
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

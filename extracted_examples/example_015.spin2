@@ -1,0 +1,12 @@
+' Each COG gets LED pin in ptra
+        org     0
+        rdlong  pin, ptra
+        rdlong  delay, ptrb      ' Different delay per COG
+flash   drvh    pin
+        waitx   delay
+        drvl    pin
+        waitx   delay
+        shl     delay, #1        ' Double the delay
+        cmp     delay, ##100_000_000 wcz
+   if_a mov     delay, ##1_000_000  ' Reset if too long
+        jmp     #flash

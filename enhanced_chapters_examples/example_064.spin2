@@ -1,0 +1,32 @@
+{
+' Generated test program for example_064
+        org     0
+        
+orgh    $2000
+command_parser
+        call    #get_command_line
+        call    #tokenize
+        ' Compare against commands
+        mov     ptra, #command_string
+        mov     ptrb, ##cmd_help
+        call    #string_compare
+   if_z jmp     #help_command
+        mov     ptrb, ##cmd_run
+        call    #string_compare
+   if_z jmp     #run_command
+        ' Many more commands...
+help_command
+        ' 500 instructions of help text display
+        ret
+run_command
+        ' 1000 instructions of program execution
+        ret
+string_compare
+        ' 50 instructions of string comparison
+        ret
+' Thousands of instructions total
+' Would need multiple COGs without hub execution!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

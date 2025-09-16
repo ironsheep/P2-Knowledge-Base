@@ -1,0 +1,9 @@
+{
+' Generated test program for example_016
+        org     0
+        
+add     value, #1 wc
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

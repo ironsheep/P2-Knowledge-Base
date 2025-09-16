@@ -1,0 +1,4 @@
+org     0
+        jmp     #main      ' Jump to hub
+        orgh    $400
+main    ' Your big program here

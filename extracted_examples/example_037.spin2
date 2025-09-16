@@ -1,0 +1,14 @@
+{
+' Generated test program for example_037
+        org     0
+        
+wrbyte  value, hubaddr    ' Write 1 byte
+        wrword  value, hubaddr    ' Write 2 bytes
+        wrlong  value, hubaddr    ' Write 4 bytes
+' The mighty block transfer
+        setq    #16-1             ' Transfer 16 longs
+        rdlong  buffer, hubaddr   ' Reads 16 longs in one go!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

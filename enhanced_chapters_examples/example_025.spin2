@@ -1,0 +1,16 @@
+{
+' Generated test program for example_025
+        org     0
+        
+' Wait for pin to go high
+wait_high
+        testp   #SIGNAL_PIN wc
+  if_nc jmp     #wait_high
+' Wait for pin to go low
+wait_low
+        testp   #SIGNAL_PIN wc
+   if_c jmp     #wait_low
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

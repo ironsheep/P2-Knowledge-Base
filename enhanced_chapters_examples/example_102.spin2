@@ -1,0 +1,15 @@
+{
+' Generated test program for example_102
+        org     0
+        
+' COG 1: Signal event
+        wrlong  ##EVENT_FLAG, ##EVENT_ADDR
+' COG 2: Wait for event
+wait_event
+        rdlong  flag, ##EVENT_ADDR wz
+   if_z jmp     #wait_event
+        wrlong  #0, ##EVENT_ADDR      ' Clear event
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

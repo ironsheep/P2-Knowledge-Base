@@ -1,0 +1,11 @@
+{
+' Generated test program for example_021
+        org     0
+        
+drvrnot #56            ' Randomly toggle pin (hardware random!)
+        outl    #56            ' Drive low (alternate form)
+        outh    #56            ' Drive high (alternate form)
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

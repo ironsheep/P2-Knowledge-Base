@@ -1,0 +1,14 @@
+{
+' Generated test program for example_071
+        org     0
+        
+' Perfect timing without interrupts
+        getct   next_time
+loop    addct1  next_time, ##PERIOD
+        waitct1                ' Exact timing
+        call    #periodic_task
+        jmp     #loop
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

@@ -1,0 +1,22 @@
+{
+' Generated test program for example_076
+        org     0
+        
+' 2-clock instructions (most ALU operations)
+        add     x, y            ' 2 clocks
+        mov     a, b            ' 2 clocks
+        and     c, d            ' 2 clocks
+' Variable timing (hub access)
+        rdlong  value, hubaddr  ' 3-9 clocks
+        wrlong  value, hubaddr  ' 3 clocks
+' Long operations (CORDIC)
+        qrotate x, angle        ' 2 clocks to start
+        getqx   result          ' 2 clocks (but wait 55 for result)
+' Special cases
+        mul     x, y            ' 2 clocks
+        qdiv    x, y            ' 2 clocks to start
+        getqx   result          ' 2 clocks (but wait 30 for result)
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

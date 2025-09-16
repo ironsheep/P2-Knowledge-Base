@@ -1,0 +1,10 @@
+{
+' Generated test program for example_026
+        org     0
+        
+waitpeq mask, pins     ' Wait for pins to equal pattern
+        waitpne mask, pins     ' Wait for pins to NOT equal pattern
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

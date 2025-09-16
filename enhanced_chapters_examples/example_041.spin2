@@ -1,0 +1,17 @@
+{
+' Generated test program for example_041
+        org     0
+        
+' Start FIFO reading
+        rdfast  #0, ##data_start  ' Start fast read at data_start
+' Now read data at maximum speed
+stream_loop
+        rflong  value            ' Read from FIFO (no waiting!)
+        ' Process value here
+        add     accumulator, value
+        djnz    count, #stream_loop
+' The FIFO keeps feeding data automatically
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

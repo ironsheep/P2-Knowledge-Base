@@ -1,0 +1,9 @@
+PUB waterfall_display()
+  DEBUG(`SPECTRO Waterfall SIZE 800 600)
+  DEBUG(`Waterfall COLORMAP JET)
+  
+  repeat
+    ' Time-frequency analysis
+    DEBUG(`Waterfall UPDATE @new_spectrum)
+    
+    ' Patterns evolve over time

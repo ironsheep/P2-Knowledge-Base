@@ -1,0 +1,20 @@
+{
+' Generated test program for example_091
+        org     0
+        
+' Bare-bones VGA signal
+vga_simple
+        wrpin   ##P_SYNC, #HSYNC_PIN    ' Configure sync pins
+        wrpin   ##P_SYNC, #VSYNC_PIN
+        wxpin   ##H_TIMING, #HSYNC_PIN  ' Set timing
+        wxpin   ##V_TIMING, #VSYNC_PIN
+        dirh    #HSYNC_PIN              ' Enable pins
+        dirh    #VSYNC_PIN
+        ' Start streamer for pixels
+        setcmod #$100                   ' RGB mode
+        xinit   ##STREAM_CMD, ##buffer  ' Start streaming!
+' That's it - VGA signal generated!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

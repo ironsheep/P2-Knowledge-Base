@@ -1,0 +1,11 @@
+{
+' Generated test program for example_006
+        org     0
+        
+loop    drvnot  #56         ' Toggle pin 56
+        waitx   ##25_000_000 ' Wait
+        jmp     #loop       ' Repeat
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

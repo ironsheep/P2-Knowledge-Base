@@ -1,0 +1,17 @@
+{
+' Generated test program for example_076
+        org     0
+        
+' Main coordinator (COG 0)
+main    coginit #SENSOR_COG, @sensor_code, @sensor_params
+        coginit #MOTOR_COG, @motor_code, @motor_params
+        coginit #COMM_COG, @comm_code, @comm_params
+        ' Coordination loop
+loop    rdlong  sensor_data, ##SENSOR_MAILBOX
+        ' Process and decide
+        wrlong  motor_cmd, ##MOTOR_MAILBOX
+        jmp     #loop
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

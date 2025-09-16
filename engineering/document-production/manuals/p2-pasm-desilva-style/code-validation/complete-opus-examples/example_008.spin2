@@ -1,0 +1,18 @@
+{
+' Generated test program for example_008
+        org     0
+        
+' Get a lock
+try_lock
+        locktry lock_id wc     ' Try to get lock
+   if_c jmp     #try_lock      ' Keep trying if failed
+        ' Critical section - we have the lock!
+        rdlong  value, ##shared_addr
+        add     value, #1
+        wrlong  value, ##shared_addr
+        lockrel lock_id        ' Release the lock
+lock_id long    0              ' Lock 0-15
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

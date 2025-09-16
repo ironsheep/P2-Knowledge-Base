@@ -1,0 +1,11 @@
+{
+' Generated test program for example_077
+        org     0
+        
+' Just use hub variables
+' Each COG owns specific addresses
+' No locks needed if single-writer
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

@@ -1,0 +1,12 @@
+{
+' Generated test program for example_018
+        org     0
+        
+drvh    #56            ' Drive pin 56 HIGH (3.3V)
+        drvl    #56            ' Drive pin 56 LOW (0V)
+        drvnot  #56            ' Toggle pin 56
+        fltl    #56            ' Float pin 56 (high-Z)
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

@@ -1,0 +1,17 @@
+{
+' Generated test program for example_030
+        org     0
+        
+' Fast block copy using REP
+fast_copy
+        mov     ptra, ##source_addr    ' Source pointer
+        mov     ptrb, ##dest_addr      ' Destination pointer
+        rep     #2, ##256              ' Repeat 256 times
+        rdlong  temp, ptra++           ' Read and increment
+        wrlong  temp, ptrb++           ' Write and increment
+        ' 512 bytes copied with no loop overhead!
+temp    long    0
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

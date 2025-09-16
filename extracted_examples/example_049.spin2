@@ -1,0 +1,13 @@
+{
+' Generated test program for example_049
+        org     0
+        
+skipf   pattern          ' Set skip pattern
+        add     x, #1           ' Maybe executed
+        sub     y, #1           ' Maybe executed
+        mov     z, #0           ' Maybe executed
+        ' Pattern determines what runs!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

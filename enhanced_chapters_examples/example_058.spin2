@@ -1,0 +1,13 @@
+org     0
+' Critical timing code in COG
+critical_loop
+        waitpeq pattern, mask  ' Wait for trigger
+        drvh    #CRITICAL_PIN  ' Immediate response!
+        call    #hub_process   ' Do complex processing
+        jmp     #critical_loop
+        orgh    $4000
+' Complex processing in hub
+hub_process
+        ' Hundreds of instructions for data analysis
+        ' Not time-critical, so hub execution is fine
+        ret

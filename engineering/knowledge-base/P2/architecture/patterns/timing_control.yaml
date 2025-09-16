@@ -1,0 +1,236 @@
+# Timing Control Pattern
+# Pattern for precise timing control and synchronization in P2 applications
+
+pattern_id: "timing_control"
+pattern_name: "Timing Control Pattern"
+category: "hardware_utilization"
+prevalence: 77.4  # 565 of 730 files (77.4%)
+
+selection_criteria:
+  description: "Use this pattern when your application requires precise timing, delays, synchronization, or time-based coordination"
+  indicators:
+    - "Need for precise delays or timing intervals"
+    - "Synchronization between multiple processes or COGs"
+    - "Time-based state machines or protocols"
+    - "Real-time response requirements"
+    - "Coordination of hardware operations with specific timing"
+  decision_factors:
+    - "Timing precision requirements exceed simple loop delays"
+    - "Multiple timing events need coordination"
+    - "Hardware protocols require specific timing characteristics"
+    - "Real-time constraints must be met"
+
+structural_signature:
+  characteristics:
+    - "Use of CNT (system counter) for precise timing"
+    - "waitcnt(), waitms(), waitus() timing functions"
+    - "COG synchronization using timing primitives"
+    - "Timer-based state machines"
+    - "Cycle-accurate timing calculations"
+  code_patterns:
+    - "start_time := CNT"
+    - "waitcnt(CNT + clocks_delay)"
+    - "waitms(milliseconds)"
+    - "waitus(microseconds)"
+    - "Timer expiration checks with CNT comparisons"
+    - "Synchronized COG startup timing"
+
+implementation_template: |
+  CON
+    _CLKFREQ = 180_000_000
+    
+  VAR
+    long start_time, elapsed_time
+    
+  PUB precise_timing_example()
+    
+    ' Capture precise start time
+    start_time := CNT
+    
+    ' Precise microsecond delay
+    waitus(100)
+    
+    ' Calculate elapsed time in clock cycles
+    elapsed_time := CNT - start_time
+    
+    ' Synchronized timing loop
+    repeat
+      waitcnt(CNT + _CLKFREQ / 1000)  ' 1ms intervals
+      process_timed_event()
+      
+  PUB synchronized_cog_timing()
+    ' All COGs wait for synchronized start
+    start_time := CNT + _CLKFREQ      ' 1 second from now
+    waitcnt(start_time)
+    
+    ' Now all COGs execute synchronously
+    repeat
+      ' Synchronized 10ms intervals
+      waitcnt(start_time += _CLKFREQ / 100)
+      synchronized_operation()
+
+resource_profile:
+  memory_usage:
+    code_size: "minimal overhead for timing functions"
+    variable_space: "timing variables (typically few longs)"
+    stack_depth: "minimal (timing calls are efficient)"
+  performance:
+    execution_speed: "high precision with minimal overhead"
+    timing_accuracy: "cycle-accurate when using CNT directly"
+    jitter: "very low with proper timing primitives"
+  complexity:
+    implementation: "moderate (requires understanding of P2 timing)"
+    maintainability: "good when timing requirements are clear"
+    testability: "timing-dependent testing can be challenging"
+
+composition_rules:
+  compatible_patterns:
+    - "buffer_management" (for timed data operations)
+    - "protocol_implementation" (for protocol timing)
+    - "state_machine" (for timed state transitions)
+    - "cog_management" (for COG synchronization)
+    - "smart_pin_usage" (for hardware timing)
+  incompatible_patterns:
+    - None (timing is fundamental to most patterns)
+  synergies:
+    - "Works excellently with Smart Pins for hardware timing"
+    - "Essential for multi-COG coordination"
+    - "Critical for real-time protocol implementation"
+
+timing_categories:
+  precise_delays:
+    description: "Exact timing delays for protocols or hardware"
+    techniques:
+      - "waitcnt() for cycle-accurate delays"
+      - "waitus() for microsecond timing"
+      - "waitms() for millisecond timing"
+    accuracy: "cycle-accurate"
+    
+  periodic_operations:
+    description: "Regular intervals for sampling or control"
+    techniques:
+      - "Synchronized waitcnt() loops"
+      - "Timer-based interrupts using Smart Pins"
+      - "COG-based periodic tasks"
+    accuracy: "very high for software timing"
+    
+  synchronization:
+    description: "Coordinating timing between COGs or processes"
+    techniques:
+      - "Shared timing reference points"
+      - "Barrier synchronization using CNT"
+      - "Timed handshaking protocols"
+    accuracy: "sub-microsecond synchronization possible"
+
+real_examples:
+  typical_applications:
+    - "Communication protocol timing (UART, SPI, I2C)"
+    - "Sensor sampling at precise intervals"
+    - "Motor control with precise step timing"
+    - "Audio/video timing synchronization"
+    - "Real-time data acquisition systems"
+    - "Multi-COG coordination for parallel processing"
+  timing_requirements:
+    - "Microsecond-level precision for high-speed protocols"
+    - "Millisecond timing for user interface updates"
+    - "Cycle-accurate timing for hardware bit-banging"
+    - "Synchronized timing across multiple COGs"
+
+statistics:
+  total_files: 565
+  percentage_of_codebase: 77.4
+  timing_function_usage:
+    waitms: 421      # ~75% of timing control files
+    waitus: 298      # ~53% of timing control files
+    waitcnt: 187     # ~33% of timing control files
+    cnt_direct: 134  # ~24% of timing control files
+
+pattern_variations:
+  software_timing:
+    description: "Pure software-based timing using P2 counter"
+    characteristics:
+      - "Uses CNT register for timing reference"
+      - "Software loops with timing calculations"
+      - "Predictable but CPU-intensive"
+    
+  hardware_timing:
+    description: "Smart Pin-based hardware timing"
+    characteristics:
+      - "Smart Pins configured as timers"
+      - "Hardware-generated timing events"
+      - "CPU-independent timing accuracy"
+    
+  hybrid_timing:
+    description: "Combination of software and hardware timing"
+    characteristics:
+      - "Smart Pins for critical timing"
+      - "Software timing for coordination"
+      - "Best balance of accuracy and flexibility"
+
+timing_precision_levels:
+  cycle_accurate:
+    description: "Timing accurate to single clock cycles"
+    use_cases: "Hardware protocols, bit-banging"
+    techniques: "Direct CNT manipulation, waitcnt()"
+    
+  microsecond_accurate:
+    description: "Timing accurate to microseconds"
+    use_cases: "High-speed protocols, precise measurements"
+    techniques: "waitus(), calculated CNT delays"
+    
+  millisecond_accurate:
+    description: "Timing accurate to milliseconds"
+    use_cases: "User interfaces, general coordination"
+    techniques: "waitms(), timer objects"
+
+anti_patterns:
+  common_mistakes:
+    - "Using simple repeat loops for timing (inaccurate)"
+    - "Ignoring timing jitter in multi-tasking scenarios"
+    - "Not accounting for execution time in timing calculations"
+    - "Mixing blocking and non-blocking timing inappropriately"
+  warning_signs:
+    - "Timing drift over long periods"
+    - "Inconsistent timing behavior"
+    - "CPU usage too high for timing requirements"
+    - "Difficulty achieving required timing precision"
+
+timing_challenges:
+  jitter_sources:
+    - "Interrupt handling in other COGs"
+    - "Memory access contention"
+    - "Code execution time variations"
+    - "Clock frequency stability"
+    
+  mitigation_strategies:
+    - "Use dedicated COGs for critical timing"
+    - "Minimize code in time-critical sections"
+    - "Use hardware timing where possible"
+    - "Compensate for known execution delays"
+
+performance_considerations:
+  cpu_overhead:
+    description: "Impact of timing operations on CPU usage"
+    factors:
+      - "Blocking vs non-blocking timing calls"
+      - "Frequency of timing operations"
+      - "Complexity of timing calculations"
+    
+  timing_resolution:
+    description: "Achievable timing precision"
+    factors:
+      - "System clock frequency (180MHz typical)"
+      - "Code execution overhead"
+      - "Hardware timing capabilities"
+      - "Multi-COG interference"
+
+evolution_pressure:
+  increasing_precision:
+    description: "Need for more precise timing"
+    triggers: "Higher speed protocols, better performance"
+    solutions: "Hardware timing, dedicated COGs"
+    
+  complex_coordination:
+    description: "More sophisticated timing relationships"
+    triggers: "Multi-system synchronization, real-time requirements"
+    solutions: "Timing frameworks, hierarchical timing"

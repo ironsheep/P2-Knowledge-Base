@@ -1,0 +1,10 @@
+{
+' Generated test program for example_046
+        org     0
+        
+setq    #SIZE-1
+        rdlong  buffer, source
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

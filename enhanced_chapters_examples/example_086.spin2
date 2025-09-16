@@ -1,0 +1,17 @@
+{
+' Generated test program for example_086
+        org     0
+        
+' Slow version
+checksum_slow
+        mov     sum, #0
+        mov     addr, ##buffer
+        mov     count, #256
+loop    rdbyte  temp, addr
+        add     sum, temp
+        add     addr, #1
+        djnz    count, #loop
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

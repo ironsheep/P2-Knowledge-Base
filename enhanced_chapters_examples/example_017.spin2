@@ -1,0 +1,12 @@
+{
+' Generated test program for example_017
+        org     0
+        
+' Even simpler - button controls LED directly
+loop    testp   #BUTTON_PIN wc  ' Read button
+        drvc    #LED_PIN        ' Drive LED from C flag!
+        jmp     #loop
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

@@ -1,0 +1,15 @@
+{
+' Generated test program for example_088
+        org     0
+        
+' Bad: result needed immediately
+        add     x, y
+        cmp     x, #10 wcz      ' Stall waiting for x
+' Good: interleave operations
+        add     x, y
+        mov     a, b            ' Do something else
+        cmp     x, #10 wcz      ' Now x is ready
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

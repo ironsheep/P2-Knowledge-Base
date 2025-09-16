@@ -1,0 +1,13 @@
+PUB four_channel_scope()
+  DEBUG(`SCOPE Signals SIZE 800 400 CHANNELS 4)
+  DEBUG(`Signals TIMEBASE 100us)
+  DEBUG(`Signals TRIGGER CH1 RISING 2048)
+  
+  repeat
+    ' Capture all channels
+    DEBUG(`Signals CAPTURE @ch1 @ch2 @ch3 @ch4)
+    
+    ' Auto measurements
+    DEBUG(`Signals MEASURE VRMS CH1)
+    DEBUG(`Signals MEASURE FREQUENCY CH2)
+    DEBUG(`Signals MEASURE PHASE CH1 CH2)

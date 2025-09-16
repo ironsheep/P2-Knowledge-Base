@@ -1,0 +1,21 @@
+{
+' Generated test program for example_081
+        org     0
+        
+' Multiply while doing other work
+        mul     x, y            ' Start multiply
+        add     a, b            ' This executes during multiply
+        sub     c, d            ' So does this
+        getmulh result          ' Now get multiply result
+' CORDIC overlap
+        qrotate angle, radius   ' Start CORDIC
+        ' 55 clocks to do other work!
+        mov     index, #0
+        rdlong  data, ptra++
+        process data
+        ' ... more work
+        getqx   x_result        ' Get CORDIC result
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

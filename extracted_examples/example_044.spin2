@@ -1,0 +1,15 @@
+{
+' Generated test program for example_044
+        org     0
+        
+' 64-bit add
+        add     low1, low2 wc
+        addx    high1, high2
+' 64-bit multiply
+        mul     x, y
+        getmulh high
+        ' Result in high:x
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

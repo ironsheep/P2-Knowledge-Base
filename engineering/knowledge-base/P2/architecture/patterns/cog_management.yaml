@@ -1,0 +1,75 @@
+pattern_id: "cog_management"
+category: "architecture"
+usage_frequency: "38.5%"
+file_count: 281
+
+selection_criteria:
+  use_when:
+    - Need to coordinate multiple parallel processing units
+    - Have compute-intensive tasks that can be parallelized
+    - Managing real-time operations across multiple cogs
+    - Implementing multicore system architectures
+    - Need to balance processing load across available cogs
+  avoid_when:
+    - Simple single-threaded operations are sufficient
+    - Memory constraints make multiple cogs impractical
+    - Task doesn't benefit from parallelization
+    - Cog communication overhead exceeds benefits
+
+structural_signature:
+  cog_startup:
+    - "cognew(function, stack_pointer)"
+    - "coginit(cog_id, function, parameter)"
+  cog_coordination:
+    - "Hub variables for inter-cog communication"
+    - "Mailbox systems between cogs"
+    - "Shared memory regions"
+  cog_synchronization:
+    - "Hub memory polling"
+    - "Event-driven coordination"
+    - "Lock mechanisms"
+
+implementation_template: |
+  PUB start_system()
+    ' Start multiple cogs for parallel processing
+    cognew(sensor_cog(@sensor_mailbox), @sensor_stack)
+    cognew(control_cog(@control_mailbox), @control_stack)
+    cognew(communication_cog(@comm_mailbox), @comm_stack)
+    
+  PUB sensor_cog(mailbox_ptr) | value
+    repeat
+      value := read_sensors()
+      long[mailbox_ptr] := value
+      waitms(10)
+      
+  PUB control_cog(mailbox_ptr)
+    repeat
+      if long[mailbox_ptr] <> 0
+        process_sensor_data(long[mailbox_ptr])
+        long[mailbox_ptr] := 0
+
+resource_profile:
+  memory_usage: "1-8 cogs (512 bytes stack each minimum)"
+  hub_memory: "Communication variables and shared data"
+  timing: "Parallel execution, coordination overhead"
+  power: "Higher consumption with multiple active cogs"
+
+composition_rules:
+  combines_with:
+    - "timing_control: For synchronized multi-cog operations"
+    - "buffer_management: For inter-cog data sharing"
+    - "state_machine: Each cog can run independent state machines"
+  conflicts_with:
+    - "Single-threaded patterns"
+    - "Memory-constrained designs"
+
+real_examples:
+  - "Multi-motor control systems"
+  - "Sensor fusion applications"
+  - "Real-time data acquisition"
+  - "Communication protocol handlers"
+  - "Display refresh engines"
+
+statistics:
+  prevalence: "281 of 730 files"
+  percentage: "38.5%"

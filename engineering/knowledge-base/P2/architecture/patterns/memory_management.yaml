@@ -1,0 +1,310 @@
+# Memory Management Pattern
+# Pattern for efficient memory usage and allocation in P2 applications
+
+pattern_id: "memory_management"
+pattern_name: "Memory Management Pattern"
+category: "hardware_utilization"
+prevalence: 49.7  # 363 of 730 files (49.7%)
+
+selection_criteria:
+  description: "Use this pattern when your application has complex memory requirements, dynamic allocation needs, or memory efficiency constraints"
+  indicators:
+    - "Dynamic memory allocation and deallocation"
+    - "Memory-constrained applications requiring optimization"
+    - "Large data structures requiring careful organization"
+    - "Shared memory between COGs or processes"
+    - "Memory pooling for performance or fragmentation avoidance"
+  decision_factors:
+    - "Static allocation insufficient for application needs"
+    - "Memory usage optimization provides significant benefits"
+    - "Complex data structures require sophisticated management"
+    - "Memory sharing between components is required"
+
+structural_signature:
+  characteristics:
+    - "Memory allocation and deallocation functions"
+    - "Memory pool management and free list tracking"
+    - "Shared memory regions with access control"
+    - "Memory usage tracking and monitoring"
+    - "Memory alignment and optimization techniques"
+  code_patterns:
+    - "Memory allocator implementations (malloc/free style)"
+    - "Memory pool initialization and management"
+    - "Shared memory declarations and access patterns"
+    - "Memory usage calculation and optimization"
+    - "Memory protection and validation code"
+
+implementation_template: |
+  CON
+    MEMORY_POOL_SIZE = 4096
+    BLOCK_SIZE = 64
+    MAX_BLOCKS = MEMORY_POOL_SIZE / BLOCK_SIZE
+    
+  VAR
+    byte memory_pool[MEMORY_POOL_SIZE]
+    byte block_used[MAX_BLOCKS]
+    long free_blocks
+    long allocation_ptr
+    
+  PUB memory_init()
+    bytefill(@block_used, FALSE, MAX_BLOCKS)
+    free_blocks := MAX_BLOCKS
+    allocation_ptr := 0
+    
+  PUB allocate_memory(size) : ptr
+    ' Simple block allocator
+    long blocks_needed, i, start_block
+    
+    blocks_needed := (size + BLOCK_SIZE - 1) / BLOCK_SIZE
+    
+    if blocks_needed > free_blocks
+      return 0  ' Insufficient memory
+      
+    ' Find contiguous free blocks
+    start_block := find_free_blocks(blocks_needed)
+    if start_block >= 0
+      ' Mark blocks as used
+      repeat i from 0 to blocks_needed - 1
+        block_used[start_block + i] := TRUE
+      free_blocks -= blocks_needed
+      return @memory_pool[start_block * BLOCK_SIZE]
+    
+    return 0  ' No contiguous space available
+    
+  PUB free_memory(ptr, size)
+    long block_start, blocks_to_free, i
+    
+    block_start := (ptr - @memory_pool) / BLOCK_SIZE
+    blocks_to_free := (size + BLOCK_SIZE - 1) / BLOCK_SIZE
+    
+    ' Mark blocks as free
+    repeat i from 0 to blocks_to_free - 1
+      if block_start + i < MAX_BLOCKS
+        block_used[block_start + i] := FALSE
+        free_blocks++
+        
+  PUB get_memory_usage() : used_bytes
+    return (MAX_BLOCKS - free_blocks) * BLOCK_SIZE
+    
+  PRI find_free_blocks(needed) : start_block
+    long i, consecutive
+    
+    start_block := -1
+    consecutive := 0
+    
+    repeat i from 0 to MAX_BLOCKS - 1
+      if not block_used[i]
+        if consecutive == 0
+          start_block := i
+        consecutive++
+        if consecutive >= needed
+          return start_block
+      else
+        consecutive := 0
+        
+    return -1  ' Not found
+
+resource_profile:
+  memory_usage:
+    code_size: "moderate to large (allocation algorithms and tracking)"
+    variable_space: "significant (pools, tracking structures, metadata)"
+    stack_depth: "moderate (allocation function calls)"
+  performance:
+    execution_speed: "variable (depends on allocation strategy)"
+    allocation_time: "depends on fragmentation and algorithm"
+    overhead: "moderate (metadata and tracking overhead)"
+  complexity:
+    implementation: "moderate to high (allocation algorithms)"
+    maintainability: "moderate (complex pointer management)"
+    testability: "challenging (memory corruption issues)"
+
+composition_rules:
+  compatible_patterns:
+    - "buffer_management" (for dynamic buffer allocation)
+    - "cog_management" (for shared memory between COGs)
+    - "protocol_implementation" (for dynamic protocol buffers)
+    - "several_objects" (for complex object memory needs)
+  incompatible_patterns:
+    - "no_objects" (typically uses simple static allocation)
+  synergies:
+    - "Essential for complex buffer management"
+    - "Critical for multi-COG shared data"
+    - "Enables sophisticated object architectures"
+
+memory_management_strategies:
+  static_allocation:
+    description: "Fixed memory allocation at compile time"
+    characteristics:
+      - "All memory allocated at compile time"
+      - "Predictable memory usage"
+      - "No runtime allocation overhead"
+    pros: "Predictable, fast, no fragmentation"
+    cons: "Inflexible, potential waste, size limitations"
+    
+  dynamic_allocation:
+    description: "Runtime memory allocation and deallocation"
+    characteristics:
+      - "Memory allocated/freed during execution"
+      - "Flexible memory usage"
+      - "Potential for fragmentation"
+    pros: "Flexible, efficient memory use"
+    cons: "Fragmentation, allocation overhead, complexity"
+    
+  pool_allocation:
+    description: "Pre-allocated memory pools for specific purposes"
+    characteristics:
+      - "Fixed-size pools allocated at startup"
+      - "Fast allocation from pools"
+      - "Predictable allocation behavior"
+    pros: "Fast allocation, no fragmentation, predictable"
+    cons: "Pool size planning required, potential waste"
+
+real_examples:
+  typical_applications:
+    - "Dynamic data structures (linked lists, trees)"
+    - "Protocol implementations with variable-size packets"
+    - "Multi-COG applications with shared data structures"
+    - "Data acquisition systems with configurable buffer sizes"
+    - "Graphics applications with dynamic frame buffers"
+    - "Communication systems with dynamic message queues"
+  memory_requirements:
+    - "Small scale: Few KB for simple dynamic structures"
+    - "Medium scale: 10s of KB for protocol buffers"
+    - "Large scale: 100s of KB for graphics/audio applications"
+
+statistics:
+  total_files: 363
+  percentage_of_codebase: 49.7
+  memory_strategy_distribution:
+    static_with_pools: 187      # ~52% of memory management files
+    dynamic_allocation: 134     # ~37% of memory management files
+    shared_memory: 201          # ~55% of memory management files
+    custom_allocators: 89       # ~25% of memory management files
+
+pattern_variations:
+  simple_pool_management:
+    description: "Basic memory pools with fixed-size blocks"
+    characteristics:
+      - "Single block size per pool"
+      - "Simple free list management"
+      - "Fast allocation and deallocation"
+    
+  sophisticated_allocation:
+    description: "Advanced allocation with multiple strategies"
+    characteristics:
+      - "Multiple allocation algorithms"
+      - "Garbage collection or compaction"
+      - "Memory usage optimization"
+    
+  shared_memory_coordination:
+    description: "Memory shared between multiple COGs"
+    characteristics:
+      - "Synchronization primitives for shared access"
+      - "Memory regions with access control"
+      - "Inter-COG communication through memory"
+
+allocation_algorithms:
+  first_fit:
+    description: "Allocate from first available block that fits"
+    pros: "Simple, fast allocation"
+    cons: "Can lead to fragmentation"
+    
+  best_fit:
+    description: "Allocate from smallest block that fits"
+    pros: "Minimizes wasted space"
+    cons: "Slower allocation, can create small unusable blocks"
+    
+  buddy_system:
+    description: "Allocation in power-of-2 sized blocks"
+    pros: "Efficient coalescing, predictable behavior"
+    cons: "Internal fragmentation, complex implementation"
+
+shared_memory_patterns:
+  producer_consumer:
+    description: "One COG produces data, another consumes"
+    synchronization: "Semaphores or atomic operations"
+    challenges: "Race conditions, buffer overflow"
+    
+  multiple_readers:
+    description: "Multiple COGs reading shared data"
+    synchronization: "Read-write locks or copy mechanisms"
+    challenges: "Data consistency, update coordination"
+    
+  message_passing:
+    description: "COGs communicate through shared message buffers"
+    synchronization: "Message queues with atomic operations"
+    challenges: "Message ordering, buffer management"
+
+memory_optimization:
+  alignment_optimization:
+    description: "Optimizing memory layout for access efficiency"
+    techniques:
+      - "Align data to natural boundaries"
+      - "Group related data together"
+      - "Minimize padding between structure members"
+    
+  cache_optimization:
+    description: "Optimizing for memory access patterns"
+    techniques:
+      - "Locality of reference optimization"
+      - "Sequential access patterns"
+      - "Minimizing memory access conflicts"
+    
+  compression_techniques:
+    description: "Reducing memory usage through compression"
+    techniques:
+      - "Data structure packing"
+      - "Run-length encoding for sparse data"
+      - "Bit-level packing for boolean arrays"
+
+anti_patterns:
+  common_mistakes:
+    - "Memory leaks from failed deallocation"
+    - "Double-free errors causing corruption"
+    - "Buffer overruns in dynamic allocations"
+    - "Race conditions in shared memory access"
+    - "Fragmentation due to poor allocation patterns"
+  warning_signs:
+    - "Increasing memory usage over time"
+    - "Allocation failures in long-running applications"
+    - "Inconsistent application behavior"
+    - "Performance degradation over time"
+    - "Memory corruption errors"
+
+debugging_techniques:
+  memory_tracking:
+    description: "Monitoring memory allocation and usage"
+    techniques:
+      - "Allocation tracking and logging"
+      - "Memory usage statistics"
+      - "Leak detection mechanisms"
+    
+  corruption_detection:
+    description: "Detecting memory corruption early"
+    techniques:
+      - "Guard bytes around allocations"
+      - "Checksum validation"
+      - "Access pattern validation"
+    
+  profiling_tools:
+    description: "Tools for memory usage analysis"
+    techniques:
+      - "Memory usage profiling"
+      - "Allocation pattern analysis"
+      - "Performance impact measurement"
+
+evolution_pressure:
+  increasing_complexity:
+    description: "More sophisticated memory requirements"
+    drivers: "Larger applications, more dynamic behavior"
+    solutions: "Advanced allocation algorithms, memory frameworks"
+    
+  performance_requirements:
+    description: "Stricter performance constraints"
+    drivers: "Real-time requirements, higher throughput"
+    solutions: "Optimized allocators, hardware assistance"
+    
+  reliability_requirements:
+    description: "Higher reliability and error tolerance"
+    drivers: "Critical applications, long-running systems"
+    solutions: "Error detection, graceful degradation, redundancy"

@@ -1,0 +1,15 @@
+{
+' Generated test program for example_044
+        org     0
+        
+' Configure streamer for video output
+        setcmod #$100           ' Set color mode
+        setcy   ##640           ' Cycles per line
+        setci   ##LINE_TIME     ' Line timing
+' Start streaming video data to pins
+        xinit   ##STREAM_CMD, #0  ' Start streamer
+        ' Data flows from hub to pins automatically!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

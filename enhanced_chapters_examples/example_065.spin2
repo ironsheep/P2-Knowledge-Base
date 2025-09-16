@@ -1,0 +1,17 @@
+{
+' Generated test program for example_065
+        org     0
+        
+' Dedicated COG watching button
+button_watcher
+        testp   #BUTTON_PIN wc
+   if_c wrlong  ##1, ##button_flag
+        jmp     #button_watcher
+' Main COG doing important work
+main_code
+        ' Never interrupted!
+        ' Checks button_flag when convenient
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

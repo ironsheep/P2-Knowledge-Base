@@ -1,0 +1,88 @@
+pattern_id: "smart_pin_usage"
+category: "architecture"
+usage_frequency: "14.7%"
+file_count: 107
+
+selection_criteria:
+  use_when:
+    - Need autonomous I/O operations
+    - Implementing communication protocols
+    - Generating precise timing signals
+    - Measuring external signals
+    - Reducing CPU overhead for I/O
+    - Creating custom waveforms
+  avoid_when:
+    - Simple digital I/O is sufficient
+    - Smart Pin complexity exceeds benefits
+    - Limited knowledge of Smart Pin modes
+    - Basic pin toggling is adequate
+
+structural_signature:
+  smart_pin_setup:
+    - "pinstart(pin, mode, x_parameter, y_parameter)"
+    - "Mode selection for specific function"
+    - "Parameter configuration for timing/behavior"
+  smart_pin_interaction:
+    - "pinread(pin) for reading results"
+    - "pinwrite(pin, value) for control"
+    - "Smart Pin autonomous operation"
+  mode_patterns:
+    - "PWM generation modes"
+    - "Pulse measurement modes" 
+    - "Communication protocol modes"
+
+implementation_template: |
+  CON
+    PWM_PIN = 10
+    SERVO_PIN = 11
+    ENCODER_PIN_A = 12
+    ENCODER_PIN_B = 13
+    
+  PUB setup_smart_pins()
+    ' PWM output for motor control
+    pinstart(PWM_PIN, P_PWM_SAWTOOTH, 1000, 0)  ' 1000 Hz PWM
+    
+    ' Servo control with precise timing
+    pinstart(SERVO_PIN, P_PULSE, 20_000, 1500)  ' 20ms period, 1.5ms pulse
+    
+    ' Quadrature encoder reading
+    pinstart(ENCODER_PIN_A, P_QUADRATURE, 0, 0)
+    
+  PUB control_motor(speed)
+    ' Set PWM duty cycle (0-1000)
+    pinwrite(PWM_PIN, speed)
+    
+  PUB read_encoder() : position
+    ' Read accumulated encoder counts
+    return pinread(ENCODER_PIN_A)
+    
+  PUB set_servo_position(angle)
+    ' Convert angle to pulse width (1000-2000 microseconds)
+    pinwrite(SERVO_PIN, 1000 + angle * 1000 / 180)
+
+resource_profile:
+  memory_usage: "Minimal - Smart Pins operate autonomously"
+  cpu_overhead: "Very low - hardware handles I/O"
+  timing_precision: "Hardware-level accuracy"
+  pin_resources: "1-64 pins available, each with specific modes"
+
+composition_rules:
+  combines_with:
+    - "timing_control: Smart Pins provide precise timing"
+    - "asm_integration: Direct Smart Pin register access"
+    - "state_machine: Smart Pins handle I/O state changes"
+  conflicts_with:
+    - "Simple digital I/O patterns"
+    - "Bit-banged protocol implementations"
+
+real_examples:
+  - "Motor PWM control"
+  - "Servo positioning systems"
+  - "Encoder reading"
+  - "UART communication"
+  - "Frequency measurement"
+  - "Custom protocol generation"
+
+statistics:
+  prevalence: "107 of 730 files"
+  percentage: "14.7%"

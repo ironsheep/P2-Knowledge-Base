@@ -1,0 +1,14 @@
+{
+' Generated test program for example_054
+        org     0
+        
+wrpin   ##P_ASYNC_TX, #PIN    ' Configure as UART TX
+        wxpin   ##BAUD_RATE, #PIN     ' Set baud rate
+        dirh    #PIN                  ' Enable pin
+        ' That's it - hardware UART ready!
+        wypin   char, #PIN            ' Send a character
+        ' No bit-banging required!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

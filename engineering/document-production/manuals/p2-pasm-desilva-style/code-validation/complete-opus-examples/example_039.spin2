@@ -1,0 +1,14 @@
+{
+' Generated test program for example_039
+        org     0
+        
+' Fast screen clear using block transfer
+clear_screen
+        mov     color, ##$00_00_00_00  ' Black
+        setq2   ##640*480-1             ' Number of longs
+        wrlong  color, ##screen_buffer  ' Fills entire screen!
+        ' 1.2MB cleared in microseconds!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

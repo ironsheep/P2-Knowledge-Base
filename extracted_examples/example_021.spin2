@@ -1,0 +1,17 @@
+{
+' Generated test program for example_021
+        org     0
+        
+and     x, mask        ' x = x AND mask
+        or      x, bits        ' x = x OR bits
+        xor     x, toggle      ' x = x XOR toggle
+        not     x              ' x = NOT x (same as XOR with $FFFFFFFF)
+' Bit manipulation
+        bitl    x, #5          ' Clear bit 5 of x
+        bith    x, #5          ' Set bit 5 of x
+        bitnot  x, #5          ' Toggle bit 5 of x
+        testb   x, #5 wc       ' Test bit 5, result in C flag
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

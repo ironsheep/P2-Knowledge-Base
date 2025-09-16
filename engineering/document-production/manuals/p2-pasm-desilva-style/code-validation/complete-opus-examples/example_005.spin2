@@ -1,0 +1,10 @@
+org     0
+        wrpin   ##P_PWM_TRIANGLE, #56  ' Configure pin 56 for PWM
+        wxpin   ##$100, #56            ' Set period to 256
+        dirh    #56                    ' Enable the pin
+fade    wypin   level, #56             ' Set duty cycle
+        waitx   ##100_000              ' Small delay
+        add     level, #1              ' Increment brightness
+        and     level, #$FF            ' Wrap at 256
+        jmp     #fade
+level   long    0

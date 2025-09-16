@@ -1,0 +1,13 @@
+{
+' Generated test program for example_005
+        org     0
+        
+' Convert (x,y) to polar (radius, angle)
+        setq    y              ' Load Y coordinate
+        qvector x, #0          ' Start conversion
+        getqx   radius         ' sqrt(x² + y²)
+        getqy   angle          ' atan2(y, x)
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

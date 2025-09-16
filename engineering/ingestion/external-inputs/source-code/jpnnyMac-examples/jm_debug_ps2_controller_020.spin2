@@ -1,0 +1,174 @@
+'' =================================================================================================
+''
+''   File........ jm_debug_ps2_controller_020.spin2
+''   Purpose.....
+''   Cogs Used...
+''   Author...... Jon "JonnyMac" McPhalen
+''                Copyright (c) 2025 Jon McPhalen
+''                -- see below for terms of use
+''   E-mail...... jon.mcphalen@gmail.com
+''   Started..... 03 FEB 2025
+''   Updated..... 16 FEB 2025
+''
+'' =================================================================================================
+
+con
+
+  VERSION = 0_2_0
+
+
+con { timing }
+
+  CLK_FREQ = 200_000_000                                        ' system freq as a constant
+  MS_001   = CLK_FREQ / 1_000                                   ' ticks in 1ms
+  US_001   = CLK_FREQ / 1_000_000                               ' ticks in 1us
+
+' _xtlfreq = 20_000_000                                         ' 19_200_000 for "irregular" Edge
+  _clkfreq = CLK_FREQ                                           ' set system clock
+
+
+con { fixed io pins }
+
+  PGM_RX   = 63  { I }                                          ' programming / debug
+  PGM_TX   = 62  { O }
+
+  SF_CS    = 61  { O }                                          ' flash storage
+  SF_SCLK  = 60  { O }
+  SF_MOSI  = 59  { O }
+  SF_MISO  = 58  { I }
+
+  LED2     = 57  { O }                                          ' Eval and Edge LEDs
+  LED1     = 56  { O }
+
+
+con { app io pins }
+
+  PS2_CLK  = 35  { O }
+  PS2_DAT  = 34  { I }                                          ' requires pull-up
+  PS2_CMD  = 33  { O }
+  PS2_ATT  = 32  { O }
+
+
+obj
+
+' main                                                          ' * master Spin cog
+  ps2  : "jm_playstation"                                       ' * PS2 controller interface
+
+' * uses cog when loaded
+
+
+pub main() | t
+
+  setup()
+
+  t := getct()
+  repeat
+    show_buttons(ps2.mode(), ps2.buttons(0), ps2.buttons(1))
+    show_joysticks(ps2.joy_lx(), ps2.joy_ly(), ps2.joy_rx(), ps2.joy_ry())
+    debug(`ps2 update)
+    waitct(t += (CLK_FREQ / 10))
+
+
+pub show_buttons(mode, btnslo, btnshi)
+
+  if ((mode & $F0) == $40)
+    debug(`ps2 crop 1 306, 240, 28, 12)
+  else
+    debug(`ps2 crop 2 306, 240, 28, 12)
+
+  debug(`ps2 crop `(btnslo.[0]+1, 255, 163, 30, 19))            ' Select
+  debug(`ps2 crop `(btnslo.[1]+1, 197, 213, 82, 82))            ' Left joystick button
+  debug(`ps2 crop `(btnslo.[2]+1, 361, 213, 82, 82))            ' Right joystick button
+  debug(`ps2 crop `(btnslo.[3]+1, 355, 163, 30, 19))            ' Start
+
+  debug(`ps2 crop `(btnslo.[4]+1, 137, 125, 31, 38))            ' Up
+  debug(`ps2 crop `(btnslo.[5]+1, 162, 157, 38, 31))            ' Right
+  debug(`ps2 crop `(btnslo.[6]+1, 137, 182, 31, 38))            ' Down
+  debug(`ps2 crop `(btnslo.[7]+1, 105, 157, 38, 31))            ' Left
+
+  debug(`ps2 crop `(btnshi.[0]+1, 144,  39, 42, 18))            ' L2
+  debug(`ps2 crop `(btnshi.[1]+1, 454,  39, 42, 18))            ' R2
+  debug(`ps2 crop `(btnshi.[2]+1, 119,  39, 24, 18))            ' L1
+  debug(`ps2 crop `(btnshi.[3]+1, 497,  39, 24, 18))            ' R1
+
+  debug(`ps2 crop `(btnshi.[4]+1, 467, 112, 42, 42))            ' Triangle
+  debug(`ps2 crop `(btnshi.[5]+1, 507, 152, 42, 42))            ' Circle
+  debug(`ps2 crop `(btnshi.[6]+1, 467, 192, 42, 42))            ' Cross
+  debug(`ps2 crop `(btnshi.[7]+1, 427, 152, 42, 42))            ' Square
+
+
+pub show_joysticks(lx, ly, rx, ry)
+
+  debug(`ps2 crop  1 `(160, 315, 320, 50))                      ' clear text
+
+  debug(`ps2 set 216 317)                                       ' show left joystick
+  debug(`ps2 textstyle %11100000 color black text 14 'X')
+  debug(`ps2 set 268 317)
+  debug(`ps2 textstyle %11110000 color black text 14 '`(lx))
+  debug(`ps2 set 216 338)
+  debug(`ps2 textstyle %11100000 color black text 14 'Y')
+  debug(`ps2 set 268 338)
+  debug(`ps2 textstyle %11110000 color black text 14 '`(ly))
+
+  debug(`ps2 set 380 317)                                       ' show right joystick
+  debug(`ps2 textstyle %11100000 color black text 14 'X')
+  debug(`ps2 set 432 317)
+  debug(`ps2 textstyle %11110000 color black text 14 '`(rx))
+  debug(`ps2 set 380 338)
+  debug(`ps2 textstyle %11100000 color black text 14 'Y')
+  debug(`ps2 set 432 338)
+  debug(`ps2 textstyle %11110000 color black text 14 '`(ry))
+
+  lx := lx * 56 / 255                                           ' scale for graphic
+  ly := ly * 56 / 255
+  rx := rx * 56 / 255
+  ry := ry * 56 / 255
+
+  debug(`ps2 color red)
+  debug(`ps2 set `(238-28+lx, 254-28+ly))                       ' left
+  debug(`ps2 circle 15)
+  debug(`ps2 set `(402-28+rx, 254-28+ry))                       ' right
+  debug(`ps2 circle 15)
+
+
+pub setup()
+
+  ps2.start(PS2_ATT, PS2_CMD, PS2_DAT, PS2_CLK)                 ' start ps2 interface *
+
+  debug(`plot ps2 title 'PS2 Controller' size 640 400 pos 400 100 hidexy update)
+  debug(`ps2 cartesian 1 0)
+  debug(`ps2 layer 1 'ps2_off.bmp')
+  debug(`ps2 layer 2 'ps2_on.bmp')
+  debug(`ps2 crop 1)                                            ' layer 1 is default look
+  debug(`ps2 update)
+
+
+pri reboot()
+
+  hubset($1000_0000)
+
+
+con { license }
+
+{{
+
+  Terms of Use: MIT License
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this
+  software and associated documentation files (the "Software"), to deal in the Software
+  without restriction, including without limitation the rights to use, copy, modify,
+  merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to the following
+  conditions:
+
+  The above copyright notice and this permission notice shall be included in all copies
+  or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+  PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+}}

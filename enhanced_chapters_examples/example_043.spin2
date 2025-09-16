@@ -1,0 +1,17 @@
+{
+' Generated test program for example_043
+        org     0
+        
+' Ultra-fast screen clear
+clear_screen
+        mov     color, ##$00_00_00_00    ' Black (4 bytes)
+        mov     pixels, ##640*480        ' Total pixels
+        wrfast  #0, ##screen_buffer      ' Start FIFO write
+clear_loop
+        wflong  color                    ' Write 4-byte pixel
+        djnz    pixels, #clear_loop
+        ' 1.2MB cleared at maximum hub speed!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

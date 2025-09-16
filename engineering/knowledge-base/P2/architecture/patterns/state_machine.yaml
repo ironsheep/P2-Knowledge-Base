@@ -1,0 +1,346 @@
+# State Machine Pattern
+# Pattern for implementing state-based control logic in P2 applications
+
+pattern_id: "state_machine"
+pattern_name: "State Machine Pattern"
+category: "hardware_utilization"
+prevalence: 51.4  # 375 of 730 files (51.4%)
+
+selection_criteria:
+  description: "Use this pattern when your application has distinct operational modes, sequential processes, or complex control logic"
+  indicators:
+    - "Application has distinct operational modes"
+    - "Sequential process control requirements"
+    - "Event-driven behavior with state-dependent responses"
+    - "Complex control logic that benefits from state organization"
+    - "Protocol implementations with state transitions"
+  decision_factors:
+    - "Behavior varies significantly based on current state"
+    - "State transitions follow well-defined rules"
+    - "System complexity benefits from state organization"
+    - "Clear state-based design improves maintainability"
+
+structural_signature:
+  characteristics:
+    - "State variables and enumerated state constants"
+    - "State transition logic with case/switch statements"
+    - "Event processing functions that trigger state changes"
+    - "State-specific behavior implementation"
+    - "State entry/exit actions"
+  code_patterns:
+    - "State enumeration constants"
+    - "case/switch statements for state processing"
+    - "State transition functions"
+    - "Event processing with state-dependent behavior"
+    - "State validation and error handling"
+
+implementation_template: |
+  CON
+    ' State definitions
+    STATE_IDLE = 0
+    STATE_INITIALIZING = 1
+    STATE_RUNNING = 2
+    STATE_PAUSED = 3
+    STATE_ERROR = 4
+    
+    ' Event definitions
+    EVENT_START = 0
+    EVENT_STOP = 1
+    EVENT_PAUSE = 2
+    EVENT_RESUME = 3
+    EVENT_ERROR = 4
+    
+  VAR
+    byte current_state
+    byte previous_state
+    long state_entry_time
+    
+  PUB state_machine_init()
+    current_state := STATE_IDLE
+    previous_state := STATE_IDLE
+    state_entry_time := CNT
+    
+  PUB process_event(event) : success
+    previous_state := current_state
+    
+    case current_state
+      STATE_IDLE:
+        case event
+          EVENT_START:
+            transition_to_state(STATE_INITIALIZING)
+            success := TRUE
+          other:
+            success := FALSE
+            
+      STATE_INITIALIZING:
+        case event
+          EVENT_START:  ' Initialization complete
+            transition_to_state(STATE_RUNNING)
+            success := TRUE
+          EVENT_ERROR:
+            transition_to_state(STATE_ERROR)
+            success := TRUE
+          other:
+            success := FALSE
+            
+      STATE_RUNNING:
+        case event
+          EVENT_PAUSE:
+            transition_to_state(STATE_PAUSED)
+            success := TRUE
+          EVENT_STOP:
+            transition_to_state(STATE_IDLE)
+            success := TRUE
+          EVENT_ERROR:
+            transition_to_state(STATE_ERROR)
+            success := TRUE
+          other:
+            success := FALSE
+            
+      STATE_PAUSED:
+        case event
+          EVENT_RESUME:
+            transition_to_state(STATE_RUNNING)
+            success := TRUE
+          EVENT_STOP:
+            transition_to_state(STATE_IDLE)
+            success := TRUE
+          other:
+            success := FALSE
+            
+      STATE_ERROR:
+        case event
+          EVENT_STOP:
+            transition_to_state(STATE_IDLE)
+            success := TRUE
+          other:
+            success := FALSE
+    
+    return success
+    
+  PRI transition_to_state(new_state)
+    ' Exit actions for current state
+    case current_state
+      STATE_RUNNING:
+        cleanup_running_state()
+      STATE_PAUSED:
+        cleanup_paused_state()
+    
+    ' Update state
+    current_state := new_state
+    state_entry_time := CNT
+    
+    ' Entry actions for new state
+    case new_state
+      STATE_INITIALIZING:
+        initialize_system()
+      STATE_RUNNING:
+        start_operations()
+      STATE_PAUSED:
+        pause_operations()
+
+resource_profile:
+  memory_usage:
+    code_size: "moderate (state logic and transition tables)"
+    variable_space: "minimal (state variables and event data)"
+    stack_depth: "moderate (state function calls)"
+  performance:
+    execution_speed: "high (efficient case statements)"
+    response_time: "excellent (immediate state-based responses)"
+    overhead: "minimal (simple state checks)"
+  complexity:
+    implementation: "moderate (clear state organization)"
+    maintainability: "excellent (well-structured state logic)"
+    testability: "excellent (predictable state transitions)"
+
+composition_rules:
+  compatible_patterns:
+    - "timing_control" (for timed state transitions)
+    - "protocol_implementation" (for protocol state machines)
+    - "buffer_management" (for state-dependent buffering)
+    - "cog_management" (for multi-COG state coordination)
+  incompatible_patterns:
+    - None (state machines are broadly applicable)
+  synergies:
+    - "Natural fit for protocol implementations"
+    - "Excellent for coordinating multi-COG operations"
+    - "Essential for complex control systems"
+
+state_machine_types:
+  simple_state_machines:
+    description: "Basic state machines with few states and simple transitions"
+    characteristics:
+      - "3-6 states typically"
+      - "Simple transition rules"
+      - "Minimal state data"
+    use_cases: "Basic control logic, simple protocols"
+    
+  hierarchical_state_machines:
+    description: "State machines with nested substates"
+    characteristics:
+      - "Parent and child state relationships"
+      - "Inherited behavior from parent states"
+      - "Complex state hierarchies"
+    use_cases: "Complex applications, sophisticated control systems"
+    
+  concurrent_state_machines:
+    description: "Multiple state machines operating simultaneously"
+    characteristics:
+      - "Independent state machines"
+      - "Coordination between machines"
+      - "Parallel state processing"
+    use_cases: "Multi-subsystem control, parallel processing"
+
+real_examples:
+  typical_applications:
+    - "Motor control systems (start, run, brake, stop states)"
+    - "Communication protocol handlers"
+    - "User interface control (menu navigation, input handling)"
+    - "Data acquisition systems (idle, sampling, processing states)"
+    - "Safety systems with operational modes"
+    - "Device initialization and shutdown sequences"
+  complexity_levels:
+    - "Simple: LED blinker with on/off/blink states"
+    - "Moderate: UART protocol with idle/start/data/stop states"
+    - "Complex: Robot control with multiple coordinated state machines"
+
+statistics:
+  total_files: 375
+  percentage_of_codebase: 51.4
+  state_complexity_distribution:
+    simple_3_to_5_states: 201     # ~54% of state machine files
+    moderate_6_to_10_states: 134  # ~36% of state machine files
+    complex_11_plus_states: 40    # ~11% of state machine files
+
+pattern_variations:
+  switch_based_state_machines:
+    description: "State machines implemented with switch/case statements"
+    characteristics:
+      - "Clear state-based code organization"
+      - "Efficient execution"
+      - "Easy to understand and debug"
+    
+  table_driven_state_machines:
+    description: "State machines defined by transition tables"
+    characteristics:
+      - "Data-driven state definitions"
+      - "Easy to modify without code changes"
+      - "Compact representation for complex machines"
+    
+  object_oriented_state_machines:
+    description: "State machines using object-based state representation"
+    characteristics:
+      - "State-specific objects with methods"
+      - "Polymorphic state behavior"
+      - "Clean separation of state logic"
+
+event_handling:
+  synchronous_events:
+    description: "Events processed immediately when they occur"
+    characteristics:
+      - "Direct event processing"
+      - "Immediate state transitions"
+      - "Simple event handling logic"
+    
+  asynchronous_events:
+    description: "Events queued and processed later"
+    characteristics:
+      - "Event queue management"
+      - "Deferred event processing"
+      - "More complex coordination"
+    
+  prioritized_events:
+    description: "Events with different processing priorities"
+    characteristics:
+      - "Priority-based event ordering"
+      - "Critical event immediate processing"
+      - "Background event handling"
+
+state_validation:
+  state_consistency:
+    description: "Ensuring valid state transitions and combinations"
+    techniques:
+      - "Transition validation functions"
+      - "State invariant checking"
+      - "Error detection and recovery"
+    
+  debugging_support:
+    description: "Tools and techniques for state machine debugging"
+    techniques:
+      - "State transition logging"
+      - "State visualization"
+      - "Event trace recording"
+
+anti_patterns:
+  common_mistakes:
+    - "Too many states making the machine complex"
+    - "Unclear state transition conditions"
+    - "Missing error handling for invalid transitions"
+    - "State machines that are really just complex if-else logic"
+    - "Forgetting to handle all possible events in each state"
+  warning_signs:
+    - "Difficulty understanding state transitions"
+    - "Frequent invalid state transition errors"
+    - "State machine becoming too complex to maintain"
+    - "Inconsistent behavior across similar states"
+    - "Performance issues due to excessive state checking"
+
+design_guidelines:
+  state_design:
+    description: "Guidelines for effective state definition"
+    principles:
+      - "States should represent meaningful system conditions"
+      - "Minimize the number of states where possible"
+      - "Ensure states are mutually exclusive"
+      - "Consider state hierarchy for complex systems"
+    
+  transition_design:
+    description: "Guidelines for state transition design"
+    principles:
+      - "Transitions should be based on clear events or conditions"
+      - "Avoid complex transition conditions"
+      - "Provide error handling for invalid transitions"
+      - "Consider transition timing and atomicity"
+    
+  event_design:
+    description: "Guidelines for event definition and handling"
+    principles:
+      - "Events should represent meaningful occurrences"
+      - "Keep event interfaces simple and clear"
+      - "Consider event priorities and timing"
+      - "Provide event validation and error handling"
+
+testing_strategies:
+  state_coverage_testing:
+    description: "Ensuring all states are tested"
+    techniques:
+      - "Test cases for each state"
+      - "State transition coverage"
+      - "Error state testing"
+    
+  transition_testing:
+    description: "Testing all valid and invalid transitions"
+    techniques:
+      - "Valid transition testing"
+      - "Invalid transition error handling"
+      - "Edge case transition testing"
+    
+  event_testing:
+    description: "Testing event handling in all states"
+    techniques:
+      - "Event injection testing"
+      - "Event timing testing"
+      - "Event sequence testing"
+
+evolution_pressure:
+  increasing_complexity:
+    description: "More complex state-based requirements"
+    solutions: "Hierarchical state machines, state composition"
+    
+  real_time_requirements:
+    description: "Stricter timing constraints on state transitions"
+    solutions: "Optimized state processing, dedicated COGs"
+    
+  coordination_needs:
+    description: "Multiple state machines needing coordination"
+    solutions: "State machine frameworks, message passing protocols"

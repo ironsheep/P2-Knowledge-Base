@@ -1,0 +1,13 @@
+{
+' Generated test program for example_016
+        org     0
+        
+' Complete button-and-LED program
+loop    testp   #BUTTON_PIN wc  ' Read button into C flag
+   if_c drvh    #LED_PIN        ' If pressed, LED on
+  if_nc drvl    #LED_PIN        ' If not pressed, LED off
+        jmp     #loop           ' Repeat forever
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

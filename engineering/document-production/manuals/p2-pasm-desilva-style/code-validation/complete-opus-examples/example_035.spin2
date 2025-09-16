@@ -1,0 +1,13 @@
+{
+' Generated test program for example_035
+        org     0
+        
+' COG 1: Leave a message
+        wrlong  ##$DEADBEEF, ##$1000
+' COG 2: Get the message
+        rdlong  message, ##$1000
+        ' message now contains $DEADBEEF!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

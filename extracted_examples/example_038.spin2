@@ -1,0 +1,15 @@
+{
+' Generated test program for example_038
+        org     0
+        
+' Start the FIFO
+        rdfast  #0, ##data_start  ' Start fast read
+' Now read at maximum speed
+loop    rflong  value            ' Read from FIFO
+        ' Process value
+        djnz    count, #loop     ' Decrement and jump if not zero
+' No hub timing worries - FIFO handles it all!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

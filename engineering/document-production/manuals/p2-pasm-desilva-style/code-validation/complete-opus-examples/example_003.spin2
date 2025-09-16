@@ -1,0 +1,18 @@
+org     0
+        mov     short, ##10_000_000    ' 0.1 second
+        mov     long_d, ##30_000_000   ' 0.3 seconds
+pattern drvh    #56                    ' Short pulse 1
+        waitx   short
+        drvl    #56
+        waitx   short
+        drvh    #56                    ' Short pulse 2
+        waitx   short
+        drvl    #56
+        waitx   short
+        drvh    #56                    ' Long pulse
+        waitx   long_d
+        drvl    #56
+        waitx   long_d
+        jmp     #pattern
+short   long    0
+long_d  long    0

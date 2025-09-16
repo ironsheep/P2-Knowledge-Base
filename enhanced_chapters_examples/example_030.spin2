@@ -1,0 +1,6 @@
+org     0
+        mov     pattern, #1     ' Start with one LED
+loop    mov     pins, pattern   ' Your code here
+        ' Make pattern rotate through pins 56-63
+        ' Add delay between changes
+        ' Wrap around at the end

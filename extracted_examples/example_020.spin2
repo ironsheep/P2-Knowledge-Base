@@ -1,0 +1,15 @@
+{
+' Generated test program for example_020
+        org     0
+        
+' Multiply two numbers and get 64-bit result
+        mov     x, #123
+        mov     y, #456
+        mul     x, y           ' Low 32 bits in x
+        getmulh high           ' High 32 bits in high
+        ' Result: 123 * 456 = 56088
+        ' (all in 2 clock cycles!)
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

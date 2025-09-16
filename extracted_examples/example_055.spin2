@@ -1,0 +1,15 @@
+{
+' Generated test program for example_055
+        org     0
+        
+' Simple output
+        drvh    #PIN            ' Drive high
+        drvl    #PIN            ' Drive low
+        drvnot  #PIN            ' Toggle
+        fltl    #PIN            ' Float (high-Z)
+' Simple input
+        testp   #PIN wc         ' Read pin into C flag
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

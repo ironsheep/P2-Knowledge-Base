@@ -1,0 +1,11 @@
+{
+' Generated test program for example_032
+        org     0
+        
+drvh    #PIN    ' Make it high
+        drvl    #PIN    ' Make it low
+        drvnot  #PIN    ' Toggle it
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

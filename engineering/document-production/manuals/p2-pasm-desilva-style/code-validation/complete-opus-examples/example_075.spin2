@@ -1,0 +1,14 @@
+{
+' Generated test program for example_075
+        org     0
+        
+' Atomic operations using locks
+get_lock
+        locktry #0 wc
+   if_c jmp     #get_lock
+        ' Critical section
+        lockrel #0
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

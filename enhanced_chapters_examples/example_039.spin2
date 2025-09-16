@@ -1,0 +1,14 @@
+{
+' Generated test program for example_039
+        org     0
+        
+' Copy 1000 longs (4KB) at maximum speed
+        setq    ##1000-1        ' Setup for 1000 longs
+        rdlong  buffer, source  ' Read them all!
+        setq    ##1000-1        ' Setup for 1000 longs
+        wrlong  buffer, dest    ' Write them all!
+        ' 4KB moved in microseconds!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

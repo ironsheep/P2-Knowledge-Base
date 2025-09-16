@@ -1,0 +1,13 @@
+{
+' Generated test program for example_056
+        org     0
+        
+' PWM output
+        wrpin   ##P_PWM_TRIANGLE, #PIN
+        wxpin   ##1000, #PIN    ' Period
+        wypin   ##500, #PIN     ' 50% duty cycle
+        dirh    #PIN            ' Start PWM
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

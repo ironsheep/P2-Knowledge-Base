@@ -1,0 +1,24 @@
+PUB benchmark_compression() | start_time
+  ' Generate test data
+  repeat i from 0 to 1023
+    waveform[i] := 2048 + 1000 * sin(i * 360 / 64)
+  
+  ' Method 1: Traditional
+  start_time := cnt
+  repeat i from 0 to 1023
+    DEBUG(`PLOT Traditional `(i, waveform[i]))
+  traditional_time := cnt - start_time
+  
+  ' Method 2: Packed
+  start_time := cnt
+  DEBUG(`PLOT Packed PACK16 1024 @waveform)
+  packed_time := cnt - start_time
+  
+  DEBUG("Traditional: ", udec(traditional_time/clkfreq), "ms")
+  DEBUG("Packed: ", udec(packed_time/clkfreq), "ms")
+  DEBUG("Improvement: ", udec(traditional_time/packed_time), "×")
+  
+  ' Typical results:
+  ' Traditional: 412ms
+  ' Packed: 26ms
+  ' Improvement: 15×

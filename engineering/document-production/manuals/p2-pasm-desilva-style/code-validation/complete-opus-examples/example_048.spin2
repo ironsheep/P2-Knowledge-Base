@@ -1,0 +1,17 @@
+{
+' Generated test program for example_048
+        org     0
+        
+' Combining flags
+        cmp     x, y wcz
+if_a    jmp     #greater        ' x > y (unsigned)
+if_b    jmp     #less           ' x < y (unsigned)
+if_z    jmp     #equal          ' x == y
+' Signed comparisons
+        cmps    x, y wcz        ' Signed compare
+if_gt   jmp     #greater        ' x > y (signed)
+if_lt   jmp     #less           ' x < y (signed)
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

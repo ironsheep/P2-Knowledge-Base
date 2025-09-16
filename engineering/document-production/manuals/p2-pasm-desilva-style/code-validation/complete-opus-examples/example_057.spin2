@@ -1,0 +1,16 @@
+{
+' Generated test program for example_057
+        org     0
+        
+' Async serial (UART)
+        wrpin   ##P_ASYNC_TX, #TX_PIN
+        wxpin   baud_config, #TX_PIN
+        dirh    #TX_PIN
+' Send byte
+        wypin   data, #TX_PIN
+        waitx   #20             ' Brief delay
+        testp   #TX_PIN wc      ' Check if done
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

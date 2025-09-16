@@ -1,0 +1,18 @@
+{
+' Generated test program for example_010
+        org     0
+        
+' Method 1: Simple delay
+        getct   start_time
+        addct1  start_time, ##1_000_000
+        waitct1                ' Wait exactly 1,000,000 clocks
+' Method 2: Periodic events
+        getct   time
+loop    addct1  time, ##10_000_000
+        waitct1                ' Wait for next 10M clock interval
+        drvnot  #56           ' Toggle LED
+        jmp     #loop         ' Perfectly periodic!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

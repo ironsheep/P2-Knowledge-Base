@@ -1,0 +1,25 @@
+{
+' Generated test program for example_099
+        org     0
+        
+' Writer COG
+writer_cog
+        rdlong  wr_ptr, ##WRITE_PTR
+        wrlong  data, wr_ptr
+        add     wr_ptr, #4
+        and     wr_ptr, ##BUFFER_MASK  ' Wrap around
+        wrlong  wr_ptr, ##WRITE_PTR
+' Reader COG
+reader_cog
+        rdlong  rd_ptr, ##READ_PTR
+        rdlong  wr_ptr, ##WRITE_PTR
+        cmp     rd_ptr, wr_ptr wz
+   if_z jmp     #reader_cog            ' Buffer empty
+        rdlong  data, rd_ptr
+        add     rd_ptr, #4
+        and     rd_ptr, ##BUFFER_MASK
+        wrlong  rd_ptr, ##READ_PTR
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

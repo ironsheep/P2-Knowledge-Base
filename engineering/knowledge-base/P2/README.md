@@ -10,11 +10,15 @@ P2/
 │   ├── pasm2/            # 357 PASM2 instructions
 │   └── spin2/            # Spin2 language
 │       ├── methods/      # 73 methods
-│       └── operators/    # 46 operators
+│       ├── operators/    # 46 operators
+│       └── patterns/     # 28+ code patterns
+│           ├── object_composition/ # Object usage patterns
+│           └── domain_patterns/   # Application patterns
 ├── hardware/             # Physical hardware (boards, modules)
 └── architecture/         # P2 architecture components
     ├── smart-pins/       # 64 Smart Pin modes
-    └── system-registers/ # System registers
+    ├── system-registers/ # System registers
+    └── patterns/         # Hardware utilization patterns
 ```
 
 ## Quick Stats
@@ -23,6 +27,11 @@ P2/
 - **73** Spin2 methods
 - **46** Spin2 operators  
 - **64** Smart Pin modes
+- **28+** Code patterns (from 730 files analyzed)
+  - **5** Object composition patterns (NO_OBJECTS 51%, SINGLE_OBJECT 21%, etc.)
+  - **8** Hardware utilization patterns (Buffer mgmt 82%, Timing 77%, etc.)
+  - **9+** Domain-specific patterns (IoT, Robotics, Data Logger, etc.)
+  - **4** Specialized patterns (Animation, Sensor Fusion, etc.)
 - **Health Score: 100/100**
 
 ## Usage
@@ -44,6 +53,8 @@ timing: {cycles: 2, type: fixed}
 - **100% timing coverage** - All instructions have timing
 - **Clean YAML format** - Structured for AI parsing
 - **No conditionals** - Only real CPU instructions
+- **Pattern-based** - 28+ discovered patterns with usage statistics
+- **Open-ended patterns** - Patterns are descriptive, not prescriptive
 
 ## Maintenance
 

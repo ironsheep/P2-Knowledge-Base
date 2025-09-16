@@ -1,0 +1,11 @@
+{
+' Generated test program for example_022
+        org     0
+        
+testp   #BUTTON_PIN wc ' Read pin into C flag
+   if_c jmp     #pressed       ' Branch if high
+  if_nc jmp     #not_pressed   ' Branch if low
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

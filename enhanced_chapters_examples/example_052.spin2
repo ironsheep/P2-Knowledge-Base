@@ -1,0 +1,10 @@
+org     0
+        rdfast  #0, ##input_data
+        wrfast  #0, ##output_data
+        mov     count, #100
+filter_loop
+        rflong  value
+        ' Your code: Simple filter
+        ' Maybe average with previous value?
+        wflong  result
+        djnz    count, #filter_loop

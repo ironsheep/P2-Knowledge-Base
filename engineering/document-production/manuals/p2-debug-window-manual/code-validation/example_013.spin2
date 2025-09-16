@@ -1,0 +1,13 @@
+PUB debug_multi_cog() | i
+  ' Launch COGs with debug
+  repeat i from 0 to 7
+    coginit(i, @cog_code, @params[i])
+    
+  ' Create debug window per COG
+  repeat i from 0 to 7
+    DEBUG(`TERM 'COG_NAME(i)' POS `(i*100) 0 SIZE 12 10)
+    
+  ' Each COG updates its window
+  repeat
+    wait_for_sync()
+    trigger_all_cogs()

@@ -1,0 +1,12 @@
+{
+' Generated test program for example_046
+        org     0
+        
+cmp     x, y wcz         ' Compare x and y
+if_a    mov     result, x        ' If x > y, result = x
+if_be   mov     result, y        ' If x <= y, result = y
+        ' Max function in 3 instructions!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

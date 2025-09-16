@@ -1,0 +1,13 @@
+{
+' Generated test program for example_068
+        org     0
+        
+' Setting up an interrupt (not recommended!)
+        setint1 #INT_PINRISE, #PANIC_BUTTON
+int1_handler
+        ' Interrupt code
+        reti1
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

@@ -1,0 +1,11 @@
+{
+' Generated test program for example_027
+        org     0
+        
+waitse1               ' Wait for event 1
+        waitse2               ' Wait for event 2
+        ' Configure events to watch pins - super efficient!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

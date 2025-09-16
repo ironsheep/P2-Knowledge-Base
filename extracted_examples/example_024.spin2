@@ -1,0 +1,12 @@
+{
+' Generated test program for example_024
+        org     0
+        
+if_z    add     x, #1          ' Only add if Z flag set
+if_nz   add     x, #1          ' Only add if Z flag clear
+if_c    add     x, #1          ' Only add if C flag set
+if_nc   add     x, #1          ' Only add if C flag clear
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

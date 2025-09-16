@@ -1,0 +1,33 @@
+{
+' Generated test program for example_100
+        org     0
+        
+' Command structure in hub
+' +0: Command ID
+' +4: Parameter 1
+' +8: Parameter 2
+' +12: Result/Status
+' Commander COG
+send_command
+        wrlong  cmd_id, ##CMD_BUFFER+0
+        wrlong  param1, ##CMD_BUFFER+4
+        wrlong  param2, ##CMD_BUFFER+8
+        wrlong  ##$FFFF, ##CMD_BUFFER+12  ' Mark as pending
+wait_complete
+        rdlong  status, ##CMD_BUFFER+12
+        cmp     status, ##$FFFF wz
+   if_z jmp     #wait_complete
+' Worker COG
+process_commands
+        rdlong  status, ##CMD_BUFFER+12
+        cmp     status, ##$FFFF wz
+  if_nz jmp     #process_commands      ' No command
+        rdlong  cmd_id, ##CMD_BUFFER+0
+        rdlong  param1, ##CMD_BUFFER+4
+        rdlong  param2, ##CMD_BUFFER+8
+        call    #execute_command
+        wrlong  result, ##CMD_BUFFER+12   ' Signal complete
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

@@ -1,0 +1,11 @@
+{
+' Generated test program for example_033
+        org     0
+        
+testp   #PIN wc ' Read it
+   if_c jmp     #high  ' It's high
+  if_nc jmp     #low   ' It's low
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

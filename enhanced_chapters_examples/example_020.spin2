@@ -1,0 +1,10 @@
+{
+' Generated test program for example_020
+        org     0
+        
+drvnot  #56 wcz        ' Toggle pin AND read old state into C
+        ' C now contains what the pin WAS before toggling
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

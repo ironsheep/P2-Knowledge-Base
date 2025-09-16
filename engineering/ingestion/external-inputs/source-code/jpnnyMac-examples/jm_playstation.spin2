@@ -1,0 +1,473 @@
+'' =================================================================================================
+''
+''   File........ jm_playstation.spin2
+''   Purpose..... Basic PS2 controller interface
+''   Cogs Used... 1
+''   Author...... Jon "JonnyMac" McPhalen
+''                Copyright (c) 2025 Jon McPhalen
+''                -- see below for terms of use
+''   E-mail...... jon.mcphalen@gmail.com
+''   Started..... 01 FEB 2025
+''   Updated..... 07 FEB 2025
+''
+'' =================================================================================================
+
+{
+
+   References:
+   -- https://store.curiousinventor.com/guides/PS2
+   -- https://hackaday.io/project/170365-blueretro/log/186471-playstation-playstation-2-spi-interface
+   -- https://gamesx.com/controldata/psxcont/psxcont.htm
+
+
+   Looking into plug
+   -- parenthesis indiate required pins
+    _________________________________________
+   |             |             |             |
+   | (1) (2)  3  | (4) (5) (6) | (7)  8   9  |
+    \____________|_____________|____________/
+
+   1  Data          brown         DAT (MISO) - requires pull-up
+   2  Command       orange        CMD (MOSI)
+   3  7.0V          gray          Motor power
+   4  Ground        black
+   5  3.3V          red
+   6  Attention     yellow        ATT (CS)
+   7  Clock         blue          CLK (SCLK)
+   8  NC            white
+   9  Acknowlege    green         requires pull-up (not used)
+
+
+   Components
+   -- https://www.robotshop.com/products/ps2-connector (female connector)
+}
+
+
+con
+
+  VERSION = 0_1_0
+
+
+con { fixed io pins }
+
+  PGM_RX   = 63  { I }                                          ' programming / debug
+  PGM_TX   = 62  { O }
+
+  SF_CS    = 61  { O }                                          ' flash storage
+  SF_SCLK  = 60  { O }
+  SF_MOSI  = 59  { O }
+  SF_MISO  = 58  { I }
+
+  LED2     = 57  { O }                                          ' Eval and Edge LEDs
+  LED1     = 56  { O }
+
+
+var
+
+  long  cog
+  long  stack[64]
+
+  long  att                                                     ' spi pins
+  long  cmd
+  long  dta                                                     ' requires a pull-up to 3.3v
+  long  clk
+
+  long  busyflag
+
+' response packet
+' -- do not modify order
+
+  byte  header
+  byte  ps2mode
+  byte  spacer
+  byte  btnslo
+  byte  btnshi
+  byte  rjoyx
+  byte  rjoyy
+  byte  ljoyx
+  byte  ljoyy
+
+
+pub null()
+
+'' This is not an application
+
+
+pub start(attpin, cmdpin, datpin, clkpin) : result
+
+'' Configure and start PS2 controller scanner
+
+  stop()
+
+  longmove(@att, @attpin, 4)                                    ' copy spi pins
+
+  pinclear(att)                                                 ' clear pins in this cog
+  pinclear(cmd)
+  pinclear(dta)
+  pinclear(clk)
+
+  cog := cogspin(newcog, background(), @stack) + 1              ' launch the background cog
+
+  return cog
+
+
+pub stop()
+
+'' Stop PS2 scanner cog if running
+
+  if (cog)
+    cogstop(cog-1)
+    cog := 0
+
+  bytefill(@btnslo, $00, 2)
+  bytefill(@rjoyx, $7F, 4)
+
+
+pub busy() : status
+
+'' Returns true when spi coms is active
+
+  return busyflag
+
+
+pub mode() : result
+
+'' Returns mode byte from response packet
+
+  return ps2mode
+
+
+pub digital() : result
+
+'' Returns true if analog mode button not engaged
+
+  return ((ps2mode & $F0) == $40)
+
+
+pub analog() : result
+
+'' Returns true if analog mode button engaged
+
+  return ((ps2mode & $F0) == $70)
+
+
+pub joy_lx() : position
+
+'' Returns left joystick x axis value
+'' -- range is 0..255
+
+  return ljoyx
+
+
+pub joy_ly() : position
+
+'' Returns left joystick y axis value
+'' -- range is 0..255
+
+  return ljoyy
+
+
+pub joy_rx() : position
+
+'' Returns right joystick x axis value
+'' -- range is 0..255
+
+  return rjoyx
+
+
+pub joy_ry() : position
+
+'' Returns right joystick y axis value
+'' -- range is 0..255
+
+  return rjoyy
+
+
+con { buttons }
+
+  PSB_SELECT   = 0  ' %0000_0001  { btnslo }
+  PSB_LJOY     = 1  ' %0000_0010
+  PSB_RJOY     = 2  ' %0000_0100
+  PSB_START    = 3  ' %0000_1000
+
+  PSB_UP       = 4  ' %0001_0000  { btnslo }
+  PSB_RIGHT    = 5  ' %0010_0000
+  PSB_DOWN     = 6  ' %0100_0000
+  PSB_LEFT     = 7  ' %1000_0000
+
+  PSB_TRIG_L2  = 0  ' %0000_0001  { btnshi }
+  PSB_TRIG_R2  = 1  ' %0000_0010
+  PSB_TRIG_L1  = 2  ' %0000_0100
+  PSB_TRIG_R1  = 3  ' %0000_1000
+
+  PSB_TRIANGLE = 4  ' %0001_0000  { btnshi }
+  PSB_CIRCLE   = 5  ' %0010_0000
+  PSB_CROSS    = 6  ' %0100_0000
+  PSB_SQUARE   = 7  ' %1000_0000
+
+  #0, NOT_PRESSED, PRESSED
+
+
+pub trigger_l1() : status
+
+'' Returns 1 when left trigger 1 button pressed
+
+  return (!btnshi >> PSB_TRIG_L1) & 1
+
+
+pub trigger_l2() : status
+
+'' Returns 1 when left trigger 2 button pressed
+
+  return (!btnshi >> PSB_TRIG_L2) & 1
+
+
+pub trigger_r1() : status
+
+'' Returns 1 when right trigger 1 button pressed
+
+  return (!btnshi >> PSB_TRIG_R1) & 1
+
+
+pub trigger_r2() : status
+
+'' Returns 1 when right trigger 2 button pressed
+
+  return (!btnshi >> PSB_TRIG_R2) & 1
+
+
+pub btn_up() : status
+
+'' Returns 1 when left pad UP button pressed
+
+  return (!btnslo >> PSB_UP) & 1
+
+
+pub btn_right() : status
+
+'' Returns 1 when left pad RIGHT button pressed
+
+  return (!btnslo >> PSB_RIGHT) & 1
+
+
+pub btn_down() : status
+
+'' Returns 1 when left pad DOWN button pressed
+
+  return (!btnslo >> PSB_DOWN) & 1
+
+
+pub btn_left() : status
+
+'' Returns 1 when left pad LEFT button pressed
+
+  return (!btnslo >> PSB_LEFT) & 1
+
+
+pub btn_triangle() : status
+
+'' Returns 1 when right TRIANGLE button pressed
+
+  return (!btnshi >> PSB_TRIANGLE) & 1
+
+
+pub btn_circle() : status
+
+'' Returns 1 when right CIRCLE button pressed
+
+  return (!btnshi >> PSB_CIRCLE) & 1
+
+
+pub btn_cross() : status
+
+'' Returns 1 when right CROSS button pressed
+
+  return (!btnshi >> PSB_CROSS) & 1
+
+
+pub btn_square() : status
+
+'' Returns 1 when right SQUARE button pressed
+
+  return (!btnshi >> PSB_SQUARE) & 1
+
+
+pub btn_select() : status
+
+'' Returns 1 when Select button pressed
+
+  return (!btnslo >> PSB_SELECT) & 1
+
+
+pub btn_start() : status
+
+'' Returns 1 when Start button pressed
+
+  return (!btnslo >> PSB_START) & 1
+
+
+pub btn_ljoy() : status
+
+'' Returns 1 when left joystick button pressed
+'' -- returns 0 when in controller in digital mode
+
+  return (!btnslo >> PSB_LJOY) & 1
+
+
+pub btn_rjoy() : status
+
+'' Returns 1 when right joystick button pressed
+'' -- returns 0 when in controller in digital mode
+
+  return (!btnslo >> PSB_RJOY) & 1
+
+
+con { groups }
+
+pub buttons(n) : result
+
+'' Returns byte n of buttons states
+'' -- n is 0 or 1
+'' -- 1 == pressed
+
+  if (n == 0)
+    return !btnslo & $FF
+  elseif (n == 1)
+    return !btnshi & $FF
+
+
+pub triggers() : tbits
+
+'' Returns trigger bits MSB->LSB: R1-L1-R2-L2
+
+  return !btnshi & $0F
+
+
+pub left_pad() : pbits
+
+'' Returns left pad bits
+'' -- order is %LDRU
+
+  return (!btnslo & $F0) >> 4
+
+
+pub rt_pad() : pbits
+
+'' Returns right pad bits
+'' -- order is %SXCT
+
+  return (!btnshi & $F0) >> 4
+
+
+con { data }
+
+pub address() : p_resp
+
+'' Returns hub address of response package
+
+  return @header
+
+
+pub snap_shot(p_dest)
+
+'' Copy response packet to p_dest
+
+  bytemove(p_dest, @header, 9)
+
+
+pub response(idx) : b
+
+'' Return byte idx from last response packet
+
+  if (idx < 0) || (idx > 8)
+    return $FF
+
+  return byte[@header][idx]
+
+
+con { background code }
+
+pri background(hz) | looptix, t                                 ' run in separate cog
+
+'' Runs background scanner
+
+  pinhigh(att)                                                  ' CS (deselect device)
+  pinlow(cmd)                                                   ' MOSI
+  pinclear(dta)                                                 ' MISO (float to pull-up)
+  pinhigh(clk)                                                  ' SCLK
+
+  looptix := clkfreq / 50                                       ' update @ 50Hz
+
+  t := getct()
+  repeat
+    scan()
+    waitct(t += looptix)
+
+
+pri scan()
+
+'' Poll the PS2 controller
+'' -- if in digital mode, center joystick values
+''    * controller sets joysticks to max in digital mode
+'' -- read time ~0.5ms at 200MHz
+
+  busyflag := true
+  pinlow(att)                                                   ' select
+
+  header  := shiftio($01)
+  ps2mode := shiftio($42)
+  spacer  := shiftio($00)
+
+  btnslo  := shiftio($00)                                       ' raw btns are active-low
+  btnshi  := shiftio($00)
+
+  if ((ps2mode & $F0) == $70)                                   ' if analog mode
+    rjoyx := shiftio($00)                                       ' right stick 1st
+    rjoyy := shiftio($00)
+    ljoyx := shiftio($00)                                       ' left stick second
+    ljoyy := shiftio($00)
+  else
+    bytefill(@rjoyx, $7F, 4)                                    '  center joysticks
+
+  pinhigh(att)                                                  ' deselect
+  busyflag := false
+
+
+pri shiftio(txval) : rxval | i
+
+'' Shift 8 bits to controller
+'' -- get 8 bits from controller
+
+  repeat i from 0 to 7
+    pinwrite(cmd, txval.[i])
+    pinlow(clk)
+    waitus(3)
+    rxval.[i] := pinread(dta)
+    pinhigh(clk)
+    waitus(3)
+
+
+con { license }
+
+{{
+
+  Terms of Use: MIT License
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this
+  software and associated documentation files (the "Software"), to deal in the Software
+  without restriction, including without limitation the rights to use, copy, modify,
+  merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to the following
+  conditions:
+
+  The above copyright notice and this permission notice shall be included in all copies
+  or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+  PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+}}

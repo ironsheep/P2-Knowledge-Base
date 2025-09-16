@@ -1,452 +1,225 @@
-# DeSilva PASM2 Manual Visual Presentation Refinement Guide
+# DeSilva Visual Refinement Guide
 
-**Single Purpose**: Iterate DeSilva PASM2 manual visual presentation through human feedback loops
+**Purpose**: Iterate DeSilva manual visual presentation through feedback loops
 
-## 🚨 SESSION START INTEGRATION
-
-### Work Mode Identification
-**Trigger Phrases**: "De Silva visual", "De Silva visualization", "De Silva template fixes", "De Silva refinement"
-**Confirmation**: "This covers De Silva visual refinement, template fixes, and iterative PDF generation with user feedback"
-
-### Todo MCP Integration  
-**CRITICAL - Always use this filter:**
+## Session Start
 ```bash
 mcp__todo-mcp__todo_next tags:["desilva_visual"]
 ```
 
-**Why This Matters:**
-- ✅ **Filters to De Silva visual tasks only**
-- ✅ **Prevents task confusion with Smart Pins visual work** (uses `smart_pins_visual`)
-- ✅ **Unified naming**: `desilva_visual` + `smart_pins_visual` for consistency
-- ✅ **Ensures proper multi-part sequence** (Part 1 → Part 2a → Part 2b → Part 2c)
-- ✅ **No more guessing what to work on** - MCP tells you exactly
+## Directory Structure & Purpose
+**Understanding the three parallel directories - ALL have the same document structure:**
 
-### SESSION START CHECKLIST (DO THIS FIRST!)
-
-#### 1. Verify Source of Truth Locations
-```bash
-# Check working parts have visual fixes
-wc -l /engineering/document-production/workspace/p2-pasm-desilva-style/P2-PASM-deSilva-Style-FULL-Part1.md
-# Should show ~700+ lines
-
-# Check template has De Silva environments
-grep -c 'sidetrack\|interlude\|yourturn\|chapterend' \
-  /exports/pdf-generation/workspace/p2-pasm-desilva-style/templates/p2kb-pasm-desilva.latex
-# Should show 4+ matches
+### Parallel Structure Design
+```
+manuals/p2-pasm-desilva-style/     # Master documents (reference only)
+workspace/p2-pasm-desilva-style/   # Working copies (edit here)
+outbound/p2-pasm-desilva-style/    # Deployment staging (LaTeX-escaped)
 ```
 
-#### 2. Required Reading
-**Always read these documents when starting De Silva visual work:**
-1. **THIS FILE FIRST** - De Silva specific protocols and source of truth
-2. `/engineering/document-production/manuals/p2-pasm-desilva-style/creation-guide.md` - Pedagogical requirements
-3. `/documentation/pipelines/pdf-generation-format-guide.md` - PDF production workflow
-4. `/exports/pdf-generation/workspace/desilva-manual/visual-fixes-tracking.md` - Current state
+**Each directory serves a different purpose:**
 
-## 🔴 CRITICAL: DIRECTORY STRUCTURE & PURPOSE
-
-### Understanding the Three Key Directories:
 - **`manuals/`**: Opus-created master documents (reference only, NEVER edit)
-  - `/engineering/document-production/manuals/p2-pasm-desilva-style/opus-master/`
-  - Original documents with tutorial voice and structure
+  - Original documents like `p2-pasm-desilva-style/opus-master/COMBINED-COMPLETE-MASTER.md`
   - Gold masters that serve as source material
-  - Protected by READ-ONLY-PROTECTION.md
+  - Same document folder structure as workspace and outbound
+
 - **`workspace/`**: Production working copies (ALL EDITING HAPPENS HERE)
-  - `/engineering/document-production/workspace/p2-pasm-desilva-style/`
-  - Clean versions prepared from masters
+  - Clean versions prepared from masters: `workspace/p2-pasm-desilva-style/P2-PASM-deSilva-Working-Copy.md`
+  - Template files, filters, and configuration
   - Maintain as clean, unescaped markdown
   - This is your primary editing environment
+  - **Same document folder structure** as manuals and outbound
+
 - **`outbound/`**: Deployment staging for PDF Forge
-  - `/engineering/document-production/outbound/p2-pasm-desilva-style/`
   - LaTeX-escaped versions only
+  - **Same document folder structure** as workspace: `outbound/p2-pasm-desilva-style/`
   - Temporary staging area
   - NEVER edit these directly
+  - Files automatically removed when deployed to PDF Forge
 
-## SOURCE OF TRUTH LOCATIONS
+## Source of Truth Locations
+**Edit these in workspace, never in manuals or outbound:**
+- **Markdown**: `workspace/p2-pasm-desilva-style/P2-PASM-deSilva-Working-Copy.md`
+- **Main Template**: `workspace/p2-pasm-desilva-style/p2kb-desilva.latex`
+- **Lua Filters**: `workspace/p2-pasm-desilva-style/filters/p2kb-desilva-*.lua`
+  - `p2kb-desilva-code-coloring.lua` - 5-color code block system
+  - `p2kb-desilva-semantic.lua` - DeSilva pedagogical elements
+  - `p2kb-desilva-pagination.lua` - Smart page breaks
 
-### Markdown Source of Truth
-**ALWAYS EDIT HERE**: `/engineering/document-production/workspace/p2-pasm-desilva-style/`
-- `P2-PASM-deSilva-Style-FULL-Part1.md` - Part 1 working copy
-- `P2-PASM-deSilva-Style-Part2a.md` - Part 2a working copy  
-- `P2-PASM-deSilva-Style-Part2b.md` - Part 2b working copy
-- `P2-PASM-deSilva-Style-Part2c.md` - Part 2c working copy
-- ALL markdown changes happen here FIRST
-- Never edit the escaped/combined version in outbound
+## Template Architecture
+**DeSilva uses layered template system:**
+- **Foundation**: `templates/shared/p2kb-foundation.sty` (shared components)
+- **Content**: `templates/desilva/p2kb-desilva-content.sty` (5-color system + pedagogical environments)
+- **Main**: `workspace/p2-pasm-desilva-style/p2kb-desilva.latex` (loads foundation + content)
 
-### Template Source of Truth  
-**ALWAYS EDIT HERE**: `/engineering/document-production/workspace/p2-pasm-desilva-style/templates/`
-- `p2kb-pasm-desilva.latex` - Master De Silva template
-- `p2kb-*.sty` - Style files (foundation, content, presentation)
-- ALL template changes happen here FIRST
-- **TODO**: Templates scattered across multiple locations - needs consolidation
+## 5-Color Code Block System
+**DeSilva pedagogical color coding:**
+1. **Spin2** (Green) - `::: spin2`
+2. **PASM2** (Yellow/Cream) - `::: pasm2`
+3. **CORDIC** (Purple) - `::: cordic`
+4. **Multi-COG** (Blue) - `::: multicog`
+5. **Antipattern** (Red) - `::: antipattern`
 
-### NEVER Edit These Directly
-- ❌ `/engineering/document-production/outbound/p2-pasm-desilva-style/` - Deployment staging only
-- ❌ Escaped/combined markdown files - Always edit parts then re-combine
-- ❌ Templates in outbound - Always edit in workspace templates first
+## DeSilva Pedagogical Elements
+**Human-centered teaching elements:**
+- `::: medicine-cabinet` - Solutions for common problems
+- `::: your-turn` - Hands-on exercises
+- `::: sidetrack` - Interesting but optional topics
+- `::: uff` - We just got through something complex
+- `::: well` - Correcting common assumptions
+- `::: have-fun` - Encouragement and celebration
 
-## EXCHANGE DIRECTORY PROTOCOL
+## Workflow
 
-### Outbound = Two-Way Exchange Point
-**CRITICAL**: The outbound directory serves as a bidirectional exchange:
-- **User → Claude**: User places files here for Claude to examine/use
-- **Claude → Workspace**: Claude retrieves them, removes after copying to workspace
-- **Claude → User**: Claude places deployment files here for user to take to PDF Forge
-- **Cleanliness**: Keeps outbound clean and purpose-clear
+### Development Phase (Edit in Workspace)
+1. Edit source files in workspace (maintain clean, unescaped state)
+2. Test template components locally if possible
+3. Update filter chain or template files as needed
 
-**User handles deployment based on file type:**
-- Combined escaped markdown → User moves to PDF Forge inbox/
-- LaTeX template (.latex file) → User moves to PDF Forge templates/
-- Style files (.sty) → User moves to PDF Forge templates/
-- Request file (request.json) → User uses for PDF generation
+### PDF Generation Request Phase
 
-## DEPLOYMENT WORKFLOW (EXACT SEQUENCE)
-
-1. **Edit source files** in workspace (maintain clean, unescaped state)
-2. **Combine parts** if multi-part document:
-   ```bash
-   cat Part1.md Part2a.md Part2b.md Part2c.md > COMBINED-FOR-ESCAPING.md
-   ```
-3. **Run escape script**:
-   ```bash
-   /engineering/tools/conversion/latex-escape-all.sh \
-     workspace/p2-pasm-desilva-style/COMBINED-FOR-ESCAPING.md \
-     outbound/p2-pasm-desilva-style/P2-PASM-deSilva-Style.md
-   ```
-4. **Copy ONLY modified files** to outbound:
-   - Style files (.sty) - copy directly
-   - Templates (.latex) - only if changed
-   - request.json - only if updated
-5. **Clean temporary files**:
-   ```bash
-   rm workspace/p2-pasm-desilva-style/COMBINED-FOR-ESCAPING.md
-   ```
-6. **User deploys** from outbound to PDF Forge
-
-## File Structure (Fixed Locations)
-
-```
-DeSilva Working Environment:
-/engineering/document-production/workspace/p2-pasm-desilva-style/
-├── templates/                                  # SOURCE OF TRUTH templates
-│   └── p2kb-pasm-desilva.latex               # Master De Silva template
-├── ready/                                      # Ready parts location
-│   └── Part1-READY.md                        # Part 1 ready version
-├── editing/                                    # Work in progress
-├── P2-PASM-deSilva-Style-FULL-Part1.md       # Part 1 working copy
-├── P2-PASM-deSilva-Style-Part2a.md           # Part 2a working copy  
-├── P2-PASM-deSilva-Style-Part2b.md           # Part 2b working copy
-├── P2-PASM-deSilva-Style-Part2c.md           # Part 2c working copy
-├── visual-fixes-tracking.md                   # Current state tracking
-└── DESILVA-STYLE-GUIDE.md                    # Style requirements
-
-/engineering/document-production/outbound/p2-pasm-desilva-style/
-├── P2-PASM-deSilva-Style.md                   # COMBINED & ESCAPED for PDF Forge
-├── p2kb-pasm-desilva.latex                   # Template (copied from workspace)
-├── request.json                               # PDF generation config
-├── assets/                                    # Images (NO SPACES in names)
-└── last-deployed/                             # Backup (auto-managed)
-    ├── P2-PASM-deSilva-Style.md
-    ├── p2kb-pasm-desilva.latex
-    └── request.json
-```
-
-## PRODUCTION REQUEST
-
-### Always Check request-requirements.json First
+#### Step 1: Prepare Files for Outbound
 ```bash
-cat /engineering/document-production/workspace/p2-pasm-desilva-style/request-requirements.json
+# Escape markdown for LaTeX using the proven Smart Pins escaping script
+# Note: Output goes to the PARALLEL outbound document directory
+./engineering/tools/conversion/latex-escape-all.sh \
+  engineering/document-production/workspace/p2-pasm-desilva-style/P2-PASM-deSilva-Working-Copy.md \
+  engineering/document-production/outbound/p2-pasm-desilva-style/P2-PASM-deSilva-Working-Copy.md
 ```
 
-If this file exists, it contains MANDATORY pandoc arguments for this document.
-
-### Standard Production Request Format:
-```json
-{
-  "documents": [{
-    "input": "P2-PASM-deSilva-Style.md",
-    "output": "P2-PASM-deSilva-Style.pdf",
-    "template": "p2kb-pasm-desilva",
-    "variables": {
-      "title": "Discovering P2 Assembly",
-      "subtitle": "Build, Experiment, and Master the Propeller 2", 
-      "author": "P2 Community",
-      "footer": "In the Spirit of deSilva's P1 Tutorial"
-    },
-    "pandoc_args": ["--wrap=preserve", "--top-level-division=part"]
-  }],
-  "options": {"cleanup": true, "archive": false, "optimize": false}
-}
-```
-
-## The Visual Refinement Workflow
-
-### 1. Human Provides Visual Feedback
-Examples:
-- "Sidetrack boxes need dashed borders, not solid"
-- "Code highlighting inconsistent in Part 2b"  
-- "Chapter celebrations too prominent"
-- "Page breaks not working between parts"
-
-### 2. Claude Implements Changes
-**Multi-part strategy**:
-- **Small fixes**: Edit specific part file in workspace
-- **Template changes**: Update master template, affects all parts
-- **Combined document**: Combine parts → escape → deploy to outbound
-
-### 3. Part Combination Process
+#### Step 2: Copy Required Files to Outbound
+**CRITICAL**: Copy files to the parallel outbound document directory:
 ```bash
-# Combine all parts into single document
-cat workspace/desilva-manual/P2-PASM-deSilva-Style-FULL-Part1.md \
-    workspace/desilva-manual/P2-PASM-deSilva-Style-Part2a.md \
-    workspace/desilva-manual/P2-PASM-deSilva-Style-Part2b.md \
-    workspace/desilva-manual/P2-PASM-deSilva-Style-Part2c.md \
-    > workspace/desilva-manual/COMBINED-FOR-ESCAPING.md
+# Copy escaped markdown (from Step 1)
+# ✅ Already done above
 
-# Escape combined document
-./tools/latex-escape-all.sh \
-  "workspace/desilva-manual/COMBINED-FOR-ESCAPING.md" \
-  "outbound/P2-PASM-deSilva-Style/P2-PASM-deSilva-Style.md"
+# Copy template files to parallel outbound directory
+cp engineering/document-production/workspace/p2-pasm-desilva-style/p2kb-desilva.latex \
+   engineering/document-production/outbound/p2-pasm-desilva-style/
 
-# Clean up temporary file
-rm workspace/desilva-manual/COMBINED-FOR-ESCAPING.md
+cp engineering/document-production/templates/desilva/p2kb-desilva-foundation.sty \
+   engineering/document-production/outbound/p2-pasm-desilva-style/
+
+cp engineering/document-production/templates/desilva/p2kb-desilva-content.sty \
+   engineering/document-production/outbound/p2-pasm-desilva-style/
+
+# Copy Lua filters (flat structure - no filters/ subdirectory!)
+cp engineering/document-production/workspace/p2-pasm-desilva-style/filters/p2kb-desilva-code-coloring.lua \
+   engineering/document-production/outbound/p2-pasm-desilva-style/
+
+cp engineering/document-production/workspace/p2-pasm-desilva-style/filters/p2kb-desilva-semantic.lua \
+   engineering/document-production/outbound/p2-pasm-desilva-style/
+
+cp engineering/document-production/workspace/p2-pasm-desilva-style/filters/p2kb-desilva-pagination.lua \
+   engineering/document-production/outbound/p2-pasm-desilva-style/
+
+# Copy request configuration
+cp engineering/document-production/workspace/p2-pasm-desilva-style/request.json \
+   engineering/document-production/outbound/p2-pasm-desilva-style/
 ```
 
-### 4. Human Tests PDF Generation
-- Human generates PDF on Forge
-- Human provides visual feedback on combined result
-- Repeat until acceptable
-
-## Change Types & Implementations
-
-### Sidetrack/Interlude Boxes (DeSilva Specific)
-**Template**: tcolorbox configurations for pedagogical elements
-**Test**: Verify dashed borders, proper spacing around educational content
-
-### Code Highlighting (Assembly Focus)
-**Template**: Syntax highlighting for P2 assembly instructions  
-**Test**: Consistent highlighting across all 4 parts
-
-### Chapter Celebrations
-**Template**: End-of-chapter celebration formatting
-**Test**: Appropriate prominence, not overwhelming
-
-### Part Transitions
-**Template**: Page breaks between major parts
-**Test**: Each part starts on new page
-
-### Tutorial Voice Elements
-**Markdown**: "Let's explore", "You'll discover" tutorial language
-**Test**: Consistent pedagogical tone throughout
-
-## 🚨 CRITICAL RULES
-
-### NO FILE RENAMING - EVER
-- **NEVER** create `-fixed`, `-v2`, `-working`, `-escaped` versions
-- **ALWAYS** edit existing files in place
-- **WHY**: Breaks references, confuses deployment, violates production discipline
-
-### Layered Template Architecture (NEW!)  
-- **Foundation**: `p2kb-foundation.sty` - Base Pandoc compatibility, typography, basic environments
-- **Content**: `p2kb-desilva-content.sty` - De Silva pedagogical elements and tutorial styling  
-- **Presentation**: `p2kb-tech-review.sty` - Professional branding and review formatting
-- **Template**: `p2kb-pasm-desilva.latex` - Now uses layered architecture (monolithic archived as `p2kb-pasm-desilva-monolithic.latex`)
-
-**IMPORTANT**: Template is now layered! Foundation provides basic tcolorbox environments, De Silva content adds pedagogical styling, tech-review adds professional branding.
-
-### Quick Reference
-- **Sidetrack fix**: Update template tcolorbox configuration
-- **Escaping fix**: Run `latex-escape-all.sh` before deployment
-- **Part combination**: `cat Part1.md Part2a.md Part2b.md Part2c.md > COMBINED.md`
-- **Template deploy**: Always copy from workspace/templates/ to outbound/
-
-## Request.json Format (UPDATED 2025-08-25)
-
-**MANDATORY**: Use this EXACT structure with enhanced request format:
-
-```json
-{
-  "documents": [{
-    "input": "P2-PASM-deSilva-Style.md",
-    "output": "P2-PASM-deSilva-Style.pdf",
-    "template": "p2kb-pasm-desilva",
-    "variables": {
-      "title": "Discovering P2 Assembly",
-      "subtitle": "Build, Experiment, and Master the Propeller 2", 
-      "author": "P2 Community",
-      "footer": "In the Spirit of deSilva's P1 Tutorial"
-    },
-    "pandoc_args": ["--wrap=preserve", "--top-level-division=part"]
-  }],
-  "options": {"cleanup": true, "archive": false, "optimize": false}
-}
+#### Step 3: Verify Outbound Structure
+**Your outbound/p2-pasm-desilva-style/ should look exactly like this:**
+```
+engineering/document-production/outbound/p2-pasm-desilva-style/
+├── P2-PASM-deSilva-Working-Copy.md          # LaTeX-escaped markdown
+├── p2kb-desilva.latex                       # Main template
+├── p2kb-desilva-foundation.sty              # DeSilva foundation
+├── p2kb-desilva-content.sty                 # DeSilva content layer
+├── p2kb-desilva-code-coloring.lua          # Filter 1 (NO filters/ subdir!)
+├── p2kb-desilva-semantic.lua               # Filter 2
+├── p2kb-desilva-pagination.lua             # Filter 3
+└── request.json                             # PDF generation request
 ```
 
-**Key Updates:**
-- **Multiple pandoc_args**: Array supports multiple arguments
-- **No path/extension**: Template name `p2kb-pasm-desilva` (not `.latex`)
-- **Part structure**: `--top-level-division=part` enables proper chapter numbering
-- **Lua filters**: `part-chapter-pagebreaks.lua` for proper page breaks, `smart-pins-auto-indent.lua` for code block indentation (adapt as needed)
+**Key Points:**
+- **Parallel structure**: outbound mirrors workspace document organization
+- **Flat file layout**: All files at same level in document directory
+- **No subdirectories**: Lua filters and templates all in root of document folder
 
-**Enhanced Request with Lua Filters:**
-```json
-{
-  "documents": [{
-    "input": "P2-PASM-deSilva-Style.md",
-    "output": "P2-PASM-deSilva-Style.pdf",
-    "template": "p2kb-pasm-desilva",
-    "variables": {
-      "title": "Discovering P2 Assembly",
-      "subtitle": "Build, Experiment, and Master the Propeller 2", 
-      "author": "P2 Community",
-      "footer": "In the Spirit of deSilva's P1 Tutorial"
-    },
-    "pandoc_args": [
-      "--top-level-division=part",
-      "--wrap=preserve",
-      "--lua-filter=filters/part-chapter-pagebreaks.lua"
-    ]
-  }],
-  "options": {"cleanup": true, "archive": false, "optimize": false}
-}
-```
+#### Step 4: User Deploys to PDF Forge
+**User copies everything from outbound/ to PDF Forge system and runs generation**
 
-**Request Requirements Pattern**:
-- Check workspace for `request-requirements.json` 
-- If present, merge special pandoc args into standard template
-- Deploy complete `request.json` to outbound directory
+#### Step 5: Clean Up Outbound
+**After successful PDF generation, remove files from outbound to keep it clean**
 
-## Visual Refinement Workflow
+## Exchange Directory Protocol
+**Outbound = Two-way exchange point**
+- User places files here for Claude to examine/use
+- Claude retrieves them, then removes after copying to workspace
+- Claude places deployment files here for user to take to PDF Forge
+- Keeps outbound clean and purpose-clear
 
-1. **Human provides feedback** (colors, formatting, page breaks, etc.)
-2. **Claude edits** in workspace (individual parts and/or template)
-3. **Combine & escape**: Cat parts → escape → deploy to outbound
-4. **Human tests** on PDF Forge → repeat until visually perfect
+### ⚠️ Critical Outbound Rules
+1. **NO subdirectories** - Lua filters go directly in outbound/, not outbound/filters/
+2. **LaTeX-escaped markdown only** - Never put unescaped markdown in outbound
+3. **Clean after deployment** - Remove files after successful PDF generation
+4. **Exact file structure** - PDF Forge expects specific layout (see Step 3 above)
 
-## Milestones
+## Required Reading
+- `engineering/pdf-forge/work-modes/production-pdf-generation.md` - Production PDFs
+- `engineering/pdf-forge/work-modes/automated-pdf-testing.md` - Interactive testing
+- `workspace/p2-pasm-desilva-style/request-requirements.json` - Mandatory args
+- `templates/desilva/README.md` - Complete template documentation
 
-### Internal Checkpoint ("Can Resume Tomorrow")
-- [ ] All parts have current visual changes applied
-- [ ] Template updated and tested with sample content
-- [ ] Current state documented in workspace parts
-- [ ] No blocking errors in last combined PDF generation attempt
-
-### Technical Design Review Ready ("Final Handoff") 
-- [ ] All visual requirements met per human approval
-- [ ] Combined PDF generates successfully with no warnings
-- [ ] Pedagogical elements (sidetracks, interludes) display correctly
-- [ ] Tutorial voice consistent across all parts
-- [ ] Ready for formal review process
-
-## Essential Production Rules
-
-### Filename Discipline (CRITICAL)
-- ✅ **Same filename every iteration**: `P2-PASM-deSilva-Style.pdf`
-- ❌ **NO version suffixes**: No -v1, -test, -draft, -fixed
-- **Why**: Practice production process every iteration, prevent confusion
-
-### Template Architecture (All .sty files MUST start with p2kb-)
-- **Foundation**: `p2kb-foundation.sty` (Pandoc compatibility, shared by all)
-- **Content**: `p2kb-pasm-desilva-content.sty` (Tutorial structure)
-- **Presentation**: `iron-sheep-tech-review.sty` (Technical review branding)
-
-### Multi-Part Management
-- **Edit in parts**: Keep files <50KB for fast editing
-- **Combine for PDF**: Single document for generation
-- **Test iteratively**: Can test individual parts with small template samples
-
-### File Disappearance (Normal - Set Expectations)
-- **PDF succeeds**: "PDF generated, ready for visual review" (don't mention files moving)
-- **PDF fails**: "Files moved during processing (normal), here's what to regenerate"
-- **User Communication**: Focus on visual feedback, not file management
-
-### Template Changes (Only provide .sty files when they change)
-- **Don't resend unchanged**: Save human attention for visual decisions
-- **When changed**: "Updated template deployed" + specific change description
-
-### Working Copy Protection
-1. **Never modify opus-master** - Read-only source of truth
-2. **Working parts stay in workspace** - Only escaped combined version goes to outbound
-3. **Verify file sizes** - Catch truncation/corruption immediately  
-4. **Test changes incrementally** - Small changes, quick verification
-5. **Human defines "done"** - Visual approval is the success criterion
-
-## DeSilva Tutorial Standards
-
-### Voice Requirements (Tutorial Style)
-- **Pedagogical and Encouraging**: "Let's explore how P2 assembly works"
-- **Building Understanding**: Progressive difficulty, scaffold learning
-- **Experimental**: "Try this modification and see what happens"
-- **Celebratory**: Acknowledge progress and achievements
-
-### Visual Standards for Technical Design Review
-- [ ] Consistent sidetrack/interlude box formatting across all parts
-- [ ] Code examples with proper P2 assembly syntax highlighting
-- [ ] Chapter celebrations appropriately formatted
-- [ ] Part transitions with proper page breaks
-- [ ] Tutorial voice consistent throughout combined document
-- [ ] All pedagogical elements render correctly
-
-## Production PDF Generation Process
-
-### 🔴 MANDATORY: Check for Document Requirements
-
-**STEP 1: Check for requirements file**
-```bash
-cat /engineering/document-production/workspace/pasm2-desilva-tutorial/request-requirements.json
-```
-
-If this file exists, it contains MANDATORY pandoc arguments for this document.
-
-**STEP 2: Create production request**
+## Production Request Format
+Always check `request-requirements.json` first. Example:
 ```json
 {
   "format_type": "document_generation",
   "documents": [{
-    "input": "document.md",
-    "output": "document.pdf",
-    "template": "template-name",
-    "pandoc_args": [...],  // Include args from request-requirements.json
-    "lua_filters": [...]    // Document-specific filters
+    "input": "P2-PASM-deSilva-Working-Copy.md",
+    "output": "P2-PASM-deSilva-Working-Copy.pdf",
+    "template": "p2kb-desilva",
+    "pandoc_args": ["--top-level-division=part", "--pdf-engine=xelatex", "--toc", "--toc-depth=3"],
+    "lua_filters": ["p2kb-desilva-code-coloring", "p2kb-desilva-semantic", "p2kb-desilva-pagination"],
+    "metadata": {
+      "title": "P2 Assembly Programming in the Style of deSilva",
+      "subtitle": "A Human-Centered Approach to Parallel Processing",
+      "version": "Version 1.0 - deSilva Style Edition",
+      "date": "September 2025"
+    }
   }]
 }
 ```
 
-**STEP 3: Deploy to outbound**
-- Place request.json in `/engineering/document-production/outbound/[document-name]/`
-- Copy markdown and assets to same location
-- User handles deployment to PDF Forge
-
-## Current Status Tracking
-
-**Last working state**: [Update after each session]
-**Outstanding visual issues**: [From human feedback] 
-**Next iteration focus**: [Specific changes to implement]
-**Parts status**: 
-- Part 1: [status]
-- Part 2a: [status]  
-- Part 2b: [status]
-- Part 2c: [status]
-
-## QUICK REFERENCE
-
-### Common Commands
-- **Combine parts**: `cat Part1.md Part2a.md Part2b.md Part2c.md > COMBINED.md`
-- **Escape LaTeX**: `/engineering/tools/conversion/latex-escape-all.sh input.md output.md`
-- **Check requirements**: `cat workspace/p2-pasm-desilva-style/request-requirements.json`
-- **Deploy template**: `cp workspace/templates/*.latex outbound/p2-pasm-desilva-style/`
-
-### Key Fixes
-- **Sidetrack boxes**: Update template tcolorbox configuration
-- **Code highlighting**: P2 assembly syntax in template
-- **Chapter numbering**: Use `--top-level-division=part`
-- **Escaping issues**: Context-aware escape script handles # and _ in code
-
-### Critical Rules
-- NO file renaming (-fixed, -v2, -working)
+## Critical Rules
+- NO file renaming (-fixed, -v2, -working, etc)
 - Edit files in place
-- Always work in workspace/
-- Deploy from outbound/
+- Spaces in image filenames ARE allowed (Pandoc handles them)
+- Arrays in request.json for ALL fields (even single items)
+- Template names without .latex extension in request.json
 
----
+## DeSilva-Specific Guidelines
+- **Human voice**: Maintain deSilva's conversational, encouraging tone
+- **Progressive complexity**: Simple concepts first, build gradually
+- **Pedagogical flow**: Use "Medicine Cabinet" for troubleshooting, "Your Turn" for practice
+- **5-color clarity**: Different code types get different colors for visual learning
+- **Accessibility**: All code blocks have thick left borders for distinction
 
-**This guide covers ONLY DeSilva visual refinement. Other documents get their own focused guides.**
+## Filter Chain Order (IMPORTANT)
+1. **p2kb-desilva-code-coloring** - Convert div-wrapped code blocks first
+2. **p2kb-desilva-semantic** - Convert pedagogical elements second
+3. **p2kb-desilva-pagination** - Add smart page breaks last
+
+## Quick Reference
+- **Code blocks**: Must use div syntax (`::: type`)
+- **Antipatterns**: Split into separate `::: antipattern` and correct approach blocks
+- **Conversion script**: `/engineering/tools/convert-to-div-syntax.py`
+- **Template test**: Use working copy markdown for validation
+- **Filter source**: Adapted from proven Smart Pins workspace filters
+
+## Template Status
+✅ **COMPLETE**: DeSilva template stack ready for production
+- Foundation layer updated with Smart Pins improvements
+- 5-color code system implemented and tested
+- Pedagogical environments defined
+- Filter chain proven working (adapted from Smart Pins)
+- Request format validated against PDF Forge requirements
+
+## Development History
+- **Base**: Adapted from Smart Pins proven working template system
+- **Enhancement**: Extended 3-color to 5-color pedagogical system
+- **Features**: Added DeSilva human-centered teaching elements
+- **Validation**: All components copied from production Smart Pins filters

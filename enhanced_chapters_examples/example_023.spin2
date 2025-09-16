@@ -1,0 +1,11 @@
+{
+' Generated test program for example_023
+        org     0
+        
+testp   #SENSOR_PIN wz ' Read pin into Z flag
+   if_z jmp     #sensor_low    ' Jump if pin is low (Z=1 when pin=0)
+  if_nz jmp     #sensor_high   ' Jump if pin is high
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

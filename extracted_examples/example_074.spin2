@@ -1,0 +1,12 @@
+{
+' Generated test program for example_074
+        org     0
+        
+' Circular buffer for streaming data
+        wrlong  data, ptra++
+        cmp     ptra, ##BUFFER_END wcz
+   if_ae mov    ptra, ##BUFFER_START
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

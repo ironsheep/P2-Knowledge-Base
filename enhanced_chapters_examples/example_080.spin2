@@ -1,0 +1,18 @@
+{
+' Generated test program for example_080
+        org     0
+        
+' Traditional hub reading: ~6 clocks average per long
+loop    rdlong  value, ptra++
+        add     sum, value
+        djnz    count, #loop
+' FIFO reading: 2 clocks per long!
+        rdfast  #0, ptra        ' Start FIFO
+loop    rflong  value           ' 2 clocks, always!
+        add     sum, value      ' 2 clocks
+        djnz    count, #loop    ' 2 clocks
+        ' 3x faster for sequential reads!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

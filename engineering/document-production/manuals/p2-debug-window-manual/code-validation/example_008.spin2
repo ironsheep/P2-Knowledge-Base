@@ -1,0 +1,10 @@
+PUB lissajous_patterns()
+  DEBUG(`SCOPE_XY Phase SIZE 400 400)
+  
+  repeat i from 0 to 359
+    x := 2048 + 1000 * sin(i)
+    y := 2048 + 1000 * sin(i + phase_shift)
+    
+    DEBUG(`Phase `(x, y))
+    
+    ' Phase visible in pattern shape

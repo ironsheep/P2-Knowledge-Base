@@ -1,0 +1,38 @@
+manifest_type: "root"
+version: "1.0.0"
+description: "P2 Knowledge Base root manifest for Download On Demand"
+
+knowledge_domains:
+  language:
+    description: "Programming languages and patterns"
+    path: "language/"
+    manifests:
+      - "language/pasm2/instruction_manifest.yaml"
+      - "language/spin2/method_manifest.yaml"
+      - "language/spin2/patterns/pattern-index.yaml"
+    
+  hardware:
+    description: "Physical hardware and boards"
+    path: "hardware/"
+    manifests:
+      - "hardware/board_manifest.yaml"
+      
+  architecture:
+    description: "P2 architecture components"
+    path: "architecture/"
+    manifests:
+      - "architecture/smart-pins/smartpin_manifest.yaml"
+      - "architecture/system-registers/register_manifest.yaml"
+
+quick_access:
+  patterns: "language/spin2/patterns/pattern-index.yaml"
+  instructions: "language/pasm2/instruction_manifest.yaml"
+  smart_pins: "architecture/smart-pins/smartpin_manifest.yaml"
+
+statistics:
+  total_files: 730
+  instructions: 357
+  smart_pin_modes: 64
+  spin2_methods: 73
+  code_patterns: 28
+  health_score: 100

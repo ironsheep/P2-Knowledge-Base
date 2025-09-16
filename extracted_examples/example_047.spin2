@@ -1,0 +1,14 @@
+{
+' Generated test program for example_047
+        org     0
+        
+' Z Flag - Zero detection
+        sub     x, y wz          ' Z=1 if x equals y
+if_z    jmp     #equal          ' Jump if equal
+' C Flag - Carry/Borrow
+        add     x, y wc          ' C=1 if overflow
+if_c    jmp     #overflow       ' Handle overflow
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

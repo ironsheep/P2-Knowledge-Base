@@ -1,0 +1,32 @@
+{
+' Generated test program for example_056
+        org     0
+        
+orgh    $2000
+menu_system
+        call    #draw_menu_frame
+        call    #display_options
+        call    #get_user_input
+        call    #process_selection
+        cmp     selection, #1 wcz
+   if_e call    #option_1_handler
+        cmp     selection, #2 wcz
+   if_e call    #option_2_handler
+        cmp     selection, #3 wcz
+   if_e call    #option_3_handler
+        ' ... many more options
+        jmp     #menu_system
+draw_menu_frame
+        ' 200 instructions for fancy graphics
+        ret
+display_options
+        ' 300 instructions for text rendering
+        ret
+option_1_handler
+        ' 500 instructions for configuration
+        ret
+' Thousands of instructions total - no problem!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

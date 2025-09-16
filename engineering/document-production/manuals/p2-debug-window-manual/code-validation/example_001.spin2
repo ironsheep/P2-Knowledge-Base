@@ -1,0 +1,10 @@
+PUB before_packed_data()
+  ' Sending 1024 samples - the slow way
+  repeat i from 0 to 1023
+    DEBUG(udec(samples[i]), " ")  ' 5-10 bytes per sample!
+  ' Total: ~7KB transmitted, ~500ms
+
+PUB after_packed_data()  
+  ' Sending 1024 samples - the fast way
+  DEBUG(`SCOPE MyScope PACK 1024 @samples)  ' 2KB, 30ms
+  ' 16× compression, 16× speed improvement

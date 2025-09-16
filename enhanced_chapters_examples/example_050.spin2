@@ -1,0 +1,21 @@
+{
+' Generated test program for example_050
+        org     0
+        
+' Process data while streaming
+        rdfast  #0, ##source
+        wrfast  #0, ##dest
+pipeline
+        rflong  input           ' Get next input
+        ' Process while FIFO works
+        mul     input, ##SCALE_FACTOR
+        getmulh temp
+        shr     input, #16
+        or      input, temp
+        wflong  input           ' Write result
+        djnz    count, #pipeline
+' Input and output stream simultaneously!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

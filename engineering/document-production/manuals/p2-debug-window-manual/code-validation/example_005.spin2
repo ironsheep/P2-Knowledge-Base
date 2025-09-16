@@ -1,0 +1,13 @@
+PUB i2c_protocol_debug()
+  DEBUG(`LOGIC I2C SIZE 800 300 SAMPLES 2048 CHANNELS 2)
+  DEBUG(`I2C TRIGGER RISING 0)  ' Trigger on SDA
+  
+  repeat
+    ' Capture I2C transaction
+    DEBUG(`I2C CAPTURE @sda_pin @scl_pin)
+    
+    ' Automatic protocol decode
+    DEBUG(`I2C DECODE I2C)
+    
+    if error_detected()
+      DEBUG(`I2C MARK 'error_position' RED)

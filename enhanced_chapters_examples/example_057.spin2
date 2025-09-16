@@ -1,0 +1,14 @@
+{
+' Generated test program for example_057
+        org     0
+        
+' The FIFO maintains performance by reading ahead
+hub_loop
+        add     x, y           ' FIFO has next instructions ready
+        sub     a, b           ' No waiting for hub access
+        mul     c, d           ' Instructions stream smoothly
+        ' FIFO automatically refills as needed
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

@@ -1,0 +1,20 @@
+{
+' Generated test program for example_011
+        org     0
+        
+' Traditional (with interrupts):
+' Main code runs, gets interrupted, handles event, returns
+' Propeller way:
+' COG 1: Main code runs uninterrupted
+' COG 2: Watches for event continuously
+pin_watcher
+        testp   #BUTTON_PIN wc
+   if_c jmp     #button_pressed
+        jmp     #pin_watcher
+button_pressed
+        wrlong  ##1, ##button_flag  ' Signal other COGs
+        jmp     #pin_watcher
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

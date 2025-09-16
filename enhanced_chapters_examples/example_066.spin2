@@ -1,0 +1,33 @@
+{
+' Generated test program for example_066
+        org     0
+        
+' COG 0: Main application
+main_app
+        ' Complex calculations
+        ' Never interrupted
+        rdlong  command, ##mailbox wz
+   if_nz call   #process_command
+        jmp     #main_app
+' COG 1: Serial port handler
+serial_handler
+        ' Continuously monitors serial
+        testp   #RX_PIN wc
+   if_c call    #receive_byte
+        jmp     #serial_handler
+' COG 2: Motor control
+motor_control
+        ' Precise timing loops
+        ' Never disrupted
+        waitcnt motor_time
+        drvnot  #STEP_PIN
+        jmp     #motor_control
+' COG 3: Sensor monitor
+sensor_monitor
+        ' Watches multiple sensors
+        ' Responds instantly
+        ' ... and so on
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

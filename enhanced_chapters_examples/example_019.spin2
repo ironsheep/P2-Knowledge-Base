@@ -1,0 +1,12 @@
+{
+' Generated test program for example_019
+        org     0
+        
+drvc    #56            ' Drive pin to match C flag
+        drvnc   #56            ' Drive pin to NOT C flag
+        drvz    #56            ' Drive pin to match Z flag
+        drvnz   #56            ' Drive pin to NOT Z flag
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

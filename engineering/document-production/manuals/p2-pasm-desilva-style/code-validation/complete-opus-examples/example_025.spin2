@@ -1,0 +1,15 @@
+{
+' Generated test program for example_025
+        org     0
+        
+call    #subroutine    ' Call subroutine
+        ret                    ' Return from subroutine
+' But here's the P2 twist - CALL uses internal stack
+subroutine
+        ' Do something useful
+        ret                    ' Returns to instruction after CALL
+' You get 8 levels of hardware stack!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

@@ -1,0 +1,14 @@
+{
+' Generated test program for example_042
+        org     0
+        
+' Unsigned multiply
+        mul     result, value     ' result = low 32 bits
+' Signed multiply
+        muls    result, value     ' Signed version
+' Scale and multiply
+        scl     result, ##$8000   ' Scale by 0.5 (32.32 fixed point)
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

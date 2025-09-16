@@ -1,0 +1,7 @@
+{
+  "required_pandoc_args": ["--top-level-division=part"],
+  "reason": "DeSilva manual uses Part/Chapter structure - # headers become \\part{}, ## headers become \\chapter{}",
+  "discovered": "2025-09-16",
+  "issue": "Without this, Pandoc defaults to chapter-level division and parts don't get page breaks",
+  "note": "Copied from Smart Pins proven working configuration - essential for proper Part/Chapter pagination"
+}

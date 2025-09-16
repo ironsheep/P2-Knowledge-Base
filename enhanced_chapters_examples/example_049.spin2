@@ -1,0 +1,15 @@
+{
+' Generated test program for example_049
+        org     0
+        
+' Circular buffer reading
+        rdfast  ##$8000_0000, ##buffer  ' Bit 31 set = wrap mode
+circular_loop
+        rflong  value                   ' Read from FIFO
+        ' Process value
+        ' FIFO automatically wraps at buffer end!
+        jmp     #circular_loop
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

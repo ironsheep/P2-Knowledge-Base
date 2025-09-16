@@ -1,0 +1,13 @@
+{
+' Generated test program for example_007
+        org     0
+        
+' COG 1: Writer
+        mov     value, #42
+        wrlong  value, ##$1000  ' Write to hub address $1000
+' COG 2: Reader
+        rdlong  result, ##$1000 ' Read from hub address $1000
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

@@ -1,0 +1,11 @@
+{
+' Generated test program for example_041
+        org     0
+        
+mul     x, y              ' 32x32->64 bit multiply
+        getmulh high              ' Get high 32 bits
+        ' Done! 64-bit result in 2 instructions!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

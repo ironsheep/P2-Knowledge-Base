@@ -1,0 +1,9 @@
+PUB waveform_generator_debug()
+  setup_generator_display()
+  
+  repeat
+    generate_waveform()
+    display_waveform()
+    show_spectrum()
+    measure_parameters()
+    adjust_from_input()

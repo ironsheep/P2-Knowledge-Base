@@ -1,0 +1,15 @@
+PUB coordinated_debug_environment()
+  ' Create multiple synchronized windows
+  DEBUG(`TERM Status POS 0 0 SIZE 40 10)
+  DEBUG(`PLOT Waveform POS 0 200 SIZE 400 300)
+  DEBUG(`LOGIC Digital POS 420 200 SIZE 400 300)
+  DEBUG(`SCOPE Analog POS 0 520 SIZE 820 280)
+  
+  repeat
+    ' Update all windows in sync
+    timestamp := cnt
+    
+    DEBUG(`Status "Time: " udec(timestamp/clkfreq))
+    DEBUG(`Waveform `(timestamp & 1023, read_analog()))
+    DEBUG(`Digital `(read_digital_pins()))
+    DEBUG(`Analog CAPTURE)

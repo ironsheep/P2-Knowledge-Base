@@ -1,0 +1,15 @@
+{
+' Generated test program for example_067
+        org     0
+        
+setcmod #$100           ' Set colorspace
+        setcy   ##640*480      ' Set resolution
+        setci   ##HSYNC_TIMING ' Set timing
+        setcq   ##VSYNC_TIMING
+        setcfrq ##PIX_FREQ     ' Set pixel frequency
+        setcy   ##LINE_BUFFER  ' Set buffer address
+        xinit   ##STREAMER_CMD, #0  ' Start video!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

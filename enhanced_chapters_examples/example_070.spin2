@@ -1,0 +1,15 @@
+{
+' Generated test program for example_070
+        org     0
+        
+' One COG watches everything
+monitor
+        test    sensors, #SENSOR1 wz
+   if_nz call   #handle_sensor1
+        test    sensors, #SENSOR2 wz
+   if_nz call   #handle_sensor2
+        ' Check all sensors every loop
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

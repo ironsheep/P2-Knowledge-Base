@@ -1,0 +1,15 @@
+{
+' Generated test program for example_045
+        org     0
+        
+' Execute large program from hub
+        orgh    $1000           ' Code in hub memory
+hub_code
+        ' This code is in hub but executes like it's in COG
+        add     x, y
+        sub     a, b
+        ' Can be megabytes of code!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

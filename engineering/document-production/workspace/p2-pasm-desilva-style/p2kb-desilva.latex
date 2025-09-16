@@ -1,0 +1,84 @@
+% P2KB DeSilva LaTeX Template
+% DeSilva-style P2 Assembly Programming Manual Template  
+% Based on: Smart Pins p2kb-sp-template.latex (proven working)
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0 - DeSilva pedagogical approach with 5-color code system
+
+\documentclass[12pt,letterpaper,twoside]{book}
+
+% ==================== LOAD FOUNDATION LAYER ====================
+% DeSilva-specific foundation: pandoc compatibility, basic setup, pagination logic
+\usepackage{p2kb-desilva-foundation}
+
+% ==================== LOAD CONTENT LAYER ====================  
+% DeSilva-specific: 5-color code blocks and pedagogical environments
+\usepackage{p2kb-desilva-content}
+
+% ==================== DESILVA TITLE PAGE CUSTOMIZATION ====================
+% Define custom title page with Pandoc variables support
+
+\renewcommand{\maketitle}{%
+  \begin{titlepage}
+  \centering
+  \thispagestyle{empty}
+  
+  % Technical review warning
+  {\fontsize{28}{34}\selectfont\bfseries\color{red}DRAFT - TECHNICAL REVIEW ONLY\par}
+  \vspace{0.3cm}
+  {\Large\color{red}NOT FOR RELEASE OR DISTRIBUTION\par}
+  
+  % DeSilva tutorial title section
+  \vspace{1.5cm}
+  {\fontsize{40}{48}\selectfont\bfseries $title$\par}
+  \vspace{0.5cm}
+  {\Large\itshape $subtitle$\par}
+  \vspace{1.5cm}
+  {\large $date$\par}
+  \vspace{0.3cm}
+  {\large\color{blue}$version$\par}
+  
+  % DeSilva pedagogical approach box
+  \vspace{1.5cm}
+  \begin{tcolorbox}[
+    colback=green!10,
+    colframe=green!50,
+    boxrule=2pt,
+    width=0.85\textwidth,
+    center,
+    title={\bfseries DeSilva Tutorial Philosophy}
+  ]
+  \textbf{Learn by doing, celebrate progress, have fun!}
+  
+  \vspace{0.5cm}
+  This manual uses a 5-color code system:
+  
+  \vspace{0.3cm}
+  🟢 \textcolor{green}{\textbf{Green}} = Spin2 (High-level language)\\  
+  🟡 \textcolor{orange}{\textbf{Yellow}} = PASM2 (Assembly language)\\  
+  🟣 \textcolor{purple}{\textbf{Purple}} = CORDIC (Math operations)\\  
+  🔵 \textcolor{blue}{\textbf{Blue}} = Multi-COG (Parallel processing)\\  
+  🔴 \textcolor{red}{\textbf{Red}} = Antipattern (What NOT to do)
+  \end{tcolorbox}
+  
+  \vfill
+  {\small\itshape Iron Sheep Productions, LLC\par}
+  \end{titlepage}
+}
+
+% ==================== DOCUMENT STRUCTURE ====================
+\begin{document}
+
+% Title page (customized above)
+\maketitle
+
+% Table of contents
+\tableofcontents
+\clearpage
+
+% Main content from Pandoc
+$body$
+
+% Index if it exists
+\printindex
+
+\end{document}

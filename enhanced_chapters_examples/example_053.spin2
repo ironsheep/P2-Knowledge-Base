@@ -1,0 +1,28 @@
+{
+' Generated test program for example_053
+        org     0
+        
+' Audio processing pipeline
+audio_process
+        rdfast  #0, ##input_buffer      ' Input samples
+        wrfast  #0, ##output_buffer     ' Output samples
+        mov     samples, ##BUFFER_SIZE
+process_loop
+        rflong  left_sample             ' Get left channel
+        rflong  right_sample            ' Get right channel
+        ' Apply simple low-pass filter
+        add     left_filtered, left_sample
+        shr     left_filtered, #1       ' Average with previous
+        add     right_filtered, right_sample
+        shr     right_filtered, #1
+        ' Apply volume
+        muls    left_filtered, volume
+        muls    right_filtered, volume
+        ' Output processed samples
+        wflong  left_filtered
+        wflong  right_filtered
+        djnz    samples, #process_loop
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

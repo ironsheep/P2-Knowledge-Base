@@ -1,0 +1,12 @@
+{
+' Generated test program for example_013
+        org     0
+        
+' Test COG in isolation first
+debug_cog
+        drvh    #MY_DEBUG_LED  ' Visual confirmation it's running
+        ' Your actual code here
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

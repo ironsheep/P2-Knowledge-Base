@@ -1,0 +1,10 @@
+{
+' Generated test program for example_036
+        org     0
+        
+mov     outa, pattern    ' Set output register directly
+        mov     dira, ##$FF      ' Set direction register (rare in P2!)
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

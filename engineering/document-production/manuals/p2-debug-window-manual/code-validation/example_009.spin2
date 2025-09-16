@@ -1,0 +1,14 @@
+PUB spectrum_analyzer()
+  DEBUG(`FFT Spectrum SIZE 800 400 SAMPLES 1024)
+  DEBUG(`Spectrum WINDOW HANNING)
+  DEBUG(`Spectrum SCALE LOG)
+  
+  repeat
+    ' Capture time domain
+    capture_samples(@buffer, 1024)
+    
+    ' Transform to frequency domain
+    DEBUG(`Spectrum FFT @buffer)
+    
+    ' Find dominant frequency
+    DEBUG(`Spectrum PEAK @freq @magnitude)

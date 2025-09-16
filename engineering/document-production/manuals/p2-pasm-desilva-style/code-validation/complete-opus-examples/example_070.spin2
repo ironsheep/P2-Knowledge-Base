@@ -1,0 +1,12 @@
+{
+' Generated test program for example_070
+        org     0
+        
+wrpin   ##P_ADC_1X, #ADC_PIN   ' Configure ADC
+        dirh    #ADC_PIN               ' Enable
+        waitx   ##100                  ' Settle time
+        rdpin   sample, #ADC_PIN       ' Read 16-bit sample!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

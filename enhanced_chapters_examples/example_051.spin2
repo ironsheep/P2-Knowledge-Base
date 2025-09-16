@@ -1,0 +1,6 @@
+org     0
+        mov     pattern, ##$DEADBEEF
+        mov     dest, ##$1000
+        mov     count, #256
+        ' Your code here: Fill 256 longs with pattern
+        ' Use SETQ and WRLONG

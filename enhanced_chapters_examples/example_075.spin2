@@ -1,0 +1,11 @@
+{
+' Generated test program for example_075
+        org     0
+        
+add     x, y      ' Executing while next instruction fetches
+        sub     a, b      ' Fetching while previous executes
+        ' Perfect overlap = maximum throughput
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

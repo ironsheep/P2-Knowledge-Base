@@ -1,0 +1,223 @@
+# Single Object Pattern - For Download On Demand System
+# This shows what external AI would consume to understand and apply this pattern
+
+pattern_id: "single_object"
+pattern_category: "object_composition"
+usage_frequency: "21.2%"  # Found in 155 of 730 files analyzed
+confidence_level: "HIGH"   # Well-established pattern
+
+# SELECTION CRITERIA - When should AI use this pattern?
+selection_criteria:
+  use_when:
+    - "Device needs one supporting service (serial, I2C, formatting)"
+    - "Simple sensor or actuator driver"
+    - "Clean separation of concerns desired"
+    - "Resource constraints allow one dependency"
+  
+  typical_scenarios:
+    - "Temperature sensor using I2C object"
+    - "Debug output using serial object"
+    - "Display driver using font object"
+    - "Motor controller using PWM object"
+  
+  avoid_when:
+    - "No external dependencies needed (use no_objects)"
+    - "Multiple services required (use few_objects)"
+    - "Complex coordination needed (use several_objects)"
+
+# STRUCTURAL SIGNATURE - What does this pattern look like?
+structural_signature:
+  required_sections:
+    OBJ:
+      count: 1
+      typical_objects:
+        - "serial : \"jm_fullduplexserial\""
+        - "i2c : \"jm_i2c\""
+        - "nstr : \"jm_nstr\""
+    
+    VAR:
+      typical_content:
+        - "Device state variables"
+        - "Cached sensor values"
+        - "Configuration parameters"
+    
+    PUB:
+      required_methods:
+        - "null() - Non-top-level marker"
+        - "start() or setup() - Initialize"
+        - "Core functionality methods"
+      
+      optional_methods:
+        - "stop() - Cleanup"
+        - "Helper methods"
+
+# IMPLEMENTATION TEMPLATE - Actual code structure
+implementation_template:
+  basic_structure: |
+    '' Single Object Pattern Device Driver
+    '' Uses one dependency for core functionality
+    
+    CON
+      ' Device-specific constants
+      DEFAULT_ADDR = $48
+      READ_DELAY = 100
+    
+    OBJ
+      ' Single dependency
+      i2c : "jm_i2c"     ' Or serial, spi, etc.
+    
+    VAR
+      ' Device state
+      long device_addr
+      long last_value
+      byte initialized
+    
+    PUB null()
+      ' This is not a top-level object
+    
+    PUB start(scl_pin, sda_pin, addr) : success
+      ' Initialize device and dependency
+      device_addr := addr
+      
+      ' Start dependency object
+      i2c.setup(scl_pin, sda_pin, 100, i2c.PU_3K3)
+      
+      ' Verify device presence
+      if i2c.present(device_addr)
+        initialized := true
+        return true
+      else
+        return false
+    
+    PUB read_value() : value
+      ' Core functionality using dependency
+      if not initialized
+        return -1
+        
+      i2c.start()
+      i2c.write(device_addr)
+      i2c.write(READ_COMMAND)
+      i2c.start()
+      i2c.write(device_addr | 1)
+      value := i2c.read(i2c.NAK)
+      i2c.stop()
+      
+      last_value := value
+      return value
+    
+    PUB get_last() : value
+      ' Helper method - no dependency use
+      return last_value
+
+# RESOURCE PROFILE - What does this pattern cost?
+resource_profile:
+  object_overhead:
+    dependencies: 1
+    typical_methods: "5-15"
+    code_size: "200-1000 longs"
+  
+  memory_usage:
+    hub_ram: "Depends on dependency + local vars"
+    typical_range: "500-2000 bytes"
+  
+  cog_usage:
+    typical: 0  # Usually runs in caller's cog
+    maximum: 1  # If dependency needs a cog (like serial)
+  
+  pin_usage:
+    depends_on: "Device type"
+    typical: "2-4 pins"
+
+# COMPOSITION RULES - How does this work with other patterns?
+composition_rules:
+  can_be_used_by:
+    - "few_objects (as one of the 2-3 objects)"
+    - "several_objects (as one of the 4-6 objects)"
+    - "framework_pattern (as a low-level service)"
+  
+  commonly_combined_with:
+    - pattern: "buffer_management"
+      relationship: "Dependency may use buffers internally"
+    - pattern: "timing_control"
+      relationship: "Often needs delays for device communication"
+  
+  dependency_types:
+    communication:
+      - "jm_fullduplexserial"
+      - "jm_i2c"
+      - "jm_spi"
+    formatting:
+      - "jm_nstr"
+      - "jm_strings"
+    hardware:
+      - "jm_pwm"
+      - "jm_servo"
+
+# REAL EXAMPLES - Where is this pattern used?
+real_examples:
+  - file: "bme280_I2C.spin2"
+    dependency: "jm_i2c"
+    purpose: "Temperature/humidity sensor"
+    
+  - file: "servo_controller.spin2"
+    dependency: "jm_pwm"
+    purpose: "Servo motor control"
+    
+  - file: "debug_terminal.spin2"
+    dependency: "jm_fullduplexserial"
+    purpose: "Debug output"
+
+# VARIATIONS - Different flavors of this pattern
+variations:
+  - name: "Lazy initialization"
+    description: "Dependency started only when first used"
+    when_useful: "Saving resources until needed"
+    
+  - name: "Dependency injection"
+    description: "Pass dependency object reference"
+    when_useful: "Sharing single dependency instance"
+    
+  - name: "Conditional dependency"
+    description: "Dependency optional based on config"
+    when_useful: "Supporting multiple communication methods"
+
+# AI GENERATION HINTS - Help AI make good choices
+generation_hints:
+  naming_convention:
+    object_alias: "Short, descriptive (i2c, serial, pwm)"
+    file_selection: "Match protocol/purpose to dependency"
+  
+  error_handling:
+    initialization: "Always check if dependency starts successfully"
+    communication: "Handle timeouts and NAKs"
+    
+  optimization_tips:
+    - "Cache values to reduce dependency calls"
+    - "Batch operations when possible"
+    - "Use dependency's built-in features"
+
+# ANTI-PATTERNS - What to avoid
+anti_patterns:
+  - description: "Creating multiple instances of same dependency"
+    why_bad: "Wastes memory and resources"
+    instead: "Share single instance or use few_objects pattern"
+    
+  - description: "Not checking dependency startup"
+    why_bad: "Silent failures, hard to debug"
+    instead: "Always verify dependency initialization"
+    
+  - description: "Tight coupling to specific dependency"
+    why_bad: "Hard to swap implementations"
+    instead: "Use consistent interface methods"
+
+# STATISTICAL CONFIDENCE - Based on 730 file analysis
+statistics:
+  files_using_pattern: 155
+  percentage_of_codebase: "21.2%"
+  most_common_dependencies:
+    - {name: "serial objects", count: 45}
+    - {name: "i2c objects", count: 38}
+    - {name: "formatting objects", count: 32}
+    - {name: "pwm/servo objects", count: 20}
+  average_code_size: "350 longs"
+  average_methods: 8

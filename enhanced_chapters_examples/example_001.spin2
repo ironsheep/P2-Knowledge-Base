@@ -1,0 +1,13 @@
+{
+' Generated test program for example_001
+        org     0
+        
+' Rotate point (x,y) by angle - that's it!
+        setq    y_coord         ' Set Y coordinate
+        qrotate x_coord, angle  ' Start rotation by angle
+        getqx   new_x          ' Get rotated X (55 clocks later)
+        getqy   new_y          ' Get rotated Y
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

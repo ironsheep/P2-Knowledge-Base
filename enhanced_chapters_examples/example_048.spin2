@@ -1,0 +1,12 @@
+{
+' Generated test program for example_048
+        org     0
+        
+rdfast  #0, ##source
+loop    rflong  value
+        ' Process value
+        djnz    count, #loop
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

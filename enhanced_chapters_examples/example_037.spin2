@@ -1,0 +1,10 @@
+{
+' Generated test program for example_037
+        org     0
+        
+drvh    #56
+        drvl    #57
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

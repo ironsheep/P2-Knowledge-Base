@@ -1,0 +1,17 @@
+{
+' Generated test program for example_008
+        org     0
+        
+' Calculate distance between two points
+        mov     x1, #10
+        mov     y1, #20
+        mov     x2, #40
+        mov     y2, #60
+        ' Calculate differences
+        sub     x2, x1         ' dx
+        sub     y2, y1         ' dy
+        ' Your code here: use qvector to find distance
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

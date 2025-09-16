@@ -1,0 +1,8 @@
+org     0
+loop    drvh    #56                    ' LED 56 on
+        drvl    #57                    ' LED 57 off
+        waitx   ##25_000_000
+        drvl    #56                    ' LED 56 off
+        drvh    #57                    ' LED 57 on
+        waitx   ##25_000_000
+        jmp     #loop

@@ -1,0 +1,19 @@
+{
+' Generated test program for example_032
+        org     0
+        
+rdlong  x, ptra++      ' Read and auto-increment
+   rdlong  x, ++ptra      ' Pre-increment then read
+   rdlong  x, ptra--      ' Read and auto-decrement
+   rdlong  x, ptra[5]     ' Read from ptra + 5*4
+   ```
+4. **Address confusion**:
+   - COG addresses are in longs (0-511)
+   - Hub addresses are in bytes (0-524287)
+## Your Turn: Experiments
+### Experiment 1: Conditional Counter
+Count up if button pressed, down if not:
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

@@ -1,0 +1,8 @@
+org     0
+        mov     delay, ##25_000_000    ' Set delay to 0.25 seconds
+blink   drvh    #56                    ' LED on
+        waitx   delay                  ' Wait
+        drvl    #56                    ' LED off
+        waitx   delay                  ' Wait
+        jmp     #blink                 ' Repeat forever
+delay   long    0                      ' Storage for our delay value

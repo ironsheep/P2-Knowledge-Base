@@ -1,0 +1,10 @@
+PUB production_test_suite()
+  load_test_sequence()
+  
+  repeat test from 1 to num_tests
+    setup_test(test)
+    run_test(test)
+    capture_results(test)
+    generate_report(test)
+    
+  final_report()

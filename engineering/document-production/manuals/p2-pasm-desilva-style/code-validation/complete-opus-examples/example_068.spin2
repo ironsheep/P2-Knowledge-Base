@@ -1,0 +1,13 @@
+{
+' Generated test program for example_068
+        org     0
+        
+' UART in hardware
+        wrpin   ##P_ASYNC_TX, #TX_PIN
+        wxpin   ##BAUD_115200, #TX_PIN
+        dirh    #TX_PIN
+        wypin   char, #TX_PIN    ' Send character!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

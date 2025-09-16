@@ -1,0 +1,12 @@
+{
+' Generated test program for example_105
+        org     0
+        
+' Main + Helper pattern
+main    coginit #1, @helper, @params
+        ' Main work
+helper  ' Support work
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

@@ -1,0 +1,10 @@
+{
+' Generated test program for example_035
+        org     0
+        
+drvh    #LED_BASE addpins 3  ' Drive 4 pins high (base + 3 more)
+        drvl    #LED_BASE addpins 7  ' Drive 8 pins low
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

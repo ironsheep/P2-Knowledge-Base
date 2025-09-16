@@ -1,0 +1,197 @@
+'' =================================================================================================
+''
+''   File........ jm_debug_analog_meter_050.spin2
+''   Purpose.....
+''   Cogs Used...
+''   Author...... Jon "JonnyMac" McPhalen
+''                Copyright (c) 2025 Jon McPhalen
+''                -- see below for terms of use
+''   E-mail...... jon.mcphalen@gmail.com
+''   Started.....
+''   Updated..... 16 FEB 2024
+''
+'' =================================================================================================
+
+{SPIN2_V50}  ' CROP feature uses [x, y, width, height] now
+
+con
+
+  VERSION = 0_5_0
+
+
+con { timing }
+
+  CLK_FREQ = 200_000_000                                        ' system freq as a constant
+  MS_001   = CLK_FREQ / 1_000                                   ' ticks in 1ms
+  US_001   = CLK_FREQ / 1_000_000                               ' ticks in 1us
+
+' _xtlfreq = 20_000_000                                         ' 19_200_000 for "irregular" Edge
+  _clkfreq = CLK_FREQ                                           ' set system clock
+
+
+con { download / debug }
+
+' download_baud = 230_400
+' debug_baud    = download_baud
+
+' debug_main                                                    ' full debugger
+
+
+con { terminal }
+
+  BR_TERM  = 230_400                                            ' terminal baud rate
+
+
+con { fixed io pins }
+
+  PGM_RX   = 63  { I }                                          ' programming / debug
+  PGM_TX   = 62  { O }
+
+  SF_CS    = 61  { O }                                          ' flash storage
+  SF_SCLK  = 60  { O }
+  SF_MOSI  = 59  { O }
+  SF_MISO  = 58  { I }
+
+  LED2     = 57  { O }                                          ' Eval and Edge LEDs
+  LED1     = 56  { O }
+
+
+con { app io pins }
+
+
+con { application constants }
+
+  #true,  ON, OFF
+  #false, NO, YES
+
+  USE_PRECISE = YES
+
+  #0, RED, GREEN, BLUE, YELLOW, WHITE
+
+  DIG_CLR = WHITE
+
+
+obj
+
+' main                                                          ' * master Spin cog
+
+' * uses cog when loaded
+
+
+dat { pre-initialized }
+
+
+con { structure defs }
+
+
+var { globals }
+
+
+pub main() | level
+
+  setup()
+
+  repeat
+    update_meter(0, 0, %0010, %0011)                            ' 000.0, always show rightmost 2
+    waitms(500)
+
+    repeat level from 0_0 to 100_0 step 5                       ' full scale of analog meter
+      update_meter(level, level, %0010, %0011)
+      waitms(50)
+
+    waitms(1000)
+
+
+pub update_meter(aval, dval, dpbits, force) | x1, y1, y2, v, d, c, n
+
+'' Update analog and digital meter elements
+'' -- analog range is 0 to 1000
+'' -- digital range is 0 to 9999
+'' -- dpbits is flags for individual decimal points (%0000..%1111)
+'' -- force is flags for forced display columns (%0000..%1111)
+
+  aval := 0 #> aval <# 1000
+
+  if (USE_PRECISE == YES)
+    x1 := qcos(190<<8, aval-1400, 3600)                         ' calculate end of needle
+    y1 := qsin(190<<8, aval-1400, 3600)
+    debug(`amp crop 1)                                          ' clear last
+    debug(`amp set `(160<<8, 225<<8))                           ' set base of needle
+    debug(`amp line `(x1+160<<8, y1+225<<8))                    ' draw needle
+  else
+    x1 := qcos(190, aval-1400, 3600)
+    y1 := qsin(190, aval-1400, 3600)
+    debug(`amp crop 1)
+    debug(`amp set `(160, 225))
+    debug(`amp line `(x1+160, y1+225))
+
+  debug(`amp crop 1 50 140 220 95)                              ' hide base of needle
+
+
+  v := dval := 0 #> dval <# 9999                                ' limit range
+  d := 1000                                                     ' set msb divisor
+
+  y2 := 240 + (DIG_CLR * 60)                                    ' point to digits map
+
+  repeat c from 3 to 0                                          ' left to right
+    n := v / d                                                  ' get digit
+    if (dval >= d) || force.[c]                                 ' show this column?
+      x1 := 70 + ((3 - c) * 45)                                 ' locate display x
+      debug(`amp crop 1 `(n*45, y2, 45, 60, x1, 161))           ' place digit
+      if (dpbits.[c])                                           ' light dpoint?
+        x1 += 33                                                ' add dpoint offset
+        debug(`amp crop 1 `(483, y2+49, 8, 8, x1, 210))         ' show dpoint
+    v //= d                                                     ' remove digit from work val
+    d /= 10                                                     ' update divisor
+
+  debug(`amp update)                                            ' refresh window
+
+
+pub setup()
+
+'' Setup IO and objects for application
+
+  debug(`plot amp title 'Analog Meter+' size 320 240 pos 650 200 hidexy update)
+
+  if (USE_PRECISE == YES)
+    debug(`amp cartesian 1 0 precise)
+    debug(`amp color red linesize $400)                         ' linesize * 256
+'   debug(`amp opacity $C0)                                     ' make slightly translucent
+  else
+    debug(`amp cartesian 1 0)
+    debug(`amp color red linesize 4)
+
+  debug(`amp layer 1 'debug_analog_meter_050.bmp')
+  debug(`amp crop 1)
+  debug(`amp update)
+
+
+pri reboot()
+
+  hubset($1000_0000)
+
+
+con { license }
+
+{{
+
+  Terms of Use: MIT License
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this
+  software and associated documentation files (the "Software"), to deal in the Software
+  without restriction, including without limitation the rights to use, copy, modify,
+  merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to the following
+  conditions:
+
+  The above copyright notice and this permission notice shall be included in all copies
+  or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+  PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+  CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+  OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+}}

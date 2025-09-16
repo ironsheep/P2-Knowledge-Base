@@ -1,0 +1,17 @@
+{
+' Generated test program for example_026
+        org     0
+        
+' Z flag - was the result zero?
+        sub     x, y wz        ' Set Z if x-y equals zero
+if_z    jmp     #equal         ' Jump if they were equal
+' C flag - did we carry/borrow?
+        add     x, y wc        ' Set C if addition overflowed
+if_c    jmp     #overflow      ' Handle overflow
+' Both at once!
+        cmp     x, y wcz       ' Compare and set both flags
+if_a    jmp     #x_greater     ' Jump if x > y (unsigned)
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

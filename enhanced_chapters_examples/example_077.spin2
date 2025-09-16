@@ -1,0 +1,16 @@
+{
+' Generated test program for example_077
+        org     0
+        
+' Traditional loop: 4 clocks overhead per iteration
+loop    add     sum, value      ' 2 clocks
+        add     ptr, #4         ' 2 clocks
+        djnz    count, #loop    ' 2 clocks = 6 total
+' REP loop: 0 clocks overhead!
+        rep     #2, count       ' Repeat next 2 instructions
+        add     sum, value      ' 2 clocks
+        add     ptr, #4         ' 2 clocks = 4 total!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

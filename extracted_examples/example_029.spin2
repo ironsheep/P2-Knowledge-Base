@@ -1,0 +1,12 @@
+{
+' Generated test program for example_029
+        org     0
+        
+' Modify the next instruction's destination
+        mov     index, #10
+        altd    index, #array  ' Next instruction's dest = array+10
+        mov     0-0, value     ' Actually moves to array[10]!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

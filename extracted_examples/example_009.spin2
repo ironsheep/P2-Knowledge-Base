@@ -1,0 +1,15 @@
+{
+' Generated test program for example_009
+        org     0
+        
+' COG A: Leave a message
+        wrlong  message, ##mailbox
+' COG B: Check for messages
+check   rdlong  data, ##mailbox wz
+   if_z jmp     #check         ' Keep checking if empty
+        wrlong  #0, ##mailbox  ' Clear mailbox
+        ' Process the message in 'data'
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

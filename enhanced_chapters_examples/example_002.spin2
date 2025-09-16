@@ -1,0 +1,13 @@
+{
+' Generated test program for example_002
+        org     0
+        
+' Calculate sine and cosine simultaneously
+        qrotate angle, ##$7FFF_FFFF  ' Max radius for unit circle
+        getqx   cosine              ' cos(angle) in 2.30 fixed point
+        getqy   sine                ' sin(angle) in 2.30 fixed point
+        ' Both trig functions in 55 clocks total!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

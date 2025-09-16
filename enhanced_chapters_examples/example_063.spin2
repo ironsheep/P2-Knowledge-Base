@@ -1,0 +1,15 @@
+{
+' Generated test program for example_063
+        org     0
+        
+' Align branch targets to 8-byte boundaries
+        alignl                 ' Align to long boundary
+loop_start
+        ' Loop code here
+        djnz    count, #loop_start
+' Keep critical loops small
+' Consider moving inner loops to COG RAM
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

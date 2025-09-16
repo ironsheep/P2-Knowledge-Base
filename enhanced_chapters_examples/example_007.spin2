@@ -1,0 +1,10 @@
+org     0
+        mov     angle, #0
+        mov     radius, ##100          ' 100 pixel radius
+loop    qrotate angle, radius         ' Your code here
+        ' Add code to:
+        ' 1. Get X,Y coordinates
+        ' 2. Add screen center offset
+        ' 3. Draw pixel at that position
+        ' 4. Increment angle
+        ' 5. Loop

@@ -1,0 +1,9 @@
+PUB protocol_analyzer()
+  setup_protocol_windows()
+  
+  repeat
+    capture_protocol_data()
+    decode_protocol()
+    display_timing()
+    show_data_packets()
+    log_errors()

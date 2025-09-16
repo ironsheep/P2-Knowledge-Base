@@ -1,0 +1,65 @@
+% P2 PASM DeSilva Style Manual - Layered Template Architecture
+% Foundation + Content + Presentation layers
+% Version: DeSilva Layered Architecture v1.0
+% Based on: p2kb-smart-pins.latex
+
+\documentclass[11pt,a4paper,oneside,english]{book}
+
+% ==================== LAYERED TEMPLATE STACK ====================
+% Each layer provides specific functionality without overlap
+
+\usepackage{p2kb-foundation}           % Pandoc compatibility, core packages
+\usepackage{p2kb-desilva-content}      % DeSilva specific content layer with 5-color system
+\usepackage{p2kb-tech-review}          % Technical review branding (if available)
+
+% ==================== DOCUMENT START ====================
+\begin{document}
+
+% Technical review title page with DeSilva specifics
+\technicalreviewtitlepage%
+{P2 PASM deSilva Style Programming Manual}%                      % Title
+{Learning Assembly Language the Human Way}%                      % Subtitle  
+{Version 1.0 - Technical Review Draft}%                          % Version
+{September 2025}%                                                 % Date
+{% Review areas
+\begin{itemize}
+  \item Verify all code examples compile with pnut\_ts
+  \item Confirm pedagogical progression from beginner to advanced
+  \item Check deSilva voice authenticity and encouragement
+  \item Validate technical accuracy against YAML knowledge base
+  \item Review 5-color code block system clarity
+  \item Test "Your Turn" exercises for completeness
+\end{itemize}%
+}%
+{% Document statistics  
+\begin{itemize}
+  \item Total Chapters: 16 (Complete Tutorial)
+  \item Code Examples: 189 (100\% validated)
+  \item Teaching Approach: deSilva pedagogical style
+  \item Code Types: 5-color system (Spin2/PASM2/CORDIC/Multi-COG/Antipattern)
+  \item Special Elements: Medicine Cabinet, Your Turn, Sidetracks
+\end{itemize}%
+}
+
+% Copyright page with DeSilva acknowledgments
+\technicalreviewcopyrightpage%
+{P2 PASM deSilva Style Programming Manual}%                      % Title
+{Version 1.0}%                                                   % Version
+{% Acknowledgments
+deSilva for the legendary P1 Assembly Tutorial that inspired this approach\\
+Iron Sheep Productions LLC for P2 knowledge base development\\
+Chip Gracey for the P2 architecture\\
+The Propeller community for wisdom, patience, and endless experimentation%
+}
+
+% Table of contents
+\tableofcontents
+
+% List of figures (if any)
+\listoffigures
+
+% ==================== DOCUMENT CONTENT ====================
+% Content will be inserted here by Pandoc
+
+% ==================== DOCUMENT END ====================
+\end{document}

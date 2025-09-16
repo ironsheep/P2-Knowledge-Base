@@ -1,0 +1,15 @@
+org     0
+        mov     pattern, ##$DEADBEEF
+        mov     ptra, ##data_start
+search  rdlong  value, ptra++
+        cmp     value, pattern wz
+if_z    jmp     #found
+        cmp     ptra, ##data_end wcz
+if_b    jmp     #search
+        jmp     #not_found
+found   ' Pattern found!
+        drvh    #SUCCESS_LED
+        jmp     #$
+not_found
+        drvh    #FAIL_LED
+        jmp     #$

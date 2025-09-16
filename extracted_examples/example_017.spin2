@@ -1,0 +1,13 @@
+{
+' Generated test program for example_017
+        org     0
+        
+if_z    add     total, #10 wc
+ ↑       ↑        ↑     ↑   ↑
+only if  add    to this immediate set carry
+Z flag           value   value    flag
+is set
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

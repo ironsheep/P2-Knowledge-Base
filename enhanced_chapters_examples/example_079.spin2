@@ -1,0 +1,16 @@
+{
+' Generated test program for example_079
+        org     0
+        
+' Unaligned hub access: variable timing
+        rdlong  v1, ##$1001     ' Not long-aligned, slower
+' Aligned hub access: predictable timing
+        rdlong  v1, ##$1000     ' Long-aligned, faster
+' Sequential access: maximum speed
+        rdlong  v1, ptra++      ' Hardware manages sequence
+        rdlong  v2, ptra++      ' Optimal hub slot usage
+        rdlong  v3, ptra++      ' Maximum throughput
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

@@ -1,0 +1,23 @@
+{
+' Generated test program for example_031
+        org     0
+        
+' Moving data
+mov     dest, source   ' Copy data
+' Math
+add     dest, source   ' Addition
+sub     dest, source   ' Subtraction
+' Logic
+and     dest, source   ' AND operation
+or      dest, source   ' OR operation
+' Flow
+jmp     #label        ' Jump
+call    #label        ' Call subroutine
+ret                   ' Return
+' Flags
+cmp     x, y wcz      ' Compare and set flags
+if_z    jmp #label    ' Conditional jump
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

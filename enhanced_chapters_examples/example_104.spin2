@@ -1,0 +1,6 @@
+org     0
+' COG 0: Main sequencer
+        ' Launch other COGs
+        ' Coordinate light changes
+        ' Handle pedestrian requests
+' Your implementation here

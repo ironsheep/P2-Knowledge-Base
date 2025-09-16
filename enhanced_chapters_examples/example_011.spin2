@@ -1,0 +1,11 @@
+{
+' Generated test program for example_011
+        org     0
+        
+setq    dy
+        qvector dx, #0
+        getqx   distance
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

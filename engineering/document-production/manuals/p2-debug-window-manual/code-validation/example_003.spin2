@@ -1,0 +1,19 @@
+PUB correlate_multi_channel() | i
+  DEBUG(`PLOT Correlation SIZE 800 600 SAMPLES 1024)
+  
+  ' Configure for 4 data series
+  DEBUG(`Correlation SERIES 4)
+  DEBUG(`Correlation COLOR RED GREEN BLUE YELLOW)
+  
+  repeat
+    ' Collect synchronized samples
+    repeat i from 0 to 1023
+      ch1[i] := read_channel(1)
+      ch2[i] := read_channel(2)
+      ch3[i] := read_channel(3)
+      ch4[i] := read_channel(4)
+    
+    ' Display all series simultaneously
+    DEBUG(`Correlation PACK16 1024 @ch1 @ch2 @ch3 @ch4)
+    
+    ' Correlation visible in phase relationships

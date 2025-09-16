@@ -1,0 +1,18 @@
+{
+' Generated test program for example_092
+        org     0
+        
+' Generate color bars pattern
+color_bars
+        mov     x, #0
+        wrfast  #0, ##screen_buffer
+generate
+        mov     color, x
+        shl     color, #24      ' Shift to RGB position
+        wflong  color           ' Write pixel
+        incmod  x, #7           ' 8 color bars
+        djnz    pixels, #generate
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

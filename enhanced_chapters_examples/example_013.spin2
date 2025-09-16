@@ -1,0 +1,28 @@
+{
+' Generated test program for example_013
+        org     0
+        
+' Expanding spiral generator
+spiral
+        mov     angle, #0
+        mov     radius, #1
+draw_spiral
+        qrotate angle, radius
+        getqx   x
+        getqy   y
+        ' Convert to screen coordinates
+        sar     x, #16          ' Scale down
+        sar     y, #16
+        add     x, #320         ' Center X
+        add     y, #240         ' Center Y
+        ' Plot pixel (simplified)
+        call    #plot_pixel
+        ' Expand spiral
+        add     angle, ##$0400_0000   ' Rotate ~22.5 degrees
+        add     radius, ##100         ' Expand slowly
+        cmp     radius, ##30000 wcz
+   if_b jmp     #draw_spiral
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

@@ -1,0 +1,17 @@
+{
+' Generated test program for example_072
+        org     0
+        
+' COG 0: Read sensor
+' COG 1: Filter data
+' COG 2: Process signals
+' COG 3: Control motor
+' COG 4: Update display
+' COG 5: Handle communications
+' COG 6: Monitor safety
+' COG 7: Coordinate everything
+' All running simultaneously!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

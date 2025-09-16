@@ -1,0 +1,15 @@
+{
+' Generated test program for example_096
+        org     0
+        
+' FFT butterfly using CORDIC
+butterfly
+        setq    imag
+        qrotate real, twiddle   ' Complex multiply via rotation!
+        getqx   real_out
+        getqy   imag_out
+        ' One butterfly in 3 instructions!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

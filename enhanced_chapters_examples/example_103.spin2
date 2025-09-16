@@ -1,0 +1,85 @@
+{
+' Generated test program for example_103
+        org     0
+        
+' COG 0: Main Controller
+main_controller
+        call    #init_system
+main_loop
+        ' Read sensor hub
+        rdlong  distance, ##DISTANCE_SENSOR wz
+   if_z jmp     #too_close
+        ' Check for commands
+        rdlong  cmd, ##SERIAL_COMMAND wz
+   if_nz call   #process_command
+        ' Update motor speeds
+        call    #calculate_motion
+        wrlong  left_speed, ##LEFT_MOTOR
+        wrlong  right_speed, ##RIGHT_MOTOR
+        jmp     #main_loop
+' COG 1: Ultrasonic Sensor
+sensor_cog
+        ' Trigger ultrasonic pulse
+        drvh    #TRIGGER_PIN
+        waitx   ##1000
+        drvl    #TRIGGER_PIN
+        ' Measure echo time
+        waitpeq #ECHO_PIN, #ECHO_PIN
+        getct   start_time
+        waitpne #ECHO_PIN, #ECHO_PIN
+        getct   end_time
+        ' Calculate distance
+        sub     end_time, start_time
+        ' Convert to distance...
+        wrlong  distance, ##DISTANCE_SENSOR
+        waitx   ##5_000_000          ' 50ms between readings
+        jmp     #sensor_cog
+' COG 2: Left Motor Driver
+left_motor_cog
+        rdlong  speed, ##LEFT_MOTOR wz
+   if_z jmp     #left_motor_cog      ' No speed set
+        ' Generate motor control signals
+        ' ... PWM generation code
+        jmp     #left_motor_cog
+' COG 3: Right Motor Driver
+' (Similar to left motor)
+' COG 4: Serial Communications
+serial_cog
+        ' Check for incoming commands
+        testp   #RX_PIN wc
+  if_nc jmp     #serial_cog
+        call    #receive_byte
+        ' Build command...
+        wrlong  command, ##SERIAL_COMMAND
+        jmp     #serial_cog
+' COG 5: LED Status Display
+status_cog
+        rdlong  system_state, ##STATE_MAILBOX
+        ' Display state on LEDs
+        cmp     system_state, #STATE_RUNNING wz
+   if_z drvh    #GREEN_LED
+  if_nz drvl    #GREEN_LED
+        cmp     system_state, #STATE_ERROR wz
+   if_z drvh    #RED_LED
+  if_nz drvl    #RED_LED
+        waitx   ##10_000_000
+        jmp     #status_cog
+' COG 6: Safety Monitor
+safety_cog
+        ' Monitor critical systems
+        rdlong  battery, ##BATTERY_VOLTAGE
+        cmp     battery, ##MIN_VOLTAGE wcz
+   if_b wrlong  ##STATE_SHUTDOWN, ##STATE_MAILBOX
+        ' Check temperature
+        rdlong  temp, ##TEMPERATURE
+        cmp     temp, ##MAX_TEMP wcz
+   if_a wrlong  ##STATE_OVERHEAT, ##STATE_MAILBOX
+        jmp     #safety_cog
+' COG 7: Debug Output
+debug_cog
+        ' Output system state for debugging
+        ' ... debug code
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

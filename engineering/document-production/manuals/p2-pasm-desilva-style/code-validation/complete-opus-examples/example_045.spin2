@@ -1,0 +1,16 @@
+{
+' Generated test program for example_045
+        org     0
+        
+' 16.16 fixed point multiply
+fixed_mul
+        muls    a, b             ' Multiply
+        getmulh high            ' Get high part
+        shl     a, #16          ' Shift low part
+        shr     high, #16       ' Shift high part
+        or      a, high         ' Combine
+        ' Result in 16.16 format!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

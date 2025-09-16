@@ -1,0 +1,13 @@
+{
+' Generated test program for example_053
+        org     0
+        
+' Start multiple operations
+        qrotate angle1, radius
+        add     angle1, #1
+        qrotate angle1, radius  ' Starts immediately!
+        ' Both complete in ~56 clocks total
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

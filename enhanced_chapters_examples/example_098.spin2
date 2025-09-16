@@ -1,0 +1,19 @@
+{
+' Generated test program for example_098
+        org     0
+        
+' Producer COG
+producer
+        ' Generate data
+        call    #calculate_result
+        wrlong  result, ##MAILBOX_ADDR
+' Consumer COG
+consumer
+        rdlong  data, ##MAILBOX_ADDR wz
+   if_z jmp     #consumer              ' Wait for data
+        wrlong  #0, ##MAILBOX_ADDR     ' Clear mailbox
+        call    #process_data
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

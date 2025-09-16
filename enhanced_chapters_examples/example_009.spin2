@@ -1,0 +1,11 @@
+{
+' Generated test program for example_009
+        org     0
+        
+qrotate angle, ##$7FFF_FFFF
+        getqx   cos_value
+        getqy   sin_value
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

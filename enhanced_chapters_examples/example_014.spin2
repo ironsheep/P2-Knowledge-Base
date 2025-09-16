@@ -1,0 +1,25 @@
+{
+' Generated test program for example_014
+        org     0
+        
+' Audio tone generator using CORDIC
+tone_generator
+        mov     phase, #0
+        mov     frequency, ##$0100_0000  ' ~5.6 degrees per sample
+sample_loop
+        qrotate phase, ##$7FFF_FFFF     ' Unit circle
+        add     phase, frequency        ' Increment phase
+        ' Do other audio processing while waiting
+        rdlong  volume, ##volume_addr
+        getqy   sample                  ' Get sine value
+        sar     sample, #16             ' Scale to 16-bit
+        muls    sample, volume          ' Apply volume
+        ' Output to DAC
+        wypin   sample, #AUDIO_PIN
+        ' Wait for sample period (48kHz)
+        waitx   ##2083                  ' 100MHz / 48kHz
+        jmp     #sample_loop
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

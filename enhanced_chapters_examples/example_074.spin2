@@ -1,0 +1,19 @@
+{
+' Generated test program for example_074
+        org     0
+        
+' Before optimization: 11 clocks
+loop    rdlong  value, ptra      ' 3-9 clocks (avg 6)
+        add     value, #1        ' 2 clocks
+        wrlong  value, ptra      ' 3 clocks
+        add     ptra, #4         ' 2 clocks
+        djnz    count, #loop     ' 2 clocks
+' After optimization: 6 clocks!
+loop    rdlong  value, ptra++    ' 3-9 clocks, pointer incremented for free!
+        add     value, #1        ' 2 clocks
+        wrlong  value, --ptra++  ' 3 clocks, clever pointer work
+        djnz    count, #loop     ' 2 clocks
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

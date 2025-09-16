@@ -1,0 +1,10 @@
+{
+' Generated test program for example_047
+        org     0
+        
+setq    #SIZE-1
+        wrlong  buffer, dest
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

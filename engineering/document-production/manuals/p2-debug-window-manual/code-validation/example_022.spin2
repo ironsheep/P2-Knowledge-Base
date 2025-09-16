@@ -1,0 +1,9 @@
+PUB multi_cog_monitor()
+  launch_all_cogs()
+  create_cog_windows()
+  
+  repeat
+    poll_cog_status()
+    display_cog_states()
+    show_inter_cog_communication()
+    detect_deadlocks()

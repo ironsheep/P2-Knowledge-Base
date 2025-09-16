@@ -1,0 +1,12 @@
+{
+' Generated test program for example_040
+        org     0
+        
+' Just use PTRA for everything
+        mov     ptra, ##hub_address
+        rdlong  value, ptra++
+        ' That's all you really need!
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

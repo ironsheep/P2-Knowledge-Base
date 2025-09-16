@@ -1,0 +1,21 @@
+org     0
+' COG 0: Main game logic
+        coginit #1, @button_watcher, ##button_flag
+game_loop
+        ' Random delay
+        getrnd  delay
+        waitx   delay
+        drvh    #LED_PIN
+        wrlong  #0, ##button_flag
+        getct   start_time
+' Wait for button (no interrupt!)
+wait_press
+        rdlong  pressed, ##button_flag wz
+   if_z jmp     #wait_press
+        getct   end_time
+        sub     end_time, start_time
+        ' Display reaction time
+' COG 1: Button watcher
+        orgh    $400
+button_watcher
+        ' Your code here

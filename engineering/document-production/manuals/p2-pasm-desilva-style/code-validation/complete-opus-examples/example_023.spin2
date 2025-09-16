@@ -1,0 +1,13 @@
+{
+' Generated test program for example_023
+        org     0
+        
+jmp     #target        ' Jump to target
+        jmp     target         ' Jump to address in target register
+' Relative jumps
+        jmp     #$-4          ' Jump back 4 instructions
+        jmp     #$+8          ' Jump forward 8 instructions
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

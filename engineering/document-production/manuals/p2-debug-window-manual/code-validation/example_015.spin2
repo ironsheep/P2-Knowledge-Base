@@ -1,0 +1,13 @@
+PUB continuous_integration()
+  ' Connect to test framework
+  connect_ci_system()
+  
+  repeat
+    ' Wait for test trigger
+    wait_for_trigger()
+    
+    ' Run test suite
+    results := run_all_tests()
+    
+    ' Report via debug
+    DEBUG(`CI_REPORT 'results')

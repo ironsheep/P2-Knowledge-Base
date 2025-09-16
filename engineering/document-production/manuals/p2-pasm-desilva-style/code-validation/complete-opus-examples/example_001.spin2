@@ -1,0 +1,7 @@
+' LED Blinker - Your first PASM2 program!
+        org     0               ' Start at COG address 0
+        drvh    #56             ' Drive pin 56 high (LED on)
+        waitx   ##25_000_000    ' Wait ~0.25 seconds at 100MHz
+        drvl    #56             ' Drive pin 56 low (LED off)
+        waitx   ##25_000_000    ' Wait ~0.25 seconds
+        jmp     #$-4            ' Jump back 4 instructions

@@ -1,0 +1,13 @@
+{
+' Generated test program for example_004
+        org     0
+        
+' Basic rotation: rotate point (x,y) by angle
+        setq    y              ' Load Y into Q register
+        qrotate x, angle       ' Start rotation
+        getqx   new_x          ' Result: X' = X*cos(θ) - Y*sin(θ)
+        getqy   new_y          ' Result: Y' = X*sin(θ) + Y*cos(θ)
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}

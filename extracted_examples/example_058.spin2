@@ -1,0 +1,19 @@
+{
+' Generated test program for example_058
+        org     0
+        
+' Smart pin generates precise WS2812 timing
+ws2812_setup
+        wrpin   ##P_PULSE, #LED_PIN
+        wxpin   bit_timing, #LED_PIN
+        dirh    #LED_PIN
+send_rgb
+        shl     green, #8
+        or      green, red
+        shl     green, #8
+        or      green, blue
+        wypin   green, #LED_PIN  ' Send 24-bit RGB
+        
+        ' Minimal ending to make it compilable
+        jmp     #$
+}
