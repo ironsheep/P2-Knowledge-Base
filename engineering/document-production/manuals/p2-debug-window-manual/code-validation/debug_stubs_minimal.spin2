@@ -1,0 +1,560 @@
+'' debug_stubs_minimal.spin2
+'' Minimal stub implementations for P2 Debug Window Manual examples
+'' Makes all examples compilable with ~3 lines per method
+'' Total: ~500 lines for 160 methods
+
+CON
+  ' Simulation constants
+  DEMO_TEMP = 25
+  DEMO_PRESSURE = 1013
+  DEMO_HUMIDITY = 45
+  
+VAR
+  long sim_tick      ' Simulation counter
+  long mouse_x, mouse_y, mouse_btn
+  long event_queue[16]
+  byte event_ptr
+  
+' ============================================================================
+' SENSOR/INPUT METHODS (15 methods) - Returns realistic demo data
+' ============================================================================
+
+PUB read_sensor() : value
+  return (sim_tick++ // 1000)                    ' 0-999 cycling
+
+PUB read_temperature() : value  
+  return DEMO_TEMP + sin(sim_tick++, 5)          ' ±5°C variation
+
+PUB read_pressure() : value
+  return DEMO_PRESSURE + cos(sim_tick++, 20)     ' ±20 hPa variation
+
+PUB read_humidity() : value
+  return DEMO_HUMIDITY + sin(sim_tick++/2, 10)   ' ±10% variation
+
+PUB read_adc() : value
+  return sim_tick++ & $FFF                       ' 12-bit ADC simulation
+
+PUB read_channel(ch) : value
+  return (sim_tick++ * (ch+1)) & $FFF            ' Channel-specific data
+
+PUB read_input() : value
+  return ina[0..7]                               ' Read actual pins if desired
+
+PUB read_output() : value
+  return outa[0..7]                              ' Read output state
+
+PUB get_sample() : value
+  return sin(sim_tick++ * 10, 100)               ' Sine wave samples
+
+PUB get_audio_level() : value
+  return ||sin(sim_tick++ * 50, 100)             ' Audio level 0-100
+
+PUB get_value_at(addr) : value
+  return long[addr]                              ' Read actual memory
+
+PUB read_sensor_grid() : value
+  return sim_tick++ // 64                        ' 8x8 grid position
+
+PUB read_thermal_pixel(x, y) : value
+  return 20 + (x ^ y) // 10                      ' Pseudo-thermal pattern
+
+PUB debug_getkey() : key
+  key := $20 + (sim_tick++ // 95)                ' Cycle through printable chars
+
+PUB debug_get_hex() : value
+  return sim_tick++ & $FFFF                      ' Return test hex value
+
+PUB get_next_event() : event
+  return event_queue[event_ptr++ & $F]           ' Circular event buffer
+
+' ============================================================================
+' DISPLAY/DRAWING METHODS (33 methods) - Outputs debug commands
+' ============================================================================
+
+PUB draw_background()
+  DEBUG(`PLOT CLEAR COLOR BLACK)                 ' Clear to black
+
+PUB draw_grid(x, y, w, h, spacing) | i
+  repeat i from x to x+w step spacing
+    DEBUG(`PLOT LINE `(i, y, i, y+h) COLOR GRAY)
+
+PUB draw_cursor(x, y)
+  DEBUG(`PLOT LINE `(x-5, y, x+5, y) COLOR WHITE)
+  DEBUG(`PLOT LINE `(x, y-5, x, y+5) COLOR WHITE)
+
+PUB draw_waveform(samples, count) | i
+  repeat i from 0 to count-1
+    DEBUG(`PLOT POINT `(i, long[samples][i]))
+
+PUB draw_button(x, y, w, h, text)
+  DEBUG(`PLOT BOX `(x, y, w, h) COLOR WHITE)
+
+PUB draw_sprite(x, y, id)
+  DEBUG(`PLOT SPRITE 'id' AT `(x, y))
+
+PUB draw_text(x, y, str)
+  DEBUG(`PLOT TEXT `(x, y) 'str')
+
+PUB draw_instrument_face(x, y, radius)
+  DEBUG(`PLOT CIRCLE `(x, y, radius) COLOR WHITE)
+
+PUB draw_vu_meter_face(x, y)
+  draw_instrument_face(x, y, 50)                 ' Simplified
+
+PUB draw_vu_needle(x, y, angle)
+  DEBUG(`PLOT LINE `(x, y, x+cos(angle,40), y+sin(angle,40)))
+
+PUB draw_data()
+  DEBUG(`PLOT POINT 'sim_tick++')
+
+PUB draw_detailed_background()
+  draw_background()                               ' Simplified
+  draw_grid(0, 0, 400, 300, 20)
+
+PUB draw_channel_display(ch, value)
+  DEBUG(`PLOT TEXT `(10, ch*20) "CH" 'ch' ": " 'value')
+
+PUB draw_led_bars(value, max) | i
+  repeat i from 0 to value*10/max
+    DEBUG(`PLOT BOX `(i*12, 10, 10, 20))
+
+PUB draw_measurement_grid()
+  draw_grid(0, 0, 400, 300, 50)                  ' Standard grid
+
+PUB draw_overlays()
+  DEBUG(`PLOT TEXT `(10, 10) "OVERLAY")
+
+PUB draw_rotating_cube(angle)
+  DEBUG(`PLOT BOX `(100, 100, 50, 50))           ' Simplified
+
+PUB draw_scrollbar(x, y, h, pos)
+  DEBUG(`PLOT LINE `(x, y, x, y+h) COLOR GRAY)
+  DEBUG(`PLOT BOX `(x-2, y+pos, 5, 10) COLOR WHITE)
+
+PUB draw_temperature_scale(min, max)
+  DEBUG(`PLOT TEXT `(10, 20) 'min' "°C - " 'max' "°C")
+
+PUB display_menu(items, count) | i
+  repeat i from 0 to count-1
+    DEBUG(`PLOT TEXT `(10, i*20) 'items[i])
+
+PUB display_packet_hex(addr, len) | i
+  repeat i from 0 to len-1
+    DEBUG(hex(byte[addr+i], 2), " ")
+
+PUB display_waveform()
+  draw_waveform(@sim_tick, 100)                  ' Use sim data
+
+PUB redraw_entire_display()
+  draw_background()
+
+PUB redraw_item(id)
+  DEBUG(`PLOT UPDATE 'id')
+
+PUB redraw_region(x, y, w, h)
+  DEBUG(`PLOT REFRESH `(x, y, w, h))
+
+PUB show_key_metrics()
+  DEBUG("Metrics: ", udec(sim_tick), 13)
+
+PUB show_measurements()
+  DEBUG("Measure: ", udec(sim_tick++ // 100), 13)
+
+PUB show_packet_timing()
+  DEBUG("Timing: ", udec(sim_tick), " us", 13)
+
+PUB show_system_health()
+  DEBUG("Health: OK", 13)
+
+PUB show_thermal_statistics()
+  DEBUG("Thermal: ", udec(DEMO_TEMP), "°C", 13)
+
+PUB show_waveform_preview()
+  draw_waveform(@sim_tick, 50)
+
+PUB update_display_buffer()
+  DEBUG(`PLOT UPDATE)
+
+' ============================================================================
+' PROCESS/HANDLE METHODS (12 methods) - Event and input processing
+' ============================================================================
+
+PUB handle_mouse()
+  mouse_x := 200 + sin(sim_tick++, 100)
+  mouse_y := 150 + cos(sim_tick, 75)
+
+PUB handle_key(key)
+  event_queue[event_ptr++ & $F] := key
+
+PUB handle_timer()
+  sim_tick++
+
+PUB handle_custom(event)
+  event_queue[event_ptr++ & $F] := event
+
+PUB handle_generator_controls()
+  ' No-op for simulation
+
+PUB process_click()
+  if mouse_btn
+    handle_custom($CLICK)
+
+PUB process_keyboard()
+  handle_key(debug_getkey())
+
+PUB process_regular_key(key)
+  handle_key(key)
+
+PUB process_scope_controls()
+  ' No-op for simulation
+
+PUB process_value(val)
+  ' Store or process value
+  sim_tick := val
+
+PUB execute_button_action(id)
+  handle_custom($BUTTON | id)
+
+PUB execute_menu_item(item)
+  handle_custom($MENU | item)
+
+' ============================================================================
+' UPDATE METHODS (10 methods) - Display updates
+' ============================================================================
+
+PUB update_all_windows()
+  DEBUG(`PLOT UPDATE ALL)
+
+PUB update_data_region()
+  DEBUG(`PLOT UPDATE DATA)
+
+PUB update_dirty_regions()
+  DEBUG(`PLOT UPDATE DIRTY)
+
+PUB update_display()
+  DEBUG(`PLOT UPDATE)
+
+PUB update_slider_display(id, value)
+  DEBUG(`PLOT SLIDER 'id' VALUE 'value')
+
+PUB update_spectrum_display()
+  DEBUG(`PLOT UPDATE SPECTRUM)
+
+PUB update_sprite_position(id, x, y)
+  DEBUG(`PLOT SPRITE 'id' AT `(x, y))
+
+PUB update_status(msg)
+  DEBUG(`TERM STATUS 'msg')
+
+PUB update_via_crop(x, y, w, h)
+  DEBUG(`PLOT CROP `(x, y, w, h))
+
+' ============================================================================
+' UTILITY METHODS (75 methods) - Various helpers
+' ============================================================================
+
+PUB analyze_packet(addr, len) : valid
+  return true                                     ' Always valid for demo
+
+PUB analyze_timing_relationships() : result
+  return sim_tick & $FF
+
+PUB apply_parameter_change(param, value)
+  ' No-op for simulation
+
+PUB array_plotting(array, count) | i
+  repeat i from 0 to count-1
+    DEBUG(`PLOT POINT `(i, long[array][i]))
+
+PUB bits(value, n) : result
+  return value & ((1 << n) - 1)
+
+PUB capture_samples(buffer, count) | i
+  repeat i from 0 to count-1
+    long[buffer][i] := get_sample()
+
+PUB capture_and_display()
+  capture_samples(@sim_tick, 100)
+  display_waveform()
+
+PUB capture_and_fft(buffer, size)
+  capture_samples(buffer, size)
+  fft_transform(buffer, size)
+
+PUB capture_logic_samples(buffer, count) | i
+  repeat i from 0 to count-1
+    long[buffer][i] := ina
+
+PUB capture_logic_state() : state
+  return ina
+
+PUB capture_all_signals()
+  capture_samples(@sim_tick, 256)
+
+PUB capture_screenshot()
+  DEBUG(`PLOT SCREENSHOT)
+
+PUB capture_xy_samples(x_buf, y_buf, count) | i
+  repeat i from 0 to count-1
+    long[x_buf][i] := sin(i*10, 100)
+    long[y_buf][i] := cos(i*10, 100)
+
+PUB clear_display()
+  DEBUG(`PLOT CLEAR)
+
+PUB clear_screen()
+  DEBUG(`TERM CLEAR)
+
+PUB continuous_streaming()
+  ' Flag for continuous mode
+  sim_tick := -1
+
+PUB control(cmd)
+  handle_custom(cmd)
+
+PUB copy_selection()
+  ' No-op for simulation
+
+PUB crc_valid(data, len) : valid
+  return true                                     ' Always valid for demo
+
+PUB create_button_panel()
+  draw_button(10, 10, 50, 20, "OK")
+  draw_button(70, 10, 50, 20, "Cancel")
+
+PUB create_dashboard()
+  draw_background()
+  draw_grid(0, 0, 400, 300, 50)
+
+PUB create_generator_interface()
+  create_button_panel()
+
+PUB create_large_dataset() : addr
+  return @sim_tick                               ' Return some data
+
+PUB create_sliders()
+  update_slider_display(1, 50)
+  update_slider_display(2, 75)
+
+PUB data(value)
+  sim_tick := value
+
+PUB debug(msg)
+  DEBUG('msg', 13)
+
+PUB detect_rising_edge(old, new) : edge
+  return (new > old)
+
+PUB display(value)
+  DEBUG(udec(value), 13)
+
+PUB dump_memory(addr, len) | i
+  repeat i from 0 to len-1
+    DEBUG(hex(byte[addr+i], 2), " ")
+    if i & 15 == 15
+      DEBUG(13)
+
+PUB enable_interactive_controls()
+  mouse_btn := 1                                 ' Enable mouse
+
+PUB error_detected() : result
+  return false                                    ' No errors in demo
+
+PUB error_string() : str
+  return string("No error")
+
+PUB event_available() : result
+  return event_ptr > 0
+
+PUB fft_transform(buffer, size) | i
+  ' Fake FFT - just copy data
+  repeat i from 0 to size-1
+    long[buffer][i] := long[buffer][i] / 2
+
+PUB find_and_mark_hotspots() : count
+  return 3                                        ' Found 3 hotspots
+
+PUB find_item_at(x, y) : item
+  return (y / 20)                                ' Simple row calculation
+
+PUB frequency(hz)
+  sim_tick := hz
+
+PUB generate_sine(buffer, count, freq) | i
+  repeat i from 0 to count-1
+    long[buffer][i] := sin(i * freq, 100)
+
+PUB generate_square(buffer, count, freq) | i
+  repeat i from 0 to count-1
+    long[buffer][i] := (i / (count/freq)) & 1 * 100
+
+PUB generate_sawtooth(buffer, count, freq) | i
+  repeat i from 0 to count-1
+    long[buffer][i] := (i * freq) // 100
+
+PUB generate_triangle(buffer, count, freq) | i
+  repeat i from 0 to count-1
+    long[buffer][i] := abs((i * freq * 2) // 200 - 100)
+
+PUB generate_noise(buffer, count) | i
+  repeat i from 0 to count-1
+    long[buffer][i] := ?sim_tick // 100
+
+PUB highlight_button(id)
+  DEBUG(`PLOT HIGHLIGHT 'id')
+
+PUB highlight_error()
+  DEBUG(`PLOT COLOR RED)
+
+PUB highlight_menu_item(item)
+  DEBUG(`PLOT HIGHLIGHT MENU 'item')
+
+PUB issues() : count
+  return 0                                        ' No issues
+
+PUB key_left() : pressed
+  return false
+
+PUB key_pressed(key) : result
+  return debug_getkey() == key
+
+PUB key_right() : pressed  
+  return false
+
+PUB labels(str)
+  DEBUG('str')
+
+PUB leaks() : count
+  return 0                                        ' No memory leaks
+
+PUB load_configuration() : result
+  return true                                     ' Success
+
+PUB log_error_state(error)
+  DEBUG("ERROR: ", hex(error), 13)
+
+PUB longs(count) : size
+  return count * 4
+
+PUB memory() : free
+  return $7C000                                  ' Free hub RAM
+
+PUB monitor_performance() : fps
+  return 60                                       ' 60 FPS
+
+PUB mouse_over_slider(x, y) : over
+  return (y > 100 and y < 120)
+
+PUB output_to_dac(value)
+  ' Would output to DAC pin
+  outa[0] := value
+
+PUB overflows() : count
+  return 0
+
+PUB packet() : addr
+  return @sim_tick
+
+PUB packet_received() : result
+  return (sim_tick & $1F) == 0                   ' Every 32 ticks
+
+PUB palette(index) : color
+  return index * $111111                         ' Grayscale
+
+PUB paste_clipboard()
+  ' No-op
+
+PUB patterns() : count
+  return 5                                        ' 5 patterns available
+
+PUB perform_action_at(x, y)
+  handle_custom((y << 16) | x)
+
+PUB position() : pos
+  return sim_tick & $FF
+
+PUB print(str)
+  DEBUG('str')
+
+PUB queue_event(event)
+  event_queue[event_ptr++ & $F] := event
+
+PUB rate() : hz
+  return 1000                                    ' 1kHz rate
+
+PUB recognize_gesture() : gesture
+  return $SWIPE_LEFT
+
+PUB region_changed(x, y, w, h) : changed
+  return true
+
+PUB save_configuration() : result
+  return true                                    ' Success
+
+PUB scale_mouse_to_value(mouse, min, max) : value
+  return min + (mouse * (max - min)) / 400
+
+PUB scroll_down()
+  DEBUG(`TERM SCROLL DOWN)
+
+PUB scroll_up()
+  DEBUG(`TERM SCROLL UP)
+
+PUB set_parameter(param, value)
+  ' Store parameter
+  
+PUB set_thermal_palette(pal)
+  ' Set palette
+
+PUB setup_branded_display()
+  DEBUG(`TERM TITLE "P2 Debug Demo")
+
+PUB setup_dashboard_layers()
+  ' Setup layers
+
+PUB setup_scope_display()
+  DEBUG(`SCOPE Setup SIZE 400 300)
+
+PUB single_point_plotting(x, y)
+  DEBUG(`PLOT POINT `(x, y))
+
+PUB single_trigger() : triggered
+  return (sim_tick & $7F) == 0
+
+PUB snap_to_grid(value, grid) : snapped
+  return (value / grid) * grid
+
+PUB switch_to_window(id)
+  DEBUG(`WINDOW SELECT 'id')
+
+PUB temp_to_color(temp) : color
+  if temp < 20
+    color := $0000FF                             ' Blue = cold
+  elseif temp < 30  
+    color := $00FF00                             ' Green = normal
+  else
+    color := $FF0000                             ' Red = hot
+
+PUB test_failed() : result
+  return false
+
+PUB time_string() : str
+  return string("00:00:00")
+
+PUB traces() : count
+  return 4                                        ' 4 traces
+
+PUB transmission() : active
+  return true
+
+PUB undo_last_action()
+  ' No-op
+
+PUB xy_plotting(x, y)
+  DEBUG(`PLOT XY `(x, y))
+
+PUB zoom_in()
+  DEBUG(`PLOT ZOOM 2.0)
+
+PUB zoom_range(min, max)
+  DEBUG(`PLOT RANGE 'min' 'max')

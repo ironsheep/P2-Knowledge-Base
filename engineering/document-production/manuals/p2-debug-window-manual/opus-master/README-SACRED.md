@@ -2,10 +2,12 @@
 
 ## This Directory Contains the Opus-Generated Master
 
-**File**: `COMPLETE-OPUS-MASTER.md` (to be generated)
+**Files**: 
+- `complete-opus-master-v0.md` - Full manual (10,370 lines) assembled from all chapters
+- `summary-opus-master-v0.md` - Condensed summary version (2,672 lines)
 **Model**: Claude Opus 4.1
-**Status**: READ-ONLY (will be chmod 444 after generation)
-**Purpose**: P2 Debug Window Manual - Complete master document
+**Status**: READ-ONLY (version 0 - original generation)
+**Purpose**: P2 Debug Window Manual - Initial versions before any fixes
 
 ## What This Will Contain
 
@@ -48,12 +50,35 @@ This master will be generated through:
 3. Integration of all discovered patterns and techniques
 4. Validation against P2 knowledge base and compiler
 
+## Directory Structure
+
+```
+opus-master/
+├── README-SACRED.md              # This file - protection notice
+├── GENERATION-SUMMARY.md         # How this was created
+├── complete-opus-master-v0.md   # The full assembled manual (v0)
+├── summary-opus-master-v0.md    # The condensed summary (v0)
+└── chapters/                     # Individual chapter files
+    ├── chapter-01-vision-gap.md
+    ├── chapter-02-terminal-mastery.md
+    ├── ... (all 14 chapters)
+    ├── appendix-a-command-reference.md
+    ├── appendix-b-packed-formats.md
+    ├── appendix-c-performance-guide.md
+    ├── appendix-d-examples-library.md
+    └── appendix-e-hover-coordinates.md
+```
+
 ## Directory Locations
 
 - **Reference (READ-ONLY)**: `/engineering/document-production/manuals/p2-debug-window-manual/opus-master/`
 - **Working copies**: `/engineering/document-production/workspace/p2-debug-window-manual/`
 - **PDF Generation**: `/engineering/pdf-forge/production/p2-debug-window-manual/`
 - **Deployment**: `/engineering/document-production/outbound/p2-debug-window-manual/`
+- **Code Validation**: `/engineering/document-production/manuals/p2-debug-window-manual/code-validation/`
+- **Examples Library**: `/engineering/document-production/manuals/p2-debug-window-manual/examples-library/`
+- **Drafts**: `/engineering/document-production/manuals/p2-debug-window-manual/drafts/`
+- **Planning**: `/engineering/document-production/manuals/p2-debug-window-manual/planning/`
 
 ## Protection Status
 

@@ -1,0 +1,47 @@
+' Test file to validate v1 manual examples compile
+' This includes the stub definitions and a sample example from the manual
+
+'==============================================================================
+' Debug Window Manual - Helper Method Stubs (abbreviated for test)
+'==============================================================================
+
+CON
+  STUB_VERSION = 1
+  
+VAR
+  long demo_tick          
+  long ev_count           
+  long demo_buffer[256]   
+  long demo_var           
+
+' Sample stub implementations (abbreviated)
+PRI read_adc() : v = demo_tick++ // 4096            
+PRI read_sensor() : v = demo_tick++ // 100          
+PRI draw_grid(x,y,w,h,s) ' Draw grid stub                      
+PRI get_temperature() : v = 20 + demo_tick++/100    
+PRI compute_fft() = demo_tick++                     
+
+' Example from manual - adaptive_update_rates
+PUB adaptive_update_rates() | critical, normal, idle
+  repeat
+    critical := measure_signal_activity()
+    
+    if critical > 80
+      set_all_window_rates(60)      ' 60Hz for critical
+    elseif critical > 50  
+      set_all_window_rates(30)      ' 30Hz for active
+    else
+      set_all_window_rates(10)      ' 10Hz for idle
+      
+    ' Individual window optimization
+    optimize_individual_windows()
+    waitms(100)
+
+' Required stub methods for this example
+PRI measure_signal_activity() : v = demo_tick++ // 100
+PRI set_all_window_rates(rate)
+PRI optimize_individual_windows()
+
+PUB main()
+  ' Test that it compiles
+  adaptive_update_rates()
