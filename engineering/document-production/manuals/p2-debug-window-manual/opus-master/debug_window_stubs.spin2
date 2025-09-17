@@ -1,0 +1,693 @@
+## Helper Method Stubs
+
+The following helper methods are provided to allow all examples in this manual to compile and run without external hardware. They provide simulated data and basic functionality. In real applications, you would replace these with actual hardware interfaces.
+
+```spin2
+'==============================================================================
+' Debug Window Manual - Helper Method Stubs
+' Auto-generated minimal implementations for example compilation
+'==============================================================================
+'
+' These are minimal one-line stubs that allow all examples to compile and run
+' without external hardware. They provide simulated data and basic functionality.
+'
+' IMPORTANT: These are demonstration stubs only. In real applications, you would
+' replace these with actual hardware interfaces and proper implementations.
+'
+'==============================================================================
+
+CON
+  ' Stub configuration constants
+  STUB_VERSION = 1
+  
+VAR
+  ' Shared simulation variables
+  long demo_tick          ' Global counter for simulated data
+  long ev_count           ' Event counter
+  long demo_buffer[256]   ' Shared buffer for capture simulations
+  long demo_var           ' General purpose variable
+
+'------------------------------------------------------------------------------
+' STUB IMPLEMENTATIONS
+'------------------------------------------------------------------------------
+
+
+' Sensor/Input Reading Methods
+PRI read_accel() : v = demo_tick++ & $FFFF         ' Generic read
+PRI read_actual_position() : v = demo_tick & $1FF            ' Position value
+PRI read_adc() : v = demo_tick++ // 4096            ' 12-bit ADC simulation
+PRI read_adc_16bit() : v = demo_tick++ // 4096            ' 12-bit ADC simulation
+PRI read_adc_fast() : v = demo_tick++ // 4096            ' 12-bit ADC simulation
+PRI read_analog_input() : v = demo_tick & $FF             ' 8-bit analog value
+PRI read_channel_0() : v = demo_tick++ & $FFFF         ' Generic read
+PRI read_channel_1() : v = demo_tick++ & $FFFF         ' Generic read
+PRI read_channel_2() : v = demo_tick++ & $FFFF         ' Generic read
+PRI read_channel_3() : v = demo_tick++ & $FFFF         ' Generic read
+PRI read_encoder() : v = demo_tick++ & $FFFF         ' Generic read
+PRI read_fast_sensor() : v = demo_tick++ // 100           ' Sensor range 0-99
+PRI read_flow() : v = demo_tick++ & $FFFF         ' Generic read
+PRI read_humidity() : v = demo_tick++ & $FFFF         ' Generic read
+PRI read_input() : v = demo_tick++ & $FFFF         ' Generic read
+PRI read_motor_current() : v = demo_tick++ & $FFFF         ' Generic read
+PRI read_output() : v = demo_tick++ & $FFFF         ' Generic read
+PRI read_pressure() : v = demo_tick++ & $FFFF         ' Generic read
+PRI read_process_variable() : v = demo_tick++ & $FFFF         ' Generic read
+PRI read_sensor() : v = demo_tick++ // 100           ' Sensor range 0-99
+PRI read_sensor_value() : v = demo_tick++ // 100           ' Sensor range 0-99
+PRI read_stack_depth() : v = demo_tick++ & $FFFF         ' Generic read
+PRI read_temp() : v = 20 + demo_tick++ // 100      ' Temperature simulation
+PRI read_temp_power() : v = 20 + demo_tick++ // 100      ' Temperature simulation
+PRI read_temperature() : v = 20 + demo_tick++ // 100      ' Temperature simulation
+PRI read_voltage() : v = demo_tick++ & $FFFF         ' Generic read
+PRI read_waveform_sample() : v = demo_tick++ & $FFFF         ' Generic read
+
+' Data Getter Methods
+PRI get_active_zone() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_amplitude_setting() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_audio_level() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_changed_region() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_control_max() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_control_min() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_control_range() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_control_type() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_control_value() : v = demo_tick++                  ' Incrementing value
+PRI get_core_temp() : v = 20 + demo_tick++ // 100      ' Temperature simulation
+PRI get_counter_value() : v = demo_tick++                  ' Incrementing value
+PRI get_cpu_load() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_cpu_usage() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_cursor_x() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_engine_rpm() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_engine_temp() : v = 20 + demo_tick++ // 100      ' Temperature simulation
+PRI get_env() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_error_code() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_error_count() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_event_states() : v = (demo_tick >> 4) & $F       ' State machine 0-15
+PRI get_flag_byte() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_free_memory() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_frequency_setting() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_fuel_level() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_hover_target() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_hover_topic() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_led_color() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_led_state() : v = (demo_tick >> 4) & $F       ' State machine 0-15
+PRI get_lock_owner() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_memory_usage() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_memory_used() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_message_count() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_message_flow() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_parameter() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_password() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_pin_mode() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_pin_value() : v = demo_tick++                  ' Incrementing value
+PRI get_pipeline_state() : v = (demo_tick >> 4) & $F       ' State machine 0-15
+PRI get_pressed() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_pressed_button() : v = demo_tick & 1                ' Button state 0/1
+PRI get_profile_sample() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_register_name() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_register_value() : v = demo_tick++                  ' Incrementing value
+PRI get_rpm() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_rx_count() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_scroll_message() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_sensor_reading() : v = demo_tick++ // 100           ' Sensor range 0-99
+PRI get_slider_value() : v = demo_tick++                  ' Incrementing value
+PRI get_speed() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_state() : v = (demo_tick >> 4) & $F       ' State machine 0-15
+PRI get_status_label() : v = (demo_tick >> 4) & $F       ' State machine 0-15
+PRI get_status_severity() : v = (demo_tick >> 4) & $F       ' State machine 0-15
+PRI get_switch() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_system_state() : v = (demo_tick >> 4) & $F       ' State machine 0-15
+PRI get_system_status() : v = (demo_tick >> 4) & $F       ' State machine 0-15
+PRI get_target_position() : v = demo_tick & $1FF            ' Position value
+PRI get_temperature() : v = 20 + demo_tick++ // 100      ' Temperature simulation
+PRI get_tx_count() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_user_selection() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_value() : v = demo_tick++                  ' Incrementing value
+PRI get_vehicle_speed() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_warning_flags() : v = demo_tick++ & $FFFF         ' Generic read
+PRI get_waveform_selection() : v = demo_tick++ & $FFFF         ' Generic read
+
+' Drawing/Display Methods
+PRI draw_activity(x, y)                               ' Generic draw
+PRI draw_all(x, y)                               ' Generic draw
+PRI draw_check_mark(x, y)                               ' Generic draw
+PRI draw_cog_status(x, y)                               ' Generic draw
+PRI draw_complete_display(x, y)                               ' Generic draw
+PRI draw_control_panel(x, y)                               ' Generic draw
+PRI draw_gate(x, y)                               ' Generic draw
+PRI draw_gauge_at(x, y, v)                             ' Draw gauge
+PRI draw_gauge_background(x, y, v)                             ' Draw gauge
+PRI draw_gauge_needle(x, y, v)                             ' Draw gauge
+PRI draw_gauge_numbers(x, y, v)                             ' Draw gauge
+PRI draw_needle_at(x, y)                               ' Generic draw
+PRI draw_pin(x, y)                               ' Generic draw
+PRI draw_x_mark(x, y)                               ' Generic draw
+
+' Drawing/Display Methods
+PRI render_frame(x, y)                               ' Generic draw
+
+' Drawing/Display Methods
+PRI display_can_message(x, y)                               ' Generic draw
+PRI display_code_coverage(x, y)                               ' Generic draw
+PRI display_current_mode(x, y)                               ' Generic draw
+PRI display_spectrum(x, y)                               ' Generic draw
+PRI display_spi_results(x, y)                               ' Generic draw
+PRI display_values(x, y)                               ' Generic draw
+PRI display_waveform(x, y)                               ' Generic draw
+
+' Update/Setter Methods
+PRI update_alert_section(v)                                  ' Set value
+PRI update_all_displays()                                    ' Update display
+PRI update_analog_meter(v)                                  ' Set value
+PRI update_bar_graph(v)                                  ' Set value
+PRI update_communication_matrix(v)                                  ' Set value
+PRI update_communication_section(v)                                  ' Set value
+PRI update_configuration(v)                                  ' Set value
+PRI update_control_display()                                    ' Update display
+PRI update_cpu_meters(v)                                  ' Set value
+PRI update_critical_values(v) : r = v                           ' Set and return value
+PRI update_data_zone(v) : r = v                           ' Set and return value
+PRI update_detail_view(v)                                  ' Set value
+PRI update_diagnostics(v)                                  ' Set value
+PRI update_digital_display()                                    ' Update display
+PRI update_digital_readout(v)                                  ' Set value
+PRI update_displays()                                    ' Update display
+PRI update_event_logic(v)                                  ' Set value
+PRI update_important_values(v) : r = v                           ' Set and return value
+PRI update_io_monitors(v)                                  ' Set value
+PRI update_led_states(v)                                  ' Set value
+PRI update_memory_display()                                    ' Update display
+PRI update_memory_field(v)                                  ' Set value
+PRI update_network_stats(v)                                  ' Set value
+PRI update_overview_data(v) : r = v                           ' Set and return value
+PRI update_parameter_display()                                    ' Update display
+PRI update_peak_indicator(v)                                  ' Set value
+PRI update_performance_baselines(v)                                  ' Set value
+PRI update_power_metrics(v)                                  ' Set value
+PRI update_sensor_section(v)                                  ' Set value
+PRI update_signal_scope(v)                                  ' Set value
+PRI update_spectrum_fft(v)                                  ' Set value
+PRI update_state_logic(v)                                  ' Set value
+PRI update_status_panel(v)                                  ' Set value
+PRI update_status_values(v) : r = v                           ' Set and return value
+PRI update_thermal_display()                                    ' Update display
+PRI update_trend_chart(v)                                  ' Set value
+PRI update_trends_plot(v)                                  ' Set value
+PRI update_truth_table(v)                                  ' Set value
+PRI update_turn_signals(v)                                  ' Set value
+PRI update_uptime_field(v)                                  ' Set value
+PRI update_vitals_plot(v)                                  ' Set value
+
+' Update/Setter Methods
+PRI set_all_window_rates(v)                                  ' Set value
+PRI set_channel_color(v)                                  ' Set value
+PRI set_color(v)                                  ' Set value
+PRI set_control_value(v) : r = v                           ' Set and return value
+PRI set_dac(v)                                  ' Set value
+PRI set_exit_code(v)                                  ' Set value
+PRI set_frequency_range(v)                                  ' Set value
+PRI set_gain(v)                                  ' Set value
+PRI set_label(v)                                  ' Set value
+PRI set_mode(v)                                  ' Set value
+PRI set_motor(v)                                  ' Set value
+PRI set_pwm(v)                                  ' Set value
+PRI set_range(v)                                  ' Set value
+PRI set_window_sync_group(v)                                  ' Set value
+PRI set_window_update_rate(v)                                  ' Set value
+
+' Processing/Computation Methods
+PRI process_analyze_keys() : v = demo_tick++                  ' Process simulation
+PRI process_commands() : v = demo_tick++                  ' Process simulation
+PRI process_configure_keys() : v = demo_tick++                  ' Process simulation
+PRI process_control_inputs() : v = demo_tick++                  ' Process simulation
+PRI process_monitor_keys() : v = demo_tick++                  ' Process simulation
+PRI process_next_item() : v = demo_tick++                  ' Process simulation
+
+' Processing/Computation Methods
+PRI compute_fft() : v = demo_tick * 42               ' FFT simulation
+PRI compute_frequency_response() : v = demo_tick++                  ' Process simulation
+PRI compute_ifft() : v = demo_tick * 42               ' FFT simulation
+PRI compute_spectrum() : v = demo_tick++                  ' Process simulation
+
+' Processing/Computation Methods
+PRI calculate_bpfi() : v = demo_tick++                  ' Process simulation
+PRI calculate_bpfo() : v = demo_tick++                  ' Process simulation
+PRI calculate_bsf() : v = demo_tick++                  ' Process simulation
+PRI calculate_bus_utilization() : v = demo_tick++                  ' Process simulation
+PRI calculate_correlation() : v = demo_tick++                  ' Process simulation
+PRI calculate_duty_cycle() : v = demo_tick++                  ' Process simulation
+PRI calculate_event_rate() : v = demo_tick++                  ' Process simulation
+PRI calculate_fall_time() : v = demo_tick++                  ' Process simulation
+PRI calculate_fft() : v = demo_tick * 42               ' FFT simulation
+PRI calculate_ftf() : v = demo_tick++                  ' Process simulation
+PRI calculate_health_score() : v = demo_tick++                  ' Process simulation
+PRI calculate_mean() : v = demo_tick // 10              ' Average calculation
+PRI calculate_overshoot() : v = demo_tick++                  ' Process simulation
+PRI calculate_period() : v = demo_tick++                  ' Process simulation
+PRI calculate_phase_shift() : v = demo_tick++                  ' Process simulation
+PRI calculate_rise_time() : v = demo_tick++                  ' Process simulation
+PRI calculate_snr() : v = demo_tick++                  ' Process simulation
+PRI calculate_stdev() : v = demo_tick++                  ' Process simulation
+PRI calculate_thd() : v = demo_tick++                  ' Process simulation
+PRI calculate_thd_plus_n() : v = demo_tick++                  ' Process simulation
+PRI calculate_variance() : v = demo_tick++                  ' Process simulation
+PRI calculate_vavg() : v = demo_tick++                  ' Process simulation
+PRI calculate_vpp() : v = demo_tick++                  ' Process simulation
+PRI calculate_vrms() : v = demo_tick++                  ' Process simulation
+
+' Processing/Computation Methods
+PRI analyze_cache_performance() : v = demo_tick++                  ' Process simulation
+PRI analyze_correlation() : v = demo_tick++                  ' Process simulation
+PRI analyze_deadlock() : v = demo_tick++                  ' Process simulation
+PRI analyze_problem() : v = demo_tick++                  ' Process simulation
+PRI analyze_transaction() : v = demo_tick++                  ' Process simulation
+PRI analyze_trigger_buffer() : v = demo_tick++                  ' Process simulation
+PRI analyze_waveform() : v = demo_tick++                  ' Process simulation
+
+' Event Handler Methods
+PRI handle_button() = ev_count++                        ' Event handler
+PRI handle_button_press() = ev_count++                        ' Event handler
+PRI handle_keyboard_events() = ev_count++                        ' Event handler
+PRI handle_mouse() = ev_count++                        ' Event handler
+PRI handle_mouse_events() = ev_count++                        ' Event handler
+PRI handle_normal_key() = ev_count++                        ' Event handler
+PRI handle_plot_click() = ev_count++                        ' Event handler
+PRI handle_slider() = ev_count++                        ' Event handler
+
+' Initialization Methods
+PRI init() = demo_tick := 0                    ' Initialize
+
+' Miscellaneous Methods
+PRI activate_emergency_display() : v = demo_tick++                  ' Returns value
+PRI add_field()                                    ' Action stub
+PRI add_item()                                    ' Action stub
+PRI add_sample() : ptr = @demo_buffer                ' Return buffer
+PRI allocate_bandwidth()                                    ' Action stub
+PRI and()                                    ' Action stub
+PRI angle()                                    ' Action stub
+PRI angle_difference()                                    ' Action stub
+PRI apply_a_weighting()                                    ' Action stub
+PRI apply_blackman()                                    ' Action stub
+PRI apply_blackman_window()                                    ' Action stub
+PRI apply_channel_value()                                    ' Action stub
+PRI apply_control_output()                                    ' Action stub
+PRI apply_control_value()                                    ' Action stub
+PRI apply_filter()                                    ' Action stub
+PRI apply_hamming()                                    ' Action stub
+PRI apply_lowpass_filter()                                    ' Action stub
+PRI apply_lpf()                                    ' Action stub
+PRI apply_rectangular()                                    ' Action stub
+PRI apply_slider_value()                                    ' Action stub
+PRI apply_switch_setting()                                    ' Action stub
+PRI apply_value()                                    ' Action stub
+PRI apply_window()                                    ' Action stub
+PRI apply_window_function()                                    ' Action stub
+PRI arm_trigger()                                    ' Action stub
+PRI array_plotting()                                    ' Action stub
+PRI atan2()                                    ' Action stub
+PRI auto_tune_pid()                                    ' Action stub
+PRI aware()                                    ' Action stub
+PRI background()                                    ' Action stub
+PRI band()                                    ' Action stub
+PRI bandwidth_available()                                    ' Action stub
+PRI bits()                                    ' Action stub
+PRI bright_color()                                    ' Action stub
+PRI buffer()                                    ' Action stub
+PRI button()                                    ' Action stub
+PRI buttons()                                    ' Action stub
+PRI calculate()                                    ' Action stub
+PRI calibration_mode()                                    ' Action stub
+PRI capture_all_windows() : ptr = @demo_buffer                ' Return buffer
+PRI capture_and_analyze() : ptr = @demo_buffer                ' Return buffer
+PRI capture_and_compute_spectrum() : v = demo_tick++                  ' Process simulation
+PRI capture_audio() : ptr = @demo_buffer                ' Return buffer
+PRI capture_baseline() : ptr = @demo_buffer                ' Return buffer
+PRI capture_buffer() : ptr = @demo_buffer                ' Return buffer
+PRI capture_debug_frame() : ptr = @demo_buffer                ' Return buffer
+PRI capture_debug_log() : ptr = @demo_buffer                ' Return buffer
+PRI capture_io_state() : ptr = @demo_buffer                ' Return buffer
+PRI capture_logic_state() : ptr = @demo_buffer                ' Return buffer
+PRI capture_more_data() : ptr = @demo_buffer                ' Return buffer
+PRI capture_multichannel() : ptr = @demo_buffer                ' Return buffer
+PRI capture_rf_spectrum() : ptr = @demo_buffer                ' Return buffer
+PRI capture_runt_event() : ptr = @demo_buffer                ' Return buffer
+PRI capture_samples() : ptr = @demo_buffer                ' Return buffer
+PRI capture_serial_stream() : ptr = @demo_buffer                ' Return buffer
+PRI capture_time_domain() : ptr = @demo_buffer                ' Return buffer
+PRI capture_triggered_event() : ptr = @demo_buffer                ' Return buffer
+PRI capture_waveform() : ptr = @demo_buffer                ' Return buffer
+PRI changed()                                    ' Action stub
+PRI changes()                                    ' Action stub
+PRI channels()                                    ' Action stub
+PRI chapters()                                    ' Action stub
+PRI character()                                    ' Action stub
+PRI check_ack() : v = demo_tick & 1                 ' Boolean check
+PRI check_alarm_zones() : v = demo_tick & 1                 ' Boolean check
+PRI check_and_display_errors() : v = demo_tick & 1                 ' Boolean check
+PRI check_breakpoints() : v = demo_tick & 1                 ' Boolean check
+PRI check_communications() : v = demo_tick & 1                 ' Boolean check
+PRI check_compliance() : v = demo_tick & 1                 ' Boolean check
+PRI check_memory_integrity() : v = demo_tick & 1                 ' Boolean check
+PRI check_memory_usage() : v = demo_tick & 1                 ' Boolean check
+PRI check_peak_at_frequency() : v = demo_tick & 1                 ' Boolean check
+PRI check_protocol_patterns() : v = demo_tick & 1                 ' Boolean check
+PRI check_temperatures() : v = demo_tick & 1                 ' Boolean check
+PRI check_timing_margins() : v = demo_tick & 1                 ' Boolean check
+PRI check_voltage_tolerances() : v = demo_tick & 1                 ' Boolean check
+PRI chipused()                                    ' Action stub
+PRI chr_()                                    ' Action stub
+PRI clear_all_leds() = demo_tick := 0                    ' Reset state
+PRI clear_area() = demo_tick := 0                    ' Reset state
+PRI clear_gauge_area() = demo_tick := 0                    ' Reset state
+PRI colors()                                    ' Action stub
+PRI compress_bundle()                                    ' Action stub
+PRI compress_frame()                                    ' Action stub
+PRI configure_etm(v)                                    ' Configure
+PRI connect_jtag()                                    ' Action stub
+PRI contains_decimal()                                    ' Action stub
+PRI context()                                    ' Action stub
+PRI coordinate_all_windows()                                    ' Action stub
+PRI count_edges()                                    ' Action stub
+PRI count_peaks()                                    ' Action stub
+PRI count_waiting_cogs()                                    ' Action stub
+PRI count_zero_crossings()                                    ' Action stub
+PRI create_button_group()                                    ' Action stub
+PRI create_fft_window()                                    ' Action stub
+PRI create_logic_window()                                    ' Action stub
+PRI create_meter_group()                                    ' Action stub
+PRI create_plot_area()                                    ' Action stub
+PRI create_plot_window()                                    ' Action stub
+PRI create_scope_window()                                    ' Action stub
+PRI create_tab()                                    ' Action stub
+PRI create_window()                                    ' Action stub
+PRI current()                                    ' Action stub
+PRI dark_color()                                    ' Action stub
+PRI data()                                    ' Action stub
+PRI data_changed()                                    ' Action stub
+PRI date_string()                                    ' Action stub
+PRI debug()                                    ' Action stub
+PRI dec_()                                    ' Action stub
+PRI decode_can_message()                                    ' Action stub
+PRI decode_escape_sequence()                                    ' Action stub
+PRI decode_i2c_state()                                    ' Action stub
+PRI decode_protocols()                                    ' Action stub
+PRI decode_uart()                                    ' Action stub
+PRI decrease_fine()                                    ' Action stub
+PRI decrease_range()                                    ' Action stub
+PRI decrease_selected_value()                                    ' Action stub
+PRI demonstrate_applications()                                    ' Action stub
+PRI demonstrate_basic_debug()                                    ' Action stub
+PRI demonstrate_custom_protocol()                                    ' Action stub
+PRI demonstrate_i2c_read() : v = demo_tick++                  ' Returns value
+PRI demonstrate_performance()                                    ' Action stub
+PRI demonstrate_spi_fullduplex()                                    ' Action stub
+PRI demonstrate_uart_frame()                                    ' Action stub
+PRI depth()                                    ' Action stub
+PRI describe_anomaly()                                    ' Action stub
+PRI detect_anomaly()                                    ' Action stub
+PRI detect_deadlock()                                    ' Action stub
+PRI detect_glitches()                                    ' Action stub
+PRI detect_imbalance()                                    ' Action stub
+PRI detect_misalignment() : v = demo_tick++                  ' Returns value
+PRI detect_slider()                                    ' Action stub
+PRI detect_stop_condition()                                    ' Action stub
+PRI detect_switch()                                    ' Action stub
+PRI diagnose_comm_problem()                                    ' Action stub
+PRI diagnose_communication_issues() : v = demo_tick++                  ' Returns value
+PRI dimmer_color()                                    ' Action stub
+PRI direction()                                    ' Action stub
+PRI disable_debug_windows() = demo_tick := demo_tick ^ 1       ' Toggle enable
+PRI disable_low_priority_windows() = demo_tick := demo_tick ^ 1       ' Toggle enable
+PRI display() : v = demo_tick++                  ' Returns value
+PRI displays() : v = demo_tick++                  ' Returns value
+PRI distance() : v = demo_tick++                  ' Returns value
+PRI distribute_by_priority() : v = demo_tick++                  ' Returns value
+PRI draw()                                    ' Action stub
+PRI dump_memory()                                    ' Action stub
+PRI enable_debug_windows() = demo_tick := demo_tick ^ 1       ' Toggle enable
+PRI end_drag_operation()                                    ' Action stub
+PRI end_input_mode()                                    ' Action stub
+PRI entry()                                    ' Action stub
+PRI erase_needle_at()                                    ' Action stub
+PRI error_detected()                                    ' Action stub
+PRI error_log_review()                                    ' Action stub
+PRI execute_menu_item()                                    ' Action stub
+PRI execute_test()                                    ' Action stub
+PRI exit()                                    ' Action stub
+PRI exp()                                    ' Action stub
+PRI export_configuration(v)                                    ' Configure
+PRI export_error_log()                                    ' Action stub
+PRI export_performance_data()                                    ' Action stub
+PRI export_test_results()                                    ' Action stub
+PRI extract_trend()                                    ' Action stub
+PRI fade_color()                                    ' Action stub
+PRI fdec()                                    ' Action stub
+PRI fill_buffer()                                    ' Action stub
+PRI find_peak_bin() : v = demo_tick++                  ' Returns value
+PRI flicker()                                    ' Action stub
+PRI generate_bundle_id()                                    ' Action stub
+PRI generate_complex_signal()                                    ' Action stub
+PRI generate_dual_waveform()                                    ' Action stub
+PRI generate_markdown_section()                                    ' Action stub
+PRI generate_sawtooth()                                    ' Action stub
+PRI generate_sine()                                    ' Action stub
+PRI generate_sine_wave()                                    ' Action stub
+PRI generate_square()                                    ' Action stub
+PRI generate_test_report()                                    ' Action stub
+PRI generate_test_signal()                                    ' Action stub
+PRI generate_test_tone()                                    ' Action stub
+PRI generate_triangle()                                    ' Action stub
+PRI getct() : v = demo_tick++                  ' Returns value
+PRI headers()                                    ' Action stub
+PRI hide_help()                                    ' Action stub
+PRI highlight_control()                                    ' Action stub
+PRI highlight_error_sources()                                    ' Action stub
+PRI i2c_byte_complete()                                    ' Action stub
+PRI i2c_start_detected()                                    ' Action stub
+PRI identify_drag_target() : v = demo_tick++                  ' Returns value
+PRI identify_emission_sources() : v = demo_tick++                  ' Returns value
+PRI identify_hot_spots()                                    ' Action stub
+PRI identify_voltage_problems()                                    ' Action stub
+PRI in_slider()                                    ' Action stub
+PRI increase_fine()                                    ' Action stub
+PRI increase_range()                                    ' Action stub
+PRI increase_selected_value()                                    ' Action stub
+PRI index()                                    ' Action stub
+PRI indicators()                                    ' Action stub
+PRI intensity_to_color()                                    ' Action stub
+PRI interpolate()                                    ' Action stub
+PRI interrupt()                                    ' Action stub
+PRI ip_string()                                    ' Action stub
+PRI is_active() : v = demo_tick & 1                 ' Boolean check
+PRI key_pressed()                                    ' Action stub
+PRI labels()                                    ' Action stub
+PRI limit()                                    ' Action stub
+PRI load_baseline()                                    ' Action stub
+PRI load_configuration(v)                                    ' Configure
+PRI load_gauge_layers()                                    ' Action stub
+PRI load_pid_parameters()                                    ' Action stub
+PRI log_fail()                                    ' Action stub
+PRI log_failure_details()                                    ' Action stub
+PRI log_glitch_event()                                    ' Action stub
+PRI log_pass()                                    ' Action stub
+PRI log_value()                                    ' Action stub
+PRI longfill()                                    ' Action stub
+PRI longmove()                                    ' Action stub
+PRI longs()                                    ' Action stub
+PRI measure_actual_sample_rate() : ptr = @demo_buffer                ' Return buffer
+PRI measure_all_tasks() : v = demo_tick++                  ' Returns value
+PRI measure_amplitude() : v = demo_tick++                  ' Returns value
+PRI measure_bandwidth() : v = demo_tick++                  ' Returns value
+PRI measure_cog_usage() : v = demo_tick++                  ' Returns value
+PRI measure_distance() : v = demo_tick++                  ' Returns value
+PRI measure_emissions() : v = demo_tick++                  ' Returns value
+PRI measure_impedance() : v = demo_tick++                  ' Returns value
+PRI measure_memory_usage() : v = demo_tick++                  ' Returns value
+PRI measure_performance() : v = demo_tick++                  ' Returns value
+PRI measure_period() : v = demo_tick++                  ' Returns value
+PRI measure_phase() : v = demo_tick++                  ' Returns value
+PRI measure_phase_noise() : v = demo_tick++                  ' Returns value
+PRI measure_ripple() : v = demo_tick++                  ' Returns value
+PRI measure_rssi() : v = demo_tick++                  ' Returns value
+PRI measure_signal_activity() : v = demo_tick++                  ' Returns value
+PRI measure_signal_frequency() : v = demo_tick++                  ' Returns value
+PRI measure_stall_duration() : v = demo_tick++                  ' Returns value
+PRI measure_timing() : v = demo_tick++                  ' Returns value
+PRI measure_voltages() : v = demo_tick++                  ' Returns value
+PRI measurements() : v = demo_tick++                  ' Returns value
+PRI message_complete()                                    ' Action stub
+PRI monitor_system()                                    ' Action stub
+PRI multi_channel_comparison() : v = demo_tick++                  ' Returns value
+PRI needle_x()                                    ' Action stub
+PRI needle_y()                                    ' Action stub
+PRI overhead()                                    ' Action stub
+PRI panel()                                    ' Action stub
+PRI pause_resume()                                    ' Action stub
+PRI pause_system()                                    ' Action stub
+PRI perform_fft()                                    ' Action stub
+PRI performance_monitor_mode()                                    ' Action stub
+PRI persistence_display() : v = demo_tick++                  ' Returns value
+PRI pid_calculate()                                    ' Action stub
+PRI plot_data()                                    ' Action stub
+PRI plot_response()                                    ' Action stub
+PRI position_fuel_needle()                                    ' Action stub
+PRI position_temp_needle()                                    ' Action stub
+PRI positions()                                    ' Action stub
+PRI pow()                                    ' Action stub
+PRI problem()                                    ' Action stub
+PRI process()                                    ' Action stub
+PRI processed()                                    ' Action stub
+PRI profile_benchmark()                                    ' Action stub
+PRI radio()                                    ' Action stub
+PRI random_angle()                                    ' Action stub
+PRI rate()                                    ' Action stub
+PRI receive_command() : v = demo_tick & $FF              ' Receive simulation
+PRI receive_uart_byte() : v = demo_tick & $FF              ' Receive simulation
+PRI redraw_control()                                    ' Action stub
+PRI redraw_region()                                    ' Action stub
+PRI reduce_rates()                                    ' Action stub
+PRI report_bandwidth_usage()                                    ' Action stub
+PRI reset_system() = demo_tick := 0                    ' Reset state
+PRI reset_to_defaults() = demo_tick := 0                    ' Reset state
+PRI ripple()                                    ' Action stub
+PRI rotate_antenna()                                    ' Action stub
+PRI rotate_debug_logs()                                    ' Action stub
+PRI rpm_to_angle()                                    ' Action stub
+PRI run()                                    ' Action stub
+PRI run_all_demonstrations()                                    ' Action stub
+PRI run_analog_test()                                    ' Action stub
+PRI run_benchmark()                                    ' Action stub
+PRI run_diagnostic()                                    ' Action stub
+PRI run_digital_test()                                    ' Action stub
+PRI run_frequency_test()                                    ' Action stub
+PRI run_parametric_test()                                    ' Action stub
+PRI run_self_test()                                    ' Action stub
+PRI run_test()                                    ' Action stub
+PRI save_all_screenshots()                                    ' Action stub
+PRI save_configuration(v)                                    ' Configure
+PRI save_pid_parameters()                                    ' Action stub
+PRI scale()                                    ' Action stub
+PRI scroll_view()                                    ' Action stub
+PRI select_channel()                                    ' Action stub
+PRI select_next()                                    ' Action stub
+PRI select_previous()                                    ' Action stub
+PRI send_file(v)                                    ' Send data
+PRI send_frame(v)                                    ' Send data
+PRI send_pack1(v)                                    ' Send data
+PRI send_pack16(v)                                    ' Send data
+PRI send_pack2(v)                                    ' Send data
+PRI send_pack4(v)                                    ' Send data
+PRI send_pack8(v)                                    ' Send data
+PRI send_result(v)                                    ' Send data
+PRI send_rle(v)                                    ' Send data
+PRI send_system_status(v)                                    ' Send data
+PRI sensor1()                                    ' Action stub
+PRI sensor2()                                    ' Action stub
+PRI sensor3()                                    ' Action stub
+PRI sensor4()                                    ' Action stub
+PRI setup_controls() = demo_tick := 0                    ' Initialize
+PRI setup_diagnostic_windows() = demo_tick := 0                    ' Initialize
+PRI setup_effect_display() = demo_tick := 0                    ' Initialize
+PRI setup_fft_lesson() = demo_tick := 0                    ' Initialize
+PRI setup_logic_lesson() = demo_tick := 0                    ' Initialize
+PRI setup_modes() = demo_tick := 0                    ' Initialize
+PRI setup_pid_display() = demo_tick := 0                    ' Initialize
+PRI setup_sliders() = demo_tick := 0                    ' Initialize
+PRI setup_swo_trace() = demo_tick := 0                    ' Initialize
+PRI shortcuts()                                    ' Action stub
+PRI show_amplitude_effect()                                    ' Action stub
+PRI show_analysis_windows() : v = demo_tick++                  ' Returns value
+PRI show_context_menu()                                    ' Action stub
+PRI show_cursor()                                    ' Action stub
+PRI show_diagnostic_windows()                                    ' Action stub
+PRI show_digital_value()                                    ' Action stub
+PRI show_encoder_value()                                    ' Action stub
+PRI show_glitch_detail()                                    ' Action stub
+PRI show_introduction()                                    ' Action stub
+PRI show_message()                                    ' Action stub
+PRI show_output()                                    ' Action stub
+PRI show_overview_windows()                                    ' Action stub
+PRI show_performance_metrics()                                    ' Action stub
+PRI show_performance_windows()                                    ' Action stub
+PRI show_system_status()                                    ' Action stub
+PRI show_test_signals()                                    ' Action stub
+PRI show_test_summary()                                    ' Action stub
+PRI show_timing_effect()                                    ' Action stub
+PRI show_waveform_properties()                                    ' Action stub
+PRI show_windows()                                    ' Action stub
+PRI signal_analysis_mode() : v = demo_tick++                  ' Returns value
+PRI single_channel_detail()                                    ' Action stub
+PRI single_point_plotting()                                    ' Action stub
+PRI size()                                    ' Action stub
+PRI snapshot_system_state()                                    ' Action stub
+PRI spectrum()                                    ' Action stub
+PRI speed()                                    ' Action stub
+PRI speed_to_angle()                                    ' Action stub
+PRI stall_detected()                                    ' Action stub
+PRI start_logging() = demo_tick := 0                    ' Initialize
+PRI start_parameter_entry() = demo_tick := 0                    ' Initialize
+PRI start_streaming_scope() = demo_tick := 0                    ' Initialize
+PRI start_system() = demo_tick := 0                    ' Initialize
+PRI start_threshold_entry() = demo_tick := 0                    ' Initialize
+PRI state()                                    ' Action stub
+PRI state_name()                                    ' Action stub
+PRI stop_system()                                    ' Action stub
+PRI str_()                                    ' Action stub
+PRI strn_()                                    ' Action stub
+PRI suggest_corrective_actions()                                    ' Action stub
+PRI suggest_optimizations()                                    ' Action stub
+PRI supply()                                    ' Action stub
+PRI temp_to_angle()                                    ' Action stub
+PRI test_actuators()                                    ' Action stub
+PRI test_communication()                                    ' Action stub
+PRI test_function_a()                                    ' Action stub
+PRI test_function_b()                                    ' Action stub
+PRI test_function_c()                                    ' Action stub
+PRI test_function_d()                                    ' Action stub
+PRI test_function_e()                                    ' Action stub
+PRI test_function_f()                                    ' Action stub
+PRI test_function_g()                                    ' Action stub
+PRI test_function_h()                                    ' Action stub
+PRI test_hardware()                                    ' Action stub
+PRI test_initialization()                                    ' Action stub
+PRI test_integration()                                    ' Action stub
+PRI test_name()                                    ' Action stub
+PRI test_sensors()                                    ' Action stub
+PRI timestamp()                                    ' Action stub
+PRI timing()                                    ' Action stub
+PRI tip()                                    ' Action stub
+PRI toggle_auto_mode()                                    ' Action stub
+PRI toggle_help()                                    ' Action stub
+PRI toggle_manual_mode()                                    ' Action stub
+PRI toggle_mode()                                    ' Action stub
+PRI transitions()                                    ' Action stub
+PRI transmission() : v = demo_tick++                  ' Returns value
+PRI transmitter()                                    ' Action stub
+PRI transparency()                                    ' Action stub
+PRI trends()                                    ' Action stub
+PRI trigger_alarm()                                    ' Action stub
+PRI trigger_detected()                                    ' Action stub
+PRI tx_byte(v)                                    ' Send data
+PRI ubin()                                    ' Action stub
+PRI ubin_long_()                                    ' Action stub
+PRI udec_long_()                                    ' Action stub
+PRI uhex_long_()                                    ' Action stub
+PRI update()                                    ' Action stub
+PRI value()                                    ' Action stub
+PRI voltage()                                    ' Action stub
+PRI wait_for_connection() = waitms(1)                         ' Brief wait
+PRI wait_for_trigger() = waitms(1)                         ' Brief wait
+PRI waitcnt()                                    ' Action stub
+PRI while()                                    ' Action stub
+PRI widths()                                    ' Action stub
+PRI window()                                    ' Action stub
+PRI wordfill()                                    ' Action stub
+PRI xy_mode_analysis() : v = demo_tick++                  ' Returns value
+PRI xy_plotting()                                    ' Action stub
+PRI zero_selected_channel()                                    ' Action stub
+PRI zone()                                    ' Action stub
+PRI zoom_view()                                    ' Action stub
+PRI zstr_()                                    ' Action stub
+```
+
+---
+
