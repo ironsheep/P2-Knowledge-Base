@@ -1,0 +1,531 @@
+% P2KB Debug Window Content Layer
+% Debug Window manual specific environments and 5-color code block styling
+% Author: Iron Sheep Productions, LLC
+% Based on: p2kb-desilva-content.sty v1.0
+% Version: 1.0 - Debug Window Visual Discovery System
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-debugwin-content}[2025/09/16 P2KB Debug Window Content Layer v1.0]
+
+% Foundation layer already loaded by main template - don't reload
+% \RequirePackage{p2kb-foundation}  % DISABLED: Already loaded by p2kb-debugwin.latex
+
+% Required packages for colored boxes and formatting
+\RequirePackage{tcolorbox}
+\RequirePackage{xcolor}
+\RequirePackage{listings}
+\RequirePackage{needspace}
+
+% Configure tcolorbox library
+\tcbuselibrary{breakable,skins}
+
+% ==================== DEBUG WINDOW 5-COLOR CODE BLOCK SYSTEM ====================
+% Based on Debug Window functional areas with 5 distinct code block types:
+% 1. Spin2 (green) - Main program structure and control
+% 2. PASM2 (yellow/cream) - Assembly language debugging
+% 3. DEBUG (blue) - DEBUG() statements and syntax
+% 4. Terminal (gray) - Terminal window output display
+% 5. Window Commands (purple) - Bitmap/Scope/Logic/Plot commands
+
+% Define Debug Window color palette (professional with good contrast)
+\definecolor{debugwin-spin2-bg}{HTML}{F8FCF8}         % Very soft green
+\definecolor{debugwin-spin2-border}{HTML}{85B985}     % Muted green border
+\definecolor{debugwin-pasm2-bg}{HTML}{FFFEF5}         % Very soft cream
+\definecolor{debugwin-pasm2-border}{HTML}{D4B896}     % Muted tan border
+\definecolor{debugwin-debug-bg}{HTML}{F5F9FC}         % Very soft blue
+\definecolor{debugwin-debug-border}{HTML}{7FA8C9}     % Muted blue border
+\definecolor{debugwin-terminal-bg}{HTML}{F8F8F8}      % Light gray
+\definecolor{debugwin-terminal-border}{HTML}{909090}  % Medium gray border
+\definecolor{debugwin-window-bg}{HTML}{F8F5FF}        % Very soft purple
+\definecolor{debugwin-window-border}{HTML}{A785C2}    % Muted purple border
+
+% Spin2 Block Environment (green theme for program structure)
+\newtcolorbox{DebugWinSpin2Block}{%
+  boxrule=2pt,
+  colback=debugwin-spin2-bg,
+  colframe=debugwin-spin2-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,               % Accommodate line numbers
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% PASM2 Block Environment (cream theme for assembly)
+\newtcolorbox{DebugWinPASM2Block}{%
+  boxrule=2pt,
+  colback=debugwin-pasm2-bg,
+  colframe=debugwin-pasm2-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,               % Accommodate line numbers
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% DEBUG Block Environment (blue theme for DEBUG() statements)
+\newtcolorbox{DebugWinDebugBlock}{%
+  boxrule=2pt,
+  colback=debugwin-debug-bg,
+  colframe=debugwin-debug-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,               % Accommodate line numbers
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Terminal Block Environment (gray theme for output)
+\newtcolorbox{DebugWinTerminalBlock}{%
+  boxrule=2pt,
+  colback=debugwin-terminal-bg,
+  colframe=debugwin-terminal-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,               % Accommodate line numbers
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable,
+  fontupper=\ttfamily       % Terminal uses monospace font
+}
+
+% Window Command Block Environment (purple theme for visual commands)
+\newtcolorbox{DebugWinWindowBlock}{%
+  boxrule=2pt,
+  colback=debugwin-window-bg,
+  colframe=debugwin-window-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,               % Accommodate line numbers
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Specific window type blocks (all use purple theme)
+\newenvironment{DebugWinBitmapBlock}{\begin{DebugWinWindowBlock}}{\end{DebugWinWindowBlock}}
+\newenvironment{DebugWinScopeBlock}{\begin{DebugWinWindowBlock}}{\end{DebugWinWindowBlock}}
+\newenvironment{DebugWinLogicBlock}{\begin{DebugWinWindowBlock}}{\end{DebugWinWindowBlock}}
+\newenvironment{DebugWinPlotBlock}{\begin{DebugWinWindowBlock}}{\end{DebugWinWindowBlock}}
+\newenvironment{DebugWinFFTBlock}{\begin{DebugWinWindowBlock}}{\end{DebugWinWindowBlock}}
+\newenvironment{DebugWinSpectroBlock}{\begin{DebugWinWindowBlock}}{\end{DebugWinWindowBlock}}
+\newenvironment{DebugWinScopeXYBlock}{\begin{DebugWinWindowBlock}}{\end{DebugWinWindowBlock}}
+
+% Default Shaded environment maps to DEBUG (most common in debug manual)
+\renewenvironment{Shaded}{%
+  \par\needspace{4\baselineskip}
+  \vspace{1.5\baselineskip}
+  \begin{DebugWinDebugBlock}
+}{%
+  \end{DebugWinDebugBlock}%
+  \par\vspace{\baselineskip}
+}
+
+% ==================== DEBUG WINDOW SEMANTIC ENVIRONMENTS ====================
+% Discovery and learning elements specific to debug window exploration
+
+% Discovery Box - Major findings and revelations
+\newtcolorbox{DebugWinDiscovery}{
+  title=Discovery,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=orange!70!black,
+  colback=orange!5,
+  colframe=orange!70!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced,
+  attach boxed title to top left={yshift=-2mm,xshift=4mm},
+  boxed title style={boxrule=0.5pt,colback=orange!70!black}
+}
+
+% Experiment Box - Try it yourself sections
+\newtcolorbox{DebugWinExperiment}{
+  title=Experiment,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=green!60!black,
+  colback=green!5,
+  colframe=green!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced,
+  attach boxed title to top left={yshift=-2mm,xshift=4mm},
+  boxed title style={boxrule=0.5pt,colback=green!60!black}
+}
+
+% Performance Box - Optimization and efficiency tips
+\newtcolorbox{DebugWinPerformance}{
+  title=Performance,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=red!60!black,
+  colback=red!5,
+  colframe=red!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced,
+  attach boxed title to top left={yshift=-2mm,xshift=4mm},
+  boxed title style={boxrule=0.5pt,colback=red!60!black}
+}
+
+% Tip Box - Pro tips and advanced techniques
+\newtcolorbox{DebugWinTip}{
+  title=Pro Tip,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=blue!60!black,
+  colback=blue!5,
+  colframe=blue!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced,
+  attach boxed title to top left={yshift=-2mm,xshift=4mm},
+  boxed title style={boxrule=0.5pt,colback=blue!60!black}
+}
+
+% Screenshot Box - Annotated screenshots
+\newtcolorbox{DebugWinScreenshot}{
+  colback=white,
+  colframe=gray!50!black,
+  boxrule=1pt,
+  rounded corners,
+  left=5pt,
+  right=5pt,
+  top=5pt,
+  bottom=5pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable,
+  enhanced
+}
+
+% ==================== LOWERCASE DEBUG WINDOW ENVIRONMENTS ====================
+% These match the semantic filter's dw* naming convention
+
+% Discovery (dw prefix)
+\newtcolorbox{dwdiscovery}{
+  title=Discovery,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=orange!70!black,
+  colback=orange!5,
+  colframe=orange!70!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced,
+  attach boxed title to top left={yshift=-2mm,xshift=4mm},
+  boxed title style={boxrule=0.5pt,colback=orange!70!black}
+}
+
+% Experiment (dw prefix)
+\newtcolorbox{dwexperiment}{
+  title=Experiment,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=green!60!black,
+  colback=green!5,
+  colframe=green!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced,
+  attach boxed title to top left={yshift=-2mm,xshift=4mm},
+  boxed title style={boxrule=0.5pt,colback=green!60!black}
+}
+
+% Performance (dw prefix)
+\newtcolorbox{dwperformance}{
+  title=Performance,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=red!60!black,
+  colback=red!5,
+  colframe=red!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced,
+  attach boxed title to top left={yshift=-2mm,xshift=4mm},
+  boxed title style={boxrule=0.5pt,colback=red!60!black}
+}
+
+% Tip (dw prefix)
+\newtcolorbox{dwtip}{
+  title=Pro Tip,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=blue!60!black,
+  colback=blue!5,
+  colframe=blue!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced,
+  attach boxed title to top left={yshift=-2mm,xshift=4mm},
+  boxed title style={boxrule=0.5pt,colback=blue!60!black}
+}
+
+% Screenshot (dw prefix)
+\newtcolorbox{dwscreenshot}{
+  colback=white,
+  colframe=gray!50!black,
+  boxrule=1pt,
+  rounded corners,
+  left=5pt,
+  right=5pt,
+  top=5pt,
+  bottom=5pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable,
+  enhanced
+}
+
+% ==================== P2 LANGUAGE DEFINITIONS ====================
+% CRITICAL: Must include P2 syntax highlighting for DEBUG statements
+
+% Define Spin2 language
+\lstdefinelanguage{spin2}{
+  keywords={CON, VAR, OBJ, PUB, PRI, DAT, repeat, if, else, elseif, case, 
+            while, until, from, to, step, return, abort, next, quit,
+            byte, word, long, res, file, org, end, fit, DEBUG},
+  sensitive=true,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]'
+}
+
+% Define PASM2 language
+\lstdefinelanguage{pasm2}{
+  keywords={org, res, long, word, byte, mov, add, sub, and, or, xor, not,
+            shl, shr, sar, rol, ror, rcl, rcr, test, cmp, jmp, call, ret,
+            djnz, tjz, tjnz, wrpin, wxpin, wypin, rdpin, rqpin, akpin, dirh,
+            dirl, testp, waitx, rep, nop, qrotate, qvector, getqx, getqy,
+            setq, rdlong, wrlong, rdword, wrword, rdbyte, wrbyte, coginit},
+  sensitive=false,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]'
+}
+
+% Define DEBUG language (for DEBUG() statements)
+\lstdefinelanguage{debug}{
+  keywords={DEBUG, BITMAP, SCOPE, LOGIC, PLOT, FFT, SPECTRO, SCOPE_XY,
+            TERMINAL, SIZE, COLOR, PIXEL, RANGE, TRIGGER, SAMPLES, RATE,
+            UPDATE, CROP, POS, CLEAR, HOME, TEXT, DEC, HEX, BIN, UDEC, UHEX},
+  sensitive=true,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]',
+  moredelim=[is][\color{blue}]{`}{`}  % Backtick strings in blue
+}
+
+% ==================== COMPARISON ENVIRONMENTS ====================
+% For showing before/after or traditional/optimized approaches
+
+% Performance Comparison Box
+\newtcolorbox{DebugWinComparison}{
+  title=Performance Comparison,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=purple!60!black,
+  colback=purple!5,
+  colframe=purple!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced,
+  attach boxed title to top left={yshift=-2mm,xshift=4mm},
+  boxed title style={boxrule=0.5pt,colback=purple!60!black}
+}
+
+% Multi-Channel Display Box (for coordinated windows)
+\newtcolorbox{DebugWinMultiChannel}{
+  title=Multi-Window Coordination,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=teal!60!black,
+  colback=teal!5,
+  colframe=teal!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced,
+  attach boxed title to top left={yshift=-2mm,xshift=4mm},
+  boxed title style={boxrule=0.5pt,colback=teal!60!black}
+}
+
+% ==================== SPECIAL DEBUG FEATURES ====================
+% Elements unique to debug window documentation
+
+% Needs Screenshot - Placeholder for missing images
+\newtcolorbox{DebugWinNeedsScreenshot}{
+  colback=yellow!5!white,        % Cream background
+  colframe=orange!70!yellow,     % Amber border
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Screenshot Needed},
+  boxrule=1.5pt,
+  arc=2pt,
+  outer arc=2pt,
+  borderline={1.5pt}{0pt}{orange!70!yellow, dashed},
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable,
+  enhanced
+}
+
+% Lowercase version for filter compatibility
+\newtcolorbox{dwneedsscreenshot}{
+  colback=yellow!5!white,        % Cream background
+  colframe=orange!70!yellow,     % Amber border
+  coltitle=white,
+  fonttitle=\bfseries,
+  title={Screenshot Needed},
+  boxrule=1.5pt,
+  arc=2pt,
+  outer arc=2pt,
+  borderline={1.5pt}{0pt}{orange!70!yellow, dashed},
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable,
+  enhanced
+}
+
+% Window Gallery - Showing multiple window types
+\newtcolorbox{DebugWinGallery}{
+  title=Window Gallery,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=brown!60!black,
+  colback=brown!5,
+  colframe=brown!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Command Reference Box
+\newtcolorbox{DebugWinCommandRef}{
+  title=Command Reference,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=violet!60!black,
+  colback=violet!5,
+  colframe=violet!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}

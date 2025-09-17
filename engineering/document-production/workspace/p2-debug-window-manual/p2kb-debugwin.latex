@@ -1,0 +1,117 @@
+% P2 Debug Window Manual - Layered Template Architecture
+% Foundation + Content + Presentation layers
+% Version: Debug Window Visual Discovery v1.0
+% Based on: p2kb-desilva.latex (proven working)
+
+\documentclass[11pt,a4paper,oneside,english]{book}
+
+% ==================== LAYERED TEMPLATE STACK ====================
+% Each layer provides specific functionality without overlap
+
+\usepackage{p2kb-debugwin-foundation}  % Debug Window specific foundation layer
+\usepackage{p2kb-debugwin-content}     % Debug Window specific content layer with 5-color system
+
+% If tech-review exists, use it (optional)
+% \usepackage{p2kb-tech-review}                               % Technical review branding (if available)
+
+% ==================== DOCUMENT METADATA ====================
+% These can be overridden by pandoc metadata
+
+\title{P2 Debug Window Manual}
+\author{Propeller 2 Development Team}
+\date{September 2025}
+
+% Custom subtitle command if not provided by foundation
+\providecommand{\subtitle}[1]{\gdef\@subtitle{#1}}
+\subtitle{Visual Discovery Through Systematic Exploration}
+
+% ==================== DOCUMENT START ====================
+\begin{document}
+
+% Title page
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+{\Huge\bfseries P2 Debug Window Manual\par}
+\vspace{1cm}
+{\Large Visual Discovery Through Systematic Exploration\par}
+\vspace{2cm}
+{\large Version 1.0 - Technical Review Draft\par}
+\vspace{1cm}
+{\large September 2025\par}
+\vfill
+
+% Review areas section
+\begin{center}
+\rule{0.8\textwidth}{0.5pt}
+\vspace{0.5cm}
+
+{\large\bfseries Technical Review Focus Areas}\par
+\vspace{0.5cm}
+\begin{itemize}
+  \item Verify all DEBUG() examples work on P2 hardware
+  \item Confirm all 9 window types documented with examples
+  \item Check screenshot quality and placement
+  \item Validate performance metrics and comparisons
+  \item Review discovery/experiment box effectiveness
+  \item Test code examples for completeness and accuracy
+\end{itemize}
+\vspace{0.5cm}
+\rule{0.8\textwidth}{0.5pt}
+\end{center}
+
+\vfill
+
+% Document statistics
+\begin{center}
+{\large\bfseries Document Statistics}\par
+\vspace{0.5cm}
+\begin{itemize}
+  \item Total Chapters: 14 (Complete Manual)
+  \item Appendices: 5 (Command Reference, Examples, Performance)
+  \item Window Types: 9 (Terminal, Bitmap, Plot, Scope, Logic, FFT, Spectro, Scope\_XY, Mixed)
+  \item Code Examples: 200+ (DEBUG statements and programs)
+  \item Screenshots: Every feature visually verified
+  \item Learning Style: Discovery-driven exploration
+\end{itemize}
+\end{center}
+
+\vspace{2cm}
+\end{titlepage}
+
+% Copyright page
+\clearpage
+\thispagestyle{empty}
+\vspace*{\fill}
+\begin{center}
+{\large\bfseries P2 Debug Window Manual}\par
+\vspace{0.5cm}
+Version 1.0\par
+\vspace{1cm}
+Copyright \textcopyright{} 2025 Iron Sheep Productions LLC\par
+\vspace{1cm}
+{\bfseries Acknowledgments}\par
+\vspace{0.5cm}
+Chip Gracey for the P2 silicon debug architecture\\
+The P2 community for discovering hidden capabilities\\
+Early adopters who pushed debug windows beyond documentation\\
+Iron Sheep Productions LLC for systematic capability exploration\\
+\vspace{2cm}
+This manual documents discoveries made through systematic exploration\\
+of P2's debug window system. Every capability shown has been verified\\
+with actual hardware and includes visual proof via screenshots.
+\end{center}
+\vspace*{\fill}
+
+% Table of contents
+\tableofcontents
+
+% List of figures (for screenshots)
+\listoffigures
+
+% ==================== DOCUMENT CONTENT ====================
+% Content will be inserted here by Pandoc
+$body$
+
+% ==================== DOCUMENT END ====================
+\end{document}

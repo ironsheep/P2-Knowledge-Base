@@ -1,0 +1,37 @@
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2-Debug-Window-Manual.md",
+      "output": "P2-Debug-Window-Manual.pdf",
+      "template": "p2kb-debugwin",
+      "pandoc_args": [
+        "--top-level-division=part",
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=3",
+        "--number-sections",
+        "--highlight-style=tango"
+      ],
+      "lua_filters": [
+        "p2kb-debugwin-div-blocks",
+        "p2kb-debugwin-semantic"
+      ],
+      "metadata": {
+        "title": "P2 Debug Window Manual",
+        "subtitle": "Visual Discovery Through Systematic Exploration",
+        "author": "Propeller 2 Development Team",
+        "version": "Version 1.0",
+        "date": "September 2025",
+        "documentclass": "book",
+        "fontsize": "11pt",
+        "papersize": "a4",
+        "geometry": "margin=1in",
+        "colorlinks": true,
+        "linkcolor": "blue",
+        "urlcolor": "blue",
+        "toccolor": "black"
+      }
+    }
+  ]
+}
