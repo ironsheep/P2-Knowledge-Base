@@ -1,0 +1,27 @@
+group_id: counter_event_polls
+title: Counter Event Poll Instructions
+members:
+  POLLCT1: Check if counter 1 event flag is set
+  POLLCT2: Check if counter 2 event flag is set
+  POLLCT3: Check if counter 3 event flag is set
+shared_documentation:
+  explanation: These instructions are part of the Counter Event Poll Instructions
+    family.
+  timing_details: See individual instructions for specific timing.
+  addressing: null
+related_instructions:
+- ADDCT1
+- ADDCT2
+- ADDCT3
+- WAITCT1
+- WAITCT2
+- WAITCT3
+examples:
+- title: Basic counter timeout pattern
+  code: 'ADDCT1  ##1_000_000
+
+    ; ... do work ...
+
+    JCT1    #timeout_handler'
+created: '2025-09-19T15:11:04.920168'
+source: PASM2 Manual 2022-11-01

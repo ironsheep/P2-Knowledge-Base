@@ -1,0 +1,25 @@
+group_id: interrupt_return
+title: Interrupt Return Instructions
+members:
+  RETI0: Return from interrupt 0
+  RETI1: Return from interrupt 1
+  RETI2: Return from interrupt 2
+  RETI3: Return from interrupt 3
+shared_documentation:
+  explanation: These instructions are part of the Interrupt Return Instructions family.
+  timing_details: See individual instructions for specific timing.
+  addressing: null
+related_instructions:
+- RESI0
+- RESI1
+- RESI2
+- RESI3
+- SETINT1
+- SETINT2
+- SETINT3
+examples:
+- title: Interrupt handler pattern
+  code: "INT0_handler:\n    ; save state\n    ; handle interrupt\n    RESI0  ; or\
+    \ RETI0 to return"
+created: '2025-09-19T15:11:04.926035'
+source: PASM2 Manual 2022-11-01

@@ -1,0 +1,24 @@
+group_id: selector_event_waits
+title: Selector Event Wait Instructions
+members:
+  WAITSE1: Wait for selector 1 event flag, then clear it
+  WAITSE2: Wait for selector 2 event flag, then clear it
+  WAITSE3: Wait for selector 3 event flag, then clear it
+  WAITSE4: Wait for selector 4 event flag, then clear it
+shared_documentation:
+  explanation: These instructions are part of the Selector Event Wait Instructions
+    family.
+  timing_details: See individual instructions for specific timing.
+  addressing: null
+related_instructions:
+- SETSE1
+- SETSE2
+- SETSE3
+- SETSE4
+- POLLSE1
+- POLLSE2
+- POLLSE3
+- POLLSE4
+examples: []
+created: '2025-09-19T15:11:04.923145'
+source: PASM2 Manual 2022-11-01

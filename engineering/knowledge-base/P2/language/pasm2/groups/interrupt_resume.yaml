@@ -1,0 +1,25 @@
+group_id: interrupt_resume
+title: Interrupt Resume Instructions
+members:
+  RESI0: Resume from interrupt 0
+  RESI1: Resume from interrupt 1
+  RESI2: Resume from interrupt 2
+  RESI3: Resume from interrupt 3
+shared_documentation:
+  explanation: These instructions are part of the Interrupt Resume Instructions family.
+  timing_details: See individual instructions for specific timing.
+  addressing: null
+related_instructions:
+- RETI0
+- RETI1
+- RETI2
+- RETI3
+- SETINT1
+- SETINT2
+- SETINT3
+examples:
+- title: Interrupt handler pattern
+  code: "INT0_handler:\n    ; save state\n    ; handle interrupt\n    RESI0  ; or\
+    \ RETI0 to return"
+created: '2025-09-19T15:11:04.924565'
+source: PASM2 Manual 2022-11-01

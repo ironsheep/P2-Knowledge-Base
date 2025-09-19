@@ -1,0 +1,33 @@
+group_id: counter_event_jumps
+title: Counter Event Jump Instructions
+members:
+  JCT1: Jump if counter 1 event flag is set
+  JCT2: Jump if counter 2 event flag is set
+  JCT3: Jump if counter 3 event flag is set
+  JNCT1: Jump if counter 1 event flag is NOT set
+  JNCT2: Jump if counter 2 event flag is NOT set
+  JNCT3: Jump if counter 3 event flag is NOT set
+shared_documentation:
+  explanation: These instructions are part of the Counter Event Jump Instructions
+    family.
+  timing_details: 'Timing: 1'
+  addressing: The address (Src) can be absolute or relative.
+related_instructions:
+- ADDCT1
+- ADDCT2
+- ADDCT3
+- POLLCT1
+- POLLCT2
+- POLLCT3
+- WAITCT1
+- WAITCT2
+- WAITCT3
+examples:
+- title: Basic counter timeout pattern
+  code: 'ADDCT1  ##1_000_000
+
+    ; ... do work ...
+
+    JCT1    #timeout_handler'
+created: '2025-09-19T15:11:04.916751'
+source: PASM2 Manual 2022-11-01
