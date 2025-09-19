@@ -1,31 +1,34 @@
 instruction: ADDSX
-syntax: ADDSX   D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0001011 CZI DDDDDDDDD SSSSSSSSS
+syntax: ADDSX Dest, {#}Src {WC|WZ|WCZ}
+encoding: EEEE 0001011 CZI DDDDDDDDD SSSSSSSSS                   D          sign of (D+S+C)   Z AND (Result
+  = 0)           2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'ADDSX sums the signed values of Dest and Src plus C together and stores
-  the result into the Dest register. The Result: Sum of signed Src plus C and signed
-  Dest is stored in Dest.'
-category: Math Instruction - Add two signed extended values.
+group: Math Instruction - Add two signed extended values.
+description: "ADDSX sums the signed values of Dest and Src plus C together and stores the result into\
+  \ the Dest register. The Result: Sum of signed Src plus C and signed Dest is stored in Dest.\n\nADDSX\
+  \ sums the signed values of Dest and Src plus C together and stores the result into the Dest register.\
+  \ The\n\nADDSX instruction is used to perform signed multi-long (extended) addition, such as 64-bit\
+  \ addition.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if the result is\
+  \ negative (Result[31] = 1), or is cleared (0) if\n\npositive. Use WC or WCZ on preceding ADD and ADDX\
+  \ instructions for proper \uFB01nal C \uFB02ag.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02\
+  ag is set (1) if Z was previously set and the result of Dest + Src + C is\n\nzero, or it is cleared\
+  \ (0) if non-zero. Use WZ or WCZ on preceding ADD and ADDX instructions for proper \uFB01nal Z \uFB02\
+  ag.\n\nTo add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, and \uFB01nally\
+  \ ADDSX as described in\n\nAdding Two Multi-Long Values."
 flags_affected:
-  C:
-    formula: correct sign of (D + S + C)
-  Z:
-    formula: Z AND (result == 0)
+  Z: (Result = 0)
 parameters:
-- Dest is a register containing the value to add Src pluc C to, and is where the result
-  is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C
-  is added into Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Dest is a register containing the value to add Src pluc C to, and is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is added into Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - ADD
 - ADDX
 - ADDSX
 - SUBSX
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -35,3 +38,12 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Add signed, extended
+category: Math Instruction - Add two signed extended values.
+result: Sum of signed Src plus C and signed Dest is stored in Dest.
+syntax_variants:
+- ADDSX Dest, {#}Src {WC|WZ|WCZ}
+- ADDSX sums the signed values of Dest and Src plus C together and stores the result into the Dest register.
+  The
+manual_extraction_date: '2025-01-19'

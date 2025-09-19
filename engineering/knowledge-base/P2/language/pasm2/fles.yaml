@@ -1,28 +1,94 @@
 instruction: FLES
-syntax: FLES    D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0011011 CZI DDDDDDDDD SSSSSSSSS
+syntax: FLES Dest, {#}Src {WC|WZ|WCZ}
+encoding:
+- EEEE 0011011 CZI DDDDDDDDD SSSSSSSSS                       D        limit enforced        Result = 0              2
+- EEEE 1101011 CZL DDDDDDDDD 001010010 DIRx + OUTx Orig OUTx base bit Orig OUTx base bit
+- EEEE 1101011 CZL DDDDDDDDD 001010001 DIRx + OUTx Orig OUTx base bit Orig OUTx base bit
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'FLES sets signed Dest to signed Src if Dest is greater than Src. This
-  is also known as a limit maximum function; Result: Signed Dest is set to signed
-  Src if Dest was greater than Src. Optionally the C and Z flag indicates if the replacement
-  happened and the zero status of the result.'
-category: Math Instruction - Force signed value to be less than or equal to another.
+group: Math Instruction - Force signed value to be less than or equal to another.
+description: "FLES sets signed Dest to signed Src if Dest is greater than Src. This is also known as a\
+  \ limit maximum function; Result: Signed Dest is set to signed Src if Dest was greater than Src. Optionally\
+  \ the C and Z flag indicates if the replacement happened and the zero status of the result.\n\nFLES\
+  \ sets signed Dest to signed Src if Dest is greater than Src. This is also known as a limit maximum\
+  \ function;\n\npreventing Dest from rising above Src.\n\nIf the WC or WCZ effect is speci\uFB01ed, the\
+  \ C \uFB02ag is set (1) if Dest was limited (Dest was greater than Src and now\n\nDest is equal to Src),\
+  \ or is cleared (0) if not limited.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set\
+  \ (1) if the result is zero, or is cleared (0) if it is non-zero.\n\nFLTC / FLTNC\n\nFloat C or not\
+  \ C\n\nI/O Pin Instruction - Set pin(s) direction to input and an output level of low/high according\
+  \ to C.\n\nFLTC       {#}Dest {WCZ}\n\nFLTNC {#}Dest {WCZ}\n\nResult: The I/O pins described by Dest\
+  \ are set to the input direction and to an output level of low/high according\n\nto C or !C; the rest\
+  \ are left as-is.\n\n\u25CF   Dest is the register, 9-bit literal, or 11-bit augmented literal whose\
+  \ value identi\uFB01es the I/O pin(s) to set to\n\ninput direction and output levels of low or high.\n\
+  \n\u25CF   WCZ is an optional effect to update \uFB02ags.\n\nCOND INSTR            FX     DEST     \
+  \     SRC            Write             C Flag             Z Flag              Clocks\n\nEEEE 1101011\
+  \ CZL DDDDDDDDD 001010010 DIRx + OUTx Orig OUTx base bit Orig OUTx base bit\n\n1\n\n2\n\nEEEE 1101011\
+  \ CZL DDDDDDDDD 001010011 DIRx + OUTx Orig OUTx base bit Orig OUTx base bit\n\n1\n\n2\n\n1\n\nNew DIRx\
+  \ state is not data-forwarded; the next pipelined instruction sees the old state. Make sure any instruction\
+  \ that reads\n\nor modi\uFB01es DIRx is at least two instructions after a FLTC or FLTNC.\n\nFLTC or\
+  \ FLTNC sets the I/O pin(s) designated by Dest to the input direction and to a low/high output level\n\
+  \naccording to the state, or inverse state, of the C \uFB02ag; i.e. alters the pin's direction and output\
+  \ registers. All other\n\npins are left unchanged. Each of these instructions, FLTC and FLTNC, can affect\
+  \ one or more of the bits within\n\nthe DIRA or DIRB and OUTA or OUTB registers.\n\nFLTC or FLTNC achieves\
+  \ the same effect as two instructions\u2014 DIRL followed by OUTC or OUTNC.\n\nDest[5:0] indicates the\
+  \ pin number (0\u201363). For a range of pins, Dest[5:0] indicates the base pin number (0\u201363)\n\
+  \nand Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1\u201331).\n\
+  \nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous\
+  \ pins (Dest[8:6]).\n\nIf needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit\
+  \ literal value\u2014 this inserts an\n\nAUGD instruction prior.\n\nWhen Dest is a register, the register's\
+  \ value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ\n\ninstruction immediately\
+  \ precedes the FLTC / FLTNC instruction; substituting SETQ's Dest[4:0] in place of value\n\nbits[10:6],\
+  \ for FLTC / FLTNC's use.\n\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will\
+  \ wrap within the same 32-pin group (DIRA or\n\nDIRB and OUTA or OUTB); it will not cross the port boundary.\n\
+  \nIf the WCZ effect is speci\uFB01ed, the C and Z \uFB02ags are updated to the original state of OUTA\
+  \ / OUTB's base bit,\n\nidenti\uFB01ed by Dest.\n\nFLTH / FLTL\n\nFloat high or low\n\nI/O Pin Instruction\
+  \ - Set pin(s) direction to input and to an output level of high (1) or low (0).\n\nFLTH {#}Dest {WCZ}\n\
+  \nFLTL {#}Dest {WCZ}\n\nResult: The I/O pins described by Dest are set to the input direction and to\
+  \ an output level of high or low; the rest\n\nare left as-is.\n\n\u25CF   Dest is the register, 9-bit\
+  \ literal, or 11-bit augmented literal whose value identi\uFB01es the I/O pin(s) to set to\n\ninput\
+  \ direction and output levels of high or low.\n\n\u25CF   WCZ is an optional effect to update \uFB02\
+  ags.\n\nCOND INSTR            FX     DEST          SRC            Write             C Flag         \
+  \    Z Flag              Clocks\n\nEEEE 1101011 CZL DDDDDDDDD 001010001 DIRx + OUTx Orig OUTx base bit\
+  \ Orig OUTx base bit\n\n1\n\n2\n\nEEEE 1101011 CZL DDDDDDDDD 001010000 DIRx + OUTx Orig OUTx base bit\
+  \ Orig OUTx base bit\n\n1\n\n2\n\n1\n\nNew DIRx state is not data-forwarded; the next pipelined instruction\
+  \ sees the old state. Make sure any instruction that reads\n\nor modi\uFB01es DIRx is at least two instructions\
+  \ after a FLTH or FLTL.\n\nFLTH or FLTL sets the I/O pin(s) designated by Dest to the input direction\
+  \ and to a high or low output level; i.e.\n\nalters the pin's direction and output registers. All other\
+  \ pins are left unchanged. Each of these instructions, FLTH\n\nand FLTL, can affect one or more of the\
+  \ bits within the DIRA or DIRB and OUTA or OUTB registers.\n\nFLTH or FLTL achieves the same effect\
+  \ as two instructions\u2014 DIRL followed by OUTH or OUTL.\n\nDest[5:0] indicates the pin number (0\u2013\
+  63). For a range of pins, Dest[5:0] indicates the base pin number (0\u201363)\n\nand Dest[10:6] indicates\
+  \ how many contiguous pins beyond the base should be affected (1\u201331).\n\nA 9-bit literal Dest is\
+  \ enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]).\n\n\
+  If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value\u2014\
+  \ this inserts an\n\nAUGD instruction prior.\n\nWhen Dest is a register, the register's value bits [10:0]\
+  \ are used as-is to form the 11-bit ID range, unless a SETQ\n\ninstruction immediately precedes the\
+  \ FLTH / FLTL instruction; substituting SETQ's Dest[4:0] in place of value\n\nbits[10:6], for FLTH /\
+  \ FLTL's use.\n\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within\
+  \ the same 32-pin group (DIRA or\n\nDIRB and OUTA or OUTB); it will not cross the port boundary.\n\n\
+  If the WCZ effect is speci\uFB01ed, the C and Z \uFB02ags are updated to the original state of OUTA\
+  \ / OUTB's base bit,\n\nidenti\uFB01ed by Dest."
 flags_affected:
-  C:
-    formula: 1, else D same and C = 0
+  Z: Result = 0
 parameters:
-- Dest is a register containing the signed value to limit to a maximum of signed Src,
-  and is where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose signed value
-  is the upper limit to force upon Dest.
+- Dest is a register containing the signed value to limit to a maximum of signed Src, and is where the
+  result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose signed value is the upper limit
+  to force upon Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags. Copyright \xA9 Parallax Inc. 2022/11/01 \u25AA\
+  \ Propeller 2 Assembly Language Manual            \u25AA   Page 82"
+- "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the I/O\
+  \ pin(s) to set to input direction and output levels of low or high."
+- "WCZ is an optional effect to update \uFB02ags."
+- "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the I/O\
+  \ pin(s) to set to input direction and output levels of high or low."
+- "WCZ is an optional effect to update \uFB02ags."
 related:
 - FGES
 - FLE
 - FGE
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -32,3 +98,13 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Force lesser or equal, signed
+category: Math Instruction - Force signed value to be less than or equal to another.
+result: The I/O pins described by Dest are set to the input direction and to an output level of high or
+  low; the rest
+syntax_variants:
+- FLES Dest, {#}Src {WC|WZ|WCZ}
+- FLES sets signed Dest to signed Src if Dest is greater than Src. This is also known as a limit maximum
+  function;
+manual_extraction_date: '2025-01-19'

@@ -1,22 +1,27 @@
 instruction: SETBYTE
-syntax: SETBYTE D,{#}S,#N
-encoding: EEEE 1000110 00I 000000000 SSSSSSSSS
+syntax: 'SETBYTE Dest, {#}Src, #Num'
+encoding:
+- "EEEE 1000110 NNI DDDDDDDDD SSSSSSSSS                      D                 \u2014               \u2014\
+  \                     2"
+- EEEE 1000110 00I 000000000 SSSSSSSSS                      D1
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'SETBYTE stores Src[7:0] into the byte identified by Num within Dest,
-  or the byte and register described by a prior Result: Src[7:0] is written to byte
-  Num (0–3) of Dest, or to another register byte described by prior ALTSB instruction.'
-category: Bit Operation Instruction - Set a byte to new value.
+group: Bit Operation Instruction - Set a byte to new value.
+description: "SETBYTE stores Src[7:0] into the byte identified by Num within Dest, or the byte and register\
+  \ described by a prior Result: Src[7:0] is written to byte Num (0\u20133) of Dest, or to another register\
+  \ byte described by prior ALTSB instruction.\n\nSETBYTE stores Src[7:0] into the byte identi\uFB01ed\
+  \ by Num within Dest, or the byte and register described by a prior\n\nALTSB instruction. No other bits\
+  \ are modi\uFB01ed.\n\nNum (0\u20133) identi\uFB01es a value's individual bytes, by position, in least-signi\uFB01\
+  cant byte order.\n\nSyntax 2 is intended for use after an ALTSB instruction; i.e. in a loop to iteratively\
+  \ affect a series of byte values\n\nwithin contiguous long registers."
 flags_affected:
   C:
     when: D
 parameters:
 - Dest is the register in which to modify a byte.
-- Src is a register or 8-bit literal whose bits [7:0] will be stored in the designated
-  location.
-- Num is a 2-bit literal identifying the nibble ID (0–3) of Dest to modify.
+- Src is a register or 8-bit literal whose bits [7:0] will be stored in the designated location.
+- "Num is a 2-bit literal identifying the nibble ID (0\u20133) of Dest to modify."
 related:
 - ALTSB
 - SETNIB
@@ -27,7 +32,7 @@ related:
 - ROLNIB
 - ROLBYTE
 - ROLWORD
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds2set
@@ -37,3 +42,14 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 8
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Set byte
+category: Bit Operation Instruction - Set a byte to new value.
+result: "Src[7:0] is written to byte Num (0\u20133) of Dest, or to another register byte described by\
+  \ prior ALTSB"
+syntax_variants:
+- 'SETBYTE Dest, {#}Src, #Num'
+- SETBYTE {#}Src
+- "SETBYTE stores Src[7:0] into the byte identi\uFB01ed by Num within Dest, or the byte and register described\
+  \ by a prior"
+manual_extraction_date: '2025-01-19'

@@ -1,32 +1,86 @@
 instruction: FLTRND
-syntax: FLTRND  {#}D           {WCZ}
-encoding: EEEE 1101011 CZL DDDDDDDDD 001010110
+syntax: FLTRND {#}Dest {WCZ}
+encoding:
+- EEEE 1101011 CZL DDDDDDDDD 001010110 DIRx + OUTx Orig OUTx base bit Orig OUTx base bit
+- EEEE 1101011 CZL DDDDDDDDD 001010100 DIRx + OUTx Orig OUTx base bit Orig OUTx base bit
 timing:
   cycles: 2
   type: fixed
-group: Pins
-description: 'FLTRND sets the I/O pin(s) designated by Dest to the input direction
-  and with output level(s) set randomly low and Result: The I/O pins described by
-  Dest are set to the input direction and each output level is set randomly low or
-  high; the rest are left as-is. Z = OUT bit.'
-category: I/O Pin Instruction - Set pin(s) direction to input and to an output level
-  of random low/high.
+group: I/O Pin Instruction - Set pin(s) direction to input and to an output level of random low/high.
+description: "FLTRND sets the I/O pin(s) designated by Dest to the input direction and with output level(s)\
+  \ set randomly low and Result: The I/O pins described by Dest are set to the input direction and each\
+  \ output level is set randomly low or high; the rest are left as-is. Z = OUT bit.\n\nFLTRND sets the\
+  \ I/O pin(s) designated by Dest to the input direction and with output level(s) set randomly low and\n\
+  \nhigh, based on bit(s) from the Xoroshiro128** PRNG. All other pins are left unchanged. This instruction\
+  \ can\n\naffect one or more of the bits within the DIRA or DIRB and OUTA or OUTB registers.\n\nFLTRND\
+  \ achieves the same effect as two instructions\u2014 DIRL followed by OUTRND.\n\nDest[5:0] indicates\
+  \ the pin number (0\u201363). For a range of pins, Dest[5:0] indicates the base pin number (0\u2013\
+  63)\n\nand Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1\u2013\
+  31).\n\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous\
+  \ pins (Dest[8:6]).\n\nIf needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit\
+  \ literal value\u2014 this inserts an\n\nAUGD instruction prior.\n\nWhen Dest is a register, the register's\
+  \ value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ\n\ninstruction immediately\
+  \ precedes the FLTRND instruction; substituting SETQ's Dest[4:0] in place of value\n\nbits[10:6], for\
+  \ FLTRND's use.\n\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within\
+  \ the same 32-pin group (DIRA or\n\nDIRB and OUTA or OUTB); it will not cross the port boundary.\n\n\
+  If the WCZ effect is speci\uFB01ed, the C and Z \uFB02ags are updated to the original state of OUTA\
+  \ / OUTB's base bit,\n\nidenti\uFB01ed by Dest.\n\nFLTZ / FLTNZ\n\nFloat Z or not Z\n\nI/O Pin Instruction\
+  \ - Set pin(s) direction to input and an output level of low/high according to Z.\n\nFLTZ       {#}Dest\
+  \ {WCZ}\n\nFLTNZ {#}Dest {WCZ}\n\nResult: The I/O pins described by Dest are set to the input direction\
+  \ and to an output level of low/high according\n\nto Z or !Z; the rest are left as-is.\n\n\u25CF   Dest\
+  \ is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the I/O pin(s)\
+  \ to set to\n\ninput direction and output levels of low or high.\n\n\u25CF   WCZ is an optional effect\
+  \ to update \uFB02ags.\n\nCOND INSTR            FX     DEST          SRC            Write          \
+  \   C Flag             Z Flag              Clocks\n\nEEEE 1101011 CZL DDDDDDDDD 001010100 DIRx + OUTx\
+  \ Orig OUTx base bit Orig OUTx base bit\n\n1\n\n2\n\nEEEE 1101011 CZL DDDDDDDDD 001010101 DIRx + OUTx\
+  \ Orig OUTx base bit Orig OUTx base bit\n\n1\n\n2\n\n1\n\nNew DIRx state is not data-forwarded; the\
+  \ next pipelined instruction sees the old state. Make sure any instruction that reads\n\nor modi\uFB01\
+  es DIRx is at least two instructions after a FLTZ or FLTNZ.\n\nFLTZ or FLTNZ sets the I/O pin(s) designated\
+  \ by Dest to the input direction and to a low/high output level\n\naccording to the state, or inverse\
+  \ state, of the Z \uFB02ag; i.e. alters the pin's direction and output registers. All other\n\npins\
+  \ are left unchanged. Each of these instructions, FLTZ and FLTNZ, can affect one or more of the bits\
+  \ within\n\nthe DIRA or DIRB and OUTA or OUTB registers.\n\nFLTZ or FLTNZ achieves the same effect as\
+  \ two instructions\u2014 DIRL followed by OUTZ or OUTNZ.\n\nDest[5:0] indicates the pin number (0\u2013\
+  63). For a range of pins, Dest[5:0] indicates the base pin number (0\u201363)\n\nand Dest[10:6] indicates\
+  \ how many contiguous pins beyond the base should be affected (1\u201331).\n\nA 9-bit literal Dest is\
+  \ enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]).\n\n\
+  If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value\u2014\
+  \ this inserts an\n\nAUGD instruction prior.\n\nWhen Dest is a register, the register's value bits [10:0]\
+  \ are used as-is to form the 11-bit ID range, unless a SETQ\n\ninstruction immediately precedes the\
+  \ FLTZ / FLTNZ instruction; substituting SETQ's Dest[4:0] in place of value\n\nbits[10:6], for FLTZ\
+  \ / FLTNZ's use.\n\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within\
+  \ the same 32-pin group (DIRA or\n\nDIRB and OUTA or OUTB); it will not cross the port boundary.\n\n\
+  If the WCZ effect is speci\uFB01ed, the C and Z \uFB02ags are updated to the original state of OUTA\
+  \ / OUTB's base bit,\n\nidenti\uFB01ed by Dest."
 flags_affected:
   Z:
     formula: OUT bit
 parameters:
-- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
-  the I/O pin(s) to set to the input direction and with output level(s) set randomly
-  to low or high.
-- WCZ is an optional effect to update flags.
-documentation_source: PASM2 Manual 2022/11/01
+- "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the I/O\
+  \ pin(s) to set to the input direction and with output level(s) set randomly to low or high."
+- "WCZ is an optional effect to update \uFB02ags."
+- "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the I/O\
+  \ pin(s) to set to input direction and output levels of low or high."
+- "WCZ is an optional effect to update \uFB02ags."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pinop
   pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
-    flags'
+  description: 'Pin operation: destination/immediate pin number 0-511, optional effect flags'
   valueType: 30
 compiler_encoding:
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Float random
+category: I/O Pin Instruction - Set pin(s) direction to input and to an output level of random low/high.
+result: The I/O pins described by Dest are set to the input direction and to an output level of low/high
+  according
+syntax_variants:
+- FLTRND {#}Dest {WCZ}
+- FLTRND sets the I/O pin(s) designated by Dest to the input direction and with output level(s) set randomly
+  low and
+- instruction immediately precedes the FLTRND instruction; substituting SETQ's Dest[4:0] in place of value
+- bits[10:6], for FLTRND's use.
+manual_extraction_date: '2025-01-19'

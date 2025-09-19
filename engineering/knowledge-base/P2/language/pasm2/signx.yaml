@@ -1,27 +1,31 @@
 instruction: SIGNX
-syntax: SIGNX   D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0111011 CZI DDDDDDDDD SSSSSSSSS
+syntax: SIGNX Dest, {#}Src {WC|WZ|WCZ}
+encoding: EEEE 0111011 CZI DDDDDDDDD SSSSSSSSS                    D            MSB of result        Result
+  = 0               2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'SIGNX fills the bits of Dest, above the bit indicated by Src[4:0], with
-  the value of that identified bit; i.e. Result: The Dest value is sign-extended above
-  the bit indicated by Src and is stored in Dest. Optionally the C and Z flags are
-  updated to the resulting MSB and zero status. C = MSB of result.'
-category: Math Instruction - Sign-extend value beyond designated bit.
+group: Math Instruction - Sign-extend value beyond designated bit.
+description: "SIGNX fills the bits of Dest, above the bit indicated by Src[4:0], with the value of that\
+  \ identified bit; i.e. Result: The Dest value is sign-extended above the bit indicated by Src and is\
+  \ stored in Dest. Optionally the C and Z flags are updated to the resulting MSB and zero status. C =\
+  \ MSB of result.\n\nSIGNX \uFB01lls the bits of Dest, above the bit indicated by Src[4:0], with the\
+  \ value of that identi\uFB01ed bit; i.e.\n\nsign-extending the value. This is handy when converting\
+  \ encoded or received signed values from a small bit width\n\nto a large bit with; i.e. 32 bits.\n\n\
+  If the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set to the result's MSB value.\n\nIf the\
+  \ WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the result is zero, or is cleared\
+  \ (0) if it is non-zero."
 flags_affected:
-  C:
-    formula: MSB of result
+  Z: Result = 0
 parameters:
-- Dest is a register containing the value to sign-extend above bit Src[4:0] and is
-  where the result is written.
-- Src is a register or 9-bit literal whose value (lower 5 bits) identifies the bit
-  of Dest to zero-extend beyond.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Dest is a register containing the value to sign-extend above bit Src[4:0] and is where the result is
+  written.
+- "Src is a register or 9-bit literal whose value (lower 5 bits) identi\uFB01es the bit of Dest to zero-extend\
+  \ beyond."
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - ZEROX
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -31,3 +35,13 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Sign extend
+category: Math Instruction - Sign-extend value beyond designated bit.
+result: The Dest value is sign-extended above the bit indicated by Src and is stored in Dest. Optionally
+  the C and
+syntax_variants:
+- SIGNX Dest, {#}Src {WC|WZ|WCZ}
+- "SIGNX \uFB01lls the bits of Dest, above the bit indicated by Src[4:0], with the value of that identi\uFB01\
+  ed bit; i.e."
+manual_extraction_date: '2025-01-19'

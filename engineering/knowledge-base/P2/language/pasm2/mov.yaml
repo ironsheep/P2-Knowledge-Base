@@ -1,7 +1,8 @@
 instruction: MOV
-syntax: MOV     D,{#}S   {WC/WZ/WCZ}
+syntax: MOV Dest, {#}Src {WC|WZ|WCZ}
 compiler_syntax: MOV D,S/#
-encoding: EEEE 0110000 CZI DDDDDDDDD SSSSSSSSS
+encoding: EEEE 0110000 CZI DDDDDDDDD SSSSSSSSS                    D               S[31]            Result
+  = 0                  2
 compiler_encoding:
   bits: 32
   opcode: 192
@@ -11,14 +12,16 @@ compiler_encoding:
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'Mov stores the Src value into Dest. Result: The Src value is stored
-  in Dest and optionally flags are updated with the sign bit and zero status.'
-category: Bit Operation Instruction - Set a value into a register.
+group: Bit Operation Instruction - Set a value into a register.
+description: "Mov stores the Src value into Dest. Result: The Src value is stored in Dest and optionally\
+  \ flags are updated with the sign bit and zero status.\n\nMov stores the Src value into Dest.\n\nIf\
+  \ the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is updated to be Src[31].\n\nIf the WZ or WCZ\
+  \ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the Dest result equals zero, or is cleared (0)\
+  \ if it is\n\nnon-zero."
 compiler_category: Data Movement
 flags_affected:
-  C:
-    formula: S[31]
+  C: S[31] Result =
+  Z: Result = 0
 compiler_effects:
 - name: wc
   symbol: WC
@@ -37,10 +40,9 @@ compiler_effects:
   bitPattern: '11'
 parameters:
 - Dest is the register to receive the Src value.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value will be
-  stored into Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
-documentation_source: PASM2 Manual 2022/11/01
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value will be stored into Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -48,3 +50,11 @@ compiler_operand_format:
   description: Destination register, Source register or immediate value
   valueType: 0
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Move
+category: Bit Operation Instruction - Set a value into a register.
+result: "The Src value is stored in Dest and optionally \uFB02ags are updated with the sign bit and zero\
+  \ status."
+syntax_variants:
+- MOV Dest, {#}Src {WC|WZ|WCZ}
+manual_extraction_date: '2025-01-19'

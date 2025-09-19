@@ -1,8 +1,50 @@
-directive: "ALIGNW"
+directive: ALIGNW
 type: assembly_directive
-category: "Assembly"
-description: |
-  Align to word boundary (2 bytes)
-syntax: "['ALIGNW']"
+description: ALIGNW aligns the next data element to the beginning of the next word of Hub RAM. ALIGNW
+  is important to use when code requires certain data to begin on a word boundary (for access convenience
+  and speed). The directive causes zero or one byte ($00) to emit after the current data to automatically
+  pad and align the next data element to a word boundary.
+brief_description: T2        WORD $2222
+syntax: ALIGNW
+category: Directive - Align to next word in Hub RAM
+parameters:
+- No parameters - This directive takes no arguments
+usage_notes: 'ALIGNW is only allowed in DAT blocks, not in in-line PASM.
+
+
+  When data elements are naturally packed in memory, they may not align to convenient boundaries.
+
+  If code that accesses data expects it to align with a word boundary (for convenience or speed),
+
+  the ALIGNW directive achieves this by emitting 0-1 zero bytes as padding.
+
+
+  Note that elements after the ALIGNW are still packed right after each other, which may require
+
+  further alignment directives depending on the needs of the code accessing them.
+
+  '
 examples:
-  - "ALIGNW  // Align to next word boundary"
+- code: "DAT\n  T1        BYTE $11\n            ALIGNW          ' Pad to next word boundary\n  T2    \
+    \    WORD $2222\n            LONG $33333333\n"
+  comment: Aligns T2 to start at a word boundary by padding after T1
+- code: "DAT\n  Buffer    BYTE 0[7]       ' 7-byte buffer\n            ALIGNW          ' Ensure next data\
+    \ is word-aligned  \n  WordData  WORD $1234\n"
+  comment: Ensures WordData starts on a word boundary for faster access
+memory_layout_example: "Without ALIGNW:\n  L0                          L1                          L2\n\
+  \  W0        W1        W2        W3        W4        W5\n  B0    B1    B2    B3    B4    B5    B6  \
+  \  B7    B8    B9    B10   B11\n  $11   $22   $22   $33   $33   $33   $33   --    --    --    --   \
+  \ --\n\nWith ALIGNW after BYTE $11:\n  L0                          L1                          L2\n\
+  \  W0        W1        W2        W3        W4        W5  \n  B0    B1    B2    B3    B4    B5    B6\
+  \    B7    B8    B9    B10   B11\n  $11   $00   $22   $22   $33   $33   $33   $33   --    --    -- \
+  \   --\n       [pad]\n"
+group: Assembly
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
+related:
+- ALIGNL
+- BYTE
+- WORD
+- LONG
+last_updated: '2025-09-19'
+manual_extraction_date: '2025-01-19'

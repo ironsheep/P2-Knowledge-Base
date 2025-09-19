@@ -1,31 +1,81 @@
 instruction: SUBX
-syntax: SUBX    D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0001101 CZI DDDDDDDDD SSSSSSSSS
+syntax: SUBX Dest, {#}Src {WC|WZ|WCZ}
+encoding:
+- EEEE 0001101 CZI DDDDDDDDD SSSSSSSSS                   D         borrow of D-(S+C) Z AND (Result = 0)             2
+- EEEE 0011100 CZI DDDDDDDDD SSSSSSSSS                    D           sign of (D +/- S)     Result = 0                2
+- EEEE 0011101 CZI DDDDDDDDD SSSSSSSSS                    D           sign of (D +/- S)     Result = 0                2
+- EEEE 0011110 CZI DDDDDDDDD SSSSSSSSS                    D           sign of (D +/- S)     Result = 0                2
+- EEEE 0011111 CZI DDDDDDDDD SSSSSSSSS                    D           sign of (D +/- S)     Result = 0                2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'SUBX subtracts the unsigned value of Src plus C from the unsigned Dest
-  and stores the result into the Dest Result: Difference of unsigned Dest and unsigned
-  Src (plus C) is stored in Dest and optionally the C and Z flags are updated to the
-  extended borrow and zero status.'
-category: Math Instruction - Subtract one unsigned extended value from another.
+group: Math Instruction - Subtract one unsigned extended value from another.
+description: "SUBX subtracts the unsigned value of Src plus C from the unsigned Dest and stores the result\
+  \ into the Dest Result: Difference of unsigned Dest and unsigned Src (plus C) is stored in Dest and\
+  \ optionally the C and Z flags are updated to the extended borrow and zero status.\n\nSUBX subtracts\
+  \ the unsigned value of Src plus C from the unsigned Dest and stores the result into the Dest\n\nregister.\
+  \ The SUBX instruction is used to perform unsigned multi-long (extended) subtraction, such as 64-bit\n\
+  \nsubtraction.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if the subtraction\
+  \ results in an unsigned borrow, or is\n\ncleared (0) if no borrow. Use WC or WCZ on preceding SUB and\
+  \ SUBX instructions for proper \uFB01nal C \uFB02ag. If C is set\n\nafter the last SUBX in a multi-long\
+  \ subtraction, it indicates unsigned under\uFB02ow.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the\
+  \ Z \uFB02ag is set (1) if Z was previously set and the result of Dest - (Src + C) is\n\nzero, or it\
+  \ is cleared (0) if non-zero. Use WZ or WCZ on preceding SUB and SUBX instructions for proper \uFB01\
+  nal Z \uFB02ag.\n\nTo subtract unsigned multi-long values, use SUB followed by one or more SUBX instructions\
+  \ as described in\n\nSubtracting Two Multi-Long Values.\n\nSUMC / SUMNC\n\nSum C or Sum not C\n\nMath\
+  \ Instruction - Adjust signed value by other C-negated or !C-negated value.\n\nSUMC Dest, {#}Src   \
+  \    {WC|WZ|WCZ}\n\nSUMNC Dest, {#}Src {WC|WZ|WCZ}\n\nResult: The sum of signed Dest and either Src\
+  \ or -Src (according to C) is stored in Dest and optionally the C and Z\n\n\uFB02ags are updated to\
+  \ the sign and zero status.\n\n\u25CF    Dest is a register containing the signed value to adjust by\
+  \ Src or -Src, and is where the result is written.\n\n\u25CF    Src is a register, 9-bit literal, or\
+  \ 32-bit augmented literal whose value (if C=0 or !C=0) or negated value (if\n\nC=1 or !C=1) is added\
+  \ into Dest.\n\n\u25CF    WC, WZ, or WCZ are optional effects to update \uFB02ags.\n\nCOND INSTR   \
+  \      FX      DEST          SRC           Write             C Flag              Z Flag            \
+  \ Clocks\n\nEEEE 0011100 CZI DDDDDDDDD SSSSSSSSS                    D           sign of (D +/- S)  \
+  \   Result = 0                2\n\nEEEE 0011101 CZI DDDDDDDDD SSSSSSSSS                    D       \
+  \    sign of (D +/- S)     Result = 0                2\n\nRelated: SUMZ and SUMNZ\n\nSUMC or SUMNC adjusts\
+  \ the signed Dest value by Src or -Src (depending on C or !C) and stores the result into the\n\nDest\
+  \ register. Prior to adding to Dest, the Src value is negated if C (SUMC) or !C (SUMNC) is 1.\n\nIf\
+  \ the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if the result is negative, or is\
+  \ cleared (0) if positive.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if\
+  \ the result of Dest +/- Src is zero, or is cleared (0) if it is\n\nnon-zero.\n\nSUMZ / SUMNZ\n\nSum\
+  \ Z or Sum not Z\n\nMath Instruction - Adjust signed value by other Z-negated or !Z-negated value.\n\
+  \nSUMZ Dest, {#}Src       {WC|WZ|WCZ}\n\nSUMNZ Dest, {#}Src {WC|WZ|WCZ}\n\nResult: The sum of signed\
+  \ Dest and either Src or -Src (according to Z) is stored in Dest and optionally the C and Z\n\n\uFB02\
+  ags are updated to the sign and zero status.\n\n\u25CF    Dest is a register containing the signed value\
+  \ to adjust by Src or -Src, and is where the result is written.\n\n\u25CF    Src is a register, 9-bit\
+  \ literal, or 32-bit augmented literal whose value (if Z=0 or !Z=0) or negated value (if\n\nZ=1 or !Z=1)\
+  \ is added into Dest.\n\n\u25CF    WC, WZ, or WCZ are optional effects to update \uFB02ags.\n\nCOND\
+  \ INSTR         FX      DEST          SRC           Write             C Flag              Z Flag   \
+  \          Clocks\n\nEEEE 0011110 CZI DDDDDDDDD SSSSSSSSS                    D           sign of (D\
+  \ +/- S)     Result = 0                2\n\nEEEE 0011111 CZI DDDDDDDDD SSSSSSSSS                   \
+  \ D           sign of (D +/- S)     Result = 0                2\n\nRelated: SUMC and SUMNC\n\nSUMZ or\
+  \ SUMNZ adjusts the signed Dest value by Src or -Src (depending on Z or !Z) and stores the result into\
+  \ the\n\nDest register. Prior to adding to Dest, the Src value is negated if Z (SUMZ) or !Z (SUMNZ)\
+  \ is 1.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if the result is negative,\
+  \ or is cleared (0) if positive.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set\
+  \ (1) if the result of Dest +/- Src is zero, or is cleared (0) if it is\n\nnon-zero."
 flags_affected:
-  C:
-    formula: borrow of (D - (S + C))
-  Z:
-    formula: Z AND (result == 0)
+  Z: Result = 0
 parameters:
-- Dest is a register containing the value to subtract Src plus C from, and is where
-  the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C
-  is subtracted from Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Dest is a register containing the value to subtract Src plus C from, and is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is subtracted from
+  Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- Dest is a register containing the signed value to adjust by Src or -Src, and is where the result is
+  written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value (if C=0 or !C=0) or negated
+  value (if C=1 or !C=1) is added into Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- Dest is a register containing the signed value to adjust by Src or -Src, and is where the result is
+  written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value (if Z=0 or !Z=0) or negated
+  value (if Z=1 or !Z=1) is added into Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
-- SUB
-- SUBSX
-- ADDX
-documentation_source: PASM2 Manual 2022/11/01
+- SUMC
+- SUMNC
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -35,3 +85,17 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Subtract extended
+category: Math Instruction - Subtract one unsigned extended value from another.
+result: The sum of signed Dest and either Src or -Src (according to Z) is stored in Dest and optionally
+  the C and Z
+syntax_variants:
+- SUBX Dest, {#}Src {WC|WZ|WCZ}
+- SUBX subtracts the unsigned value of Src plus C from the unsigned Dest and stores the result into the
+  Dest
+- "cleared (0) if no borrow. Use WC or WCZ on preceding SUB and SUBX instructions for proper \uFB01nal\
+  \ C \uFB02ag. If C is set"
+- "zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding SUB and SUBX instructions for proper\
+  \ \uFB01nal Z \uFB02ag."
+manual_extraction_date: '2025-01-19'

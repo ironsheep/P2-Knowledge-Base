@@ -1,26 +1,57 @@
 instruction: ALTB
-syntax: ALTB    D,{#}S
-encoding: EEEE 1001100 111 DDDDDDDDD 000000000
+syntax: ALTB Dest, {#}Src
+encoding:
+- "EEEE 1001100 11I DDDDDDDDD SSSSSSSSS                     D1                  \u2014               \
+  \    \u2014                    2"
+- EEEE 1001100 111 DDDDDDDDD 000000000                     D 1
 timing:
   cycles: 2
   type: fixed
-group: Register Indirection
-description: 'ALTB should be followed by a BITxxx instruction— it modifies the BITxxx
-  instruction''s Dest value, enabling code Result: The next instruction''s pipelined
-  Dest value is altered to be (Src + Dest[13:5]) & $1FF, or just Dest[13:5] for syntax
-  2.'
-category: Indirection Instruction - Alter subsequent BITxxx instruction.
+group: Indirection Instruction - Alter subsequent BITxxx instruction.
+description: "ALTB should be followed by a BITxxx instruction\u2014 it modifies the BITxxx instruction's\
+  \ Dest value, enabling code Result: The next instruction's pipelined Dest value is altered to be (Src\
+  \ + Dest[13:5]) & $1FF, or just Dest[13:5] for syntax 2.\n\nALTB should be followed by a BITxxx instruction\u2014\
+  \ it modi\uFB01es the BITxxx instruction's Dest value, enabling code\n\nto iterate through multiple\
+  \ bits of data across a range of Reg RAM. BITxxx's Dest value is changed to (Src +\n\nDest[13:5]) &\
+  \ $1FF (for syntax 1), or to Dest[13:5] (for syntax 2).\n\nDest[13:5] corresponds to the target long\
+  \ register's 9-bit address and Dest[4:0] is the bit ID within it; values of\n\n0\u201331 identify individual\
+  \ bits, by position, in least-signi\uFB01cant bit order. Iteratively executing ALTB followed by a\n\n\
+  BITxxx instruction, and each time incrementing ALTB's 14-bit Dest value by one, effectively writes a\
+  \ stream of bit\n\nvalues to Reg RAM as if it were all made of bit-sized registers.\n\nWarning: BITxxx\
+  \ instructions optionally operate on a range of bits, encoded in the Src value\u2014 they don't limit\n\
+  \nthemselves to only reading Src[4:0] for the bit number. For this reason, care must be taken when using\
+  \ ALTB with\n\nBITxxx or the index value (often used for the Src of the altered instruction) will be\
+  \ misinterpreted as multiple bits\n\nto affect. One way to solve this is to use a SETQ #0 followed by\
+  \ the ALTB then BITxxx instructions to force\n\nBITxxx's Src[9:5] bits to 0; i.e. no extra bits beyond\
+  \ the single bit described by Src[4:0].\n\nIn syntax 1, Src consists of two 9-bit \uFB01elds; a base\
+  \ address (Src[8:0]) and a signed auto-indexer (Src[17:9]).\n\n\u25CF   The base is the Reg RAM address\
+  \ where the series of bits begins. ALTB adds the long index (Dest[13:5])\n\nto the base (Src[8:0]) to\
+  \ locate the register holding the target bit. The bit ID (Dest[4:0]) identi\uFB01es the bit's\n\nposition\
+  \ within that long register.\n\n\u25CF   At the end of ALTB execution, the optional auto-indexer value\
+  \ (usually 0, 1, or -1) is added to the 14-bit\n\nindex (Dest) for a future ALTB+BITxxx iteration.\n\
+  \nIn syntax 2, Dest serves as the full bit address\u2014 it's the same format as in syntax 1, but represents\
+  \ the target\n\nlong's absolute address and its bit index instead of the long's relative index (to add\
+  \ to a base) and bit index."
 flags_affected:
   C:
     when: D1
 parameters:
-- Dest is the register whose 14-bit value is the index, or the full bit address, for
-  the BITxxx instruction to operate on.
-- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value
-  contains a base long address (Src[8:0]; added to index (Dest[13:5]) for BITxxx)
-  and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of
-  execution).
-documentation_source: PASM2 Manual 2022/11/01
+- Dest is the register whose 14-bit value is the index, or the full bit address, for the BITxxx instruction
+  to operate on.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base
+  long address (Src[8:0]; added to index (Dest[13:5]) for BITxxx) and also an optional auto-indexer value
+  (Src[17:9]; added to Dest at the end of execution).
+- "The base is the Reg RAM address where the series of bits begins. ALTB adds the long index (Dest[13:5])\
+  \ to the base (Src[8:0]) to locate the register holding the target bit. The bit ID (Dest[4:0]) identi\uFB01\
+  es the bit's position within that long register."
+- At the end of ALTB execution, the optional auto-indexer value (usually 0, 1, or -1) is added to the
+  14-bit index (Dest) for a future ALTB+BITxxx iteration.
+- The instruction following ALTB is shielded from interrupt
+- "ALTB alters the next instruction regardless of its kind\u2014 the intention is for it to be a BITxxx"
+- "Field value modi\uFB01cation occurs in the instruction pipeline only; code is not altered, values do\
+  \ not persist"
+- "SETQ / SETQ2 does not affect ALTx instructions\u2014 the Q value passes through to the next instruction"
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_duiz
@@ -30,3 +61,25 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 5
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Alter bit
+category: Indirection Instruction - Alter subsequent BITxxx instruction.
+result: The next instruction's pipelined Dest value is altered to be (Src + Dest[13:5]) & $1FF, or just
+  Dest[13:5] for
+syntax_variants:
+- ALTB Dest, {#}Src
+- ALTB Dest
+- "ALTB should be followed by a BITxxx instruction\u2014 it modi\uFB01es the BITxxx instruction's Dest\
+  \ value, enabling code"
+- BITxxx instruction, and each time incrementing ALTB's 14-bit Dest value by one, effectively writes a
+  stream of bit
+- themselves to only reading Src[4:0] for the bit number. For this reason, care must be taken when using
+  ALTB with
+- "\u25CF   The base is the Reg RAM address where the series of bits begins. ALTB adds the long index\
+  \ (Dest[13:5])"
+- index (Dest) for a future ALTB+BITxxx iteration.
+usage_notes: "The instruction following ALTB is shielded from interrupt\nALTB alters the next instruction\
+  \ regardless of its kind\u2014 the intention is for it to be a BITxxx\nField value modi\uFB01cation\
+  \ occurs in the instruction pipeline only; code is not altered, values do not persist\nSETQ / SETQ2\
+  \ does not affect ALTx instructions\u2014 the Q value passes through to the next instruction"
+manual_extraction_date: '2025-01-19'

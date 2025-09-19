@@ -1,0 +1,26 @@
+directive: BYTE
+name: Insert Byte Data
+description: Insert byte data into Hub memory at assembly time
+syntax: BYTE value1 {, value2, ...}
+examples:
+- BYTE  $FF              ; Single byte value
+- BYTE  10, 20, 30       ; Multiple byte values
+- BYTE  "Hello", 0       ; String with null terminator
+- BYTE  value[16]        ; Duplicate value 16 times
+usage: 'BYTE is used in DAT sections to define byte-sized data values that will
+
+  be stored in Hub memory. Multiple values can be specified separated by commas.
+
+  Strings are automatically converted to their byte values.
+
+  '
+alignment: Bytes are packed sequentially without padding
+see_also:
+- WORD
+- LONG
+- ALIGNL
+- ALIGNW
+documentation_source: PASM2 Manual 2022-11-01
+created_date: '2025-09-19'
+group: Data Declaration
+last_updated: '2025-09-19T16:04:17.652869'

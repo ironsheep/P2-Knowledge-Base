@@ -1,15 +1,43 @@
 instruction: RCZR
-syntax: RCZR    D        {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 DDDDDDDDD 001101010
+syntax: RCZR Dest {WC|WZ|WCZ}
+encoding: EEEE 1101011 CZ0 DDDDDDDDD 001101010                     D                   D[1]                D[0]                2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'RCZR shifts Dest''s binary value right by two places and sets Dest[31]
-  to C and Dest[30] to Z. Result: The bits of Dest are shifted right by two places
-  and C and Z are inserted as new MSBs.'
-category: Bit Operation Instruction - Rotate carry and zero flags right into value
-  (2-bit rotate right).
+group: Bit Operation Instruction - Rotate carry and zero flags right into value (2-bit rotate right).
+description: "RCZR shifts Dest's binary value right by two places and sets Dest[31] to C and Dest[30]\
+  \ to Z. Result: The bits of Dest are shifted right by two places and C and Z are inserted as new MSBs.\n\
+  \nRCZR shifts Dest's binary value right by two places and sets Dest[31] to C and Dest[30] to Z.\n\n\
+  If the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is updated to the original Dest[1] state.\n\
+  \nIf the WZ or WCZ effect is speci\uFB01ed, the Z is \uFB02ag is updated to the original Dest[0] state.\n\
+  \nRegisters\n\nSpecial Purpose Registers - Rotate a byte left into a value.\n\nMost Reg RAM registers\
+  \ are general-purpose (used for code and data) while a small set has a special purpose.\n\nName Address\
+  \                  Access2             Special Purpose\n\nIJMP3        $1F01               Read/Write\
+  \           Interrupt call address for INT3; set by code\n\nIRET3        $1F1 1\n\nRead/Write      \
+  \     Interrupt return address and C/Z flags for INT3; set by cog\n\nIJMP2        $1F21            \
+  \   Read/Write           Interrupt call address for INT2; set by code\n\nIRET2        $1F31        \
+  \       Read/Write           Interrupt return address and C/Z flags for INT2; set by cog\n\nIJMP1  \
+  \      $1F4 1\n\nRead/Write           Interrupt call address for INT1; set by code\n\nIRET1        $1F5\
+  \ 1\n\nRead/Write           Interrupt return address and C/Z flags for INT1; set by cog\n\nPA      $1F61\
+  \               Read/Write           CALLD-imm return, CALLPA parameter, or LOC address\n\nPB      $1F71\
+  \               Read/Write           CALLD-imm return, CALLPB parameter, or LOC address\n\nPTRA    \
+  \ $1F8       Read Special / Write Special Pointer A to Hub RAM\n\nPTRB     $1F9       Read Special /\
+  \ Write Special Pointer B to Hub RAM\n\nDIRA     $1FA            Read / Write Special     Output enables\
+  \ (direction bits) for P31..P0\n\nDIRB     $1FB            Read / Write Special     Output enables (direction\
+  \ bits) for P63..P32\n\nOUTA     $1FC            Read / Write Special     Output states for P31..P0\n\
+  \nOUTB     $1FD            Read / Write Special     Output states for P63..P32\n\nINA      $1FE3   \
+  \           Read Special          Input states for P31..P0\n\n4\n\nINB      $1FF               Read\
+  \ Special          Input states for P63..P32\n\n1\n\nLocations $1F0\u2013$1F7 are general-purpose code/data\
+  \ registers by default but become these named special-purpose\n\nregisters if their associated functions\
+  \ are enabled.\n\n2\n\nMost reads and writes involve the underlying Reg RAM at these locations; however,\
+  \ those marked \"special\" may read from a\n\nspecial internal register (instead of Reg RAM) or write\
+  \ to both the Reg RAM location as well as to a special internal register.\n\n3\n\nAlso debug interrupt\
+  \ call address.\n\n4\n\nAlso debug interrupt return address.\n\nAdditionally, for PASM2 code that is\
+  \ either in-line (within a Spin2 method) or called (by a Spin2 method), the\n\nregisters $1D8\u2013\
+  $1DF are readable/writable by both languages using the symbols PR0\u2013PR7. PASM2 code that is\n\n\
+  launched into another cog does not share this Reg RAM space with Spin2.\n\nName           Address  \
+  \         Access        Special Purpose\n\nPR0\u2013PR7         $1D8\u2013$1DF         Read/Write  \
+  \    PASM2        \u21C4 Spin2 communication mechanism"
 flags_affected:
   C:
     formula: D[1], Z = D[0]
@@ -18,10 +46,9 @@ flags_affected:
     formula: D[0]
     when: D[1]
 parameters:
-- Dest is the register containing the value to rotate the carry and zero flags right
-  into.
-- WC, WZ, or WCZ are optional effects to update flags.
-documentation_source: PASM2 Manual 2022/11/01
+- "Dest is the register containing the value to rotate the carry and zero \uFB02ags right into."
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_d
@@ -31,3 +58,12 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 24
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Rotate carry and zero right
+category: "Bit Operation Instruction - Rotate carry and zero \uFB02ags right into value (2-bit rotate\
+  \ right)."
+result: The bits of Dest are shifted right by two places and C and Z are inserted as new MSBs.
+syntax_variants:
+- RCZR Dest {WC|WZ|WCZ}
+- RCZR shifts Dest's binary value right by two places and sets Dest[31] to C and Dest[30] to Z.
+manual_extraction_date: '2025-01-19'

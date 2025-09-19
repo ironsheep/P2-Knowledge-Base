@@ -1,0 +1,30 @@
+directive: WORD
+name: Insert Word Data
+description: Insert word (16-bit) data into Hub memory at assembly time
+syntax: WORD value1 {, value2, ...}
+examples:
+- WORD  $1234            ; Single word value
+- WORD  1000, 2000, 3000 ; Multiple word values
+- WORD  value[8]          ; Duplicate value 8 times
+- WORD  (@label - @base) >> 1  ; Address calculation
+usage: 'WORD is used in DAT sections to define word-sized (16-bit) data values that
+
+  will be stored in Hub memory. Multiple values can be specified separated by
+
+  commas. Words are stored in little-endian format.
+
+  '
+alignment: 'Words may not be aligned unless preceded by ALIGNW. Using ALIGNW before
+
+  WORD data ensures proper word alignment for efficient access.
+
+  '
+see_also:
+- BYTE
+- LONG
+- ALIGNW
+- ALIGNL
+documentation_source: PASM2 Manual 2022-11-01
+created_date: '2025-09-19'
+group: Data Declaration
+last_updated: '2025-09-19T16:04:17.654277'

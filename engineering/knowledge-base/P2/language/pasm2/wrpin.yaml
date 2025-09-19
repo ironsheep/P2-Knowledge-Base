@@ -9,7 +9,6 @@ description: "Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge sm
   \ pins. \nWraps within A/B pins. Prior SETQ overrides S[10:6].\n\n**CRITICAL REQUIREMENT**:\
   \ Smart pins MUST be reset (DIR=0) before configuring with WRPIN.\nThis ensures\
   \ the smart pin is in a known state and prevents configuration conflicts.\n"
-category: Smart Pins
 critical_requirement:
   reset_before_configure: true
   description: Smart pin MUST be reset (DIR=0) before any WRPIN configuration
@@ -57,7 +56,6 @@ examples:
     '
 documentation_source: enhanced
 documentation_level: comprehensive
-needs_documentation: false
 compiler_operand_format:
   name: operand_ls
   pattern: D/#,S/#
@@ -66,3 +64,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 13
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.512736'

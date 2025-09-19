@@ -1,22 +1,28 @@
 instruction: SETWORD
-syntax: SETWORD D,{#}S,#N
-encoding: EEEE 1001001 00I 000000000 SSSSSSSSS
+syntax: 'SETWORD Dest, {#}Src, #Num'
+encoding:
+- "EEEE 1001001 0NI DDDDDDDDD SSSSSSSSS                        D                   \u2014            \
+  \     \u2014                    2"
+- EEEE 1001001 00I 000000000 SSSSSSSSS                       D   1
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'SETWORD stores Src[15:0] into the word identified by Num within Dest,
-  or the word and register described by a Result: Src[15:0] is written to word Num
-  (0–1) of Dest, or to another register word described by prior ALTSW instruction.'
-category: Bit Operation Instruction - Set a word to new value.
+group: Bit Operation Instruction - Set a word to new value.
+description: "SETWORD stores Src[15:0] into the word identified by Num within Dest, or the word and register\
+  \ described by a Result: Src[15:0] is written to word Num (0\u20131) of Dest, or to another register\
+  \ word described by prior ALTSW instruction.\n\nSETWORD stores Src[15:0] into the word identi\uFB01\
+  ed by Num within Dest, or the word and register described by a\n\nprior ALTSW instruction. No other\
+  \ bits are modi\uFB01ed.\n\nNum (0\u20131) identi\uFB01es a value's individual words, by position, in\
+  \ least-signi\uFB01cant word order.\n\nSyntax 2 is intended for use after an ALTSW instruction; i.e.\
+  \ in a loop to iteratively affect a series of word values\n\nwithin contiguous long registers."
 flags_affected:
   C:
     when: D
 parameters:
 - Dest is the register in which to modify a word.
-- Src is a register, 9-bit literal, or 16-bit augmented literal whose bits [15:0]
-  will be stored in the designated location.
-- Num is a 1-bit literal identifying the word ID (0–1) of Dest to modify.
+- Src is a register, 9-bit literal, or 16-bit augmented literal whose bits [15:0] will be stored in the
+  designated location.
+- "Num is a 1-bit literal identifying the word ID (0\u20131) of Dest to modify."
 related:
 - ALTSW
 - SETNIB
@@ -27,7 +33,7 @@ related:
 - ROLNIB
 - ROLBYTE
 - ROLWORD
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds1set
@@ -37,3 +43,14 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 10
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Set word
+category: Bit Operation Instruction - Set a word to new value.
+result: "Src[15:0] is written to word Num (0\u20131) of Dest, or to another register word described by\
+  \ prior ALTSW"
+syntax_variants:
+- 'SETWORD Dest, {#}Src, #Num'
+- SETWORD {#}Src
+- "SETWORD stores Src[15:0] into the word identi\uFB01ed by Num within Dest, or the word and register\
+  \ described by a"
+manual_extraction_date: '2025-01-19'

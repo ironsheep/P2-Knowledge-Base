@@ -1,22 +1,33 @@
 instruction: DIRNOT
-syntax: DIRNOT  {#}D           {WCZ}
-encoding: EEEE 1101011 CZL DDDDDDDDD 001000111
+syntax: DIRNOT {#}Dest {WCZ}
+encoding: EEEE 1101011 CZL DDDDDDDDD 001000111                 DIRx       Orig DIRx base bit Orig DIRx
+  base bit           2
 timing:
   cycles: 2
   type: fixed
-group: Pins
-description: 'DIRNOT alters the direction register''s bit(s) designated by Dest to
-  their inverse state. All other bits are left Result: The I/O pin direction bit(s),
-  described by Dest, are toggled to their opposite state(s); the rest are left as-is.
-  Z = DIR bit.'
-category: I/O Pin Instruction - Toggle pin(s) to the opposite direction.
+group: I/O Pin Instruction - Toggle pin(s) to the opposite direction.
+description: "DIRNOT alters the direction register's bit(s) designated by Dest to their inverse state.\
+  \ All other bits are left Result: The I/O pin direction bit(s), described by Dest, are toggled to their\
+  \ opposite state(s); the rest are left as-is. Z = DIR bit.\n\nDIRNOT alters the direction register's\
+  \ bit(s) designated by Dest to their inverse state. All other bits are left\n\nunchanged.\n\nDest[5:0]\
+  \ indicates the pin number (0\u201363). For a range of pins, Dest[5:0] indicates the base pin number\
+  \ (0\u201363)\n\nand Dest[10:6] indicates how many contiguous pins beyond the base should be affected\
+  \ (1\u201331).\n\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of\
+  \ up to 8 contiguous pins (Dest[8:6]).\n\nIf needed, use the augmented literal feature (##Dest) to augment\
+  \ Dest to an 11-bit literal value\u2014 this inserts an\n\nAUGD instruction prior.\n\nWhen Dest is a\
+  \ register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ\n\
+  \ninstruction immediately precedes the DIRNOT instruction; substituting SETQ's Dest[4:0] in place of\
+  \ value\n\nbits[10:6], for DIRNOT's use.\n\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6])\
+  \ will wrap within the same 32-pin group (DIRA or\n\nDIRB); it will not cross the port boundary.\n\n\
+  If the WCZ effect is speci\uFB01ed, the C and Z \uFB02ags are updated to the original state of DIRA\
+  \ / DIRB's base bit,\n\nidenti\uFB01ed by Dest."
 flags_affected:
   Z:
     formula: DIR bit
 parameters:
-- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
-  the I/O pin(s) to toggle to the opposite direction.
-- WCZ is an optional effect to update flags.
+- "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the I/O\
+  \ pin(s) to toggle to the opposite direction."
+- "WCZ is an optional effect to update \uFB02ags."
 related:
 - DIRRND
 - DIRL
@@ -25,14 +36,25 @@ related:
 - DIRNC
 - DIRZ
 - DIRNZ
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pinop
   pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
-    flags'
+  description: 'Pin operation: destination/immediate pin number 0-511, optional effect flags'
   valueType: 30
 compiler_encoding:
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Direction not
+category: I/O Pin Instruction - Toggle pin(s) to the opposite direction.
+result: The I/O pin direction bit(s), described by Dest, are toggled to their opposite state(s); the rest
+  are left as-is.
+syntax_variants:
+- DIRNOT {#}Dest {WCZ}
+- DIRNOT alters the direction register's bit(s) designated by Dest to their inverse state. All other bits
+  are left
+- instruction immediately precedes the DIRNOT instruction; substituting SETQ's Dest[4:0] in place of value
+- bits[10:6], for DIRNOT's use.
+manual_extraction_date: '2025-01-19'

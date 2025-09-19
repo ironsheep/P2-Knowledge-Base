@@ -1,12 +1,39 @@
 instruction: TJV
-syntax: TJV     D,{#}S
-encoding: EEEE 1011110 00I DDDDDDDDD SSSSSSSSS
-description: 'Test D and jump to S** if D overflowed (D[31] != C, C = ''correct sign''
-  from last addition/subtraction).
-
-  '
+syntax: TJV Dest, {#}Src
+encoding:
+- EEEE 1011110 00I DDDDDDDDD SSSSSSSSS                     PC   1
+- EEEE 1011100 10I DDDDDDDDD SSSSSSSSS                     PC   1
+description: "Test D and jump to S** if D overflowed (D[31] != C, C = 'correct sign' from last addition/subtraction).\n\
+  \n\nTJV tests the value in Dest against C and jumps to the address described by Src if Dest has over\uFB02\
+  owed\n\n(Dest[31] != C). This instruction requires that C be updated (to the correct sign) by the previous\
+  \ ADDS / ADDSX /\n\nSUBS / SUBSX / CMPS / CMPSX / SUMx instruction.\n\nThe address (Src) can be absolute\
+  \ or relative. To specify an absolute address, Src must be a register containing a\n\n20-bit address\
+  \ value. To specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to +255\n\
+  \ninstructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset (a range\
+  \ of -524288 to\n\n+524287). Offsets are relative to the instruction following the TJV. The signed offset\
+  \ value is in units of whole\n\ninstructions\u2014 it is added to PC as-is when in Cog/LUT execution\
+  \ mode and is multiplied by 4 then added to PC\n\nwhen in Hub execution mode (long-aligned Hub code\
+  \ not required).\n\nTJZ / TJNZ\n\nTest, jump if zero or not zero\n\nFlow Control Instruction - Test\
+  \ value and jump if zero or not zero.\n\nTJZ        Dest, {#}Src\n\nTJNZ Dest, {#}Src\n\nResult: Dest\
+  \ is tested and if it's zero (or not zero in syntax 2), PC is set to a new relative (#Src) or absolute\
+  \ (Src)\n\naddress.\n\n\u25CF    Dest is a register whose value is tested for zero or not zero.\n\n\u25CF\
+  \    Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative\
+  \ address to\n\nset PC to. Use # for relative addressing; omit # for absolute addressing.\n\nCOND INSTR\
+  \            FX      DEST           SRC            Write         C Flag             Z Flag         \
+  \    Clocks\n\nEEEE 1011100 10I DDDDDDDDD SSSSSSSSS                     PC   1\n\n\u2014           \
+  \       \u2014           2 or 4 / 2 or 13\u201320\n\nEEEE 1011100 11I DDDDDDDDD SSSSSSSSS          \
+  \           PC   1\n\n\u2014                  \u2014           2 or 4 / 2 or 13\u201320\n\n1\n\nPC is\
+  \ written only when Dest is zero (or not zero in syntax 2).\n\nTJZ or TJNZ tests the value in Dest and\
+  \ jumps to the address described by Src if the result is zero (syntax 1) or\n\nnot zero (in syntax 2).\n\
+  \nThe address (Src) can be absolute or relative. To specify an absolute address, Src must be a register\
+  \ containing a\n\n20-bit address value. To specify a relative address, use #Label for a 9-bit signed\
+  \ offset (a range of -256 to +255\n\ninstructions) or use ##Label (or insert a prior AUGS instruction)\
+  \ for a 20-bit signed offset (a range of -524288 to\n\n+524287). Offsets are relative to the instruction\
+  \ following the TJZ / TJNZ. The signed offset value is in units of\n\nwhole instructions\u2014 it is\
+  \ added to PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added to\n\nPC when in\
+  \ Hub execution mode (long-aligned Hub code not required)."
 timing:
-  cycles: 2
+  cycles: 1
   type: fixed
 group: Branch S - Test
 flags_affected:
@@ -19,3 +46,22 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 12
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+brief_description: "Test, jump if over\uFB02ow"
+category: "Flow Control Instruction - Test value and jump if over\uFB02owed."
+result: Dest is tested and if it's zero (or not zero in syntax 2), PC is set to a new relative (#Src)
+  or absolute (Src)
+syntax_variants:
+- TJV Dest, {#}Src
+- "TJV tests the value in Dest against C and jumps to the address described by Src if Dest has over\uFB02\
+  owed"
+parameters:
+- "Dest is a register whose value is tested for over\uFB02ow (Dest[31] != C)."
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+- Dest is a register whose value is tested for zero or not zero.
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
+manual_extraction_date: '2025-01-19'
+last_updated: '2025-09-19'

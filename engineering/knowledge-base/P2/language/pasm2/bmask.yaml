@@ -1,23 +1,34 @@
 instruction: BMASK
-syntax: BMASK   D,{#}S
-encoding: EEEE 1001110 010 DDDDDDDDD DDDDDDDDD
+syntax: BMASK Dest, {#}Src
+encoding:
+- "EEEE 1001110 01I DDDDDDDDD SSSSSSSSS                  D                \u2014                  \u2014\
+  \                   2"
+- "EEEE 1001110 010 DDDDDDDDD DDDDDDDDD                  D                \u2014                  \u2014\
+  \                   2"
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'BMASK generates an LSB-justified bit mask (all ones) of Src+1 or Dest+1
-  length and stores it in Dest. The size Result: Bit mask of size Src+1, or Dest+1
-  (1—32 bits) is stored into Dest.'
-category: Bit Operation Instruction - Get 1..32-bit mask into Dest.
+group: Bit Operation Instruction - Get 1..32-bit mask into Dest.
+description: "BMASK generates an LSB-justified bit mask (all ones) of Src+1 or Dest+1 length and stores\
+  \ it in Dest. The size Result: Bit mask of size Src+1, or Dest+1 (1\u201432 bits) is stored into Dest.\n\
+  \nBMASK generates an LSB-justi\uFB01ed bit mask (all ones) of Src+1 or Dest+1 length and stores it in\
+  \ Dest. The size\n\nvalue, whether speci\uFB01ed by Src or Dest, is in the range 0\u201431 to generate\
+  \ 1 to 32 bits of bit mask.\n\nIn effect, Dest becomes (%10 << size) - 1 via the BMASK instruction.\n\
+  \n\u25CF   A size value of 0 generates a bit mask of %00000000_00000000_00000000_00000001.\n\n\u25CF\
+  \   A size value of 5 generates a bit mask of %00000000_00000000_00000000_00111111.\n\n\u25CF   A size\
+  \ value of 15 generates a bit mask of %00000000_00000000_11111111_11111111.\n\nA bit mask is often useful\
+  \ in bitwise operations (AND, OR, XOR) to \uFB01lter out or affect special groups of bits."
 flags_affected:
   C:
     when: D
 parameters:
-- Dest is the register in which to store the generated bit mask and optionally begins
-  by containing the 5-bit mask size it is requesting (syntax 2).
-- Src is an optional register or 5-bit literal whose value is the size of the bit
-  mask to generate.
-documentation_source: PASM2 Manual 2022/11/01
+- Dest is the register in which to store the generated bit mask and optionally begins by containing the
+  5-bit mask size it is requesting (syntax 2).
+- Src is an optional register or 5-bit literal whose value is the size of the bit mask to generate.
+- A size value of 0 generates a bit mask of %00000000_00000000_00000000_00000001.
+- A size value of 5 generates a bit mask of %00000000_00000000_00000000_00111111.
+- A size value of 15 generates a bit mask of %00000000_00000000_11111111_11111111.
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_du
@@ -27,3 +38,14 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 3
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Bit mask
+category: Bit Operation Instruction - Get 1..32-bit mask into Dest.
+result: "Bit mask of size Src+1, or Dest+1 (1\u201432 bits) is stored into Dest."
+syntax_variants:
+- BMASK Dest, {#}Src
+- BMASK Dest
+- "BMASK generates an LSB-justi\uFB01ed bit mask (all ones) of Src+1 or Dest+1 length and stores it in\
+  \ Dest. The size"
+- In effect, Dest becomes (%10 << size) - 1 via the BMASK instruction.
+manual_extraction_date: '2025-01-19'

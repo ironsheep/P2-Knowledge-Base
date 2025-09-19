@@ -4,12 +4,11 @@ encoding: EEEE 1101011 CZL DDDDDDDDD 001001000
 timing:
   cycles: 2
   type: fixed
-group: Pins
+group: I/O Pin Instruction - Set pin(s) output level to high (1) or low (0).
 description: 'OUTH or OUTL alters the output level register''s bit(s) designated by
   Dest to be high (1) or low (0). All other bits Result: The I/O pin output level
   bit(s), described by Dest, are set high (1) or low (0); the rest are left as-is.
   Z = OUT bit.'
-category: I/O Pin Instruction - Set pin(s) output level to high (1) or low (0).
 flags_affected:
   Z:
     formula: OUT bit
@@ -28,3 +27,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.615456'

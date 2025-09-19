@@ -3,13 +3,13 @@ syntax: JNCT1   {#}S
 encoding: EEEE 1011110 01I 000010001 SSSSSSSSS
 timing:
   cycles: 2
-  type: fixed
+  type: variable
+  range: 13...20
 group: Events - Branch
-description: Jump to S** if CT1 event flag is clear.
-category: Events - Branch
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+description: "Jump to S** if CT1 event \uFB02ag is clear.                        \
+  \                                               2 or 4 / 2 or"
+documentation_source: PASM2 Manual 2022-11-01
+documentation_level: structured
 compiler_operand_format:
   name: operand_jpoll
   pattern: S/#
@@ -18,3 +18,22 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 21
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- JNCT1 {#}S
+last_updated: '2025-09-19T16:04:17.043235'
+brief_description: Jump if counter 1 event flag is NOT set
+group_membership:
+  group_id: counter_event_jumps
+  group_file: groups/counter_event_jumps.yaml
+  related:
+  - jct1
+  - jct2
+  - jct3
+  - jnct2
+  - jnct3
+specifics:
+  counter_number: 1
+  event_flag: CT1
+  condition: not set
+quick_example: 'JNCT1 #handler  ; Jump if counter 1 event flag is NOT set'
+has_group_documentation: true

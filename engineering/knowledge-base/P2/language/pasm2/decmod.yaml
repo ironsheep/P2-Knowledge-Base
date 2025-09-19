@@ -1,27 +1,33 @@
 instruction: DECMOD
-syntax: DECMOD  D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0111001 CZI DDDDDDDDD SSSSSSSSS
+syntax: DECMOD Dest, {#}Src {WC|WZ|WCZ}
+encoding: EEEE 0111001 CZI DDDDDDDDD SSSSSSSSS                     D         Modulus triggered       Result
+  = 0               2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'DECMOD compares Dest with 0— if not equal, it decrements Dest; otherwise
-  it sets Dest equal to Src. If Dest Result: If Dest was not equal to 0, it is decremented
-  by 1; otherwise Dest is reset to Src. Optionally, C and Z are updated to indicate
-  reset and zero result status.'
-category: Math Instruction - Decrement with modulus.
+group: Math Instruction - Decrement with modulus.
+description: "DECMOD compares Dest with 0\u2014 if not equal, it decrements Dest; otherwise it sets Dest\
+  \ equal to Src. If Dest Result: If Dest was not equal to 0, it is decremented by 1; otherwise Dest is\
+  \ reset to Src. Optionally, C and Z are updated to indicate reset and zero result status.\n\nDECMOD\
+  \ compares Dest with 0\u2014 if not equal, it decrements Dest; otherwise it sets Dest equal to Src.\
+  \ If Dest\n\nbegins in the range 0 to Src, iterations of DECMOD will decrement Dest repetitively from\
+  \ Src to 0.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if Dest was equal\
+  \ to 0 and subsequently reset to Src; or is\n\ncleared (0) if not reset.\n\nIf the WZ or WCZ effect\
+  \ is speci\uFB01ed, the Z \uFB02ag is set (1) if the result is zero, or is cleared (0) if it is non-zero.\n\
+  \nDECMOD does not limit Dest within the speci\uFB01ed range\u2014 if Dest begins as greater than Src,\
+  \ iterations of DECMOD\n\nwill continue to decrement it down through Src before it will effectively\
+  \ cycle from Src to 0."
 flags_affected:
-  C:
-    formula: 1, else D = D - 1 and C = 0
+  Z: Result = 0
 parameters:
-- Dest is a register containing the value to decrement down to 0 with modulus, and
-  is where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is the
-  modulus limit to apply to Dest's decrement operation.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Dest is a register containing the value to decrement down to 0 with modulus, and is where the result
+  is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is the modulus limit to apply
+  to Dest's decrement operation.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - INCMOD
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -31,3 +37,16 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Decrement modulus
+category: Math Instruction - Decrement with modulus.
+result: If Dest was not equal to 0, it is decremented by 1; otherwise Dest is reset to Src. Optionally,
+  C and Z are
+syntax_variants:
+- DECMOD Dest, {#}Src {WC|WZ|WCZ}
+- "DECMOD compares Dest with 0\u2014 if not equal, it decrements Dest; otherwise it sets Dest equal to\
+  \ Src. If Dest"
+- begins in the range 0 to Src, iterations of DECMOD will decrement Dest repetitively from Src to 0.
+- "DECMOD does not limit Dest within the speci\uFB01ed range\u2014 if Dest begins as greater than Src,\
+  \ iterations of DECMOD"
+manual_extraction_date: '2025-01-19'

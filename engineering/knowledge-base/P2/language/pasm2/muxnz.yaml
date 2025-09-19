@@ -4,12 +4,11 @@ encoding: EEEE 0101111 CZI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
+group: Bit Operation Instructions - Set discrete bits to Z or !Z
 description: 'MUXZ or MUXNZ alters the Dest bit(s) designated by Src (high bits) to
   equal the state, or inverse state, of the Z flag. Result: Dest bit(s) described
   by Src are set to Z or !Z; the rest are left as-is. Flags are optionally updated
   with parity and zero status of the result.'
-category: Bit Operation Instructions - Set discrete bits to Z or !Z
 flags_affected:
   C:
     formula: parity of result
@@ -28,3 +27,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.304032'

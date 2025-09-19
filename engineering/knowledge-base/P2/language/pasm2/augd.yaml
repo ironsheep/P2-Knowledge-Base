@@ -1,21 +1,28 @@
 instruction: AUGD
-syntax: AUGD
-encoding: EEEE 11111nn nnn nnnnnnnnn nnnnnnnnn
+syntax: 'AUGD #Dest'
+encoding: "EEEE 11111DD DDD DDDDDDDDD DDDDDDDDD Hidden D Queue                     \u2014            \
+  \     \u2014                   2"
 timing:
   cycles: 2
   type: fixed
-group: Miscellaneous
-description: 'AUGD is an assistant instruction to aid with literal values that exceed
-  9 bits. Most PASM2 instructions have 9 bits Result: The 23-bit value formed from
-  Dest is queued to prefix the next literal Dest occurrence (#Dest) to form a 32-bit
-  literal for that instruction; interrupts are also temporarily disabled..'
-category: Augmentation Instruction - Augment next literal Dest to 32-bits.
+group: Augmentation Instruction - Augment next literal Dest to 32-bits.
+description: "AUGD is an assistant instruction to aid with literal values that exceed 9 bits. Most PASM2\
+  \ instructions have 9 bits Result: The 23-bit value formed from Dest is queued to prefix the next literal\
+  \ Dest occurrence (#Dest) to form a 32-bit literal for that instruction; interrupts are also temporarily\
+  \ disabled..\n\nAUGD is an assistant instruction to aid with literal values that exceed 9 bits. Most\
+  \ PASM2 instructions have 9 bits\n\navailable for literal Dest values; enough for many uses, but not\
+  \ all. AUGD augments the next occurrence of a literal\n\nDest value to be a full 32-bits. When the instruction\
+  \ with the soon-to-be-augmented literal is later executed, the\n\ncog uses the lower 9 bits encoded\
+  \ in the instruction's Dest \uFB01eld and prepends AUGD's 23 bits to it."
 parameters:
-- Dest is a 32-bit literal whose upper 23 bits are prepended to the next literal Dest
-  occurrence.
+- Dest is a 32-bit literal whose upper 23 bits are prepended to the next literal Dest occurrence.
+- All instructions following AUGD are shielded from interrupt until after the instruction with the
+- Dest value augmentation occurs in the instruction pipeline only; code is not altered, value does not
+  persist
+- "SETQ / SETQ2 does not affect AUGD\u2014 the Q value passes through to the next instruction"
 related:
 - AUGS
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_aug
@@ -25,3 +32,33 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 23
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Augment destination
+category: Augmentation Instruction - Augment next literal Dest to 32-bits.
+result: "The 23-bit value formed from Dest is queued to pre\uFB01x the next literal Dest occurrence (#Dest)\
+  \ to form a"
+syntax_variants:
+- 'AUGD #Dest'
+- available for literal Dest values; enough for many uses, but not all. AUGD augments the next occurrence
+  of a literal
+- "cog uses the lower 9 bits encoded in the instruction's Dest \uFB01eld and prepends AUGD's 23 bits to\
+  \ it."
+usage_notes: "All instructions following AUGD are shielded from interrupt until after the instruction\
+  \ with the\nnewly-augmented literal Dest value is executed\nDest value augmentation occurs in the instruction\
+  \ pipeline only; code is not altered, value does not persist\nSETQ / SETQ2 does not affect AUGD\u2014\
+  \ the Q value passes through to the next instruction\nTip: Though AUGD may be manually entered wherever\
+  \ needed, the Parallax P2 compiler supports a convenient way\nto use this feature. In the target instruction's\
+  \ Dest \uFB01eld, use \"##\" followed by the desired 32-bit literal (instead of\n\"#\" followed by a\
+  \ 9-bit literal); the compiler will automatically invoke AUGD immediately before. When counting\nclock\
+  \ cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals."
+examples:
+- code: "Both samples below use greater-than 9-bit literals (via AUGD functionality). The \uFB01rst is\
+    \ more convenient and"
+- code: "readable than using the AUGD instruction directly.\n  PUSHA       ##$ABCDEF                 \
+    \           '2+3..10 cycles (in Cog RAM)\n  QMUL        ##8192, #4                           '2+2..9\
+    \ cycles\n\fis the same as:"
+- code: "AUGD        #$ABCDEF                              '2 cycles\n  PUSHA       #$ABCDEF & $1FF  \
+    \                     '3..10 cycles (in Cog RAM)"
+- code: "AUGD        #8192                                 '2 cycles\n  QMUL        #8192 & $1FF, #4 \
+    \                     '2..9 cycles"
+manual_extraction_date: '2025-01-19'

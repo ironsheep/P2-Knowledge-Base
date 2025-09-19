@@ -1,7 +1,8 @@
 instruction: ADD
-syntax: ADD     D,{#}S   {WC/WZ/WCZ}
+syntax: ADD Dest, {#}Src {WC|WZ|WCZ}
 compiler_syntax: ADD D,S/#
-encoding: EEEE 0001000 CZI DDDDDDDDD SSSSSSSSS
+encoding: EEEE 0001000 CZI DDDDDDDDD SSSSSSSSS                    D           carry of (D + S)      Result
+  = 0               2
 compiler_encoding:
   bits: 32
   opcode: 32
@@ -11,15 +12,19 @@ compiler_encoding:
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'ADD sums the two unsigned values of Dest and Src together and stores
-  the result into the Dest register. Result: Sum of unsigned Src and unsigned Dest
-  is stored in Dest.'
-category: Math Instruction - Add two unsigned values.
+group: Math Instruction - Add two unsigned values.
+description: "ADD sums the two unsigned values of Dest and Src together and stores the result into the\
+  \ Dest register. Result: Sum of unsigned Src and unsigned Dest is stored in Dest.\n\nADD sums the two\
+  \ unsigned values of Dest and Src together and stores the result into the Dest register.\n\nIf the WC\
+  \ or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if the summation results in a 32-bit over\uFB02\
+  ow (unsigned\n\ncarry), or is cleared (0) if no over\uFB02ow.\n\nIf the WZ or WCZ effect is speci\uFB01\
+  ed, the Z \uFB02ag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it is\n\nnon-zero.\n\
+  \nTo add unsigned, multi-long values, use ADD followed by ADDX as described in Adding Two Multi-Long\
+  \ Values.\n\nADD and ADDX are also used in adding signed, multi-long values with ADDSX ending the sequence."
 compiler_category: Arithmetic
 flags_affected:
-  C:
-    formula: carry of (D + S)
+  C: carry of (D
+  Z: Result = 0
 compiler_effects:
 - name: wc
   symbol: WC
@@ -37,17 +42,15 @@ compiler_effects:
   description: Write Carry and Zero flags
   bitPattern: '11'
 parameters:
-- Dest is a register containing the value to add Src to, and is where the result is
-  written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added
-  into Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Dest is a register containing the value to add Src to, and is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - ADDX
 - ADDS
 - ADDSX
 - SUB
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -55,3 +58,11 @@ compiler_operand_format:
   description: Destination register, Source register or immediate value
   valueType: 0
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Add
+category: Math Instruction - Add two unsigned values.
+result: Sum of unsigned Src and unsigned Dest is stored in Dest.
+syntax_variants:
+- ADD Dest, {#}Src {WC|WZ|WCZ}
+- ADD sums the two unsigned values of Dest and Src together and stores the result into the Dest register.
+manual_extraction_date: '2025-01-19'

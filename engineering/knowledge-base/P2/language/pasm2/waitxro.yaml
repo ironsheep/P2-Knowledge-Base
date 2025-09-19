@@ -1,29 +1,64 @@
 instruction: WAITXRO
-syntax: WAITXRO          {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 000011100 000100100
+syntax: WAITXRO {WC|WZ|WCZ}
+encoding:
+- "EEEE 1101011 CZ0 000011100 000100100                   \u2014          Timeout Abort     Timeout Abort\
+  \               2+"
+- "EEEE 1101011 000 DDDDDDDDD 001101100                   D                \u2014                 \u2014\
+  \                     2"
+- "EEEE 1101011 000 DDDDDDDDD 001101101                   D                \u2014                 \u2014\
+  \                     2"
+- "EEEE 1101011 000 DDDDDDDDD 001101110                   D                 \u2014                  \u2014\
+  \                    2"
+- "EEEE 1101011 000 DDDDDDDDD 001101111                   D                 \u2014                  \u2014\
+  \                    2"
 timing:
   cycles: 2
-  type: variable
-group: Events - Wait
-description: 'WAITXRO waits for a streamer-NCO-rollover event to occur (unless the
-  event flag is already set), then clears the Result: Wait for streamer-NCO-rollover
-  event, then clear the flag; optionally aborting on timeout and setting C and/or
-  Z on abort. Z = timeout.'
-category: Event Monitor Instruction - Wait for and clear streamer-NCO-rollover event
-  flag
+  type: fixed
+group: Event Monitor Instruction - Wait for and clear streamer-NCO-rollover event flag
+description: "WAITXRO waits for a streamer-NCO-rollover event to occur (unless the event flag is already\
+  \ set), then clears the Result: Wait for streamer-NCO-rollover event, then clear the flag; optionally\
+  \ aborting on timeout and setting C and/or Z on abort. Z = timeout.\n\nWAITXRO waits for a streamer-NCO-rollover\
+  \ event to occur (unless the event \uFB02ag is already set), then clears the\n\nevent \uFB02ag (unless\
+  \ it's being set again by the event sensor) and resumes execution at the next instruction.\n\nOptionally,\
+  \ WAITXRO can time-out if the streamer-NCO-rollover event doesn't occur soon enough; setting C and/or\n\
+  \nZ \uFB02ags and then resuming execution at the next instruction.\n\nTo set the optional timeout, insert\
+  \ a SETQ (with a future System Counter target value) right before WAITXRO.\n\nThe WC, WZ, or WCZ effect\
+  \ is recommended only if the optional timeout is speci\uFB01ed, in which case the C \uFB02ag and/or\n\
+  \nZ \uFB02ag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred\
+  \ before the timeout.\n\nDuring a wait, the pipeline is stalled; no instructions execute and no interrupts\
+  \ are processed in the cog until the\n\nwait condition ends.\n\nThe streamer-NCO-rollover event \uFB02\
+  ag is set whenever the streamer's numerically-controlled oscillator (NCO) rolls\n\nover. The streamer-NCO-rollover\
+  \ event \uFB02ag is cleared upon execution of XINIT, XZERO, XCONT, POLLXRO,\n\nWAITXRO, JXRO, or JNXRO\
+  \ instructions.\n\nWRC / WRNC\n\nWrite C or not C\n\nBit Operation Instruction - Write C or not C to\
+  \ register.\n\nWRC       Dest\n\nWRNC      Dest\n\nResult: Dest value is replaced with state of C or\
+  \ !C.\n\n\u25CF   Dest is the register whose value will be replaced with the state of C or !C.\n\nCOND\
+  \ INSTR         FX     DEST          SRC          Write            C Flag             Z Flag       \
+  \      Clocks\n\nEEEE 1101011 000 DDDDDDDDD 001101100                   D                \u2014    \
+  \             \u2014                     2\n\nEEEE 1101011 000 DDDDDDDDD 001101101                 \
+  \  D                \u2014                 \u2014                     2\n\nWRC or WRNC writes the state\
+  \ or inverse state of C (0 or 1) to Dest.\n\nWRZ / WRNZ\n\nWrite Z or not Z\n\nBit Operation Instruction\
+  \ - Write Z or not Z to register.\n\nWRZ       Dest\n\nWRNZ      Dest\n\nResult: Dest value is replaced\
+  \ with state of Z or !Z.\n\n\u25CF   Dest is the register whose value will be replaced with the state\
+  \ of Z or !Z.\n\nCOND INSTR         FX      DEST         SRC           Write            C Flag     \
+  \        Z Flag             Clocks\n\nEEEE 1101011 000 DDDDDDDDD 001101110                   D     \
+  \            \u2014                  \u2014                    2\n\nEEEE 1101011 000 DDDDDDDDD 001101111\
+  \                   D                 \u2014                  \u2014                    2\n\nWRZ or\
+  \ WRNZ writes the state or inverse state of Z (0 or 1) to Dest."
 flags_affected:
   Z:
     formula: timeout
 parameters:
-- WC, WZ, or WCZ are optional effects to update flags.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- Dest is the register whose value will be replaced with the state of C or !C.
+- Dest is the register whose value will be replaced with the state of Z or !Z.
 related:
 - XINIT
 - XZERO
 - XCONT
 - POLLXRO
 - JXRO
-- JNXRO
-documentation_source: PASM2 Manual 2022/11/01
+- JNXRO.
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pollwait
@@ -33,3 +68,10 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Wait streamer rollover NCO
+category: "Event Monitor Instruction - Wait for and clear streamer-NCO-rollover event \uFB02ag"
+result: Dest value is replaced with state of Z or !Z.
+syntax_variants:
+- WAITXRO {WC|WZ|WCZ}
+manual_extraction_date: '2025-01-19'

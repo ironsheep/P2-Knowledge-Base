@@ -1,30 +1,35 @@
 instruction: ADDX
-syntax: ADDX    D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0001001 CZI DDDDDDDDD SSSSSSSSS
+syntax: ADDX Dest, {#}Src {WC|WZ|WCZ}
+encoding: EEEE 0001001 CZI DDDDDDDDD SSSSSSSSS                   D          carry of (D+S+C) Z AND (Result
+  = 0)            2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'ADDX sums the unsigned values of Dest and Src plus C together and stores
-  the result into the Dest register. The Result: Sum of unsigned Src plus C and unsigned
-  Dest is stored in Dest.'
-category: Math Instruction - Add two unsigned extended values.
+group: Math Instruction - Add two unsigned extended values.
+description: "ADDX sums the unsigned values of Dest and Src plus C together and stores the result into\
+  \ the Dest register. The Result: Sum of unsigned Src plus C and unsigned Dest is stored in Dest.\n\n\
+  ADDX sums the unsigned values of Dest and Src plus C together and stores the result into the Dest register.\
+  \ The\n\nADDX instruction is used to perform unsigned multi-long (extended) addition, such as 64-bit\
+  \ addition.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if the summation\
+  \ resulted in an unsigned carry, or is\n\ncleared (0) if no carry. Use WC or WCZ on preceding ADD and\
+  \ ADDX instructions for proper \uFB01nal C \uFB02ag. If C is set\n\nafter the last ADDX in a multi-long\
+  \ addition, it indicates unsigned over\uFB02ow.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02\
+  ag is set (1) if Z was previously set and the result of Dest + Src + C is\n\nzero, or it is cleared\
+  \ (0) if non-zero. Use WZ or WCZ on preceding ADD and ADDX instructions for proper \uFB01nal Z \uFB02\
+  ag.\n\nTo add unsigned multi-long values, use ADD followed by one or more ADDX instructions as described\
+  \ in Adding\n\nTwo Multi-Long Values."
 flags_affected:
-  C:
-    formula: carry of (D + S + C)
-  Z:
-    formula: Z AND (result == 0)
+  C: carry of (D+S+C)
+  Z: (Result = 0)
 parameters:
-- Dest is a register containing the value to add Src pluc C to, and is where the result
-  is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C
-  is added into Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Dest is a register containing the value to add Src pluc C to, and is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is added into Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - ADD
 - ADDSX
 - SUBX
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -34,3 +39,16 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Add extended
+category: Math Instruction - Add two unsigned extended values.
+result: Sum of unsigned Src plus C and unsigned Dest is stored in Dest.
+syntax_variants:
+- ADDX Dest, {#}Src {WC|WZ|WCZ}
+- ADDX sums the unsigned values of Dest and Src plus C together and stores the result into the Dest register.
+  The
+- "cleared (0) if no carry. Use WC or WCZ on preceding ADD and ADDX instructions for proper \uFB01nal\
+  \ C \uFB02ag. If C is set"
+- "zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding ADD and ADDX instructions for proper\
+  \ \uFB01nal Z \uFB02ag."
+manual_extraction_date: '2025-01-19'

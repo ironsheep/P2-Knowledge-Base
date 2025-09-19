@@ -4,15 +4,16 @@ encoding: EEEE 0101110 CZI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: Mux Z into each D bit that is '1' in S.
-category: Math and Logic
+group: Bit Operation Instructions - Set discrete bits to Z or !Z
+description: 'MUXZ or MUXNZ alters the Dest bit(s) designated by Src (high bits) to
+  equal the state, or inverse state, of the Z flag. Result: Dest bit(s) described
+  by Src are set to Z or !Z; the rest are left as-is. Flags are optionally updated
+  with parity and zero status of the result.'
 flags_affected:
   C:
     formula: parity of result
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
   pattern: D,S/#
@@ -21,3 +22,11 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- MUXZ D,{#}S
+last_updated: '2025-09-19T16:04:17.350263'
+parameters:
+- Dest is the register whose value will have one or more bits set to Z or !Z.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value identifies
+  the bit(s) to modify.
+- WC, WZ, or WCZ is an optional effect to update flags.

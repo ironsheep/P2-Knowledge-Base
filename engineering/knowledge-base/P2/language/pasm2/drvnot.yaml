@@ -1,31 +1,54 @@
 instruction: DRVNOT
-syntax: DRVNOT  {#}D           {WCZ}
-encoding: EEEE 1101011 CZL DDDDDDDDD 001011111
+syntax: DRVNOT {#}Dest {WCZ}
+encoding: EEEE 1101011 CZL DDDDDDDDD 001011111 DIRx + OUTx Orig OUTx base bit Orig OUTx base bit
 timing:
   cycles: 2
   type: fixed
-group: Pins
-description: 'DRVNOT sets the I/O pin(s) designated by Dest to the output direction
-  and to their opposite output level(s); i.e. Result: The I/O pins described by Dest
-  are set to the output direction and to their opposite output level(s); the rest
-  are left as-is. Z = OUT bit.'
-category: I/O Pin Instruction - Set pin(s) direction to output and toggle to the opposite
-  output level.
+group: I/O Pin Instruction - Set pin(s) direction to output and toggle to the opposite output level.
+description: "DRVNOT sets the I/O pin(s) designated by Dest to the output direction and to their opposite\
+  \ output level(s); i.e. Result: The I/O pins described by Dest are set to the output direction and to\
+  \ their opposite output level(s); the rest are left as-is. Z = OUT bit.\n\nDRVNOT sets the I/O pin(s)\
+  \ designated by Dest to the output direction and to their opposite output level(s); i.e.\n\nalters the\
+  \ pin's direction and output registers. All other pins are left unchanged. This instruction can affect\
+  \ one or\n\nmore of the bits within the DIRA or DIRB and OUTA or OUTB registers.\n\nDRVNOT achieves\
+  \ the same effect as two instructions\u2014 OUTNOT followed by DIRH.\n\nDest[5:0] indicates the pin\
+  \ number (0\u201363). For a range of pins, Dest[5:0] indicates the base pin number (0\u201363)\n\nand\
+  \ Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1\u201331).\n\n\
+  A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous\
+  \ pins (Dest[8:6]).\n\nIf needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit\
+  \ literal value\u2014 this inserts an\n\nAUGD instruction prior.\n\nWhen Dest is a register, the register's\
+  \ value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ\n\ninstruction immediately\
+  \ precedes the DRVNOT instruction; substituting SETQ's Dest[4:0] in place of value\n\nbits[10:6], for\
+  \ DRVNOT's use.\n\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within\
+  \ the same 32-pin group (DIRA or\n\nDIRB and OUTA or OUTB); it will not cross the port boundary.\n\n\
+  If the WCZ effect is speci\uFB01ed, the C and Z \uFB02ags are updated to the original state of OUTA\
+  \ / OUTB's base bit,\n\nidenti\uFB01ed by Dest."
 flags_affected:
   Z:
     formula: OUT bit
 parameters:
-- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
-  the I/O pin(s) to set to the output direction and toggle to opposite output levels.
-- WCZ is an optional effect to update flags.
-documentation_source: PASM2 Manual 2022/11/01
+- "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the I/O\
+  \ pin(s) to set to the output direction and toggle to opposite output levels."
+- "WCZ is an optional effect to update \uFB02ags."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pinop
   pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
-    flags'
+  description: 'Pin operation: destination/immediate pin number 0-511, optional effect flags'
   valueType: 30
 compiler_encoding:
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Drive not
+category: I/O Pin Instruction - Set pin(s) direction to output and toggle to the opposite output level.
+result: The I/O pins described by Dest are set to the output direction and to their opposite output level(s);
+  the rest
+syntax_variants:
+- DRVNOT {#}Dest {WCZ}
+- DRVNOT sets the I/O pin(s) designated by Dest to the output direction and to their opposite output level(s);
+  i.e.
+- instruction immediately precedes the DRVNOT instruction; substituting SETQ's Dest[4:0] in place of value
+- bits[10:6], for DRVNOT's use.
+manual_extraction_date: '2025-01-19'

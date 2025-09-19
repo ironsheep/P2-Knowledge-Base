@@ -1,23 +1,81 @@
 instruction: ONES
-syntax: ONES    D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0111101 CZ0 DDDDDDDDD DDDDDDDDD
+syntax: ONES Dest, {#}Src {WC|WZ|WCZ}
+encoding:
+- EEEE 0111101 CZI DDDDDDDDD SSSSSSSSS                    D           Result is odd        Result = 0                2
+- EEEE 0111101 CZ0 DDDDDDDDD DDDDDDDDD                    D           Result is odd        Result = 0                2
+- EEEE 1101011 CZL DDDDDDDDD 001001010                  OUTx       Orig OUTx base bit Orig OUTx base bit             2
+- EEEE 1101011 CZL DDDDDDDDD 001001011                  OUTx       Orig OUTx base bit Orig OUTx base bit             2
+- EEEE 1101011 CZL DDDDDDDDD 001001001                 OUTx        Orig OUTx base bit Orig OUTx base bit             2
+- EEEE 1101011 CZL DDDDDDDDD 001001000                 OUTx        Orig OUTx base bit Orig OUTx base bit             2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'ONES tallies the number of high bits of Src, or Dest, and stores the
-  count into Dest. Result: The number of high bits in Src, or Dest, is stored in Dest.'
-category: Bit Operation Instruction - Get number of 1s from Dest or Src into Dest.
+group: Bit Operation Instruction - Get number of 1s from Dest or Src into Dest.
+description: "ONES tallies the number of high bits of Src, or Dest, and stores the count into Dest. Result:\
+  \ The number of high bits in Src, or Dest, is stored in Dest.\n\nONES tallies the number of high bits\
+  \ of Src, or Dest, and stores the count into Dest.\n\nIf the WC or WCZ effect is speci\uFB01ed, the\
+  \ C \uFB02ag is set (1) if the count is odd, or is cleared (0) if it is even.\n\nIf the WZ or WCZ effect\
+  \ is speci\uFB01ed, the Z \uFB02ag is set (1) if the result equals zero, or is cleared (0) if not zero.\n\
+  \nOUTC / OUTNC\n\nOutput C or not C\n\nI/O Pin Instruction - Set pin(s) output level to low/high according\
+  \ to C or !C.\n\nOUTC    {#}Dest {WCZ}\n\nOUTNC {#}Dest {WCZ}\n\nResult: The I/O pin output level bit(s),\
+  \ described by Dest, are set to low/high according to C or !C; the rest are left\n\nas-is.\n\n\u25CF\
+  \   Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the\
+  \ I/O pin(s) for which\n\noutput levels are to be set low or high.\n\n\u25CF   WCZ is an optional effect\
+  \ to update \uFB02ags.\n\nCOND INSTR         FX     DEST          SRC           Write             C\
+  \ Flag             Z Flag                 Clocks\n\nEEEE 1101011 CZL DDDDDDDDD 001001010           \
+  \       OUTx       Orig OUTx base bit Orig OUTx base bit             2\n\nEEEE 1101011 CZL DDDDDDDDD\
+  \ 001001011                  OUTx       Orig OUTx base bit Orig OUTx base bit             2\n\nOUTC\
+  \ or OUTNC alters the output level register's bit(s) designated by Dest to equal the state, or inverse\
+  \ state, of\n\nthe C \uFB02ag; i.e. set pin's output level low or high. All other bits (pins) are left\
+  \ unchanged. Each of these\n\ninstructions, OUTC and OUTNC, can affect one or more of the bits within\
+  \ the OUTA or OUTB registers.\n\nDest[5:0] indicates the pin number (0\u201363). For a range of pins,\
+  \ Dest[5:0] indicates the base pin number (0\u201363)\n\nand Dest[10:6] indicates how many contiguous\
+  \ pins beyond the base should be affected (1\u201331).\n\nA 9-bit literal Dest is enough to express\
+  \ the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]).\n\nIf needed, use the\
+  \ augmented literal feature (##Dest) to augment Dest to an 11-bit literal value\u2014 this inserts an\n\
+  \nAUGD instruction prior.\n\nWhen Dest is a register, the register's value bits [10:0] are used as-is\
+  \ to form the 11-bit ID range, unless a SETQ\n\ninstruction immediately precedes the OUTC / OUTNC instruction;\
+  \ substituting SETQ's Dest[4:0] in place of value\n\nbits[10:6], for OUTC / OUTNC's use.\n\nThe range\
+  \ calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (OUTA\
+  \ or\n\nOUTB); it will not cross the port boundary.\n\nIf the WCZ effect is speci\uFB01ed, the C and\
+  \ Z \uFB02ags are updated to the original state of OUTA / OUTB's base bit,\n\nidenti\uFB01ed by Dest.\n\
+  \nOUTH / OUTL\n\nOutput high or low\n\nI/O Pin Instruction - Set pin(s) output level to high (1) or\
+  \ low (0).\n\nOUTH {#}Dest {WCZ}\n\nOUTL {#}Dest {WCZ}\n\nResult: The I/O pin output level bit(s), described\
+  \ by Dest, are set high (1) or low (0); the rest are left as-is.\n\n\u25CF   Dest is the register, 9-bit\
+  \ literal, or 11-bit augmented literal whose value identi\uFB01es the I/O pin(s) to set high\n\nor low.\n\
+  \n\u25CF   WCZ is an optional effect to update \uFB02ags.\n\nCOND INSTR         FX     DEST        \
+  \  SRC           Write             C Flag            Z Flag              Clocks\n\nEEEE 1101011 CZL\
+  \ DDDDDDDDD 001001001                 OUTx        Orig OUTx base bit Orig OUTx base bit            \
+  \ 2\n\nEEEE 1101011 CZL DDDDDDDDD 001001000                 OUTx        Orig OUTx base bit Orig OUTx\
+  \ base bit             2\n\nOUTH or OUTL alters the output level register's bit(s) designated by Dest\
+  \ to be high (1) or low (0). All other bits\n\n(pins) are left unchanged. Each of these instructions,\
+  \ OUTH and OUTL, can affect one or more of the bits within\n\nthe OUTA or OUTB registers.\n\nDest[5:0]\
+  \ indicates the pin number (0\u201363). For a range of pins, Dest[5:0] indicates the base pin number\
+  \ (0\u201363)\n\nand Dest[10:6] indicates how many contiguous pins beyond the base should be affected\
+  \ (1\u201331).\n\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of\
+  \ up to 8 contiguous pins (Dest[8:6]).\n\nIf needed, use the augmented literal feature (##Dest) to augment\
+  \ Dest to an 11-bit literal value\u2014 this inserts an\n\nAUGD instruction prior.\n\nWhen Dest is a\
+  \ register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ\n\
+  \ninstruction immediately precedes the OUTH / OUTL instruction; substituting SETQ's Dest[4:0] in place\
+  \ of value\n\nbits[10:6], for OUTH / OUTL's use.\n\nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6])\
+  \ will wrap within the same 32-pin group (OUTA or\n\nOUTB); it will not cross the port boundary.\n\n\
+  If the WCZ effect is speci\uFB01ed, the C and Z \uFB02ags are updated to the original state of OUTA\
+  \ / OUTB's base bit,\n\nidenti\uFB01ed by Dest."
 flags_affected:
-  C:
-    formula: LSB of result
+  Z: Result = 0
 parameters:
-- Dest is the register in which to store the number of high bits found and optionally
-  it begins by containing the value to check (syntax 2).
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value
-  is to be checked for ones.
-- WC, WZ, or WCZ are optional effects to update flags.
-documentation_source: PASM2 Manual 2022/11/01
+- Dest is the register in which to store the number of high bits found and optionally it begins by containing
+  the value to check (syntax 2).
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value is to be checked
+  for ones.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the I/O\
+  \ pin(s) for which output levels are to be set low or high."
+- "WCZ is an optional effect to update \uFB02ags."
+- "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the I/O\
+  \ pin(s) to set high or low."
+- "WCZ is an optional effect to update \uFB02ags."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_du
@@ -27,3 +85,13 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 3
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Ones
+category: Bit Operation Instruction - Get number of 1s from Dest or Src into Dest.
+result: The I/O pin output level bit(s), described by Dest, are set high (1) or low (0); the rest are
+  left as-is.
+syntax_variants:
+- ONES Dest, {#}Src {WC|WZ|WCZ}
+- ONES Dest            {WC|WZ|WCZ}
+- ONES tallies the number of high bits of Src, or Dest, and stores the count into Dest.
+manual_extraction_date: '2025-01-19'

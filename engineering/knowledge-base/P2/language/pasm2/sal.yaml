@@ -1,23 +1,28 @@
 instruction: SAL
-syntax: SAL     D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0000111 CZI DDDDDDDDD SSSSSSSSS
+syntax: SAL Dest, {#}Src {WC|WZ|WCZ}
+encoding: EEEE 0000111 CZI DDDDDDDDD SSSSSSSSS                            D      Last bit out   1
 timing:
-  cycles: 2
+  cycles: 1
   type: fixed
-group: Math and Logic
-description: 'SAL shifts Dest''s binary value left by Src places (0–31 bits) and sets
-  the new LSBs to that of the original Dest[0]. Result: The bits of Dest are shifted
-  left by Src bits, extending Dest[0] into new rightmost bits.'
-category: Bit Operation Instruction - Shift bits left, extending the LSB.
+group: Bit Operation Instruction - Shift bits left, extending the LSB.
+description: "SAL shifts Dest's binary value left by Src places (0\u201331 bits) and sets the new LSBs\
+  \ to that of the original Dest[0]. Result: The bits of Dest are shifted left by Src bits, extending\
+  \ Dest[0] into new rightmost bits.\n\nSAL shifts Dest's binary value left by Src places (0\u201331 bits)\
+  \ and sets the new LSBs to that of the original Dest[0].\n\nSAL is the complement of SAR for bit streams\
+  \ but not for math operations\u2014 use SHL instead for swift 32-bit\n\ninteger multiplication by a\
+  \ power-of-two.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is updated to the value\
+  \ of the last bit shifted out (effectively C =\n\nresult bit \"32\") if Src is 1\u201331, or to Dest[31]\
+  \ if Src is 0.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the Dest result\
+  \ equals zero, or is cleared (0) if it is\n\nnon-zero."
 flags_affected:
   C:
     formula: last bit shifted out if S[4:0] > 0, else D[31]
 parameters:
 - Dest is the register containing the value to arithmetically left shift by Src bits.
-- Src is a register or 5-bit literal whose value indicates the number of bits to arithmetically
-  shift left.
-- WC, WZ, or WCZ are optional effects to update flags.
-documentation_source: PASM2 Manual 2022/11/01
+- Src is a register or 5-bit literal whose value indicates the number of bits to arithmetically shift
+  left.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -27,3 +32,12 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Shift arithmetic left
+category: Bit Operation Instruction - Shift bits left, extending the LSB.
+result: The bits of Dest are shifted left by Src bits, extending Dest[0] into new rightmost bits.
+syntax_variants:
+- SAL Dest, {#}Src {WC|WZ|WCZ}
+- "SAL shifts Dest's binary value left by Src places (0\u201331 bits) and sets the new LSBs to that of\
+  \ the original Dest[0]."
+manual_extraction_date: '2025-01-19'

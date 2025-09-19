@@ -1,21 +1,31 @@
 instruction: WAITFBW
-syntax: WAITFBW          {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 000011001 000100100
+syntax: WAITFBW {WC|WZ|WCZ}
+encoding: "EEEE 1101011 CZ0 000011001 000100100                 \u2014          Timeout Abort     Timeout\
+  \ Abort               2+"
 timing:
   cycles: 2
   type: variable
-group: Events - Wait
-description: 'WAITFBW waits for a FIFO-interface-block-wrap event to occur (unless
-  the event flag is already set), then clears Result: Wait for FIFO-interface-block-wrap
-  event, then clear the flag; optionally aborting on timeout and setting C and/or
-  Z on abort. Z = timeout.'
-category: Event Monitor Instruction - Wait for and clear FIFO-interface-block-wrap
-  event flag.
+group: Event Monitor Instruction - Wait for and clear FIFO-interface-block-wrap event flag.
+description: "WAITFBW waits for a FIFO-interface-block-wrap event to occur (unless the event flag is already\
+  \ set), then clears Result: Wait for FIFO-interface-block-wrap event, then clear the flag; optionally\
+  \ aborting on timeout and setting C and/or Z on abort. Z = timeout.\n\nWAITFBW waits for a FIFO-interface-block-wrap\
+  \ event to occur (unless the event \uFB02ag is already set), then clears\n\nthe event \uFB02ag (unless\
+  \ it's being set again by the event sensor) and resumes execution at the next instruction.\n\nOptionally,\
+  \ WAITFBW can time-out if the FIFO-interface-block-wrap event doesn't occur soon enough; setting C\n\
+  \nand/or Z \uFB02ags and then resuming execution at the next instruction.\n\nTo set the optional timeout,\
+  \ insert a SETQ (with a future System Counter target value) right before WAITFBW.\n\nThe WC, WZ, or\
+  \ WCZ effect is recommended only if the optional timeout is speci\uFB01ed, in which case the C \uFB02\
+  ag and/or\n\nZ \uFB02ag is set (1) if a timeout occurred before the event, or is cleared (0) if the\
+  \ event occurred before the timeout.\n\nDuring a wait, the pipeline is stalled; no instructions execute\
+  \ and no interrupts are processed in the cog until the\n\nwait condition ends.\n\nThe FIFO-interface-block-wrap\
+  \ event \uFB02ag is set whenever the Hub RAM FIFO interface exhausts its block count\n\nand reloads\
+  \ its block count and start address. The FIFO-interface-block-wrap event \uFB02ag is cleared upon execution\n\
+  \nof RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, or JNFBW instructions."
 flags_affected:
   Z:
     formula: timeout
 parameters:
-- WC, WZ, or WCZ are optional effects to update flags.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - RDFAST
 - WRFAST
@@ -23,7 +33,7 @@ related:
 - POLLFBW
 - JFBW
 - JNFBW
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pollwait
@@ -33,3 +43,11 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Wait FIFO block wrap
+category: "Event Monitor Instruction - Wait for and clear FIFO-interface-block-wrap event \uFB02ag."
+result: "Wait for FIFO-interface-block-wrap event, then clear the \uFB02ag; optionally aborting on timeout\
+  \ and setting C"
+syntax_variants:
+- WAITFBW {WC|WZ|WCZ}
+manual_extraction_date: '2025-01-19'

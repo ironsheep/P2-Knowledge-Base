@@ -1,68 +1,69 @@
 instruction: BRK
-syntax: BRK     {#}D
-encoding: EEEE 1101011 00L DDDDDDDDD 000110110
+syntax: BRK {#}Dest
+encoding: "EEEE 1101011 00L DDDDDDDDD 000110110               Code/Cond.1             \u2014         \
+  \         \u2014                    2"
 timing:
   cycles: 2
   type: fixed
-group: Interrupts
-description: 'BRK triggers a breakpoint in the current cog and either defines a breakpoint
-  code or the
-
-  next breakpoint Result: If debug interrupts are enabled, a debug interrupt is triggered
-  in the current
-
-  cog and Dest''s value becomes the debug code or the next debug condition.
-
-
-  Key uses:
-
-  - Software breakpoints for debugging
-
-  - Conditional debug triggers
-
-  - Communication with debug monitor
-
-  - Assertion failures and error handling
-
-  '
-category: Interrupt Instruction - Trigger breakpoint in current cog.
+group: Interrupt Instruction - Trigger breakpoint in current cog.
+description: "BRK triggers a breakpoint in the current cog and either defines a breakpoint code or the\n\
+  next breakpoint Result: If debug interrupts are enabled, a debug interrupt is triggered in the current\n\
+  cog and Dest's value becomes the debug code or the next debug condition.\n\nKey uses:\n- Software breakpoints\
+  \ for debugging\n- Conditional debug triggers\n- Communication with debug monitor\n- Assertion failures\
+  \ and error handling\n\n\nBRK triggers a breakpoint in the current cog and either de\uFB01nes a breakpoint\
+  \ code or the next breakpoint\n\ncondition(s). The cog must have debug interrupts enabled, and if BRK\
+  \ is to be executed within the normal\n\nprogram (outside the Debug ISR), the \"BRK instruction\" interrupt\
+  \ must \uFB01rst be enabled from within a prior Debug\n\nISR (interrupt service routine).\n\nDuring\
+  \ normal program execution, the BRK instruction is used to generate a debug interrupt with an 8-bit\
+  \ code\n\n(from D[7:0]) which can be read within the Debug ISR using a GETBRK instruction.\n\nDuring\
+  \ a Debug ISR, the BRK instruction is used instead to establish the next debug interrupt condition(s)\
+  \ and to\n\nselect INA/INB, instead of the IJMP0/IRET0 registers exposed during the ISR, so that the\
+  \ pins' inputs states may\n\nbe read.\n\nThe format of Dest for Debug ISR use is %AAAAAAAAAAAAAAAAAAAA_BCDEFGHIJKLM\n\
+  \nA: 20-bit breakpoint address or 4-bit event code\n\nB: 1 = map INA/INB normally, 0 = map IJMP0/IRET0\
+  \ at INA/INB (default during ISR). If Debug ISR sets B\n\nto 1, it must reset it to 0 before exiting\
+  \ the Debug ISR so the RETI0 instruction sees IJMP0 and IRET0.\n\nC: 1 = enable interrupt on breakpoint\
+  \ address match\n\nD: 1 = enable interrupt on event %eeee\n\nE: 1 = enable interrupt on asynchronous\
+  \ breakpoint (via COGBRK from another cog)\n\nF: 1 = enable interrupt on INT3 ISR entry\n\nG: 1 = enable\
+  \ interrupt on INT2 ISR entry\n\nH: 1 = enable interrupt on INT1 ISR entry\n\nI: 1 = enable interrupt\
+  \ on BRK instruction\n\nJ: 1 = enable interrupt on INT3 ISR code (single step)\n\nK: 1 = enable interrupt\
+  \ on INT2 ISR code (single step)\n\nL: 1 = enable interrupt on INT1 ISR code (single step)\n\nM: 1 =\
+  \ enable interrupt on non-ISR code (single step)\n\nUpon Debug ISR entry, bits B through M are cleared\
+  \ (0). If a subsequent debug interrupt is desired, a BRK\n\ninstruction must be executed before exiting\
+  \ the Debug ISR in order to establish the next breakpoint condition(s)."
 flags_affected:
   C:
     when: Code/Cond.1
-documentation_source: enhanced
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 examples:
 - name: Software Breakpoint
   description: Insert breakpoint for debugger
-  code: "' Hit breakpoint with specific code\n        brk     #1                 \
-    \      ' Breakpoint code 1\n        ' Execution stops here if debugger attached\n\
-    \        ' Debugger can inspect state\n"
+  code: "' Hit breakpoint with specific code\n        brk     #1                       ' Breakpoint code\
+    \ 1\n        ' Execution stops here if debugger attached\n        ' Debugger can inspect state\n"
   source: Spin2_debugger.spin2
 - name: Conditional Breakpoint
   description: Break only when condition met
-  code: "' Check condition and break if true\n        cmp     value, limit    wc \
-    \      ' Check if over limit\nif_c    brk     #LIMIT_EXCEEDED          ' Break\
-    \ with error code\n        \n        ' Continue normal execution\n"
+  code: "' Check condition and break if true\n        cmp     value, limit    wc       ' Check if over\
+    \ limit\nif_c    brk     #LIMIT_EXCEEDED          ' Break with error code\n        \n        ' Continue\
+    \ normal execution\n"
   source: error_checking
 - name: Debug Communication
   description: Pass data to debug monitor
-  code: "' Send value to debugger for logging\n        mov     debug_val, result \
-    \       ' Value to report\n        brk     debug_val                ' Pass to\
-    \ debugger\n        \n        ' Debugger logs value and continues\n"
+  code: "' Send value to debugger for logging\n        mov     debug_val, result        ' Value to report\n\
+    \        brk     debug_val                ' Pass to debugger\n        \n        ' Debugger logs value\
+    \ and continues\n"
   source: debug_logging
 - name: Assert Implementation
   description: Implement assertion that breaks on failure
-  code: "' Assert macro implementation\nassert_not_zero\n        tjz     value, #.fail\
-    \            ' Test assertion\n        ret                              ' Success\
-    \ - return\n.fail   brk     #ASSERT_FAILED           ' Break with assert code\n\
-    \        ' Debugger shows assertion failure\n"
+  code: "' Assert macro implementation\nassert_not_zero\n        tjz     value, #.fail            ' Test\
+    \ assertion\n        ret                              ' Success - return\n.fail   brk     #ASSERT_FAILED\
+    \           ' Break with assert code\n        ' Debugger shows assertion failure\n"
   source: Spin2_debugger.spin2
 - name: Multi-Level Debug
   description: Different debug levels with codes
-  code: "' Debug level codes\nDEBUG_TRACE     = 1\nDEBUG_INFO      = 2  \nDEBUG_WARNING\
-    \   = 3\nDEBUG_ERROR     = 4\n\n' Break with appropriate level\n        brk  \
-    \   #DEBUG_WARNING           ' Warning-level break\n        \n' Debugger filters\
-    \ based on level\n"
+  code: "' Debug level codes\nDEBUG_TRACE     = 1\nDEBUG_INFO      = 2  \nDEBUG_WARNING   = 3\nDEBUG_ERROR\
+    \     = 4\n\n' Break with appropriate level\n        brk     #DEBUG_WARNING           ' Warning-level\
+    \ break\n        \n' Debugger filters based on level\n"
   source: debug_infrastructure
 related_instructions:
 - GETBRK: Get breakpoint status/code
@@ -82,3 +83,15 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Break
+category: Interrupt Instruction - Trigger breakpoint in current cog.
+result: If debug interrupts are enabled, a debug interrupt is triggered in the current cog and Dest's
+  value becomes
+syntax_variants:
+- BRK {#}Dest
+- (from D[7:0]) which can be read within the Debug ISR using a GETBRK instruction.
+parameters:
+- Dest is the register, 9-bit literal, or 32-bit augmented literal whose value becomes the debug code
+  or condition depending on the state of execution (outside or inside of a Debug ISR).
+manual_extraction_date: '2025-01-19'

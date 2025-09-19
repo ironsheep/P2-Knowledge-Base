@@ -1,16 +1,26 @@
 instruction: WAITPAT
-syntax: WAITPAT          {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 000011000 000100100
+syntax: WAITPAT {WC|WZ|WCZ}
+encoding: "EEEE 1101011 CZ0 000011000 000100100                 \u2014          Timeout Abort       Timeout\
+  \ Abort              2+"
 timing:
   cycles: 2
   type: variable
-group: Events - Wait
-description: 'WAITPAT waits for a pin-pattern-detected event to occur (unless the
-  event flag is already set), then clears the Result: Wait for pin-pattern-detected
-  event, then clear the flag; optionally aborting on timeout and setting C and/or
-  Z on abort. Z = timeout.'
-category: Event Monitor Instruction - Wait for and clear pin-pattern-detected event
-  flag.
+group: Event Monitor Instruction - Wait for and clear pin-pattern-detected event flag.
+description: "WAITPAT waits for a pin-pattern-detected event to occur (unless the event flag is already\
+  \ set), then clears the Result: Wait for pin-pattern-detected event, then clear the flag; optionally\
+  \ aborting on timeout and setting C and/or Z on abort. Z = timeout.\n\nWAITPAT waits for a pin-pattern-detected\
+  \ event to occur (unless the event \uFB02ag is already set), then clears the\n\nevent \uFB02ag (unless\
+  \ it's being set again by the event sensor) and resumes execution at the next instruction.\n\nOptionally,\
+  \ WAITPAT can time-out if the pin-pattern-detected event doesn't occur soon enough; setting C and/or\
+  \ Z\n\n\uFB02ags and then resuming execution at the next instruction.\n\nTo set the optional timeout,\
+  \ insert a SETQ (with a future System Counter target value) right before WAITPAT.\n\nThe WC, WZ, or\
+  \ WCZ effect is recommended only if the optional timeout is speci\uFB01ed, in which case the C \uFB02\
+  ag and/or\n\nZ \uFB02ag is set (1) if a timeout occurred before the event, or is cleared (0) if the\
+  \ event occurred before the timeout.\n\nDuring a wait, the pipeline is stalled; no instructions execute\
+  \ and no interrupts are processed in the cog until the\n\nwait condition ends.\n\nThe pin-pattern-detected\
+  \ event \uFB02ag is set whenever the masked input pins match or don't match the pattern\n\ndescribed\
+  \ by a previous SETPAT instruction. The pin-pattern-detected event \uFB02ag is cleared upon execution\
+  \ of\n\nSETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions."
 flags_affected:
   Z:
     formula: timeout
@@ -19,7 +29,7 @@ related:
 - POLLPAT
 - JPAT
 - JNPAT
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pollwait
@@ -29,3 +39,14 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Wait pattern
+category: "Event Monitor Instruction - Wait for and clear pin-pattern-detected event \uFB02ag."
+result: "Wait for pin-pattern-detected event, then clear the \uFB02ag; optionally aborting on timeout\
+  \ and setting C and/or"
+syntax_variants:
+- WAITPAT {WC|WZ|WCZ}
+parameters:
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags. Copyright \xA9 Parallax Inc. 2022/11/01 \u25AA\
+  \ Propeller 2 Assembly Language Manual         \u25AA   Page 141"
+manual_extraction_date: '2025-01-19'

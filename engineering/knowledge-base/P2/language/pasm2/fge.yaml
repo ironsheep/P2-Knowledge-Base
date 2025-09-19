@@ -1,29 +1,32 @@
 instruction: FGE
-syntax: FGE     D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0011000 CZI DDDDDDDDD SSSSSSSSS
+syntax: FGE Dest, {#}Src {WC|WZ|WCZ}
+encoding: EEEE 0011000 CZI DDDDDDDDD SSSSSSSSS                    D           limit enforced        Result
+  = 0              2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'FGE sets unsigned Dest to unsigned Src if Dest is less than Src. This
-  is also known as a limit minimum function; Result: Unsigned Dest is set to unsigned
-  Src if Dest was less than Src. Optionally the C and Z flag indicates if the replacement
-  happened and the zero status of the result.'
-category: Math Instruction - Force unsigned value to be greater than or equal to another.
+group: Math Instruction - Force unsigned value to be greater than or equal to another.
+description: "FGE sets unsigned Dest to unsigned Src if Dest is less than Src. This is also known as a\
+  \ limit minimum function; Result: Unsigned Dest is set to unsigned Src if Dest was less than Src. Optionally\
+  \ the C and Z flag indicates if the replacement happened and the zero status of the result.\n\nFGE sets\
+  \ unsigned Dest to unsigned Src if Dest is less than Src. This is also known as a limit minimum function;\n\
+  \npreventing Dest from sinking below Src.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02\
+  ag is set (1) if Dest was limited (Dest was less than Src and now Dest is\n\nequal to Src), or is cleared\
+  \ (0) if not limited.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the\
+  \ result is zero, or is cleared (0) if it is non-zero."
 flags_affected:
-  C:
-    formula: 1, else D same and C = 0
+  Z: Result = 0
 parameters:
-- Dest is a register containing the unsigned value to limit to a minimum of unsigned
-  Src, and is where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose unsigned value
-  is the lower limit to force upon Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Dest is a register containing the unsigned value to limit to a minimum of unsigned Src, and is where
+  the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose unsigned value is the lower limit
+  to force upon Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - FLE
 - FGES
 - FLES
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -33,3 +36,13 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Force greater or equal
+category: Math Instruction - Force unsigned value to be greater than or equal to another.
+result: "Unsigned Dest is set to unsigned Src if Dest was less than Src. Optionally the C and Z \uFB02\
+  ag indicates if the"
+syntax_variants:
+- FGE Dest, {#}Src {WC|WZ|WCZ}
+- FGE sets unsigned Dest to unsigned Src if Dest is less than Src. This is also known as a limit minimum
+  function;
+manual_extraction_date: '2025-01-19'

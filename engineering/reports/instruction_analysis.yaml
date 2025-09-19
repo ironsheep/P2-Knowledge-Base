@@ -1,0 +1,4811 @@
+manual_items:
+- ABS
+- ADD
+- ADDCT1
+- ADDCT1/2/3
+- ADDCT2
+- ADDCT3
+- ADDPIX
+- ADDS
+- ADDSX
+- ADDX
+- AKPIN
+- ALIGNL
+- ALIGNW
+- ALLOWI
+- ALTB
+- ALTD
+- ALTGB
+- ALTGN
+- ALTGW
+- ALTI
+- ALTR
+- ALTS
+- ALTSB
+- ALTSN
+- ALTSW
+- AND
+- ANDN
+- AUGD
+- AUGS
+- BITC
+- BITH
+- BITL
+- BITNC
+- BITNOT
+- BITNZ
+- BITRND
+- BITZ
+- BLNPIX
+- BMASK
+- BRK
+- CALL
+- CALLA
+- CALLB
+- CALLD
+- CALLPA
+- CALLPB
+- CMP
+- CMPM
+- CMPR
+- CMPS
+- CMPSUB
+- CMPSX
+- CMPX
+- COGATN
+- COGBRK
+- COGID
+- COGINIT
+- COGSTOP
+- CONVENTIONS
+- CRCBIT
+- CRCNIB
+- DECMOD
+- DECOD
+- DIRC
+- DIRH
+- DIRL
+- DIRNC
+- DIRNOT
+- DIRNZ
+- DIRRND
+- DIRZ
+- DJF
+- DJNF
+- DJNZ
+- DJZ
+- DRVC
+- DRVH
+- DRVL
+- DRVNC
+- DRVNOT
+- DRVNZ
+- DRVRND
+- DRVZ
+- ENCOD
+- FGE
+- FGES
+- FLE
+- FLES
+- FLTC
+- FLTH
+- FLTL
+- FLTNC
+- FLTNOT
+- FLTNZ
+- FLTRND
+- FLTZ
+- GETBYTE
+- GETNIB
+- GETWORD
+- IJNZ
+- IJZ
+- INCMOD
+- JATN
+- JCT1
+- JFBW
+- JINT
+- JNATN
+- JNCT1
+- JNFBW
+- JNINT
+- JNPAT
+- JNQMT
+- JNSE1
+- JNXFI
+- JNXMT
+- JNXRL
+- JNXRO
+- JPAT
+- JQMT
+- JSE1
+- JXFI
+- JXMT
+- JXRL
+- JXRO
+- MIXPIX
+- MODC
+- MODCZ
+- MODZ
+- MOV
+- MOVBYTS
+- MUL
+- MULPIX
+- MULS
+- MUXC
+- MUXNC
+- MUXNIBS
+- MUXNITS
+- MUXNZ
+- MUXQ
+- MUXZ
+- NEG
+- NEGC
+- NEGNC
+- NEGNZ
+- NEGZ
+- NOP
+- NOT
+- ONES
+- OR
+- OUTC
+- OUTH
+- OUTL
+- OUTNC
+- OUTNOT
+- OUTNZ
+- OUTRND
+- OUTZ
+- POLLATN
+- POLLCT1/2/3
+- POLLFBW
+- POLLINT
+- POLLPAT
+- POLLQMT
+- POLLSE1/2/3/4
+- POLLXFI
+- POLLXMT
+- POLLXRL
+- POLLXRO
+- PREFACE
+- PROPELLER
+- RCL
+- RCR
+- RCZL
+- RCZR
+- RDBYTE
+- RDLONG
+- RDLUT
+- RDPIN
+- RDWORD
+- REV
+- ROL
+- ROLBYTE
+- ROLNIB
+- ROLWORD
+- ROR
+- RQPIN
+- SAL
+- SAR
+- SCA
+- SCAS
+- SETBYTE
+- SETD
+- SETNIB
+- SETR
+- SETS
+- SETWORD
+- SHL
+- SHR
+- SIGNX
+- STALLI
+- SUB
+- SUBR
+- SUBS
+- SUBSX
+- SUBX
+- SUMC
+- SUMNC
+- SUMNZ
+- SUMZ
+- TEST
+- TESTB
+- TESTBN
+- TESTN
+- TJF
+- TJNF
+- TJNS
+- TJNZ
+- TJS
+- TJV
+- TJZ
+- WMLONG
+- XOR
+- ZEROX
+yaml_items:
+  CRCBIT:
+    score: 45
+    location: pasm2
+    file: crcbit.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  ALTSN:
+    score: 75
+    location: pasm2
+    file: altsn.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Indirection Instruction - Alter subsequent SETNIB instruction.
+  SETD:
+    score: 75
+    location: pasm2
+    file: setd.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Indirection Instruction - Set template D field for ALTI.
+  POLLXRO:
+    score: 70
+    location: pasm2
+    file: pollxro.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Retrieve and clear streamer-NCO-rollover event
+      flag.
+  OUTZ:
+    score: 75
+    location: pasm2
+    file: outz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id002
+    - OUTZ
+    - OUTNZ
+    group: I/O Pin Instruction - Set pin(s) output level to low/high according to
+      Z or !Z.
+  FLTRND:
+    score: 75
+    location: pasm2
+    file: fltrnd.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: I/O Pin Instruction - Set pin(s) direction to input and to an output level
+      of random low/high.
+  JNQMT:
+    score: 75
+    location: pasm2
+    file: jnqmt.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id006
+    - JQMT
+    - JNQMT
+    group: Event Branch Instruction - Jump if CORDIC-read-but-empty event flag set
+      or clear.
+  RCZL:
+    score: 75
+    location: pasm2
+    file: rczl.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Rotate carry and zero flags left into value
+      (2-bit rotate left).
+  CMP:
+    score: 75
+    location: pasm2
+    file: cmp.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Compare two unsigned values.
+  SUMZ:
+    score: 55
+    location: pasm2
+    file: sumz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  SUBS:
+    score: 75
+    location: pasm2
+    file: subs.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Subtract one signed value from another.
+  NEGNZ:
+    score: 75
+    location: pasm2
+    file: negnz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Negate value according to !Z.
+  SETQ:
+    score: 50
+    location: pasm2
+    file: setq.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Miscellaneous
+  COGBRK:
+    score: 70
+    location: pasm2
+    file: cogbrk.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Interrupt Instruction - Trigger breakpoint in specified cog.
+  CMPX:
+    score: 75
+    location: pasm2
+    file: cmpx.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Compare two unsigned values plus carry flag.
+  NEGNC:
+    score: 75
+    location: pasm2
+    file: negnc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Negate value according to !C.
+  ALTSB:
+    score: 75
+    location: pasm2
+    file: altsb.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Indirection Instruction - Alter subsequent SETBYTE instruction.
+  TJNZ:
+    score: 50
+    location: pasm2
+    file: tjnz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Flow Control Instruction - Test value and jump if zero or not zero.
+  CMPSX:
+    score: 75
+    location: pasm2
+    file: cmpsx.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Compare two signed values plus carry flag.
+  RDBYTE:
+    score: 55
+    location: pasm2
+    file: rdbyte.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub RAM - Read
+  GETBRK:
+    score: 85
+    location: pasm2
+    file: getbrk.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Interrupts
+  NOT:
+    score: 75
+    location: pasm2
+    file: not.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  SETCY:
+    score: 45
+    location: pasm2
+    file: setcy.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Color Space Converter
+  GETCT:
+    score: 50
+    location: pasm2
+    file: getct.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Miscellaneous
+  SUMC:
+    score: 55
+    location: pasm2
+    file: sumc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  RFVAR:
+    score: 55
+    location: pasm2
+    file: rfvar.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub FIFO - Read
+  JINT:
+    score: 50
+    location: pasm2
+    file: jint.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id003
+    - JINT
+    - JNINT
+    group: Events - Branch
+  EXECF:
+    score: 55
+    location: pasm2
+    file: execf.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch D - Call+Skip
+  POLLQMT:
+    score: 70
+    location: pasm2
+    file: pollqmt.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Retrieve and clear CORDIC-read-but-empty event
+      flag.
+  OUTC:
+    score: 75
+    location: pasm2
+    file: outc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id001
+    - OUTC
+    - OUTNC
+    group: I/O Pin Instruction - Set pin(s) output level to low/high according to
+      C or !C.
+  CALLD:
+    score: 75
+    location: pasm2
+    file: calld.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Flow Control Instruction - Call a subroutine; store return context in PA/PB/PTRA/PTRB/D.
+  COGINIT:
+    score: 85
+    location: pasm2
+    file: coginit.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Cog Control Instruction - Start an available cog, or restart a cog by ID.
+  XSTOP:
+    score: 45
+    location: pasm2
+    file: xstop.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Streamer
+  CMPM:
+    score: 75
+    location: pasm2
+    file: cmpm.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Compare two unsigned values, get MSB of difference.
+  JSE3:
+    score: 83
+    location: pasm2
+    file: jse3.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Branch
+  JNXRO:
+    score: 50
+    location: pasm2
+    file: jnxro.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id004
+    - JXRO
+    - JNXRO
+    group: Events - Branch
+  ALTSW:
+    score: 80
+    location: pasm2
+    file: altsw.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Indirection Instruction - Alter subsequent SETWORD instruction.
+  SETDACS:
+    score: 45
+    location: pasm2
+    file: setdacs.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Smart Pins
+  SCA:
+    score: 70
+    location: pasm2
+    file: sca.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Create unsigned 16-bit scale value for next instruction's
+      S value.
+  ROLWORD:
+    score: 75
+    location: pasm2
+    file: rolword.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Rotate a word left into a value.
+  OR:
+    score: 75
+    location: pasm2
+    file: or.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Bitwise OR a value with another.
+  XINIT:
+    score: 60
+    location: pasm2
+    file: xinit.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Streamer
+  TJF:
+    score: 50
+    location: pasm2
+    file: tjf.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch S - Test
+  JSE2:
+    score: 83
+    location: pasm2
+    file: jse2.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Branch
+  ENCOD:
+    score: 75
+    location: pasm2
+    file: encod.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Get bit position of top-most 1 of Src or Dest
+      into Dest.
+  CALLPB:
+    score: 70
+    location: pasm2
+    file: callpb.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id026
+    - CALLPA
+    - CALLPB
+    group: Flow Control Instruction - Call a subroutine; store return context on the
+      stack and copy D into PA or PB.
+  ROR:
+    score: 75
+    location: pasm2
+    file: ror.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Rotate bits right.
+  SUMNZ:
+    score: 75
+    location: pasm2
+    file: sumnz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Adjust signed value by other Z-negated or !Z-negated
+      value.
+  POLLCT1:
+    score: 85
+    location: pasm2
+    file: pollct1.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Poll
+  JNSE4:
+    score: 93
+    location: pasm2
+    file: jnse4.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Branch
+  WAITATN:
+    score: 75
+    location: pasm2
+    file: waitatn.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Wait for and clear attention flag.
+  COGATN:
+    score: 70
+    location: pasm2
+    file: cogatn.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Handling Instruction - Get the attention of one or more other cogs.
+  COGSTOP:
+    score: 70
+    location: pasm2
+    file: cogstop.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Cog Control Instruction - Stop a cog by ID.
+  OUTNC:
+    score: 75
+    location: pasm2
+    file: outnc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id001
+    group: I/O Pin Instruction - Set pin(s) output level to low/high according to
+      C or !C.
+  SKIP:
+    score: 50
+    location: pasm2
+    file: skip.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch D - Skip
+  FGES:
+    score: 75
+    location: pasm2
+    file: fges.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Force signed value to be greater than or equal to another.
+  ZEROX:
+    score: 75
+    location: pasm2
+    file: zerox.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Zero-extend value beyond designated bit.
+  FGE:
+    score: 75
+    location: pasm2
+    file: fge.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Force unsigned value to be greater than or equal to
+      another.
+  SETQ2:
+    score: 85
+    location: pasm2
+    file: setq2.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Miscellaneous
+  SAL:
+    score: 75
+    location: pasm2
+    file: sal.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Shift bits left, extending the LSB.
+  TJS:
+    score: 50
+    location: pasm2
+    file: tjs.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch S - Test
+  WRLUT:
+    score: 45
+    location: pasm2
+    file: wrlut.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Lookup Table
+  DIRC:
+    score: 75
+    location: pasm2
+    file: dirc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id011
+    - DIRC
+    - DIRNC
+    group: I/O Pin Instruction - Set pin(s) direction to input/output according to
+      C or !C.
+  TESTPN:
+    score: 75
+    location: pasm2
+    file: testpn.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: I/O Pin Instruction - Test pin and either store, AND, OR, or XOR the result
+      or inverse result into C/Z.
+  REP:
+    score: 50
+    location: pasm2
+    file: rep.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch Repeat
+  ADDX:
+    score: 75
+    location: pasm2
+    file: addx.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Add two unsigned extended values.
+  SUBR:
+    score: 75
+    location: pasm2
+    file: subr.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Subtract one unsigned value from another (in reverse
+      order to SUB).
+  IJNZ:
+    score: 75
+    location: pasm2
+    file: ijnz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id009
+    - IJZ
+    - IJNZ
+    group: Flow Control Instruction - Increment value and jump if zero or not zero.
+  WAITSE1:
+    score: 98
+    location: pasm2
+    file: waitse1.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Wait
+  RGBEXP:
+    score: 45
+    location: pasm2
+    file: rgbexp.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  RDWORD:
+    score: 65
+    location: pasm2
+    file: rdword.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub RAM - Read
+  DIRZ:
+    score: 75
+    location: pasm2
+    file: dirz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id008
+    - DIRZ
+    - DIRNZ
+    group: I/O Pin Instruction - Set pin(s) direction to input/output according to
+      Z or !Z.
+  STALLI:
+    score: 70
+    location: pasm2
+    file: stalli.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Interrupt Instruction - Prevent further interrupts.
+  PUSHA:
+    score: 35
+    location: pasm2
+    file: pusha.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub RAM - Write
+  RDFAST:
+    score: 85
+    location: pasm2
+    file: rdfast.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub FIFO - New Read
+  JPAT:
+    score: 50
+    location: pasm2
+    file: jpat.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id007
+    - JPAT
+    - JNPAT
+    group: Events - Branch
+  WAITX:
+    score: 80
+    location: pasm2
+    file: waitx.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Miscellaneous
+  ALTB:
+    score: 80
+    location: pasm2
+    file: altb.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Indirection Instruction - Alter subsequent BITxxx instruction.
+  SUMNC:
+    score: 75
+    location: pasm2
+    file: sumnc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Adjust signed value by other C-negated or !C-negated
+      value.
+  COGID:
+    score: 75
+    location: pasm2
+    file: cogid.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: "Cog Control Instruction - Get current cog\u2019s ID or any cog's status\
+      \ by ID."
+  AUGD:
+    score: 90
+    location: pasm2
+    file: augd.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Augmentation Instruction - Augment next literal Dest to 32-bits.
+  POLLSE4:
+    score: 70
+    location: pasm2
+    file: pollse4.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Poll
+  OUTNZ:
+    score: 75
+    location: pasm2
+    file: outnz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id002
+    group: I/O Pin Instruction - Set pin(s) output level to low/high according to
+      Z or !Z.
+  JNCT1:
+    score: 83
+    location: pasm2
+    file: jnct1.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id010
+    - JCT1
+    - '2'
+    - '3'
+    - JNCT1
+    - '2'
+    - '3'
+    group: Events - Branch
+  WMLONG_:
+    score: 65
+    location: pasm2
+    file: wmlong_.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub RAM - Write
+  TRGINT1:
+    score: 45
+    location: pasm2
+    file: trgint1.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Interrupts
+  RDLONG:
+    score: 65
+    location: pasm2
+    file: rdlong.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub RAM - Read
+  ROLBYTE:
+    score: 75
+    location: pasm2
+    file: rolbyte.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Rotate a byte left into a value.
+  WAITXMT:
+    score: 75
+    location: pasm2
+    file: waitxmt.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Wait for and clear streamer-empty event flag.
+  TEST:
+    score: 75
+    location: pasm2
+    file: test.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Test D, or bitwise AND D with S, to affect
+      flags.
+  JNINT:
+    score: 50
+    location: pasm2
+    file: jnint.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id003
+    group: Events - Branch
+  WAITCT3:
+    score: 98
+    location: pasm2
+    file: waitct3.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Wait
+  BITNC:
+    score: 65
+    location: pasm2
+    file: bitnc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id017
+    - BITC
+    - BITNC
+    group: Bit Operation Instruction - Set bit(s) low/high according to C or !C.
+  RFVARS:
+    score: 55
+    location: pasm2
+    file: rfvars.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub FIFO - Read
+  WFBYTE:
+    score: 50
+    location: pasm2
+    file: wfbyte.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub FIFO - Write
+  QVECTOR:
+    score: 85
+    location: pasm2
+    file: qvector.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: CORDIC Solver
+  AND:
+    score: 65
+    location: pasm2
+    file: and.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id014
+    - AND
+    - ANDN
+    group: Math and Logic
+  WRLONG:
+    score: 50
+    location: pasm2
+    file: wrlong.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub RAM - Write
+  MULPIX:
+    score: 45
+    location: pasm2
+    file: mulpix.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Pixel Mixer
+  SETINT3:
+    score: 45
+    location: pasm2
+    file: setint3.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Interrupts
+  SUB:
+    score: 75
+    location: pasm2
+    file: sub.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Subtract one unsigned value from another.
+  ALTI:
+    score: 95
+    location: pasm2
+    file: alti.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Indirection Instruction - Substitute next instruction's field values from
+      template, per configuration.
+  BITL:
+    score: 65
+    location: pasm2
+    file: bitl.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id028
+    - BITH
+    - BITL
+    group: Bit Operation Instruction - Set bit(s) high (1) or low (0).
+  ADDCT1:
+    score: 70
+    location: pasm2
+    file: addct1.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Configuration
+  DJF:
+    score: 75
+    location: pasm2
+    file: djf.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id005
+    - DJF
+    - DJNF
+    group: Flow Control Instruction - Decrement value and jump if full (-1; $FFFF_FFFF)
+      or not full (<> -1; <> $FFFF_FFFF).
+  NIXINT1:
+    score: 42
+    location: pasm2
+    file: nixint1.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Interrupts
+  JNSE3:
+    score: 83
+    location: pasm2
+    file: jnse3.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Branch
+  JXRO:
+    score: 50
+    location: pasm2
+    file: jxro.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id004
+    group: Events - Branch
+  CALLB:
+    score: 75
+    location: pasm2
+    file: callb.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id020
+    - CALLA
+    - CALLB
+    group: Flow Control Instruction - Call a subroutine; store return context in the
+      Hub long at PTRA++ or PTRB++.
+  WRWORD:
+    score: 50
+    location: pasm2
+    file: wrword.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub RAM - Write
+  WRNZ:
+    score: 55
+    location: pasm2
+    file: wrnz.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Write Z or not Z to register.
+  DRVNOT:
+    score: 75
+    location: pasm2
+    file: drvnot.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: I/O Pin Instruction - Set pin(s) direction to output and toggle to the
+      opposite output level.
+  LOCKREL:
+    score: 85
+    location: pasm2
+    file: lockrel.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub Control - Locks
+  WAITXFI:
+    score: 75
+    location: pasm2
+    file: waitxfi.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Wait for and clear streamer-finished event
+      flag.
+  WRFAST:
+    score: 50
+    location: pasm2
+    file: wrfast.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub FIFO - New Write
+  ADDS:
+    score: 75
+    location: pasm2
+    file: adds.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Add two signed values.
+  DJNF:
+    score: 75
+    location: pasm2
+    file: djnf.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id005
+    group: Flow Control Instruction - Decrement value and jump if full (-1; $FFFF_FFFF)
+      or not full (<> -1; <> $FFFF_FFFF).
+  DIRH:
+    score: 75
+    location: pasm2
+    file: dirh.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id024
+    - DIRH
+    - DIRL
+    group: I/O Pin Instruction - Set pin(s) direction to output (high; 1) or input
+      (low; 0).
+  JQMT:
+    score: 75
+    location: pasm2
+    file: jqmt.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id006
+    group: Event Branch Instruction - Jump if CORDIC-read-but-empty event flag set
+      or clear.
+  CMPR:
+    score: 75
+    location: pasm2
+    file: cmpr.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Compare two unsigned values (in reverse order to CMP).
+  WAITFBW:
+    score: 75
+    location: pasm2
+    file: waitfbw.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Wait for and clear FIFO-interface-block-wrap
+      event flag.
+  RDPIN:
+    score: 55
+    location: pasm2
+    file: rdpin.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Smart Pins
+  RESI1:
+    score: 60
+    location: pasm2
+    file: resi1.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch S - Resume
+  SETPIX:
+    score: 45
+    location: pasm2
+    file: setpix.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Pixel Mixer
+  DECOD:
+    score: 75
+    location: pasm2
+    file: decod.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: "Bit Operation Instruction - Decode value (0\u201431) into single-high-bit\
+      \ long."
+  SETCFRQ:
+    score: 45
+    location: pasm2
+    file: setcfrq.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Color Space Converter
+  DRVL:
+    score: 75
+    location: pasm2
+    file: drvl.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id023
+    - DRVH
+    - DRVL
+    group: I/O Pin Instruction - Set pin(s) direction to output and output level high
+      (1) or low (0).
+  POLLSE3:
+    score: 70
+    location: pasm2
+    file: pollse3.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Poll
+  CALL:
+    score: 75
+    location: pasm2
+    file: call.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Flow Control Instruction - Call a subroutine; store return context on the
+      stack.
+  ROL:
+    score: 75
+    location: pasm2
+    file: rol.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Rotate bits left.
+  WRNC:
+    score: 55
+    location: pasm2
+    file: wrnc.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Write C or not C to register.
+  RQPIN:
+    score: 47
+    location: pasm2
+    file: rqpin.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Smart Pins
+  QFRAC:
+    score: 90
+    location: pasm2
+    file: qfrac.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: CORDIC Solver
+  WAITXRL:
+    score: 75
+    location: pasm2
+    file: waitxrl.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Wait for and clear streamer-LUT-RAM-rollover
+      event flag
+  RETI3:
+    score: 60
+    location: pasm2
+    file: reti3.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch S - Return
+  MUXNITS:
+    score: 75
+    location: pasm2
+    file: muxnits.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Set discrete bit pairs of a value to non-zero
+      bit pair states of another.
+  POLLINT:
+    score: 70
+    location: pasm2
+    file: pollint.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Retrieve and clear interrupt-occurred event
+      flag.
+  SAR:
+    score: 75
+    location: pasm2
+    file: sar.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Divide signed 32-bit integer by power-of-two; a.k.a
+      shift bits right, extending the MSB.
+  BITNZ:
+    score: 65
+    location: pasm2
+    file: bitnz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id021
+    - BITZ
+    - BITNZ
+    group: Bit Operation Instruction - Set bit(s) low/high according to Z or !Z.
+  POPB:
+    score: 40
+    location: pasm2
+    file: popb.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub RAM - Read
+  SETSE1:
+    score: 45
+    location: pasm2
+    file: setse1.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Configuration
+  JNPAT:
+    score: 50
+    location: pasm2
+    file: jnpat.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id007
+    group: Events - Branch
+  REV:
+    score: 75
+    location: pasm2
+    file: rev.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Reverse bits of value.
+  ROLNIB:
+    score: 75
+    location: pasm2
+    file: rolnib.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Rotate a nibble left into a value.
+  RETI2:
+    score: 60
+    location: pasm2
+    file: reti2.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch S - Return
+  RETB:
+    score: 55
+    location: pasm2
+    file: retb.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch Return
+  WRC:
+    score: 45
+    location: pasm2
+    file: wrc.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  WFWORD:
+    score: 50
+    location: pasm2
+    file: wfword.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub FIFO - Write
+  SUBSX:
+    score: 75
+    location: pasm2
+    file: subsx.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Subtract one signed extended value from another.
+  DIRNZ:
+    score: 75
+    location: pasm2
+    file: dirnz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id008
+    group: I/O Pin Instruction - Set pin(s) direction to input/output according to
+      Z or !Z.
+  IJZ:
+    score: 75
+    location: pasm2
+    file: ijz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id009
+    group: Flow Control Instruction - Increment value and jump if zero or not zero.
+  QLOG:
+    score: 85
+    location: pasm2
+    file: qlog.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: CORDIC Solver
+  OUTH:
+    score: 65
+    location: pasm2
+    file: outh.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id033
+    - OUTH
+    - OUTL
+    group: I/O Pin Instruction - Set pin(s) output level to high (1) or low (0).
+  ALTD:
+    score: 75
+    location: pasm2
+    file: altd.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Indirection Instruction - Alter D field of next instruction.
+  FLTNC:
+    score: 75
+    location: pasm2
+    file: fltnc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id015
+    - FLTC
+    - FLTNC
+    group: I/O Pin Instruction - Set pin(s) direction to input and an output level
+      of low/high according to C.
+  HUBSET:
+    score: 50
+    location: pasm2
+    file: hubset.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub Control - Multi
+  DIRNOT:
+    score: 75
+    location: pasm2
+    file: dirnot.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: I/O Pin Instruction - Toggle pin(s) to the opposite direction.
+  POLLSE2:
+    score: 70
+    location: pasm2
+    file: pollse2.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Poll
+  WRBYTE:
+    score: 45
+    location: pasm2
+    file: wrbyte.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub RAM - Write
+  WFLONG:
+    score: 50
+    location: pasm2
+    file: wflong.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub FIFO - Write
+  RESI0:
+    score: 60
+    location: pasm2
+    file: resi0.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch S - Resume
+  JCT1:
+    score: 83
+    location: pasm2
+    file: jct1.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id010
+    group: Events - Branch
+  DEBUG:
+    score: 58
+    location: pasm2
+    file: debug.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: System Control Instruction
+  CMPS:
+    score: 75
+    location: pasm2
+    file: cmps.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Compare two signed values.
+  LOCKRET:
+    score: 50
+    location: pasm2
+    file: lockret.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub Control - Locks
+  JSE4:
+    score: 83
+    location: pasm2
+    file: jse4.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Branch
+  SUBX:
+    score: 75
+    location: pasm2
+    file: subx.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Subtract one unsigned extended value from another.
+  BITRND:
+    score: 75
+    location: pasm2
+    file: bitrnd.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Set bit(s) random low/high.
+  FLTNZ:
+    score: 65
+    location: pasm2
+    file: fltnz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id012
+    - FLTZ
+    - FLTNZ
+    group: I/O Pin Instruction - Set pin(s) direction to input and an output level
+      of low/high according to Z.
+  RCZR:
+    score: 75
+    location: pasm2
+    file: rczr.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Rotate carry and zero flags right into value
+      (2-bit rotate right).
+  JNSE2:
+    score: 83
+    location: pasm2
+    file: jnse2.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Branch
+  MOV:
+    score: 75
+    location: pasm2
+    file: mov.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Set a value into a register.
+  OUTNOT:
+    score: 75
+    location: pasm2
+    file: outnot.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: I/O Pin Instruction - Toggle pin(s) to the opposite output level.
+  MERGEW:
+    score: 50
+    location: pasm2
+    file: mergew.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  WRZ:
+    score: 45
+    location: pasm2
+    file: wrz.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  GETPTR:
+    score: 50
+    location: pasm2
+    file: getptr.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub FIFO
+  SETINT2:
+    score: 45
+    location: pasm2
+    file: setint2.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Interrupts
+  XOR:
+    score: 75
+    location: pasm2
+    file: xor.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Bitwise XOR a value with another.
+  BRK:
+    score: 90
+    location: pasm2
+    file: brk.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Interrupt Instruction - Trigger breakpoint in current cog.
+  FLTL:
+    score: 75
+    location: pasm2
+    file: fltl.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id029
+    - FLTH
+    - FLTL
+    group: I/O Pin Instruction - Set pin(s) direction to input and to an output level
+      of high (1) or low (0).
+  ABS:
+    score: 75
+    location: pasm2
+    file: abs.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Get the absolute value of a number.
+  DIRNC:
+    score: 75
+    location: pasm2
+    file: dirnc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id011
+    group: I/O Pin Instruction - Set pin(s) direction to input/output according to
+      C or !C.
+  ALLOWI:
+    score: 70
+    location: pasm2
+    file: allowi.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Interrupt Instruction - Allow interrupts.
+  SCAS:
+    score: 70
+    location: pasm2
+    file: scas.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Create signed 18-bit scale value for next instruction's
+      S value.
+  MERGEB:
+    score: 50
+    location: pasm2
+    file: mergeb.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  WMLONG:
+    score: 45
+    location: pasm2
+    file: wmlong.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub RAM - Write
+  WAITCT2:
+    score: 98
+    location: pasm2
+    file: waitct2.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Wait
+  POLLPAT:
+    score: 70
+    location: pasm2
+    file: pollpat.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Retrieve and clear pin-pattern-detected event
+      flag.
+  MOVBYTS:
+    score: 50
+    location: pasm2
+    file: movbyts.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  MUXC:
+    score: 55
+    location: pasm2
+    file: muxc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id013
+    - MUXC
+    - MUXNC
+    group: Math and Logic
+  RFWORD:
+    score: 55
+    location: pasm2
+    file: rfword.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub FIFO - Read
+  JNSE1:
+    score: 83
+    location: pasm2
+    file: jnse1.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id025
+    - JSE1
+    - '2'
+    - '3'
+    - '4'
+    - JNSE1
+    - '2'
+    - '3'
+    - '4'
+    group: Events - Branch
+  SETPAT:
+    score: 50
+    location: pasm2
+    file: setpat.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Configuration
+  NIXINT3:
+    score: 42
+    location: pasm2
+    file: nixint3.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Interrupts
+  FLTZ:
+    score: 65
+    location: pasm2
+    file: fltz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id012
+    group: I/O Pin Instruction - Set pin(s) direction to input and an output level
+      of low/high according to Z.
+  DRVNZ:
+    score: 75
+    location: pasm2
+    file: drvnz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id018
+    - DRVZ
+    - DRVNZ
+    group: I/O Pin Instruction - Set pin(s) direction to output and output level to
+      low/high according to Z or !Z.
+  ADDCT3:
+    score: 70
+    location: pasm2
+    file: addct3.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Configuration
+  NEGC:
+    score: 75
+    location: pasm2
+    file: negc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Negate value according to C.
+  XCONT:
+    score: 50
+    location: pasm2
+    file: xcont.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Streamer
+  SETINT1:
+    score: 45
+    location: pasm2
+    file: setint1.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Interrupts
+  TESTN:
+    score: 75
+    location: pasm2
+    file: testn.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Test D by bitwise ANDing with !S to affect
+      flags only.
+  NOP:
+    score: 50
+    location: pasm2
+    file: nop.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Miscellaneous Instruction - No operation, just elapse two cycles.
+  RFLONG:
+    score: 55
+    location: pasm2
+    file: rflong.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub FIFO - Read
+  WAITCT1:
+    score: 98
+    location: pasm2
+    file: waitct1.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Wait
+  POLLATN:
+    score: 70
+    location: pasm2
+    file: pollatn.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Retrieve and clear attention flag.
+  SETPIV:
+    score: 45
+    location: pasm2
+    file: setpiv.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Pixel Mixer
+  MUXNZ:
+    score: 75
+    location: pasm2
+    file: muxnz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id016
+    - MUXZ
+    - MUXNZ
+    group: Bit Operation Instructions - Set discrete bits to Z or !Z
+  TJV:
+    score: 75
+    location: pasm2
+    file: tjv.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch S - Test
+  MUXNC:
+    score: 55
+    location: pasm2
+    file: muxnc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id013
+    group: Math and Logic
+  SETSE2:
+    score: 45
+    location: pasm2
+    file: setse2.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Configuration
+  POPA:
+    score: 40
+    location: pasm2
+    file: popa.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub RAM - Read
+  WXPIN:
+    score: 50
+    location: pasm2
+    file: wxpin.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Smart Pins
+  ANDN:
+    score: 65
+    location: pasm2
+    file: andn.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id014
+    group: Math and Logic
+  JNATN:
+    score: 50
+    location: pasm2
+    file: jnatn.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id022
+    - JATN
+    - JNATN
+    group: Events - Branch
+  WAITSE4:
+    score: 98
+    location: pasm2
+    file: waitse4.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Wait
+  NEG:
+    score: 75
+    location: pasm2
+    file: neg.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Negate a value.
+  RETA:
+    score: 55
+    location: pasm2
+    file: reta.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch Return
+  RETI1:
+    score: 60
+    location: pasm2
+    file: reti1.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch S - Return
+  ALTR:
+    score: 75
+    location: pasm2
+    file: altr.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Indirection Instruction - Alter Result register address of next instruction.
+  NEGZ:
+    score: 75
+    location: pasm2
+    file: negz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Negate value according to Z.
+  GETQX:
+    score: 55
+    location: pasm2
+    file: getqx.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: CORDIC Solver
+  MULS:
+    score: 75
+    location: pasm2
+    file: muls.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Multiply signed 16-bit x 16-bit values.
+  JMPREL:
+    score: 50
+    location: pasm2
+    file: jmprel.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch D - Jump
+  SETCQ:
+    score: 45
+    location: pasm2
+    file: setcq.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Color Space Converter
+  POLLSE1:
+    score: 70
+    location: pasm2
+    file: pollse1.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Poll
+  DRVNC:
+    score: 75
+    location: pasm2
+    file: drvnc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id019
+    - DRVC
+    - DRVNC
+    group: I/O Pin Instruction - Set pin(s) direction to output and output level to
+      low/high according to C or !C.
+  FLTC:
+    score: 75
+    location: pasm2
+    file: fltc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id015
+    group: I/O Pin Instruction - Set pin(s) direction to input and an output level
+      of low/high according to C.
+  TESTB:
+    score: 50
+    location: pasm2
+    file: testb.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  RESI3:
+    score: 60
+    location: pasm2
+    file: resi3.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch S - Resume
+  TJZ:
+    score: 50
+    location: pasm2
+    file: tjz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch S - Test
+  MUXZ:
+    score: 75
+    location: pasm2
+    file: muxz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id016
+    group: Bit Operation Instructions - Set discrete bits to Z or !Z
+  XZERO:
+    score: 50
+    location: pasm2
+    file: xzero.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Streamer
+  JCT2:
+    score: 83
+    location: pasm2
+    file: jct2.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Branch
+  FLTNOT:
+    score: 75
+    location: pasm2
+    file: fltnot.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: I/O Pin Instruction - Set pin(s) direction to input and toggle to the opposite
+      output level.
+  SETWORD:
+    score: 75
+    location: pasm2
+    file: setword.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Set a word to new value.
+  ADD:
+    score: 75
+    location: pasm2
+    file: add.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Add two unsigned values.
+  TJNS:
+    score: 60
+    location: pasm2
+    file: tjns.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Flow Control Instruction - Test value and jump if signed or not signed.
+  JXMT:
+    score: 65
+    location: pasm2
+    file: jxmt.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id032
+    - JXMT
+    - JNXMT
+    group: Event Branch Instruction - Jump if streamer empty event flag set or clear.
+  WYPIN:
+    score: 85
+    location: pasm2
+    file: wypin.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Smart Pins
+  JCT3:
+    score: 83
+    location: pasm2
+    file: jct3.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Branch
+  RFBYTE:
+    score: 55
+    location: pasm2
+    file: rfbyte.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub FIFO - Read
+  RESI2:
+    score: 60
+    location: pasm2
+    file: resi2.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch S - Resume
+  AKPIN:
+    score: 70
+    location: pasm2
+    file: akpin.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: I/O Pin (Smart Logic) Instruction - Acknowledge smart pin(s).
+  ALTGB:
+    score: 90
+    location: pasm2
+    file: altgb.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Indirection Instruction - Alter subsequent GETBYTE / ROLBYTE instruction.
+  GETNIB:
+    score: 75
+    location: pasm2
+    file: getnib.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Get a nibble from a value.
+  BITC:
+    score: 65
+    location: pasm2
+    file: bitc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id017
+    group: Bit Operation Instruction - Set bit(s) low/high according to C or !C.
+  FLE:
+    score: 75
+    location: pasm2
+    file: fle.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Force unsigned value to be less than or equal to another.
+  SIGNX:
+    score: 75
+    location: pasm2
+    file: signx.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Sign-extend value beyond designated bit.
+  DRVZ:
+    score: 75
+    location: pasm2
+    file: drvz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id018
+    group: I/O Pin Instruction - Set pin(s) direction to output and output level to
+      low/high according to Z or !Z.
+  GETQY:
+    score: 55
+    location: pasm2
+    file: getqy.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: CORDIC Solver
+  ALTGW:
+    score: 75
+    location: pasm2
+    file: altgw.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Indirection Instruction - Alter subsequent GETWORD / ROLWORD instruction.
+  SETSCP:
+    score: 50
+    location: pasm2
+    file: setscp.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Smart Pins
+  FBLOCK:
+    score: 50
+    location: pasm2
+    file: fblock.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub FIFO - New Block
+  RCL:
+    score: 75
+    location: pasm2
+    file: rcl.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Rotate carry flag left into value.
+  WAITXRO:
+    score: 75
+    location: pasm2
+    file: waitxro.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Wait for and clear streamer-NCO-rollover event
+      flag
+  QEXP:
+    score: 85
+    location: pasm2
+    file: qexp.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: CORDIC Solver
+  ALTS:
+    score: 90
+    location: pasm2
+    file: alts.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Indirection Instruction - Alter S field of next instruction.
+  RETI0:
+    score: 60
+    location: pasm2
+    file: reti0.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch S - Return
+  TJNF:
+    score: 65
+    location: pasm2
+    file: tjnf.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Flow Control Instruction - Test value and jump if full (-1; $FFFF_FFFF)
+      or not full (<> -1; <> $FFFF_FFFF).
+  RDLUT:
+    score: 55
+    location: pasm2
+    file: rdlut.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Lookup Table
+  JXFI:
+    score: 50
+    location: pasm2
+    file: jxfi.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id034
+    - JXFI
+    - JNXFI
+    group: Events - Branch
+  RET:
+    score: 50
+    location: pasm2
+    file: ret.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch Return
+  SETSE3:
+    score: 45
+    location: pasm2
+    file: setse3.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Configuration
+  JFBW:
+    score: 70
+    location: pasm2
+    file: jfbw.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id030
+    - JFBW
+    - JNFBW
+    group: Event Branch Instruction - Jump if FIFO interface block wrap event flag
+      is set or clear.
+  BMASK:
+    score: 75
+    location: pasm2
+    file: bmask.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Get 1..32-bit mask into Dest.
+  ALTGN:
+    score: 75
+    location: pasm2
+    file: altgn.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Indirection Instruction - Alter subsequent GETNIB / ROLNIB instruction.
+  DRVC:
+    score: 75
+    location: pasm2
+    file: drvc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id019
+    group: I/O Pin Instruction - Set pin(s) direction to output and output level to
+      low/high according to C or !C.
+  ADDCT2:
+    score: 70
+    location: pasm2
+    file: addct2.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Configuration
+  SETCI:
+    score: 45
+    location: pasm2
+    file: setci.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Color Space Converter
+  QDIV:
+    score: 90
+    location: pasm2
+    file: qdiv.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: CORDIC Solver
+  NIXINT2:
+    score: 42
+    location: pasm2
+    file: nixint2.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Interrupts
+  CALLA:
+    score: 75
+    location: pasm2
+    file: calla.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id020
+    group: Flow Control Instruction - Call a subroutine; store return context in the
+      Hub long at PTRA++ or PTRB++.
+  ASMCLK:
+    score: 53
+    location: pasm2
+    file: asmclk.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: System Control Instruction
+  JXRL:
+    score: 70
+    location: pasm2
+    file: jxrl.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id031
+    - JXRL
+    - JNXRL
+    group: Event Branch Instruction - Jump if streamer LUT RAM rollover event flag
+      set or clear.
+  BITZ:
+    score: 65
+    location: pasm2
+    file: bitz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id021
+    group: Bit Operation Instruction - Set bit(s) low/high according to Z or !Z.
+  SETCMOD:
+    score: 45
+    location: pasm2
+    file: setcmod.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Color Space Converter
+  ADDSX:
+    score: 75
+    location: pasm2
+    file: addsx.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Add two signed extended values.
+  TESTBN:
+    score: 75
+    location: pasm2
+    file: testbn.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Test bit of D or !D and either store, AND,
+      OR, or XOR the result into flags.
+  SHL:
+    score: 75
+    location: pasm2
+    file: shl.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation / Math Instruction - Shift bits left; a.k.a. multiply 32-bit
+      integer by power-of-two.
+  SETBYTE:
+    score: 75
+    location: pasm2
+    file: setbyte.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Set a byte to new value.
+  QROTATE:
+    score: 90
+    location: pasm2
+    file: qrotate.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: CORDIC Solver
+  SETSE4:
+    score: 45
+    location: pasm2
+    file: setse4.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Configuration
+  WAITSE2:
+    score: 98
+    location: pasm2
+    file: waitse2.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Wait
+  SETS:
+    score: 75
+    location: pasm2
+    file: sets.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Indirection Instruction - Set template S field for ALTI.
+  GETXACC:
+    score: 50
+    location: pasm2
+    file: getxacc.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Streamer
+  JATN:
+    score: 58
+    location: pasm2
+    file: jatn.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id022
+    group: Events - Branch
+  PUSHB:
+    score: 35
+    location: pasm2
+    file: pushb.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub RAM - Write
+  MODC:
+    score: 75
+    location: pasm2
+    file: modc.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id027
+    - MODC
+    - MODZ
+    - MODCZ
+    group: Flag Modification Instruction - Modify C and/or Z flag(s) according to
+      modifier mode and current state(s).
+  JNCT2:
+    score: 83
+    location: pasm2
+    file: jnct2.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Branch
+  DRVH:
+    score: 75
+    location: pasm2
+    file: drvh.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id023
+    group: I/O Pin Instruction - Set pin(s) direction to output and output level high
+      (1) or low (0).
+  ADDPIX:
+    score: 75
+    location: pasm2
+    file: addpix.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Color Manipulation Instruction - Add RGB colors with full saturation.
+  TRGINT2:
+    score: 45
+    location: pasm2
+    file: trgint2.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Interrupts
+  ONES:
+    score: 75
+    location: pasm2
+    file: ones.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Get number of 1s from Dest or Src into Dest.
+  SETLUTS:
+    score: 50
+    location: pasm2
+    file: setluts.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Lookup Table
+  MUL:
+    score: 75
+    location: pasm2
+    file: mul.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Multiply unsigned 16-bit x 16-bit values.
+  SHR:
+    score: 75
+    location: pasm2
+    file: shr.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation / Math Instruction - Shift bits right; a.k.a. divide unsigned
+      32-bit integer by power-of-two.
+  DIRL:
+    score: 75
+    location: pasm2
+    file: dirl.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id024
+    group: I/O Pin Instruction - Set pin(s) direction to output (high; 1) or input
+      (low; 0).
+  DECMOD:
+    score: 75
+    location: pasm2
+    file: decmod.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Decrement with modulus.
+  DRVRND:
+    score: 75
+    location: pasm2
+    file: drvrnd.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: I/O Pin Instruction - Set pin(s) direction to output and output level to
+      random low/high.
+  JSE1:
+    score: 83
+    location: pasm2
+    file: jse1.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id025
+    group: Events - Branch
+  WRPIN:
+    score: 90
+    location: pasm2
+    file: wrpin.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Smart Pins
+  CALLPA:
+    score: 70
+    location: pasm2
+    file: callpa.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id026
+    group: Flow Control Instruction - Call a subroutine; store return context on the
+      stack and copy D into PA or PB.
+  MODZ:
+    score: 75
+    location: pasm2
+    file: modz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id027
+    group: Flag Modification Instruction - Modify C and/or Z flag(s) according to
+      modifier mode and current state(s).
+  POLLCT2:
+    score: 85
+    location: pasm2
+    file: pollct2.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Poll
+  INCMOD:
+    score: 90
+    location: pasm2
+    file: incmod.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Increment with modulus.
+  WAITPAT:
+    score: 75
+    location: pasm2
+    file: waitpat.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Wait for and clear pin-pattern-detected event
+      flag.
+  QMUL:
+    score: 85
+    location: pasm2
+    file: qmul.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: CORDIC Solver
+  RCR:
+    score: 75
+    location: pasm2
+    file: rcr.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Rotate carry flag right into value.
+  SEUSSR:
+    score: 50
+    location: pasm2
+    file: seussr.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  BITH:
+    score: 65
+    location: pasm2
+    file: bith.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id028
+    group: Bit Operation Instruction - Set bit(s) high (1) or low (0).
+  SETXFRQ:
+    score: 45
+    location: pasm2
+    file: setxfrq.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Streamer
+  GETBYTE:
+    score: 75
+    location: pasm2
+    file: getbyte.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Get a byte from a value.
+  RGBSQZ:
+    score: 45
+    location: pasm2
+    file: rgbsqz.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  CMPSUB:
+    score: 75
+    location: pasm2
+    file: cmpsub.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Compare two unsigned values and subtract the second
+      if it is lesser or equal.
+  LOC:
+    score: 45
+    location: pasm2
+    file: loc.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  MUXQ:
+    score: 90
+    location: pasm2
+    file: muxq.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Set discrete bits of a value to that of another.
+  BLNPIX:
+    score: 45
+    location: pasm2
+    file: blnpix.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Pixel Mixer
+  GETSCP:
+    score: 50
+    location: pasm2
+    file: getscp.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Smart Pins
+  LOCKTRY:
+    score: 90
+    location: pasm2
+    file: locktry.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub Control - Locks
+  FLTH:
+    score: 75
+    location: pasm2
+    file: flth.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id029
+    group: I/O Pin Instruction - Set pin(s) direction to input and to an output level
+      of high (1) or low (0).
+  XORO32:
+    score: 50
+    location: pasm2
+    file: xoro32.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  POLLXFI:
+    score: 70
+    location: pasm2
+    file: pollxfi.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Retrieve and clear streamer-finished event
+      flag.
+  JNFBW:
+    score: 70
+    location: pasm2
+    file: jnfbw.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id030
+    group: Event Branch Instruction - Jump if FIFO interface block wrap event flag
+      is set or clear.
+  GETRND:
+    score: 50
+    location: pasm2
+    file: getrnd.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Miscellaneous
+  POLLXMT:
+    score: 70
+    location: pasm2
+    file: pollxmt.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Retrieve and clear streamer-empty event flag.
+  SETNIB:
+    score: 70
+    location: pasm2
+    file: setnib.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Set a nibble to new value.
+  POLLCT3:
+    score: 85
+    location: pasm2
+    file: pollct3.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Poll
+  SEUSSF:
+    score: 50
+    location: pasm2
+    file: seussf.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  DJNZ:
+    score: 75
+    location: pasm2
+    file: djnz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: &id035
+    - DJZ
+    - DJNZ
+    group: Flow Control Instruction - Decrement, jump if zero or not zero.
+  OUTRND:
+    score: 75
+    location: pasm2
+    file: outrnd.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: I/O Pin Instruction - Set pin(s) output level to random low/high.
+  JNXRL:
+    score: 70
+    location: pasm2
+    file: jnxrl.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id031
+    group: Event Branch Instruction - Jump if streamer LUT RAM rollover event flag
+      set or clear.
+  SKIPF:
+    score: 50
+    location: pasm2
+    file: skipf.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch D - Jump+Skip
+  BITNOT:
+    score: 75
+    location: pasm2
+    file: bitnot.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Toggle bit(s) to the opposite state.
+  FLES:
+    score: 75
+    location: pasm2
+    file: fles.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math Instruction - Force signed value to be less than or equal to another.
+  DIRRND:
+    score: 75
+    location: pasm2
+    file: dirrnd.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: I/O Pin Instruction - Set pin(s) direction to random input/output.
+  POLLXRL:
+    score: 70
+    location: pasm2
+    file: pollxrl.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Retrieve and clear streamer-LUT-RAM-rollover
+      event flag.
+  MUXNIBS:
+    score: 75
+    location: pasm2
+    file: muxnibs.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Set discrete nibbles of a value to non-zero
+      nibble states of another.
+  TRGINT3:
+    score: 45
+    location: pasm2
+    file: trgint3.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Interrupts
+  SPLITW:
+    score: 50
+    location: pasm2
+    file: splitw.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  JNCT3:
+    score: 93
+    location: pasm2
+    file: jnct3.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Branch
+  QSQRT:
+    score: 90
+    location: pasm2
+    file: qsqrt.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: CORDIC Solver
+  WAITINT:
+    score: 75
+    location: pasm2
+    file: waitint.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Wait for and clear interrupt-occurred event
+      flag.
+  JNXMT:
+    score: 65
+    location: pasm2
+    file: jnxmt.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id032
+    group: Event Branch Instruction - Jump if streamer empty event flag set or clear.
+  OUTL:
+    score: 65
+    location: pasm2
+    file: outl.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id033
+    group: I/O Pin Instruction - Set pin(s) output level to high (1) or low (0).
+  GETWORD:
+    score: 75
+    location: pasm2
+    file: getword.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Bit Operation Instruction - Get a word from a value.
+  MODCZ:
+    score: 75
+    location: pasm2
+    file: modcz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id027
+    group: Flag Modification Instruction - Modify C and/or Z flag(s) according to
+      modifier mode and current state(s).
+  TESTP:
+    score: 80
+    location: pasm2
+    file: testp.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Pins
+  AUGS:
+    score: 90
+    location: pasm2
+    file: augs.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Augmentation Instruction - Augment next literal Src to 32-bits.
+  SPLITB:
+    score: 50
+    location: pasm2
+    file: splitb.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  POLLFBW:
+    score: 70
+    location: pasm2
+    file: pollfbw.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Event Monitor Instruction - Retrieve and clear FIFO-interface-block-wrap
+      event flag.
+  JNXFI:
+    score: 50
+    location: pasm2
+    file: jnxfi.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id034
+    group: Events - Branch
+  CRCNIB:
+    score: 42
+    location: pasm2
+    file: crcnib.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Math and Logic
+  MIXPIX:
+    score: 45
+    location: pasm2
+    file: mixpix.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Pixel Mixer
+  DJZ:
+    score: 75
+    location: pasm2
+    file: djz.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: true
+    manual_group_members: *id035
+    group: Flow Control Instruction - Decrement, jump if zero or not zero.
+  JMP:
+    score: 50
+    location: pasm2
+    file: jmp.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Branch A - Jump
+  WAITSE3:
+    score: 98
+    location: pasm2
+    file: waitse3.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Events - Wait
+  SETR:
+    score: 75
+    location: pasm2
+    file: setr.yaml
+    in_manual: true
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Indirection Instruction - Set template Result field for ALTI.
+  LOCKNEW:
+    score: 55
+    location: pasm2
+    file: locknew.yaml
+    in_manual: false
+    is_directive: false
+    is_grouped_in_manual: false
+    manual_group_members: []
+    group: Hub Control - Locks
+  ALIGNL:
+    score: 80
+    location: assembly-directives
+    file: alignl.yaml
+    in_manual: true
+    is_directive: true
+    group: Assembly
+  FIT:
+    score: 33
+    location: assembly-directives
+    file: fit.yaml
+    in_manual: false
+    is_directive: true
+    group: Assembly
+  ORGH:
+    score: 33
+    location: assembly-directives
+    file: orgh.yaml
+    in_manual: false
+    is_directive: true
+    group: Assembly
+  DITTO:
+    score: 33
+    location: assembly-directives
+    file: ditto.yaml
+    in_manual: false
+    is_directive: true
+    group: Assembly
+  FILE:
+    score: 55
+    location: assembly-directives
+    file: file.yaml
+    in_manual: false
+    is_directive: true
+    group: Data Declaration
+  ALIGNW:
+    score: 80
+    location: assembly-directives
+    file: alignw.yaml
+    in_manual: true
+    is_directive: true
+    group: Assembly
+  BYTE:
+    score: 50
+    location: assembly-directives
+    file: byte.yaml
+    in_manual: false
+    is_directive: true
+    group: Data Declaration
+  WORD:
+    score: 50
+    location: assembly-directives
+    file: word.yaml
+    in_manual: false
+    is_directive: true
+    group: Data Declaration
+  ORGF:
+    score: 33
+    location: assembly-directives
+    file: orgf.yaml
+    in_manual: false
+    is_directive: true
+    group: Assembly
+  LONG:
+    score: 50
+    location: assembly-directives
+    file: long.yaml
+    in_manual: false
+    is_directive: true
+    group: Data Declaration
+  RES:
+    score: 33
+    location: assembly-directives
+    file: res.yaml
+    in_manual: false
+    is_directive: true
+    group: Assembly
+  ORG:
+    score: 33
+    location: assembly-directives
+    file: org.yaml
+    in_manual: false
+    is_directive: true
+    group: Assembly
+missing_yaml:
+- ADDCT1/2/3
+- CONVENTIONS
+- POLLCT1/2/3
+- POLLSE1/2/3/4
+- PREFACE
+- PROPELLER
+extra_yaml:
+- ASMCLK
+- BYTE
+- DEBUG
+- DITTO
+- EXECF
+- FBLOCK
+- FILE
+- FIT
+- GETBRK
+- GETCT
+- GETPTR
+- GETQX
+- GETQY
+- GETRND
+- GETSCP
+- GETXACC
+- HUBSET
+- JCT2
+- JCT3
+- JMP
+- JMPREL
+- JNCT2
+- JNCT3
+- JNSE2
+- JNSE3
+- JNSE4
+- JSE2
+- JSE3
+- JSE4
+- LOC
+- LOCKNEW
+- LOCKREL
+- LOCKRET
+- LOCKTRY
+- LONG
+- MERGEB
+- MERGEW
+- NIXINT1
+- NIXINT2
+- NIXINT3
+- ORG
+- ORGF
+- ORGH
+- POLLCT1
+- POLLCT2
+- POLLCT3
+- POLLSE1
+- POLLSE2
+- POLLSE3
+- POLLSE4
+- POPA
+- POPB
+- PUSHA
+- PUSHB
+- QDIV
+- QEXP
+- QFRAC
+- QLOG
+- QMUL
+- QROTATE
+- QSQRT
+- QVECTOR
+- RDFAST
+- REP
+- RES
+- RESI0
+- RESI1
+- RESI2
+- RESI3
+- RET
+- RETA
+- RETB
+- RETI0
+- RETI1
+- RETI2
+- RETI3
+- RFBYTE
+- RFLONG
+- RFVAR
+- RFVARS
+- RFWORD
+- RGBEXP
+- RGBSQZ
+- SETCFRQ
+- SETCI
+- SETCMOD
+- SETCQ
+- SETCY
+- SETDACS
+- SETINT1
+- SETINT2
+- SETINT3
+- SETLUTS
+- SETPAT
+- SETPIV
+- SETPIX
+- SETQ
+- SETQ2
+- SETSCP
+- SETSE1
+- SETSE2
+- SETSE3
+- SETSE4
+- SETXFRQ
+- SEUSSF
+- SEUSSR
+- SKIP
+- SKIPF
+- SPLITB
+- SPLITW
+- TESTP
+- TESTPN
+- TRGINT1
+- TRGINT2
+- TRGINT3
+- WAITATN
+- WAITCT1
+- WAITCT2
+- WAITCT3
+- WAITFBW
+- WAITINT
+- WAITPAT
+- WAITSE1
+- WAITSE2
+- WAITSE3
+- WAITSE4
+- WAITX
+- WAITXFI
+- WAITXMT
+- WAITXRL
+- WAITXRO
+- WFBYTE
+- WFLONG
+- WFWORD
+- WMLONG_
+- WORD
+- WRBYTE
+- WRC
+- WRFAST
+- WRLONG
+- WRLUT
+- WRNC
+- WRNZ
+- WRPIN
+- WRWORD
+- WRZ
+- WXPIN
+- WYPIN
+- XCONT
+- XINIT
+- XORO32
+- XSTOP
+- XZERO
+instruction_groups:
+  Math and Logic:
+  - instruction: CRCBIT
+    score: 45
+  - instruction: SUMZ
+    score: 55
+  - instruction: NOT
+    score: 75
+  - instruction: SUMC
+    score: 55
+  - instruction: RGBEXP
+    score: 45
+  - instruction: AND
+    score: 65
+  - instruction: WRC
+    score: 45
+  - instruction: MERGEW
+    score: 50
+  - instruction: WRZ
+    score: 45
+  - instruction: MERGEB
+    score: 50
+  - instruction: MOVBYTS
+    score: 50
+  - instruction: MUXC
+    score: 55
+  - instruction: MUXNC
+    score: 55
+  - instruction: ANDN
+    score: 65
+  - instruction: TESTB
+    score: 50
+  - instruction: SEUSSR
+    score: 50
+  - instruction: RGBSQZ
+    score: 45
+  - instruction: LOC
+    score: 45
+  - instruction: XORO32
+    score: 50
+  - instruction: SEUSSF
+    score: 50
+  - instruction: SPLITW
+    score: 50
+  - instruction: SPLITB
+    score: 50
+  - instruction: CRCNIB
+    score: 42
+  Indirection Instruction - Alter subsequent SETNIB instruction.:
+  - instruction: ALTSN
+    score: 75
+  Indirection Instruction - Set template D field for ALTI.:
+  - instruction: SETD
+    score: 75
+  Event Monitor Instruction - Retrieve and clear streamer-NCO-rollover event flag.:
+  - instruction: POLLXRO
+    score: 70
+  I/O Pin Instruction - Set pin(s) output level to low/high according to Z or !Z.:
+  - instruction: OUTZ
+    score: 75
+  - instruction: OUTNZ
+    score: 75
+  I/O Pin Instruction - Set pin(s) direction to input and to an output level of random low/high.:
+  - instruction: FLTRND
+    score: 75
+  Event Branch Instruction - Jump if CORDIC-read-but-empty event flag set or clear.:
+  - instruction: JNQMT
+    score: 75
+  - instruction: JQMT
+    score: 75
+  Bit Operation Instruction - Rotate carry and zero flags left into value (2-bit rotate left).:
+  - instruction: RCZL
+    score: 75
+  Math Instruction - Compare two unsigned values.:
+  - instruction: CMP
+    score: 75
+  Math Instruction - Subtract one signed value from another.:
+  - instruction: SUBS
+    score: 75
+  Math Instruction - Negate value according to !Z.:
+  - instruction: NEGNZ
+    score: 75
+  Miscellaneous:
+  - instruction: SETQ
+    score: 50
+  - instruction: GETCT
+    score: 50
+  - instruction: SETQ2
+    score: 85
+  - instruction: WAITX
+    score: 80
+  - instruction: GETRND
+    score: 50
+  Interrupt Instruction - Trigger breakpoint in specified cog.:
+  - instruction: COGBRK
+    score: 70
+  Math Instruction - Compare two unsigned values plus carry flag.:
+  - instruction: CMPX
+    score: 75
+  Math Instruction - Negate value according to !C.:
+  - instruction: NEGNC
+    score: 75
+  Indirection Instruction - Alter subsequent SETBYTE instruction.:
+  - instruction: ALTSB
+    score: 75
+  Flow Control Instruction - Test value and jump if zero or not zero.:
+  - instruction: TJNZ
+    score: 50
+  Math Instruction - Compare two signed values plus carry flag.:
+  - instruction: CMPSX
+    score: 75
+  Hub RAM - Read:
+  - instruction: RDBYTE
+    score: 55
+  - instruction: RDWORD
+    score: 65
+  - instruction: RDLONG
+    score: 65
+  - instruction: POPB
+    score: 40
+  - instruction: POPA
+    score: 40
+  Interrupts:
+  - instruction: GETBRK
+    score: 85
+  - instruction: TRGINT1
+    score: 45
+  - instruction: SETINT3
+    score: 45
+  - instruction: NIXINT1
+    score: 42
+  - instruction: SETINT2
+    score: 45
+  - instruction: NIXINT3
+    score: 42
+  - instruction: SETINT1
+    score: 45
+  - instruction: NIXINT2
+    score: 42
+  - instruction: TRGINT2
+    score: 45
+  - instruction: TRGINT3
+    score: 45
+  Color Space Converter:
+  - instruction: SETCY
+    score: 45
+  - instruction: SETCFRQ
+    score: 45
+  - instruction: SETCQ
+    score: 45
+  - instruction: SETCI
+    score: 45
+  - instruction: SETCMOD
+    score: 45
+  Hub FIFO - Read:
+  - instruction: RFVAR
+    score: 55
+  - instruction: RFVARS
+    score: 55
+  - instruction: RFWORD
+    score: 55
+  - instruction: RFLONG
+    score: 55
+  - instruction: RFBYTE
+    score: 55
+  Events - Branch:
+  - instruction: JINT
+    score: 50
+  - instruction: JSE3
+    score: 83
+  - instruction: JNXRO
+    score: 50
+  - instruction: JSE2
+    score: 83
+  - instruction: JNSE4
+    score: 93
+  - instruction: JPAT
+    score: 50
+  - instruction: JNCT1
+    score: 83
+  - instruction: JNINT
+    score: 50
+  - instruction: JNSE3
+    score: 83
+  - instruction: JXRO
+    score: 50
+  - instruction: JNPAT
+    score: 50
+  - instruction: JCT1
+    score: 83
+  - instruction: JSE4
+    score: 83
+  - instruction: JNSE2
+    score: 83
+  - instruction: JNSE1
+    score: 83
+  - instruction: JNATN
+    score: 50
+  - instruction: JCT2
+    score: 83
+  - instruction: JCT3
+    score: 83
+  - instruction: JXFI
+    score: 50
+  - instruction: JATN
+    score: 58
+  - instruction: JNCT2
+    score: 83
+  - instruction: JSE1
+    score: 83
+  - instruction: JNCT3
+    score: 93
+  - instruction: JNXFI
+    score: 50
+  Branch D - Call+Skip:
+  - instruction: EXECF
+    score: 55
+  Event Monitor Instruction - Retrieve and clear CORDIC-read-but-empty event flag.:
+  - instruction: POLLQMT
+    score: 70
+  I/O Pin Instruction - Set pin(s) output level to low/high according to C or !C.:
+  - instruction: OUTC
+    score: 75
+  - instruction: OUTNC
+    score: 75
+  Flow Control Instruction - Call a subroutine; store return context in PA/PB/PTRA/PTRB/D.:
+  - instruction: CALLD
+    score: 75
+  Cog Control Instruction - Start an available cog, or restart a cog by ID.:
+  - instruction: COGINIT
+    score: 85
+  Streamer:
+  - instruction: XSTOP
+    score: 45
+  - instruction: XINIT
+    score: 60
+  - instruction: XCONT
+    score: 50
+  - instruction: XZERO
+    score: 50
+  - instruction: GETXACC
+    score: 50
+  - instruction: SETXFRQ
+    score: 45
+  Math Instruction - Compare two unsigned values, get MSB of difference.:
+  - instruction: CMPM
+    score: 75
+  Indirection Instruction - Alter subsequent SETWORD instruction.:
+  - instruction: ALTSW
+    score: 80
+  Smart Pins:
+  - instruction: SETDACS
+    score: 45
+  - instruction: RDPIN
+    score: 55
+  - instruction: RQPIN
+    score: 47
+  - instruction: WXPIN
+    score: 50
+  - instruction: WYPIN
+    score: 85
+  - instruction: SETSCP
+    score: 50
+  - instruction: WRPIN
+    score: 90
+  - instruction: GETSCP
+    score: 50
+  Math Instruction - Create unsigned 16-bit scale value for next instruction's S value.:
+  - instruction: SCA
+    score: 70
+  Bit Operation Instruction - Rotate a word left into a value.:
+  - instruction: ROLWORD
+    score: 75
+  Bit Operation Instruction - Bitwise OR a value with another.:
+  - instruction: OR
+    score: 75
+  Branch S - Test:
+  - instruction: TJF
+    score: 50
+  - instruction: TJS
+    score: 50
+  - instruction: TJV
+    score: 75
+  - instruction: TJZ
+    score: 50
+  Bit Operation Instruction - Get bit position of top-most 1 of Src or Dest into Dest.:
+  - instruction: ENCOD
+    score: 75
+  Flow Control Instruction - Call a subroutine; store return context on the stack and copy D into PA or PB.:
+  - instruction: CALLPB
+    score: 70
+  - instruction: CALLPA
+    score: 70
+  Bit Operation Instruction - Rotate bits right.:
+  - instruction: ROR
+    score: 75
+  Math Instruction - Adjust signed value by other Z-negated or !Z-negated value.:
+  - instruction: SUMNZ
+    score: 75
+  Events - Poll:
+  - instruction: POLLCT1
+    score: 85
+  - instruction: POLLSE4
+    score: 70
+  - instruction: POLLSE3
+    score: 70
+  - instruction: POLLSE2
+    score: 70
+  - instruction: POLLSE1
+    score: 70
+  - instruction: POLLCT2
+    score: 85
+  - instruction: POLLCT3
+    score: 85
+  Event Monitor Instruction - Wait for and clear attention flag.:
+  - instruction: WAITATN
+    score: 75
+  Event Handling Instruction - Get the attention of one or more other cogs.:
+  - instruction: COGATN
+    score: 70
+  Cog Control Instruction - Stop a cog by ID.:
+  - instruction: COGSTOP
+    score: 70
+  Branch D - Skip:
+  - instruction: SKIP
+    score: 50
+  Math Instruction - Force signed value to be greater than or equal to another.:
+  - instruction: FGES
+    score: 75
+  Math Instruction - Zero-extend value beyond designated bit.:
+  - instruction: ZEROX
+    score: 75
+  Math Instruction - Force unsigned value to be greater than or equal to another.:
+  - instruction: FGE
+    score: 75
+  Bit Operation Instruction - Shift bits left, extending the LSB.:
+  - instruction: SAL
+    score: 75
+  Lookup Table:
+  - instruction: WRLUT
+    score: 45
+  - instruction: RDLUT
+    score: 55
+  - instruction: SETLUTS
+    score: 50
+  I/O Pin Instruction - Set pin(s) direction to input/output according to C or !C.:
+  - instruction: DIRC
+    score: 75
+  - instruction: DIRNC
+    score: 75
+  I/O Pin Instruction - Test pin and either store, AND, OR, or XOR the result or inverse result into C/Z.:
+  - instruction: TESTPN
+    score: 75
+  Branch Repeat:
+  - instruction: REP
+    score: 50
+  Math Instruction - Add two unsigned extended values.:
+  - instruction: ADDX
+    score: 75
+  Math Instruction - Subtract one unsigned value from another (in reverse order to SUB).:
+  - instruction: SUBR
+    score: 75
+  Flow Control Instruction - Increment value and jump if zero or not zero.:
+  - instruction: IJNZ
+    score: 75
+  - instruction: IJZ
+    score: 75
+  Events - Wait:
+  - instruction: WAITSE1
+    score: 98
+  - instruction: WAITCT3
+    score: 98
+  - instruction: WAITCT2
+    score: 98
+  - instruction: WAITCT1
+    score: 98
+  - instruction: WAITSE4
+    score: 98
+  - instruction: WAITSE2
+    score: 98
+  - instruction: WAITSE3
+    score: 98
+  I/O Pin Instruction - Set pin(s) direction to input/output according to Z or !Z.:
+  - instruction: DIRZ
+    score: 75
+  - instruction: DIRNZ
+    score: 75
+  Interrupt Instruction - Prevent further interrupts.:
+  - instruction: STALLI
+    score: 70
+  Hub RAM - Write:
+  - instruction: PUSHA
+    score: 35
+  - instruction: WMLONG_
+    score: 65
+  - instruction: WRLONG
+    score: 50
+  - instruction: WRWORD
+    score: 50
+  - instruction: WRBYTE
+    score: 45
+  - instruction: WMLONG
+    score: 45
+  - instruction: PUSHB
+    score: 35
+  Hub FIFO - New Read:
+  - instruction: RDFAST
+    score: 85
+  Indirection Instruction - Alter subsequent BITxxx instruction.:
+  - instruction: ALTB
+    score: 80
+  Math Instruction - Adjust signed value by other C-negated or !C-negated value.:
+  - instruction: SUMNC
+    score: 75
+  "Cog Control Instruction - Get current cog\u2019s ID or any cog's status by ID.":
+  - instruction: COGID
+    score: 75
+  Augmentation Instruction - Augment next literal Dest to 32-bits.:
+  - instruction: AUGD
+    score: 90
+  Bit Operation Instruction - Rotate a byte left into a value.:
+  - instruction: ROLBYTE
+    score: 75
+  Event Monitor Instruction - Wait for and clear streamer-empty event flag.:
+  - instruction: WAITXMT
+    score: 75
+  Bit Operation Instruction - Test D, or bitwise AND D with S, to affect flags.:
+  - instruction: TEST
+    score: 75
+  Bit Operation Instruction - Set bit(s) low/high according to C or !C.:
+  - instruction: BITNC
+    score: 65
+  - instruction: BITC
+    score: 65
+  Hub FIFO - Write:
+  - instruction: WFBYTE
+    score: 50
+  - instruction: WFWORD
+    score: 50
+  - instruction: WFLONG
+    score: 50
+  CORDIC Solver:
+  - instruction: QVECTOR
+    score: 85
+  - instruction: QFRAC
+    score: 90
+  - instruction: QLOG
+    score: 85
+  - instruction: GETQX
+    score: 55
+  - instruction: GETQY
+    score: 55
+  - instruction: QEXP
+    score: 85
+  - instruction: QDIV
+    score: 90
+  - instruction: QROTATE
+    score: 90
+  - instruction: QMUL
+    score: 85
+  - instruction: QSQRT
+    score: 90
+  Pixel Mixer:
+  - instruction: MULPIX
+    score: 45
+  - instruction: SETPIX
+    score: 45
+  - instruction: SETPIV
+    score: 45
+  - instruction: BLNPIX
+    score: 45
+  - instruction: MIXPIX
+    score: 45
+  Math Instruction - Subtract one unsigned value from another.:
+  - instruction: SUB
+    score: 75
+  Indirection Instruction - Substitute next instruction's field values from template, per configuration.:
+  - instruction: ALTI
+    score: 95
+  Bit Operation Instruction - Set bit(s) high (1) or low (0).:
+  - instruction: BITL
+    score: 65
+  - instruction: BITH
+    score: 65
+  Events - Configuration:
+  - instruction: ADDCT1
+    score: 70
+  - instruction: SETSE1
+    score: 45
+  - instruction: SETPAT
+    score: 50
+  - instruction: ADDCT3
+    score: 70
+  - instruction: SETSE2
+    score: 45
+  - instruction: SETSE3
+    score: 45
+  - instruction: ADDCT2
+    score: 70
+  - instruction: SETSE4
+    score: 45
+  Flow Control Instruction - Decrement value and jump if full (-1; $FFFF_FFFF) or not full (<> -1; <> $FFFF_FFFF).:
+  - instruction: DJF
+    score: 75
+  - instruction: DJNF
+    score: 75
+  Flow Control Instruction - Call a subroutine; store return context in the Hub long at PTRA++ or PTRB++.:
+  - instruction: CALLB
+    score: 75
+  - instruction: CALLA
+    score: 75
+  Bit Operation Instruction - Write Z or not Z to register.:
+  - instruction: WRNZ
+    score: 55
+  I/O Pin Instruction - Set pin(s) direction to output and toggle to the opposite output level.:
+  - instruction: DRVNOT
+    score: 75
+  Hub Control - Locks:
+  - instruction: LOCKREL
+    score: 85
+  - instruction: LOCKRET
+    score: 50
+  - instruction: LOCKTRY
+    score: 90
+  - instruction: LOCKNEW
+    score: 55
+  Event Monitor Instruction - Wait for and clear streamer-finished event flag.:
+  - instruction: WAITXFI
+    score: 75
+  Hub FIFO - New Write:
+  - instruction: WRFAST
+    score: 50
+  Math Instruction - Add two signed values.:
+  - instruction: ADDS
+    score: 75
+  I/O Pin Instruction - Set pin(s) direction to output (high; 1) or input (low; 0).:
+  - instruction: DIRH
+    score: 75
+  - instruction: DIRL
+    score: 75
+  Math Instruction - Compare two unsigned values (in reverse order to CMP).:
+  - instruction: CMPR
+    score: 75
+  Event Monitor Instruction - Wait for and clear FIFO-interface-block-wrap event flag.:
+  - instruction: WAITFBW
+    score: 75
+  Branch S - Resume:
+  - instruction: RESI1
+    score: 60
+  - instruction: RESI0
+    score: 60
+  - instruction: RESI3
+    score: 60
+  - instruction: RESI2
+    score: 60
+  "Bit Operation Instruction - Decode value (0\u201431) into single-high-bit long.":
+  - instruction: DECOD
+    score: 75
+  I/O Pin Instruction - Set pin(s) direction to output and output level high (1) or low (0).:
+  - instruction: DRVL
+    score: 75
+  - instruction: DRVH
+    score: 75
+  Flow Control Instruction - Call a subroutine; store return context on the stack.:
+  - instruction: CALL
+    score: 75
+  Bit Operation Instruction - Rotate bits left.:
+  - instruction: ROL
+    score: 75
+  Bit Operation Instruction - Write C or not C to register.:
+  - instruction: WRNC
+    score: 55
+  Event Monitor Instruction - Wait for and clear streamer-LUT-RAM-rollover event flag:
+  - instruction: WAITXRL
+    score: 75
+  Branch S - Return:
+  - instruction: RETI3
+    score: 60
+  - instruction: RETI2
+    score: 60
+  - instruction: RETI1
+    score: 60
+  - instruction: RETI0
+    score: 60
+  Bit Operation Instruction - Set discrete bit pairs of a value to non-zero bit pair states of another.:
+  - instruction: MUXNITS
+    score: 75
+  Event Monitor Instruction - Retrieve and clear interrupt-occurred event flag.:
+  - instruction: POLLINT
+    score: 70
+  Math Instruction - Divide signed 32-bit integer by power-of-two; a.k.a shift bits right, extending the MSB.:
+  - instruction: SAR
+    score: 75
+  Bit Operation Instruction - Set bit(s) low/high according to Z or !Z.:
+  - instruction: BITNZ
+    score: 65
+  - instruction: BITZ
+    score: 65
+  Bit Operation Instruction - Reverse bits of value.:
+  - instruction: REV
+    score: 75
+  Bit Operation Instruction - Rotate a nibble left into a value.:
+  - instruction: ROLNIB
+    score: 75
+  Branch Return:
+  - instruction: RETB
+    score: 55
+  - instruction: RETA
+    score: 55
+  - instruction: RET
+    score: 50
+  Math Instruction - Subtract one signed extended value from another.:
+  - instruction: SUBSX
+    score: 75
+  I/O Pin Instruction - Set pin(s) output level to high (1) or low (0).:
+  - instruction: OUTH
+    score: 65
+  - instruction: OUTL
+    score: 65
+  Indirection Instruction - Alter D field of next instruction.:
+  - instruction: ALTD
+    score: 75
+  I/O Pin Instruction - Set pin(s) direction to input and an output level of low/high according to C.:
+  - instruction: FLTNC
+    score: 75
+  - instruction: FLTC
+    score: 75
+  Hub Control - Multi:
+  - instruction: HUBSET
+    score: 50
+  I/O Pin Instruction - Toggle pin(s) to the opposite direction.:
+  - instruction: DIRNOT
+    score: 75
+  System Control Instruction:
+  - instruction: DEBUG
+    score: 58
+  - instruction: ASMCLK
+    score: 53
+  Math Instruction - Compare two signed values.:
+  - instruction: CMPS
+    score: 75
+  Math Instruction - Subtract one unsigned extended value from another.:
+  - instruction: SUBX
+    score: 75
+  Bit Operation Instruction - Set bit(s) random low/high.:
+  - instruction: BITRND
+    score: 75
+  I/O Pin Instruction - Set pin(s) direction to input and an output level of low/high according to Z.:
+  - instruction: FLTNZ
+    score: 65
+  - instruction: FLTZ
+    score: 65
+  Bit Operation Instruction - Rotate carry and zero flags right into value (2-bit rotate right).:
+  - instruction: RCZR
+    score: 75
+  Bit Operation Instruction - Set a value into a register.:
+  - instruction: MOV
+    score: 75
+  I/O Pin Instruction - Toggle pin(s) to the opposite output level.:
+  - instruction: OUTNOT
+    score: 75
+  Hub FIFO:
+  - instruction: GETPTR
+    score: 50
+  Bit Operation Instruction - Bitwise XOR a value with another.:
+  - instruction: XOR
+    score: 75
+  Interrupt Instruction - Trigger breakpoint in current cog.:
+  - instruction: BRK
+    score: 90
+  I/O Pin Instruction - Set pin(s) direction to input and to an output level of high (1) or low (0).:
+  - instruction: FLTL
+    score: 75
+  - instruction: FLTH
+    score: 75
+  Math Instruction - Get the absolute value of a number.:
+  - instruction: ABS
+    score: 75
+  Interrupt Instruction - Allow interrupts.:
+  - instruction: ALLOWI
+    score: 70
+  Math Instruction - Create signed 18-bit scale value for next instruction's S value.:
+  - instruction: SCAS
+    score: 70
+  Event Monitor Instruction - Retrieve and clear pin-pattern-detected event flag.:
+  - instruction: POLLPAT
+    score: 70
+  I/O Pin Instruction - Set pin(s) direction to output and output level to low/high according to Z or !Z.:
+  - instruction: DRVNZ
+    score: 75
+  - instruction: DRVZ
+    score: 75
+  Math Instruction - Negate value according to C.:
+  - instruction: NEGC
+    score: 75
+  Bit Operation Instruction - Test D by bitwise ANDing with !S to affect flags only.:
+  - instruction: TESTN
+    score: 75
+  Miscellaneous Instruction - No operation, just elapse two cycles.:
+  - instruction: NOP
+    score: 50
+  Event Monitor Instruction - Retrieve and clear attention flag.:
+  - instruction: POLLATN
+    score: 70
+  Bit Operation Instructions - Set discrete bits to Z or !Z:
+  - instruction: MUXNZ
+    score: 75
+  - instruction: MUXZ
+    score: 75
+  Math Instruction - Negate a value.:
+  - instruction: NEG
+    score: 75
+  Indirection Instruction - Alter Result register address of next instruction.:
+  - instruction: ALTR
+    score: 75
+  Math Instruction - Negate value according to Z.:
+  - instruction: NEGZ
+    score: 75
+  Math Instruction - Multiply signed 16-bit x 16-bit values.:
+  - instruction: MULS
+    score: 75
+  Branch D - Jump:
+  - instruction: JMPREL
+    score: 50
+  I/O Pin Instruction - Set pin(s) direction to output and output level to low/high according to C or !C.:
+  - instruction: DRVNC
+    score: 75
+  - instruction: DRVC
+    score: 75
+  I/O Pin Instruction - Set pin(s) direction to input and toggle to the opposite output level.:
+  - instruction: FLTNOT
+    score: 75
+  Bit Operation Instruction - Set a word to new value.:
+  - instruction: SETWORD
+    score: 75
+  Math Instruction - Add two unsigned values.:
+  - instruction: ADD
+    score: 75
+  Flow Control Instruction - Test value and jump if signed or not signed.:
+  - instruction: TJNS
+    score: 60
+  Event Branch Instruction - Jump if streamer empty event flag set or clear.:
+  - instruction: JXMT
+    score: 65
+  - instruction: JNXMT
+    score: 65
+  I/O Pin (Smart Logic) Instruction - Acknowledge smart pin(s).:
+  - instruction: AKPIN
+    score: 70
+  Indirection Instruction - Alter subsequent GETBYTE / ROLBYTE instruction.:
+  - instruction: ALTGB
+    score: 90
+  Bit Operation Instruction - Get a nibble from a value.:
+  - instruction: GETNIB
+    score: 75
+  Math Instruction - Force unsigned value to be less than or equal to another.:
+  - instruction: FLE
+    score: 75
+  Math Instruction - Sign-extend value beyond designated bit.:
+  - instruction: SIGNX
+    score: 75
+  Indirection Instruction - Alter subsequent GETWORD / ROLWORD instruction.:
+  - instruction: ALTGW
+    score: 75
+  Hub FIFO - New Block:
+  - instruction: FBLOCK
+    score: 50
+  Bit Operation Instruction - Rotate carry flag left into value.:
+  - instruction: RCL
+    score: 75
+  Event Monitor Instruction - Wait for and clear streamer-NCO-rollover event flag:
+  - instruction: WAITXRO
+    score: 75
+  Indirection Instruction - Alter S field of next instruction.:
+  - instruction: ALTS
+    score: 90
+  Flow Control Instruction - Test value and jump if full (-1; $FFFF_FFFF) or not full (<> -1; <> $FFFF_FFFF).:
+  - instruction: TJNF
+    score: 65
+  Event Branch Instruction - Jump if FIFO interface block wrap event flag is set or clear.:
+  - instruction: JFBW
+    score: 70
+  - instruction: JNFBW
+    score: 70
+  Bit Operation Instruction - Get 1..32-bit mask into Dest.:
+  - instruction: BMASK
+    score: 75
+  Indirection Instruction - Alter subsequent GETNIB / ROLNIB instruction.:
+  - instruction: ALTGN
+    score: 75
+  Event Branch Instruction - Jump if streamer LUT RAM rollover event flag set or clear.:
+  - instruction: JXRL
+    score: 70
+  - instruction: JNXRL
+    score: 70
+  Math Instruction - Add two signed extended values.:
+  - instruction: ADDSX
+    score: 75
+  Bit Operation Instruction - Test bit of D or !D and either store, AND, OR, or XOR the result into flags.:
+  - instruction: TESTBN
+    score: 75
+  Bit Operation / Math Instruction - Shift bits left; a.k.a. multiply 32-bit integer by power-of-two.:
+  - instruction: SHL
+    score: 75
+  Bit Operation Instruction - Set a byte to new value.:
+  - instruction: SETBYTE
+    score: 75
+  Indirection Instruction - Set template S field for ALTI.:
+  - instruction: SETS
+    score: 75
+  Flag Modification Instruction - Modify C and/or Z flag(s) according to modifier mode and current state(s).:
+  - instruction: MODC
+    score: 75
+  - instruction: MODZ
+    score: 75
+  - instruction: MODCZ
+    score: 75
+  Color Manipulation Instruction - Add RGB colors with full saturation.:
+  - instruction: ADDPIX
+    score: 75
+  Bit Operation Instruction - Get number of 1s from Dest or Src into Dest.:
+  - instruction: ONES
+    score: 75
+  Math Instruction - Multiply unsigned 16-bit x 16-bit values.:
+  - instruction: MUL
+    score: 75
+  Bit Operation / Math Instruction - Shift bits right; a.k.a. divide unsigned 32-bit integer by power-of-two.:
+  - instruction: SHR
+    score: 75
+  Math Instruction - Decrement with modulus.:
+  - instruction: DECMOD
+    score: 75
+  I/O Pin Instruction - Set pin(s) direction to output and output level to random low/high.:
+  - instruction: DRVRND
+    score: 75
+  Math Instruction - Increment with modulus.:
+  - instruction: INCMOD
+    score: 90
+  Event Monitor Instruction - Wait for and clear pin-pattern-detected event flag.:
+  - instruction: WAITPAT
+    score: 75
+  Bit Operation Instruction - Rotate carry flag right into value.:
+  - instruction: RCR
+    score: 75
+  Bit Operation Instruction - Get a byte from a value.:
+  - instruction: GETBYTE
+    score: 75
+  Math Instruction - Compare two unsigned values and subtract the second if it is lesser or equal.:
+  - instruction: CMPSUB
+    score: 75
+  Bit Operation Instruction - Set discrete bits of a value to that of another.:
+  - instruction: MUXQ
+    score: 90
+  Event Monitor Instruction - Retrieve and clear streamer-finished event flag.:
+  - instruction: POLLXFI
+    score: 70
+  Event Monitor Instruction - Retrieve and clear streamer-empty event flag.:
+  - instruction: POLLXMT
+    score: 70
+  Bit Operation Instruction - Set a nibble to new value.:
+  - instruction: SETNIB
+    score: 70
+  Flow Control Instruction - Decrement, jump if zero or not zero.:
+  - instruction: DJNZ
+    score: 75
+  - instruction: DJZ
+    score: 75
+  I/O Pin Instruction - Set pin(s) output level to random low/high.:
+  - instruction: OUTRND
+    score: 75
+  Branch D - Jump+Skip:
+  - instruction: SKIPF
+    score: 50
+  Bit Operation Instruction - Toggle bit(s) to the opposite state.:
+  - instruction: BITNOT
+    score: 75
+  Math Instruction - Force signed value to be less than or equal to another.:
+  - instruction: FLES
+    score: 75
+  I/O Pin Instruction - Set pin(s) direction to random input/output.:
+  - instruction: DIRRND
+    score: 75
+  Event Monitor Instruction - Retrieve and clear streamer-LUT-RAM-rollover event flag.:
+  - instruction: POLLXRL
+    score: 70
+  Bit Operation Instruction - Set discrete nibbles of a value to non-zero nibble states of another.:
+  - instruction: MUXNIBS
+    score: 75
+  Event Monitor Instruction - Wait for and clear interrupt-occurred event flag.:
+  - instruction: WAITINT
+    score: 75
+  Bit Operation Instruction - Get a word from a value.:
+  - instruction: GETWORD
+    score: 75
+  Pins:
+  - instruction: TESTP
+    score: 80
+  Augmentation Instruction - Augment next literal Src to 32-bits.:
+  - instruction: AUGS
+    score: 90
+  Event Monitor Instruction - Retrieve and clear FIFO-interface-block-wrap event flag.:
+  - instruction: POLLFBW
+    score: 70
+  Branch A - Jump:
+  - instruction: JMP
+    score: 50
+  Indirection Instruction - Set template Result field for ALTI.:
+  - instruction: SETR
+    score: 75
+  Assembly:
+  - instruction: ALIGNL
+    score: 80
+  - instruction: FIT
+    score: 33
+  - instruction: ORGH
+    score: 33
+  - instruction: DITTO
+    score: 33
+  - instruction: ALIGNW
+    score: 80
+  - instruction: ORGF
+    score: 33
+  - instruction: RES
+    score: 33
+  - instruction: ORG
+    score: 33
+  Data Declaration:
+  - instruction: FILE
+    score: 55
+  - instruction: BYTE
+    score: 50
+  - instruction: WORD
+    score: 50
+  - instruction: LONG
+    score: 50
+  Undocumented:
+  - instruction: ADDCT1/2/3
+    score: 0
+  - instruction: POLLCT1/2/3
+    score: 0
+  - instruction: POLLSE1/2/3/4
+    score: 0
+  - instruction: CONVENTIONS
+    score: 0
+  - instruction: PROPELLER
+    score: 0
+  - instruction: PREFACE
+    score: 0
+statistics:
+  total_manual: 223
+  total_yaml: 370
+  in_both: 217
+  missing_yaml: 6
+  extra_yaml: 153
+  score_distribution:
+    Excellent (80-100): 54
+    Good (60-79): 192
+    Fair (40-59): 116
+    Poor (20-39): 8
+    Minimal (0-19): 0

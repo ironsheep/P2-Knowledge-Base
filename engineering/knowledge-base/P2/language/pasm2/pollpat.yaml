@@ -1,23 +1,28 @@
 instruction: POLLPAT
-syntax: POLLPAT          {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 000001000 000100100
+syntax: POLLPAT {WC|WZ|WCZ}
+encoding: "EEEE 1101011 CZ0 000001000 000100100                 \u2014            PAT Event         PAT\
+  \ Event                 2"
 timing:
   cycles: 2
   type: fixed
-group: Events - Poll
-description: 'POLLPAT copies the state of the pin-pattern-detected event flag into
-  C and/or Z and then clears the flag (unless Result: Pin-pattern-detected event flag
-  is optionally copied into C and/or Z, then it is cleared.'
-category: Event Monitor Instruction - Retrieve and clear pin-pattern-detected event
-  flag.
+group: Event Monitor Instruction - Retrieve and clear pin-pattern-detected event flag.
+description: "POLLPAT copies the state of the pin-pattern-detected event flag into C and/or Z and then\
+  \ clears the flag (unless Result: Pin-pattern-detected event flag is optionally copied into C and/or\
+  \ Z, then it is cleared.\n\nPOLLPAT copies the state of the pin-pattern-detected event \uFB02ag into\
+  \ C and/or Z and then clears the \uFB02ag (unless\n\nit's being set again by the event sensor).\n\n\
+  If the WC, WZ, or WCZ effect is speci\uFB01ed, the C \uFB02ag and/or Z \uFB02ag is updated to the state\
+  \ of the pin-pattern-detected\n\nevent \uFB02ag prior to clearing it.\n\nThe pin-pattern-detected event\
+  \ \uFB02ag is set whenever the masked input pins match or don't match the pattern\n\ndescribed by a\
+  \ previous SETPAT instruction. The pin-pattern-detected event \uFB02ag is cleared upon execution of\n\
+  \nSETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions."
 parameters:
-- WC, WZ, or WCZ are optional effects to update flags.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - SETPAT
 - WAITPAT
 - JPAT
 - JNPAT
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pollwait
@@ -27,3 +32,10 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Poll pattern
+category: "Event Monitor Instruction - Retrieve and clear pin-pattern-detected event \uFB02ag."
+result: "Pin-pattern-detected event \uFB02ag is optionally copied into C and/or Z, then it is cleared."
+syntax_variants:
+- POLLPAT {WC|WZ|WCZ}
+manual_extraction_date: '2025-01-19'

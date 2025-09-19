@@ -3,13 +3,12 @@ syntax: RETI0
 encoding: EEEE 1011001 110 111111111 111111111
 timing:
   cycles: 4
-  type: fixed
+  type: variable
+  range: 4 / 13...20
 group: Branch S - Return
 description: Return from INT0. (CALLD $1FF,$1FF WCZ).
-category: Branch S - Return
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+documentation_source: PASM2 Manual 2022-11-01
+documentation_level: structured
 compiler_operand_format:
   name: operand_xlat
   pattern: ''
@@ -18,3 +17,17 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 33
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- RETI0 Return
+last_updated: '2025-09-19T16:04:17.418941'
+brief_description: Return from interrupt 0
+group_membership:
+  group_id: interrupt_return
+  group_file: groups/interrupt_return.yaml
+  related:
+  - reti1
+  - reti2
+  - reti3
+specifics:
+  interrupt_number: 0
+has_group_documentation: true

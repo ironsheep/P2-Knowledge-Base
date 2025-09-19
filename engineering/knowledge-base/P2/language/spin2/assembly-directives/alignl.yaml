@@ -1,8 +1,50 @@
-directive: "ALIGNL"
+directive: ALIGNL
 type: assembly_directive
-category: "Assembly"
-description: |
-  Align to long boundary (4 bytes)
-syntax: "['ALIGNL']"
+description: ALIGNL aligns the next data element to the beginning of the next long of Hub RAM. ALIGNL
+  is important to use when code requires certain data to begin on a long boundary (for access convenience
+  and speed). The directive causes up to three zero ($00) bytes to emit after the current data to automatically
+  pad and align the next data element to a long boundary.
+brief_description: T2        WORD $2222
+syntax: ALIGNL
+category: Directive - Align to next long in Hub RAM
+parameters:
+- No parameters - This directive takes no arguments
+usage_notes: 'ALIGNL is only allowed in DAT blocks, not in in-line PASM.
+
+
+  When data elements are naturally packed in memory, they may not align to convenient boundaries.
+
+  If code that accesses data expects it to align with a long boundary (for convenience or speed),
+
+  the ALIGNL directive achieves this by emitting 0-3 zero bytes as padding.
+
+
+  Note that elements after the ALIGNL are still packed right after each other, which may require
+
+  further alignment directives depending on the needs of the code accessing them.
+
+  '
 examples:
-  - "ALIGNL  // Align to next long boundary"
+- code: "DAT\n  T1        BYTE $11\n            ALIGNL          ' Pad to next long boundary\n  T2    \
+    \    WORD $2222\n            LONG $33333333\n"
+  comment: Aligns T2 to start at a long boundary by padding after T1
+- code: "DAT\n  Buffer    BYTE 0[13]      ' 13-byte buffer\n            ALIGNL          ' Ensure next\
+    \ data is long-aligned\n  LongData  LONG $12345678\n"
+  comment: Ensures LongData starts on a long boundary for faster access
+memory_layout_example: "Without ALIGNL:\n  L0                          L1                          L2\n\
+  \  W0        W1        W2        W3        W4        W5\n  B0    B1    B2    B3    B4    B5    B6  \
+  \  B7    B8    B9    B10   B11\n  $11   $22   $22   $33   $33   $33   $33   --    --    --    --   \
+  \ --\n\nWith ALIGNL after BYTE $11:\n  L0                          L1                          L2  \n\
+  \  W0        W1        W2        W3        W4        W5\n  B0    B1    B2    B3    B4    B5    B6  \
+  \  B7    B8    B9    B10   B11\n  $11   $00   $00   $00   $22   $22   $33   $33   $33   $33   --   \
+  \ --\n       [<-- padding -->]\n"
+group: Assembly
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
+related:
+- ALIGNW
+- BYTE
+- WORD
+- LONG
+last_updated: '2025-09-19'
+manual_extraction_date: '2025-01-19'

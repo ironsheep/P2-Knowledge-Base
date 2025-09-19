@@ -14,7 +14,6 @@ timing:
 group: Hub RAM - Write
 description: Write memory long (alternate form). Writes long data to hub memory with
   specific addressing mode.
-category: Hub RAM - Write
 naming_note: YAML knowledge base has WMLONG (without underscore) - may be different
   instruction
 compiler_category: Miscellaneous
@@ -45,10 +44,10 @@ related_instructions:
 - WRWORD
 documentation_source: PNUT_TS_compiler_analysis
 documentation_level: minimal
-needs_documentation: true
 naming_discrepancy:
   source_yaml: WMLONG
   source_compiler: WMLONG_
   resolution_needed: true
   note: Different opcodes suggest these may be separate instructions
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
+last_updated: '2025-09-19T16:04:17.046071'

@@ -1,26 +1,31 @@
 instruction: SAR
-syntax: SAR     D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0000110 CZI DDDDDDDDD SSSSSSSSS
+syntax: SAR Dest, {#}Src {WC|WZ|WCZ}
+encoding: EEEE 0000110 CZI DDDDDDDDD SSSSSSSSS                            D      Last bit out   1
 timing:
-  cycles: 2
+  cycles: 1
   type: fixed
-group: Math and Logic
-description: The bits of Dest are shifted right by Src bits, extending Dest[31] (the
-  sign bit) into new leftmost bits.
-category: Math Instruction - Divide signed 32-bit integer by power-of-two; a.k.a shift
-  bits right, extending the MSB.
+group: Math Instruction - Divide signed 32-bit integer by power-of-two; a.k.a shift bits right, extending
+  the MSB.
+description: "The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign bit) into new\
+  \ leftmost bits.\n\nSAR shifts Dest's binary value right by Src places (0\u201331 bits) and sets the\
+  \ new MSBs to that of the original\n\nDest[31]; preserving the sign of a signed integer. This is useful\
+  \ for bit stream manipulation and for swift division\u2014\n\nit is similar to SHR for swift division\
+  \ by a power-of-two, but is safe for both signed and unsigned integers.\n\nIf the WC or WCZ effect is\
+  \ speci\uFB01ed, the C \uFB02ag is updated to the value of the last bit shifted out (effectively C =\n\
+  \nresult bit \"-1\") if Src is 1\u201331, or to Dest[0] if Src is 0.\n\nIf the WZ or WCZ effect is speci\uFB01\
+  ed, the Z \uFB02ag is set (1) if the Dest result equals zero, or is cleared (0) if it is\n\nnon-zero."
 flags_affected:
   C:
     formula: last bit shifted out if S[4:0] > 0, else D[0]
 parameters:
 - Dest is the register containing the value to arithmetically right shift by Src bits.
-- Src is a register or 5-bit literal whose value indicates the number of bits to arithmetically
-  shift right.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Src is a register or 5-bit literal whose value indicates the number of bits to arithmetically shift
+  right.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - SHR
 - SH
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -30,3 +35,14 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Shift arithmetic right
+category: Math Instruction - Divide signed 32-bit integer by power-of-two; a.k.a shift bits right, extending
+  the MSB.
+result: The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign bit) into new leftmost
+  bits.
+syntax_variants:
+- SAR Dest, {#}Src {WC|WZ|WCZ}
+- "SAR shifts Dest's binary value right by Src places (0\u201331 bits) and sets the new MSBs to that of\
+  \ the original"
+manual_extraction_date: '2025-01-19'

@@ -29,59 +29,22 @@ long_description: 'The QSQRT instruction performs square root calculation using 
   the floor of the true square root.
 
   '
-category: CORDIC Solver
 examples:
-- code: ''' Calculate square root of 1000000 (simple 32-bit value)
-
-    QSQRT   #1000000, #0   '' √{0, 1000000} = √1000000 ≈ 1000
-
-    '' Wait 55 clocks...
-
-    GETQX   sqrt_result    '' Get 1000
-
-    '
+- code: "' Calculate square root of 1000000 (simple 32-bit value)\nQSQRT   #1000000,\
+    \ #0   ' \u221A{0, 1000000} = \u221A1000000 \u2248 1000\n' Wait 55 clocks...\n\
+    GETQX   sqrt_result    ' Get 1000\n"
   description: Basic square root of 32-bit number
-- code: ''' Calculate square root of large 64-bit number
-
-    '' Example: √{0x12345678, 0x9ABCDEF0}
-
-    QSQRT   #$12345678, #$9ABCDEF0
-
-    '' ... other work for 55 clocks ...
-
-    GETQX   big_sqrt
-
-    '
+- code: "' Calculate square root of large 64-bit number\n' Example: \u221A{0x12345678,\
+    \ 0x9ABCDEF0}\nQSQRT   #$12345678, #$9ABCDEF0\n' ... other work for 55 clocks\
+    \ ...\nGETQX   big_sqrt\n"
   description: Square root of 64-bit number
-- code: ''' Distance calculation: √(x² + y²)
-
-    QMUL    coord_x, coord_x    '' x²
-
-    '' ... wait 55 clocks ...
-
-    GETQX   x_squared_low
-
-    GETQY   x_squared_high
-
-    QMUL    coord_y, coord_y    '' y²
-
-    '' ... wait 55 clocks ...
-
-    GETQX   y_squared_low
-
-    GETQY   y_squared_high
-
-    ADD     sum_low, x_squared_low, y_squared_low    '' x² + y² (low)
-
-    ADDX    sum_high, x_squared_high, y_squared_high '' x² + y² (high)
-
-    QSQRT   sum_high, sum_low   '' √(x² + y²)
-
-    '' ... wait 55 clocks ...
-
-    GETQX   distance
-
-    '
+- code: "' Distance calculation: \u221A(x\xB2 + y\xB2)\nQMUL    coord_x, coord_x \
+    \   ' x\xB2\n' ... wait 55 clocks ...\nGETQX   x_squared_low\nGETQY   x_squared_high\n\
+    QMUL    coord_y, coord_y    ' y\xB2\n' ... wait 55 clocks ...\nGETQX   y_squared_low\n\
+    GETQY   y_squared_high\nADD     sum_low, x_squared_low, y_squared_low    ' x\xB2\
+    \ + y\xB2 (low)\nADDX    sum_high, x_squared_high, y_squared_high ' x\xB2 + y\xB2\
+    \ (high)\nQSQRT   sum_high, sum_low   ' \u221A(x\xB2 + y\xB2)\n' ... wait 55 clocks\
+    \ ...\nGETQX   distance\n"
   description: 2D distance calculation using square root
 - code: ''' RMS calculation for signal processing
 
@@ -121,15 +84,14 @@ result_details:
   GETQX: 32-bit square root result (floor of true square root)
 timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
   one CORDIC instruction per hub window (every 8 clocks).
-usage_notes: Input formed as {S, D} where S contains upper 32 bits. For 32-bit square
-  roots, use S=0. Result is floor(√input).
+usage_notes: "Input formed as {S, D} where S contains upper 32 bits. For 32-bit square\
+  \ roots, use S=0. Result is floor(\u221Ainput)."
 applications: Distance calculations, RMS computations, geometric algorithms, signal
   processing, mathematical operations requiring high-precision square roots.
-mathematical_note: 'Result R satisfies: R² ≤ input < (R+1)², making it the largest
-  integer whose square doesn''t exceed the input.'
+mathematical_note: "Result R satisfies: R\xB2 \u2264 input < (R+1)\xB2, making it\
+  \ the largest integer whose square doesn't exceed the input."
 documentation_source: p2_datasheet
 documentation_level: comprehensive
-needs_documentation: false
 compiler_operand_format:
   name: operand_ls
   pattern: D/#,S/#
@@ -138,3 +100,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 13
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.607649'

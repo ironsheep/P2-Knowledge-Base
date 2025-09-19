@@ -1,30 +1,79 @@
 instruction: OUTRND
-syntax: OUTRND  {#}D           {WCZ}
-encoding: EEEE 1101011 CZL DDDDDDDDD 001001110
+syntax: OUTRND {#}Dest {WCZ}
+encoding:
+- EEEE 1101011 CZL DDDDDDDDD 001001110                OUTx       Orig OUTx base bit Orig OUTx base bit            2
+- EEEE 1101011 CZL DDDDDDDDD 001001100                OUTx       Orig OUTx base bit Orig OUTx base bit            2
+- EEEE 1101011 CZL DDDDDDDDD 001001101                OUTx       Orig OUTx base bit Orig OUTx base bit            2
 timing:
   cycles: 2
   type: fixed
-group: Pins
-description: 'OUTRND alters the output level register''s bit(s) designated by Dest
-  to be random low and high, based on bit(s) Result: The I/O pin output level bit(s),
-  described by Dest, are each set randomly low or high; the rest are left as-is. Z
-  = OUT bit.'
-category: I/O Pin Instruction - Set pin(s) output level to random low/high.
+group: I/O Pin Instruction - Set pin(s) output level to random low/high.
+description: "OUTRND alters the output level register's bit(s) designated by Dest to be random low and\
+  \ high, based on bit(s) Result: The I/O pin output level bit(s), described by Dest, are each set randomly\
+  \ low or high; the rest are left as-is. Z = OUT bit.\n\nOUTRND alters the output level register's bit(s)\
+  \ designated by Dest to be random low and high, based on bit(s)\n\nfrom the Xoroshiro128** PRNG. All\
+  \ other bits are left unchanged.\n\nDest[5:0] indicates the pin number (0\u201363). For a range of pins,\
+  \ Dest[5:0] indicates the base pin number (0\u201363)\n\nand Dest[10:6] indicates how many contiguous\
+  \ pins beyond the base should be affected (1\u201331).\n\nA 9-bit literal Dest is enough to express\
+  \ the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]).\n\nIf needed, use the\
+  \ augmented literal feature (##Dest) to augment Dest to an 11-bit literal value\u2014 this inserts an\n\
+  \nAUGD instruction prior.\n\nWhen Dest is a register, the register's value bits [10:0] are used as-is\
+  \ to form the 11-bit ID range, unless a SETQ\n\ninstruction immediately precedes the OUTRND instruction;\
+  \ substituting SETQ's Dest[4:0] in place of value\n\nbits[10:6], for OUTRND's use.\n\nIf the WCZ effect\
+  \ is speci\uFB01ed, the C and Z \uFB02ags are updated to the original state of OUTA / OUTB's base bit,\n\
+  \nidenti\uFB01ed by Dest.\n\nOUTZ / OUTNZ\n\nOutput Z or not Z\n\nI/O Pin Instruction - Set pin(s) output\
+  \ level to low/high according to Z or !Z.\n\nOUTZ    {#}Dest {WCZ}\n\nOUTNZ {#}Dest {WCZ}\n\nResult:\
+  \ The I/O pin output level bit(s), described by Dest, are set to low/high according to Z or !Z; the\
+  \ rest are left\n\nas-is.\n\n\u25CF   Dest is the register, 9-bit literal, or 11-bit augmented literal\
+  \ whose value identi\uFB01es the I/O pin(s) for which\n\noutput levels are to be set low or high.\n\n\
+  \u25CF   WCZ is an optional effect to update \uFB02ags.\n\nCOND INSTR        FX     DEST          SRC\
+  \           Write            C Flag             Z Flag             Clocks\n\nEEEE 1101011 CZL DDDDDDDDD\
+  \ 001001100                OUTx       Orig OUTx base bit Orig OUTx base bit            2\n\nEEEE 1101011\
+  \ CZL DDDDDDDDD 001001101                OUTx       Orig OUTx base bit Orig OUTx base bit          \
+  \  2\n\nOUTZ or OUTNZ alters the output level register's bit(s) designated by Dest to equal the state,\
+  \ or inverse state, of\n\nthe Z \uFB02ag; i.e. set pin's output level low or high. All other bits (pins)\
+  \ are left unchanged. Each of these\n\ninstructions, OUTZ and OUTNZ, can affect one or more of the bits\
+  \ within the OUTA or OUTB registers.\n\nDest[5:0] indicates the pin number (0\u201363). For a range\
+  \ of pins, Dest[5:0] indicates the base pin number (0\u201363)\n\nand Dest[10:6] indicates how many\
+  \ contiguous pins beyond the base should be affected (1\u201331).\n\nA 9-bit literal Dest is enough\
+  \ to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]).\n\nIf needed,\
+  \ use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value\u2014 this inserts\
+  \ an\n\nAUGD instruction prior.\n\nWhen Dest is a register, the register's value bits [10:0] are used\
+  \ as-is to form the 11-bit ID range, unless a SETQ\n\ninstruction immediately precedes the OUTZ / OUTNZ\
+  \ instruction; substituting SETQ's Dest[4:0] in place of value\n\nbits[10:6], for OUTZ / OUTNZ's use.\n\
+  \nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin\
+  \ group (OUTA or\n\nOUTB); it will not cross the port boundary.\n\nIf the WCZ effect is speci\uFB01\
+  ed, the C and Z \uFB02ags are updated to the original state of OUTA / OUTB's base bit,\n\nidenti\uFB01\
+  ed by Dest."
 flags_affected:
   Z:
     formula: OUT bit
 parameters:
-- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
-  the pins set randomly to low or high.
-- WCZ is an optional effect to update flags.
-documentation_source: PASM2 Manual 2022/11/01
+- "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the pins\
+  \ set randomly to low or high."
+- "WCZ is an optional effect to update \uFB02ags."
+- "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the I/O\
+  \ pin(s) for which output levels are to be set low or high."
+- "WCZ is an optional effect to update \uFB02ags."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pinop
   pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
-    flags'
+  description: 'Pin operation: destination/immediate pin number 0-511, optional effect flags'
   valueType: 30
 compiler_encoding:
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Output random
+category: I/O Pin Instruction - Set pin(s) output level to random low/high.
+result: The I/O pin output level bit(s), described by Dest, are set to low/high according to Z or !Z;
+  the rest are left
+syntax_variants:
+- OUTRND {#}Dest {WCZ}
+- OUTRND alters the output level register's bit(s) designated by Dest to be random low and high, based
+  on bit(s)
+- instruction immediately precedes the OUTRND instruction; substituting SETQ's Dest[4:0] in place of value
+- bits[10:6], for OUTRND's use.
+manual_extraction_date: '2025-01-19'

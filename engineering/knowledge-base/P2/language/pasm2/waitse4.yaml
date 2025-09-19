@@ -1,18 +1,36 @@
 instruction: WAITSE4
-syntax: WAITSE4          {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 000010111 000100100
+syntax: WAITSE1 {WC|WZ|WCZ}
+encoding:
+- "EEEE 1101011 CZ0 000010100 000100100                 \u2014          Timeout Abort       Timeout Abort\
+  \              2+"
+- "EEEE 1101011 CZ0 000010101 000100100                 \u2014          Timeout Abort       Timeout Abort\
+  \              2+"
+- "EEEE 1101011 CZ0 000010110 000100100                 \u2014          Timeout Abort       Timeout Abort\
+  \              2+"
+- "EEEE 1101011 CZ0 000010111 000100100                 \u2014          Timeout Abort       Timeout Abort\
+  \              2+"
 timing:
   cycles: 2
   type: variable
 group: Events - Wait
-description: Z = timeout.
-category: Events - Wait
+description: "Wait for SE4 event \uFB02ag, then clear it. Prior SETQ sets optional CT timeout value. C/Z\
+  \ = timeout.                              2+\n\nWAITSE1, WAITSE2, WAITSE3, or WAITSE4 waits for a selectable\
+  \ event to occur (unless the event \uFB02ag is already\n\nset), then clears the event \uFB02ag (unless\
+  \ it's being set again by the event sensor) and resumes execution at the next\n\ninstruction. Optionally,\
+  \ WAITSEx can time-out if the selectable event doesn't occur soon enough; setting C and/or\n\nZ \uFB02\
+  ags and then resuming execution at the next instruction.\n\nTo set the optional timeout, insert a SETQ\
+  \ (with a future System Counter target value) right before WAITSEx.\n\nThe WC, WZ, or WCZ effect is\
+  \ recommended only if the optional timeout is speci\uFB01ed, in which case the C \uFB02ag and/or\n\n\
+  Z \uFB02ag is set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred\
+  \ before the timeout.\n\nDuring a wait, the pipeline is stalled; no instructions execute and no interrupts\
+  \ are processed in the cog until the\n\nwait condition ends.\n\nThe selectable event 1, 2, 3, or 4 \uFB02\
+  ag is set whenever the corresponding con\uFB01gured event occurs. The selectable\n\nevent \uFB02ag is\
+  \ cleared upon execution of the corresponding SETSEx, POLLSEx, WAITSEx, JSEx, or JNSEx\n\ninstructions."
 flags_affected:
   Z:
     formula: timeout
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pollwait
   pattern: ''
@@ -21,3 +39,35 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+long_description: "Wait for selectable event, then clear the \uFB02ag; optionally aborting on timeout\
+  \ and setting C and/or Z on\nabort."
+syntax_variants:
+- WAITSE1 {WC|WZ|WCZ}
+- WAITSE2 {WC|WZ|WCZ}
+- WAITSE3 {WC|WZ|WCZ}
+- WAITSE4 {WC|WZ|WCZ}
+last_updated: '2025-09-19'
+brief_description: Wait selectable event 1/2/3/4
+group_membership:
+  group_id: selector_event_waits
+  group_file: groups/selector_event_waits.yaml
+  related:
+  - waitse1
+  - waitse2
+  - waitse3
+specifics:
+  selector_number: 4
+  event_flag: SE4
+quick_example: WAITSE4  ; Wait for selector 4 event flag, then clear it
+has_group_documentation: true
+category: "Event Monitor Instruction - Wait for and clear selectable event 1, 2, 3, or 4 \uFB02ag."
+result: "Wait for selectable event, then clear the \uFB02ag; optionally aborting on timeout and setting\
+  \ C and/or Z on"
+parameters:
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+related:
+- SETSEx
+- POLLSEx
+- JSEx
+- JNSEx
+manual_extraction_date: '2025-01-19'

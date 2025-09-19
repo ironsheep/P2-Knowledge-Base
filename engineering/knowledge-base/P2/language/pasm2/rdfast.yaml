@@ -24,7 +24,6 @@ description: 'Begin new fast hub read via FIFO. D[31] = no wait, D[13:0] = block
   - Used with RFBYTE/RFWORD/RFLONG instructions
 
   '
-category: Hub FIFO - New Read
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:
@@ -86,3 +85,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 13
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.018932'

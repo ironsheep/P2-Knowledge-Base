@@ -1,26 +1,36 @@
 instruction: WAITATN
-syntax: WAITATN          {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 000011110 000100100
+syntax: WAITATN {WC|WZ|WCZ}
+encoding: "EEEE 1101011 CZ0 000011110 000100100                 \u2014          Timeout Abort     Timeout\
+  \ Abort               2+"
 timing:
   cycles: 2
   type: variable
-group: Events - Wait
-description: 'WAITATN waits for an attention event to occur (unless the event flag
-  is already set), then clears the event flag Result: Wait for attention event, then
-  clear the flag; optionally aborting on timeout and setting C and/or Z on abort.
-  Z = timeout.'
-category: Event Monitor Instruction - Wait for and clear attention flag.
+group: Event Monitor Instruction - Wait for and clear attention flag.
+description: "WAITATN waits for an attention event to occur (unless the event flag is already set), then\
+  \ clears the event flag Result: Wait for attention event, then clear the flag; optionally aborting on\
+  \ timeout and setting C and/or Z on abort. Z = timeout.\n\nWAITATN waits for an attention event to occur\
+  \ (unless the event \uFB02ag is already set), then clears the event \uFB02ag\n\n(unless it's being set\
+  \ again by the event sensor) and resumes execution at the next instruction. Optionally,\n\nWAITATN can\
+  \ time-out if the attention event doesn't occur soon enough; setting C and/or Z \uFB02ags and then\n\
+  \nresuming execution at the next instruction.\n\nTo set the optional timeout, insert a SETQ (with a\
+  \ future System Counter target value) right before WAITATN.\n\nThe WC, WZ, or WCZ effect is recommended\
+  \ only if the optional timeout is speci\uFB01ed, in which case the C \uFB02ag and/or\n\nZ \uFB02ag is\
+  \ set (1) if a timeout occurred before the event, or is cleared (0) if the event occurred before the\
+  \ timeout.\n\nDuring a wait, the pipeline is stalled; no instructions execute and no interrupts are\
+  \ processed in the cog until the\n\nwait condition ends.\n\nThe attention event \uFB02ag is set whenever\
+  \ another cog issues an attention request for this cog. The attention event\n\n\uFB02ag is cleared upon\
+  \ cog start, or execution of POLLATN, WAITATN, JATN, or JNATN instructions."
 flags_affected:
   Z:
     formula: timeout
 parameters:
-- WC, WZ, or WCZ are optional effects to update flags.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - COGATN
 - POLLATN
 - JATN
 - JNATN
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pollwait
@@ -30,3 +40,11 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Wait attention
+category: "Event Monitor Instruction - Wait for and clear attention \uFB02ag."
+result: "Wait for attention event, then clear the \uFB02ag; optionally aborting on timeout and setting\
+  \ C and/or Z on abort."
+syntax_variants:
+- WAITATN {WC|WZ|WCZ}
+manual_extraction_date: '2025-01-19'

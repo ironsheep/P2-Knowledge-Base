@@ -1,25 +1,1029 @@
 instruction: ZEROX
-syntax: ZEROX   D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0111010 CZI DDDDDDDDD SSSSSSSSS
+syntax: ZEROX Dest, {#}Src {WC|WZ|WCZ}
+encoding: EEEE 0111010 CZI DDDDDDDDD SSSSSSSSS                    D            MSB of result        Result
+  = 0               2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: ZEROX fills the bits of Dest, above the bit indicated by Src[4:0], with
-  zeros; i.e. zero-extending the value. This is C = MSB of result.
-category: Math Instruction - Zero-extend value beyond designated bit.
+group: Math Instruction - Zero-extend value beyond designated bit.
+description: "ZEROX fills the bits of Dest, above the bit indicated by Src[4:0], with zeros; i.e. zero-extending\
+  \ the value. This is C = MSB of result.\n\nZEROX \uFB01lls the bits of Dest, above the bit indicated\
+  \ by Src[4:0], with zeros; i.e. zero-extending the value. This is\n\nhandy when converting encoded or\
+  \ received unsigned values from a small bit width to a large bit with; i.e. 32 bits.\n\nIf the WC or\
+  \ WCZ effect is speci\uFB01ed, the C \uFB02ag is set to the result's MSB value.\n\nIf the WZ or WCZ\
+  \ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the result is zero, or is cleared (0) if it\
+  \ is non-zero.\n\nPROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF\n\nMath and Logic Instructions\n\n\
+  Clocks\n\nInstruction                                                              Description\n\nReg,\
+  \ LUT, & Hub\n\nABS      D          {WC/WZ/WCZ}    Get absolute value of D into D. D = ABS(D). C = D[31].\
+  \ *                                                                       2\n\nABS      D,{#}S     {WC/WZ/WCZ}\
+  \    Get absolute value of S into D. D = ABS(S). C = S[31]. *                                      \
+  \                                 2\n\nADD      D,{#}S     {WC/WZ/WCZ}    Add S into D. D = D + S. C\
+  \ = carry of (D + S). *                                                                            \
+  \   2\n\nADDS     D,{#}S     {WC/WZ/WCZ}    Add S into D, signed. D = D + S. C = correct sign of (D\
+  \ + S). *                                                                2\n\nADDSX    D,{#}S     {WC/WZ/WCZ}\
+  \    Add (S + C) into D, signed and extended. D = D + S + C. C = correct sign of (D + S + C). Z = Z\
+  \ AND (result == 0).              2\n\nADDX     D,{#}S     {WC/WZ/WCZ}    Add (S + C) into D, extended.\
+  \ D = D + S + C. C = carry of (D + S + C). Z = Z AND (result == 0).                                2\n\
+  \nAND      D,{#}S     {WC/WZ/WCZ}    AND S into D. D = D & S. C = parity of result. *              \
+  \                                                                 2\n\nANDN     D,{#}S     {WC/WZ/WCZ}\
+  \    AND !S into D. D = D & !S. C = parity of result. *                                            \
+  \                                 2\n\nBITC     D,{#}S            {WCZ}   Bits D[S[9:5]+S[4:0]:S[4:0]]\
+  \ = C. Other bits una ected. Prior SETQ overrides S[9:5]. C,Z = original D[S[4:0]].                \
+  \ 2\n\nBITH     D,{#}S            {WCZ}   Bits D[S[9:5]+S[4:0]:S[4:0]] = 1. Other bits una ected. Prior\
+  \ SETQ overrides S[9:5]. C,Z = original D[S[4:0]].                 2\n\nBITL     D,{#}S            {WCZ}\
+  \   Bits D[S[9:5]+S[4:0]:S[4:0]] = 0. Other bits una ected. Prior SETQ overrides S[9:5]. C,Z = original\
+  \ D[S[4:0]].                 2\n\nBITNC    D,{#}S            {WCZ}   Bits D[S[9:5]+S[4:0]:S[4:0]] =\
+  \ !C. Other bits una ected. Prior SETQ overrides S[9:5]. C,Z = original D[S[4:0]].                2\n\
+  \nBITNOT   D,{#}S            {WCZ}   Toggle bits D[S[9:5]+S[4:0]:S[4:0]]. Other bits una ected. Prior\
+  \ SETQ overrides S[9:5]. C,Z = original D[S[4:0]].              2\n\nBITNZ    D,{#}S            {WCZ}\
+  \   Bits D[S[9:5]+S[4:0]:S[4:0]] = !Z. Other bits una ected. Prior SETQ overrides S[9:5]. C,Z = original\
+  \ D[S[4:0]].                2\n\nBits D[S[9:5]+S[4:0]:S[4:0]] = RNDs. Other bits una ected. Prior SETQ\
+  \ overrides S[9:5]. C,Z = original\n\nBITRND   D,{#}S            {WCZ}                             \
+  \                                                                                                  \
+  \   2\n\nD[S[4:0]].\n\nBITZ     D,{#}S            {WCZ}   Bits D[S[9:5]+S[4:0]:S[4:0]] = Z. Other bits\
+  \ una ected. Prior SETQ overrides S[9:5]. C,Z = original D[S[4:0]].                 2\n\nBMASK    D\
+  \                         Get LSB-justi\uFB01ed bit mask of size (D[4:0] + 1) into D. D = ($0000_0002\
+  \ << D[4:0]) - 1.                                         2\n\nBMASK    D,{#}S                    Get\
+  \ LSB-justi\uFB01ed bit mask of size (S[4:0] + 1) into D. D = ($0000_0002 << S[4:0]) - 1.          \
+  \                               2\n\nCMP      D,{#}S     {WC/WZ/WCZ}    Compare D to S. C = borrow of\
+  \ (D - S). Z = (D == S).                                                                           2\n\
+  \nCMPM     D,{#}S     {WC/WZ/WCZ}    Compare D to S, get MSB of di erence into C. C = MSB of (D - S).\
+  \ Z = (D == S).                                                 2\n\nCMPR     D,{#}S     {WC/WZ/WCZ}\
+  \    Compare S to D (reverse). C = borrow of (S - D). Z = (D == S).                                \
+  \                                 2\n\nCMPS     D,{#}S     {WC/WZ/WCZ}    Compare D to S, signed. C\
+  \ = correct sign of (D - S). Z = (D == S).                                                         \
+  \    2\n\nCMPSUB   D,{#}S     {WC/WZ/WCZ}    Compare and subtract S from D if D >= S. If D => S then\
+  \ D = D - S and C = 1, else D same and C = 0. *                          2\n\nCMPSX    D,{#}S     {WC/WZ/WCZ}\
+  \    Compare D to (S + C), signed and extended. C = correct sign of (D - (S + C)). Z = Z AND (D == S\
+  \ + C).                          2\n\nCMPX     D,{#}S     {WC/WZ/WCZ}    Compare D to (S + C), extended.\
+  \ C = borrow of (D - (S + C)). Z = Z AND (D == S + C).                                           2\n\
+  \nCRCBIT   D,{#}S                    Iterate CRC value in D using C and polynomial in S. If (C XOR D[0])\
+  \ then D = (D >> 1) XOR S, else D = (D >> 1).                2\n\nIterate CRC value in D using Q[31:28]\
+  \ and polynomial in S. Like CRCBIT x 4. Q = Q << 4. Use 'REP\n\nCRCNIB   D,{#}S                    \
+  \                                                                                                  \
+  \                             2\n\n#n,#1'+SETQ+CRCNIB+CRCNIB+CRCNIB...\n\nDECMOD   D,{#}S     {WC/WZ/WCZ}\
+  \    Decrement with modulus. If D = 0 then D = S and C = 1, else D = D - 1 and C = 0. *            \
+  \                                 2\n\nDECOD    D                         Decode D[4:0] into D. D =\
+  \ 1 << D[4:0].                                                                                     \
+  \    2\n\nDECOD    D,{#}S                    Decode S[4:0] into D. D = 1 << S[4:0].                \
+  \                                                                         2\n\nENCOD    D          {WC/WZ/WCZ}\
+  \    Get bit position of top-most '1' in D into D. D = position of top '1' in S (0..31). C = (S != 0).\
+  \ *                            2\n\nENCOD    D,{#}S     {WC/WZ/WCZ}    Get bit position of top-most\
+  \ '1' in S into D. D = position of top '1' in S (0..31). C = (S != 0). *                           \
+  \ 2\n\nFGE      D,{#}S     {WC/WZ/WCZ}    Force D >= S. If D < S then D = S and C = 1, else D same and\
+  \ C = 0. *                                                          2\n\nFGES     D,{#}S     {WC/WZ/WCZ}\
+  \    Force D >= S, signed. If D < S then D = S and C = 1, else D same and C = 0. *                 \
+  \                                 2\n\nFLE      D,{#}S     {WC/WZ/WCZ}    Force D <= S. If D > S then\
+  \ D = S and C = 1, else D same and C = 0. *                                                        \
+  \  2\n\nFLES     D,{#}S     {WC/WZ/WCZ}    Force D <= S, signed. If D > S then D = S and C = 1, else\
+  \ D same and C = 0. *                                                  2\n\nGETBYTE D              \
+  \            Get byte established by prior ALTGB instruction into D.                               \
+  \                                         2\n\nGETBYTE D,{#}S,#N                  Get byte N of S into\
+  \ D. D = {24'b0, S.BYTE[N]).                                                                       \
+  \         2\n\nGETNIB   D                         Get nibble established by prior ALTGN instruction\
+  \ into D.                                                                      2\n\nGETNIB   D,{#}S,#N\
+  \               Get nibble N of S into D. D = {28'b0, S.NIBBLE[N]).                                \
+  \                                                  2\n\nGETWORD D                        Get word established\
+  \ by prior ALTGW instruction into D.                                                               \
+  \               2\n\nGETWORD D,{#}S,#N                Get word N of S into D. D = {16'b0, S.WORD[N]).\
+  \                                                                                      2\n\nINCMOD \
+  \  D,{#}S    {WC/WZ/WCZ}   Increment with modulus. If D = S then D = 0 and C = 1, else D = D + 1 and\
+  \ C = 0. *                                                   2\n\nGet {12'b0, address[19:0]} into PA/PB/PTRA/PTRB\
+  \ (per W). If R = 1, address = PC + A, else address = A. \"\\\"\n\nLOC      PA/PB/PTRA/PTRB,#{\\}A \
+  \                                                                                                  \
+  \                                     2\n\nforces R = 0.\n\nMERGEB   D                       Merge bits\
+  \ of bytes in D. D = {D[31], D[23], D[15], D[7], ...D[24], D[16], D[8], D[0]}.                     \
+  \                         2\n\nMERGEW   D                       Merge bits of words in D. D = {D[31],\
+  \ D[15], D[30], D[14], ...D[17], D[1], D[16], D[0]}.                                             2\n\
+  \nMODC     c                {WC}   Modify C according to cccc. C = cccc[{C,Z}].                    \
+  \                                                                     2\n\nMODCZ    c,z       {WC/WZ/WCZ}\
+  \   Modify C and Z according to cccc and zzzz. C = cccc[{C,Z}], Z = zzzz[{C,Z}].                   \
+  \                                      2\n\nMODZ     z                {WZ}   Modify Z according to zzzz.\
+  \ Z = zzzz[{C,Z}].                                                                                 \
+  \        2\n\nMOV      D,{#}S    {WC/WZ/WCZ}   Move S into D. D = S. C = S[31]. *                  \
+  \                                                                                 2\n\nMOVBYTS D,{#}S\
+  \                   Move bytes within D, per S. D = {D.BYTE[S[7:6]], D.BYTE[S[5:4]], D.BYTE[S[3:2]],\
+  \ D.BYTE[S[1:0]]}.                                    2\n\nMUL      D,{#}S           {WZ}   D = unsigned\
+  \ (D[15:0] * S[15:0]). Z = (S == 0) | (D == 0).                                                    \
+  \                       2\n\nMULS     D,{#}S           {WZ}   D = signed (D[15:0] * S[15:0]). Z = (S\
+  \ == 0) | (D == 0).                                                                             2\n\n\
+  MUXC     D,{#}S    {WC/WZ/WCZ}   Mux C into each D bit that is '1' in S. D = (!S & D ) | (S & {32{ C}}).\
+  \ C = parity of result. *                                      2\n\nMUXNC    D,{#}S    {WC/WZ/WCZ} \
+  \  Mux !C into each D bit that is '1' in S. D = (!S & D ) | (S & {32{!C}}). C = parity of result. *\
+  \                                     2\n\nFor each non-zero nibble in S, copy that nibble into the\
+  \ corresponding D nibble, else leave that D nibble the\n\nMUXNIBS D,{#}S                           \
+  \                                                                                                  \
+  \                           2\n\nsame.\n\nFor each non-zero bit pair in S, copy that bit pair into the\
+  \ corresponding D bits, else leave that D bit pair the\n\nMUXNITS D,{#}S                           \
+  \                                                                                                  \
+  \                           2\n\nsame.\n\nMUXNZ    D,{#}S    {WC/WZ/WCZ}   Mux !Z into each D bit that\
+  \ is '1' in S. D = (!S & D ) | (S & {32{!Z}}). C = parity of result. *                             \
+  \        2\n\nMUXQ     D,{#}S                  Used after SETQ. For each '1' bit in Q, copy the corresponding\
+  \ bit in S into D. D = (D & !Q) | (S & Q).                              2\n\nMUXZ     D,{#}S    {WC/WZ/WCZ}\
+  \   Mux Z into each D bit that is '1' in S. D = (!S & D ) | (S & {32{ Z}}). C = parity of result. *\
+  \                                      2\n\nNEG      D         {WC/WZ/WCZ}   Negate D. D = -D. C = MSB\
+  \ of result. *                                                                                     \
+  \          2\n\nNEG      D,{#}S    {WC/WZ/WCZ}   Negate S into D. D = -S. C = MSB of result. *     \
+  \                                                                                   2\n\nNEGC     D\
+  \         {WC/WZ/WCZ}   Negate D by C. If C = 1 then D = -D, else D = D. C = MSB of result. *      \
+  \                                                          2\n\nNEGC     D,{#}S    {WC/WZ/WCZ}   Negate\
+  \ S by C into D. If C = 1 then D = -S, else D = S. C = MSB of result. *                            \
+  \                             2\n\nNEGNC    D         {WC/WZ/WCZ}   Negate D by !C. If C = 0 then D\
+  \ = -D, else D = D. C = MSB of result. *                                                           \
+  \    2\n\nNEGNC    D,{#}S    {WC/WZ/WCZ}   Negate S by !C into D. If C = 0 then D = -S, else D = S.\
+  \ C = MSB of result. *                                                        2\n\nNEGNZ    D      \
+  \   {WC/WZ/WCZ}   Negate D by !Z. If Z = 0 then D = -D, else D = D. C = MSB of result. *           \
+  \                                                    2\n\nNEGNZ    D,{#}S    {WC/WZ/WCZ}   Negate S\
+  \ by !Z into D. If Z = 0 then D = -S, else D = S. C = MSB of result. *                             \
+  \                           2\n\nNEGZ     D         {WC/WZ/WCZ}   Negate D by Z. If Z = 1 then D = -D,\
+  \ else D = D. C = MSB of result. *                                                                2\n\
+  \nNEGZ     D,{#}S    {WC/WZ/WCZ}   Negate S by Z into D. If Z = 1 then D = -S, else D = S. C = MSB of\
+  \ result. *                                                         2\n\nNOT      D         {WC/WZ/WCZ}\
+  \   Get !D into D. D = !D. C = !D[31]. *                                                           \
+  \                                      2\n\nNOT      D,{#}S    {WC/WZ/WCZ}   Get !S into D. D = !S.\
+  \ C = !S[31]. *                                                                                    \
+  \             2\n\nONES     D         {WC/WZ/WCZ}   Get number of '1's in D into D. D = number of '1's\
+  \ in S (0..32). C = LSB of result. *                                                2\n\nONES     D,{#}S\
+  \    {WC/WZ/WCZ}   Get number of '1's in S into D. D = number of '1's in S (0..32). C = LSB of result.\
+  \ *                                                2\n\nOR       D,{#}S    {WC/WZ/WCZ}   OR S into D.\
+  \ D = D | S. C = parity of result. *                                                               \
+  \                       2\n\nRCL      D,{#}S    {WC/WZ/WCZ}   Rotate carry left. D = [63:32] of ({D[31:0],\
+  \ {32{C}}} << S[4:0]). C = last bit shifted out if S[4:0] > 0, else D[31]. *              2\n\nRCR \
+  \     D,{#}S    {WC/WZ/WCZ}   Rotate carry right. D = [31:0] of ({{32{C}}, D[31:0]} >> S[4:0]). C =\
+  \ last bit shifted out if S[4:0] > 0, else D[0]. *               2\n\nRCZL     D         {WC/WZ/WCZ}\
+  \   Rotate C,Z left through D. D = {D[29:0], C, Z}. C = D[31], Z = D[30].                          \
+  \                                      2\n\nRCZR     D         {WC/WZ/WCZ}   Rotate C,Z right through\
+  \ D. D = {C, Z, D[31:2]}. C = D[1], Z = D[0].                                                      \
+  \           2\n\nREV      D                       Reverse D bits. D = D[0:31].                     \
+  \                                                                                    2\n\nExpand 5:6:5\
+  \ RGB value in D[15:0] into 8:8:8 value in D[31:8]. D = {D[15:11,15:13], D[10:5,10:9], D[4:0,4:2],\n\
+  \nRGBEXP   D                                                                                       \
+  \                                                                     2\n\n8'b0}.\n\nRGBSQZ   D    \
+  \                    Squeeze 8:8:8 RGB value in D[31:8] into 5:6:5 value in D[15:0]. D = {15'b0, D[31:27],\
+  \ D[23:18], D[15:11]}.                          2\n\nROL      D,{#}S     {WC/WZ/WCZ}   Rotate left.\
+  \ D = [63:32] of ({D[31:0], D[31:0]} << S[4:0]). C = last bit shifted out if S[4:0] > 0, else D[31].\
+  \ *                   2\n\nROLBYTE D                         Rotate-left byte established by prior ALTGB\
+  \ instruction into D.                                                                     2\n\nROLBYTE\
+  \ D,{#}S,#N                 Rotate-left byte N of S into D. D = {D[23:0], S.BYTE[N]).              \
+  \                                                             2\n\nROLNIB   D                      \
+  \  Rotate-left nibble established by prior ALTGN instruction into D.                               \
+  \                                    2\n\nROLNIB   D,{#}S,#N                Rotate-left nibble N of\
+  \ S into D. D = {D[27:0], S.NIBBLE[N]).                                                            \
+  \           2\n\nROLWORD D                         Rotate-left word established by prior ALTGW instruction\
+  \ into D.                                                                     2\n\nROLWORD D,{#}S,#N\
+  \                 Rotate-left word N of S into D. D = {D[15:0], S.WORD[N]).                        \
+  \                                                   2\n\nROR      D,{#}S     {WC/WZ/WCZ}   Rotate right.\
+  \ D = [31:0] of ({D[31:0], D[31:0]} >> S[4:0]). C = last bit shifted out if S[4:0] > 0, else D[0]. *\
+  \                    2\n\nShift arithmetic left. D = [63:32] of ({D[31:0], {32{D[0]}}} << S[4:0]). C\
+  \ = last bit shifted out if S[4:0] > 0, else\n\nSAL      D,{#}S     {WC/WZ/WCZ}                    \
+  \                                                                                                  \
+  \                 2\n\nD[31]. *\n\nShift arithmetic right. D = [31:0] of ({{32{D[31]}}, D[31:0]} >>\
+  \ S[4:0]). C = last bit shifted out if S[4:0] > 0, else\n\nSAR      D,{#}S     {WC/WZ/WCZ}         \
+  \                                                                                                  \
+  \                            2\n\nD[0]. *\n\nSCA      D,{#}S            {WZ}   Next instruction's S\
+  \ value = unsigned (D[15:0] * S[15:0]) >> 16. *                                                    \
+  \              2\n\nSCAS     D,{#}S            {WZ}   Next instruction's S value = signed (D[15:0] *\
+  \ S[15:0]) >> 14. In this scheme, $4000 = 1.0 and $C000 = -1.0. *                      2\n\nSETBYTE\
+  \ {#}S                      Set S[7:0] into byte established by prior ALTSB instruction.           \
+  \                                                             2\n\nSETBYTE D,{#}S,#N               \
+  \  Set S[7:0] into byte N in D, keeping rest of D same.                                            \
+  \                                    2\n\nSETD     D,{#}S                   Set D \uFB01eld of D to\
+  \ S[8:0]. D = {D[31:18], S[8:0], D[8:0]}.                                                          \
+  \                2\n\nSETNIB   {#}S                     Set S[3:0] into nibble established by prior\
+  \ ALTSN instruction.                                                                      2\n\nSETNIB\
+  \   D,{#}S,#N                Set S[3:0] into nibble N in D, keeping rest of D same.                \
+  \                                                              2\n\nSETR     D,{#}S                \
+  \   Set R \uFB01eld of D to S[8:0]. D = {D[31:28], S[8:0], D[18:0]}.                               \
+  \                                          2\n\nSETS     D,{#}S                   Set S \uFB01eld of\
+  \ D to S[8:0]. D = {D[31:9], S[8:0]}.                                                              \
+  \                     2\n\nSETWORD {#}S                      Set S[15:0] into word established by prior\
+  \ ALTSW instruction.                                                                       2\n\nSETWORD\
+  \ D,{#}S,#N                 Set S[15:0] into word N in D, keeping rest of D same.                  \
+  \                                                             2\n\nSEUSSF   D                      \
+  \  Relocate and periodically invert bits within D. Returns to original value on 32nd iteration. Forward\
+  \ pattern.                       2\n\nSEUSSR   D                        Relocate and periodically invert\
+  \ bits within D. Returns to original value on 32nd iteration. Reverse pattern.                     \
+  \  2\n\nSHL      D,{#}S     {WC/WZ/WCZ}   Shift left. D = [63:32] of ({D[31:0], 32'b0} << S[4:0]). C\
+  \ = last bit shifted out if S[4:0] > 0, else D[31]. *                      2\n\nSHR      D,{#}S    \
+  \ {WC/WZ/WCZ}   Shift right. D = [31:0] of ({32'b0, D[31:0]} >> S[4:0]). C = last bit shifted out if\
+  \ S[4:0] > 0, else D[0]. *                       2\n\nSIGNX    D,{#}S     {WC/WZ/WCZ}   Sign-extend\
+  \ D from bit S[4:0]. C = MSB of result. *                                                          \
+  \                       2\n\nSPLITB   D                        Split every 4th bit of D into bytes.\
+  \ D = {D[31], D[27], D[23], D[19], ...D[12], D[8], D[4], D[0]}.                                  2\n\
+  \nSPLITW   D                        Split odd/even bits of D into words. D = {D[31], D[29], D[27], D[25],\
+  \ ...D[6], D[4], D[2], D[0]}.                                   2\n\nSUB      D,{#}S     {WC/WZ/WCZ}\
+  \   Subtract S from D. D = D - S. C = borrow of (D - S). *                                         \
+  \                                     2\n\nSUBR     D,{#}S     {WC/WZ/WCZ}   Subtract D from S (reverse).\
+  \ D = S - D. C = borrow of (S - D). *                                                              \
+  \      2\n\nSUBS     D,{#}S     {WC/WZ/WCZ}   Subtract S from D, signed. D = D - S. C = correct sign\
+  \ of (D - S). *                                                                2\n\nSubtract (S + C)\
+  \ from D, signed and extended. D = D - (S + C). C = correct sign of (D - (S + C)). Z = Z AND (result\n\
+  \nSUBSX    D,{#}S     {WC/WZ/WCZ}                                                                  \
+  \                                                                     2\n\n== 0).\n\nSUBX     D,{#}S\
+  \     {WC/WZ/WCZ}   Subtract (S + C) from D, extended. D = D - (S + C). C = borrow of (D - (S + C)).\
+  \ Z = Z AND (result == 0).                           2\n\nSUMC     D,{#}S     {WC/WZ/WCZ}   Sum +/-S\
+  \ into D by C. If C = 1 then D = D - S, else D = D + S. C = correct sign of (D +/- S). *           \
+  \                          2\n\nSUMNC    D,{#}S     {WC/WZ/WCZ}   Sum +/-S into D by !C. If C = 0 then\
+  \ D = D - S, else D = D + S. C = correct sign of (D +/- S). *                                    2\n\
+  \nSUMNZ    D,{#}S     {WC/WZ/WCZ}   Sum +/-S into D by !Z. If Z = 0 then D = D - S, else D = D + S.\
+  \ C = correct sign of (D +/- S). *                                    2\n\nSUMZ     D,{#}S     {WC/WZ/WCZ}\
+  \   Sum +/-S into D by Z. If Z = 1 then D = D - S, else D = D + S. C = correct sign of (D +/- S). *\
+  \                                     2\n\nTEST     D          {WC/WZ/WCZ}   Test D. C = parity of D.\
+  \ Z = (D == 0).                                                                                    \
+  \          2\n\nTEST     D,{#}S     {WC/WZ/WCZ}   Test D with S. C = parity of (D & S). Z = ((D & S)\
+  \ == 0).                                                                           2\n\nTESTB    D,{#}S\
+  \           WC/WZ   Test bit S[4:0] of D, write to C/Z. C/Z = D[S[4:0]].                           \
+  \                                                     2\n\nTESTB    D,{#}S         ORC/ORZ   Test bit\
+  \ S[4:0] of D, OR into C/Z. C/Z = C/Z OR D[S[4:0]].                                                \
+  \                          2\n\nTESTB    D,{#}S       ANDC/ANDZ   Test bit S[4:0] of D, AND into C/Z.\
+  \ C/Z = C/Z AND D[S[4:0]].                                                                        2\n\
+  \nTESTB    D,{#}S       XORC/XORZ         Test bit S[4:0] of D, XOR into C/Z. C/Z = C/Z XOR D[S[4:0]].\
+  \                                                                 2\n\nTESTBN   D,{#}S             WC/WZ\
+  \       Test bit S[4:0] of !D, write to C/Z. C/Z = !D[S[4:0]].                                     \
+  \                                  2\n\nTESTBN   D,{#}S            ORC/ORZ      Test bit S[4:0] of !D,\
+  \ OR into C/Z. C/Z = C/Z OR !D[S[4:0]].                                                            \
+  \     2\n\nTESTBN   D,{#}S       ANDC/ANDZ         Test bit S[4:0] of !D, AND into C/Z. C/Z = C/Z AND\
+  \ !D[S[4:0]].                                                               2\n\nTESTBN   D,{#}S   \
+  \    XORC/XORZ         Test bit S[4:0] of !D, XOR into C/Z. C/Z = C/Z XOR !D[S[4:0]].              \
+  \                                                 2\n\nTESTN    D,{#}S      {WC/WZ/WCZ} Test D with\
+  \ !S. C = parity of (D & !S). Z = ((D & !S) == 0).                                                 \
+  \                       2\n\nWRC      D                              Write 0 or 1 to D, according to\
+  \ C. D = {31'b0, C).                                                                           2\n\n\
+  WRNC     D                              Write 0 or 1 to D, according to !C. D = {31'b0, !C).       \
+  \                                                                  2\n\nWRNZ     D                 \
+  \             Write 0 or 1 to D, according to !Z. D = {31'b0, !Z).                                 \
+  \                                        2\n\nWRZ      D                              Write 0 or 1 to\
+  \ D, according to Z. D = {31'b0, Z).                                                               \
+  \            2\n\nXOR      D,{#}S     {WC/WZ/WCZ}         XOR S into D. D = D ^ S. C = parity of result.\
+  \ *                                                                             2\n\nXORO32   D    \
+  \                          Iterate D with xoroshiro32+ PRNG algorithm and put PRNG result into next\
+  \ instruction's S.                                    2\n\nZEROX    D,{#}S     {WC/WZ/WCZ}         Zero-extend\
+  \ D above bit S[4:0]. C = MSB of result. *                                                         \
+  \                2\n\nPin & Smart Pin Instructions\n\nClocks\n\nInstruction                        \
+  \                                           Description\n\nCog, LUT & Hub\n\nPin\n\nDIR bits of pins\
+  \ D[10:6]+D[5:0]..D[5:0] = C. Wraps within DIRA/DIRB. Prior SETQ overrides D[10:6]. C,Z = DIR\n\nDIRC\
+  \     {#}D               {WCZ}                                                                     \
+  \                                                               2\n\nbit.\n\nDIR bits of pins D[10:6]+D[5:0]..D[5:0]\
+  \ = 1. Wraps within DIRA/DIRB. Prior SETQ overrides D[10:6]. C,Z = DIR\n\nDIRH     {#}D            \
+  \   {WCZ}                                                                                          \
+  \                                          2\n\nbit.\n\nDIR bits of pins D[10:6]+D[5:0]..D[5:0] = 0.\
+  \ Wraps within DIRA/DIRB. Prior SETQ overrides D[10:6]. C,Z = DIR\n\nDIRL     {#}D               {WCZ}\
+  \                                                                                                  \
+  \                                  2\n\nbit.\n\nDIR bits of pins D[10:6]+D[5:0]..D[5:0] = !C. Wraps\
+  \ within DIRA/DIRB. Prior SETQ overrides D[10:6]. C,Z = DIR\n\nDIRNC    {#}D               {WCZ}   \
+  \                                                                                                  \
+  \                               2\n\nbit.\n\nToggle DIR bits of pins D[10:6]+D[5:0]..D[5:0]. Wraps within\
+  \ DIRA/DIRB. Prior SETQ overrides D[10:6]. C,Z = DIR\n\nDIRNOT   {#}D               {WCZ}          \
+  \                                                                                                  \
+  \                        2\n\nbit.\n\nDIR bits of pins D[10:6]+D[5:0]..D[5:0] = !Z. Wraps within DIRA/DIRB.\
+  \ Prior SETQ overrides D[10:6]. C,Z = DIR\n\nDIRNZ    {#}D               {WCZ}                     \
+  \                                                                                                  \
+  \             2\n\nbit.\n\nDIR bits of pins D[10:6]+D[5:0]..D[5:0] = RNDs. Wraps within DIRA/DIRB. Prior\
+  \ SETQ overrides D[10:6]. C,Z =\n\nDIRRND   {#}D               {WCZ}                               \
+  \                                                                                                  \
+  \   2\n\nDIR bit.\n\nDIR bits of pins D[10:6]+D[5:0]..D[5:0] = Z. Wraps within DIRA/DIRB. Prior SETQ\
+  \ overrides D[10:6]. C,Z = DIR\n\nDIRZ     {#}D               {WCZ}                                \
+  \                                                                                                  \
+  \  2\n\nbit.\n\nOUT bits of pins D[10:6]+D[5:0]..D[5:0] = C. DIR bits = 1. Wraps within OUTA/OUTB. Prior\
+  \ SETQ overrides\n\nDRVC     {#}D               {WCZ}                                              \
+  \                                                                                      2\n\nD[10:6].\
+  \ C,Z = OUT bit.\n\nOUT bits of pins D[10:6]+D[5:0]..D[5:0] = 1. DIR bits = 1. Wraps within OUTA/OUTB.\
+  \ Prior SETQ overrides\n\nDRVH     {#}D               {WCZ}                                        \
+  \                                                                                            2\n\nD[10:6].\
+  \ C,Z = OUT bit.\n\nOUT bits of pins D[10:6]+D[5:0]..D[5:0] = 0. DIR bits = 1. Wraps within OUTA/OUTB.\
+  \ Prior SETQ overrides\n\nDRVL     {#}D               {WCZ}                                        \
+  \                                                                                            2\n\nD[10:6].\
+  \ C,Z = OUT bit.\n\nOUT bits of pins D[10:6]+D[5:0]..D[5:0] = !C. DIR bits = 1. Wraps within OUTA/OUTB.\
+  \ Prior SETQ overrides\n\nDRVNC    {#}D               {WCZ}                                        \
+  \                                                                                            2\n\nD[10:6].\
+  \ C,Z = OUT bit.\n\nToggle OUT bits of pins D[10:6]+D[5:0]..D[5:0]. DIR bits = 1. Wraps within OUTA/OUTB.\
+  \ Prior SETQ overrides\n\nDRVNOT   {#}D               {WCZ}                                        \
+  \                                                                                            2\n\nD[10:6].\
+  \ C,Z = OUT bit.\n\nOUT bits of pins D[10:6]+D[5:0]..D[5:0] = !Z. DIR bits = 1. Wraps within OUTA/OUTB.\
+  \ Prior SETQ overrides\n\nDRVNZ    {#}D               {WCZ}                                        \
+  \                                                                                            2\n\nD[10:6].\
+  \ C,Z = OUT bit.\n\nOUT bits of pins D[10:6]+D[5:0]..D[5:0] = RNDs. DIR bits = 1. Wraps within OUTA/OUTB.\
+  \ Prior SETQ overrides\n\nDRVRND   {#}D               {WCZ}                                        \
+  \                                                                                            2\n\nD[10:6].\
+  \ C,Z = OUT bit.\n\nOUT bits of pins D[10:6]+D[5:0]..D[5:0] = Z. DIR bits = 1. Wraps within OUTA/OUTB.\
+  \ Prior SETQ overrides\n\nDRVZ     {#}D               {WCZ}                                        \
+  \                                                                                            2\n\nD[10:6].\
+  \ C,Z = OUT bit.\n\nOUT bits of pins D[10:6]+D[5:0]..D[5:0] = C. DIR bits = 0. Wraps within OUTA/OUTB.\
+  \ Prior SETQ overrides\n\nFLTC     {#}D             {WCZ}                                          \
+  \                                                                                    2\n\nD[10:6]. C,Z\
+  \ = OUT bit.\n\nOUT bits of pins D[10:6]+D[5:0]..D[5:0] = 1. DIR bits = 0. Wraps within OUTA/OUTB. Prior\
+  \ SETQ overrides\n\nFLTH     {#}D             {WCZ}                                                \
+  \                                                                              2\n\nD[10:6]. C,Z = OUT\
+  \ bit.\n\nOUT bits of pins D[10:6]+D[5:0]..D[5:0] = 0. DIR bits = 0. Wraps within OUTA/OUTB. Prior SETQ\
+  \ overrides\n\nFLTL     {#}D             {WCZ}                                                     \
+  \                                                                         2\n\nD[10:6]. C,Z = OUT bit.\n\
+  \nOUT bits of pins D[10:6]+D[5:0]..D[5:0] = !C. DIR bits = 0. Wraps within OUTA/OUTB. Prior SETQ overrides\n\
+  \nFLTNC    {#}D             {WCZ}                                                                  \
+  \                                                            2\n\nD[10:6]. C,Z = OUT bit.\n\nToggle\
+  \ OUT bits of pins D[10:6]+D[5:0]..D[5:0]. DIR bits = 0. Wraps within OUTA/OUTB. Prior SETQ overrides\n\
+  \nFLTNOT   {#}D             {WCZ}                                                                  \
+  \                                                            2\n\nD[10:6]. C,Z = OUT bit.\n\nOUT bits\
+  \ of pins D[10:6]+D[5:0]..D[5:0] = !Z. DIR bits = 0. Wraps within OUTA/OUTB. Prior SETQ overrides\n\n\
+  FLTNZ    {#}D             {WCZ}                                                                    \
+  \                                                          2\n\nD[10:6]. C,Z = OUT bit.\n\nOUT bits\
+  \ of pins D[10:6]+D[5:0]..D[5:0] = RNDs. DIR bits = 0. Wraps within OUTA/OUTB. Prior SETQ overrides\n\
+  \nFLTRND   {#}D             {WCZ}                                                                  \
+  \                                                            2\n\nD[10:6]. C,Z = OUT bit.\n\nOUT bits\
+  \ of pins D[10:6]+D[5:0]..D[5:0] = Z. DIR bits = 0. Wraps within OUTA/OUTB. Prior SETQ overrides\n\n\
+  FLTZ     {#}D             {WCZ}                                                                    \
+  \                                                          2\n\nD[10:6]. C,Z = OUT bit.\n\nOUT bits\
+  \ of pins D[10:6]+D[5:0]..D[5:0] = C. Wraps within OUTA/OUTB. Prior SETQ overrides D[10:6]. C,Z = OUT\n\
+  \nOUTC     {#}D             {WCZ}                                                                  \
+  \                                                            2\n\nbit.\n\nOUT bits of pins D[10:6]+D[5:0]..D[5:0]\
+  \ = 1. Wraps within OUTA/OUTB. Prior SETQ overrides D[10:6]. C,Z = OUT\n\nOUTH     {#}D            \
+  \ {WCZ}                                                                                            \
+  \                                  2\n\nbit.\n\nOUT bits of pins D[10:6]+D[5:0]..D[5:0] = 0. Wraps within\
+  \ OUTA/OUTB. Prior SETQ overrides D[10:6]. C,Z = OUT\n\nOUTL     {#}D             {WCZ}            \
+  \                                                                                                  \
+  \                2\n\nbit.\n\nOUT bits of pins D[10:6]+D[5:0]..D[5:0] = !C. Wraps within OUTA/OUTB.\
+  \ Prior SETQ overrides D[10:6]. C,Z = OUT\n\nOUTNC    {#}D             {WCZ}                       \
+  \                                                                                                  \
+  \     2\n\nbit.\n\nToggle OUT bits of pins D[10:6]+D[5:0]..D[5:0]. Wraps within OUTA/OUTB. Prior SETQ\
+  \ overrides D[10:6]. C,Z =\n\nOUTNOT   {#}D             {WCZ}                                      \
+  \                                                                                        2\n\nOUT bit.\n\
+  \nOUT bits of pins D[10:6]+D[5:0]..D[5:0] = !Z. Wraps within OUTA/OUTB. Prior SETQ overrides D[10:6].\
+  \ C,Z = OUT\n\nOUTNZ    {#}D             {WCZ}                                                     \
+  \                                                                         2\n\nbit.\n\nOUT bits of pins\
+  \ D[10:6]+D[5:0]..D[5:0] = RNDs. Wraps within OUTA/OUTB. Prior SETQ overrides D[10:6]. C,Z =\n\nOUTRND\
+  \   {#}D             {WCZ}                                                                         \
+  \                                                     2\n\nOUT bit.\n\nOUT bits of pins D[10:6]+D[5:0]..D[5:0]\
+  \ = Z. Wraps within OUTA/OUTB. Prior SETQ overrides D[10:6]. C,Z = OUT\n\nOUTZ     {#}D            \
+  \ {WCZ}                                                                                            \
+  \                                  2\n\nbit.\n\nTESTP    {#}D             WC/WZ   Test IN bit of pin\
+  \ D[5:0], write to C/Z. C/Z = IN[D[5:0]].                                                          \
+  \       2\n\nTESTP    {#}D           ORC/ORZ   Test IN bit of pin D[5:0], OR into C/Z. C/Z = C/Z OR\
+  \ IN[D[5:0]].                                                           2\n\nTESTP    {#}D         ANDC/ANDZ\
+  \   Test IN bit of pin D[5:0], AND into C/Z. C/Z = C/Z AND IN[D[5:0]].                             \
+  \                            2\n\nTESTP    {#}D         XORC/XORZ   Test IN bit of pin D[5:0], XOR into\
+  \ C/Z. C/Z = C/Z XOR IN[D[5:0]].                                                         2\n\nTESTPN\
+  \   {#}D             WC/WZ   Test !IN bit of pin D[5:0], write to C/Z. C/Z = !IN[D[5:0]].          \
+  \                                                     2\n\nTESTPN   {#}D           ORC/ORZ   Test !IN\
+  \ bit of pin D[5:0], OR into C/Z. C/Z = C/Z OR !IN[D[5:0]].                                        \
+  \                 2\n\nTESTPN   {#}D         ANDC/ANDZ   Test !IN bit of pin D[5:0], AND into C/Z. C/Z\
+  \ = C/Z AND !IN[D[5:0]].                                                       2\n\nTESTPN   {#}D  \
+  \       XORC/XORZ   Test !IN bit of pin D[5:0], XOR into C/Z. C/Z = C/Z XOR !IN[D[5:0]].           \
+  \                                            2\n\nSmart Pin\n\nAKPIN    {#}S                     Acknowledge\
+  \ smart pins S[10:6]+S[5:0]..S[5:0]. Wraps within A/B pins. Prior SETQ overrides S[10:6].          \
+  \              2\n\nGETSCP   D                        Get four-channel oscilloscope samples into D.\
+  \ D = {ch3[7:0],ch2[7:0],ch1[7:0],ch0[7:0]}.                                   2\n\nRDPIN    D,{#}S\
+  \            {WC}   Read smart pin S[5:0] result \"Z\" into D, acknowledge smart pin. C = modal result.\
+  \                                          2\n\nRead smart pin S[5:0] result \"Z\" into D, don't acknowledge\
+  \ smart pin (\"Q\" in RQPIN means \"quiet\"). C = modal\n\nRQPIN    D,{#}S            {WC}         \
+  \                                                                                                  \
+  \                   2\n\nresult.\n\nSETDACS {#}D                      DAC3 = D[31:24], DAC2 = D[23:16],\
+  \ DAC1 = D[15:8], DAC0 = D[7:0].                                                           2\n\nSETSCP\
+  \   {#}D                     Set four-channel oscilloscope enable to D[6] and set input pin base to\
+  \ D[5:2].                                             2\n\nSet mode of smart pins S[10:6]+S[5:0]..S[5:0]\
+  \ to D, acknowledge smart pins. Wraps within A/B pins. Prior SETQ\n\nWRPIN    {#}D,{#}S            \
+  \                                                                                                  \
+  \                             2\n\noverrides S[10:6].\n\nSet \"X\" of smart pins S[10:6]+S[5:0]..S[5:0]\
+  \ to D, acknowledge smart pins. Wraps within A/B pins. Prior SETQ\n\nWXPIN    {#}D,{#}S            \
+  \                                                                                                  \
+  \                                     2\n\noverrides S[10:6].\n\nSet \"Y\" of smart pins S[10:6]+S[5:0]..S[5:0]\
+  \ to D, acknowledge smart pins. Wraps within A/B pins. Prior SETQ\n\nWYPIN    {#}D,{#}S            \
+  \                                                                                                  \
+  \                                     2\n\noverrides S[10:6].\n\nBranch Instructions\n\nClocks\n\nInstruction\
+  \                                                           Description\n\nCog & LUT / Hub\n\nCALL \
+  \    #{\\}A                    Call to A by pushing {C, Z, 10'b0, PC[19:0]} onto stack. If R = 1 then\
+  \ PC += A, else PC = A. \"\\\" forces R = 0.                4 / 13...20\n\nCALL     D          {WC/WZ/WCZ}\
+  \   Call to D by pushing {C, Z, 10'b0, PC[19:0]} onto stack. C = D[31], Z = D[30], PC = D[19:0].   \
+  \                               4 / 13...20\n\nCall to A by writing {C, Z, 10'b0, PC[19:0]} to hub long\
+  \ at PTRA++. If R = 1 then PC += A, else PC = A. \"\\\" forces R\n\nCALLA    #{\\}A                \
+  \                                                                                                  \
+  \                            5...12 1 / 14...32 1\n\n= 0.\n\nCALLA    D          {WC/WZ/WCZ}   Call\
+  \ to D by writing {C, Z, 10'b0, PC[19:0]} to hub long at PTRA++. C = D[31], Z = D[30], PC = D[19:0].\
+  \                   5...12 1 / 14...32 1\n\nCall to A by writing {C, Z, 10'b0, PC[19:0]} to hub long\
+  \ at PTRB++. If R = 1 then PC += A, else PC = A. \"\\\" forces R\n\nCALLB    #{\\}A                \
+  \                                                                                                  \
+  \                            5...12 1 / 14...32 1\n\n= 0.\n\nCALLB    D          {WC/WZ/WCZ}   Call\
+  \ to D by writing {C, Z, 10'b0, PC[19:0]} to hub long at PTRB++. C = D[31], Z = D[30], PC = D[19:0].\
+  \                   5...12 1 / 14...32 1\n\nCALLD    D,{#}S     {WC/WZ/WCZ}   Call to S** by writing\
+  \ {C, Z, 10'b0, PC[19:0]} to D. C = S[31], Z = S[30].                                              \
+  \      4 / 13...20\n\nCall to A by writing {C, Z, 10'b0, PC[19:0]} to PA/PB/PTRA/PTRB (per W). If R\
+  \ = 1 then PC += A, else PC = A. \"\\\"\n\nCALLD    PA/PB/PTRA/PTRB,#{\\}A                         \
+  \                                                                                                  \
+  \       4 / 13...20\n\nforces R = 0.\n\nCALLPA   {#}D,{#}S                Call to S** by pushing {C,\
+  \ Z, 10'b0, PC[19:0]} onto stack, copy D to PA.                                                    \
+  \  4 / 13...20\n\nCALLPB   {#}D,{#}S                Call to S** by pushing {C, Z, 10'b0, PC[19:0]} onto\
+  \ stack, copy D to PB.                                                      4 / 13...20\n\nDJF     \
+  \ D,{#}S                   Decrement D and jump to S** if result is $FFFF_FFFF.                    \
+  \                                                 2 or 4 / 2 or 13...20\n\nDJNF     D,{#}S         \
+  \          Decrement D and jump to S** if result is not $FFFF_FFFF.                                \
+  \                                 2 or 4 / 2 or 13...20\n\nDJNZ     D,{#}S                   Decrement\
+  \ D and jump to S** if result is not zero.                                                         \
+  \              2 or 4 / 2 or 13...20\n\nDJZ      D,{#}S                   Decrement D and jump to S**\
+  \ if result is zero.                                                                           2 or\
+  \ 4 / 2 or 13...20\n\nEXECF    {#}D                     Jump to D[9:0] in cog/LUT and set SKIPF pattern\
+  \ to D[31:10]. PC = {10'b0, D[9:0]}.                                               4/4\n\nIJNZ     D,{#}S\
+  \                   Increment D and jump to S** if result is not zero.                             \
+  \                                          2 or 4 / 2 or 13...20\n\nIJZ      D,{#}S                \
+  \   Increment D and jump to S** if result is zero.                                                 \
+  \                          2 or 4 / 2 or 13...20\n\nJMP      #{\\}A                    Jump to A. If\
+  \ R = 1 then PC += A, else PC = A. \"\\\" forces R = 0.                                            \
+  \                  4 / 13...20\n\nJMP      D          {WC/WZ/WCZ}   Jump to D. C = D[31], Z = D[30],\
+  \ PC = D[19:0].                                                                                4 / 13...20\n\
+  \nJMPREL   {#}D                     Jump ahead/back by D instructions. For cogex, PC += D[19:0]. For\
+  \ hubex, PC += D[17:0] << 2.                                   4 / 13...20\n\nREP      {#}D,{#}S   \
+  \             Execute next D[8:0] instructions S times. If S = 0, repeat instructions in\uFB01nitely.\
+  \ If D[8:0] = 0, nothing repeats.               2/2\n\nRESI0                             Resume from\
+  \ INT0. (CALLD $1FE,$1FF WCZ)                                                                      \
+  \                 4 / 13...20\n\nRESI1                             Resume from INT1. (CALLD $1F4,$1F5\
+  \ WCZ)                                                                                       4 / 13...20\n\
+  \nRESI2                             Resume from INT2. (CALLD $1F2,$1F3 WCZ)                        \
+  \                                                               4 / 13...20\n\nRESI3               \
+  \              Resume from INT3. (CALLD $1F0,$1F1 WCZ)                                             \
+  \                                          4 / 13...20\n\nRET                 {WC/WZ/WCZ}   Return by\
+  \ popping stack (K). C = K[31], Z = K[30], PC = K[19:0].                                           \
+  \                   4 / 13...20\n\nRETA                {WC/WZ/WCZ}   Return by reading hub long (L)\
+  \ at --PTRA. C = L[31], Z = L[30], PC = L[19:0].                                             11...18\
+  \ 1 / 20...40 1\n\nRETB                {WC/WZ/WCZ}   Return by reading hub long (L) at --PTRB. C = L[31],\
+  \ Z = L[30], PC = L[19:0].                                             11...18 1 / 20...40 1\n\nRETI0\
+  \                             Return from INT0. (CALLD $1FF,$1FF WCZ)                              \
+  \                                                         4 / 13...20\n\nRETI1                     \
+  \        Return from INT1. (CALLD $1FF,$1F5 WCZ)                                                   \
+  \                                    4 / 13...20\n\nRETI2                             Return from INT2.\
+  \ (CALLD $1FF,$1F3 WCZ)                                                                            \
+  \           4 / 13...20\n\nRETI3                             Return from INT3. (CALLD $1FF,$1F1 WCZ)\
+  \                                                                                       4 / 13...20\n\
+  \nSKIP     {#}D                     Skip instructions per D. Subsequent instructions 0..31 get cancelled\
+  \ for each '1' bit in D[0]..D[31].                            2/2\n\nSKIPF    {#}D                 \
+  \    Skip cog/LUT instructions fast per D. Like SKIP, but instead of cancelling instructions, the PC\
+  \ leaps over them.             2 / ILLEGAL\n\nTJF      D,{#}S                   Test D and jump to S**\
+  \ if D is full (D = $FFFF_FFFF).                                                                   \
+  \ 2 or 4 / 2 or 13...20\n\nTJNF       D,{#}S                   Test D and jump to S** if D is not full\
+  \ (D != $FFFF_FFFF).                                                           2 or 4 / 2 or 13...20\n\
+  \nTJNS       D,{#}S                   Test D and jump to S** if D is not signed (D[31] = 0).       \
+  \                                                        2 or 4 / 2 or 13...20\n\nTJNZ       D,{#}S\
+  \                   Test D and jump to S** if D is not zero.                                       \
+  \                                      2 or 4 / 2 or 13...20\n\nTJS        D,{#}S                  \
+  \ Test D and jump to S** if D is signed (D[31] = 1).                                               \
+  \                    2 or 4 / 2 or 13...20\n\nTJV        D,{#}S                   Test D and jump to\
+  \ S** if D over\uFB02owed (D[31] != C, C = 'correct sign' from last addition/subtraction).         \
+  \      2 or 4 / 2 or 13...20\n\nTJZ        D,{#}S                   Test D and jump to S** if D is zero.\
+  \                                                                                 2 or 4 / 2 or 13...20\n\
+  \n1\n\n+1 if crosses hub long\n\nHub Control, FIFO, & RAM Instructions\n\nClocks\n\nInstruction    \
+  \                                                      Description\n\nCog & LUT / Hub\n\nHub Control\n\
+  \nCOGID      {#}D              {WC}   If D is register and no WC, get cog ID (0 to 15) into D. If WC,\
+  \ check status of cog D[3:0], C = 1 if on.           2...9, +2 if result / same\n\nCOGINIT {#}D,{#}S\
+  \            {WC}   Start cog selected by D. S[19:0] sets hub startup address and PTRB of cog. Prior\
+  \ SETQ sets PTRA of cog.            2...9, +2 if result / same\n\nCOGSTOP {#}D                     \
+  \   Stop cog D[3:0].                                                                               \
+  \                          2...9 / same\n\nLOCKNEW D                    {WC}   Request a LOCK. D will\
+  \ be written with the LOCK number (0 to 15). C = 1 if no LOCK available.                           4...11\
+  \ / same\n\nRelease LOCK D[3:0]. If D is a register and WC, get current/last cog id of LOCK owner into\
+  \ D and LOCK status\n\nLOCKREL {#}D                 {WC}                                           \
+  \                                                                           2...9, +2 if result / same\n\
+  \ninto C.\n\nLOCKRET {#}D                        Return LOCK D[3:0] for reallocation.              \
+  \                                                                       2...9 / same\n\nTry to get LOCK\
+  \ D[3:0]. C = 1 if got LOCK. LOCKREL releases LOCK. LOCK is also released if owner cog stops or\n\n\
+  LOCKTRY {#}D                 {WC}                                                                  \
+  \                                                    2...9, +2 if result / same\n\nrestarts.\n\nHUBSET\
+  \     {#}D                     Set hub con\uFB01guration to D.                                     \
+  \                                                          2...9 / same\n\nHub FIFO\n\nGETPTR     D\
+  \                        Get current FIFO hub pointer into D.                                      \
+  \                                             2 / FIFO IN USE\n\nSet next block for when block wraps.\
+  \ D[13:0] = block size in 64-byte units (0 = max), S[19:0] = block start\n\nFBLOCK     {#}D,{#}S   \
+  \                                                                                                  \
+  \                                  2 / FIFO IN USE\n\naddress.\n\nBegin new fast hub read via FIFO.\
+  \ D[31] = no wait, D[13:0] = block size in 64-byte units (0 = max), S[19:0] =       2 or WRFAST \uFB01\
+  nish +\n\nRDFAST     {#}D,{#}S\n\nblock start address.                                             \
+  \                                                   10...17 / FIFO IN USE\n\nBegin new fast hub write\
+  \ via FIFO. D[31] = no wait, D[13:0] = block size in 64-byte units (0 = max), S[19:0] =     2 or WRFAST\
+  \ \uFB01nish + 3 /\n\nWRFAST     {#}D,{#}S\n\nblock start address.                                 \
+  \                                                                    FIFO IN USE\n\nRFBYTE     D   \
+  \       {WC/WZ/WCZ}   Used after RDFAST. Read zero-extended byte from FIFO into D. C = MSB of byte.\
+  \ *                                        2 / FIFO IN USE\n\nRFLONG     D          {WC/WZ/WCZ}   Used\
+  \ after RDFAST. Read long from FIFO into D. C = MSB of long. *                                     \
+  \                 2 / FIFO IN USE\n\nRFVAR      D          {WC/WZ/WCZ}   Used after RDFAST. Read zero-extended\
+  \ 1..4-byte value from FIFO into D. C = 0. *                                       2 / FIFO IN USE\n\
+  \nRFVARS     D          {WC/WZ/WCZ}   Used after RDFAST. Read sign-extended 1..4-byte value from FIFO\
+  \ into D. C = MSB of value. *                            2 / FIFO IN USE\n\nRFWORD     D          {WC/WZ/WCZ}\
+  \   Used after RDFAST. Read zero-extended word from FIFO into D. C = MSB of word. *                \
+  \                        2 / FIFO IN USE\n\nWFBYTE     {#}D                     Used after WRFAST. Write\
+  \ byte in D[7:0] into FIFO.                                                                     2 /\
+  \ FIFO IN USE\n\nWFLONG     {#}D                     Used after WRFAST. Write long in D[31:0] into FIFO.\
+  \                                                                    2 / FIFO IN USE\n\nWFWORD     {#}D\
+  \                     Used after WRFAST. Write word in D[15:0] into FIFO.                          \
+  \                                          2 / FIFO IN USE\n\nHub RAM\n\nPOPA       D          {WC/WZ/WCZ}\
+  \   Read long from hub address --PTRA into D. C = MSB of long. *                                   \
+  \                        9...16 1 / 9...26 1\n\nPOPB       D          {WC/WZ/WCZ}   Read long from hub\
+  \ address --PTRB into D. C = MSB of long. *                                                        \
+  \   9...16 1 / 9...26 1\n\nRDBYTE     D,{#}S/P {WC/WZ/WCZ}     Read zero-extended byte from hub address\
+  \ {#}S/PTRx into D. C = MSB of byte. *                                           9...16 / 9...26\n\n\
+  Read long from hub address {#}S/PTRx into D. C = MSB of long. * Prior SETQ/SETQ2 invokes cog/LUT block\n\
+  \nRDLONG     D,{#}S/P {WC/WZ/WCZ}                                                                  \
+  \                                                          9...16 1 / 9...26 1\n\ntransfer.\n\nRDWORD\
+  \     D,{#}S/P {WC/WZ/WCZ}     Read zero-extended word from hub address {#}S/PTRx into D. C = MSB of\
+  \ word. *                                          9...16 1 / 9...26 1\n\nPUSHA      {#}D          \
+  \           Write long in D[31:0] to hub address PTRA++.                                           \
+  \                                3...10 1 / 3...20 1\n\nPUSHB      {#}D                     Write long\
+  \ in D[31:0] to hub address PTRB++.                                                                \
+  \           3...10 1 / 3...20 1\n\nWrite only non-$00 bytes in D[31:0] to hub address {#}S/PTRx. Prior\
+  \ SETQ/SETQ2 invokes cog/LUT block\n\nWMLONG     D,{#}S/P                                          \
+  \                                                                                    3...10 1 / 3...20\
+  \ 1\n\ntransfer.\n\nWRBYTE     {#}D,{#}S/P             Write byte in D[7:0] to hub address {#}S/PTRx.\
+  \                                                                  3...10 / 3...20\n\nWRLONG     {#}D,{#}S/P\
+  \             Write long in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block\
+  \ transfer.              3...10 1 / 3...20 1\n\nWRWORD     {#}D,{#}S/P             Write word in D[15:0]\
+  \ to hub address {#}S/PTRx.                                                               3...10 1 /\
+  \ 3...20 1\n\n1\n\n+1 if crosses hub long\n\nEvent Instructions\n\nClocks\n\nInstruction           \
+  \                                                Description\n\nCog & LUT / Hub\n\nADDCT1     D,{#}S\
+  \                  Set CT1 event to trigger on CT = D + S. Adds S into D.                          \
+  \                                      2\n\nADDCT2     D,{#}S                  Set CT2 event to trigger\
+  \ on CT = D + S. Adds S into D.                                                                2\n\n\
+  ADDCT3     D,{#}S                  Set CT3 event to trigger on CT = D + S. Adds S into D.          \
+  \                                                      2\n\nCOGATN     {#}D                    Strobe\
+  \ \"attention\" of all cogs whose corresponding bits are high in D[15:0].                          \
+  \                2\n\nJATN       {#}S                    Jump to S** if ATN event \uFB02ag is set. \
+  \                                                                        2 or 4 / 2 or 13...20\n\nJCT1\
+  \       {#}S                    Jump to S** if CT1 event \uFB02ag is set.                          \
+  \                                               2 or 4 / 2 or 13...20\n\nJCT2       {#}S           \
+  \         Jump to S** if CT2 event \uFB02ag is set.                                                \
+  \                         2 or 4 / 2 or 13...20\n\nJCT3       {#}S                    Jump to S** if\
+  \ CT3 event \uFB02ag is set.                                                                       \
+  \  2 or 4 / 2 or 13...20\n\nJFBW       {#}S                    Jump to S** if FBW event \uFB02ag is\
+  \ set.                                                                         2 or 4 / 2 or 13...20\n\
+  \nJINT       {#}S                    Jump to S** if INT event \uFB02ag is set.                     \
+  \                                                    2 or 4 / 2 or 13...20\n\nJNATN      {#}S      \
+  \              Jump to S** if ATN event \uFB02ag is clear.                                         \
+  \                              2 or 4 / 2 or 13...20\n\nJNCT1      {#}S                    Jump to S**\
+  \ if CT1 event \uFB02ag is clear.                                                                  \
+  \     2 or 4 / 2 or 13...20\n\nJNCT2      {#}S                    Jump to S** if CT2 event \uFB02ag\
+  \ is clear.                                                                       2 or 4 / 2 or 13...20\n\
+  \nJNCT3      {#}S                    Jump to S** if CT3 event \uFB02ag is clear.                   \
+  \                                                    2 or 4 / 2 or 13...20\n\nJNFBW      {#}S      \
+  \              Jump to S** if FBW event \uFB02ag is clear.                                         \
+  \                              2 or 4 / 2 or 13...20\n\nJNINT      {#}S                    Jump to S**\
+  \ if INT event \uFB02ag is clear.                                                                  \
+  \     2 or 4 / 2 or 13...20\n\nJNPAT      {#}S                    Jump to S** if PAT event \uFB02ag\
+  \ is clear.                                                                       2 or 4 / 2 or 13...20\n\
+  \nJNQMT      {#}S                    Jump to S** if QMT event \uFB02ag is clear.                   \
+  \                                                    2 or 4 / 2 or 13...20\n\nJNSE1      {#}S      \
+  \              Jump to S** if SE1 event \uFB02ag is clear.                                         \
+  \                              2 or 4 / 2 or 13...20\n\nJNSE2      {#}S                    Jump to S**\
+  \ if SE2 event \uFB02ag is clear.                                                                  \
+  \     2 or 4 / 2 or 13...20\n\nJNSE3      {#}S                    Jump to S** if SE3 event \uFB02ag\
+  \ is clear.                                                                       2 or 4 / 2 or 13...20\n\
+  \nJNSE4      {#}S                    Jump to S** if SE4 event \uFB02ag is clear.                   \
+  \                                                    2 or 4 / 2 or 13...20\n\nJNXFI      {#}S      \
+  \              Jump to S** if XFI event \uFB02ag is clear.                                         \
+  \                              2 or 4 / 2 or 13...20\n\nJNXMT      {#}S                    Jump to S**\
+  \ if XMT event \uFB02ag is clear.                                                                  \
+  \     2 or 4 / 2 or 13...20\n\nJNXRL      {#}S                    Jump to S** if XRL event \uFB02ag\
+  \ is clear.                                                                       2 or 4 / 2 or 13...20\n\
+  \nJNXRO      {#}S                    Jump to S** if XRO event \uFB02ag is clear.                   \
+  \                                                    2 or 4 / 2 or 13...20\n\nJPAT       {#}S      \
+  \              Jump to S** if PAT event \uFB02ag is set.                                           \
+  \                              2 or 4 / 2 or 13...20\n\nJQMT       {#}S                    Jump to S**\
+  \ if QMT event \uFB02ag is set.                                                                    \
+  \     2 or 4 / 2 or 13...20\n\nJSE1       {#}S                    Jump to S** if SE1 event \uFB02ag\
+  \ is set.                                                                         2 or 4 / 2 or 13...20\n\
+  \nJSE2       {#}S                    Jump to S** if SE2 event \uFB02ag is set.                     \
+  \                                                    2 or 4 / 2 or 13...20\n\nJSE3       {#}S      \
+  \              Jump to S** if SE3 event \uFB02ag is set.                                           \
+  \                              2 or 4 / 2 or 13...20\n\nJSE4       {#}S                    Jump to S**\
+  \ if SE4 event \uFB02ag is set.                                                                    \
+  \     2 or 4 / 2 or 13...20\n\nJXFI       {#}S                    Jump to S** if XFI event \uFB02ag\
+  \ is set.                                                                         2 or 4 / 2 or 13...20\n\
+  \nJXMT       {#}S                    Jump to S** if XMT event \uFB02ag is set.                     \
+  \                                                    2 or 4 / 2 or 13...20\n\nJXRL       {#}S      \
+  \              Jump to S** if XRL event \uFB02ag is set.                                           \
+  \                              2 or 4 / 2 or 13...20\n\nJXRO       {#}S                    Jump to S**\
+  \ if XRO event \uFB02ag is set.                                                                    \
+  \     2 or 4 / 2 or 13...20\n\nPOLLATN              {WC/WZ/WCZ}   Get ATN event \uFB02ag into C/Z, then\
+  \ clear it.                                                                                    2\n\n\
+  POLLCT1              {WC/WZ/WCZ}   Get CT1 event \uFB02ag into C/Z, then clear it.                 \
+  \                                                                   2\n\nPOLLCT2              {WC/WZ/WCZ}\
+  \   Get CT2 event \uFB02ag into C/Z, then clear it.                                                \
+  \                                    2\n\nPOLLCT3              {WC/WZ/WCZ}   Get CT3 event \uFB02ag\
+  \ into C/Z, then clear it.                                                                         \
+  \           2\n\nPOLLFBW              {WC/WZ/WCZ}   Get FBW event \uFB02ag into C/Z, then clear it.\
+  \                                                                                    2\n\nPOLLINT  \
+  \            {WC/WZ/WCZ}   Get INT event \uFB02ag into C/Z, then clear it.                         \
+  \                                                           2\n\nPOLLPAT              {WC/WZ/WCZ}  \
+  \ Get PAT event \uFB02ag into C/Z, then clear it.                                                  \
+  \                                  2\n\nPOLLQMT              {WC/WZ/WCZ}   Get QMT event \uFB02ag into\
+  \ C/Z, then clear it.                                                                              \
+  \      2\n\nPOLLSE1              {WC/WZ/WCZ}   Get SE1 event \uFB02ag into C/Z, then clear it.     \
+  \                                                                               2\n\nPOLLSE2       \
+  \       {WC/WZ/WCZ}   Get SE2 event \uFB02ag into C/Z, then clear it.                              \
+  \                                                      2\n\nPOLLSE3              {WC/WZ/WCZ}   Get SE3\
+  \ event \uFB02ag into C/Z, then clear it.                                                          \
+  \                          2\n\nPOLLSE4              {WC/WZ/WCZ}   Get SE4 event \uFB02ag into C/Z,\
+  \ then clear it.                                                                                   \
+  \ 2\n\nPOLLXFI              {WC/WZ/WCZ}   Get XFI event \uFB02ag into C/Z, then clear it.          \
+  \                                                                          2\n\nPOLLXMT            \
+  \  {WC/WZ/WCZ}   Get XMT event \uFB02ag into C/Z, then clear it.                                   \
+  \                                                 2\n\nPOLLXRL              {WC/WZ/WCZ}   Get XRL event\
+  \ \uFB02ag into C/Z, then clear it.                                                                \
+  \                    2\n\nPOLLXRO              {WC/WZ/WCZ}   Get XRO event \uFB02ag into C/Z, then clear\
+  \ it.                                                                                    2\n\nSETPAT\
+  \    {#}D,{#}S                Set pin pattern for PAT event. C selects INA/INB, Z selects =/!=, D provides\
+  \ mask value, S provides match value.              2\n\nSETSE1    {#}D                     Set SE1 event\
+  \ con\uFB01guration to D[8:0].                                                                     \
+  \                    2\n\nSETSE2    {#}D                     Set SE2 event con\uFB01guration to D[8:0].\
+  \                                                                                         2\n\nSETSE3\
+  \    {#}D                     Set SE3 event con\uFB01guration to D[8:0].                           \
+  \                                                              2\n\nSETSE4    {#}D                 \
+  \    Set SE4 event con\uFB01guration to D[8:0].                                                    \
+  \                                     2\n\nWAITATN              {WC/WZ/WCZ}   Wait for ATN event \uFB02\
+  ag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.                       \
+  \       2+\n\nWAITCT1              {WC/WZ/WCZ}   Wait for CT1 event \uFB02ag, then clear it. Prior SETQ\
+  \ sets optional CT timeout value. C/Z = timeout.                              2+\n\nWAITCT2        \
+  \      {WC/WZ/WCZ}   Wait for CT2 event \uFB02ag, then clear it. Prior SETQ sets optional CT timeout\
+  \ value. C/Z = timeout.                              2+\n\nWAITCT3              {WC/WZ/WCZ}   Wait for\
+  \ CT3 event \uFB02ag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.     \
+  \                         2+\n\nWAITFBW              {WC/WZ/WCZ}   Wait for FBW event \uFB02ag, then\
+  \ clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.                              2+\n\
+  \nWAITINT              {WC/WZ/WCZ}   Wait for INT event \uFB02ag, then clear it. Prior SETQ sets optional\
+  \ CT timeout value. C/Z = timeout.                              2+\n\nWAITPAT              {WC/WZ/WCZ}\
+  \   Wait for PAT event \uFB02ag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.\
+  \                              2+\n\nWAITSE1              {WC/WZ/WCZ}   Wait for SE1 event \uFB02ag,\
+  \ then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.                         \
+  \     2+\n\nWAITSE2              {WC/WZ/WCZ}   Wait for SE2 event \uFB02ag, then clear it. Prior SETQ\
+  \ sets optional CT timeout value. C/Z = timeout.                              2+\n\nWAITSE3        \
+  \      {WC/WZ/WCZ}   Wait for SE3 event \uFB02ag, then clear it. Prior SETQ sets optional CT timeout\
+  \ value. C/Z = timeout.                              2+\n\nWAITSE4              {WC/WZ/WCZ}   Wait for\
+  \ SE4 event \uFB02ag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.     \
+  \                         2+\n\nWAITXFI              {WC/WZ/WCZ}   Wait for XFI event \uFB02ag, then\
+  \ clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.                              2+\n\
+  \nWAITXMT              {WC/WZ/WCZ}   Wait for XMT event \uFB02ag, then clear it. Prior SETQ sets optional\
+  \ CT timeout value. C/Z = timeout.                              2+\n\nWAITXRL              {WC/WZ/WCZ}\
+  \   Wait for XRL event \uFB02ag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.\
+  \                              2+\n\nWAITXRO              {WC/WZ/WCZ}   Wait for XRO event \uFB02ag,\
+  \ then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.                         \
+  \     2+\n\nInterrupt Instructions\n\nClocks\n\nInstruction                                        \
+  \                    Description\n\nCog, LUT & Hub\n\nALLOWI                             Allow interrupts\
+  \ (default).                                                                                       \
+  \            2\n\nIf in debug ISR, set next break condition to D. Else, set BRK code to D[7:0] and unconditionally\
+  \ trigger BRK\n\nBRK       {#}D                                                                    \
+  \                                                                               2\n\ninterrupt, if enabled.\n\
+  \nIf in debug ISR, trigger asynchronous breakpoint in cog D[3:0]. Cog D[3:0] must have asynchronous\
+  \ breakpoint\n\nCOGBRK    {#}D                                                                     \
+  \                                                                              2\n\nenabled.\n\nGETBRK\
+  \    D            WC/WZ/WCZ   Get breakpoint/cog status into D according to WC/WZ/WCZ. See documentation\
+  \ for details.                                         2\n\nNIXINT1                            Cancel\
+  \ INT1.                                                                                            \
+  \                        2\n\nNIXINT2                            Cancel INT2.                      \
+  \                                                                                              2\n\n\
+  NIXINT3                            Cancel INT3.                                                    \
+  \                                                                2\n\nSETINT1 {#}D                 \
+  \      Set INT1 source to D[3:0].                                                                  \
+  \                                    2\n\nSETINT2 {#}D                       Set INT2 source to D[3:0].\
+  \                                                                                                  \
+  \    2\n\nSETINT3 {#}D                       Set INT3 source to D[3:0].                            \
+  \                                                                          2\n\nSTALLI             \
+  \                Stall Interrupts.                                                                 \
+  \                                              2\n\nTRGINT1                            Trigger INT1,\
+  \ regardless of STALLI mode.                                                                       \
+  \                 2\n\nTRGINT2                            Trigger INT2, regardless of STALLI mode. \
+  \                                                                                       2\n\nTRGINT3\
+  \                            Trigger INT3, regardless of STALLI mode.                              \
+  \                                                          2\n\nRegister Indirection Instructions\n\n\
+  Clocks\n\nInstruction                                                         Description\n\nCog & LUT\
+  \ / Hub\n\nALTB      D,{#}S                   Alter D \uFB01eld of next instruction to D[13:5].    \
+  \                                                                                2\n\nALTB      D,{#}S\
+  \                   Alter D \uFB01eld of next instruction to (D[13:5] + S) & $1FF. D += sign-extended\
+  \ S[17:9].                                           2\n\nALTD      D                        Alter D\
+  \ \uFB01eld of next instruction to D[8:0].                                                         \
+  \                            2\n\nALTD      D,{#}S                   Alter D \uFB01eld of next instruction\
+  \ to (D + S) & $1FF. D += sign-extended S[17:9].                                                 2\n\
+  \nALTGB     D                        Alter subsequent GETBYTE/ROLBYTE instruction. Next S \uFB01eld\
+  \ = D[10:2], N \uFB01eld = D[1:0].                                           2\n\nAlter subsequent GETBYTE/ROLBYTE\
+  \ instruction. Next S \uFB01eld = (D[10:2] + S) & $1FF, N \uFB01eld = D[1:0]. D +=\n\nALTGB     D,{#}S\
+  \                                                                                                  \
+  \                                                 2\n\nsign-extended S[17:9].\n\nALTGN     D       \
+  \                 Alter subsequent GETNIB/ROLNIB instruction. Next S \uFB01eld = D[11:3], N \uFB01eld\
+  \ = D[2:0].                                             2\n\nAlter subsequent GETNIB/ROLNIB instruction.\
+  \ Next S \uFB01eld = (D[11:3] + S) & $1FF, N \uFB01eld = D[2:0]. D +=\n\nALTGN     D,{#}S          \
+  \                                                                                                  \
+  \                                       2\n\nsign-extended S[17:9].\n\nALTGW     D                 \
+  \       Alter subsequent GETWORD/ROLWORD instruction. Next S \uFB01eld = D[9:1], N \uFB01eld = D[0].\
+  \                                              2\n\nAlter subsequent GETWORD/ROLWORD instruction. Next\
+  \ S \uFB01eld = ((D[9:1] + S) & $1FF), N \uFB01eld = D[0]. D +=\n\nALTGW     D,{#}S                \
+  \                                                                                                  \
+  \                                 2\n\nsign-extended S[17:9].\n\nALTI      D                       \
+  \ Execute D in place of next instruction. D stays same.                                            \
+  \                               2\n\nALTI      D,{#}S                   Substitute next instruction's\
+  \ I/R/D/S \uFB01elds with \uFB01elds from D, per S. Modify D per S.                                \
+  \           2\n\nALTR      D                        Alter result register address (normally D \uFB01\
+  eld) of next instruction to D[8:0].                                                  2\n\nALTR     \
+  \ D,{#}S                   Alter result register address (normally D \uFB01eld) of next instruction\
+  \ to (D + S) & $1FF. D += sign-extended S[17:9].              2\n\nALTS      D                     \
+  \   Alter S \uFB01eld of next instruction to D[8:0].                                               \
+  \                                      2\n\nALTS      D,{#}S                   Alter S \uFB01eld of\
+  \ next instruction to (D + S) & $1FF. D += sign-extended S[17:9].                                  \
+  \               2\n\nALTSB     D                        Alter subsequent SETBYTE instruction. Next D\
+  \ \uFB01eld = D[10:2], N \uFB01eld = D[1:0].                                                   2\n\n\
+  Alter subsequent SETBYTE instruction. Next D \uFB01eld = (D[10:2] + S) & $1FF, N \uFB01eld = D[1:0].\
+  \ D += sign-extended\n\nALTSB     D,{#}S                                                           \
+  \                                                                                        2\n\nS[17:9].\n\
+  \nALTSN     D                        Alter subsequent SETNIB instruction. Next D \uFB01eld = D[11:3],\
+  \ N \uFB01eld = D[2:0].                                                    2\n\nAlter subsequent SETNIB\
+  \ instruction. Next D \uFB01eld = (D[11:3] + S) & $1FF, N \uFB01eld = D[2:0]. D += sign-extended\n\n\
+  ALTSN     D,{#}S                                                                                   \
+  \                                                                2\n\nS[17:9].\n\nALTSW     D      \
+  \                  Alter subsequent SETWORD instruction. Next D \uFB01eld = D[9:1], N \uFB01eld = D[0].\
+  \                                                      2\n\nAlter subsequent SETWORD instruction. Next\
+  \ D \uFB01eld = (D[9:1] + S) & $1FF, N \uFB01eld = D[0]. D += sign-extended\n\nALTSW     D,{#}S    \
+  \                                                                                                  \
+  \                                             2\n\nS[17:9].\n\nCORDIC Solver Instructions\n\nClocks\n\
+  \nInstruction                                                          Description\n\nCog, LUT & Hub\n\
+  \nGETQX       D           {WC/WZ/WCZ}   Retrieve CORDIC result X into D. Waits, in case result not ready.\
+  \ C = X[31]. 1                                           2...58\n\n1\n\nGETQY       D           {WC/WZ/WCZ}\
+  \   Retrieve CORDIC result Y into D. Waits, in case result not ready. C = Y[31].                   \
+  \                          2...58\n\nQDIV        {#}D,{#}S                 Begin CORDIC unsigned division\
+  \ of {SETQ value or 32'b0, D} / S. GETQX/GETQY retrieves quotient/remainder.                2...9\n\n\
+  QEXP        {#}D                      Begin CORDIC logarithm-to-number conversion of D. GETQX retrieves\
+  \ number.                                                2...9\n\nQFRAC       {#}D,{#}S            \
+  \     Begin CORDIC unsigned division of {D, SETQ value or 32'b0} / S. GETQX/GETQY retrieves quotient/remainder.\
+  \                2...9\n\nBegin CORDIC number-to-logarithm conversion of D. GETQX retrieves log {5'whole_exponent,\n\
+  \nQLOG        {#}D                                                                                 \
+  \                                                              2...9\n\n27'fractional_exponent}.\n\n\
+  QMUL        {#}D,{#}S                 Begin CORDIC unsigned multiplication of D * S. GETQX/GETQY retrieves\
+  \ lower/upper product.                                2...9\n\nQROTATE {#}D,{#}S                   \
+  \  Begin CORDIC rotation of point (D, SETQ value or 32'b0) by angle S. GETQX/GETQY retrieves X/Y.  \
+  \                         2...9\n\nQSQRT       {#}D,{#}S                 Begin CORDIC square root of\
+  \ {S, D}. GETQX retrieves root.                                                                2...9\n\
+  \nQVECTOR {#}D,{#}S                     Begin CORDIC vectoring of point (D, S). GETQX/GETQY retrieves\
+  \ length/angle.                                              2...9\n\n1\n\nZ = (result == 0)\n\nColor\
+  \ Space Converter and Pixel Mixer Instructions\n\nClocks\n\nInstruction                            \
+  \                              Description\n\nCog, LUT & Hub\n\nColor Space Converter\n\nSETCFRQ {#}D\
+  \                          Set the colorspace converter \"CFRQ\" parameter to D[31:0].             \
+  \                                                       2\n\nSETCI       {#}D                      Set\
+  \ the colorspace converter \"CI\" parameter to D[31:0].                                            \
+  \                          2\n\nSETCMOD {#}D                          Set the colorspace converter \"\
+  CMOD\" parameter to D[8:0].                                                                     2\n\n\
+  SETCQ       {#}D                      Set the colorspace converter \"CQ\" parameter to D[31:0].    \
+  \                                                                  2\n\nSETCY       {#}D           \
+  \           Set the colorspace converter \"CY\" parameter to D[31:0].                              \
+  \                                        2\n\nPixel Mixer\n\nADDPIX      D,{#}S                    Add\
+  \ bytes of S into bytes of D, with $FF saturation.                                                 \
+  \                        7\n\nBLNPIX      D,{#}S                    Alpha-blend bytes of S into bytes\
+  \ of D, using SETPIV value.                                                                  7\n\nMIXPIX\
+  \      D,{#}S                    Mix bytes of S into bytes of D, using SETPIX and SETPIV values.   \
+  \                                                           7\n\nMULPIX      D,{#}S                \
+  \    Multiply bytes of S into bytes of D, where $FF = 1.0 and $00 = 0.0.                           \
+  \                               7\n\nSETPIV      {#}D                      Set BLNPIX/MIXPIX blend factor\
+  \ to D[7:0].                                                                                    2\n\n\
+  SETPIX      {#}D                      Set MIXPIX mode to D[5:0].                                   \
+  \                                                                2\n\nLookup Table, Streamer, and Misc\
+  \ Instructions\n\nClocks\n\nInstruction                                                          Description\n\
+  \nCog & LUT / Hub\n\nLookup Table\n\nRDLUT       D,{#}S/P {WC/WZ/WCZ}      Read data from LUT address\
+  \ {#}S/PTRx into D. C = MSB of data. *                                                             \
+  \ 3\n\nIf D[0] = 1 then enable LUT sharing, where LUT writes within the adjacent odd/even companion\
+  \ cog are copied\n\nSETLUTS {#}D                                                                   \
+  \                                                                                    2\n\nto this cog's\
+  \ LUT.\n\nWRLUT       {#}D,{#}S/P               Write D to LUT address {#}S/PTRx.                  \
+  \                                                                          2\n\nStreamer\n\nGet the\
+  \ streamer's Goertzel X accumulator into D and the Y accumulator into the next instruction's S, clear\n\
+  \nGETXACC D                                                                                        \
+  \                                                                  2\n\naccumulators.\n\nSETXFRQ {#}D\
+  \                          Set streamer NCO frequency to D.                                        \
+  \                                                     2\n\nXCONT       {#}D,{#}S                 Bu\
+  \ er new streamer command to be issued on \uFB01nal NCO rollover of current command, continuing phase.\
+  \                           2+\n\nXINIT    {#}D,{#}S                 Issue streamer command immediately,\
+  \ zeroing phase.                                                                          2\n\nXSTOP\
+  \                              Stop streamer immediately.                                          \
+  \                                                        2\n\nXZERO    {#}D,{#}S                 Bu\
+  \ er new streamer command to be issued on \uFB01nal NCO rollover of current command, zeroing phase.\
+  \                             2+\n\nMiscellaneous\n\nQueue #n to be used as upper 23 bits for next #D\
+  \ occurrence, so that the next 9-bit #D will be augmented to 32\n\nAUGD     #n                     \
+  \                                                                                                  \
+  \                             2\n\nbits.\n\nQueue #n to be used as upper 23 bits for next #S occurrence,\
+  \ so that the next 9-bit #S will be augmented to 32\n\nAUGS     #n                                 \
+  \                                                                                                  \
+  \                 2\n\nbits.\n\nGet CT[31:0] or CT[63:32] if WC into D. GETCT WC + GETCT gets full CT.\
+  \ CT=0 on reset, CT++ on every clock. C =\n\nGETCT    D                 {WC}                       \
+  \                                                                                                  \
+  \       2\n\nsame.\n\nGETRND                WC/WZ/WCZ    Get RND into C/Z. C = RND[31], Z = RND[30],\
+  \ unique per cog.                                                                 2\n\nGet RND into\
+  \ D/C/Z. RND is the PRNG that updates on every clock. D = RND[31:0], C = RND[31], Z = RND[30],\n\nGETRND\
+  \   D           {WC/WZ/WCZ}                                                                        \
+  \                                                       2\n\nunique per cog.\n\nNOP                \
+  \                No operation.                                                                     \
+  \                                          2\n\nPOP      D          {WC/WZ/WCZ}    Pop stack (K). D\
+  \ = K. C = K[31]. *                                                                                \
+  \          2\n\nPUSH     {#}D                      Push D onto stack.                              \
+  \                                                                            2\n\nSet Q to D. Use before\
+  \ RDLONG/WRLONG/WMLONG to set block transfer. Also used before\n\nSETQ     {#}D                    \
+  \                                                                                                  \
+  \                            2\n\nMUXQ/COGINIT/QDIV/QFRAC/QROTATE/WAITxxx.\n\nSETQ2    {#}D        \
+  \              Set Q to D. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer.              \
+  \                                        2\n\nWAITX    {#}D       {WC/WZ/WCZ}    Wait 2 + D clocks if\
+  \ no WC/WZ/WCZ. If WC/WZ/WCZ, wait 2 + (D & RND) clocks. C/Z = 0.                                  \
+  \  2+D\n\nPROPELLER 2 RESERVED WORDS (SPIN2 + PASM2)\n\nPrede\uFB01ned symbols recognized by the compiler\
+  \ to have special meaning.\n\n_ (leading underscore)\n\n_C              _C_NE_Z             _E     \
+  \         _LT                   _NC_OR_NZ        _NZ_AND_C         _RET_              _Z_AND_NC    \
+  \       _Z_OR_NC\n\n_C_AND_NZ       _C_OR_NZ            _GE             _NC                   _NC_OR_Z\
+  \         _NZ_AND_NC        _SET               _Z_EQ_C\n\n_C_AND_Z        _C_OR_Z             _GT  \
+  \           _NC_AND_NZ            _NE              _NZ_OR_C          _Z                 _Z_NE_C\n\n\
+  _C_EQ_Z         _CLR                _LE             _NC_AND_Z             _NZ              _NZ_OR_NC\
+  \         _Z_AND_C           _Z_OR_C\n\nA-B\n\nABORT       ADDCT2         ADDSX          ALLOWI    \
+  \    ALTGN       ALTSB        ANDN          AUGS           BITMAP        BITZ         BOX          \
+  \ BYTES_1BIT\n\nABS         ADDCT3         ADDX           ALT           ALTGW       ALTSN        ANDZ\
+  \          BACKCOLOR      BITNC         BLACK        BRK           BYTES_2BIT\n\nADD         ADDPINS\
+  \        AKPIN          ALTB          ALTI        ALTSW        ARCHIVE       BITC           BITNOT \
+  \       BLNPIX       BYTE          BYTES_4BIT\n\nADDBITS     ADDPIX         ALIGNL         ALTD    \
+  \      ALTR        AND          ASMCLK        BITH           BITNZ         BLUE         BYTEFILL\n\n\
+  ADDCT1      ADDS           ALIGNW         ALTGB         ALTS        ANDC         AUGD          BITL\
+  \           BITRND        BMASK        BYTEMOVE\n\nC-D\n\nCALL          CIRCLE         CMPSUB      \
+  \             COGINIT         DEBUG_BAUD                    DEBUG_TOP                 DIRH        DJZ\
+  \           DRVRND\n\nCALLA         CLEAR          CMPSX                    COGSPIN         DEBUG_COGS\
+  \                    DEBUG_WIDTH               DIRL        DLY           DRVZ\n\nCALLB         CLKFREQ\
+  \        CMPX                     COGSTOP         DEBUG_DELAY                   DEBUG_WINDOWS_OFF  \
+  \       DIRNC       DOT\n\nCALLD         CLKMODE        COGATN                   COLOR           DEBUG_DISPLAY_LEFT\
+  \            DECMOD                    DIRNOT      DOTSIZE\n\nCALLPA        CLKSET         COGBRK  \
+  \                 CON             DEBUG_DISPLAY_TOP             DECOD                     DIRNZ    \
+  \   DRVC\n\nCALLPB        CLOSE          COGCHK                   CRCBIT          DEBUG_HEIGHT     \
+  \             DEPTH                     DIRRND      DRVH\n\nCARTESIAN     CMP            COGEXEC   \
+  \               CRCNIB          DEBUG_LEFT                    DEV                       DIRZ       \
+  \ DRVL\n\nCASE          CMPM           COGEXEC_NEW              CYAN            DEBUG_LOG_SIZE     \
+  \           DIRA                      DJF         DRVNC\n\nCASE_FAST     CMPR           COGEXEC_NEW_PAIR\
+  \         DAT             DEBUG_PIN                     DIRB                      DJNF        DRVNOT\n\
+  \nCHANNEL       CMPS           COGID                    DEBUG           DEBUG_TIMESTAMP            \
+  \   DIRC                      DJNZ\n\nE-F\n\nELSE        EVENT_ATN      EVENT_INT      EVENT_SE3   \
+  \  EVENT_XRO         FDEC               FDEC_REG_ARRAY_        FIT         FLTH          FLTRND    \
+  \ FVAR\n\nELSEIF      EVENT_CT1      EVENT_PAT      EVENT_SE4     EXECF             FDEC_          \
+  \    FFT                    FLE         FLTL          FLTZ       FVARS\n\nELSEIFNOT   EVENT_CT2    \
+  \  EVENT_QMT      EVENT_XFI     FABS              FDEC_ARRAY         FGE                    FLES   \
+  \     FLTNC         FRAC\n\nENCOD       EVENT_CT3      EVENT_SE1      EVENT_XMT     FALSE          \
+  \   FDEC_ARRAY_        FGES                   FLOAT       FLTNOT        FROM\n\nEND         EVENT_FBW\
+  \      EVENT_SE2      EVENT_XRL     FBLOCK            FDEC_REG_ARRAY     FILE                   FLTC\
+  \        FLTNZ         FSQRT\n\nG-H\n\nGETBRK        GETMS          GETQX           GETRND         \
+  \    GETWORD          GREY          HSV16              HSV8          HUBEXEC                 HUBSET\n\
+  \nGETBYTE       GETNIB         GETQY           GETSCP             GETXACC          HIDEXY        HSV16W\
+  \             HSV8W         HUBEXEC_NEW\n\nGETCT         GETPTR         GETREGS         GETSEC     \
+  \        GREEN            HOLDOFF       HSV16X             HSV8X         HUBEXEC_NEW_PAIR\n\nI-J\n\n\
+  IF          IF_10           IF_AE             IF_E                 IF_NOT_01          IF_Z_AND_C   \
+  \      INA               JINT          JNSE2          JSE4\n\nIF_00       IF_1000         IF_ALWAYS\
+  \         IF_GE                IF_NOT_10          IF_Z_AND_NC        INB               JMP         \
+  \  JNSE3          JXFI\n\nIF_0000     IF_1001         IF_B              IF_GT                IF_NOT_11\
+  \          IF_Z_EQ_C          INCMOD            JMPREL        JNSE4          JXMT\n\nIF_0001     IF_1010\
+  \         IF_BE             IF_LE                IF_NZ              IF_Z_NE_C          INT_OFF     \
+  \      JNATN         JNXFI          JXRL\n\nIF_0010     IF_1011         IF_C              IF_LT    \
+  \            IF_NZ_AND_C        IF_Z_OR_C          IRET1             JNCT1         JNXMT          JXRO\n\
+  \nIF_0011     IF_11           IF_C_AND_NZ       IF_NC                IF_NZ_AND_NC       IF_Z_OR_NC \
+  \        IRET2             JNCT2         JNXRL\n\nIF_01       IF_1100         IF_C_AND_Z        IF_NC_AND_NZ\
+  \         IF_NZ_OR_C         IFNOT              IRET3             JNCT3         JNXRO\n\nIF_0100   \
+  \  IF_1101         IF_C_EQ_Z         IF_NC_AND_Z          IF_NZ_OR_NC        IJMP1              JATN\
+  \              JNFBW         JPAT\n\nIF_0101     IF_1110         IF_C_NE_Z         IF_NC_OR_NZ     \
+  \     IF_SAME            IJMP2              JCT1              JNINT         JQMT\n\nIF_0110     IF_1111\
+  \         IF_C_OR_NZ        IF_NC_OR_Z           IF_X0              IJMP3              JCT2        \
+  \      JNPAT         JSE1\n\nIF_0111     IF_1X           IF_C_OR_Z         IF_NE                IF_X1\
+  \              IJNZ               JCT3              JNQMT         JSE2\n\nIF_0X       IF_A         \
+  \   IF_DIFF           IF_NOT_00            IF_Z               IJZ                JFBW              JNSE1\
+  \         JSE3\n\nL-M\n\nLINE         LOCKREL       LONG            LONGS_2BIT      LOOKUP         \
+  \ LUMA8W       LUT8             MERGEW           MODZ           MULPIX         MUXNITS\n\nLINESIZE \
+  \    LOCKRET       LONGFILL        LONGS_4BIT      LOOKUPZ         LUMA8X       LUTCOLORS        MIDI\
+  \             MOV            MULS           MUXNZ\n\nLOC          LOCKTRY       LONGMOVE        LONGS_8BIT\
+  \      LSTR            LUT1         MAG              MIXPIX           MOVBYTS        MUXC          \
+  \ MUXQ\n\nLOCKCHK      LOGIC         LONGS_16BIT     LOOKDOWN        LSTR_           LUT2         MAGENTA\
+  \          MODC             MUL            MUXNC          MUXZ\n\nLOCKNEW      LOGSCALE      LONGS_1BIT\
+  \      LOOKDOWNZ       LUMA8           LUT4         MERGEB           MODCZ            MULDIV64     \
+  \  MUXNIBS\n\nN-O\n\nNAN          NEGNZ          NEXT             NOP                ONES          \
+  \   ORC                ORIGIN          OUTB             OUTNC             OUTZ\n\nNEG          NEGX\
+  \           NIXINT1          NOT                OPACITY          ORG                ORZ            \
+  \ OUTC             OUTNOT            OVAL\n\nNEGC         NEGZ           NIXINT2          OBJ      \
+  \          OR               ORGF               OTHER           OUTH             OUTNZ\n\nNEGNC     \
+  \   NEWCOG         NIXINT3          OBOX               ORANGE           ORGH               OUTA    \
+  \        OUTL             OUTRND\n\nP\n\nP_ADC              P_COUNT_RISES         P_HIGH_1K5       \
+  \   P_LOW_10UA    P_PASS_AB           P_STATE_TICKS     PI             POLLCT2   PR0\n\nP_ADC_100X \
+  \        P_COUNTER_HIGHS       P_HIGH_1MA          P_LOW_150K    P_PERIODS_HIGHS     P_SYNC_IO     \
+  \    PINCLEAR       POLLCT3   PR1\n\nP_ADC_10X          P_COUNTER_PERIODS     P_HIGH_FAST         P_LOW_15K\
+  \     P_PERIODS_TICKS     P_SYNC_RX         PINF           POLLFBW   PR2\n\nP_ADC_1X           P_COUNTER_TICKS\
+  \       P_HIGH_FLOAT        P_LOW_1K5     P_PLUS1_A           P_SYNC_TX         PINFLOAT       POLLINT\
+  \   PR3\n\nP_ADC_30X          P_DAC_124R_3V         P_HIGH_TICKS        P_LOW_1MA     P_PLUS1_B    \
+  \       P_TRANSITION      PINH           POLLPAT   PR4\n\nP_ADC_3X           P_DAC_600R_2V         P_INVERT_A\
+  \          P_LOW_FAST    P_PLUS2_A           P_TRUE_A          PINHIGH        POLLQMT   PR5\n\nP_ADC_EXT\
+  \          P_DAC_75R_2V          P_INVERT_B          P_LOW_FLOAT   P_PLUS2_B           P_TRUE_B    \
+  \      PINL           POLLSE1   PR6\n\nP_ADC_FLOAT        P_DAC_990R_3V         P_INVERT_IN        \
+  \ P_MINUS1_A    P_PLUS3_A           P_TRUE_IN         PINLOW         POLLSE2   PR7\n\nP_ADC_GIO    \
+  \      P_DAC_DITHER_PWM      P_INVERT_OUT        P_MINUS1_B    P_PLUS3_B           P_TRUE_OUT      \
+  \  PINR           POLLSE3   PRECISE\n\nP_ADC_SCOPE        P_DAC_DITHER_RND      P_INVERT_OUTPUT    \
+  \ P_MINUS2_A    P_PULSE             P_TRUE_OUTPUT     PINREAD        POLLSE4   PRECOMPILE\n\nP_ADC_VIO\
+  \          P_DAC_NOISE           P_LEVEL_A           P_MINUS2_B    P_PWM_SAWTOOTH      P_TT_00     \
+  \      PINSTART       POLLXFI   PRI\n\nP_AND_AB           P_EVENTS_TICKS        P_LEVEL_A_FBN      \
+  \ P_MINUS3_A    P_PWM_SMPS          P_TT_01           PINT           POLLXMT   PTRA\n\nP_ASYNC_IO  \
+  \       P_FILT0_AB            P_LEVEL_B_FBN       P_MINUS3_B    P_PWM_TRIANGLE      P_TT_10        \
+  \   PINTOGGLE      POLLXRL   PTRB\n\nP_ASYNC_RX         P_FILT1_AB            P_LEVEL_B_FBP       P_NCO_DUTY\
+  \    P_QUADRATURE        P_TT_11           PINW           POLLXRO   PUB\n\nP_ASYNC_TX         P_FILT2_AB\
+  \            P_LOCAL_A           P_NCO_FREQ    P_REG_UP            P_USB_PAIR        PINWRITE      \
+  \ POLXY     PUSH\n\nP_BITDAC           P_FILT3_AB            P_LOCAL_B           P_NORMAL      P_REG_UP_DOWN\
+  \       P_XOR_AB          PLOT           POP       PUSHA\n\nP_CHANNEL          P_HIGH_100UA        \
+  \  P_LOGIC_A           P_OE          P_REPOSITORY        PA                POLAR          POPA     \
+  \ PUSHB\n\nP_COMPARE_AB       P_HIGH_10UA           P_LOGIC_A_FB        P_OR_AB       P_SCHMITT_A  \
+  \       PB                POLLATN        POPB\n\nP_COMPARE_AB_FB    P_HIGH_150K           P_LOGIC_B_FB\
+  \        P_OUTBIT_A    P_SCHMITT_A_FB      PC_KEY            POLLCT         POS\n\nP_COUNT_HIGHS   \
+  \   P_HIGH_15K            P_LOW_100UA         P_OUTBIT_B    P_SCHMITT_B_FB      PC_MOUSE          POLLCT1\
+  \        POSX\n\nQ-R\n\nQCOS        QROTATE         RATE           RDFAST          RED         RES \
+  \          RETA        RETURN         RFWORD         RGBI8W     ROLWORD\n\nQDIV        QSIN        \
+  \    RCL            RDLONG          REG         RESI0         RETB        REV            RGB16     \
+  \     RGBI8X     ROR\n\nQEXP        QSQRT           RCR            RDLUT           REGEXEC     RESI1\
+  \         RETI0       RFBYTE         RGB24          RGBSQZ     ROTXY\n\nQFRAC       QUIT           \
+  \ RCZL           RDPIN           REGLOAD     RESI2         RETI1       RFLONG         RGB8         \
+  \  ROL        ROUND\n\nQLOG        QVECTOR         RCZR           RDWORD          REP         RESI3\
+  \         RETI2       RFVAR          RGBEXP         ROLBYTE    RQPIN\n\nQMUL        RANGE          \
+  \ RDBYTE         RECV            REPEAT      RET           RETI3       RFVARS         RGBI8        \
+  \  ROLNIB\n\nS-T\n\nSAL                   SBIN_WORD_ARRAY_     SDEC_WORD             SETNIB        \
+  \   SHEX                    SIGNED             SUBR          TEXTSTYLE\n\nSAMPLES               SCA\
+  \                  SDEC_WORD_            SETPAT           SHEX_                   SIGNX            \
+  \  SUBS          TITLE\n\nSAR                   SCAS                 SDEC_WORD_ARRAY       SETPIV  \
+  \         SHEX_BYTE               SIZE               SUBSX         TJF\n\nSAVE                  SCOPE\
+  \                SDEC_WORD_ARRAY_      SETPIX           SHEX_BYTE_              SKIP               SUBX\
+  \          TJNF\n\nSBIN                  SCOPE_XY             SEND                  SETQ           \
+  \  SHEX_BYTE_ARRAY         SKIPF              SUMC          TJNS\n\nSBIN_                 SCROLL   \
+  \            SET                   SETQ2            SHEX_BYTE_ARRAY_        SPACING            SUMNC\
+  \         TJNZ\n\nSBIN_BYTE_            SDEC                 SETBYTE               SETR            \
+  \ SHEX_LONG               SPECTRO            SUMNZ         TJS\n\nSBIN_BYTE_ARRAY       SDEC_      \
+  \          SETCFRQ               SETREGS          SHEX_LONG_              SPLITB             SUMZ  \
+  \        TJV\n\nSBIN_BYTE_ARRAY_      SDEC_BYTE            SETCI                 SETS             SHEX_LONG_ARRAY\
+  \         SPLITW             TERM          TJZ\n\nSBIN_LONG             SDEC_BYTE_           SETCMOD\
+  \               SETSCP           SHEX_LONG_ARRAY_        SPRITE             TEST          TO\n\nSBIN_LONG_\
+  \            SDEC_BYTE_ARRAY      SETCQ                 SETSE1           SHEX_REG_ARRAY          SPRITEDEF\
+  \          TESTB         TRACE\n\nSBIN_LONG_ARRAY       SDEC_BYTE_ARRAY_     SETCY                 SETSE2\
+  \           SHEX_REG_ARRAY_         SQRT               TESTBN        TRGINT1\n\nSBIN_LONG_ARRAY_   \
+  \   SDEC_LONG            SETD                  SETSE3           SHEX_WORD               STALLI     \
+  \        TESTN         TRGINT2\n\nSBIN_REG_ARRAY        SDEC_LONG_           SETDACS               SETSE4\
+  \           SHEX_WORD_              STEP               TESTP         TRGINT3\n\nSBIN_REG_ARRAY_    \
+  \   SDEC_LONG_ARRAY      SETINT1               SETWORD          SHEX_WORD_ARRAY         STRCOMP    \
+  \        TESTPN        TRIGGER\n\nSBIN_WORD             SDEC_LONG_ARRAY_     SETINT2               SETXFRQ\
+  \          SHEX_WORD_ARRAY_        STRING             TEXT          TRUE\n\nSBIN_WORD_            SDEC_REG_ARRAY\
+  \       SETINT3               SEUSSF           SHL                     STRSIZE            TEXTANGLE\
+  \     TRUNC\n\nSBIN_WORD_ARRAY       SDEC_REG_ARRAY_      SETLUTS               SEUSSR           SHR\
+  \                     SUB                TEXTSIZE\n\nU, V, W\n\nUBIN                    UBIN_WORD_ARRAY_\
+  \         UDEC_WORD_ARRAY            UHEX_WORD_               WAITPAT             WFWORD           WRLONG\n\
+  \nUBIN_                   UDEC                     UDEC_WORD_ARRAY_           UHEX_WORD_ARRAY      \
+  \    WAITSE1             WHILE            WRLUT\n\nUBIN_BYTE               UDEC_                   \
+  \ UHEX                       UHEX_WORD_ARRAY_         WAITSE2             WHITE            WRNC\n\n\
+  UBIN_BYTE_              UDEC_BYTE                UHEX_                      UNTIL                  \
+  \  WAITSE3             WINDOW           WRNZ\n\nUBIN_BYTE_ARRAY         UDEC_BYTE_               UHEX_BYTE\
+  \                  UPDATE                   WAITSE4             WMLONG           WRPIN\n\nUBIN_BYTE_ARRAY_\
+  \        UDEC_BYTE_ARRAY          UHEX_BYTE_                 VAR                      WAITUS       \
+  \       WORD             WRWORD\n\nUBIN_LONG               UDEC_BYTE_ARRAY_         UHEX_BYTE_ARRAY\
+  \            VARBASE                  WAITX               WORDFILL         WRZ\n\nUBIN_LONG_       \
+  \       UDEC_LONG                UHEX_BYTE_ARRAY_           WAITATN                  WAITXFI       \
+  \      WORDMOVE         WXPIN\n\nUBIN_LONG_ARRAY         UDEC_LONG_               UHEX_LONG        \
+  \          WAITCT                   WAITXMT             WORDS_1BIT       WYPIN\n\nUBIN_LONG_ARRAY_ \
+  \       UDEC_LONG_ARRAY          UHEX_LONG_                 WAITCT1                  WAITXRL       \
+  \      WORDS_2BIT       WZ\n\nUBIN_REG_ARRAY          UDEC_LONG_ARRAY_         UHEX_LONG_ARRAY     \
+  \       WAITCT2                  WAITXRO             WORDS_4BIT\n\nUBIN_REG_ARRAY_         UDEC_REG_ARRAY\
+  \           UHEX_LONG_ARRAY_           WAITCT3                  WC                  WORDS_8BIT\n\nUBIN_WORD\
+  \               UDEC_REG_ARRAY_          UHEX_REG_ARRAY             WAITFBW                  WCZ   \
+  \              WRBYTE\n\nUBIN_WORD_              UDEC_WORD                UHEX_REG_ARRAY_          \
+  \  WAITINT                  WFBYTE              WRC\n\nUBIN_WORD_ARRAY         UDEC_WORD_          \
+  \     UHEX_WORD                  WAITMS                   WFLONG              WRFAST\n\nX, Y, Z\n\n\
+  X_16P_2DAC8_WFWORD             X_8P_4DAC2_WFBYTE           X_DACS_X_X_0N0            X_IMM_4X8_LUT \
+  \             X_RFBYTE_LUMA8            XOR\n\nX_16P_4DAC4_WFWORD             X_ALT_OFF            \
+  \       X_DACS_X_X_1_0            X_IMM_8X4_1DAC4            X_RFBYTE_RGB8             XORC\n\nX_1ADC8_0P_1DAC8_WFBYTE\
+  \        X_ALT_ON                    X_DACS_X_X_X_0            X_IMM_8X4_2DAC2            X_RFBYTE_RGBI8\
+  \            XORO32\n\nX_1ADC8_8P_2DAC8_WFWORD        X_DACS_0_0_0_0              X_DDS_GOERTZEL_SINC1\
+  \      X_IMM_8X4_4DAC1            X_RFLONG_16X2_LUT         XORZ\n\nX_1P_1DAC1_WFBYTE              X_DACS_0_0_X_X\
+  \              X_DDS_GOERTZEL_SINC2      X_IMM_8X4_LUT              X_RFLONG_32P_4DAC8        XSTOP\n\
+  \nX_2ADC8_0P_2DAC8_WFWORD        X_DACS_0_X_X_X              X_IMM_16X2_1DAC2          X_PINS_OFF  \
+  \               X_RFLONG_32X1_LUT         XYPOL\n\nX_2ADC8_16P_4DAC8_WFLONG       X_DACS_0N0_0N0   \
+  \           X_IMM_16X2_2DAC1          X_PINS_ON                  X_RFLONG_4X8_LUT          XZERO\n\n\
+  X_2P_1DAC2_WFBYTE              X_DACS_0N0_X_X              X_IMM_16X2_LUT            X_RFBYTE_1P_1DAC1\
+  \          X_RFLONG_8X4_LUT          YELLOW\n\nX_2P_2DAC1_WFBYTE              X_DACS_1_0_1_0       \
+  \       X_IMM_1X32_4DAC8          X_RFBYTE_2P_1DAC2          X_RFLONG_RGB24            ZEROX\n\nX_32P_4DAC8_WFLONG\
+  \             X_DACS_1_0_X_X              X_IMM_2X16_2DAC8          X_RFBYTE_2P_2DAC1          X_RFWORD_16P_2DAC8\
+  \        ZSTR\n\nX_4ADC8_0P_4DAC8_WFLONG        X_DACS_1N1_0N0              X_IMM_2X16_4DAC4       \
+  \   X_RFBYTE_4P_1DAC4          X_RFWORD_16P_4DAC4        ZSTR_\n\nX_4P_1DAC4_WFBYTE              X_DACS_3_2_1_0\
+  \              X_IMM_32X1_1DAC1          X_RFBYTE_4P_2DAC2          X_RFWORD_RGB16\n\nX_4P_2DAC2_WFBYTE\
+  \              X_DACS_OFF                  X_IMM_32X1_LUT            X_RFBYTE_4P_4DAC1          X_WRITE_OFF\n\
+  \nX_4P_4DAC1_WFBYTE              X_DACS_X_0_X_X              X_IMM_4X8_1DAC8           X_RFBYTE_8P_1DAC8\
+  \          X_WRITE_ON\n\nX_8P_1DAC8_WFBYTE              X_DACS_X_X_0_0              X_IMM_4X8_2DAC4\
+  \           X_RFBYTE_8P_2DAC4          XCONT\n\nX_8P_2DAC4_WFBYTE              X_DACS_X_X_0_X      \
+  \        X_IMM_4X8_4DAC2           X_RFBYTE_8P_4DAC2          XINIT\n\nCHANGE LOG\n\nDate       Notes\n\
+  \n11/11/2021    Live draft workspace published.\n\n11/02/2022    Official release.\n\nPARALLAX INCORPORATED\n\
+  \nParallax Inc.                  O\uFB03ce: +1 916-624-8333           sales@parallax.com         www.parallax.com/p2\n\
+  \n599 Menlo Drive, Suite 100     Toll Free US: 888-512-1024      support@parallax.com       forums.parallax.com\n\
+  \nRocklin, CA 95765\n\nUSA\n\nPurchase of the P2X8C4M64P does not include any license to emulate any\
+  \ other device nor to communicate\n\nvia any speci\uFB01c proprietary protocol; P2X8C4M64P connectivity\
+  \ objects and code examples provided or\n\nreferenced by Parallax, Inc. are NOT licensed and are provided\
+  \ for research and development purposes only;\n\nend users must seek permission to use licensed protocols\
+  \ for their applications and products from the protocol\n\nlicense holders.\n\nParallax, Inc. makes\
+  \ no warranty, representation or guarantee regarding the suitability of its products\n\nfor any particular\
+  \ purpose, nor does Parallax, Inc. assume any liability arising out of the application or\n\nuse of\
+  \ any product, and speci\uFB01cally disclaims any and all liability, including without limitation consequential\n\
+  \nor incidental damages even if Parallax, Inc. has been advised of the possibility of such damages.\n\
+  \nare trademarks of Parallax, Inc."
 flags_affected:
-  C:
-    formula: MSB of result
+  Z: Result = 0
 parameters:
-- Dest is a register containing the value to zero-extend above bit Src[4:0] and is
-  where the result is written.
-- Src is a register or 9-bit literal whose value (lower 5 bits) identifies the bit
-  of Dest to zero-extend beyond.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Dest is a register containing the value to zero-extend above bit Src[4:0] and is where the result is
+  written.
+- "Src is a register or 9-bit literal whose value (lower 5 bits) identi\uFB01es the bit of Dest to zero-extend\
+  \ beyond."
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - SIGNX
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -29,3 +1033,14 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Zero extend
+category: Math Instruction - Zero-extend value beyond designated bit.
+result: The Dest value is zero-extended above the bit indicated by Src and is stored in Dest. Optionally
+  the C and
+syntax_variants:
+- ZEROX Dest, {#}Src {WC|WZ|WCZ}
+- "ZEROX \uFB01lls the bits of Dest, above the bit indicated by Src[4:0], with zeros; i.e. zero-extending\
+  \ the value. This is"
+- ZEROX    D,{#}S     {WC/WZ/WCZ}         Zero-extend D above bit S[4:0]. C = MSB of result. *                                                                         2
+manual_extraction_date: '2025-01-19'

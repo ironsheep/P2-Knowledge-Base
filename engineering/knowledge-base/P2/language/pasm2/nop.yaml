@@ -4,11 +4,10 @@ encoding: 0000 0000000 000 000000000 000000000
 timing:
   cycles: 2
   type: fixed
-group: Miscellaneous
-description: 'NOP simply consumes two clock cycles; no other operation is performed.
-  Result: Two clock cycles are consumed.'
-category: Miscellaneous Instruction - No operation, just elapse two cycles.
-documentation_source: PASM2 Manual 2022/11/01
+group: Miscellaneous Instruction - No operation, just elapse two cycles.
+description: 'NOP simply consumes two clock cycles; no other operation is performed. Result: Two clock
+  cycles are consumed.'
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_nop
@@ -18,3 +17,7 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 36
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: 'Result: Two clock cycles are consumed.'
+result: Two clock cycles are consumed.
+manual_extraction_date: '2025-01-19'

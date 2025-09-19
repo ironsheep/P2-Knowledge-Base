@@ -19,7 +19,6 @@ description: 'Test pin state with optional XOR operation. Z = C/Z XOR IN[D[5:0]]
   - Pin state monitoring with conditional logic
 
   '
-category: Pins
 flags_affected:
   Z:
     formula: C/Z XOR IN[D[5:0]]
@@ -96,3 +95,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 31
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.623961'

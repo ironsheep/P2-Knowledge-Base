@@ -1,18 +1,28 @@
 instruction: AKPIN
-syntax: AKPIN   {#}S
-encoding: EEEE 1100000 01I 000000001 SSSSSSSSS
+syntax: AKPIN {#}Src
+encoding: "EEEE 1100000 01I 000000001 SSSSSSSSS                Ack Bus              \u2014           \
+  \       \u2014                   2"
 timing:
   cycles: 2
   type: fixed
-group: Smart Pins
-description: 'AKPIN acknowledges the Smart Pin(s) designated by Src. This lowers the
-  corresponding IN signal(s) so that Result: One or more Smart Pins is acknowledged;
-  lowering their corresponding IN signal(s).'
-category: I/O Pin (Smart Logic) Instruction - Acknowledge smart pin(s).
+group: I/O Pin (Smart Logic) Instruction - Acknowledge smart pin(s).
+description: "AKPIN acknowledges the Smart Pin(s) designated by Src. This lowers the corresponding IN\
+  \ signal(s) so that Result: One or more Smart Pins is acknowledged; lowering their corresponding IN\
+  \ signal(s).\n\nAKPIN acknowledges the Smart Pin(s) designated by Src. This lowers the corresponding\
+  \ IN signal(s) so that\n\nfuture Smart Pin events may raise them again later.\n\nSrc[5:0] indicates\
+  \ the pin number (0\u201363). For a range of Smart Pins, Src[5:0] indicates the \uFB01rst pin number\
+  \ (0\u201363)\n\nand Src[10:6] indicates how many contiguous pins beyond the \uFB01rst should be affected\
+  \ (1\u201331).\n\nA 9-bit literal Src is enough to express the starting pin (Src[5:0]) and a range of\
+  \ up to 8 contiguous pins (Src[8:6]).\n\nIf needed, use the augmented literal feature (##Src) to augment\
+  \ Src to the required 11-bit literal value\u2014 this\n\ninserts an AUGS instruction prior.\n\nWhen\
+  \ Src is a register, the register's value bits [10:0] are used as-is to form the 11-bit Smart Pin range,\
+  \ unless a\n\nSETQ instruction immediately precedes the AKPIN instruction; substituting SETQ's Dest[4:0]\
+  \ in place of value\n\nbits[10:6], for AKPIN's use.\n\nThe range calculation (from Src[5:0] up to Src[5:0]+Src[10:6])\
+  \ will wrap within the same 32-pin group (DIRA or\n\nDIRB); it will not cross the port boundary."
 parameters:
-- Src is a register, 9-bit literal, or 11-bit augmented literal whose value identifies
-  the Smart Pin(s) to acknowledge.
-documentation_source: PASM2 Manual 2022/11/01
+- "Src is a register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the Smart\
+  \ Pin(s) to acknowledge."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_akpin
@@ -22,3 +32,13 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 34
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Acknowledge pin
+category: I/O Pin (Smart Logic) Instruction - Acknowledge smart pin(s).
+result: One or more Smart Pins is acknowledged; lowering their corresponding IN signal(s).
+syntax_variants:
+- AKPIN {#}Src
+- SETQ instruction immediately precedes the AKPIN instruction; substituting SETQ's Dest[4:0] in place
+  of value
+- bits[10:6], for AKPIN's use.
+manual_extraction_date: '2025-01-19'

@@ -1,15 +1,20 @@
 instruction: NOT
-syntax: NOT     D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0110001 CZ0 DDDDDDDDD DDDDDDDDD
-description: 'Get !D into D
-
-  '
+syntax: NOT Dest, {#}Src {WC|WZ|WCZ}
+encoding:
+- EEEE 0110001 CZI DDDDDDDDD SSSSSSSSS                   D               !S[31]           Result = 0                2
+- EEEE 0110001 CZ0 DDDDDDDDD DDDDDDDDD                   D               !D[31]           Result = 0                2
+description: "{WC/WZ/WCZ}   Get !D into D. D = !D. C = !D[31]. *\n\nNOT performs a bitwise NOT (inverting\
+  \ all bits) of the value in Src (or in Dest) and stores the result into Dest.\n\nIf the WC or WCZ effect\
+  \ is speci\uFB01ed, the C \uFB02ag value is replaced by the inverse of either S[31] (syntax 1) or D[31]\n\
+  \n(syntax 2).\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the result of\
+  \ !Src (syntax 1) or !Dest (syntax 2) equals\n\nzero, or is cleared (0) if it is non-zero."
 timing:
   cycles: 2
   type: fixed
 group: Math and Logic
 flags_affected:
-  C: '!D[31]'
+  C: '!D[31] Result ='
+  Z: Result = 0
 compiler_operand_format:
   name: operand_du
   pattern: D{,S/#}
@@ -18,3 +23,28 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 3
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+long_description: "!Src (or !Dest) is stored in Dest and \uFB02ags are optionally updated with the NOTed\
+  \ high bit and zero status."
+syntax_variants:
+- NOT Dest, {#}Src {WC|WZ|WCZ}
+- NOT Dest           {WC|WZ|WCZ}
+- "Result: !Src (or !Dest) is stored in Dest and \uFB02ags are optionally updated with the NOTed high\
+  \ bit and zero status."
+- "\u25CF   Dest is the register containing the value to bitwise NOT (syntax 2) or to be replaced by the\
+  \ bitwise NOT of"
+- NOT performs a bitwise NOT (inverting all bits) of the value in Src (or in Dest) and stores the result
+  into Dest.
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
+last_updated: '2025-09-19'
+brief_description: Not
+category: Bit Operation Instruction - Bitwise NOT a value.
+result: "!Src (or !Dest) is stored in Dest and \uFB02ags are optionally updated with the NOTed high bit\
+  \ and zero status."
+parameters:
+- Dest is the register containing the value to bitwise NOT (syntax 2) or to be replaced by the bitwise
+  NOT of Src (syntax 1).
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value will be bitwise
+  NOTed and stored into Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+manual_extraction_date: '2025-01-19'

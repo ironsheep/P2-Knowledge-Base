@@ -3,14 +3,14 @@ syntax: CALLPB  {#}D,{#}S
 encoding: EEEE 1011010 1LI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 4
-  type: fixed
-group: Branch S - Call
+  type: variable
+  range: 4 / 13...20
+group: Flow Control Instruction - Call a subroutine; store return context on the stack
+  and copy D into PA or PB.
 description: 'CALLPA and CALLPB records the current state of the C and Z flags and
   the address of the next instruction (PC + 1 Result: Push current C and Z flags and
   address of the next instruction onto the hardware stack, copy D to PA or PB, and
   set PC to new relative or absolute address.'
-category: Flow Control Instruction - Call a subroutine; store return context on the
-  stack and copy D into PA or PB.
 parameters:
 - Dest is a register, 9-bit literal, or 32-bit augmented literal whose value is copied
   to PA or PB.
@@ -28,3 +28,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 14
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.674467'

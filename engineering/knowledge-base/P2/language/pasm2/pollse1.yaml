@@ -1,15 +1,27 @@
 instruction: POLLSE1
-syntax: POLLSE1          {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 000000100 000100100
+syntax: POLLSE1 {WC|WZ|WCZ}
+encoding:
+- "EEEE 1101011 CZ0 000000100 000100100                  \u2014             SE1 Event          SE1 Event\
+  \                2"
+- "EEEE 1101011 CZ0 000000101 000100100                  \u2014             SE2 Event          SE2 Event\
+  \                2"
+- "EEEE 1101011 CZ0 000000110 000100100                  \u2014             SE3 Event          SE3 Event\
+  \                2"
+- "EEEE 1101011 CZ0 000000111 000100100                  \u2014             SE4 Event          SE4 Event\
+  \                2"
 timing:
   cycles: 2
   type: fixed
 group: Events - Poll
-description: Get SE1 event flag into C/Z, then clear it.
-category: Events - Poll
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+description: "Get SE1 event flag into C/Z, then clear it.\n\nPOLLSE1, POLLSE2, POLLSE3, or POLLSE4 copies\
+  \ the state of the selectable event 1, 2, 3, or 4 \uFB02ag into C and/or\n\nZ and then clears the \uFB02\
+  ag (unless it's being set again by the event sensor).\n\nIf the WC, WZ, or WCZ effect is speci\uFB01\
+  ed, the C \uFB02ag and/or Z \uFB02ag is updated to the state of the corresponding\n\nselectable event\
+  \ \uFB02ag prior to clearing it.\n\nThe selectable event 1, 2, 3, or 4 \uFB02ag is set whenever the\
+  \ corresponding con\uFB01gured event occurs. The selectable\n\nevent \uFB02ag is cleared upon execution\
+  \ of the corresponding SETSEx, POLLSEx, WAITSEx, JSEx, or JNSEx\n\ninstructions."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pollwait
   pattern: ''
@@ -18,3 +30,21 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- POLLSE1 {WC|WZ|WCZ}
+- POLLSE2 {WC|WZ|WCZ}
+- POLLSE3 {WC|WZ|WCZ}
+- POLLSE4 {WC|WZ|WCZ}
+last_updated: '2025-09-19'
+brief_description: Poll selectable event 1/2/3/4
+category: "Event Monitor Instruction - Retrieve and clear selectable event 1, 2, 3, or 4 \uFB02ag."
+result: "Selectable event \uFB02ag 1, 2, 3, or 4 state is optionally copied into C and/or Z, then it is\
+  \ cleared."
+parameters:
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+related:
+- SETSEx
+- WAITSEx
+- JSEx
+- JNSEx
+manual_extraction_date: '2025-01-19'

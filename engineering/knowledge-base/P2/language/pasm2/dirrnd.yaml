@@ -1,30 +1,197 @@
 instruction: DIRRND
-syntax: DIRRND  {#}D           {WCZ}
-encoding: EEEE 1101011 CZL DDDDDDDDD 001000110
+syntax: DIRRND {#}Dest {WCZ}
+encoding:
+- EEEE 1101011 CZL DDDDDDDDD 001000110                 DIRx       Orig DIRx base bit Orig DIRx base bit           2
+- EEEE 1101011 CZI DDDDDDDDD 001000100                DIRx       Orig DIRx base bit Orig DIRx base bit           2
+- EEEE 1101011 CZI DDDDDDDDD 001000101                DIRx       Orig DIRx base bit Orig DIRx base bit           2
+- EEEE 1011011 10I DDDDDDDDD SSSSSSSSS                    D and PC   1
+- EEEE 1011011 00I DDDDDDDDD SSSSSSSSS                   D and PC   1
+- EEEE 1101011 CZL DDDDDDDDD 001011010 DIRx + OUTx Orig OUTx base bit Orig OUTx base bit
+- EEEE 1101011 CZL DDDDDDDDD 001011001 DIRx1 + OUTx Orig OUTx base bit Orig OUTx base bit                           2
+- EEEE 1101011 CZL DDDDDDDDD 001011000 DIRx + OUTx Orig OUTx base bit Orig OUTx base bit
 timing:
   cycles: 2
   type: fixed
-group: Pins
-description: 'DIRRND alters the direction register''s bit(s) designated by Dest to
-  be random low and high (input and output), Result: The I/O pin direction bit(s),
-  described by Dest, are each set randomly low or high (input or output); the rest
-  are left as-is. Z = DIR bit.'
-category: I/O Pin Instruction - Set pin(s) direction to random input/output.
+group: I/O Pin Instruction - Set pin(s) direction to random input/output.
+description: "DIRRND alters the direction register's bit(s) designated by Dest to be random low and high\
+  \ (input and output), Result: The I/O pin direction bit(s), described by Dest, are each set randomly\
+  \ low or high (input or output); the rest are left as-is. Z = DIR bit.\n\nDIRRND alters the direction\
+  \ register's bit(s) designated by Dest to be random low and high (input and output),\n\nbased on bit(s)\
+  \ from the Xoroshiro128** PRNG. All other bits are left unchanged.\n\nDest[5:0] indicates the pin number\
+  \ (0\u201363). For a range of pins, Dest[5:0] indicates the base pin number (0\u201363)\n\nand Dest[10:6]\
+  \ indicates how many contiguous pins beyond the base should be affected (1\u201331).\n\nA 9-bit literal\
+  \ Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]).\n\
+  \nIf needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit literal value\u2014\
+  \ this inserts an\n\nAUGD instruction prior.\n\nWhen Dest is a register, the register's value bits [10:0]\
+  \ are used as-is to form the 11-bit ID range, unless a SETQ\n\ninstruction immediately precedes the\
+  \ DIRRND instruction; substituting SETQ's Dest[4:0] in place of value\n\nbits[10:6], for DIRRND's use.\n\
+  \nThe range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin\
+  \ group (DIRA or\n\nDIRB); it will not cross the port boundary.\n\nIf the WCZ effect is speci\uFB01\
+  ed, the C and Z \uFB02ags are updated to the original state of DIRA / DIRB's base bit,\n\nidenti\uFB01\
+  ed by Dest.\n\nDIRZ / DIRNZ\n\nDirection Z or not Z\n\nI/O Pin Instruction - Set pin(s) direction to\
+  \ input/output according to Z or !Z.\n\nDIRZ    {#}Dest {WCZ}\n\nDIRNZ {#}Dest {WCZ}\n\nResult: The\
+  \ I/O pin direction bit(s), described by Dest, are set to output/input according to Z or !Z; the rest\
+  \ are left\n\nas-is.\n\n\u25CF   Dest is the register, 9-bit literal, or 11-bit augmented literal whose\
+  \ value identi\uFB01es the I/O pin(s) to set to\n\noutput or input.\n\n\u25CF   WCZ is an optional effect\
+  \ to update \uFB02ags.\n\nCOND INSTR        FX     DEST          SRC           Write            C Flag\
+  \             Z Flag             Clocks\n\nEEEE 1101011 CZI DDDDDDDDD 001000100                DIRx\
+  \       Orig DIRx base bit Orig DIRx base bit           2\n\nEEEE 1101011 CZI DDDDDDDDD 001000101  \
+  \              DIRx       Orig DIRx base bit Orig DIRx base bit           2\n\nRelated: DIRC, DIRNC,\
+  \ DIRNOT, DIRRND, DIRL, and DIRH\n\nDIRZ or DIRNZ alters the direction register's bit(s) designated\
+  \ by Dest to equal the state, or inverse state, of the Z\n\n\uFB02ag; i.e. set pin to the output (1)\
+  \ or input (0) direction. All other bits (pins) are left unchanged. Each of these\n\ninstructions, DIRZ\
+  \ and DIRNZ, can affect one or more of the bits within the DIRA or DIRB registers.\n\nDest[5:0] indicates\
+  \ the pin number (0\u201363). For a range of pins, Dest[5:0] indicates the base pin number (0\u2013\
+  63)\n\nand Dest[10:6] indicates how many contiguous pins beyond the base should be affected (1\u2013\
+  31).\n\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of up to 8 contiguous\
+  \ pins (Dest[8:6]).\n\nIf needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit\
+  \ literal value\u2014 this inserts an\n\nAUGD instruction prior.\n\nWhen Dest is a register, the register's\
+  \ value bits [10:0] are used as-is to form the 11-bit ID range, unless a SETQ\n\ninstruction immediately\
+  \ precedes the DIRZ / DIRNZ instruction; substituting SETQ's Dest[4:0] in place of value\n\nbits[10:6],\
+  \ for DIRZ / DIRNZ's use.\n\nIf the WCZ effect is speci\uFB01ed, the C and Z \uFB02ags are updated to\
+  \ the original state of DIRA / DIRB's base bit,\n\nidenti\uFB01ed by Dest.\n\nDJF / DJNF\n\nDecrement,\
+  \ jump if full or not full\n\nFlow Control Instruction - Decrement value and jump if full (-1; $FFFF_FFFF)\
+  \ or not full (<> -1; <> $FFFF_FFFF).\n\nDJF        Dest, {#}Src\n\nDJNF Dest, {#}Src\n\nResult: Dest\
+  \ is decremented, and if the result is full (or not full in syntax 2), PC is set to a new relative (#Src)\
+  \ or\n\nabsolute (Src) address.\n\n\u25CF    Dest is a register whose value is decremented and tested\
+  \ for full or not full.\n\n\u25CF    Src is a register, 9-bit literal, or 20-bit augmented literal whose\
+  \ value is the absolute or relative address to\n\nset PC to. Use # for relative addressing; omit # for\
+  \ absolute addressing.\n\nCOND INSTR             FX      DEST           SRC             Write      \
+  \         C Flag               Z Flag             Clocks\n\nEEEE 1011011 10I DDDDDDDDD SSSSSSSSS   \
+  \                 D and PC   1\n\n\u2014                       \u2014        2 or 4 / 2 or 13\u2013\
+  20\n\nEEEE 1011011 11I DDDDDDDDD SSSSSSSSS                    D and PC   1\n\n\u2014               \
+  \        \u2014        2 or 4 / 2 or 13\u201320\n\n1\n\nDest is always written; PC is written only when\
+  \ the result in Dest is full (or not full in syntax 2).\n\nDJF or DJNF decrements the value in Dest,\
+  \ writes the result, and jumps to the address described by Src if the\n\nresult is full (-1; $FFFF_FFFF;\
+  \ in syntax 1) or not full (<> -1; <> $FFFF_FFFF; in syntax 2).\n\nThe address (Src) can be absolute\
+  \ or relative. To specify an absolute address, Src must be a register containing a\n\n20-bit address\
+  \ value. To specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to +255\n\
+  \ninstructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset (a range\
+  \ of -524288 to\n\n+524287). Offsets are relative to the instruction following the DJF / DJNF. The signed\
+  \ offset value is in units of\n\nwhole instructions\u2014 it is added to PC as-is when in Cog/LUT execution\
+  \ mode and is multiplied by 4 then added to\n\nPC when in Hub execution mode (long-aligned Hub code\
+  \ not required).\n\nDJZ / DJNZ\n\nDecrement, jump if zero or not zero\n\nFlow Control Instruction -\
+  \ Decrement, jump if zero or not zero.\n\nDJZ        Dest, {#}Src\n\nDJNZ Dest, {#}Src\n\nResult: Dest\
+  \ is decremented, and if the result is zero (or not zero in syntax 2), PC is set to a new relative (#Src)\
+  \ or\n\nabsolute (Src) address.\n\n\u25CF    Dest is a register whose value is decremented and tested\
+  \ for zero or not zero.\n\n\u25CF    Src is a register, 9-bit literal, or 20-bit augmented literal whose\
+  \ value is the absolute or relative address to\n\nset PC to. Use # for relative addressing; omit # for\
+  \ absolute addressing.\n\nCOND INSTR             FX      DEST          SRC             Write       \
+  \       C Flag              Z Flag             Clocks\n\nEEEE 1011011 00I DDDDDDDDD SSSSSSSSS      \
+  \             D and PC   1\n\n\u2014                    \u2014          2 or 4 / 2 or 13\u201320\n\n\
+  EEEE 1011011 01I DDDDDDDDD SSSSSSSSS                   D and PC   1\n\n\u2014                    \u2014\
+  \          2 or 4 / 2 or 13\u201320\n\n1\n\nDest is always written; PC is written only when the result\
+  \ in Dest is zero (or not zero in syntax 2).\n\nDJZ or DJNZ decrements the value in Dest, writes the\
+  \ result, and jumps to the address described by Src if the\n\nresult is zero (in syntax 1) or not zero\
+  \ (in syntax 2).\n\nThe address (Src) can be absolute or relative. To specify an absolute address, Src\
+  \ must be a register containing a\n\n20-bit address value. To specify a relative address, use #Label\
+  \ for a 9-bit signed offset (a range of -256 to +255\n\ninstructions) or use ##Label (or insert a prior\
+  \ AUGS instruction) for a 20-bit signed offset (a range of -524288 to\n\n+524287). Offsets are relative\
+  \ to the instruction following the DJZ / DJNZ. The signed offset value is in units of\n\nwhole instructions\u2014\
+  \ it is added to PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added to\n\nPC\
+  \ when in Hub execution mode (long-aligned Hub code not required).\n\nDRVC / DRVNC\n\nDrive C or not\
+  \ C\n\nI/O Pin Instruction - Set pin(s) direction to output and output level to low/high according to\
+  \ C or !C.\n\nDRVC        {#}Dest {WCZ}\n\nDRVNC {#}Dest {WCZ}\n\nResult: The I/O pins described by\
+  \ Dest are set to the output direction and to an output level of low/high according\n\nto C or !C; the\
+  \ rest are left as-is.\n\n\u25CF    Dest is the register, 9-bit literal, or 11-bit augmented literal\
+  \ whose value identi\uFB01es the I/O pin(s) to set to\n\noutput direction and output levels of low or\
+  \ high.\n\n\u25CF    WCZ is an optional effect to update \uFB02ags.\n\nCOND INSTR             FX   \
+  \   DEST          SRC             Write              C Flag              Z Flag             Clocks\n\
+  \nEEEE 1101011 CZL DDDDDDDDD 001011010 DIRx + OUTx Orig OUTx base bit Orig OUTx base bit\n\n1\n\n2\n\
+  \nEEEE 1101011 CZL DDDDDDDDD 001011011 DIRx + OUTx Orig OUTx base bit Orig OUTx base bit\n\n1\n\n2\n\
+  \n1\n\nNew DIRx state is not data-forwarded; the next pipelined instruction sees the old state. Make\
+  \ sure any instruction that reads\n\nor modi\uFB01es DIRx is at least two instructions after a DRVC\
+  \ or DRVNC.\n\nDRVC or DRVNC sets the I/O pin(s) designated by Dest to the output direction and to a\
+  \ low/high output level\n\naccording to the state, or inverse state, of the C \uFB02ag; i.e. alters\
+  \ the pin's direction and output registers. All other\n\npins are left unchanged. Each of these instructions,\
+  \ DRVC and DRVNC, can affect one or more of the bits within\n\nthe DIRA or DIRB and OUTA or OUTB registers.\n\
+  \nDRVC or DRVNC achieves the same effect as two instructions\u2014 OUTC, or OUTNC, followed by DIRH.\n\
+  \nDest[5:0] indicates the pin number (0\u201363). For a range of pins, Dest[5:0] indicates the base\
+  \ pin number (0\u201363)\n\nand Dest[10:6] indicates how many contiguous pins beyond the base should\
+  \ be affected (1\u201331).\n\nA 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and\
+  \ a range of up to 8 contiguous pins (Dest[8:6]).\n\nIf needed, use the augmented literal feature (##Dest)\
+  \ to augment Dest to an 11-bit literal value\u2014 this inserts an\n\nAUGD instruction prior.\n\nWhen\
+  \ Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit ID range, unless\
+  \ a SETQ\n\ninstruction immediately precedes the DRVC / DRVNC instruction; substituting SETQ's Dest[4:0]\
+  \ in place of value\n\nbits[10:6], for DRVC / DRVNC's use.\n\nThe range calculation (from Dest[5:0]\
+  \ up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or\n\nDIRB and OUTA or OUTB);\
+  \ it will not cross the port boundary.\n\nIf the WCZ effect is speci\uFB01ed, the C and Z \uFB02ags\
+  \ are updated to the original state of OUTA / OUTB's base bit,\n\nidenti\uFB01ed by Dest.\n\nDRVH /\
+  \ DRVL\n\nDrive high or low\n\nI/O Pin Instruction - Set pin(s) direction to output and output level\
+  \ high (1) or low (0).\n\nDRVH {#}Dest {WCZ}\n\nDRVL {#}Dest {WCZ}\n\nResult: The I/O pins described\
+  \ by Dest are set to the output direction and to an output level of high or low; the rest\n\nare left\
+  \ as-is.\n\n\u25CF   Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01\
+  es the I/O pin(s) to set to\n\noutput direction and output levels of high or low.\n\n\u25CF   WCZ is\
+  \ an optional effect to update \uFB02ags.\n\nCOND INSTR            FX     DEST          SRC        \
+  \    Write             C Flag             Z Flag              Clocks\n\nEEEE 1101011 CZL DDDDDDDDD 001011001\
+  \ DIRx1 + OUTx Orig OUTx base bit Orig OUTx base bit                           2\n\nEEEE 1101011 CZL\
+  \ DDDDDDDDD 001011000 DIRx + OUTx Orig OUTx base bit Orig OUTx base bit\n\n1\n\n2\n\n1\n\nNew DIRx state\
+  \ is not data-forwarded; the next pipelined instruction sees the old state. Make sure any instruction\
+  \ that reads\n\nor modi\uFB01es DIRx is at least two instructions after a DRVH or DRVL.\n\nDRVH or DRVL\
+  \ sets the I/O pin(s) designated by Dest to the output direction and to a high or low output level;\
+  \ i.e.\n\nalters the pin's direction and output registers. All other pins are left unchanged. Each of\
+  \ these instructions, DRVH\n\nand DRVL, can affect one or more of the bits within the DIRA or DIRB and\
+  \ OUTA or OUTB registers.\n\nDRVH or DRVL achieves the same effect as two instructions\u2014 OUTH, or\
+  \ OUTL, followed by DIRH.\n\nDest[5:0] indicates the pin number (0\u201363). For a range of pins, Dest[5:0]\
+  \ indicates the base pin number (0\u201363)\n\nand Dest[10:6] indicates how many contiguous pins beyond\
+  \ the base should be affected (1\u201331).\n\nA 9-bit literal Dest is enough to express the base pin\
+  \ (Dest[5:0]) and a range of up to 8 contiguous pins (Dest[8:6]).\n\nIf needed, use the augmented literal\
+  \ feature (##Dest) to augment Dest to an 11-bit literal value\u2014 this inserts an\n\nAUGD instruction\
+  \ prior.\n\nWhen Dest is a register, the register's value bits [10:0] are used as-is to form the 11-bit\
+  \ ID range, unless a SETQ\n\ninstruction immediately precedes the DRVH / DRVL instruction; substituting\
+  \ SETQ's Dest[4:0] in place of value\n\nbits[10:6], for DRVH / DRVL's use.\n\nThe range calculation\
+  \ (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within the same 32-pin group (DIRA or\n\nDIRB\
+  \ and OUTA or OUTB); it will not cross the port boundary.\n\nIf the WCZ effect is speci\uFB01ed, the\
+  \ C and Z \uFB02ags are updated to the original state of OUTA / OUTB's base bit,\n\nidenti\uFB01ed by\
+  \ Dest."
 flags_affected:
   Z:
     formula: DIR bit
 parameters:
-- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
-  the pins set randomly to inputs or outputs.
-- WCZ is an optional effect to update flags.
-documentation_source: PASM2 Manual 2022/11/01
+- "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the pins\
+  \ set randomly to inputs or outputs."
+- "WCZ is an optional effect to update \uFB02ags."
+- "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the I/O\
+  \ pin(s) to set to output or input."
+- "WCZ is an optional effect to update \uFB02ags."
+- Dest is a register whose value is decremented and tested for full or not full.
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+- Dest is a register whose value is decremented and tested for zero or not zero.
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+- "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the I/O\
+  \ pin(s) to set to output direction and output levels of low or high."
+- "WCZ is an optional effect to update \uFB02ags."
+- "Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identi\uFB01es the I/O\
+  \ pin(s) to set to output direction and output levels of high or low."
+- "WCZ is an optional effect to update \uFB02ags."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pinop
   pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
-    flags'
+  description: 'Pin operation: destination/immediate pin number 0-511, optional effect flags'
   valueType: 30
 compiler_encoding:
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Direction random
+category: I/O Pin Instruction - Set pin(s) direction to random input/output.
+result: The I/O pins described by Dest are set to the output direction and to an output level of high
+  or low; the rest
+syntax_variants:
+- DIRRND {#}Dest {WCZ}
+- DIRRND alters the direction register's bit(s) designated by Dest to be random low and high (input and
+  output),
+- instruction immediately precedes the DIRRND instruction; substituting SETQ's Dest[4:0] in place of value
+- bits[10:6], for DIRRND's use.
+related:
+- DIRC
+- DIRNC
+- DIRNOT
+- DIRRND
+- DIRL
+- DIRH
+manual_extraction_date: '2025-01-19'

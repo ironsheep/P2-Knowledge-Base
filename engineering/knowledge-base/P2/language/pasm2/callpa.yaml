@@ -3,14 +3,16 @@ syntax: CALLPA  {#}D,{#}S
 encoding: EEEE 1011010 0LI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 4
-  type: fixed
-group: Branch S - Call
-description: Call to S** by pushing {C, Z, 10'b0, PC[19:0]} onto stack, copy D to
-  PA.
-category: Branch S - Call
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+  type: variable
+  range: 4 / 13...20
+group: Flow Control Instruction - Call a subroutine; store return context on the stack
+  and copy D into PA or PB.
+description: 'CALLPA and CALLPB records the current state of the C and Z flags and
+  the address of the next instruction (PC + 1 Result: Push current C and Z flags and
+  address of the next instruction onto the hardware stack, copy D to PA or PB, and
+  set PC to new relative or absolute address.'
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive
 compiler_operand_format:
   name: operand_lsj
   pattern: D/#,S/@
@@ -20,3 +22,12 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 14
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- CALLPA {#}D,{#}S
+last_updated: '2025-09-19T16:04:17.515786'
+parameters:
+- Dest is a register, 9-bit literal, or 32-bit augmented literal whose value is copied
+  to PA or PB.
+- 'Src is a register, 9-bit literal, or 32-bit augmented literal that contains the
+  relative or absolute address to set PC to. Use # for relative addressing; omit #
+  for absolute addressing.'

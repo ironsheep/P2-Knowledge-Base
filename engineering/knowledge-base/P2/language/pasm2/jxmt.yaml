@@ -4,12 +4,13 @@ encoding: EEEE 1011110 01I 000001010 SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-group: Events - Branch
-description: Jump to S** if XMT event flag is set.
-category: Events - Branch
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+group: Event Branch Instruction - Jump if streamer empty event flag set or clear.
+description: 'JXMT or JNXMT checks the cog''s streamer empty event flag and jumps
+  to the address described by Src if the flag Result: If streamer empty event flag
+  is set (or is clear in syntax 2), PC is set to a new relative (#Src) or absolute
+  (Src) address.'
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive
 compiler_operand_format:
   name: operand_jpoll
   pattern: S/#
@@ -18,3 +19,13 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 21
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- JXMT {#}S
+last_updated: '2025-09-19T16:04:17.744137'
+parameters:
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
+  absolute or relative address to set PC to. Use # for relative addressing; omit #
+  for absolute addressing.'
+flags_affected:
+  C:
+    when: PC1

@@ -5,11 +5,10 @@ timing:
   cycles: 2
   type: mode_dependent
 group: Hub FIFO - Write
-description: Used after WRFAST. Write byte in D[7:0] into FIFO.
-category: Hub FIFO - Write
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+description: Used after WRFAST. Write byte in D[7:0] into FIFO.                                                                     2
+  / FIFO IN USE
+documentation_source: PASM2 Manual 2022-11-01
+documentation_level: enhanced
 compiler_operand_format:
   name: operand_l
   pattern: D/#0..511
@@ -18,3 +17,6 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- WFBYTE {#}D
+last_updated: '2025-09-19T16:04:17.066956'

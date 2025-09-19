@@ -4,10 +4,9 @@ encoding: EEEE 1101011 000 DDDDDDDDD 001101111
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
+group: Bit Operation Instruction - Write Z or not Z to register.
 description: 'WRZ or WRNZ writes the state or inverse state of Z (0 or 1) to Dest.
   Result: Dest value is replaced with state of Z or !Z.'
-category: Bit Operation Instruction - Write Z or not Z to register.
 flags_affected:
   C:
     when: D
@@ -23,3 +22,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 24
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.099111'

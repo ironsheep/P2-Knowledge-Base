@@ -8,26 +8,16 @@ group: CORDIC Solver
 description: Convert cartesian coordinates (X, Y) to polar coordinates (length, angle).
   Takes X coordinate in D and Y coordinate in S as 32-bit signed values. Results retrieved
   via GETQX (length) and GETQY (angle) instructions 55 clocks later.
-long_description: 'The QVECTOR instruction performs cartesian to polar coordinate
-  conversion using the P2''s 54-stage pipelined CORDIC solver. It converts a 32-bit
-  signed (X, Y) cartesian coordinate pair into a 32-bit (length, angle) polar coordinate
-  pair.
-
-
-  The instruction takes the X coordinate in the D operand and Y coordinate in the
-  S operand, both as 32-bit signed values. After 55 clocks, the results can be retrieved
-  using GETQX for the length and GETQY for the angle.
-
-
-  The angle result uses P2''s standard angle units where $00000000 = 0°, $40000000
-  = 90°, $80000000 = 180°, and $C0000000 = 270°.
-
-
-  This operation is commonly used in signal processing, graphics, and mathematical
-  calculations requiring coordinate system conversions.
-
-  '
-category: CORDIC Solver
+long_description: "The QVECTOR instruction performs cartesian to polar coordinate\
+  \ conversion using the P2's 54-stage pipelined CORDIC solver. It converts a 32-bit\
+  \ signed (X, Y) cartesian coordinate pair into a 32-bit (length, angle) polar coordinate\
+  \ pair.\n\nThe instruction takes the X coordinate in the D operand and Y coordinate\
+  \ in the S operand, both as 32-bit signed values. After 55 clocks, the results can\
+  \ be retrieved using GETQX for the length and GETQY for the angle.\n\nThe angle\
+  \ result uses P2's standard angle units where $00000000 = 0\xB0, $40000000 = 90\xB0\
+  , $80000000 = 180\xB0, and $C0000000 = 270\xB0.\n\nThis operation is commonly used\
+  \ in signal processing, graphics, and mathematical calculations requiring coordinate\
+  \ system conversions.\n"
 examples:
 - code: ''' Convert point (100, 200) to polar coordinates
 
@@ -68,7 +58,6 @@ timing_notes: Result available 55 clocks after instruction issue. Each cog can i
   one CORDIC instruction per hub window (every 8 clocks).
 documentation_source: p2_datasheet
 documentation_level: comprehensive
-needs_documentation: false
 compiler_operand_format:
   name: operand_ls
   pattern: D/#,S/#
@@ -77,3 +66,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 13
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.069601'

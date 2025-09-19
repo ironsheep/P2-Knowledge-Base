@@ -4,13 +4,12 @@ encoding: EEEE 1101011 CZL DDDDDDDDD 001000101
 timing:
   cycles: 2
   type: fixed
-group: Pins
+group: I/O Pin Instruction - Set pin(s) direction to input/output according to Z or
+  !Z.
 description: 'DIRZ or DIRNZ alters the direction register''s bit(s) designated by
   Dest to equal the state, or inverse state, of the Z Result: The I/O pin direction
   bit(s), described by Dest, are set to output/input according to Z or !Z; the rest
   are left as-is. Z = DIR bit.'
-category: I/O Pin Instruction - Set pin(s) direction to input/output according to
-  Z or !Z.
 flags_affected:
   Z:
     formula: DIR bit
@@ -36,3 +35,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.186997'

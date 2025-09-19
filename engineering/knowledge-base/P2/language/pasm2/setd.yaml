@@ -1,26 +1,39 @@
 instruction: SETD
-syntax: SETD    D,{#}S
-encoding: EEEE 1001101 10I DDDDDDDDD SSSSSSSSS
+syntax: SETD Dest, {#}Src
+encoding: "EEEE 1001101 10I DDDDDDDDD SSSSSSSSS                        D                    \u2014   \
+  \             \u2014                     2"
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'SETD copies Src[8:0] to the D field of the template, Dest, to be used
-  with an ALTI instruction. Bits outside the D Result: The D field [17:9] of template
-  Dest is set to Src[8:0].'
-category: Indirection Instruction - Set template D field for ALTI.
+group: Indirection Instruction - Set template D field for ALTI.
+description: "SETD copies Src[8:0] to the D field of the template, Dest, to be used with an ALTI instruction.\
+  \ Bits outside the D Result: The D field [17:9] of template Dest is set to Src[8:0].\n\nSETD copies\
+  \ Src[8:0] to the D \uFB01eld of the template, Dest, to be used with an ALTI instruction. Bits outside\
+  \ the D\n\n\uFB01eld remain unaffected. The D \uFB01eld (or Dest \uFB01eld) holds the address of a register\
+  \ (or sometimes a literal value) for\n\nthe instruction to use as it's destination value, and usually\
+  \ as its result destination, during its execution.\n\nThe ALTI template is a 32-bit value with the following\
+  \ format:\n\nBits             31:28 (4 bits)          27:19 (9 bits)              18            17:9\
+  \ (9 bits)          8:0 (9 bits)\n\nField Description       Condition Field         Result Field   \
+  \    Indirect \"I\" Field     Dest \"D\" Field       Source \"S\" Field\n\nSETD can also be used in\
+  \ self-modifying Reg RAM code. Unlike with ALTx instructions, when used this way, \uFB01eld\n\nvalue\
+  \ modi\uFB01cation occurs in the program code itself (not the instruction pipeline); code is altered,\
+  \ values persist.\n\nDue to the instruction pipeline nature, after modifying a code register, it is\
+  \ necessary to elapse at least two\n\ninstructions before executing the modi\uFB01ed register.\n\nSETD\
+  \         inst, op                        'set \"inst\" register[17:9] to op[8:0]\n\nNOP           \
+  \                               '\uFB01rst spacer instruction, could be anything\n\nNOP            \
+  \                              'second spacer instruction, could be anything\n\ninst      MOV      \
+  \    x, y                            'operate on x using y; x may become any register per SETD"
 flags_affected:
   C:
     when: D
 parameters:
 - Dest is the register whose 32-bit value is a template for use with an ALTI instruction.
-- Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the D field
-  of Dest.
+- "Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the D \uFB01eld of Dest."
 related:
 - SETS
 - SETR
 - ALTI
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -30,3 +43,14 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Set destination
+category: "Indirection Instruction - Set template D \uFB01eld for ALTI."
+result: "The D \uFB01eld [17:9] of template Dest is set to Src[8:0]. Copyright \xA9 Parallax Inc. 2022/11/01\
+  \ \u25AA Propeller 2 Assembly Language Manual            \u25AA   Page 124"
+syntax_variants:
+- SETD Dest, {#}Src
+- "SETD copies Src[8:0] to the D \uFB01eld of the template, Dest, to be used with an ALTI instruction.\
+  \ Bits outside the D"
+- SETD         inst, op                        'set "inst" register[17:9] to op[8:0]
+manual_extraction_date: '2025-01-19'

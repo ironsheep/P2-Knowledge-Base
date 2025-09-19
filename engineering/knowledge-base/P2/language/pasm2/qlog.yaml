@@ -28,7 +28,6 @@ long_description: 'The QLOG instruction performs integer to logarithm conversion
   when combined with QEXP.
 
   '
-category: CORDIC Solver
 examples:
 - code: ''' Calculate logarithm of 1000
 
@@ -80,7 +79,6 @@ format_notes: 'Result format: {5''whole_exponent, 27''fractional_exponent}. Use 
   QEXP for exponential operations.'
 documentation_source: p2_datasheet
 documentation_level: comprehensive
-needs_documentation: false
 compiler_operand_format:
   name: operand_l
   pattern: D/#0..511
@@ -89,3 +87,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.192894'

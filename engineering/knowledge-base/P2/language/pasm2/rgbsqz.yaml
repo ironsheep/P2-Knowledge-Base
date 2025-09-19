@@ -6,10 +6,8 @@ timing:
   type: fixed
 group: Math and Logic
 description: Squeeze 8:8:8 RGB value in D[31:8] into 5:6:5 value in D[15:0].
-category: Math and Logic
 documentation_source: original
 documentation_level: minimal
-needs_documentation: true
 compiler_operand_format:
   name: operand_d
   pattern: D
@@ -18,3 +16,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 24
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.545480'

@@ -1,27 +1,31 @@
 instruction: SUBSX
-syntax: SUBSX   D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0001111 CZI DDDDDDDDD SSSSSSSSS
+syntax: SUBSX Dest, {#}Src {WC|WZ|WCZ}
+encoding: EEEE 0001111 CZI DDDDDDDDD SSSSSSSSS                     D          sign of D-(S+C)    Z AND
+  (Result = 0)           2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'SUBSX subtracts the signed value of Src plus C from the signed Dest
-  and stores the result into the Dest register. Result: Difference of signed Dest
-  and signed Src (plus C) is stored in Dest and optionally the C and Z flags are updated
-  to the extended sign and zero status.'
-category: Math Instruction - Subtract one signed extended value from another.
+group: Math Instruction - Subtract one signed extended value from another.
+description: "SUBSX subtracts the signed value of Src plus C from the signed Dest and stores the result\
+  \ into the Dest register. Result: Difference of signed Dest and signed Src (plus C) is stored in Dest\
+  \ and optionally the C and Z flags are updated to the extended sign and zero status.\n\nSUBSX subtracts\
+  \ the signed value of Src plus C from the signed Dest and stores the result into the Dest register.\n\
+  \nThe SUBSX instruction is used to perform signed multi-long (extended) subtraction, such as 64-bit\
+  \ subtraction.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if the result\
+  \ is negative (Result[31] = 1), or is cleared (0) if\n\npositive. Use WC or WCZ on preceding SUB and\
+  \ SUBX instructions for proper \uFB01nal C \uFB02ag.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the\
+  \ Z \uFB02ag is set (1) if Z was previously set and the result of Dest - (Src + C) is\n\nzero, or it\
+  \ is cleared (0) if non-zero. Use WZ or WCZ on preceding SUB and SUBX instructions for proper \uFB01\
+  nal Z \uFB02ag.\n\nTo subtract signed multi-long values, use SUB (not SUBS) followed possibly by SUBX,\
+  \ and \uFB01nally SUBSX as\n\ndescribed in Subtracting Two Multi-Long Values."
 flags_affected:
-  C:
-    formula: correct sign of (D - (S + C))
-  Z:
-    formula: Z AND (result == 0)
+  Z: (Result = 0)
 parameters:
-- Dest is a register containing the value to subtract Src plus C from, and is where
-  the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C
-  is subtracted from Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
-documentation_source: PASM2 Manual 2022/11/01
+- Dest is a register containing the value to subtract Src plus C from, and is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is subtracted from
+  Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -31,3 +35,18 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Subtract signed, extended
+category: Math Instruction - Subtract one signed extended value from another.
+result: "Difference of signed Dest and signed Src (plus C) is stored in Dest and optionally the C and\
+  \ Z \uFB02ags are"
+syntax_variants:
+- SUBSX Dest, {#}Src {WC|WZ|WCZ}
+- SUBSX subtracts the signed value of Src plus C from the signed Dest and stores the result into the Dest
+  register.
+related:
+- SUB
+- SUBX
+- SUBSX
+- ADDSX
+manual_extraction_date: '2025-01-19'

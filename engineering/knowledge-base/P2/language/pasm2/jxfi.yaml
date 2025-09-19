@@ -3,13 +3,13 @@ syntax: JXFI    {#}S
 encoding: EEEE 1011110 01I 000001011 SSSSSSSSS
 timing:
   cycles: 2
-  type: fixed
+  type: variable
+  range: 13...20
 group: Events - Branch
-description: Jump to S** if XFI event flag is set.
-category: Events - Branch
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+description: "Jump to S** if XFI event \uFB02ag is set.                          \
+  \                                               2 or 4 / 2 or"
+documentation_source: PASM2 Manual 2022-11-01
+documentation_level: enhanced
 compiler_operand_format:
   name: operand_jpoll
   pattern: S/#
@@ -18,3 +18,6 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 21
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- JXFI {#}S
+last_updated: '2025-09-19T16:04:17.424604'

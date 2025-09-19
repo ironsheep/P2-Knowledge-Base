@@ -1,18 +1,35 @@
 instruction: WAITCT3
-syntax: WAITCT3          {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 000010011 000100100
+syntax: WAITCT1 {WC|WZ|WCZ}
+encoding:
+- "EEEE 1101011 CZ0 000010001 000100100                 \u2014          Timeout Abort     Timeout Abort\
+  \               2+"
+- "EEEE 1101011 CZ0 000010010 000100100                 \u2014          Timeout Abort     Timeout Abort\
+  \               2+"
+- "EEEE 1101011 CZ0 000010011 000100100                 \u2014          Timeout Abort     Timeout Abort\
+  \               2+"
 timing:
   cycles: 2
   type: variable
 group: Events - Wait
-description: Z = timeout.
-category: Events - Wait
+description: "Wait for CT3 event \uFB02ag, then clear it. Prior SETQ sets optional CT timeout value. C/Z\
+  \ = timeout.                              2+\n\nWAITCT1, WAITCT2, or WAITCT3 waits for a counter 1,\
+  \ 2, or 3 event to occur (unless the event \uFB02ag is already set),\n\nthen clears the event \uFB02\
+  ag (unless it's being set again by the event sensor) and resumes execution at the next\n\ninstruction.\
+  \ Optionally, WAITCTx can time-out if the counter event doesn't occur soon enough; setting C and/or\
+  \ Z\n\n\uFB02ags and then resuming execution at the next instruction.\n\nTo set the optional timeout,\
+  \ insert a SETQ (with a future System Counter target value) right before WAITCTx.\n\nThe WC, WZ, or\
+  \ WCZ effect is recommended only if the optional timeout is speci\uFB01ed, in which case the C \uFB02\
+  ag and/or\n\nZ \uFB02ag is set (1) if a timeout occurred before the event, or is cleared (0) if the\
+  \ event occurred before the timeout.\n\nDuring a wait, the pipeline is stalled; no instructions execute\
+  \ and no interrupts are processed in the cog until the\n\nwait condition ends.\n\nThe counter 1, 2,\
+  \ or 3 event \uFB02ag is set whenever the System Counter (CT) passes the value in the CT1, CT2, or CT3\n\
+  \nevent trigger register, respectively; i.e. MSB of (CT - CTx is 0). The counter event \uFB02ags are\
+  \ cleared upon execution\n\nof the corresponding ADDCTx, POLLCTx, WAITCTx, JCTx, or JNCTx instructions."
 flags_affected:
   Z:
     formula: timeout
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pollwait
   pattern: ''
@@ -21,3 +38,33 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+long_description: "Wait for counter 1, 2, or 3 event, then clear the \uFB02ag; optionally aborting on\
+  \ timeout and setting C and/or Z\non abort."
+syntax_variants:
+- WAITCT1 {WC|WZ|WCZ}
+- WAITCT2 {WC|WZ|WCZ}
+- WAITCT3 {WC|WZ|WCZ}
+last_updated: '2025-09-19'
+brief_description: Wait counter 1/2/3
+group_membership:
+  group_id: counter_event_waits
+  group_file: groups/counter_event_waits.yaml
+  related:
+  - waitct1
+  - waitct2
+specifics:
+  counter_number: 3
+  event_flag: CT3
+quick_example: WAITCT3  ; Wait for counter 3 event flag, then clear it
+has_group_documentation: true
+category: "Event Monitor Instruction - Wait for and clear counter 1, 2, or 3 event \uFB02ag."
+result: "Wait for counter 1, 2, or 3 event, then clear the \uFB02ag; optionally aborting on timeout and\
+  \ setting C and/or Z"
+parameters:
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+related:
+- ADDCTx
+- POLLCTx
+- JCTx
+- JNCTx
+manual_extraction_date: '2025-01-19'

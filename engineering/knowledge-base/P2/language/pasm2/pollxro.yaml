@@ -1,17 +1,22 @@
 instruction: POLLXRO
-syntax: POLLXRO          {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 000001100 000100100
+syntax: POLLXRO {WC|WZ|WCZ}
+encoding: "EEEE 1101011 CZ0 000001100 000100100                            \u2014      XRO Event     \
+  \     XRO Event                2"
 timing:
   cycles: 2
   type: fixed
-group: Events - Poll
-description: 'POLLXRO copies the state of the streamer NCO rollover event flag into
-  C and/or Z and then clears the flag (unless Result: Streamer-NCO-rollover event
-  flag is optionally copied into C and/or Z, then it is cleared.'
-category: Event Monitor Instruction - Retrieve and clear streamer-NCO-rollover event
-  flag.
+group: Event Monitor Instruction - Retrieve and clear streamer-NCO-rollover event flag.
+description: "POLLXRO copies the state of the streamer NCO rollover event flag into C and/or Z and then\
+  \ clears the flag (unless Result: Streamer-NCO-rollover event flag is optionally copied into C and/or\
+  \ Z, then it is cleared.\n\nPOLLXRO copies the state of the streamer NCO rollover event \uFB02ag into\
+  \ C and/or Z and then clears the \uFB02ag (unless\n\nit's being set again by the event sensor).\n\n\
+  If the WC, WZ, or WCZ effect is speci\uFB01ed, the C \uFB02ag and/or Z \uFB02ag is updated to the state\
+  \ of the streamer-NCO-\n\nrollover event \uFB02ag prior to clearing it.\n\nThe streamer-NCO-rollover\
+  \ event \uFB02ag is set whenever the streamer's numerically-controlled oscillator (NCO) rolls\n\nover.\
+  \ The streamer-NCO-rollover event \uFB02ag is cleared upon execution of XINIT, XZERO, XCONT, POLLXRO,\n\
+  \nWAITXRO, JXRO, or JNXRO instructions."
 parameters:
-- WC, WZ, or WCZ are optional effects to update flags.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - XINIT
 - XZERO
@@ -19,7 +24,7 @@ related:
 - WAITXRO
 - JXRO
 - JNXRO
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pollwait
@@ -29,3 +34,10 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Poll streamer rollover NCO
+category: "Event Monitor Instruction - Retrieve and clear streamer-NCO-rollover event \uFB02ag."
+result: "Streamer-NCO-rollover event \uFB02ag is optionally copied into C and/or Z, then it is cleared."
+syntax_variants:
+- POLLXRO {WC|WZ|WCZ}
+manual_extraction_date: '2025-01-19'

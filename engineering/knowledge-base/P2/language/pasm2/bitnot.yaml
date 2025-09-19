@@ -1,30 +1,49 @@
 instruction: BITNOT
-syntax: BITNOT  D,{#}S         {WCZ}
-encoding: EEEE 0100111 CZI DDDDDDDDD SSSSSSSSS
+syntax: BITNOT Dest, {#}Src {WCZ}
+encoding: EEEE 0100111 CZI DDDDDDDDD SSSSSSSSS                  D         Original D base bit Original
+  D base bit          2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'BITNOT alters the Dest bit(s) designated by Src to their inverse state.
-  All other bits are left unchanged. Result: Dest bit(s) described by Src are toggled
-  to their opposite state(s); the rest are left as-is. Z = original D[S[4:0]].'
-category: Bit Operation Instruction - Toggle bit(s) to the opposite state.
+group: Bit Operation Instruction - Toggle bit(s) to the opposite state.
+description: "BITNOT alters the Dest bit(s) designated by Src to their inverse state. All other bits are\
+  \ left unchanged. Result: Dest bit(s) described by Src are toggled to their opposite state(s); the rest\
+  \ are left as-is. Z = original D[S[4:0]].\n\nBITNOT alters the Dest bit(s) designated by Src to their\
+  \ inverse state. All other bits are left unchanged.\n\nSrc[4:0] indicates the bit number (0\u201431).\
+  \ For a range of bits, Src[4:0] indicates the base bit number (0\u201431) and\n\nSrc[9:5] indicates\
+  \ how many contiguous bits beyond the base should be affected (1\u201331).\n\nA 9-bit literal Src is\
+  \ enough to express the base bit (Src[4:0]) and a range of up to 16 contiguous bits (Src[8:5]). If\n\
+  \nneeded, use the augmented literal feature (##Src) to augment Src to a 10-bit literal value\u2014 this\
+  \ inserts an AUGS\n\ninstruction prior.\n\nWhen Src is a register, the register's value bits [9:0] are\
+  \ used as-is to form the 10-bit ID range, unless a SETQ\n\ninstruction immediately precedes the BITNOT\
+  \ instruction; substituting SETQ's Dest[4:0] in place of value bits[9:5],\n\nfor BITNOT's use.\n\nIf\
+  \ the WCZ effect is speci\uFB01ed, the C and Z \uFB02ags are updated to the original state of Dest's\
+  \ base bit, identi\uFB01ed by Src."
 flags_affected:
   Z:
     formula: original D[S[4:0]]
 parameters:
 - Dest is the register whose value will have one or more bits toggled.
-- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies
-  the bit(s) to modify.
-- WCZ is an optional effect to update flags.
-documentation_source: PASM2 Manual 2022/11/01
+- "Src is a register, 9-bit literal, or 10-bit augmented literal whose value identi\uFB01es the bit(s)\
+  \ to modify."
+- "WCZ is an optional effect to update \uFB02ags."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_bitx
   pattern: D,S/#
-  description: 'Bit manipulation with optional effect flags: Destination register,
-    bit position'
+  description: 'Bit manipulation with optional effect flags: Destination register, bit position'
   valueType: 1
 compiler_encoding:
   operandFormat: 1
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Bit not
+category: Bit Operation Instruction - Toggle bit(s) to the opposite state.
+result: Dest bit(s) described by Src are toggled to their opposite state(s); the rest are left as-is.
+syntax_variants:
+- BITNOT Dest, {#}Src {WCZ}
+- BITNOT alters the Dest bit(s) designated by Src to their inverse state. All other bits are left unchanged.
+- instruction immediately precedes the BITNOT instruction; substituting SETQ's Dest[4:0] in place of value
+  bits[9:5],
+manual_extraction_date: '2025-01-19'

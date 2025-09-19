@@ -3,13 +3,13 @@ syntax: TJS     D,{#}S
 encoding: EEEE 1011101 10I DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
-  type: fixed
+  type: variable
+  range: 13...20
 group: Branch S - Test
-description: Test D and jump to S** if D is signed (D[31] = 1).
-category: Branch S - Test
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+description: Test D and jump to S** if D is signed (D[31] = 1).                                                                   2
+  or 4 / 2 or
+documentation_source: PASM2 Manual 2022-11-01
+documentation_level: enhanced
 compiler_operand_format:
   name: operand_dsj
   pattern: D,S/@
@@ -18,3 +18,6 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 12
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- TJS D,{#}S
+last_updated: '2025-09-19T16:04:16.989327'

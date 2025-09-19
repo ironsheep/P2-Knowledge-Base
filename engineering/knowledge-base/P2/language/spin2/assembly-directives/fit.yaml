@@ -1,8 +1,10 @@
-directive: "FIT"
+directive: FIT
 type: assembly_directive
-category: "Assembly"
-description: |
-  Ensure code fits in specified limit
-syntax: "['FIT limit']"
+description: 'Ensure code fits in specified limit
+
+  '
+syntax: '[''FIT limit'']'
 examples:
-  - "FIT $1F0  // Must fit in COG space"
+- FIT $1F0  // Must fit in COG space
+group: Assembly
+last_updated: '2025-09-19T16:04:17.648005'

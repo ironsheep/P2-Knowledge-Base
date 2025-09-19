@@ -3,18 +3,17 @@ syntax: JNATN   {#}S
 encoding: EEEE 1011110 01I 000011110 SSSSSSSSS
 timing:
   cycles: 2
-  type: fixed
+  type: variable
+  range: 13...20
 group: Events - Branch
-description: 'JATN or JNATN checks the cog''s attention signal and jumps to the address
-  described by Src if attention is set (in Result: If ATN event flag is set (or is
-  clear in syntax 2), PC is set to a new relative (#Src) or absolute (Src) address.'
-category: Event Branch Instruction - Jump if attention flag is set or clear.
+description: "Jump to S** if ATN event \uFB02ag is set.                          \
+  \                                               2 or 4 / 2 or"
 parameters:
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
-documentation_source: PASM2 Manual 2022/11/01
-documentation_level: comprehensive
+documentation_source: PASM2 Manual 2022-11-01
+documentation_level: enhanced
 compiler_operand_format:
   name: operand_jpoll
   pattern: S/#
@@ -23,3 +22,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 21
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.738857'

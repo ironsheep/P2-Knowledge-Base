@@ -1,17 +1,22 @@
 instruction: POLLFBW
-syntax: POLLFBW          {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 000001001 000100100
+syntax: POLLFBW {WC|WZ|WCZ}
+encoding: "EEEE 1101011 CZ0 000001001 000100100                 \u2014            FBW Event         FBW\
+  \ Event                  2"
 timing:
   cycles: 2
   type: fixed
-group: Events - Poll
-description: 'POLLFBW copies the state of the FIFO-interface-block-wrap event flag
-  into C and/or Z and then clears the flag Result: FIFO-interface-block-wrap event
-  flag is optionally copied into C and/or Z, then it is cleared.'
-category: Event Monitor Instruction - Retrieve and clear FIFO-interface-block-wrap
-  event flag.
+group: Event Monitor Instruction - Retrieve and clear FIFO-interface-block-wrap event flag.
+description: "POLLFBW copies the state of the FIFO-interface-block-wrap event flag into C and/or Z and\
+  \ then clears the flag Result: FIFO-interface-block-wrap event flag is optionally copied into C and/or\
+  \ Z, then it is cleared.\n\nPOLLFBW copies the state of the FIFO-interface-block-wrap event \uFB02ag\
+  \ into C and/or Z and then clears the \uFB02ag\n\n(unless it's being set again by the event sensor).\n\
+  \nIf the WC, WZ, or WCZ effect is speci\uFB01ed, the C \uFB02ag and/or Z \uFB02ag is updated to the\
+  \ state of the FIFO-interface\u2011block\u2011\n\nwrap event \uFB02ag prior to clearing it.\n\nThe FIFO-interface-block-wrap\
+  \ event \uFB02ag is set whenever the Hub RAM FIFO interface exhausts its block count\n\nand reloads\
+  \ its block count and start address. The FIFO-interface-block-wrap event \uFB02ag is cleared upon execution\n\
+  \nof RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, or JNFBW instructions."
 parameters:
-- WC, WZ, or WCZ are optional effects to update flags.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - RDFAST
 - WRFAST
@@ -19,7 +24,7 @@ related:
 - WAITFBW
 - JFBW
 - JNFBW
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pollwait
@@ -29,3 +34,10 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Poll FIFO block wrap
+category: "Event Monitor Instruction - Retrieve and clear FIFO-interface-block-wrap event \uFB02ag."
+result: "FIFO-interface-block-wrap event \uFB02ag is optionally copied into C and/or Z, then it is cleared."
+syntax_variants:
+- POLLFBW {WC|WZ|WCZ}
+manual_extraction_date: '2025-01-19'

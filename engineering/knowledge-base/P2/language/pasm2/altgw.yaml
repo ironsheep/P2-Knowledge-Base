@@ -1,23 +1,47 @@
 instruction: ALTGW
-syntax: ALTGW   D,{#}S
-encoding: EEEE 1001011 111 DDDDDDDDD 000000000
+syntax: ALTGW Dest, {#}Src
+encoding: EEEE 1001011 11I DDDDDDDDD SSSSSSSSS                     D 1
 timing:
-  cycles: 2
+  cycles: 1
   type: fixed
-group: Register Indirection
-description: 'ALTGW should be followed by GETWORD or ROLWORD— it modifies the GETWORD
-  / ROLWORD instruction''s Src and Result: The next instruction''s pipelined Src and
-  Num fields are altered to be (Src + Dest[9:1]) & $1FF, or just Dest[9:1] for syntax
-  2, and Dest[0], respectively.'
-category: Indirection Instruction - Alter subsequent GETWORD / ROLWORD instruction.
+group: Indirection Instruction - Alter subsequent GETWORD / ROLWORD instruction.
+description: "ALTGW should be followed by GETWORD or ROLWORD\u2014 it modifies the GETWORD / ROLWORD instruction's\
+  \ Src and Result: The next instruction's pipelined Src and Num fields are altered to be (Src + Dest[9:1])\
+  \ & $1FF, or just Dest[9:1] for syntax 2, and Dest[0], respectively.\n\nALTGW should be followed by\
+  \ GETWORD or ROLWORD\u2014 it modi\uFB01es the GETWORD / ROLWORD instruction's Src and\n\nNum values,\
+  \ enabling code to iterate through multiple words of data across a range of Reg RAM. GETWORD /\n\nROLWORD's\
+  \ Src value is changed to (Src + Dest[9:1]) & $1FF (for syntax 1), or to Dest[9:1] (for syntax 2), and\
+  \ its\n\nNum value is changed to Dest[0].\n\nDest[9:1] corresponds to the target long register's 9-bit\
+  \ address and Dest[0] is the word ID within it; values of 0\u20131\n\nidentify individual words, by\
+  \ position, in least-signi\uFB01cant word order. Iteratively executing ALTGW followed by\n\nGETWORD\
+  \ or ROLWORD, and each time incrementing ALTGW's 10-bit Dest value by one, effectively reads a stream\
+  \ of\n\nword values from Reg RAM as if it were all made of word-sized registers.\n\nIn syntax 1, Src\
+  \ consists of two 9-bit \uFB01elds; a base address (Src[8:0]) and a signed auto-indexer (Src[17:9]).\n\
+  \n\u25CF   The base is the Reg RAM address where the series of words begins. ALTGW adds the long index\n\
+  \n(Dest[9:1]) to the base (Src[8:0]) to locate the register holding the target word. The word ID (Dest[0])\n\
+  \nidenti\uFB01es the word's position within that long register.\n\n\u25CF   At the end of ALTGW execution,\
+  \ the optional auto-indexer value (usually 0, 1, or -1) is added to the 10-bit\n\nindex (Dest) for a\
+  \ future ALTGW+GETWORD or ROLWORD iteration.\n\nIn syntax 2, Dest serves as the full word address\u2014\
+  \ it's the same format as in syntax 1, but represents the target\n\nlong's absolute address and its\
+  \ word index instead of the long's relative index (to add to a base) and word index."
 parameters:
-- Dest is the register whose 10-bit value is the index, or the full word address for
-  the GETWORD / ROLWORD instruction to read.
-- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value
-  contains a base long address (Src[8:0]; added to index (Dest[9:1]) for GETWORD /
-  ROLWORD) and also an optional auto-indexer value (Src[17:9]; added to Dest at end
-  of execution).
-documentation_source: PASM2 Manual 2022/11/01
+- Dest is the register whose 10-bit value is the index, or the full word address for the GETWORD / ROLWORD
+  instruction to read.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base
+  long address (Src[8:0]; added to index (Dest[9:1]) for GETWORD / ROLWORD) and also an optional auto-indexer
+  value (Src[17:9]; added to Dest at end of execution).
+- "The base is the Reg RAM address where the series of words begins. ALTGW adds the long index (Dest[9:1])\
+  \ to the base (Src[8:0]) to locate the register holding the target word. The word ID (Dest[0]) identi\uFB01\
+  es the word's position within that long register."
+- At the end of ALTGW execution, the optional auto-indexer value (usually 0, 1, or -1) is added to the
+  10-bit index (Dest) for a future ALTGW+GETWORD or ROLWORD iteration.
+- The instruction following ALTGW is shielded from interrupt
+- "ALTGW alters the next instruction regardless of its kind\u2014 the intention is for it to be a GETWORD\
+  \ / ROLWORD"
+- "Field value modi\uFB01cation occurs in the instruction pipeline only; code is not altered, values do\
+  \ not persist"
+- "SETQ / SETQ2 does not affect ALTx instructions\u2014 the Q value passes through to the next instruction"
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_duiz
@@ -27,3 +51,19 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 5
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Alter get word
+category: Indirection Instruction - Alter subsequent GETWORD / ROLWORD instruction.
+result: "The next instruction's pipelined Src and Num \uFB01elds are altered to be (Src + Dest[9:1]) &\
+  \ $1FF, or just"
+syntax_variants:
+- ALTGW Dest, {#}Src
+- ALTGW Dest
+- GETWORD or ROLWORD, and each time incrementing ALTGW's 10-bit Dest value by one, effectively reads a
+  stream of
+- index (Dest) for a future ALTGW+GETWORD or ROLWORD iteration.
+usage_notes: "The instruction following ALTGW is shielded from interrupt\nALTGW alters the next instruction\
+  \ regardless of its kind\u2014 the intention is for it to be a GETWORD / ROLWORD\nField value modi\uFB01\
+  cation occurs in the instruction pipeline only; code is not altered, values do not persist\nSETQ / SETQ2\
+  \ does not affect ALTx instructions\u2014 the Q value passes through to the next instruction"
+manual_extraction_date: '2025-01-19'

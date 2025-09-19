@@ -4,15 +4,17 @@ encoding: EEEE 1101011 CZL DDDDDDDDD 001010010
 timing:
   cycles: 2
   type: fixed
-group: Pins
-description: Z = OUT bit.
-category: Pins
+group: I/O Pin Instruction - Set pin(s) direction to input and an output level of
+  low/high according to C.
+description: 'FLTC or FLTNC sets the I/O pin(s) designated by Dest to the input direction
+  and to a low/high output level Result: The I/O pins described by Dest are set to
+  the input direction and to an output level of low/high according to C or !C; the
+  rest are left as-is. Z = OUT bit.'
 flags_affected:
   Z:
     formula: OUT bit
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pinop
   pattern: D/#0..511 {WC/WZ}
@@ -22,3 +24,10 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- FLTC {#}D
+last_updated: '2025-09-19T16:04:17.342423'
+parameters:
+- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
+  the I/O pin(s) to set to input direction and output levels of low or high.
+- WCZ is an optional effect to update flags.

@@ -4,13 +4,12 @@ encoding: EEEE 1101011 CZ1 0cccczzzz 001101111
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
+group: Flag Modification Instruction - Modify C and/or Z flag(s) according to modifier
+  mode and current state(s).
 description: 'MODC, MODZ, or MODCZ sets or clears the C and/or Z flag based on the
   mode described by the given Modifier Result: The C and/or Z flag is set or cleared
   according to the given Modifier and the current state of the C and/or Z flags. C
   = cccc[{C,Z}], Z = zzzz[{C,Z}].'
-category: Flag Modification Instruction - Modify C and/or Z flag(s) according to modifier
-  mode and current state(s).
 flags_affected:
   C:
     formula: cccc[{C,Z}], Z = zzzz[{C,Z}]
@@ -31,3 +30,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 27
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.620023'

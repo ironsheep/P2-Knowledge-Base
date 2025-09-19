@@ -1,82 +1,88 @@
 instruction: ALTGB
-syntax: ALTGB   D,{#}S
-encoding: EEEE 1001011 011 DDDDDDDDD 000000000
+syntax: ALTGB Dest, {#}Src
+encoding: EEEE 1001011 01I DDDDDDDDD SSSSSSSSS                     D 1
 timing:
-  cycles: 2
+  cycles: 1
   type: fixed
-group: Register Indirection
-description: 'ALTGB should be followed by GETBYTE or ROLBYTE— it modifies the GETBYTE
-  / ROLBYTE instruction''s
-
-  Src and Result: The next instruction''s pipelined Src and Num fields are altered
-  to be (Src + Dest[10:2])
-
-  & $1FF, or just Dest[10:2] for syntax 2, and Dest[1:0], respectively.
-
-
-  Perfect for:
-
-  - Table lookups (commutation tables, sine tables)
-
-  - String processing with auto-increment
-
-  - Byte array traversal
-
-  - Character mapping and translation
-
-  '
-category: Indirection Instruction - Alter subsequent GETBYTE / ROLBYTE instruction.
+group: Indirection Instruction - Alter subsequent GETBYTE / ROLBYTE instruction.
+description: "ALTGB should be followed by GETBYTE or ROLBYTE\u2014 it modifies the GETBYTE / ROLBYTE instruction's\n\
+  Src and Result: The next instruction's pipelined Src and Num fields are altered to be (Src + Dest[10:2])\n\
+  & $1FF, or just Dest[10:2] for syntax 2, and Dest[1:0], respectively.\n\nPerfect for:\n- Table lookups\
+  \ (commutation tables, sine tables)\n- String processing with auto-increment\n- Byte array traversal\n\
+  - Character mapping and translation\n\n\nALTGB should be followed by GETBYTE or ROLBYTE\u2014 it modi\uFB01\
+  es the GETBYTE / ROLBYTE instruction's Src and\n\nNum values, enabling code to iterate through multiple\
+  \ bytes of data across a range of Reg RAM. GETBYTE /\n\nROLBYTE's Src value is changed to (Src + Dest[10:2])\
+  \ & $1FF (for syntax 1), or to Dest[10:2] (for syntax 2), and its\n\nNum value is changed to Dest[1:0].\n\
+  \nDest[10:2] corresponds to the target long register's 9-bit address and Dest[1:0] is the byte ID within\
+  \ it; values of\n\n0\u20133 identify individual bytes, by position, in least-signi\uFB01cant byte order.\
+  \ Iteratively executing ALTGB followed by\n\nGETBYTE or ROLBYTE, and each time incrementing ALTGB's\
+  \ 11-bit Dest value by one, effectively reads a stream of\n\nbyte values from Reg RAM as if it were\
+  \ all made of byte-sized registers.\n\nIn syntax 1, Src consists of two 9-bit \uFB01elds; a base address\
+  \ (Src[8:0]) and a signed auto-indexer (Src[17:9]).\n\n\u25CF   The base is the Reg RAM address where\
+  \ the series of bytes begins. ALTGB adds the long index\n\n(Dest[10:2]) to the base (Src[8:0]) to locate\
+  \ the register holding the target byte. The byte ID (Dest[1:0])\n\nidenti\uFB01es the byte's position\
+  \ within that long register.\n\n\u25CF   At the end of ALTGB execution, the optional auto-indexer value\
+  \ (usually 0, 1, or -1) is added to the 11-bit\n\nindex (Dest) for a future ALTGB+GETBYTE or ROLBYTE\
+  \ iteration.\n\nIn syntax 2, Dest serves as the full byte address\u2014 it's the same format as in syntax\
+  \ 1, but represents the target\n\nlong's absolute address and its byte index instead of the long's relative\
+  \ index (to add to a base) and byte index."
 parameters:
-- Dest is the register whose 11-bit value is the index, or the full byte address,
-  for the GETBYTE / ROLBYTE instruction to read.
-- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value
-  contains a base long address (Src[8:0]; added to index (Dest[10:2]) for GETBYTE
-  / ROLBYTE) and also an optional auto-indexer value (Src[17:9]; added to Dest at
-  end of execution).
-documentation_source: enhanced
+- Dest is the register whose 11-bit value is the index, or the full byte address, for the GETBYTE / ROLBYTE
+  instruction to read.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base
+  long address (Src[8:0]; added to index (Dest[10:2]) for GETBYTE / ROLBYTE) and also an optional auto-indexer
+  value (Src[17:9]; added to Dest at end of execution).
+- "The base is the Reg RAM address where the series of bytes begins. ALTGB adds the long index (Dest[10:2])\
+  \ to the base (Src[8:0]) to locate the register holding the target byte. The byte ID (Dest[1:0]) identi\uFB01\
+  es the byte's position within that long register."
+- At the end of ALTGB execution, the optional auto-indexer value (usually 0, 1, or -1) is added to the
+  11-bit index (Dest) for a future ALTGB+GETBYTE or ROLBYTE iteration.
+- "The instruction following ALTGB is shielded from interrupt Copyright \xA9 Parallax Inc. 2022/11/01\
+  \ \u25AA Propeller 2 Assembly Language Manual               \u25AA   Page 40"
+- "ALTGB alters the next instruction regardless of its kind\u2014 the intention is for it to be a GETBYTE\
+  \ / ROLBYTE"
+- "Field value modi\uFB01cation occurs in the instruction pipeline only; code is not altered, values do\
+  \ not persist"
+- "SETQ / SETQ2 does not affect ALTx instructions\u2014 the Q value passes through to the next instruction"
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 examples:
 - name: Motor Commutation Table Lookup
   description: Use Hall sensor state to lookup commutation pattern
-  code: "' Commutation lookup table in COG RAM\ncommutation_table\n        long  \
-    \  $00_00_00_00    ' Invalid state 0\n        long    $00_14_10_04    ' State\
-    \ 1: Phase pattern\n        long    $00_04_14_10    ' State 2: Phase pattern\n\
-    \        long    $00_10_04_14    ' State 3: Phase pattern\n        long    $00_10_14_04\
-    \    ' State 4: Phase pattern  \n        long    $00_04_10_14    ' State 5: Phase\
-    \ pattern\n        long    $00_14_04_10    ' State 6: Phase pattern\n        long\
-    \    $00_00_00_00    ' Invalid state 7\n        \n' Use Hall state as index\n\
-    \        mov     index, hall_state        ' Hall state (0-7)\n        altgb  \
-    \ index, #commutation_table\n        getbyte phase_a, 0-0, #0         ' Get phase\
-    \ A pattern\n        add     index, #1\n        altgb   index, #commutation_table\
-    \  \n        getbyte phase_b, 0-0, #0         ' Get phase B pattern\n        add\
-    \     index, #1\n        altgb   index, #commutation_table\n        getbyte phase_c,\
-    \ 0-0, #0         ' Get phase C pattern\n"
+  code: "' Commutation lookup table in COG RAM\ncommutation_table\n        long    $00_00_00_00    ' Invalid\
+    \ state 0\n        long    $00_14_10_04    ' State 1: Phase pattern\n        long    $00_04_14_10\
+    \    ' State 2: Phase pattern\n        long    $00_10_04_14    ' State 3: Phase pattern\n        long\
+    \    $00_10_14_04    ' State 4: Phase pattern  \n        long    $00_04_10_14    ' State 5: Phase\
+    \ pattern\n        long    $00_14_04_10    ' State 6: Phase pattern\n        long    $00_00_00_00\
+    \    ' Invalid state 7\n        \n' Use Hall state as index\n        mov     index, hall_state   \
+    \     ' Hall state (0-7)\n        altgb   index, #commutation_table\n        getbyte phase_a, 0-0,\
+    \ #0         ' Get phase A pattern\n        add     index, #1\n        altgb   index, #commutation_table\
+    \  \n        getbyte phase_b, 0-0, #0         ' Get phase B pattern\n        add     index, #1\n \
+    \       altgb   index, #commutation_table\n        getbyte phase_c, 0-0, #0         ' Get phase C\
+    \ pattern\n"
   source: isp_bldc_motor.spin2
 - name: String Processing with Auto-Increment
   description: Process string bytes with automatic pointer advance
-  code: "' Process null-terminated string\nprocess_string\n        mov     ptr, string_addr\
-    \         ' String start address\n.loop   altgb   ptr, ##$100              ' Auto-increment\
-    \ by 1\n        getbyte char, 0-0, #0            ' Get next character\n      \
-    \  tjz     char, #.done             ' Check for null terminator\n        \n  \
-    \      ' Process character\n        call    #process_char\n        jmp     #.loop\n\
-    .done   ret\n"
+  code: "' Process null-terminated string\nprocess_string\n        mov     ptr, string_addr         '\
+    \ String start address\n.loop   altgb   ptr, ##$100              ' Auto-increment by 1\n        getbyte\
+    \ char, 0-0, #0            ' Get next character\n        tjz     char, #.done             ' Check\
+    \ for null terminator\n        \n        ' Process character\n        call    #process_char\n    \
+    \    jmp     #.loop\n.done   ret\n"
   source: common_pattern
 - name: Sine Table Lookup
   description: Access sine lookup table for waveform generation
-  code: "' 256-entry sine table (0-255 degrees)\n' Each entry is a byte (0-255 amplitude)\n\
-    \        mov     angle, phase             ' Current phase angle\n        and \
-    \    angle, #$FF              ' Wrap to 0-255\n        altgb   angle, #sine_table\
-    \       ' Point to table entry\n        getbyte amplitude, 0-0, #0       ' Get\
-    \ sine value\n        \n        ' Scale amplitude for PWM\n        mul     amplitude,\
+  code: "' 256-entry sine table (0-255 degrees)\n' Each entry is a byte (0-255 amplitude)\n        mov\
+    \     angle, phase             ' Current phase angle\n        and     angle, #$FF              ' Wrap\
+    \ to 0-255\n        altgb   angle, #sine_table       ' Point to table entry\n        getbyte amplitude,\
+    \ 0-0, #0       ' Get sine value\n        \n        ' Scale amplitude for PWM\n        mul     amplitude,\
     \ max_duty\n        shr     amplitude, #8            ' Scale to duty range\n"
   source: waveform_generation
 - name: Character Translation Table
   description: Translate characters using lookup table
-  code: "' ASCII to custom encoding table\nxlate_table\n        byte    0,1,2,3,4,5,6,7\
-    \          ' Control chars\n        byte    8,9,10,11,12,13,14,15    ' More control\n\
-    \        ' ... rest of translation table ...\n        \n' Translate character\n\
-    \        altgb   input_char, #xlate_table\n        getbyte output_char, 0-0, #0\
-    \     ' Get translated value\n"
+  code: "' ASCII to custom encoding table\nxlate_table\n        byte    0,1,2,3,4,5,6,7          ' Control\
+    \ chars\n        byte    8,9,10,11,12,13,14,15    ' More control\n        ' ... rest of translation\
+    \ table ...\n        \n' Translate character\n        altgb   input_char, #xlate_table\n        getbyte\
+    \ output_char, 0-0, #0     ' Get translated value\n"
   source: protocol_conversion
 related_instructions:
 - GETBYTE: Get byte from long register
@@ -97,3 +103,19 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 5
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Alter get byte
+category: Indirection Instruction - Alter subsequent GETBYTE / ROLBYTE instruction.
+result: "The next instruction's pipelined Src and Num \uFB01elds are altered to be (Src + Dest[10:2])\
+  \ & $1FF, or just"
+syntax_variants:
+- ALTGB Dest, {#}Src
+- ALTGB Dest
+- GETBYTE or ROLBYTE, and each time incrementing ALTGB's 11-bit Dest value by one, effectively reads a
+  stream of
+- index (Dest) for a future ALTGB+GETBYTE or ROLBYTE iteration.
+usage_notes: "The instruction following ALTGB is shielded from interrupt\nALTGB alters the next instruction\
+  \ regardless of its kind\u2014 the intention is for it to be a GETBYTE / ROLBYTE\nField value modi\uFB01\
+  cation occurs in the instruction pipeline only; code is not altered, values do not persist\nSETQ / SETQ2\
+  \ does not affect ALTx instructions\u2014 the Q value passes through to the next instruction"
+manual_extraction_date: '2025-01-19'

@@ -1,23 +1,50 @@
 instruction: ALTGN
-syntax: ALTGN   D,{#}S
-encoding: EEEE 1001010 111 DDDDDDDDD 000000000
+syntax: ALTGN Dest, {#}Src
+encoding: EEEE 1001010 11I DDDDDDDDD SSSSSSSSS                     D 1
 timing:
-  cycles: 2
+  cycles: 1
   type: fixed
-group: Register Indirection
-description: 'ALTGN should be followed by GETNIB or ROLNIB— it modifies the GETNIB
-  / ROLNIB instruction''s Src and Num Result: The next instruction''s pipelined Src
-  and Num values are altered to be (Src + Dest[11:3]) & $1FF, or just Dest[11:3] for
-  syntax 2, and Dest[2:0], respectively.'
-category: Indirection Instruction - Alter subsequent GETNIB / ROLNIB instruction.
+group: Indirection Instruction - Alter subsequent GETNIB / ROLNIB instruction.
+description: "ALTGN should be followed by GETNIB or ROLNIB\u2014 it modifies the GETNIB / ROLNIB instruction's\
+  \ Src and Num Result: The next instruction's pipelined Src and Num values are altered to be (Src + Dest[11:3])\
+  \ & $1FF, or just Dest[11:3] for syntax 2, and Dest[2:0], respectively.\n\nALTGN should be followed\
+  \ by GETNIB or ROLNIB\u2014 it modi\uFB01es the GETNIB / ROLNIB instruction's Src and Num\n\nvalues,\
+  \ enabling code to iterate through multiple nibbles of data across a range of Reg RAM. GETNIB / ROLNIB's\n\
+  \nSrc value is changed to (Src + Dest[11:3]) & $1FF (for syntax 1), or to Dest[11:3] (for syntax 2),\
+  \ and its Num value\n\nis changed to Dest[2:0].\n\nDest[11:3] corresponds to the target long register's\
+  \ 9-bit address and Dest[2:0] is the nibble ID within it; values of\n\n0\u20137 identify individual\
+  \ nibbles, by position, in least-signi\uFB01cant nibble order. Iteratively executing ALTGN followed\n\
+  \nby GETNIB or ROLNIB, and each time incrementing ALTGN's 12-bit Dest value by one, effectively reads\
+  \ a stream\n\nof nibble values from Reg RAM as if it were all made of nibble-sized registers.\n\nIn\
+  \ syntax 1, Src consists of two 9-bit \uFB01elds; a base address (Src[8:0]) and a signed auto-indexer\
+  \ (Src[17:9]).\n\n\u25CF   The base is the Reg RAM address where the series of nibbles begins. ALTGN\
+  \ adds the long index\n\n(Dest[11:3]) to the base (Src[8:0]) to locate the register holding the target\
+  \ nibble. The nibble ID (Dest[2:0])\n\nidenti\uFB01es the nibble's position within that long register.\n\
+  \n\u25CF   At the end of ALTGN execution, the optional auto-indexer value (usually 0, 1, or -1) is added\
+  \ to the 12-bit\n\nindex (Dest) for a future ALTGN+GETNIB or ROLNIB iteration.\n\nIn syntax 2, Dest\
+  \ serves as the full nibble address\u2014 it's the same format as in syntax 1, but represents the target\n\
+  \nlong's absolute address and its nibble index instead of the long's relative index (to add to a base)\
+  \ and nibble index."
 parameters:
-- Dest is the register whose 12-bit value is the index, or the full nibble address,
-  for the next GETNIB / ROLNIB instruction to read.
-- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value
-  contains a base long address (Src[8:0]; added to index (Dest[11:3]) for GETNIB /
-  ROLNIB) and also an optional auto-indexer value (Src[17:9]; added to Dest at end
-  of execution).
-documentation_source: PASM2 Manual 2022/11/01
+- Dest is the register whose 12-bit value is the index, or the full nibble address, for the next GETNIB
+  / ROLNIB instruction to read.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base
+  long address (Src[8:0]; added to index (Dest[11:3]) for GETNIB / ROLNIB) and also an optional auto-indexer
+  value (Src[17:9]; added to Dest at end of execution).
+- "The base is the Reg RAM address where the series of nibbles begins. ALTGN adds the long index (Dest[11:3])\
+  \ to the base (Src[8:0]) to locate the register holding the target nibble. The nibble ID (Dest[2:0])\
+  \ identi\uFB01es the nibble's position within that long register."
+- At the end of ALTGN execution, the optional auto-indexer value (usually 0, 1, or -1) is added to the
+  12-bit index (Dest) for a future ALTGN+GETNIB or ROLNIB iteration.
+- The instruction following ALTGN is shielded from interrupt
+- "ALTGN alters the next instruction regardless of its kind\u2014 the intention is for it to be a GETNIB\
+  \ / ROLNIB"
+- "Field value modi\uFB01cation occurs in the instruction pipeline only; code is not altered, values do\
+  \ not persist"
+- "SETQ / SETQ2 does not affect ALTx instructions\u2014 the Q value passes through to the next instruction\
+  \ Copyright \xA9 Parallax Inc. 2022/11/01 \u25AA Propeller 2 Assembly Language Manual              \
+  \ \u25AA   Page 41"
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_duiz
@@ -27,3 +54,19 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 5
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Alter get nibble
+category: Indirection Instruction - Alter subsequent GETNIB / ROLNIB instruction.
+result: The next instruction's pipelined Src and Num values are altered to be (Src + Dest[11:3]) & $1FF,
+  or just
+syntax_variants:
+- ALTGN Dest, {#}Src
+- ALTGN Dest
+- by GETNIB or ROLNIB, and each time incrementing ALTGN's 12-bit Dest value by one, effectively reads
+  a stream
+- index (Dest) for a future ALTGN+GETNIB or ROLNIB iteration.
+usage_notes: "The instruction following ALTGN is shielded from interrupt\nALTGN alters the next instruction\
+  \ regardless of its kind\u2014 the intention is for it to be a GETNIB / ROLNIB\nField value modi\uFB01\
+  cation occurs in the instruction pipeline only; code is not altered, values do not persist\nSETQ / SETQ2\
+  \ does not affect ALTx instructions\u2014 the Q value passes through to the next instruction"
+manual_extraction_date: '2025-01-19'

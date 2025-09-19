@@ -1,14 +1,18 @@
 instruction: CMPR
-syntax: CMPR    D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0010100 CZI DDDDDDDDD SSSSSSSSS
+syntax: CMPR Dest, {#}Src {WC|WZ|WCZ}
+encoding: "EEEE 0010100 CZI DDDDDDDDD SSSSSSSSS                  \u2014          Unsigned (S < D)    \
+  \  D=S                    2"
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'CMP compares the unsigned values of Dest and Src (by subtracting Dest
-  from Src) and optionally setting the C Result: Greater/lesser and equality status
-  is optionally written to the C and Z flags.'
-category: Math Instruction - Compare two unsigned values (in reverse order to CMP).
+group: Math Instruction - Compare two unsigned values (in reverse order to CMP).
+description: "CMP compares the unsigned values of Dest and Src (by subtracting Dest from Src) and optionally\
+  \ setting the C Result: Greater/lesser and equality status is optionally written to the C and Z flags.\n\
+  \nCMP compares the unsigned values of Dest and Src (by subtracting Dest from Src) and optionally setting\
+  \ the C\n\nand Z \uFB02ags accordingly.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag\
+  \ is set (1) if Src is less than Dest.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is\
+  \ set (1) if Dest equals Src.\n\nTo compare unsigned, multi-long values, use CMP (instead) followed\
+  \ by CMPX as described in Comparing Two\n\nMulti-Long Values."
 flags_affected:
   C:
     formula: borrow of (S - D)
@@ -16,11 +20,11 @@ flags_affected:
     formula: (D == S)
 parameters:
 - Dest is the register containing the value to compare with that of Src.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared
-  to Dest.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - CMP
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -30,3 +34,10 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Compare reverse
+category: Math Instruction - Compare two unsigned values (in reverse order to CMP).
+result: "Greater/lesser and equality status is optionally written to the C and Z \uFB02ags."
+syntax_variants:
+- CMPR Dest, {#}Src {WC|WZ|WCZ}
+manual_extraction_date: '2025-01-19'

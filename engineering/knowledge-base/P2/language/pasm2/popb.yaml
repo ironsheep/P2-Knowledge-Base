@@ -2,17 +2,19 @@ instruction: POPB
 syntax: POPB    D        {WC/WZ/WCZ}
 encoding: EEEE 1011000 CZ1 DDDDDDDDD 111011111
 timing:
-  cycles: 9
+  cycles: 1
   type: fixed
 group: Hub RAM - Read
-description: C = MSB of long.
-category: Hub RAM - Read
+description: Read long from hub address --PTRB into D.
 flags_affected:
   C:
     formula: MSB of long
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+    description: Set to bit 31 of the popped value
+  Z:
+    formula: Result = 0
+    description: Set if popped value is zero
+documentation_source: PASM2 Manual 2022-11-01
+documentation_level: enhanced
 compiler_operand_format:
   name: operand_pushpop
   pattern: D/# | D
@@ -21,3 +23,10 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 32
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- POPB D
+last_updated: '2025-01-19'
+brief_description: Pop long from stack using PTRB
+parameters:
+- D is the destination register to receive the popped value
+- PTRB is automatically decremented before the read

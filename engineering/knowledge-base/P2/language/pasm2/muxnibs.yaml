@@ -1,23 +1,29 @@
 instruction: MUXNIBS
-syntax: MUXNIBS D,{#}S
-encoding: EEEE 1001111 01I DDDDDDDDD SSSSSSSSS
+syntax: MUXNIBS Dest, {#}Src
+encoding: "EEEE 1001111 01I DDDDDDDDD SSSSSSSSS                     D                 \u2014         \
+  \          \u2014                    2"
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'MUXNIBS copies any non-zero nibbles from Src into the corresponding
-  nibbles of Dest and leaves the rest of Result: Dest nibbles corresponding to non-zero
-  Src nibbles are set to those nibble values; the rest are left as-is.'
-category: Bit Operation Instruction - Set discrete nibbles of a value to non-zero
-  nibble states of another.
+group: Bit Operation Instruction - Set discrete nibbles of a value to non-zero nibble states of another.
+description: 'MUXNIBS copies any non-zero nibbles from Src into the corresponding nibbles of Dest and
+  leaves the rest of Result: Dest nibbles corresponding to non-zero Src nibbles are set to those nibble
+  values; the rest are left as-is.
+
+
+  MUXNIBS copies any non-zero nibbles from Src into the corresponding nibbles of Dest and leaves the rest
+  of
+
+
+  Dest''s nibbles as-is.'
 flags_affected:
   C:
     when: D
 parameters:
 - Dest is a register whose value will be updated according to Src.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose non-zero nibbles
-  will replace the corresponding nibbles in Dest.
-documentation_source: PASM2 Manual 2022/11/01
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose non-zero nibbles will replace the
+  corresponding nibbles in Dest.
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -27,3 +33,13 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Mux nibbles
+category: Bit Operation Instruction - Set discrete nibbles of a value to non-zero nibble states of another.
+result: Dest nibbles corresponding to non-zero Src nibbles are set to those nibble values; the rest are
+  left as-is.
+syntax_variants:
+- MUXNIBS Dest, {#}Src
+- MUXNIBS copies any non-zero nibbles from Src into the corresponding nibbles of Dest and leaves the rest
+  of
+manual_extraction_date: '2025-01-19'

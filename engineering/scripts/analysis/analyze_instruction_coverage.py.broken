@@ -1,0 +1,1026 @@
+#!/usr/bin/env python3
+"""
+Analyze PASM2 instruction documentation coverage between YAML files and manual.
+Includes both instructions and assembly directives.
+"""
+
+import os
+import yaml
+import re
+from pathlib import Path
+from collections import defaultdict
+
+# Paths - NOW INCLUDING BOTH INSTRUCTIONS AND DIRECTIVES
+PASM2_PATH = Path("/Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/language/pasm2")
+DIRECTIVES_PATH = Path("/Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/knowledge-base/P2/language/spin2/assembly-directives")
+MANUAL_PATH = Path("/Users/stephen/Projects/Projects-ExtGit/IronSheepProductionsLLC/Propeller2/P2-Language-Study/P2-Knowledge-Base/engineering/ingestion/sources/pasm2-manual/pasm2-manual-narrative.txt")
+
+print("Loading PASM2 manual...")
+with open(MANUAL_PATH, 'r', encoding='utf-8') as f:
+    manual_content = f.read()
+
+# Extract instructions/directives documented in manual
+manual_items = set()
+manual_groups = {}  # Track grouped instructions like 'AND / ANDN'
+
+# Pattern for table of contents entries
+toc_pattern = r'^([A-Z][A-Z0-9]+(?:\s*/\s*[A-Z0-9]+)*)\s+\d+
+
+# Also look for items in the body
+body_pattern = r'^([A-Z][A-Z0-9]+(?:/[A-Z0-9]+)*)\s+\d+
+
+# Clean up manual items list
+manual_items = {item for item in manual_items if len(item) >= 2 and item[0].isupper()}
+
+# Known directives (these should be in assembly-directives folder)
+KNOWN_DIRECTIVES = {
+    'ALIGNL', 'ALIGNW', 'ORG', 'ORGF', 'ORGH', 'FIT', 'RES', 
+    'BYTE', 'WORD', 'LONG', 'FILE', 'DITTO'
+}
+
+print(f"Found {len(manual_items)} items in manual")
+print(f"Known directives: {len(KNOWN_DIRECTIVES)}")
+
+def score_yaml_data(data):
+    """Score a YAML data structure for documentation quality."""
+    score = 0
+    
+    # Core documentation fields (25 points)
+    if data.get('syntax') or data.get('syntax_variants'): 
+        score += 5
+    if data.get('encoding'): 
+        score += 5
+    if data.get('timing'): 
+        score += 5
+    if data.get('group') or data.get('category'): 
+        score += 5
+    if data.get('documentation_source'):
+        score += 5
+    
+    # Description quality (30 points) - Updated thresholds based on manual analysis
+    desc = data.get('description', '')
+    brief_desc = data.get('brief_description', '')
+    long_desc = data.get('long_description', '')
+    detailed_desc = data.get('detailed_description', '')
+    
+    # Combine all description fields
+    total_desc = f"{desc} {brief_desc} {long_desc} {detailed_desc}".strip()
+    
+    if total_desc:
+        desc_len = len(total_desc)
+        # Updated thresholds based on actual manual descriptions (avg 238 chars)
+        if desc_len >= 250:  # Comprehensive - manual quality
+            score += 30
+        elif desc_len >= 150:  # Good - substantial explanation
+            score += 20
+        elif desc_len >= 75:  # Basic - minimal but meaningful
+            score += 10
+        elif desc_len >= 25:  # Minimal - at least attempts explanation
+            score += 5
+        else:  # Too short to be useful
+            score += 2
+    
+    # Examples (15 points)
+    if data.get('examples'):
+        examples = data['examples']
+        if len(examples) >= 2:
+            score += 15
+        elif len(examples) == 1:
+            score += 8
+    elif data.get('quick_example'):
+        score += 8
+    
+    # Group documentation (15 points)
+    if data.get('has_group_documentation'):
+        score += 10
+    if data.get('group_membership'):
+        score += 5
+    
+    # Additional documentation (15 points)
+    if data.get('parameters') or data.get('compiler_operand_format'):
+        score += 5
+    if data.get('flags_affected') or data.get('flags'):
+        score += 5
+    if data.get('usage_notes') or data.get('critical_requirement') or data.get('see_also'):
+        score += 5
+    
+    # Recently updated from manual extraction (bonus 10 points)
+    last_updated = data.get('last_updated', '')
+    if '2025-09' in str(last_updated):
+        score += 10
+    
+    # Cap at 100
+    return min(score, 100)
+
+# Get all YAML files from BOTH locations
+yaml_items = {}
+
+# Process PASM2 instruction files
+pasm2_files = list(PASM2_PATH.glob("*.yaml"))
+print(f"Found {len(pasm2_files)} YAML files in pasm2 folder")
+
+for yaml_file in pasm2_files:
+    if yaml_file.stem in ['concepts', 'patterns', 'idioms']:
+        continue
+    
+    try:
+        with open(yaml_file, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
+            
+        if data and isinstance(data, dict):
+            # Use the instruction field, or uppercase the filename
+            instruction_name = data.get('instruction', yaml_file.stem.upper())
+            
+            # Score the documentation
+            score = score_yaml_data(data)
+            
+            # Check if this instruction is part of a grouped documentation
+            is_grouped = instruction_name in manual_groups
+            group_members = manual_groups.get(instruction_name, [])
+            
+            yaml_items[instruction_name] = {
+                'score': score,
+                'location': 'pasm2',
+                'file': yaml_file.name,
+                'in_manual': instruction_name in manual_items,
+                'is_directive': instruction_name in KNOWN_DIRECTIVES,
+                'is_grouped_in_manual': is_grouped,
+                'manual_group_members': group_members,
+                'group': data.get('group', data.get('category', 'Unknown'))
+            }
+    except Exception as e:
+        print(f"Error processing {yaml_file}: {e}")
+
+# Process assembly directive files
+directive_files = list(DIRECTIVES_PATH.glob("*.yaml"))
+print(f"Found {len(directive_files)} YAML files in assembly-directives folder")
+
+for yaml_file in directive_files:
+    try:
+        with open(yaml_file, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
+            
+        if data and isinstance(data, dict):
+            # For directives, often the field is 'directive' not 'instruction'
+            directive_name = data.get('directive', data.get('instruction', yaml_file.stem.upper()))
+            
+            # Score the documentation
+            score = score_yaml_data(data)
+            
+            yaml_items[directive_name] = {
+                'score': score,
+                'location': 'assembly-directives',
+                'file': yaml_file.name,
+                'in_manual': directive_name in manual_items,
+                'is_directive': True,
+                'group': data.get('group', 'Directives')
+            }
+    except Exception as e:
+        print(f"Error processing {yaml_file}: {e}")
+
+# Find missing items
+all_items = manual_items | set(yaml_items.keys())
+missing_yaml = manual_items - set(yaml_items.keys())
+extra_yaml = set(yaml_items.keys()) - manual_items
+
+print(f"\n=== PASM2 Documentation Analysis V3 ===")
+print(f"Total items in manual: {len(manual_items)}")
+print(f"Total items with YAML: {len(yaml_items)}")
+print(f"  - In pasm2 folder: {sum(1 for v in yaml_items.values() if v['location'] == 'pasm2')}")
+print(f"  - In directives folder: {sum(1 for v in yaml_items.values() if v['location'] == 'assembly-directives')}")
+print(f"Items in both: {len(manual_items & set(yaml_items.keys()))}")
+print(f"Missing YAML files: {len(missing_yaml)}")
+print(f"Extra YAML files: {len(extra_yaml)}")
+
+# Score distribution
+score_distribution = {
+    'Excellent (80-100)': 0,
+    'Good (60-79)': 0,
+    'Fair (40-59)': 0,
+    'Poor (20-39)': 0,
+    'Minimal (0-19)': 0
+}
+
+for item, data in yaml_items.items():
+    score = data['score']
+    if score >= 80:
+        score_distribution['Excellent (80-100)'] += 1
+    elif score >= 60:
+        score_distribution['Good (60-79)'] += 1
+    elif score >= 40:
+        score_distribution['Fair (40-59)'] += 1
+    elif score >= 20:
+        score_distribution['Poor (20-39)'] += 1
+    else:
+        score_distribution['Minimal (0-19)'] += 1
+
+print(f"\n=== Documentation Quality Distribution ===")
+for category, count in score_distribution.items():
+    print(f"{category}: {count} items")
+
+# Show missing items
+if missing_yaml:
+    print(f"\n=== Missing YAML Files ({len(missing_yaml)}) ===")
+    missing_sorted = sorted(missing_yaml)
+    for item in missing_sorted[:20]:
+        if item in KNOWN_DIRECTIVES:
+            print(f"  {item} - should be directive")
+        else:
+            print(f"  {item} - missing")
+    if len(missing_sorted) > 20:
+        print(f"  ... and {len(missing_sorted) - 20} more")
+
+# Group instructions by category
+instruction_groups = defaultdict(list)
+for item, data in yaml_items.items():
+    instruction_groups[data['group']].append((item, data['score']))
+
+# Add missing items to "Undocumented" group
+for item in missing_yaml:
+    instruction_groups['Undocumented'].append((item, 0))
+
+# Convert for YAML output
+instruction_groups_dict = {}
+for group, items in instruction_groups.items():
+    instruction_groups_dict[group] = [
+        {'instruction': item, 'score': score} for item, score in items
+    ]
+
+output_data = {
+    'manual_items': sorted(manual_items),
+    'yaml_items': yaml_items,
+    'instruction_groups': instruction_groups_dict,
+    'statistics': {
+        'manual_count': len(manual_items),
+        'yaml_count': len(yaml_items),
+        'pasm2_count': sum(1 for v in yaml_items.values() if v['location'] == 'pasm2'),
+        'directive_count': sum(1 for v in yaml_items.values() if v['location'] == 'assembly-directives'),
+        'both_count': len(manual_items & set(yaml_items.keys())),
+        'missing': sorted(missing_yaml),
+        'extra': sorted(extra_yaml),
+        'score_distribution': score_distribution
+    }
+}
+
+# Save as YAML for further processing
+with open('instruction_analysis.yaml', 'w') as f:
+    yaml.dump(output_data, f, default_flow_style=False, sort_keys=False)
+
+print("\nAnalysis complete. See instruction_analysis.yaml for details.")
+toc_section = manual_content[manual_content.find("TABLE OF CONTENTS"):manual_content.find("PREFACE", manual_content.find("TABLE OF CONTENTS")+100)]
+
+for match in re.finditer(toc_pattern, toc_section, re.MULTILINE):
+    item = match.group(1)
+    # Handle multi-instruction entries
+    if ' / ' in item:
+        # Track the group
+        group_members = [inst.strip() for inst in item.split(' / ')]
+        for inst in group_members:
+            manual_items.add(inst)
+            manual_groups[inst] = group_members
+    else:
+        manual_items.add(item)
+
+# Also look for items in the body
+body_pattern = r'^([A-Z][A-Z0-9]+(?:/[A-Z0-9]+)*)\s+\d+$'
+for match in re.finditer(body_pattern, manual_content, re.MULTILINE):
+    item = match.group(1)
+    if item not in ['PREFACE', 'CONVENTIONS', 'CREDITS', 'ERRATA', 'PARALLAX', 'TABLE']:
+        if '/' in item:
+            for inst in item.split(' / '):
+                manual_items.add(inst)
+        else:
+            manual_items.add(item)
+
+# Clean up manual items list
+manual_items = {item for item in manual_items if len(item) >= 2 and item[0].isupper()}
+
+# Known directives (these should be in assembly-directives folder)
+KNOWN_DIRECTIVES = {
+    'ALIGNL', 'ALIGNW', 'ORG', 'ORGF', 'ORGH', 'FIT', 'RES', 
+    'BYTE', 'WORD', 'LONG', 'FILE', 'DITTO'
+}
+
+print(f"Found {len(manual_items)} items in manual")
+print(f"Known directives: {len(KNOWN_DIRECTIVES)}")
+
+def score_yaml_data(data):
+    """Score a YAML data structure for documentation quality."""
+    score = 0
+    
+    # Core documentation fields (25 points)
+    if data.get('syntax') or data.get('syntax_variants'): 
+        score += 5
+    if data.get('encoding'): 
+        score += 5
+    if data.get('timing'): 
+        score += 5
+    if data.get('group') or data.get('category'): 
+        score += 5
+    if data.get('documentation_source'):
+        score += 5
+    
+    # Description quality (30 points) - Updated thresholds based on manual analysis
+    desc = data.get('description', '')
+    brief_desc = data.get('brief_description', '')
+    long_desc = data.get('long_description', '')
+    detailed_desc = data.get('detailed_description', '')
+    
+    # Combine all description fields
+    total_desc = f"{desc} {brief_desc} {long_desc} {detailed_desc}".strip()
+    
+    if total_desc:
+        desc_len = len(total_desc)
+        # Updated thresholds based on actual manual descriptions (avg 238 chars)
+        if desc_len >= 250:  # Comprehensive - manual quality
+            score += 30
+        elif desc_len >= 150:  # Good - substantial explanation
+            score += 20
+        elif desc_len >= 75:  # Basic - minimal but meaningful
+            score += 10
+        elif desc_len >= 25:  # Minimal - at least attempts explanation
+            score += 5
+        else:  # Too short to be useful
+            score += 2
+    
+    # Examples (15 points)
+    if data.get('examples'):
+        examples = data['examples']
+        if len(examples) >= 2:
+            score += 15
+        elif len(examples) == 1:
+            score += 8
+    elif data.get('quick_example'):
+        score += 8
+    
+    # Group documentation (15 points)
+    if data.get('has_group_documentation'):
+        score += 10
+    if data.get('group_membership'):
+        score += 5
+    
+    # Additional documentation (15 points)
+    if data.get('parameters') or data.get('compiler_operand_format'):
+        score += 5
+    if data.get('flags_affected') or data.get('flags'):
+        score += 5
+    if data.get('usage_notes') or data.get('critical_requirement') or data.get('see_also'):
+        score += 5
+    
+    # Recently updated from manual extraction (bonus 10 points)
+    last_updated = data.get('last_updated', '')
+    if '2025-09' in str(last_updated):
+        score += 10
+    
+    # Cap at 100
+    return min(score, 100)
+
+# Get all YAML files from BOTH locations
+yaml_items = {}
+
+# Process PASM2 instruction files
+pasm2_files = list(PASM2_PATH.glob("*.yaml"))
+print(f"Found {len(pasm2_files)} YAML files in pasm2 folder")
+
+for yaml_file in pasm2_files:
+    if yaml_file.stem in ['concepts', 'patterns', 'idioms']:
+        continue
+    
+    try:
+        with open(yaml_file, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
+            
+        if data and isinstance(data, dict):
+            # Use the instruction field, or uppercase the filename
+            instruction_name = data.get('instruction', yaml_file.stem.upper())
+            
+            # Score the documentation
+            score = score_yaml_data(data)
+            
+            yaml_items[instruction_name] = {
+                'score': score,
+                'location': 'pasm2',
+                'file': yaml_file.name,
+                'in_manual': instruction_name in manual_items,
+                'is_directive': instruction_name in KNOWN_DIRECTIVES,
+                'group': data.get('group', data.get('category', 'Unknown'))
+            }
+    except Exception as e:
+        print(f"Error processing {yaml_file}: {e}")
+
+# Process assembly directive files
+directive_files = list(DIRECTIVES_PATH.glob("*.yaml"))
+print(f"Found {len(directive_files)} YAML files in assembly-directives folder")
+
+for yaml_file in directive_files:
+    try:
+        with open(yaml_file, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
+            
+        if data and isinstance(data, dict):
+            # For directives, often the field is 'directive' not 'instruction'
+            directive_name = data.get('directive', data.get('instruction', yaml_file.stem.upper()))
+            
+            # Score the documentation
+            score = score_yaml_data(data)
+            
+            yaml_items[directive_name] = {
+                'score': score,
+                'location': 'assembly-directives',
+                'file': yaml_file.name,
+                'in_manual': directive_name in manual_items,
+                'is_directive': True,
+                'group': data.get('group', 'Directives')
+            }
+    except Exception as e:
+        print(f"Error processing {yaml_file}: {e}")
+
+# Find missing items
+all_items = manual_items | set(yaml_items.keys())
+missing_yaml = manual_items - set(yaml_items.keys())
+extra_yaml = set(yaml_items.keys()) - manual_items
+
+print(f"\n=== PASM2 Documentation Analysis V3 ===")
+print(f"Total items in manual: {len(manual_items)}")
+print(f"Total items with YAML: {len(yaml_items)}")
+print(f"  - In pasm2 folder: {sum(1 for v in yaml_items.values() if v['location'] == 'pasm2')}")
+print(f"  - In directives folder: {sum(1 for v in yaml_items.values() if v['location'] == 'assembly-directives')}")
+print(f"Items in both: {len(manual_items & set(yaml_items.keys()))}")
+print(f"Missing YAML files: {len(missing_yaml)}")
+print(f"Extra YAML files: {len(extra_yaml)}")
+
+# Score distribution
+score_distribution = {
+    'Excellent (80-100)': 0,
+    'Good (60-79)': 0,
+    'Fair (40-59)': 0,
+    'Poor (20-39)': 0,
+    'Minimal (0-19)': 0
+}
+
+for item, data in yaml_items.items():
+    score = data['score']
+    if score >= 80:
+        score_distribution['Excellent (80-100)'] += 1
+    elif score >= 60:
+        score_distribution['Good (60-79)'] += 1
+    elif score >= 40:
+        score_distribution['Fair (40-59)'] += 1
+    elif score >= 20:
+        score_distribution['Poor (20-39)'] += 1
+    else:
+        score_distribution['Minimal (0-19)'] += 1
+
+print(f"\n=== Documentation Quality Distribution ===")
+for category, count in score_distribution.items():
+    print(f"{category}: {count} items")
+
+# Show missing items
+if missing_yaml:
+    print(f"\n=== Missing YAML Files ({len(missing_yaml)}) ===")
+    missing_sorted = sorted(missing_yaml)
+    for item in missing_sorted[:20]:
+        if item in KNOWN_DIRECTIVES:
+            print(f"  {item} - should be directive")
+        else:
+            print(f"  {item} - missing")
+    if len(missing_sorted) > 20:
+        print(f"  ... and {len(missing_sorted) - 20} more")
+
+# Group instructions by category
+instruction_groups = defaultdict(list)
+for item, data in yaml_items.items():
+    instruction_groups[data['group']].append((item, data['score']))
+
+# Add missing items to "Undocumented" group
+for item in missing_yaml:
+    instruction_groups['Undocumented'].append((item, 0))
+
+# Convert for YAML output
+instruction_groups_dict = {}
+for group, items in instruction_groups.items():
+    instruction_groups_dict[group] = [
+        {'instruction': item, 'score': score} for item, score in items
+    ]
+
+output_data = {
+    'manual_items': sorted(manual_items),
+    'yaml_items': yaml_items,
+    'instruction_groups': instruction_groups_dict,
+    'statistics': {
+        'manual_count': len(manual_items),
+        'yaml_count': len(yaml_items),
+        'pasm2_count': sum(1 for v in yaml_items.values() if v['location'] == 'pasm2'),
+        'directive_count': sum(1 for v in yaml_items.values() if v['location'] == 'assembly-directives'),
+        'both_count': len(manual_items & set(yaml_items.keys())),
+        'missing': sorted(missing_yaml),
+        'extra': sorted(extra_yaml),
+        'score_distribution': score_distribution
+    }
+}
+
+# Save as YAML for further processing
+with open('instruction_analysis.yaml', 'w') as f:
+    yaml.dump(output_data, f, default_flow_style=False, sort_keys=False)
+
+print("\nAnalysis complete. See instruction_analysis.yaml for details.")
+for match in re.finditer(body_pattern, manual_content, re.MULTILINE):
+    item = match.group(1)
+    if item not in ['PREFACE', 'CONVENTIONS', 'CREDITS', 'ERRATA', 'PARALLAX', 'TABLE']:
+        if '/' in item:
+            group_members = [inst.strip() for inst in item.split('/')]  # Note: no spaces in body
+            for inst in group_members:
+                manual_items.add(inst)
+                manual_groups[inst] = group_members
+        else:
+            manual_items.add(item)
+
+# Clean up manual items list
+manual_items = {item for item in manual_items if len(item) >= 2 and item[0].isupper()}
+
+# Known directives (these should be in assembly-directives folder)
+KNOWN_DIRECTIVES = {
+    'ALIGNL', 'ALIGNW', 'ORG', 'ORGF', 'ORGH', 'FIT', 'RES', 
+    'BYTE', 'WORD', 'LONG', 'FILE', 'DITTO'
+}
+
+print(f"Found {len(manual_items)} items in manual")
+print(f"Known directives: {len(KNOWN_DIRECTIVES)}")
+
+def score_yaml_data(data):
+    """Score a YAML data structure for documentation quality."""
+    score = 0
+    
+    # Core documentation fields (25 points)
+    if data.get('syntax') or data.get('syntax_variants'): 
+        score += 5
+    if data.get('encoding'): 
+        score += 5
+    if data.get('timing'): 
+        score += 5
+    if data.get('group') or data.get('category'): 
+        score += 5
+    if data.get('documentation_source'):
+        score += 5
+    
+    # Description quality (30 points) - Updated thresholds based on manual analysis
+    desc = data.get('description', '')
+    brief_desc = data.get('brief_description', '')
+    long_desc = data.get('long_description', '')
+    detailed_desc = data.get('detailed_description', '')
+    
+    # Combine all description fields
+    total_desc = f"{desc} {brief_desc} {long_desc} {detailed_desc}".strip()
+    
+    if total_desc:
+        desc_len = len(total_desc)
+        # Updated thresholds based on actual manual descriptions (avg 238 chars)
+        if desc_len >= 250:  # Comprehensive - manual quality
+            score += 30
+        elif desc_len >= 150:  # Good - substantial explanation
+            score += 20
+        elif desc_len >= 75:  # Basic - minimal but meaningful
+            score += 10
+        elif desc_len >= 25:  # Minimal - at least attempts explanation
+            score += 5
+        else:  # Too short to be useful
+            score += 2
+    
+    # Examples (15 points)
+    if data.get('examples'):
+        examples = data['examples']
+        if len(examples) >= 2:
+            score += 15
+        elif len(examples) == 1:
+            score += 8
+    elif data.get('quick_example'):
+        score += 8
+    
+    # Group documentation (15 points)
+    if data.get('has_group_documentation'):
+        score += 10
+    if data.get('group_membership'):
+        score += 5
+    
+    # Additional documentation (15 points)
+    if data.get('parameters') or data.get('compiler_operand_format'):
+        score += 5
+    if data.get('flags_affected') or data.get('flags'):
+        score += 5
+    if data.get('usage_notes') or data.get('critical_requirement') or data.get('see_also'):
+        score += 5
+    
+    # Recently updated from manual extraction (bonus 10 points)
+    last_updated = data.get('last_updated', '')
+    if '2025-09' in str(last_updated):
+        score += 10
+    
+    # Cap at 100
+    return min(score, 100)
+
+# Get all YAML files from BOTH locations
+yaml_items = {}
+
+# Process PASM2 instruction files
+pasm2_files = list(PASM2_PATH.glob("*.yaml"))
+print(f"Found {len(pasm2_files)} YAML files in pasm2 folder")
+
+for yaml_file in pasm2_files:
+    if yaml_file.stem in ['concepts', 'patterns', 'idioms']:
+        continue
+    
+    try:
+        with open(yaml_file, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
+            
+        if data and isinstance(data, dict):
+            # Use the instruction field, or uppercase the filename
+            instruction_name = data.get('instruction', yaml_file.stem.upper())
+            
+            # Score the documentation
+            score = score_yaml_data(data)
+            
+            yaml_items[instruction_name] = {
+                'score': score,
+                'location': 'pasm2',
+                'file': yaml_file.name,
+                'in_manual': instruction_name in manual_items,
+                'is_directive': instruction_name in KNOWN_DIRECTIVES,
+                'group': data.get('group', data.get('category', 'Unknown'))
+            }
+    except Exception as e:
+        print(f"Error processing {yaml_file}: {e}")
+
+# Process assembly directive files
+directive_files = list(DIRECTIVES_PATH.glob("*.yaml"))
+print(f"Found {len(directive_files)} YAML files in assembly-directives folder")
+
+for yaml_file in directive_files:
+    try:
+        with open(yaml_file, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
+            
+        if data and isinstance(data, dict):
+            # For directives, often the field is 'directive' not 'instruction'
+            directive_name = data.get('directive', data.get('instruction', yaml_file.stem.upper()))
+            
+            # Score the documentation
+            score = score_yaml_data(data)
+            
+            yaml_items[directive_name] = {
+                'score': score,
+                'location': 'assembly-directives',
+                'file': yaml_file.name,
+                'in_manual': directive_name in manual_items,
+                'is_directive': True,
+                'group': data.get('group', 'Directives')
+            }
+    except Exception as e:
+        print(f"Error processing {yaml_file}: {e}")
+
+# Find missing items
+all_items = manual_items | set(yaml_items.keys())
+missing_yaml = manual_items - set(yaml_items.keys())
+extra_yaml = set(yaml_items.keys()) - manual_items
+
+print(f"\n=== PASM2 Documentation Analysis V3 ===")
+print(f"Total items in manual: {len(manual_items)}")
+print(f"Total items with YAML: {len(yaml_items)}")
+print(f"  - In pasm2 folder: {sum(1 for v in yaml_items.values() if v['location'] == 'pasm2')}")
+print(f"  - In directives folder: {sum(1 for v in yaml_items.values() if v['location'] == 'assembly-directives')}")
+print(f"Items in both: {len(manual_items & set(yaml_items.keys()))}")
+print(f"Missing YAML files: {len(missing_yaml)}")
+print(f"Extra YAML files: {len(extra_yaml)}")
+
+# Score distribution
+score_distribution = {
+    'Excellent (80-100)': 0,
+    'Good (60-79)': 0,
+    'Fair (40-59)': 0,
+    'Poor (20-39)': 0,
+    'Minimal (0-19)': 0
+}
+
+for item, data in yaml_items.items():
+    score = data['score']
+    if score >= 80:
+        score_distribution['Excellent (80-100)'] += 1
+    elif score >= 60:
+        score_distribution['Good (60-79)'] += 1
+    elif score >= 40:
+        score_distribution['Fair (40-59)'] += 1
+    elif score >= 20:
+        score_distribution['Poor (20-39)'] += 1
+    else:
+        score_distribution['Minimal (0-19)'] += 1
+
+print(f"\n=== Documentation Quality Distribution ===")
+for category, count in score_distribution.items():
+    print(f"{category}: {count} items")
+
+# Show missing items
+if missing_yaml:
+    print(f"\n=== Missing YAML Files ({len(missing_yaml)}) ===")
+    missing_sorted = sorted(missing_yaml)
+    for item in missing_sorted[:20]:
+        if item in KNOWN_DIRECTIVES:
+            print(f"  {item} - should be directive")
+        else:
+            print(f"  {item} - missing")
+    if len(missing_sorted) > 20:
+        print(f"  ... and {len(missing_sorted) - 20} more")
+
+# Group instructions by category
+instruction_groups = defaultdict(list)
+for item, data in yaml_items.items():
+    instruction_groups[data['group']].append((item, data['score']))
+
+# Add missing items to "Undocumented" group
+for item in missing_yaml:
+    instruction_groups['Undocumented'].append((item, 0))
+
+# Convert for YAML output
+instruction_groups_dict = {}
+for group, items in instruction_groups.items():
+    instruction_groups_dict[group] = [
+        {'instruction': item, 'score': score} for item, score in items
+    ]
+
+output_data = {
+    'manual_items': sorted(manual_items),
+    'yaml_items': yaml_items,
+    'instruction_groups': instruction_groups_dict,
+    'statistics': {
+        'manual_count': len(manual_items),
+        'yaml_count': len(yaml_items),
+        'pasm2_count': sum(1 for v in yaml_items.values() if v['location'] == 'pasm2'),
+        'directive_count': sum(1 for v in yaml_items.values() if v['location'] == 'assembly-directives'),
+        'both_count': len(manual_items & set(yaml_items.keys())),
+        'missing': sorted(missing_yaml),
+        'extra': sorted(extra_yaml),
+        'score_distribution': score_distribution
+    }
+}
+
+# Save as YAML for further processing
+with open('instruction_analysis.yaml', 'w') as f:
+    yaml.dump(output_data, f, default_flow_style=False, sort_keys=False)
+
+print("\nAnalysis complete. See instruction_analysis.yaml for details.")
+toc_section = manual_content[manual_content.find("TABLE OF CONTENTS"):manual_content.find("PREFACE", manual_content.find("TABLE OF CONTENTS")+100)]
+
+for match in re.finditer(toc_pattern, toc_section, re.MULTILINE):
+    item = match.group(1)
+    # Handle multi-instruction entries
+    if ' / ' in item:
+        # Track the group
+        group_members = [inst.strip() for inst in item.split(' / ')]
+        for inst in group_members:
+            manual_items.add(inst)
+            manual_groups[inst] = group_members
+    else:
+        manual_items.add(item)
+
+# Also look for items in the body
+body_pattern = r'^([A-Z][A-Z0-9]+(?:/[A-Z0-9]+)*)\s+\d+$'
+for match in re.finditer(body_pattern, manual_content, re.MULTILINE):
+    item = match.group(1)
+    if item not in ['PREFACE', 'CONVENTIONS', 'CREDITS', 'ERRATA', 'PARALLAX', 'TABLE']:
+        if '/' in item:
+            for inst in item.split(' / '):
+                manual_items.add(inst)
+        else:
+            manual_items.add(item)
+
+# Clean up manual items list
+manual_items = {item for item in manual_items if len(item) >= 2 and item[0].isupper()}
+
+# Known directives (these should be in assembly-directives folder)
+KNOWN_DIRECTIVES = {
+    'ALIGNL', 'ALIGNW', 'ORG', 'ORGF', 'ORGH', 'FIT', 'RES', 
+    'BYTE', 'WORD', 'LONG', 'FILE', 'DITTO'
+}
+
+print(f"Found {len(manual_items)} items in manual")
+print(f"Known directives: {len(KNOWN_DIRECTIVES)}")
+
+def score_yaml_data(data):
+    """Score a YAML data structure for documentation quality."""
+    score = 0
+    
+    # Core documentation fields (25 points)
+    if data.get('syntax') or data.get('syntax_variants'): 
+        score += 5
+    if data.get('encoding'): 
+        score += 5
+    if data.get('timing'): 
+        score += 5
+    if data.get('group') or data.get('category'): 
+        score += 5
+    if data.get('documentation_source'):
+        score += 5
+    
+    # Description quality (30 points) - Updated thresholds based on manual analysis
+    desc = data.get('description', '')
+    brief_desc = data.get('brief_description', '')
+    long_desc = data.get('long_description', '')
+    detailed_desc = data.get('detailed_description', '')
+    
+    # Combine all description fields
+    total_desc = f"{desc} {brief_desc} {long_desc} {detailed_desc}".strip()
+    
+    if total_desc:
+        desc_len = len(total_desc)
+        # Updated thresholds based on actual manual descriptions (avg 238 chars)
+        if desc_len >= 250:  # Comprehensive - manual quality
+            score += 30
+        elif desc_len >= 150:  # Good - substantial explanation
+            score += 20
+        elif desc_len >= 75:  # Basic - minimal but meaningful
+            score += 10
+        elif desc_len >= 25:  # Minimal - at least attempts explanation
+            score += 5
+        else:  # Too short to be useful
+            score += 2
+    
+    # Examples (15 points)
+    if data.get('examples'):
+        examples = data['examples']
+        if len(examples) >= 2:
+            score += 15
+        elif len(examples) == 1:
+            score += 8
+    elif data.get('quick_example'):
+        score += 8
+    
+    # Group documentation (15 points)
+    if data.get('has_group_documentation'):
+        score += 10
+    if data.get('group_membership'):
+        score += 5
+    
+    # Additional documentation (15 points)
+    if data.get('parameters') or data.get('compiler_operand_format'):
+        score += 5
+    if data.get('flags_affected') or data.get('flags'):
+        score += 5
+    if data.get('usage_notes') or data.get('critical_requirement') or data.get('see_also'):
+        score += 5
+    
+    # Recently updated from manual extraction (bonus 10 points)
+    last_updated = data.get('last_updated', '')
+    if '2025-09' in str(last_updated):
+        score += 10
+    
+    # Cap at 100
+    return min(score, 100)
+
+# Get all YAML files from BOTH locations
+yaml_items = {}
+
+# Process PASM2 instruction files
+pasm2_files = list(PASM2_PATH.glob("*.yaml"))
+print(f"Found {len(pasm2_files)} YAML files in pasm2 folder")
+
+for yaml_file in pasm2_files:
+    if yaml_file.stem in ['concepts', 'patterns', 'idioms']:
+        continue
+    
+    try:
+        with open(yaml_file, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
+            
+        if data and isinstance(data, dict):
+            # Use the instruction field, or uppercase the filename
+            instruction_name = data.get('instruction', yaml_file.stem.upper())
+            
+            # Score the documentation
+            score = score_yaml_data(data)
+            
+            yaml_items[instruction_name] = {
+                'score': score,
+                'location': 'pasm2',
+                'file': yaml_file.name,
+                'in_manual': instruction_name in manual_items,
+                'is_directive': instruction_name in KNOWN_DIRECTIVES,
+                'group': data.get('group', data.get('category', 'Unknown'))
+            }
+    except Exception as e:
+        print(f"Error processing {yaml_file}: {e}")
+
+# Process assembly directive files
+directive_files = list(DIRECTIVES_PATH.glob("*.yaml"))
+print(f"Found {len(directive_files)} YAML files in assembly-directives folder")
+
+for yaml_file in directive_files:
+    try:
+        with open(yaml_file, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
+            
+        if data and isinstance(data, dict):
+            # For directives, often the field is 'directive' not 'instruction'
+            directive_name = data.get('directive', data.get('instruction', yaml_file.stem.upper()))
+            
+            # Score the documentation
+            score = score_yaml_data(data)
+            
+            yaml_items[directive_name] = {
+                'score': score,
+                'location': 'assembly-directives',
+                'file': yaml_file.name,
+                'in_manual': directive_name in manual_items,
+                'is_directive': True,
+                'group': data.get('group', 'Directives')
+            }
+    except Exception as e:
+        print(f"Error processing {yaml_file}: {e}")
+
+# Find missing items
+all_items = manual_items | set(yaml_items.keys())
+missing_yaml = manual_items - set(yaml_items.keys())
+extra_yaml = set(yaml_items.keys()) - manual_items
+
+print(f"\n=== PASM2 Documentation Analysis V3 ===")
+print(f"Total items in manual: {len(manual_items)}")
+print(f"Total items with YAML: {len(yaml_items)}")
+print(f"  - In pasm2 folder: {sum(1 for v in yaml_items.values() if v['location'] == 'pasm2')}")
+print(f"  - In directives folder: {sum(1 for v in yaml_items.values() if v['location'] == 'assembly-directives')}")
+print(f"Items in both: {len(manual_items & set(yaml_items.keys()))}")
+print(f"Missing YAML files: {len(missing_yaml)}")
+print(f"Extra YAML files: {len(extra_yaml)}")
+
+# Score distribution
+score_distribution = {
+    'Excellent (80-100)': 0,
+    'Good (60-79)': 0,
+    'Fair (40-59)': 0,
+    'Poor (20-39)': 0,
+    'Minimal (0-19)': 0
+}
+
+for item, data in yaml_items.items():
+    score = data['score']
+    if score >= 80:
+        score_distribution['Excellent (80-100)'] += 1
+    elif score >= 60:
+        score_distribution['Good (60-79)'] += 1
+    elif score >= 40:
+        score_distribution['Fair (40-59)'] += 1
+    elif score >= 20:
+        score_distribution['Poor (20-39)'] += 1
+    else:
+        score_distribution['Minimal (0-19)'] += 1
+
+print(f"\n=== Documentation Quality Distribution ===")
+for category, count in score_distribution.items():
+    print(f"{category}: {count} items")
+
+# Show missing items
+if missing_yaml:
+    print(f"\n=== Missing YAML Files ({len(missing_yaml)}) ===")
+    missing_sorted = sorted(missing_yaml)
+    for item in missing_sorted[:20]:
+        if item in KNOWN_DIRECTIVES:
+            print(f"  {item} - should be directive")
+        else:
+            print(f"  {item} - missing")
+    if len(missing_sorted) > 20:
+        print(f"  ... and {len(missing_sorted) - 20} more")
+
+# Group instructions by category
+instruction_groups = defaultdict(list)
+for item, data in yaml_items.items():
+    instruction_groups[data['group']].append((item, data['score']))
+
+# Add missing items to "Undocumented" group
+for item in missing_yaml:
+    instruction_groups['Undocumented'].append((item, 0))
+
+# Convert for YAML output
+instruction_groups_dict = {}
+for group, items in instruction_groups.items():
+    instruction_groups_dict[group] = [
+        {'instruction': item, 'score': score} for item, score in items
+    ]
+
+output_data = {
+    'manual_items': sorted(manual_items),
+    'yaml_items': yaml_items,
+    'instruction_groups': instruction_groups_dict,
+    'statistics': {
+        'manual_count': len(manual_items),
+        'yaml_count': len(yaml_items),
+        'pasm2_count': sum(1 for v in yaml_items.values() if v['location'] == 'pasm2'),
+        'directive_count': sum(1 for v in yaml_items.values() if v['location'] == 'assembly-directives'),
+        'both_count': len(manual_items & set(yaml_items.keys())),
+        'missing': sorted(missing_yaml),
+        'extra': sorted(extra_yaml),
+        'score_distribution': score_distribution
+    }
+}
+
+# Save as YAML for further processing
+with open('instruction_analysis.yaml', 'w') as f:
+    yaml.dump(output_data, f, default_flow_style=False, sort_keys=False)
+
+print("\nAnalysis complete. See instruction_analysis.yaml for details.")

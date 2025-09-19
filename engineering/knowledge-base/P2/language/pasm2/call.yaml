@@ -1,7 +1,12 @@
 instruction: CALL
-syntax: CALL    D        {WC/WZ/WCZ}
+syntax: CALL Dest {WC|WZ|WCZ}
 compiler_syntax: 'CALL #S | D'
-encoding: EEEE 1101101 RAA AAAAAAAAA AAAAAAAAA
+encoding:
+- "EEEE 1101101 RAA AAAAAAAAA AAAAAAAAA                 K1 and PC              \u2014                \
+  \   \u2014               4 / 13\u201320"
+- "EEEE 1101011 CZ0 DDDDDDDDD 000101101                 K1 and PC            D[31]               D[30]\
+  \             4 / 13\u201320"
+- EEEE 1101110 RAA AAAAAAAAA AAAAAAAAA                    1
 compiler_encoding:
   bits: 32
   opcode: 436
@@ -9,26 +14,77 @@ compiler_encoding:
   operandFormat: 19
   rawValue: 39348
 timing:
-  cycles: 4
+  cycles: 1
   type: fixed
-group: Branch A - Call
-description: 'CALL records the current state of the C and Z flags and the address
-  of the next instruction (PC + 1 if Cog/LUT Result: Push current C and Z flags and
-  address of the next instruction onto the hardware stack, set PC to new relative
-  or absolute address, and optionally update C and/or Z to new state. R = 1 then PC
-  += A, else PC = A.'
-category: Flow Control Instruction - Call a subroutine; store return context on the
-  stack.
+group: Flow Control Instruction - Call a subroutine; store return context on the stack.
+description: "CALL records the current state of the C and Z flags and the address of the next instruction\
+  \ (PC + 1 if Cog/LUT Result: Push current C and Z flags and address of the next instruction onto the\
+  \ hardware stack, set PC to new relative or absolute address, and optionally update C and/or Z to new\
+  \ state. R = 1 then PC += A, else PC = A.\n\nCALL records the current state of the C and Z \uFB02ags\
+  \ and the address of the next instruction (PC + 1 if Cog/LUT\n\nexecution; PC + 4 if Hub execution)\
+  \ by pushing to the stack (K), potentially updates the C and Z \uFB02ags with new\n\ngiven states, and\
+  \ jumps to the given address or offset. The routine at the new address should eventually execute\n\n\
+  a RET instruction, or an instruction with a _RET_ condition, to return to the recorded address (the\
+  \ instruction\n\nfollowing the CALL) and optionally restore the C and Z \uFB02ag state as it was prior.\n\
+  \nIn syntax 1, #Addr and #\\Addr encodes the instruction with relative and absolute addressing, respectively.\
+  \ The\n\nrelative form (the default) is vital for creating relocatable code. In either case, use symbolic\
+  \ references for Addr\n\nand the assembler will encode it properly. Examples: CALL #SendBit or CALL\
+  \ #\\DebugStatus\n\nIn syntax 2, the format of the value at Dest is CZxxxxxx_xxxxAAAA_AAAAAAAA_AAAAAAAA.\
+  \ C is the new C \uFB02ag\n\nstate, Z is the new Z \uFB02ag state, A is the new 20-bit address to jump\
+  \ to, and x are don't-care bits. Syntax 2\n\neffectively swaps the \uFB02ags and PC with the value in\
+  \ the Dest register (and RET swaps them back), making it\n\nconvenient for switching between two threads.\n\
+  \nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is updated to match D[31], after its original\
+  \ state is recorded.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is updated to match\
+  \ D[30], after its original state is recorded.\n\nCALLA / CALLB\n\nCall A or B\n\nFlow Control Instruction\
+  \ - Call a subroutine; store return context in the Hub long at PTRA++ or PTRB++.\n\nCALLA #{\\}Addr\n\
+  \nCALLA Dest {WC|WZ|WCZ}\n\nCALLB #{\\}Addr\n\nCALLB Dest {WC|WZ|WCZ}\n\nResult: Write current C and\
+  \ Z \uFB02ags and address of the next instruction into the 4-byte Hub RAM location at PTRA\n\nor PTRB,\
+  \ increment pointer, set PC to new relative or absolute address, and optionally update C and/or Z to\
+  \ new\n\nstate.\n\n\u25CF   Addr is a symbolic reference to the target subroutine; the location to set\
+  \ PC to. Relative addressing is the\n\ndefault; use '\\' to force absolute addressing.\n\n\u25CF   Dest\
+  \ is a register containing the 20-bit absolute address to set PC to and optional new C and Z states.\n\
+  \n\u25CF   WC, WZ, or WCZ are optional effects to update the \uFB02ags from Dest's upper bit states.\n\
+  \nCOND INSTR            FX      DEST          SRC            Write             C Flag              Z\
+  \ Flag              Clocks\n\nEEEE 1101110 RAA AAAAAAAAA AAAAAAAAA                    1\n\nHub and PC\
+  \               \u2014                   \u2014            5\u2013122 / 14\u2013322\n\nEEEE 1101011\
+  \ CZ0 DDDDDDDDD 000101110               Hub1 and PC            D[31]               D[30]          5\u2013\
+  122 / 14\u2013322\n\nEEEE 1101111 RAA AAAAAAAAA AAAAAAAAA                    1\n\nHub and PC       \
+  \        \u2014                   \u2014            5\u2013122 / 14\u2013322\n\nEEEE 1101011 CZ0 DDDDDDDDD\
+  \ 000101111               Hub1 and PC            D[31]               D[30]          5\u2013122 / 14\u2013\
+  322\n\n1\n\nThe current C, Z, and effective next PC values are written to the Hub RAM long (H) referenced\
+  \ by PTRA or PTRB prior to\n\nreplacing them with that of Addr or Dest.\n\n2\n\n+1 clock cycle if target\
+  \ address isn't long-aligned in Hub RAM.\n\nCALLA and CALLB records the current state of the C and Z\
+  \ \uFB02ags and the address of the next instruction (PC + 1 if\n\nCog/LUT execution; PC + 4 if Hub execution)\
+  \ by writing them to the Hub RAM long (H) referenced by PTRA or\n\nPTRB, increments PTRA or PTRB, potentially\
+  \ updates the C and Z \uFB02ags with new given states, and jumps to the\n\ngiven address or offset.\
+  \ The routine at the new address should eventually execute a RETA or RETB instruction to\n\nreturn to\
+  \ the recorded address (the instruction following the CALLA or CALLB) and optionally restore the C and\
+  \ Z\n\n\uFB02ag state as it was prior.\n\nIn syntax 1 and 3, #Addr and #\\Addr encodes the instruction\
+  \ with relative and absolute addressing, respectively.\n\nThe relative form (the default) is vital for\
+  \ creating relocatable code. In either case, use symbolic references for\n\nAddr and the assembler will\
+  \ encode it properly. Examples: CALLA #SendBit or CALLB #\\DebugStatus\n\nIn syntax 2 and 4, the format\
+  \ of the value at Dest is CZxxxxxx_xxxxAAAA_AAAAAAAA_AAAAAAAA. C is the new C\n\n\uFB02ag state, Z is\
+  \ the new Z \uFB02ag state, A is the new 20-bit address to jump to, and x are don't-care bits. Syntax\
+  \ 2\n\neffectively swaps the \uFB02ags and PC with the value in the Dest register (and RETA or RETB\
+  \ swaps them back),\n\nmaking it convenient for switching between two threads.\n\nIf the WC or WCZ effect\
+  \ is speci\uFB01ed, the C \uFB02ag is updated to match D[31], after its original state is recorded.\n\
+  \nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is updated to match D[30], after its original\
+  \ state is recorded."
 compiler_category: Control Flow
 flags_affected:
-  C:
-    formula: A
+  C: D[31] D[30] 4
 parameters:
-- Addr is a symbolic reference to the target subroutine; the location to set PC to.
-  Relative addressing is the default; use '\' to force absolute addressing.
-- Dest is a register containing the 20-bit absolute address to set PC to and optional
-  new C and Z states.
-documentation_source: PASM2 Manual 2022/11/01
+- Addr is a symbolic reference to the target subroutine; the location to set PC to. Relative addressing
+  is the default; use '\' to force absolute addressing.
+- Dest is a register containing the 20-bit absolute address to set PC to and optional new C and Z states.
+- "WC, WZ, or WCZ are optional effects to update the \uFB02ags from Dest's upper bit states. Copyright\
+  \ \xA9 Parallax Inc. 2022/11/01 \u25AA Propeller 2 Assembly Language Manual              \u25AA   Page\
+  \ 56"
+- Addr is a symbolic reference to the target subroutine; the location to set PC to. Relative addressing
+  is the default; use '\' to force absolute addressing.
+- Dest is a register containing the 20-bit absolute address to set PC to and optional new C and Z states.
+- "WC, WZ, or WCZ are optional effects to update the \uFB02ags from Dest's upper bit states."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_call
@@ -37,3 +93,13 @@ compiler_operand_format:
   valueType: 19
 compiler_effects: []
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Call
+category: Flow Control Instruction - Call a subroutine; store return context on the stack.
+result: "Write current C and Z \uFB02ags and address of the next instruction into the 4-byte Hub RAM location\
+  \ at PTRA"
+syntax_variants:
+- CALL Dest {WC|WZ|WCZ}
+- CALLA Dest {WC|WZ|WCZ}
+- CALLB Dest {WC|WZ|WCZ}
+manual_extraction_date: '2025-01-19'

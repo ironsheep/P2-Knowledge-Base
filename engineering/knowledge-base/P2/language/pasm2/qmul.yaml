@@ -12,45 +12,28 @@ timing:
   cycles: 2
   type: fixed
 group: CORDIC Solver
-description: Perform 32×32 unsigned multiplication producing 64-bit result. Multiplies
-  D operand by S operand. Results retrieved via GETQX (lower 32 bits) and GETQY (upper
-  32 bits) instructions 55 clocks later.
-long_description: 'The QMUL instruction performs high-precision unsigned multiplication
-  using the P2''s 54-stage pipelined CORDIC solver. It multiplies two 32-bit unsigned
-  integers (D × S) and produces a full 64-bit product, avoiding the precision loss
-  that would occur with standard 32-bit multiplication.
-
-
-  The instruction takes the first multiplicand in the D operand and the second multiplicand
-  in the S operand, both as 32-bit unsigned values. After 55 clocks, the 64-bit result
-  can be retrieved using GETQX for the lower 32 bits and GETQY for the upper 32 bits.
-
-
-  This full-precision multiplication is essential for applications requiring accurate
-  large number arithmetic, such as DSP operations, cryptographic calculations, fixed-point
-  mathematics, and multiply-accumulate operations where intermediate precision is
-  critical.
-
-
-  The pipelined nature allows for continuous multiply-accumulate operations by issuing
-  new QMUL instructions every 8 clocks (hub window) while retrieving results from
-  previous operations, enabling high-throughput mathematical processing.
-
-  '
-category: CORDIC Solver
+description: "Perform 32\xD732 unsigned multiplication producing 64-bit result. Multiplies\
+  \ D operand by S operand. Results retrieved via GETQX (lower 32 bits) and GETQY\
+  \ (upper 32 bits) instructions 55 clocks later."
+long_description: "The QMUL instruction performs high-precision unsigned multiplication\
+  \ using the P2's 54-stage pipelined CORDIC solver. It multiplies two 32-bit unsigned\
+  \ integers (D \xD7 S) and produces a full 64-bit product, avoiding the precision\
+  \ loss that would occur with standard 32-bit multiplication.\n\nThe instruction\
+  \ takes the first multiplicand in the D operand and the second multiplicand in the\
+  \ S operand, both as 32-bit unsigned values. After 55 clocks, the 64-bit result\
+  \ can be retrieved using GETQX for the lower 32 bits and GETQY for the upper 32\
+  \ bits.\n\nThis full-precision multiplication is essential for applications requiring\
+  \ accurate large number arithmetic, such as DSP operations, cryptographic calculations,\
+  \ fixed-point mathematics, and multiply-accumulate operations where intermediate\
+  \ precision is critical.\n\nThe pipelined nature allows for continuous multiply-accumulate\
+  \ operations by issuing new QMUL instructions every 8 clocks (hub window) while\
+  \ retrieving results from previous operations, enabling high-throughput mathematical\
+  \ processing.\n"
 compiler_category: Miscellaneous
 examples:
-- code: ''' Multiply 1000000 × 2000000 = 2000000000000
-
-    QMUL    #1000000, #2000000
-
-    '' Wait 55 clocks...
-
-    GETQX   lower_32       '' Get lower 32 bits
-
-    GETQY   upper_32       '' Get upper 32 bits
-
-    '
+- code: "' Multiply 1000000 \xD7 2000000 = 2000000000000\nQMUL    #1000000, #2000000\n\
+    ' Wait 55 clocks...\nGETQX   lower_32       ' Get lower 32 bits\nGETQY   upper_32\
+    \       ' Get upper 32 bits\n"
   description: Basic large number multiplication
 - code: ''' Variable multiplication
 
@@ -123,7 +106,6 @@ applications: DSP multiply-accumulate, fixed-point arithmetic, large integer cal
   cryptographic operations, precise mathematical computations.
 documentation_source: p2_datasheet
 documentation_level: comprehensive
-needs_documentation: false
 compiler_operand_format:
   name: operand_ls
   pattern: D/#,S/#
@@ -131,3 +113,4 @@ compiler_operand_format:
   valueType: 13
 compiler_effects: []
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
+last_updated: '2025-09-19T16:04:17.531155'

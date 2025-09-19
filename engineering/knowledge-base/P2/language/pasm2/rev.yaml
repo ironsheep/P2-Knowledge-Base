@@ -1,18 +1,20 @@
 instruction: REV
-syntax: REV     D
-encoding: EEEE 1101011 000 DDDDDDDDD 001101001
+syntax: REV Dest
+encoding: "EEEE 1101011 000 DDDDDDDDD 001101001                            D              \u2014     \
+  \            \u2014                    2"
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: The 32-bit pattern in Dest is reversed.
-category: Bit Operation Instruction - Reverse bits of value.
+group: Bit Operation Instruction - Reverse bits of value.
+description: "The 32-bit pattern in Dest is reversed.\n\n\u21D2\n\nREV performs a bitwise reverse (bits\
+  \ 31:0 bits 0:31) of the value in Dest and stores the result back into Dest.\n\nThis is useful for processing\
+  \ binary data in a different MSB/LSB order than it is transmitted with."
 flags_affected:
   C:
     when: D
 parameters:
 - Dest is the register containing the bit value to reverse.
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_d
@@ -22,3 +24,13 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 24
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+long_description: The 32-bit pattern in Dest is reversed.
+syntax_variants:
+- REV Dest
+- REV performs a bitwise reverse (bits 31:0 bits 0:31) of the value in Dest and stores the result back
+  into Dest.
+last_updated: '2025-09-19'
+brief_description: Reverse
+category: Bit Operation Instruction - Reverse bits of value.
+result: The 32-bit pattern in Dest is reversed.
+manual_extraction_date: '2025-01-19'

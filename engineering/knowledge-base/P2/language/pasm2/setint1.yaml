@@ -6,10 +6,8 @@ timing:
   type: fixed
 group: Interrupts
 description: Set INT1 source to D[3:0].
-category: Interrupts
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+documentation_source: PASM2 Manual 2022-11-01
+documentation_level: enhanced
 compiler_operand_format:
   name: operand_l
   pattern: D/#0..511
@@ -18,3 +16,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.290800'

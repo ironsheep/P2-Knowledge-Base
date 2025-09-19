@@ -1,21 +1,76 @@
 instruction: COGSTOP
-syntax: COGSTOP {#}D
-encoding: EEEE 1101011 00L DDDDDDDDD 000000011
+syntax: COGSTOP {#}Dest
+encoding: "EEEE 1101011 00L DDDDDDDDD 000000011                        \u2014                 \u2014 \
+  \               \u2014                    2\u20139"
 timing:
   cycles: 2
   type: fixed
-group: Hub Control - Cogs
-description: 'COGSTOP terminates the cog identified by Dest[2:0]. In this dormant
-  state, the cog ceases to execute code and Result: Cog indicated by Dest is terminated
-  (stopped).'
-category: Cog Control Instruction - Stop a cog by ID.
+group: Cog Control Instruction - Stop a cog by ID.
+description: "COGSTOP terminates the cog identified by Dest[2:0]. In this dormant state, the cog ceases\
+  \ to execute code and Result: Cog indicated by Dest is terminated (stopped).\n\nCOGSTOP terminates the\
+  \ cog identi\uFB01ed by Dest[2:0]. In this dormant state, the cog ceases to execute code and\n\npower\
+  \ consumption is greatly reduced.\n\nConditions ( IF_x )\n\nEvery PASM2 instruction has an optional\
+  \ \u201Ccondition\u201D that dynamically executes or excludes the instruction based\n\non \uFB02ag settings\
+  \ at runtime. A condition, if provided, is placed in front of the instruction it controls.\n\n{Label}\
+  \ {Condition} Instruction Operands {Effect}\n\nConditions are optional; omitting the condition means\
+  \ \"always execute\" the instruction (the default behavior). The\n\nCondition \uFB01eld on an instruction\
+  \ line can contain one of \uFB01fty condition symbols (including blank; the default). The\n\nfull set\
+  \ of condition symbols resolves down to 16 unique condition patterns (4-bits) that are stored in the\n\
+  \ninstruction's opcode (the COND \uFB01eld) during assembly.\n\nThis Condition feature, along with the\
+  \ instructions\u2019 optional Effect feature, makes Propeller 2 Assembly very\n\npowerful. For example,\
+  \ the C and Z \uFB02ags can be affected at will and later instructions can be conditionally\n\nexecuted\
+  \ based on those results, making for easy behavioral changes through a single non-branching code path.\n\
+  \nWhen an instruction\u2019s condition evaluates to FALSE, the instruction effectively does nothing\u2014\
+  \ still elapsing 2 clock\n\ncycles, but not affecting any \uFB02ags or registers. This makes the timing\
+  \ of multi-decision code deterministic.\n\nConditions\n\nCondition1        Encoding2 Instruction Executes...\n\
+  \nIF_E             %1010        if comparison/subtraction was equal (Z = 1)\n\nIF_NE            %0101\
+  \        if comparison/subtraction was not equal (Z = 0)\n\nIF_A             %0001        if comparison/subtraction\
+  \ was above (C = 0 and Z = 0)\n\nIF_AE            %0011        if comparison/subtraction was above or\
+  \ equal (C = 0)\n\nIF_B             %1100        if comparison/subtraction was below (C = 1)\n\nIF_BE\
+  \            %1110     if comparison/subtraction was below or equal (C = 1 or Z = 1)\n\nIF_GT      \
+  \      %0001     if comparison/subtraction was greater than (C = 0 and Z = 0)\n\nIF_GE            %0011\
+  \     if comparison/subtraction was greater than or equal (C = 0)\n\nIF_LT           %1100     if comparison/subtraction\
+  \ was less than (C = 1)\n\nIF_LE            %1110     if comparison/subtraction was less than or equal\
+  \ (C = 1 or Z = 1)\n\nIF_C            %1100     if C set (C = 1)\n\nIF_NC            %0011     if C\
+  \ clear (C = 0)\n\nIF_Z            %1010     if Z set (Z = 1)\n\nIF_NZ            %0101     if Z clear\
+  \ (Z = 0)\n\nIF_C_EQ_Z          %1001     if C equal to Z (C = 0 and Z = 0 --or-- C = 1 and Z = 1)\n\
+  \nIF_C_NE_Z          %0110     if C not equal to Z (C = 0 and Z = 1 --or-- C = 1 and Z = 0)\n\nIF_C_AND_Z\
+  \         %1000     if C set and Z set (C = 1 and Z = 1)\n\nIF_C_AND_NZ         %0100     if C set and\
+  \ Z clear (C = 1 and Z = 0)\n\nIF_NC_AND_Z         %0010     if C clear and Z set (C = 0 and Z = 1)\n\
+  \nIF_NC_AND_NZ        %0001     if C clear and Z clear (C = 0 and Z = 0)\n\nIF_C_OR_Z          %1110\
+  \     if C set or Z set (C = 1 or Z = 1)\n\nIF_C_OR_NZ         %1101     if C set or Z clear (C = 1\
+  \ or Z = 0)\n\nIF_NC_OR_Z         %1011     if C clear or Z set (C = 0 or Z = 1)\n\nIF_NC_OR_NZ    \
+  \     %0111     if C clear or Z clear (C = 1 or Z = 0)\n\nIF_Z_EQ_C          %1001     if Z equal to\
+  \ C (Z = 0 and C = 0 --or-- Z = 1 and C = 1)\n\nIF_Z_NE_C          %0110     if Z not equal to C (Z\
+  \ = 0 and C = 1 --or-- Z = 1 and C = 0)\n\nIF_Z_AND_C         %1000     if Z set and C set (Z = 1 and\
+  \ C = 1)\n\nIF_Z_AND_NC         %0010     if Z set and C clear (Z = 1 and C = 0)\n\nIF_NZ_AND_C    \
+  \     %0100     if Z clear and C set (Z = 0 and C = 1)\n\nIF_NZ_AND_NC        %0001     if Z clear and\
+  \ C clear (Z = 0 and C = 0)\n\nIF_Z_OR_C          %1110     if Z set or C set (Z = 1 or C = 1)\n\nIF_Z_OR_NC\
+  \         %1011     if Z set or C clear (Z = 1 or C = 0)\n\nIF_NZ_OR_C         %1101     if Z clear\
+  \ or C set (Z = 0 or C = 1)\n\nIF_NZ_OR_NC         %0111     if Z clear or C clear (Z = 0 or C = 0)\n\
+  \nIF_00           %0001     if C clear and Z clear (C = 0 and Z = 0)\n\nIF_01           %0010     if\
+  \ C clear and Z set (C = 0 and Z = 1)\n\nIF_10           %0100     if C set and Z clear (C = 1 and Z\
+  \ = 0)\n\nIF_11           %1000     if C set and Z set (C = 1 and Z = 1)\n\nIF_X0            %0101 \
+  \    if Z clear (Z = 0)\n\nIF_X1            %1010     if Z set (Z = 1)\n\nIF_0X            %0011   \
+  \  if C clear (C = 0)\n\nIF_1X            %1100     if C set (C = 1)\n\nIF_NOT_00          %1110   \
+  \  if C clear and Z clear (C = 0 and Z = 0)\n\nIF_NOT_01          %1101     if C set or Z clear (C =\
+  \ 1 or Z = 0)\n\nIF_NOT_10          %1011     if C clear or Z set (C = 0 or Z = 1)\n\nIF_NOT_11    \
+  \      %0111     if C clear or Z clear (C = 0 or Z = 0)\n\nIF_DIFF          %0110     if C not equal\
+  \ to Z (C = 0 and Z = 1 --or-- C = 1 and Z = 0)\n\nIF_SAME           %1001     if C equal to Z (C =\
+  \ 0 and Z = 0 --or-- C = 1 and Z = 1)\n\n_RET_            %0000     always; execute instruction then\
+  \ return if no branch; no context restore\n\n%1111     always; this is the default, no condition expressed\n\
+  \n1\n\nThe Condition symbol must be entered in place of the {Condition} item (ahead of the Instruction)\
+  \ on an instruction line.\n\n2\n\nThe Encoding value is emitted into the COND \uFB01eld (the EEEE bits)\
+  \ in the compiled instruction opcode.\n\nNote that for every Condition that acts upon the state of C\
+  \ and/or Z \uFB02ags, there's also a Modi\uFB01er (for use with\n\nMODxx instructions) capable of applying\
+  \ \uFB02ag state(s) based on similar logic. Additionally, the Condition symbols\n\nand descriptions\
+  \ are similar to, and the encoding exactly matches, that of the related Modi\uFB01ers."
 parameters:
-- Dest is the register or 9-bit literal indicating (in lowest 3 bits) which cog to
-  stop.
+- Dest is the register or 9-bit literal indicating (in lowest 3 bits) which cog to stop.
 related:
 - COGINIT
 - COGSTOP
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_l
@@ -25,3 +80,12 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Cog stop
+category: Cog Control Instruction - Stop a cog by ID.
+result: Cog indicated by Dest is terminated (stopped).
+syntax_variants:
+- COGSTOP {#}Dest
+- "COGSTOP terminates the cog identi\uFB01ed by Dest[2:0]. In this dormant state, the cog ceases to execute\
+  \ code and"
+manual_extraction_date: '2025-01-19'

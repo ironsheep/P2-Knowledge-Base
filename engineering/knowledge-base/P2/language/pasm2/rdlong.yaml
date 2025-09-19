@@ -9,11 +9,11 @@ compiler_encoding:
   operandFormat: 15
   rawValue: 32608
 timing:
-  cycles: 9
+  cycles: 1
   type: fixed
 group: Hub RAM - Read
-description: C = MSB of long.
-category: Hub RAM - Read
+description: '{WC/WZ/WCZ}                                                                                                                            9...16
+  1 / 9...26'
 compiler_category: Memory and I/O
 flags_affected:
   C:
@@ -34,12 +34,14 @@ compiler_effects:
   value: 3
   description: Write Carry and Zero flags
   bitPattern: '11'
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+documentation_source: PASM2 Manual 2022-11-01
+documentation_level: enhanced
 compiler_operand_format:
   name: operand_dsp
   pattern: D,S/#/PTRA/PTRB
   description: Destination, source/immediate/pointer register
   valueType: 15
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
+syntax_variants:
+- RDLONG D,{#}S/P
+last_updated: '2025-09-19T16:04:17.050451'

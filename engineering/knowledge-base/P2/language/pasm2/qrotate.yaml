@@ -9,60 +9,28 @@ description: Rotate a 32-bit signed (X, Y) point around origin (0, 0) by a speci
   angle. X coordinate comes from D operand, Y coordinate from SETQ value (or 0 if
   SETQ not used). Angle specified in S operand. Results retrieved via GETQX (X) and
   GETQY (Y) instructions 55 clocks later.
-long_description: 'The QROTATE instruction performs point rotation using the P2''s
-  54-stage pipelined CORDIC solver. It rotates a 32-bit signed (X, Y) coordinate pair
-  around the origin (0, 0) by a specified angle, producing new 32-bit signed (X, Y)
-  results.
-
-
-  The instruction takes the X coordinate from the D operand and the Y coordinate from
-  the SETQ value (or 32''b0 if SETQ was not used). The rotation angle is specified
-  in the S operand using P2''s standard angle units where $00000000 = 0°, $40000000
-  = 90°, $80000000 = 180°, and $C0000000 = 270°.
-
-
-  After 55 clocks, the rotated coordinates can be retrieved using GETQX for the new
-  X coordinate and GETQY for the new Y coordinate.
-
-
-  This instruction can also be used for polar to cartesian conversion by setting the
-  X coordinate (D) to the length, Y coordinate (SETQ) to 0, and the angle (S) to the
-  desired angle.
-
-
-  Common applications include graphics transformations, signal processing rotations,
-  and coordinate system conversions.
-
-  '
-category: CORDIC Solver
+long_description: "The QROTATE instruction performs point rotation using the P2's\
+  \ 54-stage pipelined CORDIC solver. It rotates a 32-bit signed (X, Y) coordinate\
+  \ pair around the origin (0, 0) by a specified angle, producing new 32-bit signed\
+  \ (X, Y) results.\n\nThe instruction takes the X coordinate from the D operand and\
+  \ the Y coordinate from the SETQ value (or 32'b0 if SETQ was not used). The rotation\
+  \ angle is specified in the S operand using P2's standard angle units where $00000000\
+  \ = 0\xB0, $40000000 = 90\xB0, $80000000 = 180\xB0, and $C0000000 = 270\xB0.\n\n\
+  After 55 clocks, the rotated coordinates can be retrieved using GETQX for the new\
+  \ X coordinate and GETQY for the new Y coordinate.\n\nThis instruction can also\
+  \ be used for polar to cartesian conversion by setting the X coordinate (D) to the\
+  \ length, Y coordinate (SETQ) to 0, and the angle (S) to the desired angle.\n\n\
+  Common applications include graphics transformations, signal processing rotations,\
+  \ and coordinate system conversions.\n"
 examples:
-- code: ''' Rotate point (100, 200) by 45 degrees
-
-    SETQ    #200           '' Set Y coordinate
-
-    QROTATE #100, #$20000000  '' X=100, angle=45°
-
-    '' Wait 55 clocks...
-
-    GETQX   new_x          '' Get rotated X
-
-    GETQY   new_y          '' Get rotated Y
-
-    '
+- code: "' Rotate point (100, 200) by 45 degrees\nSETQ    #200           ' Set Y coordinate\n\
+    QROTATE #100, #$20000000  ' X=100, angle=45\xB0\n' Wait 55 clocks...\nGETQX  \
+    \ new_x          ' Get rotated X\nGETQY   new_y          ' Get rotated Y\n"
   description: Basic point rotation by 45 degrees
-- code: ''' Polar to cartesian: length=500, angle=30°
-
-    SETQ    #0             '' Y coordinate = 0
-
-    QROTATE #500, #$15555555  '' X=length, angle=30°
-
-    '' ... other work for 55 clocks ...
-
-    GETQX   cart_x         '' Get cartesian X
-
-    GETQY   cart_y         '' Get cartesian Y
-
-    '
+- code: "' Polar to cartesian: length=500, angle=30\xB0\nSETQ    #0             '\
+    \ Y coordinate = 0\nQROTATE #500, #$15555555  ' X=length, angle=30\xB0\n' ...\
+    \ other work for 55 clocks ...\nGETQX   cart_x         ' Get cartesian X\nGETQY\
+    \   cart_y         ' Get cartesian Y\n"
   description: Polar to cartesian conversion
 - code: ''' Rotate with variable coordinates and angle
 
@@ -96,7 +64,6 @@ usage_notes: Use SETQ before QROTATE to specify Y coordinate. If SETQ is not use
   Y defaults to 0. Can be used for polar to cartesian conversion.
 documentation_source: p2_datasheet
 documentation_level: comprehensive
-needs_documentation: false
 compiler_operand_format:
   name: operand_ls
   pattern: D/#,S/#
@@ -105,3 +72,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 13
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.469590'

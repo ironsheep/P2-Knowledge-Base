@@ -2,14 +2,13 @@ instruction: WRWORD
 syntax: WRWORD  {#}D,{#}S/P
 encoding: EEEE 1100010 1LI DDDDDDDDD SSSSSSSSS
 timing:
-  cycles: 3
+  cycles: 1
   type: fixed
 group: Hub RAM - Write
-description: Write word in D[15:0] to hub address {#}S/PTRx.
-category: Hub RAM - Write
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+description: Write word in D[15:0] to hub address {#}S/PTRx.                                                               3...10
+  1 / 3...20
+documentation_source: PASM2 Manual 2022-11-01
+documentation_level: enhanced
 compiler_operand_format:
   name: operand_lsp
   pattern: D/#,S/#/PTRA/PTRB
@@ -18,3 +17,6 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 16
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- WRWORD {#}D,{#}S/P
+last_updated: '2025-09-19T16:04:17.097515'

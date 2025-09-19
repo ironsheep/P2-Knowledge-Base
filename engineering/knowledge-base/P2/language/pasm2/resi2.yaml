@@ -3,13 +3,12 @@ syntax: RESI2
 encoding: EEEE 1011001 110 111110010 111110011
 timing:
   cycles: 4
-  type: fixed
+  type: variable
+  range: 4 / 13...20
 group: Branch S - Resume
 description: Resume from INT2. (CALLD $1F2,$1F3 WCZ).
-category: Branch S - Resume
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+documentation_source: PASM2 Manual 2022-11-01
+documentation_level: structured
 compiler_operand_format:
   name: operand_xlat
   pattern: ''
@@ -18,3 +17,17 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 33
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- RESI2 Resume
+last_updated: '2025-09-19T16:04:17.376879'
+brief_description: Resume from interrupt 2
+group_membership:
+  group_id: interrupt_resume
+  group_file: groups/interrupt_resume.yaml
+  related:
+  - resi0
+  - resi1
+  - resi3
+specifics:
+  interrupt_number: 2
+has_group_documentation: true

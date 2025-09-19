@@ -4,11 +4,10 @@ encoding: EEEE 0100011 CZI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
+group: Bit Operation Instruction - Set bit(s) low/high according to C or !C.
 description: 'BITC or BITNC alters the Dest bit(s) designated by Src to equal the
   state, or inverse state, of the C flag. All other Result: Dest bit(s) described
   by Src are set to C or !C; the rest are left as-is. Z = original D[S[4:0]].'
-category: Bit Operation Instruction - Set bit(s) low/high according to C or !C.
 flags_affected:
   Z:
     formula: original D[S[4:0]]
@@ -28,3 +27,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 1
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.063529'

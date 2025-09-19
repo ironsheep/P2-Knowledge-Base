@@ -1,8 +1,10 @@
-directive: "ORGF"
+directive: ORGF
 type: assembly_directive
-category: "Assembly"
-description: |
-  Set origin address with forced alignment
-syntax: "['ORGF address']"
+description: 'Set origin address with forced alignment
+
+  '
+syntax: '[''ORGF address'']'
 examples:
-  - "ORGF $100  // Align to address $100"
+- ORGF $100  // Align to address $100
+group: Assembly
+last_updated: '2025-09-19T16:04:17.655294'

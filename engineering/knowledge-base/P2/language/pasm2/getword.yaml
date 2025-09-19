@@ -1,22 +1,53 @@
 instruction: GETWORD
-syntax: GETWORD D,{#}S,#N
-encoding: EEEE 1001001 100 DDDDDDDDD 000000000
+syntax: 'GETWORD Dest, {#}Src, #Num'
+encoding:
+- "EEEE 1001001 1NI DDDDDDDDD SSSSSSSSS                  D                \u2014                  \u2014\
+  \                    2"
+- "EEEE 1001001 100 DDDDDDDDD 000000000                  D                \u2014                  \u2014\
+  \                    2"
+- EEEE 1011100 00I DDDDDDDDD SSSSSSSSS                   D and PC   1
 timing:
-  cycles: 2
+  cycles: 1
   type: fixed
-group: Math and Logic
-description: 'GETWORD reads the word identified by Num (0–1) from Src, or a word from
-  the source described by a prior ALTGW Result: Word Num (0–1) of Src, or a word from
-  a source described by prior ALTGW instruction, is written to Dest.'
-category: Bit Operation Instruction - Get a word from a value.
+group: Bit Operation Instruction - Get a word from a value.
+description: "GETWORD reads the word identified by Num (0\u20131) from Src, or a word from the source\
+  \ described by a prior ALTGW Result: Word Num (0\u20131) of Src, or a word from a source described by\
+  \ prior ALTGW instruction, is written to Dest.\n\nGETWORD reads the word identi\uFB01ed by Num (0\u2013\
+  1) from Src, or a word from the source described by a prior ALTGW\n\ninstruction.\n\nNum (0\u20131)\
+  \ identi\uFB01es a value's words, by position, in least-signi\uFB01cant word order.\n\nSyntax 2 is intended\
+  \ for use after an ALTGW instruction; i.e. in a loop to iteratively read a series of word values\n\n\
+  within contiguous long registers.\n\nIF_x (Conditions)\n\nSee Conditions ( IF_x ).\n\nIJZ / IJNZ\n\n\
+  Increment, jump if zero or not zero\n\nFlow Control Instruction - Increment value and jump if zero or\
+  \ not zero.\n\nIJZ        Dest, {#}Src\n\nIJNZ Dest, {#}Src\n\nResult: Dest is incremented, and if the\
+  \ result is zero (or not zero in syntax 2), PC is set to a new relative (#Src) or\n\nabsolute (Src)\
+  \ address.\n\n\u25CF    Dest is a register whose value is incremented and tested for zero or not zero.\n\
+  \n\u25CF    Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute\
+  \ or relative address to\n\nset PC to. Use # for relative addressing; omit # for absolute addressing.\n\
+  \nCOND INSTR             FX      DEST          SRC             Write              C Flag           \
+  \   Z Flag             Clocks\n\nEEEE 1011100 00I DDDDDDDDD SSSSSSSSS                   D and PC   1\n\
+  \n\u2014                    \u2014          2 or 4 / 2 or 13\u201320\n\nEEEE 1011100 01I DDDDDDDDD SSSSSSSSS\
+  \                   D and PC   1\n\n\u2014                    \u2014          2 or 4 / 2 or 13\u2013\
+  20\n\n1\n\nDest is always written; PC is written only when the result in Dest is zero (or not zero in\
+  \ syntax 2).\n\nIJZ or IJNZ increments the value in Dest, writes the result, and jumps to the address\
+  \ described by Src if the\n\nresult is zero (syntax 1) or not zero (in syntax 2).\n\nThe address (Src)\
+  \ can be absolute or relative. To specify an absolute address, Src must be a register containing a\n\
+  \n20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset (a range\
+  \ of -256 to +255\n\ninstructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit\
+  \ signed offset (a range of -524288 to\n\n+524287). Offsets are relative to the instruction following\
+  \ the IJZ / IJNZ. The signed offset value is in units of\n\nwhole instructions\u2014 it is added to\
+  \ PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added to\n\nPC when in Hub execution\
+  \ mode (long-aligned Hub code not required)."
 flags_affected:
   C:
     when: D
 parameters:
 - Dest is the register in which to store the word.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains
-  the target word to read.
-- Num is a 1-bit literal identifying the word ID (0–1) of Src to read.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target word to
+  read.
+- "Num is a 1-bit literal identifying the word ID (0\u20131) of Src to read."
+- Dest is a register whose value is incremented and tested for zero or not zero.
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
 related:
 - ALTGW
 - GETNIB
@@ -27,7 +58,7 @@ related:
 - ROLNIB
 - ROLBYTE
 - ROLWORD
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds1get
@@ -37,3 +68,12 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 11
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Get word
+category: Bit Operation Instruction - Get a word from a value.
+result: Dest is incremented, and if the result is zero (or not zero in syntax 2), PC is set to a new relative
+  (#Src) or
+syntax_variants:
+- 'GETWORD Dest, {#}Src, #Num'
+- GETWORD Dest
+manual_extraction_date: '2025-01-19'

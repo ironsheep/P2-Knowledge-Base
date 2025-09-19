@@ -1,15 +1,26 @@
 instruction: POLLCT2
-syntax: POLLCT2          {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 000000010 000100100
+syntax: POLLCT1 {WC|WZ|WCZ}
+encoding:
+- "EEEE 1101011 CZ0 000000001 000100100                  \u2014            CT1 Event           CT1 Event\
+  \                 2"
+- "EEEE 1101011 CZ0 000000010 000100100                  \u2014            CT2 Event           CT2 Event\
+  \                 2"
+- "EEEE 1101011 CZ0 000000011 000100100                  \u2014            CT3 Event           CT3 Event\
+  \                 2"
 timing:
   cycles: 2
   type: fixed
 group: Events - Poll
-description: Get CT2 event flag into C/Z, then clear it.
-category: Events - Poll
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+description: "Get CT2 event flag into C/Z, then clear it.\n\nPOLLCT1, POLLCT2, or POLLCT3 copies the state\
+  \ of the count 1, 2, or 3 event \uFB02ag into C and/or Z and then clears\n\nthe \uFB02ag (unless it's\
+  \ being set again by the event sensor).\n\nIf the WC, WZ, or WCZ effect is speci\uFB01ed, the C \uFB02\
+  ag and/or Z \uFB02ag is updated to the state of the corresponding\n\ncounter event \uFB02ag prior to\
+  \ clearing it.\n\nThe counter 1, 2, or 3 event \uFB02ag is set whenever the System Counter (CT) passes\
+  \ the value in the CT1, CT2, or CT3\n\nevent trigger register, respectively; i.e. MSB of (CT - CTx is\
+  \ 0). The counter event \uFB02ags are cleared upon execution\n\nof the corresponding ADDCTx, POLLCTx,\
+  \ WAITCTx, JCTx, or JNCTx instructions."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pollwait
   pattern: ''
@@ -18,3 +29,29 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- POLLCT1 {WC|WZ|WCZ}
+- POLLCT2 {WC|WZ|WCZ}
+- POLLCT3 {WC|WZ|WCZ}
+last_updated: '2025-09-19'
+brief_description: Poll counter 1/2/3
+group_membership:
+  group_id: counter_event_polls
+  group_file: groups/counter_event_polls.yaml
+  related:
+  - pollct1
+  - pollct3
+specifics:
+  counter_number: 2
+  event_flag: CT2
+has_group_documentation: true
+category: "Event Monitor Instruction - Retrieve and clear counter event 1/2/3 \uFB02ag."
+result: "Counter event \uFB02ag 1, 2, or 3 state is optionally copied into C and/or Z, then it is cleared."
+parameters:
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+related:
+- ADDCTx
+- WAITCTx
+- JCTx
+- JNCTx
+manual_extraction_date: '2025-01-19'

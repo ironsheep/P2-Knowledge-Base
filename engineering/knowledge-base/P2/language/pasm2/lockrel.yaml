@@ -22,7 +22,6 @@ description: 'Release LOCK D[3:0]. If D is a register and WC, get current/last c
   - Must balance with LOCKTRY calls
 
   '
-category: Hub Control - Locks
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:
@@ -90,3 +89,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.105107'

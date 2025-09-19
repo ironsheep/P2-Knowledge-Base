@@ -5,11 +5,9 @@ timing:
   cycles: 2
   type: fixed
 group: Math and Logic
-description: Write 0 or 1 to D, according to Z.
-category: Math and Logic
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+description: Write 0 or 1 to D, according to Z. D = {31'b0, Z).
+documentation_source: PASM2 Manual 2022-11-01
+documentation_level: enhanced
 compiler_operand_format:
   name: operand_d
   pattern: D
@@ -18,3 +16,6 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 24
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- WRZ D
+last_updated: '2025-09-19T16:04:17.241380'

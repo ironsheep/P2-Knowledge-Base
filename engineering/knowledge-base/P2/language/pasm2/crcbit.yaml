@@ -6,10 +6,8 @@ timing:
   type: fixed
 group: Math and Logic
 description: Iterate CRC value in D using C and polynomial in S.
-category: Math and Logic
 documentation_source: original
 documentation_level: minimal
-needs_documentation: true
 compiler_operand_format:
   name: operand_ds
   pattern: D,S/#
@@ -18,3 +16,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:16.856840'

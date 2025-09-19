@@ -1,18 +1,25 @@
 instruction: COGBRK
-syntax: COGBRK  {#}D
-encoding: EEEE 1101011 00L DDDDDDDDD 000110101
+syntax: COGBRK {#}Dest
+encoding: "EEEE 1101011 00L DDDDDDDDD 000110101                   \u2014                 \u2014      \
+  \            \u2014                   2"
 timing:
   cycles: 2
   type: fixed
-group: Interrupts
-description: 'COGBRK triggers an asynchronous breakpoint in a designated cog. The
-  COGBRK instruction must be executed Result: If in the Debug ISR, trigger an asynchronous
-  breakpoint in cog identified by Dest.'
-category: Interrupt Instruction - Trigger breakpoint in specified cog.
+group: Interrupt Instruction - Trigger breakpoint in specified cog.
+description: 'COGBRK triggers an asynchronous breakpoint in a designated cog. The COGBRK instruction must
+  be executed Result: If in the Debug ISR, trigger an asynchronous breakpoint in cog identified by Dest.
+
+
+  COGBRK triggers an asynchronous breakpoint in a designated cog. The COGBRK instruction must be executed
+
+
+  from within a Debug ISR (interrupt service routine) and the designated cog must already have its asynchronous
+
+
+  breakpoint interrupt enabled. Dest[2:0] indicates the ID of the desired cog.'
 parameters:
-- Dest is the register or 9-bit literal whose value (lower 3-bits) indicates which
-  cog to trigger.
-documentation_source: PASM2 Manual 2022/11/01
+- Dest is the register or 9-bit literal whose value (lower 3-bits) indicates which cog to trigger.
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_l
@@ -22,3 +29,10 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Cog break
+category: "Interrupt Instruction - Trigger breakpoint in speci\uFB01ed cog."
+result: "If in the Debug ISR, trigger an asynchronous breakpoint in cog identi\uFB01ed by Dest."
+syntax_variants:
+- COGBRK {#}Dest
+manual_extraction_date: '2025-01-19'

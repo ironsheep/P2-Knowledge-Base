@@ -1,19 +1,24 @@
 instruction: SETNIB
-syntax: SETNIB  D,{#}S,#N
-encoding: EEEE 1000000 00I 000000000 SSSSSSSSS
+syntax: 'SETNIB Dest, {#}Src, #Num'
+encoding:
+- "EEEE 100000N NNI DDDDDDDDD SSSSSSSSS                        D                    \u2014           \
+  \     \u2014                     2"
+- EEEE 1000000 00I 000000000 SSSSSSSSS                       D   1
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'SETNIB stores Src[3:0] into the nibble identified by Num within Dest,
-  or the nibble and register described by a prior Result: Src[3:0] is written to nibble
-  Num (0–7) of Dest, or to another register nibble described by prior ALTSN instruction.'
-category: Bit Operation Instruction - Set a nibble to new value.
+group: Bit Operation Instruction - Set a nibble to new value.
+description: "SETNIB stores Src[3:0] into the nibble identified by Num within Dest, or the nibble and\
+  \ register described by a prior Result: Src[3:0] is written to nibble Num (0\u20137) of Dest, or to\
+  \ another register nibble described by prior ALTSN instruction.\n\nSETNIB stores Src[3:0] into the nibble\
+  \ identi\uFB01ed by Num within Dest, or the nibble and register described by a prior\n\nALTSN instruction.\
+  \ No other bits are modi\uFB01ed.\n\nNum (0\u20137) identi\uFB01es a value's individual nibbles, by\
+  \ position, in least-signi\uFB01cant nibble order.\n\nSyntax 2 is intended for use after an ALTSN instruction;\
+  \ i.e. in a loop to iteratively affect a series of nibble values\n\nwithin contiguous long registers."
 parameters:
 - Dest is the register in which to modify a nibble.
-- Src is a register or 4-bit literal whose bits [3:0] will be stored in the designated
-  location.
-- Num is a 3-bit literal identifying the nibble ID (0–7) of Dest to modify.
+- Src is a register or 4-bit literal whose bits [3:0] will be stored in the designated location.
+- "Num is a 3-bit literal identifying the nibble ID (0\u20137) of Dest to modify."
 related:
 - ALTSN
 - SETBYTE
@@ -24,14 +29,24 @@ related:
 - ROLNIB
 - ROLBYTE
 - ROLWORD
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds3set
   pattern: S/#{,D,#0..7}
-  description: 'Set nibble: source/immediate, optional destination and nibble index
-    0-7'
+  description: 'Set nibble: source/immediate, optional destination and nibble index 0-7'
   valueType: 6
 compiler_encoding:
   operandFormat: 6
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Set nibble
+category: Bit Operation Instruction - Set a nibble to new value.
+result: "Src[3:0] is written to nibble Num (0\u20137) of Dest, or to another register nibble described\
+  \ by prior ALTSN"
+syntax_variants:
+- 'SETNIB Dest, {#}Src, #Num'
+- SETNIB {#}Src
+- "SETNIB stores Src[3:0] into the nibble identi\uFB01ed by Num within Dest, or the nibble and register\
+  \ described by a prior"
+manual_extraction_date: '2025-01-19'

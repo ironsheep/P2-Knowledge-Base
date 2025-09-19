@@ -1,8 +1,10 @@
-directive: "DITTO"
+directive: DITTO
 type: assembly_directive
-category: "Assembly"
-description: |
-  Repeat last instruction (v50+)
-syntax: "['DITTO']"
+description: 'Repeat last instruction (v50+)
+
+  '
+syntax: '[''DITTO'']'
 examples:
-  - "DITTO  // Repeat previous instruction"
+- DITTO  // Repeat previous instruction
+group: Assembly
+last_updated: '2025-09-19T16:04:17.649232'

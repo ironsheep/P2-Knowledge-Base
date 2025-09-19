@@ -1,22 +1,29 @@
 instruction: GETBYTE
-syntax: GETBYTE D,{#}S,#N
-encoding: EEEE 1000111 000 DDDDDDDDD 000000000
+syntax: 'GETBYTE Dest, {#}Src, #Num'
+encoding:
+- "EEEE 1000111 NNI DDDDDDDDD SSSSSSSSS                  D                 \u2014                  \u2014\
+  \                    2"
+- "EEEE 1000111 000 DDDDDDDDD 000000000                  D                 \u2014                  \u2014\
+  \                    2"
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'GETBYTE reads the byte identified by Num (0–3) from Src, or a byte from
-  the source described by a prior ALTGB Result: Byte Num (0–3) of Src, or a byte from
-  a source described by prior ALTGB instruction, is written to Dest.'
-category: Bit Operation Instruction - Get a byte from a value.
+group: Bit Operation Instruction - Get a byte from a value.
+description: "GETBYTE reads the byte identified by Num (0\u20133) from Src, or a byte from the source\
+  \ described by a prior ALTGB Result: Byte Num (0\u20133) of Src, or a byte from a source described by\
+  \ prior ALTGB instruction, is written to Dest.\n\nGETBYTE reads the byte identi\uFB01ed by Num (0\u2013\
+  3) from Src, or a byte from the source described by a prior ALTGB\n\ninstruction.\n\nNum (0\u20133)\
+  \ identi\uFB01es a value's individual bytes, by position, in least-signi\uFB01cant byte order.\n\nSyntax\
+  \ 2 is intended for use after an ALTGB instruction; i.e. in a loop to iteratively read a series of byte\
+  \ values\n\nwithin contiguous long registers."
 flags_affected:
   C:
     when: D
 parameters:
 - Dest is the register in which to store the byte.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains
-  the target byte to read.
-- Num is a 2-bit literal identifying the byte ID (0–3) of Src to read.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target byte to
+  read.
+- "Num is a 2-bit literal identifying the byte ID (0\u20133) of Src to read."
 related:
 - ALTGB
 - GETNIB
@@ -27,7 +34,7 @@ related:
 - ROLNIB
 - ROLBYTE
 - ROLWORD
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds2get
@@ -37,3 +44,12 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 9
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Get byte
+category: Bit Operation Instruction - Get a byte from a value.
+result: "Byte Num (0\u20133) of Src, or a byte from a source described by prior ALTGB instruction, is\
+  \ written to Dest."
+syntax_variants:
+- 'GETBYTE Dest, {#}Src, #Num'
+- GETBYTE Dest
+manual_extraction_date: '2025-01-19'

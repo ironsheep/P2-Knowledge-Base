@@ -1,16 +1,21 @@
 instruction: POLLXRL
-syntax: POLLXRL          {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 000001101 000100100
+syntax: POLLXRL {WC|WZ|WCZ}
+encoding: "EEEE 1101011 CZ0 000001101 000100100                \u2014            XRL Event         XRLEvent\
+  \                 2"
 timing:
   cycles: 2
   type: fixed
-group: Events - Poll
-description: Streamer-LUT-RAM-rollover event flag is optionally copied into C and/or
-  Z, then it is cleared.
-category: Event Monitor Instruction - Retrieve and clear streamer-LUT-RAM-rollover
-  event flag.
+group: Event Monitor Instruction - Retrieve and clear streamer-LUT-RAM-rollover event flag.
+description: "Streamer-LUT-RAM-rollover event flag is optionally copied into C and/or Z, then it is cleared.\n\
+  \nPOLLXRL copies the state of the streamer-LUT-RAM-rollover event \uFB02ag into C and/or Z and then\
+  \ clears the \uFB02ag\n\n(unless it's being set again by the event sensor).\n\nIf the WC, WZ, or WCZ\
+  \ effect is speci\uFB01ed, the C \uFB02ag and/or Z \uFB02ag is updated to the state of the streamer-LUT-RAM-\n\
+  \nrollover event \uFB02ag prior to clearing it.\n\nThe streamer-LUT-RAM-rollover event \uFB02ag is set\
+  \ whenever location $1FF of the Lookup RAM is read by the\n\nstreamer. The streamer-LUT-RAM-rollover\
+  \ event \uFB02ag is cleared upon cog start or upon execution of POLLXRL,\n\nWAITXRL, JXRL, or JNXRL\
+  \ instructions."
 parameters:
-- WC, WZ, or WCZ are optional effects to update flags.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - XINIT
 - XZERO
@@ -18,7 +23,7 @@ related:
 - WAITXRL
 - JXRL
 - JNXRL
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pollwait
@@ -28,3 +33,12 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+long_description: "Streamer-LUT-RAM-rollover event \uFB02ag is optionally copied into C and/or Z, then\
+  \ it is cleared."
+syntax_variants:
+- POLLXRL {WC|WZ|WCZ}
+last_updated: '2025-09-19'
+brief_description: Poll streamer rollover LUT
+category: "Event Monitor Instruction - Retrieve and clear streamer-LUT-RAM-rollover event \uFB02ag."
+result: "Streamer-LUT-RAM-rollover event \uFB02ag is optionally copied into C and/or Z, then it is cleared."
+manual_extraction_date: '2025-01-19'

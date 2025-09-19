@@ -1,14 +1,22 @@
 instruction: CMPSX
-syntax: CMPSX   D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0010011 CZI DDDDDDDDD SSSSSSSSS
+syntax: CMPSX Dest, {#}Src {WC|WZ|WCZ}
+encoding: "EEEE 0010011 CZI DDDDDDDDD SSSSSSSSS                 \u2014         Signed (D < S+C) Z AND\
+  \ (D = (S+C))             2"
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'CMPSX compares the signed values of Dest and Src plus C (by subtracting
-  Src + C from Dest) and optionally Result: Greater/lesser and equality status is
-  optionally written to the C and Z flags.'
-category: Math Instruction - Compare two signed values plus carry flag.
+group: Math Instruction - Compare two signed values plus carry flag.
+description: "CMPSX compares the signed values of Dest and Src plus C (by subtracting Src + C from Dest)\
+  \ and optionally Result: Greater/lesser and equality status is optionally written to the C and Z flags.\n\
+  \nCMPSX compares the signed values of Dest and Src plus C (by subtracting Src + C from Dest) and optionally\n\
+  \nsetting the C and Z \uFB02ags accordingly. The CMPSX instruction is used to perform signed multi-long\
+  \ comparisons,\n\nsuch as 64-bit comparisons.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02\
+  ag is set (1) if Dest is less than Src + C (as multi-long values). Use WC\n\nor WCZ on preceding CMP\
+  \ and CMPX instructions for proper \uFB01nal C \uFB02ag.\n\nIf the WZ or WCZ effect is speci\uFB01ed,\
+  \ the Z \uFB02ag is set (1) if Z was previously set and the result of Dest - (Src + C) is\n\nzero, or\
+  \ it is cleared (0) if non-zero. Use WZ or WCZ on preceding SUB and SUBX instructions for proper \uFB01\
+  nal Z \uFB02ag.\n\nTo compare signed, multi-long values, use CMP (not CMPS) followed possibly by CMPX,\
+  \ and \uFB01nally CMPSX as\n\ndescribed in Comparing Two Multi-Long Values."
 flags_affected:
   C:
     formula: correct sign of (D - (S + C))
@@ -16,14 +24,13 @@ flags_affected:
     formula: Z AND (D == S + C)
 parameters:
 - Dest is the register containing the value to compare with that of Src.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared
-  to Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - CMP
 - CMPX
 - CMPSX
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -33,3 +40,11 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Compare signed, extended
+category: "Math Instruction - Compare two signed values plus carry \uFB02ag."
+result: "Greater/lesser and equality status is optionally written to the C and Z \uFB02ags."
+syntax_variants:
+- CMPSX Dest, {#}Src {WC|WZ|WCZ}
+- CMPSX compares the signed values of Dest and Src plus C (by subtracting Src + C from Dest) and optionally
+manual_extraction_date: '2025-01-19'

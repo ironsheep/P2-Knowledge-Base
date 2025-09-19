@@ -11,9 +11,8 @@ compiler_encoding:
 timing:
   cycles: TBD
   type: TBD
-group: System Control
+group: System Control Instruction
 description: Debug instruction. Provides debugging functionality during program execution.
-category: System Control Instruction
 compiler_category: Miscellaneous
 examples:
 - code: 'DEBUG
@@ -30,5 +29,5 @@ compiler_operand_format:
 compiler_effects: []
 documentation_source: PNUT_TS_compiler_analysis
 documentation_level: minimal
-needs_documentation: true
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
+last_updated: '2025-09-19T16:04:17.215079'

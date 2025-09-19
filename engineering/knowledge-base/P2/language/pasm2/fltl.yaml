@@ -4,13 +4,12 @@ encoding: EEEE 1101011 CZL DDDDDDDDD 001010000
 timing:
   cycles: 2
   type: fixed
-group: Pins
+group: I/O Pin Instruction - Set pin(s) direction to input and to an output level
+  of high (1) or low (0).
 description: 'FLTH or FLTL sets the I/O pin(s) designated by Dest to the input direction
   and to a high or low output level; i.e. Result: The I/O pins described by Dest are
   set to the input direction and to an output level of high or low; the rest are left
   as-is. Z = OUT bit.'
-category: I/O Pin Instruction - Set pin(s) direction to input and to an output level
-  of high (1) or low (0).
 flags_affected:
   Z:
     formula: OUT bit
@@ -29,3 +28,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.253339'

@@ -1,27 +1,21 @@
 instruction: RCZL
-syntax: RCZL    D        {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 DDDDDDDDD 001101011
+syntax: RCZL Dest {WC|WZ|WCZ}
+encoding: EEEE 1101011 CZ0 DDDDDDDDD 001101011                           D         D[31]           D[30]                  2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'RCZL shifts Dest''s binary value left by two places and sets Dest[1]
-  to C and Dest[0] to Z. Result: The bits of Dest are shifted left by two places and
-  C and Z are inserted as new LSBs.'
-category: Bit Operation Instruction - Rotate carry and zero flags left into value
-  (2-bit rotate left).
+group: Bit Operation Instruction - Rotate carry and zero flags left into value (2-bit rotate left).
+description: "RCZL shifts Dest's binary value left by two places and sets Dest[1] to C and Dest[0] to\
+  \ Z. Result: The bits of Dest are shifted left by two places and C and Z are inserted as new LSBs.\n\
+  \nRCZL shifts Dest's binary value left by two places and sets Dest[1] to C and Dest[0] to Z.\n\nIf the\
+  \ WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is updated to the original Dest[31] state.\n\nIf\
+  \ the WZ or WCZ effect is speci\uFB01ed, the Z is \uFB02ag is updated to the original Dest[30] state."
 flags_affected:
-  C:
-    formula: D[31], Z = D[30]
-    when: D
-  Z:
-    formula: D[30]
-    when: D[31]
+  C: D[31] D[30] 2
 parameters:
-- Dest is the register containing the value to rotate the carry and zero flags left
-  into.
-- WC, WZ, or WCZ are optional effects to update flags.
-documentation_source: PASM2 Manual 2022/11/01
+- "Dest is the register containing the value to rotate the carry and zero \uFB02ags left into."
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_d
@@ -31,3 +25,11 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 24
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Rotate carry and zero left
+category: "Bit Operation Instruction - Rotate carry and zero \uFB02ags left into value (2-bit rotate left)."
+result: The bits of Dest are shifted left by two places and C and Z are inserted as new LSBs.
+syntax_variants:
+- RCZL Dest {WC|WZ|WCZ}
+- RCZL shifts Dest's binary value left by two places and sets Dest[1] to C and Dest[0] to Z.
+manual_extraction_date: '2025-01-19'

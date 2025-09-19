@@ -1,7 +1,8 @@
 instruction: CMP
-syntax: CMP     D,{#}S   {WC/WZ/WCZ}
+syntax: CMP Dest, {#}Src {WC|WZ|WCZ}
 compiler_syntax: CMP D,S/#
-encoding: EEEE 0010000 CZI DDDDDDDDD SSSSSSSSS
+encoding: "EEEE 0010000 CZI DDDDDDDDD SSSSSSSSS                  \u2014          Unsigned (D < S)    \
+  \  D=S                    2"
 compiler_encoding:
   bits: 32
   opcode: 64
@@ -11,11 +12,14 @@ compiler_encoding:
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'CMP compares the unsigned values of Dest and Src (by subtracting Src
-  from Dest) and optionally setting the C Result: Greater/lesser and equality status
-  is optionally written to the C and Z flags.'
-category: Math Instruction - Compare two unsigned values.
+group: Math Instruction - Compare two unsigned values.
+description: "CMP compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally\
+  \ setting the C Result: Greater/lesser and equality status is optionally written to the C and Z flags.\n\
+  \nCMP compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally setting\
+  \ the C\n\nand Z \uFB02ags accordingly.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag\
+  \ is set (1) if Dest is less than Src.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is\
+  \ set (1) if Dest equals Src.\n\nTo compare unsigned, multi-long values, use CMP followed by CMPX as\
+  \ described in Comparing Two Multi-Long\n\nValues."
 compiler_category: Arithmetic
 flags_affected:
   C:
@@ -39,15 +43,16 @@ compiler_effects:
   description: Write Carry and Zero flags
   bitPattern: '11'
 parameters:
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared
-  to Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
+- "Dest is the register containing the value to compare with that of Src. Copyright \xA9 Parallax Inc.\
+  \ 2022/11/01 \u25AA Propeller 2 Assembly Language Manual               \u25AA   Page 59"
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - CMPR
 - CMPX
 - CMPS
 - CMPSX
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -55,3 +60,12 @@ compiler_operand_format:
   description: Destination register, Source register or immediate value
   valueType: 0
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Compare
+category: Math Instruction - Compare two unsigned values.
+result: "Greater/lesser and equality status is optionally written to the C and Z \uFB02ags."
+syntax_variants:
+- CMP Dest, {#}Src {WC|WZ|WCZ}
+- CMP compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally setting
+  the C
+manual_extraction_date: '2025-01-19'

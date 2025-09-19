@@ -1,28 +1,30 @@
 instruction: MUL
-syntax: MUL     D,{#}S          {WZ}
-encoding: EEEE 1010000 0ZI DDDDDDDDD SSSSSSSSS
+syntax: MUL Dest, {#}Src {WZ}
+encoding: "EEEE 1010000 0ZI DDDDDDDDD SSSSSSSSS                    D                  \u2014         \
+  \  (D = 0) | (S = 0)             2"
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: The 32-bit unsigned product of the 16-bit Dest and Src multiplication
-  is stored into Dest and optionally the Z flag is updated to the Dest or Src zero
-  status. D = unsigned (D[15:0] * S[15:0]).
-category: Math Instruction - Multiply unsigned 16-bit x 16-bit values.
+group: Math Instruction - Multiply unsigned 16-bit x 16-bit values.
+description: "The 32-bit unsigned product of the 16-bit Dest and Src multiplication is stored into Dest\
+  \ and optionally the Z flag is updated to the Dest or Src zero status. D = unsigned (D[15:0] * S[15:0]).\n\
+  \nMUL multiplies the lower 16-bits of each of Dest and Src together and stores the 32-bit product result\
+  \ into the Dest\n\nregister. This is a fast (2-clock) 16 x 16 bit multiplication operation\u2014 to\
+  \ multiply larger factors, use the CORDIC\n\nSolver QMUL instruction.\n\nIf the WZ effect is speci\uFB01\
+  ed, the Z \uFB02ag is set (1) if either the Dest or Src values are zero, or is cleared (0) if both are\n\
+  \nnon-zero."
 flags_affected:
   Z:
     formula: (S == 0) | (D == 0)
 parameters:
-- Dest is a register containing the 16-bit value to multiply with Src, and is where
-  the result is written.
-- Src is a register, 9-bit literal, or 16-bit augmented literal whose value is multiplied
-  into Dest.
-- WZ is an optional effect to update the Z flag.
+- Dest is a register containing the 16-bit value to multiply with Src, and is where the result is written.
+- Src is a register, 9-bit literal, or 16-bit augmented literal whose value is multiplied into Dest.
+- "WZ is an optional effect to update the Z \uFB02ag."
 related:
 - MULS
 - SCA
 - QMUL
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -32,3 +34,13 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Multiply
+category: Math Instruction - Multiply unsigned 16-bit x 16-bit values.
+result: The 32-bit unsigned product of the 16-bit Dest and Src multiplication is stored into Dest and
+  optionally the
+syntax_variants:
+- MUL Dest, {#}Src {WZ}
+- MUL multiplies the lower 16-bits of each of Dest and Src together and stores the 32-bit product result
+  into the Dest
+manual_extraction_date: '2025-01-19'

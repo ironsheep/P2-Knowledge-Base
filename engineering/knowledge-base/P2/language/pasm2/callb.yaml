@@ -2,15 +2,14 @@ instruction: CALLB
 syntax: CALLB   D        {WC/WZ/WCZ}
 encoding: EEEE 1101111 RAA AAAAAAAAA AAAAAAAAA
 timing:
-  cycles: 5
+  cycles: 1
   type: fixed
-group: Branch A - Call
+group: Flow Control Instruction - Call a subroutine; store return context in the Hub
+  long at PTRA++ or PTRB++.
 description: Write current C and Z flags and address of the next instruction into
   the 4-byte Hub RAM location at PTRA or PTRB, increment pointer, set PC to new relative
   or absolute address, and optionally update C and/or Z to new state. R = 1 then PC
   += A, else PC = A.
-category: Flow Control Instruction - Call a subroutine; store return context in the
-  Hub long at PTRA++ or PTRB++.
 flags_affected:
   C:
     formula: A
@@ -30,3 +29,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 19
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.705736'

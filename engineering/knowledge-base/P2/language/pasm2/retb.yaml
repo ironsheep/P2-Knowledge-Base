@@ -2,19 +2,18 @@ instruction: RETB
 syntax: RETB             {WC/WZ/WCZ}
 encoding: EEEE 1101011 CZ1 000000000 000101111
 timing:
-  cycles: 11
+  cycles: 1
   type: fixed
 group: Branch Return
-description: C = L[31], Z = L[30], PC = L[19:0].
-category: Branch Return
+description: Return by reading hub long (L) at --PTRB. C = L[31], Z = L[30], PC =
+  L[19:0].                                             11...18 1 / 20...40
 flags_affected:
   C:
     formula: L[31], Z = L[30], PC = L[19:0]
   Z:
     formula: L[30], PC = L[19:0]
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+documentation_source: PASM2 Manual 2022-11-01
+documentation_level: enhanced
 compiler_operand_format:
   name: operand_xlat
   pattern: ''
@@ -23,3 +22,6 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 33
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- RETB {WC/WZ/WCZ}
+last_updated: '2025-09-19T16:04:17.179361'

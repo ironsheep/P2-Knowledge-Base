@@ -1,23 +1,46 @@
 instruction: ALTSN
-syntax: ALTSN   D,{#}S
-encoding: EEEE 1001010 101 DDDDDDDDD 000000000
+syntax: ALTSN Dest, {#}Src
+encoding: EEEE 1001010 10I DDDDDDDDD SSSSSSSSS                     D 1
 timing:
-  cycles: 2
+  cycles: 1
   type: fixed
-group: Register Indirection
-description: 'ALTSN should be followed by SETNIB— it modifies the SETNIB instruction''s
-  Dest and Num values, enabling code Result: The next instruction''s pipelined Dest
-  and Num values are altered to be (Src + Dest[11:3]) & $1FF, or just Dest[11:3] for
-  syntax 2, and Dest[2:0], respectively.'
-category: Indirection Instruction - Alter subsequent SETNIB instruction.
+group: Indirection Instruction - Alter subsequent SETNIB instruction.
+description: "ALTSN should be followed by SETNIB\u2014 it modifies the SETNIB instruction's Dest and Num\
+  \ values, enabling code Result: The next instruction's pipelined Dest and Num values are altered to\
+  \ be (Src + Dest[11:3]) & $1FF, or just Dest[11:3] for syntax 2, and Dest[2:0], respectively.\n\nALTSN\
+  \ should be followed by SETNIB\u2014 it modi\uFB01es the SETNIB instruction's Dest and Num values, enabling\
+  \ code\n\nto iterate through multiple nibbles of data across a range of Reg RAM. SETNIB's Dest value\
+  \ is changed to (Src +\n\nDest[11:3]) & $1FF (for syntax 1), or to Dest[11:3] (for syntax 2), and its\
+  \ Num value is changed to Dest[2:0].\n\nDest[11:3] corresponds to the target long register's 9-bit address\
+  \ and Dest[2:0] is the nibble ID within it; values of\n\n0\u20137 identify individual nibbles, by position,\
+  \ in least-signi\uFB01cant nibble order. Iteratively executing ALTSN followed\n\nby SETNIB, and each\
+  \ time incrementing ALTSN's 12-bit Dest value by one, effectively writes a stream of nibble\n\nvalues\
+  \ to Reg RAM as if it were all made of nibble-sized registers.\n\nIn syntax 1, Src consists of two 9-bit\
+  \ \uFB01elds; a base address (Src[8:0]) and a signed auto-indexer (Src[17:9]).\n\n\u25CF   The base\
+  \ is the Reg RAM address where the series of nibbles begins. ALTSN adds the long index\n\n(Dest[11:3])\
+  \ to the base (Src[8:0]) to locate the register holding the target nibble. The nibble ID (Dest[2:0])\n\
+  \nidenti\uFB01es the nibble's position within that long register.\n\n\u25CF   At the end of ALTSN execution,\
+  \ the optional auto-indexer value (usually 0, 1, or -1) is added to the 12-bit\n\nindex (Dest) for a\
+  \ future ALTSN+SETNIB iteration.\n\nIn syntax 2, Dest serves as the full nibble address\u2014 it's the\
+  \ same format as in syntax 1, but represents the target\n\nlong's absolute address and its nibble index\
+  \ instead of the long's relative index (to add to a base) and nibble index."
 parameters:
-- Dest is the register whose 12-bit value is the index, or the full nibble address,
-  for the SETNIB instruction to operate on.
-- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value
-  contains a base long address (Src[8:0]; added to index (Dest[11:3]) for SETNIB)
-  and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of
-  execution).
-documentation_source: PASM2 Manual 2022/11/01
+- Dest is the register whose 12-bit value is the index, or the full nibble address, for the SETNIB instruction
+  to operate on.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base
+  long address (Src[8:0]; added to index (Dest[11:3]) for SETNIB) and also an optional auto-indexer value
+  (Src[17:9]; added to Dest at the end of execution).
+- "The base is the Reg RAM address where the series of nibbles begins. ALTSN adds the long index (Dest[11:3])\
+  \ to the base (Src[8:0]) to locate the register holding the target nibble. The nibble ID (Dest[2:0])\
+  \ identi\uFB01es the nibble's position within that long register."
+- At the end of ALTSN execution, the optional auto-indexer value (usually 0, 1, or -1) is added to the
+  12-bit index (Dest) for a future ALTSN+SETNIB iteration.
+- The instruction following ALTSN is shielded from interrupt
+- "ALTSN alters the next instruction regardless of its kind\u2014 the intention is for it to be a SETNIB"
+- "Field value modi\uFB01cation occurs in the instruction pipeline only; code is not altered, values do\
+  \ not persist"
+- "SETQ / SETQ2 does not affect ALTx instructions\u2014 the Q value passes through to the next instruction"
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_duiz
@@ -27,3 +50,21 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 5
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Alter set nibble
+category: Indirection Instruction - Alter subsequent SETNIB instruction.
+result: The next instruction's pipelined Dest and Num values are altered to be (Src + Dest[11:3]) & $1FF,
+  or just
+syntax_variants:
+- ALTSN Dest, {#}Src
+- ALTSN Dest
+- "ALTSN should be followed by SETNIB\u2014 it modi\uFB01es the SETNIB instruction's Dest and Num values,\
+  \ enabling code"
+- by SETNIB, and each time incrementing ALTSN's 12-bit Dest value by one, effectively writes a stream
+  of nibble
+- index (Dest) for a future ALTSN+SETNIB iteration.
+usage_notes: "The instruction following ALTSN is shielded from interrupt\nALTSN alters the next instruction\
+  \ regardless of its kind\u2014 the intention is for it to be a SETNIB\nField value modi\uFB01cation\
+  \ occurs in the instruction pipeline only; code is not altered, values do not persist\nSETQ / SETQ2\
+  \ does not affect ALTx instructions\u2014 the Q value passes through to the next instruction"
+manual_extraction_date: '2025-01-19'

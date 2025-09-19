@@ -1,23 +1,29 @@
 instruction: MUXNITS
-syntax: MUXNITS D,{#}S
-encoding: EEEE 1001111 00I DDDDDDDDD SSSSSSSSS
+syntax: MUXNITS Dest, {#}Src
+encoding: "EEEE 1001111 00I DDDDDDDDD SSSSSSSSS                     D                 \u2014         \
+  \          \u2014                    2"
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'MUXNITS copies any non-zero bit pairs from Src into the corresponding
-  bit pairs of Dest and leaves the rest of Result: Dest bit pairs corresponding to
-  non-zero Src bit pairs are set to those bit values; the rest are left as-is.'
-category: Bit Operation Instruction - Set discrete bit pairs of a value to non-zero
-  bit pair states of another.
+group: Bit Operation Instruction - Set discrete bit pairs of a value to non-zero bit pair states of another.
+description: 'MUXNITS copies any non-zero bit pairs from Src into the corresponding bit pairs of Dest
+  and leaves the rest of Result: Dest bit pairs corresponding to non-zero Src bit pairs are set to those
+  bit values; the rest are left as-is.
+
+
+  MUXNITS copies any non-zero bit pairs from Src into the corresponding bit pairs of Dest and leaves the
+  rest of
+
+
+  Dest''s bit pairs as-is.'
 flags_affected:
   C:
     when: D
 parameters:
 - Dest is a register whose value will be updated according to Src.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose non-zero bit
-  pairs will replace the corresponding bit pairs in Dest.
-documentation_source: PASM2 Manual 2022/11/01
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose non-zero bit pairs will replace
+  the corresponding bit pairs in Dest.
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -27,3 +33,14 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Mux nits
+category: Bit Operation Instruction - Set discrete bit pairs of a value to non-zero bit pair states of
+  another.
+result: Dest bit pairs corresponding to non-zero Src bit pairs are set to those bit values; the rest are
+  left as-is.
+syntax_variants:
+- MUXNITS Dest, {#}Src
+- MUXNITS copies any non-zero bit pairs from Src into the corresponding bit pairs of Dest and leaves the
+  rest of
+manual_extraction_date: '2025-01-19'

@@ -1,14 +1,19 @@
 instruction: CMPS
-syntax: CMPS    D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0010010 CZI DDDDDDDDD SSSSSSSSS
+syntax: CMPS Dest, {#}Src {WC|WZ|WCZ}
+encoding: "EEEE 0010010 CZI DDDDDDDDD SSSSSSSSS                  \u2014           Signed (D < S)     \
+  \  D=S                    2"
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'CMPS compares the signed values of Dest and Src (by subtracting Src
-  from Dest) and optionally setting the C and Result: Greater/lesser and equality
-  status is optionally written to the C and Z flags.'
-category: Math Instruction - Compare two signed values.
+group: Math Instruction - Compare two signed values.
+description: "CMPS compares the signed values of Dest and Src (by subtracting Src from Dest) and optionally\
+  \ setting the C and Result: Greater/lesser and equality status is optionally written to the C and Z\
+  \ flags.\n\nCMPS compares the signed values of Dest and Src (by subtracting Src from Dest) and optionally\
+  \ setting the C and\n\nZ \uFB02ags to indicate the comparison and operation results.\n\nIf the WC or\
+  \ WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if Dest is less than Src.\n\nIf the WZ or WCZ\
+  \ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if Dest equals Src.\n\nTo compare signed, multi-long\
+  \ values, use CMP (not CMPS) followed possibly by CMPX, and \uFB01nally CMPSX as\n\ndescribed in Comparing\
+  \ Two Multi-Long Values."
 flags_affected:
   C:
     formula: correct sign of (D - S)
@@ -16,14 +21,13 @@ flags_affected:
     formula: (D == S)
 parameters:
 - Dest is the register containing the value to compare with that of Src.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared
-  to Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - CMP
 - CMPX
 - CMPSX
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -33,3 +37,12 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Compare signed
+category: Math Instruction - Compare two signed values.
+result: "Greater/lesser and equality status is optionally written to the C and Z \uFB02ags."
+syntax_variants:
+- CMPS Dest, {#}Src {WC|WZ|WCZ}
+- CMPS compares the signed values of Dest and Src (by subtracting Src from Dest) and optionally setting
+  the C and
+manual_extraction_date: '2025-01-19'

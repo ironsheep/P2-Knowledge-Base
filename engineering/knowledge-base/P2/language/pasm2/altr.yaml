@@ -1,22 +1,41 @@
 instruction: ALTR
-syntax: ALTR    D,{#}S
-encoding: EEEE 1001100 001 DDDDDDDDD 000000000
+syntax: ALTR Dest, {#}Src
+encoding: EEEE 1001100 00I DDDDDDDDD SSSSSSSSS                     D 1
 timing:
-  cycles: 2
+  cycles: 1
   type: fixed
-group: Register Indirection
-description: 'ALTR modifies the next instruction''s Result address to be (Src + Dest)
-  & $1FF (for syntax 1), or to Dest[8:0] (for Result: The next instruction''s pipelined
-  Result address (Dest address by default) is altered to be (Src + Dest) & $1FF, or
-  just Dest[8:0] in syntax 2.'
-category: Indirection Instruction - Alter Result register address of next instruction.
+group: Indirection Instruction - Alter Result register address of next instruction.
+description: "ALTR modifies the next instruction's Result address to be (Src + Dest) & $1FF (for syntax\
+  \ 1), or to Dest[8:0] (for Result: The next instruction's pipelined Result address (Dest address by\
+  \ default) is altered to be (Src + Dest) & $1FF, or just Dest[8:0] in syntax 2.\n\nALTR modi\uFB01es\
+  \ the next instruction's Result address to be (Src + Dest) & $1FF (for syntax 1), or to Dest[8:0] (for\n\
+  \nsyntax 2).\n\nThe Result address is the Dest address by default\u2014 it identi\uFB01es where the\
+  \ result value from the instruction's\n\nexecution is written at the end of execution. During execution,\
+  \ the pipeline holds an instruction's Dest address\n\nand the Result address as two separate entities,\
+  \ normally set to the same location. ALTR causes the next\n\ninstruction's Result to redirect to a different\
+  \ address; changing an instruction from a destructive (operand\n\noverwriting) operation to a non-destructive\
+  \ (operand preserving) operation.\n\nIn syntax 1, Src consists of two 9-bit \uFB01elds; a base value\
+  \ (Src[8:0]) and a signed auto-indexer (Src[17:9]).\n\n\u25CF    The base represents a starting point.\
+  \ ALTR adds the offset (Dest[8:0]) to the base (Src[8:0]) to determine\n\nthe next instruction's Result\
+  \ address.\n\n\u25CF    At the end of ALTR execution, the optional auto-indexer value (usually 0, 1,\
+  \ or -1) is added to the offset\n\n(Dest) for a future ALTR+instruction iteration.\n\nIn syntax 2, Dest\
+  \ serves as the full value\u2014 it is used as-is for the next instruction's substitute Result address."
 parameters:
-- Dest is the register whose 9-bit value is the offset, or the full value, for the
-  next instruction to operate on.
-- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value
-  contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and
-  also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
-documentation_source: PASM2 Manual 2022/11/01
+- Dest is the register whose 9-bit value is the offset, or the full value, for the next instruction to
+  operate on.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base
+  (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value
+  (Src[17:9]; added to Dest at the end of execution).
+- The base represents a starting point. ALTR adds the offset (Dest[8:0]) to the base (Src[8:0]) to determine
+  the next instruction's Result address.
+- At the end of ALTR execution, the optional auto-indexer value (usually 0, 1, or -1) is added to the
+  offset (Dest) for a future ALTR+instruction iteration.
+- The instruction following ALTR is shielded from interrupt
+- ALTR alters the next instruction regardless of its kind
+- "Field value modi\uFB01cation occurs in the instruction pipeline only; code is not altered, values do\
+  \ not persist"
+- "SETQ / SETQ2 does not affect ALTx instructions\u2014 the Q value passes through to the next instruction"
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_duiz
@@ -26,3 +45,20 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 5
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Alter result
+category: Indirection Instruction - Alter Result register address of next instruction.
+result: The next instruction's pipelined Result address (Dest address by default) is altered to be
+syntax_variants:
+- ALTR Dest, {#}Src
+- ALTR Dest
+- "ALTR modi\uFB01es the next instruction's Result address to be (Src + Dest) & $1FF (for syntax 1), or\
+  \ to Dest[8:0] (for"
+- "\u25CF    The base represents a starting point. ALTR adds the offset (Dest[8:0]) to the base (Src[8:0])\
+  \ to determine"
+- (Dest) for a future ALTR+instruction iteration.
+usage_notes: "The instruction following ALTR is shielded from interrupt\nALTR alters the next instruction\
+  \ regardless of its kind\nField value modi\uFB01cation occurs in the instruction pipeline only; code\
+  \ is not altered, values do not persist\nSETQ / SETQ2 does not affect ALTx instructions\u2014 the Q\
+  \ value passes through to the next instruction"
+manual_extraction_date: '2025-01-19'

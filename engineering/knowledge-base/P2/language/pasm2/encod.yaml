@@ -1,28 +1,60 @@
 instruction: ENCOD
-syntax: ENCOD   D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0111100 CZ0 DDDDDDDDD DDDDDDDDD
+syntax: ENCOD Dest, {#}Src {WC|WZ|WCZ}
+encoding:
+- EEEE 0111100 CZI DDDDDDDDD SSSSSSSSS                    D               S != 0            Result = 0              2
+- EEEE 0111100 CZ0 DDDDDDDDD DDDDDDDDD                    D           Original D != 0       Result = 0              2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'ENCOD stores the bit position value (0—31) of the top-most high bit
-  (1) of Src, or Dest, into Dest. If the value to Result: The bit position value of
-  the top-most high bit (1) in Src, or Dest, is stored in Dest.'
-category: Bit Operation Instruction - Get bit position of top-most 1 of Src or Dest
-  into Dest.
+group: Bit Operation Instruction - Get bit position of top-most 1 of Src or Dest into Dest.
+description: "ENCOD stores the bit position value (0\u201431) of the top-most high bit (1) of Src, or\
+  \ Dest, into Dest. If the value to Result: The bit position value of the top-most high bit (1) in Src,\
+  \ or Dest, is stored in Dest.\n\nENCOD stores the bit position value (0\u201431) of the top-most high\
+  \ bit (1) of Src, or Dest, into Dest. If the value to\n\nencode (Src, or original Dest (in syntax 2))\
+  \ may be %0, the resulting Dest will be 0\u2014 use the WC or WCZ effect and\n\ncheck the resulting\
+  \ C \uFB02ag to distinguish between the cases of input Src/Dest = %1 verses input Src/Dest = %0.\n\n\
+  If the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if Src (or original Dest in syntax\
+  \ 2) was not zero, or is\n\ncleared (0) if it was zero.\n\nIf the WZ or WCZ effect is speci\uFB01ed,\
+  \ the Z \uFB02ag is set (1) if the result equals zero, or is cleared (0) if not zero.\n\n\u25CF    \
+  \ A long of %00000000_00000000_00000000_00000001 encodes to 0.\n\n\u25CF     A long of %00000000_00000000_00000000_00100000\
+  \ encodes to 5.\n\n\u25CF     A long of %00000000_00000000_10000001_01000000 encodes to 15.\n\n\u25CF\
+  \     A long of %00000000_00000000_00000000_00000000 encodes to 0 with optional C cleared to 0.\n\n\
+  ENCOD is the complement of DECOD.\n\nEffects ( WC, WZ, WCZ, ANDC, etc. )\n\nNearly half of PASM2 instructions\
+  \ feature optional effects to modify the C and/or Z \uFB02ags. An Effect is placed at\n\nthe end of\
+  \ such instructions.\n\n{Label} {Condition} Instruction Operands {Effect}\n\nWhen included (where allowed)\
+  \ the \uFB02ag or \uFB02ags are updated by the instruction execution; when omitted, the \uFB02ags\n\n\
+  remain as-is. Only zero or one Effect is allowed per instruction.\n\nEffects\n\nEffect        Description\n\
+  \nANDC          AND tested bit/pin into current C; used on TESTxx instructions\n\nANDZ          AND\
+  \ tested bit/pin into current Z; used on TESTxx instructions\n\nORC           OR tested bit/pin into\
+  \ current C; used on TESTxx instructions\n\nORZ           OR tested bit/pin into current Z; used on\
+  \ TESTxx instructions\n\nXORC          XOR tested bit/pin into current C; used on TESTxx instructions\n\
+  \nXORZ          XOR tested bit/pin into current Z; used on TESTxx instructions\n\nWC           Write\
+  \ C \uFB02ag; used on many instructions\n\nWCZ           Write both C and Z \uFB02ags; used on many\
+  \ instructions\n\nWZ           Write Z \uFB02ag; used on many instructions\n\nFor example:\n\nAND  \
+  \   config, #%1000        WZ               'con\uFB01g[3] low? z=1\n\nTESTP #4                     \
+  \ ANDZ             'pin 4 high? z=1\n\nif_z                 JMP     #MoreCode                      \
+  \        'jump if con\uFB01g[3] low and pin 4 high\n\nThis code jumps to the label MoreCode only if\
+  \ con\uFB01g bit 3 is low (0) and I/O pin 4 is high. This \uFB01rst instruction\n\nbitwise AND's %1000\
+  \ into con\uFB01g and sets the Z \uFB02ag if that result is zero. The second instruction tests I/O pin\
+  \ 4\n\nand bitwise AND's its high/low state into the Z \uFB02ag. The third instruction, which speci\uFB01\
+  es an if_z condition,\n\nexecutes only if the z \uFB02ag is high by then, jumping to MoreCode; otherwise\
+  \ it behaves like a nop instruction. Using\n\nan Effect on instructions, along with a Condition on later\
+  \ instructions, enables code to be much more powerful\n\nthan what is possible with typical assembly\
+  \ languages. See IF_x (Conditions) for more information. NOTE: In this\n\nexample, the \uFB01rst instruction\
+  \ modi\uFB01es con\uFB01g\u2014 to do non-destructive bit tests, use a testb instead of and\n\ninstruction."
 flags_affected:
-  C:
-    formula: (S != 0)
-    when: D
-  Z:
-    when: S
+  Z: Result = 0
 parameters:
-- Dest is the register in which to store the encoded bit position value and optionally
-  begins by containing the 32-bit value it is encoding (syntax 2).
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value
-  is to be encoded into a bit position.
-- WC, WZ, or WCZ are optional effects to update flags.
-documentation_source: PASM2 Manual 2022/11/01
+- Dest is the register in which to store the encoded bit position value and optionally begins by containing
+  the 32-bit value it is encoding (syntax 2).
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value is to be encoded
+  into a bit position.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- A long of %00000000_00000000_00000000_00000001 encodes to 0.
+- A long of %00000000_00000000_00000000_00100000 encodes to 5.
+- A long of %00000000_00000000_10000001_01000000 encodes to 15.
+- A long of %00000000_00000000_00000000_00000000 encodes to 0 with optional C cleared to 0.
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_du
@@ -32,3 +64,15 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 3
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Encode
+category: Bit Operation Instruction - Get bit position of top-most 1 of Src or Dest into Dest.
+result: The bit position value of the top-most high bit (1) in Src, or Dest, is stored in Dest.
+syntax_variants:
+- ENCOD Dest, {#}Src {WC|WZ|WCZ}
+- ENCOD Dest                 {WC|WZ|WCZ}
+- "ENCOD stores the bit position value (0\u201431) of the top-most high bit (1) of Src, or Dest, into\
+  \ Dest. If the value to"
+related:
+- DECOD
+manual_extraction_date: '2025-01-19'

@@ -30,7 +30,6 @@ long_description: 'The QEXP instruction performs logarithm to integer conversion
   modeling, and scientific computations.
 
   '
-category: CORDIC Solver
 examples:
 - code: ''' Convert 5:27 logarithm back to integer
 
@@ -88,7 +87,6 @@ format_notes: Input must be in 5:27 logarithmic format as produced by QLOG. Comp
   operation to QLOG.
 documentation_source: p2_datasheet
 documentation_level: comprehensive
-needs_documentation: false
 compiler_operand_format:
   name: operand_l
   pattern: D/#0..511
@@ -97,3 +95,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.411047'

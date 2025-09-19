@@ -1,21 +1,74 @@
 instruction: AUGS
 syntax: AUGS
-encoding: EEEE 11110nn nnn nnnnnnnnn nnnnnnnnn
+encoding:
+- "EEEE 11110SS SSS SSSSSSSSS SSSSSSSSS Hidden S Queue                     \u2014                  \u2014\
+  \                   2"
+- EEEE 0100010 CZI DDDDDDDDD SSSSSSSSS                   D         Original D base bit Original D base
+  bit           2
+- EEEE 0100011 CZI DDDDDDDDD SSSSSSSSS                   D         Original D base bit Original D base
+  bit           2
+- EEEE 0100001 CZI DDDDDDDDD SSSSSSSSS                  D         Original D base bit Original D base
+  bit          2
+- EEEE 0100000 CZI DDDDDDDDD SSSSSSSSS                  D         Original D base bit Original D base
+  bit          2
 timing:
   cycles: 2
   type: fixed
-group: Miscellaneous
-description: 'AUGS is an assistant instruction to aid with literal values that exceed
-  9 bits. Most PASM2 instructions have 9 bits Result: The 23-bit value formed from
-  Src is queued to prefix the next literal Src occurrence (#Src) to form a 32-bit
-  literal for that instruction; interrupts are also temporarily disabled.'
-category: Augmentation Instruction - Augment next literal Src to 32-bits.
+group: Augmentation Instruction - Augment next literal Src to 32-bits.
+description: "AUGS is an assistant instruction to aid with literal values that exceed 9 bits. Most PASM2\
+  \ instructions have 9 bits Result: The 23-bit value formed from Src is queued to prefix the next literal\
+  \ Src occurrence (#Src) to form a 32-bit literal for that instruction; interrupts are also temporarily\
+  \ disabled.\n\nAUGS is an assistant instruction to aid with literal values that exceed 9 bits. Most\
+  \ PASM2 instructions have 9 bits\n\navailable for literal Src values; enough for many uses, but not\
+  \ all. AUGS augments the next occurrence of a literal\n\nSrc value to be a full 32-bits. When the instruction\
+  \ with the soon-to-be-augmented literal is later executed, the cog\n\nuses the lower 9 bits encoded\
+  \ in the instruction's Src \uFB01eld and prepends AUGS's 23 bits to it.\n\nBITC or BITNC alters the\
+  \ Dest bit(s) designated by Src to equal the state, or inverse state, of the C \uFB02ag. All other\n\
+  \nbits are left unchanged.\n\nSrc[4:0] indicates the bit number (0\u201431). For a range of bits, Src[4:0]\
+  \ indicates the base bit number (0\u201431) and\n\nSrc[9:5] indicates how many contiguous bits beyond\
+  \ the base should be affected (1\u201331).\n\nA 9-bit literal Src is enough to express the base bit\
+  \ (Src[4:0]) and a range of up to 16 contiguous bits (Src[8:5]). If\n\nneeded, use the augmented literal\
+  \ feature (##Src) to augment Src to a 10-bit literal value\u2014 this inserts an AUGS\n\ninstruction\
+  \ prior.\n\nWhen Src is a register, the register's value bits [9:0] are used as-is to form the 10-bit\
+  \ ID range, unless a SETQ\n\ninstruction immediately precedes the BITC / BITNC instruction; substituting\
+  \ SETQ's Dest[4:0] in place of value\n\nbits[9:5], for BITC / BITNC's use.\n\nIf the WCZ effect is speci\uFB01\
+  ed, the C and Z \uFB02ags are updated to the original state of Dest's base bit, identi\uFB01ed by Src.\n\
+  \nBITH / BITL\n\nBit high or low\n\nBit Operation Instruction - Set bit(s) high (1) or low (0).\n\n\
+  BITH Dest, {#}Src {WCZ}\n\nBITL Dest, {#}Src {WCZ}\n\nResult: Dest bit(s) described by Src are set high\
+  \ (1) or low (0); the rest are left as-is.\n\n\u25CF    Dest is the register whose value will have one\
+  \ or more bits set high or low.\n\n\u25CF    Src is a register, 9-bit literal, or 10-bit augmented literal\
+  \ whose value identi\uFB01es the bit(s) to modify.\n\n\u25CF    WCZ is an optional effect to update\
+  \ \uFB02ags.\n\nCOND INSTR        FX      DEST         SRC           Write            C Flag       \
+  \       Z Flag              Clocks\n\nEEEE 0100001 CZI DDDDDDDDD SSSSSSSSS                  D      \
+  \   Original D base bit Original D base bit          2\n\nEEEE 0100000 CZI DDDDDDDDD SSSSSSSSS     \
+  \             D         Original D base bit Original D base bit          2\n\nBITH or BITL alters the\
+  \ Dest bit(s) designated by Src to be high (1) or low (0). All other bits are left unchanged.\n\nSrc[4:0]\
+  \ indicates the bit number (0\u201431). For a range of bits, Src[4:0] indicates the base bit number\
+  \ (0\u201431) and\n\nSrc[9:5] indicates how many contiguous bits beyond the base should be affected\
+  \ (1\u201331).\n\nA 9-bit literal Src is enough to express the base bit (Src[4:0]) and a range of up\
+  \ to 16 contiguous bits (Src[8:5]). If\n\nneeded, use the augmented literal feature (##Src) to augment\
+  \ Src to a 10-bit literal value\u2014 this inserts an AUGS\n\ninstruction prior.\n\nWhen Src is a register,\
+  \ the register's value bits [9:0] are used as-is to form the 10-bit ID range, unless a SETQ\n\ninstruction\
+  \ immediately precedes the BITH / BITL instruction; substituting SETQ's Dest[4:0] in place of value\n\
+  \nbits[9:5], for BITH / BITL's use.\n\nIf the WCZ effect is speci\uFB01ed, the C and Z \uFB02ags are\
+  \ updated to the original state of Dest's base bit, identi\uFB01ed by Src."
 parameters:
-- Src is a 32-bit literal whose upper 23 bits are prepended to the next literal Src
-  occurrence.
+- Src is a 32-bit literal whose upper 23 bits are prepended to the next literal Src occurrence.
+- All instructions following AUGS are shielded from interrupt until after the instruction with the
+- Src value augmentation occurs in the instruction pipeline only; code is not altered, value does not
+  persist
+- "SETQ / SETQ2 does not affect AUGS\u2014 the Q value passes through to the next instruction"
+- Dest is the register whose value will have one or more bits set to C or !C.
+- "Src is a register, 9-bit literal, or 10-bit augmented literal whose value identi\uFB01es the bit(s)\
+  \ to modify."
+- "WCZ is an optional effect to update \uFB02ags."
+- Dest is the register whose value will have one or more bits set high or low.
+- "Src is a register, 9-bit literal, or 10-bit augmented literal whose value identi\uFB01es the bit(s)\
+  \ to modify."
+- "WCZ is an optional effect to update \uFB02ags."
 related:
 - AUGD
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_aug
@@ -25,3 +78,35 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 23
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Augment source
+category: Augmentation Instruction - Augment next literal Src to 32-bits.
+result: Dest bit(s) described by Src are set high (1) or low (0); the rest are left as-is.
+usage_notes: "All instructions following AUGS are shielded from interrupt until after the instruction\
+  \ with the\nnewly-augmented literal Src value is executed\nSrc value augmentation occurs in the instruction\
+  \ pipeline only; code is not altered, value does not persist\nSETQ / SETQ2 does not affect AUGS\u2014\
+  \ the Q value passes through to the next instruction\nTip: Though AUGS may be manually entered wherever\
+  \ needed, the Parallax P2 compiler supports a convenient way\nto use this feature. In the target instruction's\
+  \ Src \uFB01eld, use \"##\" followed by the desired 32-bit literal (instead of \"#\"\nfollowed by a\
+  \ 9-bit literal); the compiler will automatically invoke AUGS immediately before. When counting clock\n\
+  cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals."
+examples:
+- code: "Both samples below use greater-than 9-bit literals (via AUGS functionality). The \uFB01rst is\
+    \ more convenient and"
+- code: "readable than using the AUGS instruction directly.\n  AND      address, ##$FFFFF            \
+    \            '2+2 cycles\n  DJNZ     idx, ##far_away                          '2+(2 or 4) cycles (in\
+    \ Cog RAM)\nis the same as:"
+- code: "AUGS     #$FFFFF                                   '2 cycles\n  AND      address, #$FFFFF & $1FF\
+    \                   '2 cycles"
+- code: "AUGS     #far_away                                 '2 cycles\n  DJNZ     idx, #far_away & $1FF\
+    \                     '2 or 4 cycles (in Cog RAM)\nBITC / BITNC\nBit C or not C\nBit Operation Instruction\
+    \ - Set bit(s) low/high according to C or !C.\nBITC     Dest, {#}Src {WCZ}\nBITNC Dest, {#}Src {WCZ}\n\
+    Result: Dest bit(s) described by Src are set to C or !C; the rest are left as-is.\n    \u25CF    Dest\
+    \ is the register whose value will have one or more bits set to C or !C.\n    \u25CF    Src is a register,\
+    \ 9-bit literal, or 10-bit augmented literal whose value identi\uFB01es the bit(s) to modify.\n  \
+    \  \u25CF    WCZ is an optional effect to update \uFB02ags.\nCOND INSTR         FX     DEST      \
+    \    SRC           Write            C Flag                Z Flag             Clocks\n EEEE 0100010\
+    \ CZI DDDDDDDDD SSSSSSSSS                   D         Original D base bit Original D base bit    \
+    \       2\n EEEE 0100011 CZI DDDDDDDDD SSSSSSSSS                   D         Original D base bit Original\
+    \ D base bit           2"
+manual_extraction_date: '2025-01-19'

@@ -1,31 +1,34 @@
 instruction: NEG
-syntax: NEG     D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0110011 CZ0 DDDDDDDDD DDDDDDDDD
+syntax: NEG Dest, {#}Src        {WC|WZ|WCZ}
+encoding:
+- EEEE 0110011 CZI DDDDDDDDD SSSSSSSSS                    D            Sign of result       Result = 0               2
+- EEEE 0110011 CZ0 DDDDDDDDD DDDDDDDDD                    D            Sign of result       Result = 0               2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'NEG negates Src (syntax 1) or Dest (syntax 2) and stores the result
-  in the Dest register. The negation flips the Result: The Src or Dest value is negated
-  and stored into Dest and optionally the C and Z flags are updated to the resulting
-  sign and zero status.'
-category: Math Instruction - Negate a value.
+group: Math Instruction - Negate a value.
+description: "NEG negates Src (syntax 1) or Dest (syntax 2) and stores the result in the Dest register.\
+  \ The negation flips the Result: The Src or Dest value is negated and stored into Dest and optionally\
+  \ the C and Z flags are updated to the resulting sign and zero status.\n\nNEG negates Src (syntax 1)\
+  \ or Dest (syntax 2) and stores the result in the Dest register. The negation \uFB02ips the\n\nvalue's\
+  \ sign; ex: 78 becomes -78, or -306 becomes 306.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C\
+  \ \uFB02ag is set (1) if the result is negative, or is cleared (0) if positive.\n\nIf the WZ or WCZ\
+  \ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the result is zero, or is cleared (0) if it\
+  \ is non-zero."
 flags_affected:
-  C:
-    formula: MSB of result
+  Z: Result = 0
 parameters:
-- Dest is a register to receive the -Src value (syntax 1), or contains the value to
-  negate (syntax 2).
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose negated
-  value is stored into Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Dest is a register to receive the -Src value (syntax 1), or contains the value to negate (syntax 2).
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose negated value is stored
+  into Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - ABS
 - NEGC
 - NEGNC
 - NEGZ
 - NEGNZ
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_du
@@ -35,3 +38,14 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 3
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Negate
+category: Math Instruction - Negate a value.
+result: "The Src or Dest value is negated and stored into Dest and optionally the C and Z \uFB02ags are\
+  \ updated to the"
+syntax_variants:
+- NEG Dest, {#}Src        {WC|WZ|WCZ}
+- NEG Dest                {WC|WZ|WCZ}
+- "NEG negates Src (syntax 1) or Dest (syntax 2) and stores the result in the Dest register. The negation\
+  \ \uFB02ips the"
+manual_extraction_date: '2025-01-19'

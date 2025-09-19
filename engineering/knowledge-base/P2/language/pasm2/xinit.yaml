@@ -6,10 +6,8 @@ timing:
   type: fixed
 group: Streamer
 description: Issue streamer command immediately, zeroing phase.
-category: Streamer
 documentation_source: enhanced_from_code_study
 documentation_level: comprehensive
-needs_documentation: false
 examples:
 - context: SPI Flash Programming with Smart Pin Coordination
   code: ''' Streamer + Smart Pin parallel operation for max throughput
@@ -105,3 +103,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 13
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:16.945659'

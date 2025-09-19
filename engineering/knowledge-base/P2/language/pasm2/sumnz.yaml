@@ -4,13 +4,11 @@ encoding: EEEE 0011111 CZI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
+group: Math Instruction - Adjust signed value by other Z-negated or !Z-negated value.
 description: 'SUMZ or SUMNZ adjusts the signed Dest value by Src or -Src (depending
   on Z or !Z) and stores the result into the Result: The sum of signed Dest and either
   Src or -Src (according to Z) is stored in Dest and optionally the C and Z flags
   are updated to the sign and zero status.'
-category: Math Instruction - Adjust signed value by other Z-negated or !Z-negated
-  value.
 flags_affected:
   C:
     formula: correct sign of (D +/- S)
@@ -35,3 +33,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:16.959617'

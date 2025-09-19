@@ -1,24 +1,30 @@
 instruction: ABS
-syntax: ABS     D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0110010 CZ0 DDDDDDDDD DDDDDDDDD
+syntax: ABS Dest, {#}Src {WC|WZ|WCZ}
+encoding:
+- EEEE 0110010 CZI DDDDDDDDD SSSSSSSSS                    D                S[31]            Result = 0              2
+- EEEE 0110010 CZ0 DDDDDDDDD DDDDDDDDD                    D                D[31]            Result = 0              2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'ABS determines the absolute value of Src or Dest and writes the result
-  into Dest. Result: Absolute Src (or Dest) value is stored in Dest.'
-category: Math Instruction - Get the absolute value of a number.
+group: Math Instruction - Get the absolute value of a number.
+description: "ABS determines the absolute value of Src or Dest and writes the result into Dest. Result:\
+  \ Absolute Src (or Dest) value is stored in Dest.\n\nABS determines the absolute value of Src or Dest\
+  \ and writes the result into Dest.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set\
+  \ (1) if the original Src or Dest value was negative, or is cleared\n\n(0) if it was positive.\n\nIf\
+  \ the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the result is zero, or is cleared\
+  \ (0) if it is non-zero.\n\nLiteral Src values are zero-extended, so ABS is really best used with register\
+  \ Src (or augmented Src) values."
 flags_affected:
-  C:
-    formula: D[31]
+  C: D[31] Result =
+  Z: Result = 0
 parameters:
 - Dest is the register in which to write the absolute value of Dest or Src.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose absolute
-  value is written to Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose absolute value is written
+  to Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - NEG
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_du
@@ -28,3 +34,12 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 3
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Absolute
+category: Math Instruction - Get the absolute value of a number.
+result: Absolute Src (or Dest) value is stored in Dest.
+syntax_variants:
+- ABS Dest, {#}Src {WC|WZ|WCZ}
+- ABS Dest            {WC|WZ|WCZ}
+- ABS determines the absolute value of Src or Dest and writes the result into Dest.
+manual_extraction_date: '2025-01-19'

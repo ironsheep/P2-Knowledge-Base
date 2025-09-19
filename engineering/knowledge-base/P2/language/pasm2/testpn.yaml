@@ -4,13 +4,12 @@ encoding: EEEE 1101011 CZL DDDDDDDDD 001000111
 timing:
   cycles: 2
   type: fixed
-group: Pins
+group: I/O Pin Instruction - Test pin and either store, AND, OR, or XOR the result
+  or inverse result into C/Z.
 description: 'TESTP or TESTPN reads the state (0/1) of the I/O pin designated by Dest,
   possibly inverts that result, and either Result: The state of the I/O pin described
   by Dest is read, possibly inverted, and either stored as-is, or bitwise ANDed, ORed,
   or XORed into C or Z. Z = C/Z XOR !IN[D[5:0]].'
-category: I/O Pin Instruction - Test pin and either store, AND, OR, or XOR the result
-  or inverse result into C/Z.
 flags_affected:
   Z:
     formula: C/Z XOR !IN[D[5:0]]
@@ -33,3 +32,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 31
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:16.995105'

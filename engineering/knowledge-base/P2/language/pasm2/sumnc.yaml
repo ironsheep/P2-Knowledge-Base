@@ -4,13 +4,11 @@ encoding: EEEE 0011101 CZI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
+group: Math Instruction - Adjust signed value by other C-negated or !C-negated value.
 description: 'SUMC or SUMNC adjusts the signed Dest value by Src or -Src (depending
   on C or !C) and stores the result into the Result: The sum of signed Dest and either
   Src or -Src (according to C) is stored in Dest and optionally the C and Z flags
   are updated to the sign and zero status.'
-category: Math Instruction - Adjust signed value by other C-negated or !C-negated
-  value.
 flags_affected:
   C:
     formula: 0 then D = D - S, else D = D + S
@@ -33,3 +31,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.032589'

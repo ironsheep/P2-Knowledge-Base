@@ -1,28 +1,28 @@
 instruction: SUBR
-syntax: SUBR    D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0010110 CZI DDDDDDDDD SSSSSSSSS
+syntax: SUBR Dest, {#}Src {WC|WZ|WCZ}
+encoding: EEEE 0010110 CZI DDDDDDDDD SSSSSSSSS                     D          borrow of (S - D)      Result
+  = 0               2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'SUBR subtracts the unsigned Dest from the unsigned Src and stores the
-  result into the Dest register. This is the Result: Difference of unsigned Src and
-  unsigned Dest is stored in Dest and optionally the C and Z flags are updated to
-  the borrow and zero status.'
-category: Math Instruction - Subtract one unsigned value from another (in reverse
-  order to SUB).
+group: Math Instruction - Subtract one unsigned value from another (in reverse order to SUB).
+description: "SUBR subtracts the unsigned Dest from the unsigned Src and stores the result into the Dest\
+  \ register. This is the Result: Difference of unsigned Src and unsigned Dest is stored in Dest and optionally\
+  \ the C and Z flags are updated to the borrow and zero status.\n\nSUBR subtracts the unsigned Dest from\
+  \ the unsigned Src and stores the result into the Dest register. This is the\n\nreverse of the subtraction\
+  \ order of SUB.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if the subtraction\
+  \ results in a 32-bit under\uFB02ow (unsigned\n\nborrow), or is cleared (0) if no borrow.\n\nIf the\
+  \ WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the result of Dest - Src is zero,\
+  \ or is cleared (0) if it is\n\nnon-zero."
 flags_affected:
-  C:
-    formula: borrow of (S - D)
+  Z: Result = 0
 parameters:
-- Dest is a register containing the value to subtract from Src, and is where the result
-  is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is subtracted
-  by Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Dest is a register containing the value to subtract from Src, and is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is subtracted by Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - SUB
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -32,3 +32,13 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Subtract reverse
+category: Math Instruction - Subtract one unsigned value from another (in reverse order to SUB).
+result: "Difference of unsigned Src and unsigned Dest is stored in Dest and optionally the C and Z \uFB02\
+  ags are"
+syntax_variants:
+- SUBR Dest, {#}Src {WC|WZ|WCZ}
+- SUBR subtracts the unsigned Dest from the unsigned Src and stores the result into the Dest register.
+  This is the
+manual_extraction_date: '2025-01-19'

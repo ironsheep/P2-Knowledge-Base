@@ -22,7 +22,6 @@ description: 'Get breakpoint/cog status into D according to WC/WZ/WCZ.
   Essential for debug infrastructure and multi-COG coordination.
 
   '
-category: Interrupts
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:
@@ -73,3 +72,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 29
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:16.902400'

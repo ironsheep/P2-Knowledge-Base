@@ -6,13 +6,11 @@ timing:
   type: fixed
 group: Miscellaneous
 description: T=0 on reset, CT++ on every clock.
-category: Miscellaneous
 flags_affected:
   C:
     formula: same
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+documentation_source: PASM2 Manual 2022-11-01
+documentation_level: enhanced
 compiler_operand_format:
   name: operand_d
   pattern: D
@@ -21,3 +19,6 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 24
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- GETCT D
+last_updated: '2025-09-19T16:04:16.908732'

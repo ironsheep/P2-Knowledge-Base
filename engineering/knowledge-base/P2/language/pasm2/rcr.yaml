@@ -1,23 +1,24 @@
 instruction: RCR
-syntax: RCR     D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0000100 CZI DDDDDDDDD SSSSSSSSS
+syntax: RCR Dest, {#}Src {WC|WZ|WCZ}
+encoding: EEEE 0000100 CZI DDDDDDDDD SSSSSSSSS                           D      Last bit out1    Result
+  = 0               2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'RCR shifts Dest''s binary value right by Src places (0–31 bits) and
-  sets the new MSBs to C. Result: The bits of Dest are shifted right by Src bits,
-  inserting C as new MSBs.'
-category: Bit Operation Instruction - Rotate carry flag right into value.
+group: Bit Operation Instruction - Rotate carry flag right into value.
+description: "RCR shifts Dest's binary value right by Src places (0\u201331 bits) and sets the new MSBs\
+  \ to C. Result: The bits of Dest are shifted right by Src bits, inserting C as new MSBs.\n\nRCR shifts\
+  \ Dest's binary value right by Src places (0\u201331 bits) and sets the new MSBs to C.\n\nIf the WC\
+  \ or WCZ effect is speci\uFB01ed, the C \uFB02ag is updated to the value of the last bit shifted out\
+  \ if Src is 1\u201331, or to\n\nDest[0] if Src is 0.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the\
+  \ Z \uFB02ag is set (1) if the Dest result equals zero, or is cleared (0) if it is\n\nnon-zero."
 flags_affected:
-  C:
-    formula: last bit shifted out if S[4:0] > 0, else D[0]
+  Z: Result = 0
 parameters:
 - Dest is the register containing the value to rotate carry right by Src bits.
-- Src is a register or 5-bit literal whose value indicates the number of bit positions
-  to rotate.
-- WC, WZ, or WCZ are optional effects to update flags.
-documentation_source: PASM2 Manual 2022/11/01
+- Src is a register or 5-bit literal whose value indicates the number of bit positions to rotate.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -27,3 +28,11 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Rotate carry right
+category: "Bit Operation Instruction - Rotate carry \uFB02ag right into value."
+result: The bits of Dest are shifted right by Src bits, inserting C as new MSBs.
+syntax_variants:
+- RCR Dest, {#}Src {WC|WZ|WCZ}
+- "RCR shifts Dest's binary value right by Src places (0\u201331 bits) and sets the new MSBs to C."
+manual_extraction_date: '2025-01-19'

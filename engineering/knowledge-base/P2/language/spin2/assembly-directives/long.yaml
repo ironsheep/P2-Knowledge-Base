@@ -1,0 +1,35 @@
+directive: LONG
+name: Insert Long Data
+description: Insert long (32-bit) data into Hub memory at assembly time
+syntax: LONG value1 {, value2, ...}
+examples:
+- LONG  $12345678        ; Single long value
+- LONG  -1, 0, 1         ; Multiple long values
+- LONG  value[4]          ; Duplicate value 4 times
+- LONG  @label            ; Address of label
+- LONG  %%3210            ; Quaternary literal
+usage: 'LONG is used in DAT sections to define long-sized (32-bit) data values that
+
+  will be stored in Hub memory. Multiple values can be specified separated by
+
+  commas. This is the native data size for P2 operations. Longs are stored
+
+  in little-endian format.
+
+  '
+alignment: 'Longs may not be aligned unless preceded by ALIGNL. Using ALIGNL before
+
+  LONG data ensures proper long alignment for efficient access and is
+
+  especially important for data that will be accessed as longs.
+
+  '
+see_also:
+- BYTE
+- WORD
+- ALIGNL
+- RES
+documentation_source: PASM2 Manual 2022-11-01
+created_date: '2025-09-19'
+group: Data Declaration
+last_updated: '2025-09-19T16:04:17.656499'

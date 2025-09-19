@@ -4,15 +4,15 @@ encoding: EEEE 0100100 CZI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: Z = original D[S[4:0]].
-category: Math and Logic
+group: Bit Operation Instruction - Set bit(s) low/high according to Z or !Z.
+description: 'BITZ or BITNZ alters the Dest bit(s) designated by Src to equal the
+  state, or inverse state, of the Z flag. All other Result: Dest bit(s) described
+  by Src are set to Z or !Z; the rest are left as-is. Z = original D[S[4:0]].'
 flags_affected:
   Z:
     formula: original D[S[4:0]]
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive
 compiler_operand_format:
   name: operand_bitx
   pattern: D,S/#
@@ -22,3 +22,9 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 1
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+parameters:
+- Dest is the register whose value will have one or more bits set to Z or !Z.
+- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies
+  the bit(s) to modify.
+- WCZ is an optional effect to update flags.
+last_updated: '2025-09-19T16:04:17.455318'

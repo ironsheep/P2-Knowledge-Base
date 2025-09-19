@@ -24,7 +24,6 @@ description: 'Set "Y" register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknow
   - Writing Y also acknowledges pin completion
 
   '
-category: Smart Pins
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:
@@ -98,3 +97,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 13
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.369522'

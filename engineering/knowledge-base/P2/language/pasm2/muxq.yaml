@@ -1,62 +1,75 @@
 instruction: MUXQ
-syntax: MUXQ    D,{#}S
-encoding: EEEE 1001111 10I DDDDDDDDD SSSSSSSSS
+syntax: MUXQ Dest, {#}Src
+encoding:
+- "EEEE 1001111 10I DDDDDDDDD SSSSSSSSS                     D                 \u2014                 \
+  \  \u2014                    2"
+- EEEE 0101110 CZI DDDDDDDDD SSSSSSSSS                     D          Parity of Result      Result = 0                2
+- EEEE 0101111 CZI DDDDDDDDD SSSSSSSSS                     D          Parity of Result      Result = 0                2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'MUXQ copies all bits from Src corresponding to high (1) bits of Q into
-  the corresponding
-
-  bits of Dest. All other bits remain unchanged.
-
-
-  Critical for parallel bit operations, especially RGB LED driving where
-
-  multiple data lines need simultaneous updates.
-
-  '
-category: Bit Operation Instruction - Set discrete bits of a value to that of another.
+group: Bit Operation Instruction - Set discrete bits of a value to that of another.
+description: "MUXQ copies all bits from Src corresponding to high (1) bits of Q into the corresponding\n\
+  bits of Dest. All other bits remain unchanged.\n\nCritical for parallel bit operations, especially RGB\
+  \ LED driving where\nmultiple data lines need simultaneous updates.\n\n\nMUXQ copies all bits from Src\
+  \ corresponding to high (1) bits of Q into the corresponding bits of Dest. All other\n\nDest bits are\
+  \ left as-is.\n\nMUXQ must be preceded by SETQ to function properly since the Q value's high bits identify\
+  \ the bits to target in Src\n\nand Dest.\n\nMUXZ / MUXNZ\n\nMux Z or mux not Z\n\nBit Operation Instructions\
+  \ - Set discrete bits to Z or !Z\n\nMUXZ     Dest, {#}Src {WC|WZ|WCZ}\n\nMUXNZ Dest, {#}Src {WC|WZ|WCZ}\n\
+  \nResult: Dest bit(s) described by Src are set to Z or !Z; the rest are left as-is. Flags are optionally\
+  \ updated with\n\nparity and zero status of the result.\n\n\u25CF    Dest is the register whose value\
+  \ will have one or more bits set to Z or !Z.\n\n\u25CF    Src is a register, 9-bit literal, or 32-bit\
+  \ augmented literal whose value identi\uFB01es the bit(s) to modify.\n\n\u25CF    WC, WZ, or WCZ is\
+  \ an optional effect to update \uFB02ags.\n\nCOND INSTR         FX      DEST          SRC          \
+  \ Write             C Flag              Z Flag              Clocks\n\nEEEE 0101110 CZI DDDDDDDDD SSSSSSSSS\
+  \                     D          Parity of Result      Result = 0                2\n\nEEEE 0101111 CZI\
+  \ DDDDDDDDD SSSSSSSSS                     D          Parity of Result      Result = 0              \
+  \  2\n\nMUXZ or MUXNZ alters the Dest bit(s) designated by Src (high bits) to equal the state, or inverse\
+  \ state, of the Z \uFB02ag.\n\nAll Dest bits corresponding to high (1) bits in Src are modi\uFB01ed;\
+  \ all other Dest bits are left unchanged.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02\
+  ag is set (1) if the number of high (1) bits in the result is odd, or is\n\ncleared (0) if it is even.\n\
+  \nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the result is zero, or is cleared\
+  \ (0) if it is not zero."
 flags_affected:
-  C:
-    when: D
+  Z: Result = 0
 parameters:
 - Dest is a register whose bits will be updated according to Q and Src.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose select bits
-  will replace the corresponding bits in Dest.
-documentation_source: enhanced
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose select bits will replace the corresponding
+  bits in Dest.
+- Dest is the register whose value will have one or more bits set to Z or !Z.
+- "Src is a register, 9-bit literal, or 32-bit augmented literal whose value identi\uFB01es the bit(s)\
+  \ to modify."
+- "WC, WZ, or WCZ is an optional effect to update \uFB02ags."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 examples:
 - name: HUB75 Parallel RGB Output
   description: Drive 6 RGB data lines simultaneously
-  code: "' HUB75 RGB panel driver - output 6 parallel RGB bits\n' Q register holds\
-    \ mask for RGB pins\nrgb_output\n        setq    rgb_mask         ' Set pin mask\
-    \ in Q\n        muxq    outa, rgb_data   ' Update RGB pins atomically\n      \
-    \  drvh    clk_pin          ' Clock high\n        waitx   #2               ' Hold\
-    \ time\n        drvl    clk_pin          ' Clock low\n        ret\n        \n\
-    rgb_mask long   %00111111_00000000  ' Pins 16-21 for RGB\nrgb_data long   0  \
-    \                 ' Current RGB values\n"
+  code: "' HUB75 RGB panel driver - output 6 parallel RGB bits\n' Q register holds mask for RGB pins\n\
+    rgb_output\n        setq    rgb_mask         ' Set pin mask in Q\n        muxq    outa, rgb_data \
+    \  ' Update RGB pins atomically\n        drvh    clk_pin          ' Clock high\n        waitx   #2\
+    \               ' Hold time\n        drvl    clk_pin          ' Clock low\n        ret\n        \n\
+    rgb_mask long   %00111111_00000000  ' Pins 16-21 for RGB\nrgb_data long   0                   ' Current\
+    \ RGB values\n"
   source: hub75_driver
 - name: Masked Bit Update
   description: Update specific bits without affecting others
-  code: "' Update only certain bits based on mask\n        mov     q, update_mask\
-    \   ' Load mask to Q\n        muxq    status, new_bits ' Update masked bits\n\
-    \        \n' Example: Update bits 4-7 only\n        setq    #$F0             '\
-    \ Mask for bits 4-7\n        muxq    config, #$50     ' Set bits 4-7 to $5\n"
+  code: "' Update only certain bits based on mask\n        mov     q, update_mask   ' Load mask to Q\n\
+    \        muxq    status, new_bits ' Update masked bits\n        \n' Example: Update bits 4-7 only\n\
+    \        setq    #$F0             ' Mask for bits 4-7\n        muxq    config, #$50     ' Set bits\
+    \ 4-7 to $5\n"
   source: common_pattern
 - name: SETQ Block Operation Modifier
   description: SETQ + MUXQ for masked merge
-  code: "' Masked merge operation\n        setq    mask             ' Load mask\n\
-    \        muxq    dest, source     ' dest = (dest & !mask) | (source & mask)\n\
-    \        \n' This is atomic and faster than:\n' andn dest, mask\n' and  temp,\
-    \ source, mask  \n' or   dest, temp\n"
+  code: "' Masked merge operation\n        setq    mask             ' Load mask\n        muxq    dest,\
+    \ source     ' dest = (dest & !mask) | (source & mask)\n        \n' This is atomic and faster than:\n\
+    ' andn dest, mask\n' and  temp, source, mask  \n' or   dest, temp\n"
   source: optimization_pattern
 - name: Multi-Pin State Update
   description: Update multiple pin states simultaneously
-  code: "' Update LED states on multiple pins\n        mov     q, led_mask      '\
-    \ Which LEDs to update\n        muxq    outa, led_states ' Update LED pins\n \
-    \       \nled_mask   long   %11110000_00000000_00000000  ' LEDs on pins 24-27\n\
-    led_states long   %10100000_00000000_00000000  ' Pattern to display\n"
+  code: "' Update LED states on multiple pins\n        mov     q, led_mask      ' Which LEDs to update\n\
+    \        muxq    outa, led_states ' Update LED pins\n        \nled_mask   long   %11110000_00000000_00000000\
+    \  ' LEDs on pins 24-27\nled_states long   %10100000_00000000_00000000  ' Pattern to display\n"
   source: parallel_io
 related_instructions:
 - SETQ: Set Q register for block operations
@@ -77,3 +90,13 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Mux Q
+category: Bit Operation Instruction - Set discrete bits of a value to that of another.
+result: Dest bit(s) described by Src are set to Z or !Z; the rest are left as-is. Flags are optionally
+  updated with
+syntax_variants:
+- MUXQ Dest, {#}Src
+- MUXQ copies all bits from Src corresponding to high (1) bits of Q into the corresponding bits of Dest.
+  All other
+manual_extraction_date: '2025-01-19'

@@ -1,15 +1,66 @@
 instruction: TEST
-syntax: TEST    D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0111110 CZ0 DDDDDDDDD DDDDDDDDD
+syntax: TEST Dest               {WC|WZ|WCZ}
+encoding:
+- "EEEE 0111110 CZ0 DDDDDDDDD DDDDDDDDD                    \u2014             Parity of D           D=0\
+  \                     2"
+- "EEEE 0111110 CZI DDDDDDDDD SSSSSSSSS                    \u2014          Parity of (D & S)     (D &\
+  \ S) = 0                2"
+- "EEEE 0100000 CZI DDDDDDDDD SSSSSSSSS                   \u2014             IN[D[4:0]]          IN[D[4:0]]\
+  \                2"
+- "EEEE 0100010 CZI DDDDDDDDD SSSSSSSSS                   \u2014         C AND IN[D[4:0]] Z AND IN[D[4:0]]\
+  \                 2"
+- "EEEE 0100100 CZI DDDDDDDDD SSSSSSSSS                   \u2014          C OR IN[D[4:0]]     Z OR IN[D[4:0]]\
+  \              2"
+- "EEEE 0100110 CZI DDDDDDDDD SSSSSSSSS                   \u2014         C XOR IN[D[4:0]] Z XOR IN[D[4:0]]\
+  \                 2"
+- "EEEE 0100001 CZI DDDDDDDDD SSSSSSSSS                   \u2014            !IN[D[4:0]]         !IN[D[4:0]]\
+  \                2"
+- "EEEE 0100011 CZI DDDDDDDDD SSSSSSSSS                   \u2014         C AND !IN[D[4:0]] Z AND !IN[D[4:0]]\
+  \               2"
+- "EEEE 0100101 CZI DDDDDDDDD SSSSSSSSS                   \u2014         C OR !IN[D[4:0]]     Z OR !IN[D[4:0]]\
+  \             2"
+- "EEEE 0100111 CZI DDDDDDDDD SSSSSSSSS                   \u2014         C XOR !IN[D[4:0]] Z XOR !IN[D[4:0]]\
+  \               2"
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'TEST determines the parity (number of high (1) bits) and the zero or
-  non-zero state of Dest, or of Dest bitwise Result: The parity and zero-state of
-  Dest, or of Dest bitwise ANDed with Src, is stored in the C and Z flags. C = parity
-  of (D & S).'
-category: Bit Operation Instruction - Test D, or bitwise AND D with S, to affect flags.
+group: Bit Operation Instruction - Test D, or bitwise AND D with S, to affect flags.
+description: "TEST determines the parity (number of high (1) bits) and the zero or non-zero state of Dest,\
+  \ or of Dest bitwise Result: The parity and zero-state of Dest, or of Dest bitwise ANDed with Src, is\
+  \ stored in the C and Z flags. C = parity of (D & S).\n\nTEST determines the parity (number of high\
+  \ (1) bits) and the zero or non-zero state of Dest, or of Dest bitwise\n\nANDed with Src, and stores\
+  \ the results in the C and/or Z \uFB02ag.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02\
+  ag is set (1) if the number of high (1) bits in Dest (or Dest ANDed with\n\nSrc) is odd, or is cleared\
+  \ (0) if it is even.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if Dest\
+  \ (or Dest ANDed with Src) is zero, or is cleared (0) if it\n\nis not zero.\n\nTESTB / TESTBN\n\nTest\
+  \ bit or bit not\n\nBit Operation Instruction - Test bit of D or !D and either store, AND, OR, or XOR\
+  \ the result into \uFB02ags.\n\nTESTB     Dest, {#}Src WC|WZ\n\nTESTB     Dest, {#}Src ANDC|ANDZ\n\n\
+  TESTB     Dest, {#}Src ORC|ORZ\n\nTESTB     Dest, {#}Src XORC|XORZ\n\nTESTBN Dest, {#}Src WC|WZ\n\n\
+  TESTBN Dest, {#}Src ANDC|ANDZ\n\nTESTBN Dest, {#}Src ORC|ORZ\n\nTESTBN Dest, {#}Src XORC|XORZ\n\nResult:\
+  \ The state of Dest's bit Src is read, possibly inverted, and either stored as-is, or bitwise ANDed,\
+  \ ORed, or\n\nXORed into C or Z.\n\n\u25CF    Dest is the register whose value will have a single bit\
+  \ tested.\n\n\u25CF    Src is a register or 5-bit literal whose value identi\uFB01es the bit (0\u2013\
+  31) of Dest to test.\n\n\u25CF    WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, and XORZ is a required effect\
+  \ to update or bitwise manipulate the C\n\nor Z \uFB02ag.\n\nCOND INSTR         FX     DEST        \
+  \  SRC           Write            C Flag              Z Flag              Clocks\n\nEEEE 0100000 CZI\
+  \ DDDDDDDDD SSSSSSSSS                   \u2014             IN[D[4:0]]          IN[D[4:0]]          \
+  \      2\n\nEEEE 0100010 CZI DDDDDDDDD SSSSSSSSS                   \u2014         C AND IN[D[4:0]] Z\
+  \ AND IN[D[4:0]]                 2\n\nEEEE 0100100 CZI DDDDDDDDD SSSSSSSSS                   \u2014\
+  \          C OR IN[D[4:0]]     Z OR IN[D[4:0]]              2\n\nEEEE 0100110 CZI DDDDDDDDD SSSSSSSSS\
+  \                   \u2014         C XOR IN[D[4:0]] Z XOR IN[D[4:0]]                 2\n\nEEEE 0100001\
+  \ CZI DDDDDDDDD SSSSSSSSS                   \u2014            !IN[D[4:0]]         !IN[D[4:0]]      \
+  \          2\n\nEEEE 0100011 CZI DDDDDDDDD SSSSSSSSS                   \u2014         C AND !IN[D[4:0]]\
+  \ Z AND !IN[D[4:0]]               2\n\nEEEE 0100101 CZI DDDDDDDDD SSSSSSSSS                   \u2014\
+  \         C OR !IN[D[4:0]]     Z OR !IN[D[4:0]]             2\n\nEEEE 0100111 CZI DDDDDDDDD SSSSSSSSS\
+  \                   \u2014         C XOR !IN[D[4:0]] Z XOR !IN[D[4:0]]               2\n\nRelated: TESTP\
+  \ and TESTPN\n\nTESTB or TESTBN reads the state (0/1) of a bit in Dest designated by Src, possibly inverts\
+  \ that result, and either\n\nstores it as-is, or bitwise ANDs, ORs, or XORs it into the C or Z \uFB02\
+  ag.\n\nSrc[4:0] indicates the bit number (0\u201331) to test.\n\nIf the WC or WZ effect is speci\uFB01\
+  ed, the C or Z \uFB02ag is overwritten with the state or inverse state of the bit.\n\nIf the ANDC or\
+  \ ANDZ effect is speci\uFB01ed, the C or Z \uFB02ag is bitwise ANDed with the state or inverse state\
+  \ of the bit.\n\nIf the ORC or ORZ effect is speci\uFB01ed, the C or Z \uFB02ag is bitwise ORed with\
+  \ the state or inverse state of the bit.\n\nIf the XORC or XORZ effect is speci\uFB01ed, the C or Z\
+  \ \uFB02ag is bitwise XORed with the state or inverse state of the bit."
 flags_affected:
   C:
     formula: parity of (D & S)
@@ -17,12 +68,17 @@ flags_affected:
     formula: ((D & S) == 0)
 parameters:
 - Dest is the register whose value will be tested.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value
-  is ANDed with Dest.
-- WC, WZ, and WCZ are optional effects to update flags.
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value is ANDed with Dest.
+- "WC, WZ, and WCZ are optional effects to update \uFB02ags."
+- Dest is the register whose value will have a single bit tested.
+- "Src is a register or 5-bit literal whose value identi\uFB01es the bit (0\u201331) of Dest to test."
+- "WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, and XORZ is a required effect to update or bitwise manipulate the\
+  \ C or Z \uFB02ag. Copyright \xA9 Parallax Inc. 2022/11/01 \u25AA Propeller 2 Assembly Language Manual\
+  \              \u25AA   Page 134"
 related:
-- TESTN
-documentation_source: PASM2 Manual 2022/11/01
+- TESTP
+- TESTPN
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_du
@@ -32,3 +88,24 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 3
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Test
+category: "Bit Operation Instruction - Test D, or bitwise AND D with S, to affect \uFB02ags."
+result: The state of Dest's bit Src is read, possibly inverted, and either stored as-is, or bitwise ANDed,
+  ORed, or
+syntax_variants:
+- TEST Dest               {WC|WZ|WCZ}
+- TEST Dest, {#}Src {WC|WZ|WCZ}
+- TEST determines the parity (number of high (1) bits) and the zero or non-zero state of Dest, or of Dest
+  bitwise
+- TESTB     Dest, {#}Src WC|WZ
+- TESTB     Dest, {#}Src ANDC|ANDZ
+- TESTB     Dest, {#}Src ORC|ORZ
+- TESTB     Dest, {#}Src XORC|XORZ
+- TESTBN Dest, {#}Src WC|WZ
+- TESTBN Dest, {#}Src ANDC|ANDZ
+- TESTBN Dest, {#}Src ORC|ORZ
+- TESTBN Dest, {#}Src XORC|XORZ
+- TESTB or TESTBN reads the state (0/1) of a bit in Dest designated by Src, possibly inverts that result,
+  and either
+manual_extraction_date: '2025-01-19'

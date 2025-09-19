@@ -4,11 +4,10 @@ encoding: EEEE 0100000 CZI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
+group: Bit Operation Instruction - Set bit(s) high (1) or low (0).
 description: 'BITH or BITL alters the Dest bit(s) designated by Src to be high (1)
   or low (0). All other bits are left unchanged. Result: Dest bit(s) described by
   Src are set high (1) or low (0); the rest are left as-is. Z = original D[S[4:0]].'
-category: Bit Operation Instruction - Set bit(s) high (1) or low (0).
 flags_affected:
   Z:
     formula: original D[S[4:0]]
@@ -27,3 +26,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 1
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.083922'

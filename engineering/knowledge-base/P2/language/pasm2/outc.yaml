@@ -4,15 +4,17 @@ encoding: EEEE 1101011 CZL DDDDDDDDD 001001010
 timing:
   cycles: 2
   type: fixed
-group: Pins
-description: Z = OUT bit.
-category: Pins
+group: I/O Pin Instruction - Set pin(s) output level to low/high according to C or
+  !C.
+description: 'OUTC or OUTNC alters the output level register''s bit(s) designated
+  by Dest to equal the state, or inverse state, of Result: The I/O pin output level
+  bit(s), described by Dest, are set to low/high according to C or !C; the rest are
+  left as-is. Z = OUT bit.'
 flags_affected:
   Z:
     formula: OUT bit
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+documentation_source: PASM2 Manual 2022/11/01
+documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pinop
   pattern: D/#0..511 {WC/WZ}
@@ -22,3 +24,10 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- OUTC {#}D
+last_updated: '2025-09-19T16:04:16.919208'
+parameters:
+- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
+  the I/O pin(s) for which output levels are to be set low or high.
+- WCZ is an optional effect to update flags.

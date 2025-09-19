@@ -1,37 +1,376 @@
 instruction: INCMOD
-syntax: INCMOD  D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0111000 CZI DDDDDDDDD SSSSSSSSS
+syntax: INCMOD Dest, {#}Src {WC|WZ|WCZ}
+encoding:
+- EEEE 0111000 CZI DDDDDDDDD SSSSSSSSS                      D          Modulus triggered   Result = 0              2
+- EEEE 1011110 01I 000001110 SSSSSSSSS                     PC   1
+- "EEEE 1011110 01I 000000001 SSSSSSSSS                     PC1                 \u2014             \u2014\
+  \           2 or 4 / 2 or 13\u201320"
+- "EEEE 1011110 01I 000000010 SSSSSSSSS                     PC1                 \u2014             \u2014\
+  \           2 or 4 / 2 or 13\u201320"
+- EEEE 1011110 01I 000000011 SSSSSSSSS                     PC   1
+- EEEE 1011110 01I 000001001 SSSSSSSSS                      PC   1
+- EEEE 1011110 01I 000000000 SSSSSSSSS                      PC   1
+- EEEE 1011110 01I 000001000 SSSSSSSSS                      PC   1
+- "EEEE 1011110 01I 000001111 SSSSSSSSS                      PC1                 \u2014              \
+  \     \u2014           2 or 4 / 2 or 13\u201320"
+- "EEEE 1011110 01I 000011111 SSSSSSSSS                      PC1                 \u2014              \
+  \     \u2014           2 or 4 / 2 or 13\u201320"
+- EEEE 1011110 01I 000000100 SSSSSSSSS                      PC   1
+- EEEE 1011110 01I 000001011 SSSSSSSSS                     PC   1
+- "EEEE 1011110 01I 000001010 SSSSSSSSS                     PC1                 \u2014               \u2014\
+  \           2 or 4 / 2 or 13\u201320"
+- "EEEE 1011110 01I 000011010 SSSSSSSSS                     PC1                 \u2014               \u2014\
+  \           2 or 4 / 2 or 13\u201320"
+- EEEE 1011110 01I 000001101 SSSSSSSSS                     PC   1
+- EEEE 1011110 01I 000001100 SSSSSSSSS                     PC   1
+- "EEEE 1101011 C01 0cccc0000 001101111                \u2014           C=cccc[{C,Z}]          \u2014\
+  \                     2"
+- "EEEE 1101011 0Z1 00000zzzz 001101111                \u2014                \u2014            Z=zzzz[{C,Z}]\
+  \              2"
+- "EEEE 1101011 CZ1 0cccczzzz 001101111                \u2014           C=cccc[{C,Z}]     Z=zzzz[{C,Z}]\
+  \              2"
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'INCMOD compares Dest with Src— if not equal, it increments Dest; otherwise
-  it sets Dest equal to 0. If Dest Result: If Dest was not equal to Src, it is incremented
-  by 1; otherwise Dest is reset to 0. Optionally, C and Z are updated to indicate
-  reset and zero result status.'
-category: Math Instruction - Increment with modulus.
+group: Math Instruction - Increment with modulus.
+description: "INCMOD compares Dest with Src\u2014 if not equal, it increments Dest; otherwise it sets\
+  \ Dest equal to 0. If Dest Result: If Dest was not equal to Src, it is incremented by 1; otherwise Dest\
+  \ is reset to 0. Optionally, C and Z are updated to indicate reset and zero result status.\n\nINCMOD\
+  \ compares Dest with Src\u2014 if not equal, it increments Dest; otherwise it sets Dest equal to 0.\
+  \ If Dest\n\nbegins in the range 0 to Src, iterations of INCMOD will increment Dest repetitively from\
+  \ 0 to Src.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if Dest was equal\
+  \ to Src and subsequently reset to 0; or is\n\ncleared (0) if not reset.\n\nIf the WZ or WCZ effect\
+  \ is speci\uFB01ed, the Z \uFB02ag is set (1) if the result is zero, or is cleared (0) if it is non-zero.\n\
+  \nINCMOD does not limit Dest within the speci\uFB01ed range\u2014 if Dest begins as greater than Src,\
+  \ iterations of INCMOD\n\nwill continue to increment it through the 32-bit rollover point (back to 0)\
+  \ before it will effectively cycle from 0 to\n\nSrc.\n\nJATN / JNATN\n\nJump if attention or not attention\n\
+  \nEvent Branch Instruction - Jump if attention \uFB02ag is set or clear.\n\nJATN        {#}Src\n\nJNATN\
+  \ {#}Src\n\nResult: If ATN event \uFB02ag is set (or is clear in syntax 2), PC is set to a new relative\
+  \ (#Src) or absolute (Src) address.\n\n\u25CF    Src is a register, 9-bit literal, or 20-bit augmented\
+  \ literal whose value is the absolute or relative address to\n\nset PC to. Use # for relative addressing;\
+  \ omit # for absolute addressing.\n\nCOND INSTR            FX      DEST           SRC            Write\
+  \             C Flag          Z Flag             Clocks\n\nEEEE 1011110 01I 000001110 SSSSSSSSS    \
+  \                 PC   1\n\n\u2014              \u2014          2 or 4 / 2 or 13\u201320\n\nEEEE 1011110\
+  \ 01I 000011110 SSSSSSSSS                     PC   1\n\n\u2014              \u2014          2 or 4 /\
+  \ 2 or 13\u201320\n\n1\n\nPC is written only when the ATN event \uFB02ag is set (or is clear in syntax\
+  \ 2).\n\nJATN or JNATN checks the cog's attention signal and jumps to the address described by Src if\
+  \ attention is set (in\n\nsyntax 1) or is clear (in syntax 2). The cog's attention signal, when set,\
+  \ indicates that one or more other cogs are\n\nrequesting this cog's attention. See the Hardware Manual's\
+  \ Cog Attention section for more information.\n\nThe address (Src) can be absolute or relative. To specify\
+  \ an absolute address, Src must be a register containing a\n\n20-bit address value. To specify a relative\
+  \ address, use #Label for a 9-bit signed offset (a range of -256 to +255\n\ninstructions) or use ##Label\
+  \ (or insert a prior AUGS instruction) for a 20-bit signed offset (a range of -524288 to\n\n+524287).\
+  \ Offsets are relative to the instruction following the JATN / JNATN. The signed offset value is in\
+  \ units\n\nof whole instructions\u2014 it is added to PC as-is when in Cog/LUT execution mode and is\
+  \ multiplied by 4 then added\n\nto PC when in Hub execution mode (long-aligned Hub code not required).\n\
+  \nJCT1/2/3 / JNCT1/2/3\n\nJump if counter 1/2/3 or not counter 1/2/3\n\nEvent Branch Instruction - Jump\
+  \ if counter 1, 2, or 3 event \uFB02ag is set or clear.\n\nJCT1        {#}Src\n\nJCT2        {#}Src\n\
+  \nJCT3        {#}Src\n\nJNCT1 {#}Src\n\nJNCT2 {#}Src\n\nJNCT3 {#}Src\n\nResult: If counter 1, 2, or\
+  \ 3 event \uFB02ag is set (or is clear in syntax 4\u20136), PC is set to a new relative (#Src) or absolute\n\
+  \n(Src) address.\n\n\u25CF    Src is a register, 9-bit literal, or 20-bit augmented literal whose value\
+  \ is the absolute or relative address to\n\nset PC to. Use # for relative addressing; omit # for absolute\
+  \ addressing.\n\nCOND INSTR            FX      DEST           SRC            Write             C Flag\
+  \         Z Flag             Clocks\n\nEEEE 1011110 01I 000000001 SSSSSSSSS                     PC1\
+  \                 \u2014             \u2014           2 or 4 / 2 or 13\u201320\n\nEEEE 1011110 01I 000000010\
+  \ SSSSSSSSS                     PC1                 \u2014             \u2014           2 or 4 / 2 or\
+  \ 13\u201320\n\nEEEE 1011110 01I 000000011 SSSSSSSSS                     PC   1\n\n\u2014          \
+  \   \u2014           2 or 4 / 2 or 13\u201320\n\nEEEE 1011110 01I 000010001 SSSSSSSSS              \
+  \       PC   1\n\n\u2014             \u2014           2 or 4 / 2 or 13\u201320\n\nEEEE 1011110 01I 000010010\
+  \ SSSSSSSSS                     PC   1\n\n\u2014             \u2014           2 or 4 / 2 or 13\u2013\
+  20\n\nEEEE 1011110 01I 000010001 SSSSSSSSS                     PC   1\n\n\u2014             \u2014 \
+  \          2 or 4 / 2 or 13\u201320\n\n1\n\nPC is written only when the counter event \uFB02ag is set\
+  \ (or is clear in syntax 4\u20136).\n\nJCT1, JCT2, JCT3, or JNCT1, JNCT2, JNCT3 checks the cog's counter\
+  \ 1, 2, or 3 event \uFB02ag and jumps to the\n\naddress described by Src if the \uFB02ag is set (in\
+  \ syntax 1\u20133) or is clear (in syntax 4\u20136). The cog's hidden registers,\n\nCT1, CT2, and CT3\
+  \ are dedicated to System Counter timing and events\u2014 when a counter event \uFB02ag is set, it means\n\
+  \na speci\uFB01ed time period has elapsed. See the Hardware Manual's System Counter section for more\
+  \ information.\n\nThe address (Src) can be absolute or relative. To specify an absolute address, Src\
+  \ must be a register containing a\n\n20-bit address value. To specify a relative address, use #Label\
+  \ for a 9-bit signed offset (a range of -256 to +255\n\ninstructions) or use ##Label (or insert a prior\
+  \ AUGS instruction) for a 20-bit signed offset (a range of -524288 to\n\n+524287). Offsets are relative\
+  \ to the instruction following the JCTx / JNCTx. The signed offset value is in units\n\nof whole instructions\u2014\
+  \ it is added to PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added\n\nto PC\
+  \ when in Hub execution mode (long-aligned Hub code not required).\n\nRelated instructions are ADDCTx,\
+  \ POLLCTx, and WAITCTx.\n\nJFBW / JNFBW\n\nJump if FIFO block wrap or not FIFO block wrap\n\nEvent Branch\
+  \ Instruction - Jump if FIFO interface block wrap event \uFB02ag is set or clear.\n\nJFBW        {#}Src\n\
+  \nJNFBW {#}Src\n\nResult: If FIFO interface block wrap event \uFB02ag is set (or is clear in syntax\
+  \ 2), PC is set to a new relative (#Src) or\n\nabsolute (Src) address.\n\n\u25CF    Src is a register,\
+  \ 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to\n\n\
+  set PC to. Use # for relative addressing; omit # for absolute addressing.\n\nCOND INSTR            \
+  \ FX      DEST           SRC            Write              C Flag             Z Flag             Clocks\n\
+  \nEEEE 1011110 01I 000001001 SSSSSSSSS                      PC   1\n\n\u2014                    \u2014\
+  \        2 or 4 / 2 or 13\u201320\n\nEEEE 1011110 01I 000011001 SSSSSSSSS                      PC  \
+  \ 1\n\n\u2014                    \u2014        2 or 4 / 2 or 13\u201320\n\n1\n\nPC is written only when\
+  \ the FIFO interface block wrap event \uFB02ag is set (or is clear in syntax 2).\n\nJFBW or JNFBW checks\
+  \ the cog's FIFO interface block wrap \uFB02ag and jumps to the address described by Src if the\n\n\uFB02\
+  ag is set (in syntax 1) or is clear (in syntax 2). The cog's Fast Sequential FIFO Interface is used\
+  \ to swiftly transfer\n\ndata between Hub and Cog. When the FIFO runs out of data (block count), it\
+  \ sets this \uFB02ag before wrapping\n\naround to the start of the block again.\n\nThe address (Src)\
+  \ can be absolute or relative. To specify an absolute address, Src must be a register containing a\n\
+  \n20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset (a range\
+  \ of -256 to +255\n\ninstructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit\
+  \ signed offset (a range of -524288 to\n\n+524287). Offsets are relative to the instruction following\
+  \ the JFBW / JNFBW. The signed offset value is in units\n\nof whole instructions\u2014 it is added to\
+  \ PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added\n\nto PC when in Hub execution\
+  \ mode (long-aligned Hub code not required).\n\nJINT / JNINT\n\nJump if interrupt or not interrupt\n\
+  \nEvent Branch Instruction - Jump if interrupt-occurred event \uFB02ag is set or clear.\n\nJINT    \
+  \    {#}Src\n\nJNINT {#}Src\n\nResult: If interrupt-occurred event \uFB02ag is set (or is clear in syntax\
+  \ 2), PC is set to a new relative (#Src) or absolute\n\n(Src) address.\n\n\u25CF    Src is a register,\
+  \ 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to\n\n\
+  set PC to. Use # for relative addressing; omit # for absolute addressing.\n\nCOND INSTR            \
+  \ FX      DEST           SRC            Write              C Flag             Z Flag             Clocks\n\
+  \nEEEE 1011110 01I 000000000 SSSSSSSSS                      PC   1\n\n\u2014                    \u2014\
+  \        2 or 4 / 2 or 13\u201320\n\nEEEE 1011110 01I 000010000 SSSSSSSSS                      PC  \
+  \ 1\n\n\u2014                    \u2014        2 or 4 / 2 or 13\u201320\n\n1\n\nPC is written only when\
+  \ the interrupt event \uFB02ag is set (or is clear in syntax 2).\n\nJINT or JNINT checks the cog's interrupt-occurred\
+  \ \uFB02ag and jumps to the address described by Src if the \uFB02ag is\n\nset (in syntax 1) or is clear\
+  \ (in syntax 2).\n\nThe address (Src) can be absolute or relative. To specify an absolute address, Src\
+  \ must be a register containing a\n\n20-bit address value. To specify a relative address, use #Label\
+  \ for a 9-bit signed offset (a range of -256 to +255\n\ninstructions) or use ##Label (or insert a prior\
+  \ AUGS instruction) for a 20-bit signed offset (a range of -524288 to\n\n+524287). Offsets are relative\
+  \ to the instruction following the JINT / JNINT. The signed offset value is in units\n\nof whole instructions\u2014\
+  \ it is added to PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added\n\nto PC\
+  \ when in Hub execution mode (long-aligned Hub code not required).\n\nJPAT / JNPAT\n\nJump if pattern\
+  \ or not pattern\n\nEvent Branch Instruction - Jump if pin pattern event \uFB02ag set or clear.\n\n\
+  JPAT        {#}Src\n\nJNPAT {#}Src\n\nResult: If pin pattern event \uFB02ag is set (or is clear in syntax\
+  \ 2), PC is set to a new relative (#Src) or absolute (Src)\n\naddress.\n\n\u25CF    Src is a register,\
+  \ 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to\n\n\
+  set PC to. Use # for relative addressing; omit # for absolute addressing.\n\nCOND INSTR            \
+  \ FX      DEST          SRC             Write              C Flag              Z Flag             Clocks\n\
+  \nEEEE 1011110 01I 000001000 SSSSSSSSS                      PC   1\n\n\u2014                   \u2014\
+  \           2 or 4 / 2 or 13\u201320\n\nEEEE 1011110 01I 000011000 SSSSSSSSS                      PC\
+  \   1\n\n\u2014                   \u2014           2 or 4 / 2 or 13\u201320\n\n1\n\nPC is written only\
+  \ when the pin pattern event \uFB02ag is set (or is clear in syntax 2).\n\nJPAT or JNPAT checks the\
+  \ cog's pin-pattern-detected event \uFB02ag and jumps to the address described by Src if the\n\n\uFB02\
+  ag is set (in syntax 1) or is clear (in syntax 2).\n\nThe address (Src) can be absolute or relative.\
+  \ To specify an absolute address, Src must be a register containing a\n\n20-bit address value. To specify\
+  \ a relative address, use #Label for a 9-bit signed offset (a range of -256 to +255\n\ninstructions)\
+  \ or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset (a range of -524288\
+  \ to\n\n+524287). Offsets are relative to the instruction following the JPAT / JNPAT. The signed offset\
+  \ value is in units\n\nof whole instructions\u2014 it is added to PC as-is when in Cog/LUT execution\
+  \ mode and is multiplied by 4 then added\n\nto PC when in Hub execution mode (long-aligned Hub code\
+  \ not required).\n\nJQMT / JNQMT\n\nJump if CORDIC empty or not CORDIC empty\n\nEvent Branch Instruction\
+  \ - Jump if CORDIC-read-but-empty event \uFB02ag set or clear.\n\nJQMT        {#}Src\n\nJNQMT {#}Src\n\
+  \nResult: If CORDIC-read-but-empty event \uFB02ag is set (or is clear in syntax 2), PC is set to a new\
+  \ relative (#Src) or\n\nabsolute (Src) address.\n\n\u25CF    Src is a register, 9-bit literal, or 20-bit\
+  \ augmented literal whose value is the absolute or relative address to\n\nset PC to. Use # for relative\
+  \ addressing; omit # for absolute addressing.\n\nCOND INSTR             FX      DEST          SRC  \
+  \           Write              C Flag              Z Flag             Clocks\n\nEEEE 1011110 01I 000001111\
+  \ SSSSSSSSS                      PC1                 \u2014                   \u2014           2 or\
+  \ 4 / 2 or 13\u201320\n\nEEEE 1011110 01I 000011111 SSSSSSSSS                      PC1             \
+  \    \u2014                   \u2014           2 or 4 / 2 or 13\u201320\n\n1\n\nPC is written only when\
+  \ the CORDIC-read-but-empty event \uFB02ag is set (or is clear in syntax 2).\n\nJQMT or JNQMT checks\
+  \ the cog's CORDIC results event \uFB02ag and jumps to the address described by Src if the \uFB02ag\n\
+  \nis set (in syntax 1) or is clear (in syntax 2).\n\nThe address (Src) can be absolute or relative.\
+  \ To specify an absolute address, Src must be a register containing a\n\n20-bit address value. To specify\
+  \ a relative address, use #Label for a 9-bit signed offset (a range of -256 to +255\n\ninstructions)\
+  \ or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset (a range of -524288\
+  \ to\n\n+524287). Offsets are relative to the instruction following the JQMT / JNQMT. The signed offset\
+  \ value is in units\n\nof whole instructions\u2014 it is added to PC as-is when in Cog/LUT execution\
+  \ mode and is multiplied by 4 then added\n\nto PC when in Hub execution mode (long-aligned Hub code\
+  \ not required).\n\nJSE1/2/3/4 / JNSE1/2/3/4\n\nJump if selectable event 1/2/3/4 or not selectable event\
+  \ 1/2/3/4\n\nEvent Branch Instruction - Jump if selectable event 1, 2, 3, or 4 \uFB02ag is set or clear.\n\
+  \nJSE1        {#}Src\n\nJSE2        {#}Src\n\nJSE3        {#}Src\n\nJSE4        {#}Src\n\nJNSE1 {#}Src\n\
+  \nJNSE2 {#}Src\n\nJNSE3 {#}Src\n\nJNSE4 {#}Src\n\nResult: If selectable event 1, 2, 3, or 4 \uFB02ag\
+  \ is set (or is clear in syntax 5\u20138), PC is set to a new relative (#Src) or\n\nabsolute (Src) address.\n\
+  \n\u25CF    Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute\
+  \ or relative address to\n\nset PC to. Use # for relative addressing; omit # for absolute addressing.\n\
+  \nCOND INSTR             FX      DEST           SRC            Write              C Flag           \
+  \    Z Flag             Clocks\n\nEEEE 1011110 01I 000000100 SSSSSSSSS                      PC   1\n\
+  \n\u2014                     \u2014         2 or 4 / 2 or 13\u201320\n\nEEEE 1011110 01I 000000101 SSSSSSSSS\
+  \                      PC   1\n\n\u2014                     \u2014         2 or 4 / 2 or 13\u201320\n\
+  \nEEEE 1011110 01I 000000110 SSSSSSSSS                      PC   1\n\n\u2014                     \u2014\
+  \         2 or 4 / 2 or 13\u201320\n\nEEEE 1011110 01I 000000111 SSSSSSSSS                      PC \
+  \  1\n\n\u2014                     \u2014         2 or 4 / 2 or 13\u201320\n\nEEEE 1011110 01I 000010100\
+  \ SSSSSSSSS                      PC   1\n\n\u2014                     \u2014         2 or 4 / 2 or 13\u2013\
+  20\n\nEEEE 1011110 01I 000010101 SSSSSSSSS                      PC   1\n\n\u2014                   \
+  \  \u2014         2 or 4 / 2 or 13\u201320\n\nEEEE 1011110 01I 000010110 SSSSSSSSS                 \
+  \     PC   1\n\n\u2014                     \u2014         2 or 4 / 2 or 13\u201320\n\nEEEE 1011110 01I\
+  \ 000010111 SSSSSSSSS                      PC   1\n\n\u2014                     \u2014         2 or\
+  \ 4 / 2 or 13\u201320\n\n1\n\nPC is written only when the selectable event 1, 2, 3, or 4 \uFB02ag is\
+  \ set (or is clear in syntax 5\u20138).\n\nJSE1, JSE2, JSE3, JSE4, or JNSE1, JNSE2, JNSE3, JNSE4 checks\
+  \ the cog's selectable event 1, 2, 3, or 4 event\n\n\uFB02ag and jumps to the address described by Src\
+  \ if the \uFB02ag is set (in syntax 1\u20134) or is clear (in syntax 5\u20138).\n\nThe address (Src)\
+  \ can be absolute or relative. To specify an absolute address, Src must be a register containing a\n\
+  \n20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset (a range\
+  \ of -256 to +255\n\ninstructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit\
+  \ signed offset (a range of -524288 to\n\n+524287). Offsets are relative to the instruction following\
+  \ the JSEx / JNSEx. The signed offset value is in units\n\nof whole instructions\u2014 it is added to\
+  \ PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added\n\nto PC when in Hub execution\
+  \ mode (long-aligned Hub code not required).\n\nJXFI / JNXFI\n\nJump if streamer \uFB01nished or not\
+  \ streamer \uFB01nished\n\nEvent Branch Instruction - Jump if streamer \uFB01nished event \uFB02ag set\
+  \ or clear.\n\nJXFI       {#}Src\n\nJNXFI {#}Src\n\nResult: If streamer \uFB01nished event \uFB02ag\
+  \ is set (or is clear in syntax 2), PC is set to a new relative (#Src) or absolute\n\n(Src) address.\n\
+  \n\u25CF   Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute\
+  \ or relative address to\n\nset PC to. Use # for relative addressing; omit # for absolute addressing.\n\
+  \nCOND INSTR            FX      DEST          SRC            Write              C Flag           Z Flag\
+  \             Clocks\n\nEEEE 1011110 01I 000001011 SSSSSSSSS                     PC   1\n\n\u2014  \
+  \             \u2014           2 or 4 / 2 or 13\u201320\n\nEEEE 1011110 01I 000011011 SSSSSSSSS    \
+  \                 PC   1\n\n\u2014               \u2014           2 or 4 / 2 or 13\u201320\n\n1\n\n\
+  PC is written only when the streamer \uFB01nished event \uFB02ag is set (or is clear in syntax 2).\n\
+  \nJXFI or JNXFI checks the cog's streamer \uFB01nished event \uFB02ag and jumps to the address described\
+  \ by Src if the\n\n\uFB02ag is set (in syntax 1) or is clear (in syntax 2).\n\nThe address (Src) can\
+  \ be absolute or relative. To specify an absolute address, Src must be a register containing a\n\n20-bit\
+  \ address value. To specify a relative address, use #Label for a 9-bit signed offset (a range of -256\
+  \ to +255\n\ninstructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset\
+  \ (a range of -524288 to\n\n+524287). Offsets are relative to the instruction following the JXFI / JNXFI.\
+  \ The signed offset value is in units\n\nof whole instructions\u2014 it is added to PC as-is when in\
+  \ Cog/LUT execution mode and is multiplied by 4 then added\n\nto PC when in Hub execution mode (long-aligned\
+  \ Hub code not required).\n\nJXMT / JNXMT\n\nJump if streamer empty or not streamer empty\n\nEvent Branch\
+  \ Instruction - Jump if streamer empty event \uFB02ag set or clear.\n\nJXMT       {#}Src\n\nJNXMT {#}Src\n\
+  \nResult: If streamer empty event \uFB02ag is set (or is clear in syntax 2), PC is set to a new relative\
+  \ (#Src) or absolute\n\n(Src) address.\n\n\u25CF   Src is a register, 9-bit literal, or 20-bit augmented\
+  \ literal whose value is the absolute or relative address to\n\nset PC to. Use # for relative addressing;\
+  \ omit # for absolute addressing.\n\nCOND INSTR            FX      DEST          SRC            Write\
+  \              C Flag           Z Flag             Clocks\n\nEEEE 1011110 01I 000001010 SSSSSSSSS  \
+  \                   PC1                 \u2014               \u2014           2 or 4 / 2 or 13\u2013\
+  20\n\nEEEE 1011110 01I 000011010 SSSSSSSSS                     PC1                 \u2014          \
+  \     \u2014           2 or 4 / 2 or 13\u201320\n\n1\n\nPC is written only when the streamer empty event\
+  \ \uFB02ag is set (or is clear in syntax 2).\n\nJXMT or JNXMT checks the cog's streamer empty event\
+  \ \uFB02ag and jumps to the address described by Src if the \uFB02ag\n\nis set (in syntax 1) or is clear\
+  \ (in syntax 2). The address (Src) can be absolute or relative. To specify an absolute\n\naddress, Src\
+  \ must be a register containing a 20-bit address value. To specify a relative address, use #Label for\
+  \ a\n\n9-bit signed offset (a range of -256 to +255 instructions) or use ##Label (or insert a prior\
+  \ AUGS instruction) for a\n\n20-bit signed offset (a range of -524288 to +524287). Offsets are relative\
+  \ to the instruction following the JXMT /\n\nJNXMT. The signed offset value is in units of whole instructions\u2014\
+  \ it is added to PC as-is when in Cog/LUT\n\nexecution mode and is multiplied by 4 then added to PC\
+  \ when in Hub execution mode (long-aligned Hub code not\n\nrequired).\n\nJXRL / JNXRL\n\nJump if streamer\
+  \ rollover LUT or not streamer rollover LUT\n\nEvent Branch Instruction - Jump if streamer LUT RAM rollover\
+  \ event \uFB02ag set or clear.\n\nJXRL       {#}Src\n\nJNXRL {#}Src\n\nResult: If streamer LUT RAM rollover\
+  \ event \uFB02ag is set (or is clear in syntax 2), PC is set to a new relative (#Src) or\n\nabsolute\
+  \ (Src) address.\n\n\u25CF   Src is a register, 9-bit literal, or 20-bit augmented literal whose value\
+  \ is the absolute or relative address to\n\nset PC to. Use # for relative addressing; omit # for absolute\
+  \ addressing.\n\nCOND INSTR            FX      DEST          SRC             Write             C Flag\
+  \                Z Flag             Clocks\n\nEEEE 1011110 01I 000001101 SSSSSSSSS                 \
+  \    PC   1\n\n\u2014                    \u2014           2 or 4 / 2 or 13\u201320\n\nEEEE 1011110 01I\
+  \ 000011101 SSSSSSSSS                     PC   1\n\n\u2014                    \u2014           2 or\
+  \ 4 / 2 or 13\u201320\n\n1\n\nPC is written only when the streamer LUT RAM rollover event \uFB02ag is\
+  \ set (or is clear in syntax 2).\n\nJXRL or JNXRL checks the cog's streamer LUT RAM rollover event \uFB02\
+  ag and jumps to the address described by Src\n\nif the \uFB02ag is set (in syntax 1) or is clear (in\
+  \ syntax 2).\n\nThe address (Src) can be absolute or relative. To specify an absolute address, Src must\
+  \ be a register containing a\n\n20-bit address value. To specify a relative address, use #Label for\
+  \ a 9-bit signed offset (a range of -256 to +255\n\ninstructions) or use ##Label (or insert a prior\
+  \ AUGS instruction) for a 20-bit signed offset (a range of -524288 to\n\n+524287). Offsets are relative\
+  \ to the instruction following the JXRL / JNXRL. The signed offset value is in units\n\nof whole instructions\u2014\
+  \ it is added to PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added\n\nto PC\
+  \ when in Hub execution mode (long-aligned Hub code not required).\n\nJXRO / JNXRO\n\nJump if streamer\
+  \ rollover NCO or not streamer rollover NCO\n\nEvent Branch Instruction - Jump if streamer NCO rollover\
+  \ event \uFB02ag set or clear.\n\nJXRO       {#}Src\n\nJNXRO {#}Src\n\nResult: If streamer NCO rollover\
+  \ event \uFB02ag is set (or is clear in syntax 2), PC is set to a new relative (#Src) or\n\nabsolute\
+  \ (Src) address.\n\n\u25CF   Src is a register, 9-bit literal, or 20-bit augmented literal whose value\
+  \ is the absolute or relative address to\n\nset PC to. Use # for relative addressing; omit # for absolute\
+  \ addressing.\n\nCOND INSTR            FX      DEST          SRC             Write             C Flag\
+  \                Z Flag             Clocks\n\nEEEE 1011110 01I 000001100 SSSSSSSSS                 \
+  \    PC   1\n\n\u2014                    \u2014           2 or 4 / 2 or 13\u201320\n\nEEEE 1011110 01I\
+  \ 000011100 SSSSSSSSS                     PC   1\n\n\u2014                    \u2014           2 or\
+  \ 4 / 2 or 13\u201320\n\n1\n\nPC is written only when the streamer NCO rollover event \uFB02ag is set\
+  \ (or is clear in syntax 2).\n\nJXRO or JNXRO checks the cog's streamer NCO rollover event \uFB02ag\
+  \ and jumps to the address described by Src if\n\nthe \uFB02ag is set (in syntax 1) or is clear (in\
+  \ syntax 2).\n\nThe address (Src) can be absolute or relative. To specify an absolute address, Src must\
+  \ be a register containing a\n\n20-bit address value. To specify a relative address, use #Label for\
+  \ a 9-bit signed offset (a range of -256 to +255\n\ninstructions) or use ##Label (or insert a prior\
+  \ AUGS instruction) for a 20-bit signed offset (a range of -524288 to\n\n+524287). Offsets are relative\
+  \ to the instruction following the JXRO / JNXRO. The signed offset value is in units\n\nof whole instructions\u2014\
+  \ it is added to PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added\n\nto PC\
+  \ when in Hub execution mode (long-aligned Hub code not required).\n\nMODC / MODZ / MODCZ\n\nModify\
+  \ C, Z, or C and Z\n\nFlag Modi\uFB01cation Instruction - Modify C and/or Z \uFB02ag(s) according to\
+  \ modi\uFB01er mode and current state(s).\n\nMODC    CModi\uFB01er {WC}\n\nMODZ    ZModi\uFB01er {WZ}\n\
+  \nMODCZ CModi\uFB01er, ZModi\uFB01er {WC|WZ|WCZ}\n\nResult: The C and/or Z \uFB02ag is set or cleared\
+  \ according to the given Modi\uFB01er and the current state of the C and/or\n\nZ \uFB02ags.\n\n\u25CF\
+  \   CModifer is a Modi\uFB01er symbol for the designated mode to apply to the C \uFB02ag.\n\n\u25CF\
+  \   ZModifer is a Modi\uFB01er symbol for the designated mode to apply to the Z \uFB02ag.\n\n\u25CF\
+  \   WC, WZ, or WCZ are optional effects to update \uFB02ags.\n\nCOND INSTR        FX     DEST      \
+  \  SRC           Write            C Flag            Z Flag             Clocks\n\nEEEE 1101011 C01 0cccc0000\
+  \ 001101111                \u2014           C=cccc[{C,Z}]          \u2014                     2\n\n\
+  EEEE 1101011 0Z1 00000zzzz 001101111                \u2014                \u2014            Z=zzzz[{C,Z}]\
+  \              2\n\nEEEE 1101011 CZ1 0cccczzzz 001101111                \u2014           C=cccc[{C,Z}]\
+  \     Z=zzzz[{C,Z}]              2\n\nMODC, MODZ, or MODCZ sets or clears the C and/or Z \uFB02ag based\
+  \ on the mode described by the given Modi\uFB01er\n\nsymbol(s) and the current state of the C and/or\
+  \ Z \uFB02ag. The WC, WZ, and WCZ effects are required to affect the\n\ndesignated \uFB02ag.\n\nThese\
+  \ \uFB02ag modi\uFB01er instructions allow code to preset \uFB02ags to a desired state which may be\
+  \ required for entry into\n\ncertain code routines, or to set a special state based on multiple events\
+  \ that are otherwise not possible to realize\n\nwith a single instruction.\n\nIf the WC, WZ, or WCZ\
+  \ effect is speci\uFB01ed, the C, Z, or both C and Z \uFB02ags are updated according to the given\n\n\
+  CModi\uFB01er or ZModi\uFB01er. See the Modi\uFB01er Symbols table for details.\n\nModifier Symbols\
+  \ (for MODC / MODZ / MODCZ)\n\nModifier1      Encoding2      Description\n\n_CLR              %0000\
+  \      Clear C/Z (C == 0 and/or Z == 0)\n\n_E                %1010      Set C/Z if comparison/subtraction\
+  \ was equal (C == Z and/or Z == Z)\n\n_NE               %0101      Set C/Z if comparison/subtraction\
+  \ was not equal (C == !Z and/or Z == !Z)\n\n_GT               %0001      Set C/Z if comparison/subtraction\
+  \ was greater than (C == !C AND !Z and/or Z == !C AND !Z)\n\n_GE               %0011      Set C/Z if\
+  \ comparison/subtraction was greater than or equal (C == !C and/or Z == !C)\n\n_LT               %1100\
+  \      Set C/Z if comparison/subtraction was less than (C == C and/or Z == C)\n\n_LE               %1110\
+  \      Set C/Z if comparison/subtraction was less than or equal (C == C OR Z and/or Z == C OR Z)\n\n\
+  _C                %1100      Set C/Z to C (C == C and/or Z == C)\n\n_NC               %0011      Set\
+  \ C/Z to inverse of C (C == !C and/or Z == !C)\n\n_Z                %1010      Set C/Z to Z (C == Z\
+  \ and/or Z == Z)\n\n_NZ               %0101      Set C/Z to inverse of Z (C == !Z and/or Z == !Z)\n\n\
+  _C_EQ_Z           %1001      Set C/Z if C equal to Z (C == C = Z and/or Z == C = Z)\n\n_C_NE_Z     \
+  \      %0110      Set C/Z if C not equal to Z (C == C <> Z and/or Z == C <> Z)\n\n_C_AND_Z         \
+  \ %1000      Set C/Z to C AND Z (C == C AND Z and/or Z == C AND Z)\n\n_C_AND_NZ         %0100      Set\
+  \ C/Z to C AND NOT Z (C == C AND !Z and/or Z == C AND !Z)\n\n_NC_AND_Z         %0010      Set C/Z to\
+  \ NOT C AND Z (C == !C AND Z and/or Z == !C AND Z)\n\n_NC_AND_NZ        %0001      Set C/Z to NOT C\
+  \ AND NOT Z (C == !C AND !Z and/or Z == !C AND !Z)\n\n_C_OR_Z           %1110      Set C/Z to C OR Z\
+  \ (C == C OR Z and/or Z == C OR Z)\n\n_C_OR_NZ          %1101      Set C/Z to C OR NOT Z (C == C OR\
+  \ !Z and/or Z == C OR !Z)\n\n_NC_OR_Z          %1011      Set C/Z to NOT C OR Z (C == !C OR Z and/or\
+  \ Z == !C OR Z)\n\n_NC_OR_NZ         %0111      Set C/Z to NOT C OR NOT Z (C == !C OR !Z and/or Z ==\
+  \ !C OR !Z)\n\n_Z_EQ_C           %1001      Set C/Z if Z equal to C (C == Z = C and/or Z == Z = C)\n\
+  \n_Z_NE_C           %0110      Set C/Z if Z not equal to C (C == Z <> C and/or Z == Z <> C)\n\n_Z_AND_C\
+  \          %1000      Set C/Z to Z AND C (C == Z AND C and/or Z == Z AND C)\n\n_Z_AND_NC         %0010\
+  \      Set C/Z to Z AND NOT C (C == Z AND !C and/or Z == Z AND !C)\n\n_NZ_AND_C         %0100      Set\
+  \ C/Z to NOT Z AND C (C == !Z AND C and/or Z == !Z AND C)\n\n_NZ_AND_NC        %0001      Set C/Z to\
+  \ NOT Z AND NOT C (C == !Z AND !C and/or Z == !Z AND !C)\n\n_Z_OR_C           %1110      Set C/Z to\
+  \ Z OR C (C == Z OR C and/or Z == Z OR C)\n\n_Z_OR_NC          %1011      Set C/Z to Z OR NOT C (C ==\
+  \ Z OR !C and/or Z == Z OR !C)\n\n_NZ_OR_C          %1101      Set C/Z to NOT Z OR C (C == !Z OR C and/or\
+  \ Z == !Z OR C)\n\n_NZ_OR_NC         %0111      Set C/Z to NOT Z OR NOT C (C == !Z OR !C and/or Z ==\
+  \ !Z OR !C)\n\n_SET              %1111      Set C/Z (C == 1 and/or Z == 1)\n\n1\n\nUse Modi\uFB01er\
+  \ symbol(s) in MODC, MODZ, and MODCZ instructions. Note that the symbol and description is similar to,\
+  \ and\n\nthe encoding exactly matches, that of the related Conditions used to include/exclude instructions\
+  \ at run time.\n\n2\n\nThe encoding is the 4-bit value placed into the MODC, MODZ, and MODCZ instruction's\
+  \ cccc or zzzz opcode \uFB01eld by the\n\ncompiler."
 flags_affected:
-  C:
-    formula: 1, else D = D + 1 and C = 0
+  Z: Result = 0
 parameters:
-- Dest is a register containing the value to increment up to Src with modulus, and
-  is where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is the
-  modulus limit to apply to Dest's increment operation.
+- Dest is a register containing the value to increment up to Src with modulus, and is where the result
+  is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is the modulus limit to apply
+  to Dest's increment operation.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative
+  address to set PC to. Use # for relative addressing; omit # for absolute addressing.'
+- "CModifer is a Modi\uFB01er symbol for the designated mode to apply to the C \uFB02ag."
+- "ZModifer is a Modi\uFB01er symbol for the designated mode to apply to the Z \uFB02ag."
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - DECMOD
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 examples:
 - name: Round-Robin Counter
   description: Circular counter for resource scheduling
-  code: "' Round-robin through 8 ports (0-7)\nmain_loop\n        ' Service current\
-    \ port\n        ' ... port service code ...\n        \n        ' Move to next\
-    \ port\n        incmod  portctr, portnum    wc\nif_nc   jmp     #main_loop   \
-    \       ' Continue if not wrapped\n        \n        ' We've serviced all ports,\
-    \ restart\n        jmp     #main_loop\n        \nportctr res     1           \
-    \        ' Current port (0-7)\nportnum long    7                   ' Maximum port\
-    \ number\n"
+  code: "' Round-robin through 8 ports (0-7)\nmain_loop\n        ' Service current port\n        ' ...\
+    \ port service code ...\n        \n        ' Move to next port\n        incmod  portctr, portnum \
+    \   wc\nif_nc   jmp     #main_loop          ' Continue if not wrapped\n        \n        ' We've serviced\
+    \ all ports, restart\n        jmp     #main_loop\n        \nportctr res     1                   '\
+    \ Current port (0-7)\nportnum long    7                   ' Maximum port number\n"
   source: P2-OctoSerial
 - name: Circular Buffer Index
   description: Increment buffer index with wrap-around
@@ -59,11 +398,10 @@ examples:
   source: P2-OctoSerial
 - name: Multi-Resource Iterator
   description: Iterate through active resources only
-  code: "' Service only active ports\n.next_port\n        alts    portctr, #port_active\n\
-    \        mov     is_active, 0-0      ' Get active flag\n        \n        tjz\
-    \     is_active, #.skip   ' Skip if inactive\n        call    #service_port  \
-    \     ' Service this port\n        \n.skip   incmod  portctr, #7         wc\n\
-    if_nc   jmp     #.next_port         ' Continue loop\n        \n        ' All ports\
+  code: "' Service only active ports\n.next_port\n        alts    portctr, #port_active\n        mov \
+    \    is_active, 0-0      ' Get active flag\n        \n        tjz     is_active, #.skip   ' Skip if\
+    \ inactive\n        call    #service_port       ' Service this port\n        \n.skip   incmod  portctr,\
+    \ #7         wc\nif_nc   jmp     #.next_port         ' Continue loop\n        \n        ' All ports\
     \ checked\n        ret\n"
   source: P2-OctoSerial
 notes:
@@ -79,3 +417,16 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Increment modulus
+category: Math Instruction - Increment with modulus.
+result: "The C and/or Z \uFB02ag is set or cleared according to the given Modi\uFB01er and the current\
+  \ state of the C and/or"
+syntax_variants:
+- INCMOD Dest, {#}Src {WC|WZ|WCZ}
+- "INCMOD compares Dest with Src\u2014 if not equal, it increments Dest; otherwise it sets Dest equal\
+  \ to 0. If Dest"
+- begins in the range 0 to Src, iterations of INCMOD will increment Dest repetitively from 0 to Src.
+- "INCMOD does not limit Dest within the speci\uFB01ed range\u2014 if Dest begins as greater than Src,\
+  \ iterations of INCMOD"
+manual_extraction_date: '2025-01-19'

@@ -4,12 +4,11 @@ encoding: EEEE 1101011 CZL DDDDDDDDD 001010101
 timing:
   cycles: 2
   type: fixed
-group: Pins
+group: I/O Pin Instruction - Set pin(s) direction to input and an output level of
+  low/high according to Z.
 description: The I/O pins described by Dest are set to the input direction and to
   an output level of low/high according to Z or !Z; the rest are left as-is. Z = OUT
   bit.
-category: I/O Pin Instruction - Set pin(s) direction to input and an output level
-  of low/high according to Z.
 flags_affected:
   Z:
     formula: OUT bit
@@ -28,3 +27,4 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:17.228180'

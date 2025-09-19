@@ -1,25 +1,86 @@
 instruction: ALTI
-syntax: ALTI    D,{#}S
-encoding: EEEE 1001101 001 DDDDDDDDD 101100100
+syntax: ALTI Dest, {#}Src
+encoding:
+- "EEEE 1001101 00I DDDDDDDDD SSSSSSSSS                       D                \u2014                \u2014\
+  \                     2"
+- "EEEE 1001101 001 DDDDDDDDD 101100100                      \u2014                 \u2014           \
+  \     \u2014                     2"
 timing:
   cycles: 2
   type: fixed
-group: Register Indirection
-description: 'ALTI substitutes fields from Dest for one or more of the next instruction''s
-  pipelined Dest, Src, Result, Instr, FX, Result: The next instruction''s pipelined
-  field value values are substituted from the Dest template, and Dest is modified
-  per Src configuration (syntax 1), or the entire Dest opcode (instruction) is executed
-  in place of the next instruction (syntax 2).'
-category: Indirection Instruction - Substitute next instruction's field values from
-  template, per configuration.
+group: Indirection Instruction - Substitute next instruction's field values from template, per configuration.
+description: "ALTI substitutes fields from Dest for one or more of the next instruction's pipelined Dest,\
+  \ Src, Result, Instr, FX, Result: The next instruction's pipelined field value values are substituted\
+  \ from the Dest template, and Dest is modified per Src configuration (syntax 1), or the entire Dest\
+  \ opcode (instruction) is executed in place of the next instruction (syntax 2).\n\nALTI substitutes\
+  \ \uFB01elds from Dest for one or more of the next instruction's pipelined Dest, Src, Result, Instr,\
+  \ FX,\n\nand/or Cond values, and ALTI's Dest is then modi\uFB01ed per Src con\uFB01guration (syntax\
+  \ 1), or the entire Dest opcode\n\n(instruction) is executed in place of the next instruction (syntax\
+  \ 2).\n\nThe Dest register contains the ALTI template; a 32-bit value with the following format similar\
+  \ to an opcode:\n\nBits            31:28 (4 bits)          27:19 (9 bits)          18            17:9\
+  \ (9 bits)           8:0 (9 bits)\n\nField Description      Condition Field         Result Field   \
+  \  Indirect \"I\" Field   Dest \"D\" Field        Source \"S\" Field\n\nIn syntax 1, Src consists of\
+  \ the following six 3-bit \uFB01elds that describe \uFB01eld substitution and Dest modi\uFB01cation.\n\
+  \n%rrr_ddd_sss_RRR_DDD_SSS\n\n\u25CF   %rrr = Result \uFB01eld increment/decrement mask size\n\n\u25CF\
+  \   %ddd = Dest \uFB01eld increment/decrement mask size\n\n\u25CF   %sss = Src \uFB01eld increment/decrement\
+  \ mask size\n\n\u25CF   %RRR = Result/Instruction \uFB01eld control\n\n\u25CF   %DDD = Dest \uFB01eld\
+  \ control\n\n\u25CF   %SSS = Src \uFB01eld control\n\nField Increment/Decrement Mask Size\n\n%rrr\n\n\
+  %ddd Mask Selection\n\n%sss\n\n000   Unlimited Increment/Decrement of 9 bits (default, full 512-register\
+  \ Reg RAM span)\n\n001   Limit Increment/Decrement to 8 LSBs (256-register Reg RAM looped buffer)\n\n\
+  010   Limit Increment/Decrement to 7 LSBs (128-register Reg RAM looped buffer)\n\n011    Limit Increment/Decrement\
+  \ to 6 LSBs (64-register Reg RAM looped buffer)\n\n100    Limit Increment/Decrement to 5 LSBs (32-register\
+  \ Reg RAM looped buffer)\n\n101    Limit Increment/Decrement to 4 LSBs (16-register Reg RAM looped buffer)\n\
+  \n110    Limit Increment/Decrement to 3 LSBs (8-register Reg RAM looped buffer)\n\n111    Limit Increment/Decrement\
+  \ to 2 LSBs (4-register Reg RAM looped buffer)\n\nResult/Instruction Field Control\n\n%RRR Substitution\
+  \                                       Dest[27:19] Adjustment    Notes\n\n000    None             \
+  \                                None\n\n001    None                                             None\
+  \                      Cancel next instruction's Result write\n\n010    None                       \
+  \                      Decrements per %rrr\n\n011    None                                          \
+  \   Increments per %rrr\n\n100    Dest[27:19] \u21E8 next instruction's Result field    None\n\n101\
+  \    Dest[31:18] \u21E8 next instruction's [31:18]         None                      Cond+Instr+Fx substitution1,\
+  \ 2\n\n110    Dest[27:19] \u21E8 next instruction's Result field    Decrements per %rrr\n\n111    Dest[27:19]\
+  \ \u21E8 next instruction's Result field    Increments per %rrr\n\n1\n\nSubstitutes for next instruction's\
+  \ conditional execution mode, instruction class, and/or effects (WC/WZ, I, etc.)\n\n2\n\nCan use with\
+  \ %DDD=1xx and %SSS=1xx for full instruction substitution; i.e. execute Dest opcode in place of next\
+  \ instruction\n\nDest Field Control\n\n%DDD Substitution                                      Dest[17:9]\
+  \ Adjustment     Notes\n\n000    None                                            None\n\n001    None\
+  \                                            None                      Same as %000\n\n010    None \
+  \                                           Decrements per %ddd\n\n011    None                     \
+  \                       Increments per %ddd\n\n100    Dest[17:9] \u21E8 next instruction's Dest field\
+  \      None                      Execute Dest w/ RRR = %101, SSS = %1xx\n\n101    Dest[17:9] \u21E8\
+  \ next instruction's Dest field      None                      Execute Dest w/ RRR = %101, SSS = %1xx\n\
+  \n110    Dest[17:9] \u21E8 next instruction's Dest field      Decrements per %ddd       Execute Dest\
+  \ w/ RRR = %101, SSS = %1xx\n\n111    Dest[17:9] \u21E8 next instruction's Dest field      Increments\
+  \ per %ddd       Execute Dest w/ RRR = %101, SSS = %1xx\n\nSrc Field Control\n\n%SSS Substitution  \
+  \                                    Src[8:0] Adjustment       Notes\n\n000    None                \
+  \                            None\n\n001    None                                            None   \
+  \                   Same as %000\n\n010    None                                            Decrements\
+  \ per %sss\n\n011    None                                            Increments per %sss\n\n100    Dest[8:0]\
+  \ \u21E8 next instruction's Src field        None                      Execute Dest w/ RRR = %101, DDD\
+  \ = %1xx\n\n101    Dest[8:0] \u21E8 next instruction's Src field        None                      Execute\
+  \ Dest w/ RRR = %101, DDD = %1xx\n\n110    Dest[8:0] \u21E8 next instruction's Src field        Decrements\
+  \ per %sss       Execute Dest w/ RRR = %101, DDD = %1xx\n\n111    Dest[8:0] \u21E8 next instruction's\
+  \ Src field        Increments per %sss       Execute Dest w/ RRR = %101, DDD = %1xx\n\nIn syntax 2,\
+  \ Dest serves as the full opcode value\u2014 it is executed as-is in place of the next instruction and\
+  \ Dest\n\nremains unaltered afterward."
 flags_affected:
   C:
     when: D
 parameters:
-- Dest is the register whose value contains one or more of the next instruction's
-  field substitutes or an entire 32-bit opcode for full substitution.
-- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value
-  describes the substitutions and Dest modifications to perform.
+- "Dest is the register whose value contains one or more of the next instruction's \uFB01eld substitutes\
+  \ or an entire 32-bit opcode for full substitution."
+- "Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value describes the substitutions\
+  \ and Dest modi\uFB01cations to perform."
+- "%rrr = Result \uFB01eld increment/decrement mask size"
+- "%ddd = Dest \uFB01eld increment/decrement mask size"
+- "%sss = Src \uFB01eld increment/decrement mask size"
+- "%RRR = Result/Instruction \uFB01eld control"
+- "%DDD = Dest \uFB01eld control"
+- "%SSS = Src \uFB01eld control"
+- The instruction following ALTI is shielded from interrupt
+- "Field value modi\uFB01cation occurs in the instruction pipeline only; code is not altered, values do\
+  \ not persist"
+- "SETQ / SETQ2 does not affect ALTx instructions\u2014 the Q value passes through to the next instruction"
 related:
 - SETD
 - SETS
@@ -27,7 +88,7 @@ related:
 - ALTD
 - ALTS
 - ALTR
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_duii
@@ -37,3 +98,29 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 4
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Alter instruction
+category: "Indirection Instruction - Substitute next instruction's \uFB01eld values from template, per\
+  \ con\uFB01guration."
+result: "The next instruction's pipelined \uFB01eld value values are substituted from the Dest template,\
+  \ and Dest is"
+syntax_variants:
+- ALTI Dest, {#}Src
+- ALTI Dest
+- "ALTI substitutes \uFB01elds from Dest for one or more of the next instruction's pipelined Dest, Src,\
+  \ Result, Instr, FX,"
+- "and/or Cond values, and ALTI's Dest is then modi\uFB01ed per Src con\uFB01guration (syntax 1), or the\
+  \ entire Dest opcode"
+- 'The Dest register contains the ALTI template; a 32-bit value with the following format similar to an
+  opcode:'
+- "ALTI         ptrs,#%111_111                          'set next D and S \uFB01elds, increment ptrs[17:9]\
+  \ and ptrs[8:0]"
+usage_notes: "The instruction following ALTI is shielded from interrupt\nField value modi\uFB01cation\
+  \ occurs in the instruction pipeline only; code is not altered, values do not persist\nSETQ / SETQ2\
+  \ does not affect ALTx instructions\u2014 the Q value passes through to the next instruction"
+examples:
+- code: "ALTI         ptrs,#%111_111                          'set next D and S \uFB01elds, increment\
+    \ ptrs[17:9] and ptrs[8:0]\n     ADD          0,0                                     'add registers"
+- code: "ALTI         inst                                    'execute inst; same as ALTI inst, #%101_100_100\n\
+    \     NOP                                                  'NOP becomes inst"
+manual_extraction_date: '2025-01-19'

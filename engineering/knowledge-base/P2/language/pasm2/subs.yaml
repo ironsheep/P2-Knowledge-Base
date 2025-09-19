@@ -1,30 +1,34 @@
 instruction: SUBS
-syntax: SUBS    D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0001110 CZI DDDDDDDDD SSSSSSSSS
+syntax: SUBS Dest, {#}Src {WC|WZ|WCZ}
+encoding: EEEE 0001110 CZI DDDDDDDDD SSSSSSSSS                     D           sign of (D - S)       Result
+  = 0               2
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'SUBS subtracts the signed Src from the signed Dest and stores the result
-  into the Dest register. If Src is a 9-bit Result: Difference of signed Dest and
-  signed Src is stored in Dest and optionally the C and Z flags are updated to the
-  sign and zero status.'
-category: Math Instruction - Subtract one signed value from another.
+group: Math Instruction - Subtract one signed value from another.
+description: "SUBS subtracts the signed Src from the signed Dest and stores the result into the Dest register.\
+  \ If Src is a 9-bit Result: Difference of signed Dest and signed Src is stored in Dest and optionally\
+  \ the C and Z flags are updated to the sign and zero status.\n\nSUBS subtracts the signed Src from the\
+  \ signed Dest and stores the result into the Dest register. If Src is a 9-bit\n\nliteral, its value\
+  \ is interpreted as positive (0-511; it is not sign-extended) \u2014 use ##Value (or insert a prior\
+  \ AUGS\n\ninstruction) for a 32-bit signed value; negative or positive.\n\nIf the WC or WCZ effect is\
+  \ speci\uFB01ed, the C \uFB02ag is set (1) if the subtraction results in a signed under\uFB02ow (signed\n\
+  \nborrow), or is cleared (0) if no under\uFB02ow.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z\
+  \ \uFB02ag is set (1) if the result of Dest - Src is zero, or is cleared (0) if it is\n\nnon-zero.\n\
+  \nTo subtract signed, multi-long values, use SUB (not SUBS) followed possibly by SUBX, and \uFB01nally\
+  \ SUBSX as\n\ndescribed in Subtracting Two Multi-Long Values."
 flags_affected:
-  C:
-    formula: correct sign of (D - S)
+  Z: Result = 0
 parameters:
-- Dest is a register containing the value to subtract Src from, and is where the result
-  is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is subtracted
-  from Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Dest is a register containing the value to subtract Src from, and is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is subtracted from Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - SUB
 - SUBX
 - SUBSX
 - ADDS
-documentation_source: PASM2 Manual 2022/11/01
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds
@@ -34,3 +38,13 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Subtract signed
+category: Math Instruction - Subtract one signed value from another.
+result: "Difference of signed Dest and signed Src is stored in Dest and optionally the C and Z \uFB02\
+  ags are updated to"
+syntax_variants:
+- SUBS Dest, {#}Src {WC|WZ|WCZ}
+- SUBS subtracts the signed Src from the signed Dest and stores the result into the Dest register. If
+  Src is a 9-bit
+manual_extraction_date: '2025-01-19'

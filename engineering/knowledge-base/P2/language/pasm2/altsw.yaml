@@ -1,20 +1,58 @@
 instruction: ALTSW
-syntax: ALTSW   D,{#}S
-encoding: EEEE 1001011 101 DDDDDDDDD 000000000
+syntax: ALTSW Dest, {#}Src
+encoding:
+- EEEE 1001011 10I DDDDDDDDD SSSSSSSSS                     D 1
+- EEEE 0101000 CZI DDDDDDDDD SSSSSSSSS                  D          Parity of Result     Result = 0              2
+- EEEE 0101001 CZI DDDDDDDDD SSSSSSSSS                  D          Parity of Result     Result = 0              2
 timing:
   cycles: 2
   type: fixed
-group: Register Indirection
-description: 'ALTSW should be followed by SETWORD— it modifies the SETWORD instruction''s
-  Dest and Num values, enabling Result: The next instruction''s pipelined Dest and
-  Num fields are altered to be (Src + Dest[9:1]) & $1FF, or just Dest[9:1] for syntax
-  2, and Dest[0], respectively.'
-category: Indirection Instruction - Alter subsequent SETWORD instruction.
+group: Indirection Instruction - Alter subsequent SETWORD instruction.
+description: "ALTSW should be followed by SETWORD\u2014 it modifies the SETWORD instruction's Dest and\
+  \ Num values, enabling Result: The next instruction's pipelined Dest and Num fields are altered to be\
+  \ (Src + Dest[9:1]) & $1FF, or just Dest[9:1] for syntax 2, and Dest[0], respectively.\n\nALTSW should\
+  \ be followed by SETWORD\u2014 it modi\uFB01es the SETWORD instruction's Dest and Num values, enabling\n\
+  \ncode to iterate through multiple words of data across a range of Reg RAM. SETWORD's Dest value is\
+  \ changed to\n\n(Src + Dest[9:1]) & $1FF (for syntax 1), or to Dest[9:1] (for syntax 2), and its Num\
+  \ value is changed to Dest[0].\n\nDest[9:1] corresponds to the target long register's 9-bit address\
+  \ and Dest[0] is the word ID within it; values of 0\u20131\n\nidentify individual words, by position,\
+  \ in least-signi\uFB01cant word order. Iteratively executing ALTSW followed by\n\nSETWORD, and each\
+  \ time incrementing ALTSW's 10-bit Dest value by one, effectively writes a stream of word\n\nvalues\
+  \ to Reg RAM as if it were all made of word-sized registers.\n\nIn syntax 1, Src consists of two 9-bit\
+  \ \uFB01elds; a base address (Src[8:0]) and a signed auto-indexer (Src[17:9]).\n\n\u25CF   The base\
+  \ is the Reg RAM address where the series of words begins. ALTSW adds the long index\n\n(Dest[9:1])\
+  \ to the base (Src[8:0]) to locate the register holding the target word. The word ID (Dest[0])\n\nidenti\uFB01\
+  es the word's position within that long register.\n\n\u25CF   At the end of ALTSW execution, the optional\
+  \ auto-indexer value (usually 0, 1, or -1) is added to the 10-bit\n\nindex (Dest) for a future ALTSW+SETWORD\
+  \ iteration.\n\nIn syntax 2, Dest serves as the full word address\u2014 it's the same format as in syntax\
+  \ 1, but represents the target\n\nlong's absolute address and its word index instead of the long's relative\
+  \ index (to add to a base) and word index.\n\nAND or ANDN performs a bitwise AND of the value in Src\
+  \ (or !Src) into that of Dest.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1)\
+  \ if the result contains an odd number of high (1) bits, or is\n\ncleared (0) if it contains an even\
+  \ number of high bits.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the\
+  \ Dest AND Src (or Dest AND !Src) equals zero, or is\n\ncleared (0) if it is non-zero."
 parameters:
-- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value
-  contains a base long address (Src[8:0]; added to index (Dest[9:1]) for SETWORD)
-  and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
-documentation_source: PASM2 Manual 2022/11/01
+- Dest is the register whose 10-bit value is the index, or the full word address, for the SETWORD instruction
+  to operate on.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base
+  long address (Src[8:0]; added to index (Dest[9:1]) for SETWORD) and also an optional auto-indexer value
+  (Src[17:9]; added to Dest at end of execution).
+- "The base is the Reg RAM address where the series of words begins. ALTSW adds the long index (Dest[9:1])\
+  \ to the base (Src[8:0]) to locate the register holding the target word. The word ID (Dest[0]) identi\uFB01\
+  es the word's position within that long register."
+- At the end of ALTSW execution, the optional auto-indexer value (usually 0, 1, or -1) is added to the
+  10-bit index (Dest) for a future ALTSW+SETWORD iteration.
+- The instruction following ALTSW is shielded from interrupt
+- "ALTSW alters the next instruction regardless of its kind\u2014 the intention is for it to be a SETWORD"
+- "Field value modi\uFB01cation occurs in the instruction pipeline only; code is not altered, values do\
+  \ not persist"
+- "SETQ / SETQ2 does not affect ALTx instructions\u2014 the Q value passes through to the next instruction"
+- Dest is the register containing the value to bitwise AND with Src (or with !Src) and is the destination
+  in which to write the result.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value (or inverse value) will be
+  bitwise ANDed into Dest.
+- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
   name: operand_duiz
@@ -24,3 +62,33 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 5
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+brief_description: Alter set word
+category: Indirection Instruction - Alter subsequent SETWORD instruction.
+result: "Dest AND Src (or Dest AND !Src) is stored in Dest and \uFB02ags are optionally updated with parity\
+  \ and zero"
+syntax_variants:
+- ALTSW Dest, {#}Src
+- ALTSW Dest
+- "ALTSW should be followed by SETWORD\u2014 it modi\uFB01es the SETWORD instruction's Dest and Num values,\
+  \ enabling"
+- SETWORD, and each time incrementing ALTSW's 10-bit Dest value by one, effectively writes a stream of
+  word
+- index (Dest) for a future ALTSW+SETWORD iteration.
+flags_affected:
+  Z: Result = 0
+usage_notes: "The instruction following ALTSW is shielded from interrupt\nALTSW alters the next instruction\
+  \ regardless of its kind\u2014 the intention is for it to be a SETWORD\nField value modi\uFB01cation\
+  \ occurs in the instruction pipeline only; code is not altered, values do not persist\nSETQ / SETQ2\
+  \ does not affect ALTx instructions\u2014 the Q value passes through to the next instruction\nAND /\
+  \ ANDN\nAnd not\nBit Operation Instruction - Bitwise AND a value with another, or with the NOT of another.\n\
+  AND        Dest, {#}Src {WC|WZ|WCZ}\nANDN Dest, {#}Src {WC|WZ|WCZ}\nResult: Dest AND Src (or Dest AND\
+  \ !Src) is stored in Dest and \uFB02ags are optionally updated with parity and zero\nstatus.\nDest is\
+  \ the register containing the value to bitwise AND with Src (or with !Src) and is the destination in\n\
+  which to write the result.\nSrc is a register, 9-bit literal, or 32-bit augmented literal whose value\
+  \ (or inverse value) will be bitwise\nANDed into Dest.\nWC, WZ, or WCZ are optional effects to update\
+  \ \uFB02ags.\nCOND INSTR        FX     DEST          SRC           Write            C Flag         \
+  \   Z Flag             Clocks\nEEEE 0101000 CZI DDDDDDDDD SSSSSSSSS                  D          Parity\
+  \ of Result     Result = 0              2\nEEEE 0101001 CZI DDDDDDDDD SSSSSSSSS                  D \
+  \         Parity of Result     Result = 0              2"
+manual_extraction_date: '2025-01-19'

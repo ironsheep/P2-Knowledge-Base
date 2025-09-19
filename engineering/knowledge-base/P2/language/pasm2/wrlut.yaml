@@ -6,10 +6,8 @@ timing:
   type: fixed
 group: Lookup Table
 description: Write D to LUT address {#}S/PTRx.
-category: Lookup Table
-documentation_source: original
-documentation_level: minimal
-needs_documentation: true
+documentation_source: PASM2 Manual 2022-11-01
+documentation_level: enhanced
 compiler_operand_format:
   name: operand_lsp
   pattern: D/#,S/#/PTRA/PTRB
@@ -18,3 +16,6 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 16
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+syntax_variants:
+- WRLUT {#}D,{#}S/P
+last_updated: '2025-09-19T16:04:16.990804'
