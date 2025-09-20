@@ -67,18 +67,16 @@ jobs:
         
         # Read statistics from generated file
         if [ -f "releases/v${{ env.VERSION }}/statistics.json" ]; then
-          echo "STATS_JSON=$(cat releases/v${{ env.VERSION }}/statistics.json | tr -d '\n')" >> $GITHUB_ENV
-          
-          # Extract key statistics for use in release notes
-          PASM2_TOTAL=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['pasm2_total'])")
-          SPIN2_TOTAL=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['spin2_total'])")
-          TOTAL_ELEMENTS=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['total_elements'])")
-          PASM2_INSTRUCTIONS=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['pasm2_instructions'])")
-          PASM2_IDIOMS=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['pasm2_idioms'])")
-          PASM2_PATTERNS=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['pasm2_patterns'])")
-          SPIN2_ELEMENTS=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['spin2_elements'])")
-          SPIN2_IDIOMS=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['spin2_idioms'])")
-          SPIN2_PATTERNS=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['spin2_patterns'])")
+          # Extract key statistics directly from the file (avoiding shell escaping issues)
+          PASM2_TOTAL=$(python3 -c "import json; with open('releases/v${{ env.VERSION }}/statistics.json') as f: data = json.load(f); print(data.get('summary', {}).get('pasm2_total', 0))")
+          SPIN2_TOTAL=$(python3 -c "import json; with open('releases/v${{ env.VERSION }}/statistics.json') as f: data = json.load(f); print(data.get('summary', {}).get('spin2_total', 0))")
+          TOTAL_ELEMENTS=$(python3 -c "import json; with open('releases/v${{ env.VERSION }}/statistics.json') as f: data = json.load(f); print(data.get('summary', {}).get('total_elements', 0))")
+          PASM2_INSTRUCTIONS=$(python3 -c "import json; with open('releases/v${{ env.VERSION }}/statistics.json') as f: data = json.load(f); print(data.get('summary', {}).get('pasm2_instructions', 0))")
+          PASM2_IDIOMS=$(python3 -c "import json; with open('releases/v${{ env.VERSION }}/statistics.json') as f: data = json.load(f); print(data.get('summary', {}).get('pasm2_idioms', 0))")
+          PASM2_PATTERNS=$(python3 -c "import json; with open('releases/v${{ env.VERSION }}/statistics.json') as f: data = json.load(f); print(data.get('summary', {}).get('pasm2_patterns', 0))")
+          SPIN2_ELEMENTS=$(python3 -c "import json; with open('releases/v${{ env.VERSION }}/statistics.json') as f: data = json.load(f); print(data.get('summary', {}).get('spin2_elements', 0))")
+          SPIN2_IDIOMS=$(python3 -c "import json; with open('releases/v${{ env.VERSION }}/statistics.json') as f: data = json.load(f); print(data.get('summary', {}).get('spin2_idioms', 0))")
+          SPIN2_PATTERNS=$(python3 -c "import json; with open('releases/v${{ env.VERSION }}/statistics.json') as f: data = json.load(f); print(data.get('summary', {}).get('spin2_patterns', 0))")
           
           echo "PASM2_TOTAL=$PASM2_TOTAL" >> $GITHUB_ENV
           echo "SPIN2_TOTAL=$SPIN2_TOTAL" >> $GITHUB_ENV
@@ -89,6 +87,17 @@ jobs:
           echo "SPIN2_ELEMENTS=$SPIN2_ELEMENTS" >> $GITHUB_ENV
           echo "SPIN2_IDIOMS=$SPIN2_IDIOMS" >> $GITHUB_ENV
           echo "SPIN2_PATTERNS=$SPIN2_PATTERNS" >> $GITHUB_ENV
+        else
+          # Set default values if statistics file doesn't exist
+          echo "PASM2_TOTAL=0" >> $GITHUB_ENV
+          echo "SPIN2_TOTAL=0" >> $GITHUB_ENV
+          echo "TOTAL_ELEMENTS=0" >> $GITHUB_ENV
+          echo "PASM2_INSTRUCTIONS=0" >> $GITHUB_ENV
+          echo "PASM2_IDIOMS=0" >> $GITHUB_ENV
+          echo "PASM2_PATTERNS=0" >> $GITHUB_ENV
+          echo "SPIN2_ELEMENTS=0" >> $GITHUB_ENV
+          echo "SPIN2_IDIOMS=0" >> $GITHUB_ENV
+          echo "SPIN2_PATTERNS=0" >> $GITHUB_ENV
         fi
     
     - name: Generate changelog
