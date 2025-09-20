@@ -25,7 +25,24 @@ class CompleteKnowledgeBasePackager:
         # Create release directory
         self.release_path.mkdir(parents=True, exist_ok=True)
         
-        self.stats = {}
+        self.stats = {
+            "pasm2_instructions": 0,
+            "pasm2_idioms": 0,
+            "pasm2_patterns": 0,
+            "spin2_keywords": 0,
+            "spin2_operators": 0,
+            "spin2_methods": 0,
+            "spin2_registers": 0,
+            "spin2_assembly_directives": 0,
+            "spin2_debug_commands": 0,
+            "spin2_special_symbols": 0,
+            "spin2_system_variables": 0,
+            "spin2_idioms": 0,
+            "spin2_patterns": 0,
+            "architecture": 0,
+            "hardware": 0,
+            "code_examples": 0
+        }
     
     def load_yaml(self, file_path: Path) -> Dict:
         """Load and parse a YAML file."""
@@ -101,6 +118,93 @@ class CompleteKnowledgeBasePackager:
             "directory": str(category_path.relative_to(self.kb_path)),
             "entries": entries
         }
+    
+    def count_detailed_statistics(self):
+        """Count detailed statistics for all categories including idioms and patterns."""
+        # PASM2 statistics
+        pasm2_path = self.kb_path / "language/pasm2"
+        if pasm2_path.exists():
+            # Count main instruction files
+            self.stats["pasm2_instructions"] = len(list(pasm2_path.glob("*.yaml")))
+            
+            # Count idioms
+            idioms_path = pasm2_path / "idioms"
+            if idioms_path.exists():
+                self.stats["pasm2_idioms"] = len(list(idioms_path.glob("*.yaml")))
+            
+            # Count patterns (recursive)
+            patterns_path = pasm2_path / "patterns"
+            if patterns_path.exists():
+                self.stats["pasm2_patterns"] = len(list(patterns_path.rglob("*.yaml")))
+        
+        # SPIN2 statistics
+        spin2_path = self.kb_path / "language/spin2"
+        if spin2_path.exists():
+            # Count each category
+            categories = [
+                "keywords", "operators", "methods", "registers",
+                "assembly-directives", "debug-commands", 
+                "special-symbols", "system-variables"
+            ]
+            
+            for category in categories:
+                cat_path = spin2_path / category
+                if cat_path.exists():
+                    stat_key = f"spin2_{category.replace('-', '_')}"
+                    self.stats[stat_key] = len(list(cat_path.glob("*.yaml")))
+            
+            # Count idioms
+            idioms_path = spin2_path / "idioms"
+            if idioms_path.exists():
+                self.stats["spin2_idioms"] = len(list(idioms_path.glob("*.yaml")))
+            
+            # Count patterns (recursive)
+            patterns_path = spin2_path / "patterns"
+            if patterns_path.exists():
+                self.stats["spin2_patterns"] = len(list(patterns_path.rglob("*.yaml")))
+        
+        # Other categories
+        for category in ["architecture", "hardware", "code-examples"]:
+            cat_path = self.kb_path / category
+            if cat_path.exists():
+                self.stats[category.replace("-", "_")] = len(list(cat_path.rglob("*.yaml")))
+    
+    def save_statistics(self):
+        """Save statistics to JSON file for GitHub Actions to read."""
+        stats_file = self.release_path / "statistics.json"
+        
+        # Calculate totals
+        total_pasm2 = (self.stats.get("pasm2_instructions", 0) + 
+                      self.stats.get("pasm2_idioms", 0) + 
+                      self.stats.get("pasm2_patterns", 0))
+        
+        total_spin2 = sum(v for k, v in self.stats.items() 
+                         if k.startswith("spin2_") and isinstance(v, int))
+        
+        total_all = sum(v for v in self.stats.values() if isinstance(v, int))
+        
+        stats_output = {
+            "version": self.version,
+            "generated": self.timestamp,
+            "detailed": self.stats,
+            "summary": {
+                "total_elements": total_all,
+                "pasm2_total": total_pasm2,
+                "spin2_total": total_spin2,
+                "pasm2_instructions": self.stats.get("pasm2_instructions", 0),
+                "pasm2_idioms": self.stats.get("pasm2_idioms", 0),
+                "pasm2_patterns": self.stats.get("pasm2_patterns", 0),
+                "spin2_elements": total_spin2 - self.stats.get("spin2_idioms", 0) - self.stats.get("spin2_patterns", 0),
+                "spin2_idioms": self.stats.get("spin2_idioms", 0),
+                "spin2_patterns": self.stats.get("spin2_patterns", 0)
+            }
+        }
+        
+        with open(stats_file, 'w') as f:
+            json.dump(stats_output, f, indent=2)
+        
+        print(f"\n📊 Saved statistics to {stats_file.name}")
+        return stats_output
     
     def create_complete_root_manifest(self) -> Dict:
         """Create the complete root manifest for the entire knowledge base."""
@@ -596,6 +700,10 @@ https://github.com/ironsheep/P2-Knowledge-Base
         print(f"\n🚀 Packaging P2 Knowledge Base v{self.version}")
         print("=" * 60)
         
+        # Count detailed statistics first
+        print("\n📊 Counting statistics...")
+        self.count_detailed_statistics()
+        
         # Package both artifacts
         json_package = self.package_json_artifact()
         kb_package = self.package_complete_kb_artifact()
@@ -603,11 +711,15 @@ https://github.com/ironsheep/P2-Knowledge-Base
         # Create checksums
         self.create_checksums([json_package, kb_package])
         
+        # Save statistics to JSON file for GitHub Actions
+        stats_summary = self.save_statistics()
+        
         print("\n✅ Packaging complete!")
         print(f"📁 Release directory: {self.release_path}")
         print("\n📦 Release Artifacts:")
         print(f"   1. {json_package.name} - Single JSON reference")
         print(f"   2. {kb_package.name} - Complete knowledge base")
+        print(f"   3. statistics.json - Element counts for release notes")
         
         return self.stats
 

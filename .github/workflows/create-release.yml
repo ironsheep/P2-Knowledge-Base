@@ -64,6 +64,32 @@ jobs:
       run: |
         echo "📦 Creating release packages..."
         python3 engineering/tools/package-complete-knowledge-base.py ${{ env.VERSION }}
+        
+        # Read statistics from generated file
+        if [ -f "releases/v${{ env.VERSION }}/statistics.json" ]; then
+          echo "STATS_JSON=$(cat releases/v${{ env.VERSION }}/statistics.json | tr -d '\n')" >> $GITHUB_ENV
+          
+          # Extract key statistics for use in release notes
+          PASM2_TOTAL=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['pasm2_total'])")
+          SPIN2_TOTAL=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['spin2_total'])")
+          TOTAL_ELEMENTS=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['total_elements'])")
+          PASM2_INSTRUCTIONS=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['pasm2_instructions'])")
+          PASM2_IDIOMS=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['pasm2_idioms'])")
+          PASM2_PATTERNS=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['pasm2_patterns'])")
+          SPIN2_ELEMENTS=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['spin2_elements'])")
+          SPIN2_IDIOMS=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['spin2_idioms'])")
+          SPIN2_PATTERNS=$(python3 -c "import json; data = json.loads('$STATS_JSON'); print(data['summary']['spin2_patterns'])")
+          
+          echo "PASM2_TOTAL=$PASM2_TOTAL" >> $GITHUB_ENV
+          echo "SPIN2_TOTAL=$SPIN2_TOTAL" >> $GITHUB_ENV
+          echo "TOTAL_ELEMENTS=$TOTAL_ELEMENTS" >> $GITHUB_ENV
+          echo "PASM2_INSTRUCTIONS=$PASM2_INSTRUCTIONS" >> $GITHUB_ENV
+          echo "PASM2_IDIOMS=$PASM2_IDIOMS" >> $GITHUB_ENV
+          echo "PASM2_PATTERNS=$PASM2_PATTERNS" >> $GITHUB_ENV
+          echo "SPIN2_ELEMENTS=$SPIN2_ELEMENTS" >> $GITHUB_ENV
+          echo "SPIN2_IDIOMS=$SPIN2_IDIOMS" >> $GITHUB_ENV
+          echo "SPIN2_PATTERNS=$SPIN2_PATTERNS" >> $GITHUB_ENV
+        fi
     
     - name: Generate changelog
       id: changelog
@@ -92,12 +118,17 @@ jobs:
         - **Use Case**: Systems wanting modular access to individual elements
         
         ### Statistics
-        - PASM2 Instructions: 352
-        - SPIN2 Elements: 268
-        - Total Elements: 620+
-        - Architecture Components: Multiple
-        - Hardware Specifications: Multiple
-        - Code Examples: Multiple
+        - **Total Elements**: ${{ env.TOTAL_ELEMENTS }}
+        
+        #### PASM2 (${{ env.PASM2_TOTAL }} total)
+        - Instructions: ${{ env.PASM2_INSTRUCTIONS }}
+        - Idioms: ${{ env.PASM2_IDIOMS }}
+        - Patterns: ${{ env.PASM2_PATTERNS }}
+        
+        #### SPIN2 (${{ env.SPIN2_TOTAL }} total)
+        - Language Elements: ${{ env.SPIN2_ELEMENTS }}
+        - Idioms: ${{ env.SPIN2_IDIOMS }}
+        - Patterns: ${{ env.SPIN2_PATTERNS }}
         
         ### Installation
         
