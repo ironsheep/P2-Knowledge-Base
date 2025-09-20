@@ -15,7 +15,7 @@ from datetime import datetime
 from typing import Dict, List, Any
 
 class P2ReleasePackager:
-    def __init__(self, version: str = "1.1.0"):
+    def __init__(self, version: str = "1.3.0"):
         self.version = version
         self.timestamp = datetime.now().isoformat()
         self.base_path = Path.cwd()
@@ -548,7 +548,7 @@ https://github.com/ironsheep/P2-Knowledge-Base
 if __name__ == "__main__":
     import sys
     
-    version = sys.argv[1] if len(sys.argv) > 1 else "1.1.0"
+    version = sys.argv[1] if len(sys.argv) > 1 else "1.3.0"
     
     packager = P2ReleasePackager(version)
     stats = packager.package()

@@ -9,11 +9,12 @@ ai-reference/
 ├── README.md          # This file
 └── versions/          # Released versions
     ├── v1.0.0/       # Initial release
-    ├── v1.1.0/       # Current release
-    └── latest/       # Symlink to current release
+    ├── v1.1.0/       # Previous release
+    ├── v1.3.0/       # Current release (with idioms & patterns)
+    └── latest/       # Symlink to current release (v1.3.0)
 ```
 
-## Current Release: v1.1.0
+## Current Release: v1.3.0
 
 ### What's Available
 
@@ -28,7 +29,7 @@ Each version directory contains:
 import json
 
 # Load the latest version
-with open('versions/latest/p2-reference-v1.1.0.json') as f:
+with open('versions/latest/p2-reference-v1.3.0.json') as f:
     p2_ref = json.load(f)
 
 # Access PASM2 instructions

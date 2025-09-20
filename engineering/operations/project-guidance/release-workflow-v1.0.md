@@ -83,16 +83,64 @@
 - Real screenshots replace placeholders when available
 - Build package works with either placeholders or real images
 
+## Release Preparation Steps (LOCAL)
+
+**CRITICAL: These are the ONLY local steps for release preparation:**
+
+1. **Update Master JSON** (REQUIRED)
+   ```bash
+   python3 engineering/tools/update-p2-reference-complete.py [version]
+   # Example: python3 engineering/tools/update-p2-reference-complete.py 1.3.0
+   ```
+
+2. **Update Latest Symlink** (REQUIRED)
+   ```bash
+   cd deliverables/ai-reference/versions
+   rm latest
+   ln -s v[version] latest
+   # Example: ln -s v1.3.0 latest
+   ```
+
+3. **Update README** (REQUIRED)
+   - Edit `deliverables/ai-reference/README.md`
+   - Update "Current Release" version number
+   - Update example code to reference new version
+   - Add new version to directory structure listing
+
+4. **Verify Version Metadata** (REQUIRED)
+   ```bash
+   # Check JSON has proper version in metadata
+   head -30 deliverables/ai-reference/versions/v[version]/p2-reference-v[version].json | grep version
+   ```
+
+5. **Commit Changes** (REQUIRED)
+   - Commit the new JSON file
+   - Commit the updated symlink
+   - Commit the updated README
+
+**DO NOT DO THESE LOCALLY:**
+- ❌ Do NOT run package-release-artifacts.py
+- ❌ Do NOT create tar.gz files
+- ❌ Do NOT generate checksums
+- GitHub Actions handles ALL packaging after commit
+
 ## Automation Features
+
+**IMPORTANT NOTE**: DO NOT run the package-release-artifacts.py script locally!
+- The tar.gz packaging and checksum generation is handled by GitHub Actions workflow
+- Only generate the master JSON and prepare content - GitHub workflow does the rest
+- Running packaging locally interferes with the automated release process
 
 **Zero-Oversight Protection**:
 ```bash
-./tools/build-release.sh v1.0
-# - Validates all manuals present
-# - Confirms all images available (or placeholders)
-# - Creates complete build packages
-# - Generates GitHub release with all assets
-# - Fails fast if anything missing
+# NOTE: This is handled by GitHub Actions - DO NOT RUN LOCALLY
+# ./tools/build-release.sh v1.0
+# The GitHub workflow will:
+# - Validate all manuals present
+# - Confirm all images available (or placeholders)
+# - Create complete build packages
+# - Generate GitHub release with all assets
+# - Fail fast if anything missing
 ```
 
 **Content Quality Assurance**:
