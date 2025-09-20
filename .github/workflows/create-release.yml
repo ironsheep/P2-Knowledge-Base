@@ -65,44 +65,21 @@ jobs:
         echo "📦 Creating release packages..."
         python3 engineering/tools/package-complete-knowledge-base.py ${{ env.VERSION }}
         
-        # Read statistics from generated file
+        # Read statistics from generated file using jq (more robust)
         if [ -f "releases/v${{ env.VERSION }}/statistics.json" ]; then
-          # Extract key statistics directly from the file (avoiding shell escaping issues)
-          # Create a simple Python script to extract all values at once
-          python3 << EOF > /tmp/stats.env
-import json
-import os
-
-try:
-    with open('releases/v${{ env.VERSION }}/statistics.json') as f:
-        data = json.load(f)
-        summary = data.get('summary', {})
-        
-    # Write all values as environment variable exports
-    print(f"export PASM2_TOTAL={summary.get('pasm2_total', 0)}")
-    print(f"export SPIN2_TOTAL={summary.get('spin2_total', 0)}")
-    print(f"export TOTAL_ELEMENTS={summary.get('total_elements', 0)}")
-    print(f"export PASM2_INSTRUCTIONS={summary.get('pasm2_instructions', 0)}")
-    print(f"export PASM2_IDIOMS={summary.get('pasm2_idioms', 0)}")
-    print(f"export PASM2_PATTERNS={summary.get('pasm2_patterns', 0)}")
-    print(f"export SPIN2_ELEMENTS={summary.get('spin2_elements', 0)}")
-    print(f"export SPIN2_IDIOMS={summary.get('spin2_idioms', 0)}")
-    print(f"export SPIN2_PATTERNS={summary.get('spin2_patterns', 0)}")
-except Exception as e:
-    # Default values on error
-    print("export PASM2_TOTAL=0")
-    print("export SPIN2_TOTAL=0")
-    print("export TOTAL_ELEMENTS=0")
-    print("export PASM2_INSTRUCTIONS=0")
-    print("export PASM2_IDIOMS=0")
-    print("export PASM2_PATTERNS=0")
-    print("export SPIN2_ELEMENTS=0")
-    print("export SPIN2_IDIOMS=0")
-    print("export SPIN2_PATTERNS=0")
-EOF
+          # Use jq to extract values safely (jq handles JSON properly)
+          STATS_FILE="releases/v${{ env.VERSION }}/statistics.json"
           
-          # Source the environment variables
-          source /tmp/stats.env
+          # Extract values using Python one-liner (simpler approach)
+          PASM2_TOTAL=$(python3 -c "import json; print(json.load(open('$STATS_FILE')).get('summary', {}).get('pasm2_total', 0))" 2>/dev/null || echo "0")
+          SPIN2_TOTAL=$(python3 -c "import json; print(json.load(open('$STATS_FILE')).get('summary', {}).get('spin2_total', 0))" 2>/dev/null || echo "0")
+          TOTAL_ELEMENTS=$(python3 -c "import json; print(json.load(open('$STATS_FILE')).get('summary', {}).get('total_elements', 0))" 2>/dev/null || echo "0")
+          PASM2_INSTRUCTIONS=$(python3 -c "import json; print(json.load(open('$STATS_FILE')).get('summary', {}).get('pasm2_instructions', 0))" 2>/dev/null || echo "0")
+          PASM2_IDIOMS=$(python3 -c "import json; print(json.load(open('$STATS_FILE')).get('summary', {}).get('pasm2_idioms', 0))" 2>/dev/null || echo "0")
+          PASM2_PATTERNS=$(python3 -c "import json; print(json.load(open('$STATS_FILE')).get('summary', {}).get('pasm2_patterns', 0))" 2>/dev/null || echo "0")
+          SPIN2_ELEMENTS=$(python3 -c "import json; print(json.load(open('$STATS_FILE')).get('summary', {}).get('spin2_elements', 0))" 2>/dev/null || echo "0")
+          SPIN2_IDIOMS=$(python3 -c "import json; print(json.load(open('$STATS_FILE')).get('summary', {}).get('spin2_idioms', 0))" 2>/dev/null || echo "0")
+          SPIN2_PATTERNS=$(python3 -c "import json; print(json.load(open('$STATS_FILE')).get('summary', {}).get('spin2_patterns', 0))" 2>/dev/null || echo "0")
           
           echo "PASM2_TOTAL=$PASM2_TOTAL" >> $GITHUB_ENV
           echo "SPIN2_TOTAL=$SPIN2_TOTAL" >> $GITHUB_ENV
@@ -168,18 +145,18 @@ EOF
         ### Installation
         
         #### JSON Package
-        ```bash
+        \`\`\`bash
         tar -xzf p2-reference-v${{ env.VERSION }}.tar.gz
         cd p2-reference-v${{ env.VERSION }}
         # Use p2-reference-v${{ env.VERSION }}.json
-        ```
+        \`\`\`
         
         #### Complete Knowledge Base
-        ```bash
+        \`\`\`bash
         tar -xzf p2-complete-kb-v${{ env.VERSION }}.tar.gz
         cd p2-complete-kb-v${{ env.VERSION }}
         # Start with MANIFEST.json
-        ```
+        \`\`\`
         
         ### Changes Since Last Release
         See full changelog in package or [compare versions](https://github.com/${{ github.repository }}/compare/v${{ env.PREVIOUS_VERSION }}...v${{ env.VERSION }})
