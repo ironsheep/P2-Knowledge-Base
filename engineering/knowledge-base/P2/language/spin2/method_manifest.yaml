@@ -1,0 +1,449 @@
+manifest_type: spin2_language_manifest
+version: 2.1.0
+description: P2 Spin2 language complete manifest - fully linked
+total_components: 342
+language_maps:
+  description: Language overview and schema files
+  files:
+  - spin2-language-complete-map.yaml
+  - spin2-language-schema.yaml
+language_components:
+  methods:
+    description: Built-in Spin2 methods
+    path: methods/
+    count: 87
+    files:
+    - akpin.yaml
+    - byte.yaml
+    - bytecomp.yaml
+    - bytefill.yaml
+    - bytemove.yaml
+    - byteswap.yaml
+    - call.yaml
+    - clkset.yaml
+    - cogatn.yaml
+    - cogchk.yaml
+    - cogid.yaml
+    - coginit.yaml
+    - cogspin.yaml
+    - cogstop.yaml
+    - getcrc.yaml
+    - getct.yaml
+    - getms.yaml
+    - getregs.yaml
+    - getrnd.yaml
+    - getsec.yaml
+    - hubset.yaml
+    - lockchk.yaml
+    - locknew.yaml
+    - lockrel.yaml
+    - lockret.yaml
+    - locktry.yaml
+    - long.yaml
+    - longcomp.yaml
+    - longfill.yaml
+    - longmove.yaml
+    - longswap.yaml
+    - lookdown.yaml
+    - lookdownz.yaml
+    - lookup.yaml
+    - lookupz.yaml
+    - lstring.yaml
+    - muldiv64.yaml
+    - nan.yaml
+    - pinclear.yaml
+    - pinfloat.yaml
+    - pinhigh.yaml
+    - pinlow.yaml
+    - pinread.yaml
+    - pinstart.yaml
+    - pintoggle.yaml
+    - pinwrite.yaml
+    - pollatn.yaml
+    - pollct.yaml
+    - polxy.yaml
+    - qcos.yaml
+    - qexp.yaml
+    - qlog.yaml
+    - qsin.yaml
+    - rdpin.yaml
+    - recv.yaml
+    - regexec.yaml
+    - regload.yaml
+    - rotxy.yaml
+    - rqpin.yaml
+    - send.yaml
+    - setregs.yaml
+    - sizeof.yaml
+    - strcomp.yaml
+    - strcopy.yaml
+    - string.yaml
+    - strsize.yaml
+    - taskchk.yaml
+    - taskhalt.yaml
+    - taskid.yaml
+    - tasknext.yaml
+    - taskresume.yaml
+    - taskspin.yaml
+    - taskstop.yaml
+    - taskwait.yaml
+    - waitatn.yaml
+    - waitct.yaml
+    - waitms.yaml
+    - waitus.yaml
+    - word.yaml
+    - wordcomp.yaml
+    - wordfill.yaml
+    - wordmove.yaml
+    - wordswap.yaml
+    - wrpin.yaml
+    - wxpin.yaml
+    - wypin.yaml
+    - xypol.yaml
+  keywords:
+    description: Spin2 language keywords
+    path: keywords/
+    count: 36
+    files:
+    - ABORT.yaml
+    - BYTE.yaml
+    - BYTEFIT.yaml
+    - CASE.yaml
+    - CASE_FAST.yaml
+    - CON.yaml
+    - DAT.yaml
+    - ELSE.yaml
+    - ELSEIF.yaml
+    - ELSEIFNOT.yaml
+    - FILE.yaml
+    - FROM.yaml
+    - IF.yaml
+    - IFNOT.yaml
+    - LONG.yaml
+    - LOOKDOWN.yaml
+    - LOOKDOWNZ.yaml
+    - LOOKUP.yaml
+    - LOOKUPZ.yaml
+    - NEXT.yaml
+    - OBJ.yaml
+    - OTHER.yaml
+    - PRI.yaml
+    - PUB.yaml
+    - QUIT.yaml
+    - REPEAT.yaml
+    - RETURN.yaml
+    - STEP.yaml
+    - STRING.yaml
+    - TO.yaml
+    - UNTIL.yaml
+    - VAR.yaml
+    - WHILE.yaml
+    - WITH.yaml
+    - WORD.yaml
+    - WORDFIT.yaml
+  operators:
+    description: Spin2 operators
+    path: operators/
+    count: 74
+    files:
+    - modulo_add.yaml
+    - op_ABS.yaml
+    - op_ADDBITS.yaml
+    - op_ADDPINS.yaml
+    - op_BMASK.yaml
+    - op_DECOD.yaml
+    - op_ENCOD.yaml
+    - op_FABS.yaml
+    - op_FRAC.yaml
+    - op_FSQRT.yaml
+    - op_ONES.yaml
+    - op_QEXP.yaml
+    - op_QLOG.yaml
+    - op_REV.yaml
+    - op_ROL.yaml
+    - op_ROR.yaml
+    - op_SAR.yaml
+    - op_SCA.yaml
+    - op_SCAS.yaml
+    - op_SIGNX.yaml
+    - op_SQRT.yaml
+    - op_ZEROX.yaml
+    - op_add.yaml
+    - op_adddiv.yaml
+    - op_adddot.yaml
+    - op_addgt.yaml
+    - op_addgteq.yaml
+    - op_addlt.yaml
+    - op_addlteq.yaml
+    - op_addlteqgt.yaml
+    - op_addmodulo.yaml
+    - op_and.yaml
+    - op_andand.yaml
+    - op_assign.yaml
+    - op_colon.yaml
+    - op_dec.yaml
+    - op_div.yaml
+    - op_divdiv.yaml
+    - op_divdot.yaml
+    - op_eqeq.yaml
+    - op_eqeqdot.yaml
+    - op_eqeqeq.yaml
+    - op_gt.yaml
+    - op_gtdot.yaml
+    - op_gteq.yaml
+    - op_gteqdot.yaml
+    - op_inc.yaml
+    - op_line_continuation.yaml
+    - op_lt.yaml
+    - op_ltdot.yaml
+    - op_lteq.yaml
+    - op_lteqdot.yaml
+    - op_lteqgt.yaml
+    - op_ltgt.yaml
+    - op_ltgtdot.yaml
+    - op_ltshr.yaml
+    - op_max.yaml
+    - op_min.yaml
+    - op_mul.yaml
+    - op_muldot.yaml
+    - op_not.yaml
+    - op_notandand.yaml
+    - op_or.yaml
+    - op_oror.yaml
+    - op_question.yaml
+    - op_rand.yaml
+    - op_shl.yaml
+    - op_shr.yaml
+    - op_sub.yaml
+    - op_subdot.yaml
+    - op_swap.yaml
+    - op_ternary.yaml
+    - op_xor.yaml
+    - op_xorxor.yaml
+  registers:
+    description: Spin2 accessible registers
+    path: registers/
+    count: 25
+    files:
+    - dira.yaml
+    - dirb.yaml
+    - ijmp1.yaml
+    - ijmp2.yaml
+    - ijmp3.yaml
+    - ina.yaml
+    - inb.yaml
+    - iret1.yaml
+    - iret2.yaml
+    - iret3.yaml
+    - outa.yaml
+    - outb.yaml
+    - pa.yaml
+    - pb.yaml
+    - pr0.yaml
+    - pr1.yaml
+    - pr2.yaml
+    - pr3.yaml
+    - pr4.yaml
+    - pr5.yaml
+    - pr6.yaml
+    - pr7.yaml
+    - ptra.yaml
+    - ptrb.yaml
+    - taskhlt.yaml
+  special_symbols:
+    description: Special symbols and directives
+    path: special-symbols/
+    count: 12
+    files:
+    - ..yaml
+    - ^@.yaml
+    - '`.yaml'
+    - at.yaml
+    - dollar.yaml
+    - double_at.yaml
+    - double_dollar.yaml
+    - double_dot.yaml
+    - percent.yaml
+    - underscore.yaml
+    - ~.yaml
+    - ~~.yaml
+  debug_commands:
+    description: Debug system commands
+    path: debug-commands/
+    count: 23
+    files:
+    - bool.yaml
+    - debug.yaml
+    - dly.yaml
+    - lstr.yaml
+    - pc_key.yaml
+    - pc_mouse.yaml
+    - sdec.yaml
+    - sdec_byte.yaml
+    - sdec_long.yaml
+    - sdec_word.yaml
+    - ubin.yaml
+    - ubin_byte.yaml
+    - ubin_long.yaml
+    - ubin_word.yaml
+    - udec.yaml
+    - udec_byte.yaml
+    - udec_long.yaml
+    - udec_word.yaml
+    - uhex.yaml
+    - uhex_byte.yaml
+    - uhex_long.yaml
+    - uhex_word.yaml
+    - zstr.yaml
+  debug_displays:
+    description: Debug display modes
+    path: debug-displays/
+    count: 8
+    files:
+    - bitmap.yaml
+    - fft.yaml
+    - logic.yaml
+    - midi.yaml
+    - plot.yaml
+    - scope.yaml
+    - spectro.yaml
+    - term.yaml
+  assembly_directives:
+    description: Inline assembly directives
+    path: assembly-directives/
+    count: 12
+    files:
+    - alignl.yaml
+    - alignw.yaml
+    - byte.yaml
+    - ditto.yaml
+    - file.yaml
+    - fit.yaml
+    - long.yaml
+    - org.yaml
+    - orgf.yaml
+    - orgh.yaml
+    - res.yaml
+    - word.yaml
+  system_variables:
+    description: System variables
+    path: system-variables/
+    count: 3
+    files:
+    - clkfreq.yaml
+    - clkmode.yaml
+    - varbase.yaml
+  constants:
+    description: Built-in constants
+    path: constants/
+    count: 2
+    files:
+    - newtask.yaml
+    - thistask.yaml
+  constructs:
+    description: Language constructs
+    path: constructs/
+    count: 6
+    files:
+    - blocks.yaml
+    - case.yaml
+    - if_elseif_else.yaml
+    - inline_pasm.yaml
+    - method_definition.yaml
+    - repeat.yaml
+  concepts:
+    description: Language concepts
+    path: concepts/
+    count: 1
+    files:
+    - inline_pasm2.yaml
+  idioms:
+    description: Common Spin2 idioms
+    path: idioms/
+    count: 6
+    files:
+    - bit-manipulation.yaml
+    - cog-operations.yaml
+    - loop-patterns.yaml
+    - memory-access.yaml
+    - pin-operations.yaml
+    - timing-delays.yaml
+  integration:
+    description: Spin2/PASM2 integration
+    path: integration/
+    count: 1
+    files:
+    - spin2-pasm2-integration.yaml
+  symbols:
+    description: Symbol tables and definitions
+    path: symbols/
+    count: 1
+    files:
+    - spin2-builtin-symbols-complete.yaml
+  statements:
+    description: Statement types
+    path: statements/
+    count: 1
+    files:
+    - debug.yaml
+pattern_components:
+  patterns_index: patterns/pattern-index.yaml
+  structural_patterns:
+    description: Object structure patterns
+    path: patterns/structural/
+    count: 6
+    files:
+    - few_objects.yaml
+    - framework_pattern.yaml
+    - no_objects.yaml
+    - no_objects_minimal.yaml
+    - several_objects.yaml
+    - single_object.yaml
+  implementation_patterns:
+    description: Implementation patterns
+    path: patterns/implementation/
+    count: 15
+    files:
+    - spin2_buffer_management.yaml
+    - spin2_cog_management.yaml
+    - spin2_diagnostic_output.yaml
+    - spin2_error_handling.yaml
+    - spin2_event_dispatcher.yaml
+    - spin2_layered_architecture.yaml
+    - spin2_mailbox_communication.yaml
+    - spin2_memory_allocation.yaml
+    - spin2_pin_control.yaml
+    - spin2_plugin_system.yaml
+    - spin2_protocol_implementation.yaml
+    - spin2_resource_pool.yaml
+    - spin2_shared_memory.yaml
+    - spin2_state_machine.yaml
+    - spin2_timing_control.yaml
+  application_patterns:
+    description: Application patterns
+    path: patterns/applications/
+    count: 23
+    files:
+    - animation_engine.yaml
+    - array_architecture.yaml
+    - audio_processor.yaml
+    - communication_handler.yaml
+    - configuration_manager.yaml
+    - data_logger.yaml
+    - debug_enabled.yaml
+    - display_driver.yaml
+    - dual_communication.yaml
+    - hardware_specific_app.yaml
+    - iot_device.yaml
+    - monitoring_device.yaml
+    - motor_controller.yaml
+    - multi_display_system.yaml
+    - multi_instance_coordination.yaml
+    - multi_motor_system.yaml
+    - multimedia_device.yaml
+    - robotics.yaml
+    - sensor_fusion.yaml
+    - sensor_reader.yaml
+    - single_communication.yaml
+    - test_harness.yaml
+    - utility_library.yaml

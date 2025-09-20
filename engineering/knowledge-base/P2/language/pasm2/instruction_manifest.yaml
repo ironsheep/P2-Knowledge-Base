@@ -1,0 +1,507 @@
+manifest_type: instruction_index
+version: 2.1.0
+description: P2 PASM2 instruction set manifest - fully linked
+total_instructions: 358
+total_components: 389
+instruction_groups:
+  group_A:
+    description: Instructions starting with 'A'
+    count: 27
+    instructions:
+    - abs.yaml
+    - add.yaml
+    - addct1.yaml
+    - addct2.yaml
+    - addct3.yaml
+    - addpix.yaml
+    - adds.yaml
+    - addsx.yaml
+    - addx.yaml
+    - akpin.yaml
+    - allowi.yaml
+    - altb.yaml
+    - altd.yaml
+    - altgb.yaml
+    - altgn.yaml
+    - altgw.yaml
+    - alti.yaml
+    - altr.yaml
+    - alts.yaml
+    - altsb.yaml
+    - altsn.yaml
+    - altsw.yaml
+    - and.yaml
+    - andn.yaml
+    - asmclk.yaml
+    - augd.yaml
+    - augs.yaml
+  group_B:
+    description: Instructions starting with 'B'
+    count: 11
+    instructions:
+    - bitc.yaml
+    - bith.yaml
+    - bitl.yaml
+    - bitnc.yaml
+    - bitnot.yaml
+    - bitnz.yaml
+    - bitrnd.yaml
+    - bitz.yaml
+    - blnpix.yaml
+    - bmask.yaml
+    - brk.yaml
+  group_C:
+    description: Instructions starting with 'C'
+    count: 20
+    instructions:
+    - call.yaml
+    - calla.yaml
+    - callb.yaml
+    - calld.yaml
+    - callpa.yaml
+    - callpb.yaml
+    - cmp.yaml
+    - cmpm.yaml
+    - cmpr.yaml
+    - cmps.yaml
+    - cmpsub.yaml
+    - cmpsx.yaml
+    - cmpx.yaml
+    - cogatn.yaml
+    - cogbrk.yaml
+    - cogid.yaml
+    - coginit.yaml
+    - cogstop.yaml
+    - crcbit.yaml
+    - crcnib.yaml
+  group_D:
+    description: Instructions starting with 'D'
+    count: 23
+    instructions:
+    - debug.yaml
+    - decmod.yaml
+    - decod.yaml
+    - dirc.yaml
+    - dirh.yaml
+    - dirl.yaml
+    - dirnc.yaml
+    - dirnot.yaml
+    - dirnz.yaml
+    - dirrnd.yaml
+    - dirz.yaml
+    - djf.yaml
+    - djnf.yaml
+    - djnz.yaml
+    - djz.yaml
+    - drvc.yaml
+    - drvh.yaml
+    - drvl.yaml
+    - drvnc.yaml
+    - drvnot.yaml
+    - drvnz.yaml
+    - drvrnd.yaml
+    - drvz.yaml
+  group_E:
+    description: Instructions starting with 'E'
+    count: 2
+    instructions:
+    - encod.yaml
+    - execf.yaml
+  group_F:
+    description: Instructions starting with 'F'
+    count: 13
+    instructions:
+    - fblock.yaml
+    - fge.yaml
+    - fges.yaml
+    - fle.yaml
+    - fles.yaml
+    - fltc.yaml
+    - flth.yaml
+    - fltl.yaml
+    - fltnc.yaml
+    - fltnot.yaml
+    - fltnz.yaml
+    - fltrnd.yaml
+    - fltz.yaml
+  group_G:
+    description: Instructions starting with 'G'
+    count: 11
+    instructions:
+    - getbrk.yaml
+    - getbyte.yaml
+    - getct.yaml
+    - getnib.yaml
+    - getptr.yaml
+    - getqx.yaml
+    - getqy.yaml
+    - getrnd.yaml
+    - getscp.yaml
+    - getword.yaml
+    - getxacc.yaml
+  group_H:
+    description: Instructions starting with 'H'
+    count: 1
+    instructions:
+    - hubset.yaml
+  group_I:
+    description: Instructions starting with 'I'
+    count: 3
+    instructions:
+    - ijnz.yaml
+    - ijz.yaml
+    - incmod.yaml
+  group_J:
+    description: Instructions starting with 'J'
+    count: 34
+    instructions:
+    - jatn.yaml
+    - jct1.yaml
+    - jct2.yaml
+    - jct3.yaml
+    - jfbw.yaml
+    - jint.yaml
+    - jmp.yaml
+    - jmprel.yaml
+    - jnatn.yaml
+    - jnct1.yaml
+    - jnct2.yaml
+    - jnct3.yaml
+    - jnfbw.yaml
+    - jnint.yaml
+    - jnpat.yaml
+    - jnqmt.yaml
+    - jnse1.yaml
+    - jnse2.yaml
+    - jnse3.yaml
+    - jnse4.yaml
+    - jnxfi.yaml
+    - jnxmt.yaml
+    - jnxrl.yaml
+    - jnxro.yaml
+    - jpat.yaml
+    - jqmt.yaml
+    - jse1.yaml
+    - jse2.yaml
+    - jse3.yaml
+    - jse4.yaml
+    - jxfi.yaml
+    - jxmt.yaml
+    - jxrl.yaml
+    - jxro.yaml
+  group_L:
+    description: Instructions starting with 'L'
+    count: 5
+    instructions:
+    - loc.yaml
+    - locknew.yaml
+    - lockrel.yaml
+    - lockret.yaml
+    - locktry.yaml
+  group_M:
+    description: Instructions starting with 'M'
+    count: 18
+    instructions:
+    - mergeb.yaml
+    - mergew.yaml
+    - mixpix.yaml
+    - modc.yaml
+    - modcz.yaml
+    - modz.yaml
+    - mov.yaml
+    - movbyts.yaml
+    - mul.yaml
+    - mulpix.yaml
+    - muls.yaml
+    - muxc.yaml
+    - muxnc.yaml
+    - muxnibs.yaml
+    - muxnits.yaml
+    - muxnz.yaml
+    - muxq.yaml
+    - muxz.yaml
+  group_N:
+    description: Instructions starting with 'N'
+    count: 10
+    instructions:
+    - neg.yaml
+    - negc.yaml
+    - negnc.yaml
+    - negnz.yaml
+    - negz.yaml
+    - nixint1.yaml
+    - nixint2.yaml
+    - nixint3.yaml
+    - nop.yaml
+    - not.yaml
+  group_O:
+    description: Instructions starting with 'O'
+    count: 10
+    instructions:
+    - ones.yaml
+    - or.yaml
+    - outc.yaml
+    - outh.yaml
+    - outl.yaml
+    - outnc.yaml
+    - outnot.yaml
+    - outnz.yaml
+    - outrnd.yaml
+    - outz.yaml
+  group_P:
+    description: Instructions starting with 'P'
+    count: 20
+    instructions:
+    - pollatn.yaml
+    - pollct1.yaml
+    - pollct2.yaml
+    - pollct3.yaml
+    - pollfbw.yaml
+    - pollint.yaml
+    - pollpat.yaml
+    - pollqmt.yaml
+    - pollse1.yaml
+    - pollse2.yaml
+    - pollse3.yaml
+    - pollse4.yaml
+    - pollxfi.yaml
+    - pollxmt.yaml
+    - pollxrl.yaml
+    - pollxro.yaml
+    - popa.yaml
+    - popb.yaml
+    - pusha.yaml
+    - pushb.yaml
+  group_Q:
+    description: Instructions starting with 'Q'
+    count: 8
+    instructions:
+    - qdiv.yaml
+    - qexp.yaml
+    - qfrac.yaml
+    - qlog.yaml
+    - qmul.yaml
+    - qrotate.yaml
+    - qsqrt.yaml
+    - qvector.yaml
+  group_R:
+    description: Instructions starting with 'R'
+    count: 36
+    instructions:
+    - rcl.yaml
+    - rcr.yaml
+    - rczl.yaml
+    - rczr.yaml
+    - rdbyte.yaml
+    - rdfast.yaml
+    - rdlong.yaml
+    - rdlut.yaml
+    - rdpin.yaml
+    - rdword.yaml
+    - rep.yaml
+    - resi0.yaml
+    - resi1.yaml
+    - resi2.yaml
+    - resi3.yaml
+    - ret.yaml
+    - reta.yaml
+    - retb.yaml
+    - reti0.yaml
+    - reti1.yaml
+    - reti2.yaml
+    - reti3.yaml
+    - rev.yaml
+    - rfbyte.yaml
+    - rflong.yaml
+    - rfvar.yaml
+    - rfvars.yaml
+    - rfword.yaml
+    - rgbexp.yaml
+    - rgbsqz.yaml
+    - rol.yaml
+    - rolbyte.yaml
+    - rolnib.yaml
+    - rolword.yaml
+    - ror.yaml
+    - rqpin.yaml
+  group_S:
+    description: Instructions starting with 'S'
+    count: 50
+    instructions:
+    - sal.yaml
+    - sar.yaml
+    - sca.yaml
+    - scas.yaml
+    - setbyte.yaml
+    - setcfrq.yaml
+    - setci.yaml
+    - setcmod.yaml
+    - setcq.yaml
+    - setcy.yaml
+    - setd.yaml
+    - setdacs.yaml
+    - setint1.yaml
+    - setint2.yaml
+    - setint3.yaml
+    - setluts.yaml
+    - setnib.yaml
+    - setpat.yaml
+    - setpiv.yaml
+    - setpix.yaml
+    - setq.yaml
+    - setq2.yaml
+    - setr.yaml
+    - sets.yaml
+    - setscp.yaml
+    - setse1.yaml
+    - setse2.yaml
+    - setse3.yaml
+    - setse4.yaml
+    - setword.yaml
+    - setxfrq.yaml
+    - seussf.yaml
+    - seussr.yaml
+    - shl.yaml
+    - shr.yaml
+    - signx.yaml
+    - skip.yaml
+    - skipf.yaml
+    - splitb.yaml
+    - splitw.yaml
+    - stalli.yaml
+    - sub.yaml
+    - subr.yaml
+    - subs.yaml
+    - subsx.yaml
+    - subx.yaml
+    - sumc.yaml
+    - sumnc.yaml
+    - sumnz.yaml
+    - sumz.yaml
+  group_T:
+    description: Instructions starting with 'T'
+    count: 16
+    instructions:
+    - test.yaml
+    - testb.yaml
+    - testbn.yaml
+    - testn.yaml
+    - testp.yaml
+    - testpn.yaml
+    - tjf.yaml
+    - tjnf.yaml
+    - tjns.yaml
+    - tjnz.yaml
+    - tjs.yaml
+    - tjv.yaml
+    - tjz.yaml
+    - trgint1.yaml
+    - trgint2.yaml
+    - trgint3.yaml
+  group_W:
+    description: Instructions starting with 'W'
+    count: 33
+    instructions:
+    - waitatn.yaml
+    - waitct1.yaml
+    - waitct2.yaml
+    - waitct3.yaml
+    - waitfbw.yaml
+    - waitint.yaml
+    - waitpat.yaml
+    - waitse1.yaml
+    - waitse2.yaml
+    - waitse3.yaml
+    - waitse4.yaml
+    - waitx.yaml
+    - waitxfi.yaml
+    - waitxmt.yaml
+    - waitxrl.yaml
+    - waitxro.yaml
+    - wfbyte.yaml
+    - wflong.yaml
+    - wfword.yaml
+    - wmlong.yaml
+    - wmlong_.yaml
+    - wrbyte.yaml
+    - wrc.yaml
+    - wrfast.yaml
+    - wrlong.yaml
+    - wrlut.yaml
+    - wrnc.yaml
+    - wrnz.yaml
+    - wrpin.yaml
+    - wrword.yaml
+    - wrz.yaml
+    - wxpin.yaml
+    - wypin.yaml
+  group_X:
+    description: Instructions starting with 'X'
+    count: 6
+    instructions:
+    - xcont.yaml
+    - xinit.yaml
+    - xor.yaml
+    - xoro32.yaml
+    - xstop.yaml
+    - xzero.yaml
+  group_Z:
+    description: Instructions starting with 'Z'
+    count: 1
+    instructions:
+    - zerox.yaml
+special_components:
+  concepts:
+    description: PASM2 programming concepts
+    path: concepts/
+    count: 17
+    files:
+    - additional_concepts_needed.yaml
+    - addressing_modes.yaml
+    - branch_addressing.yaml
+    - cog_hub_execution.yaml
+    - conditional_execution.yaml
+    - event_interrupt_config.yaml
+    - execution_modes.yaml
+    - instruction_skipping.yaml
+    - manual_category_alignment_check.yaml
+    - multi_cog_synchronization.yaml
+    - register_indirection.yaml
+    - rep_instruction.yaml
+    - setq_block_ops.yaml
+    - skipf_branching.yaml
+    - special_registers.yaml
+    - stack_operations.yaml
+    - streamer_smartpin_control.yaml
+  idioms:
+    description: Common PASM2 idioms
+    path: idioms/
+    count: 5
+    files:
+    - conditional-execution.yaml
+    - hub-memory.yaml
+    - loop-control.yaml
+    - register-operations.yaml
+    - timing-control.yaml
+  groups:
+    description: Instruction groups
+    path: groups/
+    count: 7
+    files:
+    - counter_event_jumps.yaml
+    - counter_event_polls.yaml
+    - counter_event_waits.yaml
+    - interrupt_resume.yaml
+    - interrupt_return.yaml
+    - selector_event_jumps.yaml
+    - selector_event_waits.yaml
+  pattern_manifest:
+    description: PASM2 patterns index
+    path: patterns/pattern_manifest.yaml
+  pattern_implementations:
+    description: PASM2 implementation patterns
+    path: patterns/implementation/
+    count: 2
+    files:
+    - pasm2_hub_synchronization.yaml
+    - pasm2_initialization.yaml

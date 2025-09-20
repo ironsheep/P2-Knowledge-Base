@@ -1,0 +1,46 @@
+manifest_type: architecture_manifest
+version: 2.1.0
+description: P2 architecture components manifest - fully linked
+total_components: 26
+components:
+  core:
+    description: Core architecture components
+    count: 18
+    files:
+    - click_module_integration.yaml
+    - clock_system.yaml
+    - cog.yaml
+    - cog_attention.yaml
+    - cordic.yaml
+    - debug_interrupt.yaml
+    - event_system.yaml
+    - hub.yaml
+    - interrupts.yaml
+    - io_pin_timing.yaml
+    - locks.yaml
+    - lookup_ram.yaml
+    - multi_resource_management.yaml
+    - serial_loader.yaml
+    - smart_pin_patterns.yaml
+    - smart_pins.yaml
+    - streamer.yaml
+    - xbyte_engine.yaml
+  patterns_analysis:
+    description: Architecture pattern analysis
+    path: patterns-analysis/
+    count: 8
+    files:
+    - asm_integration_analysis.yaml
+    - buffer_management_analysis.yaml
+    - cog_management_analysis.yaml
+    - memory_management_analysis.yaml
+    - protocol_implementation_analysis.yaml
+    - smart_pin_usage_analysis.yaml
+    - state_machine_analysis.yaml
+    - timing_control_analysis.yaml
+  smart_pins:
+    description: Smart Pin system
+    manifest: smart-pins/smartpin_manifest.yaml
+  system_registers:
+    description: System registers
+    manifest: system-registers/register_manifest.yaml

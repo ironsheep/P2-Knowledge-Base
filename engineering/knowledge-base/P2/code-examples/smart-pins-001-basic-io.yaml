@@ -67,10 +67,10 @@ validation_status:
 
 cross_references:
   related_instructions:
-    - "/engineering/knowledge-base/P2/instructions/DIRL.yaml"
-    - "/engineering/knowledge-base/P2/instructions/DIRH.yaml"
-    - "/engineering/knowledge-base/P2/instructions/OUTL.yaml"
-    - "/engineering/knowledge-base/P2/instructions/OUTH.yaml"
+    - "language/pasm2/dirl.yaml"
+    - "language/pasm2/dirh.yaml"
+    - "language/pasm2/outl.yaml"
+    - "language/pasm2/outh.yaml"
   related_examples: []
   see_also:
     - "P2 I/O fundamentals"

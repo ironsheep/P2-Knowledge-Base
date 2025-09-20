@@ -71,8 +71,10 @@ validation_status:
 
 cross_references:
   related_instructions:
-    - "/engineering/knowledge-base/P2/instructions/DIRL.yaml"
-    - "/engineering/knowledge-base/P2/instructions/INA.yaml"
+    - "language/pasm2/dirl.yaml"
+  related_registers:
+    - "language/spin2/registers/ina.yaml"
+    - "architecture/system-registers/dira-dirb-registers.yaml"
   related_examples:
     - "smart-pins-001-basic-io"
     - "smart-pins-003-multiple-inputs"

@@ -1,0 +1,49 @@
+manifest_type: hardware_manifest
+version: 2.0.0
+description: P2 hardware boards and peripherals manifest
+total_boards: 28
+board_categories:
+  eval_boards:
+    description: P2 Evaluation boards
+    boards:
+    - p2-eval-board.yaml
+    - p2_eval_board.yaml
+  edge_modules:
+    description: P2 Edge modules and carriers
+    boards:
+    - edge-32mb-module.yaml
+    - edge-breadboard-carrier.yaml
+    - edge-mini-breakout.yaml
+    - edge-standard-breakout.yaml
+    - edge-standard-module.yaml
+    - p2_edge_breadboard_adapter.yaml
+    - p2_edge_mini_breakout.yaml
+    - p2_edge_module.yaml
+  addon_boards:
+    description: Add-on boards and accessories
+    boards:
+    - addon-av-breakout.yaml
+    - addon-control-board.yaml
+    - addon-digital-io-board.yaml
+    - addon-digital-video-out.yaml
+    - addon-led-matrix.yaml
+    - addon-mini-prototyping.yaml
+    - addon-serial-device.yaml
+    - addon-serial-host.yaml
+  peripherals:
+    description: Other peripherals and boards
+    boards:
+    - 7_segment_display.yaml
+    - buttons_board.yaml
+    - control_board.yaml
+    - goertzel_board.yaml
+    - hardware-compatibility-matrix.yaml
+    - hub75_adapter.yaml
+    - p2-hardware-feature-comparison.yaml
+    - p2-hardware-selection-guide.yaml
+    - switches_and_leds.yaml
+    - switches_board.yaml
+selection_guides:
+- p2-hardware-selection-guide.yaml
+- p2-hardware-feature-comparison.yaml
+- hardware-compatibility-matrix.yaml

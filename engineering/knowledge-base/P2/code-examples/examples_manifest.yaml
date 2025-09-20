@@ -1,0 +1,8 @@
+manifest_type: code_examples_manifest
+version: 1.0.0
+description: P2 code examples manifest
+total_examples: 3
+examples:
+- code-example-schema.yaml
+- smart-pins-001-basic-io.yaml
+- smart-pins-002-button-reading.yaml

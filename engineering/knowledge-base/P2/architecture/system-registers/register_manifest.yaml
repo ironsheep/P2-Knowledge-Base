@@ -1,0 +1,8 @@
+manifest_type: register_manifest
+version: 2.0.0
+description: P2 system registers manifest
+total_registers: 2
+register_files:
+- dira-dirb-registers.yaml
+- ptra-register.yaml
+register_index: complete-system-registers-index.yaml

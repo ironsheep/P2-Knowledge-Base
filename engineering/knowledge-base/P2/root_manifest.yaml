@@ -1,39 +1,40 @@
-manifest_type: "root"
-version: "1.0.0"
-description: "P2 Knowledge Base root manifest for Download On Demand"
-
+manifest_type: root
+version: 1.0.0
+description: P2 Knowledge Base root manifest for Download On Demand
 knowledge_domains:
   language:
-    description: "Programming languages and patterns"
-    path: "language/"
+    description: Programming languages and patterns
+    path: language/
     manifests:
-      - "language/pasm2/instruction_manifest.yaml"
-      - "language/pasm2/patterns/pattern_manifest.yaml"
-      - "language/spin2/method_manifest.yaml"
-      - "language/spin2/patterns/pattern-index.yaml"
-    
+    - language/pasm2/instruction_manifest.yaml
+    - language/pasm2/patterns/pattern_manifest.yaml
+    - language/spin2/method_manifest.yaml
+    - language/spin2/patterns/pattern-index.yaml
   hardware:
-    description: "Physical hardware and boards"
-    path: "hardware/"
+    description: Physical hardware and boards
+    path: hardware/
     manifests:
-      - "hardware/board_manifest.yaml"
-      
+    - hardware/board_manifest.yaml
   architecture:
-    description: "P2 architecture components"
-    path: "architecture/"
+    description: P2 architecture components
+    path: architecture/
     manifests:
-      - "architecture/smart-pins/smartpin_manifest.yaml"
-      - "architecture/system-registers/register_manifest.yaml"
-
+    - architecture/architecture_manifest.yaml
+    - architecture/smart-pins/smartpin_manifest.yaml
+    - architecture/system-registers/register_manifest.yaml
+  code_examples:
+    description: Code examples and tutorials
+    path: code-examples/
+    manifests:
+    - code-examples/examples_manifest.yaml
 quick_access:
-  spin2_patterns: "language/spin2/patterns/pattern-index.yaml"
-  pasm2_patterns: "language/pasm2/patterns/pattern_manifest.yaml"
-  instructions: "language/pasm2/instruction_manifest.yaml"
-  smart_pins: "architecture/smart-pins/smartpin_manifest.yaml"
-  pattern_analysis: "architecture/patterns-analysis/"
-
+  spin2_patterns: language/spin2/patterns/pattern-index.yaml
+  pasm2_patterns: language/pasm2/patterns/pattern_manifest.yaml
+  instructions: language/pasm2/instruction_manifest.yaml
+  smart_pins: architecture/smart-pins/smartpin_manifest.yaml
+  pattern_analysis: architecture/patterns-analysis/
 statistics:
-  total_files: 730
+  total_files: 1000
   instructions: 357
   smart_pin_modes: 64
   spin2_methods: 73

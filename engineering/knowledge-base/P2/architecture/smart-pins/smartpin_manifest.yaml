@@ -1,0 +1,106 @@
+manifest_type: smartpin_manifest
+version: 2.0.0
+description: P2 Smart Pin modes manifest
+total_modes: 32
+mode_categories:
+  basic_io:
+    description: Basic I/O modes
+    modes:
+    - smart-pin-00000-normal-mode.yaml
+  dac_modes:
+    description: DAC and noise generation
+    modes:
+    - smart-pin-00001-long-repository-or-dac-noise.yaml
+    - smart-pin-00010-dac-16bit-pseudo-random-dither.yaml
+    - smart-pin-00011-dac-16bit-pwm-dither.yaml
+  pulse_generation:
+    description: Pulse and transition outputs
+    modes:
+    - smart-pin-00100-pulse-cycle-output.yaml
+    - smart-pin-00101-transition-output.yaml
+  nco_modes:
+    description: NCO frequency and duty
+    modes:
+    - smart-pin-00110-nco-frequency.yaml
+    - smart-pin-00111-nco-duty.yaml
+    - smart-pin-01011-quadrature-encoder.yaml
+  pwm_modes:
+    description: PWM generation modes
+    modes:
+    - smart-pin-00011-dac-16bit-pwm-dither.yaml
+    - smart-pin-01000-pwm-triangle.yaml
+    - smart-pin-01001-pwm-sawtooth.yaml
+    - smart-pin-01010-pwm-smps.yaml
+  encoder_modes:
+    description: Quadrature encoder modes
+    modes:
+    - smart-pin-01011-quadrature-encoder.yaml
+  counting_modes:
+    description: Event counting modes
+    modes:
+    - smart-pin-01100-count-a-rise-b-high.yaml
+    - smart-pin-01110-count-a-edges-optional-b-dec.yaml
+    - smart-pin-01111-count-highs-optional-dec.yaml
+    - smart-pin-10011-count-time-x-periods.yaml
+    - smart-pin-10100-count-states-x-periods.yaml
+    - smart-pin-10101-count-periods-in-x-clocks.yaml
+    - smart-pin-10110-count-states-in-x-clocks.yaml
+    - smart-pin-10111-count-time-in-x-clocks.yaml
+  timing_modes:
+    description: Time measurement modes
+    modes:
+    - smart-pin-10000-time-a-states.yaml
+    - smart-pin-10001-time-a-highs.yaml
+    - smart-pin-10010-time-x-a-events.yaml
+    - smart-pin-10011-count-time-x-periods.yaml
+    - smart-pin-10111-count-time-in-x-clocks.yaml
+  adc_modes:
+    description: ADC sampling modes
+    modes:
+    - smart-pin-11000-adc-internal-clock.yaml
+    - smart-pin-11001-adc-external-clock.yaml
+    - smart-pin-11010-adc-scope-trigger.yaml
+  usb_mode:
+    description: USB host/device mode
+    modes:
+    - smart-pin-11011-usb-host-device.yaml
+  serial_modes:
+    description: Serial communication modes
+    modes:
+    - smart-pin-11100-sync-serial-receive.yaml
+    - smart-pin-11101-sync-serial-transmit.yaml
+    - smart-pin-11110-async-serial-transmit.yaml
+    - smart-pin-11111-async-serial-receive.yaml
+all_modes:
+- smart-pin-00000-normal-mode.yaml
+- smart-pin-00001-long-repository-or-dac-noise.yaml
+- smart-pin-00010-dac-16bit-pseudo-random-dither.yaml
+- smart-pin-00011-dac-16bit-pwm-dither.yaml
+- smart-pin-00100-pulse-cycle-output.yaml
+- smart-pin-00101-transition-output.yaml
+- smart-pin-00110-nco-frequency.yaml
+- smart-pin-00111-nco-duty.yaml
+- smart-pin-01000-pwm-triangle.yaml
+- smart-pin-01001-pwm-sawtooth.yaml
+- smart-pin-01010-pwm-smps.yaml
+- smart-pin-01011-quadrature-encoder.yaml
+- smart-pin-01100-count-a-rise-b-high.yaml
+- smart-pin-01101-a-rise-inc-dec-by-b.yaml
+- smart-pin-01110-count-a-edges-optional-b-dec.yaml
+- smart-pin-01111-count-highs-optional-dec.yaml
+- smart-pin-10000-time-a-states.yaml
+- smart-pin-10001-time-a-highs.yaml
+- smart-pin-10010-time-x-a-events.yaml
+- smart-pin-10011-count-time-x-periods.yaml
+- smart-pin-10100-count-states-x-periods.yaml
+- smart-pin-10101-count-periods-in-x-clocks.yaml
+- smart-pin-10110-count-states-in-x-clocks.yaml
+- smart-pin-10111-count-time-in-x-clocks.yaml
+- smart-pin-11000-adc-internal-clock.yaml
+- smart-pin-11001-adc-external-clock.yaml
+- smart-pin-11010-adc-scope-trigger.yaml
+- smart-pin-11011-usb-host-device.yaml
+- smart-pin-11100-sync-serial-receive.yaml
+- smart-pin-11101-sync-serial-transmit.yaml
+- smart-pin-11110-async-serial-transmit.yaml
+- smart-pin-11111-async-serial-receive.yaml
