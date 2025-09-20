@@ -157,3 +157,7 @@ engineering/obex-integration/FORUM-POST-*.md
 extracted_images_enhanced_test/
 /engineering/ingestion/yaml-backups
 /engineering/knowledge-base/P2/language/pasm2/backup_before_update
+/engineering/document-production/manuals/pasm2-reference/extracted-from-manual
+/engineering/document-production/manuals/pasm2-reference/instruction-templates
+/engineering/ingestion/extracted-documentation/yaml_updates
+/engineering/ingestion/extracted-documentation/yaml_updates_pages_31_147
