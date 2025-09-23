@@ -1,283 +1,53 @@
 # Spin2 Language Construct: QUIT
-# Source: Spin2 v51 documentation
-# Critical for: Loop control and early exit
-
 construct: "QUIT"
 category: "control_flow"
 type: "loop_control"
 
-metadata:
-  query_tags: ["quit", "break", "exit", "loop_exit", "loop_control", "repeat_exit"]
-  complexity: "beginner"
-  use_cases: ["early_loop_exit", "search_termination", "error_exit", "condition_met", "nested_loop_exit"]
-  common_questions:
-    - "How do I exit a loop early in Spin2?"
-    - "How do I break out of a REPEAT loop?"
-    - "How do I exit nested loops?"
-    - "What is the Spin2 equivalent of break?"
+description: "Exit current REPEAT loop immediately (like 'break')"
 
-description: |
-  QUIT immediately exits the current REPEAT loop, transferring control to the
-  statement following the loop. Similar to 'break' in other languages.
-  QUITN variant can exit multiple nested loop levels.
+syntax:
+  - "QUIT"         # Exit innermost loop
+  - "QUITN level"  # Exit N levels of nested loops
 
-variants:
-  - variant: "simple_quit"
-    syntax: "QUIT"
-    description: "Exit the current (innermost) REPEAT loop"
-    example: |
-      REPEAT i FROM 0 TO 99
-        IF array[i] == target
-          QUIT              ' Exit loop when found
-        process(array[i])
-      ' Execution continues here after QUIT
-    
-  - variant: "quit_n"
-    syntax: "QUITN level"
-    description: "Exit N levels of nested REPEAT loops"
-    example: |
-      REPEAT x FROM 0 TO 9
-        REPEAT y FROM 0 TO 9
-          IF grid[x][y] == value
-            QUITN 2         ' Exit both loops
-      ' Execution continues here
+example: |
+  REPEAT i FROM 0 TO 99
+    IF array[i] == target
+      QUIT          ' Exit loop when found
+    process(array[i])
+  ' Execution continues here after QUIT
+  
+  ' Exit nested loops:
+  REPEAT x FROM 0 TO 9      ' Level 2
+    REPEAT y FROM 0 TO 9    ' Level 1
+      IF grid[x][y] == value
+        QUITN 2             ' Exit both loops
 
-usage_contexts:
-  - context: "infinite_loop_exit"
-    description: "Exit an infinite REPEAT loop"
-    example: |
-      REPEAT
-        data := read_sensor()
-        IF data == STOP_VALUE
-          QUIT
-        process(data)
-    
-  - context: "conditional_termination"
-    description: "Exit when condition is met"
-    example: |
-      REPEAT count
-        IF error_detected()
-          log_error()
-          QUIT              ' Stop processing on error
-        do_work()
-    
-  - context: "search_completion"
-    description: "Exit when item is found"
-    example: |
-      found := FALSE
-      REPEAT i FROM 0 TO MAX_ITEMS-1
-        IF items[i] == search_value
-          found := TRUE
-          index := i
-          QUIT              ' Stop searching
-    
-  - context: "timeout_exit"
-    description: "Exit loop on timeout"
-    example: |
-      start_time := GETMS()
-      REPEAT
-        IF GETMS() - start_time > TIMEOUT_MS
-          QUIT              ' Timeout reached
-        IF check_condition()
-          QUIT              ' Condition met
-        WAITMS(10)
+critical_behavior:
+  - "Exits loop completely (not just iteration)"
+  - "QUIT exits innermost loop only"
+  - "QUITN levels count from innermost (1) outward"
+  - "Loop counter/state abandoned"
 
-nested_loop_behavior:
-  - behavior: "single_level"
-    description: "QUIT exits only the innermost loop"
-    example: |
-      REPEAT x FROM 0 TO 9        ' Outer loop
-        REPEAT y FROM 0 TO 9      ' Inner loop
-          IF condition
-            QUIT                   ' Exits inner loop only
-        ' Execution continues here after QUIT
-      ' Outer loop continues
-    
-  - behavior: "multi_level"
-    description: "QUITN exits multiple loop levels"
-    example: |
-      REPEAT a FROM 0 TO 9         ' Level 3
-        REPEAT b FROM 0 TO 9       ' Level 2
-          REPEAT c FROM 0 TO 9     ' Level 1
-            IF found
-              QUITN 2              ' Exit levels 1 and 2
-          ' QUITN 2 continues here
-        ' QUITN 3 would continue here
-    
-  - behavior: "level_counting"
-    description: "Levels count from innermost (1) outward"
-    note: "QUITN 1 is equivalent to QUIT"
+common_patterns: |
+  ' Infinite loop with exit
+  REPEAT
+    data := read_sensor()
+    IF data == STOP_VALUE
+      QUIT
+    process(data)
+  
+  ' Search with early exit
+  found := FALSE
+  REPEAT i FROM 0 TO MAX-1
+    IF items[i] == search_value
+      found := TRUE
+      QUIT
 
-interaction_with_loop_types:
-  - loop_type: "infinite"
-    example: |
-      REPEAT
-        IF done
-          QUIT
-    
-  - loop_type: "count"
-    example: |
-      REPEAT 100
-        IF complete
-          QUIT
-    
-  - loop_type: "while_until"
-    example: |
-      REPEAT WHILE running
-        IF error
-          QUIT      ' Exit even if 'running' is true
-    
-  - loop_type: "from_to"
-    example: |
-      REPEAT i FROM start TO finish
-        IF array[i] < 0
-          QUIT      ' Exit before reaching 'finish'
+critical_pitfall: "QUIT only works in REPEAT loops, not in methods (use ABORT/RETURN)"
 
-common_patterns:
-  - pattern: "state_machine_exit"
-    description: "Exit state machine on completion"
-    code: |
-      REPEAT
-        CASE state
-          STATE_INIT:
-            init_system()
-            state := STATE_RUN
-          STATE_RUN:
-            run_process()
-            IF complete
-              state := STATE_DONE
-          STATE_DONE:
-            cleanup()
-            QUIT            ' Exit state machine
-    
-  - pattern: "menu_exit"
-    description: "Exit menu on selection"
-    code: |
-      REPEAT
-        display_menu()
-        choice := get_input()
-        CASE choice
-          1..3:
-            handle_option(choice)
-          4:
-            QUIT            ' Exit menu
-          OTHER:
-            show_error()
-    
-  - pattern: "early_termination"
-    description: "Stop processing on first error"
-    code: |
-      error := FALSE
-      REPEAT i FROM 0 TO num_items-1
-        IF NOT process_item(i)
-          error := TRUE
-          error_index := i
-          QUIT              ' Stop on first error
-    
-  - pattern: "data_collection"
-    description: "Collect data until buffer full or timeout"
-    code: |
-      count := 0
-      REPEAT MAX_SAMPLES
-        IF data_available()
-          buffer[count++] := read_data()
-          IF count == MAX_SAMPLES
-            QUIT            ' Buffer full
-        IF timeout()
-          QUIT              ' Timeout reached
+comparison:
+  quit: "Exits loop entirely"
+  next: "Skips to next iteration"
+  abort: "Exits entire method"
 
-pitfalls:
-  - pitfall: "quit_vs_abort"
-    description: "Using QUIT when ABORT is needed"
-    wrong: |
-      PUB process() | status
-        REPEAT i FROM 0 TO 9
-          status := check(i)
-          IF status < 0
-            QUIT            ' Only exits loop, method continues!
-        ' This still executes even with error
-    correct: |
-      PUB process() | status
-        REPEAT i FROM 0 TO 9
-          status := check(i)
-          IF status < 0
-            ABORT status    ' Exits entire method with error
-    
-  - pitfall: "quit_without_loop"
-    description: "QUIT only works inside REPEAT loops"
-    wrong: |
-      IF condition
-        QUIT                ' Error: not in a loop!
-    correct: |
-      IF condition
-        RETURN              ' Use RETURN to exit method
-    
-  - pitfall: "wrong_nesting_level"
-    description: "Miscounting nesting levels with QUITN"
-    wrong: |
-      REPEAT              ' Level 2
-        REPEAT            ' Level 1
-          QUITN 3         ' Error: only 2 levels exist!
-    correct: |
-      REPEAT              ' Level 2
-        REPEAT            ' Level 1
-          QUITN 2         ' Exit both loops
-
-comparison_with_next:
-  - difference: "behavior"
-    quit: "Exits loop completely"
-    next: "Skips to next iteration"
-    
-  - difference: "continuation"
-    quit: "Continues after loop"
-    next: "Continues with loop"
-    
-  - difference: "loop_counter"
-    quit: "Loop counter abandoned"
-    next: "Loop counter incremented"
-
-comparison_with_abort:
-  - difference: "scope"
-    quit: "Exits current loop only"
-    abort: "Exits entire method/call chain"
-    
-  - difference: "return_value"
-    quit: "No return value"
-    abort: "Can return values"
-    
-  - difference: "usage"
-    quit: "Loop control"
-    abort: "Error handling"
-
-performance:
-  overhead: "Single jump instruction - negligible overhead"
-  optimization_tips:
-    - "Place most likely QUIT condition first"
-    - "Use QUIT for early loop termination to save cycles"
-    - "Consider loop unrolling if QUIT is rare"
-
-pasm_equivalent:
-  description: "QUIT generates a simple jump to loop end"
-  example:
-    spin2: |
-      REPEAT i FROM 0 TO 9
-        IF condition
-          QUIT
-        process()
-    pasm2: |
-      MOV     i, #0
-      .loop:
-      ' Check condition
-      IF_NZ   JMP #.loop_end    ' QUIT becomes jump to end
-      CALL    #process
-      ADD     i, #1
-      CMP     i, #10 WC
-      IF_C    JMP #.loop
-      .loop_end:
-
-related_constructs:
-  - "repeat.yaml"
-  - "next.yaml"
-  - "abort.yaml"
-  - "if_elseif_else.yaml"
-  - "case.yaml"
+related: ["repeat.yaml", "next.yaml", "abort.yaml"]

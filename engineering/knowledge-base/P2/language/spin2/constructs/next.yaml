@@ -1,297 +1,53 @@
 # Spin2 Language Construct: NEXT
-# Source: Spin2 v51 documentation  
-# Critical for: Loop control and iteration skipping
-
 construct: "NEXT"
 category: "control_flow"
 type: "loop_control"
 
-metadata:
-  query_tags: ["next", "continue", "skip", "loop_control", "iteration_skip", "repeat_continue"]
-  complexity: "beginner"
-  use_cases: ["skip_iteration", "filter_processing", "conditional_execution", "data_validation", "error_recovery"]
-  common_questions:
-    - "How do I skip to the next iteration in Spin2?"
-    - "How do I continue a loop in Spin2?"
-    - "What is the Spin2 equivalent of continue?"
-    - "How do I skip invalid data in a loop?"
+description: "Skip to next iteration of current loop (like 'continue')"
 
-description: |
-  NEXT immediately skips to the next iteration of the current REPEAT loop,
-  bypassing remaining statements in the current iteration. Similar to 'continue'
-  in other languages. Updates loop counter and checks loop condition.
+syntax:
+  - "NEXT"         # Skip to next iteration of innermost loop
+  - "NEXTN level"  # Skip to next iteration of Nth enclosing loop
 
-variants:
-  - variant: "simple_next"
-    syntax: "NEXT"
-    description: "Skip to next iteration of current loop"
-    example: |
-      REPEAT i FROM 0 TO 99
-        IF array[i] == 0
-          NEXT              ' Skip zeros
-        process(array[i])   ' Only processes non-zero values
-    
-  - variant: "nextn"
-    syntax: "NEXTN level"
-    description: "Skip to next iteration of Nth enclosing loop"
-    example: |
-      REPEAT x FROM 0 TO 9
-        REPEAT y FROM 0 TO 9
-          IF grid[x][y] < 0
-            NEXTN 2         ' Skip to next x iteration
-          process(grid[x][y])
+example: |
+  REPEAT i FROM 0 TO 99
+    IF array[i] == 0
+      NEXT          ' Skip zeros
+    process(array[i])  ' Only non-zero values
+  
+  ' Skip in nested loops:
+  REPEAT x FROM 0 TO 9
+    REPEAT y FROM 0 TO 9
+      IF grid[x][y] < 0
+        NEXTN 2     ' Skip to next x iteration
 
-usage_contexts:
-  - context: "data_filtering"
-    description: "Skip invalid or unwanted data"
-    example: |
-      REPEAT i FROM 0 TO count-1
-        IF data[i] < MIN OR data[i] > MAX
-          NEXT              ' Skip out-of-range values
-        sum += data[i]
-        valid_count++
-    
-  - context: "error_recovery"
-    description: "Continue processing despite errors"
-    example: |
-      REPEAT sensor FROM 0 TO NUM_SENSORS-1
-        IF NOT sensor_active(sensor)
-          NEXT              ' Skip inactive sensors
-        value := read_sensor(sensor)
-        IF value < 0
-          log_error(sensor)
-          NEXT              ' Skip bad readings
-        store_value(sensor, value)
-    
-  - context: "conditional_processing"
-    description: "Process only matching items"
-    example: |
-      REPEAT i FROM 0 TO MAX_ITEMS-1
-        IF NOT item[i].enabled
-          NEXT              ' Skip disabled items
-        IF item[i].type <> target_type
-          NEXT              ' Skip wrong type
-        process_item(i)    ' Only enabled items of correct type
-    
-  - context: "optimization"
-    description: "Skip expensive operations when possible"
-    example: |
-      REPEAT pixel FROM 0 TO SCREEN_SIZE-1
-        IF pixel_unchanged(pixel)
-          NEXT              ' Skip redrawing unchanged pixels
-        calculate_new_color(pixel)
-        draw_pixel(pixel)
+critical_behavior:
+  - "Counter updates before next iteration"
+  - "Loop condition rechecked immediately"
+  - "NEXT affects only specified loop level"
+  - "Continues with loop (not exit)"
 
-loop_behavior:
-  - behavior: "counter_update"
-    description: "Loop counter is updated before next iteration"
-    example: |
-      REPEAT i FROM 0 TO 9
-        IF i == 5
-          NEXT              ' i becomes 6, not stuck at 5
-        PRINT(i)           ' Prints 0,1,2,3,4,6,7,8,9
-    
-  - behavior: "condition_check"
-    description: "Loop condition is checked after NEXT"
-    example: |
-      count := 0
-      REPEAT WHILE count < 5
-        count++
-        IF count == 3
-          NEXT              ' Condition rechecked
-        process(count)      ' Processes 1,2,4,5
-    
-  - behavior: "nested_loops"
-    description: "NEXT affects only the specified loop level"
-    example: |
-      REPEAT x FROM 0 TO 2
-        REPEAT y FROM 0 TO 2
-          IF x == y
-            NEXT            ' Inner loop continues
-          PRINT(x, y)       ' Skips diagonal
+common_patterns: |
+  ' Filter invalid data
+  REPEAT i FROM 0 TO count-1
+    IF data[i] < MIN OR data[i] > MAX
+      NEXT          ' Skip out-of-range
+    sum += data[i]
+    valid_count++
+  
+  ' Skip inactive items
+  REPEAT sensor FROM 0 TO NUM_SENSORS-1
+    IF NOT sensor_active(sensor)
+      NEXT
+    process_sensor(sensor)
 
-interaction_with_loop_types:
-  - loop_type: "from_to"
-    description: "Counter increments normally"
-    example: |
-      REPEAT i FROM 1 TO 10
-        IF i // 2 == 0
-          NEXT              ' Skip even numbers
-        odd_sum += i
-    
-  - loop_type: "while_until"
-    description: "Condition rechecked immediately"
-    example: |
-      REPEAT WHILE data_available()
-        packet := read_packet()
-        IF packet.corrupt
-          NEXT              ' Try next packet
-        process_packet(packet)
-    
-  - loop_type: "count"
-    description: "Iteration count decrements normally"
-    example: |
-      REPEAT 100
-        value := get_next()
-        IF value == INVALID
-          NEXT              ' Still counts as iteration
-        use_value(value)
-    
-  - loop_type: "infinite"
-    description: "Starts next cycle immediately"
-    example: |
-      REPEAT
-        status := check_status()
-        IF status == BUSY
-          WAITMS(10)
-          NEXT              ' Check again
-        handle_status(status)
+critical_pitfalls:
+  - "Cleanup before NEXT to avoid leaks"
+  - "Increment loop vars in WHILE/UNTIL before NEXT"
 
-common_patterns:
-  - pattern: "skip_comments"
-    description: "Skip comment lines in data"
-    code: |
-      REPEAT line FROM 0 TO num_lines-1
-        IF text[line][0] == "#"
-          NEXT              ' Skip comment lines
-        parse_line(line)
-    
-  - pattern: "sparse_array"
-    description: "Process only populated elements"
-    code: |
-      REPEAT i FROM 0 TO ARRAY_SIZE-1
-        IF sparse[i] == EMPTY
-          NEXT              ' Skip empty slots
-        result += process(sparse[i])
-    
-  - pattern: "multi_condition_filter"
-    description: "Apply multiple filter conditions"
-    code: |
-      REPEAT i FROM 0 TO count-1
-        ' Skip if any condition fails
-        IF NOT condition1(data[i])
-          NEXT
-        IF NOT condition2(data[i])
-          NEXT
-        IF NOT condition3(data[i])
-          NEXT
-        ' All conditions passed
-        process(data[i])
-    
-  - pattern: "error_tolerant_loop"
-    description: "Continue despite individual failures"
-    code: |
-      success_count := 0
-      REPEAT file FROM 0 TO num_files-1
-        IF NOT file_exists(file)
-          log_missing(file)
-          NEXT              ' Skip missing files
-        IF NOT file_valid(file)
-          log_invalid(file)
-          NEXT              ' Skip invalid files
-        process_file(file)
-        success_count++
+comparison:
+  next: "Continues with next iteration"
+  quit: "Exits loop entirely"
+  abort: "Exits entire method"
 
-pitfalls:
-  - pitfall: "infinite_loop_risk"
-    description: "NEXT in WHILE/UNTIL without state change"
-    wrong: |
-      x := 0
-      REPEAT WHILE x < 10
-        IF condition
-          NEXT              ' x never changes, infinite loop!
-        x++
-    correct: |
-      x := 0
-      REPEAT WHILE x < 10
-        x++                 ' Increment before NEXT
-        IF condition
-          NEXT
-    
-  - pitfall: "skipping_cleanup"
-    description: "Forgetting cleanup before NEXT"
-    wrong: |
-      REPEAT i FROM 0 TO 9
-        resource := allocate()
-        IF error
-          NEXT              ' Resource leaked!
-        use_resource(resource)
-        free_resource(resource)
-    correct: |
-      REPEAT i FROM 0 TO 9
-        resource := allocate()
-        IF error
-          free_resource(resource)
-          NEXT              ' Cleanup before skip
-        use_resource(resource)
-        free_resource(resource)
-    
-  - pitfall: "next_vs_quit"
-    description: "Using NEXT when QUIT is needed"
-    wrong: |
-      REPEAT
-        IF fatal_error
-          NEXT              ' Infinite loop on fatal error!
-    correct: |
-      REPEAT
-        IF fatal_error
-          QUIT              ' Exit loop on fatal error
-
-comparison_with_quit:
-  - difference: "behavior"
-    next: "Continues with next iteration"
-    quit: "Exits loop entirely"
-    
-  - difference: "loop_state"
-    next: "Loop counter/condition updated"
-    quit: "Loop state abandoned"
-    
-  - difference: "execution_point"
-    next: "Returns to loop top"
-    quit: "Continues after loop
-
-comparison_with_abort:
-  - difference: "scope"
-    next: "Affects current iteration only"
-    abort: "Exits entire method/call chain"
-    
-  - difference: "usage"
-    next: "Normal flow control"
-    abort: "Error/exception handling"
-    
-  - difference: "continuation"
-    next: "Loop continues"
-    abort: "Method terminates"
-
-performance:
-  overhead: "Single jump instruction - negligible overhead"
-  optimization_tips:
-    - "Place most likely NEXT conditions first"
-    - "Combine multiple skip conditions when possible"
-    - "Consider data reorganization to minimize skips"
-
-pasm_equivalent:
-  description: "NEXT generates jump to loop continuation point"
-  example:
-    spin2: |
-      REPEAT i FROM 0 TO 9
-        IF skip_condition
-          NEXT
-        process()
-    pasm2: |
-      MOV     i, #0
-      .loop:
-      ' Check skip_condition
-      IF_NZ   JMP #.loop_continue   ' NEXT becomes jump
-      CALL    #process
-      .loop_continue:
-      ADD     i, #1                  ' Counter updates
-      CMP     i, #10 WC
-      IF_C    JMP #.loop
-
-related_constructs:
-  - "repeat.yaml"
-  - "quit.yaml"
-  - "abort.yaml"
-  - "if_elseif_else.yaml"
-  - "case.yaml"
+related: ["repeat.yaml", "quit.yaml", "abort.yaml"]

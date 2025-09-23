@@ -1,0 +1,35 @@
+method: ABS
+type: method
+description: Returns absolute value of a number
+category: Math Operations
+syntax: "result := ABS(value)"
+parameters:
+  - name: "value"
+    type: "long"
+    description: "Signed integer value (-2³¹ to 2³¹-1)"
+returns:
+  type: "long"
+  description: "Absolute value (0 to 2³¹-1). Note: ABS($8000_0000) returns $8000_0000"
+examples:
+  - code: |
+      x := ABS(-123)     ' Result: 123
+      y := ABS(456)      ' Result: 456
+      z := ABS(0)        ' Result: 0
+    description: "Basic absolute value operations"
+  - code: |
+      ' Distance calculation
+      distance := ABS(x2 - x1)
+    description: "Calculate distance on single axis"
+  - code: |
+      ' Error magnitude
+      error := ABS(target - actual)
+      IF error > tolerance
+        correct_position()
+    description: "Error checking regardless of sign"
+notes:
+  - "ABS($8000_0000) returns $8000_0000 due to two's complement"
+  - "No floating-point variant; use FABS() for floats"
+  - "Priority 2 operator (unary)"
+related:
+  - "operators/op_sub.yaml"
+  - "methods/sqrt.yaml"

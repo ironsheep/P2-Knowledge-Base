@@ -1,0 +1,35 @@
+method: SQRT
+type: method
+description: Returns integer square root of a number
+category: Math Operations
+syntax: "result := SQRT(value)"
+parameters:
+  - name: "value"
+    type: "long"
+    description: "Unsigned integer value (0 to 2³²-1)"
+returns:
+  type: "long"
+  description: "Integer square root (0 to 65535)"
+examples:
+  - code: |
+      x := SQRT(100)     ' Result: 10
+      y := SQRT(65536)   ' Result: 256
+      z := SQRT(2)       ' Result: 1 (truncated)
+    description: "Basic square root operations"
+  - code: |
+      ' Distance calculation (Pythagorean)
+      distance := SQRT((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1))
+    description: "Calculate 2D distance"
+  - code: |
+      ' RMS calculation
+      rms := SQRT(sum_of_squares / count)
+    description: "Root mean square calculation"
+notes:
+  - "Returns integer result (truncates decimal portion)"
+  - "Input treated as unsigned 32-bit"
+  - "Maximum result is 65535 (sqrt of $FFFF_FFFF)"
+  - "No floating-point variant; use FSQRT() for floats"
+  - "Priority 2 operator (unary)"
+related:
+  - "methods/abs.yaml"
+  - "methods/rotxy.yaml"
