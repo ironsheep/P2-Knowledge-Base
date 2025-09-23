@@ -19,7 +19,7 @@ objects:
   - PASM2
   description_short: 'This object demonstrates an advanced feature of Spin2: the installation
     of an ISR (interrupt service'
-  yaml_path: ../objects/2828.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2828.yaml
 - object_id: '4060'
   title: FM Radio broadcasting
   author: Wuerfel_21
@@ -28,7 +28,7 @@ objects:
   - PASM2
   description_short: Example of generating FM radio broadcasts (ab)using the P2's
     color modulator unit.
-  yaml_path: ../objects/4060.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4060.yaml
 - object_id: '4070'
   title: MFRC522
   author: glapolla
@@ -36,7 +36,7 @@ objects:
   - SPIN2
   description_short: "The MFRC522\u2019s internal transmitter is able to drive a reader/writer\
     \ antenna designed to\ncommunicate "
-  yaml_path: ../objects/4070.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4070.yaml
 - object_id: '4911'
   title: IO Pin State Detection Demo
   author: Michael
@@ -44,7 +44,7 @@ objects:
   - SPIN2
   description_short: One method to check the pin state of an IO pin is to drive the
     pin in either direction (high/low) using the P2 smart-pin weak
-  yaml_path: ../objects/4911.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4911.yaml
 - object_id: '4926'
   title: PNut/Spin2 Latest Version (v51)
   author: Chip Gracey
@@ -52,4 +52,4 @@ objects:
   - SPIN2
   - PASM2
   description_short: 'Latest PNut Documentation: https://docs.'
-  yaml_path: ../objects/4926.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4926.yaml

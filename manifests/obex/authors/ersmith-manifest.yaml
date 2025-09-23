@@ -16,25 +16,25 @@ objects:
   languages:
   - SPIN2
   created_date: '2021-12-19 12:00:00'
-  yaml_path: ../objects/2812.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2812.yaml
 - object_id: '2814'
   title: Simple formatted text routines
   category: misc
   languages:
   - SPIN2
   created_date: '2020-08-14 12:00:00'
-  yaml_path: ../objects/2814.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2814.yaml
 - object_id: '2847'
   title: VGA Text routines
   category: drivers
   languages:
   - SPIN2
   created_date: '2020-08-14 12:00:00'
-  yaml_path: ../objects/2847.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2847.yaml
 - object_id: '4047'
   title: DecFloat
   category: misc
   languages:
   - SPIN2
   created_date: '2023-10-18 20:20:44'
-  yaml_path: ../objects/4047.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4047.yaml

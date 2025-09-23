@@ -18,11 +18,11 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2023-11-16 20:02:29'
-  yaml_path: ../objects/2849.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2849.yaml
 - object_id: '2858'
   title: MAX7219 Dot Matrix
   category: drivers
   languages:
   - SPIN2
   created_date: '2023-11-16 20:07:54'
-  yaml_path: ../objects/2858.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2858.yaml

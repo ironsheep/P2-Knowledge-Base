@@ -17,7 +17,7 @@ objects:
   languages:
   - SPIN2
   created_date: '2025-02-17 11:24:28'
-  yaml_path: ../objects/4911.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4911.yaml
 - object_id: '4917'
   title: Sharing variables with SPIN2 and PASM2
   category: display
@@ -25,4 +25,4 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2024-11-11 18:11:17'
-  yaml_path: ../objects/4917.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4917.yaml

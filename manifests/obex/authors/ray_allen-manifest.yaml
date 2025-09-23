@@ -17,7 +17,7 @@ objects:
   languages:
   - SPIN2
   created_date: '2023-12-25 19:56:27'
-  yaml_path: ../objects/4266.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4266.yaml
 - object_id: '4894'
   title: FRSW and FAT32 for P2
   category: drivers
@@ -25,4 +25,4 @@ objects:
   - SPIN2
   - PASM
   created_date: '2025-02-17 16:35:36'
-  yaml_path: ../objects/4894.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4894.yaml

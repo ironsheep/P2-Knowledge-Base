@@ -16,18 +16,18 @@ objects:
   languages:
   - SPIN2
   created_date: '2023-10-18 20:37:42'
-  yaml_path: ../objects/4064.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4064.yaml
 - object_id: '4068'
   title: MAX3010X
   category: display
   languages:
   - SPIN2
   created_date: '2023-10-18 20:42:15'
-  yaml_path: ../objects/4068.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4068.yaml
 - object_id: '4070'
   title: MFRC522
   category: demos
   languages:
   - SPIN2
   created_date: '2023-10-18 20:46:38'
-  yaml_path: ../objects/4070.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4070.yaml

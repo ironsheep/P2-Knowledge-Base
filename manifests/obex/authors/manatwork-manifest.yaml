@@ -18,14 +18,14 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2020-05-09 12:00:00'
-  yaml_path: ../objects/2811.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2811.yaml
 - object_id: '2872'
   title: Simple SPI flash driver
   category: drivers
   languages:
   - SPIN2
   created_date: '2020-07-07 12:00:00'
-  yaml_path: ../objects/2872.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2872.yaml
 - object_id: '4267'
   title: Ethernet RMII driver
   category: drivers
@@ -33,7 +33,7 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2024-02-26 16:21:51'
-  yaml_path: ../objects/4267.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4267.yaml
 - object_id: '4918'
   title: Step/Dir signal generator
   category: motors
@@ -41,4 +41,4 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2024-11-13 13:50:52'
-  yaml_path: ../objects/4918.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4918.yaml

@@ -19,7 +19,7 @@ objects:
   description_short: The ADS1118 is a precision, low power, 16-bit analog-to-digital
     converter (ADC) that provides all features necessary to measure themost common
     sensor signals in
-  yaml_path: ../objects/4064.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4064.yaml
 - object_id: '4571'
   title: "ISP P2 180\xB0 Field of View TOF Sensor"
   author: Stephen M Moraco
@@ -28,7 +28,7 @@ objects:
   - PASM2
   description_short: "A collection of P2 Spin2 objects allows us to realize a 180\xB0\
     \ field-of-view time-of-flight sensor by ganging 4 VL53L5CX TOF sensors"
-  yaml_path: ../objects/4571.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4571.yaml
 - object_id: '5259'
   title: BNO08x IMU (9 DOF) (RVC Mode)
   author: Jon McPhalen (jonnymac)
@@ -36,4 +36,4 @@ objects:
   - SPIN2
   description_short: This object takes advantage of the BNO08x RVC (serial) output
     to provide Yaw, Pitch, Roll, X acceler
-  yaml_path: ../objects/5259.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/5259.yaml

@@ -18,14 +18,14 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2024-08-26 19:18:16'
-  yaml_path: ../objects/4858.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4858.yaml
 - object_id: '4889'
   title: HostFS
   category: drivers
   languages:
   - SPIN2
   created_date: '2024-09-29 12:01:43'
-  yaml_path: ../objects/4889.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4889.yaml
 - object_id: '4926'
   title: PNut/Spin2 Latest Version (v51)
   category: demos
@@ -33,7 +33,7 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2025-04-07 20:22:09'
-  yaml_path: ../objects/4926.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4926.yaml
 - object_id: '5189'
   title: 64/96/128-Bit Unsigned Integer Math
   category: misc
@@ -41,4 +41,4 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2025-03-12 21:14:04'
-  yaml_path: ../objects/5189.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/5189.yaml

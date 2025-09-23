@@ -61,7 +61,7 @@ manifests:
     
   community_resources:
     description: "P2 community objects from Parallax OBEX (download-on-demand)"
-    url: "manifests/obex-community-manifest.yaml"
+    url: "manifests/obex/obex-root.yaml"
     entry_count: 253  # Discovered 2025-09-12
     categories: ["drivers", "sensors", "display", "motors", "communication", "audio", "misc", "demos", "tools"]
     featured_authors: ["Jon McPhalen (jonnymac)", "Chip Gracey", "Kwabena W. Agyeman"]

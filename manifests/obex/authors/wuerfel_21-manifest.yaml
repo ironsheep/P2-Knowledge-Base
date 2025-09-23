@@ -18,7 +18,7 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2024-03-13 21:12:44'
-  yaml_path: ../objects/2862.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2862.yaml
 - object_id: '2863'
   title: OPNAcog
   category: misc
@@ -26,7 +26,7 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2024-03-13 21:12:22'
-  yaml_path: ../objects/2863.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2863.yaml
 - object_id: '2864'
   title: AYcog (P2 Port)
   category: audio
@@ -34,7 +34,7 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2024-03-13 21:12:03'
-  yaml_path: ../objects/2864.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2864.yaml
 - object_id: '2865'
   title: SNEcog (P2 Port)
   category: audio
@@ -42,7 +42,7 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2024-03-13 21:11:38'
-  yaml_path: ../objects/2865.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2865.yaml
 - object_id: '2866'
   title: SPCcog
   category: audio
@@ -50,7 +50,7 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2024-03-28 12:40:10'
-  yaml_path: ../objects/2866.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2866.yaml
 - object_id: '4012'
   title: 3072 Sprites Proof-of-Concept
   category: misc
@@ -58,7 +58,7 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2023-10-18 19:57:19'
-  yaml_path: ../objects/4012.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4012.yaml
 - object_id: '4060'
   title: FM Radio broadcasting
   category: demos
@@ -66,14 +66,14 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2023-10-18 21:29:22'
-  yaml_path: ../objects/4060.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4060.yaml
 - object_id: '4080'
   title: Optimized JPEG Decoder
   category: misc
   languages:
   - UNKNOWN
   created_date: '2023-10-21 16:07:31'
-  yaml_path: ../objects/4080.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4080.yaml
 - object_id: '4087'
   title: NeoYume - NeoGeo emulator
   category: misc
@@ -81,7 +81,7 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2025-02-16 19:33:59'
-  yaml_path: ../objects/4087.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4087.yaml
 - object_id: '4162'
   title: MegaYume - Mega Drive emulator
   category: misc
@@ -89,7 +89,7 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2025-02-16 22:57:19'
-  yaml_path: ../objects/4162.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4162.yaml
 - object_id: '4198'
   title: USBnew
   category: drivers
@@ -97,4 +97,4 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2024-03-28 16:13:28'
-  yaml_path: ../objects/4198.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4198.yaml

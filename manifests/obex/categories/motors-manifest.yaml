@@ -19,7 +19,7 @@ objects:
   - PASM2
   description_short: The Park or d/q-transformation is useful when controlling AC
     motors or brushless servo motors. It transforms currents or voltages from
-  yaml_path: ../objects/2811.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2811.yaml
 - object_id: '2834'
   title: PWM
   author: Jon McPhalen (jonnymac)
@@ -28,7 +28,7 @@ objects:
   description_short: This object converts any P2 pin into a set-and-forget PWM output
     with user-selected PWM frequency. Provided methods accommodate DMX-compatible
     levels
-  yaml_path: ../objects/2834.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2834.yaml
 - object_id: '2875'
   title: DC Motor
   author: Jon McPhalen (jonnymac)
@@ -36,7 +36,7 @@ objects:
   - SPIN2
   description_short: Supports forward and reverse speed control, braking, and motor
     enable/disable.
-  yaml_path: ../objects/2875.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2875.yaml
 - object_id: '4617'
   title: ISP P2 Multi Servo Exercisor
   author: Stephen M Moraco
@@ -45,7 +45,7 @@ objects:
   - PASM2
   description_short: This project was created to help me exercise many servos within
     a single project without re-cabling each servo to characterize it.
-  yaml_path: ../objects/4617.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4617.yaml
 - object_id: '4918'
   title: Step/Dir signal generator
   author: ManAtWork
@@ -54,4 +54,4 @@ objects:
   - PASM2
   description_short: Step/Dir signal generator for multiple axes, can be used to drive
     stepper motor or servo drives Supports:.
-  yaml_path: ../objects/4918.yaml
+  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4918.yaml

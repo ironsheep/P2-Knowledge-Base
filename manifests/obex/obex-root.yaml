@@ -88,7 +88,7 @@ sub_manifests:
     - phonoclese-manifest.yaml
 access_patterns:
   individual_objects:
-    path: ../objects/
+    path: ../../engineering/knowledge-base/P2/community/obex/objects/
     format: '{object_id}.yaml'
     example: 5281.yaml
   download_on_demand:
