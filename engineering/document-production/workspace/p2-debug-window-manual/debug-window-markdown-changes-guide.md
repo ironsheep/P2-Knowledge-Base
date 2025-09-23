@@ -424,6 +424,86 @@ The following templates must work with Debug Window Manual:
 - `p2kb-debugwin-semantic.lua` - Semantic element processing
 - `p2kb-non-floating-images.lua` - Image placement (shared)
 
+## Post-Processing Transformations Required
+
+### Character Encoding Fixes
+
+**Problem**: Special characters cause LaTeX compilation errors or display incorrectly.
+
+#### Complete Unicode Character Fixes
+
+**Script Available**: `fix-unicode-characters.py` handles all replacements automatically
+
+##### Multiplication Sign Fix
+- **Issue**: × (Unicode multiplication sign) appears as "Œ" in PDF
+- **Fix**: Replace all × with ASCII x
+- **Pattern**: `20×` → `20x`, `16×16` → `16x16`
+- **Count**: 38 occurrences
+
+##### Em Dash Fix
+- **Issue**: — (em dash) may not render correctly in LaTeX
+- **Fix**: Replace with -- (double hyphen)
+- **Pattern**: `difference—it's` → `difference--it's`
+- **Count**: 20 occurrences
+
+##### Comparison Operators Fix
+- **Issue**: ≤ and ≥ cause LaTeX errors
+- **Fix**: Replace with <= and >=
+- **Count**: 3 occurrences of ≤
+
+##### Arrow Fix
+- **Issue**: → (Unicode arrow) may not render
+- **Fix**: Replace with ->
+- **Count**: 6 occurrences
+
+##### Checkmark Removal from Lists
+- **Issue**: ✓ and ✗ at start of list items
+- **Fix**: Remove from beginning of list items
+- **Pattern**: `✓ **Fixed positioning**` → `**Fixed positioning**`
+- **Count**: 25 list items with ✓
+
+#### Greek Letter and Degree Symbol Fixes
+- **Issue**: θ (theta) and ° (degree) cause LaTeX compilation errors in inline code
+- **Fix in inline code blocks**: 
+  - Replace `<r>,<θ>°` with `<r>,<theta>deg`
+  - Replace standalone θ with `theta`
+  - Replace standalone ° with `deg` (except in temperature readings)
+- **Note**: Only required in inline code (backticks), not in regular text
+
+### List Formatting Fixes
+
+**Problem**: Numbered lists immediately after headings appear inline with heading text.
+
+#### "Your Mission:" Section Fix
+- **Issue**: Lists starting with "1. Your Mission:" appear inline
+- **Fix**: Add blank line after heading before numbered list
+- **Example**:
+```markdown
+<!-- BEFORE -->
+### Discovery #1: Real-Time Without the Overhead
+1. Your Mission: Monitor a temperature sensor
+
+<!-- AFTER -->
+### Discovery #1: Real-Time Without the Overhead
+
+1. Your Mission: Monitor a temperature sensor
+```
+- **Pattern**: Search for all headings followed immediately by numbered lists
+
+### LaTeX Style File Adjustments
+
+#### Code Block Padding Fix (p2kb-debugwin-content.sty)
+- **Issue**: Excessive 30pt left padding pushes code too far right
+- **Fix**: Reduce to 10pt in all tcolorbox environments
+- **Lines to modify**: All `left=30pt` → `left=10pt`
+- **Affects**: spin2block, pasm2block, debugblock, terminalblock, etc.
+
+#### Gray Background Removal (p2kb-debugwin-foundation.sty)
+- **Issue**: Gray background overlays colored code blocks
+- **Fix**: Comment out `backgroundcolor=\color{gray!10}` in lstset
+- **Line**: Around line 172 in foundation style
+- **Result**: Colored backgrounds show properly without gray overlay
+
 ## Success Metrics
 
 🎯 **Target**: Complete conversion to div-wrapped format with debug-specific semantics
@@ -436,6 +516,10 @@ The following templates must work with Debug Window Manual:
 - ✅ All discovery/experiment boxes properly styled
 - ✅ All screenshots integrated at 85% width
 - ✅ Professional appearance matching Smart Pins/DeSilva quality
+- ✅ All special characters properly escaped (×→x, θ→theta, °→deg)
+- ✅ All lists properly formatted with blank lines after headings
+- ✅ Code blocks properly indented (10pt left padding)
+- ✅ No gray background overlay on colored code blocks
 
 ## Why This Matters for Debug Window Manual
 
