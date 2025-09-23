@@ -1,0 +1,213 @@
+# Spin2 Language Construct: ABORT
+# Source: Spin2 v51 documentation
+# Critical for: Exception handling and error propagation
+
+construct: "ABORT"
+category: "control_flow"
+type: "exception_handling"
+
+metadata:
+  query_tags: ["exception", "error", "abort", "return", "error_handling", "propagation", "immediate_return"]
+  complexity: "intermediate"
+  use_cases: ["error_handling", "immediate_exit", "error_propagation", "cleanup", "validation_failure"]
+  common_questions:
+    - "How do I handle errors in Spin2?"
+    - "How do I exit from nested method calls?"
+    - "How do I propagate errors up the call stack?"
+    - "How do I return an error code immediately?"
+
+description: |
+  ABORT provides instant return from nested method calls with optional error values.
+  Executes back through call levels until caught by error handler (\) or returns
+  to caller. Each method can have abort trap code to handle cleanup.
+
+variants:
+  - variant: "simple_abort"
+    syntax: "ABORT"
+    description: "Abort with no return value (returns 0)"
+    example: |
+      PUB start()
+        IF NOT sensor_ready()
+          ABORT             ' Exit immediately with 0
+    
+  - variant: "value_abort"
+    syntax: "ABORT value"
+    description: "Abort with single return value"
+    example: |
+      PUB validate(x) : result
+        IF x < 0
+          ABORT -1          ' Return error code -1
+        result := x * 2
+        
+  - variant: "multiple_values"
+    syntax: "ABORT value1, value2, ..."
+    description: "Abort with multiple return values"
+    example: |
+      PUB read_sensor() : value, status
+        IF NOT connected
+          ABORT 0, ERROR_DISCONNECTED
+        value := sensor.read()
+        status := OK
+
+error_handling:
+  - mechanism: "abort_trap"
+    syntax: |
+      result := \method()
+    description: "Backslash operator catches abort and returns its value"
+    example: |
+      PUB main()
+        status := \risky_operation()
+        IF status < 0
+          handle_error(status)
+        ELSE
+          continue_normally()
+    
+  - mechanism: "cleanup_code"
+    description: "Code after ABORT trap executes during abort unwinding"
+    example: |
+      PUB open_file() | handle
+        handle := \do_open()
+        IF handle < 0
+          ' This executes if do_open aborts
+          cleanup_resources()
+          ABORT handle      ' Propagate error
+        RETURN handle
+
+propagation_rules:
+  - rule: "uncaught_propagation"
+    description: "Uncaught aborts propagate through call stack"
+    example: |
+      PUB method_a()
+        method_b()          ' If b aborts, a also aborts
+        
+  - rule: "trap_stops_propagation"
+    description: "Abort trap (\) stops propagation unless re-aborted"
+    example: |
+      PUB method_a()
+        result := \method_b()  ' Catches abort from b
+        ' Execution continues here
+        
+  - rule: "return_position"
+    description: "ABORT returns to caller or trap point, not call origin"
+
+special_behaviors:
+  - behavior: "immediate_return"
+    description: "ABORT immediately unwinds stack, no further code executes"
+    
+  - behavior: "cleanup_execution"
+    description: "Abort trap cleanup code runs during unwind"
+    
+  - behavior: "value_preservation"
+    description: "Abort values passed through call chain unchanged"
+    
+  - behavior: "no_finally_block"
+    description: "Unlike try-finally, cleanup only runs on abort"
+
+common_patterns:
+  - pattern: "validation_guard"
+    description: "Validate parameters at method entry"
+    code: |
+      PUB process(value, count)
+        IF value < MIN OR value > MAX
+          ABORT ERROR_OUT_OF_RANGE
+        IF count <= 0
+          ABORT ERROR_INVALID_COUNT
+        ' Main processing...
+    
+  - pattern: "resource_management"
+    description: "Ensure cleanup on error"
+    code: |
+      PUB use_resource() | handle
+        handle := \acquire_resource()
+        IF handle < 0
+          log_error(handle)
+          ABORT handle
+        ' Use resource...
+        release_resource(handle)
+    
+  - pattern: "error_aggregation"
+    description: "Collect errors from multiple operations"
+    code: |
+      PUB init_all() | err
+        err := \init_display()
+        IF err
+          ABORT err
+        err := \init_sensors()
+        IF err
+          cleanup_display()
+          ABORT err
+        RETURN SUCCESS
+    
+  - pattern: "optional_execution"
+    description: "Try operation but continue on failure"
+    code: |
+      PUB startup()
+        \load_config()      ' Try but don't care if fails
+        \init_logging()     ' Optional initialization
+        init_core()         ' This must succeed
+
+pitfalls:
+  - pitfall: "forgotten_trap"
+    description: "Forgetting to trap aborts loses error information"
+    wrong: |
+      risky_method()        ' Abort propagates uncaught
+      next_step()          ' Never executes if abort
+    correct: |
+      result := \risky_method()
+      IF result < 0
+        handle_error(result)
+      next_step()
+    
+  - pitfall: "cleanup_without_propagation"
+    description: "Forgetting to re-abort after cleanup"
+    wrong: |
+      handle := \open()
+      IF handle < 0
+        cleanup()
+        ' Error is swallowed here!
+    correct: |
+      handle := \open()
+      IF handle < 0
+        cleanup()
+        ABORT handle    ' Propagate error
+    
+  - pitfall: "abort_in_loop"
+    description: "ABORT exits entire method, not just loop"
+    wrong: |
+      REPEAT i FROM 0 TO 9
+        IF error_condition
+          ABORT         ' Exits method, not loop!
+    correct: |
+      REPEAT i FROM 0 TO 9
+        IF error_condition
+          QUIT          ' Exits loop only
+
+performance:
+  overhead: "Minimal during normal execution, stack unwind cost on abort"
+  optimization_tips:
+    - "Place most likely abort conditions first"
+    - "Minimize cleanup code in abort traps"
+    - "Consider return codes for high-frequency operations"
+
+comparison_with_quit:
+  - difference: "scope"
+    abort: "Exits method/call chain"
+    quit: "Exits current loop only"
+    
+  - difference: "values"
+    abort: "Can return multiple values"
+    quit: "No return value"
+    
+  - difference: "trapping"
+    abort: "Can be trapped with \"
+    quit: "Cannot be trapped"
+
+related_constructs:
+  - "quit.yaml"
+  - "next.yaml"
+  - "repeat.yaml"
+  - "method_definition.yaml"
+  
+related_methods:
+  - "language/spin2/constructs/if_elseif_else.yaml"
+  - "language/spin2/constructs/case.yaml"
