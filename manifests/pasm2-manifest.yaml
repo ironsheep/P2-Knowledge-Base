@@ -53,8 +53,8 @@ by_category:
     special:
       - {name: "abs", file: "abs.yaml", desc: "Absolute value"}
       - {name: "neg", file: "neg.yaml", desc: "Negate"}
-      - {name: "mins", file: "mins.yaml", desc: "Signed minimum"}
-      - {name: "maxs", file: "maxs.yaml", desc: "Signed maximum"}
+      - {name: "fges", file: "fges.yaml", desc: "Force greater or equal (signed MIN)"}
+      - {name: "fles", file: "fles.yaml", desc: "Force less or equal (signed MAX)"}
   
   control_flow:
     jumps:
@@ -70,8 +70,7 @@ by_category:
       - {name: "ijnz", file: "ijnz.yaml", desc: "Increment and jump if not zero"}
     
     repeat:
-      - {name: "rep", file: "rep.yaml", desc: "Repeat block"}
-      - {name: "reps", file: "reps.yaml", desc: "Repeat block with setup"}
+      - {name: "rep", file: "rep.yaml", desc: "Repeat block of instructions"}
   
   memory_access:
     byte_operations:
@@ -155,7 +154,7 @@ by_category:
       - {name: "addct3", file: "addct3.yaml", desc: "Add to CT3"}
 
 by_function:
-  math: ["add", "sub", "mul", "div", "abs", "neg", "min", "max"]
+  math: ["add", "sub", "mul", "div", "abs", "neg", "fge", "fle", "fges", "fles"]
   logic: ["and", "or", "xor", "not", "test", "cmp"]
   control: ["jmp", "call", "ret", "djnz", "tjz", "rep"]
   memory: ["rdlong", "wrlong", "rdword", "wrword", "rdbyte", "wrbyte"]
