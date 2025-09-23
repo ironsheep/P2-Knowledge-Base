@@ -19,8 +19,11 @@ Exit codes:
     2 - Script error
 
 Author: P2 Knowledge Base Team
-Version: 1.0.0
+Version: 1.2.0
 Last Updated: 2025-09-23
+Changelog:
+  1.2.0 - Added orphaned file detection (files not in manifests)
+  1.1.0 - Added incomplete manifest detection (total_entries vs actual)
 """
 
 import os
@@ -61,6 +64,9 @@ class ManifestVerifier:
         self.warnings = []
         self.checked_count = 0
         self.manifest_count = 0
+        self.incomplete_manifests = []
+        self.referenced_files = set()  # Track all referenced files
+        self.orphaned_files = []
         
     def verify_all(self) -> bool:
         """
@@ -112,10 +118,49 @@ class ManifestVerifier:
             if not self.verbose and len(obex_authors) > 3:
                 print(f"  {Colors.WHITE}(Checked {sample_size} of {len(obex_authors)} author manifests){Colors.RESET}")
         
+        # Check for orphaned files
+        self._check_orphaned_files()
+        
         # Print summary
         self._print_summary()
         
         return len(self.issues) == 0
+    
+    def _check_orphaned_files(self) -> None:
+        """Check for YAML files that exist but aren't referenced in any manifest."""
+        # Define directories to check for orphaned files
+        directories_to_check = [
+            "engineering/knowledge-base/P2/language/pasm2",
+            "engineering/knowledge-base/P2/language/spin2/methods",
+            "engineering/knowledge-base/P2/language/spin2/constructs",
+            "engineering/knowledge-base/P2/language/spin2/operators",
+            "engineering/knowledge-base/P2/architecture/smart-pins",
+            "engineering/knowledge-base/P2/architecture",
+            "engineering/knowledge-base/P2/hardware",
+            "engineering/knowledge-base/P2/community/obex/objects"
+        ]
+        
+        for dir_path in directories_to_check:
+            full_dir = self.base_path / dir_path
+            if not full_dir.exists():
+                continue
+                
+            # Find all YAML files in directory
+            yaml_files = list(full_dir.glob("*.yaml"))
+            
+            for yaml_file in yaml_files:
+                relative_path = yaml_file.relative_to(self.base_path)
+                if str(relative_path) not in self.referenced_files:
+                    # Check if it's a special file we should ignore
+                    filename = yaml_file.name
+                    if filename in ['pattern-index.yaml', 'README.yaml', 'index.yaml']:
+                        continue
+                    
+                    self.orphaned_files.append({
+                        'path': str(relative_path),
+                        'dir': dir_path,
+                        'name': filename
+                    })
     
     def _verify_manifest(self, name: str, path: str, indent: int = 0) -> None:
         """
@@ -152,6 +197,35 @@ class ManifestVerifier:
                     print(f"{indent_str}{Colors.YELLOW}⚠ {name}: No file references found{Colors.RESET}")
                 return
             
+            # Check for incomplete manifest (total_entries mismatch)
+            if 'total_entries' in manifest:
+                claimed_total = manifest.get('total_entries', 0)
+                actual_refs = len(file_refs)
+                if claimed_total > 0 and actual_refs < claimed_total * 0.5:  # Less than 50% listed
+                    self.incomplete_manifests.append({
+                        'path': path,
+                        'name': name,
+                        'claimed': claimed_total,
+                        'actual': actual_refs,
+                        'coverage': f"{(actual_refs/claimed_total*100):.1f}%"
+                    })
+            
+            # Check for base_path directory existence
+            if 'base_path' in manifest:
+                base_dir = self.base_path / manifest['base_path']
+                if base_dir.exists() and base_dir.is_dir():
+                    # Count actual files in directory
+                    actual_files = list(base_dir.glob('*.yaml'))
+                    if len(actual_files) > len(file_refs) * 1.5:  # Many more files than referenced
+                        if path not in [im['path'] for im in self.incomplete_manifests]:
+                            self.incomplete_manifests.append({
+                                'path': path,
+                                'name': name,
+                                'claimed': len(actual_files),
+                                'actual': len(file_refs),
+                                'coverage': f"{(len(file_refs)/len(actual_files)*100):.1f}%"
+                            })
+            
             # Check files
             missing = []
             checked = 0
@@ -170,7 +244,10 @@ class ManifestVerifier:
                     expected = Path(base_path) / file_ref if base_path else Path(file_ref)
                     resolved = self.base_path / expected
                 
-                if not resolved.exists():
+                # Track referenced files for orphan detection
+                if resolved.exists():
+                    self.referenced_files.add(str(resolved.relative_to(self.base_path)))
+                else:
                     missing.append(str(expected))
                     
             # Report results
@@ -247,6 +324,32 @@ class ManifestVerifier:
         print(f"Manifests checked: {self.manifest_count}")
         print(f"File references checked: {self.checked_count}")
         
+        if self.incomplete_manifests:
+            print(f"\n{Colors.YELLOW}Incomplete Manifests ({len(self.incomplete_manifests)}):{Colors.RESET}")
+            for im in self.incomplete_manifests:
+                print(f"  ⚠ {im['name']}: Only {im['actual']} of {im['claimed']} entries listed ({im['coverage']})")
+                print(f"    Path: {im['path']}")
+                if self.verbose:
+                    print(f"    This may prevent AI from discovering unlisted content")
+        
+        if self.orphaned_files:
+            # Group orphaned files by directory
+            by_dir = {}
+            for of in self.orphaned_files:
+                dir_name = of['dir']
+                if dir_name not in by_dir:
+                    by_dir[dir_name] = []
+                by_dir[dir_name].append(of['name'])
+            
+            print(f"\n{Colors.YELLOW}Orphaned Files ({len(self.orphaned_files)}):{Colors.RESET}")
+            print(f"{Colors.YELLOW}Files that exist but aren't referenced in any manifest:{Colors.RESET}")
+            for dir_name, files in by_dir.items():
+                print(f"  {dir_name}:")
+                for f in files[:5]:  # Show first 5 per directory
+                    print(f"    - {f}")
+                if len(files) > 5:
+                    print(f"    ... and {len(files) - 5} more")
+        
         if self.warnings:
             print(f"\n{Colors.YELLOW}Warnings ({len(self.warnings)}):{Colors.RESET}")
             for warning in self.warnings[:10]:
@@ -261,6 +364,12 @@ class ManifestVerifier:
                 
             print(f"\n{Colors.RED}{Colors.BOLD}❌ VERIFICATION FAILED{Colors.RESET}")
             print(f"{Colors.YELLOW}Please fix the above issues before release.{Colors.RESET}")
+        elif self.incomplete_manifests or self.orphaned_files:
+            print(f"\n{Colors.YELLOW}{Colors.BOLD}⚠️  VERIFICATION PASSED WITH WARNINGS{Colors.RESET}")
+            if self.incomplete_manifests:
+                print(f"{Colors.YELLOW}Some manifests are incomplete - AI may not discover all content.{Colors.RESET}")
+            if self.orphaned_files:
+                print(f"{Colors.YELLOW}Some files exist but aren't referenced - AI cannot discover them.{Colors.RESET}")
         else:
             print(f"\n{Colors.GREEN}{Colors.BOLD}✅ ALL MANIFEST LINKAGES VERIFIED SUCCESSFULLY!{Colors.RESET}")
             print(f"{Colors.GREEN}The knowledge base is ready for release.{Colors.RESET}")
