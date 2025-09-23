@@ -1,0 +1,558 @@
+{
+  "DAT": {
+    "instruction_names": [
+      "DAT"
+    ],
+    "brief_description": "code_and_data_statements",
+    "category": "",
+    "full_description": "",
+    "syntax": [],
+    "result": "",
+    "parameters": [],
+    "encoding_table": [],
+    "flags": {},
+    "related": [],
+    "explanation": "",
+    "notes": [],
+    "examples": [],
+    "warnings": [],
+    "timing": {}
+  },
+  "ALIGNL": {
+    "instruction_names": [
+      "ALIGNL"
+    ],
+    "brief_description": "data_statements",
+    "category": "",
+    "full_description": "",
+    "syntax": [],
+    "result": "The next data element is long-aligned in Hub RAM by emitting up to three bytes (each $00) prior.",
+    "parameters": [],
+    "encoding_table": [],
+    "flags": {},
+    "related": [],
+    "explanation": "",
+    "notes": [],
+    "examples": [],
+    "warnings": [],
+    "timing": {}
+  },
+  "ALIGNW": {
+    "instruction_names": [
+      "ALIGNW"
+    ],
+    "brief_description": "data_statements",
+    "category": "",
+    "full_description": "",
+    "syntax": [
+      "ALIGNW is only allowed in DAT blocks, not in in-line PASM."
+    ],
+    "result": "The next data element is word-aligned in Hub RAM by emitting zero or one byte ($00) prior.",
+    "parameters": [
+      "Code_and_data_statements are leading program code and/or data.",
+      "Data_statements begin word-aligned in Hub RAM."
+    ],
+    "encoding_table": [],
+    "flags": {},
+    "related": [],
+    "explanation": "ALIGNW aligns the next data element to the beginning of the next word of Hub RAM. ALIGNW is important to use\n\nwhen code requires certain data to begin on a word boundary (for access convenience and speed).\n\nALIGNW is only allowed in DAT blocks, not in in-line PASM.",
+    "notes": [],
+    "examples": [
+      "The following creates a data table of a byte ($11), a word ($2222), and a long ($33333333) meant for access from\nHub RAM.\n"
+    ],
+    "warnings": [],
+    "timing": {}
+  },
+  "ALTB": {
+    "instruction_names": [
+      "ALTB"
+    ],
+    "brief_description": "Alter bit",
+    "category": "Indirection Instruction - Alter subsequent BITxxx instruction.",
+    "full_description": "",
+    "syntax": [
+      "ALTB Dest, {#}Src",
+      "ALTB Dest",
+      "ALTB should be followed by a BITxxx instruction\u2014 it modi\ufb01es the BITxxx instruction's Dest value, enabling code",
+      "BITxxx instruction, and each time incrementing ALTB's 14-bit Dest value by one, effectively writes a stream of bit",
+      "themselves to only reading Src[4:0] for the bit number. For this reason, care must be taken when using ALTB with"
+    ],
+    "result": "The next instruction's pipelined Dest value is altered to be (Src + Dest[13:5]) & $1FF, or just Dest[13:5] for",
+    "parameters": [
+      "Dest is the register whose 14-bit value is the index, or the full bit address, for the BITxxx instruction to operate on.",
+      "Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[13:5]) for BITxxx) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution)."
+    ],
+    "encoding_table": [
+      "EEEE 1001100 11I DDDDDDDDD SSSSSSSSS                     D1                  \u2014                   \u2014                    2",
+      "EEEE 1001100 111 DDDDDDDDD 000000000                     D 1"
+    ],
+    "flags": {},
+    "related": [],
+    "explanation": "ALTB should be followed by a BITxxx instruction\u2014 it modi\ufb01es the BITxxx instruction's Dest value, enabling code\n\nto iterate through multiple bits of data across a range of Reg RAM. BITxxx's Dest value is changed to (Src +\n\nDest[13:5]) & $1FF (for syntax 1), or to Dest[13:5] (for syntax 2).\n\nDest[13:5] corresponds to the target long register's 9-bit address and Dest[4:0] is the bit ID within it; values of\n\n0\u201331 identify individual bits, by position, in least-signi\ufb01cant bit order. Iteratively executing ALTB followed by a\n\nBITxxx instruction, and each time incrementing ALTB's 14-bit Dest value by one, effectively writes a stream of bit\n\nvalues to Reg RAM as if it were all made of bit-sized registers.\n\nWarning: BITxxx instructions optionally operate on a range of bits, encoded in the Src value\u2014 they don't limit\n\nthemselves to only reading Src[4:0] for the bit number. For this reason, care must be taken when using ALTB with\n\nBITxxx or the index value (often used for the Src of the altered instruction) will be misinterpreted as multiple bits",
+    "notes": [],
+    "examples": [],
+    "warnings": [
+      "Warning: BITxxx instructions optionally operate on a range of bits, encoded in the Src value\u2014 they don't limit"
+    ],
+    "timing": {}
+  },
+  "ALTI": {
+    "instruction_names": [
+      "ALTI"
+    ],
+    "brief_description": "Alter instruction",
+    "category": "Indirection Instruction - Substitute next instruction's \ufb01eld values from template, per con\ufb01guration.",
+    "full_description": "",
+    "syntax": [
+      "ALTI Dest, {#}Src",
+      "ALTI Dest",
+      "ALTI substitutes \ufb01elds from Dest for one or more of the next instruction's pipelined Dest, Src, Result, Instr, FX,",
+      "and/or Cond values, and ALTI's Dest is then modi\ufb01ed per Src con\ufb01guration (syntax 1), or the entire Dest opcode",
+      "The Dest register contains the ALTI template; a 32-bit value with the following format similar to an opcode:"
+    ],
+    "result": "The next instruction's pipelined \ufb01eld value values are substituted from the Dest template, and Dest is",
+    "parameters": [
+      "Dest is the register whose value contains one or more of the next instruction's \ufb01eld substitutes or an entire 32-bit opcode for full substitution.",
+      "Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value describes the substitutions and Dest modi\ufb01cations to perform.",
+      "%rrr = Result \ufb01eld increment/decrement mask size",
+      "%ddd = Dest \ufb01eld increment/decrement mask size",
+      "%sss = Src \ufb01eld increment/decrement mask size",
+      "%RRR = Result/Instruction \ufb01eld control",
+      "%DDD = Dest \ufb01eld control",
+      "%SSS = Src \ufb01eld control"
+    ],
+    "encoding_table": [
+      "EEEE 1001101 00I DDDDDDDDD SSSSSSSSS                       D                \u2014                \u2014                     2",
+      "EEEE 1001101 001 DDDDDDDDD 101100100                      \u2014                 \u2014                \u2014                     2"
+    ],
+    "flags": {},
+    "related": [
+      "SETD",
+      "SETS",
+      "SETR",
+      "ALTD",
+      "ALTS",
+      "ALTR"
+    ],
+    "explanation": "ALTI substitutes \ufb01elds from Dest for one or more of the next instruction's pipelined Dest, Src, Result, Instr, FX,\n\nand/or Cond values, and ALTI's Dest is then modi\ufb01ed per Src con\ufb01guration (syntax 1), or the entire Dest opcode\n\n(instruction) is executed in place of the next instruction (syntax 2).\n\nThe Dest register contains the ALTI template; a 32-bit value with the following format similar to an opcode:\n\nBits            31:28 (4 bits)          27:19 (9 bits)          18            17:9 (9 bits)           8:0 (9 bits)\n\nField Description      Condition Field         Result Field     Indirect \"I\" Field   Dest \"D\" Field        Source \"S\" Field\n\nIn syntax 1, Src consists of the following six 3-bit \ufb01elds that describe \ufb01eld substitution and Dest modi\ufb01cation.\n\n%rrr_ddd_sss_RRR_DDD_SSS\n\n\u25cf   %rrr = Result \ufb01eld increment/decrement mask size\n\n\u25cf   %ddd = Dest \ufb01eld increment/decrement mask size\n\n\u25cf   %sss = Src \ufb01eld increment/decrement mask size\n\n\u25cf   %RRR = Result/Instruction \ufb01eld control\n\n\u25cf   %DDD = Dest \ufb01eld control\n\n\u25cf   %SSS = Src \ufb01eld control\n\nField Increment/Decrement Mask Size\n\n%rrr\n\n%ddd Mask Selection\n\n%sss\n\n000   Unlimited Increment/Decrement of 9 bits (default, full 512-register Reg RAM span)\n\n001   Limit Increment/Decrement to 8 LSBs (256-register Reg RAM looped buffer)\n\n010   Limit Increment/Decrement to 7 LSBs (128-register Reg RAM looped buffer)",
+    "notes": [],
+    "examples": [],
+    "warnings": [],
+    "timing": {}
+  },
+  "BITNOT": {
+    "instruction_names": [
+      "BITNOT"
+    ],
+    "brief_description": "Bit not",
+    "category": "Bit Operation Instruction - Toggle bit(s) to the opposite state.",
+    "full_description": "",
+    "syntax": [
+      "BITNOT Dest, {#}Src {WCZ}",
+      "BITNOT alters the Dest bit(s) designated by Src to their inverse state. All other bits are left unchanged.",
+      "instruction immediately precedes the BITNOT instruction; substituting SETQ's Dest[4:0] in place of value bits[9:5],"
+    ],
+    "result": "Dest bit(s) described by Src are toggled to their opposite state(s); the rest are left as-is.",
+    "parameters": [
+      "Dest is the register whose value will have one or more bits toggled.",
+      "Src is a register, 9-bit literal, or 10-bit augmented literal whose value identi\ufb01es the bit(s) to modify.",
+      "WCZ is an optional effect to update \ufb02ags."
+    ],
+    "encoding_table": [
+      "EEEE 0100111 CZI DDDDDDDDD SSSSSSSSS                  D         Original D base bit Original D base bit          2"
+    ],
+    "flags": {},
+    "related": [],
+    "explanation": "BITNOT alters the Dest bit(s) designated by Src to their inverse state. All other bits are left unchanged.\n\nSrc[4:0] indicates the bit number (0\u201431). For a range of bits, Src[4:0] indicates the base bit number (0\u201431) and\n\nSrc[9:5] indicates how many contiguous bits beyond the base should be affected (1\u201331).\n\nA 9-bit literal Src is enough to express the base bit (Src[4:0]) and a range of up to 16 contiguous bits (Src[8:5]). If\n\nneeded, use the augmented literal feature (##Src) to augment Src to a 10-bit literal value\u2014 this inserts an AUGS\n\ninstruction prior.\n\nWhen Src is a register, the register's value bits [9:0] are used as-is to form the 10-bit ID range, unless a SETQ\n\ninstruction immediately precedes the BITNOT instruction; substituting SETQ's Dest[4:0] in place of value bits[9:5],\n\nfor BITNOT's use.\n\nIf the WCZ effect is speci\ufb01ed, the C and Z \ufb02ags are updated to the original state of Dest's base bit, identi\ufb01ed by Src.",
+    "notes": [],
+    "examples": [],
+    "warnings": [],
+    "timing": {}
+  },
+  "BITRND": {
+    "instruction_names": [
+      "BITRND"
+    ],
+    "brief_description": "Bit random",
+    "category": "Bit Operation Instruction - Set bit(s) random low/high.",
+    "full_description": "",
+    "syntax": [
+      "BITRND Dest, {#}Src {WCZ}",
+      "BITRND alters the Dest bit(s) designated by Src to each be an independent random low and high value, based on",
+      "instruction immediately precedes the BITRND instruction; substituting SETQ's Dest[4:0] in place of value bits[9:5],"
+    ],
+    "result": "Dest bit(s) described by Src are set to Z or !Z; the rest are left as-is.",
+    "parameters": [
+      "Dest is the register whose value will have one or more bits set randomly low or high.",
+      "Src is a register, 9-bit literal, or 10-bit augmented literal whose value identi\ufb01es the bit(s) to modify.",
+      "WCZ is an optional effect to update \ufb02ags.",
+      "Dest is the register whose value will have one or more bits set to Z or !Z.",
+      "Src is a register, 9-bit literal, or 10-bit augmented literal whose value identi\ufb01es the bit(s) to modify.",
+      "WCZ is an optional effect to update \ufb02ags."
+    ],
+    "encoding_table": [
+      "EEEE 0100110 CZI DDDDDDDDD SSSSSSSSS                   D         Original D base bit Original D base bit         2",
+      "EEEE 0100100 CZI DDDDDDDDD SSSSSSSSS                   D         Original D base bit Original D base bit         2",
+      "EEEE 0100101 CZI DDDDDDDDD SSSSSSSSS                   D         Original D base bit Original D base bit         2"
+    ],
+    "flags": {},
+    "related": [],
+    "explanation": "BITZ or BITNZ alters the Dest bit(s) designated by Src to equal the state, or inverse state, of the Z \ufb02ag. All other\n\nbits are left unchanged.",
+    "notes": [],
+    "examples": [],
+    "warnings": [],
+    "timing": {}
+  },
+  "BMASK": {
+    "instruction_names": [
+      "BMASK"
+    ],
+    "brief_description": "Bit mask",
+    "category": "Bit Operation Instruction - Get 1..32-bit mask into Dest.",
+    "full_description": "",
+    "syntax": [
+      "BMASK Dest, {#}Src",
+      "BMASK Dest",
+      "BMASK generates an LSB-justi\ufb01ed bit mask (all ones) of Src+1 or Dest+1 length and stores it in Dest. The size",
+      "In effect, Dest becomes (%10 << size) - 1 via the BMASK instruction."
+    ],
+    "result": "Bit mask of size Src+1, or Dest+1 (1\u201432 bits) is stored into Dest.",
+    "parameters": [
+      "Dest is the register in which to store the generated bit mask and optionally begins by containing the 5-bit mask size it is requesting (syntax 2).",
+      "Src is an optional register or 5-bit literal whose value is the size of the bit mask to generate.",
+      "A size value of 0 generates a bit mask of %00000000_00000000_00000000_00000001.",
+      "A size value of 5 generates a bit mask of %00000000_00000000_00000000_00111111.",
+      "A size value of 15 generates a bit mask of %00000000_00000000_11111111_11111111."
+    ],
+    "encoding_table": [
+      "EEEE 1001110 01I DDDDDDDDD SSSSSSSSS                  D                \u2014                  \u2014                   2",
+      "EEEE 1001110 010 DDDDDDDDD DDDDDDDDD                  D                \u2014                  \u2014                   2"
+    ],
+    "flags": {},
+    "related": [],
+    "explanation": "BMASK generates an LSB-justi\ufb01ed bit mask (all ones) of Src+1 or Dest+1 length and stores it in Dest. The size\n\nvalue, whether speci\ufb01ed by Src or Dest, is in the range 0\u201431 to generate 1 to 32 bits of bit mask.\n\nIn effect, Dest becomes (%10 << size) - 1 via the BMASK instruction.\n\n\u25cf   A size value of 0 generates a bit mask of %00000000_00000000_00000000_00000001.\n\n\u25cf   A size value of 5 generates a bit mask of %00000000_00000000_00000000_00111111.\n\n\u25cf   A size value of 15 generates a bit mask of %00000000_00000000_11111111_11111111.\n\nA bit mask is often useful in bitwise operations (AND, OR, XOR) to \ufb01lter out or affect special groups of bits.",
+    "notes": [],
+    "examples": [],
+    "warnings": [],
+    "timing": {}
+  },
+  "CMPM": {
+    "instruction_names": [
+      "CMPM"
+    ],
+    "brief_description": "Compare most signi\ufb01cant bit",
+    "category": "Math Instruction - Compare two unsigned values, get MSB of difference.",
+    "full_description": "",
+    "syntax": [
+      "CMPM Dest, {#}Src {WC|WZ|WCZ}",
+      "CMPM compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally setting the C"
+    ],
+    "result": "Greater/lesser and equality status is optionally written to the C and Z \ufb02ags.",
+    "parameters": [
+      "Dest is the register containing the value to compare with that of Src.",
+      "Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.",
+      "WC, WZ, or WCZ are optional effects to update \ufb02ags."
+    ],
+    "encoding_table": [
+      "EEEE 0010101 CZI DDDDDDDDD SSSSSSSSS                  \u2014             Result[31]         D=S                    2"
+    ],
+    "flags": {},
+    "related": [],
+    "explanation": "CMPM compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally setting the C\n\nand Z \ufb02ags accordingly.\n\nIf the WC or WCZ effect is speci\ufb01ed, the C \ufb02ag is updated to the MSB of (Dest - Src).\n\nIf the WZ or WCZ effect is speci\ufb01ed, the Z \ufb02ag is set (1) if Dest equals Src.",
+    "notes": [],
+    "examples": [],
+    "warnings": [],
+    "timing": {}
+  },
+  "NOP": {
+    "instruction_names": [
+      "NOP"
+    ],
+    "brief_description": "No operation",
+    "category": "Miscellaneous Instruction - No operation, just elapse two cycles.",
+    "full_description": "",
+    "syntax": [],
+    "result": "",
+    "parameters": [],
+    "encoding_table": [],
+    "flags": {},
+    "related": [],
+    "explanation": "",
+    "notes": [],
+    "examples": [],
+    "warnings": [],
+    "timing": {}
+  },
+  "POLLSE1": {
+    "instruction_names": [
+      "POLLSE1",
+      "POLLSE2",
+      "POLLSE3",
+      "POLLSE4"
+    ],
+    "brief_description": "Poll selectable event 1/2/3/4",
+    "category": "Event Monitor Instruction - Retrieve and clear selectable event 1, 2, 3, or 4 \ufb02ag.",
+    "full_description": "",
+    "syntax": [],
+    "result": "Selectable event \ufb02ag 1, 2, 3, or 4 state is optionally copied into C and/or Z, then it is cleared.",
+    "parameters": [
+      "WC, WZ, or WCZ are optional effects to update \ufb02ags."
+    ],
+    "encoding_table": [
+      "EEEE 1101011 CZ0 000000100 000100100                  \u2014             SE1 Event          SE1 Event                2",
+      "EEEE 1101011 CZ0 000000101 000100100                  \u2014             SE2 Event          SE2 Event                2",
+      "EEEE 1101011 CZ0 000000110 000100100                  \u2014             SE3 Event          SE3 Event                2",
+      "EEEE 1101011 CZ0 000000111 000100100                  \u2014             SE4 Event          SE4 Event                2"
+    ],
+    "flags": {},
+    "related": [
+      "SETSEx",
+      "WAITSEx",
+      "JSEx",
+      "JNSEx"
+    ],
+    "explanation": "POLLSE1, POLLSE2, POLLSE3, or POLLSE4 copies the state of the selectable event 1, 2, 3, or 4 \ufb02ag into C and/or\n\nZ and then clears the \ufb02ag (unless it's being set again by the event sensor).\n\nIf the WC, WZ, or WCZ effect is speci\ufb01ed, the C \ufb02ag and/or Z \ufb02ag is updated to the state of the corresponding\n\nselectable event \ufb02ag prior to clearing it.\n\nThe selectable event 1, 2, 3, or 4 \ufb02ag is set whenever the corresponding con\ufb01gured event occurs. The selectable\n\nevent \ufb02ag is cleared upon execution of the corresponding SETSEx, POLLSEx, WAITSEx, JSEx, or JNSEx\n\ninstructions.",
+    "notes": [],
+    "examples": [],
+    "warnings": [],
+    "timing": {}
+  },
+  "POLLSE2": {
+    "instruction_names": [
+      "POLLSE1",
+      "POLLSE2",
+      "POLLSE3",
+      "POLLSE4"
+    ],
+    "brief_description": "Poll selectable event 1/2/3/4",
+    "category": "Event Monitor Instruction - Retrieve and clear selectable event 1, 2, 3, or 4 \ufb02ag.",
+    "full_description": "",
+    "syntax": [],
+    "result": "Selectable event \ufb02ag 1, 2, 3, or 4 state is optionally copied into C and/or Z, then it is cleared.",
+    "parameters": [
+      "WC, WZ, or WCZ are optional effects to update \ufb02ags."
+    ],
+    "encoding_table": [
+      "EEEE 1101011 CZ0 000000100 000100100                  \u2014             SE1 Event          SE1 Event                2",
+      "EEEE 1101011 CZ0 000000101 000100100                  \u2014             SE2 Event          SE2 Event                2",
+      "EEEE 1101011 CZ0 000000110 000100100                  \u2014             SE3 Event          SE3 Event                2",
+      "EEEE 1101011 CZ0 000000111 000100100                  \u2014             SE4 Event          SE4 Event                2"
+    ],
+    "flags": {},
+    "related": [
+      "SETSEx",
+      "WAITSEx",
+      "JSEx",
+      "JNSEx"
+    ],
+    "explanation": "POLLSE1, POLLSE2, POLLSE3, or POLLSE4 copies the state of the selectable event 1, 2, 3, or 4 \ufb02ag into C and/or\n\nZ and then clears the \ufb02ag (unless it's being set again by the event sensor).\n\nIf the WC, WZ, or WCZ effect is speci\ufb01ed, the C \ufb02ag and/or Z \ufb02ag is updated to the state of the corresponding\n\nselectable event \ufb02ag prior to clearing it.\n\nThe selectable event 1, 2, 3, or 4 \ufb02ag is set whenever the corresponding con\ufb01gured event occurs. The selectable\n\nevent \ufb02ag is cleared upon execution of the corresponding SETSEx, POLLSEx, WAITSEx, JSEx, or JNSEx\n\ninstructions.",
+    "notes": [],
+    "examples": [],
+    "warnings": [],
+    "timing": {}
+  },
+  "POLLSE3": {
+    "instruction_names": [
+      "POLLSE1",
+      "POLLSE2",
+      "POLLSE3",
+      "POLLSE4"
+    ],
+    "brief_description": "Poll selectable event 1/2/3/4",
+    "category": "Event Monitor Instruction - Retrieve and clear selectable event 1, 2, 3, or 4 \ufb02ag.",
+    "full_description": "",
+    "syntax": [],
+    "result": "Selectable event \ufb02ag 1, 2, 3, or 4 state is optionally copied into C and/or Z, then it is cleared.",
+    "parameters": [
+      "WC, WZ, or WCZ are optional effects to update \ufb02ags."
+    ],
+    "encoding_table": [
+      "EEEE 1101011 CZ0 000000100 000100100                  \u2014             SE1 Event          SE1 Event                2",
+      "EEEE 1101011 CZ0 000000101 000100100                  \u2014             SE2 Event          SE2 Event                2",
+      "EEEE 1101011 CZ0 000000110 000100100                  \u2014             SE3 Event          SE3 Event                2",
+      "EEEE 1101011 CZ0 000000111 000100100                  \u2014             SE4 Event          SE4 Event                2"
+    ],
+    "flags": {},
+    "related": [
+      "SETSEx",
+      "WAITSEx",
+      "JSEx",
+      "JNSEx"
+    ],
+    "explanation": "POLLSE1, POLLSE2, POLLSE3, or POLLSE4 copies the state of the selectable event 1, 2, 3, or 4 \ufb02ag into C and/or\n\nZ and then clears the \ufb02ag (unless it's being set again by the event sensor).\n\nIf the WC, WZ, or WCZ effect is speci\ufb01ed, the C \ufb02ag and/or Z \ufb02ag is updated to the state of the corresponding\n\nselectable event \ufb02ag prior to clearing it.\n\nThe selectable event 1, 2, 3, or 4 \ufb02ag is set whenever the corresponding con\ufb01gured event occurs. The selectable\n\nevent \ufb02ag is cleared upon execution of the corresponding SETSEx, POLLSEx, WAITSEx, JSEx, or JNSEx\n\ninstructions.",
+    "notes": [],
+    "examples": [],
+    "warnings": [],
+    "timing": {}
+  },
+  "POLLSE4": {
+    "instruction_names": [
+      "POLLSE1",
+      "POLLSE2",
+      "POLLSE3",
+      "POLLSE4"
+    ],
+    "brief_description": "Poll selectable event 1/2/3/4",
+    "category": "Event Monitor Instruction - Retrieve and clear selectable event 1, 2, 3, or 4 \ufb02ag.",
+    "full_description": "",
+    "syntax": [],
+    "result": "Selectable event \ufb02ag 1, 2, 3, or 4 state is optionally copied into C and/or Z, then it is cleared.",
+    "parameters": [
+      "WC, WZ, or WCZ are optional effects to update \ufb02ags."
+    ],
+    "encoding_table": [
+      "EEEE 1101011 CZ0 000000100 000100100                  \u2014             SE1 Event          SE1 Event                2",
+      "EEEE 1101011 CZ0 000000101 000100100                  \u2014             SE2 Event          SE2 Event                2",
+      "EEEE 1101011 CZ0 000000110 000100100                  \u2014             SE3 Event          SE3 Event                2",
+      "EEEE 1101011 CZ0 000000111 000100100                  \u2014             SE4 Event          SE4 Event                2"
+    ],
+    "flags": {},
+    "related": [
+      "SETSEx",
+      "WAITSEx",
+      "JSEx",
+      "JNSEx"
+    ],
+    "explanation": "POLLSE1, POLLSE2, POLLSE3, or POLLSE4 copies the state of the selectable event 1, 2, 3, or 4 \ufb02ag into C and/or\n\nZ and then clears the \ufb02ag (unless it's being set again by the event sensor).\n\nIf the WC, WZ, or WCZ effect is speci\ufb01ed, the C \ufb02ag and/or Z \ufb02ag is updated to the state of the corresponding\n\nselectable event \ufb02ag prior to clearing it.\n\nThe selectable event 1, 2, 3, or 4 \ufb02ag is set whenever the corresponding con\ufb01gured event occurs. The selectable\n\nevent \ufb02ag is cleared upon execution of the corresponding SETSEx, POLLSEx, WAITSEx, JSEx, or JNSEx\n\ninstructions.",
+    "notes": [],
+    "examples": [],
+    "warnings": [],
+    "timing": {}
+  },
+  "WAITSE1": {
+    "instruction_names": [
+      "WAITSE1",
+      "WAITSE2",
+      "WAITSE3",
+      "WAITSE4"
+    ],
+    "brief_description": "Wait selectable event 1/2/3/4",
+    "category": "Event Monitor Instruction - Wait for and clear selectable event 1, 2, 3, or 4 \ufb02ag.",
+    "full_description": "",
+    "syntax": [],
+    "result": "Wait for selectable event, then clear the \ufb02ag; optionally aborting on timeout and setting C and/or Z on",
+    "parameters": [
+      "WC, WZ, or WCZ are optional effects to update \ufb02ags."
+    ],
+    "encoding_table": [
+      "EEEE 1101011 CZ0 000010100 000100100                 \u2014          Timeout Abort       Timeout Abort              2+",
+      "EEEE 1101011 CZ0 000010101 000100100                 \u2014          Timeout Abort       Timeout Abort              2+",
+      "EEEE 1101011 CZ0 000010110 000100100                 \u2014          Timeout Abort       Timeout Abort              2+",
+      "EEEE 1101011 CZ0 000010111 000100100                 \u2014          Timeout Abort       Timeout Abort              2+"
+    ],
+    "flags": {},
+    "related": [
+      "SETSEx",
+      "POLLSEx",
+      "JSEx",
+      "JNSEx"
+    ],
+    "explanation": "WAITSE1, WAITSE2, WAITSE3, or WAITSE4 waits for a selectable event to occur (unless the event \ufb02ag is already\n\nset), then clears the event \ufb02ag (unless it's being set again by the event sensor) and resumes execution at the next\n\ninstruction. Optionally, WAITSEx can time-out if the selectable event doesn't occur soon enough; setting C and/or\n\nZ \ufb02ags and then resuming execution at the next instruction.\n\nTo set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSEx.",
+    "notes": [],
+    "examples": [],
+    "warnings": [],
+    "timing": {}
+  },
+  "WAITSE2": {
+    "instruction_names": [
+      "WAITSE1",
+      "WAITSE2",
+      "WAITSE3",
+      "WAITSE4"
+    ],
+    "brief_description": "Wait selectable event 1/2/3/4",
+    "category": "Event Monitor Instruction - Wait for and clear selectable event 1, 2, 3, or 4 \ufb02ag.",
+    "full_description": "",
+    "syntax": [],
+    "result": "Wait for selectable event, then clear the \ufb02ag; optionally aborting on timeout and setting C and/or Z on",
+    "parameters": [
+      "WC, WZ, or WCZ are optional effects to update \ufb02ags."
+    ],
+    "encoding_table": [
+      "EEEE 1101011 CZ0 000010100 000100100                 \u2014          Timeout Abort       Timeout Abort              2+",
+      "EEEE 1101011 CZ0 000010101 000100100                 \u2014          Timeout Abort       Timeout Abort              2+",
+      "EEEE 1101011 CZ0 000010110 000100100                 \u2014          Timeout Abort       Timeout Abort              2+",
+      "EEEE 1101011 CZ0 000010111 000100100                 \u2014          Timeout Abort       Timeout Abort              2+"
+    ],
+    "flags": {},
+    "related": [
+      "SETSEx",
+      "POLLSEx",
+      "JSEx",
+      "JNSEx"
+    ],
+    "explanation": "WAITSE1, WAITSE2, WAITSE3, or WAITSE4 waits for a selectable event to occur (unless the event \ufb02ag is already\n\nset), then clears the event \ufb02ag (unless it's being set again by the event sensor) and resumes execution at the next\n\ninstruction. Optionally, WAITSEx can time-out if the selectable event doesn't occur soon enough; setting C and/or\n\nZ \ufb02ags and then resuming execution at the next instruction.\n\nTo set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSEx.",
+    "notes": [],
+    "examples": [],
+    "warnings": [],
+    "timing": {}
+  },
+  "WAITSE3": {
+    "instruction_names": [
+      "WAITSE1",
+      "WAITSE2",
+      "WAITSE3",
+      "WAITSE4"
+    ],
+    "brief_description": "Wait selectable event 1/2/3/4",
+    "category": "Event Monitor Instruction - Wait for and clear selectable event 1, 2, 3, or 4 \ufb02ag.",
+    "full_description": "",
+    "syntax": [],
+    "result": "Wait for selectable event, then clear the \ufb02ag; optionally aborting on timeout and setting C and/or Z on",
+    "parameters": [
+      "WC, WZ, or WCZ are optional effects to update \ufb02ags."
+    ],
+    "encoding_table": [
+      "EEEE 1101011 CZ0 000010100 000100100                 \u2014          Timeout Abort       Timeout Abort              2+",
+      "EEEE 1101011 CZ0 000010101 000100100                 \u2014          Timeout Abort       Timeout Abort              2+",
+      "EEEE 1101011 CZ0 000010110 000100100                 \u2014          Timeout Abort       Timeout Abort              2+",
+      "EEEE 1101011 CZ0 000010111 000100100                 \u2014          Timeout Abort       Timeout Abort              2+"
+    ],
+    "flags": {},
+    "related": [
+      "SETSEx",
+      "POLLSEx",
+      "JSEx",
+      "JNSEx"
+    ],
+    "explanation": "WAITSE1, WAITSE2, WAITSE3, or WAITSE4 waits for a selectable event to occur (unless the event \ufb02ag is already\n\nset), then clears the event \ufb02ag (unless it's being set again by the event sensor) and resumes execution at the next\n\ninstruction. Optionally, WAITSEx can time-out if the selectable event doesn't occur soon enough; setting C and/or\n\nZ \ufb02ags and then resuming execution at the next instruction.\n\nTo set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSEx.",
+    "notes": [],
+    "examples": [],
+    "warnings": [],
+    "timing": {}
+  },
+  "WAITSE4": {
+    "instruction_names": [
+      "WAITSE1",
+      "WAITSE2",
+      "WAITSE3",
+      "WAITSE4"
+    ],
+    "brief_description": "Wait selectable event 1/2/3/4",
+    "category": "Event Monitor Instruction - Wait for and clear selectable event 1, 2, 3, or 4 \ufb02ag.",
+    "full_description": "",
+    "syntax": [],
+    "result": "Wait for selectable event, then clear the \ufb02ag; optionally aborting on timeout and setting C and/or Z on",
+    "parameters": [
+      "WC, WZ, or WCZ are optional effects to update \ufb02ags."
+    ],
+    "encoding_table": [
+      "EEEE 1101011 CZ0 000010100 000100100                 \u2014          Timeout Abort       Timeout Abort              2+",
+      "EEEE 1101011 CZ0 000010101 000100100                 \u2014          Timeout Abort       Timeout Abort              2+",
+      "EEEE 1101011 CZ0 000010110 000100100                 \u2014          Timeout Abort       Timeout Abort              2+",
+      "EEEE 1101011 CZ0 000010111 000100100                 \u2014          Timeout Abort       Timeout Abort              2+"
+    ],
+    "flags": {},
+    "related": [
+      "SETSEx",
+      "POLLSEx",
+      "JSEx",
+      "JNSEx"
+    ],
+    "explanation": "WAITSE1, WAITSE2, WAITSE3, or WAITSE4 waits for a selectable event to occur (unless the event \ufb02ag is already\n\nset), then clears the event \ufb02ag (unless it's being set again by the event sensor) and resumes execution at the next\n\ninstruction. Optionally, WAITSEx can time-out if the selectable event doesn't occur soon enough; setting C and/or\n\nZ \ufb02ags and then resuming execution at the next instruction.\n\nTo set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSEx.",
+    "notes": [],
+    "examples": [],
+    "warnings": [],
+    "timing": {}
+  }
+}

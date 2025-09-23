@@ -1,0 +1,126 @@
+- instruction: DAT
+  status: NEW - not in YAMLs
+- instruction: ALIGNL
+  status: NEW - not in YAMLs
+- instruction: ALIGNW
+  status: NEW - not in YAMLs
+- instruction: ALTB
+  manual_has:
+    examples: 0
+    explanation: 1050
+    notes: 0
+    parameters: 2
+  missing:
+  - explanation
+- instruction: ALTI
+  manual_has:
+    examples: 0
+    explanation: 1368
+    notes: 0
+    parameters: 8
+  missing:
+  - explanation
+- instruction: BITNOT
+  manual_has:
+    examples: 0
+    explanation: 935
+    notes: 0
+    parameters: 3
+  missing:
+  - explanation
+- instruction: BITRND
+  manual_has:
+    examples: 0
+    explanation: 142
+    notes: 0
+    parameters: 6
+  missing:
+  - explanation
+- instruction: BMASK
+  manual_has:
+    examples: 0
+    explanation: 647
+    notes: 0
+    parameters: 5
+  missing:
+  - explanation
+- instruction: CMPM
+  manual_has:
+    examples: 0
+    explanation: 300
+    notes: 0
+    parameters: 3
+  missing:
+  - explanation
+- instruction: POLLSE1
+  manual_has:
+    examples: 0
+    explanation: 570
+    notes: 0
+    parameters: 1
+  missing:
+  - explanation
+  - parameters
+- instruction: POLLSE2
+  manual_has:
+    examples: 0
+    explanation: 570
+    notes: 0
+    parameters: 1
+  missing:
+  - explanation
+  - parameters
+- instruction: POLLSE3
+  manual_has:
+    examples: 0
+    explanation: 570
+    notes: 0
+    parameters: 1
+  missing:
+  - explanation
+  - parameters
+- instruction: POLLSE4
+  manual_has:
+    examples: 0
+    explanation: 570
+    notes: 0
+    parameters: 1
+  missing:
+  - explanation
+  - parameters
+- instruction: WAITSE1
+  manual_has:
+    examples: 0
+    explanation: 511
+    notes: 0
+    parameters: 1
+  missing:
+  - explanation
+  - parameters
+- instruction: WAITSE2
+  manual_has:
+    examples: 0
+    explanation: 511
+    notes: 0
+    parameters: 1
+  missing:
+  - explanation
+  - parameters
+- instruction: WAITSE3
+  manual_has:
+    examples: 0
+    explanation: 511
+    notes: 0
+    parameters: 1
+  missing:
+  - explanation
+  - parameters
+- instruction: WAITSE4
+  manual_has:
+    examples: 0
+    explanation: 511
+    notes: 0
+    parameters: 1
+  missing:
+  - explanation
+  - parameters
