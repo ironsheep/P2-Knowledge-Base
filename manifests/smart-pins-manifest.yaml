@@ -19,10 +19,10 @@ overview:
 smart_pin_modes:
   digital_io:
     basic:
-      - {name: "00000", file: "smart-pins/smart-pin-00000-normal.yaml", desc: "Normal digital I/O (default)"}
-      - {name: "00001", file: "smart-pins/smart-pin-00001-long-repository.yaml", desc: "Long repository mode"}
-      - {name: "00010", file: "smart-pins/smart-pin-00010-adc-repository.yaml", desc: "ADC/count repository"}
-      - {name: "00011", file: "smart-pins/smart-pin-00011-adc-filter.yaml", desc: "ADC/count filter mode"}
+      - {name: "00000", file: "smart-pins/smart-pin-00000-normal-mode.yaml", desc: "Normal digital I/O (default)"}
+      - {name: "00001", file: "smart-pins/smart-pin-00001-long-repository-or-dac-noise.yaml", desc: "Long repository mode"}
+      - {name: "00010", file: "smart-pins/smart-pin-00010-dac-16bit-pseudo-random-dither.yaml", desc: "ADC/count repository"}
+      - {name: "00011", file: "smart-pins/smart-pin-00011-dac-16bit-pwm-dither.yaml", desc: "ADC/count filter mode"}
     
   pulse_timing:
     measurement:

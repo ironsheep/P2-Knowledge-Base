@@ -102,30 +102,30 @@ by_category:
   
   operators:
     arithmetic:
-      - {name: "add", file: "operators/add.yaml", desc: "Addition (+)"}
-      - {name: "subtract", file: "operators/subtract.yaml", desc: "Subtraction (-)"}
-      - {name: "multiply", file: "operators/multiply.yaml", desc: "Multiplication (*)"}
-      - {name: "divide", file: "operators/divide.yaml", desc: "Division (/)"}
-      - {name: "modulo", file: "operators/modulo.yaml", desc: "Modulo (//)"}
+      - {name: "add", file: "operators/op_add.yaml", desc: "Addition (+)"}
+      - {name: "subtract", file: "operators/op_sub.yaml", desc: "Subtraction (-)"}
+      - {name: "multiply", file: "operators/op_mul.yaml", desc: "Multiplication (*)"}
+      - {name: "divide", file: "operators/op_div.yaml", desc: "Division (/)"}
+      - {name: "modulo", file: "operators/op_divdiv.yaml", desc: "Modulo (//)"}
     
     bitwise:
-      - {name: "and", file: "operators/and.yaml", desc: "Bitwise AND (&)"}
-      - {name: "or", file: "operators/or.yaml", desc: "Bitwise OR (|)"}
-      - {name: "xor", file: "operators/xor.yaml", desc: "Bitwise XOR (^)"}
-      - {name: "not", file: "operators/not.yaml", desc: "Bitwise NOT (!)"}
-      - {name: "shift_left", file: "operators/shift_left.yaml", desc: "Shift left (<<)"}
-      - {name: "shift_right", file: "operators/shift_right.yaml", desc: "Shift right (>>)"}
+      - {name: "and", file: "operators/op_and.yaml", desc: "Bitwise AND (&)"}
+      - {name: "or", file: "operators/op_or.yaml", desc: "Bitwise OR (|)"}
+      - {name: "xor", file: "operators/op_xor.yaml", desc: "Bitwise XOR (^)"}
+      - {name: "not", file: "operators/op_not.yaml", desc: "Bitwise NOT (!)"}
+      - {name: "shift_left", file: "operators/op_shl.yaml", desc: "Shift left (<<)"}
+      - {name: "shift_right", file: "operators/op_shr.yaml", desc: "Shift right (>>)"}
     
     comparison:
-      - {name: "equal", file: "operators/equal.yaml", desc: "Equal (==)"}
-      - {name: "not_equal", file: "operators/not_equal.yaml", desc: "Not equal (<>)"}
-      - {name: "less_than", file: "operators/less_than.yaml", desc: "Less than (<)"}
-      - {name: "greater_than", file: "operators/greater_than.yaml", desc: "Greater than (>)"}
+      - {name: "equal", file: "operators/op_eqeq.yaml", desc: "Equal (==)"}
+      - {name: "not_equal", file: "operators/op_ltgt.yaml", desc: "Not equal (<>)"}
+      - {name: "less_than", file: "operators/op_lt.yaml", desc: "Less than (<)"}
+      - {name: "greater_than", file: "operators/op_gt.yaml", desc: "Greater than (>)"}
     
     assignment:
-      - {name: "assign", file: "operators/assign.yaml", desc: "Assignment (:=)"}
-      - {name: "add_assign", file: "operators/add_assign.yaml", desc: "Add and assign (+=)"}
-      - {name: "sub_assign", file: "operators/sub_assign.yaml", desc: "Subtract and assign (-=)"}
+      - {name: "assign", file: "operators/op_assign.yaml", desc: "Assignment (:=)"}
+      - {name: "add_assign", file: "operators/op_addmodulo.yaml", desc: "Add and assign (+=)"}
+      - {name: "sub_assign", file: "operators/op_subdot.yaml", desc: "Subtract and assign (-=)"}
 
 by_function:
   control: ["repeat", "if", "case", "abort", "quit", "next"]
