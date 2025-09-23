@@ -1,0 +1,166 @@
+category: logic
+description: Logical and comparison operations
+instruction_count: 41
+base_path: engineering/knowledge-base/P2/language/pasm2/
+instructions:
+- name: and
+  file: and.yaml
+  desc: 'AND or ANDN performs a bitwise AND of the value in Src (or !Src) into that
+    of Dest. Result: Dest ...'
+- name: andn
+  file: andn.yaml
+  desc: 'AND or ANDN performs a bitwise AND of the value in Src (or !Src) into that
+    of Dest. Result: Dest ...'
+- name: bitnot
+  file: bitnot.yaml
+  desc: BITNOT alters the Dest bit(s) designated by Src to their inverse state. All
+    other bits are left u...
+- name: cmp
+  file: cmp.yaml
+  desc: CMP compares the unsigned values of Dest and Src (by subtracting Src from
+    Dest) and optionally se...
+- name: cmpm
+  file: cmpm.yaml
+  desc: CMPM compares the unsigned values of Dest and Src (by subtracting Src from
+    Dest) and optionally s...
+- name: cmpr
+  file: cmpr.yaml
+  desc: CMP compares the unsigned values of Dest and Src (by subtracting Dest from
+    Src) and optionally se...
+- name: cmps
+  file: cmps.yaml
+  desc: CMPS compares the signed values of Dest and Src (by subtracting Src from Dest)
+    and optionally set...
+- name: cmpsx
+  file: cmpsx.yaml
+  desc: CMPSX compares the signed values of Dest and Src plus C (by subtracting Src
+    + C from Dest) and op...
+- name: cmpx
+  file: cmpx.yaml
+  desc: CMPX compares the unsigned values of Dest and Src plus C (by subtracting Src
+    + C from Dest) and o...
+- name: dirnot
+  file: dirnot.yaml
+  desc: DIRNOT alters the direction register's bit(s) designated by Dest to their
+    inverse state. All othe...
+- name: drvnot
+  file: drvnot.yaml
+  desc: DRVNOT sets the I/O pin(s) designated by Dest to the output direction and
+    to their opposite outpu...
+- name: fltnot
+  file: fltnot.yaml
+  desc: FLTNOT sets the I/O pin(s) designated by Dest to the input direction and to
+    their opposite output...
+- name: getword
+  file: getword.yaml
+  desc: GETWORD reads the word identified by Num (0–1) from Src, or a word from the
+    source described by a...
+- name: mov
+  file: mov.yaml
+  desc: 'Mov stores the Src value into Dest. Result: The Src value is stored in Dest
+    and optionally flags ...'
+- name: movbyts
+  file: movbyts.yaml
+  desc: Move bytes within D, per S. D = {D.BYTE[S[7:6]], D.BYTE[S[5:4]], D.BYTE[S[3:2]],
+    D.BYTE[S[1:0]]}.
+- name: muxc
+  file: muxc.yaml
+  desc: '{WC/WZ/WCZ}   Mux C into each D bit that is ''1'' in S. D = (!S & D ) | (S
+    & {32{ C}}). C = parity ...'
+- name: muxnc
+  file: muxnc.yaml
+  desc: '{WC/WZ/WCZ}   Mux C into each D bit that is ''1'' in S. D = (!S & D ) | (S
+    & {32{ C}}). C = parity ...'
+- name: muxnibs
+  file: muxnibs.yaml
+  desc: MUXNIBS copies any non-zero nibbles from Src into the corresponding nibbles
+    of Dest and leaves th...
+- name: muxnits
+  file: muxnits.yaml
+  desc: MUXNITS copies any non-zero bit pairs from Src into the corresponding bit
+    pairs of Dest and leave...
+- name: muxnz
+  file: muxnz.yaml
+  desc: MUXZ or MUXNZ alters the Dest bit(s) designated by Src (high bits) to equal
+    the state, or inverse...
+- name: muxq
+  file: muxq.yaml
+  desc: MUXQ copies all bits from Src corresponding to high (1) bits of Q into the
+    corresponding bits of ...
+- name: muxz
+  file: muxz.yaml
+  desc: MUXZ or MUXNZ alters the Dest bit(s) designated by Src (high bits) to equal
+    the state, or inverse...
+- name: not
+  file: not.yaml
+  desc: '{WC/WZ/WCZ}   Get !D into D. D = !D. C = !D[31]. *  NOT performs a bitwise
+    NOT (inverting all bit...'
+- name: or
+  file: or.yaml
+  desc: 'OR performs a bitwise OR of the value in Src into that of Dest. Result: Dest
+    OR Src is stored in ...'
+- name: outnot
+  file: outnot.yaml
+  desc: OUTNOT alters the output level register's bit(s) designated by Dest to their
+    inverse state. All o...
+- name: qvector
+  file: qvector.yaml
+  desc: Convert cartesian coordinates (X, Y) to polar coordinates (length, angle).
+    Takes X coordinate in ...
+- name: rdword
+  file: rdword.yaml
+  desc: '{WC/WZ/WCZ}     Read zero-extended word from hub address {#}S/PTRx into D.
+    C = MSB of word. *    ...'
+- name: rfword
+  file: rfword.yaml
+  desc: '{WC/WZ/WCZ}   Used after RDFAST. Read zero-extended word from FIFO into D.
+    C = MSB of word. *    ...'
+- name: rolword
+  file: rolword.yaml
+  desc: ROLWORD reads the word identified by Num (0–1) from Src, or a word from the
+    source described by a...
+- name: ror
+  file: ror.yaml
+  desc: ROR rotates Dest's binary value right by Src places (0–31 bits). All LSBs
+    rotated out are moved i...
+- name: setword
+  file: setword.yaml
+  desc: SETWORD stores Src[15:0] into the word identified by Num within Dest, or the
+    word and register de...
+- name: test
+  file: test.yaml
+  desc: TEST determines the parity (number of high (1) bits) and the zero or non-zero
+    state of Dest, or o...
+- name: testb
+  file: testb.yaml
+  desc: WC/WZ   Test bit S[4:0] of D, write to C/Z. C/Z = D[S[4:0]].
+- name: testbn
+  file: testbn.yaml
+  desc: TESTB or TESTBN reads the state (0/1) of a bit in Dest designated by Src,
+    possibly inverts that r...
+- name: testn
+  file: testn.yaml
+  desc: TESTN determines the parity (number of high (1) bits) and the zero or non-zero
+    state of Dest bitw...
+- name: testp
+  file: testp.yaml
+  desc: 'Test pin state with optional XOR operation. Z = C/Z XOR IN[D[5:0]].  Common
+    uses: - Test pin stat...'
+- name: testpn
+  file: testpn.yaml
+  desc: TESTP or TESTPN reads the state (0/1) of the I/O pin designated by Dest, possibly
+    inverts that re...
+- name: wfword
+  file: wfword.yaml
+  desc: Used after WRFAST. Write word in D[15:0] into FIFO.                                              ...
+- name: wrword
+  file: wrword.yaml
+  desc: Write word in D[15:0] to hub address {#}S/PTRx.                                                  ...
+- name: xor
+  file: xor.yaml
+  desc: 'XOR performs a bitwise XOR of the value in Src into that of Dest. Result:
+    Dest XOR Src is stored ...'
+- name: xoro32
+  file: xoro32.yaml
+  desc: Iterate D with xoroshiro32+ PRNG algorithm and put PRNG result into next instruction's
+    S.

@@ -1,0 +1,17 @@
+category: stack_ops
+description: Stack operations
+instruction_count: 4
+base_path: engineering/knowledge-base/P2/language/pasm2/
+instructions:
+- name: popa
+  file: popa.yaml
+  desc: Read long from hub address --PTRA into D.
+- name: popb
+  file: popb.yaml
+  desc: Read long from hub address --PTRB into D.
+- name: pusha
+  file: pusha.yaml
+  desc: Write long in D[31:0] to hub address PTRA++.
+- name: pushb
+  file: pushb.yaml
+  desc: Write long in D[31:0] to hub address PTRB++.

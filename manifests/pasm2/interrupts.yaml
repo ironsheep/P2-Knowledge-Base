@@ -1,0 +1,48 @@
+category: interrupts
+description: Interrupt configuration and handling
+instruction_count: 14
+base_path: engineering/knowledge-base/P2/language/pasm2/
+instructions:
+- name: allowi
+  file: allowi.yaml
+  desc: ALLOWI re-enables interrupt branching; the default on cog start. ALLOWI is
+    the complement of the ...
+- name: nixint1
+  file: nixint1.yaml
+  desc: Cancel INT1.
+- name: nixint2
+  file: nixint2.yaml
+  desc: Cancel INT2.
+- name: nixint3
+  file: nixint3.yaml
+  desc: Cancel INT3.
+- name: resi0
+  file: resi0.yaml
+  desc: Resume from INT0. (CALLD $1FE,$1FF WCZ).
+- name: resi1
+  file: resi1.yaml
+  desc: Resume from INT1. (CALLD $1F4,$1F5 WCZ).
+- name: resi2
+  file: resi2.yaml
+  desc: Resume from INT2. (CALLD $1F2,$1F3 WCZ).
+- name: resi3
+  file: resi3.yaml
+  desc: Resume from INT3. (CALLD $1F0,$1F1 WCZ).
+- name: setint1
+  file: setint1.yaml
+  desc: Set INT1 source to D[3:0].
+- name: setint2
+  file: setint2.yaml
+  desc: Set INT2 source to D[3:0].
+- name: setint3
+  file: setint3.yaml
+  desc: Set INT3 source to D[3:0].
+- name: trgint1
+  file: trgint1.yaml
+  desc: Trigger INT1, regardless of STALLI mode.
+- name: trgint2
+  file: trgint2.yaml
+  desc: Trigger INT2, regardless of STALLI mode.
+- name: trgint3
+  file: trgint3.yaml
+  desc: Trigger INT3, regardless of STALLI mode.

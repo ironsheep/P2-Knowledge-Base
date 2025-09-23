@@ -1,0 +1,26 @@
+category: colorspace
+description: Pixel and colorspace operations
+instruction_count: 7
+base_path: engineering/knowledge-base/P2/language/pasm2/
+instructions:
+- name: blnpix
+  file: blnpix.yaml
+  desc: Alpha-blend bytes of S into bytes of D, using SETPIV value.
+- name: mixpix
+  file: mixpix.yaml
+  desc: Mix bytes of S into bytes of D, using SETPIX and SETPIV values.
+- name: setcfrq
+  file: setcfrq.yaml
+  desc: Set the colorspace converter \"CFRQ\" parameter to D[31:0].
+- name: setci
+  file: setci.yaml
+  desc: Set the colorspace converter \"CI\" parameter to D[31:0].
+- name: setcmod
+  file: setcmod.yaml
+  desc: Set the colorspace converter \"CMOD\" parameter to D[8:0].
+- name: setcq
+  file: setcq.yaml
+  desc: Set the colorspace converter \"CQ\" parameter to D[31:0].
+- name: setcy
+  file: setcy.yaml
+  desc: Set the colorspace converter \"CY\" parameter to D[31:0].

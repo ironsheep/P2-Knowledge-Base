@@ -1,0 +1,156 @@
+category: arithmetic
+description: Arithmetic and math operations
+instruction_count: 38
+base_path: engineering/knowledge-base/P2/language/pasm2/
+instructions:
+- name: abs
+  file: abs.yaml
+  desc: 'ABS determines the absolute value of Src or Dest and writes the result into
+    Dest. Result: Absolut...'
+- name: add
+  file: add.yaml
+  desc: ADD sums the two unsigned values of Dest and Src together and stores the result
+    into the Dest reg...
+- name: addct1
+  file: addct1.yaml
+  desc: Set CT1 event to trigger on CT = D + S. Adds S into D.  ADDCT1, ADDCT2, or
+    ADDCT3 sets the hidden...
+- name: addct2
+  file: addct2.yaml
+  desc: Set CT2 event to trigger on CT = D + S. Adds S into D.  ADDCT1, ADDCT2, or
+    ADDCT3 sets the hidden...
+- name: addct3
+  file: addct3.yaml
+  desc: Set CT3 event to trigger on CT = D + S. Adds S into D.  ADDCT1, ADDCT2, or
+    ADDCT3 sets the hidden...
+- name: addpix
+  file: addpix.yaml
+  desc: ADDPIX sums individual RGB (reg, green, blue) color values of Src into that
+    of Dest and stores th...
+- name: adds
+  file: adds.yaml
+  desc: ADDS sums the two signed values of Dest and Src together and stores the result
+    into the Dest regi...
+- name: addsx
+  file: addsx.yaml
+  desc: ADDSX sums the signed values of Dest and Src plus C together and stores the
+    result into the Dest ...
+- name: addx
+  file: addx.yaml
+  desc: ADDX sums the unsigned values of Dest and Src plus C together and stores the
+    result into the Dest...
+- name: cmpsub
+  file: cmpsub.yaml
+  desc: CMPSUB compares the unsigned values of Dest and Src, and if Src is less than
+    or equal to Dest the...
+- name: decmod
+  file: decmod.yaml
+  desc: DECMOD compares Dest with 0— if not equal, it decrements Dest; otherwise it
+    sets Dest equal to Sr...
+- name: decod
+  file: decod.yaml
+  desc: DECOD generates a 32-bit value with just one bit high, corresponding to the
+    Src, or Dest, value (...
+- name: fge
+  file: fge.yaml
+  desc: FGE sets unsigned Dest to unsigned Src if Dest is less than Src. This is also
+    known as a limit mi...
+- name: fges
+  file: fges.yaml
+  desc: FGES sets signed Dest to signed Src if Dest is less than Src. This is also
+    known as a limit minim...
+- name: fle
+  file: fle.yaml
+  desc: FLE sets unsigned Dest to unsigned Src if Dest is greater than Src. This is
+    also known as a limit...
+- name: fles
+  file: fles.yaml
+  desc: FLES sets signed Dest to signed Src if Dest is greater than Src. This is also
+    known as a limit ma...
+- name: incmod
+  file: incmod.yaml
+  desc: INCMOD compares Dest with Src— if not equal, it increments Dest; otherwise
+    it sets Dest equal to ...
+- name: mul
+  file: mul.yaml
+  desc: The 32-bit unsigned product of the 16-bit Dest and Src multiplication is stored
+    into Dest and opt...
+- name: mulpix
+  file: mulpix.yaml
+  desc: Multiply bytes of S into bytes of D, where $FF = 1.0 and $00 = 0.0.
+- name: muls
+  file: muls.yaml
+  desc: MULS multiplies the signed lower 16-bits of each of Dest and Src together
+    and stores the 32-bit s...
+- name: neg
+  file: neg.yaml
+  desc: NEG negates Src (syntax 1) or Dest (syntax 2) and stores the result in the
+    Dest register. The neg...
+- name: negc
+  file: negc.yaml
+  desc: NEGC negates Src (syntax 1) or Dest (syntax 2) if C = 1 and stores the result
+    in the Dest registe...
+- name: negnc
+  file: negnc.yaml
+  desc: NEGNC negates Src (syntax 1) or Dest (syntax 2) if !C = 1 and stores the result
+    in the Dest regis...
+- name: negnz
+  file: negnz.yaml
+  desc: NEGNZ negates Src (syntax 1) or Dest (syntax 2) if !Z = 1 and stores the result
+    in the Dest regis...
+- name: negz
+  file: negz.yaml
+  desc: NEGZ negates Src (syntax 1) or Dest (syntax 2) if Z = 1 and stores the result
+    in the Dest registe...
+- name: qdiv
+  file: qdiv.yaml
+  desc: Perform 64÷32 unsigned division with 32-bit quotient and remainder. Numerator
+    formed from {SETQ v...
+- name: qmul
+  file: qmul.yaml
+  desc: Perform 32×32 unsigned multiplication producing 64-bit result. Multiplies
+    D operand by S operand....
+- name: sca
+  file: sca.yaml
+  desc: SCA multiplies the lower 16-bits of each of Dest and Src together, right shifts
+    the 32-bit produc...
+- name: scas
+  file: scas.yaml
+  desc: SCAS multiplies the lower, signed 16-bits of each of Dest and Src together,
+    right shifts the 32-b...
+- name: sub
+  file: sub.yaml
+  desc: SUB subtracts the unsigned Src from the unsigned Dest and stores the result
+    into the Dest registe...
+- name: subr
+  file: subr.yaml
+  desc: SUBR subtracts the unsigned Dest from the unsigned Src and stores the result
+    into the Dest regist...
+- name: subs
+  file: subs.yaml
+  desc: SUBS subtracts the signed Src from the signed Dest and stores the result into
+    the Dest register. ...
+- name: subsx
+  file: subsx.yaml
+  desc: SUBSX subtracts the signed value of Src plus C from the signed Dest and stores
+    the result into th...
+- name: subx
+  file: subx.yaml
+  desc: SUBX subtracts the unsigned value of Src plus C from the unsigned Dest and
+    stores the result into...
+- name: sumc
+  file: sumc.yaml
+  desc: '{WC/WZ/WCZ}   Sum +/-S into D by C. If C = 1 then D = D - S, else D = D +
+    S. C = correct sign of ...'
+- name: sumnc
+  file: sumnc.yaml
+  desc: SUMC or SUMNC adjusts the signed Dest value by Src or -Src (depending on C
+    or !C) and stores the ...
+- name: sumnz
+  file: sumnz.yaml
+  desc: SUMZ or SUMNZ adjusts the signed Dest value by Src or -Src (depending on Z
+    or !Z) and stores the ...
+- name: sumz
+  file: sumz.yaml
+  desc: '{WC/WZ/WCZ}   Sum +/-S into D by Z. If Z = 1 then D = D - S, else D = D +
+    S. C = correct sign of ...'

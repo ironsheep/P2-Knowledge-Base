@@ -1,0 +1,165 @@
+category: misc_ops
+description: Miscellaneous operations
+instruction_count: 47
+base_path: engineering/knowledge-base/P2/language/pasm2/
+instructions:
+- name: asmclk
+  file: asmclk.yaml
+  desc: Assembly clock instruction. Controls assembly-time clock operations.
+- name: crcnib
+  file: crcnib.yaml
+  desc: Q = Q << 4.
+- name: djf
+  file: djf.yaml
+  desc: DJF or DJNF decrements the value in Dest, writes the result, and jumps to
+    the address described b...
+- name: djnf
+  file: djnf.yaml
+  desc: DJF or DJNF decrements the value in Dest, writes the result, and jumps to
+    the address described b...
+- name: instruction_manifest
+  file: instruction_manifest.yaml
+  desc: P2 PASM2 instruction set manifest - fully linked
+- name: jatn
+  file: jatn.yaml
+  desc: Jump to S** if ATN event flag is set.                                                             ...
+- name: jct1
+  file: jct1.yaml
+  desc: Jump to S** if CT1 event flag is clear.                                                           ...
+- name: jct2
+  file: jct2.yaml
+  desc: Jump to S** if CT2 event flag is set.                                                             ...
+- name: jct3
+  file: jct3.yaml
+  desc: Jump to S** if CT3 event flag is set.                                                             ...
+- name: jfbw
+  file: jfbw.yaml
+  desc: JFBW or JNFBW checks the cog's FIFO interface block wrap flag and jumps to
+    the address described ...
+- name: jint
+  file: jint.yaml
+  desc: Jump to S** if INT event flag is set.                                                             ...
+- name: jnatn
+  file: jnatn.yaml
+  desc: Jump to S** if ATN event flag is set.                                                             ...
+- name: jnct1
+  file: jnct1.yaml
+  desc: Jump to S** if CT1 event flag is clear.                                                           ...
+- name: jnct2
+  file: jnct2.yaml
+  desc: Jump to S** if CT2 event flag is clear.                                                           ...
+- name: jnct3
+  file: jnct3.yaml
+  desc: Jump to S** if CT3 event flag is clear.                                                           ...
+- name: jnfbw
+  file: jnfbw.yaml
+  desc: JFBW or JNFBW checks the cog's FIFO interface block wrap flag and jumps to
+    the address described ...
+- name: jnint
+  file: jnint.yaml
+  desc: Jump to S** if INT event flag is set.                                                             ...
+- name: jnpat
+  file: jnpat.yaml
+  desc: Jump to S** if PAT event flag is set.                                                             ...
+- name: jnqmt
+  file: jnqmt.yaml
+  desc: JQMT or JNQMT checks the cog's CORDIC results event flag and jumps to the
+    address described by Sr...
+- name: jnse1
+  file: jnse1.yaml
+  desc: Jump to S** if SE1 event flag is clear.                                                           ...
+- name: jnse2
+  file: jnse2.yaml
+  desc: Jump to S** if SE2 event flag is clear.                                                           ...
+- name: jnse3
+  file: jnse3.yaml
+  desc: Jump to S** if SE3 event flag is clear.                                                           ...
+- name: jnse4
+  file: jnse4.yaml
+  desc: Jump to S** if SE4 event flag is clear.                                                           ...
+- name: jnxfi
+  file: jnxfi.yaml
+  desc: Jump to S** if XFI event flag is set.                                                             ...
+- name: jnxmt
+  file: jnxmt.yaml
+  desc: JXMT or JNXMT checks the cog's streamer empty event flag and jumps to the
+    address described by Sr...
+- name: jnxrl
+  file: jnxrl.yaml
+  desc: JXRL or JNXRL checks the cog's streamer LUT RAM rollover event flag and jumps
+    to the address desc...
+- name: jnxro
+  file: jnxro.yaml
+  desc: Jump to S** if XRO event flag is set.                                                             ...
+- name: jpat
+  file: jpat.yaml
+  desc: Jump to S** if PAT event flag is set.                                                             ...
+- name: jqmt
+  file: jqmt.yaml
+  desc: JQMT or JNQMT checks the cog's CORDIC results event flag and jumps to the
+    address described by Sr...
+- name: jse1
+  file: jse1.yaml
+  desc: Jump to S** if SE1 event flag is clear.                                                           ...
+- name: jse2
+  file: jse2.yaml
+  desc: Jump to S** if SE2 event flag is set.                                                             ...
+- name: jse3
+  file: jse3.yaml
+  desc: Jump to S** if SE3 event flag is set.                                                             ...
+- name: jse4
+  file: jse4.yaml
+  desc: Jump to S** if SE4 event flag is set.                                                             ...
+- name: jxfi
+  file: jxfi.yaml
+  desc: Jump to S** if XFI event flag is set.                                                             ...
+- name: jxmt
+  file: jxmt.yaml
+  desc: JXMT or JNXMT checks the cog's streamer empty event flag and jumps to the
+    address described by Sr...
+- name: jxrl
+  file: jxrl.yaml
+  desc: JXRL or JNXRL checks the cog's streamer LUT RAM rollover event flag and jumps
+    to the address desc...
+- name: jxro
+  file: jxro.yaml
+  desc: Jump to S** if XRO event flag is set.                                                             ...
+- name: rcl
+  file: rcl.yaml
+  desc: The bits of Dest are shifted left by Src bits, inserting C as new LSBs.  RCL
+    shifts Dest's binary...
+- name: rcr
+  file: rcr.yaml
+  desc: RCR shifts Dest's binary value right by Src places (0–31 bits) and sets the
+    new MSBs to C. Result...
+- name: rczl
+  file: rczl.yaml
+  desc: RCZL shifts Dest's binary value left by two places and sets Dest[1] to C and
+    Dest[0] to Z. Result...
+- name: rczr
+  file: rczr.yaml
+  desc: RCZR shifts Dest's binary value right by two places and sets Dest[31] to C
+    and Dest[30] to Z. Res...
+- name: tjnf
+  file: tjnf.yaml
+  desc: TJF or TJNF tests the value in Dest and jumps to the address described by
+    Src if the result is fu...
+- name: tjns
+  file: tjns.yaml
+  desc: TJS or TJNS tests the value in Dest and jumps to the address described by
+    Src if the result is si...
+- name: tjs
+  file: tjs.yaml
+  desc: Test D and jump to S** if D is signed (D[31] = 1).                                               ...
+- name: tjv
+  file: tjv.yaml
+  desc: Test D and jump to S** if D overflowed (D[31] != C, C = 'correct sign' from
+    last addition/subtrac...
+- name: wmlong
+  file: wmlong.yaml
+  desc: Write only non-$00 bytes in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2
+    invokes cog/LUT bl...
+- name: wmlong_
+  file: wmlong_.yaml
+  desc: Write memory long (alternate form). Writes long data to hub memory with specific
+    addressing mode.

@@ -19,9 +19,10 @@ Exit codes:
     2 - Script error
 
 Author: P2 Knowledge Base Team
-Version: 1.2.0
+Version: 1.3.0
 Last Updated: 2025-09-23
 Changelog:
+  1.3.0 - Added hierarchical manifest support
   1.2.0 - Added orphaned file detection (files not in manifests)
   1.1.0 - Added incomplete manifest detection (total_entries vs actual)
 """
@@ -189,6 +190,19 @@ class ManifestVerifier:
             # Extract base path if specified
             base_path = manifest.get('base_path', '')
             
+            # Check if this is a hierarchical manifest
+            if manifest.get('structure') == 'hierarchical':
+                # Process hierarchical manifest
+                categories = manifest.get('categories', {})
+                for cat_name, cat_data in categories.items():
+                    sub_manifest_path = cat_data.get('manifest', '')
+                    if sub_manifest_path:
+                        # Verify sub-manifest
+                        full_sub_path = Path('manifests') / sub_manifest_path
+                        sub_name = f"{name}/{cat_name}"
+                        self._verify_manifest(sub_name, str(full_sub_path), indent=indent+1)
+                return
+            
             # Find all file references
             file_refs = self._extract_file_references(content, manifest)
             
@@ -282,9 +296,13 @@ class ManifestVerifier:
         """
         files = []
         
-        # Method 1: Regex search for file: "..." patterns
+        # Method 1: Regex search for file: "..." patterns (with quotes)
         file_pattern = re.compile(r'file:\s*"([^"]+)"')
         files.extend(file_pattern.findall(content))
+        
+        # Method 1b: Regex search for file: ... patterns (without quotes)
+        file_pattern_no_quotes = re.compile(r'file:\s+([\w.-]+\.yaml)')
+        files.extend(file_pattern_no_quotes.findall(content))
         
         # Method 2: Look for yaml_path in Obex manifests
         yaml_path_pattern = re.compile(r'yaml_path:\s*([^\s]+)')
