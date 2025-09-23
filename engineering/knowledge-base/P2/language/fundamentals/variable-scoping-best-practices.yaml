@@ -1,0 +1,180 @@
+# Language Fundamental: Variable Scoping and Best Practices
+# Source: Spin2 v51 documentation, observed compiler behavior
+# Critical for: Avoiding naming conflicts, preventing bugs
+
+fundamental: "Variable Scoping and Best Practices"
+category: "language_basics"
+type: "scoping_rules"
+applies_to: ["spin2"]
+
+metadata:
+  query_tags: ["scope", "shadow", "variable", "local", "VAR", "DAT", "conflict", "naming", "precedence"]
+  complexity: "intermediate"
+  critical_for_ai: true
+  prevents_bugs: ["variable shadowing", "unintended variable access", "scope confusion"]
+  common_mistakes:
+    - "Using same name for local and VAR/DAT variables"
+    - "Expecting local variable changes to affect VAR variables"
+    - "Not realizing return variables can shadow VAR/DAT"
+
+scope_hierarchy:
+  precedence_order:
+    1: "Method parameters"
+    2: "Return variables"
+    3: "Local variables"
+    4: "VAR section variables (instance)"
+    5: "DAT section variables (shared)"
+    6: "CON section constants"
+  
+  rule: "Higher precedence shadows lower precedence with same name"
+
+detailed_scoping_rules:
+  method_scope:
+    description: "Parameters, returns, and locals exist only during method execution"
+    lifetime: "Created on method entry, destroyed on method exit"
+    initialization: "Always initialized to 0"
+    visibility: "Only within the method"
+    
+  var_scope:
+    description: "Instance variables - each object has its own copy"
+    lifetime: "Exists for lifetime of object instance"
+    initialization: "Initialized to 0 when object created"
+    visibility: "All methods within the object"
+    
+  dat_scope:
+    description: "Shared variables - all instances share same memory"
+    lifetime: "Exists for program lifetime"
+    initialization: "Can be pre-initialized with data"
+    visibility: "All methods in all instances of the object"
+
+variable_shadowing:
+  definition: "When a local/parameter/return variable has the same name as a VAR/DAT variable"
+  behavior: "The local version takes precedence, making VAR/DAT inaccessible"
+  
+  example:
+    code: |
+      VAR
+        LONG count           ' Object-level variable
+        
+      PUB method(value) : count | temp
+        ' 'count' here is the RETURN variable, NOT the VAR variable!
+        count := value * 2   ' Sets return variable
+        ' VAR count is inaccessible in this method
+    
+    issue: "Return variable 'count' shadows VAR 'count'"
+    result: "VAR count is never modified, only return value is set"
+
+critical_best_practice:
+  rule: "AVOID NAMING CONFLICTS"
+  rationale: "Shadowing causes confusion and bugs"
+  
+  implementation:
+    - "Use distinct names for all variables in different scopes"
+    - "Never reuse VAR/DAT names as parameters, returns, or locals"
+    - "Consider prefixes or suffixes to distinguish scope"
+
+naming_strategies:
+  prevent_conflicts:
+    var_variables:
+      convention: "Use descriptive object-state names"
+      examples: ["motor_speed", "sensor_value", "buffer_index"]
+      
+    parameters:
+      convention: "Prefix with 'p' or use descriptive parameter names"
+      examples: ["pSpeed", "new_value", "input_data"]
+      
+    return_values:
+      convention: "Use 'result' or descriptive return names"
+      examples: ["result", "success", "calculated_value"]
+      
+    local_variables:
+      convention: "Use 'temp' prefix or descriptive temporary names"
+      examples: ["temp", "temp_sum", "loop_counter"]
+
+common_shadowing_scenarios:
+  - scenario: "return_shadows_var"
+    problematic_code: |
+      VAR
+        LONG status
+        
+      PUB check_device() : status
+        status := read_register()   ' Sets RETURN, not VAR
+        ' VAR status remains unchanged!
+    
+    fixed_code: |
+      VAR
+        LONG device_status
+        
+      PUB check_device() : result
+        result := read_register()
+        device_status := result     ' Explicitly update VAR if needed
+  
+  - scenario: "parameter_shadows_dat"
+    problematic_code: |
+      DAT
+        buffer    BYTE  0[256]
+        
+      PUB fill_buffer(buffer, size)
+        ' 'buffer' parameter shadows DAT buffer!
+        BYTEFILL(buffer, 0, size)   ' Fills parameter address, not DAT
+    
+    fixed_code: |
+      DAT
+        data_buffer    BYTE  0[256]
+        
+      PUB fill_buffer(buffer_addr, size)
+        BYTEFILL(buffer_addr, 0, size)
+  
+  - scenario: "local_shadows_var"
+    problematic_code: |
+      VAR
+        LONG index
+        
+      PUB process() | index
+        REPEAT index FROM 0 TO 9
+          ' Local 'index' shadows VAR 'index'
+          do_something(index)
+    
+    fixed_code: |
+      VAR
+        LONG current_index
+        
+      PUB process() | i
+        REPEAT i FROM 0 TO 9
+          do_something(i)
+          current_index := i   ' Update VAR if needed
+
+register_mapping_note:
+  detail: "First 16 local variables (params + returns + locals) map to cog registers"
+  registers: "$1E0-$1EF"
+  implication: "These have faster access but still follow same scoping rules"
+
+debugging_shadowing:
+  symptoms:
+    - "VAR/DAT variables not updating as expected"
+    - "Method returns unexpected values"
+    - "Object state not changing despite assignments"
+    
+  diagnosis:
+    - "Check for name conflicts between scopes"
+    - "Verify which variable is actually being accessed"
+    - "Use distinct names to eliminate ambiguity"
+
+ai_code_generation_rules:
+  mandatory:
+    - "NEVER use same identifier for variables in different scopes"
+    - "ALWAYS use distinct names for parameters vs VAR/DAT"
+    - "ALWAYS use distinct names for return variables vs VAR/DAT"
+    - "ALWAYS use distinct names for local variables vs VAR/DAT"
+    
+  recommended:
+    - "Use naming conventions to indicate scope"
+    - "Prefer 'result' for single return values"
+    - "Use descriptive names that include scope hints"
+
+related_documentation:
+  - "case-sensitivity.yaml"
+  - "identifier-rules.yaml"
+  - "../spin2/constructs/method_definition.yaml"
+  - "../spin2/keywords/VAR.yaml"
+  - "../spin2/keywords/DAT.yaml"

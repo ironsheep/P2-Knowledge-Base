@@ -1,0 +1,130 @@
+# Language Fundamental: Case Sensitivity
+# Source: Spin2 v51 documentation, PASM2 compiler behavior
+# Critical for: Code generation, identifier resolution
+
+fundamental: "Case Sensitivity"
+category: "language_basics"
+type: "syntax_rule"
+applies_to: ["spin2", "pasm2"]
+
+metadata:
+  query_tags: ["case", "sensitive", "insensitive", "identifier", "naming", "capital", "lowercase", "uppercase"]
+  complexity: "beginner"
+  critical_for_ai: true
+  common_mistakes:
+    - "Assuming case sensitivity like C/C++"
+    - "Creating duplicate identifiers with different cases"
+    - "Expecting case to distinguish between variables"
+
+core_rule: |
+  Both Spin2 and PASM2 are CASE-INSENSITIVE languages.
+  All identifiers are treated as equivalent regardless of case.
+
+detailed_specification:
+  spin2:
+    rule: "Case-insensitive throughout"
+    source: "Spin2 v51 documentation - 'Source code is case-insensitive'"
+    implications:
+      - "MyVar = myvar = MYVAR = myVAR"
+      - "PUB = pub = Pub"
+      - "REPEAT = repeat = Repeat"
+    
+  pasm2:
+    rule: "Case-insensitive for all elements"
+    source: "Compiler behavior and P1 legacy"
+    implications:
+      - "MOV = mov = Mov"
+      - "Label = label = LABEL"
+      - "LOOP = loop = Loop"
+      - "Register names: OUTA = outa = OutA"
+
+identifier_examples:
+  equivalent_identifiers:
+    - group: ["counter", "Counter", "COUNTER", "CouNTer"]
+      meaning: "All refer to the same variable"
+    
+    - group: ["MyMethod", "mymethod", "MYMETHOD", "myMethod"]
+      meaning: "All refer to the same method"
+    
+    - group: ["LED_PIN", "led_pin", "Led_Pin", "LedPin", "ledpin"]
+      meaning: "All refer to the same constant"
+
+documentation_conventions: |
+  While the languages are case-insensitive, documentation uses case conventions for clarity:
+  - UPPERCASE: Instructions, registers, keywords in PASM2 docs
+  - PascalCase: Often used for method names in examples
+  - snake_case: Often used for variables in examples
+  - UPPER_SNAKE: Often used for constants in examples
+  
+  These are ONLY documentation conventions - the compiler ignores case.
+
+implications_for_code_generation:
+  critical_rules:
+    - "Never create two identifiers that differ only in case"
+    - "Treat all case variations as the same identifier"
+    - "Cannot use case to distinguish scope (unlike some languages)"
+  
+  naming_conflicts:
+    issue: "Cannot have 'count' and 'COUNT' as different variables"
+    example: |
+      VAR
+        LONG count    ' Declares 'count'
+        LONG COUNT    ' ERROR: Redefinition of 'count'
+    
+    resolution: "Use distinct names: 'count' and 'total_count'"
+
+comparison_with_other_languages:
+  case_sensitive_languages:
+    - "C/C++ - myVar != MyVar"
+    - "Java - className != classname"
+    - "Python - my_func != MY_FUNC"
+  
+  case_insensitive_languages:
+    - "BASIC - similar case insensitivity"
+    - "Pascal/Delphi - traditionally case-insensitive"
+    - "SQL - typically case-insensitive for keywords"
+
+best_practices:
+  - practice: "consistent_case_style"
+    description: "Use consistent case throughout your code for readability"
+    rationale: "Even though compiler ignores case, humans don't"
+    example: |
+      ' Good: Consistent style
+      PUB SetMotorSpeed(speed)
+        motor_speed := speed
+      
+      ' Poor: Inconsistent style  
+      Pub SETMotorSPEED(SPEED)
+        Motor_SPEED := speed
+  
+  - practice: "meaningful_distinctions"
+    description: "Use meaningful names, not case, to distinguish identifiers"
+    wrong: |
+      VAR
+        LONG value    ' Input value
+        LONG Value    ' Processed value - WON'T WORK!
+    
+    correct: |
+      VAR
+        LONG input_value      ' Input value
+        LONG processed_value  ' Processed value
+
+common_pitfalls:
+  - pitfall: "case_based_naming"
+    description: "Attempting to use case for different variables"
+    wrong: |
+      PUB process() | temp, TEMP
+        ' ERROR: TEMP is same as temp
+    
+    correct: |
+      PUB process() | temp, final_temp
+        ' Different names for different variables
+  
+  - pitfall: "import_confusion"
+    description: "Expecting case-sensitive behavior from other language experience"
+    note: "Developers from C/Java/Python backgrounds often assume case sensitivity"
+
+related_documentation:
+  - "../spin2/constructs/method_definition.yaml"
+  - "identifier-rules.yaml"
+  - "variable-scoping-best-practices.yaml"

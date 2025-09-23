@@ -154,6 +154,32 @@ local_variables:
       count := 3
       avg := sum / count
 
+method_limits:
+  parameters:
+    maximum: 127
+    description: "Maximum 127 parameters per method"
+    source: "Spin2 v51 documentation - line 2087"
+    note: "Includes both individual longs and structures up to 15 longs"
+    
+  return_values:
+    maximum: 15
+    description: "Maximum 15 return values per method"
+    source: "Spin2 v51 documentation - line 2089"
+    note: "Can be individual longs or structures up to 15 longs"
+    
+  local_variables:
+    maximum: "64KB"
+    description: "Up to 64KB of local variables per method"
+    source: "Spin2 v51 documentation - line 1105"
+    note: "Total space for all locals combined"
+    
+  register_mapping:
+    count: 16
+    description: "First 16 local variables map to cog registers"
+    registers: "$1E0-$1EF"
+    benefit: "Faster access than hub RAM"
+    includes: "Parameters, return values, and locals (in that order)"
+
 stack_usage: |
   Each method call uses stack space for:
   - Return address

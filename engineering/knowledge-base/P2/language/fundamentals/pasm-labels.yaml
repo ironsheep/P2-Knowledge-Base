@@ -1,0 +1,97 @@
+title: "PASM2 Label Rules and Syntax"
+category: "Language Fundamentals"
+type: "reference"
+
+label_types:
+  global_labels:
+    description: "Labels with global scope within the PASM2 code section"
+    syntax: "label_name"
+    example: |
+      main_loop
+      process_data
+      error_handler
+    rules:
+      - "No prefix character required"
+      - "Visible throughout the entire PASM2 code section"
+      - "Must be unique within the code section"
+      - "Follow standard identifier rules (32 chars max, alphanumeric and underscore)"
+  
+  local_labels:
+    description: "Labels with local scope, limited to the current routine"
+    dot_prefix:
+      syntax: ".label_name"
+      example: |
+        .loop
+        .next
+        .done
+      description: "Local labels using dot prefix"
+    
+    colon_prefix:
+      syntax: ":label_name"
+      example: |
+        :retry
+        :skip
+        :exit
+      description: "Local labels using colon prefix"
+    
+    rules:
+      - "Prefix with either '.' (dot) or ':' (colon)"
+      - "Scope limited to current routine/context"
+      - "Can be reused in different routines"
+      - "Useful for common label names like 'loop' or 'done'"
+
+usage_examples:
+  global_and_local:
+    description: "Mixing global and local labels in PASM2 code"
+    code: |
+      ' Global routine
+      process_data
+          mov     x, #0
+      .loop               ' Local label with dot prefix
+          add     x, #1
+          cmp     x, #10
+          jnz     .loop   ' Jump to local .loop
+          ret
+      
+      ' Another global routine
+      validate_input
+          test    value, #$FF
+      :retry              ' Local label with colon prefix
+          rdlong  temp, ptr
+          tjz     temp, :retry  ' Jump to local :retry
+          ret
+
+best_practices:
+  naming:
+    - "Use descriptive names for global labels"
+    - "Use short, clear names for local labels"
+    - "Be consistent with prefix choice (. or :) within a project"
+  
+  scope_management:
+    - "Use local labels for routine-internal jumps"
+    - "Use global labels for entry points and major sections"
+    - "Local labels prevent namespace pollution"
+
+compiler_behavior:
+  case_sensitivity: "Labels are case-insensitive (like all PASM2 identifiers)"
+  resolution: "Local labels are resolved within their scope first"
+  conflicts: "Local labels can shadow global labels within their scope"
+
+documentation_source: "Spin2 v51 Grammar Reference"
+extraction_date: "2025-01-23"
+verified_in: "PNUT compiler and Spin2 documentation"
+
+related_concepts:
+  - "identifier-rules.yaml"
+  - "case-sensitivity.yaml"
+  
+ai_generation_notes:
+  critical_concept: |
+    PASM2 supports both global and local labels. Local labels use 
+    either a dot (.) or colon (:) prefix and have limited scope,
+    allowing reuse of common label names across different routines.
+  
+  common_pitfalls:
+    - "Forgetting that labels are case-insensitive"
+    - "Using local label syntax incorrectly"
+    - "Not understanding scope limitations of local labels"

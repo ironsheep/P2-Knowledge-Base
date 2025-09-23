@@ -3,6 +3,13 @@ version: 2.1.0
 description: P2 PASM2 instruction set manifest - fully linked
 total_instructions: 358
 total_components: 389
+language_fundamentals:
+  location: ../fundamentals/
+  critical_files:
+    - case-sensitivity.yaml  # PASM2 is case-insensitive
+    - identifier-rules.yaml   # Label and symbol naming rules
+    - pasm-labels.yaml       # Local and global label syntax
+  manifest: ../fundamentals/fundamentals-manifest.yaml
 instruction_groups:
   group_A:
     description: Instructions starting with 'A'

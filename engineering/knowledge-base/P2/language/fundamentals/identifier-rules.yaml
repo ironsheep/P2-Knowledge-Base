@@ -1,0 +1,197 @@
+# Language Fundamental: Identifier Rules
+# Source: Spin2 v51 documentation, PASM2 manual
+# Critical for: Valid code generation, naming conventions
+
+fundamental: "Identifier Rules"
+category: "language_basics"
+type: "syntax_rule"
+applies_to: ["spin2", "pasm2"]
+
+metadata:
+  query_tags: ["identifier", "naming", "variable", "label", "symbol", "length", "characters", "underscore"]
+  complexity: "beginner"
+  critical_for_ai: true
+  common_mistakes:
+    - "Creating identifiers longer than 32 characters"
+    - "Starting identifiers with numbers"
+    - "Using special characters in identifiers"
+
+core_rules:
+  maximum_length: 32
+  length_description: "Identifiers can be up to 32 characters long"
+  
+  valid_characters:
+    first_character: ["letter", "underscore"]
+    subsequent_characters: ["letter", "digit", "underscore"]
+    
+  case_sensitivity: "Case-insensitive (see case-sensitivity.yaml)"
+
+detailed_specification:
+  character_rules:
+    letters: "A-Z, a-z (treated as same due to case insensitivity)"
+    digits: "0-9 (cannot be first character)"
+    special: "_ (underscore only, can be first character)"
+    
+  invalid_characters:
+    - "- (hyphen/minus)"
+    - ". (period)"
+    - "@ (at sign)"
+    - "# (hash)"
+    - "$ (dollar - reserved for hex numbers)"
+    - "% (percent - reserved for binary numbers)"
+    - "& (ampersand)"
+    - "* (asterisk)"
+    - "spaces"
+    - "all other special characters"
+
+valid_identifier_examples:
+  simple:
+    - "x"
+    - "i"
+    - "LED"
+    - "pin"
+    
+  with_underscores:
+    - "_temp"
+    - "my_variable"
+    - "LED_PIN_"
+    - "__private"
+    
+  with_numbers:
+    - "pin56"
+    - "cog0"
+    - "motor1_speed"
+    - "i2c_400khz"
+    
+  maximum_length:
+    - "this_is_exactly_32_characters_x"  # 32 chars - valid
+    
+invalid_identifier_examples:
+  - example: "123abc"
+    reason: "Cannot start with digit"
+    
+  - example: "my-variable"
+    reason: "Hyphen not allowed"
+    
+  - example: "value.temp"
+    reason: "Period not allowed"
+    
+  - example: "pin@56"
+    reason: "@ symbol not allowed"
+    
+  - example: "this_identifier_is_way_too_long_33"
+    reason: "Exceeds 32 character limit (33 chars)"
+    
+  - example: "my variable"
+    reason: "Spaces not allowed"
+
+reserved_words:
+  note: "Cannot use Spin2/PASM2 keywords as identifiers"
+  spin2_examples:
+    - "PUB"
+    - "PRI" 
+    - "VAR"
+    - "DAT"
+    - "CON"
+    - "OBJ"
+    - "REPEAT"
+    - "IF"
+    - "CASE"
+    
+  pasm2_examples:
+    - "MOV"
+    - "ADD"
+    - "JMP"
+    - "CALL"
+    - "RET"
+    - "ORG"
+    - "FIT"
+    - "RES"
+
+naming_conventions:
+  note: "These are conventions, not requirements (due to case insensitivity)"
+  
+  common_patterns:
+    constants:
+      style: "UPPER_SNAKE_CASE"
+      example: "LED_PIN, BAUD_RATE, MAX_SIZE"
+      
+    variables:
+      style: "snake_case or camelCase"
+      example: "motor_speed, currentValue, sensor_reading"
+      
+    methods:
+      style: "PascalCase or snake_case"
+      example: "SetMotorSpeed, get_temperature, ReadSensor"
+      
+    private_elements:
+      style: "Leading underscore"
+      example: "_internal_var, _helper_method"
+      
+    labels:
+      style: "Mixed conventions"
+      example: "main_loop, :retry, .local_label"
+
+special_prefixes_pasm2:
+  dot_prefix:
+    syntax: ".label"
+    meaning: "Local label (scoped to current block)"
+    note: "Documentation indicates local label syntax exists"
+    
+  colon_prefix:
+    syntax: ":label"
+    meaning: "Local label (alternate syntax)"
+    note: "Documentation indicates local label syntax exists"
+
+length_considerations:
+  practical_limit: "Keep identifiers under 20-25 chars for readability"
+  
+  good_examples:
+    - "motor_speed"        # 11 chars - clear and concise
+    - "get_temperature"    # 15 chars - descriptive
+    - "i2c_write_byte"     # 14 chars - specific
+    
+  poor_examples:
+    - "the_current_motor_speed_value_now"  # 30 chars - too verbose
+    - "gettempfromsensorandconvert"        # 27 chars - hard to read
+
+best_practices:
+  - practice: "meaningful_names"
+    description: "Use descriptive names that convey purpose"
+    good: "motor_speed, led_state, buffer_size"
+    poor: "ms, ls, bs"
+    
+  - practice: "consistent_style"
+    description: "Maintain consistent naming style throughout code"
+    note: "Even though case-insensitive, consistency aids readability"
+    
+  - practice: "avoid_abbreviations"
+    description: "Use full words when possible"
+    good: "temperature, position, counter"
+    poor: "tmp, pos, cnt"
+    exception: "Well-known abbreviations like LED, PWM, I2C are fine"
+
+common_pitfalls:
+  - pitfall: "exceeding_length"
+    description: "Creating identifiers over 32 characters"
+    wrong: "this_is_a_really_long_identifier_name"
+    correct: "long_identifier"
+    
+  - pitfall: "starting_with_number"
+    description: "Beginning identifier with digit"
+    wrong: "2nd_motor"
+    correct: "motor_2" 
+    
+  - pitfall: "using_reserved_words"
+    description: "Using keywords as identifiers"
+    wrong: |
+      VAR
+        LONG repeat    ' 'repeat' is a keyword
+    correct: |
+      VAR
+        LONG loop_count
+
+related_documentation:
+  - "case-sensitivity.yaml"
+  - "variable-scoping-best-practices.yaml"
+  - "../spin2/constructs/method_definition.yaml"

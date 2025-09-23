@@ -179,6 +179,7 @@ spin2_language_complete_map:
   # File Organization
   directory_structure:
     language_root: "/engineering/knowledge-base/P2/language/spin2/"
+    fundamentals_root: "/engineering/knowledge-base/P2/language/fundamentals/"
     new_directories:
       - "keywords/ - All SPIN2 keywords"
       - "assembly-directives/ - PASM2 directives"
@@ -186,9 +187,15 @@ spin2_language_complete_map:
       - "debug-commands/ - Debug commands"
       - "special-symbols/ - Special syntax symbols"
       - "system-variables/ - System state variables"
+    fundamentals_files:
+      - "case-sensitivity.yaml - Case insensitivity rules"
+      - "identifier-rules.yaml - Naming rules and limits"
+      - "variable-scoping-best-practices.yaml - Scope hierarchy and conflict prevention"
+      - "fundamentals-manifest.yaml - Fundamentals index"
     existing_enhanced:
       - "operators/ - Enhanced with missing operators"
       - "methods/ - Enhanced with compiler metadata"
+      - "constructs/method_definition.yaml - Added explicit method limits (127 params, 15 returns, 64KB locals)"
       
   # Next Steps
   recommendations:
