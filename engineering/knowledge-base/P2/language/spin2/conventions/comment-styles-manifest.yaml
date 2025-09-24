@@ -41,16 +41,7 @@ documentation_styles:
       - Community standard adherence
     key_feature: Universal file structure with headers and licensing
     
-  - id: traditional-spin-documentation-style
-    name: Traditional Spin Documentation Style  
-    file: traditional-spin-documentation-style.yaml
-    recommended_for:
-      - Propeller Tool users
-      - FlexProp/FlexSpin users
-      - Legacy code maintenance
-      - OBEX library development
-    key_feature: Documentation appears BEFORE method signature
-
+  
 selection_criteria:
   by_toolchain:
     vscode_spin2_extension:
@@ -59,14 +50,14 @@ selection_criteria:
       reason: "Native support for post-signature documentation with IntelliSense"
       
     propeller_tool:
-      preferred_style: traditional-spin-documentation-style
+      preferred_style: johnny-mac-documentation-style
       organization: p2-source-file-organization-standard
-      reason: "Traditional block comment format expected by tool"
+      reason: "Professional documentation standard with high coverage"
       
     flexprop:
-      preferred_style: traditional-spin-documentation-style
+      preferred_style: johnny-mac-documentation-style
       organization: p2-source-file-organization-standard
-      reason: "Compatible with legacy Spin conventions"
+      reason: "Comprehensive plain English documentation"
       
     professional_development:
       preferred_style: johnny-mac-documentation-style
@@ -79,18 +70,18 @@ selection_criteria:
       reason: "Modern toolchain support and better IDE integration"
       
     legacy_maintenance:
-      preferred_style: traditional-spin-documentation-style
-      reason: "Consistency with existing codebase"
+      preferred_style: johnny-mac-documentation-style
+      reason: "Proven OBEX quality standard"
       
     obex_contribution:
-      preferred_style: traditional-spin-documentation-style
-      reason: "Community standard for shared libraries"
+      preferred_style: johnny-mac-documentation-style
+      reason: "Gold standard for OBEX contributions"
 
 ai_implementation_notes:
   style_detection:
     - Check for existing comments in the codebase
     - Look for @param/@returns tags (indicates VSCode style)
-    - Look for block comments above methods (indicates traditional)
+    - Look for plain English after signatures (indicates Johnny Mac style)
     - Ask user for preference if unclear
     
   style_application:
@@ -127,7 +118,7 @@ file_distribution:
     - vscode-pnut-documentation-style.yaml
     - johnny-mac-documentation-style.yaml
     - p2-source-file-organization-standard.yaml
-    - traditional-spin-documentation-style.yaml
+
   
   individual_downloads:
     vscode_style:
@@ -142,9 +133,7 @@ file_distribution:
       url: "language/spin2/conventions/p2-source-file-organization-standard.yaml"
       size: "~10KB"
       
-    traditional_style:
-      url: "language/spin2/conventions/traditional-spin-documentation-style.yaml"
-      size: "~5KB"
+
 
 external_references:
   vscode_extension:
@@ -169,7 +158,7 @@ style_relationships:
     internal_documentation:
       - vscode-pnut-documentation-style
       - johnny-mac-documentation-style
-      - traditional-spin-documentation-style
+
     note: "Organization standard provides structure, documentation styles provide internal patterns"
 
 metadata:

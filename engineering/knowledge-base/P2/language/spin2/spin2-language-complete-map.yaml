@@ -196,6 +196,7 @@ spin2_language_complete_map:
       - "operators/ - Enhanced with missing operators"
       - "methods/ - Enhanced with compiler metadata"
       - "constructs/method_definition.yaml - Added explicit method limits (127 params, 15 returns, 64KB locals)"
+      - "conventions/ - Comment style documentation (2 styles)"
       
   # Next Steps
   recommendations:
