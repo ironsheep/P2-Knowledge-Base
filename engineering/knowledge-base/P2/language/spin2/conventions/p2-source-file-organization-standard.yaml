@@ -1,0 +1,266 @@
+title: P2 Source File Organization Standard
+id: p2-source-file-organization-standard
+style_name: P2 Community File Structure Standard
+version: 1.0.0
+applies_to: All SPIN2 and PASM2 source files
+summary: Community standard for organizing P2 source files with consistent structure, proper attribution, and legal compliance
+
+description: |
+  Establishes the community standard for organizing P2 source files, regardless of internal documentation style. These structural conventions ensure all P2 code follows consistent, professional practices that benefit the entire community.
+  
+  Key principle: Every P2 source file should be self-documenting with proper attribution, clear purpose, and legal compliance.
+
+universal_file_structure: |
+  [FILE HEADER - Required]
+  ↓
+  [CODE SECTIONS - Flexible Organization]
+  ↓  
+  [LICENSE FOOTER - Required]
+
+section_organization:
+  flexibility_rules:
+    - CON sections can be repeated for grouping related constants
+    - VAR sections can be repeated for organizing variables by function
+    - DAT sections can be repeated for multiple data/assembly blocks
+    - OBJ sections can be repeated (typically used once)
+    - PUB/PRI sections are implicit and can be mixed throughout
+    
+  standard_single_section_order:
+    - con { constants and configuration }
+    - dat { shared data and assembly code }
+    - obj { object dependencies }
+    - var { instance variables }
+    - pub [public methods]
+    - pri [private methods]
+    - con { license }
+
+file_header_requirements:
+  required_components:
+    file_name:
+      format: "''   File....... actual_filename.spin2"
+      requirement: "Must exactly match actual file name"
+      purpose: "Identifies files when viewing code excerpts"
+      
+    purpose_statement:
+      format: "''   Purpose.... Clear description of what this object does"
+      requirement: "One-line preferred, can extend if needed"
+      purpose: "Focus on WHAT the object provides"
+      
+    author_attribution:
+      format: |
+        ''   Author..... Full Name "Nickname" LastName
+        ''               Copyright (c) YYYY Full Legal Name
+        ''               -- see below for terms of use
+      requirement: "Copyright must match license block"
+      purpose: "Legal attribution and community identity"
+      
+  optional_components:
+    contact_info:
+      format: "''   E-mail..... author@domain.com"
+      alternatives: ["GitHub profile", "Forum username"]
+      
+    version_info:
+      format: |
+        ''   Started.... DD MMM YYYY
+        ''   Updated.... DD MMM YYYY
+      date_format: "DD MMM YYYY (e.g., 15 JUN 2024)"
+      
+  header_template: |
+    '' =================================================================================================
+    ''
+    ''   File....... filename.spin2
+    ''   Purpose.... Brief but complete description of functionality
+    ''   Author..... Your Name "Nickname" LastName
+    ''               Copyright (c) YYYY Your Legal Name
+    ''               -- see below for terms of use
+    ''   E-mail..... your.email@domain.com
+    ''   Started.... DD MMM YYYY
+    ''   Updated.... DD MMM YYYY
+    ''
+    '' =================================================================================================
+    
+  formatting_rules:
+    separator: "Exactly 97 equals signs (=)"
+    prefix: "All header lines use '' prefix"
+    dot_leaders: "Minimum 7 dots, aligned consistently"
+    blank_lines: "Empty comment lines after opening and before closing"
+
+code_section_guidelines:
+  con_section:
+    purpose: "Constants and configuration"
+    best_practices:
+      - Group related constants with comment headers
+      - Use meaningful names explaining purpose
+      - Include units in comments (Hz, ms, bytes)
+      - Document special requirements
+      
+  dat_section:
+    purpose: "Shared data and assembly code"
+    usage:
+      - Variables accessed by both SPIN2 and PASM2
+      - Lookup tables and constant data arrays
+      - PASM2 cog code for background operations
+      
+  obj_section:
+    purpose: "Object dependencies"
+    guidelines:
+      - List all required objects with purpose comments
+      - Use meaningful instance names
+      - Document why each object is needed
+      
+  var_section:
+    purpose: "Instance variables"
+    organization:
+      - Group variables by functional purpose
+      - Document data types, ranges, special values
+      - Explain relationships between variables
+      
+  pub_section:
+    method_order:
+      1: "Main/Entry point (if top-level)"
+      2: "Initialization methods (start, begin, init)"
+      3: "Core functionality methods"
+      4: "Utility methods"
+      5: "Status/Query methods"
+      6: "Cleanup methods (stop, close, shutdown)"
+      
+  pri_section:
+    usage: "Private helper methods (optional)"
+    guidelines: "Keep focused and single-purpose"
+
+license_footer_requirements:
+  placement: "Always at end of file"
+  format: "Block comment using {{ }}"
+  standard_license: "MIT License"
+  
+  mit_license_decoration: |
+    con { license }
+    
+    {{
+    
+      Copyright (c) YYYY Your Legal Name
+    
+      Terms of Use: MIT License
+    
+      Permission is hereby granted, free of charge, to any person obtaining a copy of this
+      software and associated documentation files (the "Software"), to deal in the Software
+      without restriction, including without limitation the rights to use, copy, modify,
+      merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+      permit persons to whom the Software is furnished to do so, subject to the following
+      conditions:
+    
+      The above copyright notice and this permission notice shall be included in all copies
+      or substantial portions of the Software.
+    
+      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+      INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+      PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+      HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+      CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+      OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    
+    }}
+    
+  requirements:
+    - Always include license for legal protection
+    - Use standard MIT License as community standard
+    - Include copyright decoration at top of license block
+    - Match header copyright with license copyright
+    - Use block comment format with {{ }}
+
+professional_attribution:
+  author_formats:
+    with_nickname: "Jon \"JonnyMac\" McPhalen"
+    multiple_authors: |
+      Authors.... Original Author (original implementation)
+                  Contributing Author (enhancements)
+    corporate: |
+      Author..... Company Name
+      Developer.. Individual Name
+      
+  copyright_formats:
+    single_year: "Copyright (c) 2024 Author Name"
+    year_range: "Copyright (c) 2020-2024 Author Name"
+    multiple_holders: |
+      Copyright (c) 2024 Original Author
+      Portions Copyright (c) 2024 Contributor
+
+file_naming_conventions:
+  standard_files:
+    format: "descriptive_name.spin2"
+    style: "lowercase with underscores"
+    examples: ["sensor_interface.spin2", "motor_controller.spin2"]
+    
+  library_files:
+    format: "author_initials_description.spin2"
+    examples: ["jm_serial.spin2", "js_math_utils.spin2"]
+    purpose: "Identify author/source, prevent conflicts"
+    
+  project_files:
+    format: "project_context_purpose.spin2"
+    examples: ["robot_main.spin2", "sensor_test.spin2"]
+
+quality_checklist:
+  file_structure:
+    - Complete file header with required components
+    - Proper section organization
+    - License block present at end
+    - Consistent formatting throughout
+    
+  attribution:
+    - Author name matches license copyright
+    - Copyright year reflects development timeframe
+    - Contact information current
+    - Purpose statement clearly describes functionality
+    
+  legal_compliance:
+    - MIT license text matches standard wording
+    - No conflicting license statements
+    - All dependencies properly attributed
+    - Third-party code properly credited
+    
+  professional_presentation:
+    - Consistent code style
+    - Meaningful variable names
+    - No inappropriate content
+    - Spelling and grammar checked
+
+common_issues_to_avoid:
+  header_problems:
+    - Missing or incomplete file headers
+    - Copyright year mismatch
+    - File name doesn't match actual filename
+    - No contact information
+    
+  organization_issues:
+    - Sections in wrong order
+    - Mixed public/private methods
+    - Unclear variable purposes
+    - Missing object dependencies
+    
+  license_problems:
+    - No license block
+    - Modified license text
+    - Copyright mismatch between header and license
+    - Conflicting license statements
+
+compatibility_with_documentation_styles:
+  note: "This organizational standard works with any internal documentation style"
+  supported_styles:
+    - VSCode Spin2 Extension style
+    - Johnny Mac documentation style
+    - Other documentation approaches
+  principle: "Focuses on structure, not specific documentation format"
+
+implementation_priority:
+  1: "File headers - Most visible improvement"
+  2: "License blocks - Essential for legal compliance"
+  3: "Section organization - Improves readability"
+  4: "Consistent formatting - Professional polish"
+
+key_benefits:
+  - Universal structure works with any documentation approach
+  - Professional standards elevate community code quality
+  - Legal clarity ensures proper attribution
+  - Easy maintenance through consistent patterns
+  - Community growth through professional appearance

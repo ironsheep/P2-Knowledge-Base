@@ -1,0 +1,226 @@
+title: Traditional Spin/Spin2 Comment Style
+id: traditional-spin-comment-style
+style_name: Traditional/Classic Spin Standard
+version: 1.0.0
+compatibility:
+  - Propeller Tool
+  - FlexProp/FlexSpin
+  - SimpleIDE
+  - Legacy Spin/Spin2 codebases
+summary: Traditional documentation comment style where documentation appears above method signatures using block comments
+
+description: |
+  This is the traditional/classic documentation comment convention used in Spin and Spin2 code, particularly in legacy codebases and when using tools like Propeller Tool or FlexProp. This style places documentation above the method signature using block comments, similar to most programming languages. It's widely used in the Parallax Object Exchange (OBEX) and many community libraries.
+
+key_characteristics:
+  - Documentation appears BEFORE method signature
+  - Uses block comments {{ }} for method documentation
+  - Single apostrophe (') for inline comments
+  - Double apostrophe ('') sometimes used for section headers
+  - No formal tagging system (@param, @returns)
+  - Free-form documentation text
+
+comment_prefixes:
+  block_comment_start: "{{"
+  block_comment_end: "}}"
+  inline_comment: "'"
+  section_header: "''"
+  dat_section_comment: "'"
+
+documentation_tags:
+  - tag: "Parameters:"
+    format: "Parameters: description of parameters"
+    usage: "Informal parameter documentation"
+    example: "Parameters: frequency (Hz), duration (ms)"
+    
+  - tag: "Returns:"
+    format: "Returns: description of return value"
+    usage: "Informal return value documentation"
+    example: "Returns: True if successful, False otherwise"
+    
+  - tag: "Note:"
+    format: "Note: important information"
+    usage: "Highlight important usage notes"
+    example: "Note: This method modifies global state"
+
+documentation_structure:
+  - position: "Before method signature"
+    order:
+      1: "Block comment opening {{"
+      2: "Method purpose/description"
+      3: "Optional: Parameters section"
+      4: "Optional: Returns section"
+      5: "Optional: Notes or examples"
+      6: "Block comment closing }}"
+      7: "Method signature on next line"
+
+templates:
+  public_method_full:
+    template: |
+      {{
+        Calculate area of a rectangle
+        
+        This method takes width and height measurements and
+        returns the calculated area.
+        
+        Parameters: 
+          width  - Width of the rectangle (pixels)
+          height - Height of the rectangle (pixels)
+        
+        Returns: Calculated area in square pixels
+        
+        Note: All measurements must be positive values
+      }}
+      PUB calculateArea(width, height) : area | temp
+        area := width * height
+          
+  public_method_simple:
+    template: |
+      {{ Initialize the module to default state }}
+      PUB initialize()
+        configure_pins()
+        reset_variables()
+          
+  private_method:
+    template: |
+      {{
+        Internal calculation helper
+        Sums values from 0 to the input value
+      }}
+      PRI internalCalc(value) : result | counter
+        repeat counter from 0 to value
+          result += counter
+
+  inline_documented:
+    template: |
+      PUB quickMethod(param1, param2) : result
+        ' Quick method that adds two values
+        result := param1 + param2    ' Store the sum
+
+  section_headers:
+    template: |
+      '' ================================
+      '' Public Methods
+      '' ================================
+      
+      {{ Main initialization routine }}
+      PUB main()
+        initialize()
+        run()
+      
+      '' ================================
+      '' Private Methods  
+      '' ================================
+      
+      {{ Internal helper function }}
+      PRI helper()
+        ' Implementation here
+
+rules:
+  placement:
+    - Documentation typically appears before method signature
+    - Block comments can span multiple lines
+    - Inline comments on same line or following lines
+    
+  completeness:
+    - Document complex methods thoroughly
+    - Simple methods may have minimal documentation
+    - Focus on explaining why, not just what
+    
+  formatting:
+    - Use consistent indentation within block comments
+    - Align parameter descriptions when listing multiple
+    - Use section headers to organize code
+
+migration_to_vscode_style:
+  identify_documentation:
+    - Block comments above method signatures
+    - Inline comments within method bodies
+    - Section header comments
+    
+  migration_process:
+    1: "Extract information from block comments"
+    2: "Parse informal parameter/return documentation"
+    3: "Remove block comment from above signature"
+    4: "Create new documentation after signature"
+    5: "Convert to tagged format (@param, @returns)"
+    
+  example_before: |
+    {{
+      Calculate rectangular area
+      Takes width and height in pixels
+      Returns area in square pixels
+    }}
+    PUB calculateArea(width, height) : area
+        area := width * height
+        
+  example_after: |
+    PUB calculateArea(width, height) : area
+    '' Calculate rectangular area...
+    ''
+    '' @param width - Width in pixels
+    '' @param height - Height in pixels
+    '' @returns area - Area in square pixels
+    
+        area := width * height
+
+common_patterns:
+  file_headers:
+    description: "Large block comment at file start"
+    example: |
+      {{
+        FileName: motor_driver.spin2
+        Author: Developer Name
+        Date: 2024-01-24
+        Version: 1.0
+        
+        Description:
+        Motor driver for DC motors with PWM control
+        
+        Pin Assignments:
+        P0..P3 - Motor control signals
+        P4..P5 - Encoder inputs
+      }}
+      
+  constant_documentation:
+    description: "Comments explaining constant definitions"
+    example: |
+      CON
+        ' Clock settings
+        _clkfreq = 200_000_000      ' System clock frequency
+        
+        ' Motor parameters  
+        MAX_SPEED = 1000            ' Maximum RPM
+        MIN_SPEED = 100             ' Minimum RPM
+        
+  dat_section_documentation:
+    description: "Comments in DAT sections"
+    example: |
+      DAT
+      ' Lookup table for motor speeds
+      ' Values represent PWM duty cycles (0-255)
+      speed_table   byte    0, 25, 51, 77, 102, 128, 153, 179, 204, 230, 255
+
+best_practices:
+  - Keep block comments concise but informative
+  - Document complex algorithms in detail
+  - Use inline comments sparingly for clarification
+  - Maintain consistent style throughout codebase
+  - Document assumptions and limitations
+  - Include usage examples for complex methods
+
+toolchain_support:
+  propeller_tool:
+    - Syntax highlighting for block comments
+    - Comment folding in editor
+    - Preserves formatting in documentation view
+    
+  flexprop:
+    - Full comment syntax support
+    - Documentation extraction capabilities
+    - Compatible with traditional Spin code
+    
+  obex_compatibility:
+    - Standard format for community libraries
+    - Widely recognized by P2 developers
+    - Easy to read without special tools

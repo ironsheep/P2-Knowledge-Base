@@ -1,0 +1,256 @@
+title: VSCode/PNUT_TS Documentation Style
+id: vscode-pnut-documentation-style
+style_name: VSCode PNUT_TS Documentation Standard
+version: 1.1.0
+compatibility:
+  - VSCode with Spin2 Extension
+  - PNUT_TS Compiler
+  - PNUT_TERM_TS Downloader/Debugger
+summary: Documentation comment style supported by the official P2 VSCode toolchain where documentation appears immediately after method signatures
+
+description: |
+  This is the standard documentation comment convention for Spin2 code when using the VSCode development environment with the PNUT_TS compiler toolchain. Unlike traditional languages that place documentation before method declarations, this style places documentation immediately after the method signature, making it part of the method body. This convention is recognized and parsed by the VSCode Spin2 extension for IntelliSense and documentation features.
+  
+  The unique Spin2 documentation placement means method documentation is part of the method body, appearing immediately after the method signature with no blank lines between them.
+
+key_characteristics:
+  - Documentation appears AFTER method signature, not before
+  - Double apostrophe ('') for public method documentation and doc-comments
+  - Single apostrophe (') for private method documentation, regular comments, and local variables of public methods
+  - Uses @param, @returns, and @local tags
+  - Requires blank line after documentation block before code
+  - Local variables documented separately with single apostrophe
+  - Only document elements that actually exist (no @returns None for methods without returns)
+
+comment_prefixes:
+  public_documentation: "''"
+  private_documentation: "'"
+  inline_comment: "'"
+  block_comment_start: "{{"
+  block_comment_end: "}}"
+
+documentation_tags:
+  - tag: "@param"
+    format: "@param {paramName} - description"
+    usage: "Document each method parameter (only if parameters exist)"
+    example: "@param frequency - The clock frequency in Hz"
+    
+  - tag: "@returns"
+    format: "@returns {returnName} - description"
+    usage: "Document each return value (only if return values exist)"
+    example: "@returns result - True if successful, false otherwise"
+    
+  - tag: "@local"
+    format: "@local {localName} - description"
+    usage: "Document local variables (uses single apostrophe prefix, only if locals exist)"
+    example: "@local tempValue - Temporary storage for calculation"
+
+documentation_structure:
+  - position: "After method signature"
+    order:
+      1: "Description line ending with ..."
+      2: "Blank documentation comment line (separator)"
+      3: "Parameter documentation (@param tags)"
+      4: "Return value documentation (@returns tags)"
+      5: "Optional: Local variables section with single apostrophe"
+      6: "Blank line before code begins"
+
+templates:
+  public_method_full:
+    template: |
+      PUB methodName(param1, param2) : returnValue | local1, local2
+      '' Brief description of what this method does...
+      ''
+      '' @param param1 - Description of first parameter
+      '' @param param2 - Description of second parameter
+      '' @returns returnValue - Description of return value
+      
+      ' Local Variables:
+      ' @local local1 - Description of local variable
+      ' @local local2 - Description of local variable
+      
+          ' Implementation begins here
+          returnValue := param1 + param2
+          
+  method_with_multiple_returns:
+    template: |
+      PUB getPosition() : x, y, z
+      '' Gets the current 3D position coordinates...
+      ''
+      '' @returns x - X coordinate value
+      '' @returns y - Y coordinate value  
+      '' @returns z - Z coordinate value
+      
+          x := current_x_pos
+          y := current_y_pos
+          z := current_z_pos
+          
+  method_without_params_or_returns:
+    template: |
+      PUB initialize()
+      '' Initializes the module to default operational state...
+      ''
+      
+          configure_pins()
+          reset_variables()
+          start_timers()
+          
+  public_method_simple:
+    template: |
+      PUB initialize()
+      '' Initializes the module to default state...
+      ''
+      
+          configure_pins()
+          reset_variables()
+          
+  private_method:
+    template: |
+      PRI internalCalc(value) : result | counter
+      ' Internal calculation helper...
+      '
+      ' @param value - Input value to process
+      ' @returns result - Processed value
+      
+      ' Local Variables:
+      ' @local counter - Loop iteration counter
+      
+          repeat counter from 0 to value
+              result += counter
+
+rules:
+  placement:
+    - Documentation MUST appear immediately after method signature
+    - No blank lines between signature and documentation
+    - Always include blank line after documentation before code
+    
+  completeness:
+    - Document all parameters
+    - Document all return values
+    - Document significant local variables
+    - Use placeholder (...) for descriptions to be filled in
+    
+  formatting:
+    - Maintain consistent indentation
+    - Use appropriate comment prefix based on visibility
+    - Separate sections with blank comment lines
+    - Group related elements together
+
+migration_from_traditional:
+  identify_old_comments:
+    - Comments appearing above method signature
+    - Comments below signature but not in proper format
+    - Inline comments describing parameters/returns
+    
+  migration_process:
+    1: "Extract information from old comments"
+    2: "Delete old comment blocks completely"
+    3: "Create new documentation block after signature"
+    4: "Format with appropriate tags and structure"
+    5: "Ensure blank line before implementation code"
+    
+  example_before: |
+    '' This method calculates the area
+    '' Takes width and height as parameters
+    PUB calculateArea(width, height) : area
+        area := width * height
+        
+  example_after: |
+    PUB calculateArea(width, height) : area
+    '' Calculates the rectangular area from dimensions...
+    ''
+    '' @param width - Width of the rectangle
+    '' @param height - Height of the rectangle
+    '' @returns area - Calculated area value
+    
+        area := width * height
+
+automation_instructions:
+  parsing:
+    - Extract visibility modifier (PUB/PRI)
+    - Extract method name
+    - Parse parameter list (comma-separated, may be empty)
+    - Parse return values (after colon, may be empty)
+    - Parse local variables (after pipe, may be empty)
+    
+  generation:
+    - Use appropriate comment prefix for visibility
+    - Generate description with placeholder (...)
+    - Add blank separator line
+    - Generate @param for each parameter (only if parameters exist)
+    - Generate @returns for each return value (only if returns exist)
+    - Optionally add @local section for locals (only if locals exist)
+    - Ensure blank line before code
+    - Don't include tags for elements that don't exist (e.g., no @returns None)
+
+best_practices:
+  - Keep descriptions clear and concise
+  - Explain purpose and usage, not just what the code does
+  - Document assumptions and constraints
+  - Include units for numeric parameters
+  - Note side effects or state changes
+  - Reference related methods when appropriate
+
+toolchain_support:
+  vscode_features:
+    - IntelliSense hover documentation
+    - Parameter hints during method calls
+    - Documentation preview in completion items
+    - Syntax highlighting for documentation comments
+    - Comment priority system (preceding comments take priority over trailing)
+    
+  pnut_ts_features:
+    - Preserves documentation in compiled output
+    - No impact on binary size
+    - Compatible with debug information
+    
+  pnut_term_ts_features:
+    - Documentation available during debugging
+    - Method documentation in symbol browser
+
+constants_and_variables_documentation:
+  comment_placement_options:
+    preceding_comments:
+      description: "Placed on the line immediately before the declaration"
+      priority: "Higher - takes priority if both types present"
+      requirements: "No blank lines between comment and declaration"
+      
+    trailing_comments:
+      description: "Placed on the same line after the declaration"
+      priority: "Lower - only used if no preceding comment"
+      requirements: "Separated from code by whitespace"
+      
+  examples:
+    con_section: |
+      ' Maximum number of connection retries before timeout
+      MAX_RETRIES = 10
+      
+      TIMEOUT_MS = 5000              ' Timeout duration in milliseconds
+      
+      ' System clock frequency in Hz for timing calculations
+      CLK_FREQ = 270_000_000
+      
+    var_section: |
+      VAR
+        ' Current encoder position in counts
+        LONG currentPosition
+        
+        LONG targetSpeed               ' Desired motor speed in RPM
+        
+        ' Buffer for incoming serial data packets
+        BYTE serialBuffer[256]
+        
+    dat_section: |
+      DAT
+        ' Configuration table for sensor calibration
+        sensorConfig    long    0, 100, 200, 300
+        
+        deviceName      byte    "P2 Controller", 0    ' Null-terminated device name string
+        
+  enum_documentation: |
+    ' Motor control states for drive system:
+    '  DCS_STOPPED   - Motor completely stopped, no power
+    '  DCS_SPIN_UP   - Motor ramping up to target speed
+    '  DCS_AT_SPEED  - Motor running at target speed
+    '  DCS_SPIN_DOWN - Motor ramping down to stop
+    #0, DCS_STOPPED, DCS_SPIN_UP, DCS_AT_SPEED, DCS_SPIN_DOWN

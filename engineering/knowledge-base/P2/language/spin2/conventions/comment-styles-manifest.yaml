@@ -1,0 +1,190 @@
+title: Spin2 Documentation Styles Manifest
+id: spin2-documentation-styles
+version: 1.1.0
+description: Documentation style conventions used in Spin2 development
+last_updated: 2025-01-24
+category: language/conventions
+
+overview: |
+  This manifest documents the documentation styles used in the Spin2 development community.
+  External AI systems should use these specifications to generate properly formatted documentation
+  that matches the user's development environment and toolchain preferences.
+
+documentation_styles:
+  - id: vscode-pnut-documentation-style
+    name: VSCode/PNUT_TS Documentation Style
+    file: vscode-pnut-documentation-style.yaml
+    recommended_for:
+      - VSCode development environment
+      - PNUT_TS compiler users
+      - Modern P2 development
+      - IntelliSense support needed
+    key_feature: Documentation appears AFTER method signature
+    
+  - id: johnny-mac-documentation-style
+    name: Johnny Mac Internal Documentation Style
+    file: johnny-mac-documentation-style.yaml
+    recommended_for:
+      - Professional P2 development
+      - High documentation coverage goals (98%+)
+      - Plain English documentation preference
+      - OBEX quality contributions
+    key_feature: Comprehensive internal documentation with plain English
+    
+  - id: p2-source-file-organization-standard
+    name: P2 Source File Organization Standard
+    file: p2-source-file-organization-standard.yaml
+    recommended_for:
+      - All P2 source files
+      - Professional file structure
+      - Legal compliance requirements
+      - Community standard adherence
+    key_feature: Universal file structure with headers and licensing
+    
+  - id: traditional-spin-documentation-style
+    name: Traditional Spin Documentation Style  
+    file: traditional-spin-documentation-style.yaml
+    recommended_for:
+      - Propeller Tool users
+      - FlexProp/FlexSpin users
+      - Legacy code maintenance
+      - OBEX library development
+    key_feature: Documentation appears BEFORE method signature
+
+selection_criteria:
+  by_toolchain:
+    vscode_spin2_extension:
+      preferred_style: vscode-pnut-documentation-style
+      organization: p2-source-file-organization-standard
+      reason: "Native support for post-signature documentation with IntelliSense"
+      
+    propeller_tool:
+      preferred_style: traditional-spin-documentation-style
+      organization: p2-source-file-organization-standard
+      reason: "Traditional block comment format expected by tool"
+      
+    flexprop:
+      preferred_style: traditional-spin-documentation-style
+      organization: p2-source-file-organization-standard
+      reason: "Compatible with legacy Spin conventions"
+      
+    professional_development:
+      preferred_style: johnny-mac-documentation-style
+      organization: p2-source-file-organization-standard
+      reason: "Highest documentation coverage and quality standards"
+      
+  by_project_type:
+    new_development:
+      preferred_style: vscode-pnut-documentation-style
+      reason: "Modern toolchain support and better IDE integration"
+      
+    legacy_maintenance:
+      preferred_style: traditional-spin-documentation-style
+      reason: "Consistency with existing codebase"
+      
+    obex_contribution:
+      preferred_style: traditional-spin-documentation-style
+      reason: "Community standard for shared libraries"
+
+ai_implementation_notes:
+  style_detection:
+    - Check for existing comments in the codebase
+    - Look for @param/@returns tags (indicates VSCode style)
+    - Look for block comments above methods (indicates traditional)
+    - Ask user for preference if unclear
+    
+  style_application:
+    - Be consistent throughout the entire file
+    - Don't mix styles within the same codebase
+    - Follow the exact formatting rules for chosen style
+    - Preserve existing documentation when converting styles
+    
+  conversion_support:
+    - Both styles document migration procedures
+    - Preserve all information during conversion
+    - Maintain semantic meaning of documentation
+    - Update formatting to match target style
+
+usage_guidelines:
+  for_ai_systems:
+    1: "Load the appropriate style YAML based on user's toolchain"
+    2: "Parse method signatures to extract parameters and returns"
+    3: "Generate documentation following the style's template"
+    4: "Apply style-specific formatting rules"
+    5: "Validate placement relative to method signature"
+    
+  for_developers:
+    1: "Choose style based on your development environment"
+    2: "Configure your IDE/editor for the chosen style"
+    3: "Be consistent within your project"
+    4: "Document style choice in project README"
+    5: "Train team members on chosen convention"
+
+file_distribution:
+  download_package: spin2-documentation-styles-v1.1.0
+  included_files:
+    - comment-styles-manifest.yaml
+    - vscode-pnut-documentation-style.yaml
+    - johnny-mac-documentation-style.yaml
+    - p2-source-file-organization-standard.yaml
+    - traditional-spin-documentation-style.yaml
+  
+  individual_downloads:
+    vscode_style:
+      url: "language/spin2/conventions/vscode-pnut-documentation-style.yaml"
+      size: "~8KB"
+      
+    johnny_mac_style:
+      url: "language/spin2/conventions/johnny-mac-documentation-style.yaml"
+      size: "~12KB"
+      
+    organization_standard:
+      url: "language/spin2/conventions/p2-source-file-organization-standard.yaml"
+      size: "~10KB"
+      
+    traditional_style:
+      url: "language/spin2/conventions/traditional-spin-documentation-style.yaml"
+      size: "~5KB"
+
+external_references:
+  vscode_extension:
+    name: "Spin2 Extension for VSCode"
+    documentation: "https://github.com/ironsheep/P2-vscode-extensions"
+    
+  pnut_ts:
+    name: "PNUT_TS Compiler"
+    documentation: "engineering/tools/compiler/pnut_ts-usage-guide.md"
+    
+  propeller_tool:
+    name: "Propeller Tool"
+    vendor: "Parallax Inc."
+    
+  obex:
+    name: "Parallax Object Exchange"
+    url: "https://github.com/parallaxinc/propeller"
+
+style_relationships:
+  layered_approach:
+    foundation: p2-source-file-organization-standard
+    internal_documentation:
+      - vscode-pnut-documentation-style
+      - johnny-mac-documentation-style
+      - traditional-spin-documentation-style
+    note: "Organization standard provides structure, documentation styles provide internal patterns"
+
+metadata:
+  authors:
+    - "P2 Knowledge Base Team"
+  tags:
+    - documentation
+    - comments
+    - conventions
+    - spin2
+    - code-style
+    - file-organization
+  related:
+    - "language/spin2/spin2-language-schema.yaml"
+    - "engineering/ingestion/new-external-sources/How_To_Write_Comments.md"
+    - "engineering/ingestion/new-external-sources/vscode-documentation-style-complete.md"
+    - "engineering/ingestion/new-external-sources/johnny-mac-documentation-style-complete.md"
+    - "engineering/ingestion/new-external-sources/p2-source-file-organization-standard.md"
