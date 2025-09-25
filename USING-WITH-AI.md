@@ -21,17 +21,23 @@ When starting a new Claude Code conversation, reference this repository:
 Please use the P2 Knowledge Base directly from GitHub:
 https://github.com/ironsheep/P2-Knowledge-Base
 
-IMPORTANT: Start with the root manifest for navigation:
-https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/p2-knowledge-root.yaml
+CRITICAL INSTRUCTIONS:
+1. START with the root manifest for ALL navigation:
+   https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/p2-knowledge-root.yaml
 
-This manifest provides structured navigation to all documentation:
-- PASM2 instructions (357 total)
-- Smart Pin modes (32 modes)  
-- Spin2 language constructs
-- Architecture documentation
-- Code patterns and examples
+2. FOLLOW the manifest tree - it contains ALL file paths
+3. NEVER construct or guess file paths
+4. ONLY download .yaml files (all documentation is YAML)
+5. NEVER look for .md files in the knowledge base
 
-DO NOT clone the repository - read files directly from GitHub using raw.githubusercontent.com URLs.
+The manifest tree provides:
+- Complete file paths for all 357 PASM2 instructions
+- Paths for all 32 Smart Pin modes
+- Locations of all Spin2 methods and debug commands
+- Every architecture document location
+
+REMEMBER: If it's not in a manifest, it doesn't exist.
+DO NOT clone the repository - read files directly from GitHub.
 ```
 
 ### 2. Navigate Using the Manifest System
@@ -65,17 +71,190 @@ For best results, always start with `p2-knowledge-root.yaml` which provides:
 - Direct URLs to category manifests
 - Usage examples and navigation patterns
 
+## 🚨 CRITICAL: Use Manifest Navigation ONLY - Never Guess Paths!
+
+### The Golden Rule: Follow the Manifest Tree
+
+**YOU SHOULD NEVER CONSTRUCT OR GUESS FILE PATHS!**
+
+All file locations are provided by the manifest hierarchy. Start with the root manifest and follow the tree:
+
+```yaml
+# 1. ALWAYS START HERE:
+manifests/p2-knowledge-root.yaml
+    ↓
+# 2. Navigate to category manifests (all paths provided):
+manifests/spin2-manifest.yaml
+    ↓  
+# 3. Find specific file paths in the manifest:
+methods:
+  - name: "locknew"
+    path: "engineering/knowledge-base/P2/language/spin2/methods/locknew.yaml"
+```
+
+**Key Principles:**
+- ✅ **ONLY download .yaml files** (never .md files)
+- ✅ **ALL paths come from manifests** (never construct URLs)
+- ✅ **Follow the manifest tree** (never search or guess)
+- ✅ **Every file is referenced** (if it's not in a manifest, it doesn't exist)
+
+## ⚠️ Common Path Issues - IMPORTANT FOR EXTERNAL CLAUDE
+
+### Correct File Locations (External Claude Often Gets These Wrong)
+
+#### Lock Methods
+```yaml
+# ✅ CORRECT - Lock methods are individual YAML files:
+engineering/knowledge-base/P2/language/spin2/methods/locknew.yaml
+engineering/knowledge-base/P2/language/spin2/methods/locktry.yaml
+engineering/knowledge-base/P2/language/spin2/methods/lockrel.yaml
+engineering/knowledge-base/P2/language/spin2/methods/lockret.yaml
+engineering/knowledge-base/P2/language/spin2/methods/lockchk.yaml
+
+# ❌ WRONG - These paths don't exist:
+/language/spin2/constructs/methods/lockset.md  # No such file
+/language/spin2/methods/lockset.yaml          # No such file
+```
+
+#### DEBUG Statement
+```yaml
+# ✅ CORRECT - DEBUG is in debug-commands:
+engineering/knowledge-base/P2/language/spin2/debug-commands/debug.yaml
+
+# ❌ WRONG - These paths don't exist:
+/language/spin2/constructs/methods/debug.md   # Wrong directory
+/language/spin2/methods/debug.yaml           # Wrong directory
+```
+
+**GitHub Raw URLs for External Access:**
+```bash
+# Lock methods:
+https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/knowledge-base/P2/language/spin2/methods/locknew.yaml
+
+# DEBUG statement:
+https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/knowledge-base/P2/language/spin2/debug-commands/debug.yaml
+```
+
+### Example: Finding Lock Methods the RIGHT Way
+
+```yaml
+# Step 1: Start with p2-knowledge-root.yaml
+# It tells you:
+spin2_manifest:
+  path: "manifests/spin2-manifest.yaml"
+  
+# Step 2: Open spin2-manifest.yaml
+# It tells you:
+methods:
+  - category: "Lock Operations"
+    files:
+      - name: "locknew"
+        path: "engineering/knowledge-base/P2/language/spin2/methods/locknew.yaml"
+      - name: "locktry"
+        path: "engineering/knowledge-base/P2/language/spin2/methods/locktry.yaml"
+        
+# Step 3: Use the exact path from the manifest
+# NEVER guess or construct paths!
+```
+
+## 🎯 CRITICAL: P2 Hardware vs OBEX Boundary
+
+### Understanding What P2 Hardware DOESN'T Provide
+
+**The P2 philosophy is different from traditional MCUs!**
+
+Many features that are hardware peripherals on other processors (Arduino, STM32, etc.) are implemented as **OBEX objects** on the P2. The P2 provides flexible building blocks (Smart Pins, COGs), not fixed-function peripherals.
+
+#### What P2 Hardware Provides:
+- **Smart Pins**: Configurable I/O (32 modes) - building blocks for protocols
+- **COGs**: 8 parallel processors for implementing any protocol
+- **CORDIC**: Math engine for calculations
+- **Hub RAM**: Shared memory for communication
+- **Streamer**: DMA-like data movement
+
+#### What You Need OBEX Objects For:
+```yaml
+# Traditional MCU Peripherals → P2 OBEX Objects
+UART/Serial     → jm_fullduplexserial.spin2 (Object 2842)
+SPI Master      → jm_ez_spi.spin2 (Object 2841)  
+I2C Master      → jm_i2c.spin2 (Object 2843)
+PWM Controller  → jm_pwm.spin2 (various objects)
+Servo Control   → jm_servo.spin2 (Object 3161)
+NeoPixel/WS2812 → jm_rgbx_pixel.spin2 (Object 3213)
+SD Card         → Various SD/FAT32 objects
+USB Host/Device → USB objects in development
+CAN Bus         → Community CAN objects
+Ethernet        → Community Ethernet objects
+LCD Display     → Display driver objects
+Keyboard/Mouse  → HID objects
+```
+
+### When to Search OBEX
+
+**ALWAYS check OBEX when user asks for:**
+- "Serial communication" → Not built-in, need OBEX object
+- "SPI/I2C/UART" → Protocol objects in OBEX
+- "PWM output" → OBEX objects using Smart Pins
+- "Read SD card" → File system objects in OBEX
+- "Drive servo/motor" → Motor control objects
+- "Display on LCD/OLED" → Display drivers
+- "USB communication" → USB stack objects
+- "Network/Ethernet" → Networking objects
+- "Sensor interfaces" → Sensor-specific drivers
+
+### How to Navigate to OBEX Objects
+
+```yaml
+# 1. Start with root manifest
+manifests/p2-knowledge-root.yaml
+  ↓
+# 2. Find community_resources section
+community_resources:
+  url: "manifests/obex/obex-root.yaml"
+  ↓
+# 3. Navigate to category manifests
+manifests/obex/categories/communication-manifest.yaml  # For serial/SPI/I2C
+manifests/obex/categories/drivers-manifest.yaml       # For hardware drivers
+manifests/obex/categories/display-manifest.yaml       # For displays
+manifests/obex/categories/sensors-manifest.yaml       # For sensors
+  ↓
+# 4. Find specific object with download URL
+object_id: '2842'
+title: 'Full Duplex Serial'
+author: 'Jon McPhalen (jonnymac)'
+```
+
+### Example: User Asks "How do I do serial communication on P2?"
+
+**WRONG Response:**
+"The P2 has built-in UART..." ❌
+
+**CORRECT Response:**
+"The P2 implements serial communication using Smart Pins configured by OBEX objects. Let me find the serial driver for you..."
+1. Check `manifests/obex/categories/communication-manifest.yaml`
+2. Find Object 2842: "Full Duplex Serial" by jonnymac
+3. Provide implementation using the OBEX object
+
+### Golden Rules for P2 Capabilities:
+
+1. **Smart Pins are building blocks, not complete peripherals**
+2. **OBEX objects implement the protocols using Smart Pins**
+3. **When in doubt, search OBEX first**
+4. **Community objects are production-ready** (especially jonnymac's)
+5. **Multiple implementations may exist** - check authors and features
+
 ## Typical Usage Patterns
 
-### Pattern 1: Code Generation
+### Pattern 1: Code Generation (Updated for OBEX)
 ```
-User: "Using the P2 knowledge base, write PASM2 code to configure a Smart Pin 
-      as a UART transmitter at 115200 baud on pin 16"
+User: "Using the P2 knowledge base, write code for serial communication at 115200 baud"
 
 Claude will:
-1. Check smart-pins/modes/00010_sync_tx.yaml for UART TX mode
-2. Reference the baud rate calculation formula
-3. Generate properly formatted PASM2 code with comments
+1. Recognize serial is NOT a built-in peripheral
+2. Check manifests/obex/categories/communication-manifest.yaml
+3. Find Object 2842 (Full Duplex Serial)
+4. Show how to use jm_fullduplexserial.spin2
+5. Configure Smart Pins via the object methods
 ```
 
 ### Pattern 2: Instruction Lookup
