@@ -8,6 +8,16 @@ category: "spin2_language"
 base_path: "engineering/knowledge-base/P2/language/spin2/"
 total_entries: 141
 
+path_construction_note: |
+  TO ACCESS ANY FILE IN THIS MANIFEST:
+  Combine: raw_base_url (from root) + base_path (above) + file (from entries)
+  
+  Example for 'cogspin':
+  https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/ +
+  engineering/knowledge-base/P2/language/spin2/ +
+  methods/cogspin.yaml
+  = https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/knowledge-base/P2/language/spin2/methods/cogspin.yaml
+
 description: |
   Complete Spin2 language reference including methods, operators, and constructs.
   Covers both language syntax and built-in functionality.

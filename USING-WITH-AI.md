@@ -75,7 +75,31 @@ For best results, always start with `p2-knowledge-root.yaml` which provides:
 
 ### The Golden Rule: Follow the Manifest Tree
 
-**YOU SHOULD NEVER CONSTRUCT OR GUESS FILE PATHS!**
+**Path Construction Formula (NOW EXPLICIT IN MANIFESTS):**
+
+```
+FULL_URL = raw_base_url + base_path + file
+
+Where:
+- raw_base_url: From p2-knowledge-root.yaml (ends with /)
+- base_path: From category manifest like spin2-manifest.yaml
+- file: From the specific entry in the manifest
+```
+
+**Real Example:**
+```yaml
+# From p2-knowledge-root.yaml:
+raw_base_url: "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/"
+
+# From spin2-manifest.yaml:
+base_path: "engineering/knowledge-base/P2/language/spin2/"
+
+# From entry in manifest:
+file: "methods/cogspin.yaml"
+
+# RESULT:
+https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/knowledge-base/P2/language/spin2/methods/cogspin.yaml
+```
 
 All file locations are provided by the manifest hierarchy. Start with the root manifest and follow the tree:
 

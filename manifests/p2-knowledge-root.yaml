@@ -19,6 +19,24 @@ metadata:
   repository: "https://github.com/ironsheep/P2-Knowledge-Base"
   raw_base_url: "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/"
   
+path_construction:
+  instructions: |
+    HOW TO CONSTRUCT FULL URLs FROM MANIFESTS:
+    
+    1. Start with raw_base_url from this root manifest
+    2. Add base_path from the category manifest
+    3. Add file path from the specific entry
+    
+    FORMULA: full_url = raw_base_url + base_path + file
+    
+    EXAMPLE:
+    - raw_base_url: "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/"
+    - base_path: "engineering/knowledge-base/P2/language/spin2/" (from spin2-manifest.yaml)
+    - file: "methods/cogspin.yaml" (from the entry)
+    - RESULT: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/knowledge-base/P2/language/spin2/methods/cogspin.yaml
+    
+    IMPORTANT: All three components are required to construct valid URLs!
+  
 purpose: |
   Comprehensive P2 documentation organized for AI code generation.
   Enables both beginners and experienced developers to leverage
