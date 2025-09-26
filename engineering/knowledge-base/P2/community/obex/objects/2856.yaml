@@ -52,3 +52,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/p2es-matrix/
+  version_tracking:
+    obex_version: ''
+    obex_upload_date: '2020-06-18'
+    last_scraped: '2025-09-26T11:33:14.425179'
+    has_github_repo: false

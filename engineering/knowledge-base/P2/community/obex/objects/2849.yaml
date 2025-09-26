@@ -55,3 +55,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/ili9341_xpt2046/
+  version_tracking:
+    obex_version: ''
+    obex_upload_date: '2023-11-16'
+    last_scraped: '2025-09-26T11:33:03.559721'
+    has_github_repo: false

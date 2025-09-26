@@ -54,3 +54,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/dc-motor/
+  version_tracking:
+    obex_version: ''
+    obex_upload_date: '2020-07-05'
+    last_scraped: '2025-09-26T11:33:43.599785'
+    has_github_repo: false

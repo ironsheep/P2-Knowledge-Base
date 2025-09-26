@@ -9,15 +9,25 @@ object_metadata:
     tested_platforms: []
   functionality:
     category: demos
-    description_full: "The MFRC522\u2019s internal transmitter is able to drive a\
-      \ reader/writer antenna designed to\ncommunicate with ISO/IEC 14443 A/MIFARE\
-      \ cards and transponders without additional\nactive circuitry. The receiver\
-      \ module provides a robust and efficient implementation for\ndemodulating and\
-      \ decoding signals from ISO/IEC 14443 A/MIFARE compatible cards and\ntransponders.\
-      \ The digital module manages the complete ISO/IEC 14443 A framing and\nerror\
-      \ detection (parity and CRC) functionality."
-    description_short: "The MFRC522\u2019s internal transmitter is able to drive a\
-      \ reader/writer antenna designed to\ncommunicate "
+    description_full: 'The MFRC522’s internal transmitter is able to drive a reader/writer
+      antenna designed to
+
+      communicate with ISO/IEC 14443 A/MIFARE cards and transponders without additional
+
+      active circuitry. The receiver module provides a robust and efficient implementation
+      for
+
+      demodulating and decoding signals from ISO/IEC 14443 A/MIFARE compatible cards
+      and
+
+      transponders. The digital module manages the complete ISO/IEC 14443 A framing
+      and
+
+      error detection (parity and CRC) functionality.'
+    description_short: 'The MFRC522’s internal transmitter is able to drive a reader/writer
+      antenna designed to
+
+      communicate '
     hardware_support: []
     peripherals: []
     subcategory: ''
@@ -54,3 +64,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/mfrc522/
+  version_tracking:
+    obex_version: ''
+    obex_upload_date: '2023-10-18'
+    last_scraped: '2025-09-26T11:33:57.496856'
+    has_github_repo: false

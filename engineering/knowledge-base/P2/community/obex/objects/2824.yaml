@@ -52,3 +52,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/nec-rx/
+  version_tracking:
+    obex_version: ''
+    obex_upload_date: '2020-12-15'
+    last_scraped: '2025-09-26T11:32:24.790842'
+    has_github_repo: false

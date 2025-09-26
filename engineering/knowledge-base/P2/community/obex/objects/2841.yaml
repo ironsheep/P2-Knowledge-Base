@@ -53,3 +53,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/ez-spi/
+  version_tracking:
+    obex_version: ''
+    obex_upload_date: '2020-09-01'
+    last_scraped: '2025-09-26T11:32:51.098961'
+    has_github_repo: false

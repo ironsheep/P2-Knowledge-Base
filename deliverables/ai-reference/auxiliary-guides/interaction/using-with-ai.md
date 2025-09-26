@@ -212,7 +212,7 @@ engineering/knowledge-base/P2/hardware/smart-pins/modes/[mode].yaml
 
 ## 6. Usage Patterns and Examples
 
-### Pattern: Serial Communication
+### Pattern: Serial Communication with Repository Awareness ✨
 
 ```markdown
 User: "How do I do serial communication on P2?"
@@ -221,7 +221,8 @@ CORRECT RESPONSE:
 1. Recognize serial is NOT built-in
 2. Check manifests/obex/categories/*.yaml
 3. Find jm_fullduplexserial (Object 2842)
-4. Show implementation:
+4. Check if github_repo exists in YAML
+5. Show implementation with repo awareness:
 ```
 
 ```spin2
@@ -267,6 +268,26 @@ PROCESS:
 ---
 
 ## 7. Advanced Features
+
+### OBEX Repository Awareness ✨ NEW!
+
+**21 of 113 OBEX objects now have GitHub repository links!**
+
+When finding OBEX objects with repos:
+1. **Mention** the repo exists (don't auto-fetch)
+2. **Offer** to check for newer versions
+3. **Provide** direct links for user to explore
+
+```yaml
+# In OBEX YAML files:
+version_tracking:
+  obex_version: "3.0.2"
+  has_github_repo: true
+urls:
+  github_repo: "https://github.com/ironsheep/P2-HUB75-LED-Matrix-Driver"
+```
+
+**Best Practice**: "This object has a GitHub repository. I can check for newer releases if needed."
 
 ### Auxiliary Guides System
 

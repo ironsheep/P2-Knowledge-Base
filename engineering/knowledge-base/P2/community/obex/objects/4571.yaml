@@ -9,13 +9,13 @@ object_metadata:
     tested_platforms: []
   functionality:
     category: sensors
-    description_full: "A collection of P2 Spin2 objects allows us to realize a 180\xB0\
-      \ field-of-view time-of-flight sensor by ganging 4 VL53L5CX TOF sensors in 45-degree\
-      \ fields to form a single 180-degree sensor. Additionally, we use a PCV8575\
-      \ I2C I/O Expander to handle most of the I/O with the four sensors, thus reducing\
-      \ th"
-    description_short: "A collection of P2 Spin2 objects allows us to realize a 180\xB0\
-      \ field-of-view time-of-flight sensor by ganging 4 VL53L5CX TOF sensors"
+    description_full: A collection of P2 Spin2 objects allows us to realize a 180°
+      field-of-view time-of-flight sensor by ganging 4 VL53L5CX TOF sensors in 45-degree
+      fields to form a single 180-degree sensor. Additionally, we use a PCV8575 I2C
+      I/O Expander to handle most of the I/O with the four sensors, thus reducing
+      th
+    description_short: A collection of P2 Spin2 objects allows us to realize a 180°
+      field-of-view time-of-flight sensor by ganging 4 VL53L5CX TOF sensors
     hardware_support: []
     peripherals: []
     subcategory: ''
@@ -47,11 +47,16 @@ object_metadata:
     - PASM2
     microcontroller:
     - P2
-    version: ''
-  title: "ISP P2 180\xB0 Field of View TOF Sensor"
+    version: (Repository latest)
+  title: ISP P2 180° Field of View TOF Sensor
   urls:
     documentation: ''
     download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4571
     forum_discussion: ''
-    github_repo: ''
+    github_repo: https://github.com/ironsheep/P2-VL53L5CX-time-of-flight-driver
     obex_page: https://obex.parallax.com/obex/isp-p2-180-field-of-view-tof-sensor/
+  version_tracking:
+    obex_version: (Repository latest)
+    obex_upload_date: '2024-03-12'
+    last_scraped: '2025-09-26T11:34:20.638820'
+    has_github_repo: true

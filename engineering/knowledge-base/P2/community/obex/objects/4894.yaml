@@ -54,3 +54,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/frsw-and-fat32-for-p2/
+  version_tracking:
+    obex_version: ''
+    obex_upload_date: '2025-02-17'
+    last_scraped: '2025-09-26T11:34:43.436765'
+    has_github_repo: false

@@ -42,7 +42,7 @@ object_metadata:
     - PASM2
     microcontroller:
     - P2
-    version: ''
+    version: v0.8
   title: AYcog (P2 Port)
   urls:
     documentation: ''
@@ -50,3 +50,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/aycog/
+  version_tracking:
+    obex_version: v0.8
+    obex_upload_date: '2024-03-13'
+    last_scraped: '2025-09-26T11:33:26.837341'
+    has_github_repo: false

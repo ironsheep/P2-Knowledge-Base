@@ -53,3 +53,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/rgbx-pixel-driver/
+  version_tracking:
+    obex_version: ''
+    obex_upload_date: '2020-08-02'
+    last_scraped: '2025-09-26T11:33:15.995975'
+    has_github_repo: false

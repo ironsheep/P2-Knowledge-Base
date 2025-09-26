@@ -45,11 +45,16 @@ object_metadata:
     - PASM2
     microcontroller:
     - P2
-    version: ''
+    version: (Repository Latest)
   title: ISP PCA9685 16ch PWM Servo Driver
   urls:
     documentation: ''
     download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2873
     forum_discussion: ''
-    github_repo: ''
+    github_repo: https://github.com/ironsheep/P2-PCA9685-Servo-Driver
     obex_page: https://obex.parallax.com/obex/isp-pca9685-16ch-pwm-servo-driver/
+  version_tracking:
+    obex_version: (Repository Latest)
+    obex_upload_date: '2024-03-13'
+    last_scraped: '2025-09-26T11:33:40.530667'
+    has_github_repo: true

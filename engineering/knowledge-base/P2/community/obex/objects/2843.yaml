@@ -50,3 +50,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/i2c/
+  version_tracking:
+    obex_version: ''
+    obex_upload_date: '2022-02-24'
+    last_scraped: '2025-09-26T11:32:54.158033'
+    has_github_repo: false

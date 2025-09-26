@@ -40,11 +40,16 @@ object_metadata:
     - PASM2
     microcontroller:
     - P2
-    version: ''
+    version: 5.0.0
   title: ISP BLDC Motor Control
   urls:
     documentation: ''
     download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2874
     forum_discussion: ''
-    github_repo: ''
+    github_repo: https://github.com/ironsheep/P2-BLDC-Motor-Control
     obex_page: https://obex.parallax.com/obex/isp-bldc-motor-control/
+  version_tracking:
+    obex_version: 5.0.0
+    obex_upload_date: '2024-03-11'
+    last_scraped: '2025-09-26T11:33:42.074641'
+    has_github_repo: true

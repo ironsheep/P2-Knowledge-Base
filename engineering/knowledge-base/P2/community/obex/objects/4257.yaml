@@ -46,11 +46,16 @@ object_metadata:
     - PASM2
     microcontroller:
     - P2
-    version: ''
+    version: 1.0.2
   title: ISP high-speed 8-port serial subsystem
   urls:
     documentation: ''
     download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4257
     forum_discussion: ''
-    github_repo: ''
+    github_repo: https://github.com/ironsheep/P2-OctoSerial-subsystem
     obex_page: https://obex.parallax.com/obex/p2-high-speed-8-port-serial-subsystem/
+  version_tracking:
+    obex_version: 1.0.2
+    obex_upload_date: '2024-03-11'
+    last_scraped: '2025-09-26T11:34:06.752842'
+    has_github_repo: true

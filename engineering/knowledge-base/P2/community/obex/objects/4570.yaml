@@ -43,11 +43,16 @@ object_metadata:
     - PASM2
     microcontroller:
     - P2
-    version: ''
+    version: (Repository Latest)
   title: ISP P2 PCF8575 I2C I/O Expander Object
   urls:
     documentation: ''
     download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB4570
     forum_discussion: ''
-    github_repo: ''
+    github_repo: https://github.com/ironsheep/P2-VL53L5CX-time-of-flight-driver
     obex_page: https://obex.parallax.com/obex/isp-p2-pcf8575-i2c-i-o-expander-object/
+  version_tracking:
+    obex_version: (Repository Latest)
+    obex_upload_date: '2024-03-11'
+    last_scraped: '2025-09-26T11:34:19.134027'
+    has_github_repo: true

@@ -43,11 +43,16 @@ object_metadata:
     - PASM2
     microcontroller:
     - P2
-    version: ''
+    version: 3.0.2
   title: ISP Hub75 Matrix Driver
   urls:
     documentation: ''
     download_direct: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB2850
     forum_discussion: ''
-    github_repo: ''
+    github_repo: https://github.com/ironsheep/P2-HUB75-LED-Matrix-Driver
     obex_page: https://obex.parallax.com/obex/isp-hub75-matrix-driver/
+  version_tracking:
+    obex_version: 3.0.2
+    obex_upload_date: '2024-03-26'
+    last_scraped: '2025-09-26T11:33:05.115945'
+    has_github_repo: true

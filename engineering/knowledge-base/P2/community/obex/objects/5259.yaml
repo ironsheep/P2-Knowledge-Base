@@ -45,7 +45,7 @@ object_metadata:
     - SPIN2
     microcontroller:
     - P2
-    version: ''
+    version: v2.93
   title: BNO08x IMU (9 DOF) (RVC Mode)
   urls:
     documentation: ''
@@ -53,3 +53,8 @@ object_metadata:
     forum_discussion: ''
     github_repo: ''
     obex_page: https://obex.parallax.com/obex/bno08x-imu-9-dof-rvc-mode/
+  version_tracking:
+    obex_version: v2.93
+    obex_upload_date: '2025-07-01'
+    last_scraped: '2025-09-26T11:34:55.865224'
+    has_github_repo: false

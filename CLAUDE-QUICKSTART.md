@@ -54,7 +54,7 @@ Check engineering/knowledge-base/P2/hardware/smart-pins/modes/
 and help me select and configure the right mode.
 ```
 
-### 4. Community Code Discovery (Optimized)
+### 4. Community Code Discovery (Now with GitHub Repos!)
 ```
 Find me P2 OBEX objects related to [HARDWARE/PROTOCOL].
 
@@ -63,6 +63,9 @@ IMPORTANT: Follow the OBEX search optimization guide:
 - Many drivers are in 'misc' (34 objects), not 'drivers'
 - Expand keywords: I2C → also search IIC, TWI, two-wire
 - Check top authors like jonnymac (44 quality objects)
+
+✨ NEW: 21 objects now have GitHub repo links!
+If repo exists, I can offer to check for newer versions.
 
 Start with manifests/obex/obex-root.yaml
 ```
@@ -109,6 +112,8 @@ Need UART/SPI/I2C? → Use OBEX objects, not built-in peripherals.
 **File Navigation**: Follow manifest tree, never guess paths. All files are YAML.
 
 **Testing**: Use `pnut_ts -d` for debug, monitor `logs/*.log` not console.
+
+**OBEX Repos**: 21 objects have GitHub links - offer to check, don't auto-fetch (saves context).
 
 ---
 
