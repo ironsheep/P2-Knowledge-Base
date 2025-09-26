@@ -49,9 +49,16 @@ and help me select and configure the right mode.
 
 ### 4. Community Code Discovery
 ```
-Find me a P2 [TYPE] driver from the community.
-Check manifests/obex-community-manifest.yaml and category manifests
-for proven implementations with download URLs.
+Find me P2 community code for [HARDWARE/PROTOCOL].
+Check manifests/obex/obex-root.yaml for available objects.
+Remember: Search broadly - many drivers are in 'misc' category!
+```
+
+### 5. Using Auxiliary Guides
+```
+I need help with [BMP generation / hardware testing / OBEX search].
+Check manifests/auxiliary-guides-manifest.yaml for specialized guides.
+These guides provide techniques for specific development tasks.
 ```
 
 ### 5. Session Resume (After Clearing)

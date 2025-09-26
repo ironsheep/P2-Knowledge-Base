@@ -1,0 +1,120 @@
+manifest_metadata:
+  manifest_type: auxiliary_guides
+  version: '1.0'
+  description: "Auxiliary guides for AI-assisted P2 development"
+  last_updated: '2025-09-26'
+  purpose: "Specialized guides that teach AI systems HOW to work with P2 resources"
+
+guide_categories:
+  interaction:
+    description: "How to interact with AI for P2 development"
+    guides:
+      - name: "Using with AI"
+        path: "deliverables/ai-reference/auxiliary-guides/interaction/using-with-ai.md"
+        purpose: "Complete guide for using P2 Knowledge Base with Claude and other AI"
+        key_points:
+          - Start with root manifest navigation
+          - Use manifest tree, never guess paths
+          - Understand P2 hardware vs OBEX boundary
+          - Leverage community objects for protocols
+        when_to_use: "User asks 'how to use AI' or 'how to work with Claude'"
+        
+  search_strategies:
+    description: "Optimized search and discovery strategies"
+    guides:
+      - name: "OBEX Search Optimization"
+        path: "deliverables/ai-reference/auxiliary-guides/search-strategies/obex-search-optimization.md"
+        purpose: "How to search OBEX effectively - cast wide nets, not narrow searches"
+        key_insight: "Never filter by category first - many drivers are in 'misc'"
+        recommended_approach: |
+          1. Search ALL 113 objects with broad keywords
+          2. Expand search terms (I2C → also IIC, TWI, two-wire)
+          3. Check top authors for quality examples
+          4. Present results as: Highly Relevant, Related, Consider Also
+        when_to_use: "User asks for drivers, sensors, displays, or any hardware interface"
+        
+  special_techniques:
+    description: "P2-specific development techniques"
+    guides:
+      - name: "BMP Generation for Debug"
+        path: "deliverables/ai-reference/auxiliary-guides/special-techniques/bmp-generation-guide.md"
+        purpose: "Generate BMP files for P2 Plot window visualization"
+        key_capabilities:
+          - Create 8-bit indexed BMPs for debug visualization
+          - Design layered displays for state changes
+          - Generate bar graphs, LED arrays, 7-segment displays
+          - Support Plot window cropping commands
+        recommended_approach: |
+          1. Parse user's visualization description
+          2. Generate Python script using Pillow
+          3. Create multiple layer BMPs for different states
+          4. Provide Plot window commands for display
+        when_to_use: "User mentions debug visualization, Plot window, or BMP generation"
+        
+      - name: "Hardware Testing Workflow"
+        path: "deliverables/ai-reference/auxiliary-guides/special-techniques/hardware-testing-guide.md"
+        purpose: "Compile, download, and test on real P2 hardware"
+        tools_required:
+          - pnut_ts: "Spin2/PASM2 compiler"
+          - pnut-term-ts: "Debug terminal for P2"
+          - PropPlug: "USB to serial adapter"
+        recommended_approach: |
+          1. Compile with debug flag: pnut_ts -d program.spin2
+          2. List devices: pnut-term-ts -n
+          3. Download to RAM: pnut-term-ts -r program.bin -p [device]
+          4. Monitor logs: tail -f logs/debug_*.log
+        when_to_use: "User asks about testing, downloading, or running on hardware"
+        
+  development_workflows:
+    description: "Complete development patterns and workflows"
+    planned_guides:
+      - name: "Rapid Development Cycle"
+        status: "To be created"
+        purpose: "Fast compile-test-debug cycles with pnut_ts and pnut-term-ts"
+
+access_instructions:
+  for_remote_claude: |
+    DISCOVERY PATTERN:
+    1. When user mentions keywords, check this manifest
+    2. Download and study the relevant guide
+    3. Apply the patterns and techniques described
+    4. Use 'recommended_approach' for best results
+    
+  keyword_triggers:
+    obex_search:
+      - "find driver"
+      - "find sensor" 
+      - "OBEX object"
+      - "community code"
+      - "I2C driver"
+      - "SPI driver"
+      - "serial driver"
+    bmp_generation:
+      - "debug visualization"
+      - "Plot window"
+      - "BMP file"
+      - "debug display"
+      - "visual debug"
+    hardware_testing:
+      - "test on P2"
+      - "download to P2"
+      - "PropPlug"
+      - "pnut-term"
+      - "hardware test"
+      - "run on device"
+    ai_interaction:
+      - "how to use AI"
+      - "Claude help"
+      - "prompt patterns"
+      - "AI assistance"
+
+integration_notes:
+  critical_understanding: |
+    These guides teach AI systems HOW to work with P2 resources effectively.
+    They are meta-documentation about process and technique, not P2 facts.
+    
+  usage_flow: |
+    1. User query triggers keyword match
+    2. AI fetches relevant auxiliary guide
+    3. AI applies techniques from guide
+    4. Better results through proper methodology

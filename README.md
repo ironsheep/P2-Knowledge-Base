@@ -8,7 +8,7 @@
 
 ## 🤖 Using with AI Assistants (Claude, GPT, etc.)
 
-**[→ USING WITH AI GUIDE](USING-WITH-AI.md)**  
+**[→ USING WITH AI GUIDE](deliverables/ai-reference/auxiliary-guides/interaction/using-with-ai.md)**  
 **Start here if you're using Claude Code, GitHub Copilot, or other AI assistants!** Complete guide on how to set up and use this knowledge base with AI systems, including example prompts and usage patterns.
 
 **[→ PRIVACY GUIDE FOR DEVELOPERS](deliverables/developer-docs/ai-development/Claude-Code-Privacy-Guide-for-P2-Developers.pdf)** 📔  

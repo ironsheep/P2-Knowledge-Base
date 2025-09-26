@@ -83,6 +83,28 @@ manifests:
     entry_count: 253  # Discovered 2025-09-12
     categories: ["drivers", "sensors", "display", "motors", "communication", "audio", "misc", "demos", "tools"]
     featured_authors: ["Jon McPhalen (jonnymac)", "Chip Gracey", "Kwabena W. Agyeman"]
+    
+  auxiliary_guides:
+    description: "Specialized guides for AI-assisted P2 development"
+    manifest: "manifests/auxiliary-guides-manifest.yaml"
+    categories:
+      - name: "interaction"
+        description: "How to work with AI for P2 development"
+      - name: "search_strategies" 
+        description: "Optimized search techniques (especially OBEX)"
+      - name: "special_techniques"
+        description: "P2-specific development methods (BMP gen, hardware testing)"
+      - name: "development_workflows"
+        description: "Complete development patterns"
+    when_to_use: |
+      Check auxiliary guides when:
+      - User asks HOW to work with AI
+      - User needs to find OBEX objects (use search optimization)
+      - User wants debug visualization (BMP generation guide)
+      - User needs to test on hardware (hardware testing guide)
+    critical_insight: |
+      These are META-GUIDES that teach AI systems HOW to use P2 resources.
+      They contain techniques and methodologies, not P2 facts.
     download_mechanism: "Direct URLs to OBEX ZIP files"
     
   quick_queries:
