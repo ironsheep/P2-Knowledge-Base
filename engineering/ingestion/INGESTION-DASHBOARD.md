@@ -1,7 +1,7 @@
 # Ingestion Dashboard - Source Content Status
 
 **Generated**: 2025-09-01  
-**Updated**: 2025-09-05 - Added Authoritative Status Designations  
+**Updated**: 2025-09-26 - Added Quick Bytes ingestion planning  
 **Purpose**: Track extraction status for all ingested sources (documents, images, code)
 
 ## 🏆 Authoritative Sources Summary
@@ -128,6 +128,25 @@ Includes:
 2. Review "Other Sources" category for extraction needs
 3. Verify if hardware docs need code examples
 4. Complete pasm2-manual development
+
+## 🆕 Planned Ingestions
+
+### Quick Bytes (Parallax Community Tutorials) - READY TO EXECUTE
+- **Source**: https://www.parallax.com/propeller-2/quick-bytes/
+- **Content**: ~36 tutorial videos with code examples
+- **Plan Status**: ✅ COMPLETE - Ready for execution
+- **Execution Date**: Planned for next 2-3 days
+- **Key Features**:
+  - YouTube videos for each Quick Byte
+  - Source code downloads (some have multiple)
+  - Master tag taxonomy (21 categories)
+  - Distinguishes tutorial vs procedural content
+- **Tools Ready**:
+  - `scrape-quick-bytes.py` - Main scraper
+  - `extract-tag-taxonomy.py` - Tag analyzer
+  - `youtube-playlist-correlator.py` - Playlist validator
+- **Execution Plan**: `/engineering/ingestion/plans/QUICK-BYTES-READY-TO-EXECUTE.md`
+- **Benefits**: Makes community tutorials discoverable by remote Claude instances
 
 ## Extraction Completeness Score: 75%
 
