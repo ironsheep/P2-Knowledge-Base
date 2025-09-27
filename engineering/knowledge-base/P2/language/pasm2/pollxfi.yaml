@@ -1,18 +1,18 @@
 instruction: POLLXFI
 syntax: POLLXFI {WC|WZ|WCZ}
-encoding: "EEEE 1101011 CZ0 000001011 000100100                  \u2014             XFI Event          XFI Event         \
+encoding: "EEEE 1101011 CZ0 000001011 000100100                  --             XFI Event          XFI Event         \
   \       2"
 timing:
   cycles: 2
   type: fixed
 description: "Streamer-finished event flag is optionally copied into C and/or Z, then it is cleared.\n\nPOLLXFI copies the\
-  \ state of the streamer-\uFB01nished event \uFB02ag into C and/or Z and then clears the \uFB02ag (unless it's\n\nbeing set\
-  \ again by the event sensor).\n\nIf the WC, WZ, or WCZ effect is speci\uFB01ed, the C \uFB02ag and/or Z \uFB02ag is updated\
-  \ to the state of the streamer-\uFB01nished\n\nevent \uFB02ag prior to clearing it.\n\nThe streamer-\uFB01nished event \uFB02\
-  ag is set whenever the streamer runs out of commands to process. The\n\nstreamer-\uFB01nished event \uFB02ag is cleared\
+  \ state of the streamer-finished event flag into C and/or Z and then clears the flag (unless it's\n\nbeing set\
+  \ again by the event sensor).\n\nIf the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated\
+  \ to the state of the streamer-finished\n\nevent flag prior to clearing it.\n\nThe streamer-finished event fl\
+  ag is set whenever the streamer runs out of commands to process. The\n\nstreamer-finished event flag is cleared\
   \ upon execution of XINIT, XZERO, XCONT, POLLXFI, WAITXFI, JXFI, or\n\nJNXFI instructions."
 parameters:
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 related:
 - XINIT
 - XZERO
@@ -30,12 +30,12 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-long_description: "Streamer-\uFB01nished event \uFB02ag is optionally copied into C and/or Z, then it is cleared."
+long_description: "Streamer-finished event flag is optionally copied into C and/or Z, then it is cleared."
 syntax_variants:
 - POLLXFI {WC|WZ|WCZ}
 last_updated: '2025-09-19'
-brief_description: "Poll streamer \uFB01nished"
+brief_description: "Poll streamer finished"
 category: timing_events
-result: "Streamer-\uFB01nished event \uFB02ag is optionally copied into C and/or Z, then it is cleared."
+result: "Streamer-finished event flag is optionally copied into C and/or Z, then it is cleared."
 manual_extraction_date: '2025-01-19'
-oneliner: "Retrieve and clear streamer-\uFB01nished event \uFB02ag"
+oneliner: "Retrieve and clear streamer-finished event flag"

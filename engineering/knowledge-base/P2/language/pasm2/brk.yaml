@@ -1,6 +1,6 @@
 instruction: BRK
 syntax: BRK {#}Dest
-encoding: "EEEE 1101011 00L DDDDDDDDD 000110110               Code/Cond.1             \u2014                  \u2014     \
+encoding: "EEEE 1101011 00L DDDDDDDDD 000110110               Code/Cond.1             --                  --     \
   \               2"
 timing:
   cycles: 2
@@ -9,9 +9,9 @@ description: "BRK triggers a breakpoint in the current cog and either defines a 
   \ If debug interrupts are enabled, a debug interrupt is triggered in the current\ncog and Dest's value becomes the debug\
   \ code or the next debug condition.\n\nKey uses:\n- Software breakpoints for debugging\n- Conditional debug triggers\n-\
   \ Communication with debug monitor\n- Assertion failures and error handling\n\n\nBRK triggers a breakpoint in the current\
-  \ cog and either de\uFB01nes a breakpoint code or the next breakpoint\n\ncondition(s). The cog must have debug interrupts\
+  \ cog and either defines a breakpoint code or the next breakpoint\n\ncondition(s). The cog must have debug interrupts\
   \ enabled, and if BRK is to be executed within the normal\n\nprogram (outside the Debug ISR), the \"BRK instruction\" interrupt\
-  \ must \uFB01rst be enabled from within a prior Debug\n\nISR (interrupt service routine).\n\nDuring normal program execution,\
+  \ must first be enabled from within a prior Debug\n\nISR (interrupt service routine).\n\nDuring normal program execution,\
   \ the BRK instruction is used to generate a debug interrupt with an 8-bit code\n\n(from D[7:0]) which can be read within\
   \ the Debug ISR using a GETBRK instruction.\n\nDuring a Debug ISR, the BRK instruction is used instead to establish the\
   \ next debug interrupt condition(s) and to\n\nselect INA/INB, instead of the IJMP0/IRET0 registers exposed during the ISR,\

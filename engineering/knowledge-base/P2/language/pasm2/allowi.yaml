@@ -1,13 +1,13 @@
 instruction: ALLOWI
 syntax: ALLOWI
-encoding: "EEEE 1101011 000 000100000 000100100                      \u2014                  \u2014                   \u2014\
+encoding: "EEEE 1101011 000 000100000 000100100                      --                  --                   --\
   \                    2"
 timing:
   cycles: 2
   type: fixed
 description: "ALLOWI re-enables interrupt branching; the default on cog start. ALLOWI is the complement of the STALLI Result:\
   \ Any stalled and future interrupts are allowed.\n\nALLOWI re-enables interrupt branching; the default on cog start. ALLOWI\
-  \ is the complement of the STALLI\n\ninstruction\u2014 both are used to protect short, vital sections of main code from\
+  \ is the complement of the STALLI\n\ninstruction-- both are used to protect short, vital sections of main code from\
   \ timing jitter or state loss caused by\n\nasynchronous interrupt handling."
 related:
 - STALLI

@@ -4,7 +4,7 @@ encoding: EEEE 1100110 1LI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2/2
   type: fixed
-description: "Execute next D[8:0] instructions S times. If S = 0, repeat instructions in\uFB01nitely. If D[8:0] = 0, nothing\
+description: "Execute next D[8:0] instructions S times. If S = 0, repeat instructions infinitely. If D[8:0] = 0, nothing\
   \ repeats."
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced

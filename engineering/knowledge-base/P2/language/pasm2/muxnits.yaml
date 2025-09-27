@@ -1,6 +1,6 @@
 instruction: MUXNITS
 syntax: MUXNITS Dest, {#}Src
-encoding: "EEEE 1001111 00I DDDDDDDDD SSSSSSSSS                     D                 \u2014                   \u2014    \
+encoding: "EEEE 1001111 00I DDDDDDDDD SSSSSSSSS                     D                 --                   --    \
   \                2"
 timing:
   cycles: 2

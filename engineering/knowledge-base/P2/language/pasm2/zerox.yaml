@@ -5,10 +5,10 @@ timing:
   cycles: 2
   type: fixed
 description: "ZEROX fills the bits of Dest, above the bit indicated by Src[4:0], with zeros; i.e. zero-extending the value.\
-  \ This is C = MSB of result.\n\nZEROX \uFB01lls the bits of Dest, above the bit indicated by Src[4:0], with zeros; i.e.\
+  \ This is C = MSB of result.\n\nZEROX fills the bits of Dest, above the bit indicated by Src[4:0], with zeros; i.e.\
   \ zero-extending the value. This is\n\nhandy when converting encoded or received unsigned values from a small bit width\
-  \ to a large bit with; i.e. 32 bits.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set to the result's\
-  \ MSB value.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the result is zero, or is cleared\
+  \ to a large bit with; i.e. 32 bits.\n\nIf the WC or WCZ effect is specified, the C flag is set to the result's\
+  \ MSB value.\n\nIf the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero, or is cleared\
   \ (0) if it is non-zero.\n\nPROPELLER 2 ASSEMBLY LANGUAGE (PASM2) IN BRIEF\n\nMath and Logic Instructions\n\nClocks\n\n\
   Instruction                                                              Description\n\nReg, LUT, & Hub\n\nABS      D  \
   \        {WC/WZ/WCZ}    Get absolute value of D into D. D = ABS(D). C = D[31]. *                                       \
@@ -34,8 +34,8 @@ description: "ZEROX fills the bits of Dest, above the bit indicated by Src[4:0],
   \ S[9:5]. C,Z = original\n\nBITRND   D,{#}S            {WCZ}                                                           \
   \                                                                       2\n\nD[S[4:0]].\n\nBITZ     D,{#}S            {WCZ}\
   \   Bits D[S[9:5]+S[4:0]:S[4:0]] = Z. Other bits una ected. Prior SETQ overrides S[9:5]. C,Z = original D[S[4:0]].     \
-  \            2\n\nBMASK    D                         Get LSB-justi\uFB01ed bit mask of size (D[4:0] + 1) into D. D = ($0000_0002\
-  \ << D[4:0]) - 1.                                         2\n\nBMASK    D,{#}S                    Get LSB-justi\uFB01ed\
+  \            2\n\nBMASK    D                         Get LSB-justified bit mask of size (D[4:0] + 1) into D. D = ($0000_0002\
+  \ << D[4:0]) - 1.                                         2\n\nBMASK    D,{#}S                    Get LSB-justified\
   \ bit mask of size (S[4:0] + 1) into D. D = ($0000_0002 << S[4:0]) - 1.                                         2\n\nCMP\
   \      D,{#}S     {WC/WZ/WCZ}    Compare D to S. C = borrow of (D - S). Z = (D == S).                                  \
   \                                         2\n\nCMPM     D,{#}S     {WC/WZ/WCZ}    Compare D to S, get MSB of di erence into\
@@ -155,13 +155,13 @@ description: "ZEROX fills the bits of Dest, above the bit indicated by Src[4:0],
   \ -1.0. *                      2\n\nSETBYTE {#}S                      Set S[7:0] into byte established by prior ALTSB instruction.\
   \                                                                        2\n\nSETBYTE D,{#}S,#N                 Set S[7:0]\
   \ into byte N in D, keeping rest of D same.                                                                            \
-  \    2\n\nSETD     D,{#}S                   Set D \uFB01eld of D to S[8:0]. D = {D[31:18], S[8:0], D[8:0]}.            \
+  \    2\n\nSETD     D,{#}S                   Set D field of D to S[8:0]. D = {D[31:18], S[8:0], D[8:0]}.            \
   \                                                              2\n\nSETNIB   {#}S                     Set S[3:0] into nibble\
   \ established by prior ALTSN instruction.                                                                      2\n\nSETNIB\
   \   D,{#}S,#N                Set S[3:0] into nibble N in D, keeping rest of D same.                                    \
-  \                                          2\n\nSETR     D,{#}S                   Set R \uFB01eld of D to S[8:0]. D = {D[31:28],\
+  \                                          2\n\nSETR     D,{#}S                   Set R field of D to S[8:0]. D = {D[31:28],\
   \ S[8:0], D[18:0]}.                                                                         2\n\nSETS     D,{#}S       \
-  \            Set S \uFB01eld of D to S[8:0]. D = {D[31:9], S[8:0]}.                                                    \
+  \            Set S field of D to S[8:0]. D = {D[31:9], S[8:0]}.                                                    \
   \                               2\n\nSETWORD {#}S                      Set S[15:0] into word established by prior ALTSW\
   \ instruction.                                                                       2\n\nSETWORD D,{#}S,#N            \
   \     Set S[15:0] into word N in D, keeping rest of D same.                                                            \
@@ -356,7 +356,7 @@ description: "ZEROX fills the bits of Dest, above the bit indicated by Src[4:0],
   \        {WC/WZ/WCZ}   Jump to D. C = D[31], Z = D[30], PC = D[19:0].                                                  \
   \                              4 / 13...20\n\nJMPREL   {#}D                     Jump ahead/back by D instructions. For cogex,\
   \ PC += D[19:0]. For hubex, PC += D[17:0] << 2.                                   4 / 13...20\n\nREP      {#}D,{#}S    \
-  \            Execute next D[8:0] instructions S times. If S = 0, repeat instructions in\uFB01nitely. If D[8:0] = 0, nothing\
+  \            Execute next D[8:0] instructions S times. If S = 0, repeat instructions infinitely. If D[8:0] = 0, nothing\
   \ repeats.               2/2\n\nRESI0                             Resume from INT0. (CALLD $1FE,$1FF WCZ)              \
   \                                                                         4 / 13...20\n\nRESI1                         \
   \    Resume from INT1. (CALLD $1F4,$1F5 WCZ)                                                                           \
@@ -384,7 +384,7 @@ description: "ZEROX fills the bits of Dest, above the bit indicated by Src[4:0],
   \      Test D and jump to S** if D is not zero.                                                                        \
   \     2 or 4 / 2 or 13...20\n\nTJS        D,{#}S                   Test D and jump to S** if D is signed (D[31] = 1).  \
   \                                                                 2 or 4 / 2 or 13...20\n\nTJV        D,{#}S           \
-  \        Test D and jump to S** if D over\uFB02owed (D[31] != C, C = 'correct sign' from last addition/subtraction).   \
+  \        Test D and jump to S** if D overflowed (D[31] != C, C = 'correct sign' from last addition/subtraction).   \
   \            2 or 4 / 2 or 13...20\n\nTJZ        D,{#}S                   Test D and jump to S** if D is zero.         \
   \                                                                        2 or 4 / 2 or 13...20\n\n1\n\n+1 if crosses hub\
   \ long\n\nHub Control, FIFO, & RAM Instructions\n\nClocks\n\nInstruction                                               \
@@ -401,16 +401,16 @@ description: "ZEROX fills the bits of Dest, above the bit indicated by Src[4:0],
   \                                2...9 / same\n\nTry to get LOCK D[3:0]. C = 1 if got LOCK. LOCKREL releases LOCK. LOCK\
   \ is also released if owner cog stops or\n\nLOCKTRY {#}D                 {WC}                                          \
   \                                                                            2...9, +2 if result / same\n\nrestarts.\n\n\
-  HUBSET     {#}D                     Set hub con\uFB01guration to D.                                                    \
+  HUBSET     {#}D                     Set hub configuration to D.                                                    \
   \                                           2...9 / same\n\nHub FIFO\n\nGETPTR     D                        Get current\
   \ FIFO hub pointer into D.                                                                                   2 / FIFO IN\
   \ USE\n\nSet next block for when block wraps. D[13:0] = block size in 64-byte units (0 = max), S[19:0] = block start\n\n\
   FBLOCK     {#}D,{#}S                                                                                                   \
   \                                    2 / FIFO IN USE\n\naddress.\n\nBegin new fast hub read via FIFO. D[31] = no wait, D[13:0]\
-  \ = block size in 64-byte units (0 = max), S[19:0] =       2 or WRFAST \uFB01nish +\n\nRDFAST     {#}D,{#}S\n\nblock start\
+  \ = block size in 64-byte units (0 = max), S[19:0] =       2 or WRFAST finish +\n\nRDFAST     {#}D,{#}S\n\nblock start\
   \ address.                                                                                                10...17 / FIFO\
   \ IN USE\n\nBegin new fast hub write via FIFO. D[31] = no wait, D[13:0] = block size in 64-byte units (0 = max), S[19:0]\
-  \ =     2 or WRFAST \uFB01nish + 3 /\n\nWRFAST     {#}D,{#}S\n\nblock start address.                                   \
+  \ =     2 or WRFAST finish + 3 /\n\nWRFAST     {#}D,{#}S\n\nblock start address.                                   \
   \                                                                  FIFO IN USE\n\nRFBYTE     D          {WC/WZ/WCZ}   Used\
   \ after RDFAST. Read zero-extended byte from FIFO into D. C = MSB of byte. *                                        2 /\
   \ FIFO IN USE\n\nRFLONG     D          {WC/WZ/WCZ}   Used after RDFAST. Read long from FIFO into D. C = MSB of long. * \
@@ -448,104 +448,104 @@ description: "ZEROX fills the bits of Dest, above the bit indicated by Src[4:0],
   \                                                  2\n\nADDCT3     D,{#}S                  Set CT3 event to trigger on CT\
   \ = D + S. Adds S into D.                                                                2\n\nCOGATN     {#}D          \
   \          Strobe \"attention\" of all cogs whose corresponding bits are high in D[15:0].                              \
-  \            2\n\nJATN       {#}S                    Jump to S** if ATN event \uFB02ag is set.                         \
+  \            2\n\nJATN       {#}S                    Jump to S** if ATN event flag is set.                         \
   \                                                2 or 4 / 2 or 13...20\n\nJCT1       {#}S                    Jump to S**\
-  \ if CT1 event \uFB02ag is set.                                                                         2 or 4 / 2 or 13...20\n\
-  \nJCT2       {#}S                    Jump to S** if CT2 event \uFB02ag is set.                                         \
-  \                                2 or 4 / 2 or 13...20\n\nJCT3       {#}S                    Jump to S** if CT3 event \uFB02\
+  \ if CT1 event flag is set.                                                                         2 or 4 / 2 or 13...20\n\
+  \nJCT2       {#}S                    Jump to S** if CT2 event flag is set.                                         \
+  \                                2 or 4 / 2 or 13...20\n\nJCT3       {#}S                    Jump to S** if CT3 event fl\
   ag is set.                                                                         2 or 4 / 2 or 13...20\n\nJFBW       {#}S\
-  \                    Jump to S** if FBW event \uFB02ag is set.                                                         \
-  \                2 or 4 / 2 or 13...20\n\nJINT       {#}S                    Jump to S** if INT event \uFB02ag is set. \
+  \                    Jump to S** if FBW event flag is set.                                                         \
+  \                2 or 4 / 2 or 13...20\n\nJINT       {#}S                    Jump to S** if INT event flag is set. \
   \                                                                        2 or 4 / 2 or 13...20\n\nJNATN      {#}S      \
-  \              Jump to S** if ATN event \uFB02ag is clear.                                                             \
-  \          2 or 4 / 2 or 13...20\n\nJNCT1      {#}S                    Jump to S** if CT1 event \uFB02ag is clear.     \
+  \              Jump to S** if ATN event flag is clear.                                                             \
+  \          2 or 4 / 2 or 13...20\n\nJNCT1      {#}S                    Jump to S** if CT1 event flag is clear.     \
   \                                                                  2 or 4 / 2 or 13...20\n\nJNCT2      {#}S            \
-  \        Jump to S** if CT2 event \uFB02ag is clear.                                                                   \
-  \    2 or 4 / 2 or 13...20\n\nJNCT3      {#}S                    Jump to S** if CT3 event \uFB02ag is clear.           \
+  \        Jump to S** if CT2 event flag is clear.                                                                   \
+  \    2 or 4 / 2 or 13...20\n\nJNCT3      {#}S                    Jump to S** if CT3 event flag is clear.           \
   \                                                            2 or 4 / 2 or 13...20\n\nJNFBW      {#}S                  \
-  \  Jump to S** if FBW event \uFB02ag is clear.                                                                       2 or\
-  \ 4 / 2 or 13...20\n\nJNINT      {#}S                    Jump to S** if INT event \uFB02ag is clear.                   \
+  \  Jump to S** if FBW event flag is clear.                                                                       2 or\
+  \ 4 / 2 or 13...20\n\nJNINT      {#}S                    Jump to S** if INT event flag is clear.                   \
   \                                                    2 or 4 / 2 or 13...20\n\nJNPAT      {#}S                    Jump to\
-  \ S** if PAT event \uFB02ag is clear.                                                                       2 or 4 / 2 or\
-  \ 13...20\n\nJNQMT      {#}S                    Jump to S** if QMT event \uFB02ag is clear.                            \
+  \ S** if PAT event flag is clear.                                                                       2 or 4 / 2 or\
+  \ 13...20\n\nJNQMT      {#}S                    Jump to S** if QMT event flag is clear.                            \
   \                                           2 or 4 / 2 or 13...20\n\nJNSE1      {#}S                    Jump to S** if SE1\
-  \ event \uFB02ag is clear.                                                                       2 or 4 / 2 or 13...20\n\
-  \nJNSE2      {#}S                    Jump to S** if SE2 event \uFB02ag is clear.                                       \
-  \                                2 or 4 / 2 or 13...20\n\nJNSE3      {#}S                    Jump to S** if SE3 event \uFB02\
+  \ event flag is clear.                                                                       2 or 4 / 2 or 13...20\n\
+  \nJNSE2      {#}S                    Jump to S** if SE2 event flag is clear.                                       \
+  \                                2 or 4 / 2 or 13...20\n\nJNSE3      {#}S                    Jump to S** if SE3 event fl\
   ag is clear.                                                                       2 or 4 / 2 or 13...20\n\nJNSE4      {#}S\
-  \                    Jump to S** if SE4 event \uFB02ag is clear.                                                       \
-  \                2 or 4 / 2 or 13...20\n\nJNXFI      {#}S                    Jump to S** if XFI event \uFB02ag is clear.\
+  \                    Jump to S** if SE4 event flag is clear.                                                       \
+  \                2 or 4 / 2 or 13...20\n\nJNXFI      {#}S                    Jump to S** if XFI event flag is clear.\
   \                                                                       2 or 4 / 2 or 13...20\n\nJNXMT      {#}S       \
-  \             Jump to S** if XMT event \uFB02ag is clear.                                                              \
-  \         2 or 4 / 2 or 13...20\n\nJNXRL      {#}S                    Jump to S** if XRL event \uFB02ag is clear.      \
+  \             Jump to S** if XMT event flag is clear.                                                              \
+  \         2 or 4 / 2 or 13...20\n\nJNXRL      {#}S                    Jump to S** if XRL event flag is clear.      \
   \                                                                 2 or 4 / 2 or 13...20\n\nJNXRO      {#}S             \
-  \       Jump to S** if XRO event \uFB02ag is clear.                                                                    \
-  \   2 or 4 / 2 or 13...20\n\nJPAT       {#}S                    Jump to S** if PAT event \uFB02ag is set.              \
+  \       Jump to S** if XRO event flag is clear.                                                                    \
+  \   2 or 4 / 2 or 13...20\n\nJPAT       {#}S                    Jump to S** if PAT event flag is set.              \
   \                                                           2 or 4 / 2 or 13...20\n\nJQMT       {#}S                   \
-  \ Jump to S** if QMT event \uFB02ag is set.                                                                         2 or\
-  \ 4 / 2 or 13...20\n\nJSE1       {#}S                    Jump to S** if SE1 event \uFB02ag is set.                     \
+  \ Jump to S** if QMT event flag is set.                                                                         2 or\
+  \ 4 / 2 or 13...20\n\nJSE1       {#}S                    Jump to S** if SE1 event flag is set.                     \
   \                                                    2 or 4 / 2 or 13...20\n\nJSE2       {#}S                    Jump to\
-  \ S** if SE2 event \uFB02ag is set.                                                                         2 or 4 / 2 or\
-  \ 13...20\n\nJSE3       {#}S                    Jump to S** if SE3 event \uFB02ag is set.                              \
+  \ S** if SE2 event flag is set.                                                                         2 or 4 / 2 or\
+  \ 13...20\n\nJSE3       {#}S                    Jump to S** if SE3 event flag is set.                              \
   \                                           2 or 4 / 2 or 13...20\n\nJSE4       {#}S                    Jump to S** if SE4\
-  \ event \uFB02ag is set.                                                                         2 or 4 / 2 or 13...20\n\
-  \nJXFI       {#}S                    Jump to S** if XFI event \uFB02ag is set.                                         \
-  \                                2 or 4 / 2 or 13...20\n\nJXMT       {#}S                    Jump to S** if XMT event \uFB02\
+  \ event flag is set.                                                                         2 or 4 / 2 or 13...20\n\
+  \nJXFI       {#}S                    Jump to S** if XFI event flag is set.                                         \
+  \                                2 or 4 / 2 or 13...20\n\nJXMT       {#}S                    Jump to S** if XMT event fl\
   ag is set.                                                                         2 or 4 / 2 or 13...20\n\nJXRL       {#}S\
-  \                    Jump to S** if XRL event \uFB02ag is set.                                                         \
-  \                2 or 4 / 2 or 13...20\n\nJXRO       {#}S                    Jump to S** if XRO event \uFB02ag is set. \
+  \                    Jump to S** if XRL event flag is set.                                                         \
+  \                2 or 4 / 2 or 13...20\n\nJXRO       {#}S                    Jump to S** if XRO event flag is set. \
   \                                                                        2 or 4 / 2 or 13...20\n\nPOLLATN              {WC/WZ/WCZ}\
-  \   Get ATN event \uFB02ag into C/Z, then clear it.                                                                    \
-  \                2\n\nPOLLCT1              {WC/WZ/WCZ}   Get CT1 event \uFB02ag into C/Z, then clear it.               \
+  \   Get ATN event flag into C/Z, then clear it.                                                                    \
+  \                2\n\nPOLLCT1              {WC/WZ/WCZ}   Get CT1 event flag into C/Z, then clear it.               \
   \                                                                     2\n\nPOLLCT2              {WC/WZ/WCZ}   Get CT2 event\
-  \ \uFB02ag into C/Z, then clear it.                                                                                    2\n\
-  \nPOLLCT3              {WC/WZ/WCZ}   Get CT3 event \uFB02ag into C/Z, then clear it.                                   \
-  \                                                 2\n\nPOLLFBW              {WC/WZ/WCZ}   Get FBW event \uFB02ag into C/Z,\
+  \ flag into C/Z, then clear it.                                                                                    2\n\
+  \nPOLLCT3              {WC/WZ/WCZ}   Get CT3 event flag into C/Z, then clear it.                                   \
+  \                                                 2\n\nPOLLFBW              {WC/WZ/WCZ}   Get FBW event flag into C/Z,\
   \ then clear it.                                                                                    2\n\nPOLLINT       \
-  \       {WC/WZ/WCZ}   Get INT event \uFB02ag into C/Z, then clear it.                                                  \
-  \                                  2\n\nPOLLPAT              {WC/WZ/WCZ}   Get PAT event \uFB02ag into C/Z, then clear it.\
+  \       {WC/WZ/WCZ}   Get INT event flag into C/Z, then clear it.                                                  \
+  \                                  2\n\nPOLLPAT              {WC/WZ/WCZ}   Get PAT event flag into C/Z, then clear it.\
   \                                                                                    2\n\nPOLLQMT              {WC/WZ/WCZ}\
-  \   Get QMT event \uFB02ag into C/Z, then clear it.                                                                    \
-  \                2\n\nPOLLSE1              {WC/WZ/WCZ}   Get SE1 event \uFB02ag into C/Z, then clear it.               \
+  \   Get QMT event flag into C/Z, then clear it.                                                                    \
+  \                2\n\nPOLLSE1              {WC/WZ/WCZ}   Get SE1 event flag into C/Z, then clear it.               \
   \                                                                     2\n\nPOLLSE2              {WC/WZ/WCZ}   Get SE2 event\
-  \ \uFB02ag into C/Z, then clear it.                                                                                    2\n\
-  \nPOLLSE3              {WC/WZ/WCZ}   Get SE3 event \uFB02ag into C/Z, then clear it.                                   \
-  \                                                 2\n\nPOLLSE4              {WC/WZ/WCZ}   Get SE4 event \uFB02ag into C/Z,\
+  \ flag into C/Z, then clear it.                                                                                    2\n\
+  \nPOLLSE3              {WC/WZ/WCZ}   Get SE3 event flag into C/Z, then clear it.                                   \
+  \                                                 2\n\nPOLLSE4              {WC/WZ/WCZ}   Get SE4 event flag into C/Z,\
   \ then clear it.                                                                                    2\n\nPOLLXFI       \
-  \       {WC/WZ/WCZ}   Get XFI event \uFB02ag into C/Z, then clear it.                                                  \
-  \                                  2\n\nPOLLXMT              {WC/WZ/WCZ}   Get XMT event \uFB02ag into C/Z, then clear it.\
+  \       {WC/WZ/WCZ}   Get XFI event flag into C/Z, then clear it.                                                  \
+  \                                  2\n\nPOLLXMT              {WC/WZ/WCZ}   Get XMT event flag into C/Z, then clear it.\
   \                                                                                    2\n\nPOLLXRL              {WC/WZ/WCZ}\
-  \   Get XRL event \uFB02ag into C/Z, then clear it.                                                                    \
-  \                2\n\nPOLLXRO              {WC/WZ/WCZ}   Get XRO event \uFB02ag into C/Z, then clear it.               \
+  \   Get XRL event flag into C/Z, then clear it.                                                                    \
+  \                2\n\nPOLLXRO              {WC/WZ/WCZ}   Get XRO event flag into C/Z, then clear it.               \
   \                                                                     2\n\nSETPAT    {#}D,{#}S                Set pin pattern\
   \ for PAT event. C selects INA/INB, Z selects =/!=, D provides mask value, S provides match value.              2\n\nSETSE1\
-  \    {#}D                     Set SE1 event con\uFB01guration to D[8:0].                                               \
-  \                                          2\n\nSETSE2    {#}D                     Set SE2 event con\uFB01guration to D[8:0].\
+  \    {#}D                     Set SE1 event configuration to D[8:0].                                               \
+  \                                          2\n\nSETSE2    {#}D                     Set SE2 event configuration to D[8:0].\
   \                                                                                         2\n\nSETSE3    {#}D          \
-  \           Set SE3 event con\uFB01guration to D[8:0].                                                                 \
-  \                        2\n\nSETSE4    {#}D                     Set SE4 event con\uFB01guration to D[8:0].            \
+  \           Set SE3 event configuration to D[8:0].                                                                 \
+  \                        2\n\nSETSE4    {#}D                     Set SE4 event configuration to D[8:0].            \
   \                                                                             2\n\nWAITATN              {WC/WZ/WCZ}   Wait\
-  \ for ATN event \uFB02ag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.                     \
-  \         2+\n\nWAITCT1              {WC/WZ/WCZ}   Wait for CT1 event \uFB02ag, then clear it. Prior SETQ sets optional\
+  \ for ATN event flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.                     \
+  \         2+\n\nWAITCT1              {WC/WZ/WCZ}   Wait for CT1 event flag, then clear it. Prior SETQ sets optional\
   \ CT timeout value. C/Z = timeout.                              2+\n\nWAITCT2              {WC/WZ/WCZ}   Wait for CT2 event\
-  \ \uFB02ag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.                              2+\n\n\
-  WAITCT3              {WC/WZ/WCZ}   Wait for CT3 event \uFB02ag, then clear it. Prior SETQ sets optional CT timeout value.\
-  \ C/Z = timeout.                              2+\n\nWAITFBW              {WC/WZ/WCZ}   Wait for FBW event \uFB02ag, then\
+  \ flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.                              2+\n\n\
+  WAITCT3              {WC/WZ/WCZ}   Wait for CT3 event flag, then clear it. Prior SETQ sets optional CT timeout value.\
+  \ C/Z = timeout.                              2+\n\nWAITFBW              {WC/WZ/WCZ}   Wait for FBW event flag, then\
   \ clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.                              2+\n\nWAITINT       \
-  \       {WC/WZ/WCZ}   Wait for INT event \uFB02ag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.\
-  \                              2+\n\nWAITPAT              {WC/WZ/WCZ}   Wait for PAT event \uFB02ag, then clear it. Prior\
+  \       {WC/WZ/WCZ}   Wait for INT event flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.\
+  \                              2+\n\nWAITPAT              {WC/WZ/WCZ}   Wait for PAT event flag, then clear it. Prior\
   \ SETQ sets optional CT timeout value. C/Z = timeout.                              2+\n\nWAITSE1              {WC/WZ/WCZ}\
-  \   Wait for SE1 event \uFB02ag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.              \
-  \                2+\n\nWAITSE2              {WC/WZ/WCZ}   Wait for SE2 event \uFB02ag, then clear it. Prior SETQ sets optional\
+  \   Wait for SE1 event flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.              \
+  \                2+\n\nWAITSE2              {WC/WZ/WCZ}   Wait for SE2 event flag, then clear it. Prior SETQ sets optional\
   \ CT timeout value. C/Z = timeout.                              2+\n\nWAITSE3              {WC/WZ/WCZ}   Wait for SE3 event\
-  \ \uFB02ag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.                              2+\n\n\
-  WAITSE4              {WC/WZ/WCZ}   Wait for SE4 event \uFB02ag, then clear it. Prior SETQ sets optional CT timeout value.\
-  \ C/Z = timeout.                              2+\n\nWAITXFI              {WC/WZ/WCZ}   Wait for XFI event \uFB02ag, then\
+  \ flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.                              2+\n\n\
+  WAITSE4              {WC/WZ/WCZ}   Wait for SE4 event flag, then clear it. Prior SETQ sets optional CT timeout value.\
+  \ C/Z = timeout.                              2+\n\nWAITXFI              {WC/WZ/WCZ}   Wait for XFI event flag, then\
   \ clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.                              2+\n\nWAITXMT       \
-  \       {WC/WZ/WCZ}   Wait for XMT event \uFB02ag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.\
-  \                              2+\n\nWAITXRL              {WC/WZ/WCZ}   Wait for XRL event \uFB02ag, then clear it. Prior\
+  \       {WC/WZ/WCZ}   Wait for XMT event flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.\
+  \                              2+\n\nWAITXRL              {WC/WZ/WCZ}   Wait for XRL event flag, then clear it. Prior\
   \ SETQ sets optional CT timeout value. C/Z = timeout.                              2+\n\nWAITXRO              {WC/WZ/WCZ}\
-  \   Wait for XRO event \uFB02ag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.              \
+  \   Wait for XRO event flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.              \
   \                2+\n\nInterrupt Instructions\n\nClocks\n\nInstruction                                                 \
   \           Description\n\nCog, LUT & Hub\n\nALLOWI                             Allow interrupts (default).            \
   \                                                                                       2\n\nIf in debug ISR, set next break\
@@ -570,44 +570,44 @@ description: "ZEROX fills the bits of Dest, above the bit indicated by Src[4:0],
   \ of STALLI mode.                                                                                        2\n\nTRGINT3  \
   \                          Trigger INT3, regardless of STALLI mode.                                                    \
   \                                    2\n\nRegister Indirection Instructions\n\nClocks\n\nInstruction                   \
-  \                                      Description\n\nCog & LUT / Hub\n\nALTB      D,{#}S                   Alter D \uFB01\
+  \                                      Description\n\nCog & LUT / Hub\n\nALTB      D,{#}S                   Alter D fi\
   eld of next instruction to D[13:5].                                                                                    2\n\
-  \nALTB      D,{#}S                   Alter D \uFB01eld of next instruction to (D[13:5] + S) & $1FF. D += sign-extended S[17:9].\
-  \                                           2\n\nALTD      D                        Alter D \uFB01eld of next instruction\
+  \nALTB      D,{#}S                   Alter D field of next instruction to (D[13:5] + S) & $1FF. D += sign-extended S[17:9].\
+  \                                           2\n\nALTD      D                        Alter D field of next instruction\
   \ to D[8:0].                                                                                     2\n\nALTD      D,{#}S \
-  \                  Alter D \uFB01eld of next instruction to (D + S) & $1FF. D += sign-extended S[17:9].                \
+  \                  Alter D field of next instruction to (D + S) & $1FF. D += sign-extended S[17:9].                \
   \                                 2\n\nALTGB     D                        Alter subsequent GETBYTE/ROLBYTE instruction.\
-  \ Next S \uFB01eld = D[10:2], N \uFB01eld = D[1:0].                                           2\n\nAlter subsequent GETBYTE/ROLBYTE\
-  \ instruction. Next S \uFB01eld = (D[10:2] + S) & $1FF, N \uFB01eld = D[1:0]. D +=\n\nALTGB     D,{#}S                 \
+  \ Next S field = D[10:2], N field = D[1:0].                                           2\n\nAlter subsequent GETBYTE/ROLBYTE\
+  \ instruction. Next S field = (D[10:2] + S) & $1FF, N field = D[1:0]. D +=\n\nALTGB     D,{#}S                 \
   \                                                                                                                      \
   \            2\n\nsign-extended S[17:9].\n\nALTGN     D                        Alter subsequent GETNIB/ROLNIB instruction.\
-  \ Next S \uFB01eld = D[11:3], N \uFB01eld = D[2:0].                                             2\n\nAlter subsequent GETNIB/ROLNIB\
-  \ instruction. Next S \uFB01eld = (D[11:3] + S) & $1FF, N \uFB01eld = D[2:0]. D +=\n\nALTGN     D,{#}S                 \
+  \ Next S field = D[11:3], N field = D[2:0].                                             2\n\nAlter subsequent GETNIB/ROLNIB\
+  \ instruction. Next S field = (D[11:3] + S) & $1FF, N field = D[2:0]. D +=\n\nALTGN     D,{#}S                 \
   \                                                                                                                      \
   \            2\n\nsign-extended S[17:9].\n\nALTGW     D                        Alter subsequent GETWORD/ROLWORD instruction.\
-  \ Next S \uFB01eld = D[9:1], N \uFB01eld = D[0].                                              2\n\nAlter subsequent GETWORD/ROLWORD\
-  \ instruction. Next S \uFB01eld = ((D[9:1] + S) & $1FF), N \uFB01eld = D[0]. D +=\n\nALTGW     D,{#}S                  \
+  \ Next S field = D[9:1], N field = D[0].                                              2\n\nAlter subsequent GETWORD/ROLWORD\
+  \ instruction. Next S field = ((D[9:1] + S) & $1FF), N field = D[0]. D +=\n\nALTGW     D,{#}S                  \
   \                                                                                                                      \
   \           2\n\nsign-extended S[17:9].\n\nALTI      D                        Execute D in place of next instruction. D\
   \ stays same.                                                                           2\n\nALTI      D,{#}S          \
-  \         Substitute next instruction's I/R/D/S \uFB01elds with \uFB01elds from D, per S. Modify D per S.              \
-  \                             2\n\nALTR      D                        Alter result register address (normally D \uFB01eld)\
+  \         Substitute next instruction's I/R/D/S fields with fields from D, per S. Modify D per S.              \
+  \                             2\n\nALTR      D                        Alter result register address (normally D field)\
   \ of next instruction to D[8:0].                                                  2\n\nALTR      D,{#}S                \
-  \   Alter result register address (normally D \uFB01eld) of next instruction to (D + S) & $1FF. D += sign-extended S[17:9].\
-  \              2\n\nALTS      D                        Alter S \uFB01eld of next instruction to D[8:0].                \
-  \                                                                     2\n\nALTS      D,{#}S                   Alter S \uFB01\
+  \   Alter result register address (normally D field) of next instruction to (D + S) & $1FF. D += sign-extended S[17:9].\
+  \              2\n\nALTS      D                        Alter S field of next instruction to D[8:0].                \
+  \                                                                     2\n\nALTS      D,{#}S                   Alter S fi\
   eld of next instruction to (D + S) & $1FF. D += sign-extended S[17:9].                                                 2\n\
-  \nALTSB     D                        Alter subsequent SETBYTE instruction. Next D \uFB01eld = D[10:2], N \uFB01eld = D[1:0].\
-  \                                                   2\n\nAlter subsequent SETBYTE instruction. Next D \uFB01eld = (D[10:2]\
-  \ + S) & $1FF, N \uFB01eld = D[1:0]. D += sign-extended\n\nALTSB     D,{#}S                                            \
+  \nALTSB     D                        Alter subsequent SETBYTE instruction. Next D field = D[10:2], N field = D[1:0].\
+  \                                                   2\n\nAlter subsequent SETBYTE instruction. Next D field = (D[10:2]\
+  \ + S) & $1FF, N field = D[1:0]. D += sign-extended\n\nALTSB     D,{#}S                                            \
   \                                                                                                       2\n\nS[17:9].\n\n\
-  ALTSN     D                        Alter subsequent SETNIB instruction. Next D \uFB01eld = D[11:3], N \uFB01eld = D[2:0].\
-  \                                                    2\n\nAlter subsequent SETNIB instruction. Next D \uFB01eld = (D[11:3]\
-  \ + S) & $1FF, N \uFB01eld = D[2:0]. D += sign-extended\n\nALTSN     D,{#}S                                            \
+  ALTSN     D                        Alter subsequent SETNIB instruction. Next D field = D[11:3], N field = D[2:0].\
+  \                                                    2\n\nAlter subsequent SETNIB instruction. Next D field = (D[11:3]\
+  \ + S) & $1FF, N field = D[2:0]. D += sign-extended\n\nALTSN     D,{#}S                                            \
   \                                                                                                       2\n\nS[17:9].\n\n\
-  ALTSW     D                        Alter subsequent SETWORD instruction. Next D \uFB01eld = D[9:1], N \uFB01eld = D[0].\
-  \                                                      2\n\nAlter subsequent SETWORD instruction. Next D \uFB01eld = (D[9:1]\
-  \ + S) & $1FF, N \uFB01eld = D[0]. D += sign-extended\n\nALTSW     D,{#}S                                              \
+  ALTSW     D                        Alter subsequent SETWORD instruction. Next D field = D[9:1], N field = D[0].\
+  \                                                      2\n\nAlter subsequent SETWORD instruction. Next D field = (D[9:1]\
+  \ + S) & $1FF, N field = D[0]. D += sign-extended\n\nALTSW     D,{#}S                                              \
   \                                                                                                     2\n\nS[17:9].\n\n\
   CORDIC Solver Instructions\n\nClocks\n\nInstruction                                                          Description\n\
   \nCog, LUT & Hub\n\nGETQX       D           {WC/WZ/WCZ}   Retrieve CORDIC result X into D. Waits, in case result not ready.\
@@ -654,11 +654,11 @@ description: "ZEROX fills the bits of Dest, above the bit indicated by Src[4:0],
   \                                                                                                    2\n\naccumulators.\n\
   \nSETXFRQ {#}D                          Set streamer NCO frequency to D.                                               \
   \                                              2\n\nXCONT       {#}D,{#}S                 Bu er new streamer command to\
-  \ be issued on \uFB01nal NCO rollover of current command, continuing phase.                           2+\n\nXINIT    {#}D,{#}S\
+  \ be issued on final NCO rollover of current command, continuing phase.                           2+\n\nXINIT    {#}D,{#}S\
   \                 Issue streamer command immediately, zeroing phase.                                                   \
   \                       2\n\nXSTOP                              Stop streamer immediately.                             \
   \                                                                     2\n\nXZERO    {#}D,{#}S                 Bu er new\
-  \ streamer command to be issued on \uFB01nal NCO rollover of current command, zeroing phase.                           \
+  \ streamer command to be issued on final NCO rollover of current command, zeroing phase.                           \
   \  2+\n\nMiscellaneous\n\nQueue #n to be used as upper 23 bits for next #D occurrence, so that the next 9-bit #D will be\
   \ augmented to 32\n\nAUGD     #n                                                                                       \
   \                                                             2\n\nbits.\n\nQueue #n to be used as upper 23 bits for next\
@@ -680,7 +680,7 @@ description: "ZEROX fills the bits of Dest, above the bit indicated by Src[4:0],
   \                  Set Q to D. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer.                              \
   \                        2\n\nWAITX    {#}D       {WC/WZ/WCZ}    Wait 2 + D clocks if no WC/WZ/WCZ. If WC/WZ/WCZ, wait 2\
   \ + (D & RND) clocks. C/Z = 0.                                    2+D\n\nPROPELLER 2 RESERVED WORDS (SPIN2 + PASM2)\n\n\
-  Prede\uFB01ned symbols recognized by the compiler to have special meaning.\n\n_ (leading underscore)\n\n_C             \
+  Predefined symbols recognized by the compiler to have special meaning.\n\n_ (leading underscore)\n\n_C             \
   \ _C_NE_Z             _E              _LT                   _NC_OR_NZ        _NZ_AND_C         _RET_              _Z_AND_NC\
   \           _Z_OR_NC\n\n_C_AND_NZ       _C_OR_NZ            _GE             _NC                   _NC_OR_Z         _NZ_AND_NC\
   \        _SET               _Z_EQ_C\n\n_C_AND_Z        _C_OR_Z             _GT             _NC_AND_NZ            _NE   \
@@ -833,22 +833,22 @@ description: "ZEROX fills the bits of Dest, above the bit indicated by Src[4:0],
   \              X_IMM_4X8_2DAC4           X_RFBYTE_8P_2DAC4          XCONT\n\nX_8P_2DAC4_WFBYTE              X_DACS_X_X_0_X\
   \              X_IMM_4X8_4DAC2           X_RFBYTE_8P_4DAC2          XINIT\n\nCHANGE LOG\n\nDate       Notes\n\n11/11/2021\
   \    Live draft workspace published.\n\n11/02/2022    Official release.\n\nPARALLAX INCORPORATED\n\nParallax Inc.      \
-  \            O\uFB03ce: +1 916-624-8333           sales@parallax.com         www.parallax.com/p2\n\n599 Menlo Drive, Suite\
+  \            Office: +1 916-624-8333           sales@parallax.com         www.parallax.com/p2\n\n599 Menlo Drive, Suite\
   \ 100     Toll Free US: 888-512-1024      support@parallax.com       forums.parallax.com\n\nRocklin, CA 95765\n\nUSA\n\n\
-  Purchase of the P2X8C4M64P does not include any license to emulate any other device nor to communicate\n\nvia any speci\uFB01\
+  Purchase of the P2X8C4M64P does not include any license to emulate any other device nor to communicate\n\nvia any specifi\
   c proprietary protocol; P2X8C4M64P connectivity objects and code examples provided or\n\nreferenced by Parallax, Inc. are\
   \ NOT licensed and are provided for research and development purposes only;\n\nend users must seek permission to use licensed\
   \ protocols for their applications and products from the protocol\n\nlicense holders.\n\nParallax, Inc. makes no warranty,\
   \ representation or guarantee regarding the suitability of its products\n\nfor any particular purpose, nor does Parallax,\
-  \ Inc. assume any liability arising out of the application or\n\nuse of any product, and speci\uFB01cally disclaims any\
+  \ Inc. assume any liability arising out of the application or\n\nuse of any product, and specifically disclaims any\
   \ and all liability, including without limitation consequential\n\nor incidental damages even if Parallax, Inc. has been\
   \ advised of the possibility of such damages.\n\nare trademarks of Parallax, Inc."
 flags_affected:
   Z: Result = 0
 parameters:
 - Dest is a register containing the value to zero-extend above bit Src[4:0] and is where the result is written.
-- "Src is a register or 9-bit literal whose value (lower 5 bits) identi\uFB01es the bit of Dest to zero-extend beyond."
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "Src is a register or 9-bit literal whose value (lower 5 bits) identifies the bit of Dest to zero-extend beyond."
+- "WC, WZ, or WCZ are optional effects to update flags."
 related:
 - SIGNX
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
@@ -867,7 +867,7 @@ category: arithmetic
 result: The Dest value is zero-extended above the bit indicated by Src and is stored in Dest. Optionally the C and
 syntax_variants:
 - ZEROX Dest, {#}Src {WC|WZ|WCZ}
-- "ZEROX \uFB01lls the bits of Dest, above the bit indicated by Src[4:0], with zeros; i.e. zero-extending the value. This\
+- "ZEROX fills the bits of Dest, above the bit indicated by Src[4:0], with zeros; i.e. zero-extending the value. This\
   \ is"
 - ZEROX    D,{#}S     {WC/WZ/WCZ}         Zero-extend D above bit S[4:0]. C = MSB of result. *                                                                         2
 manual_extraction_date: '2025-01-19'

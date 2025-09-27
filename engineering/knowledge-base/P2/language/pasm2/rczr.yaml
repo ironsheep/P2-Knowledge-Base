@@ -6,8 +6,8 @@ timing:
   type: fixed
 description: "RCZR shifts Dest's binary value right by two places and sets Dest[31] to C and Dest[30] to Z. Result: The bits\
   \ of Dest are shifted right by two places and C and Z are inserted as new MSBs.\n\nRCZR shifts Dest's binary value right\
-  \ by two places and sets Dest[31] to C and Dest[30] to Z.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is\
-  \ updated to the original Dest[1] state.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z is \uFB02ag is updated to the\
+  \ by two places and sets Dest[31] to C and Dest[30] to Z.\n\nIf the WC or WCZ effect is specified, the C flag is\
+  \ updated to the original Dest[1] state.\n\nIf the WZ or WCZ effect is specified, the Z is flag is updated to the\
   \ original Dest[0] state.\n\nRegisters\n\nSpecial Purpose Registers - Rotate a byte left into a value.\n\nMost Reg RAM registers\
   \ are general-purpose (used for code and data) while a small set has a special purpose.\n\nName Address                \
   \  Access2             Special Purpose\n\nIJMP3        $1F01               Read/Write           Interrupt call address for\
@@ -22,15 +22,15 @@ description: "RCZR shifts Dest's binary value right by two places and sets Dest[
   \ enables (direction bits) for P31..P0\n\nDIRB     $1FB            Read / Write Special     Output enables (direction bits)\
   \ for P63..P32\n\nOUTA     $1FC            Read / Write Special     Output states for P31..P0\n\nOUTB     $1FD         \
   \   Read / Write Special     Output states for P63..P32\n\nINA      $1FE3              Read Special          Input states\
-  \ for P31..P0\n\n4\n\nINB      $1FF               Read Special          Input states for P63..P32\n\n1\n\nLocations $1F0\u2013\
+  \ for P31..P0\n\n4\n\nINB      $1FF               Read Special          Input states for P63..P32\n\n1\n\nLocations $1F0-\
   $1F7 are general-purpose code/data registers by default but become these named special-purpose\n\nregisters if their associated\
   \ functions are enabled.\n\n2\n\nMost reads and writes involve the underlying Reg RAM at these locations; however, those\
   \ marked \"special\" may read from a\n\nspecial internal register (instead of Reg RAM) or write to both the Reg RAM location\
   \ as well as to a special internal register.\n\n3\n\nAlso debug interrupt call address.\n\n4\n\nAlso debug interrupt return\
   \ address.\n\nAdditionally, for PASM2 code that is either in-line (within a Spin2 method) or called (by a Spin2 method),\
-  \ the\n\nregisters $1D8\u2013$1DF are readable/writable by both languages using the symbols PR0\u2013PR7. PASM2 code that\
+  \ the\n\nregisters $1D8-$1DF are readable/writable by both languages using the symbols PR0-PR7. PASM2 code that\
   \ is\n\nlaunched into another cog does not share this Reg RAM space with Spin2.\n\nName           Address           Access\
-  \        Special Purpose\n\nPR0\u2013PR7         $1D8\u2013$1DF         Read/Write      PASM2        \u21C4 Spin2 communication\
+  \        Special Purpose\n\nPR0-PR7         $1D8-$1DF         Read/Write      PASM2        <-> Spin2 communication\
   \ mechanism"
 flags_affected:
   C:
@@ -40,8 +40,8 @@ flags_affected:
     formula: D[0]
     when: D[1]
 parameters:
-- "Dest is the register containing the value to rotate the carry and zero \uFB02ags right into."
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "Dest is the register containing the value to rotate the carry and zero flags right into."
+- "WC, WZ, or WCZ are optional effects to update flags."
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -60,4 +60,4 @@ syntax_variants:
 - RCZR Dest {WC|WZ|WCZ}
 - RCZR shifts Dest's binary value right by two places and sets Dest[31] to C and Dest[30] to Z.
 manual_extraction_date: '2025-01-19'
-oneliner: "Rotate carry and zero \uFB02ags right into value (2-bit rotate right)"
+oneliner: "Rotate carry and zero flags right into value (2-bit rotate right)"

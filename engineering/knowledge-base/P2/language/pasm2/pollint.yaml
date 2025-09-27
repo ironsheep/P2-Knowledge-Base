@@ -1,19 +1,19 @@
 instruction: POLLINT
 syntax: POLLINT {WC|WZ|WCZ}
-encoding: "EEEE 1101011 CZ0 000000000 000100100                 \u2014            INT Event          INT Event           \
+encoding: "EEEE 1101011 CZ0 000000000 000100100                 --            INT Event          INT Event           \
   \      2"
 timing:
   cycles: 2
   type: fixed
 description: "POLLINT copies the state of the interrupt-occurred event flag into C and/or Z and then clears the flag (unless\
   \ it's Result: Interrupt-occurred event flag is optionally copied into C and/or Z, then it is cleared.\n\nPOLLINT copies\
-  \ the state of the interrupt-occurred event \uFB02ag into C and/or Z and then clears the \uFB02ag (unless it's\n\nbeing\
-  \ set again by the event sensor).\n\nIf the WC, WZ, or WCZ effect is speci\uFB01ed, the C \uFB02ag and/or Z \uFB02ag is\
-  \ updated to the state of the interrupt-occurred\n\nevent \uFB02ag prior to clearing it.\n\nThe interrupt-occurred event\
-  \ \uFB02ag is set whenever interrupt 1, 2, or 3 occurs\u2014 debug interrupts are ignored. The\n\ninterrupt-occurred event\
-  \ \uFB02ag is cleared upon cog start, or execution of POLLINT, WAITINT, JINT, or JNINT\n\ninstructions."
+  \ the state of the interrupt-occurred event flag into C and/or Z and then clears the flag (unless it's\n\nbeing\
+  \ set again by the event sensor).\n\nIf the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is\
+  \ updated to the state of the interrupt-occurred\n\nevent flag prior to clearing it.\n\nThe interrupt-occurred event\
+  \ flag is set whenever interrupt 1, 2, or 3 occurs-- debug interrupts are ignored. The\n\ninterrupt-occurred event\
+  \ flag is cleared upon cog start, or execution of POLLINT, WAITINT, JINT, or JNINT\n\ninstructions."
 parameters:
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 related:
 - WAITINT
 - JINT
@@ -31,8 +31,8 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Poll interrupt
 category: timing_events
-result: "Interrupt-occurred event \uFB02ag is optionally copied into C and/or Z, then it is cleared."
+result: "Interrupt-occurred event flag is optionally copied into C and/or Z, then it is cleared."
 syntax_variants:
 - POLLINT {WC|WZ|WCZ}
 manual_extraction_date: '2025-01-19'
-oneliner: "Retrieve and clear interrupt-occurred event \uFB02ag"
+oneliner: "Retrieve and clear interrupt-occurred event flag"

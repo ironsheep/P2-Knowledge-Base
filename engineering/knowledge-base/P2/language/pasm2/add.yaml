@@ -13,9 +13,9 @@ timing:
   type: fixed
 description: "ADD sums the two unsigned values of Dest and Src together and stores the result into the Dest register. Result:\
   \ Sum of unsigned Src and unsigned Dest is stored in Dest.\n\nADD sums the two unsigned values of Dest and Src together\
-  \ and stores the result into the Dest register.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if\
-  \ the summation results in a 32-bit over\uFB02ow (unsigned\n\ncarry), or is cleared (0) if no over\uFB02ow.\n\nIf the WZ\
-  \ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it\
+  \ and stores the result into the Dest register.\n\nIf the WC or WCZ effect is specified, the C flag is set (1) if\
+  \ the summation results in a 32-bit overflow (unsigned\n\ncarry), or is cleared (0) if no overflow.\n\nIf the WZ\
+  \ or WCZ effect is specified, the Z flag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it\
   \ is\n\nnon-zero.\n\nTo add unsigned, multi-long values, use ADD followed by ADDX as described in Adding Two Multi-Long\
   \ Values.\n\nADD and ADDX are also used in adding signed, multi-long values with ADDSX ending the sequence."
 compiler_category: Arithmetic
@@ -41,7 +41,7 @@ compiler_effects:
 parameters:
 - Dest is a register containing the value to add Src to, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 related:
 - ADDX
 - ADDS

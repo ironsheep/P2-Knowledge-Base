@@ -4,11 +4,11 @@ encoding: EEEE 0000000 CZI DDDDDDDDD SSSSSSSSS                           D      
 timing:
   cycles: 1
   type: fixed
-description: "ROR rotates Dest's binary value right by Src places (0\u201331 bits). All LSBs rotated out are moved into the\
+description: "ROR rotates Dest's binary value right by Src places (0-31 bits). All LSBs rotated out are moved into the\
   \ new Result: The bits of Dest are rotated right by Src bits; any departing LSBs are moved into MSBs.\n\nROR rotates Dest's\
-  \ binary value right by Src places (0\u201331 bits). All LSBs rotated out are moved into the new\n\nMSBs.\n\nIf the WC or\
-  \ WCZ effect is speci\uFB01ed, the C \uFB02ag is updated to the value of the last bit rotated out (effectively C =\n\nresult\
-  \ bit \"31\") if Src is 1\u201331, or to Dest[0] if Src is 0.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02\
+  \ binary value right by Src places (0-31 bits). All LSBs rotated out are moved into the new\n\nMSBs.\n\nIf the WC or\
+  \ WCZ effect is specified, the C flag is updated to the value of the last bit rotated out (effectively C =\n\nresult\
+  \ bit \"31\") if Src is 1-31, or to Dest[0] if Src is 0.\n\nIf the WZ or WCZ effect is specified, the Z fl\
   ag is set (1) if the Dest result equals zero, or is cleared (0) if it is\n\nnon-zero. Since no bits are lost by this operation,\
   \ the result will only be zero if Dest started at zero."
 flags_affected:
@@ -17,7 +17,7 @@ flags_affected:
 parameters:
 - Dest is the register containing the value to rotate right by Src bits.
 - Src is a register or 5-bit literal whose value indicates the number of bit positions to rotate.
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -34,6 +34,6 @@ category: bit_manipulation
 result: The bits of Dest are rotated right by Src bits; any departing LSBs are moved into MSBs.
 syntax_variants:
 - ROR Dest, {#}Src {WC|WZ|WCZ}
-- "ROR rotates Dest's binary value right by Src places (0\u201331 bits). All LSBs rotated out are moved into the new"
+- "ROR rotates Dest's binary value right by Src places (0-31 bits). All LSBs rotated out are moved into the new"
 manual_extraction_date: '2025-01-19'
 oneliner: Rotate bits right

@@ -1,23 +1,23 @@
 instruction: COGSTOP
 syntax: COGSTOP {#}Dest
-encoding: "EEEE 1101011 00L DDDDDDDDD 000000011                        \u2014                 \u2014                \u2014\
-  \                    2\u20139"
+encoding: "EEEE 1101011 00L DDDDDDDDD 000000011                        --                 --                --\
+  \                    2-9"
 timing:
   cycles: 2
   type: fixed
 description: "COGSTOP terminates the cog identified by Dest[2:0]. In this dormant state, the cog ceases to execute code and\
-  \ Result: Cog indicated by Dest is terminated (stopped).\n\nCOGSTOP terminates the cog identi\uFB01ed by Dest[2:0]. In this\
+  \ Result: Cog indicated by Dest is terminated (stopped).\n\nCOGSTOP terminates the cog identified by Dest[2:0]. In this\
   \ dormant state, the cog ceases to execute code and\n\npower consumption is greatly reduced.\n\nConditions ( IF_x )\n\n\
-  Every PASM2 instruction has an optional \u201Ccondition\u201D that dynamically executes or excludes the instruction based\n\
-  \non \uFB02ag settings at runtime. A condition, if provided, is placed in front of the instruction it controls.\n\n{Label}\
+  Every PASM2 instruction has an optional "condition" that dynamically executes or excludes the instruction based\n\
+  \non flag settings at runtime. A condition, if provided, is placed in front of the instruction it controls.\n\n{Label}\
   \ {Condition} Instruction Operands {Effect}\n\nConditions are optional; omitting the condition means \"always execute\"\
-  \ the instruction (the default behavior). The\n\nCondition \uFB01eld on an instruction line can contain one of \uFB01fty\
+  \ the instruction (the default behavior). The\n\nCondition field on an instruction line can contain one of fifty\
   \ condition symbols (including blank; the default). The\n\nfull set of condition symbols resolves down to 16 unique condition\
-  \ patterns (4-bits) that are stored in the\n\ninstruction's opcode (the COND \uFB01eld) during assembly.\n\nThis Condition\
-  \ feature, along with the instructions\u2019 optional Effect feature, makes Propeller 2 Assembly very\n\npowerful. For example,\
-  \ the C and Z \uFB02ags can be affected at will and later instructions can be conditionally\n\nexecuted based on those results,\
-  \ making for easy behavioral changes through a single non-branching code path.\n\nWhen an instruction\u2019s condition evaluates\
-  \ to FALSE, the instruction effectively does nothing\u2014 still elapsing 2 clock\n\ncycles, but not affecting any \uFB02\
+  \ patterns (4-bits) that are stored in the\n\ninstruction's opcode (the COND field) during assembly.\n\nThis Condition\
+  \ feature, along with the instructions' optional Effect feature, makes Propeller 2 Assembly very\n\npowerful. For example,\
+  \ the C and Z flags can be affected at will and later instructions can be conditionally\n\nexecuted based on those results,\
+  \ making for easy behavioral changes through a single non-branching code path.\n\nWhen an instruction's condition evaluates\
+  \ to FALSE, the instruction effectively does nothing-- still elapsing 2 clock\n\ncycles, but not affecting any fl\
   ags or registers. This makes the timing of multi-decision code deterministic.\n\nConditions\n\nCondition1        Encoding2\
   \ Instruction Executes...\n\nIF_E             %1010        if comparison/subtraction was equal (Z = 1)\n\nIF_NE        \
   \    %0101        if comparison/subtraction was not equal (Z = 0)\n\nIF_A             %0001        if comparison/subtraction\
@@ -50,11 +50,11 @@ description: "COGSTOP terminates the cog identified by Dest[2:0]. In this dorman
   \ Z = 1 --or-- C = 1 and Z = 0)\n\nIF_SAME           %1001     if C equal to Z (C = 0 and Z = 0 --or-- C = 1 and Z = 1)\n\
   \n_RET_            %0000     always; execute instruction then return if no branch; no context restore\n\n%1111     always;\
   \ this is the default, no condition expressed\n\n1\n\nThe Condition symbol must be entered in place of the {Condition} item\
-  \ (ahead of the Instruction) on an instruction line.\n\n2\n\nThe Encoding value is emitted into the COND \uFB01eld (the\
+  \ (ahead of the Instruction) on an instruction line.\n\n2\n\nThe Encoding value is emitted into the COND field (the\
   \ EEEE bits) in the compiled instruction opcode.\n\nNote that for every Condition that acts upon the state of C and/or Z\
-  \ \uFB02ags, there's also a Modi\uFB01er (for use with\n\nMODxx instructions) capable of applying \uFB02ag state(s) based\
+  \ flags, there's also a Modifier (for use with\n\nMODxx instructions) capable of applying flag state(s) based\
   \ on similar logic. Additionally, the Condition symbols\n\nand descriptions are similar to, and the encoding exactly matches,\
-  \ that of the related Modi\uFB01ers."
+  \ that of the related Modifiers."
 parameters:
 - Dest is the register or 9-bit literal indicating (in lowest 3 bits) which cog to stop.
 related:
@@ -76,6 +76,6 @@ category: control_flow
 result: Cog indicated by Dest is terminated (stopped).
 syntax_variants:
 - COGSTOP {#}Dest
-- "COGSTOP terminates the cog identi\uFB01ed by Dest[2:0]. In this dormant state, the cog ceases to execute code and"
+- "COGSTOP terminates the cog identified by Dest[2:0]. In this dormant state, the cog ceases to execute code and"
 manual_extraction_date: '2025-01-19'
 oneliner: Stop a cog by ID

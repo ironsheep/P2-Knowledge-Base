@@ -7,17 +7,17 @@ timing:
 description: "ADDS sums the two signed values of Dest and Src together and stores the result into the Dest register. If Src\
   \ is a Result: Sum of signed Src and signed Dest is stored in Dest.\n\nADDS sums the two signed values of Dest and Src together\
   \ and stores the result into the Dest register. If Src is a\n\n9-bit literal, its value is interpreted as positive (0-511;\
-  \ it is not sign-extended) \u2014 use ##Value (or insert a prior\n\nAUGS instruction) for a 32-bit signed value; negative\
-  \ or positive.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if the summation results in a signed\
-  \ over\uFB02ow (signed\n\ncarry), or is cleared (0) if no over\uFB02ow.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the\
-  \ Z \uFB02ag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it is\n\nnon-zero.\n\nTo add signed, multi-long\
-  \ values, use ADD (not ADDS) followed possibly by ADDX, and \uFB01nally ADDSX as described\n\nin Adding Two Multi-Long Values."
+  \ it is not sign-extended) -- use ##Value (or insert a prior\n\nAUGS instruction) for a 32-bit signed value; negative\
+  \ or positive.\n\nIf the WC or WCZ effect is specified, the C flag is set (1) if the summation results in a signed\
+  \ overflow (signed\n\ncarry), or is cleared (0) if no overflow.\n\nIf the WZ or WCZ effect is specified, the\
+  \ Z flag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it is\n\nnon-zero.\n\nTo add signed, multi-long\
+  \ values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as described\n\nin Adding Two Multi-Long Values."
 flags_affected:
   Z: Result = 0
 parameters:
 - Dest is a register containing the value to add Src to, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 related:
 - ADD
 - ADDX

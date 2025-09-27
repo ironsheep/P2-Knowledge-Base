@@ -1,11 +1,11 @@
 instruction: REV
 syntax: REV Dest
-encoding: "EEEE 1101011 000 DDDDDDDDD 001101001                            D              \u2014                 \u2014  \
+encoding: "EEEE 1101011 000 DDDDDDDDD 001101001                            D              --                 --  \
   \                  2"
 timing:
   cycles: 2
   type: fixed
-description: "The 32-bit pattern in Dest is reversed.\n\n\u21D2\n\nREV performs a bitwise reverse (bits 31:0 bits 0:31) of\
+description: "The 32-bit pattern in Dest is reversed.\n\n=>\n\nREV performs a bitwise reverse (bits 31:0 bits 0:31) of\
   \ the value in Dest and stores the result back into Dest.\n\nThis is useful for processing binary data in a different MSB/LSB\
   \ order than it is transmitted with."
 flags_affected:

@@ -6,15 +6,15 @@ timing:
   type: fixed
 description: "OR performs a bitwise OR of the value in Src into that of Dest. Result: Dest OR Src is stored in Dest and flags\
   \ are optionally updated with parity and zero status.\n\nOR performs a bitwise OR of the value in Src into that of Dest.\n\
-  \nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if the result contains an odd number of high (1) bits,\
-  \ or is\n\ncleared (0) if it contains an even number of high bits.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02\
+  \nIf the WC or WCZ effect is specified, the C flag is set (1) if the result contains an odd number of high (1) bits,\
+  \ or is\n\ncleared (0) if it contains an even number of high bits.\n\nIf the WZ or WCZ effect is specified, the Z fl\
   ag is set (1) if the Dest OR Src result equals zero, or is cleared (0) if it is\n\nnon-zero."
 flags_affected:
   Z: Result = 0
 parameters:
 - Dest is the register containing the value to bitwise OR with Src and is the destination in which to write the result.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value will be bitwise ORed into Dest.
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -28,14 +28,14 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Or
 category: bit_manipulation
-result: "Dest OR Src is stored in Dest and \uFB02ags are optionally updated with parity and zero status."
+result: "Dest OR Src is stored in Dest and flags are optionally updated with parity and zero status."
 syntax_variants:
 - OR Dest, {#}Src {WC|WZ|WCZ}
-- "Result: Dest OR Src is stored in Dest and \uFB02ags are optionally updated with parity and zero status."
-- "\u25CF   Dest is the register containing the value to bitwise OR with Src and is the destination in which to write the"
-- "\u25CF   Src is a register, 9-bit literal, or 32-bit augmented literal whose value will be bitwise ORed into Dest."
+- "Result: Dest OR Src is stored in Dest and flags are optionally updated with parity and zero status."
+- "*   Dest is the register containing the value to bitwise OR with Src and is the destination in which to write the"
+- "*   Src is a register, 9-bit literal, or 32-bit augmented literal whose value will be bitwise ORed into Dest."
 - OR performs a bitwise OR of the value in Src into that of Dest.
-- "If the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the Dest OR Src result equals zero, or is cleared\
+- "If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest OR Src result equals zero, or is cleared\
   \ (0) if it is"
 manual_extraction_date: '2025-01-19'
 oneliner: Bitwise OR a value with another

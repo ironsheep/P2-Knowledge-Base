@@ -1,19 +1,19 @@
 instruction: POLLQMT
 syntax: POLLQMT {WC|WZ|WCZ}
-encoding: "EEEE 1101011 CZ0 000001111 000100100                 \u2014            QMT Event         QMT Event            \
+encoding: "EEEE 1101011 CZ0 000001111 000100100                 --            QMT Event         QMT Event            \
   \     2"
 timing:
   cycles: 2
   type: fixed
 description: "POLLQMT copies the state of the CORDIC-read-but-empty event flag into C and/or Z and then clears the flag Result:\
   \ CORDIC-read-but-empty event flag is optionally copied into C and/or Z, then it is cleared.\n\nPOLLQMT copies the state\
-  \ of the CORDIC-read-but-empty event \uFB02ag into C and/or Z and then clears the \uFB02ag\n\n(unless it's being set again\
-  \ by the event sensor).\n\nIf the WC, WZ, or WCZ effect is speci\uFB01ed, the C \uFB02ag and/or Z \uFB02ag is updated to\
-  \ the state of the CORDIC-read-but-\n\nempty event \uFB02ag prior to clearing it.\n\nThe CORDIC-read-but-empty event \uFB02\
+  \ of the CORDIC-read-but-empty event flag into C and/or Z and then clears the flag\n\n(unless it's being set again\
+  \ by the event sensor).\n\nIf the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to\
+  \ the state of the CORDIC-read-but-\n\nempty event flag prior to clearing it.\n\nThe CORDIC-read-but-empty event fl\
   ag is set whenever GETQX / GETQY executes without any CORDIC results\n\navailable or in progress. The pin-pattern-detected\
-  \ event \uFB02ag is cleared upon cog start or execution of POLLQMT,\n\nWAITQMT, JQMT, or JNQMT instructions."
+  \ event flag is cleared upon cog start or execution of POLLQMT,\n\nWAITQMT, JQMT, or JNQMT instructions."
 parameters:
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 related:
 - JQMT
 - JNQMT
@@ -30,8 +30,8 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Poll CORDIC empty
 category: timing_events
-result: "CORDIC-read-but-empty event \uFB02ag is optionally copied into C and/or Z, then it is cleared."
+result: "CORDIC-read-but-empty event flag is optionally copied into C and/or Z, then it is cleared."
 syntax_variants:
 - POLLQMT {WC|WZ|WCZ}
 manual_extraction_date: '2025-01-19'
-oneliner: "Retrieve and clear CORDIC-read-but-empty event \uFB02ag"
+oneliner: "Retrieve and clear CORDIC-read-but-empty event flag"

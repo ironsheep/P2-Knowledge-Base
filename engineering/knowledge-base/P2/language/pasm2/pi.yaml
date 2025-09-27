@@ -2,7 +2,7 @@ constant: PI
 name: PI
 value: 3.141593
 hex_value: $40490FDB
-description: "Floating-point representation of PI constant\nIEEE 754 single-precision floating-point encoding of \u03C0\n"
+description: "Floating-point representation of PI constant\nIEEE 754 single-precision floating-point encoding of pi\n"
 category: Numeric Constant
 documentation_level: complete
 usage: 'Use with CORDIC operations and floating-point calculations

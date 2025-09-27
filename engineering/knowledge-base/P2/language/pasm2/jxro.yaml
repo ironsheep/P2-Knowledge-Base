@@ -4,7 +4,7 @@ encoding: EEEE 1011110 01I 000001100 SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-description: "Jump to S** if XRO event \uFB02ag is set.                                                                  \
+description: "Jump to S** if XRO event flag is set.                                                                  \
   \       2 or 4 / 2 or"
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced

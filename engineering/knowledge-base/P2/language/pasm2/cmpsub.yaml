@@ -7,9 +7,9 @@ timing:
 description: "CMPSUB compares the unsigned values of Dest and Src, and if Src is less than or equal to Dest then it is Result:\
   \ Dest is decremented by Src unless it is less than Src, and the comparison results are optionally written to the C and\
   \ Z flags.\n\nCMPSUB compares the unsigned values of Dest and Src, and if Src is less than or equal to Dest then it is\n\
-  \nsubtracted from Dest. Optionally, the C and Z \uFB02ags are set to indicate the comparison and operation results.\n\n\
-  If the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if Dest was greater than or equal to Src.\n\nIf the\
-  \ WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the result equals 0."
+  \nsubtracted from Dest. Optionally, the C and Z flags are set to indicate the comparison and operation results.\n\n\
+  If the WC or WCZ effect is specified, the C flag is set (1) if Dest was greater than or equal to Src.\n\nIf the\
+  \ WZ or WCZ effect is specified, the Z flag is set (1) if the result equals 0."
 flags_affected:
   C:
     formula: 1, else D same and C = 0
@@ -17,7 +17,7 @@ parameters:
 - Dest is the register containing the value to compare with Src and is the destination written to if a subtraction is performed.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared with and possibly subtracted from
   Dest.
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:

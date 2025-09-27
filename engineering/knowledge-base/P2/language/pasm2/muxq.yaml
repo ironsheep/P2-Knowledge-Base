@@ -1,7 +1,7 @@
 instruction: MUXQ
 syntax: MUXQ Dest, {#}Src
 encoding:
-- "EEEE 1001111 10I DDDDDDDDD SSSSSSSSS                     D                 \u2014                   \u2014            \
+- "EEEE 1001111 10I DDDDDDDDD SSSSSSSSS                     D                 --                   --            \
   \        2"
 - EEEE 0101110 CZI DDDDDDDDD SSSSSSSSS                     D          Parity of Result      Result = 0                2
 - EEEE 0101111 CZI DDDDDDDDD SSSSSSSSS                     D          Parity of Result      Result = 0                2
@@ -15,16 +15,16 @@ description: "MUXQ copies all bits from Src corresponding to high (1) bits of Q 
   \ value's high bits identify the bits to target in Src\n\nand Dest.\n\nMUXZ / MUXNZ\n\nMux Z or mux not Z\n\nBit Operation\
   \ Instructions - Set discrete bits to Z or !Z\n\nMUXZ     Dest, {#}Src {WC|WZ|WCZ}\n\nMUXNZ Dest, {#}Src {WC|WZ|WCZ}\n\n\
   Result: Dest bit(s) described by Src are set to Z or !Z; the rest are left as-is. Flags are optionally updated with\n\n\
-  parity and zero status of the result.\n\n\u25CF    Dest is the register whose value will have one or more bits set to Z\
-  \ or !Z.\n\n\u25CF    Src is a register, 9-bit literal, or 32-bit augmented literal whose value identi\uFB01es the bit(s)\
-  \ to modify.\n\n\u25CF    WC, WZ, or WCZ is an optional effect to update \uFB02ags.\n\nCOND INSTR         FX      DEST \
+  parity and zero status of the result.\n\n*    Dest is the register whose value will have one or more bits set to Z\
+  \ or !Z.\n\n*    Src is a register, 9-bit literal, or 32-bit augmented literal whose value identifies the bit(s)\
+  \ to modify.\n\n*    WC, WZ, or WCZ is an optional effect to update flags.\n\nCOND INSTR         FX      DEST \
   \         SRC           Write             C Flag              Z Flag              Clocks\n\nEEEE 0101110 CZI DDDDDDDDD SSSSSSSSS\
   \                     D          Parity of Result      Result = 0                2\n\nEEEE 0101111 CZI DDDDDDDDD SSSSSSSSS\
   \                     D          Parity of Result      Result = 0                2\n\nMUXZ or MUXNZ alters the Dest bit(s)\
-  \ designated by Src (high bits) to equal the state, or inverse state, of the Z \uFB02ag.\n\nAll Dest bits corresponding\
-  \ to high (1) bits in Src are modi\uFB01ed; all other Dest bits are left unchanged.\n\nIf the WC or WCZ effect is speci\uFB01\
-  ed, the C \uFB02ag is set (1) if the number of high (1) bits in the result is odd, or is\n\ncleared (0) if it is even.\n\
-  \nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the result is zero, or is cleared (0) if it is\
+  \ designated by Src (high bits) to equal the state, or inverse state, of the Z flag.\n\nAll Dest bits corresponding\
+  \ to high (1) bits in Src are modified; all other Dest bits are left unchanged.\n\nIf the WC or WCZ effect is specifi\
+  ed, the C flag is set (1) if the number of high (1) bits in the result is odd, or is\n\ncleared (0) if it is even.\n\
+  \nIf the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero, or is cleared (0) if it is\
   \ not zero."
 flags_affected:
   Z: Result = 0
@@ -32,8 +32,8 @@ parameters:
 - Dest is a register whose bits will be updated according to Q and Src.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose select bits will replace the corresponding bits in Dest.
 - Dest is the register whose value will have one or more bits set to Z or !Z.
-- "Src is a register, 9-bit literal, or 32-bit augmented literal whose value identi\uFB01es the bit(s) to modify."
-- "WC, WZ, or WCZ is an optional effect to update \uFB02ags."
+- "Src is a register, 9-bit literal, or 32-bit augmented literal whose value identifies the bit(s) to modify."
+- "WC, WZ, or WCZ is an optional effect to update flags."
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 examples:

@@ -13,7 +13,7 @@ flags_affected:
     when: IN[D[4:0]]
 parameters:
 - Dest is the register whose value will have a single bit tested.
-- "Src is a register or 5-bit literal whose value identifies the bit (0\u201331) of Dest to test."
+- "Src is a register or 5-bit literal whose value identifies the bit (0-31) of Dest to test."
 related:
 - TESTP
 - TESTPN

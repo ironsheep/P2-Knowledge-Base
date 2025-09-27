@@ -1,19 +1,19 @@
 instruction: ROLBYTE
 syntax: 'ROLBYTE Dest, {#}Src, #Num'
 encoding:
-- "EEEE 1001000 NNI DDDDDDDDD SSSSSSSSS                  D                \u2014                  \u2014                 \
+- "EEEE 1001000 NNI DDDDDDDDD SSSSSSSSS                  D                --                  --                 \
   \    2"
-- "EEEE 1001000 000 DDDDDDDDD 000000000                  D                \u2014                  \u2014                 \
+- "EEEE 1001000 000 DDDDDDDDD 000000000                  D                --                  --                 \
   \    2"
 timing:
   cycles: 2
   type: fixed
-description: "ROLBYTE reads the byte identified by Num (0\u20133) from Src, or a byte from the source described by a prior\
-  \ ALTGB Result: Byte Num (0\u20133) of Src, or a byte from a source described by prior ALTGB instruction, is rotated left\
-  \ into Dest.\n\nROLBYTE reads the byte identi\uFB01ed by Num (0\u20133) from Src, or a byte from the source described by\
-  \ a prior ALTGB\n\ninstruction, and rotates it left into Dest.\n\nROLBYTE achieves the same effect as two instructions\u2014\
-  \ an 8-bit SHL followed by SETBYTE into byte 0.\n\nNum (0\u20133) identi\uFB01es a value's individual bytes, by position,\
-  \ in least-signi\uFB01cant byte order.\n\nSyntax 2 is intended for use after an ALTGB instruction; i.e. in a loop to iteratively\
+description: "ROLBYTE reads the byte identified by Num (0-3) from Src, or a byte from the source described by a prior\
+  \ ALTGB Result: Byte Num (0-3) of Src, or a byte from a source described by prior ALTGB instruction, is rotated left\
+  \ into Dest.\n\nROLBYTE reads the byte identified by Num (0-3) from Src, or a byte from the source described by\
+  \ a prior ALTGB\n\ninstruction, and rotates it left into Dest.\n\nROLBYTE achieves the same effect as two instructions--\
+  \ an 8-bit SHL followed by SETBYTE into byte 0.\n\nNum (0-3) identifies a value's individual bytes, by position,\
+  \ in least-significant byte order.\n\nSyntax 2 is intended for use after an ALTGB instruction; i.e. in a loop to iteratively\
   \ read a series of byte values\n\nwithin contiguous long registers."
 flags_affected:
   C:
@@ -21,7 +21,7 @@ flags_affected:
 parameters:
 - Dest is the register in which to rotate the byte into.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target byte to read.
-- "Num is a 2-bit literal identifying the nibble ID (0\u20133) of Src to read."
+- "Num is a 2-bit literal identifying the nibble ID (0-3) of Src to read."
 related:
 - ALTGB
 - ROLNIB
@@ -45,7 +45,7 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Rotate left byte
 category: bit_manipulation
-result: "Byte Num (0\u20133) of Src, or a byte from a source described by prior ALTGB instruction, is rotated left into"
+result: "Byte Num (0-3) of Src, or a byte from a source described by prior ALTGB instruction, is rotated left into"
 syntax_variants:
 - 'ROLBYTE Dest, {#}Src, #Num'
 - ROLBYTE Dest

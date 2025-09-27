@@ -6,17 +6,17 @@ timing:
   type: fixed
 description: "SIGNX fills the bits of Dest, above the bit indicated by Src[4:0], with the value of that identified bit; i.e.\
   \ Result: The Dest value is sign-extended above the bit indicated by Src and is stored in Dest. Optionally the C and Z flags\
-  \ are updated to the resulting MSB and zero status. C = MSB of result.\n\nSIGNX \uFB01lls the bits of Dest, above the bit\
-  \ indicated by Src[4:0], with the value of that identi\uFB01ed bit; i.e.\n\nsign-extending the value. This is handy when\
+  \ are updated to the resulting MSB and zero status. C = MSB of result.\n\nSIGNX fills the bits of Dest, above the bit\
+  \ indicated by Src[4:0], with the value of that identified bit; i.e.\n\nsign-extending the value. This is handy when\
   \ converting encoded or received signed values from a small bit width\n\nto a large bit with; i.e. 32 bits.\n\nIf the WC\
-  \ or WCZ effect is speci\uFB01ed, the C \uFB02ag is set to the result's MSB value.\n\nIf the WZ or WCZ effect is speci\uFB01\
-  ed, the Z \uFB02ag is set (1) if the result is zero, or is cleared (0) if it is non-zero."
+  \ or WCZ effect is specified, the C flag is set to the result's MSB value.\n\nIf the WZ or WCZ effect is specifi\
+  ed, the Z flag is set (1) if the result is zero, or is cleared (0) if it is non-zero."
 flags_affected:
   Z: Result = 0
 parameters:
 - Dest is a register containing the value to sign-extend above bit Src[4:0] and is where the result is written.
-- "Src is a register or 9-bit literal whose value (lower 5 bits) identi\uFB01es the bit of Dest to zero-extend beyond."
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "Src is a register or 9-bit literal whose value (lower 5 bits) identifies the bit of Dest to zero-extend beyond."
+- "WC, WZ, or WCZ are optional effects to update flags."
 related:
 - ZEROX
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
@@ -35,6 +35,6 @@ category: arithmetic
 result: The Dest value is sign-extended above the bit indicated by Src and is stored in Dest. Optionally the C and
 syntax_variants:
 - SIGNX Dest, {#}Src {WC|WZ|WCZ}
-- "SIGNX \uFB01lls the bits of Dest, above the bit indicated by Src[4:0], with the value of that identi\uFB01ed bit; i.e."
+- "SIGNX fills the bits of Dest, above the bit indicated by Src[4:0], with the value of that identified bit; i.e."
 manual_extraction_date: '2025-01-19'
 oneliner: Sign-extend value beyond designated bit

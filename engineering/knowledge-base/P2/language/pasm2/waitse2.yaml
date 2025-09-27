@@ -1,23 +1,23 @@
 instruction: WAITSE2
 syntax: WAITSE1 {WC|WZ|WCZ}
 encoding:
-- "EEEE 1101011 CZ0 000010100 000100100                 \u2014          Timeout Abort       Timeout Abort              2+"
-- "EEEE 1101011 CZ0 000010101 000100100                 \u2014          Timeout Abort       Timeout Abort              2+"
-- "EEEE 1101011 CZ0 000010110 000100100                 \u2014          Timeout Abort       Timeout Abort              2+"
-- "EEEE 1101011 CZ0 000010111 000100100                 \u2014          Timeout Abort       Timeout Abort              2+"
+- "EEEE 1101011 CZ0 000010100 000100100                 --          Timeout Abort       Timeout Abort              2+"
+- "EEEE 1101011 CZ0 000010101 000100100                 --          Timeout Abort       Timeout Abort              2+"
+- "EEEE 1101011 CZ0 000010110 000100100                 --          Timeout Abort       Timeout Abort              2+"
+- "EEEE 1101011 CZ0 000010111 000100100                 --          Timeout Abort       Timeout Abort              2+"
 timing:
   cycles: 2
   type: variable
-description: "Wait for SE2 event \uFB02ag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.      \
+description: "Wait for SE2 event flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.      \
   \                        2+\n\nWAITSE1, WAITSE2, WAITSE3, or WAITSE4 waits for a selectable event to occur (unless the event\
-  \ \uFB02ag is already\n\nset), then clears the event \uFB02ag (unless it's being set again by the event sensor) and resumes\
+  \ flag is already\n\nset), then clears the event flag (unless it's being set again by the event sensor) and resumes\
   \ execution at the next\n\ninstruction. Optionally, WAITSEx can time-out if the selectable event doesn't occur soon enough;\
-  \ setting C and/or\n\nZ \uFB02ags and then resuming execution at the next instruction.\n\nTo set the optional timeout, insert\
+  \ setting C and/or\n\nZ flags and then resuming execution at the next instruction.\n\nTo set the optional timeout, insert\
   \ a SETQ (with a future System Counter target value) right before WAITSEx.\n\nThe WC, WZ, or WCZ effect is recommended only\
-  \ if the optional timeout is speci\uFB01ed, in which case the C \uFB02ag and/or\n\nZ \uFB02ag is set (1) if a timeout occurred\
+  \ if the optional timeout is specified, in which case the C flag and/or\n\nZ flag is set (1) if a timeout occurred\
   \ before the event, or is cleared (0) if the event occurred before the timeout.\n\nDuring a wait, the pipeline is stalled;\
   \ no instructions execute and no interrupts are processed in the cog until the\n\nwait condition ends.\n\nThe selectable\
-  \ event 1, 2, 3, or 4 \uFB02ag is set whenever the corresponding con\uFB01gured event occurs. The selectable\n\nevent \uFB02\
+  \ event 1, 2, 3, or 4 flag is set whenever the corresponding configured event occurs. The selectable\n\nevent fl\
   ag is cleared upon execution of the corresponding SETSEx, POLLSEx, WAITSEx, JSEx, or JNSEx\n\ninstructions."
 flags_affected:
   Z:
@@ -52,13 +52,13 @@ specifics:
 quick_example: WAITSE2  ; Wait for selector 2 event flag, then clear it
 has_group_documentation: true
 category: timing_events
-result: "Wait for selectable event, then clear the \uFB02ag; optionally aborting on timeout and setting C and/or Z on"
+result: "Wait for selectable event, then clear the flag; optionally aborting on timeout and setting C and/or Z on"
 parameters:
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 related:
 - SETSEx
 - POLLSEx
 - JSEx
 - JNSEx
 manual_extraction_date: '2025-01-19'
-oneliner: "Wait for and clear selectable event 1, 2, 3, or 4 \uFB02ag"
+oneliner: "Wait for and clear selectable event 1, 2, 3, or 4 flag"

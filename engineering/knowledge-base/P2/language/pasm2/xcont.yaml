@@ -4,7 +4,7 @@ encoding: EEEE 1100110 0LI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: variable
-description: "Bu er new streamer command to be issued on \uFB01nal NCO rollover of current command, continuing phase.    \
+description: "Bu er new streamer command to be issued on final NCO rollover of current command, continuing phase.    \
   \                       2+"
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
@@ -20,4 +20,4 @@ syntax_variants:
 - XCONT {#}D,{#}S
 last_updated: '2025-09-19T16:04:17.289286'
 category: streamer
-oneliner: "Bu er new streamer command to be issued on \uFB01nal NCO rollover of current command"
+oneliner: "Bu er new streamer command to be issued on final NCO rollover of current command"

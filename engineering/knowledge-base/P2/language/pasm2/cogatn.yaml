@@ -1,6 +1,6 @@
 instruction: COGATN
 syntax: COGATN {#}Dest
-encoding: "EEEE 1101011 00L DDDDDDDDD 000111111                  \u2014                 \u2014                  \u2014   \
+encoding: "EEEE 1101011 00L DDDDDDDDD 000111111                  --                 --                  --   \
   \                2"
 timing:
   cycles: 2
@@ -8,8 +8,8 @@ timing:
 description: "COGATN strobes the attention signal for one or more cogs. Dest bit positions 7:0 represent cogs 7 through 0;\
   \ high Result: The attention signal of one or more cogs is strobed.\n\nCOGATN strobes the attention signal for one or more\
   \ cogs. Dest bit positions 7:0 represent cogs 7 through 0; high\n\n(1) bits indicate the cog(s) to signal. The receiving\
-  \ cog(s) then latch the signal, setting an internal \uFB02ag, and can\n\nuse any of the attention monitor instructions (JATN,\
-  \ JNATN, POLLATN, WAITATN) or interrupts to respond and\n\nclear the \uFB02ag.\n\nCOGATN         #00100010             \
+  \ cog(s) then latch the signal, setting an internal flag, and can\n\nuse any of the attention monitor instructions (JATN,\
+  \ JNATN, POLLATN, WAITATN) or interrupts to respond and\n\nclear the flag.\n\nCOGATN         #00100010             \
   \       'Get attention of cogs 1 and 5\n\nIn the intended use case, the cog receiving an attention request knows which other\
   \ cog is strobing it and how to\n\nrespond. In cases where multiple cogs may request the attention of a single cog, some\
   \ messaging structure may\n\nneed to be implemented in Hub RAM to differentiate requests."

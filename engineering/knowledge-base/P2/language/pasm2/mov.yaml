@@ -12,8 +12,8 @@ timing:
   cycles: 2
   type: fixed
 description: "Mov stores the Src value into Dest. Result: The Src value is stored in Dest and optionally flags are updated\
-  \ with the sign bit and zero status.\n\nMov stores the Src value into Dest.\n\nIf the WC or WCZ effect is speci\uFB01ed,\
-  \ the C \uFB02ag is updated to be Src[31].\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the\
+  \ with the sign bit and zero status.\n\nMov stores the Src value into Dest.\n\nIf the WC or WCZ effect is specified,\
+  \ the C flag is updated to be Src[31].\n\nIf the WZ or WCZ effect is specified, the Z flag is set (1) if the\
   \ Dest result equals zero, or is cleared (0) if it is\n\nnon-zero."
 compiler_category: Data Movement
 flags_affected:
@@ -38,7 +38,7 @@ compiler_effects:
 parameters:
 - Dest is the register to receive the Src value.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value will be stored into Dest.
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -50,7 +50,7 @@ enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Move
 category: bit_manipulation
-result: "The Src value is stored in Dest and optionally \uFB02ags are updated with the sign bit and zero status."
+result: "The Src value is stored in Dest and optionally flags are updated with the sign bit and zero status."
 syntax_variants:
 - MOV Dest, {#}Src {WC|WZ|WCZ}
 manual_extraction_date: '2025-01-19'

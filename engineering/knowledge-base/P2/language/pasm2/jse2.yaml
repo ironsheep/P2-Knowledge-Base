@@ -5,7 +5,7 @@ timing:
   cycles: 2
   type: variable
   range: 13...20
-description: "Jump to S** if SE2 event \uFB02ag is set.                                                                  \
+description: "Jump to S** if SE2 event flag is set.                                                                  \
   \       2 or 4 / 2 or"
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: structured

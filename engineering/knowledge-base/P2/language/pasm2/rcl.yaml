@@ -5,9 +5,9 @@ timing:
   cycles: 1
   type: fixed
 description: "The bits of Dest are shifted left by Src bits, inserting C as new LSBs.\n\nRCL shifts Dest's binary value left\
-  \ by Src places (0\u201331 bits) and sets the new LSBs to C.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag\
-  \ is updated to the value of the last bit shifted out if Src is 1\u201331, or to\n\nDest[31] if Src is 0.\n\nIf the WZ or\
-  \ WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the Dest result equals zero, or is cleared (0) if it is\n\n\
+  \ by Src places (0-31 bits) and sets the new LSBs to C.\n\nIf the WC or WCZ effect is specified, the C flag\
+  \ is updated to the value of the last bit shifted out if Src is 1-31, or to\n\nDest[31] if Src is 0.\n\nIf the WZ or\
+  \ WCZ effect is specified, the Z flag is set (1) if the Dest result equals zero, or is cleared (0) if it is\n\n\
   non-zero."
 flags_affected:
   C:
@@ -15,7 +15,7 @@ flags_affected:
 parameters:
 - Dest is the register containing the value to rotate carry left by Src bits.
 - Src is a register or 5-bit literal whose value indicates the number of bit positions to rotate.
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -32,6 +32,6 @@ category: bit_manipulation
 result: The bits of Dest are shifted left by Src bits, inserting C as new LSBs.
 syntax_variants:
 - RCL Dest, {#}Src {WC|WZ|WCZ}
-- "RCL shifts Dest's binary value left by Src places (0\u201331 bits) and sets the new LSBs to C."
+- "RCL shifts Dest's binary value left by Src places (0-31 bits) and sets the new LSBs to C."
 manual_extraction_date: '2025-01-19'
-oneliner: "Rotate carry \uFB02ag left into value"
+oneliner: "Rotate carry flag left into value"

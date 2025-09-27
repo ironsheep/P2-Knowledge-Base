@@ -5,11 +5,11 @@ timing:
   cycles: 1
   type: fixed
 description: "The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign bit) into new leftmost bits.\n\n\
-  SAR shifts Dest's binary value right by Src places (0\u201331 bits) and sets the new MSBs to that of the original\n\nDest[31];\
-  \ preserving the sign of a signed integer. This is useful for bit stream manipulation and for swift division\u2014\n\nit\
+  SAR shifts Dest's binary value right by Src places (0-31 bits) and sets the new MSBs to that of the original\n\nDest[31];\
+  \ preserving the sign of a signed integer. This is useful for bit stream manipulation and for swift division--\n\nit\
   \ is similar to SHR for swift division by a power-of-two, but is safe for both signed and unsigned integers.\n\nIf the WC\
-  \ or WCZ effect is speci\uFB01ed, the C \uFB02ag is updated to the value of the last bit shifted out (effectively C =\n\n\
-  result bit \"-1\") if Src is 1\u201331, or to Dest[0] if Src is 0.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02\
+  \ or WCZ effect is specified, the C flag is updated to the value of the last bit shifted out (effectively C =\n\n\
+  result bit \"-1\") if Src is 1-31, or to Dest[0] if Src is 0.\n\nIf the WZ or WCZ effect is specified, the Z fl\
   ag is set (1) if the Dest result equals zero, or is cleared (0) if it is\n\nnon-zero."
 flags_affected:
   C:
@@ -17,7 +17,7 @@ flags_affected:
 parameters:
 - Dest is the register containing the value to arithmetically right shift by Src bits.
 - Src is a register or 5-bit literal whose value indicates the number of bits to arithmetically shift right.
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 related:
 - SHR
 - SH
@@ -37,6 +37,6 @@ category: arithmetic
 result: The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign bit) into new leftmost bits.
 syntax_variants:
 - SAR Dest, {#}Src {WC|WZ|WCZ}
-- "SAR shifts Dest's binary value right by Src places (0\u201331 bits) and sets the new MSBs to that of the original"
+- "SAR shifts Dest's binary value right by Src places (0-31 bits) and sets the new MSBs to that of the original"
 manual_extraction_date: '2025-01-19'
 oneliner: Divide signed 32-bit integer by power-of-two; a.k.a shift bits right, extending the MSB

@@ -1,16 +1,16 @@
 instruction: CMPS
 syntax: CMPS Dest, {#}Src {WC|WZ|WCZ}
-encoding: "EEEE 0010010 CZI DDDDDDDDD SSSSSSSSS                  \u2014           Signed (D < S)       D=S               \
+encoding: "EEEE 0010010 CZI DDDDDDDDD SSSSSSSSS                  --           Signed (D < S)       D=S               \
   \     2"
 timing:
   cycles: 2
   type: fixed
 description: "CMPS compares the signed values of Dest and Src (by subtracting Src from Dest) and optionally setting the C\
   \ and Result: Greater/lesser and equality status is optionally written to the C and Z flags.\n\nCMPS compares the signed\
-  \ values of Dest and Src (by subtracting Src from Dest) and optionally setting the C and\n\nZ \uFB02ags to indicate the\
-  \ comparison and operation results.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if Dest is less\
-  \ than Src.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if Dest equals Src.\n\nTo compare signed,\
-  \ multi-long values, use CMP (not CMPS) followed possibly by CMPX, and \uFB01nally CMPSX as\n\ndescribed in Comparing Two\
+  \ values of Dest and Src (by subtracting Src from Dest) and optionally setting the C and\n\nZ flags to indicate the\
+  \ comparison and operation results.\n\nIf the WC or WCZ effect is specified, the C flag is set (1) if Dest is less\
+  \ than Src.\n\nIf the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src.\n\nTo compare signed,\
+  \ multi-long values, use CMP (not CMPS) followed possibly by CMPX, and finally CMPSX as\n\ndescribed in Comparing Two\
   \ Multi-Long Values."
 flags_affected:
   C:
@@ -20,7 +20,7 @@ flags_affected:
 parameters:
 - Dest is the register containing the value to compare with that of Src.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 related:
 - CMP
 - CMPX
@@ -38,7 +38,7 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Compare signed
 category: arithmetic
-result: "Greater/lesser and equality status is optionally written to the C and Z \uFB02ags."
+result: "Greater/lesser and equality status is optionally written to the C and Z flags."
 syntax_variants:
 - CMPS Dest, {#}Src {WC|WZ|WCZ}
 - CMPS compares the signed values of Dest and Src (by subtracting Src from Dest) and optionally setting the C and

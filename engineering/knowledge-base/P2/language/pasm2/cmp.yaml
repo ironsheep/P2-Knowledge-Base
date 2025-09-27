@@ -1,7 +1,7 @@
 instruction: CMP
 syntax: CMP Dest, {#}Src {WC|WZ|WCZ}
 compiler_syntax: CMP D,S/#
-encoding: "EEEE 0010000 CZI DDDDDDDDD SSSSSSSSS                  \u2014          Unsigned (D < S)      D=S               \
+encoding: "EEEE 0010000 CZI DDDDDDDDD SSSSSSSSS                  --          Unsigned (D < S)      D=S               \
   \     2"
 compiler_encoding:
   bits: 32
@@ -14,9 +14,9 @@ timing:
   type: fixed
 description: "CMP compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally setting the C\
   \ Result: Greater/lesser and equality status is optionally written to the C and Z flags.\n\nCMP compares the unsigned values\
-  \ of Dest and Src (by subtracting Src from Dest) and optionally setting the C\n\nand Z \uFB02ags accordingly.\n\nIf the\
-  \ WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if Dest is less than Src.\n\nIf the WZ or WCZ effect is speci\uFB01\
-  ed, the Z \uFB02ag is set (1) if Dest equals Src.\n\nTo compare unsigned, multi-long values, use CMP followed by CMPX as\
+  \ of Dest and Src (by subtracting Src from Dest) and optionally setting the C\n\nand Z flags accordingly.\n\nIf the\
+  \ WC or WCZ effect is specified, the C flag is set (1) if Dest is less than Src.\n\nIf the WZ or WCZ effect is specifi\
+  ed, the Z flag is set (1) if Dest equals Src.\n\nTo compare unsigned, multi-long values, use CMP followed by CMPX as\
   \ described in Comparing Two Multi-Long\n\nValues."
 compiler_category: Arithmetic
 flags_affected:
@@ -41,10 +41,10 @@ compiler_effects:
   description: Write Carry and Zero flags
   bitPattern: '11'
 parameters:
-- "Dest is the register containing the value to compare with that of Src. Copyright \xA9 Parallax Inc. 2022/11/01 \u25AA Propeller\
-  \ 2 Assembly Language Manual               \u25AA   Page 59"
+- "Dest is the register containing the value to compare with that of Src. Copyright \xA9 Parallax Inc. 2022/11/01 * Propeller\
+  \ 2 Assembly Language Manual               *   Page 59"
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 related:
 - CMPR
 - CMPX
@@ -61,7 +61,7 @@ enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Compare
 category: arithmetic
-result: "Greater/lesser and equality status is optionally written to the C and Z \uFB02ags."
+result: "Greater/lesser and equality status is optionally written to the C and Z flags."
 syntax_variants:
 - CMP Dest, {#}Src {WC|WZ|WCZ}
 - CMP compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally setting the C

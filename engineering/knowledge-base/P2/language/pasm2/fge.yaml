@@ -7,16 +7,16 @@ timing:
 description: "FGE sets unsigned Dest to unsigned Src if Dest is less than Src. This is also known as a limit minimum function;\
   \ Result: Unsigned Dest is set to unsigned Src if Dest was less than Src. Optionally the C and Z flag indicates if the replacement\
   \ happened and the zero status of the result.\n\nFGE sets unsigned Dest to unsigned Src if Dest is less than Src. This is\
-  \ also known as a limit minimum function;\n\npreventing Dest from sinking below Src.\n\nIf the WC or WCZ effect is speci\uFB01\
-  ed, the C \uFB02ag is set (1) if Dest was limited (Dest was less than Src and now Dest is\n\nequal to Src), or is cleared\
-  \ (0) if not limited.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the result is zero, or is\
+  \ also known as a limit minimum function;\n\npreventing Dest from sinking below Src.\n\nIf the WC or WCZ effect is specifi\
+  ed, the C flag is set (1) if Dest was limited (Dest was less than Src and now Dest is\n\nequal to Src), or is cleared\
+  \ (0) if not limited.\n\nIf the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero, or is\
   \ cleared (0) if it is non-zero."
 flags_affected:
   Z: Result = 0
 parameters:
 - Dest is a register containing the unsigned value to limit to a minimum of unsigned Src, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose unsigned value is the lower limit to force upon Dest.
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 related:
 - FLE
 - FGES
@@ -34,7 +34,7 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Force greater or equal
 category: arithmetic
-result: "Unsigned Dest is set to unsigned Src if Dest was less than Src. Optionally the C and Z \uFB02ag indicates if the"
+result: "Unsigned Dest is set to unsigned Src if Dest was less than Src. Optionally the C and Z flag indicates if the"
 syntax_variants:
 - FGE Dest, {#}Src {WC|WZ|WCZ}
 - FGE sets unsigned Dest to unsigned Src if Dest is less than Src. This is also known as a limit minimum function;

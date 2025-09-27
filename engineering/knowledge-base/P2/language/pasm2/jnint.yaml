@@ -5,7 +5,7 @@ timing:
   cycles: 2
   type: variable
   range: 13...20
-description: "Jump to S** if INT event \uFB02ag is set.                                                                  \
+description: "Jump to S** if INT event flag is set.                                                                  \
   \       2 or 4 / 2 or"
 parameters:
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC

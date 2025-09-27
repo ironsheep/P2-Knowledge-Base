@@ -7,18 +7,18 @@ timing:
 description: "SUBS subtracts the signed Src from the signed Dest and stores the result into the Dest register. If Src is a\
   \ 9-bit Result: Difference of signed Dest and signed Src is stored in Dest and optionally the C and Z flags are updated\
   \ to the sign and zero status.\n\nSUBS subtracts the signed Src from the signed Dest and stores the result into the Dest\
-  \ register. If Src is a 9-bit\n\nliteral, its value is interpreted as positive (0-511; it is not sign-extended) \u2014 use\
+  \ register. If Src is a 9-bit\n\nliteral, its value is interpreted as positive (0-511; it is not sign-extended) -- use\
   \ ##Value (or insert a prior AUGS\n\ninstruction) for a 32-bit signed value; negative or positive.\n\nIf the WC or WCZ effect\
-  \ is speci\uFB01ed, the C \uFB02ag is set (1) if the subtraction results in a signed under\uFB02ow (signed\n\nborrow), or\
-  \ is cleared (0) if no under\uFB02ow.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the result\
+  \ is specified, the C flag is set (1) if the subtraction results in a signed underflow (signed\n\nborrow), or\
+  \ is cleared (0) if no underflow.\n\nIf the WZ or WCZ effect is specified, the Z flag is set (1) if the result\
   \ of Dest - Src is zero, or is cleared (0) if it is\n\nnon-zero.\n\nTo subtract signed, multi-long values, use SUB (not\
-  \ SUBS) followed possibly by SUBX, and \uFB01nally SUBSX as\n\ndescribed in Subtracting Two Multi-Long Values."
+  \ SUBS) followed possibly by SUBX, and finally SUBSX as\n\ndescribed in Subtracting Two Multi-Long Values."
 flags_affected:
   Z: Result = 0
 parameters:
 - Dest is a register containing the value to subtract Src from, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is subtracted from Dest.
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 related:
 - SUB
 - SUBX
@@ -37,7 +37,7 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Subtract signed
 category: arithmetic
-result: "Difference of signed Dest and signed Src is stored in Dest and optionally the C and Z \uFB02ags are updated to"
+result: "Difference of signed Dest and signed Src is stored in Dest and optionally the C and Z flags are updated to"
 syntax_variants:
 - SUBS Dest, {#}Src {WC|WZ|WCZ}
 - SUBS subtracts the signed Src from the signed Dest and stores the result into the Dest register. If Src is a 9-bit

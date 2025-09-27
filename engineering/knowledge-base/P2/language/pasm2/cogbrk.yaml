@@ -1,6 +1,6 @@
 instruction: COGBRK
 syntax: COGBRK {#}Dest
-encoding: "EEEE 1101011 00L DDDDDDDDD 000110101                   \u2014                 \u2014                  \u2014  \
+encoding: "EEEE 1101011 00L DDDDDDDDD 000110101                   --                 --                  --  \
   \                 2"
 timing:
   cycles: 2
@@ -31,8 +31,8 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Cog break
 category: interrupts
-result: "If in the Debug ISR, trigger an asynchronous breakpoint in cog identi\uFB01ed by Dest."
+result: "If in the Debug ISR, trigger an asynchronous breakpoint in cog identified by Dest."
 syntax_variants:
 - COGBRK {#}Dest
 manual_extraction_date: '2025-01-19'
-oneliner: "Trigger breakpoint in speci\uFB01ed cog"
+oneliner: "Trigger breakpoint in specified cog"

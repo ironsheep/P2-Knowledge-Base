@@ -1,18 +1,18 @@
 instruction: CMPX
 syntax: CMPX Dest, {#}Src {WC|WZ|WCZ}
-encoding: "EEEE 0010001 CZI DDDDDDDDD SSSSSSSSS                  \u2014        Unsigned (D < S+C) Z AND (D = S+C)        \
+encoding: "EEEE 0010001 CZI DDDDDDDDD SSSSSSSSS                  --        Unsigned (D < S+C) Z AND (D = S+C)        \
   \      2"
 timing:
   cycles: 2
   type: fixed
 description: "CMPX compares the unsigned values of Dest and Src plus C (by subtracting Src + C from Dest) and optionally Result:\
   \ Greater/lesser and equality status is optionally written to the C and Z flags.\n\nCMPX compares the unsigned values of\
-  \ Dest and Src plus C (by subtracting Src + C from Dest) and optionally\n\nsetting the C and Z \uFB02ags accordingly. The\
+  \ Dest and Src plus C (by subtracting Src + C from Dest) and optionally\n\nsetting the C and Z flags accordingly. The\
   \ CMPX instruction is used to perform unsigned multi-long comparisons,\n\nsuch as 64-bit comparisons.\n\nIf the WC or WCZ\
-  \ effect is speci\uFB01ed, the C \uFB02ag is set (1) if Dest is less than Src plus C, or is cleared (0) otherwise.\n\nUse\
-  \ WC or WCZ on preceding CMP and CMPX instructions for proper \uFB01nal C \uFB02ag.\n\nIf the WZ or WCZ effect is speci\uFB01\
-  ed, the Z \uFB02ag is set (1) if Z was previously set and Dest equals Src + C, or it is\n\ncleared (0) otherwise. Use WZ\
-  \ or WCZ on preceding CMP and CMPX instructions for proper \uFB01nal Z \uFB02ag.\n\nTo compare multi-long values, use CMP\
+  \ effect is specified, the C flag is set (1) if Dest is less than Src plus C, or is cleared (0) otherwise.\n\nUse\
+  \ WC or WCZ on preceding CMP and CMPX instructions for proper final C flag.\n\nIf the WZ or WCZ effect is specifi\
+  ed, the Z flag is set (1) if Z was previously set and Dest equals Src + C, or it is\n\ncleared (0) otherwise. Use WZ\
+  \ or WCZ on preceding CMP and CMPX instructions for proper final Z flag.\n\nTo compare multi-long values, use CMP\
   \ followed by one or more CMPX instructions as described in Comparing\n\nTwo Multi-Long Values."
 flags_affected:
   C:
@@ -22,7 +22,7 @@ flags_affected:
 parameters:
 - Dest is a register containing the value to compare with that of Src plus C.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is compared to Dest.
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 related:
 - CMP
 - CMPX
@@ -40,11 +40,11 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Compare extended
 category: arithmetic
-result: "Greater/lesser and equality status is optionally written to the C and Z \uFB02ags."
+result: "Greater/lesser and equality status is optionally written to the C and Z flags."
 syntax_variants:
 - CMPX Dest, {#}Src {WC|WZ|WCZ}
 - CMPX compares the unsigned values of Dest and Src plus C (by subtracting Src + C from Dest) and optionally
-- "Use WC or WCZ on preceding CMP and CMPX instructions for proper \uFB01nal C \uFB02ag."
-- "cleared (0) otherwise. Use WZ or WCZ on preceding CMP and CMPX instructions for proper \uFB01nal Z \uFB02ag."
+- "Use WC or WCZ on preceding CMP and CMPX instructions for proper final C flag."
+- "cleared (0) otherwise. Use WZ or WCZ on preceding CMP and CMPX instructions for proper final Z flag."
 manual_extraction_date: '2025-01-19'
-oneliner: "Compare two unsigned values plus carry \uFB02ag"
+oneliner: "Compare two unsigned values plus carry flag"

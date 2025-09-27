@@ -7,8 +7,8 @@ timing:
 description: "SUB subtracts the unsigned Src from the unsigned Dest and stores the result into the Dest register. Result:\
   \ Difference of unsigned Dest and unsigned Src is stored in Dest and optionally the C and Z flags are updated to the borrow\
   \ and zero status.\n\nSUB subtracts the unsigned Src from the unsigned Dest and stores the result into the Dest register.\n\
-  \nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if the subtraction results in a 32-bit under\uFB02\
-  ow (unsigned\n\nborrow), or is cleared (0) if no borrow.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is\
+  \nIf the WC or WCZ effect is specified, the C flag is set (1) if the subtraction results in a 32-bit underfl\
+  ow (unsigned\n\nborrow), or is cleared (0) if no borrow.\n\nIf the WZ or WCZ effect is specified, the Z flag is\
   \ set (1) if the result of Dest - Src is zero, or is cleared (0) if it is\n\nnon-zero.\n\nTo subtract unsigned, multi-long\
   \ values, use SUB followed by SUBX as described in Subtracting Two Multi-Long\n\nValues. SUB and SUBX are also used in subtracting\
   \ signed, multi-long values with SUBSX ending the sequence."
@@ -17,7 +17,7 @@ flags_affected:
 parameters:
 - Dest is a register containing the value to subtract Src from, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is subtracted from Dest.
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "WC, WZ, or WCZ are optional effects to update flags."
 related:
 - SUBX
 - SUBS
@@ -37,7 +37,7 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Subtract
 category: arithmetic
-result: "Difference of unsigned Dest and unsigned Src is stored in Dest and optionally the C and Z \uFB02ags are"
+result: "Difference of unsigned Dest and unsigned Src is stored in Dest and optionally the C and Z flags are"
 syntax_variants:
 - SUB Dest, {#}Src {WC|WZ|WCZ}
 - SUB subtracts the unsigned Src from the unsigned Dest and stores the result into the Dest register.

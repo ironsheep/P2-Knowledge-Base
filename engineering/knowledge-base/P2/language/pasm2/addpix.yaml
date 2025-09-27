@@ -1,6 +1,6 @@
 instruction: ADDPIX
 syntax: ADDPIX Dest, {#}Src
-encoding: "EEEE 1010010 00I DDDDDDDDD SSSSSSSSS                    D                  \u2014                  \u2014     \
+encoding: "EEEE 1010010 00I DDDDDDDDD SSSSSSSSS                    D                  --                  --     \
   \               7"
 timing:
   cycles: 7

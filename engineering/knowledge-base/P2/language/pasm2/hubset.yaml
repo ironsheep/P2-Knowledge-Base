@@ -4,7 +4,7 @@ encoding: EEEE 1101011 00L DDDDDDDDD 000000000
 timing:
   cycles: 2
   type: fixed
-description: "Set hub con\uFB01guration to D.                                                                            \
+description: "Set hub configuration to D.                                                                            \
   \                   2...9 / same"
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced

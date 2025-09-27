@@ -1,11 +1,11 @@
 instruction: ADDCT1
 syntax: ADDCT1 Dest, {#}Src
 encoding:
-- "EEEE 1010011 00I DDDDDDDDD SSSSSSSSS                    D                  \u2014                  \u2014             \
+- "EEEE 1010011 00I DDDDDDDDD SSSSSSSSS                    D                  --                  --             \
   \       2"
-- "EEEE 1010011 01I DDDDDDDDD SSSSSSSSS                    D                  \u2014                  \u2014             \
+- "EEEE 1010011 01I DDDDDDDDD SSSSSSSSS                    D                  --                  --             \
   \       2"
-- "EEEE 1010011 10I DDDDDDDDD SSSSSSSSS                    D                  \u2014                  \u2014             \
+- "EEEE 1010011 10I DDDDDDDDD SSSSSSSSS                    D                  --                  --             \
   \       2"
 timing:
   cycles: 2

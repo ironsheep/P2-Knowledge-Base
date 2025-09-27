@@ -6,14 +6,14 @@ timing:
   type: fixed
 description: "RCZL shifts Dest's binary value left by two places and sets Dest[1] to C and Dest[0] to Z. Result: The bits\
   \ of Dest are shifted left by two places and C and Z are inserted as new LSBs.\n\nRCZL shifts Dest's binary value left by\
-  \ two places and sets Dest[1] to C and Dest[0] to Z.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is updated\
-  \ to the original Dest[31] state.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z is \uFB02ag is updated to the original\
+  \ two places and sets Dest[1] to C and Dest[0] to Z.\n\nIf the WC or WCZ effect is specified, the C flag is updated\
+  \ to the original Dest[31] state.\n\nIf the WZ or WCZ effect is specified, the Z is flag is updated to the original\
   \ Dest[30] state."
 flags_affected:
   C: D[31] D[30] 2
 parameters:
-- "Dest is the register containing the value to rotate the carry and zero \uFB02ags left into."
-- "WC, WZ, or WCZ are optional effects to update \uFB02ags."
+- "Dest is the register containing the value to rotate the carry and zero flags left into."
+- "WC, WZ, or WCZ are optional effects to update flags."
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -32,4 +32,4 @@ syntax_variants:
 - RCZL Dest {WC|WZ|WCZ}
 - RCZL shifts Dest's binary value left by two places and sets Dest[1] to C and Dest[0] to Z.
 manual_extraction_date: '2025-01-19'
-oneliner: "Rotate carry and zero \uFB02ags left into value (2-bit rotate left)"
+oneliner: "Rotate carry and zero flags left into value (2-bit rotate left)"
