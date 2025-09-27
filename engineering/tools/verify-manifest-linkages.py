@@ -83,20 +83,23 @@ class ManifestVerifier:
         
         # Define all manifests to check
         manifests = [
-            ("Root Manifest", "manifests/p2-knowledge-root.yaml"),
-            ("PASM2 Instructions", "manifests/pasm2-manifest.yaml"),
-            ("Spin2 Language", "manifests/spin2-manifest.yaml"),
-            ("Architecture", "manifests/architecture-manifest.yaml"),
-            ("Smart Pins", "manifests/smart-pins-manifest.yaml"),
-            ("Patterns", "manifests/patterns-manifest.yaml"),
-            ("Hardware", "manifests/hardware-manifest.yaml"),
-            ("Quick Queries", "manifests/quick-queries-manifest.yaml"),
-            ("Obex Root", "manifests/obex/obex-root.yaml"),
+            ("Root Manifest", "manifests/propeller-knowledge-root.yaml"),
+            ("P2 Root", "manifests/P2/p2-root.yaml"),
+            ("Language Root", "manifests/P2/language/language-manifest.yaml"),
+            ("PASM2 Instructions", "manifests/P2/language/pasm2-manifest.yaml"),
+            ("Spin2 Language", "manifests/P2/language/spin2-manifest.yaml"),
+            ("Architecture", "manifests/P2/architecture-manifest.yaml"),
+            ("Smart Pins", "manifests/P2/smart-pins-manifest.yaml"),
+            ("Patterns", "manifests/P2/patterns-manifest.yaml"),
+            ("Hardware", "manifests/P2/hardware-manifest.yaml"),
+            ("Quick Queries", "manifests/P2/quick-queries-manifest.yaml"),
+            ("Community Root", "manifests/P2/community/community-manifest.yaml"),
+            ("Obex Root", "manifests/P2/community/obex-manifest.yaml"),
         ]
         
         # Also check Obex category and author manifests
-        obex_categories = self._find_obex_manifests("manifests/obex/categories")
-        obex_authors = self._find_obex_manifests("manifests/obex/authors")
+        obex_categories = self._find_obex_manifests("manifests/P2/community/obex/categories")
+        obex_authors = self._find_obex_manifests("manifests/P2/community/obex/authors")
         
         # Verify each manifest
         for name, path in manifests:
@@ -178,7 +181,7 @@ class ManifestVerifier:
                 str_path = str(relative_path)
                 
                 # Skip the root manifest as it's the entry point
-                if yaml_file.name == 'p2-knowledge-root.yaml':
+                if yaml_file.name == 'propeller-knowledge-root.yaml':
                     continue
                 
                 # Check if this manifest file is referenced anywhere
@@ -248,9 +251,15 @@ class ManifestVerifier:
                     sub_manifest_path = cat_data.get('manifest', '')
                     if sub_manifest_path:
                         # Verify sub-manifest
-                        full_sub_path = Path('manifests') / sub_manifest_path
+                        # Handle relative paths from manifest location
+                        if not sub_manifest_path.startswith('/'):
+                            # Relative to current manifest location
+                            full_sub_path = full_path.parent / sub_manifest_path
+                        else:
+                            # Absolute path from repo root
+                            full_sub_path = self.base_path / sub_manifest_path.lstrip('/')
                         sub_name = f"{name}/{cat_name}"
-                        self._verify_manifest(sub_name, str(full_sub_path), indent=indent+1)
+                        self._verify_manifest(sub_name, str(full_sub_path.relative_to(self.base_path)), indent=indent+1)
                 return
             
             # Find all file references

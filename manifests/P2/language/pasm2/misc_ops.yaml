@@ -17,9 +17,6 @@ instructions:
   file: djnf.yaml
   desc: DJF or DJNF decrements the value in Dest, writes the result, and jumps to
     the address described b...
-- name: instruction_manifest
-  file: instruction_manifest.yaml
-  desc: P2 PASM2 instruction set manifest - fully linked
 - name: jatn
   file: jatn.yaml
   desc: Jump to S** if ATN event flag is set.                                                             ...

@@ -43,9 +43,14 @@ purpose: |
   the P2's unique architecture effectively.
 
 manifests:
+  language:
+    description: "P2 programming languages (PASM2, Spin2, fundamentals)"
+    url: "language/language-manifest.yaml"
+    contains: ["pasm2", "spin2", "fundamentals", "conventions"]
+    
   pasm2_instructions:
     description: "PASM2 assembly language instruction reference with idioms"
-    url: "manifests/pasm2-manifest.yaml"
+    url: "language/pasm2-manifest.yaml"
     entry_count: 362  # 357 instructions + 5 idiom categories
     compiler_validated: 359
     compiler_source: "PNUT-TS v2.0 with spinResolver.ts operand fixes"
@@ -54,39 +59,44 @@ manifests:
     
   spin2_language:
     description: "Spin2 high-level language constructs, methods, and idioms"
-    url: "manifests/spin2-manifest.yaml"
+    url: "language/spin2-manifest.yaml"
     entry_count: 141  # 135 language elements + 6 idiom categories
     categories: ["methods", "operators", "constructs", "blocks"]
     idioms: "25 patterns extracted from 730 source files (24,715 occurrences)"
     
   architecture:
     description: "P2 hardware architecture and subsystems"
-    url: "manifests/architecture-manifest.yaml"
+    url: "architecture-manifest.yaml"
     entry_count: 15
     categories: ["cogs", "memory", "timing", "peripherals"]
     
   smart_pins:
     description: "Smart Pin modes and configurations (32 modes)"
-    url: "manifests/smart-pins-manifest.yaml"
+    url: "smart-pins-manifest.yaml"
     entry_count: 32
     categories: ["digital_io", "analog", "serial", "timing"]
     
   patterns:
     description: "Code patterns and implementation strategies"
-    url: "manifests/patterns-manifest.yaml"
+    url: "patterns-manifest.yaml"
     entry_count: 25  # Growing
     categories: ["communication", "timing", "coordination", "optimization"]
     
+  community:
+    description: "Community-contributed resources (OBEX, future Quick Bytes)"
+    url: "community/community-manifest.yaml"
+    contains: ["obex", "quickbytes (planned)"]
+    
   community_resources:
     description: "P2 community objects from Parallax OBEX (download-on-demand)"
-    url: "manifests/obex/obex-root.yaml"
+    url: "community/obex-manifest.yaml"
     entry_count: 253  # Discovered 2025-09-12
     categories: ["drivers", "sensors", "display", "motors", "communication", "audio", "misc", "demos", "tools"]
     featured_authors: ["Jon McPhalen (jonnymac)", "Chip Gracey", "Kwabena W. Agyeman"]
     
   auxiliary_guides:
     description: "Specialized guides for AI-assisted P2 development"
-    manifest: "manifests/auxiliary-guides-manifest.yaml"
+    manifest: "auxiliary-guides-manifest.yaml"
     categories:
       - name: "interaction"
         description: "How to work with AI for P2 development"
@@ -109,55 +119,55 @@ manifests:
     
   quick_queries:
     description: "Common questions with direct answers"
-    url: "manifests/quick-queries-manifest.yaml"
+    url: "quick-queries-manifest.yaml"
     categories: ["how_to", "troubleshooting", "best_practices"]
 
 quick_start:
   beginner_path:
     - step: "Basic concepts"
-      manifest: "manifests/quick-queries-manifest.yaml"
+      manifest: "quick-queries-manifest.yaml"
       query: "getting_started"
     
     - step: "First program"
-      manifest: "manifests/patterns-manifest.yaml"
+      manifest: "patterns-manifest.yaml"
       query: "blink_led"
     
     - step: "Language basics"
-      manifest: "manifests/spin2-manifest.yaml"
+      manifest: "language/spin2-manifest.yaml"
       query: "basic_constructs"
   
   experienced_path:
     - step: "Architecture deep dive"
-      manifest: "manifests/architecture-manifest.yaml"
+      manifest: "architecture-manifest.yaml"
       query: "all"
     
     - step: "Advanced patterns"
-      manifest: "manifests/patterns-manifest.yaml"
+      manifest: "patterns-manifest.yaml"
       query: "advanced"
     
     - step: "Optimization techniques"
-      manifest: "manifests/pasm2-manifest.yaml"
+      manifest: "language/pasm2-manifest.yaml"
       query: "performance"
 
 usage_examples:
   - example: "Find UART implementation"
     steps:
       - "GET this manifest"
-      - "GET manifests/quick-queries-manifest.yaml"
+      - "GET manifests/P2/quick-queries-manifest.yaml"
       - "Find 'uart_implementation' entry"
       - "GET referenced pattern files"
   
   - example: "Learn about specific instruction"
     steps:
       - "GET this manifest"
-      - "GET manifests/pasm2-manifest.yaml"
+      - "GET manifests/P2/language/pasm2-manifest.yaml"
       - "Find instruction in index"
       - "GET engineering/knowledge-base/P2/language/pasm2/[instruction].yaml"
   
   - example: "Understand Smart Pins"
     steps:
       - "GET this manifest"
-      - "GET manifests/smart-pins-manifest.yaml"
+      - "GET manifests/P2/smart-pins-manifest.yaml"
       - "Browse available modes"
       - "GET specific mode documentation"
 

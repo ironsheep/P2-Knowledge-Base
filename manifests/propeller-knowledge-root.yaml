@@ -1,0 +1,27 @@
+# Propeller Knowledge Base - Universal Root Manifest
+# Entry point for all Propeller microcontroller documentation
+# Repository: https://github.com/ironsheep/P2-Knowledge-Base
+
+version: "1.0"
+schema_version: "2024-12-30"
+last_updated: "2025-09-27T00:00:00Z"
+description: "Universal entry point for Propeller microcontroller knowledge bases"
+
+metadata:
+  repository: "https://github.com/ironsheep/P2-Knowledge-Base"
+  raw_base_url: "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/"
+  supported_chips:
+    - "P2"
+    - "P1 (future)"
+
+# Main Propeller variants
+propeller_chips:
+  p2:
+    manifest: "P2/p2-root.yaml"
+    description: "Propeller 2 (P2) - 8-cog multiprocessor with Smart Pins"
+    status: "active"
+    
+  p1:
+    manifest: null  # Future: P1/p1-root.yaml
+    description: "Propeller 1 (P1) - 8-cog multiprocessor (coming soon)"
+    status: "planned"
