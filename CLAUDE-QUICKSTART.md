@@ -1,120 +1,122 @@
-# Claude Code Quick Start Card
-*Essential copy-paste templates to get started with the P2 Knowledge Base*
+# P2 Knowledge Base QuickStart
+*Essential reference for using P2 Knowledge Base with Claude*
 
-## ⚠️ CRITICAL: Session Management for Performance
+## 🚀 For Fresh Claude Session (After /init)
 
-**🔥 Clear conversation every 3-4 hours or 15-20 major file operations!**
+Copy this entire block to Claude to configure it properly:
 
-Performance degrades as context accumulates. Watch for these warning signs:
-- Responses getting slower
-- Claude forgetting recent work
-- Repetitive questions about already-discussed topics
-
-### Session Health Indicators
-- ✅ **Healthy (0-3 hours)**: Fast responses, perfect recall
-- ⚠️ **Warning (3-4 hours)**: Slightly slower, may need reminders
-- ❌ **Clear Now (4+ hours)**: Degraded performance, confusion
-
-## 🚀 Essential Templates (Copy These!)
-
-### 1. Session Starter (Optimized for Success)
 ```
-I need help with P2 (Propeller 2) development. You should have the P2 Knowledge Base 
-repository information in CLAUDE.md.
+FIRST ACTION: Save these instructions to your CLAUDE.md file for persistent reference.
 
-Please access the P2 Knowledge Base directly from GitHub:
-https://github.com/ironsheep/P2-Knowledge-Base
+You are helping with Propeller 2 (P2) microcontroller development using the P2 Knowledge Base.
+GitHub: https://github.com/ironsheep/P2-Knowledge-Base
+Raw access: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
 
-CRITICAL: Start with these two manifests:
-1. Root manifest: manifests/p2-knowledge-root.yaml (main navigation)
-2. Auxiliary guides: manifests/auxiliary-guides-manifest.yaml (HOW to use resources)
+## CRITICAL RULES - NO EXCEPTIONS
 
-The auxiliary guides teach you:
-- OBEX search optimization (NEVER filter by category first)
-- Hardware testing workflows with pnut_ts and pnut-term-ts
-- BMP generation for debug visualization
-- Best practices for P2 development
+### Navigation (MANDATORY)
+- START: manifests/p2-knowledge-root.yaml (always)
+- THEN: manifests/auxiliary-guides-manifest.yaml (how-to guides)
+- NEVER search for YAML files - use manifest tree only
+- All files are YAML format in engineering/knowledge-base/P2/
 
-My specific task is: [YOUR TASK HERE]
-```
+### Anti-Patterns (FORBIDDEN)
+❌ Searching for *.yaml directly
+❌ Guessing paths ("probably in hardware/")  
+❌ Using pkill (use: kill -TERM $PID)
+❌ Filtering OBEX by category first
+❌ Assuming built-in peripherals exist
 
-### 2. PASM2 Assembly Code
-```
-Using the P2 knowledge base PASM2 instructions in 
-engineering/knowledge-base/P2/language/pasm2/, 
-help me write assembly code to [DESCRIBE TASK].
+### Testing Protocol
+    pnut_ts -d program.spin2              # Compile with debug
+    pnut-term-ts -r program.bin & PID=$!  # Run and capture PID
+    tail -f logs/debug_*.log              # Monitor logs (not console)
+    kill -TERM $PID                       # Clean shutdown (not pkill)
+    # Signals: -TERM (shutdown), -USR1 (reset), -9 (force)
 
-Check manifests/pasm2-manifest.yaml for instruction categories.
-```
+### OBEX Search Rules
+- Search ALL 113 objects first (34 in 'misc' have drivers!)
+- Expand terms: I2C → IIC, TWI, two-wire
+- Check jonnymac (44 objects)
+- 21 objects have GitHub links
 
-### 3. Smart Pin Configuration
-```
-I need to configure a P2 Smart Pin for [PURPOSE].
-Check engineering/knowledge-base/P2/hardware/smart-pins/modes/
-and help me select and configure the right mode.
-```
+### P2 Architecture Facts
+- 8 COGs (cores), 64 Smart Pins
+- No built-in UART/SPI/I2C → use OBEX objects
+- Smart Pins = autonomous I/O processors
+- Building blocks, not complete peripherals
 
-### 4. Community Code Discovery (Now with GitHub Repos!)
-```
-Find me P2 OBEX objects related to [HARDWARE/PROTOCOL].
+## Manifest Navigation Map
 
-IMPORTANT: Follow the OBEX search optimization guide:
-- Search ALL 113 objects, not just expected categories
-- Many drivers are in 'misc' (34 objects), not 'drivers'
-- Expand keywords: I2C → also search IIC, TWI, two-wire
-- Check top authors like jonnymac (44 quality objects)
+Start → manifests/p2-knowledge-root.yaml
+├── PASM2 → pasm2-manifest.yaml → 360+ instructions
+├── Smart Pins → hardware/smart-pins/modes/
+├── OBEX → obex/obex-root.yaml → 113 objects
+└── Guides → auxiliary-guides-manifest.yaml
 
-✨ NEW: 21 objects now have GitHub repo links!
-If repo exists, I can offer to check for newer versions.
-
-Start with manifests/obex/obex-root.yaml
+REMEMBER: Manifest tree only. No direct YAML searches. PID-based signals only.
 ```
 
-### 5. Using Auxiliary Guides
-```
-I need help with [BMP generation / hardware testing / OBEX search].
-Check manifests/auxiliary-guides-manifest.yaml for specialized guides.
-These guides provide techniques for specific development tasks.
-```
+## 💡 Common Task Templates
 
-### 6. Session Resume (After Clearing)
+### PASM2 Assembly Code
 ```
-Continuing P2 development session. Previous summary:
-[PASTE SUMMARY HERE]
-
-The P2 Knowledge Base info should be in CLAUDE.md.
-Please continue with: [SPECIFIC NEXT TASK]
+Using the P2 knowledge base, help me write PASM2 code to [TASK].
+Start with manifests/pasm2-manifest.yaml for instruction categories.
 ```
 
-## 📚 Need More Examples?
+### Smart Pin Configuration  
+```
+I need to configure a Smart Pin for [PURPOSE].
+Check hardware/smart-pins/modes/ via the manifest tree.
+```
 
-**[→ AI Prompt Patterns Library](AI-PROMPT-PATTERNS.md)**  
-Comprehensive interaction patterns for all P2 development scenarios.
+### OBEX Community Code
+```
+Find P2 OBEX objects for [HARDWARE/PROTOCOL].
+Search ALL 113 objects via manifests/obex/obex-root.yaml.
+Don't filter by category first - many drivers are in 'misc'.
+```
 
-**[→ Using With AI Guide](deliverables/ai-reference/auxiliary-guides/interaction/using-with-ai.md)**  
-Complete setup and usage guide for AI assistants.
+### Hardware Testing
+```
+Test my Spin2 program on P2 hardware.
+Use pnut_ts -d for debug compilation.
+Capture PID with & and use kill -TERM $PID for cleanup.
+```
 
-## 💡 Quick Tips
+## ⚠️ Session Management
 
-- Always mention "P2 Knowledge Base" in prompts
-- Start with manifests for navigation
-- Reference specific YAML paths when possible
-- For community code, specify category or author
-- Clear conversation when performance degrades
+**Clear conversation every 3-4 hours to maintain performance!**
 
-## 🔑 Critical P2 Knowledge Base Insights
+- ✅ **0-3 hours**: Fast responses, perfect recall
+- ⚠️ **3-4 hours**: Slower, may need reminders  
+- ❌ **4+ hours**: Degraded performance, clear now
 
-**OBEX Search**: NEVER filter by category first - 34 "misc" objects contain drivers!
+### Session Resume After Clear
+```
+Continuing P2 development. Previous: [BRIEF SUMMARY]
+Check CLAUDE.md for P2 Knowledge Base rules.
+Continue with: [SPECIFIC TASK]
+```
 
-**P2 Philosophy**: P2 provides building blocks (Smart Pins, COGs), not complete peripherals.
-Need UART/SPI/I2C? → Use OBEX objects, not built-in peripherals.
+## 🔑 Key Insights
 
-**File Navigation**: Follow manifest tree, never guess paths. All files are YAML.
+**OBEX Search**: 34 "misc" objects contain drivers - always search all!
 
-**Testing**: Use `pnut_ts -d` for debug, monitor `logs/*.log` not console.
+**P2 Philosophy**: Building blocks (COGs, Smart Pins), not complete peripherals.
 
-**OBEX Repos**: 21 objects have GitHub links - offer to check, don't auto-fetch (saves context).
+**File Access**: Follow manifests only, never guess YAML paths.
+
+**Testing**: Use PID-based signals, monitor logs not console.
+
+**GitHub Repos**: 21 OBEX objects have links - mention but don't auto-fetch.
+
+## 📚 Additional Resources
+
+- **Full Guide**: deliverables/ai-reference/auxiliary-guides/interaction/using-with-ai.md
+- **Prompt Patterns**: AI-PROMPT-PATTERNS.md
+- **Testing Guide**: auxiliary-guides/special-techniques/hardware-testing-guide.md
 
 ---
-
-*Keep this card handy for instant P2 development assistance!*
+*Keep this card handy for P2 development with Claude!*
