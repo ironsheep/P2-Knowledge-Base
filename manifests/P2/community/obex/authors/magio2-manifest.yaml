@@ -6,7 +6,7 @@ manifest_metadata:
 base_path: engineering/knowledge-base/P2/community/obex/
 path_construction_note: 'TO ACCESS ANY FILE IN THIS MANIFEST:
 
-  Combine: raw_base_url (from root) + base_path (above) + yaml_path (from entries)
+  Combine: raw_base_url (from root) + base_path (above) + content (from entries)
 
 
   Example:
@@ -33,4 +33,4 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2021-04-10 12:00:00'
-  yaml_path: objects/2848.yaml
+  content: objects/2848.yaml

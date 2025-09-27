@@ -1,25 +1,33 @@
-constant: TRUE
-name: TRUE
+constant: true
+name: true
 value: -1
-hex_value: "$FFFFFFFF"
-description: |
-  Logical true constant
+hex_value: $FFFFFFFF
+description: 'Logical true constant
+
   All bits set to represent boolean true condition
+
+  '
 category: Numeric Constant
 documentation_level: complete
-usage: |
-  Use in conditional logic and boolean operations
+usage: 'Use in conditional logic and boolean operations
+
   Commonly used with conditional execution suffixes
+
+  '
 examples:
-  - code: |
-      cmp     x, #0       wz      ' Compare x with 0
-      mov     result, TRUE        ' Default to TRUE
-      if_z mov  result, FALSE     ' Set to FALSE if x was 0
-    description: "Using TRUE in conditional logic"
+- code: 'cmp     x, #0       wz      '' Compare x with 0
+
+    mov     result, TRUE        '' Default to TRUE
+
+    if_z mov  result, FALSE     '' Set to FALSE if x was 0
+
+    '
+  description: Using TRUE in conditional logic
 notes:
-  - "All bits set (-1 in signed representation)"
-  - "Standard boolean true value in PASM2"
-  - "Compatible with bitwise operations"
+- All bits set (-1 in signed representation)
+- Standard boolean true value in PASM2
+- Compatible with bitwise operations
 related:
-  - FALSE
-  - conditional_execution
+- false
+- conditional_execution
+oneliner: Logical true constant

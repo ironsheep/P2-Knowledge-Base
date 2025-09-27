@@ -1,8 +1,7 @@
 instruction: MOV
 syntax: MOV Dest, {#}Src {WC|WZ|WCZ}
 compiler_syntax: MOV D,S/#
-encoding: EEEE 0110000 CZI DDDDDDDDD SSSSSSSSS                    D               S[31]            Result
-  = 0                  2
+encoding: EEEE 0110000 CZI DDDDDDDDD SSSSSSSSS                    D               S[31]            Result = 0                  2
 compiler_encoding:
   bits: 32
   opcode: 192
@@ -12,12 +11,10 @@ compiler_encoding:
 timing:
   cycles: 2
   type: fixed
-group: Bit Operation Instruction - Set a value into a register.
-description: "Mov stores the Src value into Dest. Result: The Src value is stored in Dest and optionally\
-  \ flags are updated with the sign bit and zero status.\n\nMov stores the Src value into Dest.\n\nIf\
-  \ the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is updated to be Src[31].\n\nIf the WZ or WCZ\
-  \ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the Dest result equals zero, or is cleared (0)\
-  \ if it is\n\nnon-zero."
+description: "Mov stores the Src value into Dest. Result: The Src value is stored in Dest and optionally flags are updated\
+  \ with the sign bit and zero status.\n\nMov stores the Src value into Dest.\n\nIf the WC or WCZ effect is speci\uFB01ed,\
+  \ the C \uFB02ag is updated to be Src[31].\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the\
+  \ Dest result equals zero, or is cleared (0) if it is\n\nnon-zero."
 compiler_category: Data Movement
 flags_affected:
   C: S[31] Result =
@@ -52,9 +49,9 @@ compiler_operand_format:
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Move
-category: Bit Operation Instruction - Set a value into a register.
-result: "The Src value is stored in Dest and optionally \uFB02ags are updated with the sign bit and zero\
-  \ status."
+category: bit_manipulation
+result: "The Src value is stored in Dest and optionally \uFB02ags are updated with the sign bit and zero status."
 syntax_variants:
 - MOV Dest, {#}Src {WC|WZ|WCZ}
 manual_extraction_date: '2025-01-19'
+oneliner: Set a value into a register

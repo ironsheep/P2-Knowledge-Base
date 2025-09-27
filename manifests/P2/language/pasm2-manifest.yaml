@@ -2,14 +2,13 @@ version: '2.0'
 schema_version: '2024-12-30'
 last_updated: '2025-09-23T00:00:00Z'
 category: pasm2_instructions
+base_path: engineering/knowledge-base/P2/language/pasm2/
 structure: hierarchical
-total_instructions: 361
-description: Complete PASM2 instruction set with hierarchical organization for efficient
-  discovery
+total_instructions: 375
+description: Complete PASM2 instruction set with hierarchical organization for efficient discovery
 categories:
   arithmetic:
-    manifest: pasm2/arithmetic.yaml
-    count: 38
+    count: 59
     description: Arithmetic and math operations
     sample_instructions:
     - abs
@@ -17,9 +16,186 @@ categories:
     - addct1
     - addct2
     - addct3
+    items:
+    - name: abs
+      content: abs.yaml
+      desc: Get the absolute value of a number
+    - name: add
+      content: add.yaml
+      desc: Add two unsigned values
+    - name: adds
+      content: adds.yaml
+      desc: Add two signed values
+    - name: addsx
+      content: addsx.yaml
+      desc: Add two signed extended values
+    - name: addx
+      content: addx.yaml
+      desc: Add two unsigned extended values
+    - name: cmp
+      content: cmp.yaml
+      desc: Compare two unsigned values
+    - name: cmpm
+      content: cmpm.yaml
+      desc: Compare two unsigned values, get MSB of difference
+    - name: cmpr
+      content: cmpr.yaml
+      desc: Compare two unsigned values (in reverse order to CMP)
+    - name: cmps
+      content: cmps.yaml
+      desc: Compare two signed values
+    - name: cmpsub
+      content: cmpsub.yaml
+      desc: Compare two unsigned values and subtract the second if it is lesser or equal
+    - name: cmpsx
+      content: cmpsx.yaml
+      desc: "Compare two signed values plus carry \uFB02ag"
+    - name: cmpx
+      content: cmpx.yaml
+      desc: "Compare two unsigned values plus carry \uFB02ag"
+    - name: crcbit
+      content: crcbit.yaml
+      desc: Iterate CRC value in D using C and polynomial in S
+    - name: crcnib
+      content: crcnib.yaml
+      desc: Q = Q << 4
+    - name: decmod
+      content: decmod.yaml
+      desc: Decrement with modulus
+    - name: fge
+      content: fge.yaml
+      desc: Force unsigned value to be greater than or equal to another
+    - name: fges
+      content: fges.yaml
+      desc: Force signed value to be greater than or equal to another
+    - name: fle
+      content: fle.yaml
+      desc: Force unsigned value to be less than or equal to another
+    - name: fles
+      content: fles.yaml
+      desc: Force signed value to be less than or equal to another
+    - name: incmod
+      content: incmod.yaml
+      desc: Increment with modulus
+    - name: loc
+      content: loc.yaml
+      desc: R = 1, address = PC + A, else address = A
+    - name: mergeb
+      content: mergeb.yaml
+      desc: Merge bits of bytes in D
+    - name: mergew
+      content: mergew.yaml
+      desc: Merge bits of words in D
+    - name: movbyts
+      content: movbyts.yaml
+      desc: Move bytes within D, per S
+    - name: mul
+      content: mul.yaml
+      desc: Multiply unsigned 16-bit x 16-bit values
+    - name: muls
+      content: muls.yaml
+      desc: Multiply signed 16-bit x 16-bit values
+    - name: muxc
+      content: muxc.yaml
+      desc: '{WC/WZ/WCZ} Mux C into each D bit that is ''1'' in S'
+    - name: muxnc
+      content: muxnc.yaml
+      desc: '{WC/WZ/WCZ} Mux C into each D bit that is ''1'' in S'
+    - name: neg
+      content: neg.yaml
+      desc: Negate a value
+    - name: negc
+      content: negc.yaml
+      desc: Negate value according to C
+    - name: negnc
+      content: negnc.yaml
+      desc: Negate value according to !C
+    - name: negnz
+      content: negnz.yaml
+      desc: Negate value according to !Z
+    - name: negz
+      content: negz.yaml
+      desc: Negate value according to Z
+    - name: rgbexp
+      content: rgbexp.yaml
+      desc: Expand 5:6:5 RGB value in D[15:0] into 8:8:8 value in D[31:8]
+    - name: rgbsqz
+      content: rgbsqz.yaml
+      desc: Squeeze 8:8:8 RGB value in D[31:8] into 5:6:5 value in D[15:0]
+    - name: sar
+      content: sar.yaml
+      desc: Divide signed 32-bit integer by power-of-two; a.k.a shift bits right, extending the MSB
+    - name: sca
+      content: sca.yaml
+      desc: Create unsigned 16-bit scale value for next instruction's S value
+    - name: scas
+      content: scas.yaml
+      desc: Create signed 18-bit scale value for next instruction's S value
+    - name: seussf
+      content: seussf.yaml
+      desc: Relocate and periodically invert bits within D
+    - name: seussr
+      content: seussr.yaml
+      desc: Relocate and periodically invert bits within D
+    - name: shl
+      content: shl.yaml
+      desc: Shift bits left; a.k.a. multiply 32-bit integer by power-of-two
+    - name: shr
+      content: shr.yaml
+      desc: Shift bits right; a.k.a. divide unsigned 32-bit integer by power-of-two
+    - name: signx
+      content: signx.yaml
+      desc: Sign-extend value beyond designated bit
+    - name: splitb
+      content: splitb.yaml
+      desc: Split every 4th bit of D into bytes
+    - name: splitw
+      content: splitw.yaml
+      desc: Split odd/even bits of D into words
+    - name: sub
+      content: sub.yaml
+      desc: Subtract one unsigned value from another
+    - name: subr
+      content: subr.yaml
+      desc: Subtract one unsigned value from another (in reverse order to SUB)
+    - name: subs
+      content: subs.yaml
+      desc: Subtract one signed value from another
+    - name: subsx
+      content: subsx.yaml
+      desc: Subtract one signed extended value from another
+    - name: subx
+      content: subx.yaml
+      desc: Subtract one unsigned extended value from another
+    - name: sumc
+      content: sumc.yaml
+      desc: '{WC/WZ/WCZ} Sum +/-S into D by C'
+    - name: sumnc
+      content: sumnc.yaml
+      desc: Adjust signed value by other C-negated or !C-negated value
+    - name: sumnz
+      content: sumnz.yaml
+      desc: Adjust signed value by other Z-negated or !Z-negated value
+    - name: sumz
+      content: sumz.yaml
+      desc: '{WC/WZ/WCZ} Sum +/-S into D by Z'
+    - name: testb
+      content: testb.yaml
+      desc: WC/WZ Test bit S[4:0] of D, write to C/Z
+    - name: wrc
+      content: wrc.yaml
+      desc: Write 0 or 1 to D, according to C
+    - name: wrz
+      content: wrz.yaml
+      desc: Write 0 or 1 to D, according to Z
+    - name: xoro32
+      content: xoro32.yaml
+      desc: Iterate D with xoroshiro32+ PRNG algorithm and put PRNG result into next
+    - name: zerox
+      content: zerox.yaml
+      desc: Zero-extend value beyond designated bit
   logic:
-    manifest: pasm2/logic.yaml
-    count: 41
+    count: 1
     description: Logical and comparison operations
     sample_instructions:
     - and
@@ -27,9 +203,12 @@ categories:
     - bitnot
     - cmp
     - cmpm
+    items:
+    - name: akpin
+      content: akpin.yaml
+      desc: Acknowledge smart pin(s)
   bit_manipulation:
-    manifest: pasm2/bit_manipulation.yaml
-    count: 23
+    count: 45
     description: Bit manipulation and shifting
     sample_instructions:
     - bitc
@@ -37,8 +216,143 @@ categories:
     - bitl
     - bitnc
     - bitnz
+    items:
+    - name: and
+      content: and.yaml
+      desc: Bitwise AND a value with another, or with the NOT of another
+    - name: andn
+      content: andn.yaml
+      desc: Bitwise AND a value with another, or with the NOT of another
+    - name: bitc
+      content: bitc.yaml
+      desc: Set bit(s) low/high according to C or !C
+    - name: bith
+      content: bith.yaml
+      desc: Set bit(s) high (1) or low (0)
+    - name: bitl
+      content: bitl.yaml
+      desc: Set bit(s) high (1) or low (0)
+    - name: bitnc
+      content: bitnc.yaml
+      desc: Set bit(s) low/high according to C or !C
+    - name: bitnot
+      content: bitnot.yaml
+      desc: Toggle bit(s) to the opposite state
+    - name: bitnz
+      content: bitnz.yaml
+      desc: Set bit(s) low/high according to Z or !Z
+    - name: bitrnd
+      content: bitrnd.yaml
+      desc: Set bit(s) random low/high
+    - name: bitz
+      content: bitz.yaml
+      desc: Set bit(s) low/high according to Z or !Z
+    - name: bmask
+      content: bmask.yaml
+      desc: Get 1..32-bit mask into Dest
+    - name: decod
+      content: decod.yaml
+      desc: "Decode value (0\u201431) into single-high-bit long"
+    - name: encod
+      content: encod.yaml
+      desc: Get bit position of top-most 1 of Src or Dest into Dest
+    - name: getbyte
+      content: getbyte.yaml
+      desc: Get a byte from a value
+    - name: getnib
+      content: getnib.yaml
+      desc: Get a nibble from a value
+    - name: getword
+      content: getword.yaml
+      desc: Get a word from a value
+    - name: mov
+      content: mov.yaml
+      desc: Set a value into a register
+    - name: muxnibs
+      content: muxnibs.yaml
+      desc: Set discrete nibbles of a value to non-zero nibble states of another
+    - name: muxnits
+      content: muxnits.yaml
+      desc: Set discrete bit pairs of a value to non-zero bit pair states of another
+    - name: muxnz
+      content: muxnz.yaml
+      desc: Set discrete bits to Z or !Z
+    - name: muxq
+      content: muxq.yaml
+      desc: Set discrete bits of a value to that of another
+    - name: muxz
+      content: muxz.yaml
+      desc: Set discrete bits to Z or !Z
+    - name: not
+      content: not.yaml
+      desc: Bitwise NOT a value
+    - name: ones
+      content: ones.yaml
+      desc: Get number of 1s from Dest or Src into Dest
+    - name: or
+      content: or.yaml
+      desc: Bitwise OR a value with another
+    - name: rcl
+      content: rcl.yaml
+      desc: "Rotate carry \uFB02ag left into value"
+    - name: rcr
+      content: rcr.yaml
+      desc: "Rotate carry \uFB02ag right into value"
+    - name: rczl
+      content: rczl.yaml
+      desc: "Rotate carry and zero \uFB02ags left into value (2-bit rotate left)"
+    - name: rczr
+      content: rczr.yaml
+      desc: "Rotate carry and zero \uFB02ags right into value (2-bit rotate right)"
+    - name: rev
+      content: rev.yaml
+      desc: Reverse bits of value
+    - name: rol
+      content: rol.yaml
+      desc: Rotate bits left
+    - name: rolbyte
+      content: rolbyte.yaml
+      desc: Rotate a byte left into a value
+    - name: rolnib
+      content: rolnib.yaml
+      desc: Rotate a nibble left into a value
+    - name: rolword
+      content: rolword.yaml
+      desc: Rotate a word left into a value
+    - name: ror
+      content: ror.yaml
+      desc: Rotate bits right
+    - name: sal
+      content: sal.yaml
+      desc: Shift bits left, extending the LSB
+    - name: setbyte
+      content: setbyte.yaml
+      desc: Set a byte to new value
+    - name: setnib
+      content: setnib.yaml
+      desc: Set a nibble to new value
+    - name: setword
+      content: setword.yaml
+      desc: Set a word to new value
+    - name: test
+      content: test.yaml
+      desc: "Test D, or bitwise AND D with S, to affect \uFB02ags"
+    - name: testbn
+      content: testbn.yaml
+      desc: Test bit of D or !D and either store, AND, OR, or XOR the result into flags
+    - name: testn
+      content: testn.yaml
+      desc: "Test D by bitwise ANDing with !S to affect \uFB02ags only"
+    - name: wrnc
+      content: wrnc.yaml
+      desc: Write C or not C to register
+    - name: wrnz
+      content: wrnz.yaml
+      desc: Write Z or not Z to register
+    - name: xor
+      content: xor.yaml
+      desc: Bitwise XOR a value with another
   memory_hub:
-    manifest: pasm2/memory_hub.yaml
     count: 22
     description: Hub memory operations
     sample_instructions:
@@ -48,7 +362,6 @@ categories:
     - rdlong
     - rdlut
   memory_cog:
-    manifest: pasm2/memory_cog.yaml
     count: 10
     description: Cog/LUT memory operations
     sample_instructions:
@@ -58,8 +371,7 @@ categories:
     - setnib
     - sets
   control_flow:
-    manifest: pasm2/control_flow.yaml
-    count: 27
+    count: 96
     description: Branches, jumps, and calls
     sample_instructions:
     - call
@@ -67,8 +379,296 @@ categories:
     - callb
     - calld
     - callpa
+    items:
+    - name: asmclk
+      content: asmclk.yaml
+      desc: Assembly clock instruction
+    - name: call
+      content: call.yaml
+      desc: Call a subroutine; store return context on the stack
+    - name: calla
+      content: calla.yaml
+      desc: Call a subroutine; store return context in the Hub long at PTRA++ or PTRB++
+    - name: callb
+      content: callb.yaml
+      desc: Call a subroutine; store return context in the Hub long at PTRA++ or PTRB++
+    - name: calld
+      content: calld.yaml
+      desc: Call a subroutine; store return context in PA/PB/PTRA/PTRB/D
+    - name: callpa
+      content: callpa.yaml
+      desc: Call a subroutine; store return context on the stack and copy D into PA or PB
+    - name: callpb
+      content: callpb.yaml
+      desc: Call a subroutine; store return context on the stack and copy D into PA or PB
+    - name: cogid
+      content: cogid.yaml
+      desc: "Get current cog\u2019s ID or any cog's status by ID"
+    - name: coginit
+      content: coginit.yaml
+      desc: Start an available cog, or restart a cog by ID
+    - name: cogstop
+      content: cogstop.yaml
+      desc: Stop a cog by ID
+    - name: debug
+      content: debug.yaml
+      desc: Debug instruction
+    - name: dirc
+      content: dirc.yaml
+      desc: Set pin(s) direction to input/output according to C or !C
+    - name: dirh
+      content: dirh.yaml
+      desc: Set pin(s) direction to output (high; 1) or input (low; 0)
+    - name: dirl
+      content: dirl.yaml
+      desc: Set pin(s) direction to output (high; 1) or input (low; 0)
+    - name: dirnc
+      content: dirnc.yaml
+      desc: Set pin(s) direction to input/output according to C or !C
+    - name: dirnot
+      content: dirnot.yaml
+      desc: Toggle pin(s) to the opposite direction
+    - name: dirnz
+      content: dirnz.yaml
+      desc: Set pin(s) direction to input/output according to Z or !Z
+    - name: dirrnd
+      content: dirrnd.yaml
+      desc: Set pin(s) direction to random input/output
+    - name: dirz
+      content: dirz.yaml
+      desc: Set pin(s) direction to input/output according to Z or !Z
+    - name: djf
+      content: djf.yaml
+      desc: Decrement value and jump if full (-1; $FFFF_FFFF) or not full (<> -1; <> $FFFF_FFFF)
+    - name: djnf
+      content: djnf.yaml
+      desc: Decrement value and jump if full (-1; $FFFF_FFFF) or not full (<> -1; <> $FFFF_FFFF)
+    - name: djnz
+      content: djnz.yaml
+      desc: Decrement, jump if zero or not zero
+    - name: djz
+      content: djz.yaml
+      desc: Decrement, jump if zero or not zero
+    - name: drvc
+      content: drvc.yaml
+      desc: Set pin(s) direction to output and output level to low/high according to C or !C
+    - name: drvh
+      content: drvh.yaml
+      desc: Set pin(s) direction to output and output level high (1) or low (0)
+    - name: drvl
+      content: drvl.yaml
+      desc: Set pin(s) direction to output and output level high (1) or low (0)
+    - name: drvnc
+      content: drvnc.yaml
+      desc: Set pin(s) direction to output and output level to low/high according to C or !C
+    - name: drvnot
+      content: drvnot.yaml
+      desc: Set pin(s) direction to output and toggle to the opposite output level
+    - name: drvnz
+      content: drvnz.yaml
+      desc: Set pin(s) direction to output and output level to low/high according to Z or !Z
+    - name: drvrnd
+      content: drvrnd.yaml
+      desc: Set pin(s) direction to output and output level to random low/high
+    - name: drvz
+      content: drvz.yaml
+      desc: Set pin(s) direction to output and output level to low/high according to Z or !Z
+    - name: execf
+      content: execf.yaml
+      desc: Call+Skip
+    - name: fltc
+      content: fltc.yaml
+      desc: Set pin(s) direction to input and an output level of low/high according to C
+    - name: flth
+      content: flth.yaml
+      desc: Set pin(s) direction to input and to an output level of high (1) or low (0)
+    - name: fltl
+      content: fltl.yaml
+      desc: Set pin(s) direction to input and to an output level of high (1) or low (0)
+    - name: fltnc
+      content: fltnc.yaml
+      desc: Set pin(s) direction to input and an output level of low/high according to C
+    - name: fltnot
+      content: fltnot.yaml
+      desc: Set pin(s) direction to input and toggle to the opposite output level
+    - name: fltnz
+      content: fltnz.yaml
+      desc: Set pin(s) direction to input and an output level of low/high according to Z
+    - name: fltrnd
+      content: fltrnd.yaml
+      desc: Set pin(s) direction to input and to an output level of random low/high
+    - name: fltz
+      content: fltz.yaml
+      desc: Set pin(s) direction to input and an output level of low/high according to Z
+    - name: getscp
+      content: getscp.yaml
+      desc: Get four-channel oscilloscope samples into D
+    - name: hubset
+      content: hubset.yaml
+      desc: Multi
+    - name: ijnz
+      content: ijnz.yaml
+      desc: Increment value and jump if zero or not zero
+    - name: ijz
+      content: ijz.yaml
+      desc: Increment value and jump if zero or not zero
+    - name: jfbw
+      content: jfbw.yaml
+      desc: Jump if FIFO interface block wrap event flag is set or clear
+    - name: jmp
+      content: jmp.yaml
+      desc: Jump
+    - name: jmprel
+      content: jmprel.yaml
+      desc: Jump
+    - name: jnfbw
+      content: jnfbw.yaml
+      desc: Jump if FIFO interface block wrap event flag is set or clear
+    - name: jnqmt
+      content: jnqmt.yaml
+      desc: Jump if CORDIC-read-but-empty event flag set or clear
+    - name: jnxmt
+      content: jnxmt.yaml
+      desc: Jump if streamer empty event flag set or clear
+    - name: jnxrl
+      content: jnxrl.yaml
+      desc: Jump if streamer LUT RAM rollover event flag set or clear
+    - name: jqmt
+      content: jqmt.yaml
+      desc: Jump if CORDIC-read-but-empty event flag set or clear
+    - name: jxmt
+      content: jxmt.yaml
+      desc: Jump if streamer empty event flag set or clear
+    - name: jxrl
+      content: jxrl.yaml
+      desc: Jump if streamer LUT RAM rollover event flag set or clear
+    - name: locknew
+      content: locknew.yaml
+      desc: Locks
+    - name: lockrel
+      content: lockrel.yaml
+      desc: Locks
+    - name: lockret
+      content: lockret.yaml
+      desc: Locks
+    - name: locktry
+      content: locktry.yaml
+      desc: Locks
+    - name: outc
+      content: outc.yaml
+      desc: Set pin(s) output level to low/high according to C or !C
+    - name: outh
+      content: outh.yaml
+      desc: Set pin(s) output level to high (1) or low (0)
+    - name: outl
+      content: outl.yaml
+      desc: Set pin(s) output level to high (1) or low (0)
+    - name: outnc
+      content: outnc.yaml
+      desc: Set pin(s) output level to low/high according to C or !C
+    - name: outnot
+      content: outnot.yaml
+      desc: Toggle pin(s) to the opposite output level
+    - name: outnz
+      content: outnz.yaml
+      desc: Set pin(s) output level to low/high according to Z or !Z
+    - name: outrnd
+      content: outrnd.yaml
+      desc: Set pin(s) output level to random low/high
+    - name: outz
+      content: outz.yaml
+      desc: Set pin(s) output level to low/high according to Z or !Z
+    - name: rdpin
+      content: rdpin.yaml
+      desc: '{WC} Read smart pin S[5:0] result "Z" into D, acknowledge smart pin'
+    - name: rep
+      content: rep.yaml
+      desc: Execute next D[8:0] instructions S times
+    - name: resi0
+      content: resi0.yaml
+      desc: Resume
+    - name: resi1
+      content: resi1.yaml
+      desc: Resume
+    - name: resi2
+      content: resi2.yaml
+      desc: Resume
+    - name: resi3
+      content: resi3.yaml
+      desc: Resume
+    - name: ret
+      content: ret.yaml
+      desc: Return by popping stack (K)
+    - name: reta
+      content: reta.yaml
+      desc: Return by reading hub long (L) at --PTRA
+    - name: retb
+      content: retb.yaml
+      desc: Return by reading hub long (L) at --PTRB
+    - name: reti0
+      content: reti0.yaml
+      desc: Return
+    - name: reti1
+      content: reti1.yaml
+      desc: Return
+    - name: reti2
+      content: reti2.yaml
+      desc: Return
+    - name: reti3
+      content: reti3.yaml
+      desc: Return
+    - name: rqpin
+      content: rqpin.yaml
+      desc: C = modal result
+    - name: setdacs
+      content: setdacs.yaml
+      desc: DAC3 = D[31:24], DAC2 = D[23:16], DAC1 = D[15:8], DAC0 = D[7:0]
+    - name: setscp
+      content: setscp.yaml
+      desc: Set four-channel oscilloscope enable to D[6] and set input pin base to D[5:2]
+    - name: skip
+      content: skip.yaml
+      desc: Skip
+    - name: skipf
+      content: skipf.yaml
+      desc: Jump+Skip
+    - name: testp
+      content: testp.yaml
+      desc: Test pin state with optional XOR operation
+    - name: testpn
+      content: testpn.yaml
+      desc: Test pin and either store, AND, OR, or XOR the result or inverse result into C/Z
+    - name: tjf
+      content: tjf.yaml
+      desc: Test
+    - name: tjnf
+      content: tjnf.yaml
+      desc: Test value and jump if full (-1; $FFFF_FFFF) or not full (<> -1; <> $FFFF_FFFF)
+    - name: tjns
+      content: tjns.yaml
+      desc: Test value and jump if signed or not signed
+    - name: tjnz
+      content: tjnz.yaml
+      desc: Test value and jump if zero or not zero
+    - name: tjs
+      content: tjs.yaml
+      desc: Test
+    - name: tjv
+      content: tjv.yaml
+      desc: "Test value and jump if over\uFB02owed"
+    - name: tjz
+      content: tjz.yaml
+      desc: Test
+    - name: wrpin
+      content: wrpin.yaml
+      desc: Set mode of smart pins S[10:6]+S[5:0]
+    - name: wxpin
+      content: wxpin.yaml
+      desc: Set \"X\" of smart pins S[10:6]+S[5:0]
+    - name: wypin
+      content: wypin.yaml
+      desc: Set "Y" register of smart pins S[10:6]+S[5:0]
   pin_control:
-    manifest: pasm2/pin_control.yaml
     count: 32
     description: Digital pin and smart pin control
     sample_instructions:
@@ -78,8 +678,7 @@ categories:
     - dirl
     - dirnc
   timing_events:
-    manifest: pasm2/timing_events.yaml
-    count: 35
+    count: 64
     description: Timing, waiting, and events
     sample_instructions:
     - cogatn
@@ -87,9 +686,201 @@ categories:
     - pollatn
     - pollct1
     - pollct2
+    items:
+    - name: addct1
+      content: addct1.yaml
+      desc: Set one of three counter events' trigger time
+    - name: addct2
+      content: addct2.yaml
+      desc: Set one of three counter events' trigger time
+    - name: addct3
+      content: addct3.yaml
+      desc: Set one of three counter events' trigger time
+    - name: cogatn
+      content: cogatn.yaml
+      desc: Get the attention of one or more other cogs
+    - name: jatn
+      content: jatn.yaml
+      desc: Branch
+    - name: jct1
+      content: jct1.yaml
+      desc: Branch
+    - name: jct2
+      content: jct2.yaml
+      desc: Branch
+    - name: jct3
+      content: jct3.yaml
+      desc: Branch
+    - name: jint
+      content: jint.yaml
+      desc: Branch
+    - name: jnatn
+      content: jnatn.yaml
+      desc: Branch
+    - name: jnct1
+      content: jnct1.yaml
+      desc: Branch
+    - name: jnct2
+      content: jnct2.yaml
+      desc: Branch
+    - name: jnct3
+      content: jnct3.yaml
+      desc: Branch
+    - name: jnint
+      content: jnint.yaml
+      desc: Branch
+    - name: jnpat
+      content: jnpat.yaml
+      desc: Branch
+    - name: jnse1
+      content: jnse1.yaml
+      desc: Branch
+    - name: jnse2
+      content: jnse2.yaml
+      desc: Branch
+    - name: jnse3
+      content: jnse3.yaml
+      desc: Branch
+    - name: jnse4
+      content: jnse4.yaml
+      desc: Branch
+    - name: jnxfi
+      content: jnxfi.yaml
+      desc: Branch
+    - name: jnxro
+      content: jnxro.yaml
+      desc: Branch
+    - name: jpat
+      content: jpat.yaml
+      desc: Branch
+    - name: jse1
+      content: jse1.yaml
+      desc: Branch
+    - name: jse2
+      content: jse2.yaml
+      desc: Branch
+    - name: jse3
+      content: jse3.yaml
+      desc: Branch
+    - name: jse4
+      content: jse4.yaml
+      desc: Branch
+    - name: jxfi
+      content: jxfi.yaml
+      desc: Branch
+    - name: jxro
+      content: jxro.yaml
+      desc: Branch
+    - name: pollatn
+      content: pollatn.yaml
+      desc: "Retrieve and clear attention \uFB02ag"
+    - name: pollct1
+      content: pollct1.yaml
+      desc: "Retrieve and clear counter event 1/2/3 \uFB02ag"
+    - name: pollct2
+      content: pollct2.yaml
+      desc: "Retrieve and clear counter event 1/2/3 \uFB02ag"
+    - name: pollct3
+      content: pollct3.yaml
+      desc: "Retrieve and clear counter event 1/2/3 \uFB02ag"
+    - name: pollfbw
+      content: pollfbw.yaml
+      desc: "Retrieve and clear FIFO-interface-block-wrap event \uFB02ag"
+    - name: pollint
+      content: pollint.yaml
+      desc: "Retrieve and clear interrupt-occurred event \uFB02ag"
+    - name: pollpat
+      content: pollpat.yaml
+      desc: "Retrieve and clear pin-pattern-detected event \uFB02ag"
+    - name: pollqmt
+      content: pollqmt.yaml
+      desc: "Retrieve and clear CORDIC-read-but-empty event \uFB02ag"
+    - name: pollse1
+      content: pollse1.yaml
+      desc: "Retrieve and clear selectable event 1, 2, 3, or 4 \uFB02ag"
+    - name: pollse2
+      content: pollse2.yaml
+      desc: "Retrieve and clear selectable event 1, 2, 3, or 4 \uFB02ag"
+    - name: pollse3
+      content: pollse3.yaml
+      desc: "Retrieve and clear selectable event 1, 2, 3, or 4 \uFB02ag"
+    - name: pollse4
+      content: pollse4.yaml
+      desc: "Retrieve and clear selectable event 1, 2, 3, or 4 \uFB02ag"
+    - name: pollxfi
+      content: pollxfi.yaml
+      desc: "Retrieve and clear streamer-\uFB01nished event \uFB02ag"
+    - name: pollxmt
+      content: pollxmt.yaml
+      desc: "Retrieve and clear streamer-empty event \uFB02ag"
+    - name: pollxrl
+      content: pollxrl.yaml
+      desc: "Retrieve and clear streamer-LUT-RAM-rollover event \uFB02ag"
+    - name: pollxro
+      content: pollxro.yaml
+      desc: "Retrieve and clear streamer-NCO-rollover event \uFB02ag"
+    - name: setpat
+      content: setpat.yaml
+      desc: Configuration
+    - name: setse1
+      content: setse1.yaml
+      desc: Configuration
+    - name: setse2
+      content: setse2.yaml
+      desc: Configuration
+    - name: setse3
+      content: setse3.yaml
+      desc: Configuration
+    - name: setse4
+      content: setse4.yaml
+      desc: Configuration
+    - name: waitatn
+      content: waitatn.yaml
+      desc: "Wait for and clear attention \uFB02ag"
+    - name: waitct1
+      content: waitct1.yaml
+      desc: "Wait for and clear counter 1, 2, or 3 event \uFB02ag"
+    - name: waitct2
+      content: waitct2.yaml
+      desc: "Wait for and clear counter 1, 2, or 3 event \uFB02ag"
+    - name: waitct3
+      content: waitct3.yaml
+      desc: "Wait for and clear counter 1, 2, or 3 event \uFB02ag"
+    - name: waitfbw
+      content: waitfbw.yaml
+      desc: "Wait for and clear FIFO-interface-block-wrap event \uFB02ag"
+    - name: waitint
+      content: waitint.yaml
+      desc: "Wait for and clear interrupt-occurred event \uFB02ag"
+    - name: waitpat
+      content: waitpat.yaml
+      desc: "Wait for and clear pin-pattern-detected event \uFB02ag"
+    - name: waitse1
+      content: waitse1.yaml
+      desc: "Wait for and clear selectable event 1, 2, 3, or 4 \uFB02ag"
+    - name: waitse2
+      content: waitse2.yaml
+      desc: "Wait for and clear selectable event 1, 2, 3, or 4 \uFB02ag"
+    - name: waitse3
+      content: waitse3.yaml
+      desc: "Wait for and clear selectable event 1, 2, 3, or 4 \uFB02ag"
+    - name: waitse4
+      content: waitse4.yaml
+      desc: "Wait for and clear selectable event 1, 2, 3, or 4 \uFB02ag"
+    - name: waitxfi
+      content: waitxfi.yaml
+      desc: "Wait for and clear streamer-\uFB01nished event \uFB02ag"
+    - name: waitxmt
+      content: waitxmt.yaml
+      desc: "Wait for and clear streamer-empty event \uFB02ag"
+    - name: waitxrl
+      content: waitxrl.yaml
+      desc: "Wait for and clear streamer-LUT-RAM-rollover event \uFB02ag"
+    - name: waitxro
+      content: waitxro.yaml
+      desc: "Wait for and clear streamer-NCO-rollover event \uFB02ag"
   cordic:
-    manifest: pasm2/cordic.yaml
-    count: 7
+    count: 10
     description: CORDIC math operations
     sample_instructions:
     - getqx
@@ -97,8 +888,38 @@ categories:
     - qexp
     - qfrac
     - qlog
+    items:
+    - name: getqx
+      content: getqx.yaml
+      desc: '{WC/WZ/WCZ} Retrieve CORDIC result X into D'
+    - name: getqy
+      content: getqy.yaml
+      desc: '{WC/WZ/WCZ} Retrieve CORDIC result Y into D'
+    - name: qdiv
+      content: qdiv.yaml
+      desc: "Perform 64\xF732 unsigned division with 32-bit quotient and remainder"
+    - name: qexp
+      content: qexp.yaml
+      desc: Convert 5:27-bit logarithm to 32-bit unsigned integer
+    - name: qfrac
+      content: qfrac.yaml
+      desc: "Perform 64\xF732 unsigned fractional division with D as upper 32 bits"
+    - name: qlog
+      content: qlog.yaml
+      desc: Convert 32-bit unsigned integer to 5:27-bit logarithm format
+    - name: qmul
+      content: qmul.yaml
+      desc: "Perform 32\xD732 unsigned multiplication producing 64-bit result"
+    - name: qrotate
+      content: qrotate.yaml
+      desc: Rotate a 32-bit signed (X, Y) point around origin (0, 0) by a specified angle
+    - name: qsqrt
+      content: qsqrt.yaml
+      desc: Calculate square root of 64-bit unsigned number formed from {S, D}
+    - name: qvector
+      content: qvector.yaml
+      desc: Convert cartesian coordinates (X, Y) to polar coordinates (length, angle)
   streamer:
-    manifest: pasm2/streamer.yaml
     count: 6
     description: Streamer operations
     sample_instructions:
@@ -107,9 +928,27 @@ categories:
     - xcont
     - xinit
     - xstop
+    items:
+    - name: getxacc
+      content: getxacc.yaml
+      desc: Get the streamer's Goertzel X accumulator into D and the Y accumulator into the
+    - name: setxfrq
+      content: setxfrq.yaml
+      desc: Set streamer NCO frequency to D
+    - name: xcont
+      content: xcont.yaml
+      desc: "Bu er new streamer command to be issued on \uFB01nal NCO rollover of current command"
+    - name: xinit
+      content: xinit.yaml
+      desc: Issue streamer command immediately, zeroing phase
+    - name: xstop
+      content: xstop.yaml
+      desc: Stop streamer immediately
+    - name: xzero
+      content: xzero.yaml
+      desc: "Bu er new streamer command to be issued on \uFB01nal NCO rollover of current command"
   colorspace:
-    manifest: pasm2/colorspace.yaml
-    count: 7
+    count: 11
     description: Pixel and colorspace operations
     sample_instructions:
     - blnpix
@@ -117,8 +956,41 @@ categories:
     - setcfrq
     - setci
     - setcmod
+    items:
+    - name: addpix
+      content: addpix.yaml
+      desc: Add RGB colors with full saturation
+    - name: blnpix
+      content: blnpix.yaml
+      desc: Alpha-blend bytes of S into bytes of D, using SETPIV value
+    - name: mixpix
+      content: mixpix.yaml
+      desc: Mix bytes of S into bytes of D, using SETPIX and SETPIV values
+    - name: mulpix
+      content: mulpix.yaml
+      desc: Multiply bytes of S into bytes of D, where $FF = 1
+    - name: setcfrq
+      content: setcfrq.yaml
+      desc: Set the colorspace converter \"CFRQ\" parameter to D[31:0]
+    - name: setci
+      content: setci.yaml
+      desc: Set the colorspace converter \"CI\" parameter to D[31:0]
+    - name: setcmod
+      content: setcmod.yaml
+      desc: Set the colorspace converter \"CMOD\" parameter to D[8:0]
+    - name: setcq
+      content: setcq.yaml
+      desc: Set the colorspace converter \"CQ\" parameter to D[31:0]
+    - name: setcy
+      content: setcy.yaml
+      desc: Set the colorspace converter \"CY\" parameter to D[31:0]
+    - name: setpiv
+      content: setpiv.yaml
+      desc: Set BLNPIX/MIXPIX blend factor to D[7:0]
+    - name: setpix
+      content: setpix.yaml
+      desc: Set MIXPIX mode to D[5:0]
   interrupts:
-    manifest: pasm2/interrupts.yaml
     count: 14
     description: Interrupt configuration and handling
     sample_instructions:
@@ -127,8 +999,50 @@ categories:
     - nixint2
     - nixint3
     - resi0
+    items:
+    - name: allowi
+      content: allowi.yaml
+      desc: Allow interrupts
+    - name: brk
+      content: brk.yaml
+      desc: Trigger breakpoint in current cog
+    - name: cogbrk
+      content: cogbrk.yaml
+      desc: "Trigger breakpoint in speci\uFB01ed cog"
+    - name: getbrk
+      content: getbrk.yaml
+      desc: Get breakpoint/cog status into D according to WC/WZ/WCZ
+    - name: nixint1
+      content: nixint1.yaml
+      desc: Cancel INT1
+    - name: nixint2
+      content: nixint2.yaml
+      desc: Cancel INT2
+    - name: nixint3
+      content: nixint3.yaml
+      desc: Cancel INT3
+    - name: setint1
+      content: setint1.yaml
+      desc: Set INT1 source to D[3:0]
+    - name: setint2
+      content: setint2.yaml
+      desc: Set INT2 source to D[3:0]
+    - name: setint3
+      content: setint3.yaml
+      desc: Set INT3 source to D[3:0]
+    - name: stalli
+      content: stalli.yaml
+      desc: Prevent further interrupts
+    - name: trgint1
+      content: trgint1.yaml
+      desc: Trigger INT1, regardless of STALLI mode
+    - name: trgint2
+      content: trgint2.yaml
+      desc: Trigger INT2, regardless of STALLI mode
+    - name: trgint3
+      content: trgint3.yaml
+      desc: Trigger INT3, regardless of STALLI mode
   cog_control:
-    manifest: pasm2/cog_control.yaml
     count: 11
     description: Cog and hub control
     sample_instructions:
@@ -138,7 +1052,6 @@ categories:
     - coginit
     - cogstop
   stack_ops:
-    manifest: pasm2/stack_ops.yaml
     count: 6
     description: Stack operations
     sample_instructions:
@@ -147,7 +1060,6 @@ categories:
     - pusha
     - pushb
   special_ops:
-    manifest: pasm2/special_ops.yaml
     count: 35
     description: Special operations and modifiers
     sample_instructions:
@@ -157,8 +1069,7 @@ categories:
     - altgn
     - altgw
   misc_ops:
-    manifest: pasm2/misc_ops.yaml
-    count: 47
+    count: 40
     description: Miscellaneous operations
     sample_instructions:
     - asmclk
@@ -166,30 +1077,233 @@ categories:
     - djf
     - djnf
     - instruction_manifest
+    items:
+    - name: augd
+      content: augd.yaml
+      desc: Augment next literal Dest to 32-bits
+    - name: augs
+      content: augs.yaml
+      desc: Augment next literal Src to 32-bits
+    - name: fblock
+      content: fblock.yaml
+      desc: New Block
+    - name: getct
+      content: getct.yaml
+      desc: T=0 on reset, CT++ on every clock
+    - name: getptr
+      content: getptr.yaml
+      desc: Get current FIFO hub pointer into D
+    - name: getrnd
+      content: getrnd.yaml
+      desc: Get RND into C/Z
+    - name: modc
+      content: modc.yaml
+      desc: Modify C and/or Z flag(s) according to modifier mode and current state(s)
+    - name: modcz
+      content: modcz.yaml
+      desc: Modify C and/or Z flag(s) according to modifier mode and current state(s)
+    - name: modz
+      content: modz.yaml
+      desc: Modify C and/or Z flag(s) according to modifier mode and current state(s)
+    - name: nop
+      content: nop.yaml
+      desc: No operation, just elapse two cycles
+    - name: pop
+      content: pop.yaml
+      desc: POP instruction (needs documentation)
+    - name: popa
+      content: popa.yaml
+      desc: Read
+    - name: popb
+      content: popb.yaml
+      desc: Read
+    - name: push
+      content: push.yaml
+      desc: PUSH instruction (needs documentation)
+    - name: pusha
+      content: pusha.yaml
+      desc: Write
+    - name: pushb
+      content: pushb.yaml
+      desc: Write
+    - name: rdbyte
+      content: rdbyte.yaml
+      desc: Read
+    - name: rdfast
+      content: rdfast.yaml
+      desc: New Read
+    - name: rdlong
+      content: rdlong.yaml
+      desc: Read
+    - name: rdlut
+      content: rdlut.yaml
+      desc: '{WC/WZ/WCZ} Read data from LUT address {#}S/PTRx into D'
+    - name: rdword
+      content: rdword.yaml
+      desc: Read
+    - name: rfbyte
+      content: rfbyte.yaml
+      desc: Read
+    - name: rflong
+      content: rflong.yaml
+      desc: Read
+    - name: rfvar
+      content: rfvar.yaml
+      desc: Read
+    - name: rfvars
+      content: rfvars.yaml
+      desc: Read
+    - name: rfword
+      content: rfword.yaml
+      desc: Read
+    - name: setluts
+      content: setluts.yaml
+      desc: If D[0] = 1 then enable LUT sharing
+    - name: setq
+      content: setq.yaml
+      desc: Set Q to D
+    - name: setq2
+      content: setq2.yaml
+      desc: Set Q to D
+    - name: waitx
+      content: waitx.yaml
+      desc: Wait for D+1 clock cycles
+    - name: wfbyte
+      content: wfbyte.yaml
+      desc: Write
+    - name: wflong
+      content: wflong.yaml
+      desc: Write
+    - name: wfword
+      content: wfword.yaml
+      desc: Write
+    - name: wmlong
+      content: wmlong.yaml
+      desc: Write
+    - name: wmlong_
+      content: wmlong_.yaml
+      desc: Write
+    - name: wrbyte
+      content: wrbyte.yaml
+      desc: Write
+    - name: wrfast
+      content: wrfast.yaml
+      desc: New Write
+    - name: wrlong
+      content: wrlong.yaml
+      desc: Write
+    - name: wrlut
+      content: wrlut.yaml
+      desc: Write D to LUT address {#}S/PTRx
+    - name: wrword
+      content: wrword.yaml
+      desc: Write
   directives:
     description: Assembly directives for code organization and data definition
     items:
-    - {name: "alignl", file: "alignl.yaml", desc: "Align to long boundary (4-byte)"}
-    - {name: "alignw", file: "alignw.yaml", desc: "Align to word boundary (2-byte)"}
-    - {name: "org", file: "org.yaml", desc: "Set cog memory origin"}
-    - {name: "orgh", file: "orgh.yaml", desc: "Set hub memory origin"}
-    - {name: "byte", file: "byte.yaml", desc: "Define byte data"}
-    - {name: "word", file: "word.yaml", desc: "Define word data"}
-    - {name: "long", file: "long.yaml", desc: "Define long data"}
-    - {name: "fit", file: "fit.yaml", desc: "Ensure code fits in cog memory"}
-    - {name: "res", file: "res.yaml", desc: "Reserve cog memory space"}
+    - name: alignl
+      content: alignl.yaml
+      desc: Align to long boundary (4-byte)
+    - name: alignw
+      content: alignw.yaml
+      desc: Align to word boundary (2-byte)
+    - name: org
+      content: org.yaml
+      desc: Set cog memory origin
+    - name: orgh
+      content: orgh.yaml
+      desc: Set hub memory origin
+    - name: hubexec
+      content: hubexec.yaml
+      desc: Set hub execution mode for subsequent code
+    - name: cogexec
+      content: cogexec.yaml
+      desc: Predefined constant for COGINIT instruction
+    - name: byte
+      content: byte.yaml
+      desc: Define byte data
+    - name: word
+      content: word.yaml
+      desc: Define word data
+    - name: long
+      content: long.yaml
+      desc: Define long data
+    - name: fit
+      content: fit.yaml
+      desc: Ensure code fits in cog memory
+    - name: res
+      content: res.yaml
+      desc: Reserve cog memory space
   constants:
     description: Predefined numeric constants for PASM2 programming
     items:
-    - {name: "TRUE", file: "true.yaml", desc: "Logical true (-1, $FFFFFFFF)"}
-    - {name: "FALSE", file: "false.yaml", desc: "Logical false (0, $00000000)"}
-    - {name: "POSX", file: "posx.yaml", desc: "Maximum positive integer (2,147,483,647, $7FFFFFFF)"}
-    - {name: "NEGX", file: "negx.yaml", desc: "Maximum negative integer (-2,147,483,648, $80000000)"}
-    - {name: "PI", file: "pi.yaml", desc: "Floating-point PI (~3.141593, $40490FDB)"}
+    - name: 'TRUE'
+      content: true.yaml
+      desc: Logical true (-1, $FFFFFFFF)
+    - name: 'FALSE'
+      content: false.yaml
+      desc: Logical false (0, $00000000)
+    - name: POSX
+      content: posx.yaml
+      desc: Maximum positive integer (2,147,483,647, $7FFFFFFF)
+    - name: NEGX
+      content: negx.yaml
+      desc: Maximum negative integer (-2,147,483,648, $80000000)
+    - name: PI
+      content: pi.yaml
+      desc: Floating-point PI (~3.141593, $40490FDB)
   special_registers:
     description: Special registers for direct I/O pin access (addresses 506-511)
     items:
-    - {name: "special_registers", file: "special-registers.yaml", desc: "DIRA/DIRB/INA/INB/OUTA/OUTB registers"}
+    - name: special_registers
+      content: special-registers.yaml
+      desc: DIRA/DIRB/INA/INB/OUTA/OUTB registers
+  indirection:
+    count: 14
+    items:
+    - name: altb
+      content: altb.yaml
+      desc: Alter subsequent BITxxx instruction
+    - name: altd
+      content: altd.yaml
+      desc: "Alter D \uFB01eld of next instruction"
+    - name: altgb
+      content: altgb.yaml
+      desc: Alter subsequent GETBYTE / ROLBYTE instruction
+    - name: altgn
+      content: altgn.yaml
+      desc: Alter subsequent GETNIB / ROLNIB instruction
+    - name: altgw
+      content: altgw.yaml
+      desc: Alter subsequent GETWORD / ROLWORD instruction
+    - name: alti
+      content: alti.yaml
+      desc: "Substitute next instruction's \uFB01eld values from template, per con\uFB01guration"
+    - name: altr
+      content: altr.yaml
+      desc: Alter Result register address of next instruction
+    - name: alts
+      content: alts.yaml
+      desc: "Alter S \uFB01eld of next instruction"
+    - name: altsb
+      content: altsb.yaml
+      desc: Alter subsequent SETBYTE instruction
+    - name: altsn
+      content: altsn.yaml
+      desc: Alter subsequent SETNIB instruction
+    - name: altsw
+      content: altsw.yaml
+      desc: Alter subsequent SETWORD instruction
+    - name: setd
+      content: setd.yaml
+      desc: "Set template D \uFB01eld for ALTI"
+    - name: setr
+      content: setr.yaml
+      desc: "Set template Result \uFB01eld for ALTI"
+    - name: sets
+      content: sets.yaml
+      desc: "Set template S \uFB01eld for ALTI"
+    description: Indirection operations
 quick_lookup:
   common_instructions:
     ADD: arithmetic
@@ -202,3 +1316,105 @@ quick_lookup:
     WRLONG: memory_hub
     WAITX: timing_events
     REP: control_flow
+
+concepts:
+  description: Core PASM2 concepts and programming patterns
+  base_path: engineering/knowledge-base/P2/language/pasm2/concepts
+  items:
+    - name: "Additional PASM2 Concepts for Complete Coverage"
+      content: additional_concepts_needed.yaml
+      desc: "Gap analysis of missing PASM2 concepts based on manual review"
+    - name: "PASM2 Addressing Modes"
+      content: addressing_modes.yaml
+      desc: "Methods for specifying operands in PASM2 instructions"
+    - name: "Branch Addressing in PASM2"
+      content: branch_addressing.yaml
+      desc: "Branch and jump addressing modes including relative, absolute, and indirect"
+    - name: "COG vs HUB Execution"
+      content: cog_hub_execution.yaml
+      desc: "Differences between cog and hub execution modes"
+    - name: "Conditional Execution"
+      content: conditional_execution.yaml
+      desc: "How to use condition codes for conditional instruction execution"
+    - name: "Event and Interrupt Configuration"
+      content: event_interrupt_config.yaml
+      desc: "Hardware event detection and interrupt handling with 4 levels and 16 events"
+    - name: "P2 Execution Modes - Register, Lookup, and Hub"
+      content: execution_modes.yaml
+      desc: "Three distinct memory spaces with different performance characteristics"
+    - name: "Instruction Skipping - SKIP and SKIPF"
+      content: instruction_skipping.yaml
+      desc: "Hardware-based instruction skipping for efficient conditional execution"
+    - name: "Alignment Check - Manual Categories vs Our Concept Files"
+      content: manual_category_alignment_check.yaml
+      desc: "Verification that concept files align with PASM2 manual organization"
+    - name: "Multi-COG Synchronization and Coordination"
+      content: multi_cog_synchronization.yaml
+      desc: "Hardware and software mechanisms for coordinating multiple COGs"
+    - name: "Register Indirection - ALTx Instructions"
+      content: register_indirection.yaml
+      desc: "Dynamic runtime modification of instruction operands using ALTx prefixes"
+    - name: "REP - Zero-Overhead Hardware Loops"
+      content: rep_instruction.yaml
+      desc: "Hardware-accelerated looping without branch penalties or overhead"
+    - name: "SETQ/SETQ2 Block Operations"
+      content: setq_block_ops.yaml
+      desc: "Hardware-accelerated block memory transfers using SETQ/SETQ2 prefixes"
+    - name: "Special SKIPF Branching Rules"
+      content: skipf_branching.yaml
+      desc: "Advanced SKIPF patterns combining instruction skipping with branching"
+    - name: "PASM2 Special Purpose Registers"
+      content: special_registers.yaml
+      desc: "Hardware registers with dedicated functions and special instructions"
+    - name: "P2 Stack Operations"
+      content: stack_operations.yaml
+      desc: "Hardware and software stacks using PTRA/PTRB and internal call stack"
+    - name: "Streamer and Smart Pin Control"
+      content: streamer_smartpin_control.yaml
+      desc: "Hardware streaming engine and Smart Pin configuration for I/O"
+
+instruction_groups:
+  description: Instruction families that share common behavior patterns
+  base_path: engineering/knowledge-base/P2/language/pasm2/groups
+  items:
+    - name: "Counter Event Jump Instructions"
+      content: counter_event_jumps.yaml
+      desc: "JCT1, JCT2, JCT3, JNCT1, JNCT2, JNCT3 family"
+    - name: "Counter Event Poll Instructions"
+      content: counter_event_polls.yaml
+      desc: "POLLCT1, POLLCT2, POLLCT3 family"
+    - name: "Counter Event Wait Instructions"
+      content: counter_event_waits.yaml
+      desc: "WAITCT1, WAITCT2, WAITCT3 family"
+    - name: "Interrupt Resume Instructions"
+      content: interrupt_resume.yaml
+      desc: "RESI0, RESI1, RESI2, RESI3 family"
+    - name: "Interrupt Return Instructions"
+      content: interrupt_return.yaml
+      desc: "RETI0, RETI1, RETI2, RETI3 family"
+    - name: "Selector Event Jump Instructions"
+      content: selector_event_jumps.yaml
+      desc: "JSE1, JSE2, JSE3, JSE4, JNSE1, JNSE2, JNSE3, JNSE4 family"
+    - name: "Selector Event Wait Instructions"
+      content: selector_event_waits.yaml
+      desc: "WAITSE1, WAITSE2, WAITSE3, WAITSE4 family"
+
+idioms:
+  description: Common PASM2 code patterns and best practices from real code
+  base_path: engineering/knowledge-base/P2/language/pasm2/idioms
+  items:
+    - name: "Conditional Execution Idioms"
+      content: conditional-execution.yaml
+      desc: "PASM2 conditional instruction execution patterns"
+    - name: "Hub Memory Access Idioms"
+      content: hub-memory.yaml
+      desc: "Common patterns for accessing hub memory from PASM2"
+    - name: "Loop Control Idioms"
+      content: loop-control.yaml
+      desc: "Common PASM2 loop patterns (REP, DJNZ, etc.)"
+    - name: "Register Operation Idioms"
+      content: register-operations.yaml
+      desc: "Common PASM2 register manipulation patterns"
+    - name: "Timing Control Idioms"
+      content: timing-control.yaml
+      desc: "PASM2 timing and synchronization patterns"

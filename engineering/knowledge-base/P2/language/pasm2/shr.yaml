@@ -4,16 +4,14 @@ encoding: EEEE 0000010 CZI DDDDDDDDD SSSSSSSSS                            D     
 timing:
   cycles: 1
   type: fixed
-group: Bit Operation / Math Instruction - Shift bits right; a.k.a. divide unsigned 32-bit integer by power-of-two.
-description: "SHR shifts Dest's binary value right by Src places (0\u201331 bits) and sets the new MSBs\
-  \ to 0. This is useful for Result: The bits of Dest are shifted right by Src bits, inserting zeros (0)\
-  \ as new leftmost bits.\n\nSHR shifts Dest's binary value right by Src places (0\u201331 bits) and sets\
-  \ the new MSBs to 0. This is useful for\n\nbit-stream manipulation as well as for swift division; unsigned\
-  \ 32-bit integer division by a power-of-two. For\n\nsimilar division of a signed value, use SAR instead.\n\
-  \nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is updated to the value of the last bit shifted\
-  \ out (effectively C =\n\nresult bit \"-1\") if Src is 1\u201331, or to Dest[0] if Src is 0.\n\nIf the\
-  \ WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the Dest result equals zero, or is\
-  \ cleared (0) if it is\n\nnon-zero."
+description: "SHR shifts Dest's binary value right by Src places (0\u201331 bits) and sets the new MSBs to 0. This is useful\
+  \ for Result: The bits of Dest are shifted right by Src bits, inserting zeros (0) as new leftmost bits.\n\nSHR shifts Dest's\
+  \ binary value right by Src places (0\u201331 bits) and sets the new MSBs to 0. This is useful for\n\nbit-stream manipulation\
+  \ as well as for swift division; unsigned 32-bit integer division by a power-of-two. For\n\nsimilar division of a signed\
+  \ value, use SAR instead.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is updated to the value of the last\
+  \ bit shifted out (effectively C =\n\nresult bit \"-1\") if Src is 1\u201331, or to Dest[0] if Src is 0.\n\nIf the WZ or\
+  \ WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the Dest result equals zero, or is cleared (0) if it is\n\n\
+  non-zero."
 flags_affected:
   C:
     formula: last bit shifted out if S[4:0] > 0, else D[0]
@@ -33,11 +31,10 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Shift right
-category: Bit Operation / Math Instruction - Shift bits right; a.k.a. divide unsigned 32-bit integer by
-  power-of-two.
+category: arithmetic
 result: The bits of Dest are shifted right by Src bits, inserting zeros (0) as new leftmost bits.
 syntax_variants:
 - SHR Dest, {#}Src {WC|WZ|WCZ}
-- "SHR shifts Dest's binary value right by Src places (0\u201331 bits) and sets the new MSBs to 0. This\
-  \ is useful for"
+- "SHR shifts Dest's binary value right by Src places (0\u201331 bits) and sets the new MSBs to 0. This is useful for"
 manual_extraction_date: '2025-01-19'
+oneliner: Shift bits right; a.k.a. divide unsigned 32-bit integer by power-of-two

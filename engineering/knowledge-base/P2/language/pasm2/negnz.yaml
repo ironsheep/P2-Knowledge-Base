@@ -6,23 +6,21 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-group: Math Instruction - Negate value according to !Z.
-description: "NEGNZ negates Src (syntax 1) or Dest (syntax 2) if !Z = 1 and stores the result in the Dest\
-  \ register. If !Z = 0, the Src Result: The Src or Dest value, possibly negated according to !Z, is stored\
-  \ into Dest and optionally the C and Z flags are updated to the resulting sign and zero status.\n\n\
-  NEGNZ negates Src (syntax 1) or Dest (syntax 2) if !Z = 1 and stores the result in the Dest register.\
-  \ If !Z = 0, the Src\n\nor Dest value is left as-is (not negated) and is stored into Dest. If the negation\
-  \ is performed, it \uFB02ips the value's\n\nsign; ex: 193 becomes -193, or -3,062 becomes 3,062.\n\n\
-  If the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if the result is negative, or is\
-  \ cleared (0) if positive.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if\
-  \ the result is zero, or is cleared (0) if it is non-zero."
+description: "NEGNZ negates Src (syntax 1) or Dest (syntax 2) if !Z = 1 and stores the result in the Dest register. If !Z\
+  \ = 0, the Src Result: The Src or Dest value, possibly negated according to !Z, is stored into Dest and optionally the C\
+  \ and Z flags are updated to the resulting sign and zero status.\n\nNEGNZ negates Src (syntax 1) or Dest (syntax 2) if !Z\
+  \ = 1 and stores the result in the Dest register. If !Z = 0, the Src\n\nor Dest value is left as-is (not negated) and is\
+  \ stored into Dest. If the negation is performed, it \uFB02ips the value's\n\nsign; ex: 193 becomes -193, or -3,062 becomes\
+  \ 3,062.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if the result is negative, or is cleared\
+  \ (0) if positive.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the result is zero, or is cleared\
+  \ (0) if it is non-zero."
 flags_affected:
   Z: Result = 0
 parameters:
-- Dest is a register to receive the Src or -Src value (syntax 1), or contains the value to negate (syntax
-  2) according to !C.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value (if !C=0) or negated
-  value (if !C=1) is stored into Dest.
+- Dest is a register to receive the Src or -Src value (syntax 1), or contains the value to negate (syntax 2) according to
+  !C.
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value (if !C=0) or negated value (if !C=1)
+  is stored into Dest.
 - "WC, WZ, or WCZ are optional effects to update \uFB02ags."
 related:
 - NEGZ
@@ -40,12 +38,11 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Negate not Z
-category: Math Instruction - Negate value according to !Z.
-result: "The Src or Dest value, possibly negated according to !Z, is stored into Dest and optionally the\
-  \ C and Z \uFB02ags"
+category: arithmetic
+result: "The Src or Dest value, possibly negated according to !Z, is stored into Dest and optionally the C and Z \uFB02ags"
 syntax_variants:
 - NEGNZ Dest, {#}Src {WC|WZ|WCZ}
 - NEGNZ Dest              {WC|WZ|WCZ}
-- NEGNZ negates Src (syntax 1) or Dest (syntax 2) if !Z = 1 and stores the result in the Dest register.
-  If !Z = 0, the Src
+- NEGNZ negates Src (syntax 1) or Dest (syntax 2) if !Z = 1 and stores the result in the Dest register. If !Z = 0, the Src
 manual_extraction_date: '2025-01-19'
+oneliner: Negate value according to !Z

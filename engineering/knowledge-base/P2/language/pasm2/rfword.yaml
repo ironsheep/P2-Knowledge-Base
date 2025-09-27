@@ -4,9 +4,8 @@ encoding: EEEE 1101011 CZ0 DDDDDDDDD 000010001
 timing:
   cycles: 2
   type: mode_dependent
-group: Hub FIFO - Read
-description: '{WC/WZ/WCZ}   Used after RDFAST. Read zero-extended word from FIFO into
-  D. C = MSB of word. *                                        2 / FIFO IN USE'
+description: '{WC/WZ/WCZ}   Used after RDFAST. Read zero-extended word from FIFO into D. C = MSB of word. *                                        2
+  / FIFO IN USE'
 flags_affected:
   C:
     formula: MSB of word
@@ -23,3 +22,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - RFWORD D
 last_updated: '2025-09-19T16:04:17.274379'
+category: misc_ops
+oneliner: Read

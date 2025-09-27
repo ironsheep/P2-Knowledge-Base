@@ -1,8 +1,7 @@
 instruction: ADD
 syntax: ADD Dest, {#}Src {WC|WZ|WCZ}
 compiler_syntax: ADD D,S/#
-encoding: EEEE 0001000 CZI DDDDDDDDD SSSSSSSSS                    D           carry of (D + S)      Result
-  = 0               2
+encoding: EEEE 0001000 CZI DDDDDDDDD SSSSSSSSS                    D           carry of (D + S)      Result = 0               2
 compiler_encoding:
   bits: 32
   opcode: 32
@@ -12,14 +11,12 @@ compiler_encoding:
 timing:
   cycles: 2
   type: fixed
-group: Math Instruction - Add two unsigned values.
-description: "ADD sums the two unsigned values of Dest and Src together and stores the result into the\
-  \ Dest register. Result: Sum of unsigned Src and unsigned Dest is stored in Dest.\n\nADD sums the two\
-  \ unsigned values of Dest and Src together and stores the result into the Dest register.\n\nIf the WC\
-  \ or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if the summation results in a 32-bit over\uFB02\
-  ow (unsigned\n\ncarry), or is cleared (0) if no over\uFB02ow.\n\nIf the WZ or WCZ effect is speci\uFB01\
-  ed, the Z \uFB02ag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it is\n\nnon-zero.\n\
-  \nTo add unsigned, multi-long values, use ADD followed by ADDX as described in Adding Two Multi-Long\
+description: "ADD sums the two unsigned values of Dest and Src together and stores the result into the Dest register. Result:\
+  \ Sum of unsigned Src and unsigned Dest is stored in Dest.\n\nADD sums the two unsigned values of Dest and Src together\
+  \ and stores the result into the Dest register.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if\
+  \ the summation results in a 32-bit over\uFB02ow (unsigned\n\ncarry), or is cleared (0) if no over\uFB02ow.\n\nIf the WZ\
+  \ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it\
+  \ is\n\nnon-zero.\n\nTo add unsigned, multi-long values, use ADD followed by ADDX as described in Adding Two Multi-Long\
   \ Values.\n\nADD and ADDX are also used in adding signed, multi-long values with ADDSX ending the sequence."
 compiler_category: Arithmetic
 flags_affected:
@@ -60,9 +57,10 @@ compiler_operand_format:
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Add
-category: Math Instruction - Add two unsigned values.
+category: arithmetic
 result: Sum of unsigned Src and unsigned Dest is stored in Dest.
 syntax_variants:
 - ADD Dest, {#}Src {WC|WZ|WCZ}
 - ADD sums the two unsigned values of Dest and Src together and stores the result into the Dest register.
 manual_extraction_date: '2025-01-19'
+oneliner: Add two unsigned values

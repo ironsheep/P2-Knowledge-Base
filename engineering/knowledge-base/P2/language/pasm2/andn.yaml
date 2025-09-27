@@ -4,26 +4,24 @@ encoding: EEEE 0101001 CZI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
-description: 'AND or ANDN performs a bitwise AND of the value in Src (or !Src) into that of Dest. Result:
-  Dest AND Src (or Dest AND !Src) is stored in Dest and flags are optionally updated with parity and zero
-  status.
+description: 'AND or ANDN performs a bitwise AND of the value in Src (or !Src) into that of Dest. Result: Dest AND Src (or
+  Dest AND !Src) is stored in Dest and flags are optionally updated with parity and zero status.
 
 
-  If the WC or WCZ effect is specified, the C flag is set (1) if the result contains an odd number of
-  high (1) bits, or is cleared (0) if it contains an even number of high bits.
+  If the WC or WCZ effect is specified, the C flag is set (1) if the result contains an odd number of high (1) bits, or is
+  cleared (0) if it contains an even number of high bits.
 
 
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest AND Src (or Dest AND !Src) equals
-  zero, or is cleared (0) if it is non-zero.'
+  If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest AND Src (or Dest AND !Src) equals zero, or is cleared
+  (0) if it is non-zero.'
 flags_affected:
   C:
     formula: parity of result
 parameters:
-- Dest is the register containing the value to bitwise AND with Src (or with !Src) and is the destination
-  in which to write the result.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value (or inverse value) will be
-  bitwise ANDed into Dest.
+- Dest is the register containing the value to bitwise AND with Src (or with !Src) and is the destination in which to write
+  the result.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value (or inverse value) will be bitwise ANDed into
+  Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 documentation_source: PASM2 Manual 2022/11/01 Page 49
 documentation_level: comprehensive
@@ -42,4 +40,5 @@ group_documentation: true
 grouped_with:
 - AND
 - ANDN
-category: Bit Operation Instruction - Bitwise AND a value with another, or with the NOT of another.
+category: bit_manipulation
+oneliner: Bitwise AND a value with another, or with the NOT of another

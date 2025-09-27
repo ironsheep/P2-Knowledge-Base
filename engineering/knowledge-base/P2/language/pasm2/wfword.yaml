@@ -4,7 +4,6 @@ encoding: EEEE 1101011 00L DDDDDDDDD 000010110
 timing:
   cycles: 2
   type: mode_dependent
-group: Hub FIFO - Write
 description: Used after WRFAST. Write word in D[15:0] into FIFO.                                                                    2
   / FIFO IN USE
 documentation_source: PASM2 Manual 2022-11-01
@@ -20,3 +19,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - WFWORD {#}D
 last_updated: '2025-09-19T16:04:17.182612'
+category: misc_ops
+oneliner: Write

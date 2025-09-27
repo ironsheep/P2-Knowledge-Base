@@ -15,49 +15,49 @@ description: |
 by_category:
   core_systems:
     processors:
-      - {name: "cog", file: "cog.yaml", desc: "8 symmetric processor cores"}
-      - {name: "cog_attention", file: "cog_attention.yaml", desc: "Inter-COG signaling system"}
-      - {name: "lookup_ram", file: "lookup_ram.yaml", desc: "512-long LUT per COG"}
+      - {name: "cog", content: "cog.yaml", desc: "8 symmetric processor cores"}
+      - {name: "cog_attention", content: "cog_attention.yaml", desc: "Inter-COG signaling system"}
+      - {name: "lookup_ram", content: "lookup_ram.yaml", desc: "512-long LUT per COG"}
     
     memory:
-      - {name: "hub", file: "hub.yaml", desc: "512KB shared hub memory with egg-beater"}
-      - {name: "lookup_ram", file: "lookup_ram.yaml", desc: "2KB LUT RAM per COG"}
+      - {name: "hub", content: "hub.yaml", desc: "512KB shared hub memory with egg-beater"}
+      - {name: "lookup_ram", content: "lookup_ram.yaml", desc: "2KB LUT RAM per COG"}
     
     execution:
-      - {name: "xbyte_engine", file: "xbyte_engine.yaml", desc: "Hardware bytecode interpreter"}
-      - {name: "serial_loader", file: "serial_loader.yaml", desc: "Boot loader and programming"}
+      - {name: "xbyte_engine", content: "xbyte_engine.yaml", desc: "Hardware bytecode interpreter"}
+      - {name: "serial_loader", content: "serial_loader.yaml", desc: "Boot loader and programming"}
   
   math_processing:
     cordic:
-      - {name: "cordic", file: "cordic.yaml", desc: "54-stage pipelined math solver"}
+      - {name: "cordic", content: "cordic.yaml", desc: "54-stage pipelined math solver"}
     
   timing_control:
     clock:
-      - {name: "clock_system", file: "clock_system.yaml", desc: "PLL, crystal, RC oscillators"}
-      - {name: "io_pin_timing", file: "io_pin_timing.yaml", desc: "Pin timing specifications"}
+      - {name: "clock_system", content: "clock_system.yaml", desc: "PLL, crystal, RC oscillators"}
+      - {name: "io_pin_timing", content: "io_pin_timing.yaml", desc: "Pin timing specifications"}
     
   interrupt_system:
     interrupts:
-      - {name: "interrupts", file: "interrupts.yaml", desc: "3-level interrupt system"}
-      - {name: "debug_interrupt", file: "debug_interrupt.yaml", desc: "Debug and breakpoint system"}
-      - {name: "event_system", file: "event_system.yaml", desc: "Hardware event detection"}
+      - {name: "interrupts", content: "interrupts.yaml", desc: "3-level interrupt system"}
+      - {name: "debug_interrupt", content: "debug_interrupt.yaml", desc: "Debug and breakpoint system"}
+      - {name: "event_system", content: "event_system.yaml", desc: "Hardware event detection"}
   
   synchronization:
     coordination:
-      - {name: "locks", file: "locks.yaml", desc: "16 hardware semaphores"}
-      - {name: "cog_attention", file: "cog_attention.yaml", desc: "Lightweight COG signaling"}
-      - {name: "event_system", file: "event_system.yaml", desc: "Event-driven programming"}
+      - {name: "locks", content: "locks.yaml", desc: "16 hardware semaphores"}
+      - {name: "cog_attention", content: "cog_attention.yaml", desc: "Lightweight COG signaling"}
+      - {name: "event_system", content: "event_system.yaml", desc: "Event-driven programming"}
   
   io_subsystem:
     smart_pins:
-      - {name: "smart_pins", file: "smart_pins.yaml", desc: "Overview of 64 smart pins"}
+      - {name: "smart_pins", content: "smart_pins.yaml", desc: "Overview of 64 smart pins"}
       - {name: "smart_pins/*", pattern: "smart-pins/smart-pin-*.yaml", desc: "32 individual modes"}
     
     streaming:
-      - {name: "streamer", file: "streamer.yaml", desc: "DMA streaming engine"}
+      - {name: "streamer", content: "streamer.yaml", desc: "DMA streaming engine"}
     
     timing:
-      - {name: "io_pin_timing", file: "io_pin_timing.yaml", desc: "I/O timing characteristics"}
+      - {name: "io_pin_timing", content: "io_pin_timing.yaml", desc: "I/O timing characteristics"}
 
 by_function:
   computation:

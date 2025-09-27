@@ -1,20 +1,18 @@
 instruction: SETNIB
 syntax: 'SETNIB Dest, {#}Src, #Num'
 encoding:
-- "EEEE 100000N NNI DDDDDDDDD SSSSSSSSS                        D                    \u2014           \
-  \     \u2014                     2"
+- "EEEE 100000N NNI DDDDDDDDD SSSSSSSSS                        D                    \u2014                \u2014         \
+  \            2"
 - EEEE 1000000 00I 000000000 SSSSSSSSS                       D   1
 timing:
   cycles: 2
   type: fixed
-group: Bit Operation Instruction - Set a nibble to new value.
-description: "SETNIB stores Src[3:0] into the nibble identified by Num within Dest, or the nibble and\
-  \ register described by a prior Result: Src[3:0] is written to nibble Num (0\u20137) of Dest, or to\
-  \ another register nibble described by prior ALTSN instruction.\n\nSETNIB stores Src[3:0] into the nibble\
-  \ identi\uFB01ed by Num within Dest, or the nibble and register described by a prior\n\nALTSN instruction.\
-  \ No other bits are modi\uFB01ed.\n\nNum (0\u20137) identi\uFB01es a value's individual nibbles, by\
-  \ position, in least-signi\uFB01cant nibble order.\n\nSyntax 2 is intended for use after an ALTSN instruction;\
-  \ i.e. in a loop to iteratively affect a series of nibble values\n\nwithin contiguous long registers."
+description: "SETNIB stores Src[3:0] into the nibble identified by Num within Dest, or the nibble and register described by\
+  \ a prior Result: Src[3:0] is written to nibble Num (0\u20137) of Dest, or to another register nibble described by prior\
+  \ ALTSN instruction.\n\nSETNIB stores Src[3:0] into the nibble identi\uFB01ed by Num within Dest, or the nibble and register\
+  \ described by a prior\n\nALTSN instruction. No other bits are modi\uFB01ed.\n\nNum (0\u20137) identi\uFB01es a value's\
+  \ individual nibbles, by position, in least-signi\uFB01cant nibble order.\n\nSyntax 2 is intended for use after an ALTSN\
+  \ instruction; i.e. in a loop to iteratively affect a series of nibble values\n\nwithin contiguous long registers."
 parameters:
 - Dest is the register in which to modify a nibble.
 - Src is a register or 4-bit literal whose bits [3:0] will be stored in the designated location.
@@ -41,12 +39,11 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Set nibble
-category: Bit Operation Instruction - Set a nibble to new value.
-result: "Src[3:0] is written to nibble Num (0\u20137) of Dest, or to another register nibble described\
-  \ by prior ALTSN"
+category: bit_manipulation
+result: "Src[3:0] is written to nibble Num (0\u20137) of Dest, or to another register nibble described by prior ALTSN"
 syntax_variants:
 - 'SETNIB Dest, {#}Src, #Num'
 - SETNIB {#}Src
-- "SETNIB stores Src[3:0] into the nibble identi\uFB01ed by Num within Dest, or the nibble and register\
-  \ described by a prior"
+- "SETNIB stores Src[3:0] into the nibble identi\uFB01ed by Num within Dest, or the nibble and register described by a prior"
 manual_extraction_date: '2025-01-19'
+oneliner: Set a nibble to new value

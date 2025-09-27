@@ -5,7 +5,6 @@ timing:
   cycles: 4
   type: variable
   range: 4 / 13...20
-group: Branch S - Resume
 description: Resume from INT3. (CALLD $1F0,$1F1 WCZ).
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: structured
@@ -31,3 +30,5 @@ group_membership:
 specifics:
   interrupt_number: 3
 has_group_documentation: true
+category: control_flow
+oneliner: Resume

@@ -4,23 +4,23 @@ instruction_count: 6
 base_path: engineering/knowledge-base/P2/language/pasm2/
 instructions:
 - name: getxacc
-  file: getxacc.yaml
+  content: getxacc.yaml
   desc: Get the streamer's Goertzel X accumulator into D and the Y accumulator into
     the next instruction'...
 - name: setxfrq
-  file: setxfrq.yaml
+  content: setxfrq.yaml
   desc: Set streamer NCO frequency to D.
 - name: xcont
-  file: xcont.yaml
+  content: xcont.yaml
   desc: Bu er new streamer command to be issued on final NCO rollover of current command,
     continuing phase...
 - name: xinit
-  file: xinit.yaml
+  content: xinit.yaml
   desc: Issue streamer command immediately, zeroing phase.
 - name: xstop
-  file: xstop.yaml
+  content: xstop.yaml
   desc: Stop streamer immediately.
 - name: xzero
-  file: xzero.yaml
+  content: xzero.yaml
   desc: Bu er new streamer command to be issued on final NCO rollover of current command,
     zeroing phase.  ...

@@ -4,9 +4,7 @@ encoding: EEEE 1101011 00L DDDDDDDDD 000101000
 timing:
   cycles: 2
   type: fixed
-group: Miscellaneous
-description: Set Q to D. Use before RDLONG/WRLONG/WMLONG to set block transfer. Also
-  used before MUXQ/COGINIT/QDIV/QFRAC/QROTATE/WAITxxx.
+description: Set Q to D. Use before RDLONG/WRLONG/WMLONG to set block transfer. Also used before MUXQ/COGINIT/QDIV/QFRAC/QROTATE/WAITxxx.
 documentation_source: original
 documentation_level: enhanced
 compiler_operand_format:
@@ -18,3 +16,5 @@ compiler_encoding:
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:16.884693'
+category: misc_ops
+oneliner: Set Q to D

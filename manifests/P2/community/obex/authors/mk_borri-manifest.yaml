@@ -6,7 +6,7 @@ manifest_metadata:
 base_path: engineering/knowledge-base/P2/community/obex/
 path_construction_note: 'TO ACCESS ANY FILE IN THIS MANIFEST:
 
-  Combine: raw_base_url (from root) + base_path (above) + yaml_path (from entries)
+  Combine: raw_base_url (from root) + base_path (above) + content (from entries)
 
 
   Example:
@@ -33,11 +33,11 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2025-05-30 06:33:41'
-  yaml_path: objects/5246.yaml
+  content: objects/5246.yaml
 - object_id: '5278'
   title: QMC5883L HMC5883 BMM150 compass drivers
   category: drivers
   languages:
   - SPIN2
   created_date: '2025-07-24 20:04:32'
-  yaml_path: objects/5278.yaml
+  content: objects/5278.yaml

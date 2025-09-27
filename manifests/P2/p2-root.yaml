@@ -45,12 +45,12 @@ purpose: |
 manifests:
   language:
     description: "P2 programming languages (PASM2, Spin2, fundamentals)"
-    url: "language/language-manifest.yaml"
+    manifest: "language/language-manifest.yaml"
     contains: ["pasm2", "spin2", "fundamentals", "conventions"]
     
   pasm2_instructions:
     description: "PASM2 assembly language instruction reference with idioms"
-    url: "language/pasm2-manifest.yaml"
+    manifest: "language/pasm2-manifest.yaml"
     entry_count: 362  # 357 instructions + 5 idiom categories
     compiler_validated: 359
     compiler_source: "PNUT-TS v2.0 with spinResolver.ts operand fixes"
@@ -59,37 +59,43 @@ manifests:
     
   spin2_language:
     description: "Spin2 high-level language constructs, methods, and idioms"
-    url: "language/spin2-manifest.yaml"
+    manifest: "language/spin2-manifest.yaml"
     entry_count: 141  # 135 language elements + 6 idiom categories
     categories: ["methods", "operators", "constructs", "blocks"]
     idioms: "25 patterns extracted from 730 source files (24,715 occurrences)"
     
   architecture:
     description: "P2 hardware architecture and subsystems"
-    url: "architecture-manifest.yaml"
+    manifest: "architecture-manifest.yaml"
     entry_count: 15
     categories: ["cogs", "memory", "timing", "peripherals"]
     
   smart_pins:
     description: "Smart Pin modes and configurations (32 modes)"
-    url: "smart-pins-manifest.yaml"
+    manifest: "smart-pins-manifest.yaml"
     entry_count: 32
     categories: ["digital_io", "analog", "serial", "timing"]
     
   patterns:
     description: "Code patterns and implementation strategies"
-    url: "patterns-manifest.yaml"
+    manifest: "patterns-manifest.yaml"
     entry_count: 25  # Growing
     categories: ["communication", "timing", "coordination", "optimization"]
     
+  hardware:
+    description: "P2 hardware ecosystem - boards, modules, and accessories"
+    manifest: "hardware-manifest.yaml"
+    entry_count: 30
+    categories: ["evaluation_boards", "p2_modules", "breakout_boards", "accessories"]
+    
   community:
     description: "Community-contributed resources (OBEX, future Quick Bytes)"
-    url: "community/community-manifest.yaml"
+    manifest: "community/community-manifest.yaml"
     contains: ["obex", "quickbytes (planned)"]
     
   community_resources:
     description: "P2 community objects from Parallax OBEX (download-on-demand)"
-    url: "community/obex-manifest.yaml"
+    manifest: "community/obex-manifest.yaml"
     entry_count: 253  # Discovered 2025-09-12
     categories: ["drivers", "sensors", "display", "motors", "communication", "audio", "misc", "demos", "tools"]
     featured_authors: ["Jon McPhalen (jonnymac)", "Chip Gracey", "Kwabena W. Agyeman"]
@@ -119,7 +125,7 @@ manifests:
     
   quick_queries:
     description: "Common questions with direct answers"
-    url: "quick-queries-manifest.yaml"
+    manifest: "quick-queries-manifest.yaml"
     categories: ["how_to", "troubleshooting", "best_practices"]
 
 quick_start:

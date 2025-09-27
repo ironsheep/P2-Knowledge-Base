@@ -1,23 +1,30 @@
 directive: ALIGNW
 name: ALIGNW
-description: |
-  Align to word boundary (2-byte alignment)
+description: 'Align to word boundary (2-byte alignment)
+
   Inserts zero bytes as needed to align the next data or instruction to a word boundary
+
+  '
 category: Assembly Directive
 documentation_level: complete
-syntax: "ALIGNW"
-usage: |
-  Use before data declarations that require word alignment
+syntax: ALIGNW
+usage: 'Use before data declarations that require word alignment
+
   for efficient 16-bit access
+
+  '
 examples:
-  - code: |
-      ALIGNW            ' Align to next word boundary
-      myword   word  0  ' This will start on a word-aligned address
-    description: "Ensure data starts on word boundary"
+- code: 'ALIGNW            '' Align to next word boundary
+
+    myword   word  0  '' This will start on a word-aligned address
+
+    '
+  description: Ensure data starts on word boundary
 notes:
-  - "Inserts 0-1 bytes of padding as needed"
-  - "Important for 16-bit data access efficiency"
+- Inserts 0-1 bytes of padding as needed
+- Important for 16-bit data access efficiency
 related:
-  - ALIGNL
-  - ORG
-  - WORD
+- ALIGNL
+- ORG
+- WORD
+oneliner: Align to word boundary (2-byte alignment)

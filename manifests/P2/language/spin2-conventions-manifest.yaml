@@ -13,7 +13,7 @@ overview: |
 documentation_styles:
   - id: vscode-pnut-documentation-style
     name: VSCode/PNUT_TS Documentation Style
-    file: vscode-pnut-documentation-style.yaml
+    content: vscode-pnut-documentation-style.yaml
     recommended_for:
       - VSCode development environment
       - PNUT_TS compiler users
@@ -23,7 +23,7 @@ documentation_styles:
     
   - id: johnny-mac-documentation-style
     name: Johnny Mac Internal Documentation Style
-    file: johnny-mac-documentation-style.yaml
+    content: johnny-mac-documentation-style.yaml
     recommended_for:
       - Professional P2 development
       - High documentation coverage goals (98%+)
@@ -33,7 +33,7 @@ documentation_styles:
     
   - id: p2-source-file-organization-standard
     name: P2 Source File Organization Standard
-    file: p2-source-file-organization-standard.yaml
+    content: p2-source-file-organization-standard.yaml
     recommended_for:
       - All P2 source files
       - Professional file structure
@@ -122,15 +122,15 @@ file_distribution:
   
   individual_downloads:
     vscode_style:
-      url: "language/spin2/conventions/vscode-pnut-documentation-style.yaml"
+      content: "language/spin2/conventions/vscode-pnut-documentation-style.yaml"
       size: "~8KB"
       
     johnny_mac_style:
-      url: "language/spin2/conventions/johnny-mac-documentation-style.yaml"
+      content: "language/spin2/conventions/johnny-mac-documentation-style.yaml"
       size: "~12KB"
       
     organization_standard:
-      url: "language/spin2/conventions/p2-source-file-organization-standard.yaml"
+      content: "language/spin2/conventions/p2-source-file-organization-standard.yaml"
       size: "~10KB"
       
 

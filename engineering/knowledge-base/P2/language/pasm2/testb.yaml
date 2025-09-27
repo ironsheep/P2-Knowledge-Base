@@ -4,7 +4,6 @@ encoding: EEEE 0100110 CZI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
 description: WC/WZ   Test bit S[4:0] of D, write to C/Z. C/Z = D[S[4:0]].
 flags_affected:
   Z:
@@ -22,3 +21,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - TESTB D,{#}S
 last_updated: '2025-09-19T16:04:17.344434'
+category: arithmetic
+oneliner: WC/WZ Test bit S[4:0] of D, write to C/Z

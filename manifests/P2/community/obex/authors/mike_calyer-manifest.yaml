@@ -6,7 +6,7 @@ manifest_metadata:
 base_path: engineering/knowledge-base/P2/community/obex/
 path_construction_note: 'TO ACCESS ANY FILE IN THIS MANIFEST:
 
-  Combine: raw_base_url (from root) + base_path (above) + yaml_path (from entries)
+  Combine: raw_base_url (from root) + base_path (above) + content (from entries)
 
 
   Example:
@@ -31,11 +31,11 @@ objects:
   languages:
   - SPIN2
   created_date: '2023-11-16 19:47:20'
-  yaml_path: objects/2815.yaml
+  content: objects/2815.yaml
 - object_id: '2836'
   title: Cricket ESP32 AT
   category: drivers
   languages:
   - SPIN2
   created_date: '2021-06-20 12:00:00'
-  yaml_path: objects/2836.yaml
+  content: objects/2836.yaml

@@ -1,20 +1,18 @@
 instruction: SETBYTE
 syntax: 'SETBYTE Dest, {#}Src, #Num'
 encoding:
-- "EEEE 1000110 NNI DDDDDDDDD SSSSSSSSS                      D                 \u2014               \u2014\
-  \                     2"
+- "EEEE 1000110 NNI DDDDDDDDD SSSSSSSSS                      D                 \u2014               \u2014               \
+  \      2"
 - EEEE 1000110 00I 000000000 SSSSSSSSS                      D1
 timing:
   cycles: 2
   type: fixed
-group: Bit Operation Instruction - Set a byte to new value.
-description: "SETBYTE stores Src[7:0] into the byte identified by Num within Dest, or the byte and register\
-  \ described by a prior Result: Src[7:0] is written to byte Num (0\u20133) of Dest, or to another register\
-  \ byte described by prior ALTSB instruction.\n\nSETBYTE stores Src[7:0] into the byte identi\uFB01ed\
-  \ by Num within Dest, or the byte and register described by a prior\n\nALTSB instruction. No other bits\
-  \ are modi\uFB01ed.\n\nNum (0\u20133) identi\uFB01es a value's individual bytes, by position, in least-signi\uFB01\
-  cant byte order.\n\nSyntax 2 is intended for use after an ALTSB instruction; i.e. in a loop to iteratively\
-  \ affect a series of byte values\n\nwithin contiguous long registers."
+description: "SETBYTE stores Src[7:0] into the byte identified by Num within Dest, or the byte and register described by a\
+  \ prior Result: Src[7:0] is written to byte Num (0\u20133) of Dest, or to another register byte described by prior ALTSB\
+  \ instruction.\n\nSETBYTE stores Src[7:0] into the byte identi\uFB01ed by Num within Dest, or the byte and register described\
+  \ by a prior\n\nALTSB instruction. No other bits are modi\uFB01ed.\n\nNum (0\u20133) identi\uFB01es a value's individual\
+  \ bytes, by position, in least-signi\uFB01cant byte order.\n\nSyntax 2 is intended for use after an ALTSB instruction; i.e.\
+  \ in a loop to iteratively affect a series of byte values\n\nwithin contiguous long registers."
 flags_affected:
   C:
     when: D
@@ -44,12 +42,11 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Set byte
-category: Bit Operation Instruction - Set a byte to new value.
-result: "Src[7:0] is written to byte Num (0\u20133) of Dest, or to another register byte described by\
-  \ prior ALTSB"
+category: bit_manipulation
+result: "Src[7:0] is written to byte Num (0\u20133) of Dest, or to another register byte described by prior ALTSB"
 syntax_variants:
 - 'SETBYTE Dest, {#}Src, #Num'
 - SETBYTE {#}Src
-- "SETBYTE stores Src[7:0] into the byte identi\uFB01ed by Num within Dest, or the byte and register described\
-  \ by a prior"
+- "SETBYTE stores Src[7:0] into the byte identi\uFB01ed by Num within Dest, or the byte and register described by a prior"
 manual_extraction_date: '2025-01-19'
+oneliner: Set a byte to new value

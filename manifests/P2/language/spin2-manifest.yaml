@@ -25,17 +25,17 @@ description: |
 by_category:
   constructs:
     control_flow:
-      - {name: "repeat", file: "constructs/repeat.yaml", desc: "Loop constructs"}
-      - {name: "if_elseif_else", file: "constructs/if_elseif_else.yaml", desc: "Conditional execution"}
-      - {name: "case", file: "constructs/case.yaml", desc: "Multi-way branching"}
-      - {name: "abort", file: "constructs/abort.yaml", desc: "Exception handling"}
-      - {name: "quit", file: "constructs/quit.yaml", desc: "Loop exit"}
-      - {name: "next", file: "constructs/next.yaml", desc: "Loop continue"}
+      - {name: "repeat", content: "constructs/repeat.yaml", desc: "Loop constructs"}
+      - {name: "if_elseif_else", content: "constructs/if_elseif_else.yaml", desc: "Conditional execution"}
+      - {name: "case", content: "constructs/case.yaml", desc: "Multi-way branching"}
+      - {name: "abort", content: "constructs/abort.yaml", desc: "Exception handling"}
+      - {name: "quit", content: "constructs/quit.yaml", desc: "Loop exit"}
+      - {name: "next", content: "constructs/next.yaml", desc: "Loop continue"}
     
     program_structure:
-      - {name: "method_definition", file: "constructs/method_definition.yaml", desc: "PUB/PRI methods"}
-      - {name: "blocks", file: "constructs/blocks.yaml", desc: "CON/VAR/OBJ/DAT blocks"}
-      - {name: "inline_pasm", file: "constructs/inline_pasm.yaml", desc: "Embedded assembly"}
+      - {name: "method_definition", content: "constructs/method_definition.yaml", desc: "PUB/PRI methods"}
+      - {name: "blocks", content: "constructs/blocks.yaml", desc: "CON/VAR/OBJ/DAT blocks"}
+      - {name: "inline_pasm", content: "constructs/inline_pasm.yaml", desc: "Embedded assembly"}
   
   debug_formatters:
     description: |
@@ -50,14 +50,14 @@ by_category:
       DEBUG("Temperature: ", SDEC_(temp), "°C")
     
     entry_point:
-      - {name: "formatters_overview", file: "debug-commands/debug-formatters-overview.yaml", desc: "START HERE - Answers 'Why does SDEC_() exist?' and common new user questions"}
+      - {name: "formatters_overview", content: "debug-commands/debug-formatters-overview.yaml", desc: "START HERE - Answers 'Why does SDEC_() exist?' and common new user questions"}
     
     grouped_references:
-      - {name: "complete_reference", file: "debug-commands/debug-formatters-complete.yaml", desc: "All formatters in single comprehensive file"}
-      - {name: "decimal_formatters", file: "debug-commands/debug-formatters-decimal.yaml", desc: "UDEC/SDEC and all size variants with underscore"}
-      - {name: "hexadecimal_formatters", file: "debug-commands/debug-formatters-hexadecimal.yaml", desc: "UHEX/SHEX and all size variants with underscore"}
-      - {name: "binary_formatters", file: "debug-commands/debug-formatters-binary.yaml", desc: "UBIN/SBIN and all size variants with underscore"}
-      - {name: "array_formatters", file: "debug-commands/debug-formatters-arrays.yaml", desc: "All array formatters for registers and hub memory"}
+      - {name: "complete_reference", content: "debug-commands/debug-formatters-complete.yaml", desc: "All formatters in single comprehensive file"}
+      - {name: "decimal_formatters", content: "debug-commands/debug-formatters-decimal.yaml", desc: "UDEC/SDEC and all size variants with underscore"}
+      - {name: "hexadecimal_formatters", content: "debug-commands/debug-formatters-hexadecimal.yaml", desc: "UHEX/SHEX and all size variants with underscore"}
+      - {name: "binary_formatters", content: "debug-commands/debug-formatters-binary.yaml", desc: "UBIN/SBIN and all size variants with underscore"}
+      - {name: "array_formatters", content: "debug-commands/debug-formatters-arrays.yaml", desc: "All array formatters for registers and hub memory"}
     
     individual_files_note: |
       Individual formatter files also exist for backwards compatibility:
@@ -69,233 +69,233 @@ by_category:
   debug_commands:
     description: Debug control and input commands for DEBUG() statement
     manifest:
-      - {name: "debug", file: "debug-commands/debug.yaml", desc: "Main DEBUG() statement documentation"}
-      - {name: "debug_guide", file: "debug-commands/debug-new-user-guide.yaml", desc: "Getting started with debug features"}
-      - {name: "dly", file: "debug-commands/dly.yaml", desc: "DLY - delay in milliseconds"}
-      - {name: "pc_key", file: "debug-commands/pc_key.yaml", desc: "PC_KEY - keyboard input"}
-      - {name: "pc_mouse", file: "debug-commands/pc_mouse.yaml", desc: "PC_MOUSE - mouse state"}
+      - {name: "debug", content: "debug-commands/debug.yaml", desc: "Main DEBUG() statement documentation"}
+      - {name: "debug_guide", content: "debug-commands/debug-new-user-guide.yaml", desc: "Getting started with debug features"}
+      - {name: "dly", content: "debug-commands/dly.yaml", desc: "DLY - delay in milliseconds"}
+      - {name: "pc_key", content: "debug-commands/pc_key.yaml", desc: "PC_KEY - keyboard input"}
+      - {name: "pc_mouse", content: "debug-commands/pc_mouse.yaml", desc: "PC_MOUSE - mouse state"}
   
   methods:
     pin_control:
-      - {name: "pinhigh", file: "methods/pinhigh.yaml", desc: "Set pin high"}
-      - {name: "pinlow", file: "methods/pinlow.yaml", desc: "Set pin low"}
-      - {name: "pintoggle", file: "methods/pintoggle.yaml", desc: "Toggle pin state"}
-      - {name: "pinread", file: "methods/pinread.yaml", desc: "Read pin state"}
-      - {name: "pinwrite", file: "methods/pinwrite.yaml", desc: "Write pin state"}
-      - {name: "pinfloat", file: "methods/pinfloat.yaml", desc: "Float pin"}
+      - {name: "pinhigh", content: "methods/pinhigh.yaml", desc: "Set pin high"}
+      - {name: "pinlow", content: "methods/pinlow.yaml", desc: "Set pin low"}
+      - {name: "pintoggle", content: "methods/pintoggle.yaml", desc: "Toggle pin state"}
+      - {name: "pinread", content: "methods/pinread.yaml", desc: "Read pin state"}
+      - {name: "pinwrite", content: "methods/pinwrite.yaml", desc: "Write pin state"}
+      - {name: "pinfloat", content: "methods/pinfloat.yaml", desc: "Float pin"}
     
     timing:
-      - {name: "waitms", file: "methods/waitms.yaml", desc: "Wait milliseconds"}
-      - {name: "waitus", file: "methods/waitus.yaml", desc: "Wait microseconds"}
-      - {name: "waitct", file: "methods/waitct.yaml", desc: "Wait for counter"}
-      - {name: "getct", file: "methods/getct.yaml", desc: "Get system counter"}
-      - {name: "getms", file: "methods/getms.yaml", desc: "Get milliseconds"}
-      - {name: "getsec", file: "methods/getsec.yaml", desc: "Get seconds"}
+      - {name: "waitms", content: "methods/waitms.yaml", desc: "Wait milliseconds"}
+      - {name: "waitus", content: "methods/waitus.yaml", desc: "Wait microseconds"}
+      - {name: "waitct", content: "methods/waitct.yaml", desc: "Wait for counter"}
+      - {name: "getct", content: "methods/getct.yaml", desc: "Get system counter"}
+      - {name: "getms", content: "methods/getms.yaml", desc: "Get milliseconds"}
+      - {name: "getsec", content: "methods/getsec.yaml", desc: "Get seconds"}
     
     cog_control:
-      - {name: "coginit", file: "methods/coginit.yaml", desc: "Start COG"}
-      - {name: "cogstop", file: "methods/cogstop.yaml", desc: "Stop COG"}
-      - {name: "cogspin", file: "methods/cogspin.yaml", desc: "Start Spin2 in COG"}
-      - {name: "cogchk", file: "methods/cogchk.yaml", desc: "Check COG status"}
-      - {name: "cogid", file: "methods/cogid.yaml", desc: "Get current COG ID"}
-      - {name: "cogatn", file: "methods/cogatn.yaml", desc: "Signal attention"}
+      - {name: "coginit", content: "methods/coginit.yaml", desc: "Start COG"}
+      - {name: "cogstop", content: "methods/cogstop.yaml", desc: "Stop COG"}
+      - {name: "cogspin", content: "methods/cogspin.yaml", desc: "Start Spin2 in COG"}
+      - {name: "cogchk", content: "methods/cogchk.yaml", desc: "Check COG status"}
+      - {name: "cogid", content: "methods/cogid.yaml", desc: "Get current COG ID"}
+      - {name: "cogatn", content: "methods/cogatn.yaml", desc: "Signal attention"}
     
     memory:
-      - {name: "bytemove", file: "methods/bytemove.yaml", desc: "Copy bytes"}
-      - {name: "wordmove", file: "methods/wordmove.yaml", desc: "Copy words"}
-      - {name: "longmove", file: "methods/longmove.yaml", desc: "Copy longs"}
-      - {name: "bytefill", file: "methods/bytefill.yaml", desc: "Fill bytes"}
-      - {name: "wordfill", file: "methods/wordfill.yaml", desc: "Fill words"}
-      - {name: "longfill", file: "methods/longfill.yaml", desc: "Fill longs"}
-      - {name: "byte", file: "methods/byte.yaml", desc: "Byte data/access"}
-      - {name: "word", file: "methods/word.yaml", desc: "Word data/access"}
-      - {name: "long", file: "methods/long.yaml", desc: "Long data/access"}
-      - {name: "bytecomp", file: "methods/bytecomp.yaml", desc: "Compare bytes"}
-      - {name: "wordcomp", file: "methods/wordcomp.yaml", desc: "Compare words"}  
-      - {name: "longcomp", file: "methods/longcomp.yaml", desc: "Compare longs"}
-      - {name: "byteswap", file: "methods/byteswap.yaml", desc: "Swap bytes"}
-      - {name: "wordswap", file: "methods/wordswap.yaml", desc: "Swap words"}
-      - {name: "longswap", file: "methods/longswap.yaml", desc: "Swap longs"}
+      - {name: "bytemove", content: "methods/bytemove.yaml", desc: "Copy bytes"}
+      - {name: "wordmove", content: "methods/wordmove.yaml", desc: "Copy words"}
+      - {name: "longmove", content: "methods/longmove.yaml", desc: "Copy longs"}
+      - {name: "bytefill", content: "methods/bytefill.yaml", desc: "Fill bytes"}
+      - {name: "wordfill", content: "methods/wordfill.yaml", desc: "Fill words"}
+      - {name: "longfill", content: "methods/longfill.yaml", desc: "Fill longs"}
+      - {name: "byte", content: "methods/byte.yaml", desc: "Byte data/access"}
+      - {name: "word", content: "methods/word.yaml", desc: "Word data/access"}
+      - {name: "long", content: "methods/long.yaml", desc: "Long data/access"}
+      - {name: "bytecomp", content: "methods/bytecomp.yaml", desc: "Compare bytes"}
+      - {name: "wordcomp", content: "methods/wordcomp.yaml", desc: "Compare words"}  
+      - {name: "longcomp", content: "methods/longcomp.yaml", desc: "Compare longs"}
+      - {name: "byteswap", content: "methods/byteswap.yaml", desc: "Swap bytes"}
+      - {name: "wordswap", content: "methods/wordswap.yaml", desc: "Swap words"}
+      - {name: "longswap", content: "methods/longswap.yaml", desc: "Swap longs"}
     
     math:
-      - {name: "abs", file: "methods/abs.yaml", desc: "Absolute value"}
-      - {name: "sqrt", file: "methods/sqrt.yaml", desc: "Square root"}
-      - {name: "rotxy", file: "methods/rotxy.yaml", desc: "Rotate coordinates"}
-      - {name: "polxy", file: "methods/polxy.yaml", desc: "Polar to rectangular"}
-      - {name: "xypol", file: "methods/xypol.yaml", desc: "Rectangular to polar"}
-      - {name: "muldiv64", file: "methods/muldiv64.yaml", desc: "64-bit multiply/divide"}
-      - {name: "getrnd", file: "methods/getrnd.yaml", desc: "Get random number"}
-      - {name: "nan", file: "methods/nan.yaml", desc: "Not-a-number constant"}
-      - {name: "qcos", file: "methods/qcos.yaml", desc: "CORDIC cosine"}
-      - {name: "qsin", file: "methods/qsin.yaml", desc: "CORDIC sine"}
-      - {name: "qexp", file: "methods/qexp.yaml", desc: "CORDIC exponential"}
-      - {name: "qlog", file: "methods/qlog.yaml", desc: "CORDIC logarithm"}
+      - {name: "abs", content: "methods/abs.yaml", desc: "Absolute value"}
+      - {name: "sqrt", content: "methods/sqrt.yaml", desc: "Square root"}
+      - {name: "rotxy", content: "methods/rotxy.yaml", desc: "Rotate coordinates"}
+      - {name: "polxy", content: "methods/polxy.yaml", desc: "Polar to rectangular"}
+      - {name: "xypol", content: "methods/xypol.yaml", desc: "Rectangular to polar"}
+      - {name: "muldiv64", content: "methods/muldiv64.yaml", desc: "64-bit multiply/divide"}
+      - {name: "getrnd", content: "methods/getrnd.yaml", desc: "Get random number"}
+      - {name: "nan", content: "methods/nan.yaml", desc: "Not-a-number constant"}
+      - {name: "qcos", content: "methods/qcos.yaml", desc: "CORDIC cosine"}
+      - {name: "qsin", content: "methods/qsin.yaml", desc: "CORDIC sine"}
+      - {name: "qexp", content: "methods/qexp.yaml", desc: "CORDIC exponential"}
+      - {name: "qlog", content: "methods/qlog.yaml", desc: "CORDIC logarithm"}
     
     strings:
-      - {name: "strsize", file: "methods/strsize.yaml", desc: "String length"}
-      - {name: "strcomp", file: "methods/strcomp.yaml", desc: "String compare"}
-      - {name: "strcopy", file: "methods/strcopy.yaml", desc: "String copy"}
-      - {name: "string", file: "methods/string.yaml", desc: "String constant"}
-      - {name: "lstring", file: "methods/lstring.yaml", desc: "Counted string"}
+      - {name: "strsize", content: "methods/strsize.yaml", desc: "String length"}
+      - {name: "strcomp", content: "methods/strcomp.yaml", desc: "String compare"}
+      - {name: "strcopy", content: "methods/strcopy.yaml", desc: "String copy"}
+      - {name: "string", content: "methods/string.yaml", desc: "String constant"}
+      - {name: "lstring", content: "methods/lstring.yaml", desc: "Counted string"}
     
     smart_pins:
-      - {name: "wrpin", file: "methods/wrpin.yaml", desc: "Configure smart pin"}
-      - {name: "wxpin", file: "methods/wxpin.yaml", desc: "Write X parameter"}
-      - {name: "wypin", file: "methods/wypin.yaml", desc: "Write Y parameter"}
-      - {name: "rdpin", file: "methods/rdpin.yaml", desc: "Read pin result"}
-      - {name: "akpin", file: "methods/akpin.yaml", desc: "Acknowledge pin"}
-      - {name: "rqpin", file: "methods/rqpin.yaml", desc: "Read pin quietly"}
-      - {name: "pinstart", file: "methods/pinstart.yaml", desc: "Start smart pin"}
-      - {name: "pinclear", file: "methods/pinclear.yaml", desc: "Clear smart pin"}
+      - {name: "wrpin", content: "methods/wrpin.yaml", desc: "Configure smart pin"}
+      - {name: "wxpin", content: "methods/wxpin.yaml", desc: "Write X parameter"}
+      - {name: "wypin", content: "methods/wypin.yaml", desc: "Write Y parameter"}
+      - {name: "rdpin", content: "methods/rdpin.yaml", desc: "Read pin result"}
+      - {name: "akpin", content: "methods/akpin.yaml", desc: "Acknowledge pin"}
+      - {name: "rqpin", content: "methods/rqpin.yaml", desc: "Read pin quietly"}
+      - {name: "pinstart", content: "methods/pinstart.yaml", desc: "Start smart pin"}
+      - {name: "pinclear", content: "methods/pinclear.yaml", desc: "Clear smart pin"}
     
     locks:
-      - {name: "locknew", file: "methods/locknew.yaml", desc: "Allocate new lock"}
-      - {name: "lockret", file: "methods/lockret.yaml", desc: "Return lock"}
-      - {name: "locktry", file: "methods/locktry.yaml", desc: "Try to acquire lock"}
-      - {name: "lockrel", file: "methods/lockrel.yaml", desc: "Release lock"}
-      - {name: "lockchk", file: "methods/lockchk.yaml", desc: "Check lock state"}
+      - {name: "locknew", content: "methods/locknew.yaml", desc: "Allocate new lock"}
+      - {name: "lockret", content: "methods/lockret.yaml", desc: "Return lock"}
+      - {name: "locktry", content: "methods/locktry.yaml", desc: "Try to acquire lock"}
+      - {name: "lockrel", content: "methods/lockrel.yaml", desc: "Release lock"}
+      - {name: "lockchk", content: "methods/lockchk.yaml", desc: "Check lock state"}
     
     tasks:
-      - {name: "taskspin", file: "methods/taskspin.yaml", desc: "Start task in cog"}
-      - {name: "taskstop", file: "methods/taskstop.yaml", desc: "Stop task"}
-      - {name: "taskid", file: "methods/taskid.yaml", desc: "Get task ID"}
-      - {name: "taskchk", file: "methods/taskchk.yaml", desc: "Check task state"}
-      - {name: "taskhalt", file: "methods/taskhalt.yaml", desc: "Halt task"}
-      - {name: "taskresume", file: "methods/taskresume.yaml", desc: "Resume task"}
-      - {name: "taskwait", file: "methods/taskwait.yaml", desc: "Wait for task"}
-      - {name: "tasknext", file: "methods/tasknext.yaml", desc: "Get next task"}
+      - {name: "taskspin", content: "methods/taskspin.yaml", desc: "Start task in cog"}
+      - {name: "taskstop", content: "methods/taskstop.yaml", desc: "Stop task"}
+      - {name: "taskid", content: "methods/taskid.yaml", desc: "Get task ID"}
+      - {name: "taskchk", content: "methods/taskchk.yaml", desc: "Check task state"}
+      - {name: "taskhalt", content: "methods/taskhalt.yaml", desc: "Halt task"}
+      - {name: "taskresume", content: "methods/taskresume.yaml", desc: "Resume task"}
+      - {name: "taskwait", content: "methods/taskwait.yaml", desc: "Wait for task"}
+      - {name: "tasknext", content: "methods/tasknext.yaml", desc: "Get next task"}
     
     lookup:
-      - {name: "lookup", file: "methods/lookup.yaml", desc: "Lookup value by index"}
-      - {name: "lookupz", file: "methods/lookupz.yaml", desc: "Lookup with zero-based index"}
-      - {name: "lookdown", file: "methods/lookdown.yaml", desc: "Find index of value"}
-      - {name: "lookdownz", file: "methods/lookdownz.yaml", desc: "Find index zero-based"}
+      - {name: "lookup", content: "methods/lookup.yaml", desc: "Lookup value by index"}
+      - {name: "lookupz", content: "methods/lookupz.yaml", desc: "Lookup with zero-based index"}
+      - {name: "lookdown", content: "methods/lookdown.yaml", desc: "Find index of value"}
+      - {name: "lookdownz", content: "methods/lookdownz.yaml", desc: "Find index zero-based"}
     
     system:
-      - {name: "clkset", file: "methods/clkset.yaml", desc: "Set system clock"}
-      - {name: "hubset", file: "methods/hubset.yaml", desc: "Set hub parameters"}
-      - {name: "call", file: "methods/call.yaml", desc: "Call method by pointer"}
-      - {name: "send", file: "methods/send.yaml", desc: "Send data"}
-      - {name: "recv", file: "methods/recv.yaml", desc: "Receive data"}
-      - {name: "getcrc", file: "methods/getcrc.yaml", desc: "Calculate CRC"}
-      - {name: "sizeof", file: "methods/sizeof.yaml", desc: "Get size of variable"}
-      - {name: "getregs", file: "methods/getregs.yaml", desc: "Get register values"}
-      - {name: "setregs", file: "methods/setregs.yaml", desc: "Set register values"}
-      - {name: "regexec", file: "methods/regexec.yaml", desc: "Execute register code"}
-      - {name: "regload", file: "methods/regload.yaml", desc: "Load registers"}
-      - {name: "pollatn", file: "methods/pollatn.yaml", desc: "Poll attention flag"}
-      - {name: "pollct", file: "methods/pollct.yaml", desc: "Poll counter"}
-      - {name: "waitatn", file: "methods/waitatn.yaml", desc: "Wait for attention"}
+      - {name: "clkset", content: "methods/clkset.yaml", desc: "Set system clock"}
+      - {name: "hubset", content: "methods/hubset.yaml", desc: "Set hub parameters"}
+      - {name: "call", content: "methods/call.yaml", desc: "Call method by pointer"}
+      - {name: "send", content: "methods/send.yaml", desc: "Send data"}
+      - {name: "recv", content: "methods/recv.yaml", desc: "Receive data"}
+      - {name: "getcrc", content: "methods/getcrc.yaml", desc: "Calculate CRC"}
+      - {name: "sizeof", content: "methods/sizeof.yaml", desc: "Get size of variable"}
+      - {name: "getregs", content: "methods/getregs.yaml", desc: "Get register values"}
+      - {name: "setregs", content: "methods/setregs.yaml", desc: "Set register values"}
+      - {name: "regexec", content: "methods/regexec.yaml", desc: "Execute register code"}
+      - {name: "regload", content: "methods/regload.yaml", desc: "Load registers"}
+      - {name: "pollatn", content: "methods/pollatn.yaml", desc: "Poll attention flag"}
+      - {name: "pollct", content: "methods/pollct.yaml", desc: "Poll counter"}
+      - {name: "waitatn", content: "methods/waitatn.yaml", desc: "Wait for attention"}
   
   idioms:
     description: "Common micro-patterns extracted from 730 source files"
     memory_operations:
-      - {name: "address_of", file: "idioms/memory-access.yaml", desc: "@ operator (16,845 occurrences)"}
-      - {name: "memory_access", file: "idioms/memory-access.yaml", desc: "Array access patterns"}
+      - {name: "address_of", content: "idioms/memory-access.yaml", desc: "@ operator (16,845 occurrences)"}
+      - {name: "memory_access", content: "idioms/memory-access.yaml", desc: "Array access patterns"}
     
     loop_patterns:
-      - {name: "loop_idioms", file: "idioms/loop-patterns.yaml", desc: "Common loop constructs (3,149 occurrences)"}
+      - {name: "loop_idioms", content: "idioms/loop-patterns.yaml", desc: "Common loop constructs (3,149 occurrences)"}
     
     pin_control_patterns:
-      - {name: "pin_operations", file: "idioms/pin-operations.yaml", desc: "Pin manipulation patterns"}
+      - {name: "pin_operations", content: "idioms/pin-operations.yaml", desc: "Pin manipulation patterns"}
     
     timing_patterns:
-      - {name: "timing_delays", file: "idioms/timing-delays.yaml", desc: "Common delay patterns"}
+      - {name: "timing_delays", content: "idioms/timing-delays.yaml", desc: "Common delay patterns"}
     
     cog_management_patterns:
-      - {name: "cog_operations", file: "idioms/cog-operations.yaml", desc: "Cog control patterns (1,445 occurrences)"}
+      - {name: "cog_operations", content: "idioms/cog-operations.yaml", desc: "Cog control patterns (1,445 occurrences)"}
     
     bit_manipulation_patterns:
-      - {name: "bit_operations", file: "idioms/bit-manipulation.yaml", desc: "Bit-level operations (988 occurrences)"}
+      - {name: "bit_operations", content: "idioms/bit-manipulation.yaml", desc: "Bit-level operations (988 occurrences)"}
   
   operators:
     arithmetic:
-      - {name: "add", file: "operators/op_add.yaml", desc: "Addition (+)"}
-      - {name: "subtract", file: "operators/op_sub.yaml", desc: "Subtraction (-)"}
-      - {name: "multiply", file: "operators/op_mul.yaml", desc: "Multiplication (*)"}
-      - {name: "divide", file: "operators/op_div.yaml", desc: "Division (/)"}
-      - {name: "modulo", file: "operators/op_divdiv.yaml", desc: "Modulo (//)"}
-      - {name: "modulo_add", file: "operators/modulo_add.yaml", desc: "Modulo add"}
-      - {name: "inc", file: "operators/op_inc.yaml", desc: "Increment (++)"}
-      - {name: "dec", file: "operators/op_dec.yaml", desc: "Decrement (--)"}
-      - {name: "abs", file: "operators/op_ABS.yaml", desc: "Absolute value"}
-      - {name: "sqrt", file: "operators/op_SQRT.yaml", desc: "Square root"}
-      - {name: "fsqrt", file: "operators/op_FSQRT.yaml", desc: "Float square root"}
-      - {name: "fabs", file: "operators/op_FABS.yaml", desc: "Float absolute"}
-      - {name: "frac", file: "operators/op_FRAC.yaml", desc: "Fractional part"}
-      - {name: "min", file: "operators/op_min.yaml", desc: "Minimum"}
-      - {name: "max", file: "operators/op_max.yaml", desc: "Maximum"}
-      - {name: "rand", file: "operators/op_rand.yaml", desc: "Random"}
-      - {name: "qexp", file: "operators/op_QEXP.yaml", desc: "Quick exponential"}
-      - {name: "qlog", file: "operators/op_QLOG.yaml", desc: "Quick logarithm"}
+      - {name: "add", content: "operators/op_add.yaml", desc: "Addition (+)"}
+      - {name: "subtract", content: "operators/op_sub.yaml", desc: "Subtraction (-)"}
+      - {name: "multiply", content: "operators/op_mul.yaml", desc: "Multiplication (*)"}
+      - {name: "divide", content: "operators/op_div.yaml", desc: "Division (/)"}
+      - {name: "modulo", content: "operators/op_divdiv.yaml", desc: "Modulo (//)"}
+      - {name: "modulo_add", content: "operators/modulo_add.yaml", desc: "Modulo add"}
+      - {name: "inc", content: "operators/op_inc.yaml", desc: "Increment (++)"}
+      - {name: "dec", content: "operators/op_dec.yaml", desc: "Decrement (--)"}
+      - {name: "abs", content: "operators/op_ABS.yaml", desc: "Absolute value"}
+      - {name: "sqrt", content: "operators/op_SQRT.yaml", desc: "Square root"}
+      - {name: "fsqrt", content: "operators/op_FSQRT.yaml", desc: "Float square root"}
+      - {name: "fabs", content: "operators/op_FABS.yaml", desc: "Float absolute"}
+      - {name: "frac", content: "operators/op_FRAC.yaml", desc: "Fractional part"}
+      - {name: "min", content: "operators/op_min.yaml", desc: "Minimum"}
+      - {name: "max", content: "operators/op_max.yaml", desc: "Maximum"}
+      - {name: "rand", content: "operators/op_rand.yaml", desc: "Random"}
+      - {name: "qexp", content: "operators/op_QEXP.yaml", desc: "Quick exponential"}
+      - {name: "qlog", content: "operators/op_QLOG.yaml", desc: "Quick logarithm"}
     
     bitwise:
-      - {name: "and", file: "operators/op_and.yaml", desc: "Bitwise AND (&)"}
-      - {name: "or", file: "operators/op_or.yaml", desc: "Bitwise OR (|)"}
-      - {name: "xor", file: "operators/op_xor.yaml", desc: "Bitwise XOR (^)"}
-      - {name: "not", file: "operators/op_not.yaml", desc: "Bitwise NOT (!)"}
-      - {name: "shift_left", file: "operators/op_shl.yaml", desc: "Shift left (<<)"}
-      - {name: "shift_right", file: "operators/op_shr.yaml", desc: "Shift right (>>)"}
-      - {name: "sar", file: "operators/op_SAR.yaml", desc: "Shift arithmetic right"}
-      - {name: "rol", file: "operators/op_ROL.yaml", desc: "Rotate left"}
-      - {name: "ror", file: "operators/op_ROR.yaml", desc: "Rotate right"}
-      - {name: "rev", file: "operators/op_REV.yaml", desc: "Reverse bits"}
-      - {name: "zerox", file: "operators/op_ZEROX.yaml", desc: "Zero extend"}
-      - {name: "signx", file: "operators/op_SIGNX.yaml", desc: "Sign extend"}
-      - {name: "ones", file: "operators/op_ONES.yaml", desc: "Count ones"}
-      - {name: "encod", file: "operators/op_ENCOD.yaml", desc: "Encode position"}
-      - {name: "decod", file: "operators/op_DECOD.yaml", desc: "Decode position"}
-      - {name: "bmask", file: "operators/op_BMASK.yaml", desc: "Bit mask"}
-      - {name: "addbits", file: "operators/op_ADDBITS.yaml", desc: "Add bits"}
-      - {name: "addpins", file: "operators/op_ADDPINS.yaml", desc: "Add pins"}
-      - {name: "sca", file: "operators/op_SCA.yaml", desc: "Scale value"}
-      - {name: "scas", file: "operators/op_SCAS.yaml", desc: "Scale signed"}
+      - {name: "and", content: "operators/op_and.yaml", desc: "Bitwise AND (&)"}
+      - {name: "or", content: "operators/op_or.yaml", desc: "Bitwise OR (|)"}
+      - {name: "xor", content: "operators/op_xor.yaml", desc: "Bitwise XOR (^)"}
+      - {name: "not", content: "operators/op_not.yaml", desc: "Bitwise NOT (!)"}
+      - {name: "shift_left", content: "operators/op_shl.yaml", desc: "Shift left (<<)"}
+      - {name: "shift_right", content: "operators/op_shr.yaml", desc: "Shift right (>>)"}
+      - {name: "sar", content: "operators/op_SAR.yaml", desc: "Shift arithmetic right"}
+      - {name: "rol", content: "operators/op_ROL.yaml", desc: "Rotate left"}
+      - {name: "ror", content: "operators/op_ROR.yaml", desc: "Rotate right"}
+      - {name: "rev", content: "operators/op_REV.yaml", desc: "Reverse bits"}
+      - {name: "zerox", content: "operators/op_ZEROX.yaml", desc: "Zero extend"}
+      - {name: "signx", content: "operators/op_SIGNX.yaml", desc: "Sign extend"}
+      - {name: "ones", content: "operators/op_ONES.yaml", desc: "Count ones"}
+      - {name: "encod", content: "operators/op_ENCOD.yaml", desc: "Encode position"}
+      - {name: "decod", content: "operators/op_DECOD.yaml", desc: "Decode position"}
+      - {name: "bmask", content: "operators/op_BMASK.yaml", desc: "Bit mask"}
+      - {name: "addbits", content: "operators/op_ADDBITS.yaml", desc: "Add bits"}
+      - {name: "addpins", content: "operators/op_ADDPINS.yaml", desc: "Add pins"}
+      - {name: "sca", content: "operators/op_SCA.yaml", desc: "Scale value"}
+      - {name: "scas", content: "operators/op_SCAS.yaml", desc: "Scale signed"}
     
     comparison:
-      - {name: "equal", file: "operators/op_eqeq.yaml", desc: "Equal (==)"}
-      - {name: "not_equal", file: "operators/op_ltgt.yaml", desc: "Not equal (<>)"}
-      - {name: "less_than", file: "operators/op_lt.yaml", desc: "Less than (<)"}
-      - {name: "greater_than", file: "operators/op_gt.yaml", desc: "Greater than (>)"}
-      - {name: "lteq", file: "operators/op_lteq.yaml", desc: "Less than or equal (<=)"}
-      - {name: "gteq", file: "operators/op_gteq.yaml", desc: "Greater than or equal (>=)"}
-      - {name: "lteqgt", file: "operators/op_lteqgt.yaml", desc: "Within range (<=>)"}
-      - {name: "eqeqeq", file: "operators/op_eqeqeq.yaml", desc: "Exact equal (===)"}
+      - {name: "equal", content: "operators/op_eqeq.yaml", desc: "Equal (==)"}
+      - {name: "not_equal", content: "operators/op_ltgt.yaml", desc: "Not equal (<>)"}
+      - {name: "less_than", content: "operators/op_lt.yaml", desc: "Less than (<)"}
+      - {name: "greater_than", content: "operators/op_gt.yaml", desc: "Greater than (>)"}
+      - {name: "lteq", content: "operators/op_lteq.yaml", desc: "Less than or equal (<=)"}
+      - {name: "gteq", content: "operators/op_gteq.yaml", desc: "Greater than or equal (>=)"}
+      - {name: "lteqgt", content: "operators/op_lteqgt.yaml", desc: "Within range (<=>)"}
+      - {name: "eqeqeq", content: "operators/op_eqeqeq.yaml", desc: "Exact equal (===)"}
     
     logical:
-      - {name: "andand", file: "operators/op_andand.yaml", desc: "Logical AND (&&)"}
-      - {name: "oror", file: "operators/op_oror.yaml", desc: "Logical OR (||)"}
-      - {name: "xorxor", file: "operators/op_xorxor.yaml", desc: "Logical XOR (^^)"}
-      - {name: "notandand", file: "operators/op_notandand.yaml", desc: "Logical NAND (!!)"}
+      - {name: "andand", content: "operators/op_andand.yaml", desc: "Logical AND (&&)"}
+      - {name: "oror", content: "operators/op_oror.yaml", desc: "Logical OR (||)"}
+      - {name: "xorxor", content: "operators/op_xorxor.yaml", desc: "Logical XOR (^^)"}
+      - {name: "notandand", content: "operators/op_notandand.yaml", desc: "Logical NAND (!!)"}
     
     assignment:
-      - {name: "assign", file: "operators/op_assign.yaml", desc: "Assignment (:=)"}
-      - {name: "add_assign", file: "operators/op_addmodulo.yaml", desc: "Add and assign (+=)"}
-      - {name: "sub_assign", file: "operators/op_subdot.yaml", desc: "Subtract and assign (-=)"}
-      - {name: "swap", file: "operators/op_swap.yaml", desc: "Swap values"}
+      - {name: "assign", content: "operators/op_assign.yaml", desc: "Assignment (:=)"}
+      - {name: "add_assign", content: "operators/op_addmodulo.yaml", desc: "Add and assign (+=)"}
+      - {name: "sub_assign", content: "operators/op_subdot.yaml", desc: "Subtract and assign (-=)"}
+      - {name: "swap", content: "operators/op_swap.yaml", desc: "Swap values"}
     
     compound:
-      - {name: "adddiv", file: "operators/op_adddiv.yaml", desc: "Add then divide"}
-      - {name: "adddot", file: "operators/op_adddot.yaml", desc: "Add with dot notation"}
-      - {name: "addgt", file: "operators/op_addgt.yaml", desc: "Add greater than"}
-      - {name: "addgteq", file: "operators/op_addgteq.yaml", desc: "Add greater equal"}
-      - {name: "addlt", file: "operators/op_addlt.yaml", desc: "Add less than"}
-      - {name: "addlteq", file: "operators/op_addlteq.yaml", desc: "Add less equal"}
-      - {name: "addlteqgt", file: "operators/op_addlteqgt.yaml", desc: "Add range check"}
-      - {name: "divdot", file: "operators/op_divdot.yaml", desc: "Divide with dot"}
-      - {name: "muldot", file: "operators/op_muldot.yaml", desc: "Multiply with dot"}
-      - {name: "eqeqdot", file: "operators/op_eqeqdot.yaml", desc: "Equal with dot"}
-      - {name: "gtdot", file: "operators/op_gtdot.yaml", desc: "Greater than dot"}
-      - {name: "gteqdot", file: "operators/op_gteqdot.yaml", desc: "Greater equal dot"}
-      - {name: "ltdot", file: "operators/op_ltdot.yaml", desc: "Less than dot"}
-      - {name: "lteqdot", file: "operators/op_lteqdot.yaml", desc: "Less equal dot"}
-      - {name: "ltgtdot", file: "operators/op_ltgtdot.yaml", desc: "Not equal dot"}
-      - {name: "ltshr", file: "operators/op_ltshr.yaml", desc: "Less shift right"}
+      - {name: "adddiv", content: "operators/op_adddiv.yaml", desc: "Add then divide"}
+      - {name: "adddot", content: "operators/op_adddot.yaml", desc: "Add with dot notation"}
+      - {name: "addgt", content: "operators/op_addgt.yaml", desc: "Add greater than"}
+      - {name: "addgteq", content: "operators/op_addgteq.yaml", desc: "Add greater equal"}
+      - {name: "addlt", content: "operators/op_addlt.yaml", desc: "Add less than"}
+      - {name: "addlteq", content: "operators/op_addlteq.yaml", desc: "Add less equal"}
+      - {name: "addlteqgt", content: "operators/op_addlteqgt.yaml", desc: "Add range check"}
+      - {name: "divdot", content: "operators/op_divdot.yaml", desc: "Divide with dot"}
+      - {name: "muldot", content: "operators/op_muldot.yaml", desc: "Multiply with dot"}
+      - {name: "eqeqdot", content: "operators/op_eqeqdot.yaml", desc: "Equal with dot"}
+      - {name: "gtdot", content: "operators/op_gtdot.yaml", desc: "Greater than dot"}
+      - {name: "gteqdot", content: "operators/op_gteqdot.yaml", desc: "Greater equal dot"}
+      - {name: "ltdot", content: "operators/op_ltdot.yaml", desc: "Less than dot"}
+      - {name: "lteqdot", content: "operators/op_lteqdot.yaml", desc: "Less equal dot"}
+      - {name: "ltgtdot", content: "operators/op_ltgtdot.yaml", desc: "Not equal dot"}
+      - {name: "ltshr", content: "operators/op_ltshr.yaml", desc: "Less shift right"}
     
     special:
-      - {name: "question", file: "operators/op_question.yaml", desc: "Ternary operator (?)"}
-      - {name: "colon", file: "operators/op_colon.yaml", desc: "Ternary colon (:)"}
-      - {name: "ternary", file: "operators/op_ternary.yaml", desc: "Ternary complete"}
-      - {name: "line_continuation", file: "operators/op_line_continuation.yaml", desc: "Line continuation"}
+      - {name: "question", content: "operators/op_question.yaml", desc: "Ternary operator (?)"}
+      - {name: "colon", content: "operators/op_colon.yaml", desc: "Ternary colon (:)"}
+      - {name: "ternary", content: "operators/op_ternary.yaml", desc: "Ternary complete"}
+      - {name: "line_continuation", content: "operators/op_line_continuation.yaml", desc: "Line continuation"}
 
 by_function:
   control: ["repeat", "if", "case", "abort", "quit", "next"]
@@ -339,16 +339,16 @@ search_index:
     "math": ["abs", "sqrt", "min", "max", "rotxy"]
 
 special_topics:
-  - {name: "operator_precedence", file: "operators/precedence.yaml", desc: "Operator precedence table"}
-  - {name: "builtin_symbols", file: "symbols/spin2-builtin-symbols-complete.yaml", desc: "Built-in constants"}
-  - {name: "integration", file: "integration/spin2-pasm2-integration.yaml", desc: "Spin2/PASM2 integration"}
+  - {name: "operator_precedence", content: "operators/precedence.yaml", desc: "Operator precedence table"}
+  - {name: "builtin_symbols", content: "symbols/spin2-builtin-symbols-complete.yaml", desc: "Built-in constants"}
+  - {name: "integration", content: "integration/spin2-pasm2-integration.yaml", desc: "Spin2/PASM2 integration"}
 
 constants:
-  - {name: "newtask", file: "constants/newtask.yaml", desc: "Constant for auto-assigning next task ID"}
-  - {name: "thistask", file: "constants/thistask.yaml", desc: "Constant for referring to current task"}
-  - {name: "configuration_symbols", file: "constants/special-configuration-symbols.yaml", desc: "Special CON symbols for system, debug, and clock configuration"}
+  - {name: "newtask", content: "constants/newtask.yaml", desc: "Constant for auto-assigning next task ID"}
+  - {name: "thistask", content: "constants/thistask.yaml", desc: "Constant for referring to current task"}
+  - {name: "configuration_symbols", content: "constants/special-configuration-symbols.yaml", desc: "Special CON symbols for system, debug, and clock configuration"}
 
 related_manifests:
   - "pasm2-manifest.yaml"  # Assembly language
-  - "patterns-manifest.yaml"  # Code patterns
-  - "architecture-manifest.yaml"  # Hardware understanding
+  - "../patterns-manifest.yaml"  # Code patterns
+  - "../architecture-manifest.yaml"  # Hardware understanding

@@ -4,99 +4,99 @@ instruction_count: 27
 base_path: engineering/knowledge-base/P2/language/pasm2/
 instructions:
 - name: call
-  file: call.yaml
+  content: call.yaml
   desc: CALL records the current state of the C and Z flags and the address of the
     next instruction (PC +...
 - name: calla
-  file: calla.yaml
+  content: calla.yaml
   desc: Write current C and Z flags and address of the next instruction into the 4-byte
     Hub RAM location ...
 - name: callb
-  file: callb.yaml
+  content: callb.yaml
   desc: Write current C and Z flags and address of the next instruction into the 4-byte
     Hub RAM location ...
 - name: calld
-  file: calld.yaml
+  content: calld.yaml
   desc: CALLD records the current state of the C and Z flags and the address of the
     next instruction (PC ...
 - name: callpa
-  file: callpa.yaml
+  content: callpa.yaml
   desc: CALLPA and CALLPB records the current state of the C and Z flags and the address
     of the next inst...
 - name: callpb
-  file: callpb.yaml
+  content: callpb.yaml
   desc: CALLPA and CALLPB records the current state of the C and Z flags and the address
     of the next inst...
 - name: djnz
-  file: djnz.yaml
+  content: djnz.yaml
   desc: DJZ or DJNZ decrements the value in Dest, writes the result, and jumps to
     the address described b...
 - name: djz
-  file: djz.yaml
+  content: djz.yaml
   desc: DJZ or DJNZ decrements the value in Dest, writes the result, and jumps to
     the address described b...
 - name: execf
-  file: execf.yaml
+  content: execf.yaml
   desc: 'Jump to D[9:0] in cog/LUT and set SKIPF pattern to D[31:10]. PC = {10''b0,
     D[9:0]}. '
 - name: ijnz
-  file: ijnz.yaml
+  content: ijnz.yaml
   desc: IJZ or IJNZ increments the value in Dest, writes the result, and jumps to
     the address described b...
 - name: ijz
-  file: ijz.yaml
+  content: ijz.yaml
   desc: IJZ or IJNZ increments the value in Dest, writes the result, and jumps to
     the address described b...
 - name: jmp
-  file: jmp.yaml
+  content: jmp.yaml
   desc: Jump to A. If R = 1 then PC += A, else PC = A. "\" forces R = 0.
 - name: jmprel
-  file: jmprel.yaml
+  content: jmprel.yaml
   desc: Jump ahead/back by D instructions. For cogex, PC += D[19:0]. For hubex, PC
     += D[17:0] << 2.
 - name: lockret
-  file: lockret.yaml
+  content: lockret.yaml
   desc: Return LOCK D[3:0] for reallocation.                                                             ...
 - name: rep
-  file: rep.yaml
+  content: rep.yaml
   desc: Execute next D[8:0] instructions S times. If S = 0, repeat instructions infinitely.
     If D[8:0] = 0,...
 - name: ret
-  file: ret.yaml
+  content: ret.yaml
   desc: Return by popping stack (K). C = K[31], Z = K[30], PC = K[19:0].
 - name: reta
-  file: reta.yaml
+  content: reta.yaml
   desc: Return by reading hub long (L) at --PTRA. C = L[31], Z = L[30], PC = L[19:0].                    ...
 - name: retb
-  file: retb.yaml
+  content: retb.yaml
   desc: Return by reading hub long (L) at --PTRB. C = L[31], Z = L[30], PC = L[19:0].                    ...
 - name: reti0
-  file: reti0.yaml
+  content: reti0.yaml
   desc: Return from INT0. (CALLD $1FF,$1FF WCZ).
 - name: reti1
-  file: reti1.yaml
+  content: reti1.yaml
   desc: Return from INT1. (CALLD $1FF,$1F5 WCZ).
 - name: reti2
-  file: reti2.yaml
+  content: reti2.yaml
   desc: Return from INT2. (CALLD $1FF,$1F3 WCZ).
 - name: reti3
-  file: reti3.yaml
+  content: reti3.yaml
   desc: Return from INT3. (CALLD $1FF,$1F1 WCZ).
 - name: skip
-  file: skip.yaml
+  content: skip.yaml
   desc: Skip instructions per D. Subsequent instructions 0..31 get cancelled for each
     '1' bit in D[0]..D[...
 - name: skipf
-  file: skipf.yaml
+  content: skipf.yaml
   desc: Skip cog/LUT instructions fast per D. Like SKIP, but instead of cancelling
     instructions, the PC l...
 - name: tjf
-  file: tjf.yaml
+  content: tjf.yaml
   desc: Test D and jump to S** if D is full (D = $FFFF_FFFF).                                            ...
 - name: tjnz
-  file: tjnz.yaml
+  content: tjnz.yaml
   desc: Dest is tested and if it's zero (or not zero in syntax 2), PC is set to a
     new relative (#Src) or ...
 - name: tjz
-  file: tjz.yaml
+  content: tjz.yaml
   desc: Test D and jump to S** if D is zero.                                                             ...

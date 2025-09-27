@@ -1,21 +1,26 @@
 directive: WORD
 name: WORD
-description: |
-  Declare word data in memory
+description: 'Declare word data in memory
+
   Stores 16-bit values at the current address
+
+  '
 category: Assembly Directive
 documentation_level: complete
-syntax: "[label] WORD value[, value...]"
+syntax: '[label] WORD value[, value...]'
 examples:
-  - code: |
-      counts  word  1000, 2000, 3000  ' Decimal values
-      addr    word  @buffer            ' Address reference
-    description: "Word data declarations"
+- code: 'counts  word  1000, 2000, 3000  '' Decimal values
+
+    addr    word  @buffer            '' Address reference
+
+    '
+  description: Word data declarations
 notes:
-  - "Each value occupies 2 bytes"
-  - "Automatically word-aligned in hub RAM"
-  - "Range: 0 to 65535 (unsigned)"
+- Each value occupies 2 bytes
+- Automatically word-aligned in hub RAM
+- 'Range: 0 to 65535 (unsigned)'
 related:
-  - BYTE
-  - LONG
-  - ALIGNW
+- BYTE
+- LONG
+- ALIGNW
+oneliner: Declare word data in memory

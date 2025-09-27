@@ -11,29 +11,21 @@ compiler_encoding:
 timing:
   cycles: 2
   type: fixed
-group: CORDIC Solver
-description: "Perform 32\xD732 unsigned multiplication producing 64-bit result. Multiplies\
-  \ D operand by S operand. Results retrieved via GETQX (lower 32 bits) and GETQY\
-  \ (upper 32 bits) instructions 55 clocks later."
-long_description: "The QMUL instruction performs high-precision unsigned multiplication\
-  \ using the P2's 54-stage pipelined CORDIC solver. It multiplies two 32-bit unsigned\
-  \ integers (D \xD7 S) and produces a full 64-bit product, avoiding the precision\
-  \ loss that would occur with standard 32-bit multiplication.\n\nThe instruction\
-  \ takes the first multiplicand in the D operand and the second multiplicand in the\
-  \ S operand, both as 32-bit unsigned values. After 55 clocks, the 64-bit result\
-  \ can be retrieved using GETQX for the lower 32 bits and GETQY for the upper 32\
-  \ bits.\n\nThis full-precision multiplication is essential for applications requiring\
-  \ accurate large number arithmetic, such as DSP operations, cryptographic calculations,\
-  \ fixed-point mathematics, and multiply-accumulate operations where intermediate\
-  \ precision is critical.\n\nThe pipelined nature allows for continuous multiply-accumulate\
-  \ operations by issuing new QMUL instructions every 8 clocks (hub window) while\
-  \ retrieving results from previous operations, enabling high-throughput mathematical\
-  \ processing.\n"
+description: "Perform 32\xD732 unsigned multiplication producing 64-bit result. Multiplies D operand by S operand. Results\
+  \ retrieved via GETQX (lower 32 bits) and GETQY (upper 32 bits) instructions 55 clocks later."
+long_description: "The QMUL instruction performs high-precision unsigned multiplication using the P2's 54-stage pipelined\
+  \ CORDIC solver. It multiplies two 32-bit unsigned integers (D \xD7 S) and produces a full 64-bit product, avoiding the\
+  \ precision loss that would occur with standard 32-bit multiplication.\n\nThe instruction takes the first multiplicand in\
+  \ the D operand and the second multiplicand in the S operand, both as 32-bit unsigned values. After 55 clocks, the 64-bit\
+  \ result can be retrieved using GETQX for the lower 32 bits and GETQY for the upper 32 bits.\n\nThis full-precision multiplication\
+  \ is essential for applications requiring accurate large number arithmetic, such as DSP operations, cryptographic calculations,\
+  \ fixed-point mathematics, and multiply-accumulate operations where intermediate precision is critical.\n\nThe pipelined\
+  \ nature allows for continuous multiply-accumulate operations by issuing new QMUL instructions every 8 clocks (hub window)\
+  \ while retrieving results from previous operations, enabling high-throughput mathematical processing.\n"
 compiler_category: Miscellaneous
 examples:
-- code: "' Multiply 1000000 \xD7 2000000 = 2000000000000\nQMUL    #1000000, #2000000\n\
-    ' Wait 55 clocks...\nGETQX   lower_32       ' Get lower 32 bits\nGETQY   upper_32\
-    \       ' Get upper 32 bits\n"
+- code: "' Multiply 1000000 \xD7 2000000 = 2000000000000\nQMUL    #1000000, #2000000\n' Wait 55 clocks...\nGETQX   lower_32\
+    \       ' Get lower 32 bits\nGETQY   upper_32       ' Get upper 32 bits\n"
   description: Basic large number multiplication
 - code: ''' Variable multiplication
 
@@ -100,10 +92,10 @@ operand_details:
 result_details:
   GETQX: Lower 32 bits of 64-bit product
   GETQY: Upper 32 bits of 64-bit product
-timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
-  one CORDIC instruction per hub window (every 8 clocks).
-applications: DSP multiply-accumulate, fixed-point arithmetic, large integer calculations,
-  cryptographic operations, precise mathematical computations.
+timing_notes: Result available 55 clocks after instruction issue. Each cog can issue one CORDIC instruction per hub window
+  (every 8 clocks).
+applications: DSP multiply-accumulate, fixed-point arithmetic, large integer calculations, cryptographic operations, precise
+  mathematical computations.
 documentation_source: p2_datasheet
 documentation_level: comprehensive
 compiler_operand_format:
@@ -114,3 +106,5 @@ compiler_operand_format:
 compiler_effects: []
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
 last_updated: '2025-09-19T16:04:17.531155'
+category: cordic
+oneliner: "Perform 32\xD732 unsigned multiplication producing 64-bit result"

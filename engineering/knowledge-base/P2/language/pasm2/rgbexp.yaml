@@ -4,7 +4,6 @@ encoding: EEEE 1101011 000 DDDDDDDDD 001100111
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
 description: Expand 5:6:5 RGB value in D[15:0] into 8:8:8 value in D[31:8].
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
@@ -19,3 +18,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - RGBEXP D
 last_updated: '2025-09-19T16:04:17.008006'
+category: arithmetic
+oneliner: Expand 5:6:5 RGB value in D[15:0] into 8:8:8 value in D[31:8]

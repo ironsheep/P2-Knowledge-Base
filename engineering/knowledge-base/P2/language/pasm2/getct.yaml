@@ -4,7 +4,6 @@ encoding: EEEE 1101011 C00 DDDDDDDDD 000011010
 timing:
   cycles: 2
   type: fixed
-group: Miscellaneous
 description: T=0 on reset, CT++ on every clock.
 flags_affected:
   C:
@@ -22,3 +21,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - GETCT D
 last_updated: '2025-09-19T16:04:16.908732'
+category: misc_ops
+oneliner: T=0 on reset, CT++ on every clock

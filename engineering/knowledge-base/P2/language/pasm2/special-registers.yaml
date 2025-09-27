@@ -1,121 +1,144 @@
 special_registers: P2 I/O Special Registers
 name: Special Registers
-description: |
-  Special registers for direct I/O pin access in PASM2
+description: 'Special registers for direct I/O pin access in PASM2
+
   These registers are mapped to fixed cog RAM addresses and can be used as operands in instructions
+
+  '
 category: Special Registers
 documentation_level: complete
-
 registers:
   DIRA:
     address: 506
-    hex_address: "$1FA"
-    description: "Direction register A (pins 0-31)"
+    hex_address: $1FA
+    description: Direction register A (pins 0-31)
     access: read_write
-    usage: |
-      Controls pin direction for pins 0-31
+    usage: 'Controls pin direction for pins 0-31
+
       1 = output, 0 = input
+
+      '
     examples:
-      - code: |
-          mov     DIRA, ##$00FF_0000  ' Set pins 16-23 as outputs
-          or      DIRA, #1            ' Set pin 0 as output
-          andn    DIRA, ##$0000_00FF  ' Set pins 0-7 as inputs
-        description: "Setting pin directions"
-    
+    - code: 'mov     DIRA, ##$00FF_0000  '' Set pins 16-23 as outputs
+
+        or      DIRA, #1            '' Set pin 0 as output
+
+        andn    DIRA, ##$0000_00FF  '' Set pins 0-7 as inputs
+
+        '
+      description: Setting pin directions
   DIRB:
     address: 507
-    hex_address: "$1FB"
-    description: "Direction register B (pins 32-63)"
+    hex_address: $1FB
+    description: Direction register B (pins 32-63)
     access: read_write
-    usage: |
-      Controls pin direction for pins 32-63
+    usage: 'Controls pin direction for pins 32-63
+
       1 = output, 0 = input
+
+      '
     examples:
-      - code: |
-          mov     DIRB, #0            ' Set all pins 32-63 as inputs
-          or      DIRB, ##$8000_0000  ' Set pin 63 as output
-        description: "Setting pin directions for upper pins"
-    
+    - code: 'mov     DIRB, #0            '' Set all pins 32-63 as inputs
+
+        or      DIRB, ##$8000_0000  '' Set pin 63 as output
+
+        '
+      description: Setting pin directions for upper pins
   OUTA:
     address: 508
-    hex_address: "$1FC"
-    description: "Output register A (pins 0-31)"
+    hex_address: $1FC
+    description: Output register A (pins 0-31)
     access: read_write
-    usage: |
-      Sets output state for pins 0-31
+    usage: 'Sets output state for pins 0-31
+
       Only affects pins configured as outputs via DIRA
+
+      '
     examples:
-      - code: |
-          mov     OUTA, #0            ' Clear all outputs 0-31
-          or      OUTA, #1            ' Set pin 0 high
-          xor     OUTA, ##$0000_00FF  ' Toggle pins 0-7
-        description: "Controlling output states"
-    
+    - code: 'mov     OUTA, #0            '' Clear all outputs 0-31
+
+        or      OUTA, #1            '' Set pin 0 high
+
+        xor     OUTA, ##$0000_00FF  '' Toggle pins 0-7
+
+        '
+      description: Controlling output states
   OUTB:
     address: 509
-    hex_address: "$1FD"
-    description: "Output register B (pins 32-63)"
+    hex_address: $1FD
+    description: Output register B (pins 32-63)
     access: read_write
-    usage: |
-      Sets output state for pins 32-63
+    usage: 'Sets output state for pins 32-63
+
       Only affects pins configured as outputs via DIRB
+
+      '
     examples:
-      - code: |
-          mov     OUTB, pattern       ' Set output pattern for pins 32-63
-          andn    OUTB, mask          ' Clear specific outputs
-        description: "Controlling upper pin outputs"
-    
+    - code: 'mov     OUTB, pattern       '' Set output pattern for pins 32-63
+
+        andn    OUTB, mask          '' Clear specific outputs
+
+        '
+      description: Controlling upper pin outputs
   INA:
     address: 510
-    hex_address: "$1FE"
-    description: "Input register A (pins 0-31)"
+    hex_address: $1FE
+    description: Input register A (pins 0-31)
     access: read_only
-    usage: |
-      Reads current state of pins 0-31
+    usage: 'Reads current state of pins 0-31
+
       Returns actual pin states regardless of direction setting
+
+      '
     examples:
-      - code: |
-          mov     state, INA          ' Read all pins 0-31
-          test    INA, #1         wz  ' Test if pin 0 is high
-          and     inputs, INA         ' Mask input pins
-        description: "Reading input states"
-    
+    - code: 'mov     state, INA          '' Read all pins 0-31
+
+        test    INA, #1         wz  '' Test if pin 0 is high
+
+        and     inputs, INA         '' Mask input pins
+
+        '
+      description: Reading input states
   INB:
     address: 511
-    hex_address: "$1FF"
-    description: "Input register B (pins 32-63)"
+    hex_address: $1FF
+    description: Input register B (pins 32-63)
     access: read_only
-    usage: |
-      Reads current state of pins 32-63
+    usage: 'Reads current state of pins 32-63
+
       Returns actual pin states regardless of direction setting
+
+      '
     examples:
-      - code: |
-          mov     state, INB          ' Read all pins 32-63
-          test    INB, ##$8000_0000  wz ' Test if pin 63 is high
-        description: "Reading upper pin inputs"
+    - code: 'mov     state, INB          '' Read all pins 32-63
 
+        test    INB, ##$8000_0000  wz '' Test if pin 63 is high
+
+        '
+      description: Reading upper pin inputs
 usage_notes:
-  - "These registers are at the top of cog RAM (addresses 506-511)"
-  - "Can be used as source or destination in most instructions"
-  - "Changes take effect immediately"
-  - "Each cog has its own copy of these registers"
-  - "Multiple cogs can control the same pins (OR'd together for outputs)"
-  - "Smart pin modes override these basic I/O functions"
-
+- These registers are at the top of cog RAM (addresses 506-511)
+- Can be used as source or destination in most instructions
+- Changes take effect immediately
+- Each cog has its own copy of these registers
+- Multiple cogs can control the same pins (OR'd together for outputs)
+- Smart pin modes override these basic I/O functions
 common_patterns:
-  - pattern: "Toggle pin"
-    code: "xor     OUTA, pin_mask"
-  - pattern: "Wait for pin high"
-    code: |
-      .wait   test    INA, pin_mask   wz
-      if_z    jmp     #.wait
-  - pattern: "Copy input to output"
-    code: "mov     OUTA, INA"
-  - pattern: "Set multiple pins atomically"
-    code: "mov     OUTA, new_pattern"
+- pattern: Toggle pin
+  code: xor     OUTA, pin_mask
+- pattern: Wait for pin high
+  code: '.wait   test    INA, pin_mask   wz
 
+    if_z    jmp     #.wait
+
+    '
+- pattern: Copy input to output
+  code: mov     OUTA, INA
+- pattern: Set multiple pins atomically
+  code: mov     OUTA, new_pattern
 related:
-  - DIRC/DIRH/DIRL - Pin direction instructions
-  - OUTC/OUTH/OUTL - Pin output instructions
-  - PINREAD/PINWRITE - High-level pin methods
-  - Smart Pins - Advanced pin modes
+- DIRC/DIRH/DIRL - Pin direction instructions
+- OUTC/OUTH/OUTL - Pin output instructions
+- PINREAD/PINWRITE - High-level pin methods
+- Smart Pins - Advanced pin modes
+oneliner: Special registers for direct I/O pin access in PASM2

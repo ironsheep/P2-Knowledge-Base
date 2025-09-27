@@ -4,129 +4,129 @@ instruction_count: 32
 base_path: engineering/knowledge-base/P2/language/pasm2/
 instructions:
 - name: akpin
-  file: akpin.yaml
+  content: akpin.yaml
   desc: AKPIN acknowledges the Smart Pin(s) designated by Src. This lowers the corresponding
     IN signal(s)...
 - name: dirc
-  file: dirc.yaml
+  content: dirc.yaml
   desc: DIRC or DIRNC alters the direction register's bit(s) designated by Dest to
     equal the state, or in...
 - name: dirh
-  file: dirh.yaml
+  content: dirh.yaml
   desc: DIRH or DIRL alters the direction register's bit(s) designated by Dest to
     be high (1) or low (0);...
 - name: dirl
-  file: dirl.yaml
+  content: dirl.yaml
   desc: DIRH or DIRL alters the direction register's bit(s) designated by Dest to
     be high (1) or low (0);...
 - name: dirnc
-  file: dirnc.yaml
+  content: dirnc.yaml
   desc: DIRC or DIRNC alters the direction register's bit(s) designated by Dest to
     equal the state, or in...
 - name: dirnz
-  file: dirnz.yaml
+  content: dirnz.yaml
   desc: DIRZ or DIRNZ alters the direction register's bit(s) designated by Dest to
     equal the state, or in...
 - name: dirrnd
-  file: dirrnd.yaml
+  content: dirrnd.yaml
   desc: DIRRND alters the direction register's bit(s) designated by Dest to be random
     low and high (input...
 - name: dirz
-  file: dirz.yaml
+  content: dirz.yaml
   desc: DIRZ or DIRNZ alters the direction register's bit(s) designated by Dest to
     equal the state, or in...
 - name: drvc
-  file: drvc.yaml
+  content: drvc.yaml
   desc: DRVC or DRVNC sets the I/O pin(s) designated by Dest to the output direction
     and to a low/high ou...
 - name: drvh
-  file: drvh.yaml
+  content: drvh.yaml
   desc: DRVH or DRVL sets the I/O pin(s) designated by Dest to the output direction
     and to a high or low ...
 - name: drvl
-  file: drvl.yaml
+  content: drvl.yaml
   desc: DRVH or DRVL sets the I/O pin(s) designated by Dest to the output direction
     and to a high or low ...
 - name: drvnc
-  file: drvnc.yaml
+  content: drvnc.yaml
   desc: DRVC or DRVNC sets the I/O pin(s) designated by Dest to the output direction
     and to a low/high ou...
 - name: drvnz
-  file: drvnz.yaml
+  content: drvnz.yaml
   desc: DRVZ or DRVNZ sets the I/O pin(s) designated by Dest to the output direction
     and to a low/high ou...
 - name: drvrnd
-  file: drvrnd.yaml
+  content: drvrnd.yaml
   desc: DRVRND sets the I/O pin(s) designated by Dest to the output direction and
     with output level(s) se...
 - name: drvz
-  file: drvz.yaml
+  content: drvz.yaml
   desc: DRVZ or DRVNZ sets the I/O pin(s) designated by Dest to the output direction
     and to a low/high ou...
 - name: fltc
-  file: fltc.yaml
+  content: fltc.yaml
   desc: FLTC or FLTNC sets the I/O pin(s) designated by Dest to the input direction
     and to a low/high out...
 - name: flth
-  file: flth.yaml
+  content: flth.yaml
   desc: FLTH or FLTL sets the I/O pin(s) designated by Dest to the input direction
     and to a high or low o...
 - name: fltl
-  file: fltl.yaml
+  content: fltl.yaml
   desc: FLTH or FLTL sets the I/O pin(s) designated by Dest to the input direction
     and to a high or low o...
 - name: fltnc
-  file: fltnc.yaml
+  content: fltnc.yaml
   desc: FLTC or FLTNC sets the I/O pin(s) designated by Dest to the input direction
     and to a low/high out...
 - name: fltnz
-  file: fltnz.yaml
+  content: fltnz.yaml
   desc: The I/O pins described by Dest are set to the input direction and to an output
     level of low/high ...
 - name: fltrnd
-  file: fltrnd.yaml
+  content: fltrnd.yaml
   desc: FLTRND sets the I/O pin(s) designated by Dest to the input direction and with
     output level(s) set...
 - name: fltz
-  file: fltz.yaml
+  content: fltz.yaml
   desc: The I/O pins described by Dest are set to the input direction and to an output
     level of low/high ...
 - name: outc
-  file: outc.yaml
+  content: outc.yaml
   desc: OUTC or OUTNC alters the output level register's bit(s) designated by Dest
     to equal the state, or...
 - name: outh
-  file: outh.yaml
+  content: outh.yaml
   desc: OUTH or OUTL alters the output level register's bit(s) designated by Dest
     to be high (1) or low (...
 - name: outl
-  file: outl.yaml
+  content: outl.yaml
   desc: OUTH or OUTL alters the output level register's bit(s) designated by Dest
     to be high (1) or low (...
 - name: outnc
-  file: outnc.yaml
+  content: outnc.yaml
   desc: OUTC or OUTNC alters the output level register's bit(s) designated by Dest
     to equal the state, or...
 - name: outnz
-  file: outnz.yaml
+  content: outnz.yaml
   desc: OUTZ or OUTNZ alters the output level register's bit(s) designated by Dest
     to equal the state, or...
 - name: outrnd
-  file: outrnd.yaml
+  content: outrnd.yaml
   desc: OUTRND alters the output level register's bit(s) designated by Dest to be
     random low and high, ba...
 - name: outz
-  file: outz.yaml
+  content: outz.yaml
   desc: OUTZ or OUTNZ alters the output level register's bit(s) designated by Dest
     to equal the state, or...
 - name: rqpin
-  file: rqpin.yaml
+  content: rqpin.yaml
   desc: C = modal result.
 - name: wxpin
-  file: wxpin.yaml
+  content: wxpin.yaml
   desc: Set \"X\" of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins.
     Wraps within A/B pin...
 - name: wypin
-  file: wypin.yaml
+  content: wypin.yaml
   desc: Set "Y" register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart
     pins. Wraps within ...

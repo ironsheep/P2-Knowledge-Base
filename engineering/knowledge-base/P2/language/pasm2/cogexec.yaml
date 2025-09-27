@@ -1,29 +1,36 @@
 constant: COGEXEC
 name: COGEXEC
-description: |
-  Predefined constant for COGINIT instruction
+description: 'Predefined constant for COGINIT instruction
+
   Loads code from hub RAM and executes from cog RAM
+
+  '
 category: Predefined Constant
-value: "%0_0_0000"
+value: '%0_0_0000'
 documentation_level: complete
-syntax: "COGINIT #COGEXEC+id, #address"
-usage: |
-  Used with COGINIT to load and start a specific cog
+syntax: 'COGINIT #COGEXEC+id, #address'
+usage: 'Used with COGINIT to load and start a specific cog
+
   Target cog loads code from hub RAM and begins execution at cog address $000
+
+  '
 examples:
-  - code: |
-      COGINIT #COGEXEC+1, #$100   ' Load and start Cog 1 from Hub RAM $100
-    description: "Start specific cog with code load"
-  - code: |
-      COGINIT #COGEXEC+5, @code   ' Load and start Cog 5 from @code
-    description: "Start Cog 5 with code at label"
+- code: 'COGINIT #COGEXEC+1, #$100   '' Load and start Cog 1 from Hub RAM $100
+
+    '
+  description: Start specific cog with code load
+- code: 'COGINIT #COGEXEC+5, @code   '' Load and start Cog 5 from @code
+
+    '
+  description: Start Cog 5 with code at label
 notes:
-  - "Loads cog RAM registers $000-$1F7 from hub RAM"
-  - "Begins execution at cog register address $000"
-  - "Must specify target cog ID (0-7)"
-  - "Use COGEXEC_NEW to auto-select available cog"
+- Loads cog RAM registers $000-$1F7 from hub RAM
+- Begins execution at cog register address $000
+- Must specify target cog ID (0-7)
+- Use COGEXEC_NEW to auto-select available cog
 related:
-  - COGINIT
-  - COGEXEC_NEW
-  - COGEXEC_NEW_PAIR
-  - HUBEXEC
+- COGINIT
+- COGEXEC_NEW
+- COGEXEC_NEW_PAIR
+- HUBEXEC
+oneliner: Predefined constant for COGINIT instruction

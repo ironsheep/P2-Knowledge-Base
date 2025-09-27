@@ -5,9 +5,7 @@ timing:
   cycles: 9
   type: variable
   range: 9...16 / 9...26
-group: Hub RAM - Read
-description: '{WC/WZ/WCZ}     Read zero-extended byte from hub address {#}S/PTRx into
-  D. C = MSB of byte. *'
+description: '{WC/WZ/WCZ}     Read zero-extended byte from hub address {#}S/PTRx into D. C = MSB of byte. *'
 flags_affected:
   C:
     formula: MSB of byte
@@ -24,3 +22,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - RDBYTE D,{#}S/P
 last_updated: '2025-09-19T16:04:16.899014'
+category: misc_ops
+oneliner: Read

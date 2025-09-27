@@ -4,11 +4,9 @@ encoding: EEEE 1100000 0LI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-group: Smart Pins
-description: "Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart\
-  \ pins. \nWraps within A/B pins. Prior SETQ overrides S[10:6].\n\n**CRITICAL REQUIREMENT**:\
-  \ Smart pins MUST be reset (DIR=0) before configuring with WRPIN.\nThis ensures\
-  \ the smart pin is in a known state and prevents configuration conflicts.\n"
+description: "Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge smart pins. \nWraps within A/B pins. Prior SETQ\
+  \ overrides S[10:6].\n\n**CRITICAL REQUIREMENT**: Smart pins MUST be reset (DIR=0) before configuring with WRPIN.\nThis\
+  \ ensures the smart pin is in a known state and prevents configuration conflicts.\n"
 critical_requirement:
   reset_before_configure: true
   description: Smart pin MUST be reset (DIR=0) before any WRPIN configuration
@@ -18,8 +16,7 @@ critical_requirement:
   - WXPIN x, pin    ' Set X parameter
   - WYPIN y, pin    ' Set Y parameter
   - DIRH pin       ' Enable smart pin (DIR=1)
-  consequence_of_skipping: Unpredictable behavior, configuration conflicts, or smart
-    pin malfunction
+  consequence_of_skipping: Unpredictable behavior, configuration conflicts, or smart pin malfunction
 usage_notes:
 - ALWAYS reset the smart pin with DIRL before WRPIN
 - 'WRPIN #0, pin clears all smart pin configuration'
@@ -65,3 +62,5 @@ compiler_encoding:
   operandFormat: 13
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.512736'
+category: control_flow
+oneliner: Set mode of smart pins S[10:6]+S[5:0]

@@ -6,7 +6,7 @@ manifest_metadata:
 base_path: engineering/knowledge-base/P2/community/obex/
 path_construction_note: 'TO ACCESS ANY FILE IN THIS MANIFEST:
 
-  Combine: raw_base_url (from root) + base_path (above) + yaml_path (from entries)
+  Combine: raw_base_url (from root) + base_path (above) + content (from entries)
 
 
   Example:
@@ -31,11 +31,11 @@ objects:
   languages:
   - SPIN2
   created_date: '2020-09-17 12:00:00'
-  yaml_path: objects/2837.yaml
+  content: objects/2837.yaml
 - object_id: '5252'
   title: MAVLink Message Parser
   category: drivers
   languages:
   - SPIN2
   created_date: '2025-07-07 23:11:12'
-  yaml_path: objects/5252.yaml
+  content: objects/5252.yaml

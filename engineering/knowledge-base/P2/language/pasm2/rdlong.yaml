@@ -11,7 +11,6 @@ compiler_encoding:
 timing:
   cycles: 1
   type: fixed
-group: Hub RAM - Read
 description: '{WC/WZ/WCZ}                                                                                                                            9...16
   1 / 9...26'
 compiler_category: Memory and I/O
@@ -45,3 +44,5 @@ enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
 syntax_variants:
 - RDLONG D,{#}S/P
 last_updated: '2025-09-19T16:04:17.050451'
+category: misc_ops
+oneliner: Read

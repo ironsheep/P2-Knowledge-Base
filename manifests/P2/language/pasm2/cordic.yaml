@@ -4,30 +4,30 @@ instruction_count: 7
 base_path: engineering/knowledge-base/P2/language/pasm2/
 instructions:
 - name: getqx
-  file: getqx.yaml
+  content: getqx.yaml
   desc: '{WC/WZ/WCZ}   Retrieve CORDIC result X into D. Waits, in case result not
     ready. C = X[31]. 1'
 - name: getqy
-  file: getqy.yaml
+  content: getqy.yaml
   desc: '{WC/WZ/WCZ}   Retrieve CORDIC result Y into D. Waits, in case result not
     ready. C = Y[31].'
 - name: qexp
-  file: qexp.yaml
+  content: qexp.yaml
   desc: Convert 5:27-bit logarithm to 32-bit unsigned integer. Takes logarithm in
     5:27 format (5-bit whol...
 - name: qfrac
-  file: qfrac.yaml
+  content: qfrac.yaml
   desc: Perform 64÷32 unsigned fractional division with D as upper 32 bits. Numerator
     formed from {D, SET...
 - name: qlog
-  file: qlog.yaml
+  content: qlog.yaml
   desc: Convert 32-bit unsigned integer to 5:27-bit logarithm format. Takes unsigned
     integer in D operand...
 - name: qrotate
-  file: qrotate.yaml
+  content: qrotate.yaml
   desc: Rotate a 32-bit signed (X, Y) point around origin (0, 0) by a specified angle.
     X coordinate comes...
 - name: qsqrt
-  file: qsqrt.yaml
+  content: qsqrt.yaml
   desc: Calculate square root of 64-bit unsigned number formed from {S, D}. Takes
     upper 32 bits from S op...

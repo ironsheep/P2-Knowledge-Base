@@ -4,141 +4,141 @@ instruction_count: 35
 base_path: engineering/knowledge-base/P2/language/pasm2/
 instructions:
 - name: cogatn
-  file: cogatn.yaml
+  content: cogatn.yaml
   desc: COGATN strobes the attention signal for one or more cogs. Dest bit positions
     7:0 represent cogs 7...
 - name: getct
-  file: getct.yaml
+  content: getct.yaml
   desc: T=0 on reset, CT++ on every clock.
 - name: pollatn
-  file: pollatn.yaml
+  content: pollatn.yaml
   desc: POLLATN copies the state of the attention event flag into C and/or Z and then
     clears the flag (un...
 - name: pollct1
-  file: pollct1.yaml
+  content: pollct1.yaml
   desc: Get CT1 event flag into C/Z, then clear it.  POLLCT1, POLLCT2, or POLLCT3
     copies the state of the...
 - name: pollct2
-  file: pollct2.yaml
+  content: pollct2.yaml
   desc: Get CT2 event flag into C/Z, then clear it.  POLLCT1, POLLCT2, or POLLCT3
     copies the state of the...
 - name: pollct3
-  file: pollct3.yaml
+  content: pollct3.yaml
   desc: Get CT3 event flag into C/Z, then clear it.  POLLCT1, POLLCT2, or POLLCT3
     copies the state of the...
 - name: pollfbw
-  file: pollfbw.yaml
+  content: pollfbw.yaml
   desc: POLLFBW copies the state of the FIFO-interface-block-wrap event flag into
     C and/or Z and then cle...
 - name: pollint
-  file: pollint.yaml
+  content: pollint.yaml
   desc: POLLINT copies the state of the interrupt-occurred event flag into C and/or
     Z and then clears the...
 - name: pollpat
-  file: pollpat.yaml
+  content: pollpat.yaml
   desc: POLLPAT copies the state of the pin-pattern-detected event flag into C and/or
     Z and then clears t...
 - name: pollqmt
-  file: pollqmt.yaml
+  content: pollqmt.yaml
   desc: POLLQMT copies the state of the CORDIC-read-but-empty event flag into C and/or
     Z and then clears ...
 - name: pollse1
-  file: pollse1.yaml
+  content: pollse1.yaml
   desc: Get SE1 event flag into C/Z, then clear it.  POLLSE1, POLLSE2, POLLSE3, or
     POLLSE4 copies the sta...
 - name: pollse2
-  file: pollse2.yaml
+  content: pollse2.yaml
   desc: Get SE2 event flag into C/Z, then clear it.  POLLSE1, POLLSE2, POLLSE3, or
     POLLSE4 copies the sta...
 - name: pollse3
-  file: pollse3.yaml
+  content: pollse3.yaml
   desc: Get SE3 event flag into C/Z, then clear it.  POLLSE1, POLLSE2, POLLSE3, or
     POLLSE4 copies the sta...
 - name: pollse4
-  file: pollse4.yaml
+  content: pollse4.yaml
   desc: Get SE4 event flag into C/Z, then clear it.  POLLSE1, POLLSE2, POLLSE3, or
     POLLSE4 copies the sta...
 - name: pollxfi
-  file: pollxfi.yaml
+  content: pollxfi.yaml
   desc: Streamer-finished event flag is optionally copied into C and/or Z, then it
     is cleared.  POLLXFI c...
 - name: pollxmt
-  file: pollxmt.yaml
+  content: pollxmt.yaml
   desc: POLLXMT copies the state of the streamer-empty event flag into C and/or Z
     and then clears the fla...
 - name: pollxrl
-  file: pollxrl.yaml
+  content: pollxrl.yaml
   desc: Streamer-LUT-RAM-rollover event flag is optionally copied into C and/or Z,
     then it is cleared.  P...
 - name: pollxro
-  file: pollxro.yaml
+  content: pollxro.yaml
   desc: POLLXRO copies the state of the streamer NCO rollover event flag into C and/or
     Z and then clears ...
 - name: stalli
-  file: stalli.yaml
+  content: stalli.yaml
   desc: STALLI disables interrupt branching. STALLI is the complement of the ALLOWI
     instruction— both are...
 - name: waitatn
-  file: waitatn.yaml
+  content: waitatn.yaml
   desc: WAITATN waits for an attention event to occur (unless the event flag is already
     set), then clears...
 - name: waitct1
-  file: waitct1.yaml
+  content: waitct1.yaml
   desc: Wait for CT1 event flag, then clear it. Prior SETQ sets optional CT timeout
     value. C/Z = timeout. ...
 - name: waitct2
-  file: waitct2.yaml
+  content: waitct2.yaml
   desc: Wait for CT2 event flag, then clear it. Prior SETQ sets optional CT timeout
     value. C/Z = timeout. ...
 - name: waitct3
-  file: waitct3.yaml
+  content: waitct3.yaml
   desc: Wait for CT3 event flag, then clear it. Prior SETQ sets optional CT timeout
     value. C/Z = timeout. ...
 - name: waitfbw
-  file: waitfbw.yaml
+  content: waitfbw.yaml
   desc: WAITFBW waits for a FIFO-interface-block-wrap event to occur (unless the event
     flag is already se...
 - name: waitint
-  file: waitint.yaml
+  content: waitint.yaml
   desc: WAITINT waits for an interrupt-occurred event to occur (unless the event flag
     is already set), th...
 - name: waitpat
-  file: waitpat.yaml
+  content: waitpat.yaml
   desc: WAITPAT waits for a pin-pattern-detected event to occur (unless the event
     flag is already set), t...
 - name: waitse1
-  file: waitse1.yaml
+  content: waitse1.yaml
   desc: Wait for SE1 event flag, then clear it. Prior SETQ sets optional CT timeout
     value. C/Z = timeout. ...
 - name: waitse2
-  file: waitse2.yaml
+  content: waitse2.yaml
   desc: Wait for SE2 event flag, then clear it. Prior SETQ sets optional CT timeout
     value. C/Z = timeout. ...
 - name: waitse3
-  file: waitse3.yaml
+  content: waitse3.yaml
   desc: Wait for SE3 event flag, then clear it. Prior SETQ sets optional CT timeout
     value. C/Z = timeout. ...
 - name: waitse4
-  file: waitse4.yaml
+  content: waitse4.yaml
   desc: Wait for SE4 event flag, then clear it. Prior SETQ sets optional CT timeout
     value. C/Z = timeout. ...
 - name: waitx
-  file: waitx.yaml
+  content: waitx.yaml
   desc: Wait for D+1 clock cycles. Stalls the cog for precise timing delays. Z = 0
     after completion.  Cri...
 - name: waitxfi
-  file: waitxfi.yaml
+  content: waitxfi.yaml
   desc: WAITXFI waits for a streamer-finished event to occur (unless the event flag
     is already set), then...
 - name: waitxmt
-  file: waitxmt.yaml
+  content: waitxmt.yaml
   desc: WAITXMT waits for a streamer-empty event to occur (unless the event flag is
     already set), then cl...
 - name: waitxrl
-  file: waitxrl.yaml
+  content: waitxrl.yaml
   desc: WAITXRL waits for a streamer-LUT-RAM-rollover event to occur (unless the event
     flag is already se...
 - name: waitxro
-  file: waitxro.yaml
+  content: waitxro.yaml
   desc: WAITXRO waits for a streamer-NCO-rollover event to occur (unless the event
     flag is already set), ...

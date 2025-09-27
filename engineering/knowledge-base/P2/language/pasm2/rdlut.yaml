@@ -4,9 +4,7 @@ encoding: EEEE 1010101 CZI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 3
   type: fixed
-group: Lookup Table
-description: '{WC/WZ/WCZ}      Read data from LUT address {#}S/PTRx into D. C = MSB
-  of data. *'
+description: '{WC/WZ/WCZ}      Read data from LUT address {#}S/PTRx into D. C = MSB of data. *'
 flags_affected:
   C:
     formula: MSB of data
@@ -23,3 +21,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - RDLUT D,{#}S/P
 last_updated: '2025-09-19T16:04:17.422959'
+category: misc_ops
+oneliner: '{WC/WZ/WCZ} Read data from LUT address {#}S/PTRx into D'

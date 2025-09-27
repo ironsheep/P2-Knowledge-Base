@@ -5,7 +5,6 @@ timing:
   cycles: 3
   type: variable
   range: 3...10 / 3...20
-group: Hub RAM - Write
 description: Write byte in D[7:0] to hub address {#}S/PTRx.
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
@@ -20,3 +19,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - WRBYTE {#}D,{#}S/P
 last_updated: '2025-09-19T16:04:17.207033'
+category: misc_ops
+oneliner: Write

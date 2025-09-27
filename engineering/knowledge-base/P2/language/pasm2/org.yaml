@@ -1,30 +1,37 @@
 directive: ORG
 name: ORG
-description: |
-  Set the assembly origin to a specific cog RAM address
+description: 'Set the assembly origin to a specific cog RAM address
+
   All subsequent instructions will be assembled starting from this address
+
+  '
 category: Assembly Directive
 documentation_level: complete
-syntax: "ORG address"
+syntax: ORG address
 parameters:
-  - name: address
-    type: immediate
-    range: 0-$1FF
-    description: Cog RAM address (0-511)
+- name: address
+  type: immediate
+  range: 0-$1FF
+  description: Cog RAM address (0-511)
 examples:
-  - code: |
-      ORG  0           ' Start at cog RAM address 0
-      entry   jmp  #main      ' First instruction at address 0
-    description: "Set code origin at start of cog"
-  - code: |
-      ORG  $100        ' Start at cog address $100
-      table   long  1, 2, 3   ' Data table at specific address
-    description: "Place data at specific cog address"
+- code: 'ORG  0           '' Start at cog RAM address 0
+
+    entry   jmp  #main      '' First instruction at address 0
+
+    '
+  description: Set code origin at start of cog
+- code: 'ORG  $100        '' Start at cog address $100
+
+    table   long  1, 2, 3   '' Data table at specific address
+
+    '
+  description: Place data at specific cog address
 notes:
-  - "ORG affects cog RAM addresses only (0-$1FF)"
-  - "For hub RAM addresses, use ORGH"
-  - "To fill between addresses, use ORGF"
+- ORG affects cog RAM addresses only (0-$1FF)
+- For hub RAM addresses, use ORGH
+- To fill between addresses, use ORGF
 related:
-  - ORGH
-  - ORGF
-  - FIT
+- ORGH
+- ORGF
+- FIT
+oneliner: Set the assembly origin to a specific cog RAM address

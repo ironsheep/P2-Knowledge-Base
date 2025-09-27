@@ -15,7 +15,7 @@ metadata:
 
 fundamentals:
   case_sensitivity:
-    file: "case-sensitivity.yaml"
+    content: "case-sensitivity.yaml"
     description: "Both languages are case-insensitive"
     critical_for:
       - "Identifier resolution"
@@ -23,7 +23,7 @@ fundamentals:
       - "Cross-language compatibility"
     
   identifier_rules:
-    file: "identifier-rules.yaml"
+    content: "identifier-rules.yaml"
     description: "Naming rules for all identifiers"
     critical_for:
       - "Valid code generation"
@@ -31,7 +31,7 @@ fundamentals:
       - "Character restrictions"
     
   variable_scoping:
-    file: "variable-scoping-best-practices.yaml"
+    content: "variable-scoping-best-practices.yaml"
     description: "Scoping rules and conflict prevention"
     applies_to: ["spin2"]  # Primarily Spin2
     critical_for:
@@ -40,7 +40,7 @@ fundamentals:
       - "Understanding scope hierarchy"
   
   pasm_labels:
-    file: "pasm-labels.yaml"
+    content: "pasm-labels.yaml"
     description: "PASM2 label syntax and scoping rules"
     applies_to: ["pasm2"]
     critical_for:

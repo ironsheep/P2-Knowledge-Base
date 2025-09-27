@@ -4,7 +4,6 @@ encoding: EEEE 1010010 01I DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 7
   type: fixed
-group: Pixel Mixer
 description: Multiply bytes of S into bytes of D, where $FF = 1.0 and $00 = 0.0.
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
@@ -19,3 +18,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - MULPIX D,{#}S
 last_updated: '2025-09-19T16:04:17.076242'
+category: colorspace
+oneliner: Multiply bytes of S into bytes of D, where $FF = 1

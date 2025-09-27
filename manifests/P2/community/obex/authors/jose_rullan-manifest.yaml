@@ -6,7 +6,7 @@ manifest_metadata:
 base_path: engineering/knowledge-base/P2/community/obex/
 path_construction_note: 'TO ACCESS ANY FILE IN THIS MANIFEST:
 
-  Combine: raw_base_url (from root) + base_path (above) + yaml_path (from entries)
+  Combine: raw_base_url (from root) + base_path (above) + content (from entries)
 
 
   Example:
@@ -32,7 +32,7 @@ objects:
   languages:
   - SPIN2
   created_date: '2024-04-06 12:26:19'
-  yaml_path: objects/4718.yaml
+  content: objects/4718.yaml
 - object_id: '4720'
   title: P2GUI (Encoder Version)
   category: drivers
@@ -40,4 +40,4 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2024-04-08 03:34:06'
-  yaml_path: objects/4720.yaml
+  content: objects/4720.yaml

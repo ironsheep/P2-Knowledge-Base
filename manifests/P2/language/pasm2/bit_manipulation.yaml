@@ -4,91 +4,91 @@ instruction_count: 23
 base_path: engineering/knowledge-base/P2/language/pasm2/
 instructions:
 - name: bitc
-  file: bitc.yaml
+  content: bitc.yaml
   desc: BITC or BITNC alters the Dest bit(s) designated by Src to equal the state,
     or inverse state, of t...
 - name: bith
-  file: bith.yaml
+  content: bith.yaml
   desc: BITH or BITL alters the Dest bit(s) designated by Src to be high (1) or low
     (0). All other bits a...
 - name: bitl
-  file: bitl.yaml
+  content: bitl.yaml
   desc: BITH or BITL alters the Dest bit(s) designated by Src to be high (1) or low
     (0). All other bits a...
 - name: bitnc
-  file: bitnc.yaml
+  content: bitnc.yaml
   desc: BITC or BITNC alters the Dest bit(s) designated by Src to equal the state,
     or inverse state, of t...
 - name: bitnz
-  file: bitnz.yaml
+  content: bitnz.yaml
   desc: BITZ or BITNZ alters the Dest bit(s) designated by Src to equal the state,
     or inverse state, of t...
 - name: bitrnd
-  file: bitrnd.yaml
+  content: bitrnd.yaml
   desc: BITRND alters the Dest bit(s) designated by Src to each be an independent
     random low and high val...
 - name: bitz
-  file: bitz.yaml
+  content: bitz.yaml
   desc: BITZ or BITNZ alters the Dest bit(s) designated by Src to equal the state,
     or inverse state, of t...
 - name: bmask
-  file: bmask.yaml
+  content: bmask.yaml
   desc: BMASK generates an LSB-justified bit mask (all ones) of Src+1 or Dest+1 length
     and stores it in D...
 - name: crcbit
-  file: crcbit.yaml
+  content: crcbit.yaml
   desc: Iterate CRC value in D using C and polynomial in S.
 - name: encod
-  file: encod.yaml
+  content: encod.yaml
   desc: ENCOD stores the bit position value (0—31) of the top-most high bit (1) of
     Src, or Dest, into Des...
 - name: ones
-  file: ones.yaml
+  content: ones.yaml
   desc: 'ONES tallies the number of high bits of Src, or Dest, and stores the count
     into Dest. Result: The...'
 - name: rev
-  file: rev.yaml
+  content: rev.yaml
   desc: The 32-bit pattern in Dest is reversed.  ⇒  REV performs a bitwise reverse
     (bits 31:0 bits 0:31) ...
 - name: rgbexp
-  file: rgbexp.yaml
+  content: rgbexp.yaml
   desc: Expand 5:6:5 RGB value in D[15:0] into 8:8:8 value in D[31:8].
 - name: rgbsqz
-  file: rgbsqz.yaml
+  content: rgbsqz.yaml
   desc: Squeeze 8:8:8 RGB value in D[31:8] into 5:6:5 value in D[15:0].
 - name: rol
-  file: rol.yaml
+  content: rol.yaml
   desc: ROL rotates Dest's binary value left by Src places (0–31 bits). All MSBs rotated
     out are moved in...
 - name: rolbyte
-  file: rolbyte.yaml
+  content: rolbyte.yaml
   desc: ROLBYTE reads the byte identified by Num (0–3) from Src, or a byte from the
     source described by a...
 - name: rolnib
-  file: rolnib.yaml
+  content: rolnib.yaml
   desc: ROLNIB reads the nibble identified by Num (0–7) from Src, or a nibble from
     the source described b...
 - name: sal
-  file: sal.yaml
+  content: sal.yaml
   desc: SAL shifts Dest's binary value left by Src places (0–31 bits) and sets the
     new LSBs to that of th...
 - name: sar
-  file: sar.yaml
+  content: sar.yaml
   desc: The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign
     bit) into new leftmo...
 - name: shl
-  file: shl.yaml
+  content: shl.yaml
   desc: SHL shifts Dest's binary value left by Src places (0–31 bits) and sets the
     new LSBs to 0. This is...
 - name: shr
-  file: shr.yaml
+  content: shr.yaml
   desc: SHR shifts Dest's binary value right by Src places (0–31 bits) and sets the
     new MSBs to 0. This i...
 - name: signx
-  file: signx.yaml
+  content: signx.yaml
   desc: SIGNX fills the bits of Dest, above the bit indicated by Src[4:0], with the
     value of that identif...
 - name: zerox
-  file: zerox.yaml
+  content: zerox.yaml
   desc: ZEROX fills the bits of Dest, above the bit indicated by Src[4:0], with zeros;
     i.e. zero-extendin...

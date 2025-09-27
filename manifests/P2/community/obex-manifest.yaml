@@ -74,7 +74,7 @@ sub_manifests:
     - obex/authors/manatwork-manifest.yaml
     - obex/authors/evanh-manifest.yaml
     - obex/authors/terry_trapp-manifest.yaml
-    - obex/authors/m.k._borri-manifest.yaml
+    - obex/authors/mk_borri-manifest.yaml
     - obex/authors/charles_current-manifest.yaml
     - obex/authors/jose_rullan-manifest.yaml
     - obex/authors/chip_gracey-manifest.yaml

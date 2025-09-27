@@ -4,11 +4,8 @@ encoding: EEEE 1101011 CZL DDDDDDDDD 001000001
 timing:
   cycles: 2
   type: fixed
-group: I/O Pin Instruction - Set pin(s) direction to output (high; 1) or input (low;
-  0).
-description: 'DIRH or DIRL alters the direction register''s bit(s) designated by Dest
-  to be high (1) or low (0); i.e. set to the output Result: The I/O pin direction
-  bit(s), described by Dest, are set high (1; output) or low (0; input); the rest
+description: 'DIRH or DIRL alters the direction register''s bit(s) designated by Dest to be high (1) or low (0); i.e. set
+  to the output Result: The I/O pin direction bit(s), described by Dest, are set high (1; output) or low (0; input); the rest
   are left as-is. Z = DIR bit.'
 flags_affected:
   Z:
@@ -18,8 +15,7 @@ documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pinop
   pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
-    flags'
+  description: 'Pin operation: destination/immediate pin number 0-511, optional effect flags'
   valueType: 30
 compiler_encoding:
   operandFormat: 30
@@ -28,6 +24,8 @@ syntax_variants:
 - DIRH {#}D
 last_updated: '2025-09-19T16:04:17.117106'
 parameters:
-- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
-  the I/O pin(s) to set to output or input.
+- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output
+  or input.
 - WCZ is an optional effect to update flags.
+category: control_flow
+oneliner: Set pin(s) direction to output (high; 1) or input (low; 0)

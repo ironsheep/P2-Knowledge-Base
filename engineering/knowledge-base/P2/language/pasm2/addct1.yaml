@@ -1,21 +1,19 @@
 instruction: ADDCT1
 syntax: ADDCT1 Dest, {#}Src
 encoding:
-- "EEEE 1010011 00I DDDDDDDDD SSSSSSSSS                    D                  \u2014                 \
-  \ \u2014                    2"
-- "EEEE 1010011 01I DDDDDDDDD SSSSSSSSS                    D                  \u2014                 \
-  \ \u2014                    2"
-- "EEEE 1010011 10I DDDDDDDDD SSSSSSSSS                    D                  \u2014                 \
-  \ \u2014                    2"
+- "EEEE 1010011 00I DDDDDDDDD SSSSSSSSS                    D                  \u2014                  \u2014             \
+  \       2"
+- "EEEE 1010011 01I DDDDDDDDD SSSSSSSSS                    D                  \u2014                  \u2014             \
+  \       2"
+- "EEEE 1010011 10I DDDDDDDDD SSSSSSSSS                    D                  \u2014                  \u2014             \
+  \       2"
 timing:
   cycles: 2
   type: fixed
-group: Events - Configuration
 description: 'Set CT1 event to trigger on CT = D + S. Adds S into D.
 
 
-  ADDCT1, ADDCT2, or ADDCT3 sets the hidden CT1, CT2, or CT3 event trigger register (respectively) to
-  the value of
+  ADDCT1, ADDCT2, or ADDCT3 sets the hidden CT1, CT2, or CT3 event trigger register (respectively) to the value of
 
 
   Dest + Src. The result is also written to Dest.
@@ -38,9 +36,8 @@ syntax_variants:
 - ADDCT3 Dest, {#}Src
 last_updated: '2025-09-19'
 brief_description: Add counter 1/2/3
-category: Event Handling Instruction - Set one of three counter events' trigger time.
-result: The Src value is added into Dest and the result is also stored in the hidden CT1, CT2, or CT3
-  event trigger
+category: timing_events
+result: The Src value is added into Dest and the result is also stored in the hidden CT1, CT2, or CT3 event trigger
 parameters:
 - Dest is a register containing the value to add Src to, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
@@ -50,3 +47,4 @@ related:
 - JCTx
 - JNCTx
 manual_extraction_date: '2025-01-19'
+oneliner: Set one of three counter events' trigger time

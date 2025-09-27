@@ -1,24 +1,30 @@
 directive: ORGH
 name: ORGH
-description: |
-  Set the assembly origin to a hub RAM address
+description: 'Set the assembly origin to a hub RAM address
+
   All subsequent code/data will be assembled for hub execution
+
+  '
 category: Assembly Directive
 documentation_level: complete
-syntax: "ORGH [address]"
+syntax: ORGH [address]
 examples:
-  - code: |
-      ORGH  $400       ' Start at hub address $400
-      ' Hub-exec code here
-    description: "Set hub RAM origin"
-  - code: |
-      ORGH             ' Default: start at hub $400
-    description: "Default hub origin"
+- code: 'ORGH  $400       '' Start at hub address $400
+
+    '' Hub-exec code here
+
+    '
+  description: Set hub RAM origin
+- code: 'ORGH             '' Default: start at hub $400
+
+    '
+  description: Default hub origin
 notes:
-  - "ORGH sets hub RAM addresses"
-  - "Default address is $400 if not specified"
-  - "Use for hub-exec code and hub data"
+- ORGH sets hub RAM addresses
+- Default address is $400 if not specified
+- Use for hub-exec code and hub data
 related:
-  - ORG
-  - ORGF
-  - HUBEXEC
+- ORG
+- ORGF
+- HUBEXEC
+oneliner: Set the assembly origin to a hub RAM address

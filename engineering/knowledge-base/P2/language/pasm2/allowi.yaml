@@ -1,16 +1,14 @@
 instruction: ALLOWI
 syntax: ALLOWI
-encoding: "EEEE 1101011 000 000100000 000100100                      \u2014                  \u2014  \
-  \                 \u2014                    2"
+encoding: "EEEE 1101011 000 000100000 000100100                      \u2014                  \u2014                   \u2014\
+  \                    2"
 timing:
   cycles: 2
   type: fixed
-group: Interrupt Instruction - Allow interrupts.
-description: "ALLOWI re-enables interrupt branching; the default on cog start. ALLOWI is the complement\
-  \ of the STALLI Result: Any stalled and future interrupts are allowed.\n\nALLOWI re-enables interrupt\
-  \ branching; the default on cog start. ALLOWI is the complement of the STALLI\n\ninstruction\u2014 both\
-  \ are used to protect short, vital sections of main code from timing jitter or state loss caused by\n\
-  \nasynchronous interrupt handling."
+description: "ALLOWI re-enables interrupt branching; the default on cog start. ALLOWI is the complement of the STALLI Result:\
+  \ Any stalled and future interrupts are allowed.\n\nALLOWI re-enables interrupt branching; the default on cog start. ALLOWI\
+  \ is the complement of the STALLI\n\ninstruction\u2014 both are used to protect short, vital sections of main code from\
+  \ timing jitter or state loss caused by\n\nasynchronous interrupt handling."
 related:
 - STALLI
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
@@ -27,3 +25,5 @@ last_updated: '2025-09-19'
 brief_description: 'Result: Any stalled and future interrupts are allowed.'
 result: Any stalled and future interrupts are allowed.
 manual_extraction_date: '2025-01-19'
+category: interrupts
+oneliner: Allow interrupts

@@ -4,36 +4,36 @@ instruction_count: 10
 base_path: engineering/knowledge-base/P2/language/pasm2/
 instructions:
 - name: getnib
-  file: getnib.yaml
+  content: getnib.yaml
   desc: GETNIB reads the nibble identified by Num (0–7) from Src, or a nibble from
     the source described b...
 - name: setd
-  file: setd.yaml
+  content: setd.yaml
   desc: SETD copies Src[8:0] to the D field of the template, Dest, to be used with
     an ALTI instruction. B...
 - name: setdacs
-  file: setdacs.yaml
+  content: setdacs.yaml
   desc: DAC3 = D[31:24], DAC2 = D[23:16], DAC1 = D[15:8], DAC0 = D[7:0].
 - name: setnib
-  file: setnib.yaml
+  content: setnib.yaml
   desc: SETNIB stores Src[3:0] into the nibble identified by Num within Dest, or the
     nibble and register ...
 - name: sets
-  file: sets.yaml
+  content: sets.yaml
   desc: SETS copies Src[8:0] to the S field of the template, Dest, to be used with
     an ALTI instruction. B...
 - name: setscp
-  file: setscp.yaml
+  content: setscp.yaml
   desc: Set four-channel oscilloscope enable to D[6] and set input pin base to D[5:2].
 - name: setse1
-  file: setse1.yaml
+  content: setse1.yaml
   desc: Set SE1 event configuration to D[8:0].
 - name: setse2
-  file: setse2.yaml
+  content: setse2.yaml
   desc: Set SE2 event configuration to D[8:0].
 - name: setse3
-  file: setse3.yaml
+  content: setse3.yaml
   desc: Set SE3 event configuration to D[8:0].
 - name: setse4
-  file: setse4.yaml
+  content: setse4.yaml
   desc: Set SE4 event configuration to D[8:0].

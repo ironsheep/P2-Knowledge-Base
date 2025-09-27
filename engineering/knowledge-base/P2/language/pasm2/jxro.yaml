@@ -4,9 +4,8 @@ encoding: EEEE 1011110 01I 000001100 SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-group: Events - Branch
-description: "Jump to S** if XRO event \uFB02ag is set.                          \
-  \                                               2 or 4 / 2 or"
+description: "Jump to S** if XRO event \uFB02ag is set.                                                                  \
+  \       2 or 4 / 2 or"
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:
@@ -21,6 +20,7 @@ syntax_variants:
 - JXRO {#}S
 last_updated: '2025-09-19T16:04:17.671220'
 parameters:
-- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
-  absolute or relative address to set PC to. Use # for relative addressing; omit #
-  for absolute addressing.'
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC
+  to. Use # for relative addressing; omit # for absolute addressing.'
+category: timing_events
+oneliner: Branch

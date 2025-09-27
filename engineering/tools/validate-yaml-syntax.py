@@ -5,8 +5,9 @@ YAML Syntax Validation Tool for P2 Knowledge Base
 Checks all YAML files in the knowledge base for syntax errors.
 Run this before generating the master JSON to catch issues early.
 
-Version: 1.0.0
+Version: 1.1.0
 Created: 2025-09-26
+Updated: 2025-09-27 - Added reference pattern checking
 """
 
 import os
@@ -34,6 +35,9 @@ class YAMLValidator:
         self.warnings = []
         self.files_checked = 0
         self.files_with_errors = 0
+        self.manifest_reference_count = 0
+        self.content_reference_count = 0
+        self.legacy_reference_count = 0
         
     def validate_directory(self, directory: Path) -> List[Tuple[Path, str]]:
         """Validate all YAML files in a directory recursively."""
@@ -52,7 +56,8 @@ class YAMLValidator:
         """Validate a single YAML file. Returns error message or empty string."""
         try:
             with open(file_path, 'r') as f:
-                content = yaml.safe_load(f)
+                raw_content = f.read()
+                content = yaml.safe_load(raw_content)
                 
             # Check for empty files
             if content is None:
@@ -61,6 +66,10 @@ class YAMLValidator:
             # Check for common issues
             if isinstance(content, str):
                 return "File contains only a string, not a structured YAML document"
+                
+            # Count reference patterns if this is a manifest
+            if 'manifests' in str(file_path):
+                self.count_references(raw_content)
                 
             return ""  # No error
             
@@ -75,6 +84,25 @@ class YAMLValidator:
             
         except Exception as e:
             return f"Unexpected error: {str(e)}"
+    
+    def count_references(self, content: str):
+        """Count the different reference patterns in manifest files."""
+        import re
+        
+        # Count new standard patterns
+        manifest_pattern = re.compile(r'^\s*manifest:', re.MULTILINE)
+        content_pattern = re.compile(r'^\s*content:', re.MULTILINE)
+        
+        # Count legacy patterns
+        file_pattern = re.compile(r'^\s*file:', re.MULTILINE)
+        yaml_path_pattern = re.compile(r'^\s*yaml_path:', re.MULTILINE)
+        url_pattern = re.compile(r'^\s*url:.*\.yaml', re.MULTILINE)
+        
+        self.manifest_reference_count += len(manifest_pattern.findall(content))
+        self.content_reference_count += len(content_pattern.findall(content))
+        self.legacy_reference_count += len(file_pattern.findall(content))
+        self.legacy_reference_count += len(yaml_path_pattern.findall(content))
+        self.legacy_reference_count += len(url_pattern.findall(content))
     
     def check_common_patterns(self, file_path: Path) -> List[str]:
         """Check for common YAML issues that might not be syntax errors."""
@@ -141,6 +169,14 @@ class YAMLValidator:
         print(f"{'=' * 70}")
         print(f"Files checked: {self.files_checked}")
         print(f"Files with errors: {self.files_with_errors}")
+        
+        # Reference pattern summary
+        print(f"\n{Colors.BOLD}Reference Pattern Usage:{Colors.RESET}")
+        print(f"  manifest: references: {Colors.GREEN}{self.manifest_reference_count}{Colors.RESET}")
+        print(f"  content: references: {Colors.GREEN}{self.content_reference_count}{Colors.RESET}")
+        if self.legacy_reference_count > 0:
+            print(f"  Legacy patterns (file:/yaml_path:/url:): {Colors.YELLOW}{self.legacy_reference_count}{Colors.RESET}")
+            print(f"  {Colors.YELLOW}⚠ Found legacy patterns - should be migrated to content:/manifest:{Colors.RESET}")
         
         if self.files_with_errors == 0:
             print(f"\n{Colors.GREEN}{Colors.BOLD}✅ ALL YAML FILES ARE VALID!{Colors.RESET}")

@@ -4,7 +4,6 @@ encoding: EEEE 1001110 10I DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
 description: Iterate CRC value in D using C and polynomial in S.
 documentation_source: original
 documentation_level: minimal
@@ -17,3 +16,5 @@ compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:16.856840'
+category: arithmetic
+oneliner: Iterate CRC value in D using C and polynomial in S

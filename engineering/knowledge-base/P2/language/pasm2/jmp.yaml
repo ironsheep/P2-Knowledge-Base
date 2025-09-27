@@ -12,7 +12,6 @@ timing:
   cycles: 4
   type: variable
   range: 4 / 13...20
-group: Branch A - Jump
 description: Jump to A. If R = 1 then PC += A, else PC = A. "\" forces R = 0.
 compiler_category: Control Flow
 flags_affected:
@@ -30,3 +29,5 @@ enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
 syntax_variants:
 - 'JMP #{\}A'
 last_updated: '2025-09-19T16:04:17.639573'
+category: control_flow
+oneliner: Jump

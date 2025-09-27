@@ -4,7 +4,6 @@ encoding: EEEE 1101011 C0L DDDDDDDDD 000000110
 timing:
   cycles: 2
   type: fixed
-group: Hub Control - Locks
 description: 'Try to acquire lock D[3:0]. C = 1 if got LOCK.
 
 
@@ -27,38 +26,31 @@ documentation_level: comprehensive
 examples:
 - name: Resource Protection
   description: Protect shared resource access
-  code: "' Try to acquire resource lock\nacquire_resource\n        locktry #RESOURCE_LOCK\
-    \     wc   ' Try to get lock\nif_nc   ret                          ' Failed -\
-    \ return\n        \n        ' Got lock - access resource safely\n        rdlong\
-    \  value, shared_addr\n        add     value, #1\n        wrlong  value, shared_addr\n\
-    \        \n        ' Release lock when done\n        lockrel #RESOURCE_LOCK\n\
-    \        ret\n"
+  code: "' Try to acquire resource lock\nacquire_resource\n        locktry #RESOURCE_LOCK     wc   ' Try to get lock\nif_nc\
+    \   ret                          ' Failed - return\n        \n        ' Got lock - access resource safely\n        rdlong\
+    \  value, shared_addr\n        add     value, #1\n        wrlong  value, shared_addr\n        \n        ' Release lock\
+    \ when done\n        lockrel #RESOURCE_LOCK\n        ret\n"
   source: multi_cog_pattern
 - name: Debug Monitor Lock
   description: Ensure single debugger instance
-  code: "' Lock[15] reserved for debug monitor\ndebug_init\n        locktry #15  \
-    \               wc   ' Try to get debug lock\nif_nc   jmp     #debug_already_running\n\
-    \        \n        ' We are the debug monitor\n        call    #setup_debug_isr\n\
+  code: "' Lock[15] reserved for debug monitor\ndebug_init\n        locktry #15                 wc   ' Try to get debug lock\n\
+    if_nc   jmp     #debug_already_running\n        \n        ' We are the debug monitor\n        call    #setup_debug_isr\n\
     \        ' Keep lock until shutdown\n"
   source: Spin2_debugger.spin2
 - name: Spin Lock Implementation
   description: Wait until lock acquired
-  code: "' Spin until lock acquired\nspin_lock\n        locktry lock_num         \
-    \  wc   ' Try to get lock\nif_nc   jmp     #spin_lock           ' Keep trying\n\
-    \        ret                          ' Got lock\n        \n' Alternative with\
-    \ timeout\nspin_lock_timeout\n        mov     timeout, ##1000000\n.loop   locktry\
-    \ lock_num           wc\nif_c    ret                          ' Got lock\n   \
-    \     djnz    timeout, #.loop\n        ' Timeout - handle error\n"
+  code: "' Spin until lock acquired\nspin_lock\n        locktry lock_num           wc   ' Try to get lock\nif_nc   jmp   \
+    \  #spin_lock           ' Keep trying\n        ret                          ' Got lock\n        \n' Alternative with timeout\n\
+    spin_lock_timeout\n        mov     timeout, ##1000000\n.loop   locktry lock_num           wc\nif_c    ret            \
+    \              ' Got lock\n        djnz    timeout, #.loop\n        ' Timeout - handle error\n"
   source: synchronization_pattern
 - name: Multi-Resource Manager
   description: Manage multiple locks for complex operations
-  code: "' Acquire multiple locks in order (prevent deadlock)\nacquire_multi\n   \
-    \     locktry #LOCK_A            wc\nif_nc   jmp     #.fail\n        locktry #LOCK_B\
-    \            wc\nif_nc   jmp     #.release_a\n        locktry #LOCK_C        \
-    \    wc\nif_nc   jmp     #.release_b\n        \n        ' Got all locks - proceed\n\
-    \        setd    .result, #1          ' Success\n        ret\n        \n.release_b\n\
-    \        lockrel #LOCK_B\n.release_a  \n        lockrel #LOCK_A\n.fail   setd\
-    \    .result, #0          ' Failed\n.result ret\n"
+  code: "' Acquire multiple locks in order (prevent deadlock)\nacquire_multi\n        locktry #LOCK_A            wc\nif_nc\
+    \   jmp     #.fail\n        locktry #LOCK_B            wc\nif_nc   jmp     #.release_a\n        locktry #LOCK_C      \
+    \      wc\nif_nc   jmp     #.release_b\n        \n        ' Got all locks - proceed\n        setd    .result, #1     \
+    \     ' Success\n        ret\n        \n.release_b\n        lockrel #LOCK_B\n.release_a  \n        lockrel #LOCK_A\n.fail\
+    \   setd    .result, #0          ' Failed\n.result ret\n"
   source: complex_synchronization
 related_instructions:
 - LOCKREL: Release lock
@@ -79,3 +71,5 @@ compiler_encoding:
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.561046'
+category: control_flow
+oneliner: Locks

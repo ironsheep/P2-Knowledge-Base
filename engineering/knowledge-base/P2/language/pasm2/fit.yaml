@@ -1,25 +1,33 @@
 directive: FIT
 name: FIT
-description: |
-  Verify that code fits within specified address limit
+description: 'Verify that code fits within specified address limit
+
   Generates error if current address exceeds specified limit
+
+  '
 category: Assembly Directive
 documentation_level: complete
-syntax: "FIT [address]"
+syntax: FIT [address]
 examples:
-  - code: |
-      ' Cog code
-      ORG  0
-      ' ... code ...
-      FIT  $1F0        ' Ensure code fits before cog special registers
-    description: "Verify code fits in available cog space"
-  - code: |
-      FIT              ' Default: ensure fits in cog RAM (< $200)
-    description: "Default fit check"
+- code: ''' Cog code
+
+    ORG  0
+
+    '' ... code ...
+
+    FIT  $1F0        '' Ensure code fits before cog special registers
+
+    '
+  description: Verify code fits in available cog space
+- code: 'FIT              '' Default: ensure fits in cog RAM (< $200)
+
+    '
+  description: Default fit check
 notes:
-  - "FIT without parameter checks for cog RAM limit ($200)"
-  - "Generates assembly error if limit exceeded"
-  - "Essential for cog code size verification"
+- FIT without parameter checks for cog RAM limit ($200)
+- Generates assembly error if limit exceeded
+- Essential for cog code size verification
 related:
-  - ORG
-  - RES
+- ORG
+- RES
+oneliner: Verify that code fits within specified address limit

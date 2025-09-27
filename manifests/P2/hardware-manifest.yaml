@@ -15,57 +15,57 @@ description: |
 by_category:
   evaluation_boards:
     boards:
-      - {name: "p2-eval-board", file: "p2-eval-board.yaml", desc: "P2 Evaluation Board (P2-EVAL) - Primary dev board"}
-      - {name: "p2_eval_board", file: "p2_eval_board.yaml", desc: "P2-EVAL alternate reference"}
+      - {name: "p2-eval-board", content: "p2-eval-board.yaml", desc: "P2 Evaluation Board (P2-EVAL) - Primary dev board"}
+      - {name: "p2_eval_board", content: "p2_eval_board.yaml", desc: "P2-EVAL alternate reference"}
       # Note: Need to identify the other 2 evaluation boards mentioned
   
   p2_modules:
     edge_variants:
-      - {name: "edge-standard-module", file: "edge-standard-module.yaml", desc: "P2 Edge Module with 16MB Flash + 16MB RAM"}
-      - {name: "edge-32mb-module", file: "edge-32mb-module.yaml", desc: "P2 Edge 32MB Flash variant"}
-      - {name: "p2_edge_module", file: "p2_edge_module.yaml", desc: "Edge module reference"}
+      - {name: "edge-standard-module", content: "edge-standard-module.yaml", desc: "P2 Edge Module with 16MB Flash + 16MB RAM"}
+      - {name: "edge-32mb-module", content: "edge-32mb-module.yaml", desc: "P2 Edge 32MB Flash variant"}
+      - {name: "p2_edge_module", content: "p2_edge_module.yaml", desc: "Edge module reference"}
     
   breakout_boards:
     edge_carriers:
-      - {name: "edge-mini-breakout", file: "edge-mini-breakout.yaml", desc: "Compact Edge breakout board"}
-      - {name: "edge-standard-breakout", file: "edge-standard-breakout.yaml", desc: "Full-featured Edge breakout"}
-      - {name: "edge-breadboard-carrier", file: "edge-breadboard-carrier.yaml", desc: "Breadboard-friendly Edge carrier"}
-      - {name: "p2_edge_mini_breakout", file: "p2_edge_mini_breakout.yaml", desc: "Mini breakout reference"}
-      - {name: "p2_edge_breadboard_adapter", file: "p2_edge_breadboard_adapter.yaml", desc: "Breadboard adapter reference"}
+      - {name: "edge-mini-breakout", content: "edge-mini-breakout.yaml", desc: "Compact Edge breakout board"}
+      - {name: "edge-standard-breakout", content: "edge-standard-breakout.yaml", desc: "Full-featured Edge breakout"}
+      - {name: "edge-breadboard-carrier", content: "edge-breadboard-carrier.yaml", desc: "Breadboard-friendly Edge carrier"}
+      - {name: "p2_edge_mini_breakout", content: "p2_edge_mini_breakout.yaml", desc: "Mini breakout reference"}
+      - {name: "p2_edge_breadboard_adapter", content: "p2_edge_breadboard_adapter.yaml", desc: "Breadboard adapter reference"}
   
   addon_boards:
     communication:
-      - {name: "addon-serial-host", file: "addon-serial-host.yaml", desc: "USB serial host adapter"}
-      - {name: "addon-serial-device", file: "addon-serial-device.yaml", desc: "Serial device interface"}
+      - {name: "addon-serial-host", content: "addon-serial-host.yaml", desc: "USB serial host adapter"}
+      - {name: "addon-serial-device", content: "addon-serial-device.yaml", desc: "Serial device interface"}
     
     display_output:
-      - {name: "addon-digital-video-out", file: "addon-digital-video-out.yaml", desc: "Digital video output board"}
-      - {name: "addon-av-breakout", file: "addon-av-breakout.yaml", desc: "Audio/Video breakout board"}
-      - {name: "addon-led-matrix", file: "addon-led-matrix.yaml", desc: "LED matrix display board"}
-      - {name: "hub75_adapter", file: "hub75_adapter.yaml", desc: "HUB75 LED panel adapter"}
-      - {name: "7_segment_display", file: "7_segment_display.yaml", desc: "7-segment display module"}
+      - {name: "addon-digital-video-out", content: "addon-digital-video-out.yaml", desc: "Digital video output board"}
+      - {name: "addon-av-breakout", content: "addon-av-breakout.yaml", desc: "Audio/Video breakout board"}
+      - {name: "addon-led-matrix", content: "addon-led-matrix.yaml", desc: "LED matrix display board"}
+      - {name: "hub75_adapter", content: "hub75_adapter.yaml", desc: "HUB75 LED panel adapter"}
+      - {name: "7_segment_display", content: "7_segment_display.yaml", desc: "7-segment display module"}
     
     control_input:
-      - {name: "addon-control-board", file: "addon-control-board.yaml", desc: "Control interface board"}
-      - {name: "control_board", file: "control_board.yaml", desc: "Control board reference"}
-      - {name: "buttons_board", file: "buttons_board.yaml", desc: "Button input board"}
-      - {name: "switches_board", file: "switches_board.yaml", desc: "Switch input board"}
-      - {name: "switches_and_leds", file: "switches_and_leds.yaml", desc: "Combined switches and LEDs"}
+      - {name: "addon-control-board", content: "addon-control-board.yaml", desc: "Control interface board"}
+      - {name: "control_board", content: "control_board.yaml", desc: "Control board reference"}
+      - {name: "buttons_board", content: "buttons_board.yaml", desc: "Button input board"}
+      - {name: "switches_board", content: "switches_board.yaml", desc: "Switch input board"}
+      - {name: "switches_and_leds", content: "switches_and_leds.yaml", desc: "Combined switches and LEDs"}
     
     io_expansion:
-      - {name: "addon-digital-io-board", file: "addon-digital-io-board.yaml", desc: "Digital I/O expansion"}
+      - {name: "addon-digital-io-board", content: "addon-digital-io-board.yaml", desc: "Digital I/O expansion"}
     
     prototyping:
-      - {name: "addon-mini-prototyping", file: "addon-mini-prototyping.yaml", desc: "Mini prototyping board"}
+      - {name: "addon-mini-prototyping", content: "addon-mini-prototyping.yaml", desc: "Mini prototyping board"}
     
     specialized:
-      - {name: "goertzel_board", file: "goertzel_board.yaml", desc: "Goertzel algorithm board"}
+      - {name: "goertzel_board", content: "goertzel_board.yaml", desc: "Goertzel algorithm board"}
   
   reference_docs:
     comparison:
-      - {name: "hardware-compatibility-matrix", file: "hardware-compatibility-matrix.yaml", desc: "Board compatibility matrix"}
-      - {name: "p2-hardware-feature-comparison", file: "p2-hardware-feature-comparison.yaml", desc: "Feature comparison table"}
-      - {name: "p2-hardware-selection-guide", file: "p2-hardware-selection-guide.yaml", desc: "Board selection guide"}
+      - {name: "hardware-compatibility-matrix", content: "hardware-compatibility-matrix.yaml", desc: "Board compatibility matrix"}
+      - {name: "p2-hardware-feature-comparison", content: "p2-hardware-feature-comparison.yaml", desc: "Feature comparison table"}
+      - {name: "p2-hardware-selection-guide", content: "p2-hardware-selection-guide.yaml", desc: "Board selection guide"}
 
 hardware_summary:
   p2_chips:

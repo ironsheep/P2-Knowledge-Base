@@ -6,7 +6,7 @@ manifest_metadata:
 base_path: engineering/knowledge-base/P2/community/obex/
 path_construction_note: 'TO ACCESS ANY FILE IN THIS MANIFEST:
 
-  Combine: raw_base_url (from root) + base_path (above) + yaml_path (from entries)
+  Combine: raw_base_url (from root) + base_path (above) + content (from entries)
 
 
   Example:
@@ -34,4 +34,4 @@ objects:
   - PASM2
   description_short: A wear-leveling filesystem for the P2 Edge on-board flash chip.
     Supports multi-cog access without consuming a Cog.
-  yaml_path: objects/4261.yaml
+  content: objects/4261.yaml

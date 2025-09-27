@@ -4,9 +4,8 @@ encoding: EEEE 1101011 00L DDDDDDDDD 000110111
 timing:
   cycles: 2
   type: fixed
-group: Lookup Table
-description: If D[0] = 1 then enable LUT sharing, where LUT writes within the adjacent
-  odd/even companion cog are copied to this cog's LUT.
+description: If D[0] = 1 then enable LUT sharing, where LUT writes within the adjacent odd/even companion cog are copied to
+  this cog's LUT.
 documentation_source: original
 documentation_level: enhanced
 compiler_operand_format:
@@ -18,3 +17,5 @@ compiler_encoding:
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.496285'
+category: misc_ops
+oneliner: If D[0] = 1 then enable LUT sharing

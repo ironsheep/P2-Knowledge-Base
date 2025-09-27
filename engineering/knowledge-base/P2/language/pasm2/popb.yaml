@@ -4,7 +4,6 @@ encoding: EEEE 1011000 CZ1 DDDDDDDDD 111011111
 timing:
   cycles: 1
   type: fixed
-group: Hub RAM - Read
 description: Read long from hub address --PTRB into D.
 flags_affected:
   C:
@@ -30,3 +29,5 @@ brief_description: Pop long from stack using PTRB
 parameters:
 - D is the destination register to receive the popped value
 - PTRB is automatically decremented before the read
+category: misc_ops
+oneliner: Read

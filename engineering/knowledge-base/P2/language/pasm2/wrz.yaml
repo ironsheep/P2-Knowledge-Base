@@ -4,7 +4,6 @@ encoding: EEEE 1101011 000 DDDDDDDDD 001101110
 timing:
   cycles: 2
   type: fixed
-group: Math and Logic
 description: Write 0 or 1 to D, according to Z. D = {31'b0, Z).
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
@@ -19,3 +18,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - WRZ D
 last_updated: '2025-09-19T16:04:17.241380'
+category: arithmetic
+oneliner: Write 0 or 1 to D, according to Z

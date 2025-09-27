@@ -1,17 +1,15 @@
 instruction: CMPR
 syntax: CMPR Dest, {#}Src {WC|WZ|WCZ}
-encoding: "EEEE 0010100 CZI DDDDDDDDD SSSSSSSSS                  \u2014          Unsigned (S < D)    \
-  \  D=S                    2"
+encoding: "EEEE 0010100 CZI DDDDDDDDD SSSSSSSSS                  \u2014          Unsigned (S < D)      D=S               \
+  \     2"
 timing:
   cycles: 2
   type: fixed
-group: Math Instruction - Compare two unsigned values (in reverse order to CMP).
-description: "CMP compares the unsigned values of Dest and Src (by subtracting Dest from Src) and optionally\
-  \ setting the C Result: Greater/lesser and equality status is optionally written to the C and Z flags.\n\
-  \nCMP compares the unsigned values of Dest and Src (by subtracting Dest from Src) and optionally setting\
-  \ the C\n\nand Z \uFB02ags accordingly.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag\
-  \ is set (1) if Src is less than Dest.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is\
-  \ set (1) if Dest equals Src.\n\nTo compare unsigned, multi-long values, use CMP (instead) followed\
+description: "CMP compares the unsigned values of Dest and Src (by subtracting Dest from Src) and optionally setting the C\
+  \ Result: Greater/lesser and equality status is optionally written to the C and Z flags.\n\nCMP compares the unsigned values\
+  \ of Dest and Src (by subtracting Dest from Src) and optionally setting the C\n\nand Z \uFB02ags accordingly.\n\nIf the\
+  \ WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is set (1) if Src is less than Dest.\n\nIf the WZ or WCZ effect is speci\uFB01\
+  ed, the Z \uFB02ag is set (1) if Dest equals Src.\n\nTo compare unsigned, multi-long values, use CMP (instead) followed\
   \ by CMPX as described in Comparing Two\n\nMulti-Long Values."
 flags_affected:
   C:
@@ -36,8 +34,9 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Compare reverse
-category: Math Instruction - Compare two unsigned values (in reverse order to CMP).
+category: arithmetic
 result: "Greater/lesser and equality status is optionally written to the C and Z \uFB02ags."
 syntax_variants:
 - CMPR Dest, {#}Src {WC|WZ|WCZ}
 manual_extraction_date: '2025-01-19'
+oneliner: Compare two unsigned values (in reverse order to CMP)

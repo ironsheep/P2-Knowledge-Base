@@ -4,15 +4,13 @@ encoding: EEEE 0000000 CZI DDDDDDDDD SSSSSSSSS                           D      
 timing:
   cycles: 1
   type: fixed
-group: Bit Operation Instruction - Rotate bits right.
-description: "ROR rotates Dest's binary value right by Src places (0\u201331 bits). All LSBs rotated out\
-  \ are moved into the new Result: The bits of Dest are rotated right by Src bits; any departing LSBs\
-  \ are moved into MSBs.\n\nROR rotates Dest's binary value right by Src places (0\u201331 bits). All\
-  \ LSBs rotated out are moved into the new\n\nMSBs.\n\nIf the WC or WCZ effect is speci\uFB01ed, the\
-  \ C \uFB02ag is updated to the value of the last bit rotated out (effectively C =\n\nresult bit \"31\"\
-  ) if Src is 1\u201331, or to Dest[0] if Src is 0.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z\
-  \ \uFB02ag is set (1) if the Dest result equals zero, or is cleared (0) if it is\n\nnon-zero. Since\
-  \ no bits are lost by this operation, the result will only be zero if Dest started at zero."
+description: "ROR rotates Dest's binary value right by Src places (0\u201331 bits). All LSBs rotated out are moved into the\
+  \ new Result: The bits of Dest are rotated right by Src bits; any departing LSBs are moved into MSBs.\n\nROR rotates Dest's\
+  \ binary value right by Src places (0\u201331 bits). All LSBs rotated out are moved into the new\n\nMSBs.\n\nIf the WC or\
+  \ WCZ effect is speci\uFB01ed, the C \uFB02ag is updated to the value of the last bit rotated out (effectively C =\n\nresult\
+  \ bit \"31\") if Src is 1\u201331, or to Dest[0] if Src is 0.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02\
+  ag is set (1) if the Dest result equals zero, or is cleared (0) if it is\n\nnon-zero. Since no bits are lost by this operation,\
+  \ the result will only be zero if Dest started at zero."
 flags_affected:
   C:
     formula: last bit shifted out if S[4:0] > 0, else D[0]
@@ -32,10 +30,10 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Rotate right
-category: Bit Operation Instruction - Rotate bits right.
+category: bit_manipulation
 result: The bits of Dest are rotated right by Src bits; any departing LSBs are moved into MSBs.
 syntax_variants:
 - ROR Dest, {#}Src {WC|WZ|WCZ}
-- "ROR rotates Dest's binary value right by Src places (0\u201331 bits). All LSBs rotated out are moved\
-  \ into the new"
+- "ROR rotates Dest's binary value right by Src places (0\u201331 bits). All LSBs rotated out are moved into the new"
 manual_extraction_date: '2025-01-19'
+oneliner: Rotate bits right

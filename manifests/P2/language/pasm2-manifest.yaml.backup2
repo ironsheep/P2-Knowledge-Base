@@ -1,0 +1,205 @@
+version: '2.0'
+schema_version: '2024-12-30'
+last_updated: '2025-09-23T00:00:00Z'
+category: pasm2_instructions
+base_path: 'engineering/knowledge-base/P2/language/pasm2/'
+structure: hierarchical
+total_instructions: 361
+description: Complete PASM2 instruction set with hierarchical organization for efficient
+  discovery
+categories:
+  arithmetic:
+    manifest: pasm2/arithmetic.yaml
+    count: 38
+    description: Arithmetic and math operations
+    sample_instructions:
+    - abs
+    - add
+    - addct1
+    - addct2
+    - addct3
+  logic:
+    manifest: pasm2/logic.yaml
+    count: 41
+    description: Logical and comparison operations
+    sample_instructions:
+    - and
+    - andn
+    - bitnot
+    - cmp
+    - cmpm
+  bit_manipulation:
+    manifest: pasm2/bit_manipulation.yaml
+    count: 23
+    description: Bit manipulation and shifting
+    sample_instructions:
+    - bitc
+    - bith
+    - bitl
+    - bitnc
+    - bitnz
+  memory_hub:
+    manifest: pasm2/memory_hub.yaml
+    count: 22
+    description: Hub memory operations
+    sample_instructions:
+    - getbyte
+    - rdbyte
+    - rdfast
+    - rdlong
+    - rdlut
+  memory_cog:
+    manifest: pasm2/memory_cog.yaml
+    count: 10
+    description: Cog/LUT memory operations
+    sample_instructions:
+    - getnib
+    - setd
+    - setdacs
+    - setnib
+    - sets
+  control_flow:
+    manifest: pasm2/control_flow.yaml
+    count: 27
+    description: Branches, jumps, and calls
+    sample_instructions:
+    - call
+    - calla
+    - callb
+    - calld
+    - callpa
+  pin_control:
+    manifest: pasm2/pin_control.yaml
+    count: 32
+    description: Digital pin and smart pin control
+    sample_instructions:
+    - akpin
+    - dirc
+    - dirh
+    - dirl
+    - dirnc
+  timing_events:
+    manifest: pasm2/timing_events.yaml
+    count: 35
+    description: Timing, waiting, and events
+    sample_instructions:
+    - cogatn
+    - getct
+    - pollatn
+    - pollct1
+    - pollct2
+  cordic:
+    manifest: pasm2/cordic.yaml
+    count: 7
+    description: CORDIC math operations
+    sample_instructions:
+    - getqx
+    - getqy
+    - qexp
+    - qfrac
+    - qlog
+  streamer:
+    manifest: pasm2/streamer.yaml
+    count: 6
+    description: Streamer operations
+    sample_instructions:
+    - getxacc
+    - setxfrq
+    - xcont
+    - xinit
+    - xstop
+  colorspace:
+    manifest: pasm2/colorspace.yaml
+    count: 7
+    description: Pixel and colorspace operations
+    sample_instructions:
+    - blnpix
+    - mixpix
+    - setcfrq
+    - setci
+    - setcmod
+  interrupts:
+    manifest: pasm2/interrupts.yaml
+    count: 14
+    description: Interrupt configuration and handling
+    sample_instructions:
+    - allowi
+    - nixint1
+    - nixint2
+    - nixint3
+    - resi0
+  cog_control:
+    manifest: pasm2/cog_control.yaml
+    count: 11
+    description: Cog and hub control
+    sample_instructions:
+    - brk
+    - cogbrk
+    - cogid
+    - coginit
+    - cogstop
+  stack_ops:
+    manifest: pasm2/stack_ops.yaml
+    count: 6
+    description: Stack operations
+    sample_instructions:
+    - popa
+    - popb
+    - pusha
+    - pushb
+  special_ops:
+    manifest: pasm2/special_ops.yaml
+    count: 35
+    description: Special operations and modifiers
+    sample_instructions:
+    - altb
+    - altd
+    - altgb
+    - altgn
+    - altgw
+  misc_ops:
+    manifest: pasm2/misc_ops.yaml
+    count: 47
+    description: Miscellaneous operations
+    sample_instructions:
+    - asmclk
+    - crcnib
+    - djf
+    - djnf
+    - instruction_manifest
+  directives:
+    description: Assembly directives for code organization and data definition
+    items:
+    - {name: "alignl", content: "alignl.yaml", desc: "Align to long boundary (4-byte)"}
+    - {name: "alignw", content: "alignw.yaml", desc: "Align to word boundary (2-byte)"}
+    - {name: "org", content: "org.yaml", desc: "Set cog memory origin"}
+    - {name: "orgh", content: "orgh.yaml", desc: "Set hub memory origin"}
+    - {name: "byte", content: "byte.yaml", desc: "Define byte data"}
+    - {name: "word", content: "word.yaml", desc: "Define word data"}
+    - {name: "long", content: "long.yaml", desc: "Define long data"}
+    - {name: "fit", content: "fit.yaml", desc: "Ensure code fits in cog memory"}
+    - {name: "res", content: "res.yaml", desc: "Reserve cog memory space"}
+  constants:
+    description: Predefined numeric constants for PASM2 programming
+    items:
+    - {name: "TRUE", content: "true.yaml", desc: "Logical true (-1, $FFFFFFFF)"}
+    - {name: "FALSE", content: "false.yaml", desc: "Logical false (0, $00000000)"}
+    - {name: "POSX", content: "posx.yaml", desc: "Maximum positive integer (2,147,483,647, $7FFFFFFF)"}
+    - {name: "NEGX", content: "negx.yaml", desc: "Maximum negative integer (-2,147,483,648, $80000000)"}
+    - {name: "PI", content: "pi.yaml", desc: "Floating-point PI (~3.141593, $40490FDB)"}
+  special_registers:
+    description: Special registers for direct I/O pin access (addresses 506-511)
+    items:
+    - {name: "special_registers", content: "special-registers.yaml", desc: "DIRA/DIRB/INA/INB/OUTA/OUTB registers"}
+quick_lookup:
+  common_instructions:
+    ADD: arithmetic
+    SUB: arithmetic
+    MOV: logic
+    JMP: control_flow
+    CALL: control_flow
+    RET: control_flow
+    RDLONG: memory_hub
+    WRLONG: memory_hub
+    WAITX: timing_events
+    REP: control_flow

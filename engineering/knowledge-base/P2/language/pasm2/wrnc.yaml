@@ -4,7 +4,6 @@ encoding: EEEE 1101011 000 DDDDDDDDD 001101101
 timing:
   cycles: 2
   type: fixed
-group: Bit Operation Instruction - Write C or not C to register.
 description: Write 0 or 1 to D, according to !C. D = {31'b0, !C).
 flags_affected:
   C:
@@ -25,3 +24,5 @@ long_description: Dest value is replaced with state of C or !C.
 syntax_variants:
 - WRNC D
 last_updated: '2025-09-19T16:04:17.145138'
+category: bit_manipulation
+oneliner: Write C or not C to register

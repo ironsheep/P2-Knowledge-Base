@@ -6,7 +6,7 @@ manifest_metadata:
 base_path: engineering/knowledge-base/P2/community/obex/
 path_construction_note: 'TO ACCESS ANY FILE IN THIS MANIFEST:
 
-  Combine: raw_base_url (from root) + base_path (above) + yaml_path (from entries)
+  Combine: raw_base_url (from root) + base_path (above) + content (from entries)
 
 
   Example:
@@ -34,7 +34,7 @@ objects:
   description_short: The ADS1118 is a precision, low power, 16-bit analog-to-digital
     converter (ADC) that provides all features necessary to measure themost common
     sensor signals in
-  yaml_path: objects/4064.yaml
+  content: objects/4064.yaml
 - object_id: '4571'
   title: ISP P2 180° Field of View TOF Sensor
   author: Stephen M Moraco
@@ -43,7 +43,7 @@ objects:
   - PASM2
   description_short: A collection of P2 Spin2 objects allows us to realize a 180°
     field-of-view time-of-flight sensor by ganging 4 VL53L5CX TOF sensors
-  yaml_path: objects/4571.yaml
+  content: objects/4571.yaml
 - object_id: '5259'
   title: BNO08x IMU (9 DOF) (RVC Mode)
   author: Jon McPhalen (jonnymac)
@@ -51,4 +51,4 @@ objects:
   - SPIN2
   description_short: This object takes advantage of the BNO08x RVC (serial) output
     to provide Yaw, Pitch, Roll, X acceler
-  yaml_path: objects/5259.yaml
+  content: objects/5259.yaml

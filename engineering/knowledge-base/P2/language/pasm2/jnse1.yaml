@@ -5,9 +5,8 @@ timing:
   cycles: 2
   type: variable
   range: 13...20
-group: Events - Branch
-description: "Jump to S** if SE1 event \uFB02ag is clear.                        \
-  \                                               2 or 4 / 2 or"
+description: "Jump to S** if SE1 event \uFB02ag is clear.                                                                \
+  \       2 or 4 / 2 or"
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: structured
 compiler_operand_format:
@@ -39,3 +38,5 @@ specifics:
   condition: not set
 quick_example: 'JNSE1 #handler  ; Jump if selector 1 event flag is NOT set'
 has_group_documentation: true
+category: timing_events
+oneliner: Branch

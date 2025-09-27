@@ -4,7 +4,6 @@ encoding: EEEE 1101011 CZ1 000000000 000011011
 timing:
   cycles: 2
   type: fixed
-group: Miscellaneous
 description: Get RND into C/Z. C = RND[31], Z = RND[30], unique per cog.
 flags_affected:
   C:
@@ -24,3 +23,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - GETRND WC/WZ/WCZ
 last_updated: '2025-09-19T16:04:17.572226'
+category: misc_ops
+oneliner: Get RND into C/Z

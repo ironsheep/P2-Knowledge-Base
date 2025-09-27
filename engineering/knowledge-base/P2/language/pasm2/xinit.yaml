@@ -4,7 +4,6 @@ encoding: EEEE 1100101 0LI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-group: Streamer
 description: Issue streamer command immediately, zeroing phase.
 documentation_source: enhanced_from_code_study
 documentation_level: comprehensive
@@ -21,8 +20,7 @@ examples:
 
     '' Where:
 
-    '' rmode = $8081_0800 + spi_di<<17  '' 1-pin output, bytes-msb-first, 256 bytes
-    from hub
+    '' rmode = $8081_0800 + spi_di<<17  '' 1-pin output, bytes-msb-first, 256 bytes from hub
 
     '' tranp = 256 * 8 * 2              '' Number of clock transitions
 
@@ -40,8 +38,7 @@ examples:
 
     '' Where:
 
-    '' bmode = $4081_0008 + spi_di<<17  '' 1-pin output, bytes-msb-first, 1 byte from
-    S
+    '' bmode = $4081_0008 + spi_di<<17  '' 1-pin output, bytes-msb-first, 1 byte from S
 
     '
   source: flash_loader.spin2
@@ -104,3 +101,5 @@ compiler_encoding:
   operandFormat: 13
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:16.945659'
+category: streamer
+oneliner: Issue streamer command immediately, zeroing phase

@@ -4,9 +4,8 @@ encoding: EEEE 1101011 CZ1 000000000 000101111
 timing:
   cycles: 1
   type: fixed
-group: Branch Return
-description: Return by reading hub long (L) at --PTRB. C = L[31], Z = L[30], PC =
-  L[19:0].                                             11...18 1 / 20...40
+description: Return by reading hub long (L) at --PTRB. C = L[31], Z = L[30], PC = L[19:0].                                             11...18
+  1 / 20...40
 flags_affected:
   C:
     formula: L[31], Z = L[30], PC = L[19:0]
@@ -25,3 +24,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - RETB {WC/WZ/WCZ}
 last_updated: '2025-09-19T16:04:17.179361'
+category: control_flow
+oneliner: Return by reading hub long (L) at --PTRB

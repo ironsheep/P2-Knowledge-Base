@@ -4,7 +4,6 @@ encoding: EEEE 1101011 00L DDDDDDDDD 000011101
 timing:
   cycles: 2
   type: fixed
-group: Streamer
 description: Set streamer NCO frequency to D.
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
@@ -17,3 +16,5 @@ compiler_encoding:
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.540091'
+category: streamer
+oneliner: Set streamer NCO frequency to D

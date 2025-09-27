@@ -1,15 +1,14 @@
 instruction: STALLI
 syntax: STALLI
-encoding: "EEEE 1101011 000 000100001 000100100                    \u2014                 \u2014     \
-  \              \u2014                    2"
+encoding: "EEEE 1101011 000 000100001 000100100                    \u2014                 \u2014                   \u2014\
+  \                    2"
 timing:
   cycles: 2
   type: fixed
-group: Interrupt Instruction - Prevent further interrupts.
-description: "STALLI disables interrupt branching. STALLI is the complement of the ALLOWI instruction\u2014\
-  \ both are used to Result: All future interrupts are disallowed.\n\nSTALLI disables interrupt branching.\
-  \ STALLI is the complement of the ALLOWI instruction\u2014 both are used to\n\nprotect short, vital\
-  \ sections of main code from timing jitter or state loss caused by asynchronous interrupt\n\nhandling."
+description: "STALLI disables interrupt branching. STALLI is the complement of the ALLOWI instruction\u2014 both are used\
+  \ to Result: All future interrupts are disallowed.\n\nSTALLI disables interrupt branching. STALLI is the complement of the\
+  \ ALLOWI instruction\u2014 both are used to\n\nprotect short, vital sections of main code from timing jitter or state loss\
+  \ caused by asynchronous interrupt\n\nhandling."
 related:
 - ALLOWI
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
@@ -26,3 +25,5 @@ last_updated: '2025-09-19'
 brief_description: 'Result: All future interrupts are disallowed.'
 result: All future interrupts are disallowed.
 manual_extraction_date: '2025-01-19'
+category: interrupts
+oneliner: Prevent further interrupts

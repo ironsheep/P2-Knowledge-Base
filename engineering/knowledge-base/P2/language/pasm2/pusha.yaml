@@ -4,7 +4,6 @@ encoding: EEEE 1100011 0L1 DDDDDDDDD 101100001
 timing:
   cycles: 1
   type: fixed
-group: Hub RAM - Write
 description: Write long in D[31:0] to hub address PTRA++.
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
@@ -23,3 +22,5 @@ brief_description: Push long to stack using PTRA
 parameters:
 - D is a register or 9-bit literal value to push onto the stack at PTRA
 - PTRA is automatically incremented after the write
+category: misc_ops
+oneliner: Write

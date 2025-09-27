@@ -6,7 +6,7 @@ manifest_metadata:
 base_path: engineering/knowledge-base/P2/community/obex/
 path_construction_note: 'TO ACCESS ANY FILE IN THIS MANIFEST:
 
-  Combine: raw_base_url (from root) + base_path (above) + yaml_path (from entries)
+  Combine: raw_base_url (from root) + base_path (above) + content (from entries)
 
 
   Example:
@@ -31,28 +31,28 @@ objects:
   - SPIN2
   - PASM2
   description_short: <Overviewn McPhalen.
-  yaml_path: objects/2843.yaml
+  content: objects/2843.yaml
 - object_id: '2844'
   title: I2C Devices
   author: Jon McPhalen (jonnymac)
   languages:
   - SPIN2
   description_short: Utility object for P2 development.
-  yaml_path: objects/2844.yaml
+  content: objects/2844.yaml
 - object_id: '2856'
   title: P2ES Matrix
   author: Jon McPhalen (jonnymac)
   languages:
   - SPIN2
   description_short: Utility object for P2 development.
-  yaml_path: objects/2856.yaml
+  content: objects/2856.yaml
 - object_id: '4068'
   title: MAX3010X
   author: glapolla
   languages:
   - SPIN2
   description_short: 'The  MAX30102  is  an  integrated  pulse  oximetry  and heart-rate  monitor  module.  It  includes  '
-  yaml_path: objects/4068.yaml
+  content: objects/4068.yaml
 - object_id: '4597'
   title: ISP P2 TIMI Spin2 Object
   author: Stephen M Moraco
@@ -61,7 +61,7 @@ objects:
   - PASM2
   description_short: 'Breadboard Mates (BBM) produces the TIMI line of displays. These
     are similar to the Nextion devices '
-  yaml_path: objects/4597.yaml
+  content: objects/4597.yaml
 - object_id: '4858'
   title: 3-pin-per-channel, 4-channel, hi-res ADC
   author: Chip Gracey
@@ -70,7 +70,7 @@ objects:
   - PASM2
   description_short: This object makes a 4-channel, constant-impedance, high-performance
     ADC which uses 3 contiguous pins
-  yaml_path: objects/4858.yaml
+  content: objects/4858.yaml
 - object_id: '4917'
   title: Sharing variables with SPIN2 and PASM2
   author: Michael
@@ -80,4 +80,4 @@ objects:
   description_short: 'Connect a P2 Propeller Board to your computer
 
     Load this code into Spin Tools IDE, then press CTRL+F1'
-  yaml_path: objects/4917.yaml
+  content: objects/4917.yaml

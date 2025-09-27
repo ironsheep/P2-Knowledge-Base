@@ -4,7 +4,6 @@ encoding: EEEE 1010100 C0I DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-group: Smart Pins
 description: C = modal result.
 flags_affected:
   C:
@@ -22,3 +21,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - RQPIN D,{#}S
 last_updated: '2025-09-19T16:04:17.146896'
+category: control_flow
+oneliner: C = modal result

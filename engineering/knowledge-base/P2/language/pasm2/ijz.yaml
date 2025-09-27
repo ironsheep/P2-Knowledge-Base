@@ -5,11 +5,9 @@ timing:
   cycles: 2
   type: variable
   range: 13...20
-group: Flow Control Instruction - Increment value and jump if zero or not zero.
-description: 'IJZ or IJNZ increments the value in Dest, writes the result, and jumps
-  to the address described by Src if the Result: Dest is incremented, and if the result
-  is zero (or not zero in syntax 2), PC is set to a new relative (#Src) or absolute
-  (Src) address.'
+description: 'IJZ or IJNZ increments the value in Dest, writes the result, and jumps to the address described by Src if the
+  Result: Dest is incremented, and if the result is zero (or not zero in syntax 2), PC is set to a new relative (#Src) or
+  absolute (Src) address.'
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:
@@ -25,11 +23,12 @@ syntax_variants:
 last_updated: '2025-09-19T16:04:17.189548'
 parameters:
 - Dest is a register whose value is incremented and tested for zero or not zero.
-- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
-  absolute or relative address to set PC to. Use # for relative addressing; omit #
-  for absolute addressing.'
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC
+  to. Use # for relative addressing; omit # for absolute addressing.'
 flags_affected:
   C:
     when: D
   Z:
     when: and
+category: control_flow
+oneliner: Increment value and jump if zero or not zero

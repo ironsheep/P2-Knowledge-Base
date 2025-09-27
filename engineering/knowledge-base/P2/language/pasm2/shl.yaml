@@ -4,17 +4,14 @@ encoding: EEEE 0000011 CZI DDDDDDDDD SSSSSSSSS                            D     
 timing:
   cycles: 1
   type: fixed
-group: Bit Operation / Math Instruction - Shift bits left; a.k.a. multiply 32-bit integer by power-of-two.
-description: "SHL shifts Dest's binary value left by Src places (0\u201331 bits) and sets the new LSBs\
-  \ to 0. This is useful for Result: The bits of Dest are shifted left by Src bits, inserting zeros (0)\
-  \ as new rightmost bits.\n\nSHL shifts Dest's binary value left by Src places (0\u201331 bits) and sets\
-  \ the new LSBs to 0. This is useful for\n\nbit-stream manipulation as well as for swift multiplication;\
-  \ signed or unsigned 32-bit integer multiplication by a\n\npower-of-two. Care must be taken for power-of-two\
-  \ multiplications since upper bits will shift through the MSB\n\n(sign bit); mangling large signed values.\n\
-  \nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is updated to the value of the last bit shifted\
-  \ out (effectively C =\n\nresult bit \"32\") if Src is 1\u201331, or to Dest[31] if Src is 0.\n\nIf\
-  \ the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the Dest result equals zero, or\
-  \ is cleared (0) if it is\n\nnon-zero."
+description: "SHL shifts Dest's binary value left by Src places (0\u201331 bits) and sets the new LSBs to 0. This is useful\
+  \ for Result: The bits of Dest are shifted left by Src bits, inserting zeros (0) as new rightmost bits.\n\nSHL shifts Dest's\
+  \ binary value left by Src places (0\u201331 bits) and sets the new LSBs to 0. This is useful for\n\nbit-stream manipulation\
+  \ as well as for swift multiplication; signed or unsigned 32-bit integer multiplication by a\n\npower-of-two. Care must\
+  \ be taken for power-of-two multiplications since upper bits will shift through the MSB\n\n(sign bit); mangling large signed\
+  \ values.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is updated to the value of the last bit shifted out\
+  \ (effectively C =\n\nresult bit \"32\") if Src is 1\u201331, or to Dest[31] if Src is 0.\n\nIf the WZ or WCZ effect is\
+  \ speci\uFB01ed, the Z \uFB02ag is set (1) if the Dest result equals zero, or is cleared (0) if it is\n\nnon-zero."
 flags_affected:
   C:
     formula: last bit shifted out if S[4:0] > 0, else D[31]
@@ -34,10 +31,10 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Shift left
-category: Bit Operation / Math Instruction - Shift bits left; a.k.a. multiply 32-bit integer by power-of-two.
+category: arithmetic
 result: The bits of Dest are shifted left by Src bits, inserting zeros (0) as new rightmost bits.
 syntax_variants:
 - SHL Dest, {#}Src {WC|WZ|WCZ}
-- "SHL shifts Dest's binary value left by Src places (0\u201331 bits) and sets the new LSBs to 0. This\
-  \ is useful for"
+- "SHL shifts Dest's binary value left by Src places (0\u201331 bits) and sets the new LSBs to 0. This is useful for"
 manual_extraction_date: '2025-01-19'
+oneliner: Shift bits left; a.k.a. multiply 32-bit integer by power-of-two

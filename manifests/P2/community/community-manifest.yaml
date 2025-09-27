@@ -18,7 +18,7 @@ metadata:
 # Community resources
 resources:
   obex:
-    manifest: "obex/obex-manifest.yaml"
+    manifest: "obex-manifest.yaml"
     description: "OBEX - Community-contributed P2 objects and libraries"
     project_count: 200
     author_count: 24

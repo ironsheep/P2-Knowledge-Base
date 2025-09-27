@@ -1,26 +1,35 @@
-constant: FALSE
-name: FALSE
+constant: false
+name: false
 value: 0
-hex_value: "$00000000"
-description: |
-  Logical false constant
+hex_value: $00000000
+description: 'Logical false constant
+
   All bits cleared to represent boolean false condition
+
+  '
 category: Numeric Constant
 documentation_level: complete
-usage: |
-  Use in conditional logic and boolean operations
+usage: 'Use in conditional logic and boolean operations
+
   Commonly used for initialization and flag clearing
+
+  '
 examples:
-  - code: |
-      mov     flag, FALSE     ' Initialize flag to FALSE
-      ' ... some operations ...
-      cmp     x, y        wz  ' Compare x and y
-      if_e mov  flag, TRUE    ' Set flag to TRUE if equal
-    description: "Using FALSE for initialization"
+- code: 'mov     flag, FALSE     '' Initialize flag to FALSE
+
+    '' ... some operations ...
+
+    cmp     x, y        wz  '' Compare x and y
+
+    if_e mov  flag, TRUE    '' Set flag to TRUE if equal
+
+    '
+  description: Using FALSE for initialization
 notes:
-  - "All bits cleared (0 value)"
-  - "Standard boolean false value in PASM2"
-  - "Used for clearing flags and initialization"
+- All bits cleared (0 value)
+- Standard boolean false value in PASM2
+- Used for clearing flags and initialization
 related:
-  - TRUE
-  - conditional_execution
+- true
+- conditional_execution
+oneliner: Logical false constant

@@ -4,12 +4,11 @@ encoding: EEEE 0000101 CZI DDDDDDDDD SSSSSSSSS                            D     
 timing:
   cycles: 1
   type: fixed
-group: Bit Operation Instruction - Rotate carry flag left into value.
-description: "The bits of Dest are shifted left by Src bits, inserting C as new LSBs.\n\nRCL shifts Dest's\
-  \ binary value left by Src places (0\u201331 bits) and sets the new LSBs to C.\n\nIf the WC or WCZ effect\
-  \ is speci\uFB01ed, the C \uFB02ag is updated to the value of the last bit shifted out if Src is 1\u2013\
-  31, or to\n\nDest[31] if Src is 0.\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag is set\
-  \ (1) if the Dest result equals zero, or is cleared (0) if it is\n\nnon-zero."
+description: "The bits of Dest are shifted left by Src bits, inserting C as new LSBs.\n\nRCL shifts Dest's binary value left\
+  \ by Src places (0\u201331 bits) and sets the new LSBs to C.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag\
+  \ is updated to the value of the last bit shifted out if Src is 1\u201331, or to\n\nDest[31] if Src is 0.\n\nIf the WZ or\
+  \ WCZ effect is speci\uFB01ed, the Z \uFB02ag is set (1) if the Dest result equals zero, or is cleared (0) if it is\n\n\
+  non-zero."
 flags_affected:
   C:
     formula: last bit shifted out if S[4:0] > 0, else D[31]
@@ -29,9 +28,10 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Rotate carry left
-category: "Bit Operation Instruction - Rotate carry \uFB02ag left into value."
+category: bit_manipulation
 result: The bits of Dest are shifted left by Src bits, inserting C as new LSBs.
 syntax_variants:
 - RCL Dest, {#}Src {WC|WZ|WCZ}
 - "RCL shifts Dest's binary value left by Src places (0\u201331 bits) and sets the new LSBs to C."
 manual_extraction_date: '2025-01-19'
+oneliner: "Rotate carry \uFB02ag left into value"

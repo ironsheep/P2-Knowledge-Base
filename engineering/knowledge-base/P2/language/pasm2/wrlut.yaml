@@ -4,7 +4,6 @@ encoding: EEEE 1100001 1LI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-group: Lookup Table
 description: Write D to LUT address {#}S/PTRx.
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
@@ -19,3 +18,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - WRLUT {#}D,{#}S/P
 last_updated: '2025-09-19T16:04:16.990804'
+category: misc_ops
+oneliner: Write D to LUT address {#}S/PTRx

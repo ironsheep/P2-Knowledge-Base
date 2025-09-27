@@ -1,17 +1,15 @@
 instruction: CMPM
 syntax: CMPM Dest, {#}Src {WC|WZ|WCZ}
-encoding: "EEEE 0010101 CZI DDDDDDDDD SSSSSSSSS                  \u2014             Result[31]       \
-  \  D=S                    2"
+encoding: "EEEE 0010101 CZI DDDDDDDDD SSSSSSSSS                  \u2014             Result[31]         D=S               \
+  \     2"
 timing:
   cycles: 2
   type: fixed
-group: Math Instruction - Compare two unsigned values, get MSB of difference.
-description: "CMPM compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally\
-  \ setting the C Result: Greater/lesser and equality status is optionally written to the C and Z flags.\n\
-  \nCMPM compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally setting\
-  \ the C\n\nand Z \uFB02ags accordingly.\n\nIf the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag\
-  \ is updated to the MSB of (Dest - Src).\n\nIf the WZ or WCZ effect is speci\uFB01ed, the Z \uFB02ag\
-  \ is set (1) if Dest equals Src."
+description: "CMPM compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally setting the\
+  \ C Result: Greater/lesser and equality status is optionally written to the C and Z flags.\n\nCMPM compares the unsigned\
+  \ values of Dest and Src (by subtracting Src from Dest) and optionally setting the C\n\nand Z \uFB02ags accordingly.\n\n\
+  If the WC or WCZ effect is speci\uFB01ed, the C \uFB02ag is updated to the MSB of (Dest - Src).\n\nIf the WZ or WCZ effect\
+  \ is speci\uFB01ed, the Z \uFB02ag is set (1) if Dest equals Src."
 flags_affected:
   Z: Result[31] D=S 2
 parameters:
@@ -30,10 +28,10 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: "Compare most signi\uFB01cant bit"
-category: Math Instruction - Compare two unsigned values, get MSB of difference.
+category: arithmetic
 result: "Greater/lesser and equality status is optionally written to the C and Z \uFB02ags."
 syntax_variants:
 - CMPM Dest, {#}Src {WC|WZ|WCZ}
-- CMPM compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally setting
-  the C
+- CMPM compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally setting the C
 manual_extraction_date: '2025-01-19'
+oneliner: Compare two unsigned values, get MSB of difference

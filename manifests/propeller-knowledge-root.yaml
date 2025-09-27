@@ -17,7 +17,7 @@ metadata:
 # Main Propeller variants
 propeller_chips:
   p2:
-    manifest: "P2/p2-root.yaml"
+    manifest: "manifests/P2/p2-root.yaml"
     description: "Propeller 2 (P2) - 8-cog multiprocessor with Smart Pins"
     status: "active"
     
