@@ -3,6 +3,21 @@ manifest_metadata:
   category: tools
   generated: 2025-09-12T16:10:0
   object_count: 1
+base_path: engineering/knowledge-base/P2/community/obex/
+path_construction_note: 'TO ACCESS ANY FILE IN THIS MANIFEST:
+
+  Combine: raw_base_url (from root) + base_path (above) + yaml_path (from entries)
+
+
+  Example:
+
+  https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/ +
+
+  engineering/knowledge-base/P2/community/obex/ +
+
+  objects/2817.yaml
+
+  = Full URL to the YAML file'
 category_info:
   name: tools
   description: Development tools, utilities, and helper objects for P2 programming
@@ -19,4 +34,4 @@ objects:
   - PASM2
   description_short: A wear-leveling filesystem for the P2 Edge on-board flash chip.
     Supports multi-cog access without consuming a Cog.
-  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4261.yaml
+  yaml_path: objects/4261.yaml

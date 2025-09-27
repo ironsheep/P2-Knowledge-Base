@@ -88,10 +88,12 @@ sub_manifests:
     - phonoclese-manifest.yaml
 access_patterns:
   individual_objects:
-    path: ../../engineering/knowledge-base/P2/community/obex/objects/
+    path: objects/
     format: '{object_id}.yaml'
     example: 5281.yaml
+    note: Relative to base_path in sub-manifests
   download_on_demand:
     enabled: true
     base_url: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB
     format: '{base_url}{object_id}'
+base_path: engineering/knowledge-base/P2/community/obex/

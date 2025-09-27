@@ -3,6 +3,21 @@ manifest_metadata:
   category: communication
   generated: 2025-09-12T16:10:0
   object_count: 4
+base_path: engineering/knowledge-base/P2/community/obex/
+path_construction_note: 'TO ACCESS ANY FILE IN THIS MANIFEST:
+
+  Combine: raw_base_url (from root) + base_path (above) + yaml_path (from entries)
+
+
+  Example:
+
+  https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/ +
+
+  engineering/knowledge-base/P2/community/obex/ +
+
+  objects/2817.yaml
+
+  = Full URL to the YAML file'
 category_info:
   name: communication
   description: Communication protocols, networking, and data exchange objects
@@ -19,7 +34,7 @@ objects:
   - PASM2
   description_short: This object enables Mode 0 SPI communications using P2 smart
     pins. This allows for high-speed SPI without needing PASM2 code.
-  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2841.yaml
+  yaml_path: objects/2841.yaml
 - object_id: '2842'
   title: Full Duplex Serial
   author: Jon McPhalen (jonnymac)
@@ -29,14 +44,14 @@ objects:
   description_short: This object is a P2 update to FullDuplexSerial for the P1. There
     are minor changes and additions to the numeric output methods, andthe inclusion
     of string formatting
-  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2842.yaml
+  yaml_path: objects/2842.yaml
 - object_id: '2845'
   title: Serial
   author: Jon McPhalen (jonnymac)
   languages:
   - SPIN2
   description_short: Utility object for P2 development.
-  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/2845.yaml
+  yaml_path: objects/2845.yaml
 - object_id: '4581'
   title: ISP P2 RPi IoT Gateway
   author: Stephen M Moraco
@@ -45,4 +60,4 @@ objects:
   - PASM2
   description_short: This provides a Spin2/Pasm2 object to be run on the P2. The P2
     communicates over high-speed bidirect
-  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4581.yaml
+  yaml_path: objects/4581.yaml

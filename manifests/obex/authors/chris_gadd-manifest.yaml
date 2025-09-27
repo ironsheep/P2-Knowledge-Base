@@ -3,6 +3,21 @@ manifest_metadata:
   author: Chris Gadd
   generated: 2025-09-12T16:10:0
   object_count: 4
+base_path: engineering/knowledge-base/P2/community/obex/
+path_construction_note: 'TO ACCESS ANY FILE IN THIS MANIFEST:
+
+  Combine: raw_base_url (from root) + base_path (above) + yaml_path (from entries)
+
+
+  Example:
+
+  https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/ +
+
+  engineering/knowledge-base/P2/community/obex/ +
+
+  objects/2817.yaml
+
+  = Full URL to the YAML file'
 author_info:
   name: Chris Gadd
   contribution_summary: 4 P2 objects contributed to OBEX
@@ -18,7 +33,7 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2024-01-28 15:42:47'
-  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4269.yaml
+  yaml_path: objects/4269.yaml
 - object_id: '4727'
   title: USB Human-Interface-Device Driver
   category: drivers
@@ -26,7 +41,7 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2024-09-10 16:40:27'
-  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4727.yaml
+  yaml_path: objects/4727.yaml
 - object_id: '4746'
   title: WizNet W5500 Driver
   category: drivers
@@ -34,11 +49,11 @@ objects:
   - SPIN2
   - PASM2
   created_date: '2024-09-17 20:01:08'
-  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4746.yaml
+  yaml_path: objects/4746.yaml
 - object_id: '4758'
   title: Waveshare 2.9" E-paper display driver
   category: drivers
   languages:
   - SPIN2
   created_date: '2024-06-04 02:11:14'
-  yaml_path: ../../../engineering/knowledge-base/P2/community/obex/objects/4758.yaml
+  yaml_path: objects/4758.yaml
