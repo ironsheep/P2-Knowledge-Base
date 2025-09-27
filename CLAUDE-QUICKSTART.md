@@ -19,10 +19,24 @@ Raw access: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
 - THEN: manifests/auxiliary-guides-manifest.yaml (how-to guides)
 - NEVER search for YAML files - use manifest tree only
 - All files are YAML format in engineering/knowledge-base/P2/
+- ONLY use paths provided by manifests - NEVER construct your own
+
+### When Content Not Found (MANDATORY PROTOCOL)
+- DO NOT manufacture/guess paths like "engineering/knowledge-base/P2/whatever.yaml"
+- DO NOT request web searches or external resources
+- DO NOT hallucinate content that might exist
+- INSTEAD explicitly report: "Content not found in P2 Knowledge Base: [specific item]"
+- PROVIDE detail: "Searched manifests/[path] for [item] but found no entry"
+- SUGGEST feedback: "Please report missing content to repo maintainer:
+  Repository: https://github.com/ironsheep/P2-Knowledge-Base/issues
+  Missing: [specific description of what you were looking for]"
 
 ### Anti-Patterns (FORBIDDEN)
 ❌ Searching for *.yaml directly
-❌ Guessing paths ("probably in hardware/")  
+❌ Guessing paths ("probably in hardware/")
+❌ Manufacturing URLs ("try fetching from...")
+❌ Creating fictional file paths when not found
+❌ Requesting web searches when content missing
 ❌ Using pkill (use: kill -TERM $PID)
 ❌ Filtering OBEX by category first
 ❌ Assuming built-in peripherals exist
@@ -54,6 +68,7 @@ Start → manifests/p2-knowledge-root.yaml
 ├── OBEX → obex/obex-root.yaml → 113 objects
 └── Guides → auxiliary-guides-manifest.yaml
 
+⚠️ CRITICAL: When content not found, REPORT IT - don't manufacture paths or request web searches!
 REMEMBER: Manifest tree only. No direct YAML searches. PID-based signals only.
 ```
 
@@ -111,6 +126,41 @@ Continue with: [SPECIFIC TASK]
 **Testing**: Use PID-based signals, monitor logs not console.
 
 **GitHub Repos**: 21 OBEX objects have links - mention but don't auto-fetch.
+
+## 🐛 Missing Content Protocol
+
+**When you can't find something in P2 Knowledge Base:**
+
+1. **Report to user exactly what's missing:**
+   ```
+   Content not found in P2 Knowledge Base:
+   - Searched: manifests/[specific path]
+   - Looking for: [specific item/instruction/pattern]
+   - Context: [what you were trying to accomplish]
+   ```
+
+2. **Provide GitHub issue template for user to submit:**
+   ```markdown
+   Title: Missing content: [specific item]
+   
+   **What I was looking for:**
+   [Specific description]
+   
+   **Where I expected to find it:**
+   manifests/[path] → [expected location]
+   
+   **Use case:**
+   [What I was trying to accomplish]
+   
+   **Claude session reference:**
+   [Date/time if available]
+   ```
+
+3. **NEVER:**
+   - Make up a path that "should" exist
+   - Suggest web searches to find it elsewhere
+   - Create hypothetical content
+   - Guess at file locations
 
 ## 📚 Additional Resources
 
