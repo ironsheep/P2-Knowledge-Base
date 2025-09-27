@@ -10,7 +10,7 @@ syntax:
   - "ABORT value"    # Returns value  
   - "ABORT v1, v2"   # Multiple returns
 
-trap_syntax: "result := \method()"  # Backslash catches abort
+trap_syntax: "result := \\method()"  # Backslash catches abort
 
 example: |
   PUB validate(x) : result
@@ -25,7 +25,7 @@ example: |
 
 critical_behavior:
   - "Unwinds call stack immediately"
-  - "Trap (\) stops propagation"
+  - "Trap (\\) stops propagation"
   - "Cleanup code after trap executes on abort"
   - "ABORT returns to caller/trap, not call origin"
 

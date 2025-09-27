@@ -1,8 +1,24 @@
-instruction: ALIGNL
+directive: ALIGNL
 name: ALIGNL
-description: ALIGNL instruction (needs documentation)
-group: Unknown
-documentation_level: stub
-needs_documentation: true
-created_by: audit-yaml-files.py
-created_date: '2025-09-19'
+description: |
+  Align to long boundary (4-byte alignment)
+  Inserts zero bytes as needed to align the next data or instruction to a long boundary
+category: Assembly Directive
+documentation_level: complete
+syntax: "ALIGNL"
+usage: |
+  Use before data declarations or code sections that require long alignment
+  for efficient access or hardware requirements
+examples:
+  - code: |
+      ALIGNL            ' Align to next long boundary
+      mydata   long  0  ' This will start on a long-aligned address
+    description: "Ensure data starts on long boundary"
+notes:
+  - "P2 requires long alignment for certain operations"
+  - "Inserts 0-3 bytes of padding as needed"
+  - "Critical for hub memory access efficiency"
+related:
+  - ALIGNW
+  - ORG
+  - LONG

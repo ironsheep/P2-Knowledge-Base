@@ -1,83 +1,12 @@
 summary:
   manual_instructions: 426
-  yaml_files: 359
-  mapped: 355
-  missing: 71
+  yaml_files: 430
+  mapped: 426
+  missing: 0
   mismatches: 0
   extra: 4
-  created_stubs: 71
-missing_yaml:
-- ABORT
-- ADDBITS
-- ALIGNL
-- ALIGNW
-- ANDC
-- ANDZ
-- ASSEMBLY
-- BYTE
-- CARTESIAN
-- CASE
-- CHANGE
-- CHANNEL
-- COGEXEC
-- CORDIC
-- DIRA
-- DIRB
-- DISCLAIMER
-- ELSE
-- ELSEIF
-- ELSEIFNOT
-- END
-- 'FALSE'
-- FIFO
-- FIT
-- HUBEXEC
-- IF
-- IJMP1
-- IJMP2
-- IJMP3
-- INA
-- INB
-- INTERNET
-- IRET1
-- IRET2
-- IRET3
-- LINE
-- LINESIZE
-- LOCKCHK
-- LONG
-- NAN
-- NEGX
-- ORC
-- ORG
-- ORGF
-- ORGH
-- ORZ
-- OUTA
-- OUTB
-- PA
-- PARALLAX
-- PB
-- PI
-- POP
-- POSX
-- PTRA
-- PTRB
-- PUSH
-- QCOS
-- RES
-- SAMPLES
-- SAVE
-- SBIN
-- SUPPORTED
-- 'TRUE'
-- UBIN
-- WC
-- WCZ
-- WORD
-- WZ
-- XORC
-- XORZ
+  created_stubs: 0
+missing_yaml: []
 case_mismatches: []
 extra_yaml:
 - asmclk

@@ -1,0 +1,87 @@
+# Complete Debug Formatters Reference
+# Remember: formatter_() gives just value, formatter() includes name
+
+underscore_rule: "name = value → value"
+
+# DECIMAL (everyday numbers)
+decimal:
+  UDEC: {use: "positive numbers 0-4294967295", example: "count = 42"}
+  UDEC_: {use: "just the number", example: "42"}
+  SDEC: {use: "positive/negative -2147483648 to 2147483647", example: "temp = -25"}
+  SDEC_: {use: "just the number", example: "-25"}
+  # Size variants force specific bit widths:
+  UDEC_BYTE/UDEC_BYTE_: "0-255"
+  UDEC_WORD/UDEC_WORD_: "0-65535"
+  UDEC_LONG/UDEC_LONG_: "full 32-bit"
+  SDEC_BYTE/SDEC_BYTE_: "-128 to 127"
+  SDEC_WORD/SDEC_WORD_: "-32768 to 32767"
+  SDEC_LONG/SDEC_LONG_: "full 32-bit signed"
+
+# HEXADECIMAL (memory addresses, bit flags)
+hexadecimal:
+  UHEX: {use: "hex with $ prefix", example: "addr = $400"}
+  UHEX_: {example: "$400"}
+  SHEX: {use: "signed hex", example: "offset = -$20"}
+  SHEX_: {example: "-$20"}
+  # Size variants:
+  UHEX_BYTE/UHEX_BYTE_: "2 digits: $00-$FF"
+  UHEX_WORD/UHEX_WORD_: "4 digits: $0000-$FFFF"
+  UHEX_LONG/UHEX_LONG_: "8 digits: $00000000-$FFFFFFFF"
+
+# BINARY (bit patterns, flags)
+binary:
+  UBIN: {use: "binary with % prefix", example: "flags = %10110"}
+  UBIN_: {example: "%10110"}
+  SBIN: {use: "signed binary", example: "mask = -%0101"}
+  SBIN_: {example: "-%0101"}
+  # Size variants show exact bits:
+  UBIN_BYTE/UBIN_BYTE_: "8 bits"
+  UBIN_WORD/UBIN_WORD_: "16 bits"
+  UBIN_LONG/UBIN_LONG_: "32 bits"
+
+# FLOATING POINT
+floating:
+  FDEC: {use: "real numbers", example: "voltage = 3.14159"}
+  FDEC_: {example: "3.14159"}
+
+# ARRAYS (multiple values at once)
+arrays:
+  syntax: "formatter_ARRAY(@pointer, count)"
+  types:
+    REG_ARRAY: "cog registers"
+    BYTE_ARRAY: "hub RAM bytes"
+    WORD_ARRAY: "hub RAM words"
+    LONG_ARRAY: "hub RAM longs"
+  example: "UHEX_BYTE_ARRAY_(@buffer, 16) → $45, $67, $89..."
+  note: "All arrays support underscore for value-only output"
+
+# BOOLEAN (true/false display)
+boolean:
+  BOOL: {use: "display as TRUE/FALSE with name", example: "enabled = TRUE"}
+  BOOL_: {use: "just TRUE/FALSE", example: "TRUE"}
+
+# FLAGS (processor state)
+flags:
+  C_Z: {use: "show C and Z flag values", example: "C=1 Z=0", note: "no underscore variant"}
+
+# STRINGS (text - no underscore variants)
+strings:
+  ZSTR: {use: "zero-terminated string", syntax: "ZSTR(@message)"}
+  LSTR: {use: "length-prefixed string", syntax: "LSTR(@text, length)"}
+
+# CONTROL
+control:
+  DLY: {use: "delay ms after output", syntax: "DLY(1000)"}
+  IF: {use: "conditional output - only output if true", syntax: "IF(condition)"}
+  IFNOT: {use: "conditional output - only output if false", syntax: "IFNOT(condition)"}
+  PC_KEY: {use: "read keyboard input"}
+  PC_MOUSE: {use: "read mouse state"}
+
+# MOST USEFUL PATTERNS FOR NEW USERS
+cookbook:
+  display_sensor: 'DEBUG("Sensor: ", SDEC_(reading), " units")'
+  show_coordinates: 'DEBUG("X:", SDEC_(x), " Y:", SDEC_(y))'
+  hex_dump: 'DEBUG(UHEX_BYTE_ARRAY_(@data, 16))'
+  error_message: 'DEBUG("ERROR: ", ZSTR(@error_msg), " at ", UHEX_(addr))'
+  multiple_values: 'DEBUG("Values: ", UDEC(a, b, c))'
+  progress_indicator: 'DEBUG("Progress: ", UDEC_(current), "/", UDEC_(total))'

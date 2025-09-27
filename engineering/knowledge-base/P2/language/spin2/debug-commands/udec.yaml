@@ -1,8 +1,0 @@
-command: "UDEC"
-type: debug_command
-category: "Decimal Format"
-description: |
-  Unsigned decimal format
-syntax: "['UDEC(value)']"
-examples:
-  - "DEBUG(UDEC(counter))"

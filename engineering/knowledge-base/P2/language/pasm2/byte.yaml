@@ -1,8 +1,22 @@
-instruction: BYTE
+directive: BYTE
 name: BYTE
-description: BYTE instruction (needs documentation)
-group: Unknown
-documentation_level: stub
-needs_documentation: true
-created_by: audit-yaml-files.py
-created_date: '2025-09-19'
+description: |
+  Declare byte data in memory
+  Stores 8-bit values at the current address
+category: Assembly Directive
+documentation_level: complete
+syntax: "[label] BYTE value[, value...]"
+examples:
+  - code: |
+      text    byte  "Hello P2", 0    ' String with terminator
+      data    byte  $FF, $00, $55    ' Hex values
+      nums    byte  1, 2, 3, 4, 5    ' Decimal values
+    description: "Various byte data declarations"
+notes:
+  - "Each value occupies exactly 1 byte"
+  - "Strings are stored as individual bytes"
+  - "No automatic alignment"
+related:
+  - WORD
+  - LONG
+  - RES

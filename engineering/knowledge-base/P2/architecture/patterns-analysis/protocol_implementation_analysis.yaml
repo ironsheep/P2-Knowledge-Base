@@ -103,10 +103,10 @@ resource_profile:
 
 composition_rules:
   compatible_patterns:
-    - "buffer_management" (for protocol data buffering)
-    - "timing_control" (for protocol timing requirements)
-    - "state_machine" (for protocol state management)
-    - "cog_management" (for dedicated protocol COGs)
+    - "buffer_management (for protocol data buffering)"
+    - "timing_control (for protocol timing requirements)"
+    - "state_machine (for protocol state management)"
+    - "cog_management (for dedicated protocol COGs)"
   incompatible_patterns:
     - None (protocols can be implemented with various architectures)
   synergies:

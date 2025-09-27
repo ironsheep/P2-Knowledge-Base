@@ -120,12 +120,12 @@ resource_profile:
 
 composition_rules:
   compatible_patterns:
-    - "buffer_management" (for dynamic buffer allocation)
-    - "cog_management" (for shared memory between COGs)
-    - "protocol_implementation" (for dynamic protocol buffers)
-    - "several_objects" (for complex object memory needs)
+    - "buffer_management (for dynamic buffer allocation)"
+    - "cog_management (for shared memory between COGs)"
+    - "protocol_implementation (for dynamic protocol buffers)"
+    - "several_objects (for complex object memory needs)"
   incompatible_patterns:
-    - "no_objects" (typically uses simple static allocation)
+    - "no_objects (typically uses simple static allocation)"
   synergies:
     - "Essential for complex buffer management"
     - "Critical for multi-COG shared data"

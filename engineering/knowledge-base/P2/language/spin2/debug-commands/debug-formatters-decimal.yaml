@@ -1,0 +1,22 @@
+# Decimal Debug Formatters (UDEC/SDEC)
+# ALL support underscore (_) variants
+
+underscore_rule: "UDEC(x) → 'x = 42' | UDEC_(x) → '42'"
+
+unsigned:
+  UDEC: {range: "0 to 4_294_967_295", auto_size: true}
+  UDEC_BYTE: {range: "0 to 255", bits: 8}
+  UDEC_WORD: {range: "0 to 65_535", bits: 16}
+  UDEC_LONG: {range: "0 to 4_294_967_295", bits: 32}
+
+signed:
+  SDEC: {range: "-2_147_483_648 to 2_147_483_647", auto_size: true}
+  SDEC_BYTE: {range: "-128 to 127", bits: 8}
+  SDEC_WORD: {range: "-32_768 to 32_767", bits: 16}
+  SDEC_LONG: {range: "-2_147_483_648 to 2_147_483_647", bits: 32}
+
+examples:
+  - "DEBUG(SDEC(temp)) → 'temp = -25'"
+  - "DEBUG(SDEC_(temp)) → '-25'"
+  - 'DEBUG("X:", UDEC_(x), " Y:", UDEC_(y)) → "X:10 Y:20"'
+  - "DEBUG(UDEC_BYTE(value)) → forces 8-bit display"

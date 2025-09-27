@@ -155,10 +155,10 @@ resource_profile:
 
 composition_rules:
   compatible_patterns:
-    - "timing_control" (for timed state transitions)
-    - "protocol_implementation" (for protocol state machines)
-    - "buffer_management" (for state-dependent buffering)
-    - "cog_management" (for multi-COG state coordination)
+    - "timing_control (for timed state transitions)"
+    - "protocol_implementation (for protocol state machines)"
+    - "buffer_management (for state-dependent buffering)"
+    - "cog_management (for multi-COG state coordination)"
   incompatible_patterns:
     - None (state machines are broadly applicable)
   synergies:

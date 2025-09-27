@@ -1,8 +1,33 @@
-instruction: PI
+constant: PI
 name: PI
-description: PI instruction (needs documentation)
-group: Unknown
-documentation_level: stub
-needs_documentation: true
-created_by: audit-yaml-files.py
-created_date: '2025-09-19'
+value: 3.141593
+hex_value: "$40490FDB"
+description: |
+  Floating-point representation of PI constant
+  IEEE 754 single-precision floating-point encoding of π
+category: Numeric Constant
+documentation_level: complete
+usage: |
+  Use with CORDIC operations and floating-point calculations
+  Provides precise PI value for trigonometric computations
+examples:
+  - code: |
+      mov     angle, PI           ' Load PI constant
+      shr     angle, #1           ' Divide by 2 for PI/2 (90 degrees)
+      qrotate angle, radius       ' Rotate by PI/2 radians
+    description: "Using PI with CORDIC rotation"
+  - code: |
+      mov     x, PI               ' Start with PI
+      qmul    x, ##180            ' Multiply PI by 180
+      qdiv    x, ##$80000000      ' Divide by 2^31 for scaling
+      getqx   degrees             ' Get degrees conversion factor
+    description: "Converting radians to degrees using PI"
+notes:
+  - "Approximately 3.141592653589793"
+  - "IEEE 754 single-precision format"
+  - "Used primarily with CORDIC and floating-point operations"
+  - "For CORDIC angles, full circle = $80000000 (2^31)"
+related:
+  - qrotate
+  - qvector
+  - cordic_operations

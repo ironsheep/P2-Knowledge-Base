@@ -85,11 +85,11 @@ resource_profile:
 
 composition_rules:
   compatible_patterns:
-    - "buffer_management" (for timed data operations)
-    - "protocol_implementation" (for protocol timing)
-    - "state_machine" (for timed state transitions)
-    - "cog_management" (for COG synchronization)
-    - "smart_pin_usage" (for hardware timing)
+    - "buffer_management (for timed data operations)"
+    - "protocol_implementation (for protocol timing)"
+    - "state_machine (for timed state transitions)"
+    - "cog_management (for COG synchronization)"
+    - "smart_pin_usage (for hardware timing)"
   incompatible_patterns:
     - None (timing is fundamental to most patterns)
   synergies:

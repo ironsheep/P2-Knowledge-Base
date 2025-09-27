@@ -1,8 +1,31 @@
-instruction: NEGX
+constant: NEGX
 name: NEGX
-description: NEGX instruction (needs documentation)
-group: Unknown
-documentation_level: stub
-needs_documentation: true
-created_by: audit-yaml-files.py
-created_date: '2025-09-19'
+value: -2147483648
+hex_value: "$80000000"
+description: |
+  Maximum negative integer constant
+  Most negative value in 32-bit signed integer representation
+category: Numeric Constant
+documentation_level: complete
+usage: |
+  Use for range checking and underflow detection
+  Represents the lower bound of signed integer values
+examples:
+  - code: |
+      cmps    value, NEGX     wc  ' Check if value is below min negative
+      if_c jmp    #underflow      ' Jump if underflow (carry set means less than)
+    description: "Checking for negative underflow"
+  - code: |
+      mov     limit, NEGX         ' Set limit to maximum negative value
+      maxs    value, limit        ' Clamp value to not go below NEGX
+    description: "Using NEGX as lower limit"
+notes:
+  - "-2^31 in decimal notation"
+  - "Bit 31 set, bits 30-0 clear"
+  - "Used for saturation arithmetic and bounds checking"
+  - "Special case: abs(NEGX) = NEGX due to two's complement representation"
+related:
+  - POSX
+  - mins
+  - maxs
+  - abs

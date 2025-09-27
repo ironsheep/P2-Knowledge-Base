@@ -83,17 +83,53 @@
 - Real screenshots replace placeholders when available
 - Build package works with either placeholders or real images
 
-## Release Preparation Steps (LOCAL)
+## YAML to JSON Release Workflow
 
-**CRITICAL: These are the ONLY local steps for release preparation:**
+**CRITICAL: Follow this exact sequence to ensure valid JSON generation:**
 
-1. **Update Master JSON** (REQUIRED)
+### Phase 1: YAML Validation and Fixes
+
+1. **Validate YAML Syntax** (NEW STEP - REQUIRED)
    ```bash
-   python3 engineering/tools/update-p2-reference-complete.py [version]
-   # Example: python3 engineering/tools/update-p2-reference-complete.py 1.3.0
+   python3 engineering/tools/validate-yaml-syntax.py
+   # This checks all YAML files for syntax errors BEFORE linkage validation
+   # Fix any YAML syntax errors (e.g., indentation issues) before proceeding
    ```
 
-2. **Update Latest Symlink** (REQUIRED)
+2. **Verify Manifest Linkages** (REQUIRED)
+   ```bash
+   python3 engineering/tools/verify-manifest-linkages-v2.py
+   # This validates that all manifest entries point to existing files
+   # Orphaned files are classified as ERRORS for PASM2/Spin2 instructions
+   # Fix any missing files or incorrect references before proceeding
+   ```
+
+3. **Fix Any Issues Found**
+   - Correct YAML syntax errors (especially indentation in code examples)
+   - Add missing YAML files for orphaned instructions/methods
+   - Update manifest entries to point to correct files
+   - Re-run both validation scripts until clean
+
+### Phase 2: JSON Generation
+
+1. **Generate Master JSON** (REQUIRED)
+   ```bash
+   python3 engineering/tools/update-p2-reference-complete.py [version]
+   # Example: python3 engineering/tools/update-p2-reference-complete.py 1.4.0
+   # This creates the master JSON from validated YAMLs
+   ```
+
+2. **Verify JSON Generation**
+   ```bash
+   # Check that JSON was created successfully
+   ls -la deliverables/ai-reference/versions/v[version]/
+   # Verify proper version in metadata
+   head -30 deliverables/ai-reference/versions/v[version]/p2-reference-v[version].json | grep version
+   ```
+
+### Phase 3: Release Preparation
+
+1. **Update Latest Symlink** (REQUIRED)
    ```bash
    cd deliverables/ai-reference/versions
    rm latest
@@ -101,19 +137,25 @@
    # Example: ln -s v1.3.0 latest
    ```
 
-3. **Update README** (REQUIRED)
+2. **Update README** (REQUIRED)
    - Edit `deliverables/ai-reference/README.md`
    - Update "Current Release" version number
    - Update example code to reference new version
    - Add new version to directory structure listing
 
-4. **Verify Version Metadata** (REQUIRED)
+3. **Create Release Notes** (REQUIRED)
    ```bash
-   # Check JSON has proper version in metadata
-   head -30 deliverables/ai-reference/versions/v[version]/p2-reference-v[version].json | grep version
+   # Create release directory
+   mkdir -p engineering/release-prep/ai-packages/v[version]
+   # Create RELEASE-NOTES.md documenting all changes
    ```
 
-5. **Commit Changes** (REQUIRED)
+4. **Update Package Changelog** (REQUIRED)
+   - Edit `engineering/release-prep/ai-packages/PACKAGE-CHANGELOG.md`
+   - Add new version section with features, improvements, and fixes
+   - Update "In Progress" to release date when complete
+
+5. **Commit All Changes** (REQUIRED)
    - Commit the new JSON file
    - Commit the updated symlink
    - Commit the updated README
@@ -178,6 +220,22 @@
 - Version compatibility clearly stated
 - Trust levels documented and maintained
 
+## YAML Validation Tools
+
+### validate-yaml-syntax.py
+- **Purpose**: Validates YAML syntax before JSON generation
+- **Catches**: Indentation errors, missing colons, malformed structures
+- **Critical for**: Preventing JSON generation failures
+- **Example errors**: Unindented conditional instructions (if_z, if_c) in code examples
+
+### verify-manifest-linkages-v2.py  
+- **Purpose**: Ensures all manifest entries point to valid files
+- **Classifies**:
+  - ERRORS: Missing PASM2/Spin2 instructions (must be fixed)
+  - WARNINGS: Other missing references (should be reviewed)
+- **Reports**: Orphaned files not referenced in manifests
+- **Critical for**: Complete knowledge base coverage
+
 ## Living Process Evolution
 
 **This workflow will evolve based on**:
@@ -188,6 +246,7 @@
 
 **Version History**:
 - v1.0 (Aug 2025): Initial workflow design
+- v1.1 (Sep 2025): Added YAML validation workflow for JSON generation
 - Future versions will be documented here
 
 ---

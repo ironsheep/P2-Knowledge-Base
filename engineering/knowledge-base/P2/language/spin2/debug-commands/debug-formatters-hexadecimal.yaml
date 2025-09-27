@@ -1,0 +1,22 @@
+# Hexadecimal Debug Formatters (UHEX/SHEX)
+# ALL support underscore (_) variants
+
+underscore_rule: "UHEX(x) → 'x = $1F4' | UHEX_(x) → '$1F4'"
+
+unsigned:
+  UHEX: {output: "$0 to $FFFF_FFFF", auto_size: true}
+  UHEX_BYTE: {output: "$00 to $FF", digits: 2}
+  UHEX_WORD: {output: "$0000 to $FFFF", digits: 4}
+  UHEX_LONG: {output: "$0000_0000 to $FFFF_FFFF", digits: 8}
+
+signed:
+  SHEX: {output: "-$8000_0000 to $7FFF_FFFF", auto_size: true}
+  SHEX_BYTE: {output: "-$80 to $7F", digits: 2}
+  SHEX_WORD: {output: "-$8000 to $7FFF", digits: 4}
+  SHEX_LONG: {output: "-$8000_0000 to $7FFF_FFFF", digits: 8}
+
+examples:
+  - "DEBUG(UHEX(addr)) → 'addr = $400'"
+  - "DEBUG(UHEX_(addr)) → '$400'"
+  - "DEBUG(SHEX_(offset)) → '-$20'"
+  - "DEBUG(UHEX_LONG(reg)) → always 8 digits"

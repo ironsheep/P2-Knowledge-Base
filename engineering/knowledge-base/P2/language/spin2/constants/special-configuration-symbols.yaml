@@ -1,0 +1,191 @@
+name: Special Configuration Symbols
+description: |
+  Special CON block symbols that configure system behavior, debug features, and clock settings.
+  These are compile-time constants that affect how your program behaves.
+category: Configuration Constants
+documentation_level: complete
+
+# System Configuration Symbols
+system_configuration:
+  DOWNLOAD_BAUD:
+    description: Sets the download baud rate for programming the P2
+    default: "2_000_000"
+    example: "CON DOWNLOAD_BAUD = 115200"
+    
+  _CLKFREQ:
+    description: Sets the system clock frequency in Hz
+    example: "CON _CLKFREQ = 297_000_000  ' 297 MHz"
+    notes: 
+      - "Used by timing functions like WAITUS, WAITMS"
+      - "Must match actual hardware configuration"
+      
+  _CLKMODE:
+    description: Clock mode configuration value
+    notes: "Usually calculated automatically based on _CLKFREQ"
+    
+  _XTLFREQ:
+    description: Crystal oscillator frequency when using external crystal
+    example: "CON _XTLFREQ = 20_000_000  ' 20 MHz crystal"
+    
+  _rcslow:
+    description: Selects internal RCSLOW oscillator (~20 KHz)
+    value: "$00_01"
+    usage: "CON _rcslow"
+    
+  _rcfast:
+    description: Selects internal RCFAST oscillator (~20 MHz)
+    value: "$00_00" 
+    usage: "CON _rcfast"
+
+# DEBUG Configuration Symbols
+debug_serial:
+  DEBUG_BAUD:
+    description: Sets the DEBUG serial baud rate
+    default: "DOWNLOAD_BAUD (typically 2_000_000)"
+    example: "CON DEBUG_BAUD = 115200"
+    notes: "May need DEBUG_DELAY if slower than DOWNLOAD_BAUD"
+    
+  DEBUG_PIN_TX:
+    description: Sets the DEBUG serial output pin
+    default: "62"
+    notes: "Must be 62 for DEBUG windows to open"
+    
+  DEBUG_PIN_RX:
+    description: Sets the DEBUG serial input pin for PC interaction
+    default: "63"
+    
+  DEBUG_PIN:
+    description: Legacy/shorthand for DEBUG_PIN_TX when RX not needed
+    default: "62"
+
+debug_output_control:
+  DEBUG_TIMESTAMP:
+    description: Adds 64-bit CT timestamp to each DEBUG message
+    default: "undefined"
+    usage: "CON DEBUG_TIMESTAMP = 1"
+    
+  DEBUG_MASK:
+    description: |
+      32-bit mask for selective DEBUG compilation.
+      Use DEBUG[bit](params) to gate specific statements.
+    default: "undefined"
+    example: |
+      CON DEBUG_MASK = %00001111  ' Enable bits 0-3
+      DEBUG[0]("This only compiles if bit 0 is set")
+    
+  DEBUG_DELAY:
+    description: Startup delay in milliseconds before DEBUG messages begin
+    default: "0"
+    example: "CON DEBUG_DELAY = 500  ' Wait 500ms"
+    
+  DEBUG_LOG_SIZE:
+    description: Maximum size in bytes for DEBUG.log file (0 = no log)
+    default: "0"
+    example: "CON DEBUG_LOG_SIZE = 10000  ' 10KB log file"
+    
+  DEBUG_DISABLE:
+    description: Disables all DEBUG statements when set to non-zero
+    default: "undefined"
+    usage: "CON DEBUG_DISABLE = 1  ' Turn off all DEBUG"
+
+debug_debugger_control:
+  DEBUG_COGINIT:
+    description: Auto-enter PASM debugger when COGINIT occurs
+    default: "undefined"
+    usage: "CON DEBUG_COGINIT = 1"
+    
+  DEBUG_MAIN:
+    description: |
+      Enter PASM debugger at main, ready to single-step.
+      DEBUG() statements ignored until "DEBUG" sensitivity selected.
+    default: "undefined"
+    usage: "CON DEBUG_MAIN = 1"
+    
+  DEBUG_COGS:
+    description: Bitmask selecting which cogs have debug interrupts enabled
+    default: "%11111111 (all cogs)"
+    example: "CON DEBUG_COGS = %00001111  ' Only cogs 0-3"
+    
+  DEBUG:
+    description: |
+      Command (no parentheses) that enters single-step PASM debugger.
+      Not a CON symbol but a statement used in code.
+    usage: "DEBUG  ' Enter debugger (no parentheses)"
+    notes: "Different from DEBUG(...) which outputs data"
+
+debug_display_windows:
+  DEBUG_LEFT:
+    description: Left screen coordinate for DEBUG message window
+    default: "(dynamic)"
+    
+  DEBUG_TOP:
+    description: Top screen coordinate for DEBUG message window
+    default: "(dynamic)"
+    
+  DEBUG_WIDTH:
+    description: Width of DEBUG message window
+    default: "(dynamic)"
+    
+  DEBUG_HEIGHT:
+    description: Height of DEBUG message window
+    default: "(dynamic)"
+    
+  DEBUG_DISPLAY_LEFT:
+    description: Overall left screen offset for DEBUG displays (adds to POS x)
+    default: "0"
+    
+  DEBUG_DISPLAY_TOP:
+    description: Overall top screen offset for DEBUG displays (adds to POS y)
+    default: "0"
+    
+  DEBUG_WINDOWS_OFF:
+    description: Disables DEBUG windows from opening (set to non-zero)
+    default: "0"
+    example: "CON DEBUG_WINDOWS_OFF = 1  ' No windows"
+
+usage_examples:
+  basic_debug_config: |
+    CON
+      ' Serial configuration
+      DOWNLOAD_BAUD = 115200
+      DEBUG_BAUD = 115200
+      DEBUG_DELAY = 100        ' Wait 100ms before debug output
+      
+      ' Clock configuration
+      _CLKFREQ = 200_000_000   ' 200 MHz
+      
+  selective_debug: |
+    CON
+      DEBUG_MASK = %00000011   ' Enable debug bits 0 and 1
+      
+    PUB main()
+      DEBUG[0]("Development message")   ' Only if bit 0 set
+      DEBUG[1]("Testing message")       ' Only if bit 1 set
+      DEBUG[2]("This won't compile")    ' Bit 2 not set
+      
+  debugger_control: |
+    CON
+      DEBUG_COGINIT = 1        ' Auto-debug new cogs
+      DEBUG_COGS = %00000011   ' Only cogs 0 and 1
+      
+    PUB main()
+      DEBUG                    ' Enter single-step debugger
+      
+  window_positioning: |
+    CON
+      DEBUG_LEFT = 100
+      DEBUG_TOP = 50
+      DEBUG_WIDTH = 800
+      DEBUG_HEIGHT = 600
+
+notes:
+  - "These symbols must be defined in the CON block"
+  - "They affect compile-time and runtime behavior"
+  - "Undefined symbols use their defaults"
+  - "DEBUG() with parentheses outputs data"
+  - "DEBUG without parentheses enters debugger"
+  
+related:
+  - debug.yaml
+  - debug-formatters-complete.yaml
+  - constants.yaml

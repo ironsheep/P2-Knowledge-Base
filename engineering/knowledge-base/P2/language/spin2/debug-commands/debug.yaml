@@ -2,7 +2,35 @@ command: "DEBUG"
 type: debug_command
 category: "Debug Control"
 description: |
-  Debug output statement
-syntax: "['DEBUG (expressions)']"
+  Debug output statement for displaying values, text, and formatted data
+  during program execution. Supports multiple formatter methods and
+  display windows.
+syntax: "['DEBUG(expressions)']"
 examples:
   - "DEBUG(\"Value:\", value)"
+  - "DEBUG(SDEC(temperature))     ' Outputs: temperature = -25"
+  - "DEBUG(SDEC_(temperature))    ' Outputs: -25"
+  - "DEBUG(\"Temp: \", SDEC_(temp), \"°C\")"
+formatter_protocol: |
+  Debug formatter methods follow a consistent underscore protocol:
+  
+  WITHOUT UNDERSCORE (e.g., SDEC, UDEC, UHEX, UBIN):
+    - Outputs variable name followed by equals sign and value
+    - Example: DEBUG(SDEC(temperature)) outputs "temperature = -25"
+  
+  WITH UNDERSCORE (e.g., SDEC_, UDEC_, UHEX_, UBIN_):
+    - Outputs just the value without variable name
+    - Example: DEBUG(SDEC_(temperature)) outputs "-25"
+    - Useful for custom formatting or embedding values in strings
+  
+  This protocol applies to all numeric formatters and their typed variants
+  (_BYTE, _WORD, _LONG suffixes).
+related:
+  - "sdec"
+  - "sdec_"
+  - "udec"
+  - "udec_"
+  - "uhex"
+  - "uhex_"
+  - "ubin"
+  - "ubin_"

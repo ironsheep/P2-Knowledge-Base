@@ -1,8 +1,28 @@
-instruction: HUBEXEC
+directive: HUBEXEC
 name: HUBEXEC
-description: HUBEXEC instruction (needs documentation)
-group: Unknown
-documentation_level: stub
-needs_documentation: true
-created_by: audit-yaml-files.py
-created_date: '2025-09-19'
+description: |
+  Set hub execution mode for subsequent code
+  Code will be assembled to run from hub RAM
+category: Assembly Directive
+documentation_level: complete
+syntax: "HUBEXEC"
+usage: |
+  Switches assembler to hub execution mode
+  All subsequent instructions are assembled for hub RAM execution
+examples:
+  - code: |
+      HUBEXEC          ' Switch to hub execution mode
+      ' Code here runs from hub RAM
+      ' Can access full 512KB hub memory
+      mov  x, data     ' Hub execution (slower than cog)
+    description: "Set hub execution mode"
+notes:
+  - "Hub execution allows unlimited code size"
+  - "Slower than cog execution due to hub access timing"
+  - "Instruction fetching through FIFO/streamer"
+  - "See also HUBEXEC_NEW and HUBEXEC_PTR variants"
+related:
+  - COGEXEC
+  - ORGH
+  - HUBEXEC_NEW
+  - HUBEXEC_PTR

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "version": "1.3.0",
+    "version": "1.4.0",
     "release_date": "2025-09-26",
     "completeness": 0.95,
     "stable": false,
@@ -15,7 +15,7 @@
       "pasm2": "engineering/knowledge-base/P2/language/pasm2/",
       "spin2": "engineering/knowledge-base/P2/language/spin2/ (PNUT-TS v1.51.5)"
     },
-    "last_updated": "2025-09-26T20:58:08.108527"
+    "last_updated": "2025-09-26T21:12:36.039421"
   },
   "architecture": {
     "cogs": {
@@ -60,7 +60,7 @@
   "instructions": {
     "total_count": 360,
     "source": "engineering/knowledge-base/P2/language/pasm2/",
-    "extraction_date": "2025-09-26T20:58:08.108527",
+    "extraction_date": "2025-09-26T21:12:36.039421",
     "categories": {
       "Math and Logic": {
         "count": 20,
@@ -14305,7 +14305,7 @@
   "spin2": {
     "version": "1.51.5",
     "source": "engineering/knowledge-base/P2/language/spin2/",
-    "extraction_date": "2025-09-26T20:58:08.108527",
+    "extraction_date": "2025-09-26T21:12:36.039421",
     "categories": {
       "keywords": {
         "count": 36,

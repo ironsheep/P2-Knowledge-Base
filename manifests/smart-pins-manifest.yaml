@@ -13,9 +13,8 @@ description: |
   Each of the 64 I/O pins can be independently configured as a smart pin
   with its own state machine for autonomous operation.
 
-# Note: Overview file smart_pins.yaml doesn't exist yet
-# overview:
-#   - {name: "smart_pins", file: "smart_pins.yaml", desc: "Smart Pin system overview and concepts"}
+# Note: Overview file would go here if we had one at smart-pins/smart_pins.yaml
+# Currently the overview is at ../smart_pins.yaml (in parent architecture directory)
 
 smart_pin_modes:
   digital_io:

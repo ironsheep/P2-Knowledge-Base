@@ -1,8 +1,26 @@
-instruction: 'FALSE'
-name: 'FALSE'
-description: FALSE instruction (needs documentation)
-group: Unknown
-documentation_level: stub
-needs_documentation: true
-created_by: audit-yaml-files.py
-created_date: '2025-09-19'
+constant: FALSE
+name: FALSE
+value: 0
+hex_value: "$00000000"
+description: |
+  Logical false constant
+  All bits cleared to represent boolean false condition
+category: Numeric Constant
+documentation_level: complete
+usage: |
+  Use in conditional logic and boolean operations
+  Commonly used for initialization and flag clearing
+examples:
+  - code: |
+      mov     flag, FALSE     ' Initialize flag to FALSE
+      ' ... some operations ...
+      cmp     x, y        wz  ' Compare x and y
+      if_e mov  flag, TRUE    ' Set flag to TRUE if equal
+    description: "Using FALSE for initialization"
+notes:
+  - "All bits cleared (0 value)"
+  - "Standard boolean false value in PASM2"
+  - "Used for clearing flags and initialization"
+related:
+  - TRUE
+  - conditional_execution

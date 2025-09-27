@@ -1,8 +1,11 @@
 category: stack_ops
 description: Stack operations
-instruction_count: 4
+instruction_count: 6
 base_path: engineering/knowledge-base/P2/language/pasm2/
 instructions:
+- name: pop
+  file: pop.yaml
+  desc: Pop value from internal hardware stack (8-level)
 - name: popa
   file: popa.yaml
   desc: Read long from hub address --PTRA into D.
@@ -12,6 +15,9 @@ instructions:
 - name: pusha
   file: pusha.yaml
   desc: Write long in D[31:0] to hub address PTRA++.
+- name: push
+  file: push.yaml
+  desc: Push value onto internal hardware stack (8-level)
 - name: pushb
   file: pushb.yaml
   desc: Write long in D[31:0] to hub address PTRB++.

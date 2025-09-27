@@ -1,8 +1,29 @@
-instruction: POSX
+constant: POSX
 name: POSX
-description: POSX instruction (needs documentation)
-group: Unknown
-documentation_level: stub
-needs_documentation: true
-created_by: audit-yaml-files.py
-created_date: '2025-09-19'
+value: 2147483647
+hex_value: "$7FFFFFFF"
+description: |
+  Maximum positive integer constant
+  Largest positive value in 32-bit signed integer representation
+category: Numeric Constant
+documentation_level: complete
+usage: |
+  Use for range checking and overflow detection
+  Represents the upper bound of signed integer values
+examples:
+  - code: |
+      cmp     value, POSX     wc  ' Check if value exceeds max positive
+      if_nc jmp   #overflow       ' Jump if overflow (carry not set means greater/equal)
+    description: "Checking for positive overflow"
+  - code: |
+      mov     limit, POSX         ' Set limit to maximum positive value
+      mins    value, limit        ' Clamp value to not exceed POSX
+    description: "Using POSX as upper limit"
+notes:
+  - "2^31 - 1 in decimal notation"
+  - "Bit 31 clear, bits 30-0 set"
+  - "Used for saturation arithmetic and bounds checking"
+related:
+  - NEGX
+  - mins
+  - maxs

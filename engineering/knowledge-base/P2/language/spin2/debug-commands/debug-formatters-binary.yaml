@@ -1,0 +1,22 @@
+# Binary Debug Formatters (UBIN/SBIN)
+# ALL support underscore (_) variants
+
+underscore_rule: "UBIN(x) → 'x = %10110' | UBIN_(x) → '%10110'"
+
+unsigned:
+  UBIN: {output: "auto-size", prefix: "%"}
+  UBIN_BYTE: {bits: 8, output: "%00000000 to %11111111"}
+  UBIN_WORD: {bits: 16, output: "%00000000_00000000"}
+  UBIN_LONG: {bits: 32, output: "%00000000_00000000_00000000_00000000"}
+
+signed:
+  SBIN: {output: "auto-size with sign", prefix: "-%"}
+  SBIN_BYTE: {bits: 8, output: "-%10000000 to %01111111"}
+  SBIN_WORD: {bits: 16, output: "-%10000000_00000000"}
+  SBIN_LONG: {bits: 32, output: "-%10000000_00000000_00000000_00000000"}
+
+examples:
+  - "DEBUG(UBIN(flags)) → 'flags = %10110'"
+  - "DEBUG(UBIN_(flags)) → '%10110'"
+  - "DEBUG(SBIN_(mask)) → '-%0101'"
+  - "DEBUG(UBIN_BYTE(val)) → forces 8-bit display"

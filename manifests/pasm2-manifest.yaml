@@ -3,7 +3,7 @@ schema_version: '2024-12-30'
 last_updated: '2025-09-23T00:00:00Z'
 category: pasm2_instructions
 structure: hierarchical
-total_instructions: 359
+total_instructions: 361
 description: Complete PASM2 instruction set with hierarchical organization for efficient
   discovery
 categories:
@@ -139,7 +139,7 @@ categories:
     - cogstop
   stack_ops:
     manifest: pasm2/stack_ops.yaml
-    count: 4
+    count: 6
     description: Stack operations
     sample_instructions:
     - popa
@@ -166,6 +166,30 @@ categories:
     - djf
     - djnf
     - instruction_manifest
+  directives:
+    description: Assembly directives for code organization and data definition
+    items:
+    - {name: "alignl", file: "alignl.yaml", desc: "Align to long boundary (4-byte)"}
+    - {name: "alignw", file: "alignw.yaml", desc: "Align to word boundary (2-byte)"}
+    - {name: "org", file: "org.yaml", desc: "Set cog memory origin"}
+    - {name: "orgh", file: "orgh.yaml", desc: "Set hub memory origin"}
+    - {name: "byte", file: "byte.yaml", desc: "Define byte data"}
+    - {name: "word", file: "word.yaml", desc: "Define word data"}
+    - {name: "long", file: "long.yaml", desc: "Define long data"}
+    - {name: "fit", file: "fit.yaml", desc: "Ensure code fits in cog memory"}
+    - {name: "res", file: "res.yaml", desc: "Reserve cog memory space"}
+  constants:
+    description: Predefined numeric constants for PASM2 programming
+    items:
+    - {name: "TRUE", file: "true.yaml", desc: "Logical true (-1, $FFFFFFFF)"}
+    - {name: "FALSE", file: "false.yaml", desc: "Logical false (0, $00000000)"}
+    - {name: "POSX", file: "posx.yaml", desc: "Maximum positive integer (2,147,483,647, $7FFFFFFF)"}
+    - {name: "NEGX", file: "negx.yaml", desc: "Maximum negative integer (-2,147,483,648, $80000000)"}
+    - {name: "PI", file: "pi.yaml", desc: "Floating-point PI (~3.141593, $40490FDB)"}
+  special_registers:
+    description: Special registers for direct I/O pin access (addresses 506-511)
+    items:
+    - {name: "special_registers", file: "special-registers.yaml", desc: "DIRA/DIRB/INA/INB/OUTA/OUTB registers"}
 quick_lookup:
   common_instructions:
     ADD: arithmetic

@@ -1,8 +1,21 @@
-instruction: RES
+directive: RES
 name: RES
-description: RES instruction (needs documentation)
-group: Unknown
-documentation_level: stub
-needs_documentation: true
-created_by: audit-yaml-files.py
-created_date: '2025-09-19'
+description: |
+  Reserve space in cog RAM without initializing
+  Allocates memory space but doesn't generate any data
+category: Assembly Directive
+documentation_level: complete
+syntax: "[label] RES count"
+examples:
+  - code: |
+      buffer  res  16    ' Reserve 16 longs
+      temp    res  1     ' Reserve 1 long for temporary storage
+    description: "Reserve uninitialized cog RAM"
+notes:
+  - "RES only reserves space in cog RAM"
+  - "No hub memory is allocated"
+  - "Useful for variables and buffers"
+related:
+  - LONG
+  - ORG
+  - FIT

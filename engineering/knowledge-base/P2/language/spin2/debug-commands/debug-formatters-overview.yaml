@@ -1,0 +1,49 @@
+# Debug Formatters Overview - START HERE
+# The ONE critical concept: underscore (_) controls output format
+
+THE_GOLDEN_RULE: |
+  WITHOUT underscore → "variable_name = value"
+  WITH underscore → just "value"
+  This applies to ALL numeric formatters
+
+# Most common user questions answered:
+quick_answers:
+  how_to_display_temperature:
+    - "DEBUG(SDEC(temp)) → 'temp = -25'"
+    - "DEBUG(\"Temperature: \", SDEC_(temp), \"°C\") → 'Temperature: -25°C'"
+    
+  why_underscore_exists:
+    "To build custom formatted output without variable names cluttering it"
+    
+  which_formatter_to_use:
+    decimal: "UDEC (positive) or SDEC (can be negative)"
+    hexadecimal: "UHEX (addresses, flags)"
+    binary: "UBIN (bit patterns)"
+    floating: "FDEC (real numbers)"
+
+# Common beginner mistakes:
+avoid_these:
+  - mistake: "DEBUG(SDEC_(temp)) without context"
+    problem: "Just shows '-25' with no label"
+    fix: "Add context: DEBUG(\"Temp: \", SDEC_(temp), \"°C\")"
+    
+  - mistake: "Using UDEC for negative numbers"
+    problem: "Shows huge positive number instead"
+    fix: "Use SDEC for signed values"
+
+# Formatter families (combine base + optional size + optional underscore):
+formatters:
+  decimal: [UDEC, SDEC]  # Add _BYTE, _WORD, _LONG for size
+  hex: [UHEX, SHEX]      # Add _ for value-only
+  binary: [UBIN, SBIN]    
+  float: [FDEC]
+  arrays: "Add _ARRAY suffix for multiple values"
+
+# Real examples new users need:
+essential_patterns:
+  status_line: 'DEBUG("X:", SDEC_(x), " Y:", SDEC_(y), " Z:", SDEC_(z))'
+  hex_dump: "DEBUG(UHEX_BYTE_ARRAY_(@buffer, 16))"
+  error_with_context: 'DEBUG("ERROR at address ", UHEX_(addr), ": ", SDEC_(error_code))'
+  sensor_reading: 'DEBUG("Sensor: ", FDEC_(value), " volts")'
+
+detailed_reference: "debug-formatters-complete.yaml"

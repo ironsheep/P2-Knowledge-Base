@@ -1,8 +1,0 @@
-instruction: PB
-name: PB
-description: PB instruction (needs documentation)
-group: Unknown
-documentation_level: stub
-needs_documentation: true
-created_by: audit-yaml-files.py
-created_date: '2025-09-19'

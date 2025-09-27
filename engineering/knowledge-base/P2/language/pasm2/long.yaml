@@ -1,8 +1,22 @@
-instruction: LONG
+directive: LONG
 name: LONG
-description: LONG instruction (needs documentation)
-group: Unknown
-documentation_level: stub
-needs_documentation: true
-created_by: audit-yaml-files.py
-created_date: '2025-09-19'
+description: |
+  Declare long data in memory
+  Stores 32-bit values at the current address
+category: Assembly Directive
+documentation_level: complete
+syntax: "[label] LONG value[, value...]"
+examples:
+  - code: |
+      counter long  0                  ' Single long
+      table   long  $1234_5678         ' Hex value
+      ptrs    long  @start, @end       ' Address pointers
+    description: "Long data declarations"
+notes:
+  - "Each value occupies 4 bytes"
+  - "Automatically long-aligned in hub RAM"
+  - "Full 32-bit range"
+related:
+  - BYTE
+  - WORD
+  - ALIGNL

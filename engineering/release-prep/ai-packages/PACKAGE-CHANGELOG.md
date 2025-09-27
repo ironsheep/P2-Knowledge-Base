@@ -2,7 +2,52 @@
 
 This changelog documents customer-facing changes for external package users.
 
-## v1.3.0 - 2025-09-16 (In Progress)
+## v1.4.0 - 2025-09-26
+
+### New Features
+- **Debug Formatter Documentation**: Complete coverage of 52+ DEBUG() formatters with underscore protocol
+  - 6 consolidated documentation files for efficient context usage
+  - Full underscore protocol documentation (with_ shows "name = value", without shows just value)
+  - Array formatter support across all numeric types (52 total array formatters)
+  
+- **PASM2 Constants**: Added 5 fundamental constants (TRUE, FALSE, POSX, NEGX, PI)
+  - Complete with hex values, usage examples, and cross-references
+  - Special case documentation (e.g., abs(NEGX) = NEGX due to two's complement)
+  
+- **Configuration Symbols**: 25+ special CON symbols for system configuration
+  - DEBUG configuration (19 symbols): DEBUG_BAUD, DEBUG_DELAY, DEBUG_DISABLE, etc.
+  - System symbols: DOWNLOAD_BAUD, _CLKFREQ, _CLKMODE, _BOOTSEL, _FLASH, _DEBUG
+  - Complete defaults and usage documentation
+
+### Improvements
+- **Manifest Coverage**: Increased from 141 to 249 entries (77% increase)
+  - Added 52 orphaned Spin2 methods to manifests
+  - Added 56 orphaned Spin2 operators to manifests
+  - Validated and corrected 71 PASM2 instruction references
+  - Properly classified debug commands vs formatters
+  
+- **Validation Tooling**: New YAML validation workflow
+  - validate-yaml-syntax.py for pre-validation of YAML syntax
+  - Enhanced verify-manifest-linkages-v2.py with ERROR vs WARNING classification
+  - Fixed critical YAML indentation errors in PASM2 examples
+  
+- **Debug Command Classification**: Properly separated commands from formatters
+  - dly (delay), pc_key (keyboard), pc_mouse (mouse) are commands, not formatters
+  - bool and bool_ are formatters, not special cases
+  - if/ifnot conditional debug execution properly documented
+
+### Bug Fixes
+- Fixed YAML syntax errors in PASM2 constant files (indentation of if_z, if_c lines)
+- Corrected array formatter count from 56 to 52 (FDEC only works with 32-bit storage)
+- Fixed manifest indentation error (constants was incorrectly nested under special_topics)
+- Resolved SDEC()/SDEC_() discovery issue reported by Remote Claude
+
+### Documentation
+- Release workflow updated with complete YAML-to-JSON validation sequence
+- Added validate-yaml-syntax.py usage documentation
+- Enhanced debugging section with proper command vs formatter distinction
+
+## v1.3.0 - 2025-09-16
 
 ### New Features
 - **Language Idioms**: Added 44 micro-patterns extracted from 730 source files (29,156 total occurrences)

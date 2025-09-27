@@ -85,10 +85,10 @@ resource_profile:
 
 composition_rules:
   compatible_patterns:
-    - "timing_control" (for timed buffer operations)
-    - "protocol_implementation" (for protocol data buffering)
-    - "cog_management" (for inter-COG buffering)
-    - "state_machine" (for buffered state transitions)
+    - "timing_control (for timed buffer operations)"
+    - "protocol_implementation (for protocol data buffering)"
+    - "cog_management (for inter-COG buffering)"
+    - "state_machine (for buffered state transitions)"
   incompatible_patterns:
     - None (buffering is broadly applicable)
   synergies:

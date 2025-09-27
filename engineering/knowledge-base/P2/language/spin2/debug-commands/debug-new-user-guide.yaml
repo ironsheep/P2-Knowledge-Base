@@ -1,0 +1,45 @@
+# Debug Guide for New P2 Users
+# Answers the questions you're about to ask
+
+first_time_debug:
+  simplest_example: 'DEBUG("Hello World")'
+  show_a_variable: 'DEBUG("Count: ", UDEC(myVariable))'
+  
+why_my_output_looks_weird:
+  "Shows 'temperature = -25' but I just want the number":
+    problem: "You used SDEC(temp) which includes the variable name"
+    solution: "Use SDEC_(temp) to get just the value"
+    example: 'DEBUG("Temperature: ", SDEC_(temp), "°C")'
+  
+  "Shows huge number instead of negative":
+    problem: "Used UDEC (unsigned) for a negative value"
+    solution: "Use SDEC (signed) for values that can be negative"
+  
+  "Shows decimal but I want hex":
+    problem: "Default is decimal output"
+    solution: "Use UHEX() for hexadecimal with $ prefix"
+
+choosing_the_right_formatter:
+  temperatures_sensors_measurements: "SDEC (signed decimal)"
+  counters_indexes_sizes: "UDEC (unsigned decimal)"  
+  memory_addresses: "UHEX (hexadecimal)"
+  bit_flags_masks: "UBIN (binary)"
+  voltages_ratios: "FDEC (floating point)"
+
+most_useful_examples:
+  sensor_with_units: 'DEBUG("Temperature: ", SDEC_(temp), "°C")'
+  multiple_values: 'DEBUG("X:", SDEC_(x), " Y:", SDEC_(y), " Z:", SDEC_(z))'
+  percentage: 'DEBUG("Progress: ", UDEC_(done*100/total), "%")'
+  error_location: 'DEBUG("Error at address ", UHEX_(addr))'
+  array_contents: 'DEBUG("Buffer: ", UHEX_BYTE_ARRAY_(@buffer, 10))'
+
+if_nothing_appears:
+  - "Check DEBUG is not disabled in your code"
+  - "Ensure terminal/debug window is open"
+  - "Verify baud rate matches (default 2_000_000)"
+
+quick_reference:
+  "I want just the number": "Add underscore: SDEC_()"
+  "I want the variable name too": "No underscore: SDEC()"
+  "I want multiple values": "List them: UDEC(a, b, c)"
+  "I want an array dump": "Use _ARRAY: UHEX_BYTE_ARRAY_(@data, count)"

@@ -1,0 +1,29 @@
+# Debug Array Formatters
+# ALL array formatters support underscore (_) variants
+
+syntax: "formatter(pointer, count)"
+underscore_rule: "array_name = v1, v2, v3 → v1, v2, v3"
+
+array_types:
+  REG_ARRAY: {source: "cog registers", pointer: "register"}
+  BYTE_ARRAY: {source: "hub memory", size: "8-bit"}
+  WORD_ARRAY: {source: "hub memory", size: "16-bit"}
+  LONG_ARRAY: {source: "hub memory", size: "32-bit"}
+
+formatters: # Combine prefix + array_type
+  decimal: [UDEC, SDEC]
+  hexadecimal: [UHEX, SHEX]
+  binary: [UBIN, SBIN]
+  floating: [FDEC]
+
+examples:
+  - "DEBUG(UHEX_BYTE_ARRAY(@buffer, 16)) → 'buffer = $45, $67, $89...'"
+  - "DEBUG(UHEX_BYTE_ARRAY_(@buffer, 16)) → '$45, $67, $89...'"
+  - "DEBUG(SDEC_REG_ARRAY(first_reg, 8)) → 'first_reg = -10, 20, 30...'"
+  - "DEBUG(FDEC_ARRAY(@floats, 4)) → 'floats = 3.14, 2.71, 1.41...'"
+
+notes:
+  - "count is number of elements, not bytes"
+  - "elements separated by commas"
+  - "REG_ARRAY uses cog register pointer"
+  - "others use hub memory address (@)"

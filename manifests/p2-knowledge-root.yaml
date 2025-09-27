@@ -32,7 +32,7 @@ path_construction:
     EXAMPLE:
     - raw_base_url: "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/"
     - base_path: "engineering/knowledge-base/P2/language/spin2/" (from spin2-manifest.yaml)
-    - file: "methods/cogspin.yaml" (from the entry)
+    - entry file path: "methods/cogspin.yaml" (from the specific entry)
     - RESULT: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/knowledge-base/P2/language/spin2/methods/cogspin.yaml
     
     IMPORTANT: All three components are required to construct valid URLs!
