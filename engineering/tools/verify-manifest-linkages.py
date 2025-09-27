@@ -129,39 +129,89 @@ class ManifestVerifier:
     
     def _check_orphaned_files(self) -> None:
         """Check for YAML files that exist but aren't referenced in any manifest."""
-        # Define directories to check for orphaned files
-        directories_to_check = [
-            "engineering/knowledge-base/P2/language/pasm2",
-            "engineering/knowledge-base/P2/language/spin2/methods",
-            "engineering/knowledge-base/P2/language/spin2/constructs",
-            "engineering/knowledge-base/P2/language/spin2/operators",
-            "engineering/knowledge-base/P2/architecture/smart-pins",
-            "engineering/knowledge-base/P2/architecture",
-            "engineering/knowledge-base/P2/hardware",
-            "engineering/knowledge-base/P2/community/obex/objects"
-        ]
+        # Check TWO locations for orphaned files:
+        # 1. Knowledge base content files
+        # 2. Manifest files themselves
         
-        for dir_path in directories_to_check:
-            full_dir = self.base_path / dir_path
-            if not full_dir.exists():
-                continue
-                
-            # Find all YAML files in directory
-            yaml_files = list(full_dir.glob("*.yaml"))
+        misplaced_manifests = []
+        orphaned_manifests = []
+        
+        # FIRST: Check all YAML files in the knowledge base
+        kb_root = self.base_path / "engineering/knowledge-base/P2"
+        if kb_root.exists():
+            all_kb_files = list(kb_root.rglob("*.yaml"))
             
-            for yaml_file in yaml_files:
+            for yaml_file in all_kb_files:
                 relative_path = yaml_file.relative_to(self.base_path)
-                if str(relative_path) not in self.referenced_files:
+                str_path = str(relative_path)
+                
+                # Check if this is a manifest file outside manifests/ directory
+                if 'manifest' in yaml_file.name.lower():
+                    misplaced_manifests.append({
+                        'path': str_path,
+                        'dir': str(yaml_file.parent.relative_to(self.base_path)),
+                        'name': yaml_file.name
+                    })
+                
+                # Check if file is referenced
+                if str_path not in self.referenced_files:
                     # Check if it's a special file we should ignore
                     filename = yaml_file.name
                     if filename in ['pattern-index.yaml', 'README.yaml', 'index.yaml']:
                         continue
-                    
+                        
                     self.orphaned_files.append({
-                        'path': str(relative_path),
-                        'dir': dir_path,
+                        'path': str_path,
+                        'dir': str(yaml_file.parent.relative_to(self.base_path)),
                         'name': filename
                     })
+        else:
+            print(f"{Colors.YELLOW}Warning: Knowledge base root not found at {kb_root}{Colors.RESET}")
+        
+        # SECOND: Check all YAML files in the manifests directory
+        manifests_root = self.base_path / "manifests"
+        if manifests_root.exists():
+            all_manifest_files = list(manifests_root.rglob("*.yaml"))
+            
+            for yaml_file in all_manifest_files:
+                relative_path = yaml_file.relative_to(self.base_path)
+                str_path = str(relative_path)
+                
+                # Skip the root manifest as it's the entry point
+                if yaml_file.name == 'p2-knowledge-root.yaml':
+                    continue
+                
+                # Check if this manifest file is referenced anywhere
+                if str_path not in self.referenced_files:
+                    # Also check if just the filename is referenced (relative references)
+                    filename = yaml_file.name
+                    found = False
+                    for ref in self.referenced_files:
+                        if ref.endswith(filename):
+                            found = True
+                            break
+                    
+                    if not found:
+                        orphaned_manifests.append({
+                            'path': str_path,
+                            'dir': str(yaml_file.parent.relative_to(self.base_path)),
+                            'name': filename
+                        })
+        else:
+            print(f"{Colors.YELLOW}Warning: Manifests root not found at {manifests_root}{Colors.RESET}")
+        
+        # Add warnings for misplaced and orphaned manifests
+        if misplaced_manifests:
+            self.warnings.append(f"Found {len(misplaced_manifests)} manifest files outside /manifests/ directory")
+            for mm in misplaced_manifests:
+                self.warnings.append(f"  Misplaced manifest: {mm['path']}")
+        
+        if orphaned_manifests:
+            self.warnings.append(f"Found {len(orphaned_manifests)} orphaned manifests in /manifests/ directory")
+            for om in orphaned_manifests:
+                self.warnings.append(f"  Orphaned manifest: {om['path']}")
+                # Add to orphaned files list so they show in the summary
+                self.orphaned_files.append(om)
     
     def _verify_manifest(self, name: str, path: str, indent: int = 0) -> None:
         """
