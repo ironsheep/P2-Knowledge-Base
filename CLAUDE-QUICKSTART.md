@@ -15,7 +15,7 @@ Raw access: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
 ## CRITICAL RULES - NO EXCEPTIONS
 
 ### Navigation (MANDATORY)
-- START: manifests/p2-knowledge-root.yaml (always)
+- START: manifests/propeller-knowledge-root.yaml (always)
 - THEN: manifests/auxiliary-guides-manifest.yaml (how-to guides)
 - NEVER search for YAML files - use manifest tree only
 - All files are YAML format in engineering/knowledge-base/P2/
@@ -62,7 +62,7 @@ Raw access: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
 
 ## Manifest Navigation Map
 
-Start → manifests/p2-knowledge-root.yaml
+Start → manifests/propeller-knowledge-root.yaml
 ├── PASM2 → pasm2-manifest.yaml → 360+ instructions
 ├── Smart Pins → hardware/smart-pins/modes/
 ├── OBEX → obex/obex-root.yaml → 113 objects

@@ -29,7 +29,7 @@
 **MONITOR**: `tail -f logs/debug_*.log` (cleaner than console)  
 
 ### AI Navigation
-**START**: `manifests/p2-knowledge-root.yaml`  
+**START**: `manifests/propeller-knowledge-root.yaml`  
 **FOLLOW**: Manifest tree (never guess paths)  
 **REMEMBER**: P2 hardware ≠ complete peripherals (need OBEX)  
 

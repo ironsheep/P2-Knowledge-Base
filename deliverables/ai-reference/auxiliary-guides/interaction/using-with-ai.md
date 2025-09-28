@@ -38,7 +38,7 @@ Please access the P2 Knowledge Base from GitHub:
 https://github.com/ironsheep/P2-Knowledge-Base
 
 CRITICAL: Start with these manifests:
-1. manifests/p2-knowledge-root.yaml - Main navigation
+1. manifests/propeller-knowledge-root.yaml - Main navigation
 2. manifests/auxiliary-guides-manifest.yaml - HOW to use resources
 
 Key auxiliary guides you should know:
@@ -68,7 +68,7 @@ My task: [YOUR SPECIFIC TASK]
 ```
 P2-Knowledge-Base/
 ├── manifests/                          # START HERE - Navigation
-│   ├── p2-knowledge-root.yaml         # Main index
+│   ├── propeller-knowledge-root.yaml  # Main index
 │   ├── auxiliary-guides-manifest.yaml # HOW to use resources ← NEW!
 │   ├── pasm2-manifest.yaml            # 357 instructions
 │   ├── smart-pins-manifest.yaml       # 32 pin modes
@@ -148,7 +148,7 @@ methods/locknew.yaml
 
 ### Step-by-Step Navigation
 
-1. **Start**: `manifests/p2-knowledge-root.yaml`
+1. **Start**: `manifests/propeller-knowledge-root.yaml`
 2. **Check auxiliary guides**: `manifests/auxiliary-guides-manifest.yaml`
 3. **Navigate to category**: e.g., `manifests/spin2-manifest.yaml`
 4. **Find specific file**: Use exact path from manifest
