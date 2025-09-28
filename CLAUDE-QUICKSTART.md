@@ -6,22 +6,44 @@
 Copy this entire block to Claude to configure it properly:
 
 ```
-FIRST ACTION: Save these instructions to your CLAUDE.md file for persistent reference.
+FIRST ACTION: Save these instructions to your CLAUDE.md, replacing any P2 Knowledge Base content you may already have.
 
 You are helping with Propeller 2 (P2) microcontroller development using the P2 Knowledge Base.
 GitHub: https://github.com/ironsheep/P2-Knowledge-Base
 Raw access: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
 
-## CRITICAL RULES - NO EXCEPTIONS
+### CRITICAL RULES - NO EXCEPTIONS
 
-### Navigation (MANDATORY)
+#### BEFORE EVERY P2KB ACCESS - Pre-Flight Checklist
+□ I have a manifest open
+□ The manifest shows the exact path
+□ I am NOT guessing or constructing paths
+□ If not found, I will report it, not search for it
+
+#### MANDATORY NAVIGATION SEQUENCE - STOP AND CHECK EACH STEP
+
+STEP 1: Did you start with a manifest file?
+   ✅ YES → Continue to Step 2
+   ❌ NO → STOP! Start with manifests/propeller-knowledge-root.yaml
+
+STEP 2: Did the manifest give you an exact path?
+   ✅ YES → Use that exact path
+   ❌ NO → STOP! Report "Content not found in P2 Knowledge Base"
+
+STEP 3: Are you about to construct a path yourself?
+   ❌ STOP! This is FORBIDDEN. Return to Step 1.
+
+⚠️ CIRCUIT BREAKER: If you typed "engineering/knowledge-base/P2/" followed by
+   ANYTHING not explicitly given by a manifest → STOP IMMEDIATELY
+
+#### Navigation (MANDATORY)
 - START: manifests/propeller-knowledge-root.yaml (always)
 - THEN: manifests/auxiliary-guides-manifest.yaml (how-to guides)
 - NEVER search for YAML files - use manifest tree only
 - All files are YAML format in engineering/knowledge-base/P2/
 - ONLY use paths provided by manifests - NEVER construct your own
 
-### When Content Not Found (MANDATORY PROTOCOL)
+#### When Content Not Found (MANDATORY PROTOCOL)
 - DO NOT manufacture/guess paths like "engineering/knowledge-base/P2/whatever.yaml"
 - DO NOT request web searches or external resources
 - DO NOT hallucinate content that might exist
@@ -31,7 +53,14 @@ Raw access: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
   Repository: https://github.com/ironsheep/P2-Knowledge-Base/issues
   Missing: [specific description of what you were looking for]"
 
-### Anti-Patterns (FORBIDDEN)
+#### RED FLAGS - If you're about to type these, STOP:
+- "blocks/con.yaml" (guessing subdirectory)
+- "keywords/con.yaml" (guessing subdirectory)
+- Any path with "/probably/" or "/maybe/"
+- Any path you "think" might exist
+- Any path containing "..." as placeholder
+
+#### Anti-Patterns (FORBIDDEN)
 ❌ Searching for *.yaml directly
 ❌ Guessing paths ("probably in hardware/")
 ❌ Manufacturing URLs ("try fetching from...")
@@ -41,35 +70,22 @@ Raw access: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
 ❌ Filtering OBEX by category first
 ❌ Assuming built-in peripherals exist
 
-### Testing Protocol
-    pnut_ts -d program.spin2              # Compile with debug
-    pnut-term-ts -r program.bin & PID=$!  # Run and capture PID
-    tail -f logs/debug_*.log              # Monitor logs (not console)
-    kill -TERM $PID                       # Clean shutdown (not pkill)
-    # Signals: -TERM (shutdown), -USR1 (reset), -9 (force)
-
-### OBEX Search Rules
-- Search ALL 113 objects first (34 in 'misc' have drivers!)
-- Expand terms: I2C → IIC, TWI, two-wire
-- Check jonnymac (44 objects)
-- 21 objects have GitHub links
-
-### P2 Architecture Facts
-- 8 COGs (cores), 64 Smart Pins
-- No built-in UART/SPI/I2C → use OBEX objects
-- Smart Pins = autonomous I/O processors
-- Building blocks, not complete peripherals
-
-## Manifest Navigation Map
-
-Start → manifests/propeller-knowledge-root.yaml
-├── PASM2 → pasm2-manifest.yaml → 360+ instructions
-├── Smart Pins → hardware/smart-pins/modes/
-├── OBEX → obex/obex-root.yaml → 113 objects
-└── Guides → auxiliary-guides-manifest.yaml
+#### VIOLATION CONSEQUENCES
+If you construct a path → You MUST:
+1. Stop immediately
+2. Report: "I violated P2KB navigation rules by constructing a path"
+3. Start over with manifest navigation
 
 ⚠️ CRITICAL: When content not found, REPORT IT - don't manufacture paths or request web searches!
 REMEMBER: Manifest tree only. No direct YAML searches. PID-based signals only.
+
+Key auxiliary guides you should know:
+- OBEX search: NEVER filter by category first (34 "misc" objects contain drivers!)
+- BMP generation: For Plot window debug visualization
+
+The P2 provides building blocks (Smart Pins, COGs), not complete peripherals.
+Need UART/SPI/I2C? Use OBEX objects.
+
 ```
 
 ## 💡 Common Task Templates
