@@ -1,21 +1,33 @@
 instruction: CMPM
 syntax: CMPM Dest, {#}Src {WC|WZ|WCZ}
-encoding: "EEEE 0010101 CZI DDDDDDDDD SSSSSSSSS                  --             Result[31]         D=S               \
-  \     2"
+encoding: EEEE 0010101 CZI DDDDDDDDD SSSSSSSSS                  --             Result[31]         D=S                    2
 timing:
   cycles: 2
   type: fixed
-description: "CMPM compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally setting the\
-  \ C Result: Greater/lesser and equality status is optionally written to the C and Z flags.\n\nCMPM compares the unsigned\
-  \ values of Dest and Src (by subtracting Src from Dest) and optionally setting the C\n\nand Z flags accordingly.\n\n\
-  If the WC or WCZ effect is specified, the C flag is updated to the MSB of (Dest - Src).\n\nIf the WZ or WCZ effect\
-  \ is specified, the Z flag is set (1) if Dest equals Src."
+description: 'CMPM compares the unsigned values of Dest and Src (by subtracting Src
+  from Dest) and optionally setting the C Result: Greater/lesser and equality status
+  is optionally written to the C and Z flags.
+
+
+  CMPM compares the unsigned values of Dest and Src (by subtracting Src from Dest)
+  and optionally setting the C
+
+
+  and Z flags accordingly.
+
+
+  If the WC or WCZ effect is specified, the C flag is updated to the MSB of (Dest
+  - Src).
+
+
+  If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src.'
 flags_affected:
   Z: Result[31] D=S 2
 parameters:
 - Dest is the register containing the value to compare with that of Src.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
-- "WC, WZ, or WCZ are optional effects to update flags."
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared
+  to Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -27,11 +39,12 @@ compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: "Compare most significant bit"
-category: arithmetic
-result: "Greater/lesser and equality status is optionally written to the C and Z flags."
+brief_description: Compare most significant bit
+category: Math and Logic
+result: Greater/lesser and equality status is optionally written to the C and Z flags.
 syntax_variants:
 - CMPM Dest, {#}Src {WC|WZ|WCZ}
-- CMPM compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally setting the C
+- CMPM compares the unsigned values of Dest and Src (by subtracting Src from Dest)
+  and optionally setting the C
 manual_extraction_date: '2025-01-19'
 oneliner: Compare two unsigned values, get MSB of difference

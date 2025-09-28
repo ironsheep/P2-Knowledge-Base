@@ -4,24 +4,29 @@ encoding: EEEE 1101011 00L DDDDDDDDD 000001111
 timing:
   cycles: 2
   type: fixed
-description: Convert 5:27-bit logarithm to 32-bit unsigned integer. Takes logarithm in 5:27 format (5-bit whole exponent,
-  27-bit fractional exponent) in D operand. Result retrieved via GETQX instruction 55 clocks later.
-long_description: 'The QEXP instruction performs logarithm to integer conversion using the P2''s 54-stage pipelined CORDIC
-  solver. It converts a 5:27-bit logarithm format into a 32-bit unsigned integer, effectively computing the exponential (antilog)
+description: Convert 5:27-bit logarithm to 32-bit unsigned integer. Takes logarithm
+  in 5:27 format (5-bit whole exponent, 27-bit fractional exponent) in D operand.
+  Result retrieved via GETQX instruction 55 clocks later.
+long_description: 'The QEXP instruction performs logarithm to integer conversion using
+  the P2''s 54-stage pipelined CORDIC solver. It converts a 5:27-bit logarithm format
+  into a 32-bit unsigned integer, effectively computing the exponential (antilog)
   of the input.
 
 
-  The instruction takes the logarithm value in the D operand, which must be in P2''s 5:27 format where bits [31:27] contain
-  the 5-bit whole exponent and bits [26:0] contain the 27-bit fractional exponent. After 55 clocks, the integer result can
+  The instruction takes the logarithm value in the D operand, which must be in P2''s
+  5:27 format where bits [31:27] contain the 5-bit whole exponent and bits [26:0]
+  contain the 27-bit fractional exponent. After 55 clocks, the integer result can
   be retrieved using the GETQX instruction.
 
 
-  This instruction is the complement of QLOG and is commonly used together with QLOG to perform power calculations, exponential
-  functions, and other mathematical operations requiring logarithmic scaling.
+  This instruction is the complement of QLOG and is commonly used together with QLOG
+  to perform power calculations, exponential functions, and other mathematical operations
+  requiring logarithmic scaling.
 
 
-  The high precision of the 5:27 format allows for accurate exponential calculations across a wide range of input values,
-  making it suitable for signal processing, mathematical modeling, and scientific computations.
+  The high precision of the 5:27 format allows for accurate exponential calculations
+  across a wide range of input values, making it suitable for signal processing, mathematical
+  modeling, and scientific computations.
 
   '
 examples:
@@ -75,9 +80,10 @@ operand_details:
   D: 5:27-bit logarithm (5-bit exponent in [31:27], 27-bit fractional in [26:0])
 result_details:
   GETQX: 32-bit unsigned integer (exponential result)
-timing_notes: Result available 55 clocks after instruction issue. Each cog can issue one CORDIC instruction per hub window
-  (every 8 clocks).
-format_notes: Input must be in 5:27 logarithmic format as produced by QLOG. Complementary operation to QLOG.
+timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
+  one CORDIC instruction per hub window (every 8 clocks).
+format_notes: Input must be in 5:27 logarithmic format as produced by QLOG. Complementary
+  operation to QLOG.
 documentation_source: p2_datasheet
 documentation_level: comprehensive
 compiler_operand_format:
@@ -89,5 +95,5 @@ compiler_encoding:
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.411047'
-category: cordic
+category: CORDIC Solver
 oneliner: Convert 5:27-bit logarithm to 32-bit unsigned integer

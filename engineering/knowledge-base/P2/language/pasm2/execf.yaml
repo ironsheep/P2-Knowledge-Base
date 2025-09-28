@@ -1,7 +1,8 @@
 instruction: EXECF
-syntax: "EXECF\_\_ {#}D"
+syntax: EXECF   {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000110011
-description: 'Jump to D[9:0] in cog/LUT and set SKIPF pattern to D[31:10]. PC = {10''b0, D[9:0]}.
+description: 'Jump to D[9:0] in cog/LUT and set SKIPF pattern to D[31:10]. PC = {10''b0,
+  D[9:0]}.
 
   '
 timing:
@@ -22,5 +23,5 @@ syntax_variants:
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 last_updated: '2025-09-19T16:04:16.915391'
-category: control_flow
+category: Branch
 oneliner: Call+Skip

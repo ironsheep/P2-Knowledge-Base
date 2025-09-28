@@ -22,5 +22,5 @@ brief_description: Push long to stack using PTRB
 parameters:
 - D is a register or 9-bit literal value to push onto the stack at PTRB
 - PTRB is automatically incremented after the write
-category: misc_ops
+category: Hub RAM
 oneliner: Write

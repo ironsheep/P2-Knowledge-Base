@@ -18,5 +18,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - SETPIV {#}D
 last_updated: '2025-09-19T16:04:17.302139'
-category: colorspace
+category: Pixel Mixer
 oneliner: Set BLNPIX/MIXPIX blend factor to D[7:0]

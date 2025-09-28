@@ -4,8 +4,8 @@ encoding: EEEE 0011110 CZI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-description: '{WC/WZ/WCZ}   Sum +/-S into D by Z. If Z = 1 then D = D - S, else D = D + S. C = correct sign of (D +/- S).
-  *'
+description: '{WC/WZ/WCZ}   Sum +/-S into D by Z. If Z = 1 then D = D - S, else D
+  = D + S. C = correct sign of (D +/- S). *'
 flags_affected:
   C:
     formula: correct sign of (D +/- S)
@@ -24,5 +24,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - SUMZ D,{#}S
 last_updated: '2025-09-19T16:04:16.878177'
-category: arithmetic
+category: Math and Logic
 oneliner: '{WC/WZ/WCZ} Sum +/-S into D by Z'

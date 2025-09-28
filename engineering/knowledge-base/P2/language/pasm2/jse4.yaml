@@ -5,8 +5,8 @@ timing:
   cycles: 2
   type: variable
   range: 13...20
-description: "Jump to S** if SE4 event flag is set.                                                                  \
-  \       2 or 4 / 2 or"
+description: Jump to S** if SE4 event flag is set.                                                                         2
+  or 4 / 2 or
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: structured
 compiler_operand_format:
@@ -38,5 +38,5 @@ specifics:
   condition: set
 quick_example: 'JSE4 #handler  ; Jump if selector 4 event flag is set'
 has_group_documentation: true
-category: timing_events
+category: Event
 oneliner: Branch

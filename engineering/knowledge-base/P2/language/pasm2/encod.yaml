@@ -1,52 +1,165 @@
 instruction: ENCOD
 syntax: ENCOD Dest, {#}Src {WC|WZ|WCZ}
 encoding:
-- EEEE 0111100 CZI DDDDDDDDD SSSSSSSSS                    D               S != 0            Result = 0              2
-- EEEE 0111100 CZ0 DDDDDDDDD DDDDDDDDD                    D           Original D != 0       Result = 0              2
+- EEEE 0111100 CZI DDDDDDDDD SSSSSSSSS                    D               S != 0            Result
+  = 0              2
+- EEEE 0111100 CZ0 DDDDDDDDD DDDDDDDDD                    D           Original D !=
+  0       Result = 0              2
 timing:
   cycles: 2
   type: fixed
-description: "ENCOD stores the bit position value (0--31) of the top-most high bit (1) of Src, or Dest, into Dest. If\
-  \ the value to Result: The bit position value of the top-most high bit (1) in Src, or Dest, is stored in Dest.\n\nENCOD\
-  \ stores the bit position value (0--31) of the top-most high bit (1) of Src, or Dest, into Dest. If the value to\n\n\
-  encode (Src, or original Dest (in syntax 2)) may be %0, the resulting Dest will be 0-- use the WC or WCZ effect and\n\
-  \ncheck the resulting C flag to distinguish between the cases of input Src/Dest = %1 verses input Src/Dest = %0.\n\n\
-  If the WC or WCZ effect is specified, the C flag is set (1) if Src (or original Dest in syntax 2) was not zero,\
-  \ or is\n\ncleared (0) if it was zero.\n\nIf the WZ or WCZ effect is specified, the Z flag is set (1) if the result\
-  \ equals zero, or is cleared (0) if not zero.\n\n*     A long of %00000000_00000000_00000000_00000001 encodes to 0.\n\
-  \n*     A long of %00000000_00000000_00000000_00100000 encodes to 5.\n\n*     A long of %00000000_00000000_10000001_01000000\
-  \ encodes to 15.\n\n*     A long of %00000000_00000000_00000000_00000000 encodes to 0 with optional C cleared to 0.\n\
-  \nENCOD is the complement of DECOD.\n\nEffects ( WC, WZ, WCZ, ANDC, etc. )\n\nNearly half of PASM2 instructions feature\
-  \ optional effects to modify the C and/or Z flags. An Effect is placed at\n\nthe end of such instructions.\n\n{Label}\
-  \ {Condition} Instruction Operands {Effect}\n\nWhen included (where allowed) the flag or flags are updated by the\
-  \ instruction execution; when omitted, the flags\n\nremain as-is. Only zero or one Effect is allowed per instruction.\n\
-  \nEffects\n\nEffect        Description\n\nANDC          AND tested bit/pin into current C; used on TESTxx instructions\n\
-  \nANDZ          AND tested bit/pin into current Z; used on TESTxx instructions\n\nORC           OR tested bit/pin into current\
-  \ C; used on TESTxx instructions\n\nORZ           OR tested bit/pin into current Z; used on TESTxx instructions\n\nXORC\
-  \          XOR tested bit/pin into current C; used on TESTxx instructions\n\nXORZ          XOR tested bit/pin into current\
-  \ Z; used on TESTxx instructions\n\nWC           Write C flag; used on many instructions\n\nWCZ           Write both\
-  \ C and Z flags; used on many instructions\n\nWZ           Write Z flag; used on many instructions\n\nFor example:\n\
-  \nAND     config, #%1000        WZ               'config[3] low? z=1\n\nTESTP #4                      ANDZ         \
-  \    'pin 4 high? z=1\n\nif_z                 JMP     #MoreCode                              'jump if config[3] low\
-  \ and pin 4 high\n\nThis code jumps to the label MoreCode only if config bit 3 is low (0) and I/O pin 4 is high. This\
-  \ first instruction\n\nbitwise AND's %1000 into config and sets the Z flag if that result is zero. The second\
-  \ instruction tests I/O pin 4\n\nand bitwise AND's its high/low state into the Z flag. The third instruction, which\
-  \ specifies an if_z condition,\n\nexecutes only if the z flag is high by then, jumping to MoreCode; otherwise it\
-  \ behaves like a nop instruction. Using\n\nan Effect on instructions, along with a Condition on later instructions, enables\
-  \ code to be much more powerful\n\nthan what is possible with typical assembly languages. See IF_x (Conditions) for more\
-  \ information. NOTE: In this\n\nexample, the first instruction modifies config-- to do non-destructive bit\
-  \ tests, use a testb instead of and\n\ninstruction."
+description: 'ENCOD stores the bit position value (0--31) of the top-most high bit
+  (1) of Src, or Dest, into Dest. If the value to Result: The bit position value of
+  the top-most high bit (1) in Src, or Dest, is stored in Dest.
+
+
+  ENCOD stores the bit position value (0--31) of the top-most high bit (1) of Src,
+  or Dest, into Dest. If the value to
+
+
+  encode (Src, or original Dest (in syntax 2)) may be %0, the resulting Dest will
+  be 0-- use the WC or WCZ effect and
+
+
+  check the resulting C flag to distinguish between the cases of input Src/Dest =
+  %1 verses input Src/Dest = %0.
+
+
+  If the WC or WCZ effect is specified, the C flag is set (1) if Src (or original
+  Dest in syntax 2) was not zero, or is
+
+
+  cleared (0) if it was zero.
+
+
+  If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
+  zero, or is cleared (0) if not zero.
+
+
+  *     A long of %00000000_00000000_00000000_00000001 encodes to 0.
+
+
+  *     A long of %00000000_00000000_00000000_00100000 encodes to 5.
+
+
+  *     A long of %00000000_00000000_10000001_01000000 encodes to 15.
+
+
+  *     A long of %00000000_00000000_00000000_00000000 encodes to 0 with optional
+  C cleared to 0.
+
+
+  ENCOD is the complement of DECOD.
+
+
+  Effects ( WC, WZ, WCZ, ANDC, etc. )
+
+
+  Nearly half of PASM2 instructions feature optional effects to modify the C and/or
+  Z flags. An Effect is placed at
+
+
+  the end of such instructions.
+
+
+  {Label} {Condition} Instruction Operands {Effect}
+
+
+  When included (where allowed) the flag or flags are updated by the instruction execution;
+  when omitted, the flags
+
+
+  remain as-is. Only zero or one Effect is allowed per instruction.
+
+
+  Effects
+
+
+  Effect        Description
+
+
+  ANDC          AND tested bit/pin into current C; used on TESTxx instructions
+
+
+  ANDZ          AND tested bit/pin into current Z; used on TESTxx instructions
+
+
+  ORC           OR tested bit/pin into current C; used on TESTxx instructions
+
+
+  ORZ           OR tested bit/pin into current Z; used on TESTxx instructions
+
+
+  XORC          XOR tested bit/pin into current C; used on TESTxx instructions
+
+
+  XORZ          XOR tested bit/pin into current Z; used on TESTxx instructions
+
+
+  WC           Write C flag; used on many instructions
+
+
+  WCZ           Write both C and Z flags; used on many instructions
+
+
+  WZ           Write Z flag; used on many instructions
+
+
+  For example:
+
+
+  AND     config, #%1000        WZ               ''config[3] low? z=1
+
+
+  TESTP #4                      ANDZ             ''pin 4 high? z=1
+
+
+  if_z                 JMP     #MoreCode                              ''jump if config[3]
+  low and pin 4 high
+
+
+  This code jumps to the label MoreCode only if config bit 3 is low (0) and I/O pin
+  4 is high. This first instruction
+
+
+  bitwise AND''s %1000 into config and sets the Z flag if that result is zero. The
+  second instruction tests I/O pin 4
+
+
+  and bitwise AND''s its high/low state into the Z flag. The third instruction, which
+  specifies an if_z condition,
+
+
+  executes only if the z flag is high by then, jumping to MoreCode; otherwise it behaves
+  like a nop instruction. Using
+
+
+  an Effect on instructions, along with a Condition on later instructions, enables
+  code to be much more powerful
+
+
+  than what is possible with typical assembly languages. See IF_x (Conditions) for
+  more information. NOTE: In this
+
+
+  example, the first instruction modifies config-- to do non-destructive bit tests,
+  use a testb instead of and
+
+
+  instruction.'
 flags_affected:
   Z: Result = 0
 parameters:
-- Dest is the register in which to store the encoded bit position value and optionally begins by containing the 32-bit value
-  it is encoding (syntax 2).
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value is to be encoded into a bit position.
-- "WC, WZ, or WCZ are optional effects to update flags."
+- Dest is the register in which to store the encoded bit position value and optionally
+  begins by containing the 32-bit value it is encoding (syntax 2).
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value
+  is to be encoded into a bit position.
+- WC, WZ, or WCZ are optional effects to update flags.
 - A long of %00000000_00000000_00000000_00000001 encodes to 0.
 - A long of %00000000_00000000_00000000_00100000 encodes to 5.
 - A long of %00000000_00000000_10000001_01000000 encodes to 15.
-- A long of %00000000_00000000_00000000_00000000 encodes to 0 with optional C cleared to 0.
+- A long of %00000000_00000000_00000000_00000000 encodes to 0 with optional C cleared
+  to 0.
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -59,12 +172,14 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Encode
-category: bit_manipulation
-result: The bit position value of the top-most high bit (1) in Src, or Dest, is stored in Dest.
+category: Math and Logic
+result: The bit position value of the top-most high bit (1) in Src, or Dest, is stored
+  in Dest.
 syntax_variants:
 - ENCOD Dest, {#}Src {WC|WZ|WCZ}
 - ENCOD Dest                 {WC|WZ|WCZ}
-- "ENCOD stores the bit position value (0--31) of the top-most high bit (1) of Src, or Dest, into Dest. If the value to"
+- ENCOD stores the bit position value (0--31) of the top-most high bit (1) of Src,
+  or Dest, into Dest. If the value to
 related:
 - DECOD
 manual_extraction_date: '2025-01-19'

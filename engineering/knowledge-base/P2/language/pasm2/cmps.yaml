@@ -1,17 +1,34 @@
 instruction: CMPS
 syntax: CMPS Dest, {#}Src {WC|WZ|WCZ}
-encoding: "EEEE 0010010 CZI DDDDDDDDD SSSSSSSSS                  --           Signed (D < S)       D=S               \
-  \     2"
+encoding: EEEE 0010010 CZI DDDDDDDDD SSSSSSSSS                  --           Signed
+  (D < S)       D=S                    2
 timing:
   cycles: 2
   type: fixed
-description: "CMPS compares the signed values of Dest and Src (by subtracting Src from Dest) and optionally setting the C\
-  \ and Result: Greater/lesser and equality status is optionally written to the C and Z flags.\n\nCMPS compares the signed\
-  \ values of Dest and Src (by subtracting Src from Dest) and optionally setting the C and\n\nZ flags to indicate the\
-  \ comparison and operation results.\n\nIf the WC or WCZ effect is specified, the C flag is set (1) if Dest is less\
-  \ than Src.\n\nIf the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src.\n\nTo compare signed,\
-  \ multi-long values, use CMP (not CMPS) followed possibly by CMPX, and finally CMPSX as\n\ndescribed in Comparing Two\
-  \ Multi-Long Values."
+description: 'CMPS compares the signed values of Dest and Src (by subtracting Src
+  from Dest) and optionally setting the C and Result: Greater/lesser and equality
+  status is optionally written to the C and Z flags.
+
+
+  CMPS compares the signed values of Dest and Src (by subtracting Src from Dest) and
+  optionally setting the C and
+
+
+  Z flags to indicate the comparison and operation results.
+
+
+  If the WC or WCZ effect is specified, the C flag is set (1) if Dest is less than
+  Src.
+
+
+  If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src.
+
+
+  To compare signed, multi-long values, use CMP (not CMPS) followed possibly by CMPX,
+  and finally CMPSX as
+
+
+  described in Comparing Two Multi-Long Values.'
 flags_affected:
   C:
     formula: correct sign of (D - S)
@@ -19,8 +36,9 @@ flags_affected:
     formula: (D == S)
 parameters:
 - Dest is the register containing the value to compare with that of Src.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
-- "WC, WZ, or WCZ are optional effects to update flags."
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared
+  to Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
 related:
 - CMP
 - CMPX
@@ -37,10 +55,11 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Compare signed
-category: arithmetic
-result: "Greater/lesser and equality status is optionally written to the C and Z flags."
+category: Math and Logic
+result: Greater/lesser and equality status is optionally written to the C and Z flags.
 syntax_variants:
 - CMPS Dest, {#}Src {WC|WZ|WCZ}
-- CMPS compares the signed values of Dest and Src (by subtracting Src from Dest) and optionally setting the C and
+- CMPS compares the signed values of Dest and Src (by subtracting Src from Dest) and
+  optionally setting the C and
 manual_extraction_date: '2025-01-19'
 oneliner: Compare two signed values

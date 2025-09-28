@@ -1,7 +1,7 @@
 # Engineering & Deliverables Structure Guide
 
 > Complete map of the P2 Knowledge Base repository structure
-> Last Updated: 2025-09-01
+> Last Updated: 2025-09-28
 
 ## 🎯 Repository Overview
 
@@ -220,6 +220,93 @@ Every document in production follows this consistent pattern with canonical nami
 
 ### `/engineering/knowledge-base/`
 **Purpose**: Core knowledge structures and matrices
+
+---
+
+## 📋 MANIFEST SYSTEM STRUCTURE
+*How knowledge is organized and referenced*
+
+### Manifest Tree Structure
+```
+manifests/
+├── propeller-knowledge-root.yaml    # Universal entry point
+└── P2/                              # P2-specific manifests
+    ├── p2-root.yaml                 # P2 entry with registry
+    ├── architecture-manifest.yaml   # Hardware architecture
+    ├── hardware-manifest.yaml       # Boards and modules  
+    ├── patterns-manifest.yaml       # Code patterns
+    ├── smart-pins-manifest.yaml     # Smart Pin modes
+    ├── language/                    # Language manifests
+    │   ├── language-manifest.yaml   # Language hub
+    │   ├── pasm2-manifest.yaml      # 376 PASM2 instructions
+    │   ├── spin2-manifest.yaml      # Spin2 methods
+    │   └── fundamentals-manifest.yaml
+    └── community/                   # Community resources
+        ├── community-manifest.yaml  
+        └── obex-manifest.yaml       # 113 OBEX objects
+```
+
+### Knowledge Base Tree Structure
+```
+engineering/knowledge-base/P2/
+├── architecture/                    # Hardware subsystems
+│   ├── cog.yaml                    # COG processor details
+│   ├── lookup_ram.yaml             # LUT RAM
+│   ├── smart_pins.yaml             # Smart Pin overview
+│   └── ...
+├── language/
+│   ├── pasm2/                      # 376 instruction files
+│   │   ├── abs.yaml               # ABS instruction
+│   │   ├── add.yaml               # ADD instruction
+│   │   └── ...
+│   ├── spin2/                      # Spin2 method files
+│   │   ├── methods/
+│   │   ├── operators/
+│   │   └── ...
+│   └── fundamentals/               # Cross-language concepts
+├── hardware/                        # Board specifications
+│   ├── boards/
+│   └── modules/
+├── community/
+│   └── obex/
+│       └── objects/                # 113 OBEX objects
+└── patterns/                        # Implementation patterns
+```
+
+### Manifest Path Standard (4-Key System)
+
+**All manifests use ONLY these four keys for paths:**
+
+1. **`manifest_base:`** - Full path for manifest references
+   - Example: `/manifests/P2/language`
+   
+2. **`content_base:`** - Full path for content references  
+   - Example: `/engineering/knowledge-base/P2/language/pasm2`
+   
+3. **`manifest:`** - Reference to another manifest
+   - Resolution: `{manifest_base}/{manifest}`
+   - Example: `"spin2-manifest.yaml"`
+   
+4. **`content:`** - Reference to knowledge content
+   - Resolution: `{content_base}/{content}`
+   - Example: `"abs.yaml"`
+
+**Example Manifest:**
+```yaml
+# Define bases once at top
+manifest_base: "/manifests/P2/language"
+content_base: "/engineering/knowledge-base/P2/language/pasm2"
+
+# Clean references
+items:
+  - manifest: "spin2-manifest.yaml"  # → /manifests/P2/language/spin2-manifest.yaml
+  - content: "abs.yaml"              # → /engineering/knowledge-base/P2/language/pasm2/abs.yaml
+```
+
+**Path Resolution is Simple:**
+- Just concatenate: `base + "/" + reference`
+- No context accumulation needed
+- External Claude instances get full paths
 
 ---
 

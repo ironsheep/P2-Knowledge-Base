@@ -1,3 +1,9 @@
+# Patterns Manifest
+# Using 4-key path standard
+
+manifest_base: "/manifests/P2"
+content_base: "/engineering/knowledge-base/P2"
+
 # P2 Code Patterns Manifest
 # Part of P2 Knowledge Base manifest hierarchy
 
@@ -5,17 +11,34 @@ version: "2.0"
 schema_version: "2024-12-30"
 last_updated: "2025-01-23T00:00:00Z"
 category: "code_patterns"
-base_path: "engineering/knowledge-base/P2/"
 
 description: |
   P2 development patterns from production code analysis.
   Note: Individual implementation pattern files were planned but never created.
   Patterns exist in consolidated form and architectural analysis.
 
+# Pattern index file
+pattern_index:
+  content: "language/spin2/patterns/pattern-index.yaml"
+  description: "Central index of all Spin2 patterns"
+
+# Pattern analysis files
+pattern_analysis:
+  description: "Deep analysis of P2 patterns from production code"
+  files:
+    - {name: "asm_integration", content: "architecture/patterns-analysis/asm_integration_analysis.yaml"}
+    - {name: "buffer_management", content: "architecture/patterns-analysis/buffer_management_analysis.yaml"}
+    - {name: "cog_management", content: "architecture/patterns-analysis/cog_management_analysis.yaml"}
+    - {name: "memory_management", content: "architecture/patterns-analysis/memory_management_analysis.yaml"}
+    - {name: "protocol_implementation", content: "architecture/patterns-analysis/protocol_implementation_analysis.yaml"}
+    - {name: "smart_pin_usage", content: "architecture/patterns-analysis/smart_pin_usage_analysis.yaml"}
+    - {name: "state_machine", content: "architecture/patterns-analysis/state_machine_analysis.yaml"}
+    - {name: "timing_control", content: "architecture/patterns-analysis/timing_control_analysis.yaml"}
+
 actual_pattern_resources:
   implementation_patterns:
     description: "Consolidated implementation patterns from production code"
-    location: "architecture/smart_pin_patterns.yaml"
+    content: "architecture/smart_pin_patterns.yaml"
     contains:
       - "SPI patterns (clock generation, data I/O)"
       - "UART patterns (async serial TX/RX)"
@@ -27,67 +50,66 @@ actual_pattern_resources:
     
   architectural_patterns:
     description: "Code structure patterns from 730 analyzed Spin2 files"
-    location: "language/spin2/patterns/"
-    manifest: "language/spin2/patterns/pattern-index.yaml"
+    base_path: "language/spin2/patterns/"
     categories:
       structural:
-        path: "language/spin2/patterns/structural/"
+        description: "Code structure patterns"
         count: 6
         files:
-          - no_objects_minimal.yaml
-          - no_objects.yaml
-          - single_object.yaml
-          - few_objects.yaml
-          - several_objects.yaml
-          - framework_pattern.yaml
+          - {name: "no_objects_minimal", content: "language/spin2/patterns/structural/no_objects_minimal.yaml"}
+          - {name: "no_objects", content: "language/spin2/patterns/structural/no_objects.yaml"}
+          - {name: "single_object", content: "language/spin2/patterns/structural/single_object.yaml"}
+          - {name: "few_objects", content: "language/spin2/patterns/structural/few_objects.yaml"}
+          - {name: "several_objects", content: "language/spin2/patterns/structural/several_objects.yaml"}
+          - {name: "framework_pattern", content: "language/spin2/patterns/structural/framework_pattern.yaml"}
           
       implementation:
-        path: "language/spin2/patterns/implementation/"
+        description: "Implementation patterns"
         count: 15
         files:
-          - spin2_buffer_management.yaml
-          - spin2_cog_management.yaml
-          - spin2_diagnostic_output.yaml
-          - spin2_error_handling.yaml
-          - spin2_event_dispatcher.yaml
-          - spin2_layered_architecture.yaml
-          - spin2_mailbox_communication.yaml
-          - spin2_memory_allocation.yaml
-          - spin2_pin_control.yaml
-          - spin2_plugin_system.yaml
-          - spin2_protocol_implementation.yaml
-          - spin2_resource_pool.yaml
-          - spin2_shared_memory.yaml
-          - spin2_state_machine.yaml
-          - spin2_timing_control.yaml
+          - {name: "buffer_management", content: "language/spin2/patterns/implementation/spin2_buffer_management.yaml"}
+          - {name: "cog_management", content: "language/spin2/patterns/implementation/spin2_cog_management.yaml"}
+          - {name: "diagnostic_output", content: "language/spin2/patterns/implementation/spin2_diagnostic_output.yaml"}
+          - {name: "error_handling", content: "language/spin2/patterns/implementation/spin2_error_handling.yaml"}
+          - {name: "event_dispatcher", content: "language/spin2/patterns/implementation/spin2_event_dispatcher.yaml"}
+          - {name: "layered_architecture", content: "language/spin2/patterns/implementation/spin2_layered_architecture.yaml"}
+          - {name: "mailbox_communication", content: "language/spin2/patterns/implementation/spin2_mailbox_communication.yaml"}
+          - {name: "memory_allocation", content: "language/spin2/patterns/implementation/spin2_memory_allocation.yaml"}
+          - {name: "pin_control", content: "language/spin2/patterns/implementation/spin2_pin_control.yaml"}
+          - {name: "plugin_system", content: "language/spin2/patterns/implementation/spin2_plugin_system.yaml"}
+          - {name: "protocol_implementation", content: "language/spin2/patterns/implementation/spin2_protocol_implementation.yaml"}
+          - {name: "resource_pool", content: "language/spin2/patterns/implementation/spin2_resource_pool.yaml"}
+          - {name: "shared_memory", content: "language/spin2/patterns/implementation/spin2_shared_memory.yaml"}
+          - {name: "state_machine", content: "language/spin2/patterns/implementation/spin2_state_machine.yaml"}
+          - {name: "timing_control", content: "language/spin2/patterns/implementation/spin2_timing_control.yaml"}
           
       applications:
-        path: "language/spin2/patterns/applications/"
+        description: "Application patterns"
         count: 23
         files:
-          - animation_engine.yaml
-          - array_architecture.yaml
-          - audio_processor.yaml
-          - communication_handler.yaml
-          - configuration_manager.yaml
-          - data_logger.yaml
-          - debug_enabled.yaml
-          - display_driver.yaml
-          - dual_communication.yaml
-          - hardware_specific_app.yaml
-          - iot_device.yaml
-          - monitoring_device.yaml
-          - motor_controller.yaml
-          - multi_display_system.yaml
-          - multi_instance_coordination.yaml
-          - multi_motor_system.yaml
-          - multimedia_device.yaml
-          - robotics.yaml
-          - sensor_fusion.yaml
-          - sensor_reader.yaml
-          - single_communication.yaml
-          - test_harness.yaml
-          - utility_library.yaml
+          - {name: "animation_engine", content: "language/spin2/patterns/applications/animation_engine.yaml"}
+          - {name: "array_architecture", content: "language/spin2/patterns/applications/array_architecture.yaml"}
+          - {name: "audio_processor", content: "language/spin2/patterns/applications/audio_processor.yaml"}
+          - {name: "communication_handler", content: "language/spin2/patterns/applications/communication_handler.yaml"}
+          - {name: "configuration_manager", content: "language/spin2/patterns/applications/configuration_manager.yaml"}
+          - {name: "data_logger", content: "language/spin2/patterns/applications/data_logger.yaml"}
+          - {name: "debug_enabled", content: "language/spin2/patterns/applications/debug_enabled.yaml"}
+          - {name: "display_driver", content: "language/spin2/patterns/applications/display_driver.yaml"}
+          - {name: "dual_communication", content: "language/spin2/patterns/applications/dual_communication.yaml"}
+          - {name: "hardware_specific_app", content: "language/spin2/patterns/applications/hardware_specific_app.yaml"}
+          - {name: "iot_device", content: "language/spin2/patterns/applications/iot_device.yaml"}
+          - {name: "monitoring_device", content: "language/spin2/patterns/applications/monitoring_device.yaml"}
+          - {name: "motor_controller", content: "language/spin2/patterns/applications/motor_controller.yaml"}
+          - {name: "multi_display_system", content: "language/spin2/patterns/applications/multi_display_system.yaml"}
+          - {name: "multi_instance_coordination", content: "language/spin2/patterns/applications/multi_instance_coordination.yaml"}
+          - {name: "multi_motor_system", content: "language/spin2/patterns/applications/multi_motor_system.yaml"}
+          - {name: "multimedia_device", content: "language/spin2/patterns/applications/multimedia_device.yaml"}
+          - {name: "robotics", content: "language/spin2/patterns/applications/robotics.yaml"}
+          - {name: "sensor_fusion", content: "language/spin2/patterns/applications/sensor_fusion.yaml"}
+          - {name: "sensor_reader", content: "language/spin2/patterns/applications/sensor_reader.yaml"}
+          - {name: "single_communication", content: "language/spin2/patterns/applications/single_communication.yaml"}
+          - {name: "test_harness", content: "language/spin2/patterns/applications/test_harness.yaml"}
+          - {name: "utility_library", content: "language/spin2/patterns/applications/utility_library.yaml"}
 
 # Original planned structure (never implemented) - kept for reference
 planned_but_not_created:
@@ -131,6 +153,6 @@ planned_but_not_created:
 
 related_manifests:
   - "smart-pins-manifest.yaml"  # Smart Pin modes that implement many patterns
-  - "spin2-manifest.yaml"       # Language features used in patterns
-  - "pasm2-manifest.yaml"       # Assembly instructions for low-level patterns
+  - "language/spin2-manifest.yaml"       # Language features used in patterns
+  - "language/pasm2-manifest.yaml"       # Assembly instructions for low-level patterns
   - "architecture-manifest.yaml" # System architecture context

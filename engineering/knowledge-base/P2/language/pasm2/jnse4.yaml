@@ -5,8 +5,8 @@ timing:
   cycles: 2
   type: variable
   range: 13...20
-description: "Jump to S** if SE4 event flag is clear.                                                                \
-  \       2 or 4 / 2 or"
+description: Jump to S** if SE4 event flag is clear.                                                                       2
+  or 4 / 2 or
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: structured
 compiler_operand_format:
@@ -17,8 +17,10 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 21
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-long_description: "If selectable event 1, 2, 3, or 4 flag is set (or is clear in syntax 5-8), PC is set to a new\
-  \ relative (#Src) or\nabsolute (Src) address."
+long_description: 'If selectable event 1, 2, 3, or 4 flag is set (or is clear in syntax
+  5-8), PC is set to a new relative (#Src) or
+
+  absolute (Src) address.'
 syntax_variants:
 - JNSE4 {#}S
 last_updated: '2025-09-19T16:04:16.964299'
@@ -40,5 +42,5 @@ specifics:
   condition: not set
 quick_example: 'JNSE4 #handler  ; Jump if selector 4 event flag is NOT set'
 has_group_documentation: true
-category: timing_events
+category: Event
 oneliner: Branch

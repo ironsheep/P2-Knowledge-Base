@@ -9,7 +9,7 @@ component_type: "dual_port_memory"
 
 description: |
   Each COG contains a 512-long (2KB) Lookup RAM (LUT) that serves as fast local storage
-  and enables special operations like LUTSON waveform generation, LUT sharing between
+  and enables special operations like streaming waveform data to DACs, LUT sharing between
   adjacent COG pairs, and use as extended COG register space. The LUT provides single-cycle
   access for most operations and can be used for lookup tables, waveform data, FIFO buffers,
   or general data storage.
@@ -37,9 +37,9 @@ architecture:
       timing: "Automatic, no COG cycles"
   
   special_features:
-    - feature: "LUTSON"
-      description: "Stream LUT contents as waveform to DACs"
-      use_case: "Arbitrary waveform generation"
+    - feature: "LUT_to_DAC_streaming"
+      description: "Streamer can read LUT contents and output to DACs"
+      use_case: "Arbitrary waveform generation using streamer with LUT as source"
     
     - feature: "LUT_sharing"
       description: "Even COG can read odd COG's LUT and vice versa"
@@ -93,9 +93,8 @@ instructions:
     usage_example: |
       SETLUTS #1              ' Enable LUT sharing
   
-  - instruction: "LUTSON"
-    encoding: "Special streamer configuration"
-    description: "Stream LUT contents to DAC pins"
+  # Note: LUT-to-DAC streaming is done via Streamer configuration (XINIT/XCONT),
+  # not a dedicated instruction. The Streamer can be configured to read from LUT.
     operation: |
       Configure streamer to read LUT sequentially
       Output to DAC channels for waveform generation
@@ -148,7 +147,7 @@ programming_patterns:
               RET
   
   - pattern: "waveform_generation"
-    description: "Generate waveform using LUTSON"
+    description: "Generate waveform using Streamer with LUT source"
     code: |
       ' Fill LUT with waveform data
               MOV     index, #0
@@ -229,7 +228,7 @@ common_applications:
       - "Deterministic timing"
   
   - application: "waveform_synthesis"
-    description: "Arbitrary waveform generation via LUTSON"
+    description: "Arbitrary waveform generation via Streamer reading from LUT"
     complexity: "advanced"
     benefits:
       - "Hardware-driven output"
@@ -299,7 +298,7 @@ debugging_considerations:
 
 related_topics:
   - topic: "streamer"
-    relationship: "Streamer can output LUT contents via LUTSON"
+    relationship: "Streamer can read LUT contents and output to DACs for waveform generation"
   
   - topic: "hub_fifo"
     relationship: "LUT often used with hub FIFO for buffering"

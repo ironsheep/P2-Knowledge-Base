@@ -1,10 +1,11 @@
 instruction: SKIP
-syntax: "SKIP \_\_ {#}D"
+syntax: SKIP    {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000110001
 timing:
   cycles: 2
   type: fixed
-description: Skip instructions per D. Subsequent instructions 0..31 get cancelled for each '1' bit in D[0]..D[31].
+description: Skip instructions per D. Subsequent instructions 0..31 get cancelled
+  for each '1' bit in D[0]..D[31].
 documentation_source: original
 documentation_level: enhanced
 compiler_operand_format:
@@ -16,5 +17,5 @@ compiler_encoding:
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:16.973607'
-category: control_flow
+category: Branch
 oneliner: Skip

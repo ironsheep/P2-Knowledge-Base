@@ -21,5 +21,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - RQPIN D,{#}S
 last_updated: '2025-09-19T16:04:17.146896'
-category: control_flow
+category: Smart Pin
 oneliner: C = modal result

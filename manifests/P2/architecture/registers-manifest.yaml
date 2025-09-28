@@ -1,3 +1,8 @@
+# Registers Manifest
+# Using 4-key path standard
+
+manifest_base: "/manifests/P2/architecture"
+
 manifest_type: register_manifest
 version: 2.0.0
 description: P2 system registers manifest

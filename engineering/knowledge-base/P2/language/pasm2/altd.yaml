@@ -4,27 +4,55 @@ encoding: EEEE 1001100 01I DDDDDDDDD SSSSSSSSS                     D 1
 timing:
   cycles: 1
   type: fixed
-description: "ALTD modifies the next instruction's Dest value to be (Src + Dest) & $1FF (for syntax 1), or to Dest[8:0] (for\
-  \ syntax Result: The next instruction's pipelined Dest value is altered to be (Src + Dest) & $1FF, or just Dest[8:0] in\
-  \ syntax 2.\n\nALTD modifies the next instruction's Dest value to be (Src + Dest) & $1FF (for syntax 1), or to Dest[8:0]\
-  \ (for syntax\n\n2).\n\nIn syntax 1, Src consists of two 9-bit fields; a base value (Src[8:0]) and a signed auto-indexer\
-  \ (Src[17:9]).\n\n*   The base represents a starting point. ALTD adds the offset (Dest[8:0]) to the base (Src[8:0])\
-  \ to determine\n\nthe next instruction's Dest value.\n\n*   At the end of ALTD execution, the optional auto-indexer\
-  \ value (usually 0, 1, or -1) is added to the offset\n\n(Dest) for a future ALTD+instruction iteration.\n\nIn syntax 2,\
-  \ Dest serves as the full value-- it is used as-is for the next instruction's substitute Dest value."
+description: 'ALTD modifies the next instruction''s Dest value to be (Src + Dest)
+  & $1FF (for syntax 1), or to Dest[8:0] (for syntax Result: The next instruction''s
+  pipelined Dest value is altered to be (Src + Dest) & $1FF, or just Dest[8:0] in
+  syntax 2.
+
+
+  ALTD modifies the next instruction''s Dest value to be (Src + Dest) & $1FF (for
+  syntax 1), or to Dest[8:0] (for syntax
+
+
+  2).
+
+
+  In syntax 1, Src consists of two 9-bit fields; a base value (Src[8:0]) and a signed
+  auto-indexer (Src[17:9]).
+
+
+  *   The base represents a starting point. ALTD adds the offset (Dest[8:0]) to the
+  base (Src[8:0]) to determine
+
+
+  the next instruction''s Dest value.
+
+
+  *   At the end of ALTD execution, the optional auto-indexer value (usually 0, 1,
+  or -1) is added to the offset
+
+
+  (Dest) for a future ALTD+instruction iteration.
+
+
+  In syntax 2, Dest serves as the full value-- it is used as-is for the next instruction''s
+  substitute Dest value.'
 parameters:
-- Dest is the register whose 9-bit value is the offset, or the full value, for the next instruction to operate on.
-- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base (Src[8:0]; added to
-  offset (Dest) for the next instruction) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of
-  execution).
-- The base represents a starting point. ALTD adds the offset (Dest[8:0]) to the base (Src[8:0]) to determine the next instruction's
-  Dest value.
-- At the end of ALTD execution, the optional auto-indexer value (usually 0, 1, or -1) is added to the offset (Dest) for a
-  future ALTD+instruction iteration.
+- Dest is the register whose 9-bit value is the offset, or the full value, for the
+  next instruction to operate on.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value
+  contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and
+  also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
+- The base represents a starting point. ALTD adds the offset (Dest[8:0]) to the base
+  (Src[8:0]) to determine the next instruction's Dest value.
+- At the end of ALTD execution, the optional auto-indexer value (usually 0, 1, or
+  -1) is added to the offset (Dest) for a future ALTD+instruction iteration.
 - The instruction following ALTD is shielded from interrupt
 - ALTD alters the next instruction regardless of its kind
-- "Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist"
-- "SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the next instruction"
+- Field value modification occurs in the instruction pipeline only; code is not altered,
+  values do not persist
+- SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the
+  next instruction
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -37,16 +65,25 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Alter destination
-category: indirection
-result: The next instruction's pipelined Dest value is altered to be (Src + Dest) & $1FF, or just Dest[8:0] in syntax 2.
+category: Register Indirection
+result: The next instruction's pipelined Dest value is altered to be (Src + Dest)
+  & $1FF, or just Dest[8:0] in syntax 2.
 syntax_variants:
 - ALTD Dest, {#}Src
 - ALTD Dest
-- "ALTD modifies the next instruction's Dest value to be (Src + Dest) & $1FF (for syntax 1), or to Dest[8:0] (for syntax"
-- "*   The base represents a starting point. ALTD adds the offset (Dest[8:0]) to the base (Src[8:0]) to determine"
+- ALTD modifies the next instruction's Dest value to be (Src + Dest) & $1FF (for syntax
+  1), or to Dest[8:0] (for syntax
+- '*   The base represents a starting point. ALTD adds the offset (Dest[8:0]) to the
+  base (Src[8:0]) to determine'
 - (Dest) for a future ALTD+instruction iteration.
-usage_notes: "The instruction following ALTD is shielded from interrupt\nALTD alters the next instruction regardless of its\
-  \ kind\nField value modification occurs in the instruction pipeline only; code is not altered, values do not persist\n\
-  SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the next instruction"
+usage_notes: 'The instruction following ALTD is shielded from interrupt
+
+  ALTD alters the next instruction regardless of its kind
+
+  Field value modification occurs in the instruction pipeline only; code is not altered,
+  values do not persist
+
+  SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the
+  next instruction'
 manual_extraction_date: '2025-01-19'
-oneliner: "Alter D field of next instruction"
+oneliner: Alter D field of next instruction

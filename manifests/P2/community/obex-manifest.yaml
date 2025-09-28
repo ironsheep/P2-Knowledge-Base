@@ -1,3 +1,9 @@
+# Obex Manifest
+# Using 4-key path standard
+
+manifest_base: "/manifests/P2/community"
+content_base: "/engineering/knowledge-base/P2/community"
+
 manifest_metadata:
   manifest_type: obex_community_root
   version: '2.0'
@@ -50,42 +56,42 @@ sub_manifests:
   by_category:
     path: obex/categories/
     manifests:
-    - obex/categories/drivers-manifest.yaml
-    - obex/categories/misc-manifest.yaml
-    - obex/categories/demos-manifest.yaml
-    - obex/categories/communication-manifest.yaml
-    - obex/categories/audio-manifest.yaml
-    - obex/categories/display-manifest.yaml
-    - obex/categories/motors-manifest.yaml
-    - obex/categories/tools-manifest.yaml
-    - obex/categories/sensors-manifest.yaml
+    - drivers-manifest.yaml
+    - misc-manifest.yaml
+    - demos-manifest.yaml
+    - communication-manifest.yaml
+    - audio-manifest.yaml
+    - display-manifest.yaml
+    - motors-manifest.yaml
+    - tools-manifest.yaml
+    - sensors-manifest.yaml
   by_author:
     path: obex/authors/
     manifests:
-    - obex/authors/jon_mcphalen_jonnymac-manifest.yaml
-    - obex/authors/ersmith-manifest.yaml
-    - obex/authors/stephen_m_moraco-manifest.yaml
-    - obex/authors/ray_allen-manifest.yaml
-    - obex/authors/wuerfel_21-manifest.yaml
-    - obex/authors/greg_lapolla-manifest.yaml
-    - obex/authors/magio2-manifest.yaml
-    - obex/authors/glapolla-manifest.yaml
-    - obex/authors/vonszarvas-manifest.yaml
-    - obex/authors/manatwork-manifest.yaml
-    - obex/authors/evanh-manifest.yaml
-    - obex/authors/terry_trapp-manifest.yaml
-    - obex/authors/mk_borri-manifest.yaml
-    - obex/authors/charles_current-manifest.yaml
-    - obex/authors/jose_rullan-manifest.yaml
-    - obex/authors/chip_gracey-manifest.yaml
-    - obex/authors/mike_calyer-manifest.yaml
-    - obex/authors/chris_gadd-manifest.yaml
-    - obex/authors/bill_tuss-manifest.yaml
-    - obex/authors/johannes-manifest.yaml
-    - obex/authors/michael-manifest.yaml
-    - obex/authors/riley_august-manifest.yaml
-    - obex/authors/bryan_thomas-manifest.yaml
-    - obex/authors/phonoclese-manifest.yaml
+    - jon_mcphalen_jonnymac-manifest.yaml
+    - ersmith-manifest.yaml
+    - stephen_m_moraco-manifest.yaml
+    - ray_allen-manifest.yaml
+    - wuerfel_21-manifest.yaml
+    - greg_lapolla-manifest.yaml
+    - magio2-manifest.yaml
+    - glapolla-manifest.yaml
+    - vonszarvas-manifest.yaml
+    - manatwork-manifest.yaml
+    - evanh-manifest.yaml
+    - terry_trapp-manifest.yaml
+    - mk_borri-manifest.yaml
+    - charles_current-manifest.yaml
+    - jose_rullan-manifest.yaml
+    - chip_gracey-manifest.yaml
+    - mike_calyer-manifest.yaml
+    - chris_gadd-manifest.yaml
+    - bill_tuss-manifest.yaml
+    - johannes-manifest.yaml
+    - michael-manifest.yaml
+    - riley_august-manifest.yaml
+    - bryan_thomas-manifest.yaml
+    - phonoclese-manifest.yaml
 access_patterns:
   individual_objects:
     path: objects/
@@ -96,4 +102,3 @@ access_patterns:
     enabled: true
     base_url: https://obex.parallax.com/wp-admin/admin-ajax.php?action=download_obex_zip&popcorn=salty&obuid=OB
     format: '{base_url}{object_id}'
-base_path: engineering/knowledge-base/P2/community/obex/

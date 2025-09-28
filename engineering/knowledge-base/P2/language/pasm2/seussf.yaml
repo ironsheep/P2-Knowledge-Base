@@ -4,7 +4,8 @@ encoding: EEEE 1101011 000 DDDDDDDDD 001100100
 timing:
   cycles: 2
   type: fixed
-description: Relocate and periodically invert bits within D. Returns to original value on 32nd iteration. Forward pattern.
+description: Relocate and periodically invert bits within D. Returns to original value
+  on 32nd iteration. Forward pattern.
 documentation_source: original
 documentation_level: enhanced
 compiler_operand_format:
@@ -16,5 +17,5 @@ compiler_encoding:
   operandFormat: 24
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.580213'
-category: arithmetic
+category: Math and Logic
 oneliner: Relocate and periodically invert bits within D

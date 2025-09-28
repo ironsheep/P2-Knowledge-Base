@@ -1,22 +1,37 @@
 instruction: SETNIB
 syntax: 'SETNIB Dest, {#}Src, #Num'
 encoding:
-- "EEEE 100000N NNI DDDDDDDDD SSSSSSSSS                        D                    --                --         \
-  \            2"
+- EEEE 100000N NNI DDDDDDDDD SSSSSSSSS                        D                    --                --                     2
 - EEEE 1000000 00I 000000000 SSSSSSSSS                       D   1
 timing:
   cycles: 2
   type: fixed
-description: "SETNIB stores Src[3:0] into the nibble identified by Num within Dest, or the nibble and register described by\
-  \ a prior Result: Src[3:0] is written to nibble Num (0-7) of Dest, or to another register nibble described by prior\
-  \ ALTSN instruction.\n\nSETNIB stores Src[3:0] into the nibble identified by Num within Dest, or the nibble and register\
-  \ described by a prior\n\nALTSN instruction. No other bits are modified.\n\nNum (0-7) identifies a value's\
-  \ individual nibbles, by position, in least-significant nibble order.\n\nSyntax 2 is intended for use after an ALTSN\
-  \ instruction; i.e. in a loop to iteratively affect a series of nibble values\n\nwithin contiguous long registers."
+description: 'SETNIB stores Src[3:0] into the nibble identified by Num within Dest,
+  or the nibble and register described by a prior Result: Src[3:0] is written to nibble
+  Num (0-7) of Dest, or to another register nibble described by prior ALTSN instruction.
+
+
+  SETNIB stores Src[3:0] into the nibble identified by Num within Dest, or the nibble
+  and register described by a prior
+
+
+  ALTSN instruction. No other bits are modified.
+
+
+  Num (0-7) identifies a value''s individual nibbles, by position, in least-significant
+  nibble order.
+
+
+  Syntax 2 is intended for use after an ALTSN instruction; i.e. in a loop to iteratively
+  affect a series of nibble values
+
+
+  within contiguous long registers.'
 parameters:
 - Dest is the register in which to modify a nibble.
-- Src is a register or 4-bit literal whose bits [3:0] will be stored in the designated location.
-- "Num is a 3-bit literal identifying the nibble ID (0-7) of Dest to modify."
+- Src is a register or 4-bit literal whose bits [3:0] will be stored in the designated
+  location.
+- Num is a 3-bit literal identifying the nibble ID (0-7) of Dest to modify.
 related:
 - ALTSN
 - SETBYTE
@@ -32,18 +47,21 @@ documentation_level: comprehensive
 compiler_operand_format:
   name: operand_ds3set
   pattern: S/#{,D,#0..7}
-  description: 'Set nibble: source/immediate, optional destination and nibble index 0-7'
+  description: 'Set nibble: source/immediate, optional destination and nibble index
+    0-7'
   valueType: 6
 compiler_encoding:
   operandFormat: 6
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Set nibble
-category: bit_manipulation
-result: "Src[3:0] is written to nibble Num (0-7) of Dest, or to another register nibble described by prior ALTSN"
+category: Math and Logic
+result: Src[3:0] is written to nibble Num (0-7) of Dest, or to another register nibble
+  described by prior ALTSN
 syntax_variants:
 - 'SETNIB Dest, {#}Src, #Num'
 - SETNIB {#}Src
-- "SETNIB stores Src[3:0] into the nibble identified by Num within Dest, or the nibble and register described by a prior"
+- SETNIB stores Src[3:0] into the nibble identified by Num within Dest, or the nibble
+  and register described by a prior
 manual_extraction_date: '2025-01-19'
 oneliner: Set a nibble to new value

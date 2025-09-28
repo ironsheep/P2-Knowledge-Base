@@ -7,7 +7,7 @@ description: 'Logical false constant
   All bits cleared to represent boolean false condition
 
   '
-category: Numeric Constant
+category: Constants
 documentation_level: complete
 usage: 'Use in conditional logic and boolean operations
 

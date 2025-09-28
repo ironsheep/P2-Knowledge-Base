@@ -1,3 +1,9 @@
+# Smart-Pins Manifest
+# Using 4-key path standard
+
+manifest_base: "/manifests/P2"
+content_base: "/engineering/knowledge-base/P2/architecture/smart-pins"
+
 # Smart Pins Manifest
 # Part of P2 Knowledge Base manifest hierarchy
 
@@ -5,16 +11,12 @@ version: "1.0"
 schema_version: "2024-12-30"
 last_updated: "2024-12-30T00:00:00Z"
 category: "smart_pins"
-base_path: "engineering/knowledge-base/P2/architecture/smart-pins/"
 total_entries: 32
 
 description: |
   Complete Smart Pin documentation - 32 configurable modes plus overview.
   Each of the 64 I/O pins can be independently configured as a smart pin
   with its own state machine for autonomous operation.
-
-# Note: Overview file would go here if we had one at smart-pins/smart_pins.yaml
-# Currently the overview is at ../smart_pins.yaml (in parent architecture directory)
 
 smart_pin_modes:
   digital_io:
@@ -208,11 +210,11 @@ actual_files_in_directory:
   - smart-pin-11111-async-serial-receive.yaml
 
 code_examples:
-  manifest: "manifests/P2/code-examples-manifest.yaml"
+  manifest: "code-examples-manifest.yaml"
   description: "Working code examples for Smart Pin usage"
   example_count: 3
   
 related_manifests:
-  - "pasm2-manifest.yaml"  # Instructions for smart pin control
+  - "language/pasm2-manifest.yaml"  # Instructions for smart pin control
   - "architecture-manifest.yaml"  # System architecture context
   - "patterns-manifest.yaml"  # Smart pin usage patterns

@@ -4,8 +4,8 @@ encoding: EEEE 1101011 CZ0 DDDDDDDDD 000010010
 timing:
   cycles: 2
   type: mode_dependent
-description: '{WC/WZ/WCZ}   Used after RDFAST. Read long from FIFO into D. C = MSB of long. *                                                      2
-  / FIFO IN USE'
+description: '{WC/WZ/WCZ}   Used after RDFAST. Read long from FIFO into D. C = MSB
+  of long. *                                                      2 / FIFO IN USE'
 flags_affected:
   C:
     formula: MSB of long
@@ -22,5 +22,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - RFLONG D
 last_updated: '2025-09-19T16:04:17.296102'
-category: misc_ops
+category: Hub FIFO
 oneliner: Read

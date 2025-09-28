@@ -5,7 +5,7 @@ description: 'Set hub execution mode for subsequent code
   Code will be assembled to run from hub RAM
 
   '
-category: Assembly Directive
+category: Execution Mode Directives
 documentation_level: complete
 syntax: HUBEXEC
 usage: 'Switches assembler to hub execution mode

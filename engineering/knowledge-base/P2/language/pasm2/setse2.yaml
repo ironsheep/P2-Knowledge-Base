@@ -18,5 +18,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - SETSE2 {#}D
 last_updated: '2025-09-19T16:04:17.308734'
-category: timing_events
+category: Event
 oneliner: Configuration

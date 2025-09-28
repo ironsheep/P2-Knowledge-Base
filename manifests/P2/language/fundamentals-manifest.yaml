@@ -1,3 +1,9 @@
+# Fundamentals Manifest
+# Using 4-key path standard
+
+manifest_base: "/manifests/P2/language"
+content_base: "/engineering/knowledge-base/P2"
+
 # Language Fundamentals Manifest
 # Core language rules that apply across Spin2 and PASM2
 # Critical for AI code generation accuracy
@@ -15,7 +21,7 @@ metadata:
 
 fundamentals:
   case_sensitivity:
-    content: "case-sensitivity.yaml"
+    content: "language/fundamentals/case-sensitivity.yaml"
     description: "Both languages are case-insensitive"
     critical_for:
       - "Identifier resolution"
@@ -23,7 +29,7 @@ fundamentals:
       - "Cross-language compatibility"
     
   identifier_rules:
-    content: "identifier-rules.yaml"
+    content: "language/fundamentals/identifier-rules.yaml"
     description: "Naming rules for all identifiers"
     critical_for:
       - "Valid code generation"
@@ -31,7 +37,7 @@ fundamentals:
       - "Character restrictions"
     
   variable_scoping:
-    content: "variable-scoping-best-practices.yaml"
+    content: "language/fundamentals/variable-scoping-best-practices.yaml"
     description: "Scoping rules and conflict prevention"
     applies_to: ["spin2"]  # Primarily Spin2
     critical_for:
@@ -40,13 +46,43 @@ fundamentals:
       - "Understanding scope hierarchy"
   
   pasm_labels:
-    content: "pasm-labels.yaml"
+    content: "language/fundamentals/pasm-labels.yaml"
     description: "PASM2 label syntax and scoping rules"
     applies_to: ["pasm2"]
     critical_for:
       - "Understanding local vs global labels"
       - "Using dot and colon prefixes correctly"
       - "Label scope management"
+
+  # System Registers - Programming Interface
+  system_registers:
+    description: "Special-purpose registers accessible from both PASM2 and Spin2"
+    applies_to: ["pasm2", "spin2"]
+    note: "These describe HOW to use registers in code, not the hardware architecture"
+
+    dira_dirb:
+      content: "architecture/system-registers/dira-dirb-registers.yaml"
+      description: "Pin direction control registers (DIRA/DIRB)"
+      critical_for:
+        - "Setting pin input/output modes"
+        - "Understanding bit-to-pin mapping"
+        - "Smart pin interaction"
+
+    ptra_ptrb:
+      content: "architecture/system-registers/ptra-register.yaml"
+      description: "General-purpose pointer registers"
+      critical_for:
+        - "Stack operations"
+        - "Indirect addressing"
+        - "Parameter passing"
+
+    register_index:
+      content: "architecture/system-registers/complete-system-registers-index.yaml"
+      description: "Complete index of all special registers"
+      critical_for:
+        - "Understanding COG memory map"
+        - "Register addresses and functions"
+        - "INA/INB, OUTA/OUTB, and other special registers"
 
 cross_references:
   spin2_constructs:

@@ -1,19 +1,46 @@
 instruction: CMPX
 syntax: CMPX Dest, {#}Src {WC|WZ|WCZ}
-encoding: "EEEE 0010001 CZI DDDDDDDDD SSSSSSSSS                  --        Unsigned (D < S+C) Z AND (D = S+C)        \
-  \      2"
+encoding: EEEE 0010001 CZI DDDDDDDDD SSSSSSSSS                  --        Unsigned
+  (D < S+C) Z AND (D = S+C)              2
 timing:
   cycles: 2
   type: fixed
-description: "CMPX compares the unsigned values of Dest and Src plus C (by subtracting Src + C from Dest) and optionally Result:\
-  \ Greater/lesser and equality status is optionally written to the C and Z flags.\n\nCMPX compares the unsigned values of\
-  \ Dest and Src plus C (by subtracting Src + C from Dest) and optionally\n\nsetting the C and Z flags accordingly. The\
-  \ CMPX instruction is used to perform unsigned multi-long comparisons,\n\nsuch as 64-bit comparisons.\n\nIf the WC or WCZ\
-  \ effect is specified, the C flag is set (1) if Dest is less than Src plus C, or is cleared (0) otherwise.\n\nUse\
-  \ WC or WCZ on preceding CMP and CMPX instructions for proper final C flag.\n\nIf the WZ or WCZ effect is specifi\
-  ed, the Z flag is set (1) if Z was previously set and Dest equals Src + C, or it is\n\ncleared (0) otherwise. Use WZ\
-  \ or WCZ on preceding CMP and CMPX instructions for proper final Z flag.\n\nTo compare multi-long values, use CMP\
-  \ followed by one or more CMPX instructions as described in Comparing\n\nTwo Multi-Long Values."
+description: 'CMPX compares the unsigned values of Dest and Src plus C (by subtracting
+  Src + C from Dest) and optionally Result: Greater/lesser and equality status is
+  optionally written to the C and Z flags.
+
+
+  CMPX compares the unsigned values of Dest and Src plus C (by subtracting Src + C
+  from Dest) and optionally
+
+
+  setting the C and Z flags accordingly. The CMPX instruction is used to perform unsigned
+  multi-long comparisons,
+
+
+  such as 64-bit comparisons.
+
+
+  If the WC or WCZ effect is specified, the C flag is set (1) if Dest is less than
+  Src plus C, or is cleared (0) otherwise.
+
+
+  Use WC or WCZ on preceding CMP and CMPX instructions for proper final C flag.
+
+
+  If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously
+  set and Dest equals Src + C, or it is
+
+
+  cleared (0) otherwise. Use WZ or WCZ on preceding CMP and CMPX instructions for
+  proper final Z flag.
+
+
+  To compare multi-long values, use CMP followed by one or more CMPX instructions
+  as described in Comparing
+
+
+  Two Multi-Long Values.'
 flags_affected:
   C:
     formula: borrow of (D - (S + C))
@@ -21,8 +48,9 @@ flags_affected:
     formula: Z AND (D == S + C)
 parameters:
 - Dest is a register containing the value to compare with that of Src plus C.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is compared to Dest.
-- "WC, WZ, or WCZ are optional effects to update flags."
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C
+  is compared to Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
 related:
 - CMP
 - CMPX
@@ -39,12 +67,14 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Compare extended
-category: arithmetic
-result: "Greater/lesser and equality status is optionally written to the C and Z flags."
+category: Math and Logic
+result: Greater/lesser and equality status is optionally written to the C and Z flags.
 syntax_variants:
 - CMPX Dest, {#}Src {WC|WZ|WCZ}
-- CMPX compares the unsigned values of Dest and Src plus C (by subtracting Src + C from Dest) and optionally
-- "Use WC or WCZ on preceding CMP and CMPX instructions for proper final C flag."
-- "cleared (0) otherwise. Use WZ or WCZ on preceding CMP and CMPX instructions for proper final Z flag."
+- CMPX compares the unsigned values of Dest and Src plus C (by subtracting Src + C
+  from Dest) and optionally
+- Use WC or WCZ on preceding CMP and CMPX instructions for proper final C flag.
+- cleared (0) otherwise. Use WZ or WCZ on preceding CMP and CMPX instructions for
+  proper final Z flag.
 manual_extraction_date: '2025-01-19'
-oneliner: "Compare two unsigned values plus carry flag"
+oneliner: Compare two unsigned values plus carry flag

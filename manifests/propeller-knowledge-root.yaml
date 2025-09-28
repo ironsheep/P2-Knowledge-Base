@@ -1,3 +1,8 @@
+# Propeller-Knowledge-Root.Yaml Manifest
+# Using 4-key path standard
+
+manifest_base: "/manifests"
+
 # Propeller Knowledge Base - Universal Root Manifest
 # Entry point for all Propeller microcontroller documentation
 # Repository: https://github.com/ironsheep/P2-Knowledge-Base
@@ -17,7 +22,7 @@ metadata:
 # Main Propeller variants
 propeller_chips:
   p2:
-    manifest: "manifests/P2/p2-root.yaml"
+    manifest: "P2/p2-root.yaml"
     description: "Propeller 2 (P2) - 8-cog multiprocessor with Smart Pins"
     status: "active"
     

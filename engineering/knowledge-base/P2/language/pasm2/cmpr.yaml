@@ -1,16 +1,34 @@
 instruction: CMPR
 syntax: CMPR Dest, {#}Src {WC|WZ|WCZ}
-encoding: "EEEE 0010100 CZI DDDDDDDDD SSSSSSSSS                  --          Unsigned (S < D)      D=S               \
-  \     2"
+encoding: EEEE 0010100 CZI DDDDDDDDD SSSSSSSSS                  --          Unsigned
+  (S < D)      D=S                    2
 timing:
   cycles: 2
   type: fixed
-description: "CMP compares the unsigned values of Dest and Src (by subtracting Dest from Src) and optionally setting the C\
-  \ Result: Greater/lesser and equality status is optionally written to the C and Z flags.\n\nCMP compares the unsigned values\
-  \ of Dest and Src (by subtracting Dest from Src) and optionally setting the C\n\nand Z flags accordingly.\n\nIf the\
-  \ WC or WCZ effect is specified, the C flag is set (1) if Src is less than Dest.\n\nIf the WZ or WCZ effect is specifi\
-  ed, the Z flag is set (1) if Dest equals Src.\n\nTo compare unsigned, multi-long values, use CMP (instead) followed\
-  \ by CMPX as described in Comparing Two\n\nMulti-Long Values."
+description: 'CMP compares the unsigned values of Dest and Src (by subtracting Dest
+  from Src) and optionally setting the C Result: Greater/lesser and equality status
+  is optionally written to the C and Z flags.
+
+
+  CMP compares the unsigned values of Dest and Src (by subtracting Dest from Src)
+  and optionally setting the C
+
+
+  and Z flags accordingly.
+
+
+  If the WC or WCZ effect is specified, the C flag is set (1) if Src is less than
+  Dest.
+
+
+  If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src.
+
+
+  To compare unsigned, multi-long values, use CMP (instead) followed by CMPX as described
+  in Comparing Two
+
+
+  Multi-Long Values.'
 flags_affected:
   C:
     formula: borrow of (S - D)
@@ -18,8 +36,9 @@ flags_affected:
     formula: (D == S)
 parameters:
 - Dest is the register containing the value to compare with that of Src.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
-- "WC, WZ, or WCZ are optional effects to update flags."
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared
+  to Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
 related:
 - CMP
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
@@ -34,8 +53,8 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Compare reverse
-category: arithmetic
-result: "Greater/lesser and equality status is optionally written to the C and Z flags."
+category: Math and Logic
+result: Greater/lesser and equality status is optionally written to the C and Z flags.
 syntax_variants:
 - CMPR Dest, {#}Src {WC|WZ|WCZ}
 manual_extraction_date: '2025-01-19'

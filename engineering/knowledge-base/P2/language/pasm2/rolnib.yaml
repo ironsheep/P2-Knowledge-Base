@@ -1,27 +1,45 @@
 instruction: ROLNIB
 syntax: 'ROLNIB Dest, {#}Src, #Num'
 encoding:
-- "EEEE 100010N NNI DDDDDDDDD SSSSSSSSS                  D                --                  --                 \
-  \    2"
-- "EEEE 1000100 000 DDDDDDDDD 000000000                  D                --                  --                 \
-  \    2"
+- EEEE 100010N NNI DDDDDDDDD SSSSSSSSS                  D                --                  --                     2
+- EEEE 1000100 000 DDDDDDDDD 000000000                  D                --                  --                     2
 timing:
   cycles: 2
   type: fixed
-description: "ROLNIB reads the nibble identified by Num (0-7) from Src, or a nibble from the source described by a prior\
-  \ ALTGN Result: Nibble Num (0-7) of Src, or a nibble from a source described by prior ALTGN instruction, is rotated\
-  \ left into Dest.\n\nROLNIB reads the nibble identified by Num (0-7) from Src, or a nibble from the source described\
-  \ by a prior ALTGN\n\ninstruction, and rotates it left into Dest.\n\nROLNIB achieves the same effect as two instructions--\
-  \ a 4-bit SHL followed by SETNIB into nibble 0.\n\nNum (0-7) identifies a value's individual nibbles, by position,\
-  \ in least-significant nibble order.\n\nSyntax 2 is intended for use after an ALTGN instruction; i.e. in a loop to iteratively\
-  \ read a series of nibble values\n\nwithin contiguous long registers."
+description: 'ROLNIB reads the nibble identified by Num (0-7) from Src, or a nibble
+  from the source described by a prior ALTGN Result: Nibble Num (0-7) of Src, or a
+  nibble from a source described by prior ALTGN instruction, is rotated left into
+  Dest.
+
+
+  ROLNIB reads the nibble identified by Num (0-7) from Src, or a nibble from the source
+  described by a prior ALTGN
+
+
+  instruction, and rotates it left into Dest.
+
+
+  ROLNIB achieves the same effect as two instructions-- a 4-bit SHL followed by SETNIB
+  into nibble 0.
+
+
+  Num (0-7) identifies a value''s individual nibbles, by position, in least-significant
+  nibble order.
+
+
+  Syntax 2 is intended for use after an ALTGN instruction; i.e. in a loop to iteratively
+  read a series of nibble values
+
+
+  within contiguous long registers.'
 flags_affected:
   C:
     when: D
 parameters:
 - Dest is the register in which to rotate the nibble into.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target nibble to read.
-- "Num is a 3-bit literal identifying the nibble ID (0-7) of Src to read."
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains
+  the target nibble to read.
+- Num is a 3-bit literal identifying the nibble ID (0-7) of Src to read.
 related:
 - ALTGN
 - ROLBYTE
@@ -44,8 +62,9 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Rotate left nibble
-category: bit_manipulation
-result: "Nibble Num (0-7) of Src, or a nibble from a source described by prior ALTGN instruction, is rotated left into"
+category: Math and Logic
+result: Nibble Num (0-7) of Src, or a nibble from a source described by prior ALTGN
+  instruction, is rotated left into
 syntax_variants:
 - 'ROLNIB Dest, {#}Src, #Num'
 - ROLNIB Dest

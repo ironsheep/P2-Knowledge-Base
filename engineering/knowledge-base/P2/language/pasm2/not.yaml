@@ -1,13 +1,29 @@
 instruction: NOT
 syntax: NOT Dest, {#}Src {WC|WZ|WCZ}
 encoding:
-- EEEE 0110001 CZI DDDDDDDDD SSSSSSSSS                   D               !S[31]           Result = 0                2
-- EEEE 0110001 CZ0 DDDDDDDDD DDDDDDDDD                   D               !D[31]           Result = 0                2
-description: "{WC/WZ/WCZ}   Get !D into D. D = !D. C = !D[31]. *\n\nNOT performs a bitwise NOT (inverting all bits) of the\
-  \ value in Src (or in Dest) and stores the result into Dest.\n\nIf the WC or WCZ effect is specified, the C flag\
-  \ value is replaced by the inverse of either S[31] (syntax 1) or D[31]\n\n(syntax 2).\n\nIf the WZ or WCZ effect is specifi\
-  ed, the Z flag is set (1) if the result of !Src (syntax 1) or !Dest (syntax 2) equals\n\nzero, or is cleared (0) if\
-  \ it is non-zero."
+- EEEE 0110001 CZI DDDDDDDDD SSSSSSSSS                   D               !S[31]           Result
+  = 0                2
+- EEEE 0110001 CZ0 DDDDDDDDD DDDDDDDDD                   D               !D[31]           Result
+  = 0                2
+description: '{WC/WZ/WCZ}   Get !D into D. D = !D. C = !D[31]. *
+
+
+  NOT performs a bitwise NOT (inverting all bits) of the value in Src (or in Dest)
+  and stores the result into Dest.
+
+
+  If the WC or WCZ effect is specified, the C flag value is replaced by the inverse
+  of either S[31] (syntax 1) or D[31]
+
+
+  (syntax 2).
+
+
+  If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of !Src
+  (syntax 1) or !Dest (syntax 2) equals
+
+
+  zero, or is cleared (0) if it is non-zero.'
 timing:
   cycles: 2
   type: fixed
@@ -22,25 +38,29 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 3
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-long_description: "!Src (or !Dest) is stored in Dest and flags are optionally updated with the NOTed high bit and zero\
-  \ status."
+long_description: '!Src (or !Dest) is stored in Dest and flags are optionally updated
+  with the NOTed high bit and zero status.'
 syntax_variants:
 - NOT Dest, {#}Src {WC|WZ|WCZ}
 - NOT Dest           {WC|WZ|WCZ}
-- "Result: !Src (or !Dest) is stored in Dest and flags are optionally updated with the NOTed high bit and zero status."
-- "*   Dest is the register containing the value to bitwise NOT (syntax 2) or to be replaced by the bitwise NOT of"
-- NOT performs a bitwise NOT (inverting all bits) of the value in Src (or in Dest) and stores the result into Dest.
+- 'Result: !Src (or !Dest) is stored in Dest and flags are optionally updated with
+  the NOTed high bit and zero status.'
+- '*   Dest is the register containing the value to bitwise NOT (syntax 2) or to be
+  replaced by the bitwise NOT of'
+- NOT performs a bitwise NOT (inverting all bits) of the value in Src (or in Dest)
+  and stores the result into Dest.
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 last_updated: '2025-09-19'
 brief_description: Not
-category: bit_manipulation
-result: "!Src (or !Dest) is stored in Dest and flags are optionally updated with the NOTed high bit and zero status."
+category: Math and Logic
+result: '!Src (or !Dest) is stored in Dest and flags are optionally updated with the
+  NOTed high bit and zero status.'
 parameters:
-- Dest is the register containing the value to bitwise NOT (syntax 2) or to be replaced by the bitwise NOT of Src (syntax
-  1).
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value will be bitwise NOTed and stored into
-  Dest.
-- "WC, WZ, or WCZ are optional effects to update flags."
+- Dest is the register containing the value to bitwise NOT (syntax 2) or to be replaced
+  by the bitwise NOT of Src (syntax 1).
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value
+  will be bitwise NOTed and stored into Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
 manual_extraction_date: '2025-01-19'
 oneliner: Bitwise NOT a value

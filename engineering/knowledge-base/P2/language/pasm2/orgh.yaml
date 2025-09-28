@@ -5,7 +5,7 @@ description: 'Set the assembly origin to a hub RAM address
   All subsequent code/data will be assembled for hub execution
 
   '
-category: Assembly Directive
+category: Assembly Directives
 documentation_level: complete
 syntax: ORGH [address]
 examples:

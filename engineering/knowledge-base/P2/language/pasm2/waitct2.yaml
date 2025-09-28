@@ -1,24 +1,62 @@
 instruction: WAITCT2
 syntax: WAITCT1 {WC|WZ|WCZ}
 encoding:
-- "EEEE 1101011 CZ0 000010001 000100100                 --          Timeout Abort     Timeout Abort               2+"
-- "EEEE 1101011 CZ0 000010010 000100100                 --          Timeout Abort     Timeout Abort               2+"
-- "EEEE 1101011 CZ0 000010011 000100100                 --          Timeout Abort     Timeout Abort               2+"
+- EEEE 1101011 CZ0 000010001 000100100                 --          Timeout Abort     Timeout
+  Abort               2+
+- EEEE 1101011 CZ0 000010010 000100100                 --          Timeout Abort     Timeout
+  Abort               2+
+- EEEE 1101011 CZ0 000010011 000100100                 --          Timeout Abort     Timeout
+  Abort               2+
 timing:
   cycles: 2
   type: variable
-description: "Wait for CT2 event flag, then clear it. Prior SETQ sets optional CT timeout value. C/Z = timeout.      \
-  \                        2+\n\nWAITCT1, WAITCT2, or WAITCT3 waits for a counter 1, 2, or 3 event to occur (unless the event\
-  \ flag is already set),\n\nthen clears the event flag (unless it's being set again by the event sensor) and resumes\
-  \ execution at the next\n\ninstruction. Optionally, WAITCTx can time-out if the counter event doesn't occur soon enough;\
-  \ setting C and/or Z\n\nflags and then resuming execution at the next instruction.\n\nTo set the optional timeout, insert\
-  \ a SETQ (with a future System Counter target value) right before WAITCTx.\n\nThe WC, WZ, or WCZ effect is recommended only\
-  \ if the optional timeout is specified, in which case the C flag and/or\n\nZ flag is set (1) if a timeout occurred\
-  \ before the event, or is cleared (0) if the event occurred before the timeout.\n\nDuring a wait, the pipeline is stalled;\
-  \ no instructions execute and no interrupts are processed in the cog until the\n\nwait condition ends.\n\nThe counter 1,\
-  \ 2, or 3 event flag is set whenever the System Counter (CT) passes the value in the CT1, CT2, or CT3\n\nevent trigger\
-  \ register, respectively; i.e. MSB of (CT - CTx is 0). The counter event flags are cleared upon execution\n\nof the\
-  \ corresponding ADDCTx, POLLCTx, WAITCTx, JCTx, or JNCTx instructions."
+description: 'Wait for CT2 event flag, then clear it. Prior SETQ sets optional CT
+  timeout value. C/Z = timeout.                              2+
+
+
+  WAITCT1, WAITCT2, or WAITCT3 waits for a counter 1, 2, or 3 event to occur (unless
+  the event flag is already set),
+
+
+  then clears the event flag (unless it''s being set again by the event sensor) and
+  resumes execution at the next
+
+
+  instruction. Optionally, WAITCTx can time-out if the counter event doesn''t occur
+  soon enough; setting C and/or Z
+
+
+  flags and then resuming execution at the next instruction.
+
+
+  To set the optional timeout, insert a SETQ (with a future System Counter target
+  value) right before WAITCTx.
+
+
+  The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified,
+  in which case the C flag and/or
+
+
+  Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the
+  event occurred before the timeout.
+
+
+  During a wait, the pipeline is stalled; no instructions execute and no interrupts
+  are processed in the cog until the
+
+
+  wait condition ends.
+
+
+  The counter 1, 2, or 3 event flag is set whenever the System Counter (CT) passes
+  the value in the CT1, CT2, or CT3
+
+
+  event trigger register, respectively; i.e. MSB of (CT - CTx is 0). The counter event
+  flags are cleared upon execution
+
+
+  of the corresponding ADDCTx, POLLCTx, WAITCTx, JCTx, or JNCTx instructions.'
 flags_affected:
   Z:
     formula: timeout
@@ -49,14 +87,15 @@ specifics:
   event_flag: CT2
 quick_example: WAITCT2  ; Wait for counter 2 event flag, then clear it
 has_group_documentation: true
-category: timing_events
-result: "Wait for counter 1, 2, or 3 event, then clear the flag; optionally aborting on timeout and setting C and/or Z"
+category: Event
+result: Wait for counter 1, 2, or 3 event, then clear the flag; optionally aborting
+  on timeout and setting C and/or Z
 parameters:
-- "WC, WZ, or WCZ are optional effects to update flags."
+- WC, WZ, or WCZ are optional effects to update flags.
 related:
 - ADDCTx
 - POLLCTx
 - JCTx
 - JNCTx
 manual_extraction_date: '2025-01-19'
-oneliner: "Wait for and clear counter 1, 2, or 3 event flag"
+oneliner: Wait for and clear counter 1, 2, or 3 event flag

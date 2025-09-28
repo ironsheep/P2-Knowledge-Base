@@ -4,9 +4,10 @@ encoding: EEEE 1101011 CZL DDDDDDDDD 001011001
 timing:
   cycles: 2
   type: fixed
-description: 'DRVH or DRVL sets the I/O pin(s) designated by Dest to the output direction and to a high or low output level;
-  i.e. Result: The I/O pins described by Dest are set to the output direction and to an output level of high or low; the rest
-  are left as-is. Z = OUT bit.'
+description: 'DRVH or DRVL sets the I/O pin(s) designated by Dest to the output direction
+  and to a high or low output level; i.e. Result: The I/O pins described by Dest are
+  set to the output direction and to an output level of high or low; the rest are
+  left as-is. Z = OUT bit.'
 flags_affected:
   Z:
     formula: OUT bit
@@ -15,7 +16,8 @@ documentation_level: comprehensive
 compiler_operand_format:
   name: operand_pinop
   pattern: D/#0..511 {WC/WZ}
-  description: 'Pin operation: destination/immediate pin number 0-511, optional effect flags'
+  description: 'Pin operation: destination/immediate pin number 0-511, optional effect
+    flags'
   valueType: 30
 compiler_encoding:
   operandFormat: 30
@@ -24,8 +26,8 @@ syntax_variants:
 - DRVH {#}D
 last_updated: '2025-09-19T16:04:17.488795'
 parameters:
-- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to output
-  direction and output levels of high or low.
+- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
+  the I/O pin(s) to set to output direction and output levels of high or low.
 - WCZ is an optional effect to update flags.
-category: control_flow
+category: Pin
 oneliner: Set pin(s) direction to output and output level high (1) or low (0)

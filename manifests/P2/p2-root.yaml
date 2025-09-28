@@ -1,3 +1,9 @@
+# P2-Root.Yaml Manifest
+# Using 4-key path standard
+
+manifest_base: "/manifests/P2"
+content_base: "/engineering/knowledge-base/P2/language/spin2"
+
 # P2 Knowledge Base - Root Manifest
 # Entry point: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/p2-knowledge-root.yaml
 # Repository: https://github.com/ironsheep/P2-Knowledge-Base
@@ -18,7 +24,94 @@ metadata:
   trust_level: "99%"
   repository: "https://github.com/ironsheep/P2-Knowledge-Base"
   raw_base_url: "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/"
-  
+
+# Manifest Registry - Complete alphabetical listing for name-based references
+manifest_registry:
+  architecture:
+    path: "manifests/P2/architecture-manifest.yaml"
+    description: "P2 hardware subsystems - cogs, memory, timing, interrupts"
+    useful_for: ["hardware understanding", "system optimization", "debugging"]
+    entry_count: 18
+
+  auxiliary_guides:
+    path: "manifests/P2/auxiliary-guides-manifest.yaml"
+    description: "Additional guides and documentation"
+    useful_for: ["learning resources", "tutorials", "best practices"]
+
+  code_examples:
+    path: "manifests/P2/code-examples-manifest.yaml"
+    description: "Working examples demonstrating P2 programming patterns"
+    useful_for: ["learning", "quick reference", "testing concepts"]
+    entry_count: 3
+
+  community:
+    path: "manifests/P2/community/community-manifest.yaml"
+    description: "Community resources and contributions"
+    useful_for: ["community objects", "shared code", "collaboration"]
+
+  fundamentals:
+    path: "manifests/P2/language/fundamentals-manifest.yaml"
+    description: "Cross-language concepts - registers, memory model, timing"
+    useful_for: ["understanding basics", "language-agnostic concepts", "system registers"]
+    entry_count: 7
+
+  hardware:
+    path: "manifests/P2/hardware-manifest.yaml"
+    description: "P2 boards, modules, and accessories"
+    useful_for: ["board selection", "peripheral compatibility", "pinouts"]
+    entry_count: 30
+
+  language:
+    path: "manifests/P2/language/language-manifest.yaml"
+    description: "Parent manifest for all P2 programming languages"
+    useful_for: ["language selection", "overview of language options"]
+
+  obex:
+    path: "manifests/P2/community/obex-manifest.yaml"
+    description: "Parallax Object Exchange - community code library"
+    useful_for: ["reusable code", "drivers", "examples"]
+    entry_count: 253
+
+  pasm2:
+    path: "manifests/P2/language/pasm2-manifest.yaml"
+    description: "PASM2 assembly language instruction reference"
+    useful_for: ["low-level programming", "optimization", "hardware control"]
+    entry_count: 362
+
+  patterns:
+    path: "manifests/P2/patterns-manifest.yaml"
+    description: "Code patterns and implementation strategies"
+    useful_for: ["best practices", "common solutions", "optimization patterns"]
+    entry_count: 25
+
+  quick_queries:
+    path: "manifests/P2/quick-queries-manifest.yaml"
+    description: "Quick reference queries and answers"
+    useful_for: ["quick lookups", "common questions", "FAQs"]
+
+  registers:
+    path: "manifests/P2/architecture/registers-manifest.yaml"
+    description: "System register documentation"
+    useful_for: ["register reference", "memory map", "special registers"]
+    entry_count: 3
+
+  smart_pins:
+    path: "manifests/P2/smart-pins-manifest.yaml"
+    description: "Smart Pin modes and configurations"
+    useful_for: ["I/O configuration", "peripheral interfaces", "timing control"]
+    entry_count: 32
+
+  spin2:
+    path: "manifests/P2/language/spin2-manifest.yaml"
+    description: "Spin2 high-level language reference"
+    useful_for: ["high-level programming", "rapid development", "object-oriented code"]
+    entry_count: 262
+
+  spin2_conventions:
+    path: "manifests/P2/language/spin2-conventions-manifest.yaml"
+    description: "Spin2 coding conventions and style guidelines"
+    useful_for: ["code style", "naming conventions", "best practices"]
+
 path_construction:
   instructions: |
     HOW TO CONSTRUCT FULL URLs FROM MANIFESTS:

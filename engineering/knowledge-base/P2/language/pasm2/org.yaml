@@ -5,7 +5,7 @@ description: 'Set the assembly origin to a specific cog RAM address
   All subsequent instructions will be assembled starting from this address
 
   '
-category: Assembly Directive
+category: Assembly Directives
 documentation_level: complete
 syntax: ORG address
 parameters:

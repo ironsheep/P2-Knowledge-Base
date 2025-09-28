@@ -5,7 +5,8 @@ timing:
   cycles: 2
   type: variable
   range: 2...58
-description: '{WC/WZ/WCZ}   Retrieve CORDIC result X into D. Waits, in case result not ready. C = X[31]. 1'
+description: '{WC/WZ/WCZ}   Retrieve CORDIC result X into D. Waits, in case result
+  not ready. C = X[31]. 1'
 flags_affected:
   C:
     formula: X[31]
@@ -22,5 +23,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - GETQX D
 last_updated: '2025-09-19T16:04:17.330972'
-category: cordic
+category: CORDIC Solver
 oneliner: '{WC/WZ/WCZ} Retrieve CORDIC result X into D'

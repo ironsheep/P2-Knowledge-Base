@@ -4,8 +4,8 @@ encoding: EEEE 1101011 CZ0 DDDDDDDDD 000010000
 timing:
   cycles: 2
   type: mode_dependent
-description: '{WC/WZ/WCZ}   Used after RDFAST. Read zero-extended byte from FIFO into D. C = MSB of byte. *                                        2
-  / FIFO IN USE'
+description: '{WC/WZ/WCZ}   Used after RDFAST. Read zero-extended byte from FIFO into
+  D. C = MSB of byte. *                                        2 / FIFO IN USE'
 flags_affected:
   C:
     formula: MSB of byte
@@ -22,5 +22,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - RFBYTE D
 last_updated: '2025-09-19T16:04:17.374923'
-category: misc_ops
+category: Hub FIFO
 oneliner: Read

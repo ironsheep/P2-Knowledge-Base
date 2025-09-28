@@ -5,7 +5,7 @@ description: 'Predefined constant for COGINIT instruction
   Loads code from hub RAM and executes from cog RAM
 
   '
-category: Predefined Constant
+category: Execution Mode Directives
 value: '%0_0_0000'
 documentation_level: complete
 syntax: 'COGINIT #COGEXEC+id, #address'

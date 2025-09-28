@@ -1,25 +1,53 @@
 instruction: SUBSX
 syntax: SUBSX Dest, {#}Src {WC|WZ|WCZ}
-encoding: EEEE 0001111 CZI DDDDDDDDD SSSSSSSSS                     D          sign of D-(S+C)    Z AND (Result = 0)           2
+encoding: EEEE 0001111 CZI DDDDDDDDD SSSSSSSSS                     D          sign
+  of D-(S+C)    Z AND (Result = 0)           2
 timing:
   cycles: 2
   type: fixed
-description: "SUBSX subtracts the signed value of Src plus C from the signed Dest and stores the result into the Dest register.\
-  \ Result: Difference of signed Dest and signed Src (plus C) is stored in Dest and optionally the C and Z flags are updated\
-  \ to the extended sign and zero status.\n\nSUBSX subtracts the signed value of Src plus C from the signed Dest and stores\
-  \ the result into the Dest register.\n\nThe SUBSX instruction is used to perform signed multi-long (extended) subtraction,\
-  \ such as 64-bit subtraction.\n\nIf the WC or WCZ effect is specified, the C flag is set (1) if the result is negative\
-  \ (Result[31] = 1), or is cleared (0) if\n\npositive. Use WC or WCZ on preceding SUB and SUBX instructions for proper fi\
-  nal C flag.\n\nIf the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously set and the result\
-  \ of Dest - (Src + C) is\n\nzero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding SUB and SUBX instructions\
-  \ for proper final Z flag.\n\nTo subtract signed multi-long values, use SUB (not SUBS) followed possibly by SUBX,\
-  \ and finally SUBSX as\n\ndescribed in Subtracting Two Multi-Long Values."
+description: 'SUBSX subtracts the signed value of Src plus C from the signed Dest
+  and stores the result into the Dest register. Result: Difference of signed Dest
+  and signed Src (plus C) is stored in Dest and optionally the C and Z flags are updated
+  to the extended sign and zero status.
+
+
+  SUBSX subtracts the signed value of Src plus C from the signed Dest and stores the
+  result into the Dest register.
+
+
+  The SUBSX instruction is used to perform signed multi-long (extended) subtraction,
+  such as 64-bit subtraction.
+
+
+  If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative
+  (Result[31] = 1), or is cleared (0) if
+
+
+  positive. Use WC or WCZ on preceding SUB and SUBX instructions for proper final
+  C flag.
+
+
+  If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously
+  set and the result of Dest - (Src + C) is
+
+
+  zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding SUB and SUBX
+  instructions for proper final Z flag.
+
+
+  To subtract signed multi-long values, use SUB (not SUBS) followed possibly by SUBX,
+  and finally SUBSX as
+
+
+  described in Subtracting Two Multi-Long Values.'
 flags_affected:
   Z: (Result = 0)
 parameters:
-- Dest is a register containing the value to subtract Src plus C from, and is where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is subtracted from Dest.
-- "WC, WZ, or WCZ are optional effects to update flags."
+- Dest is a register containing the value to subtract Src plus C from, and is where
+  the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C
+  is subtracted from Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -32,11 +60,13 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Subtract signed, extended
-category: arithmetic
-result: "Difference of signed Dest and signed Src (plus C) is stored in Dest and optionally the C and Z flags are"
+category: Math and Logic
+result: Difference of signed Dest and signed Src (plus C) is stored in Dest and optionally
+  the C and Z flags are
 syntax_variants:
 - SUBSX Dest, {#}Src {WC|WZ|WCZ}
-- SUBSX subtracts the signed value of Src plus C from the signed Dest and stores the result into the Dest register.
+- SUBSX subtracts the signed value of Src plus C from the signed Dest and stores the
+  result into the Dest register.
 related:
 - SUB
 - SUBX

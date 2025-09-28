@@ -4,7 +4,8 @@ encoding: EEEE 1100011 1LI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-description: 'Begin new fast hub read via FIFO. D[31] = no wait, D[13:0] = block size in 64-byte units
+description: 'Begin new fast hub read via FIFO. D[31] = no wait, D[13:0] = block size
+  in 64-byte units
 
   (0 = max), S[19:0] = block start address.
 
@@ -27,34 +28,42 @@ documentation_level: comprehensive
 examples:
 - name: Fast Checksum Calculation
   description: Calculate checksum over HUB memory block
-  code: "' Calculate checksum over data block\ncalc_checksum\n        rdfast  #0, data_start           ' Start FIFO read,\
-    \ max size\n        mov     checksum, #0             ' Clear checksum\n        mov     count, data_size         ' Bytes\
-    \ to process\n        \n.loop   rfbyte  byte_val                 ' Read next byte via FIFO\n        add     checksum,\
-    \ byte_val       ' Add to checksum\n        djnz    count, #.loop            ' Continue until done\n        \n       \
-    \ and     checksum, #$FF           ' Keep only low byte\n        ret\n"
+  code: "' Calculate checksum over data block\ncalc_checksum\n        rdfast  #0,\
+    \ data_start           ' Start FIFO read, max size\n        mov     checksum,\
+    \ #0             ' Clear checksum\n        mov     count, data_size         '\
+    \ Bytes to process\n        \n.loop   rfbyte  byte_val                 ' Read\
+    \ next byte via FIFO\n        add     checksum, byte_val       ' Add to checksum\n\
+    \        djnz    count, #.loop            ' Continue until done\n        \n  \
+    \      and     checksum, #$FF           ' Keep only low byte\n        ret\n"
   source: flash_loader.spin2
 - name: Data Stream Processing
   description: Process continuous data stream from HUB
-  code: "' Process audio samples from HUB buffer\n        rdfast  ##$8000_0000|512, buffer_addr ' No-wait, 512*64 bytes\n\
-    \        \n.process\n        rflong  sample                   ' Get next sample\n        ' Apply DSP operations\n    \
-    \    sar     sample, #1               ' Reduce volume by half\n        add     sample, offset           ' DC offset correction\n\
-    \        ' Output to DAC\n        wrpin   sample, dac_pin\n        jmp     #.process                ' Continue streaming\n"
+  code: "' Process audio samples from HUB buffer\n        rdfast  ##$8000_0000|512,\
+    \ buffer_addr ' No-wait, 512*64 bytes\n        \n.process\n        rflong  sample\
+    \                   ' Get next sample\n        ' Apply DSP operations\n      \
+    \  sar     sample, #1               ' Reduce volume by half\n        add     sample,\
+    \ offset           ' DC offset correction\n        ' Output to DAC\n        wrpin\
+    \   sample, dac_pin\n        jmp     #.process                ' Continue streaming\n"
   source: audio_processing
 - name: Block Copy with FIFO
   description: Fast block copy using FIFO for reading
-  code: "' Copy block using FIFO read and sequential write\n        rdfast  #0, source_addr          ' Start FIFO read\n \
-    \       mov     ptrb, dest_addr          ' Destination pointer\n        mov     count, block_size\n        \n.copy   rflong\
-    \  temp                     ' Read via FIFO\n        wrlong  temp, ptrb++             ' Write and increment\n        djnz\
-    \    count, #.copy\n"
+  code: "' Copy block using FIFO read and sequential write\n        rdfast  #0, source_addr\
+    \          ' Start FIFO read\n        mov     ptrb, dest_addr          ' Destination\
+    \ pointer\n        mov     count, block_size\n        \n.copy   rflong  temp \
+    \                    ' Read via FIFO\n        wrlong  temp, ptrb++           \
+    \  ' Write and increment\n        djnz    count, #.copy\n"
   source: memory_operations
 - name: CRC Calculation
   description: Calculate CRC over memory region
-  code: "' CRC-16 calculation over data\n        rdfast  #0, data_addr            ' Start FIFO\n        mov     crc, ##$FFFF\
-    \             ' Initial CRC value\n        mov     count, data_length\n        \n.crc_loop\n        rfbyte  data     \
-    \                ' Get next byte\n        xor     crc, data                ' XOR with CRC low byte\n        mov     bit_count,\
-    \ #8            ' Process 8 bits\n        \n.bit_loop\n        shr     crc, #1             wc   ' Shift right, get bit\n\
-    if_c    xor     crc, ##$A001             ' Apply polynomial if bit set\n        djnz    bit_count, #.bit_loop\n      \
-    \  djnz    count, #.crc_loop\n        \n        xor     crc, ##$FFFF             ' Final XOR\n        ret\n"
+  code: "' CRC-16 calculation over data\n        rdfast  #0, data_addr           \
+    \ ' Start FIFO\n        mov     crc, ##$FFFF             ' Initial CRC value\n\
+    \        mov     count, data_length\n        \n.crc_loop\n        rfbyte  data\
+    \                     ' Get next byte\n        xor     crc, data             \
+    \   ' XOR with CRC low byte\n        mov     bit_count, #8            ' Process\
+    \ 8 bits\n        \n.bit_loop\n        shr     crc, #1             wc   ' Shift\
+    \ right, get bit\nif_c    xor     crc, ##$A001             ' Apply polynomial\
+    \ if bit set\n        djnz    bit_count, #.bit_loop\n        djnz    count, #.crc_loop\n\
+    \        \n        xor     crc, ##$FFFF             ' Final XOR\n        ret\n"
   source: data_integrity
 related_instructions:
 - RFBYTE: Read byte via FIFO
@@ -76,5 +85,5 @@ compiler_encoding:
   operandFormat: 13
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.018932'
-category: misc_ops
+category: Hub FIFO
 oneliner: New Read

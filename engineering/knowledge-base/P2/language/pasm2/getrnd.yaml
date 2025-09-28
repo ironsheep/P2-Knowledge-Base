@@ -1,5 +1,5 @@
 instruction: GETRND
-syntax: "GETRND\_ D\_ \_\_\_\_\_ {WC/WZ/WCZ}"
+syntax: GETRND  D        {WC/WZ/WCZ}
 encoding: EEEE 1101011 CZ1 000000000 000011011
 timing:
   cycles: 2
@@ -23,5 +23,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - GETRND WC/WZ/WCZ
 last_updated: '2025-09-19T16:04:17.572226'
-category: misc_ops
+category: Miscellaneous
 oneliner: Get RND into C/Z

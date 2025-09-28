@@ -1,23 +1,26 @@
 instruction: COGBRK
 syntax: COGBRK {#}Dest
-encoding: "EEEE 1101011 00L DDDDDDDDD 000110101                   --                 --                  --  \
-  \                 2"
+encoding: EEEE 1101011 00L DDDDDDDDD 000110101                   --                 --                  --                   2
 timing:
   cycles: 2
   type: fixed
-description: 'COGBRK triggers an asynchronous breakpoint in a designated cog. The COGBRK instruction must be executed Result:
-  If in the Debug ISR, trigger an asynchronous breakpoint in cog identified by Dest.
+description: 'COGBRK triggers an asynchronous breakpoint in a designated cog. The
+  COGBRK instruction must be executed Result: If in the Debug ISR, trigger an asynchronous
+  breakpoint in cog identified by Dest.
 
 
-  COGBRK triggers an asynchronous breakpoint in a designated cog. The COGBRK instruction must be executed
+  COGBRK triggers an asynchronous breakpoint in a designated cog. The COGBRK instruction
+  must be executed
 
 
-  from within a Debug ISR (interrupt service routine) and the designated cog must already have its asynchronous
+  from within a Debug ISR (interrupt service routine) and the designated cog must
+  already have its asynchronous
 
 
   breakpoint interrupt enabled. Dest[2:0] indicates the ID of the desired cog.'
 parameters:
-- Dest is the register or 9-bit literal whose value (lower 3-bits) indicates which cog to trigger.
+- Dest is the register or 9-bit literal whose value (lower 3-bits) indicates which
+  cog to trigger.
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -30,9 +33,10 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Cog break
-category: interrupts
-result: "If in the Debug ISR, trigger an asynchronous breakpoint in cog identified by Dest."
+category: Interrupt
+result: If in the Debug ISR, trigger an asynchronous breakpoint in cog identified
+  by Dest.
 syntax_variants:
 - COGBRK {#}Dest
 manual_extraction_date: '2025-01-19'
-oneliner: "Trigger breakpoint in specified cog"
+oneliner: Trigger breakpoint in specified cog

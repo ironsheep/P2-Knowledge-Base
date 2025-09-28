@@ -26,11 +26,13 @@ documentation_level: comprehensive
 examples:
 - name: Hall Sensor Reading
   description: Read Hall sensor state for BLDC motor commutation
-  code: "' Read all 3 Hall sensors and build state value\nmov     hall_state, #0           ' Clear state register\ntestp \
-    \  #HALL_A_PIN         wc   ' Test Hall A\nrcl     hall_state, #1           ' Shift in bit\ntestp   #HALL_B_PIN      \
-    \   wc   ' Test Hall B  \nrcl     hall_state, #1           ' Shift in bit\ntestp   #HALL_C_PIN         wc   ' Test Hall\
-    \ C\nrcl     hall_state, #1           ' Shift in bit\n\n' hall_state now contains 3-bit Hall pattern (0-7)\n' Use for\
-    \ commutation table lookup\n"
+  code: "' Read all 3 Hall sensors and build state value\nmov     hall_state, #0 \
+    \          ' Clear state register\ntestp   #HALL_A_PIN         wc   ' Test Hall\
+    \ A\nrcl     hall_state, #1           ' Shift in bit\ntestp   #HALL_B_PIN    \
+    \     wc   ' Test Hall B  \nrcl     hall_state, #1           ' Shift in bit\n\
+    testp   #HALL_C_PIN         wc   ' Test Hall C\nrcl     hall_state, #1       \
+    \    ' Shift in bit\n\n' hall_state now contains 3-bit Hall pattern (0-7)\n' Use\
+    \ for commutation table lookup\n"
   source: isp_bldc_motor.spin2
 - name: Edge Detection
   description: Detect rising edge on input pin
@@ -66,8 +68,9 @@ examples:
   source: debugger_pattern
 - name: Multi-Pin State Check
   description: Check multiple pin states efficiently
-  code: "' Check if all required pins are high\ntestp   #PIN_A              wc\nif_nc   jmp #not_ready\ntestp   #PIN_B   \
-    \           wc  \nif_nc   jmp #not_ready\ntestp   #PIN_C              wc\nif_nc   jmp #not_ready\n\n' All pins are high,\
+  code: "' Check if all required pins are high\ntestp   #PIN_A              wc\nif_nc\
+    \   jmp #not_ready\ntestp   #PIN_B              wc  \nif_nc   jmp #not_ready\n\
+    testp   #PIN_C              wc\nif_nc   jmp #not_ready\n\n' All pins are high,\
     \ proceed\n"
   source: common_pattern
 related_instructions:
@@ -85,11 +88,12 @@ notes:
 compiler_operand_format:
   name: operand_testp
   pattern: D/#0..511 WC/ANDC/ORC/XORC | WZ/ANDZ/ORZ/XORZ
-  description: 'Test pin: destination/immediate pin number 0-511 with REQUIRED logic function'
+  description: 'Test pin: destination/immediate pin number 0-511 with REQUIRED logic
+    function'
   valueType: 31
 compiler_encoding:
   operandFormat: 31
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.623961'
-category: control_flow
+category: Pin
 oneliner: Test pin state with optional XOR operation

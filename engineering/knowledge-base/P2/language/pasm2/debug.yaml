@@ -30,5 +30,5 @@ documentation_source: PNUT_TS_compiler_analysis
 documentation_level: minimal
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
 last_updated: '2025-09-19T16:04:17.215079'
-category: control_flow
+category: Debug Directives
 oneliner: Debug instruction

@@ -30,5 +30,5 @@ group_membership:
 specifics:
   interrupt_number: 2
 has_group_documentation: true
-category: control_flow
+category: Branch
 oneliner: Resume

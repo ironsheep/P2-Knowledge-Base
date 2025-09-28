@@ -1,3 +1,9 @@
+# Spin2-Conventions Manifest
+# Using 4-key path standard
+
+manifest_base: "/manifests/P2/language"
+content_base: "/engineering/knowledge-base/P2/language/spin2/conventions"
+
 title: Spin2 Documentation Styles Manifest
 id: spin2-documentation-styles
 version: 1.1.0
@@ -13,7 +19,7 @@ overview: |
 documentation_styles:
   - id: vscode-pnut-documentation-style
     name: VSCode/PNUT_TS Documentation Style
-    content: vscode-pnut-documentation-style.yaml
+    content: "vscode-pnut-documentation-style.yaml"
     recommended_for:
       - VSCode development environment
       - PNUT_TS compiler users
@@ -23,7 +29,7 @@ documentation_styles:
     
   - id: johnny-mac-documentation-style
     name: Johnny Mac Internal Documentation Style
-    content: johnny-mac-documentation-style.yaml
+    content: "johnny-mac-documentation-style.yaml"
     recommended_for:
       - Professional P2 development
       - High documentation coverage goals (98%+)
@@ -33,7 +39,7 @@ documentation_styles:
     
   - id: p2-source-file-organization-standard
     name: P2 Source File Organization Standard
-    content: p2-source-file-organization-standard.yaml
+    content: "p2-source-file-organization-standard.yaml"
     recommended_for:
       - All P2 source files
       - Professional file structure
@@ -122,15 +128,15 @@ file_distribution:
   
   individual_downloads:
     vscode_style:
-      content: "language/spin2/conventions/vscode-pnut-documentation-style.yaml"
+      content: "vscode-pnut-documentation-style.yaml"
       size: "~8KB"
       
     johnny_mac_style:
-      content: "language/spin2/conventions/johnny-mac-documentation-style.yaml"
+      content: "johnny-mac-documentation-style.yaml"
       size: "~12KB"
       
     organization_standard:
-      content: "language/spin2/conventions/p2-source-file-organization-standard.yaml"
+      content: "p2-source-file-organization-standard.yaml"
       size: "~10KB"
       
 

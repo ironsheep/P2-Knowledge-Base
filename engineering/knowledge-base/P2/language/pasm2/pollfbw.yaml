@@ -1,20 +1,40 @@
 instruction: POLLFBW
 syntax: POLLFBW {WC|WZ|WCZ}
-encoding: "EEEE 1101011 CZ0 000001001 000100100                 --            FBW Event         FBW Event            \
-  \      2"
+encoding: EEEE 1101011 CZ0 000001001 000100100                 --            FBW Event         FBW
+  Event                  2
 timing:
   cycles: 2
   type: fixed
-description: "POLLFBW copies the state of the FIFO-interface-block-wrap event flag into C and/or Z and then clears the flag\
-  \ Result: FIFO-interface-block-wrap event flag is optionally copied into C and/or Z, then it is cleared.\n\nPOLLFBW copies\
-  \ the state of the FIFO-interface-block-wrap event flag into C and/or Z and then clears the flag\n\n(unless it's\
-  \ being set again by the event sensor).\n\nIf the WC, WZ, or WCZ effect is specified, the C flag and/or Z fl\
-  ag is updated to the state of the FIFO-interface-block-\n\nwrap event flag prior to clearing it.\n\nThe FIFO-interface-block-wrap\
-  \ event flag is set whenever the Hub RAM FIFO interface exhausts its block count\n\nand reloads its block count and\
-  \ start address. The FIFO-interface-block-wrap event flag is cleared upon execution\n\nof RDFAST, WRFAST, FBLOCK, POLLFBW,\
-  \ WAITFBW, JFBW, or JNFBW instructions."
+description: 'POLLFBW copies the state of the FIFO-interface-block-wrap event flag
+  into C and/or Z and then clears the flag Result: FIFO-interface-block-wrap event
+  flag is optionally copied into C and/or Z, then it is cleared.
+
+
+  POLLFBW copies the state of the FIFO-interface-block-wrap event flag into C and/or
+  Z and then clears the flag
+
+
+  (unless it''s being set again by the event sensor).
+
+
+  If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to
+  the state of the FIFO-interface-block-
+
+
+  wrap event flag prior to clearing it.
+
+
+  The FIFO-interface-block-wrap event flag is set whenever the Hub RAM FIFO interface
+  exhausts its block count
+
+
+  and reloads its block count and start address. The FIFO-interface-block-wrap event
+  flag is cleared upon execution
+
+
+  of RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, or JNFBW instructions.'
 parameters:
-- "WC, WZ, or WCZ are optional effects to update flags."
+- WC, WZ, or WCZ are optional effects to update flags.
 related:
 - RDFAST
 - WRFAST
@@ -34,9 +54,10 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Poll FIFO block wrap
-category: timing_events
-result: "FIFO-interface-block-wrap event flag is optionally copied into C and/or Z, then it is cleared."
+category: Event
+result: FIFO-interface-block-wrap event flag is optionally copied into C and/or Z,
+  then it is cleared.
 syntax_variants:
 - POLLFBW {WC|WZ|WCZ}
 manual_extraction_date: '2025-01-19'
-oneliner: "Retrieve and clear FIFO-interface-block-wrap event flag"
+oneliner: Retrieve and clear FIFO-interface-block-wrap event flag

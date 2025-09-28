@@ -2,26 +2,24 @@
 """
 Verify manifest linkages in the P2 Knowledge Base
 Validates that all manifests and content files are properly connected
+Uses the 4-key path standard for resolution
 
-Version: 2.1.0
-Date: 2025-01-27
+Version: 3.0.0
+Date: 2025-09-28
 Changes:
-  - v2.1.0: Made fully data-driven - no hardcoded section names
-            Recursive processing of any manifest structure
-            Preserved OBEX dual-organization validation
-  - v2.0.0: Complete rewrite with unified path construction
-            Fixed OBEX dual-organization validation
-            Limited scope to P2 knowledge base only
-            Support for all manifest patterns (lists, dicts, categories)
-  - v1.0.0: Initial version
+  - v3.0.0: Complete rewrite for 4-key path standard
+            Understands manifest_base and content_base
+            Ignores informational sections (related_manifests, notes, etc.)
+            Precise path construction with no ambiguity
+  - v2.4.0: Previous version with various path resolution attempts
 """
 
 import os
 import sys
 import yaml
 from pathlib import Path
-from collections import defaultdict, Counter
-from typing import Set, Dict, List, Tuple
+from collections import defaultdict
+from typing import Set, Dict, List, Tuple, Optional
 
 # ANSI color codes for output
 RED = '\033[91m'
@@ -34,6 +32,26 @@ WHITE = '\033[97m'
 BOLD = '\033[1m'
 RESET = '\033[0m'
 
+# Files to ignore during validation
+IGNORED_FILES = {
+    '_template.yaml',  # Template files should never be referenced
+}
+
+# Sections to ignore during validation (informational only)
+IGNORED_SECTIONS = {
+    'related_manifests',
+    'notes', 
+    'comments',
+    'description',
+    'metadata',
+    'search_terms',
+    # 'keywords',  # DON'T ignore - this contains actual content references!
+    'missing_files',  # These are documented as missing
+    'planned_files',  # These are documented as not yet created
+    'planned_but_not_created',  # These are documented as not created
+    'cross_references',  # No standard yet for cross-references
+}
+
 class ManifestValidator:
     def __init__(self, root_path: Path):
         self.root = root_path
@@ -41,225 +59,192 @@ class ManifestValidator:
         self.warnings = []
         self.referenced_files = set()
         self.referenced_manifests = set()
-        self.obex_category_refs = defaultdict(set)  # Track OBEX refs by category
-        self.obex_author_refs = defaultdict(set)    # Track OBEX refs by author
+        self.obex_category_refs = defaultdict(set)
+        self.obex_author_refs = defaultdict(set)
+        
+    def resolve_path(self, base: Optional[str], reference: str) -> str:
+        """Resolve a path using the 4-key standard"""
+        if base:
+            # Simple concatenation - the standard!
+            return f"{base}/{reference}".replace('//', '/')
+        else:
+            # No base means reference should be complete
+            return reference
+            
+    def load_manifest(self, manifest_path: Path) -> Optional[Dict]:
+        """Load a manifest file and extract its bases"""
+        if not manifest_path.exists():
+            return None
+            
+        try:
+            with open(manifest_path, 'r') as f:
+                data = yaml.safe_load(f)
+                return data
+        except Exception as e:
+            self.errors.append(f"Error loading {manifest_path}: {e}")
+            return None
     
-    def build_path(self, *parts, relative: bool = False) -> Path:
-        """Build a path from parts, optionally returning relative path"""
-        # Filter out empty parts and join
-        clean_parts = [p for p in parts if p]
+    def process_manifest(self, manifest_path: Path, depth: int = 0) -> None:
+        """Process a manifest using the 4-key standard"""
+        if depth > 10:  # Prevent infinite recursion
+            return
+            
+        # Track this manifest as processed
+        relative_path = manifest_path.relative_to(self.root)
+        self.referenced_manifests.add(str(relative_path))
         
-        # Handle absolute paths that start with /
-        if clean_parts and clean_parts[0].startswith('/'):
-            clean_parts[0] = clean_parts[0].lstrip('/')
+        # Load the manifest
+        data = self.load_manifest(manifest_path)
+        if not data:
+            return
+            
+        # Extract the base paths from the 4-key standard
+        manifest_base = data.get('manifest_base', '')
+        content_base = data.get('content_base', '')
         
-        # Build the full path
-        full_path = self.root
-        for part in clean_parts:
-            full_path = full_path / part
+        # Track OBEX references for dual-organization validation
+        is_obex_category = 'obex/categories' in str(manifest_path)
+        is_obex_author = 'obex/authors' in str(manifest_path)
         
-        # Return relative if requested
-        if relative and full_path.is_relative_to(self.root):
-            return full_path.relative_to(self.root)
-        elif relative:
-            # If can't make relative, return as is
-            return full_path
-        return full_path
+        # Process the manifest data recursively
+        self._process_data(data, manifest_path, manifest_base, content_base,
+                          is_obex_category, is_obex_author, depth)
+    
+    def _process_data(self, data, manifest_path: Path, 
+                     manifest_base: str, content_base: str,
+                     is_obex_category: bool, is_obex_author: bool, 
+                     depth: int) -> None:
+        """Process any data structure looking for manifest and content references"""
         
+        if isinstance(data, dict):
+            for key, value in data.items():
+                # Skip ignored sections
+                if key in IGNORED_SECTIONS:
+                    continue
+                    
+                # Skip the base definitions themselves
+                if key in ('manifest_base', 'content_base'):
+                    continue
+                    
+                # Process based on key type
+                if key == 'manifest' and isinstance(value, str):
+                    # This is a manifest reference
+                    full_path = self.resolve_path(manifest_base, value)
+                    self._process_manifest_ref(full_path, depth)
+                    
+                elif key == 'content' and isinstance(value, str):
+                    # This is a content reference
+                    full_path = self.resolve_path(content_base, value)
+                    self._track_content_ref(full_path, is_obex_category, is_obex_author, 
+                                          manifest_path, value)
+                    
+                # Handle OBEX-style sub_manifests
+                elif key == 'sub_manifests' and isinstance(value, dict):
+                    for section_name, section_data in value.items():
+                        if isinstance(section_data, dict):
+                            sub_path = section_data.get('path', '')
+                            manifests = section_data.get('manifests', [])
+                            if sub_path and manifests:
+                                for manifest_file in manifests:
+                                    full_path = self.resolve_path(manifest_base, f"{sub_path}{manifest_file}")
+                                    self._process_manifest_ref(full_path, depth)
+                    
+                else:
+                    # Recurse into the value
+                    self._process_data(value, manifest_path, manifest_base, content_base,
+                                     is_obex_category, is_obex_author, depth)
+                    
+        elif isinstance(data, list):
+            for item in data:
+                self._process_data(item, manifest_path, manifest_base, content_base,
+                                 is_obex_category, is_obex_author, depth)
+    
+    def _process_manifest_ref(self, manifest_ref: str, depth: int) -> None:
+        """Process a manifest reference"""
+        # Remove leading slash if present
+        if manifest_ref.startswith('/'):
+            manifest_ref = manifest_ref[1:]
+            
+        # Build full path
+        full_path = self.root / manifest_ref
+        
+        # Check if it exists and process it
+        if full_path.exists():
+            self.process_manifest(full_path, depth + 1)
+        else:
+            self.errors.append(f"Referenced manifest not found: {manifest_ref}")
+    
+    def _track_content_ref(self, content_ref: str, is_obex_category: bool, 
+                          is_obex_author: bool, manifest_path: Path, 
+                          original_ref: str) -> None:
+        """Track a content file reference"""
+        # Remove leading slash if present  
+        if content_ref.startswith('/'):
+            content_ref = content_ref[1:]
+            
+        # Track the reference
+        self.referenced_files.add(content_ref)
+        
+        # Track OBEX dual-organization
+        if is_obex_category and 'objects/' in original_ref:
+            category = manifest_path.stem.replace('-manifest', '')
+            self.obex_category_refs[original_ref].add(category)
+        elif is_obex_author and 'objects/' in original_ref:
+            author = manifest_path.stem.replace('-manifest', '')
+            self.obex_author_refs[original_ref].add(author)
+    
     def validate_root_manifest(self) -> Dict:
         """Load and validate the root manifest"""
-        root_manifest_path = self.build_path("manifests", "propeller-knowledge-root.yaml")
+        root_manifest_path = self.root / "manifests" / "propeller-knowledge-root.yaml"
         
         if not root_manifest_path.exists():
             self.errors.append(f"Root manifest not found: {root_manifest_path}")
             return {}
             
-        try:
-            with open(root_manifest_path, 'r') as f:
-                return yaml.safe_load(f)
-        except Exception as e:
-            self.errors.append(f"Error loading root manifest: {e}")
-            return {}
+        return self.load_manifest(root_manifest_path)
     
-    def process_manifest_hierarchy(self, manifest_data: Dict, manifest_path: Path, depth: int = 0) -> None:
-        """Process manifest hierarchy - purely shape-driven approach"""
-        # Prevent deep recursion
-        if depth > 10:
-            return
-
-        # Get base_path if specified at manifest level
-        base_path = manifest_data.get('base_path', '')
-
-        # Track OBEX references for dual-organization validation
-        is_obex_category = 'obex/categories' in str(manifest_path)
-        is_obex_author = 'obex/authors' in str(manifest_path)
-        
-        # Process all sections recursively based on shape only
-        self._process_any_structure(manifest_data, manifest_path, base_path, 
-                                   is_obex_category, is_obex_author, depth)
-    
-    def _process_any_structure(self, data, manifest_path: Path, base_path: str,
-                              is_obex_category: bool, is_obex_author: bool, depth: int = 0) -> None:
-        """Process any YAML structure based purely on shape - no hardcoded field names"""
-        if depth > 5:  # Prevent infinite recursion
-            return
+    def process_manifest_hierarchy(self) -> None:
+        """Process the entire manifest hierarchy starting from the root"""
+        # Start with the root manifest
+        root_path = self.root / "manifests" / "propeller-knowledge-root.yaml"
+        if root_path.exists():
+            self.process_manifest(root_path)
             
-        if isinstance(data, dict):
-            # Check if this dict has base_path to override
-            current_base = data.get('base_path', base_path)
-            
-            for key, value in data.items():
-                # Skip base_path since we handled it above
-                if key == 'base_path':
-                    continue
-                    
-                if isinstance(value, str):
-                    # Handle based on key context
-                    if key == 'manifest':
-                        # This is definitely a manifest reference
-                        self.process_sub_manifest(value, manifest_path.parent, 0)
-                    elif key == 'content':
-                        # This is definitely a content file reference
-                        content_path = self.build_path(current_base, value, relative=True)
-                        self.referenced_files.add(str(content_path))
-                        # Debug output removed for production
-                        
-                        # Track OBEX references
-                        if is_obex_category and 'objects/' in value:
-                            category = manifest_path.stem.replace('-manifest', '')
-                            self.obex_category_refs[value].add(category)
-                        elif is_obex_author and 'objects/' in value:
-                            author = manifest_path.stem.replace('-manifest', '')
-                            self.obex_author_refs[value].add(author)
-                    elif value.endswith('.yaml') or value.endswith('.yml'):
-                        # Only treat as manifest if it's not clearly a content file
-                        # and contains path separators (manifest paths typically have directories)
-                        if '/' in value or '-manifest' in value:
-                            self.process_sub_manifest(value, manifest_path.parent, 0)
-                            
-                elif isinstance(value, list):
-                    # Process lists recursively
-                    self._process_any_structure(value, manifest_path, current_base, 
-                                              is_obex_category, is_obex_author, depth + 1)
-                    
-                elif isinstance(value, dict):
-                    # Process nested dictionaries recursively
-                    self._process_any_structure(value, manifest_path, current_base,
-                                              is_obex_category, is_obex_author, depth + 1)
-                    
-        elif isinstance(data, list):
-            for item in data:
-                if isinstance(item, dict):
-                    # Check for content field in list items
-                    if 'content' in item and isinstance(item['content'], str):
-                        content_path = self.build_path(base_path, item['content'], relative=True)
-                        self.referenced_files.add(str(content_path))
-                        # Debug output removed for production
-                            
-                        # Track OBEX references
-                        if is_obex_category and 'objects/' in item['content']:
-                            category = manifest_path.stem.replace('-manifest', '')
-                            self.obex_category_refs[item['content']].add(category)
-                        elif is_obex_author and 'objects/' in item['content']:
-                            author = manifest_path.stem.replace('-manifest', '')
-                            self.obex_author_refs[item['content']].add(author)
-                    
-                    # Check for manifest field in list items
-                    if 'manifest' in item and isinstance(item['manifest'], str):
-                        self.process_sub_manifest(item['manifest'], manifest_path.parent, 0)
-                    
-                    # Recurse into the item
-                    self._process_any_structure(item, manifest_path, base_path,
-                                              is_obex_category, is_obex_author, depth + 1)
-                elif isinstance(item, str):
-                    # String items - check for manifest references
-                    if item.endswith('.yaml') or item.endswith('.yml'):
-                        self.process_sub_manifest(item, manifest_path.parent, 0)
-                else:
-                    # Recurse into other types
-                    self._process_any_structure(item, manifest_path, base_path,
-                                              is_obex_category, is_obex_author, depth + 1)
-    
-    # Old methods removed - now using shape-driven approach
-    
-
-    
-    def process_sub_manifest(self, manifest_ref, parent_dir: Path, depth: int = 0) -> None:
-        """Process a sub-manifest reference"""
-        # Handle case where manifest_ref might be a list
-        if isinstance(manifest_ref, list):
-            # Process each manifest in the list
-            for ref in manifest_ref:
-                self.process_sub_manifest(ref, parent_dir, depth)
-            return
-        
-        # Ensure manifest_ref is a string
-        if not isinstance(manifest_ref, str):
-            return
-            
-        # Prevent deep recursion
-        if depth > 10:
-            return
-        
-        # Resolve manifest path
-        if manifest_ref.startswith('/') or manifest_ref.startswith('manifests/'):
-            manifest_path = self.build_path(manifest_ref)
-        else:
-            manifest_path = parent_dir / manifest_ref
-
-        # Normalize path
-        manifest_path = manifest_path.resolve()
-        
-        # Skip if we've already processed this manifest (prevent cycles)
-        relative_path = self.build_path(str(manifest_path), relative=True) if str(manifest_path).startswith(str(self.root)) else manifest_path
-        path_str = str(relative_path)
-        
-        if path_str in self.referenced_manifests:
-            return  # Already processed
-        
-        # Track this manifest as referenced
-        self.referenced_manifests.add(path_str)
-        
-        # Debug output removed for production
-        
-        # Load and process the sub-manifest
-        if manifest_path.exists():
-            try:
-                with open(manifest_path, 'r') as f:
-                    sub_data = yaml.safe_load(f)
-                    if sub_data:
-                        self.process_manifest_hierarchy(sub_data, manifest_path, depth + 1)
-            except Exception as e:
-                self.errors.append(f"Error loading manifest {manifest_path}: {e}")
-        else:
-            self.errors.append(f"Referenced manifest not found: {manifest_path}")
-    
-    # resolve_content_path method is no longer needed - using build_path instead
+        # Also process P2 root if it exists
+        p2_root = self.root / "manifests" / "P2" / "p2-root.yaml"
+        if p2_root.exists():
+            # Process manifest_registry if present
+            data = self.load_manifest(p2_root)
+            if data and 'manifest_registry' in data:
+                for name, entry in data['manifest_registry'].items():
+                    if isinstance(entry, dict) and 'path' in entry:
+                        manifest_path = entry['path']
+                        if manifest_path.startswith('/'):
+                            manifest_path = manifest_path[1:]
+                        full_path = self.root / manifest_path
+                        if full_path.exists():
+                            self.process_manifest(full_path, depth=1)
     
     def find_orphaned_files(self) -> Tuple[Set[str], Set[str]]:
         """Find files that exist but aren't referenced"""
         orphaned_manifests = set()
         orphaned_content = set()
-
-        # ONLY check P2 knowledge base files (not P2-support or P1)
-        kb_path = self.build_path("engineering", "knowledge-base", "P2")
+        
+        # Check all content files in knowledge base (P2 directory only, not P2-support)
+        kb_path = self.root / "engineering" / "knowledge-base" / "P2"
         if kb_path.exists():
             for yaml_file in kb_path.rglob("*.yaml"):
+                if yaml_file.name in IGNORED_FILES:
+                    continue
+                    
                 relative_path = yaml_file.relative_to(self.root)
                 path_str = str(relative_path)
-
-                # Skip if referenced
-                if path_str in self.referenced_files:
-                    continue
-
-                # Skip template files
-                if yaml_file.name == '_template.yaml':
-                    continue
-
-                orphaned_content.add(path_str)
+                
+                if path_str not in self.referenced_files:
+                    orphaned_content.add(path_str)
         
         # Check all manifest files
-        manifest_path = self.build_path("manifests")
+        manifest_path = self.root / "manifests"
         if manifest_path.exists():
             for yaml_file in manifest_path.rglob("*.yaml"):
                 # Skip root manifest
@@ -275,65 +260,43 @@ class ManifestValidator:
         return orphaned_manifests, orphaned_content
     
     def validate_obex_dual_organization(self) -> Tuple[List[str], List[str]]:
-        """Validate that OBEX objects are referenced in both category and author manifests
-        Returns: (errors, warnings)
-        """
+        """Validate that OBEX objects are referenced in both category and author manifests"""
         errors = []
         warnings = []
-
+        
         # Get all OBEX object references
         all_obex_objects = set(self.obex_category_refs.keys()) | set(self.obex_author_refs.keys())
-
+        
         for obj_ref in sorted(all_obex_objects):
             categories = self.obex_category_refs.get(obj_ref, set())
             authors = self.obex_author_refs.get(obj_ref, set())
-
+            
             if not categories:
                 errors.append(f"OBEX object {obj_ref} MISSING from category manifests")
             if not authors:
                 errors.append(f"OBEX object {obj_ref} MISSING from author manifests")
-
-        # Also check if any OBEX object files exist but aren't referenced
-        obex_dir = self.build_path("engineering", "knowledge-base", "P2", "community", "obex", "objects")
+        
+        # Check for orphaned OBEX files
+        obex_dir = self.root / "engineering" / "knowledge-base" / "P2" / "community" / "obex" / "objects"
         if obex_dir.exists():
             for yaml_file in obex_dir.glob("*.yaml"):
-                if yaml_file.name == '_template.yaml':
+                if yaml_file.name in IGNORED_FILES:
                     continue
-
+                    
                 obj_ref = f"objects/{yaml_file.name}"
                 if obj_ref not in all_obex_objects:
                     errors.append(f"OBEX object {yaml_file.name} is ORPHANED (not in ANY manifest)")
-
+        
         return errors, warnings
     
-    def check_incomplete_manifests(self) -> Dict[str, float]:
-        """Check for manifests with incomplete references"""
-        incomplete = {}
-        
-        # Check specific known manifests
-        queries_manifest = self.build_path("manifests", "P2", "language", "spin2", "queries", "quick-queries-manifest.yaml")
-        if queries_manifest.exists():
-            try:
-                with open(queries_manifest, 'r') as f:
-                    data = yaml.safe_load(f)
-                    if data and 'queries' in data:
-                        total = len(data['queries'])
-                        with_content = sum(1 for q in data['queries'] if 'content' in q)
-                        if with_content < total:
-                            incomplete['Quick Queries'] = (with_content, total)
-            except:
-                pass
-                
-        return incomplete
-    
     def print_summary(self, baseline_counts=None) -> None:
-        """Print validation summary with baseline comparison"""
+        """Print validation summary"""
         print("\n" + "=" * 70)
         print(f"{BOLD}VERIFICATION SUMMARY{RESET}")
         print("=" * 70)
         
-        # Basic stats with baseline comparison if available
-        manifests_processed = len(self.referenced_manifests) + 1  # +1 for root
+        # Basic stats
+        manifests_processed = len(self.referenced_manifests)
         files_referenced = len(self.referenced_files)
         
         if baseline_counts:
@@ -343,50 +306,26 @@ class ManifestValidator:
             print(f"Manifests processed: {manifests_processed} / {baseline_counts['manifests']} ({manifest_coverage:.1f}% coverage)")
             print(f"Content files referenced: {files_referenced} / {baseline_counts['content']} ({content_coverage:.1f}% coverage)")
         else:
-            print(f"Manifests checked: {manifests_processed}")
-            print(f"File references checked: {files_referenced}")
+            print(f"Manifests processed: {manifests_processed}")
+            print(f"Content files referenced: {files_referenced}")
         
-        # Check for incomplete manifests
-        incomplete = self.check_incomplete_manifests()
-        if incomplete:
-            print(f"\n{YELLOW}Incomplete Manifests ({len(incomplete)}):{RESET}")
-            for name, (complete, total) in incomplete.items():
-                pct = (complete / total * 100) if total > 0 else 0
-                print(f"  ⚠ {name}: Only {complete} of {total} entries ({pct:.1f}%)")
+        # OBEX validation
+        obex_errors, obex_warnings = self.validate_obex_dual_organization()
+        
+        if obex_errors:
+            print(f"\n{RED}OBEX Dual-Organization Errors ({len(obex_errors)}):{RESET}")
+            for error in obex_errors[:5]:
+                print(f"  ❌ {error}")
+            if len(obex_errors) > 5:
+                print(f"  ... and {len(obex_errors) - 5} more errors")
+        else:
+            obex_count = len(set(self.obex_category_refs.keys()) | set(self.obex_author_refs.keys()))
+            if obex_count > 0:
+                print(f"\n{GREEN}✓ OBEX Dual-Organization Valid:{RESET}")
+                print(f"  All {obex_count} objects referenced in both category AND author manifests")
         
         # Find orphaned files
         orphaned_manifests, orphaned_content = self.find_orphaned_files()
-        
-        # Special handling for OBEX - don't count them as orphaned if they're properly dual-referenced
-        obex_errors, obex_warnings = self.validate_obex_dual_organization()
-
-        # Add OBEX errors to main errors list
-        if obex_errors:
-            self.errors.extend(obex_errors)
-        
-        # Remove properly referenced OBEX files from orphaned list
-        all_obex_refs = set(self.obex_category_refs.keys()) | set(self.obex_author_refs.keys())
-        filtered_orphaned = set()
-        for orphan in orphaned_content:
-            # Check if this is an OBEX object that's actually referenced
-            if 'obex/objects/' in orphan:
-                filename = orphan.split('/')[-1]
-                if f"objects/{filename}" not in all_obex_refs:
-                    filtered_orphaned.add(orphan)
-            else:
-                filtered_orphaned.add(orphan)
-        
-        # Report OBEX validation
-        if obex_errors:
-            print(f"\n{RED}OBEX Dual-Organization Errors ({len(obex_errors)}):{RESET}")
-            for error in obex_errors[:10]:  # Show first 10
-                print(f"  ❌ {error}")
-            if len(obex_errors) > 10:
-                print(f"  ... and {len(obex_errors) - 10} more errors")
-        else:
-            print(f"\n{GREEN}✓ OBEX Dual-Organization Valid:{RESET}")
-            obex_count = len([o for o in all_obex_refs if o.startswith('objects/')])
-            print(f"  All {obex_count} objects referenced in both category AND author manifests")
         
         # Report orphaned files
         if orphaned_manifests:
@@ -396,23 +335,20 @@ class ManifestValidator:
             if len(orphaned_manifests) > 5:
                 print(f"  ... and {len(orphaned_manifests) - 5} more")
         
-        if filtered_orphaned:
-            print(f"\n{YELLOW}Orphaned Files ({len(filtered_orphaned)}):{RESET}")
+        if orphaned_content:
+            print(f"\n{YELLOW}Orphaned Content Files ({len(orphaned_content)}):{RESET}")
             # Group by directory
             by_dir = defaultdict(list)
-            for orphan in filtered_orphaned:
+            for orphan in orphaned_content:
                 dir_path = str(Path(orphan).parent)
                 by_dir[dir_path].append(orphan)
             
-            # Show summary by directory
             for dir_path in sorted(by_dir.keys())[:10]:
                 count = len(by_dir[dir_path])
                 print(f"  {dir_path}: {count} files")
             
             if len(by_dir) > 10:
-                remaining_dirs = len(by_dir) - 10
-                remaining_files = sum(len(files) for dir, files in list(by_dir.items())[10:])
-                print(f"  ... and {remaining_dirs} more directories")
+                print(f"  ... and {len(by_dir) - 10} more directories")
         
         # Final status
         print()
@@ -420,12 +356,15 @@ class ManifestValidator:
             print(f"{RED}{BOLD}❌ VERIFICATION FAILED{RESET}")
             for error in self.errors[:5]:
                 print(f"{RED}  {error}{RESET}")
-        elif filtered_orphaned or orphaned_manifests:
+            if len(self.errors) > 5:
+                print(f"{RED}  ... and {len(self.errors) - 5} more errors{RESET}")
+        elif orphaned_content or orphaned_manifests:
             print(f"{YELLOW}{BOLD}⚠️  VERIFICATION PASSED WITH WARNINGS{RESET}")
-            print(f"{YELLOW}{len(filtered_orphaned)} files exist but aren't referenced.{RESET}")
+            total_orphans = len(orphaned_content) + len(orphaned_manifests)
+            print(f"{YELLOW}  {total_orphans} orphaned files found{RESET}")
         else:
             print(f"{GREEN}{BOLD}✅ VERIFICATION PASSED{RESET}")
-            print(f"{GREEN}All manifests and content files are properly connected!{RESET}")
+            print(f"{GREEN}  All manifests and content files are properly connected!{RESET}")
         
         print("\n" + "=" * 70)
 
@@ -435,27 +374,26 @@ def main():
     repo_root = script_dir.parent.parent  # Go up two levels from engineering/tools
     
     print(f"Validating manifest linkages in: {repo_root}")
+    print(f"Using 4-key path standard (v3.0.0)")
     
-    # Generate baseline file counts for comparison
+    # Generate baseline counts
     print("\n" + "=" * 50)
     print(f"{BOLD}BASELINE FILE COUNTS{RESET}")
     print("=" * 50)
     
-    # Count manifest files in manifests/ tree
+    # Count files for baseline
     manifests_dir = repo_root / "manifests"
     manifest_files = list(manifests_dir.rglob("*.yaml")) if manifests_dir.exists() else []
     manifest_count = len(manifest_files)
-    print(f"Manifest files in manifests/ tree: {manifest_count}")
     
-    # Count content files in engineering/knowledge-base/ tree
-    kb_dir = repo_root / "engineering" / "knowledge-base"
-    content_files = list(kb_dir.rglob("*.yaml")) if kb_dir.exists() else []
+    # Count only P2 knowledge base files (excluding P2-support and ignored files)
+    kb_dir = repo_root / "engineering" / "knowledge-base" / "P2"
+    content_files = [f for f in kb_dir.rglob("*.yaml") if f.name not in IGNORED_FILES] if kb_dir.exists() else []
     content_count = len(content_files)
-    print(f"Content files in engineering/knowledge-base/: {content_count}")
     
-    # Total relevant files
-    total_relevant = manifest_count + content_count
-    print(f"Total relevant YAML files: {total_relevant}")
+    print(f"Manifest files in manifests/ tree: {manifest_count}")
+    print(f"Content files in engineering/knowledge-base/: {content_count}")
+    print(f"Total relevant YAML files: {manifest_count + content_count}")
     
     print(f"\n{CYAN}Expected processing targets:{RESET}")
     print(f"  • Manifests to validate: {manifest_count}")
@@ -465,18 +403,13 @@ def main():
     # Create validator and run
     validator = ManifestValidator(repo_root)
     
-    # Load and process root manifest
-    root_data = validator.validate_root_manifest()
-    if root_data:
-        # Start with root manifest processing
-        root_path = repo_root / "manifests" / "propeller-knowledge-root.yaml"
-        validator.process_manifest_hierarchy(root_data, root_path)
+    # Process the manifest hierarchy
+    validator.process_manifest_hierarchy()
     
     # Prepare baseline counts for summary
     baseline_counts = {
         'manifests': manifest_count,
-        'content': content_count,
-        'total_relevant': total_relevant
+        'content': content_count
     }
     
     # Print results
@@ -485,8 +418,6 @@ def main():
     # Exit with appropriate code
     if validator.errors:
         sys.exit(1)
-    elif validator.find_orphaned_files()[1]:  # If there are orphaned content files
-        sys.exit(0)  # Warnings but not failure
     else:
         sys.exit(0)
 

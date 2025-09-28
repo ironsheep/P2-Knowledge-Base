@@ -7,7 +7,7 @@ description: 'Logical true constant
   All bits set to represent boolean true condition
 
   '
-category: Numeric Constant
+category: Constants
 documentation_level: complete
 usage: 'Use in conditional logic and boolean operations
 

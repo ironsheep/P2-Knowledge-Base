@@ -4,8 +4,8 @@ encoding: EEEE 1101011 CZ1 000000000 000101110
 timing:
   cycles: 1
   type: fixed
-description: Return by reading hub long (L) at --PTRA. C = L[31], Z = L[30], PC = L[19:0].                                             11...18
-  1 / 20...40
+description: Return by reading hub long (L) at --PTRA. C = L[31], Z = L[30], PC =
+  L[19:0].                                             11...18 1 / 20...40
 flags_affected:
   C:
     formula: L[31], Z = L[30], PC = L[19:0]
@@ -24,5 +24,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - RETA {WC/WZ/WCZ}
 last_updated: '2025-09-19T16:04:17.322469'
-category: control_flow
+category: Branch
 oneliner: Return by reading hub long (L) at --PTRA

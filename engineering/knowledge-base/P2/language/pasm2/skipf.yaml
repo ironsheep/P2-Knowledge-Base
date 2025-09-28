@@ -1,10 +1,11 @@
 instruction: SKIPF
-syntax: "SKIPF\_\_ {#}D"
+syntax: SKIPF   {#}D
 encoding: EEEE 1101011 00L DDDDDDDDD 000110010
 timing:
   cycles: 2
   type: fixed
-description: Skip cog/LUT instructions fast per D. Like SKIP, but instead of cancelling instructions, the PC leaps over them.
+description: Skip cog/LUT instructions fast per D. Like SKIP, but instead of cancelling
+  instructions, the PC leaps over them.
 documentation_source: original
 documentation_level: enhanced
 compiler_operand_format:
@@ -16,5 +17,5 @@ compiler_encoding:
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.587570'
-category: control_flow
+category: Branch
 oneliner: Jump+Skip

@@ -1,26 +1,40 @@
 instruction: GETNIB
 syntax: 'GETNIB Dest, {#}Src, #Num'
 encoding:
-- "EEEE 100001N NNI DDDDDDDDD SSSSSSSSS                  D                --                  --                 \
-  \   2"
-- "EEEE 1000010 000 DDDDDDDDD 000000000                  D                --                  --                 \
-  \   2"
+- EEEE 100001N NNI DDDDDDDDD SSSSSSSSS                  D                --                  --                    2
+- EEEE 1000010 000 DDDDDDDDD 000000000                  D                --                  --                    2
 timing:
   cycles: 2
   type: fixed
-description: "GETNIB reads the nibble identified by Num (0-7) from Src, or a nibble from the source described by a prior\
-  \ ALTGN Result: Nibble Num (0-7) of Src, or a nibble from a source described by prior ALTGN instruction, is written\
-  \ to Dest.\n\nGETNIB reads the nibble identified by Num (0-7) from Src, or a nibble from the source described by\
-  \ a prior ALTGN\n\ninstruction.\n\nNum (0-7) identifies a value's individual nibbles, by position, in least-signifi\
-  cant nibble order.\n\nSyntax 2 is intended for use after an ALTGN instruction; i.e. in a loop to iteratively read a series\
-  \ of nibble values\n\nwithin contiguous long registers."
+description: 'GETNIB reads the nibble identified by Num (0-7) from Src, or a nibble
+  from the source described by a prior ALTGN Result: Nibble Num (0-7) of Src, or a
+  nibble from a source described by prior ALTGN instruction, is written to Dest.
+
+
+  GETNIB reads the nibble identified by Num (0-7) from Src, or a nibble from the source
+  described by a prior ALTGN
+
+
+  instruction.
+
+
+  Num (0-7) identifies a value''s individual nibbles, by position, in least-significant
+  nibble order.
+
+
+  Syntax 2 is intended for use after an ALTGN instruction; i.e. in a loop to iteratively
+  read a series of nibble values
+
+
+  within contiguous long registers.'
 flags_affected:
   C:
     when: D
 parameters:
 - Dest is the register in which to store the nibble.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains the target nibble to read.
-- "Num is a 3-bit literal identifying the nibble ID (0-7) of Src to read."
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains
+  the target nibble to read.
+- Num is a 3-bit literal identifying the nibble ID (0-7) of Src to read.
 related:
 - ALTGN
 - GETBYTE
@@ -43,8 +57,9 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Get nibble
-category: bit_manipulation
-result: "Nibble Num (0-7) of Src, or a nibble from a source described by prior ALTGN instruction, is written to Dest."
+category: Math and Logic
+result: Nibble Num (0-7) of Src, or a nibble from a source described by prior ALTGN
+  instruction, is written to Dest.
 syntax_variants:
 - 'GETNIB Dest, {#}Src, #Num'
 - GETNIB Dest

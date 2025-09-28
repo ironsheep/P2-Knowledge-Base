@@ -1,3 +1,9 @@
+# Architecture Manifest
+# Using 4-key path standard
+
+manifest_base: "/manifests/P2"
+content_base: "/engineering/knowledge-base/P2/architecture"
+
 # P2 Architecture Manifest
 # Part of P2 Knowledge Base manifest hierarchy
 
@@ -5,7 +11,6 @@ version: "1.0"
 schema_version: "2024-12-30"
 last_updated: "2024-12-30T00:00:00Z"
 category: "p2_architecture"
-base_path: "engineering/knowledge-base/P2/architecture/"
 total_entries: 15
 
 description: |
@@ -43,19 +48,34 @@ by_category:
       - {name: "event_system", content: "event_system.yaml", desc: "Hardware event detection"}
   
   synchronization:
-    coordination:
+    locks_and_events:
       - {name: "locks", content: "locks.yaml", desc: "16 hardware semaphores"}
-      - {name: "cog_attention", content: "cog_attention.yaml", desc: "Lightweight COG signaling"}
-      - {name: "event_system", content: "event_system.yaml", desc: "Event-driven programming"}
-  
+      - {name: "multi_resource_management", content: "multi_resource_management.yaml", desc: "Managing shared resources"}
+
+  integration:
+    click_module:
+      - {name: "click_module_integration", content: "click_module_integration.yaml", desc: "Click module integration details"}
+
+  streaming:
+    data_streaming:
+      - {name: "streamer", content: "streamer.yaml", desc: "Hardware DMA/streaming engine"}
+
+  system_registers:
+    registers:
+      - {name: "complete_system_registers_index", content: "system-registers/complete-system-registers-index.yaml", desc: "Complete system register index"}
+      - {name: "dira_dirb_registers", content: "system-registers/dira-dirb-registers.yaml", desc: "Direction registers A and B"}
+      - {name: "ptra_register", content: "system-registers/ptra-register.yaml", desc: "PTRA register details"}
+
+  smart_pins:
+    overview:
+      - {name: "smart_pins", content: "smart_pins.yaml", desc: "Smart pin system overview"}
+      - {name: "smart_pin_patterns", content: "smart_pin_patterns.yaml", desc: "Common smart pin usage patterns"}
+
   io_subsystem:
-    smart_pins:
-      - {name: "smart_pins", content: "smart_pins.yaml", desc: "Overview of 64 smart pins"}
+    smart_pin_modes:
       - {name: "smart_pins/*", pattern: "smart-pins/smart-pin-*.yaml", desc: "32 individual modes"}
-    
     streaming:
       - {name: "streamer", content: "streamer.yaml", desc: "DMA streaming engine"}
-    
     timing:
       - {name: "io_pin_timing", content: "io_pin_timing.yaml", desc: "I/O timing characteristics"}
 
@@ -148,5 +168,5 @@ search_index:
 
 related_manifests:
   - "smart-pins-manifest.yaml"  # Detailed smart pin modes
-  - "pasm2-manifest.yaml"  # Instructions that use architecture
+  - "language/pasm2-manifest.yaml"  # Instructions that use architecture
   - "patterns-manifest.yaml"  # How to leverage architecture

@@ -1,18 +1,41 @@
 instruction: POLLCT2
 syntax: POLLCT1 {WC|WZ|WCZ}
 encoding:
-- "EEEE 1101011 CZ0 000000001 000100100                  --            CT1 Event           CT1 Event                 2"
-- "EEEE 1101011 CZ0 000000010 000100100                  --            CT2 Event           CT2 Event                 2"
-- "EEEE 1101011 CZ0 000000011 000100100                  --            CT3 Event           CT3 Event                 2"
+- EEEE 1101011 CZ0 000000001 000100100                  --            CT1 Event           CT1
+  Event                 2
+- EEEE 1101011 CZ0 000000010 000100100                  --            CT2 Event           CT2
+  Event                 2
+- EEEE 1101011 CZ0 000000011 000100100                  --            CT3 Event           CT3
+  Event                 2
 timing:
   cycles: 2
   type: fixed
-description: "Get CT2 event flag into C/Z, then clear it.\n\nPOLLCT1, POLLCT2, or POLLCT3 copies the state of the count 1,\
-  \ 2, or 3 event flag into C and/or Z and then clears\n\nthe flag (unless it's being set again by the event sensor).\n\
-  \nIf the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the corresponding\n\
-  \ncounter event flag prior to clearing it.\n\nThe counter 1, 2, or 3 event flag is set whenever the System Counter\
-  \ (CT) passes the value in the CT1, CT2, or CT3\n\nevent trigger register, respectively; i.e. MSB of (CT - CTx is 0). The\
-  \ counter event flags are cleared upon execution\n\nof the corresponding ADDCTx, POLLCTx, WAITCTx, JCTx, or JNCTx instructions."
+description: 'Get CT2 event flag into C/Z, then clear it.
+
+
+  POLLCT1, POLLCT2, or POLLCT3 copies the state of the count 1, 2, or 3 event flag
+  into C and/or Z and then clears
+
+
+  the flag (unless it''s being set again by the event sensor).
+
+
+  If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to
+  the state of the corresponding
+
+
+  counter event flag prior to clearing it.
+
+
+  The counter 1, 2, or 3 event flag is set whenever the System Counter (CT) passes
+  the value in the CT1, CT2, or CT3
+
+
+  event trigger register, respectively; i.e. MSB of (CT - CTx is 0). The counter event
+  flags are cleared upon execution
+
+
+  of the corresponding ADDCTx, POLLCTx, WAITCTx, JCTx, or JNCTx instructions.'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -39,14 +62,15 @@ specifics:
   counter_number: 2
   event_flag: CT2
 has_group_documentation: true
-category: timing_events
-result: "Counter event flag 1, 2, or 3 state is optionally copied into C and/or Z, then it is cleared."
+category: Event
+result: Counter event flag 1, 2, or 3 state is optionally copied into C and/or Z,
+  then it is cleared.
 parameters:
-- "WC, WZ, or WCZ are optional effects to update flags."
+- WC, WZ, or WCZ are optional effects to update flags.
 related:
 - ADDCTx
 - WAITCTx
 - JCTx
 - JNCTx
 manual_extraction_date: '2025-01-19'
-oneliner: "Retrieve and clear counter event 1/2/3 flag"
+oneliner: Retrieve and clear counter event 1/2/3 flag

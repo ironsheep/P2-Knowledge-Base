@@ -5,7 +5,7 @@ description: 'Declare long data in memory
   Stores 32-bit values at the current address
 
   '
-category: Assembly Directive
+category: Assembly Directives
 documentation_level: complete
 syntax: '[label] LONG value[, value...]'
 examples:

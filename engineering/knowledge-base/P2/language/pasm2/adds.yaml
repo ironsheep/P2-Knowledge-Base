@@ -1,23 +1,53 @@
 instruction: ADDS
 syntax: ADDS Dest, {#}Src {WC|WZ|WCZ}
-encoding: EEEE 0001010 CZI DDDDDDDDD SSSSSSSSS                    D           sign of (D + S)       Result = 0               2
+encoding: EEEE 0001010 CZI DDDDDDDDD SSSSSSSSS                    D           sign
+  of (D + S)       Result = 0               2
 timing:
   cycles: 2
   type: fixed
-description: "ADDS sums the two signed values of Dest and Src together and stores the result into the Dest register. If Src\
-  \ is a Result: Sum of signed Src and signed Dest is stored in Dest.\n\nADDS sums the two signed values of Dest and Src together\
-  \ and stores the result into the Dest register. If Src is a\n\n9-bit literal, its value is interpreted as positive (0-511;\
-  \ it is not sign-extended) -- use ##Value (or insert a prior\n\nAUGS instruction) for a 32-bit signed value; negative\
-  \ or positive.\n\nIf the WC or WCZ effect is specified, the C flag is set (1) if the summation results in a signed\
-  \ overflow (signed\n\ncarry), or is cleared (0) if no overflow.\n\nIf the WZ or WCZ effect is specified, the\
-  \ Z flag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it is\n\nnon-zero.\n\nTo add signed, multi-long\
-  \ values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as described\n\nin Adding Two Multi-Long Values."
+description: 'ADDS sums the two signed values of Dest and Src together and stores
+  the result into the Dest register. If Src is a Result: Sum of signed Src and signed
+  Dest is stored in Dest.
+
+
+  ADDS sums the two signed values of Dest and Src together and stores the result into
+  the Dest register. If Src is a
+
+
+  9-bit literal, its value is interpreted as positive (0-511; it is not sign-extended)
+  -- use ##Value (or insert a prior
+
+
+  AUGS instruction) for a 32-bit signed value; negative or positive.
+
+
+  If the WC or WCZ effect is specified, the C flag is set (1) if the summation results
+  in a signed overflow (signed
+
+
+  carry), or is cleared (0) if no overflow.
+
+
+  If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest
+  + Src is zero, or is cleared (0) if it is
+
+
+  non-zero.
+
+
+  To add signed, multi-long values, use ADD (not ADDS) followed possibly by ADDX,
+  and finally ADDSX as described
+
+
+  in Adding Two Multi-Long Values.'
 flags_affected:
   Z: Result = 0
 parameters:
-- Dest is a register containing the value to add Src to, and is where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
-- "WC, WZ, or WCZ are optional effects to update flags."
+- Dest is a register containing the value to add Src to, and is where the result is
+  written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added
+  into Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
 related:
 - ADD
 - ADDX
@@ -35,10 +65,11 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Add signed
-category: arithmetic
+category: Math and Logic
 result: Sum of signed Src and signed Dest is stored in Dest.
 syntax_variants:
 - ADDS Dest, {#}Src {WC|WZ|WCZ}
-- ADDS sums the two signed values of Dest and Src together and stores the result into the Dest register. If Src is a
+- ADDS sums the two signed values of Dest and Src together and stores the result into
+  the Dest register. If Src is a
 manual_extraction_date: '2025-01-19'
 oneliner: Add two signed values

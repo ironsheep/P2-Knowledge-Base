@@ -4,35 +4,68 @@ encoding: EEEE 1101001 0LI DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-description: "Perform 64\xF732 unsigned fractional division with D as upper 32 bits. Numerator formed from {D, SETQ value\
-  \ or 32'b0}, divided by S. Results retrieved via GETQX (quotient) and GETQY (remainder) instructions 55 clocks later."
-long_description: 'The QFRAC instruction performs fractional division using the P2''s 54-stage pipelined CORDIC solver. It
-  divides a 64-bit numerator by a 32-bit denominator, but differs from QDIV in the operand arrangement: D forms the upper
-  32 bits while SETQ (or 32''b0) forms the lower 32 bits.
+description: Perform 64÷32 unsigned fractional division with D as upper 32 bits. Numerator
+  formed from {D, SETQ value or 32'b0}, divided by S. Results retrieved via GETQX
+  (quotient) and GETQY (remainder) instructions 55 clocks later.
+long_description: 'The QFRAC instruction performs fractional division using the P2''s
+  54-stage pipelined CORDIC solver. It divides a 64-bit numerator by a 32-bit denominator,
+  but differs from QDIV in the operand arrangement: D forms the upper 32 bits while
+  SETQ (or 32''b0) forms the lower 32 bits.
 
 
-  The 64-bit numerator is formed by concatenating the D operand as the upper 32 bits with the SETQ value (or 32''b0 if SETQ
-  not used) as the lower 32 bits. This arrangement makes QFRAC particularly suitable for fractional arithmetic where the integer
-  part is in D and the fractional part is in SETQ.
+  The 64-bit numerator is formed by concatenating the D operand as the upper 32 bits
+  with the SETQ value (or 32''b0 if SETQ not used) as the lower 32 bits. This arrangement
+  makes QFRAC particularly suitable for fractional arithmetic where the integer part
+  is in D and the fractional part is in SETQ.
 
 
-  After 55 clocks, the quotient can be retrieved using GETQX and the remainder using GETQY. This instruction is essential
-  for fixed-point mathematics, fractional scaling operations, and algorithms where the dividend''s integer portion needs to
-  be preserved in the primary operand.
+  After 55 clocks, the quotient can be retrieved using GETQX and the remainder using
+  GETQY. This instruction is essential for fixed-point mathematics, fractional scaling
+  operations, and algorithms where the dividend''s integer portion needs to be preserved
+  in the primary operand.
 
 
-  The key difference from QDIV is the bit arrangement: QFRAC uses {D, SETQ} while QDIV uses {SETQ, D}, making QFRAC more natural
-  for fractional operations where D represents the whole number portion.
+  The key difference from QDIV is the bit arrangement: QFRAC uses {D, SETQ} while
+  QDIV uses {SETQ, D}, making QFRAC more natural for fractional operations where D
+  represents the whole number portion.
 
   '
 examples:
-- code: "' Fractional division: 5.75 \xF7 2 where 5.75 = {5, 0.75*2^32}\nSETQ    #$C0000000     ' 0.75 in 32-bit fraction\
-    \ format\nQFRAC   #5, #2         ' {5, 0.75} / 2 = 2.875\n' Wait 55 clocks...\nGETQX   quotient       ' Get integer quotient\n\
-    GETQY   remainder      ' Get fractional remainder\n"
+- code: ''' Fractional division: 5.75 ÷ 2 where 5.75 = {5, 0.75*2^32}
+
+    SETQ    #$C0000000     '' 0.75 in 32-bit fraction format
+
+    QFRAC   #5, #2         '' {5, 0.75} / 2 = 2.875
+
+    '' Wait 55 clocks...
+
+    GETQX   quotient       '' Get integer quotient
+
+    GETQY   remainder      '' Get fractional remainder
+
+    '
   description: Fractional number division
-- code: "' Fixed-point division: divide 16.16 fixed-point numbers\n' Example: 100.5 \xF7 3.25 in 16.16 format\nMOV     dividend_int,\
-    \ #100\nMOV     dividend_frac, #$8000  ' 0.5 in 16-bit fraction\nMOV     divisor, #$34000       ' 3.25 in 16.16 format\n\
-    SETQ    dividend_frac\nQFRAC   dividend_int, divisor\n' ... wait 55 clocks ...\nGETQX   result_quotient\nGETQY   result_remainder\n"
+- code: ''' Fixed-point division: divide 16.16 fixed-point numbers
+
+    '' Example: 100.5 ÷ 3.25 in 16.16 format
+
+    MOV     dividend_int, #100
+
+    MOV     dividend_frac, #$8000  '' 0.5 in 16-bit fraction
+
+    MOV     divisor, #$34000       '' 3.25 in 16.16 format
+
+    SETQ    dividend_frac
+
+    QFRAC   dividend_int, divisor
+
+    '' ... wait 55 clocks ...
+
+    GETQX   result_quotient
+
+    GETQY   result_remainder
+
+    '
   description: Fixed-point arithmetic division
 - code: ''' Simple fractional scaling without SETQ (D.0 format)
 
@@ -76,18 +109,21 @@ related_instructions:
 - QMUL
 operand_details:
   D: Upper 32 bits of 64-bit numerator (integer portion)
-  SETQ: Lower 32 bits of 64-bit numerator (fractional portion, optional, defaults to 0)
+  SETQ: Lower 32 bits of 64-bit numerator (fractional portion, optional, defaults
+    to 0)
   S: 32-bit denominator (divisor)
 result_details:
   GETQX: 32-bit quotient
   GETQY: 32-bit remainder
-timing_notes: Result available 55 clocks after instruction issue. Each cog can issue one CORDIC instruction per hub window
-  (every 8 clocks).
-usage_notes: QFRAC uses {D, SETQ} bit arrangement, opposite of QDIV's {SETQ, D}. Use SETQ before QFRAC to specify fractional
-  part. Without SETQ, lower 32 bits default to 0.
-applications: Fixed-point arithmetic, fractional scaling, percentage calculations, algorithms requiring integer.fraction dividend
-  format.
-key_difference: 'QFRAC: {D, SETQ} / S vs QDIV: {SETQ, D} / S - QFRAC puts integer part in primary operand D.'
+timing_notes: Result available 55 clocks after instruction issue. Each cog can issue
+  one CORDIC instruction per hub window (every 8 clocks).
+usage_notes: QFRAC uses {D, SETQ} bit arrangement, opposite of QDIV's {SETQ, D}. Use
+  SETQ before QFRAC to specify fractional part. Without SETQ, lower 32 bits default
+  to 0.
+applications: Fixed-point arithmetic, fractional scaling, percentage calculations,
+  algorithms requiring integer.fraction dividend format.
+key_difference: 'QFRAC: {D, SETQ} / S vs QDIV: {SETQ, D} / S - QFRAC puts integer
+  part in primary operand D.'
 documentation_source: p2_datasheet
 documentation_level: comprehensive
 compiler_operand_format:
@@ -99,5 +135,5 @@ compiler_encoding:
   operandFormat: 13
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.150939'
-category: cordic
-oneliner: "Perform 64\xF732 unsigned fractional division with D as upper 32 bits"
+category: CORDIC Solver
+oneliner: Perform 64÷32 unsigned fractional division with D as upper 32 bits

@@ -10,11 +10,12 @@ documentation_level: minimal
 compiler_operand_format:
   name: operand_loc
   pattern: D,#S{\}
-  description: 'Load address: destination register, immediate address (optional \ for absolute)'
+  description: 'Load address: destination register, immediate address (optional \
+    for absolute)'
   valueType: 22
 compiler_encoding:
   operandFormat: 22
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.549095'
-category: arithmetic
+category: Math and Logic
 oneliner: R = 1, address = PC + A, else address = A

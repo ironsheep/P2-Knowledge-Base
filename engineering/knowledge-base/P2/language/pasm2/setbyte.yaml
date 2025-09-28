@@ -1,25 +1,40 @@
 instruction: SETBYTE
 syntax: 'SETBYTE Dest, {#}Src, #Num'
 encoding:
-- "EEEE 1000110 NNI DDDDDDDDD SSSSSSSSS                      D                 --               --               \
-  \      2"
+- EEEE 1000110 NNI DDDDDDDDD SSSSSSSSS                      D                 --               --                     2
 - EEEE 1000110 00I 000000000 SSSSSSSSS                      D1
 timing:
   cycles: 2
   type: fixed
-description: "SETBYTE stores Src[7:0] into the byte identified by Num within Dest, or the byte and register described by a\
-  \ prior Result: Src[7:0] is written to byte Num (0-3) of Dest, or to another register byte described by prior ALTSB\
-  \ instruction.\n\nSETBYTE stores Src[7:0] into the byte identified by Num within Dest, or the byte and register described\
-  \ by a prior\n\nALTSB instruction. No other bits are modified.\n\nNum (0-3) identifies a value's individual\
-  \ bytes, by position, in least-significant byte order.\n\nSyntax 2 is intended for use after an ALTSB instruction; i.e.\
-  \ in a loop to iteratively affect a series of byte values\n\nwithin contiguous long registers."
+description: 'SETBYTE stores Src[7:0] into the byte identified by Num within Dest,
+  or the byte and register described by a prior Result: Src[7:0] is written to byte
+  Num (0-3) of Dest, or to another register byte described by prior ALTSB instruction.
+
+
+  SETBYTE stores Src[7:0] into the byte identified by Num within Dest, or the byte
+  and register described by a prior
+
+
+  ALTSB instruction. No other bits are modified.
+
+
+  Num (0-3) identifies a value''s individual bytes, by position, in least-significant
+  byte order.
+
+
+  Syntax 2 is intended for use after an ALTSB instruction; i.e. in a loop to iteratively
+  affect a series of byte values
+
+
+  within contiguous long registers.'
 flags_affected:
   C:
     when: D
 parameters:
 - Dest is the register in which to modify a byte.
-- Src is a register or 8-bit literal whose bits [7:0] will be stored in the designated location.
-- "Num is a 2-bit literal identifying the nibble ID (0-3) of Dest to modify."
+- Src is a register or 8-bit literal whose bits [7:0] will be stored in the designated
+  location.
+- Num is a 2-bit literal identifying the nibble ID (0-3) of Dest to modify.
 related:
 - ALTSB
 - SETNIB
@@ -42,11 +57,13 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Set byte
-category: bit_manipulation
-result: "Src[7:0] is written to byte Num (0-3) of Dest, or to another register byte described by prior ALTSB"
+category: Math and Logic
+result: Src[7:0] is written to byte Num (0-3) of Dest, or to another register byte
+  described by prior ALTSB
 syntax_variants:
 - 'SETBYTE Dest, {#}Src, #Num'
 - SETBYTE {#}Src
-- "SETBYTE stores Src[7:0] into the byte identified by Num within Dest, or the byte and register described by a prior"
+- SETBYTE stores Src[7:0] into the byte identified by Num within Dest, or the byte
+  and register described by a prior
 manual_extraction_date: '2025-01-19'
 oneliner: Set a byte to new value

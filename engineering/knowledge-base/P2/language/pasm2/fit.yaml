@@ -5,7 +5,7 @@ description: 'Verify that code fits within specified address limit
   Generates error if current address exceeds specified limit
 
   '
-category: Assembly Directive
+category: Assembly Directives
 documentation_level: complete
 syntax: FIT [address]
 examples:

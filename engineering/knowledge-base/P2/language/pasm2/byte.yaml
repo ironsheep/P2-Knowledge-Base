@@ -5,7 +5,7 @@ description: 'Declare byte data in memory
   Stores 8-bit values at the current address
 
   '
-category: Assembly Directive
+category: Assembly Directives
 documentation_level: complete
 syntax: '[label] BYTE value[, value...]'
 examples:

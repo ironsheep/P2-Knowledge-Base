@@ -1,26 +1,56 @@
 instruction: ADDX
 syntax: ADDX Dest, {#}Src {WC|WZ|WCZ}
-encoding: EEEE 0001001 CZI DDDDDDDDD SSSSSSSSS                   D          carry of (D+S+C) Z AND (Result = 0)            2
+encoding: EEEE 0001001 CZI DDDDDDDDD SSSSSSSSS                   D          carry
+  of (D+S+C) Z AND (Result = 0)            2
 timing:
   cycles: 2
   type: fixed
-description: "ADDX sums the unsigned values of Dest and Src plus C together and stores the result into the Dest register.\
-  \ The Result: Sum of unsigned Src plus C and unsigned Dest is stored in Dest.\n\nADDX sums the unsigned values of Dest and\
-  \ Src plus C together and stores the result into the Dest register. The\n\nADDX instruction is used to perform unsigned\
-  \ multi-long (extended) addition, such as 64-bit addition.\n\nIf the WC or WCZ effect is specified, the C flag is\
-  \ set (1) if the summation resulted in an unsigned carry, or is\n\ncleared (0) if no carry. Use WC or WCZ on preceding ADD\
-  \ and ADDX instructions for proper final C flag. If C is set\n\nafter the last ADDX in a multi-long addition, it\
-  \ indicates unsigned overflow.\n\nIf the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously\
-  \ set and the result of Dest + Src + C is\n\nzero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding ADD and\
-  \ ADDX instructions for proper final Z flag.\n\nTo add unsigned multi-long values, use ADD followed by one or more\
-  \ ADDX instructions as described in Adding\n\nTwo Multi-Long Values."
+description: 'ADDX sums the unsigned values of Dest and Src plus C together and stores
+  the result into the Dest register. The Result: Sum of unsigned Src plus C and unsigned
+  Dest is stored in Dest.
+
+
+  ADDX sums the unsigned values of Dest and Src plus C together and stores the result
+  into the Dest register. The
+
+
+  ADDX instruction is used to perform unsigned multi-long (extended) addition, such
+  as 64-bit addition.
+
+
+  If the WC or WCZ effect is specified, the C flag is set (1) if the summation resulted
+  in an unsigned carry, or is
+
+
+  cleared (0) if no carry. Use WC or WCZ on preceding ADD and ADDX instructions for
+  proper final C flag. If C is set
+
+
+  after the last ADDX in a multi-long addition, it indicates unsigned overflow.
+
+
+  If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously
+  set and the result of Dest + Src + C is
+
+
+  zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding ADD and ADDX
+  instructions for proper final Z flag.
+
+
+  To add unsigned multi-long values, use ADD followed by one or more ADDX instructions
+  as described in Adding
+
+
+  Two Multi-Long Values.'
 flags_affected:
   C: carry of (D+S+C)
   Z: (Result = 0)
 parameters:
-- Dest is a register containing the value to add Src pluc C to, and is where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is added into Dest.
-- "WC, WZ, or WCZ are optional effects to update flags."
+- Dest is a register containing the value to add Src pluc C to, and is where the result
+  is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C
+  is added into Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
 related:
 - ADD
 - ADDSX
@@ -37,14 +67,15 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Add extended
-category: arithmetic
+category: Math and Logic
 result: Sum of unsigned Src plus C and unsigned Dest is stored in Dest.
 syntax_variants:
 - ADDX Dest, {#}Src {WC|WZ|WCZ}
-- ADDX sums the unsigned values of Dest and Src plus C together and stores the result into the Dest register. The
-- "cleared (0) if no carry. Use WC or WCZ on preceding ADD and ADDX instructions for proper final C flag. If C is\
-  \ set"
-- "zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding ADD and ADDX instructions for proper final Z fl\
-  ag."
+- ADDX sums the unsigned values of Dest and Src plus C together and stores the result
+  into the Dest register. The
+- cleared (0) if no carry. Use WC or WCZ on preceding ADD and ADDX instructions for
+  proper final C flag. If C is set
+- zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding ADD and ADDX
+  instructions for proper final Z flag.
 manual_extraction_date: '2025-01-19'
 oneliner: Add two unsigned extended values

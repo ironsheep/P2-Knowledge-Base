@@ -1,3 +1,9 @@
+# Language Manifest
+# Using 4-key path standard
+
+manifest_base: "/manifests/P2/language"
+content_base: "/engineering/knowledge-base/P2/language"
+
 # P2 Language Documentation - Parent Manifest
 # Central hub for all P2 programming languages
 # Repository: https://github.com/ironsheep/P2-Knowledge-Base
@@ -6,7 +12,6 @@ version: "1.0"
 schema_version: "2024-12-30"
 last_updated: "2025-09-27T00:00:00Z"
 description: "P2 programming languages and fundamentals"
-base_path: "manifests/P2/language"
 
 metadata:
   repository: "https://github.com/ironsheep/P2-Knowledge-Base"

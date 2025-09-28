@@ -29,5 +29,5 @@ brief_description: Pop long from stack using PTRB
 parameters:
 - D is the destination register to receive the popped value
 - PTRB is automatically decremented before the read
-category: misc_ops
+category: Hub RAM
 oneliner: Read

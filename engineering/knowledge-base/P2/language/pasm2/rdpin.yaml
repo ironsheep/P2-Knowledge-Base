@@ -4,7 +4,8 @@ encoding: EEEE 1010100 C1I DDDDDDDDD SSSSSSSSS
 timing:
   cycles: 2
   type: fixed
-description: '{WC}   Read smart pin S[5:0] result "Z" into D, acknowledge smart pin. C = modal result.'
+description: '{WC}   Read smart pin S[5:0] result "Z" into D, acknowledge smart pin.
+  C = modal result.'
 flags_affected:
   C:
     formula: modal result
@@ -21,5 +22,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - RDPIN D,{#}S
 last_updated: '2025-09-19T16:04:17.127325'
-category: control_flow
+category: Smart Pin
 oneliner: '{WC} Read smart pin S[5:0] result "Z" into D, acknowledge smart pin'

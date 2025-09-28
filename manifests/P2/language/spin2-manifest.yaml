@@ -1,3 +1,9 @@
+# Spin2 Manifest
+# Using 4-key path standard
+
+manifest_base: "/manifests/P2/language"
+content_base: "/engineering/knowledge-base/P2/language/spin2"
+
 # Spin2 Language Manifest
 # Part of P2 Knowledge Base manifest hierarchy
 
@@ -5,8 +11,16 @@ version: "1.0"
 schema_version: "2024-12-30"
 last_updated: "2025-09-16T00:00:00Z"
 category: "spin2_language"
-base_path: "engineering/knowledge-base/P2/language/spin2/"
-total_entries: 249
+total_entries: 262
+
+# Core language files
+core_language:
+  schema:
+    content: "spin2-language-schema.yaml"
+    description: "Spin2 language structure schema"
+  complete_map:
+    content: "spin2-language-complete-map.yaml"
+    description: "Complete map of Spin2 language elements"
 
 path_construction_note: |
   TO ACCESS ANY FILE IN THIS MANIFEST:
@@ -343,10 +357,164 @@ special_topics:
   - {name: "builtin_symbols", content: "symbols/spin2-builtin-symbols-complete.yaml", desc: "Built-in constants"}
   - {name: "integration", content: "integration/spin2-pasm2-integration.yaml", desc: "Spin2/PASM2 integration"}
 
+assembly_directives:
+  description: "Directives for DAT blocks and inline assembly within Spin2 programs"
+  data_directives:
+    - {name: "byte", content: "assembly-directives/byte.yaml", desc: "Define byte data"}
+    - {name: "word", content: "assembly-directives/word.yaml", desc: "Define word data"}
+    - {name: "long", content: "assembly-directives/long.yaml", desc: "Define long data"}
+    - {name: "res", content: "assembly-directives/res.yaml", desc: "Reserve space"}
+
+  alignment_directives:
+    - {name: "alignl", content: "assembly-directives/alignl.yaml", desc: "Align to long boundary"}
+    - {name: "alignw", content: "assembly-directives/alignw.yaml", desc: "Align to word boundary"}
+
+  origin_directives:
+    - {name: "org", content: "assembly-directives/org.yaml", desc: "Set COG RAM origin"}
+    - {name: "orgf", content: "assembly-directives/orgf.yaml", desc: "Set fixed COG origin"}
+    - {name: "orgh", content: "assembly-directives/orgh.yaml", desc: "Set HUB RAM origin"}
+
+  misc_directives:
+    - {name: "fit", content: "assembly-directives/fit.yaml", desc: "Check size fits"}
+    - {name: "file", content: "assembly-directives/file.yaml", desc: "Include file data"}
+    - {name: "ditto", content: "assembly-directives/ditto.yaml", desc: "Repeat previous"}
+
+concepts:
+  description: "Advanced Spin2 programming concepts and paradigms"
+  programming_paradigms:
+    - {name: "inline_pasm2", content: "concepts/inline_pasm2.yaml", desc: "Embedding PASM2 assembly within Spin2 methods"}
+
 constants:
   - {name: "newtask", content: "constants/newtask.yaml", desc: "Constant for auto-assigning next task ID"}
   - {name: "thistask", content: "constants/thistask.yaml", desc: "Constant for referring to current task"}
   - {name: "configuration_symbols", content: "constants/special-configuration-symbols.yaml", desc: "Special CON symbols for system, debug, and clock configuration"}
+
+keywords:
+  description: "Spin2 language reserved keywords"
+  language_keywords:
+    - {name: "ABORT", content: "keywords/ABORT.yaml", desc: "Abort method execution"}
+    - {name: "BYTE", content: "keywords/BYTE.yaml", desc: "Byte data type/declaration"}
+    - {name: "BYTEFIT", content: "keywords/BYTEFIT.yaml", desc: "Check if value fits in byte"}
+    - {name: "CASE", content: "keywords/CASE.yaml", desc: "Multi-way branch"}
+    - {name: "CASE_FAST", content: "keywords/CASE_FAST.yaml", desc: "Fast case statement"}
+    - {name: "CON", content: "keywords/CON.yaml", desc: "Constant declaration block"}
+    - {name: "DAT", content: "keywords/DAT.yaml", desc: "Data declaration block"}
+    - {name: "ELSE", content: "keywords/ELSE.yaml", desc: "Else clause"}
+    - {name: "ELSEIF", content: "keywords/ELSEIF.yaml", desc: "Else-if clause"}
+    - {name: "ELSEIFNOT", content: "keywords/ELSEIFNOT.yaml", desc: "Else-if-not clause"}
+    - {name: "FILE", content: "keywords/FILE.yaml", desc: "Include file data"}
+    - {name: "FROM", content: "keywords/FROM.yaml", desc: "Range from value"}
+    - {name: "IF", content: "keywords/IF.yaml", desc: "Conditional execution"}
+    - {name: "IFNOT", content: "keywords/IFNOT.yaml", desc: "Conditional not execution"}
+    - {name: "LONG", content: "keywords/LONG.yaml", desc: "Long data type"}
+    - {name: "LOOKDOWN", content: "keywords/LOOKDOWN.yaml", desc: "Find index of value"}
+    - {name: "LOOKDOWNZ", content: "keywords/LOOKDOWNZ.yaml", desc: "Find zero-based index"}
+    - {name: "LOOKUP", content: "keywords/LOOKUP.yaml", desc: "Lookup value by index"}
+    - {name: "LOOKUPZ", content: "keywords/LOOKUPZ.yaml", desc: "Lookup zero-based"}
+    - {name: "NEXT", content: "keywords/NEXT.yaml", desc: "Continue to next iteration"}
+    - {name: "OBJ", content: "keywords/OBJ.yaml", desc: "Object declaration block"}
+    - {name: "OTHER", content: "keywords/OTHER.yaml", desc: "Other case option"}
+    - {name: "PRI", content: "keywords/PRI.yaml", desc: "Private method"}
+    - {name: "PUB", content: "keywords/PUB.yaml", desc: "Public method"}
+    - {name: "QUIT", content: "keywords/QUIT.yaml", desc: "Exit loop"}
+    - {name: "REPEAT", content: "keywords/REPEAT.yaml", desc: "Loop construct"}
+    - {name: "RETURN", content: "keywords/RETURN.yaml", desc: "Return from method"}
+    - {name: "STEP", content: "keywords/STEP.yaml", desc: "Loop step value"}
+    - {name: "STRING", content: "keywords/STRING.yaml", desc: "String literal"}
+    - {name: "TO", content: "keywords/TO.yaml", desc: "Range to value"}
+    - {name: "UNTIL", content: "keywords/UNTIL.yaml", desc: "Loop until condition"}
+    - {name: "VAR", content: "keywords/VAR.yaml", desc: "Variable declaration block"}
+    - {name: "WHILE", content: "keywords/WHILE.yaml", desc: "Loop while condition"}
+    - {name: "WITH", content: "keywords/WITH.yaml", desc: "With block context"}
+    - {name: "WORD", content: "keywords/WORD.yaml", desc: "Word data type"}
+    - {name: "WORDFIT", content: "keywords/WORDFIT.yaml", desc: "Check if value fits in word"}
+
+registers:
+  description: "Spin2 special registers and system variables"
+  system_registers:
+    - {name: "dira", content: "registers/dira.yaml", desc: "Direction register for pins 0-31"}
+    - {name: "dirb", content: "registers/dirb.yaml", desc: "Direction register for pins 32-63"}
+    - {name: "ina", content: "registers/ina.yaml", desc: "Input register for pins 0-31"}
+    - {name: "inb", content: "registers/inb.yaml", desc: "Input register for pins 32-63"}
+    - {name: "outa", content: "registers/outa.yaml", desc: "Output register for pins 0-31"}
+    - {name: "outb", content: "registers/outb.yaml", desc: "Output register for pins 32-63"}
+    - {name: "pa", content: "registers/pa.yaml", desc: "Pin A register"}
+    - {name: "pb", content: "registers/pb.yaml", desc: "Pin B register"}
+    - {name: "ptra", content: "registers/ptra.yaml", desc: "Pointer A register"}
+    - {name: "ptrb", content: "registers/ptrb.yaml", desc: "Pointer B register"}
+    - {name: "ijmp1", content: "registers/ijmp1.yaml", desc: "Interrupt jump 1"}
+    - {name: "ijmp2", content: "registers/ijmp2.yaml", desc: "Interrupt jump 2"}
+    - {name: "ijmp3", content: "registers/ijmp3.yaml", desc: "Interrupt jump 3"}
+    - {name: "iret1", content: "registers/iret1.yaml", desc: "Interrupt return 1"}
+    - {name: "iret2", content: "registers/iret2.yaml", desc: "Interrupt return 2"}
+    - {name: "iret3", content: "registers/iret3.yaml", desc: "Interrupt return 3"}
+    - {name: "pr0", content: "registers/pr0.yaml", desc: "Port register 0"}
+    - {name: "pr1", content: "registers/pr1.yaml", desc: "Port register 1"}
+    - {name: "pr2", content: "registers/pr2.yaml", desc: "Port register 2"}
+    - {name: "pr3", content: "registers/pr3.yaml", desc: "Port register 3"}
+    - {name: "pr4", content: "registers/pr4.yaml", desc: "Port register 4"}
+    - {name: "pr5", content: "registers/pr5.yaml", desc: "Port register 5"}
+    - {name: "pr6", content: "registers/pr6.yaml", desc: "Port register 6"}
+    - {name: "pr7", content: "registers/pr7.yaml", desc: "Port register 7"}
+    - {name: "taskhlt", content: "registers/taskhlt.yaml", desc: "Task halt register"}
+
+statements:
+  - name: DEBUG
+    content: statements/debug.yaml
+    desc: "Debug statement for debugging support"
+
+debug_displays:
+  - name: BITMAP
+    content: debug-displays/bitmap.yaml
+    desc: "Bitmap display for debugging"
+  - name: FFT
+    content: debug-displays/fft.yaml
+    desc: "FFT display for signal analysis"
+  - name: LOGIC
+    content: debug-displays/logic.yaml
+    desc: "Logic analyzer display"
+  - name: MIDI
+    content: debug-displays/midi.yaml
+    desc: "MIDI event display"
+  - name: PLOT
+    content: debug-displays/plot.yaml
+    desc: "Data plotting display"
+  - name: SCOPE
+    content: debug-displays/scope.yaml
+    desc: "Oscilloscope display"
+  - name: SPECTRO
+    content: debug-displays/spectro.yaml
+    desc: "Spectrogram display"
+  - name: TERM
+    content: debug-displays/term.yaml
+    desc: "Terminal display"
+
+system_variables:
+  - name: CLKFREQ
+    content: system-variables/clkfreq.yaml
+    desc: "System clock frequency"
+  - name: CLKMODE
+    content: system-variables/clkmode.yaml
+    desc: "System clock mode"
+  - name: VARBASE
+    content: system-variables/varbase.yaml
+    desc: "Variable base address"
+
+special_symbols:
+  description: "Spin2 special symbols and operators"
+  symbol_list:
+    - {name: ".", content: "special-symbols/..yaml", desc: "Current object reference"}
+    - {name: "^@", content: "special-symbols/^@.yaml", desc: "String address"}
+    - {name: "`", content: "special-symbols/`.yaml", desc: "Debug tick"}
+    - {name: "@", content: "special-symbols/at.yaml", desc: "Address of"}
+    - {name: "$", content: "special-symbols/dollar.yaml", desc: "Current address"}
+    - {name: "@@", content: "special-symbols/double_at.yaml", desc: "Absolute address"}
+    - {name: "$", content: "special-symbols/double_dollar.yaml", desc: "Object base address"}
+    - {name: "..", content: "special-symbols/double_dot.yaml", desc: "Range operator"}
+    - {name: "%", content: "special-symbols/percent.yaml", desc: "Binary indicator"}
+    - {name: "_", content: "special-symbols/underscore.yaml", desc: "Underscore separator"}
+    - {name: "~", content: "special-symbols/~.yaml", desc: "Post-clear"}
+    - {name: "~~", content: "special-symbols/~~.yaml", desc: "Post-set"}
 
 related_manifests:
   - "pasm2-manifest.yaml"  # Assembly language

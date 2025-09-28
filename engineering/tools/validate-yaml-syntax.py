@@ -44,6 +44,10 @@ class YAMLValidator:
         errors = []
         
         for yaml_file in sorted(directory.glob('**/*.yaml')):
+            # Skip P2-support directory (not part of P2 knowledge base)
+            if 'P2-support' in str(yaml_file):
+                continue
+                
             self.files_checked += 1
             error = self.validate_file(yaml_file)
             if error:
@@ -138,7 +142,7 @@ class YAMLValidator:
         # Directories to check
         directories = [
             self.base_path / "manifests",
-            self.base_path / "engineering/knowledge-base/P2"
+            self.base_path / "engineering/knowledge-base"  # Check ALL knowledge-base, not just P2
         ]
         
         all_errors = []

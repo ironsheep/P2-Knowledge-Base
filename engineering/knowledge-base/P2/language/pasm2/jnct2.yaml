@@ -5,8 +5,8 @@ timing:
   cycles: 2
   type: variable
   range: 13...20
-description: "Jump to S** if CT2 event flag is clear.                                                                \
-  \       2 or 4 / 2 or"
+description: Jump to S** if CT2 event flag is clear.                                                                       2
+  or 4 / 2 or
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: structured
 compiler_operand_format:
@@ -36,5 +36,5 @@ specifics:
   condition: not set
 quick_example: 'JNCT2 #handler  ; Jump if counter 2 event flag is NOT set'
 has_group_documentation: true
-category: timing_events
+category: Event
 oneliner: Branch

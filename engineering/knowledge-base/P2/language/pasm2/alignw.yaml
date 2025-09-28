@@ -5,7 +5,7 @@ description: 'Align to word boundary (2-byte alignment)
   Inserts zero bytes as needed to align the next data or instruction to a word boundary
 
   '
-category: Assembly Directive
+category: Assembly Directives
 documentation_level: complete
 syntax: ALIGNW
 usage: 'Use before data declarations that require word alignment

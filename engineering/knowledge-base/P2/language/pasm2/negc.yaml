@@ -1,27 +1,44 @@
 instruction: NEGC
 syntax: NEGC Dest, {#}Src       {WC|WZ|WCZ}
 encoding:
-- EEEE 0110100 CZI DDDDDDDDD SSSSSSSSS                    D            Sign of result       Result = 0               2
-- EEEE 0110100 CZ0 DDDDDDDDD DDDDDDDDD                    D            Sign of result       Result = 0               2
+- EEEE 0110100 CZI DDDDDDDDD SSSSSSSSS                    D            Sign of result       Result
+  = 0               2
+- EEEE 0110100 CZ0 DDDDDDDDD DDDDDDDDD                    D            Sign of result       Result
+  = 0               2
 timing:
   cycles: 2
   type: fixed
-description: "NEGC negates Src (syntax 1) or Dest (syntax 2) if C = 1 and stores the result in the Dest register. If C = 0,\
-  \ the Src Result: The Src or Dest value, possibly negated according to C, is stored into Dest and optionally the C and Z\
-  \ flags are updated to the resulting sign and zero status.\n\nNEGC negates Src (syntax 1) or Dest (syntax 2) if C = 1 and\
-  \ stores the result in the Dest register. If C = 0, the Src\n\nor Dest value is left as-is (not negated) and is stored into\
-  \ Dest. If the negation is performed, it flips the value's\n\nsign; ex: 5 becomes -5, or -200 becomes 200.\n\nIf the\
-  \ WC or WCZ effect is specified, the C flag is set (1) if the result is negative, or is cleared (0) if positive.\n\
-  \nIf the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero, or is cleared (0) if it is\
-  \ non-zero."
+description: 'NEGC negates Src (syntax 1) or Dest (syntax 2) if C = 1 and stores the
+  result in the Dest register. If C = 0, the Src Result: The Src or Dest value, possibly
+  negated according to C, is stored into Dest and optionally the C and Z flags are
+  updated to the resulting sign and zero status.
+
+
+  NEGC negates Src (syntax 1) or Dest (syntax 2) if C = 1 and stores the result in
+  the Dest register. If C = 0, the Src
+
+
+  or Dest value is left as-is (not negated) and is stored into Dest. If the negation
+  is performed, it flips the value''s
+
+
+  sign; ex: 5 becomes -5, or -200 becomes 200.
+
+
+  If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative,
+  or is cleared (0) if positive.
+
+
+  If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero,
+  or is cleared (0) if it is non-zero.'
 flags_affected:
   Z: Result = 0
 parameters:
-- Dest is a register to receive the Src or -Src value (syntax 1), or contains the value to negate (syntax 2) according to
-  C.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value (if C=0) or negated value (if C=1) is
-  stored into Dest.
-- "WC, WZ, or WCZ are optional effects to update flags."
+- Dest is a register to receive the Src or -Src value (syntax 1), or contains the
+  value to negate (syntax 2) according to C.
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value
+  (if C=0) or negated value (if C=1) is stored into Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
 related:
 - NEGNC
 - NEGZ
@@ -38,11 +55,13 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Negate C
-category: arithmetic
-result: "The Src or Dest value, possibly negated according to C, is stored into Dest and optionally the C and Z flags"
+category: Math and Logic
+result: The Src or Dest value, possibly negated according to C, is stored into Dest
+  and optionally the C and Z flags
 syntax_variants:
 - NEGC Dest, {#}Src       {WC|WZ|WCZ}
 - NEGC Dest               {WC|WZ|WCZ}
-- NEGC negates Src (syntax 1) or Dest (syntax 2) if C = 1 and stores the result in the Dest register. If C = 0, the Src
+- NEGC negates Src (syntax 1) or Dest (syntax 2) if C = 1 and stores the result in
+  the Dest register. If C = 0, the Src
 manual_extraction_date: '2025-01-19'
 oneliner: Negate value according to C

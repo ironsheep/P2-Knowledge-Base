@@ -4,7 +4,8 @@ encoding: EEEE 1101011 00L DDDDDDDDD 001110000
 timing:
   cycles: 2
   type: fixed
-description: Set four-channel oscilloscope enable to D[6] and set input pin base to D[5:2].
+description: Set four-channel oscilloscope enable to D[6] and set input pin base to
+  D[5:2].
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:
@@ -18,5 +19,5 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - SETSCP {#}D
 last_updated: '2025-09-19T16:04:17.402323'
-category: control_flow
+category: Smart Pin
 oneliner: Set four-channel oscilloscope enable to D[6] and set input pin base to D[5:2]

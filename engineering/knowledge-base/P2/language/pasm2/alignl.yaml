@@ -5,7 +5,7 @@ description: 'Align to long boundary (4-byte alignment)
   Inserts zero bytes as needed to align the next data or instruction to a long boundary
 
   '
-category: Assembly Directive
+category: Assembly Directives
 documentation_level: complete
 syntax: ALIGNL
 usage: 'Use before data declarations or code sections that require long alignment

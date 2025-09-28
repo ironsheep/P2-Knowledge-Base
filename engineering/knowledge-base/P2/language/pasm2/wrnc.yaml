@@ -24,5 +24,5 @@ long_description: Dest value is replaced with state of C or !C.
 syntax_variants:
 - WRNC D
 last_updated: '2025-09-19T16:04:17.145138'
-category: bit_manipulation
+category: Math and Logic
 oneliner: Write C or not C to register

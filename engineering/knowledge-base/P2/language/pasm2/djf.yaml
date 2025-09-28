@@ -5,9 +5,10 @@ timing:
   cycles: 2
   type: variable
   range: 13...20
-description: 'DJF or DJNF decrements the value in Dest, writes the result, and jumps to the address described by Src if the
-  Result: Dest is decremented, and if the result is full (or not full in syntax 2), PC is set to a new relative (#Src) or
-  absolute (Src) address.'
+description: 'DJF or DJNF decrements the value in Dest, writes the result, and jumps
+  to the address described by Src if the Result: Dest is decremented, and if the result
+  is full (or not full in syntax 2), PC is set to a new relative (#Src) or absolute
+  (Src) address.'
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:
@@ -23,12 +24,14 @@ syntax_variants:
 last_updated: '2025-09-19T16:04:17.087687'
 parameters:
 - Dest is a register whose value is decremented and tested for full or not full.
-- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC
-  to. Use # for relative addressing; omit # for absolute addressing.'
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
+  absolute or relative address to set PC to. Use # for relative addressing; omit #
+  for absolute addressing.'
 flags_affected:
   C:
     when: D
   Z:
     when: and
-category: control_flow
-oneliner: Decrement value and jump if full (-1; $FFFF_FFFF) or not full (<> -1; <> $FFFF_FFFF)
+category: Branch
+oneliner: Decrement value and jump if full (-1; $FFFF_FFFF) or not full (<> -1; <>
+  $FFFF_FFFF)

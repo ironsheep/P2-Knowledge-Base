@@ -1,3 +1,9 @@
+# Hardware Manifest
+# Using 4-key path standard
+
+manifest_base: "/manifests/P2"
+content_base: "/engineering/knowledge-base/P2/hardware"
+
 # P2 Hardware Ecosystem Manifest
 # Part of P2 Knowledge Base manifest hierarchy
 
@@ -5,7 +11,6 @@ version: "1.0"
 schema_version: "2024-12-30"
 last_updated: "2024-12-30T00:00:00Z"
 category: "p2_hardware"
-base_path: "engineering/knowledge-base/P2/hardware/"
 total_entries: 30
 
 description: |

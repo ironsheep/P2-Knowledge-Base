@@ -4,9 +4,10 @@ encoding: EEEE 1101110 RAA AAAAAAAAA AAAAAAAAA
 timing:
   cycles: 1
   type: fixed
-description: Write current C and Z flags and address of the next instruction into the 4-byte Hub RAM location at PTRA or PTRB,
-  increment pointer, set PC to new relative or absolute address, and optionally update C and/or Z to new state. R = 1 then
-  PC += A, else PC = A.
+description: Write current C and Z flags and address of the next instruction into
+  the 4-byte Hub RAM location at PTRA or PTRB, increment pointer, set PC to new relative
+  or absolute address, and optionally update C and/or Z to new state. R = 1 then PC
+  += A, else PC = A.
 flags_affected:
   C:
     formula: A
@@ -24,9 +25,10 @@ syntax_variants:
 - 'CALLA #{\}A'
 last_updated: '2025-09-19T16:04:17.448837'
 parameters:
-- Addr is a symbolic reference to the target subroutine; the location to set PC to. Relative addressing is the default; use
-  '\' to force absolute addressing.
-- Dest is a register containing the 20-bit absolute address to set PC to and optional new C and Z states.
+- Addr is a symbolic reference to the target subroutine; the location to set PC to.
+  Relative addressing is the default; use '\' to force absolute addressing.
+- Dest is a register containing the 20-bit absolute address to set PC to and optional
+  new C and Z states.
 - WC, WZ, or WCZ are optional effects to update the flags from Dest's upper bit states.
-category: control_flow
+category: Branch
 oneliner: Call a subroutine; store return context in the Hub long at PTRA++ or PTRB++

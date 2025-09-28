@@ -1,19 +1,37 @@
 instruction: POLLATN
 syntax: POLLATN {WC|WZ|WCZ}
-encoding: "EEEE 1101011 CZ0 000001110 000100100                  --            ATN Event           ATN Event         \
-  \        2"
+encoding: EEEE 1101011 CZ0 000001110 000100100                  --            ATN
+  Event           ATN Event                 2
 timing:
   cycles: 2
   type: fixed
-description: "POLLATN copies the state of the attention event flag into C and/or Z and then clears the flag (unless it's being\
-  \ set Result: Attention event flag is optionally copied into C and/or Z, then it is cleared.\n\nPOLLATN copies the state\
-  \ of the attention event flag into C and/or Z and then clears the flag (unless it's being set\n\nagain by the event\
-  \ sensor).\n\nIf the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of\
-  \ the attention event flag\n\nprior to clearing it.\n\nThe attention event flag is set whenever another cog issues\
-  \ an attention request for this cog. The attention event\n\nflag is cleared upon cog start, or execution of POLLATN,\
-  \ WAITATN, JATN, or JNATN instructions."
+description: 'POLLATN copies the state of the attention event flag into C and/or Z
+  and then clears the flag (unless it''s being set Result: Attention event flag is
+  optionally copied into C and/or Z, then it is cleared.
+
+
+  POLLATN copies the state of the attention event flag into C and/or Z and then clears
+  the flag (unless it''s being set
+
+
+  again by the event sensor).
+
+
+  If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to
+  the state of the attention event flag
+
+
+  prior to clearing it.
+
+
+  The attention event flag is set whenever another cog issues an attention request
+  for this cog. The attention event
+
+
+  flag is cleared upon cog start, or execution of POLLATN, WAITATN, JATN, or JNATN
+  instructions.'
 parameters:
-- "WC, WZ, or WCZ are optional effects to update flags."
+- WC, WZ, or WCZ are optional effects to update flags.
 related:
 - COGATN
 - WAITATN
@@ -31,9 +49,9 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Poll attention
-category: timing_events
-result: "Attention event flag is optionally copied into C and/or Z, then it is cleared."
+category: Event
+result: Attention event flag is optionally copied into C and/or Z, then it is cleared.
 syntax_variants:
 - POLLATN {WC|WZ|WCZ}
 manual_extraction_date: '2025-01-19'
-oneliner: "Retrieve and clear attention flag"
+oneliner: Retrieve and clear attention flag

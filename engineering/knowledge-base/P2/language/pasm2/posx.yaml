@@ -7,7 +7,7 @@ description: 'Maximum positive integer constant
   Largest positive value in 32-bit signed integer representation
 
   '
-category: Numeric Constant
+category: Constants
 documentation_level: complete
 usage: 'Use for range checking and overflow detection
 
