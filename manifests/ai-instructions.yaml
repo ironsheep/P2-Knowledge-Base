@@ -4,7 +4,7 @@
 # Hash: sha256:7e7e43f4e09dde6973639cdf023e6f70013ea6e647dfb9c2793c645699b68455
 
 instructions_version: "2.0"
-content_hash: "sha256:1fd95441e794f6d742def76bc8e04abf3f4a157239a610bce4321ee9553050c9"  # Self-reference for validation
+content_hash: "sha256:1b0e10737f53438feebe41a7d47b236d93ae3fa7800a8bb3efc362cedb23217f"  # Self-reference for validation
 last_updated: "2025-01-29T00:00:00Z"
 
 setup_instructions: |
@@ -41,17 +41,21 @@ ai_integration_content: |
   # P2 Knowledge Base Integration
   _Instructions Version: 2.0_
   _Last Updated: 2025-01-29_
-  _Instructions Hash: sha256:1fd95441e794f6d742def76bc8e04abf3f4a157239a610bce4321ee9553050c9
+  _Instructions Hash: sha256:1b0e10737f53438feebe41a7d47b236d93ae3fa7800a8bb3efc362cedb23217f
   
   ## 🚨 MANDATORY SESSION START PROTOCOL
   
   **ON EVERY SESSION START/RESUME/RESTART:**
-  1. Check P2 KB root: `manifests/propeller-knowledge-root.yaml`
-  2. Compare `ai_instructions.content_hash` with stored hash below
-  3. If different → Fetch new instructions immediately
-  4. If same → Proceed with cached instructions
+  1. Fetch root manifest: `manifests/propeller-knowledge-root.yaml`
+  2. Find the `ai_instructions.content_hash` value in that file
+  3. Compare THAT hash with the STORED HASH below (not with any hash in these instructions!)
+  4. If different → You have old instructions, fetch new ones immediately
+  5. If same → Your instructions are current, proceed
   
-  **STORED HASH:** `sha256:7e7e43f4e09dde6973639cdf023e6f70013ea6e647dfb9c2793c645699b68455`
+  **STORED HASH TO COMPARE AGAINST:** 
+  `sha256:1fd95441e794f6d742def76bc8e04abf3f4a157239a610bce4321ee9553050c9`
+  
+  ⚠️ CRITICAL: Compare the root's hash with THIS stored hash above, NOT with the hash in the header of these instructions!
   
   **TRIGGER KEYWORDS:** "P2", "Propeller", "PASM", "Spin2", "Smart Pin", "OBEX"
   → When user mentions any of these, check for updates if not already done this session
