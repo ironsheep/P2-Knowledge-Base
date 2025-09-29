@@ -16,11 +16,36 @@ from pathlib import Path
 import re
 
 def compute_file_hash(filepath):
-    """Compute SHA256 hash of a file's content."""
+    """Compute SHA256 hash of a file's content, excluding hash lines.
+
+    This makes the hash content-based and stable - the same content
+    will always produce the same hash, regardless of what hash values
+    are currently in the file.
+    """
     sha256 = hashlib.sha256()
-    with open(filepath, 'rb') as f:
-        for chunk in iter(lambda: f.read(4096), b''):
-            sha256.update(chunk)
+
+    # Patterns to exclude from hash computation
+    hash_patterns = [
+        r'^# Hash: sha256:[a-fA-F0-9]+',  # Header comment hash
+        r'content_hash: "sha256:[a-fA-F0-9]+"',  # content_hash field
+        r'_Instructions Hash: sha256:[a-fA-F0-9]+',  # Instructions Hash in content
+        r'`sha256:[a-fA-F0-9]+`',  # STORED HASH in backticks
+        r'\bsha256:[a-fA-F0-9]{64}\b',  # Any standalone hash
+    ]
+
+    with open(filepath, 'r') as f:
+        for line in f:
+            # Check if this line contains a hash that should be excluded
+            skip_line = False
+            for pattern in hash_patterns:
+                if re.search(pattern, line):
+                    # Replace the hash with a placeholder for consistent hashing
+                    line = re.sub(pattern, 'HASH_PLACEHOLDER', line)
+                    break
+
+            # Add the potentially modified line to the hash
+            sha256.update(line.encode('utf-8'))
+
     return sha256.hexdigest()
 
 def update_hash_in_file(filepath, new_hash):

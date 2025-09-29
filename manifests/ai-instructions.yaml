@@ -1,10 +1,10 @@
 # P2 Knowledge Base - AI Integration Instructions
 # This file teaches AI systems how to use the P2 Knowledge Base effectively
 # Version: 2.0
-# Hash: sha256:68dea07eab9b83c641460a83d8f84e485804f4bd37117cf7038bfe42c3a6e996
+# Hash: sha256:1afde91e0f0d1caf5e6ac77df096c52391b2696cf77815d364908d24e4b0f100
 
 instructions_version: "2.0"
-content_hash: "sha256:68dea07eab9b83c641460a83d8f84e485804f4bd37117cf7038bfe42c3a6e996"  # Self-reference for validation
+content_hash: "sha256:1afde91e0f0d1caf5e6ac77df096c52391b2696cf77815d364908d24e4b0f100"  # Self-reference for validation
 last_updated: "2025-01-29T00:00:00Z"
 
 setup_instructions: |
@@ -41,7 +41,7 @@ ai_integration_content: |
   # P2 Knowledge Base Integration
   _Instructions Version: 2.0_
   _Last Updated: 2025-01-29_
-  _Instructions Hash: sha256:68dea07eab9b83c641460a83d8f84e485804f4bd37117cf7038bfe42c3a6e996
+  _Instructions Hash: sha256:1afde91e0f0d1caf5e6ac77df096c52391b2696cf77815d364908d24e4b0f100
   
   ## 🚨 MANDATORY SESSION START PROTOCOL
   
@@ -53,7 +53,7 @@ ai_integration_content: |
   5. If same → Your instructions are current, proceed
   
   **STORED HASH TO COMPARE AGAINST:** 
-  `sha256:68dea07eab9b83c641460a83d8f84e485804f4bd37117cf7038bfe42c3a6e996`
+  `sha256:1afde91e0f0d1caf5e6ac77df096c52391b2696cf77815d364908d24e4b0f100`
   
   ⚠️ CRITICAL: Compare the root's hash with THIS stored hash above, NOT with the hash in the header of these instructions!
   
