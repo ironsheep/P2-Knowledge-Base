@@ -1,10 +1,10 @@
 # P2 Knowledge Base - AI Integration Instructions
 # This file teaches AI systems how to use the P2 Knowledge Base effectively
 # Version: 2.0
-# Hash: sha256:4a91d696ca22c289e92ce5f9bbf83173bcfbfcaeba3dfaa867d8979e2bc9eb6d
+# Hash: sha256:7e7e43f4e09dde6973639cdf023e6f70013ea6e647dfb9c2793c645699b68455
 
 instructions_version: "2.0"
-content_hash: "sha256:089aaa29ee1318d6aa373cf1cdc739f53ae550f6d1eabb25acdaa46d185f348f"  # Self-reference for validation
+content_hash: "sha256:7e7e43f4e09dde6973639cdf023e6f70013ea6e647dfb9c2793c645699b68455"  # Self-reference for validation
 last_updated: "2025-01-29T00:00:00Z"
 
 setup_instructions: |
@@ -27,175 +27,142 @@ ai_integration_content: |
   # P2 Knowledge Base Integration
   _Instructions Version: 2.0_
   _Last Updated: 2025-01-29_
-  _Instructions Hash: sha256:089aaa29ee1318d6aa373cf1cdc739f53ae550f6d1eabb25acdaa46d185f348f
+  _Instructions Hash: sha256:7e7e43f4e09dde6973639cdf023e6f70013ea6e647dfb9c2793c645699b68455_
   
-  ## Repository Access
+  ## 🚨 MANDATORY SESSION START PROTOCOL
+  
+  **ON EVERY SESSION START/RESUME/RESTART:**
+  1. Check P2 KB root: `manifests/propeller-knowledge-root.yaml`
+  2. Compare `ai_instructions.content_hash` with stored hash below
+  3. If different → Fetch new instructions immediately
+  4. If same → Proceed with cached instructions
+  
+  **STORED HASH:** `sha256:7e7e43f4e09dde6973639cdf023e6f70013ea6e647dfb9c2793c645699b68455`
+  
+  **TRIGGER KEYWORDS:** "P2", "Propeller", "PASM", "Spin2", "Smart Pin", "OBEX"
+  → When user mentions any of these, check for updates if not already done this session
+  
+  ## 📍 Quick Access Points
   - GitHub: https://github.com/ironsheep/P2-Knowledge-Base
   - Raw Base: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
-  - Root Entry: manifests/propeller-knowledge-root.yaml
+  - Root Manifest: manifests/propeller-knowledge-root.yaml
   
-  ## 🔴 CRITICAL NAVIGATION RULES - NO EXCEPTIONS
+  ## 🎯 CRITICAL CONCEPTS (MEMORIZE THESE)
   
-  ### Manifest-Only Navigation Protocol
-  1. **ALWAYS** start with a manifest file
-  2. **NEVER** guess or construct paths
-  3. **ONLY** use exact paths provided by manifests
-  4. **REPORT** missing content explicitly (don't manufacture paths)
-  
-  ### Manifest Self-Containment (CRITICAL CONCEPT)
-  Each manifest file is SELF-CONTAINED:
-  - The manifest_base and content_base at the top define the context
-  - All paths within that manifest are relative to those bases
+  ### 1. Manifest Self-Containment
+  **MOST IMPORTANT RULE:** Each manifest is SELF-CONTAINED
+  - Has its own `manifest_base` and `content_base` at top
+  - All paths within are relative to those bases
   - NEVER combine paths from different manifests
-  - Each manifest knows its own location and content paths
+  - Each manifest knows its complete context
   
-  ### When Content Not Found
-  ❌ DO NOT:
-  - Manufacture paths like "engineering/knowledge-base/P2/whatever.yaml"
-  - Request web searches for missing content
-  - Create fictional file locations
-  - Guess at directory structures
+  ### 2. P2 Philosophy
+  P2 provides **building blocks**, NOT complete peripherals:
+  - UART = Smart Pins + OBEX serial object
+  - SPI = COGs + OBEX SPI object  
+  - I2C = Smart Pins + OBEX I2C object
   
-  ✅ INSTEAD:
-  - Report: "Content not found in P2 Knowledge Base: [specific item]"
-  - Provide: "Searched manifests/[path] for [item] but found no entry"
-  - Suggest: "Report to https://github.com/ironsheep/P2-Knowledge-Base/issues"
+  ### 3. OBEX Search Rule
+  **NEVER filter by category first!** (You'll miss 60+ objects)
+  - 34 "misc" objects are actually drivers
+  - Always search ALL 253 objects
+  - Expand keywords: I2C → IIC, TWI, two-wire
   
-  ## 📚 Major Category Quick Access
+  ## 📂 DIRECT CATEGORY ACCESS (USE THESE SHORTCUTS)
   
-  ### P2 Categories (Start Here for Specific Topics):
+  ### Language References
+  **PASM2** → `manifests/P2/language/pasm2-manifest.yaml`
+  - 362 instructions, organized by: Assembly Directives, Branch, CORDIC, 
+    Event, Hub Control/FIFO/RAM, Interrupt, Math/Logic, Pin, Smart Pin, Streamer
   
-  **PASM2 Assembly** → `manifests/P2/language/pasm2-manifest.yaml`
-  - 362 instructions + directives, compiler-validated
-  - REAL Categories: Assembly Directives, Branch, CORDIC Solver, Color Space Converter,
-    Event, Hub Control, Hub FIFO, Hub RAM, Interrupt, Lookup Table, Math and Logic,
-    Pin Control, Pixel Mixer, Register Indirection, Smart Pin, Streamer
-  - Special sections: Addressing Modes, COG/HUB Execution, Multi-COG Synchronization
+  **Spin2** → `manifests/P2/language/spin2-manifest.yaml`
+  - 262 entries: methods (pin, timing, cog, memory, math, strings)
+  - Constructs: control flow, program structure, inline PASM
+  - Debug: formatters with underscore variants (SDEC vs SDEC_)
   
-  **Spin2 Language** → `manifests/P2/language/spin2-manifest.yaml`
-  - 262 total entries including methods, operators, constructs
-  - Method Categories: pin_control, timing, cog_control, memory, math, strings
-  - Constructs: control_flow (repeat, if/else, case), program_structure (PUB/PRI, blocks)
-  - Debug System: formatters (SDEC, UDEC, UHEX with underscore variants), commands (DEBUG, DLY, PC_KEY)
-  
+  ### Hardware References
   **Smart Pins** → `manifests/P2/smart-pins-manifest.yaml`
-  - 32 different I/O modes (all modes documented)
-  - Categories: digital_io (basic), pulse_timing (measurement), counting (edge/special),
-    serial_modes (async/sync serial), pwm_modes, analog (ADC/DAC/comparator)
-  - Each mode has detailed configuration and use cases
+  - 32 modes: digital I/O, pulse timing, counting, serial, PWM, analog
   
   **Architecture** → `manifests/P2/architecture-manifest.yaml`
-  - Core Systems: processors (8 COGs), memory (512KB hub), execution modes
-  - Math Processing: CORDIC solver for trig/math functions
-  - Synchronization: locks_and_events, interrupt_system
-  - Special Features: Streamer (DMA), Smart Pins overview, system registers
+  - 8 COGs, 512KB hub RAM, CORDIC, Streamer, interrupts, locks
   
-  **Hardware Ecosystem** → `manifests/P2/hardware-manifest.yaml`
-  - 30+ hardware items cataloged
-  - Categories: evaluation_boards (P2 Eval, P2 Edge), p2_modules,
-    breakout_boards, accessories (PropPlug, debuggers)
-  - Each entry has specifications, pinouts, use cases
+  **Boards** → `manifests/P2/hardware-manifest.yaml`
+  - P2 Eval, P2 Edge, modules, accessories (30+ items)
   
-  **OBEX Community** → `manifests/P2/community/obex-manifest.yaml`
-  - 253 community-contributed objects
-  - ⚠️ CRITICAL: Search ALL categories (34 "misc" objects are drivers!)
-  - Top author: Jon McPhalen (jonnymac) - 44+ quality objects
-  - Expand search terms: "I2C" → also try "IIC", "TWI", "two-wire"
+  ### Community & Patterns
+  **OBEX** → `manifests/P2/community/obex-manifest.yaml`
+  - 253 objects - SEARCH ALL CATEGORIES
+  - Top author: jonnymac (44+ objects)
   
-  **Patterns & Techniques** → `manifests/P2/patterns-manifest.yaml`
-  - 25+ documented patterns
-  - Categories: communication (UART, SPI, I2C patterns), timing (precision delays),
-    coordination (COG synchronization, shared resources), optimization (speed vs size)
-  - Real code examples from production use
+  **Patterns** → `manifests/P2/patterns-manifest.yaml`
+  - Communication, timing, COG sync, optimization (25+ patterns)
   
-  **Auxiliary Guides** → `manifests/P2/auxiliary-guides-manifest.yaml`
-  - HOW to use the knowledge base effectively
-  - OBEX search optimization strategies
-  - Hardware testing workflows
-  - Debug visualization (BMP generation)
+  **Guides** → `manifests/P2/auxiliary-guides-manifest.yaml`
+  - OBEX search strategies, hardware testing, debug visualization
   
-  ### P1 Categories (When Available):
-  _Currently planned - check knowledge_bases.p1.status in root_
+  ## ⚠️ NAVIGATION RULES
   
-  ## 🎯 Key Insights
+  1. **Start with manifests** - Never guess paths
+  2. **Report missing content** - Don't manufacture URLs
+  3. **Use exact paths** - From manifests only
+  4. **Path construction** (within single manifest):
+     ```
+     full_url = raw_base + [manifest's content_base] + [item's content]
+     ```
   
-  ### P2 Philosophy
-  The P2 provides **building blocks**, NOT complete peripherals:
-  - Need UART? → Smart Pins + OBEX serial object
-  - Need SPI? → COGs + OBEX SPI object
-  - Need I2C? → Smart Pins + OBEX I2C object
+  ## 🔄 UPDATE MECHANISMS
   
-  ### OBEX Search Strategy
-  1. **NEVER** filter by category first (miss 60+ objects!)
-  2. Search across ALL 253 objects
-  3. Expand keywords (I2C → IIC, TWI, two-wire, 2-wire)
-  4. Check author "jonnymac" for quality implementations
+  ### Automatic Check (Every Session)
+  - Triggered by session start or P2-related keywords
+  - Compare hash with stored value above
+  - Silent update if different
   
-  ### Path Construction (Within a Single Manifest)
-  When a manifest references content:
-  ```
-  full_url = raw_base_url + [manifest's content_base] + [item's content path]
-  ```
-  Example from pasm2-manifest.yaml:
-  - raw_base_url: "https://raw.githubusercontent.com/.../main/"
-  - content_base: "/engineering/knowledge-base/P2/language/pasm2" (from manifest header)
-  - item content: "call.yaml" (from specific entry)
-  - Result: https://raw.githubusercontent.com/.../main/engineering/knowledge-base/P2/language/pasm2/call.yaml
+  ### Manual Update (User Request)
+  - "Update P2 Knowledge Base instructions"
+  - "Refresh P2 KB configuration"
+  - Forces re-fetch regardless of hash
   
-  ## 💡 Session Management Tips
+  ## 💡 SESSION MANAGEMENT
   
-  **For Users**: For best performance, clear conversation every 3-4 hours:
-  - 0-3 hours: Peak performance
-  - 3-4 hours: Consider clearing
-  - 4+ hours: Performance degradation likely
+  **For Users:** Clear conversation every 3-4 hours for best performance
+  - 0-3 hrs: Peak performance
+  - 3-4 hrs: Consider clearing  
+  - 4+ hrs: Degradation likely
   
-  ## 🔄 Checking for Updates
+  **After Clear/Restart:** Always re-check root manifest (see top of instructions)
   
-  Each session, check root manifest's `ai_instructions.content_hash`:
-  - If different from stored hash → Fetch new instructions
-  - If same → Continue with cached instructions
-  - User can force update: "Please update your P2 Knowledge Base instructions"
+  ## 📋 COMMON TASK PATTERNS
   
-  ## 📋 Common Tasks
+  **PASM2 Instruction Lookup:**
+  → Start: pasm2-manifest → Find category → Get instruction YAML
   
-  **Finding PASM2 Instructions:**
-  1. Start: `manifests/P2/language/pasm2-manifest.yaml`
-  2. Locate instruction category
-  3. Fetch specific instruction YAML
+  **Smart Pin Configuration:**
+  → Start: smart-pins-manifest → Match function to mode → Get spec
   
-  **Configuring Smart Pins:**
-  1. Start: `manifests/P2/smart-pins-manifest.yaml`
-  2. Find mode by function needed
-  3. Get detailed mode specification
-  
-  **Finding OBEX Objects:**
-  1. Start: `manifests/P2/community/obex-manifest.yaml`
-  2. Search ALL categories (critical!)
-  3. Check multiple keyword variations
+  **OBEX Driver Search:**
+  → Start: obex-manifest → Search ALL categories → Try keyword variants
   
   **Hardware Testing:**
-  1. Check: `manifests/P2/auxiliary-guides-manifest.yaml`
-  2. Find hardware testing guide
-  3. Follow pnut_ts workflow with log monitoring
+  → Start: auxiliary-guides → Find testing guide → Use pnut_ts workflow
 
 notification_after_setup: |
   After saving these instructions, inform the user:
   
-  "✅ P2 Knowledge Base instructions updated to version 2.0
+  "✅ P2 Knowledge Base v2.0 configured
   
-  Key improvements in this version:
-  - Direct category access for faster navigation
-  - Self-updating instructions (checks each session)
-  - Clearer OBEX search strategy
+  • Auto-updates enabled (checks each session)
+  • Direct category access ready
+  • OBEX search optimized
   
-  💡 Tip: For best performance, clear our conversation every 3-4 hours.
+  💡 Tip: Clear conversation every 3-4 hours for best performance.
   
-  Ready to help with P2 development. Which category would you like to explore?"
+  Ready to help with P2 development!"
 
 update_changelog: |
   Version 2.0 (2025-01-29):
-  - Transformed to self-bootstrapping system
-  - Added direct category navigation
-  - Implemented hash-based auto-updates
-  - Consolidated P1/P2 navigation rules
-  - Improved OBEX search guidance
+  - Self-bootstrapping system
+  - Session-start update checks
+  - Direct category navigation  
+  - Hash-based auto-updates
+  - Reorganized for performance
