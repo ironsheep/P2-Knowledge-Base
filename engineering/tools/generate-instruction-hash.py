@@ -82,7 +82,7 @@ def verify_hash_updates(filepath, expected_hash):
     checks = [
         ('Header comment', f'# Hash: {full_hash}'),
         ('content_hash field', f'content_hash: "{full_hash}"'),
-        ('Instructions Hash', f'_Instructions Hash: {full_hash}_'),
+        ('Instructions Hash', f'_Instructions Hash: {full_hash}'),  # No trailing underscore
         ('STORED HASH', f'`{full_hash}`'),
     ]
     
