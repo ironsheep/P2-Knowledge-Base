@@ -1,32 +1,38 @@
-# Propeller-Knowledge-Root.Yaml Manifest
-# Using 4-key path standard
-
-manifest_base: "/manifests"
-
-# Propeller Knowledge Base - Universal Root Manifest
-# Entry point for all Propeller microcontroller documentation
+# Propeller Knowledge Base - Ultra-Minimal Root
 # Repository: https://github.com/ironsheep/P2-Knowledge-Base
+# This is the entry point - fetch this first, then follow instructions
 
-version: "1.0"
-schema_version: "2024-12-30"
-last_updated: "2025-09-27T00:00:00Z"
-description: "Universal entry point for Propeller microcontroller knowledge bases"
+version: "2.0"
+schema_version: "2025-01-01"
+last_updated: "2025-01-29T00:00:00Z"
 
-metadata:
-  repository: "https://github.com/ironsheep/P2-Knowledge-Base"
-  raw_base_url: "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/"
-  supported_chips:
-    - "P2"
-    - "P1 (future)"
+# STEP 1: Check AI Instructions (compare hash with your stored version)
+ai_instructions:
+  manifest: "manifests/ai-instructions.yaml"
+  content_hash: "sha256:9c2dbf67c5f952931b7b410377782c07492a52266093dc044b855e97e92f8dc2"  # Will be updated by hash script
+  check_protocol: |
+    1. Compare this hash with your stored 'p2kb_instructions_hash'
+    2. If different or not stored → fetch ai_instructions.manifest
+    3. If same → skip to knowledge_bases section
 
-# Main Propeller variants
-propeller_chips:
+# STEP 2: Access Knowledge Bases
+knowledge_bases:
   p2:
-    manifest: "P2/p2-root.yaml"
-    description: "Propeller 2 (P2) - 8-cog multiprocessor with Smart Pins"
+    manifest: "manifests/P2/p2-root.yaml"
+    description: "Propeller 2 - 8 COGs, 64 Smart Pins, 512KB RAM"
     status: "active"
     
   p1:
-    manifest: null  # Future: P1/p1-root.yaml
-    description: "Propeller 1 (P1) - 8-cog multiprocessor (coming soon)"
+    manifest: null  # Future: manifests/P1/p1-root.yaml
+    description: "Propeller 1 - 8 COGs, 32KB RAM, 32 I/O pins"
     status: "planned"
+
+# Metadata
+metadata:
+  repository: "https://github.com/ironsheep/P2-Knowledge-Base"
+  raw_base_url: "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/"
+  bootstrap_instructions: |
+    First time? Follow these steps:
+    1. Fetch the ai_instructions.manifest file
+    2. Follow its setup instructions completely
+    3. Then return here to access P1/P2 knowledge bases

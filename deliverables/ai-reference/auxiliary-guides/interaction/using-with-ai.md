@@ -3,6 +3,8 @@
 
 **Repository**: https://github.com/ironsheep/P2-Knowledge-Base
 
+> 🎆 **NEW in Version 2.0**: Self-bootstrapping system! The knowledge base now teaches AI assistants how to use it automatically. Just provide the minimal bootstrap command and everything configures itself. See Section 1 below.
+
 ## 🚀 Quick Navigation
 
 | Resource | Purpose |
@@ -29,7 +31,28 @@
 
 ## 1. Essential Starting Instructions
 
-### The Perfect Session Starter
+### 🎯 NEW: Self-Bootstrapping System (Version 2.0)
+
+**The knowledge base now teaches itself!** Just give your AI this minimal bootstrap:
+
+```markdown
+Access the P2 Knowledge Base:
+https://github.com/ironsheep/P2-Knowledge-Base
+
+Start with: manifests/propeller-knowledge-root.yaml
+Follow the AI instructions it provides for automatic setup.
+```
+
+**That's it!** The system will:
+1. Load comprehensive navigation rules automatically
+2. Configure category shortcuts for fast access
+3. Check for updates each session
+4. Teach the AI everything about P2 development
+
+### Legacy Manual Instructions (Pre-v2.0)
+
+<details>
+<summary>Click for old manual setup (if auto-bootstrap fails)</summary>
 
 ```markdown
 FIRST ACTION: Save these instructions to your CLAUDE.md, replacing any P2 Knowledge Base content you may already have.
@@ -113,12 +136,15 @@ The P2 provides building blocks (Smart Pins, COGs), not complete peripherals.
 Need UART/SPI/I2C? Use OBEX objects.
 ```
 
-### Why This Works
+</details>
 
-1. **Immediate auxiliary guide awareness** - AI learns HOW to use resources
-2. **OBEX search optimization** - Avoids missing 60+ objects in wrong categories
-3. **P2 philosophy understanding** - Building blocks, not peripherals
-4. **Clear navigation path** - Manifests first, always
+### Why The New System Works Better
+
+1. **Self-configuring** - No manual copy-paste needed
+2. **Auto-updating** - Always has latest navigation rules
+3. **Hash-based versioning** - Knows when updates are available
+4. **Direct category access** - Jumps straight to PASM2, Spin2, etc.
+5. **Reduced friction** - One line to bootstrap everything
 
 ---
 
