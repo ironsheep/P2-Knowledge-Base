@@ -4,7 +4,7 @@
 # Hash: sha256:4a91d696ca22c289e92ce5f9bbf83173bcfbfcaeba3dfaa867d8979e2bc9eb6d
 
 instructions_version: "2.0"
-content_hash: "sha256:9c2dbf67c5f952931b7b410377782c07492a52266093dc044b855e97e92f8dc2"  # Self-reference for validation
+content_hash: "sha256:089aaa29ee1318d6aa373cf1cdc739f53ae550f6d1eabb25acdaa46d185f348f"  # Self-reference for validation
 last_updated: "2025-01-29T00:00:00Z"
 
 setup_instructions: |
@@ -27,7 +27,7 @@ ai_integration_content: |
   # P2 Knowledge Base Integration
   _Instructions Version: 2.0_
   _Last Updated: 2025-01-29_
-  _Instructions Hash: sha256:9c2dbf67c5f952931b7b410377782c07492a52266093dc044b855e97e92f8dc2
+  _Instructions Hash: sha256:089aaa29ee1318d6aa373cf1cdc739f53ae550f6d1eabb25acdaa46d185f348f
   
   ## Repository Access
   - GitHub: https://github.com/ironsheep/P2-Knowledge-Base
@@ -42,13 +42,12 @@ ai_integration_content: |
   3. **ONLY** use exact paths provided by manifests
   4. **REPORT** missing content explicitly (don't manufacture paths)
   
-  ### Path Construction Formula
-  ```
-  full_url = raw_base_url + base_path + file_path
-  ```
-  - raw_base_url: From root manifest
-  - base_path: From category manifest
-  - file_path: From specific entry
+  ### Manifest Self-Containment (CRITICAL CONCEPT)
+  Each manifest file is SELF-CONTAINED:
+  - The manifest_base and content_base at the top define the context
+  - All paths within that manifest are relative to those bases
+  - NEVER combine paths from different manifests
+  - Each manifest knows its own location and content paths
   
   ### When Content Not Found
   ❌ DO NOT:
@@ -132,10 +131,16 @@ ai_integration_content: |
   3. Expand keywords (I2C → IIC, TWI, two-wire, 2-wire)
   4. Check author "jonnymac" for quality implementations
   
-  ### Manifest Self-Containment
-  - Each manifest file is self-contained
-  - Paths in a manifest are relative to that manifest's location
-  - Never combine paths from different manifests
+  ### Path Construction (Within a Single Manifest)
+  When a manifest references content:
+  ```
+  full_url = raw_base_url + [manifest's content_base] + [item's content path]
+  ```
+  Example from pasm2-manifest.yaml:
+  - raw_base_url: "https://raw.githubusercontent.com/.../main/"
+  - content_base: "/engineering/knowledge-base/P2/language/pasm2" (from manifest header)
+  - item content: "call.yaml" (from specific entry)
+  - Result: https://raw.githubusercontent.com/.../main/engineering/knowledge-base/P2/language/pasm2/call.yaml
   
   ## 💡 Session Management Tips
   
