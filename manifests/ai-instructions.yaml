@@ -1,10 +1,10 @@
 # P2 Knowledge Base - AI Integration Instructions
 # This file teaches AI systems how to use the P2 Knowledge Base effectively
 # Version: 2.0
-# Hash: sha256:1afde91e0f0d1caf5e6ac77df096c52391b2696cf77815d364908d24e4b0f100
+# Hash: sha256:bc88896c30cea8ff132e1e8cc971f30ee92dcf86ff13b42037713603b1f84f1b
 
 instructions_version: "2.0"
-content_hash: "sha256:1afde91e0f0d1caf5e6ac77df096c52391b2696cf77815d364908d24e4b0f100"  # Self-reference for validation
+content_hash: "sha256:bc88896c30cea8ff132e1e8cc971f30ee92dcf86ff13b42037713603b1f84f1b"  # Self-reference for validation
 last_updated: "2025-01-29T00:00:00Z"
 
 setup_instructions: |
@@ -41,7 +41,7 @@ ai_integration_content: |
   # P2 Knowledge Base Integration
   _Instructions Version: 2.0_
   _Last Updated: 2025-01-29_
-  _Instructions Hash: sha256:1afde91e0f0d1caf5e6ac77df096c52391b2696cf77815d364908d24e4b0f100
+  _Instructions Hash: sha256:bc88896c30cea8ff132e1e8cc971f30ee92dcf86ff13b42037713603b1f84f1b
   
   ## 🚨 MANDATORY SESSION START PROTOCOL
   
@@ -53,7 +53,7 @@ ai_integration_content: |
   5. If same → Your instructions are current, proceed
   
   **STORED HASH TO COMPARE AGAINST:** 
-  `sha256:1afde91e0f0d1caf5e6ac77df096c52391b2696cf77815d364908d24e4b0f100`
+  `sha256:bc88896c30cea8ff132e1e8cc971f30ee92dcf86ff13b42037713603b1f84f1b`
   
   ⚠️ CRITICAL: Compare the root's hash with THIS stored hash above, NOT with the hash in the header of these instructions!
   
@@ -81,22 +81,28 @@ ai_integration_content: |
   - I2C = Smart Pins + OBEX I2C object
   
   ### 3. OBEX Search Rule
-  **NEVER filter by category first!** (You'll miss 60+ objects)
-  - 34 "misc" objects are actually drivers
-  - Always search ALL 253 objects
+  **NEVER filter by category first!** (You'll miss 34+ drivers in "misc")
+  - Always search ALL 113 objects, then filter
+  - Dual organization: by author AND by category
   - Expand keywords: I2C → IIC, TWI, two-wire
   
   ## 📂 DIRECT CATEGORY ACCESS (USE THESE SHORTCUTS)
   
   ### Language References
   **PASM2** → `manifests/P2/language/pasm2-manifest.yaml`
-  - 362 instructions, organized by: Assembly Directives, Branch, CORDIC, 
-    Event, Hub Control/FIFO/RAM, Interrupt, Math/Logic, Pin, Smart Pin, Streamer
+  - 362 instructions + 16 concepts + 5 idiom categories + 2 patterns
+  - Categories: Assembly Directives, Branch, CORDIC, Event, Hub Control/FIFO/RAM,
+    Interrupt, Math/Logic, Pin, Smart Pin, Streamer
   
   **Spin2** → `manifests/P2/language/spin2-manifest.yaml`
-  - 262 entries: methods (pin, timing, cog, memory, math, strings)
-  - Constructs: control flow, program structure, inline PASM
+  - 262 entries + idioms from 730 analyzed files + 44 pattern files
+  - Methods: pin, timing, cog, memory, math, strings
   - Debug: formatters with underscore variants (SDEC vs SDEC_)
+  
+  **Conventions** → `manifests/P2/language/spin2-conventions-manifest.yaml`
+  - 3 documentation styles: VSCode/PNUT_TS, Johnny Mac, File Organization
+  - Naming conventions and code formatting standards
+  - Ask user: "Which documentation style are you using?"
   
   ### Hardware References
   **Smart Pins** → `manifests/P2/smart-pins-manifest.yaml`
@@ -110,11 +116,11 @@ ai_integration_content: |
   
   ### Community & Patterns
   **OBEX** → `manifests/P2/community/obex-manifest.yaml`
-  - 253 objects - SEARCH ALL CATEGORIES
-  - Top author: jonnymac (44+ objects)
+  - 113 objects: `/authors/` (24), `/categories/` (9) dual organization
+  - ⚠️ See OBEX Search Strategy below for critical search rules
   
   **Patterns** → `manifests/P2/patterns-manifest.yaml`
-  - Communication, timing, COG sync, optimization (25+ patterns)
+  - 44 files: structural (6), implementation (15), application (23)
   
   **Guides** → `manifests/P2/auxiliary-guides-manifest.yaml`
   - OBEX search strategies, hardware testing, debug visualization
@@ -128,6 +134,17 @@ ai_integration_content: |
      ```
      full_url = raw_base + [manifest's content_base] + [item's content]
      ```
+  
+  ## 🔍 SEARCH & NAVIGATION STRATEGIES
+  
+  ### OBEX Search Strategy
+  1. Search ALL 113 objects first (34+ drivers hidden in "misc")
+  2. Check both paths: `/authors/` and `/categories/`
+  3. Expand terms: I2C → IIC, TWI, two-wire
+  
+  ### Content Depth Hierarchy
+  Instructions/Methods → Concepts → Idioms → Patterns → Conventions
+  (base reference) → (how to use) → (snippets) → (design) → (style)
   
   ## 🔄 UPDATE MECHANISMS
   
@@ -159,7 +176,15 @@ ai_integration_content: |
   → Start: smart-pins-manifest → Match function to mode → Get spec
   
   **OBEX Driver Search:**
-  → Start: obex-manifest → Search ALL categories → Try keyword variants
+  → Start: obex-manifest → Apply OBEX Search Strategy (see above)
+  
+  **Code Style/Conventions:**
+  → Start: spin2-conventions-manifest → Choose style → Apply consistently
+  → Ask user preference if generating new code
+  
+  **Finding Patterns/Examples:**
+  → See Content Depth Hierarchy above
+  → Idioms in language manifests, Patterns in patterns-manifest
   
   **Hardware Testing:**
   → Start: auxiliary-guides → Find testing guide → Use pnut_ts workflow
