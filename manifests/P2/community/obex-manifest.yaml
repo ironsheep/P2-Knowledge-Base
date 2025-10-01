@@ -20,15 +20,15 @@ community_overview:
 navigation:
   unified_index:
     manifest: obex-unified-index.yaml
-    description: 'Complete searchable index with natural groupings'
+    description: 'Complete searchable index with natural groupings and author attribution'
     features:
     - Natural groups: communication, displays, sensors, motors, audio
     - Protocol aliases: i2c/iic/twi, spi/3-wire, uart/serial
     - 128 searchable keywords from 113 objects
+    - Author information included in each object entry
     - Single file for efficient remote access
-    
-  author_attribution:
-    manifest_base: obex/authors
+
+  author_statistics:
     total_authors: 24
     top_contributors:
       Jon McPhalen (jonnymac): 44
@@ -57,3 +57,30 @@ statistics:
 usage:
   search: 'Use obex-unified-index.yaml keyword_index for all searches'
   attribution: 'Check obex/authors/ for contributor information'
+
+# Author manifests (browse by contributor)
+author_manifests:
+  - manifest: obex/authors/bill_tuss-manifest.yaml
+  - manifest: obex/authors/bryan_thomas-manifest.yaml
+  - manifest: obex/authors/charles_current-manifest.yaml
+  - manifest: obex/authors/chip_gracey-manifest.yaml
+  - manifest: obex/authors/chris_gadd-manifest.yaml
+  - manifest: obex/authors/ersmith-manifest.yaml
+  - manifest: obex/authors/evanh-manifest.yaml
+  - manifest: obex/authors/glapolla-manifest.yaml
+  - manifest: obex/authors/greg_lapolla-manifest.yaml
+  - manifest: obex/authors/johannes-manifest.yaml
+  - manifest: obex/authors/jon_mcphalen_jonnymac-manifest.yaml
+  - manifest: obex/authors/jose_rullan-manifest.yaml
+  - manifest: obex/authors/magio2-manifest.yaml
+  - manifest: obex/authors/manatwork-manifest.yaml
+  - manifest: obex/authors/michael-manifest.yaml
+  - manifest: obex/authors/mike_calyer-manifest.yaml
+  - manifest: obex/authors/mk_borri-manifest.yaml
+  - manifest: obex/authors/phonoclese-manifest.yaml
+  - manifest: obex/authors/ray_allen-manifest.yaml
+  - manifest: obex/authors/riley_august-manifest.yaml
+  - manifest: obex/authors/stephen_m_moraco-manifest.yaml
+  - manifest: obex/authors/terry_trapp-manifest.yaml
+  - manifest: obex/authors/vonszarvas-manifest.yaml
+  - manifest: obex/authors/wuerfel_21-manifest.yaml

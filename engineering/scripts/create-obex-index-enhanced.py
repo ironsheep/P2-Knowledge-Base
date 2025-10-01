@@ -14,14 +14,24 @@ from datetime import datetime
 
 def build_unified_obex_index():
     # Collect all OBEX objects from author manifests
+    # Build a mapping of object_id -> author_name
     all_objects = []
+    object_to_author = {}  # Maps object_id to author name
     authors_path = Path('manifests/P2/community/obex/authors')
 
     for author_file in authors_path.glob('*-manifest.yaml'):
         with open(author_file) as f:
             data = yaml.safe_load(f)
+            # Extract author name from manifest metadata
+            author_name = data.get('manifest_metadata', {}).get('author', '')
+            if not author_name:
+                # Fallback: try author_info section
+                author_name = data.get('author_info', {}).get('name', '')
+
             if 'objects' in data:
                 for obj in data['objects']:
+                    # Store author mapping
+                    object_to_author[obj['object_id']] = author_name
                     all_objects.append(obj)
     
     # Natural grouping definitions - these will be added as explicit keywords
@@ -328,24 +338,24 @@ def build_unified_obex_index():
             chips = re.findall(pattern, full_text)
             keywords.update(chips)
         
-        return list(keywords)
-    
+        return sorted(list(keywords))  # Alphabetically sorted for stable diffs
+
     # Build the complete index
     objects_by_id = {}
     keyword_to_objects = defaultdict(list)
-    
+
     for obj in all_objects:
         obj_id = obj['object_id']
         keywords = extract_keywords(obj)
-        
-        # Create enriched object entry
+
+        # Create enriched object entry with author from mapping
         entry = {
             'id': obj_id,
             'title': obj['title'],
-            'author': obj.get('author', ''),
+            'author': object_to_author.get(obj_id, ''),  # Get author from mapping
             'languages': obj.get('languages', []),
             'description': obj.get('description_short', ''),
-            'keywords': keywords,
+            'keywords': keywords,  # Already sorted by extract_keywords()
             'content': f"objects/{obj_id}.yaml"  # Standard field name
         }
         
@@ -372,8 +382,8 @@ def build_unified_obex_index():
         'topic_definitions': topic_mappings,
         
         'objects': objects_by_id,
-        
-        'keyword_index': dict(keyword_to_objects),
+
+        'keyword_index': dict(sorted(keyword_to_objects.items())),  # Alphabetically sorted for stable diffs
         
         'usage_instructions': {
             'natural_group_search': [

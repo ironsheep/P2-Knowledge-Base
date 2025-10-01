@@ -2,6 +2,7 @@
 # Using 4-key path standard
 
 manifest_base: "/manifests/P2"
+content_base: "/deliverables/ai-reference/auxiliary-guides"
 
 manifest_metadata:
   manifest_type: auxiliary_guides
@@ -15,7 +16,7 @@ guide_categories:
     description: "How to interact with AI for P2 development"
     guides:
       - name: "Using with AI"
-        path: "deliverables/ai-reference/auxiliary-guides/interaction/using-with-ai.md"
+        content: "interaction/using-with-ai.md"
         purpose: "Complete guide for using P2 Knowledge Base with Claude and other AI"
         key_points:
           - Start with root manifest navigation
@@ -28,7 +29,7 @@ guide_categories:
     description: "Optimized search and discovery strategies"
     guides:
       - name: "OBEX Search Optimization"
-        path: "deliverables/ai-reference/auxiliary-guides/search-strategies/obex-search-optimization.md"
+        content: "search-strategies/obex-search-optimization.md"
         purpose: "How to search OBEX effectively - cast wide nets, not narrow searches"
         key_insight: "Never filter by category first - many drivers are in 'misc'"
         recommended_approach: |
@@ -42,7 +43,7 @@ guide_categories:
     description: "P2-specific development techniques"
     guides:
       - name: "BMP Generation for Debug"
-        path: "deliverables/ai-reference/auxiliary-guides/special-techniques/bmp-generation-guide.md"
+        content: "special-techniques/bmp-generation-guide.md"
         purpose: "Generate BMP files for P2 Plot window visualization"
         key_capabilities:
           - Create 8-bit indexed BMPs for debug visualization
@@ -57,7 +58,7 @@ guide_categories:
         when_to_use: "User mentions debug visualization, Plot window, or BMP generation"
         
       - name: "Hardware Testing Workflow"
-        path: "deliverables/ai-reference/auxiliary-guides/special-techniques/hardware-testing-guide.md"
+        content: "special-techniques/hardware-testing-guide.md"
         purpose: "Compile, download, and test on real P2 hardware"
         tools_required:
           - pnut_ts: "Spin2/PASM2 compiler"

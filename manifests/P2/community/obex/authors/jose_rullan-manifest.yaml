@@ -1,28 +1,10 @@
-# Jose Rullan Manifest
-# Using 4-key path standard
-
-manifest_base: "/manifests/P2/community/obex/authors"
-content_base: "/engineering/knowledge-base/P2/community/obex"
-
+manifest_base: /manifests/P2/community/obex/authors
+content_base: /engineering/knowledge-base/P2/community/obex
 manifest_metadata:
   manifest_type: obex_author
   author: Jose Rullan
   generated: 2025-09-12T16:10:0
   object_count: 2
-path_construction_note: 'TO ACCESS ANY FILE IN THIS MANIFEST:
-
-  Combine: raw_base_url (from root) + base_path (above) + content (from entries)
-
-
-  Example:
-
-  https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/ +
-
-  engineering/knowledge-base/P2/community/obex/ +
-
-  objects/2817.yaml
-
-  = Full URL to the YAML file'
 author_info:
   name: Jose Rullan
   contribution_summary: 2 P2 objects contributed to OBEX

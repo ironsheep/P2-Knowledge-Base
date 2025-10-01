@@ -103,7 +103,8 @@ class ManifestValidator:
         content_base = data.get('content_base', '')
         
         # Track OBEX references for dual-organization validation
-        is_obex_category = 'obex/categories' in str(manifest_path)
+        # Note: unified index serves as the "category" organization
+        is_obex_category = 'obex/categories' in str(manifest_path) or 'obex-unified-index.yaml' in str(manifest_path)
         is_obex_author = 'obex/authors' in str(manifest_path)
         
         # Process the manifest data recursively

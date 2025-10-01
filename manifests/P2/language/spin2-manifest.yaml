@@ -22,16 +22,6 @@ core_language:
     content: "spin2-language-complete-map.yaml"
     description: "Complete map of Spin2 language elements"
 
-path_construction_note: |
-  TO ACCESS ANY FILE IN THIS MANIFEST:
-  Combine: raw_base_url (from root) + base_path (above) + file (from entries)
-  
-  Example for 'cogspin':
-  https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/ +
-  engineering/knowledge-base/P2/language/spin2/ +
-  methods/cogspin.yaml
-  = https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/knowledge-base/P2/language/spin2/methods/cogspin.yaml
-
 description: |
   Complete Spin2 language reference including methods, operators, and constructs.
   Covers both language syntax and built-in functionality.
@@ -45,41 +35,41 @@ by_category:
       - {name: "abort", content: "constructs/abort.yaml", desc: "Exception handling"}
       - {name: "quit", content: "constructs/quit.yaml", desc: "Loop exit"}
       - {name: "next", content: "constructs/next.yaml", desc: "Loop continue"}
-    
+
     program_structure:
       - {name: "method_definition", content: "constructs/method_definition.yaml", desc: "PUB/PRI methods"}
       - {name: "blocks", content: "constructs/blocks.yaml", desc: "CON/VAR/OBJ/DAT blocks"}
       - {name: "inline_pasm", content: "constructs/inline_pasm.yaml", desc: "Embedded assembly"}
-  
+
   debug_formatters:
     description: |
       Debug output formatters for the DEBUG() statement.
-      
+
       THE CRITICAL CONCEPT - Underscore Protocol:
       - SDEC(temp) outputs: "temp = -25" (includes variable name)
       - SDEC_(temp) outputs: "-25" (just the value)
-      
+
       This underscore rule applies to ALL formatters (UDEC/SDEC/UHEX/SHEX/UBIN/SBIN/FDEC).
       Use underscore when building custom formatted output like:
       DEBUG("Temperature: ", SDEC_(temp), "°C")
-    
+
     entry_point:
       - {name: "formatters_overview", content: "debug-commands/debug-formatters-overview.yaml", desc: "START HERE - Answers 'Why does SDEC_() exist?' and common new user questions"}
-    
+
     grouped_references:
       - {name: "complete_reference", content: "debug-commands/debug-formatters-complete.yaml", desc: "All formatters in single comprehensive file"}
       - {name: "decimal_formatters", content: "debug-commands/debug-formatters-decimal.yaml", desc: "UDEC/SDEC and all size variants with underscore"}
       - {name: "hexadecimal_formatters", content: "debug-commands/debug-formatters-hexadecimal.yaml", desc: "UHEX/SHEX and all size variants with underscore"}
       - {name: "binary_formatters", content: "debug-commands/debug-formatters-binary.yaml", desc: "UBIN/SBIN and all size variants with underscore"}
       - {name: "array_formatters", content: "debug-commands/debug-formatters-arrays.yaml", desc: "All array formatters for registers and hub memory"}
-    
+
     individual_files_note: |
       Individual formatter files also exist for backwards compatibility:
       - Basic formatters: sdec.yaml, udec.yaml, uhex.yaml, ubin.yaml, etc.
       - Underscore variants: sdec_.yaml, udec_.yaml, uhex_.yaml, ubin_.yaml, etc.
       - Size variants: sdec_byte.yaml, udec_word.yaml, uhex_long.yaml, etc.
       However, the grouped files above are recommended for AI consumption.
-  
+
   debug_commands:
     description: Debug control and input commands for DEBUG() statement
     manifest:
@@ -88,7 +78,7 @@ by_category:
       - {name: "dly", content: "debug-commands/dly.yaml", desc: "DLY - delay in milliseconds"}
       - {name: "pc_key", content: "debug-commands/pc_key.yaml", desc: "PC_KEY - keyboard input"}
       - {name: "pc_mouse", content: "debug-commands/pc_mouse.yaml", desc: "PC_MOUSE - mouse state"}
-  
+
   methods:
     pin_control:
       - {name: "pinhigh", content: "methods/pinhigh.yaml", desc: "Set pin high"}
@@ -97,7 +87,7 @@ by_category:
       - {name: "pinread", content: "methods/pinread.yaml", desc: "Read pin state"}
       - {name: "pinwrite", content: "methods/pinwrite.yaml", desc: "Write pin state"}
       - {name: "pinfloat", content: "methods/pinfloat.yaml", desc: "Float pin"}
-    
+
     timing:
       - {name: "waitms", content: "methods/waitms.yaml", desc: "Wait milliseconds"}
       - {name: "waitus", content: "methods/waitus.yaml", desc: "Wait microseconds"}
@@ -105,7 +95,7 @@ by_category:
       - {name: "getct", content: "methods/getct.yaml", desc: "Get system counter"}
       - {name: "getms", content: "methods/getms.yaml", desc: "Get milliseconds"}
       - {name: "getsec", content: "methods/getsec.yaml", desc: "Get seconds"}
-    
+
     cog_control:
       - {name: "coginit", content: "methods/coginit.yaml", desc: "Start COG"}
       - {name: "cogstop", content: "methods/cogstop.yaml", desc: "Stop COG"}
@@ -113,7 +103,7 @@ by_category:
       - {name: "cogchk", content: "methods/cogchk.yaml", desc: "Check COG status"}
       - {name: "cogid", content: "methods/cogid.yaml", desc: "Get current COG ID"}
       - {name: "cogatn", content: "methods/cogatn.yaml", desc: "Signal attention"}
-    
+
     memory:
       - {name: "bytemove", content: "methods/bytemove.yaml", desc: "Copy bytes"}
       - {name: "wordmove", content: "methods/wordmove.yaml", desc: "Copy words"}
@@ -125,12 +115,12 @@ by_category:
       - {name: "word", content: "methods/word.yaml", desc: "Word data/access"}
       - {name: "long", content: "methods/long.yaml", desc: "Long data/access"}
       - {name: "bytecomp", content: "methods/bytecomp.yaml", desc: "Compare bytes"}
-      - {name: "wordcomp", content: "methods/wordcomp.yaml", desc: "Compare words"}  
+      - {name: "wordcomp", content: "methods/wordcomp.yaml", desc: "Compare words"}
       - {name: "longcomp", content: "methods/longcomp.yaml", desc: "Compare longs"}
       - {name: "byteswap", content: "methods/byteswap.yaml", desc: "Swap bytes"}
       - {name: "wordswap", content: "methods/wordswap.yaml", desc: "Swap words"}
       - {name: "longswap", content: "methods/longswap.yaml", desc: "Swap longs"}
-    
+
     math:
       - {name: "abs", content: "methods/abs.yaml", desc: "Absolute value"}
       - {name: "sqrt", content: "methods/sqrt.yaml", desc: "Square root"}
@@ -144,14 +134,14 @@ by_category:
       - {name: "qsin", content: "methods/qsin.yaml", desc: "CORDIC sine"}
       - {name: "qexp", content: "methods/qexp.yaml", desc: "CORDIC exponential"}
       - {name: "qlog", content: "methods/qlog.yaml", desc: "CORDIC logarithm"}
-    
+
     strings:
       - {name: "strsize", content: "methods/strsize.yaml", desc: "String length"}
       - {name: "strcomp", content: "methods/strcomp.yaml", desc: "String compare"}
       - {name: "strcopy", content: "methods/strcopy.yaml", desc: "String copy"}
       - {name: "string", content: "methods/string.yaml", desc: "String constant"}
       - {name: "lstring", content: "methods/lstring.yaml", desc: "Counted string"}
-    
+
     smart_pins:
       - {name: "wrpin", content: "methods/wrpin.yaml", desc: "Configure smart pin"}
       - {name: "wxpin", content: "methods/wxpin.yaml", desc: "Write X parameter"}
@@ -161,14 +151,14 @@ by_category:
       - {name: "rqpin", content: "methods/rqpin.yaml", desc: "Read pin quietly"}
       - {name: "pinstart", content: "methods/pinstart.yaml", desc: "Start smart pin"}
       - {name: "pinclear", content: "methods/pinclear.yaml", desc: "Clear smart pin"}
-    
+
     locks:
       - {name: "locknew", content: "methods/locknew.yaml", desc: "Allocate new lock"}
       - {name: "lockret", content: "methods/lockret.yaml", desc: "Return lock"}
       - {name: "locktry", content: "methods/locktry.yaml", desc: "Try to acquire lock"}
       - {name: "lockrel", content: "methods/lockrel.yaml", desc: "Release lock"}
       - {name: "lockchk", content: "methods/lockchk.yaml", desc: "Check lock state"}
-    
+
     tasks:
       - {name: "taskspin", content: "methods/taskspin.yaml", desc: "Start task in cog"}
       - {name: "taskstop", content: "methods/taskstop.yaml", desc: "Stop task"}
@@ -178,13 +168,13 @@ by_category:
       - {name: "taskresume", content: "methods/taskresume.yaml", desc: "Resume task"}
       - {name: "taskwait", content: "methods/taskwait.yaml", desc: "Wait for task"}
       - {name: "tasknext", content: "methods/tasknext.yaml", desc: "Get next task"}
-    
+
     lookup:
       - {name: "lookup", content: "methods/lookup.yaml", desc: "Lookup value by index"}
       - {name: "lookupz", content: "methods/lookupz.yaml", desc: "Lookup with zero-based index"}
       - {name: "lookdown", content: "methods/lookdown.yaml", desc: "Find index of value"}
       - {name: "lookdownz", content: "methods/lookdownz.yaml", desc: "Find index zero-based"}
-    
+
     system:
       - {name: "clkset", content: "methods/clkset.yaml", desc: "Set system clock"}
       - {name: "hubset", content: "methods/hubset.yaml", desc: "Set hub parameters"}
@@ -200,28 +190,28 @@ by_category:
       - {name: "pollatn", content: "methods/pollatn.yaml", desc: "Poll attention flag"}
       - {name: "pollct", content: "methods/pollct.yaml", desc: "Poll counter"}
       - {name: "waitatn", content: "methods/waitatn.yaml", desc: "Wait for attention"}
-  
+
   idioms:
     description: "Common micro-patterns extracted from 730 source files"
     memory_operations:
       - {name: "address_of", content: "idioms/memory-access.yaml", desc: "@ operator (16,845 occurrences)"}
       - {name: "memory_access", content: "idioms/memory-access.yaml", desc: "Array access patterns"}
-    
+
     loop_patterns:
       - {name: "loop_idioms", content: "idioms/loop-patterns.yaml", desc: "Common loop constructs (3,149 occurrences)"}
-    
+
     pin_control_patterns:
       - {name: "pin_operations", content: "idioms/pin-operations.yaml", desc: "Pin manipulation patterns"}
-    
+
     timing_patterns:
       - {name: "timing_delays", content: "idioms/timing-delays.yaml", desc: "Common delay patterns"}
-    
+
     cog_management_patterns:
       - {name: "cog_operations", content: "idioms/cog-operations.yaml", desc: "Cog control patterns (1,445 occurrences)"}
-    
+
     bit_manipulation_patterns:
       - {name: "bit_operations", content: "idioms/bit-manipulation.yaml", desc: "Bit-level operations (988 occurrences)"}
-  
+
   operators:
     arithmetic:
       - {name: "add", content: "operators/op_add.yaml", desc: "Addition (+)"}
@@ -242,7 +232,7 @@ by_category:
       - {name: "rand", content: "operators/op_rand.yaml", desc: "Random"}
       - {name: "qexp", content: "operators/op_QEXP.yaml", desc: "Quick exponential"}
       - {name: "qlog", content: "operators/op_QLOG.yaml", desc: "Quick logarithm"}
-    
+
     bitwise:
       - {name: "and", content: "operators/op_and.yaml", desc: "Bitwise AND (&)"}
       - {name: "or", content: "operators/op_or.yaml", desc: "Bitwise OR (|)"}
@@ -264,7 +254,7 @@ by_category:
       - {name: "addpins", content: "operators/op_ADDPINS.yaml", desc: "Add pins"}
       - {name: "sca", content: "operators/op_SCA.yaml", desc: "Scale value"}
       - {name: "scas", content: "operators/op_SCAS.yaml", desc: "Scale signed"}
-    
+
     comparison:
       - {name: "equal", content: "operators/op_eqeq.yaml", desc: "Equal (==)"}
       - {name: "not_equal", content: "operators/op_ltgt.yaml", desc: "Not equal (<>)"}
@@ -274,19 +264,19 @@ by_category:
       - {name: "gteq", content: "operators/op_gteq.yaml", desc: "Greater than or equal (>=)"}
       - {name: "lteqgt", content: "operators/op_lteqgt.yaml", desc: "Within range (<=>)"}
       - {name: "eqeqeq", content: "operators/op_eqeqeq.yaml", desc: "Exact equal (===)"}
-    
+
     logical:
       - {name: "andand", content: "operators/op_andand.yaml", desc: "Logical AND (&&)"}
       - {name: "oror", content: "operators/op_oror.yaml", desc: "Logical OR (||)"}
       - {name: "xorxor", content: "operators/op_xorxor.yaml", desc: "Logical XOR (^^)"}
       - {name: "notandand", content: "operators/op_notandand.yaml", desc: "Logical NAND (!!)"}
-    
+
     assignment:
       - {name: "assign", content: "operators/op_assign.yaml", desc: "Assignment (:=)"}
       - {name: "add_assign", content: "operators/op_addmodulo.yaml", desc: "Add and assign (+=)"}
       - {name: "sub_assign", content: "operators/op_subdot.yaml", desc: "Subtract and assign (-=)"}
       - {name: "swap", content: "operators/op_swap.yaml", desc: "Swap values"}
-    
+
     compound:
       - {name: "adddiv", content: "operators/op_adddiv.yaml", desc: "Add then divide"}
       - {name: "adddot", content: "operators/op_adddot.yaml", desc: "Add with dot notation"}
@@ -304,7 +294,7 @@ by_category:
       - {name: "lteqdot", content: "operators/op_lteqdot.yaml", desc: "Less equal dot"}
       - {name: "ltgtdot", content: "operators/op_ltgtdot.yaml", desc: "Not equal dot"}
       - {name: "ltshr", content: "operators/op_ltshr.yaml", desc: "Less shift right"}
-    
+
     special:
       - {name: "question", content: "operators/op_question.yaml", desc: "Ternary operator (?)"}
       - {name: "colon", content: "operators/op_colon.yaml", desc: "Ternary colon (:)"}
@@ -328,14 +318,14 @@ by_complexity:
     - "repeat"
     - "if"
     - "pub/pri"
-  
+
   intermediate:
     - "case"
     - "coginit"
     - "wrpin"
     - "bytemove"
     - "abort"
-  
+
   advanced:
     - "inline_pasm"
     - "cogspin"

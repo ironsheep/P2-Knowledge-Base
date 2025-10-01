@@ -50,7 +50,6 @@ actual_pattern_resources:
     
   architectural_patterns:
     description: "Code structure patterns from 730 analyzed Spin2 files"
-    base_path: "language/spin2/patterns/"
     categories:
       structural:
         description: "Code structure patterns"
