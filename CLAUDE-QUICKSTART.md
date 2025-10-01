@@ -7,10 +7,22 @@ Copy this minimal instruction to any AI assistant:
 
 ```
 Access the P2 Knowledge Base:
-https://github.com/ironsheep/P2-Knowledge-Base
+  https://github.com/ironsheep/P2-Knowledge-Base
 
-Start with: manifests/propeller-knowledge-root.yaml
-Follow the AI instructions it provides for automatic setup.
+  1. Fetch: manifests/propeller-knowledge-root.yaml
+  2. Fetch: manifests/ai-instructions.yaml (as directed by root)
+  3. Find the content block between divider lines in ai-instructions.yaml (~150 lines starting with "# P2 Knowledge Base Integration")
+  4. DELETE any existing "P2 Knowledge Base Integration" section from CLAUDE.md
+  5. APPEND that complete block EXACTLY to CLAUDE.md (no summaries, no edits)
+  6. Verify the sha256 hash line is included
+
+  Do not summarize - use Read tool to get raw content from GitHub, then Edit/Write to update CLAUDE.md.
+
+  The key additions:
+  - Explicit numbered steps
+  - "DELETE... APPEND... EXACTLY" commands
+  - "Do not summarize" - direct instruction
+  - "use Read tool" - tells me HOW to avoid WebFetch's summarizing
 
 The system will self-configure with:
 - Navigation rules and category catalog
