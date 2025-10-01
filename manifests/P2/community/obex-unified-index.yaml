@@ -1,0 +1,3174 @@
+index_metadata:
+  version: '2.1'
+  generated: '2025-10-01T12:23:10.692780'
+  total_objects: 113
+  total_keywords: 107
+  github_raw_base: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main
+  content_base: /engineering/knowledge-base/P2/community/obex
+  description: Unified topical index with natural groupings and complete URLs
+natural_groups:
+  communication:
+    triggers:
+    - i2c
+    - iic
+    - twi
+    - spi
+    - uart
+    - serial
+    - dmx
+    - 1-wire
+    - can
+    - rs232
+    - rs485
+    - async
+    - tx
+    - rx
+    description: All communication protocols and interfaces
+  displays:
+    triggers:
+    - display
+    - lcd
+    - oled
+    - tft
+    - led
+    - matrix
+    - vga
+    - epaper
+    - e-ink
+    - hmi
+    - nextion
+    - rgb
+    - neopixel
+    - ws2812
+    - hub75
+    - graphics
+    - video
+    - screen
+    description: All visual output devices and drivers
+  sensors:
+    triggers:
+    - sensor
+    - temperature
+    - humidity
+    - pressure
+    - light
+    - motion
+    - imu
+    - accelerometer
+    - gyro
+    - encoder
+    - infrared
+    - ir
+    - tof
+    - adc
+    - analog
+    - input
+    - bme280
+    - dht
+    - mpu
+    - bno
+    - ads
+    description: All sensor and input devices
+  motors:
+    triggers:
+    - motor
+    - servo
+    - stepper
+    - pwm
+    - bldc
+    - brushless
+    - h-bridge
+    - driver
+    - actuator
+    - park
+    - step/dir
+    description: Motor control and actuators
+  audio:
+    triggers:
+    - audio
+    - sound
+    - music
+    - synth
+    - wav
+    - mp3
+    - fm
+    - codec
+    - speaker
+    - ym2612
+    - opn
+    - psg
+    - ay-3
+    description: Audio generation and processing
+  storage:
+    triggers:
+    - storage
+    - memory
+    - sd
+    - flash
+    - eeprom
+    - filesystem
+    - fat32
+    - fram
+    - sram
+    - at24c
+    description: Data storage and memory
+  timing:
+    triggers:
+    - rtc
+    - clock
+    - timer
+    - time
+    - ds1307
+    - ds3231
+    - pcf8563
+    - neotimer
+    description: Timing and clock functions
+  modules:
+    triggers:
+    - click
+    - qwiic
+    - grove
+    - mikrobus
+    - sparkfun
+    - seeed
+    description: Standard module ecosystems
+  math:
+    triggers:
+    - float
+    - decimal
+    - math
+    - integer
+    - random
+    - transform
+    - fft
+    - cordic
+    - qr
+    - algorithm
+    description: Mathematical and computational functions
+  gaming:
+    triggers:
+    - game
+    - emulator
+    - sprite
+    - neogeo
+    - genesis
+    - nintendo
+    - controller
+    - joystick
+    description: Gaming and entertainment
+topic_definitions:
+  i2c:
+    aliases:
+    - i2c
+    - iic
+    - twi
+    - two-wire
+    - two wire
+    related:
+    - qwiic
+    - grove
+    - smbus
+    description: Inter-Integrated Circuit serial protocol
+  spi:
+    aliases:
+    - spi
+    - sspi
+    - 3-wire
+    - three-wire
+    - mosi
+    - miso
+    related:
+    - chip select
+    - cs
+    description: Serial Peripheral Interface
+  uart:
+    aliases:
+    - uart
+    - serial
+    - async
+    - tx
+    - rx
+    related:
+    - rs232
+    - rs485
+    - ttl
+    description: Universal Asynchronous Receiver-Transmitter
+  dmx:
+    aliases:
+    - dmx
+    - dmx512
+    - dmx-512
+    related:
+    - lighting
+    - stage
+    description: Digital Multiplex lighting control
+  1-wire:
+    aliases:
+    - 1-wire
+    - onewire
+    - one-wire
+    - 1wire
+    related:
+    - dallas
+    - maxim
+    description: Dallas 1-Wire protocol
+  can:
+    aliases:
+    - can
+    - canbus
+    - can-bus
+    - can bus
+    related:
+    - automotive
+    - obd
+    description: Controller Area Network
+  display:
+    aliases:
+    - display
+    - displays
+    - screen
+    - monitor
+    related:
+    - graphics
+    - driver
+    - interface
+    - visual
+    description: All display technologies and drivers
+  lcd:
+    aliases:
+    - lcd
+    - liquid crystal
+    related:
+    - hd44780
+    - 16x2
+    - 20x4
+    - character display
+    - pcf8574
+    description: LCD character and graphic displays
+  oled:
+    aliases:
+    - oled
+    - organic led
+    related:
+    - ssd1306
+    - ssd1331
+    - sh1106
+    description: Organic LED displays
+  tft:
+    aliases:
+    - tft
+    - tft-lcd
+    related:
+    - ili9341
+    - st7735
+    - color display
+    - touchscreen
+    description: TFT color displays
+  led:
+    aliases:
+    - led
+    - light emitting diode
+    related:
+    - neopixel
+    - ws2812
+    - ws2811
+    - apa102
+    - dotstar
+    - rgb
+    - pixel
+    description: LED control including addressable RGB
+  matrix:
+    aliases:
+    - matrix
+    - dot matrix
+    related:
+    - hub75
+    - hub-75
+    - max7219
+    - led matrix
+    - led panel
+    description: Matrix displays including LED panels
+  vga:
+    aliases:
+    - vga
+    - video
+    related:
+    - ansi
+    - text mode
+    - graphics
+    description: VGA video output
+  epaper:
+    aliases:
+    - e-paper
+    - epaper
+    - e-ink
+    - eink
+    related:
+    - waveshare
+    - electronic paper
+    description: E-paper/E-ink displays
+  hmi:
+    aliases:
+    - hmi
+    - human machine interface
+    related:
+    - nextion
+    - timi
+    - touch
+    description: Human-machine interface displays
+  temperature:
+    aliases:
+    - temperature
+    - temp
+    - thermal
+    related:
+    - thermocouple
+    - thermistor
+    - ntc
+    - rtd
+    - max31855
+    - dht11
+    - dht22
+    - bme280
+    - ds18b20
+    description: Temperature sensing
+  humidity:
+    aliases:
+    - humidity
+    - rh
+    - relative humidity
+    related:
+    - dht11
+    - dht22
+    - bme280
+    - sht
+    description: Humidity sensing
+  pressure:
+    aliases:
+    - pressure
+    - barometer
+    - barometric
+    related:
+    - bme280
+    - bmp280
+    - bmp180
+    - bmp390
+    description: Pressure sensing
+  light:
+    aliases:
+    - light
+    - lux
+    - illuminance
+    - ambient light
+    related:
+    - bh1750
+    - tsl2561
+    - photoresistor
+    - ldr
+    description: Light intensity sensing
+  motion:
+    aliases:
+    - motion
+    - movement
+    - imu
+    - inertial
+    related:
+    - accelerometer
+    - gyro
+    - gyroscope
+    - mpu6050
+    - mpu9250
+    - 9dof
+    - 6dof
+    - bno08x
+    description: Motion and orientation sensing
+  motor:
+    aliases:
+    - motor
+    - motors
+    related:
+    - stepper
+    - servo
+    - bldc
+    - brushless
+    - dc motor
+    - h-bridge
+    - driver
+    - pwm
+    - pca9685
+    description: Motor control and drivers
+  relay:
+    aliases:
+    - relay
+    - relays
+    related:
+    - switch
+    - mosfet
+    - solid state
+    - ssr
+    description: Relay and switch control
+  audio:
+    aliases:
+    - audio
+    - sound
+    - music
+    related:
+    - wav
+    - mp3
+    - i2s
+    - dac
+    - adc
+    - codec
+    - speaker
+    - microphone
+    description: Audio generation and processing
+  synth:
+    aliases:
+    - synth
+    - synthesizer
+    - synthesis
+    related:
+    - fm
+    - ym2612
+    - ym2608
+    - ay-3
+    - sid
+    - opn
+    - opna
+    - opl
+    - psg
+    - sn76489
+    description: Sound synthesis and chip emulation
+  storage:
+    aliases:
+    - storage
+    - memory
+    related:
+    - sd
+    - sdcard
+    - flash
+    - eeprom
+    - fram
+    - sram
+    - at24c
+    - filesystem
+    - fat32
+    description: Data storage and memory
+  rtc:
+    aliases:
+    - rtc
+    - real time clock
+    - realtime clock
+    related:
+    - ds1307
+    - ds3231
+    - pcf8563
+    - time
+    - clock
+    description: Real-time clock modules
+  encoder:
+    aliases:
+    - encoder
+    - rotary encoder
+    related:
+    - quadrature
+    - rotary
+    - knob
+    - dial
+    - twist
+    description: Rotary and quadrature encoders
+  infrared:
+    aliases:
+    - ir
+    - infrared
+    related:
+    - remote
+    - nec
+    - sony
+    - rc5
+    - ircs
+    description: Infrared communication and remotes
+  click:
+    aliases:
+    - click
+    - mikrobus
+    related:
+    - mikroe
+    - mikroelektronika
+    description: MikroElektronika Click boards
+  qwiic:
+    aliases:
+    - qwiic
+    related:
+    - sparkfun
+    - i2c
+    description: SparkFun Qwiic I2C modules
+  grove:
+    aliases:
+    - grove
+    related:
+    - seeed
+    - seeedstudio
+    description: Seeed Studio Grove modules
+objects:
+  '4271':
+    id: '4271'
+    title: StrToFloat
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    - sensors
+    - math
+    content: objects/4271.yaml
+  '4858':
+    id: '4858'
+    title: 3-pin-per-channel, 4-channel, hi-res ADC
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - sound
+    - audio
+    - spin2
+    - sensors
+    - music
+    - pasm2
+    content: objects/4858.yaml
+  '4889':
+    id: '4889'
+    title: HostFS
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    content: objects/4889.yaml
+  '4926':
+    id: '4926'
+    title: PNut/Spin2 Latest Version (v51)
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - miso
+    - spin2
+    - communication
+    - 3-wire
+    - pasm2
+    - three-wire
+    - spi
+    - mosi
+    - sspi
+    content: objects/4926.yaml
+  '5189':
+    id: '5189'
+    title: 64/96/128-Bit Unsigned Integer Math
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - spin2
+    - pasm2
+    - math
+    content: objects/5189.yaml
+  '2811':
+    id: '2811'
+    title: Park transformation
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - pasm2
+    - spin2
+    - motors
+    - math
+    content: objects/2811.yaml
+  '2872':
+    id: '2872'
+    title: Simple SPI flash driver
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - miso
+    - displays
+    - monitor
+    - storage
+    - spin2
+    - motors
+    - communication
+    - 3-wire
+    - display
+    - screen
+    - motor
+    - three-wire
+    - spi
+    - mosi
+    - sspi
+    - memory
+    content: objects/2872.yaml
+  '4267':
+    id: '4267'
+    title: Ethernet RMII driver
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - displays
+    - monitor
+    - spin2
+    - motors
+    - display
+    - pasm2
+    - motor
+    - screen
+    content: objects/4267.yaml
+  '4918':
+    id: '4918'
+    title: Step/Dir signal generator
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - spin2
+    - motors
+    - sensors
+    - pasm2
+    - ir
+    - infrared
+    content: objects/4918.yaml
+  '4266':
+    id: '4266'
+    title: Simplest Serial
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - serial
+    - spin2
+    - tx
+    - async
+    - rx
+    - uart
+    - communication
+    content: objects/4266.yaml
+  '4894':
+    id: '4894'
+    title: FRSW and FAT32 for P2
+    author: ''
+    languages:
+    - SPIN2
+    - PASM
+    description: ''
+    keywords:
+    - storage
+    - spin2
+    - pasm
+    - memory
+    content: objects/4894.yaml
+  '2848':
+    id: '2848'
+    title: Graphics Display Driver Architecture
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - vga
+    - miso
+    - mosi
+    - monitor
+    - spin2
+    - motors
+    - 3-wire
+    - display
+    - screen
+    - pasm2
+    - video
+    - motor
+    - three-wire
+    - spi
+    - displays
+    - sspi
+    content: objects/2848.yaml
+  '2812':
+    id: '2812'
+    title: Binary Floating Point Routines (IEEE-32 subset)
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    - math
+    content: objects/2812.yaml
+  '2814':
+    id: '2814'
+    title: Simple formatted text routines
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    content: objects/2814.yaml
+  '2847':
+    id: '2847'
+    title: VGA Text routines
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    - video
+    - vga
+    - displays
+    content: objects/2847.yaml
+  '4047':
+    id: '4047'
+    title: DecFloat
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    - math
+    content: objects/4047.yaml
+  '3804':
+    id: '3804'
+    title: Pllset
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    content: objects/3804.yaml
+  '4442':
+    id: '4442'
+    title: 8-bit SAR ADC
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - sound
+    - audio
+    - spin2
+    - sensors
+    - music
+    content: objects/4442.yaml
+  '2849':
+    id: '2849'
+    title: ILI9341_XPT2046
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - tft
+    - ili9341
+    - spin2
+    - tft-lcd
+    - pasm2
+    content: objects/2849.yaml
+  '2858':
+    id: '2858'
+    title: MAX7219 Dot Matrix
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - matrix
+    - max7219
+    - dot-matrix
+    - spin2
+    - displays
+    content: objects/2858.yaml
+  '2867':
+    id: '2867'
+    title: Accessory Board Buttons
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    content: objects/2867.yaml
+  '4800':
+    id: '4800'
+    title: P2QR
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - spin2
+    - pasm2
+    - math
+    content: objects/4800.yaml
+  '2859':
+    id: '2859'
+    title: nextion_ez
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - human-machine-interface
+    - spin2
+    - hmi
+    - displays
+    content: objects/2859.yaml
+  '4718':
+    id: '4718'
+    title: Neotimer (Non-blocking timer)
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - timing
+    - realtime-clock
+    - spin2
+    - rtc
+    - real-time-clock
+    content: objects/4718.yaml
+  '4720':
+    id: '4720'
+    title: P2GUI (Encoder Version)
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - encoder
+    - rotary-encoder
+    - spin2
+    - sensors
+    - pasm2
+    content: objects/4720.yaml
+  '4269':
+    id: '4269'
+    title: FAT32 SD card driver
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - monitor
+    - storage
+    - spin2
+    - motors
+    - display
+    - screen
+    - pasm2
+    - motor
+    - displays
+    - memory
+    content: objects/4269.yaml
+  '4727':
+    id: '4727'
+    title: USB Human-Interface-Device Driver
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - displays
+    - monitor
+    - spin2
+    - motors
+    - display
+    - pasm2
+    - motor
+    - screen
+    content: objects/4727.yaml
+  '4746':
+    id: '4746'
+    title: WizNet W5500 Driver
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - displays
+    - monitor
+    - spin2
+    - motors
+    - display
+    - pasm2
+    - motor
+    - screen
+    content: objects/4746.yaml
+  '4758':
+    id: '4758'
+    title: Waveshare 2.9" E-paper display driver
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - sound
+    - displays
+    - audio
+    - monitor
+    - e-ink
+    - spin2
+    - motors
+    - display
+    - e-paper
+    - music
+    - epaper
+    - motor
+    - eink
+    - screen
+    content: objects/4758.yaml
+  '2817':
+    id: '2817'
+    title: ISP P2 BH1750 I2C Ambient Light Object
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - ambient-light
+    - lux
+    - illuminance
+    - i2c
+    - twi
+    - two-wire
+    - sensors
+    - iic
+    - qwiic
+    - spin2
+    - bh1750
+    - pasm2
+    - light
+    - communication
+    content: objects/2817.yaml
+  '2818':
+    id: '2818'
+    title: ISP P2 Click MPU 9DOF Driver
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - inertial
+    - monitor
+    - modules
+    - motors
+    - sensors
+    - motor
+    - imu
+    - display
+    - click
+    - screen
+    - spin2
+    - pasm2
+    - mikrobus
+    - motion
+    - movement
+    - displays
+    content: objects/2818.yaml
+  '2850':
+    id: '2850'
+    title: ISP Hub75 Matrix Driver
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - matrix
+    - dot-matrix
+    - displays
+    - monitor
+    - spin2
+    - motors
+    - display
+    - pasm2
+    - motor
+    - screen
+    content: objects/2850.yaml
+  '2873':
+    id: '2873'
+    title: ISP PCA9685 16ch PWM Servo Driver
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - displays
+    - monitor
+    - pca9685
+    - spin2
+    - motors
+    - display
+    - pasm2
+    - motor
+    - screen
+    content: objects/2873.yaml
+  '2874':
+    id: '2874'
+    title: ISP BLDC Motor Control
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - pasm2
+    - spin2
+    - motors
+    - motor
+    content: objects/2874.yaml
+  '4254':
+    id: '4254'
+    title: ISP P2 eInk Driver
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - displays
+    - monitor
+    - e-ink
+    - spin2
+    - motors
+    - display
+    - e-paper
+    - epaper
+    - motor
+    - eink
+    - screen
+    content: objects/4254.yaml
+  '4257':
+    id: '4257'
+    title: ISP high-speed 8-port serial subsystem
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - serial
+    - spin2
+    - tx
+    - async
+    - pasm2
+    - rx
+    - uart
+    - communication
+    content: objects/4257.yaml
+  '4261':
+    id: '4261'
+    title: P2 FLASH Filesystem
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - storage
+    - spin2
+    - pasm2
+    - memory
+    content: objects/4261.yaml
+  '4564':
+    id: '4564'
+    title: ISP P2 VL53L5CX time of flight driver
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - vl53
+    - light
+    - ambient-light
+    - timing
+    - lux
+    - illuminance
+    - realtime-clock
+    - monitor
+    - spin2
+    - motors
+    - sensors
+    - display
+    - screen
+    - pasm2
+    - rtc
+    - motor
+    - displays
+    - real-time-clock
+    content: objects/4564.yaml
+  '4570':
+    id: '4570'
+    title: ISP P2 PCF8575 I2C I/O Expander Object
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - i2c
+    - twi
+    - two-wire
+    - iic
+    - qwiic
+    - spin2
+    - pasm2
+    - pcf8575
+    - communication
+    content: objects/4570.yaml
+  '4571':
+    id: '4571'
+    title: "ISP P2 180\xB0 Field of View TOF Sensor"
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - pasm2
+    - spin2
+    - sensors
+    content: objects/4571.yaml
+  '4581':
+    id: '4581'
+    title: ISP P2 RPi IoT Gateway
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - spin2
+    - pasm2
+    content: objects/4581.yaml
+  '4597':
+    id: '4597'
+    title: ISP P2 TIMI Spin2 Object
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - hmi
+    - human-machine-interface
+    - miso
+    - spin2
+    - communication
+    - 3-wire
+    - pasm2
+    - three-wire
+    - spi
+    - mosi
+    - sspi
+    content: objects/4597.yaml
+  '4616':
+    id: '4616'
+    title: ISP P2 HUB75 Matrix - Morphing Digits
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - matrix
+    - spin2
+    - dot-matrix
+    - displays
+    content: objects/4616.yaml
+  '4617':
+    id: '4617'
+    title: ISP P2 Multi Servo Exercisor
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - pasm2
+    - spin2
+    - motors
+    - motor
+    content: objects/4617.yaml
+  '2877':
+    id: '2877'
+    title: Stepper Motor Driver Ver 2
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - displays
+    - monitor
+    - spin2
+    - motors
+    - display
+    - pasm2
+    - motor
+    - screen
+    content: objects/2877.yaml
+  '5246':
+    id: '5246'
+    title: BMP390 driver
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - sound
+    - displays
+    - audio
+    - monitor
+    - spin2
+    - motors
+    - display
+    - music
+    - barometric
+    - pasm2
+    - bmp390
+    - motor
+    - pressure
+    - screen
+    - barometer
+    content: objects/5246.yaml
+  '5278':
+    id: '5278'
+    title: QMC5883L HMC5883 BMM150 compass drivers
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - displays
+    - monitor
+    - spin2
+    - motors
+    - display
+    - motor
+    - screen
+    content: objects/5278.yaml
+  '2815':
+    id: '2815'
+    title: Cricket BME280
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - humidity
+    - bme280
+    - relative-humidity
+    - spin2
+    - sensors
+    - barometric
+    - temperature
+    - pressure
+    - temp
+    - thermal
+    - rh
+    - barometer
+    content: objects/2815.yaml
+  '2836':
+    id: '2836'
+    title: Cricket ESP32 AT
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    content: objects/2836.yaml
+  '2831':
+    id: '2831'
+    title: P2_rctime
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - timing
+    - realtime-clock
+    - spin2
+    - rtc
+    - real-time-clock
+    content: objects/2831.yaml
+  '2813':
+    id: '2813'
+    title: Psuedo-random and random numbers
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    - math
+    content: objects/2813.yaml
+  '2819':
+    id: '2819'
+    title: Click 4-20 MA
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    - modules
+    - mikrobus
+    - click
+    content: objects/2819.yaml
+  '2820':
+    id: '2820'
+    title: Click RTC10
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - timing
+    - realtime-clock
+    - modules
+    - spin2
+    - rtc
+    - mikrobus
+    - click
+    - real-time-clock
+    content: objects/2820.yaml
+  '2821':
+    id: '2821'
+    title: DHTxx Temperature/Humidity Sensors
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - humidity
+    - relative-humidity
+    - serial
+    - sensors
+    - spin2
+    - async
+    - tx
+    - pasm2
+    - temperature
+    - rx
+    - uart
+    - temp
+    - thermal
+    - rh
+    - communication
+    content: objects/2821.yaml
+  '2823':
+    id: '2823'
+    title: EZ Analog
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    - sensors
+    content: objects/2823.yaml
+  '2824':
+    id: '2824'
+    title: NEC RX
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - serial
+    - spin2
+    - tx
+    - async
+    - pasm2
+    - rx
+    - uart
+    - ir
+    - communication
+    - infrared
+    content: objects/2824.yaml
+  '2825':
+    id: '2825'
+    title: NEC TX
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - serial
+    - spin2
+    - tx
+    - async
+    - rx
+    - uart
+    - ir
+    - communication
+    - infrared
+    content: objects/2825.yaml
+  '2826':
+    id: '2826'
+    title: MAX31855 Thermocouple Interface
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - max31855
+    - displays
+    - monitor
+    - spin2
+    - display
+    - temperature
+    - temp
+    - thermal
+    - screen
+    content: objects/2826.yaml
+  '2827':
+    id: '2827'
+    title: PIXY2
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    content: objects/2827.yaml
+  '2828':
+    id: '2828'
+    title: Soft Timer
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - timing
+    - realtime-clock
+    - spin2
+    - pasm2
+    - rtc
+    - real-time-clock
+    content: objects/2828.yaml
+  '2829':
+    id: '2829'
+    title: Quadrature Encoder
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - encoder
+    - spin2
+    - sensors
+    - rotary-encoder
+    content: objects/2829.yaml
+  '2830':
+    id: '2830'
+    title: Sparkfun Qwiic Twist Encoder
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - encoder
+    - i2c
+    - rotary-encoder
+    - twi
+    - modules
+    - motors
+    - sensors
+    - iic
+    - two-wire
+    - qwiic
+    - spin2
+    - communication
+    content: objects/2830.yaml
+  '2832':
+    id: '2832'
+    title: Click Relay2
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - relay
+    - relays
+    - modules
+    - spin2
+    - mikrobus
+    - ay2
+    - click
+    content: objects/2832.yaml
+  '2833':
+    id: '2833'
+    title: DMX TX
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - dmx
+    - serial
+    - spin2
+    - dmx512
+    - tx
+    - async
+    - pasm2
+    - rx
+    - uart
+    - dmx-512
+    - communication
+    content: objects/2833.yaml
+  '2834':
+    id: '2834'
+    title: PWM
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    - motors
+    - motor
+    content: objects/2834.yaml
+  '2835':
+    id: '2835'
+    title: Sony IRCS Tx (infrared control system transmitter)
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - miso
+    - serial
+    - sensors
+    - communication
+    - spin2
+    - async
+    - 3-wire
+    - tx
+    - uart
+    - rx
+    - three-wire
+    - ir
+    - spi
+    - mosi
+    - sspi
+    - infrared
+    content: objects/2835.yaml
+  '2838':
+    id: '2838'
+    title: 1-Wire
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - 1-wire
+    - onewire
+    - spin2
+    - sensors
+    - one-wire
+    - 1wire
+    - pasm2
+    - ir
+    - communication
+    - infrared
+    content: objects/2838.yaml
+  '2839':
+    id: '2839'
+    title: Click DMX-TX
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - dmx
+    - serial
+    - modules
+    - spin2
+    - dmx512
+    - async
+    - tx
+    - pasm2
+    - mikrobus
+    - rx
+    - uart
+    - dmx-512
+    - click
+    - communication
+    content: objects/2839.yaml
+  '2840':
+    id: '2840'
+    title: Click RS485_3v3
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - serial
+    - modules
+    - spin2
+    - async
+    - tx
+    - pasm2
+    - mikrobus
+    - rx
+    - uart
+    - click
+    - communication
+    content: objects/2840.yaml
+  '2841':
+    id: '2841'
+    title: EZ SPI
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - miso
+    - spin2
+    - communication
+    - 3-wire
+    - pasm2
+    - three-wire
+    - spi
+    - mosi
+    - sspi
+    content: objects/2841.yaml
+  '2842':
+    id: '2842'
+    title: Full Duplex Serial
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - serial
+    - spin2
+    - tx
+    - async
+    - pasm2
+    - rx
+    - uart
+    - communication
+    content: objects/2842.yaml
+  '2843':
+    id: '2843'
+    title: I2C
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - i2c
+    - twi
+    - two-wire
+    - iic
+    - qwiic
+    - spin2
+    - pasm2
+    - communication
+    content: objects/2843.yaml
+  '2844':
+    id: '2844'
+    title: I2C Devices
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - i2c
+    - twi
+    - two-wire
+    - iic
+    - qwiic
+    - spin2
+    - communication
+    content: objects/2844.yaml
+  '2845':
+    id: '2845'
+    title: Serial
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - serial
+    - spin2
+    - tx
+    - async
+    - rx
+    - uart
+    - communication
+    content: objects/2845.yaml
+  '2846':
+    id: '2846'
+    title: Sony IRCS Rx (infrared control system receiver)
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - miso
+    - serial
+    - sensors
+    - communication
+    - spin2
+    - async
+    - 3-wire
+    - tx
+    - uart
+    - pasm2
+    - rx
+    - three-wire
+    - ir
+    - spi
+    - mosi
+    - sspi
+    - infrared
+    content: objects/2846.yaml
+  '2851':
+    id: '2851'
+    title: TM1638 LED Display Driver
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - displays
+    - monitor
+    - spin2
+    - motors
+    - motor
+    - display
+    - light-emitting-diode
+    - pasm2
+    - led
+    - screen
+    content: objects/2851.yaml
+  '2852':
+    id: '2852'
+    title: APA102C Smart Pixel Driver
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - displays
+    - monitor
+    - spin2
+    - motors
+    - motor
+    - display
+    - light-emitting-diode
+    - pasm2
+    - led
+    - screen
+    content: objects/2852.yaml
+  '2853':
+    id: '2853'
+    title: EZ MAX7219
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - matrix
+    - spin2
+    - dot-matrix
+    - max7219
+    content: objects/2853.yaml
+  '2854':
+    id: '2854'
+    title: LCD PCF8574
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    - liquid-crystal
+    - pcf8574
+    - lcd
+    - displays
+    content: objects/2854.yaml
+  '2855':
+    id: '2855'
+    title: LPD8806 "Smart" Pixel Driver
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - displays
+    - monitor
+    - spin2
+    - motors
+    - motor
+    - display
+    - light-emitting-diode
+    - pasm2
+    - led
+    - screen
+    content: objects/2855.yaml
+  '2856':
+    id: '2856'
+    title: P2ES Matrix
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - matrix
+    - spin2
+    - dot-matrix
+    - displays
+    content: objects/2856.yaml
+  '2857':
+    id: '2857'
+    title: RGBX Pixel Driver
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - displays
+    - monitor
+    - spin2
+    - motors
+    - motor
+    - display
+    - light-emitting-diode
+    - pasm2
+    - led
+    - screen
+    content: objects/2857.yaml
+  '2860':
+    id: '2860'
+    title: EZ Sound
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - audio
+    - sound
+    - music
+    - spin2
+    content: objects/2860.yaml
+  '2868':
+    id: '2868'
+    title: EZ Button
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    content: objects/2868.yaml
+  '2869':
+    id: '2869'
+    title: P2ES Control
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    content: objects/2869.yaml
+  '2870':
+    id: '2870'
+    title: Sony IRCS Rx (infrared control system receiver)
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - miso
+    - serial
+    - sensors
+    - communication
+    - spin2
+    - async
+    - 3-wire
+    - tx
+    - uart
+    - pasm2
+    - rx
+    - three-wire
+    - ir
+    - spi
+    - mosi
+    - sspi
+    - infrared
+    content: objects/2870.yaml
+  '2871':
+    id: '2871'
+    title: AT24C32
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - at24c32
+    - storage
+    - spin2
+    - memory
+    content: objects/2871.yaml
+  '2875':
+    id: '2875'
+    title: DC Motor
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    - motors
+    - motor
+    content: objects/2875.yaml
+  '2876':
+    id: '2876'
+    title: Servo
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    - motors
+    - motor
+    content: objects/2876.yaml
+  '4701':
+    id: '4701'
+    title: DC Motor Control
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    - motors
+    - motor
+    content: objects/4701.yaml
+  '4883':
+    id: '4883'
+    title: P2 Pin Filter Configuration
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    content: objects/4883.yaml
+  '5259':
+    id: '5259'
+    title: BNO08x IMU (9 DOF) (RVC Mode)
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - bno08
+    - inertial
+    - spin2
+    - sensors
+    - imu
+    - motion
+    - movement
+    content: objects/5259.yaml
+  '5274':
+    id: '5274'
+    title: PING+ for PING))) and LaserPING
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    content: objects/5274.yaml
+  '5281':
+    id: '5281'
+    title: Click Stepper-2 Demo
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - modules
+    - motors
+    - spin2
+    - mikrobus
+    - motor
+    - click
+    content: objects/5281.yaml
+  '2861':
+    id: '2861'
+    title: reSound
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - sound
+    - audio
+    - spin2
+    - music
+    - pasm2
+    content: objects/2861.yaml
+  '2837':
+    id: '2837'
+    title: ESP32
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    content: objects/2837.yaml
+  '5252':
+    id: '5252'
+    title: MAVLink Message Parser
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    content: objects/5252.yaml
+  '4911':
+    id: '4911'
+    title: IO Pin State Detection Demo
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - spin2
+    content: objects/4911.yaml
+  '4917':
+    id: '4917'
+    title: Sharing variables with SPIN2 and PASM2
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - miso
+    - spin2
+    - communication
+    - 3-wire
+    - pasm2
+    - three-wire
+    - spi
+    - mosi
+    - sspi
+    content: objects/4917.yaml
+  '2862':
+    id: '2862'
+    title: OPN2cog
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - audio
+    - synth
+    - spin2
+    - synthesizer
+    - pasm2
+    - synthesis
+    content: objects/2862.yaml
+  '2863':
+    id: '2863'
+    title: OPNAcog
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - audio
+    - synth
+    - spin2
+    - synthesizer
+    - pasm2
+    - synthesis
+    content: objects/2863.yaml
+  '2864':
+    id: '2864'
+    title: AYcog (P2 Port)
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - spin2
+    - pasm2
+    content: objects/2864.yaml
+  '2865':
+    id: '2865'
+    title: SNEcog (P2 Port)
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - ir
+    - spin2
+    - pasm2
+    - infrared
+    content: objects/2865.yaml
+  '2866':
+    id: '2866'
+    title: SPCcog
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - spin2
+    - pasm2
+    content: objects/2866.yaml
+  '4012':
+    id: '4012'
+    title: 3072 Sprites Proof-of-Concept
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - spin2
+    - pasm2
+    - gaming
+    content: objects/4012.yaml
+  '4060':
+    id: '4060'
+    title: FM Radio broadcasting
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - sound
+    - audio
+    - synth
+    - spin2
+    - sensors
+    - synthesizer
+    - music
+    - pasm2
+    - synthesis
+    content: objects/4060.yaml
+  '4080':
+    id: '4080'
+    title: Optimized JPEG Decoder
+    author: ''
+    languages:
+    - UNKNOWN
+    description: ''
+    keywords:
+    - hmi
+    - human-machine-interface
+    - unknown
+    content: objects/4080.yaml
+  '4087':
+    id: '4087'
+    title: NeoYume - NeoGeo emulator
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - spin2
+    - pasm2
+    - gaming
+    content: objects/4087.yaml
+  '4162':
+    id: '4162'
+    title: MegaYume - Mega Drive emulator
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - spin2
+    - pasm2
+    - gaming
+    content: objects/4162.yaml
+  '4198':
+    id: '4198'
+    title: USBnew
+    author: ''
+    languages:
+    - SPIN2
+    - PASM2
+    description: ''
+    keywords:
+    - spin2
+    - pasm2
+    content: objects/4198.yaml
+  '4064':
+    id: '4064'
+    title: ADS1118
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - ads1118
+    - spin2
+    - sensors
+    - ds1118
+    content: objects/4064.yaml
+  '4068':
+    id: '4068'
+    title: MAX3010X
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - max3010
+    - spin2
+    content: objects/4068.yaml
+  '4070':
+    id: '4070'
+    title: MFRC522
+    author: ''
+    languages:
+    - SPIN2
+    description: ''
+    keywords:
+    - ir
+    - spin2
+    - infrared
+    content: objects/4070.yaml
+keyword_index:
+  spin2:
+  - '4271'
+  - '4858'
+  - '4889'
+  - '4926'
+  - '5189'
+  - '2811'
+  - '2872'
+  - '4267'
+  - '4918'
+  - '4266'
+  - '4894'
+  - '2848'
+  - '2812'
+  - '2814'
+  - '2847'
+  - '4047'
+  - '3804'
+  - '4442'
+  - '2849'
+  - '2858'
+  - '2867'
+  - '4800'
+  - '2859'
+  - '4718'
+  - '4720'
+  - '4269'
+  - '4727'
+  - '4746'
+  - '4758'
+  - '2817'
+  - '2818'
+  - '2850'
+  - '2873'
+  - '2874'
+  - '4254'
+  - '4257'
+  - '4261'
+  - '4564'
+  - '4570'
+  - '4571'
+  - '4581'
+  - '4597'
+  - '4616'
+  - '4617'
+  - '2877'
+  - '5246'
+  - '5278'
+  - '2815'
+  - '2836'
+  - '2831'
+  - '2813'
+  - '2819'
+  - '2820'
+  - '2821'
+  - '2823'
+  - '2824'
+  - '2825'
+  - '2826'
+  - '2827'
+  - '2828'
+  - '2829'
+  - '2830'
+  - '2832'
+  - '2833'
+  - '2834'
+  - '2835'
+  - '2838'
+  - '2839'
+  - '2840'
+  - '2841'
+  - '2842'
+  - '2843'
+  - '2844'
+  - '2845'
+  - '2846'
+  - '2851'
+  - '2852'
+  - '2853'
+  - '2854'
+  - '2855'
+  - '2856'
+  - '2857'
+  - '2860'
+  - '2868'
+  - '2869'
+  - '2870'
+  - '2871'
+  - '2875'
+  - '2876'
+  - '4701'
+  - '4883'
+  - '5259'
+  - '5274'
+  - '5281'
+  - '2861'
+  - '2837'
+  - '5252'
+  - '4911'
+  - '4917'
+  - '2862'
+  - '2863'
+  - '2864'
+  - '2865'
+  - '2866'
+  - '4012'
+  - '4060'
+  - '4087'
+  - '4162'
+  - '4198'
+  - '4064'
+  - '4068'
+  - '4070'
+  sensors:
+  - '4271'
+  - '4858'
+  - '4918'
+  - '4442'
+  - '4720'
+  - '2817'
+  - '2818'
+  - '4564'
+  - '4571'
+  - '2815'
+  - '2821'
+  - '2823'
+  - '2829'
+  - '2830'
+  - '2835'
+  - '2838'
+  - '2846'
+  - '2870'
+  - '5259'
+  - '4060'
+  - '4064'
+  math:
+  - '4271'
+  - '5189'
+  - '2811'
+  - '2812'
+  - '4047'
+  - '4800'
+  - '2813'
+  sound:
+  - '4858'
+  - '4442'
+  - '4758'
+  - '5246'
+  - '2860'
+  - '2861'
+  - '4060'
+  audio:
+  - '4858'
+  - '4442'
+  - '4758'
+  - '5246'
+  - '2860'
+  - '2861'
+  - '2862'
+  - '2863'
+  - '4060'
+  music:
+  - '4858'
+  - '4442'
+  - '4758'
+  - '5246'
+  - '2860'
+  - '2861'
+  - '4060'
+  pasm2:
+  - '4858'
+  - '4926'
+  - '5189'
+  - '2811'
+  - '4267'
+  - '4918'
+  - '2848'
+  - '2849'
+  - '4800'
+  - '4720'
+  - '4269'
+  - '4727'
+  - '4746'
+  - '2817'
+  - '2818'
+  - '2850'
+  - '2873'
+  - '2874'
+  - '4257'
+  - '4261'
+  - '4564'
+  - '4570'
+  - '4571'
+  - '4581'
+  - '4597'
+  - '4617'
+  - '2877'
+  - '5246'
+  - '2821'
+  - '2824'
+  - '2828'
+  - '2833'
+  - '2838'
+  - '2839'
+  - '2840'
+  - '2841'
+  - '2842'
+  - '2843'
+  - '2846'
+  - '2851'
+  - '2852'
+  - '2855'
+  - '2857'
+  - '2870'
+  - '2861'
+  - '4917'
+  - '2862'
+  - '2863'
+  - '2864'
+  - '2865'
+  - '2866'
+  - '4012'
+  - '4060'
+  - '4087'
+  - '4162'
+  - '4198'
+  miso:
+  - '4926'
+  - '2872'
+  - '2848'
+  - '4597'
+  - '2835'
+  - '2841'
+  - '2846'
+  - '2870'
+  - '4917'
+  communication:
+  - '4926'
+  - '2872'
+  - '4266'
+  - '2817'
+  - '4257'
+  - '4570'
+  - '4597'
+  - '2821'
+  - '2824'
+  - '2825'
+  - '2830'
+  - '2833'
+  - '2835'
+  - '2838'
+  - '2839'
+  - '2840'
+  - '2841'
+  - '2842'
+  - '2843'
+  - '2844'
+  - '2845'
+  - '2846'
+  - '2870'
+  - '4917'
+  3-wire:
+  - '4926'
+  - '2872'
+  - '2848'
+  - '4597'
+  - '2835'
+  - '2841'
+  - '2846'
+  - '2870'
+  - '4917'
+  three-wire:
+  - '4926'
+  - '2872'
+  - '2848'
+  - '4597'
+  - '2835'
+  - '2841'
+  - '2846'
+  - '2870'
+  - '4917'
+  spi:
+  - '4926'
+  - '2872'
+  - '2848'
+  - '4597'
+  - '2835'
+  - '2841'
+  - '2846'
+  - '2870'
+  - '4917'
+  mosi:
+  - '4926'
+  - '2872'
+  - '2848'
+  - '4597'
+  - '2835'
+  - '2841'
+  - '2846'
+  - '2870'
+  - '4917'
+  sspi:
+  - '4926'
+  - '2872'
+  - '2848'
+  - '4597'
+  - '2835'
+  - '2841'
+  - '2846'
+  - '2870'
+  - '4917'
+  motors:
+  - '2811'
+  - '2872'
+  - '4267'
+  - '4918'
+  - '2848'
+  - '4269'
+  - '4727'
+  - '4746'
+  - '4758'
+  - '2818'
+  - '2850'
+  - '2873'
+  - '2874'
+  - '4254'
+  - '4564'
+  - '4617'
+  - '2877'
+  - '5246'
+  - '5278'
+  - '2830'
+  - '2834'
+  - '2851'
+  - '2852'
+  - '2855'
+  - '2857'
+  - '2875'
+  - '2876'
+  - '4701'
+  - '5281'
+  displays:
+  - '2872'
+  - '4267'
+  - '2848'
+  - '2847'
+  - '2858'
+  - '2859'
+  - '4269'
+  - '4727'
+  - '4746'
+  - '4758'
+  - '2818'
+  - '2850'
+  - '2873'
+  - '4254'
+  - '4564'
+  - '4616'
+  - '2877'
+  - '5246'
+  - '5278'
+  - '2826'
+  - '2851'
+  - '2852'
+  - '2854'
+  - '2855'
+  - '2856'
+  - '2857'
+  monitor:
+  - '2872'
+  - '4267'
+  - '2848'
+  - '4269'
+  - '4727'
+  - '4746'
+  - '4758'
+  - '2818'
+  - '2850'
+  - '2873'
+  - '4254'
+  - '4564'
+  - '2877'
+  - '5246'
+  - '5278'
+  - '2826'
+  - '2851'
+  - '2852'
+  - '2855'
+  - '2857'
+  storage:
+  - '2872'
+  - '4894'
+  - '4269'
+  - '4261'
+  - '2871'
+  display:
+  - '2872'
+  - '4267'
+  - '2848'
+  - '4269'
+  - '4727'
+  - '4746'
+  - '4758'
+  - '2818'
+  - '2850'
+  - '2873'
+  - '4254'
+  - '4564'
+  - '2877'
+  - '5246'
+  - '5278'
+  - '2826'
+  - '2851'
+  - '2852'
+  - '2855'
+  - '2857'
+  screen:
+  - '2872'
+  - '4267'
+  - '2848'
+  - '4269'
+  - '4727'
+  - '4746'
+  - '4758'
+  - '2818'
+  - '2850'
+  - '2873'
+  - '4254'
+  - '4564'
+  - '2877'
+  - '5246'
+  - '5278'
+  - '2826'
+  - '2851'
+  - '2852'
+  - '2855'
+  - '2857'
+  motor:
+  - '2872'
+  - '4267'
+  - '2848'
+  - '4269'
+  - '4727'
+  - '4746'
+  - '4758'
+  - '2818'
+  - '2850'
+  - '2873'
+  - '2874'
+  - '4254'
+  - '4564'
+  - '4617'
+  - '2877'
+  - '5246'
+  - '5278'
+  - '2834'
+  - '2851'
+  - '2852'
+  - '2855'
+  - '2857'
+  - '2875'
+  - '2876'
+  - '4701'
+  - '5281'
+  memory:
+  - '2872'
+  - '4894'
+  - '4269'
+  - '4261'
+  - '2871'
+  ir:
+  - '4918'
+  - '2824'
+  - '2825'
+  - '2835'
+  - '2838'
+  - '2846'
+  - '2870'
+  - '2865'
+  - '4070'
+  infrared:
+  - '4918'
+  - '2824'
+  - '2825'
+  - '2835'
+  - '2838'
+  - '2846'
+  - '2870'
+  - '2865'
+  - '4070'
+  serial:
+  - '4266'
+  - '4257'
+  - '2821'
+  - '2824'
+  - '2825'
+  - '2833'
+  - '2835'
+  - '2839'
+  - '2840'
+  - '2842'
+  - '2845'
+  - '2846'
+  - '2870'
+  tx:
+  - '4266'
+  - '4257'
+  - '2821'
+  - '2824'
+  - '2825'
+  - '2833'
+  - '2835'
+  - '2839'
+  - '2840'
+  - '2842'
+  - '2845'
+  - '2846'
+  - '2870'
+  async:
+  - '4266'
+  - '4257'
+  - '2821'
+  - '2824'
+  - '2825'
+  - '2833'
+  - '2835'
+  - '2839'
+  - '2840'
+  - '2842'
+  - '2845'
+  - '2846'
+  - '2870'
+  rx:
+  - '4266'
+  - '4257'
+  - '2821'
+  - '2824'
+  - '2825'
+  - '2833'
+  - '2835'
+  - '2839'
+  - '2840'
+  - '2842'
+  - '2845'
+  - '2846'
+  - '2870'
+  uart:
+  - '4266'
+  - '4257'
+  - '2821'
+  - '2824'
+  - '2825'
+  - '2833'
+  - '2835'
+  - '2839'
+  - '2840'
+  - '2842'
+  - '2845'
+  - '2846'
+  - '2870'
+  pasm:
+  - '4894'
+  vga:
+  - '2848'
+  - '2847'
+  video:
+  - '2848'
+  - '2847'
+  tft:
+  - '2849'
+  ili9341:
+  - '2849'
+  tft-lcd:
+  - '2849'
+  matrix:
+  - '2858'
+  - '2850'
+  - '4616'
+  - '2853'
+  - '2856'
+  max7219:
+  - '2858'
+  - '2853'
+  dot-matrix:
+  - '2858'
+  - '2850'
+  - '4616'
+  - '2853'
+  - '2856'
+  human-machine-interface:
+  - '2859'
+  - '4597'
+  - '4080'
+  hmi:
+  - '2859'
+  - '4597'
+  - '4080'
+  timing:
+  - '4718'
+  - '4564'
+  - '2831'
+  - '2820'
+  - '2828'
+  realtime-clock:
+  - '4718'
+  - '4564'
+  - '2831'
+  - '2820'
+  - '2828'
+  rtc:
+  - '4718'
+  - '4564'
+  - '2831'
+  - '2820'
+  - '2828'
+  real-time-clock:
+  - '4718'
+  - '4564'
+  - '2831'
+  - '2820'
+  - '2828'
+  encoder:
+  - '4720'
+  - '2829'
+  - '2830'
+  rotary-encoder:
+  - '4720'
+  - '2829'
+  - '2830'
+  e-ink:
+  - '4758'
+  - '4254'
+  e-paper:
+  - '4758'
+  - '4254'
+  epaper:
+  - '4758'
+  - '4254'
+  eink:
+  - '4758'
+  - '4254'
+  ambient-light:
+  - '2817'
+  - '4564'
+  lux:
+  - '2817'
+  - '4564'
+  illuminance:
+  - '2817'
+  - '4564'
+  i2c:
+  - '2817'
+  - '4570'
+  - '2830'
+  - '2843'
+  - '2844'
+  twi:
+  - '2817'
+  - '4570'
+  - '2830'
+  - '2843'
+  - '2844'
+  two-wire:
+  - '2817'
+  - '4570'
+  - '2830'
+  - '2843'
+  - '2844'
+  iic:
+  - '2817'
+  - '4570'
+  - '2830'
+  - '2843'
+  - '2844'
+  qwiic:
+  - '2817'
+  - '4570'
+  - '2830'
+  - '2843'
+  - '2844'
+  bh1750:
+  - '2817'
+  light:
+  - '2817'
+  - '4564'
+  inertial:
+  - '2818'
+  - '5259'
+  modules:
+  - '2818'
+  - '2819'
+  - '2820'
+  - '2830'
+  - '2832'
+  - '2839'
+  - '2840'
+  - '5281'
+  imu:
+  - '2818'
+  - '5259'
+  click:
+  - '2818'
+  - '2819'
+  - '2820'
+  - '2832'
+  - '2839'
+  - '2840'
+  - '5281'
+  mikrobus:
+  - '2818'
+  - '2819'
+  - '2820'
+  - '2832'
+  - '2839'
+  - '2840'
+  - '5281'
+  motion:
+  - '2818'
+  - '5259'
+  movement:
+  - '2818'
+  - '5259'
+  pca9685:
+  - '2873'
+  vl53:
+  - '4564'
+  pcf8575:
+  - '4570'
+  barometric:
+  - '5246'
+  - '2815'
+  bmp390:
+  - '5246'
+  pressure:
+  - '5246'
+  - '2815'
+  barometer:
+  - '5246'
+  - '2815'
+  humidity:
+  - '2815'
+  - '2821'
+  bme280:
+  - '2815'
+  relative-humidity:
+  - '2815'
+  - '2821'
+  temperature:
+  - '2815'
+  - '2821'
+  - '2826'
+  temp:
+  - '2815'
+  - '2821'
+  - '2826'
+  thermal:
+  - '2815'
+  - '2821'
+  - '2826'
+  rh:
+  - '2815'
+  - '2821'
+  max31855:
+  - '2826'
+  relay:
+  - '2832'
+  relays:
+  - '2832'
+  ay2:
+  - '2832'
+  dmx:
+  - '2833'
+  - '2839'
+  dmx512:
+  - '2833'
+  - '2839'
+  dmx-512:
+  - '2833'
+  - '2839'
+  1-wire:
+  - '2838'
+  onewire:
+  - '2838'
+  one-wire:
+  - '2838'
+  1wire:
+  - '2838'
+  light-emitting-diode:
+  - '2851'
+  - '2852'
+  - '2855'
+  - '2857'
+  led:
+  - '2851'
+  - '2852'
+  - '2855'
+  - '2857'
+  liquid-crystal:
+  - '2854'
+  pcf8574:
+  - '2854'
+  lcd:
+  - '2854'
+  at24c32:
+  - '2871'
+  bno08:
+  - '5259'
+  synth:
+  - '2862'
+  - '2863'
+  - '4060'
+  synthesizer:
+  - '2862'
+  - '2863'
+  - '4060'
+  synthesis:
+  - '2862'
+  - '2863'
+  - '4060'
+  gaming:
+  - '4012'
+  - '4087'
+  - '4162'
+  unknown:
+  - '4080'
+  ads1118:
+  - '4064'
+  ds1118:
+  - '4064'
+  max3010:
+  - '4068'
+usage_instructions:
+  natural_group_search:
+  - 'Use natural group keywords for broad searches:'
+  - '  ''communication'' - All comm protocols (I2C, SPI, UART, etc.)'
+  - '  ''displays'' - All visual output devices'
+  - '  ''sensors'' - All input/sensing devices'
+  - '  ''motors'' - All motor control'
+  - '  ''audio'' - All sound generation'
+  - '  ''storage'' - All memory/storage'
+  - '  ''timing'' - All RTC/timer functions'
+  - '  ''modules'' - Click/Qwiic/Grove boards'
+  search_strategy:
+  - 1. Download this single index file
+  - 2. Search keyword_index for your topic or natural group
+  - 3. Get object IDs from keyword_index
+  - 4. Look up full object details in objects section
+  - '5. Construct URL: github_raw_base + content_base + content'
+  - 6. Fetch object YAML from constructed URL
+  - 7. Object YAML contains download_direct URL for actual code
+  url_construction:
+  - URL = github_raw_base + content_base + content
+  - 'Example:'
+  - '  github_raw_base: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main'
+  - '  content_base: /engineering/knowledge-base/P2/community/obex'
+  - '  content: objects/2817.yaml'
+  - '  Result: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/knowledge-base/P2/community/obex/objects/2817.yaml'
+  example_searches:
+    Find all communication: "keyword_index['communication'] \u2192 all protocol objects"
+    Find all displays: "keyword_index['displays'] \u2192 all display objects"
+    Find I2C drivers: "keyword_index['i2c'] \u2192 specific I2C objects"
+    Find jonnymac objects: "keyword_index['jonnymac'] \u2192 author's objects"

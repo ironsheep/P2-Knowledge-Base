@@ -35,12 +35,6 @@ Note your device ID (e.g., `P9cektn7`).
 
 ### 3. Download and Run
 
-#### Option A: Simple One-Shot Test
-```bash
-# Download to RAM and show output in console
-pnut-term-ts -r myprogram.bin -p P9cektn7
-```
-
 #### Option B: Background Execution with Log Monitoring (Cleaner)
 ```bash
 # Run download in background and capture PID
@@ -48,38 +42,12 @@ pnut-term-ts -r myprogram.bin -p P9cektn7 &
 PID=$!
 
 # Monitor the log output
-tail -f logs/debug_*.log
+tail -f logs/$(ls -t1 logs | head -1)
 
 # When done, clean shutdown
 kill -TERM $PID
 ```
 
-#### Option C: Development Cycle with Clean Signals (Recommended)
-
-##### RAM Development Workflow (Fast Iteration)
-```bash
-# Development cycle
-while developing; do
-  # Edit and compile
-  vim myprogram.spin2
-  pnut_ts -d myprogram.spin2
-
-  # Download to RAM and run in background
-  pnut-term-ts -r myprogram.bin -p P9cektn7 &
-  PID=$!
-
-  # Monitor logs (in another terminal or split pane)
-  tail -f logs/debug_*.log
-
-  # Test your program...
-  # When ready for next iteration:
-
-  # Clean shutdown using signal
-  kill -TERM $PID
-
-  # Loop continues for next edit/compile/test cycle
-done
-```
 
 ##### FLASH Testing Workflow (Persistent Storage)
 ```bash
@@ -92,7 +60,7 @@ pnut-term-ts -f myprogram.flash -p P9cektn7 &
 PID=$!
 
 # Monitor logs
-tail -f logs/debug_*.log
+tail -f logs/$(ls -t1 logs | head -1)
 
 # If you need to reset the processor (reboot from FLASH)
 kill -USR1 $PID
@@ -101,11 +69,13 @@ kill -USR1 $PID
 kill -TERM $PID
 ```
 
-**Signal Reference (Now Implemented):**
+**Signal Reference:**
+
 - `kill -TERM $PID` - Clean shutdown of terminal session
 - `kill -USR1 $PID` - Reset processor (causes reboot from FLASH)
 
-**Alternative (crude but effective):**
+**Alternative (only as last resort):**
+
 - `pkill pnut-term-ts` - Kill by process name (less precise)
 
 ### 4. Understanding Debug Logs
@@ -122,10 +92,7 @@ Log format example:
 
 ```bash
 # Find newest log file
-ls -t logs/*.log | head -1
-
-# Or with date pattern
-ls logs/debug_$(date +%y%m%d)-*.log
+ls -t1 logs/*.log | head -1
 ```
 
 ## Writing Testable Code
@@ -177,7 +144,7 @@ pnut-term-ts -r queue_test.bin -p P9cektn7 &
 PID=$!
 
 # 4. Monitor output
-tail -f logs/debug_$(date +%y%m%d)-*.log
+tail -f logs/$(ls -t1 logs | head -1)
 
 # 5. Clean shutdown when done
 kill -TERM $PID
@@ -205,7 +172,7 @@ while true; do
   
   # Show log
   echo "Monitoring output (Ctrl-C to stop test)..."
-  tail -f logs/debug_*.log
+  tail -f logs/$(ls -t1 logs | head -1)
   
   # When user hits Ctrl-C on tail, clean up
   echo "Stopping program..."
@@ -227,7 +194,7 @@ pnut-term-ts -f production.flash -p P9cektn7 &
 PID=$!
 
 # 3. Monitor initial boot
-tail -f logs/debug_*.log
+tail -f logs/$(ls -t1 logs | head -1)
 
 # 4. Test reset capability
 echo "Testing processor reset..."
@@ -243,17 +210,13 @@ kill -TERM $PID
 
 - **Always compile with `-d` flag** during testing for debug output
 - **Capture PID** when starting pnut-term-ts for clean shutdown
-- **Use `kill -TERM $PID`** instead of crude `pkill` when possible
-- **Monitor logs** instead of console for cleaner output
+- **Use `kill -TERM $PID`** instead crude `pkill` when possible
+- **Monitor logs** instead of console (console doesn't have log data)
 - **Keep test programs modular** with clear pass/fail reporting
 - **Use smaller data structures** for testing (e.g., QUEUE_SIZE = 5)
 - **Add periodic output** to confirm program is running
 
 ## Common Issues
-
-**Empty string error during compilation:**
-- Check for encoding issues
-- Use block comments `{ }` instead of line comments with apostrophes
 
 **Can't find PropPlug:**
 - Ensure USB device is connected
