@@ -9,7 +9,7 @@ last_updated: "2025-01-29T00:00:00Z"
 # STEP 1: Check AI Instructions (compare hash with your stored version)
 ai_instructions:
   manifest: "manifests/ai-instructions.yaml"
-  content_hash: "sha256:085c46261ace29f85777174e819a10c3fe648c17a689d093639085a7ba6a3684"  # Will be updated by hash script
+  content_hash: "sha256:3e28d3c09b5f10d51675ba7456c243a675b898c5f203b6b47a6456d15c05f28a"  # Will be updated by hash script
   check_protocol: |
     1. Compare this hash with your stored 'p2kb_instructions_hash'
     2. If different or not stored → fetch ai_instructions.manifest
