@@ -1,10 +1,10 @@
 # P2 Knowledge Base - AI Integration Instructions
 # This file teaches AI systems how to use the P2 Knowledge Base effectively
 # Version: 2.0
-# Hash: sha256:3e28d3c09b5f10d51675ba7456c243a675b898c5f203b6b47a6456d15c05f28a
+# Hash: sha256:56b39b658f0a2188b5f9dd2b19abc39c613c4fa5e9f94a7261b37cb1896297d1
 
 instructions_version: "2.0"
-content_hash: "sha256:3e28d3c09b5f10d51675ba7456c243a675b898c5f203b6b47a6456d15c05f28a"  # Self-reference for validation
+content_hash: "sha256:56b39b658f0a2188b5f9dd2b19abc39c613c4fa5e9f94a7261b37cb1896297d1"  # Self-reference for validation
 last_updated: "2025-01-29T00:00:00Z"
 
 # READ and follow these setup_instructions:
@@ -16,9 +16,12 @@ setup_instructions: |
   **The content is ~150 lines and MUST be saved IN FULL**
 
   ### For Claude/Claude Code:
-  1. **FETCH RAW CONTENT:** Use curl or Read tool to get this file:
-     https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-instructions.yaml
-     (DO NOT use WebFetch - it summarizes. You need RAW content.)
+  1. **FETCH RAW CONTENT:** Use WebFetch with explicit instruction to get COMPLETE content:
+     
+     WebFetch(
+       url: "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-instructions.yaml",
+       prompt: "Return the COMPLETE raw YAML content without any summarization, truncation, or modification. I need every line exactly as-is."
+     )
   2. **EXTRACT CONTENT BLOCK:** Get all lines between these markers:
      START: "# ============================================================================"
             "# START OF EXACT CONTENT - COPY EVERYTHING BELOW THIS LINE"
@@ -50,7 +53,7 @@ ai_integration_content: |
   # P2 Knowledge Base Integration
   _Instructions Version: 2.0_
   _Last Updated: 2025-01-29_
-  _Instructions Hash: sha256:3e28d3c09b5f10d51675ba7456c243a675b898c5f203b6b47a6456d15c05f28a
+  _Instructions Hash: sha256:56b39b658f0a2188b5f9dd2b19abc39c613c4fa5e9f94a7261b37cb1896297d1
 
   ## 🚨 MANDATORY SESSION START PROTOCOL
 
@@ -62,7 +65,7 @@ ai_integration_content: |
   5. If same → Your instructions are current, proceed
 
   **STORED HASH TO COMPARE AGAINST:**
-  `sha256:3e28d3c09b5f10d51675ba7456c243a675b898c5f203b6b47a6456d15c05f28a`
+  `sha256:56b39b658f0a2188b5f9dd2b19abc39c613c4fa5e9f94a7261b37cb1896297d1`
 
   ⚠️ CRITICAL: Compare the root's hash with THIS stored hash above, NOT with the hash in the header of these instructions!
 

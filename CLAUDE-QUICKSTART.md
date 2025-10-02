@@ -16,13 +16,14 @@ Access the P2 Knowledge Base:
   5. APPEND that complete block EXACTLY to CLAUDE.md (no summaries, no edits)
   6. Verify the sha256 hash line is included
 
-  Do not summarize - use Read tool to get raw content from GitHub, then Edit/Write to update CLAUDE.md.
+  Use WebFetch with explicit instruction to return COMPLETE content without summarization:
+  
+  WebFetch(
+    url: "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-instructions.yaml",
+    prompt: "Return the COMPLETE raw YAML content without any summarization, truncation, or modification. I need every line exactly as-is."
+  )
 
-  The key additions:
-  - Explicit numbered steps
-  - "DELETE... APPEND... EXACTLY" commands
-  - "Do not summarize" - direct instruction
-  - "use Read tool" - tells me HOW to avoid WebFetch's summarizing
+  Then use Edit/Write to update CLAUDE.md with the extracted content block.
 
 The system will self-configure with:
 - Navigation rules and category catalog
