@@ -53,30 +53,73 @@ Follow the AI instructions it provides for automatic setup.
 
 **For Claude Code instances that cannot directly access repository files:**
 
-Some remote AI environments have limitations accessing GitHub content directly. Use curl/wget to download and cache files on-demand:
+Some remote AI environments have limitations accessing GitHub content directly. The solution is to create a platform-specific fetch script that can be pre-approved for repeated use:
 
+#### Step 1: Platform Detection
 ```bash
-# Setup (one-time)
-mkdir -p .p2kb-cache
-echo ".p2kb-cache/" >> .gitignore
-
-# Download function
-fetch_kb_file() {
-  local path=$1
-  local cache=".p2kb-cache/${path}"
-  local url="https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/${path}"
-
-  if [ -f "$cache" ]; then cat "$cache"
-  else
-    mkdir -p "$(dirname "$cache")"
-    curl -o "$cache" "$url" 2>/dev/null || wget -O "$cache" "$url"
-    cat "$cache"
-  fi
-}
-
-# Start with root manifest
-fetch_kb_file "manifests/propeller-knowledge-root.yaml"
+# Claude will detect your platform automatically
+if command -v uname &> /dev/null; then
+  echo "Unix-like system detected (macOS/Linux)"
+elif command -v powershell &> /dev/null; then
+  echo "Windows system detected"
+fi
 ```
+
+#### Step 2: Script Creation (One-Time)
+
+**For Unix/macOS/Linux:**
+Claude will create `.p2kb-cache/fetch-kb-file.sh`:
+```bash
+#!/bin/bash
+# P2 Knowledge Base File Fetcher
+path=$1
+cache=".p2kb-cache/${path}"
+url="https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/${path}"
+
+if [ -f "$cache" ]; then
+  cat "$cache"
+else
+  mkdir -p "$(dirname "$cache")"
+  curl -sS -o "$cache" "$url" 2>/dev/null || wget -q -O "$cache" "$url"
+  cat "$cache"
+fi
+```
+
+**For Windows:**
+Claude will create `.p2kb-cache\fetch-kb-file.ps1`:
+```powershell
+# P2 Knowledge Base File Fetcher
+param($path)
+$cache = ".p2kb-cache\$($path -replace '/','\\')"
+$url = "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/$path"
+
+if (Test-Path $cache) {
+  Get-Content $cache -Raw
+} else {
+  $dir = Split-Path $cache -Parent
+  New-Item -ItemType Directory -Force -Path $dir | Out-Null
+  Invoke-WebRequest -Uri $url -OutFile $cache
+  Get-Content $cache -Raw
+}
+```
+
+#### Step 3: Usage (Repeated, No Approval Needed)
+
+**Unix/macOS/Linux:**
+```bash
+bash .p2kb-cache/fetch-kb-file.sh "manifests/propeller-knowledge-root.yaml"
+```
+
+**Windows:**
+```powershell
+powershell -File .p2kb-cache\fetch-kb-file.ps1 "manifests/propeller-knowledge-root.yaml"
+```
+
+#### Benefits of This Approach
+1. **One-time approval**: Script file can be pre-approved
+2. **Cross-platform**: Works on Windows, macOS, and Linux
+3. **Efficient caching**: Downloads only once, uses cache thereafter
+4. **No repeated prompts**: Execute the script without approval each time
 
 **Cache Management:**
 ```bash

@@ -4,7 +4,7 @@
 # Hash: sha256:56b39b658f0a2188b5f9dd2b19abc39c613c4fa5e9f94a7261b37cb1896297d1
 
 instructions_version: "2.0"
-content_hash: "sha256:31b5a9d632dd6438c01afbe8c5986e3375eded6becc181009231d42e098ff848"  # Self-reference for validation
+content_hash: "sha256:1a35a65bda47e14dfafe76ac942f67a759182075229823c567ff52a90b3afe7b"  # Self-reference for validation
 last_updated: "2025-10-03T00:00:00Z"
 
 # READ and follow these setup_instructions:
@@ -53,7 +53,7 @@ ai_integration_content: |
   # P2 Knowledge Base Integration
   _Instructions Version: 2.0_
   _Last Updated: 2025-10-03_
-  _Instructions Hash: sha256:31b5a9d632dd6438c01afbe8c5986e3375eded6becc181009231d42e098ff848
+  _Instructions Hash: sha256:1a35a65bda47e14dfafe76ac942f67a759182075229823c567ff52a90b3afe7b
 
   ## 🚨 MANDATORY SESSION START PROTOCOL
 
@@ -65,7 +65,7 @@ ai_integration_content: |
   5. If same → Your instructions are current, proceed
 
   **STORED HASH TO COMPARE AGAINST:**
-  `sha256:31b5a9d632dd6438c01afbe8c5986e3375eded6becc181009231d42e098ff848`
+  `sha256:1a35a65bda47e14dfafe76ac942f67a759182075229823c567ff52a90b3afe7b`
 
   ⚠️ CRITICAL: Compare the root's hash with THIS stored hash above, NOT with the hash in the header of these instructions!
 
@@ -77,52 +77,72 @@ ai_integration_content: |
   - Raw Base: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
   - Root Manifest: manifests/propeller-knowledge-root.yaml
 
-  ## 🚀 Remote File Access (curl/wget)
+  ## 🚀 Remote File Access (Platform-Aware)
 
   **For remote instances without repository access:**
 
   ### Download & Cache Strategy
+  - Write platform-specific script ONCE to avoid approval prompts
   - Cache location: `.p2kb-cache/` in current project directory
   - Check cache first, download only if missing
-  - Use curl (preferred) or wget (fallback)
 
-  ### Setup
+  ### Platform Detection & Setup
   ```bash
-  # Verify tools available
-  which curl || which wget
+  # Step 1: Detect platform
+  if command -v uname &> /dev/null; then
+    # Unix-like system (macOS/Linux)
+    platform="unix"
+  elif command -v powershell &> /dev/null; then
+    # Windows system
+    platform="windows"
+  fi
 
-  # Create cache directory
-  mkdir -p .p2kb-cache
+  # Step 2: Create cache directory
+  mkdir -p .p2kb-cache  # Unix
+  # OR
+  New-Item -ItemType Directory -Force -Path .p2kb-cache  # Windows
 
-  # Add to .gitignore
-  echo ".p2kb-cache/" >> .gitignore
+  # Step 3: Write appropriate script (see below)
   ```
 
-  ### File Fetch Function
+  ### Unix/macOS/Linux Script
+  **Write to `.p2kb-cache/fetch-kb-file.sh`:**
   ```bash
-  fetch_kb_file() {
-    local path=$1
-    local cache=".p2kb-cache/${path}"
-    local url="https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/${path}"
+  #!/bin/bash
+  # P2 Knowledge Base File Fetcher
+  path=$1
+  cache=".p2kb-cache/${path}"
+  url="https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/${path}"
 
-    # Check cache first
-    if [ -f "$cache" ]; then
-      cat "$cache"
-    else
-      # Download and cache
-      mkdir -p "$(dirname "$cache")"
-      if command -v curl &> /dev/null; then
-        curl -o "$cache" "$url"
-      elif command -v wget &> /dev/null; then
-        wget -O "$cache" "$url"
-      else
-        echo "ERROR: Install curl or wget"
-        exit 1
-      fi
-      cat "$cache"
-    fi
+  if [ -f "$cache" ]; then
+    cat "$cache"
+  else
+    mkdir -p "$(dirname "$cache")"
+    curl -sS -o "$cache" "$url" 2>/dev/null || wget -q -O "$cache" "$url"
+    cat "$cache"
+  fi
+  ```
+  **Make executable:** `chmod +x .p2kb-cache/fetch-kb-file.sh`
+  **Usage:** `bash .p2kb-cache/fetch-kb-file.sh "manifests/propeller-knowledge-root.yaml"`
+
+  ### Windows PowerShell Script
+  **Write to `.p2kb-cache\fetch-kb-file.ps1`:**
+  ```powershell
+  # P2 Knowledge Base File Fetcher
+  param($path)
+  $cache = ".p2kb-cache\$($path -replace '/','\\')"
+  $url = "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/$path"
+
+  if (Test-Path $cache) {
+    Get-Content $cache -Raw
+  } else {
+    $dir = Split-Path $cache -Parent
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    Invoke-WebRequest -Uri $url -OutFile $cache
+    Get-Content $cache -Raw
   }
   ```
+  **Usage:** `powershell -File .p2kb-cache\fetch-kb-file.ps1 "manifests/propeller-knowledge-root.yaml"`
 
   ### Cache Management
   - Check size: `du -sh .p2kb-cache`

@@ -9,31 +9,63 @@
 P2 Knowledge Base Access:
 https://github.com/ironsheep/P2-Knowledge-Base
 
-You'll download files from GitHub as needed using curl/wget.
-Cache them in .p2kb-cache/ in the current project directory.
+You'll download files from GitHub as needed.
+I'll create a local fetch script for you to avoid repeated approval prompts.
 
-Setup:
-1. Verify curl or wget: which curl || which wget
-2. Create cache: mkdir -p .p2kb-cache
-3. Add to .gitignore: echo ".p2kb-cache/" >> .gitignore
+1. First, I'll detect your platform (Windows/macOS/Linux)
+2. Create a cache directory: .p2kb-cache/
+3. Write a platform-appropriate fetch script
+4. You approve the script ONCE for repeated use
+5. Use the script to fetch any P2KB files
 
-Download function:
-fetch_kb_file() {
-  local path=$1
-  local cache=".p2kb-cache/${path}"
-  local url="https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/${path}"
-
-  if [ -f "$cache" ]; then cat "$cache"
-  else
-    mkdir -p "$(dirname "$cache")"
-    curl -o "$cache" "$url" 2>/dev/null || wget -O "$cache" "$url"
-    cat "$cache"
-  fi
-}
-
-Start with: fetch_kb_file "manifests/propeller-knowledge-root.yaml"
-Then navigate manifests to find PASM2, Spin2, Smart Pins, OBEX content.
+Let me set this up for you now...
 ```
+
+### Platform-Specific Setup Instructions
+
+**The AI assistant will:**
+
+1. **Detect your platform** using `uname` or PowerShell checks
+
+2. **For Unix/macOS/Linux**, create `.p2kb-cache/fetch-kb-file.sh`:
+```bash
+#!/bin/bash
+# P2 Knowledge Base File Fetcher
+path=$1
+cache=".p2kb-cache/${path}"
+url="https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/${path}"
+
+if [ -f "$cache" ]; then
+  cat "$cache"
+else
+  mkdir -p "$(dirname "$cache")"
+  curl -sS -o "$cache" "$url" 2>/dev/null || wget -q -O "$cache" "$url"
+  cat "$cache"
+fi
+```
+
+3. **For Windows**, create `.p2kb-cache\fetch-kb-file.ps1`:
+```powershell
+# P2 Knowledge Base File Fetcher
+param($path)
+$cache = ".p2kb-cache\$($path -replace '/','\\')"  
+$url = "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/$path"
+
+if (Test-Path $cache) {
+  Get-Content $cache -Raw
+} else {
+  $dir = Split-Path $cache -Parent
+  New-Item -ItemType Directory -Force -Path $dir | Out-Null
+  Invoke-WebRequest -Uri $url -OutFile $cache
+  Get-Content $cache -Raw
+}
+```
+
+4. **Usage after setup**:
+   - Unix/macOS: `bash .p2kb-cache/fetch-kb-file.sh "manifests/propeller-knowledge-root.yaml"`
+   - Windows: `powershell -File .p2kb-cache\fetch-kb-file.ps1 "manifests/propeller-knowledge-root.yaml"`
+
+5. **Start with**: Fetching the root manifest, then navigate to find PASM2, Spin2, Smart Pins, OBEX content.
 
 **That's it!** You're ready to help with P2 development.
 
