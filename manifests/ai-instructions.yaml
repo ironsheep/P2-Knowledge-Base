@@ -77,6 +77,65 @@ ai_integration_content: |
   - Raw Base: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
   - Root Manifest: manifests/propeller-knowledge-root.yaml
 
+  ## 🚀 Remote File Access (curl/wget)
+
+  **For remote instances without repository access:**
+
+  ### Download & Cache Strategy
+  - Cache location: `.p2kb-cache/` in current project directory
+  - Check cache first, download only if missing
+  - Use curl (preferred) or wget (fallback)
+
+  ### Setup
+  ```bash
+  # Verify tools available
+  which curl || which wget
+
+  # Create cache directory
+  mkdir -p .p2kb-cache
+
+  # Add to .gitignore
+  echo ".p2kb-cache/" >> .gitignore
+  ```
+
+  ### File Fetch Function
+  ```bash
+  fetch_kb_file() {
+    local path=$1
+    local cache=".p2kb-cache/${path}"
+    local url="https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/${path}"
+
+    # Check cache first
+    if [ -f "$cache" ]; then
+      cat "$cache"
+    else
+      # Download and cache
+      mkdir -p "$(dirname "$cache")"
+      if command -v curl &> /dev/null; then
+        curl -o "$cache" "$url"
+      elif command -v wget &> /dev/null; then
+        wget -O "$cache" "$url"
+      else
+        echo "ERROR: Install curl or wget"
+        exit 1
+      fi
+      cat "$cache"
+    fi
+  }
+  ```
+
+  ### Cache Management
+  - Check size: `du -sh .p2kb-cache`
+  - Clear cache: `rm -rf .p2kb-cache`
+  - Refresh file: `rm .p2kb-cache/manifests/propeller-knowledge-root.yaml`
+
+  ### Platform Notes
+  - macOS/Linux: `.p2kb-cache/` is hidden
+  - Windows: Visible in Explorer (normal behavior)
+  - Per-project: Each project has own cache (~5-15MB)
+
+  **Future:** MCP server in development for shared cache and auto-updates.
+
   ## 🎯 CRITICAL CONCEPTS (MEMORIZE THESE)
 
   ### 1. Manifest Self-Containment

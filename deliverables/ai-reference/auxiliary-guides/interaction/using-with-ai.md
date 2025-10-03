@@ -49,6 +49,54 @@ Follow the AI instructions it provides for automatic setup.
 3. Check for updates each session
 4. Teach the AI everything about P2 development
 
+### 🌐 Remote Instance Access (Without Direct GitHub Access)
+
+**For Claude Code instances that cannot directly access repository files:**
+
+Some remote AI environments have limitations accessing GitHub content directly. Use curl/wget to download and cache files on-demand:
+
+```bash
+# Setup (one-time)
+mkdir -p .p2kb-cache
+echo ".p2kb-cache/" >> .gitignore
+
+# Download function
+fetch_kb_file() {
+  local path=$1
+  local cache=".p2kb-cache/${path}"
+  local url="https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/${path}"
+
+  if [ -f "$cache" ]; then cat "$cache"
+  else
+    mkdir -p "$(dirname "$cache")"
+    curl -o "$cache" "$url" 2>/dev/null || wget -O "$cache" "$url"
+    cat "$cache"
+  fi
+}
+
+# Start with root manifest
+fetch_kb_file "manifests/propeller-knowledge-root.yaml"
+```
+
+**Cache Management:**
+```bash
+# Check cache size
+du -sh .p2kb-cache
+
+# Clear cache
+rm -rf .p2kb-cache
+
+# Refresh specific file
+rm .p2kb-cache/manifests/propeller-knowledge-root.yaml
+```
+
+**Requirements:**
+- curl (preferred) or wget installed
+- Write access to project directory
+- Per-project cache (~5-15MB)
+
+**Note**: MCP server integration is in development for improved remote access with shared caching and automatic updates.
+
 ### Legacy Manual Instructions (Pre-v2.0)
 
 <details>
