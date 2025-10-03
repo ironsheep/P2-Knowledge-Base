@@ -43,17 +43,23 @@ Then navigate manifests to find PASM2, Spin2, Smart Pins, OBEX content.
 
 Once setup, users can ask:
 
+**P2 Architecture:**
+```
+Explain P2 architecture
+```
+Navigate: `manifests/P2/architecture-manifest.yaml`
+
 **PASM2 Instructions:**
 ```
 Help me with the ADD instruction
 ```
 Navigate: `manifests/P2/language/pasm2-manifest.yaml`
 
-**Smart Pins:**
+**Hardware Boards:**
 ```
-Configure a Smart Pin for UART
+What P2 development boards exist?
 ```
-Navigate: `manifests/P2/smart-pins-manifest.yaml`
+Navigate: `manifests/P2/hardware-manifest.yaml`
 
 **OBEX Code:**
 ```

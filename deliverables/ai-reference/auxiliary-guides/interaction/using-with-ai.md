@@ -347,6 +347,33 @@ engineering/knowledge-base/P2/hardware/smart-pins/modes/[mode].yaml
 
 ## 6. Usage Patterns and Examples
 
+### Pattern: Understanding P2 Architecture
+
+```markdown
+User: "Explain the P2 architecture"
+
+PROCESS:
+1. Open manifests/P2/architecture-manifest.yaml
+2. Explain key components:
+   - 8 independent COGs (90 MIPS each)
+   - 512KB shared Hub RAM
+   - 64 Smart Pins with autonomous operation
+   - CORDIC math solver
+   - Streamer for video/audio
+```
+
+### Pattern: Finding Development Hardware
+
+```markdown
+User: "What P2 boards are available?"
+
+PROCESS:
+1. Open manifests/P2/hardware-manifest.yaml
+2. List main boards: P2 Eval, P2 Edge
+3. Show modules and accessories
+4. Provide purchase links if available
+```
+
 ### Pattern: Serial Communication with Repository Awareness ✨
 
 ```markdown

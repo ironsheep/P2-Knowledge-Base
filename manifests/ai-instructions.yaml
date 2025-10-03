@@ -4,8 +4,8 @@
 # Hash: sha256:56b39b658f0a2188b5f9dd2b19abc39c613c4fa5e9f94a7261b37cb1896297d1
 
 instructions_version: "2.0"
-content_hash: "sha256:56b39b658f0a2188b5f9dd2b19abc39c613c4fa5e9f94a7261b37cb1896297d1"  # Self-reference for validation
-last_updated: "2025-01-29T00:00:00Z"
+content_hash: "sha256:31b5a9d632dd6438c01afbe8c5986e3375eded6becc181009231d42e098ff848"  # Self-reference for validation
+last_updated: "2025-10-03T00:00:00Z"
 
 # READ and follow these setup_instructions:
 setup_instructions: |
@@ -52,8 +52,8 @@ setup_instructions: |
 ai_integration_content: |
   # P2 Knowledge Base Integration
   _Instructions Version: 2.0_
-  _Last Updated: 2025-01-29_
-  _Instructions Hash: sha256:56b39b658f0a2188b5f9dd2b19abc39c613c4fa5e9f94a7261b37cb1896297d1
+  _Last Updated: 2025-10-03_
+  _Instructions Hash: sha256:31b5a9d632dd6438c01afbe8c5986e3375eded6becc181009231d42e098ff848
 
   ## 🚨 MANDATORY SESSION START PROTOCOL
 
@@ -65,7 +65,7 @@ ai_integration_content: |
   5. If same → Your instructions are current, proceed
 
   **STORED HASH TO COMPARE AGAINST:**
-  `sha256:56b39b658f0a2188b5f9dd2b19abc39c613c4fa5e9f94a7261b37cb1896297d1`
+  `sha256:31b5a9d632dd6438c01afbe8c5986e3375eded6becc181009231d42e098ff848`
 
   ⚠️ CRITICAL: Compare the root's hash with THIS stored hash above, NOT with the hash in the header of these instructions!
 
@@ -159,37 +159,29 @@ ai_integration_content: |
 
   ## 📂 DIRECT CATEGORY ACCESS (USE THESE SHORTCUTS)
 
-  ### Language References
+  ### Core P2 References
+  **Architecture** → `manifests/P2/architecture-manifest.yaml`
+  - 8 COGs, 512KB hub RAM, CORDIC, Streamer, Smart Pins, interrupts, locks
+
   **PASM2** → `manifests/P2/language/pasm2-manifest.yaml`
   - 362 instructions + 16 concepts + 5 idiom categories + 2 patterns
-  - Categories: Assembly Directives, Branch, CORDIC, Event, Hub Control/FIFO/RAM,
-    Interrupt, Math/Logic, Pin, Smart Pin, Streamer
 
   **Spin2** → `manifests/P2/language/spin2-manifest.yaml`
   - 262 entries + idioms from 730 analyzed files + 44 pattern files
-  - Methods: pin, timing, cog, memory, math, strings
-  - Debug: formatters with underscore variants (SDEC vs SDEC_)
 
-  **Conventions** → `manifests/P2/language/spin2-conventions-manifest.yaml`
-  - 3 documentation styles: VSCode/PNUT_TS, Johnny Mac, File Organization
-  - Naming conventions and code formatting standards
-  - Ask user: "Which documentation style are you using?"
+  **Hardware** → `manifests/P2/hardware-manifest.yaml`
+  - P2 Eval, P2 Edge, modules, accessories (30+ items)
 
-  ### Hardware References
+  **OBEX** → `manifests/P2/community/obex-unified-index.yaml`
+  - ⚠️ CRITICAL: THE ONLY way to search OBEX - complete index, all 113 objects
+  - All aliases work: "i2c" = "iic" = "twi" (same results)
+
+  ### Detailed References
   **Smart Pins** → `manifests/P2/smart-pins-manifest.yaml`
   - 32 modes: digital I/O, pulse timing, counting, serial, PWM, analog
 
-  **Architecture** → `manifests/P2/architecture-manifest.yaml`
-  - 8 COGs, 512KB hub RAM, CORDIC, Streamer, interrupts, locks
-
-  **Boards** → `manifests/P2/hardware-manifest.yaml`
-  - P2 Eval, P2 Edge, modules, accessories (30+ items)
-
-  ### Community & Patterns
-  **OBEX** → `manifests/P2/community/obex-unified-index.yaml`
-  - ⚠️ CRITICAL: This is THE ONLY way to search OBEX - single file, complete index
-  - 113 objects with natural groupings: communication (48), displays (41), sensors (36)
-  - All aliases work: search "i2c" = "iic" = "twi" (same results)
+  **Conventions** → `manifests/P2/language/spin2-conventions-manifest.yaml`
+  - 3 documentation styles, naming conventions, code formatting
 
   **Patterns** → `manifests/P2/patterns-manifest.yaml`
   - 44 files: structural (6), implementation (15), application (23)
