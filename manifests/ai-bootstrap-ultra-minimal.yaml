@@ -1,0 +1,36 @@
+# P2 KB Bootstrap - Ultra Minimal
+# Max 40 lines to avoid WebFetch truncation
+
+stage_1_unix: |
+  ## P2 Knowledge Base Setup for Unix/macOS/Linux
+  
+  **Step 1: Create cache and fetch script**
+  ```bash
+  mkdir -p .p2kb-cache
+  cat > .p2kb-cache/fetch-kb-file.sh << 'SCRIPT_END'
+  #!/bin/bash
+  path=$1
+  cache=".p2kb-cache/${path}"
+  url="https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/${path}"
+  if [ -f "$cache" ]; then
+    cat "$cache"
+  else
+    mkdir -p "$(dirname "$cache")"
+    curl -sS -o "$cache" "$url" 2>/dev/null || wget -q -O "$cache" "$url"
+    cat "$cache"
+  fi
+  SCRIPT_END
+  chmod +x .p2kb-cache/fetch-kb-file.sh
+  ```
+  
+  **Step 2: Fetch complete setup instructions**
+  ```bash
+  bash .p2kb-cache/fetch-kb-file.sh "manifests/ai-instructions.yaml"
+  ```
+  Follow setup_instructions section COMPLETELY.
+
+windows_users: |
+  For Windows, first fetch:
+  manifests/ai-bootstrap-windows.yaml
+  
+# Total: 35 lines - should work!
