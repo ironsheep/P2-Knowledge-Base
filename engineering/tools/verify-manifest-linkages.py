@@ -50,6 +50,11 @@ IGNORED_SECTIONS = {
     'planned_files',  # These are documented as not yet created
     'planned_but_not_created',  # These are documented as not created
     'cross_references',  # No standard yet for cross-references
+    'keyword_index',  # OBEX keyword index contains IDs, not file paths
+    'natural_groups',  # OBEX grouping metadata
+    'topic_definitions',  # OBEX topic metadata
+    'index_metadata',  # OBEX index metadata
+    'usage_instructions',  # Documentation
 }
 
 class ManifestValidator:
@@ -61,6 +66,8 @@ class ManifestValidator:
         self.referenced_manifests = set()
         self.obex_category_refs = defaultdict(set)
         self.obex_author_refs = defaultdict(set)
+        self.file_reference_counts = defaultdict(int)  # Track how many times each file is referenced
+        self.file_reference_sources = defaultdict(list)  # Track WHERE each reference comes from
         
     def resolve_path(self, base: Optional[str], reference: str) -> str:
         """Resolve a path using the 4-key standard"""
@@ -89,9 +96,14 @@ class ManifestValidator:
         if depth > 10:  # Prevent infinite recursion
             return
             
-        # Track this manifest as processed
+        # Check if we've already processed this manifest
         relative_path = manifest_path.relative_to(self.root)
-        self.referenced_manifests.add(str(relative_path))
+        path_str = str(relative_path)
+        if path_str in self.referenced_manifests:
+            return  # Already processed, don't process again
+            
+        # Track this manifest as processed
+        self.referenced_manifests.add(path_str)
         
         # Load the manifest
         data = self.load_manifest(manifest_path)
@@ -132,12 +144,14 @@ class ManifestValidator:
                     # This is a manifest reference
                     full_path = self.resolve_path(manifest_base, value)
                     self._process_manifest_ref(full_path, depth)
+                    continue  # Don't recurse further into this value
                     
                 elif key == 'content' and isinstance(value, str):
                     # This is a content reference
                     full_path = self.resolve_path(content_base, value)
                     self._track_content_ref(full_path, is_obex_category, is_obex_author, 
                                           manifest_path, value)
+                    continue  # Don't recurse further into this value
                     
                 # Handle OBEX-style sub_manifests
                 elif key == 'sub_manifests' and isinstance(value, dict):
@@ -185,6 +199,13 @@ class ManifestValidator:
             
         # Track the reference
         self.referenced_files.add(content_ref)
+        self.file_reference_counts[content_ref] += 1
+        
+        # Track WHERE this reference came from
+        source = str(manifest_path.relative_to(self.root))
+        # Debug: Only add if not already from same source (prevent duplicates from same manifest)
+        if not self.file_reference_sources[content_ref] or self.file_reference_sources[content_ref][-1] != source:
+            self.file_reference_sources[content_ref].append(source)
         
         # Track OBEX dual-organization
         if is_obex_category and 'objects/' in original_ref:
@@ -226,6 +247,56 @@ class ManifestValidator:
                         if full_path.exists():
                             self.process_manifest(full_path, depth=1)
     
+    def get_multiply_referenced_files(self) -> Dict[str, List[str]]:
+        """Categorize multiply-referenced files"""
+        multi_refs = {
+            'obex': [],
+            'manifests': [],
+            'smart_pins': [],
+            'architecture': [],
+            'hardware': [],
+            'other': []
+        }
+        
+        for file_path, count in self.file_reference_counts.items():
+            if count > 1:
+                # Categorize by path
+                if 'community/obex/objects/' in file_path:
+                    multi_refs['obex'].append(file_path)
+                elif file_path.endswith('-manifest.yaml'):
+                    multi_refs['manifests'].append(file_path)
+                elif 'smart-pins/smart-pin-' in file_path or 'smart_pin' in file_path:
+                    multi_refs['smart_pins'].append(file_path)
+                elif '/architecture/' in file_path:
+                    multi_refs['architecture'].append(file_path)
+                elif '/hardware/' in file_path:
+                    multi_refs['hardware'].append(file_path)
+                else:
+                    multi_refs['other'].append(file_path)
+        
+        return multi_refs
+    
+    def validate_reference_counts(self) -> List[str]:
+        """Validate that reference counts match expected patterns"""
+        warnings = []
+        
+        # Expected patterns:
+        # - OBEX objects should be referenced exactly 2 times (category + author)
+        # - Other files can be referenced 1 or more times
+        
+        for file_path, count in self.file_reference_counts.items():
+            if 'community/obex/objects/' in file_path:
+                if count != 2:
+                    sources = self.file_reference_sources.get(file_path, [])
+                    warning = f"OBEX object {file_path} has {count} references (expected 2)"
+                    if sources:
+                        warning += "\n    Sources:"
+                        for source in sources:
+                            warning += f"\n      - {source}"
+                    warnings.append(warning)
+        
+        return warnings
+    
     def find_orphaned_files(self) -> Tuple[Set[str], Set[str]]:
         """Find files that exist but aren't referenced"""
         orphaned_manifests = set()
@@ -252,8 +323,10 @@ class ManifestValidator:
         manifest_path = self.root / "manifests"
         if manifest_path.exists():
             for yaml_file in manifest_path.rglob("*.yaml"):
-                # Skip root manifest
-                if yaml_file.name == "propeller-knowledge-root.yaml":
+                # Skip root manifest and bootstrap files (top-level entry points)
+                if yaml_file.name in ["propeller-knowledge-root.yaml", 
+                                      "ai-bootstrap-unix.yaml",
+                                      "ai-bootstrap-windows.yaml"]:
                     continue
                     
                 # Skip .history directories (VSCode Local History extension backups)
@@ -313,7 +386,41 @@ class ManifestValidator:
             content_coverage = (files_referenced / baseline_counts['content'] * 100) if baseline_counts['content'] > 0 else 0
             
             print(f"Manifests processed: {manifests_processed} / {baseline_counts['manifests']} ({manifest_coverage:.1f}% coverage)")
-            print(f"Content files referenced: {files_referenced} / {baseline_counts['content']} ({content_coverage:.1f}% coverage)")
+            
+            # Report content coverage more clearly
+            if content_coverage >= 100:
+                print(f"Content files referenced: All {baseline_counts['content']} files referenced ✓")
+                # Count multiply-referenced files by category
+                multi_refs = self.get_multiply_referenced_files()
+                if multi_refs:
+                    print(f"\n{CYAN}Multiply-Referenced Files (Expected Pattern):{RESET}")
+                    if multi_refs['obex']:
+                        print(f"  • OBEX objects (dual-organization): {len(multi_refs['obex'])} files")
+                    if multi_refs['manifests']:
+                        print(f"  • Cross-referenced manifests: {len(multi_refs['manifests'])} files")
+                    if multi_refs['smart_pins']:
+                        print(f"  • Smart Pin modes: {len(multi_refs['smart_pins'])} files")
+                    if multi_refs['architecture']:
+                        print(f"  • Architecture components: {len(multi_refs['architecture'])} files")
+                    if multi_refs['hardware']:
+                        print(f"  • Hardware descriptions: {len(multi_refs['hardware'])} files")
+                    if multi_refs['other']:
+                        print(f"  • Other cross-references: {len(multi_refs['other'])} files")
+                
+                # Validate reference counts match expected patterns
+                ref_warnings = self.validate_reference_counts()
+                if ref_warnings:
+                    print(f"\n{YELLOW}Reference Count Warnings:{RESET}")
+                    for i, warning in enumerate(ref_warnings[:5]):
+                        # Handle multi-line warnings (with source lists)
+                        lines = warning.split('\n')
+                        print(f"  ⚠️  {lines[0]}")
+                        for line in lines[1:]:
+                            print(f"  {line}")
+                    if len(ref_warnings) > 5:
+                        print(f"  ... and {len(ref_warnings) - 5} more warnings")
+            else:
+                print(f"Content files referenced: {files_referenced} / {baseline_counts['content']} ({content_coverage:.1f}% coverage)")
         else:
             print(f"Manifests processed: {manifests_processed}")
             print(f"Content files referenced: {files_referenced}")

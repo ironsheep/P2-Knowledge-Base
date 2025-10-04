@@ -1,5 +1,5 @@
 # P2 KB Bootstrap - Unix/macOS/Linux
-# Under 960 chars to avoid WebFetch truncation
+# Under 960 chars - avoids truncation
 
 stage_1_unix: |
   ## P2 Knowledge Base Setup for Unix/macOS/Linux
