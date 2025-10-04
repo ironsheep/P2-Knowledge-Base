@@ -1,16 +1,15 @@
-# P2 KB Bootstrap - Windows Version
-# Max 40 lines to avoid WebFetch truncation
+# P2 KB Bootstrap Windows
+# Under 960 chars
 
 stage_1_windows: |
-  ## P2 Knowledge Base Setup for Windows
+  ## P2 KB Setup - Windows
   
-  **Step 1: Create cache directory**
+  **Step 1: Create cache**
   ```powershell
   New-Item -ItemType Directory -Force -Path .p2kb-cache
   ```
   
-  **Step 2: Create fetch script**
-  Save as `.p2kb-cache\fetch-kb-file.ps1`:
+  **Step 2: Create script `.p2kb-cache\fetch-kb-file.ps1`:**
   ```powershell
   param($path)
   $cache = ".p2kb-cache\$($path -replace '/','\\')"

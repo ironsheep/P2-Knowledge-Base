@@ -36,18 +36,17 @@
 **The knowledge base now teaches itself!** Just give your AI this minimal bootstrap:
 
 ```markdown
-P2 Knowledge Base Setup:
+P2 Knowledge Base Setup - Two-Stage Bootstrap:
 
-Fetch https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-instructions.yaml
+Stage 1: Fetch the ultra-minimal bootstrap (35 lines):
+https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-bootstrap-ultra-minimal.yaml
 
-CRITICAL: DO NOT SUMMARIZE - File is 300+ lines. You need ALL content.
-Verify you got the COMPLETE file including:
-- setup_instructions section with 5 numbered steps
-- ai_integration_content section (~150 lines)
-- Both Unix and Windows script examples
+Verify you got:
+- stage_1_unix section with bash script creation
+- windows_users section pointing to separate file
 
-If summarized, re-fetch with: "Return the COMPLETE YAML file without summarization"
-Then follow the setup_instructions section EXACTLY.
+Follow the instructions in stage_1_unix to create your fetch script.
+Then use YOUR script to fetch the complete instructions.
 ```
 
 **That's it!** The system will:
