@@ -1,0 +1,34 @@
+# P2 KB Bootstrap - Windows Version
+# Max 40 lines to avoid WebFetch truncation
+
+stage_1_windows: |
+  ## P2 Knowledge Base Setup for Windows
+  
+  **Step 1: Create cache directory**
+  ```powershell
+  New-Item -ItemType Directory -Force -Path .p2kb-cache
+  ```
+  
+  **Step 2: Create fetch script**
+  Save as `.p2kb-cache\fetch-kb-file.ps1`:
+  ```powershell
+  param($path)
+  $cache = ".p2kb-cache\$($path -replace '/','\\')"
+  $url = "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/$path"
+  if (Test-Path $cache) {
+    Get-Content $cache -Raw
+  } else {
+    $dir = Split-Path $cache -Parent
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    Invoke-WebRequest -Uri $url -OutFile $cache
+    Get-Content $cache -Raw
+  }
+  ```
+  
+  **Step 3: Fetch complete setup instructions**
+  ```powershell
+  powershell -File .p2kb-cache\fetch-kb-file.ps1 "manifests/ai-instructions.yaml"
+  ```
+  Follow setup_instructions section COMPLETELY.
+  
+# Total: 33 lines
