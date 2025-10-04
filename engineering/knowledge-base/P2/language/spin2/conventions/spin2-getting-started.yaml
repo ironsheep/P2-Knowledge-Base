@@ -1,0 +1,401 @@
+title: Spin2 Getting Started - Core Language Essentials
+id: spin2-getting-started
+version: 1.0.0
+layer: "Foundation - Language Mechanics"
+purpose: Minimal viable knowledge for writing functional Spin2 code
+target_audience: AI code generators and developers new to Spin2
+
+summary: |
+  Essential Spin2 language mechanics needed to start writing functional code immediately. Covers core syntax, 
+  block types, control flow, operators, and common patterns. Style-agnostic foundation that works with any 
+  coding convention preference.
+
+description: |
+  This is Layer 1 of the Spin2 knowledge system - pure language mechanics without style opinions. After reading
+  this, you can write syntactically correct Spin2 code. Combine with formatting standards, documentation styles,
+  and naming conventions as needed for your project.
+
+core_block_types:
+  CON:
+    purpose: "Define compile-time constants"
+    syntax: "CON { optional label }"
+    common_uses:
+      - Pin assignments
+      - Configuration values
+      - Timing constants
+      - Enumeration definitions
+    example: |
+      CON { pin assignments }
+        LED_PIN = 56
+        BAUD_RATE = 115_200
+        
+      CON { enumeration }
+        #0, STATE_IDLE, STATE_ACTIVE, STATE_ERROR
+
+  OBJ:
+    purpose: "Declare object instances (libraries/drivers)"
+    syntax: "OBJ { optional label }"
+    format: 'objectName : "filename"'
+    rules:
+      - Filename without .spin2 extension
+      - Creates single instance by default
+      - Can create arrays with [size] syntax
+    example: |
+      OBJ
+        serial : "jm_fullduplexserial"
+        led[8] : "jm_pwm"
+
+  VAR:
+    purpose: "Declare runtime variables"
+    syntax: "VAR { optional label }"
+    types:
+      - "LONG - 32-bit integer (default)"
+      - "WORD - 16-bit integer"
+      - "BYTE - 8-bit integer"
+    array_syntax: "BYTE buffer[256]"
+    example: |
+      VAR
+        LONG position
+        WORD temperature[10]
+        BYTE statusFlags
+
+  DAT:
+    purpose: "Pre-initialized data and inline assembly"
+    syntax: "DAT { optional label }"
+    uses:
+      - Lookup tables
+      - String constants
+      - Inline PASM2 code
+      - Shared data between cogs
+    example: |
+      DAT
+        message   BYTE "Hello", 0
+        values    LONG 100, 200, 300
+        
+      DAT { PASM2 code }
+        ORG
+          mov     x, #0
+        END
+
+  PUB:
+    purpose: "Public methods (callable from other objects)"
+    syntax: "PUB methodName(params) : returns | locals"
+    visibility: "Externally visible"
+    example: |
+      PUB start(pin, baud)
+        ' Implementation
+        
+      PUB getValue() : result
+        result := currentValue
+
+  PRI:
+    purpose: "Private methods (internal to this object only)"
+    syntax: "PRI methodName(params) : returns | locals"
+    visibility: "Internal only"
+    example: |
+      PRI calculate(a, b) : sum
+        sum := a + b
+
+method_signature_components:
+  parameters:
+    syntax: "(param1, param2, param3)"
+    rules:
+      - Comma-separated list
+      - Optional - use () for no parameters
+      - Default to LONG (32-bit)
+      - Can use ^BYTE/^WORD/^LONG/^STRUCT for pointer parameters
+    examples:
+      basic: "PUB config(pin, mode, speed)"
+      pointers: "PUB process(^BYTE strPtr, ^LONG dataPtr)"
+
+  return_values:
+    syntax: ": return1, return2"
+    rules:
+      - Colon introduces return values
+      - Multiple returns allowed (comma-separated)
+      - Optional - omit if no returns
+      - Default to LONG (32-bit)
+      - Can use ^BYTE/^WORD/^LONG/^STRUCT for pointer returns
+      - Auto-initialized to zero
+    examples:
+      basic: "PUB getPosition() : x, y, z"
+      pointers: "PUB getBufferPtr() : ^BYTE result"
+
+  local_variables:
+    syntax: "| local1, local2, local3"
+    rules:
+      - Pipe character introduces locals
+      - Comma-separated list
+      - Optional - omit if no locals needed
+      - Default to LONG but can specify BYTE, WORD, LONG, STRUCT
+      - Can use ALIGNW/ALIGNL for alignment
+      - Can declare arrays and pointers
+      - Auto-initialized to zero
+    examples:
+      basic: "PUB process() | temp, counter, result"
+      typed: "PUB process() | BYTE buffer[64], WORD index, LONG total"
+      aligned: "PUB process() | ALIGNL LONG aligned_data[16]"
+
+  complete_signature:
+    example: "PUB calculate(input, scale) : result | temp, index"
+    breakdown:
+      - "calculate - method name"
+      - "(input, scale) - two parameters"
+      - ": result - one return value"
+      - "| temp, index - two local variables"
+
+control_flow:
+  conditional:
+    IF_THEN:
+      syntax: "IF condition THEN statement"
+      example: |
+        IF (x > 100) THEN x := 100
+        
+    IF_ELSEIF_ELSE:
+      syntax: "IF...ELSEIF...ELSE block"
+      example: |
+        IF (temp < 32)
+          status := FROZEN
+        ELSEIF (temp > 212)
+          status := BOILING
+        ELSE
+          status := NORMAL
+
+    CASE:
+      syntax: "CASE expression"
+      features:
+        - Multiple values per case
+        - Range support with .. operator
+        - OTHER for default case
+      example: |
+        CASE value
+          0..9:
+            digit := TRUE
+          10, 20, 30:
+            multiple := TRUE
+          OTHER:
+            invalid := TRUE
+
+  loops:
+    REPEAT_FOREVER:
+      syntax: "REPEAT"
+      usage: "Main application loop"
+      example: |
+        REPEAT
+          checkSensors()
+          updateDisplay()
+
+    REPEAT_COUNT:
+      syntax: "REPEAT count"
+      example: |
+        REPEAT 10
+          flash_led()
+
+    REPEAT_WITH_VARIABLE:
+      syntax: "REPEAT variable FROM start TO end STEP increment"
+      notes:
+        - STEP is optional (defaults to 1)
+        - FROM/TO order determines direction
+      example: |
+        REPEAT idx FROM 0 TO 99
+          buffer[idx] := 0
+          
+        REPEAT idx FROM 99 TO 0 STEP -1
+          process(buffer[idx])
+
+    REPEAT_WHILE:
+      syntax: "REPEAT WHILE condition"
+      example: |
+        REPEAT WHILE (count < maximum)
+          count++
+
+    REPEAT_UNTIL:
+      syntax: "REPEAT UNTIL condition"
+      example: |
+        REPEAT UNTIL (ready == TRUE)
+          WAITMS(10)
+
+    loop_control:
+      NEXT: "Skip to next iteration"
+      QUIT: "Exit loop immediately"
+      example: |
+        REPEAT
+          IF (error)
+            NEXT
+          IF (done)
+            QUIT
+          process()
+
+essential_operators:
+  arithmetic:
+    basic: "+ - * / // ++"
+    modulo: "// (remainder/modulo)"
+    description: "Standard math operations"
+    
+  comparison:
+    operators: "== <> < > =< =>"
+    returns: "TRUE (-1) or FALSE (0)"
+    note: "Use == for equality, <> for not equal"
+    
+  logical:
+    operators: "AND OR NOT"
+    bitwise: "&& || ! (bitwise versions)"
+    example: "IF (x > 0) AND (x < 100)"
+    
+  bitwise:
+    operators: "& | ^ ! << >> SAR ROL ROR"
+    shift_arithmetic: "SAR (arithmetic right shift)"
+    rotate: "ROL (rotate left), ROR (rotate right)"
+    
+  assignment:
+    basic: ":="
+    compound: "+= -= *= /= &= |= ^="
+    post_effects: "~~ (post-set), !! (post-clear)"
+    example: "x := 100  ' assign 100 to x"
+
+memory_access:
+  direct_variable:
+    syntax: "variableName"
+    example: "x := myVariable"
+    
+  pointer_syntax:
+    LONG: "LONG[address]"
+    WORD: "WORD[address]"
+    BYTE: "BYTE[address]"
+    example: |
+      value := LONG[@myVariable]
+      BYTE[ptrBuffer][index] := data
+      
+  address_of:
+    syntax: "@variableName"
+    usage: "Get memory address of variable"
+    example: "ptr := @buffer"
+
+object_usage:
+  calling_methods:
+    syntax: "objectName.methodName(params)"
+    example: |
+      serial.start(63, 62, 115_200)
+      value := sensor.read()
+      
+  object_arrays:
+    syntax: "objectName[index].methodName(params)"
+    example: |
+      led[0].start(56)
+      led[1].start(57)
+
+inline_pasm2:
+  basic_inline:
+    syntax: "ORG...END block in method"
+    purpose: "Execute assembly code inline"
+    example: |
+      PUB fastToggle(pin)
+        ORG
+          drvnot  pin
+        END
+        
+  data_exchange:
+    spin_to_pasm:
+      description: "Parameters automatically available as registers"
+      example: |
+        PUB delay(cycles)
+          ORG
+            waitx   cycles
+          END
+          
+    pasm_to_spin:
+      description: "Use return variables for results"
+      example: |
+        PUB getCount() : result
+          ORG
+            getct   result
+          END
+
+common_patterns:
+  application_structure:
+    pattern: |
+      PUB main()
+        setup()
+        REPEAT
+          ' Main loop
+          
+      PUB setup()
+        ' Initialize hardware and objects
+
+  object_initialization:
+    pattern: |
+      OBJ
+        serial : "jm_fullduplexserial"
+        
+      PUB main()
+        serial.start(RX_PIN, TX_PIN, BAUD)
+
+  state_machine:
+    pattern: |
+      VAR
+        LONG currentState
+        
+      PUB run()
+        CASE currentState
+          STATE_INIT:
+            doInit()
+            currentState := STATE_ACTIVE
+          STATE_ACTIVE:
+            doWork()
+          STATE_ERROR:
+            handleError()
+
+  timing_delays:
+    milliseconds: "WAITMS(milliseconds)"
+    microseconds: "WAITUS(microseconds)"
+    cycles: "WAITX(cycles)"
+    example: |
+      WAITMS(1000)    ' Wait 1 second
+      WAITUS(100)     ' Wait 100 microseconds
+
+critical_gotchas:
+  - "Symbol names limited to 30 characters maximum"
+  - "Parameters default to LONG but can be ^BYTE/^WORD/^LONG/^STRUCT pointers"
+  - "Return values default to LONG but can be ^BYTE/^WORD/^LONG/^STRUCT pointers"
+  - "Locals can be BYTE, WORD, LONG, STRUCT with arrays and ALIGNW/ALIGNL"
+  - "Arrays are zero-indexed: buffer[0] to buffer[255]"
+  - "TRUE is -1 (all bits set), FALSE is 0"
+  - "Use == for comparison, := for assignment"
+  - "Pin numbers are 0-63 on P2"
+  - "First PUB method is the entry point"
+  - "Object filenames exclude .spin2 extension"
+  - "Return values and locals auto-initialize to zero"
+
+string_handling:
+  string_constants:
+    location: "DAT block"
+    termination: "Null-terminated (0) for C-style"
+    example: |
+      DAT
+        message   BYTE "Hello, World!", 0
+        
+  string_methods:
+    note: "Use string library objects for manipulation"
+    common_objects:
+      - '"jm_strings" - string utilities'
+      - '"jm_nstr" - number to string conversion'
+
+debugging_support:
+  debug_statement:
+    syntax: 'DEBUG("format", values)'
+    usage: "Live debug output to terminal"
+    example: |
+      DEBUG("Value: ", DEC value)
+      DEBUG("Position: x=", DEC x, " y=", DEC y)
+
+next_steps:
+  formatting: "Apply spin2-formatting-standards.yaml for professional structure"
+  documentation: "Choose spin2-docs-jonnymac.yaml or spin2-docs-vscode.yaml"
+  naming: "Optionally apply spin2-naming-jonnymac.yaml for strict conventions"
+  details: "Reference full Spin2 manifests for complete operator/keyword documentation"
+
+see_also:
+  - manifests/P2/language/spin2-manifest.yaml
+  - engineering/knowledge-base/P2/language/spin2/operators/
+  - engineering/knowledge-base/P2/language/spin2/keywords/
+  - engineering/knowledge-base/P2/language/spin2/methods/

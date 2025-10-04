@@ -1,0 +1,349 @@
+title: Spin2 VSCode Documentation Style  
+id: spin2-docs-vscode
+version: 1.0.0
+layer: "Layer 3 - Documentation Style (VSCode)"
+derived_from: vscode-pnut-documentation-style.yaml v1.1.0
+purpose: Tagged documentation style for VSCode toolchain integration
+applies_to: Projects using VSCode Spin2 extension with IntelliSense features
+
+summary: |
+  VSCode-compatible documentation style using @param, @returns, and @local tags for structured
+  documentation that integrates with IDE features. Places documentation after method signatures
+  for tool recognition and provides rich IntelliSense support.
+
+description: |
+  Layer 3 documentation style optimized for the VSCode Spin2 extension toolchain. This layer provides
+  only the documentation conventions - no naming requirements, no indentation mandates. Enables
+  IntelliSense, parameter hints, and hover documentation in VSCode.
+
+documentation_philosophy:
+  principles:
+    - "Document for tool integration and human readability"
+    - "Use structured tags for IDE parsing"
+    - "Place documentation after signatures (Spin2 convention)"
+    - "Provide complete parameter and return documentation"
+    - "Enable rich IntelliSense experiences"
+    
+  toolchain_benefits:
+    - "IntelliSense hover documentation"
+    - "Parameter hints during method calls"
+    - "Documentation preview in completion items"
+    - "Syntax highlighting for documentation comments"
+
+comment_prefixes:
+  public_documentation: "''"
+  private_documentation: "'"
+  code_comments: "'"
+  block_comments: "{{ ... }}"
+
+documentation_tags:
+  param_tag:
+    format: "@param {paramName} - description"
+    usage: "Document each method parameter (only if parameters exist)"
+    example: "@param frequency - The clock frequency in Hz"
+    rules:
+      - "Only include if method has parameters"
+      - "One @param line per parameter"
+      - "Match parameter names from signature"
+    
+  returns_tag:
+    format: "@returns {returnName} - description"
+    usage: "Document each return value (only if return values exist)"
+    example: "@returns result - True if successful, false otherwise"
+    rules:
+      - "Only include if method has return values"
+      - "One @returns line per return value"
+      - "Match return names from signature"
+      - "Never use '@returns None' for methods without returns"
+    
+  local_tag:
+    format: "@local {localName} - description"
+    usage: "Document local variables (uses single apostrophe prefix)"
+    example: "@local tempValue - Temporary storage for calculation"
+    rules:
+      - "Only include if locals exist and need documentation"
+      - "Uses single apostrophe prefix (private comment style)"
+      - "Optional for obvious temporary variables"
+
+documentation_structure:
+  placement: "After method signature"
+  
+  ordering:
+    1: "Description line ending with ..."
+    2: "Blank documentation comment line (separator)"
+    3: "Parameter documentation (@param tags)"
+    4: "Return value documentation (@returns tags)"
+    5: "Optional: Local variables section with single apostrophe"
+    6: "Blank line before code begins"
+
+method_templates:
+  public_method_full:
+    pattern: |
+      PUB methodName(param1, param2) : returnValue | local1, local2
+      '' Brief description of what this method does...
+      ''
+      '' @param param1 - Description of first parameter
+      '' @param param2 - Description of second parameter
+      '' @returns returnValue - Description of return value
+      
+      ' Local Variables:
+      ' @local local1 - Description of local variable
+      ' @local local2 - Description of local variable
+      
+          ' Implementation begins here
+          returnValue := param1 + param2
+          
+    notes:
+      - "Double apostrophe for public methods"
+      - "Blank separator after description"
+      - "All parameters and returns documented"
+      - "Local documentation uses single apostrophe"
+      - "Blank line before implementation"
+      
+  method_with_multiple_returns:
+    pattern: |
+      PUB getPosition() : x, y, z
+      '' Gets the current 3D position coordinates...
+      ''
+      '' @returns x - X coordinate value
+      '' @returns y - Y coordinate value
+      '' @returns z - Z coordinate value
+      
+          x := current_x_pos
+          y := current_y_pos
+          z := current_z_pos
+          
+    notes:
+      - "Each return value documented separately"
+      - "Clear, descriptive documentation for each"
+      
+  method_without_params_or_returns:
+    pattern: |
+      PUB initialize()
+      '' Initializes the module to default operational state...
+      ''
+      
+          configure_pins()
+          reset_variables()
+          start_timers()
+          
+    notes:
+      - "No @param or @returns when not applicable"
+      - "Clean, simple documentation"
+      - "Don't add tags for non-existent elements"
+      
+  private_method:
+    pattern: |
+      PRI internalCalc(value) : result | counter
+      ' Internal calculation helper...
+      '
+      ' @param value - Input value to process
+      ' @returns result - Processed value
+      
+      ' Local Variables:
+      ' @local counter - Loop iteration counter
+      
+          REPEAT counter FROM 0 TO value
+              result += counter
+              
+    notes:
+      - "Single apostrophe for private methods"
+      - "Same tag structure as public"
+      - "Consistent documentation style"
+      
+  simple_method:
+    pattern: |
+      PUB reset()
+      '' Resets all state variables to defaults...
+      ''
+      
+          position := 0
+          velocity := 0
+          state := STATE_IDLE
+
+constants_and_variables_documentation:
+  comment_placement_options:
+    preceding_comments:
+      description: "Placed on line immediately before declaration"
+      priority: "Higher - takes priority if both types present"
+      requirements: "No blank lines between comment and declaration"
+      
+    trailing_comments:
+      description: "Placed on same line after declaration"
+      priority: "Lower - only used if no preceding comment"
+      requirements: "Separated from code by whitespace"
+      
+  constant_examples:
+    con_section: |
+      ' Maximum number of connection retries before timeout
+      MAX_RETRIES = 10
+      
+      TIMEOUT_MS = 5000              ' Timeout duration in milliseconds
+      
+      ' System clock frequency in Hz for timing calculations
+      CLK_FREQ = 270_000_000
+      
+  variable_examples:
+    var_section: |
+      VAR
+        ' Current encoder position in counts
+        LONG currentPosition
+        
+        LONG targetSpeed               ' Desired motor speed in RPM
+        
+        ' Buffer for incoming serial data packets
+        BYTE serialBuffer[256]
+        
+  enumeration_documentation:
+    pattern: |
+      ' Motor control states for drive system:
+      '  DCS_STOPPED   - Motor completely stopped, no power
+      '  DCS_SPIN_UP   - Motor ramping up to target speed
+      '  DCS_AT_SPEED  - Motor running at target speed
+      '  DCS_SPIN_DOWN - Motor ramping down to stop
+      #0, DCS_STOPPED, DCS_SPIN_UP, DCS_AT_SPEED, DCS_SPIN_DOWN
+
+documentation_rules:
+  completeness:
+    - "Document all parameters"
+    - "Document all return values"
+    - "Document significant local variables"
+    - "Use placeholder (...) for descriptions to be filled in"
+    
+  formatting:
+    - "Maintain consistent indentation"
+    - "Use appropriate comment prefix based on visibility"
+    - "Separate sections with blank comment lines"
+    - "Group related elements together"
+    
+  omissions:
+    - "Never add @param if no parameters exist"
+    - "Never add @returns if no return values exist"
+    - "Skip @local for obvious temporary variables"
+    - "Don't document every implementation detail"
+
+vscode_toolchain_integration:
+  intellisense_features:
+    hover_documentation:
+      - "Shows method description on hover"
+      - "Displays parameter information"
+      - "Presents return value details"
+      
+    parameter_hints:
+      - "Pop-up parameter info during method calls"
+      - "Shows parameter descriptions from @param tags"
+      - "Highlights current parameter position"
+      
+    completion_items:
+      - "Documentation preview in autocomplete"
+      - "Method signatures with descriptions"
+      - "Quick info without leaving editor"
+      
+  syntax_highlighting:
+    - "Documentation comments distinctly colored"
+    - "Tags highlighted for visibility"
+    - "Clear visual separation from code"
+
+automation_instructions:
+  parsing:
+    - "Extract visibility modifier (PUB/PRI)"
+    - "Extract method name"
+    - "Parse parameter list (comma-separated, may be empty)"
+    - "Parse return values (after colon, may be empty)"
+    - "Parse local variables (after pipe, may be empty)"
+    
+  generation:
+    - "Use appropriate comment prefix for visibility"
+    - "Generate description with placeholder (...)"
+    - "Add blank separator line"
+    - "Generate @param for each parameter (only if parameters exist)"
+    - "Generate @returns for each return value (only if returns exist)"
+    - "Optionally add @local section for locals (only if locals exist)"
+    - "Ensure blank line before code"
+    - "Don't include tags for elements that don't exist"
+
+migration_from_traditional:
+  identify_old_comments:
+    - "Comments appearing above method signature"
+    - "Comments below signature but not in proper format"
+    - "Inline comments describing parameters/returns"
+    
+  migration_process:
+    1: "Extract information from old comments"
+    2: "Delete old comment blocks completely"
+    3: "Create new documentation block after signature"
+    4: "Format with appropriate tags and structure"
+    5: "Ensure blank line before implementation code"
+    
+  before_example: |
+    '' This method calculates the area
+    '' Takes width and height as parameters
+    PUB calculateArea(width, height) : area
+        area := width * height
+        
+  after_example: |
+    PUB calculateArea(width, height) : area
+    '' Calculates the rectangular area from dimensions...
+    ''
+    '' @param width - Width of the rectangle
+    '' @param height - Height of the rectangle
+    '' @returns area - Calculated area value
+    
+        area := width * height
+
+best_practices:
+  description_quality:
+    - "Keep descriptions clear and concise"
+    - "Explain purpose and usage, not just what the code does"
+    - "Document assumptions and constraints"
+    - "Include units for numeric parameters"
+    - "Note side effects or state changes"
+    - "Reference related methods when appropriate"
+    
+  tag_usage:
+    - "Match tag names exactly to signature"
+    - "Be specific about parameter purposes"
+    - "Clarify return value meaning and ranges"
+    - "Document special values (like -1 for error)"
+    - "Explain relationships between parameters"
+    
+  maintenance:
+    - "Update documentation when changing signatures"
+    - "Keep descriptions synchronized with code"
+    - "Remove stale @local tags if locals removed"
+    - "Add documentation for new parameters immediately"
+
+why_this_style_works:
+  tool_integration:
+    - "Structured tags enable IDE parsing"
+    - "IntelliSense provides immediate documentation access"
+    - "Reduces need to context-switch to external docs"
+    
+  developer_productivity:
+    - "Parameter hints reduce errors"
+    - "Hover documentation speeds comprehension"
+    - "Autocomplete with docs improves discoverability"
+    
+  code_quality:
+    - "Forces explicit parameter documentation"
+    - "Encourages thoughtful API design"
+    - "Makes code more maintainable"
+
+integration_notes:
+  combine_with:
+    layer_1: "spin2-getting-started.yaml (language mechanics)"
+    layer_2: "spin2-formatting-standards.yaml (professional structure)"
+    
+  compatible_with:
+    - "Any naming convention preferences"
+    - "Any indentation style (tabs or spaces)"
+    - "Team-specific formatting guidelines"
+    
+  toolchain_requirements:
+    - "VSCode with Spin2 extension installed"
+    - "PNUT_TS compiler for compilation"
+    - "Optional: PNUT_TERM_TS for debugging"
+
+see_also:
+  full_specification: engineering/knowledge-base/P2/language/spin2/conventions/vscode-pnut-documentation-style.yaml
+  extension_docs: "VSCode Spin2 Extension documentation"

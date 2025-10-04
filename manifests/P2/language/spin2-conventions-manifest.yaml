@@ -16,9 +16,64 @@ overview: |
   External AI systems should use these specifications to generate properly formatted documentation
   that matches the user's development environment and toolchain preferences.
 
+getting_started_guides:
+  - id: spin2-getting-started
+    name: Spin2 Getting Started - Core Language Essentials
+    content: "spin2-getting-started.yaml"
+    layer: "Layer 1 - Language Mechanics"
+    recommended_for:
+      - AI code generation
+      - Developers new to Spin2
+      - Quick reference for syntax
+    key_feature: Core language mechanics without style opinions
+
+layered_conventions:
+  layer_2_formatting:
+    - id: spin2-formatting-standards
+      name: Spin2 Professional Formatting Standards
+      content: "spin2-formatting-standards.yaml"
+      layer: "Layer 2 - Universal Professional Formatting"
+      recommended_for:
+        - All Spin2 projects
+        - Professional code structure
+        - Team collaboration
+      key_feature: Universal formatting without indentation mandates
+      
+  layer_3_documentation:
+    - id: spin2-docs-jonnymac
+      name: Spin2 JonnyMac Documentation Style
+      content: "spin2-docs-jonnymac.yaml"
+      layer: "Layer 3 - Documentation Style (JonnyMac)"
+      recommended_for:
+        - Plain English documentation preference
+        - OBEX quality contributions
+        - Community standard adherence
+      key_feature: Plain English without formal tags
+      
+    - id: spin2-docs-vscode
+      name: Spin2 VSCode Documentation Style
+      content: "spin2-docs-vscode.yaml"
+      layer: "Layer 3 - Documentation Style (VSCode)"
+      recommended_for:
+        - VSCode development environment
+        - IntelliSense support needed
+        - Tagged documentation preference
+      key_feature: Structured tags for IDE integration
+      
+  layer_4_naming:
+    - id: spin2-naming-jonnymac
+      name: Spin2 JonnyMac Naming Conventions
+      content: "spin2-naming-jonnymac.yaml"
+      layer: "Layer 4 - Naming Conventions (JonnyMac)"
+      recommended_for:
+        - Full JonnyMac standard compliance
+        - Strict naming discipline
+        - OBEX quality contributions
+      key_feature: Complete naming conventions plus 2-space indentation
+
 documentation_styles:
   - id: vscode-pnut-documentation-style
-    name: VSCode/PNUT_TS Documentation Style
+    name: VSCode/PNUT_TS Documentation Style (Complete)
     content: "vscode-pnut-documentation-style.yaml"
     recommended_for:
       - VSCode development environment
@@ -26,9 +81,10 @@ documentation_styles:
       - Modern P2 development
       - IntelliSense support needed
     key_feature: Documentation appears AFTER method signature
+    note: "Complete specification - use spin2-docs-vscode.yaml for Layer 3 only"
     
   - id: johnny-mac-documentation-style
-    name: Johnny Mac Internal Documentation Style
+    name: Johnny Mac Complete Programming Standard
     content: "johnny-mac-documentation-style.yaml"
     recommended_for:
       - Professional P2 development
@@ -36,6 +92,7 @@ documentation_styles:
       - Plain English documentation preference
       - OBEX quality contributions
     key_feature: Comprehensive internal documentation with plain English
+    note: "Complete specification - use layered files for modular adoption"
     
   - id: p2-source-file-organization-standard
     name: P2 Source File Organization Standard

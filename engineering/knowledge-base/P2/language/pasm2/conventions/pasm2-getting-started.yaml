@@ -1,0 +1,502 @@
+title: PASM2 Getting Started - Core Assembly Essentials
+id: pasm2-getting-started
+version: 1.0.0
+layer: "Foundation - Assembly Mechanics"
+purpose: Minimal viable knowledge for writing functional PASM2 code
+target_audience: AI code generators and developers new to PASM2 assembly
+
+summary: |
+  Essential PASM2 assembly mechanics needed to start writing functional code immediately. Covers instruction
+  format, register model, core instructions, addressing modes, and common idioms. Foundation knowledge for
+  productive P2 assembly programming.
+
+description: |
+  This is the foundation layer for PASM2 knowledge - pure instruction mechanics and register model. After
+  reading this, you can write syntactically correct PASM2 code using common instructions and patterns.
+  Reference detailed instruction documentation for advanced features.
+
+instruction_format:
+  basic_syntax:
+    format: "INSTRUCTION  destination, source"
+    examples:
+      - "MOV      x, y             ' Copy y to x"
+      - "ADD      total, value     ' Add value to total"
+      - "JMP      #loop            ' Jump to label"
+      
+  operand_types:
+    register:
+      description: "Cog register 0-511 or LUT register"
+      syntax: "regname"
+      example: "MOV  x, y"
+      
+    immediate:
+      description: "Literal value (9-bit or 32-bit with ##)"
+      syntax: "#value or ##value"
+      examples:
+        - "MOV  x, #100         ' 9-bit immediate (0-511)"
+        - "MOV  x, ##1000       ' 32-bit immediate (any value)"
+        
+    address:
+      description: "Label or address"
+      syntax: "#label"
+      example: "JMP  #loop"
+
+  instruction_effects:
+    WC:
+      description: "Write C flag with result"
+      usage: "Affects carry flag based on operation"
+      example: "ADD  x, y  WC      ' Set C if overflow"
+      
+    WZ:
+      description: "Write Z flag with result"
+      usage: "Affects zero flag based on result"
+      example: "CMP  x, y  WZ      ' Set Z if equal"
+      
+    WCZ:
+      description: "Write both C and Z flags"
+      usage: "Combined flag updates"
+      example: "SUB  x, y  WCZ     ' Set both flags"
+
+register_model:
+  cog_registers:
+    range: "0-511 (512 registers)"
+    size: "32 bits each"
+    usage:
+      - "General purpose computation"
+      - "Local variable storage"
+      - "Fast access (2 clock cycles)"
+    naming: "Use meaningful names in code"
+    
+  special_registers:
+    PA:
+      range: "496 (alias for register 496)"
+      usage: "Return address A"
+      
+    PB:
+      range: "497 (alias for register 497)"
+      usage: "Return address B"
+      
+    PTRA:
+      range: "498"
+      usage: "Pointer A for hub memory access"
+      
+    PTRB:
+      range: "499"
+      usage: "Pointer B for hub memory access"
+      
+    DIRA:
+      range: "500"
+      usage: "Pin direction for pins 0-31"
+      
+    DIRB:
+      range: "501"
+      usage: "Pin direction for pins 32-63"
+      
+    OUTA:
+      range: "502"
+      usage: "Pin output for pins 0-31"
+      
+    OUTB:
+      range: "503"
+      usage: "Pin output for pins 32-63"
+      
+    INA:
+      range: "504"
+      usage: "Pin input for pins 0-31 (read-only)"
+      
+    INB:
+      range: "505"
+      usage: "Pin input for pins 32-63 (read-only)"
+
+  lut_memory:
+    range: "512 longs (separate from cog registers)"
+    access: "RDLUT/WRLUT instructions"
+    usage: "Lookup tables, additional storage"
+    speed: "Same speed as cog registers"
+
+  hub_memory:
+    size: "512KB shared memory"
+    access: "RDLONG/RDWORD/RDBYTE, WRLONG/WRWORD/WRBYTE"
+    timing: "~20 clock cycles per access"
+    usage: "Shared data, large buffers, communication"
+
+core_instructions:
+  data_movement:
+    MOV:
+      syntax: "MOV  D, S"
+      description: "Copy source to destination"
+      example: "MOV  result, input"
+      
+    MOVS:
+      syntax: "MOVS  D, S"
+      description: "Copy S field of instruction"
+      usage: "Self-modifying code"
+      
+    MOVD:
+      syntax: "MOVD  D, S"
+      description: "Copy D field of instruction"
+      usage: "Self-modifying code"
+
+  arithmetic:
+    ADD:
+      syntax: "ADD  D, S  {WC/WZ/WCZ}"
+      description: "D := D + S"
+      example: "ADD  total, value  WC"
+      
+    SUB:
+      syntax: "SUB  D, S  {WC/WZ/WCZ}"
+      description: "D := D - S"
+      example: "SUB  count, #1  WZ"
+      
+    MUL:
+      syntax: "MUL  D, S"
+      description: "Multiply (lower 32 bits)"
+      example: "MUL  product, factor"
+      
+    NEG:
+      syntax: "NEG  D, S  {WC/WZ/WCZ}"
+      description: "D := -S"
+      example: "NEG  value, value"
+
+  logical:
+    AND:
+      syntax: "AND  D, S  {WC/WZ/WCZ}"
+      description: "D := D & S (bitwise AND)"
+      example: "AND  flags, #$FF"
+      
+    OR:
+      syntax: "OR  D, S  {WC/WZ/WCZ}"
+      description: "D := D | S (bitwise OR)"
+      example: "OR  config, #%1000"
+      
+    XOR:
+      syntax: "XOR  D, S  {WC/WZ/WCZ}"
+      description: "D := D ^ S (bitwise XOR)"
+      example: "XOR  value, mask"
+      
+    NOT:
+      syntax: "NOT  D, S  {WC/WZ/WCZ}"
+      description: "D := !S (bitwise NOT)"
+      example: "NOT  inverted, original"
+
+  comparison:
+    CMP:
+      syntax: "CMP  D, S  WC/WZ/WCZ"
+      description: "Compare D with S, set flags"
+      flags:
+        - "Z=1 if D == S"
+        - "C=1 if D > S (unsigned)"
+      example: "CMP  count, #100  WZ"
+      
+    TEST:
+      syntax: "TEST  D, S  WC/WZ/WCZ"
+      description: "Test bits (D & S), set flags"
+      example: "TEST  status, #$01  WZ"
+
+  branching:
+    JMP:
+      syntax: "JMP  #address"
+      description: "Unconditional jump"
+      example: "JMP  #loop"
+      
+    CALL:
+      syntax: "CALL  #address"
+      description: "Call subroutine (saves return in PA)"
+      example: "CALL  #process_data"
+      
+    RET:
+      syntax: "RET"
+      description: "Return from CALL (jumps to PA)"
+      example: "RET"
+      
+    TJNZ:
+      syntax: "TJNZ  D, #address"
+      description: "Jump if D not zero, decrement D"
+      usage: "Loop counting"
+      example: "TJNZ  counter, #loop"
+      
+    TJZ:
+      syntax: "TJZ  D, #address"
+      description: "Jump if D zero, decrement D"
+      example: "TJZ  countdown, #done"
+
+  conditional_execution:
+    IF_Z:
+      syntax: "IF_Z  INSTRUCTION"
+      description: "Execute if Z flag is set"
+      example: "IF_Z  MOV  result, #0"
+      
+    IF_NZ:
+      syntax: "IF_NZ  INSTRUCTION"
+      description: "Execute if Z flag is clear"
+      example: "IF_NZ  JMP  #continue"
+      
+    IF_C:
+      syntax: "IF_C  INSTRUCTION"
+      description: "Execute if C flag is set"
+      example: "IF_C  ADD  overflow, #1"
+      
+    IF_NC:
+      syntax: "IF_NC  INSTRUCTION"
+      description: "Execute if C flag is clear"
+      example: "IF_NC  JMP  #no_carry"
+
+  hub_access:
+    RDLONG:
+      syntax: "RDLONG  D, PTRA/PTRB/address"
+      description: "Read long (32-bit) from hub memory"
+      timing: "~20 clocks"
+      example: "RDLONG  value, PTRA++"
+      
+    WRLONG:
+      syntax: "WRLONG  D, PTRA/PTRB/address"
+      description: "Write long to hub memory"
+      timing: "~20 clocks"
+      example: "WRLONG  result, PTRA"
+      
+    RDBYTE:
+      syntax: "RDBYTE  D, address"
+      description: "Read byte from hub memory"
+      example: "RDBYTE  char, PTRA++"
+      
+    WRBYTE:
+      syntax: "WRBYTE  D, address"
+      description: "Write byte to hub memory"
+      example: "WRBYTE  char, PTRA++"
+
+  timing:
+    WAITX:
+      syntax: "WAITX  ticks"
+      description: "Wait specified clock cycles"
+      example: "WAITX  ##1000      ' Wait 1000 clocks"
+      
+    GETCT:
+      syntax: "GETCT  D"
+      description: "Get current system counter"
+      usage: "Precise timing measurements"
+      example: "GETCT  timestamp"
+
+addressing_modes:
+  immediate:
+    syntax: "#value"
+    range: "0-511 (9-bit) or use ## for 32-bit"
+    examples:
+      - "MOV  x, #42"
+      - "MOV  x, ##1_000_000"
+      
+  register_direct:
+    syntax: "regname"
+    description: "Use register value directly"
+    example: "ADD  total, amount"
+    
+  pointer_with_auto_increment:
+    PTRA_increment:
+      syntax: "PTRA++"
+      description: "Use PTRA, then increment"
+      example: "RDLONG  data, PTRA++"
+      
+    PTRA_decrement:
+      syntax: "PTRA--"
+      description: "Use PTRA, then decrement"
+      example: "RDLONG  data, PTRA--"
+      
+    PTRB_increment:
+      syntax: "PTRB++"
+      description: "Use PTRB, then increment"
+      example: "WRLONG  data, PTRB++"
+
+common_patterns:
+  simple_loop:
+    pattern: |
+      MOV      counter, ##1000
+      
+      .loop
+      ' Loop body
+      
+      DJNZ     counter, #.loop
+      
+  delay_loop:
+    pattern: |
+      MOV      delay, ##sysclock_freq
+      
+      .wait
+      DJNZ     delay, #.wait
+      
+  subroutine_call:
+    pattern: |
+      ' Main code
+      CALL     #my_subroutine
+      
+      ' Subroutine
+      my_subroutine
+      ' Subroutine body
+      RET
+      
+  conditional_branch:
+    pattern: |
+      CMP      value, #threshold  WZ
+      IF_Z     JMP  #equal_path
+      IF_NZ    JMP  #not_equal_path
+      
+  hub_memory_copy:
+    pattern: |
+      MOV      PTRA, source_addr
+      MOV      PTRB, dest_addr
+      MOV      count, #256
+      
+      .copy
+      RDLONG   data, PTRA++
+      WRLONG   data, PTRB++
+      DJNZ     count, #.copy
+      
+  pin_toggle:
+    pattern: |
+      MOV      pin_mask, #1
+      SHL      pin_mask, pin_number
+      
+      .toggle
+      XOR      OUTA, pin_mask
+      WAITX    delay_ticks
+      JMP      #.toggle
+
+inline_pasm2_in_spin2:
+  basic_inline:
+    description: "PASM2 code between ORG and END in Spin2 method"
+    example: |
+      PUB togglePin(pin)
+        ORG
+          DRVNOT  pin
+        END
+        
+  accessing_parameters:
+    description: "Spin2 parameters automatically available as registers"
+    example: |
+      PUB delayClocks(cycles)
+        ORG
+          WAITX   cycles
+        END
+        
+  returning_values:
+    description: "Use Spin2 return variables"
+    example: |
+      PUB getCycles() : result
+        ORG
+          GETCT   result
+        END
+
+labels_and_symbols:
+  local_labels:
+    syntax: ".labelname"
+    scope: "Local to current subroutine"
+    example: |
+      process
+      .loop
+      DJNZ  count, #.loop
+      RET
+      
+  global_labels:
+    syntax: "labelname"
+    scope: "Available throughout program"
+    example: |
+      main_loop
+      CALL  #process
+      JMP   #main_loop
+
+assembler_directives:
+  ORG:
+    syntax: "ORG  address"
+    description: "Set assembly origin (default $000 for cog)"
+    example: "ORG  $000"
+    
+  ORGH:
+    syntax: "ORGH  address"
+    description: "Assemble for hub execution"
+    usage: "Code that runs from hub memory"
+    
+  FIT:
+    syntax: "FIT  max_address"
+    description: "Verify code fits in specified space"
+    example: "FIT  $1F0       ' Ensure fits in cog (496 longs)"
+    
+  LONG:
+    syntax: "LONG  value"
+    description: "Define 32-bit data"
+    example: "lookup_table  LONG  10, 20, 30, 40"
+    
+  BYTE:
+    syntax: "BYTE  value"
+    description: "Define 8-bit data"
+    example: 'message  BYTE  "Hello", 0'
+    
+  WORD:
+    syntax: "WORD  value"
+    description: "Define 16-bit data"
+    example: "data  WORD  1000, 2000, 3000"
+
+critical_gotchas:
+  - "All instructions are 32-bit (one long per instruction)"
+  - "Immediate values limited to 9 bits (0-511) unless using ##"
+  - "Hub memory access is slow (~20 clocks) compared to cog/LUT"
+  - "PTRA/PTRB auto-increment is AFTER the access (post-increment)"
+  - "Flags (C, Z) persist until explicitly changed"
+  - "Labels must start in column 1 or use local syntax (.label)"
+  - "Comments use single quote (') in PASM2"
+  - "Pin numbers are 0-63, not bit positions in some contexts"
+  - "DJNZ decrements THEN tests (jumps if result not zero)"
+  - "RET uses PA register (set by CALL)"
+
+flag_behavior:
+  C_flag:
+    name: "Carry flag"
+    uses:
+      - "Arithmetic overflow/underflow"
+      - "Shift/rotate carry out"
+      - "Conditional execution"
+    
+  Z_flag:
+    name: "Zero flag"
+    uses:
+      - "Result equals zero"
+      - "Comparison equality"
+      - "Conditional execution"
+      
+  flag_persistence:
+    note: "Flags retain values until explicitly modified"
+    example: |
+      CMP   x, y  WZ        ' Sets Z flag
+      ADD   a, b            ' Z flag unchanged
+      IF_Z  MOV  result, #0 ' Still uses Z from CMP
+
+timing_considerations:
+  instruction_timing:
+    most_instructions: "2 clock cycles"
+    hub_access: "~20 clock cycles"
+    multiply: "2 cycles (standard), varies for advanced modes"
+    
+  clock_frequency:
+    default: "20 MHz crystal with PLL"
+    typical: "200-300 MHz system clock"
+    maximum: "340+ MHz (silicon dependent)"
+    
+  precise_timing:
+    WAITX: "Accurate delay in clock cycles"
+    GETCT: "Read 32-bit system counter"
+    example: |
+      GETCT    start_time
+      ' Code to measure
+      GETCT    end_time
+      SUB      end_time, start_time
+
+next_steps:
+  detailed_instructions: "Reference full PASM2 instruction set (377 instructions)"
+  smart_pins: "Learn Smart Pin modes for advanced I/O"
+  cordic: "Explore CORDIC solver for math operations"
+  streamer: "Study streamer for video/audio generation"
+  cog_management: "Learn COGINIT for multi-cog programming"
+
+see_also:
+  - engineering/knowledge-base/P2/language/pasm2/special-registers.yaml
+  - engineering/knowledge-base/P2/language/pasm2/idioms/
+  - engineering/knowledge-base/P2/language/pasm2/patterns/
+  - engineering/knowledge-base/P2/language/pasm2/concepts/
+  - manifests/P2/language/pasm2-manifest.yaml

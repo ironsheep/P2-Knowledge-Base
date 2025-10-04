@@ -238,6 +238,10 @@ class ManifestValidator:
                 if yaml_file.name in IGNORED_FILES:
                     continue
                     
+                # Skip .history directories (VSCode Local History extension backups)
+                if '.history' in yaml_file.parts:
+                    continue
+                    
                 relative_path = yaml_file.relative_to(self.root)
                 path_str = str(relative_path)
                 
@@ -250,6 +254,10 @@ class ManifestValidator:
             for yaml_file in manifest_path.rglob("*.yaml"):
                 # Skip root manifest
                 if yaml_file.name == "propeller-knowledge-root.yaml":
+                    continue
+                    
+                # Skip .history directories (VSCode Local History extension backups)
+                if '.history' in yaml_file.parts:
                     continue
                     
                 relative_path = yaml_file.relative_to(self.root)
@@ -384,12 +392,12 @@ def main():
     
     # Count files for baseline
     manifests_dir = repo_root / "manifests"
-    manifest_files = list(manifests_dir.rglob("*.yaml")) if manifests_dir.exists() else []
+    manifest_files = [f for f in manifests_dir.rglob("*.yaml") if '.history' not in f.parts] if manifests_dir.exists() else []
     manifest_count = len(manifest_files)
     
-    # Count only P2 knowledge base files (excluding P2-support and ignored files)
+    # Count only P2 knowledge base files (excluding P2-support, .history, and ignored files)
     kb_dir = repo_root / "engineering" / "knowledge-base" / "P2"
-    content_files = [f for f in kb_dir.rglob("*.yaml") if f.name not in IGNORED_FILES] if kb_dir.exists() else []
+    content_files = [f for f in kb_dir.rglob("*.yaml") if f.name not in IGNORED_FILES and '.history' not in f.parts] if kb_dir.exists() else []
     content_count = len(content_files)
     
     print(f"Manifest files in manifests/ tree: {manifest_count}")

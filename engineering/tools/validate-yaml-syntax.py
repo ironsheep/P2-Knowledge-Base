@@ -45,7 +45,8 @@ class YAMLValidator:
         
         for yaml_file in sorted(directory.glob('**/*.yaml')):
             # Skip P2-support directory (not part of P2 knowledge base)
-            if 'P2-support' in str(yaml_file):
+            # Skip .history directories (VSCode Local History extension backups)
+            if 'P2-support' in str(yaml_file) or '.history' in str(yaml_file):
                 continue
                 
             self.files_checked += 1

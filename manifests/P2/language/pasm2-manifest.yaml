@@ -933,3 +933,15 @@ idioms:
   - name: Timing Control
     content: idioms/timing-control.yaml
     description: Timing control idioms
+
+# Conventions section - PASM2 coding conventions and getting started guides
+conventions:
+  - name: PASM2 Getting Started
+    content: conventions/pasm2-getting-started.yaml
+    description: Core PASM2 essentials for writing functional assembly code
+    layer: "Layer 1 - Language Mechanics"
+    recommended_for:
+      - AI code generation
+      - Developers new to PASM2
+      - Quick reference for instruction format and register model
+    key_feature: Essential assembly mechanics without style opinions

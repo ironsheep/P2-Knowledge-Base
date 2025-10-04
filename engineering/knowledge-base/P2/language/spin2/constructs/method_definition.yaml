@@ -155,23 +155,44 @@ local_variables:
       avg := sum / count
 
 method_limits:
+  symbol_names:
+    maximum: 30
+    description: "Maximum 30 characters for method and parameter names"
+    source: "Spin2 v51 documentation"
+
   parameters:
     maximum: 127
     description: "Maximum 127 parameters per method"
     source: "Spin2 v51 documentation - line 2087"
-    note: "Includes both individual longs and structures up to 15 longs"
-    
+    default_type: "LONG (32-bit)"
+    type_overrides:
+      pointers: "^BYTE, ^WORD, ^LONG, ^STRUCT"
+      description: "Parameters can be pointers to different-sized types"
+      example: "PUB process(^BYTE strPtr, ^LONG dataPtr)"
+
   return_values:
     maximum: 15
     description: "Maximum 15 return values per method"
     source: "Spin2 v51 documentation - line 2089"
-    note: "Can be individual longs or structures up to 15 longs"
-    
+    default_type: "LONG (32-bit)"
+    type_overrides:
+      pointers: "^BYTE, ^WORD, ^LONG, ^STRUCT"
+      description: "Returns can be pointers to different-sized types"
+      example: "PUB getBuffer() : ^BYTE result"
+
   local_variables:
     maximum: "64KB"
     description: "Up to 64KB of local variables per method"
-    source: "Spin2 v51 documentation - line 1105"
-    note: "Total space for all locals combined"
+    source: "Spin2 v51 documentation - line 1302-1307"
+    default_type: "LONG (32-bit)"
+    type_overrides:
+      basic_types: "BYTE, WORD, LONG, STRUCT"
+      pointers: "^BYTE, ^WORD, ^LONG, ^STRUCT"
+      arrays: "Supported with [size] syntax"
+      alignment: "ALIGNW, ALIGNL for word/long alignment"
+      description: "Locals can be sized types, arrays, pointers, and aligned"
+      example: "PUB process() : result | BYTE buffer[64], WORD index, ALIGNL LONG data[16]"
+    complete_syntax_example: "PRI STRCHECK(STRPTRA, STRPTRB) : PASS | I, BYTE STR[64]"
     
   register_mapping:
     count: 16

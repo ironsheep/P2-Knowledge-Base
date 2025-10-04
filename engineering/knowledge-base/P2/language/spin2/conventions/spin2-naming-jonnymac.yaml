@@ -1,0 +1,418 @@
+title: Spin2 JonnyMac Naming Conventions
+id: spin2-naming-jonnymac
+version: 1.0.0
+layer: "Layer 4 - Naming Conventions (JonnyMac)"
+derived_from: johnny-mac-documentation-style.yaml v2.0.0
+purpose: Complete JonnyMac naming and indentation standard
+applies_to: Projects adopting full JonnyMac community standard
+
+summary: |
+  Complete JonnyMac naming conventions and indentation requirements. This optional layer provides
+  strict naming patterns (UPPERCASE constants, snake_case methods, etc.) and 2-space indentation
+  standard. Use only when explicitly choosing the full JonnyMac community standard.
+
+description: |
+  Layer 4 is the most opinionated layer - enforcing specific naming patterns and indentation style.
+  This completes the full JonnyMac standard when combined with Layers 1-3. Only adopt this layer
+  when you want strict naming discipline and consistent indentation throughout your codebase.
+
+indentation_standard:
+  type: "spaces"
+  amount: 2
+  usage: "Block indentation"
+  
+  rationale:
+    - "Consistent across all JonnyMac code"
+    - "Balances readability with horizontal space"
+    - "Works well with nested structures"
+    - "Standard in P2 community examples"
+    
+  application:
+    - "All block structures (IF, REPEAT, CASE)"
+    - "Method bodies"
+    - "Nested structures"
+    
+  example: |
+    PUB main()
+      setup()
+      
+      REPEAT
+        IF (sensor_active)
+          read_sensor()
+          process_data()
+
+naming_conventions:
+  constants:
+    style: "UPPERCASE_WITH_UNDERSCORES"
+    location: "CON block"
+    rules:
+      - "All uppercase letters"
+      - "Underscores separate words"
+      - "Numbers allowed"
+      - "IO pin names are constants"
+      
+    examples:
+      - "BAUD_115200"
+      - "TX_PIN"
+      - "BUFFER_SIZE"
+      - "MS_001"
+      - "CLK_FREQ"
+      
+    rationale:
+      - "Immediately identifies compile-time constants"
+      - "Prevents accidental modification attempts"
+      - "Clear visual distinction from variables"
+      
+  variables:
+    style: "lowercase or camelCase"
+    location: "VAR block"
+    
+    rules:
+      preferred: "lowercase"
+      alternative: "camelCase (if consistent throughout project)"
+      trailing_numbers: "Allowed"
+      local_variables: "Should be short"
+      
+    lowercase_examples:
+      - "irpacket"
+      - "buffer"
+      - "count"
+      - "idx"
+      - "sensor_value"
+      
+    camelCase_examples:
+      - "irPacket"
+      - "txBuffer"
+      - "rxCount"
+      - "sensorIdx"
+      
+    rationale:
+      - "Lowercase is preferred JonnyMac style"
+      - "camelCase permitted for team consistency"
+      - "Short locals improve code readability"
+      
+  pre_initialized_data:
+    style: "PascalCase"
+    location: "DAT block"
+    
+    rules:
+      - "First letter of each word capitalized"
+      - "No underscores between words"
+      - "Clear distinction from variables"
+      
+    examples:
+      - "DamageTable"
+      - "ConfigData"
+      - "MessageStrings"
+      - "LookupValues"
+      
+    rationale:
+      - "Distinguishes DAT symbols from VAR variables"
+      - "Indicates pre-initialized/static data"
+      - "Follows established community pattern"
+      
+  objects:
+    style: "lowercase"
+    location: "OBJ block"
+    
+    rules:
+      - "Only lowercase letters allowed"
+      - "Numbers may be used"
+      - "No underscores"
+      - "No other characters allowed"
+      
+    examples:
+      - 'time : "jm_time_80"'
+      - 'irrx : "jm_elte_irrx"'
+      - 'serial : "jm_fullduplexserial"'
+      - 'led0 : "jm_pwm"'
+      
+    rationale:
+      - "Consistent with Spin2 object naming tradition"
+      - "Clear, simple instance names"
+      - "Easy to type and remember"
+      
+  methods:
+    style: "snake_case"
+    location: "PUB and PRI blocks"
+    
+    rules:
+      - "Lowercase with underscores between words"
+      - "Functions that do things named for that thing (verbs)"
+      - "Functions that return values named for what they return (nouns)"
+      - "Maximum length: 30 characters"
+      
+    action_examples:
+      - "start"
+      - "stop"
+      - "setup"
+      - "tx"
+      - "rx"
+      - "read_sensor"
+      - "update_display"
+      - "check_status"
+      
+    getter_examples:
+      - "get_packet"
+      - "damage_points"
+      - "random"
+      - "rxcheck"
+      - "current_position"
+      
+    rationale:
+      - "Clear, readable method names"
+      - "Consistent throughout community"
+      - "Verb/noun distinction aids comprehension"
+      
+  assembly_labels:
+    style: "snake_case"
+    location: "PASM2 code sections"
+    
+    rules:
+      - "Defined like method names"
+      - "Lowercase with underscores"
+      - "Descriptive of purpose"
+      
+    examples:
+      - "read_loop"
+      - "wait_done"
+      - "tx_byte"
+      - "process_buffer"
+      
+    local_labels:
+      prefix: "."
+      examples:
+        - ".loop"
+        - ".done"
+        - ".retry"
+
+code_structure_requirements:
+  line_length:
+    maximum: 100
+    includes: "Code with end-of-line comments"
+    inherited_from: "Layer 2 (spin2-formatting-standards.yaml)"
+    
+  symbol_names:
+    maximum_length: 30
+    applies_to: "All constants, variables, methods, and labels"
+    
+  method_spacing:
+    blank_lines: 2
+    between: "All method definitions"
+    inherited_from: "Layer 2 (spin2-formatting-standards.yaml)"
+    
+  keywords:
+    case: "lowercase"
+    applies_to: "All Spin keywords and symbols"
+
+naming_pattern_examples:
+  complete_constant_section: |
+    CON { timing }
+      CLK_FREQ = 270_000_000
+      MS_001   = CLK_FREQ / 1_000
+      US_001   = CLK_FREQ / 1_000_000
+      
+    CON { io pins }
+      RX_PIN = 63
+      TX_PIN = 62
+      LED_PIN = 56
+      
+    CON { configuration }
+      BAUD_115200 = 115_200
+      BUFFER_SIZE = 256
+      
+  complete_variable_section: |
+    VAR
+      ' Communication state (lowercase style)
+      LONG rx_pin
+      LONG tx_pin
+      LONG baud_rate
+      
+      ' Buffers
+      BYTE tx_buffer[BUFFER_SIZE]
+      BYTE rx_buffer[BUFFER_SIZE]
+      
+  complete_data_section: |
+    DAT
+      DamageTable   BYTE  1, 2, 4, 5, 7, 10
+      MessageText   BYTE  "Ready", 0
+      ConfigValues  LONG  100, 200, 300
+      
+  complete_object_section: |
+    OBJ
+      time   : "jm_time_80"
+      serial : "jm_fullduplexserial"
+      led    : "jm_pwm"
+
+method_naming_patterns:
+  initialization:
+    - "start"
+    - "setup"
+    - "init"
+    - "begin"
+    
+  cleanup:
+    - "stop"
+    - "cleanup"
+    - "shutdown"
+    - "close"
+    
+  data_operations:
+    - "read_sensor"
+    - "write_buffer"
+    - "clear_data"
+    - "copy_values"
+    
+  state_queries:
+    - "is_ready"
+    - "has_data"
+    - "get_status"
+    - "check_error"
+    
+  getters:
+    - "get_value"
+    - "current_position"
+    - "buffer_count"
+    
+  setters:
+    - "set_mode"
+    - "update_config"
+    - "configure_pins"
+
+complete_example:
+  description: "Complete example showing all naming conventions"
+  code: |
+    CON { timing }
+      CLK_FREQ = 270_000_000
+      MS_001   = CLK_FREQ / 1_000
+      
+    CON { io pins }
+      RX_PIN = 63
+      TX_PIN = 62
+      
+    CON { configuration }
+      BAUD_115200 = 115_200
+      BUFFER_SIZE = 64
+      
+    OBJ
+      time   : "jm_time_80"
+      serial : "jm_fullduplexserial"
+      
+    VAR
+      BYTE ir_packet[BUFFER_SIZE]
+      LONG seed
+      
+    DAT
+      DamageTable  BYTE  1, 2, 4, 5, 7, 10
+      
+      
+    PUB main()
+      setup()
+      
+      REPEAT
+        process_packets()
+        
+        
+    PUB setup()
+      time.start()
+      serial.start(RX_PIN, TX_PIN, BAUD_115200)
+      seed := GETCT()
+      
+      
+    PUB process_packets() | idx
+      read_packet(@ir_packet)
+      idx := ir_packet[0] & $0F
+      IF (idx => 0) AND (idx =< 15)
+        apply_damage(damage_points(idx))
+        
+        
+    PUB damage_points(idx) : points
+      IF (idx < 0) OR (idx > 15)
+        RETURN 0
+      ELSE
+        RETURN DamageTable[idx]
+        
+        
+    PRI apply_damage(points)
+      ' Process damage
+      
+      
+    PRI read_packet(ptr_buffer)
+      ' Read IR packet
+
+enforcement_guidelines:
+  strict_enforcement:
+    - "All constants must be UPPERCASE_WITH_UNDERSCORES"
+    - "All methods must be snake_case"
+    - "All DAT symbols must be PascalCase"
+    - "All objects must be lowercase"
+    - "All code must use 2-space indentation"
+    
+  code_review_checklist:
+    - "□ Constants properly named"
+    - "□ Variables follow lowercase or camelCase consistently"
+    - "□ Methods use snake_case"
+    - "□ Objects are lowercase only"
+    - "□ DAT symbols use PascalCase"
+    - "□ Indentation is 2 spaces throughout"
+    - "□ Symbol names under 30 characters"
+
+migration_from_other_styles:
+  from_natural_style:
+    - "Rename constants to UPPERCASE"
+    - "Convert method names to snake_case"
+    - "Adjust indentation to 2 spaces"
+    - "Update DAT symbols to PascalCase"
+    
+  tools:
+    - "Search and replace for common patterns"
+    - "Editor regex for bulk renames"
+    - "Gradual migration file by file"
+
+why_these_conventions:
+  community_alignment:
+    - "15+ years of JonnyMac OBEX contributions"
+    - "Widely recognized in P2 community"
+    - "Consistent with published examples"
+    
+  readability:
+    - "Clear visual distinction between element types"
+    - "Consistent patterns aid comprehension"
+    - "2-space indentation balances clarity and space"
+    
+  maintainability:
+    - "Enforced naming prevents ambiguity"
+    - "Consistent style across projects"
+    - "Easy onboarding for P2 developers"
+
+integration_notes:
+  requires:
+    layer_1: "spin2-getting-started.yaml (language mechanics)"
+    layer_2: "spin2-formatting-standards.yaml (professional structure)"
+    layer_3: "spin2-docs-jonnymac.yaml (documentation style)"
+    
+  creates:
+    complete_standard: "Full JonnyMac programming standard (all 4 layers)"
+    
+  alternative_layer_3:
+    note: "Can combine with spin2-docs-vscode.yaml instead of spin2-docs-jonnymac.yaml"
+    result: "JonnyMac naming + VSCode documentation style"
+
+adoption_decision:
+  choose_this_layer_if:
+    - "You want full JonnyMac standard compliance"
+    - "Your team values strict naming discipline"
+    - "You're contributing to JonnyMac-style OBEX objects"
+    - "You want maximum community alignment"
+    
+  skip_this_layer_if:
+    - "Your team prefers flexible naming"
+    - "You use different indentation (tabs or 4 spaces)"
+    - "You want minimal style constraints"
+    - "You have existing codebase with different conventions"
+
+see_also:
+  full_standard: engineering/knowledge-base/P2/language/spin2/conventions/johnny-mac-documentation-style.yaml
+  layer_1: engineering/knowledge-base/P2/language/spin2/conventions/spin2-getting-started.yaml
+  layer_2: engineering/knowledge-base/P2/language/spin2/conventions/spin2-formatting-standards.yaml
+  layer_3: engineering/knowledge-base/P2/language/spin2/conventions/spin2-docs-jonnymac.yaml

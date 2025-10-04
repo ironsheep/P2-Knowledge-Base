@@ -1,0 +1,368 @@
+title: Spin2 Professional Formatting Standards
+id: spin2-formatting-standards
+version: 1.0.0
+layer: "Layer 2 - Universal Professional Formatting"
+purpose: Professional code structure and organization standards
+applies_to: All Spin2 code regardless of documentation or naming style
+
+summary: |
+  Universal professional formatting standards that improve readability, maintainability, and collaboration.
+  These guidelines work with any documentation style (JonnyMac or VSCode) and any naming convention.
+  Focused on visual organization and structural consistency.
+
+description: |
+  Layer 2 formatting standards provide professional code structure without imposing naming conventions
+  or indentation preferences. These standards improve code reviews, git diffs, screen sharing, and
+  long-term maintainability. Compatible with all editors and toolchains.
+
+line_length:
+  maximum: 100
+  rationale:
+    - "Fits in most terminal windows (80-120 typical)"
+    - "Readable in side-by-side diffs"
+    - "Works well in code reviews"
+    - "Accommodates reasonable end-of-line comments"
+  
+  applies_to:
+    - "Code with end-of-line comments"
+    - "All statement lines"
+    - "Constant and variable declarations"
+    
+  exceptions:
+    - "Long string literals (keep on one line for clarity)"
+    - "Complex expressions that would be less clear if wrapped"
+    
+  examples:
+    good: |
+      serial.start(RX_PIN, TX_PIN, BAUD_115200)  ' Initialize serial communication
+      
+    acceptable: |
+      complexCalculation := (sensorValue * scaleFactor + offset) / denominator
+      
+    poor: |
+      veryLongMethodNameThatExceedsReasonableLimits(parameter1, parameter2, parameter3, parameter4, parameter5, parameter6)
+
+vertical_spacing:
+  between_methods:
+    blank_lines: 2
+    rationale: "Visual separation makes methods easy to scan"
+    example: |
+      PUB firstMethod()
+        ' Implementation
+        
+        
+      PUB secondMethod()
+        ' Implementation
+        
+  within_sections:
+    constant_groups:
+      pattern: "Group related constants with blank line separation"
+      example: |
+        CON { timing }
+          MS_001 = 1_000
+          MS_010 = 10_000
+          
+        CON { io pins }
+          LED_PIN = 56
+          BUTTON_PIN = 57
+          
+    variable_groups:
+      pattern: "Group related variables logically"
+      example: |
+        VAR
+          LONG currentPosition
+          LONG targetPosition
+          
+          LONG errorCount
+          LONG statusFlags
+          
+  method_documentation:
+    before_code:
+      blank_lines: 1
+      requirement: "Required - separates documentation from implementation"
+      example: |
+        PUB process(input) : result
+        '' Process the input value...
+        ''
+        '' @param input - Value to process
+        '' @returns result - Processed value
+        
+            result := input * 2
+            
+    after_signature:
+      blank_lines: 0
+      requirement: "No blank lines - documentation coupled to signature"
+      example: |
+        PUB getValue() : result
+        '' Returns the current value...
+        
+            result := currentValue
+
+section_organization:
+  required_order:
+    1: "CON - Constants"
+    2: "OBJ - Objects"
+    3: "VAR - Variables"
+    4: "DAT - Data/PASM"
+    5: "PUB - Public methods"
+    6: "PRI - Private methods"
+    
+  rationale:
+    - "Matches compiler expectations"
+    - "Constants defined before use"
+    - "Objects declared before method code"
+    - "Variables declared before use"
+    - "Public interface before private implementation"
+    
+  section_labels:
+    usage: "Optional but recommended for organization"
+    format: "{ descriptive label }"
+    examples:
+      - "CON { timing }"
+      - "CON { io pins }"
+      - "VAR { state variables }"
+      - "DAT { lookup tables }"
+      
+  example: |
+    CON { configuration }
+      BAUD_RATE = 115_200
+      
+    OBJ
+      serial : "jm_fullduplexserial"
+      
+    VAR
+      LONG currentValue
+      
+    DAT
+      lookupTable  LONG  0, 1, 2, 3
+      
+    PUB main()
+      setup()
+      
+    PRI setup()
+      serial.start(63, 62, BAUD_RATE)
+
+application_structure:
+  entry_point_pattern:
+    first_method: "main()"
+    purpose: "Application entry point"
+    
+  initialization_pattern:
+    second_method: "setup()"
+    purpose: "Initialize IO and objects"
+    called_from: "main()"
+    
+  recommended_template: |
+    PUB main()
+      setup()
+      
+      REPEAT
+        ' Main application loop
+        
+        
+    PUB setup()
+    '' Initialize hardware and objects for application
+    
+      ' Configure pins
+      ' Start objects
+      ' Initialize variables
+
+method_organization:
+  ordering_strategy:
+    1: "main() - Entry point (first)"
+    2: "setup() - Initialization (second)"
+    3: "High-level public methods"
+    4: "Supporting public methods"
+    5: "Private methods (implementation details)"
+    
+  grouping:
+    - "Group related methods together"
+    - "Keep caller near callee when practical"
+    - "Public interface first, private implementation last"
+    
+  example: |
+    PUB main()
+      ' Entry point
+      
+      
+    PUB setup()
+      ' Initialization
+      
+      
+    PUB startProcessing()
+      ' High-level public API
+      
+      
+    PUB getStatus() : status
+      ' Supporting public API
+      
+      
+    PRI processData()
+      ' Private implementation
+
+constant_organization:
+  grouping_strategy:
+    - "Group by functional area"
+    - "Use section labels for clarity"
+    - "Keep related values together"
+    
+  example: |
+    CON { timing constants }
+      BAUD_115200 = 115_200
+      BAUD_230400 = 230_400
+      TIMEOUT_MS = 5000
+      
+    CON { pin assignments }
+      RX_PIN = 63
+      TX_PIN = 62
+      LED_PIN = 56
+      
+    CON { configuration values }
+      BUFFER_SIZE = 256
+      MAX_RETRY = 10
+
+variable_organization:
+  grouping_strategy:
+    - "Group by functional relationship"
+    - "Related data structures together"
+    - "State variables grouped separately"
+    
+  example: |
+    VAR
+      ' Communication state
+      LONG rxPin
+      LONG txPin
+      LONG baudRate
+      
+      ' Buffer management
+      BYTE txBuffer[256]
+      BYTE rxBuffer[256]
+      
+      ' Status tracking
+      LONG errorCount
+      LONG packetCount
+
+code_readability:
+  blank_line_usage:
+    between_logical_blocks:
+      usage: "Separate distinct operations"
+      example: |
+        PUB process()
+          ' Phase 1: Initialization
+          clearBuffers()
+          resetCounters()
+          
+          ' Phase 2: Processing
+          REPEAT WHILE (dataAvailable())
+            readData()
+            processData()
+            
+          ' Phase 3: Cleanup
+          flushBuffers()
+          saveState()
+          
+  comment_placement:
+    end_of_line:
+      spacing: "At least 2 spaces after code"
+      example: "value := 100  ' Initialize to default"
+      
+    standalone:
+      usage: "Explain following code block"
+      example: |
+        ' Calculate checksum using XOR method
+        checksum := 0
+        REPEAT idx FROM 0 TO length-1
+          checksum ^= buffer[idx]
+
+alignment_guidelines:
+  no_requirements:
+    indentation: "Use tabs or spaces as preferred (2 or 4 spaces common)"
+    comment_columns: "Align comments as desired for readability"
+    
+  flexibility:
+    - "Choose indentation style that works for your team"
+    - "Maintain consistency within a project"
+    - "Editor settings determine indentation"
+
+git_and_collaboration:
+  benefits:
+    - "100-char limit improves side-by-side diffs"
+    - "2-blank-line spacing makes method changes obvious"
+    - "Consistent section ordering reduces merge conflicts"
+    - "Vertical spacing improves blame/history readability"
+    
+  example_diff: |
+    @@ -45,6 +45,12 @@
+     PUB getValue() : result
+       result := currentValue
+     
+     
+    +PUB setValue(newValue)
+    +  currentValue := newValue
+    +
+    +
+     PUB reset()
+       currentValue := 0
+
+editor_compatibility:
+  works_with:
+    - "VSCode with Spin2 extension"
+    - "Propeller Tool"
+    - "Any text editor"
+    - "Terminal editors (vim, emacs)"
+    
+  configuration_neutral:
+    - "No tab vs space requirements"
+    - "No column alignment mandates"
+    - "No special editor features needed"
+
+adoption_strategy:
+  immediate_wins:
+    1: "Apply 100-char line limit"
+    2: "Use 2 blank lines between methods"
+    3: "Follow section ordering (CON/OBJ/VAR/DAT/PUB/PRI)"
+    
+  gradual_improvement:
+    4: "Add section labels for organization"
+    5: "Group related constants and variables"
+    6: "Adopt main/setup pattern for applications"
+    
+  maintenance:
+    - "Apply standards to new code immediately"
+    - "Clean up existing code during edits"
+    - "Whole-file formatting when making major changes"
+
+why_these_standards:
+  evidence_based:
+    - "100-char standard from decades of industry practice"
+    - "Vertical spacing improves scanability (research-backed)"
+    - "Section ordering matches compiler and cognitive flow"
+    - "Main/setup pattern is established embedded systems practice"
+    
+  practical_benefits:
+    - "Reduces cognitive load when reading code"
+    - "Improves code review efficiency"
+    - "Makes git history more useful"
+    - "Supports pair programming and mentoring"
+    
+  community_alignment:
+    - "Compatible with existing P2 code conventions"
+    - "Works with both JonnyMac and VSCode styles"
+    - "Doesn't conflict with personal naming preferences"
+
+integration_with_other_layers:
+  layer_1:
+    file: "spin2-getting-started.yaml"
+    provides: "Language mechanics"
+    
+  layer_3_options:
+    jonnymac: "spin2-docs-jonnymac.yaml (plain English)"
+    vscode: "spin2-docs-vscode.yaml (tagged documentation)"
+    
+  layer_4_optional:
+    jonnymac_full: "spin2-naming-jonnymac.yaml (naming + 2-space indent)"
+
+next_steps:
+  documentation: "Choose documentation style (Layer 3)"
+  naming: "Optionally adopt naming conventions (Layer 4)"
+  tooling: "Configure editor to support these standards"

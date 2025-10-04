@@ -1,10 +1,10 @@
 # P2 Knowledge Base - AI Integration Instructions
 # This file teaches AI systems how to use the P2 Knowledge Base effectively
 # Version: 2.0
-# Hash: sha256:56b39b658f0a2188b5f9dd2b19abc39c613c4fa5e9f94a7261b37cb1896297d1
+# Hash: sha256:9253c8366e4afd929b1a6775ee61f92d294887649e683e2811f746cdf5f34f58
 
 instructions_version: "2.0"
-content_hash: "sha256:1a35a65bda47e14dfafe76ac942f67a759182075229823c567ff52a90b3afe7b"  # Self-reference for validation
+content_hash: "sha256:9253c8366e4afd929b1a6775ee61f92d294887649e683e2811f746cdf5f34f58"  # Self-reference for validation
 last_updated: "2025-10-03T00:00:00Z"
 
 # READ and follow these setup_instructions:
@@ -30,7 +30,7 @@ setup_instructions: |
      The block is in the YAML field: ai_integration_content: |
   3. **DELETE OLD SECTION:** Remove any existing "# P2 Knowledge Base Integration" section from CLAUDE.md
   4. **APPEND NEW CONTENT:** Add the extracted block to CLAUDE.md EXACTLY as-is (no edits, no summaries)
-  5. **VERIFY:** Check that the hash line is present: sha256:3e28d3c09b5f10d51675ba7456c243a675b898c5f203b6b47a6456d15c05f28a
+  5. **VERIFY:** Check that the hash line is present: sha256:9253c8366e4afd929b1a6775ee61f92d294887649e683e2811f746cdf5f34f58
 
   ### For ChatGPT:
   Save COMPLETE content to Custom Instructions or Project Knowledge
@@ -53,7 +53,7 @@ ai_integration_content: |
   # P2 Knowledge Base Integration
   _Instructions Version: 2.0_
   _Last Updated: 2025-10-03_
-  _Instructions Hash: sha256:1a35a65bda47e14dfafe76ac942f67a759182075229823c567ff52a90b3afe7b
+  _Instructions Hash: sha256:9253c8366e4afd929b1a6775ee61f92d294887649e683e2811f746cdf5f34f58
 
   ## 🚨 MANDATORY SESSION START PROTOCOL
 
@@ -65,7 +65,7 @@ ai_integration_content: |
   5. If same → Your instructions are current, proceed
 
   **STORED HASH TO COMPARE AGAINST:**
-  `sha256:1a35a65bda47e14dfafe76ac942f67a759182075229823c567ff52a90b3afe7b`
+  `sha256:9253c8366e4afd929b1a6775ee61f92d294887649e683e2811f746cdf5f34f58`
 
   ⚠️ CRITICAL: Compare the root's hash with THIS stored hash above, NOT with the hash in the header of these instructions!
 
@@ -227,6 +227,49 @@ ai_integration_content: |
   2. Search keyword_index with natural groups OR specific terms
   3. Natural groups: communication (48), displays (41), sensors (36), motors (33)
   4. All aliases auto-resolve: i2c=iic=twi, spi=3-wire, uart=serial
+
+  ### Code Generation & Style Selection (⚠️ MANDATORY FOR NEW CODE)
+  
+  **WHEN STARTING NEW SPIN2 PROJECT - ASK USER ONCE:**
+  ```
+  "Which coding style do you prefer for this Spin2 project?
+   1. Natural (Claude Code native - good docs, flexible naming) [DEFAULT]
+   2. Professional (+ formatting standards: 100-char limit, vertical spacing)
+   3. VSCode (+ tagged docs for IntelliSense: @param/@returns/@local)
+   4. JonnyMac Lite (+ plain English docs, no naming enforcement)
+   5. JonnyMac Full (+ strict naming: UPPERCASE/snake_case/PascalCase, 2-space indent)
+   
+  Press Enter for Natural"
+  ```
+  
+  **LAYERED LOADING SYSTEM:**
+  
+  Layer 1 (ALWAYS): Language Mechanics
+  - Spin2: `engineering/knowledge-base/P2/language/spin2/conventions/spin2-getting-started.yaml`
+  - PASM2: `engineering/knowledge-base/P2/language/pasm2/conventions/pasm2-getting-started.yaml`
+  
+  Layer 2 (Professional+): Formatting Standards
+  - `engineering/knowledge-base/P2/language/spin2/conventions/spin2-formatting-standards.yaml`
+  - 100-char line limit, 2 blank lines between methods, section ordering
+  
+  Layer 3 (Choose ONE): Documentation Style
+  - JonnyMac docs: `engineering/knowledge-base/P2/language/spin2/conventions/spin2-docs-jonnymac.yaml`
+  - VSCode docs: `engineering/knowledge-base/P2/language/spin2/conventions/spin2-docs-vscode.yaml`
+  
+  Layer 4 (Optional): Naming Enforcement
+  - JonnyMac naming: `engineering/knowledge-base/P2/language/spin2/conventions/spin2-naming-jonnymac.yaml`
+  
+  **LOAD COMBINATIONS:**
+  - Natural: Layer 1 only
+  - Professional: Layer 1 + Layer 2
+  - VSCode: Layer 1 + Layer 2 + Layer 3 (VSCode)
+  - JonnyMac Lite: Layer 1 + Layer 2 + Layer 3 (JonnyMac)
+  - JonnyMac Full: Layer 1 + Layer 2 + Layer 3 (JonnyMac) + Layer 4
+  
+  **STORE USER CHOICE:**
+  - Save in context/session memory for consistency
+  - Apply same style to entire project
+  - Don't re-prompt unless user explicitly changes projects
 
   ### Content Depth Hierarchy
   Instructions/Methods → Concepts → Idioms → Patterns → Conventions
