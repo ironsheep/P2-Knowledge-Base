@@ -19,6 +19,13 @@ https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-
 Step 2: Follow the instructions in the file to create your fetch script
 Step 3: Use YOUR script to fetch the complete setup instructions
 
+The complete setup (manifests/ai-instructions.yaml) will:
+- Update your CLAUDE.md with P2 KB navigation rules (~150 lines)
+- Load Spin2 Getting Started guide (core language essentials)
+- Load PASM2 Getting Started guide (assembly mechanics)
+- Configure direct access to all P2 resources
+- Enable automatic update checking
+
 Note: These bootstrap files are under 960 characters to avoid truncation.
 ```
 
