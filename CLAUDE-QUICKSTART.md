@@ -6,17 +6,20 @@
 **For Claude Code instances:**
 
 ```
-P2 Knowledge Base Setup - Two-Stage Bootstrap:
+P2 Knowledge Base Setup:
 
-Stage 1: Fetch the ultra-minimal bootstrap (35 lines):
-https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-bootstrap-ultra-minimal.yaml
+Step 1: Detect your platform and fetch the appropriate bootstrap file:
 
-Verify you got:
-- stage_1_unix section with bash script creation
-- windows_users section pointing to separate file
+For Unix/macOS/Linux:
+https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-bootstrap-unix.yaml
 
-Follow the instructions in stage_1_unix to create your fetch script.
-Then use YOUR script to fetch the complete instructions.
+For Windows:
+https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-bootstrap-windows.yaml
+
+Step 2: Follow the instructions in the file to create your fetch script
+Step 3: Use YOUR script to fetch the complete setup instructions
+
+Note: These bootstrap files are under 960 characters to avoid truncation.
 ```
 
 ### Platform-Specific Setup Instructions
