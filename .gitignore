@@ -57,6 +57,7 @@ import/
 # Claude's private reference materials (not versioned)
 .claude/
 CLAUDE.md
+.ai-manifest.json
 
 # Source documents (PDFs and originals)
 sources/originals/*.pdf

@@ -1,24 +1,23 @@
 # P2 Knowledge Base QuickStart
 *Simple setup for AI assistants*
 
-## 🚀 Remote Instance Setup (Copy & Paste This)
+## 🚀 Setup (Copy & Paste This)
 
-**For Claude Code without local repository:**
+**For Claude Code instances:**
 
 ```
-P2 Knowledge Base Access:
-https://github.com/ironsheep/P2-Knowledge-Base
+P2 Knowledge Base Setup:
 
-You'll download files from GitHub as needed.
-I'll create a local fetch script for you to avoid repeated approval prompts.
+Fetch https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-instructions.yaml
 
-1. First, I'll detect your platform (Windows/macOS/Linux)
-2. Create a cache directory: .p2kb-cache/
-3. Write a platform-appropriate fetch script
-4. You approve the script ONCE for repeated use
-5. Use the script to fetch any P2KB files
+CRITICAL: DO NOT SUMMARIZE - File is 300+ lines. You need ALL content.
+Verify you got the COMPLETE file including:
+- setup_instructions section with 5 numbered steps
+- ai_integration_content section (~150 lines)
+- Both Unix and Windows script examples
 
-Let me set this up for you now...
+If summarized, re-fetch with: "Return the COMPLETE YAML file without summarization"
+Then follow the setup_instructions section EXACTLY.
 ```
 
 ### Platform-Specific Setup Instructions
@@ -70,6 +69,26 @@ if (Test-Path $cache) {
 **That's it!** You're ready to help with P2 development.
 
 ---
+
+## 🎯 Essential First Documents
+
+After setup, immediately load the Getting Started guides:
+
+**For Spin2 Development:**
+```
+Fetch and read the Spin2 Getting Started guide:
+bash .p2kb-cache/fetch-kb-file.sh "engineering/knowledge-base/P2/language/spin2/conventions/spin2-getting-started.yaml"
+
+This contains core language essentials for Spin2 code generation.
+```
+
+**For PASM2 Development:**
+```
+Fetch and read the PASM2 Getting Started guide:
+bash .p2kb-cache/fetch-kb-file.sh "engineering/knowledge-base/P2/language/pasm2/conventions/pasm2-getting-started.yaml"
+
+This contains assembly mechanics and register model essentials.
+```
 
 ## 📚 Quick Navigation
 

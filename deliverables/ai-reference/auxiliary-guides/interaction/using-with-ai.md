@@ -36,11 +36,18 @@
 **The knowledge base now teaches itself!** Just give your AI this minimal bootstrap:
 
 ```markdown
-Access the P2 Knowledge Base:
-https://github.com/ironsheep/P2-Knowledge-Base
+P2 Knowledge Base Setup:
 
-Start with: manifests/propeller-knowledge-root.yaml
-Follow the AI instructions it provides for automatic setup.
+Fetch https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-instructions.yaml
+
+CRITICAL: DO NOT SUMMARIZE - File is 300+ lines. You need ALL content.
+Verify you got the COMPLETE file including:
+- setup_instructions section with 5 numbered steps
+- ai_integration_content section (~150 lines)
+- Both Unix and Windows script examples
+
+If summarized, re-fetch with: "Return the COMPLETE YAML file without summarization"
+Then follow the setup_instructions section EXACTLY.
 ```
 
 **That's it!** The system will:
@@ -49,11 +56,11 @@ Follow the AI instructions it provides for automatic setup.
 3. Check for updates each session
 4. Teach the AI everything about P2 development
 
-### 🌐 Remote Instance Access (Without Direct GitHub Access)
+### 🌐 Claude Code Access (Without Direct GitHub Access)
 
 **For Claude Code instances that cannot directly access repository files:**
 
-Some remote AI environments have limitations accessing GitHub content directly. The solution is to create a platform-specific fetch script that can be pre-approved for repeated use:
+Some AI environments have limitations accessing GitHub content directly. The solution is to create a platform-specific fetch script that can be pre-approved for repeated use:
 
 #### Step 1: Platform Detection
 ```bash
@@ -67,8 +74,10 @@ fi
 
 #### Step 2: Script Creation (One-Time)
 
+**IMPORTANT: The .p2kb-cache directory and script go in YOUR CURRENT PROJECT DIRECTORY, not in some system location.**
+
 **For Unix/macOS/Linux:**
-Claude will create `.p2kb-cache/fetch-kb-file.sh`:
+Claude will create `.p2kb-cache/fetch-kb-file.sh` in your CURRENT WORKING DIRECTORY:
 ```bash
 #!/bin/bash
 # P2 Knowledge Base File Fetcher
@@ -115,6 +124,26 @@ bash .p2kb-cache/fetch-kb-file.sh "manifests/propeller-knowledge-root.yaml"
 powershell -File .p2kb-cache\fetch-kb-file.ps1 "manifests/propeller-knowledge-root.yaml"
 ```
 
+#### Step 4: Load Essential Getting Started Guides
+
+**IMPORTANT**: After setup, immediately prompt the AI to load these guides:
+
+**For Spin2 Development:**
+```
+Fetch and read the Spin2 Getting Started guide:
+bash .p2kb-cache/fetch-kb-file.sh "engineering/knowledge-base/P2/language/spin2/conventions/spin2-getting-started.yaml"
+
+This contains core language essentials for Spin2 code generation.
+```
+
+**For PASM2 Development:**
+```
+Fetch and read the PASM2 Getting Started guide:
+bash .p2kb-cache/fetch-kb-file.sh "engineering/knowledge-base/P2/language/pasm2/conventions/pasm2-getting-started.yaml"
+
+This contains assembly mechanics and register model essentials.
+```
+
 #### Benefits of This Approach
 1. **One-time approval**: Script file can be pre-approved
 2. **Cross-platform**: Works on Windows, macOS, and Linux
@@ -138,7 +167,7 @@ rm .p2kb-cache/manifests/propeller-knowledge-root.yaml
 - Write access to project directory
 - Per-project cache (~5-15MB)
 
-**Note**: MCP server integration is in development for improved remote access with shared caching and automatic updates.
+**Note**: MCP server integration is in development for improved access with shared caching and automatic updates.
 
 ### Legacy Manual Instructions (Pre-v2.0)
 
