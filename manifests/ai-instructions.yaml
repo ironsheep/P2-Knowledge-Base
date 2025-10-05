@@ -1,10 +1,10 @@
 # P2 Knowledge Base - AI Integration Instructions
 # This file teaches AI systems how to use the P2 Knowledge Base effectively
 # Version: 2.2
-# Hash: sha256:ebe09c3513cc1a3a0cb7ee5e779330f32ca26f97617416564fe59c8c49ffddda
+# Hash: sha256:9b3ca592a9c40691c7e980c16fcb137b744e5cd1793a47ed169362857dc711b7
 
 instructions_version: "2.2"
-content_hash: "sha256:ebe09c3513cc1a3a0cb7ee5e779330f32ca26f97617416564fe59c8c49ffddda"  # Updated 2025-10-04
+content_hash: "sha256:9b3ca592a9c40691c7e980c16fcb137b744e5cd1793a47ed169362857dc711b7"  # Updated 2025-10-04
 last_updated: "2025-10-04T00:00:00Z"
 
 # READ and follow these setup_instructions:
@@ -54,7 +54,7 @@ setup_instructions: |
   2. Extract those ~150 lines COMPLETELY (no summarization!)
   3. Delete any existing "# P2 Knowledge Base Integration" section from CLAUDE.md
   4. Append the extracted content to CLAUDE.md EXACTLY AS-IS
-  5. Verify hash is present: sha256:ebe09c3513cc1a3a0cb7ee5e779330f32ca26f97617416564fe59c8c49ffddda
+  5. Verify hash is present: sha256:9b3ca592a9c40691c7e980c16fcb137b744e5cd1793a47ed169362857dc711b7
   
   **STEP 4: Download OBEX Helper Scripts Using Main Fetch Script**
   Download the platform-appropriate OBEX helper script from the repository.
@@ -144,7 +144,7 @@ ai_integration_content: |
   # P2 Knowledge Base Integration
   _Instructions Version: 2.2_
   _Last Updated: 2025-10-04_
-  _Instructions Hash: sha256:ebe09c3513cc1a3a0cb7ee5e779330f32ca26f97617416564fe59c8c49ffddda
+  _Instructions Hash: sha256:9b3ca592a9c40691c7e980c16fcb137b744e5cd1793a47ed169362857dc711b7
 
   ## 🚨 MANDATORY SESSION START PROTOCOL
 
@@ -156,7 +156,7 @@ ai_integration_content: |
   5. If same → Your instructions are current, proceed
 
   **STORED HASH TO COMPARE AGAINST:**
-  `sha256:ebe09c3513cc1a3a0cb7ee5e779330f32ca26f97617416564fe59c8c49ffddda`
+  `sha256:9b3ca592a9c40691c7e980c16fcb137b744e5cd1793a47ed169362857dc711b7`
 
   ⚠️ CRITICAL: Compare the root's hash with THIS stored hash above, NOT with the hash in the header of these instructions!
 
@@ -426,8 +426,10 @@ ai_integration_content: |
   **Smart Pin Configuration:**
   → Start: smart-pins-manifest → Match function to mode → Get spec
 
-  **OBEX Driver Search:**
-  → Start: obex-unified-index → Search keyword_index → Get object YAML → Find download_direct URL
+  **OBEX Driver Search and Download:**
+  → Start: obex-unified-index → Search keyword_index → Get object_id
+  → Use OBEX helper: `bash .p2kb-cache/obex-download-helper.sh <object_id>`
+  → Helper automatically fetches YAML, downloads file, and places in current directory
 
   **Code Style/Conventions:**
   → Start: spin2-conventions-manifest → Choose style → Apply consistently
