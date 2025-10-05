@@ -7,7 +7,7 @@ stage_1_unix: |
   **Step 1: Create cache and fetch script**
   ```bash
   mkdir -p .p2kb-cache
-  cat > .p2kb-cache/fetch-kb-file.sh << 'SCRIPT_END'
+  cat > .p2kb-cache/boot-kb-file.sh << 'SCRIPT_END'
   #!/bin/bash
   path=$1
   cache=".p2kb-cache/${path}"
@@ -20,12 +20,12 @@ stage_1_unix: |
     cat "$cache"
   fi
   SCRIPT_END
-  chmod +x .p2kb-cache/fetch-kb-file.sh
+  chmod +x .p2kb-cache/boot-kb-file.sh
   ```
   
   **Step 2: Fetch complete setup instructions**
   ```bash
-  bash .p2kb-cache/fetch-kb-file.sh "manifests/ai-instructions.yaml"
+  bash .p2kb-cache/boot-kb-file.sh "manifests/ai-instructions.yaml"
   ```
   Follow setup_instructions section COMPLETELY.
 

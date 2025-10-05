@@ -4,12 +4,12 @@
 
 version: "2.0"
 schema_version: "2025-01-01"
-last_updated: "2025-01-29T00:00:00Z"
+last_updated: "2025-01-30T00:00:00Z"
 
 # STEP 1: Check AI Instructions (compare hash with your stored version)
 ai_instructions:
   manifest: "manifests/ai-instructions.yaml"
-  content_hash: "sha256:2648fe6a10b330e25b28886467de1c299b8708a24f0364f2a64ddb5a1a79a1f4"  # Will be updated by hash script
+  content_hash: "sha256:2ac81dd15c23bc5023227f648910ea7c18efda8079ccd7a728ad316e6bea5b85"  # Updated 2025-01-30
   check_protocol: |
     1. Compare this hash with your stored 'p2kb_instructions_hash'
     2. If different or not stored → fetch ai_instructions.manifest

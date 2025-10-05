@@ -9,7 +9,7 @@ stage_1_windows: |
   New-Item -ItemType Directory -Force -Path .p2kb-cache
   ```
   
-  **Step 2: Create script `.p2kb-cache\fetch-kb-file.ps1`:**
+  **Step 2: Create script `.p2kb-cache\boot-kb-file.ps1`:**
   ```powershell
   param($path)
   $cache = ".p2kb-cache\$($path -replace '/','\\')"
@@ -26,7 +26,7 @@ stage_1_windows: |
   
   **Step 3: Fetch complete setup instructions**
   ```powershell
-  powershell -File .p2kb-cache\fetch-kb-file.ps1 "manifests/ai-instructions.yaml"
+  powershell -File .p2kb-cache\boot-kb-file.ps1 "manifests/ai-instructions.yaml"
   ```
   Follow setup_instructions section COMPLETELY.
   
