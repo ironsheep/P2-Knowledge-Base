@@ -8,7 +8,7 @@
 ```
 P2 Knowledge Base Setup:
 
-Step 1: Detect your platform and fetch the appropriate bootstrap file:
+Step 1: Fetch the appropriate bootstrap file for your platform and READ IT IN FULL (do not summarize):
 
 For Unix/macOS/Linux:
 https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-bootstrap-unix.yaml
@@ -16,8 +16,8 @@ https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-
 For Windows:
 https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-bootstrap-windows.yaml
 
-Step 2: Follow the instructions in the file to create your fetch script
-Step 3: Use YOUR script to fetch the complete setup instructions
+Step 2: Follow the instructions in the bootstrap file EXACTLY to create your fetch script
+Step 3: Use your script to fetch the complete setup instructions (manifests/ai-instructions.yaml)
 
 The complete setup (manifests/ai-instructions.yaml) will:
 - Update your CLAUDE.md with P2 KB navigation rules (~150 lines)
