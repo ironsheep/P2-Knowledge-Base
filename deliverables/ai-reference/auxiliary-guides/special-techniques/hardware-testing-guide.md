@@ -52,11 +52,11 @@ kill -TERM $PID
 ##### FLASH Testing Workflow (Persistent Storage)
 ```bash
 # FLASH deployment cycle
-# Compile for FLASH
-pnut_ts -F myprogram.spin2
+# Compile with -d if needed
+pnut_ts -d myprogram.spin2
 
 # Download to FLASH and run
-pnut-term-ts -f myprogram.flash -p P9cektn7 &
+pnut-term-ts -f myprogram.bin -p P9cektn7 &
 PID=$!
 
 # Monitor logs
@@ -186,11 +186,11 @@ done
 ### FLASH Deployment
 ```bash
 # For production deployment to FLASH
-# 1. Compile for FLASH
-pnut_ts -F production.spin2
+# 1. Compile with -d if needed
+pnut_ts -d myprogram.spin2
 
 # 2. Download to FLASH
-pnut-term-ts -f production.flash -p P9cektn7 &
+pnut-term-ts -f production.bin -p P9cektn7 &
 PID=$!
 
 # 3. Monitor initial boot
