@@ -17,21 +17,21 @@
 ## 🎯 Find What You Need
 
 ### For AI Systems & Code Generation
-**[→ AI Reference Documentation](deliverables/ai-reference/README.md)**  
+**→ AI Reference Documentation**  
 (Work in progress) Complete P2 instruction set, architecture details, and code patterns optimized for LLM consumption. Structured for accurate code generation with comprehensive examples and constraints.
 
 ## The following sections are planned for future updates, but currently contain NO content!
 
 ### For Developers
-**[→ Developer Documentation](deliverables/developer-docs/START-HERE.md)**  
+**→ Developer Documentation**  
 Intended to be Quick-start guides, programming patterns, and practical examples. Everything needed to begin P2 development, from basic concepts to advanced multicore techniques.
 
 ### For Learners
-**[→ Learning Paths](deliverables/learning-paths/README.md)**  
+**→ Learning Paths**  
 Intended to be Structured tutorials progressing from fundamentals to expertise. Includes migration guides for P1 developers and hands-on exercises for mastering P2 capabilities.
 
 ### For Reference
-**[→ Technical Reference](deliverables/reference/)**  
+**→ Technical Reference**  
 Intended to be QAuthoritative instruction set documentation, hardware specifications, and architectural details. The definitive source for P2 technical information.
 
 ## About the Propeller 2
