@@ -1,14 +1,7 @@
 instruction: MUXQ
 syntax: MUXQ Dest, {#}Src
-encoding:
-- EEEE 1001111 10I DDDDDDDDD SSSSSSSSS                     D                 --                   --                    2
-- EEEE 0101110 CZI DDDDDDDDD SSSSSSSSS                     D          Parity of Result      Result
-  = 0                2
-- EEEE 0101111 CZI DDDDDDDDD SSSSSSSSS                     D          Parity of Result      Result
-  = 0                2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Mux Q
+category: Math and Logic
 description: 'MUXQ copies all bits from Src corresponding to high (1) bits of Q into
   the corresponding
 
@@ -96,8 +89,8 @@ description: 'MUXQ copies all bits from Src corresponding to high (1) bits of Q 
 
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero,
   or is cleared (0) if it is not zero.'
-flags_affected:
-  Z: Result = 0
+result: Dest bit(s) described by Src are set to Z or !Z; the rest are left as-is.
+  Flags are optionally updated with
 parameters:
 - Dest is a register whose bits will be updated according to Q and Src.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose select bits
@@ -106,8 +99,34 @@ parameters:
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value identifies
   the bit(s) to modify.
 - WC, WZ, or WCZ is an optional effect to update flags.
+flags_affected:
+  Z: Result = 0
+syntax_variants:
+- MUXQ Dest, {#}Src
+- MUXQ copies all bits from Src corresponding to high (1) bits of Q into the corresponding
+  bits of Dest. All other
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1001111 10I DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: —
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  operandFormat: 0
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+manual_extraction_date: '2025-01-19'
+oneliner: Set discrete bits of a value to that of another
 examples:
 - name: HUB75 Parallel RGB Output
   description: Drive 6 RGB data lines simultaneously
@@ -151,22 +170,3 @@ notes:
 - Atomic operation for parallel bit updates
 - Essential for HUB75 RGB panel driving
 - More efficient than AND/OR sequences
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:
-  operandFormat: 0
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
-brief_description: Mux Q
-category: Math and Logic
-result: Dest bit(s) described by Src are set to Z or !Z; the rest are left as-is.
-  Flags are optionally updated with
-syntax_variants:
-- MUXQ Dest, {#}Src
-- MUXQ copies all bits from Src corresponding to high (1) bits of Q into the corresponding
-  bits of Dest. All other
-manual_extraction_date: '2025-01-19'
-oneliner: Set discrete bits of a value to that of another

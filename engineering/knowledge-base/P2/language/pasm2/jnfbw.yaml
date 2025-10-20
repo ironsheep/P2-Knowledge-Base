@@ -1,10 +1,6 @@
 instruction: JNFBW
 syntax: JNFBW   {#}S
-encoding: EEEE 1011110 01I 000011001 SSSSSSSSS
-timing:
-  cycles: 2
-  type: variable
-  range: 13...20
+category: Event
 description: 'JFBW or JNFBW checks the cog''s FIFO interface block wrap flag and jumps
   to the address described by Src if the Result: If FIFO interface block wrap event
   flag is set (or is clear in syntax 2), PC is set to a new relative (#Src) or absolute
@@ -13,6 +9,24 @@ parameters:
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
+timing:
+  cycles: 2
+  type: variable
+  range: 13...20
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1011110 01I 000001001 SSSSSSSSS
+  write: PC   1
+  c: —
+  z: —
+  clocks: 2 or 4 / 2 or 13–20
+- bits: EEEE 1011110 01I 000011001 SSSSSSSSS
+  write: PC   1
+  c: —
+  z: —
+  clocks: 2 or 4 / 2 or 13–20
+encoding_notes:
+- PC is written only when the FIFO interface block wrap event ﬂag is set (or is clear
+  in syntax 2).
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:
@@ -20,9 +34,8 @@ compiler_operand_format:
   pattern: S/#
   description: 'Poll jump: target address/immediate'
   valueType: 21
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 21
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.750204'
-category: Event
 oneliner: Jump if FIFO interface block wrap event flag is set or clear

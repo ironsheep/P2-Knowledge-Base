@@ -1,12 +1,59 @@
 instruction: JNSE4
 syntax: JNSE4   {#}S
-encoding: EEEE 1011110 01I 000010111 SSSSSSSSS
+brief_description: Jump if selector 4 event flag is NOT set
+category: Event
+description: Jump to S** if SE4 event flag is clear.                                                                       2
+  or 4 / 2 or
+syntax_variants:
+- JNSE4 {#}S
 timing:
   cycles: 2
   type: variable
   range: 13...20
-description: Jump to S** if SE4 event flag is clear.                                                                       2
-  or 4 / 2 or
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1011110 01I 000000100 SSSSSSSSS
+  write: PC   1
+  c: —
+  z: —
+  clocks: 2 or 4 / 2 or 13–20
+- bits: EEEE 1011110 01I 000000101 SSSSSSSSS
+  write: PC   1
+  c: —
+  z: —
+  clocks: 2 or 4 / 2 or 13–20
+- bits: EEEE 1011110 01I 000000110 SSSSSSSSS
+  write: PC   1
+  c: —
+  z: —
+  clocks: 2 or 4 / 2 or 13–20
+- bits: EEEE 1011110 01I 000000111 SSSSSSSSS
+  write: PC   1
+  c: —
+  z: —
+  clocks: 2 or 4 / 2 or 13–20
+- bits: EEEE 1011110 01I 000010100 SSSSSSSSS
+  write: PC   1
+  c: —
+  z: —
+  clocks: 2 or 4 / 2 or 13–20
+- bits: EEEE 1011110 01I 000010101 SSSSSSSSS
+  write: PC   1
+  c: —
+  z: —
+  clocks: 2 or 4 / 2 or 13–20
+- bits: EEEE 1011110 01I 000010110 SSSSSSSSS
+  write: PC   1
+  c: —
+  z: —
+  clocks: 2 or 4 / 2 or 13–20
+- bits: EEEE 1011110 01I 000010111 SSSSSSSSS
+  write: PC   1
+  c: —
+  z: —
+  clocks: 2 or 4 / 2 or 13–20
+encoding_notes:
+- PC is written only when the selectable event 1, 2, 3, or 4 ﬂag is set (or is clear
+  in syntax 5–8).
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: structured
 compiler_operand_format:
@@ -14,17 +61,15 @@ compiler_operand_format:
   pattern: S/#
   description: 'Poll jump: target address/immediate'
   valueType: 21
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 21
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19T16:04:16.964299'
+oneliner: Branch
 long_description: 'If selectable event 1, 2, 3, or 4 flag is set (or is clear in syntax
   5-8), PC is set to a new relative (#Src) or
 
   absolute (Src) address.'
-syntax_variants:
-- JNSE4 {#}S
-last_updated: '2025-09-19T16:04:16.964299'
-brief_description: Jump if selector 4 event flag is NOT set
 group_membership:
   group_id: selector_event_jumps
   group_file: groups/selector_event_jumps.yaml
@@ -42,5 +87,3 @@ specifics:
   condition: not set
 quick_example: 'JNSE4 #handler  ; Jump if selector 4 event flag is NOT set'
 has_group_documentation: true
-category: Event
-oneliner: Branch

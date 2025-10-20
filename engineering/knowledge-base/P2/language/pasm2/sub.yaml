@@ -1,10 +1,7 @@
 instruction: SUB
 syntax: SUB Dest, {#}Src {WC|WZ|WCZ}
-encoding: EEEE 0001100 CZI DDDDDDDDD SSSSSSSSS                     D          borrow
-  of (D - S)      Result = 0               2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Subtract
+category: Math and Logic
 description: 'SUB subtracts the unsigned Src from the unsigned Dest and stores the
   result into the Dest register. Result: Difference of unsigned Dest and unsigned
   Src is stored in Dest and optionally the C and Z flags are updated to the borrow
@@ -35,20 +32,29 @@ description: 'SUB subtracts the unsigned Src from the unsigned Dest and stores t
 
   Values. SUB and SUBX are also used in subtracting signed, multi-long values with
   SUBSX ending the sequence.'
-flags_affected:
-  Z: Result = 0
+result: Difference of unsigned Dest and unsigned Src is stored in Dest and optionally
+  the C and Z flags are
 parameters:
 - Dest is a register containing the value to subtract Src from, and is where the result
   is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is subtracted
   from Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
-related:
-- SUBX
-- SUBS
-- SUBSX
-- ADD
-- SUBR
+flags_affected:
+  Z: Result = 0
+syntax_variants:
+- SUB Dest, {#}Src {WC|WZ|WCZ}
+- SUB subtracts the unsigned Src from the unsigned Dest and stores the result into
+  the Dest register.
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0001100 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: borrow of (D - S)
+  z: Result = 0
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -56,17 +62,15 @@ compiler_operand_format:
   pattern: D,S/#
   description: Destination register, Source register or immediate value
   valueType: 0
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Subtract
-category: Math and Logic
-result: Difference of unsigned Dest and unsigned Src is stored in Dest and optionally
-  the C and Z flags are
-syntax_variants:
-- SUB Dest, {#}Src {WC|WZ|WCZ}
-- SUB subtracts the unsigned Src from the unsigned Dest and stores the result into
-  the Dest register.
 manual_extraction_date: '2025-01-19'
 oneliner: Subtract one unsigned value from another
+related:
+- SUBX
+- SUBS
+- SUBSX
+- ADD
+- SUBR

@@ -1,10 +1,7 @@
 instruction: NOT
 syntax: NOT Dest, {#}Src {WC|WZ|WCZ}
-encoding:
-- EEEE 0110001 CZI DDDDDDDDD SSSSSSSSS                   D               !S[31]           Result
-  = 0                2
-- EEEE 0110001 CZ0 DDDDDDDDD DDDDDDDDD                   D               !D[31]           Result
-  = 0                2
+brief_description: Not
+category: Math and Logic
 description: '{WC/WZ/WCZ}   Get !D into D. D = !D. C = !D[31]. *
 
 
@@ -24,22 +21,17 @@ description: '{WC/WZ/WCZ}   Get !D into D. D = !D. C = !D[31]. *
 
 
   zero, or is cleared (0) if it is non-zero.'
-timing:
-  cycles: 2
-  type: fixed
+result: '!Src (or !Dest) is stored in Dest and flags are optionally updated with the
+  NOTed high bit and zero status.'
+parameters:
+- Dest is the register containing the value to bitwise NOT (syntax 2) or to be replaced
+  by the bitwise NOT of Src (syntax 1).
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value
+  will be bitwise NOTed and stored into Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
   C: '!D[31] Result ='
   Z: Result = 0
-compiler_operand_format:
-  name: operand_du
-  pattern: D{,S/#}
-  description: Destination register, optional Source register or immediate (unary/binary)
-  valueType: 3
-compiler_encoding:
-  operandFormat: 3
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-long_description: '!Src (or !Dest) is stored in Dest and flags are optionally updated
-  with the NOTed high bit and zero status.'
 syntax_variants:
 - NOT Dest, {#}Src {WC|WZ|WCZ}
 - NOT Dest           {WC|WZ|WCZ}
@@ -49,18 +41,32 @@ syntax_variants:
   replaced by the bitwise NOT of'
 - NOT performs a bitwise NOT (inverting all bits) of the value in Src (or in Dest)
   and stores the result into Dest.
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0110001 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: '!S[31]'
+  z: Result = 0
+  clocks: '2'
+- bits: EEEE 0110001 CZ0 DDDDDDDDD DDDDDDDDD
+  write: D
+  c: '!D[31]'
+  z: Result = 0
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_du
+  pattern: D{,S/#}
+  description: Destination register, optional Source register or immediate (unary/binary)
+  valueType: 3
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  operandFormat: 3
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Not
-category: Math and Logic
-result: '!Src (or !Dest) is stored in Dest and flags are optionally updated with the
-  NOTed high bit and zero status.'
-parameters:
-- Dest is the register containing the value to bitwise NOT (syntax 2) or to be replaced
-  by the bitwise NOT of Src (syntax 1).
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value
-  will be bitwise NOTed and stored into Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
 manual_extraction_date: '2025-01-19'
 oneliner: Bitwise NOT a value
+long_description: '!Src (or !Dest) is stored in Dest and flags are optionally updated
+  with the NOTed high bit and zero status.'

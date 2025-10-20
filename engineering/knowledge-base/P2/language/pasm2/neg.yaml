@@ -1,13 +1,7 @@
 instruction: NEG
 syntax: NEG Dest, {#}Src        {WC|WZ|WCZ}
-encoding:
-- EEEE 0110011 CZI DDDDDDDDD SSSSSSSSS                    D            Sign of result       Result
-  = 0               2
-- EEEE 0110011 CZ0 DDDDDDDDD DDDDDDDDD                    D            Sign of result       Result
-  = 0               2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Negate
+category: Math and Logic
 description: 'NEG negates Src (syntax 1) or Dest (syntax 2) and stores the result
   in the Dest register. The negation flips the Result: The Src or Dest value is negated
   and stored into Dest and optionally the C and Z flags are updated to the resulting
@@ -27,20 +21,35 @@ description: 'NEG negates Src (syntax 1) or Dest (syntax 2) and stores the resul
 
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero,
   or is cleared (0) if it is non-zero.'
-flags_affected:
-  Z: Result = 0
+result: The Src or Dest value is negated and stored into Dest and optionally the C
+  and Z flags are updated to the
 parameters:
 - Dest is a register to receive the -Src value (syntax 1), or contains the value to
   negate (syntax 2).
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal whose negated
   value is stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
-related:
-- ABS
-- NEGC
-- NEGNC
-- NEGZ
-- NEGNZ
+flags_affected:
+  Z: Result = 0
+syntax_variants:
+- NEG Dest, {#}Src        {WC|WZ|WCZ}
+- NEG Dest                {WC|WZ|WCZ}
+- NEG negates Src (syntax 1) or Dest (syntax 2) and stores the result in the Dest
+  register. The negation flips the
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0110011 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: Sign of result
+  z: Result = 0
+  clocks: '2'
+- bits: EEEE 0110011 CZ0 DDDDDDDDD DDDDDDDDD
+  write: D
+  c: Sign of result
+  z: Result = 0
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -48,18 +57,15 @@ compiler_operand_format:
   pattern: D{,S/#}
   description: Destination register, optional Source register or immediate (unary/binary)
   valueType: 3
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 3
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Negate
-category: Math and Logic
-result: The Src or Dest value is negated and stored into Dest and optionally the C
-  and Z flags are updated to the
-syntax_variants:
-- NEG Dest, {#}Src        {WC|WZ|WCZ}
-- NEG Dest                {WC|WZ|WCZ}
-- NEG negates Src (syntax 1) or Dest (syntax 2) and stores the result in the Dest
-  register. The negation flips the
 manual_extraction_date: '2025-01-19'
 oneliner: Negate a value
+related:
+- ABS
+- NEGC
+- NEGNC
+- NEGZ
+- NEGNZ

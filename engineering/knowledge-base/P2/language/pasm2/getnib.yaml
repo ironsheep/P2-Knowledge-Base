@@ -1,11 +1,7 @@
 instruction: GETNIB
 syntax: 'GETNIB Dest, {#}Src, #Num'
-encoding:
-- EEEE 100001N NNI DDDDDDDDD SSSSSSSSS                  D                --                  --                    2
-- EEEE 1000010 000 DDDDDDDDD 000000000                  D                --                  --                    2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Get nibble
+category: Math and Logic
 description: 'GETNIB reads the nibble identified by Num (0-7) from Src, or a nibble
   from the source described by a prior ALTGN Result: Nibble Num (0-7) of Src, or a
   nibble from a source described by prior ALTGN instruction, is written to Dest.
@@ -27,14 +23,46 @@ description: 'GETNIB reads the nibble identified by Num (0-7) from Src, or a nib
 
 
   within contiguous long registers.'
-flags_affected:
-  C:
-    when: D
+result: Nibble Num (0-7) of Src, or a nibble from a source described by prior ALTGN
+  instruction, is written to Dest.
 parameters:
 - Dest is the register in which to store the nibble.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains
   the target nibble to read.
 - Num is a 3-bit literal identifying the nibble ID (0-7) of Src to read.
+flags_affected:
+  C:
+    when: D
+syntax_variants:
+- 'GETNIB Dest, {#}Src, #Num'
+- GETNIB Dest
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 100001N NNI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: —
+  clocks: '2'
+- bits: EEEE 1000010 000 DDDDDDDDD 000000000
+  write: D
+  c: —
+  z: —
+  clocks: '2'
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds3get
+  pattern: D{,S/#,#0..7}
+  description: 'Get nibble: destination, optional source and nibble index 0-7'
+  valueType: 7
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  operandFormat: 7
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+manual_extraction_date: '2025-01-19'
+oneliner: Get a nibble from a value
 related:
 - ALTGN
 - GETBYTE
@@ -45,23 +73,3 @@ related:
 - ROLNIB
 - ROLBYTE
 - ROLWORD
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
-documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds3get
-  pattern: D{,S/#,#0..7}
-  description: 'Get nibble: destination, optional source and nibble index 0-7'
-  valueType: 7
-compiler_encoding:
-  operandFormat: 7
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
-brief_description: Get nibble
-category: Math and Logic
-result: Nibble Num (0-7) of Src, or a nibble from a source described by prior ALTGN
-  instruction, is written to Dest.
-syntax_variants:
-- 'GETNIB Dest, {#}Src, #Num'
-- GETNIB Dest
-manual_extraction_date: '2025-01-19'
-oneliner: Get a nibble from a value

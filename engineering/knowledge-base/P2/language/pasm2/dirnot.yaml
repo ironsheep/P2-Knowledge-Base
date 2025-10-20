@@ -1,10 +1,7 @@
 instruction: DIRNOT
 syntax: DIRNOT {#}Dest {WCZ}
-encoding: EEEE 1101011 CZL DDDDDDDDD 001000111                 DIRx       Orig DIRx
-  base bit Orig DIRx base bit           2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Direction not
+category: Pin
 description: 'DIRNOT alters the direction register''s bit(s) designated by Dest to
   their inverse state. All other bits are left Result: The I/O pin direction bit(s),
   described by Dest, are toggled to their opposite state(s); the rest are left as-is.
@@ -60,21 +57,30 @@ description: 'DIRNOT alters the direction register''s bit(s) designated by Dest 
 
 
   identified by Dest.'
-flags_affected:
-  Z:
-    formula: DIR bit
+result: The I/O pin direction bit(s), described by Dest, are toggled to their opposite
+  state(s); the rest are left as-is.
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the I/O pin(s) to toggle to the opposite direction.
 - WCZ is an optional effect to update flags.
-related:
-- DIRRND
-- DIRL
-- DIRH
-- DIRC
-- DIRNC
-- DIRZ
-- DIRNZ
+flags_affected:
+  Z:
+    formula: DIR bit
+syntax_variants:
+- DIRNOT {#}Dest {WCZ}
+- DIRNOT alters the direction register's bit(s) designated by Dest to their inverse
+  state. All other bits are left
+- instruction immediately precedes the DIRNOT instruction; substituting SETQ's Dest[4:0]
+  in place of value
+- bits[10:6], for DIRNOT's use.
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 CZL DDDDDDDDD 001000111
+  write: DIRx
+  c: Orig DIRx base bit Orig DIRx base bit
+  z: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -83,20 +89,17 @@ compiler_operand_format:
   description: 'Pin operation: destination/immediate pin number 0-511, optional effect
     flags'
   valueType: 30
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Direction not
-category: Pin
-result: The I/O pin direction bit(s), described by Dest, are toggled to their opposite
-  state(s); the rest are left as-is.
-syntax_variants:
-- DIRNOT {#}Dest {WCZ}
-- DIRNOT alters the direction register's bit(s) designated by Dest to their inverse
-  state. All other bits are left
-- instruction immediately precedes the DIRNOT instruction; substituting SETQ's Dest[4:0]
-  in place of value
-- bits[10:6], for DIRNOT's use.
 manual_extraction_date: '2025-01-19'
 oneliner: Toggle pin(s) to the opposite direction
+related:
+- DIRRND
+- DIRL
+- DIRH
+- DIRC
+- DIRNC
+- DIRZ
+- DIRNZ

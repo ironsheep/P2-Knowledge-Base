@@ -1,15 +1,29 @@
 instruction: JNXRO
 syntax: JNXRO   {#}S
-encoding: EEEE 1011110 01I 000011100 SSSSSSSSS
-timing:
-  cycles: 2
-  type: fixed
+category: Event
 description: Jump to S** if XRO event flag is set.                                                                         2
   or 4 / 2 or
 parameters:
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1011110 01I 000001100 SSSSSSSSS
+  write: PC   1
+  c: —
+  z: —
+  clocks: 2 or 4 / 2 or 13–20
+- bits: EEEE 1011110 01I 000011100 SSSSSSSSS
+  write: PC   1
+  c: —
+  z: —
+  clocks: 2 or 4 / 2 or 13–20
+encoding_notes:
+- PC is written only when the streamer NCO rollover event ﬂag is set (or is clear
+  in syntax 2).
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:
@@ -17,9 +31,8 @@ compiler_operand_format:
   pattern: S/#
   description: 'Poll jump: target address/immediate'
   valueType: 21
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 21
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:16.932456'
-category: Event
 oneliner: Branch

@@ -1,10 +1,7 @@
 instruction: POLLQMT
 syntax: POLLQMT {WC|WZ|WCZ}
-encoding: EEEE 1101011 CZ0 000001111 000100100                 --            QMT Event         QMT
-  Event                 2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Poll CORDIC empty
+category: Event
 description: 'POLLQMT copies the state of the CORDIC-read-but-empty event flag into
   C and/or Z and then clears the flag Result: CORDIC-read-but-empty event flag is
   optionally copied into C and/or Z, then it is cleared.
@@ -33,11 +30,21 @@ description: 'POLLQMT copies the state of the CORDIC-read-but-empty event flag i
 
 
   WAITQMT, JQMT, or JNQMT instructions.'
+result: CORDIC-read-but-empty event flag is optionally copied into C and/or Z, then
+  it is cleared.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
-related:
-- JQMT
-- JNQMT
+syntax_variants:
+- POLLQMT {WC|WZ|WCZ}
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 CZ0 000001111 000100100
+  write: —
+  c: QMT Event
+  z: QMT Event
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -45,15 +52,12 @@ compiler_operand_format:
   pattern: ''
   description: No operands - poll/wait instruction (moves S to D, sets S to $024)
   valueType: 28
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Poll CORDIC empty
-category: Event
-result: CORDIC-read-but-empty event flag is optionally copied into C and/or Z, then
-  it is cleared.
-syntax_variants:
-- POLLQMT {WC|WZ|WCZ}
 manual_extraction_date: '2025-01-19'
 oneliner: Retrieve and clear CORDIC-read-but-empty event flag
+related:
+- JQMT
+- JNQMT

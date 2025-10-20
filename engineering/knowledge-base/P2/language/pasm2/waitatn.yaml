@@ -1,10 +1,7 @@
 instruction: WAITATN
 syntax: WAITATN {WC|WZ|WCZ}
-encoding: EEEE 1101011 CZ0 000011110 000100100                 --          Timeout
-  Abort     Timeout Abort               2+
-timing:
-  cycles: 2
-  type: variable
+brief_description: Wait attention
+category: Event
 description: 'WAITATN waits for an attention event to occur (unless the event flag
   is already set), then clears the event flag Result: Wait for attention event, then
   clear the flag; optionally aborting on timeout and setting C and/or Z on abort.
@@ -51,16 +48,24 @@ description: 'WAITATN waits for an attention event to occur (unless the event fl
 
   flag is cleared upon cog start, or execution of POLLATN, WAITATN, JATN, or JNATN
   instructions.'
+result: Wait for attention event, then clear the flag; optionally aborting on timeout
+  and setting C and/or Z on abort.
+parameters:
+- WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
   Z:
     formula: timeout
-parameters:
-- WC, WZ, or WCZ are optional effects to update flags.
-related:
-- COGATN
-- POLLATN
-- JATN
-- JNATN
+syntax_variants:
+- WAITATN {WC|WZ|WCZ}
+timing:
+  cycles: 2
+  type: variable
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 CZ0 000011110 000100100
+  write: —
+  c: Timeout Abort
+  z: Timeout Abort
+  clocks: 2+
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -68,15 +73,14 @@ compiler_operand_format:
   pattern: ''
   description: No operands - poll/wait instruction (moves S to D, sets S to $024)
   valueType: 28
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Wait attention
-category: Event
-result: Wait for attention event, then clear the flag; optionally aborting on timeout
-  and setting C and/or Z on abort.
-syntax_variants:
-- WAITATN {WC|WZ|WCZ}
 manual_extraction_date: '2025-01-19'
 oneliner: Wait for and clear attention flag
+related:
+- COGATN
+- POLLATN
+- JATN
+- JNATN

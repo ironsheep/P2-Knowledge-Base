@@ -1,14 +1,7 @@
 instruction: ALTSW
 syntax: ALTSW Dest, {#}Src
-encoding:
-- EEEE 1001011 10I DDDDDDDDD SSSSSSSSS                     D 1
-- EEEE 0101000 CZI DDDDDDDDD SSSSSSSSS                  D          Parity of Result     Result
-  = 0              2
-- EEEE 0101001 CZI DDDDDDDDD SSSSSSSSS                  D          Parity of Result     Result
-  = 0              2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Alter set word
+category: Register Indirection
 description: 'ALTSW should be followed by SETWORD-- it modifies the SETWORD instruction''s
   Dest and Num values, enabling Result: The next instruction''s pipelined Dest and
   Num fields are altered to be (Src + Dest[9:1]) & $1FF, or just Dest[9:1] for syntax
@@ -87,6 +80,8 @@ description: 'ALTSW should be followed by SETWORD-- it modifies the SETWORD inst
 
 
   cleared (0) if it is non-zero.'
+result: Dest AND Src (or Dest AND !Src) is stored in Dest and flags are optionally
+  updated with parity and zero
 parameters:
 - Dest is the register whose 10-bit value is the index, or the full word address,
   for the SETWORD instruction to operate on.
@@ -111,21 +106,8 @@ parameters:
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value (or inverse
   value) will be bitwise ANDed into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
-documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_duiz
-  pattern: D{,S/#}
-  description: Destination, optional source (immediate bit set if no source)
-  valueType: 5
-compiler_encoding:
-  operandFormat: 5
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
-brief_description: Alter set word
-category: Register Indirection
-result: Dest AND Src (or Dest AND !Src) is stored in Dest and flags are optionally
-  updated with parity and zero
+flags_affected:
+  Z: Result = 0
 syntax_variants:
 - ALTSW Dest, {#}Src
 - ALTSW Dest
@@ -134,8 +116,6 @@ syntax_variants:
 - SETWORD, and each time incrementing ALTSW's 10-bit Dest value by one, effectively
   writes a stream of word
 - index (Dest) for a future ALTSW+SETWORD iteration.
-flags_affected:
-  Z: Result = 0
 usage_notes: 'The instruction following ALTSW is shielded from interrupt
 
   ALTSW alters the next instruction regardless of its kind-- the intention is for
@@ -183,5 +163,33 @@ usage_notes: 'The instruction following ALTSW is shielded from interrupt
 
   EEEE 0101001 CZI DDDDDDDDD SSSSSSSSS                  D          Parity of Result     Result
   = 0              2'
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1001011 10I DDDDDDDDD SSSSSSSSS
+  write: D 1
+  c: —
+  z: —
+  clocks: '2'
+- bits: EEEE 1001011 101 DDDDDDDDD 000000000
+  write: D 1
+  c: —
+  z: —
+  clocks: '2'
+encoding_notes:
+- Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In
+  syntax 2, the auto-indexer value is 0.
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_duiz
+  pattern: D{,S/#}
+  description: Destination, optional source (immediate bit set if no source)
+  valueType: 5
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  operandFormat: 5
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Alter subsequent SETWORD instruction

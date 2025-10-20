@@ -1,13 +1,7 @@
 instruction: ENCOD
 syntax: ENCOD Dest, {#}Src {WC|WZ|WCZ}
-encoding:
-- EEEE 0111100 CZI DDDDDDDDD SSSSSSSSS                    D               S != 0            Result
-  = 0              2
-- EEEE 0111100 CZ0 DDDDDDDDD DDDDDDDDD                    D           Original D !=
-  0       Result = 0              2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Encode
+category: Math and Logic
 description: 'ENCOD stores the bit position value (0--31) of the top-most high bit
   (1) of Src, or Dest, into Dest. If the value to Result: The bit position value of
   the top-most high bit (1) in Src, or Dest, is stored in Dest.
@@ -147,8 +141,8 @@ description: 'ENCOD stores the bit position value (0--31) of the top-most high b
 
 
   instruction.'
-flags_affected:
-  Z: Result = 0
+result: The bit position value of the top-most high bit (1) in Src, or Dest, is stored
+  in Dest.
 parameters:
 - Dest is the register in which to store the encoded bit position value and optionally
   begins by containing the 32-bit value it is encoding (syntax 2).
@@ -160,6 +154,27 @@ parameters:
 - A long of %00000000_00000000_10000001_01000000 encodes to 15.
 - A long of %00000000_00000000_00000000_00000000 encodes to 0 with optional C cleared
   to 0.
+flags_affected:
+  Z: Result = 0
+syntax_variants:
+- ENCOD Dest, {#}Src {WC|WZ|WCZ}
+- ENCOD Dest                 {WC|WZ|WCZ}
+- ENCOD stores the bit position value (0--31) of the top-most high bit (1) of Src,
+  or Dest, into Dest. If the value to
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0111100 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: S != 0
+  z: Result = 0
+  clocks: '2'
+- bits: EEEE 0111100 CZ0 DDDDDDDDD DDDDDDDDD
+  write: D
+  c: Original D != 0
+  z: Result = 0
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -167,20 +182,11 @@ compiler_operand_format:
   pattern: D{,S/#}
   description: Destination register, optional Source register or immediate (unary/binary)
   valueType: 3
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 3
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Encode
-category: Math and Logic
-result: The bit position value of the top-most high bit (1) in Src, or Dest, is stored
-  in Dest.
-syntax_variants:
-- ENCOD Dest, {#}Src {WC|WZ|WCZ}
-- ENCOD Dest                 {WC|WZ|WCZ}
-- ENCOD stores the bit position value (0--31) of the top-most high bit (1) of Src,
-  or Dest, into Dest. If the value to
-related:
-- DECOD
 manual_extraction_date: '2025-01-19'
 oneliner: Get bit position of top-most 1 of Src or Dest into Dest
+related:
+- DECOD

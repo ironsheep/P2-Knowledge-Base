@@ -1,17 +1,7 @@
 instruction: POLLSE4
 syntax: POLLSE1 {WC|WZ|WCZ}
-encoding:
-- EEEE 1101011 CZ0 000000100 000100100                  --             SE1 Event          SE1
-  Event                2
-- EEEE 1101011 CZ0 000000101 000100100                  --             SE2 Event          SE2
-  Event                2
-- EEEE 1101011 CZ0 000000110 000100100                  --             SE3 Event          SE3
-  Event                2
-- EEEE 1101011 CZ0 000000111 000100100                  --             SE4 Event          SE4
-  Event                2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Poll selectable event 1/2/3/4
+category: Event
 description: 'Get SE4 event flag into C/Z, then clear it.
 
 
@@ -38,6 +28,39 @@ description: 'Get SE4 event flag into C/Z, then clear it.
 
 
   instructions.'
+result: Selectable event flag 1, 2, 3, or 4 state is optionally copied into C and/or
+  Z, then it is cleared.
+parameters:
+- WC, WZ, or WCZ are optional effects to update flags.
+syntax_variants:
+- POLLSE1 {WC|WZ|WCZ}
+- POLLSE2 {WC|WZ|WCZ}
+- POLLSE3 {WC|WZ|WCZ}
+- POLLSE4 {WC|WZ|WCZ}
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 CZ0 000000100 000100100
+  write: —
+  c: SE1 Event
+  z: SE1 Event
+  clocks: '2'
+- bits: EEEE 1101011 CZ0 000000101 000100100
+  write: —
+  c: SE2 Event
+  z: SE2 Event
+  clocks: '2'
+- bits: EEEE 1101011 CZ0 000000110 000100100
+  write: —
+  c: SE3 Event
+  z: SE3 Event
+  clocks: '2'
+- bits: EEEE 1101011 CZ0 000000111 000100100
+  write: —
+  c: SE4 Event
+  z: SE4 Event
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -45,27 +68,16 @@ compiler_operand_format:
   pattern: ''
   description: No operands - poll/wait instruction (moves S to D, sets S to $024)
   valueType: 28
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+manual_extraction_date: '2025-01-19'
+oneliner: Retrieve and clear selectable event 1, 2, 3, or 4 flag
 long_description: Selectable event flag 1, 2, 3, or 4 state is optionally copied into
   C and/or Z, then it is cleared.
-syntax_variants:
-- POLLSE1 {WC|WZ|WCZ}
-- POLLSE2 {WC|WZ|WCZ}
-- POLLSE3 {WC|WZ|WCZ}
-- POLLSE4 {WC|WZ|WCZ}
-last_updated: '2025-09-19'
-brief_description: Poll selectable event 1/2/3/4
-category: Event
-result: Selectable event flag 1, 2, 3, or 4 state is optionally copied into C and/or
-  Z, then it is cleared.
-parameters:
-- WC, WZ, or WCZ are optional effects to update flags.
 related:
 - SETSEx
 - WAITSEx
 - JSEx
 - JNSEx
-manual_extraction_date: '2025-01-19'
-oneliner: Retrieve and clear selectable event 1, 2, 3, or 4 flag

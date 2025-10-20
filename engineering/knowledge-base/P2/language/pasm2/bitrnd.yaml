@@ -1,15 +1,7 @@
 instruction: BITRND
 syntax: BITRND Dest, {#}Src {WCZ}
-encoding:
-- EEEE 0100110 CZI DDDDDDDDD SSSSSSSSS                   D         Original D base
-  bit Original D base bit         2
-- EEEE 0100100 CZI DDDDDDDDD SSSSSSSSS                   D         Original D base
-  bit Original D base bit         2
-- EEEE 0100101 CZI DDDDDDDDD SSSSSSSSS                   D         Original D base
-  bit Original D base bit         2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Bit random
+category: Math and Logic
 description: 'BITRND alters the Dest bit(s) designated by Src to each be an independent
   random low and high value, based on Result: Dest bit(s) described by Src are each
   set randomly low or high; the rest are left as-is. Z = original D[S[4:0]].
@@ -133,9 +125,7 @@ description: 'BITRND alters the Dest bit(s) designated by Src to each be an inde
 
   If the WCZ effect is specified, the C and Z flags are updated to the original state
   of Dest''s base bit, identified by Src.'
-flags_affected:
-  Z:
-    formula: original D[S[4:0]]
+result: Dest bit(s) described by Src are set to Z or !Z; the rest are left as-is.
 parameters:
 - Dest is the register whose value will have one or more bits set randomly low or
   high.
@@ -146,6 +136,23 @@ parameters:
 - Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies
   the bit(s) to modify.
 - WCZ is an optional effect to update flags.
+flags_affected:
+  Z:
+    formula: original D[S[4:0]]
+syntax_variants:
+- BITRND Dest, {#}Src {WCZ}
+- BITRND alters the Dest bit(s) designated by Src to each be an independent random
+  low and high value, based on
+- instruction immediately precedes the BITRND instruction; substituting SETQ's Dest[4:0]
+  in place of value bits[9:5],
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0100110 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: Original D base bit Original D base bit
+  z: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -154,18 +161,9 @@ compiler_operand_format:
   description: 'Bit manipulation with optional effect flags: Destination register,
     bit position'
   valueType: 1
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 1
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Bit random
-category: Math and Logic
-result: Dest bit(s) described by Src are set to Z or !Z; the rest are left as-is.
-syntax_variants:
-- BITRND Dest, {#}Src {WCZ}
-- BITRND alters the Dest bit(s) designated by Src to each be an independent random
-  low and high value, based on
-- instruction immediately precedes the BITRND instruction; substituting SETQ's Dest[4:0]
-  in place of value bits[9:5],
 manual_extraction_date: '2025-01-19'
 oneliner: Set bit(s) random low/high

@@ -1,10 +1,7 @@
 instruction: ROR
 syntax: ROR Dest, {#}Src {WC|WZ|WCZ}
-encoding: EEEE 0000000 CZI DDDDDDDDD SSSSSSSSS                           D      Last
-  bit out   1
-timing:
-  cycles: 1
-  type: fixed
+brief_description: Rotate right
+category: Math and Logic
 description: 'ROR rotates Dest''s binary value right by Src places (0-31 bits). All
   LSBs rotated out are moved into the new Result: The bits of Dest are rotated right
   by Src bits; any departing LSBs are moved into MSBs.
@@ -30,14 +27,30 @@ description: 'ROR rotates Dest''s binary value right by Src places (0-31 bits). 
 
   non-zero. Since no bits are lost by this operation, the result will only be zero
   if Dest started at zero.'
-flags_affected:
-  C:
-    formula: last bit shifted out if S[4:0] > 0, else D[0]
+result: The bits of Dest are rotated right by Src bits; any departing LSBs are moved
+  into MSBs.
 parameters:
 - Dest is the register containing the value to rotate right by Src bits.
 - Src is a register or 5-bit literal whose value indicates the number of bit positions
   to rotate.
 - WC, WZ, or WCZ are optional effects to update flags.
+flags_affected:
+  C:
+    formula: last bit shifted out if S[4:0] > 0, else D[0]
+syntax_variants:
+- ROR Dest, {#}Src {WC|WZ|WCZ}
+- ROR rotates Dest's binary value right by Src places (0-31 bits). All LSBs rotated
+  out are moved into the new
+timing:
+  cycles: 1
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0000000 CZI DDDDDDDDD SSSSSSSSS
+  write: D      Last bit out   1
+  c: Result = 0
+  z: '2'
+encoding_notes:
+- C = last bit rotated out if Src[4:0] > 0, else C = Dest[0].
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -45,17 +58,9 @@ compiler_operand_format:
   pattern: D,S/#
   description: Destination register, Source register or immediate value
   valueType: 0
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Rotate right
-category: Math and Logic
-result: The bits of Dest are rotated right by Src bits; any departing LSBs are moved
-  into MSBs.
-syntax_variants:
-- ROR Dest, {#}Src {WC|WZ|WCZ}
-- ROR rotates Dest's binary value right by Src places (0-31 bits). All LSBs rotated
-  out are moved into the new
 manual_extraction_date: '2025-01-19'
 oneliner: Rotate bits right

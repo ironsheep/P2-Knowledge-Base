@@ -1,23 +1,7 @@
 instruction: DIRRND
 syntax: DIRRND {#}Dest {WCZ}
-encoding:
-- EEEE 1101011 CZL DDDDDDDDD 001000110                 DIRx       Orig DIRx base bit
-  Orig DIRx base bit           2
-- EEEE 1101011 CZI DDDDDDDDD 001000100                DIRx       Orig DIRx base bit
-  Orig DIRx base bit           2
-- EEEE 1101011 CZI DDDDDDDDD 001000101                DIRx       Orig DIRx base bit
-  Orig DIRx base bit           2
-- EEEE 1011011 10I DDDDDDDDD SSSSSSSSS                    D and PC   1
-- EEEE 1011011 00I DDDDDDDDD SSSSSSSSS                   D and PC   1
-- EEEE 1101011 CZL DDDDDDDDD 001011010 DIRx + OUTx Orig OUTx base bit Orig OUTx base
-  bit
-- EEEE 1101011 CZL DDDDDDDDD 001011001 DIRx1 + OUTx Orig OUTx base bit Orig OUTx base
-  bit                           2
-- EEEE 1101011 CZL DDDDDDDDD 001011000 DIRx + OUTx Orig OUTx base bit Orig OUTx base
-  bit
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Direction random
+category: Pin
 description: 'DIRRND alters the direction register''s bit(s) designated by Dest to
   be random low and high (input and output), Result: The I/O pin direction bit(s),
   described by Dest, are each set randomly low or high (input or output); the rest
@@ -592,9 +576,8 @@ description: 'DIRRND alters the direction register''s bit(s) designated by Dest 
 
 
   identified by Dest.'
-flags_affected:
-  Z:
-    formula: DIR bit
+result: The I/O pins described by Dest are set to the output direction and to an output
+  level of high or low; the rest
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the pins set randomly to inputs or outputs.
@@ -616,6 +599,24 @@ parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the I/O pin(s) to set to output direction and output levels of high or low.
 - WCZ is an optional effect to update flags.
+flags_affected:
+  Z:
+    formula: DIR bit
+syntax_variants:
+- DIRRND {#}Dest {WCZ}
+- DIRRND alters the direction register's bit(s) designated by Dest to be random low
+  and high (input and output),
+- instruction immediately precedes the DIRRND instruction; substituting SETQ's Dest[4:0]
+  in place of value
+- bits[10:6], for DIRRND's use.
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 CZL DDDDDDDDD 001000110
+  write: DIRx
+  c: Orig DIRx base bit Orig DIRx base bit
+  z: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -624,21 +625,12 @@ compiler_operand_format:
   description: 'Pin operation: destination/immediate pin number 0-511, optional effect
     flags'
   valueType: 30
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Direction random
-category: Pin
-result: The I/O pins described by Dest are set to the output direction and to an output
-  level of high or low; the rest
-syntax_variants:
-- DIRRND {#}Dest {WCZ}
-- DIRRND alters the direction register's bit(s) designated by Dest to be random low
-  and high (input and output),
-- instruction immediately precedes the DIRRND instruction; substituting SETQ's Dest[4:0]
-  in place of value
-- bits[10:6], for DIRRND's use.
+manual_extraction_date: '2025-01-19'
+oneliner: Set pin(s) direction to random input/output
 related:
 - DIRC
 - DIRNC
@@ -646,5 +638,3 @@ related:
 - DIRRND
 - DIRL
 - DIRH
-manual_extraction_date: '2025-01-19'
-oneliner: Set pin(s) direction to random input/output

@@ -1,11 +1,7 @@
 instruction: ALTB
 syntax: ALTB Dest, {#}Src
-encoding:
-- EEEE 1001100 11I DDDDDDDDD SSSSSSSSS                     D1                  --                   --                    2
-- EEEE 1001100 111 DDDDDDDDD 000000000                     D 1
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Alter bit
+category: Register Indirection
 description: 'ALTB should be followed by a BITxxx instruction-- it modifies the BITxxx
   instruction''s Dest value, enabling code Result: The next instruction''s pipelined
   Dest value is altered to be (Src + Dest[13:5]) & $1FF, or just Dest[13:5] for syntax
@@ -86,9 +82,8 @@ description: 'ALTB should be followed by a BITxxx instruction-- it modifies the 
 
   long''s absolute address and its bit index instead of the long''s relative index
   (to add to a base) and bit index.'
-flags_affected:
-  C:
-    when: D1
+result: The next instruction's pipelined Dest value is altered to be (Src + Dest[13:5])
+  & $1FF, or just Dest[13:5] for
 parameters:
 - Dest is the register whose 14-bit value is the index, or the full bit address, for
   the BITxxx instruction to operate on.
@@ -108,21 +103,9 @@ parameters:
   values do not persist
 - SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the
   next instruction
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
-documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_duiz
-  pattern: D{,S/#}
-  description: Destination, optional source (immediate bit set if no source)
-  valueType: 5
-compiler_encoding:
-  operandFormat: 5
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
-brief_description: Alter bit
-category: Register Indirection
-result: The next instruction's pipelined Dest value is altered to be (Src + Dest[13:5])
-  & $1FF, or just Dest[13:5] for
+flags_affected:
+  C:
+    when: D1
 syntax_variants:
 - ALTB Dest, {#}Src
 - ALTB Dest
@@ -145,5 +128,33 @@ usage_notes: 'The instruction following ALTB is shielded from interrupt
 
   SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the
   next instruction'
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1001100 11I DDDDDDDDD SSSSSSSSS
+  write: D1
+  c: —
+  z: —
+  clocks: '2'
+- bits: EEEE 1001100 111 DDDDDDDDD 000000000
+  write: D 1
+  c: —
+  z: —
+  clocks: '2'
+encoding_notes:
+- Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In
+  syntax 2, the auto-indexer value is 0.
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_duiz
+  pattern: D{,S/#}
+  description: Destination, optional source (immediate bit set if no source)
+  valueType: 5
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  operandFormat: 5
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Alter subsequent BITxxx instruction

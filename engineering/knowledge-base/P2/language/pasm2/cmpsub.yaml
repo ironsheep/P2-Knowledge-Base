@@ -1,9 +1,7 @@
 instruction: CMPSUB
 syntax: CMPSUB Dest, {#}Src {WC|WZ|WCZ}
-encoding: EEEE 0010111 CZI DDDDDDDDD SSSSSSSSS                 D1
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Compare and subtract
+category: Math and Logic
 description: 'CMPSUB compares the unsigned values of Dest and Src, and if Src is less
   than or equal to Dest then it is Result: Dest is decremented by Src unless it is
   less than Src, and the comparison results are optionally written to the C and Z
@@ -24,15 +22,32 @@ description: 'CMPSUB compares the unsigned values of Dest and Src, and if Src is
 
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
   0.'
-flags_affected:
-  C:
-    formula: 1, else D same and C = 0
+result: Dest is decremented by Src unless it is less than Src, and the comparison
+  results are optionally written to
 parameters:
 - Dest is the register containing the value to compare with Src and is the destination
   written to if a subtraction is performed.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared
   with and possibly subtracted from Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
+flags_affected:
+  C:
+    formula: 1, else D same and C = 0
+syntax_variants:
+- CMPSUB Dest, {#}Src {WC|WZ|WCZ}
+- CMPSUB compares the unsigned values of Dest and Src, and if Src is less than or
+  equal to Dest then it is
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0010111 CZI DDDDDDDDD SSSSSSSSS
+  write: D1
+  c: Unsigned(D => S)
+  z: Result = 0
+  clocks: '2'
+encoding_notes:
+- Dest is only written if a subtraction was performed on it.
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -40,17 +55,9 @@ compiler_operand_format:
   pattern: D,S/#
   description: Destination register, Source register or immediate value
   valueType: 0
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Compare and subtract
-category: Math and Logic
-result: Dest is decremented by Src unless it is less than Src, and the comparison
-  results are optionally written to
-syntax_variants:
-- CMPSUB Dest, {#}Src {WC|WZ|WCZ}
-- CMPSUB compares the unsigned values of Dest and Src, and if Src is less than or
-  equal to Dest then it is
 manual_extraction_date: '2025-01-19'
 oneliner: Compare two unsigned values and subtract the second if it is lesser or equal

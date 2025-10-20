@@ -1,10 +1,7 @@
 instruction: ZEROX
 syntax: ZEROX Dest, {#}Src {WC|WZ|WCZ}
-encoding: EEEE 0111010 CZI DDDDDDDDD SSSSSSSSS                    D            MSB
-  of result        Result = 0               2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Zero extend
+category: Math and Logic
 description: 'ZEROX fills the bits of Dest, above the bit indicated by Src[4:0], with
   zeros; i.e. zero-extending the value. This is C = MSB of result.
 
@@ -2707,16 +2704,31 @@ description: 'ZEROX fills the bits of Dest, above the bit indicated by Src[4:0],
 
 
   are trademarks of Parallax, Inc.'
-flags_affected:
-  Z: Result = 0
+result: The Dest value is zero-extended above the bit indicated by Src and is stored
+  in Dest. Optionally the C and
 parameters:
 - Dest is a register containing the value to zero-extend above bit Src[4:0] and is
   where the result is written.
 - Src is a register or 9-bit literal whose value (lower 5 bits) identifies the bit
   of Dest to zero-extend beyond.
 - WC, WZ, or WCZ are optional effects to update flags.
-related:
-- SIGNX
+flags_affected:
+  Z: Result = 0
+syntax_variants:
+- ZEROX Dest, {#}Src {WC|WZ|WCZ}
+- ZEROX fills the bits of Dest, above the bit indicated by Src[4:0], with zeros; i.e.
+  zero-extending the value. This is
+- ZEROX    D,{#}S     {WC/WZ/WCZ}         Zero-extend D above bit S[4:0]. C = MSB
+  of result. *                                                                         2
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0111010 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: MSB of result
+  z: Result = 0
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -2724,19 +2736,11 @@ compiler_operand_format:
   pattern: D,S/#
   description: Destination register, Source register or immediate value
   valueType: 0
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Zero extend
-category: Math and Logic
-result: The Dest value is zero-extended above the bit indicated by Src and is stored
-  in Dest. Optionally the C and
-syntax_variants:
-- ZEROX Dest, {#}Src {WC|WZ|WCZ}
-- ZEROX fills the bits of Dest, above the bit indicated by Src[4:0], with zeros; i.e.
-  zero-extending the value. This is
-- ZEROX    D,{#}S     {WC/WZ/WCZ}         Zero-extend D above bit S[4:0]. C = MSB
-  of result. *                                                                         2
 manual_extraction_date: '2025-01-19'
 oneliner: Zero-extend value beyond designated bit
+related:
+- SIGNX

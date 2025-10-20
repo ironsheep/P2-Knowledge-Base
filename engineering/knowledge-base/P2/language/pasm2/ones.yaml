@@ -1,21 +1,7 @@
 instruction: ONES
 syntax: ONES Dest, {#}Src {WC|WZ|WCZ}
-encoding:
-- EEEE 0111101 CZI DDDDDDDDD SSSSSSSSS                    D           Result is odd        Result
-  = 0                2
-- EEEE 0111101 CZ0 DDDDDDDDD DDDDDDDDD                    D           Result is odd        Result
-  = 0                2
-- EEEE 1101011 CZL DDDDDDDDD 001001010                  OUTx       Orig OUTx base
-  bit Orig OUTx base bit             2
-- EEEE 1101011 CZL DDDDDDDDD 001001011                  OUTx       Orig OUTx base
-  bit Orig OUTx base bit             2
-- EEEE 1101011 CZL DDDDDDDDD 001001001                 OUTx        Orig OUTx base
-  bit Orig OUTx base bit             2
-- EEEE 1101011 CZL DDDDDDDDD 001001000                 OUTx        Orig OUTx base
-  bit Orig OUTx base bit             2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Ones
+category: Math and Logic
 description: 'ONES tallies the number of high bits of Src, or Dest, and stores the
   count into Dest. Result: The number of high bits in Src, or Dest, is stored in Dest.
 
@@ -226,8 +212,8 @@ description: 'ONES tallies the number of high bits of Src, or Dest, and stores t
 
 
   identified by Dest.'
-flags_affected:
-  Z: Result = 0
+result: The I/O pin output level bit(s), described by Dest, are set high (1) or low
+  (0); the rest are left as-is.
 parameters:
 - Dest is the register in which to store the number of high bits found and optionally
   it begins by containing the value to check (syntax 2).
@@ -240,6 +226,27 @@ parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the I/O pin(s) to set high or low.
 - WCZ is an optional effect to update flags.
+flags_affected:
+  Z: Result = 0
+syntax_variants:
+- ONES Dest, {#}Src {WC|WZ|WCZ}
+- ONES Dest            {WC|WZ|WCZ}
+- ONES tallies the number of high bits of Src, or Dest, and stores the count into
+  Dest.
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0111101 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: Result is odd
+  z: Result = 0
+  clocks: '2'
+- bits: EEEE 0111101 CZ0 DDDDDDDDD DDDDDDDDD
+  write: D
+  c: Result is odd
+  z: Result = 0
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -247,18 +254,9 @@ compiler_operand_format:
   pattern: D{,S/#}
   description: Destination register, optional Source register or immediate (unary/binary)
   valueType: 3
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 3
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Ones
-category: Math and Logic
-result: The I/O pin output level bit(s), described by Dest, are set high (1) or low
-  (0); the rest are left as-is.
-syntax_variants:
-- ONES Dest, {#}Src {WC|WZ|WCZ}
-- ONES Dest            {WC|WZ|WCZ}
-- ONES tallies the number of high bits of Src, or Dest, and stores the count into
-  Dest.
 manual_extraction_date: '2025-01-19'
 oneliner: Get number of 1s from Dest or Src into Dest

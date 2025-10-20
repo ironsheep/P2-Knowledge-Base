@@ -1,10 +1,7 @@
 instruction: COGID
 syntax: COGID {#}Dest {WC}
-encoding: EEEE 1101011 C0L DDDDDDDDD 000000001 D if reg and !WC              Cog Running              --           2-9,
-  +2 if result
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Cog identification
+category: Hub Control
 description: 'COGID writes the current cog''s ID into Dest (if Dest is a register
   and WC is omitted) or sets/clears the C flag Result: Current cog''s ID is written
   to Dest or C is set (1) or cleared (0) if the Dest cog is running or stopped. C
@@ -21,17 +18,29 @@ description: 'COGID writes the current cog''s ID into Dest (if Dest is a registe
 
   If the WC effect is specified, the C flag is set (1) if the Dest[2:0] cog is running,
   or is cleared (0) if stopped.'
-flags_affected:
-  C:
-    formula: 1 if on
+result: Current cog's ID is written to Dest or C is set (1) or cleared (0) if the
+  Dest cog is running or stopped.
 parameters:
 - Dest is the register where the current cog's ID will be written, or is the register
   or 9-bit literal whose value (lower 3-bits) indicates which cog to get the status
   for.
 - WC is an optional effect to update the C flag with the Dest cog's running status.
-related:
-- COGINIT
-- COGSTOP
+flags_affected:
+  C:
+    formula: 1 if on
+syntax_variants:
+- COGID {#}Dest {WC}
+- COGID writes the current cog's ID into Dest (if Dest is a register and WC is omitted)
+  or sets/clears the C flag
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 C0L DDDDDDDDD 000000001
+  write: D if reg and !WC
+  c: Cog Running
+  z: —
+  clocks: 2–9, +2 if result
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -39,17 +48,12 @@ compiler_operand_format:
   pattern: D/#0..511
   description: Destination or immediate value 0-511
   valueType: 26
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 26
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Cog identification
-category: Hub Control
-result: Current cog's ID is written to Dest or C is set (1) or cleared (0) if the
-  Dest cog is running or stopped.
-syntax_variants:
-- COGID {#}Dest {WC}
-- COGID writes the current cog's ID into Dest (if Dest is a register and WC is omitted)
-  or sets/clears the C flag
 manual_extraction_date: '2025-01-19'
 oneliner: Get current cog's ID or any cog's status by ID
+related:
+- COGINIT
+- COGSTOP

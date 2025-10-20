@@ -1,15 +1,28 @@
 instruction: WRNC
 syntax: WRNC    D
-encoding: EEEE 1101011 000 DDDDDDDDD 001101101
-timing:
-  cycles: 2
-  type: fixed
+category: Math and Logic
 description: Write 0 or 1 to D, according to !C. D = {31'b0, !C).
+parameters:
+- Dest is the register whose value will be replaced with the state of C or !C.
 flags_affected:
   C:
     when: D
-parameters:
-- Dest is the register whose value will be replaced with the state of C or !C.
+syntax_variants:
+- WRNC D
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 000 DDDDDDDDD 001101100
+  write: D
+  c: —
+  z: —
+  clocks: '2'
+- bits: EEEE 1101011 000 DDDDDDDDD 001101101
+  write: D
+  c: —
+  z: —
+  clocks: '2'
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:
@@ -17,12 +30,9 @@ compiler_operand_format:
   pattern: D
   description: Destination register only
   valueType: 24
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 24
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-long_description: Dest value is replaced with state of C or !C.
-syntax_variants:
-- WRNC D
 last_updated: '2025-09-19T16:04:17.145138'
-category: Math and Logic
 oneliner: Write C or not C to register
+long_description: Dest value is replaced with state of C or !C.

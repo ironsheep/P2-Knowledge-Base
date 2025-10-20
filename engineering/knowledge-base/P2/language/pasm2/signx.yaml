@@ -1,10 +1,7 @@
 instruction: SIGNX
 syntax: SIGNX Dest, {#}Src {WC|WZ|WCZ}
-encoding: EEEE 0111011 CZI DDDDDDDDD SSSSSSSSS                    D            MSB
-  of result        Result = 0               2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Sign extend
+category: Math and Logic
 description: 'SIGNX fills the bits of Dest, above the bit indicated by Src[4:0], with
   the value of that identified bit; i.e. Result: The Dest value is sign-extended above
   the bit indicated by Src and is stored in Dest. Optionally the C and Z flags are
@@ -27,16 +24,29 @@ description: 'SIGNX fills the bits of Dest, above the bit indicated by Src[4:0],
 
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero,
   or is cleared (0) if it is non-zero.'
-flags_affected:
-  Z: Result = 0
+result: The Dest value is sign-extended above the bit indicated by Src and is stored
+  in Dest. Optionally the C and
 parameters:
 - Dest is a register containing the value to sign-extend above bit Src[4:0] and is
   where the result is written.
 - Src is a register or 9-bit literal whose value (lower 5 bits) identifies the bit
   of Dest to zero-extend beyond.
 - WC, WZ, or WCZ are optional effects to update flags.
-related:
-- ZEROX
+flags_affected:
+  Z: Result = 0
+syntax_variants:
+- SIGNX Dest, {#}Src {WC|WZ|WCZ}
+- SIGNX fills the bits of Dest, above the bit indicated by Src[4:0], with the value
+  of that identified bit; i.e.
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0111011 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: MSB of result
+  z: Result = 0
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -44,17 +54,11 @@ compiler_operand_format:
   pattern: D,S/#
   description: Destination register, Source register or immediate value
   valueType: 0
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Sign extend
-category: Math and Logic
-result: The Dest value is sign-extended above the bit indicated by Src and is stored
-  in Dest. Optionally the C and
-syntax_variants:
-- SIGNX Dest, {#}Src {WC|WZ|WCZ}
-- SIGNX fills the bits of Dest, above the bit indicated by Src[4:0], with the value
-  of that identified bit; i.e.
 manual_extraction_date: '2025-01-19'
 oneliner: Sign-extend value beyond designated bit
+related:
+- ZEROX

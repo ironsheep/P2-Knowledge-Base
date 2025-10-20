@@ -1,9 +1,6 @@
 instruction: TJNS
 syntax: TJNS    D,{#}S
-encoding: EEEE 1011101 11I DDDDDDDDD SSSSSSSSS
-timing:
-  cycles: 2
-  type: fixed
+category: Branch
 description: 'TJS or TJNS tests the value in Dest and jumps to the address described
   by Src if the result is signed (Dest[31] = 1) Result: Dest is tested and if it''s
   signed (or not signed in syntax 2), PC is set to a new relative (#Src) or absolute
@@ -13,6 +10,22 @@ parameters:
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1011101 10I DDDDDDDDD SSSSSSSSS
+  write: PC    1
+  c: —
+  z: —
+  clocks: 2 or 4 / 2 or 13–20
+- bits: EEEE 1011101 11I DDDDDDDDD SSSSSSSSS
+  write: PC    1
+  c: —
+  z: —
+  clocks: 2 or 4 / 2 or 13–20
+encoding_notes:
+- PC is written only when Dest is signed (or not signed in syntax 2).
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:
@@ -20,9 +33,8 @@ compiler_operand_format:
   pattern: D,S/@
   description: 'Jump with destination and relative address: register, relative address'
   valueType: 12
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 12
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.364332'
-category: Branch
 oneliner: Test value and jump if signed or not signed

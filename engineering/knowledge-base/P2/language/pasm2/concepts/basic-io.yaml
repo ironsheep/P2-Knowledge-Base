@@ -1,0 +1,365 @@
+title: PASM2 Basic I/O - Digital Pin Control
+id: pasm2-basic-io
+version: 1.0.0
+category: pasm2_concepts
+layer: "Foundation - I/O Operations"
+purpose: Essential knowledge for basic digital I/O before smart pin autonomous modes
+
+summary: |
+  Foundational digital I/O operations in PASM2. Covers single-pin and multi-pin control,
+  direction management, drive strength configuration, internal pull resistors, and the
+  critical distinction between pin configuration (electrical characteristics) and pin
+  operation (read/write).
+
+description: |
+  P2 provides 64 general-purpose I/O pins (P0-P63) that can be controlled individually
+  or in groups. Each pin can be configured for drive strength and pull resistors, then
+  operated as simple digital I/O. This is distinct from autonomous smart pin modes where
+  the pin operates independently.
+
+core_concept_configuration_vs_operation:
+  critical_distinction: |
+    Pin electrical characteristics (drive strength, pull resistors) are CONFIGURATION
+    that persists while you perform normal I/O operations. These are not autonomous modes.
+    
+  configuration_layer:
+    purpose: "Set electrical characteristics"
+    methods:
+      - "WRPIN - Configure drive strength"
+      - "WRPIN - Enable internal pull resistors"
+    persistence: "Settings remain active during basic I/O"
+    
+  operation_layer:
+    purpose: "Read and write pin states"
+    methods:
+      - "DRVH/DRVL - Set output high/low"
+      - "TESTP/TESTPN - Read pin state"
+      - "FLTL - Float to high-impedance"
+    behavior: "Normal digital I/O with configured electrical characteristics"
+
+pin_architecture:
+  pin_count: 64
+  pin_range: "P0 to P63"
+  register_split:
+    dira_outa_ina: "Control pins P0-P31"
+    dirb_outb_inb: "Control pins P32-P63"
+  
+  per_pin_capabilities:
+    direction: "Input or output (via DIR bit)"
+    output_state: "High or low (via OUT bit)"
+    drive_strength: "1.5mA to 150mA (configurable)"
+    pull_resistors: "1.5kΩ, 15kΩ, 150kΩ, or current-mode (configurable)"
+    tristate: "High-impedance float mode"
+
+control_registers:
+  dira:
+    address: "$1FA"
+    controls: "Pins P31-P0"
+    bits: "Bit 0=P0, bit 31=P31"
+    state_0: "Input (high-impedance)"
+    state_1: "Output (drives OUT value)"
+    
+  dirb:
+    address: "$1FB"
+    controls: "Pins P63-P32"
+    bits: "Bit 0=P32, bit 31=P63"
+    
+  outa:
+    address: "$1FE"
+    controls: "Output state for P31-P0"
+    effect: "When DIR=1, pin drives this state"
+    state_0: "Drive low (0V)"
+    state_1: "Drive high (3.3V)"
+    
+  outb:
+    address: "$1FF"
+    controls: "Output state for P63-P32"
+    
+  ina:
+    address: "$1FC"
+    controls: "Read state of P31-P0"
+    read_only: true
+    reflects: "Actual pin voltage level"
+    
+  inb:
+    address: "$1FD"
+    controls: "Read state of P63-P32"
+    read_only: true
+
+single_pin_operations:
+  set_output_high:
+    instruction: "DRVH"
+    syntax: "DRVH pin_number"
+    effect: "Sets DIR=1 and OUT=1 in one operation"
+    example: "DRVH #16  ' Pin 16 outputs high"
+    
+  set_output_low:
+    instruction: "DRVL"
+    syntax: "DRVL pin_number"
+    effect: "Sets DIR=1 and OUT=0 in one operation"
+    example: "DRVL #16  ' Pin 16 outputs low"
+    
+  toggle_output:
+    instruction: "DRVNOT"
+    syntax: "DRVNOT pin_number"
+    effect: "Toggles OUT bit, maintains DIR=1"
+    example: "DRVNOT #16  ' Toggle pin 16"
+    
+  float_pin:
+    instruction: "FLTL"
+    syntax: "FLTL pin_number"
+    effect: "Sets DIR=0 (high-impedance input)"
+    example: "FLTL #16  ' Pin 16 floats"
+    
+  read_pin:
+    instruction: "TESTP"
+    syntax: "TESTP pin_number WC/WZ"
+    effect: "Test pin state, set C or Z flag"
+    example: "TESTP #16 WC  ' C=1 if pin high"
+    
+  read_pin_inverted:
+    instruction: "TESTPN"
+    syntax: "TESTPN pin_number WC/WZ"
+    effect: "Test pin inverted, set flag"
+    example: "TESTPN #16 WC  ' C=1 if pin low"
+
+multi_pin_operations:
+  concept: |
+    Operate on multiple contiguous pins with a single instruction using pin fields.
+    Pin field format: base_pin ADDPINS count, or encoded value with bits [10:6]=count, [5:0]=base.
+    
+  set_direction:
+    instruction: "DIRH/DIRL"
+    syntax: "DIRH #base_pin ADDPINS #count"
+    example: |
+      DIRH #8 ADDPINS #7  ' Pins 8-15 as outputs
+      DIRL #0 ADDPINS #3  ' Pins 0-3 as inputs
+      
+  set_output:
+    instruction: "OUTH/OUTL"
+    syntax: "OUTH #base_pin ADDPINS #count"
+    example: |
+      OUTH #8 ADDPINS #7  ' Pins 8-15 output high
+      OUTL #0 ADDPINS #3  ' Pins 0-3 output low
+      
+  drive_pins:
+    instruction: "DRVH/DRVL"
+    syntax: "DRVH #base_pin ADDPINS #count"
+    effect: "Sets DIR=1 and OUT simultaneously for pin range"
+    example: "DRVH #16 ADDPINS #7  ' Pins 16-23 drive high"
+    
+  register_masking:
+    description: "Use bit masks for non-contiguous pins"
+    example: |
+      MOV     mask, ##%11110000  ' Pins 7,6,5,4
+      OR      DIRA, mask         ' Set as outputs
+      ANDN    OUTA, mask         ' Drive low
+
+pin_field_encoding:
+  addpins_operator:
+    syntax: "base_pin ADDPINS count"
+    example: "#8 ADDPINS #7 = pins 8 through 15"
+    encoding: "Bits [10:6]=count, bits [5:0]=base_pin"
+    
+  manual_encoding:
+    formula: "(count << 6) | base_pin"
+    example: "(7 << 6) | 8 = $1C8 = pins 8-15"
+    
+  wrapping:
+    within_a_pins: "Pin fields wrap within P0-P31"
+    within_b_pins: "Pin fields wrap within P32-P63"
+
+direction_output_instructions:
+  dir_only:
+    DIRH: "Set direction to output (DIR=1)"
+    DIRL: "Set direction to input (DIR=0)"
+    DIRNOT: "Toggle direction bit"
+    DIRC: "Set DIR=C flag"
+    DIRNC: "Set DIR=!C flag"
+    DIRZ: "Set DIR=Z flag"
+    DIRNZ: "Set DIR=!Z flag"
+    
+  out_only:
+    OUTH: "Set output high (if DIR=1)"
+    OUTL: "Set output low (if DIR=1)"
+    OUTNOT: "Toggle output"
+    OUTC: "Set OUT=C flag"
+    OUTNC: "Set OUT=!C flag"
+    OUTZ: "Set OUT=Z flag"
+    OUTNZ: "Set OUT=!Z flag"
+    
+  combined_drv:
+    description: "Set both DIR=1 and OUT in single operation"
+    DRVH: "DIR=1, OUT=1"
+    DRVL: "DIR=1, OUT=0"
+    DRVNOT: "DIR=1, OUT=!OUT"
+    DRVC: "DIR=1, OUT=C"
+    DRVNC: "DIR=1, OUT=!C"
+    DRVZ: "DIR=1, OUT=Z"
+    DRVNZ: "DIR=1, OUT=!Z"
+    
+  float_flt:
+    description: "Set DIR=0 (high-impedance)"
+    FLTL: "DIR=0 (common usage)"
+    FLTH: "DIR=0"
+    FLTNOT: "DIR=0"
+    note: "All FLT* variants set DIR=0; suffix affects OUT bit for future use"
+
+drive_strength_configuration:
+  concept: |
+    Configure pin drive strength via WRPIN before performing I/O operations.
+    Drive strength setting persists during normal I/O - this is CONFIGURATION, not operation.
+    
+  strengths_available:
+    "1.5mA": "Lowest power, ~2000Ω impedance"
+    "3.0mA": "Low power, ~1000Ω impedance"
+    "15mA": "Standard digital, ~200Ω impedance"
+    "30mA": "Fast digital/LED drive, ~100Ω impedance"
+    "75mA": "High-speed signals, ~40Ω impedance"
+    "150mA": "Maximum drive, ~20Ω impedance"
+    
+  configuration_sequence:
+    example: |
+      DIRL  #16                    ' REQUIRED: Reset pin first
+      WRPIN drive_config, #16      ' Configure drive strength
+      DRVH  #16                    ' Now use as normal I/O
+      ' Drive strength remains active during all subsequent I/O
+      
+  wrpin_encoding:
+    bits_M_6_0: "Control drive strength"
+    encoding_varies: "See drive strength modes in smart pin documentation"
+
+internal_pull_resistors:
+  concept: |
+    Enable internal pull-up or pull-down resistors via WRPIN smart pin modes.
+    Once enabled, pin still operates as normal I/O with bias resistor active.
+    This is CONFIGURATION that persists, not an autonomous smart pin mode.
+    
+  pull_up_modes:
+    P_HIGH_1K5: "1.5kΩ pull-up (strong)"
+    P_HIGH_15K: "15kΩ pull-up (medium)"
+    P_HIGH_150K: "150kΩ pull-up (weak)"
+    P_HIGH_1MA: "1mA constant current pull-up"
+    
+  pull_down_modes:
+    P_LOW_1K5: "1.5kΩ pull-down (strong)"
+    P_LOW_15K: "15kΩ pull-down (medium)"
+    P_LOW_150K: "150kΩ pull-down (weak)"
+    P_LOW_1MA: "1mA constant current pull-down"
+    
+  configuration_sequence:
+    example: |
+      DIRL  #16                    ' REQUIRED: Reset pin first
+      WRPIN ##P_HIGH_15K, #16      ' Enable 15kΩ pull-up
+      DIRL  #16                    ' Use as input with pull-up
+      TESTP #16 WC                 ' Read pin (pulled high if floating)
+      ' OR
+      DRVH  #16                    ' Drive high with pull-up active
+      DRVL  #16                    ' Drive low (overrides pull-up)
+      
+  use_cases:
+    - "Button inputs without external resistors"
+    - "I2C/SPI bus lines"
+    - "Unused pins (prevent floating)"
+    - "Weak drive for bidirectional buses"
+
+smart_pin_to_basic_io_transition:
+  clearing_smart_pin:
+    instruction: "WRPIN #0, pin"
+    effect: "Disables all smart pin configuration"
+    prerequisite: "DIRL pin (DIR=0) before clearing"
+    example: |
+      DIRL  #16           ' DIR=0 required
+      WRPIN #0, #16       ' Clear smart pin config
+      DRVH  #16           ' Now use as normal I/O
+      
+  safe_reconfiguration:
+    rule: "ALWAYS set DIR=0 before WRPIN configuration"
+    sequence: |
+      DIRL  pin           ' 1. DIR=0 (REQUIRED)
+      WRPIN mode, pin     ' 2. Configure mode
+      WXPIN x, pin        ' 3. Set X parameter (if needed)
+      WYPIN y, pin        ' 4. Set Y parameter (if needed)
+      DIRH  pin           ' 5. Enable (DIR=1)
+
+safe_initialization_patterns:
+  avoid_glitches:
+    rule: "Set DIR before OUT to prevent output glitches"
+    wrong: |
+      OUTH #16  ' Glitch: OUT changes while floating
+      DIRH #16
+    correct: |
+      OUTL #16  ' Set desired state first
+      DIRH #16  ' Then enable output
+      
+  use_combined_instructions:
+    preferred: "DRVH/DRVL set DIR and OUT atomically"
+    example: "DRVH #16  ' No glitch possible"
+
+common_patterns:
+  led_blink:
+    code: |
+      led_pin = 16
+      ORG
+      DRVH  #led_pin      ' LED on
+      WAITX ##20_000_000  ' Delay
+      DRVL  #led_pin      ' LED off
+      WAITX ##20_000_000
+      JMP   #$            ' Repeat
+      
+  button_read:
+    code: |
+      button_pin = 0
+      ORG
+      DIRL  #button_pin         ' Reset pin
+      WRPIN ##P_HIGH_15K, #button_pin  ' Enable pull-up
+      DIRL  #button_pin         ' Input with pull-up
+      TESTP #button_pin WZ      ' Z=1 if button pressed (low)
+      IF_Z  CALL #button_action
+      
+  parallel_bus_write:
+    code: |
+      ' Write byte to 8-bit bus (pins 16-23)
+      DIRH  #16 ADDPINS #7      ' All outputs
+      MOV   temp, data
+      AND   temp, ##$FF         ' Mask to 8 bits
+      SHL   temp, #16           ' Position for pins 16-23
+      ANDN  OUTA, ##$00FF_0000  ' Clear bus bits
+      OR    OUTA, temp          ' Set new value
+      
+  parallel_bus_read:
+    code: |
+      ' Read byte from 8-bit bus (pins 16-23)
+      DIRL  #16 ADDPINS #7      ' All inputs
+      MOV   data, INA           ' Read all pins
+      SHR   data, #16           ' Position to bits 0-7
+      AND   data, ##$FF         ' Mask to byte
+
+timing_considerations:
+  instruction_timing: "2 clock cycles per instruction"
+  register_access: "Immediate (same cog)"
+  pin_propagation: "3-7ns output delay"
+  input_synchronization: "2-3 clock cycles for external signals"
+
+hardware_specifications:
+  voltage_levels: "3.3V I/O"
+  input_thresholds:
+    VIL_max: "0.8V"
+    VIH_min: "2.0V"
+  output_levels:
+    VOL_max: "0.4V at rated current"
+    VOH_min: "2.4V at rated current"
+  max_current_per_pin: "150mA"
+  max_current_total: "Check datasheet for package limits"
+
+related_concepts:
+  - "Smart pin autonomous modes (PWM, UART, etc.)"
+  - "Streamer for high-speed pin sequencing"
+  - "Pin timing specifications"
+  - "Multi-cog pin coordination"
+
+see_also:
+  - "engineering/knowledge-base/P2/language/pasm2/concepts/pasm2-getting-started.yaml"
+  - "engineering/knowledge-base/P2/architecture/smart_pins.yaml"
+  - "engineering/knowledge-base/P2/architecture/io_pin_timing.yaml"
+  - "engineering/knowledge-base/P2/architecture/system-registers/dira-dirb-registers.yaml"

@@ -1,10 +1,7 @@
 instruction: ROL
 syntax: ROL Dest, {#}Src {WC|WZ|WCZ}
-encoding: EEEE 0000001 CZI DDDDDDDDD SSSSSSSSS                            D         Last
-  bit out   1
-timing:
-  cycles: 1
-  type: fixed
+brief_description: Rotate left
+category: Math and Logic
 description: 'ROL rotates Dest''s binary value left by Src places (0-31 bits). All
   MSBs rotated out are moved into the new LSBs. Result: The bits of Dest are rotated
   left by Src bits; any departing MSBs are moved into LSBs.
@@ -27,14 +24,30 @@ description: 'ROL rotates Dest''s binary value left by Src places (0-31 bits). A
 
   non-zero. Since no bits are lost by this operation, the result will only be zero
   if Dest started at zero.'
-flags_affected:
-  C:
-    formula: last bit shifted out if S[4:0] > 0, else D[31]
+result: The bits of Dest are rotated left by Src bits; any departing MSBs are moved
+  into LSBs.
 parameters:
 - Dest is the register containing the value to rotate left by Src bits.
 - Src is a register or 5-bit literal whose value indicates the number of bit positions
   to rotate.
 - WC, WZ, or WCZ are optional effects to update flags.
+flags_affected:
+  C:
+    formula: last bit shifted out if S[4:0] > 0, else D[31]
+syntax_variants:
+- ROL Dest, {#}Src {WC|WZ|WCZ}
+- ROL rotates Dest's binary value left by Src places (0-31 bits). All MSBs rotated
+  out are moved into the new LSBs.
+timing:
+  cycles: 1
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0000001 CZI DDDDDDDDD SSSSSSSSS
+  write: D         Last bit out   1
+  c: Result = 0
+  z: '2'
+encoding_notes:
+- C = last bit rotated out if Src[4:0] > 0, else C = Dest[31].
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -42,17 +55,9 @@ compiler_operand_format:
   pattern: D,S/#
   description: Destination register, Source register or immediate value
   valueType: 0
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Rotate left
-category: Math and Logic
-result: The bits of Dest are rotated left by Src bits; any departing MSBs are moved
-  into LSBs.
-syntax_variants:
-- ROL Dest, {#}Src {WC|WZ|WCZ}
-- ROL rotates Dest's binary value left by Src places (0-31 bits). All MSBs rotated
-  out are moved into the new LSBs.
 manual_extraction_date: '2025-01-19'
 oneliner: Rotate bits left

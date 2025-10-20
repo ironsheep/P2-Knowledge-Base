@@ -1,10 +1,7 @@
 instruction: FLTNOT
 syntax: FLTNOT {#}Dest {WCZ}
-encoding: EEEE 1101011 CZL DDDDDDDDD 001010111 DIRx + OUTx Orig OUTx base bit Orig
-  OUTx base bit
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Float not
+category: Pin
 description: 'FLTNOT sets the I/O pin(s) designated by Dest to the input direction
   and to their opposite output level(s); i.e. Result: The I/O pins described by Dest
   are set to the input direction and to their opposite output level(s); the rest are
@@ -67,13 +64,32 @@ description: 'FLTNOT sets the I/O pin(s) designated by Dest to the input directi
 
 
   identified by Dest.'
-flags_affected:
-  Z:
-    formula: OUT bit
+result: The I/O pins described by Dest are set to the input direction and to their
+  opposite output level(s); the rest
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the I/O pin(s) to set to the input direction and toggle to opposite output levels.
 - WCZ is an optional effect to update flags.
+flags_affected:
+  Z:
+    formula: OUT bit
+syntax_variants:
+- FLTNOT {#}Dest {WCZ}
+- FLTNOT sets the I/O pin(s) designated by Dest to the input direction and to their
+  opposite output level(s); i.e.
+- instruction immediately precedes the FLTNOT instruction; substituting SETQ's Dest[4:0]
+  in place of value
+- bits[10:6], for FLTNOT's use.
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 CZL DDDDDDDDD 001010111
+  write: DIRx + OUTx Orig OUTx base bit Orig OUTx base bit
+encoding_notes:
+- '2'
+- New DIRx state is not data-forwarded; the next pipelined instruction sees the old
+  state. Make sure any instruction that reads
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -82,20 +98,9 @@ compiler_operand_format:
   description: 'Pin operation: destination/immediate pin number 0-511, optional effect
     flags'
   valueType: 30
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Float not
-category: Pin
-result: The I/O pins described by Dest are set to the input direction and to their
-  opposite output level(s); the rest
-syntax_variants:
-- FLTNOT {#}Dest {WCZ}
-- FLTNOT sets the I/O pin(s) designated by Dest to the input direction and to their
-  opposite output level(s); i.e.
-- instruction immediately precedes the FLTNOT instruction; substituting SETQ's Dest[4:0]
-  in place of value
-- bits[10:6], for FLTNOT's use.
 manual_extraction_date: '2025-01-19'
 oneliner: Set pin(s) direction to input and toggle to the opposite output level

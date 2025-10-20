@@ -1,9 +1,7 @@
 instruction: ALTR
 syntax: ALTR Dest, {#}Src
-encoding: EEEE 1001100 00I DDDDDDDDD SSSSSSSSS                     D 1
-timing:
-  cycles: 1
-  type: fixed
+brief_description: Alter result
+category: Register Indirection
 description: 'ALTR modifies the next instruction''s Result address to be (Src + Dest)
   & $1FF (for syntax 1), or to Dest[8:0] (for Result: The next instruction''s pipelined
   Result address (Dest address by default) is altered to be (Src + Dest) & $1FF, or
@@ -56,6 +54,8 @@ description: 'ALTR modifies the next instruction''s Result address to be (Src + 
 
   In syntax 2, Dest serves as the full value-- it is used as-is for the next instruction''s
   substitute Result address.'
+result: The next instruction's pipelined Result address (Dest address by default)
+  is altered to be
 parameters:
 - Dest is the register whose 9-bit value is the offset, or the full value, for the
   next instruction to operate on.
@@ -72,21 +72,6 @@ parameters:
   values do not persist
 - SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the
   next instruction
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
-documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_duiz
-  pattern: D{,S/#}
-  description: Destination, optional source (immediate bit set if no source)
-  valueType: 5
-compiler_encoding:
-  operandFormat: 5
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
-brief_description: Alter result
-category: Register Indirection
-result: The next instruction's pipelined Result address (Dest address by default)
-  is altered to be
 syntax_variants:
 - ALTR Dest, {#}Src
 - ALTR Dest
@@ -104,5 +89,33 @@ usage_notes: 'The instruction following ALTR is shielded from interrupt
 
   SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the
   next instruction'
+timing:
+  cycles: 1
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1001100 00I DDDDDDDDD SSSSSSSSS
+  write: D 1
+  c: —
+  z: —
+  clocks: '2'
+- bits: EEEE 1001100 001 DDDDDDDDD 000000000
+  write: D 1
+  c: —
+  z: —
+  clocks: '2'
+encoding_notes:
+- Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In
+  syntax 2, the auto-indexer value is 0.
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_duiz
+  pattern: D{,S/#}
+  description: Destination, optional source (immediate bit set if no source)
+  valueType: 5
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  operandFormat: 5
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Alter Result register address of next instruction

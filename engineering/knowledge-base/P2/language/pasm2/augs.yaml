@@ -1,18 +1,7 @@
 instruction: AUGS
 syntax: AUGS
-encoding:
-- EEEE 11110SS SSS SSSSSSSSS SSSSSSSSS Hidden S Queue                     --                  --                   2
-- EEEE 0100010 CZI DDDDDDDDD SSSSSSSSS                   D         Original D base
-  bit Original D base bit           2
-- EEEE 0100011 CZI DDDDDDDDD SSSSSSSSS                   D         Original D base
-  bit Original D base bit           2
-- EEEE 0100001 CZI DDDDDDDDD SSSSSSSSS                  D         Original D base
-  bit Original D base bit          2
-- EEEE 0100000 CZI DDDDDDDDD SSSSSSSSS                  D         Original D base
-  bit Original D base bit          2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Augment source
+category: Miscellaneous
 description: 'AUGS is an assistant instruction to aid with literal values that exceed
   9 bits. Most PASM2 instructions have 9 bits Result: The 23-bit value formed from
   Src is queued to prefix the next literal Src occurrence (#Src) to form a 32-bit
@@ -151,6 +140,8 @@ description: 'AUGS is an assistant instruction to aid with literal values that e
 
   If the WCZ effect is specified, the C and Z flags are updated to the original state
   of Dest''s base bit, identified by Src.'
+result: Dest bit(s) described by Src are set high (1) or low (0); the rest are left
+  as-is.
 parameters:
 - Src is a 32-bit literal whose upper 23 bits are prepended to the next literal Src
   occurrence.
@@ -167,23 +158,6 @@ parameters:
 - Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies
   the bit(s) to modify.
 - WCZ is an optional effect to update flags.
-related:
-- AUGD
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
-documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_aug
-  pattern: '#S'
-  description: 'Augment: immediate 23-bit value for AUGS/AUGD'
-  valueType: 23
-compiler_encoding:
-  operandFormat: 23
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
-brief_description: Augment source
-category: Miscellaneous
-result: Dest bit(s) described by Src are set high (1) or low (0); the rest are left
-  as-is.
 usage_notes: 'All instructions following AUGS are shielded from interrupt until after
   the instruction with the
 
@@ -205,6 +179,30 @@ usage_notes: 'All instructions following AUGS are shielded from interrupt until 
 
   cycles, make sure to account for 2 extra clock cycles for instructions containing
   ## augmented literals.'
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 11110SS SSS SSSSSSSSS SSSSSSSSS
+  write: Hidden S Queue
+  c: —
+  z: —
+  clocks: '2'
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_aug
+  pattern: '#S'
+  description: 'Augment: immediate 23-bit value for AUGS/AUGD'
+  valueType: 23
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  operandFormat: 23
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+manual_extraction_date: '2025-01-19'
+oneliner: Augment next literal Src to 32-bits
+related:
+- AUGD
 examples:
 - code: Both samples below use greater-than 9-bit literals (via AUGS functionality).
     The first is more convenient and
@@ -226,5 +224,3 @@ examples:
     \ DDDDDDDDD SSSSSSSSS                   D         Original D base bit Original\
     \ D base bit           2\n EEEE 0100011 CZI DDDDDDDDD SSSSSSSSS              \
     \     D         Original D base bit Original D base bit           2"
-manual_extraction_date: '2025-01-19'
-oneliner: Augment next literal Src to 32-bits

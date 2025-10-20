@@ -1,15 +1,7 @@
 instruction: POLLCT3
 syntax: POLLCT1 {WC|WZ|WCZ}
-encoding:
-- EEEE 1101011 CZ0 000000001 000100100                  --            CT1 Event           CT1
-  Event                 2
-- EEEE 1101011 CZ0 000000010 000100100                  --            CT2 Event           CT2
-  Event                 2
-- EEEE 1101011 CZ0 000000011 000100100                  --            CT3 Event           CT3
-  Event                 2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Poll counter 1/2/3
+category: Event
 description: 'Get CT3 event flag into C/Z, then clear it.
 
 
@@ -36,6 +28,33 @@ description: 'Get CT3 event flag into C/Z, then clear it.
 
 
   of the corresponding ADDCTx, POLLCTx, WAITCTx, JCTx, or JNCTx instructions.'
+result: Counter event flag 1, 2, or 3 state is optionally copied into C and/or Z,
+  then it is cleared.
+parameters:
+- WC, WZ, or WCZ are optional effects to update flags.
+syntax_variants:
+- POLLCT1 {WC|WZ|WCZ}
+- POLLCT2 {WC|WZ|WCZ}
+- POLLCT3 {WC|WZ|WCZ}
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 CZ0 000000001 000100100
+  write: —
+  c: CT1 Event
+  z: CT1 Event
+  clocks: '2'
+- bits: EEEE 1101011 CZ0 000000010 000100100
+  write: —
+  c: CT2 Event
+  z: CT2 Event
+  clocks: '2'
+- bits: EEEE 1101011 CZ0 000000011 000100100
+  write: —
+  c: CT3 Event
+  z: CT3 Event
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -43,17 +62,14 @@ compiler_operand_format:
   pattern: ''
   description: No operands - poll/wait instruction (moves S to D, sets S to $024)
   valueType: 28
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+manual_extraction_date: '2025-01-19'
+oneliner: Retrieve and clear counter event 1/2/3 flag
 long_description: Counter event flag 1, 2, or 3 state is optionally copied into C
   and/or Z, then it is cleared.
-syntax_variants:
-- POLLCT1 {WC|WZ|WCZ}
-- POLLCT2 {WC|WZ|WCZ}
-- POLLCT3 {WC|WZ|WCZ}
-last_updated: '2025-09-19'
-brief_description: Poll counter 1/2/3
 group_membership:
   group_id: counter_event_polls
   group_file: groups/counter_event_polls.yaml
@@ -64,15 +80,8 @@ specifics:
   counter_number: 3
   event_flag: CT3
 has_group_documentation: true
-category: Event
-result: Counter event flag 1, 2, or 3 state is optionally copied into C and/or Z,
-  then it is cleared.
-parameters:
-- WC, WZ, or WCZ are optional effects to update flags.
 related:
 - ADDCTx
 - WAITCTx
 - JCTx
 - JNCTx
-manual_extraction_date: '2025-01-19'
-oneliner: Retrieve and clear counter event 1/2/3 flag

@@ -371,6 +371,8 @@ assembly_directives:
 
 concepts:
   description: "Advanced Spin2 programming concepts and paradigms"
+  foundational:
+    - {name: "basic_io", content: "concepts/basic-io.yaml", desc: "Digital pin control, single-pin and multi-pin operations, drive strength, pull resistors"}
   programming_paradigms:
     - {name: "inline_pasm2", content: "concepts/inline_pasm2.yaml", desc: "Embedding PASM2 assembly within Spin2 methods"}
 

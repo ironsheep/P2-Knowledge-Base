@@ -1,15 +1,7 @@
 instruction: DRVRND
 syntax: DRVRND {#}Dest {WCZ}
-encoding:
-- EEEE 1101011 CZL DDDDDDDDD 001011110 DIRx + OUTx Orig OUTx base bit Orig OUTx base
-  bit
-- EEEE 1101011 CZL DDDDDDDDD 001011100 DIRx1 + OUTx Orig OUTx base bit Orig OUTx base
-  bit                           2
-- EEEE 1101011 CZL DDDDDDDDD 001011101 DIRx1 + OUTx Orig OUTx base bit Orig OUTx base
-  bit                           2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Drive random
+category: Pin
 description: 'DRVRND sets the I/O pin(s) designated by Dest to the output direction
   and with output level(s) set randomly low Result: The I/O pins described by Dest
   are set to the output direction and each output level is set randomly low or high;
@@ -190,9 +182,8 @@ description: 'DRVRND sets the I/O pin(s) designated by Dest to the output direct
 
 
   identified by Dest.'
-flags_affected:
-  Z:
-    formula: OUT bit
+result: The I/O pins described by Dest are set to the output direction and to an output
+  level of low/high according
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the I/O pin(s) to set to the output direction and with output level(s) set randomly
@@ -201,6 +192,26 @@ parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the I/O pin(s) to set to output direction and output levels of low or high.
 - WCZ is an optional effect to update flags.
+flags_affected:
+  Z:
+    formula: OUT bit
+syntax_variants:
+- DRVRND {#}Dest {WCZ}
+- DRVRND sets the I/O pin(s) designated by Dest to the output direction and with output
+  level(s) set randomly low
+- instruction immediately precedes the DRVRND instruction; substituting SETQ's Dest[4:0]
+  in place of value
+- bits[10:6], for DRVRND's use.
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 CZL DDDDDDDDD 001011110
+  write: DIRx + OUTx Orig OUTx base bit Orig OUTx base bit
+encoding_notes:
+- '2'
+- New DIRx state is not data-forwarded; the next pipelined instruction sees the old
+  state. Make sure any instruction that reads
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -209,20 +220,9 @@ compiler_operand_format:
   description: 'Pin operation: destination/immediate pin number 0-511, optional effect
     flags'
   valueType: 30
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Drive random
-category: Pin
-result: The I/O pins described by Dest are set to the output direction and to an output
-  level of low/high according
-syntax_variants:
-- DRVRND {#}Dest {WCZ}
-- DRVRND sets the I/O pin(s) designated by Dest to the output direction and with output
-  level(s) set randomly low
-- instruction immediately precedes the DRVRND instruction; substituting SETQ's Dest[4:0]
-  in place of value
-- bits[10:6], for DRVRND's use.
 manual_extraction_date: '2025-01-19'
 oneliner: Set pin(s) direction to output and output level to random low/high

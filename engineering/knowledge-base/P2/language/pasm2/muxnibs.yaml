@@ -1,9 +1,7 @@
 instruction: MUXNIBS
 syntax: MUXNIBS Dest, {#}Src
-encoding: EEEE 1001111 01I DDDDDDDDD SSSSSSSSS                     D                 --                   --                    2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Mux nibbles
+category: Math and Logic
 description: 'MUXNIBS copies any non-zero nibbles from Src into the corresponding
   nibbles of Dest and leaves the rest of Result: Dest nibbles corresponding to non-zero
   Src nibbles are set to those nibble values; the rest are left as-is.
@@ -14,13 +12,28 @@ description: 'MUXNIBS copies any non-zero nibbles from Src into the correspondin
 
 
   Dest''s nibbles as-is.'
-flags_affected:
-  C:
-    when: D
+result: Dest nibbles corresponding to non-zero Src nibbles are set to those nibble
+  values; the rest are left as-is.
 parameters:
 - Dest is a register whose value will be updated according to Src.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose non-zero nibbles
   will replace the corresponding nibbles in Dest.
+flags_affected:
+  C:
+    when: D
+syntax_variants:
+- MUXNIBS Dest, {#}Src
+- MUXNIBS copies any non-zero nibbles from Src into the corresponding nibbles of Dest
+  and leaves the rest of
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1001111 01I DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: —
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -28,17 +41,9 @@ compiler_operand_format:
   pattern: D,S/#
   description: Destination register, Source register or immediate value
   valueType: 0
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Mux nibbles
-category: Math and Logic
-result: Dest nibbles corresponding to non-zero Src nibbles are set to those nibble
-  values; the rest are left as-is.
-syntax_variants:
-- MUXNIBS Dest, {#}Src
-- MUXNIBS copies any non-zero nibbles from Src into the corresponding nibbles of Dest
-  and leaves the rest of
 manual_extraction_date: '2025-01-19'
 oneliner: Set discrete nibbles of a value to non-zero nibble states of another

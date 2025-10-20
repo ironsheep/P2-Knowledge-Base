@@ -1,9 +1,7 @@
 instruction: AUGD
 syntax: 'AUGD #Dest'
-encoding: EEEE 11111DD DDD DDDDDDDDD DDDDDDDDD Hidden D Queue                     --                 --                   2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Augment destination
+category: Miscellaneous
 description: 'AUGD is an assistant instruction to aid with literal values that exceed
   9 bits. Most PASM2 instructions have 9 bits Result: The 23-bit value formed from
   Dest is queued to prefix the next literal Dest occurrence (#Dest) to form a 32-bit
@@ -24,6 +22,8 @@ description: 'AUGD is an assistant instruction to aid with literal values that e
 
   cog uses the lower 9 bits encoded in the instruction''s Dest field and prepends
   AUGD''s 23 bits to it.'
+result: The 23-bit value formed from Dest is queued to prefix the next literal Dest
+  occurrence (#Dest) to form a
 parameters:
 - Dest is a 32-bit literal whose upper 23 bits are prepended to the next literal Dest
   occurrence.
@@ -32,23 +32,6 @@ parameters:
 - Dest value augmentation occurs in the instruction pipeline only; code is not altered,
   value does not persist
 - SETQ / SETQ2 does not affect AUGD-- the Q value passes through to the next instruction
-related:
-- AUGS
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
-documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_aug
-  pattern: '#S'
-  description: 'Augment: immediate 23-bit value for AUGS/AUGD'
-  valueType: 23
-compiler_encoding:
-  operandFormat: 23
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
-brief_description: Augment destination
-category: Miscellaneous
-result: The 23-bit value formed from Dest is queued to prefix the next literal Dest
-  occurrence (#Dest) to form a
 syntax_variants:
 - 'AUGD #Dest'
 - available for literal Dest values; enough for many uses, but not all. AUGD augments
@@ -76,6 +59,30 @@ usage_notes: 'All instructions following AUGD are shielded from interrupt until 
 
   clock cycles, make sure to account for 2 extra clock cycles for instructions containing
   ## augmented literals.'
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 11111DD DDD DDDDDDDDD DDDDDDDDD
+  write: Hidden D Queue
+  c: —
+  z: —
+  clocks: '2'
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_aug
+  pattern: '#S'
+  description: 'Augment: immediate 23-bit value for AUGS/AUGD'
+  valueType: 23
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  operandFormat: 23
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+manual_extraction_date: '2025-01-19'
+oneliner: Augment next literal Dest to 32-bits
+related:
+- AUGS
 examples:
 - code: Both samples below use greater-than 9-bit literals (via AUGD functionality).
     The first is more convenient and
@@ -86,5 +93,3 @@ examples:
     \   #$ABCDEF & $1FF                       '3..10 cycles (in Cog RAM)"
 - code: "AUGD        #8192                                 '2 cycles\n  QMUL     \
     \   #8192 & $1FF, #4                      '2..9 cycles"
-manual_extraction_date: '2025-01-19'
-oneliner: Augment next literal Dest to 32-bits

@@ -1,15 +1,7 @@
 instruction: MULS
 syntax: MULS Dest, {#}Src {WZ}
-encoding:
-- EEEE 1010000 1ZI DDDDDDDDD SSSSSSSSS                   D                 --            (D
-  = 0) | (S = 0)              2
-- EEEE 0101100 CZI DDDDDDDDD SSSSSSSSS                   D          Parity of Result      Result
-  = 0                   2
-- EEEE 0101101 CZI DDDDDDDDD SSSSSSSSS                   D          Parity of Result      Result
-  = 0                   2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Multiply, signed
+category: Math and Logic
 description: 'MULS multiplies the signed lower 16-bits of each of Dest and Src together
   and stores the 32-bit signed product Result: The 32-bit signed product of the signed
   16-bit Dest and Src multiplication is stored into Dest and optionally the Z flag
@@ -95,8 +87,8 @@ description: 'MULS multiplies the signed lower 16-bits of each of Dest and Src t
 
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero,
   or is cleared (0) if it is not zero.'
-flags_affected:
-  Z: Result = 0
+result: Dest bit(s) described by Src are set to C or !C; the rest are left as-is.
+  Flags are optionally updated with
 parameters:
 - Dest is a register containing the signed 16-bit value to multiply with Src, and
   is where the result is written.
@@ -107,10 +99,21 @@ parameters:
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value identifies
   the bit(s) to modify.
 - WC, WZ, or WCZ is an optional effect to update flags.
-related:
-- MUL
-- SCA
-- QMUL
+flags_affected:
+  Z: Result = 0
+syntax_variants:
+- MULS Dest, {#}Src {WZ}
+- MULS multiplies the signed lower 16-bits of each of Dest and Src together and stores
+  the 32-bit signed product
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1010000 1ZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: (D = 0) | (S = 0)
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -118,17 +121,13 @@ compiler_operand_format:
   pattern: D,S/#
   description: Destination register, Source register or immediate value
   valueType: 0
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Multiply, signed
-category: Math and Logic
-result: Dest bit(s) described by Src are set to C or !C; the rest are left as-is.
-  Flags are optionally updated with
-syntax_variants:
-- MULS Dest, {#}Src {WZ}
-- MULS multiplies the signed lower 16-bits of each of Dest and Src together and stores
-  the 32-bit signed product
 manual_extraction_date: '2025-01-19'
 oneliner: Multiply signed 16-bit x 16-bit values
+related:
+- MUL
+- SCA
+- QMUL

@@ -1,9 +1,7 @@
 instruction: RCZR
 syntax: RCZR Dest {WC|WZ|WCZ}
-encoding: EEEE 1101011 CZ0 DDDDDDDDD 001101010                     D                   D[1]                D[0]                2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Rotate carry and zero right
+category: Math and Logic
 description: 'RCZR shifts Dest''s binary value right by two places and sets Dest[31]
   to C and Dest[30] to Z. Result: The bits of Dest are shifted right by two places
   and C and Z are inserted as new MSBs.
@@ -150,6 +148,12 @@ description: 'RCZR shifts Dest''s binary value right by two places and sets Dest
 
   PR0-PR7         $1D8-$1DF         Read/Write      PASM2        <-> Spin2 communication
   mechanism'
+result: The bits of Dest are shifted right by two places and C and Z are inserted
+  as new MSBs.
+parameters:
+- Dest is the register containing the value to rotate the carry and zero flags right
+  into.
+- WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
   C:
     formula: D[1], Z = D[0]
@@ -157,10 +161,19 @@ flags_affected:
   Z:
     formula: D[0]
     when: D[1]
-parameters:
-- Dest is the register containing the value to rotate the carry and zero flags right
-  into.
-- WC, WZ, or WCZ are optional effects to update flags.
+syntax_variants:
+- RCZR Dest {WC|WZ|WCZ}
+- RCZR shifts Dest's binary value right by two places and sets Dest[31] to C and Dest[30]
+  to Z.
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 CZ0 DDDDDDDDD 001101010
+  write: D
+  c: D[1]
+  z: D[0]
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -168,17 +181,9 @@ compiler_operand_format:
   pattern: D
   description: Destination register only
   valueType: 24
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 24
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Rotate carry and zero right
-category: Math and Logic
-result: The bits of Dest are shifted right by two places and C and Z are inserted
-  as new MSBs.
-syntax_variants:
-- RCZR Dest {WC|WZ|WCZ}
-- RCZR shifts Dest's binary value right by two places and sets Dest[31] to C and Dest[30]
-  to Z.
 manual_extraction_date: '2025-01-19'
 oneliner: Rotate carry and zero flags right into value (2-bit rotate right)

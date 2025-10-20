@@ -1,10 +1,7 @@
 instruction: COGINIT
 syntax: COGINIT {#}Dest, {#}Src {WC}
-encoding: EEEE 1100111 CLI DDDDDDDDD SSSSSSSSS D if reg and WC              No cog
-  available           --           2-9, +2 if result
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Cog initialize
+category: Hub Control
 description: 'COGINIT starts a new (unused) cog, a new pair of cogs (that may share
   LUT memory), or a specific cog by ID, to Result: Target cog is started, according
   to Dest, to execute code from Src. The code pointer (Src) is written to the target
@@ -240,6 +237,8 @@ description: 'COGINIT starts a new (unused) cog, a new pair of cogs (that may sh
 
 
   ID of the pair if successful (when the WC effect is used).'
+result: Target cog is started, according to Dest, to execute code from Src. The code
+  pointer (Src) is written to the
 parameters:
 - Dest is the register or 9-bit literal describing the type of launch and possibly
   the ID of the desired cog to launch. If Dest is a register and WC is given, Dest
@@ -250,9 +249,21 @@ parameters:
   64
 - WC is an optional effect to update the C flag with the success (0) or fail (1) status
   and triggers Dest to be overwritten with new cog's ID.
-related:
-- COGID
-- COGSTOP
+syntax_variants:
+- COGINIT {#}Dest, {#}Src {WC}
+- A number of constants are predefined for use in forming desired Dest values for
+  COGINIT instructions.
+- COGINIT id, addr               WC                       '(id=HUBEXEC_NEW) skip load,
+  start a free cog at addr
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1100111 CLI DDDDDDDDD SSSSSSSSS
+  write: D if reg and WC
+  c: No cog available
+  z: —
+  clocks: 2–9, +2 if result
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -260,20 +271,15 @@ compiler_operand_format:
   pattern: D/#,S/#
   description: 'Two operands: destination/immediate, source/immediate'
   valueType: 13
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 13
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Cog initialize
-category: Hub Control
-result: Target cog is started, according to Dest, to execute code from Src. The code
-  pointer (Src) is written to the
-syntax_variants:
-- COGINIT {#}Dest, {#}Src {WC}
-- A number of constants are predefined for use in forming desired Dest values for
-  COGINIT instructions.
-- COGINIT id, addr               WC                       '(id=HUBEXEC_NEW) skip load,
-  start a free cog at addr
+manual_extraction_date: '2025-01-19'
+oneliner: Start an available cog, or restart a cog by ID
+related:
+- COGID
+- COGSTOP
 examples:
 - code: 'COGINIT #1,#$100                                  ''load and start Cog 1
     from Hub RAM $100
@@ -299,5 +305,3 @@ examples:
     \                    'C=0 and id=cog if okay\n  COGID         myID           \
     \                           'reload and restart me at Hub RAM PTRB"
 - code: COGINIT myID, PTRB
-manual_extraction_date: '2025-01-19'
-oneliner: Start an available cog, or restart a cog by ID

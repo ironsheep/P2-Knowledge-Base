@@ -1,10 +1,7 @@
 instruction: WAITFBW
 syntax: WAITFBW {WC|WZ|WCZ}
-encoding: EEEE 1101011 CZ0 000011001 000100100                 --          Timeout
-  Abort     Timeout Abort               2+
-timing:
-  cycles: 2
-  type: variable
+brief_description: Wait FIFO block wrap
+category: Event
 description: 'WAITFBW waits for a FIFO-interface-block-wrap event to occur (unless
   the event flag is already set), then clears Result: Wait for FIFO-interface-block-wrap
   event, then clear the flag; optionally aborting on timeout and setting C and/or
@@ -54,18 +51,24 @@ description: 'WAITFBW waits for a FIFO-interface-block-wrap event to occur (unle
 
 
   of RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, or JNFBW instructions.'
+result: Wait for FIFO-interface-block-wrap event, then clear the flag; optionally
+  aborting on timeout and setting C
+parameters:
+- WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
   Z:
     formula: timeout
-parameters:
-- WC, WZ, or WCZ are optional effects to update flags.
-related:
-- RDFAST
-- WRFAST
-- FBLOCK
-- POLLFBW
-- JFBW
-- JNFBW
+syntax_variants:
+- WAITFBW {WC|WZ|WCZ}
+timing:
+  cycles: 2
+  type: variable
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 CZ0 000011001 000100100
+  write: —
+  c: Timeout Abort
+  z: Timeout Abort
+  clocks: 2+
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -73,15 +76,16 @@ compiler_operand_format:
   pattern: ''
   description: No operands - poll/wait instruction (moves S to D, sets S to $024)
   valueType: 28
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Wait FIFO block wrap
-category: Event
-result: Wait for FIFO-interface-block-wrap event, then clear the flag; optionally
-  aborting on timeout and setting C
-syntax_variants:
-- WAITFBW {WC|WZ|WCZ}
 manual_extraction_date: '2025-01-19'
 oneliner: Wait for and clear FIFO-interface-block-wrap event flag
+related:
+- RDFAST
+- WRFAST
+- FBLOCK
+- POLLFBW
+- JFBW
+- JNFBW

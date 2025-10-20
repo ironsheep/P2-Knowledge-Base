@@ -1,27 +1,35 @@
 instruction: SUMNZ
 syntax: SUMNZ   D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0011111 CZI DDDDDDDDD SSSSSSSSS
-timing:
-  cycles: 2
-  type: fixed
+category: Math and Logic
 description: 'SUMZ or SUMNZ adjusts the signed Dest value by Src or -Src (depending
   on Z or !Z) and stores the result into the Result: The sum of signed Dest and either
   Src or -Src (according to Z) is stored in Dest and optionally the C and Z flags
   are updated to the sign and zero status.'
-flags_affected:
-  C:
-    formula: correct sign of (D +/- S)
-  Z:
-    formula: 0 then D = D - S, else D = D + S
 parameters:
 - Dest is a register containing the signed value to adjust by Src or -Src, and is
   where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value (if Z=0
   or !Z=0) or negated value (if Z=1 or !Z=1) is added into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
-related:
-- SUMC
-- SUMNC
+flags_affected:
+  C:
+    formula: correct sign of (D +/- S)
+  Z:
+    formula: 0 then D = D - S, else D = D + S
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0011110 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: sign of (D +/- S)
+  z: Result = 0
+  clocks: '2'
+- bits: EEEE 0011111 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: sign of (D +/- S)
+  z: Result = 0
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:
@@ -29,9 +37,11 @@ compiler_operand_format:
   pattern: D,S/#
   description: Destination register, Source register or immediate value
   valueType: 0
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:16.959617'
-category: Math and Logic
 oneliner: Adjust signed value by other Z-negated or !Z-negated value
+related:
+- SUMC
+- SUMNC

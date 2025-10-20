@@ -1,9 +1,7 @@
 instruction: ALLOWI
 syntax: ALLOWI
-encoding: EEEE 1101011 000 000100000 000100100                      --                  --                   --                    2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: 'Result: Any stalled and future interrupts are allowed.'
+category: Interrupt
 description: 'ALLOWI re-enables interrupt branching; the default on cog start. ALLOWI
   is the complement of the STALLI Result: Any stalled and future interrupts are allowed.
 
@@ -17,8 +15,16 @@ description: 'ALLOWI re-enables interrupt branching; the default on cog start. A
 
 
   asynchronous interrupt handling.'
-related:
-- STALLI
+result: Any stalled and future interrupts are allowed.
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 000 000100000 000100100
+  write: —
+  c: —
+  z: —
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -26,12 +32,11 @@ compiler_operand_format:
   pattern: ''
   description: No operands - poll/wait instruction (moves S to D, sets S to $024)
   valueType: 28
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: 'Result: Any stalled and future interrupts are allowed.'
-result: Any stalled and future interrupts are allowed.
 manual_extraction_date: '2025-01-19'
-category: Interrupt
 oneliner: Allow interrupts
+related:
+- STALLI

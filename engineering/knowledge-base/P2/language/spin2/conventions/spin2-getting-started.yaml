@@ -15,6 +15,27 @@ description: |
   this, you can write syntactically correct Spin2 code. Combine with formatting standards, documentation styles,
   and naming conventions as needed for your project.
 
+knowledge_progression:
+  you_are_here: "Foundation - Language Mechanics"
+  
+  immediate_next_steps:
+    REQUIRED:
+      - name: "Basic I/O Concepts"
+        content: "concepts/basic-io.yaml"
+        why: "Essential for any pin I/O - covers pin groups, ADDPINS, registers, drive strength, pull resistors"
+        when: "Read immediately after Getting Started, before writing I/O code"
+        
+    RECOMMENDED:
+      - name: "Formatting Standards"
+        content: "conventions/spin2-formatting-standards.yaml"
+        when: "Want consistent, professional code structure"
+      - name: "Documentation Styles"
+        when: "Need inline documentation (JonnyMac or VS Code style)"
+      - name: "Smart Pin Methods"
+        when: "Need hardware-assisted I/O (PWM, serial, timing)"
+  
+  note: "Basic I/O concepts are NOT optional - they're foundational for all pin operations"
+
 core_block_types:
   CON:
     purpose: "Define compile-time constants"
@@ -313,24 +334,34 @@ inline_pasm2:
 
 common_patterns:
   application_structure:
+    description: "Typical program organization"
     pattern: |
+      CON
+        LED_PIN = 56
+        
       PUB main()
         setup()
         REPEAT
-          ' Main loop
+          PINHIGH(LED_PIN)
+          WAITMS(500)
+          PINLOW(LED_PIN)
+          WAITMS(500)
           
       PUB setup()
-        ' Initialize hardware and objects
+        ' Initialize hardware
 
-  object_initialization:
+  using_objects:
+    description: "Object initialization and method calls"
     pattern: |
       OBJ
         serial : "jm_fullduplexserial"
         
       PUB main()
-        serial.start(RX_PIN, TX_PIN, BAUD)
+        serial.start(RX_PIN, TX_PIN, 115_200)
+        serial.str(string("Hello"))
 
   state_machine:
+    description: "State machine with CASE statement"
     pattern: |
       VAR
         LONG currentState
@@ -342,16 +373,6 @@ common_patterns:
             currentState := STATE_ACTIVE
           STATE_ACTIVE:
             doWork()
-          STATE_ERROR:
-            handleError()
-
-  timing_delays:
-    milliseconds: "WAITMS(milliseconds)"
-    microseconds: "WAITUS(microseconds)"
-    cycles: "WAITX(cycles)"
-    example: |
-      WAITMS(1000)    ' Wait 1 second
-      WAITUS(100)     ' Wait 100 microseconds
 
 critical_gotchas:
   - "Symbol names limited to 30 characters maximum"
@@ -389,10 +410,17 @@ debugging_support:
       DEBUG("Position: x=", DEC x, " y=", DEC y)
 
 next_steps:
-  formatting: "Apply spin2-formatting-standards.yaml for professional structure"
-  documentation: "Choose spin2-docs-jonnymac.yaml or spin2-docs-vscode.yaml"
-  naming: "Optionally apply spin2-naming-jonnymac.yaml for strict conventions"
-  details: "Reference full Spin2 manifests for complete operator/keyword documentation"
+  essential_reading:
+    - "concepts/basic-io.yaml - REQUIRED before any I/O work"
+    - "Full Spin2 method reference - for complete language details"
+  
+  code_style:
+    - "spin2-formatting-standards.yaml - professional structure"
+    - "spin2-docs-jonnymac.yaml or spin2-docs-vscode.yaml - documentation style"
+  
+  advanced_features:
+    - "Smart Pin methods - hardware-assisted operations"
+    - "Inline PASM2 - performance optimization"
 
 see_also:
   - manifests/P2/language/spin2-manifest.yaml

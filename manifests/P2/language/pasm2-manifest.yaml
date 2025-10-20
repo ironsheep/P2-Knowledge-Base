@@ -831,6 +831,9 @@ manifest:
 
 # Concepts section - fundamental PASM2 concepts
 concepts:
+  - name: Basic I/O
+    content: concepts/basic-io.yaml
+    description: Digital pin control, single-pin and multi-pin operations, drive strength, pull resistors
   - name: Addressing Modes
     content: concepts/addressing_modes.yaml
     description: Different addressing modes in PASM2

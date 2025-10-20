@@ -1,10 +1,7 @@
 instruction: SAR
 syntax: SAR Dest, {#}Src {WC|WZ|WCZ}
-encoding: EEEE 0000110 CZI DDDDDDDDD SSSSSSSSS                            D      Last
-  bit out   1
-timing:
-  cycles: 1
-  type: fixed
+brief_description: Shift arithmetic right
+category: Math and Logic
 description: 'The bits of Dest are shifted right by Src bits, extending Dest[31] (the
   sign bit) into new leftmost bits.
 
@@ -33,17 +30,30 @@ description: 'The bits of Dest are shifted right by Src bits, extending Dest[31]
 
 
   non-zero.'
-flags_affected:
-  C:
-    formula: last bit shifted out if S[4:0] > 0, else D[0]
+result: The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign
+  bit) into new leftmost bits.
 parameters:
 - Dest is the register containing the value to arithmetically right shift by Src bits.
 - Src is a register or 5-bit literal whose value indicates the number of bits to arithmetically
   shift right.
 - WC, WZ, or WCZ are optional effects to update flags.
-related:
-- SHR
-- SH
+flags_affected:
+  C:
+    formula: last bit shifted out if S[4:0] > 0, else D[0]
+syntax_variants:
+- SAR Dest, {#}Src {WC|WZ|WCZ}
+- SAR shifts Dest's binary value right by Src places (0-31 bits) and sets the new
+  MSBs to that of the original
+timing:
+  cycles: 1
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0000110 CZI DDDDDDDDD SSSSSSSSS
+  write: D      Last bit out   1
+  c: Result = 0
+  z: '2'
+encoding_notes:
+- C = last bit shifted out if Src[4:0] > 0, else C = Dest[0].
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -51,18 +61,13 @@ compiler_operand_format:
   pattern: D,S/#
   description: Destination register, Source register or immediate value
   valueType: 0
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Shift arithmetic right
-category: Math and Logic
-result: The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign
-  bit) into new leftmost bits.
-syntax_variants:
-- SAR Dest, {#}Src {WC|WZ|WCZ}
-- SAR shifts Dest's binary value right by Src places (0-31 bits) and sets the new
-  MSBs to that of the original
 manual_extraction_date: '2025-01-19'
 oneliner: Divide signed 32-bit integer by power-of-two; a.k.a shift bits right, extending
   the MSB
+related:
+- SHR
+- SH

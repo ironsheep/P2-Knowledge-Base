@@ -1,24 +1,58 @@
 instruction: TESTPN
 syntax: TESTPN  {#}D           WC/WZ
-encoding: EEEE 1101011 CZL DDDDDDDDD 001000111
-timing:
-  cycles: 2
-  type: fixed
+category: Pin
 description: 'TESTP or TESTPN reads the state (0/1) of the I/O pin designated by Dest,
   possibly inverts that result, and either Result: The state of the I/O pin described
   by Dest is read, possibly inverted, and either stored as-is, or bitwise ANDed, ORed,
   or XORed into C or Z. Z = C/Z XOR !IN[D[5:0]].'
-flags_affected:
-  Z:
-    formula: C/Z XOR !IN[D[5:0]]
-    when: IN[D[5:0]]
 parameters:
 - Dest is the register or 6-bit literal whose value identifies the I/O pin to test.
 - WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, and XORZ is a required effect to update or bitwise
   manipulate the C or Z flag.
-related:
-- TESTB
-- TESTBN
+flags_affected:
+  Z:
+    formula: C/Z XOR !IN[D[5:0]]
+    when: IN[D[5:0]]
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 CZL DDDDDDDDD 001000000
+  write: —
+  c: IN[D[5:0]]
+  z: IN[D[5:0]]
+  clocks: '2'
+- bits: EEEE 1101011 CZL DDDDDDDDD 001000010
+  write: —
+  c: C AND IN[D[5:0]] Z AND IN[D[5:0]]
+  z: '2'
+- bits: EEEE 1101011 CZL DDDDDDDDD 001000100
+  write: —
+  c: C OR IN[D[5:0]]
+  z: Z OR IN[D[5:0]]
+  clocks: '2'
+- bits: EEEE 1101011 CZL DDDDDDDDD 001000110
+  write: —
+  c: C XOR IN[D[5:0]] Z XOR IN[D[5:0]]
+  z: '2'
+- bits: EEEE 1101011 CZL DDDDDDDDD 001000001
+  write: —
+  c: '!IN[D[5:0]]'
+  z: '!IN[D[5:0]]'
+  clocks: '2'
+- bits: EEEE 1101011 CZL DDDDDDDDD 001000011
+  write: —
+  c: C AND !IN[D[5:0]] Z AND !IN[D[5:0]]
+  z: '2'
+- bits: EEEE 1101011 CZL DDDDDDDDD 001000101
+  write: —
+  c: C OR !IN[D[5:0]]
+  z: Z OR !IN[D[5:0]]
+  clocks: '2'
+- bits: EEEE 1101011 CZL DDDDDDDDD 001000111
+  write: —
+  c: C XOR !IN[D[5:0]] Z XOR !IN[D[5:0]]
+  z: '2'
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:
@@ -27,10 +61,12 @@ compiler_operand_format:
   description: 'Test pin: destination/immediate pin number 0-511 with REQUIRED logic
     function'
   valueType: 31
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 31
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:16.995105'
-category: Pin
 oneliner: Test pin and either store, AND, OR, or XOR the result or inverse result
   into C/Z
+related:
+- TESTB
+- TESTBN

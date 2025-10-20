@@ -1,10 +1,7 @@
 instruction: POLLPAT
 syntax: POLLPAT {WC|WZ|WCZ}
-encoding: EEEE 1101011 CZ0 000001000 000100100                 --            PAT Event         PAT
-  Event                 2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Poll pattern
+category: Event
 description: 'POLLPAT copies the state of the pin-pattern-detected event flag into
   C and/or Z and then clears the flag (unless Result: Pin-pattern-detected event flag
   is optionally copied into C and/or Z, then it is cleared.
@@ -33,13 +30,21 @@ description: 'POLLPAT copies the state of the pin-pattern-detected event flag in
 
 
   SETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions.'
+result: Pin-pattern-detected event flag is optionally copied into C and/or Z, then
+  it is cleared.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
-related:
-- SETPAT
-- WAITPAT
-- JPAT
-- JNPAT
+syntax_variants:
+- POLLPAT {WC|WZ|WCZ}
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 CZ0 000001000 000100100
+  write: —
+  c: PAT Event
+  z: PAT Event
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -47,15 +52,14 @@ compiler_operand_format:
   pattern: ''
   description: No operands - poll/wait instruction (moves S to D, sets S to $024)
   valueType: 28
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Poll pattern
-category: Event
-result: Pin-pattern-detected event flag is optionally copied into C and/or Z, then
-  it is cleared.
-syntax_variants:
-- POLLPAT {WC|WZ|WCZ}
 manual_extraction_date: '2025-01-19'
 oneliner: Retrieve and clear pin-pattern-detected event flag
+related:
+- SETPAT
+- WAITPAT
+- JPAT
+- JNPAT

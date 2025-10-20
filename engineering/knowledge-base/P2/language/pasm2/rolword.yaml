@@ -1,11 +1,7 @@
 instruction: ROLWORD
 syntax: 'ROLWORD Dest, {#}Src, #Num'
-encoding:
-- EEEE 1001010 0NI DDDDDDDDD SSSSSSSSS                           D           --                 --                    2
-- EEEE 1001010 000 DDDDDDDDD 000000000                           D           --                 --                    2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Rotate left word
+category: Math and Logic
 description: 'ROLWORD reads the word identified by Num (0-1) from Src, or a word from
   the source described by a prior ALTGW Result: Word Num (0-1) of Src, or a word from
   a source described by prior ALTGW instruction, is rotated left into Dest.
@@ -31,14 +27,46 @@ description: 'ROLWORD reads the word identified by Num (0-1) from Src, or a word
 
 
   within contiguous long registers.'
-flags_affected:
-  C:
-    when: D
+result: Word Num (0-1) of Src, or a word from a source described by prior ALTGW instruction,
+  is rotated left into
 parameters:
 - Dest is the register in which to rotate the word into.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains
   the target word to read.
 - Num is a 1-bit literal identifying the nibble ID (0-1) of Src to read.
+flags_affected:
+  C:
+    when: D
+syntax_variants:
+- 'ROLWORD Dest, {#}Src, #Num'
+- ROLWORD Dest
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1001010 0NI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: —
+  clocks: '2'
+- bits: EEEE 1001010 000 DDDDDDDDD 000000000
+  write: D
+  c: —
+  z: —
+  clocks: '2'
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds1get
+  pattern: D{,S/#,#0..1}
+  description: 'Get word: destination, optional source and word index 0-1'
+  valueType: 11
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  operandFormat: 11
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+manual_extraction_date: '2025-01-19'
+oneliner: Rotate a word left into a value
 related:
 - ALTGW
 - ROLNIB
@@ -49,23 +77,3 @@ related:
 - SETNIB
 - SETBYTE
 - SETWORD
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
-documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds1get
-  pattern: D{,S/#,#0..1}
-  description: 'Get word: destination, optional source and word index 0-1'
-  valueType: 11
-compiler_encoding:
-  operandFormat: 11
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
-brief_description: Rotate left word
-category: Math and Logic
-result: Word Num (0-1) of Src, or a word from a source described by prior ALTGW instruction,
-  is rotated left into
-syntax_variants:
-- 'ROLWORD Dest, {#}Src, #Num'
-- ROLWORD Dest
-manual_extraction_date: '2025-01-19'
-oneliner: Rotate a word left into a value

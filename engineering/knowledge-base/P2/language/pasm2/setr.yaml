@@ -1,9 +1,7 @@
 instruction: SETR
 syntax: SETR Dest, {#}Src
-encoding: EEEE 1001101 01I DDDDDDDDD SSSSSSSSS                        D                  --                   --                     2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Set result
+category: Math and Logic
 description: 'SETR copies Src[8:0] to the Result field of the template, Dest, to be
   used with an ALTI instruction. Bits outside the Result: The Result field [27:19]
   of template Dest is set to Src[8:0].
@@ -65,17 +63,28 @@ description: 'SETR copies Src[8:0] to the Result field of the template, Dest, to
 
   inst     MOV           x, y                            ''operate on x using y; MOV
   can become AND/OR/etc. per SETR'
-flags_affected:
-  C:
-    when: D
+result: The Result field [27:19] of template Dest is set to Src[8:0].
 parameters:
 - Dest is the register whose 32-bit value is a template for use with an ALTI instruction.
 - Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the D field
   of Dest.
-related:
-- SETD
-- SETS
-- ALTI
+flags_affected:
+  C:
+    when: D
+syntax_variants:
+- SETR Dest, {#}Src
+- SETR copies Src[8:0] to the Result field of the template, Dest, to be used with
+  an ALTI instruction. Bits outside the
+- SETR          inst, op                        'set "inst" register[27:19] to op[8:0]
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1001101 01I DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: —
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -83,17 +92,13 @@ compiler_operand_format:
   pattern: D,S/#
   description: Destination register, Source register or immediate value
   valueType: 0
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Set result
-category: Math and Logic
-result: The Result field [27:19] of template Dest is set to Src[8:0].
-syntax_variants:
-- SETR Dest, {#}Src
-- SETR copies Src[8:0] to the Result field of the template, Dest, to be used with
-  an ALTI instruction. Bits outside the
-- SETR          inst, op                        'set "inst" register[27:19] to op[8:0]
 manual_extraction_date: '2025-01-19'
 oneliner: Set template Result field for ALTI
+related:
+- SETD
+- SETS
+- ALTI

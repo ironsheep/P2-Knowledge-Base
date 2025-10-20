@@ -1,10 +1,7 @@
 instruction: POLLXRO
 syntax: POLLXRO {WC|WZ|WCZ}
-encoding: EEEE 1101011 CZ0 000001100 000100100                            --      XRO
-  Event          XRO Event                2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Poll streamer rollover NCO
+category: Event
 description: 'POLLXRO copies the state of the streamer NCO rollover event flag into
   C and/or Z and then clears the flag (unless Result: Streamer-NCO-rollover event
   flag is optionally copied into C and/or Z, then it is cleared.
@@ -33,15 +30,21 @@ description: 'POLLXRO copies the state of the streamer NCO rollover event flag i
 
 
   WAITXRO, JXRO, or JNXRO instructions.'
+result: Streamer-NCO-rollover event flag is optionally copied into C and/or Z, then
+  it is cleared.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
-related:
-- XINIT
-- XZERO
-- XCONT
-- WAITXRO
-- JXRO
-- JNXRO
+syntax_variants:
+- POLLXRO {WC|WZ|WCZ}
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 CZ0 000001100 000100100
+  write: —
+  c: XRO Event
+  z: XRO Event
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -49,15 +52,16 @@ compiler_operand_format:
   pattern: ''
   description: No operands - poll/wait instruction (moves S to D, sets S to $024)
   valueType: 28
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Poll streamer rollover NCO
-category: Event
-result: Streamer-NCO-rollover event flag is optionally copied into C and/or Z, then
-  it is cleared.
-syntax_variants:
-- POLLXRO {WC|WZ|WCZ}
 manual_extraction_date: '2025-01-19'
 oneliner: Retrieve and clear streamer-NCO-rollover event flag
+related:
+- XINIT
+- XZERO
+- XCONT
+- WAITXRO
+- JXRO
+- JNXRO

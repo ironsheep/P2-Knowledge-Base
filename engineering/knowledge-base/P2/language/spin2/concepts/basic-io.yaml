@@ -1,0 +1,400 @@
+title: Spin2 Basic I/O - Digital Pin Control
+id: spin2-basic-io
+version: 1.0.0
+category: spin2_concepts
+layer: "Foundation - I/O Operations"
+purpose: Essential knowledge for basic digital I/O before smart pin autonomous modes
+
+summary: |
+  Foundational digital I/O operations in Spin2. Covers single-pin and multi-pin control,
+  direction management, drive strength configuration, internal pull resistors, and the
+  critical distinction between pin configuration (electrical characteristics) and pin
+  operation (read/write).
+
+description: |
+  P2 provides 64 general-purpose I/O pins (P0-P63) that can be controlled individually
+  or in groups. Each pin can be configured for drive strength and pull resistors, then
+  operated as simple digital I/O. This is distinct from autonomous smart pin modes where
+  the pin operates independently.
+
+core_concept_configuration_vs_operation:
+  critical_distinction: |
+    Pin electrical characteristics (drive strength, pull resistors) are CONFIGURATION
+    that persists while you perform normal I/O operations. These are not autonomous modes.
+    
+  configuration_layer:
+    purpose: "Set electrical characteristics"
+    methods:
+      - "WRPIN() - Configure drive strength"
+      - "PINSTART() - Enable internal pull resistors"
+    persistence: "Settings remain active during basic I/O"
+    
+  operation_layer:
+    purpose: "Read and write pin states"
+    methods:
+      - "PINHIGH/PINLOW - Set output state"
+      - "PINREAD - Read pin state"
+      - "PINFLOAT - High-impedance mode"
+    behavior: "Normal digital I/O with configured electrical characteristics"
+
+pin_architecture:
+  pin_count: 64
+  pin_range: "P0 to P63"
+  register_split:
+    dira_outa_ina: "Control pins P0-P31"
+    dirb_outb_inb: "Control pins P32-P63"
+  
+  per_pin_capabilities:
+    direction: "Input or output (via DIR bit)"
+    output_state: "High or low (via OUT bit)"
+    drive_strength: "1.5mA to 150mA (configurable)"
+    pull_resistors: "1.5kΩ, 15kΩ, 150kΩ, or current-mode (configurable)"
+    tristate: "High-impedance float mode"
+
+control_registers:
+  dira:
+    controls: "Pins P31-P0"
+    access: "Direct register access"
+    state_0: "Input (high-impedance)"
+    state_1: "Output (drives OUT value)"
+    
+  dirb:
+    controls: "Pins P63-P32"
+    access: "Direct register access"
+    
+  outa:
+    controls: "Output state for P31-P0"
+    effect: "When DIR=1, pin drives this state"
+    state_0: "Drive low (0V)"
+    state_1: "Drive high (3.3V)"
+    
+  outb:
+    controls: "Output state for P63-P32"
+    
+  ina:
+    controls: "Read state of P31-P0"
+    read_only: true
+    reflects: "Actual pin voltage level"
+    
+  inb:
+    controls: "Read state of P63-P32"
+    read_only: true
+
+single_pin_operations:
+  set_output_high:
+    method: "PINHIGH"
+    syntax: "PINHIGH(pin)"
+    effect: "Sets DIR=1 and OUT=1"
+    example: "PINHIGH(16)  ' Pin 16 outputs high"
+    
+  set_output_low:
+    method: "PINLOW"
+    syntax: "PINLOW(pin)"
+    effect: "Sets DIR=1 and OUT=0"
+    example: "PINLOW(16)  ' Pin 16 outputs low"
+    
+  toggle_output:
+    method: "PINTOGGLE"
+    syntax: "PINTOGGLE(pin)"
+    effect: "Toggles OUT bit, maintains DIR=1"
+    example: "PINTOGGLE(16)  ' Toggle pin 16"
+    
+  float_pin:
+    method: "PINFLOAT"
+    syntax: "PINFLOAT(pin)"
+    effect: "Sets DIR=0 (high-impedance input)"
+    example: "PINFLOAT(16)  ' Pin 16 floats"
+    
+  read_pin:
+    method: "PINREAD"
+    syntax: "PINREAD(pin)"
+    returns: "TRUE (-1) if high, FALSE (0) if low"
+    example: |
+      IF PINREAD(16)
+        ' Pin is high
+    
+  write_pin:
+    method: "PINWRITE"
+    syntax: "PINWRITE(pin, state)"
+    effect: "Sets DIR=1 and OUT=state"
+    example: "PINWRITE(16, TRUE)  ' Drive high"
+
+multi_pin_operations:
+  concept: |
+    Operate on multiple contiguous pins with a single method call using ADDPINS operator
+    or direct register manipulation for non-contiguous pins.
+    
+  pin_field_methods:
+    syntax: "METHOD(base_pin ADDPINS count)"
+    example: |
+      PINHIGH(8 ADDPINS 7)    ' Pins 8-15 output high
+      PINLOW(0 ADDPINS 3)     ' Pins 0-3 output low
+      PINFLOAT(16 ADDPINS 7)  ' Pins 16-23 float
+      
+  register_access:
+    description: "Direct register manipulation for advanced control"
+    example: |
+      DIRA := %11110000        ' P7-P4 outputs, P3-P0 inputs
+      OUTA := %10100000        ' P7=1, P5=1, others=0
+      value := INA             ' Read all P31-P0
+      
+  bit_manipulation:
+    set_bits: "DIRA |= %11110000  ' Set P7-P4 as outputs"
+    clear_bits: "DIRA &= !%11110000  ' Set P7-P4 as inputs"
+    toggle_bits: "OUTA ^= %11110000  ' Toggle P7-P4"
+
+pin_field_encoding:
+  addpins_operator:
+    syntax: "base_pin ADDPINS count"
+    example: "8 ADDPINS 7 = pins 8 through 15 (8 pins total)"
+    meaning: "Start at base_pin, include count additional pins"
+    
+  range_operator:
+    syntax: "bottom_pin..top_pin"
+    example: "8..15 = pins 8 through 15"
+    use_case: "Primarily for constants and readability"
+    
+  wrapping:
+    within_a_pins: "Pin fields wrap within P0-P31"
+    within_b_pins: "Pin fields wrap within P32-P63"
+
+drive_strength_configuration:
+  concept: |
+    Configure pin drive strength via WRPIN() before performing I/O operations.
+    Drive strength setting persists during normal I/O - this is CONFIGURATION, not operation.
+    
+  strengths_available:
+    "1.5mA": "Lowest power, ~2000Ω impedance"
+    "3.0mA": "Low power, ~1000Ω impedance"
+    "15mA": "Standard digital, ~200Ω impedance"
+    "30mA": "Fast digital/LED drive, ~100Ω impedance"
+    "75mA": "High-speed signals, ~40Ω impedance"
+    "150mA": "Maximum drive, ~20Ω impedance"
+    
+  configuration_sequence:
+    example: |
+      PINFLOAT(16)               ' Reset pin first (DIR=0)
+      WRPIN(16, drive_config)    ' Configure drive strength
+      PINHIGH(16)                ' Now use as normal I/O
+      ' Drive strength remains active during all subsequent I/O
+      PINLOW(16)                 ' Still using configured drive
+      
+  wrpin_encoding:
+    note: "Consult smart pin mode documentation for drive strength bit encoding"
+
+internal_pull_resistors:
+  concept: |
+    Enable internal pull-up or pull-down resistors via PINSTART() with special modes.
+    Once enabled, pin still operates as normal I/O with bias resistor active.
+    This is CONFIGURATION that persists, not an autonomous smart pin mode.
+    
+  pull_up_modes:
+    P_HIGH_1K5: "1.5kΩ pull-up (strong)"
+    P_HIGH_15K: "15kΩ pull-up (medium)"
+    P_HIGH_150K: "150kΩ pull-up (weak)"
+    P_HIGH_1MA: "1mA constant current pull-up"
+    
+  pull_down_modes:
+    P_LOW_1K5: "1.5kΩ pull-down (strong)"
+    P_LOW_15K: "15kΩ pull-down (medium)"
+    P_LOW_150K: "150kΩ pull-down (weak)"
+    P_LOW_1MA: "1mA constant current pull-down"
+    
+  configuration_sequence:
+    example: |
+      ' Enable pull-up, then use as normal I/O
+      PINSTART(16, P_HIGH_15K, 0, 0)  ' 15kΩ pull-up
+      PINFLOAT(16)                    ' Input with pull-up
+      IF PINREAD(16)                  ' Read (pulled high if floating)
+        ' Pin is high
+      ' OR
+      PINHIGH(16)                     ' Drive high with pull-up
+      PINLOW(16)                      ' Drive low (overrides pull-up)
+      
+  multi_pin_example:
+    example: |
+      ' Enable pull-ups on 8 buttons
+      PINSTART(0 ADDPINS 7, P_HIGH_15K, 0, 0)
+      PINFLOAT(0 ADDPINS 7)           ' All inputs with pull-ups
+      buttons := INA & $FF            ' Read button states
+      
+  use_cases:
+    - "Button inputs without external resistors"
+    - "I2C/SPI bus lines"
+    - "Unused pins (prevent floating)"
+    - "Weak drive for bidirectional buses"
+
+smart_pin_to_basic_io_transition:
+  clearing_smart_pin:
+    method: "PINCLEAR"
+    syntax: "PINCLEAR(pin)"
+    effect: "Sets DIR=0 and WRPIN=0, returns to basic I/O"
+    example: |
+      PINCLEAR(16)        ' Disable smart pin
+      PINHIGH(16)         ' Now use as normal I/O
+      
+  safe_reconfiguration:
+    using_pinclear: |
+      PINCLEAR(16)                    ' Clear all config
+      PINSTART(16, mode, x, y)        ' Set new mode
+      
+    manual_sequence: |
+      PINFLOAT(16)                    ' DIR=0 (REQUIRED)
+      WRPIN(16, mode)                 ' Configure mode
+      WXPIN(16, x)                    ' Set X parameter
+      WYPIN(16, y)                    ' Set Y parameter
+      PINHIGH(16)                     ' Enable (DIR=1)
+
+safe_initialization_patterns:
+  method_calls_are_safe:
+    note: "PINHIGH/PINLOW set DIR and OUT atomically"
+    example: |
+      PINHIGH(16)  ' No glitch - DIR and OUT set together
+      
+  register_access_caution:
+    wrong: |
+      OUTA |= (1 << 16)  ' Glitch: OUT changes while floating
+      DIRA |= (1 << 16)
+    correct: |
+      OUTA &= !(1 << 16) ' Set desired state first
+      DIRA |= (1 << 16)  ' Then enable output
+      ' OR just use:
+      PINLOW(16)         ' Atomic, no glitch
+
+common_patterns:
+  led_blink:
+    code: |
+      CON
+        LED_PIN = 16
+        
+      PUB main()
+        REPEAT
+          PINHIGH(LED_PIN)
+          WAITMS(500)
+          PINLOW(LED_PIN)
+          WAITMS(500)
+          
+  button_read:
+    code: |
+      CON
+        BUTTON_PIN = 0
+        
+      PUB main()
+        ' Enable pull-up on button pin
+        PINSTART(BUTTON_PIN, P_HIGH_15K, 0, 0)
+        PINFLOAT(BUTTON_PIN)
+        
+        REPEAT
+          IF !PINREAD(BUTTON_PIN)  ' Active low (pulled up)
+            buttonPressed()
+            
+  parallel_bus_write:
+    code: |
+      PUB writeBus(value) | mask
+        ' Write byte to 8-bit bus (pins 16-23)
+        mask := $FF << 16
+        DIRA |= mask              ' Set as outputs
+        OUTA := (OUTA & !mask) | ((value & $FF) << 16)
+        
+  parallel_bus_read:
+    code: |
+      PUB readBus() : result | mask
+        ' Read byte from 8-bit bus (pins 16-23)
+        mask := $FF << 16
+        DIRA &= !mask             ' Set as inputs
+        result := (INA >> 16) & $FF
+
+method_vs_register_tradeoffs:
+  methods:
+    advantages:
+      - "Clean, readable code"
+      - "Atomic operations (no glitches)"
+      - "Works with pin fields (ADDPINS)"
+      - "Recommended for most applications"
+    performance: "Slightly slower (method call overhead)"
+    
+  direct_registers:
+    advantages:
+      - "Faster execution (no method call)"
+      - "Operate on arbitrary bit patterns"
+      - "Powerful bit manipulation"
+    disadvantages:
+      - "Must manage DIR/OUT carefully"
+      - "Risk of glitches if done wrong"
+      - "Less readable"
+    use_when: "Performance critical or complex bit patterns needed"
+
+timing_considerations:
+  method_calls: "~10-20 clock cycles overhead"
+  register_access: "~2-4 clock cycles"
+  pin_propagation: "3-7ns output delay"
+  when_speed_matters: "Use inline PASM2 or direct register access"
+
+hardware_specifications:
+  voltage_levels: "3.3V I/O"
+  input_thresholds:
+    VIL_max: "0.8V"
+    VIH_min: "2.0V"
+  output_levels:
+    VOL_max: "0.4V at rated current"
+    VOH_min: "2.4V at rated current"
+  max_current_per_pin: "150mA"
+  max_current_total: "Check datasheet for package limits"
+
+application_examples:
+  seven_segment_display:
+    code: |
+      CON
+        SEG_BASE = 16  ' Pins 16-23 = segments
+        
+      PUB showDigit(digit)
+        ' Look up segment pattern
+        OUTA := (OUTA & $FF00FFFF) | (lookupSegments(digit) << 16)
+        DIRA |= $00FF0000  ' Enable outputs
+        
+  matrix_keypad:
+    code: |
+      CON
+        ROW_BASE = 0    ' Rows on P0-P3
+        COL_BASE = 4    ' Columns on P4-P7
+        
+      PUB scanKeypad() : key | row, col
+        ' Enable pull-ups on columns
+        PINSTART(COL_BASE ADDPINS 3, P_HIGH_15K, 0, 0)
+        PINFLOAT(COL_BASE ADDPINS 3)
+        
+        REPEAT row FROM 0 TO 3
+          PINLOW(ROW_BASE + row)      ' Drive row low
+          col := (INA >> COL_BASE) & $0F
+          PINFLOAT(ROW_BASE + row)    ' Release row
+          IF col <> $0F               ' Key pressed?
+            RETURN decodeKey(row, col)
+            
+  ws2812_bit_bang:
+    code: |
+      PUB sendBit(pin, bit)
+        IF bit
+          PINHIGH(pin)
+          WAITUS(1)      ' T1H = 800ns
+          PINLOW(pin)
+          WAITUS(0)      ' T1L = 450ns
+        ELSE
+          PINHIGH(pin)
+          WAITUS(0)      ' T0H = 400ns
+          PINLOW(pin)
+          WAITUS(1)      ' T0L = 850ns
+
+related_concepts:
+  - "Smart pin autonomous modes (PWM, UART, etc.)"
+  - "Inline PASM2 for performance-critical I/O"
+  - "Pin timing specifications"
+  - "Multi-cog pin coordination"
+
+see_also:
+  - "engineering/knowledge-base/P2/language/spin2/conventions/spin2-getting-started.yaml"
+  - "engineering/knowledge-base/P2/language/spin2/methods/pinhigh.yaml"
+  - "engineering/knowledge-base/P2/language/spin2/methods/pinlow.yaml"
+  - "engineering/knowledge-base/P2/language/spin2/methods/pinread.yaml"
+  - "engineering/knowledge-base/P2/language/spin2/methods/pinfloat.yaml"
+  - "engineering/knowledge-base/P2/architecture/smart_pins.yaml"
+  - "engineering/knowledge-base/P2/architecture/io_pin_timing.yaml"

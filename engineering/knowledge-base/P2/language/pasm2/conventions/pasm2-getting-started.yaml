@@ -15,6 +15,27 @@ description: |
   reading this, you can write syntactically correct PASM2 code using common instructions and patterns.
   Reference detailed instruction documentation for advanced features.
 
+knowledge_progression:
+  you_are_here: "Layer 1 - Essential Assembly Mechanics"
+  
+  immediate_next_steps:
+    REQUIRED:
+      - name: "Basic I/O Concepts"
+        content: "concepts/basic-io.yaml"
+        why: "Essential for any pin I/O - covers multi-pin operations, ADDPINS, drive strength, pull resistors"
+        when: "Read immediately after Getting Started, before writing I/O code"
+        
+    THEN_CHOOSE:
+      - name: "Smart Pin Modes"
+        content: "../architecture/smart_pins.yaml"
+        when: "Need autonomous hardware (PWM, UART, ADC, counters, etc.)"
+      - name: "CORDIC Operations"
+        when: "Need math coprocessor (trig, logs, rotation)"
+      - name: "Streamer"
+        when: "Need high-speed pin sequencing (video, audio)"
+  
+  note: "Basic I/O concepts are NOT optional - they're foundational for all pin operations"
+
 instruction_format:
   basic_syntax:
     format: "INSTRUCTION  destination, source"
@@ -306,58 +327,41 @@ addressing_modes:
       example: "WRLONG  data, PTRB++"
 
 common_patterns:
-  simple_loop:
+  loop_with_counter:
+    description: "Counted loop using DJNZ (decrement and jump if not zero)"
     pattern: |
       MOV      counter, ##1000
-      
       .loop
-      ' Loop body
-      
+      ' Loop body here
       DJNZ     counter, #.loop
       
-  delay_loop:
+  subroutine:
+    description: "Call subroutine and return"
     pattern: |
-      MOV      delay, ##sysclock_freq
-      
-      .wait
-      DJNZ     delay, #.wait
-      
-  subroutine_call:
-    pattern: |
-      ' Main code
       CALL     #my_subroutine
+      ' Continues here after RET
       
-      ' Subroutine
       my_subroutine
       ' Subroutine body
       RET
       
-  conditional_branch:
+  conditional_execution:
+    description: "Compare and conditionally execute"
     pattern: |
       CMP      value, #threshold  WZ
-      IF_Z     JMP  #equal_path
-      IF_NZ    JMP  #not_equal_path
+      IF_Z     MOV  result, #equal_value
+      IF_NZ    MOV  result, #not_equal_value
       
-  hub_memory_copy:
+  hub_memory_access:
+    description: "Copy data from hub to hub using pointers"
     pattern: |
       MOV      PTRA, source_addr
       MOV      PTRB, dest_addr
       MOV      count, #256
-      
       .copy
       RDLONG   data, PTRA++
       WRLONG   data, PTRB++
       DJNZ     count, #.copy
-      
-  pin_toggle:
-    pattern: |
-      MOV      pin_mask, #1
-      SHL      pin_mask, pin_number
-      
-      .toggle
-      XOR      OUTA, pin_mask
-      WAITX    delay_ticks
-      JMP      #.toggle
 
 inline_pasm2_in_spin2:
   basic_inline:
@@ -488,11 +492,15 @@ timing_considerations:
       SUB      end_time, start_time
 
 next_steps:
-  detailed_instructions: "Reference full PASM2 instruction set (377 instructions)"
-  smart_pins: "Learn Smart Pin modes for advanced I/O"
-  cordic: "Explore CORDIC solver for math operations"
-  streamer: "Study streamer for video/audio generation"
-  cog_management: "Learn COGINIT for multi-cog programming"
+  essential_reading:
+    - "concepts/basic-io.yaml - REQUIRED before any I/O work"
+    - "Full PASM2 instruction reference - for detailed documentation"
+  
+  advanced_features:
+    - "Smart Pin modes - autonomous hardware operations"
+    - "CORDIC solver - math coprocessor functions"
+    - "Streamer - high-speed pin sequencing"
+    - "Multi-COG programming - parallel processing"
 
 see_also:
   - engineering/knowledge-base/P2/language/pasm2/special-registers.yaml

@@ -1,10 +1,7 @@
 instruction: DECMOD
 syntax: DECMOD Dest, {#}Src {WC|WZ|WCZ}
-encoding: EEEE 0111001 CZI DDDDDDDDD SSSSSSSSS                     D         Modulus
-  triggered       Result = 0               2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Decrement modulus
+category: Math and Logic
 description: 'DECMOD compares Dest with 0-- if not equal, it decrements Dest; otherwise
   it sets Dest equal to Src. If Dest Result: If Dest was not equal to 0, it is decremented
   by 1; otherwise Dest is reset to Src. Optionally, C and Z are updated to indicate
@@ -36,31 +33,16 @@ description: 'DECMOD compares Dest with 0-- if not equal, it decrements Dest; ot
 
   will continue to decrement it down through Src before it will effectively cycle
   from Src to 0.'
-flags_affected:
-  Z: Result = 0
+result: If Dest was not equal to 0, it is decremented by 1; otherwise Dest is reset
+  to Src. Optionally, C and Z are
 parameters:
 - Dest is a register containing the value to decrement down to 0 with modulus, and
   is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is the
   modulus limit to apply to Dest's decrement operation.
 - WC, WZ, or WCZ are optional effects to update flags.
-related:
-- INCMOD
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
-documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-compiler_encoding:
-  operandFormat: 0
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
-brief_description: Decrement modulus
-category: Math and Logic
-result: If Dest was not equal to 0, it is decremented by 1; otherwise Dest is reset
-  to Src. Optionally, C and Z are
+flags_affected:
+  Z: Result = 0
 syntax_variants:
 - DECMOD Dest, {#}Src {WC|WZ|WCZ}
 - DECMOD compares Dest with 0-- if not equal, it decrements Dest; otherwise it sets
@@ -69,5 +51,27 @@ syntax_variants:
   from Src to 0.
 - DECMOD does not limit Dest within the specified range-- if Dest begins as greater
   than Src, iterations of DECMOD
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0111001 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: Modulus triggered
+  z: Result = 0
+  clocks: '2'
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  operandFormat: 0
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Decrement with modulus
+related:
+- INCMOD

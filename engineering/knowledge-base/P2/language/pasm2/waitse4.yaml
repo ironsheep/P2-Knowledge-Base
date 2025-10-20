@@ -1,17 +1,7 @@
 instruction: WAITSE4
 syntax: WAITSE1 {WC|WZ|WCZ}
-encoding:
-- EEEE 1101011 CZ0 000010100 000100100                 --          Timeout Abort       Timeout
-  Abort              2+
-- EEEE 1101011 CZ0 000010101 000100100                 --          Timeout Abort       Timeout
-  Abort              2+
-- EEEE 1101011 CZ0 000010110 000100100                 --          Timeout Abort       Timeout
-  Abort              2+
-- EEEE 1101011 CZ0 000010111 000100100                 --          Timeout Abort       Timeout
-  Abort              2+
-timing:
-  cycles: 2
-  type: variable
+brief_description: Wait selectable event 1/2/3/4
+category: Event
 description: 'Wait for SE4 event flag, then clear it. Prior SETQ sets optional CT
   timeout value. C/Z = timeout.                              2+
 
@@ -59,9 +49,42 @@ description: 'Wait for SE4 event flag, then clear it. Prior SETQ sets optional C
 
 
   instructions.'
+result: Wait for selectable event, then clear the flag; optionally aborting on timeout
+  and setting C and/or Z on
+parameters:
+- WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
   Z:
     formula: timeout
+syntax_variants:
+- WAITSE1 {WC|WZ|WCZ}
+- WAITSE2 {WC|WZ|WCZ}
+- WAITSE3 {WC|WZ|WCZ}
+- WAITSE4 {WC|WZ|WCZ}
+timing:
+  cycles: 2
+  type: variable
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 CZ0 000010100 000100100
+  write: —
+  c: Timeout Abort
+  z: Timeout Abort
+  clocks: 2+
+- bits: EEEE 1101011 CZ0 000010101 000100100
+  write: —
+  c: Timeout Abort
+  z: Timeout Abort
+  clocks: 2+
+- bits: EEEE 1101011 CZ0 000010110 000100100
+  write: —
+  c: Timeout Abort
+  z: Timeout Abort
+  clocks: 2+
+- bits: EEEE 1101011 CZ0 000010111 000100100
+  write: —
+  c: Timeout Abort
+  z: Timeout Abort
+  clocks: 2+
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -69,20 +92,16 @@ compiler_operand_format:
   pattern: ''
   description: No operands - poll/wait instruction (moves S to D, sets S to $024)
   valueType: 28
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+manual_extraction_date: '2025-01-19'
+oneliner: Wait for and clear selectable event 1, 2, 3, or 4 flag
 long_description: 'Wait for selectable event, then clear the flag; optionally aborting
   on timeout and setting C and/or Z on
 
   abort.'
-syntax_variants:
-- WAITSE1 {WC|WZ|WCZ}
-- WAITSE2 {WC|WZ|WCZ}
-- WAITSE3 {WC|WZ|WCZ}
-- WAITSE4 {WC|WZ|WCZ}
-last_updated: '2025-09-19'
-brief_description: Wait selectable event 1/2/3/4
 group_membership:
   group_id: selector_event_waits
   group_file: groups/selector_event_waits.yaml
@@ -95,15 +114,8 @@ specifics:
   event_flag: SE4
 quick_example: WAITSE4  ; Wait for selector 4 event flag, then clear it
 has_group_documentation: true
-category: Event
-result: Wait for selectable event, then clear the flag; optionally aborting on timeout
-  and setting C and/or Z on
-parameters:
-- WC, WZ, or WCZ are optional effects to update flags.
 related:
 - SETSEx
 - POLLSEx
 - JSEx
 - JNSEx
-manual_extraction_date: '2025-01-19'
-oneliner: Wait for and clear selectable event 1, 2, 3, or 4 flag

@@ -1,13 +1,7 @@
 instruction: NEGNC
 syntax: NEGNC Dest, {#}Src {WC|WZ|WCZ}
-encoding:
-- EEEE 0110101 CZI DDDDDDDDD SSSSSSSSS                    D            Sign of result       Result
-  = 0               2
-- EEEE 0110101 CZ0 DDDDDDDDD DDDDDDDDD                    D            Sign of result       Result
-  = 0               2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Negate not C
+category: Math and Logic
 description: 'NEGNC negates Src (syntax 1) or Dest (syntax 2) if !C = 1 and stores
   the result in the Dest register. If !C = 0, the Src Result: The Src or Dest value,
   possibly negated according to !C, is stored into Dest and optionally the C and Z
@@ -31,18 +25,35 @@ description: 'NEGNC negates Src (syntax 1) or Dest (syntax 2) if !C = 1 and stor
 
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero,
   or is cleared (0) if it is non-zero.'
-flags_affected:
-  Z: Result = 0
+result: The Src or Dest value, possibly negated according to !C, is stored into Dest
+  and optionally the C and Z flags
 parameters:
 - Dest is a register to receive the Src or -Src value (syntax 1), or contains the
   value to negate (syntax 2) according to !C.
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value
   (if !C=0) or negated value (if !C=1) is stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
-related:
-- NEGC
-- NEGZ
-- NEGNZ
+flags_affected:
+  Z: Result = 0
+syntax_variants:
+- NEGNC Dest, {#}Src {WC|WZ|WCZ}
+- NEGNC Dest              {WC|WZ|WCZ}
+- NEGNC negates Src (syntax 1) or Dest (syntax 2) if !C = 1 and stores the result
+  in the Dest register. If !C = 0, the Src
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0110101 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: Sign of result
+  z: Result = 0
+  clocks: '2'
+- bits: EEEE 0110101 CZ0 DDDDDDDDD DDDDDDDDD
+  write: D
+  c: Sign of result
+  z: Result = 0
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -50,18 +61,13 @@ compiler_operand_format:
   pattern: D{,S/#}
   description: Destination register, optional Source register or immediate (unary/binary)
   valueType: 3
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 3
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Negate not C
-category: Math and Logic
-result: The Src or Dest value, possibly negated according to !C, is stored into Dest
-  and optionally the C and Z flags
-syntax_variants:
-- NEGNC Dest, {#}Src {WC|WZ|WCZ}
-- NEGNC Dest              {WC|WZ|WCZ}
-- NEGNC negates Src (syntax 1) or Dest (syntax 2) if !C = 1 and stores the result
-  in the Dest register. If !C = 0, the Src
 manual_extraction_date: '2025-01-19'
 oneliner: Negate value according to !C
+related:
+- NEGC
+- NEGZ
+- NEGNZ

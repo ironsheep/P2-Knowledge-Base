@@ -1,13 +1,7 @@
 instruction: ABS
 syntax: ABS Dest, {#}Src {WC|WZ|WCZ}
-encoding:
-- EEEE 0110010 CZI DDDDDDDDD SSSSSSSSS                    D                S[31]            Result
-  = 0              2
-- EEEE 0110010 CZ0 DDDDDDDDD DDDDDDDDD                    D                D[31]            Result
-  = 0              2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Absolute
+category: Math and Logic
 description: 'ABS determines the absolute value of Src or Dest and writes the result
   into Dest. Result: Absolute Src (or Dest) value is stored in Dest.
 
@@ -28,16 +22,33 @@ description: 'ABS determines the absolute value of Src or Dest and writes the re
 
   Literal Src values are zero-extended, so ABS is really best used with register Src
   (or augmented Src) values.'
-flags_affected:
-  C: D[31] Result =
-  Z: Result = 0
+result: Absolute Src (or Dest) value is stored in Dest.
 parameters:
 - Dest is the register in which to write the absolute value of Dest or Src.
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal whose absolute
   value is written to Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
-related:
-- NEG
+flags_affected:
+  C: D[31] Result =
+  Z: Result = 0
+syntax_variants:
+- ABS Dest, {#}Src {WC|WZ|WCZ}
+- ABS Dest            {WC|WZ|WCZ}
+- ABS determines the absolute value of Src or Dest and writes the result into Dest.
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0110010 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: S[31]
+  z: Result = 0
+  clocks: '2'
+- bits: EEEE 0110010 CZ0 DDDDDDDDD DDDDDDDDD
+  write: D
+  c: D[31]
+  z: Result = 0
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -45,16 +56,11 @@ compiler_operand_format:
   pattern: D{,S/#}
   description: Destination register, optional Source register or immediate (unary/binary)
   valueType: 3
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 3
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Absolute
-category: Math and Logic
-result: Absolute Src (or Dest) value is stored in Dest.
-syntax_variants:
-- ABS Dest, {#}Src {WC|WZ|WCZ}
-- ABS Dest            {WC|WZ|WCZ}
-- ABS determines the absolute value of Src or Dest and writes the result into Dest.
 manual_extraction_date: '2025-01-19'
 oneliner: Get the absolute value of a number
+related:
+- NEG

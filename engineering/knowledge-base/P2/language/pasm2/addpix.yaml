@@ -1,9 +1,7 @@
 instruction: ADDPIX
 syntax: ADDPIX Dest, {#}Src
-encoding: EEEE 1010010 00I DDDDDDDDD SSSSSSSSS                    D                  --                  --                    7
-timing:
-  cycles: 7
-  type: fixed
+brief_description: Add pixels
+category: Pixel Mixer
 description: 'ADDPIX sums individual RGB (reg, green, blue) color values of Src into
   that of Dest and stores the result in the Result: Src color value bytes are added
   into Dest color value bytes with full saturation.
@@ -14,14 +12,28 @@ description: 'ADDPIX sums individual RGB (reg, green, blue) color values of Src 
 
 
   Dest register.'
-flags_affected:
-  C:
-    when: D
+result: Src color value bytes are added into Dest color value bytes with full saturation.
 parameters:
 - Dest is a register containing the RGB color value to add Src to, and is where the
   result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose RGB color value
   bytes are added into Dest.
+flags_affected:
+  C:
+    when: D
+syntax_variants:
+- ADDPIX Dest, {#}Src
+- ADDPIX sums individual RGB (reg, green, blue) color values of Src into that of Dest
+  and stores the result in the
+timing:
+  cycles: 7
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1010010 00I DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: —
+  clocks: '7'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -29,16 +41,9 @@ compiler_operand_format:
   pattern: D,S/#
   description: Destination register, Source register or immediate value
   valueType: 0
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Add pixels
-category: Pixel Mixer
-result: Src color value bytes are added into Dest color value bytes with full saturation.
-syntax_variants:
-- ADDPIX Dest, {#}Src
-- ADDPIX sums individual RGB (reg, green, blue) color values of Src into that of Dest
-  and stores the result in the
 manual_extraction_date: '2025-01-19'
 oneliner: Add RGB colors with full saturation

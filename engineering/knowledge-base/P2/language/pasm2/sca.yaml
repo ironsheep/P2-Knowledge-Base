@@ -1,10 +1,7 @@
 instruction: SCA
 syntax: SCA Dest, {#}Src {WZ}
-encoding: EEEE 1010001 0ZI DDDDDDDDD SSSSSSSSS                    --                 --             Product
-  = 0               2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Scale
+category: Math and Logic
 description: 'SCA multiplies the lower 16-bits of each of Dest and Src together, right
   shifts the 32-bit product by 16 (to scale Result: The upper 16 bits of the unsigned
   product from the 16-bit Dest and Src multiplication is substituted as the next instruction''s
@@ -23,13 +20,26 @@ description: 'SCA multiplies the lower 16-bits of each of Dest and Src together,
 
 
   non-zero.'
+result: The upper 16 bits of the unsigned product from the 16-bit Dest and Src multiplication
+  is substituted as the
 parameters:
 - Dest is a register containing the 16-bit value to multiply with Src.
 - Src is a register, 9-bit literal, or 16-bit augmented literal whose value is multiplied
   with Dest.
 - WZ is an optional effect to update the Z flag.
-related:
-- SCAS
+syntax_variants:
+- SCA Dest, {#}Src {WZ}
+- SCA multiplies the lower 16-bits of each of Dest and Src together, right shifts
+  the 32-bit product by 16 (to scale
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1010001 0ZI DDDDDDDDD SSSSSSSSS
+  write: —
+  c: —
+  z: Product = 0
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -37,17 +47,11 @@ compiler_operand_format:
   pattern: D,S/#
   description: Destination register, Source register or immediate value
   valueType: 0
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Scale
-category: Math and Logic
-result: The upper 16 bits of the unsigned product from the 16-bit Dest and Src multiplication
-  is substituted as the
-syntax_variants:
-- SCA Dest, {#}Src {WZ}
-- SCA multiplies the lower 16-bits of each of Dest and Src together, right shifts
-  the 32-bit product by 16 (to scale
 manual_extraction_date: '2025-01-19'
 oneliner: Create unsigned 16-bit scale value for next instruction's S value
+related:
+- SCAS

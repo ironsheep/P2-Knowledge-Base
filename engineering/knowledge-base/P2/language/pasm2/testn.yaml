@@ -1,27 +1,7 @@
 instruction: TESTN
 syntax: TESTN Dest, {#}Src {WC|WZ|WCZ}
-encoding:
-- EEEE 0111111 CZI DDDDDDDDD SSSSSSSSS                   --         Parity of (D &
-  !S)     (D & !S) = 0               2
-- EEEE 1101011 CZL DDDDDDDDD 001000000                  --            IN[D[5:0]]         IN[D[5:0]]                2
-- EEEE 1101011 CZL DDDDDDDDD 001000010                  --        C AND IN[D[5:0]]
-  Z AND IN[D[5:0]]                2
-- EEEE 1101011 CZL DDDDDDDDD 001000100                  --         C OR IN[D[5:0]]    Z
-  OR IN[D[5:0]]              2
-- EEEE 1101011 CZL DDDDDDDDD 001000110                  --        C XOR IN[D[5:0]]
-  Z XOR IN[D[5:0]]                2
-- EEEE 1101011 CZL DDDDDDDDD 001000001                  --            !IN[D[5:0]]        !IN[D[5:0]]               2
-- EEEE 1101011 CZL DDDDDDDDD 001000011                  --        C AND !IN[D[5:0]]
-  Z AND !IN[D[5:0]]              2
-- EEEE 1101011 CZL DDDDDDDDD 001000101                  --         C OR !IN[D[5:0]]   Z
-  OR !IN[D[5:0]]             2
-- EEEE 1101011 CZL DDDDDDDDD 001000111                  --        C XOR !IN[D[5:0]]
-  Z XOR !IN[D[5:0]]              2
-- EEEE 1011101 00I DDDDDDDDD SSSSSSSSS                        PC    1
-- EEEE 1011101 10I DDDDDDDDD SSSSSSSSS                        PC    1
-timing:
-  cycles: 1
-  type: fixed
+brief_description: Test not
+category: Math and Logic
 description: 'TESTN determines the parity (number of high (1) bits) and the zero or
   non-zero state of Dest bitwise ANDed with Result: The parity and zero-state of Dest
   bitwise ANDed with !Src is stored in the C and Z flags. C = parity of (D & !S).
@@ -329,11 +309,8 @@ description: 'TESTN determines the parity (number of high (1) bits) and the zero
 
 
   PC when in Hub execution mode (long-aligned Hub code not required).'
-flags_affected:
-  C:
-    formula: parity of (D & !S)
-  Z:
-    formula: ((D & !S) == 0)
+result: Dest is tested and if it's signed (or not signed in syntax 2), PC is set to
+  a new relative (#Src) or absolute
 parameters:
 - Dest is the register whose value will be tested.
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal whose inverse
@@ -350,9 +327,24 @@ parameters:
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
-related:
-- TESTB
-- TESTBN
+flags_affected:
+  C:
+    formula: parity of (D & !S)
+  Z:
+    formula: ((D & !S) == 0)
+syntax_variants:
+- TESTN Dest, {#}Src {WC|WZ|WCZ}
+- TESTN determines the parity (number of high (1) bits) and the zero or non-zero state
+  of Dest bitwise ANDed with
+timing:
+  cycles: 1
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0111111 CZI DDDDDDDDD SSSSSSSSS
+  write: —
+  c: Parity of (D & !S)
+  z: (D & !S) = 0
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -360,17 +352,12 @@ compiler_operand_format:
   pattern: D,S/#
   description: Destination register, Source register or immediate value
   valueType: 0
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Test not
-category: Math and Logic
-result: Dest is tested and if it's signed (or not signed in syntax 2), PC is set to
-  a new relative (#Src) or absolute
-syntax_variants:
-- TESTN Dest, {#}Src {WC|WZ|WCZ}
-- TESTN determines the parity (number of high (1) bits) and the zero or non-zero state
-  of Dest bitwise ANDed with
 manual_extraction_date: '2025-01-19'
 oneliner: Test D by bitwise ANDing with !S to affect flags only
+related:
+- TESTB
+- TESTBN

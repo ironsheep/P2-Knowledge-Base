@@ -1,9 +1,7 @@
 instruction: ALTGW
 syntax: ALTGW Dest, {#}Src
-encoding: EEEE 1001011 11I DDDDDDDDD SSSSSSSSS                     D 1
-timing:
-  cycles: 1
-  type: fixed
+brief_description: Alter get word
+category: Register Indirection
 description: 'ALTGW should be followed by GETWORD or ROLWORD-- it modifies the GETWORD
   / ROLWORD instruction''s Src and Result: The next instruction''s pipelined Src and
   Num fields are altered to be (Src + Dest[9:1]) & $1FF, or just Dest[9:1] for syntax
@@ -68,6 +66,8 @@ description: 'ALTGW should be followed by GETWORD or ROLWORD-- it modifies the G
 
   long''s absolute address and its word index instead of the long''s relative index
   (to add to a base) and word index.'
+result: The next instruction's pipelined Src and Num fields are altered to be (Src
+  + Dest[9:1]) & $1FF, or just
 parameters:
 - Dest is the register whose 10-bit value is the index, or the full word address for
   the GETWORD / ROLWORD instruction to read.
@@ -88,21 +88,6 @@ parameters:
   values do not persist
 - SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the
   next instruction
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
-documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_duiz
-  pattern: D{,S/#}
-  description: Destination, optional source (immediate bit set if no source)
-  valueType: 5
-compiler_encoding:
-  operandFormat: 5
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
-brief_description: Alter get word
-category: Register Indirection
-result: The next instruction's pipelined Src and Num fields are altered to be (Src
-  + Dest[9:1]) & $1FF, or just
 syntax_variants:
 - ALTGW Dest, {#}Src
 - ALTGW Dest
@@ -119,5 +104,33 @@ usage_notes: 'The instruction following ALTGW is shielded from interrupt
 
   SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the
   next instruction'
+timing:
+  cycles: 1
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1001011 11I DDDDDDDDD SSSSSSSSS
+  write: D 1
+  c: —
+  z: —
+  clocks: '2'
+- bits: EEEE 1001011 111 DDDDDDDDD 000000000
+  write: D 1
+  c: —
+  z: —
+  clocks: '2'
+encoding_notes:
+- Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In
+  syntax 2, the auto-indexer value is 0.
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_duiz
+  pattern: D{,S/#}
+  description: Destination, optional source (immediate bit set if no source)
+  valueType: 5
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  operandFormat: 5
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
 oneliner: Alter subsequent GETWORD / ROLWORD instruction

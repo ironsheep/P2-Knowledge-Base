@@ -1,20 +1,30 @@
 instruction: DRVL
 syntax: DRVL    {#}D           {WCZ}
-encoding: EEEE 1101011 CZL DDDDDDDDD 001011000
-timing:
-  cycles: 2
-  type: fixed
+category: Pin
 description: 'DRVH or DRVL sets the I/O pin(s) designated by Dest to the output direction
   and to a high or low output level; i.e. Result: The I/O pins described by Dest are
   set to the output direction and to an output level of high or low; the rest are
   left as-is. Z = OUT bit.'
-flags_affected:
-  Z:
-    formula: OUT bit
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the I/O pin(s) to set to output direction and output levels of high or low.
 - WCZ is an optional effect to update flags.
+flags_affected:
+  Z:
+    formula: OUT bit
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 CZL DDDDDDDDD 001011001
+  write: DIRx1 + OUTx Orig OUTx base bit Orig OUTx base bit
+  c: '2'
+- bits: EEEE 1101011 CZL DDDDDDDDD 001011000
+  write: DIRx + OUTx Orig OUTx base bit Orig OUTx base bit
+encoding_notes:
+- '2'
+- New DIRx state is not data-forwarded; the next pipelined instruction sees the old
+  state. Make sure any instruction that reads
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:
@@ -23,9 +33,8 @@ compiler_operand_format:
   description: 'Pin operation: destination/immediate pin number 0-511, optional effect
     flags'
   valueType: 30
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.136539'
-category: Pin
 oneliner: Set pin(s) direction to output and output level high (1) or low (0)

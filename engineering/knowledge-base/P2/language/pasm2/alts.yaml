@@ -1,9 +1,7 @@
 instruction: ALTS
 syntax: ALTS Dest, {#}Src
-encoding: EEEE 1001100 10I DDDDDDDDD SSSSSSSSS                     D 1
-timing:
-  cycles: 1
-  type: fixed
+brief_description: Alter source
+category: Register Indirection
 description: 'ALTS modifies the next instruction''s Src value to be (Src + Dest) &
   $1FF (for syntax 1), or to Dest[8:0] (for syntax Result: The next instruction''s
   pipelined Src value is altered to be (Src + Dest) & $1FF, or just Dest[8:0] in syntax
@@ -37,6 +35,8 @@ description: 'ALTS modifies the next instruction''s Src value to be (Src + Dest)
 
   In syntax 2, Dest serves as the full value-- it is used as-is for the next instruction''s
   substitute Src value.'
+result: The next instruction's pipelined Src value is altered to be (Src + Dest) &
+  $1FF, or just Dest[8:0] in syntax 2.
 parameters:
 - Dest is the register whose 9-bit value is the offset, or the full value, for the
   next instruction to operate on.
@@ -53,8 +53,53 @@ parameters:
   values do not persist
 - SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the
   next instruction
+syntax_variants:
+- ALTS Dest, {#}Src
+- ALTS Dest
+- ALTS modifies the next instruction's Src value to be (Src + Dest) & $1FF (for syntax
+  1), or to Dest[8:0] (for syntax
+- '*   The base represents a starting point. ALTS adds the offset (Dest[8:0]) to the
+  base (Src[8:0]) to determine'
+- (Dest) for a future ALTS+instruction iteration.
+usage_notes: 'The instruction following ALTS is shielded from interrupt
+
+  ALTS alters the next instruction regardless of its kind
+
+  Field value modification occurs in the instruction pipeline only; code is not altered,
+  values do not persist
+
+  SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the
+  next instruction'
+timing:
+  cycles: 1
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1001100 10I DDDDDDDDD SSSSSSSSS
+  write: D 1
+  c: —
+  z: —
+  clocks: '2'
+- bits: EEEE 1001100 101 DDDDDDDDD 000000000
+  write: D 1
+  c: —
+  z: —
+  clocks: '2'
+encoding_notes:
+- Dest is post-adjusted by the auto-indexer value; the sign-extended Src[17:9]. In
+  syntax 2, the auto-indexer value is 0.
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_duiz
+  pattern: D{,S/#}
+  description: Destination, optional source (immediate bit set if no source)
+  valueType: 5
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  operandFormat: 5
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+manual_extraction_date: '2025-01-19'
+oneliner: Alter S field of next instruction
 examples:
 - name: Array Indexing Pattern
   description: Index into array of longs in COG RAM
@@ -117,35 +162,3 @@ notes:
 - Efficient for array access without loops
 - Enables self-modifying code patterns
 - Critical for multi-resource management in single COG
-compiler_operand_format:
-  name: operand_duiz
-  pattern: D{,S/#}
-  description: Destination, optional source (immediate bit set if no source)
-  valueType: 5
-compiler_encoding:
-  operandFormat: 5
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
-brief_description: Alter source
-category: Register Indirection
-result: The next instruction's pipelined Src value is altered to be (Src + Dest) &
-  $1FF, or just Dest[8:0] in syntax 2.
-syntax_variants:
-- ALTS Dest, {#}Src
-- ALTS Dest
-- ALTS modifies the next instruction's Src value to be (Src + Dest) & $1FF (for syntax
-  1), or to Dest[8:0] (for syntax
-- '*   The base represents a starting point. ALTS adds the offset (Dest[8:0]) to the
-  base (Src[8:0]) to determine'
-- (Dest) for a future ALTS+instruction iteration.
-usage_notes: 'The instruction following ALTS is shielded from interrupt
-
-  ALTS alters the next instruction regardless of its kind
-
-  Field value modification occurs in the instruction pipeline only; code is not altered,
-  values do not persist
-
-  SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the
-  next instruction'
-manual_extraction_date: '2025-01-19'
-oneliner: Alter S field of next instruction

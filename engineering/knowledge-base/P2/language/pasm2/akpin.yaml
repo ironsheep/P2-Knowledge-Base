@@ -1,9 +1,7 @@
 instruction: AKPIN
 syntax: AKPIN {#}Src
-encoding: EEEE 1100000 01I 000000001 SSSSSSSSS                Ack Bus              --                  --                   2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Acknowledge pin
+category: Smart Pin
 description: 'AKPIN acknowledges the Smart Pin(s) designated by Src. This lowers the
   corresponding IN signal(s) so that Result: One or more Smart Pins is acknowledged;
   lowering their corresponding IN signal(s).
@@ -51,9 +49,24 @@ description: 'AKPIN acknowledges the Smart Pin(s) designated by Src. This lowers
 
 
   DIRB); it will not cross the port boundary.'
+result: One or more Smart Pins is acknowledged; lowering their corresponding IN signal(s).
 parameters:
 - Src is a register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the Smart Pin(s) to acknowledge.
+syntax_variants:
+- AKPIN {#}Src
+- SETQ instruction immediately precedes the AKPIN instruction; substituting SETQ's
+  Dest[4:0] in place of value
+- bits[10:6], for AKPIN's use.
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1100000 01I 000000001 SSSSSSSSS
+  write: Ack Bus
+  c: —
+  z: —
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -61,17 +74,9 @@ compiler_operand_format:
   pattern: S/#
   description: 'Acknowledge pin: pin number/immediate'
   valueType: 34
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 34
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Acknowledge pin
-category: Smart Pin
-result: One or more Smart Pins is acknowledged; lowering their corresponding IN signal(s).
-syntax_variants:
-- AKPIN {#}Src
-- SETQ instruction immediately precedes the AKPIN instruction; substituting SETQ's
-  Dest[4:0] in place of value
-- bits[10:6], for AKPIN's use.
 manual_extraction_date: '2025-01-19'
 oneliner: Acknowledge smart pin(s)

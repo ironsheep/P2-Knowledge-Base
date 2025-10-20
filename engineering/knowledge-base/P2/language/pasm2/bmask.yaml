@@ -1,11 +1,7 @@
 instruction: BMASK
 syntax: BMASK Dest, {#}Src
-encoding:
-- EEEE 1001110 01I DDDDDDDDD SSSSSSSSS                  D                --                  --                   2
-- EEEE 1001110 010 DDDDDDDDD DDDDDDDDD                  D                --                  --                   2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Bit mask
+category: Math and Logic
 description: 'BMASK generates an LSB-justified bit mask (all ones) of Src+1 or Dest+1
   length and stores it in Dest. The size Result: Bit mask of size Src+1, or Dest+1
   (1--32 bits) is stored into Dest.
@@ -33,9 +29,7 @@ description: 'BMASK generates an LSB-justified bit mask (all ones) of Src+1 or D
 
   A bit mask is often useful in bitwise operations (AND, OR, XOR) to filter out or
   affect special groups of bits.'
-flags_affected:
-  C:
-    when: D
+result: Bit mask of size Src+1, or Dest+1 (1--32 bits) is stored into Dest.
 parameters:
 - Dest is the register in which to store the generated bit mask and optionally begins
   by containing the 5-bit mask size it is requesting (syntax 2).
@@ -44,6 +38,29 @@ parameters:
 - A size value of 0 generates a bit mask of %00000000_00000000_00000000_00000001.
 - A size value of 5 generates a bit mask of %00000000_00000000_00000000_00111111.
 - A size value of 15 generates a bit mask of %00000000_00000000_11111111_11111111.
+flags_affected:
+  C:
+    when: D
+syntax_variants:
+- BMASK Dest, {#}Src
+- BMASK Dest
+- BMASK generates an LSB-justified bit mask (all ones) of Src+1 or Dest+1 length and
+  stores it in Dest. The size
+- In effect, Dest becomes (%10 << size) - 1 via the BMASK instruction.
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1001110 01I DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: —
+  clocks: '2'
+- bits: EEEE 1001110 010 DDDDDDDDD DDDDDDDDD
+  write: D
+  c: —
+  z: —
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -51,18 +68,9 @@ compiler_operand_format:
   pattern: D{,S/#}
   description: Destination register, optional Source register or immediate (unary/binary)
   valueType: 3
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 3
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Bit mask
-category: Math and Logic
-result: Bit mask of size Src+1, or Dest+1 (1--32 bits) is stored into Dest.
-syntax_variants:
-- BMASK Dest, {#}Src
-- BMASK Dest
-- BMASK generates an LSB-justified bit mask (all ones) of Src+1 or Dest+1 length and
-  stores it in Dest. The size
-- In effect, Dest becomes (%10 << size) - 1 via the BMASK instruction.
 manual_extraction_date: '2025-01-19'
 oneliner: Get 1..32-bit mask into Dest

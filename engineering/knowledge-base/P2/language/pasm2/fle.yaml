@@ -1,10 +1,7 @@
 instruction: FLE
 syntax: FLE Dest, {#}Src {WC|WZ|WCZ}
-encoding: EEEE 0011001 CZI DDDDDDDDD SSSSSSSSS                    D           limit
-  enforced        Result = 0              2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Force lesser or equal
+category: Math and Logic
 description: 'FLE sets unsigned Dest to unsigned Src if Dest is greater than Src.
   This is also known as a limit maximum Result: Unsigned Dest is set to unsigned Src
   if Dest was greater than Src. Optionally the C and Z flag indicates if the replacement
@@ -27,18 +24,29 @@ description: 'FLE sets unsigned Dest to unsigned Src if Dest is greater than Src
 
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero,
   or is cleared (0) if it is non-zero.'
-flags_affected:
-  Z: Result = 0
+result: Unsigned Dest is set to unsigned Src if Dest was greater than Src. Optionally
+  the C and Z flag indicates if
 parameters:
 - Dest is a register containing the unsigned value to limit to a maximum of unsigned
   Src, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose unsigned value
   is the upper limit to force upon Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
-related:
-- FGE
-- FLES
-- FGES
+flags_affected:
+  Z: Result = 0
+syntax_variants:
+- FLE Dest, {#}Src {WC|WZ|WCZ}
+- FLE sets unsigned Dest to unsigned Src if Dest is greater than Src. This is also
+  known as a limit maximum
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0011001 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: limit enforced
+  z: Result = 0
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -46,17 +54,13 @@ compiler_operand_format:
   pattern: D,S/#
   description: Destination register, Source register or immediate value
   valueType: 0
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Force lesser or equal
-category: Math and Logic
-result: Unsigned Dest is set to unsigned Src if Dest was greater than Src. Optionally
-  the C and Z flag indicates if
-syntax_variants:
-- FLE Dest, {#}Src {WC|WZ|WCZ}
-- FLE sets unsigned Dest to unsigned Src if Dest is greater than Src. This is also
-  known as a limit maximum
 manual_extraction_date: '2025-01-19'
 oneliner: Force unsigned value to be less than or equal to another
+related:
+- FGE
+- FLES
+- FGES

@@ -1,10 +1,7 @@
 instruction: OUTNOT
 syntax: OUTNOT {#}Dest {WCZ}
-encoding: EEEE 1101011 CZL DDDDDDDDD 001001111                OUTx       Orig OUTx
-  base bit Orig OUTx base bit            2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Output not
+category: Pin
 description: 'OUTNOT alters the output level register''s bit(s) designated by Dest
   to their inverse state. All other bits are left Result: The I/O pin output level
   bit(s), described by Dest, are toggled to their opposite state(s); the rest are
@@ -53,13 +50,30 @@ description: 'OUTNOT alters the output level register''s bit(s) designated by De
 
 
   identified by Dest.'
-flags_affected:
-  Z:
-    formula: OUT bit
+result: The I/O pin output level bit(s), described by Dest, are toggled to their opposite
+  state(s); the rest are left
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the I/O pin(s) to toggle to the opposite output level.
 - WCZ is an optional effect to update flags.
+flags_affected:
+  Z:
+    formula: OUT bit
+syntax_variants:
+- OUTNOT {#}Dest {WCZ}
+- OUTNOT alters the output level register's bit(s) designated by Dest to their inverse
+  state. All other bits are left
+- instruction immediately precedes the OUTNOT instruction; substituting SETQ's Dest[4:0]
+  in place of value
+- bits[10:6], for OUTNOT's use.
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1101011 CZL DDDDDDDDD 001001111
+  write: OUTx
+  c: Orig OUTx base bit Orig OUTx base bit
+  z: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -68,20 +82,9 @@ compiler_operand_format:
   description: 'Pin operation: destination/immediate pin number 0-511, optional effect
     flags'
   valueType: 30
-compiler_encoding:
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 30
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
-brief_description: Output not
-category: Pin
-result: The I/O pin output level bit(s), described by Dest, are toggled to their opposite
-  state(s); the rest are left
-syntax_variants:
-- OUTNOT {#}Dest {WCZ}
-- OUTNOT alters the output level register's bit(s) designated by Dest to their inverse
-  state. All other bits are left
-- instruction immediately precedes the OUTNOT instruction; substituting SETQ's Dest[4:0]
-  in place of value
-- bits[10:6], for OUTNOT's use.
 manual_extraction_date: '2025-01-19'
 oneliner: Toggle pin(s) to the opposite output level

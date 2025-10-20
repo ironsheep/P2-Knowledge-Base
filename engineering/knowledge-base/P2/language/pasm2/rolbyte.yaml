@@ -1,11 +1,7 @@
 instruction: ROLBYTE
 syntax: 'ROLBYTE Dest, {#}Src, #Num'
-encoding:
-- EEEE 1001000 NNI DDDDDDDDD SSSSSSSSS                  D                --                  --                     2
-- EEEE 1001000 000 DDDDDDDDD 000000000                  D                --                  --                     2
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Rotate left byte
+category: Math and Logic
 description: 'ROLBYTE reads the byte identified by Num (0-3) from Src, or a byte from
   the source described by a prior ALTGB Result: Byte Num (0-3) of Src, or a byte from
   a source described by prior ALTGB instruction, is rotated left into Dest.
@@ -31,14 +27,46 @@ description: 'ROLBYTE reads the byte identified by Num (0-3) from Src, or a byte
 
 
   within contiguous long registers.'
-flags_affected:
-  C:
-    when: D
+result: Byte Num (0-3) of Src, or a byte from a source described by prior ALTGB instruction,
+  is rotated left into
 parameters:
 - Dest is the register in which to rotate the byte into.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains
   the target byte to read.
 - Num is a 2-bit literal identifying the nibble ID (0-3) of Src to read.
+flags_affected:
+  C:
+    when: D
+syntax_variants:
+- 'ROLBYTE Dest, {#}Src, #Num'
+- ROLBYTE Dest
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 1001000 NNI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: —
+  clocks: '2'
+- bits: EEEE 1001000 000 DDDDDDDDD 000000000
+  write: D
+  c: —
+  z: —
+  clocks: '2'
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds2get
+  pattern: D{,S/#,#0..3}
+  description: 'Get byte: destination, optional source and byte index 0-3'
+  valueType: 9
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  operandFormat: 9
+enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
+last_updated: '2025-09-19'
+manual_extraction_date: '2025-01-19'
+oneliner: Rotate a byte left into a value
 related:
 - ALTGB
 - ROLNIB
@@ -49,23 +77,3 @@ related:
 - SETNIB
 - SETBYTE
 - SETWORD
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
-documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds2get
-  pattern: D{,S/#,#0..3}
-  description: 'Get byte: destination, optional source and byte index 0-3'
-  valueType: 9
-compiler_encoding:
-  operandFormat: 9
-enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
-brief_description: Rotate left byte
-category: Math and Logic
-result: Byte Num (0-3) of Src, or a byte from a source described by prior ALTGB instruction,
-  is rotated left into
-syntax_variants:
-- 'ROLBYTE Dest, {#}Src, #Num'
-- ROLBYTE Dest
-manual_extraction_date: '2025-01-19'
-oneliner: Rotate a byte left into a value

@@ -1,17 +1,7 @@
 instruction: ADD
 syntax: ADD Dest, {#}Src {WC|WZ|WCZ}
-compiler_syntax: ADD D,S/#
-encoding: EEEE 0001000 CZI DDDDDDDDD SSSSSSSSS                    D           carry
-  of (D + S)      Result = 0               2
-compiler_encoding:
-  bits: 32
-  opcode: 32
-  effects: 3
-  operandFormat: 0
-  rawValue: 1568
-timing:
-  cycles: 2
-  type: fixed
+brief_description: Add
+category: Math and Logic
 description: 'ADD sums the two unsigned values of Dest and Src together and stores
   the result into the Dest register. Result: Sum of unsigned Src and unsigned Dest
   is stored in Dest.
@@ -41,10 +31,48 @@ description: 'ADD sums the two unsigned values of Dest and Src together and stor
 
   ADD and ADDX are also used in adding signed, multi-long values with ADDSX ending
   the sequence.'
-compiler_category: Arithmetic
+result: Sum of unsigned Src and unsigned Dest is stored in Dest.
+parameters:
+- Dest is a register containing the value to add Src to, and is where the result is
+  written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added
+  into Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
   C: carry of (D
   Z: Result = 0
+syntax_variants:
+- ADD Dest, {#}Src {WC|WZ|WCZ}
+- ADD sums the two unsigned values of Dest and Src together and stores the result
+  into the Dest register.
+timing:
+  cycles: 2
+  type: fixed
+encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+- bits: EEEE 0001000 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: carry of (D + S)
+  z: Result = 0
+  clocks: '2'
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
+compiler_operand_format:
+  name: operand_ds
+  pattern: D,S/#
+  description: Destination register, Source register or immediate value
+  valueType: 0
+compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+  bits: 32
+  opcode: 32
+  effects: 3
+  operandFormat: 0
+  rawValue: 1568
+enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
+last_updated: '2025-09-19'
+manual_extraction_date: '2025-01-19'
+oneliner: Add two unsigned values
+compiler_syntax: ADD D,S/#
+compiler_category: Arithmetic
 compiler_effects:
 - name: wc
   symbol: WC
@@ -61,32 +89,8 @@ compiler_effects:
   value: 3
   description: Write Carry and Zero flags
   bitPattern: '11'
-parameters:
-- Dest is a register containing the value to add Src to, and is where the result is
-  written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added
-  into Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
 related:
 - ADDX
 - ADDS
 - ADDSX
 - SUB
-documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
-documentation_level: comprehensive
-compiler_operand_format:
-  name: operand_ds
-  pattern: D,S/#
-  description: Destination register, Source register or immediate value
-  valueType: 0
-enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
-last_updated: '2025-09-19'
-brief_description: Add
-category: Math and Logic
-result: Sum of unsigned Src and unsigned Dest is stored in Dest.
-syntax_variants:
-- ADD Dest, {#}Src {WC|WZ|WCZ}
-- ADD sums the two unsigned values of Dest and Src together and stores the result
-  into the Dest register.
-manual_extraction_date: '2025-01-19'
-oneliner: Add two unsigned values
