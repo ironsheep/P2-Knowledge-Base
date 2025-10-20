@@ -1,6 +1,7 @@
 title: PASM2 Getting Started - Core Assembly Essentials
 id: pasm2-getting-started
 version: 1.0.0
+content_base: "/engineering/knowledge-base/P2/language/pasm2"
 layer: "Foundation - Assembly Mechanics"
 purpose: Minimal viable knowledge for writing functional PASM2 code
 target_audience: AI code generators and developers new to PASM2 assembly
