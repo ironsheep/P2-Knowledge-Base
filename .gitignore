@@ -164,3 +164,6 @@ extracted_images_enhanced_test/
 /engineering/ingestion/extracted-documentation/yaml_updates_pages_31_147
 /engineering/ingestion/enriched-instructions/pasm2-narratives
 /manifests/.history
+/engineering/ingestion/smart-pins-catalog
+/engineering/ingestion/sources/pasm2-manual/updated-yamls
+/engineering/ingestion/sources/pasm2-manual/image-examples

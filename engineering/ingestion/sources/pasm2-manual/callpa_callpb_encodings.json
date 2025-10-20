@@ -1,0 +1,17 @@
+{
+  "CALLPA": {
+    "bits": "EEEE 1011010 0LI DDDDDDDDD SSSSSSSSS",
+    "write": "K\u00b9, PA and PC",
+    "c": "\u2014",
+    "z": "\u2014",
+    "clocks": "4 / 13\u201320"
+  },
+  "CALLPB": {
+    "bits": "EEEE 1011010 1LI DDDDDDDDD SSSSSSSSS",
+    "write": "K\u00b9, PB and PC",
+    "c": "\u2014",
+    "z": "\u2014",
+    "clocks": "4 / 13\u201320"
+  },
+  "footnote": "The current C, Z, and effective next PC values are pushed onto the stack (K) prior to updating PC with Src."
+}
