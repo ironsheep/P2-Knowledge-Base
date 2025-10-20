@@ -376,16 +376,25 @@ class ManifestValidator:
         print("\n" + "=" * 70)
         print(f"{BOLD}VERIFICATION SUMMARY{RESET}")
         print("=" * 70)
-        
+
         # Basic stats
         manifests_processed = len(self.referenced_manifests)
         files_referenced = len(self.referenced_files)
-        
+
         if baseline_counts:
-            manifest_coverage = (manifests_processed / baseline_counts['manifests'] * 100) if baseline_counts['manifests'] > 0 else 0
+            # Calculate KB hierarchy coverage (excluding intentionally excluded files)
+            kb_manifests = baseline_counts.get('kb_manifests', baseline_counts['manifests'])
+            excluded_count = baseline_counts.get('excluded_manifests', 0)
+
+            kb_coverage = (manifests_processed / kb_manifests * 100) if kb_manifests > 0 else 0
             content_coverage = (files_referenced / baseline_counts['content'] * 100) if baseline_counts['content'] > 0 else 0
-            
-            print(f"Manifests processed: {manifests_processed} / {baseline_counts['manifests']} ({manifest_coverage:.1f}% coverage)")
+
+            # Show KB hierarchy coverage (should be 100%)
+            print(f"KB hierarchy manifests: {manifests_processed} / {kb_manifests} ({GREEN}{kb_coverage:.0f}% coverage{RESET})")
+
+            # Note intentionally excluded manifests
+            if excluded_count > 0:
+                print(f"Intentionally excluded: {excluded_count} (AI bootstrap files - not part of KB hierarchy)")
             
             # Report content coverage more clearly
             if content_coverage >= 100:
@@ -500,19 +509,27 @@ def main():
     # Count files for baseline
     manifests_dir = repo_root / "manifests"
     manifest_files = [f for f in manifests_dir.rglob("*.yaml") if '.history' not in f.parts] if manifests_dir.exists() else []
+
+    # Separate excluded manifests (AI bootstrap files only - root is part of KB hierarchy)
+    excluded_manifests = ["ai-bootstrap-unix.yaml", "ai-bootstrap-windows.yaml"]
+    kb_manifest_files = [f for f in manifest_files if f.name not in excluded_manifests]
+    excluded_count = len([f for f in manifest_files if f.name in excluded_manifests])
+
     manifest_count = len(manifest_files)
-    
+    kb_manifest_count = len(kb_manifest_files)
+
     # Count only P2 knowledge base files (excluding P2-support, .history, and ignored files)
     kb_dir = repo_root / "engineering" / "knowledge-base" / "P2"
     content_files = [f for f in kb_dir.rglob("*.yaml") if f.name not in IGNORED_FILES and '.history' not in f.parts] if kb_dir.exists() else []
     content_count = len(content_files)
-    
+
     print(f"Manifest files in manifests/ tree: {manifest_count}")
     print(f"Content files in engineering/knowledge-base/: {content_count}")
     print(f"Total relevant YAML files: {manifest_count + content_count}")
-    
+
     print(f"\n{CYAN}Expected processing targets:{RESET}")
-    print(f"  • Manifests to validate: {manifest_count}")
+    print(f"  • KB hierarchy manifests: {kb_manifest_count}")
+    print(f"  • Excluded manifests (AI bootstrap): {excluded_count}")
     print(f"  • Content files to reference: {content_count}")
     print("\n" + "=" * 50)
     
@@ -525,6 +542,8 @@ def main():
     # Prepare baseline counts for summary
     baseline_counts = {
         'manifests': manifest_count,
+        'kb_manifests': kb_manifest_count,
+        'excluded_manifests': excluded_count,
         'content': content_count
     }
     
