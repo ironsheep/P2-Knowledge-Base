@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 """
-Verify manifest linkages in the P2 Knowledge Base
+Verify path references in the P2 Knowledge Base
 Validates that all manifests and content files are properly connected
 Uses the 4-key path standard for resolution
 
-Version: 3.0.0
-Date: 2025-09-28
+Version: 4.0.0
+Date: 2025-10-20
 Changes:
+  - v4.0.0: Extended validation to content files (getting-started, concepts, etc.)
+            Validates knowledge_progression, see_also, next_steps sections
+            Detects forbidden relative paths (../)
+            Warns on cross-hierarchy references
+            Distinguishes errors (block release) from warnings (refactoring)
   - v3.0.0: Complete rewrite for 4-key path standard
             Understands manifest_base and content_base
             Ignores informational sections (related_manifests, notes, etc.)
@@ -39,17 +44,22 @@ IGNORED_FILES = {
 
 # Sections to ignore during validation (informational only)
 IGNORED_SECTIONS = {
-    'related_manifests',
-    'notes', 
+    'related_manifests',  # Human-readable cross-references, not validated paths
+    'notes',
     'comments',
     'description',
+    'summary',
     'metadata',
     'search_terms',
+    # 'examples',  # REMOVED - code-examples-manifest uses this for real file refs!
     # 'keywords',  # DON'T ignore - this contains actual content references!
     'missing_files',  # These are documented as missing
     'planned_files',  # These are documented as not yet created
     'planned_but_not_created',  # These are documented as not created
-    'cross_references',  # No standard yet for cross-references
+    # 'cross_references',  # REMOVED - Now validated!
+    # 'see_also',  # REMOVED - Now validated!
+    # 'knowledge_progression',  # REMOVED - Now validated!
+    # 'next_steps',  # REMOVED - Now validated!
     'keyword_index',  # OBEX keyword index contains IDs, not file paths
     'natural_groups',  # OBEX grouping metadata
     'topic_definitions',  # OBEX topic metadata
@@ -68,6 +78,11 @@ class ManifestValidator:
         self.obex_author_refs = defaultdict(set)
         self.file_reference_counts = defaultdict(int)  # Track how many times each file is referenced
         self.file_reference_sources = defaultdict(list)  # Track WHERE each reference comes from
+
+        # New tracking for v4.0.0
+        self.relative_path_errors = []  # {file, line, path, issue}
+        self.cross_hierarchy_warnings = []  # {file, line, path, source_hierarchy, target_hierarchy}
+        self.processed_content_files = set()  # Track which content files we've validated
         
     def resolve_path(self, base: Optional[str], reference: str) -> str:
         """Resolve a path using the 4-key standard"""
@@ -77,7 +92,60 @@ class ManifestValidator:
         else:
             # No base means reference should be complete
             return reference
-            
+
+    def validate_path_reference(self, reference: str, content_base: Optional[str],
+                               source_file: str, context: str = "") -> Optional[str]:
+        """
+        Validate a path reference and detect forbidden patterns.
+        Returns resolved path if valid, None if error detected.
+        """
+        # ERROR: Detect forbidden relative paths with ../
+        if '../' in reference or reference.startswith('..'):
+            self.relative_path_errors.append({
+                'file': source_file,
+                'path': reference,
+                'issue': 'Relative path with ../ (forbidden)',
+                'context': context
+            })
+            self.errors.append(f"Forbidden relative path in {source_file}: {reference}")
+            return None
+
+        # Resolve the path
+        resolved = self.resolve_path(content_base, reference)
+
+        # WARNING: Detect cross-hierarchy references
+        if reference.startswith('/engineering/knowledge-base/P2/'):
+            # This is an absolute path - check if it crosses hierarchies
+            source_hierarchy = self._extract_hierarchy(source_file)
+            target_hierarchy = self._extract_hierarchy(reference)
+
+            if source_hierarchy and target_hierarchy and source_hierarchy != target_hierarchy:
+                self.cross_hierarchy_warnings.append({
+                    'file': source_file,
+                    'path': reference,
+                    'source_hierarchy': source_hierarchy,
+                    'target_hierarchy': target_hierarchy,
+                    'context': context
+                })
+
+        return resolved
+
+    def _extract_hierarchy(self, path: str) -> Optional[str]:
+        """Extract hierarchy from path (e.g., 'language/spin2', 'architecture')"""
+        # Pattern: /engineering/knowledge-base/P2/{hierarchy}/...
+        parts = path.split('/')
+        try:
+            p2_idx = parts.index('P2')
+            if p2_idx + 1 < len(parts):
+                hierarchy = parts[p2_idx + 1]
+                # For language hierarchy, include the specific language
+                if hierarchy == 'language' and p2_idx + 2 < len(parts):
+                    return f"language/{parts[p2_idx + 2]}"
+                return hierarchy
+        except (ValueError, IndexError):
+            pass
+        return None
+
     def load_manifest(self, manifest_path: Path) -> Optional[Dict]:
         """Load a manifest file and extract its bases"""
         if not manifest_path.exists():
@@ -123,36 +191,36 @@ class ManifestValidator:
         self._process_data(data, manifest_path, manifest_base, content_base,
                           is_obex_category, is_obex_author, depth)
     
-    def _process_data(self, data, manifest_path: Path, 
+    def _process_data(self, data, manifest_path: Path,
                      manifest_base: str, content_base: str,
-                     is_obex_category: bool, is_obex_author: bool, 
+                     is_obex_category: bool, is_obex_author: bool,
                      depth: int) -> None:
         """Process any data structure looking for manifest and content references"""
-        
+
         if isinstance(data, dict):
             for key, value in data.items():
                 # Skip ignored sections
                 if key in IGNORED_SECTIONS:
                     continue
-                    
+
                 # Skip the base definitions themselves
                 if key in ('manifest_base', 'content_base'):
                     continue
-                    
+
                 # Process based on key type
                 if key == 'manifest' and isinstance(value, str):
                     # This is a manifest reference
                     full_path = self.resolve_path(manifest_base, value)
                     self._process_manifest_ref(full_path, depth)
                     continue  # Don't recurse further into this value
-                    
+
                 elif key == 'content' and isinstance(value, str):
                     # This is a content reference
                     full_path = self.resolve_path(content_base, value)
-                    self._track_content_ref(full_path, is_obex_category, is_obex_author, 
+                    self._track_content_ref(full_path, is_obex_category, is_obex_author,
                                           manifest_path, value)
                     continue  # Don't recurse further into this value
-                    
+
                 # Handle OBEX-style sub_manifests
                 elif key == 'sub_manifests' and isinstance(value, dict):
                     for section_name, section_data in value.items():
@@ -163,12 +231,12 @@ class ManifestValidator:
                                 for manifest_file in manifests:
                                     full_path = self.resolve_path(manifest_base, f"{sub_path}{manifest_file}")
                                     self._process_manifest_ref(full_path, depth)
-                    
+
                 else:
                     # Recurse into the value
                     self._process_data(value, manifest_path, manifest_base, content_base,
                                      is_obex_category, is_obex_author, depth)
-                    
+
         elif isinstance(data, list):
             for item in data:
                 self._process_data(item, manifest_path, manifest_base, content_base,
@@ -189,24 +257,24 @@ class ManifestValidator:
         else:
             self.errors.append(f"Referenced manifest not found: {manifest_ref}")
     
-    def _track_content_ref(self, content_ref: str, is_obex_category: bool, 
-                          is_obex_author: bool, manifest_path: Path, 
+    def _track_content_ref(self, content_ref: str, is_obex_category: bool,
+                          is_obex_author: bool, manifest_path: Path,
                           original_ref: str) -> None:
         """Track a content file reference"""
-        # Remove leading slash if present  
+        # Remove leading slash if present
         if content_ref.startswith('/'):
             content_ref = content_ref[1:]
-            
+
         # Track the reference
         self.referenced_files.add(content_ref)
         self.file_reference_counts[content_ref] += 1
-        
+
         # Track WHERE this reference came from
         source = str(manifest_path.relative_to(self.root))
         # Debug: Only add if not already from same source (prevent duplicates from same manifest)
         if not self.file_reference_sources[content_ref] or self.file_reference_sources[content_ref][-1] != source:
             self.file_reference_sources[content_ref].append(source)
-        
+
         # Track OBEX dual-organization
         if is_obex_category and 'objects/' in original_ref:
             category = manifest_path.stem.replace('-manifest', '')
@@ -214,7 +282,84 @@ class ManifestValidator:
         elif is_obex_author and 'objects/' in original_ref:
             author = manifest_path.stem.replace('-manifest', '')
             self.obex_author_refs[original_ref].add(author)
-    
+
+    def process_content_file(self, content_path: Path) -> None:
+        """
+        Process a content file to validate its internal path references.
+        Validates knowledge_progression, see_also, next_steps, etc.
+        """
+        # Check if we've already processed this file
+        relative_path = content_path.relative_to(self.root)
+        path_str = str(relative_path)
+        if path_str in self.processed_content_files:
+            return
+
+        self.processed_content_files.add(path_str)
+
+        # Load the file
+        data = self.load_manifest(content_path)  # Reuse load method (works for any YAML)
+        if not data:
+            return
+
+        # Extract content_base if present
+        content_base = data.get('content_base', '')
+
+        # Process the data looking for content references
+        self._process_content_data(data, content_path, content_base)
+
+    def _process_content_data(self, data, content_path: Path, content_base: str) -> None:
+        """Process content file data looking for 'content:' references"""
+        if isinstance(data, dict):
+            for key, value in data.items():
+                # Skip ignored sections
+                if key in IGNORED_SECTIONS:
+                    continue
+
+                # Skip the base definition itself
+                if key == 'content_base':
+                    continue
+
+                # Process 'content:' keys
+                if key == 'content' and isinstance(value, str):
+                    # This is a content reference - validate it!
+                    source_file = str(content_path.relative_to(self.root))
+                    validated_path = self.validate_path_reference(
+                        value, content_base, source_file, f"key='{key}'"
+                    )
+                    if validated_path:
+                        # Track the reference
+                        self._track_content_ref(validated_path, False, False,
+                                              content_path, value)
+                    continue  # Don't recurse into this value
+
+                # Recurse into the value
+                self._process_content_data(value, content_path, content_base)
+
+        elif isinstance(data, list):
+            for item in data:
+                self._process_content_data(item, content_path, content_base)
+
+    def process_all_content_files(self) -> None:
+        """
+        Scan and process all content files in the knowledge base.
+        This validates internal references in getting-started, concepts, etc.
+        """
+        kb_path = self.root / "engineering" / "knowledge-base" / "P2"
+        if not kb_path.exists():
+            return
+
+        for yaml_file in kb_path.rglob("*.yaml"):
+            # Skip ignored files
+            if yaml_file.name in IGNORED_FILES:
+                continue
+
+            # Skip .history directories
+            if '.history' in yaml_file.parts:
+                continue
+
+            # Process the content file
+            self.process_content_file(yaml_file)
+
     def validate_root_manifest(self) -> Dict:
         """Load and validate the root manifest"""
         root_manifest_path = self.root / "manifests" / "propeller-knowledge-root.yaml"
@@ -231,7 +376,7 @@ class ManifestValidator:
         root_path = self.root / "manifests" / "propeller-knowledge-root.yaml"
         if root_path.exists():
             self.process_manifest(root_path)
-            
+
         # Also process P2 root if it exists
         p2_root = self.root / "manifests" / "P2" / "p2-root.yaml"
         if p2_root.exists():
@@ -239,13 +384,18 @@ class ManifestValidator:
             data = self.load_manifest(p2_root)
             if data and 'manifest_registry' in data:
                 for name, entry in data['manifest_registry'].items():
-                    if isinstance(entry, dict) and 'path' in entry:
-                        manifest_path = entry['path']
-                        if manifest_path.startswith('/'):
-                            manifest_path = manifest_path[1:]
-                        full_path = self.root / manifest_path
-                        if full_path.exists():
-                            self.process_manifest(full_path, depth=1)
+                    if isinstance(entry, dict):
+                        # Support both 'path:' (legacy) and 'manifest:' (4-key standard)
+                        manifest_ref = entry.get('manifest') or entry.get('path')
+                        if manifest_ref:
+                            # Resolve relative to manifests/P2/
+                            manifest_base = data.get('manifest_base', '/manifests/P2')
+                            full_ref = self.resolve_path(manifest_base, manifest_ref)
+                            if full_ref.startswith('/'):
+                                full_ref = full_ref[1:]
+                            full_path = self.root / full_ref
+                            if full_path.exists():
+                                self.process_manifest(full_path, depth=1)
     
     def get_multiply_referenced_files(self) -> Dict[str, List[str]]:
         """Categorize multiply-referenced files"""
@@ -474,7 +624,48 @@ class ManifestValidator:
             
             if len(by_dir) > 10:
                 print(f"  ... and {len(by_dir) - 10} more directories")
-        
+
+        # V4.0.0: Report detailed path validation errors and warnings
+        if self.relative_path_errors:
+            print(f"\n{RED}{BOLD}❌ PATH ERRORS (Block Release):{RESET}")
+            print(f"{RED}Found {len(self.relative_path_errors)} forbidden relative path(s){RESET}\n")
+            for err in self.relative_path_errors[:10]:
+                print(f"  File: {err['file']}")
+                print(f"  Issue: {err['issue']}")
+                print(f"  Path: {err['path']}")
+                if err.get('context'):
+                    print(f"  Context: {err['context']}")
+                print()
+            if len(self.relative_path_errors) > 10:
+                print(f"  ... and {len(self.relative_path_errors) - 10} more path errors\n")
+
+        if self.cross_hierarchy_warnings:
+            print(f"\n{YELLOW}{BOLD}⚠️  CROSS-HIERARCHY WARNINGS (Refactoring Opportunities):{RESET}")
+            print(f"{YELLOW}Found {len(self.cross_hierarchy_warnings)} cross-hierarchy reference(s){RESET}\n")
+
+            # Group by target file for better analysis
+            by_target = defaultdict(list)
+            for warn in self.cross_hierarchy_warnings:
+                by_target[warn['path']].append(warn)
+
+            for target_path in sorted(by_target.keys())[:5]:
+                refs = by_target[target_path]
+                print(f"  {YELLOW}→ {target_path}{RESET}")
+                print(f"    Referenced by {len(refs)} file(s) across hierarchies:")
+                for ref in refs[:3]:
+                    print(f"      • {ref['file']}")
+                    print(f"        {ref['source_hierarchy']} → {ref['target_hierarchy']}")
+                if len(refs) > 3:
+                    print(f"      ... and {len(refs) - 3} more")
+                print()
+
+            if len(by_target) > 5:
+                print(f"  ... and {len(by_target) - 5} more cross-hierarchy targets\n")
+
+            print(f"{YELLOW}  Refactoring Suggestion:{RESET}")
+            print(f"{YELLOW}  Consider creating hierarchy-specific versions of shared content{RESET}")
+            print(f"{YELLOW}  Example: architecture/smart_pins.yaml → language/spin2/smart-pins.yaml{RESET}\n")
+
         # Final status
         print()
         if self.errors:
@@ -498,9 +689,9 @@ def main():
     script_dir = Path(__file__).parent
     repo_root = script_dir.parent.parent  # Go up two levels from engineering/tools
     
-    print(f"Validating manifest linkages in: {repo_root}")
-    print(f"Using 4-key path standard (v3.0.0)")
-    
+    print(f"Validating path references in: {repo_root}")
+    print(f"Using 4-key path standard (v4.0.0 - now includes content files)")
+
     # Generate baseline counts
     print("\n" + "=" * 50)
     print(f"{BOLD}BASELINE FILE COUNTS{RESET}")
@@ -535,10 +726,15 @@ def main():
     
     # Create validator and run
     validator = ManifestValidator(repo_root)
-    
+
     # Process the manifest hierarchy
     validator.process_manifest_hierarchy()
-    
+
+    # Process all content files (v4.0.0 - validates internal references)
+    print(f"\n{CYAN}Processing content files for internal references...{RESET}")
+    validator.process_all_content_files()
+    print(f"{GREEN}✓ Processed {len(validator.processed_content_files)} content files{RESET}")
+
     # Prepare baseline counts for summary
     baseline_counts = {
         'manifests': manifest_count,

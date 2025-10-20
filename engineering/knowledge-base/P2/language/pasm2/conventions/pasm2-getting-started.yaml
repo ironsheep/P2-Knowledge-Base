@@ -28,7 +28,7 @@ knowledge_progression:
         
     THEN_CHOOSE:
       - name: "Smart Pin Modes"
-        content: "../architecture/smart_pins.yaml"
+        content: "/engineering/knowledge-base/P2/architecture/smart_pins.yaml"
         when: "Need autonomous hardware (PWM, UART, ADC, counters, etc.)"
       - name: "CORDIC Operations"
         when: "Need math coprocessor (trig, logs, rotation)"
