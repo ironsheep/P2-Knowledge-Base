@@ -156,18 +156,28 @@ multi_pin_operations:
       ANDN    OUTA, mask         ' Drive low
 
 pin_field_encoding:
+  structure:
+    format: "11-bit value encoding base pin and additional pins"
+    bits_5_0: "Base pin number (0-63)"
+    bits_10_6: "Additional pins count (0-31)"
+
   addpins_operator:
     syntax: "base_pin ADDPINS count"
     example: "#8 ADDPINS #7 = pins 8 through 15"
     encoding: "Bits [10:6]=count, bits [5:0]=base_pin"
-    
+
   manual_encoding:
     formula: "(count << 6) | base_pin"
     example: "(7 << 6) | 8 = $1C8 = pins 8-15"
-    
-  wrapping:
-    within_a_pins: "Pin fields wrap within P0-P31"
-    within_b_pins: "Pin fields wrap within P32-P63"
+    direct_constant: "MOV pin_field, ##%00111_001000  ' 7 additional + base 8"
+
+  wrapping_behavior:
+    critical_rule: "Pin fields wrap WITHIN 32-pin blocks only"
+    p0_p31_block: "Pins 0-31 wrap within themselves"
+    p32_p63_block: "Pins 32-63 wrap within themselves"
+    example_no_wrap: "#8 ADDPINS #7 = pins 8-15 (no wrapping)"
+    example_with_wrap: "#28 ADDPINS #7 = pins 28-31, 0-3 (wraps at 31)"
+    cross_block: "Cannot span from P31 to P32 - separate operations required"
 
 direction_output_instructions:
   dir_only:
@@ -204,6 +214,29 @@ direction_output_instructions:
     FLTH: "DIR=0"
     FLTNOT: "DIR=0"
     note: "All FLT* variants set DIR=0; suffix affects OUT bit for future use"
+
+pin_span_setq_override:
+  concept: "Rev B silicon enhancement - SETQ overrides embedded pin span fields"
+
+  dir_out_instructions:
+    affected: "DIRH/DIRL/OUTH/OUTL/DRVH/DRVL/etc."
+    field_override: "D[10:6] pin span overridden by SETQ"
+    example: |
+      SETQ  #15           ' Override to 16 pins
+      DRVH  #8            ' Drive pins 8-23 high (not just pin 8)
+    use_case: "Dynamic pin field sizing at runtime"
+
+  smart_pin_instructions:
+    affected: "WRPIN/WXPIN/WYPIN/AKPIN"
+    field_override: "S[10:6] pin span overridden by SETQ"
+    example: |
+      SETQ  #7            ' Override to 8 pins
+      WRPIN mode, #16     ' Configure pins 16-23 (not just pin 16)
+    use_case: "Batch smart pin configuration"
+
+  priority:
+    setq_first: "SETQ value takes precedence over instruction's embedded field"
+    no_setq: "Use instruction's embedded ADDPINS or constant field normally"
 
 drive_strength_configuration:
   concept: |
@@ -352,11 +385,51 @@ hardware_specifications:
   max_current_per_pin: "150mA"
   max_current_total: "Check datasheet for package limits"
 
+multi_cog_pin_coordination:
+  architecture:
+    per_cog_registers: "DIR/OUT/IN registers at $1FA-$1FF exist in each COG's private register RAM"
+    independence: "Each COG controls only its own pin drivers via its DIR bits"
+    shared_access: "All COGs can access all 64 pins, but each COG's DIR determines if IT drives"
+
+  coordination_strategies:
+    single_cog_ownership:
+      approach: "Assign each pin to one COG (simplest, recommended for most applications)"
+      implementation: "Only one COG sets DIR=1 for any given pin"
+      advantage: "No coordination overhead, inherently safe"
+
+    shared_access_with_coordination:
+      approach: "Multiple COGs can share pin access with careful management"
+      requirements:
+        - "Use locks (LOCKTRY/LOCKREL) for exclusive access during drive operations"
+        - "COGs must tri-state (DIRL/FLTL) before releasing pin to another COG"
+        - "Protocol-based handoff between COGs"
+      use_cases: "Bidirectional protocols, time-multiplexed pin usage, COG handoff"
+
+  critical_rule:
+    avoid: "Multiple COGs simultaneously setting DIR=1 for same pin"
+    consequence: "Behavior undefined if COGs drive conflicting states (not documented in P2 spec)"
+    hardware_note: "No documented conflict resolution, wire-OR, or priority scheme"
+
+  safe_operations:
+    reading: "All COGs can read any pin (INA/INB) simultaneously without coordination"
+    smart_pins: "Smart pin state (RQPIN) can be read by multiple COGs safely"
+
+  lock_coordination_example:
+    code: |
+      ' COG 0 and COG 1 share pin 16
+      LOCKTRY lock_id WC        ' Try to acquire lock
+      IF_C  JMP #try_again      ' C=1 means locked by other COG
+      DRVH  #16                 ' We have lock, drive pin
+      ' ... do work ...
+      DIRL  #16                 ' Release pin (tri-state)
+      LOCKREL lock_id           ' Release lock
+
 related_concepts:
   - "Smart pin autonomous modes (PWM, UART, etc.)"
   - "Streamer for high-speed pin sequencing"
   - "Pin timing specifications"
-  - "Multi-cog pin coordination"
+  - "Multi-cog pin coordination with locks"
+  - "SETQ instruction for pin span override"
 
 see_also:
   - "engineering/knowledge-base/P2/language/pasm2/concepts/pasm2-getting-started.yaml"

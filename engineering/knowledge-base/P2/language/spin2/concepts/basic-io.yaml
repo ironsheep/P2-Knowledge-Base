@@ -144,19 +144,31 @@ multi_pin_operations:
     toggle_bits: "OUTA ^= %11110000  ' Toggle P7-P4"
 
 pin_field_encoding:
+  structure:
+    format: "11-bit value encoding base pin and additional pins"
+    bits_5_0: "Base pin number (0-63)"
+    bits_10_6: "Additional pins count (0-31)"
+    formula: "(additional_pins & $1F) << 6 | (base_pin & $3F)"
+
   addpins_operator:
     syntax: "base_pin ADDPINS count"
     example: "8 ADDPINS 7 = pins 8 through 15 (8 pins total)"
     meaning: "Start at base_pin, include count additional pins"
-    
+    encoding: "Compiler generates 11-bit pin field value"
+
   range_operator:
     syntax: "bottom_pin..top_pin"
     example: "8..15 = pins 8 through 15"
+    wrapping_note: "Wraps if top_pin < bottom_pin"
     use_case: "Primarily for constants and readability"
-    
-  wrapping:
-    within_a_pins: "Pin fields wrap within P0-P31"
-    within_b_pins: "Pin fields wrap within P32-P63"
+
+  wrapping_behavior:
+    critical_rule: "Pin fields wrap WITHIN 32-pin blocks only"
+    p0_p31_block: "Pins 0-31 wrap within themselves"
+    p32_p63_block: "Pins 32-63 wrap within themselves"
+    example_no_wrap: "8 ADDPINS 7 = pins 8-15 (no wrapping)"
+    example_with_wrap: "28 ADDPINS 7 = pins 28-31, 0-3 (wraps at 31)"
+    cross_block: "Cannot span from P31 to P32 - separate operations required"
 
 drive_strength_configuration:
   concept: |
@@ -384,11 +396,40 @@ application_examples:
           PINLOW(pin)
           WAITUS(1)      ' T0L = 850ns
 
+multi_cog_pin_coordination:
+  architecture:
+    per_cog_registers: "DIR/OUT/IN registers at $1FA-$1FF exist in each COG's private register RAM"
+    independence: "Each COG controls only its own pin drivers via its DIR bits"
+    shared_access: "All COGs can access all 64 pins, but each COG's DIR determines if IT drives"
+
+  coordination_strategies:
+    single_cog_ownership:
+      approach: "Assign each pin to one COG (simplest, recommended for most applications)"
+      implementation: "Only one COG sets DIR=1 for any given pin"
+      advantage: "No coordination overhead, inherently safe"
+
+    shared_access_with_coordination:
+      approach: "Multiple COGs can share pin access with careful management"
+      requirements:
+        - "Use locks for exclusive access during drive operations"
+        - "COGs must tri-state (DIR=0) before releasing pin to another COG"
+        - "Protocol-based handoff between COGs"
+      use_cases: "Bidirectional protocols, time-multiplexed pin usage, COG handoff"
+
+  critical_rule:
+    avoid: "Multiple COGs simultaneously setting DIR=1 for same pin"
+    consequence: "Behavior undefined if COGs drive conflicting states (not documented in P2 spec)"
+    hardware_note: "No documented conflict resolution, wire-OR, or priority scheme"
+
+  safe_operations:
+    reading: "All COGs can read any pin (INA/INB) simultaneously without coordination"
+    smart_pins: "Smart pin state (RQPIN) can be read by multiple COGs safely"
+
 related_concepts:
   - "Smart pin autonomous modes (PWM, UART, etc.)"
   - "Inline PASM2 for performance-critical I/O"
   - "Pin timing specifications"
-  - "Multi-cog pin coordination"
+  - "Multi-cog pin coordination with locks"
 
 see_also:
   - "engineering/knowledge-base/P2/language/spin2/conventions/spin2-getting-started.yaml"
