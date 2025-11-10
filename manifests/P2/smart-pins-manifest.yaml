@@ -53,8 +53,8 @@ smart_pin_modes:
       - {name: "11111", content: "smart-pin-11111-async-serial-receive.yaml", desc: "Async serial receive"}
     
     sync_serial:
-      - {name: "11100", content: "smart-pin-11100-sync-serial-receive.yaml", desc: "Sync serial receive"}
-      - {name: "11101", content: "smart-pin-11101-sync-serial-transmit.yaml", desc: "Sync serial transmit"}
+      - {name: "11100", content: "smart-pin-11100-sync-serial-transmit.yaml", desc: "Sync serial transmit"}
+      - {name: "11101", content: "smart-pin-11101-sync-serial-receive.yaml", desc: "Sync serial receive"}
     
   pwm_modes:
     pulse_generation:
@@ -204,8 +204,8 @@ actual_files_in_directory:
   - smart-pin-11001-adc-external-clock.yaml
   - smart-pin-11010-adc-scope-trigger.yaml
   - smart-pin-11011-usb-host-device.yaml
-  - smart-pin-11100-sync-serial-receive.yaml
-  - smart-pin-11101-sync-serial-transmit.yaml
+  - smart-pin-11100-sync-serial-transmit.yaml
+  - smart-pin-11101-sync-serial-receive.yaml
   - smart-pin-11110-async-serial-transmit.yaml
   - smart-pin-11111-async-serial-receive.yaml
 
