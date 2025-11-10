@@ -2,9 +2,9 @@
 # Repository: https://github.com/ironsheep/P2-Knowledge-Base
 # This is the entry point - fetch this first, then follow instructions
 
-version: "2.2"
+version: "2.3"
 schema_version: "2025-01-01"
-last_updated: "2025-10-04T00:00:00Z"
+last_updated: "2025-11-10T21:28:08Z"
 
 # STEP 1: Check AI Instructions (compare hash with your stored version)
 ai_instructions:
