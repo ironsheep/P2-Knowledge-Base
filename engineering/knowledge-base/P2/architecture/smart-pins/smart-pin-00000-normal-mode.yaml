@@ -1,282 +1,142 @@
-# Smart Pin Mode: %00000 - Normal Mode
-# Silicon Doc Reference: part4-smart-pins.txt, pages 85-86
-# Layer 1: Direct Silicon Doc extraction
+# Smart Pin Mode: %00000 - Normal (Smart Pin OFF)
+# Concise reference optimized for AI code generation
 
-mode_id: "%00000"
+mode: "%00000"
+name: "Normal I/O (Smart Pin OFF)"
+category: "basic_io"
 
-mode_name: "Normal Mode"
+# Constants
+constants:
+  spin2: "P_NORMAL"
+  pasm2: "P_NORMAL"  
+  mode_bits: "%00000"  # Smart pin disabled
 
-mode_group: "control"
+# Operation
+operation: |
+  Smart pin disabled. Pin operates as standard I/O with direct control.
+  DIR controls output enable, OUT sets output state, IN reads input.
+  Can still use low-level pin modes (DAC, ADC, comparator, etc).
 
-mode_complexity: "basic"
+# Parameters (when smart pin OFF)
+x_register: "Not used by smart pin"
+y_register: "Not used by smart pin"
+z_register: "Not used by smart pin"
+in_flag: "Reflects physical pin state (not smart pin)"
 
-dac_mode_dependency: false
+# Pin Usage
+pins:
+  normal_operation: |
+    DIR=0: Input mode (Hi-Z)
+    DIR=1: Output mode (drives OUT value)
+    IN: Always reflects pin state
+    OUT: Output value when DIR=1
 
-pin_pairing: "none"
+# Complete Spin2 Example
+spin2_complete: |
+  CON
+    LED_PIN = 56
+    BUTTON_PIN = 57
+    
+  PUB main()
+    ' Configure as normal I/O (smart pin OFF)
+    WRPIN(LED_PIN, P_NORMAL)     ' Or just 0
+    WRPIN(BUTTON_PIN, P_NORMAL)
+    
+    ' Simple LED control
+    PINHIGH(LED_PIN)              ' DIR=1, OUT=1
+    WAITMS(500)
+    PINLOW(LED_PIN)               ' DIR=1, OUT=0
+    WAITMS(500)
+    PINTOGGLE(LED_PIN)            ' Toggle OUT
+    
+    ' Read button with pull-up
+    WRPIN(BUTTON_PIN, P_NORMAL | P_HIGH_15K)  ' Add pull-up
+    PINFLOAT(BUTTON_PIN)          ' Input mode
+    
+    REPEAT
+      IF PINREAD(BUTTON_PIN) == 0  ' Active low button
+        PINHIGH(LED_PIN)
+      ELSE
+        PINLOW(LED_PIN)
+        
+  PUB configure_analog(pin)
+    ' Can still use low-level modes
+    WRPIN(pin, P_NORMAL | P_ADC_1X)     ' ADC mode, no smart pin
+    WRPIN(pin, P_NORMAL | P_DAC_124R_3V) ' DAC mode, no smart pin
+    WRPIN(pin, P_NORMAL | P_COMPARE_AB)  ' Comparator, no smart pin
 
-wrpin_configuration:
-  base_format: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+# Complete PASM2 Example  
+pasm2_complete: |
+  DAT
+          ORG
   
-  a_input_selector:
-    description: "4-bit A input selector configuration"
-    bit_pattern: "%AAAA"
-    options:
-      - code: "%0000"
-        description: "this pin's read state"
-        polarity: "true"
-        source: "pin_read"
-      - code: "%0001"
-        description: "relative +1 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0010"
-        description: "relative +2 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0011"
-        description: "relative +3 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0100"
-        description: "this pin's OUT bit from cogs"
-        polarity: "true"
-        source: "out_bit"
-      - code: "%0101"
-        description: "relative -3 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0110"
-        description: "relative -2 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0111"
-        description: "relative -1 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%1xxx"
-        description: "inverted versions of above"
-        polarity: "inverted"
-        source: "any"
+  ' Pin assignments
+  led_pin       LONG  56
+  button_pin    LONG  57
   
-  b_input_selector:
-    description: "4-bit B input selector configuration (same as A)"
-    bit_pattern: "%BBBB"
-    options:
-      - code: "%0000"
-        description: "this pin's read state (default)"
-        polarity: "true"
-        source: "pin_read"
-      - code: "%0001"
-        description: "relative +1 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0010"
-        description: "relative +2 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0011"
-        description: "relative +3 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0100"
-        description: "this pin's OUT bit from cogs"
-        polarity: "true"
-        source: "out_bit"
-      - code: "%0101"
-        description: "relative -3 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0110"
-        description: "relative -2 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0111"
-        description: "relative -1 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%1xxx"
-        description: "inverted versions of above"
-        polarity: "inverted"
-        source: "any"
+  ' Configure pins as normal I/O
+  setup_pins
+          MOV   pin, led_pin
+          WRPIN #P_NORMAL, pin        ' Smart pin OFF
+          DIRH  pin                   ' Output mode
+          
+          MOV   pin, button_pin
+          WRPIN ##P_NORMAL | P_HIGH_15K, pin  ' With pull-up
+          DIRL  pin                   ' Input mode
+          RET
   
-  input_logic_filtering:
-    description: "3-bit input logic/filtering after A/B selectors"
-    bit_pattern: "%FFF"
-    options:
-      - code: "%000"
-        description: "A, B (default)"
-        operation: "passthrough"
-        filter_type: "none"
-      - code: "%001"
-        description: "A AND B, B"
-        operation: "logical_and"
-        filter_type: "none"
-      - code: "%010"
-        description: "A OR B, B"
-        operation: "logical_or"
-        filter_type: "none"
-      - code: "%011"
-        description: "A XOR B, B"
-        operation: "logical_xor"
-        filter_type: "none"
-      - code: "%100"
-        description: "A, B, both filtered using global filt0 settings"
-        operation: "passthrough"
-        filter_type: "filt0"
-      - code: "%101"
-        description: "A, B, both filtered using global filt1 settings"
-        operation: "passthrough"
-        filter_type: "filt1"
-      - code: "%110"
-        description: "A, B, both filtered using global filt2 settings"
-        operation: "passthrough"
-        filter_type: "filt2"
-      - code: "%111"
-        description: "A, B, both filtered using global filt3 settings"
-        operation: "passthrough"
-        filter_type: "filt3"
+  ' Blink LED
+  blink_led
+          MOV   pin, led_pin
+          DRVNOT pin                  ' Toggle output
+          WAITX ##25_000_000          ' 250ms @ 100MHz
+          RET
+          
+  ' Read button and control LED
+  main_loop
+          MOV   pin, button_pin
+          TESTP pin WC                ' Read pin to C
+    IF_NC MOV   pin, led_pin         ' If button pressed (low)
+    IF_NC DRVH  pin                  ' Turn LED on
+    IF_C  MOV   pin, led_pin         ' If button released
+    IF_C  DRVL  pin                  ' Turn LED off
+          JMP   #main_loop
+          
+  ' Variables
+  pin     RES   1
+
+# Inline PASM2 in Spin2
+spin2_inline: |
+  PUB toggle_fast(pin)
+    ' Direct pin control in PASM2
+    ORG
+      DRVNOT pin                    ' Toggle pin directly
+    END
+    
+  PUB read_pin(pin) : state
+    ORG
+      TESTP  pin WC                 ' Read pin to C flag
+      MUXC   state, #1             ' Move C to bit 0 of state
+    END
+
+# Key Points
+standard_io: |
+  No smart pin features active
+  Direct control via DIR/OUT/IN
+  Fastest response time (2 clocks)
   
-  low_level_control:
-    description: "13-bit low-level pin control (M[12:0])"
-    bit_pattern: "%M............"
-    special_modes:
-      - condition: "M[12:10] = %101"
-        behavior: "DAC_MODE enabled - special DAC/ADC behaviors"
+low_level_modes: |
+  Can combine with P_DAC_*, P_ADC_*, P_COMPARE_* modes
+  These work without smart pin enabled
   
-  dir_out_control:
-    description: "2-bit pin DIR/OUT control"
-    bit_pattern: "%TT"
-    smart_off_behavior:
-      non_dac_mode:
-        - code: "%0x"
-          description: "OUT drives output"
-        - code: "%1x"
-          description: "OTHER drives output"
-      dac_mode:
-        - code: "%00"
-          description: "OUT enables ADC, M[7:0] sets DAC level"
-        - code: "%01"
-          description: "OUT enables ADC, M[3:0] selects cog DAC channel"
-        - code: "%10"
-          description: "OUT drives BIT_DAC"
-        - code: "%11"
-          description: "OTHER drives BIT_DAC"
-    smart_on_behavior:
-      dac_modes: []
-      non_dac_modes: []
-
-operation_description: |
-  Normal mode disables all smart pin functionality, returning the pin to standard I/O operation.
-  In this mode, the pin responds directly to DIR and OUT bits set by cogs, with optional input
-  filtering and selection capabilities. The A input selector determines what drives the IN signal
-  in non-smart-pin modes. Pin behavior is entirely controlled by the low-level M[12:0] configuration
-  bits and the DIR/OUT control bits. No autonomous operation occurs - all pin state changes must
-  be explicitly controlled by cog operations.
-
-timing_specifications:
-  clock_relationship: "No autonomous timing - pin responds immediately to cog commands"
-  base_period:
-    description: "Not applicable - no periodic operation"
-    min_clocks: 0
-    max_clocks: 0
-  update_frequency: "Immediate response to DIR/OUT changes"
-  settling_time: "1-2 clock cycles for DIR/OUT changes to take effect"
-
-in_signal_behavior:
-  trigger_conditions:
-    - "No automatic IN signal generation in normal mode"
-  acknowledgment_method: "Not applicable"
-  polling_restrictions: "IN signal reflects A input selector result only"
-
-
-initialization_requirement:
-  critical: true
-  description: "Smart pin MUST be reset before configuration"
-  requirement: |
-    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
-    This ensures the smart pin is in a known state and prevents configuration conflicts.
-  reset_sequence:
-    pasm2: |
-      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
-      WRPIN mode, pin   ' Configure mode
-      WXPIN x, pin      ' Set X parameter
-      WYPIN y, pin      ' Set Y parameter
-      DIRH  pin         ' Enable smart pin (DIR=1)
-    spin2: |
-      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
-      PINSTART(pin, mode, x, y)  ' Configure and enable
-      ' OR manually:
-      PINFLOAT(pin)              ' Ensure DIR=0
-      WRPIN(pin, mode)           ' Set mode
-      WXPIN(pin, x)              ' Set X parameter
-      WYPIN(pin, y)              ' Set Y parameter
-      PINHIGH(pin)               ' Enable (DIR=1)
-
-reset_behavior:
-  dir_low_effects:
-    - "Pin enters input mode"
-    - "Smart pin configuration retained but inactive"
-  dir_transition_effects: "Pin begins operating according to M[12:0] and %TT settings"
-  wrpin_zero_effects: "Returns pin to normal mode, clearing all smart pin configuration"
-  reset_requirement: "ALWAYS set DIR=0 before reconfiguring the smart pin"
-
-common_applications:
-  - application: "Standard digital I/O"
-    description: "Basic input/output operations without smart pin features"
-    complexity_level: "beginner"
-  - application: "Filtered input reading"
-    description: "Using global filters to clean up noisy input signals"
-    complexity_level: "intermediate"
-  - application: "Pin state routing"
-    description: "Reading adjacent pin states for complex logic operations"
-    complexity_level: "intermediate"
-
-configuration_examples:
-  - name: "Basic digital I/O"
-    description: "Configure pin for standard input/output operation"
-    reset_code: "DIRL pin_number                  ' REQUIRED: Reset before configuration"
-    wrpin_code: "WRPIN #0, pin_number"
-    explanation: "Clears all smart pin configuration, returns to normal I/O mode"
+common_uses:
+  - "Simple LED control"
+  - "Button/switch input"
+  - "Direct bit-banging"
+  - "When smart pin features not needed"
   
-  - name: "Filtered input"
-    description: "Use global filter 1 for noise reduction"
-    reset_code: "DIRL pin_number                  ' REQUIRED: Reset before configuration"
-    wrpin_code: "WRPIN ##%0000_0000_101_0000000000000_00_00000_0, pin_number"
-    explanation: "A and B inputs filtered with filt1, standard DIR/OUT control"
+transition_to_smart: |
+  WRPIN with mode value enables smart pin
+  WRPIN with 0 returns to normal I/O
   
-  - name: "Adjacent pin monitoring"
-    description: "Monitor the next pin's state"
-    reset_code: "DIRL pin_number                  ' REQUIRED: Reset before configuration"
-    wrpin_code: "WRPIN ##%0001_0000_000_0000000000000_00_00000_0, pin_number"
-    explanation: "A input reads from relative +1 pin, B input from this pin"
-
-related_modes:
-  - mode_id: "%00001"
-    relationship: "alternative"
-    description: "Long repository mode provides simple data storage capability"
-
-related_instructions:
-  - instruction: "WRPIN"
-    usage_context: "Configure pin mode and low-level settings"
-  - instruction: "DIRH/DIRL"
-    usage_context: "Control pin direction in normal mode"
-  - instruction: "OUTH/OUTL"
-    usage_context: "Control pin output state in normal mode"
-  - instruction: "TESTP"
-    usage_context: "Read pin input state"
-
-hardware_considerations:
-  power_implications: "Minimal power consumption - no autonomous switching"
-  pin_loading_effects: "Standard CMOS input/output loading"
-  noise_considerations: "No built-in noise generation - can use filters for noise reduction"
-  thermal_effects: "Minimal thermal generation in static states"
-
-extraction_metadata:
-  extraction_date: "2025-09-06"
-  source_documents:
-    - document: "Silicon Doc part4-smart-pins.txt"
-      pages: [85, 86]
-      section: "SMART PIN MODES - %00000 = normal mode"
-  validation_status: "draft"
-  completeness_score: 95
-  technical_accuracy: "silicon_doc_verified"
+related: ["All modes - this is the default/OFF state"]

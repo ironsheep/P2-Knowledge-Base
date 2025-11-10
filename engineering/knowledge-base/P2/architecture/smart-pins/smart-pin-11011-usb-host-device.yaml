@@ -1,103 +1,126 @@
-# Smart Pin Mode: %11011 - USB Host/Device
-# Silicon Doc Reference: part4-smart-pins.txt, page 75
-# Layer 1: Direct Silicon Doc extraction
+title: "USB Host/Device"
+subtitle: "Smart Pin Mode %11011 (P_USB_PAIR)"
+language_reference: "combined"
+compatible_languages: ["Spin2", "PASM2"]
 
-mode_id: "%11011"
+brief_description: "USB differential pair control for host/device communication (even/odd pin pair = DM/DP)"
 
-name: "USB Host/Device"
+detailed_description:
+  operation: |
+    Configures two adjacent pins as a USB differential pair (D-/D+) for USB host or device
+    operation. Requires even/odd pin pair configuration where even pin is DM (D-) and odd pin
+    is DP (D+). OUT signals are overridden to control the USB differential signaling. Handles
+    USB low-level protocol timing and signaling automatically in hardware.
+  
+  timing: |
+    USB signaling handled by smart pin hardware
+    Supports USB 1.1 Full Speed (12 Mbps) and Low Speed (1.5 Mbps)
+    Differential pair timing meets USB specifications
+    IN flag signals USB events
 
-mode_group: "communication"
+registers:
+  x_register:
+    function: "USB configuration and timing parameters"
+  y_register:
+    function: "USB protocol control settings"
+  z_register:
+    function: "USB data and status information"
 
-mode_complexity: "expert"
+flags:
+  in_flag: "USB event notification"
+  out_override: "OUT signals overridden for USB differential control"
 
-dac_mode_dependency: false
+code_examples:
+  - title: "USB Pin Pair Configuration"
+    description: "Configure even/odd pin pair for USB"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        usb_dm_pin = 56                          ' Even pin (D-)
+        usb_dp_pin = 57                          ' Odd pin (D+), must be dm_pin+1
+      
+      PUB main()
+        ' Configure USB pin pair
+        ' Even pin must be configured first
+        pinstart(usb_dm_pin, P_USB_PAIR, x_config, y_config)
+        
+        ' USB communication implemented in software driver
+        ' Smart pins handle low-level differential signaling
+        usb_protocol_handler()
+      
+      PRI usb_protocol_handler()
+        ' USB protocol implementation would go here
+        ' Smart pins handle the physical layer
+        repeat
+          ' Monitor USB events via IN flag
+          if pinread(usb_dm_pin)
+            ' Handle USB event...
+      
+      DAT
+      ' PASM2 USB initialization
+        org
+        ' USB requires precise timing and protocol handling
+        ' Smart pins provide differential signaling
+        dirl    #usb_dm_pin                      ' Reset DM pin
+        dirl    #usb_dp_pin                      ' Reset DP pin
+        wrpin   usb_mode, #usb_dm_pin            ' Configure USB mode
+        wxpin   usb_config, #usb_dm_pin          ' Set parameters
+        wypin   usb_ctrl, #usb_dm_pin            ' Control settings
+        dirh    #usb_dm_pin                      ' Enable USB pair
+        dirh    #usb_dp_pin
+      
+      usb_mode
+        long    %0000_0000_000_000000_0000000_00_11011_0
+      usb_config
+        long    0
+      usb_ctrl
+        long    0
 
-pin_pairing: "differential"
-
-operation_description: |
-  USB host/device mode provides USB communication protocol support using even/odd pin pairs
-  for differential signaling (DM/DP). Handles both USB host and device functionality with
-  support for low-speed (1.5 Mbps) and full-speed (12 Mbps) operation. OUT signal overridden
-  for USB protocol control.
-
-x_parameter:
-  usage: "USB configuration and timing"
-  bit_fields:
-    - range: "X[31:0]"
-      purpose: "USB timing and protocol configuration"
-
-y_parameter:
-  usage: "USB data and control"
-  bit_fields:
-    - range: "Y[31:0]"
-      purpose: "USB packet data and control information"
-
-z_result:
-  data_type: "USB packet data and status"
-  bit_interpretation:
-    - range: "Z[31:0]"
-      meaning: "Received USB data and protocol status"
-
-timing_specifications:
-  clock_relationship: "USB protocol timing (1.5 Mbps or 12 Mbps)"
-  update_frequency: "USB packet-based communication"
-
-in_signal_behavior:
-  trigger_conditions:
-    - "USB packet received"
-    - "USB transaction complete"
-  acknowledgment_method: "rdpin"
-
-pin_pairing:
-  type: "differential"
-  requirement: "Even/odd pin pairs (P0/P1, P2/P3, etc.) for DM/DP signaling"
-
-
-initialization_requirement:
-  critical: true
-  description: "Smart pin MUST be reset before configuration"
-  requirement: |
-    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
-    This ensures the smart pin is in a known state and prevents configuration conflicts.
-  reset_sequence:
-    pasm2: |
-      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
-      WRPIN mode, pin   ' Configure mode
-      WXPIN x, pin      ' Set X parameter
-      WYPIN y, pin      ' Set Y parameter
-      DIRH  pin         ' Enable smart pin (DIR=1)
-    spin2: |
-      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
-      PINSTART(pin, mode, x, y)  ' Configure and enable
-      ' OR manually:
-      PINFLOAT(pin)              ' Ensure DIR=0
-      WRPIN(pin, mode)           ' Set mode
-      WXPIN(pin, x)              ' Set X parameter
-      WYPIN(pin, y)              ' Set Y parameter
-      PINHIGH(pin)               ' Enable (DIR=1)
+  - title: "USB Event Monitoring"
+    description: "Monitor USB events and status"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        usb_dm = 56
+        usb_dp = 57
+      
+      PUB main() | usb_status
+        pinstart(usb_dm, P_USB_PAIR, 0, 0)
+        
+        repeat
+          ' Check for USB events
+          if pinread(usb_dm)
+            usb_status := rdpin(usb_dm)          ' Read USB status/data
+            handle_usb_event(usb_status)
+      
+      PRI handle_usb_event(status)
+        ' Process USB events based on status
+        debug("USB Event: ", uhex(status))
 
 common_applications:
-  - application: "USB device implementation"
-    description: "Create USB peripheral devices"
-    complexity_level: "expert"
-  - application: "USB host controller"
-    description: "Control USB devices from P2"
-    complexity_level: "expert"
+  - "USB device implementation"
+  - "USB host controller"
+  - "USB debugging and protocol analysis"
+  - "Custom USB peripherals"
 
-configuration_examples:
-  - name: "USB device setup"
-    description: "Configure USB device on even/odd pin pair"
-    reset_code: "DIRL usb_dm                  ' REQUIRED: Reset before configuration"
-    wrpin_code: "WRPIN ##%0001_0000_000_0000000000000_01_11011_0, usb_dm"
-    wxpin_code: "WXPIN usb_timing, usb_dm"
-    explanation: "Even pin (DM), odd pin automatically becomes DP"
+related_modes:
+  - "Mode %11110: Async serial TX - single-ended serial output"
+  - "Mode %11111: Async serial RX - single-ended serial input"
+  - "Mode %11100: Sync serial TX - synchronous transmission"
 
-extraction_metadata:
-  extraction_date: "2025-09-06"
-  source_documents:
-    - document: "Silicon Doc part4-smart-pins.txt"
-      pages: [75]
-      section: "%11011 = USB host/device"
-  validation_status: "draft"
-  completeness_score: 75
-  technical_accuracy: "silicon_doc_verified"
+configuration_constants:
+  mode_constant: "P_USB_PAIR"
+  binary_value: "%11011"
+  pin_requirements: "Even/odd consecutive pin pair (even=DM/D-, odd=DP/D+)"
+  out_override: "true"
+
+notes:
+  - "⚠️ Specialized mode - requires USB protocol implementation in software"
+  - "MUST use even/odd consecutive pin pair (e.g., pins 56/57)"
+  - "Even pin = DM (D-), odd pin = DP (D+)"
+  - "OUT signals overridden for differential signaling control"
+  - "Smart pins handle physical layer, software handles protocol"
+  - "Supports USB 1.1 Full Speed and Low Speed"
+  - "Requires careful timing and USB protocol knowledge"
+  - "Consult USB specification and Parallax USB examples for complete implementation"
+  - "Limited documentation available - refer to Parallax forums and examples"

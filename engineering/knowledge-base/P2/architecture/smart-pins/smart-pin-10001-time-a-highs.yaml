@@ -1,103 +1,99 @@
-# Smart Pin Mode: %10001 - Time A-Highs
-# Silicon Doc Reference: part4-smart-pins.txt, page 92
-# Layer 1: Direct Silicon Doc extraction
+title: "Time High State Durations"
+subtitle: "Smart Pin Mode %10001 (P_HIGH_TICKS)"
+language_reference: "combined"
+compatible_languages: ["Spin2", "PASM2"]
 
-mode_id: "%10001"
+brief_description: "Measures duration of consecutive high states on A-input in clock cycles"
 
-mode_name: "Time A-Highs"
+detailed_description:
+  operation: |
+    Continuously measures the duration of each high (logic-1) state on A-input. When input
+    transitions from high to low, captures the high duration in Z register and raises IN flag.
+    Only measures high periods, ignoring low periods. Useful for pulse width measurement,
+    positive duty cycle analysis, and timing high-active signals.
+  
+  timing: |
+    Continuous operation - no periodic mode
+    IN flag raised on high-to-low transitions only
+    Z register captures duration of just-completed high state
+    Z limited to $80000000 (~10.7 seconds at 200MHz)
 
-mode_group: "measurement"
+registers:
+  x_register:
+    function: "Not used in this mode"
+  y_register:  
+    function: "Not used in this mode"
+  z_register:
+    function: "Duration of previous high state in clocks (max $80000000)"
 
-mode_complexity: "intermediate"
+flags:
+  in_flag: "Raised on high-to-low transition"
+  a_input: "Signal to measure high durations"
 
-dac_mode_dependency: false
-
-pin_pairing: "none"
-
-operation_description: |
-  Time A-highs mode measures the duration of continuous high states on the A input.
-  Upon each high-to-low transition, the previous high duration count is placed in Z
-  and IN is raised. Z is limited to $80000000. Only high states are measured -
-  low states are ignored. This provides selective pulse width measurement for
-  positive pulses only.
-
-x_parameter:
-  usage: "Not used in this timing mode"
-
-y_parameter:
-  usage: "Not used in this timing mode"
-
-z_result:
-  data_type: "32-bit high state duration in clock cycles"
-  bit_interpretation:
-    - range: "Z[31:0]"
-      meaning: "Duration of previous high state in clock cycles"
-  flag_behavior: "C flag contains status information"
-  overflow_handling: "Limited to $80000000 maximum count"
-
-timing_specifications:
-  clock_relationship: "Continuous timing during high states"
-  update_frequency: "Result available on each high-to-low transition"
-
-in_signal_behavior:
-  trigger_conditions:
-    - "High-to-low transition on A input"
-  acknowledgment_method: "rdpin"
-
-
-initialization_requirement:
-  critical: true
-  description: "Smart pin MUST be reset before configuration"
-  requirement: |
-    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
-    This ensures the smart pin is in a known state and prevents configuration conflicts.
-  reset_sequence:
-    pasm2: |
-      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
-      WRPIN mode, pin   ' Configure mode
-      WXPIN x, pin      ' Set X parameter
-      WYPIN y, pin      ' Set Y parameter
-      DIRH  pin         ' Enable smart pin (DIR=1)
-    spin2: |
-      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
-      PINSTART(pin, mode, x, y)  ' Configure and enable
-      ' OR manually:
-      PINFLOAT(pin)              ' Ensure DIR=0
-      WRPIN(pin, mode)           ' Set mode
-      WXPIN(pin, x)              ' Set X parameter
-      WYPIN(pin, y)              ' Set Y parameter
-      PINHIGH(pin)               ' Enable (DIR=1)
-
-reset_behavior:
-  dir_low_effects:
-    - "IN signal goes low" 
-    - "Z is set to $00000001"
-  dir_transition_effects: "Begin timing A input high states"
-  wrpin_zero_effects: "Return to normal mode"
-  reset_requirement: "ALWAYS set DIR=0 before reconfiguring the smart pin"
+code_examples:
+  - title: "Pulse Width Measurement"
+    description: "Measure consecutive high pulse widths"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        pulse_pin = 53                           ' Pulse input signal
+      
+      PUB main() | pulse_width, pulse_us
+        pinstart(pulse_pin, P_HIGH_TICKS, 0, 0)
+        
+        repeat
+          ' Wait for high-to-low transition
+          repeat until pinr(pulse_pin)           ' Wait for IN flag
+          
+          pulse_width := rdpin(pulse_pin) & $7FFFFFFF
+          pulse_us := pulse_width / (_clkfreq / 1_000_000)
+          
+          debug("Pulse width: ", udec(pulse_us), " µs")
+      
+      DAT
+      ' PASM2 burst pulse measurement
+        org
+        dirl    #pulse_pin                       ' Reset smart pin
+        wrpin   ##P_HIGH_TICKS, #pulse_pin
+        dirh    #pulse_pin                       ' Enable timing
+        
+        mov     pulse_count, #10                 ' Measure 10 pulses
+      .loop
+        testp   #pulse_pin wc                    ' Wait for transition
+        if_nc   jmp #.loop
+        rdpin   pulse_width, #pulse_pin          ' Read high duration
+        
+        ' Store in array or process
+        alts    pulse_count, #pulse_array
+        mov     0-0, pulse_width
+        
+        djnz    pulse_count, #.loop
+        
+      pulse_array   res     10
 
 common_applications:
-  - application: "Positive pulse width measurement"
-    description: "Measure only positive pulse durations"
-    complexity_level: "intermediate"
-  - application: "High-time duty cycle measurement"
-    description: "Measure high portion of duty cycle"
-    complexity_level: "intermediate"
+  - "Positive pulse width measurement"
+  - "High-active signal timing"
+  - "Servo pulse measurement (1-2ms pulses)"
+  - "Ultrasonic sensor echo timing"
 
-configuration_examples:
-  - name: "Positive pulse measurement"
-    description: "Measure positive pulse widths only"
-    reset_code: "DIRL pulse_high                  ' REQUIRED: Reset before configuration"
-    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_00_10001_0, pulse_high"
-    wxpin_code: "WXPIN #0, pulse_high" 
-    explanation: "Measure high pulse durations on A input"
+related_modes:
+  - "Mode %10000: Time both high and low states"
+  - "Mode %10010: Time with event counting/timeout"
+  - "Mode %01111: Count clocks while high"
+  - "Mode %10011-%10111: Period measurement modes"
 
-extraction_metadata:
-  extraction_date: "2025-09-06"
-  source_documents:
-    - document: "Silicon Doc part4-smart-pins.txt"
-      pages: [92]
-      section: "%10001 = time A-highs"
-  validation_status: "draft"
-  completeness_score: 85
-  technical_accuracy: "silicon_doc_verified"
+configuration_constants:
+  mode_constant: "P_HIGH_TICKS"
+  binary_value: "%10001"
+  common_modifiers:
+    - "P_INVERT_A - Measure low periods instead of high"
+    - "P_FILT1_AB - Add filtering to reduce glitches"
+    - "P_SCHMITT_A - Use Schmitt trigger for cleaner edges"
+
+notes:
+  - "Only times high states, ignores low periods"
+  - "IN flag only on high-to-low transitions"
+  - "No data available during low periods"
+  - "For both high and low timing, use mode %10000"
+  - "Z register limited to $80000000 (2.14 billion clocks)"

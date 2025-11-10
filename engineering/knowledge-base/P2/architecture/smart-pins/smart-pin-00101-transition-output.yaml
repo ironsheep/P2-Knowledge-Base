@@ -1,369 +1,177 @@
 # Smart Pin Mode: %00101 - Transition Output
-# Silicon Doc Reference: part4-smart-pins.txt, page 87
-# Layer 1: Direct Silicon Doc extraction
+# Concise reference optimized for AI code generation
 
-mode_id: "%00101"
+mode: "%00101"
+name: "Transition Output"
+category: "timing"
 
-mode_name: "Transition Output"
+# Constants
+constants:
+  spin2: "P_TRANSITION"
+  pasm2: "P_TRANSITION"
+  mode_bits: "%00101"
 
-mode_group: "signal_gen"
+# Operation
+operation: |
+  Generates specified number of output transitions (toggles).
+  Each transition occurs at base period interval.
+  Equal high/low times create square wave.
+  Pin toggles Y times then holds final state.
 
-mode_complexity: "intermediate"
+# Parameters
+x_register:
+  function: "Base period for transitions"
+  X[15:0]: "Period in clocks between transitions"
+  timing: "Each edge occurs after X[15:0] clocks"
 
-dac_mode_dependency: false
+y_register:
+  function: "Number of transitions"
+  Y[31:0]: "Transition count (edges, not cycles)"
+  behavior: "Non-zero starts toggling, decrements each edge"
+  note: "Y=2 creates one complete cycle"
 
-pin_pairing: "none"
+z_register: "Not used"
 
-wrpin_configuration:
-  base_format: "%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
+in_flag: "Raised when Y transitions complete"
+
+out_signal: "Overridden by smart pin"
+
+# Pin Behavior
+pin_behavior:
+  reset_state: "IN=0, output=0, Y=0"
+  output_control: "Toggles on each transition"
+  final_state: "Holds last state after completion"
+  timing: "Starts at next base period after Y written"
+
+# Complete Spin2 Example
+spin2_complete: |
+  CON
+    CLK_PIN = 40
+    TX_PIN = 41  ' Sync serial TX companion
+    
+  PUB main()
+    ' Generate clock for sync serial
+    generate_clock(CLK_PIN, 1000, 16)   ' 16 transitions
+    
+    ' Continuous square wave
+    continuous_square(CLK_PIN, 100)     ' 100 clock period
+    
+  PUB generate_clock(pin, period, transitions) | mode
+    mode := P_TRANSITION | P_OE
+    
+    PINCLEAR(pin)
+    WRPIN(pin, mode)
+    WXPIN(pin, period)              ' Transition period
+    WYPIN(pin, transitions)         ' Number of edges
+    PINHIGH(pin)                    ' Enable
+    
+  PUB continuous_square(pin, period) | mode
+    ' Generate continuous square wave
+    mode := P_TRANSITION | P_OE
+    
+    PINCLEAR(pin)
+    WRPIN(pin, mode)
+    WXPIN(pin, period/2)            ' Half period for 50% duty
+    WYPIN(pin, 0)                   ' 0 = continuous
+    PINHIGH(pin)
+    
+  PUB sync_serial_clock() | mode
+    ' Clock for synchronous serial modes
+    mode := P_TRANSITION | P_OE
+    
+    PINCLEAR(CLK_PIN)
+    WRPIN(CLK_PIN, mode)
+    WXPIN(CLK_PIN, 100)             ' Bit period
+    ' Sync with TX pin setup
+    PINHIGH(TX_PIN)                 ' Enable TX first
+    WYPIN(CLK_PIN, 16)              ' 8 bits = 16 transitions
+    PINHIGH(CLK_PIN)                ' Start clock
+
+# Complete PASM2 Example
+pasm2_complete: |
+  DAT
+          ORG
   
-  a_input_selector:
-    description: "4-bit A input selector - not used for output mode"
-    bit_pattern: "%AAAA"
-    options:
-      - code: "%0000"
-        description: "this pin's read state (default, not used)"
-        polarity: "true"
-        source: "pin_read"
-      - code: "%0001"
-        description: "relative +1 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0010"
-        description: "relative +2 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0011"
-        description: "relative +3 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0100"
-        description: "this pin's OUT bit from cogs"
-        polarity: "true"
-        source: "out_bit"
-      - code: "%0101"
-        description: "relative -3 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0110"
-        description: "relative -2 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0111"
-        description: "relative -1 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%1xxx"
-        description: "inverted versions of above"
-        polarity: "inverted"
-        source: "any"
+  ' Pin and mode configuration
+  clk_pin       LONG  40
+  trans_mode    LONG  P_TRANSITION | P_OE
   
-  b_input_selector:
-    description: "4-bit B input selector - not used for output mode"
-    bit_pattern: "%BBBB"
-    options:
-      - code: "%0000"
-        description: "this pin's read state (default, not used)"
-        polarity: "true"
-        source: "pin_read"
-      - code: "%0001"
-        description: "relative +1 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0010"
-        description: "relative +2 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0011"
-        description: "relative +3 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0100"
-        description: "this pin's OUT bit from cogs"
-        polarity: "true"
-        source: "out_bit"
-      - code: "%0101"
-        description: "relative -3 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0110"
-        description: "relative -2 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%0111"
-        description: "relative -1 pin's read state"
-        polarity: "true"
-        source: "relative_pin"
-      - code: "%1xxx"
-        description: "inverted versions of above"
-        polarity: "inverted"
-        source: "any"
+  ' Generate N transitions
+  gen_transitions
+          MOV   pin, clk_pin
+          DIRL  pin                   ' Reset
+          WRPIN trans_mode, pin       ' Configure
+          WXPIN period, pin           ' Set period
+          WYPIN count, pin            ' Set transitions
+          DIRH  pin                   ' Start
+  .wait   TESTP pin WC                ' Test IN
+    IF_NC JMP   #.wait              ' Wait for completion
+          RET
   
-  input_logic_filtering:
-    description: "3-bit input logic/filtering - not used for output mode"
-    bit_pattern: "%FFF"
-    options:
-      - code: "%000"
-        description: "A, B (default)"
-        operation: "passthrough"
-        filter_type: "none"
-      - code: "%001"
-        description: "A AND B, B"
-        operation: "logical_and"
-        filter_type: "none"
-      - code: "%010"
-        description: "A OR B, B"
-        operation: "logical_or"
-        filter_type: "none"
-      - code: "%011"
-        description: "A XOR B, B"
-        operation: "logical_xor"
-        filter_type: "none"
-      - code: "%100"
-        description: "A, B, both filtered using global filt0"
-        operation: "passthrough"
-        filter_type: "filt0"
-      - code: "%101"
-        description: "A, B, both filtered using global filt1"
-        operation: "passthrough"
-        filter_type: "filt1"
-      - code: "%110"
-        description: "A, B, both filtered using global filt2"
-        operation: "passthrough"
-        filter_type: "filt2"
-      - code: "%111"
-        description: "A, B, both filtered using global filt3"
-        operation: "passthrough"
-        filter_type: "filt3"
+  ' Continuous square wave
+  continuous
+          MOV   pin, clk_pin
+          DIRL  pin
+          WRPIN trans_mode, pin
+          WXPIN #50, pin              ' 50 clock half-period
+          WYPIN #0, pin               ' 0 = continuous
+          DIRH  pin
+          RET
   
-  low_level_control:
-    description: "13-bit low-level pin control (M[12:0]) - standard output configuration"
-    bit_pattern: "%M............"
-    special_modes:
-      - condition: "M[12:10] = %101"
-        behavior: "DAC_MODE - not typically used with transition output"
+  ' Synchronized clocking for serial
+  sync_clock
+          MOV   pin, #41              ' TX pin
+          DIRL  pin
+          ' Configure TX pin first
+          WRPIN ##P_SYNC_TX | P_OE, pin
+          WXPIN #%1_00111, pin        ' 8-bit
+          DIRH  pin
+          
+          MOV   pin, clk_pin
+          DIRL  pin
+          WRPIN trans_mode, pin
+          WXPIN #100, pin             ' Bit period
+          WYPIN #16, pin              ' 16 edges for 8 bits
+          DIRH  pin
+          RET
   
-  dir_out_control:
-    description: "2-bit pin DIR/OUT control - OVERRIDDEN by smart pin"
-    bit_pattern: "%TT"
-    smart_off_behavior:
-      non_dac_mode: []
-      dac_mode: []
-    smart_on_behavior:
-      dac_modes: []
-      non_dac_modes:
-        - mode_range: "%00101 (transition output)"
-          behavior: "Smart pin overrides OUT signal to control pin transitions"
+  ' Variables
+  pin           RES   1
+  period        LONG  1000
+  count         LONG  16
 
-x_parameter:
-  usage: "Base period for transition timing"
-  bit_fields:
-    - range: "X[15:0]"
-      purpose: "Base period in clock cycles between transitions"
-      valid_values:
-        min: 1
-        max: 65535
-        special_values:
-          - value: 100
-            meaning: "100-clock intervals between transitions"
-          - value: 1000
-            meaning: "1000-clock intervals for slower transitions"
-  configuration_timing: "reset_only"
+# Inline PASM2 in Spin2
+spin2_inline: |
+  PUB quick_toggle(pin, edges)
+    ORG
+      DIRL  pin
+      WRPIN ##P_TRANSITION | P_OE, pin
+      WXPIN #2, pin                 ' Fast toggle
+      WYPIN edges, pin
+      DIRH  pin
+    END
 
-y_parameter:
-  usage: "Number of transitions to generate"
-  bit_fields:
-    - range: "Y[31:0]"
-      purpose: "Transition count"
-      valid_values:
-        min: 0
-        max: 4294967295
-        special_values:
-          - value: 0
-            meaning: "No transitions - pin state unchanged"
-          - value: 1
-            meaning: "Single transition (toggle once)"
-          - value: 10
-            meaning: "10 transitions (5 complete cycles if starting low)"
-  update_behavior: "Writing non-zero value starts transition sequence at next base period"
+# Key Points
+transition_counting: |
+  Y counts edges, not complete cycles
+  2 transitions = 1 complete cycle
+  Odd count leaves pin in opposite state
 
-z_result:
-  data_type: "Not used - no result data returned"
-  bit_interpretation: []
-  flag_behavior: "C flag may contain status information"
-  overflow_handling: "Not applicable"
+continuous_mode: |
+  Y=0 generates continuous transitions
+  No IN flag in continuous mode
+  Runs until pin disabled
 
-operation_description: |
-  Transition output mode overrides OUT to control the pin output state by generating a specific
-  number of transitions. X[15:0] establishes a base period in clock cycles which determines the
-  timing between transitions. When Y[31:0] is written with a non-zero value, the pin begins
-  toggling for Y transitions at each base period, starting at the next base period. Each transition
-  alternates the pin state from its current level. IN is raised when the transitions complete,
-  with the pin remaining in its current output state (the final state after all transitions).
-  During reset (DIR=0), IN is low, output is low, and Y is set to zero.
+synchronization: |
+  Perfect for clock generation
+  Commonly paired with sync serial modes
+  Start after data pin configured
 
-timing_specifications:
-  clock_relationship: "Base period counter operates on system clock"
-  base_period:
-    description: "Set by X[15:0] - interval between transitions"
-    min_clocks: 1
-    max_clocks: 65535
-    special_values:
-      - value: 50
-        meaning: "50-clock intervals for fast transitions"
-      - value: 10000
-        meaning: "10000-clock intervals for slow transitions"
-  update_frequency: "Pin toggles every base period until Y transitions completed"
-  settling_time: "Pin state changes within 1 clock of base period expiration"
+common_uses:
+  - "Clock generation for sync serial"
+  - "Stepper motor stepping"
+  - "Square wave generation"
+  - "Pulse train output"
+  - "Bit-banged protocol clocking"
 
-in_signal_behavior:
-  trigger_conditions:
-    - "Transition sequence completion (Y transitions generated)"
-    - "Pin remains in final state after last transition"
-  acknowledgment_method: "rdpin"
-  polling_restrictions: "2-clock delay after acknowledgment before IN can be polled again"
-
-
-initialization_requirement:
-  critical: true
-  description: "Smart pin MUST be reset before configuration"
-  requirement: |
-    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
-    This ensures the smart pin is in a known state and prevents configuration conflicts.
-  reset_sequence:
-    pasm2: |
-      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
-      WRPIN mode, pin   ' Configure mode
-      WXPIN x, pin      ' Set X parameter
-      WYPIN y, pin      ' Set Y parameter
-      DIRH  pin         ' Enable smart pin (DIR=1)
-    spin2: |
-      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
-      PINSTART(pin, mode, x, y)  ' Configure and enable
-      ' OR manually:
-      PINFLOAT(pin)              ' Ensure DIR=0
-      WRPIN(pin, mode)           ' Set mode
-      WXPIN(pin, x)              ' Set X parameter
-      WYPIN(pin, y)              ' Set Y parameter
-      PINHIGH(pin)               ' Enable (DIR=1)
-
-reset_behavior:
-  dir_low_effects:
-    - "IN signal goes low"
-    - "Output goes low"
-    - "Y is set to zero (stops any transition sequence)"
-  dir_transition_effects: "Smart pin ready to generate transitions when Y is written"
-  wrpin_zero_effects: "Returns pin to normal mode, clears all smart pin configuration"
-  reset_requirement: "ALWAYS set DIR=0 before reconfiguring the smart pin"
-
-common_applications:
-  - application: "Clock generation"
-    description: "Generate specific number of clock cycles"
-    complexity_level: "intermediate"
-  - application: "Toggle sequences"
-    description: "Create precise toggle patterns for testing"
-    complexity_level: "beginner"
-  - application: "Burst clock generation"
-    description: "Generate clock bursts for synchronization"
-    complexity_level: "intermediate"
-  - application: "Relay control sequences"
-    description: "Generate switching sequences for relays or switches"
-    complexity_level: "beginner"
-
-configuration_examples:
-  - name: "Generate 10 transitions"
-    description: "Create 5 complete square wave cycles"
-    reset_code: "DIRL toggle_pin                  ' REQUIRED: Reset before configuration"
-    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_00101_0, toggle_pin"
-    wxpin_code: "WXPIN #200, toggle_pin"
-    wypin_code: "WYPIN #10, toggle_pin"
-    explanation: "200-clock base period, 10 transitions = 5 complete high/low cycles"
-  
-  - name: "Single pulse generation"
-    description: "Generate a single pulse (2 transitions: low-to-high-to-low)"
-    reset_code: "DIRL pulse_pin                  ' REQUIRED: Reset before configuration"
-    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_00101_0, pulse_pin"
-    wxpin_code: "WXPIN #1000, pulse_pin"
-    wypin_code: "WYPIN #2, pulse_pin"
-    explanation: "Start low, transition high (1000 clocks), then low (1000 clocks)"
-  
-  - name: "Fast toggle burst"
-    description: "Generate rapid toggle sequence"
-    reset_code: "DIRL burst_pin                  ' REQUIRED: Reset before configuration"
-    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_00101_0, burst_pin"
-    wxpin_code: "WXPIN #10, burst_pin"
-    wypin_code: "WYPIN #20, burst_pin"
-    explanation: "10-clock intervals, 20 transitions = 10 complete fast cycles"
-
-typical_code_patterns:
-  - pattern_name: "Clock burst generation"
-    pasm2_code: |
-      ' Configure transition output for clock bursts
-      WRPIN ##%0000000000000_01_00101_0, clock_pin
-      WXPIN clock_period, clock_pin             ' Set transition period
-      DIRH  clock_pin                           ' Enable smart pin
-      
-      ' Generate clock burst
-      WYPIN burst_count, clock_pin              ' Start burst (even number for complete cycles)
-      
-      wait_burst_done:
-      TESTP clock_pin WC                        ' Check completion
-      IF_NC JMP #wait_burst_done                ' Wait for burst to finish
-      RDPIN dummy, clock_pin                    ' Acknowledge completion
-    explanation: "Generate precise clock bursts with completion detection"
-  
-  - pattern_name: "Sequential toggle control"
-    pasm2_code: |
-      ' Setup for sequential toggle operations
-      WRPIN ##%0000000000000_01_00101_0, toggle_pin
-      WXPIN #500, toggle_pin                    ' 500-clock between toggles
-      DIRH  toggle_pin                          ' Enable
-      
-      sequence_loop:
-      WYPIN #1, toggle_pin                      ' Single transition (toggle)
-      ' ... do other work for 500+ clocks ...
-      TESTP toggle_pin WC                       ' Check if toggle done
-      IF_C  RDPIN dummy, toggle_pin             ' Acknowledge
-      IF_C  JMP #sequence_loop                  ' Continue sequence
-    explanation: "Use single transitions to create controlled toggle sequences"
-
-related_modes:
-  - mode_id: "%00100"
-    relationship: "complementary"
-    description: "Pulse/cycle output - generates pulses instead of transitions"
-  - mode_id: "%00110"
-    relationship: "advanced_version"
-    description: "NCO frequency - continuous frequency generation"
-  - mode_id: "%00111"
-    relationship: "advanced_version"
-    description: "NCO duty - frequency generation with duty cycle control"
-
-related_instructions:
-  - instruction: "WRPIN"
-    usage_context: "Configure transition output mode"
-  - instruction: "WXPIN"
-    usage_context: "Set base period between transitions"
-  - instruction: "WYPIN"
-    usage_context: "Set transition count and start sequence"
-  - instruction: "DIRH"
-    usage_context: "Enable smart pin operation"
-  - instruction: "TESTP"
-    usage_context: "Check for sequence completion"
-  - instruction: "RDPIN"
-    usage_context: "Acknowledge completion (clears IN signal)"
-
-hardware_considerations:
-  power_implications: "Power consumption depends on transition frequency and count"
-  pin_loading_effects: "Standard digital output loading - fast transitions require good signal integrity"
-  noise_considerations: "Fast transitions can generate EMI - consider slew rate and filtering"
-  thermal_effects: "High-frequency transitions can cause heating in output drivers"
-
-extraction_metadata:
-  extraction_date: "2025-09-06"
-  source_documents:
-    - document: "Silicon Doc part4-smart-pins.txt"
-      pages: [87]
-      section: "%00101 = transition output"
-  validation_status: "draft"
-  completeness_score: 93
-  technical_accuracy: "silicon_doc_verified"
+related: ["00100 (Pulse)", "11100-11101 (Sync Serial)", "00110-00111 (NCO)"]

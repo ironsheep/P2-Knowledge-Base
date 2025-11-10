@@ -1,77 +1,146 @@
-# Smart Pin Mode: %10101 - Count Time in X+ Clocks
-# Silicon Doc Reference: part4-smart-pins.txt, pages 93-94
-# Layer 1: Direct Silicon Doc extraction
+title: "Count Periods Within X Clock Cycles"
+subtitle: "Smart Pin Mode %10111 (P_PERIODS_CLOCKS_PERIODS)"
+language_reference: "combined"
+compatible_languages: ["Spin2", "PASM2"]
 
-mode_id: "%10101"
+brief_description: "Counts complete signal periods that occur within a minimum X-clock time window"
 
-mode_name: "Count Time in X+ Clocks"
+detailed_description:
+  operation: |
+    Time-windowed period counter. Counts the number of complete A/B periods that occur within at
+    least X clock cycles. Measurement continues until X clocks elapse AND the current period
+    completes. Returns period count along with actual elapsed time. When combined with modes
+    %10101 (time) and %10110 (states) running concurrently, enables precise frequency and duty
+    cycle calculation.
+  
+  timing: |
+    Minimum measurement window is X clock cycles
+    Measurement extends to complete the period in progress when X clocks elapse
+    Period boundaries defined by Y[1:0] trigger combination
+    IN flag raised when measurement completes
+    Z register contains period count
+    Actual elapsed time longer than X due to period completion
 
-mode_group: "measurement"
+registers:
+  x_register:
+    bits_31_0: "Minimum time window duration in clock cycles (X+ clocks)"
+  y_register:
+    bits_1_0: |
+      Event trigger sensitivity:
+      %00 = A-input rise to B-input rise
+      %01 = A-input rise to B-input edge
+      %10 = A-input edge to B-input rise
+      %11 = A-input edge to B-input edge
+  z_register:
+    function: "Count of complete periods within X+ clock window (max $80000000)"
 
-mode_complexity: "advanced"
+flags:
+  in_flag: "Raised when measurement completes (X clocks + period completion)"
+  a_input: "Signal to monitor (period start marker)"
+  b_input: "Period end marker (can be same as A-input)"
 
-dac_mode_dependency: false
+code_examples:
+  - title: "Frequency Measurement"
+    description: "Measure frequency by counting periods in time window"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        signal_pin = 20
+        window_ms = 100                          ' 100ms measurement window
+      
+      PUB main() | period_count, window_clks, frequency
+        window_clks := (_clkfreq / 1000) * window_ms
+        
+        ' Count periods in ~100ms windows
+        pinstart(signal_pin, P_PERIODS_CLOCKS_PERIODS | P_B_A_INPUT, window_clks, %00)
+        
+        repeat
+          repeat until pinread(signal_pin)       ' Wait for measurement complete
+          
+          period_count := rdpin(signal_pin)      ' Get period count
+          
+          ' Frequency = periods / time
+          ' Approximate: period_count * 10 (since ~100ms window)
+          frequency := period_count * 10
+          debug("Frequency: ~", udec(frequency), " Hz (", udec(period_count), " periods)")
+      
+      DAT
+      ' PASM2 example - precise frequency measurement
+        org
+        dirl    #signal_pin                      ' Reset smart pin
+        wrpin   ##P_PERIODS_CLOCKS_PERIODS | P_B_A_INPUT, #signal_pin
+        wxpin   ##clkfreq, #signal_pin           ' 1-second minimum window
+        wypin   #%00, #signal_pin                ' Rise to rise
+        dirh    #signal_pin                      ' Start measurement
+      .loop
+        testp   #signal_pin wc                   ' Check IN flag
+        if_nc   jmp #.loop                       ' Wait for complete
+        rdpin   periods, #signal_pin             ' Period count = frequency
+        ' periods now contains Hz (cycles per second)
+        jmp     #.loop                           ' Next measurement starts auto
 
-pin_pairing: "adjacent"
-
-operation_description: |
-  Measures time across some number of A-rise/edge to B-rise/edge periods until X clocks
-  elapse, then completes any period in progress. Provides oversampled period measurement
-  with minimum duration constraint. Y[1:0] sets A/B sensitivity.
-
-x_parameter:
-  usage: "Minimum measurement duration"
-  bit_fields:
-    - range: "X[31:0]"
-      purpose: "Minimum clock cycles for measurement"
-
-y_parameter:
-  usage: "Edge sensitivity"
-  bit_fields:
-    - range: "Y[1:0]"
-      purpose: "Period edge detection sensitivity"
-
-z_result:
-  data_type: "Accumulated time measurement"
-  bit_interpretation:
-    - range: "Z[31:0]"
-      meaning: "Total time within periods during measurement window"
-
-
-initialization_requirement:
-  critical: true
-  description: "Smart pin MUST be reset before configuration"
-  requirement: |
-    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
-    This ensures the smart pin is in a known state and prevents configuration conflicts.
-  reset_sequence:
-    pasm2: |
-      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
-      WRPIN mode, pin   ' Configure mode
-      WXPIN x, pin      ' Set X parameter
-      WYPIN y, pin      ' Set Y parameter
-      DIRH  pin         ' Enable smart pin (DIR=1)
-    spin2: |
-      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
-      PINSTART(pin, mode, x, y)  ' Configure and enable
-      ' OR manually:
-      PINFLOAT(pin)              ' Ensure DIR=0
-      WRPIN(pin, mode)           ' Set mode
-      WXPIN(pin, x)              ' Set X parameter
-      WYPIN(pin, y)              ' Set Y parameter
-      PINHIGH(pin)               ' Enable (DIR=1)
+  - title: "Combined Frequency and Duty Measurement"
+    description: "Use three pins to measure frequency and duty cycle"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        pin_base = 20                            ' Use pins 20, 21, 22
+        window_ms = 100
+      
+      PUB main() | periods, high_time, total_time, freq, duty, window_clks
+        window_clks := (_clkfreq / 1000) * window_ms
+        
+        ' Pin 20: Count periods
+        pinstart(pin_base+0, P_PERIODS_CLOCKS_PERIODS | P_B_A_INPUT, window_clks, %00)
+        ' Pin 21: Measure high time (duty)
+        pinstart(pin_base+1, P_PERIODS_CLOCKS_TIME | P_B_A_INPUT, window_clks, %00)
+        ' Pin 22: Measure total time (actual elapsed)
+        pinstart(pin_base+2, P_TIME_HIGHS_A | P_A_HIGH_TO_TOGGLE, window_clks, 0)
+        
+        repeat
+          ' Wait for all measurements complete
+          repeat until (pinread(pin_base+0) and pinread(pin_base+1))
+          
+          periods := rdpin(pin_base+0)           ' Period count
+          high_time := rdpin(pin_base+1)         ' Clocks spent high
+          
+          ' Calculate precise results
+          freq := (periods * 1000) / window_ms   ' Frequency in Hz
+          duty := (high_time * 100) / window_clks ' Duty cycle %
+          
+          debug("Freq: ", udec(freq), "Hz, Duty: ", udec(duty), "%")
 
 common_applications:
-  - application: "Time-windowed period measurement"
-    description: "Period measurement with minimum sample time"
-    complexity_level: "expert"
+  - "Precise frequency measurement"
+  - "Variable frequency monitoring"
+  - "Combined with duty cycle measurement for full signal characterization"
+  - "Event rate counting in time windows"
 
-extraction_metadata:
-  extraction_date: "2025-09-06"
-  source_documents:
-    - document: "Silicon Doc part4-smart-pins.txt" 
-      pages: [93, 94]
-      section: "%10101 = for periods in X+ clocks, count time"
-  validation_status: "draft"
-  completeness_score: 75
-  technical_accuracy: "silicon_doc_verified"
+related_modes:
+  - "Mode %10101: Periods/clocks/time - measure time (duty) in same window"
+  - "Mode %10110: Periods/clocks/states - count transitions in same window"
+  - "Mode %10100: Periods/count/states - fixed period count instead of time"
+  - "Mode %10011: Periods/count/time - measures period duration not count"
+
+configuration_constants:
+  mode_constant: "P_PERIODS_CLOCKS_PERIODS"
+  binary_value: "%10111"
+  common_modifiers:
+    - "P_B_A_INPUT - Use A-input for both A and B (single pin measurement)"
+    - "P_PLUS1_B - Use next pin as B-input"
+    - "P_MINUS1_B - Use previous pin as B-input"
+    - "P_FILT1_AB - Add filtering for noise immunity"
+  
+  y_register_values:
+    - "%00 - A-rise to B-rise (typical for frequency measurement)"
+    - "%01 - A-rise to B-edge (any B transition ends period)"
+    - "%10 - A-edge to B-rise (any A transition starts period)"
+    - "%11 - A-edge to B-edge (maximum sensitivity)"
+
+notes:
+  - "Measurement extends beyond X clocks to complete the final period"
+  - "Period count with time window enables frequency calculation: freq = periods / time"
+  - "Best used with concurrent measurements on multiple pins for complete signal analysis"
+  - "Combines with mode %10101 (time) and %10110 (states) for full characterization"
+  - "B-input can be same as A-input for single-pin period counting"
+  - "Documentation states: 'At least two measurements must be made concurrently for useful results'"

@@ -1,153 +1,206 @@
-# Smart Pin Mode %00011 - DAC 16-bit with PWM Dither  
-# Source: Silicon Doc v35, part4-smart-pins.txt
+# Smart Pin Mode: %00011 - DAC 16-bit with PWM Dither
+# Concise reference optimized for AI code generation
 
-mode_id: "%00011"
-mode_name: "DAC 16-bit with PWM Dither"
-description: "Overrides M[7:0] to feed 8-bit DAC with PWM-dithered data achieving 16-bit resolution with better dynamic range"
+mode: "%00011"
+name: "DAC 16-bit with PWM Dither"
 category: "dac"
-output_override: false
 
-configuration:
-  wrpin_format:
-    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
-    sssss_value: "%00011"
-    
-  requirements:
-    condition: "M[12:10] = %101"
-    purpose: "Configure low-level pin for DAC output" 
-    override: "Overrides M[7:0] for PWM-dithered DAC data"
-
-dac_operation:
-  resolution: "16-bit effective resolution from 8-bit DAC"
-  method: "PWM dithering between adjacent 8-bit DAC levels"
-  update_rate: "Every clock cycle"
-  averaging: "16-bit resolution achieved over time through PWM dithering"
-
-timing_control:
-  x_register:
-    function: "X[15:0] establishes sample period in clock cycles"
-    constraint: "Must be a multiple of 256 (X[7:0]=0)"
-    reason: "Affords integral number of 256 PWM steps"
-    
-  y_register:
-    function: "Y[15:0] establishes DAC output value"
-    capture: "Captured at each sample period and used for its duration"
-    
-  period_completion:
-    sequence:
-      - "Y[15:0] captured for next output value"
-      - "IN is raised"
-      - "Coordinate updating Y[15:0] with IN going high"
-
-pwm_dithering_characteristics:
-  cycle_length: "256 clocks per PWM cycle"
-  transitions: "Maximum of only two transitions per 256 clocks"
-  dynamic_range: "Better than pseudo-random dithering"
+# Constants
+constants:
+  spin2: "P_DAC_DITHER_PWM"
+  pasm2: "P_DAC_DITHER_PWM"
+  mode_bits: "%00011"
   
-  frequency_artifact:
-    frequency: "Fclock/256"
-    level: "-48dB"
-    note: "Fixed frequency present in output"
+# Critical: Requires DAC mode configuration
+dac_requirement: |
+  M[12:10] MUST be %101 for DAC output
+  Use: P_DAC_DITHER_PWM | P_DAC_124R_3V | P_OE
+  Other DAC options: P_DAC_990R_3V, P_DAC_600R_2V, P_DAC_75R_2V
 
-adc_functionality:
-  condition: "OUT is high" 
-  capability: "ADC will be enabled"
-  reading: "RDPIN/RQPIN retrieve 16-bit ADC accumulation from last sample period"
-  purpose: "Measure loading on the DAC pin"
+# Operation
+operation: |
+  Outputs 16-bit DAC value using 8-bit DAC with PWM dithering.
+  Dithers between adjacent DAC levels using PWM pattern.
+  Better dynamic range than pseudo-random, but adds Fclock/256 tone at -48dB.
+  Maximum 2 transitions per 256 clocks (vs random transitions).
 
-instructions:
-  setup:
-    - "WRPIN - Configure mode (%00011) with M[12:10] = %101"
-    - "WXPIN - Set sample period in X[15:0] (must be multiple of 256)"
+# Parameters
+x_register:
+  function: "Sample period in clocks"
+  X[15:0]: "Must be multiple of 256 (X[7:0] must be 0)"
+  constraint: "Period = N × 256 clocks for integral PWM steps"
+  example: "$100 (256), $200 (512), $400 (1024)"
+
+y_register:
+  function: "16-bit DAC output value"
+  Y[15:0]: "DAC value captured at each sample period"
+  update: "Coordinate with IN flag going high"
+
+z_register:
+  function: "ADC accumulation (if OUT=1)"
+  usage: "16-bit ADC reading from last sample period"
+  enable: "Set OUT=1 to enable ADC feedback"
+
+in_flag: |
+  Raised at end of each sample period
+  Indicates Y[15:0] captured for next output
+  Use to synchronize value updates
+
+# Pin Behavior
+pin_behavior:
+  reset_state: "IN=0, Y[15:0] captured during reset"
+  output: "8-bit DAC PWM-dithered for 16-bit resolution"
+  feedback: "OUT=1 enables ADC for load measurement"
+  pwm_frequency: "Fclock/256 component at -48dB"
+
+# Complete Spin2 Example
+spin2_complete: |
+  CON
+    DAC_PIN = 48
+    SAMPLE_PERIOD = $100        ' 256 clocks (minimum)
     
-  operation:
-    - "WYPIN - Set DAC output value in Y[15:0]"
-    - "RDPIN/RQPIN - Read ADC accumulation (if OUT high)"
-
-timing_requirements:
-  sample_period: "Must be multiple of 256 clocks"
-  validation: "X[7:0] must equal 0"
-  pwm_steps: "Exactly 256 PWM steps per period"
-
-behavior:
-  in_signal: "Raised on completion of each sample period"
-  output_capture: "Y[15:0] captured at sample period start"
-  
-  acknowledgment:
-    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
-    effect: "Lowers IN signal after 2 clocks"
-
-
-initialization_requirement:
-  critical: true
-  description: "Smart pin MUST be reset before configuration"
-  requirement: |
-    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
-    This ensures the smart pin is in a known state and prevents configuration conflicts.
-  reset_sequence:
-    pasm2: |
-      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
-      WRPIN mode, pin   ' Configure mode
-      WXPIN x, pin      ' Set X parameter
-      WYPIN y, pin      ' Set Y parameter
-      DIRH  pin         ' Enable smart pin (DIR=1)
-    spin2: |
-      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
-      PINSTART(pin, mode, x, y)  ' Configure and enable
-      ' OR manually:
-      PINFLOAT(pin)              ' Ensure DIR=0
-      WRPIN(pin, mode)           ' Set mode
-      WXPIN(pin, x)              ' Set X parameter
-      WYPIN(pin, y)              ' Set Y parameter
-      PINHIGH(pin)               ' Enable (DIR=1)
-
-reset_behavior:
-  during_reset:
-    dir_state: "DIR=0" 
-    in_signal: "IN is low"
-    capture: "Y[15:0] is captured"
-
-advantages:
-  vs_pseudo_random: "Better dynamic range due to controlled transitions"
-  transition_control: "Maximum 2 transitions per 256 clocks reduces noise"
-  
-disadvantages:
-  frequency_artifact: "Fixed Fclock/256 frequency at -48dB"
-  timing_constraint: "Sample period must be multiple of 256"
-
-usage_notes:
-  - "Best dynamic range of the dithering modes"
-  - "Fixed frequency artifact may be acceptable for many applications"  
-  - "Sample period constraint requires planning"
-  - "Coordinate Y[15:0] updates with IN signal"
-  - "Monitor DAC loading via ADC when OUT high"
-
-applications:
-  - "High-fidelity audio DAC where -48dB artifact acceptable"
-  - "Precision instrumentation with controlled noise floor"
-  - "Motor control with smooth operation"
-  - "Power supply control with minimal switching artifacts"
-
-comparison:
-  vs_pseudo_random:
-    advantage: "Better dynamic range, fewer transitions"
-    disadvantage: "Fixed frequency artifact, timing constraints"
+  VAR
+    LONG dac_value
     
-  vs_standard_pwm:
-    advantage: "16-bit resolution from 8-bit DAC"
-    disadvantage: "More complex timing requirements"
+  PUB main()
+    setup_pwm_dac()
+    
+    ' Generate clean sine wave
+    REPEAT
+      REPEAT dac_value FROM 0 TO 360
+        output_sine(dac_value)
+        WAITMS(1)
+    
+  PUB setup_pwm_dac() | mode
+    ' Configure for 16-bit PWM dithered DAC
+    mode := P_DAC_DITHER_PWM | P_DAC_124R_3V | P_OE
+    
+    PINCLEAR(DAC_PIN)
+    WRPIN(DAC_PIN, mode)
+    WXPIN(DAC_PIN, SAMPLE_PERIOD)  ' Must be multiple of 256
+    WYPIN(DAC_PIN, $8000)          ' Mid-scale initial
+    PINHIGH(DAC_PIN)               ' Enable DAC
+    
+  PUB output_sine(angle) | value16
+    ' Output sine wave value
+    value16 := $8000 + (SIN(angle, $7FFF) >> 16)
+    
+    ' Wait for sample period complete
+    REPEAT UNTIL PINREAD(DAC_PIN) & $8000_0000
+    WYPIN(DAC_PIN, value16)
+    
+  PUB setup_audio_dac() | mode
+    ' Optimized for audio - higher sample rate
+    mode := P_DAC_DITHER_PWM | P_DAC_600R_2V | P_OE
+    
+    PINCLEAR(DAC_PIN)
+    WRPIN(DAC_PIN, mode)
+    WXPIN(DAC_PIN, $400)           ' 1024 clocks
+    PINHIGH(DAC_PIN)
+    
+  PUB read_load_feedback() : adc_value
+    ' Read ADC to detect loading (requires OUT=1)
+    PINWRITE(DAC_PIN, 1)           ' Enable ADC
+    WAITMS(1)                      ' Allow accumulation
+    adc_value := RDPIN(DAC_PIN)
 
-related_modes:
-  - "%00001 (DAC noise)"
-  - "%00010 (DAC 16-bit pseudo-random dither)"
+# Complete PASM2 Example
+pasm2_complete: |
+  DAT
+          ORG
+  
+  ' Pin assignment and mode
+  dac_pin       LONG  48
+  dac_mode      LONG  P_DAC_DITHER_PWM | P_DAC_124R_3V | P_OE
+  sample_period LONG  $100          ' 256 clocks minimum
+  
+  ' Setup 16-bit PWM dithered DAC
+  setup_dac
+          MOV   pin, dac_pin
+          DIRL  pin                 ' Reset (captures Y)
+          WRPIN dac_mode, pin       ' Configure mode
+          MOV   x, sample_period
+          WXPIN x, pin              ' Set period (multiple of 256)
+          WYPIN ##$8000, pin        ' Mid-scale initial
+          DIRH  pin                 ' Enable DAC
+          RET
+  
+  ' Output value synchronized with IN
+  output_sync
+          MOV   pin, dac_pin
+  .wait   TESTP pin WC              ' Test IN flag
+    IF_NC JMP   #.wait              ' Wait for sample complete
+          WYPIN value16, pin        ' Update value
+          RET
+  
+  ' Generate ramp waveform
+  ramp_gen
+          MOV   value16, #0
+  .loop   CALL  #output_sync        ' Output current value
+          ADD   value16, #256       ' Increment
+          AND   value16, ##$FFFF    ' Wrap at 16-bit
+          JMP   #.loop
+  
+  ' High-quality audio output
+  audio_setup
+          MOV   pin, dac_pin
+          MOV   mode, ##P_DAC_DITHER_PWM | P_DAC_600R_2V | P_OE
+          DIRL  pin
+          WRPIN mode, pin
+          WXPIN ##$800, pin         ' 2048 clocks for audio
+          DIRH  pin
+          RET
+  
+  ' Variables
+  pin           RES   1
+  mode          RES   1  
+  x             RES   1
+  value16       RES   1
 
-see_also:
-  - "DAC pin configuration (M[12:10] = %101)"
-  - "PWM timing calculations"
-  - "Frequency domain considerations"
+# Inline PASM2 in Spin2
+spin2_inline: |
+  PUB wait_and_output(pin, value16)
+    ' Synchronized DAC update
+    ORG
+  .wait
+      TESTP  pin WC                 ' Test IN flag
+      IF_NC  JMP #.wait             ' Wait for period end
+      WYPIN  value16, pin           ' Update DAC value
+    END
+    
+  PUB set_dac_fast(pin, value16)
+    ' Direct update (may cause glitch)
+    ORG
+      WYPIN  value16, pin
+    END
 
-source:
-  document: "Silicon Doc v35"
-  section: "Smart Pin Modes"
-  page_reference: "part4-smart-pins.txt" 
-  extraction_date: "2025-09-06"
+# Key Points
+pwm_advantages: |
+  Better dynamic range than pseudo-random
+  Only 2 transitions per 256 clocks
+  Cleaner spectrum for audio applications
+  Lower switching noise
+  
+pwm_characteristics: |
+  Fclock/256 frequency component at -48dB
+  Integral PWM steps require X[7:0]=0
+  256 clock minimum period
+  
+synchronization: |
+  IN flag indicates sample period complete
+  Update Y after IN goes high
+  Prevents mid-period glitches
+  
+common_uses:
+  - "High-quality audio DAC"
+  - "Precision analog control"
+  - "Low-noise voltage references"
+  - "Motor control signals"
+  - "Analog synthesizers"
+
+comparison_with_prng: |
+  PWM: Better dynamic range, predictable spectrum
+  PRNG: No periodic components, more transitions
+  Choose PWM for audio, PRNG for control signals
+
+related: ["00010 (DAC PRNG Dither)", "00001 (DAC Noise)", "Normal mode with P_DAC_*"]

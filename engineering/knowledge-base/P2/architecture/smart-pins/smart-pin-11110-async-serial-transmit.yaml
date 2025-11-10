@@ -1,108 +1,198 @@
-# Smart Pin Mode: %11110 - Async Serial Transmit
-# Silicon Doc Reference: part4-smart-pins.txt, page 75
-# Layer 1: Direct Silicon Doc extraction
+title: "Asynchronous Serial Transmit"
+subtitle: "Smart Pin Mode %11110 (P_ASYNC_TX)"
+language_reference: "combined"
+compatible_languages: ["Spin2", "PASM2"]
 
-mode_id: "%11110"
+brief_description: "Asynchronous serial transmission at programmable baud rate (1-32 bits per frame)"
 
-mode_name: "Async Serial Transmit"
+detailed_description:
+  operation: |
+    Transmits serial data asynchronously with automatic start bit (logic-0) and stop bit (logic-1)
+    generation. Supports 1-32 data bits per frame at programmable baud rates. Hardware handles
+    timing and framing automatically. OUT signal is overridden for serial output control. Can
+    optionally include parity bit in data (calculated by software). Ideal for UART communication.
+  
+  timing: |
+    Baud rate set by X register (system clocks per bit period)
+    Start bit (0) transmitted automatically
+    Data bits transmitted LSB first
+    Stop bit (1) transmitted automatically
+    IN flag raised when transmission complete and ready for next byte
 
-mode_group: "communication"
+registers:
+  x_register:
+    bits_31_16: "System clock periods per bit period (integer part)"
+    bits_15_10: "Fractional clock periods (base-2 fraction for precise timing)"
+    bits_9_5: "Reserved"
+    bits_4_0: "Number of data bits to transmit (1-32)"
+  y_register:
+    bits_31_0: "Data to transmit (LSB transmitted first)"
+  z_register:
+    function: "Not used in transmit mode"
 
-mode_complexity: "intermediate"
+flags:
+  in_flag: "Raised when transmission complete, ready for next byte"
+  out_override: "OUT signal overridden for serial transmission"
 
-dac_mode_dependency: false
+code_examples:
+  - title: "Basic 8-bit UART Transmit"
+    description: "Standard 115200 baud 8N1 serial output"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        tx_pin = 20
+        baud = 115_200
+      
+      PUB main() | bit_period
+        ' Calculate bit period: clocks/bit = clkfreq / baud
+        bit_period := (_clkfreq / baud) << 16   ' Shift to X[31:16]
+        
+        ' Configure async TX: 8 data bits
+        pinstart(tx_pin, P_ASYNC_TX | P_OE, (bit_period | 8), 0)
+        
+        ' Send text string
+        send_string(string("Hello, World!", 13, 10))
+      
+      PUB send_string(str_ptr) | char
+        repeat
+          char := byte[str_ptr++]
+          if char == 0
+            quit
+          send_byte(char)
+      
+      PUB send_byte(value)
+        ' Wait for transmitter ready
+        repeat until pinread(tx_pin)
+        
+        ' Send byte
+        wypin(tx_pin, value)
+      
+      DAT
+      ' PASM2 example - high-speed serial output
+        org
+        mov     bit_period, ##(_clkfreq / baud) << 16
+        or      bit_period, #8                   ' 8 data bits
+        
+        dirl    #tx_pin                          ' Reset smart pin
+        wrpin   tx_mode, #tx_pin                 ' Configure mode
+        wxpin   bit_period, #tx_pin              ' Set baud and bits
+        dirh    #tx_pin                          ' Enable smart pin
+        
+        ' Send message
+        mov     ptra, ##message
+      .loop
+        rdbyte  data, ptra++                     ' Get next character
+        cmp     data, #0 wz                      ' Check for null
+        if_z    jmp #.done
+        call    #transmit
+        jmp     #.loop
+      .done
+        ret
+      
+      transmit
+        testp   #tx_pin wc                       ' Wait for ready
+        if_nc   jmp #transmit
+        wypin   data, #tx_pin                    ' Send byte
+        ret
+      
+      tx_mode
+        long    P_ASYNC_TX | P_OE
+      message
+        byte    "Hello!", 13, 10, 0
+      data    long    0
 
-pin_pairing: "none"
+  - title: "Precise Baud Rate with Fractional Timing"
+    description: "Use fractional bits for exact baud rates"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        tx_pin = 20
+        baud = 115_200
+      
+      PUB main() | bit_period, frac_period
+        ' Calculate precise bit period with fractional part
+        ' bit_period = (clkfreq / baud) * 65536
+        bit_period := (_clkfreq * 65536) / baud
+        
+        ' Mask to X[31:10] and add 8 data bits
+        frac_period := (bit_period & $FFFFFC00) | 8
+        
+        pinstart(tx_pin, P_ASYNC_TX | P_OE, frac_period, 0)
+        
+        ' Now transmissions will have precise timing
+        send_byte($55)                           ' Send test pattern
 
-operation_description: |
-  Async serial transmit mode provides UART-style serial transmission with configurable baud rates.
-  The smart pin handles start bit, data bits, parity, and stop bit generation automatically.
-  Data is loaded via WYPIN and transmitted asynchronously. Baud rate up to clock/3 supported.
-  OUT signal is overridden by the smart pin for transmission control.
-
-x_parameter:
-  usage: "Baud rate configuration"
-  bit_fields:
-    - range: "X[31:0]"
-      purpose: "Baud rate divisor (clocks per bit)"
-      valid_values:
-        min: 3
-        max: 4294967295
-        special_values:
-          - value: 1667
-            meaning: "9600 baud at 160MHz (160M/9600/10≈1667)"
-          - value: 833
-            meaning: "19200 baud at 160MHz"
-
-y_parameter:
-  usage: "Transmit data"
-  bit_fields:
-    - range: "Y[31:0]"
-      purpose: "Data to transmit with framing"
-      valid_values:
-        min: 0
-        max: 4294967295
-
-z_result:
-  data_type: "Not used"
-
-timing_specifications:
-  clock_relationship: "Baud rate based on X parameter divisor"
-  update_frequency: "Data transmitted at configured baud rate"
-
-in_signal_behavior:
-  trigger_conditions:
-    - "Transmission complete"
-    - "Ready for next data"
-  acknowledgment_method: "wypin"
-
-
-initialization_requirement:
-  critical: true
-  description: "Smart pin MUST be reset before configuration"
-  requirement: |
-    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
-    This ensures the smart pin is in a known state and prevents configuration conflicts.
-  reset_sequence:
-    pasm2: |
-      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
-      WRPIN mode, pin   ' Configure mode
-      WXPIN x, pin      ' Set X parameter
-      WYPIN y, pin      ' Set Y parameter
-      DIRH  pin         ' Enable smart pin (DIR=1)
-    spin2: |
-      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
-      PINSTART(pin, mode, x, y)  ' Configure and enable
-      ' OR manually:
-      PINFLOAT(pin)              ' Ensure DIR=0
-      WRPIN(pin, mode)           ' Set mode
-      WXPIN(pin, x)              ' Set X parameter
-      WYPIN(pin, y)              ' Set Y parameter
-      PINHIGH(pin)               ' Enable (DIR=1)
+  - title: "Variable Data Width Transmission"
+    description: "Transmit different bit widths (7, 8, 9 bits)"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        tx_pin = 20
+        baud = 9600
+      
+      PUB main() | bit_period
+        bit_period := (_clkfreq / baud) << 16
+        
+        ' Configure for 9-bit mode (e.g., with parity)
+        pinstart(tx_pin, P_ASYNC_TX | P_OE, (bit_period | 9), 0)
+        
+        ' Send 9-bit value (8 data + 1 parity)
+        send_9bit($01FF)                         ' 8 data bits + parity
+      
+      PUB send_9bit(value)
+        repeat until pinread(tx_pin)
+        wypin(tx_pin, value)
+      
+      PUB send_7bit(value) | bit_period
+        ' Reconfigure for 7-bit ASCII
+        bit_period := (_clkfreq / baud) << 16
+        pinstart(tx_pin, P_ASYNC_TX | P_OE, (bit_period | 7), 0)
+        
+        repeat until pinread(tx_pin)
+        wypin(tx_pin, value & $7F)
 
 common_applications:
-  - application: "UART communication"
-    description: "Standard serial communication protocol"
-    complexity_level: "intermediate"
-  - application: "Debug output"
-    description: "Send debug messages to terminal"
-    complexity_level: "beginner"
+  - "UART serial communication"
+  - "Debug console output"
+  - "Serial terminal communication"
+  - "Multi-drop serial networks (RS-485)"
+  - "GPS and sensor module communication"
 
-configuration_examples:
-  - name: "9600 baud UART TX"
-    description: "Standard 9600 baud serial transmit"
-    reset_code: "DIRL uart_tx                  ' REQUIRED: Reset before configuration"
-    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_01_11110_0, uart_tx"
-    wxpin_code: "WXPIN #1667, uart_tx"
-    wypin_code: "WYPIN char_data, uart_tx"
-    explanation: "9600 baud transmission"
+related_modes:
+  - "Mode %11111: Async serial RX - asynchronous receive"
+  - "Mode %11100: Sync serial TX - synchronous transmission"
+  - "Mode %11101: Sync serial RX - synchronous receive"
 
-extraction_metadata:
-  extraction_date: "2025-09-06"
-  source_documents:
-    - document: "Silicon Doc part4-smart-pins.txt"
-      pages: [75]
-      section: "%11110 = async serial transmit"
-  validation_status: "draft"
-  completeness_score: 80
-  technical_accuracy: "silicon_doc_verified"
+configuration_constants:
+  mode_constant: "P_ASYNC_TX"
+  binary_value: "%11110"
+  required_modifiers: "P_OE (P_TT_01) to enable output"
+  out_override: "true"
+  
+  common_baud_rates:
+    - "300, 1200, 2400, 4800, 9600 baud"
+    - "19200, 38400, 57600, 115200 baud"
+    - "230400, 460800, 921600 baud (high speed)"
+  
+  bit_period_calculation:
+    formula: "bit_period = (clkfreq / baud) << 16"
+    fractional: "(clkfreq * 65536 / baud) & $FFFFFC00"
+    bits_31_16: "Integer system clocks per bit"
+    bits_15_10: "Fractional base-2 value (1/64th increments)"
+  
+  data_bits_field:
+    location: "X[4:0]"
+    range: "1-32 bits"
+    typical: "7, 8, or 9 bits (7-bit ASCII, 8-bit data, 8+parity)"
+
+notes:
+  - "OUT signal automatically overridden in this mode"
+  - "Start bit (0) and stop bit (1) added automatically by hardware"
+  - "Data transmitted LSB first (standard UART format)"
+  - "Use P_OE modifier to enable output"
+  - "IN flag indicates transmitter ready for next byte"
+  - "Supports up to 32 data bits per frame (including optional parity)"
+  - "Fractional timing in X[15:10] enables precise baud rate control"
+  - "Can achieve very high baud rates limited only by system clock"
+  - "No hardware parity generation - calculate and insert in data if needed"
+  - "Compatible with standard UART devices"

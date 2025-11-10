@@ -1,111 +1,180 @@
-# Smart Pin Mode %11001 - ADC Sample/Filter/Capture, Externally Clocked
-# Source: Silicon Doc v35, part4-smart-pins.txt
+title: "ADC Sample/Filter/Capture - External Clock"
+subtitle: "Smart Pin Mode %11001 (P_ADC_EXT)"
+language_reference: "combined"
+compatible_languages: ["Spin2", "PASM2"]
 
-mode_id: "%11001"
-mode_name: "ADC Sample/Filter/Capture, Externally Clocked"
-description: "External clock-driven ADC with SINC2/SINC3 filtering and bitstream capture modes"
-category: "adc"
-output_override: false
+brief_description: "Analog-to-digital conversion synchronized to external clock for delta-sigma ADC integration"
 
-configuration:
-  wrpin_format:
-    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
-    sssss_value: "%11001"
-
-sampling:
-  clock_source: "External clock via B-input"
-  trigger: "A-input sampled on each B-input rise"
-  application: "External delta-sigma ADC interface"
-
-mode_configuration:
-  wxpin_setup: "WXPIN sets mode X[5:4] and sample period POWER(2, X[3:0])"
+detailed_description:
+  operation: |
+    Samples A-input data on positive edge of B-input clock signal, designed for external delta-sigma
+    ADC integration. Supports same filtering modes as internal clock version but synchronized to
+    external timing. A-input carries ADC bitstream data, B-input provides sample clock. Enables use
+    of external high-precision ADC chips with P2's filtering capabilities.
   
-  modes_available:
-    sinc2_sampling: "X[5:4] = %00"
-    sinc2_filtering: "X[5:4] = %01"
-    sinc3_filtering: "X[5:4] = %10"
-    bitstream_capture: "X[5:4] = %11"
+  timing: |
+    A-input sampled on each B-input rising edge
+    Sample period configurable via X register
+    Y register can override period for non-power-of-2 periods
+    IN flag raised when sample period completes
+    New measurement begins automatically
 
-timing_control:
-  external_sync: "Synchronized to external clock via B-input"
-  sample_trigger: "Each B-input rising edge triggers A-input sample"
-  period_override: "WYPIN Y[13:0] can override base period (except SINC2 sampling)"
+registers:
+  x_register:
+    bits_5_4: |
+      Filtering mode:
+      %00 = SINC2 sampling (complete conversion in hardware)
+      %01 = SINC2 filtering (software post-processing required)
+      %10 = SINC3 filtering (software post-processing required)
+      %11 = Bitstream capturing (raw bits, LSB=oldest)
+    bits_3_0: "Sample period = 2^(X[3:0]) clocks (or overridden by Y register)"
+  y_register:
+    bits_13_0: "Optional override for sample period (non-power-of-2 periods)"
+  z_register:
+    function: "ADC measurement value or accumulator result"
 
-operation:
-  similar_to_internal: "Same filtering modes as %11000"
-  key_difference: "Clock source is external B-input rather than internal"
-  accumulator_limits: "Same 27-bit accumulator constraints"
+flags:
+  in_flag: "Raised when sample period completes"
+  a_input: "ADC bitstream data input (from external delta-sigma ADC)"
+  b_input: "External sample clock (A sampled on B rising edges)"
 
-instructions:
-  setup:
-    - "WRPIN - Configure mode (%11001)"
-    - "WXPIN - Set mode X[5:4] and base period X[3:0]"
-    - "WYPIN - Override period with Y[13:0] (optional)"
-    - "DIRH - Enable smart pin"
-    
-  operation:
-    - "RDPIN/RQPIN - Read completed measurement after IN raised"
+code_examples:
+  - title: "External Delta-Sigma ADC Interface"
+    description: "Interface with external ADC using B-input clock"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        adc_data_pin = 20                        ' A-input: ADC data
+        adc_clock_pin = 21                       ' B-input: ADC clock
+      
+      PUB main() | sample
+        ' Configure for external ADC with SINC2 sampling
+        ' Use P_PLUS1_B to use next pin as B-input (clock)
+        pinstart(adc_data_pin, P_ADC_EXT | P_PLUS1_B, %00_0111, 0)
+        
+        repeat
+          ' Wait for sample ready
+          repeat until pinread(adc_data_pin)
+          
+          sample := rdpin(adc_data_pin)          ' Read completed sample
+          debug("External ADC: ", udec(sample))
+      
+      DAT
+      ' PASM2 example - external ADC with 10-bit resolution
+        org
+        dirl    #adc_data_pin                    ' Reset smart pin
+        wrpin   adc_mode, #adc_data_pin          ' Configure mode
+        wxpin   #%00_1001, #adc_data_pin         ' SINC2 sampling, 10-bit
+        dirh    #adc_data_pin                    ' Enable smart pin
+      .loop
+        testp   #adc_data_pin wc                 ' Check IN flag
+        if_nc   jmp #.loop                       ' Wait for sample
+        rdpin   result, #adc_data_pin            ' Read sample
+        ' Process result...
+        jmp     #.loop
+      
+      adc_mode
+        long    %0000_0000_000_100011_0000001_00_11001_0  ' P_PLUS1_B for clock
+      result
+        long    0
 
-completion_behavior:
-  sequence:
-    - "Sample period completes (based on external clock)"
-    - "Measurement placed in Z"
-    - "IN raised"
-    - "New measurement begins"
+  - title: "SINC3 Filtering with Custom Period"
+    description: "Use Y register to set non-power-of-2 period"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        adc_data_pin = 20
+      
+      DAT
+        org
+        dirl    #adc_data_pin                    ' Reset smart pin
+        wrpin   adc_mode, #adc_data_pin          ' Configure ADC mode
+        wxpin   #%10_0111, #adc_data_pin         ' SINC3 filtering base
+        wypin   #320, #adc_data_pin              ' Override: 320 clock period
+        dirh    #adc_data_pin                    ' Enable smart pin
+        
+        ' SINC3 requires software post-processing
+      .loop
+        testp   #adc_data_pin wc                 ' Wait for sample ready
+        if_nc   jmp #.loop
+        rdpin   x, #adc_data_pin                 ' Get SINC3 accumulator
+        
+        ' Post-processing: compute difference
+        shl     x, #5                            ' Prescale 27-bit to 32-bit
+        sub     x, diff1                         ' First difference
+        add     diff1, x                         ' Update accumulator
+        sub     x, diff2                         ' Second difference
+        add     diff2, x                         ' Update accumulator
+        sub     x, diff3                         ' Third difference
+        add     diff3, x                         ' Update accumulator
+        
+        ' x now contains the sample
+        jmp     #.loop
+      
+      adc_mode
+        long    %0000_0000_000_100011_0000001_00_11001_0
+      x       res     1
+      diff1   res     1
+      diff2   res     1
+      diff3   res     1
 
+  - title: "Bitstream Capture Mode"
+    description: "Capture raw ADC bitstream for custom processing"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        adc_data_pin = 20
+      
+      PUB main() | bitstream
+        ' Capture 32 new bits per sample
+        pinstart(adc_data_pin, P_ADC_EXT | P_PLUS1_B, %11_0101, 0)
+        
+        repeat
+          repeat until pinread(adc_data_pin)
+          bitstream := rdpin(adc_data_pin)       ' 32 bits, LSB=oldest
+          ' Custom processing of raw bitstream...
 
-initialization_requirement:
-  critical: true
-  description: "Smart pin MUST be reset before configuration"
-  requirement: |
-    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
-    This ensures the smart pin is in a known state and prevents configuration conflicts.
-  reset_sequence:
-    pasm2: |
-      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
-      WRPIN mode, pin   ' Configure mode
-      WXPIN x, pin      ' Set X parameter
-      WYPIN y, pin      ' Set Y parameter
-      DIRH  pin         ' Enable smart pin (DIR=1)
-    spin2: |
-      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
-      PINSTART(pin, mode, x, y)  ' Configure and enable
-      ' OR manually:
-      PINFLOAT(pin)              ' Ensure DIR=0
-      WRPIN(pin, mode)           ' Set mode
-      WXPIN(pin, x)              ' Set X parameter
-      WYPIN(pin, y)              ' Set Y parameter
-      PINHIGH(pin)               ' Enable (DIR=1)
-
-reset_behavior:
-  during_reset:
-    dir_state: "DIR=0"
-    sampling: "No sampling occurs"
-
-usage_notes:
-  - "Interfaces to external delta-sigma ADC"
-  - "B-input provides sample clock"
-  - "A-input receives ADC bitstream"
-  - "Same filtering capabilities as internal clock mode"
-  - "Synchronized to external timing"
-
-applications:
-  external_adc: "Interface to external delta-sigma converters"
-  synchronized_sampling: "Sample synchronized to external events"
-  multi_channel_adc: "Coordinate with external multiplexing"
-  precision_timing: "Sample at precisely controlled intervals"
+common_applications:
+  - "Integration with external high-precision delta-sigma ADCs"
+  - "Multi-channel synchronized ADC systems"
+  - "High-speed data acquisition from external converters"
+  - "Custom ADC filtering algorithms"
 
 related_modes:
-  - "%11000 (ADC internally clocked)"
-  - "%11010 (ADC scope with trigger)"
+  - "Mode %11000: ADC internal clock - P2's internal ADC"
+  - "Mode %11010: ADC scope trigger - triggered acquisition"
+  - "Mode %11101: Sync serial receive - serial data input"
 
-see_also:
-  - "External ADC interfacing"
-  - "Delta-sigma ADC principles"
-  - "Synchronized sampling techniques"
+configuration_constants:
+  mode_constant: "P_ADC_EXT"
+  binary_value: "%11001"
+  required_pin_config: "%100011_00000000_00_11001_0"
+  
+  filtering_modes:
+    - "%00 - SINC2 sampling (complete in hardware, power-of-2 periods only)"
+    - "%01 - SINC2 filtering (software difference computation required)"
+    - "%10 - SINC3 filtering (software multi-stage difference required)"
+    - "%11 - Bitstream capturing (raw bits for custom processing)"
+  
+  resolution_table:
+    sinc2_sampling:
+      - "8 clocks = 4 bits"
+      - "128 clocks = 8 bits"
+      - "8,192 clocks = 14 bits (practical max)"
+    sinc3_filtering:
+      - "16 clocks = 8 ENOB"
+      - "128 clocks = 14 ENOB"
+      - "512 clocks = 18 ENOB (max, limited by accumulator)"
+    bitstream:
+      - "32 clocks = 32 new bits (max before overflow)"
 
-source:
-  document: "Silicon Doc v35"
-  section: "Smart Pin Modes"
-  page_reference: "part4-smart-pins.txt"
-  extraction_date: "2025-09-06"
+notes:
+  - "A-input carries data, B-input is sample clock (use P_PLUS1_B modifier)"
+  - "Samples A-input on each B-input rising edge"
+  - "Y register overrides X[3:0] period for non-power-of-2 sample rates"
+  - "SINC2 accurate starting second period, SINC3 accurate starting third period"
+  - "27-bit accumulators require careful overflow handling in software"
+  - "SINC3 limited to 512 samples/period due to accumulator size"
+  - "SINC2 supports up to 11,585 clocks/period"
+  - "Prescale 27-bit to 32-bit (SHL #5) or post-trim (ZEROX #26) for overflow handling"
+  - "Multiple pins can be configured simultaneously using pin group bits"

@@ -1,89 +1,130 @@
-# Smart Pin Mode: %10100 - Count States for X Periods
-# Silicon Doc Reference: part4-smart-pins.txt, page 93
-# Layer 1: Direct Silicon Doc extraction
+title: "Sum Pulse Duration Over X Periods"
+subtitle: "Smart Pin Mode %10100 (P_PERIODS_STATES)"
+language_reference: "combined"
+compatible_languages: ["Spin2", "PASM2"]
 
-mode_id: "%10100"
+brief_description: "Measures total A-input high-state duration across X measurement periods defined by A/B event triggers"
 
-mode_name: "Count States for X Periods"
+detailed_description:
+  operation: |
+    Accumulates total time that A-input spends in logic-1 state across X measurement periods.
+    Each period is defined by trigger events on A and B inputs (rise/edge combinations). Counts
+    clock cycles when A is high within each period, summing across all X periods. Useful for
+    oversampling period measurements and duty cycle analysis.
+  
+  timing: |
+    Period defined by Y[1:0] trigger combination (A-rise/edge to B-rise/edge)
+    Accumulates A-high time across X periods
+    IN flag raised when X periods complete
+    Z register updated with total accumulated time
+    New measurement begins automatically at next trigger
 
-mode_group: "measurement"
+registers:
+  x_register:
+    bits_31_0: "Number of measurement periods (X periods to accumulate)"
+  y_register:
+    bits_1_0: |
+      Event trigger sensitivity:
+      %00 = A-input rise to B-input rise
+      %01 = A-input rise to B-input edge
+      %10 = A-input edge to B-input rise
+      %11 = A-input edge to B-input edge
+  z_register:
+    function: "Total clock cycles A-input was high across X periods (max $80000000)"
 
-mode_complexity: "advanced"
+flags:
+  in_flag: "Raised when X periods complete, measurement ready"
+  a_input: "Signal to measure (time spent high is accumulated)"
+  b_input: "Period boundary marker (can be same as A-input)"
 
-dac_mode_dependency: false
+code_examples:
+  - title: "PWM Duty Cycle Measurement"
+    description: "Measure average duty cycle over 100 periods"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        pwm_pin = 20                             ' PWM signal input
+      
+      PUB main() | total_high, periods, duty_percent
+        ' Measure duty cycle over 100 periods
+        ' Use A-rise to A-rise (single pin, %00 mode)
+        pinstart(pwm_pin, P_PERIODS_STATES | P_B_A_INPUT, 100, %00)
+        
+        repeat
+          ' Wait for measurement complete
+          repeat until pinread(pwm_pin)
+          
+          total_high := rdpin(pwm_pin)           ' Total clocks A was high
+          
+          ' Calculate duty cycle percentage
+          ' (This measures cumulative high time, not period time)
+          debug("Total high time: ", udec(total_high), " clocks")
+      
+      DAT
+      ' PASM2 example - measure duty over 10 cycles
+        org
+        dirl    #pwm_pin                         ' Reset smart pin
+        wrpin   ##P_PERIODS_STATES | P_B_A_INPUT, #pwm_pin
+        wxpin   #10, #pwm_pin                    ' 10 periods
+        wypin   #%00, #pwm_pin                   ' A-rise to A-rise (B=A)
+        dirh    #pwm_pin                         ' Start measurement
+      .loop
+        testp   #pwm_pin wc                      ' Check IN flag
+        if_nc   jmp #.loop                       ' Wait for completion
+        rdpin   high_time, #pwm_pin              ' Get total high time
+        ' Process measurement...
+        jmp     #.loop                           ' Next measurement starts auto
 
-pin_pairing: "adjacent"
-
-operation_description: |
-  Counts A-input trigger states from each A-input rise/edge to each B-input rise/edge
-  for X periods. Complementary to %10011 - provides oversampled duty measurement rather
-  than period measurement. Accumulates A-trigger states across X complete periods.
-
-x_parameter:
-  usage: "Number of periods to measure"
-  bit_fields:
-    - range: "X[31:0]"
-      purpose: "Period count for state accumulation"
-
-y_parameter:
-  usage: "Edge sensitivity selection"
-  bit_fields:
-    - range: "Y[1:0]"
-      purpose: "00=A-rise to B-rise, 01=A-rise to B-edge, 10=A-edge to B-rise, 11=A-edge to B-edge"
-
-z_result:
-  data_type: "32-bit accumulated states"
-  bit_interpretation:
-    - range: "Z[31:0]"
-      meaning: "Total A-trigger states for X periods"
-
-
-initialization_requirement:
-  critical: true
-  description: "Smart pin MUST be reset before configuration"
-  requirement: |
-    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
-    This ensures the smart pin is in a known state and prevents configuration conflicts.
-  reset_sequence:
-    pasm2: |
-      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
-      WRPIN mode, pin   ' Configure mode
-      WXPIN x, pin      ' Set X parameter
-      WYPIN y, pin      ' Set Y parameter
-      DIRH  pin         ' Enable smart pin (DIR=1)
-    spin2: |
-      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
-      PINSTART(pin, mode, x, y)  ' Configure and enable
-      ' OR manually:
-      PINFLOAT(pin)              ' Ensure DIR=0
-      WRPIN(pin, mode)           ' Set mode
-      WXPIN(pin, x)              ' Set X parameter
-      WYPIN(pin, y)              ' Set Y parameter
-      PINHIGH(pin)               ' Enable (DIR=1)
+  - title: "Phase Relationship Measurement"
+    description: "Measure A-high time between two signal events"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        sig_a_pin = 20                           ' Signal A
+        sig_b_pin = 21                           ' Signal B (period marker)
+      
+      PUB main() | overlap_time
+        ' Measure how long A is high between B edges
+        ' A-edge to B-edge mode captures overlap
+        pinstart(sig_a_pin, P_PERIODS_STATES | P_PLUS1_B, 50, %11)
+        
+        repeat
+          repeat until pinread(sig_a_pin)        ' Wait for measurement
+          
+          overlap_time := rdpin(sig_a_pin)       ' Get accumulated time
+          debug("A-high time in 50 B-periods: ", udec(overlap_time))
 
 common_applications:
-  - application: "Duty cycle measurement"
-    description: "Oversampled duty cycle measurement"
-    complexity_level: "advanced"
-  - application: "Signal quality analysis"
-    description: "Measure signal active time vs total time"
-    complexity_level: "advanced"
+  - "PWM duty cycle measurement (oversampled)"
+  - "Phase overlap detection between two signals"
+  - "Average high-time measurement"
+  - "Signal quality analysis (cumulative on-time)"
 
-configuration_examples:
-  - name: "Duty cycle over 10 periods"
-    description: "Measure duty cycle across 10 periods"
-    reset_code: "DIRL duty_measure                  ' REQUIRED: Reset before configuration"
-    wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_10100_0, duty_measure"
-    wxpin_code: "WXPIN #10, duty_measure"
-    wypin_code: "WYPIN #%00, duty_measure"
-    explanation: "Count A-states from A-rise to B-rise, 10 periods"
+related_modes:
+  - "Mode %10011: Periods/count/time - measures period duration"
+  - "Mode %10101: Periods/clocks/time - time-limited measurement"
+  - "Mode %10110: Periods/clocks/states - combines clock and state counting"
+  - "Mode %01111: Count highs - continuous high-state counting"
 
-extraction_metadata:
-  extraction_date: "2025-09-06"
-  source_documents:
-    - document: "Silicon Doc part4-smart-pins.txt"
-      pages: [93]
-      section: "%10100 = for X periods, count states"
-  validation_status: "draft"
-  completeness_score: 82
-  technical_accuracy: "silicon_doc_verified"
+configuration_constants:
+  mode_constant: "P_PERIODS_STATES"
+  binary_value: "%10100"
+  common_modifiers:
+    - "P_B_A_INPUT - Use A-input for both A and B (single pin measurement)"
+    - "P_PLUS1_B - Use next pin as B-input"
+    - "P_MINUS1_B - Use previous pin as B-input"
+    - "P_FILT1_AB - Add filtering for noise immunity"
+  
+  y_register_values:
+    - "%00 - A-rise to B-rise (typical for same-frequency signals)"
+    - "%01 - A-rise to B-edge (any B transition ends period)"
+    - "%10 - A-edge to B-rise (any A transition starts period)"
+    - "%11 - A-edge to B-edge (maximum sensitivity)"
+
+notes:
+  - "Accumulates A-high time, not period time (use mode %10011 for periods)"
+  - "Z register limited to $80000000 clock cycles maximum"
+  - "If A-rise/edge coincides with B-rise/edge at period end, next period registered"
+  - "Measurement restarts automatically after X periods complete"
+  - "B-input can be same as A-input for single-pin period measurement"
+  - "Useful for averaging out noise by measuring over multiple cycles"

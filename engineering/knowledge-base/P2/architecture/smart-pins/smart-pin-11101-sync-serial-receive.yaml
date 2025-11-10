@@ -1,0 +1,177 @@
+# Smart Pin Mode: %11101 - Synchronous Serial Receive
+# Concise reference optimized for AI code generation
+
+mode: "%11101"
+name: "Synchronous Serial Receive (Sync RX, SSR)"
+category: "synchronous_serial"
+
+# Constants
+constants:
+  spin2: "P_SYNC_RX"
+  pasm2: "P_SYNC_RX"  # Same constants work in PASM2
+  mode_bits: "%11101"  # Binary value for reference
+
+# Operation
+operation: |
+  Receives 1-32 bits synchronized with external clock. LSB first.
+  A=data input, B=clock input. Data left-justified in Z register.
+
+# Critical: Received data needs right-shift for <32 bits (SHR #(32-bits))
+# MSB-first requires REV after reception
+
+# Parameters
+x_register:
+  X[5]: "0=sample before edge (tolerant), 1=sample on edge (fast P2-to-P2)"
+  X[4:0]: "bit_count - 1 (e.g., 7 for 8 bits)"
+
+y_register: "Not used"
+
+z_register: |
+  Received data (left-justified):
+  - 8-bit: Z[31:24]=data, use SHR #24
+  - 16-bit: Z[31:16]=data, use SHR #16  
+  - 32-bit: Z[31:0]=data, no shift needed
+
+in_flag: "High when reception complete"
+
+# Pin Usage
+pins:
+  data_pin: "Receives serial data (A-input)"
+  clock_pin: "Receives clock signal (B-input)"
+  sampling:
+    before_edge: "X[5]=0, no hold time required"
+    on_edge: "X[5]=1, needs stable data after edge"
+  clock_edge:
+    positive: "Use P_PLUS1_B for B-input from pin+1"
+    negative: "Use P_INVERT_B for inverted clock"
+
+# Complete Spin2 Example
+spin2_complete: |
+  CON
+    RX_PIN = 30
+    CLK_PIN = 31
+    
+  VAR
+    BYTE buffer[256]
+    
+  PUB main() | mode, data
+    ' 8-bit SPI slave RX, positive edge
+    mode := P_SYNC_RX | P_PLUS1_B            ' Clock from pin+1
+    PINSTART(RX_PIN, mode, %0_00111, 0)      ' Pre-edge, 8-bit
+    
+    ' Main receive loop
+    REPEAT
+      data := receive_byte()
+      buffer[idx++] := data
+    
+  PUB receive_byte() : result
+    ' Wait for and read one byte
+    REPEAT UNTIL PINREAD(RX_PIN) & $8000_0000  ' Wait for IN
+    result := RDPIN(RX_PIN) >> 24              ' Read & right-justify
+    
+  PUB setup_fast_p2() | mode
+    ' Optimized for P2-to-P2 transfer
+    mode := P_SYNC_RX | P_PLUS1_B
+    PINCLEAR(RX_PIN)
+    WRPIN(RX_PIN, mode)
+    WXPIN(RX_PIN, %1_00111)                  ' On-edge sampling, 8-bit
+    PINHIGH(RX_PIN)                          ' Enable
+    
+  PUB receive_msb_first() : result | data
+    ' Handle MSB-first protocol
+    REPEAT UNTIL PINREAD(RX_PIN) & $8000_0000
+    data := RDPIN(RX_PIN)
+    data := REV data                          ' Reverse bit order
+    result := data & $FF                     ' Mask to 8 bits
+
+# Complete PASM2 Example
+pasm2_complete: |
+  DAT
+          ORG
+  
+  ' Pin assignments and mode constants
+  rx_pin        LONG  30
+  clk_pin       LONG  31
+  sync_rx_pos   LONG  P_SYNC_RX | P_PLUS1_B            ' %0000_0001_000_0000000000000_00_11101_0
+  sync_rx_neg   LONG  P_SYNC_RX | P_INVERT_B           ' %0000_1000_000_0000000000000_00_11101_0
+  sync_rx_fast  LONG  P_SYNC_RX | P_PLUS1_B            ' Base mode for fast P2-to-P2
+  
+  ' Initialize sync serial receive
+  setup_rx
+          MOV   pin, rx_pin
+          MOV   mode, sync_rx_pos
+          DIRL  pin                   ' Reset pin
+          WRPIN mode, pin             ' Configure positive edge
+          WXPIN #%0_00111, pin        ' Pre-edge, 8-bit
+          DIRH  pin                   ' Enable
+          RET
+  
+  ' Receive one byte
+  receive_byte
+          MOV   pin, rx_pin
+  .wait   TESTP pin WC                ' Test IN flag
+    IF_NC JMP   #.wait                ' Wait for data
+          RDPIN data, pin             ' Read received
+          SHR   data, #24             ' Right-justify byte
+          RET
+  
+  ' Receive MSB-first byte
+  receive_msb
+          CALL  #receive_byte         ' Get byte (LSB-first)
+          REV   data                  ' Reverse bits
+          ZEROX data, #7              ' Mask to 8 bits
+          RET
+  
+  ' Setup for fast P2-to-P2
+  setup_fast
+          MOV   pin, rx_pin
+          MOV   mode, sync_rx_fast
+          DIRL  pin
+          WRPIN mode, pin
+          WXPIN #%1_00111, pin        ' On-edge, 8-bit
+          DIRH  pin
+          RET
+  
+  ' Buffer for received data
+  buffer  LONG  0[64]                ' 256 bytes
+  
+  ' Variables
+  pin     RES   1
+  mode    RES   1
+  data    RES   1
+
+# Inline PASM2 in Spin2
+spin2_inline: |
+  PUB fast_rx(pin) : result
+    ORG
+      DIRL  pin                     ' Reset smart pin
+      WRPIN ##P_SYNC_RX, pin        ' Configure mode
+      WXPIN #%0_00111, pin          ' Pre-edge, 8-bit
+      DIRH  pin                     ' Enable
+  .wait
+      TESTP pin WC                  ' Test IN flag
+      IF_NC JMP #.wait              ' Wait for data
+      RDPIN result, pin             ' Read data
+      SHR   result, #24             ' Right-justify
+    END
+
+# Key Points
+timing:
+  pre_edge_sample: "More tolerant, works with any transmitter"
+  on_edge_sample: "For fast P2-to-P2, requires 2-clock hold"
+  
+data_format: "Always left-justified, needs right-shift except 32-bit"
+
+initialization: "MUST reset (DIR=0) before configuration"
+
+common_uses:
+  - "SPI slave"
+  - "Shift register input (74HC165)"
+  - "Synchronous sensor interface"
+
+acknowledgment:
+  RDPIN: "Read and clear IN"
+  RQPIN: "Read without clearing IN"
+  AKPIN: "Clear IN without reading"
+
+related: ["11100 (Sync TX)", "11111 (Async RX)"]

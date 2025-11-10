@@ -1,90 +1,102 @@
-# Smart Pin Mode: %01111 - Count A-Highs with Optional B-Decrement
-# Silicon Doc Reference: part4-smart-pins.txt, page 91
-# Layer 1: Direct Silicon Doc extraction
+title: "Level-Sensitive High Counter"
+subtitle: "Smart Pin Mode %01111 (P_COUNT_HIGHS)"
+language_reference: "combined"
+compatible_languages: ["Spin2", "PASM2"]
 
-mode_id: "%01111"
+brief_description: "Counts clock cycles while A-input high, optionally decrements while B-input high"
 
-mode_name: "Count A-Highs with Optional B-Decrement"
+detailed_description:
+  operation: |
+    Level-sensitive counter that counts system clock cycles while inputs are high. When Y[0]=0,
+    counts only while A-input is high. When Y[0]=1, increments while A-input high and decrements
+    while B-input high. Useful for duty cycle measurement, pulse width timing, or time-based
+    accumulation. Counts every clock cycle, not edges.
+  
+  timing: |
+    Continuous mode (X=0): Z register always holds current clock count
+    Periodic mode (X>0): Clock count over X cycle measurement period
+    IN flag raised at end of each measurement period
+    Counts system clocks, not input transitions
 
-mode_group: "measurement"
+registers:
+  x_register:
+    bits_31_0: "Measurement period in clocks (0=continuous totalizer)"
+  y_register:  
+    bit_0: "0=count A-high only, 1=inc on A-high/dec on B-high"
+    bits_31_1: "Unused"
+  z_register:
+    function: "32-bit clock count (unsigned if Y[0]=0, signed if Y[0]=1)"
 
-mode_complexity: "intermediate"
+flags:
+  in_flag: "Raised at end of measurement period (periodic mode only)"
+  a_input: "Count while high (increments clock count)"
+  b_input: "Count while high when Y[0]=1 (decrements clock count)"
 
-dac_mode_dependency: false
-
-pin_pairing: "adjacent"
-
-operation_description: |
-  Count A-highs mode with optional B-decrement provides level-based counting.
-  Y[0] selects operation: Y[0]=0 counts A-input highs only, Y[0]=1 increments
-  on A-input high and decrements on B-input high. X[31:0] sets measurement period
-  (0=continuous). Useful for level-based rather than edge-based counting.
-
-x_parameter:
-  usage: "Measurement period"
-  bit_fields:
-    - range: "X[31:0]"
-      purpose: "Period in clocks (0=continuous)"
-
-y_parameter:
-  usage: "Mode selection"
-  bit_fields:
-    - range: "Y[0]"
-      purpose: "0=count A-highs, 1=A-inc/B-dec"
-
-z_result:
-  data_type: "32-bit count"
-  bit_interpretation:
-    - range: "Z[31:0]"
-      meaning: "High level count or differential count"
-
-
-initialization_requirement:
-  critical: true
-  description: "Smart pin MUST be reset before configuration"
-  requirement: |
-    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
-    This ensures the smart pin is in a known state and prevents configuration conflicts.
-  reset_sequence:
-    pasm2: |
-      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
-      WRPIN mode, pin   ' Configure mode
-      WXPIN x, pin      ' Set X parameter
-      WYPIN y, pin      ' Set Y parameter
-      DIRH  pin         ' Enable smart pin (DIR=1)
-    spin2: |
-      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
-      PINSTART(pin, mode, x, y)  ' Configure and enable
-      ' OR manually:
-      PINFLOAT(pin)              ' Ensure DIR=0
-      WRPIN(pin, mode)           ' Set mode
-      WXPIN(pin, x)              ' Set X parameter
-      WYPIN(pin, y)              ' Set Y parameter
-      PINHIGH(pin)               ' Enable (DIR=1)
+code_examples:
+  - title: "Duty Cycle Measurement"
+    description: "Measure duty cycle over 1-second periods"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        signal_pin = 53                          ' Signal to measure
+      
+      PUB main() | high_time, duty_percent
+        ' Configure for 1-second duty cycle measurements
+        pinstart(signal_pin, P_COUNT_HIGHS, _clkfreq, 0)
+        
+        repeat
+          ' Wait for measurement complete
+          repeat until pinr(signal_pin)
+          high_time := rdpin(signal_pin)         ' Clocks while high
+          
+          ' Calculate duty cycle percentage
+          duty_percent := (high_time * 100) / _clkfreq
+          debug("Duty cycle: ", udec(duty_percent), "%")
+      
+      DAT
+      ' PASM2 pulse width measurement
+        org
+        dirl    #signal_pin                      ' Reset smart pin
+        wrpin   ##P_COUNT_HIGHS, #signal_pin
+        wxpin   #0, #signal_pin                  ' Continuous mode
+        wypin   #0, #signal_pin                  ' Count A-high only
+        dirh    #signal_pin                      ' Enable counter
+      .wait_low
+        testp   #signal_pin wz                   ' Wait for low
+        if_nz   jmp #.wait_low
+      .wait_high  
+        testp   #signal_pin wz                   ' Wait for high
+        if_z    jmp #.wait_high
+        akpin   #signal_pin                      ' Clear counter
+      .wait_low2
+        testp   #signal_pin wz                   ' Wait for low again
+        if_nz   jmp #.wait_low2
+        rdpin   pulse_width, #signal_pin         ' Read pulse width
 
 common_applications:
-  - application: "Level monitoring"
-    description: "Count high levels over time"
-    complexity_level: "intermediate"
-  - application: "Differential level counting"
-    description: "Balance counting with two level signals"
-    complexity_level: "intermediate"
+  - "Duty cycle measurement"
+  - "Pulse width measurement in clock cycles"
+  - "Active time accumulation"
+  - "PWM signal analysis"
 
-configuration_examples:
-  - name: "Level counter"
-    description: "Count A-input high levels"
-    reset_code: "DIRL level_pin                  ' REQUIRED: Reset before configuration"
-    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_00_01111_0, level_pin"
-    wxpin_code: "WXPIN #1000000, level_pin"
-    wypin_code: "WYPIN #0, level_pin"
-    explanation: "Count A-highs in 1M clock periods"
+related_modes:
+  - "Mode %10001: Time consecutive highs"
+  - "Mode %10000: Time state durations"
+  - "Mode %01110: Count edges (not level-sensitive)"
+  - "Mode %01100: Gated edge counter"
 
-extraction_metadata:
-  extraction_date: "2025-09-06"
-  source_documents:
-    - document: "Silicon Doc part4-smart-pins.txt"
-      pages: [91]
-      section: "%01111 = inc on A-high / dec on B-high"
-  validation_status: "draft"
-  completeness_score: 85
-  technical_accuracy: "silicon_doc_verified"
+configuration_constants:
+  mode_constant: "P_COUNT_HIGHS"
+  binary_value: "%01111"
+  common_modifiers:
+    - "P_PLUS1_B - Use next pin for decrement signal"
+    - "P_INVERT_A - Count while A low instead of high"
+    - "P_INVERT_B - Decrement while B low"
+    - "P_FILT1_AB - Add filtering to reduce glitches"
+
+notes:
+  - "Counts clock cycles, not edges - level sensitive"
+  - "Y[0]=0: Simple high-time accumulator"
+  - "Y[0]=1: Differential time accumulator"
+  - "Perfect for precise pulse width measurement"
+  - "32-bit counter allows ~21 seconds at 200MHz before overflow"

@@ -1,149 +1,141 @@
-# Smart Pin Mode %00001 - Long Repository or DAC Noise
-# Source: Silicon Doc v35, part4-smart-pins.txt
+# Smart Pin Mode: %00001 - Long Repository / DAC Noise
+# Concise reference optimized for AI code generation
 
-mode_id: "%00001"
-mode_name: "Long Repository or DAC Noise"
-description: "Dual functionality based on M[12:10] setting - either long repository storage or DAC noise generation"
-category: "storage_dac"
-output_override: false
+mode: "%00001"
+name: "Long Repository (non-DAC) / DAC Noise (DAC mode)"
+category: "repository_dac"
 
-configuration:
-  wrpin_format:
-    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
-    sssss_value: "%00001"
-
-  mode_selection:
-    long_repository: "M[12:10] != %101"
-    dac_noise: "M[12:10] = %101"
-
-# Long Repository Mode
-long_repository_mode:
-  condition: "M[12:10] != %101"
-  description: "Smart pin acts as a long repository for data storage"
+# Constants
+constants:
+  spin2: "P_REPOSITORY or P_DAC_NOISE"
+  pasm2: "P_REPOSITORY or P_DAC_NOISE"
+  mode_bits: "%00001"
   
-  behavior:
-    active_state: "DIR=1"
-    reset_state: "DIR=0"
-    
-  operations:
-    write: "WXPIN writes the long and raises IN"
-    read: "RDPIN/RQPIN can read the long"
-    
-  during_active:
-    wxpin_effect: "Updates the long and raises IN"
-    
-  during_reset:
-    wxpin_effect: "WXPIN instructions are ignored"
-    in_signal: "IN is low"
+# Operation
+operation: |
+  Dual-purpose mode based on low-level pin configuration:
+  - Non-DAC: 32-bit repository for data sharing between cogs
+  - DAC mode (P[12:10]=%101): Outputs pseudo-random noise to DAC
 
-# DAC Noise Mode  
+# Parameters - Repository Mode
+repository_mode:
+  x_register: "Not used"
+  y_register: "32-bit value to store"
+  z_register: "Reads back stored value"
+  in_flag: "High when Y written"
+  
+# Parameters - DAC Noise Mode  
 dac_noise_mode:
-  condition: "M[12:10] = %101"
-  description: "Overrides M[7:0] to feed 8-bit DAC pseudo-random data"
+  x_register: "Update rate (clock divider)"
+  y_register: "Enable/disable noise (0=off, non-zero=on)"
+  z_register: "Current PRNG value"
+  requires: "P[12:10]=%101 in WRPIN mode value"
+
+# Complete Spin2 Example
+spin2_complete: |
+  CON
+    REPO_PIN = 48
+    NOISE_PIN = 49
+    
+  VAR
+    LONG shared_value
+    
+  PUB main()
+    ' Repository mode - share data between cogs
+    setup_repository()
+    
+    ' DAC noise mode - generate random analog output
+    setup_dac_noise()
+    
+  PUB setup_repository() | mode
+    mode := P_REPOSITORY
+    PINSTART(REPO_PIN, mode, 0, $12345678)  ' Store value
+    
+    ' Another cog can read this
+    shared_value := RDPIN(REPO_PIN)         ' Read repository
+    
+  PUB setup_dac_noise() | mode
+    ' Combine with DAC mode bits
+    mode := P_DAC_NOISE | P_DAC_124R_3V | P_OE
+    PINCLEAR(NOISE_PIN)
+    WRPIN(NOISE_PIN, mode)
+    WXPIN(NOISE_PIN, 1000)          ' Update rate
+    WYPIN(NOISE_PIN, 1)             ' Enable noise
+    PINHIGH(NOISE_PIN)              ' Start DAC output
+    
+  PUB write_repository(value)
+    WYPIN(REPO_PIN, value)          ' Update stored value
+    
+  PUB read_repository() : value
+    value := RDPIN(REPO_PIN)        ' Read without clearing IN
+
+# Complete PASM2 Example
+pasm2_complete: |
+  DAT
+          ORG
   
-  requirements:
-    pin_config: "M[12:10] must be set to %101 to configure low-level pin for DAC output"
-    data_pattern: "Each pin receives a unique pseudo-random data pattern"
-    
-  timing:
-    update_rate: "Pseudo-random data fed on every clock"
-    
-  sample_period:
-    x_register: "X[15:0] can be set to sample period in clock cycles"
-    zero_setting: "Set X[15:0] to zero (65,536 clocks) to maximize period and reduce switching power"
-    purpose: "For marking time with IN raising at each period completion"
-    
-  adc_functionality:
-    availability: "RDPIN/RQPIN can retrieve 16-bit ADC accumulation from last sample period"
-    
-  during_reset:
-    in_signal: "IN is low"
-
-instructions:
-  setup:
-    - "WRPIN - Configure mode (%00001) and set M[12:10] appropriately"
-    
-  long_repository:
-    write: "WXPIN - Write long value (raises IN when DIR=1)"
-    read: "RDPIN/RQPIN - Read stored long value"
-    
-  dac_noise:
-    configure: "WXPIN - Set sample period in X[15:0]"
-    read_adc: "RDPIN/RQPIN - Get 16-bit ADC accumulation"
-
-timing_characteristics:
-  dac_update: "Every clock cycle"
-  in_signal: "Raises at sample period completion (DAC mode only)"
+  ' Pin assignments
+  repo_pin      LONG  48
+  noise_pin     LONG  49
+  repo_mode     LONG  P_REPOSITORY
+  noise_mode    LONG  P_DAC_NOISE | P_DAC_124R_3V | P_OE
   
-behavior:
-  in_signal:
-    long_repository: "Raised when WXPIN updates long (DIR=1 only)"
-    dac_noise: "Raised at each sample period completion"
+  ' Setup repository for inter-cog communication
+  setup_repo
+          MOV   pin, repo_pin
+          DIRL  pin                   ' Reset
+          WRPIN repo_mode, pin        ' Configure
+          DIRH  pin                   ' Enable
+          WYPIN ##$DEADBEEF, pin      ' Store value
+          RET
+  
+  ' Read from repository
+  read_repo
+          MOV   pin, repo_pin
+          RDPIN data, pin             ' Get stored value
+          RET
+          
+  ' Setup DAC noise generator
+  setup_noise
+          MOV   pin, noise_pin
+          DIRL  pin
+          WRPIN noise_mode, pin       ' DAC + noise mode
+          WXPIN ##1000, pin           ' Update rate
+          WYPIN #1, pin               ' Enable
+          DIRH  pin                   ' Start output
+          RET
+          
+  ' Variables
+  pin     RES   1
+  data    RES   1
+
+# Inline PASM2 in Spin2
+spin2_inline: |
+  PUB store_value(pin, value)
+    ORG
+      WYPIN value, pin              ' Store to repository
+    END
     
-  acknowledgment:
-    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
-    effect: "Causes smart pin to lower IN signal"
-    timing: "Takes two clocks for IN to drop before polling again"
+  PUB get_value(pin) : result
+    ORG
+      RDPIN result, pin             ' Read repository
+    END
 
+# Key Points
+repository_use: |
+  Share 32-bit values between cogs
+  Non-blocking read/write
+  IN flag indicates new data
+  
+dac_noise_use: |
+  Requires DAC mode bits in WRPIN
+  Generates white noise output
+  X controls update frequency
+  
+common_uses:
+  - "Inter-cog communication"
+  - "Flags and semaphores"
+  - "Random analog signals"
+  - "Audio noise generation"
 
-initialization_requirement:
-  critical: true
-  description: "Smart pin MUST be reset before configuration"
-  requirement: |
-    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
-    This ensures the smart pin is in a known state and prevents configuration conflicts.
-  reset_sequence:
-    pasm2: |
-      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
-      WRPIN mode, pin   ' Configure mode
-      WXPIN x, pin      ' Set X parameter
-      WYPIN y, pin      ' Set Y parameter
-      DIRH  pin         ' Enable smart pin (DIR=1)
-    spin2: |
-      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
-      PINSTART(pin, mode, x, y)  ' Configure and enable
-      ' OR manually:
-      PINFLOAT(pin)              ' Ensure DIR=0
-      WRPIN(pin, mode)           ' Set mode
-      WXPIN(pin, x)              ' Set X parameter
-      WYPIN(pin, y)              ' Set Y parameter
-      PINHIGH(pin)               ' Enable (DIR=1)
-
-reset_behavior:
-  during_reset: 
-    - "DIR=0"
-    - "IN is low" 
-    - "WXPIN ignored (long repository mode)"
-    - "No data output (DAC mode)"
-
-usage_notes:
-  long_repository:
-    - "Use for simple data storage between cogs"
-    - "32-bit long storage capacity"
-    - "IN signal coordinates data updates"
-    
-  dac_noise:
-    - "Provides unique pseudo-random pattern per pin"
-    - "Useful for noise generation or dithering"
-    - "Can sample ADC to monitor DAC loading"
-    - "Minimize sample period changes to reduce power"
-
-power_optimization:
-  dac_noise: "Set X[15:0] to zero for maximum period to reduce switching power consumption"
-
-related_modes:
-  - "%00002 (Long Repository)"
-  - "%00003 (Long Repository)" 
-  - "%00010 (DAC 16-bit dither, noise)"
-  - "%00011 (DAC 16-bit dither, PWM)"
-
-see_also:
-  - "DAC pin configuration requirements"
-  - "ADC accumulation reading"
-  - "Smart pin acknowledgment protocol"
-
-source:
-  document: "Silicon Doc v35"
-  section: "Smart Pin Modes"
-  page_reference: "part4-smart-pins.txt"
-  extraction_date: "2025-09-06"
+related: ["00010 (DAC Dither PRNG)", "00011 (DAC Dither PWM)"]

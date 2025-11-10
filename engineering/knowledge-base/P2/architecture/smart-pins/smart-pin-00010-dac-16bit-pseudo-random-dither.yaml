@@ -1,149 +1,187 @@
-# Smart Pin Mode %00010 - DAC 16-bit with Pseudo-Random Dither
-# Source: Silicon Doc v35, part4-smart-pins.txt
+# Smart Pin Mode: %00010 - DAC 16-bit with Pseudo-Random Dither
+# Concise reference optimized for AI code generation
 
-mode_id: "%00010"
-mode_name: "DAC 16-bit with Pseudo-Random Dither"
-description: "Overrides M[7:0] to feed 8-bit DAC with pseudo-randomly-dithered data achieving 16-bit resolution"
+mode: "%00010"
+name: "DAC 16-bit with Pseudo-Random Dither"
 category: "dac"
-output_override: false
 
-configuration:
-  wrpin_format:
-    description: "D/# = %AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0"
-    sssss_value: "%00010"
-    
-  requirements:
-    condition: "M[12:10] = %101" 
-    purpose: "Configure low-level pin for DAC output"
-    override: "Overrides M[7:0] for dithered DAC data"
-
-dac_operation:
-  resolution: "16-bit effective resolution from 8-bit DAC"
-  method: "Pseudo-random dithering between adjacent DAC levels"
-  update_rate: "Every clock cycle"
-  averaging: "16-bit resolution achieved over time through dithering"
-
-timing_control:
-  x_register:
-    function: "X[15:0] establishes sample period in clock cycles"
-    
-  y_register:
-    function: "Y[15:0] establishes DAC output value"
-    capture: "Captured at each sample period and used for its duration"
-    
-  period_completion:
-    sequence:
-      - "Y[15:0] captured for next output value"
-      - "IN is raised"
-      - "Coordinate updating Y[15:0] with IN going high"
-
-dithering_characteristics:
-  type: "Pseudo-random dithering"
-  advantage: "No fixed period requirement"
-  mechanism: "Randomly dithers 8-bit DAC between adjacent levels"
-  result: "16-bit DAC output averaged over time"
+# Constants
+constants:
+  spin2: "P_DAC_DITHER_RND"
+  pasm2: "P_DAC_DITHER_RND"
+  mode_bits: "%00010"
   
-  immediate_update:
-    condition: "Set X[15:0] to one"
-    effect: "IN will stay high, output updates take immediate effect"
+# Critical: Requires DAC mode configuration
+dac_requirement: |
+  M[12:10] MUST be %101 for DAC output
+  Use: P_DAC_DITHER_RND | P_DAC_124R_3V | P_OE
+  Other DAC options: P_DAC_990R_3V, P_DAC_600R_2V, P_DAC_75R_2V
 
-adc_functionality:
-  condition: "OUT is high"
-  capability: "ADC will be enabled"
-  reading: "RDPIN/RQPIN retrieve 16-bit ADC accumulation from last sample period"
-  purpose: "Measure loading on the DAC pin"
+# Operation
+operation: |
+  Outputs 16-bit DAC value using 8-bit DAC with pseudo-random dithering.
+  Dithers between adjacent DAC levels every clock to achieve 16-bit
+  resolution averaged over time. No fixed period required.
 
-instructions:
-  setup:
-    - "WRPIN - Configure mode (%00010) with M[12:10] = %101"
-    - "WXPIN - Set sample period in X[15:0]"
-    
-  operation:
-    - "WYPIN - Set DAC output value in Y[15:0]"
-    - "RDPIN/RQPIN - Read ADC accumulation (if OUT high)"
-    
-timing_sequences:
-  normal_operation:
-    - "Sample period elapses (X[15:0] clocks)"
-    - "Y[15:0] captured for output"
-    - "IN raised"
-    - "Update Y[15:0] for next period"
-    
-  immediate_update:
-    - "Set X[15:0] to 1"
-    - "IN stays high"
-    - "Y[15:0] changes take immediate effect"
+# Parameters
+x_register:
+  function: "Sample period in clocks"
+  X[15:0]: "Sample period (1 = immediate updates, IN stays high)"
+  special: "Set to 1 for real-time updates without IN flag cycling"
 
-behavior:
-  in_signal: "Raised on completion of each sample period"
-  output_capture: "Y[15:0] captured at sample period start"
+y_register:
+  function: "16-bit DAC output value"
+  Y[15:0]: "DAC value captured at each sample period"
+  update: "Coordinate with IN flag or use X=1 for immediate"
+
+z_register:
+  function: "ADC accumulation (if OUT=1)"
+  usage: "16-bit ADC reading from last sample period"
+  enable: "Set OUT=1 to enable ADC feedback"
+
+in_flag: |
+  Raised at end of each sample period
+  Indicates Y[15:0] captured for next output
+  Stays high if X[15:0]=1
+
+# Pin Behavior
+pin_behavior:
+  reset_state: "IN=0, Y[15:0] captured during reset"
+  output: "8-bit DAC dithered to achieve 16-bit resolution"
+  feedback: "OUT=1 enables ADC for load measurement"
+
+# Complete Spin2 Example
+spin2_complete: |
+  CON
+    DAC_PIN = 48
+    
+  VAR
+    LONG dac_value
+    
+  PUB main()
+    setup_16bit_dac()
+    
+    ' Generate ramp
+    REPEAT dac_value FROM 0 TO 65535 STEP 256
+      output_dac(dac_value)
+      WAITMS(1)
+    
+  PUB setup_16bit_dac() | mode
+    ' Configure for 16-bit pseudo-random dithered DAC
+    mode := P_DAC_DITHER_RND | P_DAC_124R_3V | P_OE
+    
+    PINCLEAR(DAC_PIN)
+    WRPIN(DAC_PIN, mode)
+    WXPIN(DAC_PIN, 1)           ' Immediate updates (no IN cycling)
+    WYPIN(DAC_PIN, $8000)       ' Mid-scale initial value
+    PINHIGH(DAC_PIN)            ' Enable DAC
+    
+  PUB output_dac(value16)
+    WYPIN(DAC_PIN, value16)     ' Output 16-bit value
+    
+  PUB setup_with_feedback() | mode
+    ' Enable ADC feedback to measure loading
+    mode := P_DAC_DITHER_RND | P_DAC_124R_3V | P_OE
+    
+    PINCLEAR(DAC_PIN)
+    WRPIN(DAC_PIN, mode)
+    WXPIN(DAC_PIN, 1000)       ' 1000 clock sample period
+    WYPIN(DAC_PIN, $8000)       ' Mid-scale
+    PINWRITE(DAC_PIN, 1)        ' OUT=1 enables ADC
+    PINHIGH(DAC_PIN)            ' Enable
+    
+  PUB read_loading() : adc_value
+    ' Read ADC accumulation (requires OUT=1)
+    adc_value := RDPIN(DAC_PIN)
+
+# Complete PASM2 Example
+pasm2_complete: |
+  DAT
+          ORG
   
-  acknowledgment:
-    triggers: "WRPIN, WXPIN, WYPIN, RDPIN, AKPIN"
-    effect: "Lowers IN signal after 2 clocks"
-
-
-initialization_requirement:
-  critical: true
-  description: "Smart pin MUST be reset before configuration"
-  requirement: |
-    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
-    This ensures the smart pin is in a known state and prevents configuration conflicts.
-  reset_sequence:
-    pasm2: |
-      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
-      WRPIN mode, pin   ' Configure mode
-      WXPIN x, pin      ' Set X parameter
-      WYPIN y, pin      ' Set Y parameter
-      DIRH  pin         ' Enable smart pin (DIR=1)
-    spin2: |
-      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
-      PINSTART(pin, mode, x, y)  ' Configure and enable
-      ' OR manually:
-      PINFLOAT(pin)              ' Ensure DIR=0
-      WRPIN(pin, mode)           ' Set mode
-      WXPIN(pin, x)              ' Set X parameter
-      WYPIN(pin, y)              ' Set Y parameter
-      PINHIGH(pin)               ' Enable (DIR=1)
-
-reset_behavior:
-  during_reset:
-    dir_state: "DIR=0"
-    in_signal: "IN is low"
-    capture: "Y[15:0] is captured"
-
-advantages:
-  vs_simple_dithering: "Random dithering eliminates fixed-period artifacts"
-  flexibility: "Can update output value at any time"
-  resolution: "True 16-bit resolution from 8-bit hardware"
+  ' Pin assignment and mode
+  dac_pin       LONG  48
+  dac_mode      LONG  P_DAC_DITHER_RND | P_DAC_124R_3V | P_OE
   
-disadvantages:
-  vs_pwm_dither: "Less dynamic range than PWM dithering method"
+  ' Setup 16-bit dithered DAC
+  setup_dac
+          MOV   pin, dac_pin
+          DIRL  pin                   ' Reset (captures Y)
+          WRPIN dac_mode, pin         ' Configure mode
+          WXPIN #1, pin               ' Immediate updates
+          WYPIN ##$8000, pin          ' Mid-scale initial
+          DIRH  pin                   ' Enable DAC
+          RET
+  
+  ' Output 16-bit value
+  output_value
+          MOV   pin, dac_pin
+          WYPIN value16, pin          ' Write 16-bit value
+          RET
+  
+  ' Generate sine wave using table
+  sine_wave
+          MOV   index, #0
+  .loop   MOV   ptra, #sine_table
+          ADD   ptra, index
+          RDBYTE value16, ptra        ' Get 8-bit sine
+          SHL   value16, #8           ' Scale to 16-bit
+          CALL  #output_value
+          ADD   index, #1
+          AND   index, #255           ' Wrap at 256
+          WAITX ##10_000              ' Delay
+          JMP   #.loop
+  
+  ' Sine lookup table (256 entries, 8-bit)
+  sine_table    BYTE  $80,$83,$86,$89,$8C,$8F,$92,$95
+                BYTE  $98,$9B,$9E,$A1,$A4,$A7,$AA,$AD
+                ' ... (abbreviated for space)
+  
+  ' Variables
+  pin           RES   1
+  value16       RES   1
+  index         RES   1
 
-usage_notes:
-  - "Excellent for applications requiring smooth analog output"
-  - "Random dithering reduces spectral artifacts"
-  - "Can monitor DAC loading via ADC when OUT high"
-  - "Coordinate Y[15:0] updates with IN signal"
-  - "For immediate response, set sample period to 1"
+# Inline PASM2 in Spin2
+spin2_inline: |
+  PUB set_dac_immediate(pin, value16)
+    ' Fast inline DAC update
+    ORG
+      WYPIN value16, pin            ' Direct write
+    END
+    
+  PUB read_adc_feedback(pin) : result
+    ' Read ADC accumulation
+    ORG
+      RDPIN result, pin             ' Get ADC value
+    END
 
-applications:
-  - "Audio DAC with high resolution"
-  - "Motor control with smooth analog drive"
-  - "Instrumentation with precise analog output"
-  - "Power supply control with feedback"
+# Key Points
+resolution: |
+  True 16-bit resolution through temporal dithering
+  8-bit DAC switches between adjacent levels
+  Averaging achieves 16-bit precision
+  
+update_modes: |
+  X=1: Immediate updates, no IN flag cycling
+  X>1: Periodic updates, synchronized with IN flag
+  
+feedback_mode: |
+  OUT=1 enables ADC for load measurement
+  Useful for detecting external loading
+  Read with RDPIN/RQPIN
+  
+common_uses:
+  - "High-resolution analog output"
+  - "Audio DAC applications"
+  - "Precision voltage references"
+  - "Waveform generation"
+  - "Control voltage output"
 
-related_modes:
-  - "%00001 (DAC noise)"
-  - "%00011 (DAC 16-bit PWM dither)"
+timing_considerations: |
+  Dithering occurs every clock cycle
+  No fixed period required for dithering
+  Sample period only affects Y capture timing
+  Immediate mode (X=1) best for real-time
 
-see_also:
-  - "DAC pin configuration (M[12:10] = %101)"
-  - "ADC accumulation reading"
-  - "Smart pin timing coordination"
-
-source:
-  document: "Silicon Doc v35"
-  section: "Smart Pin Modes" 
-  page_reference: "part4-smart-pins.txt"
-  extraction_date: "2025-09-06"
+related: ["00011 (DAC PWM Dither)", "00001 (DAC Noise)", "Normal mode with P_DAC_*"]

@@ -1,103 +1,219 @@
-# Smart Pin Mode: %11111 - Async Serial Receive  
-# Silicon Doc Reference: part4-smart-pins.txt, page 75
-# Layer 1: Direct Silicon Doc extraction
+title: "Asynchronous Serial Receive"
+subtitle: "Smart Pin Mode %11111 (P_ASYNC_RX)"
+language_reference: "combined"
+compatible_languages: ["Spin2", "PASM2"]
 
-mode_id: "%11111"
+brief_description: "Asynchronous serial reception at programmable baud rate (1-32 bits per frame)"
 
-mode_name: "Async Serial Receive"
+detailed_description:
+  operation: |
+    Receives serial data asynchronously with automatic start bit detection and stop bit validation.
+    Supports 1-32 data bits per frame at programmable baud rates. Hardware handles timing, framing,
+    and synchronization automatically. Monitors input for start bit (high-to-low transition), samples
+    data bits at mid-bit timing, and validates stop bit. IN flag raised when complete frame received.
+  
+  timing: |
+    Baud rate set by X register (system clocks per bit period)
+    Start bit (0) detected automatically (high-to-low transition)
+    Data bits sampled at mid-bit timing (LSB first)
+    Stop bit (1) validated automatically
+    IN flag raised when frame received and data ready
 
-mode_group: "communication"
+registers:
+  x_register:
+    bits_31_16: "System clock periods per bit period (integer part)"
+    bits_15_10: "Fractional clock periods (base-2 fraction for precise timing)"
+    bits_9_5: "Reserved"
+    bits_4_0: "Number of data bits to receive (1-32)"
+  y_register:
+    function: "Not used in receive mode"
+  z_register:
+    bits_31_0: "Received data (LSB received first)"
 
-mode_complexity: "intermediate"
+flags:
+  in_flag: "Raised when frame received, data ready to read"
+  a_input: "Serial data input (monitors for start bit)"
 
-dac_mode_dependency: false
+code_examples:
+  - title: "Basic 8-bit UART Receive"
+    description: "Standard 115200 baud 8N1 serial input"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        rx_pin = 21
+        baud = 115_200
+      
+      PUB main() | bit_period, received_byte
+        ' Calculate bit period: clocks/bit = clkfreq / baud
+        bit_period := (_clkfreq / baud) << 16
+        
+        ' Configure async RX: 8 data bits
+        pinstart(rx_pin, P_ASYNC_RX, (bit_period | 8), 0)
+        
+        ' Receive and display characters
+        repeat
+          received_byte := receive_byte()
+          if received_byte >= 32 and received_byte < 127
+            debug("Received: ", zstr(received_byte))
+          else
+            debug("Received: $", uhex_byte(received_byte))
+      
+      PUB receive_byte() : value
+        ' Wait for character received
+        repeat until pinread(rx_pin)
+        
+        ' Read received byte
+        value := rdpin(rx_pin)
+      
+      DAT
+      ' PASM2 example - buffered serial receive
+        org
+        mov     bit_period, ##(_clkfreq / baud) << 16
+        or      bit_period, #8                   ' 8 data bits
+        
+        dirl    #rx_pin                          ' Reset smart pin
+        wrpin   rx_mode, #rx_pin                 ' Configure mode
+        wxpin   bit_period, #rx_pin              ' Set baud and bits
+        dirh    #rx_pin                          ' Enable smart pin
+        
+        ' Receive loop with buffering
+        mov     ptra, ##buffer
+        mov     count, #0
+      .loop
+        testp   #rx_pin wc                       ' Check for data
+        if_nc   jmp #.loop                       ' Wait for character
+        rdpin   data, #rx_pin                    ' Read received byte
+        wrbyte  data, ptra++                     ' Store in buffer
+        add     count, #1
+        cmp     count, #buffer_size wz
+        if_nz   jmp #.loop                       ' Continue if buffer not full
+        
+        ' Process buffer...
+        ret
+      
+      rx_mode
+        long    P_ASYNC_RX
+      buffer  long    0[256]                     ' 256-byte buffer
+      buffer_size
+        long    256
+      data    long    0
+      count   long    0
 
-pin_pairing: "none"
+  - title: "Receive with Timeout Detection"
+    description: "Detect and handle receive timeouts"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        rx_pin = 21
+        baud = 9600
+        timeout_ms = 1000                        ' 1 second timeout
+      
+      PUB main() | result
+        setup_serial()
+        
+        repeat
+          result := receive_with_timeout(timeout_ms)
+          if result < 0
+            debug("Timeout - no data received")
+          else
+            debug("Received: ", udec(result))
+      
+      PUB setup_serial() | bit_period
+        bit_period := (_clkfreq / baud) << 16
+        pinstart(rx_pin, P_ASYNC_RX, (bit_period | 8), 0)
+      
+      PUB receive_with_timeout(timeout_ms) : value | deadline
+        deadline := getms() + timeout_ms
+        
+        repeat
+          if pinread(rx_pin)
+            return rdpin(rx_pin)                 ' Data received
+          
+          if getms() >= deadline
+            return -1                            ' Timeout
+      
+      PUB receive_blocking() : value
+        ' Simple blocking receive
+        repeat until pinread(rx_pin)
+        return rdpin(rx_pin)
 
-operation_description: |
-  Async serial receive mode provides UART-style serial reception with automatic start bit detection,
-  data sampling, parity checking, and stop bit validation. Received data available via RDPIN.
-  Baud rate up to clock/3 supported. Automatically handles frame synchronization.
-
-x_parameter:
-  usage: "Baud rate configuration"
-  bit_fields:
-    - range: "X[31:0]"
-      purpose: "Baud rate divisor (clocks per bit)"
-      valid_values:
-        min: 3
-        max: 4294967295
-        special_values:
-          - value: 1667
-            meaning: "9600 baud at 160MHz"
-
-y_parameter:
-  usage: "Not used in receive mode"
-
-z_result:
-  data_type: "Received data and status"
-  bit_interpretation:
-    - range: "Z[7:0]"
-      meaning: "Received data byte"
-    - range: "Z[31:8]"
-      meaning: "Status and frame information"
-
-timing_specifications:
-  clock_relationship: "Baud rate sampling based on X parameter"
-  update_frequency: "Data received at configured baud rate"
-
-in_signal_behavior:
-  trigger_conditions:
-    - "Character received"
-    - "Frame error detected"
-  acknowledgment_method: "rdpin"
-
-
-initialization_requirement:
-  critical: true
-  description: "Smart pin MUST be reset before configuration"
-  requirement: |
-    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
-    This ensures the smart pin is in a known state and prevents configuration conflicts.
-  reset_sequence:
-    pasm2: |
-      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
-      WRPIN mode, pin   ' Configure mode
-      WXPIN x, pin      ' Set X parameter
-      WYPIN y, pin      ' Set Y parameter
-      DIRH  pin         ' Enable smart pin (DIR=1)
-    spin2: |
-      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
-      PINSTART(pin, mode, x, y)  ' Configure and enable
-      ' OR manually:
-      PINFLOAT(pin)              ' Ensure DIR=0
-      WRPIN(pin, mode)           ' Set mode
-      WXPIN(pin, x)              ' Set X parameter
-      WYPIN(pin, y)              ' Set Y parameter
-      PINHIGH(pin)               ' Enable (DIR=1)
+  - title: "Full Duplex Serial Communication"
+    description: "Simultaneous transmit and receive"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        tx_pin = 20
+        rx_pin = 21
+        baud = 115_200
+      
+      PUB main() | bit_period
+        bit_period := (_clkfreq / baud) << 16
+        
+        ' Setup TX and RX
+        pinstart(tx_pin, P_ASYNC_TX | P_OE, (bit_period | 8), 0)
+        pinstart(rx_pin, P_ASYNC_RX, (bit_period | 8), 0)
+        
+        ' Echo received characters back (loopback test)
+        repeat
+          if pinread(rx_pin)
+            echo_char(rdpin(rx_pin))
+      
+      PUB echo_char(char)
+        repeat until pinread(tx_pin)             ' Wait TX ready
+        wypin(tx_pin, char)                      ' Send character
+      
+      PUB send_and_receive(tx_byte) : rx_byte
+        ' Send a byte and wait for response
+        repeat until pinread(tx_pin)
+        wypin(tx_pin, tx_byte)
+        
+        repeat until pinread(rx_pin)
+        rx_byte := rdpin(rx_pin)
 
 common_applications:
-  - application: "UART communication"
-    description: "Standard serial data reception"
-    complexity_level: "intermediate"
-  - application: "Sensor data input"
-    description: "Receive data from serial sensors"
-    complexity_level: "intermediate"
+  - "UART serial communication"
+  - "Debug console input"
+  - "Serial terminal communication"
+  - "GPS and sensor module data reception"
+  - "Multi-drop serial networks (RS-485)"
+  - "Serial command interfaces"
 
-configuration_examples:
-  - name: "9600 baud UART RX"
-    description: "Standard 9600 baud serial receive"
-    reset_code: "DIRL uart_rx                  ' REQUIRED: Reset before configuration"
-    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_00_11111_0, uart_rx"
-    wxpin_code: "WXPIN #1667, uart_rx"
-    explanation: "9600 baud reception, input mode"
+related_modes:
+  - "Mode %11110: Async serial TX - asynchronous transmit"
+  - "Mode %11101: Sync serial RX - synchronous receive"
+  - "Mode %11100: Sync serial TX - synchronous transmit"
 
-extraction_metadata:
-  extraction_date: "2025-09-06"
-  source_documents:
-    - document: "Silicon Doc part4-smart-pins.txt"
-      pages: [75]
-      section: "%11111 = async serial receive"
-  validation_status: "draft"
-  completeness_score: 80
-  technical_accuracy: "silicon_doc_verified"
+configuration_constants:
+  mode_constant: "P_ASYNC_RX"
+  binary_value: "%11111"
+  
+  common_baud_rates:
+    - "300, 1200, 2400, 4800, 9600 baud"
+    - "19200, 38400, 57600, 115200 baud"
+    - "230400, 460800, 921600 baud (high speed)"
+  
+  bit_period_calculation:
+    formula: "bit_period = (clkfreq / baud) << 16"
+    fractional: "(clkfreq * 65536 / baud) & $FFFFFC00"
+    bits_31_16: "Integer system clocks per bit"
+    bits_15_10: "Fractional base-2 value (1/64th increments)"
+  
+  data_bits_field:
+    location: "X[4:0]"
+    range: "1-32 bits"
+    typical: "7, 8, or 9 bits (7-bit ASCII, 8-bit data, 8+parity)"
+
+notes:
+  - "Automatically detects start bit (high-to-low transition)"
+  - "Samples data bits at mid-bit timing for noise immunity"
+  - "Validates stop bit (expects logic-1)"
+  - "Data received LSB first (standard UART format)"
+  - "IN flag indicates received data ready to read"
+  - "Supports up to 32 data bits per frame (including optional parity)"
+  - "Fractional timing in X[15:10] enables precise baud rate matching"
+  - "Can receive very high baud rates limited only by system clock"
+  - "No hardware parity checking - extract and validate in software if needed"
+  - "Compatible with standard UART devices"
+  - "Pair with mode %11110 (TX) for full-duplex communication"
+  - "RDPIN reads received data and clears IN flag"
+  - "RQPIN reads data without clearing IN flag (for multi-cog access)"

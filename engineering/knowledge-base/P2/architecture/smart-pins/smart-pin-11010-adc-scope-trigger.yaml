@@ -1,100 +1,135 @@
-# Smart Pin Mode: %11010 - ADC Scope with Trigger
-# Silicon Doc Reference: part4-smart-pins.txt, page 94
-# Layer 1: Direct Silicon Doc extraction
+title: "ADC Scope with Trigger"
+subtitle: "Smart Pin Mode %11010 (P_ADC_SCOPE)"
+language_reference: "combined"
+compatible_languages: ["Spin2", "PASM2"]
 
-mode_id: "%11010"
+brief_description: "Triggered ADC data capture for oscilloscope-like functionality"
 
-mode_name: "ADC Scope with Trigger"
+detailed_description:
+  operation: |
+    ADC capture mode with trigger functionality for oscilloscope-like data acquisition. Captures
+    ADC samples based on trigger conditions, enabling waveform capture and analysis. Extends the
+    basic ADC modes with triggered acquisition capability. Useful for capturing transient events
+    and analyzing signal behavior around specific trigger points.
+  
+  timing: |
+    Trigger condition defined by Y register settings
+    Captures samples when trigger condition met
+    IN flag raised when capture completes
+    Supports pre-trigger and post-trigger capture
 
-mode_group: "adc"
+registers:
+  x_register:
+    function: "ADC configuration (similar to modes %11000/%11001)"
+  y_register:
+    function: "Trigger level and configuration"
+  z_register:
+    function: "Captured ADC sample data"
 
-mode_complexity: "expert"
+flags:
+  in_flag: "Raised when triggered capture completes"
+  a_input: "Analog signal to monitor and capture"
+  b_input: "Optional external trigger or clock"
 
-dac_mode_dependency: false
+code_examples:
+  - title: "Basic Triggered Capture"
+    description: "Capture ADC data when signal crosses threshold"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        adc_pin = 46                             ' Analog input
+      
+      PUB main() | captured_value
+        ' Configure ADC scope mode
+        ' Mode configuration requires trigger level in Y register
+        pinstart(adc_pin, P_ADC_SCOPE, x_config, trigger_level)
+        
+        repeat
+          ' Wait for trigger event
+          repeat until pinread(adc_pin)
+          
+          captured_value := rdpin(adc_pin)       ' Read captured sample
+          debug("Triggered: ", udec(captured_value))
+      
+      DAT
+      ' PASM2 example - triggered acquisition
+        org
+        dirl    #adc_pin                         ' Reset smart pin
+        wrpin   scope_mode, #adc_pin             ' Configure scope mode
+        wxpin   adc_config, #adc_pin             ' ADC settings
+        wypin   trigger_level, #adc_pin          ' Set trigger level
+        dirh    #adc_pin                         ' Enable smart pin
+      .loop
+        testp   #adc_pin wc                      ' Check for trigger
+        if_nc   jmp #.loop                       ' Wait for event
+        rdpin   sample, #adc_pin                 ' Read captured data
+        ' Process triggered sample...
+        jmp     #.loop
+      
+      scope_mode
+        long    %0000_0000_000_100011_0000000_00_11010_0
+      adc_config
+        long    %00_0111                         ' 8-bit resolution
+      trigger_level
+        long    $8000                            ' Mid-range trigger
+      sample
+        long    0
 
-pin_pairing: "none"
-
-operation_description: |
-  ADC scope with trigger mode provides oscilloscope-like functionality for capturing
-  ADC data with triggering capability. Combines ADC sampling with trigger detection
-  for synchronized data acquisition. Advanced mode requiring deep understanding of
-  ADC operations and trigger configuration.
-
-x_parameter:
-  usage: "ADC and trigger configuration"
-  bit_fields:
-    - range: "X[31:0]"
-      purpose: "ADC mode, sample rate, and trigger configuration"
-
-y_parameter:
-  usage: "Trigger level and parameters"
-  bit_fields:
-    - range: "Y[31:0]"
-      purpose: "Trigger threshold and control parameters"
-
-z_result:
-  data_type: "Captured ADC data with trigger information"
-  bit_interpretation:
-    - range: "Z[26:0]"
-      meaning: "ADC sample data and trigger status"
-
-timing_specifications:
-  clock_relationship: "Trigger-synchronized ADC sampling"
-  update_frequency: "Trigger-dependent data capture"
-
-in_signal_behavior:
-  trigger_conditions:
-    - "Trigger condition met"
-    - "Capture buffer complete"
-  acknowledgment_method: "rdpin"
-
-
-initialization_requirement:
-  critical: true
-  description: "Smart pin MUST be reset before configuration"
-  requirement: |
-    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
-    This ensures the smart pin is in a known state and prevents configuration conflicts.
-  reset_sequence:
-    pasm2: |
-      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
-      WRPIN mode, pin   ' Configure mode
-      WXPIN x, pin      ' Set X parameter
-      WYPIN y, pin      ' Set Y parameter
-      DIRH  pin         ' Enable smart pin (DIR=1)
-    spin2: |
-      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
-      PINSTART(pin, mode, x, y)  ' Configure and enable
-      ' OR manually:
-      PINFLOAT(pin)              ' Ensure DIR=0
-      WRPIN(pin, mode)           ' Set mode
-      WXPIN(pin, x)              ' Set X parameter
-      WYPIN(pin, y)              ' Set Y parameter
-      PINHIGH(pin)               ' Enable (DIR=1)
+  - title: "Waveform Capture System"
+    description: "Capture signal waveforms around trigger events"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        adc_pin = 46
+        buffer_size = 256
+      
+      VAR
+        long waveform_buffer[buffer_size]
+        long capture_index
+      
+      PUB main() | i
+        ' Setup triggered capture
+        pinstart(adc_pin, P_ADC_SCOPE, %00_0111, $8000)
+        
+        repeat
+          capture_index := 0
+          
+          ' Wait for trigger
+          repeat until pinread(adc_pin)
+          
+          ' Capture waveform after trigger
+          repeat i from 0 to buffer_size-1
+            waveform_buffer[i] := rdpin(adc_pin)
+            waitct(getcnt() + (_clkfreq / 100_000))  ' Sample rate
+          
+          ' Analyze captured waveform...
+          debug_waveform()
+      
+      PRI debug_waveform() | i
+        repeat i from 0 to buffer_size-1
+          debug("Sample ", udec(i), ": ", udec(waveform_buffer[i]))
 
 common_applications:
-  - application: "Digital oscilloscope"
-    description: "Triggered waveform capture and analysis"
-    complexity_level: "expert"
-  - application: "Event-synchronized sampling"
-    description: "Capture ADC data synchronized to external events"
-    complexity_level: "expert"
+  - "Oscilloscope functionality"
+  - "Transient event capture"
+  - "Signal anomaly detection"
+  - "Waveform analysis and characterization"
 
-configuration_examples:
-  - name: "Basic triggered scope"
-    description: "Simple triggered ADC capture"
-    reset_code: "DIRL scope_pin                  ' REQUIRED: Reset before configuration"
-    wrpin_code: "WRPIN ##%0000_0000_000_0100000000000_00_11010_0, scope_pin"
-    wxpin_code: "WXPIN trigger_config, scope_pin"
-    wypin_code: "WYPIN trigger_level, scope_pin"
-    explanation: "ADC pin with trigger configuration"
+related_modes:
+  - "Mode %11000: ADC internal clock - continuous sampling"
+  - "Mode %11001: ADC external clock - synchronized sampling"
+  - "Mode %10010: Time events with timeout - digital trigger"
 
-extraction_metadata:
-  extraction_date: "2025-09-06"
-  source_documents:
-    - document: "Silicon Doc part4-smart-pins.txt"
-      pages: [94]
-      section: "%11010 = ADC scope with trigger"
-  validation_status: "draft"
-  completeness_score: 75
-  technical_accuracy: "silicon_doc_verified"
+configuration_constants:
+  mode_constant: "P_ADC_SCOPE"
+  binary_value: "%11010"
+  required_pin_config: "%100011 in bits 17:12 for ADC functionality"
+
+notes:
+  - "⚠️ Limited documentation available for this mode"
+  - "Trigger functionality extends basic ADC capture"
+  - "Y register sets trigger level for capture initiation"
+  - "Useful for capturing signals around specific voltage thresholds"
+  - "Can be combined with software buffering for waveform storage"
+  - "Requires P[12:10] = %100 for ADC pin configuration"
+  - "Consult Parallax forums and application notes for detailed usage"

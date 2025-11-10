@@ -1,90 +1,92 @@
-# Smart Pin Mode: %10011 - Count Time for X Periods
-# Silicon Doc Reference: part4-smart-pins.txt, page 93
-# Layer 1: Direct Silicon Doc extraction
+title: "Period Time Accumulator"
+subtitle: "Smart Pin Mode %10011 (P_PERIODS_TICKS)"
+language_reference: "combined"
+compatible_languages: ["Spin2", "PASM2"]
 
-mode_id: "%10011"
+brief_description: "Measures total time for X complete A-to-B periods"
 
-mode_name: "Count Time for X Periods"
+detailed_description:
+  operation: |
+    Accumulates clock cycles over X complete periods defined by A and B input events. Each
+    period starts on A-input event and ends on B-input event. After X periods complete, total
+    accumulated time is available in Z register. Useful for average period measurement, phase
+    timing, and multi-cycle analysis.
+  
+  timing: |
+    Measures from A-event to B-event for each period
+    Accumulates time over X complete periods
+    Y[1:0] selects edge types for A and B inputs
+    Z limited to $80000000 (~10.7 seconds at 200MHz)
 
-mode_group: "measurement"
+registers:
+  x_register:
+    bits_31_0: "Number of periods to accumulate"
+  y_register:  
+    bits_1_0: "Event types: 00=A-rise/B-rise, 01=A-rise/B-edge, 10=A-edge/B-rise, 11=A-edge/B-edge"
+    bits_31_2: "Unused"
+  z_register:
+    function: "Total accumulated time for X periods in clocks"
 
-mode_complexity: "advanced"
+flags:
+  in_flag: "Raised after X periods complete"
+  a_input: "Period start signal"
+  b_input: "Period end signal"
 
-dac_mode_dependency: false
-
-pin_pairing: "adjacent"
-
-operation_description: |
-  Counts clock cycles from each A-input rise/edge to each B-input rise/edge for X periods.
-  Y[1:0] sets sensitivity (A-rise to B-rise/edge, A-edge to B-rise/edge). Oversampling
-  period measurement - accumulates time within X complete periods for precise average
-  period calculation.
-
-x_parameter:
-  usage: "Number of periods to measure"
-  bit_fields:
-    - range: "X[31:0]"
-      purpose: "Period count to accumulate"
-
-y_parameter:
-  usage: "Edge sensitivity selection"
-  bit_fields:
-    - range: "Y[1:0]"
-      purpose: "00=A-rise to B-rise, 01=A-rise to B-edge, 10=A-edge to B-rise, 11=A-edge to B-edge"
-
-z_result:
-  data_type: "32-bit accumulated time"
-  bit_interpretation:
-    - range: "Z[31:0]"
-      meaning: "Total time for X periods (limited to $80000000)"
-
-
-initialization_requirement:
-  critical: true
-  description: "Smart pin MUST be reset before configuration"
-  requirement: |
-    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
-    This ensures the smart pin is in a known state and prevents configuration conflicts.
-  reset_sequence:
-    pasm2: |
-      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
-      WRPIN mode, pin   ' Configure mode
-      WXPIN x, pin      ' Set X parameter
-      WYPIN y, pin      ' Set Y parameter
-      DIRH  pin         ' Enable smart pin (DIR=1)
-    spin2: |
-      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
-      PINSTART(pin, mode, x, y)  ' Configure and enable
-      ' OR manually:
-      PINFLOAT(pin)              ' Ensure DIR=0
-      WRPIN(pin, mode)           ' Set mode
-      WXPIN(pin, x)              ' Set X parameter
-      WYPIN(pin, y)              ' Set Y parameter
-      PINHIGH(pin)               ' Enable (DIR=1)
+code_examples:
+  - title: "Average Period Measurement"
+    description: "Measure average period over 10 cycles"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        signal_pin = 53
+      
+      PUB main() | total_time, avg_period
+        ' Configure for 10 period measurement
+        pinstart(signal_pin, P_PERIODS_TICKS | P_PLUS1_B, 10, %00)
+        
+        repeat
+          repeat until pinr(signal_pin)          ' Wait for completion
+          total_time := rdpin(signal_pin)
+          
+          avg_period := total_time / 10
+          debug("Average period: ", udec(avg_period), " clocks")
+      
+      DAT
+      ' PASM2 phase measurement
+        org
+        dirl    #signal_pin
+        wrpin   ##P_PERIODS_TICKS | P_PLUS1_B, #signal_pin
+        wxpin   #1, #signal_pin                  ' Single period
+        wypin   #%00, #signal_pin                ' Rise to rise
+        dirh    #signal_pin
+      .loop
+        testp   #signal_pin wc
+        if_nc   jmp #.loop
+        rdpin   phase_time, #signal_pin          ' A-rise to B-rise time
+        jmp     #.loop
 
 common_applications:
-  - application: "Precise period measurement"
-    description: "Oversampled period measurement for accuracy"
-    complexity_level: "advanced"
-  - application: "Frequency measurement"
-    description: "Measure frequency via period accumulation"
-    complexity_level: "advanced"
+  - "Average frequency measurement"
+  - "Phase delay measurement"
+  - "Multi-cycle timing analysis"
+  - "Communication protocol timing"
 
-configuration_examples:
-  - name: "10-period average"
-    description: "Average period over 10 cycles"
-    reset_code: "DIRL period_avg                  ' REQUIRED: Reset before configuration"
-    wrpin_code: "WRPIN ##%0000_0001_000_0000000000000_00_10011_0, period_avg"
-    wxpin_code: "WXPIN #10, period_avg"
-    wypin_code: "WYPIN #%00, period_avg"
-    explanation: "A-rise to B-rise, 10 periods"
+related_modes:
+  - "Mode %10100: Count states over X periods"
+  - "Mode %10101-%10111: Time-window period modes"
+  - "Mode %10010: Time X events"
 
-extraction_metadata:
-  extraction_date: "2025-09-06"
-  source_documents:
-    - document: "Silicon Doc part4-smart-pins.txt"
-      pages: [93]
-      section: "%10011 = for X periods, count time"
-  validation_status: "draft"
-  completeness_score: 82
-  technical_accuracy: "silicon_doc_verified"
+configuration_constants:
+  mode_constant: "P_PERIODS_TICKS"
+  binary_value: "%10011"
+  common_modifiers:
+    - "P_PLUS1_B - Use adjacent pin for B input"
+    - "P_LOCAL_B - Use same pin for both A and B (single signal)"
+    - "P_FILT1_AB - Add filtering"
+
+notes:
+  - "Accumulates time over multiple periods for averaging"
+  - "Can measure phase by using different pins for A and B"
+  - "Use BBBB bits to select B input source"
+  - "Setting B=A measures single signal period"
+  - "Z register accumulates all X period times"

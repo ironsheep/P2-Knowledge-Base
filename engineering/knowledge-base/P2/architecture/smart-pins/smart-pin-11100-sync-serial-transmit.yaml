@@ -1,0 +1,139 @@
+# Smart Pin Mode: %11100 - Synchronous Serial Transmit
+# Concise reference optimized for AI code generation
+
+mode: "%11100"
+name: "Synchronous Serial Transmit (Sync TX, SST)"
+category: "synchronous_serial"
+
+# Constants
+constants:
+  spin2: "P_SYNC_TX"
+  pasm2: "P_SYNC_TX"  # Same constants work in PASM2
+  mode_bits: "%11100"  # Binary value for reference
+
+# Operation
+operation: |
+  Transmits 1-32 bits synchronized with clock. LSB first. OUT overridden.
+  A=data output, B=clock input. Supports continuous/start-stop modes.
+
+# Critical: MSB-first requires bit reversal (SHL #(32-bits), REV)
+
+# Parameters
+x_register:
+  X[5]: "0=continuous (buffered), 1=start-stop"
+  X[4:0]: "bit_count - 1 (e.g., 7 for 8 bits)"
+
+y_register: "Data to transmit (LSB first)"
+
+z_register: "Not used"
+
+in_flag: "High when buffer empty (ready for next data)"
+
+# Pin Usage
+pins:
+  data_pin: "Outputs serial data (A-input)"
+  clock_pin: "Receives clock signal (B-input)"
+  clock_edge:
+    positive: "Default A/B inputs"
+    negative: "Use P_INVERT_A for A-input, P_INVERT_B for B-input"
+
+# Complete Spin2 Example
+spin2_complete: |
+  CON
+    TX_PIN = 41
+    CLK_PIN = 40
+    
+  PUB main() | mode
+    ' 8-bit SPI master TX, positive edge
+    mode := P_SYNC_TX | P_OE | P_PLUS1_B     ' Clock from pin+1
+    PINSTART(TX_PIN, mode, %1_00111, $A5)    ' Start-stop, 8-bit, data=$A5
+    
+    ' Setup companion clock
+    PINSTART(CLK_PIN, P_TRANSITION | P_OE, $1000, 16)  ' 16 transitions
+    
+  PUB stream_continuous() | mode
+    ' Continuous streaming with negative edge
+    mode := P_SYNC_TX | P_OE | P_INVERT_A    ' Negative edge clocking
+    PINCLEAR(TX_PIN)
+    WRPIN(TX_PIN, mode)
+    WXPIN(TX_PIN, %0_00111)                  ' Continuous, 8-bit
+    WYPIN(TX_PIN, first_data)                ' Prime shifter
+    PINHIGH(TX_PIN)                          ' Enable
+    WYPIN(TX_PIN, second_data)               ' Load buffer
+    
+    REPEAT
+      IF PINREAD(TX_PIN) & $8000_0000        ' Check IN flag
+        WYPIN(TX_PIN, get_next_data())       ' Load next
+
+# Complete PASM2 Example
+pasm2_complete: |
+  DAT
+          ORG
+  
+  ' Pin assignments and mode constants
+  tx_pin        LONG  41
+  clk_pin       LONG  40
+  sync_tx_pos   LONG  P_SYNC_TX | P_OE                 ' %0000_1111_000_0000000000000_01_11100_0
+  sync_tx_neg   LONG  P_SYNC_TX | P_OE | P_INVERT_A    ' %0000_0111_000_0000000000000_01_11100_0
+  clk_mode      LONG  P_TRANSITION | P_OE              ' %0000_0000_000_0000000000000_01_00101_0
+  
+  ' Initialize sync serial transmit
+  setup_tx
+          MOV   pin, tx_pin
+          MOV   mode, sync_tx_pos
+          DIRL  pin                   ' Reset pin
+          WRPIN mode, pin             ' Configure positive edge
+          WXPIN #%1_00111, pin        ' Start-stop, 8-bit
+          DIRH  pin                   ' Enable
+          
+  ' Initialize clock
+          MOV   pin, clk_pin
+          MOV   mode, clk_mode
+          DIRL  pin
+          WRPIN mode, pin
+          WXPIN ##$1000, pin          ' Set period
+          DIRH  pin
+          RET
+  
+  ' Transmit byte with MSB-first workaround
+  send_msb_first
+          SHL   data, #24             ' Position for 8-bit
+          REV   data                  ' Reverse bits
+          MOV   pin, tx_pin
+          WYPIN data, pin             ' Send MSB-first
+          MOV   pin, clk_pin
+          WYPIN #16, pin              ' 16 clock transitions
+          RET
+  
+  ' Variables
+  pin     RES   1
+  mode    RES   1
+  data    RES   1
+
+# Inline PASM2 in Spin2
+spin2_inline: |
+  PUB fast_tx(pin, data)
+    ORG
+      DIRL  pin                     ' Reset smart pin
+      WRPIN ##P_SYNC_TX | P_OE, pin ' Configure mode
+      WXPIN #%1_00111, pin          ' Start-stop, 8-bit
+      DIRH  pin                     ' Enable
+      WYPIN data, pin               ' Transmit
+    END
+
+# Key Points
+timing:
+  continuous_mode: "Double-buffered for gapless transmission"
+  start_stop_mode: "Can modify data before clock starts"
+  hold_time: "Data stable 2+ clocks after edge when X[5]=1"
+
+initialization: "MUST reset (DIR=0) before configuration"
+
+common_uses:
+  - "SPI master"
+  - "Shift register control (74HC595)"
+  - "LED strips (APA102)"
+
+companion_clock: "Use P_TRANSITION mode on adjacent pin for clock generation"
+
+related: ["11101 (Sync RX)", "00101 (Transition)", "11110 (Async TX)"]

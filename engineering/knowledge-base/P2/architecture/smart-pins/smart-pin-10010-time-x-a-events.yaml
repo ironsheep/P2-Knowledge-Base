@@ -1,109 +1,96 @@
-# Smart Pin Mode: %10010 - Time X A-Events or Timeout
-# Silicon Doc Reference: part4-smart-pins.txt, pages 92-93
-# Layer 1: Direct Silicon Doc extraction
+title: "Time Events or Timeout Detection"
+subtitle: "Smart Pin Mode %10010 (P_EVENTS_TICKS)"
+language_reference: "combined"
+compatible_languages: ["Spin2", "PASM2"]
 
-mode_id: "%10010"
+brief_description: "Dual-mode: Time X events or detect timeout when events stop occurring"
 
-mode_name: "Time X A-Events or Timeout"
+detailed_description:
+  operation: |
+    Two distinct modes controlled by Y[2]. When Y[2]=0, times duration until X events occur
+    (highs/rises/edges). When Y[2]=1, detects timeout if no event occurs within X clocks,
+    maintaining running count since last event. Useful for frequency measurement, watchdog
+    timers, and communication timeout detection.
+  
+  timing: |
+    Event timing mode (Y[2]=0): Measures time for X events
+    Timeout mode (Y[2]=1): Triggers after X clocks without event
+    Y[1:0] selects event type: high(00), rise(01), edge(1x)
+    Z limited to $80000000 (~10.7 seconds at 200MHz)
 
-mode_group: "measurement"
+registers:
+  x_register:
+    bits_31_0: "Event count (Y[2]=0) or timeout clocks (Y[2]=1)"
+  y_register:  
+    bit_2: "0=time X events, 1=timeout detection"
+    bits_1_0: "Event type: 00=high, 01=rise, 1x=edge"
+    bits_31_3: "Unused"
+  z_register:
+    function: "Clock count (event timing) or clocks since last event (timeout)"
 
-mode_complexity: "advanced"
+flags:
+  in_flag: "Raised when X events complete or timeout occurs"
+  a_input: "Signal to monitor for events"
 
-dac_mode_dependency: false
-
-pin_pairing: "none"
-
-operation_description: |
-  Mode %10010 provides dual functionality based on Y[2]. If Y[2]=0, measures time
-  until X A-input highs/rises/edges accumulate. If Y[2]=1, implements timeout
-  detection - if no A-input event occurs within X clocks, IN raises and Z counts
-  clocks since last event. Y[1:0] selects sensitivity (high/rise/edge).
-
-x_parameter:
-  usage: "Event count or timeout period"
-  bit_fields:
-    - range: "X[31:0]"
-      purpose: "Number of events to accumulate OR timeout clock count"
-
-y_parameter:
-  usage: "Mode and sensitivity selection"
-  bit_fields:
-    - range: "Y[2]"
-      purpose: "0=count events, 1=timeout mode"
-    - range: "Y[1:0]"
-      purpose: "Event sensitivity: 00=high, 01=rise, 1x=edge"
-
-z_result:
-  data_type: "32-bit time measurement"
-  bit_interpretation:
-    - range: "Z[31:0]"
-      meaning: "Time in clocks (limited to $80000000)"
-
-timing_specifications:
-  clock_relationship: "Continuous timing measurement"
-  update_frequency: "Event-based or timeout-based"
-
-in_signal_behavior:
-  trigger_conditions:
-    - "X events accumulated (Y[2]=0)"
-    - "Timeout occurred (Y[2]=1)"
-
-
-initialization_requirement:
-  critical: true
-  description: "Smart pin MUST be reset before configuration"
-  requirement: |
-    The smart pin MUST be reset (DIR=0) before any configuration or reconfiguration.
-    This ensures the smart pin is in a known state and prevents configuration conflicts.
-  reset_sequence:
-    pasm2: |
-      DIRL  pin         ' REQUIRED: Reset smart pin (DIR=0)
-      WRPIN mode, pin   ' Configure mode
-      WXPIN x, pin      ' Set X parameter
-      WYPIN y, pin      ' Set Y parameter
-      DIRH  pin         ' Enable smart pin (DIR=1)
-    spin2: |
-      PINCLEAR(pin)              ' Reset pin (DIR=0, WRPIN=0)
-      PINSTART(pin, mode, x, y)  ' Configure and enable
-      ' OR manually:
-      PINFLOAT(pin)              ' Ensure DIR=0
-      WRPIN(pin, mode)           ' Set mode
-      WXPIN(pin, x)              ' Set X parameter
-      WYPIN(pin, y)              ' Set Y parameter
-      PINHIGH(pin)               ' Enable (DIR=1)
+code_examples:
+  - title: "Frequency Measurement"
+    description: "Measure frequency by timing 100 rising edges"
+    code: |
+      CON
+        _clkfreq = 200_000_000
+        freq_pin = 53
+      
+      PUB main() | period, frequency
+        ' Time 100 rising edges
+        pinstart(freq_pin, P_EVENTS_TICKS, 100, %001)
+        
+        repeat
+          repeat until pinr(freq_pin)            ' Wait for measurement
+          period := rdpin(freq_pin) & $7FFFFFFF  ' Clock count for 100 edges
+          
+          frequency := (_clkfreq * 100) / period
+          debug("Frequency: ", udec(frequency), " Hz")
+      
+      DAT
+      ' PASM2 timeout watchdog
+        org
+        dirl    #freq_pin
+        wrpin   ##P_EVENTS_TICKS, #freq_pin
+        wxpin   ##clkfreq/10, #freq_pin          ' 100ms timeout
+        wypin   #%101, #freq_pin                 ' Timeout on missing edge
+        dirh    #freq_pin
+      .loop
+        testp   #freq_pin wc                     ' Check for timeout
+        if_c    call #handle_timeout
+        ' Normal operation continues
+        jmp     #.loop
+      
+      handle_timeout
+        rdpin   elapsed, #freq_pin               ' Clocks since last edge
+        ' Handle communication loss
+        ret
 
 common_applications:
-  - application: "Multi-event timing"
-    description: "Measure time for multiple events"
-    complexity_level: "advanced"
-  - application: "Watchdog timing"
-    description: "Detect missing events with timeout"
-    complexity_level: "advanced"
+  - "Frequency and period measurement"
+  - "Communication watchdog timers"
+  - "Event rate monitoring"
+  - "Missing pulse detection"
 
-configuration_examples:
-  - name: "10-pulse timing"
-    description: "Measure time for 10 rising edges"
-    reset_code: "DIRL multi_timer                  ' REQUIRED: Reset before configuration"
-    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_00_10010_0, multi_timer"
-    wxpin_code: "WXPIN #10, multi_timer"
-    wypin_code: "WYPIN #%001, multi_timer"
-    explanation: "Time 10 A-input rises, Y[2]=0, Y[1:0]=%01"
+related_modes:
+  - "Mode %10000: Time state durations"
+  - "Mode %10001: Time high periods only"
+  - "Mode %10011-%10111: Period measurement modes"
 
-  - name: "Event timeout detector"
-    description: "Detect 1-second timeout without events"
-    reset_code: "DIRL timeout_pin                  ' REQUIRED: Reset before configuration"
-    wrpin_code: "WRPIN ##%0000_0000_000_0000000000000_00_10010_0, timeout_pin"
-    wxpin_code: "WXPIN ##160_000_000, timeout_pin"
-    wypin_code: "WYPIN #%101, timeout_pin"
-    explanation: "1-second timeout, Y[2]=1, Y[1:0]=%01 for rises"
+configuration_constants:
+  mode_constant: "P_EVENTS_TICKS"
+  binary_value: "%10010"
+  common_modifiers:
+    - "P_INVERT_A - Invert input signal"
+    - "P_FILT1_AB - Add filtering for noise immunity"
 
-extraction_metadata:
-  extraction_date: "2025-09-06"
-  source_documents:
-    - document: "Silicon Doc part4-smart-pins.txt"
-      pages: [92, 93]
-      section: "%10010 = time X A-events OR timeout"
-  validation_status: "draft"
-  completeness_score: 88
-  technical_accuracy: "silicon_doc_verified"
+notes:
+  - "Y[2]=0: Times until X events occur"
+  - "Y[2]=1: Detects missing events (timeout)"
+  - "Event types: level-sensitive (high) or edge-sensitive (rise/edge)"
+  - "Timeout mode maintains running count since last event"
+  - "Z register limited to $80000000 clocks"
