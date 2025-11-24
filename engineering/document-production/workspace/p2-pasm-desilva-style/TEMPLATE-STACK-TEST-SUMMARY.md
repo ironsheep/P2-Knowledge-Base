@@ -9,9 +9,9 @@
 ## Template Stack Components
 
 ### 1. ✅ LaTeX Templates
-- **`p2kb-desilva.latex`** - Main template (loads foundation + content layers)
-- **`../templates/desilva/p2kb-desilva-content.sty`** - DeSilva content layer with 5-color system
-- **`../templates/shared/p2kb-foundation.sty`** - Updated foundation (proven Smart Pins improvements)
+- **`templates/p2kb-desilva.latex`** - Main template (loads foundation + content layers)
+- **`templates/p2kb-desilva-content.sty`** - DeSilva content layer with 5-color system
+- **`templates/p2kb-foundation.sty`** - Updated foundation (proven Smart Pins improvements)
 
 ### 2. ✅ Lua Filters (Proven Working Chain)
 - **`filters/p2kb-desilva-code-coloring.lua`** - 5-color code blocks (Spin2, PASM2, CORDIC, Multi-COG, Antipattern)
@@ -45,13 +45,13 @@
 ## Template Architecture
 
 ```
-p2kb-desilva.latex (Main Template)
-├── ../templates/shared/p2kb-foundation.sty (Foundation Layer)
+templates/p2kb-desilva.latex (Main Template)
+├── templates/p2kb-foundation.sty (Foundation Layer)
 │   ├── Pandoc compatibility
 │   ├── Part/Chapter pagination logic
 │   ├── Basic typography and layout
 │   └── Image scaling and placement
-└── ../templates/desilva/p2kb-desilva-content.sty (Content Layer)
+└── templates/p2kb-desilva-content.sty (Content Layer)
     ├── 5-color code block environments
     ├── DeSilva pedagogical environments
     └── Smart Pins compatibility elements

@@ -19,35 +19,40 @@
 
 ## 📁 Directory Structure
 
+**UPDATED**: Templates are now stored in each document's workspace `templates/` subdirectory for isolation and simplicity.
+
 ```
-/engineering/document-production/templates/
-├── README.md                           ← This plan document
-├── shared/                             ← Foundation layer (ALL documents)
-│   ├── p2kb-foundation.sty            ← Base typography, layout, fonts
-│   ├── p2kb-common-environments.sty   ← Shared environments (equations, tables)
-│   └── lua-utilities/
-│       ├── p2kb-non-floating-images.lua    ← Image placement (85% width)
-│       ├── p2kb-common-div-helpers.lua     ← Div detection utilities
-│       └── p2kb-latex-escape-helpers.lua   ← String processing utilities
-├── smart-pins/                        ← Smart Pins document family
-│   ├── p2kb-smartpins-content.sty     ← 3-color blocks + semantic envs
-│   ├── p2kb-smartpins.latex           ← Smart Pins main template
-│   ├── p2kb-smartpins-div-blocks.lua       ← spin2/pasm2/antipattern processing
-│   ├── p2kb-smartpins-semantic-blocks.lua  ← needs-diagram, tip, etc.
-│   └── README-smartpins.md            ← Smart Pins specific documentation
-├── desilva/                           ← DeSilva manual family
-│   ├── p2kb-desilva-content.sty       ← 5-color blocks + pedagogical envs
-│   ├── p2kb-desilva.latex             ← DeSilva main template
-│   ├── p2kb-desilva-div-blocks.lua          ← 5-color code block processing
-│   ├── p2kb-desilva-semantic-blocks.lua     ← medicine, yourturn, sidetrack, etc.
-│   └── README-desilva.md              ← DeSilva specific documentation
-├── debug-window/                      ← Debug Window manual family
-│   ├── p2kb-debugwin-content.sty      ← Debug-specific environments
-│   ├── p2kb-debugwin.latex            ← Debug Window main template
-│   └── README-debugwin.md             ← Debug Window documentation
-└── future-documents/                  ← Template for new document families
-    └── TEMPLATE-README.md              ← How to add new document types
+/engineering/document-production/workspace/
+├── p2-smart-pins-manual/              ← Smart Pins document workspace
+│   ├── templates/                     ← Smart Pins templates (isolated)
+│   │   ├── p2kb-foundation.sty       ← Foundation layer (copy)
+│   │   ├── p2kb-smartpins-content.sty ← Smart Pins content layer
+│   │   └── p2kb-smartpins.latex      ← Smart Pins main template
+│   └── filters/                       ← Smart Pins Lua filters
+│       └── p2kb-smartpins-*.lua
+├── p2-pasm-desilva-style/             ← DeSilva manual workspace
+│   ├── templates/                     ← DeSilva templates (isolated)
+│   │   ├── p2kb-foundation.sty       ← Foundation layer (copy)
+│   │   ├── p2kb-desilva-content.sty  ← 5-color blocks + pedagogical envs
+│   │   ├── p2kb-desilva-foundation.sty ← DeSilva foundation extensions
+│   │   └── p2kb-desilva.latex        ← DeSilva main template
+│   └── filters/                       ← DeSilva Lua filters
+│       └── p2kb-desilva-*.lua
+├── p2-debug-window-manual/            ← Debug Window manual workspace
+│   ├── templates/                     ← Debug Window templates (isolated)
+│   │   ├── p2kb-foundation.sty       ← Foundation layer (copy)
+│   │   ├── p2kb-debugwin-content.sty ← Debug-specific environments
+│   │   ├── p2kb-debugwin-foundation.sty ← Debug Window foundation extensions
+│   │   └── p2kb-debugwin.latex       ← Debug Window main template
+│   └── filters/                       ← Debug Window Lua filters
+│       └── p2kb-debugwin-*.lua
 ```
+
+**Benefits of workspace-local templates:**
+- ✅ Complete isolation between documents
+- ✅ No risk of cross-document interference
+- ✅ Self-contained workspaces for easier deployment
+- ✅ Clear ownership of each template set
 
 ## 🏷️ Namespace Strategy
 
@@ -120,55 +125,36 @@ Examples:
 
 ## 🚀 Development Workflow
 
-### **Phase 1: Foundation Setup** (One-time)
-1. **Extract Working Foundation**:
+### **Phase 1: Foundation Setup** (COMPLETED)
+Templates are now stored in each workspace's `templates/` subdirectory.
+
+1. **Foundation copies in each workspace**:
    ```bash
-   # Copy proven Smart Pins foundation as base
-   cp smart-pins-current/p2kb-foundation.sty templates/shared/
-   cp smart-pins-current/non-floating-images.lua templates/shared/lua-utilities/p2kb-non-floating-images.lua
+   # Each workspace has its own copy of foundation
+   workspace/p2-pasm-desilva-style/templates/p2kb-foundation.sty
+   workspace/p2-debug-window-manual/templates/p2kb-foundation.sty
+   workspace/p2-smart-pins-manual/templates/p2kb-foundation.sty
    ```
 
-2. **Clean Foundation** (remove document-specific elements):
-   - Keep: Typography, page layout, basic environments
-   - Remove: Smart Pins specific environments and colors
+2. **No central shared directory** - isolation preferred for production stability
 
-### **Phase 2: Document-Specific Development** (Parallel)
+### **Phase 2: Document-Specific Development** (COMPLETED)
 
-**For DeSilva Manual**:
-1. **Create Content Layer**:
-   ```bash
-   # New file: templates/desilva/p2kb-desilva-content.sty
-   # Contains: 5-color code blocks + DeSilva pedagogical environments
-   ```
+**For DeSilva Manual** (✅ DONE):
+1. **Content Layer**: `workspace/p2-pasm-desilva-style/templates/p2kb-desilva-content.sty`
+2. **Foundation Extensions**: `workspace/p2-pasm-desilva-style/templates/p2kb-desilva-foundation.sty`
+3. **Main Template**: `workspace/p2-pasm-desilva-style/templates/p2kb-desilva.latex`
+4. **Lua Filters**: `workspace/p2-pasm-desilva-style/filters/p2kb-desilva-*.lua`
 
-2. **Create Lua Filters**:
-   ```bash
-   # New file: templates/desilva/p2kb-desilva-div-blocks.lua
-   # Converts: ::: spin2|pasm2|cordic|multicog|antipattern → LaTeX environments
-   
-   # New file: templates/desilva/p2kb-desilva-semantic-blocks.lua  
-   # Converts: ::: medicine|yourturn|sidetrack|chapterend → LaTeX environments
-   ```
+**For Debug Window Manual** (✅ DONE):
+1. **Content Layer**: `workspace/p2-debug-window-manual/templates/p2kb-debugwin-content.sty`
+2. **Foundation Extensions**: `workspace/p2-debug-window-manual/templates/p2kb-debugwin-foundation.sty`
+3. **Main Template**: `workspace/p2-debug-window-manual/templates/p2kb-debugwin.latex`
+4. **Lua Filters**: `workspace/p2-debug-window-manual/filters/p2kb-debugwin-*.lua`
 
-3. **Create Main Template**:
-   ```bash
-   # New file: templates/desilva/p2kb-desilva.latex
-   # Includes: shared/p2kb-foundation.sty + desilva/p2kb-desilva-content.sty
-   ```
-
-**For Smart Pins Manual** (migrate existing):
-1. **Extract to Content Layer**:
-   ```bash
-   # New file: templates/smart-pins/p2kb-smartpins-content.sty
-   # Move Smart Pins specific environments from current template
-   ```
-
-2. **Update Existing Filters**:
-   ```bash
-   # Rename: smart-pins-div-blocks.lua → templates/smart-pins/p2kb-smartpins-div-blocks.lua
-   # Update: Environment names to use SmartPins prefix
-   # Add: p2kb- prefix for PDF Forge namespace safety
-   ```
+**For Smart Pins Manual** (✅ DONE):
+1. **Templates**: `workspace/p2-smart-pins-manual/templates/`
+2. **Filters**: `workspace/p2-smart-pins-manual/filters/`
 
 ### **Phase 3: Testing & Refinement**
 1. **Test Each Document Independently**:
@@ -200,34 +186,37 @@ Examples:
 ## 🔧 Template Assembly Pattern
 
 ### **Standard Assembly Pattern**
-Each document template follows this pattern:
+Each document template follows this pattern (all paths relative to workspace/[document]/):
 
 ```latex
-% Document-specific template: p2kb-[document].latex
+% Document-specific template: templates/p2kb-[document].latex
 
-% 1. Foundation layer (shared)
-\usepackage{shared/p2kb-foundation}
+% 1. Foundation layer (local copy)
+\usepackage{p2kb-foundation}
 
-% 2. Content layer (document-specific)
-\usepackage{[document]/p2kb-[document]-content}
+% 2. Document-specific foundation extensions (if needed)
+\usepackage{p2kb-[document]-foundation}
 
-% 3. Document configuration
+% 3. Content layer (document-specific)
+\usepackage{p2kb-[document]-content}
+
+% 4. Document configuration
 \title{Document-Specific Title}
 \author{Document-Specific Author}
 
-% 4. Document-specific customizations
+% 5. Document-specific customizations
 \renewcommand{\chapterformat}{...}  % If needed
 ```
 
 ### **Lua Filter Assembly Pattern**
-Each document uses this filter chain:
+Each document uses this filter chain (filters in workspace/[document]/filters/):
 
 ```json
 {
   "lua_filters": [
-    "shared/lua-utilities/p2kb-non-floating-images",
-    "[document]/p2kb-[document]-div-blocks", 
-    "[document]/p2kb-[document]-semantic-blocks"
+    "p2kb-[document]-code-coloring",
+    "p2kb-[document]-semantic",
+    "p2kb-[document]-pagination"
   ]
 }
 ```

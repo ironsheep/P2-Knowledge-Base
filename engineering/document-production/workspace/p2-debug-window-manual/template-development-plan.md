@@ -19,20 +19,21 @@
 
 ## 📁 Directory Structure for Debug Window
 
+**UPDATED**: Templates are now stored in the workspace's `templates/` subdirectory for isolation.
+
 ```
-/engineering/document-production/templates/
-├── shared/                             ← Foundation layer (SHARED)
-│   ├── p2kb-foundation.sty            ← Base typography, layout, fonts
-│   ├── p2kb-common-environments.sty   ← Shared environments
-│   └── lua-utilities/
-│       ├── p2kb-non-floating-images.lua    ← Image placement (85% width)
-│       └── p2kb-common-div-helpers.lua     ← Div detection utilities
-├── debug-window/                      ← Debug Window manual family (NEW)
+/engineering/document-production/workspace/p2-debug-window-manual/
+├── templates/                          ← Debug Window templates (isolated)
+│   ├── p2kb-foundation.sty            ← Base typography, layout, fonts (local copy)
+│   ├── p2kb-debugwin-foundation.sty   ← Debug Window foundation extensions
 │   ├── p2kb-debugwin-content.sty      ← Debug-specific environments
 │   ├── p2kb-debugwin.latex            ← Debug Window main template
+│   └── README.md                       ← Debug Window template documentation
+├── filters/                            ← Debug Window Lua filters
 │   ├── p2kb-debugwin-div-blocks.lua   ← Debug window code processing
-│   ├── p2kb-debugwin-semantic.lua     ← Debug semantic elements
-│   └── README-debugwin.md             ← Debug Window documentation
+│   └── p2kb-debugwin-semantic.lua     ← Debug semantic elements
+├── P2-Debug-Window-Manual.md          ← Working copy markdown
+└── images/                             ← Screenshots and diagrams
 ```
 
 ## 🏷️ Namespace Strategy for Debug Window
@@ -98,33 +99,35 @@ Examples:
 
 ## 🚀 Development Workflow for Debug Window
 
-### **Phase 1: Foundation Setup** (Use existing from Smart Pins/DeSilva)
+### **Phase 1: Foundation Setup** (COMPLETED)
 ```bash
-# Foundation already exists in templates/shared/
-# Just reference it in our template
+# Foundation is now in workspace/p2-debug-window-manual/templates/
+# Each workspace has its own isolated copy
+templates/p2kb-foundation.sty
+templates/p2kb-debugwin-foundation.sty
 ```
 
-### **Phase 2: Debug Window-Specific Development**
+### **Phase 2: Debug Window-Specific Development** (COMPLETED)
 
-1. **Create Content Layer**:
+1. **Content Layer** (✅ DONE):
 ```bash
-# New file: templates/debug-window/p2kb-debugwin-content.sty
+# Location: workspace/p2-debug-window-manual/templates/p2kb-debugwin-content.sty
 # Contains: 5-color debug blocks + debug semantic environments
 ```
 
-2. **Create Lua Filters**:
+2. **Lua Filters** (✅ DONE):
 ```bash
-# New file: templates/debug-window/p2kb-debugwin-div-blocks.lua
+# Location: workspace/p2-debug-window-manual/filters/p2kb-debugwin-div-blocks.lua
 # Converts: ::: spin2|pasm2|debug|terminal|bitmap → LaTeX environments
 
-# New file: templates/debug-window/p2kb-debugwin-semantic.lua
+# Location: workspace/p2-debug-window-manual/filters/p2kb-debugwin-semantic.lua
 # Converts: ::: discovery|experiment|tip|performance → LaTeX environments
 ```
 
-3. **Create Main Template**:
+3. **Main Template** (✅ DONE):
 ```bash
-# New file: templates/debug-window/p2kb-debugwin.latex
-# Includes: shared/p2kb-foundation.sty + debug-window/p2kb-debugwin-content.sty
+# Location: workspace/p2-debug-window-manual/templates/p2kb-debugwin.latex
+# Includes: p2kb-foundation.sty + p2kb-debugwin-foundation.sty + p2kb-debugwin-content.sty
 ```
 
 ### **Phase 3: Testing & Refinement**
@@ -154,20 +157,23 @@ Examples:
 ## 🔧 Template Assembly Pattern for Debug Window
 
 ```latex
-% Debug Window template: p2kb-debugwin.latex
+% Debug Window template: templates/p2kb-debugwin.latex
 
-% 1. Foundation layer (shared)
-\usepackage{../shared/p2kb-foundation}
+% 1. Foundation layer (local copy)
+\usepackage{p2kb-foundation}
 
-% 2. Content layer (debug-specific)
+% 2. Foundation extensions (debug-specific)
+\usepackage{p2kb-debugwin-foundation}
+
+% 3. Content layer (debug-specific)
 \usepackage{p2kb-debugwin-content}
 
-% 3. Document configuration
+% 4. Document configuration
 \title{P2 Debug Window Manual}
 \subtitle{Visual Discovery Through Systematic Exploration}
 \author{Propeller 2 Development Team}
 
-% 4. Debug Window-specific customizations
+% 5. Debug Window-specific customizations
 \renewcommand{\chapterformat}{...}  % If needed for part structure
 ```
 

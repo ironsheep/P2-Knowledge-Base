@@ -48,10 +48,10 @@ outbound/p2-pasm-desilva-style/    # Deployment staging (LaTeX-escaped)
   - `p2kb-desilva-pagination.lua` - Smart page breaks
 
 ## Template Architecture
-**DeSilva uses layered template system:**
-- **Foundation**: `templates/shared/p2kb-foundation.sty` (shared components)
-- **Content**: `templates/desilva/p2kb-desilva-content.sty` (5-color system + pedagogical environments)
-- **Main**: `workspace/p2-pasm-desilva-style/p2kb-desilva.latex` (loads foundation + content)
+**DeSilva uses layered template system (all in workspace/p2-pasm-desilva-style/templates/):**
+- **Foundation**: `workspace/p2-pasm-desilva-style/templates/p2kb-foundation.sty` (shared components)
+- **Content**: `workspace/p2-pasm-desilva-style/templates/p2kb-desilva-content.sty` (5-color system + pedagogical environments)
+- **Main**: `workspace/p2-pasm-desilva-style/templates/p2kb-desilva.latex` (loads foundation + content)
 
 ## 5-Color Code Block System
 **DeSilva pedagogical color coding:**
@@ -95,14 +95,14 @@ outbound/p2-pasm-desilva-style/    # Deployment staging (LaTeX-escaped)
 # Copy escaped markdown (from Step 1)
 # ✅ Already done above
 
-# Copy template files to parallel outbound directory
-cp engineering/document-production/workspace/p2-pasm-desilva-style/p2kb-desilva.latex \
+# Copy template files from workspace templates/ to parallel outbound directory
+cp engineering/document-production/workspace/p2-pasm-desilva-style/templates/p2kb-desilva.latex \
    engineering/document-production/outbound/p2-pasm-desilva-style/
 
-cp engineering/document-production/templates/desilva/p2kb-desilva-foundation.sty \
+cp engineering/document-production/workspace/p2-pasm-desilva-style/templates/p2kb-desilva-foundation.sty \
    engineering/document-production/outbound/p2-pasm-desilva-style/
 
-cp engineering/document-production/templates/desilva/p2kb-desilva-content.sty \
+cp engineering/document-production/workspace/p2-pasm-desilva-style/templates/p2kb-desilva-content.sty \
    engineering/document-production/outbound/p2-pasm-desilva-style/
 
 # Copy Lua filters (flat structure - no filters/ subdirectory!)
@@ -162,7 +162,7 @@ engineering/document-production/outbound/p2-pasm-desilva-style/
 - `engineering/pdf-forge/work-modes/production-pdf-generation.md` - Production PDFs
 - `engineering/pdf-forge/work-modes/automated-pdf-testing.md` - Interactive testing
 - `workspace/p2-pasm-desilva-style/request-requirements.json` - Mandatory args
-- `templates/desilva/README.md` - Complete template documentation
+- `workspace/p2-pasm-desilva-style/templates/README.md` - Complete template documentation
 
 ## Production Request Format
 Always check `request-requirements.json` first. Example:

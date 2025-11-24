@@ -317,19 +317,17 @@ grep -c '::: debug\|::: terminal\|::: discovery' P2-Debug-Window-Manual.md
 ```
 
 ### Step 6: Template and Filter Setup 🔧
-Copy required files to outbound:
+Copy required files to outbound (all templates now in workspace templates/ subdirectory):
 ```bash
-# Template files
-cp p2kb-debugwin.latex ../outbound/p2-debug-window-manual/
-cp p2kb-debugwin-content.sty ../outbound/p2-debug-window-manual/
+# Template files (from workspace templates/)
+cp templates/p2kb-debugwin.latex ../outbound/p2-debug-window-manual/
+cp templates/p2kb-debugwin-content.sty ../outbound/p2-debug-window-manual/
+cp templates/p2kb-debugwin-foundation.sty ../outbound/p2-debug-window-manual/
+cp templates/p2kb-foundation.sty ../outbound/p2-debug-window-manual/
 
 # Lua filters (flat structure - no subdirectory!)
 cp filters/p2kb-debugwin-div-blocks.lua ../outbound/p2-debug-window-manual/
 cp filters/p2kb-debugwin-semantic.lua ../outbound/p2-debug-window-manual/
-
-# Shared filter
-cp ../../templates/shared/lua-utilities/p2kb-non-floating-images.lua \
-   ../outbound/p2-debug-window-manual/
 
 # Request configuration
 cp request.json ../outbound/p2-debug-window-manual/
@@ -416,13 +414,13 @@ DEBUG(`SCOPE Monitor TRIGGER RISING 2500 'sensor_value')
 
 ## Template Requirements
 
-The following templates must work with Debug Window Manual:
-- `p2kb-foundation.sty` - Base layer (shared)
-- `p2kb-debugwin-content.sty` - Debug Window styles (5-color + semantic)
-- `p2kb-debugwin.latex` - Main template
-- `p2kb-debugwin-div-blocks.lua` - Code block processing
-- `p2kb-debugwin-semantic.lua` - Semantic element processing
-- `p2kb-non-floating-images.lua` - Image placement (shared)
+The following templates must work with Debug Window Manual (all in workspace/p2-debug-window-manual/):
+- `templates/p2kb-foundation.sty` - Base layer (local copy)
+- `templates/p2kb-debugwin-foundation.sty` - Debug Window foundation extensions
+- `templates/p2kb-debugwin-content.sty` - Debug Window styles (5-color + semantic)
+- `templates/p2kb-debugwin.latex` - Main template
+- `filters/p2kb-debugwin-div-blocks.lua` - Code block processing
+- `filters/p2kb-debugwin-semantic.lua` - Semantic element processing
 
 ## Post-Processing Transformations Required
 
