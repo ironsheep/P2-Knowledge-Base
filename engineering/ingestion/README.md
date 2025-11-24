@@ -2,9 +2,9 @@
 
 ## 📊 [LIVE AUDIT MATRIX](INGESTION-AUDIT-MATRIX.md) ← Primary Status Dashboard
 
-**Quick Status**: 72% Complete | 19/24 Sources Audited | 2 Sources Connected to Central Hub
+**Quick Status**: 73% Complete | 20/25 Sources Audited | 2 Sources Connected to Central Hub
 
-*Last Updated: 2025-09-05 | Trust Level: 95% AUTHORITATIVE | 13+ Official Sources*
+*Last Updated: 2025-11-23 | Trust Level: 95% AUTHORITATIVE | 15+ Official Sources (P2: 13+, P1: 2)*
 
 ---
 
@@ -36,8 +36,8 @@ See **[AUTHORITATIVE-SOURCES.md](AUTHORITATIVE-SOURCES.md)** for complete catalo
 
 | Metric | Count | Status |
 |--------|-------|--------|
-| **Primary Sources** | 21 documents | 7 DOCX, 1 XLSX, 1 CSV, 1 SPIN2, 11 PDF |
-| **Post-Extraction** | 21 analyses | Complete audits |
+| **Primary Sources** | 23 documents | 7 DOCX, 1 XLSX, 1 CSV, 1 SPIN2, 13 PDF (P2: 21, P1: 2) |
+| **Post-Extraction** | 23 analyses | Complete audits |
 | **Paragraphs** | 19,216+ | Processed |
 | **Tables** | 531+ | Extracted |
 | **Code Examples** | 681+ | 188 validated |
@@ -86,11 +86,22 @@ See **[AUTHORITATIVE-SOURCES.md](AUTHORITATIVE-SOURCES.md)** for complete catalo
 | **WX Adapter** | 64007 | 🏆 AUTHORITATIVE | ✅ COMPLETE | 🟡 8+ est |
 | **WX Module** | 32420 | 🏆 AUTHORITATIVE | ✅ COMPLETE | 🟡 12+ est |
 
+### P1 (Propeller 1) Sources
+
+**Status**: Building P1 knowledge base in parallel with P2
+**Purpose**: Enable P1→P2 migration guides, provide template for P2 manual, support dual-processor AI
+
+| Document | Version | Date | Authority | Status | Pages | Notes |
+|----------|---------|------|-----------|--------|-------|-------|
+| **P1 Propeller Manual** | 1.2.0 | 2011-06-14 | 🏆 AUTHORITATIVE | ✅ COMPLETE | 399 | First systematic P1 ingestion, template for P2 manual |
+| **De Silva P1 Tutorial** | 1.21 | 2007-08-21 | GREEN | ⏳ EXTRACTED | 40 | Need formal 5-pass validation |
+| **P1 Datasheet** | 1.4.0 | 2011-06-14 | 🏆 AUTHORITATIVE | ✅ COMPLETE | 36 | Hardware/electrical specs, complements P1 Manual |
+
 ### Trust Level Summary
 
 | Level | Count | Documents |
 |-------|-------|----------|
-| **🏆 AUTHORITATIVE** | 13+ | All official Parallax hardware & core docs |
+| **🏆 AUTHORITATIVE** | 15+ | All official Parallax hardware & core docs (P2: 13+, P1: 2) |
 | **🟢 GREEN (High Trust)** | 3-4 | Smart Pins, Hardware Manual, validated sources |
 | **🟡 YELLOW (Conditional)** | 1 | Q&A Spreadsheet (community) |
 | **⚠️ DRAFT/PARTIAL** | 2 | PASM2 Manual (incomplete), Spin Manual draft |

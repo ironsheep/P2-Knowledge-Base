@@ -1,9 +1,10 @@
 # P2 Knowledge Base - Code Example Extraction Matrix
-**Comprehensive backlog for source code extraction across all ingested P2 documents**
+**Comprehensive backlog for source code extraction across all ingested documents**
 
-**Created**: 2025-08-24  
-**Purpose**: Track code example extraction status across all ingested P2 documents  
-**Status**: 3/16 documents with code extraction completed  
+**Created**: 2025-08-24
+**Updated**: 2025-11-23 (P1 documents added)
+**Purpose**: Track code example extraction status across all ingested P2 and P1 documents
+**Status**: 3/17 documents with code extraction completed (P2: 3/16, P1: 0/1)  
 
 ---
 
@@ -12,10 +13,10 @@
 | Status | Count | Documents |
 |--------|-------|-----------|
 | ✅ **Extracted** | 3 | Smart Pins (98), Spin2 v51 (32), Flash Filesystem (21) |
-| 🔄 **Extraction Ready** | 6 | Major PDF documents with high code potential |
+| 🔄 **Extraction Ready** | 7 | Major PDF documents with high code potential (P2: 6, P1: 1) |
 | 📋 **Planned** | 2 | Additional sources identified |
 | ❌ **No Code** | 7 | Hardware guides, CSV, specifications (minimal code content) |
-| **TOTAL** | **16** | All ingested sources |
+| **TOTAL** | **19** | All ingested sources (P2: 16, P1: 3 total, 1 with code) |
 
 ---
 
@@ -36,6 +37,16 @@
 | **P2 Silicon Documentation v35** | PDF (5-part) | ✅ COMPLETE | ✅ **PDF READY** | ✅ **COMPLETE** | Low-level examples, register manipulation, system programming | **6 extracted** |
 | **P2 Spin Manual Draft** | DOCX (1.4MB) | ✅ COMPLETE | 🟡 **NEED PDF** | ⏸️ **WAITING** | Tutorial progression, learning examples, project demos | 75-125 |
 | **P2 Hardware Manual** | DOCX (1.9MB) | ✅ COMPLETE | 🟡 **NEED PDF** | ⏸️ **WAITING** | Hardware initialization, peripheral control, boot sequences | 25-50 |
+
+### **P1 (PROPELLER 1) DOCUMENTATION**
+
+| Document | Source Format | Ingestion Status | Format Status | Code Extraction | Expected Content | Est. Examples |
+|----------|---------------|------------------|---------------|-----------------|------------------|---------------|
+| **P1 Propeller Manual v1.2** | PDF (399 pages) | ✅ COMPLETE | ✅ **PDF READY** | ❌ **PENDING** | Spin language examples (Ch2), Assembly examples (Ch3), inline comments, instruction demos | 100-150 |
+
+**P1 Purpose**: Build P1 knowledge base, enable P1→P2 migration guides, validate compilation patterns
+
+**P1 Datasheet**: No code examples (hardware/electrical specifications only)
 
 ### **COMPLETED - Code Extraction Success** ✅
 

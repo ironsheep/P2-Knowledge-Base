@@ -1,9 +1,10 @@
 # P2 Knowledge Base - Ingestion Image Extraction Matrix
-**Comprehensive backlog for visual asset extraction across all ingestions**
+**Comprehensive backlog for visual asset extraction across all ingested documents**
 
-**Created**: 2025-08-24  
-**Purpose**: Track image extraction status across all ingested P2 documents  
-**Status**: 9/16 documents with image extraction completed  
+**Created**: 2025-08-24
+**Updated**: 2025-11-23 (P1 documents added)
+**Purpose**: Track image extraction status across all ingested P2 and P1 documents
+**Status**: 9/18 documents with image extraction completed (P2: 9/16, P1: 0/2)  
 
 ---
 
@@ -12,10 +13,10 @@
 | Status | Count | Documents |
 |--------|-------|-----------|
 | ✅ **Extracted** | 9 | P2 Edge ecosystem + Smart Pins + Spin2 v51 + P2 Datasheet + Silicon Doc v35 (complete) |
-| 🔄 **Extraction Ready** | 7 | Major DOCX/PDF documents with high image potential |
+| 🔄 **Extraction Ready** | 9 | Major DOCX/PDF documents with high image potential (P2: 7, P1: 2) |
 | 📋 **Planned** | 2 | Additional PDFs identified |
 | ❌ **No Images** | 6 | Code files, CSV, XLSX (minimal visual content) |
-| **TOTAL** | **24** | All ingested + identified sources |
+| **TOTAL** | **26** | All ingested + identified sources (P2: 24, P1: 2) |
 
 ---
 
@@ -84,6 +85,15 @@
 | **P2 Eval Board Rev C Guide (#64000)** | PDF | ✅ COMPLETE | ✅ **COMPLETE** | Board photos, pin diagrams, feature callouts | 🟡 **HIGH** | 15 images |
 | **P2 Eval Add-on Boards Product Guide (#64006-ES)** | PDF | ✅ COMPLETE | ❌ **PENDING** | Board photos, schematic diagrams, pin layouts | 🟡 **HIGH** | 12-16 |
 | **Universal Motor Driver P2 Add-on Board (#64010)** | PDF | ✅ COMPLETE | ❌ **PENDING** | Wiring diagrams, PCB photos, schematic details | 🟡 **HIGH** | 8-12 |
+
+### **P1 (PROPELLER 1) DOCUMENTATION**
+
+| Document | Source Type | Ingestion Status | Image Extraction | Expected Content | Priority | Est. Images |
+|----------|-------------|------------------|------------------|------------------|----------|-------------|
+| **P1 Propeller Manual v1.2** | PDF (399 pages) | ✅ COMPLETE | ❌ **PENDING** | Block diagrams, timing diagrams, wiring examples, character charts, pin layouts, memory maps | 🟡 **HIGH** | 30-40 |
+| **P1 Datasheet v1.4** | PDF (36 pages) | ✅ COMPLETE | ❌ **PENDING** | Pin diagrams (3 packages), current consumption graphs (7+), temperature curves, package dimensions, timing diagrams | 🟡 **HIGH** | 25-30 |
+
+**P1 Purpose**: Build P1 knowledge base, enable P1→P2 migration guides, provide template for P2 manual structure
 
 ### **IDENTIFIED BUT NOT INGESTED**
 

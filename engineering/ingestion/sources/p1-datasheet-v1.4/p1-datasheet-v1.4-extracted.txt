@@ -1,0 +1,2728 @@
+--- PAGE 1 ---
+  
+Propeller™ P8X32A Datasheet    Page 1 of 36 Rev 1.4   6/14/2011 
+Propeller™  P8X32A Datasheet 
+8-Cog Multiprocessor Microcontroller   
+1.0 PRODUCT OVERVIEW 
+1.1. Introduction 
+The Propeller chip is designed to provide high-speed processing for embedded systems while maintaining low current 
+consumption and a small physical footprint.  In addition to  being fast, the Propeller chip provides flexibility and power 
+through its eight processors, called cogs, that can perform simultaneous tasks independently or cooperatively, all while 
+maintaining a relatively simple architecture that is easy to learn and utilize.  Tw o programming languages are available: Spin 
+(a high-level object-based language) and Propeller Assembly.  Both include custom commands to easily manage the 
+Propeller chip’s unique features. 
+Figure 1: Propeller P8X32A Block Diagram 
+ 
+1.2. Stock Codes 
+Table 1: Propeller Chip Stock Codes 
+Device  
+Stock # Package Type I/O 
+Pins 
+Power  
+Requirements
+External 
+Clock 
+Speed 
+Internal RC 
+Oscillator 
+Internal 
+Execution 
+Speed 
+Global 
+ROM/RAM Cog RAM 
+P8X32A-D40 40-pin DIP 
+P8X32A-Q44 44-pin LQFP 
+P8X32A-M44 44-pin QFN 
+32 
+CMOS 3.3 volts DC DC to 80 
+MHz 
+12 MHz or 
+20 kHz* 
+0 to 160 MIPS 
+(20 MIPS/cog) 
+64 K bytes; 
+32768 bytes 
+ROM / 32768 
+bytes RAM 
+512 x 32 bits 
+per cog 
+ 
+*Approximate; may range from 8 MHz – 20 MHz, or 13 kHz – 33 kHz, respectively. 
+--- PAGE 2 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 2 of 36  Rev 1.4   6/14/2011 
+Table of Contents 
+1.0  Product Overview......................................................... 1
+1.1. ................................................................................1  Introduction
+1.2. ...............................................................................1  Stock Codes
+1.3. Key Features and Benefits .........................................................3  
+32-bit Multicore Architecture1.3.1.  ..................................................................3
+1.3.2. ......................................................3  Clock System and Wait Instructions
+1.3.3. .............................................3  Programming Languages and Resources
+1.3.4. Flexible I/O and Peripheral Interface .....................................................3   ................................................................................31.4. Applications   .......................................................3  1.4.1. Corporate and Community Support
+2.0  Connection Diagrams .................................................. 4
+2.1. ........................................................................4  Pin Assignments
+2.2. .........................................................................4  Pin Descriptions
+2.3. Typical Connection Diagrams ....................................................5  
+Propeller Clip or Propeller Plug Connection - Recommended2.3.1.  ...............5
+2.3.2. Alternative Serial Port Connection .........................................................5  
+3.0  Operating Procedures ................................................. 6
+3.1. ....................................................................6  Boot-Up Procedure
+3.2. ..................................................................6  Run-Time Procedure
+3.3. Shutdown Procedure ..................................................................6  
+4.0 System Organization ................................................... 6 
+4.1. .....................................................................6  Shared Resources
+4.2. .............................................................................6  System Clock
+4.3. ......................................................................7  Cogs (processors)
+4.4. ............................................................................................7  Hub
+4.5. ......................................................................................8  I/O Pins
+4.6. .........................................................................8  System Counter
+4.7. .........................................................................................8  Locks
+4.8. .....................................9  Assembly Instruction Execution Stages
+4.9. Cog Counters ...........................................................................10  
+CTRA / CTRB – Control register4.9.1.  .........................................................10
+4.9.2. ....................................................10  FRQA / FRQB – Frequency register
+4.9 PHSA / PHSB – Phase register.3.   .......................................................................11
+ ...........................................................10
+4.10. Video Generator  
+VCFG – Video Configuration Register4.10.1.  .................................................11
+4.10.2. ..............................................................12  VSCL – Video Scale Register
+4.1 .3. WAITVID Command/Instruction0   ............................................................................14   ..........................................................12
+4.11. CLK Register
+5.0  Memory Organization ................................................ 15
+5.1. Main Memory ...........................................................................15  
+Main RAM5.1.1.  ............................................................................................15
+5.1.2. ...........................................................................................15  Main ROM
+5.1.3. ...........................................................................15  Character Definitions
+5.1.4. Math Function Tables ..........................................................................16  
+5.2. ................................................................................. 16  Cog RAM
+6.0  Programming Languages ..........................................17
+6.1. Reserved Word List ................................................................. 17   ......................................................... 176.1.1. Words Reserved for Future Use  
+Math and Logic Operators6.2.  ....................................................... 18
+6.3. Spin Language Summary Table .............................................. 19  ........................................................................................... 216.3.1. Constants   ....................................... 226.4. Propeller Assembly Instruction Table  
+Assembly Conditions6.4.1.  .......................................................................... 24
+6.4.2. ........................................................................... 24  Assembly Directives
+6.4.3. ................................................................................ 24  Assembly Effects
+6.4.4. Assembly Operators ........................................................................... 24 
+7.0  Electrical Characteristics...........................................25
+7.1. ..................................................... 25  Absolute Maximum Ratings
+7.2. ................................................................... 25  DC Characteristics
+7.3. AC Characteristics ................................................................... 25  
+8.0 Current Consumption Characteristics .....................26 
+8.1. .................................. 26 Typical Current Consumption of 8 Cogs
+8.2. .................. 27  Typical Current of a Cog vs. Operating Frequency
+8.3. ................................. 27  Typical PLL Current vs. VCO Frequency
+8.4. ................................................... 28  Typical Crystal Drive Current
+8.5. ................................................... 28  Cog and I/O Pin Relationship
+8.6. Current Profile at Various Startup Conditions .......................... 29 
+9.0  Temperature Characteristics.....................................30
+9.1. .... 30  Internal Oscillator Frequency as a Function of Temperature
+9.2. ... 31  Fastest Operating Frequency as a Function of Temperature
+9.3. Current Consumption as a Function of Temperature ............... 32 
+10.0  Package Dimensions..................................................33
+10.1. ........................................................ 33  P8X32A-D40 (40-pin DIP)
+10.2. .................................................... 34  P8X32A-Q44 (44-pin LQFP)
+10.3. P8X32A-M44 (44-pin QFN) ...................................................... 35 
+11.0 Manufacturing Info .....................................................36 
+11.1. ....................................................... 36  Reflow Peak Temperature
+11.2. Green/RoHS Compliance ........................................................ 36 
+12.0 .........................................................36Revision History  
+Changes for Version 1.1:12.1.1.  .................................................................... 36
+12.1.2. .................................................................... 36  Changes for Version 1.2:
+12.1.3. ..................................................................... 36  Changes for Version 1.3
+12.1.4. Changes for Version 1.4 ..................................................................... 36 
+ 
+--- PAGE 3 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 3 of 36  Rev 1.4   6/14/2011 
+1.3. Key Features and Benefits 
+The P8X32A design frees developers from common 
+complexities of embedded systems programming.  
+1.3.1. 32-bit Multicore Architecture  
+ True parallel processing with eight symmetric 32-bit 
+processors (cogs) in one microcontroller 
+ Multi-cog run-time management (run/wait/stop) 
+easily solves event-handling problems and 
+eliminates the need for in terrupts.  This greatly 
+simplifies programming for asynchronous and 
+synchronous events, resulting in a responsive and 
+easily maintained application.  
+ 20 MIPS per cog, 160 MIPS total with all cogs 
+running 
+ Solves mixed-bandwidth needs common to 
+embedded applications 
+ Multi-purpose design lowers part count while 
+increasing system capabilities 
+ Developer-driven cog assignments bring flexible 
+response and deterministic timing to embedded 
+applications 
+1.3.2. Clock System and Wait Instructions 
+ Flexible Clock Modes 
+o Two internal, one external, plus optional 1x–16x 
+PLL; up to 80 MHz system clock 
+o Switchable in code at run-time; low frequency 
+for low-power periods, high frequency for high-
+bandwidth moments 
+ Shared System Clock facilitates synchronization 
+between cogs 
+ WAIT Instructions 
+o Del
+iver powerful synchronous / asynchronous 
+event management 
+o Set dedicated event cogs to an "always ready," 
+very low power state 
+1.3.3. Programming Languages and Resources 
+ Spin (object-based, high-level) and Assembly 
+(PASM; low-level); used together for thorough 
+development, i.e. fast development in Spin plus fast 
+execution with prewritten high-speed PASM drivers 
+ Third-party support: C, BASIC, and more 
+ Enhanced Assembly Language 
+o Conditional execution for individual instructions; 
+enables jitter-free signal generation and event 
+handling 
+o Optional flag and result writing for individual 
+instructions 
+ Open-source Objects 
+o Objects are shared freely via the Propeller Object 
+Exchange and Propeller Tool libraries  
+o Select objects that fit a need, easily integrate 
+them into a Propeller application 
+1.3.4. Flexible I/O and Peripheral Interface 
+ 32 I/O Pins 
+o All general-purpose I/O after boot-up; accessible 
+by every cog simultaneously 
+o Single-instruction access to any individual I/O 
+pin or any contiguous I/O pin group 
+o Easily move designed functions between pins for 
+simple system board layout 
+ Multi-function Counters 
+o Configurable state machines generate or sense 
+repetitive signals per clock cycle 
+o Measure frequency, detect  edges, count cycles, 
+D/A or A/D conversion, and more 
+o Operate autonomously with optional run-time 
+monitoring and adjusting 
+o Two counters per cog 
+ Video Generators 
+o RGB: VGA; 8 I/O pins 
+o Composite: NTSC, PAL; 1-pin (B/W), 3-pin 
+(typical), or 4-pin (optional) 
+o One generator per cog 
+ Software Peripherals 
+o Peripheral interfaces bu ilt with software and 
+inexpensive passive components; not single-
+function on-chip hardware  
+o Soft
+ware-based interfaces are flexible; enhance 
+as peripheral needs arise — no need to redesign 
+with a chip variant 
+1.4. Applications 
+The P8X32A is particularly us eful in projects that can be 
+vastly simplified with simultaneous processing, including: 
+ Industrial control systems 
+ Sensor integration, signal processing, and data 
+acquisition 
+ Handheld portable human-interface terminals 
+ Motor and actuator control 
+ User interfaces requirin g NTSC, PAL, or VGA 
+output, with  PS/2 keyboard and mouse input 
+ Low-cost video game systems 
+ Industrial, educational or personal-use robotics 
+ Wireless video transmission (NTSC or PAL) 
+1.4.1. Corporate and Community Support 
+ Sales or technical support: (916) 632-4664 
+ Email sales: sales@parallaxsemiconductor.com 
+ Email support: support@parallaxsemiconductor.com 
+ Engineer-moderated Parallax Semiconductor sub-
+forum is available from  http://forums.parallax.com 
+ Parallax-hosted Propeller Object Exchange library: 
+http://obex.parallax.com 
+--- PAGE 4 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 4 of 36  Rev 1.4   6/14/2011 
+2.0 CONNECTION DIAGRAMS 
+2.1. Pin Assignments 
+                                             
+                             LQFP and QFN Packages     
+                                                                                    DIP Package                                         
+ 
+ 
+2.2. Pin Descriptions 
+Table 2: Pin Descriptions 
+Pin Name Direction Description 
+P0 – P31 I/O 
+General purpose I/O Port A.  Can source/sink 40 mA each at 3.3 VDC. CMOS level logic with threshold 
+of ≈ ½ VDD or 1.6 VDC @ 3.3 VDC. 
+ 
+The pins shown below have a s pecial purpose upon power-up/reset but are general purpose I/O 
+afterwards. 
+P28 - I2C SCL connection to  optional, external EEPROM. 
+P29 - I2C SDA connection to  optional, external EEPROM. 
+P30 - Serial Tx to host. 
+P31 - Serial Rx from host. 
+VDD --- 3.3 volt power (2.7 – 3.6 VDC) 
+VSS --- Ground 
+BOEn I 
+Brown Out Enable (active low).  Must be connected to either VDD or VSS.  If low, RESn becomes a 
+weak output (delivering VDD through 5 k Ω) for monitoring purposes but can still be driven low to cause 
+reset.  If high, RESn is CMOS input with Schmitt Trigger. 
+RESn I/O Reset (active low).  When low, resets the Propeller chip: all cogs disabled an d I/O pins floating.  
+Propeller restarts 50 ms after RESn transitions from low to high. 
+XI I 
+Crystal Input.  Can be connected to output of crysta l/oscillator pack (with XO left disconnected), or to 
+one leg of crystal (with XO connected to other leg of crystal or resonator) depending on CLK Register 
+settings.  No external resistors or capacitors are required. 
+XO O Crystal Output.  Provides feedback for an extern al crystal, or may be left disconnected depending on 
+CLK Register settings.  No external resistors or capacitors are required. 
+--- PAGE 5 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 5 of 36  Rev 1.4   6/14/2011 
+2.3. Typical Connection Diagrams 
+2.3.1. Propeller Clip or Propeller Plug Connection - Recommended  
+Note that the connections to the external oscillator and EEPROM, which are enclosed in dashed lines, are optional. 
+Propeller Clip, Stock #32200; Propeller Plug, Stock #32201. The Propeller Clip/Plug schematic is available for download 
+from www.parallax.com. 
+ 
+ 
+ 
+ 
+2.3.2. Alternative Serial Port Connection 
+--- PAGE 6 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 6 of 36  Rev 1.4   6/14/2011 
+3.0 OPERATING PROCEDURES
+3.1. Boot-Up Procedure 
+Upon power-up, or reset: 
+1. The Propeller chip’s internal RC oscillator begins 
+running at 20 kHz, then after a 50 ms reset delay, 
+switches to 12 MHz.  Then the first processor (Cog 0) 
+loads and runs the built-in Boot Loader program. 
+2. The Boot Loader performs one or more of the 
+following tasks, in order: 
+a. Detects communication from a host, such as a 
+PC, on pins P30 and P31.  If communication 
+from a host is detected, the Boot Loader 
+converses with the host to identify the Propeller 
+chip and possibly download a program into 
+global RAM and optionally into an external 32 
+KB EEPROM. 
+b. If no host communication was detected, the Boot 
+Loader looks for an external 32 KB EEPROM on 
+pins P28 and P29.  If an EEPROM is detected, 
+the entire 32 KB data image is loaded into the 
+Propeller chip’s global RAM. 
+c. If no EEPROM was detected, the boot loader 
+stops, Cog 0 is terminated, the Propeller chip 
+goes into shutdown mode, and all I/O pins are set 
+to inputs. 
+3. If either step 2a or 2b was successful in loading a 
+program into the global RAM, and a suspend 
+command was not given by the host, then Cog 0 is 
+reloaded with the built-in Spin Interpreter and the 
+user code is run from global RAM. 
+3.2. Run-Time Procedure 
+A Propeller Application is a user program compiled into 
+its binary form and downloaded to the Propeller chip’s 
+RAM or external EEPROM.  The application consists of 
+code written in the Propeller chip’s Spin language (high-
+level code) with optional Propeller Assembly language 
+components (low-level code).  Code written in the Spin 
+language is interpreted during run time by a cog running 
+the Spin Interpreter while code written in Propeller 
+Assembly is run in its pure form directly by a cog.  Every 
+Propeller Application consists of at least a little Spin code 
+and may actually be written entirely in Spin or with 
+various amounts of Spin and assembly.  The Propeller 
+chip’s Spin Interpreter is started in Step 3 of the Boot Up 
+Procedure, above, to get the application running. 
+Once the boot-up procedure is complete and an 
+application is running in Cog 0, all further activity is 
+defined by the application itself.  The application has 
+complete control over things like the internal clock speed, 
+I/O pin usage, configuration registers, and when, what 
+and how many cogs are running at any given time.  All of 
+this is variable at run time, as controlled by the 
+application.   
+3.3. Shutdown Procedure 
+When the Propeller goes into shutdown mode, the internal 
+clock is stopped causing all cogs to halt and all I/O pins 
+are set to input direction (high impedance).  Shutdown 
+mode is triggered by one of the three following events: 
+1. VDD falling below the brown-out threshold (~2.7 
+VDC), when the brown out circuit is enabled,  
+2. the RESn pin going low, or 
+3. the application requests a reboot (see the REBOOT 
+com
+mand in the Propeller Manual). 
+Shutdown mode is discontinued when the voltage level 
+rises above the brown-out threshold and the RESn pin is 
+high. 
+4.0 SYSTEM ORGANIZATION  
+4.1. Shared Resources 
+There are two types of shared resources in the Propeller: 
+1) common, and 2) mutually-exclusive.  Common 
+resources can be accessed at any time by any number of 
+cogs.  Mutually-exclusive resources can also be accessed 
+by any number of cogs, but only by one cog at a time.  
+The common resources are the I/O pins and the System 
+Counter.  All other shared resources are mutually-
+exclusive by nature and access to them is controlled by 
+the Hub. See Section 4.4 on page 7. 
+4.2. System Clock 
+The System Clock (shown as “CLOCK” in Figure 1, page 
+1) is the central clock source for nearly every component 
+of t
+he Propeller chip.  The System Clock’s signal comes 
+from one of three possible sources:  
+ The internal RC oscillator (~12 MHz or ~20 kHz)  
+ The XI input pin (either functioning as a high-
+impedance input or a crystal oscillator in 
+conjunction with the XO pin) 
+ The Clock PLL (phase-locked loop) fed by the XI 
+input   
+The source is determined by the CLK register’s settings, 
+which is selectable at compile time and reselectable at run 
+time.  The Hub and internal Bus operate at half the 
+System Clock speed. 
+ 
+--- PAGE 7 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 7 of 36  Rev 1.4   6/14/2011 
+4.3. Cogs (processors) 
+The Propeller contains eight (8) identical, independent 
+processors, called cogs, numbered 0 to 7.  Each cog 
+contains a Processor block, local 2 KB RAM configured 
+as 512 longs (512 x 32 bits), two advanced counter 
+modules with PLLs, a Video Generator, I/O Output 
+Register, I/O Direction Register, and other registers not 
+shown in the Block Diagram.  
+All eight cogs are driven fro m the System Clock; they 
+each maintain the same time reference and all active cogs 
+execute instructions simultaneously.  They also all have 
+access to the same shared resources. 
+Cogs can be started and stopped at run time and can be 
+programmed to perform tasks simultaneously, either 
+independently or with coordination from other cogs 
+through Main RAM.  Each cog has its own RAM, called 
+Cog RAM, which contains 512 registers of 32 bits each.  
+The Cog RAM is all general purpose RAM except for the 
+last 16 registers, which are special purpose registers, as 
+described in Table 15 on page 16.   
+4.4. Hub 
+To maintain system integrity, mutually-exclusive 
+resources must not be accessed by more than one cog at a 
+time.  The Hub controls access to mutually-exclusive 
+resources by giving each cog a turn in a “round robin” 
+fashion from Cog 0 through Cog 7 and back to Cog 0 
+again.  The Hub and its bus run at half the System Clock 
+rate, giving a cog access to mu tually-exclusive resources 
+once every 16 System Clock cycles.  Hub instructions, the 
+Propeller Assembly instructions that access mutually-
+exclusive resources, require 8 cycles to execute but they 
+first need to be synchronized to the start of the Hub 
+Access Window.   
+It takes up to 15 cycles (16 minus 1, if we just missed it) 
+to synchronize to the Hub Access Window plus 8 cycles 
+to execute the hub instruction, so hub instructions take 
+from 8 to 23 cycles to complete. 
+Figure 2 and Figure 3 show examples where Cog 0 has a 
+h
+ub instruction to execute.  Figure 2 shows the best-case 
+scen
+ario; the hub instruction was ready right at the start of 
+that cog’s access window.  Th e hub instruction executes 
+immediately (8 cycles) leaving an additional 8 cycles for 
+other instructions before the next Hub Access Window 
+arrives. 
+Figure 3  shows the worst-cas e scen
+ ario; the hub 
+instruction was ready on the cy cle right after the start of 
+Cog 0’s access window; it just barely missed it.  The cog 
+waits until the next Hub Access Window (15 cycles later) 
+then the hub instruction execut es (8 cycles) for a total of 
+23 cycles for that hub instruction.  Again, there are 8 
+additional cycles after the hub instruction for other 
+instructions to execute before the next Hub Access 
+Window arrives.  To get the most efficiency out of 
+Propeller Assembly routines that have to frequently 
+access mutually-exclusive resources, it can be beneficial 
+to interleave non-hub instructions with hub instructions to 
+lessen the number of cycles waiting for the next Hub 
+Access Window.  Since most Propeller Assembly 
+instructions take 4 clock cycles, two such instructions can 
+be executed in between otherwise contiguous hub 
+instructions. 
+Keep in mind that a particular cog’s hub instructions do 
+not, in any way, interfere with other cogs’ instructions 
+because of the Hub mechanism.  Cog 1, for example, may 
+start a hub instruction during  System Clock cycle 2, in 
+both of these examples, possibly overlapping its execution 
+with that of Cog 0 without any ill effects.  Meanwhile, all 
+other cogs can continue executing non-hub instructions, 
+or awaiting their individual hub access windows 
+regardless of what the others are doing. 
+Figure 2: Cog-Hub 
+Interaction – Best Case 
+Scenario 
+ 
+Figure 3: Cog-Hub 
+Interaction – Worst Case 
+Scenario 
+ 
+ 
+--- PAGE 8 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 8 of 36  Rev 1.4   6/14/2011 
+4.5. I/O Pins
+The Propeller has 32 I/O pins, 28 of which are general 
+purpose.  I/O Pins 28 - 31 have a special purpose at boot 
+up and are available for general purpose use afterwards; 
+see section 2.2, page 4.  After boot up, any I/O pins can 
+be u
+sed by any cogs at any time.  It is up to the 
+application developer to ensure that no two cogs try to use 
+the same I/O pin for different purposes during run time. 
+Refer to Figure 1, page 1. Each cog has its own 32-bit I/O 
+Direction Register and 32-b it I/O 
+Output Register to 
+influence the states of the Propeller chip’s corresponding 
+32 I/O pins.  A cog's desired I/O directions and output 
+states is communicated thro ugh the entire cog collective 
+to become "Pin Directions" and "Pin Outputs."   
+Pin Directions are the result of OR'ing the Direction 
+Registers of the cogs together. Pin Outputs are the result 
+of OR'ing the output states of the cogs together.  A cog's 
+output state consists of the bits of its I/O modules (the 
+Counters, the Video Generator, and the I/O Output 
+Register) OR'd together then AND'd with the bits of its 
+Direction Register. All cogs can still access and influence 
+the I/O pins simultaneously, without electrical contention, 
+as described by these rules: 
+A. A pin is an input only
+ if no active cog sets it to 
+an output. 
+B. A pin outputs low only if all active cogs that set 
+it to output also set it to low. 
+C. A pin outputs high if any  active cog sets it to an 
+output and also sets it high. 
+Table 3 demonstrates a few possible combinations of the 
+collective cogs
+’ influence on a particular I/O pin, P12 in 
+this example.  For simplification, these examples assume 
+that bit 12 of each cog’s I/O hardware, other than its I/O 
+Output Register, is cleared to zero (0).  
+Any cog that is shut down has its Direction Register and 
+output states cleared to zero, effectively removing it from 
+influencing the final state of the I/O pins that the 
+remaining active cogs are controlling.  
+Each cog also has its own 32-bit Input Register.  This 
+input register is really a pseudo-register; every time it is 
+read, the actual states of the I/O pins are read, regardless 
+of their input or output direction. 
+ 
+Table 3: I/O Sharing Examples 
+ Bit 12 of Cogs’ I/O Direction Register Bit 12 of Cogs’ I/O Output Register 
+Cog ID 0  1  2  3  4  5  6  7 0  1  2  3  4  5  6  7 
+State of 
+I/O  Pin P12 
+Rule 
+Followed 
+Example 1 0  0  0  0  0  0  0  0 0  0  0  0  0  0  0  0 Input A 
+Example 2 1  0  0  0  0  0  0  0 0  0  0  0  0  0  0  0 Output Low B 
+Example 3 1  0  0  0  0  0  0  0 1  0  0  0  0  0  0  0 Output High C 
+Example 4 1  0  0  0  0  0  0  0 0  1  0  0  0  0  0  0 Output Low B 
+Example 5 1  1  0  0  0  0  0  0 0  1  0  0  0  0  0  0 Output High C 
+Example 6 1  1  1  1  1  1  1  1 0  1  0  1  0  0  0  0 Output High C 
+Example 7 1  1  1  1  1  1  1  1 0  0  0  1  0  0  0  0 Output High C 
+Example 8 1  1  1  0  1  1  1  1 0  0  0  1  0  0  0  0 Output Low B 
+Note: For the I/O Direction Register, a 1 in a bit location sets the corresponding I/O pin to the output direction; a 0 sets it to an input direction. 
+4.6. System Counter 
+The System Counter is a glob al, read-only, 32-bit counter 
+that increments once every System Clock cycle.  Cogs can 
+read the System Counter (via their CNT registers, see 
+Table 15 on page 16) to perform timing calculations and 
+can use
+ the WAITCNT command (see section 6.3 on page 
+19 and section 6.4 on page 22) to create effective delays 
+wi
+thin their processes.  The System Counter is a common 
+resource which every cog can read simultaneously.  The 
+System Counter is not cleared upon startup since its 
+practical use is for differential timing.  If a cog needs to 
+keep track of time from a speci fic, fixed moment in time, 
+it simply needs to read and save the initial counter value 
+at that moment in time, and compare subsequent counter 
+values against that initial value.  
+4.7. Locks  
+There are eight lock bits (semaphores) available to 
+facilitate exclusive access to  user-defined resources 
+among multiple cogs.  If a block of memory is to be used 
+by two or more cogs at once and that block consists of 
+more than one long (four byte s), the cogs will each have 
+to perform multiple reads and writes to retrieve or update 
+that memory block.  This leads to the likely possibility of 
+read/write contention on that memory block where one 
+cog may be writing while another is reading, resulting in 
+misreads and/or miswrites. 
+The locks are global bits accessed through the Hub via 
+LOCKNEW, LOCKRET, LOCKSET, and LOCKCLR.  Because 
+locks
+ are accessed only through the Hub, only one cog at 
+a time can affect them, maki ng this an effective control 
+mechanism.  The Hub maintains an inventory of which 
+locks are in use and their current states; cogs can check 
+out, return, set, and clear locks as needed during run time.
+--- PAGE 9 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 9 of 36  Rev 1.4   6/14/2011 
+4.8. Assembly Instruction Execution Stages 
+ 
+Figure 4: Assembly Instruction Execution Stages 
+Stage 1  2 3 4 5  
+
+(Execute  N- 1) 
+Fetch 
+Instruction 
+N 
+Write 
+Result 
+N-1 
+Fetch 
+Source 
+N 
+Fetch  
+Destination 
+N 
+(Execute N) 
+Fetch  
+Instruction 
+N+1 
+Write 
+Result 
+N 
+ 
+clock cycle M M+1 M+2 M+3 M+4 M+5  
+ 
+The Propeller executes assembly instructions in five 
+stages. While an entire instruction takes six cycles to 
+execute, two of those clock cycles are dedicated to the 
+two adjacent instructions. This results in an overall 
+throughput of four clock cycles per instruction. 
+ 
+
+ 
+Instruction N-1 
+Instruction N 
+Instruction N+1 
+ 
+Program 
+counter 
+Figure 5 
+Cog Memory 
+ 
+ 
+ 
+In Stage 1, instruction N, pointed to by the Program 
+Counter, is fetched from cog memory during clock cycle 
+M. During cycle M+1 the result from the previous 
+instruction is written to memory. The reason the previous 
+instruction result is written after the current instruction is 
+fetched will be explained shortly.  
+During Stage 2, if the immedi ate flag of Instruction N is 
+set, the 9 bit source field is saved as the source value. If 
+the value is not immediate, the location specified by the 
+source field is fetched from cog memory during clock 
+cycle M+2. During clock cycle M+3 the location 
+specified in the destination field is fetched from cog 
+memory (Stage 3).  
+At this point in time (Stage 4) the Arithmetic Logic Unit 
+(ALU) has all the information needed to execute the 
+instruction. Executing the instruction takes some amount 
+of time before the result is available. The amount of time 
+required for execution is dictated by the slowest operation 
+the ALU performs. To provide enough time for the ALU 
+to execute the instruction, a full clock cycle (M+4) is 
+provided to the ALU for the result to settle into its final 
+state. During this execution, the cog memory is not 
+accessed by instruction N. To speed up the throughput of 
+program execution, the next inst ruction to be executed is 
+fetched from cog memory while the current instruction is 
+executed in the ALU.  
+Finally at clock cycle M+5 the result of the current 
+instruction N is written back to cog memory, completing 
+Stage 5. 
+The partial interleaving of instructions has a couple 
+implications to program flow. First, when code 
+modification occurs through MOVI, MOVS, MOVD or any 
+o
+perations which modifies an assembly instruction, there 
+must be at least one instruction executed before the 
+modified instruction is executed.  If the modification is 
+done on the immediately following instruction (N+1), the 
+unmodified version of instruction N+1 will be loaded a 
+clock cycle before the modified version of instruction 
+N+1 is written to cog memory.  
+Second, conditional jumps do not know for certain if they 
+will jump until the end of clock cycle M+4. Since the next 
+instruction has already been fe tched, only one of the two 
+possible branches can be predicted. In the Propeller, 
+conditional branches are always predicted to take the 
+jump. For loops using DJNZ where the jump is taken every 
+ti
+me except the final loop, a tighter execution time of the 
+loop is achieved.  
+In the event the jump is not taken, the cog takes no action 
+until the next instruction is fetched. This is equivalent to a 
+NOP being inserted before the next instruction is executed. 
+Un
+conditional jumps always take four clock cycles to 
+execute since the Propeller ca n always accurately predict 
+what address needs to be loaded into the Program Counter 
+for the next instruction to execute. Examples of 
+unconditional jumps include JMP, JMPRET, CALL and RET.  
+If an instructi
+on needs to access any Hub resource, Stage 
+4 is extended until the Hub becomes available, increasing 
+execution time to at least 8 and potentially up to 23 clock 
+cycles.  See Section 4.4: Hub on page 7. 
+ 
+ 
+ 
+--- PAGE 10 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 10 of 36  Rev 1.4   6/14/2011 
+4.9. Cog Counters
+Each cog has two counter modules: CTRA and CTRB. Each 
+cou
+nter module can control or monitor up to two I/O pins 
+and perform conditional 32-bit accumulation of its FRQ 
+register into its PHS register on every clock cycle. 
+Each counter module also has its own phase-locked loop 
+(PLL) which can be used to synthesize frequencies up to 
+128 MHz. 
+With a little setup or oversight from the cog, a counter can 
+be used for: 
+ frequency synthesis 
+ frequency measurement 
+ pulse counting 
+ pulse measurement 
+ multi-pin state measurement 
+ pulse-width modulation 
+ duty-cycle measurement 
+ digital-to-analog conversion 
+ analog-to-digital conversion 
+ 
+For some of these operations, the cog can be set up and 
+left in a free-running mode. For others, it may use 
+WAITCNT to time-align counter read
+ s and writes within a 
+loop, creating the effect of a more complex state machine. 
+Note that for a cog clock frequency of 80 MHz, the 
+counter update period is a mere 12.5 ns. This high speed, 
+combined with 32-bit precision, allows for very dynamic 
+signal generation and measurement. 
+The design goal for the counter was to create a simple and 
+flexible subsystem which could perform some repetitive 
+task on every clock cycle, thereby freeing the cog to 
+perform some computationally richer super-task. While 
+the counters have only 32 basic operating modes, there is 
+no limit to how they might be used dynamically through 
+software. Integral to this concept is the use of the 
+WAITPEQ, WAITPNE, and WAITCNT instructions, which can 
+ev
+ent-align or time-align a cog with its counters. 
+Each counter has three registers: 
+4.9.1. CTRA / CTRB – Control register 
+The CTR (CTRA and CTRB) register selects the counter's 
+operating mode. As soon as this register is written, the 
+new operating mode goes into effect. Writing a zero to 
+CTR will immediately disable the counter, stopping all 
+pin output and PHS accumulation. 
+ 
+Table 4:  CTRA and CTRB Registers 
+31 30..26 25..23 22..15 14..9 8..6 5..0 
+- CTRMODE PLLDIV - BPIN - APIN 
+ 
+The CTRMODE field selects one of 32 operating modes 
+for the counter, conveniently written (along with 
+PLLDIV) using the MOVI instruction. These modes of 
+o
+peration are listed in Table 6 on page 11.  
+ 
+Table 5:  PLLDIV Field 
+PLLDIV %000 %001 %010 %011 %100 %101 %110 %111
+Output VCO
+128 
+VCO
+64 
+VCO 
+32 
+VCO 
+16 
+VCO 
+8 
+VCO
+4 
+VCO
+2 
+VCO
+1  
+ 
+PLLDIV selects a PLL output tap and may be ignored if 
+not used.  
+The PLL modes (%00001 to %00011) cause FRQ-to-PHS 
+accumulation to occur every clock cycle. This creates a 
+numerically-controlled oscillator (NCO) in PHS[31], 
+which feeds the counter PLL's reference input. The PLL 
+will multiply this frequency by 16 using its voltage-
+controlled oscillator (VCO). For stable operation, it is 
+recommended that the VCO frequency be kept within 64 
+MHz to 128 MHz. This translates to an NCO frequency of 
+4 MHz to 8 MHz.  
+The PLLDIV field of the CTR register selects which 
+power-of-two division of the VCO frequency will be used 
+as the final PLL output. This affords a PLL range of 500 
+kHz to 128 MHz. 
+BPIN selects a pin to be the secondary I/O. It may be 
+ignored if not used and may be written using the MOVD 
+in
+struction. 
+APIN selects a pin to be the primary I/O. It may be 
+ignored if not used and may be written using the MOVS  
+in
+struction.  
+4.9.2. FRQA / FRQB – Frequency register 
+FRQ (FRQA and FRQB) holds the value that will be 
+accumulated into the PHS register. For some applications, 
+FRQ may be written once, and then ignored. For others, it 
+may be rapidly modulated. 
+4.9.3. PHSA / PHSB – Phase register 
+The PHS (PHSA and PHSB) re gister can be written and 
+read via cog instructions, but it also functions as a free-
+running accumulator, summing the FRQ register into 
+itself on potentially every cl ock cycle. Any instruction 
+writing to PHS will override any accumulation for that 
+clock cycle. PHS can only be read through the source 
+operand (same as PAR, CNT, INA, and INB). Beware 
+that doing a read-modify-write instruction on PHS, like 
+"ADD PHSA, #1", will cause the last-written value to be 
+u
+sed as the destination operand input, rather than the 
+current accumulation. 
+ 
+ 
+--- PAGE 11 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 11 of 36  Rev 1.4   6/14/2011 
+Table 6:  Counter Modes (CTRMODE Field Values) 
+CTRMODE Description Accumulate 
+FRQx to PHSx 
+APIN 
+Output* 
+BPIN 
+Output* 
+%00000 Counter disabled (off) 0 (never) 0 (none) 0 (none) 
+%00001 
+%00010 
+%00011 
+PLL internal (video mode) 
+PLL single-ended 
+PLL differential 
+1 (always) 
+1 
+1 
+0 
+PLLx 
+PLLx 
+0 
+0 
+!P
+LLx 
+%00100 
+%00101 
+NCO single-ended 
+NCO differential 
+1 
+1 
+PHSx[31] 
+PHSx[31] 
+0 
+!PHSx[31] 
+%00110 
+%00111 
+DUTY single-ended 
+DUTY differential 
+1 
+1 
+PHSx-Carry 
+PHSx-Carry 
+0 
+!PHSx-Carry 
+%01000 
+%01001 
+%01010 
+%01011 
+POS detector 
+POS detector with feedback 
+POSEDGE detector 
+POSEDGE detector w/ feedback 
+A
+1
+ 
+A
+1
+ 
+A
+1
+ & !A
+2
+ 
+A
+1
+ & !A
+2
+ 
+0 
+0 
+0 
+0 
+0 
+!A1 
+0 
+!A1 
+%01100 
+%01101 
+%01110 
+%01111 
+NEG detector 
+NEG detector with feedback 
+NEGEDGE detector 
+NEGEDGE detector w/ feedback 
+!A
+1
+ 
+!A
+1
+ 
+!A
+1
+ & A
+2
+ 
+!A
+1
+ & A
+2
+ 
+0 
+0 
+0 
+0 
+0 
+!A1 
+0 
+!A1 
+%10000 
+%10001 
+%10010 
+%10011 
+%10100 
+%10101 
+%10110 
+%10111 
+%11000 
+%11001 
+%11010 
+%11011 
+%11100 
+%11101 
+%11110 
+%11111 
+LOGIC never 
+LOGIC !A & !B 
+LOGIC A & !B 
+LOGIC !B 
+LOGIC !A & B 
+LOGIC !A 
+LOGIC A <> B 
+LOGIC !A | !B 
+LOGIC A & B                  
+LOGIC A == B                 
+LOGIC A 
+LOGIC A | !B 
+LOGIC B 
+LOGIC !A | B 
+LOGIC A | B 
+LOGIC always                 
+0 
+!A
+1
+ & !B
+1
+ 
+A
+1
+ & !B
+1
+ 
+!B
+1
+ 
+!A
+1
+ & B
+1
+ 
+!A
+1
+ 
+A
+1
+ <> B
+1
+ 
+!A
+1
+ | !B
+1
+ 
+A
+1
+ & B
+1
+                  
+A
+1
+ == B
+1
+                 
+A
+1
+ 
+A
+1
+ | !B
+1
+ 
+B
+1
+ 
+!A
+1
+ | B
+1
+ 
+A
+1
+ | B
+1
+ 
+1                 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+0 
+*Must set corresponding DIR bit to affect pin.  A1 = APIN input delayed by 1 clock.  A2 = APIN input delayed by 2 clocks. B1 = BPIN input delayed by 1 clock. 
+ 
+4.10. Video Generator
+Each cog has a video generator module that facilitates 
+transmitting video image data at a constant rate. There are 
+two registers and one instruction which provide control 
+and access to the video generator. Counter A of the cog 
+must be running in a PLL mode and is used to generate 
+the timing signal for the Video Generator. The Video 
+Scale Register specifies th e number of Counter A PLL 
+(PLLA) clock cycles for each pixel and number of clock 
+cycles before fetching another frame of data provided by 
+the WAITVID instruction which is executed within the cog. 
+The 
+Video Configuration Register establishes the mode 
+the Video Generator should operate, and can generate 
+VGA or composite video (NTSC or PAL).  
+The Video Generator should be initialized by first starting 
+Counter A, setting the Video Scale Register, setting the 
+Video Configuration Register, then finally providing data 
+via the WAITVID instruction. Failure to properly initialize 
+th
+e Video Generator by first starting PLLA will cause the 
+cog to indefinitely hang when the WAITVID instruction is 
+execute
+d.  
+4.10.1. VCFG – Video Configuration Register 
+The Video Configuration Register contains the 
+configuration settings of the video generator and is shown 
+in Table 7. 
+In
+ Propeller Assembly, the VMode through AuralSub 
+fields can conveniently be written using the MOVI 
+in
+struction, the VGroup field can be written with the MOVD 
+in
+struction, and the VPins field can be written with the 
+MOVS instruction. 
+ 
+Table 7: VCFG Register 
+ 
+31 30..29 28 27 26 25..23 22..12 11..9 8 7..0 
+- VMode CMode Chroma1 Chroma0 AuralSub - VGroup - VPins  
+--- PAGE 12 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 12 of 36  Rev 1.4   6/14/2011 
+The 2-bit VMode (video mode) field selects the type and 
+orientation of video output, if any, according to Table 8. 
+ 
+Table 8: The Video Mode Field 
+VMode Video Mode 
+00 Disabled, no video generated. 
+01 VGA mode; 8-bit parallel output on VPins 7:0 
+10 Composite Mode 1; broadcast on VPins 7:4, baseband 
+on VPins 3:0 
+11 Composite Mode 2; baseband on VPins 7:4, broadcast 
+on VPins 3:0  
+ 
+The CMode (color mode) field selects two or four color 
+mode.  0 = two-color mode; pixel data is 32 bits by 1 bit 
+and only colors 0 or 1 are used.  1 = four-color mode; 
+pixel data is 16 bits by 2 bits, and colors 0 through 3 are 
+used. 
+The Chroma1 (broadcast chroma ) bit enables or disables 
+chroma (color) on the broadcast signal.  0 = disabled, 1 = 
+enabled. 
+The Chroma0 (baseband chroma) bit enables or disables 
+chroma (color) on the baseband signal.  0 = disabled, 1 = 
+enabled. 
+The AuralSub (aural sub-carrier) field selects the source 
+of the FM aural (audio) sub-carrier frequency to be 
+modulated on.  The source is the PLLA of one of the 
+cogs, identified by AuralSub’s value. This audio must 
+already be modulated onto the 4.5 MHz sub-carrier by the 
+source PLLA. 
+ 
+Table 9: The AuralSub Field 
+AuralSub Sub-Carrier Frequency Source 
+000 Cog 0’s PLLA 
+001 Cog 1’s PLLA 
+010 Cog 2’s PLLA 
+011 Cog 3’s PLLA 
+100 Cog 4’s PLLA 
+101 Cog 5’s PLLA 
+110 Cog 6’s PLLA 
+111 Cog 7’s PLLA  
+ 
+The VGroup (video output pin group) field selects which 
+group of 8 I/O pins to output video on. 
+ 
+  Table 10: The VGroup Field 
+VGroup Pin Group 
+000 Group 0: P7..P0 
+001 Group 1: P15..P8 
+010 Group 2: P23..P16 
+011 Group 3: P31..P24 
+100-111 <reserved for future use>  
+The VPins (video output pins) field is a mask applied to 
+the pins of VGroup that indicates which pins to output 
+video signals on. 
+ 
+  Table 11: The VPins Field 
+VPins Effect 
+00001111 Drive Video on lower 4 pins only; composite 
+11110000 Drive Video on upper 4 pins only; composite 
+11111111 Drive video on all 8 pins; VGA 
+XXXXXXXX Any value is valid for this field; the above 
+values are the most common.  
+ 
+4.10.2. VSCL – Video Scale Register 
+The Video Scale Register sets the rate at which video data 
+is generated, and is shown in Table 12.  
+ 
+  Table 12: VSCL Register  
+VSCL Bits 
+31..20 19..12 11..0 
+− PixelClocks FrameClocks  
+ 
+The 8-bit PixelClocks field indicates the number of clocks 
+per pixel; the number of clocks that should elapse before 
+each pixel is shifted out by the video generator module.  
+These clocks are the PLLA clocks, not the System Clock.  
+A value of 0 for this field is interpreted as 256. 
+The 12-bit FrameClocks field indicates the number of 
+clocks per frame; the number of clocks that will elapse 
+before each frame is shifted out by the video generator 
+module.  These clocks are the PLLA clocks, not the 
+System Clock.  A frame is one long of pixel data 
+(delivered via the WAITVID command).  Since the pixel 
+d
+ata is either 16 bits by 2 bits, or 32 bits by 1 bit (meaning 
+16 pixels wide with 4 colors, or 32 pixels wide with 2 
+colors, respectively), the Fram eClocks is typically 16 or 
+32 times that of the PixelClocks value. A value of 0 for 
+this field is interpreted as 4096. 
+4.10.3. WAITVID Command/Instruction 
+The WAITVID instruction is the delivery mechanism for 
+dat
+a to the cog’s Video Generator hardware. Since the 
+Video Generator works independently from the cog itself, 
+the two must synchronize each time data is needed for the 
+display device. The frequency at which this occurs is 
+dictated by the frequency of PLLA and the Video Scale 
+Register. The cog must have new data available before the 
+moment the Video Generator needs it. The cog uses 
+WAITVID to wait for the right time and then “hand off” 
+th
+is data to the Video Generator.  
+Two longs of data are passed to the Video Generator by 
+with the syntax WAITVID Colors, Pixels.  
+The Co
+lors parameter is a 32-bit value containing either 
+four 8-bit color values (for 4 color mode) or two 8-bit 
+color values in the lower 16 bits (for 2 color mode). For 
+--- PAGE 13 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 13 of 36  Rev 1.4   6/14/2011 
+VGA mode, each 8-bit color value is written to the pins 
+specified by the VGroup and VPins field. For VGA 
+typically the 8 bits are grouped into 2 bits per primary 
+color and Horizontal and Ver tical Sync control lines, but 
+this is up to the software and application of how these bits 
+are used. For composite video each 8-bit color value is 
+composed of 3 fields. Bits 0-2 are the luminance value of 
+the generated signal. Bit 3 is the modulation bit which 
+dictates whether the chroma information will be generated 
+and bits 4-7 indicate the phase angle of the chroma value. 
+When the modulation bit is set to 0, the chroma 
+information is ignored and only the luminance value is 
+output to pins. When the modulation bit is set to 1 the 
+luminance value is modulated ± 1 with a phase angle set 
+by bits 4-7. In order to achieve the full resolution of the 
+chroma value, PLLA should be set to 16 times the 
+modulation frequency (in composite video this is called 
+the color-burst frequency). Th e PLLB of the cog is used 
+to generate the broadcast frequency; whether this is 
+generated depends on if PLLB is running and the values 
+of VMode and VPins. 
+The Pixels parameter describes the pixel pattern to 
+display, either 16 pixels or 32 pixels depending on the 
+color depth configuration of the Video Generator. When 
+four-color mode is specified, Pixels is a 16x2 bit pattern 
+where each 2-bit pixel is an index into Colors on which 
+data pattern should be presented to the pins. When two-
+color mode is specified, Pixels is a 32x1 bit pattern where 
+each bit specifies which of the two color patterns in the 
+lower 16 bits of Colors should be output to the pins. The 
+Pixel data is shifted out least significant bits (LSB) first. 
+When the FrameClocks value is greater than 16 times the 
+PixelClocks value and 4-color mode is specified, the two 
+most significant bits are repeated until FrameClocks 
+PLLA cycles have occurred. When FrameClocks value is 
+greater than 32 times PixelClocks value and 2-color mode 
+is specified, the most significant bit is repeated until 
+FrameClocks PLLA cycles have occurred. When 
+FrameClocks cycles occur and the cog is not in a WAITVID 
+in
+struction, whatever data is on the source and destination 
+busses at the time will be fetched and used. So it is 
+important to be in a WAITVID instruction before this 
+occurs. 
+Whi
+le the Video Generator was created to display video 
+signals, its potential applications are much more diverse.  
+The Composite Video mode can be used to generate 
+phase-shift keying communications of a granularity of 16 
+or less and the VGA mode can be used to generate any bit 
+pattern with a fully settable and predictable rate. 
+Figure 6  is a block diagram of how the VGA mode is 
+orga
+nized. The two inverted triangles are the load 
+mechanism for Pixels and Colors;  n is 1 or 2 bits 
+depending on the value of CMode. The inverted trapezoid 
+is a 4-way 8-bit multiplexer that chooses which byte of 
+Colors to output. When in composite video mode the 
+Modulator transforms the byte into the luminance and 
+chroma signal and outputs the broadcast signal. VGroup 
+steers the 8 bits to a block of output pins and outputs to 
+those pins which are set to 1 in VPins; this combined 
+functionality is represented by the hexagon. 
+ 
+Figure 6: Video Generator 
+VGroup 
+Shift by n 
+Colors
+x
+8
+VPins 
+n 
+nPixels
+Source
+PLLA/PixelClocks 
+PLLA/FrameClocks 
+3 2 1 0
+Destination
+Modulator
+--- PAGE 14 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 14 of 36  Rev 1.4   6/14/2011 
+4.11. CLK Register 
+The CLK register is the System Clock configuration 
+control; it determines the source and characteristics of the 
+System Clock.  It configures the RC Oscillator, Clock 
+PLL, Crystal Oscillator, and Clock Selector circuits (See 
+the Block Diagram, page 1). It is configured at compile 
+ti
+me by the _CLKMODE declaration and is writable at run 
+ti
+me through the CLKSET command.  Whenever the CLK 
+reg
+ister is written, a global delay of ~75 µs occurs as the 
+clock source transitions. 
+Whenever this register is changed, a copy of the value 
+written should be placed in the Clock Mode value 
+location (which is BYTE[4] in Main RAM) and the 
+resulting master clock frequency should be written to the 
+Clock Frequency value location (which is LONG[0] in 
+Main RAM) so that objects which reference this data will 
+have current information for their timing calculations. 
+Use Spin's CLKSET command when possible (see sections 
+6.3 and 6.4) since it automatically updates all the above-
+m
+entioned locations with the proper information. 
+ 
+Table 13: Valid Clock Modes 
+ Valid Expression CLK Reg. Value Valid Expression CLK Reg. Value
+RCFAST   0_0_0_00_000 
+RCSLOW   0_0_0_00_001 
+XINPUT   0_0_1_00_010 
+XTAL1
+ + PLL1X 0_1_1_01_011
+XTAL1 + PLL2X 0_1_1_01_100
+XTAL1 + PLL4X 0_1_1_01_101
+XTAL1 + PLL8X 0_1_1_01_110
+XTAL1 + PLL16X 0_1_1_01_111
+XTAL1   0_0_1_01_010 
+XTAL2   0_0_1_10_010 
+XTAL3   0_0_1_11_010 
+XTAL2 + PLL1X 0_1_1_10_011
+XTAL2 + PLL2X 0_1_1_10_100
+XTAL2 + PLL4X 0_1_1_10_101
+XTAL2 + PLL8X 0_1_1_10_110
+XTAL2 + PLL16X 0_1_1_10_111
+XINPUT + PLL1X 0_1_1_00_011 
+XINPUT + PLL2X 0_1_1_00_100 
+XINPUT + PLL4X 0_1_1_00_101 
+XINPUT + PLL8X 0_1_1_00_110 
+XINPUT + PLL16X 0_1_1_00_111 
+XTAL3 + PLL1X 0_1_1_11_011
+XTAL3 + PLL2X 0_1_1_11_100
+XTAL3 + PLL4X 0_1_1_11_101
+XTAL3 + PLL8X 0_1_1_11_110
+XTAL3 + PLL16X 0_1_1_11_111
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Table 14: CLK Register Fields 
+Bit 7 6 5 4 3 2 1 0 
+Name RESET PLLENA OSCENA OSCM1 OSCM2 CLKSEL2 CLKSEL1 CLKSEL0 
+RESET Effect 
+0 Always write ‘0’ here unless you intend to reset the chip. 
+1 Same as a hardware reset – reboots the chip. 
+PLLENA Effect 
+0 Disables the PLL circuit. 
+1 
+Enables the PLL circuit. The PLL internally multiplies the XIN pin frequency by 16. OSCENA must be ‘1’ to propagate the 
+XIN signal to the PLL. The PLL’s internal frequency must be kept within 64 MHz to 128 MHz – this translates to an XIN 
+frequency range of 4 MHz to 8 MHz. Allow 100 µs for the PLL to stabilize before switching to one of its outputs via the 
+CLKSEL bits. Once the OSC and PLL circuits are enabled and st abilized, you can switch freely among all clock sources by 
+changing the CLKSEL bits. 
+OSCENA Effect 
+0 Disables the OSC circuit 
+1 
+Enables the OSC circuit so that a clock signal can be input to XIN, or so that  XIN and XOUT can function together as a 
+feedback oscillator. The OSCM bits select the operating mode of the OSC circuit. Note that no external resistors or 
+capacitors are required for crystals and resonators. Allow a crystal or resonator 10 ms to st abilize before switching to an 
+OSC or PLL output via the CLKSEL bits. When enabling the OSC circuit, the PLL may be enabled at the same time so that 
+they can share the stabilization period. 
+OSCM1 OSCM2 XOUT Resistance XIN and XOUT Capacitance Frequency Range 
+0 0 Infinite    6 pF (pad only) DC to 80 MHz Input 
+0 1 2000 Ω 36 pF 4 MHz to 16 MHz Crystal/Resonator 
+1 0 1000 Ω 26 pF 8 MHz to 32 MHz Crystal/Resonator 
+1 1 500 Ω 16 pF 20 MHz to 60 MHz Crystal/Resonator 
+CLKSEL2 CLKSEL1 CLKSEL0 Master Clock Source Notes 
+0 0 0 ~12 MHz Internal No external parts (8 to 20 MHz) 
+0 0 1 ~20 kHz Internal No external parts, very low power (13-33 kHz)
+0 1 0 XIN OSC OSCENA must be ‘1’ 
+0 1 1 XIN × 1 OSC+PLL  OSCENA and PLLENA must be ‘1’ 
+1 0 0 XIN × 2 OSC+PLL OSCENA and PLLENA must be ‘1’ 
+1 0 1 XIN × 4 OSC+PLL OSCENA and PLLENA must be ‘1’ 
+1 1 0 XIN × 8 OSC+PLL OSCENA and PLLENA must be ‘1’ 
+1 1 1 XIN × 16 OSC+PLL OSCENA and PLLENA must be ‘1’  
+--- PAGE 15 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 15 of 36  Rev 1.4   6/14/2011 
+5.0 MEMORY ORGANIZATION
+5.1. Main Memory 
+The Main Memory is a block of 64 K bytes (16 K longs) 
+that is accessible by all cogs as a mutually-exclusive 
+resource through the Hub.  It consists of 32 KB of RAM 
+and 32 KB of ROM. Main memory is byte, word and long 
+addressable. Words and longs are stored in little endian 
+format; least-significant byte first.  
+5.1.1. Main RAM 
+The 32 KB of Main RAM is general purpose and is the 
+destination of a Propeller Application either downloaded 
+from a host or from the external 32 KB EEPROM.  
+5.1.2. Main ROM 
+The 32 KB of Main ROM contains all the code and data 
+resources vital to the Propelle r chip’s function: character 
+definitions, log, anti-log and sine tables, and the Boot 
+Loader and Spin Interpreter.  
+5.1.3. Character Definitions 
+The first half of ROM is dedicated to a set of 256 
+character definitions. Each character definition is 16 
+pixels wide by 32 pixels tall. These character definitions 
+can be used for video generation, graphical LCD's, 
+printing, etc.  
+The character set is based on a North American / Western 
+European layout, with many specialized characters added 
+and inserted.  There are connecting waveform and 
+schematic building-block ch aracters, Greek characters 
+commonly used in electronics, and several arrows and 
+bullets. (A corresponding Parallax True-Type Font is 
+installed with and used by the Propeller Tool software, 
+and is available to other Windows applications.) 
+The character definitions are numbered 0 to 255 from left-
+to-right, then top-to-bottom, per Figure 7 below. They are 
+ar
+ranged as follows: Each pair of adjacent even-odd 
+characters is merged together to form 32 longs. The first 
+character pair is located in $8000-$807F. The second pair 
+occupies $8080-$80FF, and so on, until the last pair fills 
+$BF80-$BFFF.  
+ 
+ 
+Figure 7: Propeller Font Character Set 
+ 
+--- PAGE 16 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 16 of 36  Rev 1.4   6/14/2011 
+ 
+Figure 8  
+Propeller Character 
+Interleaving 
+As shown in Figure 8 , The character pairs are merged 
+row-by-row such that each character'
+s 16 horizontal pixels  
+are spaced apart and interleave d with their neighbors' so 
+that the even character takes bits 0, 2, 4, ...30, and the odd 
+character takes bits 1, 3, 5, ...31. The leftmost pixels are in 
+the lowest bits, while the rightmost pixels are in the 
+highest bits. This forms a long for each row of pixels in 
+the character pair. 32 such longs, building from top row 
+down to bottom, make up the complete merged-pair 
+definition. The definitions are encoded in this manner so 
+that a cog’s video hardware can handle the merged longs 
+directly, using color selection to display either the even or 
+the odd character. 
+Some character codes have inescapable meanings, such as 
+9 for Tab, 10 for Line Feed, and 13 for Carriage Return. 
+These character codes invoke actions and do not equate to 
+static character definitions. For this reason, their character 
+definitions have been used for special four-color 
+characters. These four-color characters are used for 
+drawing 3-D box edges at run-time and are implemented 
+as 16 x 16 pixel cells, as opposed to the normal 16 x 32 
+pixel cells. They occupy even-odd character pairs 0-1, 8-
+9, 10-11, and 12-13. 
+5.1.4. Math Function Tables 
+Base-2 Log and Anti-Log tables, each with 2048 unsigned 
+words, facilitate converting values to and from exponent 
+form to facilitate some operations; see the Propeller 
+Manual for access instructions.  Also, a sine table 
+provides 2049 unsigned 16-bit sine samples spanning 0° 
+to 90° inclusively (0.0439° resolution). 
+5.2. Cog RAM 
+As stated in Section 4.3, the Cog RAM is used for 
+executa
+ble code, data, and variables, and the last 16 
+locations serve as interfaces to the System Counter, I/O 
+pins, and local cog peripherals (see Table 15). Cog RAM 
+is lo
+ng-addressable only.  
+When a cog is booted up, locations 0 ($000) through 495 
+($1EF) are loaded sequentially from Main RAM / ROM 
+and its special purpose locations, 496 ($1F0) through 511 
+($1FF), are cleared to zero.  Each Special Purpose register 
+may be accessed via its physical address, its predefined 
+name, or indirectly in Spin via a register array variable 
+SPR with an index of 0 to 15, the last four bits of the 
+register's address. 
+ 
+Table 15: Cog RAM Special Purpose Registers 
+Cog RAM Map Address Name Type Description 
+$1F0 PAR Read- Only
+1
+ Boot Parameter 
+$1F1 CNT Read-Only
+1
+ System Counter 
+$1F2 INA Read-Only
+1
+  Input States for P31 - P0 
+$1F3 INB Read-Only
+1
+ Input States for P63- P32
+3
+ 
+$1F4 OUTA Read/Write Output States for P31 - P0 
+$1F5 OUTB Read/Write Output States for P63 – P32
+3
+ 
+$1F6 DIRA Read/Write Direction States for P31 - P0 
+$1F7 DIRB Read/Write Direction States for P63 - P32
+3
+ 
+$1F8 CTRA Read/Write Counter A Control 
+$1F9 CTRB Read/Write Counter B Control 
+$1FA FRQA Read/Write Counter A Frequency 
+$1FB FRQB Read/Write Counter B Frequency 
+$1FC PHSA Read/Write
+2
+ Counter A Phase: 
+$1FD PHSB Read/Write
+2
+ Counter B Phase 
+$1FE VCFG Read/Write Video Configuration 
+ 
+ 
+$1FF VSCL Read/Write Video Scale 
+ 
+Note 1: Only accessible as a source register (i.e. MOV Dest, Source).  
+Note 2
+: Only readable as a Source Register (i.e. MOV Dest, Source); r ead-modify-write not possible as a Destination Register.   
+Note 3: Reserved for future use. 
+--- PAGE 17 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 17 of 36  Rev 1.4   6/14/2011 
+6.0 PROGRAMMING LANGUAGES 
+The Propeller chip is programmed using two languages design ed specifically for it: 1) Spin, a high-level object-based 
+language, and 2) Propeller Assembly, a low-level, highly-opt imized assembly language.  There are many hardware-based 
+commands in Propeller Assembly that have direct equivalents in the Spin language.   
+The Spin language is compiled by the Propeller Tool software into tokens that are interpreted at run time by the Propeller 
+chip’s built-in Spin Interpreter.  The Propeller Assembly language is assembled into pure machine code by the Propeller Tool 
+and is executed in its pure form at run time.   
+Propeller Objects can be written entirely in Spin or can use various  combinations of Spin and Propeller Assembly.  It is often 
+advantageous to write objects almost entirely in Propeller Assembly, but at least two lines of Spin code are required to launch 
+the final application. 
+6.1. Reserved Word List 
+All words listed are always reserved, whether programming in Spin or in Propeller Assembly.  As of Propeller Tool v1.05: 
+Table 16: Reserved Word List 
+_CLKFREQs 
+_CLKMODEs 
+_FREEs 
+_STACKs 
+_XINFREQs 
+ABORTs 
+ABSa 
+ABSNEGa 
+ADDa 
+ADDABSa 
+ADDSa 
+ADDSXa 
+ADDXa 
+ANDd 
+ANDNa 
+BYTEs 
+BYTEFILLs 
+BYTEMOVEs 
+CALLa 
+CASEs 
+CHIPVERs 
+CLKFREQs 
+CLKMODEs 
+CLKSETd 
+CMPa 
+CMPSa 
+CMPSUBa 
+CMPSXa 
+CMPXa 
+CNTd 
+COGIDd 
+COGINITd 
+COGNEWs 
+COGSTOPd 
+CONs 
+CONSTANTs 
+CTRAd 
+CTRBd 
+DATs 
+DIRAd 
+DIRBd# 
+DJNZa 
+ELSEs 
+ELSEIFs 
+ELSEIFNOTs 
+ENCa# 
+FALSEd 
+FILEs 
+FITa 
+FLOATs 
+FROMs 
+FRQAd 
+FRQBd 
+HUBOPa 
+IFs 
+IFNOTs 
+IF_Aa 
+IF_AEa 
+IF_ALWAYSa 
+IF_Ba 
+IF_BEa 
+IF_Ca 
+IF_C_AND_NZa 
+IF_C_AND_Za 
+IF_C_EQ_Za 
+IF_C_NE_Za 
+IF_C_OR_NZa 
+I
+F_C_OR_Za 
+IF_Ea 
+IF_NCa 
+IF_NC_AND_NZa 
+IF_NC_AND_Za 
+IF_NC_OR_NZa 
+IF_NC_OR_Za 
+IF_NEa 
+IF_NEVERa 
+IF_NZa 
+IF_NZ_AND_Ca 
+IF_NZ_AND_NCa 
+IF_NZ_OR_Ca 
+IF_NZ_OR_NCa 
+IF_Za 
+IF_Z_AND_Ca 
+IF_Z_AND_NCa 
+IF_Z_EQ_Ca 
+IF_Z_NE_Ca 
+IF_Z_OR_Ca 
+IF_Z_OR_NCa 
+INAd 
+INBd#  
+JMPa 
+JMPRETa 
+LOCKCLRd 
+LOCKNEWd 
+LOCKRETd 
+LOCKSETd 
+LONGs 
+LONGFILLs 
+LONGMOVEs 
+LOOKDOWNs 
+LOOKDOWNZs 
+LOOKUPs 
+LOOKUPZs 
+MAXa 
+MAXSa 
+MINa 
+MINSa 
+MOVa 
+MOVDa 
+MOVIa 
+MOVSa 
+MULa# 
+MULSa# 
+MUXCa 
+MUXNCa 
+MUXNZa 
+MUXZa 
+NEGa 
+NEGCa 
+NEGNCa 
+NEGNZa 
+NEGXd 
+NEGZa 
+NEXTs 
+NOPa 
+NOTs 
+NRa 
+OBJs 
+ONESa# 
+ORd 
+ORGa 
+OTHERs 
+OUTAd 
+OUTBd# 
+PARd 
+PHSAd 
+PHSBd 
+PId 
+PLL1Xs 
+PLL2Xs 
+PLL4Xs 
+PLL8Xs 
+PLL16Xs 
+POSXd 
+PRIs 
+PUBs 
+QUITs 
+RCFASTs 
+RCLa 
+RCRa 
+RCSLOWs 
+RDBYTEa 
+RDLONGa 
+RDWORDa 
+REBOOTs 
+REPEATs 
+RESa 
+RESULTs 
+RETa 
+RETURNs 
+REVa 
+ROLa 
+RORa 
+ROUNDs 
+SARa 
+SHLa 
+SHRa 
+SPRs 
+STEPs 
+STRCOMPs 
+STRINGs 
+STRSIZEs 
+SUBa 
+SUBABSa 
+SUBSa 
+SUBSXa  
+SUBXa 
+SUMCa 
+SUMNCa 
+SUMNZa 
+SUMZa 
+TESTa 
+TESTNa 
+TJNZa 
+TJZa 
+TOs 
+TRUEd  
+TRUNCs 
+UNTILs 
+VARs 
+VCFGd 
+VSCLd 
+WAITCNTd 
+WAITPEQd 
+WAITPNEd 
+WAITVIDd 
+WCa 
+WHILEs 
+WORDs 
+WORDFILLs 
+WORDMOVEs 
+WRa 
+WRBYTEa 
+WRLONGa 
+WRWORDa 
+WZa 
+XINPUTs 
+XORa 
+XTAL1s 
+XTAL2s 
+XTAL3s 
+a = Assembly element;  s = Spin element;  d = dual  (available in both languages); # = reserved for future use 
+6.1.1. Words Reserved for Future Use 
+ DIRB, INB, and OUTB: Reserved for future use with a possible 64 I/O pin model.  When used with the P8X32A, these 
+labels can be used to access Cog RAM at those locations for general-purpose use. 
+ ENC, MUL, MULS, ONES: Use with the current P8X32A architecture yields indeterminate results.  
+--- PAGE 18 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 18 of 36  Rev 1.4   6/14/2011 
+6.2. Math and Logic Operators 
+Table 17: Math and Logic Operators 
+Operator Constant 
+Expressions
+3
+ Level
+1
+ 
+Normal  Assign
+2
+  
+Integer Float 
+Is Unary Description 
+-- always    Pre-decrement (--X) or post-decrement (X--).  
+++ always    Pre-increment (++X) or post-increment (X++). 
+~ always    Sign-extend bit 7 (~X) or post-clear to 0 (X~). 
+~~ always    Sign-extend bit 15 (~~X) or post-set to -1 (X~~). 
+? always    Random number forward (?X) or reverse (X?). 
+@ never    Symbol address. 
+Highest 
+(0) 
+@@ never    Object address plus symbol. 
++ never    Positive (+X); unary form of Add. 
+- if solo    Negate (-X); unary form of Subtract. 
+^^ if solo    Square root. 
+|| if solo    Absolute value. 
+|< if solo    Bitwise: Decode 0 – 31 to long w/single-high-bit. 
+>| if solo    Bitwise: Encode long to 0 – 32; high-bit priority. 
+1 
+! if solo    Bitwise: NOT. 
+<- <-=    Bitwise: Rotate left. 
+-> ->=    Bitwise: Rotate right. 
+<< <<=    Bitwise: Shift left. 
+>> >>=    Bitwise: Shift right. 
+~> ~>=    Shift arithmetic right. 
+2 
+>< ><=    Bitwise: Reverse. 
+3 & &=    Bitwise: AND. 
+| |=    Bitwise: OR. 
+4 
+^ ^=    Bitwise: XOR. 
+* *=    Multiply and return lower 32 bits (signed). 
+** **=    Multiply and return upper 32 bits (signed). 
+/ /=    Divide (signed). 
+5 
+// //=    Modulus (signed). 
++ +=    Add. 
+6 
+- -=    Subtract. 
+#> #>=    Limit minimum (signed). 
+7 
+<# <#=    Limit maximum (signed). 
+< <=    Boolean: Is less than (signed). 
+> >=    Boolean: Is greater than (signed). 
+<> <>=    Boolean: Is not equal. 
+== ===    Boolean: Is equal. 
+=< =<=    Boolean: Is equal or less (signed). 
+8 
+=> =>=    Boolean: Is equal or greater (signed). 
+9 NOT if solo    Boolean: NOT (promotes non-0 to -1). 
+10 AND AND=    Boolean: AND (promotes non-0 to -1). 
+11 OR OR=    Boolean: OR (promotes non-0 to -1). 
+= always n/a
+3
+ n/a
+3
+  Constant assignment (CON blocks).  Lowest 
+(12) := always n/a
+3
+ n/a
+3
+  Variable assignment (PUB/PRI blocks).  
+1 Precedence level: higher-level operators evaluate before lower-level operators.  Operators in same level are commutable; evaluation order does not matter. 
+2 Assignment forms of binary (non-unary) operators are in the lowest precedence (level 12). 
+3 Assignment forms of operators are not allowed in constant expressions. 
+--- PAGE 19 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 19 of 36  Rev 1.4   6/14/2011 
+6.3. Spin Language Summary Table 
+Spin Command Returns 
+Value Description 
+ABORT Value  Ex it from PUB/PRI method using abort status wit h optional return value. 
+BYTE Symbol [Count]  Declare byte-sized symbol in VAR block. 
+Symbol BYTE Dat a [Count]   Declare byte-aligned and/or byte-sized data in DAT block. 
+BYTE [BaseAddress] [Offset]  Read/ write byte of main memory. 
+Symbol.BYTE [Offset]  Read/ write byte-sized component of word/long-sized variable. 
+BYTEFILL (StartAddress, Value, Count)  Fill by tes of main memory with a value. 
+BYTEMOVE (DestAddress, SrcAddress, Count)  Copy byt es from one region to another in main memory. 
+CASE CaseExpression 
+  MatchExpression :  
+     Statement(s) 
+ MatchExpression :  
+     Stat ment(s)  e
+ OTHER : 
+     Statement(s) 
+ 
+Compare expression against matching expression(s), execute code block 
+if match found. 
+ 
+MatchExpression can contain a single expr ession or multiple comma-
+delimited expressions.  Expressions can be a single value (ex: 10) or a 
+range of values (ex: 10..15). 
+CHIPVER  Ver sion number of the Propeller chip (Byte at $FFFF) 
+CLKFREQ  Current  System Clock frequency, in Hz (Long at $0000) 
+CLKMODE  Current  clock mode setting (Byte at $0004) 
+CLKSET (Mode, Frequency)  Set both clock mode and System Clock frequency at run time. 
+CNT  Current  32-bit System Counter value. 
+COGID  Current  cog’s ID number; 0-7. 
+COGINIT (CogID, SpinMethod (ParameterList), StackPointer)  St art or restart cog by ID to run Spin code. 
+COGINIT (CogID, AsmAddress, Parameter)  Sta rt or restart cog by ID to run Propeller Assembly code. 
+COGNEW (SpinMethod (ParameterList), StackPointer)  St art new cog for Spin code and get cog ID; 0-7 = succeeded, -1 = failed. 
+COGNEW (AsmAddress, Parameter)  St art new cog for Propeller Assembly code and get cog ID; 0-7 = 
+succeeded, -1 = failed. 
+COGSTOP (CogID)  Stop cog by its ID. 
+CON 
+  Symbol = Expr ((,┆  )) Symbol = Expr…   Declare symbolic, global constants. 
+CON  
+ #Expr ((,┆  )) Symbol [Offset]  ((,┆  )) Symbol [Offset] …   Declare global enumerations (incrementing symbolic constants). 
+C
+  Symbol 
+ON 
+[Offset]  ((,┆  )) Symbol [Offset] …   Declare global enumerations (incrementing symbolic constants). 
+CONSTANT (ConstantExpression)  Declare in-line const ant expression to be completely resolved at compile 
+time. 
+CTRA  Count er A Control register.   
+CTRB  Count er B Control register. 
+DAT  
+  Symbol Alignment Size Data [Count] ,Size Data  [Count]…  Declare table of data, aligned and sized as specified. 
+DAT 
+  Symbol Condition Instruction Effect(s)  Denote Propeller Assembly instruction. 
+DIRA [Pin(s)]  Direct ion register for 32-bit port A. Default is 0 (input) upon cog startup. 
+FILE "FileName"  I mport external file as data in DAT block. 
+FLOAT (IntegerConstant)  Convert  integer constant expression to  compile-time floating-point value in 
+any block. 
+FRQA  Count er A Frequency register. 
+FRQB  Count er B Frequency register. 
+--- PAGE 20 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 20 of 36  Rev 1.4   6/14/2011 
+Spin Command Returns 
+Value Description 
+((IF ┆ IFNOT)) Condition(s) 
+ IfStatement(s) 
+ELSEIF Condition(s) 
+ ElseIfStatement(s)…  
+ELSEIFNOT Condition(s) 
+ ElseIfStatement(s)…  
+ELSE 
+ ElseStatement(s) 
+ 
+Test condition(s) and execute block of code if valid. 
+ 
+IF and ELSEIF each test for TRUE.  IFNOT and ELSEIFNOT each test for 
+FALSE. 
+INA [Pin(s)]  I nput register for 32-bit ports A. 
+LOCKCLR (ID)  Clear semaphore t o false and get its previous state; TRUE or FALSE. 
+LOCKNEW  Check out  new semaphore and get its ID; 0-7, or -1 if none were available.
+LOCKRET (ID)  Ret urn semaphore back to semaphore pool, releasing it for future 
+LOCKNEW requests. 
+LOCKSET (ID)  Set  semaphore to true and get its previous state; TRUE or FALSE. 
+LONG Symbol [Count]  Declare long-sized symbol in VAR block. 
+Symbol LONG Data [Count]  Declare long-aligned and/or long-sized data in DAT block. 
+LONG [BaseAddress] [Offset]  Read/ write long of main memory. 
+LONGFILL (StartAddress, Value, Count)  Fill longs of main memory with a value. 
+LONGMOVE (DestAddress, SrcAddress, Count)  Copy longs f rom one region to another in main memory. 
+LOOKDOWN (Value:ExpressionList)  Get  the one-based index of a value in a list. 
+LOOKDOWNZ (Value:ExpressionList)  Get  the zero-based index of a value in a list. 
+LOOKUP (Index:ExpressionList)  Get  value from a one-based index position of a list. 
+LOOKUPZ (Index:ExpressionList)  Get  value from a zero-based index position of a list. 
+NEXT  Skip remaining statements of REPEAT loop and continue with the next 
+loop it
+eration. 
+OBJ 
+  Symbol 
+[Count]:"Object"   Symbol [Count]: "Object"…   Declare symbol object references. 
+OUTA [Pin(s)]  Out put register for 32-bi t port A. Default is 0 (ground) upon cog startup. 
+PAR  Cog Boot  Parameter register. 
+PHSA  Count er A Phase Lock Loop (PLL) register. 
+PHSB  Count er B Phase Lock Loop (PLL) register. 
+PRI Name (Par ,Par… ) :RVal | LVar [Cnt] ,LVar [Cnt]…
+  SourceCodeStatements  Declare private method wi th optional parameters, return value and local 
+variables. 
+PUB Name (Par ,Par… ) :RVal | LVar [Cnt] ,LVar [Cnt]…
+  SourceCodeStatements  Declare public method with optional par ameters, return value and local 
+variables. 
+QUIT  Exit from REPEAT loop immediately. 
+REBOOT  Reset the Propeller chip. 
+REPEAT Count  
+ Statement(s)  Execute code block repetitively, either infinitely, or for a finite number of 
+iterations. 
+REPEAT Variable FROM Start TO Finish STEP Delta 
+ Statement(s)  Execute code block repetitively, for finite, counted iterations. 
+REPEAT ((UNTIL┆ WHILE)) Condition(s) 
+ Statement(s)  Execute code block repetitively, zero-to-many conditional iterations. 
+REPEAT 
+ Statement(s) 
+((UNTIL┆ WHILE)) Condition(s) 
+ Execute code block repetitively, one-to-many conditional iterations. 
+RESULT  Ret urn value variable for PUB/PRI methods. 
+RETURN Value  Ex it from PUB/PRI method with optional return Value. 
+ROUND (FloatConstant)  Round f loating-point constant to the nearest integer at compile-time, in any 
+block. 
+SPR [Index]  Special Purpose Re gister array. 
+STRCOMP (StringAddress1, StringAddress2)  Compare t wo strings for equality. 
+STRING (StringExpression)  Declare in-line string  constant and get its address. 
+--- PAGE 21 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 21 of 36  Rev 1.4   6/14/2011 
+Spin Command Returns 
+Value Description 
+STRSIZE (StringAddress)  Get  size, in bytes, of zero-terminate string. 
+TRUNC (FloatConstant)  Remove f ractional portion from floating-point constant at compile-time, in 
+any block. 
+VAR 
+  Size Symbol [Count] ((,┆  Size )) Symbol [Count]…   Declare symbolic global variables. 
+VCFG  Video Conf iguration register. 
+VSCL  Video Scale regist er. 
+WAITCNT (Value)  Pause cog’s ex ecution temporarily. 
+WAITPEQ (State, Mask, Port)  Pause cog’s ex ecution until I/O pin(s) match designated state(s). 
+WAITPNE (State, Mask, Port)  Pause cog’s ex ecution until I/O pin(s) do not match designated state(s). 
+WAITVID (Colors, Pixels)  Pause cog’s ex ecution until its Video Generator is available for pixel data. 
+WORD Symbol [Count]  Declare word-sized symbol in VAR block. 
+Symbol WORD Data [Count]  Declare word-aligned and/or word-sized data in DAT block. 
+WORD [BaseAddress] [Offset]  Read/ write word of main memory. 
+Symbol.WORD [Offset]  Read/ write word-sized component of long-sized variable. 
+WORDFILL (StartAddress, Value, Count)  Fill words  of main memory with a value. 
+WORDMOVE (DestAddress, SrcAddress, Count)  Copy words f rom one region to another in main memory. 
+6.3.1. Constants 
+Constants (pre-defined)  
+Constant1 Description 
+_CLKFREQ Settable in Top Object File to specify System Clock frequency. 
+_CLKMODE Settable in Top Object File to specify application’s clock mode. 
+_XINFREQ Settable in Top Object File to specify external crystal frequency. 
+_FREE Settable in Top Object File to specify application’s free space. 
+_STACK Settable in Top Object File to specify application’s stack space. 
+TRUE Logical true: -1 ($FFFFFFFF) 
+FALSE Logical false: 0 ($00000000) 
+POSX Max. positive integer: 2,147,483,647 ($7FFFFFFF) 
+NEGX Max. negative integer: -2,147,483,648 ($80000000) 
+PI Floating-point PI: ≈ 3.141593 ($40490FDB) 
+RCFAST Internal fast oscillator: $00000001 (%00000000001) 
+RCSLOW Internal slow oscillator: $00000002 (%00000000010) 
+XINPUT External clock/oscillator: $00000004 (%00000000100) 
+XTAL1 External low-speed crystal: $00000008 (%00000001000) 
+XTAL2 External medium-speed crystal: $00000010 (%00000010000) 
+XTAL3 External high-speed crystal: $00000020 (%00000100000) 
+PLL1X External frequency times 1: $00000040 (%00001000000) 
+PLL2X External frequency times 2: $00000080 (%00010000000) 
+PLL4X External frequency times 4: $00000100 (%00100000000) 
+PLL8X External frequency times 8: $00000200 (%01000000000) 
+PLL16X External frequency times 16: $00000400 (%10000000000) 
+1 “Settable” constants are defined in Top Object File’s CON block.  See Valid Clock Modes for _CLKMODE.  Other settable constants use whole numbers. 
+ 
+--- PAGE 22 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 22 of 36  Rev 1.4   6/14/2011 
+6.4. Propeller Assembly Instruction Table 
+The Propeller Assembly Instruction Table lists the instruction’s 32-bit opcode, outputs and number of clock cycles.  The 
+opcode consists of the instruction bits ( iiiiii), the “effect” status for the Z flag, C flag, result and indirect/immediate status 
+(zcri), the conditional execution bits ( cccc), and the destination and source bits ( ddddddddd and sssssssss).  The meaning of the 
+Z and C flags, if any, is shown in the Z Result and C Result fields; indicating the meaning of a 1 in those flags.  The Result field 
+(R) shows the instruction’s default behavior for writing (1) or not writing (0) the instruction’s result value.  The Clocks field 
+shows the number of clocks the instruction requires for execution. 
+0 1 Zeros (0) and ones (1) mean binary 0 and 1. 
+i Lower case “i” denotes a bit that is affected by immediate status. 
+d s Lower case “d” and “s” indicate destination and source bits. 
+? Question marks denote bits that are dynamically set by the compiler. 
+--- Hyphens indicate items that are not applicable or not important. 
+.. Double-periods represent a range of contiguous values. 
+ 
+iiiiii zcri cccc ddddddddd sssssssss Instruction Description Z Result C Result R Clocks
+000000 000i 1111 ddddddddd sssssssss WRBYTE  D,S Write D[7..0] to main memory byte S[15..0] - - 0 8..23 *
+000000 001i 1111 ddddddddd sssssssss RDBYTE  D,S Read main memory byte S[15..0] into D (0-
+extended) Result = 0 - 1 8..23 *
+000001 000i 1111 ddddddddd sssssssss WRWORD  D,S Write D[15..0] to main memory word S[15..1] - - 0 8..23 *
+000001 001i 1111 ddddddddd sssssssss RDWORD  D,S Read main memory word S[15..1] into D (0- 
+extended) Result = 0 - 1 8..23 *
+000010 000i 1111 ddddddddd sssssssss WRLONG  D,S Write D to main memory long S[15..2] - - 0 8..23 *
+000010 001i 1111 ddddddddd sssssssss RDLONG  D,S Read main memory long S[15..2] into D Result = 0 - 1 8..23 *
+000011 000i 1111 ddddddddd sssssssss HUBOP   D,S Perform hub operation according to S Result = 0 - 0 8..23 *
+000011 0001 1111 ddddddddd ------000 CLKSET  D Set the global CLK register to D[7..0] - - 0 8..23 *
+000011 0011 1111 ddddddddd ------001 COGID   D Get this cog number (0..7) into D ID = 0 0 1 8..23 *
+000011 0001 1111 ddddddddd ------010 COGINIT D Initialize a cog according to D ID = 0 No cog free 0 8..23 *
+000011 0001 1111 ddddddddd ------011 COGSTOP D Stop cog number D[2..0] Stopped ID = 0 No Cog Free 0 8..23 *
+000011 0011 1111 ddddddddd ------100 LOCKNEW D Checkout a new LOCK number (0..7) into D ID = 0 No lock free 1 8..23 *
+000011 0001 1111 ddddddddd ------101 LOCKRET D Return lock number D[2..0] ID = 0 No lock free 0 8..23 *
+000011 0001 1111 ddddddddd ------110 LOCKSET D Set lock number D[2..0] ID = 0 Prior lock state 0 8..23 *
+000011 0001 1111 ddddddddd ------111 LOCKCLR D Clear lock number D[2..0] ID = 0 Prior lock state 0 8..23 *
+000100 001i 1111 ddddddddd sssssssss MUL     D,S Multiply unsigned D[15..0] by S[15..0] Result = 0 - 1 future 
+000101 001i 1111 ddddddddd sssssssss MULS    D,S Multiply signed D[15..0] by S[15..0] Result = 0 - 1 future 
+000110 001i 1111 ddddddddd sssssssss ENC     D,S Encode magnitude of S into D, result = 0..31 Result = 0 - 1 future 
+000111 001i 1111 ddddddddd sssssssss ONES    D,S Get number of 1's in S into D, result = 0..31 Result = 0 - 1 future 
+001000 001i 1111 ddddddddd sssssssss ROR     D,S Rotate D right by S[4..0] bits Result = 0 D[0] 1 4 
+001001 001i 1111 ddddddddd sssssssss ROL     D,S Rotate D left by S[4..0] bits Result = 0 D[31] 1 4 
+001010 001i 1111 ddddddddd sssssssss SHR     D,S Shift D right by S[4..0] bits, set new MSB to 0 Result = 0 D[0] 1 4 
+001011 001i 1111 ddddddddd sssssssss SHL     D,S Shift D left by S[4..0] bits, set new LSB to 0 Result = 0 D[31] 1 4 
+001100 001i 1111 ddddddddd sssssssss RCR     D,S Rotate carry right into D by S[4..0] bits Result = 0 D[0] 1 4 
+001101 001i 1111 ddddddddd sssssssss RCL     D,S Rotate carry left into D by S[4..0] bits Result = 0 D[31] 1 4 
+001110 001i 1111 ddddddddd sssssssss SAR     D,S Shift D arithmetically right by S[4..0] bits Result = 0 D[0] 1 4 
+001111 001i 1111 ddddddddd sssssssss REV     D,S Reverse 32–S[4..0] bottom bits in D and 0-
+extend Result = 0 D[0] 1 4 
+010000 001i 1111 ddddddddd sssssssss MINS    D,S Set D to S if signed (D < S) S = 0 Signed (D < S) 1 4 
+010001 001i 1111 ddddddddd sssssssss MAXS    D,S Set D to S if signed (D => S) S = 0 Signed (D < S) 1 4 
+010010 001i 1111 ddddddddd sssssssss MIN     D,S Set D to S if unsigned (D < S) S = 0 Unsigned (D < S) 1 4 
+010011 001i 1111 ddddddddd sssssssss MAX     D,S Set D to S if unsigned (D => S) S = 0 Unsigned (D < S) 1 4 
+010100 001i 1111 ddddddddd sssssssss MOVS    D,S Insert S[8..0] into D[8..0] Result = 0 - 1 4 
+010101 001i 1111 ddddddddd sssssssss MOVD    D,S Insert S[8..0] into D[17..9] Result = 0 - 1 4 
+010110 001i 1111 ddddddddd sssssssss MOVI    D,S Insert S[8..0] into D[31..23] Result = 0 - 1 4 
+010111 001i 1111 ddddddddd sssssssss JMPRET  D,S Insert PC+1 into D[8..0] and set PC to S[8..0] Result = 0 - 1 4 
+010111 000i 1111 --------- sssssssss JMP     S Set PC to S[8..0] Result = 0 - 0 4 
+--- PAGE 23 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 23 of 36  Rev 1.4   6/14/2011 
+iiiiii zcri cccc ddddddddd sssssssss Instruction Description Z Result C Result R Clocks
+010111 0011 1111 ????????? sssssssss CALL    #S Like JMPRET, but assembler handles details Result = 0 - 1 4 
+010111 0001 1111 --------- --------- RET Like JMP, but assembler handles details Result = 0 - 0 4 
+011000 000i 1111 ddddddddd sssssssss TEST    D,S AND S with D to affect flags only D = 0 Parity of Result 0 4 
+011001 000i 1111 ddddddddd sssssssss TESTN   D,S AND !S into D to affect flags only Result = 0 Parity of Result 0 4 
+011000 001i 1111 ddddddddd sssssssss AND     D,S AND S into D Result = 0 Parity of Result 1 4 
+011001 001i 1111 ddddddddd sssssssss ANDN    D,S AND !S into D Result = 0 Parity of Result 1 4 
+011010 001i 1111 ddddddddd sssssssss OR      D,S OR S into D Result = 0 Parity of Result 1 4 
+011011 001i 1111 ddddddddd sssssssss XOR     D,S XOR S into D Result = 0 Parity of Result 1 4 
+011100 001i 1111 ddddddddd sssssssss MUXC    D,S Copy C to bits in D using S as mask Result = 0 Parity of Result 1 4 
+011101 001i 1111 ddddddddd sssssssss MUXNC   D,S Copy !C to bits in D using S as mask Result = 0 Parity of Result 1 4 
+011110 001i 1111 ddddddddd sssssssss MUXZ    D,S Copy Z to bits in D using S as mask Result = 0 Parity of Result 1 4 
+011111 001i 1111 ddddddddd sssssssss MUXNZ   D,S Copy !Z to bits in D using S as mask Result = 0 Parity of Result 1 4 
+100000 001i 1111 ddddddddd sssssssss ADD     D,S Add S into D D + S = 0 Unsigned Carry 1 4 
+100001 001i 1111 ddddddddd sssssssss SUB     D,S Subtract S from D D - S = 0 Unsigned Borrow 1 4 
+100001 000i 1111 ddddddddd sssssssss CMP     D,S Compare D to S D = S Unsigned (D < S) 0 4 
+100010 001i 1111 ddddddddd sssssssss ADDABS  D,S Add absolute S into D D + |S| = 0 Unsigned Carry 1 1 4 
+100011 001i 1111 ddddddddd sssssssss SUBABS  D,S Subtract absolute S from D D - |S| = 0 Unsigned Borrow 2 1 4 
+100100 001i 1111 ddddddddd sssssssss SUMC    D,S Sum either –S if C or S if !C into D D ± S = 0 Signed Overflow 1 4 
+100101 001i 1111 ddddddddd sssssssss SUMNC   D,S Sum either S if C or –S if !C into D D ± S = 0 Signed Overflow 1 4 
+100110 001i 1111 ddddddddd sssssssss SUMZ    D,S Sum either –S if Z or S if !Z into D D ± S = 0 Signed Overflow 1 4 
+100111 001i 1111 ddddddddd sssssssss SUMNZ   D,S Sum either S if Z or –S if !Z into D D ± S = 0 Signed Overflow 1 4 
+101000 001i 1111 ddddddddd sssssssss MOV     D,S Set D to S Result = 0 S[31] 1 4 
+101001 001i 1111 ddddddddd sssssssss NEG     D,S Set D to –S Result = 0 S[31] 1 4 
+101010 001i 1111 ddddddddd sssssssss ABS     D,S Set D to absolute S Result = 0 S[31] 1 4 
+101011 001i 1111 ddddddddd sssssssss ABSNEG  D,S Set D to –absolute S Result = 0 S[31] 1 4 
+101100 001i 1111 ddddddddd sssssssss NEGC    D,S Set D to either –S if C or S if !C Result = 0 S[31] 1 4 
+101101 001i 1111 ddddddddd sssssssss NEGNC   D,S Set D to either S if C or –S if !C Result = 0 S[31] 1 4 
+101110 001i 1111 ddddddddd sssssssss NEGZ    D,S Set D to either –S if Z or S if !Z Result = 0 S[31] 1 4 
+101111 001i 1111 ddddddddd sssssssss NEGNZ   D,S Set D to either S if Z or –S if !Z Result = 0 S[31] 1 4 
+110000 000i 1111 ddddddddd sssssssss CMPS    D,S Compare-signed D to S D = S Signed (D < S) 0 4 
+110001 000i 1111 ddddddddd sssssssss CMPSX   D,S Compare-signed-extended D to S+C Z & (D = S+C) Signed (D < S+C) 0 4 
+110010 001i 1111 ddddddddd sssssssss ADDX    D,S Add-extended S+C into D Z & (D+S+C = 0) Unsigned Carry 1 4 
+110011 001i 1111 ddddddddd sssssssss SUBX    D,S Subtract-extended S+C from D Z & (D-(S+C)=0) Unsigned Borrow 1 4 
+110011 000i 1111 ddddddddd sssssssss CMPX    D,S Compare-extended D to S+C Z & (D = S+C) Signed (D < S+C) 0 4 
+110100 001i 1111 ddddddddd sssssssss ADDS    D,S Add-signed S into D D + S = 0 Signed Overflow 1 4 
+110101 001i 1111 ddddddddd sssssssss SUBS    D,S Subtract-signed S from D D - S = 0 Signed Overflow 1 4 
+110110 001i 1111 ddddddddd sssssssss ADDSX   D,S Add-signed-extended S+C into D Z & (D+S+C = 0) Signed Overflow 1 4 
+110111 001i 1111 ddddddddd sssssssss SUBSX   D,S Subtract-signed-extended S+C from D Z & (D-(S+C)=0) Signed Overflow 1 4 
+111000 001i 1111 ddddddddd sssssssss CMPSUB  D,S Subtract S from D if D => S D = S Unsigned (D => S) 1 4 
+111001 001i 1111 ddddddddd sssssssss DJNZ    D,S Dec D, jump if not zero to S (no jump = 8 
+clocks) Result = 0 Unsigned Borrow 1 4 or 8 
+111010 000i 1111 ddddddddd sssssssss TJNZ    D,S Test D, jump if not zero to S (no jump = 8 
+clocks) D = 0 0 0 4 or 8 
+111011 000i 1111 ddddddddd sssssssss TJZ     D,S Test D, jump if zero to S (no jump = 8 clocks) D = 0 0 0 4 or 8 
+111100 000i 1111 ddddddddd sssssssss WAITPEQ D,S Wait for pins equal - (INA & S) = D - - 0 6+ 
+111101 000i 1111 ddddddddd sssssssss WAITPNE D,S Wait for pins not equal - (INA & S) != D - - 0 6+ 
+111110 001i 1111 ddddddddd sssssssss WAITCNT D,S Wait for CNT = D, then add S into D - Unsigned Carry 1 6+ 
+111111 000i 1111 ddddddddd sssssssss WAITVID D,S Wait for video peripheral to grab D and S - - 0 4+3 
+------ ---- 0000 --------- --------- NOP No operation, just elapses 4 clocks - - - 4 
+ 
+* See , section  on page . Hub 4.4 7
+1. ADDABS C out: If S is negative, C = the inverse of unsigned bor row (for D-S).   
+2. SUBABS C out: If S is negative, C = the inverse of unsigned car ry (for D+S).   
+3. WAITVID consumes 4 clocks itself; however, complete data handoff requires 7 clocks (6 at some frequencies) between frames.  The 
+com
+bination of CTRA PLL frequency and VSCL FrameClocks must provide an effective 7 (or 6) system clocks. 
+--- PAGE 24 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+6.4.1. Assembly Conditions 
+Condition Instruction Executes 
+IF_ALWAYS  always 
+IF_NEVER  never 
+IF_E  if equal (Z) 
+IF_NE  if not equal (!Z) 
+IF_A  if above (!C & !Z) 
+IF_B  if below (C) 
+IF_AE  if above/equal (!C) 
+IF_BE  if below/equal (C | Z) 
+IF_C  if C set 
+IF_NC  if C clear 
+IF_Z  if Z set 
+IF_NZ  if Z clear 
+IF_C_EQ_Z  if C equal to Z 
+IF_C_NE_Z  if C not equal to Z 
+IF_C_AND_Z  if C set and Z set 
+IF_C_AND_NZ  if C set and Z clear 
+IF_NC_AND_Z  if C clear and Z set 
+IF_NC_AND_NZ  if C clear and Z clear 
+IF_C_OR_Z  if C set or Z set 
+IF_C_OR_NZ  if C set or Z clear 
+IF_NC_OR_Z  if C clear or Z set 
+IF_NC_OR_NZ  if C clear or Z clear 
+IF_Z_EQ_C  if Z equal to C 
+IF_Z_NE_C  if Z not equal to C 
+IF_Z_AND_C  if Z set and C set 
+IF_Z_AND_NC  if Z set and C clear 
+IF_NZ_AND_C  if Z clear and C set 
+IF_NZ_AND_NC  if Z clear and C clear 
+IF_Z_OR_C  if Z set or C set 
+IF_Z_OR_NC  if Z set or C clear 
+IF_NZ_OR_C  if Z clear or C set 
+IF_NZ_OR_NC  if Z clear or C clear 
+6.4.2. Assembly Directives 
+Directive Description 
+FIT Address Validate previous instr/data fit below an 
+address. 
+ORG Address Adjust compile-time cog address 
+pointer. 
+Symbol RES Count Reserve next long(s) for symbol. 
+6.4.3. Assembly Effects 
+Effect Results In 
+WC  C Flag modified 
+WZ Z Flag modified 
+WR Destination Register modified 
+NR Destination Register not modified 
+6.4.4. Assembly Operators 
+Propeller Assembly code can contain constant 
+expressions, which may use any operators that are 
+allowed in constant expressions.  The table (a subset of 
+Table 17 ) lists the operators allowed in Propeller 
+Assem
+bly. 
+Operator Description 
++ Add 
++ Positive (+X); unary form of Add 
+- Subtract 
+- Negate (-X); unary form of Subtract 
+* Multiply and return lower 32 bits (signed) 
+** Multiply and return upper 32 bits (signed) 
+/ Divide (signed) 
+// Modulus (signed) 
+#> Limit minimum (signed) 
+<# Limit maximum (signed) 
+^^ Square root; unary 
+|| Absolute value; unary 
+~> Shift arithmetic right 
+|< Bitwise: Decode value (0- 31) into single-high-bit 
+long; unary 
+>| Bitwise: Encode long into value (0 - 32) as high-
+bit priority; unary 
+<< Bitwise: Shift left 
+>> Bitwise: Shift right 
+<- Bitwise: Rotate left 
+-> Bitwise: Rotate right 
+>< Bitwise: Reverse 
+& Bitwise: AND 
+| Bitwise: OR 
+^ Bitwise: XOR 
+! Bitwise: NOT; unary 
+AND Boolean: AND (promotes non-0 to -1) 
+OR Boolean: OR (promotes non-0 to -1) 
+NOT Boolean: NOT (promotes non-0 to -1); unary 
+== Boolean: Is equal 
+<> Boolean: Is not equal 
+< Boolean: Is less than (signed) 
+> Boolean: Is greater than (signed) 
+=< Boolean: Is equal or less (signed) 
+=> Boolean: Is equal or greater (signed) 
+@ Symbol address; unary 
+ 
+  
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 24 of 36  Rev 1.4   6/14/2011 
+--- PAGE 25 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 25 of 36  Rev 1.4   6/14/2011 
+ 
+7.0 ELECTRICAL CHARACTERISTICS 
+7.1. Absolute Maximum Ratings 
+Stresses in excess of the absolute maximu m ratings can cause permanent damage to the device.  These are absolute stress 
+ratings only.  Functional operation of the device is not implied at these or any other conditions in excess of those given in t he 
+remainder of Section 0. Exposure to absolute maximum ratings for extended periods can adversely affect device reliability. 
+ 
+Table 18: Absolute Maximum Ratings 
+Ambient temperature under bias  -55 °C to +125 °C 
+Storage temperature -65 °C to +150 °C 
+Voltage on Vdd with respect to Vss -0.3 V to +4.0 V 
+Voltage on all other pins with respect to Vss
+* 
+-0.3 V to (Vdd + 0.3 V) 
+Total power dissipation 1 W 
+Max. current out of Vss pins 300 mA 
+Max. current into Vdd pins 300 mA 
+Max. DC current into an input pin with internal protection diode forward biased ±500 µA 
+Max. allowable current per I/O pin
+ 
+40 mA 
+ESD (Human Body Model) Supply pins 3 kV 
+ESD (Human Body Model) all non-supply pins 8 kV 
+*Note: I/O pin voltages with respect to Vss may be exceeded if internal protection diode forward bias current is not exceeded.  
+7.2. DC Characteristics 
+ (Operating temperature range: -55° C < Ta < +125° C unless otherwise noted) 
+ 
+Symbol Parameter Conditions Min Typ* Max Units 
+Vdd Supply Voltage  2.7 - 
+ 3.6 V 
+Vih, Vil   Logic High 
+  Logic Low  0.6 Vdd 
+Vss 
+ Vdd 
+0.3 Vdd 
+V 
+V 
+Iil Input Leakage Current Vin = Vdd or Vss -1.0  +1.0 µA 
+Voh Output High Voltage Ioh = 10 mA, Vdd = 3.3 V 2.85  
+  V 
+Vol Output Low Voltage Iol = 10 mA, Vdd = 3.3 V   0.4 V 
+IBO Brownout Detector Current   3.8  µA 
+I Quiescent Current RESn = 0V, BOEn = Vdd, P0-P31=0V  600  nA 
+*Note: Data in the Typical (“Typ”) column is T  = 25 °C unless otherwise stated. a
+ 
+7.3. AC Characteristics 
+(Operating temperature range: -55°C < Ta < +125°C unless otherwise noted) 
+ 
+Symbol Parameter Min Typ* Max Units Condition 
+Fosc External XI Frequency DC - 80 MHz  
+ 
+Oscillator Frequency DC 
+13 
+8 
+4 
+- 
+20 
+12 
+- 
+80 
+33 
+20 
+8 
+MHz 
+kHz 
+MHz 
+MHz 
+Direct drive (no PLL) 
+RCSLOW 
+RCFAST 
+Crystal using PLL 
+Cin Input Capacitance  6 - pF   
+*Note: Data in the Typical (“Typ”) column is T  = 25 °C unless otherwise stated. a
+--- PAGE 26 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 26 of 36  Rev 1.4   6/14/2011 
+8.0 CURRENT CONSUMPTION CHARACTERISTICS 
+8.1. Typical Current Consumption of 8 Cogs 
+This figure shows the typical current consumption of the Prop eller under various operating conditions duplicated across all 
+cogs.  Brown out circuitry and the Phase-Locked Loop were disabled for the duration of the test. Current consumption is 
+substantially constant over the operational temperature range. 
+ 
+ 
+ 
+2
+10
+3
+10
+4
+10
+5
+10
+6
+10
+7
+10
+8
+10
+-6
+10
+-5
+10
+-4
+10
+-3
+10
+-2
+10
+-1
+10
+0
+10
+Typical Current Consumption of 8 cogs vs. Operating Frequency (3.3V, Ta = 25°C)
+Frequency (Hz)
+Current (A)
+Spin Loops (REPEAT)
+Assembly Loops (JMP)
+WAIT(CNT/PEQ/PNE)
+Hub Only
+--- PAGE 27 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 27 of 36  Rev 1.4   6/14/2011 
+8.2. Typical Current of a Cog vs. Operating Frequency 
+This graph shows a cog’s typical current consumption under various conditions, in isolation of other sources of current within 
+the Propeller chip. 
+0 10 20 30 40 50 60 70 80 90 100
+0
+2
+4
+6
+8
+10
+12
+14
+Typical Current of a Cog vs. Operating Frequency (Vdd = 3.3 V, Ta = 25° C)
+Current (mA)
+Spin Loop (REPEAT)
+Assembly Loop (JMP)
+WAIT(CNT/PEQ/PNE)
+ 
+Frequency (MHz) 
+ 
+8.3. Typical PLL Current vs. VCO Frequency 
+This graph shows the typical amount of current consumed by a Phase-Locked Loop as a function of the frequency of the 
+Voltage Controlled Oscillator which is 16 times the frequency of the input clock. 
+ 
+20 40 60 80 100 120 140 160
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+1.0
+1.1
+1.2
+1.3
+1.4
+Typical PLL Current vs. VCO Frequency (Vdd = 3.3 V, Ta = 25° C)
+Frequency (MHz)
+Current (mA)
+ 
+--- PAGE 28 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 28 of 36  Rev 1.4   6/14/2011 
+8.4. Typical Crystal Drive Current 
+This graph  shows the current consumption of the crystal driver  over a range of crystal frequencies and crystal settings, all 
+data points above 25 MHz were obtained by using a resonator since the driver does not perform 3 rd harmonic overtone 
+driving required for crystals over 25 MHz. 
+ 
+0 5 10 15 20 25 30 35 40 45 50
+0.2
+0.4
+0.6
+0.8
+1.0
+1.2
+1.4
+Typical Crystal Drive Current (Vdd = 3.3 V, Ta = 25° C)
+Current (mA)
+xtal1
+xtal2
+xtal3
+ 
+Frequency (MHz) 
+ 
+8.5. Cog and I/O Pin Relationship 
+The figure below illustrates the physical relationship between the cogs and I/O pins. While there can be a 1 to 1.5 ns 
+propagation delay in output transitions between the shortest and longest paths, the purpose of the figure is to illustrate the 
+length of leads and their associated parasitic capacitance. Th is capacitance increases the amount of energy required to 
+transition a pin’s state and therefore increases the current draw for toggling a pin. So, the current consumed by Cog 7 
+toggling P0 at 20 MHz will be greater than Cog 0 toggling P7 at 20 MHz. The amount of current consumed by transitioning a 
+pin’s state is dependent on many factors including: temperature, frequency of transitions, external load, and internal load. As  
+mentioned, the internal load is dependent upon which cog and pin are used. Internal load current for room temperature 
+toggling of a pin at 20 MHz for a Propeller in a DIP package varies on the order of 300 µA.  
+cog 0 cog 1 cog 2 cog 3 cog 4 cog 5 cog 6 cog 7P7
+P8
+P6
+P5
+P10
+P9
+P24
+P23
+P25
+P26
+P21
+P22
+P15
+P0
+P16
+P31
+ 
+--- PAGE 29 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 29 of 36  Rev 1.4   6/14/2011 
+8.6. Current Profile at Various Startup Conditions 
+The diagrams below show the current profile for various startup conditions of the Propeller chip dependent upon the presence 
+of an EEPROM and PC.  
+Figure 9  
+Boot Sequence Current Profile for 
+no PC and no EEPROM (P31 
+held low and P29 not connected
+(same as held low)). 
+       
+Figure 10 
+Boot Sequence Current Profile for
+PC (connected but idle) and no
+EEPROM.  (P31 held high an d 
+P29 not connected). 
+       
+Figure 11 
+Boot Sequence Current Profile for
+no PC and no EEPROM (P31 
+held low and P29 held high). 
+ 
+Figure 12 
+Boot Sequence Current Profile for
+no PC and EEPROM (P31 hel d
+low and P29 connected to 
+EEPROM SDA). 
+       
+Figure 13 
+Boot Sequence Current Profile for
+PC (connected but idle) and
+EEPROM (P31 held high and P29
+connected to EEPROM SDA). 
+       
+--- PAGE 30 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 30 of 36  Rev 1.4   6/14/2011 
+9.0 TEMPERATURE CHARACTERISTICS 
+9.1. Internal Oscillator Frequency as a Function of Temperature 
+While the internal oscillator frequency is variable due to proces s variation, the rate of change as a function of temperature 
+when normalized provides a chip invariant ratio which can be used to calculate the oscillation frequency when the ambient 
+temperature is other than 25 °C (the temperature to which the graph was normalized). The absolute frequency at 25 °C varied 
+from 13.26 to 13.75 MHz in the sample set. The section of the graph which has a white background is the military range of 
+temperature; the sections in grey represent data which is beyond military temperature specification.    
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 31 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 31 of 36  Rev 1.4   6/14/2011 
+9.2. Fastest Operating Frequency as a Function of Temperature 
+The following graph represents a small samp le average of a Propeller chip’s fastest operating range. The test was performed 
+in a forced air chamber using code run on all eight cogs, multiple video generators, and counter modules. A frequency was 
+considered successful if the demo ran without fault for one minute. The curves represent an  aggressive testing procedure 
+(averaged, forced air, one minute time limit); therefore the designer must de-rate the curve to arrive at a stable frequency for a 
+particular application. Again the grayed regions represent temperatures beyond the military temperature range.  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 32 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 32 of 36  Rev 1.4   6/14/2011 
+9.3. Current Consumption as a Function of Temperature 
+The following graph demonstrates the current consumption of the Propeller as a function of temper ature. It is clear from the 
+graph that current consumption is nearly independent of temperature over the entire military temperature range. 
+-40 -20 0 20 40 60 80 100 120
+0
+10
+20
+30
+40
+50
+60
+70
+80
+90
+Current Consumption vs Temperature
+Temperature (C)
+Current (mA)
+Spin
+Asse m b l y
+waitloop
+Waitloop
+Asse m b l y
+Spin
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 33 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 33 of 36  Rev 1.4   6/14/2011 
+10.0 PACKAGE DIMENSIONS 
+10.1. P8X32A-D40 (40-pin DIP) 
+ 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 34 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 34 of 36  Rev 1.4   6/14/2011 
+10.2. P8X32A-Q44 (44-pin LQFP) 
+ 
+ 
+ 
+ 
+--- PAGE 35 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 35 of 36  Rev 1.4   6/14/2011 
+10.3. P8X32A-M44 (44-pin QFN) 
+ 
+ 
+ 
+ 
+--- PAGE 36 ---
+Propeller™ P8X32A Datasheet                                                www.parallaxsemiconductor.com 
+ 
+Copyright © Parallax Inc., dba Parallax Semiconductor   Page 36 of 36  Rev 1.4   6/14/2011 
+11.0 MANUFACTURING INFO 
+11.1. Reflow Peak Temperature 
+Package Type Reflow Peak Temp. 
+DIP 255+5/-0 °C 
+LQFP 255+5/-0 °C 
+QFN 255+5/-0 °C  
+11.2. Green/RoHS Compliance 
+All Parallax Semiconductor Propeller P8X32A chip 
+models are certified Green/RoHS Compliant.  RoHS, 
+Green, and ISO certificates  are available online at 
+www.parallaxsemiconductor.com. 
+ 
+12.0 REVISION HISTORY 
+12.1.1. Changes for Version 1.1:  
+Section 10.3: P8X32A-M44 (44-pin QFN) . Image 
+replace
+d to add stencil pattern diagram.  New section 
+inserted: 4.8 Assembly Instruction Execution Stages . 
+C
+ontact Information updated. 
+12.1.2. Changes for Version 1.2: 
+Section 6.4: Modified table entries for ADD, A
+ DDABS, ADDS, 
+ADDSX, ADDX, CMP, CMPS, CMPSX, CMPX, COGID, COGINIT, 
+COGSTOP, LOCKCLR, LCOKNEW, LOCKRET, LOCKSET, MAX, 
+MAXS, MIN, MINS, SUB, SUBABS, SUBS, SUBSX, SUBX, SUMC, 
+SUMNC, SUMNZ, SUMZ, TEST, TJNZ, TJZ. Section 4.5 
+up
+dated. Section 5.1: new sentence added at end of 
+para
+graph. Section 5.2: new sentence added at end of first 
+para
+graph. 
+12.1.3. Changes for Version 1.3 
+Throughout: updated logo and contact information for 
+Parallax Inc., dba Parallax Semiconductor.  Section 7.1: 
+fo
+otnote added to Table 18: Absolute Maximum Ratings. 
+12.1.4. 
+Changes for Version 1.4 
+Section 1.0 changes: 1.3: Key Features and Benefits  
+revi
+sed; former sections 1.4 , 1.6 removed. Section  4.4: 
+up
+dated all references to hub timing and replaced both 
+timing diagrams. Section 4.8: reference to hub timing 
+up
+dated.  Section 6.4: timing for hub instructions and 
+W
+AITxxx instructions revised.  Former Section 7.0: 
+Propeller Demo Board schematic removed. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Parallax Semiconductor Contact Information 
+Parallax Semiconductor 
+599 Menlo Drive 
+Rocklin, CA 95765 
+USA 
+Phone: (916) 632-4664 
+Fax: (916) 624-8003 
+sales@parallaxsemiconductor.com 
+support@parallaxsemiconductor.com 
+www.parallaxsemiconductor.com 
+http://obex.parallax.com
+ 
+Parallax, Inc., dba Parallax Semiconductor, makes no warranty, representation or guarantee regarding the suitability of its products for any 
+particular purpose, nor does Parallax, Inc., dba Parallax Semiconduc tor, assume any liability arising out of the application or  use of any 
+product, and specifically disclaims any and all liability, incl uding without limitation consequent ial or incidental damages eve n if Parallax, Inc., 
+dba Parallax Semiconductor, has been advised of the possibility of such  damages. Reproduction of this  document in whole or in part is 
+prohibited without the prior written consent of Parallax, Inc., dba Parallax Semiconductor.  
+Copyright © 2011 Parallax, Inc. dba Parallax Semiconductor. All rights are reserved. 
+Propeller and Parallax Semiconductor are trademarks of Parallax, Inc. 
