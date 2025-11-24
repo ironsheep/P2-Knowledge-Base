@@ -1,33 +1,17 @@
 # Production Process Rules for PDF Generation
 
-## 🚨 CRITICAL: Pandoc Version Distinction
+## 🚨 CRITICAL: Local Pandoc Cannot Be Used
 
-**WARNING: Local machine has ancient Pandoc 1.19 - DO NOT USE FOR TESTING!**
+**WARNING: Do NOT use local Pandoc for PDF work!**
 
-### Environment Differences:
-- **Local Machine**: Pandoc 1.19.2.1 (pre-2016, NO Lua filter support)
-  - Found at: `/Users/stephen/anaconda3/bin/pandoc`
-  - **NEVER use this for PDF work** - it's misleading and incompatible
-  - Cannot test Lua filters locally
-  - Cannot generate proper PDFs locally
-  
-- **PDF Forge**: Pandoc 2.17.1.1 (modern version with full Lua filter support)
-  - This is where ALL actual PDF generation happens
-  - Supports all our Lua filters
-  - Has proper LaTeX integration
-  - This is the ONLY Pandoc that matters for our workflow
+- Local machine has ancient Pandoc 1.19 (no Lua filter support)
+- PDF Forge has modern Pandoc 2.17 (required for our workflow)
+- **ALL PDF generation must happen on PDF Forge**
 
-### Key Implications:
-1. **Cannot test Lua filters locally** - they will fail with "unrecognized option"
-2. **All PDF testing must go through PDF Forge** - no local shortcuts
-3. **Local Pandoc output is NOT representative** - different version = different behavior
-4. **Filter errors only show up on PDF Forge** - that's where they actually run
-
-### Best Practice:
+**Best Practice:**
 - Prepare files locally (markdown, templates, filters)
-- Deploy to PDF Forge for ALL testing and production
-- Never trust local Pandoc output or errors
-- When debugging, remember: filters run on PDF Forge, not locally
+- Deploy to PDF Forge for all testing and production
+- See `PDF-FORGE-INTERNAL-DETAILS.md` for technical details
 
 ## Directory Structure and Purpose
 
@@ -56,29 +40,34 @@
 - `P2-PASM-deSilva-Style-Part1-FINAL.md` - Ready for production
 
 ### `/outbound/[document-name]/` - PRODUCTION STAGING
-**ONLY final, deployment-ready files go here:**
-- One markdown file (properly named, no suffixes)
-- One LaTeX template 
-- One request.json
-- Modified .sty, .lua, or .latex files (when changed)
-- NO intermediate files
-- NO backups
-- NO test versions
 
-**CRITICAL: Template and Support File Persistence**
-- PDF Forge remembers the last copy of all .latex, .sty, and .lua files
-- These files persist across PDF generation sessions
-- Only copy modified files to outbound when you change them
-- The Knowledge Base repository is the source of truth for these files
-- User deploys modified files from outbound to PDF Forge to update production environment
+## 🚨 CRITICAL RULE: ONLY CHANGED FILES GO IN OUTBOUND 🚨
 
-**🎯 IMPORTANT: Files Disappear from Outbound - This is NORMAL!**
-- User drags files from outbound to PDF Forge
-- **Files disappearing = successful deployment** (don't panic!)
-- Empty outbound folder means files are now on the Forge
-- Assets folder may remain as backup (intentional)
-- Workspace always contains the masters - you can re-copy if needed
-- During production iterations, keep copies in workspace to re-deploy quickly
+**PDF Forge PERSISTS templates, filters, and styles - don't resend what hasn't changed!**
+
+**ALWAYS include:**
+- ✅ `request.json` - Required every time
+- ✅ `[Document-Name].md` - The content to process
+- ✅ `assets/` folder - If images are referenced
+
+**ONLY include if YOU modified during THIS session:**
+- ⚠️ `*.latex` files - Template you edited
+- ⚠️ `*.sty` files - Style packages you changed
+- ⚠️ `*.lua` files - Filters you created or fixed
+
+**NEVER include:**
+- ❌ Templates that haven't changed
+- ❌ Filters that haven't changed
+- ❌ Style files that haven't changed
+- ❌ Intermediate work files
+- ❌ Backup files
+- ❌ Test versions
+
+**Why "Only Changed Files" Matters:**
+- PDF Forge has persistent storage for templates and filters
+- Files sent once stay installed until replaced
+- Sending unchanged files wastes time and causes confusion
+- Keep workspace as source of truth for all files
 
 **Strict naming rules:**
 - Markdown: `[DocumentBaseName].md` (NO -FINAL, -COMPLETE, etc.)
@@ -102,15 +91,10 @@
 
 ### Phase 3: Staging (outbound)
 **ONLY when ready for PDF Forge:**
-1. Copy ONLY the final files
+1. Copy ONLY changed files (see rules above)
 2. Use production names (no suffixes)
-3. Verify request.json format
-4. Copy ONLY modified template files:
-   - If you changed p2kb-smart-pins.latex → copy it
-   - If you changed p2kb-smart-pins-content.sty → copy it
-   - If you changed green-book-semantic-blocks.lua → copy it
-   - If files weren't changed → DON'T copy (Forge has them)
-5. User moves files from outbound to PDF Forge
+3. Verify request.json format includes request-requirements.json args
+4. Ready for deployment to PDF Forge
 
 ## Process Tracking Requirements
 

@@ -89,34 +89,43 @@ cat /engineering/document-production/workspace/[document-name]/request-requireme
 
 ### Step 3: Prepare Outbound Directory
 
-**Standard structure:**
+**Standard structure (flat - all files at root level):**
 ```
 /engineering/document-production/outbound/[document-name]/
-├── request.json                    # Production request
-├── Document-Name.md                 # Escaped markdown (if needed)
-├── assets/                          # Images, diagrams
-│   └── *.png, *.jpg
-├── *.sty                           # Modified style files (if changed)
-├── *.latex                         # Template files (if changed)
-└── *.lua                           # Lua filters (if changed)
+├── request.json                    # ALWAYS: Production request
+├── Document-Name.md                 # ALWAYS: Document content
+├── assets/                          # ALWAYS: Images subdirectory (if referenced)
+│   └── *.png, *.jpg                #         Images stay in assets/
+├── my-template.latex               # ONLY IF CHANGED: Template file
+├── my-styles.sty                   # ONLY IF CHANGED: Style file
+└── my-filter.lua                   # ONLY IF CHANGED: Lua filter
+
+⚠️ IMPORTANT: .latex, .sty, and .lua files go at ROOT level, NOT in subdirectories!
 ```
+
+## 🚨 CRITICAL: ONLY CHANGED FILES GO IN OUTBOUND 🚨
+
+**PDF Forge has a PERSISTENT file system - templates and filters stay installed!**
 
 **What to Copy from Workspace to Outbound:**
 
-1. **ALWAYS copy:**
-   - `request.json` - Production request with requirements
-   - `*.md` - The document markdown (escaped if needed)
-   - `assets/` - All referenced images
+### **ALWAYS copy these files:**
+- ✅ `request.json` - Required every time
+- ✅ `[Document-Name].md` - The content (escaped if needed)
+- ✅ `assets/` - Referenced images
 
-2. **Copy ONLY if modified during your session:**
-   - `*.sty` files - Style packages you changed
-   - `*.latex` files - Templates you modified  
-   - `*.lua` filters - Filters you created/fixed
+### **ONLY copy if YOU modified during THIS session:**
+- ⚠️ `*.latex` files - Templates you edited
+- ⚠️ `*.sty` files - Style packages you changed
+- ⚠️ `*.lua` filters - Filters you created or fixed
 
-3. **DO NOT copy if unchanged:**
-   - Standard templates already on PDF Forge
-   - Existing filters that weren't modified
-   - Foundation files that are shared
+### **NEVER copy if unchanged:**
+- ❌ Templates already on PDF Forge
+- ❌ Filters that weren't modified
+- ❌ Style files that are the same
+- ❌ Foundation files shared across documents
+
+**Why This Matters:** PDF Forge remembers installed files. Copying unchanged files wastes time and causes confusion about what actually changed.
 
 **Example for Smart Pins:**
 ```bash

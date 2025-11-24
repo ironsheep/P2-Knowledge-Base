@@ -2,6 +2,7 @@
 
 # Doc Forge - Main Processing Script
 # Processes markdown files from inbox/ to create PDFs in outbox/
+# FIXED: Archives now use YYMMDD_HHMM format to prevent same-day overwrites
 
 set -e  # Exit on error
 

@@ -7,10 +7,11 @@ The PDF Forge daemon v2.3 now supports full Lua filter automation with enhanced 
 ## Confirmed Working Features ✅
 
 ### Lua Filter Support
-- **Auto-deployment**: `.lua` files from templates automatically deployed to `/workspace/filters/`
+- **Temporary testing**: `.lua` files used from `/workspace/shared/filters/` for testing only
 - **Path resolution**: Filter names automatically resolved to `filters/name.lua` paths
-- **Filter copying**: Lua filters copied to working directory for Pandoc execution
+- **Filter copying**: Lua filters copied to temporary `/tmp/` working directory for Pandoc execution
 - **Debug support**: Lua filters can output debug comments to .tex files
+- **No permanent installation**: Filters are NOT automatically deployed to production
 
 ### Validation Workflow
 - **Filter validation**: Local filter paths checked before processing
@@ -59,11 +60,13 @@ pdf-forge-workspace/
 ├── scripts/
 │   └── watch-shared-workspace.js    # v2.3 daemon script (MASTER)
 ├── templates/
-│   ├── *.lua                        # Lua filters (auto-deployed)
-│   └── *.latex                      # Templates
+│   ├── *.lua                        # Lua filters (temporary testing only)
+│   └── *.latex                      # Templates (temporary testing only)
 ├── test-requests/                   # Test requests directory
-├── test-documents/                  # Test documents directory  
+├── test-documents/                  # Test documents directory
 └── test-results/                    # Results with .tex files
+
+⚠️ IMPORTANT: This workspace is for TESTING ONLY - not production deployment!
 ```
 
 ### Shared Directory (Container Communication)

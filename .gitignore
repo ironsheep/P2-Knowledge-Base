@@ -167,3 +167,6 @@ extracted_images_enhanced_test/
 /engineering/ingestion/smart-pins-catalog
 /engineering/ingestion/sources/pasm2-manual/updated-yamls
 /engineering/ingestion/sources/pasm2-manual/image-examples
+.mcp.json
+/.devcontainer
+engineering/document-production/WORKSPACE-REORGANIZATION-COMPLETE.md

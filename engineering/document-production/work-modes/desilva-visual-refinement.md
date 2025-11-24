@@ -89,7 +89,8 @@ outbound/p2-pasm-desilva-style/    # Deployment staging (LaTeX-escaped)
 ```
 
 #### Step 2: Copy Required Files to Outbound
-**CRITICAL**: Copy files to the parallel outbound document directory:
+**CRITICAL**: Copy ONLY CHANGED files to the parallel outbound document directory.
+**See `/engineering/pdf-forge/PRODUCTION-PROCESS-RULES.md` for complete "only changed files" rules.**
 ```bash
 # Copy escaped markdown (from Step 1)
 # ✅ Already done above

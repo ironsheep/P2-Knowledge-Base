@@ -1,7 +1,8 @@
-# PDF Forge Deployment Workflow - CRITICAL UNDERSTANDING
+# PDF Forge Deployment Workflow - User Guide
 
-**Last Updated**: 2025-08-31  
-**Purpose**: Clarify the persistent file system behavior of PDF Forge
+**Last Updated**: 2025-08-31
+**Purpose**: How to deploy files to PDF Forge efficiently
+**For technical details**: See `PDF-FORGE-INTERNAL-DETAILS.md`
 
 ## 🔴 CRITICAL CONCEPT: PDF Forge is a PERSISTENT INSTALLATION
 
@@ -15,17 +16,20 @@ The PDF Forge is NOT a stateless system. It maintains a persistent file store wh
 ### Phase 1: Initial Installation (First Deployment)
 When setting up a new document type for the first time:
 
-**Send ALL required files:**
+**Send ALL required files (flat structure):**
 ```
 /exports/pdf-generation/outbound/[document-name]/
 ├── request.json                    # Always needed
 ├── document.md                     # The content
-├── template.latex                  # Main template
-├── required-style1.sty            # All style files
-├── required-style2.sty            
-├── filter1.lua                    # All Lua filters
+├── template.latex                  # Main template (root level)
+├── required-style1.sty            # Style files (root level)
+├── required-style2.sty
+├── filter1.lua                    # Lua filters (root level)
 ├── filter2.lua
-└── assets/                        # Images if needed
+└── assets/                        # ONLY subdirectory (for images)
+    └── *.png, *.jpg
+
+⚠️ All .latex, .sty, and .lua files at ROOT level alongside request.json!
 ```
 
 **These files become "installed" on PDF Forge.**
@@ -120,30 +124,16 @@ cp request.json outbound/            # Always needed
 }
 ```
 
-**Key insights from generate-pdf.js**: 
-- Template is read from `doc.template` (falls back to 'admin-manual' if missing)
-- lua_filters is read from `doc.lua_filters` 
-- metadata is read from `doc.metadata`
-- ALL document-specific settings go INSIDE the document object
-- When you see "Template: admin-manual" in the log, it means template is missing from the document object!
+**Key Point**: ALL document-specific settings go INSIDE the document object, not at root level.
 
-## Debugging File Issues
+## Common Issues
 
-### Symptom: "Filter not found"
-**Cause**: Filter was never installed or has different name
-**Fix**: Send the .lua file to install it
+**"Filter not found"** → Send the .lua file
+**"Template: admin-manual" (unexpected)** → Move template field inside document object
+**Old template being used** → Send updated template file
+**Styles not applying** → Send .sty file with exact name
 
-### Symptom: "Template: admin-manual" (wrong template)
-**Cause**: lua_filters at wrong level in request.json
-**Fix**: Move lua_filters inside document object
-
-### Symptom: Old version of template being used
-**Cause**: Updated file never sent to PDF Forge
-**Fix**: Send the updated file to replace installed version
-
-### Symptom: Styles not applying
-**Cause**: .sty file not installed or wrong name
-**Fix**: Send the .sty file with exact name template expects
+For detailed troubleshooting, see `PDF-FORGE-INTERNAL-DETAILS.md`
 
 ## Best Practices
 

@@ -2,9 +2,9 @@
 
 ⚠️ **IMPORTANT**: Test patterns before trusting! This document contains patterns that have worked, but the system evolves. Always verify that a specific pattern (like `debug_tex: true`) actually works in the current system before relying on it.
 
-**DUAL PURPOSE**:
-1. **Rapid iteration testing** for PDF template development and visual refinement
-2. **Automatic template deployment** - Forge updates its permanent template library during testing
+**PURPOSE**:
+- **Rapid iteration testing** for PDF template development and visual refinement
+- **Temporary testing only** - Templates are NOT automatically deployed to production
 
 ## System Architecture
 
@@ -23,7 +23,7 @@
 
 - **Auto-detection**: Monitors for new test requests, processes them automatically
 - **Result Format**: JSON files with detailed analysis and error reporting
-- **🔴 CRITICAL**: Automatically updates Forge's permanent template collection with any .sty/.latex files from testing
+- **Temporary testing**: Templates copied to `/tmp/` for testing, NOT installed permanently
 
 ## Directory Structure on PDF Forge
 
@@ -200,23 +200,23 @@ cat /workspace/shared/status/forge-ready.txt
 }
 ```
 
-## Manual vs Automated Deployment
+## Testing vs Manual Production Deployment
 
-### Why Automated Testing Solves Path Issues
+### Why Automated Testing Helps Debug Path Issues
 
-**Manual Deployment Problems:**
-- ❌ Deploy files to outbound/ with correct paths
-- ❌ Manage filter paths and dependencies manually
-- ❌ Debug each filter individually
-- ❌ Path resolution issues when filters can't be found
-
-**Automated Testing Solutions:**
-- ✅ System automatically finds filters in templates/ or filters/
-- ✅ Handles all path resolution internally
+**Testing Environment Benefits:**
+- ✅ System automatically finds filters in `/workspace/shared/filters/`
+- ✅ Handles all path resolution internally for testing
 - ✅ Tests multiple filters simultaneously
-- ✅ Proven pattern that "just works"
+- ✅ Validates templates work correctly before production use
 
-**Key Insight:** Path resolution issues are often deployment problems, not filter problems. The automated system bypasses these issues entirely.
+**Production Deployment (Manual):**
+- 📦 User receives tested templates from Claude
+- 🔧 User manually copies templates to PDF Forge `./templates/` directory
+- 📄 User copies filters to PDF Forge `./filters/` directory if needed
+- ⚡ User runs `generate-pdf.js` with tested, validated templates
+
+**Key Insight:** Testing validates templates work correctly, but does NOT install them. Manual deployment to production is still required.
 
 ## Debug Information Available
 
@@ -248,23 +248,32 @@ When tests run, you get comprehensive debug information:
 - **Template paths**: .sty file dependency issues
 - **Auto-fix capable**: High confidence errors
 
-## 🔄 CRITICAL WORKFLOW INSIGHT: Testing = Automatic Deployment
+## 🔄 CRITICAL WORKFLOW UNDERSTANDING: Testing vs Production
 
-**DISCOVERY**: Automated testing serves dual functions:
-1. **Debug templates** through rapid iteration
-2. **Deploy fixes** automatically to Forge's permanent template library
+**IMPORTANT**: Automated testing is **TEMPORARY ONLY** - it does NOT deploy templates!
 
-**RESULT**: By completion of automated testing cycles, **Forge has updated templates**!
+**How Testing Works:**
+1. **Templates copied FROM**: `/workspace/shared/templates/` (testing location)
+2. **Templates copied TO**: `/tmp/pandoc-work-*/` (temporary working directory)
+3. **After testing**: Temporary directory cleaned up, nothing installed permanently
 
-### Streamlined Human Workflow
+**Testing vs Production Template Locations:**
+- **Testing templates**: `/workspace/shared/templates/` - Used ONLY for testing
+- **Production templates**: `./templates/` - Used by `generate-pdf.js` for final PDFs
+- **No automatic sync**: Changes to testing templates do NOT affect production templates
+
+### Manual Template Deployment Required
 **After Claude completes automated testing:**
-- ✅ **Forge templates updated** - All .sty/.latex fixes absorbed into permanent collection
-- 📄 **Human gets clean deliverables** - Just markdown + request.json
-- ❌ **No .sty file management** - Forge already has corrected templates
-- ⚡ **Immediate PDF generation** - Human can generate full documents without template setup
+- ✅ **Templates debugged** - Testing validates templates work correctly
+- ⚠️ **Manual deployment needed** - User must copy fixed templates to production
+- 📄 **Deliverables include templates** - Fixed .sty/.latex files must be provided
+- 🔧 **User installs templates** - Copy to PDF Forge production `./templates/` directory
 
-**Before this discovery**: Human managed .sty files manually
-**After this discovery**: Claude's testing auto-deploys templates, human gets content-only deliverables
+**Workflow:**
+1. Claude tests templates in `/workspace/shared/templates/` (temporary testing)
+2. Claude provides fixed templates to user (outbound deliverables)
+3. User manually copies templates to PDF Forge production location
+4. User runs `generate-pdf.js` for final PDF generation
 
 ## Integration with Visual Refinement
 

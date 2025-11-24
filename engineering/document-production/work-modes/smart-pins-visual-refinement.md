@@ -34,10 +34,11 @@ mcp__todo-mcp__todo_next tags:["smart_pins_visual"]
 1. Edit source files in workspace (maintain clean, unescaped state)
 2. Run: `/engineering/tools/conversion/latex-escape-all.sh workspace/input.md outbound/output.md`
 3. Copy ONLY modified files to outbound:
-   - Style files (.sty) - copy directly
-   - Lua filters (.lua) - copy directly to outbound (no filters/ subdirectory)
-   - Templates (.latex) - only if changed
+   - Style files (.sty) - copy directly to root
+   - Lua filters (.lua) - copy directly to root (no filters/ subdirectory)
+   - Templates (.latex) - only if changed (root level)
    - request.json - only if updated
+   - See `/engineering/pdf-forge/PRODUCTION-PROCESS-RULES.md` for complete rules
 4. User deploys from outbound to PDF Forge
 
 ## Exchange Directory Protocol

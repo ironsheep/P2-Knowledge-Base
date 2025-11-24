@@ -1,0 +1,470 @@
+% P2KB DeSilva Content Layer
+% DeSilva manual specific environments and 5-color code block styling
+% Author: Iron Sheep Productions, LLC
+% Based on: p2kb-smart-pins-content.sty v1.2
+% Version: 1.0 - DeSilva Pedagogical Environments with 5-Color System
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-desilva-content}[2025/09/16 P2KB DeSilva Content Layer v1.0]
+
+% Foundation layer already loaded by main template - don't reload
+% \RequirePackage{p2kb-foundation}  % DISABLED: Already loaded by p2kb-desilva.latex
+
+% ==================== PRESERVE FOUNDATION STRUCTURAL FIXES ====================
+% CRITICAL: These ensure proper part/chapter numbering and page breaks
+% The foundation layer provides these - we must not override them
+
+% Foundation provides:
+% - \thepart = \arabic{part} (shows "Part 1" not "0.2 Part I:")
+% - Chapter page breaks with \ifafterpart logic
+% - Part page breaks with chapter counter reset
+% - Proper section numbering depth (tocdepth=2, secnumdepth=2)
+% - Chapter header formatting without prefix issues
+
+% DO NOT override these foundation commands:
+% \renewcommand{\thepart}{...}     % Foundation handles this correctly
+% \renewcommand{\chapter}{...}     % Foundation handles page breaks
+% \renewcommand{\part}{...}        % Foundation handles counter reset
+% \titleformat{\chapter}{...}      % Foundation provides proper format
+
+% ==================== DESILVA 5-COLOR CODE BLOCK SYSTEM ====================
+% Based on deSilva pedagogical approach with 5 distinct code block types:
+% 1. Spin2 (green) - High-level language examples
+% 2. PASM2 (yellow/cream) - Assembly language (most common)
+% 3. CORDIC (purple) - Mathematical operations and trigonometry
+% 4. Multi-COG (blue) - Parallel processing examples
+% 5. Antipattern (red) - What NOT to do
+
+% Define DeSilva color palette (muted pastels for accessibility)
+\definecolor{desilva-spin2-bg}{HTML}{F8FCF8}         % Very soft green-gray
+\definecolor{desilva-spin2-border}{HTML}{85B985}     % Muted green border
+\definecolor{desilva-pasm2-bg}{HTML}{FFFEF5}         % Very soft cream (deSilva yellow)
+\definecolor{desilva-pasm2-border}{HTML}{D4B896}     % Muted tan border
+\definecolor{desilva-cordic-bg}{HTML}{F8F5FF}        % Very soft purple
+\definecolor{desilva-cordic-border}{HTML}{A785C2}    % Muted purple border
+\definecolor{desilva-multicog-bg}{HTML}{F5F9FC}      % Very soft blue-gray
+\definecolor{desilva-multicog-border}{HTML}{7FA8C9}  % Muted blue border
+\definecolor{desilva-antipattern-bg}{HTML}{FFF5F5}   % Very soft pink
+\definecolor{desilva-antipattern-border}{HTML}{C08080} % Muted rose border
+
+% Spin2 Block Environment (green theme)
+\newtcolorbox{DeSilvaSpin2Block}{%
+  boxrule=2pt,
+  colback=desilva-spin2-bg,
+  colframe=desilva-spin2-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,               % Accommodate line numbers
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% PASM2 Block Environment (deSilva yellow/cream theme) - Most common
+\newtcolorbox{DeSilvaPASM2Block}{%
+  boxrule=2pt,
+  colback=desilva-pasm2-bg,
+  colframe=desilva-pasm2-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,               % Accommodate line numbers
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% CORDIC Block Environment (purple theme for math)
+\newtcolorbox{DeSilvaCORDICBlock}{%
+  boxrule=2pt,
+  colback=desilva-cordic-bg,
+  colframe=desilva-cordic-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,               % Accommodate line numbers
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Multi-COG Block Environment (blue theme for parallel processing)
+\newtcolorbox{DeSilvaMultiCOGBlock}{%
+  boxrule=2pt,
+  colback=desilva-multicog-bg,
+  colframe=desilva-multicog-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,               % Accommodate line numbers
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Antipattern Block Environment (red theme for mistakes)
+\newtcolorbox{DeSilvaAntipatternBlock}{%
+  boxrule=2pt,
+  colback=desilva-antipattern-bg,
+  colframe=desilva-antipattern-border,
+  leftrule=4pt,             % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,               % Accommodate line numbers
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Default Shaded environment maps to PASM2 (most common in deSilva manual)
+\renewenvironment{Shaded}{%
+  \par\needspace{4\baselineskip}
+  \vspace{1.5\baselineskip}
+  \begin{DeSilvaPASM2Block}
+}{%
+  \end{DeSilvaPASM2Block}%
+  \par\vspace{\baselineskip}
+}
+
+% ==================== DESILVA PEDAGOGICAL ENVIRONMENTS ====================
+% Teaching elements that capture deSilva's encouraging and human approach
+
+% Medicine Cabinet - Simpler alternatives when overwhelmed
+\newtcolorbox{DeSilvaMedicineCabinet}{
+  title=The Medicine Cabinet,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=teal!70!black,
+  colback=teal!5,
+  colframe=teal!70!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Your Turn - Hands-on exercises
+\newtcolorbox{DeSilvaYourTurn}{
+  title=Your Turn,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=green!60!black,
+  colback=green!5,
+  colframe=green!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Sidetrack - Interesting diversions and deeper explanations
+\newtcolorbox{DeSilvaSidetrack}{
+  title=Sidetrack,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=purple!60!black,
+  colback=purple!5,
+  colframe=purple!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Interlude - Stories and historical context
+\newtcolorbox{DeSilvaInterlude}{
+  title=Interlude,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=orange!70!black,
+  colback=orange!5,
+  colframe=orange!70!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Chapter End - Summary and encouragement
+\newtcolorbox{DeSilvaChapterEnd}{
+  title=Chapter Summary,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=blue!60!black,
+  colback=blue!5,
+  colframe=blue!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% ==================== P2 LANGUAGE DEFINITIONS ====================
+% CRITICAL: Must include P2 syntax highlighting (inherited from Smart Pins)
+
+% Define Spin2 language
+\lstdefinelanguage{spin2}{
+  keywords={CON, VAR, OBJ, PUB, PRI, DAT, repeat, if, else, elseif, case, 
+            while, until, from, to, step, return, abort, next, quit,
+            byte, word, long, res, file, org, end, fit},
+  sensitive=true,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]'
+}
+
+% Define PASM2 language
+\lstdefinelanguage{pasm2}{
+  keywords={org, res, long, word, byte, mov, add, sub, and, or, xor, not,
+            shl, shr, sar, rol, ror, rcl, rcr, test, cmp, jmp, call, ret,
+            djnz, tjz, tjnz, wrpin, wxpin, wypin, rdpin, rqpin, akpin, dirh,
+            dirl, testp, waitx, rep, nop, qrotate, qvector, getqx, getqy,
+            setq, rdlong, wrlong, rdword, wrword, rdbyte, wrbyte, coginit},
+  sensitive=false,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]'
+}
+
+% Define CORDIC-specific keywords (extends PASM2)
+\lstdefinelanguage{cordic}[]{pasm2}{
+  morekeywords={qrotate, qvector, qlog, qexp, getqx, getqy, setq},
+  sensitive=false
+}
+
+% Define Multi-COG keywords (extends PASM2) 
+\lstdefinelanguage{multicog}[]{pasm2}{
+  morekeywords={coginit, cogid, cogstop, lockret, locktry, lockrel, locknew,
+                hubset, clkset, waitcnt, waitpeq, waitpne},
+  sensitive=false
+}
+
+% ==================== LOWERCASE DESILVA ENVIRONMENTS ====================
+% These match the semantic filter's ds* naming convention
+
+% Medicine Cabinet (ds prefix)
+\newtcolorbox{dsmedicinecabinet}{
+  title=The Medicine Cabinet,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=teal!70!black,
+  colback=teal!5,
+  colframe=teal!70!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Your Turn (ds prefix)
+\newtcolorbox{dsyourturn}{
+  title=Your Turn,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=green!60!black,
+  colback=green!5,
+  colframe=green!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Sidetrack (ds prefix)
+\newtcolorbox{dssidetrack}{
+  title=Sidetrack,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=purple!60!black,
+  colback=purple!5,
+  colframe=purple!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Uff (ds prefix)
+\newtcolorbox{dsuff}{
+  title=Uff!,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=orange!70!black,
+  colback=orange!5,
+  colframe=orange!70!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Well (ds prefix)
+\newtcolorbox{dswell}{
+  title=Well...,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=blue!60!black,
+  colback=blue!5,
+  colframe=blue!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Have Fun (ds prefix)
+\newtcolorbox{dshavefun}{
+  title=Have Fun!,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=magenta!60!black,
+  colback=magenta!5,
+  colframe=magenta!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% ==================== DESILVA SPECIFIC ENVIRONMENTS ====================
+% Additional environments that support the deSilva teaching style
+
+% Common Gotchas - Debugging help
+\newtcolorbox{commongotas}{
+  title=Common Gotchas,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=red!60!black,
+  colback=red!5,
+  colframe=red!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Real-World Example - Practical applications
+\newtcolorbox{realworldexample}{
+  title=Real-World Example,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=brown!60!black,
+  colback=brown!5,
+  colframe=brown!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
+
+% Performance Notes - Optimization tips
+\newtcolorbox{performancenote}{
+  title=Performance Note,
+  fonttitle=\bfseries\color{white},
+  colbacktitle=violet!60!black,
+  colback=violet!5,
+  colframe=violet!60!black,
+  boxrule=2pt,
+  rounded corners,
+  left=15pt,
+  right=15pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=20pt,
+  after skip=20pt,
+  breakable,
+  enhanced
+}
