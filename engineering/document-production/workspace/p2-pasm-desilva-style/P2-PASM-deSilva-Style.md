@@ -224,6 +224,26 @@ Let's make some magic happen with the Propeller 2!
 
 *Let's blink an LED and change your life*
 
+## Why P2?
+
+Before we dive into code, let me tell you why you're in for something different.
+
+If you've fought with interrupt priority conflicts on an ARM, watched your timing jitter because of cache misses, or discovered that the UART you need is only available on pins you're already using... well, the P2 was designed by someone who got tired of those problems too.
+
+Here's the P2 philosophy in a nutshell:
+
+**Instead of one processor fighting with interrupts**, you get eight complete, identical processors (COGs) that run truly in parallel. Your serial handler never delays your motor control. Your sensor sampling never misses a deadline. Each task owns its own processor.
+
+**Instead of fixed peripherals**, every one of the 64 pins contains its own programmable state machine. Any pin can become a UART, PWM output, quadrature encoder, ADC - whatever you need, wherever you need it.
+
+**Instead of timing that depends on cache luck**, the hub memory has deterministic access. Your timing loops work the same way every time.
+
+**Instead of calling math libraries**, there's a hardware CORDIC that computes sine, cosine, and arctangent in exactly 55 clocks. Every time.
+
+Does this mean P2 is perfect for everything? Of course not. But if your projects involve multiple real-time tasks, precise timing, video or audio generation, or just running out of peripheral pins - you're in the right place.
+
+For a full comparison to ARM, ESP32, Arduino, and PIC platforms, see [Appendix A](#appendix-a-platform-comparison). But you probably want to blink that LED first, don't you?
+
 ## The Hook: Making Light
 
 I know you're absolutely crazy to have your first instruction executed, so let's not waste any time. Here's a complete PASM2 program that blinks an LED on pin 56 (that's the built-in LED on the P2 Eval board):
@@ -1400,11 +1420,18 @@ loop    rflong  value            ' Read from FIFO
 ::: pasm2
 ```
 ' Fast screen clear using block transfer
+' Note: SETQ/SETQ2 maximum is 511 (for 512 longs)
+' For larger fills, we loop in 512-long chunks
 clear_screen
-        mov     color, ##$00_00_00_00  ' Black
-        setq2   ##640*480-1             ' Number of longs
-        wrlong  color, ##screen_buffer  ' Fills entire screen!
-        ' 1.2MB cleared in microseconds!
+        mov     hub_ptr, ##screen_buffer
+        mov     chunks, ##640*480/512   ' Number of 512-long chunks
+        mov     color, ##$00_00_00_00   ' Black
+
+.loop   setq    #512-1                  ' Transfer 512 longs (max block size)
+        wrlong  color, hub_ptr          ' Fill this chunk
+        add     hub_ptr, ##512*4        ' Advance by 512 longs (2KB)
+        djnz    chunks, #.loop
+        ' Full screen cleared with minimal loop overhead!
 ```
 :::
 
@@ -1648,11 +1675,13 @@ The pipeline means you're not really waiting 55 clocks - you're getting useful w
 
 ### QROTATE - The Rotation Engine
 
+Here's a subtle detail: CORDIC operations work on 2D coordinates (X, Y), but the **QROTATE** instruction only takes one coordinate directly. The solution? **SETQ** loads the Y coordinate into the Q register, then **QROTATE** takes X from its first operand. It's a two-instruction dance that becomes second nature:
+
 ::: pasm2
 ```
 ' Basic rotation: rotate point (x,y) by angle
-        setq    y              ' Load Y into Q register
-        qrotate x, angle       ' Start rotation
+        setq    y              ' First: load Y into Q register
+        qrotate x, angle       ' Then: X from operand, Y from Q
         getqx   new_x          ' Result: X' = X*cos(θ) - Y*sin(θ)
         getqy   new_y          ' Result: Y' = X*sin(θ) + Y*cos(θ)
 ```
@@ -3662,9 +3691,10 @@ copy_better
         
 ' Version 3: Block transfer (ultimate)
 copy_ultimate
+        sub     count, #1       ' SETQ needs count-1 (0 = 1 long)
         setq    count           ' Setup block transfer
         rdlong  buffer, source  ' Read all at once
-        setq    count
+        setq    count           ' (count already decremented)
         wrlong  buffer, dest    ' Write all at once
         ' <1 clock per long for large blocks!
 ```
@@ -3833,188 +3863,1029 @@ Chapters 13-15 provide quick examples of Video Generation, Serial Protocols, and
 **Have Fun!** Remember, the best optimization is often a better algorithm. But when you need every last cycle, you now know how to get them!
 
 
-# Chapter 13: Video Generation Basics
+# Chapter 13: LUT Memory - Your Private Lookup Table
 
-*A taste of P2's video capabilities*
+*512 longs of fast, deterministic storage in every COG*
 
-## The Hook: VGA in 20 Lines
+## The Hook: A Lookup Table in 3 Cycles
 
-Here's a minimal VGA signal generator:
-
-::: pasm2
-```
-' Bare-bones VGA signal
-vga_simple
-        wrpin   ##P_SYNC, #HSYNC_PIN    ' Configure sync pins
-        wrpin   ##P_SYNC, #VSYNC_PIN
-        wxpin   ##H_TIMING, #HSYNC_PIN  ' Set timing
-        wxpin   ##V_TIMING, #VSYNC_PIN
-        dirh    #HSYNC_PIN              ' Enable pins
-        dirh    #VSYNC_PIN
-        
-        ' Start streamer for pixels
-        setcmod #$100                   ' RGB mode
-        xinit   ##STREAM_CMD, ##buffer  ' Start streaming!
-        
-' That's it - VGA signal generated!
-```
-:::
-
-The P2's streamer and Smart Pins handle all the timing complexity. You just provide the pixels!
-
-## What's Really Happening
-
-The P2 has dedicated hardware for video:
-- **Streamer**: DMA engine that feeds pixels to pins
-- **Smart Pins**: Generate sync signals
-- **COG**: Orchestrates the timing
-
-This is just a taste. Real video generation involves color spaces, multiple buffers, sprites, and more.
-
-📚 **Want to learn more?** See the dedicated "P2 Video Generation Guide" for:
-- Complete VGA, HDMI, and composite drivers
-- Color space conversions
-- Sprite and tile engines
-- Video effects and transitions
-- Multiple resolution support
-
-## Simple Example: Color Bars
+Need fast data lookup without hub timing? Every COG has its own private 512-long Lookup RAM (LUT):
 
 ::: pasm2
 ```
-' Generate color bars pattern
-color_bars
-        mov     x, #0
-        wrfast  #0, ##screen_buffer
-        
-generate
-        mov     color, x
-        shl     color, #24      ' Shift to RGB position
-        wflong  color           ' Write pixel
-        incmod  x, #7           ' 8 color bars
-        djnz    pixels, #generate
+' Sine table lookup - 3 clocks, every time
+get_sine
+        and     angle, #$FF      ' Mask to table index
+        rdlut   value, angle     ' Read from LUT in 3 clocks!
+        ret
 ```
 :::
 
+No hub timing to worry about. No waiting for the egg beater. Just 3 clock cycles, guaranteed. The LUT is like having a personal data assistant that never takes a coffee break.
 
-**Have Fun!** Video generation is a whole world unto itself. This chapter just opened the door - walk through it in the dedicated manual!
+## Why Another Memory?
 
+You might be thinking, "Wait, I already have COG RAM and Hub RAM - why do I need a third memory?" Excellent question!
 
-# Chapter 14: Serial Protocols Basics
+| Memory | Size per COG | Access Time | Special Features |
+|--------|--------------|-------------|------------------|
+| COG RAM | 512 longs | 2 clocks (write), 0 (read) | Instructions live here |
+| Hub RAM | 512 KB shared | 9-16 clocks (depends on slot) | Shared by all COGs |
+| **LUT RAM** | 512 longs | **3 clocks** | **Private, deterministic, shareable with neighbor** |
 
-*Quick introduction to serial communication*
+The LUT fills a sweet spot: faster than hub memory, doesn't compete with your instruction space, and has a trick up its sleeve - neighboring COGs can share LUTs!
 
-## The Hook: UART Without Bit-Banging
+## Reading and Writing the LUT
 
-Remember bit-banging serial from Chapter 8? Here's the Smart Pin way:
+### Basic LUT Access
 
 ::: pasm2
 ```
-' Hardware UART - so much easier!
-        wrpin   ##P_ASYNC_TX, #TX_PIN   ' Configure as UART
-        wxpin   ##BAUD_RATE, #TX_PIN    ' Set baud rate
-        dirh    #TX_PIN                 ' Enable
-        
-send_char
-        testp   #TX_PIN wc              ' Check if ready
-   if_c wypin   char, #TX_PIN           ' Send character
-        ' Hardware handles start bit, data, stop bit!
+' Write to LUT
+        wrlut   #$12345678, #100  ' Write constant to LUT[100]
+        wrlut   value, index      ' Write variable to LUT[index]
+
+' Read from LUT
+        rdlut   result, #100      ' Read LUT[100] into result
+        rdlut   data, index       ' Read LUT[index] into data
 ```
 :::
 
-## Quick Protocol Overview
+Notice the operand order: **WRLUT** writes its first operand to the address in the second, while **RDLUT** reads from its second operand into the first. A bit backwards from what you might expect, but you'll get used to it.
 
-P2 can handle many protocols:
-- **UART**: Built into Smart Pins
-- **SPI**: Smart Pins or bit-bang
-- **I2C**: Bit-bang with special pin modes
-- **USB**: Yes, even USB with Smart Pins!
+### Building a Lookup Table
 
-📚 **For complete coverage**: See the "P2 I/O Protocols Manual" which covers:
-- All serial protocols in detail
-- Smart Pin configurations
-- Bit-bang implementations
-- Protocol analyzers
-- Real-world interfacing
-
-## Simple SPI Example
+Here's how to load a sine table into LUT:
 
 ::: pasm2
 ```
-' Basic SPI transfer (bit-bang style)
-spi_byte
-        mov     bits, #8
-        
-spi_loop
-        shl     mosi_data, #1 wc
-        drvc    #MOSI_PIN       ' Output bit
-        drvh    #SCK_PIN        ' Clock high
-        testp   #MISO_PIN wc    ' Read MISO
-        rcl     miso_data, #1   ' Store bit
-        drvl    #SCK_PIN        ' Clock low
-        djnz    bits, #spi_loop
+' Copy 256-entry sine table from hub to LUT
+load_sine_table
+        mov     index, #0
+        loc     ptra, #\sine_data_hub   ' Hub address of table
+
+.loop   rdlong  value, ptra++    ' Read from hub
+        wrlut   value, index     ' Write to LUT
+        add     index, #1
+        cmp     index, #256 wz
+  if_nz jmp     #.loop
+        ret
+
+' Now lookups are fast!
+get_sine
+        rdlut   sine_value, angle  ' 3 clocks!
+        ret
 ```
 :::
 
+::: sidetrack
+**Bulk LUT Loading with SETQ2**
 
-**Have Fun!** Serial protocols are the gateway to talking with the world. Explore more in the dedicated manual!
+For loading entire tables, **SETQ2** + **RDLONG** can transfer hub data directly to LUT addresses $200+:
 
+```pasm2
+setq2   #256-1              ' 256 longs
+rdlong  $200, hub_table_ptr ' Load into LUT starting at $200
+```
 
-# Chapter 15: Signal Processing Basics
+This works because the assembler maps LUT addresses $200-$3FF. Just remember the -1 in **SETQ2** (same rule as **SETQ** for hub block transfers).
+:::
 
-*DSP with CORDIC and Smart Pins*
+## LUT Sharing Between COGs
 
-## The Hook: Real-Time Audio Filter
+Here's something clever: adjacent COG pairs can share LUT access! COG 0 can read COG 1's LUT, COG 2 can read COG 3's, and so on.
+
+::: multicog
+```
+' --- COG 0 (producer) ---
+        wrlut   message, #10    ' Write to my LUT[10]
+        wrlut   #1, #0          ' Set "ready" flag at LUT[0]
+
+' --- COG 1 (consumer) ---
+        setluts #1              ' Enable LUT sharing
+.wait   rdluts  flag, #0        ' Read COG 0's LUT[0]
+        cmp     flag, #1 wz
+  if_nz jmp     #.wait
+        rdluts  message, #10    ' Read COG 0's LUT[10]
+```
+:::
+
+The instructions are:
+- **SETLUTS**: Enable shared LUT reading
+- **RDLUTS**: Read from neighbor COG's LUT
+
+This gives you a 512-long shared buffer between COG pairs without touching hub memory at all. Perfect for high-bandwidth data passing!
+
+::: sidetrack
+**Which COGs Are Neighbors?**
+
+The LUT sharing pairs are fixed:
+- COG 0 ↔ COG 1
+- COG 2 ↔ COG 3
+- COG 4 ↔ COG 5
+- COG 6 ↔ COG 7
+
+An even-numbered COG reads its odd neighbor's LUT, and vice versa. You cannot read LUTs from non-adjacent COGs.
+:::
+
+## Practical Examples
+
+### Fast Data Transformation
 
 ::: pasm2
 ```
-' Simple low-pass filter using CORDIC
-filter_sample
-        rdpin   sample, #ADC_PIN        ' Read ADC
-        
-        ' Apply filter using CORDIC rotation
-        setq    filtered
-        qrotate sample, ##FILTER_COEFF
-        getqy   filtered                ' Filtered output!
-        
-        wypin   filtered, #DAC_PIN      ' Output to DAC
+' Gamma correction table in LUT
+' Input: 8-bit value in 'pixel'
+' Output: Gamma-corrected value
+gamma_correct
+        and     pixel, #$FF     ' Mask to 8 bits
+        rdlut   pixel, pixel    ' Transform via table
+        ret
+
+' Initialize gamma table (power law curve)
+' Would be pre-calculated and loaded from hub
 ```
 :::
 
-Three instructions for DSP filtering. The CORDIC engine is incredibly powerful for signal processing!
-
-## What's Possible
-
-P2's signal processing capabilities:
-- 16-bit ADC on every pin
-- 16-bit DAC on every pin  
-- CORDIC for DSP math
-- Hardware multiply/divide
-- Streaming for high-speed data
-
-📚 **Deep dive available**: The "P2 Signal Processing Guide" covers:
-- Digital filters (FIR, IIR)
-- FFT implementation
-- Audio processing
-- Software-defined radio
-- Sensor fusion algorithms
-
-## Simple FFT Teaser
+### Circular Buffer in LUT
 
 ::: pasm2
 ```
-' FFT butterfly using CORDIC
-butterfly
-        setq    imag
-        qrotate real, twiddle   ' Complex multiply via rotation!
-        getqx   real_out
-        getqy   imag_out
-        ' One butterfly in 3 instructions!
+' Fast circular buffer using LUT
+' 256-entry buffer at LUT addresses 0-255
+
+buf_write_ptr   long    0
+buf_read_ptr    long    0
+
+put_byte
+        wrlut   data, buf_write_ptr
+        add     buf_write_ptr, #1
+        and     buf_write_ptr, #$FF   ' Wrap at 256
+        ret
+
+get_byte
+        rdlut   data, buf_read_ptr
+        add     buf_read_ptr, #1
+        and     buf_read_ptr, #$FF    ' Wrap at 256
+        ret
 ```
 :::
 
+### Fast Stack in LUT
 
-**Have Fun!** Signal processing on P2 is surprisingly powerful. The CORDIC engine was born for DSP!
+::: pasm2
+```
+' Stack implementation in LUT
+' Grows downward from $1FF
+stack_ptr       long    $1FF
+
+push
+        wrlut   value, stack_ptr
+        sub     stack_ptr, #1
+        ret
+
+pop
+        add     stack_ptr, #1
+        rdlut   value, stack_ptr
+        ret
+```
+:::
+
+## LUT with the Streamer
+
+Here's where LUT gets really interesting. The Streamer can read directly from LUT to generate waveforms without any COG intervention:
+
+::: pasm2
+```
+' Fill LUT with waveform data
+' Then let Streamer output it to DAC
+
+load_waveform
+        mov     index, #0
+
+.fill   mov     value, index
+        shl     value, #24       ' Scale for DAC
+        wrlut   value, index
+        add     index, #1
+        cmp     index, #512 wz
+  if_nz jmp     #.fill
+
+' Now configure Streamer to read from LUT
+' Streamer handles the rest - no COG cycles needed!
+```
+:::
+
+The Streamer configuration for LUT reading is covered in detail in the Video and Audio manuals - but the key point is that your LUT becomes a 512-sample waveform buffer that plays automatically.
+
+## Common Gotchas
+
+::: antipattern
+**❌ WRONG: Confusing LUT addresses**
+```pasm2
+' WRONG - This reads COG RAM, not LUT!
+        mov     value, $200     ' $200 is COG RAM address
+```
+
+**✓ RIGHT: Use RDLUT for LUT access**
+```pasm2
+' RIGHT - RDLUT addresses the LUT space
+        rdlut   value, #0       ' LUT address 0
+```
+:::
+
+::: antipattern
+**❌ WRONG: Forgetting SETLUTS for sharing**
+```pasm2
+' WRONG - RDLUTS fails without SETLUTS
+        rdluts  data, #10       ' Won't work!
+```
+
+**✓ RIGHT: Enable sharing first**
+```pasm2
+' RIGHT - Enable LUT sharing first
+        setluts #1              ' Enable sharing
+        rdluts  data, #10       ' Now it works
+```
+:::
+
+## Medicine Cabinet
+
+::: medicine-cabinet
+**LUT Memory Quick Reference**
+
+| Instruction | Operation | Cycles |
+|-------------|-----------|--------|
+| **RDLUT** D, S | Read LUT[S] into D | 3 |
+| **WRLUT** D, S | Write D to LUT[S] | 2 |
+| **RDLUTS** D, S | Read neighbor's LUT[S] | 3 |
+| **SETLUTS** | Enable LUT sharing | 2 |
+
+**Memory Map:**
+- LUT addresses: 0-511 (512 longs = 2KB)
+- Neighbor pairs: 0↔1, 2↔3, 4↔5, 6↔7
+
+**Best Uses:**
+- Lookup tables (sine, gamma, encoding)
+- Fast circular buffers
+- COG-pair data sharing
+- Streamer waveform source
+:::
+
+## Your Turn
+
+::: exercise
+**Exercise 1: Build an 8-bit Encoder**
+
+Create a LUT-based ASCII to 7-segment display encoder. Load a 128-entry table where each entry maps an ASCII code to the 7-segment pattern for that character.
+
+```pasm2
+' Your code here:
+' 1. Load segment patterns into LUT
+' 2. Write encode_char routine
+' Hint: rdlut segment_pattern, ascii_char
+```
+:::
+
+::: exercise
+**Exercise 2: High-Speed COG Communication**
+
+Use LUT sharing to create a message passing system between COG 2 and COG 3:
+- COG 2 writes 8-long messages
+- COG 3 reads them without hub access
+- Use a simple ready/ack protocol
+
+```pasm2
+' Hint: Use LUT[0] as ready flag, LUT[1-8] as message buffer
+```
+:::
+
+*Continue to [Chapter 14: Smart Pins Orientation](#chapter-14-smart-pins-orientation) →*
+
+
+# Chapter 14: Smart Pins Orientation
+
+*64 autonomous I/O processors waiting to do your bidding*
+
+## The Hook: A UART in 4 Lines
+
+Remember that tedious bit-bang serial from Chapter 8? Watch this:
+
+::: pasm2
+```
+' Configure pin as UART transmitter - done!
+        dirl    #TX_PIN                 ' CRITICAL: Reset pin first!
+        wrpin   ##P_ASYNC_TX, #TX_PIN   ' Configure as async TX
+        wxpin   ##BAUD_115200, #TX_PIN  ' Set baud rate
+        dirh    #TX_PIN                 ' Enable - pin now runs autonomously
+```
+:::
+
+That's it. The pin is now a fully autonomous UART transmitter. It handles start bits, stop bits, timing - everything. You just feed it bytes with **WYPIN** and it sends them. The pin has become a state machine.
+
+And here's the mind-bending part: *every single one of the 64 pins can do this*. Or PWM. Or ADC. Or quadrature decoding. Or 28 other modes.
+
+## What Are Smart Pins, Really?
+
+Each of the P2's 64 I/O pins contains its own little processor - a state machine that can operate completely independently of the COGs. This means:
+
+- A pin configured as UART keeps sending/receiving without COG intervention
+- A PWM output keeps running its duty cycle automatically
+- An ADC samples continuously in the background
+- A quadrature decoder tracks position even while your COG does other things
+
+The COG only needs to configure the pin and occasionally read/write data. The pin does the rest.
+
+## The Universal Smart Pin Pattern
+
+Every Smart Pin follows the same configuration pattern. This is **the most important thing to remember**:
+
+::: pasm2
+```
+' === THE SMART PIN RECIPE ===
+
+' Step 1: RESET the pin (CRITICAL!)
+        dirl    pin             ' Always start by resetting
+
+' Step 2: CONFIGURE the mode
+        wrpin   mode, pin       ' What should this pin do?
+
+' Step 3: SET parameters
+        wxpin   x_value, pin    ' Mode-specific parameter X
+        wypin   y_value, pin    ' Mode-specific parameter Y
+
+' Step 4: ENABLE the pin
+        dirh    pin             ' Start the magic!
+```
+:::
+
+::: sidetrack
+**Why DIRL First?**
+
+The **DIRL** at the start isn't optional politeness - it's *required*. Smart Pins must be reset before configuration to ensure they're in a known state. Skip this and you'll get unpredictable behavior as old settings conflict with new ones.
+
+Think of it like power-cycling a misbehaving device. Always start fresh.
+:::
+
+## The Core Instructions
+
+### Configuration Instructions
+
+| Instruction | Purpose |
+|-------------|---------|
+| **WRPIN** mode, pin | Set the operating mode |
+| **WXPIN** value, pin | Set X parameter (mode-specific) |
+| **WYPIN** value, pin | Set Y parameter (mode-specific) |
+| **DIRH** pin | Enable the Smart Pin |
+| **DIRL** pin | Disable/reset the Smart Pin |
+
+### Data Instructions
+
+| Instruction | Purpose |
+|-------------|---------|
+| **WYPIN** data, pin | Write data to Smart Pin (same instruction!) |
+| **RDPIN** data, pin | Read result, clear "ready" flag |
+| **RQPIN** data, pin | Read result, keep "ready" flag |
+| **AKPIN** pin | Acknowledge (clear "ready" flag only) |
+
+### Status Instructions
+
+| Instruction | Purpose |
+|-------------|---------|
+| **TESTP** pin WC | Check if IN flag is set (data ready) |
+| **TESTPN** pin WC | Check if IN flag is clear |
+
+## Understanding the IN Flag
+
+Every Smart Pin has an IN flag that signals "something happened." What that something is depends on the mode:
+
+- **UART TX**: IN high = ready for another byte
+- **UART RX**: IN high = byte received
+- **ADC**: IN high = new sample ready
+- **PWM**: IN high = period complete
+- **Counter**: IN high = threshold reached
+
+You check this flag with **TESTP** and clear it by reading with **RDPIN** (or explicitly with **AKPIN**).
+
+::: pasm2
+```
+' Wait for Smart Pin to be ready
+wait_ready
+        testp   #PIN wc         ' Check IN flag
+  if_nc jmp     #wait_ready     ' Loop if not ready
+        rdpin   data, #PIN      ' Read and clear flag
+```
+:::
+
+::: sidetrack
+**Event-Driven Alternative**
+
+Instead of polling with **TESTP**, you can use the event system:
+
+```pasm2
+setse1  #%001<<6 + PIN   ' Event when IN rises
+waitse1                   ' Sleep until ready - no polling!
+rdpin   result, #PIN      ' Read the result
+```
+
+This is more efficient because your COG sleeps instead of spinning. See Chapter 15 for the full event story.
+:::
+
+## Common Smart Pin Modes
+
+Here are the modes you'll use most often:
+
+### Asynchronous Serial (UART)
+
+::: pasm2
+```
+' Transmit mode
+        dirl    #TX_PIN
+        wrpin   ##P_ASYNC_TX | P_OE, #TX_PIN
+        wxpin   ##(clkfreq/baud)<<16 | 7, #TX_PIN  ' Baud + 8 bits
+        dirh    #TX_PIN
+
+' Send a byte
+send    testp   #TX_PIN wc      ' Wait for ready
+  if_nc jmp     #send
+        wypin   byte, #TX_PIN   ' Send it
+```
+:::
+
+::: pasm2
+```
+' Receive mode
+        dirl    #RX_PIN
+        wrpin   ##P_ASYNC_RX, #RX_PIN
+        wxpin   ##(clkfreq/baud)<<16 | 7, #RX_PIN
+        dirh    #RX_PIN
+
+' Get a byte
+recv    testp   #RX_PIN wc      ' Check for received byte
+  if_nc jmp     #recv
+        rdpin   byte, #RX_PIN   ' Get it
+        shr     byte, #24       ' Shift to low byte
+```
+:::
+
+### PWM Output
+
+::: pasm2
+```
+' PWM mode - period + duty cycle
+        dirl    #PWM_PIN
+        wrpin   ##P_PWM_SAWTOOTH | P_OE, #PWM_PIN
+        wxpin   ##period, #PWM_PIN      ' Period in clocks
+        wypin   ##duty, #PWM_PIN        ' High time in clocks
+        dirh    #PWM_PIN
+
+' Change duty cycle on the fly
+        wypin   ##new_duty, #PWM_PIN    ' Just update Y parameter
+```
+:::
+
+### ADC Input
+
+::: pasm2
+```
+' ADC mode - continuous sampling
+        dirl    #ADC_PIN
+        wrpin   ##P_ADC | P_ADC_GIO, #ADC_PIN
+        wxpin   ##14, #ADC_PIN          ' 14-bit mode
+        dirh    #ADC_PIN
+
+' Read ADC value
+read_adc
+        rdpin   adc_value, #ADC_PIN     ' Get sample
+        shr     adc_value, #17          ' Right-justify the result
+```
+:::
+
+### Quadrature Encoder
+
+::: pasm2
+```
+' Quadrature decoder - A on pin, B on pin+1
+        dirl    #ENC_PIN
+        wrpin   ##P_QUADRATURE, #ENC_PIN
+        dirh    #ENC_PIN
+
+' Read position
+        rdpin   position, #ENC_PIN      ' Get accumulated count
+```
+:::
+
+## Configuration Values Demystified
+
+The mode values like `P_ASYNC_TX` are constants defined by the assembler. Here's what's happening behind the scenes:
+
+The **WRPIN** D value is a 32-bit configuration:
+
+```
+%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
+  │    │    │        │        │    │
+  │    │    │        │        │    └─ Mode (5 bits): What this pin does
+  │    │    │        │        └─ Output control (2 bits)
+  │    │    │        └─ Low-level controls (13 bits)
+  │    │    └─ Filter/logic (3 bits)
+  │    └─ B input source (4 bits)
+  └─ A input source (4 bits)
+```
+
+For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM_SAWTOOTH`, `P_ADC`. The P2 assembler knows all of them.
+
+## Common Gotchas
+
+::: antipattern
+**❌ WRONG: Forgetting to reset before configure**
+```pasm2
+' WRONG - Pin may be in unknown state!
+        wrpin   ##P_PWM_SAWTOOTH, #PIN
+        wxpin   ##1000, #PIN
+        dirh    #PIN
+```
+
+**✓ RIGHT: Always DIRL first**
+```pasm2
+' RIGHT - Start clean
+        dirl    #PIN                    ' Reset first!
+        wrpin   ##P_PWM_SAWTOOTH, #PIN
+        wxpin   ##1000, #PIN
+        dirh    #PIN
+```
+:::
+
+::: antipattern
+**❌ WRONG: Enabling before configuring**
+```pasm2
+' WRONG - Pin enabled with partial config!
+        dirl    #PIN
+        dirh    #PIN                    ' Enabled too early!
+        wrpin   ##P_ASYNC_TX, #PIN
+```
+
+**✓ RIGHT: DIRH comes last**
+```pasm2
+' RIGHT - Configure completely, then enable
+        dirl    #PIN
+        wrpin   ##P_ASYNC_TX, #PIN
+        wxpin   ##BAUD, #PIN
+        dirh    #PIN                    ' Enable last!
+```
+:::
+
+## Medicine Cabinet
+
+::: medicine-cabinet
+**Smart Pin Quick Reference**
+
+**The Recipe:**
+```
+DIRL pin          ' 1. Reset
+WRPIN mode, pin   ' 2. Mode
+WXPIN x, pin      ' 3. X parameter
+WYPIN y, pin      ' 4. Y parameter
+DIRH pin          ' 5. Enable
+```
+
+**Common Modes:**
+| Mode | Constant | Use |
+|------|----------|-----|
+| UART TX | P_ASYNC_TX | Serial transmit |
+| UART RX | P_ASYNC_RX | Serial receive |
+| PWM Saw | P_PWM_SAWTOOTH | PWM output |
+| PWM Tri | P_PWM_TRIANGLE | PWM output |
+| ADC | P_ADC | Analog input |
+| Quadrature | P_QUADRATURE | Encoder |
+| NCO | P_NCO_FREQ | Frequency output |
+
+**Data Flow:**
+- **WYPIN** = Write data TO Smart Pin
+- **RDPIN** = Read data FROM Smart Pin (clears IN)
+- **TESTP** = Check if IN flag set
+
+**Golden Rule:** DIRL before WRPIN, DIRH after WXPIN/WYPIN
+:::
+
+## Your Turn
+
+::: exercise
+**Exercise 1: PWM LED Dimmer**
+
+Create a PWM output that dims an LED:
+1. Configure a pin for PWM sawtooth mode
+2. Set a 1 kHz period (at 160 MHz: period = 160,000)
+3. Vary duty cycle from 0% to 100%
+
+```pasm2
+' Your code here:
+' Hint: Change duty with WYPIN new_duty, #LED_PIN
+```
+:::
+
+::: exercise
+**Exercise 2: Simple Serial Echo**
+
+Set up UART at 115200 baud:
+1. Configure RX on pin 63
+2. Configure TX on pin 62
+3. Echo every received byte back
+
+```pasm2
+' Your code here:
+' At 160 MHz: baud_divisor = 160_000_000 / 115200 = 1389
+' WXPIN format: (divisor << 16) | (bits - 1)
+```
+:::
+
+📚 **Going Deeper**: This chapter covered the Smart Pin essentials - the configuration pattern and common modes. For complete coverage of all 32 modes, timing diagrams, and advanced techniques, see the dedicated "P2 Smart Pins Manual."
+
+*Continue to [Chapter 15: Event-Driven Programming](#chapter-15-event-driven-programming) →*
+
+
+# Chapter 15: Event-Driven Programming
+
+*Stop spinning, start waiting*
+
+## The Hook: No More Polling Loops
+
+Remember all those busy loops waiting for things to happen?
+
+::: pasm2
+```
+' OLD WAY: Spin waiting for serial data (burns CPU cycles!)
+wait_rx testp   #RX_PIN wc      ' Check over and over
+  if_nc jmp     #wait_rx        ' Spin spin spin...
+        rdpin   data, #RX_PIN
+
+' NEW WAY: Sleep until data arrives (zero CPU cycles!)
+        setse1  #%001<<6 + RX_PIN  ' Wake on IN rise
+        waitse1                     ' Sleep until event
+        rdpin   data, #RX_PIN
+```
+:::
+
+The event system lets your COG sleep while waiting. When the event happens, it wakes up instantly. No cycles wasted, and you respond the moment something happens.
+
+## Why Events Matter
+
+Polling loops have two problems:
+1. **They waste cycles** - The COG spins doing nothing useful
+2. **They add latency** - You check periodically, so there's delay between "thing happened" and "you noticed"
+
+The event system solves both. Your COG *sleeps* and *wakes the instant* something happens. It's like having a personal assistant tap your shoulder instead of constantly looking up to check.
+
+## The Four Selectable Events
+
+Every COG has four configurable event channels: SE1, SE2, SE3, and SE4. Each can be configured to trigger on different conditions:
+
+| Event | Configuration | Wait | Poll |
+|-------|--------------|------|------|
+| SE1 | **SETSE1** | **WAITSE1** | **POLLSE1** |
+| SE2 | **SETSE2** | **WAITSE2** | **POLLSE2** |
+| SE3 | **SETSE3** | **WAITSE3** | **POLLSE3** |
+| SE4 | **SETSE4** | **WAITSE4** | **POLLSE4** |
+
+Plus there are built-in timer events:
+
+| Timer | Wait | Poll |
+|-------|------|------|
+| CT1 | **WAITCT1** | **POLLCT1** |
+| CT2 | **WAITCT2** | **POLLCT2** |
+| CT3 | **WAITCT3** | **POLLCT3** |
+
+## Configuring an Event
+
+The **SETSE1** through **SETSE4** instructions take a 9-bit configuration value:
+
+```
+%MMM_PPPPPP
+  │   │
+  │   └─ Pin number (0-63) or special source
+  └─ Mode: What triggers the event
+```
+
+### Event Modes
+
+| Mode | Meaning |
+|------|---------|
+| %000 | Never (disabled) |
+| %001 | IN rises (Smart Pin ready) |
+| %010 | IN falls |
+| %011 | IN changes |
+| %100 | Pin high |
+| %101 | Pin low |
+| %110 | Pin rises |
+| %111 | Pin falls |
+
+### Smart Pin Events
+
+The most common use is waiting for a Smart Pin to have data:
+
+::: pasm2
+```
+' Wait for Smart Pin on pin 15 to be ready
+        setse1  #%001<<6 + 15   ' IN rise on pin 15
+        waitse1                  ' Sleep until ready
+        rdpin   data, #15        ' Get the data
+```
+:::
+
+### Pin Edge Events
+
+You can also wait for raw pin edges (without Smart Pin):
+
+::: pasm2
+```
+' Wait for rising edge on pin 5
+        setse1  #%110<<6 + 5    ' Rise on pin 5
+        waitse1                  ' Sleep until edge
+        ' Edge detected!
+
+' Wait for falling edge on pin 10
+        setse2  #%111<<6 + 10   ' Fall on pin 10
+        waitse2
+        ' Edge detected!
+```
+:::
+
+## Timer Events
+
+For precise timing, use the counter comparison events:
+
+::: pasm2
+```
+' Wait exactly 1 millisecond (at 160 MHz)
+        getct   target          ' Current time
+        add     target, ##160_000  ' +1ms
+        addct1  target, #0      ' Set CT1 target (add 0 for exact value)
+        waitct1                  ' Sleep until CT >= CT1
+
+' Alternative using WAITX (simpler but less precise)
+        waitx   ##160_000       ' Wait ~1ms
+```
+:::
+
+The timer events are:
+- **ADDCT1/ADDCT2/ADDCT3**: Set the comparison target
+- **WAITCT1/WAITCT2/WAITCT3**: Wait until CT reaches target
+- **POLLCT1/POLLCT2/POLLCT3**: Check (non-blocking) if target reached
+
+## Waiting vs Polling
+
+Two ways to use events:
+
+### WAIT - Sleep Until Event
+
+::: pasm2
+```
+        waitse1                 ' COG sleeps here
+        ' Wakes instantly when event occurs
+```
+:::
+
+- COG sleeps, uses no cycles
+- Wakes immediately when event fires
+- Can't do anything else while waiting
+
+### POLL - Check and Continue
+
+::: pasm2
+```
+        pollse1 wc              ' Check event, clear if set
+  if_c  jmp     #event_handler  ' Handle if occurred
+        ' Continue with other work...
+```
+:::
+
+- COG keeps running
+- Checks event flag, clears it
+- Returns result in C flag
+- Good for servicing multiple events
+
+## Multiple Events
+
+With four SE channels, you can monitor multiple sources:
+
+::: pasm2
+```
+' Setup multiple events
+        setse1  #%001<<6 + RX_PIN     ' Serial data ready
+        setse2  #%110<<6 + BUTTON_PIN ' Button pressed
+        setse3  #%001<<6 + ADC_PIN    ' ADC sample ready
+
+event_loop
+        pollse1 wc              ' Check serial
+  if_c  call    #handle_serial
+
+        pollse2 wc              ' Check button
+  if_c  call    #handle_button
+
+        pollse3 wc              ' Check ADC
+  if_c  call    #handle_adc
+
+        jmp     #event_loop
+```
+:::
+
+## Practical Examples
+
+### Timeout with Fallback
+
+::: pasm2
+```
+' Wait for serial data, but give up after 100ms
+wait_with_timeout
+        setse1  #%001<<6 + RX_PIN     ' Serial ready event
+
+        getct   timeout
+        add     timeout, ##16_000_000  ' 100ms at 160MHz
+        addct1  timeout, #0
+
+.wait   pollse1 wc              ' Check serial
+  if_c  jmp     #.got_data
+        pollct1 wc              ' Check timeout
+  if_c  jmp     #.timed_out
+        jmp     #.wait
+
+.got_data
+        rdpin   data, #RX_PIN
+        ret
+
+.timed_out
+        mov     data, #-1       ' Return error
+        ret
+```
+:::
+
+### Debounced Button Press
+
+::: pasm2
+```
+' Wait for clean button press with debounce
+debounced_button
+        setse1  #%110<<6 + BUTTON  ' Rising edge
+        waitse1                     ' Wait for press
+
+        waitx   ##1_600_000        ' 10ms debounce delay
+
+        testp   #BUTTON wc         ' Verify still pressed
+  if_nc jmp     #debounced_button  ' Bounce - try again
+        ret                         ' Clean press!
+```
+:::
+
+### Precise Periodic Sampling
+
+::: pasm2
+```
+' Sample ADC at exactly 10 kHz
+sample_loop
+        getct   next_sample
+
+.loop   addct1  next_sample, ##16_000  ' 100us period
+        waitct1                         ' Wait for next slot
+
+        rdpin   sample, #ADC_PIN        ' Read sample
+        wrlong  sample, buffer_ptr      ' Store it
+        add     buffer_ptr, #4
+
+        jmp     #.loop
+```
+:::
+
+## ATN - Inter-COG Events
+
+The ATN (attention) system lets COGs signal each other:
+
+::: pasm2
+```
+' COG 0: Signal another COG
+        cogatn  #%0000_0010     ' Send ATN to COG 1
+
+' COG 1: Wait for attention
+        waitatn                  ' Sleep until ATN received
+        ' Another COG signaled us!
+```
+:::
+
+The **COGATN** instruction takes an 8-bit mask where each bit corresponds to a COG. Setting bit N sends attention to COG N.
+
+## Common Gotchas
+
+::: antipattern
+**❌ WRONG: Forgetting to clear event flag**
+```pasm2
+' WRONG - Event may fire before you're ready
+        setse1  #%001<<6 + PIN
+        ' ... do other stuff ...
+        waitse1                 ' May return immediately!
+```
+
+**✓ RIGHT: Poll first to clear any pending event**
+```pasm2
+' RIGHT - Clear any stale event
+        setse1  #%001<<6 + PIN
+        pollse1                 ' Clear if already set
+        ' ... do other stuff ...
+        waitse1                 ' Now wait cleanly
+```
+:::
+
+::: antipattern
+**❌ WRONG: Using WAIT when you need to handle multiple sources**
+```pasm2
+' WRONG - Can only wait for one event at a time
+        waitse1                 ' Stuck here until SE1
+        ' SE2 might fire and be missed!
+```
+
+**✓ RIGHT: Use POLL loop for multiple events**
+```pasm2
+' RIGHT - Check all sources
+.loop   pollse1 wc
+  if_c  call    #handle_se1
+        pollse2 wc
+  if_c  call    #handle_se2
+        jmp     #.loop
+```
+:::
+
+## Medicine Cabinet
+
+::: medicine-cabinet
+**Event System Quick Reference**
+
+**Configure Events:**
+```
+SETSE1/2/3/4  #%MMM_PPPPPP    ' Mode and pin
+```
+
+**Event Modes:**
+| %MMM | Trigger |
+|------|---------|
+| %001 | IN rises (Smart Pin ready) |
+| %010 | IN falls |
+| %011 | IN changes |
+| %110 | Pin rises |
+| %111 | Pin falls |
+
+**Wait (blocking):**
+```
+WAITSE1/2/3/4    ' Sleep until event
+WAITCT1/2/3      ' Sleep until timer
+WAITATN          ' Sleep until attention
+```
+
+**Poll (non-blocking):**
+```
+POLLSE1/2/3/4 WC ' Check event, clear flag, C=occurred
+POLLCT1/2/3 WC   ' Check timer, C=reached
+POLLATN WC       ' Check attention, C=received
+```
+
+**Timer Setup:**
+```
+ADDCT1/2/3 target, #delta   ' Set comparison target
+```
+
+**Inter-COG:**
+```
+COGATN #mask    ' Signal COGs (bit per COG)
+```
+:::
+
+## Your Turn
+
+::: exercise
+**Exercise 1: Event-Driven Serial**
+
+Rewrite a serial receive loop to use events instead of polling:
+1. Configure SE1 for UART RX Smart Pin ready
+2. Use WAITSE1 instead of TESTP loop
+3. Measure the cycle count difference
+
+```pasm2
+' Your code here:
+' Hint: setse1 #%001<<6 + RX_PIN
+```
+:::
+
+::: exercise
+**Exercise 2: Dual Event Monitor**
+
+Create a loop that monitors both a button (pin edge event) and a timer (periodic event):
+1. SE1 = button press (rising edge)
+2. CT1 = 1 second heartbeat
+3. On button: toggle LED
+4. On timer: print timestamp
+
+```pasm2
+' Your code here:
+' Use POLL for both, handle whichever fires
+```
+:::
+
+*Continue to [Chapter 16: Multi-COG Orchestration](#chapter-16-multi-cog-orchestration) →*
 
 
 # Chapter 16: Multi-COG Orchestration
@@ -4471,11 +5342,166 @@ This teaching manual focuses on concepts, patterns, and building your understand
 : Official silicon documentation from Parallax covering hardware specifications, electrical characteristics, and detailed register maps.
 
 
+# Appendix A: Platform Comparison {#appendix-a-platform-comparison}
+
+*How P2 compares to other microcontrollers*
+
+If you're coming from another embedded platform, this appendix shows how the P2's approach differs and when those differences matter.
+
+## The Landscape
+
+The embedded world is dominated by a handful of architectures:
+
+| Platform | Architecture | Typical Cores | Peripherals | Timing |
+|----------|--------------|---------------|-------------|--------|
+| **STM32** | ARM Cortex-M | 1-2 | Fixed location | Cache-dependent |
+| **ESP32** | Xtensa/RISC-V | 2 | Fixed location | FreeRTOS scheduled |
+| **Arduino/AVR** | AVR | 1 | Fixed location | Deterministic but slow |
+| **PIC32** | MIPS | 1 | Fixed location | Interrupt-driven |
+| **P2 Propeller** | Custom | **8** | **Any pin** | **Deterministic** |
+
+## What Makes P2 Different
+
+### Eight Real Processors, Not Time-Slicing
+
+On ARM, ESP32, or PIC, you typically have 1-2 cores that share time between tasks using interrupts or an RTOS. The P2 gives you eight complete, identical processors that run truly in parallel.
+
+**Traditional approach:**
+```c
+// Everyone fights for the same CPU
+ISR(TIMER1_vect) { motor_control(); }  // Might delay...
+ISR(UART_RX_vect) { serial_handler(); }  // ...this
+main() { while(1) { sensor_loop(); } }   // Hope we get time
+```
+
+**P2 approach:**
+```spin
+COG0: motor_control()     ' Dedicated - always on time
+COG1: serial_handler()    ' Dedicated - never misses a byte
+COG2: sensor_loop()       ' Dedicated - consistent sampling
+COG3-7: ready for more
+```
+
+No interrupt priority juggling. No RTOS configuration. Each task owns its processor.
+
+### Smart Pins: Peripherals on Every Pin
+
+Traditional MCUs have fixed peripheral assignments: UART1 is on PA9/PA10, SPI1 is on PB3/PB4/PB5, and if you need those pins for something else, you're stuck rerouting your PCB.
+
+On P2, every pin contains a programmable state machine. Any pin can become a UART, SPI, PWM, ADC, quadrature decoder, or 27 other modes. The peripheral comes to your pin, not the other way around.
+
+### Deterministic Timing
+
+ARM MCUs with cache have unpredictable timing. A memory read might take 1 cycle (cache hit) or 50+ cycles (cache miss). This makes cycle-accurate timing extremely difficult.
+
+P2's hub memory uses round-robin access that gives every COG predictable, guaranteed access slots. Your timing loops work identically every time.
+
+## Coming From ARM/STM32
+
+You're used to configuring HAL structures, writing interrupt handlers, and managing DMA. Here's the translation:
+
+| Instead of... | You... | Why It's Different |
+|---------------|--------|-------------------|
+| `HAL_UART_Transmit()` | Configure Smart Pin once, then **WYPIN** bytes | Pin handles all timing |
+| `HAL_TIM_PWM_Start()` | Configure Smart Pin once, update with **WYPIN** | Pin runs autonomously |
+| NVIC priority configuration | Nothing | All COGs equal, no preemption |
+| `HAL_DMA_Start()` | Use built-in FIFO/Streamer | Integrated into COG, simpler API |
+| `arm_sin_f32()` library | **QROTATE** instruction | Hardware trig in 55 clocks |
+| FreeRTOS `xTaskCreate()` | **COGINIT** | Real parallel, not scheduled |
+
+**What you'll miss:** Extensive middleware ecosystem, WiFi/BT on-chip
+
+**What you'll gain:** Deterministic timing, no interrupt conflicts, simpler I/O configuration
+
+## Coming From ESP32
+
+You're used to WiFi/Bluetooth convenience and FreeRTOS abstractions:
+
+| ESP32 Approach | P2 Approach | Trade-off |
+|----------------|-------------|-----------|
+| Built-in WiFi/BT | Add WizNet or ESP module | You choose connectivity |
+| `xTaskCreate()` | **COGINIT** | True parallel, not scheduled |
+| GPIO matrix routing | Smart Pins | More capability per pin |
+| FreeRTOS timing | Deterministic hub | Cycle-accurate guaranteed |
+| Arduino framework | Spin2/PASM2 | Steeper learning, deeper control |
+
+**What you'll miss:** Built-in networking, Arduino library ecosystem
+
+**What you'll gain:** 8 real cores, deterministic timing, flexible I/O
+
+## Coming From Arduino/AVR
+
+You'll find P2 familiar but more powerful:
+
+| Arduino Approach | P2 Approach | The Upgrade |
+|------------------|-------------|-------------|
+| `digitalWrite()` | **DRVH/DRVL** or Smart Pins | Similar syntax, more capability |
+| `delay()` blocks everything | **WAITX** or dedicated COG | Timing without blocking others |
+| One thing at a time | 8 things truly parallel | Real concurrency |
+| 8-bit math limits | 32-bit + hardware CORDIC | No more overflow headaches |
+| Libraries for everything | Growing ecosystem | More control, deeper understanding |
+
+**What you'll miss:** Vast library ecosystem, beginner tutorials
+
+**What you'll gain:** 8 COGs, 64 Smart Pins, hardware math, adult-sized variables
+
+## When P2 Is the Right Choice
+
+P2 excels when you need:
+
+- **Multiple real-time tasks** running simultaneously without conflicts
+- **Precise timing** that cache misses and interrupts can't disrupt
+- **Video or audio generation** requiring cycle-accurate output
+- **Flexible I/O** where any pin can become any peripheral
+- **Hardware math** for motor control, signal processing, or robotics
+- **Multiple motor/servo control** with dedicated COGs per channel
+- **Protocol implementation** where Smart Pins handle timing autonomously
+
+## When P2 May Not Be the Right Choice
+
+Consider other platforms if you need:
+
+- **Built-in WiFi/Bluetooth** (though P2 can use external modules)
+- **Huge library ecosystems** with off-the-shelf drivers
+- **Extreme low power** sleep modes
+- **Very low unit cost** at high volumes
+- **Familiar programming model** (interrupt-driven, RTOS-based)
+
+## The P2 Hardware Ecosystem
+
+P2 isn't just a chip - it's a platform with expansion options:
+
+**Video & Audio:**
+- A/V Breakout Board: VGA, RCA, 80mW stereo, microphone input
+- Digital Video Out: HDMI-type with differential signaling
+- Built-in 8-bit DAC per pin (16-bit with dithering)
+
+**Connectivity:**
+- USB Host Board: Two USB-A ports
+- USB Device Board: HID or CDC modes
+- Serial Host/Device: RS-232 interfaces
+- WizNet/ESP modules: Ethernet or WiFi
+
+**Development:**
+- P2 Eval Board: Complete development environment
+- Edge Modules: 4MB or 32MB flash for embedding
+- Breakout Boards: All 64 pins accessible
+
+You add what you need - no paying for peripherals you won't use.
+
+## Summary
+
+P2 takes a fundamentally different approach to embedded computing. Instead of one processor fighting interrupts, you get eight processors working in parallel. Instead of fixed peripherals, every pin becomes whatever you need. Instead of cache-dependent timing, you get deterministic access.
+
+This isn't a better or worse approach - it's a *different* approach that solves different problems. If your project involves multiple real-time tasks, precise timing, or flexible I/O, P2 was designed for exactly those challenges.
+
+
 # Index
 
 ### A
-- ADC operations: Ch15
+- ADC operations: Ch14
 - ADD instruction: Ch3, Ch5
+- ADDCT1/2/3: Ch15
 - Address modes: Ch3
 - ALTD/ALTS: Ch3
 - Architecture: Ch2
@@ -4498,13 +5524,14 @@ This teaching manual focuses on concepts, patterns, and building your understand
 - Counters: Ch2
 
 ### D
-- DAC operations: Ch15
+- DAC operations: Ch14
 - Debugging: Ch12
 - Division: Ch5
 - DRVH/DRVL: Ch1
 
 ### E
 - Egg beater: Ch2, Ch4
+- Event system: Ch15
 
 ### F
 - FIFO: Ch4, Ch9
@@ -4517,12 +5544,11 @@ This teaching manual focuses on concepts, patterns, and building your understand
 
 ### H
 - Hardware multiply: Ch5
-- HDMI: Ch13
 - Hub execution: Ch10
 - Hub memory: Ch2, Ch4
 
 ### I
-- I2C: Ch14
+- IN flag: Ch14, Ch15
 - Immediate values: Ch3
 - Instruction format: Ch3
 - Interrupts: Ch11
@@ -4534,6 +5560,8 @@ This teaching manual focuses on concepts, patterns, and building your understand
 - LED control: Ch1
 - Locks: Ch2, Ch16
 - Logic operations: Ch3
+- LUT memory: Ch13
+- LUT sharing: Ch13
 
 ### M
 - Mailboxes: Ch2, Ch16
@@ -4549,9 +5577,11 @@ This teaching manual focuses on concepts, patterns, and building your understand
 ### P
 - Parallel processing: Ch2
 - Pipeline: Ch7, Ch12
-- Pins, Smart: Ch8
+- Pins, Smart: Ch8, Ch14
+- Platform comparison: Appendix A
+- POLLSE1-4: Ch15
 - PTRA/PTRB: Ch3, Ch4
-- PWM: Ch8
+- PWM: Ch8, Ch14
 
 ### Q
 - Q flag: Ch7
@@ -4560,17 +5590,17 @@ This teaching manual focuses on concepts, patterns, and building your understand
 
 ### R
 - RDBYTE/RDWORD/RDLONG: Ch4
+- RDLUT/WRLUT: Ch13
+- RDPIN: Ch14, Ch15
 - REP instruction: Ch3
 - Rotation: Ch3, Ch7
 
 ### S
-- Serial protocols: Ch14
+- SETSE1-4: Ch15
 - Shift operations: Ch3
-- Signal processing: Ch15
 - SKIP instruction: Ch3, Ch6
-- Smart Pins: Ch8
-- SPI: Ch14
-- Streamer: Ch9
+- Smart Pins: Ch8, Ch14
+- Streamer: Ch9, Ch13
 
 ### T
 - Timer: Ch2
@@ -4581,13 +5611,13 @@ This teaching manual focuses on concepts, patterns, and building your understand
 - UART: Ch8, Ch14
 
 ### V
-- VGA: Ch13
-- Video generation: Ch13
 
 ### W
+- WAITSE1-4: Ch15
+- WAITCT1-3: Ch15
 - WAITX: Ch1
 - WRBYTE/WRWORD/WRLONG: Ch4
-
+- WRPIN/WXPIN/WYPIN: Ch14
 
 ### Z
 - Z flag: Ch6
