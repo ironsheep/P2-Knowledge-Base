@@ -3,6 +3,15 @@
 
 component: Smart_Pins
 category: io_system
+version: "1.1"
+last_updated: "2025-11-25"
+change_log:
+  - version: "1.1"
+    date: "2025-11-25"
+    changes: "Added event_driven_waiting section to in_flag"
+  - version: "1.0"
+    date: "2025-09-07"
+    changes: "Initial version"
 description: |
   64 identical smart I/O pins, each with autonomous processing capabilities for
   timing, counting, serial protocols, ADC/DAC operations, and more. Offloads
@@ -171,10 +180,20 @@ in_flag:
     - "RDPIN instruction"
     - "AKPIN instruction"
     - "Smart pin reset"
-    
-  events:
-    selectable: "Can trigger COG events"
-    interrupt: "Can trigger interrupts"
+
+  event_driven_waiting:
+    description: "Use events instead of polling for efficient waiting"
+    event_sources:
+      "%001": "IN rises (data ready)"
+      "%010": "IN falls"
+      "%011": "IN changes"
+    format: "setse1 #%MMM<<6 + pin"
+    example: |
+      setse1  #%001<<6 + pin   ' Event on IN rise
+      waitse1                   ' Sleep until ready
+      rdpin   result, #pin      ' Read result
+    vs_polling: "Eliminates busy-wait loops, COG sleeps during wait"
+    see_also: "event_system.yaml"
 
 adc_capabilities:
   resolution: "12 bits"

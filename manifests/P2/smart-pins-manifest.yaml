@@ -7,9 +7,9 @@ content_base: "/engineering/knowledge-base/P2/architecture/smart-pins"
 # Smart Pins Manifest
 # Part of P2 Knowledge Base manifest hierarchy
 
-version: "1.1"
+version: "1.2"
 schema_version: "2024-12-30"
-last_updated: "2025-11-10T21:28:08Z"
+last_updated: "2025-11-25T21:35:00Z"
 category: "smart_pins"
 total_entries: 32
 
