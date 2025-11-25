@@ -23,11 +23,29 @@ function Div(elem)
         }
     elseif class == "sidetrack" then
         -- Sidetrack - Interesting diversions and deeper explanations
-        return {
-            pandoc.RawBlock("latex", "\\begin{DeSilvaSidetrack}"),
-            elem,
-            pandoc.RawBlock("latex", "\\end{DeSilvaSidetrack}")
-        }
+        -- Extract the title from the first header inside the sidetrack
+        local sidetrack_title = nil
+        for _, block in ipairs(elem.content) do
+            if block.t == "Header" then
+                sidetrack_title = pandoc.utils.stringify(block.content)
+                break
+            end
+        end
+
+        -- Build result with TOC entry if we found a title
+        local result = {}
+        if sidetrack_title then
+            -- Add TOC entry for sidetrack (indented, italic style)
+            local toc_entry = string.format(
+                "\\addcontentsline{toc}{section}{\\textit{Sidetrack: %s}}",
+                sidetrack_title
+            )
+            table.insert(result, pandoc.RawBlock("latex", toc_entry))
+        end
+        table.insert(result, pandoc.RawBlock("latex", "\\begin{DeSilvaSidetrack}"))
+        table.insert(result, elem)
+        table.insert(result, pandoc.RawBlock("latex", "\\end{DeSilvaSidetrack}"))
+        return result
     elseif class == "interlude" then
         -- Interlude - Stories and historical context
         return {

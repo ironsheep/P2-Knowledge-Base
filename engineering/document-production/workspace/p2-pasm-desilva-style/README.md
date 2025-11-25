@@ -1,5 +1,13 @@
 # P2 PASM DeSilva Style - Workspace Guide
 
+## Before You Begin
+
+**Read the PDF generation lessons learned:** `/engineering/operations/lessons-learned/pdf-generation-changelog.md`
+
+This changelog documents critical issues discovered during document production (font configuration, Pandoc quirks, pagination problems) that will save significant debugging time.
+
+---
+
 ## Quick Reference
 **Canonical Name:** `p2-pasm-desilva-style`
 **Document Title:** Discovering P2 Assembly
@@ -17,7 +25,7 @@ Creating a pedagogical PASM2 manual that captures deSilva's teaching philosophy:
 ## Related Folders
 
 ### This Workspace
-- **Master Markdown:** `P2-PASM-deSilva-Working-Copy.md` (main working document)
+- **Master Markdown:** `P2-PASM-deSilva-Style.md` (main working document)
 - **Templates:** `templates/` folder - See [templates/README.md](templates/README.md)
 - **Lua Filters:** `filters/` folder - Pandoc processing filters
 - **Special Requirements:** `request-requirements.json` (--top-level-division=part)
@@ -95,13 +103,13 @@ This document REQUIRES special pandoc arguments:
 ## Workflow Quick Start
 
 ### 1. Edit Content
-Edit `P2-PASM-deSilva-Working-Copy.md` in this workspace
+Edit `P2-PASM-deSilva-Style.md` in this workspace
 
 ### 2. Prepare for PDF Generation
 ```bash
 # From workspace directory:
-/workspaces/P2-Knowledge-Base/engineering/tools/latex-escape-all.sh \
-    P2-PASM-deSilva-Working-Copy.md \
+/workspaces/P2-Knowledge-Base/engineering/tools/conversion/latex-escape-all.sh \
+    P2-PASM-deSilva-Style.md \
     /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-pasm-desilva-style/P2-PASM-deSilva-Style.md
 ```
 
@@ -188,6 +196,22 @@ All code examples MUST be validated before inclusion:
 - Templates and filters persist on PDF Forge - don't resend unchanged files
 
 **Complete Rules:** `/engineering/pdf-forge/PRODUCTION-PROCESS-RULES.md` (🚨 "only changed files" details)
+
+## Formatting Decisions
+
+### Chapter Headings
+- **Page break only** - No extra vertical space ("chapter drop") before chapter titles
+- **Rationale:** Chapter titles use a larger font size which already differentiates them clearly from section headings. The P1 deSilva manual uses manual formatting with chapters starting at the top of new pages. Extra whitespace is unnecessary and wastes space.
+
+### Section Headings (Planned)
+- Reduce space BELOW section headings (keep heading connected to its content)
+- Maintain space ABOVE section headings (separates from previous content)
+- **Rationale:** Gestalt principle of proximity - headings should feel attached to what they introduce
+
+### Vertical Whitespace Strategy
+- Minimize unnecessary vertical whitespace throughout
+- Address object splitting (tables, code blocks) across pages as separate concern
+- Goal: Professional, compact layout without feeling cramped
 
 ## Notes
 

@@ -75,15 +75,13 @@ function Div(div)
         return cb
       end
     })
-    
+
     if code_block then
-      -- Return complete LaTeX block with proper lstlisting settings
+      -- Return complete LaTeX block using Verbatim (mnemonics already uppercased by mnemonic filter)
       local latex_block = '\\begin{DeSilvaPASM2Block}\n' ..
-                         '\\lstset{language=pasm2,basicstyle=\\ttfamily,keywordstyle=\\bfseries\\uppercase,' ..
-                         'numbers=left,numberstyle=\\tiny,numbersep=8pt,xleftmargin=-10pt,frame=none,backgroundcolor={}}\n' ..
-                         '\\begin{lstlisting}\n' ..
+                         '\\begin{Verbatim}[numbers=left,numbersep=8pt,xleftmargin=-10pt]\n' ..
                          code_block.text .. '\n' ..
-                         '\\end{lstlisting}\n' ..
+                         '\\end{Verbatim}\n' ..
                          '\\end{DeSilvaPASM2Block}'
       return pandoc.RawBlock('latex', latex_block)
     end
@@ -133,36 +131,76 @@ function Div(div)
   -- ===== DESILVA PEDAGOGICAL ELEMENTS =====
   
   elseif classes:includes("medicine-cabinet") then
-    local begin_env = pandoc.RawBlock('latex', '\\begin{dsmedicinecabinet}')
-    local end_env = pandoc.RawBlock('latex', '\\end{dsmedicinecabinet}')
-    return {begin_env, div, end_env}
-  
+    local result = {pandoc.RawBlock('latex', '\\begin{dsmedicinecabinet}')}
+    for _, block in ipairs(div.content) do
+      table.insert(result, block)
+    end
+    table.insert(result, pandoc.RawBlock('latex', '\\end{dsmedicinecabinet}'))
+    return result
+
   elseif classes:includes("your-turn") then
-    local begin_env = pandoc.RawBlock('latex', '\\begin{dsyourturn}')
-    local end_env = pandoc.RawBlock('latex', '\\end{dsyourturn}')
-    return {begin_env, div, end_env}
-  
+    local result = {pandoc.RawBlock('latex', '\\begin{dsyourturn}')}
+    for _, block in ipairs(div.content) do
+      table.insert(result, block)
+    end
+    table.insert(result, pandoc.RawBlock('latex', '\\end{dsyourturn}'))
+    return result
+
   elseif classes:includes("sidetrack") then
-    local begin_env = pandoc.RawBlock('latex', '\\begin{dssidetrack}')
-    local end_env = pandoc.RawBlock('latex', '\\end{dssidetrack}')
-    return {begin_env, div, end_env}
-  
+    -- Extract title from first heading in sidetrack for TOC entry
+    local sidetrack_title = nil
+    for _, block in ipairs(div.content) do
+      if block.t == "Header" then
+        sidetrack_title = pandoc.utils.stringify(block.content)
+        break
+      end
+    end
+
+    local result = {pandoc.RawBlock('latex', '\\begin{dssidetrack}')}
+    -- Add TOC entry if we found a title
+    if sidetrack_title then
+      table.insert(result, pandoc.RawBlock('latex',
+        '\\addcontentsline{toc}{section}{Sidetrack: ' .. sidetrack_title .. '}'))
+    end
+    for _, block in ipairs(div.content) do
+      table.insert(result, block)
+    end
+    table.insert(result, pandoc.RawBlock('latex', '\\end{dssidetrack}'))
+    return result
+
   elseif classes:includes("uff") then
-    local begin_env = pandoc.RawBlock('latex', '\\begin{dsuff}')
-    local end_env = pandoc.RawBlock('latex', '\\end{dsuff}')
-    return {begin_env, div, end_env}
-  
+    local result = {pandoc.RawBlock('latex', '\\begin{dsuff}')}
+    for _, block in ipairs(div.content) do
+      table.insert(result, block)
+    end
+    table.insert(result, pandoc.RawBlock('latex', '\\end{dsuff}'))
+    return result
+
   elseif classes:includes("well") then
-    local begin_env = pandoc.RawBlock('latex', '\\begin{dswell}')
-    local end_env = pandoc.RawBlock('latex', '\\end{dswell}')
-    return {begin_env, div, end_env}
-  
+    local result = {pandoc.RawBlock('latex', '\\begin{dswell}')}
+    for _, block in ipairs(div.content) do
+      table.insert(result, block)
+    end
+    table.insert(result, pandoc.RawBlock('latex', '\\end{dswell}'))
+    return result
+
   elseif classes:includes("have-fun") then
-    local begin_env = pandoc.RawBlock('latex', '\\begin{dshavefun}')
-    local end_env = pandoc.RawBlock('latex', '\\end{dshavefun}')
-    return {begin_env, div, end_env}
+    local result = {pandoc.RawBlock('latex', '\\begin{dshavefun}')}
+    for _, block in ipairs(div.content) do
+      table.insert(result, block)
+    end
+    table.insert(result, pandoc.RawBlock('latex', '\\end{dshavefun}'))
+    return result
+
+  elseif classes:includes("interlude") then
+    local result = {pandoc.RawBlock('latex', '\\begin{DeSilvaInterlude}')}
+    for _, block in ipairs(div.content) do
+      table.insert(result, block)
+    end
+    table.insert(result, pandoc.RawBlock('latex', '\\end{DeSilvaInterlude}'))
+    return result
   end
-  
+
   -- Return div unchanged if not a recognized type
   return div
 end

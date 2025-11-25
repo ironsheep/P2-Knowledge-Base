@@ -1,5 +1,13 @@
 # AI Privacy Guide - Workspace Guide
 
+## Before You Begin
+
+**Read the PDF generation lessons learned:** `/engineering/operations/lessons-learned/pdf-generation-changelog.md`
+
+This changelog documents critical issues discovered during document production (font configuration, Pandoc quirks, pagination problems) that will save significant debugging time.
+
+---
+
 ## Quick Reference
 **Canonical Name:** `ai-privacy-guide`
 **Document Title:** AI Privacy Guide for P2 Developers

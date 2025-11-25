@@ -1,0 +1,301 @@
+% P2KB DeSilva Diagrams Package
+% TikZ diagrams for COG and Hub memory layouts
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-desilva-diagrams}[2025/11/24 P2KB DeSilva Diagrams v1.0]
+
+\RequirePackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, decorations.pathreplacing}
+
+% Define colors for diagrams
+\definecolor{diagram-box}{HTML}{E8E8E8}
+\definecolor{diagram-border}{HTML}{666666}
+\definecolor{diagram-highlight}{HTML}{D4E8D4}
+\definecolor{diagram-text}{HTML}{333333}
+
+% ==================== COG ANATOMY DIAGRAM ====================
+\newcommand{\CogAnatomyDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={
+        rectangle,
+        draw=diagram-border,
+        fill=diagram-box,
+        minimum width=5.5cm,
+        minimum height=0.6cm,
+        align=center,
+        font=\footnotesize
+    },
+    highlight/.style={
+        box,
+        fill=diagram-highlight
+    },
+    smallbox/.style={
+        rectangle,
+        draw=diagram-border,
+        fill=diagram-box,
+        minimum width=2.3cm,
+        minimum height=0.7cm,
+        align=center,
+        font=\scriptsize
+    },
+    annotation/.style={
+        font=\scriptsize\itshape,
+        text=diagram-text
+    },
+    addr/.style={
+        font=\scriptsize\ttfamily,
+        text=diagram-text
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 6.0) {Each COG Contains:};
+
+% === COG RAM Section ===
+\node[font=\small\bfseries] at (-3.8, 5.3) {COG RAM};
+
+% COG RAM boxes with addresses (addresses positioned closer to boxes)
+\node[addr] at (-3.5, 4.3) {\$000};
+\node[highlight, minimum height=1.2cm] (gpram) at (0, 4.3) {General Purpose RAM\\(496 longs)};
+\node[annotation, right=0.2cm of gpram] {Code \& data};
+
+\node[addr] at (-3.5, 2.9) {\$1F0};
+\node[box, minimum height=0.5cm] (intvec) at (0, 2.9) {Interrupt Vectors (6 longs)};
+\node[annotation, right=0.2cm of intvec] {IJMP/IRET 1-3};
+
+\node[addr] at (-3.5, 2.3) {\$1F6};
+\node[box, minimum height=0.5cm] (papb) at (0, 2.3) {PA, PB (2 longs)};
+\node[annotation, right=0.2cm of papb] {Parameters};
+
+\node[addr] at (-3.5, 1.7) {\$1F8};
+\node[box, minimum height=0.5cm, fill=orange!20] (ptrs) at (0, 1.7) {PTRA, PTRB (hub pointers)};
+
+\node[addr] at (-3.5, 1.1) {\$1FA};
+\node[box, minimum height=0.5cm, fill=orange!20] (ioreg) at (0, 1.1) {DIRA/B, OUTA/B, INA/B};
+
+% Bracket for special registers - moved further right to avoid overlap
+\draw[thick, decorate, decoration={brace, amplitude=5pt}]
+    (3.2, 2.0) -- (3.2, 0.9) node[midway, right=6pt, font=\scriptsize, text width=1.8cm, align=left] {Special\\Registers};
+
+% === LUT RAM Section ===
+% Center both addresses vertically with the LUT RAM box
+\node[addr] at (-3.5, 0.4) {\$200};
+\node[highlight, minimum height=0.8cm] (lutram) at (0, 0.3) {LUT RAM (512 longs, 2KB)};
+\node[annotation, right=0.2cm of lutram] {Tables, sharing};
+\node[addr] at (-3.5, 0.1) {\$3FF};
+
+% === Other Resources === (moved down for more separation)
+\node[font=\small\bfseries] at (-3.8, -0.9) {Other Resources};
+
+% Hardware stack and flags side by side (increased spacing, smaller boxes)
+\node[smallbox] (stack) at (-1.5, -1.7) {Hardware Stack\\(8 levels)};
+\node[smallbox] (flags) at (1.5, -1.7) {C \& Z Flags};
+
+% FIFO and execution (more spacing from above)
+\node[smallbox] (fifo) at (-1.5, -2.7) {Hub FIFO\\(19 entries)};
+\node[smallbox] (pipe) at (1.5, -2.7) {5-Stage\\Pipeline};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ==================== HUB MEMORY DIAGRAM ====================
+\newcommand{\HubMemoryDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={
+        rectangle,
+        draw=diagram-border,
+        fill=diagram-box,
+        minimum width=5cm,
+        align=center,
+        font=\small
+    },
+    addr/.style={
+        font=\small\ttfamily,
+        text=diagram-text
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 4.5) {Hub Memory Layout:};
+
+% Address labels (left side) - moved further left to avoid overlap
+\node[addr, anchor=east] at (-3.0, 3.8) {\$00000};
+\node[addr, anchor=east] at (-3.0, -2.8) {\$7FFFF (512KB)};
+
+% Memory sections (top to bottom)
+\node[box, minimum height=1.5cm, fill=diagram-highlight] (prog) at (0, 3) {Your Program\\(Spin2/PASM2)};
+\node[box, minimum height=1.5cm] (vars) at (0, 1) {Variables\\Stack\\Data};
+\node[box, minimum height=2cm] (free) at (0, -1) {(Free Space)};
+
+% Draw outer border
+\draw[diagram-border, thick] (-2.7, 4) rectangle (2.7, -2.5);
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ==================== EGG BEATER DIAGRAM ====================
+\newcommand{\EggBeaterDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    cogbox/.style={
+        rectangle,
+        draw=diagram-border,
+        fill=diagram-highlight,
+        minimum width=0.7cm,
+        minimum height=0.5cm,
+        align=center,
+        font=\footnotesize\bfseries
+    },
+    annotation/.style={
+        font=\small\itshape,
+        text=diagram-text
+    },
+    linestyle/.style={
+        thick,
+        diagram-border
+    },
+    arrowstyle/.style={
+        ->,
+        >=Stealth,
+        thick,
+        green!50!black
+    }
+]
+
+% === P1 Traditional (Left side) ===
+\node[font=\bfseries] at (-4, 5) {P1 Traditional:};
+
+% COGs in a circle for P1 - taller diagram
+\foreach \i in {0,...,7} {
+    \pgfmathsetmacro{\angle}{90 - \i * 45}
+    \node[cogbox] (p1cog\i) at ({-4 + 2.0*cos(\angle)}, {2.0 + 2.0*sin(\angle)}) {\i};
+}
+
+% Simple lines connecting COGs in ring (no arrows - just shows connection)
+\foreach \i in {0,...,6} {
+    \pgfmathtruncatemacro{\next}{\i + 1}
+    \draw[linestyle, gray] (p1cog\i) -- (p1cog\next);
+}
+\draw[linestyle, gray] (p1cog7) -- (p1cog0);
+
+% P1 annotation - moved further down
+\node[annotation, text width=3cm, align=center] at (-4, -1.5) {COGs take turns\\Each waits up to\\16 clocks};
+
+% === P2 Egg Beater (Right side) ===
+\node[font=\bfseries] at (4, 5) {P2 Egg Beater:};
+
+% Central hub as a CIRCLE
+\draw[diagram-border, thick, fill=white] (4, 2.0) circle (0.9cm);
+\node[font=\footnotesize\bfseries] at (4, 2.0) {HUB};
+
+% Clockwise rotating arrow inside hub to show rotation
+\draw[thick, green!50!black, ->]
+    ([shift={(45:0.5cm)}]4,2.0) arc (45:-270:0.5cm);
+
+% COGs around the hub - taller diagram
+\foreach \i in {0,...,7} {
+    \pgfmathsetmacro{\angle}{90 - \i * 45}
+    \node[cogbox] (p2cog\i) at ({4 + 2.2*cos(\angle)}, {2.0 + 2.2*sin(\angle)}) {\i};
+    % Lines from COGs to hub circle edge (no arrows, bidirectional access)
+    \draw[linestyle, green!50!black] (p2cog\i) -- ({4 + 0.95*cos(\angle)}, {2.0 + 0.95*sin(\angle)});
+}
+
+% P2 annotation - moved further down
+\node[annotation, text width=3cm, align=center] at (4, -1.5) {All COGs access\\simultaneously!\\Max 8 clocks wait};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ==================== INSTRUCTION ANATOMY DIAGRAM ====================
+\newcommand{\InstructionAnatomyDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    field/.style={
+        rectangle,
+        draw=diagram-border,
+        fill=diagram-highlight,
+        minimum height=0.8cm,
+        align=center,
+        font=\ttfamily\small
+    },
+    optfield/.style={
+        field,
+        fill=diagram-box,
+        dashed
+    },
+    label/.style={
+        font=\scriptsize,
+        text=diagram-text,
+        align=center
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 2) {PASM2 Instruction Format:};
+
+% Fields (left to right)
+\node[optfield, minimum width=1.8cm] (cond) at (-4.5, 0.8) {condition};
+\node[field, minimum width=2.2cm] (instr) at (-2.2, 0.8) {instruction};
+\node[field, minimum width=1.5cm] (dest) at (0, 0.8) {dest};
+\node[font=\ttfamily] at (1, 0.8) {,};
+\node[field, minimum width=1.8cm] (src) at (2.3, 0.8) {\#source};
+\node[optfield, minimum width=1.2cm] (flags) at (4.3, 0.8) {flags};
+
+% Labels below
+\node[label] at (-4.5, -0.1) {optional\\(if\_z, if\_c, ...)};
+\node[label] at (-2.2, -0.1) {operation\\(add, mov, ...)};
+\node[label] at (0, -0.1) {target\\register};
+\node[label] at (2.3, -0.1) {data/value\\\# = immediate};
+\node[label] at (4.3, -0.1) {optional\\(wc, wz, wcz)};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ==================== INSTRUCTION EXAMPLE DIAGRAM ====================
+\newcommand{\InstructionExampleDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    field/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum height=0.7cm,
+        align=center,
+        font=\ttfamily\small
+    },
+    label/.style={
+        font=\scriptsize\itshape,
+        text=diagram-text,
+        align=center
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 1.8) {Example: \texttt{if\_z add total, \#10 wc}};
+
+% Fields with actual values
+\node[field, fill=orange!20, minimum width=1.2cm] (cond) at (-4, 0.7) {if\_z};
+\node[field, fill=diagram-highlight, minimum width=1.2cm] (instr) at (-2.3, 0.7) {add};
+\node[field, fill=diagram-highlight, minimum width=1.4cm] (dest) at (-0.6, 0.7) {total};
+\node[field, fill=blue!15, minimum width=1.2cm] (src) at (1, 0.7) {\#10};
+\node[field, fill=orange!20, minimum width=1cm] (flags) at (2.5, 0.7) {wc};
+
+% Labels below
+\node[label] at (-4, -0.2) {only if\\Z is set};
+\node[label] at (-2.3, -0.2) {add to};
+\node[label] at (-0.6, -0.2) {this\\register};
+\node[label] at (1, -0.2) {immediate\\value 10};
+\node[label] at (2.5, -0.2) {set carry\\flag};
+
+\end{tikzpicture}
+\end{center}
+}
+
+\endinput

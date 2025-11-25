@@ -1,5 +1,13 @@
 # P2 Smart Pins Tutorial - Workspace Guide
 
+## Before You Begin
+
+**Read the PDF generation lessons learned:** `/engineering/operations/lessons-learned/pdf-generation-changelog.md`
+
+This changelog documents critical issues discovered during document production (font configuration, Pandoc quirks, pagination problems) that will save significant debugging time.
+
+---
+
 ## Quick Reference
 **Canonical Name:** `p2-smart-pins-tutorial`
 **Document Title:** P2 Smart Pins Complete Tutorial

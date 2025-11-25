@@ -1,5 +1,13 @@
 # Spin2 Reference Manual - Workspace Guide
 
+## Before You Begin
+
+**Read the PDF generation lessons learned:** `/engineering/operations/lessons-learned/pdf-generation-changelog.md`
+
+This changelog documents critical issues discovered during document production (font configuration, Pandoc quirks, pagination problems) that will save significant debugging time.
+
+---
+
 ## Quick Reference
 **Canonical Name:** `spin2-reference-manual`
 **Document Title:** Spin2 Reference Manual (TBD)

@@ -170,3 +170,4 @@ extracted_images_enhanced_test/
 .mcp.json
 /.devcontainer
 engineering/document-production/WORKSPACE-REORGANIZATION-COMPLETE.md
+/engineering/document-production/outbound

@@ -1,3 +1,47 @@
+```{=latex}
+% Banner image at top (full width)
+\noindent\includegraphics[width=\textwidth]{inbox/assets/book-artwork.png}
+
+\begin{center}
+\vspace{0.6cm}
+{\fontsize{36}{42}\selectfont\bfseries P2 Assembly Programming\par}
+\vspace{0.3cm}
+{\Large\itshape A Human-Centered Approach to Parallel Processing\par}
+\vspace{0.6cm}
+{\large November 2025\par}
+\vspace{0.2cm}
+{\large\color{blue}Version 1.0 - Technical Review\par}
+
+\vspace{0.6cm}
+\begin{tcolorbox}[
+  colback=green!10,
+  colframe=green!50,
+  boxrule=2pt,
+  width=0.85\textwidth,
+  center,
+  title={\bfseries Tutorial Philosophy}
+]
+\textbf{Learn by doing, celebrate progress, have fun!}
+
+\vspace{0.3cm}
+This manual uses a 5-color code system:
+
+\vspace{0.2cm}
+\textcolor{green}{\textbf{Green}} = Spin2 \quad
+\textcolor{orange}{\textbf{Yellow}} = PASM2 \quad
+\textcolor{purple}{\textbf{Purple}} = CORDIC\\[0.1cm]
+\textcolor{blue}{\textbf{Blue}} = Multi-COG \quad
+\textcolor{red}{\textbf{Red}} = Antipattern (avoid)
+\end{tcolorbox}
+\end{center}
+
+\clearpage
+\pagestyle{fancy}
+
+\tableofcontents
+\clearpage
+```
+
 # Copyright and License
 
 Copyright © 2025 Parallax Inc.  
@@ -8,72 +52,53 @@ This manual incorporates knowledge and teaching approaches inspired by:
 - **Iron Sheep Productions LLC** - Technical expertise and P2 community contributions
 - **The Propeller Community** - Years of collective wisdom
 
----
 
-## License
+### License
 
 This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 
 You are free to:
+
 - **Share** — copy and redistribute the material in any medium or format
 - **Adapt** — remix, transform, and build upon the material for any purpose, even commercially
 
 Under the following terms:
+
 - **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made
 - **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license
 
----
 
-## Trademarks
+### Trademarks
 
 Propeller, Propeller 2, P2, Spin, and the Parallax logo are trademarks of Parallax Inc.
 
----
 
-## Disclaimer
+### Disclaimer
 
 The information in this manual is subject to change without notice. While every effort has been made to ensure accuracy, the authors and publishers assume no responsibility for errors or omissions, or for damages resulting from the use of the information contained herein.
 
----
 
 *First Edition: August 2025*  
 *Manual Version: 1.0.0*  
 *Knowledge Base Coverage: 80%*
 
----
 
 # Dedication
 
----
+**To deSilva** — *Whose legendary P1 assembly tutorial taught a generation of programmers that assembly language could be approachable, enjoyable, and even fun. Your unique voice—combining technical precision with human warmth—showed us that great documentation teaches not just the mind, but speaks to the spirit of discovery.*
 
-## To deSilva
+**To the Propeller Community** — *Who have spent countless hours exploring, documenting, and sharing their knowledge. From the early P1 pioneers to today's P2 innovators, your collective wisdom makes this manual possible.*
 
-*Whose legendary P1 assembly tutorial taught a generation of programmers that assembly language could be approachable, enjoyable, and even fun. Your unique voice—combining technical precision with human warmth—showed us that great documentation teaches not just the mind, but speaks to the spirit of discovery.*
+**To Future Makers** — *May you find in these pages the same joy of discovery that we experienced. The Propeller 2 is more than a microcontroller—it's an invitation to think differently about computing. Welcome to the journey.*
 
----
+*"The best way to predict the future is to invent it."* — Alan Kay
 
-## To the Propeller Community
-
-*Who have spent countless hours exploring, documenting, and sharing their knowledge. From the early P1 pioneers to today's P2 innovators, your collective wisdom makes this manual possible.*
-
----
-
-## To Future Makers
-
-*May you find in these pages the same joy of discovery that we experienced. The Propeller 2 is more than a microcontroller—it's an invitation to think differently about computing. Welcome to the journey.*
-
----
-
-*"The best way to predict the future is to invent it."*  
-— Alan Kay
-
----
 
 # Acknowledgments
 
 This manual stands on the shoulders of giants. We gratefully acknowledge:
 
-## Primary Contributors
+### Primary Contributors
 
 **deSilva** - For creating the gold standard of microcontroller documentation with the P1 Assembly Tutorial. Your pedagogical approach, combining technical depth with human empathy, remains unmatched. This manual attempts to honor your legacy while adapting to the P2's capabilities.
 
@@ -81,20 +106,21 @@ This manual stands on the shoulders of giants. We gratefully acknowledge:
 
 **Chip Gracey** - Creator of the Propeller architecture. Thank you for giving us a microcontroller that thinks differently and challenges us to do the same.
 
-## Community Contributors
+### Community Contributors
 
 **The Parallax Forums Community** - Your questions, answers, code examples, and endless experimentation have created a living knowledge base that no single author could match.
 
 **Early P2 Adopters** - Who dealt with evolving documentation, changing specifications, and still produced amazing projects that showed us what was possible.
 
-## Technical Reviewers
+### Technical Reviewers
 
 Special thanks to those who reviewed drafts, tested code examples, and provided invaluable feedback:
+
 - The P2 Documentation Team at Parallax
 - Community members who beta-tested examples
 - Everyone who reported errors and suggested improvements
 
-## Inspiration
+### Inspiration
 
 **The MIT AI Lab** - For showing us that technical documentation can have personality
 
@@ -102,38 +128,31 @@ Special thanks to those who reviewed drafts, tested code examples, and provided 
 
 **The Demoscene Community** - For pushing hardware beyond its limits and inspiring us to do the same
 
----
-
-## Production Notes
+### Production Notes
 
 This manual was created using:
+
 - Knowledge extracted from hundreds of P2 documents, forum posts, and code examples
 - AI-assisted content generation trained on deSilva's writing style
 - Community validation and real-world testing
 - A commitment to making parallel processing accessible to everyone
 
----
-
-*"If I have seen further, it is by standing on the shoulders of giants."*  
-— Isaac Newton
-
----
+*"If I have seen further, it is by standing on the shoulders of giants."* — Isaac Newton
 
 Any errors, omissions, or dad jokes that fell flat are entirely the responsibility of the authors, not our distinguished contributors.
 
----
 
 # Preface: Welcome to the Journey
 
 Well, here we are! You're about to embark on a journey into the heart of the Propeller 2, and I promise you, it's going to be quite different from what you might expect.
 
-## A Different Kind of Processor
+### A Different Kind of Processor
 
 The Propeller 2 isn't just another microcontroller. Oh no, it's something far more interesting. Imagine, if you will, eight independent processors (we call them COGs) all working together in perfect harmony, sharing a common memory space, yet each running their own programs at full speed. No interrupts fighting for attention, no complex priority schemes, just eight brains working in parallel.
 
 And if you think this sounds terribly complicated, you're probably right... but here's the secret: it's actually simpler than traditional architectures once you understand the philosophy.
 
-## About This Manual
+### About This Manual
 
 This manual follows in the footsteps of deSilva's legendary P1 tutorial. What does that mean? It means we're going to:
 
@@ -142,7 +161,7 @@ This manual follows in the footsteps of deSilva's legendary P1 tutorial. What do
 3. **Have some fun** - Yes, assembly language can actually be enjoyable!
 4. **Be honest about complexity** - When something is hard, we'll admit it and then show you how to handle it
 
-## Who Is This For?
+### Who Is This For?
 
 Are you a complete beginner to assembly language? Welcome! We'll take good care of you.
 
@@ -152,20 +171,18 @@ Are you somewhere in between? Perfect! This is exactly where you want to be.
 
 The only requirement is curiosity and a willingness to think a bit differently about how computers can work.
 
-## How to Use This Manual
+### How to Use This Manual
 
-### The Fast Track
-If you're impatient (and who isn't?), jump straight to Chapter 1. Get that LED blinking. Feel the satisfaction. Then come back here when you're ready for more.
+**The Fast Track** — If you're impatient (and who isn't?), jump straight to Chapter 1. Get that LED blinking. Feel the satisfaction. Then come back here when you're ready for more.
 
-### The Scenic Route  
-Read the chapters in order. Each builds on the previous one, and I've hidden little gems of knowledge throughout that will make later chapters easier.
+**The Scenic Route** — Read the chapters in order. Each builds on the previous one, and I've hidden little gems of knowledge throughout that will make later chapters easier.
 
-### The Reference Approach
-Already know what you're looking for? The table of contents and index are your friends. The appendices contain every instruction, every Smart Pin mode, every CORDIC operation.
+**The Reference Approach** — Already know what you're looking for? The table of contents and index are your friends. The appendices contain every instruction, every Smart Pin mode, every CORDIC operation.
 
-## What Makes the P2 Special?
+### What Makes the P2 Special?
 
 Let me count the ways:
+
 - **8 symmetric COGs** - No master/slave relationships, all COGs are equal
 - **64 Smart Pins** - Each pin has its own processor for I/O operations
 - **CORDIC engine** - Hardware trigonometry and coordinate transformations
@@ -173,37 +190,35 @@ Let me count the ways:
 - **512KB of RAM** - Shared by all COGs with deterministic access timing
 - **No interrupts** - Well, actually there are interrupts, but we'll talk about why you probably don't want them
 
-## A Personal Note
+### A Note on Our Approach
 
-I've been writing technical documentation for longer than I care to admit, and I've learned one thing: the best manual is the one that remembers you're human. You'll get frustrated. You'll make mistakes. Your code won't work the first time (or the second, or sometimes even the third).
+The best technical documentation remembers you're human. You'll get frustrated. You'll make mistakes. Your code won't work the first time (or the second, or sometimes even the third).
 
-That's normal. That's learning. And that's why I'll provide plenty of "medicine" along the way - simpler alternatives, working examples, and the occasional bad joke to keep your spirits up.
+That's normal. That's learning. And that's why this manual provides plenty of "medicine" along the way - simpler alternatives, working examples, and the occasional moment of levity to keep your spirits up.
 
-## The deSilva Spirit
+### The deSilva Spirit
 
 Throughout this manual, you'll encounter the teaching spirit of deSilva. When you see phrases like:
+
 - "Well, ..." - We're about to correct a common assumption
 - "Uff!" - We just got through something complex
 - "Have Fun!" - We mean it, this stuff is actually enjoyable
 
 These aren't just quirks; they're signals that we remember you're human and we're on this journey together.
 
-## Ready?
+### Ready?
 
 Take a deep breath. Pour yourself your favorite beverage. Open your development environment.
 
 Let's make some magic happen with the Propeller 2!
 
----
 
 *"The Propeller architecture is based on the simple idea that the best way to avoid the complexity of interrupts is to have enough processors that you don't need them."*  
 — Chip Gracey, creator of the Propeller
 
----
 
 **Turn the page, and let's blink that LED!** →
 
----
 
 # Chapter 1: Your First Spin
 
@@ -380,8 +395,7 @@ level   long    0
 
 Don't worry if the PWM example seems complex - we'll cover Smart Pins in detail in Chapter 8!
 
-## The Medicine Cabinet
-
+::: medicine-cabinet
 Feeling overwhelmed? Here's the simplified prescription:
 
 **Minimum viable blinker** - Just 3 instructions:
@@ -395,12 +409,15 @@ loop    drvnot  #56         ' Toggle pin 56
 :::
 
 The `drvnot` instruction toggles a pin - if it's high, make it low; if it's low, make it high. Sometimes simpler is better!
+:::
 
-## Sidetrack: Why Start at Address 0?
+::: sidetrack
+### Why Start at Address 0?
 
 You might wonder why COG code always starts at address 0. It's actually quite elegant:
 
 When a COG is started with `coginit`, the hardware:
+
 1. Stops the COG (if it was running)
 2. Copies 512 longs from hub to COG memory (addresses 0-511)
 3. Starts execution at COG address 0
@@ -408,6 +425,7 @@ When a COG is started with `coginit`, the hardware:
 This means every COG program starts fresh, with a clean slate. No residual state, no confusion. It's like each COG gets a fresh brain transplant every time it starts!
 
 The last 16 longs (addresses 496-511) are special purpose registers (DIRA, OUTA, etc. in P1 terms, though P2 handles these differently). We'll explore these later.
+:::
 
 ## Common Gotchas
 
@@ -443,15 +461,12 @@ In Chapter 2, we'll take our "Architecture Safari" and explore:
 
 But for now, enjoy your blinking LED. You've just taken your first step into parallel processing!
 
----
 
 **Have Fun!** And remember, every expert was once a beginner who kept their LED blinking when everyone else gave up.
 
----
 
 *Continue to [Chapter 2: Architecture Safari](02-architecture-safari.md) →*
 
----
 
 # Chapter 2: Architecture Safari
 
@@ -485,20 +500,8 @@ It's like the difference between one stressed-out juggler trying to keep eight b
 
 Let's dissect a COG and see what makes it tick:
 
-```
-Each COG Contains:
-┌────────────────────────────────┐
-│ 512 Longs of RAM (2KB)         │ ← Your code and data live here
-├────────────────────────────────┤
-│ Program Counter (PC)            │ ← Points to next instruction
-├────────────────────────────────┤
-│ Z Flag (Zero)                   │ ← Result was zero
-│ C Flag (Carry)                  │ ← Carry/borrow occurred
-├────────────────────────────────┤
-│ FIFO (Optional)                 │ ← For streaming operations
-├────────────────────────────────┤
-│ Interrupt Vectors (Optional)    │ ← If you really must...
-└────────────────────────────────┘
+```{=latex}
+\CogAnatomyDiagram
 ```
 
 But here's the beautiful part: COGs are identical. There's no "master" COG or "special" COG. Any COG can do anything any other COG can do. Democracy in silicon!
@@ -521,24 +524,8 @@ Think of it like haiku - the constraint forces elegance.
 
 The hub is where COGs come together. It's 512KB of RAM shared by all COGs, and it's where the magic of cooperation happens.
 
-```
-Hub Memory Layout:
-┌────────────────────┐ $00000
-│                    │
-│    Your Program    │
-│    (Spin2/PASM2)   │
-│                    │
-├────────────────────┤ 
-│                    │
-│     Variables      │
-│       Stack        │
-│       Data         │
-│                    │
-├────────────────────┤
-│                    │
-│    (Free Space)    │
-│                    │
-└────────────────────┘ $7FFFF (512KB)
+```{=latex}
+\HubMemoryDiagram
 ```
 
 ### The Egg Beater Revolution
@@ -547,15 +534,8 @@ Now here's where P2 gets clever. In P1, COGs took turns accessing the hub in a r
 
 P2 uses what we call the "egg beater" model. Imagine eight beaters (COGs) all whipping through the same bowl (hub) simultaneously, but their paths are cleverly arranged so they never collide:
 
-```
-Traditional (P1) Hub Access:
-COG0 → COG1 → COG2 → COG3 → ... → COG0 (repeat)
-Each COG waits its turn
-
-Egg Beater (P2) Hub Access:
-All COGs access different "slices" simultaneously!
-Every COG gets access every 8 clocks
-No collisions, no waiting (if you're clever)
+```{=latex}
+\EggBeaterDiagram
 ```
 
 The practical result? Hub access is MUCH faster and more predictable. Instead of waiting up to 16 clocks (P1), you wait at most 8 clocks (P2), and often less if you align your accesses properly.
@@ -731,8 +711,7 @@ counter    long 0
 
 Four COGs running this code = four sensors being read truly simultaneously. Try doing that with a single processor and interrupts!
 
-## The Medicine Cabinet
-
+::: medicine-cabinet
 Feeling overwhelmed by all this parallel processing? Here's your prescription:
 
 **Start simple**: Use just one or two COGs at first
@@ -764,19 +743,22 @@ debug_cog
 ' Spin2 manages COGs, PASM2 does the real-time work
 PUB orchestrator()
     startSensorCog(0)
-    startMotorCog(1)  
+    startMotorCog(1)
     startCommsCog(2)
     ' Spin2 coordinates, PASM2 executes
 ```
 :::
+:::
 
-## Sidetrack: The Philosophy of Parallel
+::: sidetrack
+### The Philosophy of Parallel
 
 The Propeller's design philosophy comes from a simple observation: in the real world, things happen in parallel, not in sequence.
 
 Consider your car:
+
 - The engine runs continuously
-- The radio plays independently  
+- The radio plays independently
 - The climate control maintains temperature
 - The dashboard updates displays
 - The ABS monitors wheel speed
@@ -784,6 +766,7 @@ Consider your car:
 These aren't taking turns - they're all happening simultaneously. The Propeller models this reality directly. Instead of one processor frantically time-slicing between tasks, you have eight processors each focused on their job.
 
 It's not just different - it's more natural.
+:::
 
 ## Common Gotchas
 
@@ -874,15 +857,12 @@ In Chapter 3, "Speaking PASM2", we'll dive deep into the instruction set:
 
 But for now, appreciate what you've learned: you understand the Propeller's parallel philosophy. That's not just technical knowledge - it's a new way of thinking about computing.
 
----
 
 **Have Fun!** Remember, parallel processing isn't harder - it's different. And different can be wonderful.
 
----
 
 *Continue to [Chapter 3: Speaking PASM2](03-speaking-pasm2.md) →*
 
----
 
 # Chapter 3: Speaking PASM2
 
@@ -911,23 +891,15 @@ In most processors, that would take multiple instructions. In PASM2, it's just o
 
 Every PASM2 instruction follows the same basic pattern:
 
-```
-[condition] instruction dest, [#]source [flags]
-     ↑           ↑        ↑       ↑        ↑
- optional    what to do  target  data   optional
+```{=latex}
+\InstructionAnatomyDiagram
 ```
 
 Let's dissect a real instruction:
 
-::: pasm2
+```{=latex}
+\InstructionExampleDiagram
 ```
-if_z    add     total, #10 wc
- ↑       ↑        ↑     ↑   ↑
-only if  add    to this immediate set carry
-Z flag           value   value    flag
-is set
-```
-:::
 
 ## The Basic Vocabulary
 
@@ -1062,27 +1034,27 @@ if_nc   add     x, #1          ' Only add if C flag clear
 ```
 :::
 
-The conditions:
+The basic conditions:
 
-```
-if_z     - If Z flag set (result was zero)
-if_nz    - If Z flag clear (result not zero)
-if_c     - If C flag set (carry/borrow occurred)
-if_nc    - If C flag clear
-if_c_and_z   - If both C and Z set
-if_c_or_z    - If either C or Z set
-if_c_eq_z    - If C equals Z
-if_c_ne_z    - If C not equal to Z
-```
+| Condition | Meaning |
+|-----------|---------|
+| `if_z` | If Z flag set (result was zero) |
+| `if_nz` | If Z flag clear (result not zero) |
+| `if_c` | If C flag set (carry/borrow occurred) |
+| `if_nc` | If C flag clear |
+| `if_c_and_z` | If both C and Z set |
+| `if_c_or_z` | If either C or Z set |
+| `if_c_eq_z` | If C equals Z |
+| `if_c_ne_z` | If C not equal to Z |
 
-And the advanced ones:
+And the comparison conditions (use after CMP):
 
-```
-if_a     - If above (unsigned greater)
-if_b     - If below (unsigned less)
-if_ae    - If above or equal
-if_be    - If below or equal
-```
+| Condition | Meaning |
+|-----------|---------|
+| `if_a` | If above (unsigned greater) |
+| `if_b` | If below (unsigned less) |
+| `if_ae` | If above or equal |
+| `if_be` | If below or equal |
 
 ### The Call/Return Dance
 
@@ -1187,11 +1159,10 @@ temp    long    0
 ```
 :::
 
-## The Medicine Cabinet
-
+::: medicine-cabinet
 Feeling overwhelmed? Here's your simplified prescription:
 
-### Minimum Instructions to Know
+**Minimum Instructions to Know**
 
 ::: pasm2
 ```
@@ -1218,6 +1189,7 @@ if_z    jmp #label    ' Conditional jump
 :::
 
 Master these 10 instructions and you can write real programs!
+:::
 
 ## Common Gotchas
 
@@ -1313,7 +1285,8 @@ Compare multiply methods:
 ```
 :::
 
-## Sidetrack: Why PASM2 Is Different
+::: sidetrack
+### Why PASM2 Is Different
 
 Most assembly languages are thin wrappers over hardware. PASM2 is different - it's designed for humans:
 
@@ -1323,6 +1296,7 @@ Most assembly languages are thin wrappers over hardware. PASM2 is different - it
 4. **No special cases**: General-purpose registers, no accumulator
 
 This isn't accident - it's philosophy. The P2 was designed to make assembly programming pleasant.
+:::
 
 ## What We've Learned
 
@@ -1344,15 +1318,12 @@ Chapter 4, "The Hub Connection", explores:
 
 You now speak basic PASM2. Time to learn how COGs communicate!
 
----
 
 **Have Fun!** Remember, PASM2 isn't like other assembly languages - it's actually enjoyable!
 
----
 
 *Continue to [Chapter 4: The Hub Connection](04-hub-connection.md) →*
 
----
 
 # Chapter 4: The Hub Connection
 
@@ -1437,8 +1408,7 @@ clear_screen
 ```
 :::
 
-## The Medicine Cabinet
-
+::: medicine-cabinet
 **Simple hub access pattern**:
 
 ::: pasm2
@@ -1449,12 +1419,10 @@ clear_screen
         ' That's all you really need!
 ```
 :::
-
----
+:::
 
 *Continue to [Chapter 5: Mathematics Unleashed](05-mathematics-unleashed.md) →*
 
----
 
 # Chapter 5: Mathematics Unleashed
 
@@ -1534,11 +1502,9 @@ fixed_mul
 ```
 :::
 
----
 
 *Continue to [Chapter 6: Flags and Decisions](06-flags-decisions.md) →*
 
----
 
 # Chapter 6: Flags and Decisions
 
@@ -1598,777 +1564,13 @@ if_lt   jmp     #less           ' x < y (signed)
 ```
 :::
 
----
 
 *Continue to [Chapter 7: CORDIC Magic](07-cordic-magic.md) →*
 
----
+
 
 # Chapter 7: CORDIC Magic
 
-*Trigonometry at the speed of logic*
-
-## The Hook: Hardware Sine in 55 Clocks
-
-::: pasm2
-```
-        qrotate angle, ##$7FFF_FFFF  ' Start rotation
-        getqx   cosine               ' Get cosine (55 clocks later)
-        getqy   sine                 ' Get sine
-        ' Hardware trigonometry!
-```
-:::
-
-No lookup tables. No approximations. Pure mathematical precision.
-
-## What Is CORDIC?
-
-CORDIC (COordinate Rotation DIgital Computer) is a method for calculating trigonometric functions using only shifts and adds. P2 has it in hardware!
-
-::: pasm2
-```
-' Rotate a point
-        setq    y                ' Set Y coordinate
-        qrotate x, angle        ' Rotate X,Y by angle
-        getqx   new_x           ' Get rotated X
-        getqy   new_y           ' Get rotated Y
-```
-:::
-
-## Practical Applications
-
-::: pasm2
-```
-' Calculate distance (Pythagorean theorem)
-        setq    y
-        qvector x, #0           ' Start vector calculation
-        getqx   distance        ' sqrt(x² + y²)
-        getqy   angle          ' atan2(y, x)
-        
-' Generate sine wave
-        qrotate angle, ##AMPLITUDE
-        getqy   sample         ' Sine wave sample
-        add     angle, ##FREQUENCY
-```
-:::
-
-## The Pipeline Concept
-
-CORDIC operations take 55 clocks, but they're pipelined:
-
-::: pasm2
-```
-' Start multiple operations
-        qrotate angle1, radius
-        add     angle1, #1
-        qrotate angle1, radius  ' Starts immediately!
-        ' Both complete in ~56 clocks total
-```
-:::
-
----
-
-*Continue to [Chapter 8: Smart Pins Symphony](08-smart-pins-symphony.md) →*
-
----
-
-# Chapter 8: Smart Pins Symphony
-
-*64 independent I/O processors*
-
-## The Hook: UART in 3 Instructions
-
-::: pasm2
-```
-        wrpin   ##P_ASYNC_TX, #PIN    ' Configure as UART TX
-        wxpin   ##BAUD_RATE, #PIN     ' Set baud rate
-        dirh    #PIN                  ' Enable pin
-        ' That's it - hardware UART ready!
-        
-        wypin   char, #PIN            ' Send a character
-        ' No bit-banging required!
-```
-:::
-
-## Smart Pins Explained
-
-Each of the 64 pins has its own processor that can:
-- Generate PWM
-- Measure frequency
-- Send/receive serial data
-- Perform ADC/DAC operations
-- Count edges
-- Measure pulse widths
-- And much more!
-
-## Digital I/O Basics
-
-::: pasm2
-```
-' Simple output
-        drvh    #PIN            ' Drive high
-        drvl    #PIN            ' Drive low
-        drvnot  #PIN            ' Toggle
-        fltl    #PIN            ' Float (high-Z)
-        
-' Simple input
-        testp   #PIN wc         ' Read pin into C flag
-```
-:::
-
-## PWM and Timing
-
-::: pasm2
-```
-' PWM output
-        wrpin   ##P_PWM_TRIANGLE, #PIN
-        wxpin   ##1000, #PIN    ' Period
-        wypin   ##500, #PIN     ' 50% duty cycle
-        dirh    #PIN            ' Start PWM
-```
-:::
-
-## Serial Communications
-
-::: pasm2
-```
-' Async serial (UART)
-        wrpin   ##P_ASYNC_TX, #TX_PIN
-        wxpin   baud_config, #TX_PIN
-        dirh    #TX_PIN
-        
-' Send byte
-        wypin   data, #TX_PIN
-        waitx   #20             ' Brief delay
-        testp   #TX_PIN wc      ' Check if done
-```
-:::
-
-## Real-World Example: WS2812 LED Driver
-
-::: pasm2
-```
-' Smart pin generates precise WS2812 timing
-ws2812_setup
-        wrpin   ##P_PULSE, #LED_PIN
-        wxpin   bit_timing, #LED_PIN
-        dirh    #LED_PIN
-        
-send_rgb
-        shl     green, #8
-        or      green, red
-        shl     green, #8
-        or      green, blue
-        wypin   green, #LED_PIN  ' Send 24-bit RGB
-```
-:::
-
----
-
-*Continue to [Chapter 9: Streaming Data](09-streaming-data.md) →*
-
----
-
-# Chapter 9: Streaming Data
-
-*Moving data at maximum velocity*
-
-## The Hook: DMA-Like Streaming
-
-::: pasm2
-```
-        setq    ##1000-1         ' Transfer 1000 longs
-        rdlong  buffer, source   ' Happens at maximum speed!
-        ' 4KB moved in microseconds!
-```
-:::
-
-## The Streamer Concept
-
-The streamer is P2's DMA engine:
-- Moves data between hub and pins
-- Generates video
-- Captures high-speed data
-- All without CPU intervention
-
-## FIFO Operations
-
-::: pasm2
-```
-        rdfast  #0, hubaddr     ' Start FIFO read
-loop    rflong  data           ' Read from FIFO (no waiting!)
-        ' Process data
-        djnz    count, #loop
-```
-:::
-
----
-
-*Continue to [Chapter 10: Hub Execution](10-hub-execution.md) →*
-
----
-
-# Chapter 10: Hub Execution
-
-*Breaking free from 512 instructions*
-
-## The Hook: Unlimited Code Size
-
-::: pasm2
-```
-        orgh    $400            ' Code in hub memory
-        org     0               ' But executes like COG code!
-        
-hub_code
-        ' Your code can be megabytes!
-        ' No more 512 instruction limit!
-```
-:::
-
-## COG vs Hub Execution
-
-**COG Execution**:
-- Fast (2 clocks per instruction)
-- Limited to 512 instructions
-- Deterministic timing
-
-**Hub Execution**:
-- Slower (2-9 clocks per instruction)
-- Unlimited size
-- Perfect for large programs
-
-## Mixed Mode Programming
-
-::: pasm2
-```
-        call    #hub_function   ' Call hub code from COG
-        jmp     #cog_code      ' Jump back to COG
-        ' Mix and match as needed!
-```
-:::
-
----
-
-*Continue to [Chapter 11: Interrupts (If You Must)](11-interrupts-if-you-must.md) →*
-
----
-
-# Chapter 11: Interrupts (If You Must)
-
-*With great power comes great responsibility*
-
-## The Hook: Yes, P2 Has Interrupts
-
-::: pasm2
-```
-        setint1 #INT_PINRISE, #BUTTON_PIN  ' Setup interrupt
-        ' Your code runs normally...
-        ' Until button is pressed!
-        
-int1_handler
-        ' Interrupt code here
-        reti1                               ' Return from interrupt
-```
-:::
-
-## The Interrupt Controversy
-
-P2 has interrupts. Should you use them? Usually NO.
-
-Why? Because you have 8 COGs! Instead of interrupting important work, dedicate a COG to monitoring.
-
-## When to Use Them
-
-Rarely. But sometimes useful for:
-- Ultra-low latency response
-- Power-saving scenarios
-- Legacy code ports
-
-## When NOT to Use Them
-
-Most of the time! Use a dedicated COG instead:
-- Cleaner code
-- Deterministic timing
-- No priority inversion
-- Easier debugging
-
----
-
-*Continue to [Chapter 12: Optimization Mastery](12-optimization-mastery.md) →*
-
----
-
-# Chapter 12: Optimization Mastery
-
-*Making it faster, smaller, better*
-
-## The Hook: 2x Speed with One Change
-
-::: pasm2
-```
-' Before: 8 clocks
-        rdlong  x, hubaddr
-        add     x, #1
-        wrlong  x, hubaddr
-        
-' After: 4 clocks  
-        rdlong  x, ptra++
-        add     x, #1
-        wrlong  x, --ptra
-        ' PTRA magic saves cycles!
-```
-:::
-
-## Pipeline Optimization
-
-Understanding the pipeline:
-- Most instructions: 2 clocks
-- Hub access: 2-9 clocks
-- CORDIC: 55 clocks
-- Multiply: 2 clocks
-
-## Instruction Pairing
-
-::: pasm2
-```
-' These can overlap
-        mul     x, y           ' Starts multiply
-        add     a, b           ' Executes while multiply runs
-        getmulh result         ' Gets multiply result
-```
-:::
-
-## Memory Access Patterns
-
-::: pasm2
-```
-' Block transfers are FAST
-        setq    #16-1
-        rdlong  buffer, hubaddr ' 16 longs in one go!
-```
-:::
-
----
-
-*Continue to [Chapter 13: Video Generation](13-video-generation.md) →*
-
----
-
-# Chapter 13: Video Generation
-
-*From pixels to pictures*
-
-## The Hook: VGA in 10 Instructions
-
-::: pasm2
-```
-        setcmod #$100           ' Set colorspace
-        setcy   ##640*480      ' Set resolution
-        setci   ##HSYNC_TIMING ' Set timing
-        setcq   ##VSYNC_TIMING
-        setcfrq ##PIX_FREQ     ' Set pixel frequency
-        setcy   ##LINE_BUFFER  ' Set buffer address
-        xinit   ##STREAMER_CMD, #0  ' Start video!
-```
-:::
-
-## Video Fundamentals
-
-P2 generates video through:
-- The streamer (DMA engine)
-- Smart pins (sync signals)
-- COG timing (line control)
-
-## VGA Generation
-
-Complete VGA driver example with proper timing and double buffering.
-
-## HDMI Basics
-
-P2 can generate HDMI signals using Smart Pins in special modes.
-
----
-
-*Continue to [Chapter 14: Serial Protocols](14-serial-protocols.md) →*
-
----
-
-# Chapter 14: Serial Protocols
-
-*Talking to the world*
-
-## The Hook: Hardware UART, SPI, and I2C
-
-::: pasm2
-```
-' UART in hardware
-        wrpin   ##P_ASYNC_TX, #TX_PIN
-        wxpin   ##BAUD_115200, #TX_PIN
-        dirh    #TX_PIN
-        wypin   char, #TX_PIN    ' Send character!
-```
-:::
-
-## UART Implementation
-
-Smart Pins handle the bit timing, you handle the bytes.
-
-## SPI Master and Slave
-
-::: pasm2
-```
-' SPI using Smart Pins
-        wrpin   ##P_SYNC_TX, #MOSI_PIN
-        wrpin   ##P_SYNC_RX, #MISO_PIN
-        ' Clock and data handled in hardware!
-```
-:::
-
-## I2C Communication
-
-Bit-banged or Smart Pin assisted - your choice!
-
----
-
-*Continue to [Chapter 15: Signal Processing](15-signal-processing.md) →*
-
----
-
-# Chapter 15: Signal Processing
-
-*Digital meets analog*
-
-## The Hook: 16-Bit ADC, No External Hardware
-
-::: pasm2
-```
-        wrpin   ##P_ADC_1X, #ADC_PIN   ' Configure ADC
-        dirh    #ADC_PIN               ' Enable
-        waitx   ##100                  ' Settle time
-        rdpin   sample, #ADC_PIN       ' Read 16-bit sample!
-```
-:::
-
-## ADC and DAC Operations
-
-Every pin can be:
-- 16-bit ADC (with noise shaping)
-- 16-bit DAC (with dithering)
-- Comparator
-- Sigma-delta converter
-
-## Digital Filtering
-
-Using CORDIC for DSP:
-
-::: pasm2
-```
-' Simple low-pass filter
-        qrotate sample, ##FILTER_COEFF
-        getqy   filtered
-```
-:::
-
-## Audio Processing
-
-Real-time audio with Smart Pins and CORDIC.
-
----
-
-*Continue to [Chapter 16: Multi-COG Orchestration](16-multi-cog-orchestration.md) →*
-
----
-
-# Chapter 16: Multi-COG Orchestration
-
-*The symphony comes together*
-
-## The Hook: 8-COG Pipeline
-
-::: pasm2
-```
-' COG 0: Read sensor
-' COG 1: Filter data  
-' COG 2: Process signals
-' COG 3: Control motor
-' COG 4: Update display
-' COG 5: Handle communications
-' COG 6: Monitor safety
-' COG 7: Coordinate everything
-' All running simultaneously!
-```
-:::
-
-## COG Communication Patterns
-
-### Producer-Consumer
-
-::: pasm2
-```
-' Producer COG
-        wrlong  data, ##mailbox
-        
-' Consumer COG
-poll    rdlong  data, ##mailbox wz
-   if_z jmp     #poll
-        wrlong  #0, ##mailbox    ' Clear
-```
-:::
-
-### Ring Buffer
-
-::: pasm2
-```
-' Circular buffer for streaming data
-        wrlong  data, ptra++
-        cmp     ptra, ##BUFFER_END wcz
-   if_ae mov    ptra, ##BUFFER_START
-```
-:::
-
-## Locks and Semaphores
-
-::: pasm2
-```
-' Atomic operations using locks
-get_lock
-        locktry #0 wc
-   if_c jmp     #get_lock
-        ' Critical section
-        lockrel #0
-```
-:::
-
-## System Architecture
-
-Best practices for multi-COG systems:
-- Dedicate COGs to specific tasks
-- Minimize shared state
-- Use mailboxes for commands
-- Keep timing deterministic
-
-## Real-World Example: Robot Controller
-
-::: pasm2
-```
-' Main coordinator (COG 0)
-main    coginit #SENSOR_COG, @sensor_code, @sensor_params
-        coginit #MOTOR_COG, @motor_code, @motor_params
-        coginit #COMM_COG, @comm_code, @comm_params
-        
-        ' Coordination loop
-loop    rdlong  sensor_data, ##SENSOR_MAILBOX
-        ' Process and decide
-        wrlong  motor_cmd, ##MOTOR_MAILBOX
-        jmp     #loop
-```
-:::
-
-## The Medicine Cabinet
-
-**Simple multi-COG pattern**:
-
-::: pasm2
-```
-' Just use hub variables
-' Each COG owns specific addresses
-' No locks needed if single-writer
-```
-:::
-
-## What We've Learned
-
-You've completed the journey! You now understand:
-- ✅ Parallel processing philosophy
-- ✅ COG architecture and communication
-- ✅ PASM2 instruction set
-- ✅ Smart Pins and I/O
-- ✅ CORDIC mathematics
-- ✅ Video and serial protocols
-- ✅ Multi-COG orchestration
-
-## Your Next Steps
-
-1. Build something amazing
-2. Share with the community
-3. Push the boundaries
-4. Have fun!
-
----
-
-**Congratulations!** You're now fluent in PASM2 and ready to unleash the full power of the Propeller 2!
-
----
-
-*Continue to [Appendix A: Instruction Set Reference](appendix-a-instruction-reference.md) →*
-
----
-
-# Appendix A: Instruction Set Reference
-
-## Quick Reference Format
-
-Each instruction entry includes:
-- Syntax
-- Operation
-- Flags affected
-- Timing
-- Example
-
-## Memory Access Instructions
-
-### RDBYTE - Read Byte from Hub
-```
-Syntax:  RDBYTE D, S/# {WZ/WC}
-Operation: D = byte at hub[S]
-Flags:    Z = (D == 0), C = D[7]
-Timing:   2-9 clocks
-Example:  RDBYTE value, hubaddr wz
-```
-
-### RDWORD - Read Word from Hub
-```
-Syntax:  RDWORD D, S/# {WZ/WC}
-Operation: D = word at hub[S]
-Flags:    Z = (D == 0), C = D[15]
-Timing:   2-9 clocks
-```
-
-### RDLONG - Read Long from Hub
-```
-Syntax:  RDLONG D, S/# {WZ/WC}
-Operation: D = long at hub[S]
-Flags:    Z = (D == 0), C = D[31]
-Timing:   2-9 clocks
-```
-
-[Continue with all instruction categories...]
-
----
-
-*For complete instruction details, see the P2 Silicon Documentation*
-
----
-
-# Index
-
-## A
-- ADC operations: Ch15
-- ADD instruction: Ch3, Ch5
-- Address modes: Ch3
-- ALTD/ALTS: Ch3
-- Architecture: Ch2
-- Assembly basics: Ch3
-
-## B
-- Bit manipulation: Ch3
-- Block transfers: Ch4, Ch9
-- Booleans: Ch3
-
-## C
-- C flag: Ch6
-- CALL/RET: Ch3
-- Clock timing: Ch2
-- CMP instruction: Ch6
-- COG anatomy: Ch2
-- COG communication: Ch2, Ch16
-- Conditional execution: Ch3, Ch6
-- CORDIC: Ch7
-- Counters: Ch2
-
-## D
-- DAC operations: Ch15
-- Debugging: Ch12
-- Division: Ch5
-- DRVH/DRVL: Ch1
-
-## E
-- Egg beater: Ch2, Ch4
-
-## F
-- FIFO: Ch4, Ch9
-- Flags: Ch6
-- Flow control: Ch3
-
-## G
-- GETMULH: Ch5
-- GETQX/GETQY: Ch7
-
-## H
-- Hardware multiply: Ch5
-- HDMI: Ch13
-- Hub execution: Ch10
-- Hub memory: Ch2, Ch4
-
-## I
-- I2C: Ch14
-- Immediate values: Ch3
-- Instruction format: Ch3
-- Interrupts: Ch11
-
-## J
-- JMP instruction: Ch3
-
-## L
-- LED control: Ch1
-- Locks: Ch2, Ch16
-- Logic operations: Ch3
-
-## M
-- Mailboxes: Ch2, Ch16
-- Mathematics: Ch5
-- Memory access: Ch4
-- MOV instruction: Ch3
-- MUL/MULS: Ch5
-- Multi-COG: Ch16
-
-## O
-- Optimization: Ch12
-
-## P
-- Parallel processing: Ch2
-- Pipeline: Ch7, Ch12
-- Pins, Smart: Ch8
-- PTRA/PTRB: Ch3, Ch4
-- PWM: Ch8
-
-## Q
-- Q flag: Ch7
-- QDIV: Ch5
-- QROTATE: Ch7
-
-## R
-- RDBYTE/RDWORD/RDLONG: Ch4
-- REP instruction: Ch3
-- Rotation: Ch3, Ch7
-
-## S
-- Serial protocols: Ch14
-- Shift operations: Ch3
-- Signal processing: Ch15
-- SKIP instruction: Ch3, Ch6
-- Smart Pins: Ch8
-- SPI: Ch14
-- Streamer: Ch9
-
-## T
-- Timer: Ch2
-- Timing: Ch2, Ch12
-- Trigonometry: Ch7
-
-## U
-- UART: Ch8, Ch14
-
-## V
-- VGA: Ch13
-- Video generation: Ch13
-
-## W
-- WAITX: Ch1
-- WRBYTE/WRWORD/WRLONG: Ch4
-
-## Z
-- Z flag: Ch6# Chapter 7: CORDIC Magic
 
 *Trigonometry at the speed of logic gates*
 
@@ -2590,12 +1792,8 @@ Hint: qvector with Y in Q gives you radius (distance)
 Success Check: Distance should be 50 units
 :::
 
-## The Medicine Cabinet
-
+::: medicine-cabinet
 Feeling overwhelmed by all this trigonometry? Here's your simplified prescription:
-
-:::sidetrack
-### Sidetrack D: CORDIC Medicine
 
 **Too Complex?** Just remember these three patterns:
 
@@ -2775,10 +1973,8 @@ CORDIC can also do logarithms and exponentials:
 
 These are less commonly used but incredibly powerful for DSP and scientific calculations.
 
-## Interlude 2: The History of CORDIC
-
 :::interlude
-**Interlude 2: Jack Volder's Gift to Computing**
+**Jack Volder's Gift to Computing**
 
 In 1959, Jack Volder was working on navigation computers for aircraft. He needed to calculate trigonometric functions, but the computers of the day couldn't handle the complex math quickly enough.
 
@@ -2807,11 +2003,9 @@ Chapter 8 brings us back to Earth with "Basic I/O" - the fundamental pin operati
 
 But first, take a moment to appreciate what you just learned. CORDIC is unique to the Propeller 2 - most microcontrollers would need extensive software libraries to do what you just did in three instructions!
 
----
 
 **Have Fun!** And remember - with CORDIC, you're not just calculating trigonometry, you're doing it at hardware speed. That's magical!
 
----
 
 # Chapter 8: Basic I/O
 
@@ -3082,12 +2276,8 @@ Hint: Use getct after button detection
 Success Check: Time measured in clock cycles
 :::
 
-## The Medicine Cabinet
-
+::: medicine-cabinet
 Feeling overwhelmed by all these pin operations? Here's the simplified prescription:
-
-:::sidetrack
-### Sidetrack E: I/O Medicine
 
 **Just need something working?** Remember these patterns:
 
@@ -3234,11 +2424,9 @@ Well, while you CAN bit-bang serial at 115200 baud, or generate PWM, or measure 
 
 Chapter 9 takes us into "Streaming Data" - the P2's incredible FIFO system that can move megabytes of data without breaking a sweat. We'll see how to stream video, audio, and massive data blocks at maximum speed.
 
----
 
 **Have Fun!** Remember, every embedded system ultimately comes down to pins going high and low. You've just mastered the fundamentals that everything else builds upon!
 
----
 
 # Chapter 9: Streaming Data
 
@@ -3376,12 +2564,8 @@ hub_code
 
 When you call or jump to hub code, the FIFO automatically feeds instructions to the COG. It's like having unlimited code space!
 
-## The Medicine Cabinet
-
+::: medicine-cabinet
 Feeling overwhelmed by all this streaming? Here's your prescription:
-
-:::sidetrack
-### Sidetrack F: Streaming Medicine
 
 **Just need to move data?** Use these simple patterns:
 
@@ -3583,11 +2767,9 @@ Your streaming skills now include:
 
 Chapter 10 explores "Hub Execution" - how to break free from the 512-instruction limit and run massive programs directly from hub memory. It's like having your cake and eating it too!
 
----
 
 **Have Fun!** Remember, streaming is about throughput, not just speed. It's the difference between carrying one brick at a time and using a wheelbarrow!
 
----
 
 # Chapter 10: Hub Execution
 
@@ -3782,12 +2964,8 @@ Hint: Each function can be as complex as needed
 Success Check: Multiple operations working
 :::
 
-## The Medicine Cabinet
-
+::: medicine-cabinet
 Overwhelmed by execution modes? Here's the simple version:
-
-:::sidetrack
-### Sidetrack G: Hub Execution Medicine
 
 **Keep it simple:**
 
@@ -3801,7 +2979,7 @@ Overwhelmed by execution modes? Here's the simple version:
 ```
         org     0
         jmp     #main      ' Jump to hub
-        
+
         orgh    $400
 main    ' Your big program here
 ```
@@ -3940,11 +3118,9 @@ You've mastered hub execution:
 
 Chapter 11 tackles the controversial topic: "Why No Interrupts?" We'll explore why the Propeller philosophy says you don't need them, and why that's actually a good thing!
 
----
 
 **Have Fun!** Hub execution is like having a sports car that can also carry furniture - you get both speed and capacity when you need them!
 
----
 
 # Chapter 11: Why No Interrupts?
 
@@ -4095,12 +3271,8 @@ When might you use them?
 
 Uff! Even writing interrupt code feels wrong on a Propeller!
 
-## The Medicine Cabinet
-
+::: medicine-cabinet
 Still thinking you need interrupts? Here's your medicine:
-
-:::sidetrack
-### Sidetrack H: Interrupt Alternatives
 
 **Think you need an interrupt for...**
 
@@ -4171,31 +3343,25 @@ Events are like interrupts that wait politely for you to check them. No rudeness
 Let me share why we avoid interrupts:
 
 ### Story 1: The Jittery Display
-```
-With interrupts: Display updates interrupted by serial
-Result: Visible glitches, tearing, inconsistent timing
 
-With COGs: Display COG runs uninterrupted  
-Result: Perfect, smooth, glitch-free display
-```
+| Approach | Problem | Result |
+|----------|---------|--------|
+| **With Interrupts** | Display updates interrupted by serial | Visible glitches, tearing, inconsistent timing |
+| **With COGs** | Display COG runs uninterrupted | Perfect, smooth, glitch-free display |
 
 ### Story 2: The Missed Pulse
-```
-With interrupts: Motor step interrupted by sensor read
-Result: Missed step, motor stalls, position lost
 
-With COGs: Motor COG never misses a beat
-Result: Perfect positioning, no lost steps
-```
+| Approach | Problem | Result |
+|----------|---------|--------|
+| **With Interrupts** | Motor step interrupted by sensor read | Missed step, motor stalls, position lost |
+| **With COGs** | Motor COG never misses a beat | Perfect positioning, no lost steps |
 
 ### Story 3: The Debugging Nightmare
-```
-With interrupts: Bug only appears under specific timing
-Result: Days of debugging, hair loss, coffee overdose
 
-With COGs: Deterministic timing, reproducible behavior
-Result: Bug found in minutes, sanity preserved
-```
+| Approach | Problem | Result |
+|----------|---------|--------|
+| **With Interrupts** | Bug only appears under specific timing | Days of debugging, hair loss, coffee overdose |
+| **With COGs** | Deterministic timing, reproducible behavior | Bug found in minutes, sanity preserved |
 
 ## Your Turn: COG vs Interrupt Challenge
 
@@ -4295,11 +3461,9 @@ You now understand the Propeller way:
 
 Chapter 12 shows you "Optimization Mastery" - how to make your PASM2 code blazingly fast. We'll explore the pipeline, instruction pairing, and timing tricks that squeeze every drop of performance from the P2.
 
----
 
 **Have Fun!** And remember - in a world of interruptions, be a COG: focused, deterministic, and uninterruptible!
 
----
 
 # Chapter 12: Optimization Mastery
 
@@ -4506,12 +3670,8 @@ copy_ultimate
 ```
 :::
 
-## The Medicine Cabinet
-
+::: medicine-cabinet
 Optimization overwhelming you? Start with these simple improvements:
-
-:::sidetrack
-### Sidetrack I: Optimization Medicine
 
 **Three easy wins:**
 
@@ -4522,7 +3682,7 @@ Optimization overwhelming you? Start with these simple improvements:
 ' Slow
         rdlong  x, addr
         add     addr, #4
-        
+
 ' Fast
         rdlong  x, ptra++
 ```
@@ -4669,11 +3829,9 @@ You're now an optimization expert:
 
 Chapters 13-15 provide quick examples of Video Generation, Serial Protocols, and Signal Processing - with references to dedicated manuals for deep dives. Think of them as appetizers showing what's possible!
 
----
 
 **Have Fun!** Remember, the best optimization is often a better algorithm. But when you need every last cycle, you now know how to get them!
 
----
 
 # Chapter 13: Video Generation Basics
 
@@ -4738,11 +3896,9 @@ generate
 ```
 :::
 
----
 
 **Have Fun!** Video generation is a whole world unto itself. This chapter just opened the door - walk through it in the dedicated manual!
 
----
 
 # Chapter 14: Serial Protocols Basics
 
@@ -4800,11 +3956,9 @@ spi_loop
 ```
 :::
 
----
 
 **Have Fun!** Serial protocols are the gateway to talking with the world. Explore more in the dedicated manual!
 
----
 
 # Chapter 15: Signal Processing Basics
 
@@ -4859,11 +4013,9 @@ butterfly
 ```
 :::
 
----
 
 **Have Fun!** Signal processing on P2 is surprisingly powerful. The CORDIC engine was born for DSP!
 
----
 
 # Chapter 16: Multi-COG Orchestration
 
@@ -5171,12 +4323,8 @@ Hint: Use mailboxes for COG communication
 Success Check: Lights change correctly, pedestrian button works
 :::
 
-## The Medicine Cabinet
-
+::: medicine-cabinet
 Multi-COG systems overwhelming? Start simple:
-
-:::sidetrack
-### Sidetrack J: Multi-COG Medicine
 
 **Start with just 2 COGs:**
 
@@ -5185,7 +4333,7 @@ Multi-COG systems overwhelming? Start simple:
 ' Main + Helper pattern
 main    coginit #1, @helper, @params
         ' Main work
-        
+
 helper  ' Support work
 ```
 :::
@@ -5254,7 +4402,6 @@ You now understand:
 **You did it!** You're now fluent in PASM2 and ready to build incredible parallel systems!
 :::
 
----
 
 **Have Fun!** 
 
@@ -5266,7 +4413,6 @@ Remember what you've learned:
 
 Now go forth and create something amazing with your Propeller 2!
 
----
 
 ## Epilogue: The Journey Forward
 
@@ -5298,7 +4444,6 @@ Show them what eight COGs can do.
 
 Show them the Propeller way.
 
----
 
 *"The best way to predict the future is to invent it."*  
 — Alan Kay
@@ -5311,8 +4456,138 @@ And with your Propeller 2, you have everything you need to invent amazing future
 
 *P.S. - Don't forget to blink an LED once in a while, just for old times' sake. It's still magical, even after all you've learned.*
 
----
 
 THE END
 
 (But really, just the beginning...)
+## Further Reading
+
+This teaching manual focuses on concepts, patterns, and building your understanding. For complete technical specifications, refer to these companion documents:
+
+**Propeller 2 Assembly Language (PASM2) Manual**
+: Complete PASM2 instruction details including syntax, timing, and flag effects for all 300+ instructions. Quick lookup reference for day-to-day development.
+
+**Parallax Propeller 2 Documentation** *(v35, Rev B/C silicon, 2021-05-18)*
+: Official silicon documentation from Parallax covering hardware specifications, electrical characteristics, and detailed register maps.
+
+
+# Index
+
+### A
+- ADC operations: Ch15
+- ADD instruction: Ch3, Ch5
+- Address modes: Ch3
+- ALTD/ALTS: Ch3
+- Architecture: Ch2
+- Assembly basics: Ch3
+
+### B
+- Bit manipulation: Ch3
+- Block transfers: Ch4, Ch9
+- Booleans: Ch3
+
+### C
+- C flag: Ch6
+- CALL/RET: Ch3
+- Clock timing: Ch2
+- CMP instruction: Ch6
+- COG anatomy: Ch2
+- COG communication: Ch2, Ch16
+- Conditional execution: Ch3, Ch6
+- CORDIC: Ch7
+- Counters: Ch2
+
+### D
+- DAC operations: Ch15
+- Debugging: Ch12
+- Division: Ch5
+- DRVH/DRVL: Ch1
+
+### E
+- Egg beater: Ch2, Ch4
+
+### F
+- FIFO: Ch4, Ch9
+- Flags: Ch6
+- Flow control: Ch3
+
+### G
+- GETMULH: Ch5
+- GETQX/GETQY: Ch7
+
+### H
+- Hardware multiply: Ch5
+- HDMI: Ch13
+- Hub execution: Ch10
+- Hub memory: Ch2, Ch4
+
+### I
+- I2C: Ch14
+- Immediate values: Ch3
+- Instruction format: Ch3
+- Interrupts: Ch11
+
+### J
+- JMP instruction: Ch3
+
+### L
+- LED control: Ch1
+- Locks: Ch2, Ch16
+- Logic operations: Ch3
+
+### M
+- Mailboxes: Ch2, Ch16
+- Mathematics: Ch5
+- Memory access: Ch4
+- MOV instruction: Ch3
+- MUL/MULS: Ch5
+- Multi-COG: Ch16
+
+### O
+- Optimization: Ch12
+
+### P
+- Parallel processing: Ch2
+- Pipeline: Ch7, Ch12
+- Pins, Smart: Ch8
+- PTRA/PTRB: Ch3, Ch4
+- PWM: Ch8
+
+### Q
+- Q flag: Ch7
+- QDIV: Ch5
+- QROTATE: Ch7
+
+### R
+- RDBYTE/RDWORD/RDLONG: Ch4
+- REP instruction: Ch3
+- Rotation: Ch3, Ch7
+
+### S
+- Serial protocols: Ch14
+- Shift operations: Ch3
+- Signal processing: Ch15
+- SKIP instruction: Ch3, Ch6
+- Smart Pins: Ch8
+- SPI: Ch14
+- Streamer: Ch9
+
+### T
+- Timer: Ch2
+- Timing: Ch2, Ch12
+- Trigonometry: Ch7
+
+### U
+- UART: Ch8, Ch14
+
+### V
+- VGA: Ch13
+- Video generation: Ch13
+
+### W
+- WAITX: Ch1
+- WRBYTE/WRWORD/WRLONG: Ch4
+
+
+### Z
+- Z flag: Ch6
