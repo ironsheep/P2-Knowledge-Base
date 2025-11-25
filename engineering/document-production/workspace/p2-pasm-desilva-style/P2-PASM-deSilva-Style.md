@@ -12,27 +12,42 @@
 \vspace{0.2cm}
 {\large\color{blue}Version 1.0 - Technical Review\par}
 
-\vspace{0.6cm}
+\vfill
 \begin{tcolorbox}[
-  colback=green!10,
-  colframe=green!50,
-  boxrule=2pt,
+  colback=gray!5,
+  colframe=gray!40,
+  boxrule=1pt,
   width=0.85\textwidth,
   center,
-  title={\bfseries Tutorial Philosophy}
+  title={\bfseries\color{black} Tutorial Philosophy},
+  colbacktitle=gray!15,
+  coltitle=black
 ]
 \textbf{Learn by doing, celebrate progress, have fun!}
 
 \vspace{0.3cm}
-This manual uses a 5-color code system:
-
-\vspace{0.2cm}
-\textcolor{green}{\textbf{Green}} = Spin2 \quad
-\textcolor{orange}{\textbf{Yellow}} = PASM2 \quad
-\textcolor{purple}{\textbf{Purple}} = CORDIC\\[0.1cm]
-\textcolor{blue}{\textbf{Blue}} = Multi-COG \quad
-\textcolor{red}{\textbf{Red}} = Antipattern (avoid)
+\begin{minipage}[t]{0.38\textwidth}
+\textbf{Code Block Colors:}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item \textcolor{green!50!black}{\textbf{Green}} -- Spin2
+\item \textcolor{orange!70!black}{\textbf{Yellow}} -- PASM2
+\item \textcolor{purple!60!black}{\textbf{Purple}} -- CORDIC
+\item \textcolor{blue!60!black}{\textbf{Blue}} -- Multi-COG
+\item \textcolor{red!60!black}{\textbf{Red}} -- Antipattern
+\end{itemize}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.58\textwidth}
+\textbf{Teaching Elements:}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item \textcolor{purple!60!black}{\textbf{Sidetracks}} -- deeper dives
+\item \textcolor{teal!70!black}{\textbf{Medicine Cabinet}} -- simpler alternatives
+\item \textcolor{green!50!black}{\textbf{Your Turn}} -- hands-on exercises
+\item \textcolor{orange!70!black}{\textbf{Interludes}} -- stories \& context
+\end{itemize}
+\end{minipage}
 \end{tcolorbox}
+\vspace{0.5cm}
 \end{center}
 
 \clearpage
@@ -250,13 +265,17 @@ I know you're absolutely crazy to have your first instruction executed, so let's
 
 ::: pasm2
 ```
+CON
+  _clkfreq = 200_000_000        ' 200 MHz system clock
+
+DAT
 ' LED Blinker - Your first PASM2 program!
         org     0               ' Start at COG address 0
-        
+
         drvh    #56             ' Drive pin 56 high (LED on)
-        waitx   ##25_000_000    ' Wait ~0.25 seconds at 100MHz
-        drvl    #56             ' Drive pin 56 low (LED off)  
-        waitx   ##25_000_000    ' Wait ~0.25 seconds
+        waitx   ##50_000_000    ' Wait 0.25 seconds at 200MHz
+        drvl    #56             ' Drive pin 56 low (LED off)
+        waitx   ##50_000_000    ' Wait 0.25 seconds
         jmp     #$-4            ' Jump back 4 instructions
 ```
 :::
@@ -287,22 +306,42 @@ Ah, excellent question! In the real world, you'd typically launch this from Spin
 
 ::: spin2
 ```
+CON
+  _clkfreq = 200_000_000  ' 200 MHz system clock
+
 PUB main()
     coginit(COGEXEC_NEW, @blink_code, 0)  ' Start PASM2 in a new COG
     repeat  ' Keep the main COG alive
 
 DAT
-    org     0
+        org     0
 blink_code
-    drvh    #56
-    waitx   ##25_000_000
-    drvl    #56
-    waitx   ##25_000_000
-    jmp     #$-4
+        drvh    #56
+        waitx   ##50_000_000
+        drvl    #56
+        waitx   ##50_000_000
+        jmp     #$-4
 ```
 :::
 
 The `coginit` instruction loads your PASM2 code from hub memory into a fresh COG and starts it running. Meanwhile, your Spin2 code keeps running in its own COG. You now have parallel processing!
+
+::: sidetrack
+### The Clock Preamble
+
+Notice the `CON` section at the top of that example? Every P2 program needs to configure its system clock:
+
+::: pasm2
+```
+CON
+  _clkfreq = 200_000_000  ' 200 MHz system clock
+```
+:::
+
+This tells the P2 to run at 200 MHz using your board's crystal oscillator. Without it, the chip runs at a sluggish ~20 MHz on its internal RC oscillator—and timing-dependent code (including DEBUG output) won't behave as expected.
+
+**From here on, we'll omit this preamble from examples to keep them focused on the concept being taught.** When you create your own files, always include it at the top before your `PUB` or `DAT` sections.
+:::
 
 ## Let's Make It Better
 
@@ -1187,24 +1226,24 @@ Feeling overwhelmed? Here's your simplified prescription:
 ::: pasm2
 ```
 ' Moving data
-mov     dest, source   ' Copy data
+        mov     dest, source   ' Copy data
 
 ' Math
-add     dest, source   ' Addition
-sub     dest, source   ' Subtraction
+        add     dest, source   ' Addition
+        sub     dest, source   ' Subtraction
 
 ' Logic
-and     dest, source   ' AND operation
-or      dest, source   ' OR operation
+        and     dest, source   ' AND operation
+        or      dest, source   ' OR operation
 
 ' Flow
-jmp     #label        ' Jump
-call    #label        ' Call subroutine
-ret                   ' Return
+        jmp     #label         ' Jump
+        call    #label         ' Call subroutine
+        ret                    ' Return
 
 ' Flags
-cmp     x, y wcz      ' Compare and set flags
-if_z    jmp #label    ' Conditional jump
+        cmp     x, y wcz       ' Compare and set flags
+        if_z    jmp #label     ' Conditional jump
 ```
 :::
 
@@ -3159,7 +3198,8 @@ Chapter 11 tackles the controversial topic: "Why No Interrupts?" We'll explore w
 
 Here's a traditional interrupt-driven button handler:
 
-```c
+::: antipattern
+```
 // Traditional approach (not P2!)
 ISR(BUTTON_INTERRUPT) {
     // Interrupt service routine
@@ -3167,6 +3207,7 @@ ISR(BUTTON_INTERRUPT) {
     // Return to interrupted code
 }
 ```
+:::
 
 And here's the P2 way:
 
@@ -3943,10 +3984,12 @@ get_sine
 
 For loading entire tables, **SETQ2** + **RDLONG** can transfer hub data directly to LUT addresses $200+:
 
-```pasm2
+::: pasm2
+```
 setq2   #256-1              ' 256 longs
 rdlong  $200, hub_table_ptr ' Load into LUT starting at $200
 ```
+:::
 
 This works because the assembler maps LUT addresses $200-$3FF. Just remember the -1 in **SETQ2** (same rule as **SETQ** for hub block transfers).
 :::
@@ -3955,7 +3998,7 @@ This works because the assembler maps LUT addresses $200-$3FF. Just remember the
 
 Here's something clever: adjacent COG pairs can share LUT access! COG 0 can read COG 1's LUT, COG 2 can read COG 3's, and so on.
 
-::: multicog
+::: pasm2
 ```
 ' --- COG 0 (producer) ---
         wrlut   message, #10    ' Write to my LUT[10]
@@ -5331,6 +5374,7 @@ And with your Propeller 2, you have everything you need to invent amazing future
 THE END
 
 (But really, just the beginning...)
+
 ## Further Reading
 
 This teaching manual focuses on concepts, patterns, and building your understanding. For complete technical specifications, refer to these companion documents:
@@ -5342,7 +5386,7 @@ This teaching manual focuses on concepts, patterns, and building your understand
 : Official silicon documentation from Parallax covering hardware specifications, electrical characteristics, and detailed register maps.
 
 
-# Appendix A: Platform Comparison {#appendix-a-platform-comparison}
+# Appendix A: Platform Comparison
 
 *How P2 compares to other microcontrollers*
 
@@ -5367,20 +5411,28 @@ The embedded world is dominated by a handful of architectures:
 On ARM, ESP32, or PIC, you typically have 1-2 cores that share time between tasks using interrupts or an RTOS. The P2 gives you eight complete, identical processors that run truly in parallel.
 
 **Traditional approach:**
-```c
-// Everyone fights for the same CPU
-ISR(TIMER1_vect) { motor_control(); }  // Might delay...
-ISR(UART_RX_vect) { serial_handler(); }  // ...this
-main() { while(1) { sensor_loop(); } }   // Hope we get time
+
+::: antipattern
 ```
+' Everyone fights for the same CPU
+ISR(TIMER1_vect) { motor_control(); }   ' Might delay...
+ISR(UART_RX_vect) { serial_handler(); } ' ...this
+main() { while(1) { sensor_loop(); } }  ' Hope we get time
+```
+:::
 
 **P2 approach:**
-```spin
-COG0: motor_control()     ' Dedicated - always on time
-COG1: serial_handler()    ' Dedicated - never misses a byte
-COG2: sensor_loop()       ' Dedicated - consistent sampling
-COG3-7: ready for more
+
+::: multicog
 ```
+' Each task owns its own processor
+COG0: coginit(1, @motor_control)   ' Coordinator launches workers
+COG1: motor_control()              ' Dedicated - always on time
+COG2: serial_handler()             ' Dedicated - never misses a byte
+COG3: sensor_loop()                ' Dedicated - consistent sampling
+COG4-7: ready for more
+```
+:::
 
 No interrupt priority juggling. No RTOS configuration. Each task owns its processor.
 
@@ -5392,58 +5444,52 @@ On P2, every pin contains a programmable state machine. Any pin can become a UAR
 
 ### Deterministic Timing
 
-ARM MCUs with cache have unpredictable timing. A memory read might take 1 cycle (cache hit) or 50+ cycles (cache miss). This makes cycle-accurate timing extremely difficult.
+ARM MCUs with cache have unpredictable timing. A memory read might take 1 cycle (cache hit) or 50+ cycles (cache miss). Even instruction timing varies—ARM instructions take 1-3+ cycles depending on the operation. This makes cycle-accurate timing extremely difficult.
 
-P2's hub memory uses round-robin access that gives every COG predictable, guaranteed access slots. Your timing loops work identically every time.
+P2 takes a different approach: nearly all instructions execute in exactly **2 clock cycles**. Want to know how long a code sequence takes? Count the instructions and multiply by 2. Hub memory uses round-robin access that gives every COG predictable, guaranteed access slots. Your timing loops work identically every time—no cache luck required.
 
 ## Coming From ARM/STM32
 
-You're used to configuring HAL structures, writing interrupt handlers, and managing DMA. Here's the translation:
+You're used to configuring HAL structures, writing interrupt handlers, and managing DMA. Here's how P2 solves those problems:
 
-| Instead of... | You... | Why It's Different |
-|---------------|--------|-------------------|
-| `HAL_UART_Transmit()` | Configure Smart Pin once, then **WYPIN** bytes | Pin handles all timing |
-| `HAL_TIM_PWM_Start()` | Configure Smart Pin once, update with **WYPIN** | Pin runs autonomously |
-| NVIC priority configuration | Nothing | All COGs equal, no preemption |
-| `HAL_DMA_Start()` | Use built-in FIFO/Streamer | Integrated into COG, simpler API |
-| `arm_sin_f32()` library | **QROTATE** instruction | Hardware trig in 55 clocks |
-| FreeRTOS `xTaskCreate()` | **COGINIT** | Real parallel, not scheduled |
+| Instead of... | On P2... | The Benefit |
+|---------------|----------|-------------|
+| `HAL_UART_Transmit()` | Configure Smart Pin once, then **WYPIN** bytes | Pin handles all timing autonomously |
+| `HAL_TIM_PWM_Start()` | Configure Smart Pin once, update with **WYPIN** | Pin runs independently—your COG is free |
+| NVIC priority configuration | Nothing needed | All COGs equal, no priority inversion ever |
+| `HAL_DMA_Start()` | Use built-in FIFO/Streamer | Simpler API, integrated into each COG |
+| `arm_sin_f32()` library | **QROTATE** instruction | Hardware trig in exactly 55 clocks |
+| FreeRTOS `xTaskCreate()` | **COGINIT** | True parallel execution, not scheduled |
 
-**What you'll miss:** Extensive middleware ecosystem, WiFi/BT on-chip
-
-**What you'll gain:** Deterministic timing, no interrupt conflicts, simpler I/O configuration
+**The result**: Deterministic timing, zero interrupt conflicts, and I/O configuration that just works.
 
 ## Coming From ESP32
 
-You're used to WiFi/Bluetooth convenience and FreeRTOS abstractions:
+You're used to WiFi/Bluetooth convenience and FreeRTOS abstractions. P2 takes a different approach:
 
-| ESP32 Approach | P2 Approach | Trade-off |
-|----------------|-------------|-----------|
-| Built-in WiFi/BT | Add WizNet or ESP module | You choose connectivity |
-| `xTaskCreate()` | **COGINIT** | True parallel, not scheduled |
-| GPIO matrix routing | Smart Pins | More capability per pin |
-| FreeRTOS timing | Deterministic hub | Cycle-accurate guaranteed |
-| Arduino framework | Spin2/PASM2 | Steeper learning, deeper control |
+| ESP32 Way | P2 Way | The Benefit |
+|-----------|--------|-------------|
+| Built-in WiFi/BT | Add WizNet or ESP module | You choose your connectivity—or skip it entirely |
+| `xTaskCreate()` | **COGINIT** | Not scheduled—truly parallel, guaranteed timing |
+| GPIO matrix routing | Smart Pins | 32 modes per pin, far more capability |
+| FreeRTOS timing | Deterministic hub | Cycle-accurate timing guaranteed |
+| Arduino framework | Spin2/PASM2 | Deeper control, deeper understanding |
 
-**What you'll miss:** Built-in networking, Arduino library ecosystem
-
-**What you'll gain:** 8 real cores, deterministic timing, flexible I/O
+**The result**: 8 real cores running simultaneously, timing you can count on, I/O flexibility that eliminates peripheral conflicts.
 
 ## Coming From Arduino/AVR
 
-You'll find P2 familiar but more powerful:
+You'll find P2 familiar but dramatically more powerful:
 
-| Arduino Approach | P2 Approach | The Upgrade |
-|------------------|-------------|-------------|
-| `digitalWrite()` | **DRVH/DRVL** or Smart Pins | Similar syntax, more capability |
-| `delay()` blocks everything | **WAITX** or dedicated COG | Timing without blocking others |
-| One thing at a time | 8 things truly parallel | Real concurrency |
-| 8-bit math limits | 32-bit + hardware CORDIC | No more overflow headaches |
-| Libraries for everything | Growing ecosystem | More control, deeper understanding |
+| Arduino Way | P2 Way | The Upgrade |
+|-------------|--------|-------------|
+| `digitalWrite()` | **DRVH/DRVL** or Smart Pins | Similar syntax, vastly more capability |
+| `delay()` blocks everything | **WAITX** or dedicated COG | Timing without blocking other tasks |
+| One thing at a time | 8 things truly parallel | Real concurrency, not fake multitasking |
+| 8-bit math limits | 32-bit + hardware CORDIC | No more overflow worries, hardware trig |
+| Libraries for everything | Growing ecosystem + OBEX | More control, deeper understanding |
 
-**What you'll miss:** Vast library ecosystem, beginner tutorials
-
-**What you'll gain:** 8 COGs, 64 Smart Pins, hardware math, adult-sized variables
+**The result**: Graduate from 8-bit limitations to 8 parallel 32-bit processors with hardware math and Smart Pins on every I/O.
 
 ## When P2 Is the Right Choice
 
@@ -5457,15 +5503,30 @@ P2 excels when you need:
 - **Multiple motor/servo control** with dedicated COGs per channel
 - **Protocol implementation** where Smart Pins handle timing autonomously
 
-## When P2 May Not Be the Right Choice
+## Platform Trade-offs
 
-Consider other platforms if you need:
+Every platform makes trade-offs. P2 optimizes for **determinism, parallelism, and flexibility** rather than:
 
-- **Built-in WiFi/Bluetooth** (though P2 can use external modules)
-- **Huge library ecosystems** with off-the-shelf drivers
-- **Extreme low power** sleep modes
-- **Very low unit cost** at high volumes
-- **Familiar programming model** (interrupt-driven, RTOS-based)
+| If you need... | P2's answer |
+|----------------|-------------|
+| Built-in WiFi/Bluetooth | Add WizNet or ESP module—you choose connectivity |
+| Massive library ecosystem | Growing OBEX + helpful community |
+| Ultra-low-power sleep | External modules or different platform |
+| Lowest unit cost at 100K+ volumes | P2 targets flexibility over commodity pricing |
+
+**The honest reality**: If your project is "connect to WiFi and display data," an ESP32 does that with less effort. But if your ESP32 project is fighting timing jitter, missing deadlines, or running out of peripheral pins—that's exactly what P2 solves.
+
+## Community Resources
+
+While P2's ecosystem is smaller than ARM or Arduino, it's active and welcoming:
+
+**Parallax Forums** - The heart of the P2 community. Chip Gracey (P2's designer) participates actively, answering questions and discussing design decisions. You'll find help from experienced developers who've solved problems you haven't encountered yet.
+
+**P2 Object Exchange (OBEX)** - A library of reusable Spin2 and PASM2 objects covering drivers, protocols, display interfaces, and more. Before writing something from scratch, check OBEX—someone may have already done the work.
+
+**Community Support** - Unlike large platforms where your question disappears in a sea of posts, the P2 community is small enough that questions get noticed and answered. Many community members have decades of Propeller experience.
+
+Coming from Arduino's library-for-everything culture, you'll write more code yourself—but you'll understand it deeply, and help is always available when you get stuck.
 
 ## The P2 Hardware Ecosystem
 
@@ -5491,9 +5552,16 @@ You add what you need - no paying for peripherals you won't use.
 
 ## Summary
 
-P2 takes a fundamentally different approach to embedded computing. Instead of one processor fighting interrupts, you get eight processors working in parallel. Instead of fixed peripherals, every pin becomes whatever you need. Instead of cache-dependent timing, you get deterministic access.
+P2 represents a fundamentally different approach to embedded computing—one that eliminates entire categories of problems:
 
-This isn't a better or worse approach - it's a *different* approach that solves different problems. If your project involves multiple real-time tasks, precise timing, or flexible I/O, P2 was designed for exactly those challenges.
+- **Eight processors** means your motor control never delays your serial handler
+- **64 Smart Pins** means peripheral conflicts become impossible
+- **Deterministic timing** means your code works the same way every time
+- **Hardware CORDIC** means real-time math without floating-point libraries
+
+Engineers who've fought interrupt priority inversions, missed timing deadlines, and PCB rework due to peripheral conflicts find P2 refreshing. You spend your time solving your actual problem, not fighting your MCU.
+
+**Welcome to the P2 community.** You've got 8 processors, 64 Smart Pins, and a community that's been building amazing things since the original Propeller. Time to see what you can build.
 
 
 # Index

@@ -26,8 +26,9 @@
 % ==================== DOCUMENT STRUCTURE ====================
 \begin{document}
 
-% Title page setup - no headers/footers on first page
-\pagestyle{empty}
+% Title page setup - no headers/footers on first page only
+% NOTE: The markdown content sets \pagestyle{fancy} after the title page
+\thispagestyle{empty}
 \enlargethispage{2cm}
 
 % Main content from Pandoc (includes title page at beginning)

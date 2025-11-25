@@ -74,7 +74,7 @@
 \renewcommand{\fps@figure}{H}
 \makeatother
 \RequirePackage[english]{babel}
-\RequirePackage[top=0.75in,bottom=1in,left=1in,right=1in]{geometry}
+\RequirePackage[top=0.75in,bottom=0.5in,left=1in,right=1in]{geometry}
 \RequirePackage{tcolorbox}
 \RequirePackage{makeidx}  % For \printindex support
 \RequirePackage{calc}  % Mathematical calculations
@@ -92,16 +92,18 @@
 \linespread{1.3}
 
 % ==================== HEADING SPACING ====================
-% Reduce space below headings to keep them connected to their content
+% Use titlesec for ALL heading formatting (work WITH it, not against it)
 % Format: \titlespacing*{command}{left}{before-sep}{after-sep}
-% Chapter: minimal space at top of page (page break is sufficient differentiation)
-% Using titlesec's \titleformat to fully control chapter appearance
+
+% CHAPTER: Minimal space above, consistent formatting
+% The key is using \titleformat to completely control chapter appearance
 \titleformat{\chapter}[block]
-  {\normalfont\Huge\bfseries}  % format
-  {}                            % label (empty - no "Chapter N")
-  {0pt}                         % sep between label and title
-  {}                            % before-code
-\titlespacing*{\chapter}{0pt}{0pt}{12pt plus 2pt minus 2pt}
+  {\normalfont\Huge\bfseries}  % Format
+  {}                            % Label (empty - no "Chapter X")
+  {0pt}                         % Sep between label and title
+  {}                            % Before-code
+\titlespacing*{\chapter}{0pt}{-40pt}{10pt}  % Left, before (more negative!), after
+
 \titlespacing*{\section}{0pt}{12pt plus 4pt minus 2pt}{4pt plus 2pt minus 2pt}
 \titlespacing*{\subsection}{0pt}{10pt plus 3pt minus 2pt}{3pt plus 1pt minus 1pt}
 \titlespacing*{\subsubsection}{0pt}{8pt plus 2pt minus 1pt}{2pt plus 1pt minus 1pt}
@@ -199,141 +201,52 @@
   framesep=0pt
 }
 
-% ==================== CHAPTER FORMATTING BASE ====================
-% Chapter formatting now handled by titlesec in HEADING SPACING section above
-% Using \titleformat{\chapter} and \titlespacing*{\chapter} for full control
-
-% CONDITIONAL PAGE BREAKS: Track document structure for intelligent breaks
-% NOTE: With --top-level-division=part:
-%   # (markdown) → \part{} (LaTeX)
-%   ## (markdown) → \chapter{} (LaTeX) 
-%   ### (markdown) → \section{} (LaTeX)
-%   #### (markdown) → \subsection{} (LaTeX)
+% ==================== CHAPTER FORMATTING ====================
+% Using titlesec for chapter formatting (configured above in HEADING SPACING)
+% With --top-level-division=chapter:
+%   # (markdown) → \chapter{} (LaTeX)
+%   ## (markdown) → \section{} (LaTeX)
+%   ### (markdown) → \subsection{} (LaTeX)
 %
-% PAGINATION RULES:
-% 1. Parts always start new page
-% 2. FIRST chapter in part stays on same page as part
-% 3. Subsequent chapters in part get own pages
-% 4. In Part II, sections (modes) behave like chapters
-% 5. In other parts, sections flow normally within chapters
-\newif\ifafterpart         % Just saw a \part
-\newif\ifafterchapter      % Just saw a \chapter  
-\newif\iffirstchapterinpart % This is the first chapter after a part
-\newif\iffirstsectioninchapter % This is the first section after a chapter
-\newcounter{currentpart}    % Track which part we're in
-\afterpartfalse
-\afterchapterfalse
-\firstchapterinpartfalse
-\firstsectioninchapterfalse
-\setcounter{currentpart}{0}
+% Page breaks are handled by the Lua pagination filter, not here.
+% titlesec handles the chapter title formatting and spacing.
 
-% Apply pagination hooks at document begin, after all packages are loaded
-\makeatletter  % Need this for @ commands
-\AtBeginDocument{%
-  % Save original commands
-  \let\origpart\part
-  \let\origchapter\chapter
-  \let\origsection\section
-  
-  % Redefine \chapter to add conditional page breaks
-  \RenewDocumentCommand{\chapter}{s o m}{%
-    \iffirstchapterinpart%
-      % First chapter in part - bypass origchapter entirely to avoid its page break
-      \firstchapterinpartfalse% Reset flag
-      % Format chapter directly without page break
-      % Add TOC entry since we're bypassing origchapter which normally does this
-      \addcontentsline{toc}{chapter}{#3}%
-      \IfBooleanTF{#1}%
-        {\@makeschapterhead{#3}}% Starred version
-        {\@makechapterhead{#3}}% Regular version (we don't number anyway)
-      \chaptermark{#3}% Update header
-    \else%
-      % Subsequent chapters - use original command with its page break
-      \IfBooleanTF{#1}%
-        {\origchapter*{#3}}% Starred version
-        {\IfValueTF{#2}%
-          {\origchapter[#2]{#3}}% With optional argument
-          {\origchapter{#3}}}% No optional argument
-    \fi%
-    \afterpartfalse% No longer directly after part
-    \afterchaptertrue% Now we're after a chapter
-    \firstsectioninchaptertrue% Next section will be first in this chapter
-  }
-  
-  % Redefine \section to add conditional page breaks
-  \RenewDocumentCommand{\section}{s o m}{%
-    \ifnum\value{currentpart}=2\relax%
-      % Part II: sections (modes) behave like chapters
-      \iffirstsectioninchapter%
-        % First section/mode in chapter - NO page break
-        \firstsectioninchapterfalse% Reset flag
-      \else%
-        % Subsequent sections/modes - add page break
-        \clearpage%
-      \fi%
-    \else%
-      % Other parts: sections flow normally within chapters
-      % No page breaks between sections
-    \fi%
-    \IfBooleanTF{#1}%
-      {\origsection*{#3}\markboth{#3}{}}% Starred version
-      {\IfValueTF{#2}%
-        {\origsection[#2]{#3}\markboth{#3}{}}% With optional argument
-        {\origsection{#3}\markboth{#3}{}}}% No optional argument
-  }
-  
-  % Redefine \part to reset all flags and track part number
-  % Bypass original \part entirely - go straight to formatting
-  \renewcommand{\part}[1]{%
-    \clearpage% Parts always start new page
-    \stepcounter{currentpart}% Track which part we're in
-    \markboth{}{}% Clear header marks - part title will show via thispagestyle
-    \@part{#1}% Call our formatting directly, skip original \part
-    \afterparttrue% Now we're directly after a part
-    \afterchapterfalse% Not in a chapter anymore
-    \firstchapterinparttrue% Next chapter will be first in this part
-    \firstsectioninchapterfalse% Reset section flag
-  }
-}
-\makeatother  % End the makeatletter block
-
-% Part formatting - no auto-numbering, headings contain numbers already
-% Using standard LaTeX
+% Ensure chapter marks are set for headers
 \makeatletter
-\renewcommand{\@part}[1]{%
-  % NO \cleardoublepage here - \clearpage already done in \part command
-  \thispagestyle{empty}%  % No headers/footers on part pages
-  \vspace*{12pt}%  % Modest space from top of page (about 1 line)
-  {\normalfont\Huge\bfseries #1\par}%  % Left-aligned, Huge font (same as chapter)
-  \vspace{18pt}%  % Space after part title before first chapter (1.5 lines)
-  % First chapter should follow on same page
-}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
 \makeatother
 
 % ==================== HEADER CONFIGURATION ====================
-% Option C: Headers on chapter pages but not part pages
-% Fix header content to show clean chapter titles only
+% Headers on all pages except part pages and title page
+% Chapter title on left, page number on right
 
-% Custom page styles
-\fancypagestyle{plain}{%  % Used by chapters
+% Configure the main 'fancy' style (used for all regular pages)
+\fancyhf{}%  Clear all headers/footers
+\fancyhead[L]{\nouppercase{\leftmark}}%  % Left: chapter title
+\fancyhead[R]{\thepage}%  % Right: page number
+\renewcommand{\headrulewidth}{0.4pt}%
+
+% 'plain' style - same as fancy (used on chapter first pages)
+\fancypagestyle{plain}{%
   \fancyhf{}%
-  \fancyhead[L]{\nouppercase{\leftmark}}%  % Left: chapter title
-  \fancyhead[R]{\thepage}%  % Right: page number
+  \fancyhead[L]{\nouppercase{\leftmark}}%
+  \fancyhead[R]{\thepage}%
   \renewcommand{\headrulewidth}{0.4pt}%
 }%
 
-\fancypagestyle{empty}{%  % Used by title page and parts
+% 'empty' style - no headers/footers (used by title page and parts)
+\fancypagestyle{empty}{%
   \fancyhf{}%
   \renewcommand{\headrulewidth}{0pt}%
   \renewcommand{\footrulewidth}{0pt}%
 }%
 
-% Fix chapter mark to show clean titles (no prefixes)
-\renewcommand{\chaptermark}[1]{\markboth{#1}{}}  % Just the chapter title, no "Chapter X:"
-\renewcommand{\sectionmark}[1]{}  % Disable section marks to avoid conflicts
+% Disable section marks to avoid overwriting chapter in header
+\renewcommand{\sectionmark}[1]{}
 
-% Handle missing commands gracefully
-% Note: needspace package now properly loaded above
+% Set default page style to fancy for all pages
+% Individual pages can override with \thispagestyle{empty} or \thispagestyle{plain}
+\pagestyle{fancy}
 
 % ==================== PANDOC SYNTAX HIGHLIGHTING ====================
 % Minimal syntax highlighting support

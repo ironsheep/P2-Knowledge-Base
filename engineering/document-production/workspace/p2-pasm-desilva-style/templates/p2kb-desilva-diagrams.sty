@@ -241,19 +241,21 @@
 \node[font=\bfseries] at (0, 2) {PASM2 Instruction Format:};
 
 % Fields (left to right)
-\node[optfield, minimum width=1.8cm] (cond) at (-4.5, 0.8) {condition};
-\node[field, minimum width=2.2cm] (instr) at (-2.2, 0.8) {instruction};
-\node[field, minimum width=1.5cm] (dest) at (0, 0.8) {dest};
-\node[font=\ttfamily] at (1, 0.8) {,};
-\node[field, minimum width=1.8cm] (src) at (2.3, 0.8) {\#source};
-\node[optfield, minimum width=1.2cm] (flags) at (4.3, 0.8) {flags};
+\node[optfield, minimum width=1.4cm] (lbl) at (-6.0, 0.8) {label};
+\node[optfield, minimum width=1.8cm] (cond) at (-4.0, 0.8) {condition};
+\node[field, minimum width=2.2cm] (instr) at (-1.7, 0.8) {instruction};
+\node[field, minimum width=1.5cm] (dest) at (0.5, 0.8) {dest};
+\node[font=\ttfamily] at (1.5, 0.8) {,};
+\node[field, minimum width=1.8cm] (src) at (2.8, 0.8) {\#source};
+\node[optfield, minimum width=1.2cm] (flags) at (4.8, 0.8) {flags};
 
 % Labels below
-\node[label] at (-4.5, -0.1) {optional\\(if\_z, if\_c, ...)};
-\node[label] at (-2.2, -0.1) {operation\\(add, mov, ...)};
-\node[label] at (0, -0.1) {target\\register};
-\node[label] at (2.3, -0.1) {data/value\\\# = immediate};
-\node[label] at (4.3, -0.1) {optional\\(wc, wz, wcz)};
+\node[label] at (-6.0, -0.1) {optional\\(for jumps)};
+\node[label] at (-4.0, -0.1) {optional\\(if\_z, if\_c, ...)};
+\node[label] at (-1.7, -0.1) {operation\\(add, mov, ...)};
+\node[label] at (0.5, -0.1) {target\\register};
+\node[label] at (2.8, -0.1) {data/value\\\# = immediate};
+\node[label] at (4.8, -0.1) {optional\\(wc, wz, wcz)};
 
 \end{tikzpicture}
 \end{center}

@@ -52,9 +52,10 @@ local mnemonics = {
   "stalli", "sub", "subr", "subs", "subsx", "subx", "sumc", "sumnc", "sumnz",
   "sumz", "test", "testb", "testbn", "testn", "testp", "testpn", "tjf", "tjnf",
   "tjns", "tjnz", "tjs", "tjv", "tjz", "trgint1", "trgint2", "trgint3",
-  "waitatn", "waitct1", "waitct2", "waitct3", "waitfbw", "waitint", "waitpat",
-  "waitse1", "waitse2", "waitse3", "waitse4", "waitx", "waitxfi", "waitxmt",
-  "waitxrl", "waitxro", "wfbyte", "wflong", "wfword", "wmlong", "word", "wrbyte",
+  "waitatn", "waitcnt", "waitct1", "waitct2", "waitct3", "waitfbw", "waitint",
+  "waitpat", "waitpeq", "waitpne", "waitse1", "waitse2", "waitse3", "waitse4", "waitx",
+  "waitxfi", "waitxmt", "waitxrl", "waitxro", "wfbyte", "wflong", "wfword",
+  "wmlong", "word", "wrbyte",
   "wrc", "wrfast", "wrlong", "wrlut", "wrnc", "wrnz", "wrpin", "wrword", "wrz",
   "wxpin", "wypin", "xcont", "xinit", "xor", "xoro32", "xstop", "xzero", "zerox"
 }
