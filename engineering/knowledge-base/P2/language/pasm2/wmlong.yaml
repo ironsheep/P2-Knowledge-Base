@@ -6,22 +6,16 @@ timing:
   type: fixed
 description: Write only non-$00 bytes in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2
   invokes cog/LUT block transfer.
-naming_note: Compiler uses WMLONG_ (with underscore) - may be different instruction
 documentation_source: original
 documentation_level: enhanced
-alternate_names:
-- WMLONG_
 related_instructions:
-- WMLONG_
 - WRLONG
 - WRBYTE
 - WRWORD
-naming_discrepancy:
-  source_yaml: WMLONG
-  source_compiler: WMLONG_
-  resolution_needed: true
-  note: Different opcodes suggest these may be separate instructions
+compiler_note: pnut-ts internally uses WMLONG_ (with underscore) but this is a compiler
+  naming quirk, not a separate instruction. The enum_name ac_wmlong confirms the
+  canonical name is WMLONG.
 enhancement_source: PNUT_TS_v2.0_operand_fixes_2025-09-13
-last_updated: '2025-09-19T16:04:17.264898'
+last_updated: '2025-11-26'
 category: Hub RAM
-oneliner: Write
+oneliner: Write masked long to hub RAM (non-zero bytes only)
