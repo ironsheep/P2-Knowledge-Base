@@ -1,0 +1,39 @@
+directive: WORDFIT
+name: WORDFIT
+description: 'Constrain expression to fit within word range (0-65535)
+
+  Generates assembly error if expression value exceeds word range
+
+  Used to ensure compile-time verification that values fit in 16 bits
+
+  '
+category: Assembly Directives
+documentation_level: complete
+syntax: WORDFIT(expression)
+parameters:
+- name: expression
+  type: constant expression
+  range: 0-65535
+  description: Expression that must evaluate to a value fitting in 16 bits (0-65535)
+examples:
+- code: 'DAT
+           word  WORDFIT(1000)     '' OK: 1000 fits in a word
+    '
+  description: Valid word value passes WORDFIT check
+- code: 'CON
+      MED_VAL = WORDFIT(50000)     '' OK: 50000 fits in word range
+    '
+  description: Use WORDFIT in constant definition
+- code: 'DAT
+           word  WORDFIT(70000)    '' ERROR: 70000 exceeds word range
+    '
+  description: Value exceeding word range causes assembly error
+notes:
+- Compile-time constraint only - no runtime overhead
+- Useful for catching overflow errors during assembly
+- Expression must be resolvable at compile time
+- Generates error if value is negative or exceeds 65535
+related:
+- BYTEFIT
+- WORD
+oneliner: Constrain expression to fit within word range (0-65535)

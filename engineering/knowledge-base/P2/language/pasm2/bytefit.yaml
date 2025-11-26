@@ -1,0 +1,39 @@
+directive: BYTEFIT
+name: BYTEFIT
+description: 'Constrain expression to fit within byte range (0-255)
+
+  Generates assembly error if expression value exceeds byte range
+
+  Used to ensure compile-time verification that values fit in 8 bits
+
+  '
+category: Assembly Directives
+documentation_level: complete
+syntax: BYTEFIT(expression)
+parameters:
+- name: expression
+  type: constant expression
+  range: 0-255
+  description: Expression that must evaluate to a value fitting in 8 bits (0-255)
+examples:
+- code: 'DAT
+           byte  BYTEFIT(100)      '' OK: 100 fits in a byte
+    '
+  description: Valid byte value passes BYTEFIT check
+- code: 'CON
+      SMALL_VAL = BYTEFIT(200)     '' OK: 200 fits in byte range
+    '
+  description: Use BYTEFIT in constant definition
+- code: 'DAT
+           byte  BYTEFIT(256)      '' ERROR: 256 exceeds byte range
+    '
+  description: Value exceeding byte range causes assembly error
+notes:
+- Compile-time constraint only - no runtime overhead
+- Useful for catching overflow errors during assembly
+- Expression must be resolvable at compile time
+- Generates error if value is negative or exceeds 255
+related:
+- WORDFIT
+- BYTE
+oneliner: Constrain expression to fit within byte range (0-255)

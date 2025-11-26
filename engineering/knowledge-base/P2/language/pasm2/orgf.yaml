@@ -1,0 +1,57 @@
+directive: ORGF
+name: ORGF
+description: 'Set origin with fill - advance to specified address filling with zeros
+
+  Unlike ORG which simply sets the address counter, ORGF fills the gap between
+  the current address and the target address with zero bytes
+
+  Ensures contiguous binary output when jumping to a specific address
+
+  '
+category: Assembly Directives
+documentation_level: complete
+syntax: ORGF address
+parameters:
+- name: address
+  type: immediate
+  range: 0-$1FF (cog) or hub address
+  description: Target address to advance to, filling intervening space with zeros
+examples:
+- code: 'DAT
+    ORG  0
+    entry   jmp  #main
+            '' ... some code ...
+
+    ORGF $100            '' Fill with zeros up to address $100
+    table   long 1,2,3   '' Table starts exactly at $100
+    '
+  description: Fill gap to place data at exact address
+- code: 'DAT
+    ORG  0
+            nop
+            nop
+    ORGF $10             '' Advance to $10, filling $02-$0F with zeros
+    handler jmp  #process
+    '
+  description: Create padded interrupt vector table
+- code: 'DAT
+    '' Create fixed-size code block
+    ORG  0
+    block_start
+            '' ... code ...
+    ORGF block_start + 64   '' Ensure block is exactly 64 longs
+    block_end
+    '
+  description: Pad code block to fixed size
+notes:
+- ORGF fills the gap with zero bytes/longs
+- ORG only changes the address counter without filling
+- ORGF generates error if target address is less than current address
+- Useful for creating fixed-layout binary structures
+- Essential for interrupt vector tables and memory-mapped structures
+related:
+- ORG
+- ORGH
+- FIT
+- RES
+oneliner: Set origin with fill - advance to address filling with zeros

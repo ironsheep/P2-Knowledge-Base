@@ -1,0 +1,50 @@
+directive: DITTO
+name: DITTO
+description: 'Repeat the previous instruction
+
+  Inserts a copy of the immediately preceding instruction at the current location
+
+  Useful for creating repeated instruction sequences without copy-paste
+
+  Introduced in Spin2/PASM2 version 50+
+
+  '
+category: Assembly Directives
+documentation_level: complete
+syntax: DITTO
+examples:
+- code: 'DAT
+           nop               '' First NOP
+           ditto             '' Second NOP (repeat of previous)
+           ditto             '' Third NOP (repeat of previous)
+    '
+  description: Repeat NOP instruction multiple times
+- code: 'DAT
+           wrlong  data, ptra++   '' Write and increment pointer
+           ditto                   '' Repeat the wrlong with ptra++
+           ditto                   '' And again
+           ditto                   '' Four total writes
+    '
+  description: Repeat memory write instruction for unrolled loop
+- code: 'DAT
+    '' Initialize 8 consecutive registers to zero
+           mov     reg+0, #0
+           ditto                   '' reg+1
+           ditto                   '' reg+2
+           ditto                   '' reg+3
+           ditto                   '' reg+4
+           ditto                   '' reg+5
+           ditto                   '' reg+6
+           ditto                   '' reg+7
+    '
+  description: Initialize multiple registers with repeated MOV
+notes:
+- Introduced in Spin2/PASM2 version 50 and later
+- DITTO copies the exact previous instruction including all operands and effects
+- Useful for loop unrolling and repeated initialization sequences
+- Must follow a valid instruction - cannot be first in a DAT block
+- The repeated instruction appears in listing output for clarity
+related:
+- REP
+- ORG
+oneliner: Repeat the previous instruction

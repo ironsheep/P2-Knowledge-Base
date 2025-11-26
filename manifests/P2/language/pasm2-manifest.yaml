@@ -19,18 +19,26 @@ manifest:
       content: alignw.yaml
     - name: BYTE
       content: byte.yaml
+    - name: BYTEFIT
+      content: bytefit.yaml
+    - name: DITTO
+      content: ditto.yaml
     - name: FIT
       content: fit.yaml
     - name: LONG
       content: long.yaml
     - name: ORG
       content: org.yaml
+    - name: ORGF
+      content: orgf.yaml
     - name: ORGH
       content: orgh.yaml
     - name: RES
       content: res.yaml
     - name: WORD
       content: word.yaml
+    - name: WORDFIT
+      content: wordfit.yaml
   - name: Branch
     description: Program flow control and branching operations
     items:
