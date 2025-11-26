@@ -2,157 +2,54 @@ instruction: BITRND
 syntax: BITRND Dest, {#}Src {WCZ}
 brief_description: Bit random
 category: Math and Logic
-description: 'BITRND alters the Dest bit(s) designated by Src to each be an independent
-  random low and high value, based on Result: Dest bit(s) described by Src are each
-  set randomly low or high; the rest are left as-is. Z = original D[S[4:0]].
-
-
-  BITRND alters the Dest bit(s) designated by Src to each be an independent random
-  low and high value, based on
-
-
-  bit(s) from the Xoroshiro128** PRNG. All other bits are left unchanged.
-
-
-  Src[4:0] indicates the bit number (0--31). For a range of bits, Src[4:0] indicates
-  the base bit number (0--31) and
-
-
-  Src[9:5] indicates how many contiguous bits beyond the base should be affected (1-31).
-
-
-  A 9-bit literal Src is enough to express the base bit (Src[4:0]) and a range of
-  up to 16 contiguous bits (Src[8:5]). If
-
-
-  needed, use the augmented literal feature (##Src) to augment Src to a 10-bit literal
-  value-- this inserts an AUGS
-
-
-  instruction prior.
-
-
-  When Src is a register, the register''s value bits [9:0] are used as-is to form
-  the 10-bit ID range, unless a SETQ
-
-
-  instruction immediately precedes the BITRND instruction; substituting SETQ''s Dest[4:0]
-  in place of value bits[9:5],
-
-
-  for BITRND''s use.
-
-
-  If the WCZ effect is specified, the C and Z flags are updated to the original state
-  of Dest''s base bit, identified by Src.
-
-
-  BITZ / BITNZ
-
-
-  Bit Z or not Z
-
-
-  Bit Operation Instruction - Set bit(s) low/high according to Z or !Z.
-
-
-  BITZ    Dest, {#}Src {WCZ}
-
-
-  BITNZ Dest, {#}Src {WCZ}
-
-
-  Result: Dest bit(s) described by Src are set to Z or !Z; the rest are left as-is.
-
-
-  *   Dest is the register whose value will have one or more bits set to Z or !Z.
-
-
-  *   Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies
-  the bit(s) to modify.
-
-
-  *   WCZ is an optional effect to update flags.
-
-
-  COND INSTR         FX     DEST          SRC           Write            C Flag              Z
-  Flag             Clocks
-
-
-  EEEE 0100100 CZI DDDDDDDDD SSSSSSSSS                   D         Original D base
-  bit Original D base bit         2
-
-
-  EEEE 0100101 CZI DDDDDDDDD SSSSSSSSS                   D         Original D base
-  bit Original D base bit         2
-
-
-  BITZ or BITNZ alters the Dest bit(s) designated by Src to equal the state, or inverse
-  state, of the Z flag. All other
-
-
-  bits are left unchanged.
-
-
-  Src[4:0] indicates the bit number (0--31). For a range of bits, Src[4:0] indicates
-  the base bit number (0--31) and
-
-
-  Src[9:5] indicates how many contiguous bits beyond the base should be affected (1-31).
-
-
-  A 9-bit literal Src is enough to express the base bit (Src[4:0]) and a range of
-  up to 16 contiguous bits (Src[8:5]). If
-
-
-  needed, use the augmented literal feature (##Src) to augment Src to a 10-bit literal
-  value-- this inserts an AUGS
-
-
-  instruction prior.
-
-
-  When Src is a register, the register''s value bits [9:0] are natrally used as-is
-  to form the 10-bit ID range, unless a
-
-
-  SETQ instruction immediately precedes the BITZ / BITNZ instruction; substituting
-  SETQ''s Dest[4:0] in place of
-
-
-  value bits[9:5], for BITZ / BITNZ''s use.
-
-
-  If the WCZ effect is specified, the C and Z flags are updated to the original state
-  of Dest''s base bit, identified by Src.'
-result: Dest bit(s) described by Src are set to Z or !Z; the rest are left as-is.
+description: >-
+  BITRND alters the Dest bit(s) designated by Src to each be an independent
+  random low or high value, based on bit(s) from the Xoroshiro128** PRNG. All
+  other bits are left unchanged.
+
+  Src[4:0] indicates the bit number (0-31). For a range of bits, Src[4:0]
+  indicates the base bit number (0-31) and Src[9:5] indicates how many
+  contiguous bits beyond the base should be affected (1-31).
+
+  A 9-bit literal Src is enough to express the base bit (Src[4:0]) and a range
+  of up to 16 contiguous bits (Src[8:5]). If needed, use the augmented literal
+  feature (##Src) to augment Src to a 10-bit literal value-- this inserts an
+  AUGS instruction prior.
+
+  When Src is a register, the register's value bits [9:0] are used as-is to
+  form the 10-bit ID range, unless a SETQ instruction immediately precedes the
+  BITRND instruction; substituting SETQ's Dest[4:0] in place of value bits[9:5],
+  for BITRND's use.
+
+  If the WCZ effect is specified, the C and Z flags are updated to the original
+  state of Dest's base bit, identified by Src.
+result: >-
+  Dest bit(s) described by Src are each set randomly low or high; the rest are
+  left as-is.
 parameters:
-- Dest is the register whose value will have one or more bits set randomly low or
-  high.
-- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies
-  the bit(s) to modify.
-- WCZ is an optional effect to update flags.
-- Dest is the register whose value will have one or more bits set to Z or !Z.
-- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies
-  the bit(s) to modify.
+- Dest is the register whose value will have one or more bits set randomly low
+  or high.
+- Src is a register, 9-bit literal, or 10-bit augmented literal whose value
+  identifies the bit(s) to modify.
 - WCZ is an optional effect to update flags.
 flags_affected:
+  C:
+    formula: original D[S[4:0]]
+    description: Set to original state of base bit before modification
   Z:
     formula: original D[S[4:0]]
+    description: Set to original state of base bit before modification
 syntax_variants:
 - BITRND Dest, {#}Src {WCZ}
-- BITRND alters the Dest bit(s) designated by Src to each be an independent random
-  low and high value, based on
-- instruction immediately precedes the BITRND instruction; substituting SETQ's Dest[4:0]
-  in place of value bits[9:5],
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:
 - bits: EEEE 0100110 CZI DDDDDDDDD SSSSSSSSS
   write: D
-  c: Original D base bit Original D base bit
-  z: '2'
+  c: Original D base bit
+  z: Original D base bit
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -161,9 +58,14 @@ compiler_operand_format:
   description: 'Bit manipulation with optional effect flags: Destination register,
     bit position'
   valueType: 1
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+compiler_encoding:
   operandFormat: 1
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
+last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 oneliner: Set bit(s) random low/high
+related:
+- BITZ
+- BITNZ
+- BITC
+- BITNC
