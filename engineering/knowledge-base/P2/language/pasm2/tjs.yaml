@@ -1,14 +1,45 @@
 instruction: TJS
-syntax: TJS     D,{#}S
-encoding: EEEE 1011101 10I DDDDDDDDD SSSSSSSSS
+syntax: TJS Dest, {#}Src
+brief_description: Test, jump if signed
+category: Branch
+description: >-
+  TJS tests the value in Dest and jumps to the address described by Src if the
+  result is signed (Dest[31] = 1).
+
+  The address (Src) can be absolute or relative. To specify an absolute address,
+  Src must be a register containing a 20-bit address value. To specify a
+  relative address, use #Label for a 9-bit signed offset (a range of -256 to
+  +255 instructions) or use ##Label (or insert a prior AUGS instruction) for a
+  20-bit signed offset (a range of -524288 to +524287). Offsets are relative to
+  the instruction following the TJS. The signed offset value is in units of
+  whole instructions-- it is added to PC as-is when in Cog/LUT execution mode
+  and is multiplied by 4 then added to PC when in Hub execution mode.
+result: >-
+  Dest is tested and if it's signed (Dest[31] = 1), PC is set to a new relative
+  (#Src) or absolute (Src) address.
+parameters:
+- Dest is a register whose value is tested for sign.
+- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is
+  the absolute or relative address to set PC to. Use # for relative addressing;
+  omit # for absolute addressing.'
+flags_affected:
+  C: Not affected
+  Z: Not affected
+syntax_variants:
+- TJS Dest, {#}Src
 timing:
   cycles: 2
   type: variable
-  range: 13...20
-description: Test D and jump to S** if D is signed (D[31] = 1).                                                                   2
-  or 4 / 2 or
-documentation_source: PASM2 Manual 2022-11-01
-documentation_level: enhanced
+  notes: 2 or 4 cycles for Cog/LUT, 2 or 13-20 cycles for Hub execution
+encoding:
+- bits: EEEE 1011101 10I DDDDDDDDD SSSSSSSSS
+  write: PC (conditional)
+  c: —
+  z: —
+  clocks: '2 or 4 / 2 or 13-20'
+  notes: PC is written only when Dest is signed
+documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
+documentation_level: comprehensive
 compiler_operand_format:
   name: operand_dsj
   pattern: D,S/@
@@ -17,8 +48,12 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 12
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-syntax_variants:
-- TJS D,{#}S
-last_updated: '2025-09-19T16:04:16.989327'
-category: Branch
-oneliner: Test
+last_updated: '2025-11-26'
+manual_extraction_date: '2025-01-19'
+oneliner: Test value and jump if signed (D[31] = 1)
+related:
+- TJNS
+- TJF
+- TJNF
+- TJZ
+- TJNZ

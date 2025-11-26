@@ -1,196 +1,52 @@
 instruction: TEST
-syntax: TEST Dest               {WC|WZ|WCZ}
+syntax: TEST Dest {WC|WZ|WCZ}
 brief_description: Test
 category: Math and Logic
-description: 'TEST determines the parity (number of high (1) bits) and the zero or
-  non-zero state of Dest, or of Dest bitwise Result: The parity and zero-state of
-  Dest, or of Dest bitwise ANDed with Src, is stored in the C and Z flags. C = parity
-  of (D & S).
-
-
-  TEST determines the parity (number of high (1) bits) and the zero or non-zero state
-  of Dest, or of Dest bitwise
-
-
-  ANDed with Src, and stores the results in the C and/or Z flag.
-
-
-  If the WC or WCZ effect is specified, the C flag is set (1) if the number of high
-  (1) bits in Dest (or Dest ANDed with
-
-
-  Src) is odd, or is cleared (0) if it is even.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest (or Dest ANDed
-  with Src) is zero, or is cleared (0) if it
-
-
-  is not zero.
-
-
-  TESTB / TESTBN
-
-
-  Test bit or bit not
-
-
-  Bit Operation Instruction - Test bit of D or !D and either store, AND, OR, or XOR
-  the result into flags.
-
-
-  TESTB     Dest, {#}Src WC|WZ
-
-
-  TESTB     Dest, {#}Src ANDC|ANDZ
-
-
-  TESTB     Dest, {#}Src ORC|ORZ
-
-
-  TESTB     Dest, {#}Src XORC|XORZ
-
-
-  TESTBN Dest, {#}Src WC|WZ
-
-
-  TESTBN Dest, {#}Src ANDC|ANDZ
-
-
-  TESTBN Dest, {#}Src ORC|ORZ
-
-
-  TESTBN Dest, {#}Src XORC|XORZ
-
-
-  Result: The state of Dest''s bit Src is read, possibly inverted, and either stored
-  as-is, or bitwise ANDed, ORed, or
-
-
-  XORed into C or Z.
-
-
-  *    Dest is the register whose value will have a single bit tested.
-
-
-  *    Src is a register or 5-bit literal whose value identifies the bit (0-31) of
-  Dest to test.
-
-
-  *    WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, and XORZ is a required effect to update
-  or bitwise manipulate the C
-
-
-  or Z flag.
-
-
-  COND INSTR         FX     DEST          SRC           Write            C Flag              Z
-  Flag              Clocks
-
-
-  EEEE 0100000 CZI DDDDDDDDD SSSSSSSSS                   --             IN[D[4:0]]          IN[D[4:0]]                2
-
-
-  EEEE 0100010 CZI DDDDDDDDD SSSSSSSSS                   --         C AND IN[D[4:0]]
-  Z AND IN[D[4:0]]                 2
-
-
-  EEEE 0100100 CZI DDDDDDDDD SSSSSSSSS                   --          C OR IN[D[4:0]]     Z
-  OR IN[D[4:0]]              2
-
-
-  EEEE 0100110 CZI DDDDDDDDD SSSSSSSSS                   --         C XOR IN[D[4:0]]
-  Z XOR IN[D[4:0]]                 2
-
-
-  EEEE 0100001 CZI DDDDDDDDD SSSSSSSSS                   --            !IN[D[4:0]]         !IN[D[4:0]]                2
-
-
-  EEEE 0100011 CZI DDDDDDDDD SSSSSSSSS                   --         C AND !IN[D[4:0]]
-  Z AND !IN[D[4:0]]               2
-
-
-  EEEE 0100101 CZI DDDDDDDDD SSSSSSSSS                   --         C OR !IN[D[4:0]]     Z
-  OR !IN[D[4:0]]             2
-
-
-  EEEE 0100111 CZI DDDDDDDDD SSSSSSSSS                   --         C XOR !IN[D[4:0]]
-  Z XOR !IN[D[4:0]]               2
-
-
-  Related: TESTP and TESTPN
-
-
-  TESTB or TESTBN reads the state (0/1) of a bit in Dest designated by Src, possibly
-  inverts that result, and either
-
-
-  stores it as-is, or bitwise ANDs, ORs, or XORs it into the C or Z flag.
-
-
-  Src[4:0] indicates the bit number (0-31) to test.
-
-
-  If the WC or WZ effect is specified, the C or Z flag is overwritten with the state
-  or inverse state of the bit.
-
-
-  If the ANDC or ANDZ effect is specified, the C or Z flag is bitwise ANDed with the
-  state or inverse state of the bit.
-
-
-  If the ORC or ORZ effect is specified, the C or Z flag is bitwise ORed with the
-  state or inverse state of the bit.
-
-
-  If the XORC or XORZ effect is specified, the C or Z flag is bitwise XORed with the
-  state or inverse state of the bit.'
-result: The state of Dest's bit Src is read, possibly inverted, and either stored
-  as-is, or bitwise ANDed, ORed, or
+description: >-
+  TEST determines the parity (number of high (1) bits) and the zero or non-zero
+  state of Dest, or of Dest bitwise ANDed with Src, and stores the results in
+  the C and/or Z flag.
+
+  If the WC or WCZ effect is specified, the C flag is set (1) if the number of
+  high (1) bits in Dest (or Dest ANDed with Src) is odd, or is cleared (0) if it
+  is even.
+
+  If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest (or Dest
+  ANDed with Src) is zero, or is cleared (0) if it is not zero.
+result: >-
+  The parity and zero-state of Dest, or of Dest bitwise ANDed with Src, is
+  stored in the C and Z flags.
 parameters:
 - Dest is the register whose value will be tested.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value
-  is ANDed with Dest.
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose
+  value is ANDed with Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
-- Dest is the register whose value will have a single bit tested.
-- Src is a register or 5-bit literal whose value identifies the bit (0-31) of Dest
-  to test.
-- WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, or XORZ is a required effect to update or bitwise
-  manipulate the C or Z flag.
 flags_affected:
   C:
     formula: parity of (D & S)
+    description: Set if odd number of high bits in result
   Z:
-    formula: ((D & S) == 0)
+    formula: (D & S) = 0
+    description: Set if result is zero
 syntax_variants:
-- TEST Dest               {WC|WZ|WCZ}
+- TEST Dest {WC|WZ|WCZ}
 - TEST Dest, {#}Src {WC|WZ|WCZ}
-- TEST determines the parity (number of high (1) bits) and the zero or non-zero state
-  of Dest, or of Dest bitwise
-- TESTB     Dest, {#}Src WC|WZ
-- TESTB     Dest, {#}Src ANDC|ANDZ
-- TESTB     Dest, {#}Src ORC|ORZ
-- TESTB     Dest, {#}Src XORC|XORZ
-- TESTBN Dest, {#}Src WC|WZ
-- TESTBN Dest, {#}Src ANDC|ANDZ
-- TESTBN Dest, {#}Src ORC|ORZ
-- TESTBN Dest, {#}Src XORC|XORZ
-- TESTB or TESTBN reads the state (0/1) of a bit in Dest designated by Src, possibly
-  inverts that result, and either
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:
 - bits: EEEE 0111110 CZ0 DDDDDDDDD DDDDDDDDD
   write: —
   c: Parity of D
-  z: D=0
+  z: D = 0
   clocks: '2'
+  notes: Syntax 1 - test Dest only (S=D)
 - bits: EEEE 0111110 CZI DDDDDDDDD SSSSSSSSS
   write: —
   c: Parity of (D & S)
   z: (D & S) = 0
   clocks: '2'
+  notes: Syntax 2 - test (Dest AND Src)
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -198,12 +54,15 @@ compiler_operand_format:
   pattern: D{,S/#}
   description: Destination register, optional Source register or immediate (unary/binary)
   valueType: 3
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+compiler_encoding:
   operandFormat: 3
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
+last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 oneliner: Test D, or bitwise AND D with S, to affect flags
 related:
+- TESTN
+- TESTB
+- TESTBN
 - TESTP
 - TESTPN

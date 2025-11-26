@@ -1,84 +1,53 @@
 instruction: WAITCT3
-syntax: WAITCT1 {WC|WZ|WCZ}
-brief_description: Wait counter 1/2/3
+syntax: WAITCT3 {WC|WZ|WCZ}
+brief_description: Wait counter 3
 category: Event
-description: 'Wait for CT3 event flag, then clear it. Prior SETQ sets optional CT
-  timeout value. C/Z = timeout.                              2+
-
-
-  WAITCT1, WAITCT2, or WAITCT3 waits for a counter 1, 2, or 3 event to occur (unless
-  the event flag is already set),
-
-
-  then clears the event flag (unless it''s being set again by the event sensor) and
-  resumes execution at the next
-
-
-  instruction. Optionally, WAITCTx can time-out if the counter event doesn''t occur
-  soon enough; setting C and/or Z
-
-
+description: >-
+  WAITCT3 waits for a counter 3 event to occur (unless the event flag is already
+  set), then clears the event flag (unless it's being set again by the event
+  sensor) and resumes execution at the next instruction. Optionally, WAITCT3 can
+  time-out if the counter event doesn't occur soon enough; setting C and/or Z
   flags and then resuming execution at the next instruction.
 
+  To set the optional timeout, insert a SETQ (with a future System Counter
+  target value) right before WAITCT3.
 
-  To set the optional timeout, insert a SETQ (with a future System Counter target
-  value) right before WAITCTx.
+  The WC, WZ, or WCZ effect is recommended only if the optional timeout is
+  specified, in which case the C flag and/or Z flag is set (1) if a timeout
+  occurred before the event, or is cleared (0) if the event occurred before the
+  timeout.
 
+  During a wait, the pipeline is stalled; no instructions execute and no
+  interrupts are processed in the cog until the wait condition ends.
 
-  The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified,
-  in which case the C flag and/or
-
-
-  Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the
-  event occurred before the timeout.
-
-
-  During a wait, the pipeline is stalled; no instructions execute and no interrupts
-  are processed in the cog until the
-
-
-  wait condition ends.
-
-
-  The counter 1, 2, or 3 event flag is set whenever the System Counter (CT) passes
-  the value in the CT1, CT2, or CT3
-
-
-  event trigger register, respectively; i.e. MSB of (CT - CTx is 0). The counter event
-  flags are cleared upon execution
-
-
-  of the corresponding ADDCTx, POLLCTx, WAITCTx, JCTx, or JNCTx instructions.'
-result: Wait for counter 1, 2, or 3 event, then clear the flag; optionally aborting
-  on timeout and setting C and/or Z
+  The counter 3 event flag is set whenever the System Counter (CT) passes the
+  value in the CT3 event trigger register; i.e. MSB of (CT - CT3) is 0. The
+  counter event flags are cleared upon execution of the corresponding ADDCT3,
+  POLLCT3, WAITCT3, JCT3, or JNCT3 instructions.
+result: >-
+  Wait for counter 3 event, then clear the flag; optionally aborting on timeout
+  and setting C and/or Z on abort.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
+  C:
+    formula: timeout
+    description: Set if timeout occurred before event
   Z:
     formula: timeout
+    description: Set if timeout occurred before event
 syntax_variants:
-- WAITCT1 {WC|WZ|WCZ}
-- WAITCT2 {WC|WZ|WCZ}
 - WAITCT3 {WC|WZ|WCZ}
 timing:
   cycles: 2
   type: variable
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-- bits: EEEE 1101011 CZ0 000010001 000100100
-  write: —
-  c: Timeout Abort
-  z: Timeout Abort
-  clocks: 2+
-- bits: EEEE 1101011 CZ0 000010010 000100100
-  write: —
-  c: Timeout Abort
-  z: Timeout Abort
-  clocks: 2+
+  notes: 2+ cycles depending on wait time
+encoding:
 - bits: EEEE 1101011 CZ0 000010011 000100100
   write: —
   c: Timeout Abort
   z: Timeout Abort
-  clocks: 2+
+  clocks: '2+'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -86,29 +55,16 @@ compiler_operand_format:
   pattern: ''
   description: No operands - poll/wait instruction (moves S to D, sets S to $024)
   valueType: 28
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
+last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
-oneliner: Wait for and clear counter 1, 2, or 3 event flag
-long_description: 'Wait for counter 1, 2, or 3 event, then clear the flag; optionally
-  aborting on timeout and setting C and/or Z
-
-  on abort.'
-group_membership:
-  group_id: counter_event_waits
-  group_file: groups/counter_event_waits.yaml
-  related:
-  - waitct1
-  - waitct2
-specifics:
-  counter_number: 3
-  event_flag: CT3
-quick_example: WAITCT3  ; Wait for counter 3 event flag, then clear it
-has_group_documentation: true
+oneliner: Wait for and clear counter 3 event flag
 related:
-- ADDCTx
-- POLLCTx
-- JCTx
-- JNCTx
+- WAITCT1
+- WAITCT2
+- ADDCT3
+- POLLCT3
+- JCT3
+- JNCT3

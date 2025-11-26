@@ -2,344 +2,37 @@ instruction: TESTN
 syntax: TESTN Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Test not
 category: Math and Logic
-description: 'TESTN determines the parity (number of high (1) bits) and the zero or
-  non-zero state of Dest bitwise ANDed with Result: The parity and zero-state of Dest
-  bitwise ANDed with !Src is stored in the C and Z flags. C = parity of (D & !S).
-
-
-  TESTN determines the parity (number of high (1) bits) and the zero or non-zero state
-  of Dest bitwise ANDed with
-
-
-  !Src and stores the results in the C and/or Z flag.
-
-
-  If the WC or WCZ effect is specified, the C flag is set (1) if the number of high
-  (1) bits in Dest ANDed with !Src is
-
-
-  odd, or is cleared (0) if it is even.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest ANDed with !Src
-  is zero, or is cleared (0) if it is not
-
-
-  zero.
-
-
-  TESTP / TESTPN
-
-
-  Test pin or pin not
-
-
-  I/O Pin Instruction - Test pin and either store, AND, OR, or XOR the result or inverse
-  result into C/Z.
-
-
-  TESTP    {#}Dest WC|WZ
-
-
-  TESTP    {#}Dest ANDC|ANDZ
-
-
-  TESTP    {#}Dest ORC|ORZ
-
-
-  TESTP    {#}Dest XORC|XORZ
-
-
-  TESTPN {#}Dest WC|WZ
-
-
-  TESTPN {#}Dest ANDC|ANDZ
-
-
-  TESTPN {#}Dest ORC|ORZ
-
-
-  TESTPN {#}Dest XORC|XORZ
-
-
-  Result: The state of the I/O pin described by Dest is read, possibly inverted, and
-  either stored as-is, or bitwise
-
-
-  ANDed, ORed, or XORed into C or Z.
-
-
-  *   Dest is the register or 6-bit literal whose value identifies the I/O pin to
-  test.
-
-
-  *   WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, and XORZ is a required effect to update
-  or bitwise manipulate the C
-
-
-  or Z flag.
-
-
-  COND INSTR        FX     DEST          SRC           Write            C Flag            Z
-  Flag              Clocks
-
-
-  EEEE 1101011 CZL DDDDDDDDD 001000000                  --            IN[D[5:0]]         IN[D[5:0]]                2
-
-
-  EEEE 1101011 CZL DDDDDDDDD 001000010                  --        C AND IN[D[5:0]]
-  Z AND IN[D[5:0]]                2
-
-
-  EEEE 1101011 CZL DDDDDDDDD 001000100                  --         C OR IN[D[5:0]]    Z
-  OR IN[D[5:0]]              2
-
-
-  EEEE 1101011 CZL DDDDDDDDD 001000110                  --        C XOR IN[D[5:0]]
-  Z XOR IN[D[5:0]]                2
-
-
-  EEEE 1101011 CZL DDDDDDDDD 001000001                  --            !IN[D[5:0]]        !IN[D[5:0]]               2
-
-
-  EEEE 1101011 CZL DDDDDDDDD 001000011                  --        C AND !IN[D[5:0]]
-  Z AND !IN[D[5:0]]              2
-
-
-  EEEE 1101011 CZL DDDDDDDDD 001000101                  --         C OR !IN[D[5:0]]   Z
-  OR !IN[D[5:0]]             2
-
-
-  EEEE 1101011 CZL DDDDDDDDD 001000111                  --        C XOR !IN[D[5:0]]
-  Z XOR !IN[D[5:0]]              2
-
-
-  Related: TESTB and TESTBN
-
-
-  TESTP or TESTPN reads the state (0/1) of the I/O pin designated by Dest, possibly
-  inverts that result, and either
-
-
-  stores it as-is, or bitwise ANDs, ORs, or XORs it into the C or Z flag. Dest[5:0]
-  indicates the pin number (0-63) to
-
-
-  test.
-
-
-  If the WC or WZ effect is specified, the C or Z flag is overwritten with the state
-  or inverse state of the pin.
-
-
-  If the ANDC or ANDZ effect is specified, the C or Z flag is bitwise ANDed with the
-  state or inverse state of the pin.
-
-
-  If the ORC or ORZ effect is specified, the C or Z flag is bitwise ORed with the
-  state or inverse state of the pin.
-
-
-  If the XORC or XORZ effect is specified, the C or Z flag is bitwise XORed with the
-  state or inverse state of the pin.
-
-
-  TJF / TJNF
-
-
-  Test, jump if full or not full
-
-
-  Flow Control Instruction - Test value and jump if full (-1; $FFFF_FFFF) or not full
-  (<> -1; <> $FFFF_FFFF).
-
-
-  TJF        Dest, {#}Src
-
-
-  TJNF Dest, {#}Src
-
-
-  Result: Dest is tested and if it''s full (or not full in syntax 2), PC is set to
-  a new relative (#Src) or absolute (Src)
-
-
-  address.
-
-
-  *    Dest is a register whose value is tested for full or not full.
-
-
-  *    Src is a register, 9-bit literal, or 20-bit augmented literal whose value is
-  the absolute or relative address to
-
-
-  set PC to. Use # for relative addressing; omit # for absolute addressing.
-
-
-  COND INSTR             FX      DEST           SRC             Write       C Flag             Z
-  Flag             Clocks
-
-
-  EEEE 1011101 00I DDDDDDDDD SSSSSSSSS                        PC    1
-
-
-  --                  --           2 or 4 / 2 or 13-20
-
-
-  EEEE 1011101 01I DDDDDDDDD SSSSSSSSS                        PC1         --                  --           2
-  or 4 / 2 or 13-20
-
-
-  1
-
-
-  PC is written only when Dest is full (or not full in syntax 2).
-
-
-  TJF or TJNF tests the value in Dest and jumps to the address described by Src if
-  the result is full (-1; $FFFF_FFFF;
-
-
-  in syntax 1) or not full (<> -1; <> $FFFF_FFFF; in syntax 2).
-
-
-  The address (Src) can be absolute or relative. To specify an absolute address, Src
-  must be a register containing a
-
-
-  20-bit address value. To specify a relative address, use #Label for a 9-bit signed
-  offset (a range of -256 to +255
-
-
-  instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed
-  offset (a range of -524288 to
-
-
-  +524287). Offsets are relative to the instruction following the TJF / TJNF. The
-  signed offset value is in units of
-
-
-  whole instructions-- it is added to PC as-is when in Cog/LUT execution mode and
-  is multiplied by 4 then added to
-
-
-  PC when in Hub execution mode (long-aligned Hub code not required).
-
-
-  TJS / TJNS
-
-
-  Test, jump if signed or not signed
-
-
-  Flow Control Instruction - Test value and jump if signed or not signed.
-
-
-  TJS        Dest, {#}Src
-
-
-  TJNS Dest, {#}Src
-
-
-  Result: Dest is tested and if it''s signed (or not signed in syntax 2), PC is set
-  to a new relative (#Src) or absolute
-
-
-  (Src) address.
-
-
-  *    Dest is a register whose value is tested for sign or no sign.
-
-
-  *    Src is a register, 9-bit literal, or 20-bit augmented literal whose value is
-  the absolute or relative address to
-
-
-  set PC to. Use # for relative addressing; omit # for absolute addressing.
-
-
-  COND INSTR             FX      DEST           SRC             Write       C Flag             Z
-  Flag             Clocks
-
-
-  EEEE 1011101 10I DDDDDDDDD SSSSSSSSS                        PC    1
-
-
-  --                  --           2 or 4 / 2 or 13-20
-
-
-  EEEE 1011101 11I DDDDDDDDD SSSSSSSSS                        PC    1
-
-
-  --                  --           2 or 4 / 2 or 13-20
-
-
-  1
-
-
-  PC is written only when Dest is signed (or not signed in syntax 2).
-
-
-  TJS or TJNS tests the value in Dest and jumps to the address described by Src if
-  the result is signed (Dest[31] = 1)
-
-
-  or not signed (Dest[31] = 0).
-
-
-  The address (Src) can be absolute or relative. To specify an absolute address, Src
-  must be a register containing a
-
-
-  20-bit address value. To specify a relative address, use #Label for a 9-bit signed
-  offset (a range of -256 to +255
-
-
-  instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed
-  offset (a range of -524288 to
-
-
-  +524287). Offsets are relative to the instruction following the TJS / TJNS. The
-  signed offset value is in units of
-
-
-  whole instructions-- it is added to PC as-is when in Cog/LUT execution mode and
-  is multiplied by 4 then added to
-
-
-  PC when in Hub execution mode (long-aligned Hub code not required).'
-result: Dest is tested and if it's signed (or not signed in syntax 2), PC is set to
-  a new relative (#Src) or absolute
+description: >-
+  TESTN determines the parity (number of high (1) bits) and the zero or non-zero
+  state of Dest bitwise ANDed with !Src and stores the results in the C and/or Z
+  flag.
+
+  If the WC or WCZ effect is specified, the C flag is set (1) if the number of
+  high (1) bits in Dest ANDed with !Src is odd, or is cleared (0) if it is even.
+
+  If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest ANDed with
+  !Src is zero, or is cleared (0) if it is not zero.
+result: >-
+  The parity and zero-state of Dest bitwise ANDed with !Src is stored in the C
+  and Z flags.
 parameters:
 - Dest is the register whose value will be tested.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose inverse
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose inverse
   value is ANDed with Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
-- Dest is the register or 6-bit literal whose value identifies the I/O pin to test.
-- WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, and XORZ is a required effect to update or bitwise
-  manipulate the C or Z flag.
-- Dest is a register whose value is tested for full or not full.
-- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
-  absolute or relative address to set PC to. Use # for relative addressing; omit #
-  for absolute addressing.'
-- Dest is a register whose value is tested for sign or no sign.
-- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
-  absolute or relative address to set PC to. Use # for relative addressing; omit #
-  for absolute addressing.'
 flags_affected:
   C:
     formula: parity of (D & !S)
+    description: Set if odd number of high bits in result
   Z:
-    formula: ((D & !S) == 0)
+    formula: (D & !S) = 0
+    description: Set if result is zero
 syntax_variants:
 - TESTN Dest, {#}Src {WC|WZ|WCZ}
-- TESTN determines the parity (number of high (1) bits) and the zero or non-zero state
-  of Dest bitwise ANDed with
 timing:
-  cycles: 1
+  cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:
 - bits: EEEE 0111111 CZI DDDDDDDDD SSSSSSSSS
   write: —
   c: Parity of (D & !S)
@@ -352,12 +45,15 @@ compiler_operand_format:
   pattern: D,S/#
   description: Destination register, Source register or immediate value
   valueType: 0
-compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+compiler_encoding:
   operandFormat: 0
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
+last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 oneliner: Test D by bitwise ANDing with !S to affect flags only
 related:
+- TEST
 - TESTB
 - TESTBN
+- TESTP
+- TESTPN
