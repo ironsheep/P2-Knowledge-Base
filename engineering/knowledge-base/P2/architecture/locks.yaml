@@ -203,18 +203,19 @@ common_applications:
           LOCKREL #BUFFER_LOCK
   
   - application: "resource_arbitration"
-    description: "Manage access to shared hardware resources like pins or CORDIC"
+    description: "Manage access to shared hardware resources like pins or hub peripherals"
     complexity: "intermediate"
     example: |
-      ' CORDIC access control
-      CORDIC_LOCK = 1
-      
-      .use_cordic:
-          LOCKTRY #CORDIC_LOCK WC
+      ' Shared pin group access control
+      PIN_GROUP_LOCK = 1
+
+      .use_pins:
+          LOCKTRY #PIN_GROUP_LOCK WC
           IF_NC   JMP #$-1
-          QMUL    x, y          ' Use CORDIC
-          GETQX   result
-          LOCKREL #CORDIC_LOCK
+          DRVH    #LED_PIN      ' Use shared pins
+          WAITX   ##1000
+          DRVL    #LED_PIN
+          LOCKREL #PIN_GROUP_LOCK
   
   - application: "producer_consumer"
     description: "Synchronize producer/consumer queues"

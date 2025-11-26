@@ -1,0 +1,252 @@
+'
+' CORDIC overlapping command demo
+'
+' - outputs 32 sine waves of increasing frequency on P0..P31 using 990-ohm DACs
+' - uses SETQ+QROTATE+GETQY+GETQX, the most input/output-intensive CORDIC command
+'
+con	_clkfreq = 256_000_000			'clock frequency
+	clks = 3*256				'clocks per frame, 3 complete DAC cycles
+	f = 100 frac (_clkfreq / clks)		'100 Hz, gets multiplied by 100, 101, 102..
+	dacmode = %10100_00000000_01_00011_0	'990-ohm DAC + pwm-dithered 16-bit DAC mode
+
+
+dat	org
+
+	wrpin	##dacmode,pins32	'set 16-bit pwm-dither DAC mode for P0..P31
+	wxpin	##clks,pins32		'set period for three pwm-dithered DAC cycles
+	dirh	pins32			'enable smart pins
+'
+'
+' Rotate 32 sets of (x,y) coordinates at different rates
+' by overlapping CORDIC commands and result fetches
+'
+'					'clk	sum
+'					'w=wait	!=cordic tick
+'
+loop	setq	y+00			'2	?	begin first 8 commands
+	qrotate	x+00,a+00		'?w+2	2!
+
+	setq	y+01			'2	4
+	qrotate	x+01,a+01		'4w+2	10!
+
+	setq	y+02			'2	12
+	qrotate	x+02,a+02		'4w+2	18!
+
+	setq	y+03			'2	20
+	qrotate	x+03,a+03		'4w+2	26!
+
+	setq	y+04			'2	28
+	qrotate	x+04,a+04		'4w+2	34!
+
+	setq	y+05			'2	36
+	qrotate	x+05,a+05		'4w+2	42!
+
+	setq	y+06			'2	44
+	qrotate	x+06,a+06		'4w+2	50!
+
+	setq	y+07			'2	52
+	qrotate	x+07,a+07		'4w+2	58!	result 00 is ready at 54!!!
+
+	getqy	y+00			'2	60	get result 00, no waiting!!!
+	getqx	x+00			'2	62
+
+	setq	y+08			'2	64	begin overlapping commands and results
+	qrotate	x+08,a+08		'2	66!
+
+	getqy	y+01			'2	68
+	getqx	x+01			'2	70
+
+	setq	y+09			'2	72
+	qrotate	x+09,a+09		'2	74!
+
+	getqy	y+02			'2	76
+	getqx	x+02			'2	78
+
+	setq	y+10			'2	80
+	qrotate	x+10,a+10		'2	82!
+
+	getqy	y+03			'2	84
+	getqx	x+03			'2	86
+
+	setq	y+11			'2	88
+	qrotate	x+11,a+11		'2	90!
+
+	getqy	y+04			'2	92
+	getqx	x+04			'2	94
+
+	setq	y+12			'2	96
+	qrotate	x+12,a+12		'2	98!
+
+	getqy	y+05			'2	100
+	getqx	x+05			'2	102
+
+	setq	y+13			'2	104
+	qrotate	x+13,a+13		'2	106!
+
+	getqy	y+06			'2	108
+	getqx	x+06			'2	110
+
+	setq	y+14			'2	112
+	qrotate	x+14,a+14		'2	114!
+
+	getqy	y+07			'2	116
+	getqx	x+07			'2	118
+
+	setq	y+15			'2	120
+	qrotate	x+15,a+15		'2	122!
+
+	getqy	y+08			'2	124
+	getqx	x+08			'2	126
+
+	setq	y+16			'2	128
+	qrotate	x+16,a+16		'2	130!
+
+	getqy	y+09			'2	132
+	getqx	x+09			'2	134
+
+	setq	y+17			'2	136
+	qrotate	x+17,a+17		'2	138!
+
+	getqy	y+10			'2	140
+	getqx	x+10			'2	142
+
+	setq	y+18			'2	144
+	qrotate	x+18,a+18		'2	146!
+
+	getqy	y+11			'2	148
+	getqx	x+11			'2	150
+
+	setq	y+19			'2	152
+	qrotate	x+19,a+19		'2	154!
+
+	getqy	y+12			'2	156
+	getqx	x+12			'2	158
+
+	setq	y+20			'2	160
+	qrotate	x+20,a+20		'2	162!
+
+	getqy	y+13			'2	164
+	getqx	x+13			'2	166
+
+	setq	y+21			'2	168
+	qrotate	x+21,a+21		'2	170!
+
+	getqy	y+14			'2	172
+	getqx	x+14			'2	174
+
+	setq	y+22			'2	176
+	qrotate	x+22,a+22		'2	178!
+
+	getqy	y+15			'2	180
+	getqx	x+15			'2	182
+
+	setq	y+23			'2	184
+	qrotate	x+23,a+23		'2	186!
+
+	getqy	y+16			'2	188
+	getqx	x+16			'2	190
+
+	setq	y+24			'2	192
+	qrotate	x+24,a+24		'2	194!
+
+	getqy	y+17			'2	196
+	getqx	x+17			'2	198
+
+	setq	y+25			'2	200
+	qrotate	x+25,a+25		'2	202!
+
+	getqy	y+18			'2	204
+	getqx	x+18			'2	206
+
+	setq	y+26			'2	208
+	qrotate	x+26,a+26		'2	210!
+
+	getqy	y+19			'2	212
+	getqx	x+19			'2	214
+
+	setq	y+27			'2	216
+	qrotate	x+27,a+27		'2	218!
+
+	getqy	y+20			'2	220
+	getqx	x+20			'2	222
+
+	setq	y+28			'2	224
+	qrotate	x+28,a+28		'2	226!
+
+	getqy	y+21			'2	228
+	getqx	x+21			'2	230
+
+	setq	y+29			'2	232
+	qrotate	x+29,a+29		'2	234!
+
+	getqy	y+22			'2	236
+	getqx	x+22			'2	238
+
+	setq	y+30			'2	240
+	qrotate	x+30,a+30		'2	242!
+
+	getqy	y+23			'2	244
+	getqx	x+23			'2	246
+
+	setq	y+31			'2	248
+	qrotate	x+31,a+31		'2	250!
+
+	getqy	y+24			'2	252	get 8 trailing results
+	getqx	x+24			'2	254
+
+	getqy	y+25			'4w+2	260
+	getqx	x+25			'2	262
+
+	getqy	y+26			'4w+2	268
+	getqx	x+26			'2	270
+
+	getqy	y+27			'4w+2	276
+	getqx	x+27			'2	278
+
+	getqy	y+28			'4w+2	284
+	getqx	x+28			'2	286
+
+	getqy	y+29			'4w+2	292
+	getqx	x+29			'2	294
+
+	getqy	y+30			'4w+2	300
+	getqx	x+30			'2	302
+
+	getqy	y+31			'4w+2	308
+	getqx	x+31			'2	310
+'
+'
+' Wait for next DAC frame
+'
+.wait	testp	#0		wc	'check ina[0]
+ if_nc	jmp	#.wait
+'
+'
+' Output y[00..31] (sines) to P0..P31 DACs
+'
+	rep	@.r,#32			'ready to update 32 DACs
+	alts	i,#y			'get y[00..31] into next s and inc i
+	getword	j,0-0,#1		'get upper word of y
+	bitnot	j,#15			'convert signed word to unsigned word for DAC output
+	wypin	j,i			'update DAC output value
+	incmod	i,#31			'inc index, wrap to 0
+.r
+	drvnot	#32			'toggle P32 on each iteration
+
+	jmp	#loop			'loop for another sample set
+'
+'
+' Data
+'
+pins32	long	0 addpins 31		'pin range for P0..P31
+
+i	long	0			'index
+j	long	0			'misc
+
+x	long	$7F000000[32]		'initial (x,y) coordinates
+y	long	$00000000[32]
+
+a	long	100*f,101*f,102*f,103*f,104*f,105*f,106*f,107*f		'ascending frequencies
+	long	108*f,109*f,110*f,111*f,112*f,113*f,114*f,115*f
+	long	116*f,117*f,118*f,119*f,120*f,121*f,122*f,123*f
+	long	124*f,125*f,126*f,127*f,128*f,129*f,130*f,131*f

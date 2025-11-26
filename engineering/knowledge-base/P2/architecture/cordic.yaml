@@ -1,20 +1,29 @@
 # CORDIC Solver - 54-Stage Pipelined Math Engine
-# Source: Silicon Doc v35, P2 Datasheet
+# Source: Silicon Doc v35, P2 Datasheet, Chip Gracey clarification
 
 component: CORDIC
 category: math_engine
 description: |
-  54-stage pipelined CORDIC (COordinate Rotation DIgital Computer) solver providing
-  high-performance mathematical operations for all COGs. Fully pipelined for one
-  operation per clock with 54-clock latency.
+  54-stage pipelined CORDIC (COordinate Rotation DIgital Computer) solver shared by
+  all COGs via hub rotation. Each COG gets access every 8 clocks, enabling up to
+  7-8 operations in flight per COG simultaneously.
 
 architecture:
   pipeline_stages: 54
   pipeline_type: "Fully pipelined"
-  throughput: "1 operation per clock"
+  access_model: "Hub rotation (like hub RAM)"
+  cog_access_interval: "Every 8 clocks per COG"
+  ops_in_flight_per_cog: "7-8 maximum"
+  system_throughput: "1 operation per clock (all COGs combined)"
   latency: "54 clocks for result"
   shared_resource: true
-  arbitration: "Round-robin between COGs"
+  arbitration: "Round-robin via hub rotation"
+
+critical_usage_pattern:
+  fill_phase: "Submit 7-8 ops before expecting results"
+  steady_state: "Each 8-clock slot: retrieve one result + submit one op"
+  drain_phase: "Retrieve remaining results (may stall)"
+  warning: "GETQX/GETQY stalls COG if result not ready - use POLLQMT to check"
 
 operations:
   multiply:
