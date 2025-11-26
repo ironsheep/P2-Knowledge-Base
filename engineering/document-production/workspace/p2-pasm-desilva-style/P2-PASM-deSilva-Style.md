@@ -1,6 +1,19 @@
 ```{=latex}
-% Banner image at top (full width)
-\noindent\includegraphics[width=\textwidth]{inbox/assets/book-artwork.png}
+% Banner image at top (full width) with drop shadow for visual balance
+\begin{tcolorbox}[
+  enhanced,
+  boxrule=1.5pt,
+  colframe=gray!60,
+  colback=white,
+  drop shadow southeast,
+  shadow={3pt}{-3pt}{1mm}{black!15},
+  left=0pt, right=0pt, top=0pt, bottom=0pt,
+  width=\textwidth,
+  arc=0pt,
+  outer arc=0pt
+]
+\includegraphics[width=\linewidth]{inbox/assets/book-artwork.png}
+\end{tcolorbox}
 
 \begin{center}
 \vspace{0.6cm}
@@ -47,7 +60,7 @@
 \end{itemize}
 \end{minipage}
 \end{tcolorbox}
-\vspace{0.5cm}
+\vspace{1cm}
 \end{center}
 
 \clearpage
@@ -93,7 +106,7 @@ Propeller, Propeller 2, P2, Spin, and the Parallax logo are trademarks of Parall
 The information in this manual is subject to change without notice. While every effort has been made to ensure accuracy, the authors and publishers assume no responsibility for errors or omissions, or for damages resulting from the use of the information contained herein.
 
 
-*First Edition: August 2025*  
+*First Edition: November 2025*  
 *Manual Version: 1.0.0*  
 *Knowledge Base Coverage: 80%*
 
@@ -292,7 +305,7 @@ Well, now that you've seen it work (you did try it, right?), let's talk about wh
 
 **`drvh #56`** - This drives pin 56 high (3.3V). The 'h' means high. The '#' means we're using an immediate value (the actual number 56) rather than the contents of register 56. One instruction, and your LED is on!
 
-**`waitx ##25_000_000`** - This waits for 25 million clock cycles. At the default 100MHz clock, that's 0.25 seconds. Notice the double '##'? That means this is a 32-bit immediate value. Single '#' only gives us 9 bits.
+**`waitx ##50_000_000`** - This waits for 50 million clock cycles. At 200 MHz, that's 0.25 seconds. Notice the double '##'? That means this is a 32-bit immediate value. Single '#' only gives us 9 bits.
 
 **`drvl #56`** - Drive low. LED off. You get the pattern.
 
@@ -340,6 +353,8 @@ CON
 
 This tells the P2 to run at 200 MHz using your board's crystal oscillator. Without it, the chip runs at a sluggish ~20 MHz on its internal RC oscillator—and timing-dependent code (including DEBUG output) won't behave as expected.
 
+At 200 MHz with most instructions taking 2 clocks, each COG executes approximately 100 million instructions per second (100 MIPS). With 8 COGs running in parallel, that's 800 MIPS of total processing power—and that's before Smart Pins start handling I/O autonomously.
+
 **From here on, we'll omit this preamble from examples to keep them focused on the concept being taught.** When you create your own files, always include it at the top before your `PUB` or `DAT` sections.
 :::
 
@@ -351,7 +366,7 @@ The blinker works, but it's a bit rigid, isn't it? What if we want to change the
 ```
         org     0
         
-        mov     delay, ##25_000_000    ' Set delay to 0.25 seconds
+        mov     delay, ##50_000_000    ' Set delay to 0.25 seconds (at 200 MHz)
         
 blink   drvh    #56                    ' LED on
         waitx   delay                  ' Wait
@@ -364,6 +379,8 @@ delay   long    0                      ' Storage for our delay value
 :::
 
 Uff! Look at that - we're using a register now! The `mov` instruction copies our delay value into a register (which we cleverly named 'delay'). Now we can change the blink rate by modifying just one value.
+
+*A note on terminology: P2 documentation often uses "register" to refer to any long in COG RAM. Unlike ARM or x86 where registers are a small, special set (R0-R15, EAX, etc.), every COG RAM location can be used as a general-purpose register. However, the last 16 locations (addresses 496-511) are reserved for special-purpose registers, so avoid those for your variables. When you see "register" in P2 context, think "COG RAM location."*
 
 ## Understanding COGs
 
@@ -387,8 +404,8 @@ Make the LED blink in a pattern: short-short-long (like SOS):
 ```
         org     0
         
-        mov     short, ##10_000_000    ' 0.1 second
-        mov     long_d, ##30_000_000   ' 0.3 seconds
+        mov     short, ##20_000_000    ' 0.1 second (at 200 MHz)
+        mov     long_d, ##60_000_000   ' 0.3 seconds (at 200 MHz)
         
 pattern drvh    #56                    ' Short pulse 1
         waitx   short
@@ -421,11 +438,11 @@ Blink LEDs on pins 56 and 57 alternately:
         
 loop    drvh    #56                    ' LED 56 on
         drvl    #57                    ' LED 57 off
-        waitx   ##25_000_000
-        
+        waitx   ##50_000_000           ' 0.25 sec at 200 MHz
+
         drvl    #56                    ' LED 56 off
         drvh    #57                    ' LED 57 on
-        waitx   ##25_000_000
+        waitx   ##50_000_000           ' 0.25 sec at 200 MHz
         
         jmp     #loop
 ```
@@ -461,9 +478,9 @@ Feeling overwhelmed? Here's the simplified prescription:
 
 ::: pasm2
 ```
-loop    drvnot  #56         ' Toggle pin 56
-        waitx   ##25_000_000 ' Wait
-        jmp     #loop       ' Repeat
+loop    drvnot  #56          ' Toggle pin 56
+        waitx   ##50_000_000 ' 0.25s at 200MHz
+        jmp     #loop        ' Repeat
 ```
 :::
 
@@ -1670,7 +1687,7 @@ Let me show you something even more impressive:
 
 ## What Just Happened?
 
-CORDIC stands for COordinate Rotation DIgital Computer. It's a method invented in 1959 for calculating trigonometric functions using only shifts and adds - no multiplies needed! The P2 has this algorithm implemented in hardware, shared by all COGs.
+CORDIC stands for COordinate Rotation DIgital Computer. It's a method invented in 1959 for calculating trigonometric functions using only shifts and adds - no multiplies needed! Each P2 COG has its own dedicated CORDIC unit built into the hardware.
 
 Think of CORDIC as your mathematical co-processor that can:
 - Rotate points around the origin
@@ -2003,7 +2020,7 @@ sample_loop
         wypin   sample, #AUDIO_PIN
         
         ' Wait for sample period (48kHz)
-        waitx   ##2083                  ' 100MHz / 48kHz
+        waitx   ##4166                  ' 200MHz / 48kHz
         
         jmp     #sample_loop
 ```
@@ -2013,7 +2030,7 @@ sample_loop
 
 Before you pull your hair out debugging, know these:
 
-1. **CORDIC is shared** - All COGs share one CORDIC unit. Starting a new operation cancels any in progress!
+1. **One result at a time** - Each COG has its own CORDIC, but starting a new operation before retrieving your result overwrites it!
 
 2. **55 clocks is exact** - Not 54, not 56. Always exactly 55 clocks from operation start to result ready.
 
@@ -2256,7 +2273,7 @@ check_button
         cmp     debounce, #10 wcz ' Need 10 consecutive highs
   if_ae jmp     #button_confirmed
         
-        waitx   ##100_000        ' Wait 1ms
+        waitx   ##200_000        ' Wait 1ms at 200MHz
         jmp     #check_button
         
 button_confirmed
@@ -2374,7 +2391,7 @@ Feeling overwhelmed by all these pin operations? Here's the simplified prescript
 ::: pasm2
 ```
 loop    drvnot  #LED
-        waitx   ##25_000_000
+        waitx   ##50_000_000
         jmp     #loop
 ```
 :::
@@ -2443,18 +2460,18 @@ Even without Smart Pins, controlling a servo is easy:
 ```
 ' Standard servo control (1-2ms pulse every 20ms)
 servo_control
-        mov     position, ##150_000    ' 1.5ms = center
-        
+        mov     position, ##300_000    ' 1.5ms = center at 200MHz
+
 servo_loop
         drvh    #SERVO_PIN
         waitx   position              ' 1-2ms high pulse
         drvl    #SERVO_PIN
-        waitx   ##2_000_000          ' Rest of 20ms period
-        
+        waitx   ##4_000_000          ' Rest of 20ms at 200MHz
+
         ' Adjust position as needed
         rdlong  position, ##position_addr
-        fle     position, ##100_000   ' Limit to 1ms min
-        fge     position, ##200_000   ' Limit to 2ms max
+        fle     position, ##200_000   ' Limit to 1ms min
+        fge     position, ##400_000   ' Limit to 2ms max
         
         jmp     #servo_loop
 ```
@@ -3308,7 +3325,7 @@ check_servos
         tjnz    servo_mask, #check_servos
         
         ' Wait for 20ms frame
-        waitx   ##2_000_000
+        waitx   ##4_000_000
         jmp     #servo_loop
         
 ' Result: 8 servos with ZERO jitter!
@@ -3986,8 +4003,8 @@ For loading entire tables, **SETQ2** + **RDLONG** can transfer hub data directly
 
 ::: pasm2
 ```
-setq2   #256-1              ' 256 longs
-rdlong  $200, hub_table_ptr ' Load into LUT starting at $200
+        setq2   #256-1              ' 256 longs
+        rdlong  $200, hub_table_ptr ' Load into LUT starting at $200
 ```
 :::
 
@@ -4176,7 +4193,7 @@ The Streamer configuration for LUT reading is covered in detail in the Video and
 
 ## Your Turn
 
-::: exercise
+::: your-turn
 **Exercise 1: Build an 8-bit Encoder**
 
 Create a LUT-based ASCII to 7-segment display encoder. Load a 128-entry table where each entry maps an ASCII code to the 7-segment pattern for that character.
@@ -4189,7 +4206,7 @@ Create a LUT-based ASCII to 7-segment display encoder. Load a 128-entry table wh
 ```
 :::
 
-::: exercise
+::: your-turn
 **Exercise 2: High-Speed COG Communication**
 
 Use LUT sharing to create a message passing system between COG 2 and COG 3:
@@ -4423,16 +4440,7 @@ The mode values like `P_ASYNC_TX` are constants defined by the assembler. Here's
 
 The **WRPIN** D value is a 32-bit configuration:
 
-```
-%AAAA_BBBB_FFF_MMMMMMMMMMMMM_TT_SSSSS_0
-  │    │    │        │        │    │
-  │    │    │        │        │    └─ Mode (5 bits): What this pin does
-  │    │    │        │        └─ Output control (2 bits)
-  │    │    │        └─ Low-level controls (13 bits)
-  │    │    └─ Filter/logic (3 bits)
-  │    └─ B input source (4 bits)
-  └─ A input source (4 bits)
-```
+\WRPINBitFieldDiagram
 
 For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM_SAWTOOTH`, `P_ADC`. The P2 assembler knows all of them.
 
@@ -4482,7 +4490,7 @@ For most common modes, you'll use predefined constants like `P_ASYNC_TX`, `P_PWM
 **Smart Pin Quick Reference**
 
 **The Recipe:**
-```
+```pasm2
 DIRL pin          ' 1. Reset
 WRPIN mode, pin   ' 2. Mode
 WXPIN x, pin      ' 3. X parameter
@@ -4511,7 +4519,7 @@ DIRH pin          ' 5. Enable
 
 ## Your Turn
 
-::: exercise
+::: your-turn
 **Exercise 1: PWM LED Dimmer**
 
 Create a PWM output that dims an LED:
@@ -4525,7 +4533,7 @@ Create a PWM output that dims an LED:
 ```
 :::
 
-::: exercise
+::: your-turn
 **Exercise 2: Simple Serial Echo**
 
 Set up UART at 115200 baud:
@@ -4600,12 +4608,7 @@ Plus there are built-in timer events:
 
 The **SETSE1** through **SETSE4** instructions take a 9-bit configuration value:
 
-```
-%MMM_PPPPPP
-  │   │
-  │   └─ Pin number (0-63) or special source
-  └─ Mode: What triggers the event
-```
+\SETSEBitFieldDiagram
 
 ### Event Modes
 
@@ -4657,14 +4660,14 @@ For precise timing, use the counter comparison events:
 
 ::: pasm2
 ```
-' Wait exactly 1 millisecond (at 160 MHz)
+' Wait exactly 1 millisecond (at 200 MHz)
         getct   target          ' Current time
-        add     target, ##160_000  ' +1ms
-        addct1  target, #0      ' Set CT1 target (add 0 for exact value)
+        add     target, ##200_000  ' +1ms at 200MHz
+        addct1  target, #0      ' Set CT1 target
         waitct1                  ' Sleep until CT >= CT1
 
 ' Alternative using WAITX (simpler but less precise)
-        waitx   ##160_000       ' Wait ~1ms
+        waitx   ##200_000       ' Wait ~1ms at 200MHz
 ```
 :::
 
@@ -4769,7 +4772,7 @@ debounced_button
         setse1  #%110<<6 + BUTTON  ' Rising edge
         waitse1                     ' Wait for press
 
-        waitx   ##1_600_000        ' 10ms debounce delay
+        waitx   ##2_000_000        ' 10ms debounce at 200MHz
 
         testp   #BUTTON wc         ' Verify still pressed
   if_nc jmp     #debounced_button  ' Bounce - try again
@@ -4859,11 +4862,15 @@ The **COGATN** instruction takes an 8-bit mask where each bit corresponds to a C
 **Event System Quick Reference**
 
 **Configure Events:**
+
+::: pasm2
 ```
-SETSE1/2/3/4  #%MMM_PPPPPP    ' Mode and pin
+        SETSE1/2/3/4  #%MMM_PPPPPP    ' Mode and pin
 ```
+:::
 
 **Event Modes:**
+
 | %MMM | Trigger |
 |------|---------|
 | %001 | IN rises (Smart Pin ready) |
@@ -4873,38 +4880,53 @@ SETSE1/2/3/4  #%MMM_PPPPPP    ' Mode and pin
 | %111 | Pin falls |
 
 **Wait (blocking):**
+
+::: pasm2
 ```
-WAITSE1/2/3/4    ' Sleep until event
-WAITCT1/2/3      ' Sleep until timer
-WAITATN          ' Sleep until attention
+        WAITSE1/2/3/4    ' Sleep until event
+        WAITCT1/2/3      ' Sleep until timer
+        WAITATN          ' Sleep until attention
 ```
+:::
 
 **Poll (non-blocking):**
+
+::: pasm2
 ```
-POLLSE1/2/3/4 WC ' Check event, clear flag, C=occurred
-POLLCT1/2/3 WC   ' Check timer, C=reached
-POLLATN WC       ' Check attention, C=received
+        POLLSE1/2/3/4 WC ' Check event, clear flag, C=occurred
+        POLLCT1/2/3 WC   ' Check timer, C=reached
+        POLLATN WC       ' Check attention, C=received
 ```
+:::
 
 **Timer Setup:**
+
+::: pasm2
 ```
-ADDCT1/2/3 target, #delta   ' Set comparison target
+        ADDCT1/2/3 target, #delta   ' Set comparison target
 ```
+:::
 
 **Inter-COG:**
+
+::: pasm2
 ```
-COGATN #mask    ' Signal COGs (bit per COG)
+        COGATN #mask    ' Signal COGs (bit per COG)
 ```
+:::
 :::
 
 ## Your Turn
 
-::: exercise
+::: your-turn
 **Exercise 1: Event-Driven Serial**
 
 Rewrite a serial receive loop to use events instead of polling:
+
 1. Configure SE1 for UART RX Smart Pin ready
+
 2. Use WAITSE1 instead of TESTP loop
+
 3. Measure the cycle count difference
 
 ```pasm2
@@ -4913,13 +4935,17 @@ Rewrite a serial receive loop to use events instead of polling:
 ```
 :::
 
-::: exercise
+::: your-turn
 **Exercise 2: Dual Event Monitor**
 
 Create a loop that monitors both a button (pin edge event) and a timer (periodic event):
+
 1. SE1 = button press (rising edge)
+
 2. CT1 = 1 second heartbeat
+
 3. On button: toggle LED
+
 4. On timer: print timestamp
 
 ```pasm2
@@ -5141,7 +5167,7 @@ sensor_cog
         ' Convert to distance...
         wrlong  distance, ##DISTANCE_SENSOR
         
-        waitx   ##5_000_000          ' 50ms between readings
+        waitx   ##10_000_000         ' 50ms at 200MHz
         jmp     #sensor_cog
 
 ' COG 2: Left Motor Driver
@@ -5208,8 +5234,8 @@ Eight COGs, each doing one job perfectly, creating a responsive, reliable robot!
 
 ## Your Turn: Multi-COG Project
 
-:::yourturn
-**Your Turn:** Create a traffic light controller
+::: your-turn
+**Exercise: Traffic Light Controller**
 
 Requirements:
 - COG 0: Main sequencer

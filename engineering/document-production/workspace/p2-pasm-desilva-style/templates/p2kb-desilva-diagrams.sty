@@ -261,6 +261,137 @@
 \end{center}
 }
 
+% ==================== WRPIN CONFIGURATION BIT FIELD DIAGRAM ====================
+% 32-bit Smart Pin configuration register layout
+\newcommand{\WRPINBitFieldDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    bitfield/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum height=0.9cm,
+        align=center,
+        font=\ttfamily\footnotesize
+    },
+    bitnum/.style={
+        font=\tiny\ttfamily,
+        text=gray
+    },
+    fieldlabel/.style={
+        font=\scriptsize,
+        text=diagram-text,
+        align=center
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 2.3) {WRPIN Configuration (32 bits):};
+
+% Calculate total width: 32 bits at 0.28cm each = 8.96cm
+% Fields from MSB to LSB (left to right):
+% AAAA(4) BBBB(4) FFF(3) MMMMMMMMMMMMM(13) TT(2) SSSSS(5) 0(1)
+
+% Bit positions (31 down to 0)
+\node[bitnum] at (-4.34, 1.6) {31};
+\node[bitnum] at (-3.22, 1.6) {27};
+\node[bitnum] at (-2.10, 1.6) {23};
+\node[bitnum] at (-1.26, 1.6) {20};
+\node[bitnum] at (1.54, 1.6) {7};
+\node[bitnum] at (2.10, 1.6) {5};
+\node[bitnum] at (3.50, 1.6) {0};
+
+% Field boxes (positioned by center, width = bits * 0.28cm)
+% AAAA: 4 bits = 1.12cm, center at -3.78
+\node[bitfield, fill=red!20, minimum width=1.12cm] (aaaa) at (-3.78, 0.8) {AAAA};
+% BBBB: 4 bits = 1.12cm, center at -2.66
+\node[bitfield, fill=orange!20, minimum width=1.12cm] (bbbb) at (-2.66, 0.8) {BBBB};
+% FFF: 3 bits = 0.84cm, center at -1.68
+\node[bitfield, fill=yellow!30, minimum width=0.84cm] (fff) at (-1.68, 0.8) {FFF};
+% MMMMMMMMMMMMM: 13 bits = 3.64cm, center at 0.56
+\node[bitfield, fill=diagram-box, minimum width=3.64cm] (mmm) at (0.14, 0.8) {M...M};
+% TT: 2 bits = 0.56cm, center at 2.38
+\node[bitfield, fill=green!20, minimum width=0.56cm] (tt) at (1.82, 0.8) {TT};
+% SSSSS: 5 bits = 1.40cm, center at 3.08
+\node[bitfield, fill=blue!20, minimum width=1.40cm] (sssss) at (2.80, 0.8) {SSSSS};
+% 0: 1 bit = 0.28cm, center at 3.78
+\node[bitfield, fill=gray!30, minimum width=0.28cm] (zero) at (3.64, 0.8) {0};
+
+% Field labels below
+\node[fieldlabel] at (-3.78, -0.3) {A input\\source\\(4 bits)};
+\node[fieldlabel] at (-2.66, -0.3) {B input\\source\\(4 bits)};
+\node[fieldlabel] at (-1.68, -0.3) {Filter\\(3 bits)};
+\node[fieldlabel] at (0.14, -0.3) {Low-level controls\\(13 bits)};
+\node[fieldlabel] at (1.82, -0.3) {Out\\(2)};
+\node[fieldlabel] at (2.80, -0.3) {Mode\\(5 bits)};
+\node[fieldlabel] at (3.64, -0.3) {};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ==================== SETSE CONFIGURATION BIT FIELD DIAGRAM ====================
+% 9-bit event configuration for SETSE1/2/3/4
+\newcommand{\SETSEBitFieldDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    bitfield/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum height=1.0cm,
+        align=center,
+        font=\ttfamily\small
+    },
+    bitnum/.style={
+        font=\scriptsize\ttfamily,
+        text=gray
+    },
+    fieldlabel/.style={
+        font=\small,
+        text=diagram-text,
+        align=center
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 2.0) {SETSE1/2/3/4 Configuration (9 bits):};
+
+% Bit positions
+\node[bitnum] at (-2.1, 1.3) {8};
+\node[bitnum] at (-0.7, 1.3) {6};
+\node[bitnum] at (0.7, 1.3) {5};
+\node[bitnum] at (2.1, 1.3) {0};
+
+% Field boxes
+% MMM: 3 bits, larger for visibility
+\node[bitfield, fill=blue!25, minimum width=2.1cm] (mmm) at (-1.4, 0.5) {MMM};
+% PPPPPP: 6 bits
+\node[bitfield, fill=green!25, minimum width=2.8cm] (ppp) at (1.4, 0.5) {PPPPPP};
+
+% Field labels below
+\node[fieldlabel] at (-1.4, -0.7) {Event Mode\\(3 bits)};
+\node[fieldlabel] at (1.4, -0.7) {Pin Number\\(6 bits: 0--63)};
+
+% Mode values reference (compact)
+\node[font=\scriptsize, align=left, anchor=north west] at (-3.5, -1.5) {%
+\begin{tabular}{ll}
+\texttt{\%000} & Disabled \\
+\texttt{\%001} & IN rises (Smart Pin ready) \\
+\texttt{\%010} & IN falls \\
+\texttt{\%011} & IN changes \\
+\end{tabular}};
+
+\node[font=\scriptsize, align=left, anchor=north west] at (0.5, -1.5) {%
+\begin{tabular}{ll}
+\texttt{\%100} & Pin high \\
+\texttt{\%101} & Pin low \\
+\texttt{\%110} & Pin rises \\
+\texttt{\%111} & Pin falls \\
+\end{tabular}};
+
+\end{tikzpicture}
+\end{center}
+}
+
 % ==================== INSTRUCTION EXAMPLE DIAGRAM ====================
 \newcommand{\InstructionExampleDiagram}{%
 \begin{center}

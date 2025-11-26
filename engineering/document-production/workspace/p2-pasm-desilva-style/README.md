@@ -114,15 +114,17 @@ Edit `P2-PASM-deSilva-Style.md` in this workspace
 ```
 
 ### 3. Copy Supporting Files
-```bash
-# Copy templates if changed
-cp templates/*.{latex,sty} ../outbound/p2-pasm-desilva-style/
+**CRITICAL: Outbound must be a FLAT directory - no subdirectories!**
 
-# Copy Lua filters if changed
-cp -r filters ../outbound/p2-pasm-desilva-style/
+```bash
+# Copy templates if changed (flat - no subdirectory)
+cp templates/*.{latex,sty} /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-pasm-desilva-style/
+
+# Copy Lua filters if changed (flat - no subdirectory)
+cp filters/*.lua /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-pasm-desilva-style/
 
 # Ensure request.json is present
-cp request.json ../outbound/p2-pasm-desilva-style/
+cp request.json /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-pasm-desilva-style/
 ```
 
 ### 4. User Deploys to PDF Forge

@@ -25,8 +25,9 @@ local mnemonics = {
   "dirrnd", "dirz", "djf", "djnf", "djnz", "djz", "drvc", "drvh", "drvl", "drvnc",
   "drvnot", "drvnz", "drvrnd", "drvz", "encod", "execf", "fblock", "fge", "fges",
   "fit", "fle", "fles", "fltc", "flth", "fltl", "fltnc", "fltnot", "fltnz",
-  "fltrnd", "fltz", "getbrk", "getbyte", "getct", "getnib", "getptr", "getqx",
-  "getqy", "getrnd", "getscp", "getword", "getxacc", "hubexec", "hubset", "ijnz",
+  "fltrnd", "fltz", "getbrk", "getbyte", "getct", "getnib", "getmull", "getmulh",
+  "getptr", "getqx", "getqy", "getrnd", "getscp", "getword", "getxacc", "hubexec",
+  "hubset", "ijnz",
   "ijz", "incmod", "jatn", "jct1", "jct2", "jct3", "jfbw", "jint", "jmp", "jmprel",
   "jnatn", "jnct1", "jnct2", "jnct3", "jnfbw", "jnint", "jnpat", "jnqmt", "jnse1",
   "jnse2", "jnse3", "jnse4", "jnxfi", "jnxmt", "jnxrl", "jnxro", "jpat", "jqmt",
@@ -40,11 +41,11 @@ local mnemonics = {
   "pollpat", "pollqmt", "pollse1", "pollse2", "pollse3", "pollse4", "pollxfi",
   "pollxmt", "pollxrl", "pollxro", "pop", "popa", "popb", "posx", "push", "pusha",
   "pushb", "qdiv", "qexp", "qfrac", "qlog", "qmul", "qrotate", "qsqrt", "qvector",
-  "rcl", "rcr", "rczl", "rczr", "rdbyte", "rdfast", "rdlong", "rdlut", "rdpin",
-  "rdword", "rep", "res", "resi0", "resi1", "resi2", "resi3", "ret", "reta",
+  "rcl", "rcr", "rczl", "rczr", "rdbyte", "rdfast", "rdlong", "rdlut", "rdluts",
+  "rdpin", "rdword", "rep", "res", "resi0", "resi1", "resi2", "resi3", "ret", "reta",
   "retb", "reti0", "reti1", "reti2", "reti3", "rev", "rfbyte", "rflong", "rfvar",
   "rfvars", "rfword", "rgbexp", "rgbsqz", "rol", "rolbyte", "rolnib", "rolword",
-  "ror", "rqpin", "sal", "sar", "sca", "scas", "setbyte", "setcfrq", "setci",
+  "ror", "rqpin", "sal", "sar", "sca", "scas", "scl", "setbyte", "setcfrq", "setci",
   "setcmod", "setcq", "setcy", "setd", "setdacs", "setint1", "setint2", "setint3",
   "setluts", "setnib", "setpat", "setpiv", "setpix", "setq", "setq2", "setr",
   "sets", "setscp", "setse1", "setse2", "setse3", "setse4", "setword", "setxfrq",
@@ -71,29 +72,35 @@ local function is_mnemonic(word)
   return mnemonic_set[word:lower()] ~= nil
 end
 
--- Uppercase mnemonics in a line of code
+-- Uppercase mnemonics in a single line of code (stops at comment)
 -- Only match standalone mnemonics, not parts of identifiers like "long_d"
-local function uppercase_mnemonics_in_code(text)
-  -- Process character by character to handle word boundaries properly
+local function uppercase_mnemonics_in_line(line)
+  -- Find comment start (single quote in PASM2)
+  local comment_start = line:find("'")
+  local code_part = comment_start and line:sub(1, comment_start - 1) or line
+  local comment_part = comment_start and line:sub(comment_start) or ""
+
+  -- Process only the code part
   local result = {}
   local i = 1
-  local len = #text
+  local len = #code_part
 
   while i <= len do
-    local char = text:sub(i, i)
+    local char = code_part:sub(i, i)
 
     -- Check if we're starting a potential word (letter)
+    -- Match words starting with letter, can contain digits (for addct1, waitct2, setse1, pollse1, etc.)
     if char:match("%a") then
-      -- Find the end of this alphabetic sequence
+      -- Find the end of this alphanumeric sequence
       local word_start = i
-      while i <= len and text:sub(i, i):match("%a") do
+      while i <= len and code_part:sub(i, i):match("[%a%d]") do
         i = i + 1
       end
-      local word = text:sub(word_start, i - 1)
+      local word = code_part:sub(word_start, i - 1)
 
       -- Check what comes before and after
-      local char_before = word_start > 1 and text:sub(word_start - 1, word_start - 1) or ""
-      local char_after = i <= len and text:sub(i, i) or ""
+      local char_before = word_start > 1 and code_part:sub(word_start - 1, word_start - 1) or ""
+      local char_after = i <= len and code_part:sub(i, i) or ""
 
       -- Only uppercase if it's a standalone mnemonic (not part of identifier)
       -- Identifier chars: letters, digits, underscore
@@ -110,7 +117,19 @@ local function uppercase_mnemonics_in_code(text)
     end
   end
 
-  return table.concat(result)
+  -- Return code part (with uppercased mnemonics) + unchanged comment part
+  return table.concat(result) .. comment_part
+end
+
+-- Uppercase mnemonics in a code block (process line by line)
+local function uppercase_mnemonics_in_code(text)
+  local lines = {}
+  for line in text:gmatch("([^\n]*)\n?") do
+    if line ~= "" or text:sub(-1) == "\n" then
+      table.insert(lines, uppercase_mnemonics_in_line(line))
+    end
+  end
+  return table.concat(lines, "\n")
 end
 
 -- Process code blocks - uppercase mnemonics

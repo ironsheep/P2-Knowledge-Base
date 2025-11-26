@@ -110,18 +110,20 @@ python3 fix-document-structure.py P2-Debug-Window-Manual.md
 ```
 
 ### 5. Copy Supporting Files
+**CRITICAL: Outbound must be a FLAT directory - no subdirectories!**
+
 ```bash
-# Copy templates if changed
-cp templates/*.{latex,sty} ../outbound/p2-debug-window-manual/
+# Copy templates if changed (flat - no subdirectory)
+cp templates/*.{latex,sty} /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-debug-window-manual/
 
-# Copy Lua filters if changed (if applicable)
-cp -r filters ../outbound/p2-debug-window-manual/
+# Copy Lua filters if changed (flat - no subdirectory)
+cp filters/*.lua /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-debug-window-manual/
 
-# Copy screenshots/assets if present
-cp -r assets ../outbound/p2-debug-window-manual/
+# Copy screenshots/assets (flat - individual files, no subdirectory)
+cp assets/*.png /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-debug-window-manual/
 
 # Ensure request.json is present
-cp request.json ../outbound/p2-debug-window-manual/
+cp request.json /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-debug-window-manual/
 ```
 
 ### 6. User Deploys to PDF Forge
