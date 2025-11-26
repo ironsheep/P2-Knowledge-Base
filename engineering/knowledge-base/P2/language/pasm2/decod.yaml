@@ -1,274 +1,50 @@
 instruction: DECOD
-syntax: DECOD Dest, {#}Src
-encoding:
-- EEEE 1001110 00I DDDDDDDDD SSSSSSSSS                  D                 --                  --                   2
-- EEEE 1001110 000 DDDDDDDDD DDDDDDDDD                  D                 --                  --                   2
-- EEEE 1101011 CZL DDDDDDDDD 001000010                DIRx       Orig DIRx base bit
-  Orig DIRx base bit           2
-- EEEE 1101011 CZL DDDDDDDDD 001000011                DIRx       Orig DIRx base bit
-  Orig DIRx base bit           2
-- EEEE 1101011 CZL DDDDDDDDD 001000001                 DIRx       Orig DIRx base bit
-  Orig DIRx base bit           2
-- EEEE 1101011 CZL DDDDDDDDD 001000000                 DIRx       Orig DIRx base bit
-  Orig DIRx base bit           2
+syntax: DECOD Dest, {#}Src | DECOD Dest
+brief_description: Decode bit position to single-bit mask
+category: Math and Logic
+description: >-
+  DECOD generates a 32-bit value with just one bit high, corresponding to the
+  Src, or Dest, value (0-31) and stores that result in Dest.
+
+  In effect, Dest becomes %1 << value via the DECOD instruction; where value
+  is Src[4:0] or Dest[4:0].
+
+  Examples:
+  - A value of 0 generates %00000000_00000000_00000000_00000001
+  - A value of 5 generates %00000000_00000000_00000000_00100000
+  - A value of 15 generates %00000000_00000000_10000000_00000000
+
+  DECOD is the complement of ENCOD.
+result: >-
+  A 32-bit value, with the bit position corresponding to Src, or Dest, value
+  (0-31) set high, is stored in Dest.
+parameters:
+- Dest is the register in which to store the decoded value and optionally
+  begins by containing the 5-bit bit position value it is requesting (syntax 2).
+- Src is an optional register or 5-bit literal whose value is the bit position
+  to set high in the decoded value.
+flags_affected:
+  C: Not affected
+  Z: Not affected
+syntax_variants:
+- DECOD Dest, {#}Src
+- DECOD Dest
 timing:
   cycles: 2
   type: fixed
-description: 'DECOD generates a 32-bit value with just one bit high, corresponding
-  to the Src, or Dest, value (0--31) and stores Result: A 32-bit value, with the bit
-  position corresponding to Src, or Dest, value (0--31) set high, is stored in Dest.
-
-
-  DECOD generates a 32-bit value with just one bit high, corresponding to the Src,
-  or Dest, value (0--31) and stores
-
-
-  that result in Dest.
-
-
-  In effect, Dest becomes %1 << value via the DECOD instruction; where value is Src[4:0]
-  or Dest[4:0].
-
-
-  *   A value of 0 generates %00000000_00000000_00000000_00000001.
-
-
-  *   A value of 5 generates %00000000_00000000_00000000_00100000.
-
-
-  *   A value of 15 generates %00000000_00000000_10000000_00000000.
-
-
-  DECOD is the complement of ENCOD.
-
-
-  DIRC / DIRNC
-
-
-  Direction C or not C
-
-
-  I/O Pin Instruction - Set pin(s) direction to input/output according to C or !C.
-
-
-  DIRC    {#}Dest {WCZ}
-
-
-  DIRNC {#}Dest {WCZ}
-
-
-  Result: The I/O pin direction bit(s), described by Dest, are set to output/input
-  according to C or !C; the rest are left
-
-
-  as-is.
-
-
-  *   Dest is the register, 9-bit literal, or 11-bit augmented literal whose value
-  identifies the I/O pin(s) to set to
-
-
-  output or input.
-
-
-  *   WCZ is an optional effect to update flags.
-
-
-  COND INSTR        FX     DEST          SRC           Write            C Flag             Z
-  Flag             Clocks
-
-
-  EEEE 1101011 CZL DDDDDDDDD 001000010                DIRx       Orig DIRx base bit
-  Orig DIRx base bit           2
-
-
-  EEEE 1101011 CZL DDDDDDDDD 001000011                DIRx       Orig DIRx base bit
-  Orig DIRx base bit           2
-
-
-  Related: DIRZ, DIRNZ, DIRL, DIRH, DIRNOT, and DIRRND
-
-
-  DIRC or DIRNC alters the direction register''s bit(s) designated by Dest to equal
-  the state, or inverse state, of the C
-
-
-  flag; i.e. set pin to the output (1) or input (0) direction. All other bits (pins)
-  are left unchanged. Each of these
-
-
-  instructions, DIRC and DIRNC, can affect one or more of the bits within the DIRA
-  or DIRB registers.
-
-
-  Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates
-  the base pin number (0-63)
-
-
-  and Dest[10:6] indicates how many contiguous pins beyond the base should be affected
-  (1-31).
-
-
-  A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of
-  up to 8 contiguous pins (Dest[8:6]).
-
-
-  If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit
-  literal value-- this inserts an
-
-
-  AUGD instruction prior.
-
-
-  When Dest is a register, the register''s value bits [10:0] are used as-is to form
-  the 11-bit ID range, unless a SETQ
-
-
-  instruction immediately precedes the DIRC / DIRNC instruction; substituting SETQ''s
-  Dest[4:0] in place of value
-
-
-  bits[10:6], for DIRC / DIRNC''s use.
-
-
-  The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within
-  the same 32-pin group (DIRA or
-
-
-  DIRB); it will not cross the port boundary.
-
-
-  If the WCZ effect is specified, the C and Z flags are updated to the original state
-  of DIRA / DIRB''s base bit,
-
-
-  identified by Dest.
-
-
-  DIRH / DIRL
-
-
-  Direction high or low
-
-
-  I/O Pin Instruction - Set pin(s) direction to output (high; 1) or input (low; 0).
-
-
-  DIRH {#}Dest {WCZ}
-
-
-  DIRL {#}Dest {WCZ}
-
-
-  Result: The I/O pin direction bit(s), described by Dest, are set high (1; output)
-  or low (0; input); the rest are left
-
-
-  as-is.
-
-
-  *   Dest is the register, 9-bit literal, or 11-bit augmented literal whose value
-  identifies the I/O pin(s) to set to
-
-
-  output or input.
-
-
-  *   WCZ is an optional effect to update flags.
-
-
-  COND INSTR         FX     DEST         SRC            Write            C Flag             Z
-  Flag             Clocks
-
-
-  EEEE 1101011 CZL DDDDDDDDD 001000001                 DIRx       Orig DIRx base bit
-  Orig DIRx base bit           2
-
-
-  EEEE 1101011 CZL DDDDDDDDD 001000000                 DIRx       Orig DIRx base bit
-  Orig DIRx base bit           2
-
-
-  Related: DIRC, DIRNC, DIRZ, DIRNZ, DIRNOT, and DIRRND
-
-
-  DIRH or DIRL alters the direction register''s bit(s) designated by Dest to be high
-  (1) or low (0); i.e. set to the output
-
-
-  or input direction. All other bits (pins) are left unchanged. Each of these instructions,
-  DIRH and DIRL, can affect
-
-
-  one or more of the bits within the DIRA or DIRB registers.
-
-
-  Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates
-  the base pin number (0-63)
-
-
-  and Dest[10:6] indicates how many contiguous pins beyond the base should be affected
-  (1-31).
-
-
-  A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of
-  up to 8 contiguous pins (Dest[8:6]).
-
-
-  If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit
-  literal value-- this inserts an
-
-
-  AUGD instruction prior.
-
-
-  When Dest is a register, the register''s value bits [10:0] are used as-is to form
-  the 11-bit ID range, unless a SETQ
-
-
-  instruction immediately precedes the DIRH / DIRL instruction; substituting SETQ''s
-  Dest[4:0] in place of value
-
-
-  bits[10:6], for DIRH / DIRL''s use.
-
-
-  The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within
-  the same 32-pin group (DIRA or
-
-
-  DIRB); it will not cross the port boundary.
-
-
-  If the WCZ effect is specified, the C and Z flags are updated to the original state
-  of DIRA / DIRB''s base bit,
-
-
-  identified by Dest.'
-flags_affected:
-  C:
-    when: D
-parameters:
-- Dest is the register in which to store the decoded value and optionally begins by
-  containing the 5-bit bit position value it is requesting (syntax 2).
-- Src is an optional register or 5-bit literal whose value is the bit position to
-  set high in the decoded value.
-- A value of 0 generates %00000000_00000000_00000000_00000001.
-- A value of 5 generates %00000000_00000000_00000000_00100000.
-- A value of 15 generates %00000000_00000000_10000000_00000000.
-- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
-  the I/O pin(s) to set to output or input.
-- WCZ is an optional effect to update flags.
-- Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
-  the I/O pin(s) to set to output or input.
-- WCZ is an optional effect to update flags.
-related:
-- DIRC
-- DIRNC
-- DIRZ
-- DIRNZ
-- DIRNOT
-- DIRRND
+encoding:
+- bits: EEEE 1001110 00I DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: —
+  clocks: '2'
+  notes: Syntax 1 - bit position from Src
+- bits: EEEE 1001110 000 DDDDDDDDD DDDDDDDDD
+  write: D
+  c: —
+  z: —
+  clocks: '2'
+  notes: Syntax 2 - bit position from Dest[4:0]
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -279,17 +55,9 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 3
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
-brief_description: Decode
-category: Math and Logic
-result: The I/O pin direction bit(s), described by Dest, are set high (1; output)
-  or low (0; input); the rest are left
-syntax_variants:
-- DECOD Dest, {#}Src
-- DECOD Dest
-- DECOD generates a 32-bit value with just one bit high, corresponding to the Src,
-  or Dest, value (0--31) and stores
-- In effect, Dest becomes %1 << value via the DECOD instruction; where value is Src[4:0]
-  or Dest[4:0].
+last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
-oneliner: Decode value (0--31) into single-high-bit long
+oneliner: Decode value (0-31) into single-high-bit long
+related:
+- ENCOD
+- BMASK
