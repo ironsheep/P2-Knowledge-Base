@@ -1,186 +1,86 @@
 instruction: CALLD
-syntax: CALLD Dest, {#}Src {WC|WZ|WCZ}
-encoding:
-- EEEE 11100WW RAA AAAAAAAAA AAAAAAAAA             Pxxx1 and PC            --                   --               4
-  / 13-20
-- EEEE 1011001 CZI DDDDDDDDD SSSSSSSSS              D1 and PC             S[31]               S[30]            4
-  / 13-20
-- EEEE 1011010 0LI DDDDDDDDD SSSSSSSSS                1
-timing:
-  cycles: 1
-  type: fixed
-description: 'CALLD records the current state of the C and Z flags and the address
-  of the next instruction (PC + 1 if Cog/LUT Result: Write current C and Z flags and
-  address of the next instruction into either PA, PB, PTRA, PTRB, or Dest, set PC
-  to new relative or absolute address (in Addr or Src), and optionally update C and/or
-  Z to new state. R = 1 then PC += A, else PC = A.
-
-
-  CALLD records the current state of the C and Z flags and the address of the next
-  instruction (PC + 1 if Cog/LUT
-
-
-  execution; PC + 4 if Hub execution) by writing them to the PA, PB, PTRA, PTRB, or
-  Dest register, potentially updates
-
-
-  the C and Z flags with new given states, and jumps to the given address or offset.
-  The routine at the new address
-
-
-  should eventually execute another CALLD instruction to return to the recorded address
-  (the instruction following
-
-
-  the original CALLD) optionally restore the C and Z flag state as it was prior, and
-  optionally prep for another CALLD.
-
+syntax: CALLD PA|PB|PTRA|PTRB, #{\}Addr | CALLD Dest, {#}Src {WC|WZ|WCZ}
+brief_description: Call with destination register
+category: Branch
+description: >-
+  CALLD records the current state of the C and Z flags and the address of the
+  next instruction (PC + 1 if Cog/LUT execution; PC + 4 if Hub execution) by
+  writing them to the PA, PB, PTRA, PTRB, or Dest register, potentially updates
+  the C and Z flags with new given states, and jumps to the given address or
+  offset. The routine at the new address should eventually execute another
+  CALLD instruction to return to the recorded address (the instruction
+  following the original CALLD) optionally restore the C and Z flag state as
+  it was prior, and optionally prep for another CALLD.
 
   This instruction is typically used for the P2 DEBUG function.
 
-
-  In syntax 1, #Addr and #\Addr encodes the instruction with relative and absolute
-  addressing, respectively. The
-
-
-  relative form (the default) is vital for creating relocatable code. In either case,
-  use symbolic references for Addr
-
-
-  and the assembler will encode it properly. Examples: CALLD PA, #SendBit or CALLD
-  PB, #\DebugStatus
-
-
-  In syntax 2, the format of the value at Src is CZxxxxxx_xxxxAAAA_AAAAAAAA_AAAAAAAA.
-  C is the new C flag
-
-
-  state, Z is the new Z flag state, A is the new 20-bit address to jump to, and x
-  are don''t-care bits. If Src is a 9-bit
-
-
-  literal (immediate), it will be sign-extended to 20 bits and used as a relative
-  offset; giving a range of -256 to +255
-
-
-  instructions, relative to the instruction following the CALLD. When relative, PC
-  is adjusted by signed(Src) if
-
-
-  Cog/LUT execution, or by signed(Src*4) if Hub execution.
-
-
-  If the WC or WCZ effect is specified, the C flag is updated to match S[31], after
-  its original state is recorded.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is updated to match S[30], after
-  its original state is recorded.
-
-
-  CALLPA / CALLPB
-
-
-  Call parameter A or B
-
-
-  Flow Control Instruction - Call a subroutine; store return context on the stack
-  and copy D into PA or PB.
-
-
-  CALLPA {#}Dest, {#}Src
-
-
-  CALLPB {#}Dest, {#}Src
-
-
-  Result: Push current C and Z flags and address of the next instruction onto the
-  hardware stack, copy D to PA or
-
-
-  PB, and set PC to new relative or absolute address.
-
-
-  *   Dest is a register, 9-bit literal, or 32-bit augmented literal whose value is
-  copied to PA or PB.
-
-
-  *   Src is a register, 9-bit literal, or 32-bit augmented literal that contains
-  the relative or absolute address to
-
-
-  set PC to. Use # for relative addressing; omit # for absolute addressing.
-
-
-  COND INSTR            FX      DEST          SRC             Write            C Flag              Z
-  Flag             Clocks
-
-
-  EEEE 1011010 0LI DDDDDDDDD SSSSSSSSS                1
-
-
-  K , PA and PC           --                   --               4 / 13-20
-
-
-  EEEE 1011010 1LI DDDDDDDDD SSSSSSSSS K , PB and PC  1
-
-
-  --                   --               4 / 13-20
-
-
-  1
-
-
-  The current C, Z, and effective next PC values are pushed onto the stack (K) prior
-  to updating PC with Src.
-
-
-  CALLPA and CALLPB records the current state of the C and Z flags and the address
-  of the next instruction (PC + 1
-
-
-  if Cog/LUT execution; PC + 4 if Hub execution) by pushing to the stack (K), copies
-  Dest to PA or PB, and jumps to
-
-
-  the given address or offset in Src. The routine at the new address should eventually
-  execute a RET instruction, or
-
-
-  an instruction with a _RET_ condition, to return to the recorded address (the instruction
-  following the CALLPA or
-
-
-  CALLPB) and optionally restore the C and Z flag state as it was prior.
-
-
-  The Src can be absolute or relative; use #Addr for calling a range of -256 to +255
-  instructions, relative to the
-
-
-  instruction following the CALLPA or CALLPA. When relative, PC is adjusted by signed(Src)
-  if Cog/LUT execution,
-
-
-  or by signed(Src*4) if Hub execution.'
-flags_affected:
-  C: S[31] S[30] 4
+  In syntax 1, #Addr and #\Addr encodes the instruction with relative and
+  absolute addressing, respectively. The relative form (the default) is vital
+  for creating relocatable code. In either case, use symbolic references for
+  Addr and the assembler will encode it properly. Examples: CALLD PA, #SendBit
+  or CALLD PB, #\DebugStatus
+
+  In syntax 2, the format of the value at Src is
+  CZxxxxxx_xxxxAAAA_AAAAAAAA_AAAAAAAA. C is the new C flag state, Z is the new
+  Z flag state, A is the new 20-bit address to jump to, and x are don't-care
+  bits. If Src is a 9-bit literal (immediate), it will be sign-extended to 20
+  bits and used as a relative offset; giving a range of -256 to +255
+  instructions, relative to the instruction following the CALLD. When
+  relative, PC is adjusted by signed(Src) if Cog/LUT execution, or by
+  signed(Src*4) if Hub execution.
+
+  If the WC or WCZ effect is specified, the C flag is updated to match S[31],
+  after its original state is recorded.
+
+  If the WZ or WCZ effect is specified, the Z flag is updated to match S[30],
+  after its original state is recorded.
+result: >-
+  Write current C and Z flags and address of the next instruction into either
+  PA, PB, PTRA, PTRB, or Dest, set PC to new relative or absolute address (in
+  Addr or Src), and optionally update C and/or Z to new state.
 parameters:
-- PA|PB|PTRA|PTRB is the special register to store the current C and Z flags and next
-  address into.
-- Addr is a symbolic reference to the target subroutine; the location to set PC to.
-  Relative addressing is the default; use '\' to force absolute addressing.
-- Dest is a register to write the current C and Z flags and the address of the next
-  instruction into.
-- 'Src is a register, 9-bit literal, or 32-bit augmented literal that contains the
-  relative or absolute address to set PC to and optional new C and Z states. Use #
-  for relative addressing; omit # for absolute addressing.'
-- WC, WZ, or WCZ are optional effects to update the flags from Src's upper bit states.
-- Dest is a register, 9-bit literal, or 32-bit augmented literal whose value is copied
-  to PA or PB.
-- 'Src is a register, 9-bit literal, or 32-bit augmented literal that contains the
-  relative or absolute address to set PC to. Use # for relative addressing; omit #
-  for absolute addressing.'
+- PA|PB|PTRA|PTRB is the special register to store the current C and Z flags
+  and next address into.
+- Addr is a symbolic reference to the target subroutine; the location to set
+  PC to. Relative addressing is the default; use '\' to force absolute
+  addressing.
+- Dest is a register to write the current C and Z flags and the address of the
+  next instruction into.
+- Src is a register, 9-bit literal, or 32-bit augmented literal that contains
+  the relative or absolute address to set PC to and optional new C and Z
+  states. Use # for relative addressing; omit # for absolute addressing.
+- WC, WZ, or WCZ are optional effects to update the flags from Src's upper bit
+  states.
+flags_affected:
+  C:
+    formula: S[31]
+    description: Updated from Src bit 31 if WC/WCZ specified (after recording original)
+  Z:
+    formula: S[30]
+    description: Updated from Src bit 30 if WZ/WCZ specified (after recording original)
+syntax_variants:
+- CALLD PA, #Addr
+- CALLD PB, #Addr
+- CALLD PTRA, #Addr
+- CALLD PTRB, #Addr
+- CALLD Dest, {#}Src {WC|WZ|WCZ}
+timing:
+  cycles: 4
+  type: variable
+  notes: 4 cycles for Cog/LUT, 13-20 cycles for Hub execution
+encoding:
+- bits: EEEE 11100WW RAA AAAAAAAAA AAAAAAAAA
+  write: Pxxx and PC
+  c: —
+  z: —
+  clocks: '4 / 13-20'
+  notes: Syntax 1 - WW selects PA/PB/PTRA/PTRB
+- bits: EEEE 1011001 CZI DDDDDDDDD SSSSSSSSS
+  write: D and PC
+  c: S[31]
+  z: S[30]
+  clocks: '4 / 13-20'
+  notes: Syntax 2 - address from register/immediate
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -191,12 +91,11 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 20
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-last_updated: '2025-09-19'
-brief_description: Call D
-category: Branch
-result: Push current C and Z flags and address of the next instruction onto the hardware
-  stack, copy D to PA or
-syntax_variants:
-- CALLD Dest, {#}Src {WC|WZ|WCZ}
+last_updated: '2025-11-26'
 manual_extraction_date: '2025-01-19'
 oneliner: Call a subroutine; store return context in PA/PB/PTRA/PTRB/D
+related:
+- CALL
+- CALLPA
+- CALLPB
+- RET
