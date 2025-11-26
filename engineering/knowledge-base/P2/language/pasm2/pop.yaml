@@ -1,9 +1,31 @@
 instruction: POP
-name: POP
-description: POP instruction (needs documentation)
-documentation_level: stub
-needs_documentation: true
-created_by: audit-yaml-files.py
-created_date: '2025-09-19'
+syntax: POP     D        {WC/WZ/WCZ}
+encoding: EEEE 1101011 CZ0 DDDDDDDDD 000101011
+timing:
+  cycles: 2
+  type: fixed
+description: Pop stack (K). D = K. C = K[31]. Pops the internal stack register K
+  into destination register D.
+flags_affected:
+  C:
+    formula: K[31]
+    description: Set to bit 31 of the popped value
+  Z:
+    formula: Result = 0
+    description: Set if popped value is zero
+documentation_source: P2 Instructions v35 CSV
+documentation_level: enhanced
+compiler_operand_format:
+  name: operand_d
+  pattern: D
+  description: Destination register only
+  valueType: 24
+compiler_encoding:
+  operandFormat: 24
+related_instructions:
+- PUSH
+- POPA
+- POPB
 category: Miscellaneous
-oneliner: POP instruction (needs documentation)
+oneliner: Pop internal stack (K) to destination register
+last_updated: '2025-11-26'
