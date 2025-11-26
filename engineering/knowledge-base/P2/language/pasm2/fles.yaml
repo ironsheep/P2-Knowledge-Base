@@ -296,8 +296,7 @@ parameters:
   and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose signed value
   is the upper limit to force upon Dest.
-- WC, WZ, or WCZ are optional effects to update flags. Copyright © Parallax Inc. 2022/11/01
-  * Propeller 2 Assembly Language Manual            *   Page 82
+- WC, WZ, or WCZ are optional effects to update flags.
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the I/O pin(s) to set to input direction and output levels of low or high.
 - WCZ is an optional effect to update flags.

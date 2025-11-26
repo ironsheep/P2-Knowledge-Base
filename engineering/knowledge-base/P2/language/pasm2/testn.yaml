@@ -315,7 +315,7 @@ parameters:
 - Dest is the register whose value will be tested.
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal whose inverse
   value is ANDed with Dest.
-- WC, WZ, and WCZ are optional effects to update flags.
+- WC, WZ, or WCZ are optional effects to update flags.
 - Dest is the register or 6-bit literal whose value identifies the I/O pin to test.
 - WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, and XORZ is a required effect to update or bitwise
   manipulate the C or Z flag.

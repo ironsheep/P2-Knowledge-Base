@@ -151,13 +151,12 @@ parameters:
 - Dest is the register whose value will be tested.
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value
   is ANDed with Dest.
-- WC, WZ, and WCZ are optional effects to update flags.
+- WC, WZ, or WCZ are optional effects to update flags.
 - Dest is the register whose value will have a single bit tested.
 - Src is a register or 5-bit literal whose value identifies the bit (0-31) of Dest
   to test.
-- WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, and XORZ is a required effect to update or bitwise
-  manipulate the C or Z flag. Copyright © Parallax Inc. 2022/11/01 * Propeller 2 Assembly
-  Language Manual              *   Page 134
+- WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, or XORZ is a required effect to update or bitwise
+  manipulate the C or Z flag.
 flags_affected:
   C:
     formula: parity of (D & S)

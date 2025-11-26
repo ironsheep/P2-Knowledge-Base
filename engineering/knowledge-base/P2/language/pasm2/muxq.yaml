@@ -98,7 +98,7 @@ parameters:
 - Dest is the register whose value will have one or more bits set to Z or !Z.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value identifies
   the bit(s) to modify.
-- WC, WZ, or WCZ is an optional effect to update flags.
+- WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
   Z: Result = 0
 syntax_variants:

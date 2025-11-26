@@ -28,9 +28,7 @@ description: 'CMP compares the unsigned values of Dest and Src (by subtracting S
   Values.'
 result: Greater/lesser and equality status is optionally written to the C and Z flags.
 parameters:
-- Dest is the register containing the value to compare with that of Src. Copyright
-  © Parallax Inc. 2022/11/01 * Propeller 2 Assembly Language Manual               *   Page
-  59
+- Dest is the register containing the value to compare with that of Src.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared
   to Dest.
 - WC, WZ, or WCZ are optional effects to update flags.

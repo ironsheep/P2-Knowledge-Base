@@ -229,8 +229,6 @@ parameters:
 - Dest is a register containing the 20-bit absolute address to set PC to and optional
   new C and Z states.
 - WC, WZ, or WCZ are optional effects to update the flags from Dest's upper bit states.
-  Copyright © Parallax Inc. 2022/11/01 * Propeller 2 Assembly Language Manual              *   Page
-  56
 - Addr is a symbolic reference to the target subroutine; the location to set PC to.
   Relative addressing is the default; use '\' to force absolute addressing.
 - Dest is a register containing the 20-bit absolute address to set PC to and optional

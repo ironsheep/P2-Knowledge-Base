@@ -27,7 +27,7 @@ syntax_variants:
 last_updated: '2025-01-19'
 brief_description: Pop long from stack using PTRA
 parameters:
-- D is the destination register to receive the popped value
+- Dest is the destination register to receive the popped value
 - PTRA is automatically decremented before the read
 category: Hub RAM
 oneliner: Read

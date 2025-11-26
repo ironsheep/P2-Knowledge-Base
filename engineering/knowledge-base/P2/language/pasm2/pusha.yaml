@@ -20,7 +20,7 @@ syntax_variants:
 last_updated: '2025-01-19'
 brief_description: Push long to stack using PTRA
 parameters:
-- D is a register or 9-bit literal value to push onto the stack at PTRA
+- Dest is a register or 9-bit literal value to push onto the stack at PTRA
 - PTRA is automatically incremented after the write
 category: Hub RAM
 oneliner: Write

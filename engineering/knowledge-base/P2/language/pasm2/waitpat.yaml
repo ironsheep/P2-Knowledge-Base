@@ -80,7 +80,6 @@ result: Wait for pin-pattern-detected event, then clear the flag; optionally abo
 syntax_variants:
 - WAITPAT {WC|WZ|WCZ}
 parameters:
-- WC, WZ, or WCZ are optional effects to update flags. Copyright © Parallax Inc. 2022/11/01
-  * Propeller 2 Assembly Language Manual         *   Page 141
+- WC, WZ, or WCZ are optional effects to update flags.
 manual_extraction_date: '2025-01-19'
 oneliner: Wait for and clear pin-pattern-detected event flag

@@ -79,7 +79,6 @@ result: Wait for streamer-empty event, then clear the flag; optionally aborting 
 syntax_variants:
 - WAITXMT {WC|WZ|WCZ}
 parameters:
-- WC, WZ, or WCZ are optional effects to update flags. Copyright © Parallax Inc. 2022/11/01
-  * Propeller 2 Assembly Language Manual         *   Page 143
+- WC, WZ, or WCZ are optional effects to update flags.
 manual_extraction_date: '2025-01-19'
 oneliner: Wait for and clear streamer-empty event flag

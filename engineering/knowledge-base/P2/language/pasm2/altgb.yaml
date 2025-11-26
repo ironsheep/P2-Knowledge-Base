@@ -96,8 +96,7 @@ parameters:
   long register.
 - At the end of ALTGB execution, the optional auto-indexer value (usually 0, 1, or
   -1) is added to the 11-bit index (Dest) for a future ALTGB+GETBYTE or ROLBYTE iteration.
-- The instruction following ALTGB is shielded from interrupt Copyright © Parallax
-  Inc. 2022/11/01 * Propeller 2 Assembly Language Manual               *   Page 40
+- The instruction following ALTGB is shielded from interrupt.
 - ALTGB alters the next instruction regardless of its kind-- the intention is for
   it to be a GETBYTE / ROLBYTE
 - Field value modification occurs in the instruction pipeline only; code is not altered,

@@ -87,8 +87,7 @@ parameters:
 - Field value modification occurs in the instruction pipeline only; code is not altered,
   values do not persist
 - SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the
-  next instruction Copyright © Parallax Inc. 2022/11/01 * Propeller 2 Assembly Language
-  Manual               *   Page 41
+  next instruction.
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:

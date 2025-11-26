@@ -244,9 +244,7 @@ parameters:
   the ID of the desired cog to launch. If Dest is a register and WC is given, Dest
   is also where the ID of the launched cog will be written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value (lower
-  20 bits) is the target RAM address (for code) and the new cog's PTRB value. Copyright
-  © Parallax Inc. 2022/11/01 * Propeller 2 Assembly Language Manual           *   Page
-  64
+  20 bits) is the target RAM address (for code) and the new cog's PTRB value.
 - WC is an optional effect to update the C flag with the success (0) or fail (1) status
   and triggers Dest to be overwritten with new cog's ID.
 syntax_variants:
