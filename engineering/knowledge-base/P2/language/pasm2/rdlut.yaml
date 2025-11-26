@@ -1,6 +1,11 @@
 instruction: RDLUT
 syntax: RDLUT   D,{#}S/P {WC/WZ/WCZ}
-encoding: EEEE 1010101 CZI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1010101 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: MSB of data
+  z: Result = 0
+  clocks: '3'
 timing:
   cycles: 3
   type: fixed

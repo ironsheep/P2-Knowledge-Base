@@ -1,6 +1,11 @@
 instruction: RDBYTE
 syntax: RDBYTE  D,{#}S/P {WC/WZ/WCZ}
-encoding: EEEE 1010110 CZI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1010110 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: MSB of byte
+  z: Result = 0
+  clocks: '9...16'
 timing:
   cycles: 9
   type: variable

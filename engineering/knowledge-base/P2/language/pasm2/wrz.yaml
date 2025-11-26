@@ -1,6 +1,11 @@
 instruction: WRZ
 syntax: WRZ     D
-encoding: EEEE 1101011 000 DDDDDDDDD 001101110
+encoding:
+- bits: EEEE 1101011 000 DDDDDDDDD 001101110
+  write: D
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

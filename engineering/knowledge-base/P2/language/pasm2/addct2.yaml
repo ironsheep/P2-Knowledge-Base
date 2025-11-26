@@ -1,9 +1,11 @@
 instruction: ADDCT2
-syntax: ADDCT1 Dest, {#}Src
+syntax: ADDCT2 Dest, {#}Src
 encoding:
-- EEEE 1010011 00I DDDDDDDDD SSSSSSSSS                    D                  --                  --                    2
-- EEEE 1010011 01I DDDDDDDDD SSSSSSSSS                    D                  --                  --                    2
-- EEEE 1010011 10I DDDDDDDDD SSSSSSSSS                    D                  --                  --                    2
+- bits: EEEE 1010011 01I DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

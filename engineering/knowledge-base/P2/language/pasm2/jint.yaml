@@ -1,6 +1,11 @@
 instruction: JINT
 syntax: JINT    {#}S
-encoding: EEEE 1011110 01I 000000000 SSSSSSSSS
+encoding:
+- bits: EEEE 1011110 01I 000000000 SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '2 or 4'
 timing:
   cycles: 2
   type: variable

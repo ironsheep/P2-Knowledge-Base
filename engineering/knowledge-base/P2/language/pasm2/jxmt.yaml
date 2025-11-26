@@ -1,6 +1,11 @@
 instruction: JXMT
 syntax: JXMT    {#}S
-encoding: EEEE 1011110 01I 000001010 SSSSSSSSS
+encoding:
+- bits: EEEE 1011110 01I 000001010 SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '2 or 4'
 timing:
   cycles: 2
   type: fixed

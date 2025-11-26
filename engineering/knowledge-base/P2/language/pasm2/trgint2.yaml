@@ -1,6 +1,11 @@
 instruction: TRGINT2
 syntax: TRGINT2
-encoding: EEEE 1101011 000 000100011 000100100
+encoding:
+- bits: EEEE 1101011 000 000100011 000100100
+  write: —
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

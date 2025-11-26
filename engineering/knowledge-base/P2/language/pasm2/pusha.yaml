@@ -1,6 +1,11 @@
 instruction: PUSHA
 syntax: PUSHA   {#}D
-encoding: EEEE 1100011 0L1 DDDDDDDDD 101100001
+encoding:
+- bits: EEEE 1100011 0L1 DDDDDDDDD 101100001
+  write: —
+  c: —
+  z: —
+  clocks: '3...10*'
 timing:
   cycles: 1
   type: fixed

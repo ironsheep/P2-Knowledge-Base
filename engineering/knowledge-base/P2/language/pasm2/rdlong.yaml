@@ -1,7 +1,12 @@
 instruction: RDLONG
 syntax: RDLONG  D,{#}S/P {WC/WZ/WCZ}
 compiler_syntax: RDLONG D,S/#/PTRA/PTRB
-encoding: EEEE 1011000 CZI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1011000 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: MSB of long
+  z: —
+  clocks: '9...16 *'
 compiler_encoding:
   bits: 32
   opcode: 352

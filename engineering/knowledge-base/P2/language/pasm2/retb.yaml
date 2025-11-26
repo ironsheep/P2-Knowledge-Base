@@ -1,6 +1,11 @@
 instruction: RETB
 syntax: RETB             {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ1 000000000 000101111
+encoding:
+- bits: EEEE 1101011 CZ1 000000000 000101111
+  write: —
+  c: L[31]
+  z: L[30]
+  clocks: '11...18 *'
 timing:
   cycles: 1
   type: fixed

@@ -1,8 +1,7 @@
 instruction: JNXFI
 syntax: JNXFI   {#}S
 category: Event
-description: Jump to S** if XFI event flag is set.                                                                         2
-  or 4 / 2 or
+description: Jump to S if XFI event flag is clear.
 parameters:
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
   absolute or relative address to set PC to. Use # for relative addressing; omit #
@@ -11,17 +10,12 @@ timing:
   cycles: 2
   type: variable
   range: 13...20
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-- bits: EEEE 1011110 01I 000001011 SSSSSSSSS
-  write: PC   1
-  c: —
-  z: —
-  clocks: 2 or 4 / 2 or 13–20
+encoding:
 - bits: EEEE 1011110 01I 000011011 SSSSSSSSS
-  write: PC   1
+  write: —
   c: —
   z: —
-  clocks: 2 or 4 / 2 or 13–20
+  clocks: 2 or 4
 encoding_notes:
 - PC is written only when the streamer ﬁnished event ﬂag is set (or is clear in syntax
   2).

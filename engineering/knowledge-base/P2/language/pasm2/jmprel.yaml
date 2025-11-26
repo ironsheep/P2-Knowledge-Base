@@ -1,6 +1,11 @@
 instruction: JMPREL
 syntax: JMPREL  {#}D
-encoding: EEEE 1101011 00L DDDDDDDDD 000110000
+encoding:
+- bits: EEEE 1101011 00L DDDDDDDDD 000110000
+  write: —
+  c: —
+  z: —
+  clocks: '4'
 timing:
   cycles: 4
   type: variable

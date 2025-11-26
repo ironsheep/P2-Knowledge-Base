@@ -1,6 +1,11 @@
 instruction: MODC
 syntax: MODC    c               {WC}
-encoding: EEEE 1101011 C01 0cccc0000 001101111
+encoding:
+- bits: EEEE 1101011 C01 0cccc0000 001101111
+  write: —
+  c: cccc[{C,Z}]
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

@@ -1,6 +1,11 @@
 instruction: RDFAST
 syntax: RDFAST  {#}D,{#}S
-encoding: EEEE 1100011 1LI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1100011 1LI DDDDDDDDD SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '2 or WRFAST finish + 10...17'
 timing:
   cycles: 2
   type: fixed

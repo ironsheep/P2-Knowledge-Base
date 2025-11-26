@@ -1,6 +1,11 @@
 instruction: BLNPIX
 syntax: BLNPIX  D,{#}S
-encoding: EEEE 1010010 10I DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1010010 10I DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: —
+  clocks: '7'
 timing:
   cycles: 7
   type: fixed

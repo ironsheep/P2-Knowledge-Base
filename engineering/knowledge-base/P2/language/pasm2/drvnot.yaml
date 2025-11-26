@@ -83,9 +83,12 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:
 - bits: EEEE 1101011 CZL DDDDDDDDD 001011111
-  write: DIRx + OUTx Orig OUTx base bit Orig OUTx base bit
+  write: DIRx* + OUTx
+  c: —
+  z: OUT bit
+  clocks: '2'
 encoding_notes:
 - '2'
 - New DIRx state is not data-forwarded; the next pipelined instruction sees the old

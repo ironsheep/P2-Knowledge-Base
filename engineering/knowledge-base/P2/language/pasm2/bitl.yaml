@@ -1,6 +1,11 @@
 instruction: BITL
 syntax: BITL    D,{#}S         {WCZ}
-encoding: EEEE 0100000 CZI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 0100000 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: original D[S[4:0]]
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

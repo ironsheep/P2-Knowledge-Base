@@ -1,6 +1,11 @@
 instruction: LOCKNEW
 syntax: LOCKNEW D               {WC}
-encoding: EEEE 1101011 C00 DDDDDDDDD 000000100
+encoding:
+- bits: EEEE 1101011 C00 DDDDDDDDD 000000100
+  write: D
+  c: 1 if no LOCK available
+  z: —
+  clocks: '4...11'
 timing:
   cycles: 4
   type: fixed

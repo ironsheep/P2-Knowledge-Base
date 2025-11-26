@@ -1,6 +1,11 @@
 instruction: RFLONG
 syntax: RFLONG  D        {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 DDDDDDDDD 000010010
+encoding:
+- bits: EEEE 1101011 CZ0 DDDDDDDDD 000010010
+  write: D
+  c: MSB of long
+  z: Result = 0
+  clocks: '2'
 timing:
   cycles: 2
   type: mode_dependent

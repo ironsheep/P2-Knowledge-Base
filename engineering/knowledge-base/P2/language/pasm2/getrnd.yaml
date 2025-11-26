@@ -1,6 +1,16 @@
 instruction: GETRND
 syntax: GETRND  D        {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ1 000000000 000011011
+encoding:
+- bits: EEEE 1101011 CZ0 DDDDDDDDD 000011011
+  write: D
+  c: RND[31]
+  z: RND[30], unique per cog
+  clocks: '2'
+- bits: EEEE 1101011 CZ1 000000000 000011011
+  write: —
+  c: RND[31]
+  z: RND[30], unique per cog
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

@@ -1,6 +1,11 @@
 instruction: DRVZ
 syntax: DRVZ    {#}D           {WCZ}
-encoding: EEEE 1101011 CZL DDDDDDDDD 001011100
+encoding:
+- bits: EEEE 1101011 CZL DDDDDDDDD 001011100
+  write: DIRx* + OUTx
+  c: —
+  z: OUT bit
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

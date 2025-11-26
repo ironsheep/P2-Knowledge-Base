@@ -1,6 +1,11 @@
 instruction: GETBRK
 syntax: GETBRK  D          WC/WZ/WCZ
-encoding: EEEE 1101011 CZ0 DDDDDDDDD 000110101
+encoding:
+- bits: EEEE 1101011 CZ0 DDDDDDDDD 000110101
+  write: D
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

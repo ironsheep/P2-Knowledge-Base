@@ -1,6 +1,11 @@
 instruction: WMLONG
 syntax: WMLONG  D,{#}S/P
-encoding: EEEE 1010011 11I DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1010011 11I DDDDDDDDD SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '3...10 *'
 timing:
   cycles: 3
   type: fixed

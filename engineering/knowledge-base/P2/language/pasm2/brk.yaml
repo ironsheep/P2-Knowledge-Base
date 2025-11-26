@@ -1,6 +1,11 @@
 instruction: BRK
 syntax: BRK {#}Dest
-encoding: EEEE 1101011 00L DDDDDDDDD 000110110               Code/Cond.1             --                  --                    2
+encoding:
+- bits: EEEE 1101011 00L DDDDDDDDD 000110110
+  write: —
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

@@ -1,7 +1,11 @@
 instruction: WAITPAT
 syntax: WAITPAT {WC|WZ|WCZ}
-encoding: EEEE 1101011 CZ0 000011000 000100100                 --          Timeout
-  Abort       Timeout Abort              2+
+encoding:
+- bits: EEEE 1101011 CZ0 000011000 000100100
+  write: —
+  c: timeout
+  z: timeout
+  clocks: '2+'
 timing:
   cycles: 2
   type: variable

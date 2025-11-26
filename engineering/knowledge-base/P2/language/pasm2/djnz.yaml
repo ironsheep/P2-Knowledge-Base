@@ -18,17 +18,12 @@ timing:
   cycles: 2
   type: variable
   range: 13...20
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-- bits: EEEE 1011011 00I DDDDDDDDD SSSSSSSSS
-  write: D and PC   1
-  c: —
-  z: —
-  clocks: 2 or 4 / 2 or 13–20
+encoding:
 - bits: EEEE 1011011 01I DDDDDDDDD SSSSSSSSS
-  write: D and PC   1
+  write: D
   c: —
   z: —
-  clocks: 2 or 4 / 2 or 13–20
+  clocks: 2 or 4
 encoding_notes:
 - Dest is always written; PC is written only when the result in Dest is zero (or not
   zero in syntax 2).

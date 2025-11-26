@@ -1,6 +1,11 @@
 instruction: WFLONG
 syntax: WFLONG  {#}D
-encoding: EEEE 1101011 00L DDDDDDDDD 000010111
+encoding:
+- bits: EEEE 1101011 00L DDDDDDDDD 000010111
+  write: —
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: mode_dependent

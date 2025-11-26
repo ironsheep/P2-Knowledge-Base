@@ -1,6 +1,11 @@
 instruction: POP
 syntax: POP     D        {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 DDDDDDDDD 000101011
+encoding:
+- bits: EEEE 1101011 CZ0 DDDDDDDDD 000101011
+  write: D
+  c: K[31]
+  z: Result = 0
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

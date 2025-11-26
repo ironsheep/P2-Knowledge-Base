@@ -1,6 +1,26 @@
 instruction: TESTP
 syntax: TESTP   {#}D           WC/WZ
-encoding: EEEE 1101011 CZL DDDDDDDDD 001000110
+encoding:
+- bits: EEEE 1101011 CZL DDDDDDDDD 001000000
+  write: —
+  c: IN[D[5:0]]
+  z: IN[D[5:0]]
+  clocks: '2'
+- bits: EEEE 1101011 CZL DDDDDDDDD 001000010
+  write: —
+  c: C/Z AND  IN[D[5:0]]
+  z: C/Z AND  IN[D[5:0]]
+  clocks: '2'
+- bits: EEEE 1101011 CZL DDDDDDDDD 001000100
+  write: —
+  c: C/Z OR   IN[D[5:0]]
+  z: C/Z OR   IN[D[5:0]]
+  clocks: '2'
+- bits: EEEE 1101011 CZL DDDDDDDDD 001000110
+  write: —
+  c: C/Z XOR  IN[D[5:0]]
+  z: C/Z XOR  IN[D[5:0]]
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

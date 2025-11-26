@@ -1,6 +1,11 @@
 instruction: WRWORD
 syntax: WRWORD  {#}D,{#}S/P
-encoding: EEEE 1100010 1LI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1100010 1LI DDDDDDDDD SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '3...10*'
 timing:
   cycles: 1
   type: fixed

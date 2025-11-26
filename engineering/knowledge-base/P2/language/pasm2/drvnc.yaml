@@ -15,14 +15,14 @@ flags_affected:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-- bits: EEEE 1101011 CZL DDDDDDDDD 001011010
-  write: DIRx + OUTx Orig OUTx base bit Orig OUTx base bit
+encoding:
+- bits: EEEE 1101011 CZL DDDDDDDDD 001011011
+  write: DIRx* + OUTx
+  c: —
+  z: OUT bit
+  clocks: '2'
 encoding_notes:
-- 2 EEEE 1101011 CZL DDDDDDDDD 001011011 DIRx + OUTx Orig OUTx base bit Orig OUTx
-  base bit 1 2
-- New DIRx state is not data-forwarded; the next pipelined instruction sees the old
-  state. Make sure any instruction that reads
+- New DIRx state is not data-forwarded; the next pipelined instruction sees the old state.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:

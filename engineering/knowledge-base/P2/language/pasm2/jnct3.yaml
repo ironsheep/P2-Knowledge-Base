@@ -2,47 +2,21 @@ instruction: JNCT3
 syntax: JNCT3   {#}S
 brief_description: Jump if counter 3 event flag is NOT set
 category: Event
-description: Jump to S** if CT3 event flag is clear.                                                                       2
-  or 4 / 2 or
+description: Jump to S if CT3 event flag is clear.
 syntax_variants:
 - JNCT3 {#}S
 timing:
   cycles: 2
   type: variable
   range: 13...20
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-- bits: EEEE 1011110 01I 000000001 SSSSSSSSS
-  write: PC1
+encoding:
+- bits: EEEE 1011110 01I 000010011 SSSSSSSSS
+  write: —
   c: —
   z: —
-  clocks: 2 or 4 / 2 or 13–20
-- bits: EEEE 1011110 01I 000000010 SSSSSSSSS
-  write: PC1
-  c: —
-  z: —
-  clocks: 2 or 4 / 2 or 13–20
-- bits: EEEE 1011110 01I 000000011 SSSSSSSSS
-  write: PC   1
-  c: —
-  z: —
-  clocks: 2 or 4 / 2 or 13–20
-- bits: EEEE 1011110 01I 000010001 SSSSSSSSS
-  write: PC   1
-  c: —
-  z: —
-  clocks: 2 or 4 / 2 or 13–20
-- bits: EEEE 1011110 01I 000010010 SSSSSSSSS
-  write: PC   1
-  c: —
-  z: —
-  clocks: 2 or 4 / 2 or 13–20
-- bits: EEEE 1011110 01I 000010001 SSSSSSSSS
-  write: PC   1
-  c: —
-  z: —
-  clocks: 2 or 4 / 2 or 13–20
+  clocks: 2 or 4
 encoding_notes:
-- PC is written only when the counter event ﬂag is set (or is clear in syntax 4–6).
+- PC is written only when the CT3 event flag is clear.
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: structured
 compiler_operand_format:
@@ -55,10 +29,8 @@ compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.603366'
 oneliner: Branch
-long_description: 'If counter 1, 2, or 3 event flag is set (or is clear in syntax
-  4-6), PC is set to a new relative (#Src) or absolute
-
-  (Src) address.'
+long_description: 'If CT3 event flag is clear, PC is set to a new relative (#Src)
+  or absolute (Src) address.'
 group_membership:
   group_id: counter_event_jumps
   group_file: groups/counter_event_jumps.yaml

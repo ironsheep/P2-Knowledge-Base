@@ -1,6 +1,11 @@
 instruction: JCT2
 syntax: JCT2    {#}S
-encoding: EEEE 1011110 01I 000000010 SSSSSSSSS
+encoding:
+- bits: EEEE 1011110 01I 000000010 SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '2 or 4'
 timing:
   cycles: 2
   type: variable

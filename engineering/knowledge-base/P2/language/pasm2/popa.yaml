@@ -1,6 +1,11 @@
 instruction: POPA
 syntax: POPA    D        {WC/WZ/WCZ}
-encoding: EEEE 1011000 CZ1 DDDDDDDDD 101011111
+encoding:
+- bits: EEEE 1011000 CZ1 DDDDDDDDD 101011111
+  write: D
+  c: MSB of long
+  z: Result = 0
+  clocks: '9...16 *'
 timing:
   cycles: 1
   type: fixed

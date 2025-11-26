@@ -1,9 +1,9 @@
 instruction: WAITSE4
-syntax: WAITSE1 {WC|WZ|WCZ}
+syntax: WAITSE4 {WC|WZ|WCZ}
 brief_description: Wait selectable event 1/2/3/4
 category: Event
 description: 'Wait for SE4 event flag, then clear it. Prior SETQ sets optional CT
-  timeout value. C/Z = timeout.                              2+
+  timeout value. C/Z = timeout.
 
 
   WAITSE1, WAITSE2, WAITSE3, or WAITSE4 waits for a selectable event to occur (unless
@@ -64,27 +64,12 @@ syntax_variants:
 timing:
   cycles: 2
   type: variable
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-- bits: EEEE 1101011 CZ0 000010100 000100100
-  write: —
-  c: Timeout Abort
-  z: Timeout Abort
-  clocks: 2+
-- bits: EEEE 1101011 CZ0 000010101 000100100
-  write: —
-  c: Timeout Abort
-  z: Timeout Abort
-  clocks: 2+
-- bits: EEEE 1101011 CZ0 000010110 000100100
-  write: —
-  c: Timeout Abort
-  z: Timeout Abort
-  clocks: 2+
+encoding:
 - bits: EEEE 1101011 CZ0 000010111 000100100
   write: —
-  c: Timeout Abort
-  z: Timeout Abort
-  clocks: 2+
+  c: timeout
+  z: timeout
+  clocks: '2+'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:

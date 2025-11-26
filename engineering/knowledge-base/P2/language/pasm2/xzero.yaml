@@ -1,6 +1,11 @@
 instruction: XZERO
 syntax: XZERO   {#}D,{#}S
-encoding: EEEE 1100101 1LI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1100101 1LI DDDDDDDDD SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '2+'
 timing:
   cycles: 2
   type: variable

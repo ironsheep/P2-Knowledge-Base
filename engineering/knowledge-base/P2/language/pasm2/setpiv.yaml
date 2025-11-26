@@ -1,6 +1,11 @@
 instruction: SETPIV
 syntax: SETPIV  {#}D
-encoding: EEEE 1101011 00L DDDDDDDDD 000111101
+encoding:
+- bits: EEEE 1101011 00L DDDDDDDDD 000111101
+  write: —
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

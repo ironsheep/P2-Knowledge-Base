@@ -1,6 +1,11 @@
 instruction: MODZ
 syntax: MODZ    z               {WZ}
-encoding: EEEE 1101011 0Z1 00000zzzz 001101111
+encoding:
+- bits: EEEE 1101011 0Z1 00000zzzz 001101111
+  write: —
+  c: —
+  z: zzzz[{C,Z}]
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

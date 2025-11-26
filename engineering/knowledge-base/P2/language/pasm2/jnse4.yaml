@@ -2,58 +2,21 @@ instruction: JNSE4
 syntax: JNSE4   {#}S
 brief_description: Jump if selector 4 event flag is NOT set
 category: Event
-description: Jump to S** if SE4 event flag is clear.                                                                       2
-  or 4 / 2 or
+description: Jump to S if SE4 event flag is clear.
 syntax_variants:
 - JNSE4 {#}S
 timing:
   cycles: 2
   type: variable
   range: 13...20
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-- bits: EEEE 1011110 01I 000000100 SSSSSSSSS
-  write: PC   1
-  c: —
-  z: —
-  clocks: 2 or 4 / 2 or 13–20
-- bits: EEEE 1011110 01I 000000101 SSSSSSSSS
-  write: PC   1
-  c: —
-  z: —
-  clocks: 2 or 4 / 2 or 13–20
-- bits: EEEE 1011110 01I 000000110 SSSSSSSSS
-  write: PC   1
-  c: —
-  z: —
-  clocks: 2 or 4 / 2 or 13–20
-- bits: EEEE 1011110 01I 000000111 SSSSSSSSS
-  write: PC   1
-  c: —
-  z: —
-  clocks: 2 or 4 / 2 or 13–20
-- bits: EEEE 1011110 01I 000010100 SSSSSSSSS
-  write: PC   1
-  c: —
-  z: —
-  clocks: 2 or 4 / 2 or 13–20
-- bits: EEEE 1011110 01I 000010101 SSSSSSSSS
-  write: PC   1
-  c: —
-  z: —
-  clocks: 2 or 4 / 2 or 13–20
-- bits: EEEE 1011110 01I 000010110 SSSSSSSSS
-  write: PC   1
-  c: —
-  z: —
-  clocks: 2 or 4 / 2 or 13–20
+encoding:
 - bits: EEEE 1011110 01I 000010111 SSSSSSSSS
-  write: PC   1
+  write: —
   c: —
   z: —
-  clocks: 2 or 4 / 2 or 13–20
+  clocks: 2 or 4
 encoding_notes:
-- PC is written only when the selectable event 1, 2, 3, or 4 ﬂag is set (or is clear
-  in syntax 5–8).
+- PC is written only when the SE4 event flag is clear.
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: structured
 compiler_operand_format:

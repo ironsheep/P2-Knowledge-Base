@@ -1,6 +1,11 @@
 instruction: NIXINT1
 syntax: NIXINT1
-encoding: EEEE 1101011 000 000100101 000100100
+encoding:
+- bits: EEEE 1101011 000 000100101 000100100
+  write: —
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

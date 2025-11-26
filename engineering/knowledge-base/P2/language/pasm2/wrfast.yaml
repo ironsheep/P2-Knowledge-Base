@@ -1,6 +1,11 @@
 instruction: WRFAST
 syntax: WRFAST  {#}D,{#}S
-encoding: EEEE 1100100 0LI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1100100 0LI DDDDDDDDD SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '2 or WRFAST finish + 3'
 timing:
   cycles: 2
   type: conditional

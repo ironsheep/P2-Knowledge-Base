@@ -1,6 +1,16 @@
 instruction: CALLA
 syntax: CALLA   D        {WC/WZ/WCZ}
-encoding: EEEE 1101110 RAA AAAAAAAAA AAAAAAAAA
+encoding:
+- bits: EEEE 1101011 CZ0 DDDDDDDDD 000101110
+  write: —
+  c: D[31]
+  z: D[30]
+  clocks: 5...12 *
+- bits: EEEE 1101110 RAA AAAAAAAAA AAAAAAAAA
+  write: —
+  c: —
+  z: —
+  clocks: 5...12 *
 timing:
   cycles: 1
   type: fixed

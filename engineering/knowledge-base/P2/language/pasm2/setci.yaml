@@ -1,6 +1,11 @@
 instruction: SETCI
 syntax: SETCI   {#}D
-encoding: EEEE 1101011 00L DDDDDDDDD 000111001
+encoding:
+- bits: EEEE 1101011 00L DDDDDDDDD 000111001
+  write: —
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

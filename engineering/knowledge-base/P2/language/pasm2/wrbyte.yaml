@@ -1,6 +1,11 @@
 instruction: WRBYTE
 syntax: WRBYTE  {#}D,{#}S/P
-encoding: EEEE 1100010 0LI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1100010 0LI DDDDDDDDD SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '3...10'
 timing:
   cycles: 3
   type: variable

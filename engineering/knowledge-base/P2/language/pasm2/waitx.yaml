@@ -1,6 +1,11 @@
 instruction: WAITX
 syntax: WAITX   {#}D     {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZL DDDDDDDDD 000011111
+encoding:
+- bits: EEEE 1101011 CZL DDDDDDDDD 000011111
+  write: —
+  c: 0
+  z: 0
+  clocks: '2 + D'
 timing:
   cycles: 2 + D
   type: variable

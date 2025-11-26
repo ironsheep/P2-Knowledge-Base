@@ -1,6 +1,11 @@
 instruction: XSTOP
 syntax: XSTOP
-encoding: EEEE 1100101 011 000000000 000000000
+encoding:
+- bits: EEEE 1100101 011 000000000 000000000
+  write: —
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

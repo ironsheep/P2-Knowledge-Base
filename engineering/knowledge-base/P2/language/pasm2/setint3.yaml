@@ -1,6 +1,11 @@
 instruction: SETINT3
 syntax: SETINT3 {#}D
-encoding: EEEE 1101011 00L DDDDDDDDD 000100111
+encoding:
+- bits: EEEE 1101011 00L DDDDDDDDD 000100111
+  write: —
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

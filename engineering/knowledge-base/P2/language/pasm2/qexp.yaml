@@ -1,6 +1,11 @@
 instruction: QEXP
 syntax: QEXP    {#}D
-encoding: EEEE 1101011 00L DDDDDDDDD 000001111
+encoding:
+- bits: EEEE 1101011 00L DDDDDDDDD 000001111
+  write: —
+  c: —
+  z: —
+  clocks: '2...9'
 timing:
   cycles: 2
   type: fixed

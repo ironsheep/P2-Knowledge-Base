@@ -1,6 +1,11 @@
 instruction: RFVAR
 syntax: RFVAR   D        {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 DDDDDDDDD 000010011
+encoding:
+- bits: EEEE 1101011 CZ0 DDDDDDDDD 000010011
+  write: D
+  c: 0
+  z: Result = 0
+  clocks: '2'
 timing:
   cycles: 2
   type: mode_dependent

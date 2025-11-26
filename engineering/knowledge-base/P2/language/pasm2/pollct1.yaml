@@ -1,12 +1,11 @@
 instruction: POLLCT1
 syntax: POLLCT1 {WC|WZ|WCZ}
 encoding:
-- EEEE 1101011 CZ0 000000001 000100100                  --            CT1 Event           CT1
-  Event                 2
-- EEEE 1101011 CZ0 000000010 000100100                  --            CT2 Event           CT2
-  Event                 2
-- EEEE 1101011 CZ0 000000011 000100100                  --            CT3 Event           CT3
-  Event                 2
+- bits: EEEE 1101011 CZ0 000000001 000100100
+  write: —
+  c: CT1 Event
+  z: CT1 Event
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

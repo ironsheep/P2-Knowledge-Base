@@ -1,6 +1,11 @@
 instruction: WYPIN
 syntax: WYPIN   {#}D,{#}S
-encoding: EEEE 1100001 0LI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1100001 0LI DDDDDDDDD SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

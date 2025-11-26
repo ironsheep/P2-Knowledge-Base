@@ -1,6 +1,11 @@
 instruction: WRLUT
 syntax: WRLUT   {#}D,{#}S/P
-encoding: EEEE 1100001 1LI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1100001 1LI DDDDDDDDD SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

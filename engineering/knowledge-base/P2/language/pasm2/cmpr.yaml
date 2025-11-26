@@ -1,7 +1,11 @@
 instruction: CMPR
 syntax: CMPR Dest, {#}Src {WC|WZ|WCZ}
-encoding: EEEE 0010100 CZI DDDDDDDDD SSSSSSSSS                  --          Unsigned
-  (S < D)      D=S                    2
+encoding:
+- bits: EEEE 0010100 CZI DDDDDDDDD SSSSSSSSS
+  write: —
+  c: borrow of (S - D)
+  z: (D == S)
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

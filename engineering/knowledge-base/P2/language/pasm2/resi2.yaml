@@ -1,6 +1,11 @@
 instruction: RESI2
 syntax: RESI2
-encoding: EEEE 1011001 110 111110010 111110011
+encoding:
+- bits: EEEE 1011001 110 111110010 111110011
+  write: D
+  c: —
+  z: —
+  clocks: '4'
 timing:
   cycles: 4
   type: variable

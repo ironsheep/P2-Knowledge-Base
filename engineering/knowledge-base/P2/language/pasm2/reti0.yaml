@@ -1,6 +1,11 @@
 instruction: RETI0
 syntax: RETI0
-encoding: EEEE 1011001 110 111111111 111111111
+encoding:
+- bits: EEEE 1011001 110 111111111 111111111
+  write: D
+  c: —
+  z: —
+  clocks: '4'
 timing:
   cycles: 4
   type: variable

@@ -1,6 +1,11 @@
 instruction: SETSE4
 syntax: SETSE4  {#}D
-encoding: EEEE 1101011 00L DDDDDDDDD 000100011
+encoding:
+- bits: EEEE 1101011 00L DDDDDDDDD 000100011
+  write: —
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

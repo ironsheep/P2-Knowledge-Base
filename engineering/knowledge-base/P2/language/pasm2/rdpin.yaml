@@ -1,6 +1,11 @@
 instruction: RDPIN
 syntax: RDPIN   D,{#}S          {WC}
-encoding: EEEE 1010100 C1I DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1010100 C1I DDDDDDDDD SSSSSSSSS
+  write: D
+  c: modal result
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

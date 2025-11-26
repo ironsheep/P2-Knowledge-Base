@@ -1,6 +1,11 @@
 instruction: LOC
 syntax: LOC     PA/PB/PTRA/PTRB,#{\}A
-encoding: EEEE 11101WW RAA AAAAAAAAA AAAAAAAAA
+encoding:
+- bits: EEEE 11101WW RAA AAAAAAAAA AAAAAAAAA
+  write: Per W
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

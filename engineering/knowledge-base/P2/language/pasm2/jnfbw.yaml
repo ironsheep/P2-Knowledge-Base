@@ -13,17 +13,12 @@ timing:
   cycles: 2
   type: variable
   range: 13...20
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-- bits: EEEE 1011110 01I 000001001 SSSSSSSSS
-  write: PC   1
-  c: —
-  z: —
-  clocks: 2 or 4 / 2 or 13–20
+encoding:
 - bits: EEEE 1011110 01I 000011001 SSSSSSSSS
-  write: PC   1
+  write: —
   c: —
   z: —
-  clocks: 2 or 4 / 2 or 13–20
+  clocks: 2 or 4
 encoding_notes:
 - PC is written only when the FIFO interface block wrap event ﬂag is set (or is clear
   in syntax 2).

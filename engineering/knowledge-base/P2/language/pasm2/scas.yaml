@@ -1,7 +1,11 @@
 instruction: SCAS
 syntax: SCAS Dest, {#}Src {WZ}
-encoding: EEEE 1010001 1ZI DDDDDDDDD SSSSSSSSS                      --                 --          Product
-  = 0                2
+encoding:
+- bits: EEEE 1010001 1ZI DDDDDDDDD SSSSSSSSS
+  write: —
+  c: —
+  z: Result = 0
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

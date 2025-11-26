@@ -1,6 +1,11 @@
 instruction: RFWORD
 syntax: RFWORD  D        {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ0 DDDDDDDDD 000010001
+encoding:
+- bits: EEEE 1101011 CZ0 DDDDDDDDD 000010001
+  write: D
+  c: MSB of word
+  z: Result = 0
+  clocks: '2'
 timing:
   cycles: 2
   type: mode_dependent

@@ -1,6 +1,11 @@
 instruction: XCONT
 syntax: XCONT   {#}D,{#}S
-encoding: EEEE 1100110 0LI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1100110 0LI DDDDDDDDD SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '2+'
 timing:
   cycles: 2
   type: variable

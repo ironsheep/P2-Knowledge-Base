@@ -1,6 +1,11 @@
 instruction: QLOG
 syntax: QLOG    {#}D
-encoding: EEEE 1101011 00L DDDDDDDDD 000001110
+encoding:
+- bits: EEEE 1101011 00L DDDDDDDDD 000001110
+  write: —
+  c: —
+  z: —
+  clocks: '2...9'
 timing:
   cycles: 2
   type: fixed

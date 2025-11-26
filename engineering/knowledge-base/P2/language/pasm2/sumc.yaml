@@ -1,6 +1,11 @@
 instruction: SUMC
 syntax: SUMC    D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0011100 CZI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 0011100 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: 1 then D = D - S, else D = D + S. C = correct sign of (D +/- S)
+  z: Result = 0
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

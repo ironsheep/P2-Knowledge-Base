@@ -1,6 +1,11 @@
 instruction: JATN
 syntax: JATN    {#}S
-encoding: EEEE 1011110 01I 000001110 SSSSSSSSS
+encoding:
+- bits: EEEE 1011110 01I 000001110 SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '2 or 4'
 timing:
   cycles: 2
   type: variable

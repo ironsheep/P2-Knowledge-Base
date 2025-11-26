@@ -1,7 +1,12 @@
 instruction: QMUL
 syntax: QMUL    {#}D,{#}S
 compiler_syntax: QMUL D/#,S/#
-encoding: EEEE 1101000 0LI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1101000 0LI DDDDDDDDD SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '2...9'
 compiler_encoding:
   bits: 32
   opcode: 416

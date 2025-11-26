@@ -1,6 +1,11 @@
 instruction: CRCBIT
 syntax: CRCBIT  D,{#}S
-encoding: EEEE 1001110 10I DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1001110 10I DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

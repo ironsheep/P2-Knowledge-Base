@@ -1,6 +1,11 @@
 instruction: SETPAT
 syntax: SETPAT  {#}D,{#}S
-encoding: EEEE 1011111 1LI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1011111 1LI DDDDDDDDD SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

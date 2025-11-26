@@ -1,6 +1,11 @@
 instruction: GETSCP
 syntax: GETSCP  D
-encoding: EEEE 1101011 000 DDDDDDDDD 001110001
+encoding:
+- bits: EEEE 1101011 000 DDDDDDDDD 001110001
+  write: —
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

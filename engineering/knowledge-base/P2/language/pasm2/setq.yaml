@@ -1,6 +1,11 @@
 instruction: SETQ
 syntax: SETQ    {#}D
-encoding: EEEE 1101011 00L DDDDDDDDD 000101000
+encoding:
+- bits: EEEE 1101011 00L DDDDDDDDD 000101000
+  write: —
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

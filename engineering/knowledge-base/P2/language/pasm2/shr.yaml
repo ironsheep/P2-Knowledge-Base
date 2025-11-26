@@ -47,11 +47,12 @@ syntax_variants:
 timing:
   cycles: 1
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:
 - bits: EEEE 0000010 CZI DDDDDDDDD SSSSSSSSS
-  write: D      Last bit out   1
-  c: Result = 0
-  z: '2'
+  write: D
+  c: last bit shifted out if S[4:0] > 0, else D[0]
+  z: Result = 0
+  clocks: '2'
 encoding_notes:
 - C = last bit shifted out if Src[4:0] > 0, else C = Dest[0].
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147

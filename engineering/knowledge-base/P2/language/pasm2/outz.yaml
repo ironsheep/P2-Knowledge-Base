@@ -1,6 +1,11 @@
 instruction: OUTZ
 syntax: OUTZ    {#}D           {WCZ}
-encoding: EEEE 1101011 CZL DDDDDDDDD 001001100
+encoding:
+- bits: EEEE 1101011 CZL DDDDDDDDD 001001100
+  write: OUTx
+  c: —
+  z: OUT bit
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

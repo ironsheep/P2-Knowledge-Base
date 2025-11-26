@@ -1,6 +1,11 @@
 instruction: SUMZ
 syntax: SUMZ    D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0011110 CZI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 0011110 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: correct sign of (D +/- S)
+  z: 1 then D = D - S, else D = D + S
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

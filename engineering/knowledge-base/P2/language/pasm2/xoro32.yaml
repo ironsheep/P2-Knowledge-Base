@@ -1,6 +1,11 @@
 instruction: XORO32
 syntax: XORO32  D
-encoding: EEEE 1101011 000 DDDDDDDDD 001101000
+encoding:
+- bits: EEEE 1101011 000 DDDDDDDDD 001101000
+  write: D
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

@@ -1,19 +1,16 @@
 instruction: WAITSE3
-syntax: WAITSE1 {WC|WZ|WCZ}
+syntax: WAITSE3 {WC|WZ|WCZ}
 encoding:
-- EEEE 1101011 CZ0 000010100 000100100                 --          Timeout Abort       Timeout
-  Abort              2+
-- EEEE 1101011 CZ0 000010101 000100100                 --          Timeout Abort       Timeout
-  Abort              2+
-- EEEE 1101011 CZ0 000010110 000100100                 --          Timeout Abort       Timeout
-  Abort              2+
-- EEEE 1101011 CZ0 000010111 000100100                 --          Timeout Abort       Timeout
-  Abort              2+
+- bits: EEEE 1101011 CZ0 000010110 000100100
+  write: —
+  c: timeout
+  z: timeout
+  clocks: '2+'
 timing:
   cycles: 2
   type: variable
 description: 'Wait for SE3 event flag, then clear it. Prior SETQ sets optional CT
-  timeout value. C/Z = timeout.                              2+
+  timeout value. C/Z = timeout.
 
 
   WAITSE1, WAITSE2, WAITSE3, or WAITSE4 waits for a selectable event to occur (unless

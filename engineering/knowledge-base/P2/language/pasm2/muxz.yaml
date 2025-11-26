@@ -1,6 +1,11 @@
 instruction: MUXZ
 syntax: MUXZ    D,{#}S   {WC/WZ/WCZ}
-encoding: EEEE 0101110 CZI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 0101110 CZI DDDDDDDDD SSSSSSSSS
+  write: D
+  c: parity of result
+  z: Result = 0
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

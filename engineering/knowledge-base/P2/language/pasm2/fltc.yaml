@@ -1,6 +1,11 @@
 instruction: FLTC
 syntax: FLTC    {#}D           {WCZ}
-encoding: EEEE 1101011 CZL DDDDDDDDD 001010010
+encoding:
+- bits: EEEE 1101011 CZL DDDDDDDDD 001010010
+  write: DIRx* + OUTx
+  c: —
+  z: OUT bit
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

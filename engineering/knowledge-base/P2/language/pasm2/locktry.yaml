@@ -1,6 +1,11 @@
 instruction: LOCKTRY
 syntax: LOCKTRY {#}D            {WC}
-encoding: EEEE 1101011 C0L DDDDDDDDD 000000110
+encoding:
+- bits: EEEE 1101011 C0L DDDDDDDDD 000000110
+  write: —
+  c: 1 if got LOCK
+  z: —
+  clocks: '2...9, +2 if result'
 timing:
   cycles: 2
   type: fixed

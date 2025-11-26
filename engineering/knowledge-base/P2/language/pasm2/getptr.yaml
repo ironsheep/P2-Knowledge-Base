@@ -1,6 +1,11 @@
 instruction: GETPTR
 syntax: GETPTR  D
-encoding: EEEE 1101011 000 DDDDDDDDD 000110100
+encoding:
+- bits: EEEE 1101011 000 DDDDDDDDD 000110100
+  write: D
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: mode_dependent

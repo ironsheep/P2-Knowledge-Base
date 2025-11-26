@@ -1,7 +1,12 @@
 instruction: WRLONG
 syntax: WRLONG  {#}D,{#}S/P
 compiler_syntax: WRLONG D/#,S/#/PTRA/PTRB
-encoding: EEEE 1100011 0LI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1100011 0LI DDDDDDDDD SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '3...10*'
 compiler_encoding:
   bits: 32
   opcode: 396

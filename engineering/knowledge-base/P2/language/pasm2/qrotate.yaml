@@ -1,6 +1,11 @@
 instruction: QROTATE
 syntax: QROTATE {#}D,{#}S
-encoding: EEEE 1101010 0LI DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1101010 0LI DDDDDDDDD SSSSSSSSS
+  write: —
+  c: —
+  z: —
+  clocks: '2...9'
 timing:
   cycles: 2
   type: fixed

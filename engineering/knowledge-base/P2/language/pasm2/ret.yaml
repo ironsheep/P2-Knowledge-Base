@@ -1,6 +1,11 @@
 instruction: RET
 syntax: RET              {WC/WZ/WCZ}
-encoding: EEEE 1101011 CZ1 000000000 000101101
+encoding:
+- bits: EEEE 1101011 CZ1 000000000 000101101
+  write: —
+  c: K[31]
+  z: K[30]
+  clocks: '4'
 timing:
   cycles: 4
   type: variable

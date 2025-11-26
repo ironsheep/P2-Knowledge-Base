@@ -1,6 +1,11 @@
 instruction: LOCKRET
 syntax: LOCKRET {#}D
-encoding: EEEE 1101011 00L DDDDDDDDD 000000101
+encoding:
+- bits: EEEE 1101011 00L DDDDDDDDD 000000101
+  write: —
+  c: —
+  z: —
+  clocks: '2...9'
 timing:
   cycles: 2
   type: fixed

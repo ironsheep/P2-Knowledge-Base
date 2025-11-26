@@ -1,6 +1,11 @@
 instruction: DJZ
 syntax: DJZ     D,{#}S
-encoding: EEEE 1011011 00I DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1011011 00I DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: —
+  clocks: '2 or 4'
 timing:
   cycles: 2
   type: variable

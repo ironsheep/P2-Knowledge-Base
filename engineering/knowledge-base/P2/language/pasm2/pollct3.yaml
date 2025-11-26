@@ -1,5 +1,5 @@
 instruction: POLLCT3
-syntax: POLLCT1 {WC|WZ|WCZ}
+syntax: POLLCT3 {WC|WZ|WCZ}
 brief_description: Poll counter 1/2/3
 category: Event
 description: 'Get CT3 event flag into C/Z, then clear it.
@@ -39,17 +39,7 @@ syntax_variants:
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-- bits: EEEE 1101011 CZ0 000000001 000100100
-  write: —
-  c: CT1 Event
-  z: CT1 Event
-  clocks: '2'
-- bits: EEEE 1101011 CZ0 000000010 000100100
-  write: —
-  c: CT2 Event
-  z: CT2 Event
-  clocks: '2'
+encoding:
 - bits: EEEE 1101011 CZ0 000000011 000100100
   write: —
   c: CT3 Event

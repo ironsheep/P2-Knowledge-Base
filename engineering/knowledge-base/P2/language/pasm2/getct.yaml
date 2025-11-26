@@ -1,6 +1,11 @@
 instruction: GETCT
 syntax: GETCT   D               {WC}
-encoding: EEEE 1101011 C00 DDDDDDDDD 000011010
+encoding:
+- bits: EEEE 1101011 C00 DDDDDDDDD 000011010
+  write: D
+  c: same
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

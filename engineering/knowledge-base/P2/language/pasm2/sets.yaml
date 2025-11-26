@@ -1,6 +1,11 @@
 instruction: SETS
 syntax: SETS Dest, {#}Src
-encoding: EEEE 1001101 11I DDDDDDDDD SSSSSSSSS                        D                   --                 --                    2
+encoding:
+- bits: EEEE 1001101 11I DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

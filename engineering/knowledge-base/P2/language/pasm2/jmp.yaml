@@ -1,7 +1,17 @@
 instruction: JMP
 syntax: JMP     D        {WC/WZ/WCZ}
 compiler_syntax: JMP
-encoding: EEEE 1101100 RAA AAAAAAAAA AAAAAAAAA
+encoding:
+- bits: EEEE 1101011 CZ0 DDDDDDDDD 000101100
+  write: —
+  c: D[31]
+  z: D[30]
+  clocks: '4'
+- bits: EEEE 1101100 RAA AAAAAAAAA AAAAAAAAA
+  write: —
+  c: —
+  z: —
+  clocks: '4'
 compiler_encoding:
   bits: 32
   opcode: 432

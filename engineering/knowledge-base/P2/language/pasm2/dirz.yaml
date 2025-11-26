@@ -1,6 +1,11 @@
 instruction: DIRZ
 syntax: DIRZ    {#}D           {WCZ}
-encoding: EEEE 1101011 CZL DDDDDDDDD 001000100
+encoding:
+- bits: EEEE 1101011 CZL DDDDDDDDD 001000100
+  write: DIRx
+  c: —
+  z: DIR bit
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

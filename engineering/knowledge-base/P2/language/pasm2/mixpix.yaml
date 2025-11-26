@@ -1,6 +1,11 @@
 instruction: MIXPIX
 syntax: MIXPIX  D,{#}S
-encoding: EEEE 1010010 11I DDDDDDDDD SSSSSSSSS
+encoding:
+- bits: EEEE 1010010 11I DDDDDDDDD SSSSSSSSS
+  write: D
+  c: —
+  z: —
+  clocks: '7'
 timing:
   cycles: 7
   type: fixed

@@ -1,13 +1,13 @@
 # Engineering Operations
 
-*Last Updated: 2025-09-13 | Status: SPIN2 Language Specification Integration Complete*
+*Last Updated: 2025-11-26 | Status: PASM2 Assembly Reference Manual - First Technical Draft*
 
 ## Mission Metrics
 
 | Metric | Status | Target |
 |--------|--------|--------|
 | **Coverage** | 95% verified (+114% increase) | 100% |
-| **Authoritative Sources** | 🏆 13+ Official | - |
+| **Authoritative Sources** | 🏆 15+ Official (P2: 13+, P1: 2) | - |
 | **Trust Level** | 95% AUTHORITATIVE | 100% |
 | **Code Examples** | 157 validated | 500+ |
 | **Language Elements** | 287 documented | 371+ |
@@ -17,10 +17,10 @@
 
 ## Current Focus
 
-**Active**: SPIN2 Language Specification Integration  
-**Status**: ✅ COMPLETE - 287 language elements documented from compiler  
-**Coverage**: 🚀 114% INCREASE - From 134 to 287 elements  
-**Achievement**: First comprehensive SPIN2 reference with compiler-accurate definitions
+**Active**: PASM2 Assembly Reference Manual - First Technical Draft
+**Status**: 🚀 IN PROGRESS - YAML cleanup sprint for reference manual source data
+**Milestone**: Clean PASM2 YAML files ready for manual generation
+**Purpose**: Prepare authoritative instruction data for deSilva-style reference manual PDF
 
 ## Active Goals
 1. **Enable Production P2 Code Generation** (75%)
@@ -28,9 +28,9 @@
 3. **Establish Predictable Sprint Velocity** (30%)
 4. **Validate Visual Refinement Methodology** (70%)
 
-## 🏆 Authoritative Sources (13+ Documents)
+## 🏆 Authoritative Sources (15+ Documents)
 
-### Core Technical Documentation (3)
+### P2 Core Technical Documentation (3)
 | Source | Status | Authority |
 |--------|--------|----------|
 | **Silicon Doc v35** | 🏆 AUTHORITATIVE | Chip architecture |
@@ -54,6 +54,12 @@
 | **PropPlug Rev E** | Programming | 🏆 AUTHORITATIVE |
 | **Universal Motor Driver** | Motor Control | 🏆 AUTHORITATIVE |
 | **P2 Eval Add-On Boards** | Expansion | 🏆 AUTHORITATIVE |
+
+### P1 (Propeller 1) Documentation (2)
+| Source | Type | Purpose |
+|--------|------|---------|
+| **P1 Propeller Manual v1.2** | Complete Reference | P1 baseline, P2 manual template, migration |
+| **P1 Datasheet v1.4** | Hardware Specification | Electrical/mechanical specs, complements Manual |
 
 ## Source Quality Matrix
 

@@ -1,6 +1,11 @@
 instruction: SPLITW
 syntax: SPLITW  D
-encoding: EEEE 1101011 000 DDDDDDDDD 001100010
+encoding:
+- bits: EEEE 1101011 000 DDDDDDDDD 001100010
+  write: D
+  c: —
+  z: —
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

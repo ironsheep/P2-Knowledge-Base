@@ -1,6 +1,11 @@
 instruction: RETI1
 syntax: RETI1
-encoding: EEEE 1011001 110 111111111 111110101
+encoding:
+- bits: EEEE 1011001 110 111111111 111110101
+  write: D
+  c: —
+  z: —
+  clocks: '4'
 timing:
   cycles: 4
   type: variable

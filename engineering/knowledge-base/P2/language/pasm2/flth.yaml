@@ -1,6 +1,11 @@
 instruction: FLTH
 syntax: FLTH    {#}D           {WCZ}
-encoding: EEEE 1101011 CZL DDDDDDDDD 001010001
+encoding:
+- bits: EEEE 1101011 CZL DDDDDDDDD 001010001
+  write: DIRx* + OUTx
+  c: —
+  z: OUT bit
+  clocks: '2'
 timing:
   cycles: 2
   type: fixed

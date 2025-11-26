@@ -17,27 +17,17 @@ flags_affected:
 timing:
   cycles: 1
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
-- bits: EEEE 1101110 RAA AAAAAAAAA AAAAAAAAA
-  write: '1'
-  c: Hub and PC
-  z: —
-  clocks: — 5–122 / 14–322
-- bits: EEEE 1101011 CZ0 DDDDDDDDD 000101110
-  write: Hub1 and PC
-  c: D[31]
-  z: D[30]
-  clocks: 5–122 / 14–322
-- bits: EEEE 1101111 RAA AAAAAAAAA AAAAAAAAA
-  write: '1'
-  c: Hub and PC
-  z: —
-  clocks: — 5–122 / 14–322
+encoding:
 - bits: EEEE 1101011 CZ0 DDDDDDDDD 000101111
-  write: Hub1 and PC
+  write: —
   c: D[31]
   z: D[30]
-  clocks: 5–122 / 14–322
+  clocks: 5...12 *
+- bits: EEEE 1101111 RAA AAAAAAAAA AAAAAAAAA
+  write: —
+  c: —
+  z: —
+  clocks: 5...12 *
 encoding_notes:
 - ''
 documentation_source: PASM2 Manual 2022/11/01

@@ -3,222 +3,43 @@ syntax: SUBX Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Subtract extended
 category: Math and Logic
 description: 'SUBX subtracts the unsigned value of Src plus C from the unsigned Dest
-  and stores the result into the Dest Result: Difference of unsigned Dest and unsigned
-  Src (plus C) is stored in Dest and optionally the C and Z flags are updated to the
-  extended borrow and zero status.
-
-
-  SUBX subtracts the unsigned value of Src plus C from the unsigned Dest and stores
-  the result into the Dest
-
-
-  register. The SUBX instruction is used to perform unsigned multi-long (extended)
-  subtraction, such as 64-bit
-
-
-  subtraction.
-
+  and stores the result into the Dest register. The SUBX instruction is used to perform
+  unsigned multi-long (extended) subtraction, such as 64-bit subtraction.
 
   If the WC or WCZ effect is specified, the C flag is set (1) if the subtraction results
-  in an unsigned borrow, or is
-
-
-  cleared (0) if no borrow. Use WC or WCZ on preceding SUB and SUBX instructions for
-  proper final C flag. If C is set
-
-
-  after the last SUBX in a multi-long subtraction, it indicates unsigned underflow.
-
+  in an unsigned borrow, or is cleared (0) if no borrow. Use WC or WCZ on preceding
+  SUB and SUBX instructions for proper final C flag. If C is set after the last SUBX
+  in a multi-long subtraction, it indicates unsigned underflow.
 
   If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously
-  set and the result of Dest - (Src + C) is
-
-
-  zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding SUB and SUBX
-  instructions for proper final Z flag.
-
-
-  To subtract unsigned multi-long values, use SUB followed by one or more SUBX instructions
-  as described in
-
-
-  Subtracting Two Multi-Long Values.
-
-
-  SUMC / SUMNC
-
-
-  Sum C or Sum not C
-
-
-  Math Instruction - Adjust signed value by other C-negated or !C-negated value.
-
-
-  SUMC Dest, {#}Src       {WC|WZ|WCZ}
-
-
-  SUMNC Dest, {#}Src {WC|WZ|WCZ}
-
-
-  Result: The sum of signed Dest and either Src or -Src (according to C) is stored
-  in Dest and optionally the C and Z
-
-
-  flags are updated to the sign and zero status.
-
-
-  *    Dest is a register containing the signed value to adjust by Src or -Src, and
-  is where the result is written.
-
-
-  *    Src is a register, 9-bit literal, or 32-bit augmented literal whose value (if
-  C=0 or !C=0) or negated value (if
-
-
-  C=1 or !C=1) is added into Dest.
-
-
-  *    WC, WZ, or WCZ are optional effects to update flags.
-
-
-  COND INSTR         FX      DEST          SRC           Write             C Flag              Z
-  Flag             Clocks
-
-
-  EEEE 0011100 CZI DDDDDDDDD SSSSSSSSS                    D           sign of (D +/-
-  S)     Result = 0                2
-
-
-  EEEE 0011101 CZI DDDDDDDDD SSSSSSSSS                    D           sign of (D +/-
-  S)     Result = 0                2
-
-
-  Related: SUMZ and SUMNZ
-
-
-  SUMC or SUMNC adjusts the signed Dest value by Src or -Src (depending on C or !C)
-  and stores the result into the
-
-
-  Dest register. Prior to adding to Dest, the Src value is negated if C (SUMC) or
-  !C (SUMNC) is 1.
-
-
-  If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative,
-  or is cleared (0) if positive.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest
-  +/- Src is zero, or is cleared (0) if it is
-
-
-  non-zero.
-
-
-  SUMZ / SUMNZ
-
-
-  Sum Z or Sum not Z
-
-
-  Math Instruction - Adjust signed value by other Z-negated or !Z-negated value.
-
-
-  SUMZ Dest, {#}Src       {WC|WZ|WCZ}
-
-
-  SUMNZ Dest, {#}Src {WC|WZ|WCZ}
-
-
-  Result: The sum of signed Dest and either Src or -Src (according to Z) is stored
-  in Dest and optionally the C and Z
-
-
-  flags are updated to the sign and zero status.
-
-
-  *    Dest is a register containing the signed value to adjust by Src or -Src, and
-  is where the result is written.
-
-
-  *    Src is a register, 9-bit literal, or 32-bit augmented literal whose value (if
-  Z=0 or !Z=0) or negated value (if
-
-
-  Z=1 or !Z=1) is added into Dest.
-
-
-  *    WC, WZ, or WCZ are optional effects to update flags.
-
-
-  COND INSTR         FX      DEST          SRC           Write             C Flag              Z
-  Flag             Clocks
-
-
-  EEEE 0011110 CZI DDDDDDDDD SSSSSSSSS                    D           sign of (D +/-
-  S)     Result = 0                2
-
-
-  EEEE 0011111 CZI DDDDDDDDD SSSSSSSSS                    D           sign of (D +/-
-  S)     Result = 0                2
-
-
-  Related: SUMC and SUMNC
-
-
-  SUMZ or SUMNZ adjusts the signed Dest value by Src or -Src (depending on Z or !Z)
-  and stores the result into the
-
-
-  Dest register. Prior to adding to Dest, the Src value is negated if Z (SUMZ) or
-  !Z (SUMNZ) is 1.
-
-
-  If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative,
-  or is cleared (0) if positive.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest
-  +/- Src is zero, or is cleared (0) if it is
-
-
-  non-zero.'
-result: The sum of signed Dest and either Src or -Src (according to Z) is stored in
-  Dest and optionally the C and Z
+  set and the result of Dest - (Src + C) is zero, or it is cleared (0) if non-zero.
+  Use WZ or WCZ on preceding SUB and SUBX instructions for proper final Z flag.
+
+  To subtract unsigned multi-long values, use SUB followed by one or more SUBX instructions.'
+result: Difference of unsigned Dest and unsigned Src (plus C) is stored in Dest and
+  optionally the C and Z flags are updated to the extended borrow and zero status.
 parameters:
 - Dest is a register containing the value to subtract Src plus C from, and is where
   the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C
   is subtracted from Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
-- Dest is a register containing the signed value to adjust by Src or -Src, and is
-  where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value (if C=0
-  or !C=0) or negated value (if C=1 or !C=1) is added into Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
-- Dest is a register containing the signed value to adjust by Src or -Src, and is
-  where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value (if Z=0
-  or !Z=0) or negated value (if Z=1 or !Z=1) is added into Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  Z: Result = 0
+  C:
+    formula: borrow of (D - (S + C))
+  Z:
+    formula: Z AND (result == 0)
 syntax_variants:
 - SUBX Dest, {#}Src {WC|WZ|WCZ}
-- SUBX subtracts the unsigned value of Src plus C from the unsigned Dest and stores
-  the result into the Dest
-- cleared (0) if no borrow. Use WC or WCZ on preceding SUB and SUBX instructions for
-  proper final C flag. If C is set
-- zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding SUB and SUBX
-  instructions for proper final Z flag.
 timing:
   cycles: 2
   type: fixed
-encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
+encoding:
 - bits: EEEE 0001101 CZI DDDDDDDDD SSSSSSSSS
   write: D
-  c: borrow of D-(S+C) Z AND (Result = 0)
-  z: '2'
+  c: borrow of (D - (S + C))
+  z: Z AND (result == 0)
+  clocks: '2'
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:

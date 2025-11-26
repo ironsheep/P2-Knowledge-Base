@@ -1,6 +1,11 @@
 instruction: RESI1
 syntax: RESI1
-encoding: EEEE 1011001 110 111110100 111110101
+encoding:
+- bits: EEEE 1011001 110 111110100 111110101
+  write: D
+  c: —
+  z: —
+  clocks: '4'
 timing:
   cycles: 4
   type: variable
