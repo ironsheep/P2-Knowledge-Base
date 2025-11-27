@@ -33,5 +33,5 @@ layer2_datasheet:
     type: fixed
 layer3_narrative:
   source: P2 Instructions CSV v35
-  description: "Get {12'b0, address[19:0]} into PA/PB/PTRA/PTRB (per W).          If R = 1, address = PC + A, else address = A. \"\\" forces R = 0."
-  syntax: "LOC     PA/PB/PTRA/PTRB,#{\}A"
+  description: 'Get {12''b0, address[19:0]} into PA/PB/PTRA/PTRB (per W). If R = 1, address = PC + A, else address = A. "\" forces R = 0.'
+  syntax: 'LOC PA/PB/PTRA/PTRB,#{\\}A'

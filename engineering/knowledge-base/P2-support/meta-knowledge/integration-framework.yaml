@@ -201,10 +201,10 @@ integration_framework:
         - "Chip Gracey clarifications"
         - "Community best practices"
       confidence_levels:
-        - "silicon_doc_verified" (highest)
-        - "datasheet_confirmed" (high)
-        - "community_validated" (medium)
-        - "analytical_derived" (lower)
+        - "silicon_doc_verified (highest)"
+        - "datasheet_confirmed (high)"
+        - "community_validated (medium)"
+        - "analytical_derived (lower)"
 
 automation_support:
   batch_processing:
