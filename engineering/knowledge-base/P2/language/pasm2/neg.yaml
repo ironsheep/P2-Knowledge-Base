@@ -22,12 +22,8 @@ parameters:
   negated value is stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C:
-    formula: Sign of result
-    description: Set if result is negative
-  Z:
-    formula: Result = 0
-    description: Set if result is zero
+  C: Set if result is negative (sign bit)
+  Z: Set if result equals zero
 syntax_variants:
 - NEG Dest, {#}Src {WC|WZ|WCZ}
 - NEG Dest {WC|WZ|WCZ}

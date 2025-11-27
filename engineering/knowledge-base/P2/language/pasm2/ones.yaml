@@ -19,10 +19,8 @@ parameters:
   is to be checked for ones.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C:
-    formula: Result is odd (parity)
-  Z:
-    formula: Result == 0
+  C: Set if result is odd (parity)
+  Z: Set if result equals zero
 syntax_variants:
 - ONES Dest, {#}Src {WC|WZ|WCZ}
 - ONES Dest {WC|WZ|WCZ}

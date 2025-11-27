@@ -11,6 +11,9 @@ description: >-
   occurs. The flag is cleared upon execution of SETSE4, POLLSE4, WAITSE4, JSE4, or
   JNSE4 instructions.
 result: SE4 event flag state is optionally copied into C and/or Z, then the flag is cleared.
+flags_affected:
+  C: Set to SE4 event flag state
+  Z: Set to SE4 event flag state
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 syntax_variants:

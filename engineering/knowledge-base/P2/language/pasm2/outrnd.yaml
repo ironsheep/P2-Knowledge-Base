@@ -31,12 +31,8 @@ parameters:
   identifies the I/O pin(s) set randomly to low or high output levels.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C:
-    formula: original OUTx base bit
-    description: Set to original state of base bit before modification
-  Z:
-    formula: original OUTx base bit
-    description: Set to original state of base bit before modification
+  C: Set to original OUT bit state
+  Z: Set to original OUT bit state
 syntax_variants:
 - OUTRND {#}Dest {WCZ}
 timing:

@@ -18,10 +18,8 @@ parameters:
   bitwise ORed into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C:
-    formula: Parity of result
-  Z:
-    formula: Result == 0
+  C: Set to parity of result
+  Z: Set if result equals zero
 syntax_variants:
 - OR Dest, {#}Src {WC|WZ|WCZ}
 timing:

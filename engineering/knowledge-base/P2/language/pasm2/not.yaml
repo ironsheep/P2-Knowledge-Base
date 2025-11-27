@@ -18,10 +18,8 @@ parameters:
   will be bitwise NOTed and stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C:
-    formula: '!S[31] or !D[31]'
-  Z:
-    formula: Result == 0
+  C: Set to inverse of S[31] or D[31]
+  Z: Set if result equals zero
 syntax_variants:
 - NOT Dest, {#}Src {WC|WZ|WCZ}
 - NOT Dest {WC|WZ|WCZ}

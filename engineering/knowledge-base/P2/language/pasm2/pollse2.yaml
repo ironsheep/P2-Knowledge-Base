@@ -17,6 +17,9 @@ description: >-
   The selectable event 2 flag is set whenever the corresponding configured event
   occurs. The flag is cleared upon execution of SETSE2, POLLSE2, WAITSE2, JSE2, or
   JNSE2 instructions.
+flags_affected:
+  C: Set to SE2 event flag state
+  Z: Set to SE2 event flag state
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:

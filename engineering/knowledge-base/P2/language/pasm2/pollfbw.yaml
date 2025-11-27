@@ -13,6 +13,9 @@ description: >-
   JNFBW instructions.
 result: FIFO-interface-block-wrap event flag is optionally copied into C and/or Z,
   then it is cleared.
+flags_affected:
+  C: Set to FBW event flag state
+  Z: Set to FBW event flag state
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 syntax_variants:

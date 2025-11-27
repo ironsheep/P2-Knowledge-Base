@@ -11,6 +11,9 @@ description: >-
   for this cog. The attention event flag is cleared upon cog start, or execution of
   POLLATN, WAITATN, JATN, or JNATN instructions.
 result: Attention event flag is optionally copied into C and/or Z, then it is cleared.
+flags_affected:
+  C: Set to ATN event flag state
+  Z: Set to ATN event flag state
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 syntax_variants:

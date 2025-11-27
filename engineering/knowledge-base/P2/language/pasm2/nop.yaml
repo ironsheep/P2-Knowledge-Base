@@ -6,6 +6,9 @@ description: >-
   NOP simply consumes two clock cycles; no other operation is performed.
 result: >-
   Two clock cycles are consumed.
+flags_affected:
+  C: No effect
+  Z: No effect
 timing:
   cycles: 2
   type: fixed

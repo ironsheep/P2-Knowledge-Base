@@ -17,6 +17,9 @@ description: >-
   The counter 2 event flag is set whenever the System Counter (CT) passes the value
   in the CT2 event trigger register; i.e. MSB of (CT - CT2) is 0. The counter event
   flag is cleared upon execution of ADDCT2, POLLCT2, WAITCT2, JCT2, or JNCT2.
+flags_affected:
+  C: Set to CT2 event flag state
+  Z: Set to CT2 event flag state
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:

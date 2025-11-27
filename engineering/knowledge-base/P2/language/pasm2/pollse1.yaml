@@ -17,6 +17,9 @@ description: >-
   The selectable event 1 flag is set whenever the corresponding configured event
   occurs. The flag is cleared upon execution of SETSE1, POLLSE1, WAITSE1, JSE1, or
   JNSE1 instructions.
+flags_affected:
+  C: Set to SE1 event flag state
+  Z: Set to SE1 event flag state
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:

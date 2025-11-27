@@ -11,6 +11,9 @@ description: >-
   in the CT3 event trigger register; i.e. MSB of (CT - CT3) is 0. The counter event
   flag is cleared upon execution of ADDCT3, POLLCT3, WAITCT3, JCT3, or JNCT3.
 result: CT3 event flag state is optionally copied into C and/or Z, then the flag is cleared.
+flags_affected:
+  C: Set to CT3 event flag state
+  Z: Set to CT3 event flag state
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 syntax_variants:

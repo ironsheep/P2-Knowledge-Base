@@ -12,6 +12,9 @@ description: >-
   XZERO, XCONT, POLLXRO, WAITXRO, JXRO, or JNXRO instructions.
 result: Streamer-NCO-rollover event flag is optionally copied into C and/or Z, then
   it is cleared.
+flags_affected:
+  C: Set to XRO event flag state
+  Z: Set to XRO event flag state
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 syntax_variants:

@@ -12,6 +12,9 @@ description: >-
   execution of POLLQMT, WAITQMT, JQMT, or JNQMT instructions.
 result: CORDIC-read-but-empty event flag is optionally copied into C and/or Z, then
   it is cleared.
+flags_affected:
+  C: Set to QMT event flag state
+  Z: Set to QMT event flag state
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 syntax_variants:

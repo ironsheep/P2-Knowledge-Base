@@ -16,8 +16,8 @@ result: >-
   The I/O pin output level bit(s), described by Dest, are set to low/high according
   to Z; the rest are left as-is. Z = original OUT bit state.
 flags_affected:
-  Z:
-    formula: OUT bit
+  C: No effect
+  Z: Set to original OUT bit state
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:

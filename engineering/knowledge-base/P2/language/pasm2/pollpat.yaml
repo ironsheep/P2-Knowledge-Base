@@ -12,6 +12,9 @@ description: >-
   cleared upon execution of SETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions.
 result: Pin-pattern-detected event flag is optionally copied into C and/or Z, then
   it is cleared.
+flags_affected:
+  C: Set to PAT event flag state
+  Z: Set to PAT event flag state
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 syntax_variants:
