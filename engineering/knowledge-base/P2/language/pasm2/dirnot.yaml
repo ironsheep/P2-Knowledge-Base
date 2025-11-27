@@ -32,8 +32,8 @@ parameters:
   the I/O pin(s) to toggle to the opposite direction.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  Z:
-    formula: DIR bit
+  C: No effect
+  Z: Set to DIR bit state
 syntax_variants:
 - DIRNOT {#}Dest {WCZ}
 timing:

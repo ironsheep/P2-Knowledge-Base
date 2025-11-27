@@ -12,6 +12,9 @@ description: >-
   multiple cogs may request the attention of a single cog, some messaging structure
   may need to be implemented in Hub RAM to differentiate requests.
 result: The attention signal of one or more cogs is strobed.
+flags_affected:
+  C: No effect
+  Z: No effect
 parameters:
 - Dest is the register or 9-bit literal whose value (lower 8-bit pattern) indicates
   which cogs to signal.

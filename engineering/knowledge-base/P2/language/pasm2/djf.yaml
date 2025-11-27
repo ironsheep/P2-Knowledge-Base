@@ -40,10 +40,8 @@ parameters:
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
 flags_affected:
-  C:
-    formula: not affected
-  Z:
-    formula: not affected
+  C: No effect
+  Z: No effect
 category: Branch
 oneliner: Decrement value and jump if full (-1; $FFFF_FFFF) or not full (<> -1; <>
   $FFFF_FFFF)

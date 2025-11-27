@@ -36,8 +36,8 @@ result: >-
   The I/O pin direction bit(s), described by Dest, are set to output/input according
   to Z or !Z; the rest are left as-is.
 flags_affected:
-  Z:
-    formula: DIR bit
+  C: No effect
+  Z: Set to DIR bit state
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:

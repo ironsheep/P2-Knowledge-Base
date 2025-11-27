@@ -12,6 +12,9 @@ parameters:
   20 bits) is the target RAM address (for code) and the new cog's PTRB value.
 - WC is an optional effect to update the C flag with the success (0) or fail (1) status
   and triggers Dest to be overwritten with new cog's ID.
+flags_affected:
+  C: Set if no cog available (failure), cleared on success (when WC specified)
+  Z: No effect
 syntax_variants:
 - COGINIT {#}Dest, {#}Src {WC}
 timing:

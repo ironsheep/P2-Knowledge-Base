@@ -14,8 +14,8 @@ description: >-
   the C flag. High (1) bits set the pin(s) to output, low (0) to input. All other
   direction bits are left unchanged. Z is set to the state of the direction bit.
 flags_affected:
-  Z:
-    formula: DIR bit
+  C: No effect
+  Z: Set to DIR bit state
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:

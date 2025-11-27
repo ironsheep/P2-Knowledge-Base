@@ -9,6 +9,9 @@ description: 'COGSTOP terminates the cog identified by Dest[2:0]. In this dorman
 
   '
 result: Cog indicated by Dest is terminated (stopped).
+flags_affected:
+  C: No effect
+  Z: No effect
 parameters:
 - Dest is the register or 9-bit literal indicating (in lowest 3 bits) which cog to
   stop.

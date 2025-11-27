@@ -18,8 +18,8 @@ parameters:
   with and possibly subtracted from Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C:
-    formula: 1, else D same and C = 0
+  C: Set if unsigned D >= S (subtraction performed)
+  Z: Set if result equals zero
 syntax_variants:
 - CMPSUB D,{#}S {WC|WZ|WCZ}
 timing:

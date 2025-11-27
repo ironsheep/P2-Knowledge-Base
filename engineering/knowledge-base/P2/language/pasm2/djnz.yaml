@@ -15,10 +15,8 @@ parameters:
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
 flags_affected:
-  C:
-    formula: not affected
-  Z:
-    formula: not affected
+  C: No effect
+  Z: No effect
 timing:
   cycles: 2
   type: variable
