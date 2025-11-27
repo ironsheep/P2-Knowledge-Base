@@ -16,10 +16,8 @@ parameters:
   stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C:
-    formula: S[31]
-  Z:
-    formula: Result == 0
+  C: Set to S[31] (sign bit of source)
+  Z: Set if result equals zero
 syntax_variants:
 - MOV Dest, {#}Src {WC|WZ|WCZ}
 timing:

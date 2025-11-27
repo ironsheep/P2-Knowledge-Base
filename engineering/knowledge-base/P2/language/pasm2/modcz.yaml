@@ -13,10 +13,8 @@ parameters:
 - ZModifer is a Modifier symbol for the designated mode to apply to the Z flag.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C:
-    formula: cccc[{C,Z}], Z = zzzz[{C,Z}]
-  Z:
-    formula: zzzz[{C,Z}]
+  C: Set per cccc modifier and current C/Z state
+  Z: Set per zzzz modifier and current C/Z state
 timing:
   cycles: 2
   type: fixed

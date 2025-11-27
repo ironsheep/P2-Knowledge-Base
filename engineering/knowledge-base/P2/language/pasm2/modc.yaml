@@ -17,8 +17,8 @@ result: >-
   C = cccc[{C,Z}], where cccc is the 4-bit modifier value that selects which
   combination of current C and Z states produces a 1 result.
 flags_affected:
-  C:
-    formula: cccc[{C,Z}]
+  C: Set per cccc modifier and current C/Z state
+  Z: No effect
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:

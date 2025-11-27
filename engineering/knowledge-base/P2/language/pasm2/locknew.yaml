@@ -13,8 +13,8 @@ description: >-
   Request a LOCK. D will be written with the LOCK number (0 to 15). If the WC
   effect is specified, C = 1 if no LOCK is available.
 flags_affected:
-  C:
-    formula: 1 if no LOCK available
+  C: Set if no LOCK available
+  Z: No effect
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:

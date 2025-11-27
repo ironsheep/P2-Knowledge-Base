@@ -13,10 +13,8 @@ parameters:
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose non-zero bit
   pairs will replace the corresponding bit pairs in Dest.
 flags_affected:
-  C:
-    formula: not affected
-  Z:
-    formula: not affected
+  C: No effect
+  Z: No effect
 syntax_variants:
 - MUXNITS Dest, {#}Src
 timing:

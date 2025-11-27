@@ -11,8 +11,8 @@ parameters:
   the bit(s) to modify.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C:
-    formula: parity of result
+  C: Set to parity of result
+  Z: Set if result equals zero
 timing:
   cycles: 2
   type: fixed

@@ -24,8 +24,8 @@ description: 'Try to acquire lock D[3:0]. C = 1 if got LOCK.
 
   '
 flags_affected:
-  C:
-    formula: 1 if got LOCK
+  C: Set if LOCK acquired
+  Z: No effect
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:

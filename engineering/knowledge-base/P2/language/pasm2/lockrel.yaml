@@ -26,6 +26,9 @@ description: 'Release LOCK D[3:0]. If D is a register and WC, get current/last c
   - Must balance with LOCKTRY calls
 
   '
+flags_affected:
+  C: No effect
+  Z: No effect
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:

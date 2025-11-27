@@ -11,6 +11,9 @@ timing:
   type: fixed
 description: Move bytes within D, per S. D = {D.BYTE[S[7:6]], D.BYTE[S[5:4]], D.BYTE[S[3:2]],
   D.BYTE[S[1:0]]}.
+flags_affected:
+  C: No effect
+  Z: No effect
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:

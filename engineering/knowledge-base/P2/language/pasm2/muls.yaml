@@ -23,10 +23,8 @@ parameters:
   value is multiplied into Dest.
 - WZ is an optional effect to update the Z flag.
 flags_affected:
-  C: Not affected
-  Z:
-    formula: (D = 0) | (S = 0)
-    description: Set if either Dest or Src was zero before multiplication
+  C: No effect
+  Z: Set if D or S equals zero
 syntax_variants:
 - MULS Dest, {#}Src {WZ}
 timing:

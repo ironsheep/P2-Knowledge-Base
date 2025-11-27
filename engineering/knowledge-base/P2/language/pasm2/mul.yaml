@@ -19,8 +19,8 @@ parameters:
   into Dest.
 - WZ is an optional effect to update the Z flag.
 flags_affected:
-  Z:
-    formula: (S == 0) | (D == 0)
+  C: No effect
+  Z: Set if D or S equals zero
 syntax_variants:
 - MUL Dest, {#}Src {WZ}
 timing:

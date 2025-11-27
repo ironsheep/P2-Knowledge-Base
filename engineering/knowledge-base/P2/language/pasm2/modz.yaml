@@ -17,8 +17,8 @@ result: >-
   Z = zzzz[{C,Z}], where zzzz is the 4-bit modifier value that selects which
   combination of current C and Z states produces a 1 result.
 flags_affected:
-  Z:
-    formula: zzzz[{C,Z}]
+  C: No effect
+  Z: Set per zzzz modifier and current C/Z state
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:

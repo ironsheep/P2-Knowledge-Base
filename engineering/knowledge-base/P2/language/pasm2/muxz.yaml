@@ -14,8 +14,8 @@ description: >-
   the Z flag. Dest bit(s) described by Src are set to Z; the rest are left as-is.
   Flags are optionally updated with parity and zero status of the result.
 flags_affected:
-  C:
-    formula: parity of result
+  C: Set to parity of result
+  Z: Set if result equals zero
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:
