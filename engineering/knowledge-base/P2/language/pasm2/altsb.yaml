@@ -7,12 +7,15 @@ result: The next instruction's pipelined Dest and Num values are altered to be (
 parameters:
 - Dest is the register whose 11-bit value is the index (Dest[10:2] = long address, Dest[1:0] = byte ID) or the full byte address for SETBYTE to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal containing base long address (Src[8:0]) and optional auto-indexer value (Src[17:9]).
+flags_affected:
+  C: No effect
+  Z: No effect
 syntax_variants:
 - ALTSB Dest, {#}Src
 - ALTSB Dest
 usage_notes: The instruction following ALTSB is shielded from interrupt. ALTSB alters the next instruction regardless of its kind (intended for SETBYTE). Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 timing:
-  cycles: 1
+  cycles: 2
   type: fixed
 encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
 - bits: EEEE 1001011 00I DDDDDDDDD SSSSSSSSS

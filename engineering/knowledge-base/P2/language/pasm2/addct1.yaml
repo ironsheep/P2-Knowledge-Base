@@ -10,6 +10,9 @@ timing:
   cycles: 2
   type: fixed
 description: Set CT1 event to trigger on CT = D + S. ADDCT1 sets the hidden CT1 event trigger register to the value of Dest + Src. The result is also written to Dest. Use the POLLCT1, WAITCT1, JCT1, and JNCT1 instructions to process CT1 time-based events.
+flags_affected:
+  C: No effect
+  Z: No effect
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:

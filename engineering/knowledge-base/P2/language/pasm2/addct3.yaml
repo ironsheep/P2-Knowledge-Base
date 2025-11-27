@@ -3,6 +3,9 @@ syntax: ADDCT3 Dest, {#}Src
 brief_description: Add and set CT3 event trigger
 category: Event
 description: Set CT3 event to trigger on CT = D + S. ADDCT3 sets the hidden CT3 event trigger register to the value of Dest + Src. The result is also written to Dest. Use the POLLCT3, WAITCT3, JCT3, and JNCT3 instructions to process CT3 time-based events.
+flags_affected:
+  C: No effect
+  Z: No effect
 result: The Src value is added into Dest and the result is also stored in the hidden CT3 event trigger register.
 parameters:
 - Dest is a register containing the value to add Src to, and is where the result is

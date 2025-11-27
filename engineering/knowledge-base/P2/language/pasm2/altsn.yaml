@@ -7,6 +7,9 @@ result: The next instruction's pipelined Dest and Num values are altered to be (
 parameters:
 - Dest is the register whose 12-bit value is the index, or the full nibble address, for the SETNIB instruction to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[11:3]) for SETNIB) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
+flags_affected:
+  C: No effect
+  Z: No effect
 syntax_variants:
 - ALTSN Dest, {#}Src
 - ALTSN Dest
@@ -21,7 +24,7 @@ usage_notes: 'The instruction following ALTSN is shielded from interrupt
   SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the
   next instruction'
 timing:
-  cycles: 1
+  cycles: 2
   type: fixed
 encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
 - bits: EEEE 1001010 10I DDDDDDDDD SSSSSSSSS

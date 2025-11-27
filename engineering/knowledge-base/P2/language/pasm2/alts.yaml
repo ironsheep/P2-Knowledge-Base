@@ -7,6 +7,9 @@ result: The next instruction's pipelined Src value is altered to be (Src + Dest)
 parameters:
 - Dest is the register whose 9-bit value is the offset, or the full value, for the next instruction to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base (Src[8:0]; added to offset (Dest) for the next instruction) and also an optional auto-indexer value (Src[17:9]; added to Dest at the end of execution).
+flags_affected:
+  C: No effect
+  Z: No effect
 syntax_variants:
 - ALTS Dest, {#}Src
 - ALTS Dest
@@ -20,7 +23,7 @@ usage_notes: 'The instruction following ALTS is shielded from interrupt
   SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the
   next instruction'
 timing:
-  cycles: 1
+  cycles: 2
   type: fixed
 encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
 - bits: EEEE 1001100 10I DDDDDDDDD SSSSSSSSS
