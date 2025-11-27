@@ -2,7 +2,7 @@ instruction: COGID
 syntax: COGID {#}Dest {WC}
 brief_description: Cog identification
 category: Hub Control
-description: COGID writes the current cog's ID into Dest (if Dest is a register and WC is omitted) or sets/clears the C flag according to the running/stopped state of the cog indicated by Dest[2:0] (if WC is given). If the WC effect is specified, the C flag is set (1) if the Dest[2:0] cog is running, or is cleared (0) if stopped.
+description: 'COGID writes the current cog''s ID into Dest (if Dest is a register and WC is omitted) or sets/clears the C flag according to the running/stopped state of the cog indicated by Dest[2:0] (if WC is given). If the WC effect is specified, the C flag is set (1) if the Dest[2:0] cog is running, or is cleared (0) if stopped.'
 result: Current cog's ID is written to Dest or C is set (1) or cleared (0) if the
   Dest cog is running or stopped.
 parameters:

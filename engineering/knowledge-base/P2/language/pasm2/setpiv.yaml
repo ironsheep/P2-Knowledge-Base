@@ -9,7 +9,7 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Set BLNPIX/MIXPIX blend factor to D[7:0].
+description: 'Set BLNPIX/MIXPIX blend factor to D[7:0].'
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:

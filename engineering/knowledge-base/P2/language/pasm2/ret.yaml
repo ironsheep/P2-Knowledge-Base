@@ -10,7 +10,7 @@ timing:
   cycles: 4
   type: variable
   range: 4 / 13...20
-description: Return by popping stack (K). C = K[31], Z = K[30], PC = K[19:0].
+description: 'Return by popping stack (K). C = K[31], Z = K[30], PC = K[19:0].'
 flags_affected:
   C:
     formula: K[31], Z = K[30], PC = K[19:0]

@@ -9,7 +9,7 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Set INT3 source to D[3:0].
+description: 'Set INT3 source to D[3:0].'
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:

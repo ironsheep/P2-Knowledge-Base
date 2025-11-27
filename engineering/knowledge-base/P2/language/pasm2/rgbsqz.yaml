@@ -9,7 +9,7 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Squeeze 8:8:8 RGB value in D[31:8] into 5:6:5 value in D[15:0].
+description: 'Squeeze 8:8:8 RGB value in D[31:8] into 5:6:5 value in D[15:0].'
 documentation_source: original
 documentation_level: minimal
 compiler_operand_format:
