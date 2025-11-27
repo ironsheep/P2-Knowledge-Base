@@ -8,6 +8,9 @@ parameters:
 - 'Src is a register, 9-bit literal, or 32-bit augmented literal that contains the
   relative or absolute address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
+flags_affected:
+  C: No effect
+  Z: No effect
 syntax_variants:
 - CALLPA {#}D,{#}S
 timing:

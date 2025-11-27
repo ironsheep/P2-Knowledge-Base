@@ -13,8 +13,8 @@ description: >-
   BITH sets the Dest bit(s) designated by Src to high (1). All other bits are left
   unchanged. Z is set to the original state of the target bit before modification.
 flags_affected:
-  Z:
-    formula: original D[S[4:0]]
+  C: No effect
+  Z: Set to original D[S[4:0]]
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:

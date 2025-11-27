@@ -9,8 +9,8 @@ parameters:
 - Dest is the register whose value will have one or more bits toggled.
 - Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
 flags_affected:
-  C: Set to original D[S[4:0]] (if WCZ specified)
-  Z: Set to original D[S[4:0]] (if WCZ specified)
+  C: No effect
+  Z: Set to original D[S[4:0]]
 syntax_variants:
 - BITNOT Dest, {#}Src {WCZ}
 timing:

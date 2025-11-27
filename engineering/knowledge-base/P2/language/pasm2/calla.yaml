@@ -12,8 +12,8 @@ encoding:
   z: —
   clocks: 5...12 *
 timing:
-  cycles: 1
-  type: fixed
+  cycles: 5-12
+  type: variable
 description: Write current C and Z flags and address of the next instruction into
   the 4-byte Hub RAM location at PTRA or PTRB, increment pointer, set PC to new relative
   or absolute address, and optionally update C and/or Z to new state. R = 1 then PC
