@@ -10,8 +10,10 @@ timing:
   cycles: 2
   type: variable
   range: 2...58
-description: '{WC/WZ/WCZ}   Retrieve CORDIC result Y into D. Waits, in case result
-  not ready. C = Y[31].'
+description: >-
+  Retrieve CORDIC result Y into D. Waits in case result is not ready. If the WC
+  effect is specified, C is set to Y[31] (the sign bit). If the WZ effect is
+  specified, Z is set if the result equals zero.
 flags_affected:
   C:
     formula: Y[31]

@@ -9,10 +9,10 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'MUXZ or MUXNZ alters the Dest bit(s) designated by Src (high bits) to
-  equal the state, or inverse state, of the Z flag. Result: Dest bit(s) described
-  by Src are set to Z or !Z; the rest are left as-is. Flags are optionally updated
-  with parity and zero status of the result.'
+description: >-
+  MUXZ alters the Dest bit(s) designated by Src (high bits) to equal the state of
+  the Z flag. Dest bit(s) described by Src are set to Z; the rest are left as-is.
+  Flags are optionally updated with parity and zero status of the result.
 flags_affected:
   C:
     formula: parity of result

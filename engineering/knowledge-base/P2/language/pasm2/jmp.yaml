@@ -26,7 +26,9 @@ description: Jump to A. If R = 1 then PC += A, else PC = A. "\" forces R = 0.
 compiler_category: Control Flow
 flags_affected:
   C:
-    formula: A
+    formula: D[31] if WC effect used
+  Z:
+    formula: D[30] if WZ effect used
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:

@@ -1,10 +1,16 @@
 instruction: SUMNC
-syntax: SUMNC   D,{#}S   {WC/WZ/WCZ}
+syntax: SUMNC D,{#}S {WC|WZ|WCZ}
+brief_description: Sum with negated carry condition
 category: Math and Logic
-description: 'SUMC or SUMNC adjusts the signed Dest value by Src or -Src (depending
-  on C or !C) and stores the result into the Result: The sum of signed Dest and either
-  Src or -Src (according to C) is stored in Dest and optionally the C and Z flags
-  are updated to the sign and zero status.'
+description: >-
+  SUMNC adjusts the signed Dest value by Src or -Src (depending on !C) and stores
+  the result into the Dest register. If !C is true (C=0), Dest = Dest - Src. If !C
+  is false (C=1), Dest = Dest + Src. If the WC or WCZ effect is specified, the C flag
+  is updated to the correct sign of the result. If the WZ or WCZ effect is specified,
+  the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero.
+result: >-
+  The sum of signed Dest and either Src or -Src (according to !C) is stored in Dest
+  and optionally the C and Z flags are updated to the sign and zero status.
 parameters:
 - Dest is a register containing the signed value to adjust by Src or -Src, and is
   where the result is written.

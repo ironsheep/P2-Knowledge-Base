@@ -2,26 +2,7 @@ instruction: ABS
 syntax: ABS Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Absolute
 category: Math and Logic
-description: 'ABS determines the absolute value of Src or Dest and writes the result
-  into Dest. Result: Absolute Src (or Dest) value is stored in Dest.
-
-
-  ABS determines the absolute value of Src or Dest and writes the result into Dest.
-
-
-  If the WC or WCZ effect is specified, the C flag is set (1) if the original Src
-  or Dest value was negative, or is cleared
-
-
-  (0) if it was positive.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero,
-  or is cleared (0) if it is non-zero.
-
-
-  Literal Src values are zero-extended, so ABS is really best used with register Src
-  (or augmented Src) values.'
+description: ABS determines the absolute value of Src or Dest and writes the result into Dest. If the WC or WCZ effect is specified, the C flag is set (1) if the original Src or Dest value was negative, or is cleared (0) if it was positive. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero, or is cleared (0) if it is non-zero. Literal Src values are zero-extended, so ABS is really best used with register Src (or augmented Src) values.
 result: Absolute Src (or Dest) value is stored in Dest.
 parameters:
 - Dest is the register in which to write the absolute value of Dest or Src.
@@ -29,12 +10,11 @@ parameters:
   value is written to Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C: D[31] Result =
-  Z: Result = 0
+  C: Set to original sign bit (S[31] or D[31])
+  Z: Set if result equals zero
 syntax_variants:
 - ABS Dest, {#}Src {WC|WZ|WCZ}
-- ABS Dest            {WC|WZ|WCZ}
-- ABS determines the absolute value of Src or Dest and writes the result into Dest.
+- ABS Dest {WC|WZ|WCZ}
 timing:
   cycles: 2
   type: fixed

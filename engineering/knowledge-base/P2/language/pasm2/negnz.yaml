@@ -2,44 +2,32 @@ instruction: NEGNZ
 syntax: NEGNZ Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Negate not Z
 category: Math and Logic
-description: 'NEGNZ negates Src (syntax 1) or Dest (syntax 2) if !Z = 1 and stores
-  the result in the Dest register. If !Z = 0, the Src Result: The Src or Dest value,
-  possibly negated according to !Z, is stored into Dest and optionally the C and Z
-  flags are updated to the resulting sign and zero status.
-
-
-  NEGNZ negates Src (syntax 1) or Dest (syntax 2) if !Z = 1 and stores the result
-  in the Dest register. If !Z = 0, the Src
-
-
-  or Dest value is left as-is (not negated) and is stored into Dest. If the negation
-  is performed, it flips the value''s
-
-
-  sign; ex: 193 becomes -193, or -3,062 becomes 3,062.
-
-
+description: >-
+  NEGNZ negates Src (syntax 1) or Dest (syntax 2) if !Z = 1 (Z = 0) and stores the
+  result in the Dest register. If !Z = 0 (Z = 1), the Src or Dest value is left as-is
+  (not negated) and is stored into Dest. If the negation is performed, it flips the
+  value's sign; ex: 193 becomes -193, or -3,062 becomes 3,062.
   If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative,
   or is cleared (0) if positive.
-
-
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero,
-  or is cleared (0) if it is non-zero.'
-result: The Src or Dest value, possibly negated according to !Z, is stored into Dest
-  and optionally the C and Z flags
+  or is cleared (0) if it is non-zero.
+result: >-
+  The Src or Dest value, possibly negated according to !Z, is stored into Dest and
+  optionally the C and Z flags are updated to the resulting sign and zero status.
 parameters:
 - Dest is a register to receive the Src or -Src value (syntax 1), or contains the
-  value to negate (syntax 2) according to !C.
+  value to negate (syntax 2) according to !Z.
 - Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value
-  (if !C=0) or negated value (if !C=1) is stored into Dest.
+  (if !Z=0) or negated value (if !Z=1) is stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  Z: Result = 0
+  C:
+    formula: Sign of result
+  Z:
+    formula: Result == 0
 syntax_variants:
 - NEGNZ Dest, {#}Src {WC|WZ|WCZ}
-- NEGNZ Dest              {WC|WZ|WCZ}
-- NEGNZ negates Src (syntax 1) or Dest (syntax 2) if !Z = 1 and stores the result
-  in the Dest register. If !Z = 0, the Src
+- NEGNZ Dest {WC|WZ|WCZ}
 timing:
   cycles: 2
   type: fixed

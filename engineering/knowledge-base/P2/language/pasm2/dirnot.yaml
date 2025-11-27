@@ -2,61 +2,29 @@ instruction: DIRNOT
 syntax: DIRNOT {#}Dest {WCZ}
 brief_description: Direction not
 category: Pin
-description: 'DIRNOT alters the direction register''s bit(s) designated by Dest to
-  their inverse state. All other bits are left Result: The I/O pin direction bit(s),
-  described by Dest, are toggled to their opposite state(s); the rest are left as-is.
-  Z = DIR bit.
-
-
-  DIRNOT alters the direction register''s bit(s) designated by Dest to their inverse
-  state. All other bits are left
-
-
-  unchanged.
-
+description: >-
+  DIRNOT alters the direction register's bit(s) designated by Dest to their inverse
+  state. All other bits are left unchanged.
 
   Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates
-  the base pin number (0-63)
-
-
-  and Dest[10:6] indicates how many contiguous pins beyond the base should be affected
-  (1-31).
-
+  the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond
+  the base should be affected (1-31).
 
   A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of
-  up to 8 contiguous pins (Dest[8:6]).
+  up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature
+  (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD
+  instruction prior.
 
-
-  If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit
-  literal value-- this inserts an
-
-
-  AUGD instruction prior.
-
-
-  When Dest is a register, the register''s value bits [10:0] are used as-is to form
-  the 11-bit ID range, unless a SETQ
-
-
-  instruction immediately precedes the DIRNOT instruction; substituting SETQ''s Dest[4:0]
-  in place of value
-
-
-  bits[10:6], for DIRNOT''s use.
-
+  When Dest is a register, the register's value bits [10:0] are used as-is to form
+  the 11-bit ID range, unless a SETQ instruction immediately precedes the DIRNOT
+  instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for
+  DIRNOT's use.
 
   The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within
-  the same 32-pin group (DIRA or
-
-
-  DIRB); it will not cross the port boundary.
-
+  the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.
 
   If the WCZ effect is specified, the C and Z flags are updated to the original state
-  of DIRA / DIRB''s base bit,
-
-
-  identified by Dest.'
+  of DIRA / DIRB's base bit, identified by Dest.
 result: The I/O pin direction bit(s), described by Dest, are toggled to their opposite
   state(s); the rest are left as-is.
 parameters:
@@ -68,11 +36,6 @@ flags_affected:
     formula: DIR bit
 syntax_variants:
 - DIRNOT {#}Dest {WCZ}
-- DIRNOT alters the direction register's bit(s) designated by Dest to their inverse
-  state. All other bits are left
-- instruction immediately precedes the DIRNOT instruction; substituting SETQ's Dest[4:0]
-  in place of value
-- bits[10:6], for DIRNOT's use.
 timing:
   cycles: 2
   type: fixed

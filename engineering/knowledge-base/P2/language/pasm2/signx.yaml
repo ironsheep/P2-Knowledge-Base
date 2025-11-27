@@ -2,30 +2,16 @@ instruction: SIGNX
 syntax: SIGNX Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Sign extend
 category: Math and Logic
-description: 'SIGNX fills the bits of Dest, above the bit indicated by Src[4:0], with
-  the value of that identified bit; i.e. Result: The Dest value is sign-extended above
-  the bit indicated by Src and is stored in Dest. Optionally the C and Z flags are
-  updated to the resulting MSB and zero status. C = MSB of result.
-
-
-  SIGNX fills the bits of Dest, above the bit indicated by Src[4:0], with the value
-  of that identified bit; i.e.
-
-
-  sign-extending the value. This is handy when converting encoded or received signed
-  values from a small bit width
-
-
-  to a large bit with; i.e. 32 bits.
-
-
-  If the WC or WCZ effect is specified, the C flag is set to the result''s MSB value.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero,
-  or is cleared (0) if it is non-zero.'
-result: The Dest value is sign-extended above the bit indicated by Src and is stored
-  in Dest. Optionally the C and
+description: >-
+  SIGNX fills the bits of Dest, above the bit indicated by Src[4:0], with the value of
+  that identified bit, i.e. sign-extending the value. This is handy when converting
+  encoded or received signed values from a small bit width to a large bit width, i.e. 32
+  bits. If the WC or WCZ effect is specified, the C flag is set to the result's MSB
+  value. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is
+  zero, or is cleared (0) if it is non-zero.
+result: >-
+  The Dest value is sign-extended above the bit indicated by Src and is stored in Dest.
+  Optionally the C and Z flags are updated to the resulting MSB and zero status.
 parameters:
 - Dest is a register containing the value to sign-extend above bit Src[4:0] and is
   where the result is written.
@@ -35,9 +21,7 @@ parameters:
 flags_affected:
   Z: Result = 0
 syntax_variants:
-- SIGNX Dest, {#}Src {WC|WZ|WCZ}
-- SIGNX fills the bits of Dest, above the bit indicated by Src[4:0], with the value
-  of that identified bit; i.e.
+- SIGNX D,{#}S {WC|WZ|WCZ}
 timing:
   cycles: 2
   type: fixed

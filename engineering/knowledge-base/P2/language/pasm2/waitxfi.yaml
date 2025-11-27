@@ -2,57 +2,24 @@ instruction: WAITXFI
 syntax: WAITXFI {WC|WZ|WCZ}
 brief_description: Wait streamer finished
 category: Event
-description: 'WAITXFI waits for a streamer-finished event to occur (unless the event
-  flag is already set), then clears the event Result: Wait for streamer-finished event,
-  then clear the flag; optionally aborting on timeout and setting C and/or Z on abort.
-  Z = timeout.
-
-
-  WAITXFI waits for a streamer-finished event to occur (unless the event flag is already
-  set), then clears the event
-
-
-  flag (unless it''s being set again by the event sensor) and resumes execution at
-  the next instruction. Optionally,
-
-
-  WAITXFI can time-out if the streamer-finished doesn''t occur soon enough; setting
-  C and/or Z flags and then
-
-
-  resuming execution at the next instruction.
-
-
-  To set the optional timeout, insert a SETQ (with a future System Counter target
-  value) right before WAITXFI.
-
-
-  The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified,
-  in which case the C flag and/or
-
-
-  Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the
-  event occurred before the timeout.
-
-
-  During a wait, the pipeline is stalled; no instructions execute and no interrupts
-  are processed in the cog until the
-
-
-  wait condition ends.
-
-
-  The streamer-finished event flag is set whenever the streamer runs out of commands
-  to process. The
-
-
-  streamer-finished event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXFI,
-  WAITXFI, JXFI, or
-
-
-  JNXFI instructions.'
-result: Wait for streamer-finished event, then clear the flag; optionally aborting
-  on timeout and setting C and/or Z
+description: >-
+  WAITXFI waits for a streamer-finished event to occur (unless the event flag is
+  already set), then clears the event flag (unless it's being set again by the event
+  sensor) and resumes execution at the next instruction. Optionally, WAITXFI can
+  time-out if the streamer-finished event doesn't occur soon enough; setting C and/or
+  Z flags and then resuming execution at the next instruction. To set the optional
+  timeout, insert a SETQ (with a future System Counter target value) right before
+  WAITXFI. The WC, WZ, or WCZ effect is recommended only if the optional timeout is
+  specified, in which case the C flag and/or Z flag is set (1) if a timeout occurred
+  before the event, or is cleared (0) if the event occurred before the timeout. During
+  a wait, the pipeline is stalled; no instructions execute and no interrupts are
+  processed in the cog until the wait condition ends. The streamer-finished event
+  flag is set whenever the streamer runs out of commands to process. The streamer-finished
+  event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXFI, WAITXFI, JXFI,
+  or JNXFI instructions.
+result: >-
+  Wait for streamer-finished event, then clear the flag; optionally aborting on
+  timeout and setting C and/or Z on abort.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:

@@ -2,34 +2,14 @@ instruction: SAL
 syntax: SAL Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Shift arithmetic left
 category: Math and Logic
-description: 'SAL shifts Dest''s binary value left by Src places (0-31 bits) and sets
-  the new LSBs to that of the original Dest[0]. Result: The bits of Dest are shifted
-  left by Src bits, extending Dest[0] into new rightmost bits.
-
-
-  SAL shifts Dest''s binary value left by Src places (0-31 bits) and sets the new
-  LSBs to that of the original Dest[0].
-
-
-  SAL is the complement of SAR for bit streams but not for math operations-- use SHL
-  instead for swift 32-bit
-
-
-  integer multiplication by a power-of-two.
-
-
-  If the WC or WCZ effect is specified, the C flag is updated to the value of the
-  last bit shifted out (effectively C =
-
-
-  result bit "32") if Src is 1-31, or to Dest[31] if Src is 0.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest result equals
-  zero, or is cleared (0) if it is
-
-
-  non-zero.'
+description: >-
+  SAL shifts Dest's binary value left by Src places (0-31 bits) and sets the new LSBs to
+  that of the original Dest[0]. SAL is the complement of SAR for bit streams but not for
+  math operations; use SHL instead for swift 32-bit integer multiplication by a
+  power-of-two. If the WC or WCZ effect is specified, the C flag is updated to the value
+  of the last bit shifted out (effectively C = result bit "32") if Src is 1-31, or to
+  Dest[31] if Src is 0. If the WZ or WCZ effect is specified, the Z flag is set (1) if
+  the Dest result equals zero, or is cleared (0) if it is non-zero.
 result: The bits of Dest are shifted left by Src bits, extending Dest[0] into new
   rightmost bits.
 parameters:
@@ -41,9 +21,7 @@ flags_affected:
   C:
     formula: last bit shifted out if S[4:0] > 0, else D[31]
 syntax_variants:
-- SAL Dest, {#}Src {WC|WZ|WCZ}
-- SAL shifts Dest's binary value left by Src places (0-31 bits) and sets the new LSBs
-  to that of the original Dest[0].
+- SAL D,{#}S {WC|WZ|WCZ}
 timing:
   cycles: 1
   type: fixed

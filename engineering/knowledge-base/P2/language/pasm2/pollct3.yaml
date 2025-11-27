@@ -2,39 +2,19 @@ instruction: POLLCT3
 syntax: POLLCT3 {WC|WZ|WCZ}
 brief_description: Poll counter 1/2/3
 category: Event
-description: 'Get CT3 event flag into C/Z, then clear it.
-
-
-  POLLCT1, POLLCT2, or POLLCT3 copies the state of the count 1, 2, or 3 event flag
-  into C and/or Z and then clears
-
-
-  the flag (unless it''s being set again by the event sensor).
-
-
+description: >-
+  POLLCT3 copies the state of the counter 3 event flag into C and/or Z and then clears
+  the flag (unless it's being set again by the event sensor).
   If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to
-  the state of the corresponding
-
-
-  counter event flag prior to clearing it.
-
-
-  The counter 1, 2, or 3 event flag is set whenever the System Counter (CT) passes
-  the value in the CT1, CT2, or CT3
-
-
-  event trigger register, respectively; i.e. MSB of (CT - CTx is 0). The counter event
-  flags are cleared upon execution
-
-
-  of the corresponding ADDCTx, POLLCTx, WAITCTx, JCTx, or JNCTx instructions.'
+  the state of the counter event flag prior to clearing it.
+  The counter 3 event flag is set whenever the System Counter (CT) passes the value
+  in the CT3 event trigger register; i.e. MSB of (CT - CT3) is 0. The counter event
+  flag is cleared upon execution of ADDCT3, POLLCT3, WAITCT3, JCT3, or JNCT3.
 result: Counter event flag 1, 2, or 3 state is optionally copied into C and/or Z,
   then it is cleared.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 syntax_variants:
-- POLLCT1 {WC|WZ|WCZ}
-- POLLCT2 {WC|WZ|WCZ}
 - POLLCT3 {WC|WZ|WCZ}
 timing:
   cycles: 2

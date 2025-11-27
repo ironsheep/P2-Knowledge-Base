@@ -9,10 +9,12 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'OUTC or OUTNC alters the output level register''s bit(s) designated
-  by Dest to equal the state, or inverse state, of Result: The I/O pin output level
-  bit(s), described by Dest, are set to low/high according to C or !C; the rest are
-  left as-is. Z = OUT bit.'
+description: >-
+  OUTC alters the output level register's bit(s) designated by Dest to equal the
+  state of the C flag. All other bits are left as-is.
+result: >-
+  The I/O pin output level bit(s), described by Dest, are set to low/high according
+  to C; the rest are left as-is. Z = original OUT bit state.
 flags_affected:
   Z:
     formula: OUT bit

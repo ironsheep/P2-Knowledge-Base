@@ -1,20 +1,11 @@
 instruction: STALLI
 syntax: STALLI
-brief_description: 'Result: All future interrupts are disallowed.'
+brief_description: Disallow future interrupts
 category: Interrupt
-description: 'STALLI disables interrupt branching. STALLI is the complement of the
-  ALLOWI instruction-- both are used to Result: All future interrupts are disallowed.
-
-
-  STALLI disables interrupt branching. STALLI is the complement of the ALLOWI instruction--
-  both are used to
-
-
-  protect short, vital sections of main code from timing jitter or state loss caused
-  by asynchronous interrupt
-
-
-  handling.'
+description: >-
+  STALLI disables interrupt branching. STALLI is the complement of the ALLOWI instruction;
+  both are used to protect short, vital sections of main code from timing jitter or state
+  loss caused by asynchronous interrupt handling.
 result: All future interrupts are disallowed.
 timing:
   cycles: 2

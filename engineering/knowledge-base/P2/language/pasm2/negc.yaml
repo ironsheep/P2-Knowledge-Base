@@ -2,31 +2,18 @@ instruction: NEGC
 syntax: NEGC Dest, {#}Src       {WC|WZ|WCZ}
 brief_description: Negate C
 category: Math and Logic
-description: 'NEGC negates Src (syntax 1) or Dest (syntax 2) if C = 1 and stores the
-  result in the Dest register. If C = 0, the Src Result: The Src or Dest value, possibly
-  negated according to C, is stored into Dest and optionally the C and Z flags are
-  updated to the resulting sign and zero status.
-
-
+description: >-
   NEGC negates Src (syntax 1) or Dest (syntax 2) if C = 1 and stores the result in
-  the Dest register. If C = 0, the Src
-
-
-  or Dest value is left as-is (not negated) and is stored into Dest. If the negation
-  is performed, it flips the value''s
-
-
-  sign; ex: 5 becomes -5, or -200 becomes 200.
-
-
+  the Dest register. If C = 0, the Src or Dest value is left as-is (not negated) and
+  is stored into Dest. If the negation is performed, it flips the value's sign;
+  ex: 5 becomes -5, or -200 becomes 200.
   If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative,
   or is cleared (0) if positive.
-
-
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero,
-  or is cleared (0) if it is non-zero.'
-result: The Src or Dest value, possibly negated according to C, is stored into Dest
-  and optionally the C and Z flags
+  or is cleared (0) if it is non-zero.
+result: >-
+  The Src or Dest value, possibly negated according to C, is stored into Dest and
+  optionally the C and Z flags are updated to the resulting sign and zero status.
 parameters:
 - Dest is a register to receive the Src or -Src value (syntax 1), or contains the
   value to negate (syntax 2) according to C.
@@ -34,12 +21,13 @@ parameters:
   (if C=0) or negated value (if C=1) is stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  Z: Result = 0
+  C:
+    formula: Sign of result
+  Z:
+    formula: Result == 0
 syntax_variants:
-- NEGC Dest, {#}Src       {WC|WZ|WCZ}
-- NEGC Dest               {WC|WZ|WCZ}
-- NEGC negates Src (syntax 1) or Dest (syntax 2) if C = 1 and stores the result in
-  the Dest register. If C = 0, the Src
+- NEGC Dest, {#}Src {WC|WZ|WCZ}
+- NEGC Dest {WC|WZ|WCZ}
 timing:
   cycles: 2
   type: fixed

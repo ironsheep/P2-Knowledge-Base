@@ -9,116 +9,10 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'BRK triggers a breakpoint in the current cog and either defines a breakpoint
-  code or the
-
-  next breakpoint Result: If debug interrupts are enabled, a debug interrupt is triggered
-  in the current
-
-  cog and Dest''s value becomes the debug code or the next debug condition.
-
-
-  Key uses:
-
-  - Software breakpoints for debugging
-
-  - Conditional debug triggers
-
-  - Communication with debug monitor
-
-  - Assertion failures and error handling
-
-
-
-  BRK triggers a breakpoint in the current cog and either defines a breakpoint code
-  or the next breakpoint
-
-
-  condition(s). The cog must have debug interrupts enabled, and if BRK is to be executed
-  within the normal
-
-
-  program (outside the Debug ISR), the "BRK instruction" interrupt must first be enabled
-  from within a prior Debug
-
-
-  ISR (interrupt service routine).
-
-
-  During normal program execution, the BRK instruction is used to generate a debug
-  interrupt with an 8-bit code
-
-
-  (from D[7:0]) which can be read within the Debug ISR using a GETBRK instruction.
-
-
-  During a Debug ISR, the BRK instruction is used instead to establish the next debug
-  interrupt condition(s) and to
-
-
-  select INA/INB, instead of the IJMP0/IRET0 registers exposed during the ISR, so
-  that the pins'' inputs states may
-
-
-  be read.
-
-
-  The format of Dest for Debug ISR use is %AAAAAAAAAAAAAAAAAAAA_BCDEFGHIJKLM
-
-
-  A: 20-bit breakpoint address or 4-bit event code
-
-
-  B: 1 = map INA/INB normally, 0 = map IJMP0/IRET0 at INA/INB (default during ISR).
-  If Debug ISR sets B
-
-
-  to 1, it must reset it to 0 before exiting the Debug ISR so the RETI0 instruction
-  sees IJMP0 and IRET0.
-
-
-  C: 1 = enable interrupt on breakpoint address match
-
-
-  D: 1 = enable interrupt on event %eeee
-
-
-  E: 1 = enable interrupt on asynchronous breakpoint (via COGBRK from another cog)
-
-
-  F: 1 = enable interrupt on INT3 ISR entry
-
-
-  G: 1 = enable interrupt on INT2 ISR entry
-
-
-  H: 1 = enable interrupt on INT1 ISR entry
-
-
-  I: 1 = enable interrupt on BRK instruction
-
-
-  J: 1 = enable interrupt on INT3 ISR code (single step)
-
-
-  K: 1 = enable interrupt on INT2 ISR code (single step)
-
-
-  L: 1 = enable interrupt on INT1 ISR code (single step)
-
-
-  M: 1 = enable interrupt on non-ISR code (single step)
-
-
-  Upon Debug ISR entry, bits B through M are cleared (0). If a subsequent debug interrupt
-  is desired, a BRK
-
-
-  instruction must be executed before exiting the Debug ISR in order to establish
-  the next breakpoint condition(s).'
+description: BRK triggers a breakpoint in the current cog and either defines a breakpoint code or the next breakpoint condition(s). The cog must have debug interrupts enabled, and if BRK is to be executed within the normal program (outside the Debug ISR), the "BRK instruction" interrupt must first be enabled from within a prior Debug ISR. During normal program execution, the BRK instruction is used to generate a debug interrupt with an 8-bit code (from D[7:0]) which can be read within the Debug ISR using a GETBRK instruction. During a Debug ISR, the BRK instruction is used instead to establish the next debug interrupt condition(s) and to select INA/INB, instead of the IJMP0/IRET0 registers exposed during the ISR, so that the pins' inputs states may be read. The format of Dest for Debug ISR use is %AAAAAAAAAAAAAAAAAAAA_BCDEFGHIJKLM where A is the 20-bit breakpoint address or 4-bit event code, and bits B-M control various interrupt enable conditions.
 flags_affected:
-  C:
-    when: Code/Cond.1
+  C: Not affected
+  Z: Not affected
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 examples:
@@ -175,11 +69,9 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Break
 category: Interrupt
-result: If debug interrupts are enabled, a debug interrupt is triggered in the current
-  cog and Dest's value becomes
+result: If debug interrupts are enabled, a debug interrupt is triggered in the current cog and Dest's value becomes the debug code or the next debug condition.
 syntax_variants:
 - BRK {#}Dest
-- (from D[7:0]) which can be read within the Debug ISR using a GETBRK instruction.
 parameters:
 - Dest is the register, 9-bit literal, or 32-bit augmented literal whose value becomes
   the debug code or condition depending on the state of execution (outside or inside

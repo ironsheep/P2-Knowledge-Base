@@ -2,29 +2,15 @@ instruction: SETWORD
 syntax: 'SETWORD Dest, {#}Src, #Num'
 brief_description: Set word
 category: Math and Logic
-description: 'SETWORD stores Src[15:0] into the word identified by Num within Dest,
-  or the word and register described by a Result: Src[15:0] is written to word Num
-  (0-1) of Dest, or to another register word described by prior ALTSW instruction.
-
-
-  SETWORD stores Src[15:0] into the word identified by Num within Dest, or the word
-  and register described by a
-
-
-  prior ALTSW instruction. No other bits are modified.
-
-
-  Num (0-1) identifies a value''s individual words, by position, in least-significant
-  word order.
-
-
-  Syntax 2 is intended for use after an ALTSW instruction; i.e. in a loop to iteratively
-  affect a series of word values
-
-
-  within contiguous long registers.'
-result: Src[15:0] is written to word Num (0-1) of Dest, or to another register word
-  described by prior ALTSW
+description: >-
+  SETWORD stores Src[15:0] into the word identified by Num within Dest, or the word and
+  register described by a prior ALTSW instruction. No other bits are modified. Num (0-1)
+  identifies a value's individual words, by position, in least-significant word order.
+  Syntax 2 is intended for use after an ALTSW instruction, i.e. in a loop to iteratively
+  affect a series of word values within contiguous long registers.
+result: >-
+  Src[15:0] is written to word Num (0-1) of Dest, or to another register word described
+  by prior ALTSW instruction.
 parameters:
 - Dest is the register in which to modify a word.
 - Src is a register, 9-bit literal, or 16-bit augmented literal whose bits [15:0]
@@ -34,10 +20,8 @@ flags_affected:
   C:
     when: D
 syntax_variants:
-- 'SETWORD Dest, {#}Src, #Num'
-- SETWORD {#}Src
-- SETWORD stores Src[15:0] into the word identified by Num within Dest, or the word
-  and register described by a
+- 'SETWORD D,{#}S,#N'
+- SETWORD {#}S
 timing:
   cycles: 2
   type: fixed

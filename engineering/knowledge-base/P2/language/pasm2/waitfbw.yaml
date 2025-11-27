@@ -2,57 +2,25 @@ instruction: WAITFBW
 syntax: WAITFBW {WC|WZ|WCZ}
 brief_description: Wait FIFO block wrap
 category: Event
-description: 'WAITFBW waits for a FIFO-interface-block-wrap event to occur (unless
-  the event flag is already set), then clears Result: Wait for FIFO-interface-block-wrap
-  event, then clear the flag; optionally aborting on timeout and setting C and/or
-  Z on abort. Z = timeout.
-
-
+description: >-
   WAITFBW waits for a FIFO-interface-block-wrap event to occur (unless the event flag
-  is already set), then clears
-
-
-  the event flag (unless it''s being set again by the event sensor) and resumes execution
-  at the next instruction.
-
-
-  Optionally, WAITFBW can time-out if the FIFO-interface-block-wrap event doesn''t
-  occur soon enough; setting C
-
-
-  and/or Z flags and then resuming execution at the next instruction.
-
-
-  To set the optional timeout, insert a SETQ (with a future System Counter target
-  value) right before WAITFBW.
-
-
-  The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified,
-  in which case the C flag and/or
-
-
-  Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the
-  event occurred before the timeout.
-
-
+  is already set), then clears the event flag (unless it's being set again by the
+  event sensor) and resumes execution at the next instruction. Optionally, WAITFBW
+  can time-out if the FIFO-interface-block-wrap event doesn't occur soon enough;
+  setting C and/or Z flags and then resuming execution at the next instruction. To
+  set the optional timeout, insert a SETQ (with a future System Counter target value)
+  right before WAITFBW. The WC, WZ, or WCZ effect is recommended only if the optional
+  timeout is specified, in which case the C flag and/or Z flag is set (1) if a timeout
+  occurred before the event, or is cleared (0) if the event occurred before the timeout.
   During a wait, the pipeline is stalled; no instructions execute and no interrupts
-  are processed in the cog until the
-
-
-  wait condition ends.
-
-
-  The FIFO-interface-block-wrap event flag is set whenever the Hub RAM FIFO interface
-  exhausts its block count
-
-
-  and reloads its block count and start address. The FIFO-interface-block-wrap event
-  flag is cleared upon execution
-
-
-  of RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, or JNFBW instructions.'
-result: Wait for FIFO-interface-block-wrap event, then clear the flag; optionally
-  aborting on timeout and setting C
+  are processed in the cog until the wait condition ends. The FIFO-interface-block-wrap
+  event flag is set whenever the Hub RAM FIFO interface exhausts its block count and
+  reloads its block count and start address. The FIFO-interface-block-wrap event flag
+  is cleared upon execution of RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, or
+  JNFBW instructions.
+result: >-
+  Wait for FIFO-interface-block-wrap event, then clear the flag; optionally aborting
+  on timeout and setting C and/or Z on abort.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:

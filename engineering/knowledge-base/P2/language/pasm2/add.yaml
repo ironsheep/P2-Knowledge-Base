@@ -2,35 +2,7 @@ instruction: ADD
 syntax: ADD Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Add
 category: Math and Logic
-description: 'ADD sums the two unsigned values of Dest and Src together and stores
-  the result into the Dest register. Result: Sum of unsigned Src and unsigned Dest
-  is stored in Dest.
-
-
-  ADD sums the two unsigned values of Dest and Src together and stores the result
-  into the Dest register.
-
-
-  If the WC or WCZ effect is specified, the C flag is set (1) if the summation results
-  in a 32-bit overflow (unsigned
-
-
-  carry), or is cleared (0) if no overflow.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest
-  + Src is zero, or is cleared (0) if it is
-
-
-  non-zero.
-
-
-  To add unsigned, multi-long values, use ADD followed by ADDX as described in Adding
-  Two Multi-Long Values.
-
-
-  ADD and ADDX are also used in adding signed, multi-long values with ADDSX ending
-  the sequence.'
+description: ADD sums the two unsigned values of Dest and Src together and stores the result into the Dest register. If the WC or WCZ effect is specified, the C flag is set (1) if the summation results in a 32-bit overflow (unsigned carry), or is cleared (0) if no overflow. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest + Src is zero, or is cleared (0) if it is non-zero. To add unsigned, multi-long values, use ADD followed by ADDX as described in Adding Two Multi-Long Values. ADD and ADDX are also used in adding signed, multi-long values with ADDSX ending the sequence.
 result: Sum of unsigned Src and unsigned Dest is stored in Dest.
 parameters:
 - Dest is a register containing the value to add Src to, and is where the result is
@@ -39,12 +11,10 @@ parameters:
   into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C: carry of (D
-  Z: Result = 0
+  C: Set if unsigned overflow (carry of D + S)
+  Z: Set if result equals zero
 syntax_variants:
 - ADD Dest, {#}Src {WC|WZ|WCZ}
-- ADD sums the two unsigned values of Dest and Src together and stores the result
-  into the Dest register.
 timing:
   cycles: 2
   type: fixed

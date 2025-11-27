@@ -2,57 +2,16 @@ instruction: CMPSX
 syntax: CMPSX Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Compare signed, extended
 category: Math and Logic
-description: 'CMPSX compares the signed values of Dest and Src plus C (by subtracting
-  Src + C from Dest) and optionally Result: Greater/lesser and equality status is
-  optionally written to the C and Z flags.
-
-
-  CMPSX compares the signed values of Dest and Src plus C (by subtracting Src + C
-  from Dest) and optionally
-
-
-  setting the C and Z flags accordingly. The CMPSX instruction is used to perform
-  signed multi-long comparisons,
-
-
-  such as 64-bit comparisons.
-
-
-  If the WC or WCZ effect is specified, the C flag is set (1) if Dest is less than
-  Src + C (as multi-long values). Use WC
-
-
-  or WCZ on preceding CMP and CMPX instructions for proper final C flag.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously
-  set and the result of Dest - (Src + C) is
-
-
-  zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding SUB and SUBX
-  instructions for proper final Z flag.
-
-
-  To compare signed, multi-long values, use CMP (not CMPS) followed possibly by CMPX,
-  and finally CMPSX as
-
-
-  described in Comparing Two Multi-Long Values.'
+description: CMPSX compares the signed values of Dest and Src plus C (by subtracting Src + C from Dest) and optionally setting the C and Z flags accordingly. The CMPSX instruction is used to perform signed multi-long comparisons, such as 64-bit comparisons. If the WC or WCZ effect is specified, the C flag is set (1) if Dest is less than Src + C (as multi-long values). Use WC or WCZ on preceding CMP and CMPX instructions for proper final C flag. If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously set and the result of Dest - (Src + C) is zero, or it is cleared (0) if non-zero.
 result: Greater/lesser and equality status is optionally written to the C and Z flags.
 parameters:
 - Dest is the register containing the value to compare with that of Src.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared
-  to Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
 flags_affected:
-  C:
-    formula: correct sign of (D - (S + C))
-  Z:
-    formula: Z AND (D == S + C)
+  C: Set if signed D < (S + C), correct sign of difference
+  Z: Set if Z was set AND D == (S + C)
 syntax_variants:
 - CMPSX Dest, {#}Src {WC|WZ|WCZ}
-- CMPSX compares the signed values of Dest and Src plus C (by subtracting Src + C
-  from Dest) and optionally
 timing:
   cycles: 2
   type: fixed

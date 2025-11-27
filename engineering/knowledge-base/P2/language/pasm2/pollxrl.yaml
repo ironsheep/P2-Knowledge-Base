@@ -2,33 +2,15 @@ instruction: POLLXRL
 syntax: POLLXRL {WC|WZ|WCZ}
 brief_description: Poll streamer rollover LUT
 category: Event
-description: 'Streamer-LUT-RAM-rollover event flag is optionally copied into C and/or
-  Z, then it is cleared.
-
-
-  POLLXRL copies the state of the streamer-LUT-RAM-rollover event flag into C and/or
-  Z and then clears the flag
-
-
-  (unless it''s being set again by the event sensor).
-
-
+description: >-
+  Streamer-LUT-RAM-rollover event flag is optionally copied into C and/or Z, then it
+  is cleared. POLLXRL copies the state of the streamer-LUT-RAM-rollover event flag into
+  C and/or Z and then clears the flag (unless it's being set again by the event sensor).
   If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to
-  the state of the streamer-LUT-RAM-
-
-
-  rollover event flag prior to clearing it.
-
-
-  The streamer-LUT-RAM-rollover event flag is set whenever location $1FF of the Lookup
-  RAM is read by the
-
-
-  streamer. The streamer-LUT-RAM-rollover event flag is cleared upon cog start or
-  upon execution of POLLXRL,
-
-
-  WAITXRL, JXRL, or JNXRL instructions.'
+  the state of the streamer-LUT-RAM-rollover event flag prior to clearing it. The
+  streamer-LUT-RAM-rollover event flag is set whenever location $1FF of the Lookup RAM
+  is read by the streamer. The streamer-LUT-RAM-rollover event flag is cleared upon
+  cog start or upon execution of POLLXRL, WAITXRL, JXRL, or JNXRL instructions.
 result: Streamer-LUT-RAM-rollover event flag is optionally copied into C and/or Z,
   then it is cleared.
 parameters:

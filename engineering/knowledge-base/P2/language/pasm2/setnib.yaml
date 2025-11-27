@@ -2,39 +2,23 @@ instruction: SETNIB
 syntax: 'SETNIB Dest, {#}Src, #Num'
 brief_description: Set nibble
 category: Math and Logic
-description: 'SETNIB stores Src[3:0] into the nibble identified by Num within Dest,
-  or the nibble and register described by a prior Result: Src[3:0] is written to nibble
-  Num (0-7) of Dest, or to another register nibble described by prior ALTSN instruction.
-
-
-  SETNIB stores Src[3:0] into the nibble identified by Num within Dest, or the nibble
-  and register described by a prior
-
-
-  ALTSN instruction. No other bits are modified.
-
-
-  Num (0-7) identifies a value''s individual nibbles, by position, in least-significant
-  nibble order.
-
-
-  Syntax 2 is intended for use after an ALTSN instruction; i.e. in a loop to iteratively
-  affect a series of nibble values
-
-
-  within contiguous long registers.'
-result: Src[3:0] is written to nibble Num (0-7) of Dest, or to another register nibble
-  described by prior ALTSN
+description: >-
+  SETNIB stores Src[3:0] into the nibble identified by Num within Dest, or the nibble and
+  register described by a prior ALTSN instruction. No other bits are modified. Num (0-7)
+  identifies a value's individual nibbles, by position, in least-significant nibble
+  order. Syntax 2 is intended for use after an ALTSN instruction, i.e. in a loop to
+  iteratively affect a series of nibble values within contiguous long registers.
+result: >-
+  Src[3:0] is written to nibble Num (0-7) of Dest, or to another register nibble
+  described by prior ALTSN instruction.
 parameters:
 - Dest is the register in which to modify a nibble.
 - Src is a register or 4-bit literal whose bits [3:0] will be stored in the designated
   location.
 - Num is a 3-bit literal identifying the nibble ID (0-7) of Dest to modify.
 syntax_variants:
-- 'SETNIB Dest, {#}Src, #Num'
-- SETNIB {#}Src
-- SETNIB stores Src[3:0] into the nibble identified by Num within Dest, or the nibble
-  and register described by a prior
+- 'SETNIB D,{#}S,#N'
+- SETNIB {#}S
 timing:
   cycles: 2
   type: fixed

@@ -2,113 +2,14 @@ instruction: ALTGB
 syntax: ALTGB Dest, {#}Src
 brief_description: Alter get byte
 category: Register Indirection
-description: 'ALTGB should be followed by GETBYTE or ROLBYTE-- it modifies the GETBYTE
-  / ROLBYTE instruction''s
-
-  Src and Result: The next instruction''s pipelined Src and Num fields are altered
-  to be (Src + Dest[10:2])
-
-  & $1FF, or just Dest[10:2] for syntax 2, and Dest[1:0], respectively.
-
-
-  Perfect for:
-
-  - Table lookups (commutation tables, sine tables)
-
-  - String processing with auto-increment
-
-  - Byte array traversal
-
-  - Character mapping and translation
-
-
-
-  ALTGB should be followed by GETBYTE or ROLBYTE-- it modifies the GETBYTE / ROLBYTE
-  instruction''s Src and
-
-
-  Num values, enabling code to iterate through multiple bytes of data across a range
-  of Reg RAM. GETBYTE /
-
-
-  ROLBYTE''s Src value is changed to (Src + Dest[10:2]) & $1FF (for syntax 1), or
-  to Dest[10:2] (for syntax 2), and its
-
-
-  Num value is changed to Dest[1:0].
-
-
-  Dest[10:2] corresponds to the target long register''s 9-bit address and Dest[1:0]
-  is the byte ID within it; values of
-
-
-  0-3 identify individual bytes, by position, in least-significant byte order. Iteratively
-  executing ALTGB followed by
-
-
-  GETBYTE or ROLBYTE, and each time incrementing ALTGB''s 11-bit Dest value by one,
-  effectively reads a stream of
-
-
-  byte values from Reg RAM as if it were all made of byte-sized registers.
-
-
-  In syntax 1, Src consists of two 9-bit fields; a base address (Src[8:0]) and a signed
-  auto-indexer (Src[17:9]).
-
-
-  *   The base is the Reg RAM address where the series of bytes begins. ALTGB adds
-  the long index
-
-
-  (Dest[10:2]) to the base (Src[8:0]) to locate the register holding the target byte.
-  The byte ID (Dest[1:0])
-
-
-  identifies the byte''s position within that long register.
-
-
-  *   At the end of ALTGB execution, the optional auto-indexer value (usually 0, 1,
-  or -1) is added to the 11-bit
-
-
-  index (Dest) for a future ALTGB+GETBYTE or ROLBYTE iteration.
-
-
-  In syntax 2, Dest serves as the full byte address-- it''s the same format as in
-  syntax 1, but represents the target
-
-
-  long''s absolute address and its byte index instead of the long''s relative index
-  (to add to a base) and byte index.'
-result: The next instruction's pipelined Src and Num fields are altered to be (Src
-  + Dest[10:2]) & $1FF, or just
+description: ALTGB should be followed by GETBYTE or ROLBYTE-- it modifies the GETBYTE / ROLBYTE instruction's Src and Num values, enabling code to iterate through multiple bytes of data across a range of Reg RAM. GETBYTE / ROLBYTE's Src value is changed to (Src + Dest[10:2]) & $1FF (for syntax 1), or to Dest[10:2] (for syntax 2), and its Num value is changed to Dest[1:0]. Dest[10:2] corresponds to the target long register's 9-bit address and Dest[1:0] is the byte ID within it; values of 0-3 identify individual bytes, by position, in least-significant byte order. Iteratively executing ALTGB followed by GETBYTE or ROLBYTE, and each time incrementing ALTGB's 11-bit Dest value by one, effectively reads a stream of byte values from Reg RAM as if it were all made of byte-sized registers. In syntax 1, Src consists of two 9-bit fields; a base address (Src[8:0]) and a signed auto-indexer (Src[17:9]). The base is the Reg RAM address where the series of bytes begins. ALTGB adds the long index (Dest[10:2]) to the base (Src[8:0]) to locate the register holding the target byte. The byte ID (Dest[1:0]) identifies the byte's position within that long register. At the end of ALTGB execution, the optional auto-indexer value (usually 0, 1, or -1) is added to the 11-bit index (Dest) for a future ALTGB+GETBYTE or ROLBYTE iteration. In syntax 2, Dest serves as the full byte address-- it's the same format as in syntax 1, but represents the target long's absolute address and its byte index instead of the long's relative index (to add to a base) and byte index.
+result: The next instruction's pipelined Src and Num fields are altered to be (Src + Dest[10:2]) & $1FF, or just Dest[10:2] for syntax 2, and Dest[1:0], respectively.
 parameters:
-- Dest is the register whose 11-bit value is the index, or the full byte address,
-  for the GETBYTE / ROLBYTE instruction to read.
-- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value
-  contains a base long address (Src[8:0]; added to index (Dest[10:2]) for GETBYTE
-  / ROLBYTE) and also an optional auto-indexer value (Src[17:9]; added to Dest at
-  end of execution).
-- The base is the Reg RAM address where the series of bytes begins. ALTGB adds the
-  long index (Dest[10:2]) to the base (Src[8:0]) to locate the register holding the
-  target byte. The byte ID (Dest[1:0]) identifies the byte's position within that
-  long register.
-- At the end of ALTGB execution, the optional auto-indexer value (usually 0, 1, or
-  -1) is added to the 11-bit index (Dest) for a future ALTGB+GETBYTE or ROLBYTE iteration.
-- The instruction following ALTGB is shielded from interrupt.
-- ALTGB alters the next instruction regardless of its kind-- the intention is for
-  it to be a GETBYTE / ROLBYTE
-- Field value modification occurs in the instruction pipeline only; code is not altered,
-  values do not persist
-- SETQ / SETQ2 does not affect ALTx instructions-- the Q value passes through to the
-  next instruction
+- Dest is the register whose 11-bit value is the index, or the full byte address, for the GETBYTE / ROLBYTE instruction to read.
+- Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[10:2]) for GETBYTE / ROLBYTE) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 syntax_variants:
 - ALTGB Dest, {#}Src
 - ALTGB Dest
-- GETBYTE or ROLBYTE, and each time incrementing ALTGB's 11-bit Dest value by one,
-  effectively reads a stream of
-- index (Dest) for a future ALTGB+GETBYTE or ROLBYTE iteration.
 usage_notes: 'The instruction following ALTGB is shielded from interrupt
 
   ALTGB alters the next instruction regardless of its kind-- the intention is for

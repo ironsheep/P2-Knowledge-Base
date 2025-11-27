@@ -10,10 +10,17 @@ timing:
   cycles: 2
   type: variable
   range: 13...20
-description: 'DJF or DJNF decrements the value in Dest, writes the result, and jumps
-  to the address described by Src if the Result: Dest is decremented, and if the result
-  is full (or not full in syntax 2), PC is set to a new relative (#Src) or absolute
-  (Src) address.'
+description: >-
+  DJF decrements the value in Dest, writes the result, and jumps to the address
+  described by Src if the result is full ($FFFF_FFFF, or -1 signed).
+
+  This instruction is useful for implementing loops that count down until a register
+  wraps from 0 to -1. Use # prefix on Src for relative addressing; omit # for
+  absolute addressing.
+result: >-
+  Dest is decremented. If the result equals $FFFF_FFFF (full), PC is set to a new
+  relative (#Src) or absolute (Src) address; otherwise execution continues with
+  the next instruction.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:
@@ -34,9 +41,9 @@ parameters:
   for absolute addressing.'
 flags_affected:
   C:
-    when: D
+    formula: not affected
   Z:
-    when: and
+    formula: not affected
 category: Branch
 oneliner: Decrement value and jump if full (-1; $FFFF_FFFF) or not full (<> -1; <>
   $FFFF_FFFF)

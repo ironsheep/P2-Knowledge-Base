@@ -2,17 +2,11 @@ instruction: MUXNITS
 syntax: MUXNITS Dest, {#}Src
 brief_description: Mux nits
 category: Math and Logic
-description: 'MUXNITS copies any non-zero bit pairs from Src into the corresponding
-  bit pairs of Dest and leaves the rest of Result: Dest bit pairs corresponding to
-  non-zero Src bit pairs are set to those bit values; the rest are left as-is.
-
-
+description: >-
   MUXNITS copies any non-zero bit pairs from Src into the corresponding bit pairs
-  of Dest and leaves the rest of
-
-
-  Dest''s bit pairs as-is.'
-result: Dest bit pairs corresponding to non-zero Src bit pairs are set to those bit
+  of Dest and leaves the rest of Dest's bit pairs as-is.
+result: >-
+  Dest bit pairs corresponding to non-zero Src bit pairs are set to those bit pair
   values; the rest are left as-is.
 parameters:
 - Dest is a register whose value will be updated according to Src.
@@ -20,11 +14,11 @@ parameters:
   pairs will replace the corresponding bit pairs in Dest.
 flags_affected:
   C:
-    when: D
+    formula: not affected
+  Z:
+    formula: not affected
 syntax_variants:
 - MUXNITS Dest, {#}Src
-- MUXNITS copies any non-zero bit pairs from Src into the corresponding bit pairs
-  of Dest and leaves the rest of
 timing:
   cycles: 2
   type: fixed

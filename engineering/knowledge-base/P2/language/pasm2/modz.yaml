@@ -9,13 +9,14 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'MODC, MODZ, or MODCZ sets or clears the C and/or Z flag based on the
-  mode described by the given Modifier Result: The C and/or Z flag is set or cleared
-  according to the given Modifier and the current state of the C and/or Z flags. C
-  = cccc[{C,Z}], Z = zzzz[{C,Z}].'
+description: >-
+  MODZ sets or clears the Z flag based on the mode described by the given Modifier.
+  The Z flag is set or cleared according to the given Modifier and the current state
+  of the C and/or Z flags.
+result: >-
+  Z = zzzz[{C,Z}], where zzzz is the 4-bit modifier value that selects which
+  combination of current C and Z states produces a 1 result.
 flags_affected:
-  C:
-    formula: cccc[{C,Z}], Z = zzzz[{C,Z}]
   Z:
     formula: zzzz[{C,Z}]
 documentation_source: PASM2 Manual 2022/11/01

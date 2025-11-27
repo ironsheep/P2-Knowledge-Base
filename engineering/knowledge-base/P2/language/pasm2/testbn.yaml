@@ -1,5 +1,6 @@
 instruction: TESTBN
-syntax: TESTBN  D,{#}S         WC/WZ
+syntax: TESTBN D,{#}S WC/WZ
+brief_description: Test bit negated
 encoding:
 - bits: EEEE 0100001 CZI DDDDDDDDD SSSSSSSSS
   write: —
@@ -24,10 +25,15 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'TESTB or TESTBN reads the state (0/1) of a bit in Dest designated by
-  Src, possibly inverts that result, and either Result: The state of Dest''s bit Src
-  is read, possibly inverted, and either stored as-is, or bitwise ANDed, ORed, or
-  XORed into C or Z. Z = C/Z XOR !D[S[4:0]].'
+description: >-
+  TESTBN reads the state (0/1) of a bit in Dest designated by Src, inverts that
+  result, and either stores it as-is, or bitwise ANDs, ORs, or XORs it into C or Z.
+  The bit position is specified by Src[4:0] (0-31). The WC, WZ, ANDC, ANDZ, ORC,
+  ORZ, XORC, or XORZ effect determines how the inverted bit state is applied to the
+  selected flag.
+result: >-
+  The inverted state of Dest's bit Src is read and either stored as-is, or bitwise
+  ANDed, ORed, or XORed into C or Z.
 flags_affected:
   Z:
     formula: C/Z XOR !D[S[4:0]]

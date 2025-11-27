@@ -1,10 +1,11 @@
 instruction: NOP
 syntax: NOP
-brief_description: 'Result: Two clock cycles are consumed.'
+brief_description: No operation
 category: Miscellaneous
-description: 'NOP simply consumes two clock cycles; no other operation is performed.
-  Result: Two clock cycles are consumed.'
-result: Two clock cycles are consumed.
+description: >-
+  NOP simply consumes two clock cycles; no other operation is performed.
+result: >-
+  Two clock cycles are consumed.
 timing:
   cycles: 2
   type: fixed

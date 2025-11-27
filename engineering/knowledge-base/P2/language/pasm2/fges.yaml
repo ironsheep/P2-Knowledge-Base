@@ -2,30 +2,19 @@ instruction: FGES
 syntax: FGES Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Force greater or equal, signed
 category: Math and Logic
-description: 'FGES sets signed Dest to signed Src if Dest is less than Src. This is
-  also known as a limit minimum function; Result: Signed Dest is set to signed Src
-  if Dest was less than Src. Optionally the C and Z flag indicates if the replacement
-  happened and the zero status of the result.
-
-
-  FGES sets signed Dest to signed Src if Dest is less than Src. This is also known
-  as a limit minimum function;
-
-
-  preventing Dest from sinking below Src.
-
+description: >-
+  FGES sets signed Dest to signed Src if Dest is less than Src. This is also
+  known as a limit minimum function; preventing Dest from sinking below Src.
 
   If the WC or WCZ effect is specified, the C flag is set (1) if Dest was limited
-  (Dest was less than Src and now Dest is
-
-
-  equal to Src), or is cleared (0) if not limited.
-
+  (Dest was less than Src and now Dest is equal to Src), or is cleared (0) if not
+  limited.
 
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero,
-  or is cleared (0) if it is non-zero.'
-result: Signed Dest is set to signed Src if Dest was less than Src. Optionally the
-  C and Z flag indicates if the
+  or is cleared (0) if it is non-zero.
+result: >-
+  Signed Dest is set to signed Src if Dest was less than Src. Optionally the C and
+  Z flags indicate if the replacement happened and the zero status of the result.
 parameters:
 - Dest is a register containing the signed value to limit to a minimum of signed Src,
   and is where the result is written.
@@ -36,8 +25,6 @@ flags_affected:
   Z: Result = 0
 syntax_variants:
 - FGES Dest, {#}Src {WC|WZ|WCZ}
-- FGES sets signed Dest to signed Src if Dest is less than Src. This is also known
-  as a limit minimum function;
 timing:
   cycles: 2
   type: fixed

@@ -12,8 +12,8 @@ parameters:
   new C and Z states.
 - WC, WZ, or WCZ are optional effects to update the flags from Dest's upper bit states.
 flags_affected:
-  C:
-    formula: A
+  C: Set to D[31] if WC/WCZ specified
+  Z: Set to D[30] if WZ/WCZ specified
 timing:
   cycles: 1
   type: fixed
@@ -29,7 +29,7 @@ encoding:
   z: —
   clocks: 5...12 *
 encoding_notes:
-- ''
+- Stores return context at PTRB address then increments PTRB by 4
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:

@@ -1,10 +1,12 @@
 instruction: OUTNC
 syntax: OUTNC   {#}D           {WCZ}
 category: Pin
-description: 'OUTC or OUTNC alters the output level register''s bit(s) designated
-  by Dest to equal the state, or inverse state, of Result: The I/O pin output level
-  bit(s), described by Dest, are set to low/high according to C or !C; the rest are
-  left as-is. Z = OUT bit.'
+description: >-
+  OUTNC alters the output level register's bit(s) designated by Dest to equal the
+  inverse state of the C flag (!C). All other bits are left as-is.
+result: >-
+  The I/O pin output level bit(s), described by Dest, are set to low/high according
+  to !C; the rest are left as-is. Z = original OUT bit state.
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the I/O pin(s) for which output levels are to be set low or high.

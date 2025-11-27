@@ -2,28 +2,15 @@ instruction: XOR
 syntax: XOR Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Exclusive or
 category: Math and Logic
-description: 'XOR performs a bitwise XOR of the value in Src into that of Dest. Result:
+description: >-
+  XOR performs a bitwise XOR of the value in Src into that of Dest. If the WC or WCZ
+  effect is specified, the C flag is set (1) if the result contains an odd number of
+  high (1) bits, or is cleared (0) if it contains an even number of high bits. If the
+  WZ or WCZ effect is specified, the Z flag is set (1) if the Dest XOR Src result
+  equals zero, or is cleared (0) if it is non-zero.
+result: >-
   Dest XOR Src is stored in Dest and flags are optionally updated with parity and
   zero status.
-
-
-  XOR performs a bitwise XOR of the value in Src into that of Dest.
-
-
-  If the WC or WCZ effect is specified, the C flag is set (1) if the result contains
-  an odd number of high (1) bits, or is
-
-
-  cleared (0) if it contains an even number of high bits.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest XOR Src
-  result equals zero, or is cleared (0) if it
-
-
-  is non-zero.'
-result: Dest XOR Src is stored in Dest and flags are optionally updated with parity
-  and zero status.
 parameters:
 - Dest is the register containing the value to bitwise XOR with Src and is the destination
   in which to write the result.
@@ -33,16 +20,7 @@ parameters:
 flags_affected:
   Z: Result = 0
 syntax_variants:
-- XOR Dest, {#}Src {WC|WZ|WCZ}
-- 'Result: Dest XOR Src is stored in Dest and flags are optionally updated with parity
-  and zero status.'
-- '*   Dest is the register containing the value to bitwise XOR with Src and is the
-  destination in which to write'
-- '*   Src is a register, 9-bit literal, or 32-bit augmented literal whose value will
-  be bitwise XORed into Dest.'
-- XOR performs a bitwise XOR of the value in Src into that of Dest.
-- If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest XOR Src
-  result equals zero, or is cleared (0) if it
+- XOR D,{#}S {WC|WZ|WCZ}
 timing:
   cycles: 2
   type: fixed

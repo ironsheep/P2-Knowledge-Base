@@ -26,4 +26,4 @@ syntax_variants:
 - JMPREL {#}D
 last_updated: '2025-09-19T16:04:17.335015'
 category: Branch
-oneliner: Jump
+oneliner: Jump ahead/back by D instructions

@@ -2,29 +2,23 @@ instruction: MUXNIBS
 syntax: MUXNIBS Dest, {#}Src
 brief_description: Mux nibbles
 category: Math and Logic
-description: 'MUXNIBS copies any non-zero nibbles from Src into the corresponding
-  nibbles of Dest and leaves the rest of Result: Dest nibbles corresponding to non-zero
-  Src nibbles are set to those nibble values; the rest are left as-is.
-
-
+description: >-
   MUXNIBS copies any non-zero nibbles from Src into the corresponding nibbles of Dest
-  and leaves the rest of
-
-
-  Dest''s nibbles as-is.'
-result: Dest nibbles corresponding to non-zero Src nibbles are set to those nibble
-  values; the rest are left as-is.
+  and leaves the rest of Dest's nibbles as-is.
+result: >-
+  Dest nibbles corresponding to non-zero Src nibbles are set to those nibble values;
+  the rest are left as-is.
 parameters:
 - Dest is a register whose value will be updated according to Src.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose non-zero nibbles
   will replace the corresponding nibbles in Dest.
 flags_affected:
   C:
-    when: D
+    formula: not affected
+  Z:
+    formula: not affected
 syntax_variants:
 - MUXNIBS Dest, {#}Src
-- MUXNIBS copies any non-zero nibbles from Src into the corresponding nibbles of Dest
-  and leaves the rest of
 timing:
   cycles: 2
   type: fixed

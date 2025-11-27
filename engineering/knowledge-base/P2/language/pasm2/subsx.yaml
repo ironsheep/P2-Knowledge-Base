@@ -2,43 +2,20 @@ instruction: SUBSX
 syntax: SUBSX Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Subtract signed, extended
 category: Math and Logic
-description: 'SUBSX subtracts the signed value of Src plus C from the signed Dest
-  and stores the result into the Dest register. Result: Difference of signed Dest
-  and signed Src (plus C) is stored in Dest and optionally the C and Z flags are updated
-  to the extended sign and zero status.
-
-
+description: >-
   SUBSX subtracts the signed value of Src plus C from the signed Dest and stores the
-  result into the Dest register.
-
-
-  The SUBSX instruction is used to perform signed multi-long (extended) subtraction,
-  such as 64-bit subtraction.
-
-
-  If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative
-  (Result[31] = 1), or is cleared (0) if
-
-
-  positive. Use WC or WCZ on preceding SUB and SUBX instructions for proper final
-  C flag.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously
-  set and the result of Dest - (Src + C) is
-
-
-  zero, or it is cleared (0) if non-zero. Use WZ or WCZ on preceding SUB and SUBX
-  instructions for proper final Z flag.
-
-
-  To subtract signed multi-long values, use SUB (not SUBS) followed possibly by SUBX,
-  and finally SUBSX as
-
-
-  described in Subtracting Two Multi-Long Values.'
-result: Difference of signed Dest and signed Src (plus C) is stored in Dest and optionally
-  the C and Z flags are
+  result into the Dest register. The SUBSX instruction is used to perform signed
+  multi-long (extended) subtraction, such as 64-bit subtraction. If the WC or WCZ
+  effect is specified, the C flag is set (1) if the result is negative (Result[31] = 1),
+  or is cleared (0) if positive. Use WC or WCZ on preceding SUB and SUBX instructions
+  for proper final C flag. If the WZ or WCZ effect is specified, the Z flag is set (1)
+  if Z was previously set and the result of Dest - (Src + C) is zero, or it is cleared
+  (0) if non-zero. Use WZ or WCZ on preceding SUB and SUBX instructions for proper
+  final Z flag. To subtract signed multi-long values, use SUB (not SUBS) followed
+  possibly by SUBX, and finally SUBSX as described in Subtracting Two Multi-Long Values.
+result: >-
+  Difference of signed Dest and signed Src (plus C) is stored in Dest and optionally
+  the C and Z flags are updated to the extended sign and zero status.
 parameters:
 - Dest is a register containing the value to subtract Src plus C from, and is where
   the result is written.
@@ -48,9 +25,7 @@ parameters:
 flags_affected:
   Z: (Result = 0)
 syntax_variants:
-- SUBSX Dest, {#}Src {WC|WZ|WCZ}
-- SUBSX subtracts the signed value of Src plus C from the signed Dest and stores the
-  result into the Dest register.
+- SUBSX D,{#}S {WC|WZ|WCZ}
 timing:
   cycles: 2
   type: fixed

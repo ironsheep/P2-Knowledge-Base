@@ -2,27 +2,15 @@ instruction: GETNIB
 syntax: 'GETNIB Dest, {#}Src, #Num'
 brief_description: Get nibble
 category: Math and Logic
-description: 'GETNIB reads the nibble identified by Num (0-7) from Src, or a nibble
-  from the source described by a prior ALTGN Result: Nibble Num (0-7) of Src, or a
-  nibble from a source described by prior ALTGN instruction, is written to Dest.
-
-
+description: >-
   GETNIB reads the nibble identified by Num (0-7) from Src, or a nibble from the source
-  described by a prior ALTGN
+  described by a prior ALTGN instruction.
 
+  Num (0-7) identifies a value's individual nibbles, by position, in least-significant
+  nibble order: Num 0 is bits [3:0], Num 1 is bits [7:4], etc.
 
-  instruction.
-
-
-  Num (0-7) identifies a value''s individual nibbles, by position, in least-significant
-  nibble order.
-
-
-  Syntax 2 is intended for use after an ALTGN instruction; i.e. in a loop to iteratively
-  read a series of nibble values
-
-
-  within contiguous long registers.'
+  Syntax 2 (GETNIB Dest) is intended for use after an ALTGN instruction; i.e. in
+  a loop to iteratively read a series of nibble values within contiguous long registers.
 result: Nibble Num (0-7) of Src, or a nibble from a source described by prior ALTGN
   instruction, is written to Dest.
 parameters:
@@ -32,7 +20,9 @@ parameters:
 - Num is a 3-bit literal identifying the nibble ID (0-7) of Src to read.
 flags_affected:
   C:
-    when: D
+    formula: not affected
+  Z:
+    formula: not affected
 syntax_variants:
 - 'GETNIB Dest, {#}Src, #Num'
 - GETNIB Dest

@@ -1,10 +1,7 @@
 instruction: CALLPB
 syntax: CALLPB  {#}D,{#}S
 category: Branch
-description: 'CALLPA and CALLPB records the current state of the C and Z flags and
-  the address of the next instruction (PC + 1 Result: Push current C and Z flags and
-  address of the next instruction onto the hardware stack, copy D to PA or PB, and
-  set PC to new relative or absolute address.'
+description: CALLPB records the current state of the C and Z flags and the address of the next instruction (PC + 1 if Cog/LUT execution; PC + 4 if Hub execution) by pushing to the stack (K), copies the value of Dest to PB, and jumps to the address specified by Src. The routine at the new address should eventually execute a RET instruction to return to the recorded address and restore the flags.
 parameters:
 - Dest is a register, 9-bit literal, or 32-bit augmented literal whose value is copied
   to PA or PB.

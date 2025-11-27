@@ -9,9 +9,9 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'BITH or BITL alters the Dest bit(s) designated by Src to be high (1)
-  or low (0). All other bits are left unchanged. Result: Dest bit(s) described by
-  Src are set high (1) or low (0); the rest are left as-is. Z = original D[S[4:0]].'
+description: >-
+  BITL sets the Dest bit(s) designated by Src to low (0). All other bits are left
+  unchanged. Z is set to the original state of the target bit before modification.
 flags_affected:
   Z:
     formula: original D[S[4:0]]

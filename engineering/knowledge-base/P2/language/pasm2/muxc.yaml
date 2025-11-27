@@ -9,8 +9,9 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: '{WC/WZ/WCZ}   Mux C into each D bit that is ''1'' in S. D = (!S & D
-  ) | (S & {32{ C}}). C = parity of result. *'
+description: >-
+  Mux C into each D bit that is '1' in S. D = (!S & D) | (S & {32{C}}).
+  Each bit position in D where S has a '1' is replaced with the C flag value.
 flags_affected:
   C:
     formula: parity of result
@@ -28,4 +29,4 @@ syntax_variants:
 - MUXC D,{#}S
 last_updated: '2025-09-19T16:04:17.272624'
 category: Math and Logic
-oneliner: '{WC/WZ/WCZ} Mux C into each D bit that is ''1'' in S'
+oneliner: Mux C into each D bit that is '1' in S

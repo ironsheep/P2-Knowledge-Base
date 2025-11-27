@@ -2,38 +2,15 @@ instruction: SHL
 syntax: SHL Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Shift left
 category: Math and Logic
-description: 'SHL shifts Dest''s binary value left by Src places (0-31 bits) and sets
-  the new LSBs to 0. This is useful for Result: The bits of Dest are shifted left
-  by Src bits, inserting zeros (0) as new rightmost bits.
-
-
-  SHL shifts Dest''s binary value left by Src places (0-31 bits) and sets the new
-  LSBs to 0. This is useful for
-
-
-  bit-stream manipulation as well as for swift multiplication; signed or unsigned
-  32-bit integer multiplication by a
-
-
-  power-of-two. Care must be taken for power-of-two multiplications since upper bits
-  will shift through the MSB
-
-
-  (sign bit); mangling large signed values.
-
-
-  If the WC or WCZ effect is specified, the C flag is updated to the value of the
-  last bit shifted out (effectively C =
-
-
-  result bit "32") if Src is 1-31, or to Dest[31] if Src is 0.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest result equals
-  zero, or is cleared (0) if it is
-
-
-  non-zero.'
+description: >-
+  SHL shifts Dest's binary value left by Src places (0-31 bits) and sets the new LSBs to
+  0. This is useful for bit-stream manipulation as well as for swift multiplication;
+  signed or unsigned 32-bit integer multiplication by a power-of-two. Care must be taken
+  for power-of-two multiplications since upper bits will shift through the MSB (sign
+  bit), mangling large signed values. If the WC or WCZ effect is specified, the C flag is
+  updated to the value of the last bit shifted out (effectively C = result bit "32") if
+  Src is 1-31, or to Dest[31] if Src is 0. If the WZ or WCZ effect is specified, the Z
+  flag is set (1) if the Dest result equals zero, or is cleared (0) if it is non-zero.
 result: The bits of Dest are shifted left by Src bits, inserting zeros (0) as new
   rightmost bits.
 parameters:
@@ -45,9 +22,7 @@ flags_affected:
   C:
     formula: last bit shifted out if S[4:0] > 0, else D[31]
 syntax_variants:
-- SHL Dest, {#}Src {WC|WZ|WCZ}
-- SHL shifts Dest's binary value left by Src places (0-31 bits) and sets the new LSBs
-  to 0. This is useful for
+- SHL D,{#}S {WC|WZ|WCZ}
 timing:
   cycles: 1
   type: fixed

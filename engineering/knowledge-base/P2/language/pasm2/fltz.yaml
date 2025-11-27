@@ -9,9 +9,26 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: The I/O pins described by Dest are set to the input direction and to
-  an output level of low/high according to Z or !Z; the rest are left as-is. Z = OUT
-  bit.
+description: >-
+  FLTZ sets the I/O pin(s) designated by Dest to the input direction (floating)
+  and to a low/high output level according to the Z flag. All other pins are left
+  unchanged. This pre-sets the output register so that when the pin is later driven
+  as output, it will immediately be at the desired level.
+
+  Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates
+  the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond
+  the base should be affected (1-31).
+
+  A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of
+  up to 8 contiguous pins (Dest[8:6]). If needed, use the augmented literal feature
+  (##Dest) to augment Dest to an 11-bit literal value-- this inserts an AUGD
+  instruction prior.
+
+  The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap within
+  the same 32-pin group; it will not cross the port boundary.
+result: >-
+  The I/O pins described by Dest are set to the input direction and to an output
+  level of low/high according to Z; the rest are left as-is.
 flags_affected:
   Z:
     formula: OUT bit

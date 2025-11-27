@@ -9,7 +9,10 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: R = 1, address = PC + A, else address = A.
+description: >-
+  Load address into PA, PB, PTRA, or PTRB. If the R bit is 1 (default for relative
+  addressing), address = PC + A. If R = 0 (forced with \ prefix), address = A.
+  Used to set up pointer registers for memory operations.
 documentation_source: original
 documentation_level: minimal
 compiler_operand_format:
@@ -23,4 +26,4 @@ compiler_encoding:
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.549095'
 category: Math and Logic
-oneliner: R = 1, address = PC + A, else address = A
+oneliner: Load address into PA/PB/PTRA/PTRB

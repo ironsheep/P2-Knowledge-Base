@@ -10,8 +10,9 @@ timing:
   cycles: 2
   type: variable
   range: 13...20
-description: Jump to S** if INT event flag is set.                                                                         2
-  or 4 / 2 or
+description: >-
+  Jump to S if INT (interrupt) event flag is set. The INT event flag is set when
+  a hardware interrupt condition is pending.
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:
@@ -26,4 +27,4 @@ syntax_variants:
 - JINT {#}S
 last_updated: '2025-09-19T16:04:16.913823'
 category: Event
-oneliner: Branch
+oneliner: Jump if INT event flag is set

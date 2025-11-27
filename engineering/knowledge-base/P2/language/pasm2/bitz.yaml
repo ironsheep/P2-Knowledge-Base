@@ -9,12 +9,10 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'BITZ or BITNZ alters the Dest bit(s) designated by Src to equal the
-  state, or inverse state, of the Z flag. All other Result: Dest bit(s) described
-  by Src are set to Z or !Z; the rest are left as-is. Z = original D[S[4:0]].'
+description: BITZ alters the Dest bit(s) designated by Src to equal the state of the Z flag. Dest bit(s) described by Src are set to Z; the rest are left as-is. If WCZ is specified, the Z flag is updated to the original state of the target bit.
 flags_affected:
-  Z:
-    formula: original D[S[4:0]]
+  C: Not affected
+  Z: Set to original D[S[4:0]] (original state of target bit)
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:
@@ -27,10 +25,8 @@ compiler_encoding:
   operandFormat: 1
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 parameters:
-- Dest is the register whose value will have one or more bits set to Z or !Z.
-- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies
-  the bit(s) to modify.
-- WCZ is an optional effect to update flags.
+- Dest is the register whose value will have one or more bits set to Z.
+- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
 last_updated: '2025-09-19T16:04:17.455318'
 category: Math and Logic
 oneliner: Set bit(s) low/high according to Z or !Z

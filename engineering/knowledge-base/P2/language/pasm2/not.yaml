@@ -2,25 +2,13 @@ instruction: NOT
 syntax: NOT Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Not
 category: Math and Logic
-description: '{WC/WZ/WCZ}   Get !D into D. D = !D. C = !D[31]. *
-
-
+description: >-
   NOT performs a bitwise NOT (inverting all bits) of the value in Src (or in Dest)
   and stores the result into Dest.
-
-
   If the WC or WCZ effect is specified, the C flag value is replaced by the inverse
-  of either S[31] (syntax 1) or D[31]
-
-
-  (syntax 2).
-
-
+  of either S[31] (syntax 1) or D[31] (syntax 2).
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of !Src
-  (syntax 1) or !Dest (syntax 2) equals
-
-
-  zero, or is cleared (0) if it is non-zero.'
+  (syntax 1) or !Dest (syntax 2) equals zero, or is cleared (0) if it is non-zero.
 result: '!Src (or !Dest) is stored in Dest and flags are optionally updated with the
   NOTed high bit and zero status.'
 parameters:
@@ -30,17 +18,13 @@ parameters:
   will be bitwise NOTed and stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C: '!D[31] Result ='
-  Z: Result = 0
+  C:
+    formula: '!S[31] or !D[31]'
+  Z:
+    formula: Result == 0
 syntax_variants:
 - NOT Dest, {#}Src {WC|WZ|WCZ}
-- NOT Dest           {WC|WZ|WCZ}
-- 'Result: !Src (or !Dest) is stored in Dest and flags are optionally updated with
-  the NOTed high bit and zero status.'
-- '*   Dest is the register containing the value to bitwise NOT (syntax 2) or to be
-  replaced by the bitwise NOT of'
-- NOT performs a bitwise NOT (inverting all bits) of the value in Src (or in Dest)
-  and stores the result into Dest.
+- NOT Dest {WC|WZ|WCZ}
 timing:
   cycles: 2
   type: fixed

@@ -2,33 +2,16 @@ instruction: SUBR
 syntax: SUBR Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Subtract reverse
 category: Math and Logic
-description: 'SUBR subtracts the unsigned Dest from the unsigned Src and stores the
-  result into the Dest register. This is the Result: Difference of unsigned Src and
-  unsigned Dest is stored in Dest and optionally the C and Z flags are updated to
-  the borrow and zero status.
-
-
+description: >-
   SUBR subtracts the unsigned Dest from the unsigned Src and stores the result into
-  the Dest register. This is the
-
-
-  reverse of the subtraction order of SUB.
-
-
-  If the WC or WCZ effect is specified, the C flag is set (1) if the subtraction results
-  in a 32-bit underflow (unsigned
-
-
-  borrow), or is cleared (0) if no borrow.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest
-  - Src is zero, or is cleared (0) if it is
-
-
-  non-zero.'
-result: Difference of unsigned Src and unsigned Dest is stored in Dest and optionally
-  the C and Z flags are
+  the Dest register. This is the reverse of the subtraction order of SUB. If the WC
+  or WCZ effect is specified, the C flag is set (1) if the subtraction results in a
+  32-bit underflow (unsigned borrow), or is cleared (0) if no borrow. If the WZ or
+  WCZ effect is specified, the Z flag is set (1) if the result of Src - Dest is zero,
+  or is cleared (0) if it is non-zero.
+result: >-
+  Difference of unsigned Src and unsigned Dest is stored in Dest and optionally the
+  C and Z flags are updated to the borrow and zero status.
 parameters:
 - Dest is a register containing the value to subtract from Src, and is where the result
   is written.
@@ -38,9 +21,7 @@ parameters:
 flags_affected:
   Z: Result = 0
 syntax_variants:
-- SUBR Dest, {#}Src {WC|WZ|WCZ}
-- SUBR subtracts the unsigned Dest from the unsigned Src and stores the result into
-  the Dest register. This is the
+- SUBR D,{#}S {WC|WZ|WCZ}
 timing:
   cycles: 2
   type: fixed

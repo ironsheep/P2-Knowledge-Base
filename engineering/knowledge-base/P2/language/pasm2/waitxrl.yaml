@@ -2,57 +2,24 @@ instruction: WAITXRL
 syntax: WAITXRL {WC|WZ|WCZ}
 brief_description: Wait streamer rollover LUT
 category: Event
-description: 'WAITXRL waits for a streamer-LUT-RAM-rollover event to occur (unless
-  the event flag is already set), then clears Result: Wait for streamer-LUT-RAM-rollover
-  event, then clear the flag; optionally aborting on timeout and setting C and/or
-  Z on abort. Z = timeout.
-
-
+description: >-
   WAITXRL waits for a streamer-LUT-RAM-rollover event to occur (unless the event flag
-  is already set), then clears
-
-
-  the event flag (unless it''s being set again by the event sensor) and resumes execution
-  at the next instruction.
-
-
-  Optionally, WAITXRL can time-out if the streamer-LUT-RAM-rollover event doesn''t
-  occur soon enough; setting C
-
-
-  and/or Z flags and then resuming execution at the next instruction.
-
-
-  To set the optional timeout, insert a SETQ (with a future System Counter target
-  value) right before WAITXRL.
-
-
-  The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified,
-  in which case the C flag and/or
-
-
-  Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the
-  event occurred before the timeout.
-
-
+  is already set), then clears the event flag (unless it's being set again by the
+  event sensor) and resumes execution at the next instruction. Optionally, WAITXRL
+  can time-out if the streamer-LUT-RAM-rollover event doesn't occur soon enough;
+  setting C and/or Z flags and then resuming execution at the next instruction. To
+  set the optional timeout, insert a SETQ (with a future System Counter target value)
+  right before WAITXRL. The WC, WZ, or WCZ effect is recommended only if the optional
+  timeout is specified, in which case the C flag and/or Z flag is set (1) if a timeout
+  occurred before the event, or is cleared (0) if the event occurred before the timeout.
   During a wait, the pipeline is stalled; no instructions execute and no interrupts
-  are processed in the cog until the
-
-
-  wait condition ends.
-
-
-  The streamer-LUT-RAM-rollover event flag is set whenever location $1FF of the Lookup
-  RAM is read by the
-
-
-  streamer. The streamer-LUT-RAM-rollover event flag is cleared upon cog start or
-  upon execution of POLLXRL,
-
-
-  WAITXRL, JXRL, or JNXRL instructions.'
-result: Wait for streamer-LUT-RAM-rollover event, then clear the flag; optionally
-  aborting on timeout and setting C
+  are processed in the cog until the wait condition ends. The streamer-LUT-RAM-rollover
+  event flag is set whenever location $1FF of the Lookup RAM is read by the streamer.
+  The streamer-LUT-RAM-rollover event flag is cleared upon cog start or upon execution
+  of POLLXRL, WAITXRL, JXRL, or JNXRL instructions.
+result: >-
+  Wait for streamer-LUT-RAM-rollover event, then clear the flag; optionally aborting
+  on timeout and setting C and/or Z on abort.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:

@@ -10,8 +10,9 @@ timing:
   cycles: 2
   type: variable
   range: 13...20
-description: Jump to S** if CT2 event flag is set.                                                                         2
-  or 4 / 2 or
+description: >-
+  Jump to S if CT2 (counter 2) event flag is set. The CT2 event flag is set when
+  the system counter reaches the CT2 target value set by ADDCT2.
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: structured
 compiler_operand_format:
@@ -42,4 +43,4 @@ specifics:
 quick_example: 'JCT2 #handler  ; Jump if counter 2 event flag is set'
 has_group_documentation: true
 category: Event
-oneliner: Branch
+oneliner: Jump if counter 2 event flag is set

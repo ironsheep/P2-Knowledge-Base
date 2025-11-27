@@ -2,128 +2,26 @@ instruction: WAITXRO
 syntax: WAITXRO {WC|WZ|WCZ}
 brief_description: Wait streamer rollover NCO
 category: Event
-description: 'WAITXRO waits for a streamer-NCO-rollover event to occur (unless the
-  event flag is already set), then clears the Result: Wait for streamer-NCO-rollover
-  event, then clear the flag; optionally aborting on timeout and setting C and/or
-  Z on abort. Z = timeout.
-
-
-  WAITXRO waits for a streamer-NCO-rollover event to occur (unless the event flag
-  is already set), then clears the
-
-
-  event flag (unless it''s being set again by the event sensor) and resumes execution
-  at the next instruction.
-
-
-  Optionally, WAITXRO can time-out if the streamer-NCO-rollover event doesn''t occur
-  soon enough; setting C and/or
-
-
-  Z flags and then resuming execution at the next instruction.
-
-
-  To set the optional timeout, insert a SETQ (with a future System Counter target
-  value) right before WAITXRO.
-
-
-  The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified,
-  in which case the C flag and/or
-
-
-  Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the
-  event occurred before the timeout.
-
-
-  During a wait, the pipeline is stalled; no instructions execute and no interrupts
-  are processed in the cog until the
-
-
-  wait condition ends.
-
-
-  The streamer-NCO-rollover event flag is set whenever the streamer''s numerically-controlled
-  oscillator (NCO) rolls
-
-
+description: >-
+  WAITXRO waits for a streamer-NCO-rollover event to occur (unless the event flag is
+  already set), then clears the event flag (unless it's being set again by the event
+  sensor) and resumes execution at the next instruction. Optionally, WAITXRO can
+  time-out if the streamer-NCO-rollover event doesn't occur soon enough; setting C
+  and/or Z flags and then resuming execution at the next instruction. To set the
+  optional timeout, insert a SETQ (with a future System Counter target value) right
+  before WAITXRO. The WC, WZ, or WCZ effect is recommended only if the optional timeout
+  is specified, in which case the C flag and/or Z flag is set (1) if a timeout occurred
+  before the event, or is cleared (0) if the event occurred before the timeout. During
+  a wait, the pipeline is stalled; no instructions execute and no interrupts are
+  processed in the cog until the wait condition ends. The streamer-NCO-rollover event
+  flag is set whenever the streamer's numerically-controlled oscillator (NCO) rolls
   over. The streamer-NCO-rollover event flag is cleared upon execution of XINIT, XZERO,
-  XCONT, POLLXRO,
-
-
-  WAITXRO, JXRO, or JNXRO instructions.
-
-
-  WRC / WRNC
-
-
-  Write C or not C
-
-
-  Bit Operation Instruction - Write C or not C to register.
-
-
-  WRC       Dest
-
-
-  WRNC      Dest
-
-
-  Result: Dest value is replaced with state of C or !C.
-
-
-  *   Dest is the register whose value will be replaced with the state of C or !C.
-
-
-  COND INSTR         FX     DEST          SRC          Write            C Flag             Z
-  Flag             Clocks
-
-
-  EEEE 1101011 000 DDDDDDDDD 001101100                   D                --                 --                     2
-
-
-  EEEE 1101011 000 DDDDDDDDD 001101101                   D                --                 --                     2
-
-
-  WRC or WRNC writes the state or inverse state of C (0 or 1) to Dest.
-
-
-  WRZ / WRNZ
-
-
-  Write Z or not Z
-
-
-  Bit Operation Instruction - Write Z or not Z to register.
-
-
-  WRZ       Dest
-
-
-  WRNZ      Dest
-
-
-  Result: Dest value is replaced with state of Z or !Z.
-
-
-  *   Dest is the register whose value will be replaced with the state of Z or !Z.
-
-
-  COND INSTR         FX      DEST         SRC           Write            C Flag             Z
-  Flag             Clocks
-
-
-  EEEE 1101011 000 DDDDDDDDD 001101110                   D                 --                  --                    2
-
-
-  EEEE 1101011 000 DDDDDDDDD 001101111                   D                 --                  --                    2
-
-
-  WRZ or WRNZ writes the state or inverse state of Z (0 or 1) to Dest.'
-result: Dest value is replaced with state of Z or !Z.
+  XCONT, POLLXRO, WAITXRO, JXRO, or JNXRO instructions.
+result: >-
+  Wait for streamer-NCO-rollover event, then clear the flag; optionally aborting on
+  timeout and setting C and/or Z on abort.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
-- Dest is the register whose value will be replaced with the state of C or !C.
-- Dest is the register whose value will be replaced with the state of Z or !Z.
 flags_affected:
   Z:
     formula: timeout

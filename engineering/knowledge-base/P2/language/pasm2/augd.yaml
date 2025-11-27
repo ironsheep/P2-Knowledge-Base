@@ -2,42 +2,12 @@ instruction: AUGD
 syntax: 'AUGD #Dest'
 brief_description: Augment destination
 category: Miscellaneous
-description: 'AUGD is an assistant instruction to aid with literal values that exceed
-  9 bits. Most PASM2 instructions have 9 bits Result: The 23-bit value formed from
-  Dest is queued to prefix the next literal Dest occurrence (#Dest) to form a 32-bit
-  literal for that instruction; interrupts are also temporarily disabled..
-
-
-  AUGD is an assistant instruction to aid with literal values that exceed 9 bits.
-  Most PASM2 instructions have 9 bits
-
-
-  available for literal Dest values; enough for many uses, but not all. AUGD augments
-  the next occurrence of a literal
-
-
-  Dest value to be a full 32-bits. When the instruction with the soon-to-be-augmented
-  literal is later executed, the
-
-
-  cog uses the lower 9 bits encoded in the instruction''s Dest field and prepends
-  AUGD''s 23 bits to it.'
-result: The 23-bit value formed from Dest is queued to prefix the next literal Dest
-  occurrence (#Dest) to form a
+description: AUGD is an assistant instruction to aid with literal values that exceed 9 bits. Most PASM2 instructions have 9 bits available for literal Dest values; enough for many uses, but not all. AUGD augments the next occurrence of a literal Dest value to be a full 32-bits. When the instruction with the soon-to-be-augmented literal is later executed, the cog uses the lower 9 bits encoded in the instruction's Dest field and prepends AUGD's 23 bits to it.
+result: The 23-bit value formed from Dest is queued to prefix the next literal Dest occurrence (#Dest) to form a 32-bit literal for that instruction; interrupts are also temporarily disabled.
 parameters:
-- Dest is a 32-bit literal whose upper 23 bits are prepended to the next literal Dest
-  occurrence.
-- All instructions following AUGD are shielded from interrupt until after the instruction
-  with the
-- Dest value augmentation occurs in the instruction pipeline only; code is not altered,
-  value does not persist
-- SETQ / SETQ2 does not affect AUGD-- the Q value passes through to the next instruction
+- Dest is a 32-bit literal whose upper 23 bits are prepended to the next literal Dest occurrence.
 syntax_variants:
 - 'AUGD #Dest'
-- available for literal Dest values; enough for many uses, but not all. AUGD augments
-  the next occurrence of a literal
-- cog uses the lower 9 bits encoded in the instruction's Dest field and prepends AUGD's
-  23 bits to it.
 usage_notes: 'All instructions following AUGD are shielded from interrupt until after
   the instruction with the
 
@@ -84,12 +54,13 @@ oneliner: Augment next literal Dest to 32-bits
 related:
 - AUGS
 examples:
-- code: Both samples below use greater-than 9-bit literals (via AUGD functionality).
-    The first is more convenient and
-- code: "readable than using the AUGD instruction directly.\n  PUSHA       ##$ABCDEF\
-    \                            '2+3..10 cycles (in Cog RAM)\n  QMUL        ##8192,\
-    \ #4                           '2+2..9 cycles\n\fis the same as:"
-- code: "AUGD        #$ABCDEF                              '2 cycles\n  PUSHA    \
-    \   #$ABCDEF & $1FF                       '3..10 cycles (in Cog RAM)"
-- code: "AUGD        #8192                                 '2 cycles\n  QMUL     \
-    \   #8192 & $1FF, #4                      '2..9 cycles"
+- description: Using ## syntax (compiler auto-generates AUGD)
+  code: |
+    PUSHA       ##$ABCDEF                            '2+3..10 cycles (in Cog RAM)
+    QMUL        ##8192, #4                           '2+2..9 cycles
+- description: Explicit AUGD usage (equivalent to above)
+  code: |
+    AUGD        #$ABCDEF                              '2 cycles
+    PUSHA       #$ABCDEF & $1FF                       '3..10 cycles (in Cog RAM)
+    AUGD        #8192                                 '2 cycles
+    QMUL        #8192 & $1FF, #4                      '2..9 cycles

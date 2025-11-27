@@ -2,28 +2,14 @@ instruction: ROL
 syntax: ROL Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Rotate left
 category: Math and Logic
-description: 'ROL rotates Dest''s binary value left by Src places (0-31 bits). All
-  MSBs rotated out are moved into the new LSBs. Result: The bits of Dest are rotated
-  left by Src bits; any departing MSBs are moved into LSBs.
-
-
-  ROL rotates Dest''s binary value left by Src places (0-31 bits). All MSBs rotated
-  out are moved into the new LSBs.
-
-
-  If the WC or WCZ effect is specified, the C flag is updated to the value of the
-  last bit rotated out (effectively C =
-
-
-  result bit "0") if Src is 1-31, or to Dest[31] if Src is 0.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest result equals
-  zero, or is cleared (0) if it is
-
-
-  non-zero. Since no bits are lost by this operation, the result will only be zero
-  if Dest started at zero.'
+description: >-
+  ROL rotates Dest's binary value left by Src places (0-31 bits). All MSBs rotated out
+  are moved into the new LSBs. If the WC or WCZ effect is specified, the C flag is
+  updated to the value of the last bit rotated out (effectively C = result bit "0") if
+  Src is 1-31, or to Dest[31] if Src is 0. If the WZ or WCZ effect is specified, the Z
+  flag is set (1) if the Dest result equals zero, or is cleared (0) if it is non-zero.
+  Since no bits are lost by this operation, the result will only be zero if Dest started
+  at zero.
 result: The bits of Dest are rotated left by Src bits; any departing MSBs are moved
   into LSBs.
 parameters:
@@ -35,9 +21,7 @@ flags_affected:
   C:
     formula: last bit shifted out if S[4:0] > 0, else D[31]
 syntax_variants:
-- ROL Dest, {#}Src {WC|WZ|WCZ}
-- ROL rotates Dest's binary value left by Src places (0-31 bits). All MSBs rotated
-  out are moved into the new LSBs.
+- ROL D,{#}S {WC|WZ|WCZ}
 timing:
   cycles: 1
   type: fixed

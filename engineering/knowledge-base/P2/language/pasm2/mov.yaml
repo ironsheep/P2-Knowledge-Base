@@ -2,31 +2,24 @@ instruction: MOV
 syntax: MOV Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Move
 category: Math and Logic
-description: 'Mov stores the Src value into Dest. Result: The Src value is stored
-  in Dest and optionally flags are updated with the sign bit and zero status.
-
-
-  Mov stores the Src value into Dest.
-
-
+description: >-
+  MOV stores the Src value into Dest.
   If the WC or WCZ effect is specified, the C flag is updated to be Src[31].
-
-
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest result equals
-  zero, or is cleared (0) if it is
-
-
-  non-zero.'
-result: The Src value is stored in Dest and optionally flags are updated with the
-  sign bit and zero status.
+  zero, or is cleared (0) if it is non-zero.
+result: >-
+  The Src value is stored in Dest and optionally flags are updated with the sign bit
+  and zero status.
 parameters:
 - Dest is the register to receive the Src value.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value will be
   stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C: S[31] Result =
-  Z: Result = 0
+  C:
+    formula: S[31]
+  Z:
+    formula: Result == 0
 syntax_variants:
 - MOV Dest, {#}Src {WC|WZ|WCZ}
 timing:

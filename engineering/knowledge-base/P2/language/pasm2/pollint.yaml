@@ -2,34 +2,14 @@ instruction: POLLINT
 syntax: POLLINT {WC|WZ|WCZ}
 brief_description: Poll interrupt
 category: Event
-description: 'POLLINT copies the state of the interrupt-occurred event flag into C
-  and/or Z and then clears the flag (unless it''s Result: Interrupt-occurred event
-  flag is optionally copied into C and/or Z, then it is cleared.
-
-
+description: >-
   POLLINT copies the state of the interrupt-occurred event flag into C and/or Z and
-  then clears the flag (unless it''s
-
-
-  being set again by the event sensor).
-
-
+  then clears the flag (unless it's being set again by the event sensor).
   If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to
-  the state of the interrupt-occurred
-
-
-  event flag prior to clearing it.
-
-
+  the state of the interrupt-occurred event flag prior to clearing it.
   The interrupt-occurred event flag is set whenever interrupt 1, 2, or 3 occurs--
-  debug interrupts are ignored. The
-
-
-  interrupt-occurred event flag is cleared upon cog start, or execution of POLLINT,
-  WAITINT, JINT, or JNINT
-
-
-  instructions.'
+  debug interrupts are ignored. The flag is cleared upon cog start, or execution of
+  POLLINT, WAITINT, JINT, or JNINT instructions.
 result: Interrupt-occurred event flag is optionally copied into C and/or Z, then it
   is cleared.
 parameters:

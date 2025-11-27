@@ -9,40 +9,13 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'CMP compares the unsigned values of Dest and Src (by subtracting Dest
-  from Src) and optionally setting the C Result: Greater/lesser and equality status
-  is optionally written to the C and Z flags.
-
-
-  CMP compares the unsigned values of Dest and Src (by subtracting Dest from Src)
-  and optionally setting the C
-
-
-  and Z flags accordingly.
-
-
-  If the WC or WCZ effect is specified, the C flag is set (1) if Src is less than
-  Dest.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src.
-
-
-  To compare unsigned, multi-long values, use CMP (instead) followed by CMPX as described
-  in Comparing Two
-
-
-  Multi-Long Values.'
+description: CMPR compares the unsigned values of Dest and Src (by subtracting Dest from Src, the reverse of CMP) and optionally setting the C and Z flags accordingly. If the WC or WCZ effect is specified, the C flag is set (1) if Src is less than Dest. If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src. To compare unsigned, multi-long values, use CMP (instead) followed by CMPX.
 flags_affected:
-  C:
-    formula: borrow of (S - D)
-  Z:
-    formula: (D == S)
+  C: Set if unsigned S < D (borrow from subtraction)
+  Z: Set if D == S
 parameters:
 - Dest is the register containing the value to compare with that of Src.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared
-  to Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
 related:
 - CMP
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147

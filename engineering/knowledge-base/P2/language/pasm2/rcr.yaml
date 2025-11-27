@@ -2,27 +2,12 @@ instruction: RCR
 syntax: RCR Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Rotate carry right
 category: Math and Logic
-description: 'RCR shifts Dest''s binary value right by Src places (0-31 bits) and
-  sets the new MSBs to C. Result: The bits of Dest are shifted right by Src bits,
-  inserting C as new MSBs.
-
-
-  RCR shifts Dest''s binary value right by Src places (0-31 bits) and sets the new
-  MSBs to C.
-
-
-  If the WC or WCZ effect is specified, the C flag is updated to the value of the
-  last bit shifted out if Src is 1-31, or to
-
-
-  Dest[0] if Src is 0.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest result equals
-  zero, or is cleared (0) if it is
-
-
-  non-zero.'
+description: >-
+  RCR shifts Dest's binary value right by Src places (0-31 bits) and sets the new MSBs
+  to C. If the WC or WCZ effect is specified, the C flag is updated to the value of the
+  last bit shifted out if Src is 1-31, or to Dest[0] if Src is 0. If the WZ or WCZ
+  effect is specified, the Z flag is set (1) if the Dest result equals zero, or is
+  cleared (0) if it is non-zero.
 result: The bits of Dest are shifted right by Src bits, inserting C as new MSBs.
 parameters:
 - Dest is the register containing the value to rotate carry right by Src bits.
@@ -32,9 +17,7 @@ parameters:
 flags_affected:
   Z: Result = 0
 syntax_variants:
-- RCR Dest, {#}Src {WC|WZ|WCZ}
-- RCR shifts Dest's binary value right by Src places (0-31 bits) and sets the new
-  MSBs to C.
+- RCR D,{#}S {WC|WZ|WCZ}
 timing:
   cycles: 2
   type: fixed

@@ -1,17 +1,14 @@
 instruction: DIRL
 syntax: DIRL    {#}D           {WCZ}
 category: Pin
-description: 'DIRH or DIRL alters the direction register''s bit(s) designated by Dest
-  to be high (1) or low (0); i.e. set to the output Result: The I/O pin direction
-  bit(s), described by Dest, are set high (1; output) or low (0; input); the rest
-  are left as-is. Z = DIR bit.'
+description: DIRL alters the direction register's bit(s) designated by Dest to be low (0), setting the I/O pin(s) to input mode. The rest of the direction bits are left as-is. If WCZ is specified, the Z flag is updated to the original state of the target direction bit.
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the I/O pin(s) to set to output or input.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  Z:
-    formula: DIR bit
+  C: Not affected
+  Z: Set to original DIR bit state (if WCZ specified)
 timing:
   cycles: 2
   type: fixed

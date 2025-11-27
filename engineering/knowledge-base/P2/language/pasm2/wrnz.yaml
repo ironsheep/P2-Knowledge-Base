@@ -1,8 +1,12 @@
 instruction: WRNZ
-syntax: WRNZ    D
+syntax: WRNZ D
+brief_description: Write not Z
 category: Math and Logic
-description: 'WRZ or WRNZ writes the state or inverse state of Z (0 or 1) to Dest.
-  Result: Dest value is replaced with state of Z or !Z.'
+description: >-
+  WRNZ writes the inverse state of Z (0 or 1) to Dest. If Z is set (1), Dest becomes 0.
+  If Z is clear (0), Dest becomes 1.
+result: >-
+  Dest value is replaced with the inverse state of Z (!Z).
 parameters:
 - Dest is the register whose value will be replaced with the state of Z or !Z.
 flags_affected:

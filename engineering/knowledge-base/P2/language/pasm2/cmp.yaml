@@ -2,45 +2,16 @@ instruction: CMP
 syntax: CMP Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Compare
 category: Math and Logic
-description: 'CMP compares the unsigned values of Dest and Src (by subtracting Src
-  from Dest) and optionally setting the C Result: Greater/lesser and equality status
-  is optionally written to the C and Z flags.
-
-
-  CMP compares the unsigned values of Dest and Src (by subtracting Src from Dest)
-  and optionally setting the C
-
-
-  and Z flags accordingly.
-
-
-  If the WC or WCZ effect is specified, the C flag is set (1) if Dest is less than
-  Src.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src.
-
-
-  To compare unsigned, multi-long values, use CMP followed by CMPX as described in
-  Comparing Two Multi-Long
-
-
-  Values.'
+description: CMP compares the unsigned values of Dest and Src (by subtracting Src from Dest) and optionally setting the C and Z flags accordingly. If the WC or WCZ effect is specified, the C flag is set (1) if Dest is less than Src. If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src. To compare unsigned, multi-long values, use CMP followed by CMPX.
 result: Greater/lesser and equality status is optionally written to the C and Z flags.
 parameters:
 - Dest is the register containing the value to compare with that of Src.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared
-  to Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is compared to Dest.
 flags_affected:
-  C:
-    formula: borrow of (D - S)
-  Z:
-    formula: (D == S)
+  C: Set if unsigned D < S (borrow from subtraction)
+  Z: Set if D == S
 syntax_variants:
 - CMP Dest, {#}Src {WC|WZ|WCZ}
-- CMP compares the unsigned values of Dest and Src (by subtracting Src from Dest)
-  and optionally setting the C
 timing:
   cycles: 2
   type: fixed

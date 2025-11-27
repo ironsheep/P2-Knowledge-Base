@@ -9,61 +9,16 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: 'SETS copies Src[8:0] to the S field of the template, Dest, to be used
-  with an ALTI instruction. Bits outside the S Result: The S field [8:0] of template
-  Dest is set to Src[8:0].
-
-
+description: >-
   SETS copies Src[8:0] to the S field of the template, Dest, to be used with an ALTI
-  instruction. Bits outside the S
-
-
-  field remain unaffected. The S field (or Src field) holds the address of a register
-  or literal value for an instruction
-
-
-  to use as it''s source value during its execution.
-
-
-  The ALTI template is a 32-bit value with the following format:
-
-
-  Bits             31:28 (4 bits)          27:19 (9 bits)             18              17:9
-  (9 bits)        8:0 (9 bits)
-
-
-  Field Description       Condition Field         Result Field        Indirect "I"
-  Field    Dest "D" Field      Source "S" Field
-
-
-  SETS can also be used in self-modifying Reg RAM code. Unlike with ALTx instructions,
-  when used this way, field
-
-
-  value modification occurs in the program code itself (not the instruction pipeline);
-  code is altered, values persist.
-
-
-  Due to the instruction pipeline nature, after modifying a code register, it is necessary
-  to elapse at least two
-
-
-  instructions before executing the modified register.
-
-
-  SETS         inst, op                        ''set "inst" register[8:0] to op[8:0]
-
-
-  NOP                                          ''first spacer instruction, could be
-  anything
-
-
-  NOP                                          ''second spacer instruction, could
-  be anything
-
-
-  inst      MOV          x, y                            ''operate on x using y; y
-  may become any register/value per SETS'
+  instruction. Bits outside the S field remain unaffected. The S field (or Src field)
+  holds the address of a register or literal value for an instruction to use as its
+  source value during its execution. SETS can also be used in self-modifying Reg RAM
+  code. Unlike with ALTx instructions, when used this way, field value modification
+  occurs in the program code itself (not the instruction pipeline); code is altered,
+  values persist. Due to the instruction pipeline nature, after modifying a code register,
+  it is necessary to elapse at least two instructions before executing the modified
+  register.
 flags_affected:
   C:
     when: D
@@ -90,9 +45,6 @@ brief_description: Set source
 category: Math and Logic
 result: The S field [8:0] of template Dest is set to Src[8:0].
 syntax_variants:
-- SETS Dest, {#}Src
-- SETS copies Src[8:0] to the S field of the template, Dest, to be used with an ALTI
-  instruction. Bits outside the S
-- SETS         inst, op                        'set "inst" register[8:0] to op[8:0]
+- SETS D,{#}S
 manual_extraction_date: '2025-01-19'
 oneliner: Set template S field for ALTI

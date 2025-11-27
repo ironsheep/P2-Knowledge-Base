@@ -2,30 +2,19 @@ instruction: FLE
 syntax: FLE Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Force lesser or equal
 category: Math and Logic
-description: 'FLE sets unsigned Dest to unsigned Src if Dest is greater than Src.
-  This is also known as a limit maximum Result: Unsigned Dest is set to unsigned Src
-  if Dest was greater than Src. Optionally the C and Z flag indicates if the replacement
-  happened and the zero status of the result.
-
-
+description: >-
   FLE sets unsigned Dest to unsigned Src if Dest is greater than Src. This is also
-  known as a limit maximum
-
-
-  function; preventing Dest from rising above Src.
-
+  known as a limit maximum function; preventing Dest from rising above Src.
 
   If the WC or WCZ effect is specified, the C flag is set (1) if Dest was limited
-  (Dest was greater than Src and now
-
-
-  Dest is equal to Src), or is cleared (0) if not limited.
-
+  (Dest was greater than Src and now Dest is equal to Src), or is cleared (0) if
+  not limited.
 
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero,
-  or is cleared (0) if it is non-zero.'
-result: Unsigned Dest is set to unsigned Src if Dest was greater than Src. Optionally
-  the C and Z flag indicates if
+  or is cleared (0) if it is non-zero.
+result: >-
+  Unsigned Dest is set to unsigned Src if Dest was greater than Src. Optionally the
+  C and Z flags indicate if the replacement happened and the zero status of the result.
 parameters:
 - Dest is a register containing the unsigned value to limit to a maximum of unsigned
   Src, and is where the result is written.
@@ -36,8 +25,6 @@ flags_affected:
   Z: Result = 0
 syntax_variants:
 - FLE Dest, {#}Src {WC|WZ|WCZ}
-- FLE sets unsigned Dest to unsigned Src if Dest is greater than Src. This is also
-  known as a limit maximum
 timing:
   cycles: 2
   type: fixed

@@ -9,8 +9,10 @@ encoding:
 timing:
   cycles: 2
   type: fixed
-description: Set hub configuration to D.                                                                                               2...9
-  / same
+description: >-
+  Set hub configuration to D. HUBSET configures various hub parameters including
+  clock source, crystal settings, and PLL configuration. The exact operation depends
+  on the bits set in D.
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:
@@ -25,4 +27,4 @@ syntax_variants:
 - HUBSET {#}D
 last_updated: '2025-09-19T16:04:17.201537'
 category: Hub Control
-oneliner: Multi
+oneliner: Set hub configuration

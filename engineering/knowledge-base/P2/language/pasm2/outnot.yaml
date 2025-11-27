@@ -2,56 +2,17 @@ instruction: OUTNOT
 syntax: OUTNOT {#}Dest {WCZ}
 brief_description: Output not
 category: Pin
-description: 'OUTNOT alters the output level register''s bit(s) designated by Dest
-  to their inverse state. All other bits are left Result: The I/O pin output level
-  bit(s), described by Dest, are toggled to their opposite state(s); the rest are
-  left as-is. Z = OUT bit.
-
-
-  OUTNOT alters the output level register''s bit(s) designated by Dest to their inverse
-  state. All other bits are left
-
-
-  unchanged.
-
-
+description: >-
+  OUTNOT alters the output level register's bit(s) designated by Dest to their inverse
+  state (toggles them). All other bits are left unchanged.
   Dest[5:0] indicates the pin number (0-63). For a range of pins, Dest[5:0] indicates
-  the base pin number (0-63)
-
-
-  and Dest[10:6] indicates how many contiguous pins beyond the base should be affected
-  (1-31).
-
-
-  A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range of
-  up to 8 contiguous pins (Dest[8:6]).
-
-
-  If needed, use the augmented literal feature (##Dest) to augment Dest to an 11-bit
-  literal value-- this inserts an
-
-
-  AUGD instruction prior.
-
-
-  When Dest is a register, the register''s value bits [10:0] are used as-is to form
-  the 11-bit ID range, unless a SETQ
-
-
-  instruction immediately precedes the OUTNOT instruction; substituting SETQ''s Dest[4:0]
-  in place of value
-
-
-  bits[10:6], for OUTNOT''s use.
-
-
+  the base pin number (0-63) and Dest[10:6] indicates how many contiguous pins beyond
+  the base should be affected (1-31).
   If the WCZ effect is specified, the C and Z flags are updated to the original state
-  of OUTA / OUTB''s base bit,
-
-
-  identified by Dest.'
-result: The I/O pin output level bit(s), described by Dest, are toggled to their opposite
-  state(s); the rest are left
+  of OUTA / OUTB's base bit, identified by Dest.
+result: >-
+  The I/O pin output level bit(s), described by Dest, are toggled to their opposite
+  state(s); the rest are left as-is. Z = original OUT bit state.
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the I/O pin(s) to toggle to the opposite output level.
@@ -61,11 +22,6 @@ flags_affected:
     formula: OUT bit
 syntax_variants:
 - OUTNOT {#}Dest {WCZ}
-- OUTNOT alters the output level register's bit(s) designated by Dest to their inverse
-  state. All other bits are left
-- instruction immediately precedes the OUTNOT instruction; substituting SETQ's Dest[4:0]
-  in place of value
-- bits[10:6], for OUTNOT's use.
 timing:
   cycles: 2
   type: fixed

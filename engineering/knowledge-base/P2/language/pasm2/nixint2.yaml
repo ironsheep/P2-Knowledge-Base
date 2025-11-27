@@ -21,7 +21,7 @@ compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
-- NIXINT2 Cancel
+- NIXINT2
 last_updated: '2025-09-19T16:04:17.446666'
 category: Interrupt
 oneliner: Cancel INT2

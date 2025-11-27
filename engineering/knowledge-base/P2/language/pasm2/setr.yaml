@@ -2,67 +2,18 @@ instruction: SETR
 syntax: SETR Dest, {#}Src
 brief_description: Set result
 category: Math and Logic
-description: 'SETR copies Src[8:0] to the Result field of the template, Dest, to be
-  used with an ALTI instruction. Bits outside the Result: The Result field [27:19]
-  of template Dest is set to Src[8:0].
-
-
-  SETR copies Src[8:0] to the Result field of the template, Dest, to be used with
-  an ALTI instruction. Bits outside the
-
-
-  Result field remain unaffected. The Result field does not exist in instruction opcodes,
-  but takes its value from the
-
-
-  Dest field, holding the address of a register for the instruction to use as its
-  result destination upon execution.
-
-
-  The ALTI template is a 32-bit value with the following format:
-
-
-  Bits             31:28 (4 bits)          27:19 (9 bits)            18              17:9
-  (9 bits)           8:0 (9 bits)
-
-
-  Field Description       Condition Field         Result Field       Indirect "I"
-  Field    Dest "D" Field         Source "S" Field
-
-
-  SETR can also be used in self-modifying Reg RAM code, though it won''t affect the
-  Register field (which doesn''t
-
-
-  exist in instruction opcodes) but rather will affect the Instr field and the upper
-  two bits of the FX field. Unlike with
-
-
-  ALTx instructions, when used this way, field value modification occurs in the program
-  code itself (not the
-
-
+description: >-
+  SETR copies Src[8:0] to the Result field of the template, Dest, to be used with an ALTI
+  instruction. Bits outside the Result field remain unaffected. The Result field does not
+  exist in instruction opcodes, but takes its value from the Dest field, holding the
+  address of a register for the instruction to use as its result destination upon
+  execution. SETR can also be used in self-modifying Reg RAM code, though it won't affect
+  the Register field (which doesn't exist in instruction opcodes) but rather will affect
+  the Instr field and the upper two bits of the FX field. Unlike with ALTx instructions,
+  when used this way, field value modification occurs in the program code itself (not the
   instruction pipeline); code is altered, values persist. Due to the instruction pipeline
-  nature, after modifying a code
-
-
-  register, it is necessary to elapse at least two instructions before executing the
-  modified register.
-
-
-  SETR          inst, op                        ''set "inst" register[27:19] to op[8:0]
-
-
-  NOP                                           ''first spacer instruction, could
-  be anything
-
-
-  NOP                                           ''second spacer instruction, could
-  be anything
-
-
-  inst     MOV           x, y                            ''operate on x using y; MOV
-  can become AND/OR/etc. per SETR'
+  nature, after modifying a code register, it is necessary to elapse at least two
+  instructions before executing the modified register.
 result: The Result field [27:19] of template Dest is set to Src[8:0].
 parameters:
 - Dest is the register whose 32-bit value is a template for use with an ALTI instruction.
@@ -72,10 +23,7 @@ flags_affected:
   C:
     when: D
 syntax_variants:
-- SETR Dest, {#}Src
-- SETR copies Src[8:0] to the Result field of the template, Dest, to be used with
-  an ALTI instruction. Bits outside the
-- SETR          inst, op                        'set "inst" register[27:19] to op[8:0]
+- SETR D,{#}S
 timing:
   cycles: 2
   type: fixed

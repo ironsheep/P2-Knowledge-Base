@@ -2,34 +2,14 @@ instruction: POLLXRO
 syntax: POLLXRO {WC|WZ|WCZ}
 brief_description: Poll streamer rollover NCO
 category: Event
-description: 'POLLXRO copies the state of the streamer NCO rollover event flag into
-  C and/or Z and then clears the flag (unless Result: Streamer-NCO-rollover event
-  flag is optionally copied into C and/or Z, then it is cleared.
-
-
-  POLLXRO copies the state of the streamer NCO rollover event flag into C and/or Z
-  and then clears the flag (unless
-
-
-  it''s being set again by the event sensor).
-
-
-  If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to
-  the state of the streamer-NCO-
-
-
-  rollover event flag prior to clearing it.
-
-
-  The streamer-NCO-rollover event flag is set whenever the streamer''s numerically-controlled
-  oscillator (NCO) rolls
-
-
-  over. The streamer-NCO-rollover event flag is cleared upon execution of XINIT, XZERO,
-  XCONT, POLLXRO,
-
-
-  WAITXRO, JXRO, or JNXRO instructions.'
+description: >-
+  POLLXRO copies the state of the streamer NCO rollover event flag into C and/or Z and
+  then clears the flag (unless it's being set again by the event sensor). If the WC,
+  WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of
+  the streamer-NCO-rollover event flag prior to clearing it. The streamer-NCO-rollover
+  event flag is set whenever the streamer's numerically-controlled oscillator (NCO)
+  rolls over. The streamer-NCO-rollover event flag is cleared upon execution of XINIT,
+  XZERO, XCONT, POLLXRO, WAITXRO, JXRO, or JNXRO instructions.
 result: Streamer-NCO-rollover event flag is optionally copied into C and/or Z, then
   it is cleared.
 parameters:

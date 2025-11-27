@@ -2,46 +2,21 @@ instruction: COGATN
 syntax: COGATN {#}Dest
 brief_description: Cog attention
 category: Event
-description: 'COGATN strobes the attention signal for one or more cogs. Dest bit positions
-  7:0 represent cogs 7 through 0; high Result: The attention signal of one or more
-  cogs is strobed.
-
-
+description: >-
   COGATN strobes the attention signal for one or more cogs. Dest bit positions 7:0
-  represent cogs 7 through 0; high
-
-
-  (1) bits indicate the cog(s) to signal. The receiving cog(s) then latch the signal,
-  setting an internal flag, and can
-
-
-  use any of the attention monitor instructions (JATN, JNATN, POLLATN, WAITATN) or
-  interrupts to respond and
-
-
-  clear the flag.
-
-
-  COGATN         #00100010                    ''Get attention of cogs 1 and 5
-
-
-  In the intended use case, the cog receiving an attention request knows which other
-  cog is strobing it and how to
-
-
-  respond. In cases where multiple cogs may request the attention of a single cog,
-  some messaging structure may
-
-
-  need to be implemented in Hub RAM to differentiate requests.'
+  represent cogs 7 through 0; high (1) bits indicate the cog(s) to signal. The receiving
+  cog(s) then latch the signal, setting an internal flag, and can use any of the
+  attention monitor instructions (JATN, JNATN, POLLATN, WAITATN) or interrupts to
+  respond and clear the flag. In the intended use case, the cog receiving an attention
+  request knows which other cog is strobing it and how to respond. In cases where
+  multiple cogs may request the attention of a single cog, some messaging structure
+  may need to be implemented in Hub RAM to differentiate requests.
 result: The attention signal of one or more cogs is strobed.
 parameters:
 - Dest is the register or 9-bit literal whose value (lower 8-bit pattern) indicates
   which cogs to signal.
 syntax_variants:
-- COGATN {#}Dest
-- COGATN strobes the attention signal for one or more cogs. Dest bit positions 7:0
-  represent cogs 7 through 0; high
+- COGATN {#}D
 timing:
   cycles: 2
   type: fixed

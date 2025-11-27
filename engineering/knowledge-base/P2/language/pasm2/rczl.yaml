@@ -2,21 +2,11 @@ instruction: RCZL
 syntax: RCZL Dest {WC|WZ|WCZ}
 brief_description: Rotate carry and zero left
 category: Math and Logic
-description: 'RCZL shifts Dest''s binary value left by two places and sets Dest[1]
-  to C and Dest[0] to Z. Result: The bits of Dest are shifted left by two places and
-  C and Z are inserted as new LSBs.
-
-
-  RCZL shifts Dest''s binary value left by two places and sets Dest[1] to C and Dest[0]
-  to Z.
-
-
-  If the WC or WCZ effect is specified, the C flag is updated to the original Dest[31]
-  state.
-
-
-  If the WZ or WCZ effect is specified, the Z is flag is updated to the original Dest[30]
-  state.'
+description: >-
+  RCZL shifts Dest's binary value left by two places and sets Dest[1] to C and Dest[0]
+  to Z. If the WC or WCZ effect is specified, the C flag is updated to the original
+  Dest[31] state. If the WZ or WCZ effect is specified, the Z flag is updated to the
+  original Dest[30] state.
 result: The bits of Dest are shifted left by two places and C and Z are inserted as
   new LSBs.
 parameters:
@@ -26,9 +16,7 @@ parameters:
 flags_affected:
   C: D[31] D[30] 2
 syntax_variants:
-- RCZL Dest {WC|WZ|WCZ}
-- RCZL shifts Dest's binary value left by two places and sets Dest[1] to C and Dest[0]
-  to Z.
+- RCZL D {WC|WZ|WCZ}
 timing:
   cycles: 2
   type: fixed

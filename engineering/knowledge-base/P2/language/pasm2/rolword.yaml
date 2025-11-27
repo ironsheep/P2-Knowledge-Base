@@ -2,33 +2,16 @@ instruction: ROLWORD
 syntax: 'ROLWORD Dest, {#}Src, #Num'
 brief_description: Rotate left word
 category: Math and Logic
-description: 'ROLWORD reads the word identified by Num (0-1) from Src, or a word from
-  the source described by a prior ALTGW Result: Word Num (0-1) of Src, or a word from
-  a source described by prior ALTGW instruction, is rotated left into Dest.
-
-
+description: >-
   ROLWORD reads the word identified by Num (0-1) from Src, or a word from the source
-  described by a prior ALTGW
-
-
-  instruction, and rotates it left into Dest.
-
-
-  ROLWORD achieves the same effect as two instructions-- a 16-bit SHL followed by
-  SETWORD into word 0.
-
-
-  Num (0-1) identifies a value''s individual words, by position, in least-significant
-  word order.
-
-
-  Syntax 2 is intended for use after an ALTGW instruction; i.e. in a loop to iteratively
-  read a series of word values
-
-
-  within contiguous long registers.'
-result: Word Num (0-1) of Src, or a word from a source described by prior ALTGW instruction,
-  is rotated left into
+  described by a prior ALTGW instruction, and rotates it left into Dest. ROLWORD achieves
+  the same effect as two instructions: a 16-bit SHL followed by SETWORD into word 0.
+  Num (0-1) identifies a value's individual words, by position, in least-significant
+  word order. Syntax 2 is intended for use after an ALTGW instruction, i.e. in a loop to
+  iteratively read a series of word values within contiguous long registers.
+result: >-
+  Word Num (0-1) of Src, or a word from a source described by prior ALTGW instruction,
+  is rotated left into Dest.
 parameters:
 - Dest is the register in which to rotate the word into.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains

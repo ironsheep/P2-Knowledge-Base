@@ -2,144 +2,30 @@ instruction: TJV
 syntax: TJV Dest, {#}Src
 brief_description: Test, jump if overflow
 category: Branch
-description: 'Test D and jump to S** if D overflowed (D[31] != C, C = ''correct sign''
-  from last addition/subtraction).
-
-
-
+description: >-
   TJV tests the value in Dest against C and jumps to the address described by Src
-  if Dest has overflowed
-
-
-  (Dest[31] != C). This instruction requires that C be updated (to the correct sign)
-  by the previous ADDS / ADDSX /
-
-
-  SUBS / SUBSX / CMPS / CMPSX / SUMx instruction.
-
-
-  The address (Src) can be absolute or relative. To specify an absolute address, Src
-  must be a register containing a
-
-
-  20-bit address value. To specify a relative address, use #Label for a 9-bit signed
-  offset (a range of -256 to +255
-
-
-  instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed
-  offset (a range of -524288 to
-
-
-  +524287). Offsets are relative to the instruction following the TJV. The signed
-  offset value is in units of whole
-
-
-  instructions-- it is added to PC as-is when in Cog/LUT execution mode and is multiplied
-  by 4 then added to PC
-
-
-  when in Hub execution mode (long-aligned Hub code not required).
-
-
-  TJZ / TJNZ
-
-
-  Test, jump if zero or not zero
-
-
-  Flow Control Instruction - Test value and jump if zero or not zero.
-
-
-  TJZ        Dest, {#}Src
-
-
-  TJNZ Dest, {#}Src
-
-
-  Result: Dest is tested and if it''s zero (or not zero in syntax 2), PC is set to
-  a new relative (#Src) or absolute (Src)
-
-
-  address.
-
-
-  *    Dest is a register whose value is tested for zero or not zero.
-
-
-  *    Src is a register, 9-bit literal, or 20-bit augmented literal whose value is
-  the absolute or relative address to
-
-
-  set PC to. Use # for relative addressing; omit # for absolute addressing.
-
-
-  COND INSTR            FX      DEST           SRC            Write         C Flag             Z
-  Flag             Clocks
-
-
-  EEEE 1011100 10I DDDDDDDDD SSSSSSSSS                     PC   1
-
-
-  --                  --           2 or 4 / 2 or 13-20
-
-
-  EEEE 1011100 11I DDDDDDDDD SSSSSSSSS                     PC   1
-
-
-  --                  --           2 or 4 / 2 or 13-20
-
-
-  1
-
-
-  PC is written only when Dest is zero (or not zero in syntax 2).
-
-
-  TJZ or TJNZ tests the value in Dest and jumps to the address described by Src if
-  the result is zero (syntax 1) or
-
-
-  not zero (in syntax 2).
-
-
-  The address (Src) can be absolute or relative. To specify an absolute address, Src
-  must be a register containing a
-
-
-  20-bit address value. To specify a relative address, use #Label for a 9-bit signed
-  offset (a range of -256 to +255
-
-
-  instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed
-  offset (a range of -524288 to
-
-
-  +524287). Offsets are relative to the instruction following the TJZ / TJNZ. The
-  signed offset value is in units of
-
-
-  whole instructions-- it is added to PC as-is when in Cog/LUT execution mode and
-  is multiplied by 4 then added to
-
-
-  PC when in Hub execution mode (long-aligned Hub code not required).'
-result: Dest is tested and if it's zero (or not zero in syntax 2), PC is set to a
-  new relative (#Src) or absolute (Src)
+  if Dest has overflowed (Dest[31] != C). This instruction requires that C be updated
+  (to the correct sign) by the previous ADDS / ADDSX / SUBS / SUBSX / CMPS / CMPSX /
+  SUMx instruction. The address (Src) can be absolute or relative. To specify an
+  absolute address, Src must be a register containing a 20-bit address value. To
+  specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to
+  +255 instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit
+  signed offset. Offsets are relative to the instruction following the TJV. The signed
+  offset value is in units of whole instructions -- it is added to PC as-is when in
+  Cog/LUT execution mode and is multiplied by 4 then added to PC when in Hub execution
+  mode (long-aligned Hub code not required).
+result: >-
+  Dest is tested against C and if it has overflowed (Dest[31] != C), PC is set to a
+  new relative (#Src) or absolute (Src) address.
 parameters:
 - Dest is a register whose value is tested for overflow (Dest[31] != C).
-- 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
-  absolute or relative address to set PC to. Use # for relative addressing; omit #
-  for absolute addressing.'
-- Dest is a register whose value is tested for zero or not zero.
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
 flags_affected:
   C: '''correct sign'' from last addition/subtraction'
 syntax_variants:
-- TJV Dest, {#}Src
-- TJV tests the value in Dest against C and jumps to the address described by Src
-  if Dest has overflowed
+- TJV D,{#}S
 timing:
   cycles: 1
   type: fixed

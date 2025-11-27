@@ -2,32 +2,15 @@ instruction: POLLSE4
 syntax: POLLSE4 {WC|WZ|WCZ}
 brief_description: Poll selectable event 1/2/3/4
 category: Event
-description: 'Get SE4 event flag into C/Z, then clear it.
-
-
-  POLLSE1, POLLSE2, POLLSE3, or POLLSE4 copies the state of the selectable event 1,
-  2, 3, or 4 flag into C and/or
-
-
-  Z and then clears the flag (unless it''s being set again by the event sensor).
-
-
-  If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to
-  the state of the corresponding
-
-
-  selectable event flag prior to clearing it.
-
-
-  The selectable event 1, 2, 3, or 4 flag is set whenever the corresponding configured
-  event occurs. The selectable
-
-
+description: >-
+  Get SE4 event flag into C/Z, then clear it. POLLSE1, POLLSE2, POLLSE3, or POLLSE4
+  copies the state of the selectable event 1, 2, 3, or 4 flag into C and/or Z and then
+  clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or
+  WCZ effect is specified, the C flag and/or Z flag is updated to the state of the
+  corresponding selectable event flag prior to clearing it. The selectable event 1, 2,
+  3, or 4 flag is set whenever the corresponding configured event occurs. The selectable
   event flag is cleared upon execution of the corresponding SETSEx, POLLSEx, WAITSEx,
-  JSEx, or JNSEx
-
-
-  instructions.'
+  JSEx, or JNSEx instructions.
 result: Selectable event flag 1, 2, 3, or 4 state is optionally copied into C and/or
   Z, then it is cleared.
 parameters:

@@ -2,152 +2,11 @@ instruction: RCZR
 syntax: RCZR Dest {WC|WZ|WCZ}
 brief_description: Rotate carry and zero right
 category: Math and Logic
-description: 'RCZR shifts Dest''s binary value right by two places and sets Dest[31]
-  to C and Dest[30] to Z. Result: The bits of Dest are shifted right by two places
-  and C and Z are inserted as new MSBs.
-
-
-  RCZR shifts Dest''s binary value right by two places and sets Dest[31] to C and
-  Dest[30] to Z.
-
-
-  If the WC or WCZ effect is specified, the C flag is updated to the original Dest[1]
-  state.
-
-
-  If the WZ or WCZ effect is specified, the Z is flag is updated to the original Dest[0]
-  state.
-
-
-  Registers
-
-
-  Special Purpose Registers - Rotate a byte left into a value.
-
-
-  Most Reg RAM registers are general-purpose (used for code and data) while a small
-  set has a special purpose.
-
-
-  Name Address                  Access2             Special Purpose
-
-
-  IJMP3        $1F01               Read/Write           Interrupt call address for
-  INT3; set by code
-
-
-  IRET3        $1F1 1
-
-
-  Read/Write           Interrupt return address and C/Z flags for INT3; set by cog
-
-
-  IJMP2        $1F21               Read/Write           Interrupt call address for
-  INT2; set by code
-
-
-  IRET2        $1F31               Read/Write           Interrupt return address and
-  C/Z flags for INT2; set by cog
-
-
-  IJMP1        $1F4 1
-
-
-  Read/Write           Interrupt call address for INT1; set by code
-
-
-  IRET1        $1F5 1
-
-
-  Read/Write           Interrupt return address and C/Z flags for INT1; set by cog
-
-
-  PA      $1F61               Read/Write           CALLD-imm return, CALLPA parameter,
-  or LOC address
-
-
-  PB      $1F71               Read/Write           CALLD-imm return, CALLPB parameter,
-  or LOC address
-
-
-  PTRA     $1F8       Read Special / Write Special Pointer A to Hub RAM
-
-
-  PTRB     $1F9       Read Special / Write Special Pointer B to Hub RAM
-
-
-  DIRA     $1FA            Read / Write Special     Output enables (direction bits)
-  for P31..P0
-
-
-  DIRB     $1FB            Read / Write Special     Output enables (direction bits)
-  for P63..P32
-
-
-  OUTA     $1FC            Read / Write Special     Output states for P31..P0
-
-
-  OUTB     $1FD            Read / Write Special     Output states for P63..P32
-
-
-  INA      $1FE3              Read Special          Input states for P31..P0
-
-
-  4
-
-
-  INB      $1FF               Read Special          Input states for P63..P32
-
-
-  1
-
-
-  Locations $1F0-$1F7 are general-purpose code/data registers by default but become
-  these named special-purpose
-
-
-  registers if their associated functions are enabled.
-
-
-  2
-
-
-  Most reads and writes involve the underlying Reg RAM at these locations; however,
-  those marked "special" may read from a
-
-
-  special internal register (instead of Reg RAM) or write to both the Reg RAM location
-  as well as to a special internal register.
-
-
-  3
-
-
-  Also debug interrupt call address.
-
-
-  4
-
-
-  Also debug interrupt return address.
-
-
-  Additionally, for PASM2 code that is either in-line (within a Spin2 method) or called
-  (by a Spin2 method), the
-
-
-  registers $1D8-$1DF are readable/writable by both languages using the symbols PR0-PR7.
-  PASM2 code that is
-
-
-  launched into another cog does not share this Reg RAM space with Spin2.
-
-
-  Name           Address           Access        Special Purpose
-
-
-  PR0-PR7         $1D8-$1DF         Read/Write      PASM2        <-> Spin2 communication
-  mechanism'
+description: >-
+  RCZR shifts Dest's binary value right by two places and sets Dest[31] to C and
+  Dest[30] to Z. If the WC or WCZ effect is specified, the C flag is updated to the
+  original Dest[1] state. If the WZ or WCZ effect is specified, the Z flag is updated
+  to the original Dest[0] state.
 result: The bits of Dest are shifted right by two places and C and Z are inserted
   as new MSBs.
 parameters:
@@ -162,9 +21,7 @@ flags_affected:
     formula: D[0]
     when: D[1]
 syntax_variants:
-- RCZR Dest {WC|WZ|WCZ}
-- RCZR shifts Dest's binary value right by two places and sets Dest[31] to C and Dest[30]
-  to Z.
+- RCZR D {WC|WZ|WCZ}
 timing:
   cycles: 2
   type: fixed

@@ -1,10 +1,17 @@
 instruction: DJNF
 syntax: DJNF    D,{#}S
 category: Branch
-description: 'DJF or DJNF decrements the value in Dest, writes the result, and jumps
-  to the address described by Src if the Result: Dest is decremented, and if the result
-  is full (or not full in syntax 2), PC is set to a new relative (#Src) or absolute
-  (Src) address.'
+description: >-
+  DJNF decrements the value in Dest, writes the result, and jumps to the address
+  described by Src if the result is NOT full (not equal to $FFFF_FFFF).
+
+  This instruction is useful for implementing loops that continue until a register
+  wraps from 0 to -1 (full). Use # prefix on Src for relative addressing; omit #
+  for absolute addressing.
+result: >-
+  Dest is decremented. If the result does NOT equal $FFFF_FFFF (not full), PC is
+  set to a new relative (#Src) or absolute (Src) address; otherwise execution
+  continues with the next instruction.
 parameters:
 - Dest is a register whose value is decremented and tested for full or not full.
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
@@ -12,9 +19,9 @@ parameters:
   for absolute addressing.'
 flags_affected:
   C:
-    when: D
+    formula: not affected
   Z:
-    when: and
+    formula: not affected
 timing:
   cycles: 2
   type: variable

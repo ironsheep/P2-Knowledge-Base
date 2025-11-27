@@ -10,10 +10,16 @@ timing:
   cycles: 2
   type: variable
   range: 13...20
-description: 'DJZ or DJNZ decrements the value in Dest, writes the result, and jumps
-  to the address described by Src if the Result: Dest is decremented, and if the result
-  is zero (or not zero in syntax 2), PC is set to a new relative (#Src) or absolute
-  (Src) address.'
+description: >-
+  DJZ decrements the value in Dest, writes the result, and jumps to the address
+  described by Src if the result IS zero.
+
+  This instruction is useful when you want to jump when a counter reaches zero,
+  rather than looping while non-zero. Use # prefix on Src for relative addressing;
+  omit # for absolute addressing.
+result: >-
+  Dest is decremented. If the result equals zero, PC is set to a new relative (#Src)
+  or absolute (Src) address; otherwise execution continues with the next instruction.
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:
@@ -33,8 +39,8 @@ parameters:
   for absolute addressing.'
 flags_affected:
   C:
-    when: D
+    formula: not affected
   Z:
-    when: and
+    formula: not affected
 category: Branch
 oneliner: Decrement, jump if zero or not zero

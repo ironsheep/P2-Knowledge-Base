@@ -1,10 +1,15 @@
 instruction: IJNZ
 syntax: IJNZ    D,{#}S
 category: Branch
-description: 'IJZ or IJNZ increments the value in Dest, writes the result, and jumps
-  to the address described by Src if the Result: Dest is incremented, and if the result
-  is zero (or not zero in syntax 2), PC is set to a new relative (#Src) or absolute
-  (Src) address.'
+description: >-
+  IJNZ increments the value in Dest, writes the result, and jumps to the address
+  described by Src if the result is NOT zero.
+
+  This is useful for counting up to a value. Use # prefix on Src for relative
+  addressing; omit # for absolute addressing.
+result: >-
+  Dest is incremented. If the result is not zero, PC is set to a new relative (#Src)
+  or absolute (Src) address; otherwise execution continues with the next instruction.
 parameters:
 - Dest is a register whose value is incremented and tested for zero or not zero.
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
@@ -12,9 +17,9 @@ parameters:
   for absolute addressing.'
 flags_affected:
   C:
-    when: D
+    formula: not affected
   Z:
-    when: and
+    formula: not affected
 timing:
   cycles: 2
   type: variable

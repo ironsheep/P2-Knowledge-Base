@@ -2,29 +2,15 @@ instruction: SETBYTE
 syntax: 'SETBYTE Dest, {#}Src, #Num'
 brief_description: Set byte
 category: Math and Logic
-description: 'SETBYTE stores Src[7:0] into the byte identified by Num within Dest,
-  or the byte and register described by a prior Result: Src[7:0] is written to byte
-  Num (0-3) of Dest, or to another register byte described by prior ALTSB instruction.
-
-
-  SETBYTE stores Src[7:0] into the byte identified by Num within Dest, or the byte
-  and register described by a prior
-
-
-  ALTSB instruction. No other bits are modified.
-
-
-  Num (0-3) identifies a value''s individual bytes, by position, in least-significant
-  byte order.
-
-
-  Syntax 2 is intended for use after an ALTSB instruction; i.e. in a loop to iteratively
-  affect a series of byte values
-
-
-  within contiguous long registers.'
-result: Src[7:0] is written to byte Num (0-3) of Dest, or to another register byte
-  described by prior ALTSB
+description: >-
+  SETBYTE stores Src[7:0] into the byte identified by Num within Dest, or the byte and
+  register described by a prior ALTSB instruction. No other bits are modified. Num (0-3)
+  identifies a value's individual bytes, by position, in least-significant byte order.
+  Syntax 2 is intended for use after an ALTSB instruction, i.e. in a loop to iteratively
+  affect a series of byte values within contiguous long registers.
+result: >-
+  Src[7:0] is written to byte Num (0-3) of Dest, or to another register byte described
+  by prior ALTSB instruction.
 parameters:
 - Dest is the register in which to modify a byte.
 - Src is a register or 8-bit literal whose bits [7:0] will be stored in the designated
@@ -34,10 +20,8 @@ flags_affected:
   C:
     when: D
 syntax_variants:
-- 'SETBYTE Dest, {#}Src, #Num'
-- SETBYTE {#}Src
-- SETBYTE stores Src[7:0] into the byte identified by Num within Dest, or the byte
-  and register described by a prior
+- 'SETBYTE D,{#}S,#N'
+- SETBYTE {#}S
 timing:
   cycles: 2
   type: fixed

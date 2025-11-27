@@ -17,9 +17,11 @@ timing:
 description: Get RND into C/Z. C = RND[31], Z = RND[30], unique per cog.
 flags_affected:
   C:
-    formula: RND[31], Z = RND[30], unique per cog
+    formula: RND[31]
+    description: Set to bit 31 of the random number
   Z:
-    formula: RND[30], unique per cog
+    formula: RND[30]
+    description: Set to bit 30 of the random number (unique per cog)
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:

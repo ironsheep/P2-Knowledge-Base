@@ -2,31 +2,18 @@ instruction: NEGZ
 syntax: NEGZ Dest, {#}Src        {WC|WZ|WCZ}
 brief_description: Negate Z
 category: Math and Logic
-description: 'NEGZ negates Src (syntax 1) or Dest (syntax 2) if Z = 1 and stores the
-  result in the Dest register. If Z = 0, the Src or Result: The Src or Dest value,
-  possibly negated according to Z, is stored into Dest and optionally the C and Z
-  flags are updated to the resulting sign and zero status.
-
-
+description: >-
   NEGZ negates Src (syntax 1) or Dest (syntax 2) if Z = 1 and stores the result in
-  the Dest register. If Z = 0, the Src or
-
-
-  Dest value is left as-is (not negated) and is stored into Dest. If the negation
-  is performed, it flips the value''s sign;
-
-
+  the Dest register. If Z = 0, the Src or Dest value is left as-is (not negated) and
+  is stored into Dest. If the negation is performed, it flips the value's sign;
   ex: 526 becomes -526, or -41 becomes 41.
-
-
   If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative,
   or is cleared (0) if positive.
-
-
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero,
-  or is cleared (0) if it is non-zero.'
-result: The Src or Dest value, possibly negated according to Z, is stored into Dest
-  and optionally the C and Z flags
+  or is cleared (0) if it is non-zero.
+result: >-
+  The Src or Dest value, possibly negated according to Z, is stored into Dest and
+  optionally the C and Z flags are updated to the resulting sign and zero status.
 parameters:
 - Dest is a register to receive the Src or -Src value (syntax 1), or contains the
   value to negate (syntax 2) according to Z.
@@ -34,12 +21,13 @@ parameters:
   (if Z=0) or negated value (if Z=1) is stored into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  Z: Result = 0
+  C:
+    formula: Sign of result
+  Z:
+    formula: Result == 0
 syntax_variants:
-- NEGZ Dest, {#}Src        {WC|WZ|WCZ}
-- NEGZ Dest                {WC|WZ|WCZ}
-- NEGZ negates Src (syntax 1) or Dest (syntax 2) if Z = 1 and stores the result in
-  the Dest register. If Z = 0, the Src or
+- NEGZ Dest, {#}Src {WC|WZ|WCZ}
+- NEGZ Dest {WC|WZ|WCZ}
 timing:
   cycles: 2
   type: fixed

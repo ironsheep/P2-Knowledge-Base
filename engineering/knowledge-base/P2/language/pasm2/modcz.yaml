@@ -1,10 +1,13 @@
 instruction: MODCZ
 syntax: MODCZ   c,z      {WC/WZ/WCZ}
 category: Math and Logic
-description: 'MODC, MODZ, or MODCZ sets or clears the C and/or Z flag based on the
-  mode described by the given Modifier Result: The C and/or Z flag is set or cleared
-  according to the given Modifier and the current state of the C and/or Z flags. C
-  = cccc[{C,Z}], Z = zzzz[{C,Z}].'
+description: >-
+  MODCZ sets or clears both the C and Z flags based on the modes described by the
+  given Modifiers. Each flag is set or cleared according to its given Modifier and
+  the current state of both the C and Z flags.
+result: >-
+  C = cccc[{C,Z}] and Z = zzzz[{C,Z}], where the 4-bit modifier values select which
+  combinations of current C and Z states produce 1 results for each flag.
 parameters:
 - CModifer is a Modifier symbol for the designated mode to apply to the C flag.
 - ZModifer is a Modifier symbol for the designated mode to apply to the Z flag.

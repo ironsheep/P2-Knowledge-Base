@@ -2,27 +2,16 @@ instruction: GETBYTE
 syntax: 'GETBYTE Dest, {#}Src, #Num'
 brief_description: Get byte
 category: Math and Logic
-description: 'GETBYTE reads the byte identified by Num (0-3) from Src, or a byte from
-  the source described by a prior ALTGB Result: Byte Num (0-3) of Src, or a byte from
-  a source described by prior ALTGB instruction, is written to Dest.
-
-
+description: >-
   GETBYTE reads the byte identified by Num (0-3) from Src, or a byte from the source
-  described by a prior ALTGB
+  described by a prior ALTGB instruction.
 
+  Num (0-3) identifies a value's individual bytes, by position, in least-significant
+  byte order: Num 0 is bits [7:0], Num 1 is bits [15:8], Num 2 is bits [23:16],
+  Num 3 is bits [31:24].
 
-  instruction.
-
-
-  Num (0-3) identifies a value''s individual bytes, by position, in least-significant
-  byte order.
-
-
-  Syntax 2 is intended for use after an ALTGB instruction; i.e. in a loop to iteratively
-  read a series of byte values
-
-
-  within contiguous long registers.'
+  Syntax 2 (GETBYTE Dest) is intended for use after an ALTGB instruction; i.e. in
+  a loop to iteratively read a series of byte values within contiguous long registers.
 result: Byte Num (0-3) of Src, or a byte from a source described by prior ALTGB instruction,
   is written to Dest.
 parameters:
@@ -32,7 +21,9 @@ parameters:
 - Num is a 2-bit literal identifying the byte ID (0-3) of Src to read.
 flags_affected:
   C:
-    when: D
+    formula: not affected
+  Z:
+    formula: not affected
 syntax_variants:
 - 'GETBYTE Dest, {#}Src, #Num'
 - GETBYTE Dest

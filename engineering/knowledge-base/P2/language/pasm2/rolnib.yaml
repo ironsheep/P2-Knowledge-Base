@@ -2,34 +2,16 @@ instruction: ROLNIB
 syntax: 'ROLNIB Dest, {#}Src, #Num'
 brief_description: Rotate left nibble
 category: Math and Logic
-description: 'ROLNIB reads the nibble identified by Num (0-7) from Src, or a nibble
-  from the source described by a prior ALTGN Result: Nibble Num (0-7) of Src, or a
-  nibble from a source described by prior ALTGN instruction, is rotated left into
-  Dest.
-
-
+description: >-
   ROLNIB reads the nibble identified by Num (0-7) from Src, or a nibble from the source
-  described by a prior ALTGN
-
-
-  instruction, and rotates it left into Dest.
-
-
-  ROLNIB achieves the same effect as two instructions-- a 4-bit SHL followed by SETNIB
-  into nibble 0.
-
-
-  Num (0-7) identifies a value''s individual nibbles, by position, in least-significant
-  nibble order.
-
-
-  Syntax 2 is intended for use after an ALTGN instruction; i.e. in a loop to iteratively
-  read a series of nibble values
-
-
-  within contiguous long registers.'
-result: Nibble Num (0-7) of Src, or a nibble from a source described by prior ALTGN
-  instruction, is rotated left into
+  described by a prior ALTGN instruction, and rotates it left into Dest. ROLNIB achieves
+  the same effect as two instructions: a 4-bit SHL followed by SETNIB into nibble 0.
+  Num (0-7) identifies a value's individual nibbles, by position, in least-significant
+  nibble order. Syntax 2 is intended for use after an ALTGN instruction, i.e. in a loop
+  to iteratively read a series of nibble values within contiguous long registers.
+result: >-
+  Nibble Num (0-7) of Src, or a nibble from a source described by prior ALTGN instruction,
+  is rotated left into Dest.
 parameters:
 - Dest is the register in which to rotate the nibble into.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value contains

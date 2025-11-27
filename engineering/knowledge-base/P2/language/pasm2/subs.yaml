@@ -2,44 +2,20 @@ instruction: SUBS
 syntax: SUBS Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Subtract signed
 category: Math and Logic
-description: 'SUBS subtracts the signed Src from the signed Dest and stores the result
-  into the Dest register. If Src is a 9-bit Result: Difference of signed Dest and
-  signed Src is stored in Dest and optionally the C and Z flags are updated to the
-  sign and zero status.
-
-
+description: >-
   SUBS subtracts the signed Src from the signed Dest and stores the result into the
-  Dest register. If Src is a 9-bit
-
-
-  literal, its value is interpreted as positive (0-511; it is not sign-extended) --
-  use ##Value (or insert a prior AUGS
-
-
-  instruction) for a 32-bit signed value; negative or positive.
-
-
-  If the WC or WCZ effect is specified, the C flag is set (1) if the subtraction results
-  in a signed underflow (signed
-
-
-  borrow), or is cleared (0) if no underflow.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Dest
-  - Src is zero, or is cleared (0) if it is
-
-
-  non-zero.
-
-
-  To subtract signed, multi-long values, use SUB (not SUBS) followed possibly by SUBX,
-  and finally SUBSX as
-
-
-  described in Subtracting Two Multi-Long Values.'
-result: Difference of signed Dest and signed Src is stored in Dest and optionally
-  the C and Z flags are updated to
+  Dest register. If Src is a 9-bit literal, its value is interpreted as positive
+  (0-511; it is not sign-extended) -- use ##Value (or insert a prior AUGS instruction)
+  for a 32-bit signed value; negative or positive. If the WC or WCZ effect is
+  specified, the C flag is set (1) if the subtraction results in a signed underflow
+  (signed borrow), or is cleared (0) if no underflow. If the WZ or WCZ effect is
+  specified, the Z flag is set (1) if the result of Dest - Src is zero, or is cleared
+  (0) if it is non-zero. To subtract signed, multi-long values, use SUB (not SUBS)
+  followed possibly by SUBX, and finally SUBSX as described in Subtracting Two
+  Multi-Long Values.
+result: >-
+  Difference of signed Dest and signed Src is stored in Dest and optionally the C
+  and Z flags are updated to the sign and zero status.
 parameters:
 - Dest is a register containing the value to subtract Src from, and is where the result
   is written.
@@ -49,9 +25,7 @@ parameters:
 flags_affected:
   Z: Result = 0
 syntax_variants:
-- SUBS Dest, {#}Src {WC|WZ|WCZ}
-- SUBS subtracts the signed Src from the signed Dest and stores the result into the
-  Dest register. If Src is a 9-bit
+- SUBS D,{#}S {WC|WZ|WCZ}
 timing:
   cycles: 2
   type: fixed

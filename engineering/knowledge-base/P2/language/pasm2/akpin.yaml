@@ -2,62 +2,13 @@ instruction: AKPIN
 syntax: AKPIN {#}Src
 brief_description: Acknowledge pin
 category: Smart Pin
-description: 'AKPIN acknowledges the Smart Pin(s) designated by Src. This lowers the
-  corresponding IN signal(s) so that Result: One or more Smart Pins is acknowledged;
-  lowering their corresponding IN signal(s).
-
-
-  AKPIN acknowledges the Smart Pin(s) designated by Src. This lowers the corresponding
-  IN signal(s) so that
-
-
-  future Smart Pin events may raise them again later.
-
-
-  Src[5:0] indicates the pin number (0-63). For a range of Smart Pins, Src[5:0] indicates
-  the first pin number (0-63)
-
-
-  and Src[10:6] indicates how many contiguous pins beyond the first should be affected
-  (1-31).
-
-
-  A 9-bit literal Src is enough to express the starting pin (Src[5:0]) and a range
-  of up to 8 contiguous pins (Src[8:6]).
-
-
-  If needed, use the augmented literal feature (##Src) to augment Src to the required
-  11-bit literal value-- this
-
-
-  inserts an AUGS instruction prior.
-
-
-  When Src is a register, the register''s value bits [10:0] are used as-is to form
-  the 11-bit Smart Pin range, unless a
-
-
-  SETQ instruction immediately precedes the AKPIN instruction; substituting SETQ''s
-  Dest[4:0] in place of value
-
-
-  bits[10:6], for AKPIN''s use.
-
-
-  The range calculation (from Src[5:0] up to Src[5:0]+Src[10:6]) will wrap within
-  the same 32-pin group (DIRA or
-
-
-  DIRB); it will not cross the port boundary.'
+description: AKPIN acknowledges the Smart Pin(s) designated by Src. This lowers the corresponding IN signal(s) so that future Smart Pin events may raise them again later. Src[5:0] indicates the pin number (0-63). For a range of Smart Pins, Src[5:0] indicates the first pin number (0-63) and Src[10:6] indicates how many contiguous pins beyond the first should be affected (1-31). A 9-bit literal Src is enough to express the starting pin (Src[5:0]) and a range of up to 8 contiguous pins (Src[8:6]). If needed, use the augmented literal feature (##Src) to augment Src to the required 11-bit literal value-- this inserts an AUGS instruction prior. When Src is a register, the register's value bits [10:0] are used as-is to form the 11-bit Smart Pin range, unless a SETQ instruction immediately precedes the AKPIN instruction; substituting SETQ's Dest[4:0] in place of value bits[10:6], for AKPIN's use. The range calculation (from Src[5:0] up to Src[5:0]+Src[10:6]) will wrap within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.
 result: One or more Smart Pins is acknowledged; lowering their corresponding IN signal(s).
 parameters:
 - Src is a register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the Smart Pin(s) to acknowledge.
 syntax_variants:
 - AKPIN {#}Src
-- SETQ instruction immediately precedes the AKPIN instruction; substituting SETQ's
-  Dest[4:0] in place of value
-- bits[10:6], for AKPIN's use.
 timing:
   cycles: 2
   type: fixed

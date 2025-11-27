@@ -1,10 +1,18 @@
 instruction: TJNS
-syntax: TJNS    D,{#}S
+syntax: TJNS D,{#}S
+brief_description: Test, jump if not signed
 category: Branch
-description: 'TJS or TJNS tests the value in Dest and jumps to the address described
-  by Src if the result is signed (Dest[31] = 1) Result: Dest is tested and if it''s
-  signed (or not signed in syntax 2), PC is set to a new relative (#Src) or absolute
-  (Src) address.'
+description: >-
+  TJNS tests the value in Dest and jumps to the address described by Src if the
+  value is not signed (Dest[31] = 0). The address (Src) can be absolute or relative.
+  To specify an absolute address, Src must be a register containing a 20-bit address
+  value. To specify a relative address, use #Label for a 9-bit signed offset (a range
+  of -256 to +255 instructions) or use ##Label (or insert a prior AUGS instruction)
+  for a 20-bit signed offset. Offsets are relative to the instruction following the
+  TJNS.
+result: >-
+  Dest is tested and if it's not signed (Dest[31] = 0), PC is set to a new relative
+  (#Src) or absolute (Src) address.
 parameters:
 - Dest is a register whose value is tested for sign or no sign.
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the

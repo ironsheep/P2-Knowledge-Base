@@ -2,34 +2,14 @@ instruction: SHR
 syntax: SHR Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Shift right
 category: Math and Logic
-description: 'SHR shifts Dest''s binary value right by Src places (0-31 bits) and
-  sets the new MSBs to 0. This is useful for Result: The bits of Dest are shifted
-  right by Src bits, inserting zeros (0) as new leftmost bits.
-
-
-  SHR shifts Dest''s binary value right by Src places (0-31 bits) and sets the new
-  MSBs to 0. This is useful for
-
-
-  bit-stream manipulation as well as for swift division; unsigned 32-bit integer division
-  by a power-of-two. For
-
-
-  similar division of a signed value, use SAR instead.
-
-
-  If the WC or WCZ effect is specified, the C flag is updated to the value of the
-  last bit shifted out (effectively C =
-
-
-  result bit "-1") if Src is 1-31, or to Dest[0] if Src is 0.
-
-
-  If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest result equals
-  zero, or is cleared (0) if it is
-
-
-  non-zero.'
+description: >-
+  SHR shifts Dest's binary value right by Src places (0-31 bits) and sets the new MSBs to
+  0. This is useful for bit-stream manipulation as well as for swift division; unsigned
+  32-bit integer division by a power-of-two. For similar division of a signed value, use
+  SAR instead. If the WC or WCZ effect is specified, the C flag is updated to the value
+  of the last bit shifted out (effectively C = result bit "-1") if Src is 1-31, or to
+  Dest[0] if Src is 0. If the WZ or WCZ effect is specified, the Z flag is set (1) if
+  the Dest result equals zero, or is cleared (0) if it is non-zero.
 result: The bits of Dest are shifted right by Src bits, inserting zeros (0) as new
   leftmost bits.
 parameters:
@@ -41,9 +21,7 @@ flags_affected:
   C:
     formula: last bit shifted out if S[4:0] > 0, else D[0]
 syntax_variants:
-- SHR Dest, {#}Src {WC|WZ|WCZ}
-- SHR shifts Dest's binary value right by Src places (0-31 bits) and sets the new
-  MSBs to 0. This is useful for
+- SHR D,{#}S {WC|WZ|WCZ}
 timing:
   cycles: 1
   type: fixed

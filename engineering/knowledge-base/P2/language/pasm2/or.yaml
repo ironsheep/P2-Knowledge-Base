@@ -2,26 +2,13 @@ instruction: OR
 syntax: OR Dest, {#}Src {WC|WZ|WCZ}
 brief_description: Or
 category: Math and Logic
-description: 'OR performs a bitwise OR of the value in Src into that of Dest. Result:
-  Dest OR Src is stored in Dest and flags are optionally updated with parity and zero
-  status.
-
-
+description: >-
   OR performs a bitwise OR of the value in Src into that of Dest.
-
-
   If the WC or WCZ effect is specified, the C flag is set (1) if the result contains
-  an odd number of high (1) bits, or is
-
-
-  cleared (0) if it contains an even number of high bits.
-
-
+  an odd number of high (1) bits, or is cleared (0) if it contains an even number
+  of high bits.
   If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest OR Src result
-  equals zero, or is cleared (0) if it is
-
-
-  non-zero.'
+  equals zero, or is cleared (0) if it is non-zero.
 result: Dest OR Src is stored in Dest and flags are optionally updated with parity
   and zero status.
 parameters:
@@ -31,18 +18,12 @@ parameters:
   bitwise ORed into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  Z: Result = 0
+  C:
+    formula: Parity of result
+  Z:
+    formula: Result == 0
 syntax_variants:
 - OR Dest, {#}Src {WC|WZ|WCZ}
-- 'Result: Dest OR Src is stored in Dest and flags are optionally updated with parity
-  and zero status.'
-- '*   Dest is the register containing the value to bitwise OR with Src and is the
-  destination in which to write the'
-- '*   Src is a register, 9-bit literal, or 32-bit augmented literal whose value will
-  be bitwise ORed into Dest.'
-- OR performs a bitwise OR of the value in Src into that of Dest.
-- If the WZ or WCZ effect is specified, the Z flag is set (1) if the Dest OR Src result
-  equals zero, or is cleared (0) if it is
 timing:
   cycles: 2
   type: fixed

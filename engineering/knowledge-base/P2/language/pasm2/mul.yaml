@@ -2,29 +2,16 @@ instruction: MUL
 syntax: MUL Dest, {#}Src {WZ}
 brief_description: Multiply
 category: Math and Logic
-description: 'The 32-bit unsigned product of the 16-bit Dest and Src multiplication
-  is stored into Dest and optionally the Z flag is updated to the Dest or Src zero
-  status. D = unsigned (D[15:0] * S[15:0]).
-
-
+description: >-
   MUL multiplies the lower 16-bits of each of Dest and Src together and stores the
-  32-bit product result into the Dest
-
-
-  register. This is a fast (2-clock) 16 x 16 bit multiplication operation-- to multiply
-  larger factors, use the CORDIC
-
-
-  Solver QMUL instruction.
-
-
+  32-bit product result into the Dest register. This is a fast (2-clock) 16 x 16 bit
+  multiplication operation-- to multiply larger factors, use the CORDIC Solver QMUL
+  instruction. D = unsigned (D[15:0] * S[15:0]).
   If the WZ effect is specified, the Z flag is set (1) if either the Dest or Src values
-  are zero, or is cleared (0) if both are
-
-
-  non-zero.'
-result: The 32-bit unsigned product of the 16-bit Dest and Src multiplication is stored
-  into Dest and optionally the
+  are zero, or is cleared (0) if both are non-zero.
+result: >-
+  The 32-bit unsigned product of the 16-bit Dest and Src multiplication is stored
+  into Dest and optionally the Z flag is updated to the Dest or Src zero status.
 parameters:
 - Dest is a register containing the 16-bit value to multiply with Src, and is where
   the result is written.
@@ -36,8 +23,6 @@ flags_affected:
     formula: (S == 0) | (D == 0)
 syntax_variants:
 - MUL Dest, {#}Src {WZ}
-- MUL multiplies the lower 16-bits of each of Dest and Src together and stores the
-  32-bit product result into the Dest
 timing:
   cycles: 2
   type: fixed

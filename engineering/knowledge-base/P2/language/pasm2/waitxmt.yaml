@@ -9,52 +9,20 @@ encoding:
 timing:
   cycles: 2
   type: variable
-description: 'WAITXMT waits for a streamer-empty event to occur (unless the event
-  flag is already set), then clears the event Result: Wait for streamer-empty event,
-  then clear the flag; optionally aborting on timeout and setting C and/or Z on abort.
-  Z = timeout.
-
-
+description: >-
   WAITXMT waits for a streamer-empty event to occur (unless the event flag is already
-  set), then clears the event
-
-
-  flag (unless it''s being set again by the event sensor) and resumes execution at
-  the next instruction. Optionally,
-
-
-  WAITXMT can time-out if the streamer-empty event doesn''t occur soon enough; setting
-  C and/or Z flags and then
-
-
-  resuming execution at the next instruction.
-
-
-  To set the optional timeout, insert a SETQ (with a future System Counter target
-  value) right before WAITXMT.
-
-
-  The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified,
-  in which case the C flag and/or
-
-
-  Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the
-  event occurred before the timeout.
-
-
-  During a wait, the pipeline is stalled; no instructions execute and no interrupts
-  are processed in the cog until the
-
-
-  wait condition ends.
-
-
-  The streamer-empty event flag is set whenever the streamer is ready for a new command.
-  The streamer-empty
-
-
-  event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXMT, WAITXMT, JXMT,
-  or JNXMT instructions.'
+  set), then clears the event flag (unless it's being set again by the event sensor)
+  and resumes execution at the next instruction. Optionally, WAITXMT can time-out if
+  the streamer-empty event doesn't occur soon enough; setting C and/or Z flags and
+  then resuming execution at the next instruction. To set the optional timeout, insert
+  a SETQ (with a future System Counter target value) right before WAITXMT. The WC,
+  WZ, or WCZ effect is recommended only if the optional timeout is specified, in which
+  case the C flag and/or Z flag is set (1) if a timeout occurred before the event, or
+  is cleared (0) if the event occurred before the timeout. During a wait, the pipeline
+  is stalled; no instructions execute and no interrupts are processed in the cog until
+  the wait condition ends. The streamer-empty event flag is set whenever the streamer
+  is ready for a new command. The streamer-empty event flag is cleared upon execution
+  of XINIT, XZERO, XCONT, POLLXMT, WAITXMT, JXMT, or JNXMT instructions.
 flags_affected:
   Z:
     formula: timeout
@@ -78,8 +46,9 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 brief_description: Wait streamer empty
 category: Event
-result: Wait for streamer-empty event, then clear the flag; optionally aborting on
-  timeout and setting C and/or Z
+result: >-
+  Wait for streamer-empty event, then clear the flag; optionally aborting on timeout
+  and setting C and/or Z on abort.
 syntax_variants:
 - WAITXMT {WC|WZ|WCZ}
 parameters:

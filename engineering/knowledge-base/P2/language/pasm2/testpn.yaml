@@ -1,10 +1,15 @@
 instruction: TESTPN
-syntax: TESTPN  {#}D           WC/WZ
+syntax: TESTPN {#}D WC/WZ
+brief_description: Test pin negated
 category: Pin
-description: 'TESTP or TESTPN reads the state (0/1) of the I/O pin designated by Dest,
-  possibly inverts that result, and either Result: The state of the I/O pin described
-  by Dest is read, possibly inverted, and either stored as-is, or bitwise ANDed, ORed,
-  or XORed into C or Z. Z = C/Z XOR !IN[D[5:0]].'
+description: >-
+  TESTPN reads the state (0/1) of the I/O pin designated by Dest, inverts that result,
+  and either stores it as-is, or bitwise ANDs, ORs, or XORs it into C or Z. The pin
+  number is specified by Dest[5:0] (0-63). The WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC,
+  or XORZ effect determines how the inverted pin state is applied to the selected flag.
+result: >-
+  The inverted state of the I/O pin described by Dest is read and either stored as-is,
+  or bitwise ANDed, ORed, or XORed into C or Z.
 parameters:
 - Dest is the register or 6-bit literal whose value identifies the I/O pin to test.
 - WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, and XORZ is a required effect to update or bitwise

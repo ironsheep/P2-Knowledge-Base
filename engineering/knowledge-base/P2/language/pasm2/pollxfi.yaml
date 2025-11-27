@@ -2,33 +2,15 @@ instruction: POLLXFI
 syntax: POLLXFI {WC|WZ|WCZ}
 brief_description: Poll streamer finished
 category: Event
-description: 'Streamer-finished event flag is optionally copied into C and/or Z, then
-  it is cleared.
-
-
+description: >-
+  Streamer-finished event flag is optionally copied into C and/or Z, then it is cleared.
   POLLXFI copies the state of the streamer-finished event flag into C and/or Z and
-  then clears the flag (unless it''s
-
-
-  being set again by the event sensor).
-
-
-  If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to
-  the state of the streamer-finished
-
-
-  event flag prior to clearing it.
-
-
-  The streamer-finished event flag is set whenever the streamer runs out of commands
-  to process. The
-
-
-  streamer-finished event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXFI,
-  WAITXFI, JXFI, or
-
-
-  JNXFI instructions.'
+  then clears the flag (unless it's being set again by the event sensor). If the WC, WZ,
+  or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the
+  streamer-finished event flag prior to clearing it. The streamer-finished event flag
+  is set whenever the streamer runs out of commands to process. The streamer-finished
+  event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXFI, WAITXFI, JXFI,
+  or JNXFI instructions.
 result: Streamer-finished event flag is optionally copied into C and/or Z, then it
   is cleared.
 parameters:
