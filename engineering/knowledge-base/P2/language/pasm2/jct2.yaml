@@ -13,6 +13,9 @@ timing:
 description: >-
   Jump to S if CT2 (counter 2) event flag is set. The CT2 event flag is set when
   the system counter reaches the CT2 target value set by ADDCT2.
+flags_affected:
+  C: No effect
+  Z: No effect
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: structured
 compiler_operand_format:

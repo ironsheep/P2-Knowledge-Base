@@ -17,6 +17,9 @@ description: >-
 result: >-
   If FIFO interface block wrap event flag is set, PC is set to a new relative (#Src)
   or absolute (Src) address; otherwise execution continues with the next instruction.
+flags_affected:
+  C: No effect
+  Z: No effect
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive
 compiler_operand_format:

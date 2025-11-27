@@ -1,7 +1,10 @@
 instruction: JNPAT
 syntax: JNPAT   {#}S
 category: Event
-description: Jump to S if PAT event flag is clear.
+description: Jump to S if PAT (pattern match) event flag is clear.
+flags_affected:
+  C: No effect
+  Z: No effect
 parameters:
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
   absolute or relative address to set PC to. Use # for relative addressing; omit #

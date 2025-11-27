@@ -5,6 +5,9 @@ description: >-
   JNXRL checks the cog's streamer LUT RAM rollover event flag and jumps to the address
   described by Src if the flag is clear. PC is set to a new relative (#Src) or absolute
   (Src) address. The flag is cleared after the check.
+flags_affected:
+  C: No effect
+  Z: No effect
 parameters:
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
   absolute or relative address to set PC to. Use # for relative addressing; omit #

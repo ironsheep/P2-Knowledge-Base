@@ -2,7 +2,10 @@ instruction: JNSE4
 syntax: JNSE4   {#}S
 brief_description: Jump if selector 4 event flag is NOT set
 category: Event
-description: Jump to S if SE4 event flag is clear.
+description: Jump to S if SE4 (selector 4) event flag is clear.
+flags_affected:
+  C: No effect
+  Z: No effect
 syntax_variants:
 - JNSE4 {#}S
 timing:

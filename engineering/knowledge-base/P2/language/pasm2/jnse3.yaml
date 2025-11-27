@@ -10,8 +10,10 @@ timing:
   cycles: 2
   type: variable
   range: 13...20
-description: Jump to S** if SE3 event flag is clear.                                                                       2
-  or 4 / 2 or
+description: Jump to S if SE3 (selector 3) event flag is clear.
+flags_affected:
+  C: No effect
+  Z: No effect
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: structured
 compiler_operand_format:

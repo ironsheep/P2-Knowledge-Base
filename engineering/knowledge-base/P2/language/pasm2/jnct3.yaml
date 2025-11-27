@@ -2,7 +2,10 @@ instruction: JNCT3
 syntax: JNCT3   {#}S
 brief_description: Jump if counter 3 event flag is NOT set
 category: Event
-description: Jump to S if CT3 event flag is clear.
+description: Jump to S if CT3 (counter 3) event flag is clear.
+flags_affected:
+  C: No effect
+  Z: No effect
 syntax_variants:
 - JNCT3 {#}S
 timing:

@@ -31,7 +31,7 @@ parameters:
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
 flags_affected:
-  C:
-    when: PC1
+  C: No effect
+  Z: No effect
 category: Event
 oneliner: Jump if streamer empty event flag set or clear
