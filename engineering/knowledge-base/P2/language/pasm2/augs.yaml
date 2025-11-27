@@ -1,5 +1,5 @@
 instruction: AUGS
-syntax: AUGS {#}Src
+syntax: AUGS #Src
 brief_description: Augment source
 category: Miscellaneous
 description: >-

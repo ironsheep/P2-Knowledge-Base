@@ -28,4 +28,4 @@ syntax_variants:
 - RDWORD D,{#}S/P
 last_updated: '2025-09-19T16:04:17.009591'
 category: Hub RAM
-oneliner: Read
+oneliner: Read zero-extended word from hub RAM

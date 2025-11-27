@@ -1,5 +1,6 @@
 instruction: CALLA
-syntax: CALLA   D        {WC/WZ/WCZ}
+syntax: CALLA #{\}Addr | CALLA Dest {WC|WZ|WCZ}
+brief_description: Call subroutine via PTRA
 encoding:
 - bits: EEEE 1101011 CZ0 DDDDDDDDD 000101110
   write: —
@@ -32,7 +33,9 @@ compiler_encoding:
   operandFormat: 19
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
-- 'CALLA #{\}A'
+- 'CALLA #Addr'
+- 'CALLA #\Addr'
+- 'CALLA Dest {WC|WZ|WCZ}'
 last_updated: '2025-09-19T16:04:17.448837'
 parameters:
 - Addr is a symbolic reference to the target subroutine; the location to set PC to.

@@ -42,4 +42,4 @@ syntax_variants:
 - TESTB D,{#}S
 last_updated: '2025-09-19T16:04:17.344434'
 category: Math and Logic
-oneliner: WC/WZ Test bit S[4:0] of D, write to C/Z
+oneliner: Test bit of register and write to C/Z flag

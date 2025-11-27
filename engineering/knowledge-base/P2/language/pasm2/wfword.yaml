@@ -28,4 +28,4 @@ syntax_variants:
 - WFWORD {#}D
 last_updated: '2025-09-19T16:04:17.182612'
 category: Hub FIFO
-oneliner: Write
+oneliner: Write word to FIFO

@@ -11,6 +11,7 @@ result: >-
   Dest is decremented. If the result is not zero, PC is set to a new relative (#Src)
   or absolute (Src) address; otherwise execution continues with the next instruction.
 parameters:
+- Dest is a register whose value is decremented and tested for zero or not zero.
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'

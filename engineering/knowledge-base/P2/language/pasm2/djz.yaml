@@ -34,6 +34,7 @@ syntax_variants:
 - DJZ D,{#}S
 last_updated: '2025-09-19T16:04:17.637402'
 parameters:
+- Dest is a register whose value is decremented and tested for zero or not zero.
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'

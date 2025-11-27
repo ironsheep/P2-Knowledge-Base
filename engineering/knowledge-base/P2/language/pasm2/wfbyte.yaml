@@ -28,4 +28,4 @@ syntax_variants:
 - WFBYTE {#}D
 last_updated: '2025-09-19T16:04:17.066956'
 category: Hub FIFO
-oneliner: Write
+oneliner: Write byte to FIFO

@@ -31,4 +31,4 @@ parameters:
 - Dest is the destination register to receive the popped value
 - PTRA is automatically decremented before the read
 category: Hub RAM
-oneliner: Read
+oneliner: Pop long from hub stack using PTRA (pre-decrement)

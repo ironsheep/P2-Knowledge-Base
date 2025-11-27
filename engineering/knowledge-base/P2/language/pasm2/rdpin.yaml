@@ -28,4 +28,4 @@ syntax_variants:
 - RDPIN D,{#}S
 last_updated: '2025-09-19T16:04:17.127325'
 category: Smart Pin
-oneliner: '{WC} Read smart pin S[5:0] result "Z" into D, acknowledge smart pin'
+oneliner: Read smart pin result and acknowledge pin

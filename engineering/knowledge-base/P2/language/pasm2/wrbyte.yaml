@@ -28,4 +28,4 @@ syntax_variants:
 - WRBYTE {#}D,{#}S/P
 last_updated: '2025-09-19T16:04:17.207033'
 category: Hub RAM
-oneliner: Write
+oneliner: Write byte to hub RAM

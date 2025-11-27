@@ -28,4 +28,4 @@ syntax_variants:
 - SUMC D,{#}S
 last_updated: '2025-09-19T16:04:16.910403'
 category: Math and Logic
-oneliner: '{WC/WZ/WCZ} Sum +/-S into D by C'
+oneliner: Sum +/- source into destination based on C flag

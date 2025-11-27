@@ -28,4 +28,4 @@ syntax_variants:
 - WRWORD {#}D,{#}S/P
 last_updated: '2025-09-19T16:04:17.097515'
 category: Hub RAM
-oneliner: Write
+oneliner: Write word to hub RAM

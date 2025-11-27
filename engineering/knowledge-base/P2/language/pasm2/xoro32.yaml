@@ -28,4 +28,4 @@ syntax_variants:
 - XORO32 D
 last_updated: '2025-09-19T16:04:17.566506'
 category: Math and Logic
-oneliner: Iterate D with xoroshiro32+ PRNG algorithm and put PRNG result into next
+oneliner: Iterate D with xoroshiro32+ PRNG algorithm

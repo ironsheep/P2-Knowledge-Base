@@ -50,4 +50,4 @@ syntax_variants:
 - RDLONG D,{#}S/P
 last_updated: '2025-09-19T16:04:17.050451'
 category: Hub RAM
-oneliner: Read
+oneliner: Read long from hub RAM

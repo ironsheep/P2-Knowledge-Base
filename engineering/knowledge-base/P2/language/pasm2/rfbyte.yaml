@@ -28,4 +28,4 @@ syntax_variants:
 - RFBYTE D
 last_updated: '2025-09-19T16:04:17.374923'
 category: Hub FIFO
-oneliner: Read
+oneliner: Read zero-extended byte from FIFO

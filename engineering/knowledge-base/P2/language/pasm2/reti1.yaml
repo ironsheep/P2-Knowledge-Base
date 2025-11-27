@@ -39,4 +39,4 @@ specifics:
   interrupt_number: 1
 has_group_documentation: true
 category: Branch
-oneliner: Return
+oneliner: Return from interrupt 1

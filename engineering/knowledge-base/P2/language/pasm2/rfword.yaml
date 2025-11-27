@@ -28,4 +28,4 @@ syntax_variants:
 - RFWORD D
 last_updated: '2025-09-19T16:04:17.274379'
 category: Hub FIFO
-oneliner: Read
+oneliner: Read zero-extended word from FIFO

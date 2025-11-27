@@ -28,4 +28,4 @@ syntax_variants:
 - RFVARS D
 last_updated: '2025-09-19T16:04:17.065388'
 category: Hub FIFO
-oneliner: Read
+oneliner: Read sign-extended 1-4 byte variable from FIFO

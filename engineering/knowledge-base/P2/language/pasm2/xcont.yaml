@@ -28,5 +28,4 @@ syntax_variants:
 - XCONT {#}D,{#}S
 last_updated: '2025-09-19T16:04:17.289286'
 category: Streamer
-oneliner: Bu er new streamer command to be issued on final NCO rollover of current
-  command
+oneliner: Buffer new streamer command, continuing phase

@@ -1,5 +1,6 @@
 instruction: CALLB
-syntax: CALLB   D        {WC/WZ/WCZ}
+syntax: CALLB #{\}Addr | CALLB Dest {WC|WZ|WCZ}
+brief_description: Call subroutine via PTRB
 category: Branch
 description: Write current C and Z flags and address of the next instruction into
   the 4-byte Hub RAM location at PTRA or PTRB, increment pointer, set PC to new relative
@@ -41,4 +42,8 @@ compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
   operandFormat: 19
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19T16:04:17.705736'
-oneliner: Call a subroutine; store return context in the Hub long at PTRA++ or PTRB++
+oneliner: Call a subroutine; store return context in the Hub long at PTRB++
+syntax_variants:
+- 'CALLB #Addr'
+- 'CALLB #\Addr'
+- 'CALLB Dest {WC|WZ|WCZ}'

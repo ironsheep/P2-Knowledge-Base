@@ -27,4 +27,4 @@ syntax_variants:
 - RQPIN D,{#}S
 last_updated: '2025-09-19T16:04:17.146896'
 category: Smart Pin
-oneliner: C = modal result
+oneliner: Read smart pin result without acknowledge
