@@ -12,7 +12,7 @@ parameters:
 - WC is an optional effect to update the C flag with the Dest cog's running status.
 flags_affected:
   C: Set to 1 if specified cog is running, 0 if stopped (when WC specified)
-  Z: Not affected
+  Z: No effect
 syntax_variants:
 - COGID {#}Dest {WC}
 timing:

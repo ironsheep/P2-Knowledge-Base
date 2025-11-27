@@ -43,8 +43,8 @@ encoding:
   z: —
   clocks: '2'
 flags_affected:
-  C: Not affected
-  Z: Not affected
+  C: No effect
+  Z: No effect
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:

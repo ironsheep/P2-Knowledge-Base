@@ -8,8 +8,8 @@ parameters:
 - Dest is the register whose 10-bit value is the index, or the full word address, for the SETWORD instruction to operate on.
 - Src is an optional register, 9-bit literal, or 18-bit augmented literal whose value contains a base long address (Src[8:0]; added to index (Dest[9:1]) for SETWORD) and also an optional auto-indexer value (Src[17:9]; added to Dest at end of execution).
 flags_affected:
-  C: Not affected
-  Z: Not affected
+  C: No effect
+  Z: No effect
 syntax_variants:
 - ALTSW Dest, {#}Src
 - ALTSW Dest

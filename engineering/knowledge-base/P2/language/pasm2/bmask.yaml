@@ -8,8 +8,8 @@ parameters:
 - Dest is the register in which to store the generated bit mask and optionally begins by containing the 5-bit mask size it is requesting (syntax 2).
 - Src is an optional register or 5-bit literal whose value is the size of the bit mask to generate.
 flags_affected:
-  C: Not affected
-  Z: Not affected
+  C: No effect
+  Z: No effect
 syntax_variants:
 - BMASK Dest, {#}Src
 - BMASK Dest

@@ -23,8 +23,8 @@ parameters:
   the absolute or relative address to set PC to. Use # for relative addressing;
   omit # for absolute addressing.'
 flags_affected:
-  C: Not affected
-  Z: Not affected
+  C: No effect
+  Z: No effect
 syntax_variants:
 - TJS Dest, {#}Src
 timing:

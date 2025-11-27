@@ -43,12 +43,8 @@ parameters:
 - WC, WZ, or WCZ are optional effects to update the flags from Dest's upper
   bit states.
 flags_affected:
-  C:
-    formula: D[31]
-    description: Updated from Dest bit 31 if WC/WCZ specified (after recording original)
-  Z:
-    formula: D[30]
-    description: Updated from Dest bit 30 if WZ/WCZ specified (after recording original)
+  C: Updated from D[31] if WC/WCZ specified (after recording original)
+  Z: Updated from D[30] if WZ/WCZ specified (after recording original)
 syntax_variants:
 - CALL #Addr
 - CALL #\Addr

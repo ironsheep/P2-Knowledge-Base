@@ -7,7 +7,7 @@ parameters:
   the I/O pin(s) to set to output or input.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C: Not affected
+  C: No effect
   Z: Set to original DIR bit state (if WCZ specified)
 timing:
   cycles: 2

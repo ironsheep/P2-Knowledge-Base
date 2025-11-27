@@ -24,8 +24,8 @@ parameters:
 - Src is an optional register or 5-bit literal whose value is the bit position
   to set high in the decoded value.
 flags_affected:
-  C: Not affected
-  Z: Not affected
+  C: No effect
+  Z: No effect
 syntax_variants:
 - DECOD Dest, {#}Src
 - DECOD Dest

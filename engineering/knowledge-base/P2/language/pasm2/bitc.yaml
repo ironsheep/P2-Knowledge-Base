@@ -11,7 +11,7 @@ timing:
   type: fixed
 description: BITC alters the Dest bit(s) designated by Src to equal the state of the C flag. Dest bit(s) described by Src are set to C; the rest are left as-is. If WCZ is specified, the Z flag is updated to the original state of the target bit.
 flags_affected:
-  C: Not affected
+  C: No effect
   Z: Set to original D[S[4:0]] (original state of target bit)
 documentation_source: PASM2 Manual 2022/11/01
 documentation_level: comprehensive

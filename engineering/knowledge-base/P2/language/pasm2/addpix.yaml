@@ -10,8 +10,8 @@ parameters:
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose RGB color value
   bytes are added into Dest.
 flags_affected:
-  C: Not affected
-  Z: Not affected
+  C: No effect
+  Z: No effect
 syntax_variants:
 - ADDPIX Dest, {#}Src
 timing:

@@ -35,12 +35,8 @@ parameters:
   identifies the I/O pin(s) to set randomly to input or output.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C:
-    formula: original DIRx base bit
-    description: Set to original state of base bit before modification
-  Z:
-    formula: original DIRx base bit
-    description: Set to original state of base bit before modification
+  C: Set to original DIRx base bit (original state before modification)
+  Z: Set to original DIRx base bit (original state before modification)
 syntax_variants:
 - DIRRND {#}Dest {WCZ}
 timing:

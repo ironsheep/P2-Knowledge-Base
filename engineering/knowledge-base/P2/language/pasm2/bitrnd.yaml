@@ -33,12 +33,8 @@ parameters:
   identifies the bit(s) to modify.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C:
-    formula: original D[S[4:0]]
-    description: Set to original state of base bit before modification
-  Z:
-    formula: original D[S[4:0]]
-    description: Set to original state of base bit before modification
+  C: Set to original D[S[4:0]] (original state of base bit before modification)
+  Z: Set to original D[S[4:0]] (original state of base bit before modification)
 syntax_variants:
 - BITRND Dest, {#}Src {WCZ}
 timing:

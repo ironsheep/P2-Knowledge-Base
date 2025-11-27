@@ -19,8 +19,8 @@ parameters:
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose select
   bits will replace the corresponding bits in Dest.
 flags_affected:
-  C: Not affected
-  Z: Not affected
+  C: No effect
+  Z: No effect
 syntax_variants:
 - MUXQ Dest, {#}Src
 timing:

@@ -20,8 +20,8 @@ parameters:
   contains the target word to read.
 - Num is a 1-bit literal identifying the word ID (0-1) of Src to read.
 flags_affected:
-  C: Not affected
-  Z: Not affected
+  C: No effect
+  Z: No effect
 syntax_variants:
 - 'GETWORD Dest, {#}Src, #Num'
 - GETWORD Dest
