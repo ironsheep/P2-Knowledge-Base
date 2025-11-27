@@ -30,7 +30,8 @@ parameters:
   is to be encoded into a bit position.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  Z: Result = 0
+  C: Set if source was not zero
+  Z: Set if result is zero
 syntax_variants:
 - ENCOD Dest, {#}Src {WC|WZ|WCZ}
 - ENCOD Dest {WC|WZ|WCZ}

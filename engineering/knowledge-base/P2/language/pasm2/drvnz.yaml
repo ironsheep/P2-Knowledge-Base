@@ -29,8 +29,8 @@ result: >-
   The I/O pins described by Dest are set to the output direction and to an output
   level of low/high according to !Z; the rest are left as-is.
 flags_affected:
-  Z:
-    formula: OUT bit
+  C: No effect
+  Z: Set to OUT bit state
 parameters:
 - Dest is the register, 9-bit literal, or 11-bit augmented literal whose value identifies
   the I/O pin(s) to set to output direction and output levels of low or high.

@@ -14,7 +14,8 @@ timing:
   cycles: 4/4
   type: fixed
 flags_affected:
-  C: '{10''b0, D[9:0]}'
+  C: No effect
+  Z: No effect
 compiler_operand_format:
   name: operand_l
   pattern: D/#0..511

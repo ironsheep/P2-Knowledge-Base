@@ -26,6 +26,9 @@ description: 'Get breakpoint/cog status into D according to WC/WZ/WCZ.
   Essential for debug infrastructure and multi-COG coordination.
 
   '
+flags_affected:
+  C: No effect
+  Z: No effect
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:

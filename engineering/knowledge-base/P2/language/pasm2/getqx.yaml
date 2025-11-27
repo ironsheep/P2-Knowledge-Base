@@ -15,8 +15,8 @@ description: >-
   effect is specified, C is set to X[31] (the sign bit). If the WZ effect is
   specified, Z is set if the result equals zero.
 flags_affected:
-  C:
-    formula: X[31]
+  C: Set to X[31] (sign bit)
+  Z: Set if result is zero
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:

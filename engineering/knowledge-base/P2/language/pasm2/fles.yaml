@@ -23,12 +23,8 @@ parameters:
   value is the upper limit to force upon Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C:
-    formula: limit enforced
-    description: Set if Dest was limited (was greater than Src)
-  Z:
-    formula: Result = 0
-    description: Set if result is zero
+  C: Set if limit was enforced
+  Z: Set if result is zero
 syntax_variants:
 - FLES Dest, {#}Src {WC|WZ|WCZ}
 timing:

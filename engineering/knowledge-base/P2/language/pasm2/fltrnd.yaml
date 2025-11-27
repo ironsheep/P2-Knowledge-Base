@@ -40,12 +40,8 @@ parameters:
   level(s) set randomly to low or high.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  C:
-    formula: original OUTx base bit
-    description: Set to original state of base bit before modification
-  Z:
-    formula: original OUTx base bit
-    description: Set to original state of base bit before modification
+  C: Set to original OUTx base bit state
+  Z: Set to original OUTx base bit state
 syntax_variants:
 - FLTRND {#}Dest {WCZ}
 timing:

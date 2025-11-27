@@ -19,10 +19,8 @@ parameters:
   the target nibble to read.
 - Num is a 3-bit literal identifying the nibble ID (0-7) of Src to read.
 flags_affected:
-  C:
-    formula: not affected
-  Z:
-    formula: not affected
+  C: No effect
+  Z: No effect
 syntax_variants:
 - 'GETNIB Dest, {#}Src, #Num'
 - GETNIB Dest

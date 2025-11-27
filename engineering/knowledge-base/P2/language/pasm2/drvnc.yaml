@@ -25,8 +25,8 @@ parameters:
   the I/O pin(s) to set to output direction and output levels of low or high.
 - WCZ is an optional effect to update flags.
 flags_affected:
-  Z:
-    formula: OUT bit
+  C: No effect
+  Z: Set to OUT bit state
 timing:
   cycles: 2
   type: fixed

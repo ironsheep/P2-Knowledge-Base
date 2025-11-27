@@ -20,10 +20,8 @@ parameters:
   the target byte to read.
 - Num is a 2-bit literal identifying the byte ID (0-3) of Src to read.
 flags_affected:
-  C:
-    formula: not affected
-  Z:
-    formula: not affected
+  C: No effect
+  Z: No effect
 syntax_variants:
 - 'GETBYTE Dest, {#}Src, #Num'
 - GETBYTE Dest
