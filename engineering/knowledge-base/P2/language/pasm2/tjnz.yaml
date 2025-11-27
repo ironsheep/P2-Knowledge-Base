@@ -3,6 +3,9 @@ syntax: TJNZ    D,{#}S
 category: Branch
 description: Dest is tested and if it's zero (or not zero in syntax 2), PC is set
   to a new relative (#Src) or absolute (Src) address.
+flags_affected:
+  C: No effect
+  Z: No effect
 parameters:
 - Dest is a register whose value is tested for zero or not zero.
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the

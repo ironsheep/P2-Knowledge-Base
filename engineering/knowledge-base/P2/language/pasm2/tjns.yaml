@@ -13,6 +13,9 @@ description: >-
 result: >-
   Dest is tested and if it's not signed (Dest[31] = 0), PC is set to a new relative
   (#Src) or absolute (Src) address.
+flags_affected:
+  C: No effect
+  Z: No effect
 parameters:
 - Dest is a register whose value is tested for sign or no sign.
 - 'Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the

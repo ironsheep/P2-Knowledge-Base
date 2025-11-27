@@ -23,7 +23,8 @@ parameters:
   absolute or relative address to set PC to. Use # for relative addressing; omit #
   for absolute addressing.'
 flags_affected:
-  C: '''correct sign'' from last addition/subtraction'
+  C: No effect
+  Z: No effect
 syntax_variants:
 - TJV D,{#}S
 timing:

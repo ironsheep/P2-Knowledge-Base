@@ -25,8 +25,8 @@ description: >-
   by a previous SETPAT instruction. The pin-pattern-detected event flag is cleared
   upon execution of SETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions.
 flags_affected:
-  Z:
-    formula: timeout
+  C: Set if timeout occurred before event
+  Z: Set if timeout occurred before event
 related:
 - SETPAT
 - POLLPAT

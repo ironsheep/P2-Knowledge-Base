@@ -7,8 +7,8 @@ result: Waits for SE4 event, clears the flag, and resumes. If timeout occurs (wi
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  Z:
-    formula: timeout
+  C: Set if timeout occurred before event
+  Z: Set if timeout occurred before event
 syntax_variants:
 - WAITSE4 {WC|WZ|WCZ}
 timing:

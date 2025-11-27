@@ -13,6 +13,9 @@ description: "Set mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledge sm
   \ pins. \nWraps within A/B pins. Prior SETQ overrides S[10:6].\n\n**CRITICAL REQUIREMENT**:\
   \ Smart pins MUST be reset (DIR=0) before configuring with WRPIN.\nThis ensures\
   \ the smart pin is in a known state and prevents configuration conflicts.\n"
+flags_affected:
+  C: No effect
+  Z: No effect
 critical_requirement:
   reset_before_configure: true
   description: Smart pin MUST be reset (DIR=0) before any WRPIN configuration

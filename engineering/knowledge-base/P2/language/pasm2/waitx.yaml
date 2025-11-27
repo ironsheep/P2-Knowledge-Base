@@ -20,8 +20,8 @@ description: 'Wait for D+1 clock cycles. Stalls the cog for precise timing delay
 
   '
 flags_affected:
-  Z:
-    formula: 0
+  C: Set to 0 after completion
+  Z: Set to 0 after completion
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:

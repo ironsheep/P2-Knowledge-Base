@@ -21,12 +21,8 @@ parameters:
   value is ANDed with Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C:
-    formula: parity of (D & !S)
-    description: Set if odd number of high bits in result
-  Z:
-    formula: (D & !S) = 0
-    description: Set if result is zero
+  C: Set if odd number of high (1) bits in result (parity)
+  Z: Set if result equals zero
 syntax_variants:
 - TESTN Dest, {#}Src {WC|WZ|WCZ}
 timing:

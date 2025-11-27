@@ -23,8 +23,8 @@ result: >-
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  Z:
-    formula: timeout
+  C: Set if timeout occurred before event
+  Z: Set if timeout occurred before event
 syntax_variants:
 - WAITXRL {WC|WZ|WCZ}
 timing:

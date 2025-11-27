@@ -10,6 +10,9 @@ timing:
   cycles: 2
   type: fixed
 description: Issue streamer command immediately, zeroing phase.
+flags_affected:
+  C: No effect
+  Z: No effect
 documentation_source: enhanced_from_code_study
 documentation_level: comprehensive
 examples:

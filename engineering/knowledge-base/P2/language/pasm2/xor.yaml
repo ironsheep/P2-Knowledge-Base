@@ -18,7 +18,8 @@ parameters:
   bitwise XORed into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  Z: Result = 0
+  C: Set if odd number of high (1) bits in result (parity)
+  Z: Set if result equals zero
 syntax_variants:
 - XOR D,{#}S {WC|WZ|WCZ}
 timing:

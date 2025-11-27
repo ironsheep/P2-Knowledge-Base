@@ -18,6 +18,9 @@ timing:
   type: fixed
 description: Write long in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2 invokes
   cog/LUT block transfer.              3...10 1 / 3...20
+flags_affected:
+  C: No effect
+  Z: No effect
 compiler_category: Memory and I/O
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced

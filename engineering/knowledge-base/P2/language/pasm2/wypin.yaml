@@ -28,6 +28,9 @@ description: 'Set "Y" register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknow
   - Writing Y also acknowledges pin completion
 
   '
+flags_affected:
+  C: No effect
+  Z: No effect
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:

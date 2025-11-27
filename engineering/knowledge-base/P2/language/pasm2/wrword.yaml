@@ -11,6 +11,9 @@ timing:
   type: fixed
 description: Write word in D[15:0] to hub address {#}S/PTRx.                                                               3...10
   1 / 3...20
+flags_affected:
+  C: No effect
+  Z: No effect
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:

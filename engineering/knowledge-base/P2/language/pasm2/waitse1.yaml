@@ -11,8 +11,8 @@ timing:
   type: variable
 description: Wait for SE1 event flag, then clear it. WAITSE1 waits for selectable event 1 to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITSE1 can time-out if the event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSE1. The WC/WZ/WCZ effect is recommended only with timeout specified; flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The SE1 event flag is set whenever the configured selectable event 1 occurs. The flag is cleared by SETSE1, POLLSE1, WAITSE1, JSE1, or JNSE1 execution.
 flags_affected:
-  Z:
-    formula: timeout
+  C: Set if timeout occurred before event
+  Z: Set if timeout occurred before event
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:

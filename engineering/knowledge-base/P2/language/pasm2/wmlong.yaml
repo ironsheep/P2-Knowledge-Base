@@ -11,6 +11,9 @@ timing:
   type: fixed
 description: Write only non-$00 bytes in D[31:0] to hub address {#}S/PTRx. Prior SETQ/SETQ2
   invokes cog/LUT block transfer.
+flags_affected:
+  C: No effect
+  Z: No effect
 documentation_source: original
 documentation_level: enhanced
 related_instructions:

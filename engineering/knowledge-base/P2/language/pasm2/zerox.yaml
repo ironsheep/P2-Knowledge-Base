@@ -23,12 +23,8 @@ parameters:
   bit of Dest to zero-extend beyond.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C:
-    formula: MSB of result
-    description: Set to the result's MSB value
-  Z:
-    formula: Result = 0
-    description: Set if result is zero
+  C: Set to result's MSB value
+  Z: Set if result equals zero
 syntax_variants:
 - ZEROX Dest, {#}Src {WC|WZ|WCZ}
 timing:

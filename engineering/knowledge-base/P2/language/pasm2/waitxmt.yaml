@@ -24,8 +24,8 @@ description: >-
   is ready for a new command. The streamer-empty event flag is cleared upon execution
   of XINIT, XZERO, XCONT, POLLXMT, WAITXMT, JXMT, or JNXMT instructions.
 flags_affected:
-  Z:
-    formula: timeout
+  C: Set if timeout occurred before event
+  Z: Set if timeout occurred before event
 related:
 - XINIT
 - XZERO
