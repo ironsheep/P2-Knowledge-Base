@@ -9,53 +9,7 @@ encoding:
 timing:
   cycles: 2
   type: variable
-description: 'Wait for CT1 event flag, then clear it. Prior SETQ sets optional CT
-  timeout value. C/Z = timeout.
-
-
-  WAITCT1, WAITCT2, or WAITCT3 waits for a counter 1, 2, or 3 event to occur (unless
-  the event flag is already set),
-
-
-  then clears the event flag (unless it''s being set again by the event sensor) and
-  resumes execution at the next
-
-
-  instruction. Optionally, WAITCTx can time-out if the counter event doesn''t occur
-  soon enough; setting C and/or Z
-
-
-  flags and then resuming execution at the next instruction.
-
-
-  To set the optional timeout, insert a SETQ (with a future System Counter target
-  value) right before WAITCTx.
-
-
-  The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified,
-  in which case the C flag and/or
-
-
-  Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the
-  event occurred before the timeout.
-
-
-  During a wait, the pipeline is stalled; no instructions execute and no interrupts
-  are processed in the cog until the
-
-
-  wait condition ends.
-
-
-  The counter 1, 2, or 3 event flag is set whenever the System Counter (CT) passes
-  the value in the CT1, CT2, or CT3
-
-
-  event trigger register, respectively; i.e. MSB of (CT - CTx is 0). The counter event
-  flags are cleared upon execution
-
-
-  of the corresponding ADDCTx, POLLCTx, WAITCTx, JCTx, or JNCTx instructions.'
+description: Wait for CT1 event flag, then clear it. WAITCT1 waits for the counter 1 event to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITCT1 can time-out if the counter event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITCT1. The WC/WZ/WCZ effect is recommended only with timeout specified; flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The CT1 event flag is set whenever the System Counter passes the value in the CT1 event trigger register (MSB of CT - CT1 is 0). The flag is cleared by ADDCT1, POLLCT1, WAITCT1, JCT1, or JNCT1 execution.
 flags_affected:
   Z:
     formula: timeout
@@ -69,16 +23,11 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-examples:
-- 's being set again by the event sensor) and resumes execution at the next
-
-  instruction. Optionally, WAITCTx can time-out if the counter event doesn'
+examples: []
 syntax_variants:
 - WAITCT1 {WC|WZ|WCZ}
-- WAITCT2 {WC|WZ|WCZ}
-- WAITCT3 {WC|WZ|WCZ}
 last_updated: '2025-09-19'
-brief_description: Wait counter 1/2/3
+brief_description: Wait for CT1 event flag
 group_membership:
   group_id: counter_event_waits
   group_file: groups/counter_event_waits.yaml
@@ -90,8 +39,7 @@ specifics:
   event_flag: CT1
 has_group_documentation: true
 category: Event
-result: Wait for counter 1, 2, or 3 event, then clear the flag; optionally aborting
-  on timeout and setting C and/or Z
+result: Waits for CT1 event, clears the flag, and resumes. If timeout occurs (with prior SETQ), C and/or Z are set.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 related:
@@ -100,4 +48,4 @@ related:
 - JCTx
 - JNCTx
 manual_extraction_date: '2025-01-19'
-oneliner: Wait for and clear counter 1, 2, or 3 event flag
+oneliner: Wait for and clear CT1 event flag

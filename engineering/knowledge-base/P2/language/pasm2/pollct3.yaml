@@ -1,6 +1,6 @@
 instruction: POLLCT3
 syntax: POLLCT3 {WC|WZ|WCZ}
-brief_description: Poll counter 1/2/3
+brief_description: Poll CT3 event flag
 category: Event
 description: >-
   POLLCT3 copies the state of the counter 3 event flag into C and/or Z and then clears
@@ -10,8 +10,7 @@ description: >-
   The counter 3 event flag is set whenever the System Counter (CT) passes the value
   in the CT3 event trigger register; i.e. MSB of (CT - CT3) is 0. The counter event
   flag is cleared upon execution of ADDCT3, POLLCT3, WAITCT3, JCT3, or JNCT3.
-result: Counter event flag 1, 2, or 3 state is optionally copied into C and/or Z,
-  then it is cleared.
+result: CT3 event flag state is optionally copied into C and/or Z, then the flag is cleared.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 syntax_variants:
@@ -37,9 +36,8 @@ compiler_encoding:  # [bits|write|c|z|clocks] See encoding-table-reference.yaml
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 last_updated: '2025-09-19'
 manual_extraction_date: '2025-01-19'
-oneliner: Retrieve and clear counter event 1/2/3 flag
-long_description: Counter event flag 1, 2, or 3 state is optionally copied into C
-  and/or Z, then it is cleared.
+oneliner: Retrieve and clear CT3 event flag
+long_description: CT3 event flag state is optionally copied into C and/or Z, then the flag is cleared.
 group_membership:
   group_id: counter_event_polls
   group_file: groups/counter_event_polls.yaml

@@ -10,14 +10,13 @@ timing:
   cycles: 2
   type: fixed
 description: >-
-  Get SE3 event flag into C/Z, then clear it. POLLSE1, POLLSE2, POLLSE3, or POLLSE4
-  copies the state of the selectable event 1, 2, 3, or 4 flag into C and/or Z and then
-  clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or
-  WCZ effect is specified, the C flag and/or Z flag is updated to the state of the
-  corresponding selectable event flag prior to clearing it. The selectable event 1, 2,
-  3, or 4 flag is set whenever the corresponding configured event occurs. The selectable
-  event flag is cleared upon execution of the corresponding SETSEx, POLLSEx, WAITSEx,
-  JSEx, or JNSEx instructions.
+  POLLSE3 copies the state of the selectable event 3 flag into C and/or Z and then
+  clears the flag (unless it's being set again by the event sensor).
+  If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to
+  the state of the selectable event 3 flag prior to clearing it.
+  The selectable event 3 flag is set whenever the corresponding configured event
+  occurs. The flag is cleared upon execution of SETSE3, POLLSE3, WAITSE3, JSE3, or
+  JNSE3 instructions.
 documentation_source: PASM2 Manual 2022/11/01 Pages 31-147
 documentation_level: comprehensive
 compiler_operand_format:
@@ -29,15 +28,11 @@ compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
-- POLLSE1 {WC|WZ|WCZ}
-- POLLSE2 {WC|WZ|WCZ}
 - POLLSE3 {WC|WZ|WCZ}
-- POLLSE4 {WC|WZ|WCZ}
 last_updated: '2025-09-19'
-brief_description: Poll selectable event 1/2/3/4
+brief_description: Poll SE3 event flag
 category: Event
-result: Selectable event flag 1, 2, 3, or 4 state is optionally copied into C and/or
-  Z, then it is cleared.
+result: SE3 event flag state is optionally copied into C and/or Z, then the flag is cleared.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 related:
@@ -46,4 +41,4 @@ related:
 - JSEx
 - JNSEx
 manual_extraction_date: '2025-01-19'
-oneliner: Retrieve and clear selectable event 1, 2, 3, or 4 flag
+oneliner: Retrieve and clear SE3 event flag

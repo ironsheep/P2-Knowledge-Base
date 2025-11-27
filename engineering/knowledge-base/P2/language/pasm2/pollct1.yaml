@@ -30,7 +30,7 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - POLLCT1 {WC|WZ|WCZ}
 last_updated: '2025-09-19'
-brief_description: Poll counter 1/2/3
+brief_description: Poll CT1 event flag
 group_membership:
   group_id: counter_event_polls
   group_file: groups/counter_event_polls.yaml
@@ -42,8 +42,7 @@ specifics:
   event_flag: CT1
 has_group_documentation: true
 category: Event
-result: Counter event flag 1, 2, or 3 state is optionally copied into C and/or Z,
-  then it is cleared.
+result: CT1 event flag state is optionally copied into C and/or Z, then the flag is cleared.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 related:
@@ -52,4 +51,4 @@ related:
 - JCTx
 - JNCTx
 manual_extraction_date: '2025-01-19'
-oneliner: Retrieve and clear counter event 1/2/3 flag
+oneliner: Retrieve and clear CT1 event flag

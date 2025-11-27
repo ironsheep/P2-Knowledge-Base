@@ -9,53 +9,7 @@ encoding:
 timing:
   cycles: 2
   type: variable
-description: 'Wait for SE1 event flag, then clear it. Prior SETQ sets optional CT
-  timeout value. C/Z = timeout.
-
-
-  WAITSE1, WAITSE2, WAITSE3, or WAITSE4 waits for a selectable event to occur (unless
-  the event flag is already
-
-
-  set), then clears the event flag (unless it''s being set again by the event sensor)
-  and resumes execution at the next
-
-
-  instruction. Optionally, WAITSEx can time-out if the selectable event doesn''t occur
-  soon enough; setting C and/or
-
-
-  Z flags and then resuming execution at the next instruction.
-
-
-  To set the optional timeout, insert a SETQ (with a future System Counter target
-  value) right before WAITSEx.
-
-
-  The WC, WZ, or WCZ effect is recommended only if the optional timeout is specified,
-  in which case the C flag and/or
-
-
-  Z flag is set (1) if a timeout occurred before the event, or is cleared (0) if the
-  event occurred before the timeout.
-
-
-  During a wait, the pipeline is stalled; no instructions execute and no interrupts
-  are processed in the cog until the
-
-
-  wait condition ends.
-
-
-  The selectable event 1, 2, 3, or 4 flag is set whenever the corresponding configured
-  event occurs. The selectable
-
-
-  event flag is cleared upon execution of the corresponding SETSEx, POLLSEx, WAITSEx,
-  JSEx, or JNSEx
-
-
-  instructions.'
+description: Wait for SE1 event flag, then clear it. WAITSE1 waits for selectable event 1 to occur (unless the flag is already set), then clears the event flag and resumes execution. Optionally, WAITSE1 can time-out if the event doesn't occur soon enough, setting C and/or Z flags. To set the optional timeout, insert a SETQ (with a future System Counter target value) right before WAITSE1. The WC/WZ/WCZ effect is recommended only with timeout specified; flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first. During wait, the pipeline is stalled; no instructions execute and no interrupts are processed until the wait ends. The SE1 event flag is set whenever the configured selectable event 1 occurs. The flag is cleared by SETSE1, POLLSE1, WAITSE1, JSE1, or JNSE1 execution.
 flags_affected:
   Z:
     formula: timeout
@@ -69,17 +23,11 @@ compiler_operand_format:
 compiler_encoding:
   operandFormat: 28
 enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
-examples:
-- 's being set again by the event sensor) and resumes execution at the next
-
-  instruction. Optionally, WAITSEx can time-out if the selectable event doesn'
+examples: []
 syntax_variants:
 - WAITSE1 {WC|WZ|WCZ}
-- WAITSE2 {WC|WZ|WCZ}
-- WAITSE3 {WC|WZ|WCZ}
-- WAITSE4 {WC|WZ|WCZ}
 last_updated: '2025-09-19'
-brief_description: Wait selectable event 1/2/3/4
+brief_description: Wait for SE1 event flag
 group_membership:
   group_id: selector_event_waits
   group_file: groups/selector_event_waits.yaml
@@ -92,8 +40,7 @@ specifics:
   event_flag: SE1
 has_group_documentation: true
 category: Event
-result: Wait for selectable event, then clear the flag; optionally aborting on timeout
-  and setting C and/or Z on
+result: Waits for SE1 event, clears the flag, and resumes. If timeout occurs (with prior SETQ), C and/or Z are set.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 related:
@@ -102,4 +49,4 @@ related:
 - JSEx
 - JNSEx
 manual_extraction_date: '2025-01-19'
-oneliner: Wait for and clear selectable event 1, 2, 3, or 4 flag
+oneliner: Wait for and clear SE1 event flag

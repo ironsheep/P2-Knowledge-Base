@@ -30,10 +30,9 @@ enhancement_source: PNUT_TS_v2.0_complete_operand_integration_2025-09-13
 syntax_variants:
 - POLLSE1 {WC|WZ|WCZ}
 last_updated: '2025-09-19'
-brief_description: Poll selectable event 1/2/3/4
+brief_description: Poll SE1 event flag
 category: Event
-result: Selectable event flag 1, 2, 3, or 4 state is optionally copied into C and/or
-  Z, then it is cleared.
+result: SE1 event flag state is optionally copied into C and/or Z, then the flag is cleared.
 parameters:
 - WC, WZ, or WCZ are optional effects to update flags.
 related:
@@ -42,4 +41,4 @@ related:
 - JSEx
 - JNSEx
 manual_extraction_date: '2025-01-19'
-oneliner: Retrieve and clear selectable event 1, 2, 3, or 4 flag
+oneliner: Retrieve and clear SE1 event flag
