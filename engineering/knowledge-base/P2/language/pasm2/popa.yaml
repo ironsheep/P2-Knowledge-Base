@@ -11,12 +11,8 @@ timing:
   type: fixed
 description: Read long from hub address --PTRA into D.
 flags_affected:
-  C:
-    formula: MSB of long
-    description: Set to bit 31 of the popped value
-  Z:
-    formula: Result = 0
-    description: Set if popped value is zero
+  C: Set to MSB of long (bit 31 of popped value)
+  Z: Set if result equals zero
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:

@@ -12,6 +12,9 @@ timing:
 description: Calculate square root of 64-bit unsigned number formed from {S, D}. Takes
   upper 32 bits from S operand and lower 32 bits from D operand. Result retrieved
   via GETQX instruction 55 clocks later.
+flags_affected:
+  C: No effect
+  Z: No effect
 long_description: 'The QSQRT instruction performs square root calculation using the
   P2''s 54-stage pipelined CORDIC solver. It calculates the square root of a 64-bit
   unsigned value and produces a 32-bit result.

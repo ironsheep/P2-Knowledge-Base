@@ -18,8 +18,8 @@ parameters:
   the target byte to read.
 - Num is a 2-bit literal identifying the nibble ID (0-3) of Src to read.
 flags_affected:
-  C:
-    when: D
+  C: No effect
+  Z: No effect
 syntax_variants:
 - 'ROLBYTE Dest, {#}Src, #Num'
 - ROLBYTE Dest

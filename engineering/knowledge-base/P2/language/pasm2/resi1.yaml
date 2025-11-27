@@ -11,6 +11,9 @@ timing:
   type: variable
   range: 4 / 13...20
 description: Resume from INT1. (CALLD $1F4,$1F5 WCZ).
+flags_affected:
+  C: No effect
+  Z: No effect
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: structured
 compiler_operand_format:

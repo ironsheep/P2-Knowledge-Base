@@ -15,7 +15,8 @@ parameters:
   to rotate.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  Z: Result = 0
+  C: Set to last bit shifted out if S[4:0] > 0, else D[0]
+  Z: Set if result equals zero
 syntax_variants:
 - RCR D,{#}S {WC|WZ|WCZ}
 timing:

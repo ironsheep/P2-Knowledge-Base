@@ -19,6 +19,9 @@ timing:
 description: Perform 32×32 unsigned multiplication producing 64-bit result. Multiplies
   D operand by S operand. Results retrieved via GETQX (lower 32 bits) and GETQY (upper
   32 bits) instructions 55 clocks later.
+flags_affected:
+  C: No effect
+  Z: No effect
 long_description: 'The QMUL instruction performs high-precision unsigned multiplication
   using the P2''s 54-stage pipelined CORDIC solver. It multiplies two 32-bit unsigned
   integers (D × S) and produces a full 64-bit product, avoiding the precision loss

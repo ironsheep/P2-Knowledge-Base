@@ -28,8 +28,8 @@ parameters:
   to rotate.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C:
-    formula: last bit shifted out if S[4:0] > 0, else D[31]
+  C: Set to last bit shifted out if S[4:0] > 0, else D[31]
+  Z: Set if result equals zero
 syntax_variants:
 - RCL Dest, {#}Src {WC|WZ|WCZ}
 - RCL shifts Dest's binary value left by Src places (0-31 bits) and sets the new LSBs

@@ -12,8 +12,8 @@ timing:
 description: '{WC/WZ/WCZ}   Used after RDFAST. Read sign-extended 1..4-byte value
   from FIFO into D. C = MSB of value. *                            2 / FIFO IN USE'
 flags_affected:
-  C:
-    formula: MSB of value
+  C: Set to MSB of value
+  Z: Set if result equals zero
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:

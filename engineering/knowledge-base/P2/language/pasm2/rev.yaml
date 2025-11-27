@@ -18,8 +18,8 @@ result: The 32-bit pattern in Dest is reversed.
 parameters:
 - Dest is the register containing the bit value to reverse.
 flags_affected:
-  C:
-    when: D
+  C: No effect
+  Z: No effect
 syntax_variants:
 - REV Dest
 - REV performs a bitwise reverse (bits 31:0 bits 0:31) of the value in Dest and stores

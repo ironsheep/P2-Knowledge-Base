@@ -28,6 +28,9 @@ description: 'Begin new fast hub read via FIFO. D[31] = no wait, D[13:0] = block
   - Used with RFBYTE/RFWORD/RFLONG instructions
 
   '
+flags_affected:
+  C: No effect
+  Z: No effect
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:

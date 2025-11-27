@@ -12,10 +12,8 @@ timing:
   range: 4 / 13...20
 description: 'Return by popping stack (K). C = K[31], Z = K[30], PC = K[19:0].'
 flags_affected:
-  C:
-    formula: K[31], Z = K[30], PC = K[19:0]
-  Z:
-    formula: K[30], PC = K[19:0]
+  C: Set to K[31] (bit 31 of popped stack value)
+  Z: Set to K[30] (bit 30 of popped stack value)
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:

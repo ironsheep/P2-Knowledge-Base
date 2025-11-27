@@ -12,12 +12,8 @@ timing:
 description: Pop stack (K). D = K. C = K[31]. Pops the internal stack register K
   into destination register D.
 flags_affected:
-  C:
-    formula: K[31]
-    description: Set to bit 31 of the popped value
-  Z:
-    formula: Result = 0
-    description: Set if popped value is zero
+  C: Set to K[31] (bit 31 of popped value)
+  Z: Set if result equals zero
 documentation_source: P2 Instructions v35 CSV
 documentation_level: enhanced
 compiler_operand_format:

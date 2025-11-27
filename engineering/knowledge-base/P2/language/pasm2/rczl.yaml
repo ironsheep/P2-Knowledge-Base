@@ -14,7 +14,8 @@ parameters:
   into.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C: D[31] D[30] 2
+  C: Set to original D[31] state
+  Z: Set to original D[30] state
 syntax_variants:
 - RCZL D {WC|WZ|WCZ}
 timing:

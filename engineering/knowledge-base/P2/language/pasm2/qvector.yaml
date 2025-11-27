@@ -12,6 +12,9 @@ timing:
 description: Convert cartesian coordinates (X, Y) to polar coordinates (length, angle).
   Takes X coordinate in D and Y coordinate in S as 32-bit signed values. Results retrieved
   via GETQX (length) and GETQY (angle) instructions 55 clocks later.
+flags_affected:
+  C: No effect
+  Z: No effect
 long_description: 'The QVECTOR instruction performs cartesian to polar coordinate
   conversion using the P2''s 54-stage pipelined CORDIC solver. It converts a 32-bit
   signed (X, Y) cartesian coordinate pair into a 32-bit (length, angle) polar coordinate

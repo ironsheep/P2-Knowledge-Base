@@ -13,6 +13,9 @@ description: Rotate a 32-bit signed (X, Y) point around origin (0, 0) by a speci
   angle. X coordinate comes from D operand, Y coordinate from SETQ value (or 0 if
   SETQ not used). Angle specified in S operand. Results retrieved via GETQX (X) and
   GETQY (Y) instructions 55 clocks later.
+flags_affected:
+  C: No effect
+  Z: No effect
 long_description: 'The QROTATE instruction performs point rotation using the P2''s
   54-stage pipelined CORDIC solver. It rotates a 32-bit signed (X, Y) coordinate pair
   around the origin (0, 0) by a specified angle, producing new 32-bit signed (X, Y)

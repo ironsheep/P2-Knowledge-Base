@@ -12,6 +12,9 @@ timing:
 description: Perform 64÷32 unsigned division with 32-bit quotient and remainder. Numerator
   formed from {SETQ value or 32'b0, D}, divided by S. Results retrieved via GETQX
   (quotient) and GETQY (remainder) instructions 55 clocks later.
+flags_affected:
+  C: No effect
+  Z: No effect
 long_description: 'The QDIV instruction performs high-precision unsigned division
   using the P2''s 54-stage pipelined CORDIC solver. It divides a 64-bit numerator
   by a 32-bit denominator, producing both a 32-bit quotient and 32-bit remainder.

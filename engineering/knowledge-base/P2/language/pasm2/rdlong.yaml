@@ -20,8 +20,8 @@ description: '{WC/WZ/WCZ}                                                       
   1 / 9...26'
 compiler_category: Memory and I/O
 flags_affected:
-  C:
-    formula: MSB of long
+  C: Set to MSB of long
+  Z: No effect
 compiler_effects:
 - name: wc
   symbol: WC

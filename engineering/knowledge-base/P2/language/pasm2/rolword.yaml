@@ -18,8 +18,8 @@ parameters:
   the target word to read.
 - Num is a 1-bit literal identifying the nibble ID (0-1) of Src to read.
 flags_affected:
-  C:
-    when: D
+  C: No effect
+  Z: No effect
 syntax_variants:
 - 'ROLWORD Dest, {#}Src, #Num'
 - ROLWORD Dest

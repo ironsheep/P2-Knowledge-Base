@@ -12,6 +12,9 @@ timing:
 description: Perform 64÷32 unsigned fractional division with D as upper 32 bits. Numerator
   formed from {D, SETQ value or 32'b0}, divided by S. Results retrieved via GETQX
   (quotient) and GETQY (remainder) instructions 55 clocks later.
+flags_affected:
+  C: No effect
+  Z: No effect
 long_description: 'The QFRAC instruction performs fractional division using the P2''s
   54-stage pipelined CORDIC solver. It divides a 64-bit numerator by a 32-bit denominator,
   but differs from QDIV in the operand arrangement: D forms the upper 32 bits while
