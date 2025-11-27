@@ -17,8 +17,8 @@ parameters:
   location.
 - Num is a 2-bit literal identifying the nibble ID (0-3) of Dest to modify.
 flags_affected:
-  C:
-    when: D
+  C: No effect
+  Z: No effect
 syntax_variants:
 - 'SETBYTE D,{#}S,#N'
 - SETBYTE {#}S

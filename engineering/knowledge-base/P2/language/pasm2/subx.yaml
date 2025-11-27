@@ -25,10 +25,8 @@ parameters:
   is subtracted from Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C:
-    formula: borrow of (D - (S + C))
-  Z:
-    formula: Z AND (result == 0)
+  C: Set if unsigned borrow occurs in D-(S+C)
+  Z: Set if Z was previously set AND result equals zero
 syntax_variants:
 - SUBX Dest, {#}Src {WC|WZ|WCZ}
 timing:

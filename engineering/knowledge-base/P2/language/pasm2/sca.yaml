@@ -15,6 +15,9 @@ parameters:
 - Src is a register, 9-bit literal, or 16-bit augmented literal whose value is multiplied
   with Dest.
 - WZ is an optional effect to update the Z flag.
+flags_affected:
+  C: No effect
+  Z: Set if product equals zero (before scaling)
 syntax_variants:
 - SCA D,{#}S {WZ}
 timing:

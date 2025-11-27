@@ -20,8 +20,8 @@ parameters:
 - Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the D field
   of Dest.
 flags_affected:
-  C:
-    when: D
+  C: No effect
+  Z: No effect
 syntax_variants:
 - SETR D,{#}S
 timing:

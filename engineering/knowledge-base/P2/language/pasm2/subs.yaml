@@ -23,7 +23,8 @@ parameters:
   from Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  Z: Result = 0
+  C: Set to sign of result (1 if negative)
+  Z: Set if result equals zero
 syntax_variants:
 - SUBS D,{#}S {WC|WZ|WCZ}
 timing:

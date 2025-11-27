@@ -12,10 +12,8 @@ timing:
 description: '{WC/WZ/WCZ}   Sum +/-S into D by Z. If Z = 1 then D = D - S, else D
   = D + S. C = correct sign of (D +/- S). *'
 flags_affected:
-  C:
-    formula: correct sign of (D +/- S)
-  Z:
-    formula: 1 then D = D - S, else D = D + S
+  C: Set to correct sign of result (D +/- S)
+  Z: Set if result equals zero
 documentation_source: PASM2 Manual 2022-11-01
 documentation_level: enhanced
 compiler_operand_format:

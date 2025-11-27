@@ -39,8 +39,8 @@ description: 'Test pin state with optional XOR operation. Z = C/Z XOR IN[D[5:0]]
 
   '
 flags_affected:
-  Z:
-    formula: C/Z XOR IN[D[5:0]]
+  C: Set to IN[D[5:0]] (pin state), or AND/OR/XOR with C
+  Z: Set to IN[D[5:0]] (pin state), or AND/OR/XOR with Z
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:

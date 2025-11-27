@@ -35,9 +35,8 @@ result: >-
   The inverted state of Dest's bit Src is read and either stored as-is, or bitwise
   ANDed, ORed, or XORed into C or Z.
 flags_affected:
-  Z:
-    formula: C/Z XOR !D[S[4:0]]
-    when: IN[D[4:0]]
+  C: Set to !D[S[4:0]] (inverted tested bit value), or AND/OR/XOR with C
+  Z: Set to !D[S[4:0]] (inverted tested bit value), or AND/OR/XOR with Z
 parameters:
 - Dest is the register whose value will have a single bit tested.
 - Src is a register or 5-bit literal whose value identifies the bit (0-31) of Dest

@@ -20,8 +20,8 @@ description: >-
   it is necessary to elapse at least two instructions before executing the modified
   register.
 flags_affected:
-  C:
-    when: D
+  C: No effect
+  Z: No effect
 parameters:
 - Dest is the register whose 32-bit value is a template for use with an ALTI instruction.
 - Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the S field

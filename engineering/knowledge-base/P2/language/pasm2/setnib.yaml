@@ -16,6 +16,9 @@ parameters:
 - Src is a register or 4-bit literal whose bits [3:0] will be stored in the designated
   location.
 - Num is a 3-bit literal identifying the nibble ID (0-7) of Dest to modify.
+flags_affected:
+  C: No effect
+  Z: No effect
 syntax_variants:
 - 'SETNIB D,{#}S,#N'
 - SETNIB {#}S

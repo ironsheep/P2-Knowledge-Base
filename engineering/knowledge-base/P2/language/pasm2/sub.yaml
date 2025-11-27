@@ -21,7 +21,8 @@ parameters:
   from Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  Z: Result = 0
+  C: Set if unsigned borrow (underflow) occurs
+  Z: Set if result equals zero
 syntax_variants:
 - SUB D,{#}S {WC|WZ|WCZ}
 timing:

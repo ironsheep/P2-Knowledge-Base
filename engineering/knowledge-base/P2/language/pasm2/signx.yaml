@@ -19,7 +19,8 @@ parameters:
   of Dest to zero-extend beyond.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  Z: Result = 0
+  C: Set to MSB of result
+  Z: Set if result equals zero
 syntax_variants:
 - SIGNX D,{#}S {WC|WZ|WCZ}
 timing:

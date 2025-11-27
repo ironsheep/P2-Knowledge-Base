@@ -18,10 +18,8 @@ parameters:
   or !Z=0) or negated value (if Z=1 or !Z=1) is added into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C:
-    formula: correct sign of (D +/- S)
-  Z:
-    formula: 0 then D = D - S, else D = D + S
+  C: Set to correct sign of result (D +/- S)
+  Z: Set if result equals zero
 timing:
   cycles: 2
   type: fixed

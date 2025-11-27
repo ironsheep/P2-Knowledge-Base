@@ -17,8 +17,8 @@ parameters:
   will be stored in the designated location.
 - Num is a 1-bit literal identifying the word ID (0-1) of Dest to modify.
 flags_affected:
-  C:
-    when: D
+  C: No effect
+  Z: No effect
 syntax_variants:
 - 'SETWORD D,{#}S,#N'
 - SETWORD {#}S

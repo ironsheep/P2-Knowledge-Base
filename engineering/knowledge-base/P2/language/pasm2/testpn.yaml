@@ -15,9 +15,8 @@ parameters:
 - WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, and XORZ is a required effect to update or bitwise
   manipulate the C or Z flag.
 flags_affected:
-  Z:
-    formula: C/Z XOR !IN[D[5:0]]
-    when: IN[D[5:0]]
+  C: Set to !IN[D[5:0]] (inverted pin state), or AND/OR/XOR with C
+  Z: Set to !IN[D[5:0]] (inverted pin state), or AND/OR/XOR with Z
 timing:
   cycles: 2
   type: fixed

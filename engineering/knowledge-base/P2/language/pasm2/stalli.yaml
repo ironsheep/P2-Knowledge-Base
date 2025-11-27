@@ -7,6 +7,9 @@ description: >-
   both are used to protect short, vital sections of main code from timing jitter or state
   loss caused by asynchronous interrupt handling.
 result: All future interrupts are disallowed.
+flags_affected:
+  C: No effect
+  Z: No effect
 timing:
   cycles: 2
   type: fixed

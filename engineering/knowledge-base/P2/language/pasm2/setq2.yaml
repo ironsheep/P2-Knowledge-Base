@@ -23,6 +23,9 @@ description: 'Set Q to D. Use before RDLONG/WRLONG/WMLONG to set LUT block trans
   - Essential for waveform tables and large datasets
 
   '
+flags_affected:
+  C: No effect
+  Z: No effect
 documentation_source: enhanced
 documentation_level: comprehensive
 examples:

@@ -19,8 +19,8 @@ parameters:
   left.
 - WC, WZ, or WCZ are optional effects to update flags.
 flags_affected:
-  C:
-    formula: last bit shifted out if S[4:0] > 0, else D[31]
+  C: Set to last bit shifted out if S[4:0] > 0, else D[31]
+  Z: Set if result equals zero
 syntax_variants:
 - SHL D,{#}S {WC|WZ|WCZ}
 timing:
