@@ -1,144 +1,340 @@
-special_registers: P2 I/O Special Registers
+special_registers: P2 COG Special Registers
 name: Special Registers
-description: 'Special registers for direct I/O pin access in PASM2
+description: |
+  Special registers mapped to COG RAM addresses $1F0-$1FF.
 
-  These registers are mapped to fixed cog RAM addresses and can be used as operands in instructions
+  Addresses $1F0-$1F7 are dual-purpose: usable as general RAM or as special
+  registers when their associated functions are enabled.
 
-  '
+  Addresses $1F8-$1FF are fixed special-purpose registers that always provide
+  their special functions when accessed.
+
 category: Special Registers
 documentation_level: complete
-registers:
+documentation_source: Silicon Documentation v35
+
+dual_purpose_registers:
+  description: |
+    RAM registers $1F0-$1F7 may be used as general-purpose registers, or as
+    special-purpose registers if their associated functions are enabled.
+
+  IJMP3:
+    address: 496
+    hex_address: $1F0
+    description: Interrupt 3 call address
+    access: read_write
+    usage: |
+      When INT3 is triggered, execution jumps to the address stored here.
+      Can be used as general RAM if INT3 is not enabled.
+    related:
+    - IRET3
+    - SETINT3
+
+  IRET3:
+    address: 497
+    hex_address: $1F1
+    description: Interrupt 3 return address
+    access: read_write
+    usage: |
+      Stores the return address when INT3 is triggered.
+      Can be used as general RAM if INT3 is not enabled.
+    related:
+    - IJMP3
+    - RETI3
+
+  IJMP2:
+    address: 498
+    hex_address: $1F2
+    description: Interrupt 2 call address
+    access: read_write
+    usage: |
+      When INT2 is triggered, execution jumps to the address stored here.
+      Can be used as general RAM if INT2 is not enabled.
+    related:
+    - IRET2
+    - SETINT2
+
+  IRET2:
+    address: 499
+    hex_address: $1F3
+    description: Interrupt 2 return address
+    access: read_write
+    usage: |
+      Stores the return address when INT2 is triggered.
+      Can be used as general RAM if INT2 is not enabled.
+    related:
+    - IJMP2
+    - RETI2
+
+  IJMP1:
+    address: 500
+    hex_address: $1F4
+    description: Interrupt 1 call address
+    access: read_write
+    usage: |
+      When INT1 is triggered, execution jumps to the address stored here.
+      Can be used as general RAM if INT1 is not enabled.
+    related:
+    - IRET1
+    - SETINT1
+
+  IRET1:
+    address: 501
+    hex_address: $1F5
+    description: Interrupt 1 return address
+    access: read_write
+    usage: |
+      Stores the return address when INT1 is triggered.
+      Can be used as general RAM if INT1 is not enabled.
+    related:
+    - IJMP1
+    - RETI1
+
+  PA:
+    address: 502
+    hex_address: $1F6
+    description: Multi-purpose register A
+    access: read_write
+    usage: |
+      Serves multiple purposes:
+      - CALLD immediate return address storage
+      - CALLPA parameter passing
+      - LOC address storage
+      Can be used as general RAM when these functions are not needed.
+    examples:
+    - code: |
+        CALLD   PA, #subroutine   ' Store return info in PA, call subroutine
+        CALLPA  param, #handler   ' Copy param to PA, call handler
+        LOC     PA, #label        ' Store address of label in PA
+      description: PA register uses
+    related:
+    - PB
+    - CALLD
+    - CALLPA
+    - LOC
+
+  PB:
+    address: 503
+    hex_address: $1F7
+    description: Multi-purpose register B
+    access: read_write
+    usage: |
+      Serves multiple purposes:
+      - CALLD immediate return address storage
+      - CALLPB parameter passing
+      - LOC address storage
+      Can be used as general RAM when these functions are not needed.
+    examples:
+    - code: |
+        CALLD   PB, #subroutine   ' Store return info in PB, call subroutine
+        CALLPB  param, #handler   ' Copy param to PB, call handler
+        LOC     PB, #label        ' Store address of label in PB
+      description: PB register uses
+    related:
+    - PA
+    - CALLD
+    - CALLPB
+    - LOC
+
+fixed_special_registers:
+  description: |
+    Registers $1F8-$1FF are fixed special-purpose registers. When specifying
+    an address in this range, the instruction accesses the special-purpose
+    register, not just the underlying RAM.
+
+  PTRA:
+    address: 504
+    hex_address: $1F8
+    description: Pointer A to Hub RAM
+    access: read_write
+    usage: |
+      Primary pointer register for Hub RAM access.
+      Used with PTRx-based addressing modes for efficient Hub memory operations.
+      Supports pre/post increment/decrement addressing.
+    examples:
+    - code: |
+        rdlong  data, ptra++      ' Read long from Hub at PTRA, post-increment
+        wrlong  data, ptra[4]     ' Write long to Hub at PTRA+16
+        mov     ptra, ##hub_addr  ' Set PTRA to Hub address
+      description: PTRA pointer operations
+    related:
+    - PTRB
+    - RDLONG
+    - WRLONG
+    - SETQ
+
+  PTRB:
+    address: 505
+    hex_address: $1F9
+    description: Pointer B to Hub RAM
+    access: read_write
+    usage: |
+      Secondary pointer register for Hub RAM access.
+      Used with PTRx-based addressing modes for efficient Hub memory operations.
+      Supports pre/post increment/decrement addressing.
+      COGINIT writes the code address to the target cog's PTRB.
+    examples:
+    - code: |
+        rdlong  data, ptrb++      ' Read long from Hub at PTRB, post-increment
+        wrlong  data, ptrb[4]     ' Write long to Hub at PTRB+16
+        mov     ptrb, ##hub_addr  ' Set PTRB to Hub address
+      description: PTRB pointer operations
+    related:
+    - PTRA
+    - RDLONG
+    - WRLONG
+    - COGINIT
+
   DIRA:
     address: 506
     hex_address: $1FA
     description: Direction register A (pins 0-31)
     access: read_write
-    usage: 'Controls pin direction for pins 0-31
-
+    usage: |
+      Controls pin direction for pins 0-31.
       1 = output, 0 = input
-
-      '
     examples:
-    - code: 'mov     DIRA, ##$00FF_0000  '' Set pins 16-23 as outputs
-
-        or      DIRA, #1            '' Set pin 0 as output
-
-        andn    DIRA, ##$0000_00FF  '' Set pins 0-7 as inputs
-
-        '
+    - code: |
+        mov     DIRA, ##$00FF_0000  ' Set pins 16-23 as outputs
+        or      DIRA, #1            ' Set pin 0 as output
+        andn    DIRA, ##$0000_00FF  ' Set pins 0-7 as inputs
       description: Setting pin directions
+    related:
+    - DIRB
+    - OUTA
+    - INA
+    - DIRC
+    - DIRH
+    - DIRL
+
   DIRB:
     address: 507
     hex_address: $1FB
     description: Direction register B (pins 32-63)
     access: read_write
-    usage: 'Controls pin direction for pins 32-63
-
+    usage: |
+      Controls pin direction for pins 32-63.
       1 = output, 0 = input
-
-      '
     examples:
-    - code: 'mov     DIRB, #0            '' Set all pins 32-63 as inputs
-
-        or      DIRB, ##$8000_0000  '' Set pin 63 as output
-
-        '
+    - code: |
+        mov     DIRB, #0            ' Set all pins 32-63 as inputs
+        or      DIRB, ##$8000_0000  ' Set pin 63 as output
       description: Setting pin directions for upper pins
+    related:
+    - DIRA
+    - OUTB
+    - INB
+
   OUTA:
     address: 508
     hex_address: $1FC
     description: Output register A (pins 0-31)
     access: read_write
-    usage: 'Sets output state for pins 0-31
-
-      Only affects pins configured as outputs via DIRA
-
-      '
+    usage: |
+      Sets output state for pins 0-31.
+      Only affects pins configured as outputs via DIRA.
     examples:
-    - code: 'mov     OUTA, #0            '' Clear all outputs 0-31
-
-        or      OUTA, #1            '' Set pin 0 high
-
-        xor     OUTA, ##$0000_00FF  '' Toggle pins 0-7
-
-        '
+    - code: |
+        mov     OUTA, #0            ' Clear all outputs 0-31
+        or      OUTA, #1            ' Set pin 0 high
+        xor     OUTA, ##$0000_00FF  ' Toggle pins 0-7
       description: Controlling output states
+    related:
+    - OUTB
+    - DIRA
+    - INA
+    - OUTC
+    - OUTH
+    - OUTL
+
   OUTB:
     address: 509
     hex_address: $1FD
     description: Output register B (pins 32-63)
     access: read_write
-    usage: 'Sets output state for pins 32-63
-
-      Only affects pins configured as outputs via DIRB
-
-      '
+    usage: |
+      Sets output state for pins 32-63.
+      Only affects pins configured as outputs via DIRB.
     examples:
-    - code: 'mov     OUTB, pattern       '' Set output pattern for pins 32-63
-
-        andn    OUTB, mask          '' Clear specific outputs
-
-        '
+    - code: |
+        mov     OUTB, pattern       ' Set output pattern for pins 32-63
+        andn    OUTB, mask          ' Clear specific outputs
       description: Controlling upper pin outputs
+    related:
+    - OUTA
+    - DIRB
+    - INB
+
   INA:
     address: 510
     hex_address: $1FE
     description: Input register A (pins 0-31)
     access: read_only
-    usage: 'Reads current state of pins 0-31
-
-      Returns actual pin states regardless of direction setting
-
-      '
+    alternate_function: Debug interrupt call address
+    usage: |
+      Reads current state of pins 0-31.
+      Returns actual pin states regardless of direction setting.
+      Also serves as debug interrupt call address.
     examples:
-    - code: 'mov     state, INA          '' Read all pins 0-31
-
-        test    INA, #1         wz  '' Test if pin 0 is high
-
-        and     inputs, INA         '' Mask input pins
-
-        '
+    - code: |
+        mov     state, INA          ' Read all pins 0-31
+        test    INA, #1         wz  ' Test if pin 0 is high
+        and     inputs, INA         ' Mask input pins
       description: Reading input states
+    related:
+    - INB
+    - DIRA
+    - OUTA
+
   INB:
     address: 511
     hex_address: $1FF
     description: Input register B (pins 32-63)
     access: read_only
-    usage: 'Reads current state of pins 32-63
-
-      Returns actual pin states regardless of direction setting
-
-      '
+    alternate_function: Debug interrupt return address
+    usage: |
+      Reads current state of pins 32-63.
+      Returns actual pin states regardless of direction setting.
+      Also serves as debug interrupt return address.
     examples:
-    - code: 'mov     state, INB          '' Read all pins 32-63
-
-        test    INB, ##$8000_0000  wz '' Test if pin 63 is high
-
-        '
+    - code: |
+        mov     state, INB          ' Read all pins 32-63
+        test    INB, ##$8000_0000  wz ' Test if pin 63 is high
       description: Reading upper pin inputs
+    related:
+    - INA
+    - DIRB
+    - OUTB
+
 usage_notes:
-- These registers are at the top of cog RAM (addresses 506-511)
-- Can be used as source or destination in most instructions
-- Changes take effect immediately
-- Each cog has its own copy of these registers
-- Multiple cogs can control the same pins (OR'd together for outputs)
-- Smart pin modes override these basic I/O functions
+- Dual-purpose registers ($1F0-$1F7) can be used as general RAM when their special functions are not enabled
+- Fixed special registers ($1F8-$1FF) always provide special functions when accessed
+- Each cog has its own copy of all these registers
+- Changes to output/direction registers take effect immediately
+- Multiple cogs can control the same pins (outputs are OR'd together)
+- Smart pin modes override basic I/O functions on DIRA/DIRB/OUTA/OUTB/INA/INB
+
 common_patterns:
 - pattern: Toggle pin
   code: xor     OUTA, pin_mask
 - pattern: Wait for pin high
-  code: '.wait   test    INA, pin_mask   wz
-
-    if_z    jmp     #.wait
-
-    '
+  code: |
+    .wait   test    INA, pin_mask   wz
+            if_z    jmp     #.wait
 - pattern: Copy input to output
   code: mov     OUTA, INA
 - pattern: Set multiple pins atomically
   code: mov     OUTA, new_pattern
+- pattern: Hub block read with pointer
+  code: |
+    setq    #count-1
+    rdlong  buffer, ptra++
+
 related:
 - DIRC/DIRH/DIRL - Pin direction instructions
 - OUTC/OUTH/OUTL - Pin output instructions
-- PINREAD/PINWRITE - High-level pin methods
+- SETINT1/SETINT2/SETINT3 - Interrupt setup
+- RETI0/RETI1/RETI2/RETI3 - Interrupt return
 - Smart Pins - Advanced pin modes
-oneliner: Special registers for direct I/O pin access in PASM2
+
+oneliner: Special registers mapped to COG RAM addresses $1F0-$1FF

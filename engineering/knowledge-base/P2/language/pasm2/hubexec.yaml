@@ -28,10 +28,10 @@ notes:
 - Hub execution allows unlimited code size
 - Slower than cog execution due to hub access timing
 - Instruction fetching through FIFO/streamer
-- See also HUBEXEC_NEW and HUBEXEC_PTR variants
+- See also HUBEXEC_NEW and HUBEXEC_NEW_PAIR variants
 related:
 - COGEXEC
 - ORGH
 - HUBEXEC_NEW
-- HUBEXEC_PTR
+- HUBEXEC_NEW_PAIR
 oneliner: Set hub execution mode for subsequent code
