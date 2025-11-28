@@ -12,7 +12,7 @@
 
 Produce the complete P2 Assembly Language Manual from start to finish:
 - Part I: Architectural Foundation (5 chapters, ~40 pages)
-- Part II: Language Reference (380 entries - 359 instructions, 14 directives, 6 constants, special registers)
+- Part II: Language Reference (380 entries - 359 instructions, 13 directives, 7 constants, special registers)
 - Part III: Appendices (encoding tables, categorical index, reference data)
 - Professional PDF output via PDF Forge
 
@@ -299,10 +299,10 @@ Chapter 2 (The Instruction Format) written early because:
 **Goal:** Complete non-instruction language elements
 
 **Tasks:**
-- [ ] Generate 14 directive entries (ORG, ORGH, ORGF, BYTE, WORD, LONG, RES, FIT, ALIGNL, ALIGNW, BYTEFIT, WORDFIT, DITTO, HUBEXEC)
-- [ ] Generate 6 constant entries (TRUE, FALSE, PI, NEGX, POSX, COGEXEC)
+- [ ] Generate 13 directive entries (ORG, ORGH, ORGF, BYTE, WORD, LONG, RES, FIT, ALIGNL, ALIGNW, BYTEFIT, WORDFIT, DITTO)
+- [ ] Generate 7 constant entries (TRUE, FALSE, PI, NEGX, POSX, COGEXEC, HUBEXEC)
   - Note: COGEXEC has variants (COGEXEC_NEW, COGEXEC_NEW_PAIR) documented within entry
-  - Note: HUBEXEC has variants (HUBEXEC_NEW, HUBEXEC_NEW_PAIR) documented in directive entry
+  - Note: HUBEXEC has variants (HUBEXEC_NEW, HUBEXEC_NEW_PAIR) documented within entry
 - [ ] Generate Special Registers section covering all 16 registers:
   - Dual-purpose ($1F0-$1F7): IJMP3, IRET3, IJMP2, IRET2, IJMP1, IRET1, PA, PB
   - Fixed special ($1F8-$1FF): PTRA, PTRB, DIRA, DIRB, OUTA, OUTB, INA, INB
@@ -765,7 +765,7 @@ Session start:
 ---
 
 *Document Created: 2025-11-27*
-*Version: 1.1 - Updated with corrected counts from YAML review*
+*Version: 1.2 - Fixed HUBEXEC classification*
 
 ---
 
@@ -775,3 +775,4 @@ Session start:
 |---------|------|---------|
 | 1.0 | 2025-11-27 | Initial sprint plan |
 | 1.1 | 2025-11-28 | Corrected directive count (10→14), expanded special registers (6→16), added variant documentation notes |
+| 1.2 | 2025-11-28 | Fixed HUBEXEC classification (directive→constant), corrected counts to 13 directives + 7 constants |

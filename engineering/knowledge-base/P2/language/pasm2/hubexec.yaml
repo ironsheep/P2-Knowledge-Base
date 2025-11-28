@@ -1,33 +1,35 @@
-directive: HUBEXEC
+constant: HUBEXEC
 name: HUBEXEC
-description: 'Set hub execution mode for subsequent code
+description: 'Predefined constant for COGINIT instruction
 
-  Code will be assembled to run from hub RAM
+  Executes code directly from hub RAM without loading to cog RAM
 
   '
-category: Execution Mode Directives
+category: Execution Mode Constants
+value: '%0_1_0000'
 documentation_level: complete
-syntax: HUBEXEC
-usage: 'Switches assembler to hub execution mode
+syntax: 'COGINIT #HUBEXEC+id, #address'
+usage: 'Used with COGINIT to start a cog executing from hub RAM
 
-  All subsequent instructions are assembled for hub RAM execution
+  Target cog executes instructions directly from hub RAM (no cog RAM load)
 
   '
 examples:
-- code: 'HUBEXEC          '' Switch to hub execution mode
-
-    '' Code here runs from hub RAM
-
-    '' Can access full 512KB hub memory
-
-    mov  x, data     '' Hub execution (slower than cog)
+- code: 'COGINIT #HUBEXEC+1, #$400   '' Start Cog 1 executing from Hub RAM $400
 
     '
-  description: Set hub execution mode
+  description: Start specific cog with hub execution
+- code: 'COGINIT #HUBEXEC+5, @code   '' Start Cog 5 executing from @code in hub
+
+    '
+  description: Start Cog 5 with hub execution at label
 notes:
-- Hub execution allows unlimited code size
+- Executes instructions directly from hub RAM (no cog RAM load)
+- Hub execution allows unlimited code size (not limited to 512 longs)
 - Slower than cog execution due to hub access timing
 - Instruction fetching through FIFO/streamer
+- Must specify target cog ID (0-7)
+- Use HUBEXEC_NEW to auto-select available cog
 - See also HUBEXEC_NEW and HUBEXEC_NEW_PAIR variants
 related:
 - COGEXEC
