@@ -12,7 +12,7 @@
 
 Produce the complete P2 Assembly Language Manual from start to finish:
 - Part I: Architectural Foundation (5 chapters, ~40 pages)
-- Part II: Language Reference (380 entries - 359 instructions, 10 directives, 6 constants, special registers)
+- Part II: Language Reference (380 entries - 359 instructions, 14 directives, 6 constants, special registers)
 - Part III: Appendices (encoding tables, categorical index, reference data)
 - Professional PDF output via PDF Forge
 
@@ -299,9 +299,14 @@ Chapter 2 (The Instruction Format) written early because:
 **Goal:** Complete non-instruction language elements
 
 **Tasks:**
-- [ ] Generate 10 directive entries (ORG, ORGH, BYTE, WORD, LONG, RES, FIT, ALIGNL, ALIGNW, ORGF)
+- [ ] Generate 14 directive entries (ORG, ORGH, ORGF, BYTE, WORD, LONG, RES, FIT, ALIGNL, ALIGNW, BYTEFIT, WORDFIT, DITTO, HUBEXEC)
 - [ ] Generate 6 constant entries (TRUE, FALSE, PI, NEGX, POSX, COGEXEC)
-- [ ] Generate Special Registers section (DIRA, DIRB, INA, INB, OUTA, OUTB, PTRA, PTRB, PA, PB)
+  - Note: COGEXEC has variants (COGEXEC_NEW, COGEXEC_NEW_PAIR) documented within entry
+  - Note: HUBEXEC has variants (HUBEXEC_NEW, HUBEXEC_NEW_PAIR) documented in directive entry
+- [ ] Generate Special Registers section covering all 16 registers:
+  - Dual-purpose ($1F0-$1F7): IJMP3, IRET3, IJMP2, IRET2, IJMP1, IRET1, PA, PB
+  - Fixed special ($1F8-$1FF): PTRA, PTRB, DIRA, DIRB, OUTA, OUTB, INA, INB
+  - Note: INA/INB also serve as debug interrupt call/return addresses
 - [ ] Ensure consistent formatting with instruction entries
 
 **Deliverables:**
@@ -760,4 +765,13 @@ Session start:
 ---
 
 *Document Created: 2025-11-27*
-*Version: 1.0 - Initial Sprint Plan*
+*Version: 1.1 - Updated with corrected counts from YAML review*
+
+---
+
+## Revision History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0 | 2025-11-27 | Initial sprint plan |
+| 1.1 | 2025-11-28 | Corrected directive count (10→14), expanded special registers (6→16), added variant documentation notes |
