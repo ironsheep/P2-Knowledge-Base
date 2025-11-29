@@ -1,5 +1,0 @@
-operator: "<>>"
-type: operator
-description: |
-  Equal/not equal (logical/bitwise)
-category: Equality

@@ -1,643 +1,231 @@
-# AI Integration Guide for P2 Knowledge Base
-*Master guide for using this knowledge base with Claude Code and other AI assistants*
+# AI Integration Guide for P2 Knowledge Base v3.0
+*Key-based access - simple and reliable*
 
-**Repository**: https://github.com/ironsheep/P2-Knowledge-Base
+**Repository**: https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base
 
-> 🎆 **NEW in Version 2.0**: Self-bootstrapping system! The knowledge base now teaches AI assistants how to use it automatically. Just provide the minimal bootstrap command and everything configures itself. See Section 1 below.
+> **Version 3.0**: Key-based access system replaces manifest navigation. No more path construction - just use keys like `p2kbPasm2Mov`.
 
-## 🚀 Quick Navigation
+## Quick Navigation
 
 | Resource | Purpose |
 |----------|---------|
-| **[Claude QuickStart](../../../../CLAUDE-QUICKSTART.md)** | Essential copy-paste templates |
-| **[Prompt Patterns](../../../../AI-PROMPT-PATTERNS.md)** | Comprehensive interaction patterns |
-| **[Privacy Guide](../../developer-docs/ai-development/Claude-Code-Privacy-Guide-for-P2-Developers.pdf)** | **Must read!** Protect your IP |
-| **[Auxiliary Guides](../README.md)** | Specialized techniques and workflows |
+| **[QuickStart](../../../../CLAUDE-QUICKSTART.md)** | Setup in 3 steps |
+| **[Prompt Patterns](../../../../AI-PROMPT-PATTERNS.md)** | Key-based interaction examples |
+| **[Privacy Guide](../../developer-docs/ai-development/Claude-Code-Privacy-Guide-for-P2-Developers.pdf)** | Protect your IP |
 
 ---
 
-## 📋 Table of Contents
+## 1. Setup (One-Time)
 
-1. [Essential Starting Instructions](#1-essential-starting-instructions)
-2. [Understanding the Knowledge Base Structure](#2-understanding-the-knowledge-base-structure)
-3. [Critical Concepts for Success](#3-critical-concepts-for-success)
-4. [Navigation Best Practices](#4-navigation-best-practices)
-5. [Common Pitfalls and Solutions](#5-common-pitfalls-and-solutions)
-6. [Usage Patterns and Examples](#6-usage-patterns-and-examples)
-7. [Advanced Features](#7-advanced-features)
-8. [Troubleshooting](#8-troubleshooting)
-
----
-
-## 1. Essential Starting Instructions
-
-### 🎯 NEW: Self-Bootstrapping System (Version 2.0)
-
-**The knowledge base now teaches itself!** Just give your AI this minimal bootstrap:
-
-```markdown
-P2 Knowledge Base Setup:
-
-Step 1: Detect your platform and fetch the appropriate bootstrap file:
-
-For Unix/macOS/Linux:
-https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-bootstrap-unix.yaml
-
-For Windows:
-https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-bootstrap-windows.yaml
-
-Step 2: Follow the instructions in the file to create your fetch script
-Step 3: Use YOUR script to fetch the complete setup instructions
-
-The complete setup (manifests/ai-instructions.yaml) will:
-- Update your CLAUDE.md with P2 KB navigation rules (~150 lines)
-- Load Spin2 Getting Started guide (core language essentials)
-- Load PASM2 Getting Started guide (assembly mechanics)
-- Configure direct access to all P2 resources
-- Enable automatic update checking
-
-Note: These bootstrap files are under 960 characters to avoid truncation.
-```
-
-### 🌐 Claude Code Access (Without Direct GitHub Access)
-
-**For Claude Code instances that cannot directly access repository files:**
-
-Some AI environments have limitations accessing GitHub content directly. The solution is to create a platform-specific fetch script that can be pre-approved for repeated use:
-
-#### Step 1: Platform Detection
+### Step 1: Create Cache Directory
 ```bash
-# Claude will detect your platform automatically
-if command -v uname &> /dev/null; then
-  echo "Unix-like system detected (macOS/Linux)"
-elif command -v powershell &> /dev/null; then
-  echo "Windows system detected"
-fi
+mkdir -p ~/.p2kb-cache
 ```
 
-#### Step 2: Script Creation (One-Time)
-
-**IMPORTANT: The .p2kb-cache directory and script go in YOUR CURRENT PROJECT DIRECTORY, not in some system location.**
-
-**For Unix/macOS/Linux:**
-Claude will create `.p2kb-cache/fetch-kb-file.sh` in your CURRENT WORKING DIRECTORY:
-```bash
-#!/bin/bash
-# P2 Knowledge Base File Fetcher
-path=$1
-cache=".p2kb-cache/${path}"
-url="https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/${path}"
-
-if [ -f "$cache" ]; then
-  cat "$cache"
-else
-  mkdir -p "$(dirname "$cache")"
-  curl -sS -o "$cache" "$url" 2>/dev/null || wget -q -O "$cache" "$url"
-  cat "$cache"
-fi
-```
-
-**For Windows:**
-Claude will create `.p2kb-cache\fetch-kb-file.ps1`:
-```powershell
-# P2 Knowledge Base File Fetcher
-param($path)
-$cache = ".p2kb-cache\$($path -replace '/','\\')"
-$url = "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/$path"
-
-if (Test-Path $cache) {
-  Get-Content $cache -Raw
-} else {
-  $dir = Split-Path $cache -Parent
-  New-Item -ItemType Directory -Force -Path $dir | Out-Null
-  Invoke-WebRequest -Uri $url -OutFile $cache
-  Get-Content $cache -Raw
-}
-```
-
-#### Step 3: Usage (Repeated, No Approval Needed)
+### Step 2: Download Fetch Script
 
 **Unix/macOS/Linux:**
 ```bash
-bash .p2kb-cache/fetch-kb-file.sh "manifests/propeller-knowledge-root.yaml"
+curl -sS https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
+chmod +x ~/.p2kb-cache/fetch-kb-file.sh
 ```
 
-**Windows:**
+**Windows PowerShell:**
 ```powershell
-powershell -File .p2kb-cache\fetch-kb-file.ps1 "manifests/propeller-knowledge-root.yaml"
+mkdir "$env:USERPROFILE\.p2kb-cache" -Force
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\fetch-kb-file.ps1"
 ```
 
-#### Step 4: Load Essential Getting Started Guides
-
-**IMPORTANT**: After setup, immediately prompt the AI to load these guides:
-
-**For Spin2 Development:**
-```
-Fetch and read the Spin2 Getting Started guide:
-bash .p2kb-cache/fetch-kb-file.sh "engineering/knowledge-base/P2/language/spin2/conventions/spin2-getting-started.yaml"
-
-This contains core language essentials for Spin2 code generation.
-```
-
-**For PASM2 Development:**
-```
-Fetch and read the PASM2 Getting Started guide:
-bash .p2kb-cache/fetch-kb-file.sh "engineering/knowledge-base/P2/language/pasm2/conventions/pasm2-getting-started.yaml"
-
-This contains assembly mechanics and register model essentials.
-```
-
-#### Benefits of This Approach
-1. **One-time approval**: Script file can be pre-approved
-2. **Cross-platform**: Works on Windows, macOS, and Linux
-3. **Efficient caching**: Downloads only once, uses cache thereafter
-4. **No repeated prompts**: Execute the script without approval each time
-
-**Cache Management:**
+### Step 3: Verify
 ```bash
-# Check cache size
-du -sh .p2kb-cache
-
-# Clear cache
-rm -rf .p2kb-cache
-
-# Refresh specific file
-rm .p2kb-cache/manifests/propeller-knowledge-root.yaml
+~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog --verbose
 ```
-
-**Requirements:**
-- curl (preferred) or wget installed
-- Write access to project directory
-- Per-project cache (~5-15MB)
-
-**Note**: MCP server integration is in development for improved access with shared caching and automatic updates.
-
-### Legacy Manual Instructions (Pre-v2.0)
-
-<details>
-<summary>Click for old manual setup (if auto-bootstrap fails)</summary>
-
-```markdown
-FIRST ACTION: Save these instructions to your CLAUDE.md, replacing any P2 Knowledge Base content you may already have.
-
-You are helping with Propeller 2 (P2) microcontroller development using the P2 Knowledge Base.
-GitHub: https://github.com/ironsheep/P2-Knowledge-Base
-Raw access: https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/
-
-### CRITICAL RULES - NO EXCEPTIONS
-
-#### BEFORE EVERY P2KB ACCESS - Pre-Flight Checklist
-□ I have a manifest open
-□ The manifest shows the exact path
-□ I am NOT guessing or constructing paths
-□ If not found, I will report it, not search for it
-
-#### MANDATORY NAVIGATION SEQUENCE - STOP AND CHECK EACH STEP
-
-STEP 1: Did you start with a manifest file?
-   ✅ YES → Continue to Step 2
-   ❌ NO → STOP! Start with manifests/propeller-knowledge-root.yaml
-
-STEP 2: Did the manifest give you an exact path?
-   ✅ YES → Use that exact path
-   ❌ NO → STOP! Report "Content not found in P2 Knowledge Base"
-
-STEP 3: Are you about to construct a path yourself?
-   ❌ STOP! This is FORBIDDEN. Return to Step 1.
-
-⚠️ CIRCUIT BREAKER: If you typed "engineering/knowledge-base/P2/" followed by
-   ANYTHING not explicitly given by a manifest → STOP IMMEDIATELY
-
-#### Navigation (MANDATORY)
-- START: manifests/propeller-knowledge-root.yaml (always)
-- THEN: manifests/auxiliary-guides-manifest.yaml (how-to guides)
-- NEVER search for YAML files - use manifest tree only
-- All files are YAML format in engineering/knowledge-base/P2/
-- ONLY use paths provided by manifests - NEVER construct your own
-
-#### When Content Not Found (MANDATORY PROTOCOL)
-- DO NOT manufacture/guess paths like "engineering/knowledge-base/P2/whatever.yaml"
-- DO NOT request web searches or external resources
-- DO NOT hallucinate content that might exist
-- INSTEAD explicitly report: "Content not found in P2 Knowledge Base: [specific item]"
-- PROVIDE detail: "Searched manifests/[path] for [item] but found no entry"
-- SUGGEST feedback: "Please report missing content to repo maintainer:
-  Repository: https://github.com/ironsheep/P2-Knowledge-Base/issues
-  Missing: [specific description of what you were looking for]"
-
-#### RED FLAGS - If you're about to type these, STOP:
-- "blocks/con.yaml" (guessing subdirectory)
-- "keywords/con.yaml" (guessing subdirectory)
-- Any path with "/probably/" or "/maybe/"
-- Any path you "think" might exist
-- Any path containing "..." as placeholder
-
-#### Anti-Patterns (FORBIDDEN)
-❌ Searching for *.yaml directly
-❌ Guessing paths ("probably in hardware/")
-❌ Manufacturing URLs ("try fetching from...")
-❌ Creating fictional file paths when not found
-❌ Requesting web searches when content missing
-❌ Using pkill (use: kill -TERM $PID)
-❌ Filtering OBEX by category first
-❌ Assuming built-in peripherals exist
-
-#### VIOLATION CONSEQUENCES
-If you construct a path → You MUST:
-1. Stop immediately
-2. Report: "I violated P2KB navigation rules by constructing a path"
-3. Start over with manifest navigation
-
-⚠️ CRITICAL: When content not found, REPORT IT - don't manufacture paths or request web searches!
-REMEMBER: Manifest tree only. No direct YAML searches. PID-based signals only.
-
-Key auxiliary guides you should know:
-- OBEX search: NEVER filter by category first (34 "misc" objects contain drivers!)
-- BMP generation: For Plot window debug visualization
-
-The P2 provides building blocks (Smart Pins, COGs), not complete peripherals.
-Need UART/SPI/I2C? Use OBEX objects.
-```
-
-</details>
-
-### Why The New System Works Better
-
-1. **Self-configuring** - No manual copy-paste needed
-2. **Auto-updating** - Always has latest navigation rules
-3. **Hash-based versioning** - Knows when updates are available
-4. **Direct category access** - Jumps straight to PASM2, Spin2, etc.
-5. **Reduced friction** - One line to bootstrap everything
 
 ---
 
-## 2. Understanding the Knowledge Base Structure
+## 2. How It Works
 
-### Hierarchical Organization
+### Key-Based Access
 
-```
-P2-Knowledge-Base/
-├── manifests/                          # START HERE - Navigation
-│   ├── propeller-knowledge-root.yaml  # Main index
-│   ├── auxiliary-guides-manifest.yaml # HOW to use resources ← NEW!
-│   ├── pasm2-manifest.yaml            # 357 instructions
-│   ├── smart-pins-manifest.yaml       # 32 pin modes
-│   ├── spin2-manifest.yaml            # Language constructs
-│   └── obex/                          # Community code
-│       ├── obex-root.yaml             # 113 objects index
-│       ├── categories/*.yaml          # By function
-│       └── authors/*.yaml             # By contributor
-│
-├── engineering/knowledge-base/P2/      # Detailed specs
-│   ├── language/
-│   │   ├── pasm2/                     # Instruction YAMLs
-│   │   └── spin2/                     # Method YAMLs
-│   ├── hardware/
-│   │   └── smart-pins/                # Pin mode YAMLs
-│   └── community/obex/objects/        # Object YAMLs
-│
-└── deliverables/ai-reference/
-    └── auxiliary-guides/               # Meta-guides ← NEW!
-        ├── search-strategies/          # OBEX optimization
-        ├── special-techniques/         # BMP, testing
-        └── interaction/                # This guide
+Every piece of content has a unique key:
+
+| Key | Content |
+|-----|---------|
+| `p2kbPasm2Mov` | MOV instruction documentation |
+| `p2kbArchCog` | COG architecture |
+| `p2kbSpin2Pinwrite` | Spin2 PINWRITE method |
+| `p2kbGuideQuickQueries` | Quick reference guide |
+
+### Fetch Content
+
+```bash
+~/.p2kb-cache/fetch-kb-file.sh <key>
 ```
 
-### Key Insight: Two Types of Documentation
+### Find Keys
 
-1. **P2 Knowledge** - WHAT the P2 can do (instructions, pins, methods)
-2. **Auxiliary Guides** - HOW to use the knowledge effectively
+```bash
+# Search index for keys
+jq '.files | keys[] | select(contains("Pasm2"))' ~/.p2kb-cache/p2kb-index.json
+
+# Grep-based search
+grep -o '"p2kb[^"]*"' ~/.p2kb-cache/p2kb-index.json | grep -i uart
+```
 
 ---
 
-## 3. Critical Concepts for Success
+## 3. Key Naming Convention
 
-### 🔴 Concept 1: OBEX Search Strategy
+Keys follow the pattern: `p2kb` + Category + Name
 
-**NEVER filter by category first!**
+| Prefix | Content Type | Examples |
+|--------|--------------|----------|
+| `p2kbPasm2` | PASM2 instructions | `p2kbPasm2Mov`, `p2kbPasm2Add`, `p2kbPasm2Jmp` |
+| `p2kbSpin2` | Spin2 methods | `p2kbSpin2Pinwrite`, `p2kbSpin2Waitms` |
+| `p2kbSpin2Kw` | Spin2 keywords | `p2kbSpin2KwRepeat`, `p2kbSpin2KwIf` |
+| `p2kbSpin2Op` | Spin2 operators | `p2kbSpin2OpAdd` |
+| `p2kbArch` | Architecture | `p2kbArchCog`, `p2kbArchHub`, `p2kbArchCordic` |
+| `p2kbSmartPin` | Smart Pin modes | `p2kbSmartPinAsyncSerial` |
+| `p2kbGuide` | Guides | `p2kbGuideQuickQueries` |
+| `p2kbHw` | Hardware | `p2kbHwP2Eval` |
 
-```yaml
-# BAD: "Find I2C drivers in drivers category"
-Result: Miss 60+ relevant objects in other categories
+---
 
-# GOOD: "Find ALL OBEX objects related to I2C, IIC, TWI, two-wire"
-Result: Find all relevant objects regardless of category
+## 4. Common Usage Patterns
+
+### Start Here: Quick Queries
+```bash
+# Get the quick reference guide first
+~/.p2kb-cache/fetch-kb-file.sh p2kbGuideQuickQueries
 ```
 
-**Why**: 34 objects in "misc" are actually drivers!
+This guide maps common questions to relevant keys.
 
-### 🔴 Concept 2: P2 Philosophy
+### PASM2 Instructions
+```bash
+# Get specific instruction
+~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov
+~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Add
+```
 
-**P2 provides building blocks, NOT complete peripherals**
+### Spin2 Methods
+```bash
+# Get specific method
+~/.p2kb-cache/fetch-kb-file.sh p2kbSpin2Pinwrite
+~/.p2kb-cache/fetch-kb-file.sh p2kbSpin2Waitms
+```
+
+### Architecture
+```bash
+# Core architecture docs
+~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog
+~/.p2kb-cache/fetch-kb-file.sh p2kbArchHub
+~/.p2kb-cache/fetch-kb-file.sh p2kbArchCordic
+```
+
+---
+
+## 5. P2 Philosophy
+
+**P2 provides building blocks, NOT complete peripherals.**
 
 | Traditional MCU | P2 Approach |
 |----------------|-------------|
-| Built-in UART peripheral | Smart Pins + OBEX serial object |
-| Hardware SPI controller | COGs + OBEX SPI object |
-| I2C hardware | Smart Pins + OBEX I2C object |
+| Built-in UART | Smart Pins + software driver |
+| Hardware SPI | COGs + software driver |
+| I2C peripheral | Smart Pins + software driver |
 
-**Always check OBEX** when user asks for any communication protocol or peripheral.
+---
 
-### 🔴 Concept 3: Manifest-Only Navigation
+## 6. Index Details
 
-**NEVER guess paths - ALWAYS follow manifests**
+The index (`p2kb-index.json`) contains:
 
-```yaml
-# Path Construction:
-raw_base_url + base_path + file = complete_url
+- **973 entries** mapping keys to file paths
+- **Git mtime** for each file (change detection)
+- **Full paths** (no construction needed)
 
-# Example:
-https://raw.githubusercontent.com/.../main/ + 
-engineering/knowledge-base/P2/language/spin2/ + 
-methods/locknew.yaml
+### Index Structure
+```json
+{
+  "system": {
+    "version": "2.0.0",
+    "generated": "2025-11-29T...",
+    "total_entries": 973
+  },
+  "files": {
+    "p2kbPasm2Mov": {
+      "path": "deliverables/ai/P2/language/pasm2/mov.yaml",
+      "mtime": 1732900000
+    }
+  }
+}
 ```
 
 ---
 
-## 4. Navigation Best Practices
+## 7. Automatic Features
 
-### Step-by-Step Navigation
+### Caching
+- Files cached locally after first download
+- Index auto-refreshes every 24 hours
+- Delete `~/.p2kb-cache/content/` to force refresh
 
-1. **Start**: `manifests/propeller-knowledge-root.yaml`
-2. **Check auxiliary guides**: `manifests/auxiliary-guides-manifest.yaml`
-3. **Navigate to category**: e.g., `manifests/spin2-manifest.yaml`
-4. **Find specific file**: Use exact path from manifest
-5. **Download YAML only**: Never .md files in knowledge base
-
-### Finding OBEX Objects Effectively
-
-```yaml
-# 1. Start with OBEX root
-manifests/obex/obex-root.yaml
-
-# 2. Search ALL categories, not specific ones
-manifests/obex/categories/*.yaml  # Check ALL
-
-# 3. Expand keywords
-"I2C" → also search "IIC", "TWI", "two-wire", "2-wire"
-
-# 4. Check top authors
-Jon McPhalen (jonnymac): 44 high-quality objects
-```
-
-### Smart Pin Configuration
-
-```yaml
-# 1. Check manifest
-manifests/smart-pins-manifest.yaml
-
-# 2. Find mode by function
-Need pulse measurement? → Mode %10000 (time A input)
-Need UART TX? → Mode %11110 (async serial transmit)
-
-# 3. Get detailed spec
-engineering/knowledge-base/P2/hardware/smart-pins/modes/[mode].yaml
-```
-
----
-
-## 5. Common Pitfalls and Solutions
-
-### Pitfall 1: Assuming P2 has Built-in Peripherals
-
-❌ **Wrong**: "The P2's UART peripheral..."  
-✅ **Right**: "The P2 implements UART using Smart Pins and OBEX objects"
-
-### Pitfall 2: Searching Only Expected Categories
-
-❌ **Wrong**: Looking for drivers only in "drivers" category  
-✅ **Right**: Search all 113 objects across all categories
-
-### Pitfall 3: Guessing File Paths
-
-❌ **Wrong**: `/language/spin2/methods/debug.md`  
-✅ **Right**: Check manifest for actual path: `debug-commands/debug.yaml`
-
-### Pitfall 4: Using Console Output for Testing
-
-❌ **Wrong**: Reading cluttered console output  
-✅ **Right**: Monitor `logs/*.log` files for clean debug output
-
----
-
-## 6. Usage Patterns and Examples
-
-### Pattern: Understanding P2 Architecture
-
-```markdown
-User: "Explain the P2 architecture"
-
-PROCESS:
-1. Open manifests/P2/architecture-manifest.yaml
-2. Explain key components:
-   - 8 independent COGs (90 MIPS each)
-   - 512KB shared Hub RAM
-   - 64 Smart Pins with autonomous operation
-   - CORDIC math solver
-   - Streamer for video/audio
-```
-
-### Pattern: Finding Development Hardware
-
-```markdown
-User: "What P2 boards are available?"
-
-PROCESS:
-1. Open manifests/P2/hardware-manifest.yaml
-2. List main boards: P2 Eval, P2 Edge
-3. Show modules and accessories
-4. Provide purchase links if available
-```
-
-### Pattern: Serial Communication with Repository Awareness ✨
-
-```markdown
-User: "How do I do serial communication on P2?"
-
-CORRECT RESPONSE:
-1. Recognize serial is NOT built-in
-2. Check manifests/obex/categories/*.yaml
-3. Find jm_fullduplexserial (Object 2842)
-4. Check if github_repo exists in YAML
-5. Show implementation with repo awareness:
-```
-
-```spin2
-OBJ
-  serial : "jm_fullduplexserial"
-
-PUB main()
-  serial.start(RX_PIN, TX_PIN, %0000, 115_200)
-  serial.str(@"Hello World")
-```
-
-### Pattern: Finding Instructions
-
-```markdown
-User: "What CORDIC instructions are available?"
-
-PROCESS:
-1. Open manifests/pasm2-manifest.yaml
-2. Find CORDIC category
-3. List instructions:
-   - QROTATE
-   - QVECTOR
-   - QDIV
-   - QFRAC
-   - QMUL
-   ...
-```
-
-### Pattern: Hardware Testing
-
-```markdown
-User: "How do I test my code on real P2?"
-
-PROCESS:
-1. Check auxiliary-guides/special-techniques/hardware-testing-guide.md
-2. Key steps:
-   - Compile: pnut_ts -d program.spin2
-   - Download: pnut-term-ts -r program.bin -p [device] &
-   - Monitor: tail -f logs/debug_*.log
-   - Clean shutdown: kill -TERM $PID
-```
-
----
-
-## 7. Advanced Features
-
-### OBEX Repository Awareness ✨ NEW!
-
-**21 of 113 OBEX objects now have GitHub repository links!**
-
-When finding OBEX objects with repos:
-1. **Mention** the repo exists (don't auto-fetch)
-2. **Offer** to check for newer versions
-3. **Provide** direct links for user to explore
-
-```yaml
-# In OBEX YAML files:
-version_tracking:
-  obex_version: "3.0.2"
-  has_github_repo: true
-urls:
-  github_repo: "https://github.com/ironsheep/P2-HUB75-LED-Matrix-Driver"
-```
-
-**Best Practice**: "This object has a GitHub repository. I can check for newer releases if needed."
-
-### Auxiliary Guides System
-
-The knowledge base now includes specialized guides for techniques:
-
-| Guide | Location | Use When |
-|-------|----------|----------|
-| OBEX Search Optimization | `search-strategies/` | Finding community code |
-| BMP Generation | `special-techniques/` | Debug visualization |
-| Hardware Testing | `special-techniques/` | Real device testing |
-| Using with AI | `interaction/` | AI integration help |
-
-Access via: `manifests/auxiliary-guides-manifest.yaml`
-
-### Enrichment Status Tracking
-
-Check `.ai-manifest.json` for coverage:
-- PASM2: 166 enriched, 188 minimal
-- Smart Pins: All 32 modes complete
-- Spin2: 71 methods enriched
-
-### Multi-COG Patterns
-
-Find proven patterns in:
-- `external-projects/flash-fs-code/` - COG coordination
-- `external-projects/p2-HUB75-LED-Matrix-Driver/` - Parallel processing
+### Metadata Filtering
+- Editorial metadata stripped on download
+- Reduces token overhead by ~38,000 tokens
+- Source YAMLs unchanged
 
 ---
 
 ## 8. Troubleshooting
 
-### Issue: Can't Find Information
+### Key Not Found
+```bash
+# Verify key exists
+grep "p2kbPasm2Mov" ~/.p2kb-cache/p2kb-index.json
+```
 
-**Solution Checklist:**
-1. Started with root manifest? ✓
-2. Checked auxiliary guides? ✓
-3. Searched ALL OBEX categories? ✓
-4. Expanded search keywords? ✓
+### Stale Content
+```bash
+# Clear content cache
+rm -rf ~/.p2kb-cache/content/
 
-### Issue: Wrong File Paths
+# Clear entire cache (forces fresh download)
+rm -rf ~/.p2kb-cache
+```
 
-**Common Corrections:**
-- Lock methods: `methods/locknew.yaml` not `constructs/methods/`
-- DEBUG: `debug-commands/debug.yaml` not `methods/debug.yaml`
-- All files are `.yaml` not `.md`
-
-### Issue: Code Won't Compile
-
-**Debug Process:**
-1. Check against instruction YAML specs
-2. Verify OBEX object is included
-3. Confirm pin assignments
-4. Add debug statements with `-d` flag
+### Network Issues
+- Check internet connectivity
+- Verify GitHub is accessible
+- Try `--verbose` flag for diagnostics
 
 ---
 
-## 🎯 Golden Rules Summary
+## 9. Migration from v2.x
 
-1. **Start with manifests** - Always, no exceptions
-2. **Check auxiliary guides** - Learn HOW before WHAT
-3. **OBEX search broadly** - Never filter by category first
-4. **P2 = building blocks** - Not complete peripherals
-5. **Follow exact paths** - Never guess or construct
-6. **Monitor logs, not console** - For clean testing output
-7. **Capture PID for control** - Clean shutdown with signals
-8. **Expand keywords** - I2C → IIC, TWI, two-wire
-9. **Check top authors** - jonnymac = quality
-10. **YAML only** - No .md files in knowledge base
+If you have old cached content:
 
----
+1. **Delete** the old `.p2kb-cache/` directory
+2. **Follow** the setup steps above
+3. **Use keys** instead of paths
 
-## 📚 Additional Resources
-
-### Example Conversation Starters
-
-**For Beginners:**
-```
-"I'm new to P2. Using the P2 Knowledge Base and auxiliary guides,
-explain the architecture and show a LED blink example."
-```
-
-**For OBEX Discovery:**
-```
-"Find ALL P2 OBEX objects related to display control.
-Remember to search all categories, not just 'display'."
-```
-
-**For Hardware Testing:**
-```
-"Show me the complete workflow for testing P2 code on hardware,
-including signal-based control and log monitoring."
-```
-
-### Contributing Back
-
-Found improvements? Follow these guidelines:
-1. Enriched YAMLs → `engineering/knowledge-base/P2/`
-2. Auxiliary guides → `deliverables/ai-reference/auxiliary-guides/`
-3. Update relevant manifests
-4. Follow CONTRIBUTING.md
+The v3.0 system eliminates:
+- Path construction errors (404s)
+- Manifest navigation complexity
+- Stale path references
 
 ---
 
-## 🔒 Privacy and Security
+## 10. Golden Rules
 
-**Essential Reading**: [Privacy Guide for P2 Developers](../../developer-docs/ai-development/Claude-Code-Privacy-Guide-for-P2-Developers.pdf)
-
-Key points:
-- Protect your IP when using AI tools
-- Understand data retention policies
-- Use proper .gitignore patterns
-- Consider local-first development
+1. **Use keys** - Never construct paths manually
+2. **Start with Quick Queries** - `p2kbGuideQuickQueries` maps questions to keys
+3. **Search the index** - Use jq or grep to find keys
+4. **Trust the cache** - Auto-refresh handles updates
+5. **P2 = building blocks** - Check drivers for peripherals
 
 ---
 
-*Remember: This knowledge base is AI-optimized. Always mention "P2 Knowledge Base" and check auxiliary guides for best results.*
+*Version 3.0 - Key-Based Access*
+*Last Updated: 2025-11-29*

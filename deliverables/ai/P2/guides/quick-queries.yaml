@@ -1,0 +1,200 @@
+# Quick Queries Guide
+# Direct answers to common P2 programming questions
+# Maps questions to relevant knowledge base keys for quick lookup
+
+version: "2.0"
+last_updated: "2025-11-29"
+description: |
+  Quick reference for common P2 programming questions.
+  Each question maps to relevant p2kb index keys.
+
+questions:
+  # === Getting Started ===
+
+  "how do I blink an LED":
+    keys:
+      - p2kbPasm2Drvh
+      - p2kbPasm2Drvl
+      - p2kbSpin2Pinhigh
+      - p2kbSpin2Pinlow
+    example: |
+      PUB blink()
+        REPEAT
+          PINHIGH(56)
+          WAITMS(500)
+          PINLOW(56)
+          WAITMS(500)
+
+  "how do I read a button":
+    keys:
+      - p2kbPasm2Testp
+      - p2kbSpin2Pinread
+    example: |
+      IF PINREAD(0)
+        ' Button pressed
+
+  "how do I set up the clock":
+    keys:
+      - p2kbArchClockSystem
+      - p2kbSpin2Clkset
+    example: |
+      CON
+        _CLKFREQ = 200_000_000
+
+  "how do I start another COG":
+    keys:
+      - p2kbArchCog
+      - p2kbSpin2Coginit
+      - p2kbSpin2Cogspin
+    example: |
+      COGSPIN(NEWCOG, method(), @stack)
+
+  # === Communication ===
+
+  "how do I implement UART":
+    keys:
+      - p2kbArchSmartPin11110AsyncSerialTransmit
+      - p2kbArchSmartPin11111AsyncSerialReceive
+    complexity: beginner
+
+  "how do I implement SPI":
+    keys:
+      - p2kbArchSmartPin11100SyncSerialTransmit
+      - p2kbArchSmartPin11101SyncSerialReceive
+    complexity: intermediate
+
+  "how do I implement I2C":
+    keys:
+      - p2kbPasm2Drvh
+      - p2kbPasm2Drvl
+      - p2kbPasm2Testp
+    complexity: intermediate
+
+  "how do I implement USB":
+    keys:
+      - p2kbArchSmartPin11011UsbHostDevice
+    complexity: advanced
+
+  # === Timing and Control ===
+
+  "how do I create a delay":
+    keys:
+      - p2kbSpin2Waitms
+      - p2kbSpin2Waitus
+      - p2kbPasm2Waitx
+      - p2kbPasm2Waitct1
+
+  "how do I measure a pulse":
+    keys:
+      - p2kbArchSmartPin00100PulseCycleOutput
+    complexity: intermediate
+
+  "how do I generate PWM":
+    keys:
+      - p2kbArchSmartPin01000PwmTriangle
+      - p2kbArchSmartPin01001PwmSawtooth
+    complexity: beginner
+
+  "how do I read an encoder":
+    keys:
+      - p2kbArchSmartPin01011QuadratureEncoder
+    complexity: intermediate
+
+  # === Multi-COG Programming ===
+
+  "how do COGs communicate":
+    keys:
+      - p2kbArchHub
+      - p2kbArchCogAttention
+    complexity: intermediate
+
+  "how do I synchronize COGs":
+    keys:
+      - p2kbArchLocks
+      - p2kbPasm2Locktry
+      - p2kbPasm2Lockrel
+    complexity: intermediate
+
+  "how do I share data between COGs":
+    keys:
+      - p2kbArchHub
+    tip: "Use DAT section for shared data, VAR for private"
+
+  # === Optimization ===
+
+  "how do I speed up my code":
+    keys:
+      - p2kbArchCog
+    tip: "Use inline PASM for critical sections"
+
+  "how do I reduce power consumption":
+    keys:
+      - p2kbPasm2Waitct1
+      - p2kbPasm2Waitx
+    tip: "Use WAIT instructions to sleep COGs"
+
+  "how do I use the CORDIC":
+    keys:
+      - p2kbArchCordic
+      - p2kbPasm2Qmul
+      - p2kbPasm2Qdiv
+      - p2kbSpin2Rotxy
+      - p2kbSpin2Polxy
+
+troubleshooting:
+  "why won't my COG start":
+    checklist:
+      - "Check stack size (minimum 32 longs)"
+      - "Verify COG code is in DAT section"
+      - "Check COGINIT return value"
+    keys:
+      - p2kbArchCog
+      - p2kbSpin2Coginit
+
+  "why is my timing wrong":
+    checklist:
+      - "Verify _CLKFREQ setting"
+      - "Account for hub access timing"
+      - "Check for blocking operations"
+    keys:
+      - p2kbArchClockSystem
+      - p2kbArchHub
+
+  "why is my serial not working":
+    checklist:
+      - "Verify baud rate calculation"
+      - "Check pin assignments"
+      - "Confirm smart pin configuration"
+    keys:
+      - p2kbArchSmartPin11110AsyncSerialTransmit
+      - p2kbArchSmartPin11111AsyncSerialReceive
+
+by_experience:
+  beginner:
+    start_with:
+      - "how do I blink an LED"
+      - "how do I read a button"
+      - "how do I create a delay"
+    next:
+      - "how do I implement UART"
+      - "how do I start another COG"
+
+  intermediate:
+    common:
+      - "how do I implement SPI"
+      - "how do COGs communicate"
+      - "how do I generate PWM"
+      - "how do I measure a pulse"
+
+  advanced:
+    topics:
+      - "how do I implement USB"
+      - "how do I use the CORDIC"
+      - "how do I synchronize COGs"
+
+search_tags:
+  gpio: ["blink", "button", "pin", "led", "digital"]
+  serial: ["uart", "spi", "i2c", "usb", "communication"]
+  timing: ["delay", "wait", "pulse", "pwm", "encoder"]
+  parallel: ["cog", "synchronize", "communicate", "share", "lock"]
+  math: ["cordic", "multiply", "divide", "trig"]

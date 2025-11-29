@@ -1,5 +1,0 @@
-operator: "-"
-type: operator
-description: |
-  Integer/float subtraction
-category: Subtract

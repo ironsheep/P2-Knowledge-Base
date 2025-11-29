@@ -1,8 +1,0 @@
-keyword: "STRING"
-type: keyword
-category: "Built-in Functions"
-description: |
-  Convert expression to string representation
-syntax: "STRING(expression)"
-examples:
-  - "text := STRING(number)"

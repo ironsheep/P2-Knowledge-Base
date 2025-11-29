@@ -19,16 +19,23 @@ class DateTimeEncoder(json.JSONEncoder):
         return super().default(obj)
 
 class P2CompleteReferenceUpdater:
-    def __init__(self, version: str = "1.7.0"):
-        self.version = version
+    def __init__(self):
         self.timestamp = datetime.now().isoformat()
         self.base_path = Path.cwd()
-        self.kb_path = self.base_path / "engineering/knowledge-base/P2"
-        
-        # Start with existing JSON structure
-        self.existing_json_path = self.base_path / "deliverables/ai-reference/versions/v0.1.0/p2-reference-v0.1.0.json"
-        with open(self.existing_json_path, 'r') as f:
-            self.reference = json.load(f)
+        self.kb_path = self.base_path / "deliverables/ai/P2"
+
+        # Output location (flattened, no version directories - git provides versioning)
+        self.output_path = self.base_path / "deliverables/ai-reference/p2-reference.json"
+
+        # Initialize fresh reference structure
+        self.reference = {
+            "meta": {
+                "release_date": datetime.now().strftime("%Y-%m-%d"),
+                "last_updated": self.timestamp,
+                "completeness": 0.95,
+                "sources": {}
+            }
+        }
             
         self.stats = {
             "pasm2_instructions": 0,
@@ -106,7 +113,7 @@ class P2CompleteReferenceUpdater:
         
         return {
             "total_count": self.stats["pasm2_instructions"],
-            "source": "engineering/knowledge-base/P2/language/pasm2/",
+            "source": "deliverables/ai/P2/language/pasm2/",
             "extraction_date": self.timestamp,
             "categories": categories
         }
@@ -131,7 +138,7 @@ class P2CompleteReferenceUpdater:
         print("Collecting SPIN2 elements...")
         spin2 = {
             "version": "1.51.5",
-            "source": "engineering/knowledge-base/P2/language/spin2/",
+            "source": "deliverables/ai/P2/language/spin2/",
             "extraction_date": self.timestamp,
             "categories": {}
         }
@@ -183,31 +190,25 @@ class P2CompleteReferenceUpdater:
         return spin2
     
     def update_meta_section(self):
-        """Update metadata for new version."""
-        self.reference["meta"]["version"] = self.version
+        """Update metadata."""
         self.reference["meta"]["release_date"] = datetime.now().strftime("%Y-%m-%d")
-        self.reference["meta"]["completeness"] = 0.95  # Updated from 0.85
+        self.reference["meta"]["completeness"] = 0.95
         self.reference["meta"]["last_updated"] = self.timestamp
-        self.reference["meta"]["sources"]["pasm2"] = "engineering/knowledge-base/P2/language/pasm2/"
-        self.reference["meta"]["sources"]["spin2"] = "engineering/knowledge-base/P2/language/spin2/ (PNUT-TS v1.51.5)"
+        self.reference["meta"]["sources"]["pasm2"] = "deliverables/ai/P2/language/pasm2/"
+        self.reference["meta"]["sources"]["spin2"] = "deliverables/ai/P2/language/spin2/ (PNUT-TS v1.51.5)"
         
     def save_updated_reference(self):
-        """Save the updated reference JSON."""
-        output_dir = self.base_path / "deliverables/ai-reference/versions" / f"v{self.version}"
-        output_dir.mkdir(parents=True, exist_ok=True)
-        
-        output_file = output_dir / f"p2-reference-v{self.version}.json"
-        
-        with open(output_file, 'w') as f:
+        """Save the updated reference JSON to flattened location."""
+        with open(self.output_path, 'w') as f:
             json.dump(self.reference, f, indent=2, cls=DateTimeEncoder)
-        
-        return output_file
+
+        return self.output_path
     
     def generate_summary(self):
         """Generate summary of what was included."""
         summary = f"""
-P2 Reference v{self.version} - Complete Update Summary
-========================================================
+P2 Reference - Complete Update Summary
+======================================
 
 PASM2 Instructions: {self.stats['pasm2_instructions']} (from YAMLs)
   - Full instruction details
@@ -226,13 +227,13 @@ SPIN2 Elements: {sum(v for k, v in self.stats.items() if k.startswith('spin2_'))
 
 Total Elements: {sum(self.stats.values())}
 
-Source: engineering/knowledge-base/P2/
+Source: deliverables/ai/P2/
 """
         return summary
     
     def update(self):
         """Main update process."""
-        print(f"Updating P2 Reference to v{self.version} with COMPLETE data...")
+        print("Updating P2 Reference with COMPLETE data...")
         
         # Build PASM2 section from YAMLs
         print("Building PASM2 instructions section...")
@@ -263,7 +264,5 @@ Source: engineering/knowledge-base/P2/
 
 
 if __name__ == "__main__":
-    import sys
-    version = sys.argv[1] if len(sys.argv) > 1 else "1.7.0"
-    updater = P2CompleteReferenceUpdater(version=version)
+    updater = P2CompleteReferenceUpdater()
     stats = updater.update()

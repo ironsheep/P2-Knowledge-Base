@@ -1,7 +1,0 @@
-operator: "NOT"
-type: operator
-description: |
-  Logical NOT (also PASM2 instruction)
-category: Unary
-examples:
-  - "IF NOT ready\n  wait()"

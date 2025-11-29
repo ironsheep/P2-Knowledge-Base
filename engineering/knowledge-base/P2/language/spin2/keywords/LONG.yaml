@@ -1,9 +1,0 @@
-keyword: "LONG"
-type: keyword
-category: "Data Types"
-description: |
-  32-bit signed integer type
-syntax: "LONG variable[count]"
-examples:
-  - "LONG counter"
-  - "LONG data_buffer[256]"

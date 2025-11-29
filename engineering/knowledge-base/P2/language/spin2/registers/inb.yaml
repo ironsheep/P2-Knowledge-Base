@@ -1,9 +1,0 @@
-register: "INB"
-type: register
-category: "I/O Registers"
-description: |
-  Input register B (pins 32-63)
-examples:
-  - "sensor_data := INB"
-address: "511"
-access: "read"

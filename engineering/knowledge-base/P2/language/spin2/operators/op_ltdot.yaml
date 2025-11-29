@@ -1,7 +1,0 @@
-operator: "<."
-type: operator
-description: |
-  Floating point less than comparison
-category: Float Compare
-examples:
-  - "IF x <. y\n  smaller := x"

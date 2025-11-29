@@ -1,8 +1,0 @@
-command: "DEBUG"
-type: debug_command
-category: "Debug Control"
-description: |
-  Debug output statement
-syntax: "['DEBUG (expressions)']"
-examples:
-  - "DEBUG(\"Value:\", value)"

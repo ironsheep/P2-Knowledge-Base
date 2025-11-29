@@ -1,8 +1,0 @@
-symbol: "$"
-type: special_symbol
-category: "Special"
-description: |
-  Hexadecimal number prefix
-examples:
-  - "value := $FF"
-  - "address := $1000"

@@ -1,9 +1,0 @@
-register: "IRET1"
-type: register
-category: "Interrupt Vectors"
-description: |
-  Interrupt 1 return vector
-examples:
-  - "IRET1 := stored_pc"
-address: "501"
-access: "read_write"

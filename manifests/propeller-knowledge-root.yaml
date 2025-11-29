@@ -1,38 +1,74 @@
-# Propeller Knowledge Base - Ultra-Minimal Root
-# Repository: https://github.com/ironsheep/P2-Knowledge-Base
-# This is the entry point - fetch this first, then follow instructions
+# Propeller Knowledge Base - Root Manifest v3.0
+# Repository: https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base
+# This is the entry point - fetch this first
 
-version: "2.3"
-schema_version: "2025-01-01"
-last_updated: "2025-11-10T21:28:08Z"
+version: "3.0"
+last_updated: "2025-11-29"
 
-# STEP 1: Check AI Instructions (compare hash with your stored version)
+# ============================================================================
+# 🚨 MIGRATION REQUIRED - v2.x users MUST upgrade
+# ============================================================================
+migration:
+  required: true
+  from_version: "2.x"
+  to_version: "3.0"
+  reason: |
+    v3.0 introduces key-based access that eliminates 404 errors and
+    simplifies content retrieval. The old manifest navigation system
+    is replaced by a single index with stable keys.
+
+  human_action_required: |
+    ⚠️ YOUR CACHED CONTENT IS OUTDATED AND MAY CONTAIN DEFECTS
+
+    Please tell your human:
+    1. Delete .p2kb-cache/ directory completely
+    2. Re-bootstrap from CLAUDE-QUICKSTART.md
+    3. The new system uses keys (p2kbPasm2Mov) instead of paths
+
+    This is a one-time migration. The new system is simpler and more reliable.
+
+# ============================================================================
+# v3.0 Key-Based Access System
+# ============================================================================
+index:
+  location: "deliverables/ai/p2kb-index.json"
+  compressed: "deliverables/ai/p2kb-index.json.gz"
+  description: "Master index mapping keys to YAML file paths"
+  total_entries: 973
+
 ai_instructions:
-  manifest: "manifests/ai-instructions.yaml"
-  content_hash: "sha256:9b3ca592a9c40691c7e980c16fcb137b744e5cd1793a47ed169362857dc711b7"  # Updated 2025-10-04
-  check_protocol: |
-    1. Compare this hash with your stored 'p2kb_instructions_hash'
-    2. If different or not stored → fetch ai_instructions.manifest
-    3. If same → skip to knowledge_bases section
+  location: "manifests/ai-instructions.yaml"
+  version: "3.0"
+  description: "Setup and usage instructions for v3.0 key-based access"
 
-# STEP 2: Access Knowledge Bases
+fetch_scripts:
+  bash: "engineering/tools/p2kb/fetch-kb-file.sh"
+  powershell: "engineering/tools/p2kb/fetch-kb-file.ps1"
+
+# Quick Start for v3.0
+quickstart: |
+  # 1. Download fetch script
+  curl -sS https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
+  chmod +x ~/.p2kb-cache/fetch-kb-file.sh
+
+  # 2. Fetch content by key
+  ~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov
+  ~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog
+  ~/.p2kb-cache/fetch-kb-file.sh p2kbGuideQuickQueries
+
+# Knowledge Base Status
 knowledge_bases:
   p2:
-    manifest: "manifests/P2/p2-root.yaml"
-    description: "Propeller 2 - 8 COGs, 64 Smart Pins, 512KB RAM"
     status: "active"
-    
+    description: "Propeller 2 - 8 COGs, 64 Smart Pins, 512KB RAM"
+    content_location: "deliverables/ai/P2/"
+    index_prefix: "p2kb"
+
   p1:
-    manifest: null  # Future: manifests/P1/p1-root.yaml
-    description: "Propeller 1 - 8 COGs, 32KB RAM, 32 I/O pins"
     status: "planned"
+    description: "Propeller 1 - 8 COGs, 32KB RAM, 32 I/O pins"
 
 # Metadata
 metadata:
-  repository: "https://github.com/ironsheep/P2-Knowledge-Base"
-  raw_base_url: "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/"
-  bootstrap_instructions: |
-    First time? Follow these steps:
-    1. Fetch the ai_instructions.manifest file
-    2. Follow its setup instructions completely
-    3. Then return here to access P1/P2 knowledge bases
+  repository: "https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base"
+  raw_base_url: "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/"

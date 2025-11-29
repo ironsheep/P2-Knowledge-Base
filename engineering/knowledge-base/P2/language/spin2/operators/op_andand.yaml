@@ -1,5 +1,0 @@
-operator: "&&"
-type: operator
-description: |
-  Boolean AND/NAND
-category: Logical AND

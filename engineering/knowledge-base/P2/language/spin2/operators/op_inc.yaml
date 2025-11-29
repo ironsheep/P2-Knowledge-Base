@@ -1,5 +1,0 @@
-operator: "++"
-type: operator
-description: |
-  Pre/post increment/decrement/random
-category: Var-modify

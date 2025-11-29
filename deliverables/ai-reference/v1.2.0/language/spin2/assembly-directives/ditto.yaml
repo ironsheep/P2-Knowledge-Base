@@ -1,8 +1,0 @@
-directive: "DITTO"
-type: assembly_directive
-category: "Assembly"
-description: |
-  Repeat last instruction (v50+)
-syntax: "['DITTO']"
-examples:
-  - "DITTO  // Repeat previous instruction"

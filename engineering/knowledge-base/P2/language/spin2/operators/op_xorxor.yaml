@@ -1,7 +1,0 @@
-operator: "^^"
-type: operator
-description: |
-  Logical XOR operator
-category: Bitwise
-examples:
-  - "IF state1 ^^ state2\n  toggle()"

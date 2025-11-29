@@ -1,175 +1,139 @@
-# P2 Knowledge Base QuickStart
-*Simple setup for AI assistants*
+# P2 Knowledge Base QuickStart v3.0
+*Key-based access - simple and reliable*
 
-## 🚀 Setup (Copy & Paste This)
+## Overview
 
-**For Claude Code instances:**
+v3.0 uses **keys** to access content. No path construction needed.
 
-```
-P2 Knowledge Base Setup:
+- Keys like `p2kbPasm2Mov` map directly to YAML files
+- One index contains all ~970 content files
+- Automatic caching and metadata filtering
 
-Step 1: Fetch the appropriate bootstrap file for your platform and READ IT IN FULL (do not summarize):
+## 🚀 Setup (3 Steps)
 
-For Unix/macOS/Linux:
-https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-bootstrap-unix.yaml
+### Step 1: Create Cache Directory
 
-For Windows:
-https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/manifests/ai-bootstrap-windows.yaml
-
-Step 2: Follow the instructions in the bootstrap file EXACTLY to create your fetch script
-Step 3: Use your script to fetch the complete setup instructions (manifests/ai-instructions.yaml)
-
-The complete setup (manifests/ai-instructions.yaml) will:
-- Update your CLAUDE.md with P2 KB navigation rules (~150 lines)
-- Load Spin2 Getting Started guide (core language essentials)
-- Load PASM2 Getting Started guide (assembly mechanics)
-- Configure direct access to all P2 resources
-- Enable automatic update checking
-
-Note: These bootstrap files are under 960 characters to avoid truncation.
-```
-
-### Platform-Specific Setup Instructions
-
-**The AI assistant will:**
-
-1. **Detect your platform** using `uname` or PowerShell checks
-
-2. **For Unix/macOS/Linux**, create `.p2kb-cache/fetch-kb-file.sh`:
 ```bash
-#!/bin/bash
-# P2 Knowledge Base File Fetcher
-path=$1
-cache=".p2kb-cache/${path}"
-url="https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/${path}"
-
-if [ -f "$cache" ]; then
-  cat "$cache"
-else
-  mkdir -p "$(dirname "$cache")"
-  curl -sS -o "$cache" "$url" 2>/dev/null || wget -q -O "$cache" "$url"
-  cat "$cache"
-fi
+mkdir -p ~/.p2kb-cache
 ```
 
-3. **For Windows**, create `.p2kb-cache\fetch-kb-file.ps1`:
+### Step 2: Download Fetch Script
+
+**Unix/macOS/Linux:**
+```bash
+curl -sS https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
+chmod +x ~/.p2kb-cache/fetch-kb-file.sh
+```
+
+**Windows PowerShell:**
 ```powershell
-# P2 Knowledge Base File Fetcher
-param($path)
-$cache = ".p2kb-cache\$($path -replace '/','\\')"  
-$url = "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/$path"
-
-if (Test-Path $cache) {
-  Get-Content $cache -Raw
-} else {
-  $dir = Split-Path $cache -Parent
-  New-Item -ItemType Directory -Force -Path $dir | Out-Null
-  Invoke-WebRequest -Uri $url -OutFile $cache
-  Get-Content $cache -Raw
-}
+mkdir "$env:USERPROFILE\.p2kb-cache" -Force
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\fetch-kb-file.ps1"
 ```
 
-4. **Usage after setup**:
-   - Unix/macOS: `bash .p2kb-cache/fetch-kb-file.sh "manifests/propeller-knowledge-root.yaml"`
-   - Windows: `powershell -File .p2kb-cache\fetch-kb-file.ps1 "manifests/propeller-knowledge-root.yaml"`
+### Step 3: Verify Setup
 
-5. **Start with**: Fetching the root manifest, then navigate to find PASM2, Spin2, Smart Pins, OBEX content.
+```bash
+~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog --verbose
+```
 
-**That's it!** You're ready to help with P2 development.
+✅ Setup complete when you see YAML content output.
 
 ---
 
-## 🎯 Essential First Documents
+## 📖 Usage
 
-After setup, immediately load the Getting Started guides:
+### Fetch Content by Key
 
-**For Spin2 Development:**
-```
-Fetch and read the Spin2 Getting Started guide:
-bash .p2kb-cache/fetch-kb-file.sh "engineering/knowledge-base/P2/language/spin2/conventions/spin2-getting-started.yaml"
+```bash
+# Architecture documentation
+~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog
+~/.p2kb-cache/fetch-kb-file.sh p2kbArchHub
 
-This contains core language essentials for Spin2 code generation.
+# PASM2 instructions
+~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov
+~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Add
+
+# Spin2 methods
+~/.p2kb-cache/fetch-kb-file.sh p2kbSpin2Pinwrite
+~/.p2kb-cache/fetch-kb-file.sh p2kbSpin2Waitms
+
+# Quick reference guide
+~/.p2kb-cache/fetch-kb-file.sh p2kbGuideQuickQueries
 ```
 
-**For PASM2 Development:**
-```
-Fetch and read the PASM2 Getting Started guide:
-bash .p2kb-cache/fetch-kb-file.sh "engineering/knowledge-base/P2/language/pasm2/conventions/pasm2-getting-started.yaml"
+### Find Keys
 
-This contains assembly mechanics and register model essentials.
+```bash
+# Search index for keys containing "Pasm2"
+jq '.files | keys[] | select(contains("Pasm2"))' ~/.p2kb-cache/p2kb-index.json
+
+# Find Smart Pin keys
+jq '.files | keys[] | select(contains("SmartPin"))' ~/.p2kb-cache/p2kb-index.json
+
+# Grep-based search (no jq required)
+grep -o '"p2kb[^"]*"' ~/.p2kb-cache/p2kb-index.json | grep -i uart
 ```
 
-## 📚 Quick Navigation
+---
 
-Once setup, users can ask:
+## 🔑 Key Prefixes
 
-**P2 Architecture:**
-```
-Explain P2 architecture
-```
-Navigate: `manifests/P2/architecture-manifest.yaml`
-
-**PASM2 Instructions:**
-```
-Help me with the ADD instruction
-```
-Navigate: `manifests/P2/language/pasm2-manifest.yaml`
-
-**Hardware Boards:**
-```
-What P2 development boards exist?
-```
-Navigate: `manifests/P2/hardware-manifest.yaml`
-
-**OBEX Code:**
-```
-Find I2C driver objects
-```
-Navigate: `manifests/P2/community/obex-unified-index.yaml`
+| Prefix | Content Type | Example |
+|--------|--------------|---------|
+| `p2kbPasm2` | PASM2 instructions | `p2kbPasm2Mov` |
+| `p2kbSpin2` | Spin2 methods | `p2kbSpin2Pinwrite` |
+| `p2kbArch` | Architecture docs | `p2kbArchCog` |
+| `p2kbSmartPin` | Smart Pin modes | `p2kbSmartPinUart` |
+| `p2kbGuide` | Guides | `p2kbGuideQuickQueries` |
+| `p2kbHw` | Hardware specs | `p2kbHwP2Eval` |
 
 ---
 
 ## 🔧 Cache Management
 
-**Check size:** `du -sh .p2kb-cache`
+**Check size:**
+```bash
+du -sh ~/.p2kb-cache
+```
 
-**Clear cache:** `rm -rf .p2kb-cache`
+**Clear cache (forces refresh):**
+```bash
+rm -rf ~/.p2kb-cache
+```
 
-**Refresh file:** `rm .p2kb-cache/manifests/propeller-knowledge-root.yaml`
-
----
-
-## 💡 Notes
-
-- **Cache location:** `.p2kb-cache/` in project root (hidden on macOS/Linux)
-- **Per-project:** Each project has its own cache (~5-15MB)
-- **Requirements:** curl (preferred) or wget
-- **Future:** MCP server in development for shared cache and auto-updates
+**Force index refresh:**
+```bash
+rm ~/.p2kb-cache/p2kb-index.json
+```
 
 ---
 
 ## 📋 Troubleshooting
 
-**"Neither curl nor wget found":**
-```bash
-# macOS
-brew install curl
+**"Key not found":**
+- Verify the key exists: `grep "keyname" ~/.p2kb-cache/p2kb-index.json`
+- Keys are case-sensitive and start with `p2kb`
 
-# Linux
-sudo apt-get install curl
-```
+**Stale content:**
+- Index auto-refreshes every 24 hours
+- Delete specific cached file to force refresh
+- Or clear entire cache: `rm -rf ~/.p2kb-cache`
 
-**Permission errors:**
-- Ensure you can write to project directory
-- Check `.p2kb-cache/` permissions
-
-**Corrupted cache:**
-```bash
-rm -rf .p2kb-cache
-# Files will re-download
-```
+**Network errors:**
+- Check internet connectivity
+- Verify GitHub is accessible
 
 ---
 
-*Version 2.1 - Remote Access*
-*Last Updated: 2025-10-02*
+## 💡 Notes
+
+- **Cache location:** `~/.p2kb-cache/`
+- **Index size:** ~130KB (13KB compressed)
+- **Total content:** 973 YAML files
+- **Auto-refresh:** Index checks for updates every 24 hours
+
+---
+
+*Version 3.0 - Key-Based Access*
+*Last Updated: 2025-11-29*
