@@ -1,0 +1,476 @@
+%% p2kb-pasm2-diagrams.sty
+%% TikZ diagram macros for P2 Assembly Language Reference Manual
+%% Version: 0.1.0
+%% Created: 2025-11-28
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-pasm2-diagrams}[2025/11/28 P2KB PASM2 Diagram Macros]
+
+%% ============================================================================
+%% REQUIRED PACKAGES
+%% ============================================================================
+
+\RequirePackage{tikz}
+\RequirePackage{xcolor}
+
+\usetikzlibrary{calc,positioning,shapes.geometric,arrows.meta,patterns}
+
+%% ============================================================================
+%% COLOR DEFINITIONS (matching p2kb-pasm2-reference.latex)
+%% ============================================================================
+
+% Memory region colors
+\definecolor{mem-cog}{HTML}{E0E8E0}         % COG RAM - light green
+\definecolor{mem-lut}{HTML}{E0E0E8}         % LUT RAM - light blue
+\definecolor{mem-hub}{HTML}{E8E0E0}         % Hub RAM - light red/pink
+\definecolor{mem-special}{HTML}{FFE8B0}     % Special registers - light gold
+\definecolor{mem-border}{HTML}{666666}      % Border color
+\definecolor{mem-addr}{HTML}{333333}        % Address text color
+\definecolor{mem-label}{HTML}{000000}       % Label text color
+
+%% ============================================================================
+%% MEMORY MAP MACRO
+%% ============================================================================
+%% \MemoryMap{width}{total-height}{region-definitions}
+%%
+%% Creates a vertical memory map diagram.
+%%
+%% Parameters:
+%%   width        - Width of the memory block (e.g., 4cm)
+%%   total-height - Total height of the diagram (e.g., 8cm)
+%%   region-defs  - Series of \MemRegion commands
+%%
+%% Usage:
+%%   \begin{tikzpicture}
+%%     \MemoryMap{4cm}{8cm}{
+%%       \MemRegion{0}{0.5}{mem-cog}{COG RAM}{$000-$1FF}{512 longs}
+%%       \MemRegion{0.5}{1.0}{mem-lut}{LUT RAM}{$200-$3FF}{512 longs}
+%%     }
+%%   \end{tikzpicture}
+%%
+%% Note: MemRegion positions are fractions of total height (0.0 to 1.0)
+%% ============================================================================
+
+% Internal state for memory map dimensions
+\newlength{\memmapwidth}
+\newlength{\memmapheight}
+
+% Begin memory map context
+\newcommand{\MemoryMapStart}[2]{%
+    \setlength{\memmapwidth}{#1}%
+    \setlength{\memmapheight}{#2}%
+}
+
+% Draw a memory region within the map
+% Args: start-frac, end-frac, color, label, addr-range, size-annotation
+\newcommand{\MemRegion}[6]{%
+    \pgfmathsetmacro{\starty}{#1 * \memmapheight}%
+    \pgfmathsetmacro{\endy}{#2 * \memmapheight}%
+    \pgfmathsetmacro{\regionheight}{(\endy - \starty)}%
+    % Draw filled region
+    \fill[#3, draw=mem-border, line width=0.5pt]
+        (0, \starty pt) rectangle (\memmapwidth, \endy pt);
+    % Center label
+    \node[anchor=center, font=\sffamily\small]
+        at (0.5\memmapwidth, {(\starty + \endy)/2} pt) {#4};
+    % Address range on left
+    \node[anchor=east, font=\ttfamily\scriptsize, text=mem-addr]
+        at (-2pt, {(\starty + \endy)/2} pt) {#5};
+    % Size annotation on right
+    \node[anchor=west, font=\scriptsize, text=mem-addr]
+        at (\memmapwidth + 2pt, {(\starty + \endy)/2} pt) {#6};
+}
+
+% High-level memory map command
+% Args: width, height, content (MemRegion commands)
+\newcommand{\MemoryMap}[3]{%
+    \MemoryMapStart{#1}{#2}%
+    #3%
+}
+
+%% ============================================================================
+%% COG MEMORY MAP PRESET
+%% ============================================================================
+%% \CogMemoryMap - Draws standard COG memory layout
+%% Shows: General registers, LUT RAM, Special registers
+%% ============================================================================
+
+\newcommand{\CogMemoryMap}{%
+    \begin{tikzpicture}
+        \MemoryMapStart{4cm}{6cm}
+        % General purpose COG RAM ($000-$1EF)
+        \MemRegion{0}{0.625}{mem-cog}{General COG RAM}{\$000--\$1EF}{496 longs}
+        % Special registers ($1F0-$1FF)
+        \MemRegion{0.625}{0.75}{mem-special}{Special Registers}{\$1F0--\$1FF}{16 longs}
+        % LUT RAM ($200-$3FF)
+        \MemRegion{0.75}{1.0}{mem-lut}{LUT RAM}{\$200--\$3FF}{512 longs}
+    \end{tikzpicture}
+}
+
+%% ============================================================================
+%% HUB MEMORY MAP PRESET
+%% ============================================================================
+%% \HubMemoryMap - Draws Hub RAM overview
+%% Shows: Full 512KB Hub space
+%% ============================================================================
+
+\newcommand{\HubMemoryMap}{%
+    \begin{tikzpicture}
+        \MemoryMapStart{4cm}{4cm}
+        % Hub RAM (512KB = $00000-$7FFFF)
+        \MemRegion{0}{1.0}{mem-hub}{Hub RAM}{\$00000--\$7FFFF}{512 KB}
+    \end{tikzpicture}
+}
+
+%% ============================================================================
+%% COMBINED COG+HUB RELATIONSHIP DIAGRAM
+%% ============================================================================
+%% \CogHubRelationship - Shows how COGs relate to Hub
+%% ============================================================================
+
+\newcommand{\CogHubRelationship}{%
+    \begin{tikzpicture}[
+        cogbox/.style={draw=mem-border, fill=mem-cog, minimum width=1.5cm, minimum height=1cm},
+        hubbox/.style={draw=mem-border, fill=mem-hub, minimum width=5cm, minimum height=2cm}
+    ]
+        % Hub RAM at bottom
+        \node[hubbox, anchor=center] (hub) at (0, 0) {\sffamily Hub RAM (512KB shared)};
+
+        % COGs above
+        \foreach \i in {0,...,7} {
+            \pgfmathsetmacro{\xpos}{(\i - 3.5) * 1.8}
+            \node[cogbox, anchor=south] (cog\i) at (\xpos, 1.5) {\scriptsize\sffamily COG \i};
+            \draw[->, >=Stealth, gray] (cog\i.south) -- ($(hub.north)!0.5!(cog\i.south)$) -- (hub.north);
+        }
+
+        % Labels
+        \node[anchor=south, font=\sffamily\footnotesize] at (0, 2.7) {8 Independent Cogs};
+        \node[anchor=north, font=\sffamily\footnotesize] at (0, -1.2) {Shared Access via Hub Window};
+    \end{tikzpicture}
+}
+
+%% ============================================================================
+%% SPECIAL REGISTERS DETAIL
+%% ============================================================================
+%% \SpecialRegistersMap - Detailed view of $1F0-$1FF
+%% ============================================================================
+
+\newcommand{\SpecialRegistersMap}{%
+    \begin{tikzpicture}
+        \MemoryMapStart{5cm}{4cm}
+        % Dual-purpose registers ($1F0-$1F7)
+        \fill[mem-special!70, draw=mem-border, line width=0.5pt]
+            (0, 0) rectangle (\memmapwidth, 2cm);
+        \node[anchor=center, font=\sffamily\small] at (2.5cm, 1cm) {Dual-Purpose};
+        \node[anchor=east, font=\ttfamily\scriptsize] at (-2pt, 1cm) {\$1F0--\$1F7};
+        \node[anchor=west, font=\scriptsize] at (\memmapwidth + 2pt, 1.4cm) {IJMP3, IRET3};
+        \node[anchor=west, font=\scriptsize] at (\memmapwidth + 2pt, 1.0cm) {IJMP2, IRET2};
+        \node[anchor=west, font=\scriptsize] at (\memmapwidth + 2pt, 0.6cm) {IJMP1, IRET1, PA, PB};
+
+        % Fixed special registers ($1F8-$1FF)
+        \fill[mem-special, draw=mem-border, line width=0.5pt]
+            (0, 2cm) rectangle (\memmapwidth, 4cm);
+        \node[anchor=center, font=\sffamily\small] at (2.5cm, 3cm) {Fixed Special};
+        \node[anchor=east, font=\ttfamily\scriptsize] at (-2pt, 3cm) {\$1F8--\$1FF};
+        \node[anchor=west, font=\scriptsize] at (\memmapwidth + 2pt, 3.4cm) {PTRA, PTRB};
+        \node[anchor=west, font=\scriptsize] at (\memmapwidth + 2pt, 3.0cm) {DIRA, DIRB};
+        \node[anchor=west, font=\scriptsize] at (\memmapwidth + 2pt, 2.6cm) {OUTA, OUTB, INA, INB};
+    \end{tikzpicture}
+}
+
+%% ============================================================================
+%% INLINE MEMORY REGION REFERENCE
+%% ============================================================================
+%% \MemoryRegion{addr-range}{name} - Compact inline reference
+%% Usage: The COG registers live in \MemoryRegion{$000-$1FF}{COG RAM}.
+%% ============================================================================
+
+\newcommand{\MemoryRegionInline}[2]{%
+    \tikz[baseline=(char.base)]{
+        \node[fill=mem-cog!50, draw=mem-border, rounded corners=2pt,
+              inner sep=2pt, font=\ttfamily\scriptsize] (char) {#1};
+    } \textit{#2}%
+}
+
+%% ============================================================================
+%% INSTRUCTION ENCODING DIAGRAM (32-bit)
+%% ============================================================================
+%% \InstructionEncoding{name}{cond}{opcode}{czi}{dest}{src}
+%% Creates horizontal 32-bit encoding diagram
+%% ============================================================================
+
+% Bit width constants
+\newlength{\bitwidth}
+\setlength{\bitwidth}{0.28cm}
+\newlength{\bitheight}
+\setlength{\bitheight}{0.6cm}
+
+\newcommand{\InstructionEncoding}[6]{%
+    \begin{tikzpicture}[
+        bitcell/.style={draw=mem-border, minimum width=\bitwidth, minimum height=\bitheight, anchor=south west}
+    ]
+        % Calculate positions
+        % 32 bits total: EEEE(4) + opcode(7) + CZI(3) + D(9) + S(9)
+        \def\condwidth{4}
+        \def\opcodewidth{7}
+        \def\cziwidth{3}
+        \def\destwidth{9}
+        \def\srcwidth{9}
+
+        % Draw fields with colors
+        % Condition field (bits 31-28)
+        \fill[encoding-cond, draw=mem-border] (0, 0) rectangle ({4*\bitwidth}, \bitheight);
+        \node[font=\ttfamily\scriptsize] at ({2*\bitwidth}, 0.5\bitheight) {#2};
+
+        % Opcode field (bits 27-21)
+        \fill[encoding-op, draw=mem-border] ({4*\bitwidth}, 0) rectangle ({11*\bitwidth}, \bitheight);
+        \node[font=\ttfamily\scriptsize] at ({7.5*\bitwidth}, 0.5\bitheight) {#3};
+
+        % CZI field (bits 20-18)
+        \fill[encoding-flag, draw=mem-border] ({11*\bitwidth}, 0) rectangle ({14*\bitwidth}, \bitheight);
+        \node[font=\ttfamily\scriptsize] at ({12.5*\bitwidth}, 0.5\bitheight) {#4};
+
+        % Dest field (bits 17-9)
+        \fill[encoding-dest, draw=mem-border] ({14*\bitwidth}, 0) rectangle ({23*\bitwidth}, \bitheight);
+        \node[font=\ttfamily\scriptsize] at ({18.5*\bitwidth}, 0.5\bitheight) {#5};
+
+        % Src field (bits 8-0)
+        \fill[encoding-src, draw=mem-border] ({23*\bitwidth}, 0) rectangle ({32*\bitwidth}, \bitheight);
+        \node[font=\ttfamily\scriptsize] at ({27.5*\bitwidth}, 0.5\bitheight) {#6};
+
+        % Field labels above
+        \node[font=\sffamily\tiny, anchor=south] at ({2*\bitwidth}, \bitheight) {COND};
+        \node[font=\sffamily\tiny, anchor=south] at ({7.5*\bitwidth}, \bitheight) {OPCODE};
+        \node[font=\sffamily\tiny, anchor=south] at ({12.5*\bitwidth}, \bitheight) {CZI};
+        \node[font=\sffamily\tiny, anchor=south] at ({18.5*\bitwidth}, \bitheight) {DEST};
+        \node[font=\sffamily\tiny, anchor=south] at ({27.5*\bitwidth}, \bitheight) {SRC};
+
+        % Bit numbers below
+        \node[font=\tiny, anchor=north] at ({0}, 0) {31};
+        \node[font=\tiny, anchor=north] at ({4*\bitwidth}, 0) {27};
+        \node[font=\tiny, anchor=north] at ({11*\bitwidth}, 0) {20};
+        \node[font=\tiny, anchor=north] at ({14*\bitwidth}, 0) {17};
+        \node[font=\tiny, anchor=north] at ({23*\bitwidth}, 0) {8};
+        \node[font=\tiny, anchor=north] at ({32*\bitwidth}, 0) {0};
+
+        % Instruction name label
+        \node[font=\sffamily\footnotesize\bfseries, anchor=west] at ({-0.5cm}, 0.5\bitheight) {#1};
+    \end{tikzpicture}
+}
+
+%% ============================================================================
+%% BIT REORDERING DIAGRAMS (Phase 0.4)
+%% ============================================================================
+%% Macros for visualizing bit/byte/word manipulation operations
+%% Used for: SPLITB, MERGB, MOVBYTS, REV, GETBYTE, etc.
+%% ============================================================================
+
+% Colors for bit position highlighting
+\definecolor{bit-byte0}{HTML}{FFE0E0}       % Byte 0 (bits 7-0)
+\definecolor{bit-byte1}{HTML}{E0FFE0}       % Byte 1 (bits 15-8)
+\definecolor{bit-byte2}{HTML}{E0E0FF}       % Byte 2 (bits 23-16)
+\definecolor{bit-byte3}{HTML}{FFFFE0}       % Byte 3 (bits 31-24)
+\definecolor{bit-highlight}{HTML}{FF6B6B}  % Highlighted bit
+
+% Draw a 32-bit value with byte coloring
+% Args: label, byte3-val, byte2-val, byte1-val, byte0-val
+\newcommand{\BitValueBar}[5]{%
+    \begin{tikzpicture}[
+        byteblock/.style={minimum width=2cm, minimum height=0.6cm, draw=mem-border, font=\ttfamily\small}
+    ]
+        % Label
+        \node[anchor=east, font=\sffamily\small] at (-0.2, 0) {#1};
+        % Byte 3 (MSB)
+        \node[byteblock, fill=bit-byte3] (b3) at (1, 0) {#2};
+        \node[font=\tiny, anchor=south] at (b3.north) {31..24};
+        % Byte 2
+        \node[byteblock, fill=bit-byte2, right=0pt of b3] (b2) {#3};
+        \node[font=\tiny, anchor=south] at (b2.north) {23..16};
+        % Byte 1
+        \node[byteblock, fill=bit-byte1, right=0pt of b2] (b1) {#4};
+        \node[font=\tiny, anchor=south] at (b1.north) {15..8};
+        % Byte 0 (LSB)
+        \node[byteblock, fill=bit-byte0, right=0pt of b1] (b0) {#5};
+        \node[font=\tiny, anchor=south] at (b0.north) {7..0};
+    \end{tikzpicture}
+}
+
+% SPLITB visualization - shows every 4th bit extraction
+% SPLITB splits every 4th bit into bytes
+\newcommand{\SplitBDiagram}{%
+    \begin{tikzpicture}[
+        bitcell/.style={minimum width=0.25cm, minimum height=0.5cm, draw=gray!50, font=\tiny},
+        arrow/.style={->, >=Stealth, thick, gray}
+    ]
+        % Before label
+        \node[anchor=east, font=\sffamily\small] at (-0.2, 1.5) {Before:};
+        % 32 bits shown as cells with alternating colors by which byte they go to
+        \foreach \i in {0,...,31} {
+            \pgfmathtruncatemacro{\bytenum}{mod(\i, 4)}
+            \ifnum\bytenum=0 \def\col{bit-byte0}\fi
+            \ifnum\bytenum=1 \def\col{bit-byte1}\fi
+            \ifnum\bytenum=2 \def\col{bit-byte2}\fi
+            \ifnum\bytenum=3 \def\col{bit-byte3}\fi
+            \node[bitcell, fill=\col] at ({(31-\i)*0.25}, 1.5) {\i};
+        }
+
+        % Arrow
+        \draw[arrow] (4, 0.9) -- (4, 0.4) node[midway, right, font=\sffamily\scriptsize] {SPLITB};
+
+        % After label
+        \node[anchor=east, font=\sffamily\small] at (-0.2, 0) {After:};
+        % Byte 3: bits 31,27,23,19,15,11,7,3
+        \foreach \b/\bits in {3/{31,27,23,19,15,11,7,3}, 2/{30,26,22,18,14,10,6,2}, 1/{29,25,21,17,13,9,5,1}, 0/{28,24,20,16,12,8,4,0}} {
+            \pgfmathtruncatemacro{\xstart}{(3-\b)*2.1}
+            \ifnum\b=0 \def\col{bit-byte0}\fi
+            \ifnum\b=1 \def\col{bit-byte1}\fi
+            \ifnum\b=2 \def\col{bit-byte2}\fi
+            \ifnum\b=3 \def\col{bit-byte3}\fi
+            \node[minimum width=2cm, minimum height=0.5cm, draw=mem-border, fill=\col, font=\tiny]
+                at ({\xstart + 1}, 0) {Byte \b};
+        }
+    \end{tikzpicture}
+}
+
+% REV (bit reversal) visualization
+\newcommand{\RevDiagram}{%
+    \begin{tikzpicture}[
+        bitcell/.style={minimum width=0.22cm, minimum height=0.5cm, draw=gray!50, font=\tiny\ttfamily},
+        arrow/.style={->, >=Stealth, thick, gray}
+    ]
+        % Before
+        \node[anchor=east, font=\sffamily\small] at (-0.2, 1) {Before:};
+        \foreach \i in {0,...,7} {
+            \node[bitcell, fill=gray!20] at ({(7-\i)*0.25 + 0.5}, 1) {\i};
+        }
+        \node[font=\tiny] at (3, 1) {...};
+        \foreach \i in {24,...,31} {
+            \pgfmathtruncatemacro{\pos}{\i - 24}
+            \node[bitcell, fill=gray!20] at ({(7-\pos)*0.25 + 5.5}, 1) {\i};
+        }
+
+        % Arrow
+        \draw[arrow] (4, 0.5) -- (4, 0.1) node[midway, right, font=\sffamily\scriptsize] {REV};
+
+        % After (reversed)
+        \node[anchor=east, font=\sffamily\small] at (-0.2, -0.4) {After:};
+        \foreach \i in {0,...,7} {
+            \pgfmathtruncatemacro{\rev}{31 - \i}
+            \node[bitcell, fill=gray!20] at ({(7-\i)*0.25 + 0.5}, -0.4) {\rev};
+        }
+        \node[font=\tiny] at (3, -0.4) {...};
+        \foreach \i in {24,...,31} {
+            \pgfmathtruncatemacro{\pos}{\i - 24}
+            \pgfmathtruncatemacro{\rev}{31 - \i}
+            \node[bitcell, fill=gray!20] at ({(7-\pos)*0.25 + 5.5}, -0.4) {\rev};
+        }
+
+        % Annotation
+        \node[font=\sffamily\scriptsize, anchor=west] at (8, 0.3) {bits 31:0 $\rightarrow$ bits 0:31};
+    \end{tikzpicture}
+}
+
+% MOVBYTS visualization - byte shuffle
+% Args: source-pattern (e.g., "3210" for no change, "0123" for reverse)
+\newcommand{\MovbytsDiagram}[1]{%
+    \begin{tikzpicture}[
+        byteblock/.style={minimum width=1.5cm, minimum height=0.6cm, draw=mem-border, font=\ttfamily\small},
+        arrow/.style={->, >=Stealth, gray}
+    ]
+        % Before
+        \node[anchor=east, font=\sffamily\small] at (-0.2, 1) {Before:};
+        \node[byteblock, fill=bit-byte3] (b3) at (1, 1) {B3};
+        \node[byteblock, fill=bit-byte2, right=0pt of b3] (b2) {B2};
+        \node[byteblock, fill=bit-byte1, right=0pt of b2] (b1) {B1};
+        \node[byteblock, fill=bit-byte0, right=0pt of b1] (b0) {B0};
+
+        % Pattern label
+        \node[font=\sffamily\scriptsize] at (7, 1) {S = #1};
+
+        % After
+        \node[anchor=east, font=\sffamily\small] at (-0.2, -0.2) {After:};
+        % Parse pattern and draw reordered bytes
+        \foreach \pos/\src in {0/{\strchar{#1}{3}}, 1/{\strchar{#1}{2}}, 2/{\strchar{#1}{1}}, 3/{\strchar{#1}{0}}} {
+            \pgfmathtruncatemacro{\xpos}{\pos * 1.5 + 1}
+        }
+        % Simplified: just show the concept
+        \node[byteblock, fill=bit-byte0!50] at (1, -0.2) {B[S[7:6]]};
+        \node[byteblock, fill=bit-byte0!50, right=0pt] at (2.5, -0.2) {B[S[5:4]]};
+        \node[byteblock, fill=bit-byte0!50, right=0pt] at (4, -0.2) {B[S[3:2]]};
+        \node[byteblock, fill=bit-byte0!50, right=0pt] at (5.5, -0.2) {B[S[1:0]]};
+    \end{tikzpicture}
+}
+
+%% ============================================================================
+%% REGISTER BIT FIELD MAP (Phase 0.4)
+%% ============================================================================
+%% \RegisterMap{name}{field-definitions}
+%% For showing bit field layouts of special registers
+%% ============================================================================
+
+% Draw a register with bit fields
+% Usage: \RegisterBitField{width-in-bits}{start-bit}{color}{label}
+\newcommand{\RegisterBitField}[4]{%
+    \fill[#3, draw=mem-border]
+        ({#2 * 0.25}, 0) rectangle ({(#2 + #1) * 0.25}, 0.6);
+    \node[font=\ttfamily\tiny] at ({(#2 + #1/2) * 0.25}, 0.3) {#4};
+}
+
+% COGINIT Dest field format: %E_N_xVVV
+\newcommand{\CoginitDestField}{%
+    \begin{tikzpicture}
+        \node[anchor=east, font=\sffamily\small] at (-0.2, 0.3) {Dest:};
+        % E bit (bit 8)
+        \RegisterBitField{1}{8}{bit-byte3}{E}
+        % N bit (bit 7)
+        \RegisterBitField{1}{7}{bit-byte2}{N}
+        % x (unused, bit 6)
+        \RegisterBitField{1}{6}{gray!30}{x}
+        % VVV (bits 5-3)
+        \RegisterBitField{3}{3}{bit-byte1}{VVV}
+        % Low bits (2-0)
+        \RegisterBitField{3}{0}{gray!30}{---}
+
+        % Bit labels below
+        \node[font=\tiny] at ({8.5 * 0.25}, -0.15) {8};
+        \node[font=\tiny] at ({7.5 * 0.25}, -0.15) {7};
+        \node[font=\tiny] at ({6.5 * 0.25}, -0.15) {6};
+        \node[font=\tiny] at ({4.5 * 0.25}, -0.15) {5..3};
+        \node[font=\tiny] at ({1.5 * 0.25}, -0.15) {2..0};
+
+        % Legend
+        \node[font=\sffamily\scriptsize, anchor=west] at (3, 0.3) {E=exec, N=new, VVV=cog\#};
+    \end{tikzpicture}
+}
+
+% DIRA/DIRB format (simple 32-bit pin mask)
+\newcommand{\DirRegisterField}{%
+    \begin{tikzpicture}
+        \node[anchor=east, font=\sffamily\small] at (-0.2, 0.3) {DIRA/B:};
+        % Show as 32-bit field
+        \fill[bit-byte1!50, draw=mem-border] (0, 0) rectangle (8, 0.6);
+        \node[font=\ttfamily\small] at (4, 0.3) {Pin Direction Mask (32 bits)};
+        % Bit labels
+        \node[font=\tiny] at (0, -0.15) {31};
+        \node[font=\tiny] at (8, -0.15) {0};
+        % Legend
+        \node[font=\sffamily\scriptsize, anchor=west] at (8.3, 0.3) {1=output, 0=input};
+    \end{tikzpicture}
+}
+
+% Generic register bit field diagram
+% Args: name, list of {width,label,color} tuples (comma separated)
+% Simplified version - draws fixed 32-bit field with custom segments
+\newcommand{\RegisterFieldDiagram}[2]{%
+    \begin{tikzpicture}
+        \node[anchor=east, font=\sffamily\small] at (-0.2, 0.3) {#1:};
+        % Draw the field content passed as #2
+        #2
+    \end{tikzpicture}
+}
+
+%% ============================================================================
+%% END OF PACKAGE
+%% ============================================================================
+
+\endinput

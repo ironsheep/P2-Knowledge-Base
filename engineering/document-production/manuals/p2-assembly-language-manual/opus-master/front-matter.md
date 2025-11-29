@@ -1,0 +1,201 @@
+# P2 Assembly Language (PASM2) Manual
+
+## Complete Reference for Propeller 2 Assembly Language
+
+Version 1.0
+
+P2 Knowledge Base Project
+
+---
+
+## Copyright and License
+
+Copyright 2025 P2 Knowledge Base Project
+
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+
+You are free to:
+- **Share** — copy and redistribute the material in any medium or format
+- **Adapt** — remix, transform, and build upon the material for any purpose, even commercially
+
+Under the following terms:
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made
+- **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original
+
+Propeller 2, P2, and Parallax are trademarks of Parallax Inc. This manual is an independent community resource and is not officially endorsed by Parallax Inc.
+
+---
+
+## Acknowledgments
+
+This manual would not exist without the contributions of many individuals and organizations:
+
+**Parallax Inc.** for creating the Propeller 2 microcontroller and providing comprehensive reference documentation that forms the foundation of this work.
+
+**Chip Gracey** for the brilliant design of the P2 architecture and for maintaining detailed technical specifications.
+
+**The P2 Community** for extensive testing, feedback, and real-world usage that has refined our understanding of the instruction set and identified critical details worth documenting.
+
+**Open Source Contributors** who have developed tools, compilers, and applications that demonstrate the power and flexibility of PASM2.
+
+This manual is a community-developed resource, created to make the P2's assembly language more accessible to developers at all skill levels.
+
+---
+
+## How to Use This Manual
+
+This manual serves multiple audiences and use cases. The organization is designed to support both learning and reference workflows.
+
+### For Different Reader Types
+
+**New to P2**: Start with Part I, Chapters 1-2 to understand the P2 architecture and instruction format fundamentals. These chapters provide essential context for understanding how PASM2 instructions work. Then explore Part II selectively based on what you need to accomplish.
+
+**Experienced P1 Users**: Review Chapter 1 for key differences between P1 and P2, particularly the enhanced instruction set and Smart Pin capabilities. Then use Part II as your primary reference, as the instruction-by-instruction format will feel familiar.
+
+**Looking Up a Specific Instruction**: Go directly to Part II, which is organized alphabetically by instruction name. Each entry provides complete syntax, encoding, behavior, and examples.
+
+**Quick Reference Needed**: Part III appendices provide dense lookup tables organized by category, encoding pattern, and flag effects for rapid consultation.
+
+### Manual Structure
+
+**Part I: Architectural Foundation** — Five chapters explaining how the P2 works:
+- Chapter 1: P2 Architecture Overview
+- Chapter 2: Instruction Format and Encoding
+- Chapter 3: Addressing Modes and Register Usage
+- Chapter 4: Flags and Conditional Execution
+- Chapter 5: Program Flow and Subroutines
+
+**Part II: Language Reference** — Complete documentation of all PASM2 elements:
+- Instructions (alphabetically organized)
+- Directives (assembly-time commands)
+- Constants (predefined values)
+- Special Registers (hardware registers)
+
+**Part III: Appendices** — Quick reference materials:
+- Appendix A: Instruction Encoding Summary
+- Appendix B: Instructions by Category
+- Appendix C: Flag Effects Reference
+- Appendix D: Smart Pin Modes
+- Appendix E: CORDIC Functions
+- Appendix F: Opcode Map
+- Appendix G: Glossary
+- Appendix H: Index
+
+### Quick Navigation Guide
+
+**"I need to find instruction X"** → Part II, Instructions section, alphabetically organized
+
+**"I need to understand the architecture"** → Part I, read Chapters 1-2 sequentially
+
+**"I need encoding details"** → Appendix A (summary tables) or Appendix F (complete opcode map)
+
+**"I need to find instructions by category"** → Appendix B (grouped by function: arithmetic, logic, memory, etc.)
+
+**"I need to know what flags an instruction affects"** → Part II (each instruction entry) or Appendix C (summary table)
+
+**"I need Smart Pin configuration values"** → Appendix D
+
+**"I need CORDIC function codes"** → Appendix E
+
+---
+
+## Conventions Used in This Manual
+
+### Typography
+
+`Monospace font` is used for code examples, instruction names in syntax descriptions, register names, and literal values.
+
+**Bold text** is used for instruction names when mentioned in prose, emphasis of important concepts, and section headings.
+
+*Italic text* is used for emphasis, the first use of technical terms, and parameter names in descriptions.
+
+UPPERCASE is used for instruction mnemonics, register names (PA, PTRA, DIRA), and condition codes (IF_C, IF_Z).
+
+### Code Examples
+
+PASM2 code examples follow standard formatting conventions:
+
+```
+label           instruction     D,S             ' Comment
+                instruction     D,#immediate    ' Indented code
+```
+
+- Labels are flush left
+- Instructions are indented to column 16 (two tabs or 8 spaces)
+- Operands follow the instruction
+- Comments start with a single quote (') and explain the operation
+- 8-character column alignment for readability
+
+### Special Markers
+
+Throughout this manual, special markers highlight important information:
+
+**Pitfall**: Common mistakes or non-obvious behavior that can cause errors. Pay careful attention to these to avoid debugging challenges.
+
+**Tip**: Useful techniques, optimization opportunities, or best practices that experienced P2 developers have discovered.
+
+**Hardware**: Hardware-specific considerations, timing constraints, or interactions with P2 peripherals that affect instruction behavior.
+
+### Instruction Encoding Tables
+
+Part II instruction entries include encoding tables with the following columns:
+
+**COND** — Condition code field (4 bits, EEEE). Determines when instruction executes based on flag states.
+
+**INSTR** — Opcode bits. The instruction-specific portion of the 32-bit encoding.
+
+**FX** — Flag effects field (3 bits, CZI). Controls which flags are updated and how.
+
+**DEST** — Destination register (9 bits). Where the result is written.
+
+**SRC** — Source register or immediate value (9 bits). Second operand for the instruction.
+
+**Write** — What value gets written to the destination register.
+
+**C Flag** — Effect on the Carry flag: set (1), cleared (0), modified based on result, or unchanged (-).
+
+**Z Flag** — Effect on the Zero flag: set (1), cleared (0), modified based on result, or unchanged (-).
+
+**Clocks** — Execution time in system clock cycles.
+
+### Cross-References
+
+This manual uses consistent cross-reference formats:
+
+**[INSTRUCTION](#instruction)** — Hyperlink to a Part II instruction entry (in digital versions)
+
+**"See Chapter X"** — Reference to Part I chapters for architectural context
+
+**"See Appendix X"** — Reference to Part III appendices for quick reference tables
+
+**"Compare: OTHER_INSTRUCTION"** — Points to related or contrasting instructions
+
+---
+
+## Document Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0 | 2025-11 | Initial release. Complete coverage of PASM2 instruction set, directives, constants, and special registers. Includes architectural foundation chapters and comprehensive appendices. |
+
+---
+
+## About This Manual
+
+This manual represents a comprehensive effort to document the P2 Assembly Language (PASM2) in a format optimized for both human learning and AI-assisted development. The content is derived from official Parallax documentation, community expertise, and extensive verification against the P2 silicon behavior.
+
+The manual is designed to be:
+
+**Complete** — Every documented instruction, directive, constant, and special register is included with full details.
+
+**Accurate** — Information has been verified against official sources and tested on actual P2 hardware.
+
+**Accessible** — Content is organized for multiple skill levels and use cases, from learning to quick reference.
+
+**Structured** — Consistent formatting enables both human reading and programmatic parsing for tool development.
+
+We welcome feedback, corrections, and suggestions for improvement. This is a living document that will evolve with the P2 community's growing expertise.
+
+---
+
+*You are now ready to explore the P2 Assembly Language. Whether you are learning for the first time or looking up specific details, this manual is designed to support your journey into P2 development.*

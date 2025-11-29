@@ -1,0 +1,12 @@
+{
+  "input_file": "P2-Assembly-Language-Manual.md",
+  "output_file": "P2-Assembly-Language-Manual.pdf",
+  "template": "p2kb-pasm2-reference.latex",
+  "pandoc_args": [
+    "--pdf-engine=xelatex",
+    "--toc",
+    "--toc-depth=3",
+    "--number-sections",
+    "--highlight-style=tango"
+  ]
+}

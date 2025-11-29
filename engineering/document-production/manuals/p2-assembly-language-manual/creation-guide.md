@@ -323,123 +323,211 @@ Each instruction entry should be traceable to sources:
 
 ## 5. Instruction Entry Specification
 
-### 5.1 Complete Entry Template
+### 5.1 Entry Layout (Parallax Format)
+
+Each instruction entry follows this structure, matching the Parallax draft manual format:
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 INSTRUCTION_NAME
-Full Name | Category
+Short description
+Category Link - One-line summary of instruction purpose.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SYNTAX  (one line per form)
+INSTR1  {#}Src  {effects}
+INSTR2  {#}Src  {effects}
 
-AT A GLANCE
-┌─────────────────────────────────────────────────────────────────────┐
-│  INSTR Dest, {#}Src {WC|WZ|WCZ}                                    │
-│  Cycles: N    Hub: Yes/No    Flags: C=effect, Z=effect             │
-└─────────────────────────────────────────────────────────────────────┘
+**Result:** Brief statement of what happens.
 
-SYNTAX
-  INSTR Dest, {#}Src {WC|WZ|WCZ}
-  INSTR Dest {WC|WZ|WCZ}
-  (all valid syntactic forms)
+  • Parameter1 description
+  • Parameter2 description
+  • Effects description
 
-PARAMETERS
-  • Dest - Register to receive result (and/or source operand)
-  • Src - Register, 9-bit immediate, or 32-bit augmented immediate
-  • WC - Update C flag based on result
-  • WZ - Update Z flag based on result
-  • WCZ - Update both C and Z flags
+┌──────┬─────────┬─────┬───────────┬───────────┬───────┬─────────┬─────────┬────────┐
+│ COND │  INSTR  │ FX  │   DEST    │    SRC    │ Write │ C Flag  │ Z Flag  │ Clocks │
+├──────┼─────────┼─────┼───────────┼───────────┼───────┼─────────┼─────────┼────────┤
+│ EEEE │ 0001000 │ CZI │ DDDDDDDDD │ SSSSSSSSS │   D   │ carry   │ D = 0   │   2    │
+└──────┴─────────┴─────┴───────────┴───────────┴───────┴─────────┴─────────┴────────┘
+(footnotes if needed)
 
-ENCODING
-  ┌──────────────────────────────────────────────────────────────────┐
-  │ EEEE  OOOOOOO  CZI  DDDDDDDDD  SSSSSSSSS                        │
-  │ cond  opcode   flg  dest       src                               │
-  │                                                                   │
-  │ EEEE = Condition (IF_x)                                          │
-  │ OOOOOOO = Opcode bits                                            │
-  │ C = WC effect bit                                                │
-  │ Z = WZ effect bit                                                │
-  │ I = Immediate source (1 = #Src)                                  │
-  │ DDDDDDDDD = Destination register address                         │
-  │ SSSSSSSSS = Source register/immediate                            │
-  └──────────────────────────────────────────────────────────────────┘
+**Related:** INSTR1, INSTR2, INSTR3
 
-OPERATION
-  Precise description of instruction behavior:
-  1. What values are read
-  2. What computation occurs
-  3. What values are written
-  4. How flags are affected
+**Explanation:**
+Prose description of instruction behavior. Multiple paragraphs as needed.
 
-  C Flag: [description of C flag behavior]
-  Z Flag: [description of Z flag behavior]
+Flag behavior paragraphs.
 
-TIMING
-  Execution: N clock cycles
-  Hub Access: Yes/No (if Yes, describe timing)
-  Pipeline: [any pipeline considerations]
-
-RELATED INSTRUCTIONS
-  • Similar: [instructions with similar function]
-  • Family: [instruction variants - ADDX, ADDS, ADDSX]
-  • See also: [complementary instructions]
-  • Contrast: [opposite or alternative instructions]
-
-EXAMPLE
-  ' Brief, illuminating code example
-  ' Comments explain the WHY, not just the what
-          instr   dest, src       wc      ' Explanation of this usage
-
-NOTES
-  ⚠️ Pitfall: [common mistakes to avoid]
-  💡 Tip: [non-obvious useful techniques]
-  🔧 Hardware: [silicon-level details if relevant]
-
-SOURCE REFERENCES
-  • YAML: /engineering/knowledge-base/P2/language/pasm2/instr.yaml
-  • Parallax Manual: p.XX (if documented)
-  • Encoding verified: Yes/No
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Additional details, edge cases, usage notes.
 ```
 
-### 5.2 Section Requirements
+### 5.2 Entry Structure Details
+
+#### Header Block
+- **Instruction Name** - Large heading, the mnemonic(s)
+- **Short description** - Human-readable name (e.g., "Add unsigned", "Compare signed")
+- **Category** - Hyperlinked category (e.g., "Math Instruction", "I/O Pin Instruction")
+- **One-liner** - Brief summary after the category
+
+#### Syntax Block
+- One line per syntax form
+- Monospace formatting
+- Shows all valid parameter combinations
+
+#### Result Line
+- Single sentence stating what the instruction produces
+- Appears after a horizontal rule
+
+#### Parameters
+- Bullet list describing each parameter
+- Includes Dest, Src, and any effects (WC, WZ, WCZ)
+
+#### Encoding Table
+- **Horizontal table format** with styled gray header row
+- Columns: COND, INSTR, FX, DEST, SRC, Write, C Flag, Z Flag, Clocks
+- **One row per encoding variant** (see Section 5.3)
+- Monospace font for encoding values
+- "—" indicates no effect on a flag
+- Footnotes (superscript markers) for conditional behaviors
+
+#### Related Line
+- Inline list of related instruction hyperlinks
+- No categories - just comma-separated names
+
+#### Explanation Section
+- Prose paragraphs describing behavior in detail
+- Flag behavior described in dedicated paragraphs
+- Examples embedded in prose when helpful
+
+### 5.3 When Multiple Encoding Rows Appear
+
+The encoding table has **one row per distinct encoding**. Multiple rows appear when:
+
+**1. Multiple related instructions share an entry:**
+```
+DIRZ / DIRNZ
+...
+│ EEEE │ 1101011 │ CZI │ DDDDDDDDD │ 001000100 │ DIRx │ ... │
+│ EEEE │ 1101011 │ CZI │ DDDDDDDDD │ 001000101 │ DIRx │ ... │
+```
+Each instruction variant (DIRZ, DIRNZ) gets its own row.
+
+**2. Multiple syntax forms for one instruction:**
+```
+GETBYTE Dest, {#}Src, #Num
+GETBYTE Dest
+...
+│ EEEE │ 1000111 │ NNI │ DDDDDDDDD │ SSSSSSSSS │  D  │ ... │
+│ EEEE │ 1000111 │ 000 │ DDDDDDDDD │ 000000000 │  D  │ ... │
+```
+The first form uses Src and Num; the second form (for ALTGB) has fixed encoding.
+
+**3. Instruction families documented together:**
+```
+JCT1/2/3 / JNCT1/2/3
+...
+│ EEEE │ 1011110 │ 01I │ 000000001 │ SSSSSSSSS │ PC¹ │ ... │
+│ EEEE │ 1011110 │ 01I │ 000000010 │ SSSSSSSSS │ PC¹ │ ... │
+│ EEEE │ 1011110 │ 01I │ 000000011 │ SSSSSSSSS │ PC¹ │ ... │
+│ EEEE │ 1011110 │ 01I │ 000010001 │ SSSSSSSSS │ PC¹ │ ... │
+│ EEEE │ 1011110 │ 01I │ 000010010 │ SSSSSSSSS │ PC¹ │ ... │
+│ EEEE │ 1011110 │ 01I │ 000010001 │ SSSSSSSSS │ PC¹ │ ... │
+```
+Six instructions (JCT1, JCT2, JCT3, JNCT1, JNCT2, JNCT3) = six rows.
+
+**Key principle:** Each unique opcode encoding = one table row.
+
+### 5.4 Encoding Table Column Reference
+
+| Column | Content | Notes |
+|--------|---------|-------|
+| COND | `EEEE` | Condition field (always EEEE for conditional execution) |
+| INSTR | 7-bit opcode | The instruction's opcode bits |
+| FX | `CZI` or variant | Flag/immediate bits; may show `NNI`, `000`, etc. |
+| DEST | `DDDDDDDDD` | 9-bit destination field |
+| SRC | `SSSSSSSSS` | 9-bit source field; may be fixed value |
+| Write | What's written | `D`, `D and PC`, `DIRx`, `—`, etc. |
+| C Flag | C behavior | Effect description or `—` for no change |
+| Z Flag | Z behavior | Effect description or `—` for no change |
+| Clocks | Cycle count | May be complex: `2 or 4 / 2 or 13-20` |
+
+### 5.5 Table Footnotes
+
+Use superscript markers for conditional behaviors:
+
+```
+│ ... │ PC¹ │ — │ — │ 2 or 4 / 2 or 13-20 │
+...
+¹ PC is written only when the counter event flag is set (or is clear in syntax 4-6).
+```
+
+### 5.6 Section Requirements
 
 | Section | Required? | Notes |
 |---------|-----------|-------|
-| Instruction Name | YES | Mnemonic as heading |
-| Full Name / Category | YES | Human-readable name and functional category |
-| At a Glance | YES | Quick-reference box |
-| Syntax | YES | All valid forms |
-| Parameters | YES | All parameters explained |
-| Encoding | YES | Bit-level format |
-| Operation | YES | Precise behavioral description |
-| Timing | YES | Cycle count, hub access |
-| Related Instructions | YES | Cross-references |
-| Example | OPTIONAL | Include when it illuminates; omit for trivial instructions |
-| Notes | OPTIONAL | Include when pitfalls, tips, or hardware details exist |
-| Source References | YES | Traceability |
+| Instruction Name | YES | Mnemonic(s) as heading |
+| Short description | YES | Human-readable name |
+| Category + one-liner | YES | Linked category, brief summary |
+| Syntax | YES | All valid forms, one per line |
+| Result | YES | One-sentence outcome statement |
+| Parameters | YES | Bullet list of all parameters |
+| Encoding Table | YES | One row per encoding variant |
+| Related | YES | Inline hyperlinked list |
+| Explanation | YES | Prose description of behavior |
 
-### 5.3 Writing Guidelines for Each Section
+### 5.7 Writing Guidelines
 
-**At a Glance:** Most common syntax form, cycle count, flag summary. One quick look tells experienced dev what they need.
+**Syntax:** One line per form. Monospace. Show all valid combinations.
 
-**Syntax:** Show ALL valid forms. Use consistent notation: `{#}` for optional immediate, `{effect}` for optional effects.
+**Result:** Single sentence. States what the instruction produces or affects.
 
-**Parameters:** Bullet list. Be precise about what each parameter can be (register, immediate, augmented).
+**Parameters:** Bullet list. Be precise about what each can be (register, immediate, augmented).
 
-**Encoding:** Visual box format. Show the bit fields clearly. Include legend for field meanings.
+**Encoding Table:** Generate from YAML. One row per encoding. Use "—" for no flag effect.
 
-**Operation:** Procedural description. Number the steps. Be explicit about flag behavior - don't assume reader remembers from elsewhere.
+**Related:** Inline comma-separated list. Hyperlink each instruction name.
 
-**Timing:** Always include cycle count. Note hub access if applicable. Pipeline effects for advanced instructions.
+**Explanation:**
+- Prose paragraphs, not numbered steps
+- Describe the operation clearly
+- Dedicate paragraphs to C flag and Z flag behavior when they're updated
+- Include usage context and edge cases
+- Embed examples in prose when they illuminate
 
-**Related Instructions:** This is a teaching tool. Group by relationship type (similar, family, contrast).
+### 5.8 Directive Entry Format
 
-**Example:** Only include if it adds value. The example should show *why* you'd use this instruction, not just that you can.
+Directives are assembler-time constructs, not runtime instructions. They have a different format:
 
-**Notes:** Categorize with emoji markers. Keep concise - this isn't a tutorial.
+```
+DIRECTIVE_NAME
+Short description
+Directive - One-line summary of directive purpose.
+
+DAT
+  code_and_data_statements
+  DIRECTIVE
+  data_statements
+
+**Result:** Brief statement of what the directive does.
+
+  • Parameter descriptions
+
+**Explanation:**
+Prose description of directive behavior.
+
+**Example**
+Code example showing typical usage, often with before/after memory diagrams.
+```
+
+**Key differences from instructions:**
+- **No encoding table** - Directives don't generate machine code
+- **Syntax shown in DAT context** - Shows usage within DAT blocks
+- **Memory diagrams** - TikZ diagrams showing byte/word/long alignment (where helpful)
+- **Before/after examples** - Visual demonstration of effect
+
+**Memory alignment diagrams (TikZ):**
+For directives like ALIGNW, ALIGNL, BYTE, WORD, LONG, include memory layout diagrams showing:
+- Byte positions within longs
+- Address boundaries (L0, L1, L2... for longs; W0, W1... for words; B0, B1... for bytes)
+- Before and after states when relevant
 
 ---
 
@@ -545,101 +633,105 @@ Maintain tracking of:
 - **Lua filters:** As needed for formatting
 - **Request file:** `request.json` with appropriate pandoc_args
 
-### 8.5 TikZ Diagrams
+### 8.5 Encoding Tables and TikZ Diagrams
 
-This manual uses **TikZ**, a LaTeX-based vector diagram language, to recreate and improve upon all diagrams from the original Parallax draft. This ensures visual consistency, professional quality, and maintainability.
+This manual uses two visual approaches:
+1. **LaTeX Tables** for instruction encodings (dense, tabular format matching Parallax draft)
+2. **TikZ Diagrams** for architectural concepts, memory layouts, and bit manipulation visualizations
 
-#### 8.5.1 Why TikZ for All Diagrams
+#### 8.5.1 Instruction Encoding: Tables (Not Diagrams)
 
-**Quality Benefits:**
-- Resolution-independent vector output (crisp at any zoom/print size)
-- Consistent with document typography
-- No pixel artifacts or compression issues
-- Professional appearance throughout
+Instruction encodings use a **horizontal table format** with styled gray header:
 
-**Maintainability Benefits:**
-- Diagrams are code - version controlled and diff-able
-- Fix a typo? Edit one line of code
-- Change color scheme? Update one style definition
-- Add new instruction? Copy template, change values
-
-**Pedagogical Benefits:**
-- Consistent visual structure reinforces learning
-- Readers develop instant recognition of patterns
-- Visual consistency = reduced cognitive load
-- Same diagram style throughout builds familiarity
-
-#### 8.5.2 Diagram Types to Recreate
-
-**Instruction Encoding Diagrams (every instruction):**
 ```
-┌────────┬─────────┬─────┬───────────┬───────────┐
-│  EEEE  │ OOOOOOO │ CZI │ DDDDDDDDD │ SSSSSSSSS │
-│  31-28 │  27-21  │20-18│   17-9    │    8-0    │
-│  cond  │ opcode  │flags│   dest    │    src    │
-└────────┴─────────┴─────┴───────────┴───────────┘
+┌──────┬─────────┬─────┬───────────┬───────────┬───────┬─────────┬─────────┬────────┐
+│ COND │  INSTR  │ FX  │   DEST    │    SRC    │ Write │ C Flag  │ Z Flag  │ Clocks │
+├──────┼─────────┼─────┼───────────┼───────────┼───────┼─────────┼─────────┼────────┤
+│ EEEE │ 0001000 │ CZI │ DDDDDDDDD │ SSSSSSSSS │   D   │  carry  │  D = 0  │   2    │
+└──────┴─────────┴─────┴───────────┴───────────┴───────┴─────────┴─────────┴────────┘
 ```
-- Bit field boundaries clearly marked
-- Field names and bit positions labeled
-- Consistent styling across all 359 instructions
 
-**Byte/Word/Long Alignment Diagrams:**
-- Memory layout showing data alignment
-- Hub address boundaries
-- Byte ordering within longs (little-endian visualization)
-- Useful for BYTE, WORD, LONG directives and RDxxxx/WRxxxx instructions
+**Why tables instead of TikZ diagrams:**
+- Matches the Parallax draft manual format exactly
+- Scales naturally for multi-row encodings (multiple syntax forms)
+- Easier to generate programmatically from YAML
+- More compact and information-dense
+- Includes result columns (Write, C Flag, Z Flag, Clocks) in same view
 
-**Special Register Maps:**
-- DIRA/DIRB bit-to-pin assignments (32 bits → 32 pins)
-- INA/INB/OUTA/OUTB layouts
-- Special purpose register address map (496-511)
-- PTRA/PTRB pointer register structure
+**Table styling (LaTeX):**
+- `booktabs` for clean horizontal rules
+- `colortbl` for gray header background
+- `\ttfamily` for monospace encoding values
+- Consistent column widths across all entries
 
-**Architectural Diagrams (Part I):**
+#### 8.5.2 TikZ Diagrams: Where They Add Value
+
+TikZ is reserved for visual concepts that benefit from graphical representation:
+
+**Part I Architectural Diagrams:**
 - COG memory map (addresses 0-511, showing register regions)
 - Hub memory organization (512KB layout)
 - LUT memory layout (512 longs per COG)
 - Egg beater hub access timing diagram
 - Instruction pipeline visualization
+- 8-COG parallel execution overview
+
+**Directive Memory Layout Diagrams:**
+- Byte/Word/Long alignment (ALIGNW, ALIGNL examples)
+- Hub address boundaries
+- Before/after memory state comparisons
+- Byte ordering within longs (little-endian)
+
+**Bit/Nibble Reordering Diagrams:**
+Instructions that rearrange bits or nibbles benefit from before/after visualizations:
+- SPLITB, SPLITW - Bit/word splitting operations
+- MERGB, MERGW - Bit/word merging operations
+- MOVBYTS - Byte shuffling within a long
+- ROLNIB, ROLBYTE, ROLWORD - Nibble/byte/word rotation
+- SETNIB, SETBYTE, SETWORD - Nibble/byte/word insertion
+- GETNIB, GETBYTE, GETWORD - Nibble/byte/word extraction
+- REV - Bit reversal
+
+These diagrams show the 32-bit value with labeled positions, arrows indicating movement, and before/after states.
+
+**Special Register Maps:**
+- DIRA/DIRB bit-to-pin assignments (32 bits → 32 pins)
+- Special purpose register address map ($1F0-$1FF)
+- PTRA/PTRB pointer structure
 
 **CORDIC Operation Diagrams:**
 - Input/output register flow
-- Operation modes visualization
-- Timing/pipeline for CORDIC operations
-
-**Smart Pin Diagrams (overview only):**
-- Pin configuration register layout
-- Basic mode selection bits
-- (Detailed Smart Pin diagrams belong in Smart Pins manual)
+- Operation queue visualization
 
 #### 8.5.3 TikZ Template Strategy
 
-**Base Templates to Create:**
+**Templates to Create:**
 
-1. **`\InstructionEncoding{opcode}{flags}{...}`**
-   - Parameterized template for any instruction's encoding
-   - Accepts opcode bits, flag effects, field values
-   - Produces consistent 32-bit encoding diagram
-
-2. **`\MemoryMap{start}{end}{regions}`**
+1. **`\MemoryMap{start}{end}{regions}`**
    - Generic memory region visualization
    - Used for COG, Hub, and LUT maps
    - Configurable labels and highlighting
 
-3. **`\BitFieldDiagram{width}{fields}`**
-   - Generic bit field layout
-   - Used for registers, configuration values
-   - Shows bit positions and field names
-
-4. **`\ByteAlignment{size}{values}`**
+2. **`\ByteAlignment{size}{values}`**
    - Shows byte ordering in memory
    - Little-endian visualization
-   - Address annotations
+   - Address annotations (L0, L1, W0, W1, B0-B3)
+
+3. **`\BitReorder{before}{after}{arrows}`**
+   - 32-bit value with numbered bit positions
+   - Shows before and after states
+   - Arrows or color coding to show movement
+   - Used for SPLITB, MERGB, MOVBYTS, etc.
+
+4. **`\RegisterMap{name}{fields}`**
+   - Generic register bit field layout
+   - Shows bit positions and field names
+   - Used for special registers, configuration values
 
 #### 8.5.4 Implementation
 
 **Reference Implementation:**
-See `/engineering/document-production/workspace/p2-pasm-desilva-style/templates/p2kb-desilva-diagrams.sty` for existing TikZ diagram definitions used in the DeSilva manual.
+See `/engineering/document-production/workspace/p2-pasm-desilva-style/templates/p2kb-desilva-diagrams.sty` for existing TikZ diagram definitions.
 
 **TikZ Libraries Required:**
 ```latex
@@ -647,7 +739,7 @@ See `/engineering/document-production/workspace/p2-pasm-desilva-style/templates/
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, decorations.pathreplacing}
 ```
 
-**Color Palette (consistent with P2KB manuals):**
+**Color Palette:**
 ```latex
 \definecolor{diagram-box}{HTML}{E8E8E8}      % Light gray fill
 \definecolor{diagram-border}{HTML}{666666}   % Medium gray border
@@ -655,26 +747,17 @@ See `/engineering/document-production/workspace/p2-pasm-desilva-style/templates/
 \definecolor{diagram-text}{HTML}{333333}     % Dark gray text
 ```
 
-**Creating New Diagrams:**
-1. Define diagram as LaTeX command in `.sty` package
-2. Use consistent color palette
-3. Parameterize where possible for reuse
-4. Test in PDF Forge before committing
-5. Document diagram purpose and parameters
-
 #### 8.5.5 Diagram Inventory
 
-Track diagram creation progress:
+| Diagram Type | Count | Notes |
+|--------------|-------|-------|
+| Part I Architectural | ~8 | COG, Hub, LUT maps, pipeline, timing |
+| Directive Memory | ~5 | ALIGNW, ALIGNL, BYTE/WORD/LONG layouts |
+| Bit Reordering | ~12 | SPLITB/W, MERGB/W, MOVBYTS, ROLxxx, etc. |
+| Special Registers | ~4 | $1F0-$1FF map, PTRA/PTRB structure |
+| CORDIC | ~2 | Queue operation, register flow |
 
-| Diagram Type | Count | Status |
-|--------------|-------|--------|
-| Instruction Encoding | 359 | Template needed |
-| Directive Layouts | ~5 | Template needed |
-| Part I Architectural | ~8 | Template needed |
-| Special Registers | ~6 | Template needed |
-| CORDIC Operations | ~4 | Template needed |
-
-**Goal:** All diagrams from Parallax draft recreated in TikZ, plus new diagrams where they improve understanding.
+**Total TikZ diagrams:** ~31 (vs. 359 encoding tables)
 
 ---
 
@@ -732,88 +815,50 @@ Every update should document:
 
 ---
 
-## Appendix: Exemplar Instruction Entry
+## Appendix: Exemplar Instruction Entry (Parallax Format)
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 ADD
-Add Unsigned | Math Instruction
+Add unsigned
+Math Instruction - Add two unsigned values.
+
+ADD  Dest, {#}Src  {WC|WZ|WCZ}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**Result:** The sum of Dest and Src is stored in Dest.
 
-AT A GLANCE
-┌─────────────────────────────────────────────────────────────────────┐
-│  ADD Dest, {#}Src {WC|WZ|WCZ}                                      │
-│  Cycles: 2    Hub: No    Flags: C=carry, Z=zero                    │
-└─────────────────────────────────────────────────────────────────────┘
+  • Dest is the register containing the first operand and receiving the sum.
+  • Src is a register, 9-bit literal, or 32-bit augmented literal to add to Dest.
+  • WC, WZ, or WCZ are optional effects to update flags.
 
-SYNTAX
-  ADD Dest, {#}Src {WC|WZ|WCZ}
+┌──────┬─────────┬─────┬───────────┬───────────┬───────┬─────────┬─────────┬────────┐
+│ COND │  INSTR  │ FX  │   DEST    │    SRC    │ Write │ C Flag  │ Z Flag  │ Clocks │
+├──────┼─────────┼─────┼───────────┼───────────┼───────┼─────────┼─────────┼────────┤
+│ EEEE │ 0001000 │ CZI │ DDDDDDDDD │ SSSSSSSSS │   D   │  carry  │  D = 0  │   2    │
+└──────┴─────────┴─────┴───────────┴───────────┴───────┴─────────┴─────────┴────────┘
 
-PARAMETERS
-  • Dest - Register containing first operand; receives the sum
-  • Src - Register, 9-bit immediate (#0-511), or 32-bit augmented immediate (##value)
-  • WC - Set C flag if unsigned overflow (carry out of bit 31)
-  • WZ - Set Z flag if result is zero
-  • WCZ - Set both C and Z flags
+**Related:** ADDX, ADDS, ADDSX, SUB
 
-ENCODING
-  ┌──────────────────────────────────────────────────────────────────┐
-  │ EEEE  0001000  CZI  DDDDDDDDD  SSSSSSSSS                        │
-  │                                                                   │
-  │ EEEE = Condition (default: 1111 = always)                        │
-  │ 0001000 = ADD opcode                                             │
-  │ C = 1 if WC specified                                            │
-  │ Z = 1 if WZ specified                                            │
-  │ I = 1 if Src is immediate (#)                                    │
-  │ DDDDDDDDD = Destination register (0-511)                         │
-  │ SSSSSSSSS = Source register or 9-bit immediate                   │
-  └──────────────────────────────────────────────────────────────────┘
+**Explanation:**
 
-OPERATION
-  1. Read the value in Dest
-  2. Read the value in Src (or use immediate value)
-  3. Compute Dest + Src as unsigned 32-bit addition
-  4. Write the 32-bit result to Dest
+ADD adds the unsigned values of Dest and Src and stores the 32-bit result in Dest.
 
-  C Flag: Set to 1 if addition produces carry (overflow beyond 32 bits);
-          cleared to 0 otherwise. Only updated if WC or WCZ specified.
+If the WC or WCZ effect is specified, the C flag is set (1) if the addition
+produces a carry out of bit 31, or is cleared (0) otherwise.
 
-  Z Flag: Set to 1 if result is zero; cleared to 0 otherwise.
-          Only updated if WZ or WCZ specified.
+If the WZ or WCZ effect is specified, the Z flag is set (1) if the result
+equals zero, or is cleared (0) otherwise.
 
-TIMING
-  Execution: 2 clock cycles
-  Hub Access: No
-  Pipeline: Standard execution, no stalls
+For 64-bit addition, use ADD with WC on the low longs, then ADDX on the high
+longs to incorporate the carry:
 
-RELATED INSTRUCTIONS
-  • Family: ADDX (extended), ADDS (signed), ADDSX (signed extended)
-  • Contrast: SUB (subtraction)
-  • See also: ADDCT1/2/3 (counter events), ADDPIX (pixel addition)
+    add     X_lo, Y_lo      wc      ' Add low longs, capture carry
+    addx    X_hi, Y_hi              ' Add high longs with carry-in
 
-EXAMPLE
-  ' 64-bit addition: result in X_hi:X_lo
-          add     X_lo, Y_lo      wc      ' Add low longs, MUST capture carry
-          addx    X_hi, Y_hi              ' Add high longs with carry-in
-
-NOTES
-  ⚠️ Pitfall: For multi-long addition, forgetting WC on the first ADD
-     causes incorrect results. The carry MUST propagate to ADDX.
-
-  💡 Tip: ADD treats both operands as unsigned. For signed addition
-     where you need signed overflow detection, see ADDS.
-
-SOURCE REFERENCES
-  • YAML: /engineering/knowledge-base/P2/language/pasm2/add.yaml
-  • Parallax Manual: p.32
-  • Encoding verified: Yes
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+For signed addition with signed overflow detection, use ADDS instead.
 ```
 
 ---
 
-*Last Updated: 2025-11-26*
-*Version: 1.0 - Initial Creation Guide*
+*Last Updated: 2025-11-28*
+*Version: 1.1 - Updated to Parallax format (encoding tables, not diagrams)*

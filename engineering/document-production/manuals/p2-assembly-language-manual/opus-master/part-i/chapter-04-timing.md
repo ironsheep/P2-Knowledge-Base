@@ -1,0 +1,657 @@
+# Chapter 4: Timing and Determinism
+
+<!-- Chapter covering clock cycles, hub windows, and deterministic timing -->
+
+The P2 provides deterministic instruction timing, enabling precise real-time control. Understanding timing characteristics is essential for time-critical applications and optimizing code performance.
+
+---
+
+## 4.1 Clock Sources and Configuration
+
+Before examining instruction timing, understanding clock configuration is essential—the system clock frequency determines all timing calculations. The P2 supports multiple clock sources, from simple internal oscillators to PLL-multiplied crystals running at 320 MHz.
+
+### 4.1.1 Available Clock Sources
+
+The P2 provides four clock source options, each suited to different application requirements:
+
+**RCFAST** is the internal fast RC oscillator, running at approximately 20-25 MHz. This is the default clock source at power-on and reset. RCFAST requires no external components and provides immediate operation, though its frequency varies with temperature and process. Use RCFAST for applications where precise timing is not critical or as a bootstrap clock while configuring a more accurate source.
+
+**RCSLOW** is the internal slow RC oscillator, running at approximately 20 kHz. This ultra-low-power clock serves sleep modes and real-time clock applications. RCSLOW frequency varies significantly with temperature (±50%), making it unsuitable for precision timing but ideal for power-sensitive applications.
+
+**Crystal oscillator** mode connects an external crystal (typically 10-20 MHz) between the XI and XO pins. The P2 includes internal feedback resistors and programmable loading capacitors, simplifying crystal circuit design. Crystal sources provide the stability needed for precise timing, communication protocols, and frequency synthesis.
+
+**External clock** mode accepts an external clock signal on the XI pin, supporting frequencies from DC to 350 MHz. This mode allows the P2 to synchronize with external timing sources or use specialized oscillators.
+
+### 4.1.2 PLL Multiplication
+
+The Phase-Locked Loop (PLL) multiplies a reference clock to achieve higher frequencies. The PLL takes the crystal or external clock as input and produces an output frequency according to three parameters:
+
+- **Input divider** (1-64): Divides the reference frequency before the VCO
+- **VCO multiplier** (1-1024): Multiplies to produce the VCO frequency
+- **Post divider** (1-30, even values): Divides the VCO output to the final frequency
+
+The output frequency follows the equation: f_out = (f_ref / input_div) × multiplier / post_div
+
+For example, a 20 MHz crystal with input divider 1, multiplier 16, and post divider 2 produces: (20 MHz / 1) × 16 / 2 = 160 MHz.
+
+The VCO operates optimally between 100-200 MHz. Higher frequencies are possible but may reduce stability. The recommended maximum system clock is 180 MHz; overclocking to 250-320 MHz is possible but application-dependent.
+
+### 4.1.3 The HUBSET Instruction
+
+Clock configuration uses the HUBSET instruction with a 32-bit configuration value:
+
+```pasm
+        hubset  ##config_value          ' Configure clock system
+```
+
+The configuration value contains fields for crystal mode, clock source selection, and PLL parameters. Key fields include:
+
+| Bits | Field | Purpose |
+|------|-------|---------|
+| 1:0 | CC | Crystal configuration (loading capacitors) |
+| 3:2 | SS | Source select (RCFAST/RCSLOW/crystal/PLL) |
+| 7:4 | DDDD | Post divider selection |
+| 9 | - | PLL power enable |
+| 8 | - | Crystal oscillator enable |
+| 27:24 | PPPP | Input divider |
+| 23:14 | MMMM | VCO multiplier |
+
+### 4.1.4 Clock Switching Sequence
+
+Switching clock sources requires a careful sequence to ensure glitch-free transitions:
+
+1. **Enable the new source**: Configure crystal oscillator or PLL, but keep the current clock source active
+2. **Wait for stabilization**: Crystal oscillators need approximately 10 ms to stabilize; PLL lock requires approximately 10 µs
+3. **Switch sources**: Change the SS field to select the new clock source
+4. **Optionally disable the old source**: Turn off unused oscillators to save power
+
+```pasm
+        hubset  ##%0000_0000_0000_0000_0000_0000_0001_0010  ' Enable crystal, 15pF caps
+        waitx   ##20_000_000/100                            ' Wait ~10 ms at RCFAST
+        hubset  ##%0000_0000_0000_0000_0000_0000_0010_0010  ' Switch to crystal
+```
+
+The P2 provides automatic fallback to RCFAST if the selected clock source fails, preventing system lockup from clock problems.
+
+### 4.1.5 Power Considerations
+
+Clock frequency directly affects power consumption. Lower frequencies reduce power but also reduce performance. For battery-powered applications, consider:
+
+- Use RCSLOW during sleep periods when only basic timekeeping is needed
+- Disable the PLL when not required—it consumes power even when not selected
+- Run at the lowest frequency that meets timing requirements
+- Stop unused COGs to eliminate their clock-related power consumption
+
+---
+
+## 4.2 Instruction Timing
+
+### 4.2.1 The System Clock
+
+The P2 operates from a system clock that can run up to 320 MHz. All instruction execution, memory access, and I/O operations occur in relation to this master clock. The clock source can be an internal RC oscillator for standalone operation, an external crystal for precision timing, or a PLL-multiplied clock for maximum performance.
+
+Every timing measurement in the P2 is expressed in clock cycles. At 320 MHz, one clock cycle represents 3.125 nanoseconds. This means that a two-cycle instruction completes in 6.25 nanoseconds—fast enough for demanding real-time applications like video generation, high-speed communication protocols, and precision motor control.
+
+Understanding cycle counts is fundamental to P2 programming because the processor provides cycle-accurate timing guarantees. When a program executes the same instruction sequence under the same conditions, it takes exactly the same number of clock cycles every time. This determinism distinguishes the P2 from processors with caches, speculative execution, or variable-latency memory systems.
+
+### 4.2.2 Instruction Cycle Counts
+
+Most COG instructions execute in exactly 2 clock cycles. This consistency simplifies timing calculations and makes hand-optimized assembly code practical. The processor can execute one instruction per two-cycle period, achieving an effective instruction rate of 160 million instructions per second at 320 MHz.
+
+The following table shows typical cycle counts for different instruction categories:
+
+| Instruction Type | Typical Cycles |
+|------------------|----------------|
+| Register-to-register ALU | 2 |
+| Immediate ALU | 2 |
+| Branches (not taken) | 2 |
+| Branches (taken) | 4 |
+| Hub access | 2-16+ |
+| CORDIC operations | 2 (start), 54 (wait) |
+
+Register operations like ADD, SUB, AND, and OR complete in 2 cycles whether they operate on registers or immediate values. This uniformity means that choosing between a register operand and an immediate operand has no performance impact—the decision is purely about code clarity and register pressure.
+
+Branch instructions take 2 cycles when the branch is not taken and 4 cycles when taken. This predictable variation allows precise timing of both paths through conditional code. Programmers can eliminate this variation entirely by using conditional execution instead of branches.
+
+Hub memory access instructions have variable timing because they must wait for the COG's hub access window. The base instruction time is 2 cycles, but the wait for hub access adds 0 to 7 additional cycles depending on when the instruction executes relative to the hub rotation pattern.
+
+CORDIC operations use a two-phase execution model. The instruction that starts a CORDIC operation (like QMUL for multiplication) completes in 2 cycles, but the result is not available until 54 cycles after the operation starts. Programs can perform other work during this 54-cycle computation period and retrieve the result later with GETQX or GETQY.
+
+### 4.2.3 Reading Cycle Counts
+
+The instruction encoding table in the P2 documentation provides precise cycle counts in its Clocks column. Understanding the notation used in this column is essential for accurate timing analysis:
+
+| Notation | Meaning |
+|----------|---------|
+| 2 | Always 2 cycles |
+| 2+ | Minimum 2 cycles, may be more |
+| 2 or 4 | 2 if not taken, 4 if taken |
+| 2 / 8-23 | COG mode / Hub mode |
+| 9..35 | Variable range |
+
+A simple "2" means the instruction always takes exactly 2 cycles regardless of operands or conditions. This applies to most arithmetic, logical, and data movement instructions.
+
+The "2+" notation indicates a base time of 2 cycles plus additional variable time. This typically appears for hub access instructions, where the "+" represents the hub window wait time. RDLONG might show "2+~" indicating 2 cycles plus hub wait (the ~ symbol represents hub-related timing).
+
+Branch instructions show "2 or 4" to reflect their dual timing behavior. When the branch condition is false, the processor continues to the next instruction in 2 cycles. When the condition is true, the processor loads a new program counter and takes 4 cycles total.
+
+The "2 / 8-23" notation distinguishes between COG execution mode and hub execution mode. In COG mode (when executing from COG RAM), the instruction takes the first number. In hub execution mode (when executing from hub RAM), the instruction takes longer because the processor must fetch each instruction through the hub access mechanism. The range "8-23" reflects the variability of hub access timing.
+
+Variable range notation like "9..35" indicates that execution time depends on the instruction's parameters or the processor state. For example, REP (repeat) shows variable timing because the total time depends on how many iterations the repeat block executes.
+
+---
+
+## 4.3 Hub Access Timing
+
+### 4.3.1 The Egg Beater Pattern
+
+<!-- DIAGRAM: Egg beater timing showing 8 COGs and hub slots -->
+
+Hub memory access uses a round-robin "egg beater" pattern that gives each COG fair access to the shared hub RAM. The name comes from the visual similarity to a rotating egg beater, with each COG's access window spinning through the rotation in sequence.
+
+The hub controller divides time into eight-cycle periods. Within each period, every COG gets exactly one cycle to access hub memory. The access windows rotate continuously through COGs 0, 1, 2, 3, 4, 5, 6, 7, then back to COG 0, repeating this pattern indefinitely. This rotation never stops and never changes—it runs continuously from the moment the chip powers on.
+
+When a COG executes an instruction that accesses hub memory (RDLONG, WRLONG, RDWORD, WRWORD, RDBYTE, or WRBYTE), the instruction waits until that COG's window arrives, performs the memory access during the window, then completes. The wait time depends on when the instruction executes relative to the rotation pattern.
+
+This deterministic rotation means hub access timing is predictable. While the wait time varies from 0 to 7 cycles, the variation follows a fixed pattern. A program that knows its phase relationship to the egg beater can achieve minimum wait times by scheduling hub access to align with its windows.
+
+### 4.3.2 Hub Access Latency
+
+When a COG executes a hub instruction, the actual wait time depends on timing relative to the egg beater rotation. Three scenarios illustrate the range of possibilities:
+
+**Best case:** The instruction executes just as the COG's hub window arrives. The memory access occurs immediately with zero wait cycles. The total instruction time equals the base instruction time (2 cycles) plus the memory access itself (1 cycle), for 3 cycles total.
+
+**Worst case:** The instruction executes just after the COG's hub window has passed. The instruction must wait for the rotation to complete—seven more COGs must take their turns before this COG's window comes around again. This adds 7 wait cycles to the instruction time, for 10 cycles total (2 base + 7 wait + 1 access).
+
+**Average case:** On average, an instruction that executes at a random time relative to the egg beater waits 3.5 cycles for its hub window. This average assumes no deliberate scheduling to align with windows.
+
+The hub access latency directly impacts program performance when hub memory access is frequent. Programs that minimize hub access (by keeping frequently-accessed data in COG registers or COG RAM) avoid this latency. Programs that must access hub memory frequently achieve better performance by organizing hub access into bursts, which amortize the window wait time across multiple memory transfers.
+
+### 4.3.3 Hub Burst Transfers
+
+SETQ enables burst transfers that read or write multiple consecutive longs in a single hub access sequence. This feature dramatically improves hub memory throughput by eliminating the window wait time for all but the first transfer.
+
+The SETQ instruction takes one parameter specifying how many additional longs to transfer. The hub access instruction that follows SETQ performs a burst of that many consecutive transfers:
+
+```pasm
+        setq    #15                     ' Transfer 16 longs total
+        rdlong  buffer, ptr             ' Burst read from Hub
+```
+
+This code reads 16 consecutive longs from hub memory starting at address `ptr` and stores them in COG RAM starting at address `buffer`. The first long experiences normal hub window wait (0-7 cycles), but each subsequent long transfers in just one additional cycle. The total time is approximately 2 (SETQ) + 2 (RDLONG base) + wait (0-7) + 1 + 15 (subsequent longs) = 20-27 cycles—far faster than 16 separate RDLONG instructions, which would average 16 × (2 + 3.5 + 1) = 104 cycles.
+
+Burst transfers work because once a COG has started transferring data during its hub window, it can continue occupying subsequent windows in the rotation. The hub controller grants consecutive windows to a COG performing a burst, allowing continuous transfers without interruption.
+
+SETQ affects only the next hub instruction. If that instruction is not a hub access instruction, SETQ has no effect (some non-hub instructions use SETQ for other purposes). After the hub instruction completes, SETQ must be reissued to enable another burst.
+
+### 4.3.4 FIFO Operations
+
+The P2 includes a hardware FIFO (First In, First Out) buffer that provides the highest-bandwidth method for sequential hub data transfer. Unlike individual hub access instructions that wait for hub windows, the FIFO continuously moves data between hub memory and the COG in the background. The hardware prefetches data before the COG needs it (for reads) or buffers data until hub windows become available (for writes), hiding hub access latency from the program.
+
+**FIFO Architecture:**
+
+Each COG has access to a shared FIFO buffer that can operate in either read mode or write mode (not both simultaneously). The FIFO holds 16 longs (64 bytes) of data, providing substantial buffering to smooth out hub access timing. When reading, the FIFO stays filled by automatically fetching ahead; when writing, the FIFO drains to hub memory during available hub windows.
+
+**Setting Up the Read FIFO:**
+
+RDFAST configures the FIFO for reading from hub memory. The instruction takes two parameters: a block count (or 0 for continuous operation) and the starting hub address:
+
+```pasm
+        rdfast  #0, ptr                 ' Start continuous read FIFO at address ptr
+loop
+        rflong  data                    ' Read from FIFO (fast, no hub wait)
+        ' ... process data ...
+        jmp     #loop                   ' Continue reading
+```
+
+The RFLONG, RFWORD, and RFBYTE instructions read from the FIFO without waiting for hub windows—if data is available in the FIFO buffer, the read completes immediately. The FIFO refills automatically in the background using whatever hub windows become available.
+
+**Setting Up the Write FIFO:**
+
+WRFAST configures the FIFO for writing to hub memory:
+
+```pasm
+        wrfast  #0, ptr                 ' Start continuous write FIFO at address ptr
+loop
+        ' ... generate data ...
+        wflong  data                    ' Write to FIFO (fast, no hub wait)
+        jmp     #loop                   ' Continue writing
+```
+
+The WFLONG, WFWORD, and WFBYTE instructions write to the FIFO buffer. If buffer space is available, the write completes immediately without waiting for a hub window. The FIFO drains to hub memory automatically.
+
+**Circular Buffer Mode:**
+
+The FIFO supports circular buffer operation for continuous streaming. When configured with a block count, the FIFO wraps back to the starting address after transferring the specified number of longs:
+
+```pasm
+        rdfast  #256, audio_buffer      ' Read 256 longs, then wrap to start
+```
+
+This creates a 1KB circular buffer. The program can continuously read from the FIFO while another process (perhaps on a different COG) refills the buffer behind the read pointer. Circular buffers enable double-buffering and continuous streaming without explicit pointer management.
+
+**FIFO Events:**
+
+The FIFO generates events that programs can monitor for buffer management:
+
+- **EVENT_FBW** (FIFO Block Wrap) signals when the FIFO wraps around in circular buffer mode. Programs use this event to know when to refill the next section of a circular buffer or to synchronize with buffer boundaries.
+
+Programs can wait for this event using WAITSE or poll it using POLLSE after configuring a selectable event source. This enables efficient ping-pong buffering where one COG fills buffers while another consumes them.
+
+**FIFO and the Streamer:**
+
+The Streamer subsystem (described in Chapter 5) uses the FIFO for high-bandwidth data transfer to and from I/O pins. When the Streamer is active, it shares the FIFO with FIFO access instructions. RDFAST/WRFAST configure the FIFO source or destination in hub memory; the Streamer then moves data between the FIFO and pins at rates matching the system clock. This combination enables video generation, audio streaming, and high-speed data acquisition without per-sample CPU intervention.
+
+**Performance Considerations:**
+
+FIFO access provides near-instantaneous data transfer from the program's perspective—no hub window waiting, no variable latency. However, the FIFO has finite depth. If a program reads faster than the FIFO can refill (or writes faster than it can drain), the FIFO stalls waiting for hub access. For sustained maximum throughput, balance data production/consumption rate with the hub's aggregate bandwidth.
+
+The FIFO access instructions (RFLONG, RFWORD, RFBYTE, WFLONG, WFWORD, WFBYTE) complete in 2 cycles when the FIFO has data available or space available, respectively. This makes FIFO access ideal for streaming applications: video pixel generation, audio sample processing, high-speed communication protocols, and bulk data movement.
+
+---
+
+## 4.4 Deterministic Timing
+
+### 4.4.1 What Determinism Means
+
+The P2's deterministic timing guarantees that the same instruction sequence, executing under the same conditions, takes exactly the same number of clock cycles every time it runs. This guarantee holds across all executions—there are no cache misses, no speculative execution failures, no memory controller delays, and no unpredictable pipeline stalls.
+
+Determinism provides several critical benefits for embedded systems programming:
+
+**Predictable performance:** When a routine takes 1,000 cycles during testing, it takes 1,000 cycles in production. Performance measurements made during development remain accurate in the deployed system.
+
+**Reliable timing:** Real-time systems can meet hard timing deadlines because worst-case execution time equals actual execution time. If an interrupt handler must complete within 500 cycles, testing that it does so once proves it always will.
+
+**Reproducible behavior:** Timing-related bugs are reproducible because timing is consistent. A race condition that appears during development will appear in the same way in production, making debugging practical.
+
+**Simplified analysis:** Programmers can calculate execution time by hand, adding up cycle counts from the instruction table. This makes optimization straightforward—identify the critical path, count cycles, improve the slow parts.
+
+The P2 achieves determinism through architectural choices: no instruction cache (COG RAM provides fast local storage without cache complexity), no data cache (hub access uses predictable round-robin scheduling), no branch prediction (conditional execution eliminates branches), and no speculative execution (instructions execute in program order).
+
+### 4.4.2 Sources of Timing Variation
+
+While the P2 provides deterministic timing, four sources of variation exist. These variations are predictable and controllable, not random like cache misses or memory arbitration in complex processors:
+
+| Source | Variation | Mitigation |
+|--------|-----------|------------|
+| Hub access wait | 0-7 cycles | HUBSET sync, careful scheduling |
+| Branches | 2 vs 4 cycles | Conditional execution instead |
+| CORDIC wait | Up to 54 cycles | Interleave other work |
+| WAITX | Variable | Intentional delays |
+
+**Hub access wait** varies from 0 to 7 cycles depending on when a hub instruction executes relative to the egg beater rotation. This variation is deterministic—if a program executes a hub instruction at the same point in the egg beater cycle, the wait time is identical. Programs can eliminate this variation by synchronizing with the egg beater using HUBSET, or by scheduling hub access to occur at aligned points in loops.
+
+**Branch timing** varies because taken branches require 4 cycles while not-taken branches require only 2 cycles. This variation is completely predictable—the same branch decision always takes the same time. Programs can eliminate this variation by using conditional execution instead of branches, trading the variable 2-or-4-cycle branch for a fixed 2-cycle conditional instruction.
+
+**CORDIC wait** varies because different CORDIC operations take different amounts of time to compute. Multiplication, division, square root, and trigonometric functions each have specific completion times. The variation is deterministic—the same operation always takes the same time. Programs hide CORDIC latency by issuing the operation early and performing other work during the computation period.
+
+**WAITX** provides intentional variable delay. This is the only case where variation is desired rather than avoided—WAITX exists specifically to introduce precise, controlled timing delays for applications like bit-banging protocols or pulse generation.
+
+### 4.4.3 Eliminating Branches
+
+Conditional execution provides an alternative to branching that eliminates timing variation. Instead of using a compare instruction followed by a conditional jump, code can use a compare instruction followed by conditionally-executed instructions.
+
+The branching approach introduces timing variation:
+
+```pasm
+' With branch (2 or 4 cycles):
+        cmp     a, b            wz
+        if_z    jmp     #equal_case
+        ' Not-equal path continues here
+```
+
+When `a` equals `b`, this code takes 2 (CMP) + 4 (JMP taken) = 6 cycles. When `a` differs from `b`, the code takes 2 (CMP) + 2 (JMP not taken) = 4 cycles. The 2-cycle variation complicates timing analysis.
+
+The conditional execution approach provides constant timing:
+
+```pasm
+' Without branch (2 cycles always):
+        cmp     a, b            wz
+        if_z    mov     result, #1
+        if_nz   mov     result, #0
+```
+
+This code takes 2 (CMP) + 2 (first MOV, executed if Z set) + 2 (second MOV, executed if Z clear) = 6 cycles when Z is set, or 2 (CMP) + 2 (first MOV, skipped) + 2 (second MOV, executed) = 6 cycles when Z is clear. Both paths take exactly 6 cycles.
+
+The key insight is that conditionally-skipped instructions still consume their execution time slot—the processor evaluates the condition and skips the instruction's effect, but the instruction still occupies 2 cycles. This behavior ensures that all execution paths through conditionally-executed code take the same time.
+
+Conditional execution works for simple cases where both branches are short. For longer code sequences or cases where only one branch performs work, traditional branching may be more efficient despite the timing variation. The choice depends on whether consistent timing or shorter average time is more important for the specific application.
+
+---
+
+## 4.5 Synchronization
+
+### 4.5.1 WAITX - Precise Delays
+
+WAITX provides precise, cycle-accurate delays by pausing execution for a specified number of clock cycles:
+
+```pasm
+        waitx   ##100                   ' Wait exactly 100 cycles
+```
+
+The instruction accepts a value specifying the delay duration. Execution resumes exactly after that many cycles have elapsed. This precision makes WAITX essential for timing-critical operations like bit-banging communication protocols, generating precise pulse widths, or synchronizing with external events.
+
+WAITX delays are relative to when the instruction executes. If a program needs to generate a pulse every 1,000 cycles, using WAITX alone accumulates timing drift because the WAITX instruction itself consumes time, and the instructions between WAITX calls add additional cycles. For precise periodic timing without drift, the counter-based wait instructions provide better alternatives.
+
+### 4.5.2 Counter-Based Waiting
+
+The P2 provides a global cycle counter that increments every clock cycle. COGs can read this counter with GETCT and wait for specific counter values using the WAITCT family of instructions. This mechanism enables drift-free periodic timing.
+
+Each COG has three independent counter match registers (CT1, CT2, CT3). Programs load target counter values into these registers using ADDCT1, ADDCT2, or ADDCT3, then wait for the counter to reach those values using WAITCT1, WAITCT2, or WAITCT3:
+
+```pasm
+        getct   time                    ' Read current time
+        addct1  time, ##1000            ' Set CT1 = time + 1000
+        ' ... do work ...
+        waitct1                         ' Wait until counter reaches CT1
+```
+
+This pattern ensures that the wait completes exactly 1,000 cycles after the GETCT instruction, regardless of how long the intervening work takes. If the work completes in 800 cycles, WAITCT1 waits 200 more cycles. If the work takes 1,200 cycles, WAITCT1 returns immediately (the deadline has already passed).
+
+For periodic operations, adding a fixed delta to the counter match register each iteration eliminates drift:
+
+```pasm
+        getct   time                    ' Initialize time base
+loop
+        addct1  time, ##1000            ' Next deadline = previous + 1000
+        ' ... generate pulse or process data ...
+        waitct1                         ' Wait for next period
+        jmp     #loop
+```
+
+Each iteration runs exactly 1,000 cycles from the previous iteration, maintaining perfect periodicity regardless of small variations in the work performed each cycle.
+
+### 4.5.3 Hub Slot Synchronization
+
+Programs that need predictable hub access timing can synchronize with the egg beater rotation using HUBSET. This instruction provides control over hub timing parameters and can align a COG's execution with its hub access windows.
+
+While HUBSET's primary purpose is configuring hub execution mode, it also provides synchronization side effects. When a COG enters hub execution mode, it aligns with the hub rotation, ensuring that subsequent hub access occurs at known phases of the egg beater cycle.
+
+For applications that need consistent hub access timing without entering hub execution mode, careful scheduling provides an alternative. If a loop performs hub access at regular intervals aligned with the 8-cycle egg beater period, the hub wait time remains consistent across iterations:
+
+```pasm
+loop
+        ' ... exactly 8 cycles of work ...
+        rdlong  data, ptr               ' Hub access occurs at same phase
+        ' ... more work ...
+        jmp     #loop                   ' Loop maintains 8-cycle alignment
+```
+
+This technique requires precise cycle counting and works only when the loop body contains an integer multiple of 8 cycles.
+
+### 4.5.4 Pin-Based Synchronization
+
+Several instructions synchronize with pin state changes, enabling precise timing relative to external events:
+
+**WAITATN** waits for any pin to make a low-to-high transition (attention flag). Smart Pins can be configured to set their ATN flags on specific conditions, making WAITATN useful for waiting on external events with minimal COG overhead.
+
+**WAITSE1, WAITSE2, WAITSE3, WAITSE4** wait for streamer events. The streamer can transfer data to or from pins with precise timing, and these wait instructions synchronize code execution with streamer operations.
+
+**WAITPAT** waits for a pin pattern match. Programs configure a pattern and mask, then WAITPAT suspends execution until the pin states match the specified pattern. This enables synchronization with parallel interfaces or detection of specific pin combinations.
+
+**POLLATE, POLLCT1, POLLCT2, POLLCT3** provide polling-based alternatives to waiting. Instead of blocking until a condition occurs, these instructions check whether an event has occurred and set flags accordingly. This allows code to perform useful work while watching for events, rather than waiting idly.
+
+---
+
+## 4.6 Timing-Critical Patterns
+
+### 4.6.1 Cycle-Exact Loops
+
+Many real-time applications require loops that execute with precise, predictable timing. The P2's deterministic instruction timing makes cycle-exact loops practical and reliable.
+
+Consider a loop that reads data from hub memory, processes it, and repeats:
+
+```pasm
+' 8-cycle loop body (fits in one Hub window period)
+loop
+        rdlong  data, ptr               ' 2 + wait cycles
+        add     ptr, #4                 ' 2 cycles
+        djnz    count, #loop            ' 4 cycles (taken)
+```
+
+This loop body must account for hub access timing variation. If the loop starts aligned with the COG's hub window, RDLONG waits 0 cycles and the loop takes 2 + 2 + 4 = 8 cycles. If the loop starts just after the hub window, RDLONG waits 7 cycles and the loop takes 9 + 2 + 4 = 15 cycles.
+
+For truly cycle-exact timing, loops must either eliminate hub access or align hub access with the egg beater rotation. One approach uses COG RAM for all data, avoiding hub access entirely:
+
+```pasm
+loop
+        add     data, #1                ' 2 cycles
+        djnz    count, #loop            ' 4 cycles (taken)
+        ' Exactly 6 cycles per iteration
+```
+
+Another approach aligns the loop body to an 8-cycle boundary and ensures hub access occurs at the same phase each iteration:
+
+```pasm
+loop
+        rdlong  data, ptr               ' 2 + wait (same wait each time)
+        add     result, data            ' 2 cycles
+        add     ptr, #4                 ' 2 cycles
+        djnz    count, #loop            ' 4 cycles (taken)
+        nop                             ' 2 cycles - padding to 16 total
+        ' Loop body = 16 cycles (2× hub period)
+```
+
+If the first iteration experiences 3 cycles of hub wait, every subsequent iteration also experiences 3 cycles of wait because the 16-cycle loop maintains alignment with the 8-cycle hub period.
+
+### 4.6.2 Pipelined Hub Access
+
+Programs can hide hub access latency by overlapping computation with hub waiting. Instead of waiting for one hub operation to complete before starting the next computation, a program can issue a hub access and immediately begin computing with data already available, allowing the hub access to proceed in parallel.
+
+The SETQ-based burst transfer provides one form of pipelining—while later longs transfer, the program can begin processing earlier longs. A more general approach separates hub access from computation:
+
+```pasm
+loop
+        rdlong  next_data, next_ptr     ' Start fetching next data
+        add     next_ptr, #4
+        ' Process current_data while hub fetch proceeds
+        add     result, current_data
+        sub     current_data, offset
+        mov     current_data, next_data ' Previous fetch is now ready
+        djnz    count, #loop
+```
+
+This pattern keeps hub access and computation overlapped—the RDLONG for iteration N+1 occurs while iteration N's computation proceeds. The technique works best when computation time roughly equals hub access time, maximizing overlap.
+
+### 4.6.3 CORDIC Pipelining
+
+CORDIC operations take 54 cycles to compute results, but the instruction that starts a CORDIC operation completes in just 2 cycles. This creates an opportunity for pipelining: start a CORDIC operation, perform other work during the 54-cycle computation period, then retrieve the result.
+
+A simple example shows the pattern:
+
+```pasm
+        qmul    a, b                    ' Start multiply
+        ' ... 54 cycles of other work ...
+        getqx   result                  ' Get result (low 32 bits)
+```
+
+For maximum efficiency, interleave multiple CORDIC operations with other work:
+
+```pasm
+        qmul    a1, b1                  ' Start first multiply
+        ' ... some work ...
+        qmul    a2, b2                  ' Start second multiply
+        ' ... more work ...
+        getqx   result1                 ' Get first result
+        ' ... more work ...
+        getqx   result2                 ' Get second result
+```
+
+The key constraint is that at least 54 cycles must elapse between starting a CORDIC operation and retrieving its result. If GETQX executes too early, it retrieves an incomplete result. If it executes later, the result remains available—CORDIC results persist until the next CORDIC operation starts.
+
+Multiple CORDIC operations can be in flight simultaneously, with results retrieved in order. Starting a new CORDIC operation does not invalidate results from previous operations until their results have been read.
+
+### 4.6.4 Deterministic I/O
+
+Bit-banging—directly controlling I/O pins with software timing—requires cycle-accurate execution. The P2's deterministic timing makes bit-banging practical for protocols like WS2812 LED control, custom serial formats, or precise pulse generation.
+
+A WS2812 LED protocol example demonstrates the precision required:
+
+```pasm
+' WS2812 requires precise pulse widths:
+' 0 bit: 400ns high, 850ns low
+' 1 bit: 800ns high, 450ns low
+' At 200 MHz (5ns per cycle):
+' 0 bit: 80 cycles high, 170 cycles low
+' 1 bit: 160 cycles high, 90 cycles low
+
+send_bit
+        test    data, #31       wc      ' Get high bit into C flag
+        drvh    pin                     ' Start pulse (high)
+        if_c    waitx   ##160           ' 1-bit: wait 160 cycles
+        if_nc   waitx   ##80            ' 0-bit: wait 80 cycles
+        drvl    pin                     ' End pulse (low)
+        if_c    waitx   ##90            ' 1-bit: wait 90 cycles
+        if_nc   waitx   ##170           ' 0-bit: wait 170 cycles
+        rol     data, #1                ' Shift to next bit
+        djnz    count, #send_bit
+```
+
+This code generates precise pulse widths using WAITX for delays and conditional execution to avoid branch timing variation. The DRVH and DRVL instructions change pin states, and the WAITX instructions maintain exact timing between transitions.
+
+Deterministic timing eliminates the jitter and uncertainty common in systems with caches or interrupts. Each pulse width is exactly the specified duration, enabling reliable communication with timing-sensitive devices.
+
+---
+
+## 4.7 Measuring Execution Time
+
+### 4.7.1 The Cycle Counter
+
+The P2 provides a global 32-bit cycle counter that increments every clock cycle. This counter runs continuously from power-on and wraps around after reaching its maximum value. COGs read the counter using the GETCT instruction, which returns the current counter value.
+
+Measuring code execution time involves reading the counter before and after the code section of interest:
+
+```pasm
+        getct   start_time              ' Read cycle counter
+        ' ... code to measure ...
+        getct   end_time                ' Read cycle counter again
+        sub     end_time, start_time    ' Elapsed cycles
+```
+
+The difference between the two readings gives the exact number of cycles elapsed. This measurement includes the cycles consumed by GETCT itself (2 cycles each), so precise measurements should account for this overhead.
+
+For short code sequences, the measurement overhead matters. Measuring a 10-cycle sequence with two GETCT instructions reports 14 cycles (2 + 10 + 2). For longer sequences, the 4-cycle overhead becomes negligible.
+
+The cycle counter is global across all COGs—all COGs read the same counter value. This enables synchronization and coordination between COGs. One COG can mark a time value and pass it to another COG via hub memory, allowing the second COG to measure time relative to events in the first COG.
+
+### 4.7.2 Counter Wrap-Around
+
+The 32-bit cycle counter wraps around every 2³² cycles. At 320 MHz, this occurs every 13.4 seconds. Code that measures elapsed time must handle wrap-around correctly.
+
+Subtraction using unsigned arithmetic naturally handles wrap-around. When end_time is less than start_time (because wrap-around occurred), the subtraction `end_time - start_time` produces the correct elapsed time due to modular arithmetic:
+
+```pasm
+        mov     start_time, ##$FFFF_FFF0  ' Near wrap-around
+        mov     end_time,   ##$0000_0010  ' After wrap-around
+        sub     end_time, start_time      ' Result: $20 (32 cycles)
+```
+
+This automatic wrap-around handling works for elapsed times up to 2³¹ cycles (half the counter range). For longer measurements, code must count wrap-around events explicitly or use multiple counter values.
+
+### 4.7.3 Profiling Techniques
+
+GETCT enables detailed performance profiling of assembly code. By measuring execution time for different code paths, programmers can identify performance bottlenecks and verify that optimizations achieve expected speedups.
+
+A common profiling pattern measures loop iteration time:
+
+```pasm
+        mov     iterations, ##1000
+        getct   start_time
+loop
+        ' ... code to profile ...
+        djnz    iterations, #loop
+        getct   end_time
+        sub     elapsed, end_time, start_time
+```
+
+The total elapsed time divided by the iteration count gives the average time per iteration. For more detailed profiling, place multiple GETCT measurements within the loop to identify which parts of the loop consume the most time:
+
+```pasm
+loop
+        getct   time1
+        ' ... section A ...
+        getct   time2
+        ' ... section B ...
+        getct   time3
+        sub     timeA, time2, time1       ' Section A timing
+        sub     timeB, time3, time2       ' Section B timing
+        ' Store or accumulate timing data
+        djnz    iterations, #loop
+```
+
+This approach provides cycle-accurate timing for each code section, enabling precise optimization. The overhead of GETCT instructions affects absolute timing but not the relative timing between sections.
+
+Profiling can reveal unexpected timing variations. If a loop shows inconsistent timing across iterations, the variation likely comes from hub access timing, branch behavior, or CORDIC latency. Identifying these variations guides optimization efforts toward the actual bottlenecks rather than presumed slow code.
+
+---
+
+## 4.8 COG vs Hub Execution Mode Timing
+
+### 4.8.1 COG Execution Mode
+
+COG execution mode—often called "COG mode"—executes instructions from the COG's local 512-long (2KB) RAM. This provides the fastest possible execution because instruction fetch occurs from the COG's private memory without any shared resource contention.
+
+In COG mode, most instructions complete in exactly 2 clock cycles. The processor fetches an instruction and executes it without waiting for memory access arbitration, cache lookups, or bus conflicts. This predictable timing makes COG mode ideal for timing-critical code like interrupt handlers, real-time control loops, and I/O bit-banging.
+
+COG mode execution begins when a COG starts via COGINIT with a COG RAM address (0-$1FF). The program counter points to COG RAM locations, and instruction fetch proceeds at full speed. All 512 longs of COG RAM are available for code and data, though programs typically reserve some locations for data and use the remainder for code.
+
+The limitation of COG mode is size—only 512 longs of code and data combined. Programs that need more code space must use hub execution mode or carefully manage code overlays.
+
+### 4.8.2 Hub Execution Mode
+
+Hub execution mode—often called "HUBEXEC mode"—executes instructions from hub RAM. This allows programs to exceed the 512-long COG RAM size limit, supporting much larger code bases at the cost of slower instruction fetch.
+
+In hub execution mode, each instruction fetch waits for the COG's hub access window. This adds 0-7 cycles of wait time per instruction, similar to how hub data access works. The average instruction fetch time becomes 2 (base) + 3.5 (average hub wait) = 5.5 cycles, roughly 2.75× slower than COG mode.
+
+Hub execution mode begins when a COG starts via COGINIT with a hub RAM address ($200 or higher). The program counter points to hub RAM locations, and the processor fetches instructions through the egg beater hub access mechanism. Code can be megabytes in size, limited only by available hub RAM.
+
+Despite the slower instruction fetch, hub mode remains useful for several scenarios:
+
+**Large programs:** When code exceeds 512 longs, hub mode is the only option short of implementing code overlays.
+
+**Non-critical code:** Initialization routines, background tasks, and other code without tight timing requirements run acceptably in hub mode.
+
+**Mixed execution:** Programs can start in hub mode and copy time-critical sections to COG RAM for execution at full speed. COGINIT can switch a running COG between hub and COG mode dynamically.
+
+### 4.8.3 Timing Comparison
+
+The following table shows typical execution times for common operations in both execution modes:
+
+| Operation | COG Mode | Hub Mode |
+|-----------|----------|----------|
+| Simple ALU | 2 cycles | 8-23 cycles |
+| Branch taken | 4 cycles | 12-27 cycles |
+| Hub access | 2 + hub wait | 2 + hub wait |
+| CORDIC start | 2 cycles | 8-23 cycles |
+
+Simple ALU operations (ADD, SUB, AND, OR, etc.) take 2 cycles in COG mode but 8-23 cycles in hub mode. The hub mode time includes instruction fetch delay—the actual execution is still 2 cycles, but fetching the instruction adds the variable hub wait. The range 8-23 represents minimum (just hit hub window) to maximum (just missed hub window) timing.
+
+Branch instructions take 4 cycles in COG mode when taken. In hub mode, the taken branch must fetch the target instruction through the hub, adding 8-21 cycles for a total of 12-27 cycles.
+
+Hub access instructions show the same timing in both modes because the data access (as opposed to instruction fetch) uses the hub window mechanism regardless of where the instruction itself came from. A RDLONG takes 2 + hub wait whether executing from COG RAM or hub RAM.
+
+CORDIC operations start in 2 cycles in COG mode but take 8-23 cycles to start in hub mode (the 54-cycle computation time is the same in both modes). The instruction that starts the CORDIC operation must be fetched before it can execute, incurring hub fetch delay in hub mode.
+
+The dramatic timing difference between modes—often 4× or more—makes COG mode strongly preferred for timing-critical code. Programs typically keep inner loops, interrupt handlers, and time-sensitive operations in COG RAM while using hub mode for larger, less-critical code sections.
+
+---
+
+## Key Concepts
+
+```{=latex}
+\begin{keyconcepts}
+\item System clock configurable from 20 kHz (RCSLOW) to 320 MHz (PLL) via HUBSET
+\item Most COG instructions execute in exactly 2 clock cycles
+\item Branch instructions take 2 cycles if not taken, 4 cycles if taken
+\item Hub access uses round-robin timing with 0-7 cycle wait for window
+\item Burst transfers (via SETQ) amortize Hub access overhead
+\item The P2 provides deterministic timing with no cache or speculative execution
+\item Conditional execution eliminates branch timing variation
+\item GETCT reads the cycle counter for precise timing measurement
+\item Hub execution mode adds instruction fetch latency
+\end{keyconcepts}
+```
+
+---
+
+<!-- End of Chapter 4 -->

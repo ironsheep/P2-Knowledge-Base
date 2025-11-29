@@ -1,0 +1,346 @@
+%% p2kb-pasm2-reference.latex
+%% Main LaTeX template for P2 Assembly Language Reference Manual
+%% Version: 0.1.0
+%% Created: 2025-11-28
+
+\documentclass[10pt,twoside]{report}
+
+%% ============================================================================
+%% PACKAGES
+%% ============================================================================
+
+% Page geometry
+\usepackage[
+    papersize={8.5in, 11in},
+    margin=0.75in,
+    inner=0.9in,
+    outer=0.7in,
+    top=0.75in,
+    bottom=0.75in,
+    headheight=14pt,
+    headsep=0.3in,
+    footskip=0.4in
+]{geometry}
+
+% Typography
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Termes}
+\setsansfont{TeX Gyre Heros}
+\setmonofont{DejaVu Sans Mono}[Scale=0.9]
+
+% Colors - must load before other packages that use colors
+\usepackage[table]{xcolor}
+
+% Tables
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{multirow}
+
+% Graphics and diagrams
+\usepackage{tikz}
+\usetikzlibrary{calc,positioning,shapes.geometric,arrows.meta,patterns}
+\usepackage{graphicx}
+
+% Load diagram macros (must be after tikz and xcolor)
+% Note: p2kb-pasm2-diagrams.sty must be in same directory as template
+\IfFileExists{p2kb-pasm2-diagrams.sty}{\usepackage{p2kb-pasm2-diagrams}}{}
+
+% Code listings
+\usepackage{listings}
+
+% Boxes
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable,skins}
+
+% Headers/footers
+\usepackage{fancyhdr}
+
+% Links
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=p2kb-accent,
+    urlcolor=p2kb-accent,
+    pdftitle={P2 Assembly Language Reference Manual},
+    pdfauthor={P2 Knowledge Base Project}
+}
+
+% Enumeration
+\usepackage{enumitem}
+
+% Multi-column
+\usepackage{multicol}
+
+% Landscape pages
+\usepackage{pdflscape}
+
+%% ============================================================================
+%% COLOR PALETTE (Style Guide Section 9)
+%% ============================================================================
+
+% Primary palette
+\definecolor{p2kb-dark}{HTML}{2C3E50}       % Dark blue-gray (headings)
+\definecolor{p2kb-medium}{HTML}{7F8C8D}     % Medium gray (secondary)
+\definecolor{p2kb-light}{HTML}{ECF0F1}      % Light gray (backgrounds)
+\definecolor{p2kb-accent}{HTML}{3498DB}     % Blue (links, highlights)
+
+% Encoding diagram colors (for TikZ bit field diagrams)
+\definecolor{encoding-cond}{HTML}{E8E8E8}   % Condition field (EEEE)
+\definecolor{encoding-op}{HTML}{D0D0D0}     % Opcode field
+\definecolor{encoding-flag}{HTML}{E8E0E0}   % Flag field (CZI)
+\definecolor{encoding-dest}{HTML}{E0E8E0}   % Destination field
+\definecolor{encoding-src}{HTML}{E0E0E8}    % Source field
+
+% Note colors
+\definecolor{pitfall-bg}{HTML}{FFF3E0}      % Light orange (warnings)
+\definecolor{tip-bg}{HTML}{E3F2FD}          % Light blue (tips)
+\definecolor{hardware-bg}{HTML}{F5F5F5}     % Light gray (hardware notes)
+\definecolor{warningcolor}{HTML}{CC6600}    % Orange text
+\definecolor{tipcolor}{HTML}{006699}        % Blue text
+\definecolor{hardwarecolor}{HTML}{666666}   % Gray text
+
+% Encoding table colors (matching Parallax format)
+\definecolor{table-header-bg}{HTML}{E0E0E0} % Gray header background
+\definecolor{table-row-alt}{HTML}{F8F8F8}   % Alternating row (if used)
+
+%% ============================================================================
+%% ENCODING TABLE STYLING (Phase 0.2)
+%% Matches Parallax draft format from REF/ screenshots
+%% ============================================================================
+
+% Column type for monospace encoding values
+\newcolumntype{E}{>{\ttfamily}l}
+
+% Column type for centered content
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+
+% Encoding table environment
+% Usage: \begin{encodingtable} ... \end{encodingtable}
+\newenvironment{encodingtable}{%
+    \par\vspace{6pt}%
+    \noindent%
+    \begin{tabular}{|E|E|E|E|E|c|c|c|c|}
+    \hline
+    \rowcolor{table-header-bg}
+    \textbf{COND} & \textbf{INSTR} & \textbf{FX} & \textbf{DEST} & \textbf{SRC} &
+    \textbf{Write} & \textbf{C Flag} & \textbf{Z Flag} & \textbf{Clocks} \\
+    \hline
+}{%
+    \hline
+    \end{tabular}%
+    \par\vspace{6pt}%
+}
+
+% Encoding table row macro for single-row entries
+% Args: COND, INSTR, FX, DEST, SRC, Write, CFlag, ZFlag, Clocks
+\newcommand{\encodingrow}[9]{%
+    #1 & #2 & #3 & #4 & #5 & #6 & #7 & #8 & #9 \\
+    \hline
+}
+
+% Encoding table row without bottom hline (for multi-row entries)
+\newcommand{\encodingrowcont}[9]{%
+    #1 & #2 & #3 & #4 & #5 & #6 & #7 & #8 & #9 \\
+}
+
+% Quick encoding table for simple single-row instructions
+% Args: COND, INSTR, FX, DEST, SRC, Write, CFlag, ZFlag, Clocks
+\newcommand{\simpleencoding}[9]{%
+    \begin{encodingtable}
+    \encodingrow{#1}{#2}{#3}{#4}{#5}{#6}{#7}{#8}{#9}
+    \end{encodingtable}
+}
+
+% Multi-row encoding table helper
+% Use encodingtable environment with multiple encodingrow/encodingrowcont calls
+
+%% ============================================================================
+%% CUSTOM COMMANDS (Style Guide Sections 3, 8)
+%% ============================================================================
+
+% Instruction reference (in prose) - bold sans-serif
+\newcommand{\instr}[1]{\textbf{\textsf{#1}}}
+
+% Instruction cross-reference (linked)
+\newcommand{\instrref}[1]{\hyperref[instr:#1]{\textbf{\textsf{#1}}}}
+
+% Register reference
+\newcommand{\reg}[1]{\texttt{#1}}
+
+% Flag reference
+\newcommand{\flag}[1]{\textsf{#1 flag}}
+
+% Bit field reference
+\newcommand{\bitfield}[1]{\texttt{#1}}
+
+% Immediate value
+\newcommand{\imm}[1]{\texttt{\##1}}
+
+% Section headers within instruction entries
+\newcommand{\entrysection}[1]{%
+    \vspace{6pt}%
+    \noindent\textbf{\textsf{#1}}%
+    \vspace{2pt}%
+    \par
+}
+
+%% ============================================================================
+%% NOTE MARKERS (Style Guide Section 8.1)
+%% ============================================================================
+
+% Pitfall warning
+\newcommand{\pitfall}[1]{%
+    \par\noindent
+    \textcolor{warningcolor}{\textbf{Warning:}} #1
+    \par
+}
+
+% Tip
+\newcommand{\tip}[1]{%
+    \par\noindent
+    \textcolor{tipcolor}{\textbf{Tip:}} #1
+    \par
+}
+
+% Hardware note
+\newcommand{\hardwarenote}[1]{%
+    \par\noindent
+    \textcolor{hardwarecolor}{\textbf{Hardware:}} #1
+    \par
+}
+
+%% ============================================================================
+%% BOXES (Style Guide Section 5)
+%% ============================================================================
+
+% At A Glance box
+\newtcolorbox{ataglance}{
+    colback=gray!8,
+    colframe=gray!40,
+    boxrule=0.5pt,
+    arc=2pt,
+    left=6pt, right=6pt, top=4pt, bottom=4pt,
+    fontupper=\ttfamily\small
+}
+
+% Encoding box (for bit field diagrams)
+\newtcolorbox{encodingbox}{
+    colback=white,
+    colframe=black,
+    boxrule=0.8pt,
+    arc=0pt,
+    left=4pt, right=4pt, top=4pt, bottom=4pt,
+    fontupper=\ttfamily\footnotesize
+}
+
+% Key Concepts box (Part I chapters)
+\newtcolorbox{keyconcepts}{
+    colback=p2kb-light,
+    colframe=p2kb-dark,
+    title={\textbf{Key Concepts}},
+    fonttitle=\sffamily,
+    breakable
+}
+
+%% ============================================================================
+%% CODE LISTINGS (Style Guide Section 6)
+%% ============================================================================
+
+\lstdefinelanguage{pasm2}{
+    morekeywords={add, sub, mov, jmp, call, ret, cmp, test, and, or, xor,
+                  rdlong, wrlong, rdbyte, wrbyte, rdword, wrword,
+                  waitx, cogid, coginit, hubset, setq, setq2,
+                  wc, wz, wcz, if_c, if_nc, if_z, if_nz, if_c_and_z,
+                  org, fit, res, byte, word, long, orgh, orgf,
+                  alignl, alignw, bytefit, wordfit, ditto},
+    sensitive=false,
+    morecomment=[l]{'},
+    morestring=[b]",
+}
+
+\lstdefinestyle{pasm}{
+    language=pasm2,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\bfseries,
+    commentstyle=\itshape\color{gray!60!black},
+    columns=fixed,
+    keepspaces=true,
+    showstringspaces=false,
+    tabsize=8,
+    xleftmargin=2em,
+    frame=none,
+    aboveskip=4pt,
+    belowskip=4pt,
+}
+
+\lstnewenvironment{pasm}{\lstset{style=pasm}}{}
+
+%% ============================================================================
+%% PAGE STYLES (Style Guide Section 4.3)
+%% ============================================================================
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\textsl{\leftmark}}
+\fancyhead[RO]{\textsl{\rightmark}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+%% ============================================================================
+%% CHAPTER FORMATTING (Style Guide Section 10)
+%% ============================================================================
+
+\newcommand{\partichapter}[2]{%
+    \chapter{#1}
+    \begin{center}
+    \large\itshape #2
+    \end{center}
+    \vspace{1em}
+}
+
+%% ============================================================================
+%% PANDOC COMPATIBILITY
+%% ============================================================================
+
+% Pandoc uses tightlist
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% Ensure passthrough works
+\newcommand{\passmark}{}
+
+%% ============================================================================
+%% DOCUMENT METADATA
+%% ============================================================================
+
+$if(title)$
+\title{$title$}
+$endif$
+$if(author)$
+\author{$for(author)$$author$$sep$ \and $endfor$}
+$endif$
+$if(date)$
+\date{$date$}
+$endif$
+
+%% ============================================================================
+%% DOCUMENT BODY
+%% ============================================================================
+
+\begin{document}
+
+$if(title)$
+\maketitle
+$endif$
+
+$if(toc)$
+\tableofcontents
+\newpage
+$endif$
+
+$body$
+
+\end{document}

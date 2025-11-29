@@ -1,0 +1,447 @@
+# Instructions: F
+
+This section contains all PASM2 instructions beginning with the letter F.
+
+---
+
+## FBLOCK {#fblock}
+
+Set next block for when block wraps
+[Hub FIFO Instruction](#hub-fifo-instructions) - Configure the next Hub memory block for FIFO wraparound.
+
+```
+FBLOCK  {#}Dest, {#}Src
+```
+
+**Result:** The next block parameters are configured for FIFO wraparound operations.
+
+- Dest is a register or 9-bit literal whose value specifies the block size in 64-byte units (0 = maximum size).
+- Src is a register or 9-bit literal whose value specifies the block start address in Hub memory.
+
+```{=latex}
+\simpleencoding{EEEE}{1100100}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
+```
+
+**Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [RFLONG](#rflong), [WFLONG](#wflong)
+
+**Explanation:**
+
+FBLOCK configures the parameters for the next Hub FIFO block that will be used when the current block wraps around. This instruction is used to set up circular buffering in Hub memory for streaming read and write operations.
+
+Dest\[13:0\] specifies the block size in 64-byte units. A value of 0 represents the maximum block size. The block size determines how many bytes can be transferred before the FIFO wraps to the beginning of the block.
+
+Src\[19:0\] specifies the starting address of the block in Hub memory. This address marks where the FIFO will wrap to when it reaches the end of the current block.
+
+FBLOCK is typically used in conjunction with RDFAST/WRFAST for setting up high-throughput data streaming between Hub memory and COG/LUT memory. The block configuration takes effect when the current FIFO operation completes and wraps around.
+
+---
+
+## FGE {#fge}
+
+Force greater or equal
+[Math Instruction](#math-instructions) - Force unsigned value to be greater than or equal to another.
+
+```
+FGE  Dest, {#}Src  {WC|WZ|WCZ}
+```
+
+**Result:** Unsigned Dest is set to unsigned Src if Dest was less than Src.
+
+- Dest is a register containing the unsigned value to limit to a minimum of unsigned Src, and is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose unsigned value is the lower limit to force upon Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0011000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{limit enforced}{Result = 0}{2}
+```
+
+**Related:** [FLE](#fle), [FGES](#fges), [FLES](#fles)
+
+**Explanation:**
+
+FGE sets unsigned Dest to unsigned Src if Dest is less than Src. This is a limit minimum function that prevents Dest from sinking below the value of Src. If Dest is already greater than or equal to Src, Dest remains unchanged.
+
+If the WC or WCZ effect is specified, the C flag is set (1) if Dest was limited (Dest was less than Src and is now equal to Src), or is cleared (0) if not limited (Dest was already greater than or equal to Src).
+
+If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if the result is non-zero.
+
+FGE is useful for clamping values to a minimum threshold, ensuring that a value never falls below a specified floor. This is commonly used in digital signal processing, graphics calculations, and boundary checking where values must stay within valid ranges.
+
+---
+
+## FGES {#fges}
+
+Force greater or equal, signed
+[Math Instruction](#math-instructions) - Force signed value to be greater than or equal to another.
+
+```
+FGES  Dest, {#}Src  {WC|WZ|WCZ}
+```
+
+**Result:** Signed Dest is set to signed Src if Dest was less than Src.
+
+- Dest is a register containing the signed value to limit to a minimum of signed Src, and is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose signed value is the lower limit to force upon Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0011010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{limit enforced}{Result = 0}{2}
+```
+
+**Related:** [FLES](#fles), [FGE](#fge), [FLE](#fle)
+
+**Explanation:**
+
+FGES sets signed Dest to signed Src if Dest is less than Src. This is a limit minimum function that prevents Dest from sinking below the signed value of Src. If Dest is already greater than or equal to Src, Dest remains unchanged. The comparison and limiting are performed treating both operands as signed 32-bit values.
+
+If the WC or WCZ effect is specified, the C flag is set (1) if Dest was limited (Dest was less than Src and is now equal to Src), or is cleared (0) if not limited (Dest was already greater than or equal to Src).
+
+If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if the result is non-zero.
+
+FGES is the signed counterpart to FGE and is used when working with signed values that need to be clamped to a minimum threshold. This is particularly useful in audio processing, control systems, and any application where signed values must be constrained within bounds.
+
+---
+
+## FLE {#fle}
+
+Force lesser or equal
+[Math Instruction](#math-instructions) - Force unsigned value to be less than or equal to another.
+
+```
+FLE  Dest, {#}Src  {WC|WZ|WCZ}
+```
+
+**Result:** Unsigned Dest is set to unsigned Src if Dest was greater than Src.
+
+- Dest is a register containing the unsigned value to limit to a maximum of unsigned Src, and is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose unsigned value is the upper limit to force upon Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0011001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{limit enforced}{Result = 0}{2}
+```
+
+**Related:** [FGE](#fge), [FLES](#fles), [FGES](#fges)
+
+**Explanation:**
+
+FLE sets unsigned Dest to unsigned Src if Dest is greater than Src. This is a limit maximum function that prevents Dest from rising above the value of Src. If Dest is already less than or equal to Src, Dest remains unchanged.
+
+If the WC or WCZ effect is specified, the C flag is set (1) if Dest was limited (Dest was greater than Src and is now equal to Src), or is cleared (0) if not limited (Dest was already less than or equal to Src).
+
+If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if the result is non-zero.
+
+FLE is useful for clamping values to a maximum threshold, ensuring that a value never exceeds a specified ceiling. This is commonly used in digital signal processing, graphics calculations, and boundary checking where values must stay within valid ranges.
+
+---
+
+## FLES {#fles}
+
+Force lesser or equal, signed
+[Math Instruction](#math-instructions) - Force signed value to be less than or equal to another.
+
+```
+FLES  Dest, {#}Src  {WC|WZ|WCZ}
+```
+
+**Result:** Signed Dest is set to signed Src if Dest was greater than Src.
+
+- Dest is a register containing the signed value to limit to a maximum of signed Src, and is where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose signed value is the upper limit to force upon Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0011011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{limit enforced}{Result = 0}{2}
+```
+
+**Related:** [FGES](#fges), [FLE](#fle), [FGE](#fge)
+
+**Explanation:**
+
+FLES sets signed Dest to signed Src if Dest is greater than Src. This is a limit maximum function that prevents Dest from rising above the signed value of Src. If Dest is already less than or equal to Src, Dest remains unchanged. The comparison and limiting are performed treating both operands as signed 32-bit values.
+
+If the WC or WCZ effect is specified, the C flag is set (1) if Dest was limited (Dest was greater than Src and is now equal to Src), or is cleared (0) if not limited (Dest was already less than or equal to Src).
+
+If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if the result is non-zero.
+
+FLES is the signed counterpart to FLE and is used when working with signed values that need to be clamped to a maximum threshold. This is particularly useful in audio processing, control systems, and any application where signed values must be constrained within bounds.
+
+---
+
+## FLTC {#fltc}
+
+Float if C
+[I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input and an output level of low/high according to C.
+
+```
+FLTC  {#}Dest  {WCZ}
+```
+
+**Result:** The I/O pins described by Dest are set to the input direction and to an output level of low/high according to C.
+
+- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output levels of low or high.
+- WCZ is an optional effect to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010010}{DIRx + OUTx}{---}{OUT bit}{2}
+```
+
+**Related:** [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTH](#flth), [FLTL](#fltl)
+
+**Explanation:**
+
+FLTC sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low/high output level according to the C flag. All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be at the desired level.
+
+Dest\[5:0\] indicates the pin number (0-63). For a range of pins, Dest\[5:0\] indicates the base pin number (0-63) and Dest\[10:6\] indicates how many contiguous pins beyond the base should be affected (1-31).
+
+A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range of up to 8 contiguous pins (Dest\[8:6\]). If needed, use the augmented literal feature (\#\#Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
+
+The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group and will not cross the port boundary.
+
+If the WCZ effect is specified, the Z flag is set to the original state of the OUTA/OUTB base bit identified by Dest.
+
+---
+
+## FLTH {#flth}
+
+Float high
+[I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input and to an output level of high.
+
+```
+FLTH  {#}Dest  {WCZ}
+```
+
+**Result:** The I/O pins described by Dest are set to the input direction and to an output level of high.
+
+- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output level of high.
+- WCZ is an optional effect to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010001}{DIRx + OUTx}{---}{OUT bit}{2}
+```
+
+**Related:** [FLTL](#fltl), [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz)
+
+**Explanation:**
+
+FLTH sets the I/O pin(s) designated by Dest to the input direction (floating) and to a high output level. All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be high.
+
+Dest\[5:0\] indicates the pin number (0-63). For a range of pins, Dest\[5:0\] indicates the base pin number (0-63) and Dest\[10:6\] indicates how many contiguous pins beyond the base should be affected (1-31).
+
+A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range of up to 8 contiguous pins (Dest\[8:6\]). If needed, use the augmented literal feature (\#\#Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
+
+The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group and will not cross the port boundary.
+
+If the WCZ effect is specified, the Z flag is set to the original state of the OUTA/OUTB base bit identified by Dest.
+
+---
+
+## FLTL {#fltl}
+
+Float low
+[I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input and to an output level of low.
+
+```
+FLTL  {#}Dest  {WCZ}
+```
+
+**Result:** The I/O pins described by Dest are set to the input direction and to an output level of low.
+
+- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output level of low.
+- WCZ is an optional effect to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010000}{DIRx + OUTx}{---}{OUT bit}{2}
+```
+
+**Related:** [FLTH](#flth), [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz)
+
+**Explanation:**
+
+FLTL sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low output level. All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be low.
+
+Dest\[5:0\] indicates the pin number (0-63). For a range of pins, Dest\[5:0\] indicates the base pin number (0-63) and Dest\[10:6\] indicates how many contiguous pins beyond the base should be affected (1-31).
+
+A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range of up to 8 contiguous pins (Dest\[8:6\]). If needed, use the augmented literal feature (\#\#Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
+
+The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group and will not cross the port boundary.
+
+If the WCZ effect is specified, the Z flag is set to the original state of the OUTA/OUTB base bit identified by Dest.
+
+---
+
+## FLTNC {#fltnc}
+
+Float if not C
+[I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input and an output level of low/high according to !C.
+
+```
+FLTNC  {#}Dest  {WCZ}
+```
+
+**Result:** The I/O pins described by Dest are set to the input direction and to an output level of low/high according to !C.
+
+- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output levels of low or high.
+- WCZ is an optional effect to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010011}{DIRx + OUTx}{---}{OUT bit}{2}
+```
+
+**Related:** [FLTC](#fltc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTH](#flth), [FLTL](#fltl)
+
+**Explanation:**
+
+FLTNC sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low/high output level according to the inverse of the C flag (!C). All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be at the desired level.
+
+Dest\[5:0\] indicates the pin number (0-63). For a range of pins, Dest\[5:0\] indicates the base pin number (0-63) and Dest\[10:6\] indicates how many contiguous pins beyond the base should be affected (1-31).
+
+A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range of up to 8 contiguous pins (Dest\[8:6\]). If needed, use the augmented literal feature (\#\#Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
+
+The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group and will not cross the port boundary.
+
+If the WCZ effect is specified, the Z flag is set to the original state of the OUTA/OUTB base bit identified by Dest.
+
+---
+
+## FLTNOT {#fltnot}
+
+Float not
+[I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input and toggle to the opposite output level.
+
+```
+FLTNOT  {#}Dest  {WCZ}
+```
+
+**Result:** The I/O pins described by Dest are set to the input direction and to their opposite output level(s).
+
+- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to the input direction and toggle to opposite output levels.
+- WCZ is an optional effect to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010111}{DIRx + OUTx}{---}{OUT bit}{2}
+```
+
+**Related:** [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTRND](#fltrnd)
+
+**Explanation:**
+
+FLTNOT sets the I/O pin(s) designated by Dest to the input direction (floating) and toggles their output level(s) to the opposite state. All other pins are left unchanged. FLTNOT achieves the same effect as two instructions: DIRL followed by OUTNOT.
+
+Dest\[5:0\] indicates the pin number (0-63). For a range of pins, Dest\[5:0\] indicates the base pin number (0-63) and Dest\[10:6\] indicates how many contiguous pins beyond the base should be affected (1-31).
+
+A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range of up to 8 contiguous pins (Dest\[8:6\]). If needed, use the augmented literal feature (\#\#Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
+
+When Dest is a register, the register's value bits \[10:0\] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the FLTNOT instruction, in which case SETQ's Dest\[4:0\] substitutes in place of value bits\[10:6\] for FLTNOT's use.
+
+The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group (DIRA or DIRB and OUTA or OUTB) and will not cross the port boundary.
+
+If the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA/OUTB's base bit identified by Dest.
+
+---
+
+## FLTNZ {#fltnz}
+
+Float if not Z
+[I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input and an output level of low/high according to !Z.
+
+```
+FLTNZ  {#}Dest  {WCZ}
+```
+
+**Result:** The I/O pins described by Dest are set to the input direction and to an output level of low/high according to !Z.
+
+- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output levels of low or high.
+- WCZ is an optional effect to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010101}{DIRx + OUTx}{---}{OUT bit}{2}
+```
+
+**Related:** [FLTZ](#fltz), [FLTC](#fltc), [FLTNC](#fltnc), [FLTH](#flth), [FLTL](#fltl)
+
+**Explanation:**
+
+FLTNZ sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low/high output level according to the inverse of the Z flag (!Z). All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be at the desired level.
+
+Dest\[5:0\] indicates the pin number (0-63). For a range of pins, Dest\[5:0\] indicates the base pin number (0-63) and Dest\[10:6\] indicates how many contiguous pins beyond the base should be affected (1-31).
+
+A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range of up to 8 contiguous pins (Dest\[8:6\]). If needed, use the augmented literal feature (\#\#Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
+
+The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group and will not cross the port boundary.
+
+If the WCZ effect is specified, the Z flag is set to the original state of the OUTA/OUTB base bit identified by Dest.
+
+---
+
+## FLTRND {#fltrnd}
+
+Float random
+[I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input and to an output level of random low/high.
+
+```
+FLTRND  {#}Dest  {WCZ}
+```
+
+**Result:** The I/O pins described by Dest are set to the input direction and each output level is set randomly low or high.
+
+- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to the input direction and with output level(s) set randomly to low or high.
+- WCZ is an optional effect to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010110}{DIRx + OUTx}{Original OUTx base bit}{Original OUTx base bit}{2}
+```
+
+**Related:** [FLTC](#fltc), [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot)
+
+**Explanation:**
+
+FLTRND sets the I/O pin(s) designated by Dest to the input direction and with output level(s) set randomly low and high, based on bit(s) from the Xoroshiro128\*\* PRNG. All other pins are left unchanged. This instruction can affect one or more of the bits within the DIRA or DIRB and OUTA or OUTB registers.
+
+FLTRND achieves the same effect as two instructions: DIRL followed by OUTRND.
+
+Dest\[5:0\] indicates the pin number (0-63). For a range of pins, Dest\[5:0\] indicates the base pin number (0-63) and Dest\[10:6\] indicates how many contiguous pins beyond the base should be affected (1-31).
+
+A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range of up to 8 contiguous pins (Dest\[8:6\]). If needed, use the augmented literal feature (\#\#Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
+
+When Dest is a register, the register's value bits \[10:0\] are used as-is to form the 11-bit ID range, unless a SETQ instruction immediately precedes the FLTRND instruction, in which case SETQ's Dest\[4:0\] substitutes in place of value bits\[10:6\] for FLTRND's use.
+
+The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group (DIRA or DIRB and OUTA or OUTB) and will not cross the port boundary.
+
+If the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA/OUTB's base bit identified by Dest.
+
+---
+
+## FLTZ {#fltz}
+
+Float if Z
+[I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input and an output level of low/high according to Z.
+
+```
+FLTZ  {#}Dest  {WCZ}
+```
+
+**Result:** The I/O pins described by Dest are set to the input direction and to an output level of low/high according to Z.
+
+- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output levels of low or high.
+- WCZ is an optional effect to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010100}{DIRx + OUTx}{---}{OUT bit}{2}
+```
+
+**Related:** [FLTNZ](#fltnz), [FLTC](#fltc), [FLTNC](#fltnc), [FLTH](#flth), [FLTL](#fltl)
+
+**Explanation:**
+
+FLTZ sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low/high output level according to the Z flag. All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be at the desired level.
+
+Dest\[5:0\] indicates the pin number (0-63). For a range of pins, Dest\[5:0\] indicates the base pin number (0-63) and Dest\[10:6\] indicates how many contiguous pins beyond the base should be affected (1-31).
+
+A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range of up to 8 contiguous pins (Dest\[8:6\]). If needed, use the augmented literal feature (\#\#Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
+
+The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group and will not cross the port boundary.
+
+If the WCZ effect is specified, the Z flag is set to the original state of the OUTA/OUTB base bit identified by Dest.
+
+---

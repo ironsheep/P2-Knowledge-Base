@@ -1,0 +1,12 @@
+{
+  "description": "Mandatory pandoc arguments for P2 Assembly Language Manual",
+  "required_args": [
+    "--pdf-engine=xelatex",
+    "--toc"
+  ],
+  "notes": [
+    "XeLaTeX required for TikZ diagram rendering",
+    "TOC required for navigation in 400+ page document",
+    "Template includes custom TikZ macros for encoding diagrams"
+  ]
+}
