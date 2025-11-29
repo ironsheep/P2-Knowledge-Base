@@ -531,6 +531,24 @@ categories: |
 
 **Deliverable**: New repository structure with content in `/deliverables/ai/P2/`
 
+### Phase 0.5: JSON Reference Simplification (15 min)
+
+| Task | Description | Time |
+|------|-------------|------|
+| 0.5.1 | Relocate JSON reference file: `deliverables/ai-reference/versions/v1.7.0/p2-reference-v1.7.0.json` → `deliverables/ai-reference/p2-reference.json` | 3 min |
+| 0.5.2 | Delete version directories: `deliverables/ai-reference/versions/` (v0.1.0 through v1.7.0, plus `latest` symlink) | 3 min |
+| 0.5.3 | Delete legacy directory: `deliverables/ai-reference/v1.2.0/` | 2 min |
+| 0.5.4 | Update `update-p2-reference-complete.py` script: change output path to `deliverables/ai-reference/p2-reference.json`, remove version parameter logic | 5 min |
+| 0.5.5 | Audit and update any other scripts referencing the old versioned paths | 2 min |
+
+**Rationale:**
+- JSON file is under git version control - git provides versioning
+- Older versions have no utility (superseded by current)
+- Single file at predictable location simplifies tooling
+- Eliminates version string management in scripts
+
+**Deliverable**: Single `p2-reference.json` at `deliverables/ai-reference/p2-reference.json`
+
 ### Phase 1: Index Generation (1.5 hours)
 
 | Task | Description | Time |
@@ -714,11 +732,12 @@ fi
 | 7.3 | Push to main | 1 min |
 | 7.4 | Verify live on GitHub | 1 min |
 
-**Total Estimated Time**: ~4.5 hours (with Option A filtering approach)
+**Total Estimated Time**: ~4.75 hours (with Option A filtering approach)
 
 | Phase | Time |
 |-------|------|
 | Phase 0: Repository Restructure | 10 min |
+| Phase 0.5: JSON Reference Simplification | 15 min |
 | Phase 1: Index Generation | 1.5 hours |
 | Phase 2: Metadata Filtering (Option A) | 20 min |
 | Phase 3: Scripts & Instructions | 45 min |
@@ -726,7 +745,7 @@ fi
 | Phase 5: Manifest Deletion | 10 min |
 | Phase 6: Testing & Validation | 45 min |
 | Phase 7: Commit & Deploy | 5 min |
-| **Total** | **~4.5 hours** |
+| **Total** | **~4.75 hours** |
 
 ---
 
@@ -895,3 +914,4 @@ Files exist in two locations:
 | 2025-11-28 | Fixed task 1.7: quick-queries becomes standalone YAML file, not embedded in index | Claude |
 | 2025-11-28 | Added key-specific filtering note to prevent content collisions | Claude |
 | 2025-11-28 | Expanded Phase 4 to include all AI documentation files (3 total) | Claude |
+| 2025-11-29 | Added Phase 0.5: JSON Reference Simplification - remove versioned directories, single file location | Claude |

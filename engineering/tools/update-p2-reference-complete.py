@@ -19,7 +19,7 @@ class DateTimeEncoder(json.JSONEncoder):
         return super().default(obj)
 
 class P2CompleteReferenceUpdater:
-    def __init__(self, version: str = "1.3.0"):
+    def __init__(self, version: str = "1.7.0"):
         self.version = version
         self.timestamp = datetime.now().isoformat()
         self.base_path = Path.cwd()
@@ -264,6 +264,6 @@ Source: engineering/knowledge-base/P2/
 
 if __name__ == "__main__":
     import sys
-    version = sys.argv[1] if len(sys.argv) > 1 else "1.3.0"
+    version = sys.argv[1] if len(sys.argv) > 1 else "1.7.0"
     updater = P2CompleteReferenceUpdater(version=version)
     stats = updater.update()
