@@ -23,7 +23,7 @@ examples:
   description: Checking for negative underflow
 - code: 'mov     limit, NEGX         '' Set limit to maximum negative value
 
-    maxs    value, limit        '' Clamp value to not go below NEGX
+    fges    value, limit        '' Clamp value to not go below NEGX
 
     '
   description: Using NEGX as lower limit
@@ -34,7 +34,7 @@ notes:
 - 'Special case: abs(NEGX) = NEGX due to two''s complement representation'
 related:
 - POSX
-- mins
-- maxs
-- abs
+- FLES
+- FGES
+- ABS
 oneliner: Maximum negative integer constant

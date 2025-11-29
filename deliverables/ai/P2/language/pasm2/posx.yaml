@@ -23,7 +23,7 @@ examples:
   description: Checking for positive overflow
 - code: 'mov     limit, POSX         '' Set limit to maximum positive value
 
-    mins    value, limit        '' Clamp value to not exceed POSX
+    fles    value, limit        '' Clamp value to not exceed POSX
 
     '
   description: Using POSX as upper limit
@@ -33,6 +33,6 @@ notes:
 - Used for saturation arithmetic and bounds checking
 related:
 - NEGX
-- mins
-- maxs
+- FLES
+- FGES
 oneliner: Maximum positive integer constant
