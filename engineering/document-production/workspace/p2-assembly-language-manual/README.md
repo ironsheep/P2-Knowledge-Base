@@ -45,19 +45,66 @@ p2-assembly-language-manual/
 ### 1. Content Creation (Opus Master)
 All markdown content is created in the Opus Master folder.
 
-### 2. Assembly
-Combine Opus Master files into single document:
+### 2. Assembly Strategy (Option 3: Validate Parts, Then Combine)
+
+The complete manual is expected to be 400-600 pages. To ensure quality and efficient debugging, we use a phased assembly approach:
+
+#### Phase A: Generate Part I Alone (~50-80 pages)
 ```bash
-# From opus-master directory:
+# Assemble Part I only
+cat front-matter.md \
+    part-i/chapter-01-execution-model.md \
+    part-i/chapter-02-instruction-format.md \
+    part-i/chapter-03-flags.md \
+    part-i/chapter-04-timing.md \
+    part-i/chapter-05-hardware.md \
+    > ../../workspace/p2-assembly-language-manual/P2-PASM2-Manual-Part-I.md
+```
+**Validate:** Chapter formatting, Key Concepts boxes, code examples, any TikZ diagrams. Fix template issues while the document is small—this catches 80% of rendering problems.
+
+#### Phase B: Generate Part II in Chunks
+```bash
+# Assemble Part II - Instructions A-M
+cat part-ii/instructions-a.md \
+    part-ii/instructions-b.md \
+    ... \
+    part-ii/instructions-m.md \
+    > ../../workspace/p2-assembly-language-manual/P2-PASM2-Manual-Part-II-A-M.md
+
+# Assemble Part II - Instructions N-Z plus reference sections
+cat part-ii/instructions-n.md \
+    ... \
+    part-ii/instructions-z.md \
+    part-ii/directives.md \
+    part-ii/constants.md \
+    part-ii/smartpin-constants.md \
+    part-ii/streamer-constants.md \
+    part-ii/special-registers.md \
+    > ../../workspace/p2-assembly-language-manual/P2-PASM2-Manual-Part-II-N-Z.md
+```
+**Validate:** Instruction entry tables, encoding diagrams, code examples. The repetitive structure means fixing one entry fixes patterns for all.
+
+#### Phase C: Assemble Complete Manual
+```bash
+# Full assembly
 cat front-matter.md \
     part-i/chapter-*.md \
     part-ii/instructions-*.md \
     part-ii/directives.md \
     part-ii/constants.md \
+    part-ii/smartpin-constants.md \
+    part-ii/streamer-constants.md \
     part-ii/special-registers.md \
     part-iii/appendix-*.md \
     > ../../workspace/p2-assembly-language-manual/P2-Assembly-Language-Manual.md
 ```
+**Validate:** Complete cross-references, TOC generation, page numbering, final polish.
+
+#### Why This Approach?
+- A rendering bug in a 600-page PDF is painful to diagnose
+- The same bug in a 50-page Part I is manageable
+- Can release Part I while Part II is finalized (if needed)
+- Faster iteration on template fixes
 
 ### 3. PDF Generation
 Deploy to PDF Forge:
