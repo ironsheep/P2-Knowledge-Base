@@ -221,31 +221,25 @@ Benefits:
   "system": {
     "version": "3.0",
     "generated": "2025-11-28T00:00:00Z",
-    "base_url": "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/",
-    "content_base": "deliverables/ai",
     "total_entries": 972
   },
 
   "files": {
     "p2kbPasm2Mov": {
-      "path": "P2/language/pasm2/mov.yaml",
-      "mtime": 1732780800,
-      "cat": "pasm2"
+      "path": "deliverables/ai/P2/language/pasm2/mov.yaml",
+      "mtime": 1732780800
     },
     "p2kbSpin2Abs": {
-      "path": "P2/language/spin2/methods/abs.yaml",
-      "mtime": 1732780800,
-      "cat": "spin2"
+      "path": "deliverables/ai/P2/language/spin2/methods/abs.yaml",
+      "mtime": 1732780800
     },
     "p2kbPasm2Abs": {
-      "path": "P2/language/pasm2/abs.yaml",
-      "mtime": 1732780800,
-      "cat": "pasm2"
+      "path": "deliverables/ai/P2/language/pasm2/abs.yaml",
+      "mtime": 1732780800
     },
     "p2kbArchCog": {
-      "path": "P2/architecture/cog.yaml",
-      "mtime": 1732780800,
-      "cat": "arch"
+      "path": "deliverables/ai/P2/architecture/cog.yaml",
+      "mtime": 1732780800
     }
   },
 
@@ -254,40 +248,6 @@ Benefits:
     "identifier-rules.yaml": "p2kbFundIdentifierRules",
     "event_system.yaml": "p2kbArchEventSystem",
     "dira-dirb-registers.yaml": "p2kbArchRegDiraDirb"
-  },
-
-  "categories": {
-    "pasm2_instruction": {
-      "count": 362,
-      "description": "PASM2 assembly instructions",
-      "keys": ["p2kbPasm2Mov", "p2kbPasm2Add", "..."]
-    },
-    "spin2_method": {
-      "count": 135,
-      "description": "Spin2 built-in methods",
-      "keys": ["p2kbSpin2Abs", "..."]
-    },
-    "smart_pin_mode": {
-      "count": 32,
-      "description": "Smart Pin operating modes",
-      "keys": ["p2kbSmartPin00000", "..."]
-    },
-    "architecture": {
-      "count": 18,
-      "description": "P2 system architecture components",
-      "keys": ["p2kbArchCog", "p2kbArchHub", "..."]
-    },
-    "obex_object": {
-      "count": 113,
-      "description": "OBEX community objects",
-      "keys": ["p2kbObexFullDuplexSerial", "..."]
-    }
-  },
-
-  "quick_queries": {
-    "blink_led": ["p2kbPatternBlinkLed", "p2kbSpin2Pinwrite"],
-    "uart_serial": ["p2kbObexFullDuplexSerial", "p2kbSmartPin00100"],
-    "i2c": ["p2kbObexI2cDriver", "p2kbSmartPin10000"]
   }
 }
 ```
@@ -376,7 +336,6 @@ cache=".p2kb-cache"
 index="$cache/p2kb-index.json"
 base_url="https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main"
 index_url="$base_url/deliverables/ai/p2kb-index.json.gz"
-content_base="$base_url/deliverables/ai"
 
 report() { [ "$verbose" = "--verbose" ] && echo "P2KB: $1" >&2; }
 
@@ -418,7 +377,8 @@ else
     report "Downloading: $path"
     mkdir -p "$(dirname "$file_cache")"
     # Download, filter metadata, then cache
-    curl -sS "$content_base/$path" | filter_metadata > "$file_cache"
+    # Path is full (e.g., deliverables/ai/P2/language/pasm2/mov.yaml)
+    curl -sS "$base_url/$path" | filter_metadata > "$file_cache"
     cat "$file_cache"
 fi
 ```
@@ -426,8 +386,8 @@ fi
 **Key Features:**
 1. **Compressed index** - Downloads gzipped index (~18 KB vs 44 KB)
 2. **Key-based lookup** - No path construction by remote AI
-3. **Metadata filtering** - Strips `last_updated`, `enhancement_source`, etc. on download
-4. **New paths** - Content from `/deliverables/ai/P2/`
+3. **Full paths in index** - No URL assembly from multiple sources
+4. **Metadata filtering** - Strips `last_updated`, `enhancement_source`, etc. on download
 5. **Local caching** - Same `.p2kb-cache/` structure as before
 6. **Index auto-refresh** - Re-fetches index if older than 24 hours
 7. **jq fallback** - Works even without jq installed
@@ -557,8 +517,8 @@ categories: |
 | 1.2 | Walk all YAML in `deliverables/ai/P2/` | (in script) |
 | 1.3 | Generate keys using naming convention | (in script) |
 | 1.4 | Handle collisions (PASM2/Spin2 disambiguation) | (in script) |
-| 1.5 | Extract versions from files (or default to 1.0) | (in script) |
-| 1.6 | Generate category groupings | (in script) |
+| 1.5 | Extract mtime from git history for each file | (in script) |
+| 1.6 | ~~Generate category groupings~~ (removed - Decision 6) | — |
 | 1.7 | Convert `quick-queries-manifest.yaml` to standalone YAML file (key: `p2kbGuideQuickQueries`) | 15 min |
 | 1.8 | Run script, validate output | 30 min |
 | 1.9 | Compress index: `gzip -k p2kb-index.json` | 1 min |
@@ -775,21 +735,18 @@ fi
 - Key: `p2kbGuideQuickQueries`
 - Remote AIs fetch when needed (not embedded in index)
 
-### 5. Version Strategy
-**Options:**
-- A) Extract from existing YAML files where present
-- B) Default all to "1.0", increment on future changes
-- C) Use git commit date as version proxy
+### 5. Version Strategy ✅
+**Decision**: C - Use git commit date as version proxy
+- Aligns with Decision 8 (mtime-based versioning)
+- No manual version management needed
+- Git history provides authoritative timestamps
 
-**Recommendation**: B - Clean slate, simple management
-
-### 6. Category Granularity
-**Options:**
-- A) Broad categories (pasm2, spin2, arch, obex)
-- B) Fine categories (pasm2_arithmetic, pasm2_branch, pasm2_memory, ...)
-- C) Both (categories + subcategories)
-
-**Recommendation**: C - Categories for browsing, subcategories for precision
+### 6. Category Granularity ✅
+**Decision**: No categories in index
+- Index is purely a lookup table (key → path + mtime)
+- Fetch script is the only consumer of the index
+- Discovery/browsing handled by JSON reference file and YAML `category`/`related` fields
+- Keeps index minimal and single-purpose
 
 ### 7. Cross-Reference Transformation ✅
 **Decision**: Algorithmic transformation + exceptions in index
