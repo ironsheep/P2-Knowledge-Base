@@ -70,8 +70,9 @@ lookup_key() {
 }
 
 # Filter metadata from YAML content
+# These fields are process/lineage metadata, not content
 filter_metadata() {
-    grep -v -E "^[[:space:]]*(last_updated|enhancement_source|documentation_source|documentation_level):"
+    grep -v -E "^[[:space:]]*(last_updated|enhancement_source|documentation_source|documentation_level|manual_extraction_date):"
 }
 
 # Main execution

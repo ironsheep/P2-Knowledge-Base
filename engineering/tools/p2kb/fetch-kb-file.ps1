@@ -70,9 +70,10 @@ function Get-PathForKey($key) {
 }
 
 # Filter metadata from YAML content
+# These fields are process/lineage metadata, not content
 function Remove-Metadata($content) {
     $content -split "`n" | Where-Object {
-        $_ -notmatch '^\s*(last_updated|enhancement_source|documentation_source|documentation_level):'
+        $_ -notmatch '^\s*(last_updated|enhancement_source|documentation_source|documentation_level|manual_extraction_date):'
     } | Out-String
 }
 

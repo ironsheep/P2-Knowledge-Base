@@ -173,3 +173,6 @@ engineering/document-production/WORKSPACE-REORGANIZATION-COMPLETE.md
 /engineering/document-production/outbound
 engineering/document-production/workspace/p2-pasm-desilva-style/P2-PASM-deSilva-Style.md.v1-before-yourturn-fixes
 /engineering/document-production/manuals/p2-assembly-language-manual/REF
+
+# DOD validation local state
+engineering/tools/.dod-validation-history.json
