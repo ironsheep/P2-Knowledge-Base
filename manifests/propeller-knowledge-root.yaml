@@ -59,12 +59,12 @@ index:
   location: "deliverables/ai/p2kb-index.json"
   compressed: "deliverables/ai/p2kb-index.json.gz"
   description: "Master index mapping keys to YAML file paths"
-  total_entries: 973
+  total_entries: 974
 
 ai_instructions:
   location: "manifests/ai-instructions.yaml"
   version: "3.1"
-  content_hash: "sha256:c5454dbe221fa6dd47d0315fbe147251c2a44c90cf475baeb4fdfb848ed5095d"
+  content_hash: "sha256:57083c058ac9c123a5ed6c6772990b16e0fa08c0b68cc81f7e16392d7cac4b8f"
   description: "Setup and usage instructions for v3.0 key-based access"
 
 fetch_scripts:
