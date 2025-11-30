@@ -5,7 +5,7 @@
 
 set -e
 
-BASE_URL="https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main"
+BASE_URL="https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main"
 
 # Determine script's directory (where this script lives)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

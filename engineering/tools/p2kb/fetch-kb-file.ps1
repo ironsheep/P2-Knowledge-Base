@@ -16,7 +16,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$BaseUrl = "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main"
+$BaseUrl = "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main"
 
 # Determine script's directory (where this script lives)
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
