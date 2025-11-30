@@ -1,0 +1,200 @@
+{
+  "_comment": "Category definitions extracted from old manifests (pre-DOD v3.0). Maps category names to arrays of filename patterns that get translated to p2kb keys at index generation time.",
+  "_version": "1.0",
+  "_source": "git show e271cab~1:manifests/P2/*.yaml",
+
+  "pasm2": {
+    "directives": {
+      "description": "Assembly-time directives for code organization",
+      "files": ["alignl", "alignw", "byte", "bytefit", "ditto", "fit", "long", "org", "orgf", "orgh", "res", "word", "wordfit"]
+    },
+    "branch": {
+      "description": "Program flow control and branching operations",
+      "files": ["call", "calla", "callb", "calld", "callpa", "callpb", "djf", "djnf", "djnz", "djz", "execf", "ijnz", "ijz", "jmp", "jmprel", "rep", "resi0", "resi1", "resi2", "resi3", "ret", "reta", "retb", "reti0", "reti1", "reti2", "reti3", "skip", "skipf", "tjf", "tjnf", "tjns", "tjnz", "tjs", "tjv", "tjz"]
+    },
+    "cordic": {
+      "description": "CORDIC math coprocessor operations",
+      "files": ["getqx", "getqy", "qdiv", "qexp", "qfrac", "qlog", "qmul", "qrotate", "qsqrt", "qvector"]
+    },
+    "colorspace": {
+      "description": "Color space conversion operations",
+      "files": ["setcfrq", "setci", "setcmod", "setcq", "setcy"]
+    },
+    "constants": {
+      "description": "Predefined constant values",
+      "files": ["false", "negx", "pi", "posx", "true"]
+    },
+    "event": {
+      "description": "Event detection, waiting, and handling",
+      "files": ["addct1", "addct2", "addct3", "cogatn", "jatn", "jct1", "jct2", "jct3", "jfbw", "jint", "jnatn", "jnct1", "jnct2", "jnct3", "jnfbw", "jnint", "jnpat", "jnqmt", "jnse1", "jnse2", "jnse3", "jnse4", "jnxfi", "jnxmt", "jnxrl", "jnxro", "jpat", "jqmt", "jse1", "jse2", "jse3", "jse4", "jxfi", "jxmt", "jxrl", "jxro", "pollatn", "pollct1", "pollct2", "pollct3", "pollfbw", "pollint", "pollpat", "pollqmt", "pollse1", "pollse2", "pollse3", "pollse4", "pollxfi", "pollxmt", "pollxrl", "pollxro", "setpat", "setse1", "setse2", "setse3", "setse4", "waitatn", "waitct1", "waitct2", "waitct3", "waitfbw", "waitint", "waitpat", "waitse1", "waitse2", "waitse3", "waitse4", "waitxfi", "waitxmt", "waitxrl", "waitxro"]
+    },
+    "hub_control": {
+      "description": "Cog and hub control operations",
+      "files": ["cogid", "coginit", "cogstop", "hubset", "locknew", "lockrel", "lockret", "locktry"]
+    },
+    "hub_fifo": {
+      "description": "Hub FIFO operations for fast data transfer",
+      "files": ["fblock", "getptr", "rdfast", "rfbyte", "rflong", "rfvar", "rfvars", "rfword", "wfbyte", "wflong", "wfword", "wrfast"]
+    },
+    "hub_ram": {
+      "description": "Hub memory read and write operations",
+      "files": ["popa", "popb", "pusha", "pushb", "rdbyte", "rdlong", "rdword", "wmlong", "wrbyte", "wrlong", "wrword"]
+    },
+    "interrupt": {
+      "description": "Interrupt configuration and control",
+      "files": ["allowi", "brk", "cogbrk", "getbrk", "nixint1", "nixint2", "nixint3", "setint1", "setint2", "setint3", "stalli", "trgint1", "trgint2", "trgint3"]
+    },
+    "lookup_table": {
+      "description": "Lookup table (LUT) operations",
+      "files": ["rdlut", "setluts", "wrlut"]
+    },
+    "math": {
+      "description": "Mathematical and logical operations",
+      "files": ["abs", "add", "adds", "addsx", "addx", "and", "andn", "bitc", "bith", "bitl", "bitnc", "bitnot", "bitnz", "bitrnd", "bitz", "bmask", "cmp", "cmpm", "cmpr", "cmps", "cmpsub", "cmpsx", "cmpx", "crcbit", "crcnib", "decmod", "decod", "encod", "fge", "fges", "fle", "fles", "getbyte", "getnib", "getword", "incmod", "loc", "mergeb", "mergew", "modc", "modcz", "modz", "mov", "movbyts", "mul", "muls", "muxc", "muxnc", "muxnibs", "muxnits", "muxnz", "muxq", "muxz", "neg", "negc", "negnc", "negnz", "negz", "not", "ones", "or", "rcl", "rcr", "rczl", "rczr", "rev", "rgbexp", "rgbsqz", "rol", "rolbyte", "rolnib", "rolword", "ror", "sal", "sar", "sca", "scas", "setbyte", "setd", "setnib", "setr", "sets", "setword", "seussf", "seussr", "shl", "shr", "signx", "splitb", "splitw", "sub", "subr", "subs", "subsx", "subx", "sumc", "sumnc", "sumnz", "sumz", "test", "testb", "testbn", "testn", "wrc", "wrnc", "wrnz", "wrz", "xor", "xoro32", "zerox"]
+    },
+    "misc": {
+      "description": "Miscellaneous operations and utilities",
+      "files": ["augd", "augs", "getct", "getrnd", "nop", "pop", "push", "setq", "setq2", "waitx"]
+    },
+    "pin": {
+      "description": "Basic pin control operations",
+      "files": ["dirc", "dirh", "dirl", "dirnc", "dirnot", "dirnz", "dirrnd", "dirz", "drvc", "drvh", "drvl", "drvnc", "drvnot", "drvnz", "drvrnd", "drvz", "fltc", "flth", "fltl", "fltnc", "fltnot", "fltnz", "fltrnd", "fltz", "outc", "outh", "outl", "outnc", "outnot", "outnz", "outrnd", "outz", "testp", "testpn"]
+    },
+    "pixel": {
+      "description": "Pixel mixing and blending operations",
+      "files": ["addpix", "blnpix", "mixpix", "mulpix", "setpiv", "setpix"]
+    },
+    "register_indirection": {
+      "description": "Register field alteration and indirection",
+      "files": ["altb", "altd", "altgb", "altgn", "altgw", "alti", "altr", "alts", "altsb", "altsn", "altsw"]
+    },
+    "smart_pin": {
+      "description": "Advanced smart pin configuration and control",
+      "files": ["akpin", "getscp", "rdpin", "rqpin", "setdacs", "setscp", "wrpin", "wxpin", "wypin"]
+    },
+    "streamer": {
+      "description": "Streamer operations for continuous data flow",
+      "files": ["getxacc", "setxfrq", "xcont", "xinit", "xstop", "xzero"]
+    }
+  },
+
+  "architecture": {
+    "core": {
+      "description": "Core processor and memory systems",
+      "files": ["cog", "hub", "lookup_ram", "cog_attention"]
+    },
+    "math": {
+      "description": "Math acceleration hardware",
+      "files": ["cordic"]
+    },
+    "timing": {
+      "description": "Clock and timing systems",
+      "files": ["clock_system", "io_pin_timing"]
+    },
+    "interrupts": {
+      "description": "Interrupt and event systems",
+      "files": ["interrupts", "debug_interrupt", "event_system"]
+    },
+    "sync": {
+      "description": "Synchronization mechanisms",
+      "files": ["locks", "multi_resource_management"]
+    },
+    "io": {
+      "description": "I/O subsystems",
+      "files": ["smart_pins", "streamer", "serial_loader"]
+    },
+    "execution": {
+      "description": "Execution engines",
+      "files": ["xbyte_engine"]
+    }
+  },
+
+  "smart_pins": {
+    "digital": {
+      "description": "Digital I/O modes",
+      "modes": ["00000", "00001", "00010", "00011"]
+    },
+    "serial": {
+      "description": "Serial communication modes",
+      "modes": ["11100", "11101", "11110", "11111"]
+    },
+    "pwm": {
+      "description": "PWM generation modes",
+      "modes": ["00100", "00101", "01000", "01001", "01010"]
+    },
+    "counting": {
+      "description": "Counter and encoder modes",
+      "modes": ["01011", "01100", "01101", "01110", "01111"]
+    },
+    "timing": {
+      "description": "Timing measurement modes",
+      "modes": ["10000", "10001", "10010", "10011", "10100", "10101", "10110", "10111"]
+    },
+    "frequency": {
+      "description": "NCO frequency generation",
+      "modes": ["00110", "00111"]
+    },
+    "analog": {
+      "description": "ADC/DAC modes",
+      "modes": ["11000", "11001", "11010"]
+    },
+    "special": {
+      "description": "Special modes (USB)",
+      "modes": ["11011"]
+    },
+    "beginner": {
+      "description": "Recommended for beginners",
+      "modes": ["00000", "11110", "11111", "01000", "01001", "00110"]
+    }
+  },
+
+  "spin2": {
+    "control_flow": {
+      "description": "Control flow constructs",
+      "files": ["repeat", "if_elseif_else", "case", "abort", "quit", "next"]
+    },
+    "pin_control": {
+      "description": "Pin control methods",
+      "files": ["pinhigh", "pinlow", "pintoggle", "pinread", "pinwrite", "pinfloat"]
+    },
+    "timing": {
+      "description": "Timing and delay methods",
+      "files": ["waitms", "waitus", "waitct", "getct", "getms", "getsec"]
+    },
+    "cog_control": {
+      "description": "COG management methods",
+      "files": ["coginit", "cogstop", "cogspin", "cogchk", "cogid", "cogatn"]
+    },
+    "memory": {
+      "description": "Memory operations",
+      "files": ["bytemove", "wordmove", "longmove", "bytefill", "wordfill", "longfill", "byte", "word", "long"]
+    },
+    "math": {
+      "description": "Math functions",
+      "files": ["abs", "sqrt", "rotxy", "polxy", "xypol", "muldiv64", "getrnd", "qcos", "qsin", "qexp", "qlog"]
+    },
+    "strings": {
+      "description": "String operations",
+      "files": ["strsize", "strcomp", "strcopy", "string", "lstring"]
+    },
+    "smart_pins": {
+      "description": "Smart pin methods",
+      "files": ["wrpin", "wxpin", "wypin", "rdpin", "akpin", "rqpin", "pinstart", "pinclear"]
+    },
+    "locks": {
+      "description": "Lock operations",
+      "files": ["locknew", "lockret", "locktry", "lockrel", "lockchk"]
+    },
+    "lookup": {
+      "description": "Lookup table methods",
+      "files": ["lookup", "lookupz", "lookdown", "lookdownz"]
+    }
+  },
+
+  "guides": {
+    "getting_started": {
+      "description": "Getting started guides",
+      "files": ["quick-queries", "pasm2-getting-started", "spin2-getting-started"]
+    }
+  }
+}

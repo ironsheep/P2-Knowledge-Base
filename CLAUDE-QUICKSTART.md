@@ -1,17 +1,29 @@
-# P2 Knowledge Base QuickStart v3.0
-*Key-based access - simple and reliable*
+# P2 Knowledge Base QuickStart v3.2
+*Key-based access with navigation support*
 
 ## Overview
 
-v3.0 uses **keys** to access content. No path construction needed.
+v3.2 uses **keys** to access content with built-in navigation.
 
 - Keys like `p2kbPasm2Mov` map directly to YAML files
-- One index contains all ~970 content files
+- Use `--search` and `--browse` to find keys - never guess!
 - Automatic caching and metadata filtering
+- ~970 content files organized into 45 categories
+
+## 🚨 IMPORTANT: Script-Only Access
+
+**ALWAYS use the fetch script. NEVER access index or cache files directly.**
+
+- ❌ DON'T: `jq ... ~/.p2kb/p2kb-index.json`
+- ❌ DON'T: `cat ~/.p2kb/cache/...`
+- ❌ DON'T: Guess at key names
+- ✅ DO: Use `--search`, `--browse`, `--cached` commands
+
+---
 
 ## 🚀 Setup (3 Steps)
 
-### Step 1: Create Cache Directory
+### Step 1: Create Script Directory
 
 ```bash
 mkdir -p ~/.p2kb-cache
@@ -34,14 +46,36 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/IronSheepProductionsLL
 ### Step 3: Verify Setup
 
 ```bash
-~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog --verbose
+~/.p2kb-cache/fetch-kb-file.sh --help
 ```
 
-✅ Setup complete when you see YAML content output.
+✅ Setup complete when you see the help message with available commands.
 
 ---
 
 ## 📖 Usage
+
+### Get Help
+```bash
+~/.p2kb-cache/fetch-kb-file.sh --help
+```
+
+### Find Keys
+
+```bash
+# Search for keys containing a term (case-insensitive)
+~/.p2kb-cache/fetch-kb-file.sh --search uart
+~/.p2kb-cache/fetch-kb-file.sh --search cordic
+~/.p2kb-cache/fetch-kb-file.sh --search mov
+
+# Browse keys by category
+~/.p2kb-cache/fetch-kb-file.sh --browse pasm2_branch
+~/.p2kb-cache/fetch-kb-file.sh --browse architecture_core
+~/.p2kb-cache/fetch-kb-file.sh --browse smart_pins_serial
+
+# List all categories
+~/.p2kb-cache/fetch-kb-file.sh --categories
+```
 
 ### Fetch Content by Key
 
@@ -62,17 +96,10 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/IronSheepProductionsLL
 ~/.p2kb-cache/fetch-kb-file.sh p2kbGuideQuickQueries
 ```
 
-### Find Keys
+### Check Downloaded Files
 
 ```bash
-# Search index for keys containing "Pasm2"
-jq '.files | keys[] | select(contains("Pasm2"))' ~/.p2kb-cache/p2kb-index.json
-
-# Find Smart Pin keys
-jq '.files | keys[] | select(contains("SmartPin"))' ~/.p2kb-cache/p2kb-index.json
-
-# Grep-based search (no jq required)
-grep -o '"p2kb[^"]*"' ~/.p2kb-cache/p2kb-index.json | grep -i uart
+~/.p2kb-cache/fetch-kb-file.sh --cached
 ```
 
 ---
@@ -84,27 +111,55 @@ grep -o '"p2kb[^"]*"' ~/.p2kb-cache/p2kb-index.json | grep -i uart
 | `p2kbPasm2` | PASM2 instructions | `p2kbPasm2Mov` |
 | `p2kbSpin2` | Spin2 methods | `p2kbSpin2Pinwrite` |
 | `p2kbArch` | Architecture docs | `p2kbArchCog` |
-| `p2kbSmartPin` | Smart Pin modes | `p2kbSmartPinUart` |
 | `p2kbGuide` | Guides | `p2kbGuideQuickQueries` |
 | `p2kbHw` | Hardware specs | `p2kbHwP2Eval` |
 
 ---
 
+## 📂 Categories (for --browse)
+
+**PASM2 Instructions:**
+- `pasm2_directives`, `pasm2_branch`, `pasm2_cordic`, `pasm2_math`, `pasm2_pin`
+- `pasm2_event`, `pasm2_hub_control`, `pasm2_hub_fifo`, `pasm2_hub_ram`
+- `pasm2_interrupt`, `pasm2_lookup_table`, `pasm2_misc`, `pasm2_pixel`
+- `pasm2_register_indirection`, `pasm2_smart_pin`, `pasm2_streamer`
+
+**Architecture:**
+- `architecture_core`, `architecture_math`, `architecture_timing`
+- `architecture_interrupts`, `architecture_sync`, `architecture_io`
+
+**Smart Pins:**
+- `smart_pins_digital`, `smart_pins_serial`, `smart_pins_pwm`
+- `smart_pins_counting`, `smart_pins_timing`, `smart_pins_frequency`
+- `smart_pins_analog`, `smart_pins_special`, `smart_pins_beginner`
+
+**Spin2:**
+- `spin2_control_flow`, `spin2_pin_control`, `spin2_timing`
+- `spin2_cog_control`, `spin2_memory`, `spin2_math`
+- `spin2_strings`, `spin2_smart_pins`, `spin2_locks`
+
+**Guides:**
+- `guides_getting_started`
+
+---
+
 ## 🔧 Cache Management
 
-**Check size:**
+The script manages caching automatically. You shouldn't need to access cache files directly.
+
+**Refresh everything (scripts, index, common files):**
 ```bash
-du -sh ~/.p2kb-cache
+~/.p2kb-cache/refresh-kb.sh
 ```
 
-**Clear cache (forces refresh):**
+**Check what's cached:**
 ```bash
-rm -rf ~/.p2kb-cache
+~/.p2kb-cache/fetch-kb-file.sh --cached
 ```
 
-**Force index refresh:**
+**Full reset (if needed):**
 ```bash
-rm ~/.p2kb-cache/p2kb-index.json
+rm -rf ~/.p2kb-cache ~/.p2kb
 ```
 
 ---
@@ -112,13 +167,14 @@ rm ~/.p2kb-cache/p2kb-index.json
 ## 📋 Troubleshooting
 
 **"Key not found":**
-- Verify the key exists: `grep "keyname" ~/.p2kb-cache/p2kb-index.json`
+- Use `--search <term>` to find valid keys
+- Check `--browse <category>` for related keys
 - Keys are case-sensitive and start with `p2kb`
+- The error message will show similar keys
 
 **Stale content:**
+- Run `~/.p2kb-cache/refresh-kb.sh` to update everything
 - Index auto-refreshes every 24 hours
-- Delete specific cached file to force refresh
-- Or clear entire cache: `rm -rf ~/.p2kb-cache`
 
 **Network errors:**
 - Check internet connectivity
@@ -128,12 +184,13 @@ rm ~/.p2kb-cache/p2kb-index.json
 
 ## 💡 Notes
 
-- **Cache location:** `~/.p2kb-cache/`
+- **Scripts location:** `~/.p2kb-cache/` (user-visible)
+- **Index/cache location:** `~/.p2kb/` (hidden, managed automatically)
 - **Index size:** ~130KB (13KB compressed)
-- **Total content:** 973 YAML files
+- **Total content:** ~970 YAML files in 45 categories
 - **Auto-refresh:** Index checks for updates every 24 hours
 
 ---
 
-*Version 3.0 - Key-Based Access*
-*Last Updated: 2025-11-29*
+*Version 3.2 - Key-Based Access with Navigation*
+*Last Updated: 2025-11-30*

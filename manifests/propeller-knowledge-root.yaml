@@ -1,21 +1,20 @@
-# Propeller Knowledge Base - Root Manifest v3.0
-# Repository: https://github.com/ironsheep/P2-Knowledge-Base
+# Propeller Knowledge Base - Root Manifest v3.2
+# Repository: https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base
 # This is the entry point - fetch this first
 
-version: "3.0"
-last_updated: "2025-11-29"
+version: "3.2"
+last_updated: "2025-11-30"
 
 # ============================================================================
-# 🚨 MIGRATION REQUIRED - v2.x users MUST upgrade
+# 🚨 MIGRATION REQUIRED - v3.1 and earlier users MUST upgrade
 # ============================================================================
 migration:
   required: true
-  from_version: "2.x"
-  to_version: "3.0"
+  from_version: "3.1"
+  to_version: "3.2"
   reason: |
-    v3.0 introduces key-based access that eliminates 404 errors and
-    simplifies content retrieval. The old manifest navigation system
-    is replaced by a single index with stable keys.
+    v3.2 adds navigation commands (--browse, --search, --cached, --categories)
+    and moves index/cache to hidden location. Scripts remain in ~/.p2kb-cache/.
 
   ai_action_required: |
     ⚠️ HASH MISMATCH - YOUR CACHE IS OUTDATED
@@ -24,71 +23,90 @@ migration:
 
     **Unix/macOS/Linux:**
     ```bash
-    # Step 1: Clear cache contents (keep directory)
-    rm -rf ~/.p2kb-cache/*
-    mkdir -p ~/.p2kb-cache/obex
-
-    # Step 2: Download refresh script and run it
-    curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.sh > ~/.p2kb-cache/refresh-kb.sh
+    # Download and run refresh script (handles migration automatically)
+    curl -sS https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.sh > ~/.p2kb-cache/refresh-kb.sh
     chmod +x ~/.p2kb-cache/refresh-kb.sh
     ~/.p2kb-cache/refresh-kb.sh
     ```
 
     **Windows PowerShell:**
     ```powershell
-    # Step 1: Clear cache contents (keep directory)
-    Remove-Item -Path "$env:USERPROFILE\.p2kb-cache\*" -Recurse -Force
-    New-Item -ItemType Directory -Path "$env:USERPROFILE\.p2kb-cache\obex" -Force
-
-    # Step 2: Download refresh script and run it
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\refresh-kb.ps1"
+    # Download and run refresh script (handles migration automatically)
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\refresh-kb.ps1"
     & "$env:USERPROFILE\.p2kb-cache\refresh-kb.ps1"
     ```
 
-    **Step 3:** After refresh completes, fetch ai-instructions.yaml:
+    **Verify upgrade:**
     ```bash
-    ~/.p2kb-cache/fetch-kb-file.sh manifests/ai-instructions.yaml
+    ~/.p2kb-cache/fetch-kb-file.sh --help
     ```
-    Then follow the upgrade_instructions section to update your CLAUDE.md.
+
+    Then fetch ai-instructions.yaml and follow upgrade_instructions to update CLAUDE.md.
 
 # ============================================================================
-# v3.0 Key-Based Access System
+# v3.2 Key-Based Access System with Navigation
 # ============================================================================
 index:
   location: "deliverables/ai/p2kb-index.json"
   compressed: "deliverables/ai/p2kb-index.json.gz"
-  description: "Master index mapping keys to YAML file paths"
+  description: "Master index mapping keys to YAML file paths with categories"
   total_entries: 974
+  total_categories: 45
 
 ai_instructions:
   location: "manifests/ai-instructions.yaml"
-  version: "3.1"
-  content_hash: "sha256:8f1bd99568a7edb3a0fcad4e402639ea556c9169480f0b96ac6d2c6615bda32e"
-  description: "Setup and usage instructions for v3.0 key-based access"
+  version: "3.2"
+  content_hash: "sha256:81f8dcdf0009af6f483d21dca1fff83670a262766fb141290b761742704614c0"
+  description: "Setup and usage instructions for v3.2 key-based access with navigation"
 
 fetch_scripts:
   bash: "engineering/tools/p2kb/fetch-kb-file.sh"
   powershell: "engineering/tools/p2kb/fetch-kb-file.ps1"
+  features:
+    - "--help: Show usage and commands"
+    - "--cached: List downloaded keys"
+    - "--browse <category>: Browse keys by category"
+    - "--search <term>: Search for keys"
+    - "--categories: List all categories"
+    - "<key>: Fetch content by key"
 
 refresh_scripts:
   bash: "engineering/tools/p2kb/refresh-kb.sh"
   powershell: "engineering/tools/p2kb/refresh-kb.ps1"
-  description: "Updates all scripts, index, and common files in one command"
+  description: "Updates all scripts, index, and common files; handles v3.1 migration"
 
 obex_scripts:
   bash: "engineering/tools/p2kb/obex/download-helper.sh"
   powershell: "engineering/tools/p2kb/obex/download-helper.ps1"
 
-# Quick Start for v3.0
+# Storage Locations (v3.2)
+storage:
+  scripts:
+    unix: "~/.p2kb-cache/"
+    windows: "$env:USERPROFILE\\.p2kb-cache\\"
+    description: "User-visible script location"
+  index_cache:
+    unix: "~/.p2kb/"
+    windows: "$env:LOCALAPPDATA\\p2kb\\"
+    description: "Hidden index and cache location"
+
+# Quick Start for v3.2
 quickstart: |
   # 1. Download fetch script
-  curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
+  mkdir -p ~/.p2kb-cache
+  curl -sS https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
   chmod +x ~/.p2kb-cache/fetch-kb-file.sh
 
-  # 2. Fetch content by key
+  # 2. See available commands
+  ~/.p2kb-cache/fetch-kb-file.sh --help
+
+  # 3. Find keys
+  ~/.p2kb-cache/fetch-kb-file.sh --search mov
+  ~/.p2kb-cache/fetch-kb-file.sh --browse pasm2_branch
+
+  # 4. Fetch content by key
   ~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov
   ~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog
-  ~/.p2kb-cache/fetch-kb-file.sh p2kbGuideQuickQueries
 
 # Knowledge Base Status
 knowledge_bases:
@@ -97,6 +115,7 @@ knowledge_bases:
     description: "Propeller 2 - 8 COGs, 64 Smart Pins, 512KB RAM"
     content_location: "deliverables/ai/P2/"
     index_prefix: "p2kb"
+    categories: 45
 
   p1:
     status: "planned"
@@ -104,5 +123,5 @@ knowledge_bases:
 
 # Metadata
 metadata:
-  repository: "https://github.com/ironsheep/P2-Knowledge-Base"
-  raw_base_url: "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/"
+  repository: "https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base"
+  raw_base_url: "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/"

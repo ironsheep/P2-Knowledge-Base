@@ -1,30 +1,40 @@
-# P2 Knowledge Base - AI Integration Instructions v3.1
-# Key-based access system - no path construction required
-# Version: 3.1
+# P2 Knowledge Base - AI Integration Instructions v3.2
+# Key-based access system with navigation support
+# Version: 3.2
 
-instructions_version: "3.1"
+instructions_version: "3.2"
 last_updated: "2025-11-30"
 
 # ============================================================================
-# UPGRADE INSTRUCTIONS - For AI systems updating from v2.x
+# UPGRADE INSTRUCTIONS - For AI systems updating from v3.1 or earlier
 # ============================================================================
 upgrade_instructions: |
-  ## Upgrading from v2.x to v3.0
+  ## Upgrading to v3.2
 
-  If you detected a hash mismatch and are upgrading, follow these steps:
+  If you detected a hash mismatch and are upgrading:
 
-  1. You should have already cleared your cache and downloaded the new fetch script
-     (per the ai_action_required in propeller-knowledge-root.yaml)
+  1. Run the refresh script to update all components:
+     ```bash
+     ~/.p2kb-cache/refresh-kb.sh
+     ```
+     This handles migration from v3.1 structure automatically.
 
   2. Delete the existing "# P2 Knowledge Base Integration" section from your CLAUDE.md
 
   3. Append the content from the 'claude_md_content' field below to your CLAUDE.md
 
   4. Store the content_hash from propeller-knowledge-root.yaml somewhere persistent
-     (e.g., in your conversation context, a file, or memory system)
 
   5. Test the new system:
-     ~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog --verbose
+     ```bash
+     ~/.p2kb-cache/fetch-kb-file.sh --help
+     ```
+
+  ## What's New in v3.2
+  - Navigation commands: --browse, --search, --cached, --categories
+  - Better error messages with similar key suggestions
+  - Category-based browsing (45 categories)
+  - Index and cache moved to hidden location (~/.p2kb/ on Unix)
 
 # ============================================================================
 # CLAUDE.MD CONTENT - Append this to your CLAUDE.md file
@@ -32,67 +42,96 @@ upgrade_instructions: |
 claude_md_content: |
   # P2 Knowledge Base Integration
 
-  _Version: 3.1_
+  _Version: 3.2_
   _Last Updated: 2025-11-30_
   _Hash Source: propeller-knowledge-root.yaml → ai_instructions.content_hash_
 
-  ## 🔒 P2KB Cache Location
-  - **Unix/macOS/Linux:** `~/.p2kb-cache/`
-  - **Windows:** `$env:USERPROFILE\.p2kb-cache\`
+  ## 🚨 IMPORTANT: Script-Only Access
 
-  ## Quick Reference - Key-Based Access (v3.1)
+  **ALWAYS use the fetch script for ALL P2KB operations.**
+  **NEVER access the index or cache files directly.**
 
-  ### Fetch Manifests (always fresh, no caching)
+  - ❌ DON'T: `jq ... ~/.p2kb/p2kb-index.json`
+  - ❌ DON'T: `cat ~/.p2kb/cache/...`
+  - ❌ DON'T: Guess at key names
+  - ✅ DO: `~/.p2kb-cache/fetch-kb-file.sh --search <term>`
+  - ✅ DO: `~/.p2kb-cache/fetch-kb-file.sh --browse <category>`
+  - ✅ DO: `~/.p2kb-cache/fetch-kb-file.sh <key>`
+
+  ## 🔒 P2KB Locations (v3.2)
+  - **Scripts (user-visible):** `~/.p2kb-cache/` (Unix) or `$env:USERPROFILE\.p2kb-cache\` (Windows)
+  - **Index/Cache (hidden):** `~/.p2kb/` (Unix) or `$env:LOCALAPPDATA\p2kb` (Windows)
+
+  ## Quick Reference - Interface Commands
+
+  ### Get Help
   ```bash
-  ~/.p2kb-cache/fetch-kb-file.sh manifests/propeller-knowledge-root.yaml
-  ~/.p2kb-cache/fetch-kb-file.sh manifests/ai-instructions.yaml
-  ```
-
-  ### Fetch Content by Key
-  ```bash
-  ~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov      # Get MOV instruction
-  ~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog       # Get COG architecture
-  ~/.p2kb-cache/fetch-kb-file.sh p2kbSmartPinUart  # Get UART smart pin mode
+  ~/.p2kb-cache/fetch-kb-file.sh --help
   ```
 
   ### Find Keys
   ```bash
-  # Search for keys containing a term
-  jq '.files | keys[] | select(contains("Pasm2"))' ~/.p2kb-cache/p2kb-index.json
-  grep -o '"p2kb[^"]*"' ~/.p2kb-cache/p2kb-index.json | grep -i uart
+  # Search for keys containing a term (case-insensitive)
+  ~/.p2kb-cache/fetch-kb-file.sh --search uart
+  ~/.p2kb-cache/fetch-kb-file.sh --search cordic
+
+  # Browse keys by category
+  ~/.p2kb-cache/fetch-kb-file.sh --browse pasm2_branch
+  ~/.p2kb-cache/fetch-kb-file.sh --browse architecture_core
+  ~/.p2kb-cache/fetch-kb-file.sh --browse smart_pins_serial
+
+  # List all categories
+  ~/.p2kb-cache/fetch-kb-file.sh --categories
+  ```
+
+  ### Fetch Content
+  ```bash
+  ~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov      # Get MOV instruction
+  ~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog       # Get COG architecture
+  ~/.p2kb-cache/fetch-kb-file.sh p2kbGuideQuickQueries  # Starting point
+  ```
+
+  ### Check Downloaded Files
+  ```bash
+  ~/.p2kb-cache/fetch-kb-file.sh --cached
   ```
 
   ### Key Prefixes
   - `p2kbPasm2*` - PASM2 assembly instructions (362 instructions)
   - `p2kbSpin2*` - Spin2 methods and language elements
   - `p2kbArch*` - P2 architecture (cog, hub, cordic, etc.)
-  - `p2kbSmartPin*` - Smart Pin modes and configurations
   - `p2kbGuide*` - Guides and quick references
+  - `p2kbHw*` - Hardware specifications
+
+  ### Categories (for --browse)
+  **PASM2:** pasm2_branch, pasm2_math, pasm2_pin, pasm2_cordic, pasm2_hub_ram, pasm2_smart_pin, ...
+  **Architecture:** architecture_core, architecture_timing, architecture_interrupts, architecture_io, ...
+  **Smart Pins:** smart_pins_digital, smart_pins_serial, smart_pins_pwm, smart_pins_analog, ...
+  **Spin2:** spin2_control_flow, spin2_pin_control, spin2_timing, spin2_math, ...
+  **Guides:** guides_getting_started
 
   ### Update Check Protocol
-  1. Fetch root manifest (always fresh - script handles this):
+  1. Fetch root manifest:
      `~/.p2kb-cache/fetch-kb-file.sh manifests/propeller-knowledge-root.yaml`
-  2. Read the `ai_instructions.content_hash` value from the manifest
-  3. Compare with your previously stored hash (save it somewhere persistent)
-  4. If different → run `~/.p2kb-cache/refresh-kb.sh` then update CLAUDE.md
-  5. If same → cache is current, proceed with normal usage
+  2. Compare `ai_instructions.content_hash` with your stored hash
+  3. If different → run `~/.p2kb-cache/refresh-kb.sh` then update CLAUDE.md
+  4. If same → cache is current, proceed normally
 
-  ### Quick Refresh (anytime)
-  To update all scripts, index, and common files in one command:
+  ### Quick Refresh
   ```bash
   ~/.p2kb-cache/refresh-kb.sh
   ```
 
   ## Starting Point
-  Use `p2kbGuideQuickQueries` to find relevant keys for your task.
+  Use `--search` or `--browse guides_getting_started` to find relevant keys for your task.
 
 # ============================================================================
 # FRESH SETUP INSTRUCTIONS - For new AI systems
 # ============================================================================
 setup_instructions: |
-  ## P2 Knowledge Base v3.0 Setup
+  ## P2 Knowledge Base v3.2 Setup
 
-  ### Step 1: Create Cache Directory
+  ### Step 1: Create Script Directory
   ```bash
   mkdir -p ~/.p2kb-cache
   ```
@@ -101,69 +140,116 @@ setup_instructions: |
 
   **Unix/macOS/Linux:**
   ```bash
-  curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
+  curl -sS https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
   chmod +x ~/.p2kb-cache/fetch-kb-file.sh
   ```
 
   **Windows PowerShell:**
   ```powershell
-  Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\fetch-kb-file.ps1"
+  New-Item -ItemType Directory -Path "$env:USERPROFILE\.p2kb-cache" -Force
+  Invoke-WebRequest -Uri "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\fetch-kb-file.ps1"
   ```
 
   ### Step 3: Verify Setup
   ```bash
-  ~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog --verbose
+  ~/.p2kb-cache/fetch-kb-file.sh --help
   ```
 
-  ✅ Setup complete when you see YAML content output.
+  ✅ Setup complete when you see the help message with available commands.
+
+  ### Optional: Download Refresh Script
+  ```bash
+  curl -sS https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.sh > ~/.p2kb-cache/refresh-kb.sh
+  chmod +x ~/.p2kb-cache/refresh-kb.sh
+  ```
 
 usage:
   description: |
-    The v3.0 system uses keys to access content. No path construction needed.
-    Keys are stable identifiers that map to YAML files in the knowledge base.
+    The v3.2 system uses keys to access content with built-in navigation.
+    ALWAYS use the fetch script - NEVER access index or cache files directly.
 
-  fetch_by_key:
-    description: "Fetch content using a key"
-    examples:
+  interface_commands:
+    help: "Show all available commands and usage examples"
+    cached: "List keys that have been downloaded to local cache"
+    browse: "List all keys in a category (e.g., pasm2_branch)"
+    search: "Find keys matching a search term (case-insensitive)"
+    categories: "List all available categories with key counts"
+    fetch: "Fetch content by providing just the key name"
+
+  examples:
+    find_keys:
+      - "~/.p2kb-cache/fetch-kb-file.sh --search mov"
+      - "~/.p2kb-cache/fetch-kb-file.sh --browse pasm2_math"
+      - "~/.p2kb-cache/fetch-kb-file.sh --categories"
+    fetch_content:
       - "~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov"
       - "~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog"
-      - "~/.p2kb-cache/fetch-kb-file.sh p2kbSpin2Pinwrite"
       - "~/.p2kb-cache/fetch-kb-file.sh p2kbGuideQuickQueries"
+    check_cache:
+      - "~/.p2kb-cache/fetch-kb-file.sh --cached"
 
-  find_keys:
-    description: "Search for keys in the index"
+  forbidden_patterns:
+    description: "NEVER do these - always use the script interface"
     examples:
-      - "jq '.files | keys[] | select(contains(\"Pasm2\"))' ~/.p2kb-cache/p2kb-index.json"
-      - "jq '.files | keys[] | select(contains(\"SmartPin\"))' ~/.p2kb-cache/p2kb-index.json"
-      - "grep -o '\"p2kb[^\"]*\"' ~/.p2kb-cache/p2kb-index.json | grep -i uart"
-
-  check_updates:
-    description: "Compare mtime to detect changes"
-    example: "jq '.files[\"p2kbPasm2Mov\"].mtime' ~/.p2kb-cache/p2kb-index.json"
+      - "jq ... ~/.p2kb/p2kb-index.json  # DON'T access index directly"
+      - "cat ~/.p2kb/cache/...  # DON'T read cache files directly"
+      - "grep ... p2kb-index.json  # DON'T search index directly"
+      - "Guessing key names  # DON'T guess - use --search or --browse"
 
 categories:
-  description: "Key prefix patterns by content type"
-  prefixes:
-    p2kbPasm2: "PASM2 assembly instructions (362 instructions)"
-    p2kbSpin2: "Spin2 methods and language elements"
-    p2kbSpin2Kw: "Spin2 keywords"
-    p2kbSpin2Op: "Spin2 operators"
-    p2kbSpin2Reg: "Spin2 registers"
-    p2kbSpin2Asm: "Spin2 assembly directives"
-    p2kbSpin2Dbg: "Spin2 debug commands"
-    p2kbArch: "P2 architecture (cog, hub, cordic, etc.)"
-    p2kbSmartPin: "Smart Pin modes and configurations"
-    p2kbHw: "Hardware specifications"
-    p2kbExample: "Code examples"
-    p2kbGuide: "Guides and quick references"
-    p2kbCommunity: "Community content"
+  description: "Categories available for --browse command"
+  pasm2:
+    - pasm2_directives
+    - pasm2_branch
+    - pasm2_cordic
+    - pasm2_math
+    - pasm2_pin
+    - pasm2_event
+    - pasm2_hub_control
+    - pasm2_hub_fifo
+    - pasm2_hub_ram
+    - pasm2_interrupt
+    - pasm2_lookup_table
+    - pasm2_misc
+    - pasm2_pixel
+    - pasm2_register_indirection
+    - pasm2_smart_pin
+    - pasm2_streamer
+  architecture:
+    - architecture_core
+    - architecture_math
+    - architecture_timing
+    - architecture_interrupts
+    - architecture_sync
+    - architecture_io
+  smart_pins:
+    - smart_pins_digital
+    - smart_pins_serial
+    - smart_pins_pwm
+    - smart_pins_counting
+    - smart_pins_timing
+    - smart_pins_frequency
+    - smart_pins_analog
+    - smart_pins_special
+    - smart_pins_beginner
+  spin2:
+    - spin2_control_flow
+    - spin2_pin_control
+    - spin2_timing
+    - spin2_cog_control
+    - spin2_memory
+    - spin2_math
+    - spin2_strings
+    - spin2_smart_pins
+    - spin2_locks
+  guides:
+    - guides_getting_started
 
 common_keys:
   getting_started:
     - p2kbGuideQuickQueries
     - p2kbGuideSpin2GettingStarted
     - p2kbGuidePasm2GettingStarted
-    - p2kbToolsPnutTsCompiler
   architecture:
     - p2kbArchCog
     - p2kbArchHub
@@ -185,13 +271,16 @@ common_keys:
 workflow:
   description: "Typical usage workflow"
   steps:
-    - "1. Start with p2kbGuideQuickQueries to find relevant keys for your task"
-    - "2. Fetch specific content by key"
-    - "3. Cache is automatic - files only downloaded once per 24 hours"
-    - "4. Use --verbose flag for debugging"
+    - "1. Run --help to see available commands"
+    - "2. Use --search <term> or --browse <category> to find relevant keys"
+    - "3. Fetch specific content by key"
+    - "4. Use --cached to see what's already downloaded"
+    - "5. Run refresh-kb.sh periodically to update scripts and index"
 
 notes:
+  - "ALWAYS use the script interface - NEVER access files directly"
   - "Keys are stable - they won't change between versions"
   - "Index includes mtime for change detection"
   - "Metadata fields are filtered on download to save tokens"
   - "Cache refreshes automatically after 24 hours"
+  - "Index and cache are stored in hidden location (not in script dir)"

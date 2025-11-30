@@ -2,7 +2,11 @@
 """
 Generate p2kb-index.json - Master index for P2 Knowledge Base YAML files.
 
-This script creates a simple key→path index for all YAML content in deliverables/ai/P2/.
+This script creates a key→path index with category groupings for all YAML content
+in deliverables/ai/P2/.
+
+Version 3.2.0 adds categories section for navigation support.
+
 Keys follow the naming convention: p2kb + Category + Name in CamelCase.
 
 Example keys:
@@ -20,7 +24,7 @@ import re
 import subprocess
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, Set
+from typing import Dict, Any, Set, List, Optional
 
 
 def to_camel_case(name: str) -> str:
@@ -91,7 +95,8 @@ def get_category_prefix(rel_path: Path) -> str:
                         'assembly-directives': 'Spin2Asm',
                         'debug-commands': 'Spin2Dbg',
                         'special-symbols': 'Spin2Sym',
-                        'system-variables': 'Spin2Var'
+                        'system-variables': 'Spin2Var',
+                        'constructs': 'Spin2'
                     }
                     return subcat_map.get(subcat, 'Spin2')
                 return 'Spin2'
@@ -100,13 +105,11 @@ def get_category_prefix(rel_path: Path) -> str:
     if 'architecture' in parts:
         return 'Arch'
 
-    # Handle hardware/smart-pins
+    # Handle hardware
     if 'hardware' in parts:
         idx = parts.index('hardware')
         if idx + 1 < len(parts):
             hw_type = parts[idx + 1]
-            if hw_type == 'smart-pins':
-                return 'SmartPin'
             return 'Hw' + to_camel_case(hw_type)
         return 'Hw'
 
@@ -121,6 +124,10 @@ def get_category_prefix(rel_path: Path) -> str:
     # Handle guides
     if 'guides' in parts:
         return 'Guide'
+
+    # Handle tools
+    if 'tools' in parts:
+        return 'Tools'
 
     # Default: use first significant directory
     for part in parts:
@@ -147,6 +154,131 @@ def generate_key(rel_path: Path, existing_keys: Set[str]) -> str:
             key = f"p2kb{prefix}{parent}{name}"
 
     return key
+
+
+def load_category_definitions(base_path: Path) -> Optional[Dict]:
+    """Load category definitions from p2kb-categories.json."""
+    cat_file = base_path / "engineering" / "tools" / "p2kb-categories.json"
+    if cat_file.exists():
+        with open(cat_file, 'r') as f:
+            return json.load(f)
+    return None
+
+
+def build_categories(files: Dict[str, Any], cat_defs: Optional[Dict]) -> Dict[str, List[str]]:
+    """Build categories section mapping category names to arrays of keys."""
+    categories = {}
+
+    if not cat_defs:
+        return categories
+
+    # Build reverse lookup: filename base -> key
+    file_to_key = {}
+    for key, info in files.items():
+        path = info['path']
+        # Extract filename without extension
+        filename = Path(path).stem.lower()
+        file_to_key[filename] = key
+
+        # Also map with underscores replaced by nothing (for matching)
+        filename_normalized = filename.replace('_', '').replace('-', '')
+        file_to_key[filename_normalized] = key
+
+    # Process PASM2 categories
+    if 'pasm2' in cat_defs:
+        for cat_name, cat_info in cat_defs['pasm2'].items():
+            if cat_name.startswith('_'):
+                continue
+            full_cat_name = f"pasm2_{cat_name}"
+            categories[full_cat_name] = []
+
+            if 'files' in cat_info:
+                for filename in cat_info['files']:
+                    # Try to find matching key
+                    key = file_to_key.get(filename.lower())
+                    if not key:
+                        # Try with Pasm2 prefix
+                        potential_key = f"p2kbPasm2{to_camel_case(filename)}"
+                        if potential_key in files:
+                            key = potential_key
+                    if key:
+                        categories[full_cat_name].append(key)
+
+    # Process architecture categories
+    if 'architecture' in cat_defs:
+        for cat_name, cat_info in cat_defs['architecture'].items():
+            if cat_name.startswith('_'):
+                continue
+            full_cat_name = f"architecture_{cat_name}"
+            categories[full_cat_name] = []
+
+            if 'files' in cat_info:
+                for filename in cat_info['files']:
+                    # Try to find matching key
+                    potential_key = f"p2kbArch{to_camel_case(filename)}"
+                    if potential_key in files:
+                        categories[full_cat_name].append(potential_key)
+
+    # Process smart pin categories
+    if 'smart_pins' in cat_defs:
+        for cat_name, cat_info in cat_defs['smart_pins'].items():
+            if cat_name.startswith('_'):
+                continue
+            full_cat_name = f"smart_pins_{cat_name}"
+            categories[full_cat_name] = []
+
+            if 'modes' in cat_info:
+                for mode in cat_info['modes']:
+                    # Smart pin keys include the mode number
+                    for key in files:
+                        if key.startswith('p2kbArchSmartPin') and mode in key:
+                            if key not in categories[full_cat_name]:
+                                categories[full_cat_name].append(key)
+
+    # Process Spin2 categories
+    if 'spin2' in cat_defs:
+        for cat_name, cat_info in cat_defs['spin2'].items():
+            if cat_name.startswith('_'):
+                continue
+            full_cat_name = f"spin2_{cat_name}"
+            categories[full_cat_name] = []
+
+            if 'files' in cat_info:
+                for filename in cat_info['files']:
+                    # Try multiple potential key formats
+                    potential_keys = [
+                        f"p2kbSpin2{to_camel_case(filename)}",
+                        f"p2kbSpin2Kw{to_camel_case(filename)}",
+                        f"p2kbSpin2Op{to_camel_case(filename)}",
+                        f"p2kbSpin2Dbg{to_camel_case(filename)}"
+                    ]
+                    for potential_key in potential_keys:
+                        if potential_key in files:
+                            categories[full_cat_name].append(potential_key)
+                            break
+
+    # Process guides
+    if 'guides' in cat_defs:
+        for cat_name, cat_info in cat_defs['guides'].items():
+            if cat_name.startswith('_'):
+                continue
+            full_cat_name = f"guides_{cat_name}"
+            categories[full_cat_name] = []
+
+            if 'files' in cat_info:
+                for filename in cat_info['files']:
+                    potential_key = f"p2kbGuide{to_camel_case(filename)}"
+                    if potential_key in files:
+                        categories[full_cat_name].append(potential_key)
+
+    # Remove empty categories
+    categories = {k: v for k, v in categories.items() if v}
+
+    # Sort keys within each category
+    for cat_name in categories:
+        categories[cat_name].sort()
+
+    return categories
 
 
 def generate_index(base_path: Path) -> Dict[str, Any]:
@@ -198,14 +330,20 @@ def generate_index(base_path: Path) -> Dict[str, Any]:
             'mtime': mtime
         }
 
+    # Load category definitions and build categories
+    cat_defs = load_category_definitions(base_path)
+    categories = build_categories(files, cat_defs)
+
     # Build index structure
     index = {
         'system': {
-            'version': '2.0.0',
+            'version': '3.2.0',
             'generated': datetime.now().isoformat(),
             'total_entries': len(files),
+            'total_categories': len(categories),
             'source': 'deliverables/ai/P2/'
         },
+        'categories': categories,
         'files': files
     }
 
@@ -222,7 +360,7 @@ def main():
     """Main entry point."""
     base_path = Path.cwd()
 
-    print("Generating p2kb-index.json...")
+    print("Generating p2kb-index.json v3.2...")
     print(f"  Source: {base_path / 'deliverables/ai/P2/'}")
 
     # Generate the index
@@ -238,6 +376,13 @@ def main():
     print(f"\n✅ Index generated successfully!")
     print(f"   Output: {output_path}")
     print(f"   Total entries: {index['system']['total_entries']}")
+    print(f"   Total categories: {index['system']['total_categories']}")
+
+    # Show category summary
+    if index['categories']:
+        print(f"\n   Categories:")
+        for cat_name, keys in sorted(index['categories'].items()):
+            print(f"     - {cat_name}: {len(keys)} keys")
 
 
 if __name__ == "__main__":
