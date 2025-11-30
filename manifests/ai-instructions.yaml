@@ -74,8 +74,14 @@ claude_md_content: |
      `~/.p2kb-cache/fetch-kb-file.sh manifests/propeller-knowledge-root.yaml`
   2. Read the `ai_instructions.content_hash` value from the manifest
   3. Compare with your previously stored hash (save it somewhere persistent)
-  4. If different → execute `migration.ai_action_required` commands, save new hash
+  4. If different → run `~/.p2kb-cache/refresh-kb.sh` then update CLAUDE.md
   5. If same → cache is current, proceed with normal usage
+
+  ### Quick Refresh (anytime)
+  To update all scripts, index, and common files in one command:
+  ```bash
+  ~/.p2kb-cache/refresh-kb.sh
+  ```
 
   ## Starting Point
   Use `p2kbGuideQuickQueries` to find relevant keys for your task.

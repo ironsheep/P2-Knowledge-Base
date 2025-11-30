@@ -20,35 +20,34 @@ migration:
   ai_action_required: |
     ⚠️ HASH MISMATCH - YOUR CACHE IS OUTDATED
 
-    Execute these commands to upgrade to v3.0:
+    Execute these commands to upgrade:
 
     **Unix/macOS/Linux:**
     ```bash
     # Step 1: Clear cache contents (keep directory)
     rm -rf ~/.p2kb-cache/*
+    mkdir -p ~/.p2kb-cache/obex
 
-    # Step 2: Download new fetch script
-    curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
-    chmod +x ~/.p2kb-cache/fetch-kb-file.sh
+    # Step 2: Download refresh script and run it
+    curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.sh > ~/.p2kb-cache/refresh-kb.sh
+    chmod +x ~/.p2kb-cache/refresh-kb.sh
+    ~/.p2kb-cache/refresh-kb.sh
     ```
 
     **Windows PowerShell:**
     ```powershell
     # Step 1: Clear cache contents (keep directory)
     Remove-Item -Path "$env:USERPROFILE\.p2kb-cache\*" -Recurse -Force
+    New-Item -ItemType Directory -Path "$env:USERPROFILE\.p2kb-cache\obex" -Force
 
-    # Step 2: Download new fetch script
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\fetch-kb-file.ps1"
+    # Step 2: Download refresh script and run it
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/refresh-kb.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\refresh-kb.ps1"
+    & "$env:USERPROFILE\.p2kb-cache\refresh-kb.ps1"
     ```
 
-    **Both platforms - Step 3:**
-    Fetch ai-instructions.yaml (the new script handles manifest paths directly):
+    **Step 3:** After refresh completes, fetch ai-instructions.yaml:
     ```bash
     ~/.p2kb-cache/fetch-kb-file.sh manifests/ai-instructions.yaml
-    ```
-    Or on Windows:
-    ```powershell
-    & "$env:USERPROFILE\.p2kb-cache\fetch-kb-file.ps1" "manifests/ai-instructions.yaml"
     ```
     Then follow the upgrade_instructions section to update your CLAUDE.md.
 
@@ -64,12 +63,21 @@ index:
 ai_instructions:
   location: "manifests/ai-instructions.yaml"
   version: "3.1"
-  content_hash: "sha256:57083c058ac9c123a5ed6c6772990b16e0fa08c0b68cc81f7e16392d7cac4b8f"
+  content_hash: "sha256:8f1bd99568a7edb3a0fcad4e402639ea556c9169480f0b96ac6d2c6615bda32e"
   description: "Setup and usage instructions for v3.0 key-based access"
 
 fetch_scripts:
   bash: "engineering/tools/p2kb/fetch-kb-file.sh"
   powershell: "engineering/tools/p2kb/fetch-kb-file.ps1"
+
+refresh_scripts:
+  bash: "engineering/tools/p2kb/refresh-kb.sh"
+  powershell: "engineering/tools/p2kb/refresh-kb.ps1"
+  description: "Updates all scripts, index, and common files in one command"
+
+obex_scripts:
+  bash: "engineering/tools/p2kb/obex/download-helper.sh"
+  powershell: "engineering/tools/p2kb/obex/download-helper.ps1"
 
 # Quick Start for v3.0
 quickstart: |
