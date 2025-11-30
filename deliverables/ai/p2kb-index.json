@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "2.0.0",
-    "generated": "2025-11-30T00:40:07.004383",
+    "generated": "2025-11-30T01:11:34.043855",
     "total_entries": 974,
     "source": "deliverables/ai/P2/"
   },
@@ -718,9 +718,17 @@
       "path": "deliverables/ai/P2/community/obex/objects/_template.yaml",
       "mtime": 1764449566
     },
+    "p2kbGuidePasm2GettingStarted": {
+      "path": "deliverables/ai/P2/guides/pasm2-getting-started.yaml",
+      "mtime": 1764465080
+    },
     "p2kbGuideQuickQueries": {
       "path": "deliverables/ai/P2/guides/quick-queries.yaml",
       "mtime": 1764449566
+    },
+    "p2kbGuideSpin2GettingStarted": {
+      "path": "deliverables/ai/P2/guides/spin2-getting-started.yaml",
+      "mtime": 1764465080
     },
     "p2kbHw7SegmentDisplay7SegmentDisplay": {
       "path": "deliverables/ai/P2/hardware/7_segment_display.yaml",
@@ -1164,10 +1172,6 @@
     },
     "p2kbPasm2StreamerSmartpinControl": {
       "path": "deliverables/ai/P2/language/pasm2/concepts/streamer_smartpin_control.yaml",
-      "mtime": 1764449566
-    },
-    "p2kbPasm2Pasm2GettingStarted": {
-      "path": "deliverables/ai/P2/language/pasm2/conventions/pasm2-getting-started.yaml",
       "mtime": 1764449566
     },
     "p2kbPasm2Crcbit": {
@@ -2624,10 +2628,6 @@
     },
     "p2kbSpin2Spin2FormattingStandards": {
       "path": "deliverables/ai/P2/language/spin2/conventions/spin2-formatting-standards.yaml",
-      "mtime": 1764449566
-    },
-    "p2kbSpin2Spin2GettingStarted": {
-      "path": "deliverables/ai/P2/language/spin2/conventions/spin2-getting-started.yaml",
       "mtime": 1764449566
     },
     "p2kbSpin2Spin2NamingJonnymac": {

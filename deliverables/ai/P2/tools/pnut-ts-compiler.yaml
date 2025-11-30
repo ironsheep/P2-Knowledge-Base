@@ -134,5 +134,5 @@ platform_compatibility:
   - "Fast enough for real-time validation"
 
 related:
-  - p2kbPasm2Pasm2GettingStarted
-  - p2kbSpin2Spin2GettingStarted
+  - p2kbGuidePasm2GettingStarted
+  - p2kbGuideSpin2GettingStarted
