@@ -45,103 +45,19 @@ During a wait, the pipeline is stalled—no instructions execute and no interrup
 
 ---
 
-## WAITCT1 — Event
+## WAITCT1 / WAITCT2 / WAITCT3 — Event {#waitct1}
 
-Wait for counter 1 event flag.
+Wait for counter event flag (1, 2, or 3).
 
 ### Syntax
 ```pasm
         WAITCT1 {WC|WZ|WCZ}
-```
-
-### Result
-Waits for the CT1 event flag to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
-
-### Encoding
-```
-EEEE 1101011 CZ0 000010001 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITCT2](#waitct2) — Wait for counter 2 event
-- [WAITCT3](#waitct3) — Wait for counter 3 event
-- [ADDCT1](#addct1) — Add value to CT1 event trigger
-- [POLLCT1](#pollct1) — Poll CT1 flag without waiting
-
-### Explanation
-WAITCT1 waits for a counter 1 event to occur, stalling the pipeline until the event flag is set. The CT1 event flag is set whenever the System Counter (CT) passes the value in the CT1 event trigger register; i.e., MSB of (CT - CT1) is 0.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITCT1. The WC/WZ/WCZ effect is recommended only with timeout specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first.
-
-The CT1 event flag is cleared by execution of ADDCT1, POLLCT1, WAITCT1, JCT1, or JNCT1 instructions.
-
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed until the wait ends. This provides deterministic timing for time-critical operations.
-
----
-
-## WAITCT2 — Event
-
-Wait for counter 2 event flag.
-
-### Syntax
-```pasm
         WAITCT2 {WC|WZ|WCZ}
-```
-
-### Result
-Waits for the CT2 event flag to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
-
-### Encoding
-```
-EEEE 1101011 CZ0 000010010 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITCT1](#waitct1) — Wait for counter 1 event
-- [WAITCT3](#waitct3) — Wait for counter 3 event
-- [ADDCT2](#addct2) — Add value to CT2 event trigger
-- [POLLCT2](#pollct2) — Poll CT2 flag without waiting
-
-### Explanation
-WAITCT2 waits for a counter 2 event to occur, stalling the pipeline until the event flag is set. The CT2 event flag is set whenever the System Counter (CT) passes the value in the CT2 event trigger register; i.e., MSB of (CT - CT2) is 0.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITCT2. The WC/WZ/WCZ effect is recommended only with timeout specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first.
-
-The CT2 event flag is cleared by execution of ADDCT2, POLLCT2, WAITCT2, JCT2, or JNCT2 instructions.
-
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed until the wait ends.
-
----
-
-## WAITCT3 — Event
-
-Wait for counter 3 event flag.
-
-### Syntax
-```pasm
         WAITCT3 {WC|WZ|WCZ}
 ```
 
 ### Result
-Waits for the CT3 event flag to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
+Waits for the specified counter event flag (CT1, CT2, or CT3) to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
 
 ### Parameters
 | Parameter | Description |
@@ -149,28 +65,30 @@ Waits for the CT3 event flag to be set, then clears the flag and resumes executi
 | WC/WZ/WCZ | Optional effects to update flags on timeout |
 
 ### Encoding
-```
-EEEE 1101011 CZ0 000010011 000100100
-```
+| Instruction | Encoding | Clocks |
+|-------------|----------|--------|
+| WAITCT1 | `EEEE 1101011 CZ0 000010001 000100100` | 2+ |
+| WAITCT2 | `EEEE 1101011 CZ0 000010010 000100100` | 2+ |
+| WAITCT3 | `EEEE 1101011 CZ0 000010011 000100100` | 2+ |
+
 **Write:** —
 **C Flag:** Set if timeout occurred before event
 **Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
 
 ### Related Instructions
-- [WAITCT1](#waitct1) — Wait for counter 1 event
-- [WAITCT2](#waitct2) — Wait for counter 2 event
-- [ADDCT3](#addct3) — Add value to CT3 event trigger
-- [POLLCT3](#pollct3) — Poll CT3 flag without waiting
+- [ADDCT1/2/3](#addct1) — Add value to CTn event trigger
+- [POLLCT1/2/3](#pollct1) — Poll CTn flag without waiting
+- [JCT1/2/3](#jct1) — Jump if CTn event occurred
+- [JNCT1/2/3](#jnct1) — Jump if CTn event did not occur
 
 ### Explanation
-WAITCT3 waits for a counter 3 event to occur, stalling the pipeline until the event flag is set. The counter 3 event flag is set whenever the System Counter (CT) passes the value in the CT3 event trigger register; i.e., MSB of (CT - CT3) is 0.
+WAITCT1, WAITCT2, and WAITCT3 wait for their respective counter events to occur, stalling the pipeline until the event flag is set. The P2 provides three independent counter event triggers, allowing a cog to manage multiple concurrent timing events.
 
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITCT3. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
+Each counter event flag is set whenever the System Counter (CT) passes the value in that counter's event trigger register; i.e., MSB of (CT - CTn) is 0. The event flag is cleared by execution of the corresponding ADDCTn, POLLCTn, WAITCTn, JCTn, or JNCTn instruction.
 
-The counter event flag is cleared upon execution of ADDCT3, POLLCT3, WAITCT3, JCT3, or JNCT3 instructions.
+To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before the WAITCT instruction. The WC/WZ/WCZ effect is recommended only with timeout specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first.
 
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
+During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed until the wait ends. This provides deterministic timing for time-critical operations.
 
 ---
 
@@ -302,149 +220,20 @@ During a wait, the pipeline is stalled—no instructions execute and no interrup
 
 ---
 
-## WAITSE1 — Event
+## WAITSE1 / WAITSE2 / WAITSE3 / WAITSE4 — Event {#waitse1}
 
-Wait for selectable event 1 flag.
+Wait for selectable event flag (1, 2, 3, or 4).
 
 ### Syntax
 ```pasm
         WAITSE1 {WC|WZ|WCZ}
-```
-
-### Result
-Waits for the SE1 event flag to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
-
-### Encoding
-```
-EEEE 1101011 CZ0 000010100 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITSE2](#waitse2) — Wait for selectable event 2
-- [WAITSE3](#waitse3) — Wait for selectable event 3
-- [WAITSE4](#waitse4) — Wait for selectable event 4
-- [SETSE1](#setse1) — Configure selectable event 1
-- [POLLSE1](#pollse1) — Poll SE1 flag without waiting
-
-### Explanation
-WAITSE1 waits for selectable event 1 to occur, stalling the pipeline until the event flag is set. The SE1 event flag is set whenever the configured selectable event 1 occurs.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITSE1. The WC/WZ/WCZ effect is recommended only with timeout specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first.
-
-The SE1 event flag is cleared by execution of SETSE1, POLLSE1, WAITSE1, JSE1, or JNSE1 instructions.
-
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed until the wait ends.
-
----
-
-## WAITSE2 — Event
-
-Wait for selectable event 2 flag.
-
-### Syntax
-```pasm
         WAITSE2 {WC|WZ|WCZ}
-```
-
-### Result
-Waits for the SE2 event flag to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
-
-### Encoding
-```
-EEEE 1101011 CZ0 000010101 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITSE1](#waitse1) — Wait for selectable event 1
-- [WAITSE3](#waitse3) — Wait for selectable event 3
-- [WAITSE4](#waitse4) — Wait for selectable event 4
-- [SETSE2](#setse2) — Configure selectable event 2
-- [POLLSE2](#pollse2) — Poll SE2 flag without waiting
-
-### Explanation
-WAITSE2 waits for selectable event 2 to occur, stalling the pipeline until the event flag is set. The SE2 event flag is set whenever the configured selectable event 2 occurs.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITSE2. The WC/WZ/WCZ effect is recommended only with timeout specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first.
-
-The SE2 event flag is cleared by execution of SETSE2, POLLSE2, WAITSE2, JSE2, or JNSE2 instructions.
-
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed until the wait ends.
-
----
-
-## WAITSE3 — Event
-
-Wait for selectable event 3 flag.
-
-### Syntax
-```pasm
         WAITSE3 {WC|WZ|WCZ}
-```
-
-### Result
-Waits for the SE3 event flag to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
-
-### Encoding
-```
-EEEE 1101011 CZ0 000010110 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITSE1](#waitse1) — Wait for selectable event 1
-- [WAITSE2](#waitse2) — Wait for selectable event 2
-- [WAITSE4](#waitse4) — Wait for selectable event 4
-- [SETSE3](#setse3) — Configure selectable event 3
-- [POLLSE3](#pollse3) — Poll SE3 flag without waiting
-
-### Explanation
-WAITSE3 waits for selectable event 3 to occur, stalling the pipeline until the event flag is set. The SE3 event flag is set whenever the configured selectable event 3 occurs.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITSE3. The WC/WZ/WCZ effect is recommended only with timeout specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first.
-
-The SE3 event flag is cleared by execution of SETSE3, POLLSE3, WAITSE3, JSE3, or JNSE3 instructions.
-
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed until the wait ends.
-
----
-
-## WAITSE4 — Event
-
-Wait for selectable event 4 flag.
-
-### Syntax
-```pasm
         WAITSE4 {WC|WZ|WCZ}
 ```
 
 ### Result
-Waits for the SE4 event flag to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
+Waits for the specified selectable event flag (SE1, SE2, SE3, or SE4) to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
 
 ### Parameters
 | Parameter | Description |
@@ -452,27 +241,29 @@ Waits for the SE4 event flag to be set, then clears the flag and resumes executi
 | WC/WZ/WCZ | Optional effects to update flags on timeout |
 
 ### Encoding
-```
-EEEE 1101011 CZ0 000010111 000100100
-```
+| Instruction | Encoding | Clocks |
+|-------------|----------|--------|
+| WAITSE1 | `EEEE 1101011 CZ0 000010100 000100100` | 2+ |
+| WAITSE2 | `EEEE 1101011 CZ0 000010101 000100100` | 2+ |
+| WAITSE3 | `EEEE 1101011 CZ0 000010110 000100100` | 2+ |
+| WAITSE4 | `EEEE 1101011 CZ0 000010111 000100100` | 2+ |
+
 **Write:** —
 **C Flag:** Set if timeout occurred before event
 **Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
 
 ### Related Instructions
-- [WAITSE1](#waitse1) — Wait for selectable event 1
-- [WAITSE2](#waitse2) — Wait for selectable event 2
-- [WAITSE3](#waitse3) — Wait for selectable event 3
-- [SETSE4](#setse4) — Configure selectable event 4
-- [POLLSE4](#pollse4) — Poll SE4 flag without waiting
+- [SETSE1/2/3/4](#setse1) — Configure selectable event source
+- [POLLSE1/2/3/4](#pollse1) — Poll SEn flag without waiting
+- [JSE1/2/3/4](#jse1) — Jump if SEn event occurred
+- [JNSE1/2/3/4](#jnse1) — Jump if SEn event did not occur
 
 ### Explanation
-WAITSE4 waits for selectable event 4 to occur, stalling the pipeline until the event flag is set. The SE4 event flag is set whenever the configured selectable event 4 occurs.
+WAITSE1, WAITSE2, WAITSE3, and WAITSE4 wait for their respective selectable events to occur, stalling the pipeline until the event flag is set. The P2 provides four independent selectable event channels, each configurable via SETSE instructions to respond to various system conditions.
 
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITSE4. The WC/WZ/WCZ effect is recommended only with timeout specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first.
+Each selectable event flag is set whenever the configured event source for that channel triggers. The event flag is cleared by execution of the corresponding SETSEn, POLLSEn, WAITSEn, JSEn, or JNSEn instruction.
 
-The SE4 event flag is cleared by execution of SETSE4, POLLSE4, WAITSE4, JSE4, or JNSE4 instructions.
+To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before the WAITSE instruction. The WC/WZ/WCZ effect is recommended only with timeout specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first.
 
 During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed until the wait ends.
 
@@ -506,11 +297,9 @@ EEEE 1101011 CZL DDDDDDDDD 000011111
 **Clocks:** 2 + D
 
 ### Related Instructions
-- [WAITCT1](#waitct1) — Wait for specific CT value
-- [WAITCT2](#waitct2) — Wait for specific CT value
-- [WAITCT3](#waitct3) — Wait for specific CT value
+- [WAITCT1/2/3](#waitct1) — Wait for specific CT value
 - [WAITPAT](#waitpat) — Wait for pin pattern
-- [WAITSE1-4](#waitse1) — Wait for selectable event
+- [WAITSE1/2/3/4](#waitse1) — Wait for selectable event
 
 ### Explanation
 WAITX stalls the cog for precise timing delays. The actual wait time is D+1 cycles minimum. This instruction is critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.

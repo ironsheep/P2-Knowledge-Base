@@ -372,9 +372,7 @@ The next D[8:0] instructions are executed S times.
 
 ### Related Instructions
 - [DJNZ](#djnz) — Decrement and jump if not zero
-- [JNCT1](#jnct1) — Jump if CT1 not reached
-- [JNCT2](#jnct2) — Jump if CT2 not reached
-- [JNCT3](#jnct3) — Jump if CT3 not reached
+- [JNCT1/2/3](instructions-j.md#jnct1) — Jump if CTn not reached
 
 ### Explanation
 REP creates a hardware-implemented loop that executes the next D[8:0] instructions S times. If S = 0, the instructions repeat infinitely (useful for main loops). If D[8:0] = 0, nothing repeats. The REP instruction itself takes 2 cycles, and the repeated instructions execute with zero overhead—no jump penalty, no counter decrement. This makes REP ideal for time-critical inner loops.
@@ -383,127 +381,43 @@ REP blocks can be nested up to 3 levels deep, allowing complex loop structures. 
 
 ---
 
-## RESI0 — Resume from Interrupt 0
+## RESI0 / RESI1 / RESI2 / RESI3 — Resume from Interrupt {#resi0}
 
-Resumes execution after returning from interrupt 0, restoring flags and program counter.
+Resumes execution after returning from interrupt (0, 1, 2, or 3), restoring flags and program counter.
 
 ### Syntax
 ```pasm
         RESI0
-```
-
-### Result
-Execution resumes from the interrupted location for interrupt 0.
-
-### Parameters
-None.
-
-### Encoding
-\simpleencoding{EEEE 1011001 110 111111110 111111111 | D | — | — | 4}
-
-### Related Instructions
-- [RESI1](#resi1) — Resume from interrupt 1
-- [RESI2](#resi2) — Resume from interrupt 2
-- [RESI3](#resi3) — Resume from interrupt 3
-- [RETI0](#reti0) — Return from interrupt 0
-
-### Explanation
-RESI0 resumes execution from interrupt 0. This is functionally equivalent to CALLD $1FE,$1FF WCZ, which restores the program counter, C flag, and Z flag from the interrupt return address registers. The operation takes 4 cycles minimum, with variable timing depending on hub access if the resume location is in hub memory (13-20 cycles).
-
-Unlike RETIx instructions which return from the interrupt handler, RESIx instructions resume interrupted execution, used when an interrupt handler needs to yield to another interrupt priority level before completion.
-
----
-
-## RESI1 — Resume from Interrupt 1
-
-Resumes execution after returning from interrupt 1, restoring flags and program counter.
-
-### Syntax
-```pasm
         RESI1
-```
-
-### Result
-Execution resumes from the interrupted location for interrupt 1.
-
-### Parameters
-None.
-
-### Encoding
-\simpleencoding{EEEE 1011001 110 111110100 111110101 | D | — | — | 4}
-
-### Related Instructions
-- [RESI0](#resi0) — Resume from interrupt 0
-- [RESI2](#resi2) — Resume from interrupt 2
-- [RESI3](#resi3) — Resume from interrupt 3
-- [RETI1](#reti1) — Return from interrupt 1
-
-### Explanation
-RESI1 resumes execution from interrupt 1. This is functionally equivalent to CALLD $1F4,$1F5 WCZ, which restores the program counter, C flag, and Z flag from the interrupt return address registers. The operation takes 4 cycles minimum, with variable timing depending on hub access if the resume location is in hub memory (13-20 cycles).
-
-Unlike RETIx instructions which return from the interrupt handler, RESIx instructions resume interrupted execution, used when an interrupt handler needs to yield to another interrupt priority level before completion.
-
----
-
-## RESI2 — Resume from Interrupt 2
-
-Resumes execution after returning from interrupt 2, restoring flags and program counter.
-
-### Syntax
-```pasm
         RESI2
-```
-
-### Result
-Execution resumes from the interrupted location for interrupt 2.
-
-### Parameters
-None.
-
-### Encoding
-\simpleencoding{EEEE 1011001 110 111110010 111110011 | D | — | — | 4}
-
-### Related Instructions
-- [RESI0](#resi0) — Resume from interrupt 0
-- [RESI1](#resi1) — Resume from interrupt 1
-- [RESI3](#resi3) — Resume from interrupt 3
-- [RETI2](#reti2) — Return from interrupt 2
-
-### Explanation
-RESI2 resumes execution from interrupt 2. This is functionally equivalent to CALLD $1F2,$1F3 WCZ, which restores the program counter, C flag, and Z flag from the interrupt return address registers. The operation takes 4 cycles minimum, with variable timing depending on hub access if the resume location is in hub memory (13-20 cycles).
-
-Unlike RETIx instructions which return from the interrupt handler, RESIx instructions resume interrupted execution, used when an interrupt handler needs to yield to another interrupt priority level before completion.
-
----
-
-## RESI3 — Resume from Interrupt 3
-
-Resumes execution after returning from interrupt 3, restoring flags and program counter.
-
-### Syntax
-```pasm
         RESI3
 ```
 
 ### Result
-Execution resumes from the interrupted location for interrupt 3.
+Execution resumes from the interrupted location for the specified interrupt level.
 
 ### Parameters
 None.
 
 ### Encoding
-\simpleencoding{EEEE 1011001 110 111110000 111110001 | D | — | — | 4}
+| Instruction | Encoding | Equivalent |
+|-------------|----------|------------|
+| RESI0 | `EEEE 1011001 110 111111110 111111111` | CALLD $1FE,$1FF WCZ |
+| RESI1 | `EEEE 1011001 110 111110100 111110101` | CALLD $1F4,$1F5 WCZ |
+| RESI2 | `EEEE 1011001 110 111110010 111110011` | CALLD $1F2,$1F3 WCZ |
+| RESI3 | `EEEE 1011001 110 111110000 111110001` | CALLD $1F0,$1F1 WCZ |
+
+**Clocks:** 4 (COG), 13-20 (Hub)
 
 ### Related Instructions
-- [RESI0](#resi0) — Resume from interrupt 0
-- [RESI1](#resi1) — Resume from interrupt 1
-- [RESI2](#resi2) — Resume from interrupt 2
-- [RETI3](#reti3) — Return from interrupt 3
+- [RETI0/1/2/3](#reti0) — Return from interrupt
+- [SETINT1/2/3](instructions-s.md#setint1) — Set interrupt source
+- [NIXINT1/2/3](instructions-n.md#nixint1) — Cancel interrupt
 
 ### Explanation
-RESI3 resumes execution from interrupt 3. This is functionally equivalent to CALLD $1F0,$1F1 WCZ, which restores the program counter, C flag, and Z flag from the interrupt return address registers. The operation takes 4 cycles minimum, with variable timing depending on hub access if the resume location is in hub memory (13-20 cycles).
+RESI0, RESI1, RESI2, and RESI3 resume execution from their respective interrupt levels. Each instruction is functionally equivalent to a CALLD instruction that restores the program counter, C flag, and Z flag from the corresponding interrupt return address registers.
 
-Unlike RETIx instructions which return from the interrupt handler, RESIx instructions resume interrupted execution, used when an interrupt handler needs to yield to another interrupt priority level before completion.
+Unlike RETIx instructions which return from the interrupt handler, RESIx instructions resume interrupted execution, used when an interrupt handler needs to yield to another interrupt priority level before completion. The operation takes 4 cycles minimum in COG memory, or 13-20 cycles if the resume location is in Hub memory.
 
 ---
 
@@ -605,127 +519,43 @@ RETB is paired with CALLB for implementing software stacks in hub memory, enabli
 
 ---
 
-## RETI0 — Return from Interrupt 0
+## RETI0 / RETI1 / RETI2 / RETI3 — Return from Interrupt {#reti0}
 
-Returns from interrupt 0 handler, restoring execution to the interrupted code.
+Returns from interrupt handler (0, 1, 2, or 3), restoring execution to the interrupted code.
 
 ### Syntax
 ```pasm
         RETI0
-```
-
-### Result
-Execution returns from interrupt 0 to the interrupted location.
-
-### Parameters
-None.
-
-### Encoding
-\simpleencoding{EEEE 1011001 110 111111111 111111111 | D | — | — | 4}
-
-### Related Instructions
-- [RETI1](#reti1) — Return from interrupt 1
-- [RETI2](#reti2) — Return from interrupt 2
-- [RETI3](#reti3) — Return from interrupt 3
-- [RESI0](#resi0) — Resume from interrupt 0
-
-### Explanation
-RETI0 returns from interrupt 0. This is functionally equivalent to CALLD $1FF,$1FF WCZ, which restores the program counter, C flag, and Z flag from the interrupt return address registers. The operation takes 4 cycles minimum, with variable timing depending on hub access if the return location is in hub memory (13-20 cycles).
-
-The P2 provides four interrupt levels (INT0-INT3), with INT0 being the lowest priority. RETI0 completes the interrupt handler and resumes normal execution at the point where the interrupt occurred.
-
----
-
-## RETI1 — Return from Interrupt 1
-
-Returns from interrupt 1 handler, restoring execution to the interrupted code.
-
-### Syntax
-```pasm
         RETI1
-```
-
-### Result
-Execution returns from interrupt 1 to the interrupted location.
-
-### Parameters
-None.
-
-### Encoding
-\simpleencoding{EEEE 1011001 110 111111111 111110101 | D | — | — | 4}
-
-### Related Instructions
-- [RETI0](#reti0) — Return from interrupt 0
-- [RETI2](#reti2) — Return from interrupt 2
-- [RETI3](#reti3) — Return from interrupt 3
-- [RESI1](#resi1) — Resume from interrupt 1
-
-### Explanation
-RETI1 returns from interrupt 1. This is functionally equivalent to CALLD $1FF,$1F5 WCZ, which restores the program counter, C flag, and Z flag from the interrupt return address registers. The operation takes 4 cycles minimum, with variable timing depending on hub access if the return location is in hub memory (13-20 cycles).
-
-The P2 provides four interrupt levels (INT0-INT3), with INT1 being the second priority level. RETI1 completes the interrupt handler and resumes normal execution at the point where the interrupt occurred.
-
----
-
-## RETI2 — Return from Interrupt 2
-
-Returns from interrupt 2 handler, restoring execution to the interrupted code.
-
-### Syntax
-```pasm
         RETI2
-```
-
-### Result
-Execution returns from interrupt 2 to the interrupted location.
-
-### Parameters
-None.
-
-### Encoding
-\simpleencoding{EEEE 1011001 110 111111111 111110011 | D | — | — | 4}
-
-### Related Instructions
-- [RETI0](#reti0) — Return from interrupt 0
-- [RETI1](#reti1) — Return from interrupt 1
-- [RETI3](#reti3) — Return from interrupt 3
-- [RESI2](#resi2) — Resume from interrupt 2
-
-### Explanation
-RETI2 returns from interrupt 2. This is functionally equivalent to CALLD $1FF,$1F3 WCZ, which restores the program counter, C flag, and Z flag from the interrupt return address registers. The operation takes 4 cycles minimum, with variable timing depending on hub access if the return location is in hub memory (13-20 cycles).
-
-The P2 provides four interrupt levels (INT0-INT3), with INT2 being the third priority level. RETI2 completes the interrupt handler and resumes normal execution at the point where the interrupt occurred.
-
----
-
-## RETI3 — Return from Interrupt 3
-
-Returns from interrupt 3 handler, restoring execution to the interrupted code.
-
-### Syntax
-```pasm
         RETI3
 ```
 
 ### Result
-Execution returns from interrupt 3 to the interrupted location.
+Execution returns from the specified interrupt level to the interrupted location.
 
 ### Parameters
 None.
 
 ### Encoding
-\simpleencoding{EEEE 1011001 110 111111111 111110001 | D | — | — | 4}
+| Instruction | Encoding | Equivalent |
+|-------------|----------|------------|
+| RETI0 | `EEEE 1011001 110 111111111 111111111` | CALLD $1FF,$1FF WCZ |
+| RETI1 | `EEEE 1011001 110 111111111 111110101` | CALLD $1FF,$1F5 WCZ |
+| RETI2 | `EEEE 1011001 110 111111111 111110011` | CALLD $1FF,$1F3 WCZ |
+| RETI3 | `EEEE 1011001 110 111111111 111110001` | CALLD $1FF,$1F1 WCZ |
+
+**Clocks:** 4 (COG), 13-20 (Hub)
 
 ### Related Instructions
-- [RETI0](#reti0) — Return from interrupt 0
-- [RETI1](#reti1) — Return from interrupt 1
-- [RETI2](#reti2) — Return from interrupt 2
-- [RESI3](#resi3) — Resume from interrupt 3
+- [RESI0/1/2/3](#resi0) — Resume from interrupt
+- [SETINT1/2/3](instructions-s.md#setint1) — Set interrupt source
+- [NIXINT1/2/3](instructions-n.md#nixint1) — Cancel interrupt
 
 ### Explanation
-RETI3 returns from interrupt 3. This is functionally equivalent to CALLD $1FF,$1F1 WCZ, which restores the program counter, C flag, and Z flag from the interrupt return address registers. The operation takes 4 cycles minimum, with variable timing depending on hub access if the return location is in hub memory (13-20 cycles).
+RETI0, RETI1, RETI2, and RETI3 return from their respective interrupt handlers. Each instruction is functionally equivalent to a CALLD instruction that restores the program counter, C flag, and Z flag from the corresponding interrupt return address registers.
 
-The P2 provides four interrupt levels (INT0-INT3), with INT3 being the highest priority level. RETI3 completes the interrupt handler and resumes normal execution at the point where the interrupt occurred.
+The P2 provides four interrupt levels (INT0-INT3), with INT0 being the lowest priority and INT3 being the highest. Each RETI instruction completes its interrupt handler and resumes normal execution at the point where the interrupt occurred. The operation takes 4 cycles minimum in COG memory, or 13-20 cycles if the return location is in Hub memory.
 
 ---
 

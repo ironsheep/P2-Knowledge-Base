@@ -189,78 +189,34 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 
 ---
 
-## NIXINT1 {#nixint1}
+## NIXINT1 / NIXINT2 / NIXINT3 {#nixint1}
 
-Cancel INT1
-[Event Instruction](#event-instructions) - Cancel INT1.
+Cancel interrupt (1, 2, or 3)
+[Event Instruction](#event-instructions) - Cancel INTn interrupt.
 
 ```
 NIXINT1
-```
-
-**Result:** The INT1 interrupt event is cancelled.
-
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{000100101}{000100100}{---}{---}{---}{2}
-```
-
-**Related:** [NIXINT2](#nixint2), [NIXINT3](#nixint3), [SETINT1](#setint1)
-
-**Explanation:**
-
-NIXINT1 cancels any pending INT1 interrupt event. This instruction prevents the INT1 interrupt from occurring even if its event condition has been met.
-
-NIXINT1 is used when an interrupt that was previously configured is no longer needed or when the program needs to explicitly clear a pending interrupt condition before it can trigger COG execution flow changes.
-
----
-
-## NIXINT2 {#nixint2}
-
-Cancel INT2
-[Event Instruction](#event-instructions) - Cancel INT2.
-
-```
 NIXINT2
-```
-
-**Result:** The INT2 interrupt event is cancelled.
-
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{000100110}{000100100}{---}{---}{---}{2}
-```
-
-**Related:** [NIXINT1](#nixint1), [NIXINT3](#nixint3), [SETINT2](#setint2)
-
-**Explanation:**
-
-NIXINT2 cancels any pending INT2 interrupt event. This instruction prevents the INT2 interrupt from occurring even if its event condition has been met.
-
-NIXINT2 is used when an interrupt that was previously configured is no longer needed or when the program needs to explicitly clear a pending interrupt condition before it can trigger COG execution flow changes.
-
----
-
-## NIXINT3 {#nixint3}
-
-Cancel INT3
-[Event Instruction](#event-instructions) - Cancel INT3.
-
-```
 NIXINT3
 ```
 
-**Result:** The INT3 interrupt event is cancelled.
+**Result:** The specified interrupt event (INT1, INT2, or INT3) is cancelled.
 
 ```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{000100111}{000100100}{---}{---}{---}{2}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{000}{000100101}{000100100}{---}{---}{---}{2}
+\encodingrowcont{EEEE}{1101011}{000}{000100110}{000100100}{---}{---}{---}{2}
+\encodingrow{EEEE}{1101011}{000}{000100111}{000100100}{---}{---}{---}{2}
+\end{encodingtable}
 ```
 
-**Related:** [NIXINT1](#nixint1), [NIXINT2](#nixint2), [SETINT3](#setint3)
+**Related:** [SETINT1/2/3](instructions-s.md#setint1), [TRGINT1/2/3](instructions-t.md#trgint1), [RETI0/1/2/3](instructions-r.md#reti0), [RESI0/1/2/3](instructions-r.md#resi0)
 
 **Explanation:**
 
-NIXINT3 cancels any pending INT3 interrupt event. This instruction prevents the INT3 interrupt from occurring even if its event condition has been met.
+NIXINT1, NIXINT2, and NIXINT3 cancel any pending interrupt events for their respective interrupt levels. These instructions prevent the interrupt from occurring even if its event condition has been met.
 
-NIXINT3 is used when an interrupt that was previously configured is no longer needed or when the program needs to explicitly clear a pending interrupt condition before it can trigger COG execution flow changes.
+The P2 provides three independent interrupt levels, and each NIXINT instruction cancels only its corresponding level. Use these instructions when an interrupt that was previously configured is no longer needed or when the program needs to explicitly clear a pending interrupt condition before it can trigger cog execution flow changes.
 
 ---
 

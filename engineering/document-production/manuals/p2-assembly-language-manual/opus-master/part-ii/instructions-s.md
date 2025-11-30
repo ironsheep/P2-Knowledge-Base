@@ -392,83 +392,19 @@ Sets all four DAC channels simultaneously from the four bytes in D. DAC3 receive
 
 ---
 
-## SETINT1 — Set Interrupt 1 Source
+## SETINT1 / SETINT2 / SETINT3 — Set Interrupt Source {#setint1}
 
-Configures the INT1 interrupt source.
+Configures the interrupt source (1, 2, or 3).
 
 ### Syntax
 ```pasm
         SETINT1 {#}D
-```
-
-### Result
-INT1 source is set to D[3:0].
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing interrupt source in bits [3:0] |
-
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000100101 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETINT2](#setint2--set-interrupt-2-source) — Set INT2 source
-- [SETINT3](#setint3--set-interrupt-3-source) — Set INT3 source
-
-### Explanation
-Sets the INT1 interrupt source to the value in D[3:0]. This configures which event will trigger the INT1 interrupt.
-
----
-
-## SETINT2 — Set Interrupt 2 Source
-
-Configures the INT2 interrupt source.
-
-### Syntax
-```pasm
         SETINT2 {#}D
-```
-
-### Result
-INT2 source is set to D[3:0].
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing interrupt source in bits [3:0] |
-
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000100110 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETINT1](#setint1--set-interrupt-1-source) — Set INT1 source
-- [SETINT3](#setint3--set-interrupt-3-source) — Set INT3 source
-
-### Explanation
-Sets the INT2 interrupt source to the value in D[3:0]. This configures which event will trigger the INT2 interrupt.
-
----
-
-## SETINT3 — Set Interrupt 3 Source
-
-Configures the INT3 interrupt source.
-
-### Syntax
-```pasm
         SETINT3 {#}D
 ```
 
 ### Result
-INT3 source is set to D[3:0].
+The specified interrupt source (INT1, INT2, or INT3) is set to D[3:0].
 
 ### Parameters
 | Parameter | Description |
@@ -476,18 +412,25 @@ INT3 source is set to D[3:0].
 | D | Register or literal value (0-511) containing interrupt source in bits [3:0] |
 
 ### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000100111 | — | — | — | 2}
+| Instruction | Encoding |
+|-------------|----------|
+| SETINT1 | `EEEE 1101011 00L DDDDDDDDD 000100101` |
+| SETINT2 | `EEEE 1101011 00L DDDDDDDDD 000100110` |
+| SETINT3 | `EEEE 1101011 00L DDDDDDDDD 000100111` |
+
+**Clocks:** 2
 
 ### Flags
 - **C**: No effect
 - **Z**: No effect
 
 ### Related Instructions
-- [SETINT1](#setint1--set-interrupt-1-source) — Set INT1 source
-- [SETINT2](#setint2--set-interrupt-2-source) — Set INT2 source
+- [NIXINT1/2/3](#nixint1) — Cancel interrupt
+- [TRGINT1/2/3](#trgint1) — Trigger interrupt
+- [RETI0/1/2/3](instructions-r.md#reti0) — Return from interrupt
 
 ### Explanation
-Sets the INT3 interrupt source to the value in D[3:0]. This configures which event will trigger the INT3 interrupt.
+SETINT1, SETINT2, and SETINT3 configure which event will trigger their respective interrupts. The interrupt source is specified in D[3:0]. The P2 provides three configurable interrupt levels (INT1-INT3), each of which can be independently configured to respond to different event sources.
 
 ---
 
@@ -824,119 +767,20 @@ Sets the four-channel oscilloscope enable to D[6] and sets the input pin base to
 
 ---
 
-## SETSE1 — Set Selectable Event 1
+## SETSE1 / SETSE2 / SETSE3 / SETSE4 — Set Selectable Event {#setse1}
 
-Configures selectable event 1 detection.
+Configures selectable event detection (1, 2, 3, or 4).
 
 ### Syntax
 ```pasm
         SETSE1  {#}D
-```
-
-### Result
-SE1 event configuration is set to D[8:0].
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing event configuration in bits [8:0] |
-
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000100000 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETSE2](#setse2--set-selectable-event-2) — Set SE2 event
-- [SETSE3](#setse3--set-selectable-event-3) — Set SE3 event
-- [SETSE4](#setse4--set-selectable-event-4) — Set SE4 event
-
-### Explanation
-Sets the SE1 event configuration to D[8:0]. This configures which condition will trigger selectable event 1.
-
----
-
-## SETSE2 — Set Selectable Event 2
-
-Configures selectable event 2 detection.
-
-### Syntax
-```pasm
         SETSE2  {#}D
-```
-
-### Result
-SE2 event configuration is set to D[8:0].
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing event configuration in bits [8:0] |
-
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000100001 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETSE1](#setse1--set-selectable-event-1) — Set SE1 event
-- [SETSE3](#setse3--set-selectable-event-3) — Set SE3 event
-- [SETSE4](#setse4--set-selectable-event-4) — Set SE4 event
-
-### Explanation
-Sets the SE2 event configuration to D[8:0]. This configures which condition will trigger selectable event 2.
-
----
-
-## SETSE3 — Set Selectable Event 3
-
-Configures selectable event 3 detection.
-
-### Syntax
-```pasm
         SETSE3  {#}D
-```
-
-### Result
-SE3 event configuration is set to D[8:0].
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing event configuration in bits [8:0] |
-
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000100010 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETSE1](#setse1--set-selectable-event-1) — Set SE1 event
-- [SETSE2](#setse2--set-selectable-event-2) — Set SE2 event
-- [SETSE4](#setse4--set-selectable-event-4) — Set SE4 event
-
-### Explanation
-Sets the SE3 event configuration to D[8:0]. This configures which condition will trigger selectable event 3.
-
----
-
-## SETSE4 — Set Selectable Event 4
-
-Configures selectable event 4 detection.
-
-### Syntax
-```pasm
         SETSE4  {#}D
 ```
 
 ### Result
-SE4 event configuration is set to D[8:0].
+The specified selectable event (SE1, SE2, SE3, or SE4) configuration is set to D[8:0].
 
 ### Parameters
 | Parameter | Description |
@@ -944,19 +788,27 @@ SE4 event configuration is set to D[8:0].
 | D | Register or literal value (0-511) containing event configuration in bits [8:0] |
 
 ### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000100011 | — | — | — | 2}
+| Instruction | Encoding | C | Z | Clocks |
+|-------------|----------|---|---|--------|
+| SETSE1 | `EEEE 1101011 00L DDDDDDDDD 000100000` | — | — | 2 |
+| SETSE2 | `EEEE 1101011 00L DDDDDDDDD 000100001` | — | — | 2 |
+| SETSE3 | `EEEE 1101011 00L DDDDDDDDD 000100010` | — | — | 2 |
+| SETSE4 | `EEEE 1101011 00L DDDDDDDDD 000100011` | — | — | 2 |
 
 ### Flags
 - **C**: No effect
 - **Z**: No effect
 
 ### Related Instructions
-- [SETSE1](#setse1--set-selectable-event-1) — Set SE1 event
-- [SETSE2](#setse2--set-selectable-event-2) — Set SE2 event
-- [SETSE3](#setse3--set-selectable-event-3) — Set SE3 event
+- [POLLSE1/2/3/4](#pollse1) — Poll selectable event flag
+- [WAITSE1/2/3/4](#waitse1) — Wait for selectable event
+- [JSE1/2/3/4](#jse1) — Jump if selectable event set
+- [JNSE1/2/3/4](#jnse1) — Jump if selectable event clear
 
 ### Explanation
-Sets the SE4 event configuration to D[8:0]. This configures which condition will trigger selectable event 4.
+SETSE1, SETSE2, SETSE3, and SETSE4 configure the corresponding selectable event's detection criteria. The D[8:0] operand specifies which condition will trigger the event.
+
+The P2 provides four independent selectable events, each of which can be configured to detect various conditions including pin states, hub operations, CORDIC completion, and other system events. Once configured, these events can be polled with POLLSE1/2/3/4, waited upon with WAITSE1/2/3/4, or used for conditional jumps with JSE1/2/3/4 and JNSE1/2/3/4.
 
 ---
 

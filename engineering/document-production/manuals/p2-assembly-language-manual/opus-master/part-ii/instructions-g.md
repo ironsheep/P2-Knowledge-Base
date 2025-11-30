@@ -93,7 +93,7 @@ GETCT  Dest  {WC}
 \simpleencoding{EEEE}{1101011}{C00}{DDDDDDDDD}{000011010}{D}{same}{---}{2}
 ```
 
-**Related:** [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [WAITCT1](#waitct1), [WAITCT2](#waitct2), [WAITCT3](#waitct3)
+**Related:** [ADDCT1/2/3](instructions-a.md#addct1), [WAITCT1/2/3](instructions-w.md#waitct1)
 
 **Explanation:**
 

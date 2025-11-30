@@ -37,102 +37,42 @@ JATN is useful for implementing inter-cog communication mechanisms where one cog
 
 ---
 
-## JCT1 {#jct1}
+## JCT1 / JCT2 / JCT3 {#jct1}
 
-Jump if counter 1 event flag is set
-[Event Instruction](#event-instructions) - Jump to S if CT1 (counter 1) event flag is set.
+Jump if counter event flag is set (1, 2, or 3)
+[Event Instruction](#event-instructions) - Jump to S if CTn event flag is set.
 
 ```
 JCT1  {#}S
-```
-
-**Result:** If the CT1 event flag is set, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000000001}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the CT1 event flag is set.
-```
-
-**Related:** [JCT2](#jct2), [JCT3](#jct3), [JNCT1](#jnct1), [ADDCT1](#addct1), [POLLCT1](#pollct1)
-
-**Explanation:**
-
-JCT1 checks the CT1 (counter 1) event flag and conditionally jumps to the address specified by S if the flag is set. The CT1 event flag is automatically set when the system counter reaches the CT1 target value that was previously configured using the ADDCT1 instruction.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CT1 event flag is clear, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JCT1 is commonly used for timing loops, delays, and periodic task scheduling where code needs to execute when the system counter reaches a specific value.
-
----
-
-## JCT2 {#jct2}
-
-Jump if counter 2 event flag is set
-[Event Instruction](#event-instructions) - Jump to S if CT2 (counter 2) event flag is set.
-
-```
 JCT2  {#}S
-```
-
-**Result:** If the CT2 event flag is set, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000000010}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the CT2 event flag is set.
-```
-
-**Related:** [JCT1](#jct1), [JCT3](#jct3), [JNCT2](#jnct2), [ADDCT2](#addct2), [POLLCT2](#pollct2)
-
-**Explanation:**
-
-JCT2 checks the CT2 (counter 2) event flag and conditionally jumps to the address specified by S if the flag is set. The CT2 event flag is automatically set when the system counter reaches the CT2 target value that was previously configured using the ADDCT2 instruction.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CT2 event flag is clear, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JCT2 provides a second independent hardware counter for timing operations, allowing a cog to manage two simultaneous time-based events without software overhead.
-
----
-
-## JCT3 {#jct3}
-
-Jump if counter 3 event flag is set
-[Event Instruction](#event-instructions) - Jump to S if CT3 (counter 3) event flag is set.
-
-```
 JCT3  {#}S
 ```
 
-**Result:** If the CT3 event flag is set, PC is set to the address specified by S.
+**Result:** If the CTn event flag is set, PC is set to the address specified by S.
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 ```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000000011}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011110}{01I}{000000001}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000000010}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011110}{01I}{000000011}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\end{encodingtable}
 
-\textsuperscript{1} PC is written only when the CT3 event flag is set.
+\textsuperscript{1} PC is written only when the CTn event flag is set.
 ```
 
-**Related:** [JCT1](#jct1), [JCT2](#jct2), [JNCT3](#jnct3), [ADDCT3](#addct3), [POLLCT3](#pollct3)
+**Related:** [JNCT1/2/3](#jnct1), [ADDCT1/2/3](#addct1), [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1)
 
 **Explanation:**
 
-JCT3 checks the CT3 (counter 3) event flag and conditionally jumps to the address specified by S if the flag is set. The CT3 event flag is automatically set when the system counter reaches the CT3 target value that was previously configured using the ADDCT3 instruction.
+JCT1, JCT2, and JCT3 check their respective counter event flags and conditionally jump to the address specified by S if the flag is set. Each CTn event flag is automatically set when the system counter reaches the CTn target value that was previously configured using the corresponding ADDCTn instruction.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CT3 event flag is clear, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CTn event flag is clear, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-JCT3 provides a third independent hardware counter for timing operations, enabling complex multi-event timing scenarios within a single cog.
+The P2 provides three independent hardware counters for timing operations, allowing a cog to manage multiple simultaneous time-based events without software overhead. These instructions are commonly used for timing loops, delays, and periodic task scheduling.
 
 ---
 
@@ -188,7 +128,7 @@ JINT  {#}S
 \textsuperscript{1} PC is written only when the INT event flag is set.
 ```
 
-**Related:** [JNINT](#jnint), [POLLINT](#pollint), [SETINT1](#setint1), [SETINT2](#setint2), [SETINT3](#setint3)
+**Related:** [JNINT](#jnint), [POLLINT](#pollint), [SETINT1/2/3](instructions-s.md#setint1)
 
 **Explanation:**
 
@@ -307,102 +247,42 @@ JNATN is useful for implementing polling loops that wait until the ATN flag is c
 
 ---
 
-## JNCT1 {#jnct1}
+## JNCT1 / JNCT2 / JNCT3 {#jnct1}
 
-Jump if counter 1 event flag is clear
-[Event Instruction](#event-instructions) - Jump to S if CT1 (counter 1) event flag is clear.
+Jump if counter event flag is clear (1, 2, or 3)
+[Event Instruction](#event-instructions) - Jump to S if CTn event flag is clear.
 
 ```
 JNCT1  {#}S
-```
-
-**Result:** If the CT1 event flag is clear, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000010001}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the CT1 event flag is clear.
-```
-
-**Related:** [JNCT2](#jnct2), [JNCT3](#jnct3), [JCT1](#jct1), [ADDCT1](#addct1), [POLLCT1](#pollct1)
-
-**Explanation:**
-
-JNCT1 checks the CT1 (counter 1) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JCT1, allowing code to jump when the counter 1 event has not yet occurred.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CT1 event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JNCT1 is useful for implementing polling loops that continue until the CT1 counter event occurs, or for skipping code that should only execute before a specific time.
-
----
-
-## JNCT2 {#jnct2}
-
-Jump if counter 2 event flag is clear
-[Event Instruction](#event-instructions) - Jump to S if CT2 (counter 2) event flag is clear.
-
-```
 JNCT2  {#}S
-```
-
-**Result:** If the CT2 event flag is clear, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000010010}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the CT2 event flag is clear.
-```
-
-**Related:** [JNCT1](#jnct1), [JNCT3](#jnct3), [JCT2](#jct2), [ADDCT2](#addct2), [POLLCT2](#pollct2)
-
-**Explanation:**
-
-JNCT2 checks the CT2 (counter 2) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JCT2, allowing code to jump when the counter 2 event has not yet occurred.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CT2 event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JNCT2 provides the same polling capability as JNCT1 but for the independent counter 2 event, enabling complex multi-timer control flows.
-
----
-
-## JNCT3 {#jnct3}
-
-Jump if counter 3 event flag is clear
-[Event Instruction](#event-instructions) - Jump to S if CT3 (counter 3) event flag is clear.
-
-```
 JNCT3  {#}S
 ```
 
-**Result:** If the CT3 event flag is clear, PC is set to the address specified by S.
+**Result:** If the CTn event flag is clear, PC is set to the address specified by S.
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 ```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000010011}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011110}{01I}{000010001}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000010010}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011110}{01I}{000010011}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\end{encodingtable}
 
-\textsuperscript{1} PC is written only when the CT3 event flag is clear.
+\textsuperscript{1} PC is written only when the CTn event flag is clear.
 ```
 
-**Related:** [JNCT1](#jnct1), [JNCT2](#jnct2), [JCT3](#jct3), [ADDCT3](#addct3), [POLLCT3](#pollct3)
+**Related:** [JCT1/2/3](#jct1), [ADDCT1/2/3](#addct1), [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1)
 
 **Explanation:**
 
-JNCT3 checks the CT3 (counter 3) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JCT3, allowing code to jump when the counter 3 event has not yet occurred.
+JNCT1, JNCT2, and JNCT3 check their respective counter event flags and conditionally jump to the address specified by S if the flag is clear. These are the logical complements of JCT1/2/3, allowing code to jump when the corresponding counter event has not yet occurred.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CT3 event flag is set, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CTn event flag is set, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-JNCT3 completes the set of three independent counter event polling mechanisms, allowing sophisticated timing control with minimal code overhead.
+These instructions are useful for implementing polling loops that continue until a counter event occurs, or for skipping code that should only execute before a specific time. The P2's three independent counter event polling mechanisms enable sophisticated timing control with minimal code overhead.
 
 ---
 
@@ -458,7 +338,7 @@ JNINT  {#}S
 \textsuperscript{1} PC is written only when the INT event flag is clear.
 ```
 
-**Related:** [JINT](#jint), [POLLINT](#pollint), [SETINT1](#setint1), [SETINT2](#setint2), [SETINT3](#setint3)
+**Related:** [JINT](#jint), [POLLINT](#pollint), [SETINT1/2/3](instructions-s.md#setint1)
 
 **Explanation:**
 
@@ -538,135 +418,44 @@ JNQMT is useful for ensuring CORDIC results are read at the correct time, helpin
 
 ---
 
-## JNSE1 {#jnse1}
+## JNSE1 / JNSE2 / JNSE3 / JNSE4 {#jnse1}
 
-Jump if selector 1 event flag is clear
-[Event Instruction](#event-instructions) - Jump to S if SE1 (selector 1) event flag is clear.
+Jump if selectable event flag is clear (1, 2, 3, or 4)
+[Event Instruction](#event-instructions) - Jump to S if SEn event flag is clear.
 
 ```
 JNSE1  {#}S
-```
-
-**Result:** If the SE1 event flag is clear, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000010100}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the SE1 event flag is clear.
-```
-
-**Related:** [JNSE2](#jnse2), [JNSE3](#jnse3), [JNSE4](#jnse4), [JSE1](#jse1), [SETSE1](#setse1)
-
-**Explanation:**
-
-JNSE1 checks the SE1 (selector 1) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JSE1, allowing code to jump when the selector 1 event has not occurred.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SE1 event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JNSE1 provides polling capability for the first of four selectable event sources, which can be configured to detect various hardware conditions.
-
----
-
-## JNSE2 {#jnse2}
-
-Jump if selector 2 event flag is clear
-[Event Instruction](#event-instructions) - Jump to S if SE2 (selector 2) event flag is clear.
-
-```
 JNSE2  {#}S
-```
-
-**Result:** If the SE2 event flag is clear, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000010101}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the SE2 event flag is clear.
-```
-
-**Related:** [JNSE1](#jnse1), [JNSE3](#jnse3), [JNSE4](#jnse4), [JSE2](#jse2), [SETSE2](#setse2)
-
-**Explanation:**
-
-JNSE2 checks the SE2 (selector 2) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JSE2, allowing code to jump when the selector 2 event has not occurred.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SE2 event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JNSE2 provides polling capability for the second of four selectable event sources, enabling independent monitoring of multiple hardware events.
-
----
-
-## JNSE3 {#jnse3}
-
-Jump if selector 3 event flag is clear
-[Event Instruction](#event-instructions) - Jump to S if SE3 (selector 3) event flag is clear.
-
-```
 JNSE3  {#}S
-```
-
-**Result:** If the SE3 event flag is clear, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000010110}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the SE3 event flag is clear.
-```
-
-**Related:** [JNSE1](#jnse1), [JNSE2](#jnse2), [JNSE4](#jnse4), [JSE3](#jse3), [SETSE3](#setse3)
-
-**Explanation:**
-
-JNSE3 checks the SE3 (selector 3) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JSE3, allowing code to jump when the selector 3 event has not occurred.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SE3 event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JNSE3 provides polling capability for the third of four selectable event sources, supporting complex event-driven control flows.
-
----
-
-## JNSE4 {#jnse4}
-
-Jump if selector 4 event flag is clear
-[Event Instruction](#event-instructions) - Jump to S if SE4 (selector 4) event flag is clear.
-
-```
 JNSE4  {#}S
 ```
 
-**Result:** If the SE4 event flag is clear, PC is set to the address specified by S.
+**Result:** If the SEn event flag is clear, PC is set to the address specified by S.
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 ```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000010111}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011110}{01I}{000010100}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000010101}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000010110}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011110}{01I}{000010111}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\end{encodingtable}
 
-\textsuperscript{1} PC is written only when the SE4 event flag is clear.
+\textsuperscript{1} PC is written only when the SEn event flag is clear.
 ```
 
-**Related:** [JNSE1](#jnse1), [JNSE2](#jnse2), [JNSE3](#jnse3), [JSE4](#jse4), [SETSE4](#setse4)
+**Related:** [JSE1/2/3/4](#jse1), [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1)
 
 **Explanation:**
 
-JNSE4 checks the SE4 (selector 4) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JSE4, allowing code to jump when the selector 4 event has not occurred.
+JNSE1, JNSE2, JNSE3, and JNSE4 check their respective selectable event flags and conditionally jump to the address specified by S if the flag is clear. These are the logical complements of JSE1/2/3/4, allowing code to jump when the corresponding selectable event has not occurred.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SE4 event flag is set, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SEn event flag is set, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-JNSE4 completes the set of four selectable event polling mechanisms, providing maximum flexibility for hardware event monitoring.
+The P2 provides four selectable event sources, each configurable via SETSE instructions to detect various hardware conditions. These polling mechanisms provide maximum flexibility for event-driven control flows.
 
 ---
 
@@ -868,135 +657,44 @@ JQMT is useful for error handling in CORDIC operations, allowing code to detect 
 
 ---
 
-## JSE1 {#jse1}
+## JSE1 / JSE2 / JSE3 / JSE4 {#jse1}
 
-Jump if selector 1 event flag is set
-[Event Instruction](#event-instructions) - Jump to S if SE1 (selector 1) event flag is set.
+Jump if selectable event flag is set (1, 2, 3, or 4)
+[Event Instruction](#event-instructions) - Jump to S if SEn event flag is set.
 
 ```
 JSE1  {#}S
-```
-
-**Result:** If the SE1 event flag is set, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000000100}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the SE1 event flag is set.
-```
-
-**Related:** [JSE2](#jse2), [JSE3](#jse3), [JSE4](#jse4), [JNSE1](#jnse1), [SETSE1](#setse1)
-
-**Explanation:**
-
-JSE1 checks the SE1 (selector 1) event flag and conditionally jumps to the address specified by S if the flag is set. The selector 1 event can be configured to detect various hardware conditions using the SETSE1 instruction.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SE1 event flag is clear, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JSE1 is the first of four selectable event polling instructions, providing flexible hardware event detection for custom event handling.
-
----
-
-## JSE2 {#jse2}
-
-Jump if selector 2 event flag is set
-[Event Instruction](#event-instructions) - Jump to S if SE2 (selector 2) event flag is set.
-
-```
 JSE2  {#}S
-```
-
-**Result:** If the SE2 event flag is set, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000000101}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the SE2 event flag is set.
-```
-
-**Related:** [JSE1](#jse1), [JSE3](#jse3), [JSE4](#jse4), [JNSE2](#jnse2), [SETSE2](#setse2)
-
-**Explanation:**
-
-JSE2 checks the SE2 (selector 2) event flag and conditionally jumps to the address specified by S if the flag is set. The selector 2 event can be configured to detect various hardware conditions using the SETSE2 instruction.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SE2 event flag is clear, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JSE2 provides a second independent selectable event source, enabling multiple concurrent hardware event detection mechanisms.
-
----
-
-## JSE3 {#jse3}
-
-Jump if selector 3 event flag is set
-[Event Instruction](#event-instructions) - Jump to S if SE3 (selector 3) event flag is set.
-
-```
 JSE3  {#}S
-```
-
-**Result:** If the SE3 event flag is set, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000000110}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the SE3 event flag is set.
-```
-
-**Related:** [JSE1](#jse1), [JSE2](#jse2), [JSE4](#jse4), [JNSE3](#jnse3), [SETSE3](#setse3)
-
-**Explanation:**
-
-JSE3 checks the SE3 (selector 3) event flag and conditionally jumps to the address specified by S if the flag is set. The selector 3 event can be configured to detect various hardware conditions using the SETSE3 instruction.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SE3 event flag is clear, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JSE3 provides a third independent selectable event source for sophisticated event-driven applications.
-
----
-
-## JSE4 {#jse4}
-
-Jump if selector 4 event flag is set
-[Event Instruction](#event-instructions) - Jump to S if SE4 (selector 4) event flag is set.
-
-```
 JSE4  {#}S
 ```
 
-**Result:** If the SE4 event flag is set, PC is set to the address specified by S.
+**Result:** If the SEn event flag is set, PC is set to the address specified by S.
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 ```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000000111}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011110}{01I}{000000100}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000000101}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000000110}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011110}{01I}{000000111}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\end{encodingtable}
 
-\textsuperscript{1} PC is written only when the SE4 event flag is set.
+\textsuperscript{1} PC is written only when the SEn event flag is set.
 ```
 
-**Related:** [JSE1](#jse1), [JSE2](#jse2), [JSE3](#jse3), [JNSE4](#jnse4), [SETSE4](#setse4)
+**Related:** [JNSE1/2/3/4](#jnse1), [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1)
 
 **Explanation:**
 
-JSE4 checks the SE4 (selector 4) event flag and conditionally jumps to the address specified by S if the flag is set. The selector 4 event can be configured to detect various hardware conditions using the SETSE4 instruction.
+JSE1, JSE2, JSE3, and JSE4 check their respective selectable event flags and conditionally jump to the address specified by S if the flag is set. Each selectable event can be configured to detect various hardware conditions using the corresponding SETSE instruction.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SE4 event flag is clear, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SEn event flag is clear, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-JSE4 completes the set of four selectable event sources, providing maximum flexibility for complex event-driven control flow.
+The P2 provides four independent selectable event sources, enabling multiple concurrent hardware event detection mechanisms for sophisticated event-driven applications.
 
 ---
 

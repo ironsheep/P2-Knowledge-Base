@@ -515,93 +515,37 @@ The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken (2
 
 ---
 
-## TRGINT1 — Trigger Interrupt 1
+## TRGINT1 / TRGINT2 / TRGINT3 — Trigger Interrupt {#trgint1}
 
-Software-triggers interrupt handler INT1.
+Software-triggers interrupt handler (INT1, INT2, or INT3).
 
 ### Syntax
 ```pasm
         TRGINT1
-```
-
-### Result
-The INT1 interrupt handler is triggered regardless of STALLI mode.
-
-### Parameters
-None.
-
-### Encoding
-\simpleencoding{EEEE | 1101011 | 000 | 000100010 | 000100100 | — | — | — | 2}
-
-### Related Instructions
-- [TRGINT2](#trgint2) — Trigger interrupt 2
-- [TRGINT3](#trgint3) — Trigger interrupt 3
-- [SETINT1](instructions-s.md#setint1) — Set interrupt 1 handler
-- [STALLI](instructions-s.md#stalli) — Stall on interrupt
-
-### Explanation
-TRGINT1 software-triggers the INT1 interrupt handler, regardless of STALLI mode. This allows code to explicitly invoke interrupt service routines without waiting for external events.
-
-The instruction executes in 2 clock cycles.
-
----
-
-## TRGINT2 — Trigger Interrupt 2
-
-Software-triggers interrupt handler INT2.
-
-### Syntax
-```pasm
         TRGINT2
-```
-
-### Result
-The INT2 interrupt handler is triggered regardless of STALLI mode.
-
-### Parameters
-None.
-
-### Encoding
-\simpleencoding{EEEE | 1101011 | 000 | 000100011 | 000100100 | — | — | — | 2}
-
-### Related Instructions
-- [TRGINT1](#trgint1) — Trigger interrupt 1
-- [TRGINT3](#trgint3) — Trigger interrupt 3
-- [SETINT2](instructions-s.md#setint2) — Set interrupt 2 handler
-- [STALLI](instructions-s.md#stalli) — Stall on interrupt
-
-### Explanation
-TRGINT2 software-triggers the INT2 interrupt handler, regardless of STALLI mode. This allows code to explicitly invoke interrupt service routines without waiting for external events.
-
-The instruction executes in 2 clock cycles.
-
----
-
-## TRGINT3 — Trigger Interrupt 3
-
-Software-triggers interrupt handler INT3.
-
-### Syntax
-```pasm
         TRGINT3
 ```
 
 ### Result
-The INT3 interrupt handler is triggered regardless of STALLI mode.
+The specified interrupt handler (INT1, INT2, or INT3) is triggered regardless of STALLI mode.
 
 ### Parameters
 None.
 
 ### Encoding
-\simpleencoding{EEEE | 1101011 | 000 | 000100100 | 000100100 | — | — | — | 2}
+| Instruction | Encoding | C | Z | Clocks |
+|-------------|----------|---|---|--------|
+| TRGINT1 | `EEEE 1101011 000 000100010 000100100` | — | — | 2 |
+| TRGINT2 | `EEEE 1101011 000 000100011 000100100` | — | — | 2 |
+| TRGINT3 | `EEEE 1101011 000 000100100 000100100` | — | — | 2 |
 
 ### Related Instructions
-- [TRGINT1](#trgint1) — Trigger interrupt 1
-- [TRGINT2](#trgint2) — Trigger interrupt 2
-- [SETINT3](instructions-s.md#setint3) — Set interrupt 3 handler
+- [SETINT1/2/3](instructions-s.md#setint1) — Set interrupt handler
+- [NIXINT1/2/3](instructions-n.md#nixint1) — Cancel interrupt
+- [RETI0/1/2/3](instructions-r.md#reti0) — Return from interrupt
 - [STALLI](instructions-s.md#stalli) — Stall on interrupt
 
 ### Explanation
-TRGINT3 software-triggers the INT3 interrupt handler, regardless of STALLI mode. This allows code to explicitly invoke interrupt service routines without waiting for external events.
+TRGINT1, TRGINT2, and TRGINT3 software-trigger the corresponding interrupt handler, regardless of STALLI mode. This allows code to explicitly invoke interrupt service routines without waiting for external events.
 
-The instruction executes in 2 clock cycles.
+The P2 provides three independent interrupt levels. Each TRGINT instruction triggers only its corresponding level. These instructions are useful for testing interrupt handlers or for implementing software-generated interrupts.

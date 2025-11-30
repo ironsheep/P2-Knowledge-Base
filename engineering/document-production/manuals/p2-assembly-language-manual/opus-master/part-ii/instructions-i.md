@@ -95,7 +95,7 @@ INCMOD  Dest, {#}Src  {WC|WZ|WCZ}
 \simpleencoding{EEEE}{0111000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{D = S, set D = 0 and C = 1, else D = D + 1 and C = 0}{Result = 0}{2}
 ```
 
-**Related:** [DECMOD](#decmod), [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3)
+**Related:** [DECMOD](#decmod), [ADDCT1/2/3](instructions-a.md#addct1)
 
 **Explanation:**
 

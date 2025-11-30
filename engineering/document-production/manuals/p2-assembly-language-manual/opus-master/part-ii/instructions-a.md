@@ -81,87 +81,37 @@ ADD and ADDX are also used for adding signed multi-long values, with ADDSX endin
 
 ---
 
-## ADDCT1 {#addct1}
+## ADDCT1 / ADDCT2 / ADDCT3 {#addct1}
 
-Add and set CT1 event trigger
-[Event Instruction](#event-instructions) - Set CT1 counter event trigger time.
+Add and set counter event trigger (1, 2, or 3)
+[Event Instruction](#event-instructions) - Set CTn counter event trigger time.
 
 ```
 ADDCT1  Dest, {#}Src
-```
-
-**Result:** The Src value is added into Dest and the result is also stored in the hidden CT1 event trigger register.
-
-- Dest is a register containing the value to add Src to, and is where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
-
-```{=latex}
-\simpleencoding{EEEE}{1010011}{00I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-```
-
-**Related:** [ADDCT2](#addct2), [ADDCT3](#addct3), [POLLCT1](#pollct1), [WAITCT1](#waitct1), [JCT1](#jct1), [JNCT1](#jnct1)
-
-**Explanation:**
-
-ADDCT1 sets the hidden CT1 event trigger register to the value of Dest + Src. The result is also written to Dest. This instruction is used to schedule a time-based event that will trigger when the System Counter (CT) reaches the specified value.
-
-Use the POLLCT1, WAITCT1, JCT1, and JNCT1 instructions to process CT1 time-based events. This enables precise timing control for periodic operations, delays, and synchronized activities.
-
----
-
-## ADDCT2 {#addct2}
-
-Add and set CT2 event trigger
-[Event Instruction](#event-instructions) - Set CT2 counter event trigger time.
-
-```
 ADDCT2  Dest, {#}Src
-```
-
-**Result:** The Src value is added into Dest and the result is also stored in the hidden CT2 event trigger register.
-
-- Dest is a register containing the value to add Src to, and is where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
-
-```{=latex}
-\simpleencoding{EEEE}{1010011}{01I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-```
-
-**Related:** [ADDCT1](#addct1), [ADDCT3](#addct3), [POLLCT2](#pollct2), [WAITCT2](#waitct2), [JCT2](#jct2), [JNCT2](#jnct2)
-
-**Explanation:**
-
-ADDCT2 sets the hidden CT2 event trigger register to the value of Dest + Src. The result is also written to Dest. This instruction is used to schedule a time-based event that will trigger when the System Counter (CT) reaches the specified value.
-
-Use the POLLCT2, WAITCT2, JCT2, and JNCT2 instructions to process CT2 time-based events. The P2 provides three independent counter event triggers (CT1, CT2, CT3), allowing multiple simultaneous time-based operations.
-
----
-
-## ADDCT3 {#addct3}
-
-Add and set CT3 event trigger
-[Event Instruction](#event-instructions) - Set CT3 counter event trigger time.
-
-```
 ADDCT3  Dest, {#}Src
 ```
 
-**Result:** The Src value is added into Dest and the result is also stored in the hidden CT3 event trigger register.
+**Result:** The Src value is added into Dest and the result is also stored in the hidden CTn event trigger register.
 
 - Dest is a register containing the value to add Src to, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
 
 ```{=latex}
-\simpleencoding{EEEE}{1010011}{10I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1010011}{00I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrowcont{EEEE}{1010011}{01I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1010011}{10I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\end{encodingtable}
 ```
 
-**Related:** [ADDCT1](#addct1), [ADDCT2](#addct2), [POLLCT3](#pollct3), [WAITCT3](#waitct3), [JCT3](#jct3), [JNCT3](#jnct3)
+**Related:** [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
 
 **Explanation:**
 
-ADDCT3 sets the hidden CT3 event trigger register to the value of Dest + Src. The result is also written to Dest. This instruction is used to schedule a time-based event that will trigger when the System Counter (CT) reaches the specified value.
+ADDCT1, ADDCT2, and ADDCT3 set their respective hidden counter event trigger registers to the value of Dest + Src. The result is also written to Dest. These instructions are used to schedule time-based events that will trigger when the System Counter (CT) reaches the specified value.
 
-Use the POLLCT3, WAITCT3, JCT3, and JNCT3 instructions to process CT3 time-based events. The event triggers when System Counter (CT) equals the original Dest + Src value.
+The P2 provides three independent counter event triggers (CT1, CT2, CT3), allowing a cog to manage multiple simultaneous time-based operations. Use the corresponding POLLCTn, WAITCTn, JCTn, and JNCTn instructions to process each counter's time-based events. This enables precise timing control for periodic operations, delays, and synchronized activities.
 
 ---
 
@@ -881,7 +831,7 @@ ASMCLK
 \simpleencoding{EEEE}{0000000}{000}{000000000}{000000000}{---}{---}{---}{2}
 ```
 
-**Related:** [GETCT](#getct), [POLLCT1](#pollct1)
+**Related:** [GETCT](instructions-g.md#getct), [POLLCT1/2/3](instructions-p.md#pollct1)
 
 **Explanation:**
 

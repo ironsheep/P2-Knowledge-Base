@@ -45,91 +45,19 @@ This instruction enables inter-cog communication by allowing a cog to check whet
 
 ---
 
-### POLLCT1 — Event
+### POLLCT1 / POLLCT2 / POLLCT3 — Event {#pollct1}
 
-Checks the CT1 event flag without waiting.
+Checks the counter event flag (1, 2, or 3) without waiting.
 
 #### Syntax
 ```pasm
         POLLCT1 {WC|WZ|WCZ}
-```
-
-#### Result
-CT1 event flag state is optionally copied into C and/or Z, then the flag is cleared.
-
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
-
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000000001 | 000100100 | — | CT1 Event | CT1 Event | 2}
-
-#### Related Instructions
-- [ADDCT1](#addct1) — Add to CT1 event trigger
-- [WAITCT1](#waitct1) — Wait for CT1 event
-- [JCT1](#jct1) — Jump if CT1 event occurred
-- [JNCT1](#jnct1) — Jump if CT1 event did not occur
-- [POLLCT2](#pollct2) — Poll CT2 event flag
-- [POLLCT3](#pollct3) — Poll CT3 event flag
-
-#### Explanation
-POLLCT1 copies the state of the counter 1 event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the counter event flag prior to clearing it.
-
-The counter 1 event flag is set whenever the System Counter (CT) passes the value in the CT1 event trigger register; that is, the MSB of (CT - CT1) is 0. The counter event flag is cleared upon execution of ADDCT1, POLLCT1, WAITCT1, JCT1, or JNCT1.
-
-This instruction enables time-based event polling without blocking execution. Use POLLCT1 in loops where the cog needs to perform other work while periodically checking for timeout or scheduled events.
-
----
-
-### POLLCT2 — Event
-
-Checks the CT2 event flag without waiting.
-
-#### Syntax
-```pasm
         POLLCT2 {WC|WZ|WCZ}
-```
-
-#### Result
-CT2 event flag state is optionally copied into C and/or Z, then the flag is cleared.
-
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
-
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000000010 | 000100100 | — | CT2 Event | CT2 Event | 2}
-
-#### Related Instructions
-- [ADDCT2](#addct2) — Add to CT2 event trigger
-- [WAITCT2](#waitct2) — Wait for CT2 event
-- [JCT2](#jct2) — Jump if CT2 event occurred
-- [JNCT2](#jnct2) — Jump if CT2 event did not occur
-- [POLLCT1](#pollct1) — Poll CT1 event flag
-- [POLLCT3](#pollct3) — Poll CT3 event flag
-
-#### Explanation
-POLLCT2 copies the state of the counter 2 event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the counter event flag prior to clearing it.
-
-The counter 2 event flag is set whenever the System Counter (CT) passes the value in the CT2 event trigger register; that is, the MSB of (CT - CT2) is 0. The counter event flag is cleared upon execution of ADDCT2, POLLCT2, WAITCT2, JCT2, or JNCT2.
-
-This instruction enables time-based event polling without blocking execution. The P2 provides three independent counter event triggers (CT1, CT2, CT3) allowing a cog to manage multiple concurrent timing events.
-
----
-
-### POLLCT3 — Event
-
-Checks the CT3 event flag without waiting.
-
-#### Syntax
-```pasm
         POLLCT3 {WC|WZ|WCZ}
 ```
 
 #### Result
-CT3 event flag state is optionally copied into C and/or Z, then the flag is cleared.
+CTn event flag state is optionally copied into C and/or Z, then the flag is cleared.
 
 #### Parameters
 | Parameter | Description |
@@ -137,22 +65,26 @@ CT3 event flag state is optionally copied into C and/or Z, then the flag is clea
 | WC/WZ/WCZ | Optional flag effects to capture event state |
 
 #### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000000011 | 000100100 | — | CT3 Event | CT3 Event | 2}
+| Instruction | Encoding |
+|-------------|----------|
+| POLLCT1 | `EEEE 1101011 CZ0 000000001 000100100` |
+| POLLCT2 | `EEEE 1101011 CZ0 000000010 000100100` |
+| POLLCT3 | `EEEE 1101011 CZ0 000000011 000100100` |
+
+**Clocks:** 2
 
 #### Related Instructions
-- [ADDCT3](#addct3) — Add to CT3 event trigger
-- [WAITCT3](#waitct3) — Wait for CT3 event
-- [JCT3](#jct3) — Jump if CT3 event occurred
-- [JNCT3](#jnct3) — Jump if CT3 event did not occur
-- [POLLCT1](#pollct1) — Poll CT1 event flag
-- [POLLCT2](#pollct2) — Poll CT2 event flag
+- [ADDCT1/2/3](#addct1) — Add to CTn event trigger
+- [WAITCT1/2/3](#waitct1) — Wait for CTn event
+- [JCT1/2/3](#jct1) — Jump if CTn event occurred
+- [JNCT1/2/3](#jnct1) — Jump if CTn event did not occur
 
 #### Explanation
-POLLCT3 copies the state of the counter 3 event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the counter event flag prior to clearing it.
+POLLCT1, POLLCT2, and POLLCT3 copy the state of their respective counter event flags into C and/or Z and then clear the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the counter event flag prior to clearing it.
 
-The counter 3 event flag is set whenever the System Counter (CT) passes the value in the CT3 event trigger register; that is, the MSB of (CT - CT3) is 0. The counter event flag is cleared upon execution of ADDCT3, POLLCT3, WAITCT3, JCT3, or JNCT3.
+Each counter event flag is set whenever the System Counter (CT) passes the value in that counter's event trigger register; that is, the MSB of (CT - CTn) is 0. The counter event flag is cleared upon execution of ADDCTn, POLLCTn, WAITCTn, JCTn, or JNCTn.
 
-This instruction enables time-based event polling without blocking execution. Having three independent counter event triggers allows a cog to simultaneously track multiple timing requirements such as watchdog timers, periodic tasks, and timeout detection.
+These instructions enable time-based event polling without blocking execution. The P2 provides three independent counter event triggers (CT1, CT2, CT3) allowing a cog to simultaneously track multiple timing requirements such as watchdog timers, periodic tasks, and timeout detection.
 
 ---
 
@@ -297,131 +229,20 @@ This instruction enables error detection for CORDIC operations. Reading CORDIC r
 
 ---
 
-### POLLSE1 — Event
+### POLLSE1 / POLLSE2 / POLLSE3 / POLLSE4 — Event {#pollse1}
 
-Checks the selectable event 1 flag without waiting.
+Checks the selectable event flag (1, 2, 3, or 4) without waiting.
 
 #### Syntax
 ```pasm
         POLLSE1 {WC|WZ|WCZ}
-```
-
-#### Result
-SE1 event flag state is optionally copied into C and/or Z, then the flag is cleared.
-
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
-
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000000100 | 000100100 | — | SE1 Event | SE1 Event | 2}
-
-#### Related Instructions
-- [SETSE1](#setse1) — Configure selectable event 1
-- [WAITSE1](#waitse1) — Wait for selectable event 1
-- [JSE1](#jse1) — Jump if SE1 event occurred
-- [JNSE1](#jnse1) — Jump if SE1 event did not occur
-- [POLLSE2](#pollse2) — Poll selectable event 2
-- [POLLSE3](#pollse3) — Poll selectable event 3
-- [POLLSE4](#pollse4) — Poll selectable event 4
-
-#### Explanation
-POLLSE1 copies the state of the selectable event 1 flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the selectable event 1 flag prior to clearing it.
-
-The selectable event 1 flag is set whenever the corresponding configured event occurs. The flag is cleared upon execution of SETSE1, POLLSE1, WAITSE1, JSE1, or JNSE1 instructions.
-
-The P2 provides four independent selectable event generators that can be configured to monitor various hardware conditions including pin edges, Smart Pin events, Hub RAM FIFO status, and more. POLLSE1 enables non-blocking monitoring of the first selectable event.
-
----
-
-### POLLSE2 — Event
-
-Checks the selectable event 2 flag without waiting.
-
-#### Syntax
-```pasm
         POLLSE2 {WC|WZ|WCZ}
-```
-
-#### Result
-SE2 event flag state is optionally copied into C and/or Z, then the flag is cleared.
-
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
-
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000000101 | 000100100 | — | SE2 Event | SE2 Event | 2}
-
-#### Related Instructions
-- [SETSE2](#setse2) — Configure selectable event 2
-- [WAITSE2](#waitse2) — Wait for selectable event 2
-- [JSE2](#jse2) — Jump if SE2 event occurred
-- [JNSE2](#jnse2) — Jump if SE2 event did not occur
-- [POLLSE1](#pollse1) — Poll selectable event 1
-- [POLLSE3](#pollse3) — Poll selectable event 3
-- [POLLSE4](#pollse4) — Poll selectable event 4
-
-#### Explanation
-POLLSE2 copies the state of the selectable event 2 flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the selectable event 2 flag prior to clearing it.
-
-The selectable event 2 flag is set whenever the corresponding configured event occurs. The flag is cleared upon execution of SETSE2, POLLSE2, WAITSE2, JSE2, or JNSE2 instructions.
-
-Having four independent selectable events allows a cog to simultaneously monitor multiple hardware conditions. Each selectable event can be configured independently to watch different sources.
-
----
-
-### POLLSE3 — Event
-
-Checks the selectable event 3 flag without waiting.
-
-#### Syntax
-```pasm
         POLLSE3 {WC|WZ|WCZ}
-```
-
-#### Result
-SE3 event flag state is optionally copied into C and/or Z, then the flag is cleared.
-
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
-
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000000110 | 000100100 | — | SE3 Event | SE3 Event | 2}
-
-#### Related Instructions
-- [SETSE3](#setse3) — Configure selectable event 3
-- [WAITSE3](#waitse3) — Wait for selectable event 3
-- [JSE3](#jse3) — Jump if SE3 event occurred
-- [JNSE3](#jnse3) — Jump if SE3 event did not occur
-- [POLLSE1](#pollse1) — Poll selectable event 1
-- [POLLSE2](#pollse2) — Poll selectable event 2
-- [POLLSE4](#pollse4) — Poll selectable event 4
-
-#### Explanation
-POLLSE3 copies the state of the selectable event 3 flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the selectable event 3 flag prior to clearing it.
-
-The selectable event 3 flag is set whenever the corresponding configured event occurs. The flag is cleared upon execution of SETSE3, POLLSE3, WAITSE3, JSE3, or JNSE3 instructions.
-
-The selectable events provide a flexible event detection mechanism that can be tailored to application-specific needs, enabling efficient hardware monitoring without polling loops.
-
----
-
-### POLLSE4 — Event
-
-Checks the selectable event 4 flag without waiting.
-
-#### Syntax
-```pasm
         POLLSE4 {WC|WZ|WCZ}
 ```
 
 #### Result
-SE4 event flag state is optionally copied into C and/or Z, then the flag is cleared.
+SEn event flag state is optionally copied into C and/or Z, then the flag is cleared.
 
 #### Parameters
 | Parameter | Description |
@@ -429,23 +250,27 @@ SE4 event flag state is optionally copied into C and/or Z, then the flag is clea
 | WC/WZ/WCZ | Optional flag effects to capture event state |
 
 #### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000000111 | 000100100 | — | SE4 Event | SE4 Event | 2}
+| Instruction | Encoding |
+|-------------|----------|
+| POLLSE1 | `EEEE 1101011 CZ0 000000100 000100100` |
+| POLLSE2 | `EEEE 1101011 CZ0 000000101 000100100` |
+| POLLSE3 | `EEEE 1101011 CZ0 000000110 000100100` |
+| POLLSE4 | `EEEE 1101011 CZ0 000000111 000100100` |
+
+**Clocks:** 2
 
 #### Related Instructions
-- [SETSE4](#setse4) — Configure selectable event 4
-- [WAITSE4](#waitse4) — Wait for selectable event 4
-- [JSE4](#jse4) — Jump if SE4 event occurred
-- [JNSE4](#jnse4) — Jump if SE4 event did not occur
-- [POLLSE1](#pollse1) — Poll selectable event 1
-- [POLLSE2](#pollse2) — Poll selectable event 2
-- [POLLSE3](#pollse3) — Poll selectable event 3
+- [SETSE1/2/3/4](#setse1) — Configure selectable event source
+- [WAITSE1/2/3/4](#waitse1) — Wait for selectable event
+- [JSE1/2/3/4](#jse1) — Jump if SEn event occurred
+- [JNSE1/2/3/4](#jnse1) — Jump if SEn event did not occur
 
 #### Explanation
-POLLSE4 copies the state of the selectable event 4 flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the selectable event 4 flag prior to clearing it.
+POLLSE1, POLLSE2, POLLSE3, and POLLSE4 copy the state of their respective selectable event flags into C and/or Z and then clear the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the selectable event flag prior to clearing it.
 
-The selectable event 4 flag is set whenever the corresponding configured event occurs. The flag is cleared upon execution of SETSE4, POLLSE4, WAITSE4, JSE4, or JNSE4 instructions.
+Each selectable event flag is set whenever the corresponding configured event occurs. The flag is cleared upon execution of SETSEn, POLLSEn, WAITSEn, JSEn, or JNSEn instructions.
 
-This is the fourth and final selectable event. Together, the four selectable events enable complex event-driven applications that can monitor multiple hardware sources concurrently.
+The P2 provides four independent selectable event generators that can be configured to monitor various hardware conditions including pin edges, Smart Pin events, Hub RAM FIFO status, and more. These instructions enable non-blocking monitoring of multiple hardware sources concurrently.
 
 ---
 
