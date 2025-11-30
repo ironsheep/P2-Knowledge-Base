@@ -143,19 +143,22 @@ Invoke-Migration
 Write-Host ""
 Write-Host "Updating scripts..."
 
+# Cache-busting timestamp to bypass GitHub CDN cache
+$CacheBust = "?$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())"
+
 # Fetch script
 Write-Log "Downloading fetch-kb-file.ps1"
-Invoke-WebRequest -Uri "$BaseUrl/engineering/tools/p2kb/fetch-kb-file.ps1" -OutFile "$ScriptDir\fetch-kb-file.ps1"
+Invoke-WebRequest -Uri "$BaseUrl/engineering/tools/p2kb/fetch-kb-file.ps1$CacheBust" -OutFile "$ScriptDir\fetch-kb-file.ps1"
 Write-Status "fetch-kb-file.ps1"
 
 # Refresh script (self-update)
 Write-Log "Downloading refresh-kb.ps1"
-Invoke-WebRequest -Uri "$BaseUrl/engineering/tools/p2kb/refresh-kb.ps1" -OutFile "$ScriptDir\refresh-kb.ps1"
+Invoke-WebRequest -Uri "$BaseUrl/engineering/tools/p2kb/refresh-kb.ps1$CacheBust" -OutFile "$ScriptDir\refresh-kb.ps1"
 Write-Status "refresh-kb.ps1"
 
 # OBEX helper
 Write-Log "Downloading obex\download-helper.ps1"
-Invoke-WebRequest -Uri "$BaseUrl/engineering/tools/p2kb/obex/download-helper.ps1" -OutFile "$ScriptDir\obex\download-helper.ps1"
+Invoke-WebRequest -Uri "$BaseUrl/engineering/tools/p2kb/obex/download-helper.ps1$CacheBust" -OutFile "$ScriptDir\obex\download-helper.ps1"
 Write-Status "obex\download-helper.ps1"
 
 # =============================================================================
@@ -168,7 +171,7 @@ Write-Log "Downloading p2kb-index.json.gz"
 $tempGz = "$IndexFile.tmp.gz"
 $tempJson = "$IndexFile.tmp"
 
-Invoke-WebRequest -Uri "$BaseUrl/deliverables/ai/p2kb-index.json.gz" -OutFile $tempGz
+Invoke-WebRequest -Uri "$BaseUrl/deliverables/ai/p2kb-index.json.gz$CacheBust" -OutFile $tempGz
 
 # Decompress gzip
 $input = [System.IO.File]::OpenRead($tempGz)
@@ -227,7 +230,7 @@ foreach ($key in $CommonKeys) {
     if ($path) {
         Write-Log "Fetching $key -> $path"
         $cacheFile = "$CacheDir\$key.yaml"
-        $content = (Invoke-WebRequest -Uri "$BaseUrl/$path" -UseBasicParsing).Content
+        $content = (Invoke-WebRequest -Uri "$BaseUrl/$path$CacheBust" -UseBasicParsing).Content
         $filtered = Filter-Metadata $content
         $filtered | Out-File -FilePath $cacheFile -Encoding UTF8 -NoNewline
         Write-Status $key
@@ -243,11 +246,11 @@ Write-Host ""
 Write-Host "Updating reference files..."
 
 Write-Log "Downloading propeller-knowledge-root.yaml"
-Invoke-WebRequest -Uri "$BaseUrl/manifests/propeller-knowledge-root.yaml" -OutFile "$IndexDir\propeller-knowledge-root.yaml"
+Invoke-WebRequest -Uri "$BaseUrl/manifests/propeller-knowledge-root.yaml$CacheBust" -OutFile "$IndexDir\propeller-knowledge-root.yaml"
 Write-Status "propeller-knowledge-root.yaml"
 
 Write-Log "Downloading ai-instructions.yaml"
-Invoke-WebRequest -Uri "$BaseUrl/manifests/ai-instructions.yaml" -OutFile "$IndexDir\ai-instructions.yaml"
+Invoke-WebRequest -Uri "$BaseUrl/manifests/ai-instructions.yaml$CacheBust" -OutFile "$IndexDir\ai-instructions.yaml"
 Write-Status "ai-instructions.yaml"
 
 # =============================================================================

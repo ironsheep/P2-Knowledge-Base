@@ -125,23 +125,26 @@ migrate_old_structure
 echo "" >&2
 echo "Updating scripts..." >&2
 
+# Cache-busting timestamp to bypass GitHub CDN cache
+CACHE_BUST="?$(date +%s)"
+
 # Fetch script
 log "Downloading fetch-kb-file.sh"
-curl -sS "$BASE_URL/engineering/tools/p2kb/fetch-kb-file.sh" > "$SCRIPT_DIR/fetch-kb-file.sh.tmp"
+curl -sS "$BASE_URL/engineering/tools/p2kb/fetch-kb-file.sh$CACHE_BUST" > "$SCRIPT_DIR/fetch-kb-file.sh.tmp"
 mv "$SCRIPT_DIR/fetch-kb-file.sh.tmp" "$SCRIPT_DIR/fetch-kb-file.sh"
 chmod +x "$SCRIPT_DIR/fetch-kb-file.sh"
 status "fetch-kb-file.sh"
 
 # Refresh script (self-update)
 log "Downloading refresh-kb.sh"
-curl -sS "$BASE_URL/engineering/tools/p2kb/refresh-kb.sh" > "$SCRIPT_DIR/refresh-kb.sh.tmp"
+curl -sS "$BASE_URL/engineering/tools/p2kb/refresh-kb.sh$CACHE_BUST" > "$SCRIPT_DIR/refresh-kb.sh.tmp"
 mv "$SCRIPT_DIR/refresh-kb.sh.tmp" "$SCRIPT_DIR/refresh-kb.sh"
 chmod +x "$SCRIPT_DIR/refresh-kb.sh"
 status "refresh-kb.sh"
 
 # OBEX helper
 log "Downloading obex/download-helper.sh"
-curl -sS "$BASE_URL/engineering/tools/p2kb/obex/download-helper.sh" > "$SCRIPT_DIR/obex/download-helper.sh.tmp"
+curl -sS "$BASE_URL/engineering/tools/p2kb/obex/download-helper.sh$CACHE_BUST" > "$SCRIPT_DIR/obex/download-helper.sh.tmp"
 mv "$SCRIPT_DIR/obex/download-helper.sh.tmp" "$SCRIPT_DIR/obex/download-helper.sh"
 chmod +x "$SCRIPT_DIR/obex/download-helper.sh"
 status "obex/download-helper.sh"
@@ -153,7 +156,7 @@ echo "" >&2
 echo "Updating index..." >&2
 
 log "Downloading p2kb-index.json.gz"
-curl -sS "$BASE_URL/deliverables/ai/p2kb-index.json.gz" > "$INDEX_FILE.tmp.gz"
+curl -sS "$BASE_URL/deliverables/ai/p2kb-index.json.gz$CACHE_BUST" > "$INDEX_FILE.tmp.gz"
 gunzip -c "$INDEX_FILE.tmp.gz" > "$INDEX_FILE.tmp"
 mv "$INDEX_FILE.tmp" "$INDEX_FILE"
 rm -f "$INDEX_FILE.tmp.gz"
@@ -204,7 +207,7 @@ for key in "${COMMON_KEYS[@]}"; do
     if [[ -n "$path" ]]; then
         log "Fetching $key -> $path"
         cache_file="$CACHE_DIR/${key}.yaml"
-        curl -sS "$BASE_URL/$path" | filter_metadata > "$cache_file.tmp"
+        curl -sS "$BASE_URL/$path$CACHE_BUST" | filter_metadata > "$cache_file.tmp"
         mv "$cache_file.tmp" "$cache_file"
         status "$key"
     else
@@ -219,11 +222,11 @@ echo "" >&2
 echo "Updating reference files..." >&2
 
 log "Downloading propeller-knowledge-root.yaml"
-curl -sS "$BASE_URL/manifests/propeller-knowledge-root.yaml" > "$INDEX_DIR/propeller-knowledge-root.yaml"
+curl -sS "$BASE_URL/manifests/propeller-knowledge-root.yaml$CACHE_BUST" > "$INDEX_DIR/propeller-knowledge-root.yaml"
 status "propeller-knowledge-root.yaml"
 
 log "Downloading ai-instructions.yaml"
-curl -sS "$BASE_URL/manifests/ai-instructions.yaml" > "$INDEX_DIR/ai-instructions.yaml"
+curl -sS "$BASE_URL/manifests/ai-instructions.yaml$CACHE_BUST" > "$INDEX_DIR/ai-instructions.yaml"
 status "ai-instructions.yaml"
 
 # =============================================================================
