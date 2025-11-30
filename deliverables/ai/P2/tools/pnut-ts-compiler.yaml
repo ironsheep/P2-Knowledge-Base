@@ -1,0 +1,134 @@
+# P2 Knowledge Base - PNut-TS Compiler Guide
+# Key: p2kbToolsPnutTsCompiler
+key: p2kbToolsPnutTsCompiler
+category: tools
+subcategory: compiler
+title: "PNut-TS Compiler Usage Guide"
+description: "Guide for using pnut_ts and pnut-term-ts to compile and download P2 Spin2/PASM2 code"
+
+overview: |
+  The P2 Spin2/PASM2 compiler (pnut_ts) and terminal/downloader (pnut-term-ts) are
+  available for validating and compiling P2 code. These tools enable:
+  - Validating code snippets in documentation
+  - Generating binary and listing files
+  - Downloading compiled code to P2 hardware
+  - Debugging compilation issues
+  - Ensuring examples are syntactically correct
+
+pnut_ts:
+  description: "P2 Spin2/PASM2 compiler"
+
+  basic_usage:
+    - command: "pnut_ts filename.spin2"
+      description: "Compile to .bin file"
+    - command: "pnut_ts -l filename.spin2"
+      description: "Compile with listing file (.lst)"
+    - command: "pnut_ts -q filename.spin2"
+      description: "Quiet mode (errors only)"
+
+  common_options:
+    - option: "-l, --list"
+      description: "Generate listing file showing compiled bytecode"
+    - option: "-v, --verbose"
+      description: "Show detailed compilation messages"
+    - option: "-q, --quiet"
+      description: "Suppress non-error output"
+    - option: "-o, --output <name>"
+      description: "Specify output filename"
+    - option: "-d, --debug"
+      description: "Compile with DEBUG enabled"
+    - option: "-F, --flashfile"
+      description: "Generate .flash file for flash programming"
+    - option: "-D <symbol>"
+      description: "Define preprocessor symbol"
+    - option: "-I <path>"
+      description: "Add include path"
+
+  validation_workflow:
+    step1_validate:
+      description: "Validate documentation code snippet"
+      example: |
+        # Create test file from documentation snippet
+        echo 'DAT
+            ORG 0
+            DRVH #16
+            JMP #$' > test.spin2
+
+        # Compile to check syntax
+        pnut_ts -q test.spin2
+
+    step2_listing:
+      description: "Generate listing for analysis"
+      example: |
+        pnut_ts -l example.spin2
+        cat example.lst    # View compiled output
+
+    step3_includes:
+      description: "Check include paths"
+      example: |
+        pnut_ts -I /path/to/includes main.spin2
+
+  common_errors:
+    - error: "Expected unique symbol"
+      meaning: "Duplicate label definition"
+    - error: "Symbol is not defined"
+      meaning: "Missing label or constant"
+    - error: "Expected '#' or constant"
+      meaning: "Immediate value required"
+    - error: "Value exceeds $1FF"
+      meaning: "9-bit immediate overflow"
+
+pnut_term_ts:
+  description: "P2 terminal and downloader"
+
+  basic_usage:
+    - command: "pnut-term-ts -d filename.bin"
+      description: "Download binary to P2 hardware"
+    - command: "pnut-term-ts -t"
+      description: "Open terminal to connected P2"
+    - command: "pnut-term-ts -d filename.bin -t"
+      description: "Download and open terminal"
+
+  common_options:
+    - option: "-d, --download <file>"
+      description: "Download binary file to P2"
+    - option: "-t, --terminal"
+      description: "Open serial terminal after download"
+    - option: "-p, --port <port>"
+      description: "Specify serial port"
+    - option: "-b, --baud <rate>"
+      description: "Set baud rate (default: 2000000)"
+    - option: "-l, --list"
+      description: "List available serial ports"
+
+  workflow:
+    description: "Typical compile-download-debug workflow"
+    example: |
+      # Compile the code
+      pnut_ts -l myprogram.spin2
+
+      # List available ports
+      pnut-term-ts -l
+
+      # Download and open terminal
+      pnut-term-ts -p /dev/ttyUSB0 -d myprogram.bin -t
+
+best_practices:
+  - "Always validate code with pnut_ts -q before including in documentation"
+  - "Use listing files (-l) to verify instruction encodings when documenting opcodes"
+  - "Use quiet mode (-q) for automated validation scripts"
+  - "Check exit code ($?) to determine compilation success in scripts"
+
+version_info:
+  pnut_ts: "PNut-TS v1.51.5 (Build date: 7/11/2025)"
+  copyright: "© 2025 Iron Sheep Productions, LLC., Parallax Inc."
+
+platform_compatibility:
+  - "Multi-platform: macOS, Linux, Windows"
+  - "Command-line based (no GUI required)"
+  - "Suitable for CI/CD pipelines"
+  - "Fast enough for real-time validation"
+
+related:
+  - p2kbPasm2Pasm2GettingStarted
+  - p2kbSpin2Spin2GettingStarted
