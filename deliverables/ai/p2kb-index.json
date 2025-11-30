@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "2.0.0",
-    "generated": "2025-11-30T01:11:34.043855",
+    "generated": "2025-11-30T01:19:29.183120",
     "total_entries": 974,
     "source": "deliverables/ai/P2/"
   },
@@ -724,7 +724,7 @@
     },
     "p2kbGuideQuickQueries": {
       "path": "deliverables/ai/P2/guides/quick-queries.yaml",
-      "mtime": 1764449566
+      "mtime": 1764465554
     },
     "p2kbGuideSpin2GettingStarted": {
       "path": "deliverables/ai/P2/guides/spin2-getting-started.yaml",
@@ -3900,7 +3900,7 @@
     },
     "p2kbToolsPnutTsCompiler": {
       "path": "deliverables/ai/P2/tools/pnut-ts-compiler.yaml",
-      "mtime": 1764463192
+      "mtime": 1764465146
     }
   }
 }
