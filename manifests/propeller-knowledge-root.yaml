@@ -39,6 +39,7 @@ index:
 ai_instructions:
   location: "manifests/ai-instructions.yaml"
   version: "3.0"
+  content_hash: "sha256:539bb6c5698c702fd7a17c72d8e483378cc3a068e672c8b379e1d53dfaf91112"
   description: "Setup and usage instructions for v3.0 key-based access"
 
 fetch_scripts:
