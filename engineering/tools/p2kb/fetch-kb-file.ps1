@@ -10,7 +10,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$BaseUrl = "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main"
+$BaseUrl = "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main"
 $CacheDir = if ($env:P2KB_CACHE) { $env:P2KB_CACHE } else { "$env:USERPROFILE\.p2kb-cache" }
 $IndexFile = "$CacheDir\p2kb-index.json"
 $IndexMaxAge = 86400  # 24 hours in seconds

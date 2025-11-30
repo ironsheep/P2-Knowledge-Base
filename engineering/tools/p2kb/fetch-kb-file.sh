@@ -5,7 +5,7 @@
 
 set -e
 
-BASE_URL="https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main"
+BASE_URL="https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main"
 CACHE_DIR="${P2KB_CACHE:-$HOME/.p2kb-cache}"
 INDEX_FILE="$CACHE_DIR/p2kb-index.json"
 INDEX_MAX_AGE=86400  # 24 hours in seconds

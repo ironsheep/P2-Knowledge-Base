@@ -1,5 +1,5 @@
 # Propeller Knowledge Base - Root Manifest v3.0
-# Repository: https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base
+# Repository: https://github.com/ironsheep/P2-Knowledge-Base
 # This is the entry point - fetch this first
 
 version: "3.0"
@@ -28,7 +28,7 @@ migration:
     rm -rf ~/.p2kb-cache/*
 
     # Step 2: Download new fetch script
-    curl -sS https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
+    curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
     chmod +x ~/.p2kb-cache/fetch-kb-file.sh
     ```
 
@@ -38,7 +38,7 @@ migration:
     Remove-Item -Path "$env:USERPROFILE\.p2kb-cache\*" -Recurse -Force
 
     # Step 2: Download new fetch script
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\fetch-kb-file.ps1"
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\fetch-kb-file.ps1"
     ```
 
     **Both platforms - Step 3:**
@@ -64,7 +64,7 @@ index:
 ai_instructions:
   location: "manifests/ai-instructions.yaml"
   version: "3.1"
-  content_hash: "sha256:c6566b5d85c756ca89839349827a6aad05bc6d1109f184fee284d1312333e4fa"
+  content_hash: "sha256:c5454dbe221fa6dd47d0315fbe147251c2a44c90cf475baeb4fdfb848ed5095d"
   description: "Setup and usage instructions for v3.0 key-based access"
 
 fetch_scripts:
@@ -74,7 +74,7 @@ fetch_scripts:
 # Quick Start for v3.0
 quickstart: |
   # 1. Download fetch script
-  curl -sS https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
+  curl -sS https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
   chmod +x ~/.p2kb-cache/fetch-kb-file.sh
 
   # 2. Fetch content by key
@@ -96,5 +96,5 @@ knowledge_bases:
 
 # Metadata
 metadata:
-  repository: "https://github.com/IronSheepProductionsLLC/P2-Knowledge-Base"
-  raw_base_url: "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/"
+  repository: "https://github.com/ironsheep/P2-Knowledge-Base"
+  raw_base_url: "https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main/"
