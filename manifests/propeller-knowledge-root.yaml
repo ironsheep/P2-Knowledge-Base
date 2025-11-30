@@ -42,8 +42,11 @@ migration:
     ```
 
     **Both platforms - Step 3:**
-    Fetch manifests/ai-instructions.yaml and follow the setup_instructions section.
-    Then update your CLAUDE.md with the new instructions and hash.
+    Fetch ai-instructions.yaml using curl (it's not in the index):
+    ```bash
+    curl -sS https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/manifests/ai-instructions.yaml
+    ```
+    Then follow the upgrade_instructions section to update your CLAUDE.md.
 
 # ============================================================================
 # v3.0 Key-Based Access System
