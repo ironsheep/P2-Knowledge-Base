@@ -8,8 +8,8 @@ set -e
 BASE_URL="https://raw.githubusercontent.com/ironsheep/P2-Knowledge-Base/main"
 
 # Determine script's directory (where this script lives)
-# Use subshell to isolate from any shell hooks, head -1 to handle any doubled output
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P | head -1 | tr -d '\r')"
+# Redirect cd output to /dev/null to handle CDPATH environments
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd -P)"
 
 # Index and cache location (relative to script directory)
 INDEX_DIR="${P2KB_INDEX:-$SCRIPT_DIR/.p2kb}"
