@@ -7,11 +7,11 @@ set -e
 
 BASE_URL="https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main"
 
-# Script location (user-visible)
-SCRIPT_DIR="${P2KB_SCRIPTS:-$HOME/.p2kb-cache}"
+# Determine script's directory (where this script lives)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Index and cache location (hidden from user)
-INDEX_DIR="${P2KB_INDEX:-$HOME/.p2kb}"
+# Index and cache location (relative to script directory)
+INDEX_DIR="${P2KB_INDEX:-$SCRIPT_DIR/.p2kb}"
 INDEX_FILE="$INDEX_DIR/p2kb-index.json"
 CACHE_DIR="$INDEX_DIR/cache"
 

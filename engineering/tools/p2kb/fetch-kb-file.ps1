@@ -18,11 +18,11 @@ $ErrorActionPreference = "Stop"
 
 $BaseUrl = "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main"
 
-# Script location (user-visible)
-$ScriptDir = if ($env:P2KB_SCRIPTS) { $env:P2KB_SCRIPTS } else { "$env:USERPROFILE\.p2kb-cache" }
+# Determine script's directory (where this script lives)
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-# Index and cache location (hidden - uses AppData on Windows)
-$IndexDir = if ($env:P2KB_INDEX) { $env:P2KB_INDEX } else { "$env:LOCALAPPDATA\p2kb" }
+# Index and cache location (relative to script directory)
+$IndexDir = if ($env:P2KB_INDEX) { $env:P2KB_INDEX } else { "$ScriptDir\.p2kb" }
 $IndexFile = "$IndexDir\p2kb-index.json"
 $CacheDir = "$IndexDir\cache"
 
