@@ -1,8 +1,8 @@
-# P2 Knowledge Base - AI Integration Instructions v3.0
+# P2 Knowledge Base - AI Integration Instructions v3.1
 # Key-based access system - no path construction required
-# Version: 3.0
+# Version: 3.1
 
-instructions_version: "3.0"
+instructions_version: "3.1"
 last_updated: "2025-11-30"
 
 # ============================================================================
@@ -32,7 +32,7 @@ upgrade_instructions: |
 claude_md_content: |
   # P2 Knowledge Base Integration
 
-  _Version: 3.0_
+  _Version: 3.1_
   _Last Updated: 2025-11-30_
   _Hash Source: propeller-knowledge-root.yaml → ai_instructions.content_hash_
 
@@ -40,7 +40,13 @@ claude_md_content: |
   - **Unix/macOS/Linux:** `~/.p2kb-cache/`
   - **Windows:** `$env:USERPROFILE\.p2kb-cache\`
 
-  ## Quick Reference - Key-Based Access (v3.0)
+  ## Quick Reference - Key-Based Access (v3.1)
+
+  ### Fetch Manifests (always fresh, no caching)
+  ```bash
+  ~/.p2kb-cache/fetch-kb-file.sh manifests/propeller-knowledge-root.yaml
+  ~/.p2kb-cache/fetch-kb-file.sh manifests/ai-instructions.yaml
+  ```
 
   ### Fetch Content by Key
   ```bash
@@ -64,7 +70,8 @@ claude_md_content: |
   - `p2kbGuide*` - Guides and quick references
 
   ### Update Check Protocol
-  1. Fetch: `manifests/propeller-knowledge-root.yaml` (bypass cache)
+  1. Fetch root manifest (always fresh - script handles this):
+     `~/.p2kb-cache/fetch-kb-file.sh manifests/propeller-knowledge-root.yaml`
   2. Read the `ai_instructions.content_hash` value from the manifest
   3. Compare with your previously stored hash (save it somewhere persistent)
   4. If different → execute `migration.ai_action_required` commands, save new hash

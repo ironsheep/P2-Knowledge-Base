@@ -1,7 +1,7 @@
 #!/bin/bash
-# P2 Knowledge Base Fetch Script v3.0
-# Key-based access to YAML content
-# Usage: ./fetch-kb-file.sh <key> [--verbose]
+# P2 Knowledge Base Fetch Script v3.1
+# Key-based access to YAML content, with special handling for manifest files
+# Usage: ./fetch-kb-file.sh <key|manifest-path> [--verbose]
 
 set -e
 
@@ -10,21 +10,28 @@ CACHE_DIR="${P2KB_CACHE:-$HOME/.p2kb-cache}"
 INDEX_FILE="$CACHE_DIR/p2kb-index.json"
 INDEX_MAX_AGE=86400  # 24 hours in seconds
 
+# Special manifest paths - always fetched fresh (no caching, no key lookup)
+MANIFEST_ROOT="manifests/propeller-knowledge-root.yaml"
+MANIFEST_AI="manifests/ai-instructions.yaml"
+
 VERBOSE=0
-KEY=""
+ARG=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         --verbose|-v) VERBOSE=1; shift ;;
         -*) echo "Unknown option: $1" >&2; exit 1 ;;
-        *) KEY="$1"; shift ;;
+        *) ARG="$1"; shift ;;
     esac
 done
 
-if [[ -z "$KEY" ]]; then
-    echo "Usage: $0 <key> [--verbose]" >&2
-    echo "Example: $0 p2kbPasm2Mov" >&2
+if [[ -z "$ARG" ]]; then
+    echo "Usage: $0 <key|manifest-path> [--verbose]" >&2
+    echo "Examples:" >&2
+    echo "  $0 p2kbPasm2Mov                              # Fetch by key" >&2
+    echo "  $0 manifests/propeller-knowledge-root.yaml   # Fetch root manifest (always fresh)" >&2
+    echo "  $0 manifests/ai-instructions.yaml            # Fetch AI instructions (always fresh)" >&2
     exit 1
 fi
 
@@ -32,6 +39,20 @@ log() { [[ $VERBOSE -eq 1 ]] && echo "[INFO] $*" >&2; }
 
 # Ensure cache directory exists
 mkdir -p "$CACHE_DIR"
+
+# =============================================================================
+# Special handling for manifest files - always fetch fresh, no caching
+# =============================================================================
+if [[ "$ARG" == "$MANIFEST_ROOT" || "$ARG" == "$MANIFEST_AI" ]]; then
+    log "Manifest file detected: $ARG (fetching fresh, no cache)"
+    curl -sS "$BASE_URL/$ARG"
+    exit 0
+fi
+
+# =============================================================================
+# Standard key-based access for all other content
+# =============================================================================
+KEY="$ARG"
 
 # Check if index needs refresh
 refresh_index() {

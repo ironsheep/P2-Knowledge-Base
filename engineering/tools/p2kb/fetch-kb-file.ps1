@@ -1,10 +1,10 @@
-# P2 Knowledge Base Fetch Script v3.0
-# Key-based access to YAML content
-# Usage: .\fetch-kb-file.ps1 <key> [-Verbose]
+# P2 Knowledge Base Fetch Script v3.1
+# Key-based access to YAML content, with special handling for manifest files
+# Usage: .\fetch-kb-file.ps1 <key|manifest-path> [-Verbose]
 
 param(
     [Parameter(Mandatory=$true, Position=0)]
-    [string]$Key,
+    [string]$Arg,
     [switch]$Verbose
 )
 
@@ -15,6 +15,10 @@ $CacheDir = if ($env:P2KB_CACHE) { $env:P2KB_CACHE } else { "$env:USERPROFILE\.p
 $IndexFile = "$CacheDir\p2kb-index.json"
 $IndexMaxAge = 86400  # 24 hours in seconds
 
+# Special manifest paths - always fetched fresh (no caching, no key lookup)
+$ManifestRoot = "manifests/propeller-knowledge-root.yaml"
+$ManifestAI = "manifests/ai-instructions.yaml"
+
 function Write-Log($Message) {
     if ($Verbose) { Write-Host "[INFO] $Message" -ForegroundColor Cyan }
 }
@@ -23,6 +27,20 @@ function Write-Log($Message) {
 if (-not (Test-Path $CacheDir)) {
     New-Item -ItemType Directory -Path $CacheDir -Force | Out-Null
 }
+
+# =============================================================================
+# Special handling for manifest files - always fetch fresh, no caching
+# =============================================================================
+if ($Arg -eq $ManifestRoot -or $Arg -eq $ManifestAI) {
+    Write-Log "Manifest file detected: $Arg (fetching fresh, no cache)"
+    (Invoke-WebRequest -Uri "$BaseUrl/$Arg").Content
+    exit 0
+}
+
+# =============================================================================
+# Standard key-based access for all other content
+# =============================================================================
+$Key = $Arg
 
 # Check if index needs refresh
 function Update-Index {
