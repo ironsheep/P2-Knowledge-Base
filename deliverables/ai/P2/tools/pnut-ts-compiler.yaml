@@ -23,6 +23,10 @@ pnut_ts:
       description: "Compile to .bin file"
     - command: "pnut_ts -l filename.spin2"
       description: "Compile with listing file (.lst)"
+    - command: "pnut_ts -d filename.spin2"
+      description: "Compile with DEBUG enabled - activates all DEBUG() statements in code"
+    - command: "pnut_ts -d -l filename.spin2"
+      description: "Compile with DEBUG enabled and generate listing file"
     - command: "pnut_ts -q filename.spin2"
       description: "Quiet mode (errors only)"
 
