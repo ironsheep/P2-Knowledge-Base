@@ -1,7 +1,7 @@
 {
   "system": {
     "version": "2.0.0",
-    "generated": "2025-11-30T00:38:36.382488",
+    "generated": "2025-11-30T00:40:07.004383",
     "total_entries": 974,
     "source": "deliverables/ai/P2/"
   },
@@ -3900,7 +3900,7 @@
     },
     "p2kbToolsPnutTsCompiler": {
       "path": "deliverables/ai/P2/tools/pnut-ts-compiler.yaml",
-      "mtime": 1764463105
+      "mtime": 1764463192
     }
   }
 }
