@@ -2,11 +2,50 @@
 # Direct answers to common P2 programming questions
 # Maps questions to relevant knowledge base keys for quick lookup
 
-version: "2.0"
-last_updated: "2025-11-29"
+version: "2.1"
+last_updated: "2025-11-30"
 description: |
   Quick reference for common P2 programming questions.
   Each question maps to relevant p2kb index keys.
+
+  IMPORTANT: This is your bootstrap document. Start here to find keys.
+
+# =============================================================================
+# GETTING STARTED GUIDES - Fetch these for comprehensive introductions
+# =============================================================================
+getting_started_guides:
+  pasm2:
+    key: p2kbGuidePasm2GettingStarted
+    description: "Complete PASM2 assembly language introduction"
+  spin2:
+    key: p2kbGuideSpin2GettingStarted
+    description: "Complete Spin2 high-level language introduction"
+  compiler:
+    key: p2kbToolsPnutTsCompiler
+    description: "pnut_ts compiler setup and usage"
+
+# =============================================================================
+# ARCHITECTURE FUNDAMENTALS - Core P2 concepts
+# =============================================================================
+architecture_keys:
+  cog:
+    key: p2kbArchCog
+    description: "COG processor architecture and capabilities"
+  hub:
+    key: p2kbArchHub
+    description: "Hub memory and inter-COG communication"
+  smart_pins:
+    key: p2kbArchSmartPinUsageAnalysis
+    description: "Smart Pin system overview and usage patterns"
+  cordic:
+    key: p2kbArchCordic
+    description: "CORDIC math accelerator"
+  clock:
+    key: p2kbArchClockSystem
+    description: "Clock configuration and timing"
+  locks:
+    key: p2kbArchLocks
+    description: "Hardware locks for synchronization"
 
 questions:
   # === Getting Started ===
