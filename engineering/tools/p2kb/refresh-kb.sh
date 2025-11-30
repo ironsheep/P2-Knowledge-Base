@@ -78,8 +78,8 @@ echo "Updating common files..." >&2
 # List of common_keys.getting_started files to refresh
 COMMON_KEYS=(
     "p2kbGuideQuickQueries"
-    "p2kbSpin2Spin2GettingStarted"
-    "p2kbPasm2Pasm2GettingStarted"
+    "p2kbGuideSpin2GettingStarted"
+    "p2kbGuidePasm2GettingStarted"
     "p2kbToolsPnutTsCompiler"
 )
 
