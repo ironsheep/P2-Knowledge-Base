@@ -3,8 +3,79 @@
 # Version: 3.0
 
 instructions_version: "3.0"
-last_updated: "2025-11-29"
+last_updated: "2025-11-30"
 
+# ============================================================================
+# UPGRADE INSTRUCTIONS - For AI systems updating from v2.x
+# ============================================================================
+upgrade_instructions: |
+  ## Upgrading from v2.x to v3.0
+
+  If you detected a hash mismatch and are upgrading, follow these steps:
+
+  1. You should have already cleared your cache and downloaded the new fetch script
+     (per the ai_action_required in propeller-knowledge-root.yaml)
+
+  2. Delete the existing "# P2 Knowledge Base Integration" section from your CLAUDE.md
+
+  3. Append the content from the 'claude_md_content' field below to your CLAUDE.md
+
+  4. Store the content_hash from propeller-knowledge-root.yaml somewhere persistent
+     (e.g., in your conversation context, a file, or memory system)
+
+  5. Test the new system:
+     ~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog --verbose
+
+# ============================================================================
+# CLAUDE.MD CONTENT - Append this to your CLAUDE.md file
+# ============================================================================
+claude_md_content: |
+  # P2 Knowledge Base Integration
+
+  _Version: 3.0_
+  _Last Updated: 2025-11-30_
+  _Hash Source: propeller-knowledge-root.yaml → ai_instructions.content_hash_
+
+  ## 🔒 P2KB Cache Location
+  - **Unix/macOS/Linux:** `~/.p2kb-cache/`
+  - **Windows:** `$env:USERPROFILE\.p2kb-cache\`
+
+  ## Quick Reference - Key-Based Access (v3.0)
+
+  ### Fetch Content by Key
+  ```bash
+  ~/.p2kb-cache/fetch-kb-file.sh p2kbPasm2Mov      # Get MOV instruction
+  ~/.p2kb-cache/fetch-kb-file.sh p2kbArchCog       # Get COG architecture
+  ~/.p2kb-cache/fetch-kb-file.sh p2kbSmartPinUart  # Get UART smart pin mode
+  ```
+
+  ### Find Keys
+  ```bash
+  # Search for keys containing a term
+  jq '.files | keys[] | select(contains("Pasm2"))' ~/.p2kb-cache/p2kb-index.json
+  grep -o '"p2kb[^"]*"' ~/.p2kb-cache/p2kb-index.json | grep -i uart
+  ```
+
+  ### Key Prefixes
+  - `p2kbPasm2*` - PASM2 assembly instructions (362 instructions)
+  - `p2kbSpin2*` - Spin2 methods and language elements
+  - `p2kbArch*` - P2 architecture (cog, hub, cordic, etc.)
+  - `p2kbSmartPin*` - Smart Pin modes and configurations
+  - `p2kbGuide*` - Guides and quick references
+
+  ### Update Check Protocol
+  1. Fetch: `manifests/propeller-knowledge-root.yaml` (bypass cache)
+  2. Read the `ai_instructions.content_hash` value from the manifest
+  3. Compare with your previously stored hash (save it somewhere persistent)
+  4. If different → execute `migration.ai_action_required` commands, save new hash
+  5. If same → cache is current, proceed with normal usage
+
+  ## Starting Point
+  Use `p2kbGuideQuickQueries` to find relevant keys for your task.
+
+# ============================================================================
+# FRESH SETUP INSTRUCTIONS - For new AI systems
+# ============================================================================
 setup_instructions: |
   ## P2 Knowledge Base v3.0 Setup
 

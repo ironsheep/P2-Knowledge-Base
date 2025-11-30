@@ -17,15 +17,33 @@ migration:
     simplifies content retrieval. The old manifest navigation system
     is replaced by a single index with stable keys.
 
-  human_action_required: |
-    ⚠️ YOUR CACHED CONTENT IS OUTDATED AND MAY CONTAIN DEFECTS
+  ai_action_required: |
+    ⚠️ HASH MISMATCH - YOUR CACHE IS OUTDATED
 
-    Please tell your human:
-    1. Delete .p2kb-cache/ directory completely
-    2. Re-bootstrap from CLAUDE-QUICKSTART.md
-    3. The new system uses keys (p2kbPasm2Mov) instead of paths
+    Execute these commands to upgrade to v3.0:
 
-    This is a one-time migration. The new system is simpler and more reliable.
+    **Unix/macOS/Linux:**
+    ```bash
+    # Step 1: Clear cache contents (keep directory)
+    rm -rf ~/.p2kb-cache/*
+
+    # Step 2: Download new fetch script
+    curl -sS https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.sh > ~/.p2kb-cache/fetch-kb-file.sh
+    chmod +x ~/.p2kb-cache/fetch-kb-file.sh
+    ```
+
+    **Windows PowerShell:**
+    ```powershell
+    # Step 1: Clear cache contents (keep directory)
+    Remove-Item -Path "$env:USERPROFILE\.p2kb-cache\*" -Recurse -Force
+
+    # Step 2: Download new fetch script
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/IronSheepProductionsLLC/P2-Knowledge-Base/main/engineering/tools/p2kb/fetch-kb-file.ps1" -OutFile "$env:USERPROFILE\.p2kb-cache\fetch-kb-file.ps1"
+    ```
+
+    **Both platforms - Step 3:**
+    Fetch manifests/ai-instructions.yaml and follow the setup_instructions section.
+    Then update your CLAUDE.md with the new instructions and hash.
 
 # ============================================================================
 # v3.0 Key-Based Access System
@@ -39,7 +57,7 @@ index:
 ai_instructions:
   location: "manifests/ai-instructions.yaml"
   version: "3.0"
-  content_hash: "sha256:539bb6c5698c702fd7a17c72d8e483378cc3a068e672c8b379e1d53dfaf91112"
+  content_hash: "sha256:f0652b21e229dd96db2d161675aac237066510fc8400e26668e70eaed74d122f"
   description: "Setup and usage instructions for v3.0 key-based access"
 
 fetch_scripts:
