@@ -16,36 +16,134 @@
 | **Style Guide** | `../../manuals/p2-assembly-language-manual/style-guide.md` |
 | **Voice Guide** | `../../manuals/p2-assembly-language-manual/voice-guide.md` |
 | **Sprint Plan** | `../../manuals/p2-assembly-language-manual/sprint/PASM2-MANUAL-GENERATION-SPRINT.md` |
+| **Escape Script** | `../../../tools/conversion/latex-escape-all.sh` |
+| **Outbound Folder** | `../../outbound/p2-assembly-language-manual/` |
+
+---
+
+## Critical File Naming Convention
+
+**The master document name is sacred and never changes:**
+
+| Purpose | Filename |
+|---------|----------|
+| **Master Document** | `P2-Assembly-Language-Manual.md` |
+| **Output PDF** | `P2-Assembly-Language-Manual.pdf` |
+
+**Rules:**
+- Always use the exact document name - no suffixes like `-escaped`, `-v2`, `-final`
+- The workspace copy is unescaped (source of truth)
+- The outbound copy is escaped (ready for Forge)
+- Both use the identical filename: `P2-Assembly-Language-Manual.md`
+- Never rename files - always replace in place
 
 ---
 
 ## Directory Structure
 
 ```
-p2-assembly-language-manual/
-├── README.md                           # This file
-├── P2-Assembly-Language-Manual.md      # Assembled master document
+workspace/p2-assembly-language-manual/     ← YOU ARE HERE (unescaped source)
+├── README.md                              # This file
+├── P2-Assembly-Language-Manual.md         # Master document (UNESCAPED)
 ├── templates/
-│   ├── README.md                       # Template stack documentation
-│   ├── p2kb-pasm2-reference.latex      # Main LaTeX template
-│   └── p2kb-pasm2-diagrams.sty         # TikZ diagram macro definitions
+│   ├── README.md                          # Template documentation
+│   ├── p2kb-pasm2-reference.latex         # Main LaTeX template
+│   ├── p2kb-pasm2-foundation.sty          # Pandoc compatibility layer
+│   ├── p2kb-pasm2-content.sty             # Reference manual environments
+│   └── p2kb-pasm2-diagrams.sty            # TikZ diagram macros (24 diagrams)
 ├── filters/
 │   └── (Lua filters if needed)
 ├── assets/
 │   └── (External images if needed)
-├── request.json                        # PDF Forge configuration
-├── request-requirements.json           # Mandatory pandoc arguments
-└── VERSION-TRACKING.md                 # Document version history
+├── request.json                           # PDF Forge configuration
+├── request-requirements.json              # Mandatory pandoc arguments
+└── VERSION-TRACKING.md                    # Document version history
+
+outbound/p2-assembly-language-manual/      ← FLAT structure for PDF Forge
+├── P2-Assembly-Language-Manual.md         # ESCAPED copy (same name!)
+├── p2kb-pasm2-reference.latex             # Template (FLAT - no subfolder!)
+├── p2kb-pasm2-foundation.sty              # Style files at root level
+├── p2kb-pasm2-content.sty
+├── p2kb-pasm2-diagrams.sty
+└── request.json
 ```
 
 ---
 
-## Workflow
+## PDF Forge Workflow
 
-### 1. Content Creation (Opus Master)
-All markdown content is created in the Opus Master folder.
+### Overview
 
-### 2. Assembly Strategy (Option 3: Validate Parts, Then Combine)
+```
+WORKSPACE (unescaped)          OUTBOUND (escaped, flat)         PDF FORGE
+        │                              │                            │
+   Edit files here            Escape & flatten here          Generate PDF here
+        │                              │                            │
+        └──── latex-escape-all.sh ────►│                            │
+              + copy templates flat    │                            │
+                                       └──── User hand-copies ─────►│
+                                             (files disappear)      │
+                                                                    │
+        ◄─────────────────── User provides feedback ────────────────┘
+        │
+   Fix issues, repeat
+```
+
+### Step-by-Step Process
+
+#### 1. Edit in Workspace
+All edits happen in the workspace folder. Files here are **unescaped** - this is your source of truth.
+
+#### 2. Escape and Stage to Outbound
+```bash
+# From the workspace folder:
+cd /workspaces/P2-Knowledge-Base/engineering/document-production/workspace/p2-assembly-language-manual
+
+# Run escape script (creates backup automatically)
+../../../tools/conversion/latex-escape-all.sh \
+    P2-Assembly-Language-Manual.md \
+    ../../outbound/p2-assembly-language-manual/P2-Assembly-Language-Manual.md
+
+# Copy templates FLAT (no subfolder!) to outbound
+cp templates/*.latex templates/*.sty ../../outbound/p2-assembly-language-manual/
+
+# Copy request.json
+cp request.json ../../outbound/p2-assembly-language-manual/
+```
+
+#### 3. User Deploys to PDF Forge
+The user hand-copies files from `outbound/p2-assembly-language-manual/` to PDF Forge.
+**Files will disappear from outbound** after being moved to the Forge.
+
+#### 4. Feedback Loop
+- If PDF Forge reports errors → User relays error messages → Fix in workspace → Re-escape → Repeat
+- If PDF generates successfully → User provides visual feedback → Fix in workspace → Re-escape → Repeat
+- Continue until PDF is correct
+
+#### 5. Debugging with Generated .tex File
+After each PDF Forge run, the user will drop the generated `.tex` file into the outbound directory:
+```
+outbound/p2-assembly-language-manual/P2-Assembly-Language-Manual.tex
+```
+This intermediate LaTeX file is useful for:
+- Correlating error line numbers to actual content
+- Understanding how Pandoc transformed the markdown
+- Debugging rendering issues when user provides visual feedback
+- Finding the exact LaTeX that produced problematic output
+
+### Important Notes
+
+- **Outbound is FLAT** - No subfolders! All `.sty` and `.latex` files go at root level
+- **Same filename everywhere** - `P2-Assembly-Language-Manual.md` in workspace AND outbound
+- **Workspace is unescaped** - Never run escape script in place; always output to outbound
+- **Outbound files disappear** - This is normal; user moves them to Forge
+- **Iterative process** - Expect multiple rounds of feedback and fixes
+
+---
+
+## Content Assembly
+
+### Assembly Strategy (Phased Approach)
 
 The complete manual is expected to be 400-600 pages. To ensure quality and efficient debugging, we use a phased assembly approach:
 
@@ -58,35 +156,16 @@ cat front-matter.md \
     part-i/chapter-03-flags.md \
     part-i/chapter-04-timing.md \
     part-i/chapter-05-hardware.md \
-    > ../../workspace/p2-assembly-language-manual/P2-PASM2-Manual-Part-I.md
+    > P2-Assembly-Language-Manual.md
 ```
 **Validate:** Chapter formatting, Key Concepts boxes, code examples, any TikZ diagrams. Fix template issues while the document is small—this catches 80% of rendering problems.
 
-#### Phase B: Generate Part II in Chunks
-```bash
-# Assemble Part II - Instructions A-M
-cat part-ii/instructions-a.md \
-    part-ii/instructions-b.md \
-    ... \
-    part-ii/instructions-m.md \
-    > ../../workspace/p2-assembly-language-manual/P2-PASM2-Manual-Part-II-A-M.md
+#### Phase B: Add Part II Incrementally
+Add instruction groups progressively, validating after each addition.
 
-# Assemble Part II - Instructions N-Z plus reference sections
-cat part-ii/instructions-n.md \
-    ... \
-    part-ii/instructions-z.md \
-    part-ii/directives.md \
-    part-ii/constants.md \
-    part-ii/smartpin-constants.md \
-    part-ii/streamer-constants.md \
-    part-ii/special-registers.md \
-    > ../../workspace/p2-assembly-language-manual/P2-PASM2-Manual-Part-II-N-Z.md
-```
-**Validate:** Instruction entry tables, encoding diagrams, code examples. The repetitive structure means fixing one entry fixes patterns for all.
-
-#### Phase C: Assemble Complete Manual
+#### Phase C: Complete Manual
 ```bash
-# Full assembly
+# Full assembly - all parts
 cat front-matter.md \
     part-i/chapter-*.md \
     part-ii/instructions-*.md \
@@ -96,9 +175,8 @@ cat front-matter.md \
     part-ii/streamer-constants.md \
     part-ii/special-registers.md \
     part-iii/appendix-*.md \
-    > ../../workspace/p2-assembly-language-manual/P2-Assembly-Language-Manual.md
+    > P2-Assembly-Language-Manual.md
 ```
-**Validate:** Complete cross-references, TOC generation, page numbering, final polish.
 
 #### Why This Approach?
 - A rendering bug in a 600-page PDF is painful to diagnose
@@ -106,25 +184,18 @@ cat front-matter.md \
 - Can release Part I while Part II is finalized (if needed)
 - Faster iteration on template fixes
 
-### 3. PDF Generation
-Deploy to PDF Forge:
-1. Copy assembled markdown to PDF Forge
-2. Copy templates/ contents to PDF Forge
-3. Copy request.json to PDF Forge
-4. Run PDF generation
-
 ---
 
 ## Template Stack
 
-The LaTeX template system consists of:
+| File | Purpose | Lines |
+|------|---------|-------|
+| `p2kb-pasm2-reference.latex` | Main document template | ~70 |
+| `p2kb-pasm2-foundation.sty` | Pandoc compatibility, fonts, headers | ~270 |
+| `p2kb-pasm2-content.sty` | Reference manual environments, callouts | ~320 |
+| `p2kb-pasm2-diagrams.sty` | TikZ diagram macros (24 diagrams) | ~1600 |
 
-| File | Purpose |
-|------|---------|
-| `p2kb-pasm2-reference.latex` | Main template with document structure, colors, environments |
-| `p2kb-pasm2-diagrams.sty` | TikZ macro definitions for encoding diagrams, memory maps, bit fields |
-
-See `templates/README.md` for detailed template documentation.
+See `templates/README.md` for detailed template and diagram documentation.
 
 ---
 
@@ -134,13 +205,26 @@ The `request.json` file configures PDF Forge:
 
 ```json
 {
-  "input_file": "P2-Assembly-Language-Manual.md",
-  "output_file": "P2-Assembly-Language-Manual.pdf",
-  "template": "p2kb-pasm2-reference.latex",
-  "pandoc_args": [
-    "--pdf-engine=xelatex",
-    "--toc",
-    "--toc-depth=3"
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2-Assembly-Language-Manual.md",
+      "output": "P2-Assembly-Language-Manual.pdf",
+      "template": "p2kb-pasm2-reference",
+      "pandoc_args": [
+        "--top-level-division=chapter",
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=2"
+      ],
+      "metadata": {
+        "title": "P2 Assembly Language Reference Manual",
+        "subtitle": "Complete PASM2 Instruction Set Documentation",
+        "author": "Iron Sheep Productions, LLC",
+        "version": "Version 1.0 - Technical Review",
+        "date": "December 2025"
+      }
+    }
   ]
 }
 ```
@@ -150,4 +234,5 @@ Required arguments are documented in `request-requirements.json`.
 ---
 
 *Created: 2025-11-28*
+*Updated: 2025-12-01 - Added PDF Forge workflow, file naming conventions*
 *Sprint: PASM2 Manual Generation*

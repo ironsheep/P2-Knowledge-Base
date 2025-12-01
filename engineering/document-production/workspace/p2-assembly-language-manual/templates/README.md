@@ -1,102 +1,168 @@
-# Templates - P2 Assembly Language Manual
+# PASM2 Reference Manual - Template Documentation
 
-**Purpose:** LaTeX template stack for PDF generation via PDF Forge.
+## Template Prefix
+**Prefix:** `p2kb-pasm2-*`
+**Purpose:** Complete PASM2 Assembly Language Reference Manual
+**Status:** Production ready
 
----
+## Template Stack
 
-## Template Files
+```
+p2kb-pasm2-reference.latex     (Main template)
+    |
+    +-- p2kb-pasm2-foundation.sty   (Pandoc compatibility, core setup)
+    |
+    +-- p2kb-pasm2-content.sty      (Reference manual environments)
+    |
+    +-- p2kb-pasm2-diagrams.sty     (TikZ diagram macros - 24 diagrams)
+```
 
-| File | Purpose | Status |
-|------|---------|--------|
-| `p2kb-pasm2-reference.latex` | Main document template | **Complete** |
-| `p2kb-pasm2-diagrams.sty` | TikZ macro definitions | **Complete** |
+## File Inventory
 
----
+| File | Purpose | Lines |
+|------|---------|-------|
+| `p2kb-pasm2-reference.latex` | Main document template | ~70 |
+| `p2kb-pasm2-foundation.sty` | Pandoc compat, fonts, headers | ~230 |
+| `p2kb-pasm2-content.sty` | Reference environments, colors | ~280 |
+| `p2kb-pasm2-diagrams.sty` | TikZ diagrams | ~900+ |
+| `p2kb-foundation.sty` | Shared foundation (if needed) | ~200 |
 
-## Template Architecture
+## Diagram Macros Available
 
-### p2kb-pasm2-reference.latex
+### Part I: Architectural (from DeSilva + new)
+- `\CogAnatomyDiagram` - COG memory layout
+- `\HubMemoryDiagram` - Hub 512KB layout
+- `\EggBeaterDiagram` - P1 vs P2 hub access timing
+- `\InstructionAnatomyDiagram` - PASM2 instruction format
+- `\InstructionExampleDiagram` - Concrete instruction example
+- `\EightCogOverviewDiagram` - 8 COGs connected to Hub
+- `\CogMemoryMapDiagram` - COG $000-$1FF layout
+- `\LutMemoryMapDiagram` - LUT $200-$3FF layout
+- `\CogHubRelationshipDiagram` - Memory hierarchy
+- `\SpecialRegistersMapDiagram` - $1F0-$1FF detail
 
-The main template defines:
+### Part I: Timing
+- `\HubWindowTimingDiagram` - Egg beater rotation timing
+- `\InstructionTimingDiagram` - 2-cycle base with hub extension
+- `\BranchTimingDiagram` - Branch taken vs not taken
 
-- **Document class and geometry** - Page size, margins
-- **Color palette** - All colors from style-guide Section 9
-- **Typography** - Fonts, heading styles
-- **Custom environments** - At-a-glance boxes, note callouts, code blocks
-- **Encoding table styling** - Column widths, header formatting
-- **Package imports** - TikZ, colortbl, booktabs, etc.
+### Part I: Flags & Hardware
+- `\FlagFlowDiagram` - WC/WZ flag modification
+- `\CordicOperationDiagram` - CORDIC pipeline
+- `\InterruptPriorityDiagram` - INT1/2/3 priority levels
 
-#### Encoding Table Macros
+### Part II: Instruction Encoding
+- `\InstructionEncoding{NAME}{EEEE}{OPCODE}{CZI}{DEST}{SRC}` - Universal encoding diagram
 
-| Macro | Purpose |
-|-------|---------|
-| `\begin{encodingtable}...\end{encodingtable}` | Full encoding table environment |
-| `\encodingrow{9 args}` | Table row with bottom border |
-| `\encodingrowcont{9 args}` | Table row without border (for multi-row) |
-| `\simpleencoding{9 args}` | Quick single-row encoding table |
+### Part II: Bit Reordering
+- `\SplitBDiagram` - SPLITB operation
+- `\RevDiagram` - REV bit reversal
+- `\MovbytsDiagram{pattern}` - MOVBYTS shuffle
+- `\RolByteDiagram` - ROLBYTE rotation
+- `\SetByteDiagram` - SETBYTE insertion
+- `\BitValueBar{value}` - 32-bit value display
 
-**Arguments (9 total):** COND, INSTR, FX, DEST, SRC, Write, CFlag, ZFlag, Clocks
+### Part II: Directives
+- `\AlignWDiagram` - ALIGNW word alignment
+- `\AlignLDiagram` - ALIGNL long alignment
+- `\MemoryMap{title}{content}` - Generic memory map
 
-### p2kb-pasm2-diagrams.sty
+### Part II: Register Fields
+- `\CoginitDestFieldDiagram` - COGINIT dest field
+- `\DirRegisterFieldDiagram` - DIRA/DIRB layout
+- `\RegisterBitField{name}{width}{content}` - Generic bit field
 
-TikZ macro definitions for:
+## Content Environments
 
-| Macro | Purpose |
-|-------|---------|
-| `\InstructionEncoding{}` | 32-bit instruction encoding diagram |
-| `\MemoryMap{}` | Vertical memory layout diagrams |
-| `\MemoryRegion{}` | Inline memory reference (compact) |
-| `\BitReorder{}` | Before/after bit manipulation diagrams |
-| `\RegisterMap{}` | Special register bit field layouts |
+### Callout Boxes
+```latex
+\begin{warningbox}
+Warning content here
+\end{warningbox}
 
----
+\begin{notebox}
+Note content here
+\end{notebox}
+
+\begin{tipbox}
+Tip content here
+\end{tipbox}
+
+\begin{hardwarebox}
+Hardware-specific note here
+\end{hardwarebox}
+```
+
+### At a Glance
+```latex
+\begin{ataglance}
+Quick summary of instruction
+\end{ataglance}
+```
+
+### Syntax Display
+```latex
+\begin{syntaxbox}
+\texttt{ADD D, S/\#n}
+\end{syntaxbox}
+```
 
 ## Usage in Markdown
 
-Invoke TikZ macros using LaTeX passthrough:
+### Embedding Diagrams
+```markdown
+```{=latex}
+\EggBeaterDiagram
+```
+```
 
+### Instruction Encoding
 ```markdown
 ```{=latex}
 \InstructionEncoding{ADD}{EEEE}{0001000}{CZI}{DDDDDDDDD}{SSSSSSSSS}
 ```
 ```
 
+## PDF Generation
+
+### Prerequisites on PDF Forge
+- XeLaTeX with Latin Modern fonts
+- TikZ with libraries: shapes.geometric, arrows.meta, positioning, calc, decorations.pathreplacing, patterns, fit
+- tcolorbox with skins, breakable
+- All template files in same directory
+
+### Command
+```bash
+pandoc P2-Assembly-Language-Manual.md \
+  --template=p2kb-pasm2-reference.latex \
+  --pdf-engine=xelatex \
+  --top-level-division=chapter \
+  --toc \
+  --toc-depth=2 \
+  -o P2-Assembly-Language-Manual.pdf
+```
+
+## Color Palette
+
+### Entry Structure
+- `pasm2-entry-header` (#2C3E50) - Dark blue-gray headers
+- `pasm2-entry-bg` (#F8F9FA) - Light gray background
+- `pasm2-glance-bg` (#E3F2FD) - Light blue for At a Glance
+
+### Callouts
+- `pasm2-warning-*` - Orange theme
+- `pasm2-note-*` - Blue theme
+- `pasm2-tip-*` - Green theme
+- `pasm2-hardware-*` - Purple theme
+
+### Diagram Colors
+- `mem-cog` (#E0F0E0) - COG memory (light green)
+- `mem-hub` (#E0E0F0) - Hub memory (light blue)
+- `mem-lut` (#F0E0E0) - LUT memory (light red)
+- `mem-special` (#F0F0E0) - Special registers (light yellow)
+- `encoding-*` - Instruction field colors
+
 ---
 
-## Color Palette Reference
-
-Defined in template, matching style-guide Section 9.1:
-
-**Primary Palette:**
-- `p2kb-dark` (#2C3E50) - Headers, emphasis
-- `p2kb-medium` (#7F8C8D) - Secondary text
-- `p2kb-light` (#ECF0F1) - Backgrounds
-- `p2kb-accent` (#3498DB) - Links, highlights
-
-**Encoding Diagram Colors:**
-- `encoding-cond` (#E8E8E8) - Condition field
-- `encoding-op` (#D0D0D0) - Opcode field
-- `encoding-flag` (#E8E0E0) - Flag field
-- `encoding-dest` (#E0E8E0) - Destination field
-- `encoding-src` (#E0E0E8) - Source field
-
-**Note Colors:**
-- `pitfall-bg` (#FFF3E0) - Warning backgrounds
-- `tip-bg` (#E3F2FD) - Tip backgrounds
-- `hardware-bg` (#F5F5F5) - Hardware note backgrounds
-
----
-
-## PDF Forge Deployment
-
-When deploying to PDF Forge:
-
-1. Copy `p2kb-pasm2-reference.latex` to PDF Forge templates
-2. Copy `p2kb-pasm2-diagrams.sty` to PDF Forge templates
-3. Ensure both files are in same directory as input markdown
-4. PDF Forge will use these for rendering
-
----
-
-*Created: 2025-11-28*
-*Sprint: PASM2 Manual Generation Phase 0*
+*Created: 2025-12-01*
+*Template Version: 1.0*

@@ -1,0 +1,398 @@
+% P2KB PASM2 Reference Manual Content Layer
+% Reference manual specific environments and styling
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0
+%
+% This package defines environments specific to a reference manual:
+% - Instruction entries with encoding tables
+% - At a Glance boxes
+% - Warning/Note/Tip callouts
+% - Related instruction cross-references
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-pasm2-content}[2025/12/01 P2KB PASM2 Content Layer v1.0]
+
+% ==================== COLOR PALETTE ====================
+% Reference manual color scheme - professional and readable
+
+% Entry structure colors
+\definecolor{pasm2-entry-header}{HTML}{2C3E50}      % Dark blue-gray for headers
+\definecolor{pasm2-entry-bg}{HTML}{F8F9FA}          % Very light gray background
+\definecolor{pasm2-entry-border}{HTML}{DEE2E6}      % Light gray border
+
+% At a Glance box
+\definecolor{pasm2-glance-bg}{HTML}{E3F2FD}         % Light blue
+\definecolor{pasm2-glance-border}{HTML}{1976D2}     % Blue border
+
+% Encoding table colors
+\definecolor{pasm2-encoding-header}{HTML}{E8E8E8}   % Gray header row
+\definecolor{pasm2-encoding-cond}{HTML}{F5F5F5}     % Condition field
+\definecolor{pasm2-encoding-op}{HTML}{EEEEEE}       % Opcode field
+
+% Callout colors
+\definecolor{pasm2-warning-bg}{HTML}{FFF3E0}        % Light orange
+\definecolor{pasm2-warning-border}{HTML}{FF9800}    % Orange
+\definecolor{pasm2-note-bg}{HTML}{E3F2FD}           % Light blue
+\definecolor{pasm2-note-border}{HTML}{2196F3}       % Blue
+\definecolor{pasm2-tip-bg}{HTML}{E8F5E9}            % Light green
+\definecolor{pasm2-tip-border}{HTML}{4CAF50}        % Green
+\definecolor{pasm2-hardware-bg}{HTML}{F3E5F5}       % Light purple
+\definecolor{pasm2-hardware-border}{HTML}{9C27B0}   % Purple
+
+% Code block colors (single style for reference manual)
+\definecolor{pasm2-code-bg}{HTML}{FAFAFA}           % Very light gray
+\definecolor{pasm2-code-border}{HTML}{BDBDBD}       % Gray border
+
+% ==================== AT A GLANCE BOX ====================
+% Summary box at the top of each instruction entry
+
+\newtcolorbox{ataglance}{
+  title=At a Glance,
+  fonttitle=\bfseries\small,
+  colbacktitle=pasm2-glance-border,
+  coltitle=white,
+  colback=pasm2-glance-bg,
+  colframe=pasm2-glance-border,
+  boxrule=1pt,
+  rounded corners=southeast,
+  arc=3pt,
+  left=10pt,
+  right=10pt,
+  top=6pt,
+  bottom=6pt,
+  before skip=12pt,
+  after skip=12pt,
+  enhanced,
+  attach boxed title to top left={xshift=10pt, yshift=-2pt}
+}
+
+% ==================== ENCODING TABLE STYLING ====================
+% For instruction encoding display
+
+% Gray header row for encoding tables
+\newcommand{\encodingheader}[1]{%
+  \rowcolor{pasm2-encoding-header}%
+  \textbf{#1}%
+}
+
+% Encoding field styling
+\newcommand{\encodingfield}[1]{%
+  \texttt{#1}%
+}
+
+% Encoding table environment
+% Creates a formatted table for instruction binary encoding
+% Columns: EEEE | Opcode | CZI | D | S | C Result | Z Result | Result | Clocks
+\newenvironment{encodingtable}{%
+  \par\vspace{6pt}%
+  \small
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+  \hline
+  \rowcolor{pasm2-encoding-header}
+  \textbf{EEEE} & \textbf{Opcode} & \textbf{CZI} & \textbf{D} & \textbf{S} & \textbf{C} & \textbf{Z} & \textbf{Result} & \textbf{Clks} \\
+  \hline
+}{%
+  \end{tabular}%
+  \par\vspace{6pt}%
+}
+
+% Encoding row (with bottom hline)
+% Args: EEEE, Opcode, CZI, D, S, C result, Z result, Result, Clocks
+\newcommand{\encodingrow}[9]{%
+  \texttt{#1} & \texttt{#2} & \texttt{#3} & \texttt{#4} & \texttt{#5} & #6 & #7 & #8 & #9 \\
+  \hline
+}
+
+% Encoding row continued (no bottom hline, for multi-row entries)
+\newcommand{\encodingrowcont}[9]{%
+  \texttt{#1} & \texttt{#2} & \texttt{#3} & \texttt{#4} & \texttt{#5} & #6 & #7 & #8 & #9 \\
+}
+
+% Simple encoding - standalone single-row encoding table
+% Args: EEEE, Opcode, CZI, D, S, C result, Z result, Result, Clocks
+\newcommand{\simpleencoding}[9]{%
+  \par\vspace{6pt}%
+  \small
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+  \hline
+  \rowcolor{pasm2-encoding-header}
+  \textbf{EEEE} & \textbf{Opcode} & \textbf{CZI} & \textbf{D} & \textbf{S} & \textbf{C} & \textbf{Z} & \textbf{Result} & \textbf{Clks} \\
+  \hline
+  \texttt{#1} & \texttt{#2} & \texttt{#3} & \texttt{#4} & \texttt{#5} & #6 & #7 & #8 & #9 \\
+  \hline
+  \end{tabular}%
+  \par\vspace{6pt}%
+}
+
+% ==================== CALLOUT BOXES ====================
+% Warning, Note, Tip, Hardware callouts
+
+% Warning box (orange) - for common mistakes and gotchas
+\newtcolorbox{warningbox}{
+  colback=pasm2-warning-bg,
+  colframe=pasm2-warning-border,
+  boxrule=0pt,
+  leftrule=4pt,
+  rounded corners,
+  arc=2pt,
+  left=10pt,
+  right=10pt,
+  top=6pt,
+  bottom=6pt,
+  before skip=10pt,
+  after skip=10pt,
+  breakable
+}
+
+% Note box (blue) - for additional information
+\newtcolorbox{notebox}{
+  colback=pasm2-note-bg,
+  colframe=pasm2-note-border,
+  boxrule=0pt,
+  leftrule=4pt,
+  rounded corners,
+  arc=2pt,
+  left=10pt,
+  right=10pt,
+  top=6pt,
+  bottom=6pt,
+  before skip=10pt,
+  after skip=10pt,
+  breakable
+}
+
+% Tip box (green) - for best practices
+\newtcolorbox{tipbox}{
+  colback=pasm2-tip-bg,
+  colframe=pasm2-tip-border,
+  boxrule=0pt,
+  leftrule=4pt,
+  rounded corners,
+  arc=2pt,
+  left=10pt,
+  right=10pt,
+  top=6pt,
+  bottom=6pt,
+  before skip=10pt,
+  after skip=10pt,
+  breakable
+}
+
+% Hardware box (purple) - for hardware-specific notes
+\newtcolorbox{hardwarebox}{
+  colback=pasm2-hardware-bg,
+  colframe=pasm2-hardware-border,
+  boxrule=0pt,
+  leftrule=4pt,
+  rounded corners,
+  arc=2pt,
+  left=10pt,
+  right=10pt,
+  top=6pt,
+  bottom=6pt,
+  before skip=10pt,
+  after skip=10pt,
+  breakable
+}
+
+% ==================== KEY CONCEPTS BOX ====================
+% Summary box for key concepts at end of chapters
+
+\definecolor{pasm2-concepts-bg}{HTML}{F0F7FF}         % Very light blue
+\definecolor{pasm2-concepts-border}{HTML}{4A90D9}     % Medium blue
+
+\newenvironment{keyconcepts}{%
+  \begin{tcolorbox}[
+    title=Key Concepts,
+    fonttitle=\bfseries\small,
+    colbacktitle=pasm2-concepts-border,
+    coltitle=white,
+    colback=pasm2-concepts-bg,
+    colframe=pasm2-concepts-border,
+    boxrule=1pt,
+    rounded corners,
+    arc=3pt,
+    left=10pt,
+    right=10pt,
+    top=6pt,
+    bottom=6pt,
+    before skip=12pt,
+    after skip=12pt,
+    breakable
+  ]
+  \begin{itemize}[leftmargin=15pt, itemsep=4pt, topsep=0pt]
+}{%
+  \end{itemize}
+  \end{tcolorbox}
+}
+
+% ==================== ENTRY STRUCTURE ENVIRONMENTS ====================
+
+% Instruction entry container (optional - for visual separation)
+\newtcolorbox{instructionentry}{
+  colback=white,
+  colframe=pasm2-entry-border,
+  boxrule=0.5pt,
+  rounded corners,
+  arc=3pt,
+  left=12pt,
+  right=12pt,
+  top=10pt,
+  bottom=10pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Related instructions section styling
+\newcommand{\relatedinstructions}[1]{%
+  \par\vspace{6pt}%
+  \textbf{Related Instructions:} #1%
+  \par%
+}
+
+% ==================== SYNTAX DISPLAY ====================
+% For displaying instruction syntax
+
+% Syntax box with monospace font
+\newtcolorbox{syntaxbox}{
+  colback=pasm2-code-bg,
+  colframe=pasm2-code-border,
+  boxrule=0.5pt,
+  rounded corners,
+  arc=2pt,
+  left=10pt,
+  right=10pt,
+  top=6pt,
+  bottom=6pt,
+  before skip=8pt,
+  after skip=8pt
+}
+
+% Inline syntax command
+\newcommand{\syntax}[1]{\texttt{#1}}
+
+% ==================== PASM2 LANGUAGE DEFINITIONS ====================
+
+\lstdefinelanguage{pasm2}{
+  keywords={org, res, long, word, byte, mov, add, sub, and, or, xor, not,
+            shl, shr, sar, rol, ror, rcl, rcr, test, cmp, jmp, call, ret,
+            djnz, tjz, tjnz, wrpin, wxpin, wypin, rdpin, rqpin, akpin,
+            dirh, dirl, testp, waitx, rep, nop, if_z, if_nz, if_c, if_nc,
+            if_c_and_z, if_c_or_z, if_nc_and_nz, if_nc_or_nz,
+            wc, wz, wcz, qrotate, qvector, getqx, getqy,
+            setq, setq2, rdlong, wrlong, rdword, wrword, rdbyte, wrbyte,
+            coginit, cogid, cogstop, hubset, waitcnt, locknew, lockret,
+            locktry, lockrel, augs, augd, ptra, ptrb},
+  sensitive=false,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]'
+}
+
+\lstdefinelanguage{spin2}{
+  keywords={CON, VAR, OBJ, PUB, PRI, DAT, repeat, if, else, elseif, case,
+            while, until, from, to, step, return, abort, next, quit,
+            byte, word, long, res, file, org, end, fit},
+  sensitive=true,
+  comment=[l]{'},
+  morecomment=[l]{//},
+  string=[b]",
+  morestring=[b]'
+}
+
+% ==================== CODE BLOCK STYLING ====================
+% Override default Shaded to use reference manual style
+
+\renewenvironment{Shaded}{%
+  \par\needspace{4\baselineskip}%
+  \vspace{0.5\baselineskip}%
+  \begin{tcolorbox}[
+    boxrule=0.5pt,
+    colback=pasm2-code-bg,
+    colframe=pasm2-code-border,
+    rounded corners,
+    arc=2pt,
+    left=8pt,
+    right=8pt,
+    top=6pt,
+    bottom=6pt,
+    before skip=8pt,
+    after skip=8pt
+  ]
+}{%
+  \end{tcolorbox}%
+  \par\vspace{0.5\baselineskip}%
+}
+
+% ==================== PART/CHAPTER STYLING ====================
+% Reference manual has three parts: Foundation, Reference, Appendices
+
+% Part styling - centered, large
+\titleformat{\part}[display]
+  {\centering\normalfont\Huge\bfseries}
+  {\partname\ \thepart}
+  {20pt}
+  {\Huge}
+
+% ==================== ENTRY HEADING STYLING ====================
+% For instruction names as section headers
+
+% Instruction name styling (used in section headers)
+\newcommand{\instrname}[1]{%
+  \texttt{\large\bfseries #1}%
+}
+
+% Category label
+\newcommand{\category}[1]{%
+  \textit{\small #1}%
+}
+
+% ==================== ENHANCEMENT MARKERS ====================
+% Visual markers for enhanced content (from voice-guide.md)
+
+\newcommand{\warningmarker}{\textcolor{pasm2-warning-border}{$\blacktriangle$}}
+\newcommand{\tipmarker}{\textcolor{pasm2-tip-border}{$\star$}}
+\newcommand{\hardwaremarker}{\textcolor{pasm2-hardware-border}{$\blacksquare$}}
+
+% ==================== INDEX ENTRIES ====================
+% Automatic index entry creation
+
+\newcommand{\indexinstruction}[1]{%
+  \index{#1 (instruction)}%
+}
+
+\newcommand{\indexdirective}[1]{%
+  \index{#1 (directive)}%
+}
+
+\newcommand{\indexconstant}[1]{%
+  \index{#1 (constant)}%
+}
+
+\newcommand{\indexregister}[1]{%
+  \index{#1 (register)}%
+}
+
+% ==================== TABLE ENHANCEMENTS ====================
+% For encoding tables and appendix tables
+
+% Encoding table column types
+\newcolumntype{E}{>{\ttfamily\centering\arraybackslash}p{1.2cm}}  % Encoding field
+\newcolumntype{O}{>{\ttfamily\centering\arraybackslash}p{2cm}}   % Opcode field
+\newcolumntype{C}{>{\centering\arraybackslash}p{0.8cm}}          % CZI field
+\newcolumntype{T}{>{\centering\arraybackslash}p{1cm}}            % Timing field
+
+% ==================== CROSS-REFERENCE HELPERS ====================
+
+% Cross-reference to instruction (creates hyperlink)
+\newcommand{\instrref}[1]{\hyperref[instr:#1]{\texttt{#1}}}
+
+% Cross-reference to chapter
+\newcommand{\chapref}[1]{Chapter~\ref{chap:#1}}
+
+% Cross-reference to appendix
+\newcommand{\appref}[1]{Appendix~\ref{app:#1}}
+
+\endinput

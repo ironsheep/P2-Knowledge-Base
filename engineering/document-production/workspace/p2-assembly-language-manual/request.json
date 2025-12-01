@@ -1,12 +1,28 @@
 {
-  "input_file": "P2-Assembly-Language-Manual.md",
-  "output_file": "P2-Assembly-Language-Manual.pdf",
-  "template": "p2kb-pasm2-reference.latex",
-  "pandoc_args": [
-    "--pdf-engine=xelatex",
-    "--toc",
-    "--toc-depth=3",
-    "--number-sections",
-    "--highlight-style=tango"
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2-Assembly-Language-Manual.md",
+      "output": "P2-Assembly-Language-Manual.pdf",
+      "template": "p2kb-pasm2-reference",
+      "pandoc_args": [
+        "--top-level-division=chapter",
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=2"
+      ],
+      "lua_filters": [
+        "p2kb-pasm2-mnemonic-bold",
+        "p2kb-pasm2-code-coloring",
+        "p2kb-pasm2-pagination"
+      ],
+      "metadata": {
+        "title": "P2 Assembly Language Reference Manual",
+        "subtitle": "Complete PASM2 Instruction Set Documentation",
+        "author": "Iron Sheep Productions, LLC",
+        "version": "Version 1.0 - Technical Review",
+        "date": "December 2025"
+      }
+    }
   ]
 }

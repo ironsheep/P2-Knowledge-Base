@@ -1,476 +1,1601 @@
-%% p2kb-pasm2-diagrams.sty
-%% TikZ diagram macros for P2 Assembly Language Reference Manual
-%% Version: 0.1.0
-%% Created: 2025-11-28
+% P2KB PASM2 Reference Manual Diagrams Package
+% TikZ diagrams for P2 Assembly Language Reference Manual
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0
+%
+% Based on p2kb-desilva-diagrams.sty with additions for PASM2 manual
+% Provides all diagrams from DIAGRAM-INVENTORY.md
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{p2kb-pasm2-diagrams}[2025/11/28 P2KB PASM2 Diagram Macros]
-
-%% ============================================================================
-%% REQUIRED PACKAGES
-%% ============================================================================
+\ProvidesPackage{p2kb-pasm2-diagrams}[2025/12/01 P2KB PASM2 Diagrams v1.0]
 
 \RequirePackage{tikz}
-\RequirePackage{xcolor}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, decorations.pathreplacing, patterns, fit}
 
-\usetikzlibrary{calc,positioning,shapes.geometric,arrows.meta,patterns}
+% ============================================================================
+% COLOR DEFINITIONS
+% ============================================================================
 
-%% ============================================================================
-%% COLOR DEFINITIONS (matching p2kb-pasm2-reference.latex)
-%% ============================================================================
+% Base diagram colors (from DeSilva)
+\definecolor{diagram-box}{HTML}{E8E8E8}
+\definecolor{diagram-border}{HTML}{666666}
+\definecolor{diagram-highlight}{HTML}{D4E8D4}
+\definecolor{diagram-text}{HTML}{333333}
 
 % Memory region colors
-\definecolor{mem-cog}{HTML}{E0E8E0}         % COG RAM - light green
-\definecolor{mem-lut}{HTML}{E0E0E8}         % LUT RAM - light blue
-\definecolor{mem-hub}{HTML}{E8E0E0}         % Hub RAM - light red/pink
-\definecolor{mem-special}{HTML}{FFE8B0}     % Special registers - light gold
-\definecolor{mem-border}{HTML}{666666}      % Border color
-\definecolor{mem-addr}{HTML}{333333}        % Address text color
-\definecolor{mem-label}{HTML}{000000}       % Label text color
+\definecolor{mem-cog}{HTML}{E0F0E0}       % Light green - COG RAM
+\definecolor{mem-hub}{HTML}{E0E0F0}       % Light blue - Hub RAM
+\definecolor{mem-lut}{HTML}{F0E0E0}       % Light red/pink - LUT RAM
+\definecolor{mem-special}{HTML}{F0F0E0}   % Light yellow - Special registers
 
-%% ============================================================================
-%% MEMORY MAP MACRO
-%% ============================================================================
-%% \MemoryMap{width}{total-height}{region-definitions}
-%%
-%% Creates a vertical memory map diagram.
-%%
-%% Parameters:
-%%   width        - Width of the memory block (e.g., 4cm)
-%%   total-height - Total height of the diagram (e.g., 8cm)
-%%   region-defs  - Series of \MemRegion commands
-%%
-%% Usage:
-%%   \begin{tikzpicture}
-%%     \MemoryMap{4cm}{8cm}{
-%%       \MemRegion{0}{0.5}{mem-cog}{COG RAM}{$000-$1FF}{512 longs}
-%%       \MemRegion{0.5}{1.0}{mem-lut}{LUT RAM}{$200-$3FF}{512 longs}
-%%     }
-%%   \end{tikzpicture}
-%%
-%% Note: MemRegion positions are fractions of total height (0.0 to 1.0)
-%% ============================================================================
+% Instruction encoding colors
+\definecolor{encoding-cond}{HTML}{E8E8E8} % Condition field (EEEE)
+\definecolor{encoding-op}{HTML}{D0D0D0}   % Opcode field
+\definecolor{encoding-flag}{HTML}{E8E0E0} % Flag field (CZI)
+\definecolor{encoding-dest}{HTML}{E0E8E0} % Dest field (DDDDDDDDD)
+\definecolor{encoding-src}{HTML}{E0E0E8}  % Src field (SSSSSSSSS)
 
-% Internal state for memory map dimensions
-\newlength{\memmapwidth}
-\newlength{\memmapheight}
+% Bit reordering colors
+\definecolor{bit-byte0}{HTML}{FFE0E0}     % Byte 0 - light red
+\definecolor{bit-byte1}{HTML}{E0FFE0}     % Byte 1 - light green
+\definecolor{bit-byte2}{HTML}{E0E0FF}     % Byte 2 - light blue
+\definecolor{bit-byte3}{HTML}{FFFFE0}     % Byte 3 - light yellow
 
-% Begin memory map context
-\newcommand{\MemoryMapStart}[2]{%
-    \setlength{\memmapwidth}{#1}%
-    \setlength{\memmapheight}{#2}%
+% Timing diagram colors
+\definecolor{timing-active}{HTML}{90EE90}  % Light green - active
+\definecolor{timing-wait}{HTML}{FFB6C1}    % Light pink - waiting
+\definecolor{timing-hub}{HTML}{ADD8E6}     % Light blue - hub access
+
+% ============================================================================
+% PART I: ARCHITECTURAL DIAGRAMS (FROM DESILVA + NEW)
+% ============================================================================
+
+% ==================== COG ANATOMY DIAGRAM (from DeSilva) ====================
+% Shows COG memory layout: $000-$1FF COG RAM, $200-$3FF LUT, other resources
+\newcommand{\CogAnatomyDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={
+        rectangle,
+        draw=diagram-border,
+        fill=diagram-box,
+        minimum width=5.5cm,
+        minimum height=0.6cm,
+        align=center,
+        font=\footnotesize
+    },
+    highlight/.style={
+        box,
+        fill=diagram-highlight
+    },
+    smallbox/.style={
+        rectangle,
+        draw=diagram-border,
+        fill=diagram-box,
+        minimum width=2.3cm,
+        minimum height=0.7cm,
+        align=center,
+        font=\scriptsize
+    },
+    annotation/.style={
+        font=\scriptsize\itshape,
+        text=diagram-text
+    },
+    addr/.style={
+        font=\scriptsize\ttfamily,
+        text=diagram-text
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 6.0) {Each COG Contains:};
+
+% === COG RAM Section ===
+\node[font=\small\bfseries] at (-3.8, 5.3) {COG RAM};
+
+% COG RAM boxes with addresses
+\node[addr] at (-3.5, 4.3) {\$000};
+\node[highlight, minimum height=1.2cm] (gpram) at (0, 4.3) {General Purpose RAM\\(496 longs)};
+\node[annotation, right=0.2cm of gpram] {Code \& data};
+
+\node[addr] at (-3.5, 2.9) {\$1F0};
+\node[box, minimum height=0.5cm] (intvec) at (0, 2.9) {Interrupt Vectors (6 longs)};
+\node[annotation, right=0.2cm of intvec] {IJMP/IRET 1-3};
+
+\node[addr] at (-3.5, 2.3) {\$1F6};
+\node[box, minimum height=0.5cm] (papb) at (0, 2.3) {PA, PB (2 longs)};
+\node[annotation, right=0.2cm of papb] {Parameters};
+
+\node[addr] at (-3.5, 1.7) {\$1F8};
+\node[box, minimum height=0.5cm, fill=orange!20] (ptrs) at (0, 1.7) {PTRA, PTRB (hub pointers)};
+
+\node[addr] at (-3.5, 1.1) {\$1FA};
+\node[box, minimum height=0.5cm, fill=orange!20] (ioreg) at (0, 1.1) {DIRA/B, OUTA/B, INA/B};
+
+% Bracket for special registers
+\draw[thick, decorate, decoration={brace, amplitude=5pt}]
+    (3.2, 2.0) -- (3.2, 0.9) node[midway, right=6pt, font=\scriptsize, text width=1.8cm, align=left] {Special\\Registers};
+
+% === LUT RAM Section ===
+\node[addr] at (-3.5, 0.4) {\$200};
+\node[highlight, minimum height=0.8cm] (lutram) at (0, 0.3) {LUT RAM (512 longs, 2KB)};
+\node[annotation, right=0.2cm of lutram] {Tables, sharing};
+\node[addr] at (-3.5, 0.1) {\$3FF};
+
+% === Other Resources ===
+\node[font=\small\bfseries] at (-3.8, -0.9) {Other Resources};
+
+\node[smallbox] (stack) at (-1.5, -1.7) {Hardware Stack\\(8 levels)};
+\node[smallbox] (flags) at (1.5, -1.7) {C \& Z Flags};
+
+\node[smallbox] (fifo) at (-1.5, -2.7) {Hub FIFO\\(19 entries)};
+\node[smallbox] (pipe) at (1.5, -2.7) {5-Stage\\Pipeline};
+
+\end{tikzpicture}
+\end{center}
 }
 
-% Draw a memory region within the map
-% Args: start-frac, end-frac, color, label, addr-range, size-annotation
-\newcommand{\MemRegion}[6]{%
-    \pgfmathsetmacro{\starty}{#1 * \memmapheight}%
-    \pgfmathsetmacro{\endy}{#2 * \memmapheight}%
-    \pgfmathsetmacro{\regionheight}{(\endy - \starty)}%
-    % Draw filled region
-    \fill[#3, draw=mem-border, line width=0.5pt]
-        (0, \starty pt) rectangle (\memmapwidth, \endy pt);
-    % Center label
-    \node[anchor=center, font=\sffamily\small]
-        at (0.5\memmapwidth, {(\starty + \endy)/2} pt) {#4};
-    % Address range on left
-    \node[anchor=east, font=\ttfamily\scriptsize, text=mem-addr]
-        at (-2pt, {(\starty + \endy)/2} pt) {#5};
-    % Size annotation on right
-    \node[anchor=west, font=\scriptsize, text=mem-addr]
-        at (\memmapwidth + 2pt, {(\starty + \endy)/2} pt) {#6};
+% ==================== HUB MEMORY DIAGRAM (from DeSilva) ====================
+% Shows Hub memory layout: 512KB shared memory
+\newcommand{\HubMemoryDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={
+        rectangle,
+        draw=diagram-border,
+        fill=diagram-box,
+        minimum width=5cm,
+        align=center,
+        font=\small
+    },
+    addr/.style={
+        font=\small\ttfamily,
+        text=diagram-text
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 4.5) {Hub Memory Layout:};
+
+% Address labels
+\node[addr, anchor=east] at (-3.0, 3.8) {\$00000};
+\node[addr, anchor=east] at (-3.0, -2.8) {\$7FFFF (512KB)};
+
+% Memory sections
+\node[box, minimum height=1.5cm, fill=diagram-highlight] (prog) at (0, 3) {Your Program\\(Spin2/PASM2)};
+\node[box, minimum height=1.5cm] (vars) at (0, 1) {Variables\\Stack\\Data};
+\node[box, minimum height=2cm] (free) at (0, -1) {(Free Space)};
+
+% Draw outer border
+\draw[diagram-border, thick] (-2.7, 4) rectangle (2.7, -2.5);
+
+\end{tikzpicture}
+\end{center}
 }
 
-% High-level memory map command
-% Args: width, height, content (MemRegion commands)
-\newcommand{\MemoryMap}[3]{%
-    \MemoryMapStart{#1}{#2}%
-    #3%
+% ==================== EGG BEATER DIAGRAM (from DeSilva) ====================
+% Compares P1 sequential hub access vs P2 egg beater simultaneous access
+\newcommand{\EggBeaterDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    cogbox/.style={
+        rectangle,
+        draw=diagram-border,
+        fill=diagram-highlight,
+        minimum width=0.7cm,
+        minimum height=0.5cm,
+        align=center,
+        font=\footnotesize\bfseries
+    },
+    annotation/.style={
+        font=\small\itshape,
+        text=diagram-text
+    },
+    linestyle/.style={
+        thick,
+        diagram-border
+    }
+]
+
+% === P1 Traditional (Left side) ===
+\node[font=\bfseries] at (-4, 5) {P1 Traditional:};
+
+% COGs in a circle for P1
+\foreach \i in {0,...,7} {
+    \pgfmathsetmacro{\angle}{90 - \i * 45}
+    \node[cogbox] (p1cog\i) at ({-4 + 2.0*cos(\angle)}, {2.0 + 2.0*sin(\angle)}) {\i};
 }
 
-%% ============================================================================
-%% COG MEMORY MAP PRESET
-%% ============================================================================
-%% \CogMemoryMap - Draws standard COG memory layout
-%% Shows: General registers, LUT RAM, Special registers
-%% ============================================================================
+% Lines connecting COGs in ring
+\foreach \i in {0,...,6} {
+    \pgfmathtruncatemacro{\next}{\i + 1}
+    \draw[linestyle, gray] (p1cog\i) -- (p1cog\next);
+}
+\draw[linestyle, gray] (p1cog7) -- (p1cog0);
 
-\newcommand{\CogMemoryMap}{%
-    \begin{tikzpicture}
-        \MemoryMapStart{4cm}{6cm}
-        % General purpose COG RAM ($000-$1EF)
-        \MemRegion{0}{0.625}{mem-cog}{General COG RAM}{\$000--\$1EF}{496 longs}
-        % Special registers ($1F0-$1FF)
-        \MemRegion{0.625}{0.75}{mem-special}{Special Registers}{\$1F0--\$1FF}{16 longs}
-        % LUT RAM ($200-$3FF)
-        \MemRegion{0.75}{1.0}{mem-lut}{LUT RAM}{\$200--\$3FF}{512 longs}
-    \end{tikzpicture}
+% P1 annotation
+\node[annotation, text width=3cm, align=center] at (-4, -1.5) {COGs take turns\\Each waits up to\\16 clocks};
+
+% === P2 Egg Beater (Right side) ===
+\node[font=\bfseries] at (4, 5) {P2 Egg Beater:};
+
+% Central hub as a CIRCLE
+\draw[diagram-border, thick, fill=white] (4, 2.0) circle (0.9cm);
+\node[font=\footnotesize\bfseries] at (4, 2.0) {HUB};
+
+% Rotating arrow inside hub
+\draw[thick, green!50!black, ->]
+    ([shift={(45:0.5cm)}]4,2.0) arc (45:-270:0.5cm);
+
+% COGs around the hub
+\foreach \i in {0,...,7} {
+    \pgfmathsetmacro{\angle}{90 - \i * 45}
+    \node[cogbox] (p2cog\i) at ({4 + 2.2*cos(\angle)}, {2.0 + 2.2*sin(\angle)}) {\i};
+    \draw[linestyle, green!50!black] (p2cog\i) -- ({4 + 0.95*cos(\angle)}, {2.0 + 0.95*sin(\angle)});
 }
 
-%% ============================================================================
-%% HUB MEMORY MAP PRESET
-%% ============================================================================
-%% \HubMemoryMap - Draws Hub RAM overview
-%% Shows: Full 512KB Hub space
-%% ============================================================================
+% P2 annotation
+\node[annotation, text width=3cm, align=center] at (4, -1.5) {All COGs access\\simultaneously!\\Max 8 clocks wait};
 
-\newcommand{\HubMemoryMap}{%
-    \begin{tikzpicture}
-        \MemoryMapStart{4cm}{4cm}
-        % Hub RAM (512KB = $00000-$7FFFF)
-        \MemRegion{0}{1.0}{mem-hub}{Hub RAM}{\$00000--\$7FFFF}{512 KB}
-    \end{tikzpicture}
+\end{tikzpicture}
+\end{center}
 }
 
-%% ============================================================================
-%% COMBINED COG+HUB RELATIONSHIP DIAGRAM
-%% ============================================================================
-%% \CogHubRelationship - Shows how COGs relate to Hub
-%% ============================================================================
+% ==================== INSTRUCTION ANATOMY DIAGRAM (from DeSilva) ====================
+% Shows PASM2 instruction format components
+\newcommand{\InstructionAnatomyDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    field/.style={
+        rectangle,
+        draw=diagram-border,
+        fill=diagram-highlight,
+        minimum height=0.8cm,
+        align=center,
+        font=\ttfamily\small
+    },
+    optfield/.style={
+        field,
+        fill=diagram-box,
+        dashed
+    },
+    label/.style={
+        font=\scriptsize,
+        text=diagram-text,
+        align=center
+    }
+]
 
-\newcommand{\CogHubRelationship}{%
-    \begin{tikzpicture}[
-        cogbox/.style={draw=mem-border, fill=mem-cog, minimum width=1.5cm, minimum height=1cm},
-        hubbox/.style={draw=mem-border, fill=mem-hub, minimum width=5cm, minimum height=2cm}
-    ]
-        % Hub RAM at bottom
-        \node[hubbox, anchor=center] (hub) at (0, 0) {\sffamily Hub RAM (512KB shared)};
+% Title
+\node[font=\bfseries] at (0, 2) {PASM2 Instruction Format:};
 
-        % COGs above
-        \foreach \i in {0,...,7} {
-            \pgfmathsetmacro{\xpos}{(\i - 3.5) * 1.8}
-            \node[cogbox, anchor=south] (cog\i) at (\xpos, 1.5) {\scriptsize\sffamily COG \i};
-            \draw[->, >=Stealth, gray] (cog\i.south) -- ($(hub.north)!0.5!(cog\i.south)$) -- (hub.north);
-        }
+% Fields (left to right)
+\node[optfield, minimum width=1.4cm] (lbl) at (-6.0, 0.8) {label};
+\node[optfield, minimum width=1.8cm] (cond) at (-4.0, 0.8) {condition};
+\node[field, minimum width=2.2cm] (instr) at (-1.7, 0.8) {instruction};
+\node[field, minimum width=1.5cm] (dest) at (0.5, 0.8) {dest};
+\node[font=\ttfamily] at (1.5, 0.8) {,};
+\node[field, minimum width=1.8cm] (src) at (2.8, 0.8) {\#source};
+\node[optfield, minimum width=1.2cm] (flags) at (4.8, 0.8) {flags};
 
-        % Labels
-        \node[anchor=south, font=\sffamily\footnotesize] at (0, 2.7) {8 Independent Cogs};
-        \node[anchor=north, font=\sffamily\footnotesize] at (0, -1.2) {Shared Access via Hub Window};
-    \end{tikzpicture}
+% Labels below
+\node[label] at (-6.0, -0.1) {optional\\(for jumps)};
+\node[label] at (-4.0, -0.1) {optional\\(if\_z, if\_c, ...)};
+\node[label] at (-1.7, -0.1) {operation\\(add, mov, ...)};
+\node[label] at (0.5, -0.1) {target\\register};
+\node[label] at (2.8, -0.1) {data/value\\\# = immediate};
+\node[label] at (4.8, -0.1) {optional\\(wc, wz, wcz)};
+
+\end{tikzpicture}
+\end{center}
 }
 
-%% ============================================================================
-%% SPECIAL REGISTERS DETAIL
-%% ============================================================================
-%% \SpecialRegistersMap - Detailed view of $1F0-$1FF
-%% ============================================================================
+% ==================== INSTRUCTION EXAMPLE DIAGRAM (from DeSilva) ====================
+% Shows a concrete example instruction parsed
+\newcommand{\InstructionExampleDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    field/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum height=0.7cm,
+        align=center,
+        font=\ttfamily\small
+    },
+    label/.style={
+        font=\scriptsize\itshape,
+        text=diagram-text,
+        align=center
+    }
+]
 
-\newcommand{\SpecialRegistersMap}{%
-    \begin{tikzpicture}
-        \MemoryMapStart{5cm}{4cm}
-        % Dual-purpose registers ($1F0-$1F7)
-        \fill[mem-special!70, draw=mem-border, line width=0.5pt]
-            (0, 0) rectangle (\memmapwidth, 2cm);
-        \node[anchor=center, font=\sffamily\small] at (2.5cm, 1cm) {Dual-Purpose};
-        \node[anchor=east, font=\ttfamily\scriptsize] at (-2pt, 1cm) {\$1F0--\$1F7};
-        \node[anchor=west, font=\scriptsize] at (\memmapwidth + 2pt, 1.4cm) {IJMP3, IRET3};
-        \node[anchor=west, font=\scriptsize] at (\memmapwidth + 2pt, 1.0cm) {IJMP2, IRET2};
-        \node[anchor=west, font=\scriptsize] at (\memmapwidth + 2pt, 0.6cm) {IJMP1, IRET1, PA, PB};
+% Title
+\node[font=\bfseries] at (0, 1.8) {Example: \texttt{if\_z add total, \#10 wc}};
 
-        % Fixed special registers ($1F8-$1FF)
-        \fill[mem-special, draw=mem-border, line width=0.5pt]
-            (0, 2cm) rectangle (\memmapwidth, 4cm);
-        \node[anchor=center, font=\sffamily\small] at (2.5cm, 3cm) {Fixed Special};
-        \node[anchor=east, font=\ttfamily\scriptsize] at (-2pt, 3cm) {\$1F8--\$1FF};
-        \node[anchor=west, font=\scriptsize] at (\memmapwidth + 2pt, 3.4cm) {PTRA, PTRB};
-        \node[anchor=west, font=\scriptsize] at (\memmapwidth + 2pt, 3.0cm) {DIRA, DIRB};
-        \node[anchor=west, font=\scriptsize] at (\memmapwidth + 2pt, 2.6cm) {OUTA, OUTB, INA, INB};
-    \end{tikzpicture}
+% Fields with actual values
+\node[field, fill=orange!20, minimum width=1.2cm] (cond) at (-4, 0.7) {if\_z};
+\node[field, fill=diagram-highlight, minimum width=1.2cm] (instr) at (-2.3, 0.7) {add};
+\node[field, fill=diagram-highlight, minimum width=1.4cm] (dest) at (-0.6, 0.7) {total};
+\node[field, fill=blue!15, minimum width=1.2cm] (src) at (1, 0.7) {\#10};
+\node[field, fill=orange!20, minimum width=1cm] (flags) at (2.5, 0.7) {wc};
+
+% Labels below
+\node[label] at (-4, -0.2) {only if\\Z is set};
+\node[label] at (-2.3, -0.2) {add to};
+\node[label] at (-0.6, -0.2) {this\\register};
+\node[label] at (1, -0.2) {immediate\\value 10};
+\node[label] at (2.5, -0.2) {set carry\\flag};
+
+\end{tikzpicture}
+\end{center}
 }
 
-%% ============================================================================
-%% INLINE MEMORY REGION REFERENCE
-%% ============================================================================
-%% \MemoryRegion{addr-range}{name} - Compact inline reference
-%% Usage: The COG registers live in \MemoryRegion{$000-$1FF}{COG RAM}.
-%% ============================================================================
+% ==================== EIGHT-COG OVERVIEW DIAGRAM (NEW) ====================
+% D1.1: 8 COGs connected to shared Hub (high-level architecture)
+\newcommand{\EightCogOverviewDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    cogbox/.style={
+        rectangle,
+        draw=diagram-border,
+        fill=mem-cog,
+        minimum width=1.8cm,
+        minimum height=1.2cm,
+        align=center,
+        font=\small\bfseries
+    },
+    hubbox/.style={
+        rectangle,
+        draw=diagram-border,
+        fill=mem-hub,
+        minimum width=3.5cm,
+        minimum height=2.5cm,
+        align=center,
+        font=\bfseries
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    },
+    linestyle/.style={
+        thick,
+        diagram-border,
+        <->
+    }
+]
 
-\newcommand{\MemoryRegionInline}[2]{%
-    \tikz[baseline=(char.base)]{
-        \node[fill=mem-cog!50, draw=mem-border, rounded corners=2pt,
-              inner sep=2pt, font=\ttfamily\scriptsize] (char) {#1};
-    } \textit{#2}%
+% Central Hub
+\node[hubbox] (hub) at (0, 0) {HUB\\512KB\\Shared RAM};
+
+% 8 COGs arranged around hub
+\node[cogbox] (cog0) at (-4.5, 2.5) {COG 0\\2KB RAM\\2KB LUT};
+\node[cogbox] (cog1) at (-1.5, 3.5) {COG 1\\2KB RAM\\2KB LUT};
+\node[cogbox] (cog2) at (1.5, 3.5) {COG 2\\2KB RAM\\2KB LUT};
+\node[cogbox] (cog3) at (4.5, 2.5) {COG 3\\2KB RAM\\2KB LUT};
+\node[cogbox] (cog4) at (4.5, -2.5) {COG 4\\2KB RAM\\2KB LUT};
+\node[cogbox] (cog5) at (1.5, -3.5) {COG 5\\2KB RAM\\2KB LUT};
+\node[cogbox] (cog6) at (-1.5, -3.5) {COG 6\\2KB RAM\\2KB LUT};
+\node[cogbox] (cog7) at (-4.5, -2.5) {COG 7\\2KB RAM\\2KB LUT};
+
+% Connection lines (bidirectional arrows)
+\draw[linestyle] (cog0) -- (hub);
+\draw[linestyle] (cog1) -- (hub);
+\draw[linestyle] (cog2) -- (hub);
+\draw[linestyle] (cog3) -- (hub);
+\draw[linestyle] (cog4) -- (hub);
+\draw[linestyle] (cog5) -- (hub);
+\draw[linestyle] (cog6) -- (hub);
+\draw[linestyle] (cog7) -- (hub);
+
+% Annotations
+\node[annotation] at (0, -5) {Each COG: Independent processor with private RAM + LUT};
+\node[annotation] at (0, -5.5) {Hub: Shared memory accessible by all COGs via egg-beater};
+
+\end{tikzpicture}
+\end{center}
 }
 
-%% ============================================================================
-%% INSTRUCTION ENCODING DIAGRAM (32-bit)
-%% ============================================================================
-%% \InstructionEncoding{name}{cond}{opcode}{czi}{dest}{src}
-%% Creates horizontal 32-bit encoding diagram
-%% ============================================================================
+% ==================== COG MEMORY MAP DIAGRAM (NEW) ====================
+% D1.2: COG memory map showing $000-$1FF address space
+\newcommand{\CogMemoryMapDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    membox/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=6cm,
+        align=center,
+        font=\small
+    },
+    addr/.style={
+        font=\footnotesize\ttfamily,
+        text=diagram-text,
+        anchor=east
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text,
+        anchor=west
+    }
+]
 
-% Bit width constants
-\newlength{\bitwidth}
-\setlength{\bitwidth}{0.28cm}
-\newlength{\bitheight}
-\setlength{\bitheight}{0.6cm}
+% Title
+\node[font=\bfseries] at (0, 5) {COG RAM Address Space (\$000--\$1FF)};
 
+% Memory regions (top to bottom = low to high address)
+\node[membox, fill=mem-cog, minimum height=2.5cm] (gp) at (0, 3) {General Purpose Registers\\(496 longs)\\Code and Data};
+\node[addr] at (-3.5, 4.1) {\$000};
+\node[addr] at (-3.5, 1.9) {\$1EF};
+
+\node[membox, fill=mem-special, minimum height=0.6cm] (ijmp3) at (0, 1.4) {IJMP3, IRET3};
+\node[addr] at (-3.5, 1.4) {\$1F0};
+
+\node[membox, fill=mem-special, minimum height=0.6cm] (ijmp2) at (0, 0.7) {IJMP2, IRET2};
+\node[addr] at (-3.5, 0.7) {\$1F2};
+
+\node[membox, fill=mem-special, minimum height=0.6cm] (ijmp1) at (0, 0) {IJMP1, IRET1};
+\node[addr] at (-3.5, 0) {\$1F4};
+
+\node[membox, fill=mem-special, minimum height=0.6cm] (papb) at (0, -0.7) {PA, PB};
+\node[addr] at (-3.5, -0.7) {\$1F6};
+
+\node[membox, fill=orange!20, minimum height=0.6cm] (ptrs) at (0, -1.4) {PTRA, PTRB};
+\node[addr] at (-3.5, -1.4) {\$1F8};
+
+\node[membox, fill=orange!20, minimum height=0.6cm] (dir) at (0, -2.1) {DIRA, DIRB};
+\node[addr] at (-3.5, -2.1) {\$1FA};
+
+\node[membox, fill=orange!20, minimum height=0.6cm] (out) at (0, -2.8) {OUTA, OUTB};
+\node[addr] at (-3.5, -2.8) {\$1FC};
+
+\node[membox, fill=orange!20, minimum height=0.6cm] (ina) at (0, -3.5) {INA, INB};
+\node[addr] at (-3.5, -3.5) {\$1FE};
+
+% Bracket for special registers
+\draw[thick, decorate, decoration={brace, amplitude=5pt, mirror}]
+    (3.3, 1.7) -- (3.3, -3.8) node[midway, right=6pt, font=\scriptsize, text width=2cm, align=left] {Special\\Registers\\(\$1F0--\$1FF)};
+
+% Annotations
+\node[annotation] at (3.5, 3.5) {Read/Write};
+\node[annotation] at (3.5, 0.3) {Interrupt vectors};
+\node[annotation] at (3.5, -1.4) {Hub pointers};
+\node[annotation] at (3.5, -2.5) {I/O control};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ==================== LUT MEMORY MAP DIAGRAM (NEW) ====================
+% D1.5: LUT memory layout showing $200-$3FF
+\newcommand{\LutMemoryMapDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    membox/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=5cm,
+        align=center,
+        font=\small
+    },
+    addr/.style={
+        font=\footnotesize\ttfamily,
+        text=diagram-text,
+        anchor=east
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 3) {LUT RAM Address Space (\$200--\$3FF)};
+
+% Memory region
+\node[membox, fill=mem-lut, minimum height=3cm] (lut) at (0, 0.5) {Look-Up Table RAM\\(512 longs = 2KB)\\\\Tables, sine waves,\\COG-to-COG sharing};
+\node[addr] at (-3.0, 1.8) {\$200};
+\node[addr] at (-3.0, -0.8) {\$3FF};
+
+% Annotations
+\node[annotation] at (0, -1.5) {Accessible via RDLUT/WRLUT instructions};
+\node[annotation] at (0, -2.0) {Can be shared between adjacent COG pairs};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ==================== COG-HUB RELATIONSHIP DIAGRAM (NEW) ====================
+% D1.6: Shows per-COG vs shared memory relationship
+\newcommand{\CogHubRelationshipDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    membox/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=2.5cm,
+        minimum height=1.5cm,
+        align=center,
+        font=\small
+    },
+    hubbox/.style={
+        rectangle,
+        draw=diagram-border,
+        fill=mem-hub,
+        minimum width=8cm,
+        minimum height=1.5cm,
+        align=center,
+        font=\small
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    },
+    linestyle/.style={
+        thick,
+        diagram-border,
+        <->
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 4) {Memory Hierarchy};
+
+% Per-COG Memory (top row)
+\node[font=\small\bfseries] at (-5.5, 3) {Per-COG (Private)};
+\node[membox, fill=mem-cog] (cog0ram) at (-3.5, 1.5) {COG 0\\RAM\\2KB};
+\node[membox, fill=mem-lut] (cog0lut) at (-1, 1.5) {COG 0\\LUT\\2KB};
+\node[font=\small] at (0.5, 1.5) {...};
+\node[membox, fill=mem-cog] (cog7ram) at (2, 1.5) {COG 7\\RAM\\2KB};
+\node[membox, fill=mem-lut] (cog7lut) at (4.5, 1.5) {COG 7\\LUT\\2KB};
+
+% Shared Hub (bottom)
+\node[font=\small\bfseries] at (-5.5, -0.5) {Shared};
+\node[hubbox] (hub) at (0.5, -1.5) {Hub RAM --- 512KB Shared Memory};
+
+% Connections
+\draw[linestyle] (cog0ram) -- ($(hub.north) + (-3,0)$);
+\draw[linestyle] (cog0lut) -- ($(hub.north) + (-1.5,0)$);
+\draw[linestyle] (cog7ram) -- ($(hub.north) + (1.5,0)$);
+\draw[linestyle] (cog7lut) -- ($(hub.north) + (3,0)$);
+
+% Annotations
+\node[annotation] at (0, -3) {COG RAM/LUT: Fast, private access (2 cycles)};
+\node[annotation] at (0, -3.5) {Hub: Slower, shared access (up to 8 cycles via egg-beater)};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ==================== SPECIAL REGISTERS MAP DIAGRAM (NEW) ====================
+% D1.3: Detailed special registers $1F0-$1FF
+\newcommand{\SpecialRegistersMapDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    regbox/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=3cm,
+        minimum height=0.6cm,
+        align=center,
+        font=\footnotesize\ttfamily
+    },
+    addr/.style={
+        font=\scriptsize\ttfamily,
+        text=diagram-text
+    },
+    desc/.style={
+        font=\scriptsize,
+        text=diagram-text,
+        anchor=west
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 5) {Special Registers (\$1F0--\$1FF)};
+
+% Column headers
+\node[font=\scriptsize\bfseries] at (-2.5, 4.3) {Address};
+\node[font=\scriptsize\bfseries] at (0, 4.3) {Register};
+\node[font=\scriptsize\bfseries] at (3.5, 4.3) {Function};
+
+% Registers
+\node[addr] at (-2.5, 3.6) {\$1F0};
+\node[regbox, fill=mem-special] at (0, 3.6) {IJMP3};
+\node[desc] at (1.8, 3.6) {Interrupt 3 jump address};
+
+\node[addr] at (-2.5, 2.9) {\$1F1};
+\node[regbox, fill=mem-special] at (0, 2.9) {IRET3};
+\node[desc] at (1.8, 2.9) {Interrupt 3 return address};
+
+\node[addr] at (-2.5, 2.2) {\$1F2};
+\node[regbox, fill=mem-special] at (0, 2.2) {IJMP2};
+\node[desc] at (1.8, 2.2) {Interrupt 2 jump address};
+
+\node[addr] at (-2.5, 1.5) {\$1F3};
+\node[regbox, fill=mem-special] at (0, 1.5) {IRET2};
+\node[desc] at (1.8, 1.5) {Interrupt 2 return address};
+
+\node[addr] at (-2.5, 0.8) {\$1F4};
+\node[regbox, fill=mem-special] at (0, 0.8) {IJMP1};
+\node[desc] at (1.8, 0.8) {Interrupt 1 jump address};
+
+\node[addr] at (-2.5, 0.1) {\$1F5};
+\node[regbox, fill=mem-special] at (0, 0.1) {IRET1};
+\node[desc] at (1.8, 0.1) {Interrupt 1 return address};
+
+\node[addr] at (-2.5, -0.6) {\$1F6};
+\node[regbox, fill=diagram-highlight] at (0, -0.6) {PA};
+\node[desc] at (1.8, -0.6) {Parameter A (COGINIT)};
+
+\node[addr] at (-2.5, -1.3) {\$1F7};
+\node[regbox, fill=diagram-highlight] at (0, -1.3) {PB};
+\node[desc] at (1.8, -1.3) {Parameter B (COGINIT)};
+
+\node[addr] at (-2.5, -2.0) {\$1F8};
+\node[regbox, fill=orange!20] at (0, -2.0) {PTRA};
+\node[desc] at (1.8, -2.0) {Hub pointer A};
+
+\node[addr] at (-2.5, -2.7) {\$1F9};
+\node[regbox, fill=orange!20] at (0, -2.7) {PTRB};
+\node[desc] at (1.8, -2.7) {Hub pointer B};
+
+\node[addr] at (-2.5, -3.4) {\$1FA};
+\node[regbox, fill=orange!20] at (0, -3.4) {DIRA};
+\node[desc] at (1.8, -3.4) {Direction P0--P31};
+
+\node[addr] at (-2.5, -4.1) {\$1FB};
+\node[regbox, fill=orange!20] at (0, -4.1) {DIRB};
+\node[desc] at (1.8, -4.1) {Direction P32--P63};
+
+\node[addr] at (-2.5, -4.8) {\$1FC};
+\node[regbox, fill=orange!20] at (0, -4.8) {OUTA};
+\node[desc] at (1.8, -4.8) {Output P0--P31};
+
+\node[addr] at (-2.5, -5.5) {\$1FD};
+\node[regbox, fill=orange!20] at (0, -5.5) {OUTB};
+\node[desc] at (1.8, -5.5) {Output P32--P63};
+
+\node[addr] at (-2.5, -6.2) {\$1FE};
+\node[regbox, fill=orange!20] at (0, -6.2) {INA};
+\node[desc] at (1.8, -6.2) {Input P0--P31 (read-only)};
+
+\node[addr] at (-2.5, -6.9) {\$1FF};
+\node[regbox, fill=orange!20] at (0, -6.9) {INB};
+\node[desc] at (1.8, -6.9) {Input P32--P63 (read-only)};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PART I: TIMING DIAGRAMS
+% ============================================================================
+
+% ==================== HUB WINDOW TIMING DIAGRAM (NEW) ====================
+% D4.1: Hub window showing egg beater access pattern across 8 cogs
+\newcommand{\HubWindowTimingDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    slot/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=0.8cm,
+        minimum height=0.5cm,
+        align=center,
+        font=\scriptsize
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 3) {Hub Access Windows (Egg Beater Rotation)};
+
+% Time axis
+\draw[->, thick] (-5, 1.5) -- (5.5, 1.5) node[right] {Time (clocks)};
+
+% Clock markers
+\foreach \i in {0,...,15} {
+    \pgfmathsetmacro{\x}{-4.5 + \i * 0.6}
+    \draw (\x, 1.4) -- (\x, 1.6);
+    \node[font=\tiny] at (\x, 1.2) {\i};
+}
+
+% Hub window slots (showing which COG has access)
+\node[slot, fill=timing-active] at (-4.2, 2.2) {COG0};
+\node[slot, fill=timing-wait] at (-3.6, 2.2) {};
+\node[slot, fill=timing-active] at (-3.0, 2.2) {COG1};
+\node[slot, fill=timing-wait] at (-2.4, 2.2) {};
+\node[slot, fill=timing-active] at (-1.8, 2.2) {COG2};
+\node[slot, fill=timing-wait] at (-1.2, 2.2) {};
+\node[slot, fill=timing-active] at (-0.6, 2.2) {COG3};
+\node[slot, fill=timing-wait] at (0, 2.2) {};
+\node[slot, fill=timing-active] at (0.6, 2.2) {COG4};
+\node[slot, fill=timing-wait] at (1.2, 2.2) {};
+\node[slot, fill=timing-active] at (1.8, 2.2) {COG5};
+\node[slot, fill=timing-wait] at (2.4, 2.2) {};
+\node[slot, fill=timing-active] at (3.0, 2.2) {COG6};
+\node[slot, fill=timing-wait] at (3.6, 2.2) {};
+\node[slot, fill=timing-active] at (4.2, 2.2) {COG7};
+
+% Cycle marker
+\draw[<->] (-4.5, 2.8) -- (4.5, 2.8);
+\node[annotation] at (0, 3.1) {16 clocks = 1 full rotation};
+
+% Annotation
+\node[annotation, text width=8cm, align=center] at (0, 0.5) {Each COG gets a 2-clock hub window every 16 clocks.\\If a COG misses its window, it waits for the next rotation (max 8 clocks).};
+
+% Legend
+\node[slot, fill=timing-active, minimum width=0.5cm] at (-3, -0.3) {};
+\node[annotation, anchor=west] at (-2.6, -0.3) {Hub access window};
+\node[slot, fill=timing-wait, minimum width=0.5cm] at (1, -0.3) {};
+\node[annotation, anchor=west] at (1.4, -0.3) {Other COG's window};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ==================== INSTRUCTION TIMING DIAGRAM (NEW) ====================
+% D4.2: Instruction timing showing 2-cycle base with hub extension
+\newcommand{\InstructionTimingDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    instr/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum height=0.6cm,
+        align=center,
+        font=\scriptsize\ttfamily
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 3.5) {Instruction Timing Examples};
+
+% Time axis
+\draw[->, thick] (-4, 2.5) -- (5, 2.5) node[right, font=\scriptsize] {Clocks};
+\foreach \i in {0,...,10} {
+    \pgfmathsetmacro{\x}{-3.5 + \i * 0.8}
+    \draw (\x, 2.4) -- (\x, 2.6);
+    \node[font=\tiny] at (\x, 2.2) {\i};
+}
+
+% Row 1: Simple 2-cycle instruction
+\node[annotation, anchor=east] at (-4.2, 1.5) {ADD (2 cycles):};
+\node[instr, fill=timing-active, minimum width=1.6cm] at (-2.7, 1.5) {ADD};
+
+% Row 2: Hub read (variable)
+\node[annotation, anchor=east] at (-4.2, 0.7) {RDLONG (2+wait):};
+\node[instr, fill=timing-active, minimum width=0.8cm] at (-3.1, 0.7) {RD};
+\node[instr, fill=timing-wait, minimum width=2.4cm] at (-1.5, 0.7) {wait for hub};
+\node[instr, fill=timing-hub, minimum width=0.8cm] at (-0.3, 0.7) {hub};
+
+% Row 3: Branch taken
+\node[annotation, anchor=east] at (-4.2, -0.1) {JMP (4 cycles):};
+\node[instr, fill=timing-active, minimum width=3.2cm] at (-1.9, -0.1) {JMP (flush pipeline)};
+
+% Row 4: CORDIC
+\node[annotation, anchor=east] at (-4.2, -0.9) {QMUL (2+54):};
+\node[instr, fill=timing-active, minimum width=0.8cm] at (-3.1, -0.9) {Q};
+\node[instr, fill=diagram-box, pattern=north east lines, minimum width=4cm] at (-0.7, -0.9) {CORDIC processing};
+
+% Annotations
+\node[annotation, text width=7cm, align=left] at (0.5, -2) {
+Most instructions: 2 clocks\\
+Hub access: 2 + wait (0--8 clocks)\\
+Branches: 4 clocks (pipeline flush)\\
+CORDIC: 2 + 54 clocks (can overlap)
+};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ==================== BRANCH TIMING DIAGRAM (NEW) ====================
+% D4.3: Branch timing (taken vs not taken)
+\newcommand{\BranchTimingDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    stage/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=1.2cm,
+        minimum height=0.5cm,
+        align=center,
+        font=\tiny
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 3) {Branch Instruction Timing};
+
+% Not taken path
+\node[font=\small\bfseries, anchor=west] at (-5, 2) {Branch NOT taken:};
+\node[stage, fill=timing-active] at (-2.5, 2) {IF\_C JMP};
+\node[stage, fill=timing-active] at (-1.3, 2) {next};
+\node[stage, fill=timing-active] at (-0.1, 2) {next+1};
+\node[annotation, anchor=west] at (1, 2) {2 clocks (condition false)};
+
+% Taken path
+\node[font=\small\bfseries, anchor=west] at (-5, 0.8) {Branch TAKEN:};
+\node[stage, fill=timing-active] at (-2.5, 0.8) {IF\_C JMP};
+\node[stage, fill=timing-wait] at (-1.3, 0.8) {flush};
+\node[stage, fill=timing-wait] at (-0.1, 0.8) {flush};
+\node[stage, fill=timing-active] at (1.1, 0.8) {target};
+\node[annotation, anchor=west] at (2.2, 0.8) {4 clocks (pipeline flush)};
+
+% Explanation
+\node[annotation, text width=8cm, align=center] at (0, -0.5) {
+The P2 has a 2-stage pipeline. When a branch is taken,\\
+the prefetched instruction is discarded (2 extra clocks).
+};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PART I: FLAG DIAGRAMS
+% ============================================================================
+
+% ==================== FLAG FLOW DIAGRAM (NEW) ====================
+% D3.1: How WC/WZ affects C/Z registers
+\newcommand{\FlagFlowDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={
+        rectangle,
+        draw=diagram-border,
+        fill=diagram-box,
+        minimum width=2cm,
+        minimum height=0.8cm,
+        align=center,
+        font=\small
+    },
+    flagbox/.style={
+        rectangle,
+        draw=diagram-border,
+        fill=orange!20,
+        minimum width=1.2cm,
+        minimum height=0.8cm,
+        align=center,
+        font=\small\bfseries
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    },
+    arrow/.style={
+        ->,
+        >=Stealth,
+        thick
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 4) {Flag Modification Flow};
+
+% Instruction
+\node[box, minimum width=3cm] (instr) at (-3, 2.5) {Instruction\\(ADD, SUB, etc.)};
+
+% Flag effects
+\node[box, minimum width=2cm] (wc) at (0, 3.2) {WC suffix};
+\node[box, minimum width=2cm] (wz) at (0, 1.8) {WZ suffix};
+
+% Flag registers
+\node[flagbox] (cflag) at (3, 3.2) {C Flag};
+\node[flagbox] (zflag) at (3, 1.8) {Z Flag};
+
+% Arrows
+\draw[arrow] (instr) -- (wc);
+\draw[arrow] (instr) -- (wz);
+\draw[arrow] (wc) -- (cflag) node[midway, above, font=\scriptsize] {if WC};
+\draw[arrow] (wz) -- (zflag) node[midway, above, font=\scriptsize] {if WZ};
+
+% Examples below
+\node[annotation, anchor=north west, text width=10cm] at (-4.5, 0.5) {
+\textbf{Examples:}\\[2pt]
+\texttt{ADD x, y} \quad\quad\quad\ --- No flag update\\
+\texttt{ADD x, y WC} \quad\quad --- Updates C (carry/overflow)\\
+\texttt{ADD x, y WZ} \quad\quad --- Updates Z (result zero)\\
+\texttt{ADD x, y WCZ} \quad\ --- Updates both C and Z
+};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PART I: HARDWARE DIAGRAMS
+% ============================================================================
+
+% ==================== CORDIC OPERATION DIAGRAM (NEW) ====================
+% D5.1: CORDIC operation sequence
+\newcommand{\CordicOperationDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    stage/.style={
+        rectangle,
+        draw=diagram-border,
+        fill=diagram-box,
+        minimum width=2.5cm,
+        minimum height=1cm,
+        align=center,
+        font=\small
+    },
+    arrow/.style={
+        ->,
+        >=Stealth,
+        thick
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 4) {CORDIC Coprocessor Pipeline};
+
+% Stages
+\node[stage, fill=diagram-highlight] (queue) at (-4, 2) {Queue\\Command\\(QMUL, QDIV,\\QSQRT, etc.)};
+\node[stage] (process) at (0, 2) {CORDIC\\Processing\\(54 clocks)};
+\node[stage, fill=mem-special] (result) at (4, 2) {Result Ready\\(GETQX,\\GETQY)};
+
+% Arrows
+\draw[arrow] (queue) -- (process) node[midway, above, font=\scriptsize] {async};
+\draw[arrow] (process) -- (result);
+
+% COG continues
+\node[annotation] at (-4, 0.5) {COG continues\\executing};
+\draw[arrow, dashed] (-4, 1.3) -- (-4, 0.8);
+
+% Timeline
+\node[annotation, anchor=west] at (-5, -0.5) {Clock 0: Issue QMUL};
+\node[annotation, anchor=west] at (-5, -1) {Clocks 1--53: COG runs other instructions};
+\node[annotation, anchor=west] at (-5, -1.5) {Clock 54+: GETQX/GETQY retrieves result};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ==================== INTERRUPT PRIORITY DIAGRAM (NEW) ====================
+% D5.2: Interrupt priority and nesting
+\newcommand{\InterruptPriorityDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    intbox/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=3cm,
+        minimum height=0.8cm,
+        align=center,
+        font=\small
+    },
+    arrow/.style={
+        ->,
+        >=Stealth,
+        thick
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 3.5) {Interrupt Priority Levels};
+
+% Priority levels (highest to lowest)
+\node[intbox, fill=red!30] (int3) at (0, 2.5) {INT3 (Highest)};
+\node[intbox, fill=orange!30] (int2) at (0, 1.5) {INT2};
+\node[intbox, fill=yellow!30] (int1) at (0, 0.5) {INT1 (Lowest)};
+
+% Priority indicator
+\draw[arrow] (2, 2.5) -- (2, 0.5);
+\node[annotation, rotate=90] at (2.5, 1.5) {Priority};
+
+% Vector registers
+\node[annotation, anchor=west] at (2, 2.5) {IJMP3/IRET3 (\$1F0/\$1F1)};
+\node[annotation, anchor=west] at (2, 1.5) {IJMP2/IRET2 (\$1F2/\$1F3)};
+\node[annotation, anchor=west] at (2, 0.5) {IJMP1/IRET1 (\$1F4/\$1F5)};
+
+% Nesting note
+\node[annotation, text width=8cm, align=center] at (0, -0.8) {
+Higher priority interrupts can preempt lower priority handlers.\\
+Each level has its own IJMP/IRET register pair.
+};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PART II: INSTRUCTION ENCODING DIAGRAM
+% ============================================================================
+
+% ==================== INSTRUCTION ENCODING MACRO ====================
+% Universal macro for displaying 32-bit instruction encoding
+% Usage: \InstructionEncoding{NAME}{EEEE}{OOOOOOO}{CZI}{DDDDDDDDD}{SSSSSSSSS}
 \newcommand{\InstructionEncoding}[6]{%
-    \begin{tikzpicture}[
-        bitcell/.style={draw=mem-border, minimum width=\bitwidth, minimum height=\bitheight, anchor=south west}
-    ]
-        % Calculate positions
-        % 32 bits total: EEEE(4) + opcode(7) + CZI(3) + D(9) + S(9)
-        \def\condwidth{4}
-        \def\opcodewidth{7}
-        \def\cziwidth{3}
-        \def\destwidth{9}
-        \def\srcwidth{9}
+\begin{center}
+\begin{tikzpicture}[
+    bitfield/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum height=0.7cm,
+        align=center,
+        font=\ttfamily\footnotesize
+    },
+    bitnum/.style={
+        font=\tiny\ttfamily,
+        text=gray
+    },
+    label/.style={
+        font=\scriptsize,
+        text=diagram-text,
+        align=center
+    }
+]
 
-        % Draw fields with colors
-        % Condition field (bits 31-28)
-        \fill[encoding-cond, draw=mem-border] (0, 0) rectangle ({4*\bitwidth}, \bitheight);
-        \node[font=\ttfamily\scriptsize] at ({2*\bitwidth}, 0.5\bitheight) {#2};
+% Bit positions (31 down to 0)
+\node[bitnum] at (-4.2, 0.8) {31};
+\node[bitnum] at (-3.4, 0.8) {28};
+\node[bitnum] at (-2.4, 0.8) {27};
+\node[bitnum] at (-1.1, 0.8) {21};
+\node[bitnum] at (-0.3, 0.8) {20};
+\node[bitnum] at (0.4, 0.8) {18};
+\node[bitnum] at (1.2, 0.8) {17};
+\node[bitnum] at (2.7, 0.8) {9};
+\node[bitnum] at (3.5, 0.8) {8};
+\node[bitnum] at (4.7, 0.8) {0};
 
-        % Opcode field (bits 27-21)
-        \fill[encoding-op, draw=mem-border] ({4*\bitwidth}, 0) rectangle ({11*\bitwidth}, \bitheight);
-        \node[font=\ttfamily\scriptsize] at ({7.5*\bitwidth}, 0.5\bitheight) {#3};
+% Field boxes
+% EEEE: 4 bits (condition)
+\node[bitfield, fill=encoding-cond, minimum width=1.0cm] at (-3.8, 0) {#2};
+% OOOOOOO: 7 bits (opcode)
+\node[bitfield, fill=encoding-op, minimum width=1.75cm] at (-2.1, 0) {#3};
+% CZI: 3 bits (flags)
+\node[bitfield, fill=encoding-flag, minimum width=0.75cm] at (-0.6, 0) {#4};
+% DDDDDDDDD: 9 bits (destination)
+\node[bitfield, fill=encoding-dest, minimum width=2.0cm] at (1.0, 0) {#5};
+% SSSSSSSSS: 9 bits (source)
+\node[bitfield, fill=encoding-src, minimum width=2.0cm] at (3.3, 0) {#6};
 
-        % CZI field (bits 20-18)
-        \fill[encoding-flag, draw=mem-border] ({11*\bitwidth}, 0) rectangle ({14*\bitwidth}, \bitheight);
-        \node[font=\ttfamily\scriptsize] at ({12.5*\bitwidth}, 0.5\bitheight) {#4};
+% Field labels below
+\node[label] at (-3.8, -0.7) {EEEE\\cond};
+\node[label] at (-2.1, -0.7) {opcode};
+\node[label] at (-0.6, -0.7) {CZI};
+\node[label] at (1.0, -0.7) {D};
+\node[label] at (3.3, -0.7) {S};
 
-        % Dest field (bits 17-9)
-        \fill[encoding-dest, draw=mem-border] ({14*\bitwidth}, 0) rectangle ({23*\bitwidth}, \bitheight);
-        \node[font=\ttfamily\scriptsize] at ({18.5*\bitwidth}, 0.5\bitheight) {#5};
-
-        % Src field (bits 8-0)
-        \fill[encoding-src, draw=mem-border] ({23*\bitwidth}, 0) rectangle ({32*\bitwidth}, \bitheight);
-        \node[font=\ttfamily\scriptsize] at ({27.5*\bitwidth}, 0.5\bitheight) {#6};
-
-        % Field labels above
-        \node[font=\sffamily\tiny, anchor=south] at ({2*\bitwidth}, \bitheight) {COND};
-        \node[font=\sffamily\tiny, anchor=south] at ({7.5*\bitwidth}, \bitheight) {OPCODE};
-        \node[font=\sffamily\tiny, anchor=south] at ({12.5*\bitwidth}, \bitheight) {CZI};
-        \node[font=\sffamily\tiny, anchor=south] at ({18.5*\bitwidth}, \bitheight) {DEST};
-        \node[font=\sffamily\tiny, anchor=south] at ({27.5*\bitwidth}, \bitheight) {SRC};
-
-        % Bit numbers below
-        \node[font=\tiny, anchor=north] at ({0}, 0) {31};
-        \node[font=\tiny, anchor=north] at ({4*\bitwidth}, 0) {27};
-        \node[font=\tiny, anchor=north] at ({11*\bitwidth}, 0) {20};
-        \node[font=\tiny, anchor=north] at ({14*\bitwidth}, 0) {17};
-        \node[font=\tiny, anchor=north] at ({23*\bitwidth}, 0) {8};
-        \node[font=\tiny, anchor=north] at ({32*\bitwidth}, 0) {0};
-
-        % Instruction name label
-        \node[font=\sffamily\footnotesize\bfseries, anchor=west] at ({-0.5cm}, 0.5\bitheight) {#1};
-    \end{tikzpicture}
+\end{tikzpicture}
+\end{center}
 }
 
-%% ============================================================================
-%% BIT REORDERING DIAGRAMS (Phase 0.4)
-%% ============================================================================
-%% Macros for visualizing bit/byte/word manipulation operations
-%% Used for: SPLITB, MERGB, MOVBYTS, REV, GETBYTE, etc.
-%% ============================================================================
+% ============================================================================
+% PART II: BIT REORDERING DIAGRAMS
+% ============================================================================
 
-% Colors for bit position highlighting
-\definecolor{bit-byte0}{HTML}{FFE0E0}       % Byte 0 (bits 7-0)
-\definecolor{bit-byte1}{HTML}{E0FFE0}       % Byte 1 (bits 15-8)
-\definecolor{bit-byte2}{HTML}{E0E0FF}       % Byte 2 (bits 23-16)
-\definecolor{bit-byte3}{HTML}{FFFFE0}       % Byte 3 (bits 31-24)
-\definecolor{bit-highlight}{HTML}{FF6B6B}  % Highlighted bit
-
-% Draw a 32-bit value with byte coloring
-% Args: label, byte3-val, byte2-val, byte1-val, byte0-val
-\newcommand{\BitValueBar}[5]{%
-    \begin{tikzpicture}[
-        byteblock/.style={minimum width=2cm, minimum height=0.6cm, draw=mem-border, font=\ttfamily\small}
-    ]
-        % Label
-        \node[anchor=east, font=\sffamily\small] at (-0.2, 0) {#1};
-        % Byte 3 (MSB)
-        \node[byteblock, fill=bit-byte3] (b3) at (1, 0) {#2};
-        \node[font=\tiny, anchor=south] at (b3.north) {31..24};
-        % Byte 2
-        \node[byteblock, fill=bit-byte2, right=0pt of b3] (b2) {#3};
-        \node[font=\tiny, anchor=south] at (b2.north) {23..16};
-        % Byte 1
-        \node[byteblock, fill=bit-byte1, right=0pt of b2] (b1) {#4};
-        \node[font=\tiny, anchor=south] at (b1.north) {15..8};
-        % Byte 0 (LSB)
-        \node[byteblock, fill=bit-byte0, right=0pt of b1] (b0) {#5};
-        \node[font=\tiny, anchor=south] at (b0.north) {7..0};
-    \end{tikzpicture}
+% ==================== GENERIC BIT VALUE BAR ====================
+% Shows a 32-bit value with byte coloring
+% Usage: \BitValueBar{value_hex}
+\newcommand{\BitValueBar}[1]{%
+\begin{tikzpicture}[baseline=-0.5ex]
+    \node[rectangle, draw=diagram-border, fill=bit-byte3, minimum width=0.8cm, minimum height=0.4cm, font=\tiny\ttfamily] at (0,0) {};
+    \node[rectangle, draw=diagram-border, fill=bit-byte2, minimum width=0.8cm, minimum height=0.4cm, font=\tiny\ttfamily] at (0.8,0) {};
+    \node[rectangle, draw=diagram-border, fill=bit-byte1, minimum width=0.8cm, minimum height=0.4cm, font=\tiny\ttfamily] at (1.6,0) {};
+    \node[rectangle, draw=diagram-border, fill=bit-byte0, minimum width=0.8cm, minimum height=0.4cm, font=\tiny\ttfamily] at (2.4,0) {};
+    \node[font=\tiny\ttfamily] at (1.2, -0.5) {#1};
+\end{tikzpicture}
 }
 
-% SPLITB visualization - shows every 4th bit extraction
-% SPLITB splits every 4th bit into bytes
+% ==================== SPLITB DIAGRAM ====================
+% Shows SPLITB bit extraction pattern
 \newcommand{\SplitBDiagram}{%
-    \begin{tikzpicture}[
-        bitcell/.style={minimum width=0.25cm, minimum height=0.5cm, draw=gray!50, font=\tiny},
-        arrow/.style={->, >=Stealth, thick, gray}
-    ]
-        % Before label
-        \node[anchor=east, font=\sffamily\small] at (-0.2, 1.5) {Before:};
-        % 32 bits shown as cells with alternating colors by which byte they go to
-        \foreach \i in {0,...,31} {
-            \pgfmathtruncatemacro{\bytenum}{mod(\i, 4)}
-            \ifnum\bytenum=0 \def\col{bit-byte0}\fi
-            \ifnum\bytenum=1 \def\col{bit-byte1}\fi
-            \ifnum\bytenum=2 \def\col{bit-byte2}\fi
-            \ifnum\bytenum=3 \def\col{bit-byte3}\fi
-            \node[bitcell, fill=\col] at ({(31-\i)*0.25}, 1.5) {\i};
-        }
+\begin{center}
+\begin{tikzpicture}[
+    bit/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=0.25cm,
+        minimum height=0.4cm,
+        align=center,
+        font=\tiny
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    }
+]
 
-        % Arrow
-        \draw[arrow] (4, 0.9) -- (4, 0.4) node[midway, right, font=\sffamily\scriptsize] {SPLITB};
+% Title
+\node[font=\bfseries] at (0, 2) {SPLITB: Extract Every 4th Bit};
 
-        % After label
-        \node[anchor=east, font=\sffamily\small] at (-0.2, 0) {After:};
-        % Byte 3: bits 31,27,23,19,15,11,7,3
-        \foreach \b/\bits in {3/{31,27,23,19,15,11,7,3}, 2/{30,26,22,18,14,10,6,2}, 1/{29,25,21,17,13,9,5,1}, 0/{28,24,20,16,12,8,4,0}} {
-            \pgfmathtruncatemacro{\xstart}{(3-\b)*2.1}
-            \ifnum\b=0 \def\col{bit-byte0}\fi
-            \ifnum\b=1 \def\col{bit-byte1}\fi
-            \ifnum\b=2 \def\col{bit-byte2}\fi
-            \ifnum\b=3 \def\col{bit-byte3}\fi
-            \node[minimum width=2cm, minimum height=0.5cm, draw=mem-border, fill=\col, font=\tiny]
-                at ({\xstart + 1}, 0) {Byte \b};
-        }
-    \end{tikzpicture}
+% Source (before)
+\node[annotation, anchor=east] at (-4, 1) {Before:};
+\foreach \i in {0,...,31} {
+    \pgfmathsetmacro{\x}{-3.5 + \i * 0.23}
+    \pgfmathtruncatemacro{\bytenum}{mod(\i, 4)}
+    \ifnum\bytenum=0 \node[bit, fill=bit-byte3] at (\x, 1) {}; \fi
+    \ifnum\bytenum=1 \node[bit, fill=bit-byte2] at (\x, 1) {}; \fi
+    \ifnum\bytenum=2 \node[bit, fill=bit-byte1] at (\x, 1) {}; \fi
+    \ifnum\bytenum=3 \node[bit, fill=bit-byte0] at (\x, 1) {}; \fi
 }
 
-% REV (bit reversal) visualization
+% Result (after)
+\node[annotation, anchor=east] at (-4, 0) {After:};
+% Byte 3 (bits 0,4,8,12,16,20,24,28)
+\foreach \i in {0,...,7} {
+    \pgfmathsetmacro{\x}{-3.5 + \i * 0.23}
+    \node[bit, fill=bit-byte3] at (\x, 0) {};
+}
+% Byte 2 (bits 1,5,9,13,17,21,25,29)
+\foreach \i in {8,...,15} {
+    \pgfmathsetmacro{\x}{-3.5 + \i * 0.23}
+    \node[bit, fill=bit-byte2] at (\x, 0) {};
+}
+% Byte 1 (bits 2,6,10,14,18,22,26,30)
+\foreach \i in {16,...,23} {
+    \pgfmathsetmacro{\x}{-3.5 + \i * 0.23}
+    \node[bit, fill=bit-byte1] at (\x, 0) {};
+}
+% Byte 0 (bits 3,7,11,15,19,23,27,31)
+\foreach \i in {24,...,31} {
+    \pgfmathsetmacro{\x}{-3.5 + \i * 0.23}
+    \node[bit, fill=bit-byte0] at (\x, 0) {};
+}
+
+% Explanation
+\node[annotation] at (0, -0.8) {Gathers bits by position mod 4 into bytes};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ==================== REV DIAGRAM ====================
+% Shows REV bit reversal operation
 \newcommand{\RevDiagram}{%
-    \begin{tikzpicture}[
-        bitcell/.style={minimum width=0.22cm, minimum height=0.5cm, draw=gray!50, font=\tiny\ttfamily},
-        arrow/.style={->, >=Stealth, thick, gray}
-    ]
-        % Before
-        \node[anchor=east, font=\sffamily\small] at (-0.2, 1) {Before:};
-        \foreach \i in {0,...,7} {
-            \node[bitcell, fill=gray!20] at ({(7-\i)*0.25 + 0.5}, 1) {\i};
-        }
-        \node[font=\tiny] at (3, 1) {...};
-        \foreach \i in {24,...,31} {
-            \pgfmathtruncatemacro{\pos}{\i - 24}
-            \node[bitcell, fill=gray!20] at ({(7-\pos)*0.25 + 5.5}, 1) {\i};
-        }
+\begin{center}
+\begin{tikzpicture}[
+    bit/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=0.4cm,
+        minimum height=0.4cm,
+        align=center,
+        font=\tiny
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    },
+    arrow/.style={
+        ->,
+        >=Stealth,
+        thick,
+        gray
+    }
+]
 
-        % Arrow
-        \draw[arrow] (4, 0.5) -- (4, 0.1) node[midway, right, font=\sffamily\scriptsize] {REV};
+% Title
+\node[font=\bfseries] at (0, 2.5) {REV: Bit Reversal};
 
-        % After (reversed)
-        \node[anchor=east, font=\sffamily\small] at (-0.2, -0.4) {After:};
-        \foreach \i in {0,...,7} {
-            \pgfmathtruncatemacro{\rev}{31 - \i}
-            \node[bitcell, fill=gray!20] at ({(7-\i)*0.25 + 0.5}, -0.4) {\rev};
-        }
-        \node[font=\tiny] at (3, -0.4) {...};
-        \foreach \i in {24,...,31} {
-            \pgfmathtruncatemacro{\pos}{\i - 24}
-            \pgfmathtruncatemacro{\rev}{31 - \i}
-            \node[bitcell, fill=gray!20] at ({(7-\pos)*0.25 + 5.5}, -0.4) {\rev};
-        }
+% Source
+\node[annotation, anchor=east] at (-4, 1.5) {Before:};
+\node[bit, fill=bit-byte3] (s0) at (-3, 1.5) {31};
+\node[bit, fill=bit-byte3] at (-2.5, 1.5) {30};
+\node[font=\small] at (-2, 1.5) {...};
+\node[bit, fill=bit-byte0] at (-1.5, 1.5) {1};
+\node[bit, fill=bit-byte0] (s31) at (-1, 1.5) {0};
 
-        % Annotation
-        \node[font=\sffamily\scriptsize, anchor=west] at (8, 0.3) {bits 31:0 $\rightarrow$ bits 0:31};
-    \end{tikzpicture}
+% Result
+\node[annotation, anchor=east] at (-4, 0) {After:};
+\node[bit, fill=bit-byte0] (d0) at (-3, 0) {0};
+\node[bit, fill=bit-byte0] at (-2.5, 0) {1};
+\node[font=\small] at (-2, 0) {...};
+\node[bit, fill=bit-byte3] at (-1.5, 0) {30};
+\node[bit, fill=bit-byte3] (d31) at (-1, 0) {31};
+
+% Crossing arrows
+\draw[arrow] (s0.south) to[bend right=30] (d31.north);
+\draw[arrow] (s31.south) to[bend left=30] (d0.north);
+
+% Explanation
+\node[annotation] at (0, -1) {Bit 0 $\leftrightarrow$ Bit 31, Bit 1 $\leftrightarrow$ Bit 30, etc.};
+
+\end{tikzpicture}
+\end{center}
 }
 
-% MOVBYTS visualization - byte shuffle
-% Args: source-pattern (e.g., "3210" for no change, "0123" for reverse)
+% ==================== MOVBYTS DIAGRAM ====================
+% Shows MOVBYTS byte shuffle operation
+% Usage: \MovbytsDiagram{pattern} where pattern is like "3210" or "0000"
 \newcommand{\MovbytsDiagram}[1]{%
-    \begin{tikzpicture}[
-        byteblock/.style={minimum width=1.5cm, minimum height=0.6cm, draw=mem-border, font=\ttfamily\small},
-        arrow/.style={->, >=Stealth, gray}
-    ]
-        % Before
-        \node[anchor=east, font=\sffamily\small] at (-0.2, 1) {Before:};
-        \node[byteblock, fill=bit-byte3] (b3) at (1, 1) {B3};
-        \node[byteblock, fill=bit-byte2, right=0pt of b3] (b2) {B2};
-        \node[byteblock, fill=bit-byte1, right=0pt of b2] (b1) {B1};
-        \node[byteblock, fill=bit-byte0, right=0pt of b1] (b0) {B0};
+\begin{center}
+\begin{tikzpicture}[
+    bytebox/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=1.2cm,
+        minimum height=0.6cm,
+        align=center,
+        font=\small\ttfamily
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    }
+]
 
-        % Pattern label
-        \node[font=\sffamily\scriptsize] at (7, 1) {S = #1};
+% Title
+\node[font=\bfseries] at (0, 2) {MOVBYTS: Byte Shuffle};
 
-        % After
-        \node[anchor=east, font=\sffamily\small] at (-0.2, -0.2) {After:};
-        % Parse pattern and draw reordered bytes
-        \foreach \pos/\src in {0/{\strchar{#1}{3}}, 1/{\strchar{#1}{2}}, 2/{\strchar{#1}{1}}, 3/{\strchar{#1}{0}}} {
-            \pgfmathtruncatemacro{\xpos}{\pos * 1.5 + 1}
-        }
-        % Simplified: just show the concept
-        \node[byteblock, fill=bit-byte0!50] at (1, -0.2) {B[S[7:6]]};
-        \node[byteblock, fill=bit-byte0!50, right=0pt] at (2.5, -0.2) {B[S[5:4]]};
-        \node[byteblock, fill=bit-byte0!50, right=0pt] at (4, -0.2) {B[S[3:2]]};
-        \node[byteblock, fill=bit-byte0!50, right=0pt] at (5.5, -0.2) {B[S[1:0]]};
-    \end{tikzpicture}
+% Source bytes
+\node[annotation, anchor=east] at (-4, 1) {Source:};
+\node[bytebox, fill=bit-byte3] at (-2.5, 1) {B3};
+\node[bytebox, fill=bit-byte2] at (-1.2, 1) {B2};
+\node[bytebox, fill=bit-byte1] at (0.1, 1) {B1};
+\node[bytebox, fill=bit-byte0] at (1.4, 1) {B0};
+
+% Result (pattern dependent)
+\node[annotation, anchor=east] at (-4, 0) {Result (#1):};
+% This would need pattern parsing - simplified version
+\node[bytebox, fill=diagram-box] at (-2.5, 0) {B?};
+\node[bytebox, fill=diagram-box] at (-1.2, 0) {B?};
+\node[bytebox, fill=diagram-box] at (0.1, 0) {B?};
+\node[bytebox, fill=diagram-box] at (1.4, 0) {B?};
+
+\node[annotation] at (0, -0.8) {Each result byte selected by 2-bit index from pattern};
+
+\end{tikzpicture}
+\end{center}
 }
 
-%% ============================================================================
-%% REGISTER BIT FIELD MAP (Phase 0.4)
-%% ============================================================================
-%% \RegisterMap{name}{field-definitions}
-%% For showing bit field layouts of special registers
-%% ============================================================================
+% ==================== ROLBYTE DIAGRAM ====================
+% Shows ROLBYTE rotation
+\newcommand{\RolByteDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    bytebox/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=1cm,
+        minimum height=0.6cm,
+        align=center,
+        font=\small\ttfamily
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    },
+    arrow/.style={
+        ->,
+        >=Stealth,
+        thick,
+        green!50!black
+    }
+]
 
-% Draw a register with bit fields
-% Usage: \RegisterBitField{width-in-bits}{start-bit}{color}{label}
-\newcommand{\RegisterBitField}[4]{%
-    \fill[#3, draw=mem-border]
-        ({#2 * 0.25}, 0) rectangle ({(#2 + #1) * 0.25}, 0.6);
-    \node[font=\ttfamily\tiny] at ({(#2 + #1/2) * 0.25}, 0.3) {#4};
+% Title
+\node[font=\bfseries] at (0, 2.5) {ROLBYTE: Rotate Bytes Left};
+
+% Source
+\node[annotation, anchor=east] at (-4, 1.5) {Before:};
+\node[bytebox, fill=bit-byte3] (b3) at (-2.3, 1.5) {B3};
+\node[bytebox, fill=bit-byte2] (b2) at (-1.2, 1.5) {B2};
+\node[bytebox, fill=bit-byte1] (b1) at (-0.1, 1.5) {B1};
+\node[bytebox, fill=bit-byte0] (b0) at (1.0, 1.5) {B0};
+
+% Result (rotate left by 1)
+\node[annotation, anchor=east] at (-4, 0) {After (n=1):};
+\node[bytebox, fill=bit-byte2] at (-2.3, 0) {B2};
+\node[bytebox, fill=bit-byte1] at (-1.2, 0) {B1};
+\node[bytebox, fill=bit-byte0] at (-0.1, 0) {B0};
+\node[bytebox, fill=bit-byte3] at (1.0, 0) {B3};
+
+% Rotation arrow
+\draw[arrow, bend left=40] (b3.east) to (1.5, 0.75) to (1.0, 0.3);
+
+\node[annotation] at (0, -0.8) {Rotates bytes left, MSB byte wraps to LSB position};
+
+\end{tikzpicture}
+\end{center}
 }
 
-% COGINIT Dest field format: %E_N_xVVV
-\newcommand{\CoginitDestField}{%
-    \begin{tikzpicture}
-        \node[anchor=east, font=\sffamily\small] at (-0.2, 0.3) {Dest:};
-        % E bit (bit 8)
-        \RegisterBitField{1}{8}{bit-byte3}{E}
-        % N bit (bit 7)
-        \RegisterBitField{1}{7}{bit-byte2}{N}
-        % x (unused, bit 6)
-        \RegisterBitField{1}{6}{gray!30}{x}
-        % VVV (bits 5-3)
-        \RegisterBitField{3}{3}{bit-byte1}{VVV}
-        % Low bits (2-0)
-        \RegisterBitField{3}{0}{gray!30}{---}
+% ==================== SETBYTE DIAGRAM ====================
+% Shows SETBYTE insertion
+\newcommand{\SetByteDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    bytebox/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=1cm,
+        minimum height=0.6cm,
+        align=center,
+        font=\small\ttfamily
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    },
+    arrow/.style={
+        ->,
+        >=Stealth,
+        thick,
+        blue!50!black
+    }
+]
 
-        % Bit labels below
-        \node[font=\tiny] at ({8.5 * 0.25}, -0.15) {8};
-        \node[font=\tiny] at ({7.5 * 0.25}, -0.15) {7};
-        \node[font=\tiny] at ({6.5 * 0.25}, -0.15) {6};
-        \node[font=\tiny] at ({4.5 * 0.25}, -0.15) {5..3};
-        \node[font=\tiny] at ({1.5 * 0.25}, -0.15) {2..0};
+% Title
+\node[font=\bfseries] at (0, 2.5) {SETBYTE: Insert Byte};
 
-        % Legend
-        \node[font=\sffamily\scriptsize, anchor=west] at (3, 0.3) {E=exec, N=new, VVV=cog\#};
-    \end{tikzpicture}
+% Original dest
+\node[annotation, anchor=east] at (-4, 1.5) {Dest:};
+\node[bytebox, fill=bit-byte3] at (-2.3, 1.5) {D3};
+\node[bytebox, fill=bit-byte2] at (-1.2, 1.5) {D2};
+\node[bytebox, fill=bit-byte1] at (-0.1, 1.5) {D1};
+\node[bytebox, fill=bit-byte0] at (1.0, 1.5) {D0};
+
+% Source byte
+\node[annotation, anchor=east] at (-4, 0.5) {Source:};
+\node[bytebox, fill=diagram-highlight] (src) at (-2.3, 0.5) {S0};
+
+% Result (insert at position 2)
+\node[annotation, anchor=east] at (-4, -0.5) {Result (n=2):};
+\node[bytebox, fill=bit-byte3] at (-2.3, -0.5) {D3};
+\node[bytebox, fill=diagram-highlight] (dest) at (-1.2, -0.5) {S0};
+\node[bytebox, fill=bit-byte1] at (-0.1, -0.5) {D1};
+\node[bytebox, fill=bit-byte0] at (1.0, -0.5) {D0};
+
+% Arrow showing insertion
+\draw[arrow] (src.south) to[bend right=20] (dest.north);
+
+\node[annotation] at (0, -1.3) {Inserts source byte at position n (0--3)};
+
+\end{tikzpicture}
+\end{center}
 }
 
-% DIRA/DIRB format (simple 32-bit pin mask)
-\newcommand{\DirRegisterField}{%
-    \begin{tikzpicture}
-        \node[anchor=east, font=\sffamily\small] at (-0.2, 0.3) {DIRA/B:};
-        % Show as 32-bit field
-        \fill[bit-byte1!50, draw=mem-border] (0, 0) rectangle (8, 0.6);
-        \node[font=\ttfamily\small] at (4, 0.3) {Pin Direction Mask (32 bits)};
-        % Bit labels
-        \node[font=\tiny] at (0, -0.15) {31};
-        \node[font=\tiny] at (8, -0.15) {0};
-        % Legend
-        \node[font=\sffamily\scriptsize, anchor=west] at (8.3, 0.3) {1=output, 0=input};
-    \end{tikzpicture}
+% ============================================================================
+% PART II: DIRECTIVE MEMORY DIAGRAMS
+% ============================================================================
+
+% ==================== GENERIC MEMORY MAP MACRO ====================
+% Usage: \MemoryMap{title}{regions} where regions is TikZ code
+\newcommand{\MemoryMap}[2]{%
+\begin{center}
+\begin{tikzpicture}[
+    membox/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=4cm,
+        align=center,
+        font=\small
+    },
+    addr/.style={
+        font=\footnotesize\ttfamily,
+        text=diagram-text,
+        anchor=east
+    }
+]
+\node[font=\bfseries] at (0, 3) {#1};
+#2
+\end{tikzpicture}
+\end{center}
 }
 
-% Generic register bit field diagram
-% Args: name, list of {width,label,color} tuples (comma separated)
-% Simplified version - draws fixed 32-bit field with custom segments
-\newcommand{\RegisterFieldDiagram}[2]{%
-    \begin{tikzpicture}
-        \node[anchor=east, font=\sffamily\small] at (-0.2, 0.3) {#1:};
-        % Draw the field content passed as #2
-        #2
-    \end{tikzpicture}
+% ==================== ALIGNW DIAGRAM ====================
+% Shows ALIGNW word alignment effect
+\newcommand{\AlignWDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    cell/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=0.8cm,
+        minimum height=0.6cm,
+        align=center,
+        font=\scriptsize\ttfamily
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 2) {ALIGNW: Word Alignment};
+
+% Before
+\node[annotation, anchor=east] at (-4, 1) {Before:};
+\node[cell, fill=diagram-highlight] at (-2.5, 1) {B0};
+\node[cell, fill=diagram-box] at (-1.7, 1) {?};
+\node[cell, fill=diagram-box] at (-0.9, 1) {?};
+\node[annotation] at (-3.3, 1) {\$001};
+
+% After
+\node[annotation, anchor=east] at (-4, 0) {After:};
+\node[cell, fill=diagram-highlight] at (-2.5, 0) {B0};
+\node[cell, fill=timing-wait] at (-1.7, 0) {pad};
+\node[cell, fill=diagram-box] at (-0.9, 0) {next};
+\node[annotation] at (-3.3, 0) {\$001};
+\node[annotation] at (-0.9, -0.5) {\$002 (word aligned)};
+
+\node[annotation, text width=6cm, align=center] at (0, -1.2) {Pads to next word boundary (even address)};
+
+\end{tikzpicture}
+\end{center}
 }
 
-%% ============================================================================
-%% END OF PACKAGE
-%% ============================================================================
+% ==================== ALIGNL DIAGRAM ====================
+% Shows ALIGNL long alignment effect
+\newcommand{\AlignLDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    cell/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=0.8cm,
+        minimum height=0.6cm,
+        align=center,
+        font=\scriptsize\ttfamily
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 2) {ALIGNL: Long Alignment};
+
+% Before
+\node[annotation, anchor=east] at (-4, 1) {Before:};
+\node[cell, fill=diagram-highlight] at (-2.5, 1) {B0};
+\node[cell, fill=diagram-box] at (-1.7, 1) {?};
+\node[cell, fill=diagram-box] at (-0.9, 1) {?};
+\node[cell, fill=diagram-box] at (-0.1, 1) {?};
+\node[annotation] at (-3.3, 1) {\$001};
+
+% After
+\node[annotation, anchor=east] at (-4, 0) {After:};
+\node[cell, fill=diagram-highlight] at (-2.5, 0) {B0};
+\node[cell, fill=timing-wait] at (-1.7, 0) {pad};
+\node[cell, fill=timing-wait] at (-0.9, 0) {pad};
+\node[cell, fill=timing-wait] at (-0.1, 0) {pad};
+\node[cell, fill=diagram-box] at (0.7, 0) {next};
+\node[annotation] at (-3.3, 0) {\$001};
+\node[annotation] at (0.7, -0.5) {\$004 (long aligned)};
+
+\node[annotation, text width=6cm, align=center] at (0, -1.2) {Pads to next long boundary (multiple of 4)};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PART II: REGISTER BIT FIELD DIAGRAMS
+% ============================================================================
+
+% ==================== COGINIT DEST FIELD DIAGRAM ====================
+\newcommand{\CoginitDestFieldDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    bitfield/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum height=0.8cm,
+        align=center,
+        font=\ttfamily\footnotesize
+    },
+    bitnum/.style={
+        font=\tiny\ttfamily,
+        text=gray
+    },
+    label/.style={
+        font=\scriptsize,
+        text=diagram-text,
+        align=center
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 2) {COGINIT Dest Field (9 bits):};
+
+% Bit positions
+\node[bitnum] at (-2.5, 1.2) {8};
+\node[bitnum] at (-1.5, 1.2) {4};
+\node[bitnum] at (-0.5, 1.2) {3};
+\node[bitnum] at (1.5, 1.2) {0};
+
+% Fields
+\node[bitfield, fill=encoding-dest, minimum width=2cm] (setq) at (-2, 0.5) {SETQ+};
+\node[bitfield, fill=encoding-flag, minimum width=1cm] (newcog) at (-0.5, 0.5) {N};
+\node[bitfield, fill=encoding-src, minimum width=2cm] (cogid) at (1, 0.5) {COG ID};
+
+% Labels
+\node[label] at (-2, -0.3) {Hub addr\\(SETQ+)};
+\node[label] at (-0.5, -0.3) {New\\COG};
+\node[label] at (1, -0.3) {COG\\(0--7)};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ==================== DIR REGISTER FIELD DIAGRAM ====================
+\newcommand{\DirRegisterFieldDiagram}{%
+\begin{center}
+\begin{tikzpicture}[
+    bit/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum width=0.25cm,
+        minimum height=0.5cm,
+        align=center,
+        font=\tiny
+    },
+    annotation/.style={
+        font=\scriptsize,
+        text=diagram-text
+    }
+]
+
+% Title
+\node[font=\bfseries] at (0, 2) {DIRA/DIRB Register (32 bits each):};
+
+% Bit cells
+\foreach \i in {0,...,31} {
+    \pgfmathsetmacro{\x}{-4 + \i * 0.25}
+    \node[bit, fill=encoding-dest] at (\x, 1) {};
+}
+
+% Bit labels
+\node[annotation] at (-3.9, 0.3) {31};
+\node[annotation] at (3.9, 0.3) {0};
+
+% Explanation
+\node[annotation, text width=8cm, align=center] at (0, -0.3) {
+Each bit controls one pin: 0 = Input, 1 = Output\\
+DIRA = P0--P31, DIRB = P32--P63
+};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ==================== GENERIC REGISTER BIT FIELD ====================
+% Usage: \RegisterBitField{name}{width}{fields}
+\newcommand{\RegisterBitField}[3]{%
+\begin{center}
+\begin{tikzpicture}[
+    bitfield/.style={
+        rectangle,
+        draw=diagram-border,
+        minimum height=0.7cm,
+        align=center,
+        font=\ttfamily\footnotesize
+    }
+]
+\node[font=\bfseries] at (0, 1.5) {#1 (#2 bits):};
+#3
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% END OF PACKAGE
+% ============================================================================
 
 \endinput
