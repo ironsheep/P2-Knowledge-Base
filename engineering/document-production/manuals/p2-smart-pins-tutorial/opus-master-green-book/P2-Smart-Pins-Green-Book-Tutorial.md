@@ -76,13 +76,15 @@ Before we dive into the sophisticated world of Smart Pins, let's establish a sol
 
 Forget what you might have seen about 32+ pin instructions. You really only need four to get started:
 
-```spin2
+::: spin2
+```
 PUB the_essentials()
   pinfloat(56)          ' Make P56 an input (float it)
   pinhigh(56)           ' Make P56 an output high
   pinlow(56)            ' Set P56 output to 0
   pinhigh(56)           ' Set P56 output to 1
 ```
+:::
 
 That's it! With just these four instructions, you can:
 - Control LEDs
@@ -92,7 +94,8 @@ That's it! With just these four instructions, you can:
 
 Let's see them in action with the classic "Hello World" of embedded systems:
 
-```spin2
+::: spin2
+```
 CON
   _clkfreq = 200_000_000        ' 200MHz system clock
   LED = 56                      ' P2 Eval board LED
@@ -105,10 +108,12 @@ PUB blink_basic()
     pinlow(LED)                 ' LED off
     waitms(500)                 ' Wait 500ms
 ```
+:::
 
 Simple, right? Now let's read a button:
 
-```spin2
+::: spin2
+```
 CON
   BUTTON = 32                   ' Button on P32
 
@@ -117,6 +122,7 @@ PUB read_button() : pressed
   pressed := pinread(BUTTON)   ' Read the pin state
   ' Returns 1 if pressed (assuming active-high button)
 ```
+:::
 
 ### 0.2 Reading Inputs - The INA and INB Registers
 
@@ -124,7 +130,8 @@ The P2 has 64 I/O pins, split across two 32-bit registers:
 - **INA[31..0]** - Read pins P0 through P31
 - **INB[31..0]** - Read pins P32 through P63
 
-```spin2
+::: spin2
+```
 PUB read_multiple_inputs() | value, button1, button2, sensor, i
   ' Make P0-P7 inputs
   repeat i from 0 to 7
@@ -138,6 +145,7 @@ PUB read_multiple_inputs() | value, button1, button2, sensor, i
   button2 := pinread(1)         ' Read P1
   sensor  := pinread(2)         ' Read P2
 ```
+:::
 
 **Important:** Input pins read the actual pin state, regardless of the output register setting. This means you can read back what you're outputting (useful for debugging).
 
@@ -145,13 +153,23 @@ PUB read_multiple_inputs() | value, button1, button2, sensor, i
 
 When you control pins, there's a tiny delay between your instruction and the pin actually changing:
 
-![Basic I/O Output Timing](v6-assets/P2 SmartPins-220809_page03_img01.png)
+```{=latex}
+\DRVHTimingDiagram
+```
 
 **What this means in practice**: At 200MHz, the 3-clock delay is only 15 nanoseconds - essentially instant for LEDs, buttons, and most I/O!
 
 Similarly, when reading pins:
 
-![Basic I/O Input Sampling](v6-assets/P2 SmartPins-220809_page04_img01.png)
+```{=latex}
+\TESTBINATimingDiagram
+```
+
+And for quick pin testing (TESTP instruction):
+
+```{=latex}
+\TESTPTimingDiagram
+```
 
 **The bottom line**: For most projects, you can completely ignore these delays! They only matter when:
 - Bit-banging high-speed protocols (>10MHz)
@@ -184,7 +202,8 @@ This gives us 4 × 8 = 32 instructions, but remember: **You'll use the L and H v
 
 Here's a practical example using the NOT variant:
 
-```spin2
+::: spin2
+```
 PUB toggle_led()
   pinhigh(56)                   ' Make P56 an output high
   repeat
@@ -192,6 +211,7 @@ PUB toggle_led()
     waitms(500)                 ' Wait 500ms
     ' No need to track on/off state - toggle does it for us!
 ```
+:::
 
 ### 0.5 Practical I/O Patterns
 
@@ -199,7 +219,8 @@ Let's look at some common patterns you'll use in real projects:
 
 #### Button Debouncing
 
-```spin2
+::: spin2
+```
 PUB debounced_button() : pressed | sample1, sample2
   pinfloat(32)                  ' Button on P32 as input
   sample1 := pinread(32)        ' First reading
@@ -207,19 +228,23 @@ PUB debounced_button() : pressed | sample1, sample2
   sample2 := pinread(32)        ' Second reading
   pressed := sample1 & sample2  ' Both must be pressed
 ```
+:::
 
 #### Parallel Output (8-bit LCD, etc.)
 
-```spin2
+::: spin2
+```
 PUB output_byte(value) | i
   repeat i from 0 to 7
     pinhigh(i)                  ' P0..P7 as outputs
   OUTA := (OUTA & !$FF) | value ' Write all 8 bits at once
 ```
+:::
 
 #### Simple Bit-Banged Serial (Slow but Educational)
 
-```spin2
+::: spin2
+```
 PUB send_byte_slow(value) | bit, TX_PIN
   TX_PIN := 62                  ' Define TX pin
   pinhigh(TX_PIN)               ' TX pin as output high
@@ -230,12 +255,14 @@ PUB send_byte_slow(value) | bit, TX_PIN
       pinlow(TX_PIN)            ' Send 0
     waitus(104)                 ' ~9600 baud (104us per bit)
 ```
+:::
 
 ### 0.6 Multiple Pin Control
 
 The P2 can control multiple pins simultaneously using the ADDPINS operator:
 
-```spin2
+::: spin2
+```
 PUB control_multiple() | i
   ' Control 8 LEDs on P16..P23
   repeat i from 16 to 23
@@ -247,6 +274,7 @@ PUB control_multiple() | i
   ' Create a pattern
   OUTA := (OUTA & !$FF0000) | (%10101010 << 16)  ' Alternating pattern on P16-P23
 ```
+:::
 
 ### 0.7 When Basic I/O Isn't Enough
 
@@ -258,7 +286,8 @@ Basic I/O is perfect for:
 
 But watch what happens when we need precise timing:
 
-```spin2
+::: spin2
+```
 PUB square_wave_painful()
   ' Try to generate a 1kHz square wave - THE HARD WAY
   pinhigh(56)                   ' Make pin 56 output
@@ -269,6 +298,7 @@ PUB square_wave_painful()
     waitus(500)                 ' 500us low
     ' Problem: Our cog is 100% busy just toggling one pin!
 ```
+:::
 
 What if you need:
 - 10 different square waves at different frequencies?
@@ -282,7 +312,8 @@ This is where Smart Pins revolutionize everything. Instead of your code toggling
 
 Let's see the same 1kHz square wave using a Smart Pin:
 
-```spin2
+::: spin2
+```
 PUB square_wave_smart()
   ' Configure Smart Pin for square wave - THE SMART WAY
   pinstart(56, P_TRANSITION | P_OE, clkfreq/1000, 0)
@@ -292,6 +323,7 @@ PUB square_wave_smart()
   repeat
     ' Do whatever you want here - the square wave continues!
 ```
+:::
 
 The difference is profound:
 - **Basic I/O**: Your code does the work
@@ -356,7 +388,8 @@ Once configured, a Smart Pin runs completely independently. Set up a PWM? It gen
 
 Let's start with something simple but satisfying - making an LED blink without using any processor time.
 
-```spin2
+::: spin2
+```
 CON
   _clkfreq = 200_000_000        ' System clock: 200MHz
   LED = 56                      ' P2 Eval board LED
@@ -371,6 +404,7 @@ PUB main()
     ' The processor is completely free here
     ' The LED keeps blinking no matter what we do
 ```
+:::
 
 What just happened? Let's break it down:
 
@@ -384,8 +418,6 @@ The magic? Once that `pinstart()` executes, the LED blinks forever without any f
 ### Understanding Smart Pin Architecture
 
 Each Smart Pin contains sophisticated hardware that operates independently once configured. The architecture includes mode control logic, three 32-bit registers (X, Y, Z), input selection circuitry, and output drivers.
-
-![Smart Pin Configuration Flow](v6-assets/P2 SmartPins-220809_page04_img01.png)
 
 Each Smart Pin contains:
 
@@ -409,7 +441,8 @@ This is where it gets interesting - a Smart Pin can monitor ANY other pin, not j
 
 Every Smart Pin follows the same configuration sequence:
 
-```spin2
+::: spin2
+```
 ' The Universal Smart Pin Setup Sequence
 pinclear(pin)                  ' 1. Reset to known state
 wrpin(pin, mode)               ' 2. Set the mode
@@ -417,6 +450,7 @@ wxpin(pin, x_value)            ' 3. Configure X parameter
 wypin(pin, y_value)            ' 4. Configure Y parameter
 pinstart(pin, mode, x, y)      ' Or do 1-4 in one call!
 ```
+:::
 
 The beauty is in the consistency. Whether you're setting up a DAC, configuring a UART, or measuring pulses, it's always the same dance: mode, X, Y, enable.
 
@@ -425,39 +459,65 @@ The beauty is in the consistency. Whether you're setting up a DAC, configuring a
 Let's deliberately make some mistakes so you'll recognize them later:
 
 **Mistake 1: Forgetting Output Enable**
-```spin2
+
+::: antipattern
+```
 ' This won't work - no output!
 pinstart(LED, P_TRANSITION, clkfreq/2, 0)      ' Missing P_OE
+```
+:::
 
+::: spin2
+```
 ' This works - output enabled
 pinstart(LED, P_TRANSITION | P_OE, clkfreq/2, 0)  ' P_OE included
 ```
+:::
 
 Why does this matter? Smart Pins can generate internal signals without driving the physical pin. Sometimes that's useful, but usually you want to see the output!
 
 **Mistake 2: Wrong Timing Calculation**
-```spin2
+
+::: antipattern
+```
 ' This blinks at 0.5Hz, not 1Hz!
 pinstart(LED, P_TRANSITION | P_OE, clkfreq, 0)    ' Period too long
+```
+:::
 
+::: spin2
+```
 ' This blinks at 1Hz correctly
 pinstart(LED, P_TRANSITION | P_OE, clkfreq/2, 0)  ' Correct period
 ```
+:::
 
 Remember: Period is the time between transitions, not the full cycle time!
 
 **Mistake 3: Not Clearing Before Reconfiguring**
-```spin2
+
+::: spin2
+```
 ' First configuration
 pinstart(pin, P_PWM_SAWTOOTH | P_OE, 1000, 500)  ' 50% duty PWM
 
+```
+:::
+
+::: antipattern
+```
 ' Trying to change modes - might not work!
 pinstart(pin, P_TRANSITION | P_OE, clkfreq/2, 0)  ' Old settings interfere
+```
+:::
 
+::: spin2
+```
 ' Correct way - clear first
 pinclear(pin)
 pinstart(pin, P_TRANSITION | P_OE, clkfreq/2, 0)  ' Clean configuration
 ```
+:::
 
 ### Exercises to Build Confidence
 
@@ -506,7 +566,9 @@ Every Smart Pin configuration follows the same five steps. Master these, and you
 Let's see this in both Spin2 and PASM2:
 
 **Spin2 Approach:**
-```spin2
+
+::: spin2
+```
 PUB configure_smart_pin(pin, mode, x_val, y_val)
   pinclear(pin)                 ' Step 1: Clear
   wrpin(pin, mode)             ' Step 2: Mode
@@ -514,10 +576,12 @@ PUB configure_smart_pin(pin, mode, x_val, y_val)
   wypin(pin, y_val)            ' Step 4: Y parameter
   dirh(pin)                    ' Step 5: Enable
 ```
+:::
 
 **PASM2 Approach:**
 
-```pasm2
+::: pasm2
+```
 configure_smart_pin
         dirl    #pin            ' Step 1: Clear
         wrpin   mode, #pin      ' Step 2: Mode
@@ -525,12 +589,11 @@ configure_smart_pin
         wypin   y_val, #pin     ' Step 4: Y parameter
         dirh    #pin            ' Step 5: Enable
 ```
+:::
 
 ### Understanding the Mode Register
 
 The mode register (written with WRPIN) is 32 bits of configuration magic. The register layout controls both the Smart Pin mode and the pin's electrical characteristics.
-
-![Pin Configuration Register Layout](v6-assets/P2 SmartPins-220809_page04_img02.png)
 
 ```
 Bits 31..14: Pin configuration (input, output, drive strength)
@@ -541,13 +604,15 @@ Bits 5..0:   Smart Pin mode (%MMMMMM)
 
 But here's the beautiful part - Spin2 provides constants for everything:
 
-```spin2
+::: spin2
+```
 ' Instead of remembering bit patterns...
 wrpin(pin, %00_0_000000_000000_00_00_00010)  ' What does this do?!
 
 ' Use meaningful constants!
 wrpin(pin, P_DAC_124R_3V | P_OE)            ' Ah, DAC mode with output!
 ```
+:::
 
 ### The X Register: Master of Time
 
@@ -569,7 +634,8 @@ In most modes, X controls timing:
 
 Let's see a pattern emerge:
 
-```spin2
+::: spin2
+```
 ' NCO frequency output
 wxpin(pin, $8000_0000)         ' 1/2 maximum frequency
 
@@ -579,6 +645,7 @@ wxpin(pin, 10_000)             ' 10,000 clock period
 ' UART baud rate (115200 at 200MHz)
 wxpin(pin, (clkfreq / 115200) << 16 | 7)  ' Baud generator
 ```
+:::
 
 ### The Y Register: Bearer of Values
 
@@ -598,7 +665,8 @@ Y typically holds the value or data:
 
 Example uses:
 
-```spin2
+::: spin2
+```
 ' DAC output at 1.65V (assuming 3.3V range)
 wypin(pin, $8000)              ' Mid-scale output
 
@@ -608,12 +676,14 @@ wypin(pin, 2500)               ' If period is 10,000
 ' UART transmit 'A'
 wypin(pin, "A")                ' Send character
 ```
+:::
 
 ### The Z Register: Keeper of Results
 
 Z is read-only and holds results:
 
-```spin2
+::: spin2
+```
 ' Read encoder count
 count := rdpin(encoder_pin)
 
@@ -623,6 +693,7 @@ voltage := rdpin(adc_pin)
 ' Read received UART byte
 char := rdpin(serial_pin)
 ```
+:::
 
 But there's a crucial distinction:
 
@@ -632,7 +703,8 @@ But there's a crucial distinction:
 
 When do you use which?
 
-```spin2
+::: spin2
+```
 ' Use RDPIN when you're consuming the data
 char := rdpin(serial_pin)      ' Read and clear flag
 
@@ -640,6 +712,7 @@ char := rdpin(serial_pin)      ' Read and clear flag
 if rqpin(serial_pin) & $100    ' Check if byte available
   char := rdpin(serial_pin)    ' Now read and clear
 ```
+:::
 
 ### Pin Input Selection Magic
 
@@ -647,7 +720,8 @@ Here's where Smart Pins get really powerful - any Smart Pin can monitor any othe
 
 The input selector lets you route signals:
 
-```spin2
+::: spin2
+```
 ' Count pulses on Pin 5 using Smart Pin 20
 pinstart(20, P_COUNT_RISES | P_INPUT_RELATIVE, 0, -15)
 ' -15 means "15 pins below me" (20 - 15 = 5)
@@ -656,6 +730,7 @@ pinstart(20, P_COUNT_RISES | P_INPUT_RELATIVE, 0, -15)
 pinstart(30, P_COUNT_CYCLES | P_INPUT_RELATIVE, clkfreq, -20)
 ' -20 means "20 pins below me" (30 - 20 = 10)
 ```
+:::
 
 This flexibility means you can:
 - Put all your Smart Pins together for easy management
@@ -666,7 +741,8 @@ This flexibility means you can:
 
 Want to start multiple PWMs in perfect sync? Here's how:
 
-```spin2
+::: spin2
+```
 PUB start_synchronized_pwm() | pins
   pins := %1111 << 20          ' Pins P23..P20
 
@@ -680,10 +756,12 @@ PUB start_synchronized_pwm() | pins
   ' Enable all simultaneously!
   DIRH(pins)                   ' All start together
 ```
+:::
 
 In PASM2, it's even more precise:
 
-```pasm2
+::: pasm2
+```
 sync_pwm
         mov     mask, #$0F      ' Four pins
         shl     mask, #20       ' P23..P20
@@ -700,76 +778,103 @@ sync_pwm
         ' Simultaneous start
         dirh    mask            ' Perfect sync!
 ```
+:::
 
 ### Common Configuration Patterns
 
 Let's establish some patterns you'll use repeatedly:
 
 **Pattern 1: Digital Output**
-```spin2
+
+::: spin2
+```
 ' Blinking LED
 pinstart(pin, P_TRANSITION | P_OE, clkfreq/2/freq, 0)
 ```
+:::
 
 **Pattern 2: Analog Output**
-```spin2
+
+::: spin2
+```
 ' DAC voltage output
 pinstart(pin, P_DAC_124R_3V | P_OE | P_CHANNEL, 0, voltage)
 ```
+:::
 
 **Pattern 3: Digital Input**
-```spin2
+
+::: spin2
+```
 ' Count pulses
 pinstart(pin, P_COUNT_RISES, 0, 0)
 ```
+:::
 
 **Pattern 4: Analog Input**
-```spin2
+
+::: spin2
+```
 ' ADC reading
 pinstart(pin, P_ADC_1X | P_ADC_GND, 0, 0)
 ```
+:::
 
 **Pattern 5: Serial Communication**
-```spin2
+
+::: spin2
+```
 ' UART setup
 pinstart(pin, P_ASYNC_TX | P_OE, (clkfreq/baud) << 16 | 7, 0)
 ```
+:::
 
 ### Debugging Smart Pin Configuration
 
 When a Smart Pin doesn't work as expected, here's your checklist:
 
 **1. Is it enabled?**
-```spin2
+
+::: spin2
+```
 if pinr(pin) & $8000_0000      ' Check if DIR is set
   debug("Pin is enabled")
 else
   debug("Pin is NOT enabled!")
 ```
+:::
 
 **2. Is the mode correct?**
-```spin2
+
+::: spin2
+```
 ' Read back configuration
 mode := pinr(pin) & $3F        ' Bottom 6 bits
 debug("Mode: %", mode)
 ```
+:::
 
 **3. Are X and Y set correctly?**
 Unfortunately, you can't read these back directly, but you can test:
 
-```spin2
+::: spin2
+```
 ' For output modes, change Y and see if output changes
 wypin(pin, test_value)
 if rdpin(pin) == expected
   debug("Y register working")
 ```
+:::
 
 **4. Is the input routed correctly?**
-```spin2
+
+::: spin2
+```
 ' Test with known signal
 ' Apply signal to expected input pin
 ' Check if Smart Pin responds
 ```
+:::
 
 ### Exercise: Configuration Workout
 
@@ -826,7 +931,8 @@ This is where every Smart Pin begins - turned off, acting like a normal I/O pin.
 **How It Works:**
 In this mode, the Smart Pin hardware is completely disabled. The pin behaves exactly like a traditional microcontroller I/O pin - you can read it, write it, float it, or pull it.
 
-```spin2
+::: spin2
+```
 PUB demonstrate_normal_io()
   ' Make sure Smart Pin is OFF
   pinclear(56)                  ' LED on P2 Eval board
@@ -841,11 +947,14 @@ PUB demonstrate_normal_io()
   ' This uses processor time for timing!
   ' Compare to Smart Pin modes that don't
 ```
+:::
 
-```pasm2
+::: pasm2
+```
 WYPIN D/#,S/#         Write bits D[31:0] to register Y for Smart Pin S[5:0],
                                     acknowledge Smart Pin.
 ```
+:::
 
 **Key Point:** Notice how we need `waitms()` for timing? That's processor time being consumed. Every other mode we'll learn eliminates this waste.
 
@@ -862,7 +971,8 @@ Now for our first real Smart Pin mode - Repository. Think of it as a mailbox whe
 **How It Works:**
 The Smart Pin becomes a 32-bit storage location. Write a value with WYPIN, read it with RDPIN. The value persists until overwritten.
 
-```spin2
+::: spin2
+```
 CON
   MAILBOX_PIN = 20              ' Our repository pin
 
@@ -892,10 +1002,12 @@ PRI consumer() | val
     debug("Consumer got: ", uhex(val))
     waitms(150)
 ```
+:::
 
 **PASM2 Implementation:**
 
-```pasm2
+::: pasm2
+```
 repository_setup
         dirl    #MAILBOX_PIN    ' Clear pin first
         wrpin   ##P_REPOSITORY, #MAILBOX_PIN
@@ -907,6 +1019,7 @@ store_value
 read_value
         rdpin   result, #MAILBOX_PIN  ' Read current value
 ```
+:::
 
 **Important Notes:**
 - No IN flag is raised when value changes
@@ -918,7 +1031,9 @@ read_value
 
 The P2's Smart Pins include sophisticated DAC (Digital to Analog Converter) capabilities. These modes turn your digital pin into a precision analog output.
 
-![DAC Output Characteristics](v6-assets/P2 SmartPins-220809_mode00011_page13_img01.png)
+```{=latex}
+\DACPWMPeriodDiagram
+```
 
 **Mode %00010: DAC 124Ω, 3.3V Output**
 - 16-bit resolution
@@ -941,7 +1056,8 @@ The P2's Smart Pins include sophisticated DAC (Digital to Analog Converter) capa
 
 **Configuration Example:**
 
-```spin2
+::: spin2
+```
 CON
   DAC_PIN = 16
 
@@ -958,9 +1074,12 @@ PUB dac_demo() | level
       wypin(DAC_PIN, level)
       waitus(100)
 ```
+:::
 
 **Generating a Sine Wave:**
-```spin2
+
+::: spin2
+```
 PUB sine_wave_output() | angle
   pinstart(DAC_PIN, P_DAC_124R_3V | P_OE | P_CHANNEL, 0, 0)
 
@@ -969,10 +1088,12 @@ PUB sine_wave_output() | angle
       wypin(DAC_PIN, $8000 + (qsin(angle, 360, $7FFF)))
       waitus(28)  ' ~1kHz sine wave
 ```
+:::
 
 **PASM2 Implementation:**
 
-```pasm2
+::: pasm2
+```
 dac_setup
         dirl    #DAC_PIN
         wrpin   ##P_DAC_124R_3V | P_OE | P_CHANNEL, #DAC_PIN
@@ -982,6 +1103,7 @@ output_voltage
         shl     value, #16      ' Scale to 16-bit
         wypin   value, #DAC_PIN ' Output voltage
 ```
+:::
 
 ::: tip
 The DAC modes can be combined with dithering for even higher effective resolution. The P2 automatically applies smart dithering when you provide values with more than 16 bits of precision.
@@ -991,7 +1113,9 @@ The DAC modes can be combined with dithering for even higher effective resolutio
 
 This mode generates precise pulses or continuous cycles with programmable high and low times.
 
-![Pulse Output Timing](v6-assets/P2 SmartPins-220809_mode01000_page19_img01.png)
+```{=latex}
+\PulseWidthMeasurementDiagram
+```
 
 **When to Use:**
 - Servo control pulses
@@ -1005,7 +1129,8 @@ X[31:16] = High time in clocks
 X[15:0] = Low time in clocks
 Y[31:0] = Number of pulses (0 = continuous)
 
-```spin2
+::: spin2
+```
 CON
   SERVO_PIN = 24
 
@@ -1029,17 +1154,21 @@ PUB single_pulse(width_us)
   ' Wait for completion
   repeat until pinr(PULSE_PIN) & $80000000 == 0
 ```
+:::
 
-```pasm2
+::: pasm2
+```
         wrpin    PulseConfig,  #20   'Set config for pulse/cycle
         wxpin    PulseTiming,  #20   'Set cycle time and logic-0
                                      '  period
         dirh     #20                 'Finished setup
 ```
+:::
 
 **PASM2 Pulse Generation:**
 
-```pasm2
+::: pasm2
+```
 pulse_gen
         dirl    #PULSE_PIN
         wrpin   ##P_PULSE | P_OE, #PULSE_PIN
@@ -1055,12 +1184,15 @@ pulse_gen
 
         dirh    #PULSE_PIN      ' Start pulsing
 ```
+:::
 
 ### Mode %00101 - NCO Frequency
 
 NCO (Numerically Controlled Oscillator) mode generates precise frequencies using phase accumulation.
 
-![NCO Frequency Generation](v6-assets/P2 SmartPins-220809_mode00100_page15_img01.png)
+```{=latex}
+\NCOFrequencyDiagram
+```
 
 **When to Use:**
 - Clock generation
@@ -1074,7 +1206,8 @@ The NCO adds X to a 32-bit phase accumulator on each clock. When bit 31 changes,
 
 Frequency = (X * ClockFreq) / 2^32
 
-```spin2
+::: spin2
+```
 PUB nco_frequency(pin, freq_hz) | x
   ' Calculate X value for desired frequency
   x := freq_hz frac clkfreq
@@ -1088,8 +1221,10 @@ PUB audio_tones()
   nco_frequency(22, 523)       ' C5
   nco_frequency(23, 587)       ' D5
 ```
+:::
 
-```pasm2
+::: pasm2
+```
       wrpin   NCO_Config, #20
 'Set configuration for NCO mode
       wxpin   #1, #20
@@ -1100,9 +1235,12 @@ PUB audio_tones()
       qfrac     ##123, ##_clkfreq   'Calc #of 25-MHz cycles for
                                     '  8 msec period
 ```
+:::
 
 **Precision Frequency Generation:**
-```spin2
+
+::: spin2
+```
 PUB precise_10khz() | x
   ' Generate exactly 10.000kHz
   x := 10_000 frac clkfreq     ' Fractional math for precision
@@ -1113,10 +1251,12 @@ PUB precise_10khz() | x
   debug("X value: ", uhex_long(x))
   debug("Actual freq: ", fdec(float(x) *. float(clkfreq) /. 4294967296.0))
 ```
+:::
 
 **PASM2 NCO Setup:**
 
-```pasm2
+::: pasm2
+```
 nco_freq
         dirl    #NCO_PIN
         wrpin   ##P_NCO_FREQ | P_OE, #NCO_PIN
@@ -1128,12 +1268,15 @@ nco_freq
 
         dirh    #NCO_PIN         ' Start oscillating
 ```
+:::
 
 ### Mode %00110 - NCO Duty
 
 NCO Duty mode generates PWM with precise duty cycle control at a specific frequency.
 
-![NCO Duty Mode Operation](v6-assets/P2 SmartPins-220809_mode01001_page21_img01.png)
+```{=latex}
+\NCODutyTimingDiagram
+```
 
 **When to Use:**
 - PWM with specific frequency AND duty
@@ -1147,7 +1290,8 @@ Y = Duty threshold (sets duty cycle)
 
 Output is high when phase accumulator > Y
 
-```spin2
+::: spin2
+```
 PUB nco_duty_demo(pin, freq_hz, duty_percent) | x, y
   ' Calculate frequency
   x := freq_hz frac clkfreq
@@ -1173,18 +1317,19 @@ PUB breathing_led() | brightness
       wypin(LED_PIN, brightness * $FFFFFFFF / 100)
       waitms(10)
 ```
+:::
 
-```pasm2
+::: pasm2
+```
       wrpin   NCO_Config,  #20   'Set config for Transition mode
       wxpin   #25, #20           'Base period at 1 usec (25 MHz/25)
       dirh    #20                'Finished setup
 ```
+:::
 
 ### Mode %00111 - Transition Output
 
 Transition output mode generates edges at programmable intervals - perfect for clocks and timing references.
-
-![Transition Output Timing](v6-assets/P2 SmartPins-220809_mode01000_page20_img01.png)
 
 **When to Use:**
 - Clock generation
@@ -1197,7 +1342,8 @@ X = Period between transitions
 Y = (not used)
 Output toggles every X clocks
 
-```spin2
+::: spin2
+```
 PUB clock_generator(pin, freq_hz) | period
   ' Calculate period for transitions
   period := clkfreq / (freq_hz * 2)  ' Two transitions per cycle
@@ -1211,10 +1357,12 @@ PUB multiple_clocks()
   clock_generator(22, 100_000)       ' 100kHz
   clock_generator(23, 10_000)        ' 10kHz
 ```
+:::
 
 **PASM2 Transition Generation:**
 
-```pasm2
+::: pasm2
+```
 trans_out
         dirl    #TRANS_PIN
         wrpin   ##P_TRANSITION | P_OE, #TRANS_PIN
@@ -1225,12 +1373,15 @@ trans_out
 
         dirh    #TRANS_PIN         ' Start toggling
 ```
+:::
 
 ### Mode %01000 - PWM Sawtooth
 
 PWM Sawtooth mode provides high-resolution PWM using a sawtooth comparison.
 
-![PWM Sawtooth Waveform](v6-assets/P2 SmartPins-220809_mode01001_page21_img01.png)
+```{=latex}
+\TrianglePWMDiagram
+```
 
 **When to Use:**
 - Motor speed control
@@ -1243,7 +1394,8 @@ X = PWM period (frame)
 Y = ON time within frame
 Output is high for Y clocks out of every X clocks
 
-```spin2
+::: spin2
+```
 PUB pwm_sawtooth(pin, freq_hz, duty_percent) | period, duty
   ' Calculate period
   period := clkfreq / freq_hz
@@ -1269,10 +1421,12 @@ PUB dynamic_pwm() | duty
       wypin(PWM_PIN, duty)     ' Update duty cycle
       waitms(10)
 ```
+:::
 
 **PASM2 PWM Control:**
 
-```pasm2
+::: pasm2
+```
 pwm_saw
         dirl    #PWM_PIN
         wrpin   ##P_PWM_SAWTOOTH | P_OE, #PWM_PIN
@@ -1291,12 +1445,15 @@ update_duty
         ' Change duty cycle on the fly
         wypin   new_duty, #PWM_PIN
 ```
+:::
 
 ### Mode %01001 - PWM Triangle
 
 PWM Triangle mode provides phase-correct PWM using triangle wave comparison.
 
-![PWM Triangle Waveform](v6-assets/P2 SmartPins-220809_mode01000_page20_img01.png)
+```{=latex}
+\SawtoothPWMDiagram
+```
 
 **When to Use:**
 - Phase-correct PWM needed
@@ -1309,7 +1466,8 @@ Counter counts up to X, then down to 0
 Output is high when counter < Y (both up and down)
 Period = 2 * X clocks
 
-```spin2
+::: spin2
+```
 PUB pwm_triangle(pin, freq_hz, duty_percent) | period, duty
   ' Triangle PWM has 2X period due to up/down counting
   period := clkfreq / (freq_hz * 2)
@@ -1326,10 +1484,12 @@ PUB phase_correct_pwm()
     wypin(AUDIO_PIN, sample)
     waitus(125)  ' 8kHz sample rate
 ```
+:::
 
 **PASM2 Triangle PWM:**
 
-```pasm2
+::: pasm2
+```
 pwm_tri
         dirl    #PWM_PIN
         wrpin   ##P_PWM_TRIANGLE | P_OE, #PWM_PIN
@@ -1342,10 +1502,9 @@ pwm_tri
 
         dirh    #PWM_PIN
 ```
+:::
 
 ### Mode %01010 - Switch-Mode Power Supply
-
-![SMPS Timing Diagram](assets/smps-timing-diagram.png)
 
 This specialized mode is designed for switch-mode power supply control with current feedback.
 
@@ -1361,7 +1520,8 @@ X[31:16] = ON time limit
 X[15:0] = OFF time limit
 Y = Target ADC reading
 
-```spin2
+::: spin2
+```
 PUB smps_controller() | config
   ' Configure for SMPS operation
   config := P_SMPS_INDUCTOR | P_OE
@@ -1374,10 +1534,12 @@ PUB smps_controller() | config
 
   pinstart(SMPS_PIN, config, x_val, y_val)
 ```
+:::
 
 **PASM2 SMPS Control:**
 
-```pasm2
+::: pasm2
+```
 smps_setup
         dirl    #SMPS_PIN
         wrpin   ##P_SMPS_INDUCTOR | P_OE, #SMPS_PIN
@@ -1393,6 +1555,7 @@ smps_setup
 
         dirh    #SMPS_PIN
 ```
+:::
 
 ---
 
@@ -1404,7 +1567,9 @@ Now let's explore modes that measure external signals - these are your oscillosc
 
 This mode decodes quadrature encoder signals for position and rotation sensing.
 
-![Quadrature Encoder Signals](v6-assets/P2 SmartPins-220809_mode01011_page23_img01.png)
+```{=latex}
+\QuadEncoderDiagram
+```
 
 **When to Use:**
 - Rotary encoder reading
@@ -1418,7 +1583,8 @@ X = (not used)
 Y = (not used)
 Z accumulates position count
 
-```spin2
+::: spin2
+```
 CON
   ENCODER_A = 32
   ENCODER_B = 33
@@ -1434,14 +1600,19 @@ PUB quadrature_demo() | position, last_pos
       debug("Position: ", sdec(position))
       last_pos := position
 ```
+:::
 
-```pasm2
+::: pasm2
+```
         mov    outa, QuadEnc_data
  'send to LEDs
 ```
+:::
 
 **Advanced Quadrature with Velocity:**
-```spin2
+
+::: spin2
+```
 PUB encoder_with_velocity() | pos, last_pos, velocity
   pinstart(ENCODER_A, P_QUADRATURE | ENCODER_B << 8, 0, 0)
 
@@ -1454,10 +1625,12 @@ PUB encoder_with_velocity() | pos, last_pos, velocity
     last_pos := pos
     waitms(100)
 ```
+:::
 
 **PASM2 Quadrature Reading:**
 
-```pasm2
+::: pasm2
+```
 quad_setup
         dirl    #ENCODER_A
         mov     config, ##P_QUADRATURE
@@ -1468,12 +1641,15 @@ quad_setup
 read_encoder
         rdpin   position, #ENCODER_A   ' Read accumulated count
 ```
+:::
 
 ### Mode %01100 - Count Rises
 
 Count rising edges on the input - your basic pulse counter.
 
-![Pulse Counting Timing](v6-assets/P2 SmartPins-220809_mode10010_page31_img01.png)
+```{=latex}
+\PeriodMeasurementDiagram
+```
 
 **When to Use:**
 - Event counting
@@ -1487,7 +1663,8 @@ X = (optional) count period for gated counting
 Y = (not used)
 Z accumulates count
 
-```spin2
+::: spin2
+```
 PUB count_pulses(pin) | count
   ' Simple pulse counter
   pinstart(pin, P_COUNT_RISES, 0, 0)
@@ -1497,14 +1674,19 @@ PUB count_pulses(pin) | count
     count := rdpin(pin)        ' Read and reset count
     debug("Pulses/sec: ", udec(count))
 ```
+:::
 
-```pasm2
+::: pasm2
+```
         wrpin   A_in_mode,     #A_in   'Set up mode for pin P53
         wxpin   ##$17D_7840,   #A_in   'Set continuous count 1-sec,
 ```
+:::
 
 **Gated Counting:**
-```spin2
+
+::: spin2
+```
 PUB gated_counter(pin, gate_ms) | period
   ' Count for specific period
   period := clkfreq / 1000 * gate_ms
@@ -1517,17 +1699,18 @@ PUB gated_counter(pin, gate_ms) | period
   count := rdpin(pin)
   debug("Count in ", udec(gate_ms), "ms: ", udec(count))
 ```
+:::
 
-```pasm2
+::: pasm2
+```
         wypin   #0,            #A_in   'Count only A-input highs
         dirh    #A_in                  'Enable Smart Pin
 ```
+:::
 
 ### Mode %01101 - A-B Encoder (Inc/Dec)
 
 Counts transitions on A input, with B input controlling direction.
-
-![A-B Encoder Timing](assets/ab-encoder-timing.png)
 
 **When to Use:**
 - Step/direction motor feedback
@@ -1540,7 +1723,8 @@ A input provides pulses
 B input sets direction (high = up, low = down)
 Z accumulates signed count
 
-```spin2
+::: spin2
+```
 PUB step_dir_counter() | count
   pinstart(STEP_PIN, P_INCREMENT | DIR_PIN << 8, 0, 0)
 
@@ -1549,13 +1733,16 @@ PUB step_dir_counter() | count
     debug("Step count: ", sdec(count))
     waitms(100)
 ```
+:::
 
-```pasm2
+::: pasm2
+```
       wrpin   QuadEnc_Config,  #32 'Set for Quad-Encoder mode
       wxpin   X_RegData,       #32 'Set sample period in system-clock
                                    '   periods
       dirh       #32               'Finished setup
 ```
+:::
 
 ### Mode %01110 - Incremental Encoder
 
@@ -1570,7 +1757,8 @@ Single-phase encoder counting with optional direction control.
 - Tachometers
 - Single-phase position sensing
 
-```spin2
+::: spin2
+```
 PUB incremental_encoder() | count
   pinstart(ENCODER_PIN, P_INCREMENTAL, 0, 0)
 
@@ -1579,16 +1767,21 @@ PUB incremental_encoder() | count
     debug("Count: ", sdec(count))
     waitms(100)
 ```
+:::
 
-```pasm2
+::: pasm2
+```
         sar    QuadEnc_data, #2        'Arithmetic shift right 2
                                        ' (divide by 4)
         nop
 ```
+:::
 
 ### Mode %01111 - Local/Global Comparator
 
-![Comparator Operation](assets/comparator-operation.png)
+```{=latex}
+\ComparatorDiagram
+```
 
 Compares input against threshold with optional hysteresis.
 
@@ -1598,7 +1791,8 @@ Compares input against threshold with optional hysteresis.
 - Threshold monitoring
 - Window comparators
 
-```spin2
+::: spin2
+```
 PUB comparator_demo() | threshold
   threshold := $8000            ' Mid-scale threshold
 
@@ -1611,11 +1805,14 @@ PUB comparator_demo() | threshold
       debug("Below threshold")
     waitms(100)
 ```
+:::
 
-```pasm2
+::: pasm2
+```
         wrpin  A_in_mode, #A_in        'Set up mode for pin P53
         dirh   #A_in                   'Enable Smart Pin
 ```
+:::
 
 ### Modes %10000-%10011 - Logic Input Modes
 
@@ -1633,7 +1830,8 @@ Logic mode operations showing:
 **Mode %10010: A XOR B**
 **Mode %10011: A AND !B**
 
-```spin2
+::: spin2
+```
 PUB logic_gates()
   ' AND gate between pins 20 and 21
   pinstart(22, P_LOGIC_AND | 20 << 8 | 21 << 16, 0, 0)
@@ -1641,25 +1839,27 @@ PUB logic_gates()
   ' XOR gate
   pinstart(23, P_LOGIC_XOR | 20 << 8 | 21 << 16, 0, 0)
 ```
+:::
 
-```pasm2
+::: pasm2
+```
         wrpin  A_in_mode,  #A_in    'Set up mode for pin P53
         nop
         dirh   #A_in                'Enable Smart Pin
 ```
+:::
 
 ### Modes %10100-%10111 - Time Measurement Modes
 
 These modes measure time between events with high precision.
-
-![Time Measurement Timing](v6-assets/P2 SmartPins-220809_mode10000_page29_img01.png)
 
 **Mode %10100: Time A-input rises**
 **Mode %10101: Time A-input high states**
 **Mode %10110: Time X-input high**
 **Mode %10111: Continuous timing**
 
-```spin2
+::: spin2
+```
 PUB measure_pulse_width() | width
   pinstart(MEASURE_PIN, P_MEASURE_HIGH, 0, 0)
 
@@ -1670,6 +1870,7 @@ PUB measure_pulse_width() | width
   debug("Pulse width: ", udec(width), " clocks")
   debug("Time: ", udec(width / (clkfreq / 1_000_000)), " us")
 ```
+:::
 
 ### Mode %11000 & %11001 - USB Host/Device Modes
 
@@ -1687,7 +1888,8 @@ USB communication showing:
 **Mode %11000: USB host (even/odd)**
 **Mode %11001: USB device (even/odd)**
 
-```spin2
+::: spin2
+```
 PUB usb_basic_setup()
   ' Basic USB configuration
   ' Full implementation requires protocol stack
@@ -1696,6 +1898,7 @@ PUB usb_basic_setup()
 
   ' USB operation requires additional software stack
 ```
+:::
 
 ### Mode %11010 - Oscilloscope Mode
 
@@ -1716,9 +1919,12 @@ This mode provides hardware-based signal capture with triggering.
 
 Synchronous serial transmission with clock generation.
 
-![Sync Serial Transmit Timing](v6-assets/P2 SmartPins-220809_mode11100_page46_img01.png)
+```{=latex}
+\SyncSerialFallingDiagram
+```
 
-```spin2
+::: spin2
+```
 PUB sync_serial_tx(pin, data, bits) | config
   ' Configure sync serial transmit
   config := P_SYNC_TX | P_OE
@@ -1729,23 +1935,25 @@ PUB sync_serial_tx(pin, data, bits) | config
 
   pinstart(pin, config, x_val, data)
 ```
+:::
 
-```pasm2
+::: pasm2
+```
         wrpin   sync_tx_mode, #txout      'Set sync tx mode pin 41
         wxpin   #%1_00111,    #txout     'Set up stop/start mode,
                                           ' 8 bits (7 + 1)
 ```
+:::
 
 ### Modes %11011-%11110 - Async Serial (UART)
 
 The P2's Smart Pins excel at UART communication, handling all timing and framing in hardware.
 
-![UART Frame Structure](assets/uart-frame-structure.png)
-
 **Mode %11011: Async serial receive**
 **Mode %11100: Async serial transmit**
 
-```spin2
+::: spin2
+```
 CON
   BAUD = 115_200
 
@@ -1767,8 +1975,10 @@ PUB uart_receive(pin) : char | ready
       char := rdpin(pin) & $FF        ' Get byte
       quit
 ```
+:::
 
-```pasm2
+::: pasm2
+```
         wrpin sync_rx_mode, #rxin
 'Set sync receiver mode
         wxpin #%1_00111, #rxin
@@ -1777,9 +1987,12 @@ PUB uart_receive(pin) : char | ready
         dirh #rxin
       'Enable Smart-Pin sync receiver
 ```
+:::
 
 **Full UART Driver:**
-```spin2
+
+::: spin2
+```
 OBJ
   uart : "uart_driver"
 
@@ -1793,10 +2006,12 @@ PUB full_uart_example()
       char := uart.rx()
       uart.tx(char)        ' Echo back
 ```
+:::
 
 **PASM2 UART Implementation:**
 
-```pasm2
+::: pasm2
+```
 uart_tx_setup
         dirl    #TX_PIN
         wrpin   ##P_ASYNC_TX | P_OE, #TX_PIN
@@ -1814,19 +2029,19 @@ send_byte
 .wait   testp   #TX_PIN wc      ' Wait for completion
   if_nc jmp     #.wait
 ```
+:::
 
 ### Mode %11111 - ADC Input Modes
 
 The P2's Smart Pins include sophisticated ADC capabilities for analog measurements.
-
-![ADC Operation Diagram](assets/adc-operation-diagram.png)
 
 **ADC Sub-modes:**
 - SINC1 filtering (fastest)
 - SINC2 filtering (balanced)
 - SINC3 filtering (smoothest)
 
-```spin2
+::: spin2
+```
 PUB adc_reading(pin) : value
   ' Configure for ADC input, 1x gain, GND reference
   pinstart(pin, P_ADC_1X | P_ADC_GND, 0, 0)
@@ -1844,15 +2059,20 @@ PUB continuous_adc() | voltage
     debug("Voltage: ", udec(voltage), " mV")
     waitms(100)
 ```
+:::
 
-```pasm2
+::: pasm2
+```
       wrpin     A_ADC_mode, #A_ADC    'Set up mode for ADC
       wxpin     #%00_0111, #A_ADC     '8-bit resolution
       dirh      #A_ADC                'Enable Smart Pin
 ```
+:::
 
 **Differential ADC:**
-```spin2
+
+::: spin2
+```
 PUB differential_adc(pos_pin, neg_pin) : diff
   ' Configure for differential measurement
   pinstart(pos_pin, P_ADC_1X | neg_pin << 8, 0, 0)
@@ -1863,14 +2083,17 @@ PUB differential_adc(pos_pin, neg_pin) : diff
   ' Result is signed
   debug("Differential: ", sdec(diff))
 ```
+:::
 
-```pasm2
+::: pasm2
+```
         wrpin     A_ADC_mode, #A_ADC   'Set up mode for ADC
         wxpin     #%01_0111, #A_ADC    '8-bit resolution
         dirh      #A_ADC               'Enable Smart Pin
         setse1    #%001<<6 + A_ADC     'Special event trigger
                                        '  #1 on A_ADC high
 ```
+:::
 
 ---
 
@@ -1889,7 +2112,8 @@ Multi-pin sync showing:
 - Synchronized outputs
 :::
 
-```spin2
+::: spin2
+```
 PUB sync_four_pwm() | mask
   mask := %1111 << BASE_PIN
 
@@ -1912,6 +2136,7 @@ PUB phase_shifted_clocks() | phase
 
   DIRH(%1111 << 20)            ' Start all together
 ```
+:::
 
 ### Pin Input Routing
 
@@ -1924,7 +2149,8 @@ Pin routing diagram showing:
 - Destination Smart Pins
 :::
 
-```spin2
+::: spin2
+```
 PUB signal_distribution()
   ' Pin 10 generates reference clock
   pinstart(10, P_NCO_FREQ | P_OE, 1_000_000 frac clkfreq, 0)
@@ -1944,6 +2170,7 @@ PUB signal_distribution()
     debug("Period: ", udec(rdpin(22)), " clocks")
     waitms(1000)
 ```
+:::
 
 ### Feedback Loops
 
@@ -1956,7 +2183,8 @@ Feedback loop showing:
 - Adjustment cycle
 :::
 
-```spin2
+::: spin2
+```
 PUB pwm_with_current_feedback() | current, duty
   ' PWM output on Pin 20
   pinstart(20, P_PWM_SAWTOOTH | P_OE, 10_000, 5_000)
@@ -1980,6 +2208,7 @@ PUB pwm_with_current_feedback() | current, duty
     wypin(20, duty)            ' Update PWM
     waitms(10)                 ' Control loop rate
 ```
+:::
 
 ### Precision Timing Networks
 
@@ -1992,7 +2221,8 @@ Timing network showing:
 - Phase relationships
 :::
 
-```spin2
+::: spin2
+```
 PUB timing_network()
   ' Master clock at 10MHz
   pinstart(MASTER_CLK, P_NCO_FREQ | P_OE, 10_000_000 frac clkfreq, 0)
@@ -2009,6 +2239,7 @@ PUB timing_network()
   pinstart(MEASURE_WIN, P_PULSE | P_OE,
            (100 * US_001) << 16 | (900 * US_001), 0)
 ```
+:::
 
 ### Protocol Bridges
 
@@ -2021,7 +2252,8 @@ Protocol bridge showing:
 - Output protocol
 :::
 
-```spin2
+::: spin2
+```
 PUB uart_to_spi_bridge() | data
   ' UART receive
   pinstart(UART_RX, P_ASYNC_RX, (clkfreq / 115200) << 16 | 7, 0)
@@ -2039,6 +2271,7 @@ PUB uart_to_spi_bridge() | data
     wypin(SPI_DATA, data)
     repeat until pinr(SPI_DATA) & $80000000
 ```
+:::
 
 ### State Machines with Smart Pins
 
@@ -2051,7 +2284,8 @@ State machine showing:
 - Smart Pin interactions
 :::
 
-```spin2
+::: spin2
+```
 PUB traffic_light_controller() | state, timer
   ' Red LED
   pinstart(RED_LED, P_TRANSITION | P_OE, 0, 0)
@@ -2096,6 +2330,7 @@ PUB traffic_light_controller() | state, timer
         repeat until pinr(TIMER_PIN) & $80000000
         state := "R"
 ```
+:::
 
 ---
 
@@ -2115,7 +2350,8 @@ Motor controller showing:
 - Control loop
 :::
 
-```spin2
+::: spin2
+```
 OBJ
   motor : "motor_controller"
 
@@ -2189,6 +2425,7 @@ PUB position_control(target_pos) | current_pos, error, output
   ' Stop at position
   wypin(MOTOR_A_PWM, 0)
 ```
+:::
 
 ### Creating a Data Acquisition System
 
@@ -2201,7 +2438,8 @@ Data acquisition showing:
 - Buffer management
 :::
 
-```spin2
+::: spin2
+```
 CON
   NUM_CHANNELS = 8
   SAMPLE_RATE = 10_000          ' Hz
@@ -2252,6 +2490,7 @@ PUB process_data() | chan, sample, min, max, avg
     debug("CH", udec(chan), ": Min=", sdec(min),
           " Max=", sdec(max), " Avg=", sdec(avg))
 ```
+:::
 
 ### Building a Communication Hub
 
@@ -2265,7 +2504,8 @@ Communication hub showing:
 - Protocol routing
 :::
 
-```spin2
+::: spin2
+```
 OBJ
   comm : "comm_hub"
 
@@ -2329,6 +2569,7 @@ PRI process_spi_message(data)
   ' Route to UART1
   wypin(UART1_TX, data)
 ```
+:::
 
 ### Synchronized Sampling System
 
@@ -2341,7 +2582,8 @@ Synchronized sampling showing:
 - Data alignment
 :::
 
-```spin2
+::: spin2
+```
 PUB synchronized_sampling() | trigger_time
   ' Configure multiple input channels
   repeat pin from INPUT_BASE to INPUT_BASE + 7
@@ -2361,6 +2603,7 @@ PUB synchronized_sampling() | trigger_time
   repeat pin from INPUT_BASE to INPUT_BASE + 7
     samples[pin - INPUT_BASE] := rdpin(pin)
 ```
+:::
 
 ---
 
@@ -2376,7 +2619,8 @@ This section needs verification of error conditions and recovery procedures
 
 **Problem: Smart Pin doesn't respond**
 
-```spin2
+::: spin2
+```
 PUB diagnose_smart_pin(pin)
   ' Check if pin is enabled
   if pinr(pin) & $80000000
@@ -2392,10 +2636,12 @@ PUB diagnose_smart_pin(pin)
   result := rdpin(pin)
   debug("Z register: ", uhex(result))
 ```
+:::
 
 **Problem: Wrong timing/frequency**
 
-```spin2
+::: spin2
+```
 PUB verify_frequency(pin, expected_hz) | measured
   ' Set up frequency counter on different pin
   pinstart(MEASURE_PIN, P_COUNT_CYCLES | pin << 8, clkfreq, 0)
@@ -2407,10 +2653,12 @@ PUB verify_frequency(pin, expected_hz) | measured
   debug("Measured: ", udec(measured), " Hz")
   debug("Error: ", sdec(measured - expected_hz), " Hz")
 ```
+:::
 
 **Problem: No output signal**
 
-```spin2
+::: spin2
+```
 PUB check_output_enable(pin)
   config := pinr(pin)
 
@@ -2424,6 +2672,7 @@ PUB check_output_enable(pin)
   else
     debug("Default drive strength")
 ```
+:::
 
 ### Performance Optimization
 
@@ -2433,7 +2682,8 @@ Add specific optimization examples with measurements
 
 **Minimize Pin Access Overhead**
 
-```spin2
+::: spin2
+```
 ' Slow approach - multiple pin accesses
 PUB slow_update()
   repeat i from 0 to 7
@@ -2444,10 +2694,12 @@ PUB fast_update()
   mask := $FF << BASE_PIN
   WYPIN(mask, packed_values)    ' Update 8 pins at once
 ```
+:::
 
 **Optimize Timing Precision**
 
-```spin2
+::: spin2
+```
 PUB precise_timing() | start_time
   ' Compensate for instruction overhead
   start_time := cnt
@@ -2457,10 +2709,12 @@ PUB precise_timing() | start_time
   actual_period := desired_period - instruction_overhead
   wxpin(pin, actual_period)
 ```
+:::
 
 **Reduce Latency**
 
-```spin2
+::: spin2
+```
 ' High latency - polling approach
 PUB high_latency()
   repeat
@@ -2478,12 +2732,14 @@ PUB low_latency()
     data := rdpin(pin)
     process(data)
 ```
+:::
 
 ### Debugging Techniques
 
 **Use Debug Smart Pin Monitor**
 
-```spin2
+::: spin2
+```
 PUB smart_pin_monitor(pin)
   debug(`SCOPE_XY MyScope SIZE 256 SAMPLES 0 COLOR black green TRIGGER 128)
 
@@ -2492,10 +2748,12 @@ PUB smart_pin_monitor(pin)
     debug(`MyScope `(sample))
     waitms(1)
 ```
+:::
 
 **Create Test Patterns**
 
-```spin2
+::: spin2
+```
 PUB test_pattern_generator()
   ' Generate known test pattern
   repeat value from 0 to 255
@@ -2509,10 +2767,12 @@ PUB test_pattern_generator()
     if ||(expected - actual) > TOLERANCE
       debug("ERROR at ", udec(value))
 ```
+:::
 
 **Logic Analyzer Mode**
 
-```spin2
+::: spin2
+```
 PUB logic_analyzer()
   ' Configure 8 pins as digital inputs
   repeat pin from 0 to 7
@@ -2527,6 +2787,7 @@ PUB logic_analyzer()
   repeat sample from 0 to BUFFER_SIZE - 1
     debug("", ubin(buffer[sample]))
 ```
+:::
 
 ### Power Optimization
 
@@ -2536,7 +2797,8 @@ Power consumption figures need hardware verification
 
 **Disable Unused Smart Pins**
 
-```spin2
+::: spin2
+```
 PUB power_optimize()
   ' Disable all Smart Pins initially
   repeat pin from 0 to 63
@@ -2545,10 +2807,12 @@ PUB power_optimize()
   ' Only enable what's needed
   pinstart(NEEDED_PIN, mode, x, y)
 ```
+:::
 
 **Use Appropriate Modes**
 
-```spin2
+::: spin2
+```
 ' Power hungry - continuous ADC sampling
 PUB continuous_adc()
   pinstart(ADC_PIN, P_ADC_1X, 0, 0)
@@ -2563,6 +2827,7 @@ PUB triggered_adc()
   value := rdpin(ADC_PIN)
   pinclear(ADC_PIN)             ' Disable until next reading
 ```
+:::
 
 ---
 
@@ -2580,7 +2845,8 @@ Oscilloscope architecture showing:
 - Display output
 :::
 
-```spin2
+::: spin2
+```
 CON
   SAMPLES = 1024
   ADC_PIN = 16
@@ -2620,6 +2886,7 @@ PRI display_waveform(buffer, count) | i, value
     value := long[buffer][i] >> 8  ' Scale to 8-bit for display
     debug(`MyScope `(value))
 ```
+:::
 
 ### Frequency Generator with Display
 
@@ -2627,7 +2894,8 @@ PRI display_waveform(buffer, count) | i, value
 Verify frequency calculation accuracy
 :::
 
-```spin2
+::: spin2
+```
 OBJ
   lcd : "lcd_driver"
 
@@ -2693,6 +2961,7 @@ PRI lookup(delta) : multiplier
     2...4:    multiplier := 2.0
     5...10:   multiplier := 10.0
 ```
+:::
 
 ### Complete Robot Controller
 
@@ -2704,7 +2973,8 @@ Robot system architecture showing:
 - Navigation logic
 :::
 
-```spin2
+::: spin2
+```
 OBJ
   motors : "motor_driver"
   sensors : "sensor_array"
@@ -2815,6 +3085,7 @@ PRI set_motor_speed(pwm_pin, dir_pin, speed)
     pinh(dir_pin)               ' Forward
     wypin(pwm_pin, speed * 100)
 ```
+:::
 
 ---
 
@@ -2830,7 +3101,8 @@ Now let's create a complete data acquisition and control system that showcases t
 Complete system architecture showing all subsystems and interconnections
 :::
 
-```spin2
+::: spin2
+```
 '' Complete Industrial Control System
 '' Demonstrates: ADC, DAC, PWM, Encoders, Serial, Timing
 
@@ -2924,6 +3196,7 @@ PRI update_all_pwm() | i
   repeat i from 0 to PWM_CHANNELS - 1
     wypin(PWM_BASE + i, pwm_values[i])
 ```
+:::
 
 ### Performance Metrics and Validation
 
@@ -2931,7 +3204,8 @@ PRI update_all_pwm() | i
 Performance numbers need hardware validation
 :::
 
-```spin2
+::: spin2
+```
 PUB measure_system_performance() | start, overhead, pins_configured
   ' Count configured Smart Pins
   pins_configured := 0
@@ -2967,6 +3241,7 @@ PRI measure_response_latency() | start, latency
   debug("Smart Pin latency: ", udec(latency), " clocks")
   debug("Latency: ", udec(latency * 1_000_000 / clkfreq), " ns")
 ```
+:::
 
 ---
 
@@ -3015,7 +3290,8 @@ PRI measure_response_latency() | start, latency
 
 ### Pin Configuration Constants
 
-```spin2
+::: spin2
+```
 ' Output Enable and Drive
 P_OE            = $01_00_00_00  ' Output enable
 P_DRIVE_1MA     = $02_00_00_00  ' 1mA drive
@@ -3038,6 +3314,7 @@ P_TRANSITION    = $00_00_00_07  ' Transition output
 P_PWM_SAWTOOTH  = $00_00_00_08  ' PWM sawtooth
 P_PWM_TRIANGLE  = $00_00_00_09  ' PWM triangle
 ```
+:::
 
 ## Appendix C: Timing Formulas
 

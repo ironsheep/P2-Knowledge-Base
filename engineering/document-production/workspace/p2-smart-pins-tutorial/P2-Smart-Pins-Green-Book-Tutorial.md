@@ -153,17 +153,23 @@ PUB read_multiple_inputs() | value, button1, button2, sensor, i
 
 When you control pins, there's a tiny delay between your instruction and the pin actually changing:
 
-![Basic I/O Output Timing](v6-assets/P2 SmartPins-220809_page03_img01.png)
+```{=latex}
+\DRVHTimingDiagram
+```
 
 **What this means in practice**: At 200MHz, the 3-clock delay is only 15 nanoseconds - essentially instant for LEDs, buttons, and most I/O!
 
 Similarly, when reading pins:
 
-![Basic I/O Input Sampling](v6-assets/P2 SmartPins-220809_page04_img01.png)
+```{=latex}
+\TESTBINATimingDiagram
+```
 
 And for quick pin testing (TESTP instruction):
 
-![Basic I/O Pin Test Timing](v6-assets/P2 SmartPins-220809_page04_img02.png)
+```{=latex}
+\TESTPTimingDiagram
+```
 
 **The bottom line**: For most projects, you can completely ignore these delays! They only matter when:
 - Bit-banging high-speed protocols (>10MHz)
@@ -1025,7 +1031,9 @@ read_value
 
 The P2's Smart Pins include sophisticated DAC (Digital to Analog Converter) capabilities. These modes turn your digital pin into a precision analog output.
 
-![DAC Output Characteristics](v6-assets/P2 SmartPins-220809_mode00011_page13_img01.png)
+```{=latex}
+\DACPWMPeriodDiagram
+```
 
 **Mode %00010: DAC 124Ω, 3.3V Output**
 - 16-bit resolution
@@ -1105,7 +1113,9 @@ The DAC modes can be combined with dithering for even higher effective resolutio
 
 This mode generates precise pulses or continuous cycles with programmable high and low times.
 
-![Pulse Output Timing](v6-assets/P2 SmartPins-220809_mode01000_page19_img01.png)
+```{=latex}
+\PulseWidthMeasurementDiagram
+```
 
 **When to Use:**
 - Servo control pulses
@@ -1180,7 +1190,9 @@ pulse_gen
 
 NCO (Numerically Controlled Oscillator) mode generates precise frequencies using phase accumulation.
 
-![NCO Frequency Generation](v6-assets/P2 SmartPins-220809_mode00100_page15_img01.png)
+```{=latex}
+\NCOFrequencyDiagram
+```
 
 **When to Use:**
 - Clock generation
@@ -1262,7 +1274,9 @@ nco_freq
 
 NCO Duty mode generates PWM with precise duty cycle control at a specific frequency.
 
-![NCO Duty Mode Operation](v6-assets/P2 SmartPins-220809_mode01001_page21_img01.png)
+```{=latex}
+\NCODutyTimingDiagram
+```
 
 **When to Use:**
 - PWM with specific frequency AND duty
@@ -1317,8 +1331,6 @@ PUB breathing_led() | brightness
 
 Transition output mode generates edges at programmable intervals - perfect for clocks and timing references.
 
-![Transition Output Timing](v6-assets/P2 SmartPins-220809_mode01000_page20_img01.png)
-
 **When to Use:**
 - Clock generation
 - Baud rate generation
@@ -1367,7 +1379,9 @@ trans_out
 
 PWM Sawtooth mode provides high-resolution PWM using a sawtooth comparison.
 
-![PWM Sawtooth Waveform](v6-assets/P2 SmartPins-220809_mode01001_page21_img01.png)
+```{=latex}
+\TrianglePWMDiagram
+```
 
 **When to Use:**
 - Motor speed control
@@ -1437,7 +1451,9 @@ update_duty
 
 PWM Triangle mode provides phase-correct PWM using triangle wave comparison.
 
-![PWM Triangle Waveform](v6-assets/P2 SmartPins-220809_mode01000_page20_img01.png)
+```{=latex}
+\SawtoothPWMDiagram
+```
 
 **When to Use:**
 - Phase-correct PWM needed
@@ -1489,8 +1505,6 @@ pwm_tri
 :::
 
 ### Mode %01010 - Switch-Mode Power Supply
-
-![SMPS Timing Diagram](assets/smps-timing-diagram.png)
 
 This specialized mode is designed for switch-mode power supply control with current feedback.
 
@@ -1553,7 +1567,9 @@ Now let's explore modes that measure external signals - these are your oscillosc
 
 This mode decodes quadrature encoder signals for position and rotation sensing.
 
-![Quadrature Encoder Signals](v6-assets/P2 SmartPins-220809_mode01011_page23_img01.png)
+```{=latex}
+\QuadEncoderDiagram
+```
 
 **When to Use:**
 - Rotary encoder reading
@@ -1631,7 +1647,9 @@ read_encoder
 
 Count rising edges on the input - your basic pulse counter.
 
-![Pulse Counting Timing](v6-assets/P2 SmartPins-220809_mode10010_page31_img01.png)
+```{=latex}
+\PeriodMeasurementDiagram
+```
 
 **When to Use:**
 - Event counting
@@ -1693,8 +1711,6 @@ PUB gated_counter(pin, gate_ms) | period
 ### Mode %01101 - A-B Encoder (Inc/Dec)
 
 Counts transitions on A input, with B input controlling direction.
-
-![A-B Encoder Timing](assets/ab-encoder-timing.png)
 
 **When to Use:**
 - Step/direction motor feedback
@@ -1763,7 +1779,9 @@ PUB incremental_encoder() | count
 
 ### Mode %01111 - Local/Global Comparator
 
-![Comparator Operation](assets/comparator-operation.png)
+```{=latex}
+\ComparatorDiagram
+```
 
 Compares input against threshold with optional hysteresis.
 
@@ -1835,8 +1853,6 @@ PUB logic_gates()
 
 These modes measure time between events with high precision.
 
-![Time Measurement Timing](v6-assets/P2 SmartPins-220809_mode10000_page29_img01.png)
-
 **Mode %10100: Time A-input rises**
 **Mode %10101: Time A-input high states**
 **Mode %10110: Time X-input high**
@@ -1903,7 +1919,9 @@ This mode provides hardware-based signal capture with triggering.
 
 Synchronous serial transmission with clock generation.
 
-![Sync Serial Transmit Timing](v6-assets/P2 SmartPins-220809_mode11100_page46_img01.png)
+```{=latex}
+\SyncSerialFallingDiagram
+```
 
 ::: spin2
 ```
@@ -1930,8 +1948,6 @@ PUB sync_serial_tx(pin, data, bits) | config
 ### Modes %11011-%11110 - Async Serial (UART)
 
 The P2's Smart Pins excel at UART communication, handling all timing and framing in hardware.
-
-![UART Frame Structure](assets/uart-frame-structure.png)
 
 **Mode %11011: Async serial receive**
 **Mode %11100: Async serial transmit**
@@ -2018,8 +2034,6 @@ send_byte
 ### Mode %11111 - ADC Input Modes
 
 The P2's Smart Pins include sophisticated ADC capabilities for analog measurements.
-
-![ADC Operation Diagram](assets/adc-operation-diagram.png)
 
 **ADC Sub-modes:**
 - SINC1 filtering (fastest)

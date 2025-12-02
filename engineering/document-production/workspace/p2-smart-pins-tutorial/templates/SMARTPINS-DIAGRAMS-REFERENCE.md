@@ -52,22 +52,32 @@ Then use diagram commands in your document:
 |---------------|--------------|-------------|
 | `page23_img01.png` | `\QuadEncoderDiagram` | Quadrature encoder circuit schematic + CW/CCW timing waveforms |
 
-### Counting/Measurement Diagrams
+### Comparator Diagram (Mode %01111)
 
 | Original Image | TikZ Command | Description |
 |---------------|--------------|-------------|
-| `page29_img01.png` | `\HighLowCountingDiagram` | High/low state counting with Q/R/S regions, C/Z flag outputs |
-| `page31_img01.png` | `\PeriodMeasurementDiagram` | Period measurement (9 cycles) with system-clock count output |
-| `page32_img01.png` | `\ContinuousPeriodDiagram` | Continuous period measurement (two 6-cycle measurements) |
-| `page33_img01.png` | `\TimeoutWatchdogDiagram` | Timeout/watchdog with clock reset on each input pulse |
-| `page34_img01.png` | `\DualInputTimeDiagram` | Dual input (A/B) time measurement, Q+R calculation |
+| `page29_img01.png` | `\ComparatorDiagram` | Mode %01111 - High/low state counting with Q/R/S regions, C/Z flag outputs |
 
-### Serial Data Diagrams
+### Period/Time Measurement Diagrams (Mode %10010)
 
 | Original Image | TikZ Command | Description |
 |---------------|--------------|-------------|
-| `page46_img01.png` | `\SyncSerialFallingDiagram` | Synchronous serial receive, sampling on falling clock edge, LSB→MSB |
-| `page46_img02.png` | `\SyncSerialRisingDiagram` | Synchronous serial receive, sampling on rising clock edge, LSB→MSB |
+| `page31_img01.png` | `\PeriodMeasurementDiagram` | Mode %10010 - Period measurement (9 cycles) with system-clock count output |
+| `page32_img01.png` | `\ContinuousPeriodDiagram` | Mode %10010 - Continuous period measurement (two 6-cycle measurements) |
+| `page33_img01.png` | `\TimeoutWatchdogDiagram` | Mode %10010 - Timeout/watchdog with clock reset on each input pulse |
+
+### Dual Input Time Measurement (Mode %10011)
+
+| Original Image | TikZ Command | Description |
+|---------------|--------------|-------------|
+| `page34_img01.png` | `\DualInputTimeDiagram` | Mode %10011 - Dual input (A/B) time measurement, Q+R calculation |
+
+### Serial Data Diagrams (Mode %11100)
+
+| Original Image | TikZ Command | Description |
+|---------------|--------------|-------------|
+| `page46_img01.png` | `\SyncSerialFallingDiagram` | Mode %11100 - Synchronous serial receive, sampling on falling clock edge, LSB→MSB |
+| `page46_img02.png` | `\SyncSerialRisingDiagram` | Mode %11100 - Synchronous serial receive, sampling on rising clock edge, LSB→MSB |
 
 ## Images NOT Converted (Keep as PNG)
 

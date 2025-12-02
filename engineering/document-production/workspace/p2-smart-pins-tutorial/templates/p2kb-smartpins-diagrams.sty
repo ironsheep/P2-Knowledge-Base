@@ -850,10 +850,10 @@
 }
 
 % ============================================================================
-% PAGE 31: Mode %10010 (18) Diagram - First image
+% PAGE 31: Mode %10010 (18) - Period Measurement Diagram
 % ============================================================================
 
-\newcommand{\Mode18Diagram}{%
+\newcommand{\PeriodMeasurementDiagram}{%
 \begin{center}
 \begin{tikzpicture}[x=0.7cm, y=1cm]
 
@@ -894,10 +894,10 @@
 }
 
 % ============================================================================
-% PAGE 32: Mode %10010 (18) Diagram - Second image
+% PAGE 32: Mode %10010 (18) - Continuous Period Measurement Diagram
 % ============================================================================
 
-\newcommand{\Mode18Diagram2}{%
+\newcommand{\ContinuousPeriodDiagram}{%
 \begin{center}
 \begin{tikzpicture}[x=0.6cm, y=1cm]
 
@@ -947,10 +947,10 @@
 }
 
 % ============================================================================
-% PAGE 33: Mode %10010 (18) Diagram - Third image (mislabeled as mode10011 in filename)
+% PAGE 33: Mode %10010 (18) - Timeout/Watchdog Diagram (mislabeled as mode10011 in filename)
 % ============================================================================
 
-\newcommand{\Mode18Diagram3}{%
+\newcommand{\TimeoutWatchdogDiagram}{%
 \begin{center}
 \begin{tikzpicture}[x=0.8cm, y=1cm]
 
@@ -1023,10 +1023,10 @@
 }
 
 % ============================================================================
-% PAGE 34: Mode %10011 (19) Diagram
+% PAGE 34: Mode %10011 (19) - Dual Input Time Measurement Diagram
 % ============================================================================
 
-\newcommand{\Mode19Diagram}{%
+\newcommand{\DualInputTimeDiagram}{%
 \begin{center}
 \begin{tikzpicture}[x=1cm, y=1cm]
 
@@ -1078,10 +1078,10 @@
 }
 
 % ============================================================================
-% PAGE 46 IMAGE 01: Mode %11100 (28) - Sync Serial
+% PAGE 46 IMAGE 01: Mode %11100 (28) - Sync Serial Receive (Falling Edge)
 % ============================================================================
 
-\newcommand{\Mode28Diagram}{%
+\newcommand{\SyncSerialFallingDiagram}{%
 \begin{center}
 \begin{tikzpicture}[x=0.7cm, y=1cm]
 
@@ -1125,10 +1125,10 @@
 }
 
 % ============================================================================
-% PAGE 46 IMAGE 02: Mode %11100 (28) - Sync Serial second image
+% PAGE 46 IMAGE 02: Mode %11100 (28) - Sync Serial Receive (Rising Edge)
 % ============================================================================
 
-\newcommand{\Mode28Diagram2}{%
+\newcommand{\SyncSerialRisingDiagram}{%
 \begin{center}
 \begin{tikzpicture}[x=0.7cm, y=1cm]
 
@@ -1180,12 +1180,6 @@
 \let\NCOPWMTimingDiagram\NCODutyTimingDiagram          % page17_img01 -> Mode %00110
 \let\NCOPWMBlockDiagram\NCODutyBlockDiagram            % page17_img02 -> Mode %00110
 \let\HighLowCountingDiagram\ComparatorDiagram          % page29 -> Mode %01111
-\let\PeriodMeasurementDiagram\Mode18Diagram            % page31 -> Mode %10010
-\let\ContinuousPeriodDiagram\Mode18Diagram2            % page32 -> Mode %10010
-\let\TimeoutWatchdogDiagram\Mode18Diagram3             % page33 -> Mode %10010 (mislabeled)
-\let\DualInputTimeDiagram\Mode19Diagram                % page34 -> Mode %10011
-\let\SyncSerialFallingDiagram\Mode28Diagram            % page46_img01 -> Mode %11100
-\let\SyncSerialRisingDiagram\Mode28Diagram2            % page46_img02 -> Mode %11100
 
 % ============================================================================
 % END OF PACKAGE
