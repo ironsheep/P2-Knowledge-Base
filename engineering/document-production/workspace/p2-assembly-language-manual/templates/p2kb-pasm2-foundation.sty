@@ -60,7 +60,9 @@
 \RequirePackage{tabularx}
 \RequirePackage{multirow}
 \RequirePackage[table]{xcolor}
-\RequirePackage{hyperref}
+\RequirePackage{tabularray}  % Modern table package - replaces tabularx for encoding tables
+\UseTblrLibrary{booktabs}    % Enable booktabs-style rules in tabularray
+\RequirePackage{environ}     % For capturing environment body
 \RequirePackage{fancyhdr}
 \RequirePackage{titlesec}
 \RequirePackage{tocloft}
@@ -81,6 +83,11 @@
 
 % Load tcolorbox libraries
 \tcbuselibrary{skins,breakable}
+
+% ==================== HYPERREF (must be loaded late) ====================
+% hyperref should be loaded after most other packages to avoid conflicts
+\RequirePackage{hyperref}
+\RequirePackage{bookmark}  % Better PDF bookmarks/navigation
 
 % ==================== BASIC TYPOGRAPHY ====================
 

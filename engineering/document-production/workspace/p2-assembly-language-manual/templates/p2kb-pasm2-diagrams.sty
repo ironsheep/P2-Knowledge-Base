@@ -394,14 +394,15 @@
 \node[cogbox] (cog7) at (-3.2, -1.3) {COG 7\\2KB};
 
 % 4 LUT blocks on outer ring, between each cog pair
+% Position indicates which cog pair shares this LUT; label shows capacity
 % LUT 0-1: between COG 0 and COG 1 (upper-left)
-\node[lutbox] (lut01) at (-3.5, 3.5) {LUT\\0-1};
+\node[lutbox] (lut01) at (-3.5, 3.5) {LUT\\2KB};
 % LUT 2-3: between COG 2 and COG 3 (upper-right)
-\node[lutbox] (lut23) at (3.5, 3.5) {LUT\\2-3};
+\node[lutbox] (lut23) at (3.5, 3.5) {LUT\\2KB};
 % LUT 4-5: between COG 4 and COG 5 (lower-right)
-\node[lutbox] (lut45) at (3.5, -3.5) {LUT\\4-5};
+\node[lutbox] (lut45) at (3.5, -3.5) {LUT\\2KB};
 % LUT 6-7: between COG 6 and COG 7 (lower-left)
-\node[lutbox] (lut67) at (-3.5, -3.5) {LUT\\6-7};
+\node[lutbox] (lut67) at (-3.5, -3.5) {LUT\\2KB};
 
 % LUT connections to their paired cogs (dashed lines)
 \draw[lutline] (lut01) -- (cog0);

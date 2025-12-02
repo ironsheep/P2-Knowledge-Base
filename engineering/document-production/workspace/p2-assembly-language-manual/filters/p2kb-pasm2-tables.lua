@@ -106,71 +106,72 @@ function Table(el)
     end
 
   elseif num_cols == 3 then
-    -- 3-column tables: adjust based on first two columns
+    -- 3-column tables: more generous minimum widths
     local c1 = col_classes[1]
     local c2 = col_classes[2]
 
     if c1 == "tiny" and c2 == "tiny" then
-      -- Both tiny: 10/10/75
-      el.colspecs[1] = {pandoc.AlignLeft, 0.10}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.10}
-      el.colspecs[3] = {pandoc.AlignLeft, 0.75}
-    elseif c1 == "tiny" and c2 == "small" then
-      -- Tiny + small: 10/18/67
-      el.colspecs[1] = {pandoc.AlignLeft, 0.10}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.18}
-      el.colspecs[3] = {pandoc.AlignLeft, 0.67}
-    elseif c1 == "small" and c2 == "tiny" then
-      -- Small + tiny: 18/10/67
-      el.colspecs[1] = {pandoc.AlignLeft, 0.18}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.10}
-      el.colspecs[3] = {pandoc.AlignLeft, 0.67}
-    elseif c1 == "small" and c2 == "small" then
-      -- Both small: 15/15/65
+      -- Both short: 15/15/65 (was 10/10/75 - too cramped)
       el.colspecs[1] = {pandoc.AlignLeft, 0.15}
       el.colspecs[2] = {pandoc.AlignLeft, 0.15}
       el.colspecs[3] = {pandoc.AlignLeft, 0.65}
-    elseif c1 == "tiny" then
-      -- Tiny first, medium+ second: 10/30/55
-      el.colspecs[1] = {pandoc.AlignLeft, 0.10}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.30}
-      el.colspecs[3] = {pandoc.AlignLeft, 0.55}
-    elseif c2 == "tiny" then
-      -- Medium+ first, tiny second: 30/10/55
-      el.colspecs[1] = {pandoc.AlignLeft, 0.30}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.10}
-      el.colspecs[3] = {pandoc.AlignLeft, 0.55}
-    else
-      -- Default balanced: 20/25/50
+    elseif c1 == "tiny" and c2 == "small" then
+      -- Short + medium: 15/20/60 (was 10/18/67)
+      el.colspecs[1] = {pandoc.AlignLeft, 0.15}
+      el.colspecs[2] = {pandoc.AlignLeft, 0.20}
+      el.colspecs[3] = {pandoc.AlignLeft, 0.60}
+    elseif c1 == "small" and c2 == "tiny" then
+      -- Medium + short: 20/15/60 (was 18/10/67)
       el.colspecs[1] = {pandoc.AlignLeft, 0.20}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.25}
+      el.colspecs[2] = {pandoc.AlignLeft, 0.15}
+      el.colspecs[3] = {pandoc.AlignLeft, 0.60}
+    elseif c1 == "small" and c2 == "small" then
+      -- Both medium: 20/20/55 (was 15/15/65)
+      el.colspecs[1] = {pandoc.AlignLeft, 0.20}
+      el.colspecs[2] = {pandoc.AlignLeft, 0.20}
+      el.colspecs[3] = {pandoc.AlignLeft, 0.55}
+    elseif c1 == "tiny" then
+      -- Short first, larger second: 15/30/50 (was 10/30/55)
+      el.colspecs[1] = {pandoc.AlignLeft, 0.15}
+      el.colspecs[2] = {pandoc.AlignLeft, 0.30}
       el.colspecs[3] = {pandoc.AlignLeft, 0.50}
+    elseif c2 == "tiny" then
+      -- Larger first, short second: 30/15/50 (was 30/10/55)
+      el.colspecs[1] = {pandoc.AlignLeft, 0.30}
+      el.colspecs[2] = {pandoc.AlignLeft, 0.15}
+      el.colspecs[3] = {pandoc.AlignLeft, 0.50}
+    else
+      -- Default balanced: 25/25/45
+      el.colspecs[1] = {pandoc.AlignLeft, 0.25}
+      el.colspecs[2] = {pandoc.AlignLeft, 0.25}
+      el.colspecs[3] = {pandoc.AlignLeft, 0.45}
     end
 
   elseif num_cols == 4 then
-    -- 4-column tables: check if first columns are tiny
+    -- 4-column tables: more generous minimum widths to avoid overlap
+    -- Even "tiny" columns need enough space for monospace text like "DDDDDDDDD"
     local c1 = col_classes[1]
     local c2 = col_classes[2]
     local c3 = col_classes[3]
 
     if c1 == "tiny" and c2 == "tiny" and c3 == "tiny" then
-      -- Three tiny columns: 10/10/10/65
-      el.colspecs[1] = {pandoc.AlignLeft, 0.10}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.10}
-      el.colspecs[3] = {pandoc.AlignLeft, 0.10}
-      el.colspecs[4] = {pandoc.AlignLeft, 0.65}
-    elseif c1 == "tiny" and c2 == "tiny" then
-      -- Two tiny columns: 10/10/25/50
-      el.colspecs[1] = {pandoc.AlignLeft, 0.10}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.10}
-      el.colspecs[3] = {pandoc.AlignLeft, 0.25}
+      -- Three short columns: 15/15/15/50 (was 10/10/10/65 - too cramped)
+      el.colspecs[1] = {pandoc.AlignLeft, 0.15}
+      el.colspecs[2] = {pandoc.AlignLeft, 0.15}
+      el.colspecs[3] = {pandoc.AlignLeft, 0.15}
       el.colspecs[4] = {pandoc.AlignLeft, 0.50}
+    elseif c1 == "tiny" and c2 == "tiny" then
+      -- Two short columns: 15/15/20/45 (was 10/10/25/50)
+      el.colspecs[1] = {pandoc.AlignLeft, 0.15}
+      el.colspecs[2] = {pandoc.AlignLeft, 0.15}
+      el.colspecs[3] = {pandoc.AlignLeft, 0.20}
+      el.colspecs[4] = {pandoc.AlignLeft, 0.45}
     elseif c1 == "tiny" then
-      -- One tiny column: 10/22/22/41
-      el.colspecs[1] = {pandoc.AlignLeft, 0.10}
-      el.colspecs[2] = {pandoc.AlignLeft, 0.22}
-      el.colspecs[3] = {pandoc.AlignLeft, 0.22}
-      el.colspecs[4] = {pandoc.AlignLeft, 0.41}
+      -- One short column: 15/20/20/40 (was 10/22/22/41)
+      el.colspecs[1] = {pandoc.AlignLeft, 0.15}
+      el.colspecs[2] = {pandoc.AlignLeft, 0.20}
+      el.colspecs[3] = {pandoc.AlignLeft, 0.20}
+      el.colspecs[4] = {pandoc.AlignLeft, 0.40}
     else
       -- Default: roughly equal
       el.colspecs[1] = {pandoc.AlignLeft, 0.20}

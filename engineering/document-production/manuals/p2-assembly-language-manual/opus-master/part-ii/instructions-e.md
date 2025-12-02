@@ -7,7 +7,7 @@ This section contains all PASM2 instructions beginning with the letter E.
 ## ENCOD {#encod}
 
 Encode
-[Math Instruction](#math-instructions) - Get bit position of top-most 1 of Src or Dest into Dest.
+[Math and Logic](#math-and-logic) - Get bit position of top-most 1 of Src or Dest into Dest.
 
 **ENCOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **ENCOD**  *Dest*  **{WC|WZ|WCZ}**
@@ -52,7 +52,7 @@ ENCOD is the complement of DECOD. Where DECOD converts a bit position (0-31) int
 ## EXECF {#execf}
 
 Call and skip
-[Branch/Jump Instruction](#branch-jump-instructions) - Jump to address in COG/LUT and set SKIPF pattern.
+[Branch](#branch) - Jump to address in COG/LUT and set SKIPF pattern.
 
 **EXECF**  *{#}Dest*
 

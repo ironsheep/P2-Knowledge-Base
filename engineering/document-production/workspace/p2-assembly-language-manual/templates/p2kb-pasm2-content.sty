@@ -82,10 +82,10 @@
 
 % ==================== ENCODING TABLE STYLING ====================
 % For instruction encoding display
+% Uses tabularray package to avoid tabularx + cellcolor conflicts
 
-% Gray header row for encoding tables
+% Gray header row for encoding tables (legacy - kept for compatibility)
 \newcommand{\encodingheader}[1]{%
-  \rowcolor{pasm2-encoding-header}%
   \textbf{#1}%
 }
 
@@ -94,51 +94,72 @@
   \texttt{#1}%
 }
 
-% Encoding table environment
-% Creates a formatted table for instruction binary encoding
-% Columns: EEEE | Opcode | CZI | D | S | C Result | Z Result | Result | Clocks
-% Uses tabular with fixed widths (tabularx + rowcolor has known incompatibility)
-\newenvironment{encodingtable}{%
+% Define tabularray style for encoding tables
+% 9 columns: EEEE | Opcode | CZI | D | S | C | Z | Result | Clks
+% Fixed widths for encoding fields, flexible for result columns
+%
+% Uses environ package with tabularray's expand key for proper macro expansion
+\DefTblrTemplate{contfoot-text}{default}{}
+\DefTblrTemplate{conthead-text}{default}{}
+
+% Row macros that expand to tblr row syntax
+\newcommand{\encodingrow}[9]{#1 & #2 & #3 & #4 & #5 & #6 & #7 & #8 & #9 \\}
+\newcommand{\encodingrowcont}[9]{#1 & #2 & #3 & #4 & #5 & #6 & #7 & #8 & #9 \\}
+
+% Environment for encoding tables using environ + tabularray expand key
+% The expand=\BODY tells tabularray to expand \BODY before parsing table structure
+\NewEnviron{encodingtable}{%
   \par\vspace{6pt}%
-  \small
   \noindent
-  \begin{tabular}{|>{\centering\arraybackslash}p{0.055\textwidth}|>{\centering\arraybackslash}p{0.10\textwidth}|>{\centering\arraybackslash}p{0.035\textwidth}|>{\centering\arraybackslash}p{0.11\textwidth}|>{\centering\arraybackslash}p{0.11\textwidth}|>{\centering\arraybackslash}p{0.08\textwidth}|>{\centering\arraybackslash}p{0.08\textwidth}|>{\centering\arraybackslash}p{0.30\textwidth}|>{\centering\arraybackslash}p{0.045\textwidth}|}
-  \hline
-  \rowcolor{pasm2-encoding-header}
-  \textbf{EEEE} & \textbf{Opcode} & \textbf{CZI} & \textbf{D} & \textbf{S} & \textbf{C} & \textbf{Z} & \textbf{Result} & \textbf{Clks} \\
-  \hline
-}{%
-  \end{tabular}%
+  \begin{tblr}[expand=\BODY]{
+    width=\linewidth,
+    rowsep=2pt,
+    colsep=4pt,
+    row{1}={bg=pasm2-encoding-header, font=\bfseries\small},
+    column{1}={wd=0.055\linewidth, halign=c, font=\ttfamily\small},
+    column{2}={wd=0.100\linewidth, halign=c, font=\ttfamily\small},
+    column{3}={wd=0.035\linewidth, halign=c, font=\ttfamily\small},
+    column{4}={wd=0.110\linewidth, halign=c, font=\ttfamily\small},
+    column{5}={wd=0.110\linewidth, halign=c, font=\ttfamily\small},
+    column{6}={halign=c, font=\small},
+    column{7}={halign=c, font=\small},
+    column{8}={halign=l, font=\small},
+    column{9}={halign=c, font=\small},
+    hlines,
+    vlines,
+  }
+    EEEE & Opcode & CZI & D & S & C & Z & Result & Clks \\
+    \BODY
+  \end{tblr}%
   \par\vspace{6pt}%
-}
-
-% Encoding row (with bottom hline)
-% Args: EEEE, Opcode, CZI, D, S, C result, Z result, Result, Clocks
-\newcommand{\encodingrow}[9]{%
-  \texttt{#1} & \texttt{#2} & \texttt{#3} & \texttt{#4} & \texttt{#5} & #6 & #7 & #8 & #9 \\
-  \hline
-}
-
-% Encoding row continued (no bottom hline, for multi-row entries)
-\newcommand{\encodingrowcont}[9]{%
-  \texttt{#1} & \texttt{#2} & \texttt{#3} & \texttt{#4} & \texttt{#5} & #6 & #7 & #8 & #9 \\
 }
 
 % Simple encoding - standalone single-row encoding table
 % Args: EEEE, Opcode, CZI, D, S, C result, Z result, Result, Clocks
-% Uses tabular with fixed widths (tabularx + rowcolor has known incompatibility)
 \newcommand{\simpleencoding}[9]{%
   \par\vspace{6pt}%
-  \small
   \noindent
-  \begin{tabular}{|>{\centering\arraybackslash}p{0.055\textwidth}|>{\centering\arraybackslash}p{0.10\textwidth}|>{\centering\arraybackslash}p{0.035\textwidth}|>{\centering\arraybackslash}p{0.11\textwidth}|>{\centering\arraybackslash}p{0.11\textwidth}|>{\centering\arraybackslash}p{0.08\textwidth}|>{\centering\arraybackslash}p{0.08\textwidth}|>{\centering\arraybackslash}p{0.30\textwidth}|>{\centering\arraybackslash}p{0.045\textwidth}|}
-  \hline
-  \rowcolor{pasm2-encoding-header}
-  \textbf{EEEE} & \textbf{Opcode} & \textbf{CZI} & \textbf{D} & \textbf{S} & \textbf{C} & \textbf{Z} & \textbf{Result} & \textbf{Clks} \\
-  \hline
-  \texttt{#1} & \texttt{#2} & \texttt{#3} & \texttt{#4} & \texttt{#5} & #6 & #7 & #8 & #9 \\
-  \hline
-  \end{tabular}%
+  \begin{tblr}{
+    width=\linewidth,
+    rowsep=2pt,
+    colsep=4pt,
+    row{1}={bg=pasm2-encoding-header, font=\bfseries\small},
+    row{2}={font=\small},
+    column{1}={wd=0.055\linewidth, halign=c, font=\ttfamily},
+    column{2}={wd=0.100\linewidth, halign=c, font=\ttfamily},
+    column{3}={wd=0.035\linewidth, halign=c, font=\ttfamily},
+    column{4}={wd=0.110\linewidth, halign=c, font=\ttfamily},
+    column{5}={wd=0.110\linewidth, halign=c, font=\ttfamily},
+    column{6}={halign=c},
+    column{7}={halign=c},
+    column{8}={halign=l},
+    column{9}={halign=c},
+    hlines,
+    vlines,
+  }
+    EEEE & Opcode & CZI & D & S & C & Z & Result & Clks \\
+    #1 & #2 & #3 & #4 & #5 & #6 & #7 & #8 & #9 \\
+  \end{tblr}%
   \par\vspace{6pt}%
 }
 

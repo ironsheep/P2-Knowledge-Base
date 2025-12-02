@@ -7,7 +7,7 @@ This section contains all PASM2 instructions beginning with the letter W.
 ## WAITATN {#waitatn}
 
 Wait for attention
-[Event Instruction](#event-instructions) - Wait for attention event from another cog.
+[Event](#event) - Wait for attention event from another cog.
 
 **WAITATN**  **{WC|WZ|WCZ}**
 
@@ -40,7 +40,7 @@ During a wait, the pipeline is stalled—no instructions execute and no interrup
 ## WAITCT1 / WAITCT2 / WAITCT3 {#waitct1}
 
 Wait for counter event {#waitct2} {#waitct3}
-[Event Instruction](#event-instructions) - Wait for counter event 1, 2, or 3 flag.
+[Event](#event) - Wait for counter event 1, 2, or 3 flag.
 
 **WAITCT1**  **{WC|WZ|WCZ}**
 **WAITCT2**  **{WC|WZ|WCZ}**
@@ -75,7 +75,7 @@ To set an optional timeout, insert a SETQ instruction immediately before the WAI
 ## WAITFBW {#waitfbw}
 
 Wait for FIFO block wrap
-[Event Instruction](#event-instructions) - Wait for FIFO-interface-block-wrap event.
+[Event](#event) - Wait for FIFO-interface-block-wrap event.
 
 **WAITFBW**  **{WC|WZ|WCZ}**
 
@@ -102,7 +102,7 @@ The FIFO-interface-block-wrap event flag is cleared upon execution of RDFAST, WR
 ## WAITINT {#waitint}
 
 Wait for interrupt
-[Event Instruction](#event-instructions) - Wait for interrupt-occurred event.
+[Event](#event) - Wait for interrupt-occurred event.
 
 **WAITINT**  **{WC|WZ|WCZ}**
 
@@ -129,7 +129,7 @@ The interrupt-occurred event flag is cleared upon cog start or execution of POLL
 ## WAITPAT {#waitpat}
 
 Wait for pattern
-[Event Instruction](#event-instructions) - Wait for pin-pattern-detected event.
+[Event](#event) - Wait for pin-pattern-detected event.
 
 **WAITPAT**  **{WC|WZ|WCZ}**
 
@@ -161,7 +161,7 @@ The pin-pattern-detected event flag is cleared upon execution of SETPAT, POLLPAT
 ## WAITSE1 {#waitse1}
 
 Wait for selectable event 1
-[Event Instruction](#event-instructions) - Wait for selectable event 1 flag.
+[Event](#event) - Wait for selectable event 1 flag.
 
 **WAITSE1**  **{WC|WZ|WCZ}**
 
@@ -186,7 +186,7 @@ WAITSE1 waits for selectable event 1 to occur, stalling the pipeline until the S
 ## WAITSE2 {#waitse2}
 
 Wait for selectable event 2
-[Event Instruction](#event-instructions) - Wait for selectable event 2 flag.
+[Event](#event) - Wait for selectable event 2 flag.
 
 **WAITSE2**  **{WC|WZ|WCZ}**
 
@@ -211,7 +211,7 @@ WAITSE2 waits for selectable event 2 to occur, stalling the pipeline until the S
 ## WAITSE3 {#waitse3}
 
 Wait for selectable event 3
-[Event Instruction](#event-instructions) - Wait for selectable event 3 flag.
+[Event](#event) - Wait for selectable event 3 flag.
 
 **WAITSE3**  **{WC|WZ|WCZ}**
 
@@ -236,7 +236,7 @@ WAITSE3 waits for selectable event 3 to occur, stalling the pipeline until the S
 ## WAITSE4 {#waitse4}
 
 Wait for selectable event 4
-[Event Instruction](#event-instructions) - Wait for selectable event 4 flag.
+[Event](#event) - Wait for selectable event 4 flag.
 
 **WAITSE4**  **{WC|WZ|WCZ}**
 
@@ -261,7 +261,7 @@ WAITSE4 waits for selectable event 4 to occur, stalling the pipeline until the S
 ## WAITX {#waitx}
 
 Wait cycles
-[Timing Instruction](#timing-instructions) - Wait for Dest+1 clock cycles.
+[Event](#event) - Wait for Dest+1 clock cycles.
 
 **WAITX**  *{#}Dest*  **{WC|WZ|WCZ}**
 
@@ -293,7 +293,7 @@ WAITX blocks cog execution completely—no instructions execute and no interrupt
 ## WAITXFI {#waitxfi}
 
 Wait for streamer finished
-[Event Instruction](#event-instructions) - Wait for streamer-finished event.
+[Event](#event) - Wait for streamer-finished event.
 
 **WAITXFI**  **{WC|WZ|WCZ}**
 
@@ -320,7 +320,7 @@ The streamer-finished event flag is cleared upon execution of XINIT, XZERO, XCON
 ## WAITXMT {#waitxmt}
 
 Wait for streamer empty
-[Event Instruction](#event-instructions) - Wait for streamer-empty event.
+[Event](#event) - Wait for streamer-empty event.
 
 **WAITXMT**  **{WC|WZ|WCZ}**
 
@@ -347,7 +347,7 @@ The streamer-empty event flag is cleared upon execution of XINIT, XZERO, XCONT, 
 ## WAITXRL {#waitxrl}
 
 Wait for streamer LUT rollover
-[Event Instruction](#event-instructions) - Wait for streamer-LUT-RAM-rollover event.
+[Event](#event) - Wait for streamer-LUT-RAM-rollover event.
 
 **WAITXRL**  **{WC|WZ|WCZ}**
 
@@ -374,7 +374,7 @@ The streamer-LUT-RAM-rollover event flag is cleared upon cog start or execution 
 ## WAITXRO {#waitxro}
 
 Wait for streamer NCO rollover
-[Event Instruction](#event-instructions) - Wait for streamer-NCO-rollover event.
+[Event](#event) - Wait for streamer-NCO-rollover event.
 
 **WAITXRO**  **{WC|WZ|WCZ}**
 
@@ -401,7 +401,7 @@ The streamer-NCO-rollover event flag is cleared upon execution of XINIT, XZERO, 
 ## WFBYTE {#wfbyte}
 
 Write FIFO byte
-[FIFO Instruction](#fifo-instructions) - Write byte to FIFO.
+[Hub FIFO](#hub-fifo) - Write byte to FIFO.
 
 **WFBYTE**  *{#}Dest*
 
@@ -428,7 +428,7 @@ Only the lower 8 bits of Dest are written. WFBYTE executes in 2 clock cycles whe
 ## WFLONG {#wflong}
 
 Write FIFO long
-[FIFO Instruction](#fifo-instructions) - Write long to FIFO.
+[Hub FIFO](#hub-fifo) - Write long to FIFO.
 
 **WFLONG**  *{#}Dest*
 
@@ -455,7 +455,7 @@ All 32 bits of Dest are written. WFLONG executes in 2 clock cycles when the FIFO
 ## WFWORD {#wfword}
 
 Write FIFO word
-[FIFO Instruction](#fifo-instructions) - Write word to FIFO.
+[Hub FIFO](#hub-fifo) - Write word to FIFO.
 
 **WFWORD**  *{#}Dest*
 
@@ -482,7 +482,7 @@ Only the lower 16 bits of Dest are written. WFWORD executes in 2 clock cycles wh
 ## WMLONG {#wmlong}
 
 Write masked long
-[Hub Instruction](#hub-instructions) - Write masked long to hub RAM (non-zero bytes only).
+[Hub RAM](#hub-ram) - Write masked long to hub RAM (non-zero bytes only).
 
 **WMLONG**  *Dest, {#}Src/P*
 
@@ -512,7 +512,7 @@ Prior execution of SETQ or SETQ2 invokes cog or LUT block transfer mode.
 ## WRBYTE {#wrbyte}
 
 Write byte
-[Hub Instruction](#hub-instructions) - Write byte to hub RAM.
+[Hub RAM](#hub-ram) - Write byte to hub RAM.
 
 **WRBYTE**  *{#}Dest, {#}Src/P*
 
@@ -544,7 +544,7 @@ The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src
 ## WRC / WRNC / WRZ / WRNZ {#wrc}
 
 Write flag to register {#wrnc} {#wrz} {#wrnz}
-[Flag Instruction](#flag-instructions) - Write C, NC, Z, or NZ flag value to register.
+[Math and Logic](#math-and-logic) - Write C, NC, Z, or NZ flag value to register.
 
 **WRC**  *Dest*
 **WRNC**  *Dest*
@@ -584,7 +584,7 @@ WRC and WRZ write the direct flag state (C or Z), while WRNC and WRNZ write the 
 ## WRFAST {#wrfast}
 
 Write FIFO setup
-[FIFO Instruction](#fifo-instructions) - Begin new fast hub write via FIFO.
+[Hub FIFO](#hub-fifo) - Begin new fast hub write via FIFO.
 
 **WRFAST**  *{#}Dest, {#}Src*
 
@@ -619,7 +619,7 @@ Src[19:0] specifies the starting Hub RAM address. The FIFO automatically increme
 ## WRLONG {#wrlong}
 
 Write long
-[Hub Instruction](#hub-instructions) - Write long to hub RAM.
+[Hub RAM](#hub-ram) - Write long to hub RAM.
 
 **WRLONG**  *{#}Dest, {#}Src/P*
 
@@ -654,7 +654,7 @@ Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple l
 ## WRLUT {#wrlut}
 
 Write LUT
-[LUT Instruction](#lut-instructions) - Write Dest to LUT address.
+[Lookup Table](#lookup-table) - Write Dest to LUT address.
 
 **WRLUT**  *{#}Dest, {#}Src/P*
 
@@ -688,7 +688,7 @@ WRLUT executes in 2 clock cycles, providing fast access to LUT RAM for lookup ta
 ## WRPIN {#wrpin}
 
 Write pin mode
-[Smart Pin Instruction](#smart-pin-instructions) - Configure smart pin mode.
+[Smart Pin](#smart-pin) - Configure smart pin mode.
 
 **WRPIN**  *{#}Dest, {#}Src*
 
@@ -732,7 +732,7 @@ WRPIN #0, pin clears all smart pin configuration.
 ## WRWORD {#wrword}
 
 Write word
-[Hub Instruction](#hub-instructions) - Write word to hub RAM.
+[Hub RAM](#hub-ram) - Write word to hub RAM.
 
 **WRWORD**  *{#}Dest, {#}Src/P*
 
@@ -760,7 +760,7 @@ The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src
 ## WXPIN {#wxpin}
 
 Write pin X parameter
-[Smart Pin Instruction](#smart-pin-instructions) - Set smart pin X parameter.
+[Smart Pin](#smart-pin) - Set smart pin X parameter.
 
 **WXPIN**  *{#}Dest, {#}Src*
 
@@ -793,7 +793,7 @@ Writing the X register also acknowledges the smart pin, clearing any completion 
 ## WYPIN {#wypin}
 
 Write pin Y parameter
-[Smart Pin Instruction](#smart-pin-instructions) - Set smart pin Y parameter.
+[Smart Pin](#smart-pin) - Set smart pin Y parameter.
 
 **WYPIN**  *{#}Dest, {#}Src*
 

@@ -7,7 +7,7 @@ This section contains all PASM2 instructions beginning with the letter G.
 ## GETBRK {#getbrk}
 
 Get breakpoint status
-[Debug Instruction](#debug-instructions) - Get breakpoint/cog status into D according to WC/WZ/WCZ.
+[Miscellaneous](#miscellaneous) - Get breakpoint/cog status into D according to WC/WZ/WCZ.
 
 **GETBRK**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -43,7 +43,7 @@ GETBRK is essential for implementing debug infrastructure and coordinating multi
 ## GETBYTE {#getbyte}
 
 Get byte
-[Math Instruction](#math-instructions) - Get a byte from a value.
+[Math and Logic](#math-and-logic) - Get a byte from a value.
 
 **GETBYTE**  *Dest, {#}Src, #Num*
 **GETBYTE**  *Dest*
@@ -78,7 +78,7 @@ The second syntax form (GETBYTE Dest) is intended for use after an ALTGB instruc
 ## GETCT {#getct}
 
 Get system counter
-[Misc Instruction](#misc-instructions) - Get the current system counter value into D.
+[Miscellaneous](#miscellaneous) - Get the current system counter value into D.
 
 **GETCT**  *Dest*  **{WC}**
 
@@ -110,7 +110,7 @@ GETCT is commonly used with the ADDCT and WAITCT instruction families to impleme
 ## GETNIB {#getnib}
 
 Get nibble
-[Math Instruction](#math-instructions) - Get a nibble from a value.
+[Math and Logic](#math-and-logic) - Get a nibble from a value.
 
 **GETNIB**  *Dest, {#}Src, #Num*
 **GETNIB**  *Dest*
@@ -145,7 +145,7 @@ The second syntax form (GETNIB Dest) is intended for use after an ALTGN instruct
 ## GETPTR {#getptr}
 
 Get FIFO hub pointer
-[Hub Memory Instruction](#hub-memory-instructions) - Get current FIFO hub pointer into D.
+[Hub RAM](#hub-ram) - Get current FIFO hub pointer into D.
 
 **GETPTR**  *Dest*
 
@@ -174,7 +174,7 @@ GETPTR is useful for monitoring FIFO transfer progress, calculating how much dat
 ## GETQX {#getqx}
 
 Get CORDIC X result
-[CORDIC Instruction](#cordic-instructions) - Retrieve CORDIC result X into D.
+[CORDIC Solver](#cordic-solver) - Retrieve CORDIC result X into D.
 
 **GETQX**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -208,7 +208,7 @@ The timing for GETQX varies from 2 to 58 clock cycles depending on whether the r
 ## GETQY {#getqy}
 
 Get CORDIC Y result
-[CORDIC Instruction](#cordic-instructions) - Retrieve CORDIC result Y into D.
+[CORDIC Solver](#cordic-solver) - Retrieve CORDIC result Y into D.
 
 **GETQY**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -242,7 +242,7 @@ The timing for GETQY varies from 2 to 58 clock cycles depending on whether the r
 ## GETRND {#getrnd}
 
 Get random value
-[Misc Instruction](#misc-instructions) - Get RND into D or C/Z flags.
+[Miscellaneous](#miscellaneous) - Get RND into D or C/Z flags.
 
 **GETRND**  *Dest*  **{WC|WZ|WCZ}**
 **GETRND**  **{WC|WZ|WCZ}**
@@ -282,7 +282,7 @@ The random number generator uses a maximal-length linear feedback shift register
 ## GETSCP {#getscp}
 
 Get oscilloscope samples
-[Smart Pin Instruction](#smart-pin-instructions) - Get four-channel oscilloscope samples into D.
+[Smart Pin](#smart-pin) - Get four-channel oscilloscope samples into D.
 
 **GETSCP**  *Dest*
 
@@ -313,7 +313,7 @@ This instruction is useful for real-time signal monitoring, debugging, and creat
 ## GETWORD {#getword}
 
 Get word
-[Math Instruction](#math-instructions) - Get a word from a value.
+[Math and Logic](#math-and-logic) - Get a word from a value.
 
 **GETWORD**  *Dest, {#}Src, #Num*
 **GETWORD**  *Dest*
@@ -348,7 +348,7 @@ The second syntax form (GETWORD Dest) is intended for use after an ALTGW instruc
 ## GETXACC {#getxacc}
 
 Get Goertzel accumulators
-[Streamer Instruction](#streamer-instructions) - Get streamer's Goertzel X/Y accumulators into D and next S.
+[Streamer](#streamer-category) - Get streamer's Goertzel X/Y accumulators into D and next S.
 
 **GETXACC**  *Dest*
 

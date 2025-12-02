@@ -7,7 +7,7 @@ This section contains all PASM2 instructions beginning with the letter A.
 ## ABS {#abs}
 
 Absolute
-[Math Instruction](#math-instructions) - Get the absolute value of a number.
+[Math and Logic](#math-and-logic) - Get the absolute value of a number.
 
 **ABS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **ABS**  *Dest*  **{WC|WZ|WCZ}**
@@ -44,7 +44,7 @@ Literal Src values are zero-extended, so ABS is best used with register Src (or 
 ## ADD {#add}
 
 Add
-[Math Instruction](#math-instructions) - Add two unsigned values.
+[Math and Logic](#math-and-logic) - Add two unsigned values.
 
 **ADD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -84,7 +84,7 @@ ADD and ADDX are also used for adding signed multi-long values, with ADDSX endin
 ## ADDCT1 / ADDCT2 / ADDCT3 {#addct1}
 
 Add and set counter event trigger (1, 2, or 3)
-[Event Instruction](#event-instructions) - Set CTn counter event trigger time.
+[Event](#event) - Set CTn counter event trigger time.
 
 **ADDCT1**  *Dest, {#}Src*
 **ADDCT2**  *Dest, {#}Src*
@@ -118,7 +118,7 @@ The P2 provides three independent counter event triggers (CT1, CT2, CT3), allowi
 ## ADDPIX {#addpix}
 
 Add pixels
-[Pixel Mixer Instruction](#pixel-mixer-instructions) - Add RGB colors with full saturation.
+[Pixel Mixer](#pixel-mixer) - Add RGB colors with full saturation.
 
 **ADDPIX**  *Dest, {#}Src*
 
@@ -148,7 +148,7 @@ The instruction processes all three color channels (and alpha if present) in par
 ## ADDS {#adds}
 
 Add signed
-[Math Instruction](#math-instructions) - Add two signed values.
+[Math and Logic](#math-and-logic) - Add two signed values.
 
 **ADDS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -183,7 +183,7 @@ To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, a
 ## ADDSX {#addsx}
 
 Add signed, extended
-[Math Instruction](#math-instructions) - Add two signed extended values.
+[Math and Logic](#math-and-logic) - Add two signed extended values.
 
 **ADDSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -216,7 +216,7 @@ To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, a
 ## ADDX {#addx}
 
 Add extended
-[Math Instruction](#math-instructions) - Add two unsigned extended values.
+[Math and Logic](#math-and-logic) - Add two unsigned extended values.
 
 **ADDX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -249,7 +249,7 @@ To add unsigned multi-long values, use ADD followed by one or more ADDX instruct
 ## AKPIN {#akpin}
 
 Acknowledge pin
-[Smart Pin Instruction](#smart-pin-instructions) - Acknowledge smart pin(s).
+[Smart Pin](#smart-pin) - Acknowledge smart pin(s).
 
 **AKPIN**  *{#}Src*
 
@@ -282,7 +282,7 @@ The range calculation (from Src[5:0] up to Src[5:0]+Src[10:6]) wraps within the 
 ## ALLOWI {#allowi}
 
 Allow interrupts
-[Interrupt Instruction](#interrupt-instructions) - Allow interrupts.
+[Interrupt](#interrupt) - Allow interrupts.
 
 ```
 ALLOWI
@@ -307,7 +307,7 @@ When ALLOWI is executed, any interrupts that were stalled by a previous STALLI i
 ## ALTB {#altb}
 
 Alter bit
-[Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent BITxxx instruction.
+[Register Indirection](#register-indirection) - Alter subsequent BITxxx instruction.
 
 **ALTB**  *Dest, {#}Src*
 **ALTB**  *Dest*
@@ -351,7 +351,7 @@ The instruction following ALTB is shielded from interrupt. Field value modificat
 ## ALTD {#altd}
 
 Alter destination
-[Register Indirection Instruction](#register-indirection-instructions) - Alter D field of next instruction.
+[Register Indirection](#register-indirection) - Alter D field of next instruction.
 
 **ALTD**  *Dest, {#}Src*
 **ALTD**  *Dest*
@@ -389,7 +389,7 @@ The instruction following ALTD is shielded from interrupt. ALTD alters the next 
 ## ALTGB {#altgb}
 
 Alter get byte
-[Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent GETBYTE / ROLBYTE instruction.
+[Register Indirection](#register-indirection) - Alter subsequent GETBYTE / ROLBYTE instruction.
 
 **ALTGB**  *Dest, {#}Src*
 **ALTGB**  *Dest*
@@ -431,7 +431,7 @@ The instruction following ALTGB is shielded from interrupt. Field value modifica
 ## ALTGN {#altgn}
 
 Alter get nibble
-[Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent GETNIB / ROLNIB instruction.
+[Register Indirection](#register-indirection) - Alter subsequent GETNIB / ROLNIB instruction.
 
 **ALTGN**  *Dest, {#}Src*
 **ALTGN**  *Dest*
@@ -473,7 +473,7 @@ The instruction following ALTGN is shielded from interrupt. Field value modifica
 ## ALTGW {#altgw}
 
 Alter get word
-[Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent GETWORD / ROLWORD instruction.
+[Register Indirection](#register-indirection) - Alter subsequent GETWORD / ROLWORD instruction.
 
 **ALTGW**  *Dest, {#}Src*
 **ALTGW**  *Dest*
@@ -515,7 +515,7 @@ The instruction following ALTGW is shielded from interrupt. Field value modifica
 ## ALTI {#alti}
 
 Alter instruction
-[Register Indirection Instruction](#register-indirection-instructions) - Substitute next instruction's field values from template, per configuration.
+[Register Indirection](#register-indirection) - Substitute next instruction's field values from template, per configuration.
 
 **ALTI**  *Dest, {#}Src*
 **ALTI**  *Dest*
@@ -553,7 +553,7 @@ The instruction following ALTI is shielded from interrupt. Field value modificat
 ## ALTR {#altr}
 
 Alter result
-[Register Indirection Instruction](#register-indirection-instructions) - Alter Result register address of next instruction.
+[Register Indirection](#register-indirection) - Alter Result register address of next instruction.
 
 **ALTR**  *Dest, {#}Src*
 **ALTR**  *Dest*
@@ -593,7 +593,7 @@ The instruction following ALTR is shielded from interrupt. ALTR alters the next 
 ## ALTS {#alts}
 
 Alter source
-[Register Indirection Instruction](#register-indirection-instructions) - Alter S field of next instruction.
+[Register Indirection](#register-indirection) - Alter S field of next instruction.
 
 **ALTS**  *Dest, {#}Src*
 **ALTS**  *Dest*
@@ -631,7 +631,7 @@ The instruction following ALTS is shielded from interrupt. ALTS alters the next 
 ## ALTSB {#altsb}
 
 Alter set byte
-[Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent SETBYTE instruction.
+[Register Indirection](#register-indirection) - Alter subsequent SETBYTE instruction.
 
 **ALTSB**  *Dest, {#}Src*
 **ALTSB**  *Dest*
@@ -671,7 +671,7 @@ The instruction following ALTSB is shielded from interrupt. ALTSB alters the nex
 ## ALTSN {#altsn}
 
 Alter set nibble
-[Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent SETNIB instruction.
+[Register Indirection](#register-indirection) - Alter subsequent SETNIB instruction.
 
 **ALTSN**  *Dest, {#}Src*
 **ALTSN**  *Dest*
@@ -713,7 +713,7 @@ The instruction following ALTSN is shielded from interrupt. ALTSN alters the nex
 ## ALTSW {#altsw}
 
 Alter set word
-[Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent SETWORD instruction.
+[Register Indirection](#register-indirection) - Alter subsequent SETWORD instruction.
 
 **ALTSW**  *Dest, {#}Src*
 **ALTSW**  *Dest*
@@ -755,7 +755,7 @@ The instruction following ALTSW is shielded from interrupt. ALTSW alters the nex
 ## AND {#and}
 
 Bitwise AND
-[Logic Instruction](#logic-instructions) - Bitwise AND a value with another, or with the NOT of another.
+[Math and Logic](#math-and-logic) - Bitwise AND a value with another, or with the NOT of another.
 
 **AND**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -786,7 +786,7 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 ## ANDN {#andn}
 
 And not
-[Logic Instruction](#logic-instructions) - Bitwise AND a value with the NOT of another.
+[Math and Logic](#math-and-logic) - Bitwise AND a value with the NOT of another.
 
 **ANDN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -819,7 +819,7 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 ## ASMCLK {#asmclk}
 
 Assembly clock instruction
-[System Control Instruction](#system-control-instructions) - Assembly clock instruction.
+[System Control](#system-control) - Assembly clock instruction.
 
 ```
 ASMCLK
@@ -842,7 +842,7 @@ ASMCLK controls assembly-time clock operations. This instruction is used during 
 ## AUGD {#augd}
 
 Augment destination
-[Misc Instruction](#misc-instructions) - Augment next literal Dest to 32-bits.
+[Miscellaneous](#miscellaneous) - Augment next literal Dest to 32-bits.
 
 **AUGD**  *#Dest*
 
@@ -873,7 +873,7 @@ Though AUGD may be manually entered wherever needed, the Parallax P2 compiler su
 ## AUGS {#augs}
 
 Augment source
-[Misc Instruction](#misc-instructions) - Augment next literal Src to 32-bits.
+[Miscellaneous](#miscellaneous) - Augment next literal Src to 32-bits.
 
 **AUGS**  *#Src*
 

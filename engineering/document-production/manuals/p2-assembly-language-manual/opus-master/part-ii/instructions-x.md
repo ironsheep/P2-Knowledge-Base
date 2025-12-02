@@ -7,7 +7,7 @@ This section contains all PASM2 instructions beginning with the letter X. The X 
 ## XCONT {#xcont}
 
 Execute continue
-[Streamer Instruction](#streamer-instructions) - Buffer new streamer command to continue from current phase.
+[Streamer](#streamer-category) - Buffer new streamer command to continue from current phase.
 
 **XCONT**  *{#}Dest, {#}Src*
 
@@ -37,7 +37,7 @@ The mode word in Dest specifies the streamer configuration including pin assignm
 ## XINIT {#xinit}
 
 Execute initialize
-[Streamer Instruction](#streamer-instructions) - Issue streamer command immediately, zeroing phase.
+[Streamer](#streamer-category) - Issue streamer command immediately, zeroing phase.
 
 **XINIT**  *{#}Dest, {#}Src*
 
@@ -80,7 +80,7 @@ This parallel operation eliminates CPU intervention, enabling sustained high-spe
 ## XOR {#xor}
 
 Exclusive or
-[Math/Logic Instruction](#mathlogic-instructions) - Bitwise XOR a value with another.
+[Math and Logic](#math-and-logic) - Bitwise XOR a value with another.
 
 **XOR**  *Dest, {#}Src*  **{WC/WZ/WCZ}**
 
@@ -119,7 +119,7 @@ When the WZ effect is specified, the Z flag is set if the result equals zero (me
 ## XORO32 {#xoro32}
 
 Xoroshiro 32
-[Math/Logic Instruction](#mathlogic-instructions) - Iterate Dest with xoroshiro32+ PRNG algorithm.
+[Math and Logic](#math-and-logic) - Iterate Dest with xoroshiro32+ PRNG algorithm.
 
 **XORO32**  *Dest*
 
@@ -162,7 +162,7 @@ The seed value in Dest must be non-zero. A seed of zero will produce only zero v
 ## XSTOP {#xstop}
 
 Execute stop
-[Streamer Instruction](#streamer-instructions) - Stop streamer immediately.
+[Streamer](#streamer-category) - Stop streamer immediately.
 
 **XSTOP**
 
@@ -196,7 +196,7 @@ After XSTOP, the streamer remains idle until a new XINIT command is issued. The 
 ## XZERO {#xzero}
 
 Execute zero
-[Streamer Instruction](#streamer-instructions) - Buffer new streamer command, zeroing phase.
+[Streamer](#streamer-category) - Buffer new streamer command, zeroing phase.
 
 **XZERO**  *{#}Dest, {#}Src*
 

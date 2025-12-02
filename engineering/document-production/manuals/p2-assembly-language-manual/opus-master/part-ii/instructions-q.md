@@ -7,7 +7,7 @@ This section contains all PASM2 instructions beginning with the letter Q. The Q 
 ## QDIV {#qdiv}
 
 Queue divide
-[CORDIC Instruction](#cordic-instructions) - Perform 64÷32 unsigned division with 32-bit quotient and remainder.
+[CORDIC Solver](#cordic-solver) - Perform 64÷32 unsigned division with 32-bit quotient and remainder.
 
 **QDIV**  *{#}Dest, {#}Src*
 
@@ -45,7 +45,7 @@ Division by zero produces undefined results. Each cog can issue one CORDIC instr
 ## QEXP {#qexp}
 
 Queue exponential
-[CORDIC Instruction](#cordic-instructions) - Convert 5:27-bit logarithm to 32-bit unsigned integer.
+[CORDIC Solver](#cordic-solver) - Convert 5:27-bit logarithm to 32-bit unsigned integer.
 
 **QEXP**  *{#}Dest*
 
@@ -80,7 +80,7 @@ QEXP is the complement of QLOG and is commonly used together with QLOG to perfor
 ## QFRAC {#qfrac}
 
 Queue fractional divide
-[CORDIC Instruction](#cordic-instructions) - Perform 64÷32 unsigned fractional division.
+[CORDIC Solver](#cordic-solver) - Perform 64÷32 unsigned fractional division.
 
 **QFRAC**  *{#}Dest, {#}Src*
 
@@ -117,7 +117,7 @@ The 64-bit numerator is formed as {Dest, SETQ}. This arrangement makes QFRAC par
 ## QLOG {#qlog}
 
 Queue logarithm
-[CORDIC Instruction](#cordic-instructions) - Convert 32-bit unsigned integer to 5:27-bit logarithm.
+[CORDIC Solver](#cordic-solver) - Convert 32-bit unsigned integer to 5:27-bit logarithm.
 
 **QLOG**  *{#}Dest*
 
@@ -150,7 +150,7 @@ The instruction takes the unsigned integer value in the Dest operand. After 55 c
 ## QMUL {#qmul}
 
 Queue multiply
-[CORDIC Instruction](#cordic-instructions) - Perform 32×32 unsigned multiplication producing 64-bit result.
+[CORDIC Solver](#cordic-solver) - Perform 32×32 unsigned multiplication producing 64-bit result.
 
 **QMUL**  *{#}Dest, {#}Src*
 
@@ -187,7 +187,7 @@ Each cog can issue one CORDIC instruction per hub window (every 8 clocks), allow
 ## QROTATE {#qrotate}
 
 Queue rotate
-[CORDIC Instruction](#cordic-instructions) - Rotate a 32-bit signed (X, Y) point around origin by specified angle.
+[CORDIC Solver](#cordic-solver) - Rotate a 32-bit signed (X, Y) point around origin by specified angle.
 
 **QROTATE**  *{#}Dest, {#}Src*
 
@@ -226,7 +226,7 @@ This instruction can also be used for polar to cartesian conversion by setting X
 ## QSQRT {#qsqrt}
 
 Queue square root
-[CORDIC Instruction](#cordic-instructions) - Calculate square root of 64-bit unsigned number.
+[CORDIC Solver](#cordic-solver) - Calculate square root of 64-bit unsigned number.
 
 **QSQRT**  *{#}Dest, {#}Src*
 
@@ -264,7 +264,7 @@ For 32-bit square roots, use Src=0.
 ## QVECTOR {#qvector}
 
 Queue vector
-[CORDIC Instruction](#cordic-instructions) - Convert cartesian coordinates (X, Y) to polar coordinates (length, angle).
+[CORDIC Solver](#cordic-solver) - Convert cartesian coordinates (X, Y) to polar coordinates (length, angle).
 
 **QVECTOR**  *{#}Dest, {#}Src*
 

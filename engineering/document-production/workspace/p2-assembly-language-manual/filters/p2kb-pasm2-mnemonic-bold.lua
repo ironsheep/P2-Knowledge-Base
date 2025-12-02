@@ -107,64 +107,39 @@ local function is_english_context(word, prev_word, next_word)
 
   -- "and" as conjunction: "X and Y", "and the", "and then", "and also"
   if w == "and" then
-    -- English: preceded by noun/adjective/verb, followed by article/noun/adjective
-    -- Instruction: standalone or "AND instruction"
-    if next == "the" or next == "a" or next == "an" or next == "then" or
-       next == "also" or next == "so" or next == "if" or next == "when" or
-       next == "this" or next == "that" or next == "it" or next == "its" or
-       next == "their" or next == "other" or next == "each" or next == "all" then
-      return true
-    end
     -- If followed by instruction/directive keywords, it's the instruction
     if next == "instruction" or next == "performs" or next == "operation" then
       return false
     end
-    -- After common sentence words, likely English
-    if prev == "c" or prev == "z" then
-      -- "C and Z" - flags, this is English usage
-      return true
+    -- If preceded by instruction-like context, it's the instruction
+    if prev == "the" and next == "instruction" then
+      return false
     end
-    return false  -- Default: treat as instruction when ambiguous
+    -- Otherwise, "and" in prose is almost always a conjunction
+    -- The instruction AND is typically written as `AND` in code or "the AND instruction"
+    return true
   end
 
   -- "or" as conjunction: "X or Y", "either...or", "or the"
   if w == "or" then
-    if next == "the" or next == "a" or next == "an" or next == "if" or
-       next == "when" or next == "other" or next == "else" or
-       next == "this" or next == "that" or next == "it" then
-      return true
-    end
-    if prev == "either" or prev == "whether" then
-      return true
-    end
+    -- If followed by instruction/directive keywords, it's the instruction
     if next == "instruction" or next == "performs" or next == "operation" then
       return false
     end
-    -- "C or Z" - flags
-    if prev == "c" or prev == "z" or next == "z" or next == "c" then
-      return true
-    end
-    return false
+    -- Otherwise, "or" in prose is almost always a conjunction
+    -- The instruction OR is typically written as `OR` in code or "the OR instruction"
+    return true
   end
 
   -- "not" as negation: "not the", "does not", "is not", "will not", "do not", "can not"
   if w == "not" then
-    if prev == "does" or prev == "is" or prev == "are" or prev == "was" or
-       prev == "will" or prev == "do" or prev == "did" or prev == "can" or
-       prev == "could" or prev == "would" or prev == "should" or prev == "has" or
-       prev == "have" or prev == "had" or prev == "may" or prev == "might" or
-       prev == "must" or prev == "shall" then
-      return true
-    end
-    if next == "the" or next == "a" or next == "an" or next == "be" or
-       next == "have" or next == "only" or next == "just" or next == "yet" or
-       next == "all" or next == "every" or next == "any" then
-      return true
-    end
+    -- If followed by instruction/directive keywords, it's the instruction
     if next == "instruction" or next == "performs" or next == "operation" then
       return false
     end
-    return false
+    -- Otherwise, "not" in prose is almost always negation
+    -- The instruction NOT is typically written as `NOT` in code or "the NOT instruction"
+    return true
   end
 
   -- "long" as adjective: "long time", "long value", "how long", "too long"
@@ -216,19 +191,13 @@ local function is_english_context(word, prev_word, next_word)
 
   -- "add" as verb: "add to", "add the", "to add", "will add"
   if w == "add" then
-    if prev == "to" or prev == "will" or prev == "can" or prev == "could" or
-       prev == "would" or prev == "should" or prev == "must" or prev == "may" then
-      return true
-    end
-    if next == "to" or next == "the" or next == "a" or next == "an" or
-       next == "this" or next == "that" or next == "it" or next == "them" or
-       next == "more" or next == "additional" then
-      return true
-    end
-    if next == "instruction" or next == "performs" then
+    -- If followed by instruction/directive keywords, it's the instruction
+    if next == "instruction" or next == "performs" or next == "operation" then
       return false
     end
-    return false
+    -- Otherwise, "add" in prose is almost always the verb
+    -- The instruction ADD is typically written as `ADD` in code or "the ADD instruction"
+    return true
   end
 
   -- "sub" as prefix/noun: rarely used alone in English, usually instruction
@@ -393,6 +362,64 @@ local function is_english_context(word, prev_word, next_word)
   return false
 end
 
+-- Check if paragraph content is in instruction header area (before Explanation)
+-- These areas already have proper formatting and shouldn't be double-processed
+local function is_instruction_header_area(elements)
+  local full_text = ""
+  for _, elem in ipairs(elements) do
+    if elem.t == "Str" then
+      full_text = full_text .. elem.text
+    elseif elem.t == "Strong" then
+      full_text = full_text .. pandoc.utils.stringify(elem)
+    end
+  end
+
+  -- Patterns indicating instruction header area:
+  -- Syntax lines with operand placeholders
+  if full_text:match("{#}") or full_text:match("Dest,") or full_text:match(", Src") or
+     full_text:match("{WC") or full_text:match("{WZ") or full_text:match("WCZ}") then
+    return true
+  end
+
+  -- Result line
+  if full_text:match("^Result:") then
+    return true
+  end
+
+  -- Related line
+  if full_text:match("^Related:") then
+    return true
+  end
+
+  -- Category/one-liner (contains instruction category links)
+  if full_text:match("Instruction%]") or full_text:match("Directive%]") or
+     full_text:match("Constant%]") then
+    return true
+  end
+
+  return false
+end
+
+-- Check if a Plain block (bullet item) is an operand description
+local function is_operand_description(elements)
+  local full_text = ""
+  for _, elem in ipairs(elements) do
+    if elem.t == "Str" then
+      full_text = full_text .. elem.text
+    end
+  end
+
+  -- Operand description patterns: starts with operand name
+  if full_text:match("^Dest ") or full_text:match("^Src ") or
+     full_text:match("^D ") or full_text:match("^S ") or
+     full_text:match("^WC,") or full_text:match("^WZ,") or
+     full_text:match("^The ") then
+    return true
+  end
+
+  return false
+end
+
 -- Uppercase mnemonics in a single line of code (stops at comment)
 local function uppercase_mnemonics_in_line(line)
   local comment_start = line:find("'")
@@ -457,8 +484,14 @@ end
 
 -- Process paragraph text - bold mnemonics with grammar awareness
 function Para(para)
-  local new_content = {}
   local elements = para.content
+
+  -- Skip instruction header areas (syntax lines, Result, Related, etc.)
+  if is_instruction_header_area(elements) then
+    return para
+  end
+
+  local new_content = {}
 
   for i, elem in ipairs(elements) do
     if elem.t == "Str" then
@@ -531,8 +564,14 @@ end
 
 -- Also process plain blocks (like in list items)
 function Plain(plain)
-  local new_content = {}
   local elements = plain.content
+
+  -- Skip operand description bullets (Dest is..., Src is..., etc.)
+  if is_operand_description(elements) then
+    return plain
+  end
+
+  local new_content = {}
 
   for i, elem in ipairs(elements) do
     if elem.t == "Str" then

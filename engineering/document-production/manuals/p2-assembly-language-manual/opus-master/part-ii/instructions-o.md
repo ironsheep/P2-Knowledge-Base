@@ -7,7 +7,7 @@ This section contains all PASM2 instructions beginning with the letter O.
 ## ONES {#ones}
 
 Ones
-[Math Instruction](#math-instructions) - Count the number of high bits (1s) in a value.
+[Math and Logic](#math-and-logic) - Count the number of high bits (1s) in a value.
 
 **ONES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **ONES**  *Dest*  **{WC|WZ|WCZ}**
@@ -46,7 +46,7 @@ ONES is useful for analyzing bit patterns, counting enabled flags, and implement
 ## OR {#or}
 
 Or
-[Logic Instruction](#logic-instructions) - Perform bitwise OR operation.
+[Math and Logic](#math-and-logic) - Perform bitwise OR operation.
 
 **OR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -89,7 +89,7 @@ OR is commonly used for setting specific bits in a value, combining bit masks, a
 ## OUTC / OUTNC / OUTZ / OUTNZ {#outc}
 
 Output by flag state {#outnc} {#outz} {#outnz}
-[I/O Pin Instruction](#io-pin-instructions) - Set pin output level according to C, NC, Z, or NZ flag state.
+[Pin](#pin) - Set pin output level according to C, NC, Z, or NZ flag state.
 
 **OUTC**  *{#}Dest*  **{WCZ}**
 **OUTNC**  *{#}Dest*  **{WCZ}**
@@ -132,7 +132,7 @@ If WCZ is specified, the Z flag is set to the original output state of the base 
 ## OUTH {#outh}
 
 Output high
-[I/O Pin Instruction](#io-pin-instructions) - Set pin output level to high.
+[Pin](#pin) - Set pin output level to high.
 
 **OUTH**  *{#}Dest*  **{WCZ}**
 
@@ -166,7 +166,7 @@ OUTH is commonly used to turn on LEDs, assert control signals, or drive pins hig
 ## OUTL {#outl}
 
 Output low
-[I/O Pin Instruction](#io-pin-instructions) - Set pin output level to low.
+[Pin](#pin) - Set pin output level to low.
 
 **OUTL**  *{#}Dest*  **{WCZ}**
 
@@ -200,7 +200,7 @@ OUTL is commonly used to turn off LEDs, de-assert control signals, or drive pins
 ## OUTNOT {#outnot}
 
 Output not (toggle)
-[I/O Pin Instruction](#io-pin-instructions) - Toggle pin output level to opposite state.
+[Pin](#pin) - Toggle pin output level to opposite state.
 
 **OUTNOT**  *{#}Dest*  **{WCZ}**
 
@@ -234,7 +234,7 @@ OUTNOT is commonly used for blinking LEDs, generating clock signals, or toggling
 ## OUTRND {#outrnd}
 
 Output random
-[I/O Pin Instruction](#io-pin-instructions) - Set pin output level(s) to random values.
+[Pin](#pin) - Set pin output level(s) to random values.
 
 **OUTRND**  *{#}Dest*  **{WCZ}**
 

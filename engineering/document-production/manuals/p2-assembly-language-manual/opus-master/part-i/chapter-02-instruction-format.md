@@ -192,10 +192,10 @@ When related instructions share an entry (e.g., DIRZ/DIRNZ), each instruction ge
 **DIRZ / DIRNZ**
 
 ```{=latex}
-\begin{inlineencodingtable}
-\inlineencodingrow{EEEE}{1101011}{CZI}{DDDDDDDDD}{001000100}{DIRx}{Orig bit}{2}
-\inlineencodingrow{EEEE}{1101011}{CZI}{DDDDDDDDD}{001000101}{DIRx}{Orig bit}{2}
-\end{inlineencodingtable}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZ0}{DDDDDDDDD}{001000100}{D}{---}{Orig bit}{2}
+\encodingrow{EEEE}{1101011}{CZ0}{DDDDDDDDD}{001000101}{D}{---}{Orig bit}{2}
+\end{encodingtable}
 ```
 
 The first row is DIRZ (S = 001000100), the second is DIRNZ (S = 001000101). Both share the same opcode but differ in the SRC field.
@@ -211,10 +211,10 @@ Syntax 1: `GETBYTE  Dest, {#}Src, #Num`
 Syntax 2: `GETBYTE  Dest`
 
 ```{=latex}
-\begin{inlineencodingtable}
-\inlineencodingrow{EEEE}{1000111}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{...}{2}
-\inlineencodingrow{EEEE}{1000111}{000}{DDDDDDDDD}{000000000}{D}{...}{2}
-\end{inlineencodingtable}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1000111}{NNI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{D}{2}
+\encodingrow{EEEE}{1000111}{000}{DDDDDDDDD}{000000000}{---}{---}{D}{2}
+\end{encodingtable}
 ```
 
 The first row shows the standard form with Src and Num operands (NN encodes the byte number 0-3). The second row shows the ALTGB-compatible form where Dest is both read and written.
@@ -286,6 +286,7 @@ When `#` is used:
 ### 2.6.2 Immediate Range
 
 9-bit immediates can represent:
+
 - Unsigned: 0 to 511 ($000 to $1FF)
 - Signed (when interpreted): -256 to +255
 
@@ -389,9 +390,7 @@ Consider the ADD instruction entry:
 :::
 
 ```{=latex}
-\begin{inlineencodingtable}
-\inlineencodingrow{EEEE}{0001000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{C: carry, Z: D=0}{2}
-\end{inlineencodingtable}
+\simpleencoding{EEEE}{0001000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{carry of (D + S)}{Result = 0}{2}
 ```
 
 From this entry:

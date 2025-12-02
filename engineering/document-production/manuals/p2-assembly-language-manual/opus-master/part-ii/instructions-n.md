@@ -7,7 +7,7 @@ This section contains all PASM2 instructions beginning with the letter N.
 ## NEG {#neg}
 
 Negate
-[Math Instruction](#math-instructions) - Negate a value.
+[Math and Logic](#math-and-logic) - Negate a value.
 
 **NEG**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **NEG**  *Dest*  **{WC|WZ|WCZ}**
@@ -44,7 +44,7 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 ## NEGC / NEGNC / NEGZ / NEGNZ {#negc}
 
 Conditional negate {#negnc} {#negz} {#negnz}
-[Math Instruction](#math-instructions) - Negate value according to C, NC, Z, or NZ flag.
+[Math and Logic](#math-and-logic) - Negate value according to C, NC, Z, or NZ flag.
 
 **NEGC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **NEGC**  *Dest*  **{WC|WZ|WCZ}**
@@ -103,7 +103,7 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 ## NIXINT1 / NIXINT2 / NIXINT3 {#nixint1}
 
 Cancel interrupt (1, 2, or 3)
-[Event Instruction](#event-instructions) - Cancel INTn interrupt.
+[Event](#event) - Cancel INTn interrupt.
 
 **NIXINT1**
 **NIXINT2**
@@ -134,7 +134,7 @@ The P2 provides three independent interrupt levels, and each NIXINT instruction 
 ## NOP {#nop}
 
 No operation
-[Misc Instruction](#misc-instructions) - No operation, just elapse two cycles.
+[Miscellaneous](#miscellaneous) - No operation, just elapse two cycles.
 
 **NOP**
 
@@ -159,7 +159,7 @@ NOP is primarily used for timing adjustments, creating precise delays, or as a p
 ## NOT {#not}
 
 Not
-[Logic Instruction](#logic-instructions) - Bitwise NOT a value.
+[Math and Logic](#math-and-logic) - Bitwise NOT a value.
 
 **NOT**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 **NOT**  *Dest*  **{WC|WZ|WCZ}**

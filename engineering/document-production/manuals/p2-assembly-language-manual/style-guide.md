@@ -509,6 +509,73 @@ ADDX & 2 & Add with carry-in (extended) \\
 \end{longtable}
 ```
 
+### 7.4 Table Design Decisions
+
+This section documents the rationale behind table formatting choices made during PDF generation refinement.
+
+#### 7.4.1 Encoding Tables - Design Intent
+
+**Goal:** Encoding tables must be visually consistent throughout the document. Every encoding table—whether in Part I explanatory chapters or Part II instruction entries—should look identical so readers learn to parse the format once and apply that knowledge everywhere.
+
+**Structure:** All encoding tables use 9 columns:
+
+| Column | Purpose | Width Strategy |
+|--------|---------|----------------|
+| EEEE | Condition code | Fixed (5.5%) - always 4 chars |
+| Opcode | 7-bit opcode | Fixed (10%) - always 7 chars |
+| CZI | Flag/immediate bits | Fixed (3.5%) - always 3 chars |
+| D | Destination field | Fixed (11%) - always 9 chars |
+| S | Source field | Fixed (11%) - always 9 chars |
+| C | C flag effect | Flexible (X) - content varies |
+| Z | Z flag effect | Flexible (X) - content varies |
+| Result | What's written | Flexible (X) - content varies |
+| Clks | Clock cycles | Flexible (X) - content varies |
+
+**Implementation:** Uses `tabularx` with fixed-width columns for the predictable encoding fields (left 5) and flexible `X` columns for the variable-content result fields (right 4). This ensures:
+- Encoding fields always align perfectly across all tables
+- Result columns share remaining space based on actual content
+- Tables respect page margins (use `\linewidth` not `\textwidth`)
+
+**Header styling:** Gray background (`pasm2-encoding-header` color) on header row using `\cellcolor` on each cell. We use `\cellcolor` instead of `\rowcolor` because `\rowcolor` is incompatible with `tabularx` flexible columns.
+
+**Consistency requirement:** The same `encodingtable` environment and `encodingrow`/`encodingrowcont` commands are used in:
+- Part I Chapter 2 (instruction format explanation)
+- Part II instruction entries
+- Any other location showing encoding information
+
+Never use a different table format for encoding data. If a simpler display is needed, use `\simpleencoding` (single-row) which has identical visual appearance.
+
+#### 7.4.2 General Tables - Column Width Strategy
+
+**Problem solved:** Tables with narrow columns (e.g., 10% width) caused text overlap when content exceeded the allocated space.
+
+**Solution:** Minimum column widths of 15% for text-containing columns. This is enforced in the `p2kb-pasm2-tables.lua` filter which processes Pandoc-generated tables.
+
+**Rationale:**
+- 10% of `\linewidth` ≈ 0.6 inches - too narrow for most text
+- 15% of `\linewidth` ≈ 0.9 inches - accommodates typical cell content
+- Tables with many columns may need manual width adjustments in the markdown source
+
+#### 7.4.3 Table Margins and Boundaries
+
+**Problem solved:** Tables extending beyond the right margin to the page edge.
+
+**Solution:** All tables use `\linewidth` (respects current text margins) rather than `\textwidth` (full page width). This ensures tables stay within the content column.
+
+**Implementation:** The encoding table environments in `p2kb-pasm2-content.sty` explicitly use:
+```latex
+\begin{tabularx}{\linewidth}{...}
+```
+
+#### 7.4.4 Visual Consistency Across Document Sections
+
+**Principle:** A reader should not be able to tell which section of the document they're in based on table appearance alone. All tables of the same type (encoding, parameter, reference) should be visually identical regardless of location.
+
+**Specific applications:**
+- Encoding examples in Chapter 2 use the same `encodingtable` as Part II entries
+- The ADD example in Section 2.8.2 uses `\simpleencoding` (same format as single-row instruction encodings)
+- Appendix encoding tables match the Part II format
+
 ---
 
 ## 8. Special Elements
@@ -875,5 +942,5 @@ When ready for PDF generation, deploy to:
 
 ---
 
-*Last Updated: 2025-11-26*
-*Version: 1.0 - Initial Style Guide*
+*Last Updated: 2025-12-02*
+*Version: 1.1 - Added Section 7.4 Table Design Decisions*

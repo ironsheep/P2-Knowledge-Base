@@ -7,7 +7,7 @@ This section contains all PASM2 instructions beginning with the letter L.
 ## LOC {#loc}
 
 Load address
-[Hub Memory Instruction](#hub-memory-instructions) - Load address into PA, PB, PTRA, or PTRB.
+[Hub RAM](#hub-ram) - Load address into PA, PB, PTRA, or PTRB.
 
 **LOC**  *PA/PB/PTRA/PTRB, #A*
 **LOC**  *PA/PB/PTRA/PTRB, #\A*
@@ -41,7 +41,7 @@ LOC is commonly used to set up pointer registers before memory operations, call 
 ## LOCKNEW {#locknew}
 
 Allocate new lock
-[COG Control Instruction](#cog-control-instructions) - Request a new LOCK from the hardware lock pool.
+[Hub Control](#hub-control) - Request a new LOCK from the hardware lock pool.
 
 **LOCKNEW**  *D*  **{WC}**
 
@@ -73,7 +73,7 @@ LOCKNEW is essential for dynamic lock allocation in systems where the number of 
 ## LOCKREL {#lockrel}
 
 Release lock
-[COG Control Instruction](#cog-control-instructions) - Release a previously acquired LOCK.
+[Hub Control](#hub-control) - Release a previously acquired LOCK.
 
 **LOCKREL**  *{#}D*  **{WC}**
 
@@ -105,7 +105,7 @@ Proper lock management requires that every LOCKTRY that successfully acquires a 
 ## LOCKRET {#lockret}
 
 Return lock to pool
-[COG Control Instruction](#cog-control-instructions) - Return a LOCK to the pool for reallocation.
+[Hub Control](#hub-control) - Return a LOCK to the pool for reallocation.
 
 **LOCKRET**  *{#}D*
 
@@ -136,7 +136,7 @@ The proper pattern for dynamic lock usage is: LOCKNEW to allocate, LOCKTRY/LOCKR
 ## LOCKTRY {#locktry}
 
 Try to acquire lock
-[COG Control Instruction](#cog-control-instructions) - Attempt to acquire a LOCK with atomic test-and-set.
+[Hub Control](#hub-control) - Attempt to acquire a LOCK with atomic test-and-set.
 
 **LOCKTRY**  *{#}D*  **{WC}**
 

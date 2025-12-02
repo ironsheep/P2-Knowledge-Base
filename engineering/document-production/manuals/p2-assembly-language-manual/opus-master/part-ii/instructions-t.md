@@ -7,7 +7,7 @@ This section contains all PASM2 instructions beginning with the letter T.
 ## TEST {#test}
 
 Test
-[Logic Instruction](#logic-instructions) - Test the parity and zero state of a register value.
+[Math and Logic](#math-and-logic) - Test the parity and zero state of a register value.
 
 **TEST**  *Dest*  **{WC|WZ|WCZ}**
 **TEST**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
@@ -49,7 +49,7 @@ TEST is non-destructive—it does not modify Dest.
 ## TESTB {#testb}
 
 Test bit
-[Bit Test Instruction](#bit-test-instructions) - Test a single bit in a register and write the result to C or Z.
+[Math and Logic](#math-and-logic) - Test a single bit in a register and write the result to C or Z.
 
 **TESTB**  *Dest, {#}Src*  **WC/WZ**
 **TESTB**  *Dest, {#}Src*  **ANDC/ANDZ**
@@ -94,7 +94,7 @@ TESTB is useful for examining individual bits without modifying the register val
 ## TESTBN {#testbn}
 
 Test bit negated
-[Bit Test Instruction](#bit-test-instructions) - Test a single bit in a register, invert the result, and write to C or Z.
+[Math and Logic](#math-and-logic) - Test a single bit in a register, invert the result, and write to C or Z.
 
 **TESTBN**  *Dest, {#}Src*  **WC/WZ**
 **TESTBN**  *Dest, {#}Src*  **ANDC/ANDZ**
@@ -134,7 +134,7 @@ TESTBN is useful for testing whether a bit is clear (0) rather than set (1).
 ## TESTN {#testn}
 
 Test not
-[Logic Instruction](#logic-instructions) - Test the parity and zero state of a register ANDed with an inverted value.
+[Math and Logic](#math-and-logic) - Test the parity and zero state of a register ANDed with an inverted value.
 
 **TESTN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -167,7 +167,7 @@ TESTN is non-destructive—it does not modify Dest. It is useful for testing whi
 ## TESTP / TESTPN {#testp}
 
 Test pin / Test pin negated {#testpn}
-[Pin Instruction](#pin-instructions) - Test the state of an I/O pin and write the result (or inverted result) to C or Z.
+[Pin](#pin) - Test the state of an I/O pin and write the result (or inverted result) to C or Z.
 
 **TESTP**  *{#}Dest*  **WC/WZ**
 **TESTP**  *{#}Dest*  **ANDC/ANDZ**
@@ -223,7 +223,7 @@ Both instructions read the actual pin state from the IN register, not the output
 ## TJF {#tjf}
 
 Test and jump if full
-[Flow Control Instruction](#flow-control-instructions) - Test a register value and jump if it equals $FFFF_FFFF.
+[Branch](#branch) - Test a register value and jump if it equals $FFFF_FFFF.
 
 **TJF**  *Dest, {#}Src*
 
@@ -253,7 +253,7 @@ The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken (1
 ## TJNF {#tjnf}
 
 Test and jump if not full
-[Flow Control Instruction](#flow-control-instructions) - Test a register value and jump if it does not equal $FFFF_FFFF.
+[Branch](#branch) - Test a register value and jump if it does not equal $FFFF_FFFF.
 
 **TJNF**  *Dest, {#}Src*
 
@@ -283,7 +283,7 @@ The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 ## TJNS {#tjns}
 
 Test and jump if not signed
-[Flow Control Instruction](#flow-control-instructions) - Test a register value and jump if bit 31 is clear (positive/unsigned).
+[Branch](#branch) - Test a register value and jump if bit 31 is clear (positive/unsigned).
 
 **TJNS**  *Dest, {#}Src*
 
@@ -311,7 +311,7 @@ The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 ## TJZ / TJNZ {#tjz}
 
 Test and jump if zero / not zero {#tjnz}
-[Flow Control Instruction](#flow-control-instructions) - Test a register value and jump based on zero/non-zero result.
+[Branch](#branch) - Test a register value and jump based on zero/non-zero result.
 
 **TJZ**  *Dest, {#}Src*
 **TJNZ**  *Dest, {#}Src*
@@ -357,7 +357,7 @@ Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 ## TJS {#tjs}
 
 Test and jump if signed
-[Flow Control Instruction](#flow-control-instructions) - Test a register value and jump if bit 31 is set (negative).
+[Branch](#branch) - Test a register value and jump if bit 31 is set (negative).
 
 **TJS**  *Dest, {#}Src*
 
@@ -391,7 +391,7 @@ The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 ## TJV {#tjv}
 
 Test and jump if overflow
-[Flow Control Instruction](#flow-control-instructions) - Test a register value against the C flag and jump if overflow occurred.
+[Branch](#branch) - Test a register value against the C flag and jump if overflow occurred.
 
 **TJV**  *Dest, {#}Src*
 
@@ -427,7 +427,7 @@ The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 ## TRGINT1 {#trgint1}
 
 Trigger interrupt 1
-[Interrupt Instruction](#interrupt-instructions) - Software-trigger interrupt handler 1.
+[Interrupt](#interrupt) - Software-trigger interrupt handler 1.
 
 **TRGINT1**
 
@@ -450,7 +450,7 @@ TRGINT1 software-triggers interrupt handler 1, regardless of STALLI mode. This a
 ## TRGINT2 {#trgint2}
 
 Trigger interrupt 2
-[Interrupt Instruction](#interrupt-instructions) - Software-trigger interrupt handler 2.
+[Interrupt](#interrupt) - Software-trigger interrupt handler 2.
 
 **TRGINT2**
 
@@ -473,7 +473,7 @@ TRGINT2 software-triggers interrupt handler 2, regardless of STALLI mode. This a
 ## TRGINT3 {#trgint3}
 
 Trigger interrupt 3
-[Interrupt Instruction](#interrupt-instructions) - Software-trigger interrupt handler 3.
+[Interrupt](#interrupt) - Software-trigger interrupt handler 3.
 
 **TRGINT3**
 

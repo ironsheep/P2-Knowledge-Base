@@ -98,5 +98,20 @@ This document catalogues narrative improvements to add more detail in future rev
 
 ---
 
+## XBYTE Bytecode Engine
+
+**Location:** Part I Chapter 5, Section 5.7 (Hardware)
+
+**Current state:** Brief overview of XBYTE functionality exists, but lacks depth on practical usage and configuration.
+
+**Needed:** Locate XBYTE source ingestion materials and embellish the XBYTE description to be more meaningful:
+- XBYTE instruction table format and layout
+- Bytecode dispatch mechanism details
+- Practical examples of bytecode interpreter implementation
+- Performance characteristics and timing
+- Comparison with traditional instruction dispatch approaches
+
+---
+
 *Created: 2025-12-02*
 *Last updated: 2025-12-02*

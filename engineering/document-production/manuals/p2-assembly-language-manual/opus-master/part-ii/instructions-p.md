@@ -7,7 +7,7 @@ This section contains all PASM2 instructions beginning with the letter P.
 ## POLLATN {#pollatn}
 
 Poll attention event
-[Event Instruction](#event-instructions) - Check attention event flag without waiting.
+[Event](#event) - Check attention event flag without waiting.
 
 **POLLATN**  **{WC|WZ|WCZ}**
 
@@ -36,7 +36,7 @@ This instruction enables inter-cog communication by allowing a cog to check whet
 ## POLLCT1 / POLLCT2 / POLLCT3 {#pollct1}
 
 Poll counter event (1, 2, or 3)
-[Event Instruction](#event-instructions) - Check counter event flag without waiting.
+[Event](#event) - Check counter event flag without waiting.
 
 **POLLCT1**  **{WC|WZ|WCZ}**
 **POLLCT2**  **{WC|WZ|WCZ}**
@@ -71,7 +71,7 @@ These instructions enable time-based event polling without blocking execution. T
 ## POLLFBW {#pollfbw}
 
 Poll FIFO block wrap event
-[Event Instruction](#event-instructions) - Check FIFO block wrap event flag without waiting.
+[Event](#event) - Check FIFO block wrap event flag without waiting.
 
 **POLLFBW**  **{WC|WZ|WCZ}**
 
@@ -100,7 +100,7 @@ This instruction enables circular buffer management for high-speed Hub RAM trans
 ## POLLINT {#pollint}
 
 Poll interrupt event
-[Event Instruction](#event-instructions) - Check interrupt event flag without waiting.
+[Event](#event) - Check interrupt event flag without waiting.
 
 **POLLINT**  **{WC|WZ|WCZ}**
 
@@ -129,7 +129,7 @@ This instruction enables non-blocking interrupt handling.
 ## POLLPAT {#pollpat}
 
 Poll pin pattern event
-[Event Instruction](#event-instructions) - Check pin pattern event flag without waiting.
+[Event](#event) - Check pin pattern event flag without waiting.
 
 **POLLPAT**  **{WC|WZ|WCZ}**
 
@@ -158,7 +158,7 @@ This instruction enables non-blocking pattern detection on input pins.
 ## POLLQMT {#pollqmt}
 
 Poll CORDIC empty event
-[Event Instruction](#event-instructions) - Check CORDIC-read-but-empty event flag without waiting.
+[Event](#event) - Check CORDIC-read-but-empty event flag without waiting.
 
 **POLLQMT**  **{WC|WZ|WCZ}**
 
@@ -187,7 +187,7 @@ This instruction enables error detection for CORDIC operations.
 ## POLLSE1 / POLLSE2 / POLLSE3 / POLLSE4 {#pollse1}
 
 Poll selectable event (1, 2, 3, or 4)
-[Event Instruction](#event-instructions) - Check selectable event flag without waiting.
+[Event](#event) - Check selectable event flag without waiting.
 
 **POLLSE1**  **{WC|WZ|WCZ}**
 **POLLSE2**  **{WC|WZ|WCZ}**
@@ -224,7 +224,7 @@ The P2 provides four independent selectable event generators that can be configu
 ## POLLXFI {#pollxfi}
 
 Poll streamer finished event
-[Event Instruction](#event-instructions) - Check streamer-finished event flag without waiting.
+[Event](#event) - Check streamer-finished event flag without waiting.
 
 **POLLXFI**  **{WC|WZ|WCZ}**
 
@@ -253,7 +253,7 @@ This instruction enables non-blocking management of the streamer subsystem.
 ## POLLXMT {#pollxmt}
 
 Poll streamer empty event
-[Event Instruction](#event-instructions) - Check streamer-empty event flag without waiting.
+[Event](#event) - Check streamer-empty event flag without waiting.
 
 **POLLXMT**  **{WC|WZ|WCZ}**
 
@@ -282,7 +282,7 @@ This instruction enables pipelined streamer operations.
 ## POLLXRL {#pollxrl}
 
 Poll streamer LUT rollover event
-[Event Instruction](#event-instructions) - Check streamer LUT rollover event flag without waiting.
+[Event](#event) - Check streamer LUT rollover event flag without waiting.
 
 **POLLXRL**  **{WC|WZ|WCZ}**
 
@@ -311,7 +311,7 @@ This instruction enables circular buffer management when using LUT RAM as a stre
 ## POLLXRO {#pollxro}
 
 Poll streamer NCO rollover event
-[Event Instruction](#event-instructions) - Check streamer NCO rollover event flag without waiting.
+[Event](#event) - Check streamer NCO rollover event flag without waiting.
 
 **POLLXRO**  **{WC|WZ|WCZ}**
 
@@ -340,7 +340,7 @@ This instruction enables precise timing control for streamer operations that use
 ## POP {#pop}
 
 Pop from internal stack
-[Miscellaneous Instruction](#miscellaneous-instructions) - Pop a value from the internal K register stack.
+[Miscellaneous](#miscellaneous) - Pop a value from the internal K register stack.
 
 **POP**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -372,7 +372,7 @@ POP retrieves this value, typically as part of a return sequence, though it can 
 ## POPA {#popa}
 
 Pop from Hub stack A
-[Hub RAM Instruction](#hub-ram-instructions) - Pop a long value from Hub RAM using PTRA as stack pointer.
+[Hub RAM](#hub-ram) - Pop a long value from Hub RAM using PTRA as stack pointer.
 
 **POPA**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -404,7 +404,7 @@ This instruction enables Hub RAM-based stacks for deep subroutine nesting and la
 ## POPB {#popb}
 
 Pop from Hub stack B
-[Hub RAM Instruction](#hub-ram-instructions) - Pop a long value from Hub RAM using PTRB as stack pointer.
+[Hub RAM](#hub-ram) - Pop a long value from Hub RAM using PTRB as stack pointer.
 
 **POPB**  *Dest*  **{WC|WZ|WCZ}**
 
@@ -436,7 +436,7 @@ Having two independent Hub stack pointers (PTRA and PTRB) allows a cog to manage
 ## PUSH {#push}
 
 Push to internal stack
-[Miscellaneous Instruction](#miscellaneous-instructions) - Push a value onto the internal K register stack.
+[Miscellaneous](#miscellaneous) - Push a value onto the internal K register stack.
 
 **PUSH**  *{#}Dest*
 
@@ -463,7 +463,7 @@ The P2 provides a single-level internal stack register K that is automatically u
 ## PUSHA {#pusha}
 
 Push to Hub stack A
-[Hub RAM Instruction](#hub-ram-instructions) - Push a long value to Hub RAM using PTRA as stack pointer.
+[Hub RAM](#hub-ram) - Push a long value to Hub RAM using PTRA as stack pointer.
 
 **PUSHA**  *{#}Dest*
 
@@ -492,7 +492,7 @@ PUSHA paired with POPA implements a descending stack in Hub RAM.
 ## PUSHB {#pushb}
 
 Push to Hub stack B
-[Hub RAM Instruction](#hub-ram-instructions) - Push a long value to Hub RAM using PTRB as stack pointer.
+[Hub RAM](#hub-ram) - Push a long value to Hub RAM using PTRB as stack pointer.
 
 **PUSHB**  *{#}Dest*
 

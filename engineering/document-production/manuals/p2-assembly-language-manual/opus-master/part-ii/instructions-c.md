@@ -7,7 +7,7 @@ This section contains all PASM2 instructions beginning with the letter C.
 ## CALL {#call}
 
 Call subroutine
-[Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context on the stack.
+[Branch](#branch) - Call a subroutine; store return context on the stack.
 
 **CALL**  *#Addr*
 **CALL**  *#\Addr*
@@ -49,7 +49,7 @@ The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub ex
 ## CALLA {#calla}
 
 Call subroutine via PTRA
-[Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context in the Hub long at PTRA++.
+[Branch](#branch) - Call a subroutine; store return context in the Hub long at PTRA++.
 
 **CALLA**  *#Addr*
 **CALLA**  *#\Addr*
@@ -91,7 +91,7 @@ CALLA is used for subroutine calls when Hub RAM is being used as the call stack 
 ## CALLB {#callb}
 
 Call subroutine via PTRB
-[Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context in the Hub long at PTRB++.
+[Branch](#branch) - Call a subroutine; store return context in the Hub long at PTRB++.
 
 **CALLB**  *#Addr*
 **CALLB**  *#\Addr*
@@ -133,7 +133,7 @@ CALLB operates identically to CALLA except it uses PTRB as the stack pointer ins
 ## CALLD {#calld}
 
 Call with destination register
-[Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context in PA/PB/PTRA/PTRB/D.
+[Branch](#branch) - Call a subroutine; store return context in PA/PB/PTRA/PTRB/D.
 
 **CALLD**  *PA|PB|PTRA|PTRB, #Addr*
 **CALLD**  *PA|PB|PTRA|PTRB, #\Addr*
@@ -179,7 +179,7 @@ The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub ex
 ## CALLPA {#callpa}
 
 Call subroutine with PA parameter
-[Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context on the stack and copy D into PA.
+[Branch](#branch) - Call a subroutine; store return context on the stack and copy D into PA.
 
 **CALLPA**  *{#}Dest, {#}Src*
 
@@ -211,7 +211,7 @@ The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub ex
 ## CALLPB {#callpb}
 
 Call subroutine with PB parameter
-[Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context on the stack and copy D into PB.
+[Branch](#branch) - Call a subroutine; store return context on the stack and copy D into PB.
 
 **CALLPB**  *{#}Dest, {#}Src*
 
@@ -243,7 +243,7 @@ The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub ex
 ## CMP {#cmp}
 
 Compare
-[Math Instruction](#math-instructions) - Compare two unsigned values.
+[Math and Logic](#math-and-logic) - Compare two unsigned values.
 
 **CMP**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -284,7 +284,7 @@ CMP is fundamental for implementing conditional logic and control flow based on 
 ## CMPM {#cmpm}
 
 Compare most significant bit
-[Math Instruction](#math-instructions) - Compare two unsigned values, get MSB of difference.
+[Math and Logic](#math-and-logic) - Compare two unsigned values, get MSB of difference.
 
 **CMPM**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -317,7 +317,7 @@ CMPM is useful when the most significant bit of the difference carries semantic 
 ## CMPR {#cmpr}
 
 Compare reverse
-[Math Instruction](#math-instructions) - Compare two unsigned values (in reverse order to CMP).
+[Math and Logic](#math-and-logic) - Compare two unsigned values (in reverse order to CMP).
 
 **CMPR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -350,7 +350,7 @@ CMPR is useful when the natural order of operands in your code is reversed from 
 ## CMPS {#cmps}
 
 Compare signed
-[Math Instruction](#math-instructions) - Compare two signed values.
+[Math and Logic](#math-and-logic) - Compare two signed values.
 
 **CMPS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -389,7 +389,7 @@ To compare signed multi-long values (64-bit or larger), use CMP (not CMPS) for t
 ## CMPSUB {#cmpsub}
 
 Compare and subtract
-[Math Instruction](#math-instructions) - Compare two unsigned values and subtract the second if it is lesser or equal.
+[Math and Logic](#math-and-logic) - Compare two unsigned values and subtract the second if it is lesser or equal.
 
 **CMPSUB**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -426,7 +426,7 @@ CMPSUB is particularly useful for implementing division algorithms, modulo opera
 ## CMPSX {#cmpsx}
 
 Compare signed, extended
-[Math Instruction](#math-instructions) - Compare two signed values plus carry flag.
+[Math and Logic](#math-and-logic) - Compare two signed values plus carry flag.
 
 **CMPSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -465,7 +465,7 @@ For signed multi-long comparisons, use CMP for the least significant long, optio
 ## CMPX {#cmpx}
 
 Compare extended
-[Math Instruction](#math-instructions) - Compare two unsigned values plus carry flag.
+[Math and Logic](#math-and-logic) - Compare two unsigned values plus carry flag.
 
 **CMPX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
 
@@ -504,7 +504,7 @@ For unsigned multi-long comparisons, use CMP for the least significant long, the
 ## COGATN {#cogatn}
 
 Cog attention
-[Event Instruction](#event-instructions) - Get the attention of one or more other cogs.
+[Event](#event) - Get the attention of one or more other cogs.
 
 **COGATN**  *{#}Dest*
 
@@ -545,7 +545,7 @@ COGATN is useful for implementing inter-cog communication, synchronization, and 
 ## COGBRK {#cogbrk}
 
 Cog break
-[Debug Instruction](#debug-instructions) - Trigger breakpoint in specified cog.
+[Miscellaneous](#miscellaneous) - Trigger breakpoint in specified cog.
 
 **COGBRK**  *{#}Dest*
 
@@ -580,7 +580,7 @@ COGBRK is a specialized instruction primarily used by development and debugging 
 ## COGID {#cogid}
 
 Cog identification
-[COG Control Instruction](#cog-control-instructions) - Get current cog's ID or any cog's status by ID.
+[Hub Control](#hub-control) - Get current cog's ID or any cog's status by ID.
 
 **COGID**  *{#}Dest*  **{WC}**
 
@@ -622,7 +622,7 @@ To check if cog 3 is running:
 ## COGINIT {#coginit}
 
 Cog initialize
-[COG Control Instruction](#cog-control-instructions) - Start an available cog, or restart a cog by ID.
+[Hub Control](#hub-control) - Start an available cog, or restart a cog by ID.
 
 **COGINIT**  *{#}Dest, {#}Src*  **{WC}**
 
@@ -685,7 +685,7 @@ Start a cog pair for LUT sharing:
 ## COGSTOP {#cogstop}
 
 Cog stop
-[COG Control Instruction](#cog-control-instructions) - Stop a cog by ID.
+[Hub Control](#hub-control) - Stop a cog by ID.
 
 **COGSTOP**  *{#}Dest*
 
@@ -727,7 +727,7 @@ COGSTOP is useful for managing cog resources dynamically, shutting down cogs tha
 ## CRCBIT {#crcbit}
 
 CRC iterate bit
-[Math Instruction](#math-instructions) - Iterate CRC value in D using C and polynomial in S.
+[Math and Logic](#math-and-logic) - Iterate CRC value in D using C and polynomial in S.
 
 **CRCBIT**  *Dest, {#}Src*
 
@@ -770,7 +770,7 @@ For processing nibbles (4 bits) at a time instead, use CRCNIB.
 ## CRCNIB {#crcnib}
 
 CRC iterate nibble
-[Math Instruction](#math-instructions) - Iterate CRC value in D for a nibble using polynomial in S.
+[Math and Logic](#math-and-logic) - Iterate CRC value in D for a nibble using polynomial in S.
 
 **CRCNIB**  *Dest, {#}Src*
 

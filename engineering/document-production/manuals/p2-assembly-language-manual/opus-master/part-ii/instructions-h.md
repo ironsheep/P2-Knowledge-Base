@@ -7,7 +7,7 @@ This section contains all PASM2 instructions beginning with the letter H.
 ## HUBSET {#hubset}
 
 Set hub configuration
-[COG Control Instruction](#cog-control-instructions) - Configure system clock and hub parameters.
+[Hub Control](#hub-control) - Configure system clock and hub parameters.
 
 **HUBSET**  *{#}D*
 

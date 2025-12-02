@@ -2,11 +2,14 @@
 -- Purpose: ONLY handles page breaks between Chapters and special sections
 -- No code block processing - single responsibility
 --
--- Version: 1.2 - Part dividers use custom command (no post-heading page break)
+-- Version: 1.3 - Part and first chapter stay on same page
 -- Date: 2025-12-02
 
 -- Track if this is the first chapter (to avoid clearpage right after TOC)
 local first_chapter = true
+
+-- Track if we just emitted a Part divider (next chapter stays on same page)
+local just_emitted_part = false
 
 -- Handle Header elements for page breaks
 function Header(header)
@@ -20,6 +23,7 @@ function Header(header)
     if title:match("^Part ") then
       -- Convert Part heading to custom LaTeX command
       local partdivider = pandoc.RawBlock('latex', '\\partdivider{' .. title .. '}')
+      just_emitted_part = true
       return partdivider
     end
 
@@ -35,11 +39,20 @@ function Header(header)
         return header  -- No page break for first header
       end
 
+      -- Skip clearpage for chapter immediately after a Part divider
+      if just_emitted_part then
+        just_emitted_part = false
+        return header  -- No page break - stay on same page as Part
+      end
+
       -- All other chapters/appendices get page breaks
       local pagebreak = pandoc.RawBlock('latex', '\\clearpage')
       return {pagebreak, header}
     end
   end
+
+  -- Any other header clears the just_emitted_part flag
+  just_emitted_part = false
 
   -- Level 2 and below: no automatic page breaks (sections flow within chapters)
   return header
