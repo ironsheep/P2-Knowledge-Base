@@ -1,4 +1,25 @@
-# P2 Smart Pins Tutorial - Workspace Guide
+# Workspace - P2 Smart Pins Tutorial (Green Book)
+
+**Purpose:** PDF production workspace for the P2 Smart Pins Complete Tutorial.
+
+**Status:** Active - Sprint audit complete, ready for PDF generation
+**Content Source:** `../../manuals/p2-smart-pins-tutorial/opus-master-green-book/`
+
+---
+
+## Quick Reference
+
+| Resource | Location |
+|----------|----------|
+| **Content (Opus Master)** | `../../manuals/p2-smart-pins-tutorial/opus-master-green-book/` |
+| **Creation Guide** | `../../manuals/p2-smart-pins-tutorial/creation-guide.md` |
+| **Style Guide** | `../../manuals/p2-smart-pins-tutorial/style-guide.md` |
+| **Content Guide** | `../../manuals/p2-smart-pins-tutorial/content-guide.md` |
+| **Presentation Style** | `../../manuals/p2-smart-pins-tutorial/presentation-style-guide.md` |
+| **Escape Script** | `../../../tools/latex-escape-all.sh` |
+| **Outbound Folder** | `../../outbound/p2-smart-pins-tutorial/` |
+
+---
 
 ## Before You Begin
 
@@ -8,13 +29,149 @@ This changelog documents critical issues discovered during document production (
 
 ---
 
-## Quick Reference
-**Canonical Name:** `p2-smart-pins-tutorial`
-**Document Title:** P2 Smart Pins Complete Tutorial
-**Subtitle:** Master Every Smart Pin Mode Through Progressive Learning
-**Creation Guide:** `/engineering/document-production/manuals/p2-smart-pins-tutorial/creation-guide.md`
-**Outbound Deployment:** `/engineering/document-production/outbound/p2-smart-pins-tutorial/`
-**Status:** In Production - Technical Review Phase
+## Critical File Naming Convention
+
+**The master document name is sacred and never changes:**
+
+| Purpose | Filename |
+|---------|----------|
+| **Master Document** | `P2-Smart-Pins-Green-Book-Tutorial.md` |
+| **Output PDF** | `P2-Smart-Pins-Green-Book-Tutorial.pdf` |
+
+**Rules:**
+- Always use the exact document name - no suffixes like `-escaped`, `-v2`, `-final`
+- The workspace copy is unescaped (source of truth)
+- The outbound copy is escaped (ready for Forge)
+- Both use the identical filename: `P2-Smart-Pins-Green-Book-Tutorial.md`
+- Never rename files - always replace in place
+
+---
+
+## Directory Structure
+
+```
+workspace/p2-smart-pins-tutorial/     ← YOU ARE HERE (unescaped source)
+├── README.md                         # This file
+├── P2-Smart-Pins-Green-Book-Tutorial.md  # Master document (UNESCAPED)
+├── templates/
+│   ├── README.md                     # Template documentation
+│   ├── p2kb-sp-template.latex        # Main LaTeX template
+│   ├── p2kb-foundation.sty           # Core infrastructure (shared)
+│   ├── p2kb-sp-styles.sty            # Smart Pins content styling
+│   ├── p2kb-sp-numbering.sty         # Numbering system
+│   ├── p2kb-tech-review.sty          # Presentation branding
+│   └── p2kb-smartpins-diagrams.sty   # TikZ diagram macros (18 diagrams)
+├── filters/
+│   ├── smart-pins-colored-blocks.lua # Code block coloring
+│   ├── green-book-semantic-blocks.lua# Semantic marker conversion
+│   └── part-chapter-pagebreaks.lua   # Page break management
+├── assets/
+│   └── (PNG images for diagrams)
+├── request.json                      # PDF Forge configuration
+├── request-requirements.json         # Mandatory pandoc arguments
+├── green-book-processing-guide.md    # Processing documentation
+└── green-book-markdown-changes-guide.md  # Markdown transform rules
+
+outbound/p2-smart-pins-tutorial/      ← FLAT structure for PDF Forge
+├── P2-Smart-Pins-Green-Book-Tutorial.md  # ESCAPED copy (same name!)
+├── p2kb-sp-template.latex            # Template (FLAT - no subfolder!)
+├── p2kb-foundation.sty               # Style files at root level
+├── p2kb-sp-styles.sty
+├── p2kb-sp-numbering.sty
+├── p2kb-tech-review.sty
+├── p2kb-smartpins-diagrams.sty
+├── smart-pins-colored-blocks.lua     # Lua filters at root level
+├── green-book-semantic-blocks.lua
+├── part-chapter-pagebreaks.lua
+└── request.json
+```
+
+---
+
+## PDF Forge Workflow
+
+### Overview
+
+```
+WORKSPACE (unescaped)          OUTBOUND (escaped, flat)         PDF FORGE
+        │                              │                            │
+   Edit files here            Escape & flatten here          Generate PDF here
+        │                              │                            │
+        └──── latex-escape-all.sh ────►│                            │
+              + copy templates flat    │                            │
+                                       └──── User hand-copies ─────►│
+                                             (files disappear)      │
+                                                                    │
+        ◄─────────────────── User provides feedback ────────────────┘
+        │
+   Fix issues, repeat
+```
+
+### Step-by-Step Process
+
+#### 1. Edit in Workspace
+All edits happen in the workspace folder. Files here are **unescaped** - this is your source of truth.
+
+#### 2. Escape and Stage to Outbound
+
+**IMPORTANT: Only copy files that have changed!** PDF Forge is persistent and retains the last version of each file. Sending unchanged files is nonsensical - the Forge already has them. Only stage files that were actually modified in this iteration.
+
+```bash
+# From the workspace folder:
+cd /workspaces/P2-Knowledge-Base/engineering/document-production/workspace/p2-smart-pins-tutorial
+
+# Run escape script (creates backup automatically)
+../../../tools/latex-escape-all.sh \
+    P2-Smart-Pins-Green-Book-Tutorial.md \
+    ../../outbound/p2-smart-pins-tutorial/P2-Smart-Pins-Green-Book-Tutorial.md
+
+# Copy ONLY CHANGED templates FLAT (no subfolder!) to outbound
+# Example: If only p2kb-sp-styles.sty changed:
+cp templates/p2kb-sp-styles.sty ../../outbound/p2-smart-pins-tutorial/
+
+# Copy ONLY CHANGED filters to outbound
+# Example: If green-book-semantic-blocks.lua was modified:
+cp filters/green-book-semantic-blocks.lua ../../outbound/p2-smart-pins-tutorial/
+
+# Copy request.json ONLY if it changed
+cp request.json ../../outbound/p2-smart-pins-tutorial/
+```
+
+**What to copy each iteration:**
+- `P2-Smart-Pins-Green-Book-Tutorial.md` - Always (content changes)
+- Template files (`.latex`, `.sty`) - Only if modified
+- Lua filters (`.lua`) - Only if modified or added
+- `request.json` - Only if configuration changed
+
+#### 3. User Deploys to PDF Forge
+The user hand-copies files from `outbound/p2-smart-pins-tutorial/` to PDF Forge.
+**Files will disappear from outbound** after being moved to the Forge.
+
+#### 4. Feedback Loop
+- If PDF Forge reports errors → User relays error messages → Fix in workspace → Re-escape → Repeat
+- If PDF generates successfully → User provides visual feedback → Fix in workspace → Re-escape → Repeat
+- Continue until PDF is correct
+
+#### 5. Debugging with Generated .tex File
+After each PDF Forge run, the user will drop the generated `.tex` file into the outbound directory:
+```
+outbound/p2-smart-pins-tutorial/P2-Smart-Pins-Green-Book-Tutorial.tex
+```
+This intermediate LaTeX file is useful for:
+- Correlating error line numbers to actual content
+- Understanding how Pandoc transformed the markdown
+- Debugging rendering issues when user provides visual feedback
+- Finding the exact LaTeX that produced problematic output
+
+### Important Notes
+
+- **Outbound is FLAT** - No subfolders! All `.sty`, `.latex`, and `.lua` files go at root level
+- **Same filename everywhere** - `P2-Smart-Pins-Green-Book-Tutorial.md` in workspace AND outbound
+- **Workspace is unescaped** - Never run escape script in place; always output to outbound
+- **Outbound files disappear** - This is normal; user moves them to Forge
+- **Iterative process** - Expect multiple rounds of feedback and fixes
+
+---
 
 ## Document Identity
 
@@ -23,25 +180,7 @@ This changelog documents critical issues discovered during document production (
 **Size:** ~450 pages (comprehensive learning resource)
 **Philosophy:** "Understand deeply, implement confidently"
 
-## Related Folders
-
-### This Workspace
-- **Master Markdown:** `P2-Smart-Pins-Green-Book-Tutorial.md` (main working document)
-- **Templates:** `templates/` folder - See [templates/README.md](templates/README.md)
-- **Lua Filters:** `filters/` folder - Pandoc processing filters
-- **Images/Screenshots:** `assets/` folder (21+ images)
-- **Special Requirements:** `request-requirements.json` (--top-level-division=part)
-- **Request Config:** `request.json` (PDF generation configuration)
-
-### Creation and Style Guides
-- **Creation Guide:** `/engineering/document-production/manuals/p2-smart-pins-tutorial/creation-guide.md`
-- **Content Guide:** `/engineering/document-production/manuals/p2-smart-pins-tutorial/content-guide.md`
-- **Presentation Style:** `/engineering/document-production/manuals/p2-smart-pins-tutorial/presentation-style-guide.md`
-- **Style Guide:** `/engineering/document-production/manuals/p2-smart-pins-tutorial/style-guide.md`
-
-### Deployment Location
-- **Outbound:** `/engineering/document-production/outbound/p2-smart-pins-tutorial/`
-- **Process:** Files copied here after LaTeX escaping, ready for PDF Forge
+---
 
 ## Template Stack
 
@@ -60,6 +199,8 @@ Main: p2kb-sp-template.latex (orchestrates all layers)
 ```
 
 **Full Details:** See [templates/README.md](templates/README.md)
+
+---
 
 ## Special Requirements
 
@@ -84,53 +225,12 @@ Filters must be applied in this exact order:
 
 ### Assets Folder
 - **Location:** `assets/` subfolder in this workspace
-- **Contents:** 21+ PNG images (Smart Pins diagrams and examples)
-- **Naming:** NO SPACES in filenames (use hyphens: `Smart-Pins-Mode-01.png`)
+- **Contents:** PNG images (Smart Pins diagrams and oscilloscope captures)
+- **Naming:** NO SPACES in filenames (use hyphens: `smart-pins-master-trimmed.png`)
 - **References:** Use relative paths in markdown: `![Caption](assets/image.png)`
+- **TikZ Replacement:** Most PNG images have been replaced with TikZ diagrams
 
-## Workflow Quick Start
-
-### 1. Edit Content
-Edit `P2-Smart-Pins-Green-Book-Tutorial.md` in this workspace
-
-### 2. Prepare for PDF Generation
-```bash
-# From workspace directory:
-/workspaces/P2-Knowledge-Base/engineering/tools/latex-escape-all.sh \
-    P2-Smart-Pins-Green-Book-Tutorial.md \
-    /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-smart-pins-tutorial/P2-Smart-Pins-Green-Book-Tutorial.md
-```
-
-### 3. Copy Supporting Files
-**CRITICAL: Outbound must be a FLAT directory - no subdirectories!**
-
-```bash
-# Copy templates if changed (flat - no subdirectory)
-cp templates/*.{latex,sty} /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-smart-pins-tutorial/
-
-# Copy Lua filters if changed (flat - no subdirectory)
-cp filters/*.lua /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-smart-pins-tutorial/
-
-# Copy assets (flat - individual files, no subdirectory)
-cp assets/*.png /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-smart-pins-tutorial/
-
-# Ensure request.json is present
-cp request.json /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-smart-pins-tutorial/
-```
-
-### 4. User Deploys to PDF Forge
-User manually moves files from outbound to PDF Forge system
-
-## Key Process Documents
-
-### Universal Methodology
-- **Format Guide:** `/engineering/document-production/methodology/pdf-generation-format-guide.md`
-- **Workflow Guide:** `/engineering/document-production/methodology/pdf-generation-workflow-guide.md`
-
-### Document-Specific
-- **Creation Guide:** `/engineering/document-production/manuals/p2-smart-pins-tutorial/creation-guide.md` (voice, philosophy, content sources)
-- **Green Book Processing:** `green-book-processing-guide.md` (in this workspace)
-- **Markdown Changes:** `green-book-markdown-changes-guide.md` (in this workspace)
+---
 
 ## Visual Features
 
@@ -140,45 +240,77 @@ User manually moves files from outbound to PDF Forge system
 - Pastel color palette optimized for extended reading
 
 ### Code Block System (3 types)
-- **Configuration:** Pin setup and mode selection (light blue)
 - **Spin2:** High-level programming examples (light green)
 - **PASM2:** Assembly language examples (light yellow)
+- **Antipattern:** Common mistakes with correct alternatives (light red)
 
 ### Typography
 - 10.5pt body text (5% larger than reference manual)
 - 1.25x line spacing for comfortable reading
 - Digital-first margins (0.75" with 1" binding)
 
-## Current Status
+---
 
-**Phase:** Technical Review
-**Completion:** Content complete, visual refinement ongoing
-**Next Steps:**
-- Iterate on visual presentation based on PDF output
-- Refine semantic marker styling
-- Complete code example validation
-- Prepare for technical review submission
+## Two-Book Strategy
 
-## PDF Forge Integration
+This workspace maintains the "Green Book" (tutorial) variant of Smart Pins documentation:
 
-### Testing (Template Development & Visual Refinement)
-**Guide:** `/engineering/pdf-forge/work-modes/automated-pdf-testing.md`
-- Rapid iteration for template fixes and visual refinement (30-60 sec cycles)
-- Test multiple scenarios in one request
-- Temporary testing - does NOT install templates permanently
+| Book | Pages | Purpose |
+|------|-------|---------|
+| **Green Book** (this) | ~450 | Comprehensive tutorial |
+| **Blue Book** (separate) | ~230 | Quick reference |
 
-### Production (Final Deliverable Generation)
-**Guide:** `/engineering/pdf-forge/work-modes/production-pdf-generation.md`
-- Create deliverable PDFs for distribution
-- **CRITICAL:** Only copy CHANGED files to outbound (request.json + .md always, templates/filters only if modified)
-- Templates and filters persist on PDF Forge - don't resend unchanged files
+---
 
-**Complete Rules:** `/engineering/pdf-forge/PRODUCTION-PROCESS-RULES.md` (🚨 "only changed files" details)
+## PDF Forge Configuration
 
-## Notes
+The `request.json` file configures PDF Forge:
 
-This workspace maintains the "Green Book" (tutorial) variant of Smart Pins documentation. The companion "Blue Book" (quick reference) is a separate document.
+```json
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2-Smart-Pins-Green-Book-Tutorial.md",
+      "output": "P2-Smart-Pins-Green-Book-Tutorial.pdf",
+      "template": "p2kb-sp-template",
+      "pandoc_args": [
+        "--top-level-division=part",
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=3",
+        "--lua-filter=smart-pins-colored-blocks.lua",
+        "--lua-filter=green-book-semantic-blocks.lua",
+        "--lua-filter=part-chapter-pagebreaks.lua"
+      ],
+      "metadata": {
+        "title": "P2 Smart Pins Complete Tutorial",
+        "subtitle": "Master Every Smart Pin Mode Through Progressive Learning",
+        "author": "Iron Sheep Productions, LLC",
+        "version": "Version 1.0 - Technical Review",
+        "date": "December 2025"
+      }
+    }
+  ]
+}
+```
 
-**Two-Book Strategy:**
-- Green Book (this): ~450 pages, comprehensive tutorial
-- Blue Book (separate): ~230 pages, quick reference
+Required arguments are documented in `request-requirements.json`.
+
+---
+
+## Related Processing Documents
+
+### In This Workspace
+- **Green Book Processing Guide:** `green-book-processing-guide.md`
+- **Markdown Changes Guide:** `green-book-markdown-changes-guide.md`
+
+### Universal Methodology
+- **Format Guide:** `/engineering/document-production/methodology/pdf-generation-format-guide.md`
+- **Workflow Guide:** `/engineering/document-production/methodology/pdf-generation-workflow-guide.md`
+
+---
+
+*Created: 2025-09-10*
+*Updated: 2025-12-02 - Sprint audit complete, PDF Forge workflow documented*
+*Sprint: Smart Pins Tutorial Audit*
