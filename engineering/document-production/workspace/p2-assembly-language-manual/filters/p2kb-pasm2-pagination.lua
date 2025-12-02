@@ -2,8 +2,8 @@
 -- Purpose: ONLY handles page breaks between Chapters and special sections
 -- No code block processing - single responsibility
 --
--- Version: 1.1 - Updated for chapter-based document (no Parts)
--- Date: 2025-11-24
+-- Version: 1.2 - Part dividers use custom command (no post-heading page break)
+-- Date: 2025-12-02
 
 -- Track if this is the first chapter (to avoid clearpage right after TOC)
 local first_chapter = true
@@ -14,6 +14,15 @@ function Header(header)
 
   -- Level 1 headers are Chapters with --top-level-division=chapter
   if header.level == 1 then
+
+    -- Part headings get special treatment: use \partdivider command
+    -- This prevents the page break AFTER the part heading
+    if title:match("^Part ") then
+      -- Convert Part heading to custom LaTeX command
+      local partdivider = pandoc.RawBlock('latex', '\\partdivider{' .. title .. '}')
+      return partdivider
+    end
+
     -- Check for chapter, appendix, or special sections
     if title:match("^Chapter") or title:match("^Appendix") or
        title:match("^Preface") or title:match("^Copyright") or

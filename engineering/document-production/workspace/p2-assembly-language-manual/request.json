@@ -12,8 +12,10 @@
         "--toc-depth=2"
       ],
       "lua_filters": [
+        "p2kb-pasm2-tables",
         "p2kb-pasm2-mnemonic-bold",
         "p2kb-pasm2-code-coloring",
+        "p2kb-pasm2-entry-format",
         "p2kb-pasm2-pagination"
       ],
       "metadata": {

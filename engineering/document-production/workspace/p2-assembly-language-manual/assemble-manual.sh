@@ -4,7 +4,7 @@
 
 set -e
 
-OPUS_MASTER="../opus-master"
+OPUS_MASTER="../../manuals/p2-assembly-language-manual/opus-master"
 OUTPUT="P2-Assembly-Language-Manual.md"
 
 echo "========================================"
@@ -104,11 +104,7 @@ assemble_section "front-matter.md" "Front Matter"
 echo "  Adding: Part I marker"
 cat >> "$OUTPUT" << 'EOF'
 
-\newpage
-
 # Part I: Architectural Foundation
-
-\newpage
 
 EOF
 
@@ -123,11 +119,7 @@ assemble_section "part-i/chapter-05-hardware.md" "Chapter 5: Hardware"
 echo "  Adding: Part II marker"
 cat >> "$OUTPUT" << 'EOF'
 
-\newpage
-
 # Part II: Instruction Set Reference
-
-\newpage
 
 EOF
 
@@ -164,11 +156,7 @@ assemble_section "part-ii/special-registers.md" "Special Registers"
 echo "  Adding: Part III marker"
 cat >> "$OUTPUT" << 'EOF'
 
-\newpage
-
 # Part III: Reference Tables
-
-\newpage
 
 EOF
 

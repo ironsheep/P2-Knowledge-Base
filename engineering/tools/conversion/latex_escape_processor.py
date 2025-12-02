@@ -61,11 +61,19 @@ def process_latex_escaping(input_file, output_file):
             continue
             
         # Handle markdown headers - keep structure but escape content
+        # IMPORTANT: Preserve Pandoc anchor syntax {#anchor-id} at end of headers
         header_match = re.match(r'^(#+\s+)(.*)', line)
         if header_match:
-            header_prefix = header_match.group(1)  # "### " 
-            header_content = header_match.group(2) # "Immediate Values (# characters)"
-            
+            header_prefix = header_match.group(1)  # "### "
+            header_content = header_match.group(2) # "INSTR {#instr}" or "Immediate Values (# characters)"
+
+            # Check for Pandoc anchor at end: {#some-anchor-id}
+            anchor_match = re.search(r'\s*(\{#[a-zA-Z0-9_-]+\})\s*$', header_content)
+            anchor_suffix = ''
+            if anchor_match:
+                anchor_suffix = anchor_match.group(1)  # Preserve the anchor exactly
+                header_content = header_content[:anchor_match.start()]  # Content before anchor
+
             # Escape the content part but keep header structure
             escaped_content = header_content
             escaped_content = escaped_content.replace('\\', '\\textbackslash{}')
@@ -81,8 +89,12 @@ def process_latex_escaping(input_file, output_file):
             escaped_content = escaped_content.replace('_', '\\_')
             # Don't escape tildes - Pandoc handles them fine in markdown
             # escaped_content = escaped_content.replace('~', '\\textasciitilde{}')
-            
-            output_lines.append(header_prefix + escaped_content + '\n')
+
+            # Reassemble: header prefix + escaped content + unescaped anchor
+            if anchor_suffix:
+                output_lines.append(header_prefix + escaped_content + ' ' + anchor_suffix + '\n')
+            else:
+                output_lines.append(header_prefix + escaped_content + '\n')
             continue
             
         # Process normal text lines - escape LaTeX special characters
@@ -206,21 +218,29 @@ def process_latex_escaping(input_file, output_file):
                 protected_commands.append(match.group(0))
                 line = line.replace(match.group(0), placeholder, 1)
         
+        # Protect PASM2 operand syntax {#} meaning "optional immediate"
+        # This appears in instruction syntax like: ADD Dest, {#}Src
+        # Must be protected BEFORE escaping { } and #
+        line = line.replace('{#}', 'XPROTECT_OPTIONAL_IMM_X')
+
         # Now escape special characters in the remaining text
         # 1. Escape backslashes (but not in protected commands)
         line = line.replace('\\', '\\textbackslash{}')
-        
+
         # 2. Escape ^ before { } to create \^{} correctly
         line = line.replace('^', '\\^{}')
-        
+
         # 3. Now protect our \^{} patterns and escape remaining { }
         line = line.replace('\\^{}', 'XPROTECT_CARET_X')
         line = line.replace('{', '\\{')
         line = line.replace('}', '\\}')
         line = line.replace('XPROTECT_CARET_X', '\\^{}')
-        
+
         # 4. Escape other special characters
         line = line.replace('#', '\\#')
+
+        # 5. Restore {#} optional immediate syntax
+        line = line.replace('XPROTECT_OPTIONAL_IMM_X', '{\\#}')
         line = line.replace('$', '\\$') 
         line = line.replace('%', '\\%')
         line = line.replace('&', '\\&')

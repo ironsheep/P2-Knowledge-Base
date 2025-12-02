@@ -95,6 +95,9 @@ WORKSPACE (unescaped)          OUTBOUND (escaped, flat)         PDF FORGE
 All edits happen in the workspace folder. Files here are **unescaped** - this is your source of truth.
 
 #### 2. Escape and Stage to Outbound
+
+**IMPORTANT: Only copy files that have changed!** PDF Forge is persistent and retains the last version of each file. Sending unchanged files is nonsensical - the Forge already has them. Only stage files that were actually modified in this iteration.
+
 ```bash
 # From the workspace folder:
 cd /workspaces/P2-Knowledge-Base/engineering/document-production/workspace/p2-assembly-language-manual
@@ -104,12 +107,23 @@ cd /workspaces/P2-Knowledge-Base/engineering/document-production/workspace/p2-as
     P2-Assembly-Language-Manual.md \
     ../../outbound/p2-assembly-language-manual/P2-Assembly-Language-Manual.md
 
-# Copy templates FLAT (no subfolder!) to outbound
-cp templates/*.latex templates/*.sty ../../outbound/p2-assembly-language-manual/
+# Copy ONLY CHANGED templates FLAT (no subfolder!) to outbound
+# Example: If only p2kb-pasm2-content.sty changed:
+cp templates/p2kb-pasm2-content.sty ../../outbound/p2-assembly-language-manual/
 
-# Copy request.json
+# Copy ONLY CHANGED filters to outbound
+# Example: If a new filter was added:
+cp filters/p2kb-pasm2-tables.lua ../../outbound/p2-assembly-language-manual/
+
+# Copy request.json ONLY if it changed
 cp request.json ../../outbound/p2-assembly-language-manual/
 ```
+
+**What to copy each iteration:**
+- `P2-Assembly-Language-Manual.md` - Always (content changes)
+- Template files (`.latex`, `.sty`) - Only if modified
+- Lua filters (`.lua`) - Only if modified or added
+- `request.json` - Only if configuration changed
 
 #### 3. User Deploys to PDF Forge
 The user hand-copies files from `outbound/p2-assembly-language-manual/` to PDF Forge.

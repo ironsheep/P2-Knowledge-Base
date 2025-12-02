@@ -43,6 +43,20 @@
 \definecolor{pasm2-code-bg}{HTML}{FAFAFA}           % Very light gray
 \definecolor{pasm2-code-border}{HTML}{BDBDBD}       % Gray border
 
+% ==================== PART DIVIDER ====================
+% Custom part heading that doesn't force a page break after
+% Used for Part I, Part II, Part III markers between major sections
+% Styled like a chapter but without the automatic post-chapter clearpage
+
+\newcommand{\partdivider}[1]{%
+  \clearpage%                           % Start on new page
+  \thispagestyle{plain}%                % Page number only
+  \vspace*{2cm}%                        % Space from top
+  {\Huge\bfseries #1\par}%              % Large bold title
+  \vspace{1cm}%                         % Space after title
+  \nobreak%                             % Prevent page break here
+}
+
 % ==================== AT A GLANCE BOX ====================
 % Summary box at the top of each instruction entry
 
@@ -83,10 +97,12 @@
 % Encoding table environment
 % Creates a formatted table for instruction binary encoding
 % Columns: EEEE | Opcode | CZI | D | S | C Result | Z Result | Result | Clocks
+% Uses tabular with fixed widths (tabularx + rowcolor has known incompatibility)
 \newenvironment{encodingtable}{%
   \par\vspace{6pt}%
   \small
-  \begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+  \noindent
+  \begin{tabular}{|>{\centering\arraybackslash}p{0.055\textwidth}|>{\centering\arraybackslash}p{0.10\textwidth}|>{\centering\arraybackslash}p{0.035\textwidth}|>{\centering\arraybackslash}p{0.11\textwidth}|>{\centering\arraybackslash}p{0.11\textwidth}|>{\centering\arraybackslash}p{0.08\textwidth}|>{\centering\arraybackslash}p{0.08\textwidth}|>{\centering\arraybackslash}p{0.30\textwidth}|>{\centering\arraybackslash}p{0.045\textwidth}|}
   \hline
   \rowcolor{pasm2-encoding-header}
   \textbf{EEEE} & \textbf{Opcode} & \textbf{CZI} & \textbf{D} & \textbf{S} & \textbf{C} & \textbf{Z} & \textbf{Result} & \textbf{Clks} \\
@@ -110,10 +126,12 @@
 
 % Simple encoding - standalone single-row encoding table
 % Args: EEEE, Opcode, CZI, D, S, C result, Z result, Result, Clocks
+% Uses tabular with fixed widths (tabularx + rowcolor has known incompatibility)
 \newcommand{\simpleencoding}[9]{%
   \par\vspace{6pt}%
   \small
-  \begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+  \noindent
+  \begin{tabular}{|>{\centering\arraybackslash}p{0.055\textwidth}|>{\centering\arraybackslash}p{0.10\textwidth}|>{\centering\arraybackslash}p{0.035\textwidth}|>{\centering\arraybackslash}p{0.11\textwidth}|>{\centering\arraybackslash}p{0.11\textwidth}|>{\centering\arraybackslash}p{0.08\textwidth}|>{\centering\arraybackslash}p{0.08\textwidth}|>{\centering\arraybackslash}p{0.30\textwidth}|>{\centering\arraybackslash}p{0.045\textwidth}|}
   \hline
   \rowcolor{pasm2-encoding-header}
   \textbf{EEEE} & \textbf{Opcode} & \textbf{CZI} & \textbf{D} & \textbf{S} & \textbf{C} & \textbf{Z} & \textbf{Result} & \textbf{Clks} \\
@@ -195,6 +213,124 @@
   breakable
 }
 
+% ==================== DESILVA CODE BLOCK ENVIRONMENTS ====================
+% 5-color pedagogical system for code examples
+
+% PASM2 Block (Yellow/Cream) - Assembly language examples
+% Colors and styling matched to deSilva manual for visual consistency
+\definecolor{desilva-pasm2-bg}{HTML}{FFFEF5}          % Very soft cream (deSilva yellow)
+\definecolor{desilva-pasm2-border}{HTML}{D4B896}      % Muted tan border
+
+\newtcolorbox{DeSilvaPASM2Block}{
+  colback=desilva-pasm2-bg,
+  colframe=desilva-pasm2-border,
+  boxrule=2pt,
+  leftrule=4pt,              % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,                 % Accommodate line numbers inside box
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Spin2 Block (Green) - High-level Spin2 examples
+% Colors and styling matched to deSilva manual for visual consistency
+\definecolor{desilva-spin2-bg}{HTML}{F8FCF8}          % Very soft green-gray
+\definecolor{desilva-spin2-border}{HTML}{85B985}      % Muted green border
+
+\newtcolorbox{DeSilvaSpin2Block}{
+  colback=desilva-spin2-bg,
+  colframe=desilva-spin2-border,
+  boxrule=2pt,
+  leftrule=4pt,              % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,                 % Accommodate line numbers inside box
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% CORDIC Block (Purple) - Hardware math operations
+% Colors and styling matched to deSilva manual for visual consistency
+\definecolor{desilva-cordic-bg}{HTML}{F8F5FF}         % Very soft purple
+\definecolor{desilva-cordic-border}{HTML}{A785C2}     % Muted purple border
+
+\newtcolorbox{DeSilvaCORDICBlock}{
+  colback=desilva-cordic-bg,
+  colframe=desilva-cordic-border,
+  boxrule=2pt,
+  leftrule=4pt,              % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,                 % Accommodate line numbers inside box
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Multi-COG Block (Blue) - Parallel processing examples
+% Colors and styling matched to deSilva manual for visual consistency
+\definecolor{desilva-multicog-bg}{HTML}{F5F9FC}       % Very soft blue-gray
+\definecolor{desilva-multicog-border}{HTML}{7FA8C9}   % Muted blue border
+
+\newtcolorbox{DeSilvaMultiCOGBlock}{
+  colback=desilva-multicog-bg,
+  colframe=desilva-multicog-border,
+  boxrule=2pt,
+  leftrule=4pt,              % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,                 % Accommodate line numbers inside box
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
+% Antipattern Block (Red) - What NOT to do
+% Colors and styling matched to deSilva manual for visual consistency
+\definecolor{desilva-antipattern-bg}{HTML}{FFF5F5}    % Very soft pink
+\definecolor{desilva-antipattern-border}{HTML}{C08080} % Muted rose border
+
+\newtcolorbox{DeSilvaAntipatternBlock}{
+  colback=desilva-antipattern-bg,
+  colframe=desilva-antipattern-border,
+  boxrule=2pt,
+  leftrule=4pt,              % Thick left border for accessibility
+  rightrule=0.5pt,
+  toprule=0.5pt,
+  bottomrule=0.5pt,
+  rounded corners,
+  left=30pt,                 % Accommodate line numbers inside box
+  right=10pt,
+  top=8pt,
+  bottom=8pt,
+  before skip=15pt,
+  after skip=15pt,
+  breakable
+}
+
 % ==================== KEY CONCEPTS BOX ====================
 % Summary box for key concepts at end of chapters
 
@@ -217,8 +353,7 @@
     top=6pt,
     bottom=6pt,
     before skip=12pt,
-    after skip=12pt,
-    breakable
+    after skip=12pt
   ]
   \begin{itemize}[leftmargin=15pt, itemsep=4pt, topsep=0pt]
 }{%
@@ -329,12 +464,32 @@
 % ==================== PART/CHAPTER STYLING ====================
 % Reference manual has three parts: Foundation, Reference, Appendices
 
-% Part styling - centered, large
-\titleformat{\part}[display]
+% Part styling - centered, large, NO page break after
+\titleformat{\part}[block]
   {\centering\normalfont\Huge\bfseries}
-  {\partname\ \thepart}
-  {20pt}
+  {\partname\ \thepart:}
+  {10pt}
   {\Huge}
+\titlespacing*{\part}{0pt}{40pt}{20pt}
+
+% Prevent automatic page break after part
+\makeatletter
+\renewcommand\part{%
+  \if@openright
+    \cleardoublepage
+  \else
+    \clearpage
+  \fi
+  \thispagestyle{plain}%
+  \if@twocolumn
+    \onecolumn
+    \@tempswatrue
+  \else
+    \@tempswafalse
+  \fi
+  \secdef\@part\@spart}
+\renewcommand\@endpart{}
+\makeatother
 
 % ==================== ENTRY HEADING STYLING ====================
 % For instruction names as section headers
@@ -375,6 +530,78 @@
   \index{#1 (register)}%
 }
 
+% ==================== INLINE ENCODING EXAMPLES ====================
+% For showing encoding snippets in explanatory text (simpler than full tables)
+
+% Inline encoding snippet - shows a compact encoding example
+% Uses a simple single-row format for illustrative purposes
+% Args: 6 columns - EEEE, Opcode, CZI, D, S, Description
+\newcommand{\inlineencoding}[6]{%
+  \par\vspace{4pt}%
+  \small
+  \noindent
+  \begin{tabular}{|c|c|c|c|c|l|}
+  \hline
+  \texttt{#1} & \texttt{#2} & \texttt{#3} & \texttt{#4} & \texttt{#5} & #6 \\
+  \hline
+  \end{tabular}%
+  \par\vspace{4pt}%
+}
+
+% Multi-row inline encoding (for instruction families)
+% Usage: \begin{inlineencodingtable} ... \inlineencodingrow{...} ... \end{inlineencodingtable}
+\newenvironment{inlineencodingtable}{%
+  \par\vspace{6pt}%
+  \small
+  \noindent
+  \begin{tabular}{|c|c|c|c|c|c|c|c|}
+  \hline
+  \textbf{EEEE} & \textbf{Opcode} & \textbf{CZI} & \textbf{D} & \textbf{S} & \textbf{Write} & \textbf{Flags} & \textbf{Clks} \\
+  \hline
+}{%
+  \end{tabular}%
+  \par\vspace{6pt}%
+}
+
+% Row for inline encoding table
+\newcommand{\inlineencodingrow}[8]{%
+  \texttt{#1} & \texttt{#2} & \texttt{#3} & \texttt{#4} & \texttt{#5} & #6 & #7 & #8 \\
+  \hline
+}
+
+% Simple 5-column encoding snippet (just bit fields, no result columns)
+% For showing encoding structure in explanatory sections
+\newcommand{\encodingsnippet}[5]{%
+  \par\vspace{4pt}%
+  \small
+  \noindent
+  \begin{tabular}{|c|c|c|c|c|}
+  \hline
+  \textbf{EEEE} & \textbf{Opcode} & \textbf{CZI} & \textbf{D} & \textbf{S} \\
+  \hline
+  \texttt{#1} & \texttt{#2} & \texttt{#3} & \texttt{#4} & \texttt{#5} \\
+  \hline
+  \end{tabular}%
+  \par\vspace{4pt}%
+}
+
+% Encoding snippet with annotation below S field
+% For Section 2.5.3 style where we want to highlight a fixed S value
+\newcommand{\encodingsnippetannotated}[6]{%
+  \par\vspace{4pt}%
+  \small
+  \noindent
+  \begin{tabular}{|c|c|c|c|c|}
+  \hline
+  \textbf{EEEE} & \textbf{Opcode} & \textbf{CZI} & \textbf{D} & \textbf{S} \\
+  \hline
+  \texttt{#1} & \texttt{#2} & \texttt{#3} & \texttt{#4} & \texttt{#5} \\
+  \hline
+  \multicolumn{5}{c}{\scriptsize\itshape #6} \\
+  \end{tabular}%
+  \par\vspace{4pt}%
+}
+
 % ==================== TABLE ENHANCEMENTS ====================
 % For encoding tables and appendix tables
 
@@ -383,6 +610,24 @@
 \newcolumntype{O}{>{\ttfamily\centering\arraybackslash}p{2cm}}   % Opcode field
 \newcolumntype{C}{>{\centering\arraybackslash}p{0.8cm}}          % CZI field
 \newcolumntype{T}{>{\centering\arraybackslash}p{1cm}}            % Timing field
+
+% ==================== FULL-WIDTH TABLE CONFIGURATION ====================
+% Make all longtables full page width with better column ratios
+
+% Set longtable to full width by default
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt plus 1fill}
+
+% For 2-column tables: 30% left, 70% right (instead of 50-50)
+% This prevents wrapping on the right edge for description columns
+\newcolumntype{N}{>{\raggedright\arraybackslash}p{0.28\textwidth}}  % Narrow left column (30%)
+\newcolumntype{W}{>{\raggedright\arraybackslash}p{0.68\textwidth}}  % Wide right column (70%)
+
+% For 3-column reference tables (appendices)
+% Note: S conflicts with siunitx, using R for "Reference" column
+\newcolumntype{R}{>{\ttfamily\centering\arraybackslash}p{0.15\textwidth}}  % Reference/code column
+\newcolumntype{M}{>{\raggedright\arraybackslash}p{0.35\textwidth}}          % Medium column
+\newcolumntype{L}{>{\raggedright\arraybackslash}p{0.45\textwidth}}          % Long description
 
 % ==================== CROSS-REFERENCE HELPERS ====================
 

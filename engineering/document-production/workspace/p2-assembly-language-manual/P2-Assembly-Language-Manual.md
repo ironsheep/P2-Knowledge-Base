@@ -81,12 +81,10 @@ Copyright 2025 P2 Knowledge Base Project
 This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 You are free to:
-
 - **Share** — copy and redistribute the material in any medium or format
 - **Adapt** — remix, transform, and build upon the material for any purpose, even commercially
 
 Under the following terms:
-
 - **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made
 - **ShareAlike** — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original
 
@@ -183,7 +181,7 @@ UPPERCASE is used for instruction mnemonics, register names (PA, PTRA, DIRA), an
 
 PASM2 code examples follow standard formatting conventions:
 
-```
+```pasm
 label           instruction     D,S             ' Comment
                 instruction     D,#immediate    ' Indented code
 ```
@@ -266,10 +264,6 @@ We welcome feedback, corrections, and suggestions for improvement. This is a liv
 *You are now ready to explore the P2 Assembly Language. Whether you are learning for the first time or looking up specific details, this manual is designed to support your journey into P2 development.*
 
 
-```{=latex}
-\newpage
-```
-
 # Part I: Architectural Foundation
 
 # Chapter 1: The P2 Execution Model
@@ -281,7 +275,9 @@ The Propeller 2 microcontroller implements a unique multi-processor architecture
 
 ## 1.1 The Eight-COG Architecture
 
-<!-- DIAGRAM: 8-COG overview showing parallel processors with shared Hub -->
+```{=latex}
+\EightCogOverviewDiagram
+```
 
 The P2 contains eight identical processors called COGs (Cog Processors). Each COG:
 
@@ -313,7 +309,9 @@ The `COGSTOP` instruction halts a running COG. A COG can stop itself or another 
 
 ## 1.2 COG Memory
 
-<!-- DIAGRAM: COG memory map showing $000-$1FF regions -->
+```{=latex}
+\CogMemoryMapDiagram
+```
 
 Each COG has 512 longs (2048 bytes) of dedicated RAM addressed from $000 to $1FF. This memory is private to each COG and provides single-cycle read and write access. Unlike Hub memory, COG memory stores 32-bit longs only and uses long-addressing rather than byte-addressing.
 
@@ -325,7 +323,9 @@ Programs can use this space flexibly. A small program might dedicate most of the
 
 ### 1.2.2 Special Purpose Registers ($1F0-$1FF)
 
-<!-- DIAGRAM: Special register map with DIRA, DIRB, OUTA, OUTB, INA, INB, etc. -->
+```{=latex}
+\SpecialRegistersMapDiagram
+```
 
 The final 16 registers ($1F0-$1FF) have special hardware functions:
 
@@ -357,7 +357,9 @@ PASM2 instructions use 9-bit fields to specify source (S) and destination (D) re
 
 ## 1.3 Hub Memory
 
-<!-- DIAGRAM: Hub memory map showing 512KB layout -->
+```{=latex}
+\HubMemoryDiagram
+```
 
 The Hub provides 512KB of shared RAM accessible by all COGs. Unlike COG memory, Hub memory is byte-addressable and stores programs, data, and resources shared among COGs.
 
@@ -384,7 +386,9 @@ The `SETQ` instruction enhances Hub access efficiency by enabling burst transfer
 
 ## 1.4 LUT Memory
 
-<!-- DIAGRAM: LUT memory layout showing 512 longs per COG -->
+```{=latex}
+\LutMemoryMapDiagram
+```
 
 Each COG has a dedicated 512-long Lookup Table (LUT) providing additional fast memory separate from the main COG RAM space. The LUT serves as auxiliary storage for lookup tables, waveform data, additional code space, or working memory.
 
@@ -444,8 +448,6 @@ Programs switch between execution modes using `CALL` or `JMP` instructions. A CO
 
 The hardware automatically handles mode transitions. The programmer simply specifies the target address, and the COG switches to the appropriate execution mode. This seamless transition enables hybrid programs that place performance-critical code in COG RAM while maintaining larger program logic in Hub RAM.
 
-
-## Key Concepts
 
 ```{=latex}
 \begin{keyconcepts}
@@ -544,49 +546,45 @@ Conditional execution eliminates branches, providing deterministic timing:
 
 ```pasm
 ' Instead of branching:
-        cmp     a, b            wc wz
-        if_z    jmp     #equal_handler  ' 4 cycles if taken
-        mov     result, #0
+                cmp     a, b            wc wz
+        if_z    jmp     #equal_handler          ' 4 cycles if taken
+                mov     result, #0
 
 ' Use conditional execution:
-        cmp     a, b            wc wz
-        if_z    mov     result, #1      ' Always 2 cycles
-        if_nz   mov     result, #0      ' Always 2 cycles
+                cmp     a, b            wc wz
+        if_z    mov     result, #1              ' Always 2 cycles
+        if_nz   mov     result, #0              ' Always 2 cycles
 ```
 
 Common patterns:
 
 **Minimum/Maximum:**
 ```pasm
-        cmp     a, b            wc      ' Compare unsigned
-        if_c    mov     min, a          ' min = a if a < b
-        if_nc   mov     min, b          ' min = b if a >= b
+                cmp     a, b            wc      ' Compare unsigned
+        if_c    mov     min, a                  ' min = a if a < b
+        if_nc   mov     min, b                  ' min = b if a >= b
 ```
 
 **Conditional Assignment:**
 ```pasm
-        test    flags, #MASK    wz      ' Test bit
-        if_nz   mov     mode, #1        ' Set if bit present
+                test    flags, #MASK    wz      ' Test bit
+        if_nz   mov     mode, #1                ' Set if bit present
 ```
 
 **Multi-way Selection:**
 ```pasm
-        cmp     selector, #0    wz
+                cmp     selector, #0    wz
         if_z    mov     result, value0
-        cmp     selector, #1    wz
+                cmp     selector, #1    wz
         if_z    mov     result, value1
-        cmp     selector, #2    wz
+                cmp     selector, #2    wz
         if_z    mov     result, value2
 ```
 
 
 ## 2.3 Reading Encoding Tables
 
-Each instruction entry in Part II includes an encoding table with nine columns. Here is an example showing the ADD instruction:
-
-```{=latex}
-\simpleencoding{EEEE}{0001000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{carry of (D + S)}{Result = 0}{2}
-```
+Each instruction entry in Part II includes an encoding table with nine columns. The table shows the instruction's binary encoding on the left and its effects on the right.
 
 ### 2.3.1 Encoding Columns (Left Five)
 
@@ -657,11 +655,13 @@ Some instruction entries show multiple rows in the encoding table. Each row repr
 
 When related instructions share an entry (e.g., DIRZ/DIRNZ), each instruction gets its own row:
 
+**DIRZ / DIRNZ**
+
 ```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1101011}{CZI}{DDDDDDDDD}{001000100}{DIRx}{---}{Orig bit}{2}
-\encodingrow{EEEE}{1101011}{CZI}{DDDDDDDDD}{001000101}{DIRx}{---}{Orig bit}{2}
-\end{encodingtable}
+\begin{inlineencodingtable}
+\inlineencodingrow{EEEE}{1101011}{CZI}{DDDDDDDDD}{001000100}{DIRx}{Orig bit}{2}
+\inlineencodingrow{EEEE}{1101011}{CZI}{DDDDDDDDD}{001000101}{DIRx}{Orig bit}{2}
+\end{inlineencodingtable}
 ```
 
 The first row is DIRZ (S = 001000100), the second is DIRNZ (S = 001000101). Both share the same opcode but differ in the SRC field.
@@ -670,15 +670,17 @@ The first row is DIRZ (S = 001000100), the second is DIRNZ (S = 001000101). Both
 
 When one instruction has multiple syntax forms with different encodings:
 
-**GETBYTE** has two syntax forms:
-- Syntax 1: `GETBYTE  Dest, {#}Src, #Num`
-- Syntax 2: `GETBYTE  Dest`
+**GETBYTE**
+
+Syntax 1: `GETBYTE  Dest, {#}Src, #Num`
+
+Syntax 2: `GETBYTE  Dest`
 
 ```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{1000111}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-\encodingrow{EEEE}{1000111}{000}{DDDDDDDDD}{000000000}{D}{---}{---}{2}
-\end{encodingtable}
+\begin{inlineencodingtable}
+\inlineencodingrow{EEEE}{1000111}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{...}{2}
+\inlineencodingrow{EEEE}{1000111}{000}{DDDDDDDDD}{000000000}{D}{...}{2}
+\end{inlineencodingtable}
 ```
 
 The first row shows the standard form with Src and Num operands (NN encodes the byte number 0-3). The second row shows the ALTGB-compatible form where Dest is both read and written.
@@ -699,7 +701,6 @@ The 9-bit D field (bits 17-9) addresses a COG register from $000 to $1FF:
 - **Write only:** Some move instructions write D without reading its previous value
 
 The D field can also specify:
-
 - Hub addresses (for ALTD-modified instructions)
 - LUT addresses (for LUT instructions)
 - Pin numbers (for certain I/O instructions)
@@ -725,10 +726,8 @@ The 9-bit S field (bits 8-0) has two modes controlled by the I bit:
 
 Some encodings show fixed S values instead of SSSSSSSSS. These instructions use the S field to encode which specific operation to perform:
 
-```
-│ EEEE │ 1101011 │ CZI │ DDDDDDDDD │ 001000100 │   ...   │
-                                      ─────────
-                                      Fixed value selects DIRZ
+```{=latex}
+\encodingsnippetannotated{EEEE}{1101011}{CZI}{DDDDDDDDD}{001000100}{Fixed value selects DIRZ}
 ```
 
 The fixed value distinguishes this instruction from others sharing the same opcode. The programmer does not specify this value; it is implicit in the instruction mnemonic.
@@ -747,14 +746,12 @@ The `#` prefix before an operand indicates an immediate value:
 ```
 
 When `#` is used:
-
 - The assembler sets the I bit (bit 18) to 1
 - The S field contains the 9-bit value
 
 ### 2.6.2 Immediate Range
 
 9-bit immediates can represent:
-
 - Unsigned: 0 to 511 ($000 to $1FF)
 - Signed (when interpreted): -256 to +255
 
@@ -817,7 +814,6 @@ If any instruction intervenes (including a conditional NOP), the augmentation is
 ### 2.7.4 When Augmentation is Required
 
 Augmentation is needed when:
-
 - Values exceed 9 bits (> 511 for unsigned)
 - Hub addresses are used (20-bit address space)
 - 32-bit constants are needed
@@ -846,23 +842,22 @@ Augmentation is needed when:
 
 Consider the ADD instruction entry:
 
-```
-## ADD
+::: {.notebox}
+**ADD** --- Math Instruction --- Add two unsigned values.
 
-Add
-Math Instruction - Add two unsigned values.
-
-ADD  Dest, {#}Src  {WC|WZ|WCZ}
+`ADD  Dest, {#}Src  {WC|WZ|WCZ}`
 
 **Result:** Sum of unsigned Src and unsigned Dest is stored in Dest.
 
 - Dest is a register containing the value to add Src to, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
+:::
 
-┌──────┬─────────┬─────┬───────────┬───────────┬───────┬───────────────┬───────────┬────────┐
-│ EEEE │ 0001000 │ CZI │ DDDDDDDDD │ SSSSSSSSS │   D   │ carry of D+S  │ D = 0     │   2    │
-└──────┴─────────┴─────┴───────────┴───────────┴───────┴───────────────┴───────────┴────────┘
+```{=latex}
+\begin{inlineencodingtable}
+\inlineencodingrow{EEEE}{0001000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{C: carry, Z: D=0}{2}
+\end{inlineencodingtable}
 ```
 
 From this entry:
@@ -892,14 +887,11 @@ The Related line shows instructions in the same family or with similar purpose:
 ```
 
 This tells you:
-
 - ADDX: ADD with carry-in (for multi-precision)
 - ADDS: Signed addition
 - ADDSX: Signed addition with carry-in
 - SUB: The opposite operation
 
-
-## Key Concepts
 
 ```{=latex}
 \begin{keyconcepts}
@@ -959,10 +951,10 @@ The Z flag indicates **zero result** or **equality** across most instructions:
 Flags retain their values until explicitly modified by a WC, WZ, or WCZ effect. This persistence is a deliberate design feature that enables powerful programming patterns:
 
 ```pasm
-        cmp     a, b            wc wz   ' Set flags once
-        if_c    mov   min, a            ' Use C here
-        if_nc   mov   min, b            ' And here
-        if_z    mov   equal, #1         ' And use Z here
+                cmp     a, b            wc wz   ' Set flags once
+        if_c    mov     min, a                  ' Use C here
+        if_nc   mov     min, b                  ' And here
+        if_z    mov     equal, #1               ' And use Z here
 ```
 
 In this example, one comparison sets both flags, and three subsequent instructions each test the preserved flag values. No instruction between them modifies the flags, so the flag state from the comparison remains available.
@@ -1015,10 +1007,10 @@ When no effect is specified, the instruction executes normally but leaves both C
 This behavior enables using flag values across multiple instructions without interference:
 
 ```pasm
-        cmp     a, b            wc      ' Set C based on comparison
-        mov     temp, c                 ' Does not modify C
-        add     temp, d                 ' Does not modify C
-        if_c    mov   result, temp      ' Still tests original C value
+                cmp     a, b            wc      ' Set C based on comparison
+                mov     temp, c                 ' Does not modify C
+                add     temp, d                 ' Does not modify C
+        if_c    mov     result, temp            ' Tests original C
 ```
 
 The comparison sets C, and two subsequent operations execute without modifying it. The conditional instruction tests the comparison result even though two operations occurred in between.
@@ -1033,9 +1025,9 @@ The P2 allows any instruction to execute conditionally based on the current flag
 Any instruction can be made conditional by prefixing with an IF_x condition. When the condition is false, the instruction does not execute, but still consumes its normal execution time (typically one clock cycle). When the condition is true, the instruction executes normally:
 
 ```pasm
-        cmp     a, b            wc wz   ' Compare, set flags
-        if_z    mov   result, #1        ' Execute only if Z=1 (equal)
-        if_nz   mov   result, #0        ' Execute only if Z=0 (not equal)
+                cmp     a, b            wc wz   ' Compare, set flags
+        if_z    mov     result, #1              ' Only if Z=1 (equal)
+        if_nz   mov     result, #0              ' Only if Z=0 (not equal)
 ```
 
 This three-instruction sequence sets `result` to 1 if `a` equals `b`, or 0 if they differ. It takes exactly three clock cycles regardless of the comparison result. The unconditional CMP always executes, then exactly one of the two conditional MOVs executes.
@@ -1049,19 +1041,19 @@ When a conditional instruction's condition is false, the instruction does not ex
 Consider this example:
 
 ```pasm
-        test    flags, #BIT_READY  wz          ' Check ready bit
+                test    flags, #BIT_READY  wz   ' Check ready bit
         if_nz   rdlong  data, ptr               ' Read if ready
-        if_nz   add     ptr, #4                 ' Advance pointer if read occurred
+        if_nz   add     ptr, #4                 ' Advance if read occurred
 ```
 
 This sequence takes exactly three clock cycles whether the ready bit is set or clear. If implementing the same logic with branches:
 
 ```pasm
-        test    flags, #BIT_READY  wz
+                test    flags, #BIT_READY  wz
         if_z    jmp     #skip
-        rdlong  data, ptr
-        add     ptr, #4
-skip:
+                rdlong  data, ptr
+                add     ptr, #4
+skip
 ```
 
 The branch version takes 2 cycles when not ready (test + jump) or 4 cycles when ready (test + not-jump + rdlong + add). The timing varies by 100%. The conditional version maintains constant 3-cycle timing.
@@ -1189,8 +1181,8 @@ Understanding common flag usage patterns accelerates learning and provides templ
 Testing whether a specific bit is set uses TEST with WZ:
 
 ```pasm
-        test    value, #%00000100  wz   ' Test bit 2
-        if_nz   jmp     #bit_set        ' Jump if bit is set
+                test    value, #%00000100  wz   ' Test bit 2
+        if_nz   jmp     #bit_set                ' Jump if bit is set
 ```
 
 TEST performs a bitwise AND of its operands but writes the result nowhere—it only sets flags. The mask `%00000100` isolates bit 2. If bit 2 is set, the AND produces a non-zero result (specifically, the value 4), so Z=0. If bit 2 is clear, the AND produces zero, so Z=1.
@@ -1222,9 +1214,9 @@ Each ADDX uses the carry from the previous addition and generates a new carry fo
 Selecting between two values based on a comparison uses conditional moves:
 
 ```pasm
-        cmp     a, b            wc      ' Compare a and b
-        if_c    mov   result, a         ' If a < b, result = a
-        if_nc   mov   result, b         ' If a >= b, result = b
+                cmp     a, b            wc      ' Compare a and b
+        if_c    mov     result, a               ' If a < b, result = a
+        if_nc   mov     result, b               ' If a >= b, result = b
 ```
 
 This implements `result = min(a, b)` without branches. The comparison sets C if `a < b` (unsigned). Exactly one of the two conditional moves executes, storing the smaller value in result. The sequence takes exactly three clock cycles regardless of which value is smaller.
@@ -1232,9 +1224,9 @@ This implements `result = min(a, b)` without branches. The comparison sets C if 
 For maximum of two values, invert the conditions:
 
 ```pasm
-        cmp     a, b            wc      ' Compare a and b
-        if_c    mov   result, b         ' If a < b, result = b
-        if_nc   mov   result, a         ' If a >= b, result = a
+                cmp     a, b            wc      ' Compare a and b
+        if_c    mov     result, b               ' If a < b, result = b
+        if_nc   mov     result, a               ' If a >= b, result = a
 ```
 
 ### 3.5.4 Branchless Absolute Value
@@ -1242,8 +1234,8 @@ For maximum of two values, invert the conditions:
 Computing the absolute value of a signed number uses the ABS instruction with conditional negation:
 
 ```pasm
-        abs     result, value   wc      ' Get absolute value, C = was negative
-        if_c    neg   result            ' Correct if value was negative
+                abs     result, value   wc      ' Absolute value, C = negative
+        if_c    neg     result                  ' Correct if was negative
 ```
 
 Wait—this looks wrong. If ABS already computes the absolute value, why negate it afterward?
@@ -1259,8 +1251,8 @@ Most code doesn't care about this edge case and can simply use `ABS result, valu
 Updating a counter only when a condition is met uses conditional arithmetic:
 
 ```pasm
-        test    flags, #FLAG_READY  wz  ' Test ready flag
-        if_nz   add   count, #1         ' Increment if ready
+                test    flags, #FLAG_READY  wz  ' Test ready flag
+        if_nz   add     count, #1               ' Increment if ready
 ```
 
 This increments `count` only when the ready flag is set. No branches are needed, and timing is deterministic—two clock cycles regardless of flag state.
@@ -1270,11 +1262,11 @@ This increments `count` only when the ready flag is set. No branches are needed,
 Checking whether a value falls within a range combines comparison and logical conditions:
 
 ```pasm
-        cmp     value, min      wc      ' Check if value < min
-        if_c    jmp   #out_of_range     ' Too small
-        cmp     value, max      wc      ' Check if value >= max
-        if_nc   jmp   #out_of_range     ' Too large
-        ' Value is in range [min, max)
+                cmp     value, min      wc      ' Check if value < min
+        if_c    jmp     #out_of_range           ' Too small
+                cmp     value, max      wc      ' Check if value >= max
+        if_nc   jmp     #out_of_range           ' Too large
+                ' Value is in range [min, max)
 ```
 
 This checks whether `value` is in the range [min, max). The first comparison tests for too small; the second tests for too large. If either condition fails, the value is out of range.
@@ -1309,10 +1301,10 @@ MODCZ accepts operands that specify operations: `_clr` (clear to 0), `_set` (set
 The MUX family of instructions uses flag values to conditionally modify individual bits:
 
 ```pasm
-        muxc    value, #mask    ' If C=1, OR value with mask; if C=0, AND value with NOT mask
-        muxnc   value, #mask    ' If C=0, OR value with mask; if C=1, AND value with NOT mask
-        muxz    value, #mask    ' If Z=1, OR value with mask; if Z=0, AND value with NOT mask
-        muxnz   value, #mask    ' If Z=0, OR value with mask; if Z=1, AND value with NOT mask
+        muxc    value, #mask    ' C=1: set bits; C=0: clear bits
+        muxnc   value, #mask    ' C=0: set bits; C=1: clear bits
+        muxz    value, #mask    ' Z=1: set bits; Z=0: clear bits
+        muxnz   value, #mask    ' Z=0: set bits; Z=1: clear bits
 ```
 
 These instructions conditionally set or clear bits based on flag values. For example, MUXC sets the masked bits if C=1, or clears them if C=0. This enables building up bit patterns based on multiple flag tests:
@@ -1351,19 +1343,17 @@ An alternative approach uses MODCZ with computed values, but the TESTB pattern i
 Flags can encode state transitions in compact state machines. Instead of comparing state variables and branching, use flags to select the next state:
 
 ```pasm
-        ' Current state determines which flags are set
-        test    state, #STATE_IDLE      wz
+                ' Current state determines which flags are set
+                test    state, #STATE_IDLE      wz
         if_z    jmp     #handle_idle
-        test    state, #STATE_ACTIVE    wz
+                test    state, #STATE_ACTIVE    wz
         if_z    jmp     #handle_active
-        test    state, #STATE_DONE      wz
+                test    state, #STATE_DONE      wz
         if_z    jmp     #handle_done
 ```
 
 This pattern tests state bits and branches to handlers. Each TEST sets Z if the state bit is set, and the conditional jump executes for that state. While this uses jumps (not purely branchless), it demonstrates using flags to encode complex state without comparison operations.
 
-
-## Key Concepts
 
 ```{=latex}
 \begin{keyconcepts}
@@ -1390,9 +1380,86 @@ This pattern tests state bits and branches to handlers. Each TEST sets Z if the 
 The P2 provides deterministic instruction timing, enabling precise real-time control. Understanding timing characteristics is essential for time-critical applications and optimizing code performance.
 
 
-## 4.1 Clock Cycles
+## 4.1 Clock Sources and Configuration
 
-### 4.1.1 The System Clock
+Before examining instruction timing, understanding clock configuration is essential—the system clock frequency determines all timing calculations. The P2 supports multiple clock sources, from simple internal oscillators to PLL-multiplied crystals running at 320 MHz.
+
+### 4.1.1 Available Clock Sources
+
+The P2 provides four clock source options, each suited to different application requirements:
+
+**RCFAST** is the internal fast RC oscillator, running at approximately 20-25 MHz. This is the default clock source at power-on and reset. RCFAST requires no external components and provides immediate operation, though its frequency varies with temperature and process. Use RCFAST for applications where precise timing is not critical or as a bootstrap clock while configuring a more accurate source.
+
+**RCSLOW** is the internal slow RC oscillator, running at approximately 20 kHz. This ultra-low-power clock serves sleep modes and real-time clock applications. RCSLOW frequency varies significantly with temperature (±50%), making it unsuitable for precision timing but ideal for power-sensitive applications.
+
+**Crystal oscillator** mode connects an external crystal (typically 10-20 MHz) between the XI and XO pins. The P2 includes internal feedback resistors and programmable loading capacitors, simplifying crystal circuit design. Crystal sources provide the stability needed for precise timing, communication protocols, and frequency synthesis.
+
+**External clock** mode accepts an external clock signal on the XI pin, supporting frequencies from DC to 350 MHz. This mode allows the P2 to synchronize with external timing sources or use specialized oscillators.
+
+### 4.1.2 PLL Multiplication
+
+The Phase-Locked Loop (PLL) multiplies a reference clock to achieve higher frequencies. The PLL takes the crystal or external clock as input and produces an output frequency according to three parameters:
+
+- **Input divider** (1-64): Divides the reference frequency before the VCO
+- **VCO multiplier** (1-1024): Multiplies to produce the VCO frequency
+- **Post divider** (1-30, even values): Divides the VCO output to the final frequency
+
+The output frequency follows the equation: f_out = (f_ref / input_div) × multiplier / post_div
+
+For example, a 20 MHz crystal with input divider 1, multiplier 16, and post divider 2 produces: (20 MHz / 1) × 16 / 2 = 160 MHz.
+
+The VCO operates optimally between 100-200 MHz. Higher frequencies are possible but may reduce stability. The recommended maximum system clock is 180 MHz; overclocking to 250-320 MHz is possible but application-dependent.
+
+### 4.1.3 The HUBSET Instruction
+
+Clock configuration uses the HUBSET instruction with a 32-bit configuration value:
+
+```pasm
+        hubset  ##config_value          ' Configure clock system
+```
+
+The configuration value contains fields for crystal mode, clock source selection, and PLL parameters. Key fields include:
+
+| Bits | Field | Purpose |
+|------|-------|---------|
+| 1:0 | CC | Crystal configuration (loading capacitors) |
+| 3:2 | SS | Source select (RCFAST/RCSLOW/crystal/PLL) |
+| 7:4 | DDDD | Post divider selection |
+| 9 | - | PLL power enable |
+| 8 | - | Crystal oscillator enable |
+| 27:24 | PPPP | Input divider |
+| 23:14 | MMMM | VCO multiplier |
+
+### 4.1.4 Clock Switching Sequence
+
+Switching clock sources requires a careful sequence to ensure glitch-free transitions:
+
+1. **Enable the new source**: Configure crystal oscillator or PLL, but keep the current clock source active
+2. **Wait for stabilization**: Crystal oscillators need approximately 10 ms to stabilize; PLL lock requires approximately 10 µs
+3. **Switch sources**: Change the SS field to select the new clock source
+4. **Optionally disable the old source**: Turn off unused oscillators to save power
+
+```pasm
+        hubset  ##%0000_0000_0000_0000_0000_0000_0001_0010  ' Enable xtal
+        waitx   ##20_000_000/100                            ' Wait ~10ms
+        hubset  ##%0000_0000_0000_0000_0000_0000_0010_0010  ' Switch
+```
+
+The P2 provides automatic fallback to RCFAST if the selected clock source fails, preventing system lockup from clock problems.
+
+### 4.1.5 Power Considerations
+
+Clock frequency directly affects power consumption. Lower frequencies reduce power but also reduce performance. For battery-powered applications, consider:
+
+- Use RCSLOW during sleep periods when only basic timekeeping is needed
+- Disable the PLL when not required—it consumes power even when not selected
+- Run at the lowest frequency that meets timing requirements
+- Stop unused COGs to eliminate their clock-related power consumption
+
+
+## 4.2 Instruction Timing
+
+### 4.2.1 The System Clock
 
 The P2 operates from a system clock that can run up to 320 MHz. All instruction execution, memory access, and I/O operations occur in relation to this master clock. The clock source can be an internal RC oscillator for standalone operation, an external crystal for precision timing, or a PLL-multiplied clock for maximum performance.
 
@@ -1400,7 +1467,7 @@ Every timing measurement in the P2 is expressed in clock cycles. At 320 MHz, one
 
 Understanding cycle counts is fundamental to P2 programming because the processor provides cycle-accurate timing guarantees. When a program executes the same instruction sequence under the same conditions, it takes exactly the same number of clock cycles every time. This determinism distinguishes the P2 from processors with caches, speculative execution, or variable-latency memory systems.
 
-### 4.1.2 Instruction Cycle Counts
+### 4.2.2 Instruction Cycle Counts
 
 Most COG instructions execute in exactly 2 clock cycles. This consistency simplifies timing calculations and makes hand-optimized assembly code practical. The processor can execute one instruction per two-cycle period, achieving an effective instruction rate of 160 million instructions per second at 320 MHz.
 
@@ -1423,7 +1490,7 @@ Hub memory access instructions have variable timing because they must wait for t
 
 CORDIC operations use a two-phase execution model. The instruction that starts a CORDIC operation (like QMUL for multiplication) completes in 2 cycles, but the result is not available until 54 cycles after the operation starts. Programs can perform other work during this 54-cycle computation period and retrieve the result later with GETQX or GETQY.
 
-### 4.1.3 Reading Cycle Counts
+### 4.2.3 Reading Cycle Counts
 
 The instruction encoding table in the P2 documentation provides precise cycle counts in its Clocks column. Understanding the notation used in this column is essential for accurate timing analysis:
 
@@ -1446,11 +1513,13 @@ The "2 / 8-23" notation distinguishes between COG execution mode and hub executi
 Variable range notation like "9..35" indicates that execution time depends on the instruction's parameters or the processor state. For example, REP (repeat) shows variable timing because the total time depends on how many iterations the repeat block executes.
 
 
-## 4.2 Hub Access Timing
+## 4.3 Hub Access Timing
 
-### 4.2.1 The Egg Beater Pattern
+### 4.3.1 The Egg Beater Pattern
 
-<!-- DIAGRAM: Egg beater timing showing 8 COGs and hub slots -->
+```{=latex}
+\EggBeaterDiagram
+```
 
 Hub memory access uses a round-robin "egg beater" pattern that gives each COG fair access to the shared hub RAM. The name comes from the visual similarity to a rotating egg beater, with each COG's access window spinning through the rotation in sequence.
 
@@ -1460,7 +1529,7 @@ When a COG executes an instruction that accesses hub memory (RDLONG, WRLONG, RDW
 
 This deterministic rotation means hub access timing is predictable. While the wait time varies from 0 to 7 cycles, the variation follows a fixed pattern. A program that knows its phase relationship to the egg beater can achieve minimum wait times by scheduling hub access to align with its windows.
 
-### 4.2.2 Hub Access Latency
+### 4.3.2 Hub Access Latency
 
 When a COG executes a hub instruction, the actual wait time depends on timing relative to the egg beater rotation. Three scenarios illustrate the range of possibilities:
 
@@ -1472,7 +1541,7 @@ When a COG executes a hub instruction, the actual wait time depends on timing re
 
 The hub access latency directly impacts program performance when hub memory access is frequent. Programs that minimize hub access (by keeping frequently-accessed data in COG registers or COG RAM) avoid this latency. Programs that must access hub memory frequently achieve better performance by organizing hub access into bursts, which amortize the window wait time across multiple memory transfers.
 
-### 4.2.3 Hub Burst Transfers
+### 4.3.3 Hub Burst Transfers
 
 SETQ enables burst transfers that read or write multiple consecutive longs in a single hub access sequence. This feature dramatically improves hub memory throughput by eliminating the window wait time for all but the first transfer.
 
@@ -1489,36 +1558,74 @@ Burst transfers work because once a COG has started transferring data during its
 
 SETQ affects only the next hub instruction. If that instruction is not a hub access instruction, SETQ has no effect (some non-hub instructions use SETQ for other purposes). After the hub instruction completes, SETQ must be reissued to enable another burst.
 
-### 4.2.4 FIFO Operations
+### 4.3.4 FIFO Operations
 
-RDFAST and WRFAST establish streaming FIFO (First In, First Out) access to hub memory, providing the highest-bandwidth method for sequential hub data transfer. These instructions configure a hardware FIFO that continuously feeds data to the COG or drains data from the COG with minimal instruction overhead.
+The P2 includes a hardware FIFO (First In, First Out) buffer that provides the highest-bandwidth method for sequential hub data transfer. Unlike individual hub access instructions that wait for hub windows, the FIFO continuously moves data between hub memory and the COG in the background. The hardware prefetches data before the COG needs it (for reads) or buffers data until hub windows become available (for writes), hiding hub access latency from the program.
 
-RDFAST configures a read FIFO that fetches data from hub memory into a buffer. The COG reads from this buffer using RFLONG, RFWORD, or RFBYTE instructions. The FIFO automatically refills as the COG consumes data, maintaining a continuous flow:
+**FIFO Architecture:**
+
+Each COG has access to a shared FIFO buffer that can operate in either read mode or write mode (not both simultaneously). The FIFO holds 16 longs (64 bytes) of data, providing substantial buffering to smooth out hub access timing. When reading, the FIFO stays filled by automatically fetching ahead; when writing, the FIFO drains to hub memory during available hub windows.
+
+**Setting Up the Read FIFO:**
+
+RDFAST configures the FIFO for reading from hub memory. The instruction takes two parameters: a block count (or 0 for continuous operation) and the starting hub address:
 
 ```pasm
-        rdfast  #0, ptr                 ' Start read FIFO at address ptr
+        rdfast  #0, ptr                 ' Start continuous read FIFO
 loop
-        rflong  data                    ' Read from FIFO (fast)
+        rflong  data                    ' Read from FIFO (fast, no hub wait)
         ' ... process data ...
         jmp     #loop                   ' Continue reading
 ```
 
-WRFAST configures a write FIFO that buffers data from the COG to hub memory. The COG writes to this buffer using WFLONG, WFWORD, or WFBYTE instructions. The FIFO automatically drains to hub memory as the COG produces data:
+The RFLONG, RFWORD, and RFBYTE instructions read from the FIFO without waiting for hub windows—if data is available in the FIFO buffer, the read completes immediately. The FIFO refills automatically in the background using whatever hub windows become available.
+
+**Setting Up the Write FIFO:**
+
+WRFAST configures the FIFO for writing to hub memory:
 
 ```pasm
-        wrfast  #0, ptr                 ' Start write FIFO at address ptr
+        wrfast  #0, ptr                 ' Start continuous write FIFO
 loop
         ' ... generate data ...
-        wflong  data                    ' Write to FIFO (fast)
+        wflong  data                    ' Write to FIFO (fast, no hub wait)
         jmp     #loop                   ' Continue writing
 ```
 
-FIFO operations eliminate per-access hub window wait time by overlapping data transfer with program execution. The FIFO fetches ahead (for reads) or buffers behind (for writes), hiding the hub access latency. This makes FIFO access ideal for streaming applications like video generation, audio processing, and high-speed communication.
+The WFLONG, WFWORD, and WFBYTE instructions write to the FIFO buffer. If buffer space is available, the write completes immediately without waiting for a hub window. The FIFO drains to hub memory automatically.
+
+**Circular Buffer Mode:**
+
+The FIFO supports circular buffer operation for continuous streaming. When configured with a block count, the FIFO wraps back to the starting address after transferring the specified number of longs:
+
+```pasm
+        rdfast  #256, audio_buffer      ' Read 256 longs, then wrap to start
+```
+
+This creates a 1KB circular buffer. The program can continuously read from the FIFO while another process (perhaps on a different COG) refills the buffer behind the read pointer. Circular buffers enable double-buffering and continuous streaming without explicit pointer management.
+
+**FIFO Events:**
+
+The FIFO generates events that programs can monitor for buffer management:
+
+- **EVENT_FBW** (FIFO Block Wrap) signals when the FIFO wraps around in circular buffer mode. Programs use this event to know when to refill the next section of a circular buffer or to synchronize with buffer boundaries.
+
+Programs can wait for this event using WAITSE or poll it using POLLSE after configuring a selectable event source. This enables efficient ping-pong buffering where one COG fills buffers while another consumes them.
+
+**FIFO and the Streamer:**
+
+The Streamer subsystem (described in Chapter 5) uses the FIFO for high-bandwidth data transfer to and from I/O pins. When the Streamer is active, it shares the FIFO with FIFO access instructions. RDFAST/WRFAST configure the FIFO source or destination in hub memory; the Streamer then moves data between the FIFO and pins at rates matching the system clock. This combination enables video generation, audio streaming, and high-speed data acquisition without per-sample CPU intervention.
+
+**Performance Considerations:**
+
+FIFO access provides near-instantaneous data transfer from the program's perspective—no hub window waiting, no variable latency. However, the FIFO has finite depth. If a program reads faster than the FIFO can refill (or writes faster than it can drain), the FIFO stalls waiting for hub access. For sustained maximum throughput, balance data production/consumption rate with the hub's aggregate bandwidth.
+
+The FIFO access instructions (RFLONG, RFWORD, RFBYTE, WFLONG, WFWORD, WFBYTE) complete in 2 cycles when the FIFO has data available or space available, respectively. This makes FIFO access ideal for streaming applications: video pixel generation, audio sample processing, high-speed communication protocols, and bulk data movement.
 
 
-## 4.3 Deterministic Timing
+## 4.4 Deterministic Timing
 
-### 4.3.1 What Determinism Means
+### 4.4.1 What Determinism Means
 
 The P2's deterministic timing guarantees that the same instruction sequence, executing under the same conditions, takes exactly the same number of clock cycles every time it runs. This guarantee holds across all executions—there are no cache misses, no speculative execution failures, no memory controller delays, and no unpredictable pipeline stalls.
 
@@ -1534,7 +1641,7 @@ Determinism provides several critical benefits for embedded systems programming:
 
 The P2 achieves determinism through architectural choices: no instruction cache (COG RAM provides fast local storage without cache complexity), no data cache (hub access uses predictable round-robin scheduling), no branch prediction (conditional execution eliminates branches), and no speculative execution (instructions execute in program order).
 
-### 4.3.2 Sources of Timing Variation
+### 4.4.2 Sources of Timing Variation
 
 While the P2 provides deterministic timing, four sources of variation exist. These variations are predictable and controllable, not random like cache misses or memory arbitration in complex processors:
 
@@ -1553,7 +1660,7 @@ While the P2 provides deterministic timing, four sources of variation exist. The
 
 **WAITX** provides intentional variable delay. This is the only case where variation is desired rather than avoided—WAITX exists specifically to introduce precise, controlled timing delays for applications like bit-banging protocols or pulse generation.
 
-### 4.3.3 Eliminating Branches
+### 4.4.3 Eliminating Branches
 
 Conditional execution provides an alternative to branching that eliminates timing variation. Instead of using a compare instruction followed by a conditional jump, code can use a compare instruction followed by conditionally-executed instructions.
 
@@ -1584,9 +1691,9 @@ The key insight is that conditionally-skipped instructions still consume their e
 Conditional execution works for simple cases where both branches are short. For longer code sequences or cases where only one branch performs work, traditional branching may be more efficient despite the timing variation. The choice depends on whether consistent timing or shorter average time is more important for the specific application.
 
 
-## 4.4 Synchronization
+## 4.5 Synchronization
 
-### 4.4.1 WAITX - Precise Delays
+### 4.5.1 WAITX - Precise Delays
 
 WAITX provides precise, cycle-accurate delays by pausing execution for a specified number of clock cycles:
 
@@ -1598,7 +1705,7 @@ The instruction accepts a value specifying the delay duration. Execution resumes
 
 WAITX delays are relative to when the instruction executes. If a program needs to generate a pulse every 1,000 cycles, using WAITX alone accumulates timing drift because the WAITX instruction itself consumes time, and the instructions between WAITX calls add additional cycles. For precise periodic timing without drift, the counter-based wait instructions provide better alternatives.
 
-### 4.4.2 Counter-Based Waiting
+### 4.5.2 Counter-Based Waiting
 
 The P2 provides a global cycle counter that increments every clock cycle. COGs can read this counter with GETCT and wait for specific counter values using the WAITCT family of instructions. This mechanism enables drift-free periodic timing.
 
@@ -1626,7 +1733,7 @@ loop
 
 Each iteration runs exactly 1,000 cycles from the previous iteration, maintaining perfect periodicity regardless of small variations in the work performed each cycle.
 
-### 4.4.3 Hub Slot Synchronization
+### 4.5.3 Hub Slot Synchronization
 
 Programs that need predictable hub access timing can synchronize with the egg beater rotation using HUBSET. This instruction provides control over hub timing parameters and can align a COG's execution with its hub access windows.
 
@@ -1644,7 +1751,7 @@ loop
 
 This technique requires precise cycle counting and works only when the loop body contains an integer multiple of 8 cycles.
 
-### 4.4.4 Pin-Based Synchronization
+### 4.5.4 Pin-Based Synchronization
 
 Several instructions synchronize with pin state changes, enabling precise timing relative to external events:
 
@@ -1657,9 +1764,9 @@ Several instructions synchronize with pin state changes, enabling precise timing
 **POLLATE, POLLCT1, POLLCT2, POLLCT3** provide polling-based alternatives to waiting. Instead of blocking until a condition occurs, these instructions check whether an event has occurred and set flags accordingly. This allows code to perform useful work while watching for events, rather than waiting idly.
 
 
-## 4.5 Timing-Critical Patterns
+## 4.6 Timing-Critical Patterns
 
-### 4.5.1 Cycle-Exact Loops
+### 4.6.1 Cycle-Exact Loops
 
 Many real-time applications require loops that execute with precise, predictable timing. The P2's deterministic instruction timing makes cycle-exact loops practical and reliable.
 
@@ -1698,7 +1805,7 @@ loop
 
 If the first iteration experiences 3 cycles of hub wait, every subsequent iteration also experiences 3 cycles of wait because the 16-cycle loop maintains alignment with the 8-cycle hub period.
 
-### 4.5.2 Pipelined Hub Access
+### 4.6.2 Pipelined Hub Access
 
 Programs can hide hub access latency by overlapping computation with hub waiting. Instead of waiting for one hub operation to complete before starting the next computation, a program can issue a hub access and immediately begin computing with data already available, allowing the hub access to proceed in parallel.
 
@@ -1717,7 +1824,7 @@ loop
 
 This pattern keeps hub access and computation overlapped—the RDLONG for iteration N+1 occurs while iteration N's computation proceeds. The technique works best when computation time roughly equals hub access time, maximizing overlap.
 
-### 4.5.3 CORDIC Pipelining
+### 4.6.3 CORDIC Pipelining
 
 CORDIC operations take 54 cycles to compute results, but the instruction that starts a CORDIC operation completes in just 2 cycles. This creates an opportunity for pipelining: start a CORDIC operation, perform other work during the 54-cycle computation period, then retrieve the result.
 
@@ -1745,7 +1852,7 @@ The key constraint is that at least 54 cycles must elapse between starting a COR
 
 Multiple CORDIC operations can be in flight simultaneously, with results retrieved in order. Starting a new CORDIC operation does not invalidate results from previous operations until their results have been read.
 
-### 4.5.4 Deterministic I/O
+### 4.6.4 Deterministic I/O
 
 Bit-banging—directly controlling I/O pins with software timing—requires cycle-accurate execution. The P2's deterministic timing makes bit-banging practical for protocols like WS2812 LED control, custom serial formats, or precise pulse generation.
 
@@ -1776,9 +1883,9 @@ This code generates precise pulse widths using WAITX for delays and conditional 
 Deterministic timing eliminates the jitter and uncertainty common in systems with caches or interrupts. Each pulse width is exactly the specified duration, enabling reliable communication with timing-sensitive devices.
 
 
-## 4.6 Measuring Execution Time
+## 4.7 Measuring Execution Time
 
-### 4.6.1 The Cycle Counter
+### 4.7.1 The Cycle Counter
 
 The P2 provides a global 32-bit cycle counter that increments every clock cycle. This counter runs continuously from power-on and wraps around after reaching its maximum value. COGs read the counter using the GETCT instruction, which returns the current counter value.
 
@@ -1797,7 +1904,7 @@ For short code sequences, the measurement overhead matters. Measuring a 10-cycle
 
 The cycle counter is global across all COGs—all COGs read the same counter value. This enables synchronization and coordination between COGs. One COG can mark a time value and pass it to another COG via hub memory, allowing the second COG to measure time relative to events in the first COG.
 
-### 4.6.2 Counter Wrap-Around
+### 4.7.2 Counter Wrap-Around
 
 The 32-bit cycle counter wraps around every 2³² cycles. At 320 MHz, this occurs every 13.4 seconds. Code that measures elapsed time must handle wrap-around correctly.
 
@@ -1811,7 +1918,7 @@ Subtraction using unsigned arithmetic naturally handles wrap-around. When end_ti
 
 This automatic wrap-around handling works for elapsed times up to 2³¹ cycles (half the counter range). For longer measurements, code must count wrap-around events explicitly or use multiple counter values.
 
-### 4.6.3 Profiling Techniques
+### 4.7.3 Profiling Techniques
 
 GETCT enables detailed performance profiling of assembly code. By measuring execution time for different code paths, programmers can identify performance bottlenecks and verify that optimizations achieve expected speedups.
 
@@ -1847,9 +1954,9 @@ This approach provides cycle-accurate timing for each code section, enabling pre
 Profiling can reveal unexpected timing variations. If a loop shows inconsistent timing across iterations, the variation likely comes from hub access timing, branch behavior, or CORDIC latency. Identifying these variations guides optimization efforts toward the actual bottlenecks rather than presumed slow code.
 
 
-## 4.7 COG vs Hub Execution Mode Timing
+## 4.8 COG vs Hub Execution Mode Timing
 
-### 4.7.1 COG Execution Mode
+### 4.8.1 COG Execution Mode
 
 COG execution mode—often called "COG mode"—executes instructions from the COG's local 512-long (2KB) RAM. This provides the fastest possible execution because instruction fetch occurs from the COG's private memory without any shared resource contention.
 
@@ -1859,7 +1966,7 @@ COG mode execution begins when a COG starts via COGINIT with a COG RAM address (
 
 The limitation of COG mode is size—only 512 longs of code and data combined. Programs that need more code space must use hub execution mode or carefully manage code overlays.
 
-### 4.7.2 Hub Execution Mode
+### 4.8.2 Hub Execution Mode
 
 Hub execution mode—often called "HUBEXEC mode"—executes instructions from hub RAM. This allows programs to exceed the 512-long COG RAM size limit, supporting much larger code bases at the cost of slower instruction fetch.
 
@@ -1875,7 +1982,7 @@ Despite the slower instruction fetch, hub mode remains useful for several scenar
 
 **Mixed execution:** Programs can start in hub mode and copy time-critical sections to COG RAM for execution at full speed. COGINIT can switch a running COG between hub and COG mode dynamically.
 
-### 4.7.3 Timing Comparison
+### 4.8.3 Timing Comparison
 
 The following table shows typical execution times for common operations in both execution modes:
 
@@ -1897,10 +2004,9 @@ CORDIC operations start in 2 cycles in COG mode but take 8-23 cycles to start in
 The dramatic timing difference between modes—often 4× or more—makes COG mode strongly preferred for timing-critical code. Programs typically keep inner loops, interrupt handlers, and time-sensitive operations in COG RAM while using hub mode for larger, less-critical code sections.
 
 
-## Key Concepts
-
 ```{=latex}
 \begin{keyconcepts}
+\item System clock configurable from 20 kHz (RCSLOW) to 320 MHz (PLL) via HUBSET
 \item Most COG instructions execute in exactly 2 clock cycles
 \item Branch instructions take 2 cycles if not taken, 4 cycles if taken
 \item Hub access uses round-robin timing with 0-7 cycle wait for window
@@ -2197,22 +2303,22 @@ The allocation model prevents lock ID conflicts. LOCKNEW returns a lock ID from 
 Typical lock usage follows a four-phase pattern: allocate, acquire-use-release loop, deallocate:
 
 ```pasm
-        locknew lock_id         wc      ' Allocate lock from pool
-        if_c    jmp     #no_locks       ' Handle pool exhaustion
+                locknew lock_id         wc      ' Allocate lock from pool
+        if_c    jmp     #no_locks               ' Handle pool exhaustion
 
 critical_section
-        locktry lock_id         wc      ' Try to acquire lock
-        if_nc   jmp     #critical_section ' Retry if another COG holds it
+                locktry lock_id         wc      ' Try to acquire lock
+        if_nc   jmp     #critical_section       ' Retry if lock held
 
-        ' ... exclusive access to shared resource ...
-        wrlong  data, hub_addr          ' Safe: we hold the lock
+                ' ... exclusive access to shared resource ...
+                wrlong  data, hub_addr          ' Safe: we hold the lock
 
-        lockrel lock_id                 ' Release for other COGs
+                lockrel lock_id                 ' Release for other COGs
 
-        ' ... additional work ...
-        jmp     #critical_section       ' Repeat access cycle
+                ' ... additional work ...
+                jmp     #critical_section       ' Repeat access cycle
 
-done    lockret lock_id                 ' Return lock to pool
+done            lockret lock_id                 ' Return lock to pool
 ```
 
 The LOCKTRY/LOCKREL pair forms the critical section boundary. Between LOCKTRY success and LOCKREL, this COG has exclusive access—all other COGs executing LOCKTRY on the same lock will fail (C=0) until LOCKREL executes. The retry loop (`if_nc jmp #critical_section`) implements busy-waiting, appropriate when lock hold times are short.
@@ -2226,12 +2332,12 @@ Locks solve multiple classes of multi-COG coordination problems:
 When multiple COGs read and modify Hub memory data structures (queues, buffers, linked lists), locks prevent partial updates:
 
 ```pasm
-        locktry queue_lock      wc
+                locktry queue_lock      wc
         if_nc   jmp     #retry
-        rdlong  head, queue_head        ' Read
-        add     head, #1                ' Modify
-        wrlong  head, queue_head        ' Write back
-        lockrel queue_lock              ' Complete atomic update
+                rdlong  head, queue_head        ' Read
+                add     head, #1                ' Modify
+                wrlong  head, queue_head        ' Write back
+                lockrel queue_lock              ' Complete atomic update
 ```
 
 Without the lock, two COGs might simultaneously read the same `head` value, increment independently, and write back the same result—losing one increment.
@@ -2241,10 +2347,10 @@ Without the lock, two COGs might simultaneously read the same `head` value, incr
 When multiple COGs share hardware resources (specific Smart Pin, display controller, audio output), locks coordinate exclusive access:
 
 ```pasm
-        locktry display_lock    wc      ' Acquire display
+                locktry display_lock    wc      ' Acquire display
         if_nc   jmp     #retry
-        ' ... draw graphics, write text ...
-        lockrel display_lock            ' Release for other COGs
+                ' ... draw graphics, write text ...
+                lockrel display_lock            ' Release for other COGs
 ```
 
 **Producer/Consumer Synchronization:**
@@ -2289,7 +2395,54 @@ When the development environment supports debug windows, DEBUG output can drive 
 Debug window types, format specifiers, and configuration options vary by development environment. The DEBUG instruction supports dozens of format codes and window modes, each optimized for specific debugging tasks. Complete documentation of debug capabilities, including window types, format specifier syntax, and real-time plotting features, appears in the **P2 Debug Window Manual** (`p2-debug-window-manual`). That manual provides essential reference for effective debugging with the P2's built-in debug hardware.
 
 
-## Key Concepts
+## 5.7 XBYTE Bytecode Engine
+
+The P2 includes a hardware bytecode execution engine called XBYTE that accelerates interpreted languages and virtual machines. Traditional software interpreters spend 20-40 clock cycles dispatching each bytecode—reading the bytecode, looking up a handler address, and jumping to the handler. XBYTE reduces this overhead to just 6 clock cycles through dedicated hardware that automates the fetch-lookup-dispatch cycle. This acceleration makes the P2 practical for running bytecode interpreters at speeds approaching native code performance.
+
+### 5.7.1 XBYTE Operation
+
+XBYTE operates by reading bytecodes from the hub FIFO and using each bytecode as an index into a lookup table stored in LUT RAM. Each LUT entry contains a routine address and optional skip pattern. The hardware automatically fetches the bytecode, retrieves the corresponding LUT entry, and dispatches to the routine using EXECF—all in 6 clock cycles plus the routine's own execution time.
+
+The execution cycle proceeds through eight clock phases: fetch bytecode from FIFO, write bytecode to the PA register, read routine address from LUT, begin EXECF dispatch, write FIFO pointer to PB register, flush pipeline, reload pipeline, and execute the first instruction of the bytecode routine. This overlapped operation achieves the 6-cycle dispatch overhead.
+
+When a bytecode routine completes and returns, XBYTE automatically fetches the next bytecode and repeats the cycle. The bytecode stream flows continuously from hub memory through the FIFO, enabling sustained interpretation without explicit fetching in the bytecode routines themselves.
+
+### 5.7.2 Configuration Options
+
+XBYTE supports multiple configuration modes that trade bytecode count against LUT space requirements:
+
+| Mode | Bytecodes | LUT Usage | Index Calculation |
+|------|-----------|-----------|-------------------|
+| Full | 256 | 256 longs | bytecode[7:0] |
+| Half | 128 | 128 longs | bytecode[6:0] |
+| Quarter | 64 | 64 longs | bytecode[5:0] |
+| Eighth | 32 | 32 longs | bytecode[4:0] |
+| Sixteenth | 16 | 16 longs | bytecode[3:0] |
+
+The full 256-bytecode mode uses the entire LUT for dispatch tables. Smaller modes leave LUT space available for other purposes—data tables, waveforms, or additional code. A compressed mode also exists that provides 16 primary bytecodes with full dispatch plus 240 extended bytecodes using a secondary lookup, balancing bytecode variety against LUT consumption.
+
+### 5.7.3 Starting XBYTE
+
+XBYTE mode begins through a specific instruction sequence. The SETQ instruction configures the bytecode mode and LUT base address. A RET instruction with $1FF on the hardware stack triggers XBYTE activation:
+
+```pasm
+        call    #xbyte_start            ' Push $1FF to stack
+        ' ... XBYTE runs until stopped ...
+
+xbyte_start
+_RET_   setq    #%00000001              ' Configure 256 bytecodes, set flags
+```
+
+The configuration value in SETQ specifies the LUT base address, bytecode count, and whether bytecode bits should set the C and Z flags. The flags option allows bytecode routines to receive up to 4 states encoded in the flag bits, enabling compact opcode families.
+
+### 5.7.4 XBYTE Applications
+
+XBYTE enables efficient implementation of virtual machines and interpreters. Java bytecode interpreters, Forth threaded code systems, BASIC interpreters, and custom scripting languages all benefit from the reduced dispatch overhead. At 160 MHz, XBYTE can dispatch over 26 million bytecodes per second (considering only dispatch overhead), making interpreted languages practical for real-time applications.
+
+Bytecode routines reside in COG or LUT RAM and must end with RET or _RET_ to return control to the XBYTE engine. The PA register ($1F6) contains the current bytecode value, available as an operand within routines. The PB register ($1F7) contains the FIFO read pointer, enabling routines to track their position in the bytecode stream or read inline parameters following the bytecode.
+
+Complete XBYTE programming details, including LUT table construction, skip pattern usage, and advanced dispatch techniques, appear in specialized virtual machine documentation.
+
 
 ```{=latex}
 \begin{keyconcepts}
@@ -2299,6 +2452,7 @@ Debug window types, format specifiers, and configuration options vary by develop
 \item Events provide non-interrupt notification; interrupts are available when needed
 \item 16 hardware locks enable safe inter-COG synchronization
 \item DEBUG instruction provides built-in debugging output
+\item XBYTE provides 6-cycle bytecode dispatch for interpreters and virtual machines
 \item The 8-COG architecture often eliminates the need for interrupts
 \item Each subsystem is controlled through dedicated PASM2 instructions
 \end{keyconcepts}
@@ -2308,10 +2462,6 @@ Debug window types, format specifiers, and configuration options vary by develop
 <!-- End of Chapter 5 -->
 
 
-```{=latex}
-\newpage
-```
-
 # Part II: Instruction Set Reference
 
 # Instructions: A
@@ -2319,15 +2469,16 @@ Debug window types, format specifiers, and configuration options vary by develop
 This section contains all PASM2 instructions beginning with the letter A.
 
 
+
 ## ABS {#abs}
 
 Absolute
 [Math Instruction](#math-instructions) - Get the absolute value of a number.
 
-```
-ABS  Dest, {#}Src  {WC|WZ|WCZ}
-ABS  Dest          {WC|WZ|WCZ}
-```
+**ABS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**ABS**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Absolute Src (or Dest) value is stored in Dest.
 
@@ -2355,14 +2506,15 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 Literal Src values are zero-extended, so ABS is best used with register Src (or augmented Src) values for meaningful signed operations.
 
 
+
 ## ADD {#add}
 
 Add
 [Math Instruction](#math-instructions) - Add two unsigned values.
 
-```
-ADD  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**ADD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Sum of unsigned Src and unsigned Dest is stored in Dest.
 
@@ -2394,85 +2546,39 @@ To add unsigned multi-long values (64-bit or larger), use ADD for the least sign
 ADD and ADDX are also used for adding signed multi-long values, with ADDSX ending the sequence to properly handle sign extension.
 
 
-## ADDCT1 {#addct1}
 
-Add and set CT1 event trigger
-[Event Instruction](#event-instructions) - Set CT1 counter event trigger time.
+## ADDCT1 / ADDCT2 / ADDCT3 {#addct1}
 
-```
-ADDCT1  Dest, {#}Src
-```
+Add and set counter event trigger (1, 2, or 3)
+[Event Instruction](#event-instructions) - Set CTn counter event trigger time.
 
-**Result:** The Src value is added into Dest and the result is also stored in the hidden CT1 event trigger register.
+**ADDCT1**  *Dest, {#}Src*
+**ADDCT2**  *Dest, {#}Src*
+**ADDCT3**  *Dest, {#}Src*
 
-- Dest is a register containing the value to add Src to, and is where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
+---
 
-```{=latex}
-\simpleencoding{EEEE}{1010011}{00I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-```
-
-**Related:** [ADDCT2](#addct2), [ADDCT3](#addct3), [POLLCT1](#pollct1), [WAITCT1](#waitct1), [JCT1](#jct1), [JNCT1](#jnct1)
-
-**Explanation:**
-
-ADDCT1 sets the hidden CT1 event trigger register to the value of Dest + Src. The result is also written to Dest. This instruction is used to schedule a time-based event that will trigger when the System Counter (CT) reaches the specified value.
-
-Use the POLLCT1, WAITCT1, JCT1, and JNCT1 instructions to process CT1 time-based events. This enables precise timing control for periodic operations, delays, and synchronized activities.
-
-
-## ADDCT2 {#addct2}
-
-Add and set CT2 event trigger
-[Event Instruction](#event-instructions) - Set CT2 counter event trigger time.
-
-```
-ADDCT2  Dest, {#}Src
-```
-
-**Result:** The Src value is added into Dest and the result is also stored in the hidden CT2 event trigger register.
+**Result:** The Src value is added into Dest and the result is also stored in the hidden CTn event trigger register.
 
 - Dest is a register containing the value to add Src to, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
 
 ```{=latex}
-\simpleencoding{EEEE}{1010011}{01I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1010011}{00I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrowcont{EEEE}{1010011}{01I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1010011}{10I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\end{encodingtable}
 ```
 
-**Related:** [ADDCT1](#addct1), [ADDCT3](#addct3), [POLLCT2](#pollct2), [WAITCT2](#waitct2), [JCT2](#jct2), [JNCT2](#jnct2)
+**Related:** [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
 
 **Explanation:**
 
-ADDCT2 sets the hidden CT2 event trigger register to the value of Dest + Src. The result is also written to Dest. This instruction is used to schedule a time-based event that will trigger when the System Counter (CT) reaches the specified value.
+ADDCT1, ADDCT2, and ADDCT3 set their respective hidden counter event trigger registers to the value of Dest + Src. The result is also written to Dest. These instructions are used to schedule time-based events that will trigger when the System Counter (CT) reaches the specified value.
 
-Use the POLLCT2, WAITCT2, JCT2, and JNCT2 instructions to process CT2 time-based events. The P2 provides three independent counter event triggers (CT1, CT2, CT3), allowing multiple simultaneous time-based operations.
+The P2 provides three independent counter event triggers (CT1, CT2, CT3), allowing a cog to manage multiple simultaneous time-based operations. Use the corresponding POLLCTn, WAITCTn, JCTn, and JNCTn instructions to process each counter's time-based events. This enables precise timing control for periodic operations, delays, and synchronized activities.
 
-
-## ADDCT3 {#addct3}
-
-Add and set CT3 event trigger
-[Event Instruction](#event-instructions) - Set CT3 counter event trigger time.
-
-```
-ADDCT3  Dest, {#}Src
-```
-
-**Result:** The Src value is added into Dest and the result is also stored in the hidden CT3 event trigger register.
-
-- Dest is a register containing the value to add Src to, and is where the result is written.
-- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
-
-```{=latex}
-\simpleencoding{EEEE}{1010011}{10I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
-```
-
-**Related:** [ADDCT1](#addct1), [ADDCT2](#addct2), [POLLCT3](#pollct3), [WAITCT3](#waitct3), [JCT3](#jct3), [JNCT3](#jnct3)
-
-**Explanation:**
-
-ADDCT3 sets the hidden CT3 event trigger register to the value of Dest + Src. The result is also written to Dest. This instruction is used to schedule a time-based event that will trigger when the System Counter (CT) reaches the specified value.
-
-Use the POLLCT3, WAITCT3, JCT3, and JNCT3 instructions to process CT3 time-based events. The event triggers when System Counter (CT) equals the original Dest + Src value.
 
 
 ## ADDPIX {#addpix}
@@ -2480,9 +2586,9 @@ Use the POLLCT3, WAITCT3, JCT3, and JNCT3 instructions to process CT3 time-based
 Add pixels
 [Pixel Mixer Instruction](#pixel-mixer-instructions) - Add RGB colors with full saturation.
 
-```
-ADDPIX  Dest, {#}Src
-```
+**ADDPIX**  *Dest, {#}Src*
+
+---
 
 **Result:** Src color value bytes are added into Dest color value bytes with full saturation.
 
@@ -2504,14 +2610,15 @@ Saturation means that if the sum of a color channel exceeds 255, the result is c
 The instruction processes all three color channels (and alpha if present) in parallel, completing in 7 clock cycles.
 
 
+
 ## ADDS {#adds}
 
 Add signed
 [Math Instruction](#math-instructions) - Add two signed values.
 
-```
-ADDS  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**ADDS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Sum of signed Src and signed Dest is stored in Dest.
 
@@ -2538,14 +2645,15 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Des
 To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as the last operation to properly handle sign extension.
 
 
+
 ## ADDSX {#addsx}
 
 Add signed, extended
 [Math Instruction](#math-instructions) - Add two signed extended values.
 
-```
-ADDSX  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**ADDSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Sum of signed Src plus C and signed Dest is stored in Dest.
 
@@ -2570,14 +2678,15 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously 
 To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as the last operation. ADDSX properly handles the sign extension for the most significant portion of the multi-long value.
 
 
+
 ## ADDX {#addx}
 
 Add extended
 [Math Instruction](#math-instructions) - Add two unsigned extended values.
 
-```
-ADDX  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**ADDX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Sum of unsigned Src plus C and unsigned Dest is stored in Dest.
 
@@ -2602,14 +2711,15 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously 
 To add unsigned multi-long values, use ADD followed by one or more ADDX instructions. Each ADDX carries the overflow from the previous addition into the current one.
 
 
+
 ## AKPIN {#akpin}
 
 Acknowledge pin
 [Smart Pin Instruction](#smart-pin-instructions) - Acknowledge smart pin(s).
 
-```
-AKPIN  {#}Src
-```
+**AKPIN**  *{#}Src*
+
+---
 
 **Result:** One or more Smart Pins is acknowledged; lowering their corresponding IN signal(s).
 
@@ -2632,6 +2742,7 @@ A 9-bit literal Src is enough to express the starting pin (Src[5:0]) and a range
 When Src is a register, the register's value bits [10:0] are used as-is to form the 11-bit Smart Pin range, unless a SETQ instruction immediately precedes the AKPIN instruction; in that case, SETQ's Dest[4:0] substitutes for value bits[10:6] for AKPIN's use.
 
 The range calculation (from Src[5:0] up to Src[5:0]+Src[10:6]) wraps within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.
+
 
 
 ## ALLOWI {#allowi}
@@ -2658,15 +2769,16 @@ ALLOWI re-enables interrupt branching; the default on COG start. ALLOWI is the c
 When ALLOWI is executed, any interrupts that were stalled by a previous STALLI instruction are allowed to proceed, and future interrupts are also enabled. This allows the COG to respond to interrupt events normally.
 
 
+
 ## ALTB {#altb}
 
 Alter bit
 [Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent BITxxx instruction.
 
-```
-ALTB  Dest, {#}Src
-ALTB  Dest
-```
+**ALTB**  *Dest, {#}Src*
+**ALTB**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Dest value is altered to be (Src + Dest[13:5]) & $1FF, or just Dest[13:5] for syntax 2.
 
@@ -2701,15 +2813,16 @@ In syntax 2, Dest serves as the full bit address. It is the same format as in sy
 The instruction following ALTB is shielded from interrupt. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
 
+
 ## ALTD {#altd}
 
 Alter destination
 [Register Indirection Instruction](#register-indirection-instructions) - Alter D field of next instruction.
 
-```
-ALTD  Dest, {#}Src
-ALTD  Dest
-```
+**ALTD**  *Dest, {#}Src*
+**ALTD**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Dest value is altered to be (Src + Dest) & $1FF, or just Dest[8:0] in syntax 2.
 
@@ -2738,15 +2851,16 @@ In syntax 2, Dest serves as the full value. It is used as-is for the next instru
 The instruction following ALTD is shielded from interrupt. ALTD alters the next instruction regardless of its kind. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
 
+
 ## ALTGB {#altgb}
 
 Alter get byte
 [Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent GETBYTE / ROLBYTE instruction.
 
-```
-ALTGB  Dest, {#}Src
-ALTGB  Dest
-```
+**ALTGB**  *Dest, {#}Src*
+**ALTGB**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Src and Num fields are altered to be (Src + Dest[10:2]) & $1FF, or just Dest[10:2] for syntax 2, and Dest[1:0], respectively.
 
@@ -2779,15 +2893,16 @@ In syntax 2, Dest serves as the full byte address. It is the same format as in s
 The instruction following ALTGB is shielded from interrupt. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
 
+
 ## ALTGN {#altgn}
 
 Alter get nibble
 [Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent GETNIB / ROLNIB instruction.
 
-```
-ALTGN  Dest, {#}Src
-ALTGN  Dest
-```
+**ALTGN**  *Dest, {#}Src*
+**ALTGN**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Src and Num values are altered to be (Src + Dest[11:3]) & $1FF, or just Dest[11:3] for syntax 2, and Dest[2:0], respectively.
 
@@ -2820,15 +2935,16 @@ In syntax 2, Dest serves as the full nibble address. It is the same format as in
 The instruction following ALTGN is shielded from interrupt. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
 
+
 ## ALTGW {#altgw}
 
 Alter get word
 [Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent GETWORD / ROLWORD instruction.
 
-```
-ALTGW  Dest, {#}Src
-ALTGW  Dest
-```
+**ALTGW**  *Dest, {#}Src*
+**ALTGW**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Src and Num fields are altered to be (Src + Dest[9:1]) & $1FF, or just Dest[9:1] for syntax 2, and Dest[0], respectively.
 
@@ -2861,15 +2977,16 @@ In syntax 2, Dest serves as the full word address. It is the same format as in s
 The instruction following ALTGW is shielded from interrupt. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
 
+
 ## ALTI {#alti}
 
 Alter instruction
 [Register Indirection Instruction](#register-indirection-instructions) - Substitute next instruction's field values from template, per configuration.
 
-```
-ALTI  Dest, {#}Src
-ALTI  Dest
-```
+**ALTI**  *Dest, {#}Src*
+**ALTI**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined field values are substituted from the Dest template, and Dest is modified per Src configuration.
 
@@ -2898,15 +3015,16 @@ In syntax 2, Dest serves as the full opcode value. It is executed as-is in place
 The instruction following ALTI is shielded from interrupt. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
 
+
 ## ALTR {#altr}
 
 Alter result
 [Register Indirection Instruction](#register-indirection-instructions) - Alter Result register address of next instruction.
 
-```
-ALTR  Dest, {#}Src
-ALTR  Dest
-```
+**ALTR**  *Dest, {#}Src*
+**ALTR**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Result address (Dest address by default) is altered to be (Src + Dest) & $1FF, or just Dest[8:0] in syntax 2.
 
@@ -2937,15 +3055,16 @@ In syntax 2, Dest serves as the full value. It is used as-is for the next instru
 The instruction following ALTR is shielded from interrupt. ALTR alters the next instruction regardless of its kind. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
 
+
 ## ALTS {#alts}
 
 Alter source
 [Register Indirection Instruction](#register-indirection-instructions) - Alter S field of next instruction.
 
-```
-ALTS  Dest, {#}Src
-ALTS  Dest
-```
+**ALTS**  *Dest, {#}Src*
+**ALTS**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Src value is altered to be (Src + Dest) & $1FF, or just Dest[8:0] in syntax 2.
 
@@ -2974,15 +3093,16 @@ In syntax 2, Dest serves as the full value. It is used as-is for the next instru
 The instruction following ALTS is shielded from interrupt. ALTS alters the next instruction regardless of its kind. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
 
+
 ## ALTSB {#altsb}
 
 Alter set byte
 [Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent SETBYTE instruction.
 
-```
-ALTSB  Dest, {#}Src
-ALTSB  Dest
-```
+**ALTSB**  *Dest, {#}Src*
+**ALTSB**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Dest and Num values are altered to be (Src + Dest[10:2]) & $1FF (syntax 1), or just Dest[10:2] (syntax 2), and Num is set to Dest[1:0]. Dest is post-adjusted by auto-indexer.
 
@@ -3013,15 +3133,16 @@ In syntax 1, Src contains a base address (Src[8:0]) and signed auto-indexer (Src
 The instruction following ALTSB is shielded from interrupt. ALTSB alters the next instruction regardless of its kind (intended for SETBYTE). Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
 
+
 ## ALTSN {#altsn}
 
 Alter set nibble
 [Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent SETNIB instruction.
 
-```
-ALTSN  Dest, {#}Src
-ALTSN  Dest
-```
+**ALTSN**  *Dest, {#}Src*
+**ALTSN**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Dest and Num values are altered to be (Src + Dest[11:3]) & $1FF, or just Dest[11:3] for syntax 2, and Dest[2:0], respectively.
 
@@ -3054,15 +3175,16 @@ In syntax 2, Dest serves as the full nibble address. It is the same format as in
 The instruction following ALTSN is shielded from interrupt. ALTSN alters the next instruction regardless of its kind (intended for SETNIB). Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
 
+
 ## ALTSW {#altsw}
 
 Alter set word
 [Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent SETWORD instruction.
 
-```
-ALTSW  Dest, {#}Src
-ALTSW  Dest
-```
+**ALTSW**  *Dest, {#}Src*
+**ALTSW**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Dest and Num fields are altered to be (Src + Dest[9:1]) & $1FF, or just Dest[9:1] for syntax 2, and Dest[0], respectively.
 
@@ -3095,14 +3217,15 @@ In syntax 2, Dest serves as the full word address. It is the same format as in s
 The instruction following ALTSW is shielded from interrupt. ALTSW alters the next instruction regardless of its kind (intended for SETWORD). Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
 
+
 ## AND {#and}
 
 Bitwise AND
 [Logic Instruction](#logic-instructions) - Bitwise AND a value with another, or with the NOT of another.
 
-```
-AND  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**AND**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Bitwise AND of Dest and Src is stored in Dest.
 
@@ -3125,14 +3248,15 @@ If the WC or WCZ effect is specified, the C flag is set (1) if the result contai
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if it is non-zero.
 
 
+
 ## ANDN {#andn}
 
 And not
 [Logic Instruction](#logic-instructions) - Bitwise AND a value with the NOT of another.
 
-```
-ANDN  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**ANDN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Bitwise AND of Dest with inverse of Src is stored in Dest.
 
@@ -3157,6 +3281,7 @@ If the WC or WCZ effect is specified, the C flag is set (1) if the result contai
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if it is non-zero.
 
 
+
 ## ASMCLK {#asmclk}
 
 Assembly clock instruction
@@ -3172,11 +3297,12 @@ ASMCLK
 \simpleencoding{EEEE}{0000000}{000}{000000000}{000000000}{---}{---}{---}{2}
 ```
 
-**Related:** [GETCT](#getct), [POLLCT1](#pollct1)
+**Related:** [GETCT](instructions-g.md#getct), [POLLCT1/2/3](instructions-p.md#pollct1)
 
 **Explanation:**
 
 ASMCLK controls assembly-time clock operations. This instruction is used during the assembly process to manage timing-related assembly directives.
+
 
 
 ## AUGD {#augd}
@@ -3184,9 +3310,9 @@ ASMCLK controls assembly-time clock operations. This instruction is used during 
 Augment destination
 [Misc Instruction](#misc-instructions) - Augment next literal Dest to 32-bits.
 
-```
-AUGD  #Dest
-```
+**AUGD**  *#Dest*
+
+---
 
 **Result:** The 23-bit value formed from Dest is queued to prefix the next literal Dest occurrence (#Dest) to form a 32-bit literal for that instruction; interrupts are also temporarily disabled.
 
@@ -3209,14 +3335,15 @@ All instructions following AUGD are shielded from interrupt until after the inst
 Though AUGD may be manually entered wherever needed, the Parallax P2 compiler supports a convenient way to use this feature. In the target instruction's Dest field, use "##" followed by the desired 32-bit literal (instead of "#" followed by a 9-bit literal); the compiler will automatically invoke AUGD immediately before. When counting clock cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals.
 
 
+
 ## AUGS {#augs}
 
 Augment source
 [Misc Instruction](#misc-instructions) - Augment next literal Src to 32-bits.
 
-```
-AUGS  #Src
-```
+**AUGS**  *#Src*
+
+---
 
 **Result:** The 23-bit value formed from Src is queued to prefix the next literal Src occurrence (#Src) to form a 32-bit literal for that instruction; interrupts are also temporarily disabled.
 
@@ -3239,41 +3366,57 @@ All instructions following AUGS are shielded from interrupt until after the inst
 Though AUGS may be manually entered wherever needed, the Parallax P2 compiler supports a convenient way to use this feature. In the target instruction's Src field, use "##" followed by the desired 32-bit literal (instead of "#" followed by a 9-bit literal); the compiler will automatically invoke AUGS immediately before. When counting clock cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals.
 
 
+
 # Instructions: B
 
 This section contains all PASM2 instructions beginning with the letter B.
 
 
-## BITC {#bitc}
 
-Bit set to C
-[Math and Logic Instruction](#math-and-logic-instructions) - Set bit(s) to the state of the C flag.
+## BITC / BITNC / BITZ / BITNZ {#bitc}
 
-```
-BITC  Dest, {#}Src  {WCZ}
-```
+Set bit(s) to flag state {#bitnc} {#bitz} {#bitnz}
+[Math and Logic Instruction](#math-and-logic-instructions) - Set bit(s) to C, NC, Z, or NZ flag state.
 
-**Result:** Dest bit(s) designated by Src are set to the C flag state.
+**BITC**  *Dest, {#}Src*  **{WCZ}**
+**BITNC**  *Dest, {#}Src*  **{WCZ}**
+**BITZ**  *Dest, {#}Src*  **{WCZ}**
+**BITNZ**  *Dest, {#}Src*  **{WCZ}**
 
-- Dest is a register whose value will have one or more bits set to C.
-- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
-- WCZ is an optional effect to update the Z flag.
+---
+
+**Result:** Dest bit(s) designated by Src are set to the specified flag state:
+
+| Instruction | Sets bits to |
+|-------------|--------------|
+| BITC | C flag value |
+| BITNC | !C (inverted C) |
+| BITZ | Z flag value |
+| BITNZ | !Z (inverted Z) |
+
+- Dest is a register whose value will have bit(s) set to the flag state.
+- Src identifies the bit(s) to modify: Src[4:0] = bit number, Src[9:5] = additional contiguous bits.
+- WCZ is an optional effect to update the Z flag to the original bit state.
 
 ```{=latex}
-\simpleencoding{EEEE}{0100010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{original D[S[4:0]]}{2}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0100010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{orig bit}{2}
+\encodingrowcont{EEEE}{0100011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{orig bit}{2}
+\encodingrowcont{EEEE}{0100100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{orig bit}{2}
+\encodingrow{EEEE}{0100101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{orig bit}{2}
+\end{encodingtable}
 ```
 
-**Related:** [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz), [BITRND](#bitrnd), [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot)
+**Related:** [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot), [BITRND](#bitrnd)
 
 **Explanation:**
 
-BITC alters the Dest bit(s) designated by Src to equal the state of the C flag. Dest bit(s) described by Src are set to C; the rest are left unchanged.
+These instructions set designated bit(s) in Dest to the specified flag value. BITC and BITZ copy the direct flag state; BITNC and BITNZ copy the inverted flag state.
 
-Src[4:0] indicates the bit number (0-31). For a range of bits, Src[4:0] indicates the base bit number and Src[9:5] indicates how many contiguous bits beyond the base should be affected (1-31). A 9-bit literal Src is enough to express the base bit (Src[4:0]) and a range of up to 16 contiguous bits (Src[8:5]). If needed, use the augmented literal feature (##Src) to augment Src to a 10-bit literal value.
+Src[4:0] indicates the bit number (0-31). For a range, Src[9:5] specifies additional contiguous bits (1-31). A SETQ instruction preceding these can substitute its Dest[4:0] for Src[9:5].
 
-When Src is a register, the register's value bits [9:0] are used as-is, unless a SETQ instruction immediately precedes BITC, substituting SETQ's Dest[4:0] in place of value bits[9:5].
+If WCZ is specified, the Z flag is set (1) if the original base bit was set, or cleared (0) if it was clear.
 
-If the WCZ effect is specified, the Z flag is set (1) if the original Dest base bit (before modification) was set, or is cleared (0) if it was clear. This preserves information about the original bit state.
 
 
 ## BITH {#bith}
@@ -3281,9 +3424,9 @@ If the WCZ effect is specified, the Z flag is set (1) if the original Dest base 
 Bit high
 [Math and Logic Instruction](#math-and-logic-instructions) - Set bit(s) to high (1).
 
-```
-BITH  Dest, {#}Src  {WCZ}
-```
+**BITH**  *Dest, {#}Src*  **{WCZ}**
+
+---
 
 **Result:** Dest bit(s) designated by Src are set to high (1).
 
@@ -3308,14 +3451,15 @@ When Src is a register, the register's value bits [9:0] are used as-is, unless a
 If the WCZ effect is specified, the Z flag is set (1) if the original Dest base bit (before modification) was set, or is cleared (0) if it was clear. This preserves information about the original bit state before it was set high.
 
 
+
 ## BITL {#bitl}
 
 Bit low
 [Math and Logic Instruction](#math-and-logic-instructions) - Set bit(s) to low (0).
 
-```
-BITL  Dest, {#}Src  {WCZ}
-```
+**BITL**  *Dest, {#}Src*  **{WCZ}**
+
+---
 
 **Result:** Dest bit(s) designated by Src are set to low (0).
 
@@ -3340,46 +3484,15 @@ When Src is a register, the register's value bits [9:0] are used as-is, unless a
 If the WCZ effect is specified, the Z flag is set (1) if the original Dest base bit (before modification) was set, or is cleared (0) if it was clear. This preserves information about the original bit state before it was cleared to low.
 
 
-## BITNC {#bitnc}
-
-Bit set to not C
-[Math and Logic Instruction](#math-and-logic-instructions) - Set bit(s) to the inverse state of the C flag.
-
-```
-BITNC  Dest, {#}Src  {WCZ}
-```
-
-**Result:** Dest bit(s) designated by Src are set to the inverse C flag state (!C).
-
-- Dest is a register whose value will have one or more bits set to !C.
-- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
-- WCZ is an optional effect to update the Z flag.
-
-```{=latex}
-\simpleencoding{EEEE}{0100011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{original D[S[4:0]]}{2}
-```
-
-**Related:** [BITC](#bitc), [BITNZ](#bitnz), [BITZ](#bitz), [BITRND](#bitrnd), [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot)
-
-**Explanation:**
-
-BITNC alters the Dest bit(s) designated by Src to equal the inverse state of the C flag (!C). Dest bit(s) described by Src are set to !C; the rest are left unchanged.
-
-Src[4:0] indicates the bit number (0-31). For a range of bits, Src[4:0] indicates the base bit number and Src[9:5] indicates how many contiguous bits beyond the base should be affected (1-31). A 9-bit literal Src is enough to express the base bit (Src[4:0]) and a range of up to 16 contiguous bits (Src[8:5]). If needed, use the augmented literal feature (##Src) to augment Src to a 10-bit literal value.
-
-When Src is a register, the register's value bits [9:0] are used as-is, unless a SETQ instruction immediately precedes BITNC, substituting SETQ's Dest[4:0] in place of value bits[9:5].
-
-If the WCZ effect is specified, the Z flag is set (1) if the original Dest base bit (before modification) was set, or is cleared (0) if it was clear. This preserves information about the original bit state.
-
 
 ## BITNOT {#bitnot}
 
 Bit not
 [Math and Logic Instruction](#math-and-logic-instructions) - Toggle bit(s) to the opposite state.
 
-```
-BITNOT  Dest, {#}Src  {WCZ}
-```
+**BITNOT**  *Dest, {#}Src*  **{WCZ}**
+
+---
 
 **Result:** Dest bit(s) designated by Src are toggled to their opposite state(s).
 
@@ -3404,46 +3517,15 @@ When Src is a register, the register's value bits [9:0] are used as-is, unless a
 If the WCZ effect is specified, the C and Z flags are set (1) if the original Dest base bit (before modification) was set, or are cleared (0) if it was clear. This preserves information about the original bit state.
 
 
-## BITNZ {#bitnz}
-
-Bit set to not Z
-[Math and Logic Instruction](#math-and-logic-instructions) - Set bit(s) to the inverse state of the Z flag.
-
-```
-BITNZ  Dest, {#}Src  {WCZ}
-```
-
-**Result:** Dest bit(s) designated by Src are set to the inverse Z flag state (!Z).
-
-- Dest is a register whose value will have one or more bits set to !Z.
-- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
-- WCZ is an optional effect to update the Z flag.
-
-```{=latex}
-\simpleencoding{EEEE}{0100101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{original D[S[4:0]]}{2}
-```
-
-**Related:** [BITZ](#bitz), [BITNC](#bitnc), [BITC](#bitc), [BITRND](#bitrnd), [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot)
-
-**Explanation:**
-
-BITNZ alters the Dest bit(s) designated by Src to equal the inverse state of the Z flag (!Z). Dest bit(s) described by Src are set to !Z; the rest are left unchanged.
-
-Src[4:0] indicates the bit number (0-31). For a range of bits, Src[4:0] indicates the base bit number and Src[9:5] indicates how many contiguous bits beyond the base should be affected (1-31). A 9-bit literal Src is enough to express the base bit (Src[4:0]) and a range of up to 16 contiguous bits (Src[8:5]). If needed, use the augmented literal feature (##Src) to augment Src to a 10-bit literal value.
-
-When Src is a register, the register's value bits [9:0] are used as-is, unless a SETQ instruction immediately precedes BITNZ, substituting SETQ's Dest[4:0] in place of value bits[9:5].
-
-If the WCZ effect is specified, the Z flag is set (1) if the original Dest base bit (before modification) was set, or is cleared (0) if it was clear. This preserves information about the original bit state.
-
 
 ## BITRND {#bitrnd}
 
 Bit random
 [Math and Logic Instruction](#math-and-logic-instructions) - Set bit(s) to random low or high values.
 
-```
-BITRND  Dest, {#}Src  {WCZ}
-```
+**BITRND**  *Dest, {#}Src*  **{WCZ}**
+
+---
 
 **Result:** Dest bit(s) designated by Src are each set randomly to low or high.
 
@@ -3470,46 +3552,15 @@ If the WCZ effect is specified, the C and Z flags are set (1) if the original De
 Each bit in the range is set independently from the PRNG, producing true random values suitable for cryptographic initialization vectors, random number generation, and simulation applications.
 
 
-## BITZ {#bitz}
-
-Bit set to Z
-[Math and Logic Instruction](#math-and-logic-instructions) - Set bit(s) to the state of the Z flag.
-
-```
-BITZ  Dest, {#}Src  {WCZ}
-```
-
-**Result:** Dest bit(s) designated by Src are set to the Z flag state.
-
-- Dest is a register whose value will have one or more bits set to Z.
-- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
-- WCZ is an optional effect to update the Z flag.
-
-```{=latex}
-\simpleencoding{EEEE}{0100100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{original D[S[4:0]]}{2}
-```
-
-**Related:** [BITNZ](#bitnz), [BITC](#bitc), [BITNC](#bitnc), [BITRND](#bitrnd), [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot)
-
-**Explanation:**
-
-BITZ alters the Dest bit(s) designated by Src to equal the state of the Z flag. Dest bit(s) described by Src are set to Z; the rest are left unchanged.
-
-Src[4:0] indicates the bit number (0-31). For a range of bits, Src[4:0] indicates the base bit number and Src[9:5] indicates how many contiguous bits beyond the base should be affected (1-31). A 9-bit literal Src is enough to express the base bit (Src[4:0]) and a range of up to 16 contiguous bits (Src[8:5]). If needed, use the augmented literal feature (##Src) to augment Src to a 10-bit literal value.
-
-When Src is a register, the register's value bits [9:0] are used as-is, unless a SETQ instruction immediately precedes BITZ, substituting SETQ's Dest[4:0] in place of value bits[9:5].
-
-If the WCZ effect is specified, the Z flag is set (1) if the original Dest base bit (before modification) was set, or is cleared (0) if it was clear. This preserves information about the original bit state.
-
 
 ## BLNPIX {#blnpix}
 
 Blend pixels
 [Pixel Mixer Instruction](#pixel-mixer-instructions) - Alpha-blend RGB bytes using SETPIV value.
 
-```
-BLNPIX  Dest, {#}Src
-```
+**BLNPIX**  *Dest, {#}Src*
+
+---
 
 **Result:** Src color value bytes are alpha-blended into Dest color value bytes using the SETPIV blend factor.
 
@@ -3531,15 +3582,16 @@ The alpha-blending operation combines the two color values based on the blend fa
 The instruction processes all three color channels (and alpha if present) in parallel, completing in 7 clock cycles. This enables efficient pixel manipulation for graphics applications, user interfaces, and visual effects.
 
 
+
 ## BMASK {#bmask}
 
 Bit mask
 [Math and Logic Instruction](#math-and-logic-instructions) - Generate an LSB-justified bit mask.
 
-```
-BMASK  Dest, {#}Src
-BMASK  Dest
-```
+**BMASK**  *Dest, {#}Src*
+**BMASK**  *Dest*
+
+---
 
 **Result:** Bit mask of size Src+1, or Dest+1 (1 to 32 bits) is stored into Dest.
 
@@ -3571,14 +3623,15 @@ A bit mask is often useful in bitwise operations (AND, OR, XOR) to filter out or
 The first syntax form uses Src to specify the size, while the second syntax form (without Src) uses the value already in Dest to determine the mask size. Both forms write the resulting mask back to Dest.
 
 
+
 ## BRK {#brk}
 
 Break
 [Interrupt Instruction](#interrupt-instructions) - Trigger breakpoint in current COG.
 
-```
-BRK  {#}Dest
-```
+**BRK**  *{#}Dest*
+
+---
 
 **Result:** If debug interrupts are enabled, a debug interrupt is triggered in the current COG and Dest's value becomes the debug code or the next debug condition.
 
@@ -3603,9 +3656,11 @@ The format of Dest for Debug ISR use is %AAAAAAAAAAAAAAAAAAAA_BCDEFGHIJKLM where
 BRK is essential for interactive debugging, allowing precise control over program execution and inspection of program state at specific points or conditions.
 
 
+
 # Instructions: C
 
 This section contains all PASM2 instructions beginning with the letter C.
+
 
 
 ## CALL {#call}
@@ -3613,11 +3668,11 @@ This section contains all PASM2 instructions beginning with the letter C.
 Call subroutine
 [Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context on the stack.
 
-```
-CALL  #Addr
-CALL  #\Addr
-CALL  Dest  {WC|WZ|WCZ}
-```
+**CALL**  *#Addr*
+**CALL**  *#\Addr*
+**CALL**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Current C and Z flags and address of the next instruction are pushed onto the hardware stack, PC is set to the new address, and optionally C and Z are updated to new states.
 
@@ -3649,16 +3704,17 @@ If the WZ or WCZ effect is specified, the Z flag is updated to match D[30], afte
 The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub execution.
 
 
+
 ## CALLA {#calla}
 
 Call subroutine via PTRA
 [Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context in the Hub long at PTRA++.
 
-```
-CALLA  #Addr
-CALLA  #\Addr
-CALLA  Dest  {WC|WZ|WCZ}
-```
+**CALLA**  *#Addr*
+**CALLA**  *#\Addr*
+**CALLA**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Current C and Z flags and address of the next instruction are written to Hub RAM at PTRA, PTRA is incremented by 4, PC is set to the new address, and optionally C and Z are updated to new states.
 
@@ -3690,16 +3746,17 @@ If the WZ or WCZ effect is specified, the Z flag is set to D[30] after the origi
 CALLA is used for subroutine calls when Hub RAM is being used as the call stack instead of the hardware stack. This is useful for deep nesting or when preserving the hardware stack for other purposes. The instruction takes 5-12 cycles depending on Hub memory timing.
 
 
+
 ## CALLB {#callb}
 
 Call subroutine via PTRB
 [Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context in the Hub long at PTRB++.
 
-```
-CALLB  #Addr
-CALLB  #\Addr
-CALLB  Dest  {WC|WZ|WCZ}
-```
+**CALLB**  *#Addr*
+**CALLB**  *#\Addr*
+**CALLB**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Current C and Z flags and address of the next instruction are written to Hub RAM at PTRB, PTRB is incremented by 4, PC is set to the new address, and optionally C and Z are updated to new states.
 
@@ -3731,16 +3788,17 @@ If the WZ or WCZ effect is specified, the Z flag is set to D[30] after the origi
 CALLB operates identically to CALLA except it uses PTRB as the stack pointer instead of PTRA. This allows for maintaining separate call stacks or using both pointers for different purposes. The instruction takes 5-12 cycles depending on Hub memory timing.
 
 
+
 ## CALLD {#calld}
 
 Call with destination register
 [Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context in PA/PB/PTRA/PTRB/D.
 
-```
-CALLD  PA|PB|PTRA|PTRB, #Addr
-CALLD  PA|PB|PTRA|PTRB, #\Addr
-CALLD  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**CALLD**  *PA|PB|PTRA|PTRB, #Addr*
+**CALLD**  *PA|PB|PTRA|PTRB, #\Addr*
+**CALLD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Current C and Z flags and address of the next instruction are written to the specified register (PA, PB, PTRA, PTRB, or Dest), PC is set to the new address, and optionally C and Z are updated to new states.
 
@@ -3776,14 +3834,15 @@ If the WZ or WCZ effect is specified, the Z flag is updated to match S[30], afte
 The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub execution.
 
 
+
 ## CALLPA {#callpa}
 
 Call subroutine with PA parameter
 [Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context on the stack and copy D into PA.
 
-```
-CALLPA  {#}Dest, {#}Src
-```
+**CALLPA**  *{#}Dest, {#}Src*
+
+---
 
 **Result:** Current C and Z flags and address of the next instruction are pushed onto the hardware stack, Dest is copied to PA, and PC is set to the address specified by Src.
 
@@ -3807,14 +3866,15 @@ The Src operand determines the target address. If Src is preceded by #, it is tr
 The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub execution.
 
 
+
 ## CALLPB {#callpb}
 
 Call subroutine with PB parameter
 [Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context on the stack and copy D into PB.
 
-```
-CALLPB  {#}Dest, {#}Src
-```
+**CALLPB**  *{#}Dest, {#}Src*
+
+---
 
 **Result:** Current C and Z flags and address of the next instruction are pushed onto the hardware stack, Dest is copied to PB, and PC is set to the address specified by Src.
 
@@ -3838,14 +3898,15 @@ The Src operand determines the target address. If Src is preceded by #, it is tr
 The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub execution.
 
 
+
 ## CMP {#cmp}
 
 Compare
 [Math Instruction](#math-instructions) - Compare two unsigned values.
 
-```
-CMP  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**CMP**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
@@ -3870,7 +3931,7 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src, 
 To compare unsigned multi-long values (64-bit or larger), use CMP for the least significant long, then CMPX for each subsequent long. For example, to compare two 64-bit values:
 
 ```pasm
-        cmp     value_lo, other_lo  wc    ' Compare low longs, C=1 if value < other
+        cmp     value_lo, other_lo  wc    ' Compare low longs
         cmpx    value_hi, other_hi  wcz   ' Compare high longs with borrow
         ' C and Z now reflect the 64-bit comparison result
 ```
@@ -3878,14 +3939,15 @@ To compare unsigned multi-long values (64-bit or larger), use CMP for the least 
 CMP is fundamental for implementing conditional logic and control flow based on numeric comparisons.
 
 
+
 ## CMPM {#cmpm}
 
 Compare most significant bit
 [Math Instruction](#math-instructions) - Compare two unsigned values, get MSB of difference.
 
-```
-CMPM  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**CMPM**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
@@ -3910,14 +3972,15 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src, 
 CMPM is useful when the most significant bit of the difference carries semantic meaning for the algorithm being implemented, such as certain mathematical operations or specialized comparison logic.
 
 
+
 ## CMPR {#cmpr}
 
 Compare reverse
 [Math Instruction](#math-instructions) - Compare two unsigned values (in reverse order to CMP).
 
-```
-CMPR  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**CMPR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
@@ -3942,14 +4005,15 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src, 
 CMPR is useful when the natural order of operands in your code is reversed from what CMP expects, avoiding the need to swap operands or reverse the logic. Note that for unsigned multi-long comparisons, use CMP (not CMPR) followed by CMPX.
 
 
+
 ## CMPS {#cmps}
 
 Compare signed
 [Math Instruction](#math-instructions) - Compare two signed values.
 
-```
-CMPS  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**CMPS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
@@ -3975,9 +4039,10 @@ To compare signed multi-long values (64-bit or larger), use CMP (not CMPS) for t
 
 ```pasm
         cmp     value_lo, other_lo  wc    ' Compare low longs unsigned
-        cmpsx   value_hi, other_hi  wcz   ' Compare high longs signed with borrow
+        cmpsx   value_hi, other_hi  wcz   ' Compare high signed w/borrow
         ' C and Z now reflect the signed 64-bit comparison result
 ```
+
 
 
 ## CMPSUB {#cmpsub}
@@ -3985,9 +4050,9 @@ To compare signed multi-long values (64-bit or larger), use CMP (not CMPS) for t
 Compare and subtract
 [Math Instruction](#math-instructions) - Compare two unsigned values and subtract the second if it is lesser or equal.
 
-```
-CMPSUB  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**CMPSUB**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Dest is decremented by Src unless it is less than Src, and the comparison results are optionally written to the C and Z flags.
 
@@ -4016,14 +4081,15 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 CMPSUB is particularly useful for implementing division algorithms, modulo operations, and other mathematical routines where conditional subtraction based on magnitude is needed.
 
 
+
 ## CMPSX {#cmpsx}
 
 Compare signed, extended
 [Math Instruction](#math-instructions) - Compare two signed values plus carry flag.
 
-```
-CMPSX  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**CMPSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
@@ -4049,9 +4115,10 @@ For signed multi-long comparisons, use CMP for the least significant long, optio
 
 ```pasm
         cmp     value_lo, other_lo  wc    ' Compare low longs
-        cmpsx   value_hi, other_hi  wcz   ' Compare high longs signed with borrow
+        cmpsx   value_hi, other_hi  wcz   ' Compare high signed w/borrow
         ' C=1 if signed value < other, Z=1 if equal
 ```
+
 
 
 ## CMPX {#cmpx}
@@ -4059,9 +4126,9 @@ For signed multi-long comparisons, use CMP for the least significant long, optio
 Compare extended
 [Math Instruction](#math-instructions) - Compare two unsigned values plus carry flag.
 
-```
-CMPX  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**CMPX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
@@ -4092,14 +4159,15 @@ For unsigned multi-long comparisons, use CMP for the least significant long, the
 ```
 
 
+
 ## COGATN {#cogatn}
 
 Cog attention
 [Event Instruction](#event-instructions) - Get the attention of one or more other cogs.
 
-```
-COGATN  {#}Dest
-```
+**COGATN**  *{#}Dest*
+
+---
 
 **Result:** The attention signal of one or more cogs is strobed.
 
@@ -4132,14 +4200,15 @@ To signal multiple cogs simultaneously:
 COGATN is useful for implementing inter-cog communication, synchronization, and event notification without requiring polling of shared memory.
 
 
+
 ## COGBRK {#cogbrk}
 
 Cog break
 [Debug Instruction](#debug-instructions) - Trigger breakpoint in specified cog.
 
-```
-COGBRK  {#}Dest
-```
+**COGBRK**  *{#}Dest*
+
+---
 
 **Result:** If in the Debug ISR, trigger an asynchronous breakpoint in cog identified by Dest.
 
@@ -4166,14 +4235,15 @@ For example, to trigger a breakpoint in cog 2:
 COGBRK is a specialized instruction primarily used by development and debugging tools rather than in typical application code.
 
 
+
 ## COGID {#cogid}
 
 Cog identification
 [COG Control Instruction](#cog-control-instructions) - Get current cog's ID or any cog's status by ID.
 
-```
-COGID  {#}Dest  {WC}
-```
+**COGID**  *{#}Dest*  **{WC}**
+
+---
 
 **Result:** Current cog's ID is written to Dest or C is set (1) or cleared (0) if the Dest cog is running or stopped.
 
@@ -4207,14 +4277,15 @@ To check if cog 3 is running:
 ```
 
 
+
 ## COGINIT {#coginit}
 
 Cog initialize
 [COG Control Instruction](#cog-control-instructions) - Start an available cog, or restart a cog by ID.
 
-```
-COGINIT  {#}Dest, {#}Src  {WC}
-```
+**COGINIT**  *{#}Dest, {#}Src*  **{WC}**
+
+---
 
 **Result:** Target cog is started according to Dest to execute code from Src. The code pointer (Src) is written to the target cog's PTRB, and optionally a data pointer is written to its PTRA if SETQ preceded COGINIT.
 
@@ -4233,7 +4304,6 @@ COGINIT  {#}Dest, {#}Src  {WC}
 COGINIT starts a new (unused) cog, a new pair of cogs (that may share LUT memory), or a specific cog by ID, to load code from Hub RAM to be executed within COG/LUT RAM or to be executed right from Hub RAM.
 
 The format of Dest is `%E_N_xVVV` where:
-
 - E controls loading (0=load from Hub, 1=no load/Hub exec)
 - N controls target selection (0=specific cog ID, 1=find free cog)
 - VVV is the cog ID or mode
@@ -4253,14 +4323,14 @@ Load and start a specific cog from Hub RAM:
 Start a free cog:
 
 ```pasm
-        coginit #COGEXEC_NEW, addr  wc    ' Find free cog, load, start
-  if_c  jmp     #no_cog_available     ' Branch if no cog available
+                coginit #COGEXEC_NEW, addr  wc  ' Find free cog, load, start
+        if_c    jmp     #no_cog_available       ' Branch if no cog available
 ```
 
 Skip load and execute from Hub RAM:
 
 ```pasm
-        coginit #HUBEXEC+3, addr      ' Skip load, start cog 3 in Hub exec mode
+        coginit #HUBEXEC+3, addr      ' Cog 3 hub exec mode
 ```
 
 Start a cog pair for LUT sharing:
@@ -4270,14 +4340,15 @@ Start a cog pair for LUT sharing:
 ```
 
 
+
 ## COGSTOP {#cogstop}
 
 Cog stop
 [COG Control Instruction](#cog-control-instructions) - Stop a cog by ID.
 
-```
-COGSTOP  {#}Dest
-```
+**COGSTOP**  *{#}Dest*
+
+---
 
 **Result:** Cog indicated by Dest is terminated (stopped).
 
@@ -4311,14 +4382,15 @@ To stop the current cog (terminate self):
 COGSTOP is useful for managing cog resources dynamically, shutting down cogs that are no longer needed, or resetting a cog before restarting it with new code. Note that stopping a cog does not free any Hub memory it may have been using.
 
 
+
 ## CRCBIT {#crcbit}
 
 CRC iterate bit
 [Math Instruction](#math-instructions) - Iterate CRC value in D using C and polynomial in S.
 
-```
-CRCBIT  Dest, {#}Src
-```
+**CRCBIT**  *Dest, {#}Src*
+
+---
 
 **Result:** Dest is updated with the next CRC iteration using the C flag and polynomial in Src.
 
@@ -4353,14 +4425,15 @@ CRCBIT is typically used in a loop to process data one bit at a time:
 For processing nibbles (4 bits) at a time instead, use CRCNIB.
 
 
+
 ## CRCNIB {#crcnib}
 
 CRC iterate nibble
 [Math Instruction](#math-instructions) - Iterate CRC value in D for a nibble using polynomial in S.
 
-```
-CRCNIB  Dest, {#}Src
-```
+**CRCNIB**  *Dest, {#}Src*
+
+---
 
 **Result:** Dest is updated with CRC iterations for a nibble, and Q is shifted left by 4 bits.
 
@@ -4392,33 +4465,13 @@ The typical usage pattern is:
 CRCNIB is more efficient than CRCBIT when processing byte-oriented data, providing a 4x speedup for CRC calculations. The automatic Q shift simplifies the loop logic for multi-nibble processing.
 
 
+
 # Instructions: D
 
 This section contains all PASM2 instructions beginning with the letter D.
 
+<!-- DEBUG instruction removed - will be covered in a dedicated narrative chapter with examples -->
 
-## DEBUG {#debug}
-
-Debug instruction
-[Debug Instruction](#debug-instructions) - Provides debugging functionality during program execution.
-
-```
-DEBUG
-```
-
-**Result:** Debug functionality is triggered during program execution.
-
-```{=latex}
-\simpleencoding{EEEE}{0000000}{000}{000010110}{000000000}{---}{---}{---}{2}
-```
-
-**Related:** [NOP](#nop)
-
-**Explanation:**
-
-DEBUG provides debugging functionality during program execution. This instruction is used by development tools to insert breakpoints or trigger debugging events within PASM2 code.
-
-The DEBUG instruction has no operands and does not modify any registers or flags. Its behavior is implementation-specific and depends on the debugging environment in use.
 
 
 ## DECMOD {#decmod}
@@ -4426,9 +4479,9 @@ The DEBUG instruction has no operands and does not modify any registers or flags
 Decrement modulus
 [Math Instruction](#math-instructions) - Decrement with modulus wrapping.
 
-```
-DECMOD  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**DECMOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** If Dest was not equal to 0, it is decremented by 1; otherwise Dest is reset to Src.
 
@@ -4453,15 +4506,16 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 DECMOD does not limit Dest within the specified range—if Dest begins as greater than Src, iterations will continue to decrement it down through Src before cycling from Src to 0. This instruction is useful for implementing circular buffers and modular counters that wrap from 0 back to a maximum value.
 
 
+
 ## DECOD {#decod}
 
 Decode bit position to single-bit mask
 [Math Instruction](#math-instructions) - Decode value (0-31) into single-high-bit long.
 
-```
-DECOD  Dest, {#}Src
-DECOD  Dest
-```
+**DECOD**  *Dest, {#}Src*
+**DECOD**  *Dest*
+
+---
 
 **Result:** A 32-bit value, with the bit position corresponding to Src or Dest value (0-31) set high, is stored in Dest.
 
@@ -4482,7 +4536,6 @@ DECOD  Dest
 DECOD generates a 32-bit value with just one bit high, corresponding to the Src or Dest value (0-31) and stores that result in Dest. In effect, Dest becomes %1 << value via the DECOD instruction, where value is Src[4:0] or Dest[4:0].
 
 Examples of decoded values:
-
 - A value of 0 generates %00000000_00000000_00000000_00000001
 - A value of 5 generates %00000000_00000000_00000000_00100000
 - A value of 15 generates %00000000_00000000_10000000_00000000
@@ -4492,15 +4545,16 @@ The first syntax form uses Src to specify the bit position, while the second syn
 DECOD is the complement of ENCOD. It is commonly used to generate bit masks for testing or setting individual bits within registers or memory locations.
 
 
+
 ## DIRC / DIRNC {#dirc}
 
 Set pin direction if C / not C
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input/output according to C or !C.
 
-```
-DIRC   {#}Dest  {WCZ}
-DIRNC  {#}Dest  {WCZ}
-```
+**DIRC**  *{#}Dest*  **{WCZ}**
+**DIRNC**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pin direction bit(s), described by Dest, are set to output/input according to C or !C; the rest are left as-is.
 
@@ -4533,14 +4587,15 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 If the WCZ effect is specified, the C and Z flags are updated to the original state of DIRA / DIRB's base bit, identified by Dest.
 
 
+
 ## DIRH {#dirh}
 
 Set pin direction high
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to output (high; 1).
 
-```
-DIRH  {#}Dest  {WCZ}
-```
+**DIRH**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to output direction; the rest are left as-is.
 
@@ -4564,14 +4619,15 @@ A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range o
 If the WCZ effect is specified, the Z flag is set to the state of the direction bit before modification.
 
 
+
 ## DIRL {#dirl}
 
 Set pin direction low
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input (low; 0).
 
-```
-DIRL  {#}Dest  {WCZ}
-```
+**DIRL**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to input direction; the rest are left as-is.
 
@@ -4595,14 +4651,15 @@ A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range o
 If the WCZ effect is specified, the Z flag is updated to the original state of the target direction bit.
 
 
+
 ## DIRNOT {#dirnot}
 
 Direction not
 [I/O Pin Instruction](#io-pin-instructions) - Toggle pin(s) to the opposite direction.
 
-```
-DIRNOT  {#}Dest  {WCZ}
-```
+**DIRNOT**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pin direction bit(s), described by Dest, are toggled to their opposite state(s); the rest are left as-is.
 
@@ -4630,15 +4687,16 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 If the WCZ effect is specified, the C and Z flags are updated to the original state of DIRA / DIRB's base bit, identified by Dest.
 
 
+
 ## DIRZ / DIRNZ {#dirz}
 
 Set pin direction if Z / not Z
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input/output according to Z or !Z.
 
-```
-DIRZ   {#}Dest  {WCZ}
-DIRNZ  {#}Dest  {WCZ}
-```
+**DIRZ**  *{#}Dest*  **{WCZ}**
+**DIRNZ**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pin direction bit(s), described by Dest, are set to output/input according to Z or !Z; the rest are left as-is.
 
@@ -4671,14 +4729,15 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 If the WCZ effect is specified, the C and Z flags are updated to the original state of DIRA / DIRB's base bit, identified by Dest.
 
 
+
 ## DIRRND {#dirrnd}
 
 Direction random
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to random input/output.
 
-```
-DIRRND  {#}Dest  {WCZ}
-```
+**DIRRND**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pin direction bit(s), described by Dest, are each set randomly low or high (input or output); the rest are left as-is.
 
@@ -4706,14 +4765,15 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 If the WCZ effect is specified, the C and Z flags are updated to the original state of DIRA / DIRB's base bit, identified by Dest, before the random modification occurs.
 
 
+
 ## DJF {#djf}
 
 Decrement and jump if full
 [Branch/Jump Instruction](#branch-jump-instructions) - Decrement value and jump if full (-1; $FFFF_FFFF).
 
-```
-DJF  Dest, {#}Src
-```
+**DJF**  *Dest, {#}Src*
+
+---
 
 **Result:** Dest is decremented. If the result equals $FFFF_FFFF (full), PC is set to a new relative (#Src) or absolute (Src) address; otherwise execution continues with the next instruction.
 
@@ -4735,14 +4795,15 @@ This instruction is useful for implementing loops that count down until a regist
 The instruction executes in 2 clock cycles when the branch is not taken, and 4 clock cycles when the branch is taken.
 
 
+
 ## DJNF {#djnf}
 
 Decrement and jump if not full
 [Branch/Jump Instruction](#branch-jump-instructions) - Decrement value and jump if not full (<> -1; <> $FFFF_FFFF).
 
-```
-DJNF  Dest, {#}Src
-```
+**DJNF**  *Dest, {#}Src*
+
+---
 
 **Result:** Dest is decremented. If the result does NOT equal $FFFF_FFFF (not full), PC is set to a new relative (#Src) or absolute (Src) address; otherwise execution continues with the next instruction.
 
@@ -4766,72 +4827,53 @@ Dest is always written with the decremented value. PC is written only when the r
 The instruction executes in 2 clock cycles when the branch is not taken, and 4 clock cycles when the branch is taken.
 
 
-## DJNZ {#djnz}
 
-Decrement and jump if not zero
-[Branch/Jump Instruction](#branch-jump-instructions) - Decrement, jump if not zero.
+## DJZ / DJNZ {#djz}
 
-```
-DJNZ  Dest, {#}Src
-```
+Decrement and jump if zero / not zero {#djnz}
+[Branch/Jump Instruction](#branch-jump-instructions) - Decrement a register and jump based on zero/non-zero result.
 
-**Result:** Dest is decremented. If the result is not zero, PC is set to a new relative (#Src) or absolute (Src) address; otherwise execution continues with the next instruction.
+**DJZ**  *Dest, {#}Src*
+**DJNZ**  *Dest, {#}Src*
 
-- Dest is a register whose value is decremented and tested for zero or not zero.
-- Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC to. Use # for relative addressing; omit # for absolute addressing.
+---
+
+**Result:** Dest is decremented by 1, and conditionally jumps:
+
+| Instruction | Jumps when |
+|-------------|------------|
+| DJZ | Result = 0 |
+| DJNZ | Result ≠ 0 |
+
+- Dest is a register whose value is decremented and tested.
+- Src is the jump address: use # for relative, omit for absolute.
 
 ```{=latex}
-\simpleencoding{EEEE}{1011011}{01I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2 or 4}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011011}{00I}{DDDDDDDDD}{SSSSSSSSS}{D + PC*}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011011}{01I}{DDDDDDDDD}{SSSSSSSSS}{D + PC*}{---}{---}{2 or 4}
+\end{encodingtable}
+
+*PC is written only when the jump condition is met.
 ```
 
-**Related:** [DJZ](#djz), [DJF](#djf), [DJNF](#djnf), [TJZ](#tjz), [TJNZ](#tjnz)
+**Related:** [DJF](#djf), [DJNF](#djnf), [IJZ](#ijz), [IJNZ](#ijnz), [TJZ](#tjz), [TJNZ](#tjnz)
 
 **Explanation:**
 
-DJNZ decrements the value in Dest, writes the result, and jumps to the address described by Src if the result is NOT zero.
+DJZ and DJNZ decrement Dest and conditionally jump based on whether the result is zero or non-zero.
 
-This is one of the most commonly used loop instructions. Use # prefix on Src for relative addressing (typical usage); omit # for absolute addressing.
+DJNZ is one of the most commonly used loop instructions—it continues looping while the counter is non-zero.
 
-Dest is always written with the decremented value. PC is written only when the result in Dest is not zero.
-
-The instruction executes in 2 clock cycles when the branch is not taken (result equals zero), and 4 clock cycles when the branch is taken (result is not zero).
-
-Example loop using DJNZ:
-
+Example loop:
 ```pasm
         mov     count, #10              ' Set loop counter to 10
 .loop   ' loop body here
         djnz    count, #.loop           ' Decrement and loop if not zero
 ```
 
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
-## DJZ {#djz}
-
-Decrement and jump if zero
-[Branch/Jump Instruction](#branch-jump-instructions) - Decrement, jump if zero.
-
-```
-DJZ  Dest, {#}Src
-```
-
-**Result:** Dest is decremented. If the result equals zero, PC is set to a new relative (#Src) or absolute (Src) address; otherwise execution continues with the next instruction.
-
-- Dest is a register whose value is decremented and tested for zero or not zero.
-- Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011011}{00I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2 or 4}
-```
-
-**Related:** [DJNZ](#djnz), [DJF](#djf), [DJNF](#djnf), [TJZ](#tjz), [TJNZ](#tjnz)
-
-**Explanation:**
-
-DJZ decrements the value in Dest, writes the result, and jumps to the address described by Src if the result IS zero.
-
-This instruction is useful when you want to jump when a counter reaches zero, rather than looping while non-zero. Use # prefix on Src for relative addressing; omit # for absolute addressing.
-
-The instruction executes in 2 clock cycles when the branch is not taken (result is not zero), and 4 clock cycles when the branch is taken (result equals zero).
 
 
 ## DRVC / DRVNC {#drvc}
@@ -4839,10 +4881,10 @@ The instruction executes in 2 clock cycles when the branch is not taken (result 
 Drive pins if C / not C
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to output and output level to low/high according to C or !C.
 
-```
-DRVC   {#}Dest  {WCZ}
-DRVNC  {#}Dest  {WCZ}
-```
+**DRVC**  *{#}Dest*  **{WCZ}**
+**DRVNC**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to the output direction and to an output level of low/high according to C or !C; the rest are left as-is.
 
@@ -4873,14 +4915,15 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 If the WCZ effect is specified, the Z flag is set to the state of the OUT bit before modification.
 
 
+
 ## DRVH {#drvh}
 
 Drive pins high
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to output and output level high (1).
 
-```
-DRVH  {#}Dest  {WCZ}
-```
+**DRVH**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to the output direction and to an output level of high; the rest are left as-is.
 
@@ -4906,14 +4949,15 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 If the WCZ effect is specified, the Z flag is set to the state of the OUT bit before modification.
 
 
+
 ## DRVL {#drvl}
 
 Drive pins low
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to output and output level low (0).
 
-```
-DRVL  {#}Dest  {WCZ}
-```
+**DRVL**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to the output direction and to an output level of low; the rest are left as-is.
 
@@ -4941,14 +4985,15 @@ If the WCZ effect is specified, the Z flag is set to the state of the OUT bit be
 Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state.
 
 
+
 ## DRVNOT {#drvnot}
 
 Drive not
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to output and toggle to the opposite output level.
 
-```
-DRVNOT  {#}Dest  {WCZ}
-```
+**DRVNOT**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to the output direction and to their opposite output level(s); the rest are left as-is.
 
@@ -4978,15 +5023,16 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state.
 
 
+
 ## DRVZ / DRVNZ {#drvz}
 
 Drive pins if Z / not Z
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to output and output level to low/high according to Z or !Z.
 
-```
-DRVZ   {#}Dest  {WCZ}
-DRVNZ  {#}Dest  {WCZ}
-```
+**DRVZ**  *{#}Dest*  **{WCZ}**
+**DRVNZ**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to the output direction and to an output level of low/high according to Z or !Z; the rest are left as-is.
 
@@ -5017,14 +5063,15 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 If the WCZ effect is specified, the Z flag is set to the state of the OUT bit before modification.
 
 
+
 ## DRVRND {#drvrnd}
 
 Drive random
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to output and output level to random low/high.
 
-```
-DRVRND  {#}Dest  {WCZ}
-```
+**DRVRND**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to the output direction and each output level is set randomly low or high; the rest are left as-is.
 
@@ -5056,9 +5103,11 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state.
 
 
+
 # Instructions: E
 
 This section contains all PASM2 instructions beginning with the letter E.
+
 
 
 ## ENCOD {#encod}
@@ -5066,10 +5115,10 @@ This section contains all PASM2 instructions beginning with the letter E.
 Encode
 [Math Instruction](#math-instructions) - Get bit position of top-most 1 of Src or Dest into Dest.
 
-```
-ENCOD  Dest, {#}Src  {WC|WZ|WCZ}
-ENCOD  Dest          {WC|WZ|WCZ}
-```
+**ENCOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**ENCOD**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** The bit position value of the top-most high bit (1) in Src, or Dest, is stored in Dest.
 
@@ -5095,7 +5144,6 @@ If the WC or WCZ effect is specified, the C flag is set (1) if Src (or original 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if not zero.
 
 For example:
-
 - `%00000000_00000000_00000000_00000001` encodes to 0 (bit position of the only 1)
 - `%00000000_00000000_00000000_00100000` encodes to 5 (bit position 5 is the top-most 1)
 - `%00000000_00000000_10000001_01000000` encodes to 15 (bit position 15 is the top-most 1)
@@ -5106,14 +5154,15 @@ If the value to encode may be 0, use the WC or WCZ effect and check the resultin
 ENCOD is the complement of DECOD. Where DECOD converts a bit position (0-31) into a 32-bit value with a single bit set, ENCOD performs the reverse operation, converting a 32-bit value into the position of its highest set bit.
 
 
+
 ## EXECF {#execf}
 
 Call and skip
 [Branch/Jump Instruction](#branch-jump-instructions) - Jump to address in COG/LUT and set SKIPF pattern.
 
-```
-EXECF  {#}Dest
-```
+**EXECF**  *{#}Dest*
+
+---
 
 **Result:** PC is set to Dest[9:0] and the SKIPF pattern is set to Dest[31:10].
 
@@ -5138,9 +5187,11 @@ EXECF combines the functionality of CALL (jumping to a new address) and SKIPF (s
 The instruction takes 4 clock cycles to execute, regardless of whether it executes from COG/LUT or Hub memory.
 
 
+
 # Instructions: F
 
 This section contains all PASM2 instructions beginning with the letter F.
+
 
 
 ## FBLOCK {#fblock}
@@ -5148,9 +5199,9 @@ This section contains all PASM2 instructions beginning with the letter F.
 Set next block for when block wraps
 [Hub FIFO Instruction](#hub-fifo-instructions) - Configure the next Hub memory block for FIFO wraparound.
 
-```
-FBLOCK  {#}Dest, {#}Src
-```
+**FBLOCK**  *{#}Dest, {#}Src*
+
+---
 
 **Result:** The next block parameters are configured for FIFO wraparound operations.
 
@@ -5174,14 +5225,15 @@ Src\[19:0\] specifies the starting address of the block in Hub memory. This addr
 FBLOCK is typically used in conjunction with RDFAST/WRFAST for setting up high-throughput data streaming between Hub memory and COG/LUT memory. The block configuration takes effect when the current FIFO operation completes and wraps around.
 
 
+
 ## FGE {#fge}
 
 Force greater or equal
 [Math Instruction](#math-instructions) - Force unsigned value to be greater than or equal to another.
 
-```
-FGE  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**FGE**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Unsigned Dest is set to unsigned Src if Dest was less than Src.
 
@@ -5206,14 +5258,15 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 FGE is useful for clamping values to a minimum threshold, ensuring that a value never falls below a specified floor. This is commonly used in digital signal processing, graphics calculations, and boundary checking where values must stay within valid ranges.
 
 
+
 ## FGES {#fges}
 
 Force greater or equal, signed
 [Math Instruction](#math-instructions) - Force signed value to be greater than or equal to another.
 
-```
-FGES  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**FGES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Signed Dest is set to signed Src if Dest was less than Src.
 
@@ -5238,14 +5291,15 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 FGES is the signed counterpart to FGE and is used when working with signed values that need to be clamped to a minimum threshold. This is particularly useful in audio processing, control systems, and any application where signed values must be constrained within bounds.
 
 
+
 ## FLE {#fle}
 
 Force lesser or equal
 [Math Instruction](#math-instructions) - Force unsigned value to be less than or equal to another.
 
-```
-FLE  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**FLE**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Unsigned Dest is set to unsigned Src if Dest was greater than Src.
 
@@ -5270,14 +5324,15 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 FLE is useful for clamping values to a maximum threshold, ensuring that a value never exceeds a specified ceiling. This is commonly used in digital signal processing, graphics calculations, and boundary checking where values must stay within valid ranges.
 
 
+
 ## FLES {#fles}
 
 Force lesser or equal, signed
 [Math Instruction](#math-instructions) - Force signed value to be less than or equal to another.
 
-```
-FLES  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**FLES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Signed Dest is set to signed Src if Dest was greater than Src.
 
@@ -5302,37 +5357,50 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 FLES is the signed counterpart to FLE and is used when working with signed values that need to be clamped to a maximum threshold. This is particularly useful in audio processing, control systems, and any application where signed values must be constrained within bounds.
 
 
-## FLTC {#fltc}
 
-Float if C
-[I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input and an output level of low/high according to C.
+## FLTC / FLTNC / FLTZ / FLTNZ {#fltc}
 
-```
-FLTC  {#}Dest  {WCZ}
-```
+Float with output preset by flag {#fltnc} {#fltz} {#fltnz}
+[I/O Pin Instruction](#io-pin-instructions) - Set pin(s) to input direction with output preset according to C, NC, Z, or NZ flag.
 
-**Result:** The I/O pins described by Dest are set to the input direction and to an output level of low/high according to C.
+**FLTC**  *{#}Dest*  **{WCZ}**
+**FLTNC**  *{#}Dest*  **{WCZ}**
+**FLTZ**  *{#}Dest*  **{WCZ}**
+**FLTNZ**  *{#}Dest*  **{WCZ}**
 
-- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output levels of low or high.
-- WCZ is an optional effect to update flags.
+---
+
+**Result:** The I/O pins are set to input direction with output preset according to flag state:
+
+| Instruction | Presets output high when |
+|-------------|--------------------------|
+| FLTC | C = 1 |
+| FLTNC | C = 0 |
+| FLTZ | Z = 1 |
+| FLTNZ | Z = 0 |
+
+- Dest identifies the I/O pin(s): Dest[5:0] = base pin (0-63), Dest[10:6] = additional contiguous pins.
+- WCZ is an optional effect to set Z to the original output state.
 
 ```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010010}{DIRx + OUTx}{---}{OUT bit}{2}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010010}{DIRx + OUTx}{---}{OUT bit}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010011}{DIRx + OUTx}{---}{OUT bit}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010100}{DIRx + OUTx}{---}{OUT bit}{2}
+\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010101}{DIRx + OUTx}{---}{OUT bit}{2}
+\end{encodingtable}
 ```
 
-**Related:** [FLTNC](#fltnc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTH](#flth), [FLTL](#fltl)
+**Related:** [FLTH](#flth), [FLTL](#fltl), [FLTNOT](#fltnot), [FLTRND](#fltrnd)
 
 **Explanation:**
 
-FLTC sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low/high output level according to the C flag. All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be at the desired level.
+These instructions set pin(s) to input direction (floating) while pre-setting the output register based on flag state. When the pin is later driven as output, it will immediately be at the desired level.
 
-Dest\[5:0\] indicates the pin number (0-63). For a range of pins, Dest\[5:0\] indicates the base pin number (0-63) and Dest\[10:6\] indicates how many contiguous pins beyond the base should be affected (1-31).
+FLTC and FLTZ preset output high when their flag is set; FLTNC and FLTNZ preset output high when their flag is clear.
 
-A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range of up to 8 contiguous pins (Dest\[8:6\]). If needed, use the augmented literal feature (\#\#Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
+If WCZ is specified, the Z flag is set to the original output state of the base pin.
 
-The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group and will not cross the port boundary.
-
-If the WCZ effect is specified, the Z flag is set to the original state of the OUTA/OUTB base bit identified by Dest.
 
 
 ## FLTH {#flth}
@@ -5340,9 +5408,9 @@ If the WCZ effect is specified, the Z flag is set to the original state of the O
 Float high
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input and to an output level of high.
 
-```
-FLTH  {#}Dest  {WCZ}
-```
+**FLTH**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to the input direction and to an output level of high.
 
@@ -5368,14 +5436,15 @@ The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps wi
 If the WCZ effect is specified, the Z flag is set to the original state of the OUTA/OUTB base bit identified by Dest.
 
 
+
 ## FLTL {#fltl}
 
 Float low
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input and to an output level of low.
 
-```
-FLTL  {#}Dest  {WCZ}
-```
+**FLTL**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to the input direction and to an output level of low.
 
@@ -5401,47 +5470,15 @@ The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps wi
 If the WCZ effect is specified, the Z flag is set to the original state of the OUTA/OUTB base bit identified by Dest.
 
 
-## FLTNC {#fltnc}
-
-Float if not C
-[I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input and an output level of low/high according to !C.
-
-```
-FLTNC  {#}Dest  {WCZ}
-```
-
-**Result:** The I/O pins described by Dest are set to the input direction and to an output level of low/high according to !C.
-
-- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output levels of low or high.
-- WCZ is an optional effect to update flags.
-
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010011}{DIRx + OUTx}{---}{OUT bit}{2}
-```
-
-**Related:** [FLTC](#fltc), [FLTZ](#fltz), [FLTNZ](#fltnz), [FLTH](#flth), [FLTL](#fltl)
-
-**Explanation:**
-
-FLTNC sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low/high output level according to the inverse of the C flag (!C). All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be at the desired level.
-
-Dest\[5:0\] indicates the pin number (0-63). For a range of pins, Dest\[5:0\] indicates the base pin number (0-63) and Dest\[10:6\] indicates how many contiguous pins beyond the base should be affected (1-31).
-
-A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range of up to 8 contiguous pins (Dest\[8:6\]). If needed, use the augmented literal feature (\#\#Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
-
-The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group and will not cross the port boundary.
-
-If the WCZ effect is specified, the Z flag is set to the original state of the OUTA/OUTB base bit identified by Dest.
-
 
 ## FLTNOT {#fltnot}
 
 Float not
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input and toggle to the opposite output level.
 
-```
-FLTNOT  {#}Dest  {WCZ}
-```
+**FLTNOT**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to the input direction and to their opposite output level(s).
 
@@ -5469,47 +5506,15 @@ The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps wi
 If the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA/OUTB's base bit identified by Dest.
 
 
-## FLTNZ {#fltnz}
-
-Float if not Z
-[I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input and an output level of low/high according to !Z.
-
-```
-FLTNZ  {#}Dest  {WCZ}
-```
-
-**Result:** The I/O pins described by Dest are set to the input direction and to an output level of low/high according to !Z.
-
-- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output levels of low or high.
-- WCZ is an optional effect to update flags.
-
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010101}{DIRx + OUTx}{---}{OUT bit}{2}
-```
-
-**Related:** [FLTZ](#fltz), [FLTC](#fltc), [FLTNC](#fltnc), [FLTH](#flth), [FLTL](#fltl)
-
-**Explanation:**
-
-FLTNZ sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low/high output level according to the inverse of the Z flag (!Z). All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be at the desired level.
-
-Dest\[5:0\] indicates the pin number (0-63). For a range of pins, Dest\[5:0\] indicates the base pin number (0-63) and Dest\[10:6\] indicates how many contiguous pins beyond the base should be affected (1-31).
-
-A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range of up to 8 contiguous pins (Dest\[8:6\]). If needed, use the augmented literal feature (\#\#Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
-
-The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group and will not cross the port boundary.
-
-If the WCZ effect is specified, the Z flag is set to the original state of the OUTA/OUTB base bit identified by Dest.
-
 
 ## FLTRND {#fltrnd}
 
 Float random
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input and to an output level of random low/high.
 
-```
-FLTRND  {#}Dest  {WCZ}
-```
+**FLTRND**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to the input direction and each output level is set randomly low or high.
 
@@ -5539,37 +5544,6 @@ The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps wi
 If the WCZ effect is specified, the C and Z flags are updated to the original state of OUTA/OUTB's base bit identified by Dest.
 
 
-## FLTZ {#fltz}
-
-Float if Z
-[I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input and an output level of low/high according to Z.
-
-```
-FLTZ  {#}Dest  {WCZ}
-```
-
-**Result:** The I/O pins described by Dest are set to the input direction and to an output level of low/high according to Z.
-
-- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) to set to input direction and output levels of low or high.
-- WCZ is an optional effect to update flags.
-
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001010100}{DIRx + OUTx}{---}{OUT bit}{2}
-```
-
-**Related:** [FLTNZ](#fltnz), [FLTC](#fltc), [FLTNC](#fltnc), [FLTH](#flth), [FLTL](#fltl)
-
-**Explanation:**
-
-FLTZ sets the I/O pin(s) designated by Dest to the input direction (floating) and to a low/high output level according to the Z flag. All other pins are left unchanged. This pre-sets the output register so that when the pin is later driven as output, it will immediately be at the desired level.
-
-Dest\[5:0\] indicates the pin number (0-63). For a range of pins, Dest\[5:0\] indicates the base pin number (0-63) and Dest\[10:6\] indicates how many contiguous pins beyond the base should be affected (1-31).
-
-A 9-bit literal Dest is enough to express the base pin (Dest\[5:0\]) and a range of up to 8 contiguous pins (Dest\[8:6\]). If needed, use the augmented literal feature (\#\#Dest) to augment Dest to an 11-bit literal value, which inserts an AUGD instruction prior.
-
-The range calculation (from Dest\[5:0\] up to Dest\[5:0\]+Dest\[10:6\]) wraps within the same 32-pin group and will not cross the port boundary.
-
-If the WCZ effect is specified, the Z flag is set to the original state of the OUTA/OUTB base bit identified by Dest.
 
 
 # Instructions: G
@@ -5577,14 +5551,15 @@ If the WCZ effect is specified, the Z flag is set to the original state of the O
 This section contains all PASM2 instructions beginning with the letter G.
 
 
+
 ## GETBRK {#getbrk}
 
 Get breakpoint status
 [Debug Instruction](#debug-instructions) - Get breakpoint/cog status into D according to WC/WZ/WCZ.
 
-```
-GETBRK  Dest  {WC|WZ|WCZ}
-```
+**GETBRK**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Breakpoint or COG status information is retrieved into Dest based on the flag effect specified.
 
@@ -5612,15 +5587,16 @@ When no flag effects are specified, GETBRK retrieves the 16-bit skip pattern int
 GETBRK is essential for implementing debug infrastructure and coordinating multi-COG debugging systems. It works in conjunction with BRK and SETBRK to provide comprehensive breakpoint support.
 
 
+
 ## GETBYTE {#getbyte}
 
 Get byte
 [Math Instruction](#math-instructions) - Get a byte from a value.
 
-```
-GETBYTE  Dest, {#}Src, #Num
-GETBYTE  Dest
-```
+**GETBYTE**  *Dest, {#}Src, #Num*
+**GETBYTE**  *Dest*
+
+---
 
 **Result:** Byte Num (0-3) of Src, or a byte from a source described by prior ALTGB instruction, is written to Dest.
 
@@ -5646,14 +5622,15 @@ Num 0 selects bits [7:0], Num 1 selects bits [15:8], Num 2 selects bits [23:16],
 The second syntax form (GETBYTE Dest) is intended for use after an ALTGB instruction. This form is useful in loops that iteratively read a series of byte values from contiguous long registers. The ALTGB instruction modifies the subsequent GETBYTE instruction's source register and byte index automatically, enabling efficient sequential byte extraction without explicitly specifying the source and index on each iteration.
 
 
+
 ## GETCT {#getct}
 
 Get system counter
 [Misc Instruction](#misc-instructions) - Get the current system counter value into D.
 
-```
-GETCT  Dest  {WC}
-```
+**GETCT**  *Dest*  **{WC}**
+
+---
 
 **Result:** The current value of the system counter CT is written to Dest.
 
@@ -5664,7 +5641,7 @@ GETCT  Dest  {WC}
 \simpleencoding{EEEE}{1101011}{C00}{DDDDDDDDD}{000011010}{D}{same}{---}{2}
 ```
 
-**Related:** [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [WAITCT1](#waitct1), [WAITCT2](#waitct2), [WAITCT3](#waitct3)
+**Related:** [ADDCT1/2/3](instructions-a.md#addct1), [WAITCT1/2/3](instructions-w.md#waitct1)
 
 **Explanation:**
 
@@ -5677,15 +5654,16 @@ If the WC effect is specified, the C flag is preserved and remains unchanged by 
 GETCT is commonly used with the ADDCT and WAITCT instruction families to implement precise timing, delays, and event scheduling. The retrieved counter value serves as a time reference for calculating future wait points or measuring elapsed time intervals.
 
 
+
 ## GETNIB {#getnib}
 
 Get nibble
 [Math Instruction](#math-instructions) - Get a nibble from a value.
 
-```
-GETNIB  Dest, {#}Src, #Num
-GETNIB  Dest
-```
+**GETNIB**  *Dest, {#}Src, #Num*
+**GETNIB**  *Dest*
+
+---
 
 **Result:** Nibble Num (0-7) of Src, or a nibble from a source described by prior ALTGN instruction, is written to Dest.
 
@@ -5711,14 +5689,15 @@ Num 0 selects bits [3:0], Num 1 selects bits [7:4], Num 2 selects bits [11:8], a
 The second syntax form (GETNIB Dest) is intended for use after an ALTGN instruction. This form is useful in loops that iteratively read a series of nibble values from contiguous long registers. The ALTGN instruction modifies the subsequent GETNIB instruction's source register and nibble index automatically, enabling efficient sequential nibble extraction without explicitly specifying the source and index on each iteration.
 
 
+
 ## GETPTR {#getptr}
 
 Get FIFO hub pointer
 [Hub Memory Instruction](#hub-memory-instructions) - Get current FIFO hub pointer into D.
 
-```
-GETPTR  Dest
-```
+**GETPTR**  *Dest*
+
+---
 
 **Result:** The current FIFO hub pointer is written to Dest.
 
@@ -5739,14 +5718,15 @@ The hub FIFO pointer advances automatically as data is read from or written to t
 GETPTR is useful for monitoring FIFO transfer progress, calculating how much data has been transferred, or determining the current position within a buffer. The retrieved pointer value represents the hub memory address that will be accessed by the next FIFO read or write operation.
 
 
+
 ## GETQX {#getqx}
 
 Get CORDIC X result
 [CORDIC Instruction](#cordic-instructions) - Retrieve CORDIC result X into D.
 
-```
-GETQX  Dest  {WC|WZ|WCZ}
-```
+**GETQX**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** The CORDIC X result is written to Dest after waiting if necessary for the computation to complete.
 
@@ -5772,14 +5752,15 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 The timing for GETQX varies from 2 to 58 clock cycles depending on whether the result is immediately available or the instruction must wait for the CORDIC computation to complete. Most CORDIC operations complete in 54 clock cycles.
 
 
+
 ## GETQY {#getqy}
 
 Get CORDIC Y result
 [CORDIC Instruction](#cordic-instructions) - Retrieve CORDIC result Y into D.
 
-```
-GETQY  Dest  {WC|WZ|WCZ}
-```
+**GETQY**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** The CORDIC Y result is written to Dest after waiting if necessary for the computation to complete.
 
@@ -5805,15 +5786,16 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 The timing for GETQY varies from 2 to 58 clock cycles depending on whether the result is immediately available or the instruction must wait for the CORDIC computation to complete. Most CORDIC operations complete in 54 clock cycles.
 
 
+
 ## GETRND {#getrnd}
 
 Get random value
 [Misc Instruction](#misc-instructions) - Get RND into D or C/Z flags.
 
-```
-GETRND  Dest  {WC|WZ|WCZ}
-GETRND        {WC|WZ|WCZ}
-```
+**GETRND**  *Dest*  **{WC|WZ|WCZ}**
+**GETRND**  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** The current pseudo-random value is written to Dest, or the random bits are stored in the C and Z flags.
 
@@ -5844,14 +5826,15 @@ If the WZ or WCZ effect is specified, the Z flag is set to RND[30]. Notably, RND
 The random number generator uses a maximal-length linear feedback shift register (LFSR) to produce a deterministic but statistically random sequence. The sequence repeats with a period of 2^32 - 1 values.
 
 
+
 ## GETSCP {#getscp}
 
 Get oscilloscope samples
 [Smart Pin Instruction](#smart-pin-instructions) - Get four-channel oscilloscope samples into D.
 
-```
-GETSCP  Dest
-```
+**GETSCP**  *Dest*
+
+---
 
 **Result:** Four 8-bit oscilloscope samples are written to Dest as D = {ch3[7:0], ch2[7:0], ch1[7:0], ch0[7:0]}.
 
@@ -5874,15 +5857,16 @@ The oscilloscope is configured using the SETSCP instruction to specify which pin
 This instruction is useful for real-time signal monitoring, debugging, and creating oscilloscope-like functionality for analyzing digital signals or pin states within the P2 system.
 
 
+
 ## GETWORD {#getword}
 
 Get word
 [Math Instruction](#math-instructions) - Get a word from a value.
 
-```
-GETWORD  Dest, {#}Src, #Num
-GETWORD  Dest
-```
+**GETWORD**  *Dest, {#}Src, #Num*
+**GETWORD**  *Dest*
+
+---
 
 **Result:** Word Num (0-1) of Src, or a word from a source described by prior ALTGW instruction, is written to Dest.
 
@@ -5908,14 +5892,15 @@ Num 0 selects bits [15:0] (the lower word), and Num 1 selects bits [31:16] (the 
 The second syntax form (GETWORD Dest) is intended for use after an ALTGW instruction. This form is useful in loops that iteratively read a series of word values from contiguous long registers. The ALTGW instruction modifies the subsequent GETWORD instruction's source register and word index automatically, enabling efficient sequential word extraction without explicitly specifying the source and index on each iteration.
 
 
+
 ## GETXACC {#getxacc}
 
 Get Goertzel accumulators
 [Streamer Instruction](#streamer-instructions) - Get streamer's Goertzel X/Y accumulators into D and next S.
 
-```
-GETXACC  Dest
-```
+**GETXACC**  *Dest*
+
+---
 
 **Result:** The streamer's Goertzel X accumulator is written to Dest, the Y accumulator is written to the next instruction's S field, and both accumulators are cleared.
 
@@ -5938,9 +5923,11 @@ This dual-retrieval mechanism allows both accumulator values to be captured in a
 GETXACC is used in conjunction with the streamer's Goertzel mode, configured via XINIT and controlled via XCONT. The retrieved accumulator values represent the correlation between the input signal and the reference frequency configured in the Goertzel algorithm.
 
 
+
 # Instructions: H
 
 This section contains all PASM2 instructions beginning with the letter H.
+
 
 
 ## HUBSET {#hubset}
@@ -5948,9 +5935,9 @@ This section contains all PASM2 instructions beginning with the letter H.
 Set hub configuration
 [COG Control Instruction](#cog-control-instructions) - Configure system clock and hub parameters.
 
-```
-HUBSET  {#}D
-```
+**HUBSET**  *{#}D*
+
+---
 
 **Result:** Hub configuration is updated according to the value in D, controlling clock source, crystal settings, and PLL configuration.
 
@@ -6016,79 +6003,52 @@ In this PLL example, the VCO runs at 20 MHz * 16 = 320 MHz, then the post divide
 HUBSET takes 2 clock cycles to execute, but switching to a new clock source may take additional time for oscillator stabilization and PLL lock. Always allow appropriate wait periods when changing clock sources.
 
 
+
 # Instructions: I
 
 This section contains all PASM2 instructions beginning with the letter I.
 
 
-## IJZ {#ijz}
 
-Increment and jump if zero
-[Branch/Jump Instruction](#branch-jump-instructions) - Increment a register value and jump if the result equals zero.
+## IJZ / IJNZ {#ijz}
 
-```
-IJZ     Dest, {#}Src
-```
+Increment and jump if zero / not zero {#ijnz}
+[Branch/Jump Instruction](#branch-jump-instructions) - Increment a register and jump based on zero/non-zero result.
 
-**Result:** Dest is incremented by 1, and if the result equals zero, PC is set to a new address.
+**IJZ**  *Dest, {#}Src*
+**IJNZ**  *Dest, {#}Src*
 
-- Dest is a register whose value is incremented and tested for zero or not zero.
-- Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC to. Use # for relative addressing; omit # for absolute addressing.
+---
+
+**Result:** Dest is incremented by 1, and conditionally jumps:
+
+| Instruction | Jumps when |
+|-------------|------------|
+| IJZ | Result = 0 |
+| IJNZ | Result ≠ 0 |
+
+- Dest is a register whose value is incremented and tested.
+- Src is the jump address: use # for relative, omit for absolute.
 
 ```{=latex}
-\simpleencoding{EEEE}{1011100}{00I}{DDDDDDDDD}{SSSSSSSSS}{D and PC\textsuperscript{1}}{---}{---}{2 or 4}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011100}{00I}{DDDDDDDDD}{SSSSSSSSS}{D + PC*}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011100}{01I}{DDDDDDDDD}{SSSSSSSSS}{D + PC*}{---}{---}{2 or 4}
+\end{encodingtable}
 
-\textsuperscript{1} PC is written only when the result in Dest equals zero.
+*PC is written only when the jump condition is met.
 ```
 
-**Related:** [IJNZ](#ijnz), [DJZ](#djz), [DJNZ](#djnz)
+**Related:** [DJZ](#djz), [DJNZ](#djnz), [TJZ](#tjz), [TJNZ](#tjnz)
 
 **Explanation:**
 
-IJZ increments the value in Dest, writes the result back to Dest, and jumps to the address described by Src if the result equals zero.
+IJZ and IJNZ increment Dest and conditionally jump based on whether the result is zero or non-zero.
 
-This instruction is useful for counting until overflow to zero. The typical pattern is to start with a value and increment it repeatedly until it wraps around to zero (after reaching $FFFF\_FFFF).
+IJZ is useful for counting until overflow to zero (from $FFFF_FFFF to 0). IJNZ is useful for counting up from a negative value until reaching zero.
 
-When the # prefix is used on Src, the addressing is relative—the value in Src is treated as a signed offset from the current PC address. This is the most common usage for loops. When # is omitted, the addressing is absolute—Src contains the actual COG address to jump to.
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
-If the result after incrementing Dest is zero, the jump is taken and execution continues at the new address. If the result is not zero, execution continues with the next sequential instruction.
-
-IJZ always takes 2 clock cycles when the jump is not taken, and 4 clock cycles when the jump is taken (due to the pipeline flush).
-
-
-## IJNZ {#ijnz}
-
-Increment and jump if not zero
-[Branch/Jump Instruction](#branch-jump-instructions) - Increment a register value and jump if the result is not zero.
-
-```
-IJNZ    Dest, {#}Src
-```
-
-**Result:** Dest is incremented by 1, and if the result is not zero, PC is set to a new address.
-
-- Dest is a register whose value is incremented and tested for zero or not zero.
-- Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011100}{01I}{DDDDDDDDD}{SSSSSSSSS}{D and PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the result in Dest is not zero.
-```
-
-**Related:** [IJZ](#ijz), [DJNZ](#djnz), [DJZ](#djz)
-
-**Explanation:**
-
-IJNZ increments the value in Dest, writes the result back to Dest, and jumps to the address described by Src if the result is not zero.
-
-This instruction is useful for counting up to a specific value. The typical pattern is to start with zero (or a negative value) and increment until reaching a target count. Since most non-zero values result in a jump, the loop continues until Dest increments to exactly zero, at which point execution falls through to the next instruction.
-
-When the # prefix is used on Src, the addressing is relative—the value in Src is treated as a signed offset from the current PC address. This is the most common usage for loops. When # is omitted, the addressing is absolute—Src contains the actual COG address to jump to.
-
-If the result after incrementing Dest is not zero, the jump is taken and execution continues at the new address. If the result equals zero, execution continues with the next sequential instruction.
-
-IJNZ always takes 2 clock cycles when the jump is not taken, and 4 clock cycles when the jump is taken (due to the pipeline flush).
 
 
 ## INCMOD {#incmod}
@@ -6096,9 +6056,9 @@ IJNZ always takes 2 clock cycles when the jump is not taken, and 4 clock cycles 
 Increment with modulus
 [Math Instruction](#math-instructions) - Increment a value with automatic wrap-around at a specified modulus.
 
-```
-INCMOD  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**INCMOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** If Dest was not equal to Src, it is incremented by 1; otherwise Dest is reset to 0.
 
@@ -6110,7 +6070,7 @@ INCMOD  Dest, {#}Src  {WC|WZ|WCZ}
 \simpleencoding{EEEE}{0111000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{D = S, set D = 0 and C = 1, else D = D + 1 and C = 0}{Result = 0}{2}
 ```
 
-**Related:** [DECMOD](#decmod), [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3)
+**Related:** [DECMOD](#decmod), [ADDCT1/2/3](instructions-a.md#addct1)
 
 **Explanation:**
 
@@ -6127,29 +6087,30 @@ INCMOD does not limit Dest within the specified range. If Dest begins at a value
 A common usage pattern for INCMOD is managing circular buffers:
 
 ```pasm
-        ' Increment tail index with modulo for circular buffer
-        incmod  tail_idx, #BUF_SIZE-1  wc
-if_c    jmp     #buffer_wrapped
+                ' Increment tail index with modulo for circular buffer
+                incmod  tail_idx, #BUF_SIZE-1  wc
+        if_c    jmp     #buffer_wrapped
 
-        ' Safe to add data at tail
-        add     buffer_ptr, tail_idx
-        wrbyte  new_data, buffer_ptr
+                ' Safe to add data at tail
+                add     buffer_ptr, tail_idx
+                wrbyte  new_data, buffer_ptr
 ```
 
 INCMOD is also ideal for round-robin scheduling across a fixed number of resources:
 
 ```pasm
-        ' Round-robin through 8 ports (0-7)
+                ' Round-robin through 8 ports (0-7)
 .loop
-        ' Service current port
-        ' ... port service code ...
+                ' Service current port
+                ' ... port service code ...
 
-        ' Move to next port
-        incmod  portctr, #7            wc
-if_nc   jmp     #.loop
+                ' Move to next port
+                incmod  portctr, #7            wc
+        if_nc   jmp     #.loop
 
-        ' All ports serviced, continue
+                ' All ports serviced, continue
 ```
+
 
 
 # Instructions: J
@@ -6157,14 +6118,15 @@ if_nc   jmp     #.loop
 This section contains all PASM2 instructions beginning with the letter J.
 
 
+
 ## JATN {#jatn}
 
 Jump if ATN event flag is set
 [Event Instruction](#event-instructions) - Jump to S if ATN (attention) event flag is set.
 
-```
-JATN  {#}S
-```
+**JATN**  *{#}S*
+
+---
 
 **Result:** If the ATN event flag is set, PC is set to the address specified by S.
 
@@ -6189,100 +6151,44 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JATN is useful for implementing inter-cog communication mechanisms where one cog needs to signal and get the attention of another cog for coordination or data exchange purposes.
 
 
-## JCT1 {#jct1}
 
-Jump if counter 1 event flag is set
-[Event Instruction](#event-instructions) - Jump to S if CT1 (counter 1) event flag is set.
+## JCT1 / JCT2 / JCT3 {#jct1}
 
-```
-JCT1  {#}S
-```
+Jump if counter event flag is set (1, 2, or 3)
+[Event Instruction](#event-instructions) - Jump to S if CTn event flag is set.
 
-**Result:** If the CT1 event flag is set, PC is set to the address specified by S.
+**JCT1**  *{#}S*
+**JCT2**  *{#}S*
+**JCT3**  *{#}S*
 
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
+---
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000000001}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the CT1 event flag is set.
-```
-
-**Related:** [JCT2](#jct2), [JCT3](#jct3), [JNCT1](#jnct1), [ADDCT1](#addct1), [POLLCT1](#pollct1)
-
-**Explanation:**
-
-JCT1 checks the CT1 (counter 1) event flag and conditionally jumps to the address specified by S if the flag is set. The CT1 event flag is automatically set when the system counter reaches the CT1 target value that was previously configured using the ADDCT1 instruction.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CT1 event flag is clear, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JCT1 is commonly used for timing loops, delays, and periodic task scheduling where code needs to execute when the system counter reaches a specific value.
-
-
-## JCT2 {#jct2}
-
-Jump if counter 2 event flag is set
-[Event Instruction](#event-instructions) - Jump to S if CT2 (counter 2) event flag is set.
-
-```
-JCT2  {#}S
-```
-
-**Result:** If the CT2 event flag is set, PC is set to the address specified by S.
+**Result:** If the CTn event flag is set, PC is set to the address specified by S.
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 ```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000000010}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011110}{01I}{000000001}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000000010}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011110}{01I}{000000011}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\end{encodingtable}
 
-\textsuperscript{1} PC is written only when the CT2 event flag is set.
+\textsuperscript{1} PC is written only when the CTn event flag is set.
 ```
 
-**Related:** [JCT1](#jct1), [JCT3](#jct3), [JNCT2](#jnct2), [ADDCT2](#addct2), [POLLCT2](#pollct2)
+**Related:** [JNCT1/2/3](#jnct1), [ADDCT1/2/3](#addct1), [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1)
 
 **Explanation:**
 
-JCT2 checks the CT2 (counter 2) event flag and conditionally jumps to the address specified by S if the flag is set. The CT2 event flag is automatically set when the system counter reaches the CT2 target value that was previously configured using the ADDCT2 instruction.
+JCT1, JCT2, and JCT3 check their respective counter event flags and conditionally jump to the address specified by S if the flag is set. Each CTn event flag is automatically set when the system counter reaches the CTn target value that was previously configured using the corresponding ADDCTn instruction.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CT2 event flag is clear, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JCT2 provides a second independent hardware counter for timing operations, allowing a cog to manage two simultaneous time-based events without software overhead.
-
-
-## JCT3 {#jct3}
-
-Jump if counter 3 event flag is set
-[Event Instruction](#event-instructions) - Jump to S if CT3 (counter 3) event flag is set.
-
-```
-JCT3  {#}S
-```
-
-**Result:** If the CT3 event flag is set, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000000011}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the CT3 event flag is set.
-```
-
-**Related:** [JCT1](#jct1), [JCT2](#jct2), [JNCT3](#jnct3), [ADDCT3](#addct3), [POLLCT3](#pollct3)
-
-**Explanation:**
-
-JCT3 checks the CT3 (counter 3) event flag and conditionally jumps to the address specified by S if the flag is set. The CT3 event flag is automatically set when the system counter reaches the CT3 target value that was previously configured using the ADDCT3 instruction.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CT3 event flag is clear, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CTn event flag is clear, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-JCT3 provides a third independent hardware counter for timing operations, enabling complex multi-event timing scenarios within a single cog.
+The P2 provides three independent hardware counters for timing operations, allowing a cog to manage multiple simultaneous time-based events without software overhead. These instructions are commonly used for timing loops, delays, and periodic task scheduling.
+
 
 
 ## JFBW {#jfbw}
@@ -6290,9 +6196,9 @@ JCT3 provides a third independent hardware counter for timing operations, enabli
 Jump if FIFO block wrap event flag is set
 [Event Instruction](#event-instructions) - Jump to S if FIFO interface block wrap event flag is set.
 
-```
-JFBW  {#}S
-```
+**JFBW**  *{#}S*
+
+---
 
 **Result:** If the FIFO interface block wrap event flag is set, PC is set to the address specified by S.
 
@@ -6317,14 +6223,15 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JFBW is useful for implementing circular buffer operations and managing block-based data transfers through the FIFO interface, allowing code to respond immediately when a block boundary has been crossed.
 
 
+
 ## JINT {#jint}
 
 Jump if INT event flag is set
 [Event Instruction](#event-instructions) - Jump to S if INT (interrupt) event flag is set.
 
-```
-JINT  {#}S
-```
+**JINT**  *{#}S*
+
+---
 
 **Result:** If the INT event flag is set, PC is set to the address specified by S.
 
@@ -6336,7 +6243,7 @@ JINT  {#}S
 \textsuperscript{1} PC is written only when the INT event flag is set.
 ```
 
-**Related:** [JNINT](#jnint), [POLLINT](#pollint), [SETINT1](#setint1), [SETINT2](#setint2), [SETINT3](#setint3)
+**Related:** [JNINT](#jnint), [POLLINT](#pollint), [SETINT1/2/3](instructions-s.md#setint1)
 
 **Explanation:**
 
@@ -6349,15 +6256,17 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JINT provides a polling-based mechanism for handling hardware interrupts, allowing code to check for interrupt conditions at convenient points in the program flow rather than using asynchronous interrupt handling.
 
 
+
 ## JMP {#jmp}
 
 Jump
 [Branch/Jump Instruction](#branch-jump-instructions) - Unconditional jump to address.
 
-```
-JMP   D          {WC/WZ/WCZ}
-JMP   #{\}A
-```
+**JMP**  *D*  **{WC/WZ/WCZ}**
+**JMP**  *#A*
+**JMP**  *#\A*
+
+---
 
 **Result:** PC is set to the address specified by D or A.
 
@@ -6387,14 +6296,15 @@ For PC-relative jumps in COG execution mode, the 20-bit address field is added t
 The instruction executes in 4 clock cycles in COG execution mode. In Hub execution mode, jumps take 13-20 clock cycles depending on Hub access timing.
 
 
+
 ## JMPREL {#jmprel}
 
 Jump relative
 [Branch/Jump Instruction](#branch-jump-instructions) - Jump ahead or back by D instructions.
 
-```
-JMPREL  {#}D
-```
+**JMPREL**  *{#}D*
+
+---
 
 **Result:** PC is incremented or decremented by the value in D.
 
@@ -6419,14 +6329,15 @@ The instruction executes in 4 clock cycles in COG execution mode. In Hub executi
 JMPREL is useful for implementing position-independent code, jump tables, and dynamic control flow where the jump offset is computed at runtime.
 
 
+
 ## JNATN {#jnatn}
 
 Jump if ATN event flag is clear
 [Event Instruction](#event-instructions) - Jump to S if ATN (attention) event flag is clear.
 
-```
-JNATN  {#}S
-```
+**JNATN**  *{#}S*
+
+---
 
 **Result:** If the ATN event flag is clear, PC is set to the address specified by S.
 
@@ -6451,100 +6362,44 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JNATN is useful for implementing polling loops that wait until the ATN flag is clear before proceeding with other operations.
 
 
-## JNCT1 {#jnct1}
 
-Jump if counter 1 event flag is clear
-[Event Instruction](#event-instructions) - Jump to S if CT1 (counter 1) event flag is clear.
+## JNCT1 / JNCT2 / JNCT3 {#jnct1}
 
-```
-JNCT1  {#}S
-```
+Jump if counter event flag is clear (1, 2, or 3)
+[Event Instruction](#event-instructions) - Jump to S if CTn event flag is clear.
 
-**Result:** If the CT1 event flag is clear, PC is set to the address specified by S.
+**JNCT1**  *{#}S*
+**JNCT2**  *{#}S*
+**JNCT3**  *{#}S*
 
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
+---
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000010001}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the CT1 event flag is clear.
-```
-
-**Related:** [JNCT2](#jnct2), [JNCT3](#jnct3), [JCT1](#jct1), [ADDCT1](#addct1), [POLLCT1](#pollct1)
-
-**Explanation:**
-
-JNCT1 checks the CT1 (counter 1) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JCT1, allowing code to jump when the counter 1 event has not yet occurred.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CT1 event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JNCT1 is useful for implementing polling loops that continue until the CT1 counter event occurs, or for skipping code that should only execute before a specific time.
-
-
-## JNCT2 {#jnct2}
-
-Jump if counter 2 event flag is clear
-[Event Instruction](#event-instructions) - Jump to S if CT2 (counter 2) event flag is clear.
-
-```
-JNCT2  {#}S
-```
-
-**Result:** If the CT2 event flag is clear, PC is set to the address specified by S.
+**Result:** If the CTn event flag is clear, PC is set to the address specified by S.
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 ```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000010010}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011110}{01I}{000010001}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000010010}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011110}{01I}{000010011}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\end{encodingtable}
 
-\textsuperscript{1} PC is written only when the CT2 event flag is clear.
+\textsuperscript{1} PC is written only when the CTn event flag is clear.
 ```
 
-**Related:** [JNCT1](#jnct1), [JNCT3](#jnct3), [JCT2](#jct2), [ADDCT2](#addct2), [POLLCT2](#pollct2)
+**Related:** [JCT1/2/3](#jct1), [ADDCT1/2/3](#addct1), [POLLCT1/2/3](#pollct1), [WAITCT1/2/3](#waitct1)
 
 **Explanation:**
 
-JNCT2 checks the CT2 (counter 2) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JCT2, allowing code to jump when the counter 2 event has not yet occurred.
+JNCT1, JNCT2, and JNCT3 check their respective counter event flags and conditionally jump to the address specified by S if the flag is clear. These are the logical complements of JCT1/2/3, allowing code to jump when the corresponding counter event has not yet occurred.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CT2 event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JNCT2 provides the same polling capability as JNCT1 but for the independent counter 2 event, enabling complex multi-timer control flows.
-
-
-## JNCT3 {#jnct3}
-
-Jump if counter 3 event flag is clear
-[Event Instruction](#event-instructions) - Jump to S if CT3 (counter 3) event flag is clear.
-
-```
-JNCT3  {#}S
-```
-
-**Result:** If the CT3 event flag is clear, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000010011}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the CT3 event flag is clear.
-```
-
-**Related:** [JNCT1](#jnct1), [JNCT2](#jnct2), [JCT3](#jct3), [ADDCT3](#addct3), [POLLCT3](#pollct3)
-
-**Explanation:**
-
-JNCT3 checks the CT3 (counter 3) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JCT3, allowing code to jump when the counter 3 event has not yet occurred.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CT3 event flag is set, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the CTn event flag is set, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-JNCT3 completes the set of three independent counter event polling mechanisms, allowing sophisticated timing control with minimal code overhead.
+These instructions are useful for implementing polling loops that continue until a counter event occurs, or for skipping code that should only execute before a specific time. The P2's three independent counter event polling mechanisms enable sophisticated timing control with minimal code overhead.
+
 
 
 ## JNFBW {#jnfbw}
@@ -6552,9 +6407,9 @@ JNCT3 completes the set of three independent counter event polling mechanisms, a
 Jump if FIFO block wrap event flag is clear
 [Event Instruction](#event-instructions) - Jump to S if FIFO interface block wrap event flag is clear.
 
-```
-JNFBW  {#}S
-```
+**JNFBW**  *{#}S*
+
+---
 
 **Result:** If the FIFO interface block wrap event flag is clear, PC is set to the address specified by S.
 
@@ -6579,14 +6434,15 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JNFBW is useful for polling loops that wait until a block wrap occurs, or for conditional code that should only execute when within a block boundary.
 
 
+
 ## JNINT {#jnint}
 
 Jump if INT event flag is clear
 [Event Instruction](#event-instructions) - Jump to S if INT (interrupt) event flag is clear.
 
-```
-JNINT  {#}S
-```
+**JNINT**  *{#}S*
+
+---
 
 **Result:** If the INT event flag is clear, PC is set to the address specified by S.
 
@@ -6598,7 +6454,7 @@ JNINT  {#}S
 \textsuperscript{1} PC is written only when the INT event flag is clear.
 ```
 
-**Related:** [JINT](#jint), [POLLINT](#pollint), [SETINT1](#setint1), [SETINT2](#setint2), [SETINT3](#setint3)
+**Related:** [JINT](#jint), [POLLINT](#pollint), [SETINT1/2/3](instructions-s.md#setint1)
 
 **Explanation:**
 
@@ -6611,14 +6467,15 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JNINT is useful for polling loops that wait until an interrupt occurs, or for implementing interrupt-safe critical sections that should only execute when interrupts are not pending.
 
 
+
 ## JNPAT {#jnpat}
 
 Jump if pattern match event flag is clear
 [Event Instruction](#event-instructions) - Jump to S if PAT (pattern match) event flag is clear.
 
-```
-JNPAT  {#}S
-```
+**JNPAT**  *{#}S*
+
+---
 
 **Result:** If the PAT event flag is clear, PC is set to the address specified by S.
 
@@ -6643,14 +6500,15 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JNPAT is useful for polling loops that wait until a specific pattern appears on the I/O pins, or for conditional logic that should execute only when the pattern has not yet matched.
 
 
+
 ## JNQMT {#jnqmt}
 
 Jump if CORDIC empty event flag is clear
 [Event Instruction](#event-instructions) - Jump to S if CORDIC-read-but-empty event flag is clear.
 
-```
-JNQMT  {#}S
-```
+**JNQMT**  *{#}S*
+
+---
 
 **Result:** If the CORDIC-read-but-empty event flag is clear, PC is set to the address specified by S.
 
@@ -6675,132 +6533,46 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JNQMT is useful for ensuring CORDIC results are read at the correct time, helping to detect and handle timing errors in mathematical operations.
 
 
-## JNSE1 {#jnse1}
 
-Jump if selector 1 event flag is clear
-[Event Instruction](#event-instructions) - Jump to S if SE1 (selector 1) event flag is clear.
+## JNSE1 / JNSE2 / JNSE3 / JNSE4 {#jnse1}
 
-```
-JNSE1  {#}S
-```
+Jump if selectable event flag is clear (1, 2, 3, or 4)
+[Event Instruction](#event-instructions) - Jump to S if SEn event flag is clear.
 
-**Result:** If the SE1 event flag is clear, PC is set to the address specified by S.
+**JNSE1**  *{#}S*
+**JNSE2**  *{#}S*
+**JNSE3**  *{#}S*
+**JNSE4**  *{#}S*
 
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
+---
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000010100}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the SE1 event flag is clear.
-```
-
-**Related:** [JNSE2](#jnse2), [JNSE3](#jnse3), [JNSE4](#jnse4), [JSE1](#jse1), [SETSE1](#setse1)
-
-**Explanation:**
-
-JNSE1 checks the SE1 (selector 1) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JSE1, allowing code to jump when the selector 1 event has not occurred.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SE1 event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JNSE1 provides polling capability for the first of four selectable event sources, which can be configured to detect various hardware conditions.
-
-
-## JNSE2 {#jnse2}
-
-Jump if selector 2 event flag is clear
-[Event Instruction](#event-instructions) - Jump to S if SE2 (selector 2) event flag is clear.
-
-```
-JNSE2  {#}S
-```
-
-**Result:** If the SE2 event flag is clear, PC is set to the address specified by S.
+**Result:** If the SEn event flag is clear, PC is set to the address specified by S.
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 ```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000010101}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011110}{01I}{000010100}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000010101}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000010110}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011110}{01I}{000010111}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\end{encodingtable}
 
-\textsuperscript{1} PC is written only when the SE2 event flag is clear.
+\textsuperscript{1} PC is written only when the SEn event flag is clear.
 ```
 
-**Related:** [JNSE1](#jnse1), [JNSE3](#jnse3), [JNSE4](#jnse4), [JSE2](#jse2), [SETSE2](#setse2)
+**Related:** [JSE1/2/3/4](#jse1), [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1)
 
 **Explanation:**
 
-JNSE2 checks the SE2 (selector 2) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JSE2, allowing code to jump when the selector 2 event has not occurred.
+JNSE1, JNSE2, JNSE3, and JNSE4 check their respective selectable event flags and conditionally jump to the address specified by S if the flag is clear. These are the logical complements of JSE1/2/3/4, allowing code to jump when the corresponding selectable event has not occurred.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SE2 event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JNSE2 provides polling capability for the second of four selectable event sources, enabling independent monitoring of multiple hardware events.
-
-
-## JNSE3 {#jnse3}
-
-Jump if selector 3 event flag is clear
-[Event Instruction](#event-instructions) - Jump to S if SE3 (selector 3) event flag is clear.
-
-```
-JNSE3  {#}S
-```
-
-**Result:** If the SE3 event flag is clear, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000010110}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the SE3 event flag is clear.
-```
-
-**Related:** [JNSE1](#jnse1), [JNSE2](#jnse2), [JNSE4](#jnse4), [JSE3](#jse3), [SETSE3](#setse3)
-
-**Explanation:**
-
-JNSE3 checks the SE3 (selector 3) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JSE3, allowing code to jump when the selector 3 event has not occurred.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SE3 event flag is set, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SEn event flag is set, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-JNSE3 provides polling capability for the third of four selectable event sources, supporting complex event-driven control flows.
+The P2 provides four selectable event sources, each configurable via SETSE instructions to detect various hardware conditions. These polling mechanisms provide maximum flexibility for event-driven control flows.
 
-
-## JNSE4 {#jnse4}
-
-Jump if selector 4 event flag is clear
-[Event Instruction](#event-instructions) - Jump to S if SE4 (selector 4) event flag is clear.
-
-```
-JNSE4  {#}S
-```
-
-**Result:** If the SE4 event flag is clear, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000010111}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the SE4 event flag is clear.
-```
-
-**Related:** [JNSE1](#jnse1), [JNSE2](#jnse2), [JNSE3](#jnse3), [JSE4](#jse4), [SETSE4](#setse4)
-
-**Explanation:**
-
-JNSE4 checks the SE4 (selector 4) event flag and conditionally jumps to the address specified by S if the flag is clear. This is the logical complement of JSE4, allowing code to jump when the selector 4 event has not occurred.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SE4 event flag is set, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JNSE4 completes the set of four selectable event polling mechanisms, providing maximum flexibility for hardware event monitoring.
 
 
 ## JNXFI {#jnxfi}
@@ -6808,9 +6580,9 @@ JNSE4 completes the set of four selectable event polling mechanisms, providing m
 Jump if streamer finished event flag is clear
 [Event Instruction](#event-instructions) - Jump to S if XFI (streamer finished) event flag is clear.
 
-```
-JNXFI  {#}S
-```
+**JNXFI**  *{#}S*
+
+---
 
 **Result:** If the XFI event flag is clear, PC is set to the address specified by S.
 
@@ -6835,14 +6607,15 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JNXFI is useful for polling loops that wait until the streamer completes its operation, synchronizing code execution with streamer activity.
 
 
+
 ## JNXMT {#jnxmt}
 
 Jump if streamer empty event flag is clear
 [Event Instruction](#event-instructions) - Jump to S if XMT (streamer empty) event flag is clear.
 
-```
-JNXMT  {#}S
-```
+**JNXMT**  *{#}S*
+
+---
 
 **Result:** If the XMT event flag is clear, PC is set to the address specified by S.
 
@@ -6867,14 +6640,15 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JNXMT is useful for maintaining continuous streamer operation by reloading data only when the streamer buffer still contains data, avoiding underrun conditions.
 
 
+
 ## JNXRL {#jnxrl}
 
 Jump if streamer LUT rollover event flag is clear
 [Event Instruction](#event-instructions) - Jump to S if XRL (streamer LUT RAM rollover) event flag is clear.
 
-```
-JNXRL  {#}S
-```
+**JNXRL**  *{#}S*
+
+---
 
 **Result:** If the XRL event flag is clear, PC is set to the address specified by S.
 
@@ -6899,14 +6673,15 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JNXRL is useful for implementing circular buffer management for streamer operations using LUT RAM, allowing code to detect when a buffer boundary has not yet been crossed.
 
 
+
 ## JNXRO {#jnxro}
 
 Jump if streamer NCO rollover event flag is clear
 [Event Instruction](#event-instructions) - Jump to S if XRO (streamer NCO rollover) event flag is clear.
 
-```
-JNXRO  {#}S
-```
+**JNXRO**  *{#}S*
+
+---
 
 **Result:** If the XRO event flag is clear, PC is set to the address specified by S.
 
@@ -6931,14 +6706,15 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JNXRO is useful for timing-sensitive streamer applications where code needs to synchronize with or detect the absence of NCO rollovers in the streaming operation.
 
 
+
 ## JPAT {#jpat}
 
 Jump if pattern match event flag is set
 [Event Instruction](#event-instructions) - Jump to S if PAT (pattern match) event flag is set.
 
-```
-JPAT  {#}S
-```
+**JPAT**  *{#}S*
+
+---
 
 **Result:** If the PAT event flag is set, PC is set to the address specified by S.
 
@@ -6963,14 +6739,15 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JPAT is useful for implementing hardware-triggered control flow where code execution branches based on specific pin state patterns, enabling efficient event-driven programming without continuous polling.
 
 
+
 ## JQMT {#jqmt}
 
 Jump if CORDIC empty event flag is set
 [Event Instruction](#event-instructions) - Jump to S if CORDIC-read-but-empty event flag is set.
 
-```
-JQMT  {#}S
-```
+**JQMT**  *{#}S*
+
+---
 
 **Result:** If the CORDIC-read-but-empty event flag is set, PC is set to the address specified by S.
 
@@ -6995,132 +6772,46 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JQMT is useful for error handling in CORDIC operations, allowing code to detect and respond to premature reads of calculation results, which can help debug timing issues in mathematical code.
 
 
-## JSE1 {#jse1}
 
-Jump if selector 1 event flag is set
-[Event Instruction](#event-instructions) - Jump to S if SE1 (selector 1) event flag is set.
+## JSE1 / JSE2 / JSE3 / JSE4 {#jse1}
 
-```
-JSE1  {#}S
-```
+Jump if selectable event flag is set (1, 2, 3, or 4)
+[Event Instruction](#event-instructions) - Jump to S if SEn event flag is set.
 
-**Result:** If the SE1 event flag is set, PC is set to the address specified by S.
+**JSE1**  *{#}S*
+**JSE2**  *{#}S*
+**JSE3**  *{#}S*
+**JSE4**  *{#}S*
 
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
+---
 
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000000100}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the SE1 event flag is set.
-```
-
-**Related:** [JSE2](#jse2), [JSE3](#jse3), [JSE4](#jse4), [JNSE1](#jnse1), [SETSE1](#setse1)
-
-**Explanation:**
-
-JSE1 checks the SE1 (selector 1) event flag and conditionally jumps to the address specified by S if the flag is set. The selector 1 event can be configured to detect various hardware conditions using the SETSE1 instruction.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SE1 event flag is clear, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JSE1 is the first of four selectable event polling instructions, providing flexible hardware event detection for custom event handling.
-
-
-## JSE2 {#jse2}
-
-Jump if selector 2 event flag is set
-[Event Instruction](#event-instructions) - Jump to S if SE2 (selector 2) event flag is set.
-
-```
-JSE2  {#}S
-```
-
-**Result:** If the SE2 event flag is set, PC is set to the address specified by S.
+**Result:** If the SEn event flag is set, PC is set to the address specified by S.
 
 - S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
 
 ```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000000101}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011110}{01I}{000000100}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000000101}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrowcont{EEEE}{1011110}{01I}{000000110}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011110}{01I}{000000111}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
+\end{encodingtable}
 
-\textsuperscript{1} PC is written only when the SE2 event flag is set.
+\textsuperscript{1} PC is written only when the SEn event flag is set.
 ```
 
-**Related:** [JSE1](#jse1), [JSE3](#jse3), [JSE4](#jse4), [JNSE2](#jnse2), [SETSE2](#setse2)
+**Related:** [JNSE1/2/3/4](#jnse1), [SETSE1/2/3/4](#setse1), [POLLSE1/2/3/4](#pollse1), [WAITSE1/2/3/4](#waitse1)
 
 **Explanation:**
 
-JSE2 checks the SE2 (selector 2) event flag and conditionally jumps to the address specified by S if the flag is set. The selector 2 event can be configured to detect various hardware conditions using the SETSE2 instruction.
+JSE1, JSE2, JSE3, and JSE4 check their respective selectable event flags and conditionally jump to the address specified by S if the flag is set. Each selectable event can be configured to detect various hardware conditions using the corresponding SETSE instruction.
 
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SE2 event flag is clear, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JSE2 provides a second independent selectable event source, enabling multiple concurrent hardware event detection mechanisms.
-
-
-## JSE3 {#jse3}
-
-Jump if selector 3 event flag is set
-[Event Instruction](#event-instructions) - Jump to S if SE3 (selector 3) event flag is set.
-
-```
-JSE3  {#}S
-```
-
-**Result:** If the SE3 event flag is set, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000000110}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the SE3 event flag is set.
-```
-
-**Related:** [JSE1](#jse1), [JSE2](#jse2), [JSE4](#jse4), [JNSE3](#jnse3), [SETSE3](#setse3)
-
-**Explanation:**
-
-JSE3 checks the SE3 (selector 3) event flag and conditionally jumps to the address specified by S if the flag is set. The selector 3 event can be configured to detect various hardware conditions using the SETSE3 instruction.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SE3 event flag is clear, execution continues with the next instruction and the jump is not taken.
+When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SEn event flag is clear, execution continues with the next instruction and the jump is not taken.
 
 The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
 
-JSE3 provides a third independent selectable event source for sophisticated event-driven applications.
+The P2 provides four independent selectable event sources, enabling multiple concurrent hardware event detection mechanisms for sophisticated event-driven applications.
 
-
-## JSE4 {#jse4}
-
-Jump if selector 4 event flag is set
-[Event Instruction](#event-instructions) - Jump to S if SE4 (selector 4) event flag is set.
-
-```
-JSE4  {#}S
-```
-
-**Result:** If the SE4 event flag is set, PC is set to the address specified by S.
-
-- S is a register, 9-bit literal, or 20-bit augmented literal specifying the absolute or relative address to jump to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011110}{01I}{000000111}{SSSSSSSSS}{PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the SE4 event flag is set.
-```
-
-**Related:** [JSE1](#jse1), [JSE2](#jse2), [JSE3](#jse3), [JNSE4](#jnse4), [SETSE4](#setse4)
-
-**Explanation:**
-
-JSE4 checks the SE4 (selector 4) event flag and conditionally jumps to the address specified by S if the flag is set. The selector 4 event can be configured to detect various hardware conditions using the SETSE4 instruction.
-
-When the # prefix is used with S, the jump is relative to the current PC value. When # is omitted, the jump is to the absolute address specified by S. If the SE4 event flag is clear, execution continues with the next instruction and the jump is not taken.
-
-The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock cycles if the jump is taken (in COG execution mode). In Hub execution mode, taken jumps require 13-20 clock cycles depending on Hub timing.
-
-JSE4 completes the set of four selectable event sources, providing maximum flexibility for complex event-driven control flow.
 
 
 ## JXFI {#jxfi}
@@ -7128,9 +6819,9 @@ JSE4 completes the set of four selectable event sources, providing maximum flexi
 Jump if streamer finished event flag is set
 [Event Instruction](#event-instructions) - Jump to S if XFI (streamer finished) event flag is set.
 
-```
-JXFI  {#}S
-```
+**JXFI**  *{#}S*
+
+---
 
 **Result:** If the XFI event flag is set, PC is set to the address specified by S.
 
@@ -7155,14 +6846,15 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JXFI is useful for chaining streamer operations or triggering code execution immediately when a streaming operation completes, enabling efficient streamer-driven workflows.
 
 
+
 ## JXMT {#jxmt}
 
 Jump if streamer empty event flag is set
 [Event Instruction](#event-instructions) - Jump to S if XMT (streamer empty) event flag is set.
 
-```
-JXMT  {#}S
-```
+**JXMT**  *{#}S*
+
+---
 
 **Result:** If the XMT event flag is set, PC is set to the address specified by S.
 
@@ -7187,14 +6879,15 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JXMT is useful for implementing continuous streaming operations where the code needs to reload data into the streamer when the buffer empties, preventing gaps or underruns in the output stream.
 
 
+
 ## JXRL {#jxrl}
 
 Jump if streamer LUT rollover event flag is set
 [Event Instruction](#event-instructions) - Jump to S if XRL (streamer LUT RAM rollover) event flag is set.
 
-```
-JXRL  {#}S
-```
+**JXRL**  *{#}S*
+
+---
 
 **Result:** If the XRL event flag is set, PC is set to the address specified by S.
 
@@ -7219,14 +6912,15 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JXRL is useful for implementing circular buffer operations with the streamer using LUT RAM, allowing code to detect when a complete cycle through the buffer has occurred.
 
 
+
 ## JXRO {#jxro}
 
 Jump if streamer NCO rollover event flag is set
 [Event Instruction](#event-instructions) - Jump to S if XRO (streamer NCO rollover) event flag is set.
 
-```
-JXRO  {#}S
-```
+**JXRO**  *{#}S*
+
+---
 
 **Result:** If the XRO event flag is set, PC is set to the address specified by S.
 
@@ -7251,9 +6945,11 @@ The instruction executes in 2 clock cycles if the jump is not taken, or 4 clock 
 JXRO is useful for timing-critical streamer applications where code needs to synchronize with the NCO rollovers, such as sample-rate based operations or periodic streamer updates.
 
 
+
 # Instructions: L
 
 This section contains all PASM2 instructions beginning with the letter L.
+
 
 
 ## LOC {#loc}
@@ -7261,9 +6957,10 @@ This section contains all PASM2 instructions beginning with the letter L.
 Load address
 [Hub Memory Instruction](#hub-memory-instructions) - Load address into PA, PB, PTRA, or PTRB.
 
-```
-LOC  PA/PB/PTRA/PTRB, #{\}A
-```
+**LOC**  *PA/PB/PTRA/PTRB, #A*
+**LOC**  *PA/PB/PTRA/PTRB, #\A*
+
+---
 
 **Result:** Address is loaded into the specified pointer register.
 
@@ -7288,14 +6985,15 @@ The WW field in the encoding selects which pointer register to load: 00 for PA, 
 LOC is commonly used to set up pointer registers before memory operations, call sequences, or when establishing base addresses for data structures. The relative addressing mode is particularly useful for creating position-independent code blocks that can execute correctly regardless of where they are loaded in Hub memory.
 
 
+
 ## LOCKNEW {#locknew}
 
 Allocate new lock
 [COG Control Instruction](#cog-control-instructions) - Request a new LOCK from the hardware lock pool.
 
-```
-LOCKNEW  D  {WC}
-```
+**LOCKNEW**  *D*  **{WC}**
+
+---
 
 **Result:** D is written with an available lock number (0-15), or remains unchanged if no lock is available.
 
@@ -7319,14 +7017,15 @@ Once a lock is allocated with LOCKNEW, it remains assigned until explicitly retu
 LOCKNEW is essential for dynamic lock allocation in systems where the number of required locks is not known at compile time, or where locks are allocated and deallocated as resources are created and destroyed. The instruction completes in 4 to 11 clock cycles depending on lock availability and contention.
 
 
+
 ## LOCKREL {#lockrel}
 
 Release lock
 [COG Control Instruction](#cog-control-instructions) - Release a previously acquired LOCK.
 
-```
-LOCKREL  {#}D  {WC}
-```
+**LOCKREL**  *{#}D*  **{WC}**
+
+---
 
 **Result:** The lock specified by D[3:0] is released for other COGs to acquire.
 
@@ -7350,14 +7049,15 @@ LOCKREL is safe to call even if the lock was not held by the current COG. Releas
 Proper lock management requires that every LOCKTRY that successfully acquires a lock is balanced with a corresponding LOCKREL. Failure to release locks leads to deadlocks and resource starvation. The instruction completes in 2 to 9 clock cycles, with an additional 2 cycles if the result is written back to D.
 
 
+
 ## LOCKRET {#lockret}
 
 Return lock to pool
 [COG Control Instruction](#cog-control-instructions) - Return a LOCK to the pool for reallocation.
 
-```
-LOCKRET  {#}D
-```
+**LOCKRET**  *{#}D*
+
+---
 
 **Result:** The lock specified by D[3:0] is returned to the pool and becomes available for LOCKNEW.
 
@@ -7380,14 +7080,15 @@ LOCKRET should only be called on locks that are not currently held by any COG. B
 The proper pattern for dynamic lock usage is: LOCKNEW to allocate, LOCKTRY/LOCKREL for each critical section, and LOCKRET when the lock is no longer needed for any purpose. This ensures efficient use of the limited pool of 16 hardware locks. The instruction completes in 2 to 9 clock cycles depending on Hub access contention.
 
 
+
 ## LOCKTRY {#locktry}
 
 Try to acquire lock
 [COG Control Instruction](#cog-control-instructions) - Attempt to acquire a LOCK with atomic test-and-set.
 
-```
-LOCKTRY  {#}D  {WC}
-```
+**LOCKTRY**  *{#}D*  **{WC}**
+
+---
 
 **Result:** Attempts to acquire the lock specified by D[3:0]. The C flag indicates success.
 
@@ -7411,9 +7112,11 @@ LOCKTRY implements the critical section entry point in the standard lock pattern
 The instruction is non-blocking and returns immediately regardless of lock availability. For spin-lock behavior (waiting until the lock is acquired), LOCKTRY must be called repeatedly in a loop. Lock 15 is traditionally reserved for debug monitor use. The instruction completes in 2 to 9 clock cycles, with an additional 2 cycles if a result is returned.
 
 
+
 # Instructions: M
 
 This section contains all PASM2 instructions beginning with the letter M.
+
 
 
 ## MERGEB {#mergeb}
@@ -7421,9 +7124,9 @@ This section contains all PASM2 instructions beginning with the letter M.
 Merge bits of bytes
 [Math and Logic Instruction](#math-and-logic-instructions) - Rearrange bits from each byte into a merged pattern.
 
-```
-MERGEB  D
-```
+**MERGEB**  *D*
+
+---
 
 **Result:** Bits from each byte in D are rearranged into a specific merged pattern.
 
@@ -7444,14 +7147,15 @@ This operation takes the most significant bit from each of the four bytes in D a
 MERGEB is useful for bit-plane conversions, graphics operations, and data transformations where bits need to be regrouped across byte boundaries. It performs the inverse operation of SPLITB, which distributes bits back into their original byte positions.
 
 
+
 ## MERGEW {#mergew}
 
 Merge bits of words
 [Math and Logic Instruction](#math-and-logic-instructions) - Rearrange bits from each word into a merged pattern.
 
-```
-MERGEW  D
-```
+**MERGEW**  *D*
+
+---
 
 **Result:** Bits from each word in D are rearranged into a specific merged pattern.
 
@@ -7472,14 +7176,15 @@ This operation interleaves the bits from the upper and lower words of D, alterna
 MERGEW is useful for word-level bit-plane conversions, graphics operations requiring word-aligned data transformations, and encoding operations. It performs the inverse operation of SPLITW, which de-interleaves the bits back into their original word positions.
 
 
+
 ## MIXPIX {#mixpix}
 
 Mix pixels
 [Pixel Mixer Instruction](#pixel-mixer-instructions) - Blend bytes of source into destination using pixel mixer configuration.
 
-```
-MIXPIX  D,{#}S
-```
+**MIXPIX**  *D,{#}S*
+
+---
 
 **Result:** Bytes of S are blended into bytes of D according to the SETPIX and SETPIV configuration.
 
@@ -7503,14 +7208,15 @@ This instruction executes in 7 clock cycles to perform the pixel arithmetic on a
 MIXPIX is essential for high-performance graphics operations, enabling real-time color mixing, transparency effects, and color space transformations without requiring multiple individual byte operations.
 
 
+
 ## MODC {#modc}
 
 Modify C flag
 [Flag Instruction](#flag-instructions) - Set or clear the C flag based on a modifier and current flag state.
 
-```
-MODC  c  {WC}
-```
+**MODC**  *c*  **{WC}**
+
+---
 
 **Result:** The C flag is set or cleared according to the modifier and current C and Z flag states.
 
@@ -7536,14 +7242,15 @@ MODC is typically used after comparison or test instructions to create complex c
 If the WC effect is specified, the flag modification becomes visible to subsequent instructions; otherwise, the modification may be used internally without affecting the architectural flag state.
 
 
+
 ## MODCZ {#modcz}
 
 Modify C and Z flags
 [Flag Instruction](#flag-instructions) - Set or clear both C and Z flags based on modifiers and current flag states.
 
-```
-MODCZ  c,z  {WC/WZ/WCZ}
-```
+**MODCZ**  *c,z*  **{WC/WZ/WCZ}**
+
+---
 
 **Result:** Both C and Z flags are set or cleared according to their modifiers and the current C and Z flag states.
 
@@ -7572,14 +7279,15 @@ If the WC, WZ, or WCZ effects are specified, the flag modifications become visib
 The simultaneous update of both flags makes MODCZ more powerful than using separate MODC and MODZ instructions, as it allows each flag's new value to be based on the same initial flag state rather than having one flag update affect the other's calculation.
 
 
+
 ## MODZ {#modz}
 
 Modify Z flag
 [Flag Instruction](#flag-instructions) - Set or clear the Z flag based on a modifier and current flag state.
 
-```
-MODZ  z  {WZ}
-```
+**MODZ**  *z*  **{WZ}**
+
+---
 
 **Result:** The Z flag is set or cleared according to the modifier and current C and Z flag states.
 
@@ -7605,14 +7313,15 @@ MODZ is typically used after comparison or test instructions to create complex c
 If the WZ effect is specified, the flag modification becomes visible to subsequent instructions; otherwise, the modification may be used internally without affecting the architectural flag state.
 
 
+
 ## MOV {#mov}
 
 Move
 [Math and Logic Instruction](#math-and-logic-instructions) - Copy a value from source to destination.
 
-```
-MOV  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**MOV**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** The Src value is stored in Dest.
 
@@ -7652,11 +7361,12 @@ MOV between registers is used for preserving values and working with temporary c
 When combined with flag effects, MOV enables efficient value testing:
 
 ```pasm
-        mov     data, source  wz        ' Copy and test if zero
-if_nz   call    #process                ' Process only if non-zero
-        mov     signed, value  wc       ' Copy and test sign bit
-if_c    neg     signed, signed          ' Make positive if negative
+                mov     data, source  wz        ' Copy and test if zero
+        if_nz   call    #process                ' Process only if non-zero
+                mov     signed, value  wc       ' Copy and test sign bit
+        if_c    neg     signed, signed          ' Make positive if negative
 ```
+
 
 
 ## MOVBYTS {#movbyts}
@@ -7664,9 +7374,9 @@ if_c    neg     signed, signed          ' Make positive if negative
 Move bytes
 [Math and Logic Instruction](#math-and-logic-instructions) - Rearrange bytes within a register according to a control pattern.
 
-```
-MOVBYTS  D,{#}S
-```
+**MOVBYTS**  *D,{#}S*
+
+---
 
 **Result:** Bytes within D are rearranged according to the byte selection pattern in S.
 
@@ -7690,11 +7400,11 @@ For example, to swap the high and low words of D, use S = $4E (binary 01_00_11_1
 MOVBYTS is useful for byte-order conversions (endianness swapping), color channel reordering in pixel data, and general byte permutation operations. It executes in 2 clock cycles, making it an efficient alternative to multiple shift and mask operations.
 
 Common patterns include:
-
 - S = $E4 (binary 11_10_01_00): No change (identity)
 - S = $1B (binary 00_01_10_11): Reverse bytes (big/little endian swap)
 - S = $B1 (binary 10_11_00_01): Swap words
 - S = $4E (binary 01_00_11_10): Swap bytes within each word
+
 
 
 ## MUL {#mul}
@@ -7702,9 +7412,9 @@ Common patterns include:
 Multiply
 [Math and Logic Instruction](#math-and-logic-instructions) - Multiply two unsigned 16-bit values to produce a 32-bit result.
 
-```
-MUL  Dest, {#}Src  {WZ}
-```
+**MUL**  *Dest, {#}Src*  **{WZ}**
+
+---
 
 **Result:** The 32-bit unsigned product of the lower 16 bits of Dest and Src is stored in Dest.
 
@@ -7746,14 +7456,15 @@ For fixed-point math with 16-bit fractional parts:
 For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which can multiply full 32-bit values and produces a 64-bit result accessible through the upper and lower result registers. MUL's 2-clock speed makes it ideal when the operands are known to fit in 16 bits.
 
 
+
 ## MULPIX {#mulpix}
 
 Multiply pixels
 [Pixel Mixer Instruction](#pixel-mixer-instructions) - Multiply corresponding bytes treating them as fractional values.
 
-```
-MULPIX  D,{#}S
-```
+**MULPIX**  *D,{#}S*
+
+---
 
 **Result:** Each byte of S is multiplied with the corresponding byte of D, with results stored in D.
 
@@ -7777,7 +7488,6 @@ This instruction is essential for pixel color multiplication operations used in 
 MULPIX executes in 7 clock cycles to perform all four parallel multiplications. This is significantly faster than performing four separate multiply and scale operations, making it practical for real-time graphics processing.
 
 Common uses include:
-
 - Color modulation (tinting): Multiply each color channel by a tint value
 - Brightness adjustment: Multiply RGB by a brightness factor
 - Alpha premultiplication: Multiply RGB by alpha for compositing
@@ -7786,14 +7496,15 @@ Common uses include:
 The instruction treats all bytes independently, so it can be used for any four-byte parallel multiply operation, not just color processing.
 
 
+
 ## MULS {#muls}
 
 Multiply signed
 [Math and Logic Instruction](#math-and-logic-instructions) - Multiply two signed 16-bit values to produce a signed 32-bit result.
 
-```
-MULS  Dest, {#}Src  {WZ}
-```
+**MULS**  *Dest, {#}Src*  **{WZ}**
+
+---
 
 **Result:** The 32-bit signed product of the signed lower 16 bits of Dest and Src is stored in Dest.
 
@@ -7838,96 +7549,61 @@ MULS differs from MUL only in that it treats the 16-bit operands as signed value
 For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which can multiply full signed 32-bit values and produces a signed 64-bit result accessible through the upper and lower result registers.
 
 
-## MUXC {#muxc}
 
-Multiplex C
-[Math and Logic Instruction](#math-and-logic-instructions) - Set selected bits of destination to the C flag value.
+## MUXC / MUXNC / MUXZ / MUXNZ {#muxc}
 
-```
-MUXC  D,{#}S  {WC|WZ|WCZ}
-```
+Multiplex flag to bits {#muxnc} {#muxz} {#muxnz}
+[Math and Logic Instruction](#math-and-logic-instructions) - Set selected bits of destination to C, NC, Z, or NZ flag value.
 
-**Result:** Each bit position in D where S has a 1 is set to the current C flag value.
+**MUXC**  *D,{#}S*  **{WC|WZ|WCZ}**
+**MUXNC**  *D,{#}S*  **{WC|WZ|WCZ}**
+**MUXZ**  *D,{#}S*  **{WC|WZ|WCZ}**
+**MUXNZ**  *D,{#}S*  **{WC|WZ|WCZ}**
 
-- D is a register whose bits will be set to the C flag value where S has 1 bits.
+---
+
+**Result:** Each bit position in D where S has a 1 is set to the specified flag value:
+
+| Instruction | Sets bits to |
+|-------------|--------------|
+| MUXC | C flag value |
+| MUXNC | !C (inverted C) |
+| MUXZ | Z flag value |
+| MUXNZ | !Z (inverted Z) |
+
+- D is a register whose bits will be set to the flag value where S has 1 bits.
 - S is a register, 9-bit literal, or 32-bit augmented literal that selects which bits to modify.
 - WC, WZ, or WCZ are optional effects to update flags.
 
 ```{=latex}
-\simpleencoding{EEEE}{0101100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{parity of result}{Result = 0}{2}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0101100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Result = 0}{2}
+\encodingrowcont{EEEE}{0101101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Result = 0}{2}
+\encodingrowcont{EEEE}{0101110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Result = 0}{2}
+\encodingrow{EEEE}{0101111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Result = 0}{2}
+\end{encodingtable}
 ```
 
-**Related:** [MUXNC](#muxnc), [MUXZ](#muxz), [MUXNZ](#muxnz), [MUXQ](#muxq), [TESTB](#testb)
+**Related:** [MUXQ](#muxq), [TESTB](#testb), [TESTBN](#testbn)
 
 **Explanation:**
 
-MUXC modifies selected bits in D based on the current C flag value. For each bit position where S contains a 1, the corresponding bit in D is replaced with the C flag value. All other bits in D remain unchanged. The operation is: D = (!S & D) | (S & {32{C}}), where {32{C}} represents the C flag value replicated across all 32 bits.
+These instructions modify selected bits in D based on a flag value. For each bit position where S contains a 1, the corresponding bit in D is replaced with the flag value (or its inverse). All other bits in D remain unchanged. The operation is: D = (!S & D) | (S & {32{flag}}).
 
-For example, if C = 1, D = $F0F0_F0F0, and S = $00FF_00FF, the result is D = $F0FF_F0FF, because the 1 bits in S (the lower byte of each word) are set to 1 (the C flag value), while the 0 bits in S leave the corresponding D bits unchanged.
+MUXC and MUXZ copy the direct flag value; MUXNC and MUXNZ copy the inverted flag value.
 
-MUXC is commonly used to conditionally set or clear specific bits based on a flag test:
-
-```pasm
-        cmp     value, limit  wc        ' Set C if value < limit
-        muxc    status, #$01            ' Set bit 0 of status to C
-```
-
-Multiple bits can be set simultaneously:
-
-```pasm
-        test    data, #$80  wc          ' Test bit 7, set C if high
-        muxc    flags, #$07             ' Set bits 0-2 to match C
-```
-
-If the WC or WCZ effect is specified, the C flag is set to the parity of the result (1 if an odd number of bits are set, 0 if even). If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero.
-
-MUXC provides an efficient alternative to conditional branches when setting bits based on test results. Instead of branching, a comparison can set the C flag, and MUXC can immediately apply that result to specific bits.
-
-
-## MUXNC {#muxnc}
-
-Multiplex not C
-[Math and Logic Instruction](#math-and-logic-instructions) - Set selected bits of destination to the inverted C flag value.
-
-```
-MUXNC  D,{#}S  {WC|WZ|WCZ}
-```
-
-**Result:** Each bit position in D where S has a 1 is set to the inverted C flag value.
-
-- D is a register whose bits will be set to the inverted C flag value where S has 1 bits.
-- S is a register, 9-bit literal, or 32-bit augmented literal that selects which bits to modify.
-- WC, WZ, or WCZ are optional effects to update flags.
-
-```{=latex}
-\simpleencoding{EEEE}{0101101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{parity of result}{Result = 0}{2}
-```
-
-**Related:** [MUXC](#muxc), [MUXZ](#muxz), [MUXNZ](#muxnz), [MUXQ](#muxq), [TESTBN](#testbn)
-
-**Explanation:**
-
-MUXNC modifies selected bits in D based on the inverted C flag value. For each bit position where S contains a 1, the corresponding bit in D is replaced with !C (the logical complement of the C flag). All other bits in D remain unchanged. The operation is: D = (!S & D) | (S & {32{!C}}), where {32{!C}} represents the inverted C flag value replicated across all 32 bits.
-
-For example, if C = 0, D = $F0F0_F0F0, and S = $00FF_00FF, the result is D = $F0FF_F0FF, because !C = 1, and the 1 bits in S (the lower byte of each word) are set to 1, while the 0 bits in S leave the corresponding D bits unchanged.
-
-MUXNC is commonly used to conditionally set or clear specific bits based on the inverted result of a flag test:
+Example: Conditionally set bits based on a comparison:
 
 ```pasm
         cmp     value, limit  wc        ' Set C if value < limit
-        muxnc   status, #$01            ' Set bit 0 to 1 if value >= limit
+        muxc    status, #$01            ' Set bit 0 if less than
+        muxnc   status, #$02            ' Set bit 1 if greater or equal
 ```
 
-This is particularly useful when the desired action corresponds to the opposite of the comparison result:
+If the WC or WCZ effect is specified, the C flag is set to the parity of the result. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero.
 
-```pasm
-        test    enable, #$01  wc        ' Test enable bit
-        muxnc   control, #$80           ' Set bit 7 high if disabled
-```
+These instructions provide an efficient alternative to conditional branches when setting bits based on flag states.
 
-If the WC or WCZ effect is specified, the C flag is set to the parity of the result (1 if an odd number of bits are set, 0 if even). If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero.
-
-MUXNC provides the logical complement of MUXC, allowing both polarities of flag-based bit setting without requiring a separate instruction to invert the flag. Together, MUXC and MUXNC provide complete control over conditional bit manipulation based on comparison and test results.
 
 
 ## MUXNIBS {#muxnibs}
@@ -7935,9 +7611,9 @@ MUXNC provides the logical complement of MUXC, allowing both polarities of flag-
 Multiplex nibbles
 [Math and Logic Instruction](#math-and-logic-instructions) - Copy non-zero nibbles from source to destination.
 
-```
-MUXNIBS  Dest, {#}Src
-```
+**MUXNIBS**  *Dest, {#}Src*
+
+---
 
 **Result:** Each non-zero nibble in Src replaces the corresponding nibble in Dest.
 
@@ -7969,14 +7645,15 @@ MUXNIBS is commonly used in graphics operations for palette updates, bit-field m
 The instruction treats nibbles independently, enabling parallel conditional updates across all eight nibble positions in a single 2-clock operation.
 
 
+
 ## MUXNITS {#muxnits}
 
 Multiplex nits
 [Math and Logic Instruction](#math-and-logic-instructions) - Copy non-zero bit pairs from source to destination.
 
-```
-MUXNITS  Dest, {#}Src
-```
+**MUXNITS**  *Dest, {#}Src*
+
+---
 
 **Result:** Each non-zero bit pair in Src replaces the corresponding bit pair in Dest.
 
@@ -8008,60 +7685,15 @@ MUXNITS provides parallel conditional updates across all sixteen bit pair positi
 The name "nits" comes from "nibble bits" or 2-bit fields, representing the next smaller grouping after nibbles (4-bit fields). This instruction complements MUXNIBS by operating at a finer granularity.
 
 
-## MUXNZ {#muxnz}
-
-Multiplex not Z
-[Math and Logic Instruction](#math-and-logic-instructions) - Set selected bits of destination to the inverted Z flag value.
-
-```
-MUXNZ  D,{#}S  {WC|WZ|WCZ}
-```
-
-**Result:** Each bit position in D where S has a 1 is set to the inverted Z flag value.
-
-- D is a register whose bits will be set to the inverted Z flag value where S has 1 bits.
-- S is a register, 9-bit literal, or 32-bit augmented literal that selects which bits to modify.
-- WC, WZ, or WCZ are optional effects to update flags.
-
-```{=latex}
-\simpleencoding{EEEE}{0101111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{parity of result}{Result = 0}{2}
-```
-
-**Related:** [MUXZ](#muxz), [MUXC](#muxc), [MUXNC](#muxnc), [MUXQ](#muxq), [CMP](#cmp)
-
-**Explanation:**
-
-MUXNZ modifies selected bits in D based on the inverted Z flag value. For each bit position where S contains a 1, the corresponding bit in D is replaced with !Z (the logical complement of the Z flag). All other bits in D remain unchanged. The operation is: D = (!S & D) | (S & {32{!Z}}), where {32{!Z}} represents the inverted Z flag value replicated across all 32 bits.
-
-The Z flag is typically set by comparison or arithmetic instructions when a result equals zero. MUXNZ therefore sets the selected bits high when the previous result was non-zero, and low when it was zero.
-
-For example, after a comparison that sets Z to indicate equality:
-
-```pasm
-        cmp     value, target  wz       ' Set Z if equal
-        muxnz   status, #$01            ' Set bit 0 if not equal
-```
-
-This is particularly useful when the desired action corresponds to the non-zero condition:
-
-```pasm
-        sub     counter, #1  wz         ' Decrement and test
-        muxnz   flags, #$80             ' Set flag if counter not exhausted
-```
-
-If the WC or WCZ effect is specified, the C flag is set to the parity of the result (1 if an odd number of bits are set, 0 if even). If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero. Note that the WZ effect updates the Z flag based on the result value, not the original Z flag state that determined which value to mux.
-
-MUXNZ provides the logical complement of MUXZ, allowing both polarities of zero-test-based bit setting without requiring a separate instruction to invert the flag. Together, MUXZ and MUXNZ provide complete control over conditional bit manipulation based on zero-detection results.
-
 
 ## MUXQ {#muxq}
 
 Multiplex Q
 [Math and Logic Instruction](#math-and-logic-instructions) - Copy selected bits from source to destination based on Q register mask.
 
-```
-MUXQ  Dest, {#}Src
-```
+**MUXQ**  *Dest, {#}Src*
+
+---
 
 **Result:** Bits from Src are copied to Dest at positions where Q has 1 bits.
 
@@ -8119,60 +7751,6 @@ MUXQ is particularly valuable for HUB75 RGB panel driving and other applications
 Unlike MUXC and MUXZ which replicate a single flag bit to all selected positions, MUXQ copies the actual corresponding bits from the source, enabling true parallel bit transfer operations.
 
 
-## MUXZ {#muxz}
-
-Multiplex Z
-[Math and Logic Instruction](#math-and-logic-instructions) - Set selected bits of destination to the Z flag value.
-
-```
-MUXZ  D,{#}S  {WC|WZ|WCZ}
-```
-
-**Result:** Each bit position in D where S has a 1 is set to the current Z flag value.
-
-- D is a register whose bits will be set to the Z flag value where S has 1 bits.
-- S is a register, 9-bit literal, or 32-bit augmented literal that selects which bits to modify.
-- WC, WZ, or WCZ are optional effects to update flags.
-
-```{=latex}
-\simpleencoding{EEEE}{0101110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{parity of result}{Result = 0}{2}
-```
-
-**Related:** [MUXNZ](#muxnz), [MUXC](#muxc), [MUXNC](#muxnc), [MUXQ](#muxq), [CMP](#cmp)
-
-**Explanation:**
-
-MUXZ modifies selected bits in D based on the current Z flag value. For each bit position where S contains a 1, the corresponding bit in D is replaced with the Z flag value. All other bits in D remain unchanged. The operation is: D = (!S & D) | (S & {32{Z}}), where {32{Z}} represents the Z flag value replicated across all 32 bits.
-
-The Z flag is typically set by comparison or arithmetic instructions when a result equals zero. MUXZ therefore sets the selected bits high when the previous result was zero, and low when it was non-zero.
-
-For example, after a comparison that sets Z to indicate equality:
-
-```pasm
-        cmp     value, target  wz       ' Set Z if equal
-        muxz    status, #$01            ' Set bit 0 if equal
-```
-
-Multiple status bits can be updated simultaneously:
-
-```pasm
-        sub     counter, #1  wz         ' Decrement and test for zero
-        muxz    flags, #$07             ' Set bits 0-2 if counter exhausted
-```
-
-MUXZ is commonly used to record test results in status registers without branching:
-
-```pasm
-        ' Build status word from multiple tests
-        test    data, #$80  wz          ' Test bit 7
-        muxz    status, #$01            ' Record result in bit 0
-        test    data, #$40  wz          ' Test bit 6
-        muxz    status, #$02            ' Record result in bit 1
-```
-
-If the WC or WCZ effect is specified, the C flag is set to the parity of the result (1 if an odd number of bits are set, 0 if even). If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero. Note that the WZ effect updates the Z flag based on the result value, not the original Z flag state that determined which value to mux.
-
-MUXZ provides an efficient alternative to conditional branches when recording zero-test results as bits. It enables building status values from multiple tests without requiring any jumps or conditional execution.
 
 
 # Instructions: N
@@ -8180,15 +7758,16 @@ MUXZ provides an efficient alternative to conditional branches when recording ze
 This section contains all PASM2 instructions beginning with the letter N.
 
 
+
 ## NEG {#neg}
 
 Negate
 [Math Instruction](#math-instructions) - Negate a value.
 
-```
-NEG  Dest, {#}Src  {WC|WZ|WCZ}
-NEG  Dest          {WC|WZ|WCZ}
-```
+**NEG**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEG**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** The Src or Dest value is negated and stored into Dest.
 
@@ -8216,220 +7795,95 @@ If the WC or WCZ effect is specified, the C flag is set (1) if the result is neg
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if it is non-zero.
 
 
-## NEGC {#negc}
 
-Negate C
-[Math Instruction](#math-instructions) - Negate value according to C.
+## NEGC / NEGNC / NEGZ / NEGNZ {#negc}
 
-```
-NEGC  Dest, {#}Src  {WC|WZ|WCZ}
-NEGC  Dest          {WC|WZ|WCZ}
-```
+Conditional negate {#negnc} {#negz} {#negnz}
+[Math Instruction](#math-instructions) - Negate value according to C, NC, Z, or NZ flag.
 
-**Result:** The Src or Dest value, possibly negated according to C, is stored into Dest.
+**NEGC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEGC**  *Dest*  **{WC|WZ|WCZ}**
 
-- Dest is a register to receive the Src or -Src value (syntax 1), or contains the value to negate (syntax 2) according to C.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value (if C=0) or negated value (if C=1) is stored into Dest.
+**NEGNC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEGNC**  *Dest*  **{WC|WZ|WCZ}**
+
+**NEGZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEGZ**  *Dest*  **{WC|WZ|WCZ}**
+
+**NEGNZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEGNZ**  *Dest*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The Src or Dest value, conditionally negated based on flag state, is stored into Dest.
+
+| Instruction | Negates when |
+|-------------|--------------|
+| NEGC | C = 1 |
+| NEGNC | C = 0 |
+| NEGZ | Z = 1 |
+| NEGNZ | Z = 0 |
+
+- Dest is a register to receive the result.
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal.
 - WC, WZ, or WCZ are optional effects to update flags.
 
 ```{=latex}
 \begin{encodingtable}
-\encodingrowcont{EEEE}{0110100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign of result}{Result = 0}{2}
-\encodingrow{EEEE}{0110100}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign of result}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110100}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110101}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110110}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
+\encodingrow{EEEE}{0110111}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign}{Result = 0}{2}
 \end{encodingtable}
 ```
 
-**Related:** [NEGNC](#negnc), [NEGZ](#negz), [NEGNZ](#negnz), [NEG](#neg)
+**Related:** [NEG](#neg)
 
 **Explanation:**
 
-NEGC conditionally negates the value in Src (syntax 1) or Dest (syntax 2) based on the C flag state. If C = 1, the value is negated before being stored in Dest. If C = 0, the value is stored as-is (not negated). When negation is performed, it flips the value's sign; for example, 5 becomes -5, or -200 becomes 200.
+These instructions conditionally negate the value in Src (two-operand form) or Dest (single-operand form) based on the specified flag condition. If the condition is true, the value is negated (sign flipped) before being stored in Dest. If the condition is false, the value is stored unchanged.
 
-This instruction is useful for conditional arithmetic operations where the sign of a value needs to be adjusted based on previous computation results captured in the C flag.
+NEGC and NEGZ negate when their flag is set (1). NEGNC and NEGNZ negate when their flag is clear (0), providing complementary behavior.
 
-If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative, or is cleared (0) if positive.
+If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative, or cleared (0) if positive.
 
-If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero, or is cleared (0) if it is non-zero.
+If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero, or cleared (0) if non-zero.
 
 
-## NEGNC {#negnc}
 
-Negate not C
-[Math Instruction](#math-instructions) - Negate value according to !C.
+## NIXINT1 / NIXINT2 / NIXINT3 {#nixint1}
 
-```
-NEGNC  Dest, {#}Src  {WC|WZ|WCZ}
-NEGNC  Dest          {WC|WZ|WCZ}
-```
+Cancel interrupt (1, 2, or 3)
+[Event Instruction](#event-instructions) - Cancel INTn interrupt.
 
-**Result:** The Src or Dest value, possibly negated according to !C, is stored into Dest.
+**NIXINT1**
+**NIXINT2**
+**NIXINT3**
 
-- Dest is a register to receive the Src or -Src value (syntax 1), or contains the value to negate (syntax 2) according to !C.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value (if !C=0) or negated value (if !C=1) is stored into Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
+---
+
+**Result:** The specified interrupt event (INT1, INT2, or INT3) is cancelled.
 
 ```{=latex}
 \begin{encodingtable}
-\encodingrowcont{EEEE}{0110101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign of result}{Result = 0}{2}
-\encodingrow{EEEE}{0110101}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign of result}{Result = 0}{2}
+\encodingrowcont{EEEE}{1101011}{000}{000100101}{000100100}{---}{---}{---}{2}
+\encodingrowcont{EEEE}{1101011}{000}{000100110}{000100100}{---}{---}{---}{2}
+\encodingrow{EEEE}{1101011}{000}{000100111}{000100100}{---}{---}{---}{2}
 \end{encodingtable}
 ```
 
-**Related:** [NEGC](#negc), [NEGZ](#negz), [NEGNZ](#negnz), [NEG](#neg)
+**Related:** [SETINT1/2/3](instructions-s.md#setint1), [TRGINT1/2/3](instructions-t.md#trgint1), [RETI0/1/2/3](instructions-r.md#reti0), [RESI0/1/2/3](instructions-r.md#resi0)
 
 **Explanation:**
 
-NEGNC conditionally negates the value in Src (syntax 1) or Dest (syntax 2) based on the inverse of the C flag state. If C = 0 (!C = 1), the value is negated before being stored in Dest. If C = 1 (!C = 0), the value is stored as-is (not negated). When negation is performed, it flips the value's sign; for example, 21 becomes -21, or -1,374 becomes 1,374.
+NIXINT1, NIXINT2, and NIXINT3 cancel any pending interrupt events for their respective interrupt levels. These instructions prevent the interrupt from occurring even if its event condition has been met.
 
-This instruction complements NEGC, providing the opposite conditional behavior. It is useful when the logic requires negation when the C flag is clear rather than set.
+The P2 provides three independent interrupt levels, and each NIXINT instruction cancels only its corresponding level. Use these instructions when an interrupt that was previously configured is no longer needed or when the program needs to explicitly clear a pending interrupt condition before it can trigger cog execution flow changes.
 
-If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative, or is cleared (0) if positive.
-
-If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero, or is cleared (0) if it is non-zero.
-
-
-## NEGNZ {#negnz}
-
-Negate not Z
-[Math Instruction](#math-instructions) - Negate value according to !Z.
-
-```
-NEGNZ  Dest, {#}Src  {WC|WZ|WCZ}
-NEGNZ  Dest          {WC|WZ|WCZ}
-```
-
-**Result:** The Src or Dest value, possibly negated according to !Z, is stored into Dest.
-
-- Dest is a register to receive the Src or -Src value (syntax 1), or contains the value to negate (syntax 2) according to !Z.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value (if !Z=0) or negated value (if !Z=1) is stored into Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
-
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0110111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign of result}{Result = 0}{2}
-\encodingrow{EEEE}{0110111}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign of result}{Result = 0}{2}
-\end{encodingtable}
-```
-
-**Related:** [NEGZ](#negz), [NEGC](#negc), [NEGNC](#negnc), [NEG](#neg)
-
-**Explanation:**
-
-NEGNZ conditionally negates the value in Src (syntax 1) or Dest (syntax 2) based on the inverse of the Z flag state. If Z = 0 (!Z = 1), the value is negated before being stored in Dest. If Z = 1 (!Z = 0), the value is stored as-is (not negated). When negation is performed, it flips the value's sign; for example, 193 becomes -193, or -3,062 becomes 3,062.
-
-This instruction complements NEGZ, providing the opposite conditional behavior. It is useful when the logic requires negation when the Z flag is clear (result non-zero) rather than set.
-
-If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative, or is cleared (0) if positive.
-
-If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero, or is cleared (0) if it is non-zero.
-
-
-## NEGZ {#negz}
-
-Negate Z
-[Math Instruction](#math-instructions) - Negate value according to Z.
-
-```
-NEGZ  Dest, {#}Src  {WC|WZ|WCZ}
-NEGZ  Dest          {WC|WZ|WCZ}
-```
-
-**Result:** The Src or Dest value, possibly negated according to Z, is stored into Dest.
-
-- Dest is a register to receive the Src or -Src value (syntax 1), or contains the value to negate (syntax 2) according to Z.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value (if Z=0) or negated value (if Z=1) is stored into Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
-
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0110110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign of result}{Result = 0}{2}
-\encodingrow{EEEE}{0110110}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign of result}{Result = 0}{2}
-\end{encodingtable}
-```
-
-**Related:** [NEGNZ](#negnz), [NEGC](#negc), [NEGNC](#negnc), [NEG](#neg)
-
-**Explanation:**
-
-NEGZ conditionally negates the value in Src (syntax 1) or Dest (syntax 2) based on the Z flag state. If Z = 1, the value is negated before being stored in Dest. If Z = 0, the value is stored as-is (not negated). When negation is performed, it flips the value's sign; for example, 526 becomes -526, or -41 becomes 41.
-
-This instruction is useful for conditional arithmetic operations where the sign of a value needs to be adjusted based on zero-test results from previous operations.
-
-If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative, or is cleared (0) if positive.
-
-If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero, or is cleared (0) if it is non-zero.
-
-
-## NIXINT1 {#nixint1}
-
-Cancel INT1
-[Event Instruction](#event-instructions) - Cancel INT1.
-
-```
-NIXINT1
-```
-
-**Result:** The INT1 interrupt event is cancelled.
-
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{000100101}{000100100}{---}{---}{---}{2}
-```
-
-**Related:** [NIXINT2](#nixint2), [NIXINT3](#nixint3), [SETINT1](#setint1)
-
-**Explanation:**
-
-NIXINT1 cancels any pending INT1 interrupt event. This instruction prevents the INT1 interrupt from occurring even if its event condition has been met.
-
-NIXINT1 is used when an interrupt that was previously configured is no longer needed or when the program needs to explicitly clear a pending interrupt condition before it can trigger COG execution flow changes.
-
-
-## NIXINT2 {#nixint2}
-
-Cancel INT2
-[Event Instruction](#event-instructions) - Cancel INT2.
-
-```
-NIXINT2
-```
-
-**Result:** The INT2 interrupt event is cancelled.
-
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{000100110}{000100100}{---}{---}{---}{2}
-```
-
-**Related:** [NIXINT1](#nixint1), [NIXINT3](#nixint3), [SETINT2](#setint2)
-
-**Explanation:**
-
-NIXINT2 cancels any pending INT2 interrupt event. This instruction prevents the INT2 interrupt from occurring even if its event condition has been met.
-
-NIXINT2 is used when an interrupt that was previously configured is no longer needed or when the program needs to explicitly clear a pending interrupt condition before it can trigger COG execution flow changes.
-
-
-## NIXINT3 {#nixint3}
-
-Cancel INT3
-[Event Instruction](#event-instructions) - Cancel INT3.
-
-```
-NIXINT3
-```
-
-**Result:** The INT3 interrupt event is cancelled.
-
-```{=latex}
-\simpleencoding{EEEE}{1101011}{000}{000100111}{000100100}{---}{---}{---}{2}
-```
-
-**Related:** [NIXINT1](#nixint1), [NIXINT2](#nixint2), [SETINT3](#setint3)
-
-**Explanation:**
-
-NIXINT3 cancels any pending INT3 interrupt event. This instruction prevents the INT3 interrupt from occurring even if its event condition has been met.
-
-NIXINT3 is used when an interrupt that was previously configured is no longer needed or when the program needs to explicitly clear a pending interrupt condition before it can trigger COG execution flow changes.
 
 
 ## NOP {#nop}
@@ -8437,9 +7891,9 @@ NIXINT3 is used when an interrupt that was previously configured is no longer ne
 No operation
 [Misc Instruction](#misc-instructions) - No operation, just elapse two cycles.
 
-```
-NOP
-```
+**NOP**
+
+---
 
 **Result:** Two clock cycles are consumed.
 
@@ -8456,15 +7910,16 @@ NOP simply consumes two clock cycles without performing any operation. No regist
 NOP is primarily used for timing adjustments, creating precise delays, or as a placeholder during development. It can also be used to align code for performance optimization or to fill instruction slots in pipelined operations.
 
 
+
 ## NOT {#not}
 
 Not
 [Logic Instruction](#logic-instructions) - Bitwise NOT a value.
 
-```
-NOT  Dest, {#}Src  {WC|WZ|WCZ}
-NOT  Dest          {WC|WZ|WCZ}
-```
+**NOT**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NOT**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** The bitwise NOT of Src or Dest is stored in Dest.
 
@@ -8492,9 +7947,11 @@ If the WC or WCZ effect is specified, the C flag is set to the inverse of bit 31
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if it is non-zero.
 
 
+
 # Instructions: O
 
 This section contains all PASM2 instructions beginning with the letter O.
+
 
 
 ## ONES {#ones}
@@ -8502,10 +7959,10 @@ This section contains all PASM2 instructions beginning with the letter O.
 Ones
 [Math Instruction](#math-instructions) - Count the number of high bits (1s) in a value.
 
-```
-ONES  Dest, {#}Src  {WC|WZ|WCZ}
-ONES  Dest          {WC|WZ|WCZ}
-```
+**ONES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**ONES**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** The number of high bits (1s) in Src, or Dest, is stored in Dest.
 
@@ -8535,14 +7992,15 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 ONES is useful for analyzing bit patterns, counting enabled flags, and implementing parity checks in data transmission protocols.
 
 
+
 ## OR {#or}
 
 Or
 [Logic Instruction](#logic-instructions) - Perform bitwise OR operation.
 
-```
-OR  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**OR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Dest OR Src is stored in Dest.
 
@@ -8577,37 +8035,48 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 OR is commonly used for setting specific bits in a value, combining bit masks, and implementing logical operations in algorithms.
 
 
-## OUTC {#outc}
 
-Output if C
-[I/O Pin Instruction](#io-pin-instructions) - Set pin output level according to C flag state.
+## OUTC / OUTNC / OUTZ / OUTNZ {#outc}
 
-```
-OUTC  {#}Dest  {WCZ}
-```
+Output by flag state {#outnc} {#outz} {#outnz}
+[I/O Pin Instruction](#io-pin-instructions) - Set pin output level according to C, NC, Z, or NZ flag state.
 
-**Result:** The I/O pin output level bit(s) described by Dest are set to low/high according to C flag state.
+**OUTC**  *{#}Dest*  **{WCZ}**
+**OUTNC**  *{#}Dest*  **{WCZ}**
+**OUTZ**  *{#}Dest*  **{WCZ}**
+**OUTNZ**  *{#}Dest*  **{WCZ}**
 
-- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) for which output levels are to be set.
-- WCZ is an optional effect to update flags.
+---
+
+**Result:** The I/O pin output level bit(s) described by Dest are set according to the flag state:
+
+| Instruction | Drives high when |
+|-------------|------------------|
+| OUTC | C = 1 |
+| OUTNC | C = 0 |
+| OUTZ | Z = 1 |
+| OUTNZ | Z = 0 |
+
+- Dest identifies the I/O pin(s): Dest[5:0] = base pin (0-63), Dest[10:6] = additional contiguous pins.
+- WCZ is an optional effect to set Z to the original output state.
 
 ```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001010}{OUTx}{---}{Original OUTx base bit}{2}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001010}{OUTx}{---}{orig out}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001011}{OUTx}{---}{orig out}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001100}{OUTx}{---}{orig out}{2}
+\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001101}{OUTx}{---}{orig out}{2}
+\end{encodingtable}
 ```
 
-**Related:** [OUTNC](#outnc), [OUTZ](#outz), [OUTNZ](#outnz), [OUTH](#outh), [OUTL](#outl)
+**Related:** [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot), [OUTRND](#outrnd)
 
 **Explanation:**
 
-OUTC sets the output level of the pin(s) specified by Dest to match the state of the C flag. If C is set (1), the pin(s) are driven high. If C is clear (0), the pin(s) are driven low. All other output level bits remain unchanged.
+These instructions set pin output level(s) based on flag state. OUTC and OUTZ drive high when their flag is set; OUTNC and OUTNZ drive high when their flag is clear.
 
-Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, only these lower 6 bits matter. For controlling a range of contiguous pins, Dest[10:6] specifies how many additional pins beyond the base should be affected (0-31, where 0 means just the base pin, 1 means base plus one additional pin, etc.).
+If WCZ is specified, the Z flag is set to the original output state of the base pin before modification.
 
-A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
-
-If the WCZ effect is specified, the Z flag is set to the original state of the output level bit for the base pin, before the instruction executes. The C flag is not affected by this instruction.
-
-OUTC is useful for reflecting the result of a previous comparison or calculation directly onto an output pin, such as driving an LED to indicate a status condition.
 
 
 ## OUTH {#outh}
@@ -8615,9 +8084,9 @@ OUTC is useful for reflecting the result of a previous comparison or calculation
 Output high
 [I/O Pin Instruction](#io-pin-instructions) - Set pin output level to high.
 
-```
-OUTH  {#}Dest  {WCZ}
-```
+**OUTH**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pin output level bit(s) described by Dest are set high (1).
 
@@ -8643,14 +8112,15 @@ If the WCZ effect is specified, the Z flag is set to the original state of the o
 OUTH is commonly used to turn on LEDs, assert control signals, or drive pins high for any digital output purpose. For the output level change to affect the actual pin voltage, the pin must also be configured as an output using the direction control instructions.
 
 
+
 ## OUTL {#outl}
 
 Output low
 [I/O Pin Instruction](#io-pin-instructions) - Set pin output level to low.
 
-```
-OUTL  {#}Dest  {WCZ}
-```
+**OUTL**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pin output level bit(s) described by Dest are set low (0).
 
@@ -8676,47 +8146,15 @@ If the WCZ effect is specified, the Z flag is set to the original state of the o
 OUTL is commonly used to turn off LEDs, de-assert control signals, or drive pins low for any digital output purpose. For the output level change to affect the actual pin voltage, the pin must also be configured as an output using the direction control instructions.
 
 
-## OUTNC {#outnc}
-
-Output if not C
-[I/O Pin Instruction](#io-pin-instructions) - Set pin output level according to inverted C flag state.
-
-```
-OUTNC  {#}Dest  {WCZ}
-```
-
-**Result:** The I/O pin output level bit(s) described by Dest are set to low/high according to inverted C flag state (!C).
-
-- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) for which output levels are to be set.
-- WCZ is an optional effect to update flags.
-
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001011}{OUTx}{---}{Original OUTx base bit}{2}
-```
-
-**Related:** [OUTC](#outc), [OUTZ](#outz), [OUTNZ](#outnz), [OUTH](#outh), [OUTL](#outl)
-
-**Explanation:**
-
-OUTNC sets the output level of the pin(s) specified by Dest to match the inverse state of the C flag. If C is clear (0), the pin(s) are driven high. If C is set (1), the pin(s) are driven low. All other output level bits remain unchanged.
-
-Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, only these lower 6 bits matter. For controlling a range of contiguous pins, Dest[10:6] specifies how many additional pins beyond the base should be affected (0-31, where 0 means just the base pin, 1 means base plus one additional pin, etc.).
-
-A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
-
-If the WCZ effect is specified, the Z flag is set to the original state of the output level bit for the base pin, before the instruction executes. The C flag is not affected by this instruction.
-
-OUTNC is useful for reflecting the inverse of a comparison or calculation result onto an output pin, such as driving an active-low signal or implementing inverted logic.
-
 
 ## OUTNOT {#outnot}
 
 Output not (toggle)
 [I/O Pin Instruction](#io-pin-instructions) - Toggle pin output level to opposite state.
 
-```
-OUTNOT  {#}Dest  {WCZ}
-```
+**OUTNOT**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pin output level bit(s) described by Dest are toggled to their opposite state(s).
 
@@ -8742,47 +8180,15 @@ If the WCZ effect is specified, the Z flag is set to the original state of the o
 OUTNOT is commonly used for blinking LEDs, generating clock signals, or toggling any output that needs to alternate states. It is particularly efficient for creating square waves or implementing state machines that alternate between two states.
 
 
-## OUTNZ {#outnz}
-
-Output if not Z
-[I/O Pin Instruction](#io-pin-instructions) - Set pin output level according to inverted Z flag state.
-
-```
-OUTNZ  {#}Dest  {WCZ}
-```
-
-**Result:** The I/O pin output level bit(s) described by Dest are set to low/high according to inverted Z flag state (!Z).
-
-- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) for which output levels are to be set.
-- WCZ is an optional effect to update flags.
-
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001101}{OUTx}{---}{Original OUTx base bit}{2}
-```
-
-**Related:** [OUTZ](#outz), [OUTC](#outc), [OUTNC](#outnc), [OUTH](#outh), [OUTL](#outl)
-
-**Explanation:**
-
-OUTNZ sets the output level of the pin(s) specified by Dest to match the inverse state of the Z flag. If Z is clear (0), the pin(s) are driven high. If Z is set (1), the pin(s) are driven low. All other output level bits remain unchanged.
-
-Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, only these lower 6 bits matter. For controlling a range of contiguous pins, Dest[10:6] specifies how many additional pins beyond the base should be affected (0-31, where 0 means just the base pin, 1 means base plus one additional pin, etc.).
-
-A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
-
-If the WCZ effect is specified, the Z flag is set to the original state of the output level bit for the base pin, before the instruction executes. The C flag is not affected by this instruction.
-
-OUTNZ is useful for reflecting the non-zero result of a previous operation onto an output pin, such as indicating when a counter or accumulator holds a non-zero value, or implementing active-low logic for zero detection.
-
 
 ## OUTRND {#outrnd}
 
 Output random
 [I/O Pin Instruction](#io-pin-instructions) - Set pin output level(s) to random values.
 
-```
-OUTRND  {#}Dest  {WCZ}
-```
+**OUTRND**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pin output level bit(s) described by Dest are each set randomly to low or high.
 
@@ -8810,5877 +8216,4321 @@ If the WCZ effect is specified, both the C and Z flags are set to the original s
 OUTRND is useful for generating random visual patterns on LEDs, creating noise signals for testing or audio applications, or implementing randomized control sequences. The quality of randomness depends on proper initialization of the PRNG using the SETRAND instruction.
 
 
-## OUTZ {#outz}
 
-Output if Z
-[I/O Pin Instruction](#io-pin-instructions) - Set pin output level according to Z flag state.
 
-```
-OUTZ  {#}Dest  {WCZ}
-```
+# Instructions: P
 
-**Result:** The I/O pin output level bit(s) described by Dest are set to low/high according to Z flag state.
+This section contains all PASM2 instructions beginning with the letter P.
 
-- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) for which output levels are to be set.
-- WCZ is an optional effect to update flags.
+
+
+## POLLATN {#pollatn}
+
+Poll attention event
+[Event Instruction](#event-instructions) - Check attention event flag without waiting.
+
+**POLLATN**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Attention event flag is optionally copied into C and/or Z, then it is cleared.
+
+- WC, WZ, or WCZ are optional effects to capture the event state into flags.
 
 ```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001100}{OUTx}{---}{Original OUTx base bit}{2}
+\simpleencoding{EEEE}{1101011}{CZ0}{000001110}{000100100}{---}{ATN Event}{ATN Event}{2}
 ```
 
-**Related:** [OUTNZ](#outnz), [OUTC](#outc), [OUTNC](#outnc), [OUTH](#outh), [OUTL](#outl)
+**Related:** [COGATN](#cogatn), [WAITATN](#waitatn), [JATN](#jatn), [JNATN](#jnatn)
 
 **Explanation:**
 
-OUTZ sets the output level of the pin(s) specified by Dest to match the state of the Z flag. If Z is set (1), the pin(s) are driven high. If Z is clear (0), the pin(s) are driven low. All other output level bits remain unchanged.
-
-Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, only these lower 6 bits matter. For controlling a range of contiguous pins, Dest[10:6] specifies how many additional pins beyond the base should be affected (0-31, where 0 means just the base pin, 1 means base plus one additional pin, etc.).
-
-A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
-
-If the WCZ effect is specified, the Z flag is set to the original state of the output level bit for the base pin, before the instruction executes. The C flag is not affected by this instruction.
-
-OUTZ is useful for reflecting the zero result of a previous operation onto an output pin, such as indicating when a counter reaches zero, or implementing status LEDs that activate based on equality comparisons.
-
-
-<!-- PASM2 Instruction Reference - P Instructions -->
-<!-- Generated from YAML knowledge base -->
-<!-- Source: /workspaces/P2-Knowledge-Base/engineering/knowledge-base/P2/language/pasm2/ -->
-
-# P Instructions
-
-This section covers all PASM2 instructions beginning with the letter P, organized by instruction family.
-
-## POLL Instructions — Event Polling
-
-The POLL family of instructions checks event status without waiting. Each POLL instruction copies the state of its corresponding event flag into the C and/or Z flags (when WC, WZ, or WCZ effects are specified) and then clears the event flag. These instructions enable non-blocking event-driven programming by allowing the cog to check for events and continue execution without suspending.
-
-### POLLATN — Event
-
-Checks the attention event flag without waiting.
-
-#### Syntax
-```pasm
-        POLLATN {WC|WZ|WCZ}
-```
-
-#### Result
-Attention event flag is optionally copied into C and/or Z, then it is cleared.
-
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
-
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000001110 | 000100100 | — | ATN Event | ATN Event | 2}
-
-#### Related Instructions
-- [COGATN](#cogatn) — Send attention request to another cog
-- [WAITATN](#waitatn) — Wait for attention event
-- [JATN](#jatn) — Jump if attention event occurred
-- [JNATN](#jnatn) — Jump if attention event did not occur
-
-#### Explanation
 POLLATN copies the state of the attention event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the attention event flag prior to clearing it.
 
-The attention event flag is set whenever another cog issues an attention request for this cog. The attention event flag is cleared upon cog start, or execution of POLLATN, WAITATN, JATN, or JNATN instructions.
+The attention event flag is set whenever another cog issues an attention request for this cog using COGATN. The flag is cleared upon cog start, or execution of POLLATN, WAITATN, JATN, or JNATN instructions.
 
 This instruction enables inter-cog communication by allowing a cog to check whether another cog has requested its attention without blocking execution.
 
 
-### POLLCT1 — Event
 
-Checks the CT1 event flag without waiting.
+## POLLCT1 / POLLCT2 / POLLCT3 {#pollct1}
 
-#### Syntax
-```pasm
-        POLLCT1 {WC|WZ|WCZ}
+Poll counter event (1, 2, or 3)
+[Event Instruction](#event-instructions) - Check counter event flag without waiting.
+
+**POLLCT1**  **{WC|WZ|WCZ}**
+**POLLCT2**  **{WC|WZ|WCZ}**
+**POLLCT3**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** CTn event flag state is optionally copied into C and/or Z, then the flag is cleared.
+
+- WC, WZ, or WCZ are optional effects to capture the event state into flags.
+
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZ0}{000000001}{000100100}{---}{CT1 Event}{CT1 Event}{2}
+\encodingrowcont{EEEE}{1101011}{CZ0}{000000010}{000100100}{---}{CT2 Event}{CT2 Event}{2}
+\encodingrow{EEEE}{1101011}{CZ0}{000000011}{000100100}{---}{CT3 Event}{CT3 Event}{2}
+\end{encodingtable}
 ```
 
-#### Result
-CT1 event flag state is optionally copied into C and/or Z, then the flag is cleared.
+**Related:** [ADDCT1/2/3](#addct1), [WAITCT1/2/3](#waitct1), [JCT1/2/3](#jct1), [JNCT1/2/3](#jnct1)
 
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
+**Explanation:**
 
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000000001 | 000100100 | — | CT1 Event | CT1 Event | 2}
+POLLCT1, POLLCT2, and POLLCT3 copy the state of their respective counter event flags into C and/or Z and then clear the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the counter event flag prior to clearing it.
 
-#### Related Instructions
-- [ADDCT1](#addct1) — Add to CT1 event trigger
-- [WAITCT1](#waitct1) — Wait for CT1 event
-- [JCT1](#jct1) — Jump if CT1 event occurred
-- [JNCT1](#jnct1) — Jump if CT1 event did not occur
-- [POLLCT2](#pollct2) — Poll CT2 event flag
-- [POLLCT3](#pollct3) — Poll CT3 event flag
+Each counter event flag is set whenever the System Counter (CT) passes the value in that counter's event trigger register; that is, the MSB of (CT - CTn) is 0. The counter event flag is cleared upon execution of ADDCTn, POLLCTn, WAITCTn, JCTn, or JNCTn.
 
-#### Explanation
-POLLCT1 copies the state of the counter 1 event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the counter event flag prior to clearing it.
-
-The counter 1 event flag is set whenever the System Counter (CT) passes the value in the CT1 event trigger register; that is, the MSB of (CT - CT1) is 0. The counter event flag is cleared upon execution of ADDCT1, POLLCT1, WAITCT1, JCT1, or JNCT1.
-
-This instruction enables time-based event polling without blocking execution. Use POLLCT1 in loops where the cog needs to perform other work while periodically checking for timeout or scheduled events.
+These instructions enable time-based event polling without blocking execution. The P2 provides three independent counter event triggers (CT1, CT2, CT3) allowing a cog to simultaneously track multiple timing requirements.
 
 
-### POLLCT2 — Event
 
-Checks the CT2 event flag without waiting.
+## POLLFBW {#pollfbw}
 
-#### Syntax
-```pasm
-        POLLCT2 {WC|WZ|WCZ}
+Poll FIFO block wrap event
+[Event Instruction](#event-instructions) - Check FIFO block wrap event flag without waiting.
+
+**POLLFBW**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** FIFO-interface-block-wrap event flag is optionally copied into C and/or Z, then it is cleared.
+
+- WC, WZ, or WCZ are optional effects to capture the event state into flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000001001}{000100100}{---}{FBW Event}{FBW Event}{2}
 ```
 
-#### Result
-CT2 event flag state is optionally copied into C and/or Z, then the flag is cleared.
+**Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [FBLOCK](#fblock), [WAITFBW](#waitfbw), [JFBW](#jfbw), [JNFBW](#jnfbw)
 
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
+**Explanation:**
 
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000000010 | 000100100 | — | CT2 Event | CT2 Event | 2}
-
-#### Related Instructions
-- [ADDCT2](#addct2) — Add to CT2 event trigger
-- [WAITCT2](#waitct2) — Wait for CT2 event
-- [JCT2](#jct2) — Jump if CT2 event occurred
-- [JNCT2](#jnct2) — Jump if CT2 event did not occur
-- [POLLCT1](#pollct1) — Poll CT1 event flag
-- [POLLCT3](#pollct3) — Poll CT3 event flag
-
-#### Explanation
-POLLCT2 copies the state of the counter 2 event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the counter event flag prior to clearing it.
-
-The counter 2 event flag is set whenever the System Counter (CT) passes the value in the CT2 event trigger register; that is, the MSB of (CT - CT2) is 0. The counter event flag is cleared upon execution of ADDCT2, POLLCT2, WAITCT2, JCT2, or JNCT2.
-
-This instruction enables time-based event polling without blocking execution. The P2 provides three independent counter event triggers (CT1, CT2, CT3) allowing a cog to manage multiple concurrent timing events.
-
-
-### POLLCT3 — Event
-
-Checks the CT3 event flag without waiting.
-
-#### Syntax
-```pasm
-        POLLCT3 {WC|WZ|WCZ}
-```
-
-#### Result
-CT3 event flag state is optionally copied into C and/or Z, then the flag is cleared.
-
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
-
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000000011 | 000100100 | — | CT3 Event | CT3 Event | 2}
-
-#### Related Instructions
-- [ADDCT3](#addct3) — Add to CT3 event trigger
-- [WAITCT3](#waitct3) — Wait for CT3 event
-- [JCT3](#jct3) — Jump if CT3 event occurred
-- [JNCT3](#jnct3) — Jump if CT3 event did not occur
-- [POLLCT1](#pollct1) — Poll CT1 event flag
-- [POLLCT2](#pollct2) — Poll CT2 event flag
-
-#### Explanation
-POLLCT3 copies the state of the counter 3 event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the counter event flag prior to clearing it.
-
-The counter 3 event flag is set whenever the System Counter (CT) passes the value in the CT3 event trigger register; that is, the MSB of (CT - CT3) is 0. The counter event flag is cleared upon execution of ADDCT3, POLLCT3, WAITCT3, JCT3, or JNCT3.
-
-This instruction enables time-based event polling without blocking execution. Having three independent counter event triggers allows a cog to simultaneously track multiple timing requirements such as watchdog timers, periodic tasks, and timeout detection.
-
-
-### POLLFBW — Event
-
-Checks the FIFO-interface-block-wrap event flag without waiting.
-
-#### Syntax
-```pasm
-        POLLFBW {WC|WZ|WCZ}
-```
-
-#### Result
-FIFO-interface-block-wrap event flag is optionally copied into C and/or Z, then it is cleared.
-
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
-
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000001001 | 000100100 | — | FBW Event | FBW Event | 2}
-
-#### Related Instructions
-- [RDFAST](#rdfast) — Start FIFO read operation
-- [WRFAST](#wrfast) — Start FIFO write operation
-- [FBLOCK](#fblock) — Set FIFO block parameters
-- [WAITFBW](#waitfbw) — Wait for FIFO block wrap
-- [JFBW](#jfbw) — Jump if FIFO block wrap occurred
-- [JNFBW](#jnfbw) — Jump if FIFO block wrap did not occur
-
-#### Explanation
-POLLFBW copies the state of the FIFO-interface-block-wrap event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the FIFO-interface-block-wrap event flag prior to clearing it.
+POLLFBW copies the state of the FIFO-interface-block-wrap event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the event flag prior to clearing it.
 
 The FIFO-interface-block-wrap event flag is set whenever the Hub RAM FIFO interface exhausts its block count and reloads its block count and start address. The flag is cleared upon execution of RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, or JNFBW instructions.
 
-This instruction enables circular buffer management for high-speed Hub RAM transfers. When the FIFO interface completes a block, the event signals that the buffer has wrapped and is ready for the next iteration.
+This instruction enables circular buffer management for high-speed Hub RAM transfers.
 
 
-### POLLINT — Event
 
-Checks the interrupt-occurred event flag without waiting.
+## POLLINT {#pollint}
 
-#### Syntax
-```pasm
-        POLLINT {WC|WZ|WCZ}
+Poll interrupt event
+[Event Instruction](#event-instructions) - Check interrupt event flag without waiting.
+
+**POLLINT**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Interrupt-occurred event flag is optionally copied into C and/or Z, then it is cleared.
+
+- WC, WZ, or WCZ are optional effects to capture the event state into flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000000000}{000100100}{---}{INT Event}{INT Event}{2}
 ```
 
-#### Result
-Interrupt-occurred event flag is optionally copied into C and/or Z, then it is cleared.
+**Related:** [WAITINT](#waitint), [JINT](#jint), [JNINT](#jnint)
 
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
+**Explanation:**
 
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000000000 | 000100100 | — | INT Event | INT Event | 2}
-
-#### Related Instructions
-- [WAITINT](#waitint) — Wait for interrupt event
-- [JINT](#jint) — Jump if interrupt occurred
-- [JNINT](#jnint) — Jump if interrupt did not occur
-
-#### Explanation
-POLLINT copies the state of the interrupt-occurred event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the interrupt-occurred event flag prior to clearing it.
+POLLINT copies the state of the interrupt-occurred event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the event flag prior to clearing it.
 
 The interrupt-occurred event flag is set whenever interrupt 1, 2, or 3 occurs. Debug interrupts are ignored. The flag is cleared upon cog start, or execution of POLLINT, WAITINT, JINT, or JNINT instructions.
 
-This instruction enables non-blocking interrupt handling. The cog can check for interrupts and respond appropriately without suspending execution in a wait loop.
+This instruction enables non-blocking interrupt handling.
 
 
-### POLLPAT — Event
 
-Checks the pin-pattern-detected event flag without waiting.
+## POLLPAT {#pollpat}
 
-#### Syntax
-```pasm
-        POLLPAT {WC|WZ|WCZ}
+Poll pin pattern event
+[Event Instruction](#event-instructions) - Check pin pattern event flag without waiting.
+
+**POLLPAT**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Pin-pattern-detected event flag is optionally copied into C and/or Z, then it is cleared.
+
+- WC, WZ, or WCZ are optional effects to capture the event state into flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000001000}{000100100}{---}{PAT Event}{PAT Event}{2}
 ```
 
-#### Result
-Pin-pattern-detected event flag is optionally copied into C and/or Z, then it is cleared.
+**Related:** [SETPAT](#setpat), [WAITPAT](#waitpat), [JPAT](#jpat), [JNPAT](#jnpat)
 
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
+**Explanation:**
 
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000001000 | 000100100 | — | PAT Event | PAT Event | 2}
-
-#### Related Instructions
-- [SETPAT](#setpat) — Configure pin pattern detection
-- [WAITPAT](#waitpat) — Wait for pin pattern match
-- [JPAT](#jpat) — Jump if pattern matched
-- [JNPAT](#jnpat) — Jump if pattern did not match
-
-#### Explanation
-POLLPAT copies the state of the pin-pattern-detected event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the pin-pattern-detected event flag prior to clearing it.
+POLLPAT copies the state of the pin-pattern-detected event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the event flag prior to clearing it.
 
 The pin-pattern-detected event flag is set whenever the masked input pins match or don't match the pattern described by a previous SETPAT instruction. The flag is cleared upon execution of SETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions.
 
-This instruction enables non-blocking pattern detection on input pins. The cog can monitor for specific pin states or changes without blocking, allowing it to perform other work while waiting for external signals.
+This instruction enables non-blocking pattern detection on input pins.
 
 
-### POLLQMT — Event
 
-Checks the CORDIC-read-but-empty event flag without waiting.
+## POLLQMT {#pollqmt}
 
-#### Syntax
-```pasm
-        POLLQMT {WC|WZ|WCZ}
+Poll CORDIC empty event
+[Event Instruction](#event-instructions) - Check CORDIC-read-but-empty event flag without waiting.
+
+**POLLQMT**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** CORDIC-read-but-empty event flag is optionally copied into C and/or Z, then it is cleared.
+
+- WC, WZ, or WCZ are optional effects to capture the event state into flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000001111}{000100100}{---}{QMT Event}{QMT Event}{2}
 ```
 
-#### Result
-CORDIC-read-but-empty event flag is optionally copied into C and/or Z, then it is cleared.
+**Related:** [GETQX](#getqx), [GETQY](#getqy), [JQMT](#jqmt), [JNQMT](#jnqmt)
 
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
+**Explanation:**
 
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000001111 | 000100100 | — | QMT Event | QMT Event | 2}
-
-#### Related Instructions
-- [GETQX](#getqx) — Get CORDIC X result
-- [GETQY](#getqy) — Get CORDIC Y result
-- [JQMT](#jqmt) — Jump if CORDIC empty
-- [JNQMT](#jnqmt) — Jump if CORDIC not empty
-
-#### Explanation
-POLLQMT copies the state of the CORDIC-read-but-empty event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the CORDIC-read-but-empty event flag prior to clearing it.
+POLLQMT copies the state of the CORDIC-read-but-empty event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the event flag prior to clearing it.
 
 The CORDIC-read-but-empty event flag is set whenever GETQX or GETQY executes without any CORDIC results available or in progress. The flag is cleared upon cog start or execution of POLLQMT, WAITQMT, JQMT, or JNQMT instructions.
 
-This instruction enables error detection for CORDIC operations. Reading CORDIC results before they are ready produces undefined values and sets this event flag, allowing the program to detect and handle the error condition.
+This instruction enables error detection for CORDIC operations.
 
 
-### POLLSE1 — Event
 
-Checks the selectable event 1 flag without waiting.
+## POLLSE1 / POLLSE2 / POLLSE3 / POLLSE4 {#pollse1}
 
-#### Syntax
-```pasm
-        POLLSE1 {WC|WZ|WCZ}
+Poll selectable event (1, 2, 3, or 4)
+[Event Instruction](#event-instructions) - Check selectable event flag without waiting.
+
+**POLLSE1**  **{WC|WZ|WCZ}**
+**POLLSE2**  **{WC|WZ|WCZ}**
+**POLLSE3**  **{WC|WZ|WCZ}**
+**POLLSE4**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** SEn event flag state is optionally copied into C and/or Z, then the flag is cleared.
+
+- WC, WZ, or WCZ are optional effects to capture the event state into flags.
+
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZ0}{000000100}{000100100}{---}{SE1 Event}{SE1 Event}{2}
+\encodingrowcont{EEEE}{1101011}{CZ0}{000000101}{000100100}{---}{SE2 Event}{SE2 Event}{2}
+\encodingrowcont{EEEE}{1101011}{CZ0}{000000110}{000100100}{---}{SE3 Event}{SE3 Event}{2}
+\encodingrow{EEEE}{1101011}{CZ0}{000000111}{000100100}{---}{SE4 Event}{SE4 Event}{2}
+\end{encodingtable}
 ```
 
-#### Result
-SE1 event flag state is optionally copied into C and/or Z, then the flag is cleared.
+**Related:** [SETSE1/2/3/4](#setse1), [WAITSE1/2/3/4](#waitse1), [JSE1/2/3/4](#jse1), [JNSE1/2/3/4](#jnse1)
 
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
+**Explanation:**
 
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000000100 | 000100100 | — | SE1 Event | SE1 Event | 2}
+POLLSE1, POLLSE2, POLLSE3, and POLLSE4 copy the state of their respective selectable event flags into C and/or Z and then clear the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the selectable event flag prior to clearing it.
 
-#### Related Instructions
-- [SETSE1](#setse1) — Configure selectable event 1
-- [WAITSE1](#waitse1) — Wait for selectable event 1
-- [JSE1](#jse1) — Jump if SE1 event occurred
-- [JNSE1](#jnse1) — Jump if SE1 event did not occur
-- [POLLSE2](#pollse2) — Poll selectable event 2
-- [POLLSE3](#pollse3) — Poll selectable event 3
-- [POLLSE4](#pollse4) — Poll selectable event 4
+Each selectable event flag is set whenever the corresponding configured event occurs. The flag is cleared upon execution of SETSEn, POLLSEn, WAITSEn, JSEn, or JNSEn instructions.
 
-#### Explanation
-POLLSE1 copies the state of the selectable event 1 flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the selectable event 1 flag prior to clearing it.
-
-The selectable event 1 flag is set whenever the corresponding configured event occurs. The flag is cleared upon execution of SETSE1, POLLSE1, WAITSE1, JSE1, or JNSE1 instructions.
-
-The P2 provides four independent selectable event generators that can be configured to monitor various hardware conditions including pin edges, Smart Pin events, Hub RAM FIFO status, and more. POLLSE1 enables non-blocking monitoring of the first selectable event.
+The P2 provides four independent selectable event generators that can be configured to monitor various hardware conditions.
 
 
-### POLLSE2 — Event
 
-Checks the selectable event 2 flag without waiting.
+## POLLXFI {#pollxfi}
 
-#### Syntax
-```pasm
-        POLLSE2 {WC|WZ|WCZ}
+Poll streamer finished event
+[Event Instruction](#event-instructions) - Check streamer-finished event flag without waiting.
+
+**POLLXFI**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Streamer-finished event flag is optionally copied into C and/or Z, then it is cleared.
+
+- WC, WZ, or WCZ are optional effects to capture the event state into flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000001011}{000100100}{---}{XFI Event}{XFI Event}{2}
 ```
 
-#### Result
-SE2 event flag state is optionally copied into C and/or Z, then the flag is cleared.
+**Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXFI](#waitxfi), [JXFI](#jxfi), [JNXFI](#jnxfi)
 
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
+**Explanation:**
 
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000000101 | 000100100 | — | SE2 Event | SE2 Event | 2}
+POLLXFI copies the state of the streamer-finished event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the event flag prior to clearing it.
 
-#### Related Instructions
-- [SETSE2](#setse2) — Configure selectable event 2
-- [WAITSE2](#waitse2) — Wait for selectable event 2
-- [JSE2](#jse2) — Jump if SE2 event occurred
-- [JNSE2](#jnse2) — Jump if SE2 event did not occur
-- [POLLSE1](#pollse1) — Poll selectable event 1
-- [POLLSE3](#pollse3) — Poll selectable event 3
-- [POLLSE4](#pollse4) — Poll selectable event 4
+The streamer-finished event flag is set whenever the streamer runs out of commands to process. The flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXFI, WAITXFI, JXFI, or JNXFI instructions.
 
-#### Explanation
-POLLSE2 copies the state of the selectable event 2 flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the selectable event 2 flag prior to clearing it.
-
-The selectable event 2 flag is set whenever the corresponding configured event occurs. The flag is cleared upon execution of SETSE2, POLLSE2, WAITSE2, JSE2, or JNSE2 instructions.
-
-Having four independent selectable events allows a cog to simultaneously monitor multiple hardware conditions. Each selectable event can be configured independently to watch different sources.
+This instruction enables non-blocking management of the streamer subsystem.
 
 
-### POLLSE3 — Event
 
-Checks the selectable event 3 flag without waiting.
+## POLLXMT {#pollxmt}
 
-#### Syntax
-```pasm
-        POLLSE3 {WC|WZ|WCZ}
+Poll streamer empty event
+[Event Instruction](#event-instructions) - Check streamer-empty event flag without waiting.
+
+**POLLXMT**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Streamer-empty event flag is optionally copied into C and/or Z, then it is cleared.
+
+- WC, WZ, or WCZ are optional effects to capture the event state into flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000001010}{000100100}{---}{XMT Event}{XMT Event}{2}
 ```
 
-#### Result
-SE3 event flag state is optionally copied into C and/or Z, then the flag is cleared.
+**Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXMT](#waitxmt), [JXMT](#jxmt), [JNXMT](#jnxmt)
 
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
+**Explanation:**
 
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000000110 | 000100100 | — | SE3 Event | SE3 Event | 2}
+POLLXMT copies the state of the streamer-empty event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the event flag prior to clearing it.
 
-#### Related Instructions
-- [SETSE3](#setse3) — Configure selectable event 3
-- [WAITSE3](#waitse3) — Wait for selectable event 3
-- [JSE3](#jse3) — Jump if SE3 event occurred
-- [JNSE3](#jnse3) — Jump if SE3 event did not occur
-- [POLLSE1](#pollse1) — Poll selectable event 1
-- [POLLSE2](#pollse2) — Poll selectable event 2
-- [POLLSE4](#pollse4) — Poll selectable event 4
+The streamer-empty event flag is set whenever the streamer is ready for a new command. The flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXMT, WAITXMT, JXMT, or JNXMT instructions.
 
-#### Explanation
-POLLSE3 copies the state of the selectable event 3 flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the selectable event 3 flag prior to clearing it.
-
-The selectable event 3 flag is set whenever the corresponding configured event occurs. The flag is cleared upon execution of SETSE3, POLLSE3, WAITSE3, JSE3, or JNSE3 instructions.
-
-The selectable events provide a flexible event detection mechanism that can be tailored to application-specific needs, enabling efficient hardware monitoring without polling loops.
+This instruction enables pipelined streamer operations.
 
 
-### POLLSE4 — Event
 
-Checks the selectable event 4 flag without waiting.
+## POLLXRL {#pollxrl}
 
-#### Syntax
-```pasm
-        POLLSE4 {WC|WZ|WCZ}
+Poll streamer LUT rollover event
+[Event Instruction](#event-instructions) - Check streamer LUT rollover event flag without waiting.
+
+**POLLXRL**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Streamer-LUT-RAM-rollover event flag is optionally copied into C and/or Z, then it is cleared.
+
+- WC, WZ, or WCZ are optional effects to capture the event state into flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000001101}{000100100}{---}{XRL Event}{XRL Event}{2}
 ```
 
-#### Result
-SE4 event flag state is optionally copied into C and/or Z, then the flag is cleared.
+**Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXRL](#waitxrl), [JXRL](#jxrl), [JNXRL](#jnxrl)
 
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
+**Explanation:**
 
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000000111 | 000100100 | — | SE4 Event | SE4 Event | 2}
+POLLXRL copies the state of the streamer-LUT-RAM-rollover event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the event flag prior to clearing it.
 
-#### Related Instructions
-- [SETSE4](#setse4) — Configure selectable event 4
-- [WAITSE4](#waitse4) — Wait for selectable event 4
-- [JSE4](#jse4) — Jump if SE4 event occurred
-- [JNSE4](#jnse4) — Jump if SE4 event did not occur
-- [POLLSE1](#pollse1) — Poll selectable event 1
-- [POLLSE2](#pollse2) — Poll selectable event 2
-- [POLLSE3](#pollse3) — Poll selectable event 3
+The streamer-LUT-RAM-rollover event flag is set whenever location $1FF of the Lookup RAM is read by the streamer. The flag is cleared upon cog start or upon execution of POLLXRL, WAITXRL, JXRL, or JNXRL instructions.
 
-#### Explanation
-POLLSE4 copies the state of the selectable event 4 flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the selectable event 4 flag prior to clearing it.
-
-The selectable event 4 flag is set whenever the corresponding configured event occurs. The flag is cleared upon execution of SETSE4, POLLSE4, WAITSE4, JSE4, or JNSE4 instructions.
-
-This is the fourth and final selectable event. Together, the four selectable events enable complex event-driven applications that can monitor multiple hardware sources concurrently.
+This instruction enables circular buffer management when using LUT RAM as a streamer data source.
 
 
-### POLLXFI — Event
 
-Checks the streamer-finished event flag without waiting.
+## POLLXRO {#pollxro}
 
-#### Syntax
-```pasm
-        POLLXFI {WC|WZ|WCZ}
+Poll streamer NCO rollover event
+[Event Instruction](#event-instructions) - Check streamer NCO rollover event flag without waiting.
+
+**POLLXRO**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Streamer-NCO-rollover event flag is optionally copied into C and/or Z, then it is cleared.
+
+- WC, WZ, or WCZ are optional effects to capture the event state into flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000001100}{000100100}{---}{XRO Event}{XRO Event}{2}
 ```
 
-#### Result
-Streamer-finished event flag is optionally copied into C and/or Z, then it is cleared.
+**Related:** [XINIT](#xinit), [XZERO](#xzero), [XCONT](#xcont), [WAITXRO](#waitxro), [JXRO](#jxro), [JNXRO](#jnxro)
 
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
+**Explanation:**
 
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000001011 | 000100100 | — | XFI Event | XFI Event | 2}
+POLLXRO copies the state of the streamer NCO rollover event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the event flag prior to clearing it.
 
-#### Related Instructions
-- [XINIT](#xinit) — Initialize streamer
-- [XZERO](#xzero) — Initialize streamer with zeros
-- [XCONT](#xcont) — Continue streamer
-- [WAITXFI](#waitxfi) — Wait for streamer finished
-- [JXFI](#jxfi) — Jump if streamer finished
-- [JNXFI](#jnxfi) — Jump if streamer not finished
+The streamer-NCO-rollover event flag is set whenever the streamer's numerically-controlled oscillator (NCO) rolls over. The flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXRO, WAITXRO, JXRO, or JNXRO instructions.
 
-#### Explanation
-POLLXFI copies the state of the streamer-finished event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the streamer-finished event flag prior to clearing it.
-
-The streamer-finished event flag is set whenever the streamer runs out of commands to process. The streamer-finished event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXFI, WAITXFI, JXFI, or JNXFI instructions.
-
-This instruction enables non-blocking management of the streamer subsystem. The cog can queue streamer commands and check for completion without blocking, allowing it to prepare the next data while the streamer processes the current transfer.
+This instruction enables precise timing control for streamer operations that use the NCO for rate control.
 
 
-### POLLXMT — Event
 
-Checks the streamer-empty event flag without waiting.
+## POP {#pop}
 
-#### Syntax
-```pasm
-        POLLXMT {WC|WZ|WCZ}
+Pop from internal stack
+[Miscellaneous Instruction](#miscellaneous-instructions) - Pop a value from the internal K register stack.
+
+**POP**  *Dest*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Dest receives the value from the K register.
+
+- Dest is the register to receive the popped value.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000101011}{D}{K[31]}{Result = 0}{2}
 ```
 
-#### Result
-Streamer-empty event flag is optionally copied into C and/or Z, then it is cleared.
+**Related:** [PUSH](#push), [POPA](#popa), [POPB](#popb)
 
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
+**Explanation:**
 
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000001010 | 000100100 | — | XMT Event | XMT Event | 2}
+POP pops the internal stack register K into the destination register Dest. The P2 provides a single-level internal stack register K that is automatically used by CALL instructions to store the return address.
 
-#### Related Instructions
-- [XINIT](#xinit) — Initialize streamer
-- [XZERO](#xzero) — Initialize streamer with zeros
-- [XCONT](#xcont) — Continue streamer
-- [WAITXMT](#waitxmt) — Wait for streamer ready
-- [JXMT](#jxmt) — Jump if streamer ready
-- [JNXMT](#jnxmt) — Jump if streamer not ready
+If the WC or WCZ effect is specified, the C flag is set to bit 31 of the popped value.
 
-#### Explanation
-POLLXMT copies the state of the streamer-empty event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the streamer-empty event flag prior to clearing it.
+If the WZ or WCZ effect is specified, the Z flag is set (1) if the popped value equals zero, or is cleared (0) if non-zero.
 
-The streamer-empty event flag is set whenever the streamer is ready for a new command. The streamer-empty event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXMT, WAITXMT, JXMT, or JNXMT instructions.
-
-This instruction enables pipelined streamer operations. By checking when the streamer is ready for the next command, the cog can queue operations without gaps, achieving maximum throughput for video generation, DAC output, or other streaming applications.
+POP retrieves this value, typically as part of a return sequence, though it can also be used to retrieve any value previously stored with PUSH.
 
 
-### POLLXRL — Event
 
-Checks the streamer-LUT-RAM-rollover event flag without waiting.
+## POPA {#popa}
 
-#### Syntax
-```pasm
-        POLLXRL {WC|WZ|WCZ}
+Pop from Hub stack A
+[Hub RAM Instruction](#hub-ram-instructions) - Pop a long value from Hub RAM using PTRA as stack pointer.
+
+**POPA**  *Dest*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Dest receives the long value from Hub address --PTRA.
+
+- Dest is the register to receive the popped value.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1011000}{CZ1}{DDDDDDDDD}{101011111}{D}{MSB of long}{Result = 0}{9...16}
 ```
 
-#### Result
-Streamer-LUT-RAM-rollover event flag is optionally copied into C and/or Z, then it is cleared.
+**Related:** [PUSHA](#pusha), [POPB](#popb), [POP](#pop)
 
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
+**Explanation:**
 
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000001101 | 000100100 | — | XRL Event | XRL Event | 2}
+POPA reads a long from Hub address --PTRA into the destination register Dest. PTRA is automatically decremented by 4 before the read occurs (pre-decrement), implementing a descending stack model where the stack grows downward in memory.
 
-#### Related Instructions
-- [XINIT](#xinit) — Initialize streamer
-- [XZERO](#xzero) — Initialize streamer with zeros
-- [XCONT](#xcont) — Continue streamer
-- [WAITXRL](#waitxrl) — Wait for LUT rollover
-- [JXRL](#jxrl) — Jump if LUT rollover occurred
-- [JNXRL](#jnxrl) — Jump if LUT rollover did not occur
+If the WC or WCZ effect is specified, the C flag is set to the MSB (bit 31) of the popped value.
 
-#### Explanation
-POLLXRL copies the state of the streamer-LUT-RAM-rollover event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the streamer-LUT-RAM-rollover event flag prior to clearing it.
+If the WZ or WCZ effect is specified, the Z flag is set (1) if the popped value equals zero, or is cleared (0) if non-zero.
 
-The streamer-LUT-RAM-rollover event flag is set whenever location $1FF of the Lookup RAM is read by the streamer. The streamer-LUT-RAM-rollover event flag is cleared upon cog start or upon execution of POLLXRL, WAITXRL, JXRL, or JNXRL instructions.
-
-This instruction enables circular buffer management when using LUT RAM as a streamer data source. The event signals when the streamer has wrapped around to the beginning of the LUT buffer, allowing the application to refill the consumed portion.
+This instruction enables Hub RAM-based stacks for deep subroutine nesting and large temporary storage.
 
 
-### POLLXRO — Event
 
-Checks the streamer-NCO-rollover event flag without waiting.
+## POPB {#popb}
 
-#### Syntax
-```pasm
-        POLLXRO {WC|WZ|WCZ}
+Pop from Hub stack B
+[Hub RAM Instruction](#hub-ram-instructions) - Pop a long value from Hub RAM using PTRB as stack pointer.
+
+**POPB**  *Dest*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Dest receives the long value from Hub address --PTRB.
+
+- Dest is the register to receive the popped value.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1011000}{CZ1}{DDDDDDDDD}{111011111}{D}{MSB of long}{Result = 0}{9...16}
 ```
 
-#### Result
-Streamer-NCO-rollover event flag is optionally copied into C and/or Z, then it is cleared.
+**Related:** [PUSHB](#pushb), [POPA](#popa), [POP](#pop)
 
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flag effects to capture event state |
+**Explanation:**
 
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | 000001100 | 000100100 | — | XRO Event | XRO Event | 2}
+POPB reads a long from Hub address --PTRB into the destination register Dest. PTRB is automatically decremented by 4 before the read occurs (pre-decrement), implementing a descending stack model where the stack grows downward in memory.
 
-#### Related Instructions
-- [XINIT](#xinit) — Initialize streamer
-- [XZERO](#xzero) — Initialize streamer with zeros
-- [XCONT](#xcont) — Continue streamer
-- [WAITXRO](#waitxro) — Wait for NCO rollover
-- [JXRO](#jxro) — Jump if NCO rollover occurred
-- [JNXRO](#jnxro) — Jump if NCO rollover did not occur
+If the WC or WCZ effect is specified, the C flag is set to the MSB (bit 31) of the popped value.
 
-#### Explanation
-POLLXRO copies the state of the streamer NCO rollover event flag into C and/or Z and then clears the flag (unless it's being set again by the event sensor). If the WC, WZ, or WCZ effect is specified, the C flag and/or Z flag is updated to the state of the streamer-NCO-rollover event flag prior to clearing it.
+If the WZ or WCZ effect is specified, the Z flag is set (1) if the popped value equals zero, or is cleared (0) if non-zero.
 
-The streamer-NCO-rollover event flag is set whenever the streamer's numerically-controlled oscillator (NCO) rolls over. The streamer-NCO-rollover event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXRO, WAITXRO, JXRO, or JNXRO instructions.
-
-This instruction enables precise timing control for streamer operations that use the NCO for rate control. The NCO rollover event signals completion of a timing period, useful for synchronized video output, audio generation, or other time-critical streaming applications.
+Having two independent Hub stack pointers (PTRA and PTRB) allows a cog to manage separate stacks for different purposes.
 
 
-## POP Instructions — Stack Operations
 
-The POP family of instructions retrieves values from stacks. POP works with the internal K register stack, while POPA and POPB read from Hub RAM stacks using PTRA and PTRB as stack pointers. These instructions enable subroutine call/return mechanisms and temporary value storage.
+## PUSH {#push}
 
-### POP — Miscellaneous
+Push to internal stack
+[Miscellaneous Instruction](#miscellaneous-instructions) - Push a value onto the internal K register stack.
 
-Pops a value from the internal K register stack.
+**PUSH**  *{#}Dest*
 
-#### Syntax
-```pasm
-        POP     D        {WC|WZ|WCZ}
+---
+
+**Result:** The value from Dest (or immediate value) is stored in the K register.
+
+- Dest is a register or 9-bit immediate value (0-511) to push.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000101010}{---}{---}{---}{2}
 ```
 
-#### Result
-D receives the value from the K register.
+**Related:** [POP](#pop), [PUSHA](#pusha), [PUSHB](#pushb)
 
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register to receive popped value |
-| WC/WZ/WCZ | Optional flag effects |
+**Explanation:**
 
-#### Encoding
-\simpleencoding{EEEE | 1101011 | CZ0 | DDDDDDDDD | 000101011 | D | K[31] | Result = 0 | 2}
+PUSH pushes the value in Dest (or an immediate value 0-511) onto the internal stack register K. This instruction does not affect any flags.
 
-#### Related Instructions
-- [PUSH](#push) — Push value onto internal stack
-- [POPA](#popa) — Pop from Hub stack using PTRA
-- [POPB](#popb) — Pop from Hub stack using PTRB
-
-#### Explanation
-POP pops the internal stack register K into destination register D. The C flag is set to bit 31 of the popped value when the WC effect is specified. The Z flag is set if the popped value equals zero when the WZ effect is specified.
-
-The P2 provides a single-level internal stack register K that is automatically used by CALL instructions to store the return address. POP retrieves this value, typically as part of a return sequence, though it can also be used to retrieve any value previously stored with PUSH.
+The P2 provides a single-level internal stack register K that is automatically used by CALL instructions to store the return address. PUSH can be used to save other values in K, though this overwrites any return address that may be stored there.
 
 
-### POPA — Hub RAM
 
-Pops a long value from Hub RAM using PTRA as the stack pointer.
+## PUSHA {#pusha}
 
-#### Syntax
-```pasm
-        POPA    D        {WC|WZ|WCZ}
+Push to Hub stack A
+[Hub RAM Instruction](#hub-ram-instructions) - Push a long value to Hub RAM using PTRA as stack pointer.
+
+**PUSHA**  *{#}Dest*
+
+---
+
+**Result:** The long value from Dest is written to Hub address PTRA++.
+
+- Dest is a register or 9-bit immediate value to push.
+
+```{=latex}
+\simpleencoding{EEEE}{1100011}{0L1}{DDDDDDDDD}{101100001}{---}{---}{---}{3...10}
 ```
 
-#### Result
-D receives the long value from Hub address --PTRA.
+**Related:** [POPA](#popa), [PUSHB](#pushb), [PUSH](#push)
 
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register to receive popped value |
-| WC/WZ/WCZ | Optional flag effects |
+**Explanation:**
 
-#### Encoding
-\simpleencoding{EEEE | 1011000 | CZ1 | DDDDDDDDD | 101011111 | D | MSB of long | Result = 0 | 9...16}
-
-#### Related Instructions
-- [PUSHA](#pusha) — Push value to Hub stack using PTRA
-- [POPB](#popb) — Pop from Hub stack using PTRB
-- [PTRA](#ptra) — Stack pointer register A
-
-#### Explanation
-POPA reads a long from Hub address --PTRA into destination register D. PTRA is automatically decremented by 4 before the read occurs (pre-decrement), implementing a descending stack model where the stack grows downward in memory.
-
-The C flag is set to the MSB (bit 31) of the popped value when the WC effect is specified. The Z flag is set if the popped value equals zero when the WZ effect is specified.
-
-This instruction enables Hub RAM-based stacks for deep subroutine nesting and large temporary storage. The descending stack model (decrement before read) pairs with PUSHA's ascending model (write then increment) to create a standard stack convention.
-
-
-### POPB — Hub RAM
-
-Pops a long value from Hub RAM using PTRB as the stack pointer.
-
-#### Syntax
-```pasm
-        POPB    D        {WC|WZ|WCZ}
-```
-
-#### Result
-D receives the long value from Hub address --PTRB.
-
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register to receive popped value |
-| WC/WZ/WCZ | Optional flag effects |
-
-#### Encoding
-\simpleencoding{EEEE | 1011000 | CZ1 | DDDDDDDDD | 111011111 | D | MSB of long | Result = 0 | 9...16}
-
-#### Related Instructions
-- [PUSHB](#pushb) — Push value to Hub stack using PTRB
-- [POPA](#popa) — Pop from Hub stack using PTRA
-- [PTRB](#ptrb) — Stack pointer register B
-
-#### Explanation
-POPB reads a long from Hub address --PTRB into destination register D. PTRB is automatically decremented by 4 before the read occurs (pre-decrement), implementing a descending stack model where the stack grows downward in memory.
-
-The C flag is set to the MSB (bit 31) of the popped value when the WC effect is specified. The Z flag is set if the popped value equals zero when the WZ effect is specified.
-
-Having two independent Hub stack pointers (PTRA and PTRB) allows a cog to manage separate stacks for different purposes, such as one for subroutine calls and another for parameter passing or local variables.
-
-
-## PUSH Instructions — Stack Operations
-
-The PUSH family of instructions stores values onto stacks. PUSH works with the internal K register stack, while PUSHA and PUSHB write to Hub RAM stacks using PTRA and PTRB as stack pointers. These instructions enable subroutine call/return mechanisms and temporary value storage.
-
-### PUSH — Miscellaneous
-
-Pushes a value onto the internal K register stack.
-
-#### Syntax
-```pasm
-        PUSH    {#}D
-```
-
-#### Result
-The value from D (or immediate value) is stored in the K register.
-
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Source register or 9-bit immediate value (0-511) |
-
-#### Encoding
-\simpleencoding{EEEE | 1101011 | 00L | DDDDDDDDD | 000101010 | — | — | — | 2}
-
-#### Related Instructions
-- [POP](#pop) — Pop value from internal stack
-- [PUSHA](#pusha) — Push to Hub stack using PTRA
-- [PUSHB](#pushb) — Push to Hub stack using PTRB
-
-#### Explanation
-PUSH pushes the value in D (or an immediate value 0-511) onto the internal stack register K. This instruction does not affect any flags.
-
-The P2 provides a single-level internal stack register K that is automatically used by CALL instructions to store the return address. PUSH can be used to save other values in K, though this overwrites any return address that may be stored there. The typical use is to temporarily save a value that will be restored with POP before the subroutine returns.
-
-
-### PUSHA — Hub RAM
-
-Pushes a long value to Hub RAM using PTRA as the stack pointer.
-
-#### Syntax
-```pasm
-        PUSHA   {#}D
-```
-
-#### Result
-The long value from D is written to Hub address PTRA++.
-
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Source register or 9-bit immediate value to push |
-
-#### Encoding
-\simpleencoding{EEEE | 1100011 | 0L1 | DDDDDDDDD | 101100001 | — | — | — | 3...10}
-
-#### Related Instructions
-- [POPA](#popa) — Pop from Hub stack using PTRA
-- [PUSHB](#pushb) — Push to Hub stack using PTRB
-- [PTRA](#ptra) — Stack pointer register A
-
-#### Explanation
-PUSHA writes the long value in D (or a 9-bit immediate value) to Hub address PTRA++. PTRA is automatically incremented by 4 after the write occurs (post-increment).
+PUSHA writes the long value in Dest (or a 9-bit immediate value) to Hub address PTRA++. PTRA is automatically incremented by 4 after the write occurs (post-increment).
 
 This instruction does not affect any flags. The post-increment model means PTRA always points to the next available stack location after the push operation.
 
-PUSHA paired with POPA implements a descending stack in Hub RAM. PUSHA increments after writing (grows upward), while POPA decrements before reading (shrinks downward). Initialize PTRA to the top of the stack area before first use.
+PUSHA paired with POPA implements a descending stack in Hub RAM.
 
 
-### PUSHB — Hub RAM
 
-Pushes a long value to Hub RAM using PTRB as the stack pointer.
+## PUSHB {#pushb}
 
-#### Syntax
-```pasm
-        PUSHB   {#}D
+Push to Hub stack B
+[Hub RAM Instruction](#hub-ram-instructions) - Push a long value to Hub RAM using PTRB as stack pointer.
+
+**PUSHB**  *{#}Dest*
+
+---
+
+**Result:** The long value from Dest is written to Hub address PTRB++.
+
+- Dest is a register or 9-bit immediate value to push.
+
+```{=latex}
+\simpleencoding{EEEE}{1100011}{0L1}{DDDDDDDDD}{111100001}{---}{---}{---}{3...10}
 ```
 
-#### Result
-The long value from D is written to Hub address PTRB++.
+**Related:** [POPB](#popb), [PUSHA](#pusha), [PUSH](#push)
 
-#### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Source register or 9-bit immediate value to push |
+**Explanation:**
 
-#### Encoding
-\simpleencoding{EEEE | 1100011 | 0L1 | DDDDDDDDD | 111100001 | — | — | — | 3...10}
-
-#### Related Instructions
-- [POPB](#popb) — Pop from Hub stack using PTRB
-- [PUSHA](#pusha) — Push to Hub stack using PTRA
-- [PTRB](#ptrb) — Stack pointer register B
-
-#### Explanation
-PUSHB writes the long value in D (or a 9-bit immediate value) to Hub address PTRB++. PTRB is automatically incremented by 4 after the write occurs (post-increment).
+PUSHB writes the long value in Dest (or a 9-bit immediate value) to Hub address PTRB++. PTRB is automatically incremented by 4 after the write occurs (post-increment).
 
 This instruction does not affect any flags. The post-increment model means PTRB always points to the next available stack location after the push operation.
 
-Having two independent Hub stack pointers (PTRA and PTRB) allows a cog to manage separate stacks for different purposes. For example, PTRA might track subroutine return addresses while PTRB manages a parameter stack or circular buffer.
-
-# Q Instructions — CORDIC Coprocessor Operations
-
-The P2 Propeller includes a dedicated CORDIC (COordinate Rotation DIgital Computer) coprocessor that performs high-precision mathematical operations. The Q* instruction family queues operations to this 54-stage pipelined coprocessor, enabling sophisticated calculations while the cog continues executing other instructions.
-
-## CORDIC Operation Model
-
-All Q* instructions follow a queue-based operation model:
-
-1. **Queue Operation**: Q* instructions (QMUL, QDIV, etc.) start a computation but do not wait for the result
-2. **54-Cycle Latency**: All CORDIC operations take 54 clock cycles to complete
-3. **Result Retrieval**: Use GETQX and GETQY to retrieve results 55 clocks after issuing the Q* instruction
-4. **Pipelining**: Multiple operations can be queued while waiting for results (one per hub window, every 8 clocks)
-5. **Extended Operands**: Some operations use SETQ to provide additional 32-bit input data
-
-This pipelined architecture enables high-throughput mathematical processing by overlapping computation with other work.
+Having two independent Hub stack pointers (PTRA and PTRB) allows a cog to manage separate stacks for different purposes.
 
 
-## QDIV — CORDIC Solver
+# Instructions: Q
 
-Perform 64÷32 unsigned division with 32-bit quotient and remainder.
+This section contains all PASM2 instructions beginning with the letter Q. The Q instructions are part of the CORDIC coprocessor family.
 
-### Syntax
-```pasm
-        QDIV    {#}D,{#}S
+
+
+## QDIV {#qdiv}
+
+Queue divide
+[CORDIC Instruction](#cordic-instructions) - Perform 64÷32 unsigned division with 32-bit quotient and remainder.
+
+**QDIV**  *{#}Dest, {#}Src*
+
+---
+
+**Result:** Divides a 64-bit numerator by a 32-bit denominator, producing a 32-bit quotient (GETQX) and remainder (GETQY) 55 clocks later.
+
+- Dest is a register or literal containing the lower 32 bits of the 64-bit numerator.
+- Src is a register or literal containing the 32-bit denominator (divisor).
+- Use SETQ before QDIV to specify the upper 32 bits of the numerator (defaults to 0 if not used).
+
+```{=latex}
+\simpleencoding{EEEE}{1101000}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
 ```
 
-### Result
-Divides a 64-bit numerator by a 32-bit denominator, producing both a 32-bit quotient (retrieved via GETQX) and a 32-bit remainder (retrieved via GETQY) 55 clocks later.
+**Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QFRAC](#qfrac), [QMUL](#qmul)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Lower 32 bits of 64-bit numerator |
-| S | 32-bit denominator (divisor) |
-| SETQ | Upper 32 bits of 64-bit numerator (optional, defaults to 0 if not used) |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 1101000 1LI | DDDDDDDDD | SSSSSSSSS | — | — | — | 2...9}
+QDIV performs high-precision unsigned division using the P2's 54-stage pipelined CORDIC solver. It divides a 64-bit numerator by a 32-bit denominator, producing both a 32-bit quotient and 32-bit remainder.
 
-### Related Instructions
-- [GETQX](#getqx) — Retrieve quotient result
-- [GETQY](#getqy) — Retrieve remainder result
-- [SETQ](#setq) — Set upper 32 bits of numerator
-- [QFRAC](#qfrac) — Fractional division with reversed operand order
-- [QMUL](#qmul) — CORDIC multiplication
+The 64-bit numerator is formed by concatenating the SETQ value (or 0 if SETQ not used) as the upper 32 bits with the Dest operand as the lower 32 bits: {SETQ, Dest}. The denominator is specified in the Src operand. After 55 clocks, the quotient can be retrieved using GETQX and the remainder using GETQY.
 
-### Explanation
-The QDIV instruction performs high-precision unsigned division using the P2's 54-stage pipelined CORDIC solver. It divides a 64-bit numerator by a 32-bit denominator, producing both a 32-bit quotient and 32-bit remainder.
-
-The 64-bit numerator is formed by concatenating the SETQ value (or 32'b0 if SETQ not used) as the upper 32 bits with the D operand as the lower 32 bits: {SETQ, D}. The denominator is specified in the S operand. After 55 clocks, the quotient can be retrieved using GETQX and the remainder using GETQY.
-
-The optional SETQ instruction allows for true 64-bit division when high precision is required, while omitting SETQ effectively performs 32-bit division (equivalent to {0, D} / S). This instruction is essential for precise arithmetic operations where full 64-bit precision is needed in the dividend, such as fixed-point mathematics, scaling operations, and algorithms requiring exact division results without precision loss.
-
-**Simple 32-bit division example (1000000 ÷ 3 = 333333 remainder 1):**
-```pasm
-        QDIV    #1000000, #3   ' No SETQ, so {0, 1000000} / 3
+::: pasm2
+        QDIV    #1000000, #3   ' {0, 1000000} / 3
         ' Wait 55 clocks...
         GETQX   quotient       ' Get 333333
         GETQY   remainder      ' Get 1
+:::
+
+Division by zero produces undefined results. Each cog can issue one CORDIC instruction per hub window (every 8 clocks).
+
+
+
+## QEXP {#qexp}
+
+Queue exponential
+[CORDIC Instruction](#cordic-instructions) - Convert 5:27-bit logarithm to 32-bit unsigned integer.
+
+**QEXP**  *{#}Dest*
+
+---
+
+**Result:** Converts a 5:27-bit logarithm format into a 32-bit unsigned integer, retrieved via GETQX 55 clocks later.
+
+- Dest is a register or literal containing the 5:27-bit logarithm (5-bit exponent in bits [31:27], 27-bit fraction in bits [26:0]).
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000001111}{---}{---}{---}{2...9}
 ```
 
-**Full 64-bit division example:**
-```pasm
-        SETQ    #$12345678     ' Set upper 32 bits
-        QDIV    #$9ABCDEF0, #1000  ' {SETQ, D} / S
-        ' ... other work for 55 clocks ...
-        GETQX   big_quotient
-        GETQY   big_remainder
-```
+**Related:** [GETQX](#getqx), [QLOG](#qlog), [QMUL](#qmul)
 
-Division by zero produces undefined results. Each cog can issue one CORDIC instruction per hub window (every 8 clocks), allowing pipelined mathematical operations.
+**Explanation:**
 
+QEXP performs logarithm to integer conversion using the P2's 54-stage pipelined CORDIC solver. It converts a 5:27-bit logarithm format into a 32-bit unsigned integer, effectively computing the exponential (antilog) of the input.
 
-## QEXP — CORDIC Solver
+The instruction takes the logarithm value in the Dest operand, which must be in P2's 5:27 format where bits [31:27] contain the 5-bit whole exponent and bits [26:0] contain the 27-bit fractional exponent. After 55 clocks, the integer result can be retrieved using GETQX.
 
-Convert 5:27-bit logarithm to 32-bit unsigned integer.
+QEXP is the complement of QLOG and is commonly used together with QLOG to perform power calculations.
 
-### Syntax
-```pasm
-        QEXP    {#}D
-```
-
-### Result
-Converts a 5:27-bit logarithm format into a 32-bit unsigned integer (exponential result), retrieved via GETQX 55 clocks later.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | 5:27-bit logarithm (5-bit whole exponent in bits [31:27], 27-bit fractional exponent in bits [26:0]) |
-
-### Encoding
-\simpleencoding{EEEE | 1101011 00L | DDDDDDDDD | 000001111 | — | — | — | 2...9}
-
-### Related Instructions
-- [GETQX](#getqx) — Retrieve exponential result
-- [QLOG](#qlog) — Convert integer to logarithm
-- [QMUL](#qmul) — CORDIC multiplication for logarithmic scaling
-
-### Explanation
-The QEXP instruction performs logarithm to integer conversion using the P2's 54-stage pipelined CORDIC solver. It converts a 5:27-bit logarithm format into a 32-bit unsigned integer, effectively computing the exponential (antilog) of the input.
-
-The instruction takes the logarithm value in the D operand, which must be in P2's 5:27 format where bits [31:27] contain the 5-bit whole exponent and bits [26:0] contain the 27-bit fractional exponent. After 55 clocks, the integer result can be retrieved using the GETQX instruction.
-
-This instruction is the complement of QLOG and is commonly used together with QLOG to perform power calculations, exponential functions, and other mathematical operations requiring logarithmic scaling. The high precision of the 5:27 format allows for accurate exponential calculations across a wide range of input values, making it suitable for signal processing, mathematical modeling, and scientific computations.
-
-**Basic logarithm to integer conversion:**
-```pasm
+::: pasm2
         QEXP    log_value      ' Begin exponential conversion
         ' Wait 55 clocks...
         GETQX   integer_result ' Get 32-bit integer
+:::
+
+
+
+## QFRAC {#qfrac}
+
+Queue fractional divide
+[CORDIC Instruction](#cordic-instructions) - Perform 64÷32 unsigned fractional division.
+
+**QFRAC**  *{#}Dest, {#}Src*
+
+---
+
+**Result:** Divides a 64-bit numerator by a 32-bit denominator, producing a 32-bit quotient (GETQX) and remainder (GETQY) 55 clocks later.
+
+- Dest is a register or literal containing the upper 32 bits of the 64-bit numerator.
+- Src is a register or literal containing the 32-bit denominator (divisor).
+- Use SETQ before QFRAC to specify the lower 32 bits of the numerator (defaults to 0 if not used).
+
+```{=latex}
+\simpleencoding{EEEE}{1101001}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
 ```
 
-**Power calculation using log/exp (result = base^exponent):**
-```pasm
-        QLOG    base          ' Convert base to log
-        ' ... wait 55 clocks ...
-        GETQX   log_base
-        QMUL    log_base, exponent  ' Multiply log by exponent
-        ' ... wait 55 clocks ...
-        GETQX   log_result
-        QEXP    log_result    ' Convert back to integer
-        ' ... wait 55 clocks ...
-        GETQX   power_result
-```
+**Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QDIV](#qdiv), [QMUL](#qmul)
 
-The input must be in 5:27 logarithmic format as produced by QLOG. QEXP is the complementary operation to QLOG, enabling sophisticated power and exponential calculations.
+**Explanation:**
 
+QFRAC performs fractional division using the P2's 54-stage pipelined CORDIC solver. It divides a 64-bit numerator by a 32-bit denominator, but differs from QDIV in the operand arrangement: Dest forms the upper 32 bits while SETQ (or 0) forms the lower 32 bits.
 
-## QFRAC — CORDIC Solver
+The 64-bit numerator is formed as {Dest, SETQ}. This arrangement makes QFRAC particularly suitable for fractional arithmetic where the integer part is in Dest and the fractional part is in SETQ.
 
-Perform 64÷32 unsigned fractional division with D as upper 32 bits.
-
-### Syntax
-```pasm
-        QFRAC   {#}D,{#}S
-```
-
-### Result
-Divides a 64-bit numerator by a 32-bit denominator, producing both a 32-bit quotient (retrieved via GETQX) and a 32-bit remainder (retrieved via GETQY) 55 clocks later.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Upper 32 bits of 64-bit numerator (integer portion) |
-| S | 32-bit denominator (divisor) |
-| SETQ | Lower 32 bits of 64-bit numerator (fractional portion, optional, defaults to 0 if not used) |
-
-### Encoding
-\simpleencoding{EEEE | 1101001 0LI | DDDDDDDDD | SSSSSSSSS | — | — | — | 2...9}
-
-### Related Instructions
-- [GETQX](#getqx) — Retrieve quotient result
-- [GETQY](#getqy) — Retrieve remainder result
-- [SETQ](#setq) — Set lower 32 bits of numerator
-- [QDIV](#qdiv) — Standard division with reversed operand order
-- [QMUL](#qmul) — CORDIC multiplication
-
-### Explanation
-The QFRAC instruction performs fractional division using the P2's 54-stage pipelined CORDIC solver. It divides a 64-bit numerator by a 32-bit denominator, but differs from QDIV in the operand arrangement: D forms the upper 32 bits while SETQ (or 32'b0) forms the lower 32 bits.
-
-The 64-bit numerator is formed by concatenating the D operand as the upper 32 bits with the SETQ value (or 32'b0 if SETQ not used) as the lower 32 bits: {D, SETQ}. This arrangement makes QFRAC particularly suitable for fractional arithmetic where the integer part is in D and the fractional part is in SETQ.
-
-After 55 clocks, the quotient can be retrieved using GETQX and the remainder using GETQY. This instruction is essential for fixed-point mathematics, fractional scaling operations, and algorithms where the dividend's integer portion needs to be preserved in the primary operand.
-
-The key difference from QDIV is the bit arrangement: QFRAC uses {D, SETQ} while QDIV uses {SETQ, D}, making QFRAC more natural for fractional operations where D represents the whole number portion.
-
-**Fractional number division (5.75 ÷ 2):**
-```pasm
+::: pasm2
         SETQ    #$C0000000     ' 0.75 in 32-bit fraction format
         QFRAC   #5, #2         ' {5, 0.75} / 2 = 2.875
         ' Wait 55 clocks...
         GETQX   quotient       ' Get integer quotient
         GETQY   remainder      ' Get fractional remainder
+:::
+
+
+
+## QLOG {#qlog}
+
+Queue logarithm
+[CORDIC Instruction](#cordic-instructions) - Convert 32-bit unsigned integer to 5:27-bit logarithm.
+
+**QLOG**  *{#}Dest*
+
+---
+
+**Result:** Converts a 32-bit unsigned integer into a 5:27-bit logarithm format, retrieved via GETQX 55 clocks later.
+
+- Dest is a register or literal containing the 32-bit unsigned integer input.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000001110}{---}{---}{---}{2...9}
 ```
 
-**Simple fractional scaling without SETQ (D.0 format):**
-```pasm
-        QFRAC   #1000, #3      ' {1000, 0} / 3 = 333 remainder 1
-        ' ... other work for 55 clocks ...
-        GETQX   scaled_result
-        GETQY   leftover
-```
+**Related:** [GETQX](#getqx), [QEXP](#qexp)
 
-Use SETQ before QFRAC to specify the fractional part. Without SETQ, the lower 32 bits default to 0. Division by zero produces undefined results.
+**Explanation:**
 
+QLOG performs integer to logarithm conversion using the P2's 54-stage pipelined CORDIC solver. It converts a 32-bit unsigned integer into a 5:27-bit logarithm format, where the result contains a 5-bit whole exponent in bits [31:27] and a 27-bit fractional exponent in bits [26:0].
 
-## QLOG — CORDIC Solver
+The instruction takes the unsigned integer value in the Dest operand. After 55 clocks, the logarithm result can be retrieved using GETQX.
 
-Convert 32-bit unsigned integer to 5:27-bit logarithm format.
-
-### Syntax
-```pasm
-        QLOG    {#}D
-```
-
-### Result
-Converts a 32-bit unsigned integer into a 5:27-bit logarithm format (retrieved via GETQX) 55 clocks later.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | 32-bit unsigned integer input |
-
-### Encoding
-\simpleencoding{EEEE | 1101011 00L | DDDDDDDDD | 000001110 | — | — | — | 2...9}
-
-### Related Instructions
-- [GETQX](#getqx) — Retrieve logarithm result
-- [QEXP](#qexp) — Convert logarithm back to integer
-
-### Explanation
-The QLOG instruction performs integer to logarithm conversion using the P2's 54-stage pipelined CORDIC solver. It converts a 32-bit unsigned integer into a 5:27-bit logarithm format, where the result contains a 5-bit whole exponent in bits [31:27] and a 27-bit fractional exponent in bits [26:0].
-
-The instruction takes the unsigned integer value in the D operand. After 55 clocks, the logarithm result can be retrieved using the GETQX instruction.
-
-The logarithm result uses P2's fixed-point 5:27 format, which provides high precision for mathematical calculations. This format allows representing a wide range of logarithmic values while maintaining fractional precision.
-
-Common applications include signal processing algorithms, mathematical computations requiring logarithmic scaling, and implementations of exponential/power functions when combined with QEXP.
-
-**Basic logarithm calculation:**
-```pasm
+::: pasm2
         QLOG    #1000          ' Begin log conversion
         ' Wait 55 clocks...
         GETQX   log_result     ' Get 5:27 logarithm
+:::
+
+
+
+## QMUL {#qmul}
+
+Queue multiply
+[CORDIC Instruction](#cordic-instructions) - Perform 32×32 unsigned multiplication producing 64-bit result.
+
+**QMUL**  *{#}Dest, {#}Src*
+
+---
+
+**Result:** Multiplies two 32-bit unsigned values, producing a 64-bit result with lower 32 bits via GETQX and upper 32 bits via GETQY, 55 clocks later.
+
+- Dest is a register or literal containing the first 32-bit multiplicand.
+- Src is a register or literal containing the second 32-bit multiplicand.
+
+```{=latex}
+\simpleencoding{EEEE}{1101000}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
 ```
 
-**Extracting logarithm components:**
-```pasm
-        QLOG    number
-        ' ... wait 55 clocks ...
-        GETQX   log_result
-        SHR     log_result, #27 WZ  ' Extract 5-bit exponent
-        MOV     exponent, log_result
-        AND     mantissa, ##$07FFFFFF  ' Extract 27-bit mantissa
-```
+**Related:** [GETQX](#getqx), [GETQY](#getqy), [QDIV](#qdiv), [QFRAC](#qfrac)
 
-The result format is {5'whole_exponent, 27'fractional_exponent}. Use with QEXP for exponential operations.
+**Explanation:**
 
+QMUL performs high-precision unsigned multiplication using the P2's 54-stage pipelined CORDIC solver. It multiplies two 32-bit unsigned integers (Dest × Src) and produces a full 64-bit product, avoiding the precision loss that would occur with standard 32-bit multiplication.
 
-## QMUL — CORDIC Solver
+After 55 clocks, the 64-bit result can be retrieved using GETQX for the lower 32 bits and GETQY for the upper 32 bits.
 
-Perform 32×32 unsigned multiplication producing 64-bit result.
-
-### Syntax
-```pasm
-        QMUL    {#}D,{#}S
-```
-
-### Result
-Multiplies two 32-bit unsigned values, producing a 64-bit result with the lower 32 bits retrieved via GETQX and upper 32 bits retrieved via GETQY, 55 clocks later.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | First multiplicand (32-bit unsigned) |
-| S | Second multiplicand (32-bit unsigned) |
-
-### Encoding
-\simpleencoding{EEEE | 1101000 0LI | DDDDDDDDD | SSSSSSSSS | — | — | — | 2...9}
-
-### Related Instructions
-- [GETQX](#getqx) — Retrieve lower 32 bits of product
-- [GETQY](#getqy) — Retrieve upper 32 bits of product
-- [QDIV](#qdiv) — CORDIC division
-- [QFRAC](#qfrac) — CORDIC fractional division
-
-### Explanation
-The QMUL instruction performs high-precision unsigned multiplication using the P2's 54-stage pipelined CORDIC solver. It multiplies two 32-bit unsigned integers (D × S) and produces a full 64-bit product, avoiding the precision loss that would occur with standard 32-bit multiplication.
-
-The instruction takes the first multiplicand in the D operand and the second multiplicand in the S operand, both as 32-bit unsigned values. After 55 clocks, the 64-bit result can be retrieved using GETQX for the lower 32 bits and GETQY for the upper 32 bits.
-
-This full-precision multiplication is essential for applications requiring accurate large number arithmetic, such as DSP operations, cryptographic calculations, fixed-point mathematics, and multiply-accumulate operations where intermediate precision is critical.
-
-The pipelined nature allows for continuous multiply-accumulate operations by issuing new QMUL instructions every 8 clocks (hub window) while retrieving results from previous operations, enabling high-throughput mathematical processing.
-
-**Basic large number multiplication (1000000 × 2000000):**
-```pasm
+::: pasm2
         QMUL    #1000000, #2000000
         ' Wait 55 clocks...
         GETQX   lower_32       ' Get lower 32 bits
         GETQY   upper_32       ' Get upper 32 bits
+:::
+
+Each cog can issue one CORDIC instruction per hub window (every 8 clocks), allowing efficient pipelining.
+
+
+
+## QROTATE {#qrotate}
+
+Queue rotate
+[CORDIC Instruction](#cordic-instructions) - Rotate a 32-bit signed (X, Y) point around origin by specified angle.
+
+**QROTATE**  *{#}Dest, {#}Src*
+
+---
+
+**Result:** Rotates a coordinate pair around the origin, producing new X (GETQX) and Y (GETQY) coordinates 55 clocks later.
+
+- Dest is a register or literal containing the X coordinate (32-bit signed).
+- Src is a register or literal containing the rotation angle in P2 angle units ($00000000 = 0°, $40000000 = 90°, $80000000 = 180°, $C0000000 = 270°).
+- Use SETQ before QROTATE to specify the Y coordinate (defaults to 0 if not used).
+
+```{=latex}
+\simpleencoding{EEEE}{1101010}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
 ```
 
-**Multiply-accumulate pattern:**
-```pasm
-        MOV     acc_low, #0
-        MOV     acc_high, #0
-        QMUL    a1, b1          ' First multiplication
-        ' ... 55 clocks of other work ...
-        GETQX   prod_low
-        GETQY   prod_high
-        ADD     acc_low, prod_low
-        ADDX    acc_high, prod_high  ' Add with carry
-```
+**Related:** [GETQX](#getqx), [GETQY](#getqy), [SETQ](#setq), [QVECTOR](#qvector)
 
-**Pipelined multiplication for throughput:**
-```pasm
-        QMUL    a1, b1          ' Start first multiply
-        ' ... 8 clocks later ...
-        QMUL    a2, b2          ' Start second multiply
-        ' ... 47 clocks later ...
-        GETQX   result1_low     ' Get first result
-        GETQY   result1_high
-        ' ... 8 clocks later ...
-        GETQX   result2_low     ' Get second result
-        GETQY   result2_high
-```
+**Explanation:**
 
-Each cog can issue one CORDIC instruction per hub window (every 8 clocks), allowing efficient pipelining of multiple operations.
+QROTATE performs point rotation using the P2's 54-stage pipelined CORDIC solver. It rotates a 32-bit signed (X, Y) coordinate pair around the origin (0, 0) by a specified angle, producing new 32-bit signed (X, Y) results.
 
+The instruction takes the X coordinate from Dest and the Y coordinate from the SETQ value (or 0 if SETQ was not used). The rotation angle is specified in Src using P2's standard angle units.
 
-## QROTATE — CORDIC Solver
+This instruction can also be used for polar to cartesian conversion by setting X (Dest) to the length, Y (SETQ) to 0, and the angle (Src) to the desired angle.
 
-Rotate a 32-bit signed (X, Y) point around origin (0, 0) by a specified angle.
-
-### Syntax
-```pasm
-        QROTATE {#}D,{#}S
-```
-
-### Result
-Rotates a coordinate pair around the origin, producing new X and Y coordinates retrieved via GETQX (X) and GETQY (Y) 55 clocks later.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | X coordinate (32-bit signed) |
-| S | Rotation angle in P2 angle units (32-bit unsigned: $00000000 = 0°, $40000000 = 90°, $80000000 = 180°, $C0000000 = 270°) |
-| SETQ | Y coordinate (32-bit signed, optional - defaults to 0 if not used) |
-
-### Encoding
-\simpleencoding{EEEE | 1101010 0LI | DDDDDDDDD | SSSSSSSSS | — | — | — | 2...9}
-
-### Related Instructions
-- [GETQX](#getqx) — Retrieve rotated X coordinate
-- [GETQY](#getqy) — Retrieve rotated Y coordinate
-- [SETQ](#setq) — Set Y coordinate
-- [QVECTOR](#qvector) — Cartesian to polar conversion (inverse operation)
-
-### Explanation
-The QROTATE instruction performs point rotation using the P2's 54-stage pipelined CORDIC solver. It rotates a 32-bit signed (X, Y) coordinate pair around the origin (0, 0) by a specified angle, producing new 32-bit signed (X, Y) results.
-
-The instruction takes the X coordinate from the D operand and the Y coordinate from the SETQ value (or 32'b0 if SETQ was not used). The rotation angle is specified in the S operand using P2's standard angle units where $00000000 = 0°, $40000000 = 90°, $80000000 = 180°, and $C0000000 = 270°.
-
-After 55 clocks, the rotated coordinates can be retrieved using GETQX for the new X coordinate and GETQY for the new Y coordinate.
-
-This instruction can also be used for polar to cartesian conversion by setting the X coordinate (D) to the length, Y coordinate (SETQ) to 0, and the angle (S) to the desired angle.
-
-Common applications include graphics transformations, signal processing rotations, and coordinate system conversions.
-
-**Rotate point (100, 200) by 45 degrees:**
-```pasm
+::: pasm2
         SETQ    #200           ' Set Y coordinate
-        QROTATE #100, #$20000000  ' X=100, angle=45°
+        QROTATE #100, #$20000000  ' X=100, angle=45 degrees
         ' Wait 55 clocks...
         GETQX   new_x          ' Get rotated X
         GETQY   new_y          ' Get rotated Y
+:::
+
+
+
+## QSQRT {#qsqrt}
+
+Queue square root
+[CORDIC Instruction](#cordic-instructions) - Calculate square root of 64-bit unsigned number.
+
+**QSQRT**  *{#}Dest, {#}Src*
+
+---
+
+**Result:** Calculates the square root of a 64-bit value, producing a 32-bit result via GETQX 55 clocks later.
+
+- Dest is a register or literal containing the lower 32 bits of the 64-bit input value.
+- Src is a register or literal containing the upper 32 bits of the 64-bit input value.
+
+```{=latex}
+\simpleencoding{EEEE}{1101001}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
 ```
 
-**Polar to cartesian conversion (length=500, angle=30°):**
-```pasm
-        SETQ    #0             ' Y coordinate = 0
-        QROTATE #500, #$15555555  ' X=length, angle=30°
-        ' ... other work for 55 clocks ...
-        GETQX   cart_x         ' Get cartesian X
-        GETQY   cart_y         ' Get cartesian Y
-```
+**Related:** [GETQX](#getqx), [QMUL](#qmul)
 
-Use SETQ before QROTATE to specify the Y coordinate. If SETQ is not used, Y defaults to 0, making this useful for polar to cartesian conversions.
+**Explanation:**
 
+QSQRT performs square root calculation using the P2's 54-stage pipelined CORDIC solver. It calculates the square root of a 64-bit unsigned value and produces a 32-bit result.
 
-## QSQRT — CORDIC Solver
+The 64-bit input is formed by concatenating the Src operand as the upper 32 bits with the Dest operand as the lower 32 bits, creating the value {Src, Dest}. After 55 clocks, the 32-bit square root result can be retrieved using GETQX.
 
-Calculate square root of 64-bit unsigned number formed from {S, D}.
+The result is the largest integer whose square does not exceed the input value.
 
-### Syntax
-```pasm
-        QSQRT   {#}D,{#}S
-```
-
-### Result
-Calculates the square root of a 64-bit value, producing a 32-bit result retrieved via GETQX 55 clocks later.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Lower 32 bits of 64-bit input value |
-| S | Upper 32 bits of 64-bit input value |
-
-### Encoding
-\simpleencoding{EEEE | 1101001 1LI | DDDDDDDDD | SSSSSSSSS | — | — | — | 2...9}
-
-### Related Instructions
-- [GETQX](#getqx) — Retrieve square root result
-- [QMUL](#qmul) — CORDIC multiplication for squaring operations
-- [ADD](#add) — Addition for sum of squares calculations
-- [ADDX](#addx) — Addition with carry
-
-### Explanation
-The QSQRT instruction performs square root calculation using the P2's 54-stage pipelined CORDIC solver. It calculates the square root of a 64-bit unsigned value and produces a 32-bit result.
-
-The 64-bit input is formed by concatenating the S operand as the upper 32 bits with the D operand as the lower 32 bits, creating the value {S, D}. Note that the operand order is reversed from the typical convention: QSQRT takes D first, S second, but forms {S, D}. After 55 clocks, the 32-bit square root result can be retrieved using the GETQX instruction.
-
-This instruction is essential for mathematical calculations requiring precise square root operations on large values, such as distance calculations, RMS computations, geometric algorithms, and signal processing applications where maintaining precision across the full 64-bit range is important.
-
-The result is the largest integer whose square does not exceed the input value. For perfect squares, the result is exact; for non-perfect squares, the result is the floor of the true square root. Mathematically, the result R satisfies: R² ≤ input < (R+1)².
-
-**Basic square root of 32-bit number:**
-```pasm
-        QSQRT   #1000000, #0   ' sqrt{0, 1000000} = sqrt(1000000) ≈ 1000
+::: pasm2
+        QSQRT   #1000000, #0   ' sqrt(1000000) = 1000
         ' Wait 55 clocks...
         GETQX   sqrt_result    ' Get 1000
+:::
+
+For 32-bit square roots, use Src=0.
+
+
+
+## QVECTOR {#qvector}
+
+Queue vector
+[CORDIC Instruction](#cordic-instructions) - Convert cartesian coordinates (X, Y) to polar coordinates (length, angle).
+
+**QVECTOR**  *{#}Dest, {#}Src*
+
+---
+
+**Result:** Converts cartesian coordinates to polar form, producing length (GETQX) and angle (GETQY) 55 clocks later.
+
+- Dest is a register or literal containing the X coordinate (32-bit signed).
+- Src is a register or literal containing the Y coordinate (32-bit signed).
+
+```{=latex}
+\simpleencoding{EEEE}{1101010}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2...9}
 ```
 
-**Square root of 64-bit number:**
-```pasm
-        ' Example: sqrt({0x12345678, 0x9ABCDEF0})
-        QSQRT   #$9ABCDEF0, #$12345678
-        ' ... other work for 55 clocks ...
-        GETQX   big_sqrt
-```
+**Related:** [GETQX](#getqx), [GETQY](#getqy), [QROTATE](#qrotate)
 
-**Distance calculation (sqrt(x² + y²)):**
-```pasm
-        QMUL    coord_x, coord_x    ' x²
-        ' ... wait 55 clocks ...
-        GETQX   x_squared_low
-        GETQY   x_squared_high
-        QMUL    coord_y, coord_y    ' y²
-        ' ... wait 55 clocks ...
-        GETQX   y_squared_low
-        GETQY   y_squared_high
-        ADD     sum_low, x_squared_low, y_squared_low    ' x² + y² (low)
-        ADDX    sum_high, x_squared_high, y_squared_high ' x² + y² (high)
-        QSQRT   sum_low, sum_high   ' sqrt(x² + y²)
-        ' ... wait 55 clocks ...
-        GETQX   distance
-```
+**Explanation:**
 
-For 32-bit square roots, use S=0. The result is floor(sqrt(input)).
+QVECTOR performs cartesian to polar coordinate conversion using the P2's 54-stage pipelined CORDIC solver. It converts a 32-bit signed (X, Y) cartesian coordinate pair into a 32-bit (length, angle) polar coordinate pair.
 
-
-## QVECTOR — CORDIC Solver
-
-Convert cartesian coordinates (X, Y) to polar coordinates (length, angle).
-
-### Syntax
-```pasm
-        QVECTOR {#}D,{#}S
-```
-
-### Result
-Converts cartesian coordinates to polar form, producing length (retrieved via GETQX) and angle (retrieved via GETQY) 55 clocks later.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | X coordinate (32-bit signed) |
-| S | Y coordinate (32-bit signed) |
-
-### Encoding
-\simpleencoding{EEEE | 1101010 1LI | DDDDDDDDD | SSSSSSSSS | — | — | — | 2...9}
-
-### Related Instructions
-- [GETQX](#getqx) — Retrieve length/magnitude result
-- [GETQY](#getqy) — Retrieve angle result
-- [QROTATE](#qrotate) — Polar to cartesian conversion (inverse operation)
-- [SETQ](#setq) — Used in complementary QROTATE operation
-
-### Explanation
-The QVECTOR instruction performs cartesian to polar coordinate conversion using the P2's 54-stage pipelined CORDIC solver. It converts a 32-bit signed (X, Y) cartesian coordinate pair into a 32-bit (length, angle) polar coordinate pair.
-
-The instruction takes the X coordinate in the D operand and Y coordinate in the S operand, both as 32-bit signed values. After 55 clocks, the results can be retrieved using GETQX for the length and GETQY for the angle.
+The instruction takes the X coordinate in Dest and Y coordinate in Src, both as 32-bit signed values. After 55 clocks, the results can be retrieved using GETQX for the length and GETQY for the angle.
 
 The angle result uses P2's standard angle units where $00000000 = 0°, $40000000 = 90°, $80000000 = 180°, and $C0000000 = 270°.
 
-This operation is commonly used in signal processing, graphics, and mathematical calculations requiring coordinate system conversions. It is the inverse operation of QROTATE, which converts polar coordinates back to cartesian form.
+QVECTOR is the inverse operation of QROTATE.
 
-**Basic cartesian to polar conversion:**
-```pasm
+::: pasm2
         QVECTOR #100, #200     ' Begin conversion
         ' Wait 55 clocks...
         GETQX   length         ' Get polar length
         GETQY   angle          ' Get polar angle
+:::
+
+
+# Instructions: R
+
+This section contains all PASM2 instructions beginning with the letter R.
+
+
+
+## RCL {#rcl}
+
+Rotate carry left
+[Shift/Rotate Instruction](#shift-rotate-instructions) - Rotate bits left, inserting carry flag as new LSBs.
+
+**RCL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The bits of Dest are shifted left by Src bits, inserting C as new LSBs.
+
+- Dest is a register containing the value to rotate carry left.
+- Src is a register or 5-bit literal (0-31) specifying the number of bit positions to rotate.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0000101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
+
+\textsuperscript{1} C = last bit shifted out if S[4:0] > 0, else D[31]
 ```
 
-**Converting variable coordinates:**
-```pasm
-        QVECTOR x_coord, y_coord
-        ' ... other work for 55 clocks ...
-        GETQX   magnitude
-        GETQY   phase_angle
-```
+**Related:** [RCR](#rcr), [ROL](#rol), [ROR](#ror)
 
-Each cog can issue one CORDIC instruction per hub window (every 8 clocks), allowing efficient pipelining with other Q* operations.
+**Explanation:**
 
-# R Instructions
+RCL shifts Dest's binary value left by Src places (0-31 bits) and sets the new LSBs to C. The carry flag acts as an extension of the register, allowing 33-bit rotations.
 
-## RCL — Rotate Carry Left
+If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit shifted out if Src is 1-31, or to Dest[31] if Src is 0.
 
-Rotates the bits of Dest left by Src positions, inserting the carry flag as new LSBs.
-
-### Syntax
-```pasm
-        RCL     D,{#}S {WC|WZ|WCZ}
-```
-
-### Result
-The bits of Dest are shifted left by Src bits, inserting C as new LSBs.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to rotate carry left by S bits |
-| S | Register or 5-bit literal (0-31) indicating the number of bit positions to rotate |
-| WC/WZ/WCZ | Optional flags: write carry, write zero, or both |
-
-### Encoding
-\simpleencoding{EEEE 0000101 CZI DDDDDDDDD SSSSSSSSS | D | Last bit out¹ | Result = 0 | 2}
-
-¹ C = last bit shifted out if S[4:0] > 0, else D[31]
-
-### Related Instructions
-- [RCR](#rcr) — Rotate carry right
-- [ROL](#rol) — Rotate left
-- [ROR](#ror) — Rotate right
-
-### Explanation
-RCL shifts Dest's binary value left by Src places (0-31 bits) and sets the new LSBs to C. The carry flag acts as an extension of the register, allowing 33-bit rotations. If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit shifted out if Src is 1-31, or to Dest[31] if Src is 0. If the WZ or WCZ effect is specified, the Z flag is set if the Dest result equals zero, or is cleared if it is non-zero.
+If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
 This instruction is useful for multi-precision arithmetic operations where the carry from one word needs to be propagated into the next word.
 
 
-## RCR — Rotate Carry Right
 
-Rotates the bits of Dest right by Src positions, inserting the carry flag as new MSBs.
+## RCR {#rcr}
 
-### Syntax
-```pasm
-        RCR     D,{#}S {WC|WZ|WCZ}
+Rotate carry right
+[Shift/Rotate Instruction](#shift-rotate-instructions) - Rotate bits right, inserting carry flag as new MSBs.
+
+**RCR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The bits of Dest are shifted right by Src bits, inserting C as new MSBs.
+
+- Dest is a register containing the value to rotate carry right.
+- Src is a register or 5-bit literal (0-31) specifying the number of bit positions to rotate.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0000100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
+
+\textsuperscript{1} C = last bit shifted out if S[4:0] > 0, else D[0]
 ```
 
-### Result
-The bits of Dest are shifted right by Src bits, inserting C as new MSBs.
+**Related:** [RCL](#rcl), [ROL](#rol), [ROR](#ror)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to rotate carry right by S bits |
-| S | Register or 5-bit literal (0-31) indicating the number of bit positions to rotate |
-| WC/WZ/WCZ | Optional flags: write carry, write zero, or both |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 0000100 CZI DDDDDDDDD SSSSSSSSS | D | Last bit out¹ | Result = 0 | 2}
+RCR shifts Dest's binary value right by Src places (0-31 bits) and sets the new MSBs to C. The carry flag acts as an extension of the register, allowing 33-bit rotations.
 
-¹ C = last bit shifted out if S[4:0] > 0, else D[0]
+If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit shifted out if Src is 1-31, or to Dest[0] if Src is 0.
 
-### Related Instructions
-- [RCL](#rcl) — Rotate carry left
-- [ROL](#rol) — Rotate left
-- [ROR](#ror) — Rotate right
-
-### Explanation
-RCR shifts Dest's binary value right by Src places (0-31 bits) and sets the new MSBs to C. The carry flag acts as an extension of the register, allowing 33-bit rotations. If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit shifted out if Src is 1-31, or to Dest[0] if Src is 0. If the WZ or WCZ effect is specified, the Z flag is set if the Dest result equals zero, or is cleared if it is non-zero.
+If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
 This instruction is useful for multi-precision arithmetic operations where the carry needs to be propagated through multiple words.
 
 
-## RCZL — Rotate Carry and Zero Left
 
-Rotates Dest left by two bit positions, inserting carry and zero flags as new LSBs.
+## RCZL {#rczl}
 
-### Syntax
-```pasm
-        RCZL    D {WC|WZ|WCZ}
+Rotate carry and zero left
+[Shift/Rotate Instruction](#shift-rotate-instructions) - Rotate left by two bits, inserting C and Z flags as new LSBs.
+
+**RCZL**  *Dest*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The bits of Dest are shifted left by two places and C and Z are inserted as new LSBs.
+
+- Dest is a register containing the value to rotate.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{001101011}{D}{D[31]}{D[30]}{2}
 ```
 
-### Result
-The bits of Dest are shifted left by two places and C and Z are inserted as new LSBs.
+**Related:** [RCZR](#rczr), [RCL](#rcl), [RCR](#rcr)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to rotate the carry and zero flags left into |
-| WC/WZ/WCZ | Optional flags: write carry, write zero, or both |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 CZ0 DDDDDDDDD 001101011 | D | D[31] | D[30] | 2}
+RCZL shifts Dest's binary value left by two places and sets Dest[1] to C and Dest[0] to Z.
 
-### Related Instructions
-- [RCZR](#rczr) — Rotate carry and zero right
-- [RCL](#rcl) — Rotate carry left
-- [RCR](#rcr) — Rotate carry right
+If the WC or WCZ effect is specified, the C flag is updated to the original Dest[31] state.
 
-### Explanation
-RCZL shifts Dest's binary value left by two places and sets Dest[1] to C and Dest[0] to Z. If the WC or WCZ effect is specified, the C flag is updated to the original Dest[31] state. If the WZ or WCZ effect is specified, the Z flag is updated to the original Dest[30] state.
+If the WZ or WCZ effect is specified, the Z flag is updated to the original Dest[30] state.
 
 This instruction provides a compact way to shift two flag states into a register while simultaneously extracting two bits from the register into the flags, enabling efficient state serialization and deserialization.
 
 
-## RCZR — Rotate Carry and Zero Right
 
-Rotates Dest right by two bit positions, inserting carry and zero flags as new MSBs.
+## RCZR {#rczr}
 
-### Syntax
-```pasm
-        RCZR    D {WC|WZ|WCZ}
+Rotate carry and zero right
+[Shift/Rotate Instruction](#shift-rotate-instructions) - Rotate right by two bits, inserting C and Z flags as new MSBs.
+
+**RCZR**  *Dest*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The bits of Dest are shifted right by two places and C and Z are inserted as new MSBs.
+
+- Dest is a register containing the value to rotate.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{001101010}{D}{D[1]}{D[0]}{2}
 ```
 
-### Result
-The bits of Dest are shifted right by two places and C and Z are inserted as new MSBs.
+**Related:** [RCZL](#rczl), [RCL](#rcl), [RCR](#rcr)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to rotate the carry and zero flags right into |
-| WC/WZ/WCZ | Optional flags: write carry, write zero, or both |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 CZ0 DDDDDDDDD 001101010 | D | D[1] | D[0] | 2}
+RCZR shifts Dest's binary value right by two places and sets Dest[31] to C and Dest[30] to Z.
 
-### Related Instructions
-- [RCZL](#rczl) — Rotate carry and zero left
-- [RCL](#rcl) — Rotate carry left
-- [RCR](#rcr) — Rotate carry right
+If the WC or WCZ effect is specified, the C flag is updated to the original Dest[1] state.
 
-### Explanation
-RCZR shifts Dest's binary value right by two places and sets Dest[31] to C and Dest[30] to Z. If the WC or WCZ effect is specified, the C flag is updated to the original Dest[1] state. If the WZ or WCZ effect is specified, the Z flag is updated to the original Dest[0] state.
+If the WZ or WCZ effect is specified, the Z flag is updated to the original Dest[0] state.
 
 This instruction provides a compact way to shift two flag states into a register while simultaneously extracting two bits from the register into the flags, enabling efficient state serialization and deserialization.
 
 
-## RDBYTE — Read Byte from Hub RAM
 
-Reads a zero-extended byte from hub memory into a cog register.
+## RDBYTE {#rdbyte}
 
-### Syntax
-```pasm
-        RDBYTE  D,{#}S/P {WC|WZ|WCZ}
+Read byte from Hub
+[Hub RAM Instruction](#hub-ram-instructions) - Read a zero-extended byte from Hub memory into a register.
+
+**RDBYTE**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** A zero-extended byte from Hub address Src or pointer (PTRA/PTRB) is loaded into Dest.
+
+- Dest is the register to receive the byte value.
+- Src/Ptr is a Hub address from register, immediate value, or pointer register (PTRA/PTRB).
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1010110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB of byte}{Result = 0}{9...16}
 ```
 
-### Result
-A zero-extended byte from hub address S or pointer (PTRA/PTRB) is loaded into D.
+**Related:** [RDWORD](#rdword), [RDLONG](#rdlong), [WRBYTE](#wrbyte)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register to receive the byte value |
-| S/P | Hub address from register, immediate value, or pointer register (PTRA/PTRB) |
-| WC/WZ/WCZ | Optional flags: write carry, write zero, or both |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1010110 CZI DDDDDDDDD SSSSSSSSS | D | MSB of byte | Result = 0 | 9...16}
+RDBYTE reads a byte from Hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:8 are cleared to 0). The operation takes 9-16 clock cycles depending on Hub timing, as the cog must wait for its Hub access window.
 
-### Related Instructions
-- [RDWORD](#rdword) — Read word from hub RAM
-- [RDLONG](#rdlong) — Read long from hub RAM
-- [WRBYTE](#wrbyte) — Write byte to hub RAM
+If preceded by a SETQ instruction, burst reads of multiple bytes can be performed.
 
-### Explanation
-RDBYTE reads a byte from hub memory at the address specified by S (or pointer register) and loads it into D with zero extension (bits 31:8 are cleared to 0). The operation takes 9-16 clock cycles depending on hub timing, as the cog must wait for its hub access window. If preceded by a SETQ instruction, burst reads of multiple bytes can be performed. If the WC flag is specified, C is set to the MSB of the byte. If the WZ flag is specified, Z is set if the result equals zero.
+If the WC or WCZ effect is specified, C is set to the MSB of the byte.
 
-Hub memory operations follow a round-robin access pattern where each cog gets a regular time slot. The actual latency depends on when the request arrives relative to the cog's assigned slot, resulting in the variable 9-16 cycle range.
+If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
+
+Hub memory operations follow a round-robin access pattern where each cog gets a regular time slot. The actual latency depends on when the request arrives relative to the cog's assigned slot.
 
 
-## RDFAST — Begin Fast Hub Read via FIFO
 
-Initiates a fast sequential read from hub memory into the FIFO buffer for streaming operations.
+## RDFAST {#rdfast}
 
-### Syntax
-```pasm
-        RDFAST  {#}D,{#}S
+Read fast via FIFO
+[Hub RAM Instruction](#hub-ram-instructions) - Begin fast sequential read from Hub memory into FIFO buffer.
+
+**RDFAST**  *{#}Dest, {#}Src*
+
+---
+
+**Result:** A fast read operation begins, filling the FIFO with data from Hub memory starting at address Src.
+
+- Dest is a configuration value: Dest[31] = no-wait mode, Dest[13:0] = block size in 64-byte units (0 = maximum).
+- Src is the Hub memory start address (Src[19:0]) for the read operation.
+
+```{=latex}
+\simpleencoding{EEEE}{1100011}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2 or WRFAST finish + 10...17}
 ```
 
-### Result
-A fast read operation begins, filling the FIFO with data from hub memory starting at address S.
+**Related:** [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFLONG](#rflong), [WRFAST](#wrfast), [FBLOCK](#fblock)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Configuration value: D[31] = no-wait mode, D[13:0] = block size in 64-byte units (0 = maximum) |
-| S | Hub memory start address (S[19:0]) for the read operation |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1100011 1LI DDDDDDDDD SSSSSSSSS | — | — | — | 2 or WRFAST finish + 10...17}
+RDFAST begins a new fast Hub read operation via the FIFO. The instruction configures automatic sequential reading from Hub memory with background FIFO refill, enabling high-throughput streaming data processing.
 
-### Related Instructions
-- [RFBYTE](#rfbyte) — Read byte via FIFO
-- [RFWORD](#rfword) — Read word via FIFO
-- [RFLONG](#rflong) — Read long via FIFO
-- [WRFAST](#wrfast) — Begin fast hub write via FIFO
-- [FBLOCK](#fblock) — Wait for FIFO block wrap
+Dest[31] = 1 enables no-wait mode, which prevents stalls when the FIFO is being filled. Dest[13:0] specifies the block size in 64-byte units, with 0 indicating maximum size (16384 longs). Src[19:0] specifies the starting Hub address. The FIFO automatically wraps at the block boundary.
 
-### Explanation
-RDFAST begins a new fast hub read operation via the FIFO. The instruction configures automatic sequential reading from hub memory with background FIFO refill, enabling high-throughput streaming data processing. D[31] = 1 enables no-wait mode, which prevents stalls when the FIFO is being filled. D[13:0] specifies the block size in 64-byte units, with 0 indicating maximum size (16384 longs). S[19:0] specifies the starting hub address. The FIFO automatically wraps at the block boundary.
-
-After RDFAST is executed, subsequent RFBYTE, RFWORD, or RFLONG instructions read data from the FIFO. The FIFO is automatically refilled in the background, making this ideal for checksums, CRC calculations, data processing, and block copy operations. The operation takes 2 cycles if no prior WRFAST is active, otherwise it must wait for the WRFAST to complete (10-17 additional cycles).
-
-RDFAST is essential for high-performance applications that need to process large amounts of hub data efficiently, such as:
-
-- Checksum and CRC calculations over memory blocks
-- Audio/video data stream processing
-- Fast memory-to-memory transfers when combined with sequential writes
-- Serial data encoding/decoding operations
+After RDFAST is executed, subsequent RFBYTE, RFWORD, or RFLONG instructions read data from the FIFO. The FIFO is automatically refilled in the background, making this ideal for checksums, CRC calculations, data processing, and block copy operations.
 
 
-## RDLONG — Read Long from Hub RAM
 
-Reads a long (32-bit value) from hub memory into a cog register.
+## RDLONG {#rdlong}
 
-### Syntax
-```pasm
-        RDLONG  D,{#}S/P {WC|WZ|WCZ}
+Read long from Hub
+[Hub RAM Instruction](#hub-ram-instructions) - Read a long (32-bit value) from Hub memory into a register.
+
+**RDLONG**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** A long from Hub address Src or pointer (PTRA/PTRB) is loaded into Dest.
+
+- Dest is the register to receive the long value.
+- Src/Ptr is a Hub address from register, immediate value, or pointer register (PTRA/PTRB).
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1011000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB of long}{---}{9...16}
 ```
 
-### Result
-A long from hub address S or pointer (PTRA/PTRB) is loaded into D.
+**Related:** [RDBYTE](#rdbyte), [RDWORD](#rdword), [WRLONG](#wrlong)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register to receive the long value |
-| S/P | Hub address from register, immediate value, or pointer register (PTRA/PTRB) |
-| WC/WZ/WCZ | Optional flags: write carry, write zero, or both |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1011000 CZI DDDDDDDDD SSSSSSSSS | D | MSB of long | — | 9...16}
+RDLONG reads a long from Hub memory at the address specified by Src (or pointer register) and loads it into Dest. The operation takes 9-16 clock cycles depending on Hub timing, as the cog must wait for its Hub access window.
 
-### Related Instructions
-- [RDBYTE](#rdbyte) — Read byte from hub RAM
-- [RDWORD](#rdword) — Read word from hub RAM
-- [WRLONG](#wrlong) — Write long to hub RAM
+If preceded by a SETQ instruction, burst reads of multiple longs can be performed.
 
-### Explanation
-RDLONG reads a long from hub memory at the address specified by S (or pointer register) and loads it into D. The operation takes 9-16 clock cycles depending on hub timing, as the cog must wait for its hub access window. If preceded by a SETQ instruction, burst reads of multiple longs can be performed. If the WC flag is specified, C is set to the MSB of the long.
+If the WC or WCZ effect is specified, C is set to the MSB of the long.
 
-Hub memory operations follow a round-robin access pattern where each cog gets a regular time slot. The actual latency depends on when the request arrives relative to the cog's assigned slot, resulting in the variable 9-16 cycle range.
+Hub memory operations follow a round-robin access pattern where each cog gets a regular time slot.
 
 
-## RDLUT — Read Data from Lookup Table
 
-Reads a long from the lookup table (LUT) into a cog register.
+## RDLUT {#rdlut}
 
-### Syntax
-```pasm
-        RDLUT   D,{#}S/P {WC|WZ|WCZ}
+Read from LUT
+[LUT Instruction](#lut-instructions) - Read a long from the Lookup Table into a register.
+
+**RDLUT**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Data from LUT address Src or pointer (PTRA/PTRB) is loaded into Dest.
+
+- Dest is the register to receive the data.
+- Src/Ptr is a LUT address from register, immediate value, or pointer register (PTRA/PTRB).
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1010101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB of data}{Result = 0}{3}
 ```
 
-### Result
-Data from LUT address S or pointer (PTRA/PTRB) is loaded into D.
+**Related:** [WRLUT](#wrlut), [RDLONG](#rdlong)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register to receive the data |
-| S/P | LUT address from register, immediate value, or pointer register (PTRA/PTRB) |
-| WC/WZ/WCZ | Optional flags: write carry, write zero, or both |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1010101 CZI DDDDDDDDD SSSSSSSSS | D | MSB of data | Result = 0 | 3}
+RDLUT reads data from the Lookup Table at the address specified by Src (or pointer register) and loads it into Dest. The LUT is a 512-long (2KB) memory area in each cog that can be used for lookup tables, buffers, or general-purpose memory. The operation takes 3 clock cycles.
 
-### Related Instructions
-- [WRLUT](#wrlut) — Write data to lookup table
-- [RDLONG](#rdlong) — Read long from hub RAM
+If the WC or WCZ effect is specified, C is set to the MSB of the data.
 
-### Explanation
-RDLUT reads data from the lookup table at the address specified by S (or pointer register) and loads it into D. The LUT is a 512-long (2KB) memory area in each cog that can be used for lookup tables, buffers, or general-purpose memory. The operation takes 3 clock cycles. If the WC flag is specified, C is set to the MSB of the data. If the WZ flag is specified, Z is set if the result equals zero.
+If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
 The LUT provides fast local memory access for frequently accessed data structures, making it ideal for sin/cos tables, gamma correction tables, and small data buffers.
 
 
-## RDPIN — Read Smart Pin Result
 
-Reads a smart pin's result value and acknowledges the pin, clearing its ready flag.
+## RDPIN {#rdpin}
 
-### Syntax
-```pasm
-        RDPIN   D,{#}S {WC}
+Read Smart Pin
+[Smart Pin Instruction](#smart-pin-instructions) - Read a Smart Pin's result value and acknowledge the pin.
+
+**RDPIN**  *Dest, {#}Src*  **{WC}**
+
+---
+
+**Result:** Smart Pin Src[5:0] result is loaded into Dest, and the pin is acknowledged.
+
+- Dest is the register to receive the pin result.
+- Src is a register or literal identifying the pin number (Src[5:0]) to read from.
+- WC is an optional effect to write the modal result to C.
+
+```{=latex}
+\simpleencoding{EEEE}{1010100}{C1I}{DDDDDDDDD}{SSSSSSSSS}{D}{Modal result}{---}{2}
 ```
 
-### Result
-Smart pin S[5:0] result "Z" is loaded into D, and the pin is acknowledged.
+**Related:** [RQPIN](#rqpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register to receive the pin result |
-| S | Pin number (S[5:0]) to read from |
-| WC | Optional flag: write carry with modal result |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1010100 C1I DDDDDDDDD SSSSSSSSS | D | Modal result | — | 2}
+RDPIN reads the result value from the specified Smart Pin and acknowledges the pin, clearing its "ready" flag. The result value depends on the pin's configured mode and represents measurement data such as pulse width, period, edge count, ADC value, or serial data.
 
-### Related Instructions
-- [RQPIN](#rqpin) — Read smart pin result without acknowledge
-- [WRPIN](#wrpin) — Write smart pin mode
-- [WXPIN](#wxpin) — Write smart pin X parameter
-- [WYPIN](#wypin) — Write smart pin Y parameter
+If the WC effect is specified, the C flag is set to the modal result, which provides mode-specific status information.
 
-### Explanation
-RDPIN reads the result value from the specified smart pin and acknowledges the pin, clearing its "ready" flag. The result value depends on the pin's configured mode and represents measurement data such as pulse width, period, edge count, ADC value, or serial data. If the WC flag is specified, the C flag is set to the modal result, which provides mode-specific status information.
-
-Smart pins are powerful autonomous I/O processors that can measure timing, count edges, perform A/D conversion, generate PWM, and communicate serially without continuous CPU intervention. RDPIN retrieves the measured or received data after the pin signals completion.
+Smart Pins are powerful autonomous I/O processors that can measure timing, count edges, perform A/D conversion, generate PWM, and communicate serially without continuous CPU intervention. RDPIN retrieves the measured or received data after the pin signals completion.
 
 
-## RDWORD — Read Word from Hub RAM
 
-Reads a zero-extended word (16-bit value) from hub memory into a cog register.
+## RDWORD {#rdword}
 
-### Syntax
-```pasm
-        RDWORD  D,{#}S/P {WC|WZ|WCZ}
+Read word from Hub
+[Hub RAM Instruction](#hub-ram-instructions) - Read a zero-extended word (16-bit value) from Hub memory into a register.
+
+**RDWORD**  *Dest, {#}Src/Ptr*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** A zero-extended word from Hub address Src or pointer (PTRA/PTRB) is loaded into Dest.
+
+- Dest is the register to receive the word value.
+- Src/Ptr is a Hub address from register, immediate value, or pointer register (PTRA/PTRB).
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1010111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB of word}{Result = 0}{9...16}
 ```
 
-### Result
-A zero-extended word from hub address S or pointer (PTRA/PTRB) is loaded into D.
+**Related:** [RDBYTE](#rdbyte), [RDLONG](#rdlong), [WRWORD](#wrword)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register to receive the word value |
-| S/P | Hub address from register, immediate value, or pointer register (PTRA/PTRB) |
-| WC/WZ/WCZ | Optional flags: write carry, write zero, or both |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1010111 CZI DDDDDDDDD SSSSSSSSS | D | MSB of word | Result = 0 | 9...16}
+RDWORD reads a word from Hub memory at the address specified by Src (or pointer register) and loads it into Dest with zero extension (bits 31:16 are cleared to 0). The operation takes 9-16 clock cycles depending on Hub timing, as the cog must wait for its Hub access window.
 
-### Related Instructions
-- [RDBYTE](#rdbyte) — Read byte from hub RAM
-- [RDLONG](#rdlong) — Read long from hub RAM
-- [WRWORD](#wrword) — Write word to hub RAM
+If preceded by a SETQ instruction, burst reads of multiple words can be performed.
 
-### Explanation
-RDWORD reads a word from hub memory at the address specified by S (or pointer register) and loads it into D with zero extension (bits 31:16 are cleared to 0). The operation takes 9-16 clock cycles depending on hub timing, as the cog must wait for its hub access window. If preceded by a SETQ instruction, burst reads of multiple words can be performed. If the WC flag is specified, C is set to the MSB of the word. If the WZ flag is specified, Z is set if the result equals zero.
+If the WC or WCZ effect is specified, C is set to the MSB of the word.
 
-Hub memory operations follow a round-robin access pattern where each cog gets a regular time slot. The actual latency depends on when the request arrives relative to the cog's assigned slot, resulting in the variable 9-16 cycle range.
+If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
 
-## REP — Repeat Block
 
-Executes the next D[8:0] instructions S times, creating a hardware loop.
+## REP {#rep}
 
-### Syntax
-```pasm
-        REP     {#}D,{#}S
+Repeat block
+[Control Flow Instruction](#control-flow-instructions) - Execute a block of instructions repeatedly with hardware loop.
+
+**REP**  *{#}Dest, {#}Src*
+
+---
+
+**Result:** The next Dest[8:0] instructions are executed Src times.
+
+- Dest is the number of instructions to repeat (Dest[8:0], 0-511). If Dest[8:0] = 0, nothing repeats.
+- Src is the number of repetitions. If Src = 0, instructions repeat infinitely.
+
+```{=latex}
+\simpleencoding{EEEE}{1100110}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
 ```
 
-### Result
-The next D[8:0] instructions are executed S times.
+**Related:** [DJNZ](#djnz), [JNCT1/2/3](#jnct1)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Number of instructions to repeat (D[8:0], 0-511). If D[8:0] = 0, nothing repeats |
-| S | Number of repetitions. If S = 0, instructions repeat infinitely |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1100110 1LI DDDDDDDDD SSSSSSSSS | — | — | — | 2}
+REP creates a hardware-implemented loop that executes the next Dest[8:0] instructions Src times. If Src = 0, the instructions repeat infinitely (useful for main loops). If Dest[8:0] = 0, nothing repeats.
 
-### Related Instructions
-- [DJNZ](#djnz) — Decrement and jump if not zero
-- [JNCT1](#jnct1) — Jump if CT1 not reached
-- [JNCT2](#jnct2) — Jump if CT2 not reached
-- [JNCT3](#jnct3) — Jump if CT3 not reached
-
-### Explanation
-REP creates a hardware-implemented loop that executes the next D[8:0] instructions S times. If S = 0, the instructions repeat infinitely (useful for main loops). If D[8:0] = 0, nothing repeats. The REP instruction itself takes 2 cycles, and the repeated instructions execute with zero overhead—no jump penalty, no counter decrement. This makes REP ideal for time-critical inner loops.
+The REP instruction itself takes 2 cycles, and the repeated instructions execute with zero overhead—no jump penalty, no counter decrement. This makes REP ideal for time-critical inner loops.
 
 REP blocks can be nested up to 3 levels deep, allowing complex loop structures. Interrupts are blocked during REP execution to maintain timing precision. The zero-overhead nature of REP makes it essential for high-performance applications like DSP algorithms, graphics rendering, and precise timing operations.
 
 
-## RESI0 — Resume from Interrupt 0
 
-Resumes execution after returning from interrupt 0, restoring flags and program counter.
+## RESI0 / RESI1 / RESI2 / RESI3 {#resi0}
 
-### Syntax
-```pasm
-        RESI0
+Resume from interrupt (0, 1, 2, or 3)
+[Interrupt Instruction](#interrupt-instructions) - Resume execution after returning from interrupt.
+
+**RESI0**
+**RESI1**
+**RESI2**
+**RESI3**
+
+---
+
+**Result:** Execution resumes from the interrupted location for the specified interrupt level.
+
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011001}{110}{111111110}{111111111}{---}{---}{---}{4 (COG), 13...20 (Hub)}
+\encodingrowcont{EEEE}{1011001}{110}{111110100}{111110101}{---}{---}{---}{4 (COG), 13...20 (Hub)}
+\encodingrowcont{EEEE}{1011001}{110}{111110010}{111110011}{---}{---}{---}{4 (COG), 13...20 (Hub)}
+\encodingrow{EEEE}{1011001}{110}{111110000}{111110001}{---}{---}{---}{4 (COG), 13...20 (Hub)}
+\end{encodingtable}
 ```
 
-### Result
-Execution resumes from the interrupted location for interrupt 0.
+**Related:** [RETI0/1/2/3](#reti0), [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1)
 
-### Parameters
-None.
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1011001 110 111111110 111111111 | D | — | — | 4}
-
-### Related Instructions
-- [RESI1](#resi1) — Resume from interrupt 1
-- [RESI2](#resi2) — Resume from interrupt 2
-- [RESI3](#resi3) — Resume from interrupt 3
-- [RETI0](#reti0) — Return from interrupt 0
-
-### Explanation
-RESI0 resumes execution from interrupt 0. This is functionally equivalent to CALLD $1FE,$1FF WCZ, which restores the program counter, C flag, and Z flag from the interrupt return address registers. The operation takes 4 cycles minimum, with variable timing depending on hub access if the resume location is in hub memory (13-20 cycles).
+RESI0, RESI1, RESI2, and RESI3 resume execution from their respective interrupt levels. Each instruction is functionally equivalent to a CALLD instruction that restores the program counter, C flag, and Z flag from the corresponding interrupt return address registers.
 
 Unlike RETIx instructions which return from the interrupt handler, RESIx instructions resume interrupted execution, used when an interrupt handler needs to yield to another interrupt priority level before completion.
 
 
-## RESI1 — Resume from Interrupt 1
 
-Resumes execution after returning from interrupt 1, restoring flags and program counter.
+## RET {#ret}
 
-### Syntax
-```pasm
-        RESI1
+Return from subroutine
+[Control Flow Instruction](#control-flow-instructions) - Return from subroutine by popping the hardware stack.
+
+**RET**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The program counter, C flag, and Z flag are restored from the top of the hardware stack.
+
+- WC, WZ, or WCZ are optional effects to restore flags from the stack.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ1}{000000000}{000101101}{---}{K[31]}{K[30]}{4}
 ```
 
-### Result
-Execution resumes from the interrupted location for interrupt 1.
+**Related:** [CALL](#call), [CALLA](#calla), [CALLB](#callb), [RETA](#reta), [RETB](#retb)
 
-### Parameters
-None.
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1011001 110 111110100 111110101 | D | — | — | 4}
+RET returns from a subroutine by popping the hardware stack (K register). The program counter is restored from K[19:0].
 
-### Related Instructions
-- [RESI0](#resi0) — Resume from interrupt 0
-- [RESI2](#resi2) — Resume from interrupt 2
-- [RESI3](#resi3) — Resume from interrupt 3
-- [RETI1](#reti1) — Return from interrupt 1
+If the WC or WCZ effect is specified, the C flag is restored from K[31].
 
-### Explanation
-RESI1 resumes execution from interrupt 1. This is functionally equivalent to CALLD $1F4,$1F5 WCZ, which restores the program counter, C flag, and Z flag from the interrupt return address registers. The operation takes 4 cycles minimum, with variable timing depending on hub access if the resume location is in hub memory (13-20 cycles).
+If the WZ or WCZ effect is specified, the Z flag is restored from K[30].
 
-Unlike RETIx instructions which return from the interrupt handler, RESIx instructions resume interrupted execution, used when an interrupt handler needs to yield to another interrupt priority level before completion.
+The operation takes 4 cycles minimum, with variable timing depending on Hub access if the return location is in Hub memory (13-20 cycles).
+
+The P2 provides an 8-level hardware stack for fast subroutine calls. RET is paired with CALL, CALLPA, CALLPB, CALLA, and CALLB instructions.
 
 
-## RESI2 — Resume from Interrupt 2
 
-Resumes execution after returning from interrupt 2, restoring flags and program counter.
+## RETA {#reta}
 
-### Syntax
-```pasm
-        RESI2
+Return via PTRA stack
+[Control Flow Instruction](#control-flow-instructions) - Return from subroutine by reading return address from Hub via PTRA.
+
+**RETA**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The program counter, C flag, and Z flag are restored from Hub memory at --PTRA.
+
+- WC, WZ, or WCZ are optional effects to restore flags from the stack.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ1}{000000000}{000101110}{---}{L[31]}{L[30]}{11...18}
 ```
 
-### Result
-Execution resumes from the interrupted location for interrupt 2.
+**Related:** [CALLA](#calla), [RET](#ret), [RETB](#retb)
 
-### Parameters
-None.
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1011001 110 111110010 111110011 | D | — | — | 4}
+RETA returns from a subroutine by reading a Hub long from --PTRA. PTRA is pre-decremented by 4 bytes, then a long is read from that address. The program counter is restored from L[19:0].
 
-### Related Instructions
-- [RESI0](#resi0) — Resume from interrupt 0
-- [RESI1](#resi1) — Resume from interrupt 1
-- [RESI3](#resi3) — Resume from interrupt 3
-- [RETI2](#reti2) — Return from interrupt 2
+If the WC or WCZ effect is specified, the C flag is restored from L[31].
 
-### Explanation
-RESI2 resumes execution from interrupt 2. This is functionally equivalent to CALLD $1F2,$1F3 WCZ, which restores the program counter, C flag, and Z flag from the interrupt return address registers. The operation takes 4 cycles minimum, with variable timing depending on hub access if the resume location is in hub memory (13-20 cycles).
+If the WZ or WCZ effect is specified, the Z flag is restored from L[30].
 
-Unlike RETIx instructions which return from the interrupt handler, RESIx instructions resume interrupted execution, used when an interrupt handler needs to yield to another interrupt priority level before completion.
+RETA is paired with CALLA for implementing software stacks in Hub memory, enabling deep call nesting beyond the 8-level hardware stack limit.
 
 
-## RESI3 — Resume from Interrupt 3
 
-Resumes execution after returning from interrupt 3, restoring flags and program counter.
+## RETB {#retb}
 
-### Syntax
-```pasm
-        RESI3
+Return via PTRB stack
+[Control Flow Instruction](#control-flow-instructions) - Return from subroutine by reading return address from Hub via PTRB.
+
+**RETB**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The program counter, C flag, and Z flag are restored from Hub memory at --PTRB.
+
+- WC, WZ, or WCZ are optional effects to restore flags from the stack.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ1}{000000000}{000101111}{---}{L[31]}{L[30]}{11...18}
 ```
 
-### Result
-Execution resumes from the interrupted location for interrupt 3.
+**Related:** [CALLB](#callb), [RET](#ret), [RETA](#reta)
 
-### Parameters
-None.
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1011001 110 111110000 111110001 | D | — | — | 4}
+RETB returns from a subroutine by reading a Hub long from --PTRB. PTRB is pre-decremented by 4 bytes, then a long is read from that address. The program counter is restored from L[19:0].
 
-### Related Instructions
-- [RESI0](#resi0) — Resume from interrupt 0
-- [RESI1](#resi1) — Resume from interrupt 1
-- [RESI2](#resi2) — Resume from interrupt 2
-- [RETI3](#reti3) — Return from interrupt 3
+If the WC or WCZ effect is specified, the C flag is restored from L[31].
 
-### Explanation
-RESI3 resumes execution from interrupt 3. This is functionally equivalent to CALLD $1F0,$1F1 WCZ, which restores the program counter, C flag, and Z flag from the interrupt return address registers. The operation takes 4 cycles minimum, with variable timing depending on hub access if the resume location is in hub memory (13-20 cycles).
+If the WZ or WCZ effect is specified, the Z flag is restored from L[30].
 
-Unlike RETIx instructions which return from the interrupt handler, RESIx instructions resume interrupted execution, used when an interrupt handler needs to yield to another interrupt priority level before completion.
+RETB is paired with CALLB for implementing software stacks in Hub memory, enabling deep call nesting beyond the 8-level hardware stack limit.
 
 
-## RET — Return from Subroutine
 
-Returns from a subroutine by popping the return address from the hardware stack.
+## RETI0 / RETI1 / RETI2 / RETI3 {#reti0}
 
-### Syntax
-```pasm
-        RET     {WC|WZ|WCZ}
+Return from interrupt (0, 1, 2, or 3)
+[Interrupt Instruction](#interrupt-instructions) - Return from interrupt handler, restoring execution to interrupted code.
+
+**RETI0**
+**RETI1**
+**RETI2**
+**RETI3**
+
+---
+
+**Result:** Execution returns from the specified interrupt level to the interrupted location.
+
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011001}{110}{111111111}{111111111}{---}{---}{---}{4 (COG), 13...20 (Hub)}
+\encodingrowcont{EEEE}{1011001}{110}{111111111}{111110101}{---}{---}{---}{4 (COG), 13...20 (Hub)}
+\encodingrowcont{EEEE}{1011001}{110}{111111111}{111110011}{---}{---}{---}{4 (COG), 13...20 (Hub)}
+\encodingrow{EEEE}{1011001}{110}{111111111}{111110001}{---}{---}{---}{4 (COG), 13...20 (Hub)}
+\end{encodingtable}
 ```
 
-### Result
-The program counter, C flag, and Z flag are restored from the top of the hardware stack.
+**Related:** [RESI0/1/2/3](#resi0), [SETINT1/2/3](#setint1), [NIXINT1/2/3](#nixint1)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flags: restore carry, restore zero, or both |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 CZ1 000000000 000101101 | — | K[31] | K[30] | 4}
+RETI0, RETI1, RETI2, and RETI3 return from their respective interrupt handlers. Each instruction is functionally equivalent to a CALLD instruction that restores the program counter, C flag, and Z flag from the corresponding interrupt return address registers.
 
-### Related Instructions
-- [CALL](#call) — Call subroutine
-- [CALLA](#calla) — Call subroutine with PTRA stack
-- [CALLB](#callb) — Call subroutine with PTRB stack
-- [RETA](#reta) — Return via PTRA stack
-- [RETB](#retb) — Return via PTRB stack
-
-### Explanation
-RET returns from a subroutine by popping the hardware stack (K). The program counter is restored from K[19:0]. If the WC or WCZ effect is specified, the C flag is restored from K[31]. If the WZ or WCZ effect is specified, the Z flag is restored from K[30]. The operation takes 4 cycles minimum, with variable timing depending on hub access if the return location is in hub memory (13-20 cycles).
-
-The P2 provides an 8-level hardware stack for fast subroutine calls. RET is paired with CALL, CALLPA, CALLPB, CALLA, and CALLB instructions. The hardware stack eliminates the overhead of software stack management for shallow call depths.
+The P2 provides four interrupt levels (INT0-INT3), with INT0 being the lowest priority and INT3 being the highest. Each RETI instruction completes its interrupt handler and resumes normal execution at the point where the interrupt occurred.
 
 
-## RETA — Return via PTRA Stack
 
-Returns from a subroutine by reading the return address from hub memory via PTRA.
+## REV {#rev}
 
-### Syntax
-```pasm
-        RETA    {WC|WZ|WCZ}
+Reverse bits
+[Bit Manipulation Instruction](#bit-manipulation-instructions) - Reverse the bit pattern in a register.
+
+**REV**  *Dest*
+
+---
+
+**Result:** The 32-bit pattern in Dest is reversed (bits 31:0 become bits 0:31).
+
+- Dest is the register containing the bit pattern to reverse.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001101001}{D}{---}{---}{2}
 ```
 
-### Result
-The program counter, C flag, and Z flag are restored from hub memory at --PTRA.
+**Related:** [ROL](#rol), [ROR](#ror), [ZEROX](#zerox)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flags: restore carry, restore zero, or both |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 CZ1 000000000 000101110 | — | L[31] | L[30] | 11...18}
-
-### Related Instructions
-- [CALLA](#calla) — Call subroutine with PTRA stack
-- [RET](#ret) — Return from subroutine via hardware stack
-- [RETB](#retb) — Return via PTRB stack
-
-### Explanation
-RETA returns from a subroutine by reading a hub long from --PTRA. PTRA is pre-decremented by 4 bytes, then a long is read from that address. The program counter is restored from L[19:0]. If the WC or WCZ effect is specified, the C flag is restored from L[31]. If the WZ or WCZ effect is specified, the Z flag is restored from L[30]. The operation takes 11-18 cycles minimum (20-40 cycles if the return location is in hub memory).
-
-RETA is paired with CALLA for implementing software stacks in hub memory, enabling deep call nesting beyond the 8-level hardware stack limit. The PTRA pointer must be properly maintained by the calling convention.
-
-
-## RETB — Return via PTRB Stack
-
-Returns from a subroutine by reading the return address from hub memory via PTRB.
-
-### Syntax
-```pasm
-        RETB    {WC|WZ|WCZ}
-```
-
-### Result
-The program counter, C flag, and Z flag are restored from hub memory at --PTRB.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional flags: restore carry, restore zero, or both |
-
-### Encoding
-\simpleencoding{EEEE 1101011 CZ1 000000000 000101111 | — | L[31] | L[30] | 11...18}
-
-### Related Instructions
-- [CALLB](#callb) — Call subroutine with PTRB stack
-- [RET](#ret) — Return from subroutine via hardware stack
-- [RETA](#reta) — Return via PTRA stack
-
-### Explanation
-RETB returns from a subroutine by reading a hub long from --PTRB. PTRB is pre-decremented by 4 bytes, then a long is read from that address. The program counter is restored from L[19:0]. If the WC or WCZ effect is specified, the C flag is restored from L[31]. If the WZ or WCZ effect is specified, the Z flag is restored from L[30]. The operation takes 11-18 cycles minimum (20-40 cycles if the return location is in hub memory).
-
-RETB is paired with CALLB for implementing software stacks in hub memory, enabling deep call nesting beyond the 8-level hardware stack limit. The PTRB pointer must be properly maintained by the calling convention.
-
-
-## RETI0 — Return from Interrupt 0
-
-Returns from interrupt 0 handler, restoring execution to the interrupted code.
-
-### Syntax
-```pasm
-        RETI0
-```
-
-### Result
-Execution returns from interrupt 0 to the interrupted location.
-
-### Parameters
-None.
-
-### Encoding
-\simpleencoding{EEEE 1011001 110 111111111 111111111 | D | — | — | 4}
-
-### Related Instructions
-- [RETI1](#reti1) — Return from interrupt 1
-- [RETI2](#reti2) — Return from interrupt 2
-- [RETI3](#reti3) — Return from interrupt 3
-- [RESI0](#resi0) — Resume from interrupt 0
-
-### Explanation
-RETI0 returns from interrupt 0. This is functionally equivalent to CALLD $1FF,$1FF WCZ, which restores the program counter, C flag, and Z flag from the interrupt return address registers. The operation takes 4 cycles minimum, with variable timing depending on hub access if the return location is in hub memory (13-20 cycles).
-
-The P2 provides four interrupt levels (INT0-INT3), with INT0 being the lowest priority. RETI0 completes the interrupt handler and resumes normal execution at the point where the interrupt occurred.
-
-
-## RETI1 — Return from Interrupt 1
-
-Returns from interrupt 1 handler, restoring execution to the interrupted code.
-
-### Syntax
-```pasm
-        RETI1
-```
-
-### Result
-Execution returns from interrupt 1 to the interrupted location.
-
-### Parameters
-None.
-
-### Encoding
-\simpleencoding{EEEE 1011001 110 111111111 111110101 | D | — | — | 4}
-
-### Related Instructions
-- [RETI0](#reti0) — Return from interrupt 0
-- [RETI2](#reti2) — Return from interrupt 2
-- [RETI3](#reti3) — Return from interrupt 3
-- [RESI1](#resi1) — Resume from interrupt 1
-
-### Explanation
-RETI1 returns from interrupt 1. This is functionally equivalent to CALLD $1FF,$1F5 WCZ, which restores the program counter, C flag, and Z flag from the interrupt return address registers. The operation takes 4 cycles minimum, with variable timing depending on hub access if the return location is in hub memory (13-20 cycles).
-
-The P2 provides four interrupt levels (INT0-INT3), with INT1 being the second priority level. RETI1 completes the interrupt handler and resumes normal execution at the point where the interrupt occurred.
-
-
-## RETI2 — Return from Interrupt 2
-
-Returns from interrupt 2 handler, restoring execution to the interrupted code.
-
-### Syntax
-```pasm
-        RETI2
-```
-
-### Result
-Execution returns from interrupt 2 to the interrupted location.
-
-### Parameters
-None.
-
-### Encoding
-\simpleencoding{EEEE 1011001 110 111111111 111110011 | D | — | — | 4}
-
-### Related Instructions
-- [RETI0](#reti0) — Return from interrupt 0
-- [RETI1](#reti1) — Return from interrupt 1
-- [RETI3](#reti3) — Return from interrupt 3
-- [RESI2](#resi2) — Resume from interrupt 2
-
-### Explanation
-RETI2 returns from interrupt 2. This is functionally equivalent to CALLD $1FF,$1F3 WCZ, which restores the program counter, C flag, and Z flag from the interrupt return address registers. The operation takes 4 cycles minimum, with variable timing depending on hub access if the return location is in hub memory (13-20 cycles).
-
-The P2 provides four interrupt levels (INT0-INT3), with INT2 being the third priority level. RETI2 completes the interrupt handler and resumes normal execution at the point where the interrupt occurred.
-
-
-## RETI3 — Return from Interrupt 3
-
-Returns from interrupt 3 handler, restoring execution to the interrupted code.
-
-### Syntax
-```pasm
-        RETI3
-```
-
-### Result
-Execution returns from interrupt 3 to the interrupted location.
-
-### Parameters
-None.
-
-### Encoding
-\simpleencoding{EEEE 1011001 110 111111111 111110001 | D | — | — | 4}
-
-### Related Instructions
-- [RETI0](#reti0) — Return from interrupt 0
-- [RETI1](#reti1) — Return from interrupt 1
-- [RETI2](#reti2) — Return from interrupt 2
-- [RESI3](#resi3) — Resume from interrupt 3
-
-### Explanation
-RETI3 returns from interrupt 3. This is functionally equivalent to CALLD $1FF,$1F1 WCZ, which restores the program counter, C flag, and Z flag from the interrupt return address registers. The operation takes 4 cycles minimum, with variable timing depending on hub access if the return location is in hub memory (13-20 cycles).
-
-The P2 provides four interrupt levels (INT0-INT3), with INT3 being the highest priority level. RETI3 completes the interrupt handler and resumes normal execution at the point where the interrupt occurred.
-
-
-## REV — Reverse Bits
-
-Reverses the bit pattern in a register, swapping bit 0 with bit 31, bit 1 with bit 30, etc.
-
-### Syntax
-```pasm
-        REV     D
-```
-
-### Result
-The 32-bit pattern in D is reversed (bits 31:0 become bits 0:31).
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the bit pattern to reverse |
-
-### Encoding
-\simpleencoding{EEEE 1101011 000 DDDDDDDDD 001101001 | D | — | — | 2}
-
-### Related Instructions
-- [ROL](#rol) — Rotate left
-- [ROR](#ror) — Rotate right
-- [ZEROX](#zerox) — Zero-extend
-
-### Explanation
-REV performs a complete bitwise reverse of the value in D, storing the result back into D. Bit 31 becomes bit 0, bit 30 becomes bit 1, and so on through bit 0 becoming bit 31. The operation takes 2 cycles and does not affect any flags.
+REV performs a complete bitwise reverse of the value in Dest, storing the result back into Dest. Bit 31 becomes bit 0, bit 30 becomes bit 1, and so on through bit 0 becoming bit 31. The operation takes 2 cycles and does not affect any flags.
 
 This instruction is useful for processing binary data in different MSB/LSB order than it is transmitted with, such as serial protocols that send least-significant bit first but need processing in most-significant bit first order. It is also used in bit-reversal algorithms for FFT operations.
 
 
-## RFBYTE — Read Byte via FIFO
 
-Reads a zero-extended byte from the FIFO after a RDFAST operation.
+## RFBYTE {#rfbyte}
 
-### Syntax
-```pasm
-        RFBYTE  D {WC|WZ|WCZ}
+Read byte via FIFO
+[Hub RAM Instruction](#hub-ram-instructions) - Read a zero-extended byte from the FIFO after RDFAST.
+
+**RFBYTE**  *Dest*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** A zero-extended byte from the FIFO is loaded into Dest.
+
+- Dest is the register to receive the byte value.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000010000}{D}{MSB of byte}{Result = 0}{2}
 ```
 
-### Result
-A zero-extended byte from the FIFO is loaded into D.
+**Related:** [RDFAST](#rdfast), [RFWORD](#rfword), [RFLONG](#rflong), [RFVAR](#rfvar)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register to receive the byte value |
-| WC/WZ/WCZ | Optional flags: write carry, write zero, or both |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 CZ0 DDDDDDDDD 000010000 | D | MSB of byte | Result = 0 | 2}
+RFBYTE is used after RDFAST to read zero-extended bytes from the FIFO. The byte is loaded into Dest with bits 31:8 cleared to 0.
 
-### Related Instructions
-- [RDFAST](#rdfast) — Begin fast hub read via FIFO
-- [RFWORD](#rfword) — Read word via FIFO
-- [RFLONG](#rflong) — Read long via FIFO
-- [RFVAR](#rfvar) — Read variable-length value via FIFO
+If the WC or WCZ effect is specified, C is set to the MSB of the byte.
 
-### Explanation
-RFBYTE is used after RDFAST to read zero-extended bytes from the FIFO. The byte is loaded into D with bits 31:8 cleared to 0. If the WC flag is specified, C is set to the MSB of the byte. If the WZ flag is specified, Z is set if the result equals zero. The operation takes 2 cycles when the FIFO has data available.
+If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
-The FIFO is automatically refilled in the background by the RDFAST operation, enabling high-throughput sequential byte processing without hub access overhead for each byte. This is essential for checksum calculations, data parsing, and stream processing.
+The operation takes 2 cycles when the FIFO has data available. The FIFO is automatically refilled in the background by the RDFAST operation.
 
 
-## RFLONG — Read Long via FIFO
 
-Reads a long (32-bit value) from the FIFO after a RDFAST operation.
+## RFLONG {#rflong}
 
-### Syntax
-```pasm
-        RFLONG  D {WC|WZ|WCZ}
+Read long via FIFO
+[Hub RAM Instruction](#hub-ram-instructions) - Read a long (32-bit value) from the FIFO after RDFAST.
+
+**RFLONG**  *Dest*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** A long from the FIFO is loaded into Dest.
+
+- Dest is the register to receive the long value.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000010010}{D}{MSB of long}{Result = 0}{2}
 ```
 
-### Result
-A long from the FIFO is loaded into D.
+**Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFWORD](#rfword), [RFVAR](#rfvar)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register to receive the long value |
-| WC/WZ/WCZ | Optional flags: write carry, write zero, or both |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 CZ0 DDDDDDDDD 000010010 | D | MSB of long | Result = 0 | 2}
+RFLONG is used after RDFAST to read longs from the FIFO.
 
-### Related Instructions
-- [RDFAST](#rdfast) — Begin fast hub read via FIFO
-- [RFBYTE](#rfbyte) — Read byte via FIFO
-- [RFWORD](#rfword) — Read word via FIFO
-- [RFVAR](#rfvar) — Read variable-length value via FIFO
+If the WC or WCZ effect is specified, C is set to the MSB of the long.
 
-### Explanation
-RFLONG is used after RDFAST to read longs from the FIFO. If the WC flag is specified, C is set to the MSB of the long. If the WZ flag is specified, Z is set if the result equals zero. The operation takes 2 cycles when the FIFO has data available.
+If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
-The FIFO is automatically refilled in the background by the RDFAST operation, enabling high-throughput sequential long processing without hub access overhead for each long. This is ideal for memory block processing, array operations, and bulk data transfers.
+The operation takes 2 cycles when the FIFO has data available. The FIFO is automatically refilled in the background by the RDFAST operation.
 
 
-## RFVAR — Read Variable-Length Value via FIFO
 
-Reads a zero-extended 1-4 byte variable-length value from the FIFO after a RDFAST operation.
+## RFVAR {#rfvar}
 
-### Syntax
-```pasm
-        RFVAR   D {WC|WZ|WCZ}
+Read variable via FIFO
+[Hub RAM Instruction](#hub-ram-instructions) - Read a zero-extended 1-4 byte variable-length value from the FIFO.
+
+**RFVAR**  *Dest*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** A zero-extended 1-4 byte value from the FIFO is loaded into Dest.
+
+- Dest is the register to receive the variable-length value.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000010011}{D}{0}{Result = 0}{2}
 ```
 
-### Result
-A zero-extended 1-4 byte value from the FIFO is loaded into D.
+**Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFVARS](#rfvars)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register to receive the variable-length value |
-| WC/WZ/WCZ | Optional flags: write carry, write zero, or both |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 CZ0 DDDDDDDDD 000010011 | D | 0 | Result = 0 | 2}
+RFVAR is used after RDFAST to read variable-length values (1-4 bytes) from the FIFO with zero extension. The value is loaded into Dest with upper bits cleared to 0.
 
-### Related Instructions
-- [RDFAST](#rdfast) — Begin fast hub read via FIFO
-- [RFBYTE](#rfbyte) — Read byte via FIFO
-- [RFWORD](#rfword) — Read word via FIFO
-- [RFLONG](#rflong) — Read long via FIFO
-- [RFVARS](#rfvars) — Read sign-extended variable via FIFO
+If the WC or WCZ effect is specified, C is always cleared to 0.
 
-### Explanation
-RFVAR is used after RDFAST to read variable-length values (1-4 bytes) from the FIFO with zero extension. The value is loaded into D with upper bits cleared to 0. If the WC flag is specified, C is always cleared to 0. If the WZ flag is specified, Z is set if the result equals zero. The operation takes 2 cycles when the FIFO has data available.
+If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
-The length of each value read is determined by the streamer configuration set up before the RDFAST operation. RFVAR is useful for processing variable-length encoded data streams where different values occupy different numbers of bytes.
+The length of each value read is determined by the streamer configuration set up before the RDFAST operation.
 
 
-## RFVARS — Read Sign-Extended Variable via FIFO
 
-Reads a sign-extended 1-4 byte variable-length value from the FIFO after a RDFAST operation.
+## RFVARS {#rfvars}
 
-### Syntax
-```pasm
-        RFVARS  D {WC|WZ|WCZ}
+Read signed variable via FIFO
+[Hub RAM Instruction](#hub-ram-instructions) - Read a sign-extended 1-4 byte variable-length value from the FIFO.
+
+**RFVARS**  *Dest*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** A sign-extended 1-4 byte value from the FIFO is loaded into Dest.
+
+- Dest is the register to receive the sign-extended value.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000010100}{D}{MSB of value}{Result = 0}{2}
 ```
 
-### Result
-A sign-extended 1-4 byte value from the FIFO is loaded into D.
+**Related:** [RDFAST](#rdfast), [RFVAR](#rfvar), [RFBYTE](#rfbyte)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register to receive the sign-extended value |
-| WC/WZ/WCZ | Optional flags: write carry, write zero, or both |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 CZ0 DDDDDDDDD 000010100 | D | MSB of value | Result = 0 | 2}
+RFVARS is used after RDFAST to read variable-length values (1-4 bytes) from the FIFO with sign extension. The value is loaded into Dest with upper bits set according to the MSB of the value (sign extension).
 
-### Related Instructions
-- [RDFAST](#rdfast) — Begin fast hub read via FIFO
-- [RFVAR](#rfvar) — Read zero-extended variable via FIFO
-- [RFBYTE](#rfbyte) — Read byte via FIFO
+If the WC or WCZ effect is specified, C is set to the MSB of the value.
 
-### Explanation
-RFVARS is used after RDFAST to read variable-length values (1-4 bytes) from the FIFO with sign extension. The value is loaded into D with upper bits set according to the MSB of the value (sign extension). If the WC flag is specified, C is set to the MSB of the value. If the WZ flag is specified, Z is set if the result equals zero. The operation takes 2 cycles when the FIFO has data available.
-
-The length of each value read is determined by the streamer configuration set up before the RDFAST operation. RFVARS is useful for processing variable-length encoded signed data streams where different values occupy different numbers of bytes.
+If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
 
-## RFWORD — Read Word via FIFO
 
-Reads a zero-extended word (16-bit value) from the FIFO after a RDFAST operation.
+## RFWORD {#rfword}
 
-### Syntax
-```pasm
-        RFWORD  D {WC|WZ|WCZ}
+Read word via FIFO
+[Hub RAM Instruction](#hub-ram-instructions) - Read a zero-extended word (16-bit value) from the FIFO after RDFAST.
+
+**RFWORD**  *Dest*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** A zero-extended word from the FIFO is loaded into Dest.
+
+- Dest is the register to receive the word value.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{DDDDDDDDD}{000010001}{D}{MSB of word}{Result = 0}{2}
 ```
 
-### Result
-A zero-extended word from the FIFO is loaded into D.
+**Related:** [RDFAST](#rdfast), [RFBYTE](#rfbyte), [RFLONG](#rflong), [RFVAR](#rfvar)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register to receive the word value |
-| WC/WZ/WCZ | Optional flags: write carry, write zero, or both |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 CZ0 DDDDDDDDD 000010001 | D | MSB of word | Result = 0 | 2}
+RFWORD is used after RDFAST to read zero-extended words from the FIFO. The word is loaded into Dest with bits 31:16 cleared to 0.
 
-### Related Instructions
-- [RDFAST](#rdfast) — Begin fast hub read via FIFO
-- [RFBYTE](#rfbyte) — Read byte via FIFO
-- [RFLONG](#rflong) — Read long via FIFO
-- [RFVAR](#rfvar) — Read variable-length value via FIFO
+If the WC or WCZ effect is specified, C is set to the MSB of the word.
 
-### Explanation
-RFWORD is used after RDFAST to read zero-extended words from the FIFO. The word is loaded into D with bits 31:16 cleared to 0. If the WC flag is specified, C is set to the MSB of the word. If the WZ flag is specified, Z is set if the result equals zero. The operation takes 2 cycles when the FIFO has data available.
+If the WZ or WCZ effect is specified, Z is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
-The FIFO is automatically refilled in the background by the RDFAST operation, enabling high-throughput sequential word processing without hub access overhead for each word. This is useful for processing 16-bit audio samples, network packets, and other word-oriented data streams.
+The operation takes 2 cycles when the FIFO has data available.
 
 
-## RGBEXP — Expand RGB Color
 
-Expands a 5:6:5 RGB color value into an 8:8:8 format for display.
+## RGBEXP {#rgbexp}
 
-### Syntax
-```pasm
-        RGBEXP  D
+Expand RGB color
+[Pixel Mixer Instruction](#pixel-mixer-instructions) - Expand a 5:6:5 RGB color value into 8:8:8 format.
+
+**RGBEXP**  *Dest*
+
+---
+
+**Result:** The 5:6:5 RGB value in Dest[15:0] is expanded into 8:8:8 format in Dest[31:8].
+
+- Dest contains 5:6:5 RGB in Dest[15:0], receives 8:8:8 RGB in Dest[31:8].
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100111}{D}{---}{---}{2}
 ```
 
-### Result
-The 5:6:5 RGB value in D[15:0] is expanded into 8:8:8 format in D[31:8].
+**Related:** [RGBSQZ](#rgbsqz)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing 5:6:5 RGB in D[15:0], receives 8:8:8 RGB in D[31:8] |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 000 DDDDDDDDD 001100111 | D | — | — | 2}
+RGBEXP expands a compact 5:6:5 RGB color value (commonly used in 16-bit color displays) into full 8:8:8 RGB format (24-bit true color). The input 5:6:5 value is in Dest[15:0] with 5 bits red, 6 bits green, and 5 bits blue. The output 8:8:8 value is placed in Dest[31:8] with 8 bits each for red, green, and blue. The expansion replicates the most significant bits into the lower bits to maintain color accuracy.
 
-### Related Instructions
-- [RGBSQZ](#rgbsqz) — Squeeze RGB color from 8:8:8 to 5:6:5
-
-### Explanation
-RGBEXP expands a compact 5:6:5 RGB color value (commonly used in 16-bit color displays) into full 8:8:8 RGB format (24-bit true color). The input 5:6:5 value is in D[15:0] with 5 bits red, 6 bits green, and 5 bits blue. The output 8:8:8 value is placed in D[31:8] with 8 bits each for red, green, and blue. The expansion replicates the most significant bits into the lower bits to maintain color accuracy.
-
-This instruction is useful when converting between 16-bit and 24-bit color formats for graphics processing, blending operations, or display output.
+This instruction is useful when converting between 16-bit and 24-bit color formats for graphics processing.
 
 
-## RGBSQZ — Squeeze RGB Color
 
-Compresses an 8:8:8 RGB color value into 5:6:5 format for compact storage.
+## RGBSQZ {#rgbsqz}
 
-### Syntax
-```pasm
-        RGBSQZ  D
+Squeeze RGB color
+[Pixel Mixer Instruction](#pixel-mixer-instructions) - Compress an 8:8:8 RGB color value into 5:6:5 format.
+
+**RGBSQZ**  *Dest*
+
+---
+
+**Result:** The 8:8:8 RGB value in Dest[31:8] is compressed into 5:6:5 format in Dest[15:0].
+
+- Dest contains 8:8:8 RGB in Dest[31:8], receives 5:6:5 RGB in Dest[15:0].
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100110}{D}{---}{---}{2}
 ```
 
-### Result
-The 8:8:8 RGB value in D[31:8] is compressed into 5:6:5 format in D[15:0].
+**Related:** [RGBEXP](#rgbexp)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing 8:8:8 RGB in D[31:8], receives 5:6:5 RGB in D[15:0] |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 000 DDDDDDDDD 001100110 | D | — | — | 2}
+RGBSQZ compresses a full 8:8:8 RGB color value (24-bit true color) into compact 5:6:5 format (16-bit color). The input 8:8:8 value is in Dest[31:8] with 8 bits each for red, green, and blue. The output 5:6:5 value is placed in Dest[15:0] with 5 bits red, 6 bits green, and 5 bits blue. The compression keeps the most significant bits of each color channel.
 
-### Related Instructions
-- [RGBEXP](#rgbexp) — Expand RGB color from 5:6:5 to 8:8:8
-
-### Explanation
-RGBSQZ compresses a full 8:8:8 RGB color value (24-bit true color) into compact 5:6:5 format (16-bit color). The input 8:8:8 value is in D[31:8] with 8 bits each for red, green, and blue. The output 5:6:5 value is placed in D[15:0] with 5 bits red, 6 bits green, and 5 bits blue. The compression keeps the most significant bits of each color channel.
-
-This instruction is useful when converting from 24-bit to 16-bit color formats for display output or when memory/bandwidth constraints require compact color representation.
+This instruction is useful when converting from 24-bit to 16-bit color formats for display output.
 
 
-## ROL — Rotate Left
 
-Rotates the bits of a register left by a specified number of positions.
+## ROL {#rol}
 
-### Syntax
-```pasm
-        ROL     D,{#}S {WC|WZ|WCZ}
+Rotate left
+[Shift/Rotate Instruction](#shift-rotate-instructions) - Rotate the bits of a register left.
+
+**ROL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The bits of Dest are rotated left by Src positions; departing MSBs are moved into LSBs.
+
+- Dest is the register containing the value to rotate left.
+- Src is a register or 5-bit literal (0-31) specifying the number of bit positions to rotate.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0000001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
+
+\textsuperscript{1} C = last bit rotated out if S[4:0] > 0, else D[31]
 ```
 
-### Result
-The bits of D are rotated left by S positions; departing MSBs are moved into LSBs.
+**Related:** [ROR](#ror), [RCL](#rcl), [RCR](#rcr), [SHL](#shl)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to rotate left by S bits |
-| S | Register or 5-bit literal (0-31) indicating the number of bit positions to rotate |
-| WC/WZ/WCZ | Optional flags: write carry, write zero, or both |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 0000001 CZI DDDDDDDDD SSSSSSSSS | D | Last bit out¹ | Result = 0 | 2}
+ROL rotates Dest's binary value left by Src places (0-31 bits). All MSBs rotated out are moved into the new LSBs.
 
-¹ C = last bit rotated out if S[4:0] > 0, else D[31]
+If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit rotated out if Src is 1-31, or to Dest[31] if Src is 0.
 
-### Related Instructions
-- [ROR](#ror) — Rotate right
-- [RCL](#rcl) — Rotate carry left
-- [RCR](#rcr) — Rotate carry right
-- [SHL](#shl) — Shift left
+If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero. Since no bits are lost by this operation, the result will only be zero if Dest started at zero.
 
-### Explanation
-ROL rotates D's binary value left by S places (0-31 bits). All MSBs rotated out are moved into the new LSBs. If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit rotated out if S is 1-31, or to D[31] if S is 0. If the WZ or WCZ effect is specified, the Z flag is set if the result equals zero. Since no bits are lost by this operation, the result will only be zero if D started at zero.
-
-Rotation is useful for bit manipulation, circular buffers, hash functions, and cryptographic operations. Unlike shifts, rotations preserve all bits, making them reversible operations.
+Rotation is useful for bit manipulation, circular buffers, hash functions, and cryptographic operations.
 
 
-## ROLBYTE — Rotate Byte Left
 
-Reads a byte from a source and rotates it left into the destination register.
+## ROLBYTE {#rolbyte}
 
-### Syntax
-```pasm
-        ROLBYTE D,{#}S,#N
-        ROLBYTE D
-```
+Rotate byte left into register
+[Bit Manipulation Instruction](#bit-manipulation-instructions) - Read a byte from source and rotate it left into destination.
 
-### Result
-Byte N (0-3) of S, or a byte from a source described by prior ALTGB instruction, is rotated left into D.
+**ROLBYTE**  *Dest, {#}Src, #N*
+**ROLBYTE**  *Dest*
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register in which to rotate the byte into |
-| S | Register, 9-bit literal, or 32-bit augmented literal containing the target byte |
-| N | 2-bit literal (0-3) identifying the byte position in S |
+---
 
-### Encoding
+**Result:** Byte N (0-3) of Src, or a byte from a source described by prior ALTGB instruction, is rotated left into Dest.
+
+- Dest is the register into which the byte is rotated.
+- Src is a register, 9-bit literal, or 32-bit augmented literal containing the target byte.
+- N is a 2-bit literal (0-3) identifying the byte position in Src.
+
+```{=latex}
 \begin{encodingtable}
-EEEE 1001000 NNI DDDDDDDDD SSSSSSSSS & D & — & — & 2 \\
-EEEE 1001000 000 DDDDDDDDD 000000000 & D & — & — & 2
+\encodingrowcont{EEEE}{1001000}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1001000}{000}{DDDDDDDDD}{000000000}{D}{---}{---}{2}
 \end{encodingtable}
-
-### Related Instructions
-- [ROLNIB](#rolnib) — Rotate nibble left
-- [ROLWORD](#rolword) — Rotate word left
-- [GETBYTE](#getbyte) — Get byte from value
-- [SETBYTE](#setbyte) — Set byte in value
-- [ALTGB](#altgb) — Alter next GETBYTE/ROLBYTE instruction
-
-### Explanation
-ROLBYTE reads the byte identified by N (0-3) from S, or a byte from the source described by a prior ALTGB instruction, and rotates it left into D. ROLBYTE achieves the same effect as two instructions: an 8-bit SHL followed by SETBYTE into byte 0. N (0-3) identifies a value's individual bytes by position in least-significant byte order.
-
-The second syntax form is intended for use after an ALTGB instruction in a loop to iteratively read a series of byte values within contiguous long registers. This enables efficient unpacking of byte arrays into separate values.
-
-
-## ROLNIB — Rotate Nibble Left
-
-Reads a nibble from a source and rotates it left into the destination register.
-
-### Syntax
-```pasm
-        ROLNIB  D,{#}S,#N
-        ROLNIB  D
 ```
 
-### Result
-Nibble N (0-7) of S, or a nibble from a source described by prior ALTGN instruction, is rotated left into D.
+**Related:** [ROLNIB](#rolnib), [ROLWORD](#rolword), [GETBYTE](#getbyte), [SETBYTE](#setbyte), [ALTGB](#altgb)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register in which to rotate the nibble into |
-| S | Register, 9-bit literal, or 32-bit augmented literal containing the target nibble |
-| N | 3-bit literal (0-7) identifying the nibble position in S |
+**Explanation:**
 
-### Encoding
+ROLBYTE reads the byte identified by N (0-3) from Src, or a byte from the source described by a prior ALTGB instruction, and rotates it left into Dest. ROLBYTE achieves the same effect as two instructions: an 8-bit SHL followed by SETBYTE into byte 0.
+
+The second syntax form is intended for use after an ALTGB instruction in a loop to iteratively read a series of byte values within contiguous long registers.
+
+
+
+## ROLNIB {#rolnib}
+
+Rotate nibble left into register
+[Bit Manipulation Instruction](#bit-manipulation-instructions) - Read a nibble from source and rotate it left into destination.
+
+**ROLNIB**  *Dest, {#}Src, #N*
+**ROLNIB**  *Dest*
+
+---
+
+**Result:** Nibble N (0-7) of Src, or a nibble from a source described by prior ALTGN instruction, is rotated left into Dest.
+
+- Dest is the register into which the nibble is rotated.
+- Src is a register, 9-bit literal, or 32-bit augmented literal containing the target nibble.
+- N is a 3-bit literal (0-7) identifying the nibble position in Src.
+
+```{=latex}
 \begin{encodingtable}
-EEEE 100010N NNI DDDDDDDDD SSSSSSSSS & D & — & — & 2 \\
-EEEE 1000100 000 DDDDDDDDD 000000000 & D & — & — & 2
+\encodingrowcont{EEEE}{100010N}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1000100}{000}{DDDDDDDDD}{000000000}{D}{---}{---}{2}
 \end{encodingtable}
-
-### Related Instructions
-- [ROLBYTE](#rolbyte) — Rotate byte left
-- [ROLWORD](#rolword) — Rotate word left
-- [GETNIB](#getnib) — Get nibble from value
-- [SETNIB](#setnib) — Set nibble in value
-- [ALTGN](#altgn) — Alter next GETNIB/ROLNIB instruction
-
-### Explanation
-ROLNIB reads the nibble identified by N (0-7) from S, or a nibble from the source described by a prior ALTGN instruction, and rotates it left into D. ROLNIB achieves the same effect as two instructions: a 4-bit SHL followed by SETNIB into nibble 0. N (0-7) identifies a value's individual nibbles by position in least-significant nibble order.
-
-The second syntax form is intended for use after an ALTGN instruction in a loop to iteratively read a series of nibble values within contiguous long registers. This enables efficient unpacking of nibble arrays, useful for BCD arithmetic and compact data encoding.
-
-
-## ROLWORD — Rotate Word Left
-
-Reads a word from a source and rotates it left into the destination register.
-
-### Syntax
-```pasm
-        ROLWORD D,{#}S,#N
-        ROLWORD D
 ```
 
-### Result
-Word N (0-1) of S, or a word from a source described by prior ALTGW instruction, is rotated left into D.
+**Related:** [ROLBYTE](#rolbyte), [ROLWORD](#rolword), [GETNIB](#getnib), [SETNIB](#setnib), [ALTGN](#altgn)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register in which to rotate the word into |
-| S | Register, 9-bit literal, or 32-bit augmented literal containing the target word |
-| N | 1-bit literal (0-1) identifying the word position in S |
+**Explanation:**
 
-### Encoding
+ROLNIB reads the nibble identified by N (0-7) from Src, or a nibble from the source described by a prior ALTGN instruction, and rotates it left into Dest. ROLNIB achieves the same effect as two instructions: a 4-bit SHL followed by SETNIB into nibble 0.
+
+The second syntax form is intended for use after an ALTGN instruction in a loop to iteratively read a series of nibble values within contiguous long registers.
+
+
+
+## ROLWORD {#rolword}
+
+Rotate word left into register
+[Bit Manipulation Instruction](#bit-manipulation-instructions) - Read a word from source and rotate it left into destination.
+
+**ROLWORD**  *Dest, {#}Src, #N*
+**ROLWORD**  *Dest*
+
+---
+
+**Result:** Word N (0-1) of Src, or a word from a source described by prior ALTGW instruction, is rotated left into Dest.
+
+- Dest is the register into which the word is rotated.
+- Src is a register, 9-bit literal, or 32-bit augmented literal containing the target word.
+- N is a 1-bit literal (0-1) identifying the word position in Src.
+
+```{=latex}
 \begin{encodingtable}
-EEEE 1001010 0NI DDDDDDDDD SSSSSSSSS & D & — & — & 2 \\
-EEEE 1001010 000 DDDDDDDDD 000000000 & D & — & — & 2
+\encodingrowcont{EEEE}{1001010}{0NI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1001010}{000}{DDDDDDDDD}{000000000}{D}{---}{---}{2}
 \end{encodingtable}
-
-### Related Instructions
-- [ROLBYTE](#rolbyte) — Rotate byte left
-- [ROLNIB](#rolnib) — Rotate nibble left
-- [GETWORD](#getword) — Get word from value
-- [SETWORD](#setword) — Set word in value
-- [ALTGW](#altgw) — Alter next GETWORD/ROLWORD instruction
-
-### Explanation
-ROLWORD reads the word identified by N (0-1) from S, or a word from the source described by a prior ALTGW instruction, and rotates it left into D. ROLWORD achieves the same effect as two instructions: a 16-bit SHL followed by SETWORD into word 0. N (0-1) identifies a value's individual words by position in least-significant word order.
-
-The second syntax form is intended for use after an ALTGW instruction in a loop to iteratively read a series of word values within contiguous long registers. This enables efficient unpacking of word arrays into separate values.
-
-
-## ROR — Rotate Right
-
-Rotates the bits of a register right by a specified number of positions.
-
-### Syntax
-```pasm
-        ROR     D,{#}S {WC|WZ|WCZ}
 ```
 
-### Result
-The bits of D are rotated right by S positions; departing LSBs are moved into MSBs.
+**Related:** [ROLBYTE](#rolbyte), [ROLNIB](#rolnib), [GETWORD](#getword), [SETWORD](#setword), [ALTGW](#altgw)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to rotate right by S bits |
-| S | Register or 5-bit literal (0-31) indicating the number of bit positions to rotate |
-| WC/WZ/WCZ | Optional flags: write carry, write zero, or both |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 0000000 CZI DDDDDDDDD SSSSSSSSS | D | Last bit out¹ | Result = 0 | 2}
+ROLWORD reads the word identified by N (0-1) from Src, or a word from the source described by a prior ALTGW instruction, and rotates it left into Dest. ROLWORD achieves the same effect as two instructions: a 16-bit SHL followed by SETWORD into word 0.
 
-¹ C = last bit rotated out if S[4:0] > 0, else D[0]
-
-### Related Instructions
-- [ROL](#rol) — Rotate left
-- [RCL](#rcl) — Rotate carry left
-- [RCR](#rcr) — Rotate carry right
-- [SHR](#shr) — Shift right
-
-### Explanation
-ROR rotates D's binary value right by S places (0-31 bits). All LSBs rotated out are moved into the new MSBs. If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit rotated out if S is 1-31, or to D[0] if S is 0. If the WZ or WCZ effect is specified, the Z flag is set if the result equals zero. Since no bits are lost by this operation, the result will only be zero if D started at zero.
-
-Rotation is useful for bit manipulation, circular buffers, hash functions, and cryptographic operations. Unlike shifts, rotations preserve all bits, making them reversible operations. ROR is particularly useful for serial communications where data needs to be processed in reverse bit order.
+The second syntax form is intended for use after an ALTGW instruction in a loop to iteratively read a series of word values within contiguous long registers.
 
 
-## RQPIN — Read Smart Pin without Acknowledge
 
-Reads a smart pin's result value without acknowledging the pin, leaving its ready flag set.
+## ROR {#ror}
 
-### Syntax
-```pasm
-        RQPIN   D,{#}S {WC}
+Rotate right
+[Shift/Rotate Instruction](#shift-rotate-instructions) - Rotate the bits of a register right.
+
+**ROR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The bits of Dest are rotated right by Src positions; departing LSBs are moved into MSBs.
+
+- Dest is the register containing the value to rotate right.
+- Src is a register or 5-bit literal (0-31) specifying the number of bit positions to rotate.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0000000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
+
+\textsuperscript{1} C = last bit rotated out if S[4:0] > 0, else D[0]
 ```
 
-### Result
-Smart pin S[5:0] result "Z" is loaded into D without clearing the pin's ready flag.
+**Related:** [ROL](#rol), [RCL](#rcl), [RCR](#rcr), [SHR](#shr)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register to receive the pin result |
-| S | Pin number (S[5:0]) to read from |
-| WC | Optional flag: write carry with modal result |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1010100 C0I DDDDDDDDD SSSSSSSSS | D | Modal result | — | 2}
+ROR rotates Dest's binary value right by Src places (0-31 bits). All LSBs rotated out are moved into the new MSBs.
 
-### Related Instructions
-- [RDPIN](#rdpin) — Read smart pin result and acknowledge
-- [WRPIN](#wrpin) — Write smart pin mode
-- [WXPIN](#wxpin) — Write smart pin X parameter
-- [WYPIN](#wypin) — Write smart pin Y parameter
+If the WC or WCZ effect is specified, the C flag is updated to the value of the last bit rotated out if Src is 1-31, or to Dest[0] if Src is 0.
 
-### Explanation
-RQPIN reads the result value from the specified smart pin without acknowledging the pin. Unlike RDPIN, this instruction does not clear the pin's "ready" flag, allowing the same result to be read multiple times or checked before being consumed. If the WC flag is specified, the C flag is set to the modal result, which provides mode-specific status information.
+If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero. Since no bits are lost by this operation, the result will only be zero if Dest started at zero.
 
-This instruction is useful when you need to check a pin's result value without consuming it, such as polling for completion before actually processing the result, or when multiple parts of the code need to examine the same measurement.
+Rotation is useful for bit manipulation, circular buffers, hash functions, and cryptographic operations.
 
-# S Instructions
 
-This section documents all PASM2 instructions beginning with S, organized alphabetically.
 
-## SAL — Shift Arithmetic Left
+## RQPIN {#rqpin}
 
-Shifts the destination register left by the specified number of bits, extending the original LSB into new rightmost positions.
+Read Smart Pin without acknowledge
+[Smart Pin Instruction](#smart-pin-instructions) - Read a Smart Pin's result value without clearing its ready flag.
 
-### Syntax
-```pasm
-        SAL     D, {#}S {WC|WZ|WCZ}
+**RQPIN**  *Dest, {#}Src*  **{WC}**
+
+---
+
+**Result:** Smart Pin Src[5:0] result is loaded into Dest without clearing the pin's ready flag.
+
+- Dest is the register to receive the pin result.
+- Src is a register or literal identifying the pin number (Src[5:0]) to read from.
+- WC is an optional effect to write the modal result to C.
+
+```{=latex}
+\simpleencoding{EEEE}{1010100}{C0I}{DDDDDDDDD}{SSSSSSSSS}{D}{Modal result}{---}{2}
 ```
 
-### Result
-The bits of D are shifted left by S bits, extending D[0] into new rightmost bits.
+**Related:** [RDPIN](#rdpin), [WRPIN](#wrpin), [WXPIN](#wxpin), [WYPIN](#wypin)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to arithmetically left shift by S bits |
-| S | Register or 5-bit literal (0-31) indicating the number of bits to shift left |
-| WC/WZ/WCZ | Optional flag effects |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 0000111 CZI DDDDDDDDD SSSSSSSSS | D | Last bit shifted out if S[4:0] > 0, else D[31] | Result = 0 | 2}
+RQPIN reads the result value from the specified Smart Pin without acknowledging the pin. Unlike RDPIN, this instruction does not clear the pin's "ready" flag, allowing the same result to be read multiple times or checked before being consumed.
 
-### Flags
-- **C**: Set to last bit shifted out if S[4:0] > 0, else D[31]
-- **Z**: Set if result equals zero
+If the WC effect is specified, the C flag is set to the modal result, which provides mode-specific status information.
 
-### Related Instructions
-- [SAR](#sar--shift-arithmetic-right) — Shift arithmetic right (complement for bit streams)
-- [SHL](#shl--shift-left) — Shift left (for power-of-two multiplication)
-
-### Explanation
-SAL shifts the destination's binary value left by the source number of places (0-31 bits) and sets the new LSBs to that of the original D[0]. SAL is the complement of SAR for bit streams but not for math operations. For swift 32-bit integer multiplication by a power-of-two, use SHL instead.
+This instruction is useful when you need to check a pin's result value without consuming it, such as polling for completion before actually processing the result.
 
 
-## SAR — Shift Arithmetic Right
+# Instructions: S
 
-Shifts the destination register right by the specified number of bits, extending the sign bit into new leftmost positions.
+This section contains all PASM2 instructions beginning with the letter S.
 
-### Syntax
-```pasm
-        SAR     D, {#}S {WC|WZ|WCZ}
+
+
+## SAL {#sal}
+
+Shift arithmetic left
+[Shift/Rotate Instruction](#shift-rotate-instructions) - Shift bits left, extending original LSB into new rightmost positions.
+
+**SAL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The bits of Dest are shifted left by Src bits, extending Dest[0] into new rightmost bits.
+
+- Dest is a register containing the value to arithmetically left shift.
+- Src is a register or 5-bit literal (0-31) specifying the number of bit positions to shift.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0000111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
+
+\textsuperscript{1} C = last bit shifted out if S[4:0] > 0, else D[31]
 ```
 
-### Result
-The bits of D are shifted right by S bits, extending D[31] (the sign bit) into new leftmost bits.
+**Related:** [SAR](#sar), [SHL](#shl), [SHR](#shr)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to arithmetically right shift by S bits |
-| S | Register or 5-bit literal (0-31) indicating the number of bits to shift right |
-| WC/WZ/WCZ | Optional flag effects |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 0000110 CZI DDDDDDDDD SSSSSSSSS | D | Last bit shifted out if S[4:0] > 0, else D[0] | Result = 0 | 2}
+SAL shifts the destination's binary value left by the source number of places (0-31 bits) and sets the new LSBs to that of the original Dest[0]. SAL is the complement of SAR for bit streams but not for math operations. For swift 32-bit integer multiplication by a power-of-two, use SHL instead.
 
-### Flags
-- **C**: Set to last bit shifted out if S[4:0] > 0, else D[0]
-- **Z**: Set if result equals zero
-
-### Related Instructions
-- [SAL](#sal--shift-arithmetic-left) — Shift arithmetic left (complement for bit streams)
-- [SHR](#shr--shift-right) — Shift right (logical shift)
-
-### Explanation
-SAR shifts the destination's binary value right by the source number of places (0-31 bits) and sets the new MSBs to that of the original D[31], preserving the sign of a signed integer. This is useful for bit stream manipulation and for swift division. It is similar to SHR for swift division by a power-of-two, but is safe for both signed and unsigned integers.
+::: pasm2
+        SAL     data, #4       ' Shift left 4 bits, extending LSB
+:::
 
 
-## SCA — Scale
 
-Multiplies two 16-bit values and scales the result for use in the next instruction.
+## SAR {#sar}
 
-### Syntax
-```pasm
-        SCA     D, {#}S {WZ}
+Shift arithmetic right
+[Shift/Rotate Instruction](#shift-rotate-instructions) - Shift bits right, extending sign bit into new leftmost positions.
+
+**SAR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The bits of Dest are shifted right by Src bits, extending Dest[31] (the sign bit) into new leftmost bits.
+
+- Dest is a register containing the value to arithmetically right shift.
+- Src is a register or 5-bit literal (0-31) specifying the number of bit positions to shift.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0000110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
+
+\textsuperscript{1} C = last bit shifted out if S[4:0] > 0, else D[0]
 ```
 
-### Result
-The upper 16 bits of the unsigned product from the 16-bit D and S multiplication is substituted as the next instruction's S value.
+**Related:** [SAL](#sal), [SHL](#shl), [SHR](#shr)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the 16-bit value to multiply with S |
-| S | Register, 9-bit literal, or 16-bit augmented literal to multiply with D |
-| WZ | Optional flag effect |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1010001 0ZI DDDDDDDDD SSSSSSSSS | — | — | Product = 0 | 2}
+SAR shifts the destination's binary value right by the source number of places (0-31 bits) and sets the new MSBs to that of the original Dest[31], preserving the sign of a signed integer. This is useful for bit stream manipulation and for swift division. It is similar to SHR for swift division by a power-of-two, but is safe for both signed and unsigned integers.
 
-### Flags
-- **C**: No effect
-- **Z**: Set if product equals zero (before scaling)
-
-### Related Instructions
-- [SCAS](#scas--scale-signed) — Scale signed (similar operation for signed values)
-
-### Explanation
-SCA multiplies the lower 16 bits of each of D and S together, right shifts the 32-bit product by 16 (to scale down the result), and substitutes this value as the next instruction's S value. This is useful for creating scaled unsigned 16-bit values for subsequent operations.
+::: pasm2
+        SAR     value, #3      ' Divide signed value by 8
+:::
 
 
-## SCAS — Scale, Signed
 
-Multiplies two signed 16-bit values and scales the result for use in the next instruction.
+## SCA {#sca}
 
-### Syntax
-```pasm
-        SCAS    D, {#}S {WZ}
+Scale
+[Multiply/Divide Instruction](#multiply-divide-instructions) - Multiply 16-bit values and scale result for next instruction.
+
+**SCA**  *Dest, {#}Src*  **{WZ}**
+
+---
+
+**Result:** The upper 16 bits of the unsigned product from the 16-bit Dest and Src multiplication is substituted as the next instruction's S value.
+
+- Dest is a register containing the 16-bit value to multiply with Src.
+- Src is a register, 9-bit literal, or 16-bit augmented literal to multiply with Dest.
+- WZ is an optional effect to update the Z flag.
+
+```{=latex}
+\simpleencoding{EEEE}{1010001}{0ZI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{Product = 0}{2}
 ```
 
-### Result
-The upper 18 bits of the signed product from the 16-bit D and S multiplication is substituted as the next instruction's S value.
+**Related:** [SCAS](#scas)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the signed 16-bit value to multiply with S |
-| S | Register, 9-bit literal, or signed 16-bit augmented literal to multiply with D |
-| WZ | Optional flag effect |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1010001 1ZI DDDDDDDDD SSSSSSSSS | — | — | Result = 0 | 2}
+SCA multiplies the lower 16 bits of each of Dest and Src together, right shifts the 32-bit product by 16 (to scale down the result), and substitutes this value as the next instruction's S value. This is useful for creating scaled unsigned 16-bit values for subsequent operations.
 
-### Flags
-- **C**: No effect
-- **Z**: Set if result equals zero (before scaling)
-
-### Related Instructions
-- [SCA](#sca--scale) — Scale (unsigned version)
-
-### Explanation
-SCAS multiplies the lower signed 16 bits of each of D and S together, right shifts the 32-bit product by 14 (to scale down the result), and substitutes this value as the next instruction's S value. This is useful for creating scaled signed values for subsequent operations.
+::: pasm2
+        SCA     factor, #$8000  ' Scale by 0.5 (32768/65536)
+        ADD     result, #0      ' Add scaled value
+:::
 
 
-## SETBYTE — Set Byte
 
-Stores an 8-bit value into a specified byte position within a register.
+## SCAS {#scas}
 
-### Syntax
-```pasm
-        SETBYTE D, {#}S, #N
-        SETBYTE {#}S
+Scale signed
+[Multiply/Divide Instruction](#multiply-divide-instructions) - Multiply signed 16-bit values and scale result for next instruction.
+
+**SCAS**  *Dest, {#}Src*  **{WZ}**
+
+---
+
+**Result:** The upper 18 bits of the signed product from the 16-bit Dest and Src multiplication is substituted as the next instruction's S value.
+
+- Dest is a register containing the signed 16-bit value to multiply with Src.
+- Src is a register, 9-bit literal, or signed 16-bit augmented literal to multiply with Dest.
+- WZ is an optional effect to update the Z flag.
+
+```{=latex}
+\simpleencoding{EEEE}{1010001}{1ZI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{Result = 0}{2}
 ```
 
-### Result
-S[7:0] is written to byte N (0-3) of D, or to another register byte described by prior ALTSB instruction.
+**Related:** [SCA](#sca)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register in which to modify a byte |
-| S | Register or 8-bit literal whose bits [7:0] will be stored in the designated location |
-| N | 2-bit literal identifying the byte ID (0-3) of D to modify |
+**Explanation:**
 
-### Encoding
+SCAS multiplies the lower signed 16 bits of each of Dest and Src together, right shifts the 32-bit product by 14 (to scale down the result), and substitutes this value as the next instruction's S value. This is useful for creating scaled signed values for subsequent operations.
+
+
+
+## SETBYTE {#setbyte}
+
+Set byte
+[Bit/Nibble/Byte/Word Instruction](#bit-nibble-byte-word-instructions) - Store an 8-bit value into a specified byte position within a register.
+
+**SETBYTE**  *Dest, {#}Src, #N*
+**SETBYTE**  *{#}Src*
+
+---
+
+**Result:** Src[7:0] is written to byte N (0-3) of Dest, or to another register byte described by prior ALTSB instruction.
+
+- Dest is a register in which to modify a byte.
+- Src is a register or 8-bit literal whose bits [7:0] will be stored in the designated location.
+- N is a 2-bit literal (0-3) identifying the byte of Dest to modify.
+
+```{=latex}
 \begin{encodingtable}
-EEEE 1000110 NNI DDDDDDDDD SSSSSSSSS & D & — & — & 2 \\
-EEEE 1000110 00I 000000000 SSSSSSSSS & D† & — & — & 2 \\
+\encodingrowcont{EEEE}{1000110}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1000110}{00I}{000000000}{SSSSSSSSS}{D*}{---}{---}{2}
 \end{encodingtable}
-
-†Dest and target byte ID specified by prior ALTSB instruction.
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [ALTSB](#altsb) — Modify next SETBYTE destination
-- [SETNIB](#setnib--set-nibble) — Set nibble value
-- [SETWORD](#setword--set-word) — Set word value
-- [GETBYTE](#getbyte) — Get byte value
-
-### Explanation
-SETBYTE stores S[7:0] into the byte identified by N within D, or the byte and register described by a prior ALTSB instruction. No other bits are modified. N (0-3) identifies a value's individual bytes by position in least-significant byte order. The second syntax is intended for use after an ALTSB instruction in a loop to iteratively affect a series of byte values within contiguous long registers.
-
-
-## SETCFRQ — Set Colorspace Converter Frequency
-
-Configures the colorspace converter CFRQ parameter.
-
-### Syntax
-```pasm
-        SETCFRQ {#}D
 ```
 
-### Result
-The colorspace converter CFRQ parameter is set to D[31:0].
+*Dest and byte ID specified by prior ALTSB instruction.
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) to set as CFRQ parameter |
+**Related:** [ALTSB](#altsb), [SETNIB](#setnib), [SETWORD](#setword), [GETBYTE](#getbyte)
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000111011 | — | — | — | 2}
+**Explanation:**
 
-### Flags
-- **C**: No effect
-- **Z**: No effect
+SETBYTE stores Src[7:0] into the byte identified by N within Dest, or the byte and register described by a prior ALTSB instruction. No other bits are modified. N (0-3) identifies a value's individual bytes by position in least-significant byte order. The second syntax is intended for use after an ALTSB instruction in a loop to iteratively affect a series of byte values within contiguous long registers.
 
-### Explanation
-Sets the colorspace converter CFRQ parameter to the value in D. This instruction configures the frequency parameter for the colorspace conversion hardware.
+::: pasm2
+        SETBYTE data, #$FF, #2  ' Set byte 2 of data to $FF
+:::
 
 
-## SETCI — Set Colorspace Converter CI
 
-Configures the colorspace converter CI parameter.
+## SETCFRQ {#setcfrq}
 
-### Syntax
-```pasm
-        SETCI   {#}D
+Set colorspace converter frequency
+[Colorspace Instruction](#colorspace-instructions) - Configure the colorspace converter CFRQ parameter.
+
+**SETCFRQ**  *{#}Dest*
+
+---
+
+**Result:** The colorspace converter CFRQ parameter is set to Dest[31:0].
+
+- Dest is a register or literal value (0-511) to set as CFRQ parameter.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000111011}{---}{---}{---}{2}
 ```
 
-### Result
-The colorspace converter CI parameter is set to D[31:0].
+**Related:** [SETCI](#setci), [SETCMOD](#setcmod), [SETCQ](#setcq), [SETCY](#setcy)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) to set as CI parameter |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000111001 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Explanation
-Sets the colorspace converter CI parameter to the value in D. This instruction configures the CI parameter for the colorspace conversion hardware.
+Sets the colorspace converter CFRQ parameter to the value in Dest. This instruction configures the frequency parameter for the colorspace conversion hardware.
 
 
-## SETCMOD — Set Colorspace Converter Mode
 
-Configures the colorspace converter mode parameter.
+## SETCI {#setci}
 
-### Syntax
-```pasm
-        SETCMOD {#}D
+Set colorspace converter CI
+[Colorspace Instruction](#colorspace-instructions) - Configure the colorspace converter CI parameter.
+
+**SETCI**  *{#}Dest*
+
+---
+
+**Result:** The colorspace converter CI parameter is set to Dest[31:0].
+
+- Dest is a register or literal value (0-511) to set as CI parameter.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000111001}{---}{---}{---}{2}
 ```
 
-### Result
-The colorspace converter CMOD parameter is set to D[8:0].
+**Related:** [SETCFRQ](#setcfrq), [SETCMOD](#setcmod), [SETCQ](#setcq), [SETCY](#setcy)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) to set as CMOD parameter |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000111100 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Explanation
-Sets the colorspace converter CMOD parameter to D[8:0]. This instruction configures the mode parameter for the colorspace conversion hardware.
+Sets the colorspace converter CI parameter to the value in Dest. This instruction configures the CI parameter for the colorspace conversion hardware.
 
 
-## SETCQ — Set Colorspace Converter CQ
 
-Configures the colorspace converter CQ parameter.
+## SETCMOD {#setcmod}
 
-### Syntax
-```pasm
-        SETCQ   {#}D
+Set colorspace converter mode
+[Colorspace Instruction](#colorspace-instructions) - Configure the colorspace converter mode parameter.
+
+**SETCMOD**  *{#}Dest*
+
+---
+
+**Result:** The colorspace converter CMOD parameter is set to Dest[8:0].
+
+- Dest is a register or literal value (0-511) to set as CMOD parameter.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000111100}{---}{---}{---}{2}
 ```
 
-### Result
-The colorspace converter CQ parameter is set to D[31:0].
+**Related:** [SETCFRQ](#setcfrq), [SETCI](#setci), [SETCQ](#setcq), [SETCY](#setcy)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) to set as CQ parameter |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000111010 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Explanation
-Sets the colorspace converter CQ parameter to the value in D. This instruction configures the CQ parameter for the colorspace conversion hardware.
+Sets the colorspace converter CMOD parameter to Dest[8:0]. This instruction configures the mode parameter for the colorspace conversion hardware.
 
 
-## SETCY — Set Colorspace Converter CY
 
-Configures the colorspace converter CY parameter.
+## SETCQ {#setcq}
 
-### Syntax
-```pasm
-        SETCY   {#}D
+Set colorspace converter CQ
+[Colorspace Instruction](#colorspace-instructions) - Configure the colorspace converter CQ parameter.
+
+**SETCQ**  *{#}Dest*
+
+---
+
+**Result:** The colorspace converter CQ parameter is set to Dest[31:0].
+
+- Dest is a register or literal value (0-511) to set as CQ parameter.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000111010}{---}{---}{---}{2}
 ```
 
-### Result
-The colorspace converter CY parameter is set to D[31:0].
+**Related:** [SETCFRQ](#setcfrq), [SETCI](#setci), [SETCMOD](#setcmod), [SETCY](#setcy)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) to set as CY parameter |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000111000 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Explanation
-Sets the colorspace converter CY parameter to the value in D. This instruction configures the CY parameter for the colorspace conversion hardware.
+Sets the colorspace converter CQ parameter to the value in Dest. This instruction configures the CQ parameter for the colorspace conversion hardware.
 
 
-## SETD — Set Destination Field
 
-Modifies the D field of an instruction template for use with ALTI.
+## SETCY {#setcy}
 
-### Syntax
-```pasm
-        SETD    D, {#}S
+Set colorspace converter CY
+[Colorspace Instruction](#colorspace-instructions) - Configure the colorspace converter CY parameter.
+
+**SETCY**  *{#}Dest*
+
+---
+
+**Result:** The colorspace converter CY parameter is set to Dest[31:0].
+
+- Dest is a register or literal value (0-511) to set as CY parameter.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000111000}{---}{---}{---}{2}
 ```
 
-### Result
-The D field [17:9] of template D is set to S[8:0].
+**Related:** [SETCFRQ](#setcfrq), [SETCI](#setci), [SETCMOD](#setcmod), [SETCQ](#setcq)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register whose 32-bit value is a template for use with an ALTI instruction |
-| S | Register or 9-bit literal whose value (S[8:0]) is copied to the D field of D |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1001101 10I DDDDDDDDD SSSSSSSSS | D | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETS](#sets--set-source-field) — Set source field
-- [SETR](#setr--set-result-field) — Set result field
-- [ALTI](#alti) — Execute instruction from template
-
-### Explanation
-SETD copies S[8:0] to the D field of the template D to be used with an ALTI instruction. Bits outside the D field remain unaffected. The D field holds the address of a register (or sometimes a literal value) for the instruction to use as its destination value, and usually as its result destination, during its execution. SETD can also be used in self-modifying register RAM code. Unlike with ALTx instructions, when used this way, field value modification occurs in the program code itself (not the instruction pipeline); code is altered, values persist. Due to the instruction pipeline nature, after modifying a code register, it is necessary to elapse at least two instructions before executing the modified register.
+Sets the colorspace converter CY parameter to the value in Dest. This instruction configures the CY parameter for the colorspace conversion hardware.
 
 
-## SETDACS — Set DACs
 
-Simultaneously sets all four DAC channels.
+## SETD {#setd}
 
-### Syntax
-```pasm
-        SETDACS {#}D
+Set destination field
+[Register Indirection Instruction](#register-indirection-instructions) - Modify the D field of an instruction template for use with ALTI.
+
+**SETD**  *Dest, {#}Src*
+
+---
+
+**Result:** The D field [17:9] of template Dest is set to Src[8:0].
+
+- Dest is a register whose 32-bit value is a template for use with an ALTI instruction.
+- Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the D field of Dest.
+
+```{=latex}
+\simpleencoding{EEEE}{1001101}{10I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
 ```
 
-### Result
-DAC3 = D[31:24], DAC2 = D[23:16], DAC1 = D[15:8], DAC0 = D[7:0].
+**Related:** [SETS](#sets), [SETR](#setr), [ALTI](#alti)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing four 8-bit DAC values |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000011100 | — | — | — | 2}
+SETD copies Src[8:0] to the D field of the template Dest to be used with an ALTI instruction. Bits outside the D field remain unaffected. The D field holds the address of a register (or sometimes a literal value) for the instruction to use as its destination value, and usually as its result destination, during its execution.
 
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Explanation
-Sets all four DAC channels simultaneously from the four bytes in D. DAC3 receives bits [31:24], DAC2 receives bits [23:16], DAC1 receives bits [15:8], and DAC0 receives bits [7:0].
+SETD can also be used in self-modifying register RAM code. Unlike with ALTx instructions, when used this way, field value modification occurs in the program code itself (not the instruction pipeline); code is altered, values persist. Due to the instruction pipeline nature, after modifying a code register, it is necessary to elapse at least two instructions before executing the modified register.
 
 
-## SETINT1 — Set Interrupt 1 Source
 
-Configures the INT1 interrupt source.
+## SETDACS {#setdacs}
 
-### Syntax
-```pasm
-        SETINT1 {#}D
+Set DACs
+[DAC Instruction](#dac-instructions) - Simultaneously set all four DAC channels.
+
+**SETDACS**  *{#}Dest*
+
+---
+
+**Result:** DAC3 = Dest[31:24], DAC2 = Dest[23:16], DAC1 = Dest[15:8], DAC0 = Dest[7:0].
+
+- Dest is a register or literal value (0-511) containing four 8-bit DAC values.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000011100}{---}{---}{---}{2}
 ```
 
-### Result
-INT1 source is set to D[3:0].
+**Explanation:**
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing interrupt source in bits [3:0] |
-
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000100101 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETINT2](#setint2--set-interrupt-2-source) — Set INT2 source
-- [SETINT3](#setint3--set-interrupt-3-source) — Set INT3 source
-
-### Explanation
-Sets the INT1 interrupt source to the value in D[3:0]. This configures which event will trigger the INT1 interrupt.
+Sets all four DAC channels simultaneously from the four bytes in Dest. DAC3 receives bits [31:24], DAC2 receives bits [23:16], DAC1 receives bits [15:8], and DAC0 receives bits [7:0].
 
 
-## SETINT2 — Set Interrupt 2 Source
 
-Configures the INT2 interrupt source.
+## SETINT1 {#setint1}
 
-### Syntax
-```pasm
-        SETINT2 {#}D
+Set interrupt 1 source
+[Interrupt Instruction](#interrupt-instructions) - Configure the interrupt 1 source.
+
+**SETINT1**  *{#}Dest*
+
+---
+
+**Result:** The INT1 interrupt source is set to Dest[3:0].
+
+- Dest is a register or literal value (0-511) containing interrupt source in bits [3:0].
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000100101}{---}{---}{---}{2}
 ```
 
-### Result
-INT2 source is set to D[3:0].
+**Related:** [SETINT2](#setint2), [SETINT3](#setint3), [NIXINT1](#nixint1), [TRGINT1](#trgint1), [RETI0](#reti0)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing interrupt source in bits [3:0] |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000100110 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETINT1](#setint1--set-interrupt-1-source) — Set INT1 source
-- [SETINT3](#setint3--set-interrupt-3-source) — Set INT3 source
-
-### Explanation
-Sets the INT2 interrupt source to the value in D[3:0]. This configures which event will trigger the INT2 interrupt.
+SETINT1 configures which event will trigger interrupt 1. The interrupt source is specified in Dest[3:0]. The P2 provides three configurable interrupt levels (INT1-INT3), each of which can be independently configured to respond to different event sources.
 
 
-## SETINT3 — Set Interrupt 3 Source
 
-Configures the INT3 interrupt source.
+## SETINT2 {#setint2}
 
-### Syntax
-```pasm
-        SETINT3 {#}D
+Set interrupt 2 source
+[Interrupt Instruction](#interrupt-instructions) - Configure the interrupt 2 source.
+
+**SETINT2**  *{#}Dest*
+
+---
+
+**Result:** The INT2 interrupt source is set to Dest[3:0].
+
+- Dest is a register or literal value (0-511) containing interrupt source in bits [3:0].
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000100110}{---}{---}{---}{2}
 ```
 
-### Result
-INT3 source is set to D[3:0].
+**Related:** [SETINT1](#setint1), [SETINT3](#setint3), [NIXINT2](#nixint2), [TRGINT2](#trgint2), [RETI0](#reti0)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing interrupt source in bits [3:0] |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000100111 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETINT1](#setint1--set-interrupt-1-source) — Set INT1 source
-- [SETINT2](#setint2--set-interrupt-2-source) — Set INT2 source
-
-### Explanation
-Sets the INT3 interrupt source to the value in D[3:0]. This configures which event will trigger the INT3 interrupt.
+SETINT2 configures which event will trigger interrupt 2. The interrupt source is specified in Dest[3:0].
 
 
-## SETLUTS — Set LUT Sharing
 
-Enables or disables LUT sharing between adjacent cogs.
+## SETINT3 {#setint3}
 
-### Syntax
-```pasm
-        SETLUTS {#}D
+Set interrupt 3 source
+[Interrupt Instruction](#interrupt-instructions) - Configure the interrupt 3 source.
+
+**SETINT3**  *{#}Dest*
+
+---
+
+**Result:** The INT3 interrupt source is set to Dest[3:0].
+
+- Dest is a register or literal value (0-511) containing interrupt source in bits [3:0].
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000100111}{---}{---}{---}{2}
 ```
 
-### Result
-If D[0] = 1, LUT sharing is enabled where LUT writes within the adjacent odd/even companion cog are copied to this cog's LUT.
+**Related:** [SETINT1](#setint1), [SETINT2](#setint2), [NIXINT3](#nixint3), [TRGINT3](#trgint3), [RETI0](#reti0)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) with enable bit in D[0] |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000110111 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Explanation
-Enables or disables LUT sharing based on D[0]. When enabled (D[0] = 1), LUT writes within the adjacent odd/even companion cog are automatically copied to this cog's LUT, allowing cogs to share lookup table data.
+SETINT3 configures which event will trigger interrupt 3. The interrupt source is specified in Dest[3:0].
 
 
-## SETNIB — Set Nibble
 
-Stores a 4-bit value into a specified nibble position within a register.
+## SETLUTS {#setluts}
 
-### Syntax
-```pasm
-        SETNIB  D, {#}S, #N
-        SETNIB  {#}S
+Set LUT sharing
+[LUT Instruction](#lut-instructions) - Enable or disable LUT sharing between adjacent cogs.
+
+**SETLUTS**  *{#}Dest*
+
+---
+
+**Result:** If Dest[0] = 1, LUT sharing is enabled where LUT writes within the adjacent odd/even companion cog are copied to this cog's LUT.
+
+- Dest is a register or literal value (0-511) with enable bit in Dest[0].
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000110111}{---}{---}{---}{2}
 ```
 
-### Result
-S[3:0] is written to nibble N (0-7) of D, or to another register nibble described by prior ALTSN instruction.
+**Related:** [RDLUT](#rdlut), [WRLUT](#wrlut)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register in which to modify a nibble |
-| S | Register or 4-bit literal whose bits [3:0] will be stored in the designated location |
-| N | 3-bit literal identifying the nibble ID (0-7) of D to modify |
+**Explanation:**
 
-### Encoding
+Enables or disables LUT sharing based on Dest[0]. When enabled (Dest[0] = 1), LUT writes within the adjacent odd/even companion cog are automatically copied to this cog's LUT, allowing cogs to share lookup table data.
+
+
+
+## SETNIB {#setnib}
+
+Set nibble
+[Bit/Nibble/Byte/Word Instruction](#bit-nibble-byte-word-instructions) - Store a 4-bit value into a specified nibble position within a register.
+
+**SETNIB**  *Dest, {#}Src, #N*
+**SETNIB**  *{#}Src*
+
+---
+
+**Result:** Src[3:0] is written to nibble N (0-7) of Dest, or to another register nibble described by prior ALTSN instruction.
+
+- Dest is a register in which to modify a nibble.
+- Src is a register or 4-bit literal whose bits [3:0] will be stored in the designated location.
+- N is a 3-bit literal (0-7) identifying the nibble of Dest to modify.
+
+```{=latex}
 \begin{encodingtable}
-EEEE 100000N NNI DDDDDDDDD SSSSSSSSS & D & — & — & 2 \\
-EEEE 1000000 00I 000000000 SSSSSSSSS & D† & — & — & 2 \\
+\encodingrowcont{EEEE}{100000N}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1000000}{00I}{000000000}{SSSSSSSSS}{D*}{---}{---}{2}
 \end{encodingtable}
-
-†Dest and target nibble ID specified by prior ALTSN instruction.
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [ALTSN](#altsn) — Modify next SETNIB destination
-- [SETBYTE](#setbyte--set-byte) — Set byte value
-- [SETWORD](#setword--set-word) — Set word value
-- [GETNIB](#getnib) — Get nibble value
-
-### Explanation
-SETNIB stores S[3:0] into the nibble identified by N within D, or the nibble and register described by a prior ALTSN instruction. No other bits are modified. N (0-7) identifies a value's individual nibbles by position in least-significant nibble order. The second syntax is intended for use after an ALTSN instruction in a loop to iteratively affect a series of nibble values within contiguous long registers.
-
-
-## SETPAT — Set Pin Pattern
-
-Configures pin pattern matching for PAT event detection.
-
-### Syntax
-```pasm
-        SETPAT  {#}D, {#}S
 ```
 
-### Result
-Pin pattern for PAT event is configured. C selects INA/INB, Z selects =/!=, D provides mask value, S provides match value.
+*Dest and nibble ID specified by prior ALTSN instruction.
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or immediate containing mask value |
-| S | Register or immediate containing match value |
+**Related:** [ALTSN](#altsn), [SETBYTE](#setbyte), [SETWORD](#setword), [GETNIB](#getnib)
 
-### Encoding
-\simpleencoding{EEEE 1011111 1LI DDDDDDDDD SSSSSSSSS | — | — | — | 2}
+**Explanation:**
 
-### Flags
-- **C**: No effect
-- **Z**: No effect
+SETNIB stores Src[3:0] into the nibble identified by N within Dest, or the nibble and register described by a prior ALTSN instruction. No other bits are modified. N (0-7) identifies a value's individual nibbles by position in least-significant nibble order. The second syntax is intended for use after an ALTSN instruction in a loop to iteratively affect a series of nibble values within contiguous long registers.
 
-### Explanation
-Sets pin pattern for PAT event detection. The C flag selects INA or INB for monitoring, the Z flag selects equality (=) or inequality (!=) matching, D provides the mask value to select which pins to monitor, and S provides the match value to compare against.
+::: pasm2
+        SETNIB  data, #$A, #5   ' Set nibble 5 of data to $A
+:::
 
 
-## SETPIV — Set Pixel Blend Factor
 
-Sets the blend factor for pixel mixing operations.
+## SETPAT {#setpat}
 
-### Syntax
-```pasm
-        SETPIV  {#}D
+Set pin pattern
+[Pin Instruction](#pin-instructions) - Configure pin pattern matching for PAT event detection.
+
+**SETPAT**  *{#}Dest, {#}Src*
+
+---
+
+**Result:** Pin pattern for PAT event is configured. C selects INA/INB, Z selects =/!=, Dest provides mask value, Src provides match value.
+
+- Dest is a register or immediate containing mask value.
+- Src is a register or immediate containing match value.
+
+```{=latex}
+\simpleencoding{EEEE}{1011111}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
 ```
 
-### Result
-BLNPIX/MIXPIX blend factor is set to D[7:0].
+**Related:** [POLLPAT](#pollpat), [WAITPAT](#waitpat)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing 8-bit blend factor in bits [7:0] |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000111101 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETPIX](#setpix--set-pixel-mixer-mode) — Set pixel mixer mode
-
-### Explanation
-Sets the blend factor for BLNPIX and MIXPIX operations to D[7:0]. This controls the blending ratio for pixel mixing operations.
+Sets pin pattern for PAT event detection. The C flag selects INA or INB for monitoring, the Z flag selects equality (=) or inequality (!=) matching, Dest provides the mask value to select which pins to monitor, and Src provides the match value to compare against.
 
 
-## SETPIX — Set Pixel Mixer Mode
 
-Configures the pixel mixer operating mode.
+## SETPIV {#setpiv}
 
-### Syntax
-```pasm
-        SETPIX  {#}D
+Set pixel blend factor
+[Pixel Instruction](#pixel-instructions) - Set the blend factor for pixel mixing operations.
+
+**SETPIV**  *{#}Dest*
+
+---
+
+**Result:** BLNPIX/MIXPIX blend factor is set to Dest[7:0].
+
+- Dest is a register or literal value (0-511) containing 8-bit blend factor in bits [7:0].
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000111101}{---}{---}{---}{2}
 ```
 
-### Result
-MIXPIX mode is set to D[5:0].
+**Related:** [SETPIX](#setpix), [BLNPIX](#blnpix), [MIXPIX](#mixpix)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing 6-bit mode in bits [5:0] |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000111110 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETPIV](#setpiv--set-pixel-blend-factor) — Set pixel blend factor
-
-### Explanation
-Sets the MIXPIX operating mode to D[5:0]. This configures how the pixel mixer combines pixel values.
+Sets the blend factor for BLNPIX and MIXPIX operations to Dest[7:0]. This controls the blending ratio for pixel mixing operations.
 
 
-## SETQ — Set Q Register
 
-Sets the Q register for use by subsequent instructions.
+## SETPIX {#setpix}
 
-### Syntax
-```pasm
-        SETQ    {#}D
+Set pixel mixer mode
+[Pixel Instruction](#pixel-instructions) - Configure the pixel mixer operating mode.
+
+**SETPIX**  *{#}Dest*
+
+---
+
+**Result:** MIXPIX mode is set to Dest[5:0].
+
+- Dest is a register or literal value (0-511) containing 6-bit mode in bits [5:0].
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000111110}{---}{---}{---}{2}
 ```
 
-### Result
-Q register is set to D.
+**Related:** [SETPIV](#setpiv), [MIXPIX](#mixpix)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) to load into Q |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000101000 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETQ2](#setq2--set-q-for-lut-transfers) — Set Q for LUT block transfers
-
-### Explanation
-Sets Q register to D. Use before RDLONG/WRLONG/WMLONG to set block transfer count. Also used before MUXQ/COGINIT/QDIV/QFRAC/QROTATE/WAITxxx instructions to provide additional parameters.
+Sets the MIXPIX operating mode to Dest[5:0]. This configures how the pixel mixer combines pixel values.
 
 
-## SETQ2 — Set Q for LUT Transfers
 
-Sets the Q register for LUT block transfers.
+## SETQ {#setq}
 
-### Syntax
-```pasm
-        SETQ2   {#}D
+Set Q register
+[Hub Instruction](#hub-instructions) - Set the Q register for use by subsequent instructions.
+
+**SETQ**  *{#}Dest*
+
+---
+
+**Result:** Q register is set to Dest.
+
+- Dest is a register or literal value (0-511) to load into Q.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000101000}{---}{---}{---}{2}
 ```
 
-### Result
-Q register is set to D for LUT block transfers.
+**Related:** [SETQ2](#setq2), [RDLONG](#rdlong), [WRLONG](#wrlong)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) to load into Q |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000101001 | — | — | — | 2}
+Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set block transfer count. Also used before MUXQ/COGINIT/QDIV/QFRAC/QROTATE/WAITxxx instructions to provide additional parameters.
 
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETQ](#setq--set-q-register) — Set Q for COG RAM block transfers
-- [RDLONG](#rdlong) — Read long(s) from HUB
-- [WRLONG](#wrlong) — Write long(s) to HUB
-- [RDLUT](#rdlut) — Read from LUT
-- [WRLUT](#wrlut) — Write to LUT
-
-### Explanation
-Sets Q register to D. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer. SETQ2 enables block transfers to/from LUT RAM instead of COG RAM: SETQ2 + RDLONG performs block read from HUB to LUT, while SETQ2 + WRLONG performs block write from LUT to HUB. This is essential for fast bulk data movement for lookup tables, waveform tables, and large datasets.
+::: pasm2
+        SETQ    #16-1          ' Set up for 16-long block transfer
+        RDLONG  buffer, ptra   ' Read 16 longs from hub
+:::
 
 
-## SETR — Set Result Field
 
-Modifies the Result field of an instruction template for use with ALTI.
+## SETQ2 {#setq2}
 
-### Syntax
-```pasm
-        SETR    D, {#}S
+Set Q for LUT transfers
+[Hub Instruction](#hub-instructions) - Set the Q register for LUT block transfers.
+
+**SETQ2**  *{#}Dest*
+
+---
+
+**Result:** Q register is set to Dest for LUT block transfers.
+
+- Dest is a register or literal value (0-511) to load into Q.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000101001}{---}{---}{---}{2}
 ```
 
-### Result
-The Result field [27:19] of template D is set to S[8:0].
+**Related:** [SETQ](#setq), [RDLONG](#rdlong), [WRLONG](#wrlong), [RDLUT](#rdlut), [WRLUT](#wrlut)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register whose 32-bit value is a template for use with an ALTI instruction |
-| S | Register or 9-bit literal whose value (S[8:0]) is copied to the Result field of D |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1001101 01I DDDDDDDDD SSSSSSSSS | D | — | — | 2}
+Sets Q register to Dest. Use before RDLONG/WRLONG/WMLONG to set LUT block transfer. SETQ2 enables block transfers to/from LUT RAM instead of COG RAM: SETQ2 + RDLONG performs block read from HUB to LUT, while SETQ2 + WRLONG performs block write from LUT to HUB. This is essential for fast bulk data movement for lookup tables, waveform tables, and large datasets.
 
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETD](#setd--set-destination-field) — Set destination field
-- [SETS](#sets--set-source-field) — Set source field
-- [ALTI](#alti) — Execute instruction from template
-
-### Explanation
-SETR copies S[8:0] to the Result field of the template D to be used with an ALTI instruction. Bits outside the Result field remain unaffected. The Result field does not exist in instruction opcodes, but takes its value from the D field, holding the address of a register for the instruction to use as its result destination upon execution. SETR can also be used in self-modifying register RAM code, though it affects the Instr field and upper two bits of the FX field rather than a non-existent Register field. Unlike with ALTx instructions, when used this way, field value modification occurs in the program code itself (not the instruction pipeline); code is altered, values persist. Due to the instruction pipeline nature, after modifying a code register, it is necessary to elapse at least two instructions before executing the modified register.
+::: pasm2
+        SETQ2   #256-1         ' Set up for 256-long LUT transfer
+        RDLONG  0, ptra        ' Read 256 longs from hub into LUT
+:::
 
 
-## SETS — Set Source Field
 
-Modifies the S field of an instruction template for use with ALTI.
+## SETR {#setr}
 
-### Syntax
-```pasm
-        SETS    D, {#}S
+Set result field
+[Register Indirection Instruction](#register-indirection-instructions) - Modify the Result field of an instruction template for use with ALTI.
+
+**SETR**  *Dest, {#}Src*
+
+---
+
+**Result:** The Result field [27:19] of template Dest is set to Src[8:0].
+
+- Dest is a register whose 32-bit value is a template for use with an ALTI instruction.
+- Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the Result field of Dest.
+
+```{=latex}
+\simpleencoding{EEEE}{1001101}{01I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
 ```
 
-### Result
-The S field [8:0] of template D is set to S[8:0].
+**Related:** [SETD](#setd), [SETS](#sets), [ALTI](#alti)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register whose 32-bit value is a template for use with an ALTI instruction |
-| S | Register or 9-bit literal whose value (S[8:0]) is copied to the S field of D |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1001101 11I DDDDDDDDD SSSSSSSSS | D | — | — | 2}
+SETR copies Src[8:0] to the Result field of the template Dest to be used with an ALTI instruction. Bits outside the Result field remain unaffected. The Result field does not exist in instruction opcodes, but takes its value from the D field, holding the address of a register for the instruction to use as its result destination upon execution.
 
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETD](#setd--set-destination-field) — Set destination field
-- [SETR](#setr--set-result-field) — Set result field
-- [ALTI](#alti) — Execute instruction from template
-
-### Explanation
-SETS copies S[8:0] to the S field of the template D to be used with an ALTI instruction. Bits outside the S field remain unaffected. The S field holds the address of a register or literal value for an instruction to use as its source value during its execution. SETS can also be used in self-modifying register RAM code. Unlike with ALTx instructions, when used this way, field value modification occurs in the program code itself (not the instruction pipeline); code is altered, values persist. Due to the instruction pipeline nature, after modifying a code register, it is necessary to elapse at least two instructions before executing the modified register.
+SETR can also be used in self-modifying register RAM code, though it affects the Instr field and upper two bits of the FX field rather than a non-existent Register field. Unlike with ALTx instructions, when used this way, field value modification occurs in the program code itself (not the instruction pipeline); code is altered, values persist. Due to the instruction pipeline nature, after modifying a code register, it is necessary to elapse at least two instructions before executing the modified register.
 
 
-## SETSCP — Set Oscilloscope
 
-Configures the four-channel oscilloscope.
+## SETS {#sets}
 
-### Syntax
-```pasm
-        SETSCP  {#}D
+Set source field
+[Register Indirection Instruction](#register-indirection-instructions) - Modify the S field of an instruction template for use with ALTI.
+
+**SETS**  *Dest, {#}Src*
+
+---
+
+**Result:** The S field [8:0] of template Dest is set to Src[8:0].
+
+- Dest is a register whose 32-bit value is a template for use with an ALTI instruction.
+- Src is a register or 9-bit literal whose value (Src[8:0]) is copied to the S field of Dest.
+
+```{=latex}
+\simpleencoding{EEEE}{1001101}{11I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
 ```
 
-### Result
-Four-channel oscilloscope enable is set to D[6] and input pin base is set to D[5:2].
+**Related:** [SETD](#setd), [SETR](#setr), [ALTI](#alti)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing enable bit [6] and pin base [5:2] |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 001110000 | — | — | — | 2}
+SETS copies Src[8:0] to the S field of the template Dest to be used with an ALTI instruction. Bits outside the S field remain unaffected. The S field holds the address of a register or literal value for an instruction to use as its source value during its execution.
 
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Explanation
-Sets the four-channel oscilloscope enable to D[6] and sets the input pin base to D[5:2]. This configures the hardware oscilloscope feature for debugging and signal monitoring.
+SETS can also be used in self-modifying register RAM code. Unlike with ALTx instructions, when used this way, field value modification occurs in the program code itself (not the instruction pipeline); code is altered, values persist. Due to the instruction pipeline nature, after modifying a code register, it is necessary to elapse at least two instructions before executing the modified register.
 
 
-## SETSE1 — Set Selectable Event 1
 
-Configures selectable event 1 detection.
+## SETSCP {#setscp}
 
-### Syntax
-```pasm
-        SETSE1  {#}D
+Set oscilloscope
+[Debug Instruction](#debug-instructions) - Configure the four-channel oscilloscope.
+
+**SETSCP**  *{#}Dest*
+
+---
+
+**Result:** Four-channel oscilloscope enable is set to Dest[6] and input pin base is set to Dest[5:2].
+
+- Dest is a register or literal value (0-511) containing enable bit [6] and pin base [5:2].
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{001110000}{---}{---}{---}{2}
 ```
 
-### Result
-SE1 event configuration is set to D[8:0].
+**Explanation:**
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing event configuration in bits [8:0] |
-
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000100000 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETSE2](#setse2--set-selectable-event-2) — Set SE2 event
-- [SETSE3](#setse3--set-selectable-event-3) — Set SE3 event
-- [SETSE4](#setse4--set-selectable-event-4) — Set SE4 event
-
-### Explanation
-Sets the SE1 event configuration to D[8:0]. This configures which condition will trigger selectable event 1.
+Sets the four-channel oscilloscope enable to Dest[6] and sets the input pin base to Dest[5:2]. This configures the hardware oscilloscope feature for debugging and signal monitoring.
 
 
-## SETSE2 — Set Selectable Event 2
 
-Configures selectable event 2 detection.
+## SETSE1 {#setse1}
 
-### Syntax
-```pasm
-        SETSE2  {#}D
+Set selectable event 1
+[Event Instruction](#event-instructions) - Configure selectable event 1 detection.
+
+**SETSE1**  *{#}Dest*
+
+---
+
+**Result:** The SE1 selectable event configuration is set to Dest[8:0].
+
+- Dest is a register or literal value (0-511) containing event configuration in bits [8:0].
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000100000}{---}{---}{---}{2}
 ```
 
-### Result
-SE2 event configuration is set to D[8:0].
+**Related:** [SETSE2](#setse2), [SETSE3](#setse3), [SETSE4](#setse4), [POLLSE1](#pollse1), [WAITSE1](#waitse1)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing event configuration in bits [8:0] |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000100001 | — | — | — | 2}
+SETSE1 configures selectable event 1's detection criteria. The Dest[8:0] operand specifies which condition will trigger the event.
 
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETSE1](#setse1--set-selectable-event-1) — Set SE1 event
-- [SETSE3](#setse3--set-selectable-event-3) — Set SE3 event
-- [SETSE4](#setse4--set-selectable-event-4) — Set SE4 event
-
-### Explanation
-Sets the SE2 event configuration to D[8:0]. This configures which condition will trigger selectable event 2.
+The P2 provides four independent selectable events, each of which can be configured to detect various conditions including pin states, hub operations, CORDIC completion, and other system events. Once configured, these events can be polled with POLLSE1, waited upon with WAITSE1, or used for conditional jumps with JSE1 and JNSE1.
 
 
-## SETSE3 — Set Selectable Event 3
 
-Configures selectable event 3 detection.
+## SETSE2 {#setse2}
 
-### Syntax
-```pasm
-        SETSE3  {#}D
+Set selectable event 2
+[Event Instruction](#event-instructions) - Configure selectable event 2 detection.
+
+**SETSE2**  *{#}Dest*
+
+---
+
+**Result:** The SE2 selectable event configuration is set to Dest[8:0].
+
+- Dest is a register or literal value (0-511) containing event configuration in bits [8:0].
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000100001}{---}{---}{---}{2}
 ```
 
-### Result
-SE3 event configuration is set to D[8:0].
+**Related:** [SETSE1](#setse1), [SETSE3](#setse3), [SETSE4](#setse4), [POLLSE2](#pollse2), [WAITSE2](#waitse2)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing event configuration in bits [8:0] |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000100010 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETSE1](#setse1--set-selectable-event-1) — Set SE1 event
-- [SETSE2](#setse2--set-selectable-event-2) — Set SE2 event
-- [SETSE4](#setse4--set-selectable-event-4) — Set SE4 event
-
-### Explanation
-Sets the SE3 event configuration to D[8:0]. This configures which condition will trigger selectable event 3.
+SETSE2 configures selectable event 2's detection criteria. The Dest[8:0] operand specifies which condition will trigger the event.
 
 
-## SETSE4 — Set Selectable Event 4
 
-Configures selectable event 4 detection.
+## SETSE3 {#setse3}
 
-### Syntax
-```pasm
-        SETSE4  {#}D
+Set selectable event 3
+[Event Instruction](#event-instructions) - Configure selectable event 3 detection.
+
+**SETSE3**  *{#}Dest*
+
+---
+
+**Result:** The SE3 selectable event configuration is set to Dest[8:0].
+
+- Dest is a register or literal value (0-511) containing event configuration in bits [8:0].
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000100010}{---}{---}{---}{2}
 ```
 
-### Result
-SE4 event configuration is set to D[8:0].
+**Related:** [SETSE1](#setse1), [SETSE2](#setse2), [SETSE4](#setse4), [POLLSE3](#pollse3), [WAITSE3](#waitse3)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing event configuration in bits [8:0] |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000100011 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SETSE1](#setse1--set-selectable-event-1) — Set SE1 event
-- [SETSE2](#setse2--set-selectable-event-2) — Set SE2 event
-- [SETSE3](#setse3--set-selectable-event-3) — Set SE3 event
-
-### Explanation
-Sets the SE4 event configuration to D[8:0]. This configures which condition will trigger selectable event 4.
+SETSE3 configures selectable event 3's detection criteria. The Dest[8:0] operand specifies which condition will trigger the event.
 
 
-## SETWORD — Set Word
 
-Stores a 16-bit value into a specified word position within a register.
+## SETSE4 {#setse4}
 
-### Syntax
-```pasm
-        SETWORD D, {#}S, #N
-        SETWORD {#}S
+Set selectable event 4
+[Event Instruction](#event-instructions) - Configure selectable event 4 detection.
+
+**SETSE4**  *{#}Dest*
+
+---
+
+**Result:** The SE4 selectable event configuration is set to Dest[8:0].
+
+- Dest is a register or literal value (0-511) containing event configuration in bits [8:0].
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000100011}{---}{---}{---}{2}
 ```
 
-### Result
-S[15:0] is written to word N (0-1) of D, or to another register word described by prior ALTSW instruction.
+**Related:** [SETSE1](#setse1), [SETSE2](#setse2), [SETSE3](#setse3), [POLLSE4](#pollse4), [WAITSE4](#waitse4)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register in which to modify a word |
-| S | Register, 9-bit literal, or 16-bit augmented literal whose bits [15:0] will be stored in the designated location |
-| N | 1-bit literal identifying the word ID (0-1) of D to modify |
+**Explanation:**
 
-### Encoding
+SETSE4 configures selectable event 4's detection criteria. The Dest[8:0] operand specifies which condition will trigger the event.
+
+
+
+## SETWORD {#setword}
+
+Set word
+[Bit/Nibble/Byte/Word Instruction](#bit-nibble-byte-word-instructions) - Store a 16-bit value into a specified word position within a register.
+
+**SETWORD**  *Dest, {#}Src, #N*
+**SETWORD**  *{#}Src*
+
+---
+
+**Result:** Src[15:0] is written to word N (0-1) of Dest, or to another register word described by prior ALTSW instruction.
+
+- Dest is a register in which to modify a word.
+- Src is a register, 9-bit literal, or 16-bit augmented literal whose bits [15:0] will be stored in the designated location.
+- N is a 1-bit literal (0-1) identifying the word of Dest to modify.
+
+```{=latex}
 \begin{encodingtable}
-EEEE 1001001 0NI DDDDDDDDD SSSSSSSSS & D & — & — & 2 \\
-EEEE 1001001 00I 000000000 SSSSSSSSS & D† & — & — & 2 \\
+\encodingrowcont{EEEE}{1001001}{0NI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2}
+\encodingrow{EEEE}{1001001}{00I}{000000000}{SSSSSSSSS}{D*}{---}{---}{2}
 \end{encodingtable}
-
-†Dest and target word ID specified by prior ALTSW instruction.
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [ALTSW](#altsw) — Modify next SETWORD destination
-- [SETNIB](#setnib--set-nibble) — Set nibble value
-- [SETBYTE](#setbyte--set-byte) — Set byte value
-- [GETWORD](#getword) — Get word value
-
-### Explanation
-SETWORD stores S[15:0] into the word identified by N within D, or the word and register described by a prior ALTSW instruction. No other bits are modified. N (0-1) identifies a value's individual words by position in least-significant word order. The second syntax is intended for use after an ALTSW instruction in a loop to iteratively affect a series of word values within contiguous long registers.
-
-
-## SETXFRQ — Set Streamer Frequency
-
-Sets the streamer NCO frequency.
-
-### Syntax
-```pasm
-        SETXFRQ {#}D
 ```
 
-### Result
-Streamer NCO frequency is set to D.
+*Dest and word ID specified by prior ALTSW instruction.
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing frequency value |
+**Related:** [ALTSW](#altsw), [SETNIB](#setnib), [SETBYTE](#setbyte), [GETWORD](#getword)
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000011101 | — | — | — | 2}
+**Explanation:**
 
-### Flags
-- **C**: No effect
-- **Z**: No effect
+SETWORD stores Src[15:0] into the word identified by N within Dest, or the word and register described by a prior ALTSW instruction. No other bits are modified. N (0-1) identifies a value's individual words by position in least-significant word order. The second syntax is intended for use after an ALTSW instruction in a loop to iteratively affect a series of word values within contiguous long registers.
 
-### Explanation
-Sets the streamer NCO (Numerically Controlled Oscillator) frequency to D. This controls the frequency at which the streamer outputs data.
+::: pasm2
+        SETWORD data, #$ABCD, #1  ' Set high word of data to $ABCD
+:::
 
 
-## SEUSSF — Seuss Forward
 
-Relocates and periodically inverts bits within a register using forward pattern.
+## SETXFRQ {#setxfrq}
 
-### Syntax
-```pasm
-        SEUSSF  D
+Set streamer frequency
+[Streamer Instruction](#streamer-instructions) - Set the streamer NCO frequency.
+
+**SETXFRQ**  *{#}Dest*
+
+---
+
+**Result:** Streamer NCO frequency is set to Dest.
+
+- Dest is a register or literal value (0-511) containing frequency value.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000011101}{---}{---}{---}{2}
 ```
 
-### Result
-D is transformed by relocating and periodically inverting bits. Returns to original value on 32nd iteration.
+**Related:** [XINIT](#xinit), [XCONT](#xcont)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register to transform |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 000 DDDDDDDDD 001100100 | D | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SEUSSR](#seussr--seuss-reverse) — Seuss reverse (reverse pattern)
-
-### Explanation
-Relocates and periodically inverts bits within D using a forward pattern. The transformation returns to the original value after 32 iterations. This is useful for pseudo-random bit scrambling and data obfuscation.
+Sets the streamer NCO (Numerically Controlled Oscillator) frequency to Dest. This controls the frequency at which the streamer outputs data.
 
 
-## SEUSSR — Seuss Reverse
 
-Relocates and periodically inverts bits within a register using reverse pattern.
+## SEUSSF {#seussf}
 
-### Syntax
-```pasm
-        SEUSSR  D
+Seuss forward
+[Bit Manipulation Instruction](#bit-manipulation-instructions) - Relocate and periodically invert bits using forward pattern.
+
+**SEUSSF**  *Dest*
+
+---
+
+**Result:** Dest is transformed by relocating and periodically inverting bits. Returns to original value on 32nd iteration.
+
+- Dest is a register to transform.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100100}{D}{---}{---}{2}
 ```
 
-### Result
-D is transformed by relocating and periodically inverting bits. Returns to original value on 32nd iteration.
+**Related:** [SEUSSR](#seussr)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register to transform |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 000 DDDDDDDDD 001100101 | D | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SEUSSF](#seussf--seuss-forward) — Seuss forward (forward pattern)
-
-### Explanation
-Relocates and periodically inverts bits within D using a reverse pattern. The transformation returns to the original value after 32 iterations. This is useful for pseudo-random bit scrambling and data obfuscation, providing the inverse operation of SEUSSF.
+Relocates and periodically inverts bits within Dest using a forward pattern. The transformation returns to the original value after 32 iterations. This is useful for pseudo-random bit scrambling and data obfuscation.
 
 
-## SHL — Shift Left
 
-Shifts the destination register left by the specified number of bits, inserting zeros as new rightmost bits.
+## SEUSSR {#seussr}
 
-### Syntax
-```pasm
-        SHL     D, {#}S {WC|WZ|WCZ}
+Seuss reverse
+[Bit Manipulation Instruction](#bit-manipulation-instructions) - Relocate and periodically invert bits using reverse pattern.
+
+**SEUSSR**  *Dest*
+
+---
+
+**Result:** Dest is transformed by relocating and periodically inverting bits. Returns to original value on 32nd iteration.
+
+- Dest is a register to transform.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100101}{D}{---}{---}{2}
 ```
 
-### Result
-The bits of D are shifted left by S bits, inserting zeros (0) as new rightmost bits.
+**Related:** [SEUSSF](#seussf)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to left shift by S bits |
-| S | Register or 5-bit literal (0-31) indicating the number of bits to shift left |
-| WC/WZ/WCZ | Optional flag effects |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 0000011 CZI DDDDDDDDD SSSSSSSSS | D | Last bit shifted out if S[4:0] > 0, else D[31] | Result = 0 | 2}
+Relocates and periodically inverts bits within Dest using a reverse pattern. The transformation returns to the original value after 32 iterations. This is useful for pseudo-random bit scrambling and data obfuscation, providing the inverse operation of SEUSSF.
 
-### Flags
-- **C**: Set to last bit shifted out if S[4:0] > 0, else D[31]
-- **Z**: Set if result equals zero
 
-### Related Instructions
-- [SAL](#sal--shift-arithmetic-left) — Shift arithmetic left
-- [SHR](#shr--shift-right) — Shift right
 
-### Explanation
+## SHL {#shl}
+
+Shift left
+[Shift/Rotate Instruction](#shift-rotate-instructions) - Shift bits left, inserting zeros as new rightmost bits.
+
+**SHL**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The bits of Dest are shifted left by Src bits, inserting zeros (0) as new rightmost bits.
+
+- Dest is a register containing the value to left shift.
+- Src is a register or 5-bit literal (0-31) specifying the number of bit positions to shift.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0000011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
+
+\textsuperscript{1} C = last bit shifted out if S[4:0] > 0, else D[31]
+```
+
+**Related:** [SHR](#shr), [SAL](#sal), [SAR](#sar), [ROL](#rol)
+
+**Explanation:**
+
 SHL shifts the destination's binary value left by the source number of places (0-31 bits) and sets the new LSBs to 0. This is useful for bit-stream manipulation as well as for swift multiplication; signed or unsigned 32-bit integer multiplication by a power-of-two. Care must be taken for power-of-two multiplications since upper bits shift through the MSB (sign bit), mangling large signed values.
 
+::: pasm2
+        SHL     value, #2      ' Multiply by 4
+:::
 
-## SHR — Shift Right
 
-Shifts the destination register right by the specified number of bits, inserting zeros as new leftmost bits.
 
-### Syntax
-```pasm
-        SHR     D, {#}S {WC|WZ|WCZ}
+## SHR {#shr}
+
+Shift right
+[Shift/Rotate Instruction](#shift-rotate-instructions) - Shift bits right, inserting zeros as new leftmost bits.
+
+**SHR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The bits of Dest are shifted right by Src bits, inserting zeros (0) as new leftmost bits.
+
+- Dest is a register containing the value to right shift.
+- Src is a register or 5-bit literal (0-31) specifying the number of bit positions to shift.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0000010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Last bit out\textsuperscript{1}}{Result = 0}{2}
+
+\textsuperscript{1} C = last bit shifted out if S[4:0] > 0, else D[0]
 ```
 
-### Result
-The bits of D are shifted right by S bits, inserting zeros (0) as new leftmost bits.
+**Related:** [SHL](#shl), [SAR](#sar), [ROR](#ror)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to right shift by S bits |
-| S | Register or 5-bit literal (0-31) indicating the number of bits to shift right |
-| WC/WZ/WCZ | Optional flag effects |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 0000010 CZI DDDDDDDDD SSSSSSSSS | D | Last bit shifted out if S[4:0] > 0, else D[0] | Result = 0 | 2}
-
-### Flags
-- **C**: Set to last bit shifted out if S[4:0] > 0, else D[0]
-- **Z**: Set if result equals zero
-
-### Related Instructions
-- [SAR](#sar--shift-arithmetic-right) — Shift arithmetic right (preserves sign)
-- [SHL](#shl--shift-left) — Shift left
-
-### Explanation
 SHR shifts the destination's binary value right by the source number of places (0-31 bits) and sets the new MSBs to 0. This is useful for bit-stream manipulation as well as for swift division; unsigned 32-bit integer division by a power-of-two. For similar division of a signed value, use SAR instead.
 
+::: pasm2
+        SHR     value, #3      ' Divide unsigned by 8
+:::
 
-## SIGNX — Sign Extend
 
-Sign-extends a value beyond a designated bit position.
 
-### Syntax
-```pasm
-        SIGNX   D, {#}S {WC|WZ|WCZ}
+## SIGNX {#signx}
+
+Sign extend
+[Bit Manipulation Instruction](#bit-manipulation-instructions) - Sign-extend a value beyond a designated bit position.
+
+**SIGNX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The Dest value is sign-extended above the bit indicated by Src and is stored in Dest. Optionally the C and Z flags are updated to the resulting MSB and zero status.
+
+- Dest is a register containing the value to sign-extend above bit Src[4:0] and where the result is written.
+- Src is a register or 9-bit literal whose value (lower 5 bits) identifies the bit of Dest to sign-extend beyond.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0111011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB of result}{Result = 0}{2}
 ```
 
-### Result
-The D value is sign-extended above the bit indicated by S and is stored in D. Optionally the C and Z flags are updated to the resulting MSB and zero status.
+**Related:** [ZEROX](#zerox)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to sign-extend above bit S[4:0] and where the result is written |
-| S | Register or 9-bit literal whose value (lower 5 bits) identifies the bit of D to sign-extend beyond |
-| WC/WZ/WCZ | Optional flag effects |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 0111011 CZI DDDDDDDDD SSSSSSSSS | D | MSB of result | Result = 0 | 2}
+SIGNX fills the bits of Dest above the bit indicated by Src[4:0] with the value of that identified bit, i.e. sign-extending the value. This is handy when converting encoded or received signed values from a small bit width to a large bit width, i.e. 32 bits.
 
-### Flags
-- **C**: Set to MSB of result
-- **Z**: Set if result equals zero
-
-### Related Instructions
-- [ZEROX](#zerox) — Zero extend
-
-### Explanation
-SIGNX fills the bits of D above the bit indicated by S[4:0] with the value of that identified bit, i.e. sign-extending the value. This is handy when converting encoded or received signed values from a small bit width to a large bit width, i.e. 32 bits.
+::: pasm2
+        SIGNX   value, #7      ' Sign-extend 8-bit value to 32 bits
+:::
 
 
-## SKIP — Skip Instructions
 
-Skips subsequent instructions based on a bitmask.
+## SKIP {#skip}
 
-### Syntax
-```pasm
-        SKIP    {#}D
+Skip instructions
+[Flow Control Instruction](#flow-control-instructions) - Skip subsequent instructions based on a bitmask.
+
+**SKIP**  *{#}Dest*
+
+---
+
+**Result:** Subsequent instructions 0-31 are cancelled for each '1' bit in Dest[0]-Dest[31].
+
+- Dest is a register or literal value (0-511) containing skip pattern bitmask.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000110001}{---}{---}{---}{2}
 ```
 
-### Result
-Subsequent instructions 0-31 are cancelled for each '1' bit in D[0]-D[31].
+**Related:** [SKIPF](#skipf)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing skip pattern bitmask |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000110001 | — | — | — | 2}
+Skips instructions based on Dest bitmask. Subsequent instructions 0-31 get cancelled for each '1' bit in Dest[0]-Dest[31]. Each set bit causes the corresponding sequential instruction to be cancelled (replaced with NOP).
 
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SKIPF](#skipf--skip-instructions-fast) — Skip instructions fast (jumps over instead of cancelling)
-
-### Explanation
-Skips instructions based on D bitmask. Subsequent instructions 0-31 get cancelled for each '1' bit in D[0]-D[31]. Each set bit causes the corresponding sequential instruction to be cancelled (replaced with NOP).
+::: pasm2
+        SKIP    #%10101        ' Skip instructions 0, 2, 4
+        NOP                    ' Skipped (bit 0)
+        ADD     x, #1          ' Executed (bit 1 = 0)
+        NOP                    ' Skipped (bit 2)
+:::
 
 
-## SKIPF — Skip Instructions Fast
 
-Rapidly skips over instructions by jumping the program counter.
+## SKIPF {#skipf}
 
-### Syntax
-```pasm
-        SKIPF   {#}D
+Skip instructions fast
+[Flow Control Instruction](#flow-control-instructions) - Rapidly skip over instructions by jumping the program counter.
+
+**SKIPF**  *{#}Dest*
+
+---
+
+**Result:** Program counter leaps over cog/LUT instructions based on Dest bitmask.
+
+- Dest is a register or literal value (0-511) containing skip pattern bitmask.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000110010}{---}{---}{---}{2}
 ```
 
-### Result
-Program counter leaps over cog/LUT instructions based on D bitmask.
+**Related:** [SKIP](#skip)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or literal value (0-511) containing skip pattern bitmask |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 00L DDDDDDDDD 000110010 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SKIP](#skip--skip-instructions) — Skip instructions (cancels instead of jumping)
-
-### Explanation
 Like SKIP, but instead of cancelling instructions, the PC leaps over them. This provides faster execution when skipping multiple instructions, as the skipped instructions are never fetched or executed.
 
 
-## SPLITB — Split Bits to Bytes
 
-Reorganizes bits by extracting every 4th bit into separate bytes.
+## SPLITB {#splitb}
 
-### Syntax
-```pasm
-        SPLITB  D
+Split bits to bytes
+[Bit Manipulation Instruction](#bit-manipulation-instructions) - Reorganize bits by extracting every 4th bit into separate bytes.
+
+**SPLITB**  *Dest*
+
+---
+
+**Result:** Dest = {Dest[31], Dest[27], Dest[23], Dest[19], ...Dest[12], Dest[8], Dest[4], Dest[0]}.
+
+- Dest is a register to transform.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100000}{D}{---}{---}{2}
 ```
 
-### Result
-D = {D[31], D[27], D[23], D[19], ...D[12], D[8], D[4], D[0]}.
+**Related:** [SPLITW](#splitw), [MERGEB](#mergeb)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register to transform |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 000 DDDDDDDDD 001100000 | D | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SPLITW](#splitw--split-bits-to-words) — Split odd/even bits to words
-
-### Explanation
-Splits every 4th bit of D into bytes. The bits at positions 0, 4, 8, 12, 16, 20, 24, 28 become the new low byte, the bits at positions 1, 5, 9, 13, 17, 21, 25, 29 become the second byte, and so on. This is useful for bit reordering and data unpacking operations.
+Splits every 4th bit of Dest into bytes. The bits at positions 0, 4, 8, 12, 16, 20, 24, 28 become the new low byte, the bits at positions 1, 5, 9, 13, 17, 21, 25, 29 become the second byte, and so on. This is useful for bit reordering and data unpacking operations.
 
 
-## SPLITW — Split Bits to Words
 
-Reorganizes bits by separating odd and even bits into separate words.
+## SPLITW {#splitw}
 
-### Syntax
-```pasm
-        SPLITW  D
+Split bits to words
+[Bit Manipulation Instruction](#bit-manipulation-instructions) - Reorganize bits by separating odd and even bits into separate words.
+
+**SPLITW**  *Dest*
+
+---
+
+**Result:** Dest = {Dest[31], Dest[29], Dest[27], Dest[25], ...Dest[6], Dest[4], Dest[2], Dest[0]}.
+
+- Dest is a register to transform.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001100010}{D}{---}{---}{2}
 ```
 
-### Result
-D = {D[31], D[29], D[27], D[25], ...D[6], D[4], D[2], D[0]}.
+**Related:** [SPLITB](#splitb), [MERGEW](#mergew)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register to transform |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 000 DDDDDDDDD 001100010 | D | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [SPLITB](#splitb--split-bits-to-bytes) — Split every 4th bit to bytes
-
-### Explanation
-Splits odd and even bits of D into separate words. The even bits (0, 2, 4, ...30) become the low word, and the odd bits (1, 3, 5, ...31) become the high word. This is useful for bit reordering and data unpacking operations.
+Splits odd and even bits of Dest into separate words. The even bits (0, 2, 4, ...30) become the low word, and the odd bits (1, 3, 5, ...31) become the high word. This is useful for bit reordering and data unpacking operations.
 
 
-## STALLI — Disallow Interrupts
 
-Disables interrupt branching to protect critical code sections.
+## STALLI {#stalli}
 
-### Syntax
-```pasm
-        STALLI
+Disallow interrupts
+[Interrupt Instruction](#interrupt-instructions) - Disable interrupt branching to protect critical code sections.
+
+**STALLI**
+
+---
+
+**Result:** All future interrupts are disallowed.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{000100001}{000100100}{---}{---}{---}{2}
 ```
 
-### Result
-All future interrupts are disallowed.
+**Related:** [ALLOWI](#allowi)
 
-### Parameters
-None.
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 1101011 000 000100001 000100100 | — | — | — | 2}
-
-### Flags
-- **C**: No effect
-- **Z**: No effect
-
-### Related Instructions
-- [ALLOWI](#allowi) — Allow interrupts (complement instruction)
-
-### Explanation
 STALLI disables interrupt branching. STALLI is the complement of the ALLOWI instruction; both are used to protect short, vital sections of main code from timing jitter or state loss caused by asynchronous interrupt handling.
 
+::: pasm2
+        STALLI                 ' Disable interrupts
+        ' Critical section...
+        ALLOWI                 ' Re-enable interrupts
+:::
 
-## SUB — Subtract
 
-Subtracts one unsigned value from another.
 
-### Syntax
-```pasm
-        SUB     D, {#}S {WC|WZ|WCZ}
+## SUB {#sub}
+
+Subtract
+[Math Instruction](#math-instructions) - Subtract one unsigned value from another.
+
+**SUB**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Difference of unsigned Dest and unsigned Src is stored in Dest and optionally the C and Z flags are updated to the borrow and zero status.
+
+- Dest is a register containing the value to subtract Src from, and where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is subtracted from Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0001100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Borrow of (D - S)}{Result = 0}{2}
 ```
 
-### Result
-Difference of unsigned D and unsigned S is stored in D and optionally the C and Z flags are updated to the borrow and zero status.
+**Related:** [SUBX](#subx), [SUBS](#subs), [SUBSX](#subsx), [SUBR](#subr), [ADD](#add)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to subtract S from, and where the result is written |
-| S | Register, 9-bit literal, or 32-bit augmented literal whose value is subtracted from D |
-| WC/WZ/WCZ | Optional flag effects |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 0001100 CZI DDDDDDDDD SSSSSSSSS | D | Borrow of (D - S) | Result = 0 | 2}
+SUB subtracts the unsigned Src from the unsigned Dest and stores the result into the Dest register. To subtract unsigned multi-long values, use SUB followed by SUBX as described in Subtracting Two Multi-Long Values. SUB and SUBX are also used in subtracting signed multi-long values with SUBSX ending the sequence.
 
-### Flags
-- **C**: Set if unsigned borrow (underflow) occurs
-- **Z**: Set if result equals zero
-
-### Related Instructions
-- [SUBX](#subx--subtract-extended) — Subtract extended (for multi-long subtraction)
-- [SUBS](#subs--subtract-signed) — Subtract signed
-- [SUBSX](#subsx--subtract-signed-extended) — Subtract signed extended
-- [SUBR](#subr--subtract-reverse) — Subtract reverse
-
-### Explanation
-SUB subtracts the unsigned S from the unsigned D and stores the result into the D register. To subtract unsigned multi-long values, use SUB followed by SUBX as described in Subtracting Two Multi-Long Values. SUB and SUBX are also used in subtracting signed multi-long values with SUBSX ending the sequence.
+::: pasm2
+        SUB     count, #1 WZ   ' Decrement count, set Z if zero
+:::
 
 
-## SUBR — Subtract Reverse
 
-Subtracts the destination from the source (reverse order).
+## SUBR {#subr}
 
-### Syntax
-```pasm
-        SUBR    D, {#}S {WC|WZ|WCZ}
+Subtract reverse
+[Math Instruction](#math-instructions) - Subtract the destination from the source (reverse order).
+
+**SUBR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Difference of unsigned Src and unsigned Dest is stored in Dest and optionally the C and Z flags are updated to the borrow and zero status.
+
+- Dest is a register containing the value to subtract from Src, and where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is subtracted by Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0010110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Borrow of (S - D)}{Result = 0}{2}
 ```
 
-### Result
-Difference of unsigned S and unsigned D is stored in D and optionally the C and Z flags are updated to the borrow and zero status.
+**Related:** [SUB](#sub)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to subtract from S, and where the result is written |
-| S | Register, 9-bit literal, or 32-bit augmented literal whose value is subtracted by D |
-| WC/WZ/WCZ | Optional flag effects |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 0010110 CZI DDDDDDDDD SSSSSSSSS | D | Borrow of (S - D) | Result = 0 | 2}
-
-### Flags
-- **C**: Set if unsigned borrow (underflow) occurs
-- **Z**: Set if result equals zero
-
-### Related Instructions
-- [SUB](#sub--subtract) — Subtract (normal order)
-
-### Explanation
-SUBR subtracts the unsigned D from the unsigned S and stores the result into the D register. This is the reverse of the subtraction order of SUB, computing S - D instead of D - S.
+SUBR subtracts the unsigned Dest from the unsigned Src and stores the result into the Dest register. This is the reverse of the subtraction order of SUB, computing Src - Dest instead of Dest - Src.
 
 
-## SUBS — Subtract Signed
 
-Subtracts one signed value from another.
+## SUBS {#subs}
 
-### Syntax
-```pasm
-        SUBS    D, {#}S {WC|WZ|WCZ}
+Subtract signed
+[Math Instruction](#math-instructions) - Subtract one signed value from another.
+
+**SUBS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Difference of signed Dest and signed Src is stored in Dest and optionally the C and Z flags are updated to the sign and zero status.
+
+- Dest is a register containing the value to subtract Src from, and where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value is subtracted from Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0001110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign of (D - S)}{Result = 0}{2}
 ```
 
-### Result
-Difference of signed D and signed S is stored in D and optionally the C and Z flags are updated to the sign and zero status.
+**Related:** [SUB](#sub), [SUBX](#subx), [SUBSX](#subsx)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to subtract S from, and where the result is written |
-| S | Register, 9-bit literal, or 32-bit augmented literal whose value is subtracted from D |
-| WC/WZ/WCZ | Optional flag effects |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 0001110 CZI DDDDDDDDD SSSSSSSSS | D | Sign of (D - S) | Result = 0 | 2}
-
-### Flags
-- **C**: Set to sign of result (1 if negative)
-- **Z**: Set if result equals zero
-
-### Related Instructions
-- [SUB](#sub--subtract) — Subtract unsigned
-- [SUBX](#subx--subtract-extended) — Subtract extended
-- [SUBSX](#subsx--subtract-signed-extended) — Subtract signed extended
-
-### Explanation
-SUBS subtracts the signed S from the signed D and stores the result into the D register. If S is a 9-bit literal, its value is interpreted as positive (0-511; it is not sign-extended). Use ##Value (or insert a prior AUGS instruction) for a 32-bit signed value; negative or positive. To subtract signed multi-long values, use SUB (not SUBS) followed possibly by SUBX, and finally SUBSX.
+SUBS subtracts the signed Src from the signed Dest and stores the result into the Dest register. If Src is a 9-bit literal, its value is interpreted as positive (0-511; it is not sign-extended). Use ##Value (or insert a prior AUGS instruction) for a 32-bit signed value; negative or positive. To subtract signed multi-long values, use SUB (not SUBS) followed possibly by SUBX, and finally SUBSX.
 
 
-## SUBSX — Subtract Signed, Extended
 
-Subtracts one signed extended value from another using carry.
+## SUBSX {#subsx}
 
-### Syntax
-```pasm
-        SUBSX   D, {#}S {WC|WZ|WCZ}
+Subtract signed extended
+[Math Instruction](#math-instructions) - Subtract one signed extended value from another using carry.
+
+**SUBSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Difference of signed Dest and signed Src (plus C) is stored in Dest and optionally the C and Z flags are updated to the extended sign and zero status.
+
+- Dest is a register containing the value to subtract Src plus C from, and where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is subtracted from Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0001111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign of D-(S+C)}{Z AND (Result = 0)}{2}
 ```
 
-### Result
-Difference of signed D and signed S (plus C) is stored in D and optionally the C and Z flags are updated to the extended sign and zero status.
+**Related:** [SUB](#sub), [SUBX](#subx), [SUBS](#subs)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to subtract S plus C from, and where the result is written |
-| S | Register, 9-bit literal, or 32-bit augmented literal whose value plus C is subtracted from D |
-| WC/WZ/WCZ | Optional flag effects |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 0001111 CZI DDDDDDDDD SSSSSSSSS | D | Sign of D-(S+C) | Z AND (Result = 0) | 2}
-
-### Flags
-- **C**: Set to sign of D-(S+C) (1 if negative)
-- **Z**: Set if Z was previously set AND result equals zero
-
-### Related Instructions
-- [SUB](#sub--subtract) — Subtract
-- [SUBX](#subx--subtract-extended) — Subtract extended
-- [SUBS](#subs--subtract-signed) — Subtract signed
-
-### Explanation
-SUBSX subtracts the signed value of S plus C from the signed D and stores the result into the D register. The SUBSX instruction is used to perform signed multi-long (extended) subtraction, such as 64-bit subtraction. Use WC or WCZ on preceding SUB and SUBX instructions for proper final C flag. Use WZ or WCZ on preceding SUB and SUBX instructions for proper final Z flag. To subtract signed multi-long values, use SUB (not SUBS) followed possibly by SUBX, and finally SUBSX.
+SUBSX subtracts the signed value of Src plus C from the signed Dest and stores the result into the Dest register. The SUBSX instruction is used to perform signed multi-long (extended) subtraction, such as 64-bit subtraction. Use WC or WCZ on preceding SUB and SUBX instructions for proper final C flag. Use WZ or WCZ on preceding SUB and SUBX instructions for proper final Z flag. To subtract signed multi-long values, use SUB (not SUBS) followed possibly by SUBX, and finally SUBSX.
 
 
-## SUBX — Subtract Extended
 
-Subtracts one unsigned extended value from another using carry.
+## SUBX {#subx}
 
-### Syntax
-```pasm
-        SUBX    D, {#}S {WC|WZ|WCZ}
+Subtract extended
+[Math Instruction](#math-instructions) - Subtract one unsigned extended value from another using carry.
+
+**SUBX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Difference of unsigned Dest and unsigned Src (plus C) is stored in Dest and optionally the C and Z flags are updated to the extended borrow and zero status.
+
+- Dest is a register containing the value to subtract Src plus C from, and where the result is written.
+- Src is a register, 9-bit literal, or 32-bit augmented literal whose value plus C is subtracted from Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0001101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Borrow of (D - (S + C))}{Z AND (result = 0)}{2}
 ```
 
-### Result
-Difference of unsigned D and unsigned S (plus C) is stored in D and optionally the C and Z flags are updated to the extended borrow and zero status.
+**Related:** [SUB](#sub), [SUBSX](#subsx)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to subtract S plus C from, and where the result is written |
-| S | Register, 9-bit literal, or 32-bit augmented literal whose value plus C is subtracted from D |
-| WC/WZ/WCZ | Optional flag effects |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 0001101 CZI DDDDDDDDD SSSSSSSSS | D | Borrow of (D - (S + C)) | Z AND (result = 0) | 2}
-
-### Flags
-- **C**: Set if unsigned borrow occurs in D-(S+C)
-- **Z**: Set if Z was previously set AND result equals zero
-
-### Related Instructions
-- [SUB](#sub--subtract) — Subtract
-- [SUBSX](#subsx--subtract-signed-extended) — Subtract signed extended
-
-### Explanation
-SUBX subtracts the unsigned value of S plus C from the unsigned D and stores the result into the D register. The SUBX instruction is used to perform unsigned multi-long (extended) subtraction, such as 64-bit subtraction. Use WC or WCZ on preceding SUB and SUBX instructions for proper final C flag. If C is set after the last SUBX in a multi-long subtraction, it indicates unsigned underflow. Use WZ or WCZ on preceding SUB and SUBX instructions for proper final Z flag. To subtract unsigned multi-long values, use SUB followed by one or more SUBX instructions.
+SUBX subtracts the unsigned value of Src plus C from the unsigned Dest and stores the result into the Dest register. The SUBX instruction is used to perform unsigned multi-long (extended) subtraction, such as 64-bit subtraction. Use WC or WCZ on preceding SUB and SUBX instructions for proper final C flag. If C is set after the last SUBX in a multi-long subtraction, it indicates unsigned underflow. Use WZ or WCZ on preceding SUB and SUBX instructions for proper final Z flag. To subtract unsigned multi-long values, use SUB followed by one or more SUBX instructions.
 
 
-## SUMC — Sum by Carry
 
-Conditionally adds or subtracts based on the C flag.
+## SUMC / SUMNC / SUMZ / SUMNZ {#sumc}
 
-### Syntax
-```pasm
-        SUMC    D, {#}S {WC|WZ|WCZ}
+Conditional sum {#sumnc} {#sumz} {#sumnz}
+[Math Instruction](#math-instructions) - Conditionally add or subtract based on C, NC, Z, or NZ flag.
+
+**SUMC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**SUMNC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**SUMZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**SUMNZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Conditionally adds or subtracts Src from Dest based on flag state:
+
+| Instruction | Subtracts when | Adds when |
+|-------------|----------------|-----------|
+| SUMC | C = 1 | C = 0 |
+| SUMNC | C = 0 | C = 1 |
+| SUMZ | Z = 1 | Z = 0 |
+| SUMNZ | Z = 0 | Z = 1 |
+
+- Dest is a register containing the value to adjust.
+- Src is a register, 9-bit literal, or 32-bit augmented literal.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0011100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0011101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0011110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
+\encodingrow{EEEE}{0011111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
+\end{encodingtable}
 ```
 
-### Result
-If C = 1 then D = D - S, else D = D + S. C is set to correct sign of result.
+**Explanation:**
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to adjust |
-| S | Register or immediate value to add or subtract |
-| WC/WZ/WCZ | Optional flag effects |
+These instructions conditionally add or subtract Src from Dest based on the specified flag state. The C flag (with WC) is updated to reflect the correct sign of the result.
 
-### Encoding
-\simpleencoding{EEEE 0011100 CZI DDDDDDDDD SSSSSSSSS | D | Correct sign of (D +/- S) | Result = 0 | 2}
-
-### Flags
-- **C**: Set to correct sign of result (D +/- S)
-- **Z**: Set if result equals zero
-
-### Related Instructions
-- [SUMNC](#sumnc--sum-by-negated-carry) — Sum by negated carry
-- [SUMZ](#sumz--sum-by-zero) — Sum by zero flag
-- [SUMNZ](#sumnz--sum-by-negated-zero) — Sum by negated zero flag
-
-### Explanation
-Adjusts D by adding or subtracting S based on the C flag. If C = 1 then D = D - S, otherwise D = D + S. The C flag is updated to the correct sign of the result (D +/- S).
+SUMC and SUMZ subtract when their flag is set (1). SUMNC and SUMNZ subtract when their flag is clear (0), providing complementary behavior.
 
 
-## SUMNC — Sum by Negated Carry
+# Instructions: T
 
-Conditionally adds or subtracts based on the negated C flag.
+This section contains all PASM2 instructions beginning with the letter T.
 
-### Syntax
-```pasm
-        SUMNC   D, {#}S {WC|WZ|WCZ}
+
+
+## TEST {#test}
+
+Test
+[Logic Instruction](#logic-instructions) - Test the parity and zero state of a register value.
+
+**TEST**  *Dest*  **{WC|WZ|WCZ}**
+**TEST**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The parity and zero-state of Dest, or of Dest bitwise ANDed with Src, is stored in the C and Z flags.
+
+- Dest is a register whose value will be tested.
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal to AND with Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0111110}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{---}{Parity of D}{D = 0}{2}
+\encodingrow{EEEE}{0111110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{Parity of (D \& S)}{(D \& S) = 0}{2}
+\end{encodingtable}
 ```
 
-### Result
-The sum of signed D and either S or -S (according to !C) is stored in D and optionally the C and Z flags are updated to the sign and zero status.
+**Related:** [TESTN](#testn), [TESTB](#testb), [TESTBN](#testbn), [TESTP](#testp), [TESTPN](#testpn)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the signed value to adjust by S or -S, and where the result is written |
-| S | Register, 9-bit literal, or 32-bit augmented literal whose value or negated value is added into D |
-| WC/WZ/WCZ | Optional flag effects |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 0011101 CZI DDDDDDDDD SSSSSSSSS | D | Correct sign of (D +/- S) | Result = 0 | 2}
+TEST determines the parity (number of high bits) and the zero or non-zero state of Dest, or of Dest bitwise ANDed with Src, and stores the results in the C and/or Z flag.
 
-### Flags
-- **C**: Set to correct sign of result (D +/- S)
-- **Z**: Set if result equals zero
+If the WC or WCZ effect is specified, the C flag is set to 1 if the number of high bits in Dest (or Dest ANDed with Src) is odd, or is cleared to 0 if it is even.
 
-### Related Instructions
-- [SUMC](#sumc--sum-by-carry) — Sum by carry
-- [SUMZ](#sumz--sum-by-zero) — Sum by zero flag
-- [SUMNZ](#sumnz--sum-by-negated-zero) — Sum by negated zero flag
+If the WZ or WCZ effect is specified, the Z flag is set to 1 if Dest (or Dest ANDed with Src) is zero, or is cleared to 0 if it is not zero.
 
-### Explanation
-SUMNC adjusts the signed D value by S or -S (depending on !C) and stores the result into the D register. If !C is true (C=0), D = D - S. If !C is false (C=1), D = D + S.
+TEST is non-destructive—it does not modify Dest.
+
+::: pasm2
+        TEST    flags WCZ      ' Test all bits for parity and zero
+        TEST    value, #$FF WZ ' Test low byte for zero
+:::
 
 
-## SUMNZ — Sum by Negated Zero
 
-Conditionally adds or subtracts based on the negated Z flag.
+## TESTB {#testb}
 
-### Syntax
-```pasm
-        SUMNZ   D, {#}S {WC|WZ|WCZ}
+Test bit
+[Bit Test Instruction](#bit-test-instructions) - Test a single bit in a register and write the result to C or Z.
+
+**TESTB**  *Dest, {#}Src*  **WC/WZ**
+**TESTB**  *Dest, {#}Src*  **ANDC/ANDZ**
+**TESTB**  *Dest, {#}Src*  **ORC/ORZ**
+**TESTB**  *Dest, {#}Src*  **XORC/XORZ**
+
+---
+
+**Result:** The state of bit Src[4:0] of Dest is read and either stored as-is, or bitwise ANDed, ORed, or XORed into C or Z.
+
+- Dest is a register whose bit will be tested.
+- Src is a register or 5-bit literal (0-31) specifying bit position.
+- WC/WZ writes bit state directly to C or Z flag.
+- ANDC/ANDZ ANDs bit state with C or Z flag.
+- ORC/ORZ ORs bit state with C or Z flag.
+- XORC/XORZ XORs bit state with C or Z flag.
+
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0100000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{D[S[4:0]]}{D[S[4:0]]}{2}
+\encodingrowcont{EEEE}{0100010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z AND D[S[4:0]]}{C/Z AND D[S[4:0]]}{2}
+\encodingrowcont{EEEE}{0100100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z OR D[S[4:0]]}{C/Z OR D[S[4:0]]}{2}
+\encodingrow{EEEE}{0100110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z XOR D[S[4:0]]}{C/Z XOR D[S[4:0]]}{2}
+\end{encodingtable}
 ```
 
-### Result
-The sum of signed D and either S or -S (according to !Z) is stored in D and optionally the C and Z flags are updated to the sign and zero status.
+**Related:** [TESTBN](#testbn), [TESTP](#testp), [TESTPN](#testpn)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the signed value to adjust by S or -S, and where the result is written |
-| S | Register, 9-bit literal, or 32-bit augmented literal whose value or negated value is added into D |
-| WC/WZ/WCZ | Optional flag effects |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 0011111 CZI DDDDDDDDD SSSSSSSSS | D | Correct sign of (D +/- S) | Result = 0 | 2}
-
-### Flags
-- **C**: Set to correct sign of result (D +/- S)
-- **Z**: Set if result equals zero
-
-### Related Instructions
-- [SUMC](#sumc--sum-by-carry) — Sum by carry
-- [SUMNC](#sumnc--sum-by-negated-carry) — Sum by negated carry
-- [SUMZ](#sumz--sum-by-zero) — Sum by zero flag
-
-### Explanation
-SUMNZ adjusts the signed D value by S or -S (depending on !Z) and stores the result into the D register. If !Z is true (Z=0), D = D - S. If !Z is false (Z=1), D = D + S.
-
-
-## SUMZ — Sum by Zero
-
-Conditionally adds or subtracts based on the Z flag.
-
-### Syntax
-```pasm
-        SUMZ    D, {#}S {WC|WZ|WCZ}
-```
-
-### Result
-If Z = 1 then D = D - S, else D = D + S. C is set to correct sign of result.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to adjust |
-| S | Register or immediate value to add or subtract |
-| WC/WZ/WCZ | Optional flag effects |
-
-### Encoding
-\simpleencoding{EEEE 0011110 CZI DDDDDDDDD SSSSSSSSS | D | Correct sign of (D +/- S) | Result = 0 | 2}
-
-### Flags
-- **C**: Set to correct sign of result (D +/- S)
-- **Z**: Set if result equals zero
-
-### Related Instructions
-- [SUMC](#sumc--sum-by-carry) — Sum by carry
-- [SUMNC](#sumnc--sum-by-negated-carry) — Sum by negated carry
-- [SUMNZ](#sumnz--sum-by-negated-zero) — Sum by negated zero flag
-
-### Explanation
-Adjusts D by adding or subtracting S based on the Z flag. If Z = 1 then D = D - S, otherwise D = D + S. The C flag is updated to the correct sign of the result (D +/- S).
-
-# T Instructions
-
-## TEST — Test
-
-Tests the parity and zero state of a register value.
-
-### Syntax
-```pasm
-        TEST    D {WC|WZ|WCZ}
-        TEST    D, {#}S {WC|WZ|WCZ}
-```
-
-### Result
-The parity and zero-state of D, or of D bitwise ANDed with S, is stored in the C and Z flags.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register whose value will be tested |
-| S | Optional register, 9-bit literal, or 32-bit augmented literal to AND with D |
-| WC/WZ/WCZ | Optional effects to update C and/or Z flags |
-
-### Encoding
-\simpleencoding{EEEE | 0111110 | CZ0 | DDDDDDDDD | DDDDDDDDD | — | Parity of D | D = 0 | 2}
-
-\simpleencoding{EEEE | 0111110 | CZI | DDDDDDDDD | SSSSSSSSS | — | Parity of (D & S) | (D & S) = 0 | 2}
-
-### Related Instructions
-- [TESTN](#testn) — Test with inverted source value
-- [TESTB](#testb) — Test individual bit in register
-- [TESTBN](#testbn) — Test individual bit negated
-- [TESTP](#testp) — Test pin state
-- [TESTPN](#testpn) — Test pin state negated
-
-### Explanation
-TEST determines the parity (number of high bits) and the zero or non-zero state of D, or of D bitwise ANDed with S, and stores the results in the C and/or Z flag.
-
-If the WC or WCZ effect is specified, the C flag is set to 1 if the number of high bits in D (or D ANDed with S) is odd, or is cleared to 0 if it is even.
-
-If the WZ or WCZ effect is specified, the Z flag is set to 1 if D (or D ANDed with S) is zero, or is cleared to 0 if it is not zero.
-
-TEST is non-destructive—it does not modify D.
-
-
-## TESTB — Test Bit
-
-Tests a single bit in a register and writes the result to C or Z.
-
-### Syntax
-```pasm
-        TESTB   D, {#}S         WC/WZ
-        TESTB   D, {#}S         ANDC/ANDZ
-        TESTB   D, {#}S         ORC/ORZ
-        TESTB   D, {#}S         XORC/XORZ
-```
-
-### Result
-The state of bit S[4:0] of D is read and either stored as-is, or bitwise ANDed, ORed, or XORed into C or Z.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register whose bit will be tested |
-| S | Register or 5-bit literal specifying bit position (0-31) |
-| WC/WZ | Write bit state to C or Z flag |
-| ANDC/ANDZ | AND bit state with C or Z flag |
-| ORC/ORZ | OR bit state with C or Z flag |
-| XORC/XORZ | XOR bit state with C or Z flag |
-
-### Encoding
-\simpleencoding{EEEE | 0100000 | CZI | DDDDDDDDD | SSSSSSSSS | — | D[S[4:0]] | D[S[4:0]] | 2}
-
-\simpleencoding{EEEE | 0100010 | CZI | DDDDDDDDD | SSSSSSSSS | — | C/Z AND D[S[4:0]] | C/Z AND D[S[4:0]] | 2}
-
-\simpleencoding{EEEE | 0100100 | CZI | DDDDDDDDD | SSSSSSSSS | — | C/Z OR D[S[4:0]] | C/Z OR D[S[4:0]] | 2}
-
-\simpleencoding{EEEE | 0100110 | CZI | DDDDDDDDD | SSSSSSSSS | — | C/Z XOR D[S[4:0]] | C/Z XOR D[S[4:0]] | 2}
-
-### Related Instructions
-- [TESTBN](#testbn) — Test bit negated
-- [TESTP](#testp) — Test pin state
-- [TESTPN](#testpn) — Test pin state negated
-
-### Explanation
-TESTB reads the state (0 or 1) of a bit in D designated by S, and either stores it as-is, or bitwise ANDs, ORs, or XORs it into C or Z. The bit position is specified by S[4:0] (0-31). The WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, or XORZ effect determines how the bit state is applied to the selected flag.
+TESTB reads the state (0 or 1) of a bit in Dest designated by Src, and either stores it as-is, or bitwise ANDs, ORs, or XORs it into C or Z. The bit position is specified by Src[4:0] (0-31). The WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, or XORZ effect determines how the bit state is applied to the selected flag.
 
 TESTB is useful for examining individual bits without modifying the register value.
 
+::: pasm2
+        TESTB   flags, #7 WC   ' Test bit 7, store in C
+        TESTB   mask, #3 ANDC  ' AND bit 3 with current C
+:::
 
-## TESTBN — Test Bit Negated
 
-Tests a single bit in a register, inverts the result, and writes to C or Z.
 
-### Syntax
-```pasm
-        TESTBN  D, {#}S         WC/WZ
-        TESTBN  D, {#}S         ANDC/ANDZ
-        TESTBN  D, {#}S         ORC/ORZ
-        TESTBN  D, {#}S         XORC/XORZ
+## TESTBN {#testbn}
+
+Test bit negated
+[Bit Test Instruction](#bit-test-instructions) - Test a single bit in a register, invert the result, and write to C or Z.
+
+**TESTBN**  *Dest, {#}Src*  **WC/WZ**
+**TESTBN**  *Dest, {#}Src*  **ANDC/ANDZ**
+**TESTBN**  *Dest, {#}Src*  **ORC/ORZ**
+**TESTBN**  *Dest, {#}Src*  **XORC/XORZ**
+
+---
+
+**Result:** The inverted state of bit Src[4:0] of Dest is read and either stored as-is, or bitwise ANDed, ORed, or XORed into C or Z.
+
+- Dest is a register whose bit will be tested.
+- Src is a register or 5-bit literal (0-31) specifying bit position.
+- WC/WZ writes inverted bit state to C or Z flag.
+- ANDC/ANDZ ANDs inverted bit state with C or Z flag.
+- ORC/ORZ ORs inverted bit state with C or Z flag.
+- XORC/XORZ XORs inverted bit state with C or Z flag.
+
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0100001}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{!D[S[4:0]]}{!D[S[4:0]]}{2}
+\encodingrowcont{EEEE}{0100011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z AND !D[S[4:0]]}{C/Z AND !D[S[4:0]]}{2}
+\encodingrowcont{EEEE}{0100101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z OR !D[S[4:0]]}{C/Z OR !D[S[4:0]]}{2}
+\encodingrow{EEEE}{0100111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{C/Z XOR !D[S[4:0]]}{C/Z XOR !D[S[4:0]]}{2}
+\end{encodingtable}
 ```
 
-### Result
-The inverted state of bit S[4:0] of D is read and either stored as-is, or bitwise ANDed, ORed, or XORed into C or Z.
+**Related:** [TESTB](#testb), [TESTP](#testp), [TESTPN](#testpn)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register whose bit will be tested |
-| S | Register or 5-bit literal specifying bit position (0-31) |
-| WC/WZ | Write inverted bit state to C or Z flag |
-| ANDC/ANDZ | AND inverted bit state with C or Z flag |
-| ORC/ORZ | OR inverted bit state with C or Z flag |
-| XORC/XORZ | XOR inverted bit state with C or Z flag |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 0100001 | CZI | DDDDDDDDD | SSSSSSSSS | — | !D[S[4:0]] | !D[S[4:0]] | 2}
-
-\simpleencoding{EEEE | 0100011 | CZI | DDDDDDDDD | SSSSSSSSS | — | C/Z AND !D[S[4:0]] | C/Z AND !D[S[4:0]] | 2}
-
-\simpleencoding{EEEE | 0100101 | CZI | DDDDDDDDD | SSSSSSSSS | — | C/Z OR !D[S[4:0]] | C/Z OR !D[S[4:0]] | 2}
-
-\simpleencoding{EEEE | 0100111 | CZI | DDDDDDDDD | SSSSSSSSS | — | C/Z XOR !D[S[4:0]] | C/Z XOR !D[S[4:0]] | 2}
-
-### Related Instructions
-- [TESTB](#testb) — Test bit without inversion
-- [TESTP](#testp) — Test pin state
-- [TESTPN](#testpn) — Test pin state negated
-
-### Explanation
-TESTBN reads the state (0 or 1) of a bit in D designated by S, inverts that result, and either stores it as-is, or bitwise ANDs, ORs, or XORs it into C or Z. The bit position is specified by S[4:0] (0-31). The WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, or XORZ effect determines how the inverted bit state is applied to the selected flag.
+TESTBN reads the state (0 or 1) of a bit in Dest designated by Src, inverts that result, and either stores it as-is, or bitwise ANDs, ORs, or XORs it into C or Z. The bit position is specified by Src[4:0] (0-31). The WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, or XORZ effect determines how the inverted bit state is applied to the selected flag.
 
 TESTBN is useful for testing whether a bit is clear (0) rather than set (1).
 
 
-## TESTN — Test Not
 
-Tests the parity and zero state of a register ANDed with an inverted value.
+## TESTN {#testn}
 
-### Syntax
-```pasm
-        TESTN   D, {#}S {WC|WZ|WCZ}
+Test not
+[Logic Instruction](#logic-instructions) - Test the parity and zero state of a register ANDed with an inverted value.
+
+**TESTN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** The parity and zero-state of Dest bitwise ANDed with !Src is stored in the C and Z flags.
+
+- Dest is a register whose value will be tested.
+- Src is a register, 9-bit literal, or 32-bit augmented literal to invert and AND with Dest.
+- WC, WZ, or WCZ are optional effects to update flags.
+
+```{=latex}
+\simpleencoding{EEEE}{0111111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{---}{Parity of (D \& !S)}{(D \& !S) = 0}{2}
 ```
 
-### Result
-The parity and zero-state of D bitwise ANDed with !S is stored in the C and Z flags.
+**Related:** [TEST](#test), [TESTB](#testb), [TESTBN](#testbn)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register whose value will be tested |
-| S | Register, 9-bit literal, or 32-bit augmented literal to invert and AND with D |
-| WC/WZ/WCZ | Optional effects to update C and/or Z flags |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 0111111 | CZI | DDDDDDDDD | SSSSSSSSS | — | Parity of (D & !S) | (D & !S) = 0 | 2}
+TESTN determines the parity (number of high bits) and the zero or non-zero state of Dest bitwise ANDed with !Src and stores the results in the C and/or Z flag.
 
-### Related Instructions
-- [TEST](#test) — Test without inversion
-- [TESTB](#testb) — Test individual bit
-- [TESTBN](#testbn) — Test individual bit negated
+If the WC or WCZ effect is specified, the C flag is set to 1 if the number of high bits in Dest ANDed with !Src is odd, or is cleared to 0 if it is even.
 
-### Explanation
-TESTN determines the parity (number of high bits) and the zero or non-zero state of D bitwise ANDed with !S and stores the results in the C and/or Z flag.
+If the WZ or WCZ effect is specified, the Z flag is set to 1 if Dest ANDed with !Src is zero, or is cleared to 0 if it is not zero.
 
-If the WC or WCZ effect is specified, the C flag is set to 1 if the number of high bits in D ANDed with !S is odd, or is cleared to 0 if it is even.
-
-If the WZ or WCZ effect is specified, the Z flag is set to 1 if D ANDed with !S is zero, or is cleared to 0 if it is not zero.
-
-TESTN is non-destructive—it does not modify D. It is useful for testing which bits in D are set while masking out specific bits defined by S.
+TESTN is non-destructive—it does not modify Dest. It is useful for testing which bits in Dest are set while masking out specific bits defined by Src.
 
 
-## TESTP — Test Pin
 
-Tests the state of an I/O pin and writes the result to C or Z.
+## TESTP / TESTPN {#testp}
 
-### Syntax
-```pasm
-        TESTP   {#}D            WC/WZ
-        TESTP   {#}D            ANDC/ANDZ
-        TESTP   {#}D            ORC/ORZ
-        TESTP   {#}D            XORC/XORZ
+Test pin / Test pin negated {#testpn}
+[Pin Instruction](#pin-instructions) - Test the state of an I/O pin and write the result (or inverted result) to C or Z.
+
+**TESTP**  *{#}Dest*  **WC/WZ**
+**TESTP**  *{#}Dest*  **ANDC/ANDZ**
+**TESTP**  *{#}Dest*  **ORC/ORZ**
+**TESTP**  *{#}Dest*  **XORC/XORZ**
+
+**TESTPN**  *{#}Dest*  **WC/WZ**
+**TESTPN**  *{#}Dest*  **ANDC/ANDZ**
+**TESTPN**  *{#}Dest*  **ORC/ORZ**
+**TESTPN**  *{#}Dest*  **XORC/XORZ**
+
+---
+
+**Result:** The state (TESTP) or inverted state (TESTPN) of the I/O pin described by Dest is read and either stored as-is, or bitwise ANDed, ORed, or XORed into C or Z.
+
+- Dest is a register or 6-bit literal (0-63) identifying the I/O pin.
+- WC/WZ writes pin state to C or Z flag.
+- ANDC/ANDZ ANDs pin state with C or Z flag.
+- ORC/ORZ ORs pin state with C or Z flag.
+- XORC/XORZ XORs pin state with C or Z flag.
+
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000000}{---}{IN}{IN}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000001}{---}{!IN}{!IN}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000010}{---}{C/Z AND IN}{C/Z AND IN}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000011}{---}{C/Z AND !IN}{C/Z AND !IN}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000100}{---}{C/Z OR IN}{C/Z OR IN}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000101}{---}{C/Z OR !IN}{C/Z OR !IN}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000110}{---}{C/Z XOR IN}{C/Z XOR IN}{2}
+\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001000111}{---}{C/Z XOR !IN}{C/Z XOR !IN}{2}
+\end{encodingtable}
 ```
 
-### Result
-The state of the I/O pin described by D is read and either stored as-is, or bitwise ANDed, ORed, or XORed into C or Z.
+IN = pin state at Dest[5:0]; !IN = inverted pin state.
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or 6-bit literal (0-63) identifying the I/O pin |
-| WC/WZ | Write pin state to C or Z flag |
-| ANDC/ANDZ | AND pin state with C or Z flag |
-| ORC/ORZ | OR pin state with C or Z flag |
-| XORC/XORZ | XOR pin state with C or Z flag |
+**Related:** [TESTB](#testb), [TESTBN](#testbn), [DRVL](#drvl), [DRVH](#drvh)
 
-### Encoding
-\simpleencoding{EEEE | 1101011 | CZL | DDDDDDDDD | 001000000 | — | IN[D[5:0]] | IN[D[5:0]] | 2}
+**Explanation:**
 
-\simpleencoding{EEEE | 1101011 | CZL | DDDDDDDDD | 001000010 | — | C/Z AND IN[D[5:0]] | C/Z AND IN[D[5:0]] | 2}
+TESTP reads the state (0 or 1) of the I/O pin designated by Dest, and either stores it as-is, or bitwise ANDs, ORs, or XORs it into C or Z. TESTPN does the same but inverts the pin state first. The pin number is specified by Dest[5:0] (0-63). The WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, or XORZ effect determines how the pin state is applied to the selected flag.
 
-\simpleencoding{EEEE | 1101011 | CZL | DDDDDDDDD | 001000100 | — | C/Z OR IN[D[5:0]] | C/Z OR IN[D[5:0]] | 2}
+Both instructions read the actual pin state from the IN register, not the output register. This makes them useful for reading sensor inputs, detecting edges, and building multi-bit values from pin states. TESTPN is particularly useful for active-low signals where a low pin state (0) indicates an active condition.
 
-\simpleencoding{EEEE | 1101011 | CZL | DDDDDDDDD | 001000110 | — | C/Z XOR IN[D[5:0]] | C/Z XOR IN[D[5:0]] | 2}
-
-### Related Instructions
-- [TESTPN](#testpn) — Test pin state negated
-- [TESTB](#testb) — Test bit in register
-- [TESTBN](#testbn) — Test bit in register negated
-- [DRVL](instructions-d.md#drvl) — Drive pin low
-- [DRVH](instructions-d.md#drvh) — Drive pin high
-
-### Explanation
-TESTP reads the state (0 or 1) of the I/O pin designated by D, and either stores it as-is, or bitwise ANDs, ORs, or XORs it into C or Z. The pin number is specified by D[5:0] (0-63). The WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, or XORZ effect determines how the pin state is applied to the selected flag.
-
-TESTP reads the actual pin state from the IN register, not the output register. This makes it useful for reading sensor inputs, detecting edges, and building multi-bit values from pin states.
-
-Common uses include Hall sensor reading for motor control, digital input edge detection, and pin state monitoring with conditional logic. The XOR operations are particularly useful for conditional inversion based on previous flag states.
+::: pasm2
+        TESTP   #10 WC         ' Read pin 10 state into C
+        TESTP   sensor_pin WZ  ' Test sensor pin, store in Z
+        TESTPN  #button WC     ' C=1 if active-low button pressed
+:::
 
 
-## TESTPN — Test Pin Negated
 
-Tests the state of an I/O pin, inverts the result, and writes to C or Z.
+## TJF {#tjf}
 
-### Syntax
-```pasm
-        TESTPN  {#}D            WC/WZ
-        TESTPN  {#}D            ANDC/ANDZ
-        TESTPN  {#}D            ORC/ORZ
-        TESTPN  {#}D            XORC/XORZ
+Test and jump if full
+[Flow Control Instruction](#flow-control-instructions) - Test a register value and jump if it equals $FFFF_FFFF.
+
+**TJF**  *Dest, {#}Src*
+
+---
+
+**Result:** Dest is tested and if it is full ($FFFF_FFFF), PC is set to a new relative (#Src) or absolute (Src) address.
+
+- Dest is a register whose value is tested for full.
+- Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
+
+```{=latex}
+\simpleencoding{EEEE}{1011101}{00I}{DDDDDDDDD}{SSSSSSSSS}{PC (conditional)}{---}{---}{2 or 4}
 ```
 
-### Result
-The inverted state of the I/O pin described by D is read and either stored as-is, or bitwise ANDed, ORed, or XORed into C or Z.
+**Related:** [TJNF](#tjnf), [TJZ](#tjz), [TJNZ](#tjnz)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register or 6-bit literal (0-63) identifying the I/O pin |
-| WC/WZ | Write inverted pin state to C or Z flag |
-| ANDC/ANDZ | AND inverted pin state with C or Z flag |
-| ORC/ORZ | OR inverted pin state with C or Z flag |
-| XORC/XORZ | XOR inverted pin state with C or Z flag |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 1101011 | CZL | DDDDDDDDD | 001000001 | — | !IN[D[5:0]] | !IN[D[5:0]] | 2}
+TJF tests the value in Dest and jumps to the address described by Src if the result is full (= -1; = $FFFF_FFFF).
 
-\simpleencoding{EEEE | 1101011 | CZL | DDDDDDDDD | 001000011 | — | C/Z AND !IN[D[5:0]] | C/Z AND !IN[D[5:0]] | 2}
-
-\simpleencoding{EEEE | 1101011 | CZL | DDDDDDDDD | 001000101 | — | C/Z OR !IN[D[5:0]] | C/Z OR !IN[D[5:0]] | 2}
-
-\simpleencoding{EEEE | 1101011 | CZL | DDDDDDDDD | 001000111 | — | C/Z XOR !IN[D[5:0]] | C/Z XOR !IN[D[5:0]] | 2}
-
-### Related Instructions
-- [TESTP](#testp) — Test pin state without inversion
-- [TESTB](#testb) — Test bit in register
-- [TESTBN](#testbn) — Test bit in register negated
-
-### Explanation
-TESTPN reads the state (0 or 1) of the I/O pin designated by D, inverts that result, and either stores it as-is, or bitwise ANDs, ORs, or XORs it into C or Z. The pin number is specified by D[5:0] (0-63). The WC, WZ, ANDC, ANDZ, ORC, ORZ, XORC, or XORZ effect determines how the inverted pin state is applied to the selected flag.
-
-TESTPN is useful for testing whether a pin is low (0) rather than high (1), which is common when working with active-low signals.
-
-
-## TJF — Test and Jump if Full
-
-Tests a register value and jumps if it equals $FFFF_FFFF.
-
-### Syntax
-```pasm
-        TJF     D, {#}S
-```
-
-### Result
-D is tested and if it is full ($FFFF_FFFF), PC is set to a new relative (#S) or absolute (S) address.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register whose value is tested for full |
-| S | Register, 9-bit literal, or 20-bit augmented literal specifying jump address |
-
-### Encoding
-\simpleencoding{EEEE | 1011101 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | — | — | 2 or 4}
-
-### Related Instructions
-- [TJNF](#tjnf) — Test and jump if not full
-- [TJZ](#tjz) — Test and jump if zero
-- [TJNZ](#tjnz) — Test and jump if not zero
-
-### Explanation
-TJF tests the value in D and jumps to the address described by S if the result is full (= -1; = $FFFF_FFFF).
-
-The address (S) can be absolute or relative. To specify an absolute address, S must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to +255 instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset (a range of -524288 to +524287). Offsets are relative to the instruction following the TJF. The signed offset value is in units of whole instructions—it is added to PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added to PC when in Hub execution mode.
+The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to +255 instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset (a range of -524288 to +524287). Offsets are relative to the instruction following the TJF.
 
 The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken (13-20 cycles for Hub execution when taken).
 
 
-## TJNF — Test and Jump if Not Full
 
-Tests a register value and jumps if it does not equal $FFFF_FFFF.
+## TJNF {#tjnf}
 
-### Syntax
-```pasm
-        TJNF    D, {#}S
+Test and jump if not full
+[Flow Control Instruction](#flow-control-instructions) - Test a register value and jump if it does not equal $FFFF_FFFF.
+
+**TJNF**  *Dest, {#}Src*
+
+---
+
+**Result:** Dest is tested and if it is not full (<> $FFFF_FFFF), PC is set to a new relative (#Src) or absolute (Src) address.
+
+- Dest is a register whose value is tested for not full.
+- Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
+
+```{=latex}
+\simpleencoding{EEEE}{1011101}{01I}{DDDDDDDDD}{SSSSSSSSS}{PC (conditional)}{---}{---}{2 or 4}
 ```
 
-### Result
-D is tested and if it is not full (<> $FFFF_FFFF), PC is set to a new relative (#S) or absolute (S) address.
+**Related:** [TJF](#tjf), [TJZ](#tjz), [TJNZ](#tjnz), [TJS](#tjs), [TJNS](#tjns)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register whose value is tested for not full |
-| S | Register, 9-bit literal, or 20-bit augmented literal specifying jump address |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 1011101 | 01I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | — | — | 2 or 4}
+TJNF tests the value in Dest and jumps to the address described by Src if the result is not full (<> -1; <> $FFFF_FFFF).
 
-### Related Instructions
-- [TJF](#tjf) — Test and jump if full
-- [TJZ](#tjz) — Test and jump if zero
-- [TJNZ](#tjnz) — Test and jump if not zero
-- [TJS](#tjs) — Test and jump if signed
-- [TJNS](#tjns) — Test and jump if not signed
-
-### Explanation
-TJNF tests the value in D and jumps to the address described by S if the result is not full (<> -1; <> $FFFF_FFFF).
-
-The address (S) can be absolute or relative. To specify an absolute address, S must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to +255 instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset (a range of -524288 to +524287). Offsets are relative to the instruction following the TJNF. The signed offset value is in units of whole instructions—it is added to PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added to PC when in Hub execution mode.
-
-The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken (2 or 13-20 cycles for Hub execution).
-
-
-## TJNS — Test and Jump if Not Signed
-
-Tests a register value and jumps if bit 31 is clear (positive/unsigned).
-
-### Syntax
-```pasm
-        TJNS    D, {#}S
-```
-
-### Result
-D is tested and if it is not signed (D[31] = 0), PC is set to a new relative (#S) or absolute (S) address.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register whose value is tested for sign bit |
-| S | Register, 9-bit literal, or 20-bit augmented literal specifying jump address |
-
-### Encoding
-\simpleencoding{EEEE | 1011101 | 11I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | — | — | 2 or 4}
-
-### Related Instructions
-- [TJS](#tjs) — Test and jump if signed
-- [TJZ](#tjz) — Test and jump if zero
-- [TJNZ](#tjnz) — Test and jump if not zero
-
-### Explanation
-TJNS tests the value in D and jumps to the address described by S if the value is not signed (D[31] = 0). The address (S) can be absolute or relative. To specify an absolute address, S must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to +255 instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset. Offsets are relative to the instruction following the TJNS.
+The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJNF.
 
 The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 
 
-## TJNZ — Test and Jump if Not Zero
 
-Tests a register value and jumps if it is not zero.
+## TJNS {#tjns}
 
-### Syntax
-```pasm
-        TJNZ    D, {#}S
+Test and jump if not signed
+[Flow Control Instruction](#flow-control-instructions) - Test a register value and jump if bit 31 is clear (positive/unsigned).
+
+**TJNS**  *Dest, {#}Src*
+
+---
+
+**Result:** Dest is tested and if it is not signed (Dest[31] = 0), PC is set to a new relative (#Src) or absolute (Src) address.
+
+- Dest is a register whose value is tested for sign bit.
+- Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
+
+```{=latex}
+\simpleencoding{EEEE}{1011101}{11I}{DDDDDDDDD}{SSSSSSSSS}{PC (conditional)}{---}{---}{2 or 4}
 ```
 
-### Result
-D is tested and if it is not zero, PC is set to a new relative (#S) or absolute (S) address.
+**Related:** [TJS](#tjs), [TJZ](#tjz), [TJNZ](#tjnz)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register whose value is tested for not zero |
-| S | Register, 9-bit literal, or 20-bit augmented literal specifying jump address |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 1011100 | 11I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | — | — | 2 or 4}
-
-### Related Instructions
-- [TJZ](#tjz) — Test and jump if zero
-- [TJF](#tjf) — Test and jump if full
-- [TJNF](#tjnf) — Test and jump if not full
-- [TJS](#tjs) — Test and jump if signed
-- [TJNS](#tjns) — Test and jump if not signed
-
-### Explanation
-TJNZ tests the value in D and jumps to the address described by S if the result is not zero.
-
-The address (S) can be absolute or relative. To specify an absolute address, S must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJNZ.
+TJNS tests the value in Dest and jumps to the address described by Src if the value is not signed (Dest[31] = 0). The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJNS.
 
 The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 
 
-## TJS — Test and Jump if Signed
 
-Tests a register value and jumps if bit 31 is set (negative).
+## TJZ / TJNZ {#tjz}
 
-### Syntax
-```pasm
-        TJS     D, {#}S
+Test and jump if zero / not zero {#tjnz}
+[Flow Control Instruction](#flow-control-instructions) - Test a register value and jump based on zero/non-zero result.
+
+**TJZ**  *Dest, {#}Src*
+**TJNZ**  *Dest, {#}Src*
+
+---
+
+**Result:** Dest is tested (not modified), and conditionally jumps:
+
+| Instruction | Jumps when |
+|-------------|------------|
+| TJZ | Dest = 0 |
+| TJNZ | Dest ≠ 0 |
+
+- Dest is a register whose value is tested (unchanged).
+- Src is the jump address: use # for relative, omit for absolute.
+
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011100}{10I}{DDDDDDDDD}{SSSSSSSSS}{PC*}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011100}{11I}{DDDDDDDDD}{SSSSSSSSS}{PC*}{---}{---}{2 or 4}
+\end{encodingtable}
+
+*PC is written only when the jump condition is met.
 ```
 
-### Result
-D is tested and if it is signed (D[31] = 1), PC is set to a new relative (#S) or absolute (S) address.
+**Related:** [TJF](#tjf), [TJNF](#tjnf), [TJS](#tjs), [TJNS](#tjns), [TJV](#tjv), [DJZ](#djz), [DJNZ](#djnz)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register whose value is tested for sign bit |
-| S | Register, 9-bit literal, or 20-bit augmented literal specifying jump address |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 1011101 | 10I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | — | — | 2 or 4}
+TJZ and TJNZ test Dest (without modifying it) and conditionally jump based on whether the value is zero or non-zero.
 
-### Related Instructions
-- [TJNS](#tjns) — Test and jump if not signed
-- [TJF](#tjf) — Test and jump if full
-- [TJNF](#tjnf) — Test and jump if not full
-- [TJZ](#tjz) — Test and jump if zero
-- [TJNZ](#tjnz) — Test and jump if not zero
+Unlike DJZ/DJNZ which decrement before testing, these instructions only test.
 
-### Explanation
-TJS tests the value in D and jumps to the address described by S if the result is signed (D[31] = 1).
+::: pasm2
+        TJNZ    count, #loop   ' Loop while count <> 0
+        TJZ     count, #done   ' Exit when count = 0
+:::
 
-The address (S) can be absolute or relative. To specify an absolute address, S must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to +255 instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset (a range of -524288 to +524287). Offsets are relative to the instruction following the TJS. The signed offset value is in units of whole instructions—it is added to PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added to PC when in Hub execution mode.
-
-The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken (2 or 13-20 cycles for Hub execution).
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
 
-## TJV — Test and Jump if Overflow
 
-Tests a register value against the C flag and jumps if overflow occurred.
+## TJS {#tjs}
 
-### Syntax
-```pasm
-        TJV     D, {#}S
+Test and jump if signed
+[Flow Control Instruction](#flow-control-instructions) - Test a register value and jump if bit 31 is set (negative).
+
+**TJS**  *Dest, {#}Src*
+
+---
+
+**Result:** Dest is tested and if it is signed (Dest[31] = 1), PC is set to a new relative (#Src) or absolute (Src) address.
+
+- Dest is a register whose value is tested for sign bit.
+- Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
+
+```{=latex}
+\simpleencoding{EEEE}{1011101}{10I}{DDDDDDDDD}{SSSSSSSSS}{PC (conditional)}{---}{---}{2 or 4}
 ```
 
-### Result
-D is tested against C and if it has overflowed (D[31] != C), PC is set to a new relative (#S) or absolute (S) address.
+**Related:** [TJNS](#tjns), [TJF](#tjf), [TJNF](#tjnf), [TJZ](#tjz), [TJNZ](#tjnz)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register whose value is tested for overflow |
-| S | Register, 9-bit literal, or 20-bit augmented literal specifying jump address |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 1011110 | 00I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | — | — | 2 or 4}
+TJS tests the value in Dest and jumps to the address described by Src if the result is signed (Dest[31] = 1).
 
-### Related Instructions
-- [ADDS](instructions-a.md#adds) — Add signed with overflow detection
-- [ADDSX](instructions-a.md#addsx) — Add signed extended with overflow detection
-- [SUBS](instructions-s.md#subs) — Subtract signed with overflow detection
-- [SUBSX](instructions-s.md#subsx) — Subtract signed extended with overflow detection
+The address (Src) can be absolute or relative. To specify an absolute address, Src must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJS.
 
-### Explanation
-TJV tests the value in D against C and jumps to the address described by S if D has overflowed (D[31] != C). This instruction requires that C be updated (to the correct sign) by the previous ADDS, ADDSX, SUBS, SUBSX, CMPS, CMPSX, or SUMx instruction. The address (S) can be absolute or relative. To specify an absolute address, S must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset (a range of -256 to +255 instructions) or use ##Label (or insert a prior AUGS instruction) for a 20-bit signed offset. Offsets are relative to the instruction following the TJV. The signed offset value is in units of whole instructions—it is added to PC as-is when in Cog/LUT execution mode and is multiplied by 4 then added to PC when in Hub execution mode (long-aligned Hub code not required).
+The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 
-The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken (2 or 13-20 cycles for Hub execution when taken).
+::: pasm2
+        TJS     value, #negative_handler  ' Jump if negative
+:::
 
 
-## TJZ — Test and Jump if Zero
 
-Tests a register value and jumps if it equals zero.
+## TJV {#tjv}
 
-### Syntax
-```pasm
-        TJZ     D, {#}S
+Test and jump if overflow
+[Flow Control Instruction](#flow-control-instructions) - Test a register value against the C flag and jump if overflow occurred.
+
+**TJV**  *Dest, {#}Src*
+
+---
+
+**Result:** Dest is tested against C and if it has overflowed (Dest[31] != C), PC is set to a new relative (#Src) or absolute (Src) address.
+
+- Dest is a register whose value is tested for overflow.
+- Src is a register, 9-bit literal, or 20-bit augmented literal specifying jump address.
+
+```{=latex}
+\simpleencoding{EEEE}{1011110}{00I}{DDDDDDDDD}{SSSSSSSSS}{PC (conditional)}{---}{---}{2 or 4}
 ```
 
-### Result
-D is tested and if it is zero, PC is set to a new relative (#S) or absolute (S) address.
+**Related:** [ADDS](#adds), [ADDSX](#addsx), [SUBS](#subs), [SUBSX](#subsx)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register whose value is tested for zero |
-| S | Register, 9-bit literal, or 20-bit augmented literal specifying jump address |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 1011100 | 10I | DDDDDDDDD | SSSSSSSSS | PC (conditional) | — | — | 2 or 4}
+TJV tests the value in Dest against C and jumps to the address described by Src if Dest has overflowed (Dest[31] != C). This instruction requires that C be updated (to the correct sign) by the previous ADDS, ADDSX, SUBS, SUBSX, CMPS, CMPSX, or SUMx instruction. The address (Src) can be absolute or relative.
 
-### Related Instructions
-- [TJNZ](#tjnz) — Test and jump if not zero
-- [TJF](#tjf) — Test and jump if full
-- [TJNF](#tjnf) — Test and jump if not full
+The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken.
 
-### Explanation
-TJZ tests the value in D and jumps to the address described by S if the result is zero.
-
-The address (S) can be absolute or relative. To specify an absolute address, S must be a register containing a 20-bit address value. To specify a relative address, use #Label for a 9-bit signed offset or use ##Label for a 20-bit signed offset. Offsets are relative to the instruction following the TJZ.
-
-The instruction takes 2 cycles if the jump is not taken, or 4 cycles if taken (2 or 13-20 cycles for Hub execution when taken).
+::: pasm2
+        ADDS    result, delta WC  ' Signed add, update C
+        TJV     result, #overflow_handler
+:::
 
 
-## TRGINT1 — Trigger Interrupt 1
 
-Software-triggers interrupt handler INT1.
 
-### Syntax
-```pasm
-        TRGINT1
+
+
+## TRGINT1 {#trgint1}
+
+Trigger interrupt 1
+[Interrupt Instruction](#interrupt-instructions) - Software-trigger interrupt handler 1.
+
+**TRGINT1**
+
+---
+
+**Result:** The INT1 interrupt handler is triggered regardless of STALLI mode.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{000100010}{000100100}{---}{---}{---}{2}
 ```
 
-### Result
-The INT1 interrupt handler is triggered regardless of STALLI mode.
+**Related:** [TRGINT2](#trgint2), [TRGINT3](#trgint3), [SETINT1](#setint1), [NIXINT1](#nixint1), [RETI0](#reti0)
 
-### Parameters
-None.
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 1101011 | 000 | 000100010 | 000100100 | — | — | — | 2}
-
-### Related Instructions
-- [TRGINT2](#trgint2) — Trigger interrupt 2
-- [TRGINT3](#trgint3) — Trigger interrupt 3
-- [SETINT1](instructions-s.md#setint1) — Set interrupt 1 handler
-- [STALLI](instructions-s.md#stalli) — Stall on interrupt
-
-### Explanation
-TRGINT1 software-triggers the INT1 interrupt handler, regardless of STALLI mode. This allows code to explicitly invoke interrupt service routines without waiting for external events.
-
-The instruction executes in 2 clock cycles.
+TRGINT1 software-triggers interrupt handler 1, regardless of STALLI mode. This allows code to explicitly invoke the INT1 service routine without waiting for external events.
 
 
-## TRGINT2 — Trigger Interrupt 2
 
-Software-triggers interrupt handler INT2.
+## TRGINT2 {#trgint2}
 
-### Syntax
-```pasm
-        TRGINT2
+Trigger interrupt 2
+[Interrupt Instruction](#interrupt-instructions) - Software-trigger interrupt handler 2.
+
+**TRGINT2**
+
+---
+
+**Result:** The INT2 interrupt handler is triggered regardless of STALLI mode.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{000100011}{000100100}{---}{---}{---}{2}
 ```
 
-### Result
-The INT2 interrupt handler is triggered regardless of STALLI mode.
+**Related:** [TRGINT1](#trgint1), [TRGINT3](#trgint3), [SETINT2](#setint2), [NIXINT2](#nixint2), [RETI0](#reti0)
 
-### Parameters
-None.
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 1101011 | 000 | 000100011 | 000100100 | — | — | — | 2}
-
-### Related Instructions
-- [TRGINT1](#trgint1) — Trigger interrupt 1
-- [TRGINT3](#trgint3) — Trigger interrupt 3
-- [SETINT2](instructions-s.md#setint2) — Set interrupt 2 handler
-- [STALLI](instructions-s.md#stalli) — Stall on interrupt
-
-### Explanation
-TRGINT2 software-triggers the INT2 interrupt handler, regardless of STALLI mode. This allows code to explicitly invoke interrupt service routines without waiting for external events.
-
-The instruction executes in 2 clock cycles.
+TRGINT2 software-triggers interrupt handler 2, regardless of STALLI mode. This allows code to explicitly invoke the INT2 service routine without waiting for external events.
 
 
-## TRGINT3 — Trigger Interrupt 3
 
-Software-triggers interrupt handler INT3.
+## TRGINT3 {#trgint3}
 
-### Syntax
-```pasm
-        TRGINT3
+Trigger interrupt 3
+[Interrupt Instruction](#interrupt-instructions) - Software-trigger interrupt handler 3.
+
+**TRGINT3**
+
+---
+
+**Result:** The INT3 interrupt handler is triggered regardless of STALLI mode.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{000100100}{000100100}{---}{---}{---}{2}
 ```
 
-### Result
-The INT3 interrupt handler is triggered regardless of STALLI mode.
+**Related:** [TRGINT1](#trgint1), [TRGINT2](#trgint2), [SETINT3](#setint3), [NIXINT3](#nixint3), [RETI0](#reti0)
 
-### Parameters
-None.
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 1101011 | 000 | 000100100 | 000100100 | — | — | — | 2}
-
-### Related Instructions
-- [TRGINT1](#trgint1) — Trigger interrupt 1
-- [TRGINT2](#trgint2) — Trigger interrupt 2
-- [SETINT3](instructions-s.md#setint3) — Set interrupt 3 handler
-- [STALLI](instructions-s.md#stalli) — Stall on interrupt
-
-### Explanation
-TRGINT3 software-triggers the INT3 interrupt handler, regardless of STALLI mode. This allows code to explicitly invoke interrupt service routines without waiting for external events.
-
-The instruction executes in 2 clock cycles.
-
-# W Instructions
-
-This section documents all PASM2 instructions beginning with W, including wait operations, memory writes, FIFO operations, and Smart Pin configuration.
+TRGINT3 software-triggers interrupt handler 3, regardless of STALLI mode. This allows code to explicitly invoke the INT3 service routine without waiting for external events.
 
 
-## WAITATN — Event
+# Instructions: W
 
-Wait for attention event from another cog.
+This section contains all PASM2 instructions beginning with the letter W.
 
-### Syntax
-```pasm
-        WAITATN {WC|WZ|WCZ}
+
+
+## WAITATN {#waitatn}
+
+Wait for attention
+[Event Instruction](#event-instructions) - Wait for attention event from another cog.
+
+**WAITATN**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Waits for an attention event to occur (unless the event flag is already set), then clears the event flag and resumes execution.
+
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000011110}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for an attention event to occur (unless the event flag is already set), then clears the event flag and resumes execution at the next instruction. Optionally times out if the attention event doesn't occur soon enough, setting C and/or Z flags before resuming.
+**Related:** [COGATN](#cogatn), [POLLATN](#pollatn), [JATN](#jatn), [JNATN](#jnatn)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000011110 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [COGATN](#cogatn) — Send attention to another cog
-- [POLLATN](#pollatn) — Poll attention flag without waiting
-- [JATN](#jatn) — Jump if attention flag set
-- [JNATN](#jnatn) — Jump if attention flag clear
-
-### Explanation
 WAITATN waits for an attention event to occur, stalling the pipeline until the event flag is set. The attention event flag is set whenever another cog issues an attention request for this cog using COGATN. The flag is cleared upon cog start or execution of POLLATN, WAITATN, JATN, or JNATN instructions.
 
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITATN. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
+To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITATN. The WC, WZ, or WCZ effect is recommended only when timeout is specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
 
 During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
 
+::: pasm2
+        WAITATN                ' Wait for attention from another cog
+:::
 
-## WAITCT1 — Event
 
-Wait for counter 1 event flag.
 
-### Syntax
-```pasm
-        WAITCT1 {WC|WZ|WCZ}
+## WAITCT1 / WAITCT2 / WAITCT3 {#waitct1}
+
+Wait for counter event {#waitct2} {#waitct3}
+[Event Instruction](#event-instructions) - Wait for counter event 1, 2, or 3 flag.
+
+**WAITCT1**  **{WC|WZ|WCZ}**
+**WAITCT2**  **{WC|WZ|WCZ}**
+**WAITCT3**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Waits for the specified counter event flag (CT1, CT2, or CT3) to be set, then clears the flag and resumes execution.
+
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
+
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZ0}{000010001}{000100100}{---}{Timeout}{Timeout}{2+}
+\encodingrowcont{EEEE}{1101011}{CZ0}{000010010}{000100100}{---}{Timeout}{Timeout}{2+}
+\encodingrow{EEEE}{1101011}{CZ0}{000010011}{000100100}{---}{Timeout}{Timeout}{2+}
+\end{encodingtable}
 ```
 
-### Result
-Waits for the CT1 event flag to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
+**Related:** [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [POLLCT1](#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [JCT1](#jct1), [JCT2](#jct2), [JCT3](#jct3)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000010001 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
+WAITCT1, WAITCT2, and WAITCT3 wait for counter events 1, 2, or 3 respectively, stalling the pipeline until the corresponding event flag is set. Each counter event flag is set whenever the System Counter (CT) passes the value in the corresponding event trigger register (CT1, CT2, or CT3).
 
-### Related Instructions
-- [WAITCT2](#waitct2) — Wait for counter 2 event
-- [WAITCT3](#waitct3) — Wait for counter 3 event
-- [ADDCT1](#addct1) — Add value to CT1 event trigger
-- [POLLCT1](#pollct1) — Poll CT1 flag without waiting
+The flags are cleared by execution of ADDCT*n*, POLLCT*n*, WAITCT*n*, JCT*n*, or JNCT*n* instructions (where *n* is 1, 2, or 3).
 
-### Explanation
-WAITCT1 waits for a counter 1 event to occur, stalling the pipeline until the event flag is set. The CT1 event flag is set whenever the System Counter (CT) passes the value in the CT1 event trigger register; i.e., MSB of (CT - CT1) is 0.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITCT1. The WC/WZ/WCZ effect is recommended only with timeout specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first.
-
-The CT1 event flag is cleared by execution of ADDCT1, POLLCT1, WAITCT1, JCT1, or JNCT1 instructions.
-
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed until the wait ends. This provides deterministic timing for time-critical operations.
+To set an optional timeout, insert a SETQ instruction immediately before the WAITCTn instruction.
 
 
-## WAITCT2 — Event
 
-Wait for counter 2 event flag.
+## WAITFBW {#waitfbw}
 
-### Syntax
-```pasm
-        WAITCT2 {WC|WZ|WCZ}
+Wait for FIFO block wrap
+[Event Instruction](#event-instructions) - Wait for FIFO-interface-block-wrap event.
+
+**WAITFBW**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Waits for a FIFO-interface-block-wrap event to occur, then clears the flag and resumes execution.
+
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000011001}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for the CT2 event flag to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
+**Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [FBLOCK](#fblock), [POLLFBW](#pollfbw)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000010010 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITCT1](#waitct1) — Wait for counter 1 event
-- [WAITCT3](#waitct3) — Wait for counter 3 event
-- [ADDCT2](#addct2) — Add value to CT2 event trigger
-- [POLLCT2](#pollct2) — Poll CT2 flag without waiting
-
-### Explanation
-WAITCT2 waits for a counter 2 event to occur, stalling the pipeline until the event flag is set. The CT2 event flag is set whenever the System Counter (CT) passes the value in the CT2 event trigger register; i.e., MSB of (CT - CT2) is 0.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITCT2. The WC/WZ/WCZ effect is recommended only with timeout specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first.
-
-The CT2 event flag is cleared by execution of ADDCT2, POLLCT2, WAITCT2, JCT2, or JNCT2 instructions.
-
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed until the wait ends.
-
-
-## WAITCT3 — Event
-
-Wait for counter 3 event flag.
-
-### Syntax
-```pasm
-        WAITCT3 {WC|WZ|WCZ}
-```
-
-### Result
-Waits for the CT3 event flag to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
-
-### Encoding
-```
-EEEE 1101011 CZ0 000010011 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITCT1](#waitct1) — Wait for counter 1 event
-- [WAITCT2](#waitct2) — Wait for counter 2 event
-- [ADDCT3](#addct3) — Add value to CT3 event trigger
-- [POLLCT3](#pollct3) — Poll CT3 flag without waiting
-
-### Explanation
-WAITCT3 waits for a counter 3 event to occur, stalling the pipeline until the event flag is set. The counter 3 event flag is set whenever the System Counter (CT) passes the value in the CT3 event trigger register; i.e., MSB of (CT - CT3) is 0.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITCT3. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
-
-The counter event flag is cleared upon execution of ADDCT3, POLLCT3, WAITCT3, JCT3, or JNCT3 instructions.
-
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
-
-
-## WAITFBW — Event
-
-Wait for FIFO-interface-block-wrap event.
-
-### Syntax
-```pasm
-        WAITFBW {WC|WZ|WCZ}
-```
-
-### Result
-Waits for a FIFO-interface-block-wrap event to occur, then clears the flag and resumes execution. Optionally times out with C/Z set if event doesn't occur soon enough.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
-
-### Encoding
-```
-EEEE 1101011 CZ0 000011001 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [RDFAST](#rdfast) — Set up fast FIFO read
-- [WRFAST](#wrfast) — Set up fast FIFO write
-- [FBLOCK](#fblock) — Set FIFO block parameters
-- [POLLFBW](#pollfbw) — Poll FIFO block wrap flag
-
-### Explanation
 WAITFBW waits for a FIFO-interface-block-wrap event to occur, stalling the pipeline until the event flag is set. The FIFO-interface-block-wrap event flag is set whenever the Hub RAM FIFO interface exhausts its block count and reloads its block count and start address.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITFBW. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
 
 The FIFO-interface-block-wrap event flag is cleared upon execution of RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, or JNFBW instructions.
 
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
 
 
-## WAITINT — Event
+## WAITINT {#waitint}
 
-Wait for interrupt-occurred event.
+Wait for interrupt
+[Event Instruction](#event-instructions) - Wait for interrupt-occurred event.
 
-### Syntax
-```pasm
-        WAITINT {WC|WZ|WCZ}
+**WAITINT**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Waits for an interrupt-occurred event, then clears the flag and resumes execution.
+
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000010000}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for an interrupt-occurred event, then clears the flag and resumes execution. Optionally times out with C/Z set if event doesn't occur soon enough.
+**Related:** [POLLINT](#pollint), [JINT](#jint), [JNINT](#jnint)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000010000 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [POLLINT](#pollint) — Poll interrupt flag without waiting
-- [JINT](#jint) — Jump if interrupt occurred
-- [JNINT](#jnint) — Jump if interrupt not occurred
-
-### Explanation
 WAITINT waits for an interrupt-occurred event to occur, stalling the pipeline until the event flag is set. The interrupt-occurred event flag is set whenever interrupt 1, 2, or 3 occurs—debug interrupts are ignored.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITINT. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
 
 The interrupt-occurred event flag is cleared upon cog start or execution of POLLINT, WAITINT, JINT, or JNINT instructions.
 
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
 
 
-## WAITPAT — Event
+## WAITPAT {#waitpat}
 
-Wait for pin-pattern-detected event.
+Wait for pattern
+[Event Instruction](#event-instructions) - Wait for pin-pattern-detected event.
 
-### Syntax
-```pasm
-        WAITPAT {WC|WZ|WCZ}
+**WAITPAT**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Waits for a pin-pattern-detected event, then clears the flag and resumes execution.
+
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000011000}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for a pin-pattern-detected event, then clears the flag and resumes execution. Optionally times out with C/Z set if event doesn't occur soon enough.
+**Related:** [SETPAT](#setpat), [POLLPAT](#pollpat), [JPAT](#jpat), [JNPAT](#jnpat)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000011000 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [SETPAT](#setpat) — Configure pin pattern detector
-- [POLLPAT](#pollpat) — Poll pattern flag without waiting
-- [JPAT](#jpat) — Jump if pattern detected
-- [JNPAT](#jnpat) — Jump if pattern not detected
-
-### Explanation
 WAITPAT waits for a pin-pattern-detected event to occur, stalling the pipeline until the event flag is set. The pin-pattern-detected event flag is set whenever the masked input pins match or don't match the pattern described by a previous SETPAT instruction.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITPAT. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
 
 The pin-pattern-detected event flag is cleared upon execution of SETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions.
 
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
+::: pasm2
+        SETPAT  mask, pattern  ' Set up pattern detector
+        WAITPAT                ' Wait for pattern match
+:::
 
 
-## WAITSE1 — Event
 
-Wait for selectable event 1 flag.
+## WAITSE1 {#waitse1}
 
-### Syntax
-```pasm
-        WAITSE1 {WC|WZ|WCZ}
+Wait for selectable event 1
+[Event Instruction](#event-instructions) - Wait for selectable event 1 flag.
+
+**WAITSE1**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Waits for the SE1 selectable event flag to be set, then clears the flag and resumes execution.
+
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000010100}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for the SE1 event flag to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
+**Related:** [WAITSE2](#waitse2), [WAITSE3](#waitse3), [WAITSE4](#waitse4), [SETSE1](#setse1), [POLLSE1](#pollse1)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000010100 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITSE2](#waitse2) — Wait for selectable event 2
-- [WAITSE3](#waitse3) — Wait for selectable event 3
-- [WAITSE4](#waitse4) — Wait for selectable event 4
-- [SETSE1](#setse1) — Configure selectable event 1
-- [POLLSE1](#pollse1) — Poll SE1 flag without waiting
-
-### Explanation
-WAITSE1 waits for selectable event 1 to occur, stalling the pipeline until the event flag is set. The SE1 event flag is set whenever the configured selectable event 1 occurs.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITSE1. The WC/WZ/WCZ effect is recommended only with timeout specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first.
-
-The SE1 event flag is cleared by execution of SETSE1, POLLSE1, WAITSE1, JSE1, or JNSE1 instructions.
-
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed until the wait ends.
+WAITSE1 waits for selectable event 1 to occur, stalling the pipeline until the SE1 event flag is set. The flag is cleared by execution of SETSE1, POLLSE1, WAITSE1, JSE1, or JNSE1 instructions.
 
 
-## WAITSE2 — Event
 
-Wait for selectable event 2 flag.
+## WAITSE2 {#waitse2}
 
-### Syntax
-```pasm
-        WAITSE2 {WC|WZ|WCZ}
+Wait for selectable event 2
+[Event Instruction](#event-instructions) - Wait for selectable event 2 flag.
+
+**WAITSE2**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Waits for the SE2 selectable event flag to be set, then clears the flag and resumes execution.
+
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000010101}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for the SE2 event flag to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
+**Related:** [WAITSE1](#waitse1), [WAITSE3](#waitse3), [WAITSE4](#waitse4), [SETSE2](#setse2), [POLLSE2](#pollse2)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000010101 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITSE1](#waitse1) — Wait for selectable event 1
-- [WAITSE3](#waitse3) — Wait for selectable event 3
-- [WAITSE4](#waitse4) — Wait for selectable event 4
-- [SETSE2](#setse2) — Configure selectable event 2
-- [POLLSE2](#pollse2) — Poll SE2 flag without waiting
-
-### Explanation
-WAITSE2 waits for selectable event 2 to occur, stalling the pipeline until the event flag is set. The SE2 event flag is set whenever the configured selectable event 2 occurs.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITSE2. The WC/WZ/WCZ effect is recommended only with timeout specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first.
-
-The SE2 event flag is cleared by execution of SETSE2, POLLSE2, WAITSE2, JSE2, or JNSE2 instructions.
-
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed until the wait ends.
+WAITSE2 waits for selectable event 2 to occur, stalling the pipeline until the SE2 event flag is set. The flag is cleared by execution of SETSE2, POLLSE2, WAITSE2, JSE2, or JNSE2 instructions.
 
 
-## WAITSE3 — Event
 
-Wait for selectable event 3 flag.
+## WAITSE3 {#waitse3}
 
-### Syntax
-```pasm
-        WAITSE3 {WC|WZ|WCZ}
+Wait for selectable event 3
+[Event Instruction](#event-instructions) - Wait for selectable event 3 flag.
+
+**WAITSE3**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Waits for the SE3 selectable event flag to be set, then clears the flag and resumes execution.
+
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000010110}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for the SE3 event flag to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
+**Related:** [WAITSE1](#waitse1), [WAITSE2](#waitse2), [WAITSE4](#waitse4), [SETSE3](#setse3), [POLLSE3](#pollse3)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000010110 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITSE1](#waitse1) — Wait for selectable event 1
-- [WAITSE2](#waitse2) — Wait for selectable event 2
-- [WAITSE4](#waitse4) — Wait for selectable event 4
-- [SETSE3](#setse3) — Configure selectable event 3
-- [POLLSE3](#pollse3) — Poll SE3 flag without waiting
-
-### Explanation
-WAITSE3 waits for selectable event 3 to occur, stalling the pipeline until the event flag is set. The SE3 event flag is set whenever the configured selectable event 3 occurs.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITSE3. The WC/WZ/WCZ effect is recommended only with timeout specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first.
-
-The SE3 event flag is cleared by execution of SETSE3, POLLSE3, WAITSE3, JSE3, or JNSE3 instructions.
-
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed until the wait ends.
+WAITSE3 waits for selectable event 3 to occur, stalling the pipeline until the SE3 event flag is set. The flag is cleared by execution of SETSE3, POLLSE3, WAITSE3, JSE3, or JNSE3 instructions.
 
 
-## WAITSE4 — Event
 
-Wait for selectable event 4 flag.
+## WAITSE4 {#waitse4}
 
-### Syntax
-```pasm
-        WAITSE4 {WC|WZ|WCZ}
+Wait for selectable event 4
+[Event Instruction](#event-instructions) - Wait for selectable event 4 flag.
+
+**WAITSE4**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Waits for the SE4 selectable event flag to be set, then clears the flag and resumes execution.
+
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000010111}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for the SE4 event flag to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
+**Related:** [WAITSE1](#waitse1), [WAITSE2](#waitse2), [WAITSE3](#waitse3), [SETSE4](#setse4), [POLLSE4](#pollse4)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000010111 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITSE1](#waitse1) — Wait for selectable event 1
-- [WAITSE2](#waitse2) — Wait for selectable event 2
-- [WAITSE3](#waitse3) — Wait for selectable event 3
-- [SETSE4](#setse4) — Configure selectable event 4
-- [POLLSE4](#pollse4) — Poll SE4 flag without waiting
-
-### Explanation
-WAITSE4 waits for selectable event 4 to occur, stalling the pipeline until the event flag is set. The SE4 event flag is set whenever the configured selectable event 4 occurs.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITSE4. The WC/WZ/WCZ effect is recommended only with timeout specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first.
-
-The SE4 event flag is cleared by execution of SETSE4, POLLSE4, WAITSE4, JSE4, or JNSE4 instructions.
-
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed until the wait ends.
+WAITSE4 waits for selectable event 4 to occur, stalling the pipeline until the SE4 event flag is set. The flag is cleared by execution of SETSE4, POLLSE4, WAITSE4, JSE4, or JNSE4 instructions.
 
 
-## WAITX — Miscellaneous
 
-Wait for D+1 clock cycles.
+## WAITX {#waitx}
 
-### Syntax
-```pasm
-        WAITX   {#}D {WC/WZ/WCZ}
+Wait cycles
+[Timing Instruction](#timing-instructions) - Wait for Dest+1 clock cycles.
+
+**WAITX**  *{#}Dest*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Stalls the cog for Dest+1 clock cycles, providing precise timing delays. Sets C and Z to 0 after completion.
+
+- Dest is the number of cycles minus 1 to wait (0-511 for immediate).
+- WC, WZ, or WCZ are optional; always set to 0 after completion.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{000011111}{---}{0}{0}{2 + D}
 ```
 
-### Result
-Stalls the cog for D+1 clock cycles, providing precise timing delays. Sets C and Z to 0 after completion.
+**Related:** [WAITCT1](#waitct1), [WAITCT2](#waitct2), [WAITCT3](#waitct3)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Number of cycles minus 1 to wait (0-511 for immediate) |
-| WC/WZ/WCZ | Optional effects; always set to 0 after completion |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZL DDDDDDDDD 000011111
-```
-**Write:** —
-**C Flag:** Set to 0 after completion
-**Z Flag:** Set to 0 after completion
-**Clocks:** 2 + D
+WAITX stalls the cog for precise timing delays. The actual wait time is Dest+1 cycles minimum. This instruction is critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.
 
-### Related Instructions
-- [WAITCT1](#waitct1) — Wait for specific CT value
-- [WAITCT2](#waitct2) — Wait for specific CT value
-- [WAITCT3](#waitct3) — Wait for specific CT value
-- [WAITPAT](#waitpat) — Wait for pin pattern
-- [WAITSE1-4](#waitse1) — Wait for selectable event
+WAITX blocks cog execution completely—no instructions execute and no interrupts are processed during the wait period. For long delays, consider using WAITCT instructions instead.
 
-### Explanation
-WAITX stalls the cog for precise timing delays. The actual wait time is D+1 cycles minimum. This instruction is critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.
-
-WAITX blocks cog execution completely—no instructions execute and no interrupts are processed during the wait period. For long delays, consider using WAITCT instructions instead. For continuous PWM generation, use Smart Pins rather than software loops with WAITX.
-
-WAITX is essential for protocols requiring precise bit timing, such as HUB75 RGB LED panel driving, SPI bit-banging, and other time-critical I/O operations. The instruction guarantees deterministic timing regardless of other system activity.
+::: pasm2
+        WAITX   #99            ' Wait 100 clock cycles
+:::
 
 
-## WAITXFI — Event
 
-Wait for streamer-finished event.
+## WAITXFI {#waitxfi}
 
-### Syntax
-```pasm
-        WAITXFI {WC|WZ|WCZ}
+Wait for streamer finished
+[Event Instruction](#event-instructions) - Wait for streamer-finished event.
+
+**WAITXFI**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Waits for a streamer-finished event to occur, then clears the flag and resumes execution.
+
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000011011}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for a streamer-finished event to occur, then clears the flag and resumes execution. Optionally times out with C/Z set if event doesn't occur soon enough.
+**Related:** [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](#xinit), [XCONT](#xcont)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000011011 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITXMT](#waitxmt) — Wait for streamer empty
-- [WAITXRL](#waitxrl) — Wait for streamer LUT rollover
-- [WAITXRO](#waitxro) — Wait for streamer NCO rollover
-- [XINIT](#xinit) — Initialize streamer
-- [XCONT](#xcont) — Continue streamer
-
-### Explanation
 WAITXFI waits for a streamer-finished event to occur, stalling the pipeline until the event flag is set. The streamer-finished event flag is set whenever the streamer runs out of commands to process.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITXFI. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
 
 The streamer-finished event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXFI, WAITXFI, JXFI, or JNXFI instructions.
 
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
 
 
-## WAITXMT — Event
+## WAITXMT {#waitxmt}
 
-Wait for streamer-empty event.
+Wait for streamer empty
+[Event Instruction](#event-instructions) - Wait for streamer-empty event.
 
-### Syntax
-```pasm
-        WAITXMT {WC|WZ|WCZ}
+**WAITXMT**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Waits for a streamer-empty event to occur, then clears the flag and resumes execution.
+
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000011010}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for a streamer-empty event to occur, then clears the flag and resumes execution. Optionally times out with C/Z set if event doesn't occur soon enough.
+**Related:** [WAITXFI](#waitxfi), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](#xinit), [XCONT](#xcont)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000011010 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITXFI](#waitxfi) — Wait for streamer finished
-- [WAITXRL](#waitxrl) — Wait for streamer LUT rollover
-- [WAITXRO](#waitxro) — Wait for streamer NCO rollover
-- [XINIT](#xinit) — Initialize streamer
-- [XCONT](#xcont) — Continue streamer
-
-### Explanation
 WAITXMT waits for a streamer-empty event to occur, stalling the pipeline until the event flag is set. The streamer-empty event flag is set whenever the streamer is ready for a new command.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITXMT. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
 
 The streamer-empty event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXMT, WAITXMT, JXMT, or JNXMT instructions.
 
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
 
 
-## WAITXRL — Event
+## WAITXRL {#waitxrl}
 
-Wait for streamer-LUT-RAM-rollover event.
+Wait for streamer LUT rollover
+[Event Instruction](#event-instructions) - Wait for streamer-LUT-RAM-rollover event.
 
-### Syntax
-```pasm
-        WAITXRL {WC|WZ|WCZ}
+**WAITXRL**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Waits for a streamer-LUT-RAM-rollover event to occur, then clears the flag and resumes execution.
+
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000011101}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for a streamer-LUT-RAM-rollover event to occur, then clears the flag and resumes execution. Optionally times out with C/Z set if event doesn't occur soon enough.
+**Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRO](#waitxro), [POLLXRL](#pollxrl)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000011101 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITXFI](#waitxfi) — Wait for streamer finished
-- [WAITXMT](#waitxmt) — Wait for streamer empty
-- [WAITXRO](#waitxro) — Wait for streamer NCO rollover
-- [POLLXRL](#pollxrl) — Poll LUT rollover flag
-
-### Explanation
 WAITXRL waits for a streamer-LUT-RAM-rollover event to occur, stalling the pipeline until the event flag is set. The streamer-LUT-RAM-rollover event flag is set whenever location $1FF of the Lookup RAM is read by the streamer.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITXRL. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
 
 The streamer-LUT-RAM-rollover event flag is cleared upon cog start or execution of POLLXRL, WAITXRL, JXRL, or JNXRL instructions.
 
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
 
 
-## WAITXRO — Event
+## WAITXRO {#waitxro}
 
-Wait for streamer-NCO-rollover event.
+Wait for streamer NCO rollover
+[Event Instruction](#event-instructions) - Wait for streamer-NCO-rollover event.
 
-### Syntax
-```pasm
-        WAITXRO {WC|WZ|WCZ}
+**WAITXRO**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Waits for a streamer-NCO-rollover event to occur, then clears the flag and resumes execution.
+
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000011100}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for a streamer-NCO-rollover event to occur, then clears the flag and resumes execution. Optionally times out with C/Z set if event doesn't occur soon enough.
+**Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [POLLXRO](#pollxro)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000011100 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITXFI](#waitxfi) — Wait for streamer finished
-- [WAITXMT](#waitxmt) — Wait for streamer empty
-- [WAITXRL](#waitxrl) — Wait for streamer LUT rollover
-- [POLLXRO](#pollxro) — Poll NCO rollover flag
-
-### Explanation
 WAITXRO waits for a streamer-NCO-rollover event to occur, stalling the pipeline until the event flag is set. The streamer-NCO-rollover event flag is set whenever the streamer's numerically-controlled oscillator (NCO) rolls over.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITXRO. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
 
 The streamer-NCO-rollover event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXRO, WAITXRO, JXRO, or JNXRO instructions.
 
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
 
 
-## WFBYTE — Hub FIFO
+## WFBYTE {#wfbyte}
 
-Write byte to FIFO.
+Write FIFO byte
+[FIFO Instruction](#fifo-instructions) - Write byte to FIFO.
 
-### Syntax
-```pasm
-        WFBYTE  {#}D
+**WFBYTE**  *{#}Dest*
+
+---
+
+**Result:** Writes the byte in Dest[7:0] into the FIFO. Must be used after WRFAST has configured the FIFO.
+
+- Dest is the byte value to write (bits 7:0 used).
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000010101}{---}{---}{---}{2}
 ```
 
-### Result
-Writes the byte in D[7:0] into the FIFO. Must be used after WRFAST has configured the FIFO.
+**Related:** [WFWORD](#wfword), [WFLONG](#wflong), [WRFAST](#wrfast)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Byte value to write (bits 7:0 used) |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 00L DDDDDDDDD 000010101
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
+WFBYTE writes a byte from Dest[7:0] into the Hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast Hub memory writes.
 
-### Related Instructions
-- [WFWORD](#wfword) — Write word to FIFO
-- [WFLONG](#wflong) — Write long to FIFO
-- [WRFAST](#wrfast) — Set up fast FIFO write
-
-### Explanation
-WFBYTE writes a byte from D[7:0] into the Hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast Hub memory writes. The FIFO provides high-performance streaming writes to Hub RAM.
-
-Only the lower 8 bits of D are written; the upper 24 bits are ignored. WFBYTE executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
+Only the lower 8 bits of Dest are written. WFBYTE executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
 
 
-## WFLONG — Hub FIFO
 
-Write long to FIFO.
+## WFLONG {#wflong}
 
-### Syntax
-```pasm
-        WFLONG  {#}D
+Write FIFO long
+[FIFO Instruction](#fifo-instructions) - Write long to FIFO.
+
+**WFLONG**  *{#}Dest*
+
+---
+
+**Result:** Writes the long in Dest[31:0] into the FIFO. Must be used after WRFAST has configured the FIFO.
+
+- Dest is the long value to write (all 32 bits used).
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000010111}{---}{---}{---}{2}
 ```
 
-### Result
-Writes the long in D[31:0] into the FIFO. Must be used after WRFAST has configured the FIFO.
+**Related:** [WFBYTE](#wfbyte), [WFWORD](#wfword), [WRFAST](#wrfast)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Long value to write (all 32 bits used) |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 00L DDDDDDDDD 000010111
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
+WFLONG writes a long (32-bit value) from Dest[31:0] into the Hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast Hub memory writes.
 
-### Related Instructions
-- [WFBYTE](#wfbyte) — Write byte to FIFO
-- [WFWORD](#wfword) — Write word to FIFO
-- [WRFAST](#wrfast) — Set up fast FIFO write
-
-### Explanation
-WFLONG writes a long (32-bit value) from D[31:0] into the Hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast Hub memory writes. The FIFO provides high-performance streaming writes to Hub RAM.
-
-All 32 bits of D are written. WFLONG executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
+All 32 bits of Dest are written. WFLONG executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
 
 
-## WFWORD — Hub FIFO
 
-Write word to FIFO.
+## WFWORD {#wfword}
 
-### Syntax
-```pasm
-        WFWORD  {#}D
+Write FIFO word
+[FIFO Instruction](#fifo-instructions) - Write word to FIFO.
+
+**WFWORD**  *{#}Dest*
+
+---
+
+**Result:** Writes the word in Dest[15:0] into the FIFO. Must be used after WRFAST has configured the FIFO.
+
+- Dest is the word value to write (bits 15:0 used).
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000010110}{---}{---}{---}{2}
 ```
 
-### Result
-Writes the word in D[15:0] into the FIFO. Must be used after WRFAST has configured the FIFO.
+**Related:** [WFBYTE](#wfbyte), [WFLONG](#wflong), [WRFAST](#wrfast)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Word value to write (bits 15:0 used) |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 00L DDDDDDDDD 000010110
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
+WFWORD writes a word (16-bit value) from Dest[15:0] into the Hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast Hub memory writes.
 
-### Related Instructions
-- [WFBYTE](#wfbyte) — Write byte to FIFO
-- [WFLONG](#wflong) — Write long to FIFO
-- [WRFAST](#wrfast) — Set up fast FIFO write
-
-### Explanation
-WFWORD writes a word (16-bit value) from D[15:0] into the Hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast Hub memory writes. The FIFO provides high-performance streaming writes to Hub RAM.
-
-Only the lower 16 bits of D are written; the upper 16 bits are ignored. WFWORD executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
+Only the lower 16 bits of Dest are written. WFWORD executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
 
 
-## WMLONG — Hub RAM
 
-Write masked long to hub RAM (non-zero bytes only).
+## WMLONG {#wmlong}
 
-### Syntax
-```pasm
-        WMLONG  D,{#}S/P
+Write masked long
+[Hub Instruction](#hub-instructions) - Write masked long to hub RAM (non-zero bytes only).
+
+**WMLONG**  *Dest, {#}Src/P*
+
+---
+
+**Result:** Writes only non-$00 bytes in Dest[31:0] to hub address Src/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.
+
+- Dest is the long value with bytes to write (non-zero bytes only).
+- Src/P is the hub address or pointer (PTRA/PTRB).
+
+```{=latex}
+\simpleencoding{EEEE}{1010011}{11I}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{3...10}
 ```
 
-### Result
-Writes only non-$00 bytes in D[31:0] to hub address S/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.
+**Related:** [WRLONG](#wrlong), [WRBYTE](#wrbyte), [WRWORD](#wrword)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Long value with bytes to write (non-zero bytes only) |
-| S/P | Hub address or pointer (PTRA/PTRB) |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1010011 11I DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 3...10
-
-### Related Instructions
-- [WRLONG](#wrlong) — Write long to hub RAM
-- [WRBYTE](#wrbyte) — Write byte to hub RAM
-- [WRWORD](#wrword) — Write word to hub RAM
-
-### Explanation
-WMLONG writes only non-zero bytes from D to Hub RAM at address S. Each byte in D is examined: if the byte is $00, that byte position in Hub RAM is not modified; if the byte is non-zero, it is written to Hub RAM.
+WMLONG writes only non-zero bytes from Dest to Hub RAM at address Src. Each byte in Dest is examined: if the byte is $00, that byte position in Hub RAM is not modified; if the byte is non-zero, it is written to Hub RAM.
 
 This masked write capability is useful for sprite graphics, text overlay, and other applications where selective pixel/byte updates are needed without affecting other data in the same long.
 
-Prior execution of SETQ or SETQ2 invokes cog or LUT block transfer mode, writing multiple longs with masking.
+Prior execution of SETQ or SETQ2 invokes cog or LUT block transfer mode.
 
 
-## WRBYTE — Hub RAM
 
-Write byte to hub RAM.
+## WRBYTE {#wrbyte}
 
-### Syntax
-```pasm
-        WRBYTE  {#}D,{#}S/P
+Write byte
+[Hub Instruction](#hub-instructions) - Write byte to hub RAM.
+
+**WRBYTE**  *{#}Dest, {#}Src/P*
+
+---
+
+**Result:** Writes the byte in Dest[7:0] to hub address Src/PTRx.
+
+- Dest is the byte value to write (bits 7:0 used).
+- Src/P is the hub address or pointer (PTRA/PTRB).
+
+```{=latex}
+\simpleencoding{EEEE}{1100010}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{3...10}
 ```
 
-### Result
-Writes the byte in D[7:0] to hub address S/PTRx.
+**Related:** [WRWORD](#wrword), [WRLONG](#wrlong), [RDBYTE](#rdbyte)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Byte value to write (bits 7:0 used) |
-| S/P | Hub address or pointer (PTRA/PTRB) |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1100010 0LI DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 3...10
+WRBYTE writes the byte in Dest[7:0] to Hub RAM at address Src/PTRx. Only the lower 8 bits of Dest are written.
 
-### Related Instructions
-- [WRWORD](#wrword) — Write word to hub RAM
-- [WRLONG](#wrlong) — Write long to hub RAM
-- [RDBYTE](#rdbyte) — Read byte from hub RAM
+The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
 
-### Explanation
-WRBYTE writes the byte in D[7:0] to Hub RAM at address S/PTRx. Only the lower 8 bits of D are written; the upper 24 bits are ignored.
-
-The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. Hub RAM uses a rotating time-slot system where each cog gets access during its assigned slot. If the instruction executes during this cog's slot, it completes in 3 cycles. Otherwise, it must wait for the next available slot.
-
-When S specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes (++ and --) can be applied for sequential access.
+::: pasm2
+        WRBYTE  value, ptra++  ' Write byte, increment pointer
+:::
 
 
-## WRC — Math and Logic
 
-Write C flag value to register.
+## WRC / WRNC / WRZ / WRNZ {#wrc}
 
-### Syntax
-```pasm
-        WRC     D
-```
+Write flag to register {#wrnc} {#wrz} {#wrnz}
+[Flag Instruction](#flag-instructions) - Write C, NC, Z, or NZ flag value to register.
 
-### Result
-Writes 0 or 1 to D according to the C flag state. D = {31'b0, C}.
+**WRC**  *Dest*
+**WRNC**  *Dest*
+**WRZ**  *Dest*
+**WRNZ**  *Dest*
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register |
+---
 
-### Encoding
-```
-EEEE 1101011 000 DDDDDDDDD 001101100
-```
-**Write:** D
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
+**Result:** Writes 0 or 1 to Dest based on the specified flag condition:
 
-### Related Instructions
-- [WRNC](#wrnc) — Write inverted C flag to register
-- [WRZ](#wrz) — Write Z flag to register
-- [WRNZ](#wrnz) — Write inverted Z flag to register
+| Instruction | Dest value |
+|-------------|------------|
+| WRC | 1 if C=1, else 0 |
+| WRNC | 1 if C=0, else 0 |
+| WRZ | 1 if Z=1, else 0 |
+| WRNZ | 1 if Z=0, else 0 |
 
-### Explanation
-WRC copies the C flag state to register D. If C is set (1), D becomes 1. If C is clear (0), D becomes 0. The upper 31 bits of D are cleared to zero.
+- Dest is the destination register. Upper 31 bits are cleared to zero.
 
-This instruction provides a convenient way to convert flag states into numeric values for computation or storage. Combined with conditional execution, WRC enables flag-based value selection without branching.
-
-
-## WRFAST — Hub FIFO
-
-Begin new fast hub write via FIFO.
-
-### Syntax
-```pasm
-        WRFAST  {#}D,{#}S
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{000}{DDDDDDDDD}{001101100}{D}{---}{---}{2}
+\encodingrowcont{EEEE}{1101011}{000}{DDDDDDDDD}{001101101}{D}{---}{---}{2}
+\encodingrowcont{EEEE}{1101011}{000}{DDDDDDDDD}{001101110}{D}{---}{---}{2}
+\encodingrow{EEEE}{1101011}{000}{DDDDDDDDD}{001101111}{D}{---}{---}{2}
+\end{encodingtable}
 ```
 
-### Result
-Initializes the Hub FIFO for fast writes. D[31] = no wait, D[13:0] = block size in 64-byte units (0 = max), S[19:0] = block start address.
+**Explanation:**
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Configuration: bit 31 = nowait, bits 13:0 = block size |
-| S | Hub RAM start address (bits 19:0) |
+These instructions copy flag states to a register, providing a convenient way to convert flag conditions into numeric values for computation or storage.
 
-### Encoding
+WRC and WRZ write the direct flag state (C or Z), while WRNC and WRNZ write the inverted flag state. The result is always 0 or 1; the upper 31 bits of Dest are cleared.
+
+
+
+## WRFAST {#wrfast}
+
+Write FIFO setup
+[FIFO Instruction](#fifo-instructions) - Begin new fast hub write via FIFO.
+
+**WRFAST**  *{#}Dest, {#}Src*
+
+---
+
+**Result:** Initializes the Hub FIFO for fast writes. Dest[31] = no wait, Dest[13:0] = block size in 64-byte units (0 = max), Src[19:0] = block start address.
+
+- Dest contains configuration: bit 31 = nowait, bits 13:0 = block size.
+- Src contains Hub RAM start address (bits 19:0).
+
+```{=latex}
+\simpleencoding{EEEE}{1100100}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2 or WRFAST finish + 3}
 ```
-EEEE 1100100 0LI DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2 or WRFAST finish + 3
 
-### Related Instructions
-- [WFBYTE](#wfbyte) — Write byte to FIFO
-- [WFWORD](#wfword) — Write word to FIFO
-- [WFLONG](#wflong) — Write long to FIFO
-- [RDFAST](#rdfast) — Begin fast hub read via FIFO
+**Related:** [WFBYTE](#wfbyte), [WFWORD](#wfword), [WFLONG](#wflong), [RDFAST](#rdfast)
 
-### Explanation
+**Explanation:**
+
 WRFAST configures the Hub FIFO interface for fast streaming writes to Hub RAM. After WRFAST executes, use WFBYTE, WFWORD, or WFLONG to write data through the FIFO.
 
-D[13:0] specifies the block size in 64-byte units. A value of 0 selects the maximum block size. D[31] controls wait behavior: if set, FIFO writes proceed without stalling even when Hub RAM is busy.
+Dest[13:0] specifies the block size in 64-byte units. A value of 0 selects the maximum block size. Dest[31] controls wait behavior: if set, FIFO writes proceed without stalling.
 
-S[19:0] specifies the starting Hub RAM address. The FIFO automatically increments the address as data is written. When the block is exhausted, the FIFO can be configured to wrap or stop.
+Src[19:0] specifies the starting Hub RAM address. The FIFO automatically increments the address as data is written.
 
-If a previous WRFAST operation is still active, this instruction may stall until the previous operation finishes, adding 3 cycles to the base 2-cycle execution time.
+::: pasm2
+        WRFAST  #0, buffer_addr  ' Set up FIFO write to buffer
+        WFLONG  data               ' Write data to FIFO
+:::
 
 
-## WRLONG — Hub RAM
 
-Write long to hub RAM.
+## WRLONG {#wrlong}
 
-### Syntax
-```pasm
-        WRLONG  {#}D,{#}S/P
+Write long
+[Hub Instruction](#hub-instructions) - Write long to hub RAM.
+
+**WRLONG**  *{#}Dest, {#}Src/P*
+
+---
+
+**Result:** Writes the long in Dest[31:0] to hub address Src/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.
+
+- Dest is the long value to write (all 32 bits used).
+- Src/P is the hub address or pointer (PTRA/PTRB).
+
+```{=latex}
+\simpleencoding{EEEE}{1100011}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{3...10}
 ```
 
-### Result
-Writes the long in D[31:0] to hub address S/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.
+**Related:** [WRBYTE](#wrbyte), [WRWORD](#wrword), [WMLONG](#wmlong), [RDLONG](#rdlong)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Long value to write (all 32 bits used) |
-| S/P | Hub address or pointer (PTRA/PTRB) |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1100011 0LI DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 3...10
+WRLONG writes the 32-bit value in Dest to Hub RAM at address Src/PTRx. All 32 bits of Dest are written.
 
-### Related Instructions
-- [WRBYTE](#wrbyte) — Write byte to hub RAM
-- [WRWORD](#wrword) — Write word to hub RAM
-- [WMLONG](#wmlong) — Write masked long to hub RAM
-- [RDLONG](#rdlong) — Read long from hub RAM
-
-### Explanation
-WRLONG writes the 32-bit value in D to Hub RAM at address S/PTRx. All 32 bits of D are written.
-
-The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. Hub RAM uses a rotating time-slot system where each cog gets access during its assigned slot. If the instruction executes during this cog's slot, it completes in 3 cycles. Otherwise, it must wait for the next available slot.
-
-When S specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes (++ and --) can be applied for sequential access.
+The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
 
 Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple longs from cog or LUT RAM to Hub RAM in a burst transfer.
 
+::: pasm2
+        SETQ    #16-1          ' Set up for 16-long block transfer
+        WRLONG  buffer, ptra   ' Write 16 longs to hub
+:::
 
-## WRLUT — Lookup Table
 
-Write D to LUT address.
 
-### Syntax
-```pasm
-        WRLUT   {#}D,{#}S/P
+## WRLUT {#wrlut}
+
+Write LUT
+[LUT Instruction](#lut-instructions) - Write Dest to LUT address.
+
+**WRLUT**  *{#}Dest, {#}Src/P*
+
+---
+
+**Result:** Writes Dest to LUT address Src/PTRx.
+
+- Dest is the value to write.
+- Src/P is the LUT address or pointer (PTRA/PTRB).
+
+```{=latex}
+\simpleencoding{EEEE}{1100001}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
 ```
 
-### Result
-Writes D to LUT address S/PTRx.
+**Related:** [RDLUT](#rdlut), [WRLONG](#wrlong), [SETQ](#setq)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Value to write |
-| S/P | LUT address or pointer (PTRA/PTRB) |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1100001 1LI DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
+WRLUT writes the value in Dest to the Lookup Table (LUT) at address Src/PTRx. The LUT is a 512-long (2KB) fast memory space.
 
-### Related Instructions
-- [RDLUT](#rdlut) — Read from LUT address
-- [WRLONG](#wrlong) — Write to hub RAM
-- [SETQ](#setq) — Set up block transfer
+When Src specifies PTRA or PTRB, the pointer value is used as the LUT address. Only the lower 9 bits of the address are used (0-511).
 
-### Explanation
-WRLUT writes the value in D to the Lookup Table (LUT) at address S/PTRx. The LUT is a 512-long (2KB) fast memory space shared between cog RAM and LUT RAM in the upper 256 addresses.
+WRLUT executes in 2 clock cycles, providing fast access to LUT RAM for lookup tables, buffers, and temporary storage.
 
-When S specifies PTRA or PTRB, the pointer value is used as the LUT address. Only the lower 9 bits of the address are used (0-511), selecting from the 512-long LUT space.
-
-WRLUT executes in 2 clock cycles, providing fast access to LUT RAM for lookup tables, buffers, and temporary storage. The LUT is particularly useful for data that needs faster access than Hub RAM but doesn't fit in cog registers.
+::: pasm2
+        WRLUT   value, #100    ' Write to LUT address 100
+:::
 
 
-## WRNC — Math and Logic
 
-Write inverted C flag value to register.
+## WRPIN {#wrpin}
 
-### Syntax
-```pasm
-        WRNC    D
+Write pin mode
+[Smart Pin Instruction](#smart-pin-instructions) - Configure smart pin mode.
+
+**WRPIN**  *{#}Dest, {#}Src*
+
+---
+
+**Result:** Sets the mode of smart pins Src[10:6]+Src[5:0]..Src[5:0] to Dest, acknowledges smart pins. Wraps within A/B pins. Prior SETQ overrides Src[10:6].
+
+- Dest is the smart pin mode configuration.
+- Src is the pin number or pin range.
+
+```{=latex}
+\simpleencoding{EEEE}{1100000}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
 ```
 
-### Result
-Writes 0 or 1 to D according to the inverted C flag state. D = {31'b0, !C}.
+**Related:** [WXPIN](#wxpin), [WYPIN](#wypin), [RDPIN](#rdpin), [AKPIN](#akpin)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 000 DDDDDDDDD 001101101
-```
-**Write:** D
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
-
-### Related Instructions
-- [WRC](#wrc) — Write C flag to register
-- [WRZ](#wrz) — Write Z flag to register
-- [WRNZ](#wrnz) — Write inverted Z flag to register
-
-### Explanation
-WRNC copies the inverted C flag state to register D. If C is clear (0), D becomes 1. If C is set (1), D becomes 0. The upper 31 bits of D are cleared to zero.
-
-This instruction provides a convenient way to convert inverted flag states into numeric values for computation or storage. Combined with conditional execution, WRNC enables flag-based value selection without branching.
-
-
-## WRNZ — Math and Logic
-
-Write inverted Z flag value to register.
-
-### Syntax
-```pasm
-        WRNZ    D
-```
-
-### Result
-Writes 0 or 1 to D according to the inverted Z flag state. D = {31'b0, !Z}.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register |
-
-### Encoding
-```
-EEEE 1101011 000 DDDDDDDDD 001101111
-```
-**Write:** D
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
-
-### Related Instructions
-- [WRC](#wrc) — Write C flag to register
-- [WRNC](#wrnc) — Write inverted C flag to register
-- [WRZ](#wrz) — Write Z flag to register
-
-### Explanation
-WRNZ copies the inverted Z flag state to register D. If Z is clear (0), D becomes 1. If Z is set (1), D becomes 0. The upper 31 bits of D are cleared to zero.
-
-This instruction provides a convenient way to convert inverted flag states into numeric values for computation or storage. Combined with conditional execution, WRNZ enables flag-based value selection without branching.
-
-
-## WRPIN — Smart Pin
-
-Configure smart pin mode.
-
-### Syntax
-```pasm
-        WRPIN   {#}D,{#}S
-```
-
-### Result
-Sets the mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledges smart pins. Wraps within A/B pins. Prior SETQ overrides S[10:6].
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Smart pin mode configuration |
-| S | Pin number or pin range |
-
-### Encoding
-```
-EEEE 1100000 0LI DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
-
-### Related Instructions
-- [WXPIN](#wxpin) — Set smart pin X parameter
-- [WYPIN](#wypin) — Set smart pin Y parameter
-- [RDPIN](#rdpin) — Read smart pin result
-- [AKPIN](#akpin) — Acknowledge smart pin
-
-### Explanation
 WRPIN configures the operating mode of one or more Smart Pins. Each of the P2's 64 pins has a dedicated Smart Pin module capable of autonomous operation for PWM, serial I/O, pulse measurement, ADC, and many other functions.
 
-**CRITICAL REQUIREMENT**: Smart pins MUST be reset (DIR=0) before configuring with WRPIN. This ensures the smart pin is in a known state and prevents configuration conflicts.
+**CRITICAL REQUIREMENT**: Smart pins MUST be reset (DIR=0) before configuring with WRPIN.
 
 The standard configuration sequence is:
 1. DIRL pin — Reset smart pin (required)
@@ -14689,121 +12539,67 @@ The standard configuration sequence is:
 4. WYPIN y, pin — Set Y parameter
 5. DIRH pin — Enable smart pin
 
-WRPIN #0, pin clears all smart pin configuration. The smart pin begins operation when DIR is set high after configuration.
+WRPIN #0, pin clears all smart pin configuration.
 
-When S[10:6] is non-zero, multiple pins are configured. Prior SETQ can override the pin count. Pin numbering wraps within A pins (0-31) and B pins (32-63).
+::: pasm2
+        DIRL    #10            ' Reset pin 10
+        WRPIN   pwm_mode, #10  ' Configure for PWM
+        WXPIN   period, #10    ' Set period
+        DIRH    #10            ' Enable
+:::
 
 
-## WRWORD — Hub RAM
 
-Write word to hub RAM.
+## WRWORD {#wrword}
 
-### Syntax
-```pasm
-        WRWORD  {#}D,{#}S/P
+Write word
+[Hub Instruction](#hub-instructions) - Write word to hub RAM.
+
+**WRWORD**  *{#}Dest, {#}Src/P*
+
+---
+
+**Result:** Writes the word in Dest[15:0] to hub address Src/PTRx.
+
+- Dest is the word value to write (bits 15:0 used).
+- Src/P is the hub address or pointer (PTRA/PTRB).
+
+```{=latex}
+\simpleencoding{EEEE}{1100010}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{3...10}
 ```
 
-### Result
-Writes the word in D[15:0] to hub address S/PTRx.
+**Related:** [WRBYTE](#wrbyte), [WRLONG](#wrlong), [RDWORD](#rdword)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Word value to write (bits 15:0 used) |
-| S/P | Hub address or pointer (PTRA/PTRB) |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1100010 1LI DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 3...10
+WRWORD writes the word (16-bit value) in Dest[15:0] to Hub RAM at address Src/PTRx. Only the lower 16 bits of Dest are written.
 
-### Related Instructions
-- [WRBYTE](#wrbyte) — Write byte to hub RAM
-- [WRLONG](#wrlong) — Write long to hub RAM
-- [RDWORD](#rdword) — Read word from hub RAM
-
-### Explanation
-WRWORD writes the word (16-bit value) in D[15:0] to Hub RAM at address S/PTRx. Only the lower 16 bits of D are written; the upper 16 bits are ignored.
-
-The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. Hub RAM uses a rotating time-slot system where each cog gets access during its assigned slot. If the instruction executes during this cog's slot, it completes in 3 cycles. Otherwise, it must wait for the next available slot.
-
-When S specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes (++ and --) can be applied for sequential access.
+The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
 
 
-## WRZ — Math and Logic
 
-Write Z flag value to register.
+## WXPIN {#wxpin}
 
-### Syntax
-```pasm
-        WRZ     D
+Write pin X parameter
+[Smart Pin Instruction](#smart-pin-instructions) - Set smart pin X parameter.
+
+**WXPIN**  *{#}Dest, {#}Src*
+
+---
+
+**Result:** Sets the X register of smart pins Src[10:6]+Src[5:0]..Src[5:0] to Dest, acknowledges smart pins. Wraps within A/B pins. Prior SETQ overrides Src[10:6].
+
+- Dest is the X parameter value.
+- Src is the pin number or pin range.
+
+```{=latex}
+\simpleencoding{EEEE}{1100000}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
 ```
 
-### Result
-Writes 0 or 1 to D according to the Z flag state. D = {31'b0, Z}.
+**Related:** [WRPIN](#wrpin), [WYPIN](#wypin), [RDPIN](#rdpin)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 000 DDDDDDDDD 001101110
-```
-**Write:** D
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
-
-### Related Instructions
-- [WRC](#wrc) — Write C flag to register
-- [WRNC](#wrnc) — Write inverted C flag to register
-- [WRNZ](#wrnz) — Write inverted Z flag to register
-
-### Explanation
-WRZ copies the Z flag state to register D. If Z is set (1), D becomes 1. If Z is clear (0), D becomes 0. The upper 31 bits of D are cleared to zero.
-
-This instruction provides a convenient way to convert flag states into numeric values for computation or storage. Combined with conditional execution, WRZ enables flag-based value selection without branching.
-
-
-## WXPIN — Smart Pin
-
-Set smart pin X parameter.
-
-### Syntax
-```pasm
-        WXPIN   {#}D,{#}S
-```
-
-### Result
-Sets the X register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledges smart pins. Wraps within A/B pins. Prior SETQ overrides S[10:6].
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | X parameter value |
-| S | Pin number or pin range |
-
-### Encoding
-```
-EEEE 1100000 1LI DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
-
-### Related Instructions
-- [WRPIN](#wrpin) — Configure smart pin mode
-- [WYPIN](#wypin) — Set smart pin Y parameter
-- [RDPIN](#rdpin) — Read smart pin result
-
-### Explanation
 WXPIN sets the X parameter of one or more Smart Pins. The X register meaning depends on the smart pin mode:
 
 - For PWM modes: Sets frame period or duty cycle parameter
@@ -14811,42 +12607,32 @@ WXPIN sets the X parameter of one or more Smart Pins. The X register meaning dep
 - For pulse measurement: Sets measurement parameters
 - For transition modes: Controls timebase
 
-Writing the X register also acknowledges the smart pin, clearing any completion flags. When S[10:6] is non-zero, multiple pins are configured. Prior SETQ can override the pin count.
+Writing the X register also acknowledges the smart pin, clearing any completion flags.
 
 
-## WYPIN — Smart Pin
 
-Set smart pin Y parameter.
+## WYPIN {#wypin}
 
-### Syntax
-```pasm
-        WYPIN   {#}D,{#}S
+Write pin Y parameter
+[Smart Pin Instruction](#smart-pin-instructions) - Set smart pin Y parameter.
+
+**WYPIN**  *{#}Dest, {#}Src*
+
+---
+
+**Result:** Sets the Y register of smart pins Src[10:6]+Src[5:0]..Src[5:0] to Dest, acknowledges smart pins. Wraps within A/B pins. Prior SETQ overrides Src[10:6].
+
+- Dest is the Y parameter value.
+- Src is the pin number or pin range.
+
+```{=latex}
+\simpleencoding{EEEE}{1100001}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
 ```
 
-### Result
-Sets the Y register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledges smart pins. Wraps within A/B pins. Prior SETQ overrides S[10:6].
+**Related:** [WRPIN](#wrpin), [WXPIN](#wxpin), [RDPIN](#rdpin)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Y parameter value |
-| S | Pin number or pin range |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1100001 0LI DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
-
-### Related Instructions
-- [WRPIN](#wrpin) — Configure smart pin mode
-- [WXPIN](#wxpin) — Set smart pin X parameter
-- [RDPIN](#rdpin) — Read smart pin result
-
-### Explanation
 WYPIN sets the Y parameter of one or more Smart Pins. The Y register serves multiple purposes depending on smart pin mode:
 
 - For PWM modes: Sets the base period
@@ -14856,137 +12642,118 @@ WYPIN sets the Y parameter of one or more Smart Pins. The Y register serves mult
 
 Writing the Y register also acknowledges pin completion, clearing any completion flags. This dual purpose makes WYPIN essential for continuous smart pin operation—it both provides new data and signals that previous results have been processed.
 
-When S[10:6] is non-zero, multiple pins are configured. Prior SETQ can override the pin count. Pin numbering wraps within A pins (0-31) and B pins (32-63).
+::: pasm2
+        WYPIN   pwm_value, #10  ' Set PWM duty and acknowledge
+:::
 
-# X Instructions
 
-This section documents all PASM2 instructions beginning with X, organized alphabetically.
+# Instructions: X
 
-## XCONT — Streamer
+This section contains all PASM2 instructions beginning with the letter X. The X instructions include the XOR logic operation, the xoroshiro32+ PRNG instruction, and the streamer control family.
 
-Buffer new streamer command to be issued on final NCO rollover of current command, continuing phase.
 
-### Syntax
-```pasm
-        XCONT   {#}D,{#}S
+
+## XCONT {#xcont}
+
+Execute continue
+[Streamer Instruction](#streamer-instructions) - Buffer new streamer command to continue from current phase.
+
+**XCONT**  *{#}Dest, {#}Src*
+
+---
+
+**Result:** Buffers a new streamer command to execute when the current command completes its final NCO rollover, continuing from current phase.
+
+- Dest is the streamer mode configuration.
+- Src is the data value or hub address for the streamer operation.
+
+```{=latex}
+\simpleencoding{EEEE}{1100110}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2+}
 ```
 
-### Result
-A new streamer command is buffered and will be issued when the current streamer command completes its final NCO rollover. The phase accumulator continues from its current value rather than being reset to zero.
+**Related:** [XINIT](#xinit), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](#waitxfi)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Streamer mode configuration (register or 9-bit immediate). Configures transfer direction, pin count, and data format. |
-| S | Data value or hub address (register or 9-bit immediate) for the streamer operation. |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 1100110 | 0LI | DDDDDDDDD | SSSSSSSSS | — | — | — | 2+}
-
-### Related Instructions
-- [XINIT](#xinit--streamer) — Issue streamer command immediately, zeroing phase
-- [XZERO](#xzero--streamer) — Buffer new streamer command, zeroing phase
-- [XSTOP](#xstop--streamer) — Stop streamer immediately
-- [WAITXFI](#waitxfi) — Wait for streamer to finish
-
-### Explanation
 XCONT buffers a new streamer command that executes automatically when the current command completes. Unlike XINIT and XZERO, XCONT preserves the phase accumulator, allowing seamless continuation of streamer operations without phase discontinuities.
 
 This instruction enables chaining multiple streamer operations together while maintaining phase coherence. The buffered command waits for the current command's NCO (numerically controlled oscillator) to complete its final rollover before activation.
 
-The mode word in D specifies the streamer configuration including pin assignments, data direction, and transfer format. The S parameter provides either immediate data or a hub memory address depending on the mode configuration.
-
-XCONT executes in a minimum of 2 clock cycles, with additional cycles required for the actual streamer operation to complete.
+The mode word in Dest specifies the streamer configuration including pin assignments, data direction, and transfer format. The Src parameter provides either immediate data or a hub memory address depending on the mode configuration.
 
 
-## XINIT — Streamer
 
-Issue streamer command immediately, zeroing phase.
+## XINIT {#xinit}
 
-### Syntax
-```pasm
-        XINIT   {#}D,{#}S
+Execute initialize
+[Streamer Instruction](#streamer-instructions) - Issue streamer command immediately, zeroing phase.
+
+**XINIT**  *{#}Dest, {#}Src*
+
+---
+
+**Result:** Issues a streamer command immediately with the phase accumulator reset to zero.
+
+- Dest is the streamer mode configuration.
+- Src is the data value or hub address for the streamer operation.
+
+```{=latex}
+\simpleencoding{EEEE}{1100101}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
 ```
 
-### Result
-A streamer command executes immediately with the phase accumulator reset to zero. The streamer begins data transfer according to the mode configuration.
+**Related:** [XCONT](#xcont), [XZERO](#xzero), [XSTOP](#xstop), [WAITXFI](#waitxfi), [SETXFRQ](#setxfrq)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Streamer mode configuration (register or 9-bit immediate). Configures transfer direction, pin count, and data format. |
-| S | Data value or hub address (register or 9-bit immediate) for the streamer operation. |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 1100101 | 0LI | DDDDDDDDD | SSSSSSSSS | — | — | — | 2}
-
-### Related Instructions
-- [XCONT](#xcont--streamer) — Continue streamer from current phase
-- [XZERO](#xzero--streamer) — Buffer new streamer command, zeroing phase
-- [XSTOP](#xstop--streamer) — Stop streamer immediately
-- [WAITXFI](#waitxfi) — Wait for streamer to finish
-- [WYPIN](#wypin) — Set smart pin Y parameter
-- [SETXFRQ](#setxfrq) — Set streamer frequency
-
-### Explanation
 XINIT starts a streamer operation immediately, resetting the phase accumulator to zero. This provides a clean starting point for high-speed data transfers between the cog and hub memory or I/O pins.
 
-The streamer operates as a hardware DMA engine, transferring data without CPU intervention. The mode word in D configures critical parameters:
-
+The streamer operates as a hardware DMA engine, transferring data without CPU intervention. The mode word in Dest configures critical parameters:
 - Transfer direction (input from pins to hub, output from hub to pins, or cog-only operations)
 - Number of pins involved in the transfer
 - Data formatting (bit order, byte packing, word sizes)
 
-The S parameter provides either the data source (for immediate transfers) or a hub memory address (for hub-based transfers).
+The Src parameter provides either the data source (for immediate transfers) or a hub memory address (for hub-based transfers).
 
-XINIT commonly coordinates with smart pins to achieve maximum I/O throughput. A typical pattern starts the streamer with XINIT and simultaneously starts a smart pin clock generator with WYPIN, allowing both to operate in parallel:
+XINIT commonly coordinates with smart pins to achieve maximum I/O throughput:
 
-```pasm
-        XINIT   mode,data          ' Start data transfer
-        WYPIN   count,#clk_pin     ' Start clock generation
+::: pasm2
+        XINIT   mode, data         ' Start data transfer
+        WYPIN   count, #clk_pin    ' Start clock generation
         WAITXFI                    ' Wait for completion
-```
+:::
 
 This parallel operation eliminates CPU intervention, enabling sustained high-speed data rates limited only by the configured clock frequency.
 
-XINIT executes in exactly 2 clock cycles, though the complete streamer operation requires additional time based on the data volume and configured speed.
 
 
-## XOR — Math and Logic
+## XOR {#xor}
 
-Bitwise XOR a value with another.
+Exclusive or
+[Math/Logic Instruction](#mathlogic-instructions) - Bitwise XOR a value with another.
 
-### Syntax
-```pasm
-        XOR     D,{#}S      {WC|WZ|WCZ}
+**XOR**  *Dest, {#}Src*  **{WC/WZ/WCZ}**
+
+---
+
+**Result:** Dest XOR Src is stored in Dest. Optionally sets C to parity of result and Z if result equals zero.
+
+- Dest is the register containing the value to XOR with Src.
+- Src is a register or 9-bit literal whose value is XORed with Dest.
+- WC sets C to the parity (odd number of 1 bits) of the result.
+- WZ sets Z if the result equals zero.
+- WCZ sets both C and Z.
+
+```{=latex}
+\simpleencoding{EEEE}{0101011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Zero}{2}
 ```
 
-### Result
-D XOR S is stored in D and flags are optionally updated with parity and zero status.
+**Related:** [AND](#and), [OR](#or), [ANDN](#andn), [TEST](#test)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to bitwise XOR with S and destination for the result. |
-| S | Register, 9-bit immediate, or 32-bit augmented immediate whose value will be bitwise XORed into D. |
-| WC | Optional effect to update C flag with parity of result. |
-| WZ | Optional effect to update Z flag if result equals zero. |
-| WCZ | Optional effect to update both C and Z flags. |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 0101011 | CZI | DDDDDDDDD | SSSSSSSSS | D | Parity | Zero | 2}
-
-### Related Instructions
-- [AND](#and) — Bitwise AND operation
-- [OR](#or) — Bitwise OR operation
-- [ANDN](#andn) — Bitwise AND NOT operation
-- [TEST](#test) — Test bits (non-destructive AND)
-
-### Explanation
-XOR performs a bitwise exclusive OR operation between D and S, storing the result in D. Each bit position in the result is set to 1 if the corresponding bits in D and S differ, or 0 if they match.
+XOR performs a bitwise exclusive OR operation between Dest and Src, storing the result in Dest. Each bit position in the result is set to 1 if the corresponding bits in Dest and Src differ, or 0 if they match.
 
 The exclusive OR operation has several important properties:
-
 - XORing a value with itself produces zero (useful for clearing registers)
 - XORing a value with all 1s produces the bitwise complement
 - XORing twice with the same value returns the original (useful for simple encryption)
@@ -14994,199 +12761,172 @@ The exclusive OR operation has several important properties:
 
 When the WC effect is specified, the C flag receives the parity of the result—set to 1 if the result contains an odd number of 1 bits, or cleared to 0 for an even number. This provides a fast parity calculation.
 
-When the WZ effect is specified, the Z flag is set if the result equals zero (meaning D and S were identical), or cleared if the result is non-zero (D and S differ in at least one bit).
-
-XOR executes in exactly 2 clock cycles.
+When the WZ effect is specified, the Z flag is set if the result equals zero (meaning Dest and Src were identical), or cleared if the result is non-zero (Dest and Src differ in at least one bit).
 
 
-## XORO32 — Math and Logic
 
-Iterate D with xoroshiro32+ PRNG algorithm.
+## XORO32 {#xoro32}
 
-### Syntax
-```pasm
-        XORO32  D
+Xoroshiro 32
+[Math/Logic Instruction](#mathlogic-instructions) - Iterate Dest with xoroshiro32+ PRNG algorithm.
+
+**XORO32**  *Dest*
+
+---
+
+**Result:** Dest is updated with the next PRNG state. The generated random value is placed into the S field of the next instruction.
+
+- Dest is the register containing the 32-bit PRNG state.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{000}{DDDDDDDDD}{001101000}{D}{---}{---}{2}
 ```
 
-### Result
-D is updated with the next state of the xoroshiro32+ pseudo-random number generator algorithm. The generated random value is placed into the S field of the immediately following instruction.
+**Related:** [GETRND](#getrnd), [SETQ](#setq)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the 32-bit PRNG state, which is updated to the next state. |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 1101011 | 000 | DDDDDDDDD | 001101000 | D | — | — | 2}
-
-### Related Instructions
-- [GETRND](#getrnd) — Get true random value from hub
-- [SETQ](#setq) — Set Q register (alternative for holding random values)
-
-### Explanation
-XORO32 implements one iteration of the xoroshiro32+ algorithm, a fast, high-quality pseudo-random number generator. The instruction updates the generator state in D and simultaneously makes the generated random value available to the next instruction by injecting it into that instruction's S field.
+XORO32 implements one iteration of the xoroshiro32+ algorithm, a fast, high-quality pseudo-random number generator. The instruction updates the generator state in Dest and simultaneously makes the generated random value available to the next instruction by injecting it into that instruction's S field.
 
 The xoroshiro32+ algorithm provides excellent statistical properties for a 32-bit generator:
-
 - Long period (2^32 - 1 values before repeating)
 - Good distribution across all output bits
 - Fast execution (2 clocks per random number)
 - Small state requirement (single 32-bit value)
 
-A typical usage pattern generates random numbers in sequence:
+::: pasm2
+        MOV     seed, initial_value  ' Initialize with non-zero seed
 
-```pasm
-        MOV     seed,initial_value      ' Initialize with non-zero seed
-
-.loop   XORO32  seed                    ' Advance PRNG state
-        MOV     random_val,0            ' Next instruction receives random in S
+.loop   XORO32  seed                 ' Advance PRNG state
+        MOV     random_val, 0        ' Next instruction receives random in S
         ' Process random_val...
-```
+:::
 
 The random value appears in the S field of the instruction immediately following XORO32. This means the next instruction must be one that reads from S, and the value specified for S in that instruction's encoding is ignored—it gets replaced by the random value.
 
-The seed value in D must be non-zero. A seed of zero will produce only zero values. For best results, initialize the seed with a value from GETRND or another entropy source.
-
-XORO32 executes in exactly 2 clock cycles.
+The seed value in Dest must be non-zero. A seed of zero will produce only zero values. For best results, initialize the seed with a value from GETRND or another entropy source.
 
 
-## XSTOP — Streamer
 
-Stop streamer immediately.
+## XSTOP {#xstop}
 
-### Syntax
-```pasm
-        XSTOP
+Execute stop
+[Streamer Instruction](#streamer-instructions) - Stop streamer immediately.
+
+**XSTOP**
+
+---
+
+**Result:** The currently active streamer operation terminates immediately.
+
+- Takes no operands.
+
+```{=latex}
+\simpleencoding{EEEE}{1100101}{011}{000000000}{000000000}{---}{---}{---}{2}
 ```
 
-### Result
-The currently active streamer operation terminates immediately.
+**Related:** [XINIT](#xinit), [XCONT](#xcont), [XZERO](#xzero), [WAITXFI](#waitxfi)
 
-### Parameters
-None.
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 1100101 | 011 | 000000000 | 000000000 | — | — | — | 2}
-
-### Related Instructions
-- [XINIT](#xinit--streamer) — Issue streamer command immediately, zeroing phase
-- [XCONT](#xcont--streamer) — Continue streamer from current phase
-- [XZERO](#xzero--streamer) — Buffer new streamer command, zeroing phase
-- [WAITXFI](#waitxfi) — Wait for streamer to finish
-
-### Explanation
 XSTOP immediately halts any active streamer operation. This provides programmatic control to abort streamer transfers before completion.
 
 When XSTOP executes, the streamer hardware stops all data movement and pin activity. Any buffered streamer command (from XCONT or XZERO) is also discarded.
 
 XSTOP is useful when:
-
 - Error conditions require aborting a transfer
 - Dynamic control flow needs to terminate streaming based on data content
 - Cleanup is required before reconfiguring the streamer
 
 After XSTOP, the streamer remains idle until a new XINIT command is issued. The phase accumulator state is undefined after XSTOP—use XINIT (which zeros the phase) rather than XCONT to restart operations.
 
-XSTOP executes in exactly 2 clock cycles.
 
 
-## XZERO — Streamer
+## XZERO {#xzero}
 
-Buffer new streamer command, zeroing phase.
+Execute zero
+[Streamer Instruction](#streamer-instructions) - Buffer new streamer command, zeroing phase.
 
-### Syntax
-```pasm
-        XZERO   {#}D,{#}S
+**XZERO**  *{#}Dest, {#}Src*
+
+---
+
+**Result:** Buffers a new streamer command to execute when the current command completes, resetting phase to zero.
+
+- Dest is the streamer mode configuration.
+- Src is the data value or hub address for the streamer operation.
+
+```{=latex}
+\simpleencoding{EEEE}{1100101}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2+}
 ```
 
-### Result
-A new streamer command is buffered and will be issued when the current streamer command completes its final NCO rollover. The phase accumulator is reset to zero when the buffered command activates.
+**Related:** [XINIT](#xinit), [XCONT](#xcont), [XSTOP](#xstop), [WAITXFI](#waitxfi)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Streamer mode configuration (register or 9-bit immediate). Configures transfer direction, pin count, and data format. |
-| S | Data value or hub address (register or 9-bit immediate) for the streamer operation. |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE | 1100101 | 1LI | DDDDDDDDD | SSSSSSSSS | — | — | — | 2+}
-
-### Related Instructions
-- [XINIT](#xinit--streamer) — Issue streamer command immediately, zeroing phase
-- [XCONT](#xcont--streamer) — Continue streamer from current phase
-- [XSTOP](#xstop--streamer) — Stop streamer immediately
-- [WAITXFI](#waitxfi) — Wait for streamer to finish
-
-### Explanation
 XZERO buffers a new streamer command that executes automatically when the current command completes, with the phase accumulator reset to zero. This combines the buffering behavior of XCONT with the phase-zeroing behavior of XINIT.
 
 The buffered command waits for the current streamer operation's NCO (numerically controlled oscillator) to complete its final rollover before activation. When activation occurs, the phase accumulator resets to zero, providing a clean starting point for the new operation.
 
 This instruction enables chaining multiple streamer operations where each operation should start from a known phase state. This is particularly useful when switching between different streamer modes or when phase coherence between operations is not required.
 
-The mode word in D specifies the streamer configuration including pin assignments, data direction, and transfer format. The S parameter provides either immediate data or a hub memory address depending on the mode configuration.
-
-XZERO executes in a minimum of 2 clock cycles, with additional cycles required for the actual streamer operation to complete.
-
-# Z Instructions
-
-This section covers PASM2 instructions beginning with the letter Z.
+The mode word in Dest specifies the streamer configuration including pin assignments, data direction, and transfer format. The Src parameter provides either immediate data or a hub memory address depending on the mode configuration.
 
 
-## ZEROX — Math and Logic
+# Instructions: Z
 
-Zero extend.
+This section contains all PASM2 instructions beginning with the letter Z. There is currently one Z instruction: ZEROX for zero extension.
 
-### Syntax
-```pasm
-        ZEROX   D, {#}S         {WC|WZ|WCZ}
+
+
+## ZEROX {#zerox}
+
+Zero extend
+[Math/Logic Instruction](#mathlogic-instructions) - Zero-extend a value beyond a designated bit.
+
+**ZEROX**  *Dest, {#}Src*  **{WC/WZ/WCZ}**
+
+---
+
+**Result:** Dest is zero-extended above the bit indicated by Src[4:0]. Optionally sets C to MSB of result and Z if result equals zero.
+
+- Dest is the register containing the value to zero-extend.
+- Src is a register or 9-bit literal identifying the bit position (0-31) beyond which to zero-extend.
+- WC sets C to the MSB (bit 31) of the result.
+- WZ sets Z if the result equals zero.
+- WCZ sets both C and Z.
+
+```{=latex}
+\simpleencoding{EEEE}{0111010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{MSB}{Zero}{2}
 ```
 
-### Result
-The D value is zero-extended above the bit indicated by S and is stored in D. Optionally the C and Z flags are updated.
+**Related:** [SIGNX](#signx)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Register containing the value to zero-extend above bit S[4:0]. The result is written here. |
-| S | Register or 9-bit literal whose value (lower 5 bits) identifies the bit of D to zero-extend beyond. |
-| WC/WZ/WCZ | Optional effects to update flags. |
+**Explanation:**
 
-### Encoding
-\simpleencoding{EEEE 0111010 CZI DDDDDDDDD SSSSSSSSS | D | MSB of result | Result = 0 | 2}
+ZEROX fills the bits of Dest, above the bit indicated by Src[4:0], with zeros, effectively zero-extending the value. This is useful when converting encoded or received unsigned values from a smaller bit width to 32 bits.
 
-### Flags Affected
-- **C**: Set to MSB of result (if WC or WCZ specified)
-- **Z**: Set if result equals zero (if WZ or WCZ specified)
+For example, if Dest contains $FFFF_FFFF and Src contains 7, ZEROX clears bits 31 down to bit 8, leaving only bits 7-0 intact. The result in Dest becomes $0000_00FF.
 
-### Related Instructions
-- [SIGNX](#signx) — Sign-extend value beyond designated bit
+The instruction examines only the lower 5 bits of Src (Src[4:0]), allowing bit positions 0 through 31 to be specified. This makes ZEROX particularly useful for extracting and zero-extending bit fields from packed data structures or network protocols.
 
-### Explanation
-ZEROX fills the bits of D, above the bit indicated by S[4:0], with zeros, effectively zero-extending the value. This is handy when converting encoded or received unsigned values from a small bit width to a large bit width (32 bits).
-
-For example, if D contains `$FFFF_FFFF` and S contains 7, ZEROX clears bits 31 down to bit 8, leaving only bits 7-0 intact. The result in D becomes `$0000_00FF`.
-
-The instruction examines only the lower 5 bits of S (S[4:0]), allowing bit positions 0 through 31 to be specified. This makes ZEROX particularly useful for extracting and zero-extending bit fields from packed data structures or network protocols.
-
-If the WC or WCZ effect is specified, the C flag is set to the result's MSB value (bit 31). If the WZ or WCZ effect is specified, the Z flag is set if the result is zero, or cleared if it is non-zero.
+::: pasm2
+        ' Extract lower byte and zero-extend
+        MOV     data, big_value
+        ZEROX   data, #7         ' Keep bits 7-0, clear bits 31-8
+                                 ' If big_value was $FFFF_FFFF,
+                                 ' data becomes $0000_00FF
+:::
 
 ZEROX is the complement to SIGNX. While ZEROX fills upper bits with zeros (for unsigned values), SIGNX fills upper bits with the value of the designated bit (for signed values). Use ZEROX when working with unsigned data, and SIGNX when working with signed data that needs proper sign extension.
 
-### Example
-```pasm
-        ' Extract lower byte and zero-extend
-        MOV     data, big_value
-        ZEROX   data, #7        ' Keep bits 7-0, clear bits 31-8
-                                ' If big_value was $FFFF_FFFF,
-                                ' data becomes $0000_00FF
-```
 
 # Assembler Directives
 
 Assembler directives control the assembly process itself. Unlike instructions that generate executable code, directives guide the assembler in organizing memory, reserving space, and verifying code constraints. Directives execute at assembly time, not runtime.
 
 The P2 assembler provides 13 directives organized into five functional categories: origin control, memory definition, size verification, alignment, and space management.
+
 
 
 ## Origin Control Directives
@@ -15229,6 +12969,7 @@ table   long    1, 2, 3         ' Data table at specific address
 - [ORGH](#orgh) — Set hub RAM origin
 - [ORGF](#orgf) — Set origin with zero-fill
 - [FIT](#fit) — Verify code fits within address limit
+
 
 
 ### ORGF
@@ -15280,6 +13021,7 @@ block_end
 - [RES](#res) — Reserve space without initialization
 
 
+
 ### ORGH
 
 Set the assembly origin to a hub RAM address. All subsequent code and data assemble for hub execution starting at the specified address.
@@ -15315,6 +13057,7 @@ Use ORGH when switching from cog-exec code to hub-exec code, or when defining da
 - [ORG](#org) — Set cog RAM origin
 - [ORGF](#orgf) — Set origin with fill
 - HUBEXEC constant — Hub execution mode flag
+
 
 
 ## Memory Definition Directives
@@ -15358,6 +13101,7 @@ nums    byte    1, 2, 3, 4, 5   ' Decimal values
 - [RES](#res) — Reserve uninitialized space
 
 
+
 ### LONG
 
 Declare long data in memory. Stores 32-bit values at the current address.
@@ -15395,6 +13139,7 @@ ptrs    long    @start, @end    ' Address pointers
 - [RES](#res) — Reserve uninitialized longs
 
 
+
 ### WORD
 
 Declare word data in memory. Stores 16-bit values at the current address.
@@ -15429,6 +13174,7 @@ addr    word    @buffer             ' Address reference (lower 16 bits)
 - [LONG](#long) — Declare 32-bit long data
 - [WORDFIT](#wordfit) — Verify value fits in word range
 - [ALIGNW](#alignw) — Force word alignment
+
 
 
 ## Size Verification Directives
@@ -15475,6 +13221,7 @@ DAT
 - [BYTE](#byte) — Declare byte data
 
 
+
 ### WORDFIT
 
 Constrain expression to fit within word range (0-65535). Generates assembly error if expression value exceeds word range.
@@ -15515,6 +13262,7 @@ DAT
 - [WORD](#word) — Declare word data
 
 
+
 ## Alignment Directives
 
 Alignment directives insert padding bytes to align the next data or instruction to specified boundaries. Proper alignment improves memory access efficiency and is required for certain P2 operations.
@@ -15549,6 +13297,7 @@ mydata  long    0               ' This starts on a long-aligned address
 - [ORG](#org) — Set origin address
 
 
+
 ### ALIGNW
 
 Align to word boundary (2-byte alignment). Inserts zero bytes as needed to align the next data or instruction to a word boundary.
@@ -15576,6 +13325,7 @@ myword  word    0               ' This starts on a word-aligned address
 - [ALIGNL](#alignl) — Align to long boundary
 - [WORD](#word) — Declare word data (auto-aligned in hub)
 - [ORG](#org) — Set origin address
+
 
 
 ## Space Management Directives
@@ -15629,6 +13379,7 @@ Use DITTO to create repeated instruction sequences without copy-paste. Useful fo
 - [ORG](#org) — Set origin address
 
 
+
 ### FIT
 
 Verify that code fits within specified address limit. Generates assembly error if current address exceeds specified limit.
@@ -15651,7 +13402,7 @@ Use FIT to verify that code doesn't exceed available space. This is essential fo
 ' Cog code
         ORG     0
         ' ... code ...
-        FIT     $1F0            ' Ensure code fits before cog special registers
+        FIT     $1F0            ' Ensure fits before special regs
 
         FIT                     ' Default: ensure fits in cog RAM (< $200)
 ```
@@ -15667,6 +13418,7 @@ Use FIT to verify that code doesn't exceed available space. This is essential fo
 - [ORG](#org) — Set origin address
 - [RES](#res) — Reserve space
 - [ORGF](#orgf) — Fill to address
+
 
 
 ### RES
@@ -15705,6 +13457,7 @@ temp    res     1               ' Reserve 1 long for temporary storage
 - [FIT](#fit) — Verify space fits within limit
 
 
+
 ## Summary
 
 The P2 assembler's 13 directives provide complete control over memory layout and assembly constraints:
@@ -15740,9 +13493,9 @@ The TRUE constant represents a boolean true condition with all 32 bits set to 1.
 #### Usage
 ```pasm
 ' Using TRUE in conditional logic
-        cmp     x, #0       wz      ' Compare x with 0
-        mov     result, TRUE        ' Default to TRUE
-        if_z mov  result, FALSE     ' Set to FALSE if x was 0
+                cmp     x, #0       wz      ' Compare x with 0
+                mov     result, TRUE        ' Default to TRUE
+        if_z    mov     result, FALSE       ' Set to FALSE if x was 0
 ```
 
 #### Notes
@@ -15752,6 +13505,7 @@ The TRUE constant represents a boolean true condition with all 32 bits set to 1.
 
 #### Related Constants
 - [FALSE](#false) — Logical false constant
+
 
 
 ### FALSE
@@ -15786,6 +13540,7 @@ The FALSE constant represents a boolean false condition with all 32 bits cleared
 - [TRUE](#true) — Logical true constant
 
 
+
 ## Numeric Limit Constants
 
 ### NEGX
@@ -15805,12 +13560,12 @@ NEGX represents the maximum negative integer value in 32-bit two's complement re
 #### Usage
 ```pasm
 ' Checking for negative underflow
-        cmps    value, NEGX     wc  ' Check if value is below min negative
-        if_c jmp    #underflow      ' Jump if underflow (carry set means less than)
+                cmps    value, NEGX     wc      ' Check if below min negative
+        if_c    jmp     #underflow              ' Jump if underflow
 
 ' Using NEGX as lower limit
-        mov     limit, NEGX         ' Set limit to maximum negative value
-        maxs    value, limit        ' Clamp value to not go below NEGX
+                mov     limit, NEGX             ' Set limit to max negative
+                maxs    value, limit            ' Clamp to not go below NEGX
 ```
 
 #### Notes
@@ -15821,6 +13576,7 @@ NEGX represents the maximum negative integer value in 32-bit two's complement re
 
 #### Related Constants
 - [POSX](#posx) — Maximum positive integer constant
+
 
 
 ### POSX
@@ -15840,12 +13596,12 @@ POSX represents the maximum positive integer value in 32-bit two's complement re
 #### Usage
 ```pasm
 ' Checking for positive overflow
-        cmp     value, POSX     wc  ' Check if value exceeds max positive
-        if_nc jmp   #overflow       ' Jump if overflow (carry not set means greater/equal)
+                cmp     value, POSX     wc      ' Check if exceeds max positive
+        if_nc   jmp     #overflow               ' Jump if overflow
 
 ' Using POSX as upper limit
-        mov     limit, POSX         ' Set limit to maximum positive value
-        mins    value, limit        ' Clamp value to not exceed POSX
+                mov     limit, POSX             ' Set limit to max positive
+                mins    value, limit            ' Clamp to not exceed POSX
 ```
 
 #### Notes
@@ -15856,6 +13612,7 @@ POSX represents the maximum positive integer value in 32-bit two's complement re
 
 #### Related Constants
 - [NEGX](#negx) — Maximum negative integer constant
+
 
 
 ## Mathematical Constants
@@ -15896,6 +13653,7 @@ The PI constant provides the mathematical constant π encoded in IEEE 754 single
 
 #### Related Constants
 None (unique mathematical constant)
+
 
 
 ## Execution Mode Constants
@@ -15941,6 +13699,7 @@ Where `id` specifies the target cog (0-7) and `address` points to the code in hu
 - [COGEXEC_NEW_PAIR](#cogexec_new_pair) — Auto-select adjacent cog pair variant
 
 
+
 ### HUBEXEC
 
 Execution mode constant for executing code directly from hub RAM.
@@ -15957,10 +13716,10 @@ HUBEXEC specifies hub execution mode for the COGINIT instruction. When used, COG
 #### Usage
 ```pasm
 ' Start specific cog with hub execution
-        COGINIT #HUBEXEC+1, #$400   ' Start Cog 1 executing from Hub RAM $400
+        COGINIT #HUBEXEC+1, #$400   ' Cog 1 from Hub RAM $400
 
 ' Start Cog 5 with hub execution at label
-        COGINIT #HUBEXEC+5, @code   ' Start Cog 5 executing from @code in hub
+        COGINIT #HUBEXEC+5, @code   ' Cog 5 from @code in hub
 ```
 
 #### Syntax
@@ -15983,6 +13742,7 @@ Where `id` specifies the target cog (0-7) and `address` points to the code in hu
 - [HUBEXEC_NEW_PAIR](#hubexec_new_pair) — Auto-select adjacent cog pair variant
 
 
+
 ## Execution Mode Variants
 
 The execution mode constants include additional variants for automatic cog selection:
@@ -16000,6 +13760,40 @@ Value: Automatically selects the next available cog for HUBEXEC mode. Eliminates
 Value: Automatically selects an adjacent pair of available cogs for HUBEXEC mode. Used when paired cog operations require two adjacent cogs.
 
 These variants simplify cog management by allowing the system to automatically assign available cogs rather than requiring explicit cog ID specification.
+
+
+
+## Hardware Configuration Constants
+
+The P2 provides extensive predefined constants for configuring its sophisticated hardware subsystems. These constants are documented in dedicated reference sections:
+
+### SmartPin Constants
+
+The P2's 64 Smart Pins each function as independent hardware peripherals. Over 50 predefined constants configure input selection, filtering, output control, and the 32 operating modes including DAC, ADC, PWM, serial communication, and counters.
+
+**See:** [SmartPin Configuration Constants](smartpin-constants.md)
+
+### Streamer Constants
+
+The Streamer is the P2's DMA-like engine for high-bandwidth data transfer between hub RAM, LUT, pins, and DAC outputs. Over 80 predefined constants configure data sources, destinations, formats, color modes, and control flags.
+
+**See:** [Streamer Configuration Constants](streamer-constants.md)
+
+
+
+## Constants Summary
+
+| Category | Count | Purpose |
+|----------|-------|---------|
+| Boolean | 2 | TRUE, FALSE for logical operations |
+| Numeric Limits | 2 | NEGX, POSX for bounds checking |
+| Mathematical | 1 | PI for CORDIC and floating-point |
+| Execution Mode | 6 | COGEXEC, HUBEXEC and variants |
+| SmartPin | 59 | Pin configuration and modes |
+| Streamer | 85 | Data streaming and video |
+| **Total** | **155** | Core predefined constants |
+
+*Note: Clock configuration constants (RCFAST, RCSLOW, XI, PLL, XDIV*, XMUL*, etc.) add over 1,000 additional symbols for system clock setup.*
 
 # Special Registers
 
@@ -16057,6 +13851,7 @@ Interrupt 3 call address. Stores the address where execution jumps when interrup
 **Related**: [IRET3](#iret3--address-1f1), SETINT3, RETI3
 
 
+
 ### IRET3 — Address $1F1
 
 Interrupt 3 return address. Stores the return address when interrupt 3 is triggered.
@@ -16075,6 +13870,7 @@ int3_handler
 **Related**: [IJMP3](#ijmp3--address-1f0), SETINT3, RETI3
 
 
+
 ### IJMP2 — Address $1F2
 
 Interrupt 2 call address. Stores the address where execution jumps when interrupt 2 is triggered.
@@ -16090,6 +13886,7 @@ Interrupt 2 call address. Stores the address where execution jumps when interrup
 ```
 
 **Related**: [IRET2](#iret2--address-1f3), SETINT2, RETI2
+
 
 
 ### IRET2 — Address $1F3
@@ -16110,6 +13907,7 @@ int2_handler
 **Related**: [IJMP2](#ijmp2--address-1f2), SETINT2, RETI2
 
 
+
 ### IJMP1 — Address $1F4
 
 Interrupt 1 call address. Stores the address where execution jumps when interrupt 1 is triggered.
@@ -16125,6 +13923,7 @@ Interrupt 1 call address. Stores the address where execution jumps when interrup
 ```
 
 **Related**: [IRET1](#iret1--address-1f5), SETINT1, RETI1
+
 
 
 ### IRET1 — Address $1F5
@@ -16145,6 +13944,7 @@ int1_handler
 **Related**: [IJMP1](#ijmp1--address-1f4), SETINT1, RETI1
 
 
+
 ### PA — Address $1F6
 
 Multi-purpose register A. Serves multiple special functions or can be used as general RAM.
@@ -16161,15 +13961,16 @@ When these functions are not needed, PA can be used as general-purpose cog RAM.
 
 **Example**:
 ```pasm
-        calld   PA, #subroutine         ' Store return info in PA, call subroutine
-        callpa  param, #handler         ' Copy param to PA, call handler
-        loc     PA, #label              ' Store address of label in PA
+        calld   PA, #subroutine         ' Return info in PA, call
+        callpa  param, #handler         ' Copy param to PA, call
+        loc     PA, #label              ' Store label address in PA
 
         ' Using PA as general RAM
-        mov     PA, #42                 ' Just a regular register when not using special functions
+        mov     PA, #42                 ' Regular register usage
 ```
 
 **Related**: [PB](#pb--address-1f7), CALLD, CALLPA, LOC
+
 
 
 ### PB — Address $1F7
@@ -16188,15 +13989,16 @@ When these functions are not needed, PB can be used as general-purpose cog RAM.
 
 **Example**:
 ```pasm
-        calld   PB, #subroutine         ' Store return info in PB, call subroutine
-        callpb  param, #handler         ' Copy param to PB, call handler
-        loc     PB, #label              ' Store address of label in PB
+        calld   PB, #subroutine         ' Return info in PB, call
+        callpb  param, #handler         ' Copy param to PB, call
+        loc     PB, #label              ' Store label address in PB
 
         ' Using PB as general RAM
-        mov     PB, ##hub_addr          ' Just a regular register when not using special functions
+        mov     PB, ##hub_addr          ' Regular register usage
 ```
 
 **Related**: [PA](#pa--address-1f6), CALLD, CALLPB, LOC
+
 
 
 ## Fixed Special Registers
@@ -16210,7 +14012,6 @@ Pointer A to Hub RAM. Primary pointer register for Hub RAM access with automatic
 **Usage**: PTRA is the primary pointer for Hub RAM operations. It supports indexed addressing modes with automatic pre- and post-increment/decrement, making it ideal for sequential memory access patterns. The pointer is 20 bits wide, addressing the full Hub RAM space.
 
 **Addressing Modes**:
-
 - `PTRA++` — Post-increment by 4 bytes (one long)
 - `PTRA--` — Post-decrement by 4 bytes
 - `++PTRA` — Pre-increment by 4 bytes
@@ -16220,15 +14021,16 @@ Pointer A to Hub RAM. Primary pointer register for Hub RAM access with automatic
 **Example**:
 ```pasm
         mov     ptra, ##hub_buffer      ' Set PTRA to Hub address
-        rdlong  data, ptra++            ' Read long from Hub at PTRA, post-increment by 4
+        rdlong  data, ptra++            ' Read long, post-increment
         wrlong  data, ptra[4]           ' Write long to Hub at PTRA+16 bytes
 
         ' Block transfer using SETQ
         setq    #15                     ' Transfer 16 longs
-        rdlong  cog_buffer, ptra++      ' Read 16 longs from Hub, auto-increment PTRA
+        rdlong  cog_buffer, ptra++      ' Read 16 longs, auto-inc
 ```
 
 **Related**: [PTRB](#ptrb--address-1f9), RDLONG, WRLONG, RDBYTE, RDWORD, SETQ
+
 
 
 ### PTRB — Address $1F9
@@ -16240,7 +14042,6 @@ Pointer B to Hub RAM. Secondary pointer register for Hub RAM access with automat
 **Usage**: PTRB is the secondary pointer for Hub RAM operations, providing the same capabilities as PTRA. Having two independent pointers enables efficient dual-buffer operations and complex memory access patterns. COGINIT writes the code start address to the target cog's PTRB, enabling position-independent code.
 
 **Addressing Modes**:
-
 - `PTRB++` — Post-increment by 4 bytes (one long)
 - `PTRB--` — Post-decrement by 4 bytes
 - `++PTRB` — Pre-increment by 4 bytes
@@ -16250,7 +14051,7 @@ Pointer B to Hub RAM. Secondary pointer register for Hub RAM access with automat
 **Example**:
 ```pasm
         mov     ptrb, ##hub_source      ' Set PTRB to source address
-        rdlong  data, ptrb++            ' Read long from Hub at PTRB, post-increment
+        rdlong  data, ptrb++            ' Read long, post-increment
         wrlong  data, ptrb[8]           ' Write long to Hub at PTRB+32 bytes
 
         ' COGINIT sets PTRB in launched cog
@@ -16258,6 +14059,7 @@ Pointer B to Hub RAM. Secondary pointer register for Hub RAM access with automat
 ```
 
 **Related**: [PTRA](#ptra--address-1f8), RDLONG, WRLONG, COGINIT
+
 
 
 ### DIRA — Address $1FA
@@ -16280,10 +14082,11 @@ Direction register A for pins 0-31. Controls whether each pin is an input or out
         andn    DIRA, ##$0000_00FF      ' Set pins 0-7 as inputs
 
         ' Atomic direction change
-        mov     DIRA, new_directions    ' Change all 32 pin directions atomically
+        mov     DIRA, new_directions    ' Change all 32 directions
 ```
 
 **Related**: [DIRB](#dirb--address-1fb), [OUTA](#outa--address-1fc), [INA](#ina--address-1fe), DIRC, DIRH, DIRL
+
 
 
 ### DIRB — Address $1FB
@@ -16307,6 +14110,7 @@ Direction register B for pins 32-63. Controls whether each pin is an input or ou
 ```
 
 **Related**: [DIRA](#dira--address-1fa), [OUTB](#outb--address-1fd), [INB](#inb--address-1ff)
+
 
 
 ### OUTA — Address $1FC
@@ -16336,6 +14140,7 @@ Output register A for pins 0-31. Sets the output state for pins configured as ou
 **Related**: [OUTB](#outb--address-1fd), [DIRA](#dira--address-1fa), [INA](#ina--address-1fe), OUTC, OUTH, OUTL
 
 
+
 ### OUTB — Address $1FD
 
 Output register B for pins 32-63. Sets the output state for pins configured as outputs.
@@ -16360,6 +14165,7 @@ Output register B for pins 32-63. Sets the output state for pins configured as o
 **Related**: [OUTA](#outa--address-1fc), [DIRB](#dirb--address-1fb), [INB](#inb--address-1ff)
 
 
+
 ### INA — Address $1FE
 
 Input register A for pins 0-31. Reads the current state of pins regardless of direction setting.
@@ -16375,18 +14181,19 @@ Input register A for pins 0-31. Reads the current state of pins regardless of di
 
 **Example**:
 ```pasm
-        mov     state, INA              ' Read all pins 0-31
-        test    INA, #1             wz  ' Test if pin 0 is high
+                mov     state, INA              ' Read all pins 0-31
+                test    INA, #1             wz  ' Test if pin 0 is high
         if_nz   jmp     #pin_high
 
-        and     inputs, INA             ' Mask input pins
+                and     inputs, INA             ' Mask input pins
 
-        ' Wait for pin high
-.wait   test    INA, pin_mask       wz
+                ' Wait for pin high
+.wait           test    INA, pin_mask       wz
         if_z    jmp     #.wait
 ```
 
 **Related**: [INB](#inb--address-1ff), [DIRA](#dira--address-1fa), [OUTA](#outa--address-1fc)
+
 
 
 ### INB — Address $1FF
@@ -16404,15 +14211,16 @@ Input register B for pins 32-63. Reads the current state of pins regardless of d
 
 **Example**:
 ```pasm
-        mov     state, INB              ' Read all pins 32-63
-        test    INB, ##$8000_0000   wz  ' Test if pin 63 is high
+                mov     state, INB              ' Read all pins 32-63
+                test    INB, ##$8000_0000   wz  ' Test if pin 63 is high
         if_z    jmp     #pin_low
 
-        ' Copy input pattern to output
-        mov     OUTB, INB
+                ' Copy input pattern to output
+                mov     OUTB, INB
 ```
 
 **Related**: [INA](#ina--address-1fe), [DIRB](#dirb--address-1fb), [OUTB](#outb--address-1fd)
+
 
 
 ## Non-Memory-Mapped Registers
@@ -16439,6 +14247,7 @@ The program counter is a 20-bit register that holds the Hub RAM address of the c
 ```
 
 **Related**: GETPC, JMP, CALL, CALLD
+
 
 
 ### Q Register
@@ -16474,6 +14283,7 @@ The Q register contents are volatile—CORDIC and division operations overwrite 
 **Related**: GETQX, GETQY, SETQ, SETQ2, QROTATE, QVECTOR, QDIV
 
 
+
 ### System Counter (CT)
 
 The system counter is a free-running 32-bit counter that increments on every system clock cycle. It is global across all cogs—all cogs reading CT simultaneously receive the same value.
@@ -16486,21 +14296,22 @@ The system counter is a free-running 32-bit counter that increments on every sys
 
 **Example**:
 ```pasm
-        getct   target                  ' Get current time
-        addct1  target, ##delay_cycles  ' Compute target = now + delay
-        waitct1                         ' Wait until CT reaches target
+                getct   target                  ' Get current time
+                addct1  target, ##delay_cycles  ' target = now + delay
+                waitct1                         ' Wait for CT to reach it
 
-        ' Timeout pattern
-        getct   timeout
-        add     timeout, ##max_cycles
-.loop   ' ... do work ...
-        getct   now
-        cmp     now, timeout        wc  ' Check if timeout exceeded
+                ' Timeout pattern
+                getct   timeout
+                add     timeout, ##max_cycles
+.loop           ' ... do work ...
+                getct   now
+                cmp     now, timeout        wc  ' Check if timeout exceeded
         if_nc   jmp     #timed_out
-        jmp     #.loop
+                jmp     #.loop
 ```
 
 **Related**: GETCT, ADDCT1, ADDCT2, ADDCT3, WAITCT1, WAITCT2, WAITCT3
+
 
 
 ### Hardware Random Number Generator (RANDOM)
@@ -16520,7 +14331,7 @@ The hardware random number generator produces true random numbers based on therm
         ' Generate random in range 0-99
         getrnd  temp
         qmul    temp, #100              ' Multiply by 100
-        getqy   random_0_99             ' Get high 32 bits = value * 100 / 2^32
+        getqy   random_0_99             ' High 32 bits = value*100/2^32
 
         ' Random bit
         getrnd  temp
@@ -16528,6 +14339,7 @@ The hardware random number generator produces true random numbers based on therm
 ```
 
 **Related**: GETRND, QMUL (for scaling random values)
+
 
 
 ### C and Z Flags
@@ -16541,26 +14353,26 @@ The carry (C) and zero (Z) flags are 1-bit condition flags that store the result
 **Usage**: The C and Z flags enable conditional execution and branching. Most ALU instructions can update these flags based on their results. Conditional prefixes (IF_Z, IF_NZ, IF_C, IF_NC, etc.) determine whether an instruction executes based on flag states.
 
 **Flag Setting**:
-
 - **WZ**: Sets Z flag based on result (Z=1 if result is zero)
 - **WC**: Sets C flag based on operation (carry out, bit shifted out, etc.)
 - **WCZ**: Sets both flags
 
 **Example**:
 ```pasm
-        cmp     value, #100         wz  ' Compare, set Z if equal
+                cmp     value, #100         wz  ' Compare, set Z if equal
         if_z    jmp     #equal
 
-        test    flags, ##$8000_0000 wc  ' Test bit 31, put in C
+                test    flags, ##$8000_0000 wc  ' Test bit 31, put in C
         if_c    jmp     #bit_set
 
-        add     sum, addend         wc  ' Add, set C if overflow
+                add     sum, addend         wc  ' Add, set C if overflow
         if_c    jmp     #overflow
 
-        shr     data, #1            wc  ' Shift right, C gets shifted-out bit
+                shr     data, #1            wc  ' Shift right, C = bit out
 ```
 
 **Related**: All conditional execution (IF_xx), CMP, TEST, and ALU instructions with WC/WZ/WCZ
+
 
 
 ## Common Usage Patterns
@@ -16574,7 +14386,7 @@ Toggle a pin:
 
 Wait for pin high:
 ```pasm
-.wait   test    INA, pin_mask       wz
+.wait           test    INA, pin_mask       wz
         if_z    jmp     #.wait
 ```
 
@@ -16587,6 +14399,7 @@ Set multiple pins atomically:
 ```pasm
         mov     OUTA, new_pattern       ' All 32 pins change simultaneously
 ```
+
 
 
 ### Hub RAM Access
@@ -16609,6 +14422,7 @@ Dual buffer operation:
 ```
 
 
+
 ### Interrupt Setup
 
 Configure interrupt handler:
@@ -16622,6 +14436,7 @@ handler_addr
 ```
 
 
+
 ### Timing Operations
 
 Precise delay:
@@ -16633,15 +14448,16 @@ Precise delay:
 
 Timeout detection:
 ```pasm
-        getct   deadline
-        add     deadline, ##max_time
-.loop   ' ... do work ...
-        getct   now
-        cmp     now, deadline       wc
+                getct   deadline
+                add     deadline, ##max_time
+.loop           ' ... do work ...
+                getct   now
+                cmp     now, deadline       wc
         if_nc   jmp     #timeout
-        ' ... continue if not timed out ...
-        jmp     #.loop
+                ' ... continue if not timed out ...
+                jmp     #.loop
 ```
+
 
 
 ## Important Behaviors
@@ -16661,10 +14477,6 @@ Timeout detection:
 **Per-Cog Independence**: Each cog has its own independent copy of all special registers. Changes in one cog do not affect other cogs' registers, enabling parallel independent operation.
 
 
-```{=latex}
-\newpage
-```
-
 # Part III: Reference Tables
 
 # Appendix A: Instruction Encoding Master Table
@@ -16683,9 +14495,11 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | Z Effect | What Z flag indicates after instruction execution |
 
 **Flag Effect Notation:**
+
 - `---` indicates the flag is not affected by the instruction
 - `Result = 0` means the flag is set if the result equals zero
 - Specific conditions are described where applicable
+
 
 
 ## Instruction Encodings
@@ -16716,7 +14530,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | ALTSW | `1001011` | — | 2 | — | — |
 | AND | `0101000` | CZI | 2 | parity of result | Result = 0 |
 | ANDN | `0101001` | CZI | 2 | parity of result | Result = 0 |
-| ASMCLK | --- | — | — | — | — |
+| ASMCLK | `---` | — | — | — | — |
 | AUGD | `1111100` | — | 2 | — | — |
 | AUGS | `1111000` | — | 2 | — | — |
 | BITC | `0100010` | CZI | 2 | — | original D[S[4:0]] |
@@ -16733,7 +14547,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | CALL | `1101101` | — | 4 / 13-20 | — | — |
 | CALLA | `1101011` | CZ | 5...12 * | D[31] | D[30] |
 | CALLB | `1101011` | CZ | 5...12 * | D[31] | D[30] |
-| CALLD | --- | — | 4 / 13-20 | — | — |
+| CALLD | `---` | — | 4 / 13-20 | — | — |
 | CALLPA | `1011010` | — | 4 / 13–20 | — | — |
 | CALLPB | `1011010` | — | 4 / 13–20 | — | — |
 | CMP | `0010000` | CZI | 2 | Unsigned (D < S) | D=S |
@@ -16750,7 +14564,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | COGSTOP | `1101011` | — | 2–9 | — | — |
 | CRCBIT | `1001110` | — | 2 | — | — |
 | CRCNIB | `1001110` | — | 2 | — | — |
-| DEBUG | --- | — | — | — | — |
+| DEBUG | `---` | — | — | — | — |
 | DECMOD | `0111001` | CZI | 2 | Modulus triggered | Result = 0 |
 | DECOD | `1001110` | — | 2 | — | — |
 | DIRC | `1101011` | CZ | 2 | — | DIR bit |
@@ -16837,7 +14651,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | JXMT | `1011110` | — | 2 or 4 | — | — |
 | JXRL | `1011110` | — | 2 or 4 | — | — |
 | JXRO | `1011110` | — | 2 or 4 | — | — |
-| LOC | --- | — | 2 | — | — |
+| LOC | `---` | — | 2 | — | — |
 | LOCKNEW | `1101011` | C | 4...11 | 1 if no LOCK available | — |
 | LOCKREL | `1101011` | C | 2...9, +2 if result | — | — |
 | LOCKRET | `1101011` | — | 2...9 | — | — |
@@ -17053,6 +14867,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | ZEROX | `0111010` | CZI | 2 | MSB of result | Result = 0 |
 
 **Total Instructions:** 359
+
 
 
 **Notes:**
@@ -17825,6 +15640,7 @@ Reserved words fall into six main categories:
 6. **Effect Keywords** (9 words) - Flag modification suffixes
 
 
+
 ## Instruction Mnemonics (358 words)
 
 All PASM2 instruction names are reserved. These appear in alphabetical order for quick reference:
@@ -17893,6 +15709,7 @@ XORO32      XSTOP       XZERO       ZEROX
 ```
 
 
+
 ## Assembly Directives (14 words)
 
 Directives control the assembly process and code organization:
@@ -17911,6 +15728,7 @@ Directives control the assembly process and code organization:
 - **RES** - Reserve uninitialized registers/memory
 - **WORD** - Reserve/initialize word-sized data (16 bits)
 - **WORDFIT** - Verify code fits in specified word count
+
 
 
 ## Predefined Constants (11 words)
@@ -17937,6 +15755,7 @@ Used with the COGINIT instruction to specify execution mode:
 - **HUBEXEC_NEW_PAIR** - Auto-select COG pair, execute from Hub RAM
 
 **Note:** The `_NEW` and `_NEW_PAIR` variants are bit patterns that modify the base `COGEXEC` and `HUBEXEC` constants for use with COGINIT's automatic COG selection feature.
+
 
 
 ## Special Register Names (16 words)
@@ -17968,6 +15787,7 @@ Always provide special functions when accessed:
 - **OUTB** - Output register for pins 32-63 ($1FD, 509)
 - **INA** - Input register for pins 0-31 ($1FE, 510)
 - **INB** - Input register for pins 32-63 ($1FF, 511)
+
 
 
 ## Condition Keywords (41 words)
@@ -18037,6 +15857,7 @@ Additional aliases that express the same conditions in reverse order:
 **Note:** Many conditions have multiple valid names (aliases). For example, `IF_C`, `IF_B`, and `IF_LT` all represent the same condition code but provide semantic clarity depending on context.
 
 
+
 ## Effect Keywords (9 words)
 
 Effect suffixes control flag updates after instruction execution:
@@ -18065,6 +15886,7 @@ ADD   x, y  WC      ' Update C flag with carry
 CMP   a, b  WCZ     ' Update both C and Z flags
 TEST  val, mask  ANDZ   ' AND test result with Z flag
 ```
+
 
 
 ## Avoiding Reserved Words
@@ -18098,6 +15920,7 @@ byte_data:    long  $0
 ```
 
 
+
 ## Summary
 
 PASM2 reserves **449 identifiers** across six categories:
@@ -18120,17 +15943,11 @@ PASM2 reserves **449 identifiers** across six categories:
 
 The P2 uses a fixed 32-bit instruction word with five distinct fields that encode all instruction information:
 
-```
- 31  30  29  28  27  26  25  24  23  22  21  20  19  18  17  16  15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0
-├───┴───┴───┴───┼───┴───┴───┴───┴───┴───┴───┼───┴───┴───┼───┴───┴───┴───┴───┴───┴───┴───┴───┼───┴───┴───┴───┴───┴───┴───┴───┴───┤
-│    EEEE       │       OOOOOOO             │    CZI    │         DDDDDDDDD                 │         SSSSSSSSS                 │
-│  Condition    │       Opcode              │  Effects  │         Destination               │         Source                    │
-│   (4 bits)    │       (7 bits)            │  (3 bits) │         (9 bits)                  │         (9 bits)                  │
-└───────────────┴───────────────────────────┴───────────┴───────────────────────────────────┴───────────────────────────────────┘
+```{=latex}
+\InstructionEncoding{Generic}{EEEE}{OOOOOOO}{CZI}{DDDDDDDDD}{SSSSSSSSS}
 ```
 
 This compact encoding allows:
-
 - 16 execution conditions
 - 128 primary opcodes
 - 512 register addresses (COG and LUT)
@@ -18197,7 +16014,6 @@ The D field always references a register, never an immediate value.
 ### Source Field (S) - Bits 8:0
 
 9-bit field specifying either:
-
 - **Register address** (when I=0): Same address space as D field
 - **Immediate value** (when I=1): Unsigned 0-511, or extended by AUGS
 
@@ -18390,39 +16206,29 @@ The 7-bit opcode space (128 possible opcodes) is organized by instruction catego
 
 When immediate values exceed 9 bits, AUGS and AUGD instructions extend the next instruction's operands:
 
-**AUGS Format:**
-```
-1111_000x_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx
+| Instruction | Bit Pattern | Extended Field |
+|-------------|-------------|----------------|
+| AUGS | `1111_000x_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx` | S becomes 32 bits |
+| AUGD | `1111_100x_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx` | D becomes 32 bits |
 
-Effect: Next instruction's S field becomes 23 bits:
-  Bits 31:9 from AUGS (x bits)
-  Bits 8:0 from instruction S field
-```
+**Extension mechanism:**
 
-**AUGD Format:**
-```
-1111_100x_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx
-
-Effect: Next instruction's D field becomes 23 bits:
-  Bits 31:9 from AUGD (x bits)
-  Bits 8:0 from instruction D field
-```
+- Bits 31:9 come from the AUG instruction (x bits above)
+- Bits 8:0 come from the following instruction's S or D field
+- Combined value used for that instruction only
 
 **Example:**
-```
+
+```pasm
 AUGS    #$1234      ' Bits 31:9 = $1234
 MOV     result, #$56 ' S = $1234_056 = $2468AC
 ```
 
 ### NOP Encoding
 
-NOP is encoded as all zeros, which decodes as:
-```
-0000_0000_000_000000000_000000000
-= IF_ALWAYS ROR $000, $000
-```
+NOP is encoded as all zeros: `0000_0000_000_000000000_000000000`
 
-This performs a useless rotate with no effect.
+This decodes as `IF_ALWAYS ROR $000, $000` - a useless rotate with no effect.
 
 ### Hub Instruction Extensions
 
@@ -18455,9 +16261,9 @@ Encoding breakdown:
 
 32-bit pattern:
   0000_0001000_001_DDDDDDDDD_000000101
-  ││││ │││││││ │││ ││││││││││ │││││││││
-  ││││ │││││││ │││ └────┬────┘ └───┬───┘
-  ││││ │││││││ │││      │          └─ S = 5
+  ││││ │││││││ │││ │││││││││ │││││││││
+  ││││ │││││││ │││ └────┬───┘ └───┬───┘
+  ││││ │││││││ │││      │         └─ S = 5
   ││││ │││││││ │││      └─ D = result address
   ││││ │││││││ └┴┴─ I=1, Z=0, C=0
   ││││ └─────┴─ ADD opcode
@@ -18478,9 +16284,9 @@ Encoding breakdown:
 
 32-bit pattern:
   1010_0110100_100_DDDDDDDDD_SSSSSSSSS
-  ││││ │││││││ │││ ││││││││││ │││││││││
-  ││││ │││││││ │││ └────┬────┘ └───┬───┘
-  ││││ │││││││ │││      │          └─ S = source address
+  ││││ │││││││ │││ │││││││││ │││││││││
+  ││││ │││││││ │││ └────┬───┘ └───┬───┘
+  ││││ │││││││ │││      │         └─ S = source address
   ││││ │││││││ │││      └─ D = dest address
   ││││ │││││││ └┴┴─ I=0, Z=0, C=1 (WC)
   ││││ └─────┴─ MOV opcode

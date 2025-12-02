@@ -68,6 +68,6 @@
 $body$
 
 % Index if content includes \makeindex entries
-\printindex
+% \printindex  % Disabled - no index entries in current content
 
 \end{document}
