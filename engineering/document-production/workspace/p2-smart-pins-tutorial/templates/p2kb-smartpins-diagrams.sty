@@ -1,0 +1,1194 @@
+% P2KB Smart Pins Tutorial Diagrams Package
+% TikZ diagrams for Smart Pin timing, waveforms, and block diagrams
+% Author: Iron Sheep Productions, LLC
+% Version: 1.0
+%
+% Recreates line drawings from P2 SmartPins-220809 document as TikZ
+% Excludes oscilloscope screenshots (page19, page52) which remain as images
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{p2kb-smartpins-diagrams}[2025/12/02 P2KB Smart Pins Diagrams v1.0]
+
+\RequirePackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, decorations.pathreplacing, patterns}
+
+% ============================================================================
+% COLOR DEFINITIONS
+% ============================================================================
+
+% Base colors
+\definecolor{sp-border}{HTML}{000000}
+\definecolor{sp-text}{HTML}{000000}
+\definecolor{sp-annotation}{HTML}{0000AA}
+
+% Signal colors
+\definecolor{sp-signal-high}{HTML}{000000}
+\definecolor{sp-signal-low}{HTML}{000000}
+
+% Block diagram colors
+\definecolor{sp-block-fill}{HTML}{FFFFFF}
+\definecolor{sp-block-border}{HTML}{000000}
+
+% ============================================================================
+% COMMON STYLES
+% ============================================================================
+
+\tikzset{
+    % Timing diagram styles
+    sp-signal/.style={
+        thick,
+        sp-border
+    },
+    sp-clock/.style={
+        sp-signal
+    },
+    sp-annotation/.style={
+        font=\small,
+        sp-text
+    },
+    sp-label/.style={
+        font=\small,
+        sp-text,
+        anchor=east
+    },
+    sp-bitlabel/.style={
+        font=\footnotesize,
+        sp-text
+    },
+    % Block diagram styles
+    sp-block/.style={
+        rectangle,
+        draw=sp-block-border,
+        fill=sp-block-fill,
+        minimum height=0.8cm,
+        align=center,
+        font=\small
+    },
+    sp-arrow/.style={
+        ->,
+        >=Stealth,
+        thick
+    },
+    sp-biarrow/.style={
+        <->,
+        >=Stealth,
+        thick
+    },
+    % Dimension lines
+    sp-dim/.style={
+        <->,
+        >=Stealth,
+        thin
+    }
+}
+
+% ============================================================================
+% HELPER MACROS FOR TIMING DIAGRAMS
+% ============================================================================
+
+% Draw a clock waveform
+% #1 = start x, #2 = y level, #3 = number of cycles, #4 = period width
+\newcommand{\spClock}[4]{
+    \foreach \i in {0,...,#3} {
+        \pgfmathsetmacro{\startx}{#1 + \i * #4}
+        \draw[sp-clock] (\startx, #2) -- (\startx, #2+0.5) -- (\startx+#4/2, #2+0.5) -- (\startx+#4/2, #2) -- (\startx+#4, #2);
+    }
+}
+
+% Draw a digital signal segment (low-high-low pattern)
+% Usage in tikzpicture environment
+\newcommand{\spSignalLow}[3]{% x1, x2, y
+    \draw[sp-signal] (#1, #3) -- (#2, #3);
+}
+\newcommand{\spSignalHigh}[3]{% x1, x2, y
+    \draw[sp-signal] (#1, #3+0.5) -- (#2, #3+0.5);
+}
+\newcommand{\spRisingEdge}[2]{% x, y
+    \draw[sp-signal] (#1, #2) -- (#1, #2+0.5);
+}
+\newcommand{\spFallingEdge}[2]{% x, y
+    \draw[sp-signal] (#1, #2+0.5) -- (#1, #2);
+}
+
+% ============================================================================
+% PAGE 03: DRVH Instruction Timing Diagram
+% ============================================================================
+% Shows: System Clock, DIRA, OUTA, Instruction timing for DRVH #0
+
+\newcommand{\DRVHTimingDiagram}{%
+\begin{center}
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% Clock cycle numbers
+\foreach \i in {0,...,5} {
+    \node[sp-annotation] at (\i*1.5 + 1.5, 4.5) {\i};
+}
+
+% System Clock label and waveform
+\node[sp-label] at (-0.3, 3.8) {System Clock};
+\draw[sp-signal] (0.3, 3.5) -- (0.75, 3.5);
+\foreach \i in {0,...,5} {
+    \pgfmathsetmacro{\x}{0.75 + \i*1.5}
+    \draw[sp-signal] (\x, 3.5) -- (\x, 4) -- (\x+0.75, 4) -- (\x+0.75, 3.5) -- (\x+1.5, 3.5);
+}
+
+% DIRA label and signal
+\node[sp-label] at (-0.3, 2.5) {DIRA:};
+\draw[sp-signal] (0.3, 2.5) -- (1.5, 2.5);
+\draw[sp-signal] (1.5, 2.5) -- (1.5, 2.8);
+\node[sp-annotation, anchor=west] at (1.6, 2.8) {DIRA};
+\draw[sp-signal, ->] (2.3, 2.8) -- (3.0, 2.8);
+\draw[sp-signal] (3.0, 2.65) -- (3.0, 2.95);
+\draw[sp-signal, ->] (3.0, 2.8) -- (4.5, 2.8);
+\draw[sp-signal] (4.5, 2.65) -- (4.5, 2.95);
+\draw[sp-signal, ->] (4.5, 2.8) -- (6.0, 2.8);
+\draw[sp-signal] (6.0, 2.65) -- (6.0, 2.95);
+\draw[sp-signal, ->] (6.0, 2.8) -- (7.5, 2.8);
+\draw[sp-signal] (7.5, 2.65) -- (7.5, 2.95);
+\draw[sp-signal, ->] (7.5, 2.8) -- (8.25, 2.8);
+\node[sp-annotation, anchor=west] at (8.3, 2.8) {P0 DRIV};
+\draw[sp-signal] (9.3, 2.5) -- (9.3, 2.8) -- (9.5, 2.8);
+
+% OUTA label and signal
+\node[sp-label] at (-0.3, 1.8) {OUTA:};
+\draw[sp-signal] (0.3, 1.8) -- (1.5, 1.8);
+\draw[sp-signal] (1.5, 1.8) -- (1.5, 2.1);
+\node[sp-annotation, anchor=west] at (1.6, 2.1) {OUTA};
+\draw[sp-signal, ->] (2.3, 2.1) -- (8.25, 2.1);
+\node[sp-annotation, anchor=west] at (8.3, 2.1) {P0 HIGH};
+\draw[sp-signal] (9.3, 1.8) -- (9.3, 2.1) -- (9.5, 2.1);
+
+% Register transfer annotations
+\node[sp-annotation] at (3.75, 2.35) {Reg*};
+\node[sp-annotation] at (5.25, 2.35) {Reg*};
+\node[sp-annotation] at (6.75, 2.35) {Reg*};
+
+% Instruction label and signal
+\node[sp-label] at (-0.3, 0.8) {Instruction:};
+\draw[sp-signal] (0.3, 0.8) -- (0.75, 0.8);
+\draw[sp-signal] (0.75, 0.65) -- (0.75, 0.95);
+\node[sp-annotation, anchor=west] at (0.9, 0.8) {DRVH \#0};
+\draw[sp-signal, ->] (2.0, 0.8) -- (2.5, 0.8);
+
+% Footnote
+\node[sp-annotation, anchor=west] at (5.5, 0.3) {Reg: Internal register transfers};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 04 IMAGE 01: TESTB INA Timing Diagram
+% ============================================================================
+
+\newcommand{\TESTBINATimingDiagram}{%
+\begin{center}
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% Clock cycle numbers
+\foreach \i in {0,...,5} {
+    \node[sp-annotation] at (\i*1.5 + 1.5, 3.8) {\i};
+}
+
+% Clock label and waveform
+\node[sp-label] at (-0.3, 3.0) {Clock:};
+\draw[sp-signal] (0.3, 2.8) -- (0.75, 2.8);
+\foreach \i in {0,...,5} {
+    \pgfmathsetmacro{\x}{0.75 + \i*1.5}
+    \draw[sp-signal] (\x, 2.8) -- (\x, 3.3) -- (\x+0.75, 3.3) -- (\x+0.75, 2.8) -- (\x+1.5, 2.8);
+}
+
+% INA label and signal
+\node[sp-label] at (-0.3, 1.8) {INA:};
+\draw[sp-signal] (0.3, 1.65) -- (0.3, 1.95);
+\node[sp-annotation, anchor=west] at (0.4, 1.8) {P0 IN};
+\draw[sp-signal, ->] (1.2, 1.8) -- (3.0, 1.8);
+% Register transfers
+\node[sp-annotation] at (2.25, 1.5) {Reg};
+\draw[sp-signal] (3.0, 1.65) -- (3.0, 1.95);
+\draw[sp-signal, ->] (3.0, 1.8) -- (4.5, 1.8);
+\node[sp-annotation] at (3.75, 1.5) {Reg};
+\draw[sp-signal] (4.5, 1.65) -- (4.5, 1.95);
+\draw[sp-signal, ->] (4.5, 1.8) -- (6.0, 1.8);
+\node[sp-annotation] at (5.25, 1.5) {Reg};
+\draw[sp-signal] (6.0, 1.65) -- (6.0, 1.95);
+\node[sp-annotation, anchor=west] at (6.1, 1.8) {ALU};
+\draw[sp-signal] (6.6, 1.65) -- (6.6, 1.95);
+\draw[sp-signal, ->] (6.6, 1.8) -- (7.5, 1.8);
+\node[sp-annotation, anchor=west] at (7.6, 1.8) {C/Z};
+\draw[sp-signal, ->] (8.1, 1.8) -- (8.5, 1.8);
+
+% Internal register transfers annotation
+\node[sp-annotation, color=sp-annotation] at (4.5, 1.0) {Internal register transfers};
+
+% Instruction label
+\node[sp-label] at (-0.3, 0.3) {Instruction:};
+\draw[sp-signal] (5.25, 0.15) -- (5.25, 0.45);
+\node[sp-annotation, anchor=west] at (5.4, 0.3) {TESTB INA, \#0};
+\draw[sp-signal, ->] (7.5, 0.3) -- (8.0, 0.3);
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 04 IMAGE 02: TESTP Timing Diagram
+% ============================================================================
+
+\newcommand{\TESTPTimingDiagram}{%
+\begin{center}
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% Clock cycle numbers
+\foreach \i in {0,...,4} {
+    \node[sp-annotation] at (\i*1.5 + 1.5, 3.5) {\i};
+}
+
+% Clock label and waveform
+\node[sp-label] at (-0.3, 2.8) {Clock:};
+\draw[sp-signal] (0.3, 2.5) -- (0.75, 2.5);
+\foreach \i in {0,...,4} {
+    \pgfmathsetmacro{\x}{0.75 + \i*1.5}
+    \draw[sp-signal] (\x, 2.5) -- (\x, 3.0) -- (\x+0.75, 3.0) -- (\x+0.75, 2.5) -- (\x+1.5, 2.5);
+}
+
+% INA label and signal
+\node[sp-label] at (-0.3, 1.6) {INA:};
+\draw[sp-signal] (0.3, 1.45) -- (0.3, 1.75);
+\node[sp-annotation, anchor=west] at (0.4, 1.6) {P0 IN};
+\draw[sp-signal, ->] (1.2, 1.6) -- (3.0, 1.6);
+\node[sp-annotation] at (2.25, 1.3) {Reg};
+\draw[sp-signal] (3.0, 1.45) -- (3.0, 1.75);
+\draw[sp-signal, ->] (3.0, 1.6) -- (4.5, 1.6);
+\node[sp-annotation] at (3.75, 1.3) {Reg};
+\draw[sp-signal] (4.5, 1.45) -- (4.5, 1.75);
+\draw[sp-signal, ->] (4.5, 1.6) -- (6.0, 1.6);
+\node[sp-annotation] at (5.25, 1.3) {Reg};
+\draw[sp-signal] (6.0, 1.45) -- (6.0, 1.75);
+\node[sp-annotation, anchor=west] at (6.1, 1.6) {C/Z};
+\draw[sp-signal, ->] (6.6, 1.6) -- (7.0, 1.6);
+
+% Instruction
+\node[sp-label] at (-0.3, 0.3) {Instruction:};
+\draw[sp-signal] (4.5, 0.15) -- (4.5, 0.45);
+\node[sp-annotation, anchor=west] at (4.6, 0.3) {TESTP \#0};
+\draw[sp-signal, ->] (5.8, 0.3) -- (6.3, 0.3);
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 13: DAC/PWM Period Timing Diagram
+% ============================================================================
+
+\newcommand{\DACPWMPeriodDiagram}{%
+\begin{center}
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% DAC Input label
+\node[sp-label] at (-0.5, 1.5) {DAC Input};
+
+% Signal levels
+\node[sp-annotation, anchor=east] at (0.3, 2.0) {240};
+\node[sp-annotation, anchor=east] at (0.3, 1.5) {239};
+
+% Dashed line at 240
+\draw[dashed, thin] (0.4, 2.0) -- (0.8, 2.0);
+
+% PWM waveform - low then high then continues
+\draw[sp-signal] (0.8, 1.5) -- (0.8, 2.0) -- (6.5, 2.0);
+\draw[sp-signal] (6.5, 2.0) -- (6.5, 1.5);
+\draw[dashed, thin] (6.5, 1.5) -- (7.0, 1.5);
+
+% PWM Period annotations
+\draw[sp-arrow] (0.8, 2.5) -- (0.8, 2.2);
+\node[sp-annotation, anchor=south] at (1.5, 2.5) {PWM Period Starts};
+
+\draw[sp-arrow] (6.5, 2.5) -- (6.5, 2.2);
+\node[sp-annotation, anchor=south] at (5.8, 2.5) {PWM Period Ends};
+
+% Dimension lines below
+% 20 clocks
+\draw[sp-dim] (0.8, 0.8) -- (1.3, 0.8);
+\draw[thin] (0.8, 0.6) -- (0.8, 1.0);
+\draw[thin] (1.3, 0.6) -- (1.3, 1.0);
+\node[sp-annotation] at (1.05, 0.5) {20};
+
+% 236 clocks
+\node[sp-annotation] at (3.9, 0.8) {236};
+
+% 256 total dimension
+\draw[sp-dim] (0.8, 0.0) -- (6.5, 0.0);
+\draw[thin] (0.8, -0.2) -- (0.8, 0.2);
+\draw[thin] (6.5, -0.2) -- (6.5, 0.2);
+\node[sp-annotation] at (3.65, -0.4) {256 System-clock periods};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 15: Pulse Width Measurement Diagram
+% ============================================================================
+
+\newcommand{\PulseWidthMeasurementDiagram}{%
+\begin{center}
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% Signal levels
+\node[sp-annotation, anchor=east] at (0.0, 2.5) {1};
+\node[sp-annotation, anchor=east] at (0.0, 1.5) {0};
+
+% Pulse Start annotation
+\draw[sp-arrow] (0.4, 3.0) -- (0.4, 2.6);
+\node[sp-annotation, anchor=south east] at (0.6, 3.0) {Pulse Start};
+
+% Pulse End annotation
+\draw[sp-arrow] (6.0, 3.0) -- (6.0, 2.6);
+\node[sp-annotation, anchor=south west] at (5.8, 3.0) {Pulse End};
+
+% Main pulse waveform
+\draw[dashed, thin] (-0.3, 1.5) -- (0.2, 1.5);
+\draw[sp-signal] (0.2, 1.5) -- (0.4, 1.5) -- (0.4, 2.5) -- (6.0, 2.5) -- (6.0, 1.5);
+\draw[dashed, thin] (6.0, 1.5) -- (6.5, 1.5);
+
+% X[15:0] dimension (full pulse width)
+\draw[sp-dim] (0.4, 0.8) -- (6.0, 0.8);
+\draw[thin] (0.4, 0.6) -- (0.4, 1.0);
+\draw[thin] (6.0, 0.6) -- (6.0, 1.0);
+\node[sp-annotation] at (3.2, 0.5) {X[15:0]*};
+
+% X[31:16] dimension (high portion)
+\draw[sp-dim] (4.5, 1.8) -- (6.0, 1.8);
+\node[sp-annotation] at (5.25, 2.1) {X[31:16]*};
+
+% IN Flag
+\node[sp-annotation, anchor=west] at (5.0, 0.0) {IN Flag};
+\draw[sp-signal] (6.0, -0.5) -- (6.0, 0.0) -- (6.5, 0.0);
+\draw[dashed, thin] (5.0, -0.5) -- (6.0, -0.5);
+
+% Footnote
+\node[sp-annotation] at (3.2, -1.0) {* Number of system-clock periods};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 16: Mode %00101 NCO Frequency - Transition Counting Diagram
+% ============================================================================
+
+\newcommand{\NCOFrequencyDiagram}{%
+\begin{center}
+\begin{tikzpicture}[x=0.8cm, y=1cm]
+
+% Signal levels
+\node[sp-annotation, anchor=east] at (0.0, 2.5) {1};
+\node[sp-annotation, anchor=east] at (0.0, 1.5) {0};
+
+% Pulses Start annotation
+\draw[sp-arrow] (0.8, 3.2) -- (0.8, 2.7);
+\node[sp-annotation, anchor=south east] at (1.0, 3.2) {Pulses Start};
+
+% Initial low
+\draw[dashed, thin] (-0.3, 1.5) -- (0.5, 1.5);
+
+% Draw 12 transitions (6 complete pulses)
+\draw[sp-signal] (0.5, 1.5) -- (0.8, 1.5) -- (0.8, 2.5);
+% Cycle numbers above pulses
+\node[sp-annotation] at (1.0, 2.8) {1};
+\draw[sp-signal] (0.8, 2.5) -- (1.2, 2.5) -- (1.2, 1.5);
+\node[sp-annotation] at (1.4, 2.8) {2};
+\draw[sp-signal] (1.2, 1.5) -- (1.6, 1.5) -- (1.6, 2.5);
+\node[sp-annotation] at (1.8, 2.8) {3};
+\draw[sp-signal] (1.6, 2.5) -- (2.0, 2.5) -- (2.0, 1.5);
+\draw[sp-signal] (2.0, 1.5) -- (2.4, 1.5) -- (2.4, 2.5);
+\draw[sp-signal] (2.4, 2.5) -- (2.8, 2.5) -- (2.8, 1.5);
+\draw[sp-signal] (2.8, 1.5) -- (3.2, 1.5) -- (3.2, 2.5);
+\draw[sp-signal] (3.2, 2.5) -- (3.6, 2.5) -- (3.6, 1.5);
+\draw[sp-signal] (3.6, 1.5) -- (4.0, 1.5) -- (4.0, 2.5);
+\draw[sp-signal] (4.0, 2.5) -- (4.4, 2.5) -- (4.4, 1.5);
+\draw[sp-signal] (4.4, 1.5) -- (4.8, 1.5) -- (4.8, 2.5);
+\node[sp-annotation] at (5.0, 2.8) {11};
+\draw[sp-signal] (4.8, 2.5) -- (5.2, 2.5) -- (5.2, 1.5);
+\node[sp-annotation] at (5.4, 2.8) {12};
+\draw[sp-signal] (5.2, 1.5) -- (5.6, 1.5);
+\draw[dashed, thin] (5.6, 1.5) -- (6.0, 1.5);
+
+% Y[31:0] annotation
+\node[sp-annotation] at (3.2, 2.0) {Y[31:0] = 12 transitions};
+
+% X[15:0] dimension
+\draw[sp-dim] (0.8, 0.8) -- (1.2, 0.8);
+\draw[thin] (0.8, 0.6) -- (0.8, 1.0);
+\draw[thin] (1.2, 0.6) -- (1.2, 1.0);
+\node[sp-annotation] at (1.0, 0.4) {X[15:0]*};
+
+% IN Flag
+\node[sp-annotation, anchor=west] at (4.5, 0.0) {IN Flag};
+\draw[dashed, thin] (5.2, -0.3) -- (5.2, 0.3);
+\draw[sp-signal] (5.2, -0.3) -- (5.2, 0.3);
+
+% Footnote
+\node[sp-annotation] at (3.0, -0.8) {* Number of system-clock periods};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 17 IMAGE 01: Mode %00110 NCO Duty - Multi-Signal Timing Diagram
+% ============================================================================
+
+\newcommand{\NCODutyTimingDiagram}{%
+\begin{center}
+\begin{tikzpicture}[x=0.55cm, y=1cm]
+
+% IN Flag
+\node[sp-label] at (-1.0, 4.0) {IN Flag};
+\node[sp-annotation, anchor=east] at (0.0, 4.3) {1};
+\node[sp-annotation, anchor=east] at (0.0, 3.7) {0};
+\draw[sp-signal] (0.2, 3.7) -- (12.0, 3.7) -- (12.0, 4.3) -- (13.0, 4.3);
+\draw[sp-arrow] (12.5, 4.5) -- (12.0, 4.5);
+\node[sp-annotation, anchor=west] at (12.6, 4.5) {Z Overflow};
+
+% Output
+\node[sp-label] at (-1.0, 2.8) {Output};
+\node[sp-annotation, anchor=east] at (0.0, 3.1) {1};
+\node[sp-annotation, anchor=east] at (0.0, 2.5) {0};
+\draw[sp-signal] (0.2, 2.5) -- (2.5, 2.5) -- (2.5, 3.1) -- (5.0, 3.1) -- (5.0, 2.5) -- (13.0, 2.5);
+
+% Base Period
+\node[sp-label] at (-1.0, 1.5) {Base Period};
+\node[sp-annotation, anchor=east] at (0.0, 1.8) {1};
+\node[sp-annotation, anchor=east] at (0.0, 1.2) {0};
+\foreach \i in {0,...,6} {
+    \pgfmathsetmacro{\x}{0.2 + \i*2.0}
+    \draw[sp-signal] (\x, 1.2) -- (\x, 1.8) -- (\x+1.0, 1.8) -- (\x+1.0, 1.2) -- (\x+2.0, 1.2);
+}
+
+% Z[31:16] values with arrows
+\draw[sp-arrow] (1.2, 0.8) -- (1.2, 1.1);
+\node[sp-annotation] at (1.2, 0.5) {\$0000};
+\draw[sp-arrow] (3.2, 0.8) -- (3.2, 1.1);
+\node[sp-annotation] at (3.2, 0.5) {\$5010};
+\draw[sp-arrow] (5.2, 0.8) -- (5.2, 1.1);
+\node[sp-annotation] at (5.2, 0.5) {\$A020};
+\draw[sp-arrow] (7.2, 0.8) -- (7.2, 1.1);
+\node[sp-annotation] at (7.2, 0.5) {\$F030};
+\draw[sp-arrow] (9.2, 0.8) -- (9.2, 1.1);
+\node[sp-annotation] at (9.2, 0.5) {\$4040};
+\draw[sp-arrow] (11.2, 0.8) -- (11.2, 1.1);
+\node[sp-annotation] at (11.2, 0.5) {\$9050};
+\draw[sp-arrow] (13.2, 0.8) -- (13.2, 1.1);
+\node[sp-annotation] at (13.2, 0.5) {\$E060};
+
+% Z[31:16] label
+\node[sp-annotation, anchor=east] at (-0.3, 0.5) {Z[31:16]};
+
+% System Clock
+\node[sp-label] at (-1.0, -0.5) {System Clock};
+\node[sp-annotation, anchor=east] at (0.0, -0.2) {1};
+\node[sp-annotation, anchor=east] at (0.0, -0.8) {0};
+\foreach \i in {0,...,25} {
+    \pgfmathsetmacro{\x}{0.2 + \i*0.5}
+    \draw[sp-signal] (\x, -0.8) -- (\x, -0.2) -- (\x+0.25, -0.2) -- (\x+0.25, -0.8) -- (\x+0.5, -0.8);
+}
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 17 IMAGE 02: Mode %00110 NCO Duty - Block Diagram
+% ============================================================================
+
+\newcommand{\NCODutyBlockDiagram}{%
+\begin{center}
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% System Clock input
+\node[sp-block, minimum width=2cm] (sysclk) at (0, 0) {System Clock\\100 MHz};
+
+% Div by 2
+\node[sp-block, minimum width=1.5cm] (div) at (2.5, 0) {Div by 2};
+\draw[sp-arrow] (sysclk) -- (div);
+
+% X[15:0] register
+\node[sp-block, minimum width=1.5cm] (xreg) at (2.5, 1.5) {X[15:0]};
+\node[sp-annotation, anchor=south] at (2.5, 2.0) {X = \$2};
+\draw[sp-arrow] (xreg) -- (div);
+
+% Base Period annotation
+\node[sp-annotation] at (4.0, -0.5) {50 MHz\\Base Period};
+
+% Y[31:0] register
+\node[sp-block, minimum width=1.5cm] (yreg) at (5.5, 1.5) {Y[31:0]};
+\node[sp-annotation, anchor=south] at (5.5, 2.0) {Y = \$5010};
+
+% Adder
+\node[sp-block, minimum width=1.5cm] (adder) at (5.5, 0) {Adder};
+\draw[sp-arrow] (div) -- (adder);
+\draw[sp-arrow] (yreg) -- (adder);
+
+% Z[31:0] register
+\node[sp-block, minimum width=1.5cm] (zreg) at (8.0, 1.5) {Z[31:0]};
+
+% MSB arrow from Z to output
+\draw[sp-arrow] (zreg.north) -- (8.0, 2.5) -- (6.5, 2.5);
+\node[sp-annotation, anchor=south] at (7.25, 2.5) {MSB};
+\node[sp-annotation, anchor=east] at (6.5, 2.5) {To Pin};
+\draw[sp-arrow] (6.5, 2.5) -- (6.0, 2.5);
+
+% Sum output from adder
+\draw[sp-arrow] (adder) -- (8.0, 0) -- (8.0, 1.0);
+\node[sp-annotation, anchor=west] at (8.1, 0.5) {Sum};
+
+% Overflow output
+\draw[sp-arrow] (8.0, -0.3) -- (8.0, -0.8);
+\node[sp-annotation, anchor=north] at (8.0, -0.9) {Overflow};
+
+% Optional Offset (dashed box)
+\draw[dashed] (9.0, 2.8) rectangle (10.5, 1.8);
+\node[sp-annotation] at (9.75, 2.3) {X[31:16]};
+\node[sp-annotation, anchor=south] at (9.75, 2.8) {Optional Offset};
+\draw[sp-arrow, dashed] (9.75, 1.8) -- (9.75, 1.5) -- (8.5, 1.5);
+
+% Feedback loop from Z to adder (implied by position)
+\draw[sp-arrow] (zreg.south) -- (8.0, 0.8) -- (6.5, 0.8) -- (6.5, 0) -- (adder.east);
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 20: Triangle/Sawtooth PWM Diagram (Complex)
+% ============================================================================
+
+\newcommand{\TrianglePWMDiagram}{%
+\begin{center}
+\begin{tikzpicture}[x=0.9cm, y=0.9cm]
+
+% IN signal (top)
+\node[sp-annotation, anchor=east] at (-0.5, 5.5) {IN};
+\node[sp-annotation, anchor=east] at (0.0, 5.8) {1};
+\node[sp-annotation, anchor=east] at (0.0, 5.2) {0};
+\draw[sp-signal] (0.2, 5.2) -- (5.5, 5.2) -- (5.5, 5.8) -- (7.0, 5.8);
+\draw[dashed, thin] (7.0, 5.8) -- (7.5, 5.8);
+
+% P20 Output
+\node[sp-annotation, anchor=east] at (-0.5, 3.8) {P20 Output};
+\node[sp-annotation, anchor=east] at (0.0, 4.2) {1};
+\node[sp-annotation, anchor=east] at (0.0, 3.4) {0};
+
+% PWM pulses
+\draw[sp-signal] (0.2, 4.2) -- (1.0, 4.2) -- (1.0, 3.4);
+\draw[sp-signal] (1.0, 3.4) -- (2.5, 3.4) -- (2.5, 4.2) -- (3.2, 4.2) -- (3.2, 3.4);
+\draw[sp-signal] (3.2, 3.4) -- (4.7, 3.4) -- (4.7, 4.2) -- (5.4, 4.2) -- (5.4, 3.4);
+\draw[sp-signal] (5.4, 3.4) -- (6.9, 3.4) -- (6.9, 4.2);
+\draw[dashed, thin] (6.9, 4.2) -- (7.5, 4.2);
+
+% X[31:16] and timing annotations
+\node[sp-annotation, anchor=east] at (-0.5, 3.0) {X[31:16] = \$200};
+\draw[sp-arrow] (-0.3, 3.0) -- (0.5, 3.0);
+
+% Counter Steps circle/zoom
+\draw (0.3, 2.2) circle (0.3);
+\node[sp-annotation] at (0.3, 2.2) {\tiny --};
+\node[sp-annotation, anchor=east] at (-0.3, 2.2) {Counter\\Steps};
+
+% Y[15:0] annotation
+\node[sp-annotation, anchor=east] at (-0.5, 1.5) {Y[15:0] = \$0080};
+\draw[sp-arrow, dashed] (-0.3, 1.5) -- (1.0, 1.5);
+
+% Triangle wave (counter value)
+\draw[sp-signal, dashed] (1.0, 1.5) -- (2.5, 3.0) -- (4.0, 1.5) -- (5.5, 3.0) -- (7.0, 1.5);
+\draw[dashed, thin] (7.0, 1.5) -- (7.5, 1.5);
+
+% Baseline
+\node[sp-annotation] at (1.5, 1.2) {1};
+\draw[sp-arrow] (1.3, 1.0) -- (1.3, 1.5);
+
+% 10.2 usec annotation
+\draw[sp-dim] (2.5, 4.5) -- (3.2, 4.5);
+\node[sp-annotation, anchor=west] at (2.6, 4.7) {10.2 usec};
+
+% Frame Period
+\draw[sp-dim] (1.0, 0.3) -- (2.5, 0.3);
+\draw[thin] (1.0, 0.1) -- (1.0, 0.5);
+\draw[thin] (2.5, 0.1) -- (2.5, 0.5);
+\node[sp-annotation] at (1.75, -0.1) {Frame Period\\20.5 usec};
+
+% PWM Period
+\draw[sp-dim] (2.5, 0.3) -- (5.5, 0.3);
+\draw[thin] (5.5, 0.1) -- (5.5, 0.5);
+\node[sp-annotation] at (4.0, -0.1) {PWM Period\\41.0 usec};
+
+% Time axis
+\draw[sp-arrow] (0, -0.8) -- (7.5, -0.8);
+\node[sp-annotation] at (3.75, -1.1) {Time};
+
+% Footer notes
+\node[sp-annotation, text width=8cm] at (3.5, -1.8) {Base period = 40 nsec (25 MHz system clock) X[15:0] = 1};
+\node[sp-annotation, text width=8cm] at (3.5, -2.3) {\$200 Base periods = 20.5 usec Frame Period};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 21: Simplified Sawtooth PWM Diagram
+% ============================================================================
+
+\newcommand{\SawtoothPWMDiagram}{%
+\begin{center}
+\begin{tikzpicture}[x=0.9cm, y=0.9cm]
+
+% IN signal
+\node[sp-annotation, anchor=east] at (-0.5, 4.5) {IN};
+\node[sp-annotation, anchor=east] at (0.0, 4.8) {1};
+\node[sp-annotation, anchor=east] at (0.0, 4.2) {0};
+\draw[sp-signal] (0.2, 4.2) -- (4.5, 4.2) -- (4.5, 4.8) -- (5.5, 4.8);
+\draw[dashed, thin] (5.5, 4.8) -- (6.0, 4.8);
+
+% P20 Output
+\node[sp-annotation, anchor=east] at (-0.5, 3.0) {P20 Output};
+\node[sp-annotation, anchor=east] at (0.0, 3.4) {1};
+\node[sp-annotation, anchor=east] at (0.0, 2.6) {0};
+
+% PWM pulses
+\draw[sp-signal] (0.2, 3.4) -- (0.8, 3.4) -- (0.8, 2.6);
+\draw[sp-signal] (0.8, 2.6) -- (1.8, 2.6) -- (1.8, 3.4) -- (2.4, 3.4) -- (2.4, 2.6);
+\draw[sp-signal] (2.4, 2.6) -- (3.4, 2.6) -- (3.4, 3.4) -- (4.0, 3.4) -- (4.0, 2.6);
+\draw[sp-signal] (4.0, 2.6) -- (5.0, 2.6) -- (5.0, 3.4);
+\draw[dashed, thin] (5.0, 3.4) -- (5.5, 3.4);
+
+% Timing annotations
+\draw[sp-dim] (0.8, 3.6) -- (1.3, 3.6);
+\node[sp-annotation, anchor=west] at (1.4, 3.6) {5.1 usec};
+
+% X[31:16] annotation
+\draw[sp-arrow] (3.0, 3.8) -- (2.4, 3.5);
+\node[sp-annotation, anchor=west] at (3.1, 3.8) {X[31:16] = \$200};
+
+% Y[15:0] dashed line
+\node[sp-annotation, anchor=east] at (-0.5, 1.8) {Y[15:0] = \$0080};
+\draw[sp-arrow, dashed] (-0.3, 1.8) -- (0.8, 1.8);
+
+% Sawtooth wave
+\draw[sp-signal, dashed] (0.8, 1.8) -- (1.8, 2.8) -- (1.8, 1.8) -- (2.8, 2.8) -- (2.8, 1.8) -- (3.8, 2.8) -- (3.8, 1.8);
+\draw[dashed, thin] (3.8, 1.8) -- (4.8, 2.8);
+
+% 1 annotation
+\node[sp-annotation] at (1.3, 1.5) {1};
+\draw[sp-arrow] (1.1, 1.3) -- (1.1, 1.8);
+
+% Frame Period dimension
+\draw[sp-dim] (0.8, 0.8) -- (1.8, 0.8);
+\draw[thin] (0.8, 0.6) -- (0.8, 1.0);
+\draw[thin] (1.8, 0.6) -- (1.8, 1.0);
+\node[sp-annotation] at (1.3, 0.4) {Frame Period\\20.5 usec};
+
+% Time axis
+\draw[sp-arrow] (0, 0.0) -- (5.5, 0.0);
+\node[sp-annotation] at (2.75, -0.3) {Time};
+
+% Footer
+\node[sp-annotation, text width=8cm] at (2.75, -0.9) {Base period = 40 nsec (25 MHz system clock) X[15:0] = 1};
+\node[sp-annotation, text width=8cm] at (2.75, -1.4) {\$200 Base periods = 20.5 usec Frame Period};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 23: Quadrature Encoder Diagram
+% ============================================================================
+
+\newcommand{\QuadEncoderDiagram}{%
+\begin{center}
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% === LEFT SIDE: Circuit schematic ===
+
+% +3.3V and resistor
+\draw (1.0, 4.0) -- (1.0, 3.5);
+\node[sp-annotation] at (1.0, 4.2) {+3.3V};
+% Resistor symbol
+\draw (1.0, 3.5) -- (0.85, 3.3) -- (1.15, 3.1) -- (0.85, 2.9) -- (1.15, 2.7) -- (1.0, 2.5);
+\node[sp-annotation, anchor=west] at (1.2, 3.0) {1000};
+
+% Junction to P32
+\draw[fill] (1.0, 2.5) circle (0.05);
+\draw (1.0, 2.5) -- (2.0, 2.5);
+\node[sp-block, minimum width=0.8cm, minimum height=0.5cm] (p32) at (2.4, 2.5) {P32};
+
+% Quad Encoder box
+\node[sp-block, minimum width=1.2cm, minimum height=1.5cm] (enc) at (-0.5, 1.5) {};
+\node[sp-annotation] at (-0.5, 1.5) {Quad\\Encoder};
+% Encoder symbol (circle with marks)
+\draw (-0.5, 1.5) circle (0.4);
+
+% Encoder outputs
+\draw (0.1, 2.0) -- (1.0, 2.0) -- (1.0, 2.5);
+\draw (0.1, 1.0) -- (1.0, 1.0);
+
+% Second resistor and P33
+\draw (1.0, 1.0) -- (1.0, 0.5);
+\draw[fill] (1.0, 1.0) circle (0.05);
+\draw (1.0, 1.0) -- (2.0, 1.0);
+\node[sp-block, minimum width=0.8cm, minimum height=0.5cm] (p33) at (2.4, 1.0) {P33};
+
+% Resistor to ground
+\draw (1.0, 0.5) -- (0.85, 0.3) -- (1.15, 0.1) -- (0.85, -0.1) -- (1.15, -0.3) -- (1.0, -0.5);
+\node[sp-annotation, anchor=west] at (1.2, 0.0) {1000};
+\node[sp-annotation] at (1.0, -0.7) {+3.3V};
+
+% Ground symbol
+\draw (-0.5, 0.5) -- (-0.5, 0.0);
+\draw (-0.7, 0.0) -- (-0.3, 0.0);
+\draw (-0.6, -0.1) -- (-0.4, -0.1);
+\draw (-0.55, -0.2) -- (-0.45, -0.2);
+
+% === RIGHT SIDE: Timing waveforms ===
+
+% CW (Clockwise) section
+% P32 waveform
+\node[sp-annotation] at (4.5, 4.0) {P32};
+\draw[sp-signal] (5.0, 3.5) -- (5.0, 4.0) -- (5.8, 4.0) -- (5.8, 3.5) -- (6.6, 3.5) -- (6.6, 4.0) -- (7.4, 4.0) -- (7.4, 3.5) -- (8.0, 3.5);
+
+% P33 waveform (phase shifted)
+\node[sp-annotation] at (4.5, 3.0) {P33};
+\draw[sp-signal] (5.0, 2.5) -- (5.4, 2.5) -- (5.4, 3.0) -- (6.2, 3.0) -- (6.2, 2.5) -- (7.0, 2.5) -- (7.0, 3.0) -- (7.8, 3.0) -- (7.8, 2.5) -- (8.0, 2.5);
+
+% CW direction arrow
+\draw[sp-arrow, thick] (8.2, 3.5) arc (90:-90:0.3);
+\node[sp-annotation] at (8.8, 3.2) {CW};
+
+% 4 edges annotation
+\draw[sp-arrow] (7.4, 3.2) -- (7.4, 2.8);
+\draw[sp-arrow] (7.8, 3.2) -- (7.8, 2.8);
+\node[sp-annotation, anchor=west] at (8.0, 2.8) {4 edges};
+\node[sp-annotation] at (7.0, 2.2) {4 counts};
+
+% Dividing line
+\draw[thin] (4.3, 2.0) -- (8.5, 2.0);
+
+% CCW (Counter-clockwise) section
+% P32 waveform
+\node[sp-annotation] at (4.5, 1.5) {P32};
+\draw[sp-signal] (5.0, 1.0) -- (5.4, 1.0) -- (5.4, 1.5) -- (6.2, 1.5) -- (6.2, 1.0) -- (7.0, 1.0) -- (7.0, 1.5) -- (7.8, 1.5) -- (7.8, 1.0) -- (8.0, 1.0);
+
+% P33 waveform
+\node[sp-annotation] at (4.5, 0.5) {P33};
+\draw[sp-signal] (5.0, 0.0) -- (5.0, 0.5) -- (5.8, 0.5) -- (5.8, 0.0) -- (6.6, 0.0) -- (6.6, 0.5) -- (7.4, 0.5) -- (7.4, 0.0) -- (8.0, 0.0);
+
+% CCW direction arrow
+\draw[sp-arrow, thick] (8.2, 0.5) arc (-90:90:0.3);
+\node[sp-annotation] at (8.8, 0.8) {CCW};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 29: Mode %01111 Local/Global Comparator Diagram
+% ============================================================================
+
+\newcommand{\ComparatorDiagram}{%
+\begin{center}
+\begin{tikzpicture}[x=0.5cm, y=1cm]
+
+% System Clock (dense)
+\node[sp-label] at (-1.5, 3.5) {System\\Clock};
+\node[sp-annotation, anchor=east] at (0.0, 3.8) {1};
+\node[sp-annotation, anchor=east] at (0.0, 3.2) {0};
+% Draw many clock cycles
+\foreach \i in {0,...,40} {
+    \pgfmathsetmacro{\x}{0.2 + \i*0.3}
+    \draw[sp-signal, thin] (\x, 3.2) -- (\x, 3.8) -- (\x+0.15, 3.8) -- (\x+0.15, 3.2);
+}
+
+% A Input
+\node[sp-label] at (-1.5, 1.8) {A Input};
+\node[sp-annotation, anchor=east] at (0.0, 2.2) {1};
+\node[sp-annotation, anchor=east] at (0.0, 1.4) {0};
+
+% Signal with regions Q, R, S
+\draw[dashed, thin] (-0.3, 1.4) -- (0.2, 1.4);
+\draw[sp-signal] (0.2, 1.4) -- (2.0, 1.4) -- (2.0, 2.2);
+% Q region (low)
+\node[sp-annotation] at (1.1, 1.8) {Q};
+
+% R region (high)
+\draw[sp-signal] (2.0, 2.2) -- (7.0, 2.2) -- (7.0, 1.4);
+\node[sp-annotation] at (4.5, 1.8) {R};
+
+% S region (low)
+\draw[sp-signal] (7.0, 1.4) -- (12.0, 1.4) -- (12.0, 2.2);
+\node[sp-annotation] at (9.5, 1.8) {S};
+
+\draw[sp-signal] (12.0, 2.2) -- (13.0, 2.2);
+\draw[dashed, thin] (13.0, 2.2) -- (13.5, 2.2);
+
+% Annotations at transitions
+\draw[sp-arrow] (2.0, 1.0) -- (2.0, 1.3);
+\node[sp-annotation] at (2.0, 0.6) {C = 0};
+\node[sp-annotation, color=sp-annotation] at (2.0, 0.2) {Z = Q Counts};
+
+\draw[sp-arrow] (7.0, 1.0) -- (7.0, 1.3);
+\node[sp-annotation] at (7.0, 0.6) {C= 1};
+\node[sp-annotation] at (7.0, 0.2) {Z = R Counts};
+
+\draw[sp-arrow] (12.0, 1.0) -- (12.0, 1.3);
+\node[sp-annotation] at (12.0, 0.6) {C= 0};
+\node[sp-annotation] at (12.0, 0.2) {Z = S Counts};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 31: Mode %10010 (18) Diagram - First image
+% ============================================================================
+
+\newcommand{\Mode18Diagram}{%
+\begin{center}
+\begin{tikzpicture}[x=0.7cm, y=1cm]
+
+% A Input label
+\node[sp-label] at (-1.0, 2.0) {A Input};
+\node[sp-annotation, anchor=east] at (0.0, 2.4) {1};
+\node[sp-annotation, anchor=east] at (0.0, 1.6) {0};
+
+% Cycle numbers
+\foreach \i in {1,...,9} {
+    \pgfmathsetmacro{\x}{0.5 + \i*1.0}
+    \node[sp-annotation] at (\x, 2.8) {\i};
+}
+
+% Waveform - 9 complete cycles
+\draw[dashed, thin] (-0.3, 1.6) -- (0.5, 1.6);
+\draw[sp-signal] (0.5, 1.6) -- (0.5, 2.4);
+\foreach \i in {1,...,9} {
+    \pgfmathsetmacro{\x}{0.5 + (\i-1)*1.0}
+    \draw[sp-signal] (\x, 2.4) -- (\x+0.5, 2.4) -- (\x+0.5, 1.6) -- (\x+1.0, 1.6) -- (\x+1.0, 2.4);
+}
+\draw[dashed, thin] (9.5, 2.4) -- (10.0, 2.4);
+
+% Measured Period dimension
+\draw[sp-dim] (0.5, 0.8) -- (9.5, 0.8);
+\draw[thin] (0.5, 0.6) -- (0.5, 1.0);
+\draw[thin] (9.5, 0.6) -- (9.5, 1.0);
+\node[sp-annotation] at (5.0, 0.4) {Measured Period};
+\node[sp-annotation] at (5.0, 0.0) {(in System-Clock Counts)};
+
+% C/Z annotation
+\draw[sp-arrow] (9.5, 1.2) -- (9.5, 1.5);
+\node[sp-annotation, anchor=west] at (9.7, 1.4) {C= 1};
+\node[sp-annotation, anchor=west] at (9.7, 1.0) {Z = Counts};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 32: Mode %10010 (18) Diagram - Second image
+% ============================================================================
+
+\newcommand{\Mode18Diagram2}{%
+\begin{center}
+\begin{tikzpicture}[x=0.6cm, y=1cm]
+
+% A Input label
+\node[sp-label] at (-1.0, 2.0) {A Input};
+\node[sp-annotation, anchor=east] at (0.0, 2.4) {1};
+\node[sp-annotation, anchor=east] at (0.0, 1.6) {0};
+
+% Cycle numbers (two sets of 1-6)
+\foreach \i in {1,...,6} {
+    \pgfmathsetmacro{\x}{0.3 + (\i-1)*0.9}
+    \node[sp-annotation] at (\x, 2.8) {\i};
+}
+\foreach \i in {1,...,6} {
+    \pgfmathsetmacro{\x}{5.7 + (\i-1)*0.9}
+    \node[sp-annotation] at (\x, 2.8) {\i};
+}
+
+% Waveform
+\draw[dashed, thin] (-0.3, 1.6) -- (0.0, 1.6);
+\draw[sp-signal] (0.0, 1.6) -- (0.0, 2.4);
+\foreach \i in {0,...,11} {
+    \pgfmathsetmacro{\x}{0.0 + \i*0.9}
+    \draw[sp-signal] (\x, 2.4) -- (\x+0.45, 2.4) -- (\x+0.45, 1.6) -- (\x+0.9, 1.6) -- (\x+0.9, 2.4);
+}
+\draw[dashed, thin] (10.8, 2.4) -- (11.3, 2.4);
+
+% Measurement spans
+\draw[sp-dim] (0.0, 0.8) -- (5.4, 0.8);
+\draw[thin] (0.0, 0.6) -- (0.0, 1.0);
+\draw[thin] (5.4, 0.6) -- (5.4, 1.0);
+
+\draw[sp-dim] (5.4, 0.8) -- (10.8, 0.8);
+\draw[thin] (10.8, 0.6) -- (10.8, 1.0);
+
+% C/Z annotations
+\draw[sp-arrow] (5.4, 1.1) -- (5.4, 1.5);
+\node[sp-annotation] at (5.4, 0.4) {C= 1};
+\node[sp-annotation] at (5.4, 0.0) {Z = Counts};
+
+\draw[sp-arrow] (10.8, 1.1) -- (10.8, 1.5);
+\node[sp-annotation] at (10.8, 0.4) {C= 1};
+\node[sp-annotation] at (10.8, 0.0) {Z = Counts};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 33: Mode %10010 (18) Diagram - Third image (mislabeled as mode10011 in filename)
+% ============================================================================
+
+\newcommand{\Mode18Diagram3}{%
+\begin{center}
+\begin{tikzpicture}[x=0.8cm, y=1cm]
+
+% Top signal (output pulses)
+\draw[dashed, thin] (-0.3, 4.0) -- (0.0, 4.0);
+\draw[sp-signal] (0.0, 4.0) -- (2.0, 4.0);
+\draw[thin] (2.0, 3.8) -- (2.0, 4.2);
+\draw[sp-signal] (2.0, 4.0) -- (5.0, 4.0);
+\draw[thin] (5.0, 3.8) -- (5.0, 4.2);
+\draw[sp-signal] (5.0, 4.0) -- (9.0, 4.0);
+\draw[thin] (9.0, 3.8) -- (9.0, 4.2);
+\draw[sp-signal] (9.0, 4.0) -- (11.0, 4.0);
+
+% C/Z annotation
+\draw[sp-arrow] (2.0, 4.4) -- (2.0, 4.1);
+\node[sp-annotation, anchor=south] at (2.0, 4.5) {C = 1};
+\node[sp-annotation, anchor=south] at (2.0, 5.0) {Z = Counts};
+
+% A Input
+\node[sp-label] at (-1.5, 2.5) {A Input};
+\node[sp-annotation, anchor=east] at (0.0, 2.9) {1};
+\node[sp-annotation, anchor=east] at (0.0, 2.1) {0};
+
+% Input pulses
+\draw[dashed, thin] (-0.3, 2.1) -- (0.0, 2.1);
+\draw[sp-signal] (0.0, 2.1) -- (0.0, 2.9) -- (0.5, 2.9) -- (0.5, 2.1);
+\draw[sp-signal] (0.5, 2.1) -- (1.0, 2.1) -- (1.0, 2.9) -- (1.5, 2.9) -- (1.5, 2.1);
+\draw[sp-signal] (1.5, 2.1) -- (2.0, 2.1) -- (2.0, 2.9) -- (2.5, 2.9) -- (2.5, 2.1);
+\draw[sp-signal] (2.5, 2.1) -- (3.0, 2.1) -- (3.0, 2.9) -- (3.5, 2.9) -- (3.5, 2.1);
+% Gap (no pulses)
+\draw[sp-signal] (3.5, 2.1) -- (7.0, 2.1);
+% More pulses
+\draw[sp-signal] (7.0, 2.1) -- (7.0, 2.9) -- (7.5, 2.9) -- (7.5, 2.1);
+\draw[sp-signal] (7.5, 2.1) -- (8.5, 2.1) -- (8.5, 2.9) -- (9.0, 2.9) -- (9.0, 2.1);
+\draw[sp-signal] (9.0, 2.1) -- (10.0, 2.1) -- (10.0, 2.9) -- (10.5, 2.9) -- (10.5, 2.1);
+\draw[dashed, thin] (10.5, 2.1) -- (11.0, 2.1);
+
+% Clock reset
+\node[sp-label] at (-1.5, 1.0) {Clock reset};
+\draw[dashed, thin] (-0.3, 1.0) -- (0.0, 1.0);
+% Reset ticks at each input pulse
+\draw[thin] (0.0, 0.8) -- (0.0, 1.2);
+\draw[thin] (0.5, 0.8) -- (0.5, 1.2);
+\draw[thin] (1.0, 0.8) -- (1.0, 1.2);
+\draw[thin] (1.5, 0.8) -- (1.5, 1.2);
+\draw[thin] (2.0, 0.8) -- (2.0, 1.2);
+\draw[thin] (2.5, 0.8) -- (2.5, 1.2);
+\draw[thin] (3.0, 0.8) -- (3.0, 1.2);
+\draw[thin] (3.5, 0.8) -- (3.5, 1.2);
+% Gap in reset ticks
+\draw[dashed, thin] (3.5, 1.0) -- (7.0, 1.0);
+\draw[thin] (7.0, 0.8) -- (7.0, 1.2);
+\draw[thin] (7.5, 0.8) -- (7.5, 1.2);
+\draw[thin] (8.5, 0.8) -- (8.5, 1.2);
+\draw[thin] (9.0, 0.8) -- (9.0, 1.2);
+\draw[thin] (10.0, 0.8) -- (10.0, 1.2);
+\draw[thin] (10.5, 0.8) -- (10.5, 1.2);
+
+% Legend
+\draw[sp-dim, dashed] (-1.0, -0.3) -- (0.0, -0.3);
+\node[sp-annotation, anchor=west] at (0.2, -0.3) {= Time period set via X register (210 msec.)};
+
+\draw[sp-dim] (-1.0, -0.8) -- (0.0, -0.8);
+\draw[thin] (-1.0, -1.0) -- (-1.0, -0.6);
+\draw[thin] (0.0, -1.0) -- (0.0, -0.6);
+\node[sp-annotation, anchor=west] at (0.2, -0.8) {= Actual time};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 34: Mode %10011 (19) Diagram
+% ============================================================================
+
+\newcommand{\Mode19Diagram}{%
+\begin{center}
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+% IN Flag
+\node[sp-label] at (-1.0, 4.0) {IN Flag};
+\draw[dashed, thin] (-0.3, 3.8) -- (6.5, 3.8);
+\draw[sp-signal] (6.5, 3.8) -- (6.5, 4.2) -- (7.0, 4.2);
+
+% Data annotation
+\node[sp-annotation, anchor=south] at (5.5, 4.2) {Data = Q + R};
+\draw[sp-arrow] (6.2, 4.3) -- (6.5, 4.0);
+
+% A Input
+\node[sp-label] at (-1.0, 2.8) {A Input};
+\node[sp-annotation, anchor=east] at (-0.3, 3.1) {1};
+\node[sp-annotation, anchor=east] at (-0.3, 2.5) {0};
+
+\draw[sp-signal] (-0.2, 2.5) -- (1.0, 2.5) -- (1.0, 3.1) -- (2.5, 3.1) -- (2.5, 2.5);
+\draw[sp-signal] (2.5, 2.5) -- (4.5, 2.5) -- (4.5, 3.1) -- (6.0, 3.1) -- (6.0, 2.5);
+\draw[sp-signal] (6.0, 2.5) -- (7.0, 2.5);
+
+% B Input
+\node[sp-label] at (-1.0, 1.3) {B Input};
+\node[sp-annotation, anchor=east] at (-0.3, 1.6) {1};
+\node[sp-annotation, anchor=east] at (-0.3, 1.0) {0};
+
+\draw[sp-signal] (-0.2, 1.0) -- (1.5, 1.0) -- (1.5, 1.6) -- (2.0, 1.6) -- (2.0, 1.0);
+\draw[sp-signal] (2.0, 1.0) -- (5.0, 1.0) -- (5.0, 1.6) -- (5.5, 1.6) -- (5.5, 1.0);
+\draw[sp-signal] (5.5, 1.0) -- (7.0, 1.0);
+
+% Q dimension
+\draw[sp-dim] (1.5, 0.4) -- (2.0, 0.4);
+\draw[dashed, thin] (1.5, 0.6) -- (1.5, 1.0);
+\draw[dashed, thin] (2.0, 0.6) -- (2.0, 1.0);
+\node[sp-annotation] at (1.75, 0.0) {Q};
+
+% R dimension
+\draw[sp-dim] (5.0, 0.4) -- (5.5, 0.4);
+\draw[dashed, thin] (5.0, 0.6) -- (5.0, 1.0);
+\draw[dashed, thin] (5.5, 0.6) -- (5.5, 1.0);
+\node[sp-annotation] at (5.25, 0.0) {R};
+
+% Time axis
+\draw[sp-arrow] (0, -0.5) -- (7.0, -0.5);
+\node[sp-annotation] at (3.5, -0.8) {Time};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 46 IMAGE 01: Mode %11100 (28) - Sync Serial
+% ============================================================================
+
+\newcommand{\Mode28Diagram}{%
+\begin{center}
+\begin{tikzpicture}[x=0.7cm, y=1cm]
+
+% Clock waveform with sampling arrows (falling edge)
+\draw[dashed, thin] (-0.3, 3.0) -- (0.0, 3.0);
+\foreach \i in {0,...,7} {
+    \pgfmathsetmacro{\x}{0.0 + \i*1.2}
+    \draw[sp-signal] (\x, 2.5) -- (\x, 3.0) -- (\x+0.6, 3.0) -- (\x+0.6, 2.5) -- (\x+1.2, 2.5);
+    % Sampling arrow at falling edge
+    \draw[sp-arrow] (\x+0.6, 2.4) -- (\x+0.6, 2.0);
+}
+\draw[dashed, thin] (9.6, 2.5) -- (10.0, 2.5);
+
+% Data waveform with bit values
+\draw[dashed, thin] (-0.3, 1.0) -- (0.3, 1.0);
+\draw[sp-signal] (0.3, 1.0) -- (0.3, 1.5);
+% Bit cells with values
+\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (0.9, 1.25) {1};
+\draw[sp-signal] (1.4, 1.5) -- (1.4, 1.0);
+\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (2.1, 1.25) {0};
+\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (3.3, 1.25) {0};
+\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (4.5, 1.25) {0};
+\draw[sp-signal] (5.0, 1.0) -- (5.0, 1.5);
+\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (5.7, 1.25) {1};
+\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (6.9, 1.25) {1};
+\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (8.1, 1.25) {1};
+\draw[sp-signal] (8.6, 1.5) -- (8.6, 1.0);
+\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (9.3, 1.25) {0};
+\draw[dashed, thin] (9.8, 1.0) -- (10.0, 1.0);
+
+% LSB/MSB labels
+\node[sp-annotation] at (0.9, 0.3) {LSB};
+\node[sp-annotation] at (9.3, 0.3) {MSB};
+
+% Time arrow
+\draw[sp-arrow] (0, -0.2) -- (10.0, -0.2);
+\node[sp-annotation] at (5.0, -0.5) {Time};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% PAGE 46 IMAGE 02: Mode %11100 (28) - Sync Serial second image
+% ============================================================================
+
+\newcommand{\Mode28Diagram2}{%
+\begin{center}
+\begin{tikzpicture}[x=0.7cm, y=1cm]
+
+% Clock waveform with sampling arrows (rising edge)
+\draw[dashed, thin] (-0.3, 2.5) -- (0.0, 2.5);
+\foreach \i in {0,...,7} {
+    \pgfmathsetmacro{\x}{0.0 + \i*1.2}
+    \draw[sp-signal] (\x, 2.5) -- (\x, 3.0) -- (\x+0.6, 3.0) -- (\x+0.6, 2.5) -- (\x+1.2, 2.5);
+    % Sampling arrow at rising edge
+    \draw[sp-arrow] (\x, 3.1) -- (\x, 2.0);
+}
+\draw[dashed, thin] (9.6, 2.5) -- (10.0, 2.5);
+
+% Data waveform with bit values
+\draw[dashed, thin] (-0.3, 1.0) -- (0.3, 1.0);
+\draw[sp-signal] (0.3, 1.0) -- (0.3, 1.5);
+% Bit cells with values
+\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (0.9, 1.25) {1};
+\draw[sp-signal] (1.4, 1.5) -- (1.4, 1.0);
+\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (2.1, 1.25) {0};
+\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (3.3, 1.25) {0};
+\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (4.5, 1.25) {0};
+\draw[sp-signal] (5.0, 1.0) -- (5.0, 1.5);
+\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (5.7, 1.25) {1};
+\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (6.9, 1.25) {1};
+\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (8.1, 1.25) {1};
+\draw[sp-signal] (8.6, 1.5) -- (8.6, 1.0);
+\node[sp-block, minimum width=1.0cm, minimum height=0.7cm] at (9.3, 1.25) {0};
+\draw[dashed, thin] (9.8, 1.0) -- (10.0, 1.0);
+
+% LSB/MSB labels
+\node[sp-annotation] at (0.9, 0.3) {LSB};
+\node[sp-annotation] at (9.3, 0.3) {MSB};
+
+% Time arrow
+\draw[sp-arrow] (0, -0.2) -- (10.0, -0.2);
+\node[sp-annotation] at (5.0, -0.5) {Time};
+
+\end{tikzpicture}
+\end{center}
+}
+
+% ============================================================================
+% BACKWARD COMPATIBILITY ALIASES
+% ============================================================================
+% Old names kept for compatibility - use new names for new code
+
+\let\TransitionCountingDiagram\NCOFrequencyDiagram     % page16 -> Mode %00101
+\let\NCOPWMTimingDiagram\NCODutyTimingDiagram          % page17_img01 -> Mode %00110
+\let\NCOPWMBlockDiagram\NCODutyBlockDiagram            % page17_img02 -> Mode %00110
+\let\HighLowCountingDiagram\ComparatorDiagram          % page29 -> Mode %01111
+\let\PeriodMeasurementDiagram\Mode18Diagram            % page31 -> Mode %10010
+\let\ContinuousPeriodDiagram\Mode18Diagram2            % page32 -> Mode %10010
+\let\TimeoutWatchdogDiagram\Mode18Diagram3             % page33 -> Mode %10010 (mislabeled)
+\let\DualInputTimeDiagram\Mode19Diagram                % page34 -> Mode %10011
+\let\SyncSerialFallingDiagram\Mode28Diagram            % page46_img01 -> Mode %11100
+\let\SyncSerialRisingDiagram\Mode28Diagram2            % page46_img02 -> Mode %11100
+
+% ============================================================================
+% END OF PACKAGE
+% ============================================================================
+
+\endinput
