@@ -2,17 +2,17 @@
 
 This section contains all PASM2 instructions beginning with the letter N.
 
----
+
 
 ## NEG {#neg}
 
 Negate
 [Math Instruction](#math-instructions) - Negate a value.
 
-```
-NEG  Dest, {#}Src  {WC|WZ|WCZ}
-NEG  Dest          {WC|WZ|WCZ}
-```
+**NEG**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEG**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** The Src or Dest value is negated and stored into Dest.
 
@@ -39,166 +39,77 @@ If the WC or WCZ effect is specified, the C flag is set (1) if the result is neg
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if it is non-zero.
 
+
+
+## NEGC / NEGNC / NEGZ / NEGNZ {#negc}
+
+Conditional negate {#negnc} {#negz} {#negnz}
+[Math Instruction](#math-instructions) - Negate value according to C, NC, Z, or NZ flag.
+
+**NEGC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEGC**  *Dest*  **{WC|WZ|WCZ}**
+
+**NEGNC**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEGNC**  *Dest*  **{WC|WZ|WCZ}**
+
+**NEGZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEGZ**  *Dest*  **{WC|WZ|WCZ}**
+
+**NEGNZ**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NEGNZ**  *Dest*  **{WC|WZ|WCZ}**
+
 ---
 
-## NEGC {#negc}
+**Result:** The Src or Dest value, conditionally negated based on flag state, is stored into Dest.
 
-Negate C
-[Math Instruction](#math-instructions) - Negate value according to C.
+| Instruction | Negates when |
+|-------------|--------------|
+| NEGC | C = 1 |
+| NEGNC | C = 0 |
+| NEGZ | Z = 1 |
+| NEGNZ | Z = 0 |
 
-```
-NEGC  Dest, {#}Src  {WC|WZ|WCZ}
-NEGC  Dest          {WC|WZ|WCZ}
-```
-
-**Result:** The Src or Dest value, possibly negated according to C, is stored into Dest.
-
-- Dest is a register to receive the Src or -Src value (syntax 1), or contains the value to negate (syntax 2) according to C.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value (if C=0) or negated value (if C=1) is stored into Dest.
+- Dest is a register to receive the result.
+- Src is an optional register, 9-bit literal, or 32-bit augmented literal.
 - WC, WZ, or WCZ are optional effects to update flags.
 
 ```{=latex}
 \begin{encodingtable}
-\encodingrowcont{EEEE}{0110100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign of result}{Result = 0}{2}
-\encodingrow{EEEE}{0110100}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign of result}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110100}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110101}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110110}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign}{Result = 0}{2}
+\encodingrowcont{EEEE}{0110111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign}{Result = 0}{2}
+\encodingrow{EEEE}{0110111}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign}{Result = 0}{2}
 \end{encodingtable}
 ```
 
-**Related:** [NEGNC](#negnc), [NEGZ](#negz), [NEGNZ](#negnz), [NEG](#neg)
+**Related:** [NEG](#neg)
 
 **Explanation:**
 
-NEGC conditionally negates the value in Src (syntax 1) or Dest (syntax 2) based on the C flag state. If C = 1, the value is negated before being stored in Dest. If C = 0, the value is stored as-is (not negated). When negation is performed, it flips the value's sign; for example, 5 becomes -5, or -200 becomes 200.
+These instructions conditionally negate the value in Src (two-operand form) or Dest (single-operand form) based on the specified flag condition. If the condition is true, the value is negated (sign flipped) before being stored in Dest. If the condition is false, the value is stored unchanged.
 
-This instruction is useful for conditional arithmetic operations where the sign of a value needs to be adjusted based on previous computation results captured in the C flag.
+NEGC and NEGZ negate when their flag is set (1). NEGNC and NEGNZ negate when their flag is clear (0), providing complementary behavior.
 
-If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative, or is cleared (0) if positive.
+If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative, or cleared (0) if positive.
 
-If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero, or is cleared (0) if it is non-zero.
+If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero, or cleared (0) if non-zero.
 
----
 
-## NEGNC {#negnc}
-
-Negate not C
-[Math Instruction](#math-instructions) - Negate value according to !C.
-
-```
-NEGNC  Dest, {#}Src  {WC|WZ|WCZ}
-NEGNC  Dest          {WC|WZ|WCZ}
-```
-
-**Result:** The Src or Dest value, possibly negated according to !C, is stored into Dest.
-
-- Dest is a register to receive the Src or -Src value (syntax 1), or contains the value to negate (syntax 2) according to !C.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value (if !C=0) or negated value (if !C=1) is stored into Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
-
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0110101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign of result}{Result = 0}{2}
-\encodingrow{EEEE}{0110101}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign of result}{Result = 0}{2}
-\end{encodingtable}
-```
-
-**Related:** [NEGC](#negc), [NEGZ](#negz), [NEGNZ](#negnz), [NEG](#neg)
-
-**Explanation:**
-
-NEGNC conditionally negates the value in Src (syntax 1) or Dest (syntax 2) based on the inverse of the C flag state. If C = 0 (!C = 1), the value is negated before being stored in Dest. If C = 1 (!C = 0), the value is stored as-is (not negated). When negation is performed, it flips the value's sign; for example, 21 becomes -21, or -1,374 becomes 1,374.
-
-This instruction complements NEGC, providing the opposite conditional behavior. It is useful when the logic requires negation when the C flag is clear rather than set.
-
-If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative, or is cleared (0) if positive.
-
-If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero, or is cleared (0) if it is non-zero.
-
----
-
-## NEGNZ {#negnz}
-
-Negate not Z
-[Math Instruction](#math-instructions) - Negate value according to !Z.
-
-```
-NEGNZ  Dest, {#}Src  {WC|WZ|WCZ}
-NEGNZ  Dest          {WC|WZ|WCZ}
-```
-
-**Result:** The Src or Dest value, possibly negated according to !Z, is stored into Dest.
-
-- Dest is a register to receive the Src or -Src value (syntax 1), or contains the value to negate (syntax 2) according to !Z.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value (if !Z=0) or negated value (if !Z=1) is stored into Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
-
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0110111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign of result}{Result = 0}{2}
-\encodingrow{EEEE}{0110111}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign of result}{Result = 0}{2}
-\end{encodingtable}
-```
-
-**Related:** [NEGZ](#negz), [NEGC](#negc), [NEGNC](#negnc), [NEG](#neg)
-
-**Explanation:**
-
-NEGNZ conditionally negates the value in Src (syntax 1) or Dest (syntax 2) based on the inverse of the Z flag state. If Z = 0 (!Z = 1), the value is negated before being stored in Dest. If Z = 1 (!Z = 0), the value is stored as-is (not negated). When negation is performed, it flips the value's sign; for example, 193 becomes -193, or -3,062 becomes 3,062.
-
-This instruction complements NEGZ, providing the opposite conditional behavior. It is useful when the logic requires negation when the Z flag is clear (result non-zero) rather than set.
-
-If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative, or is cleared (0) if positive.
-
-If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero, or is cleared (0) if it is non-zero.
-
----
-
-## NEGZ {#negz}
-
-Negate Z
-[Math Instruction](#math-instructions) - Negate value according to Z.
-
-```
-NEGZ  Dest, {#}Src  {WC|WZ|WCZ}
-NEGZ  Dest          {WC|WZ|WCZ}
-```
-
-**Result:** The Src or Dest value, possibly negated according to Z, is stored into Dest.
-
-- Dest is a register to receive the Src or -Src value (syntax 1), or contains the value to negate (syntax 2) according to Z.
-- Src is an optional register, 9-bit literal, or 32-bit augmented literal whose value (if Z=0) or negated value (if Z=1) is stored into Dest.
-- WC, WZ, or WCZ are optional effects to update flags.
-
-```{=latex}
-\begin{encodingtable}
-\encodingrowcont{EEEE}{0110110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Sign of result}{Result = 0}{2}
-\encodingrow{EEEE}{0110110}{CZ0}{DDDDDDDDD}{DDDDDDDDD}{D}{Sign of result}{Result = 0}{2}
-\end{encodingtable}
-```
-
-**Related:** [NEGNZ](#negnz), [NEGC](#negc), [NEGNC](#negnc), [NEG](#neg)
-
-**Explanation:**
-
-NEGZ conditionally negates the value in Src (syntax 1) or Dest (syntax 2) based on the Z flag state. If Z = 1, the value is negated before being stored in Dest. If Z = 0, the value is stored as-is (not negated). When negation is performed, it flips the value's sign; for example, 526 becomes -526, or -41 becomes 41.
-
-This instruction is useful for conditional arithmetic operations where the sign of a value needs to be adjusted based on zero-test results from previous operations.
-
-If the WC or WCZ effect is specified, the C flag is set (1) if the result is negative, or is cleared (0) if positive.
-
-If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zero, or is cleared (0) if it is non-zero.
-
----
 
 ## NIXINT1 / NIXINT2 / NIXINT3 {#nixint1}
 
 Cancel interrupt (1, 2, or 3)
 [Event Instruction](#event-instructions) - Cancel INTn interrupt.
 
-```
-NIXINT1
-NIXINT2
-NIXINT3
-```
+**NIXINT1**
+**NIXINT2**
+**NIXINT3**
+
+---
 
 **Result:** The specified interrupt event (INT1, INT2, or INT3) is cancelled.
 
@@ -218,16 +129,16 @@ NIXINT1, NIXINT2, and NIXINT3 cancel any pending interrupt events for their resp
 
 The P2 provides three independent interrupt levels, and each NIXINT instruction cancels only its corresponding level. Use these instructions when an interrupt that was previously configured is no longer needed or when the program needs to explicitly clear a pending interrupt condition before it can trigger cog execution flow changes.
 
----
+
 
 ## NOP {#nop}
 
 No operation
 [Misc Instruction](#misc-instructions) - No operation, just elapse two cycles.
 
-```
-NOP
-```
+**NOP**
+
+---
 
 **Result:** Two clock cycles are consumed.
 
@@ -243,17 +154,17 @@ NOP simply consumes two clock cycles without performing any operation. No regist
 
 NOP is primarily used for timing adjustments, creating precise delays, or as a placeholder during development. It can also be used to align code for performance optimization or to fill instruction slots in pipelined operations.
 
----
+
 
 ## NOT {#not}
 
 Not
 [Logic Instruction](#logic-instructions) - Bitwise NOT a value.
 
-```
-NOT  Dest, {#}Src  {WC|WZ|WCZ}
-NOT  Dest          {WC|WZ|WCZ}
-```
+**NOT**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**NOT**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** The bitwise NOT of Src or Dest is stored in Dest.
 
@@ -280,4 +191,4 @@ If the WC or WCZ effect is specified, the C flag is set to the inverse of bit 31
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if it is non-zero.
 
----
+

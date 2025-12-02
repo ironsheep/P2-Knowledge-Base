@@ -4,11 +4,12 @@
 
 The Propeller 2 microcontroller implements a unique multi-processor architecture that differs fundamentally from conventional microcontrollers. Understanding this architecture is essential for effective PASM2 programming.
 
----
 
 ## 1.1 The Eight-COG Architecture
 
-<!-- DIAGRAM: 8-COG overview showing parallel processors with shared Hub -->
+```{=latex}
+\EightCogOverviewDiagram
+```
 
 The P2 contains eight identical processors called COGs (Cog Processors). Each COG:
 
@@ -37,11 +38,12 @@ The `COGINIT` instruction starts a new COG or restarts an existing one. COGINIT 
 
 The `COGSTOP` instruction halts a running COG. A COG can stop itself or another COG by specifying the target COG number. Stopped COGs consume no power and can be restarted later with different code.
 
----
 
 ## 1.2 COG Memory
 
-<!-- DIAGRAM: COG memory map showing $000-$1FF regions -->
+```{=latex}
+\CogMemoryMapDiagram
+```
 
 Each COG has 512 longs (2048 bytes) of dedicated RAM addressed from $000 to $1FF. This memory is private to each COG and provides single-cycle read and write access. Unlike Hub memory, COG memory stores 32-bit longs only and uses long-addressing rather than byte-addressing.
 
@@ -53,7 +55,9 @@ Programs can use this space flexibly. A small program might dedicate most of the
 
 ### 1.2.2 Special Purpose Registers ($1F0-$1FF)
 
-<!-- DIAGRAM: Special register map with DIRA, DIRB, OUTA, OUTB, INA, INB, etc. -->
+```{=latex}
+\SpecialRegistersMapDiagram
+```
 
 The final 16 registers ($1F0-$1FF) have special hardware functions:
 
@@ -82,11 +86,12 @@ Registers $1F0-$1F7 serve dual purposes. When their associated hardware function
 
 PASM2 instructions use 9-bit fields to specify source (S) and destination (D) register addresses. Nine bits provide 512 possible values, addressing the complete COG RAM space from $000 to $1FF. The instruction encoding dedicates specific bit positions to these address fields, and the assembler automatically encodes symbolic register names into the appropriate bit patterns.
 
----
 
 ## 1.3 Hub Memory
 
-<!-- DIAGRAM: Hub memory map showing 512KB layout -->
+```{=latex}
+\HubMemoryDiagram
+```
 
 The Hub provides 512KB of shared RAM accessible by all COGs. Unlike COG memory, Hub memory is byte-addressable and stores programs, data, and resources shared among COGs.
 
@@ -110,11 +115,12 @@ PASM2 provides six instructions for Hub memory access. `RDBYTE` reads a byte, `R
 
 The `SETQ` instruction enhances Hub access efficiency by enabling burst transfers. SETQ followed by a Hub read instruction loads multiple consecutive values in a single operation, amortizing the Hub window wait time across many transfers.
 
----
 
 ## 1.4 LUT Memory
 
-<!-- DIAGRAM: LUT memory layout showing 512 longs per COG -->
+```{=latex}
+\LutMemoryMapDiagram
+```
 
 Each COG has a dedicated 512-long Lookup Table (LUT) providing additional fast memory separate from the main COG RAM space. The LUT serves as auxiliary storage for lookup tables, waveform data, additional code space, or working memory.
 
@@ -134,7 +140,6 @@ Programs often load the LUT with data from Hub memory at initialization using `S
 
 The `SETLUTS` instruction enables LUT sharing between COG pairs. Adjacent COGs (0-1, 2-3, 4-5, 6-7) can share their LUT memory, effectively giving one COG 1024 longs of LUT space while the paired COG uses the shared space as well. This feature supports applications where one COG generates data that another COG consumes, eliminating the need to transfer data through Hub memory.
 
----
 
 ## 1.5 The Execution Pipeline
 
@@ -148,7 +153,6 @@ Branch instructions incur additional overhead when taken. A conditional branch t
 
 The P2 handles data dependencies internally through forwarding logic. An instruction that depends on the result of the immediately preceding instruction receives the correct value without requiring explicit programmer intervention or NOP insertion. This hardware forwarding eliminates a major class of pipeline hazards present in simpler architectures.
 
----
 
 ## 1.6 Execution Modes
 
@@ -176,9 +180,6 @@ Programs switch between execution modes using `CALL` or `JMP` instructions. A CO
 
 The hardware automatically handles mode transitions. The programmer simply specifies the target address, and the COG switches to the appropriate execution mode. This seamless transition enables hybrid programs that place performance-critical code in COG RAM while maintaining larger program logic in Hub RAM.
 
----
-
-## Key Concepts
 
 ```{=latex}
 \begin{keyconcepts}
@@ -192,6 +193,5 @@ The hardware automatically handles mode transitions. The programmer simply speci
 \end{keyconcepts}
 ```
 
----
 
 <!-- End of Chapter 1 -->

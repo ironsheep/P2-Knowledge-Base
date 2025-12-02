@@ -27,7 +27,7 @@ Constants are combined using OR operations to build the complete configuration:
         wrpin   mode, #56
 ```
 
----
+
 
 ## A Input Configuration
 
@@ -51,7 +51,7 @@ Constants are combined using OR operations to build the complete configuration:
 | P_MINUS2_A | %0110_0000_000_0000000000000_00_00000_0 | Select pin-2 for A input |
 | P_MINUS1_A | %0111_0000_000_0000000000000_00_00000_0 | Select pin-1 for A input |
 
----
+
 
 ## B Input Configuration
 
@@ -75,7 +75,7 @@ Constants are combined using OR operations to build the complete configuration:
 | P_MINUS2_B | %0000_0110_000_0000000000000_00_00000_0 | Select pin-2 for B input |
 | P_MINUS1_B | %0000_0111_000_0000000000000_00_00000_0 | Select pin-1 for B input |
 
----
+
 
 ## A/B Input Logic (pick one)
 
@@ -90,7 +90,7 @@ Constants are combined using OR operations to build the complete configuration:
 | P_FILT2_AB | %0000_0000_110_0000000000000_00_00000_0 | Filter A and B (5-clock sample) |
 | P_FILT3_AB | %0000_0000_111_0000000000000_00_00000_0 | Filter A and B (8-clock sample) |
 
----
+
 
 ## Low-Level Pin Modes
 
@@ -138,7 +138,7 @@ Constants are combined using OR operations to build the complete configuration:
 | P_LEVEL_B_FBP | %0000_0000_000_1110000000000_00_00000_0 | B > Level → IN, output positive feedback |
 | P_LEVEL_B_FBN | %0000_0000_000_1111000000000_00_00000_0 | B > Level → IN, output negative feedback |
 
----
+
 
 ## Low-Level Pin Sub-Modes
 
@@ -163,7 +163,7 @@ Constants are combined using OR operations to build the complete configuration:
 | P_TRUE_OUTPUT | %0000_0000_000_0000000000000_00_00000_0 | True output (default) |
 | P_INVERT_OUTPUT | %0000_0000_000_0000001000000_00_00000_0 | Invert output |
 
----
+
 
 ## Drive Strength
 
@@ -193,7 +193,7 @@ Constants are combined using OR operations to build the complete configuration:
 | P_LOW_10UA | %0000_0000_000_0000000000110_00_00000_0 | Drive low 10μA current sink |
 | P_LOW_FLOAT | %0000_0000_000_0000000000111_00_00000_0 | Float low (high-impedance) |
 
----
+
 
 ## DIR/OUT Control (TT Field)
 
@@ -207,7 +207,7 @@ Constants are combined using OR operations to build the complete configuration:
 | P_CHANNEL | %0000_0000_000_0000000000000_01_00000_0 | Enable DAC channel (non-smart mode) |
 | P_BITDAC | %0000_0000_000_0000000000000_10_00000_0 | Enable BITDAC (non-smart mode) |
 
----
+
 
 ## Smart Pin Operating Modes (32 Modes)
 
@@ -279,7 +279,7 @@ Constants are combined using OR operations to build the complete configuration:
 | P_ASYNC_TX | %11110 | %0000_0000_000_0000000000000_00_11110_0 | Asynchronous serial transmit |
 | P_ASYNC_RX | %11111 | %0000_0000_000_0000000000000_00_11111_0 | Asynchronous serial receive |
 
----
+
 
 ## Usage Examples
 
@@ -320,7 +320,7 @@ Constants are combined using OR operations to build the complete configuration:
         wrpin   mode, #0
 ```
 
----
+
 
 ## Combining Constants
 
@@ -332,7 +332,7 @@ SmartPin constants are designed to be combined using OR operations. The bit fiel
         wrpin   mode, pin
 ```
 
----
+
 
 ## Related Instructions
 

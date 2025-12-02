@@ -2,41 +2,18 @@
 
 This section contains all PASM2 instructions beginning with the letter D.
 
----
+<!-- DEBUG instruction removed - will be covered in a dedicated narrative chapter with examples -->
 
-## DEBUG {#debug}
 
-Debug instruction
-[Debug Instruction](#debug-instructions) - Provides debugging functionality during program execution.
-
-```
-DEBUG
-```
-
-**Result:** Debug functionality is triggered during program execution.
-
-```{=latex}
-\simpleencoding{EEEE}{0000000}{000}{000010110}{000000000}{---}{---}{---}{2}
-```
-
-**Related:** [NOP](#nop)
-
-**Explanation:**
-
-DEBUG provides debugging functionality during program execution. This instruction is used by development tools to insert breakpoints or trigger debugging events within PASM2 code.
-
-The DEBUG instruction has no operands and does not modify any registers or flags. Its behavior is implementation-specific and depends on the debugging environment in use.
-
----
 
 ## DECMOD {#decmod}
 
 Decrement modulus
 [Math Instruction](#math-instructions) - Decrement with modulus wrapping.
 
-```
-DECMOD  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**DECMOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** If Dest was not equal to 0, it is decremented by 1; otherwise Dest is reset to Src.
 
@@ -60,17 +37,17 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 
 DECMOD does not limit Dest within the specified range—if Dest begins as greater than Src, iterations will continue to decrement it down through Src before cycling from Src to 0. This instruction is useful for implementing circular buffers and modular counters that wrap from 0 back to a maximum value.
 
----
+
 
 ## DECOD {#decod}
 
 Decode bit position to single-bit mask
 [Math Instruction](#math-instructions) - Decode value (0-31) into single-high-bit long.
 
-```
-DECOD  Dest, {#}Src
-DECOD  Dest
-```
+**DECOD**  *Dest, {#}Src*
+**DECOD**  *Dest*
+
+---
 
 **Result:** A 32-bit value, with the bit position corresponding to Src or Dest value (0-31) set high, is stored in Dest.
 
@@ -99,17 +76,17 @@ The first syntax form uses Src to specify the bit position, while the second syn
 
 DECOD is the complement of ENCOD. It is commonly used to generate bit masks for testing or setting individual bits within registers or memory locations.
 
----
+
 
 ## DIRC / DIRNC {#dirc}
 
 Set pin direction if C / not C
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input/output according to C or !C.
 
-```
-DIRC   {#}Dest  {WCZ}
-DIRNC  {#}Dest  {WCZ}
-```
+**DIRC**  *{#}Dest*  **{WCZ}**
+**DIRNC**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pin direction bit(s), described by Dest, are set to output/input according to C or !C; the rest are left as-is.
 
@@ -141,16 +118,16 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 
 If the WCZ effect is specified, the C and Z flags are updated to the original state of DIRA / DIRB's base bit, identified by Dest.
 
----
+
 
 ## DIRH {#dirh}
 
 Set pin direction high
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to output (high; 1).
 
-```
-DIRH  {#}Dest  {WCZ}
-```
+**DIRH**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to output direction; the rest are left as-is.
 
@@ -173,16 +150,16 @@ A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range o
 
 If the WCZ effect is specified, the Z flag is set to the state of the direction bit before modification.
 
----
+
 
 ## DIRL {#dirl}
 
 Set pin direction low
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input (low; 0).
 
-```
-DIRL  {#}Dest  {WCZ}
-```
+**DIRL**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to input direction; the rest are left as-is.
 
@@ -205,16 +182,16 @@ A 9-bit literal Dest is enough to express the base pin (Dest[5:0]) and a range o
 
 If the WCZ effect is specified, the Z flag is updated to the original state of the target direction bit.
 
----
+
 
 ## DIRNOT {#dirnot}
 
 Direction not
 [I/O Pin Instruction](#io-pin-instructions) - Toggle pin(s) to the opposite direction.
 
-```
-DIRNOT  {#}Dest  {WCZ}
-```
+**DIRNOT**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pin direction bit(s), described by Dest, are toggled to their opposite state(s); the rest are left as-is.
 
@@ -241,17 +218,17 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 
 If the WCZ effect is specified, the C and Z flags are updated to the original state of DIRA / DIRB's base bit, identified by Dest.
 
----
+
 
 ## DIRZ / DIRNZ {#dirz}
 
 Set pin direction if Z / not Z
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to input/output according to Z or !Z.
 
-```
-DIRZ   {#}Dest  {WCZ}
-DIRNZ  {#}Dest  {WCZ}
-```
+**DIRZ**  *{#}Dest*  **{WCZ}**
+**DIRNZ**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pin direction bit(s), described by Dest, are set to output/input according to Z or !Z; the rest are left as-is.
 
@@ -283,16 +260,16 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 
 If the WCZ effect is specified, the C and Z flags are updated to the original state of DIRA / DIRB's base bit, identified by Dest.
 
----
+
 
 ## DIRRND {#dirrnd}
 
 Direction random
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to random input/output.
 
-```
-DIRRND  {#}Dest  {WCZ}
-```
+**DIRRND**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pin direction bit(s), described by Dest, are each set randomly low or high (input or output); the rest are left as-is.
 
@@ -319,16 +296,16 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 
 If the WCZ effect is specified, the C and Z flags are updated to the original state of DIRA / DIRB's base bit, identified by Dest, before the random modification occurs.
 
----
+
 
 ## DJF {#djf}
 
 Decrement and jump if full
 [Branch/Jump Instruction](#branch-jump-instructions) - Decrement value and jump if full (-1; $FFFF_FFFF).
 
-```
-DJF  Dest, {#}Src
-```
+**DJF**  *Dest, {#}Src*
+
+---
 
 **Result:** Dest is decremented. If the result equals $FFFF_FFFF (full), PC is set to a new relative (#Src) or absolute (Src) address; otherwise execution continues with the next instruction.
 
@@ -349,16 +326,16 @@ This instruction is useful for implementing loops that count down until a regist
 
 The instruction executes in 2 clock cycles when the branch is not taken, and 4 clock cycles when the branch is taken.
 
----
+
 
 ## DJNF {#djnf}
 
 Decrement and jump if not full
 [Branch/Jump Instruction](#branch-jump-instructions) - Decrement value and jump if not full (<> -1; <> $FFFF_FFFF).
 
-```
-DJNF  Dest, {#}Src
-```
+**DJNF**  *Dest, {#}Src*
+
+---
 
 **Result:** Dest is decremented. If the result does NOT equal $FFFF_FFFF (not full), PC is set to a new relative (#Src) or absolute (Src) address; otherwise execution continues with the next instruction.
 
@@ -381,87 +358,65 @@ Dest is always written with the decremented value. PC is written only when the r
 
 The instruction executes in 2 clock cycles when the branch is not taken, and 4 clock cycles when the branch is taken.
 
+
+
+## DJZ / DJNZ {#djz}
+
+Decrement and jump if zero / not zero {#djnz}
+[Branch/Jump Instruction](#branch-jump-instructions) - Decrement a register and jump based on zero/non-zero result.
+
+**DJZ**  *Dest, {#}Src*
+**DJNZ**  *Dest, {#}Src*
+
 ---
 
-## DJNZ {#djnz}
+**Result:** Dest is decremented by 1, and conditionally jumps:
 
-Decrement and jump if not zero
-[Branch/Jump Instruction](#branch-jump-instructions) - Decrement, jump if not zero.
+| Instruction | Jumps when |
+|-------------|------------|
+| DJZ | Result = 0 |
+| DJNZ | Result ≠ 0 |
 
-```
-DJNZ  Dest, {#}Src
-```
-
-**Result:** Dest is decremented. If the result is not zero, PC is set to a new relative (#Src) or absolute (Src) address; otherwise execution continues with the next instruction.
-
-- Dest is a register whose value is decremented and tested for zero or not zero.
-- Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC to. Use # for relative addressing; omit # for absolute addressing.
+- Dest is a register whose value is decremented and tested.
+- Src is the jump address: use # for relative, omit for absolute.
 
 ```{=latex}
-\simpleencoding{EEEE}{1011011}{01I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2 or 4}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011011}{00I}{DDDDDDDDD}{SSSSSSSSS}{D + PC*}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011011}{01I}{DDDDDDDDD}{SSSSSSSSS}{D + PC*}{---}{---}{2 or 4}
+\end{encodingtable}
+
+*PC is written only when the jump condition is met.
 ```
 
-**Related:** [DJZ](#djz), [DJF](#djf), [DJNF](#djnf), [TJZ](#tjz), [TJNZ](#tjnz)
+**Related:** [DJF](#djf), [DJNF](#djnf), [IJZ](#ijz), [IJNZ](#ijnz), [TJZ](#tjz), [TJNZ](#tjnz)
 
 **Explanation:**
 
-DJNZ decrements the value in Dest, writes the result, and jumps to the address described by Src if the result is NOT zero.
+DJZ and DJNZ decrement Dest and conditionally jump based on whether the result is zero or non-zero.
 
-This is one of the most commonly used loop instructions. Use # prefix on Src for relative addressing (typical usage); omit # for absolute addressing.
+DJNZ is one of the most commonly used loop instructions—it continues looping while the counter is non-zero.
 
-Dest is always written with the decremented value. PC is written only when the result in Dest is not zero.
-
-The instruction executes in 2 clock cycles when the branch is not taken (result equals zero), and 4 clock cycles when the branch is taken (result is not zero).
-
-Example loop using DJNZ:
-
+Example loop:
 ```pasm
         mov     count, #10              ' Set loop counter to 10
 .loop   ' loop body here
         djnz    count, #.loop           ' Decrement and loop if not zero
 ```
 
----
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
-## DJZ {#djz}
 
-Decrement and jump if zero
-[Branch/Jump Instruction](#branch-jump-instructions) - Decrement, jump if zero.
-
-```
-DJZ  Dest, {#}Src
-```
-
-**Result:** Dest is decremented. If the result equals zero, PC is set to a new relative (#Src) or absolute (Src) address; otherwise execution continues with the next instruction.
-
-- Dest is a register whose value is decremented and tested for zero or not zero.
-- Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011011}{00I}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{---}{2 or 4}
-```
-
-**Related:** [DJNZ](#djnz), [DJF](#djf), [DJNF](#djnf), [TJZ](#tjz), [TJNZ](#tjnz)
-
-**Explanation:**
-
-DJZ decrements the value in Dest, writes the result, and jumps to the address described by Src if the result IS zero.
-
-This instruction is useful when you want to jump when a counter reaches zero, rather than looping while non-zero. Use # prefix on Src for relative addressing; omit # for absolute addressing.
-
-The instruction executes in 2 clock cycles when the branch is not taken (result is not zero), and 4 clock cycles when the branch is taken (result equals zero).
-
----
 
 ## DRVC / DRVNC {#drvc}
 
 Drive pins if C / not C
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to output and output level to low/high according to C or !C.
 
-```
-DRVC   {#}Dest  {WCZ}
-DRVNC  {#}Dest  {WCZ}
-```
+**DRVC**  *{#}Dest*  **{WCZ}**
+**DRVNC**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to the output direction and to an output level of low/high according to C or !C; the rest are left as-is.
 
@@ -491,16 +446,16 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 
 If the WCZ effect is specified, the Z flag is set to the state of the OUT bit before modification.
 
----
+
 
 ## DRVH {#drvh}
 
 Drive pins high
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to output and output level high (1).
 
-```
-DRVH  {#}Dest  {WCZ}
-```
+**DRVH**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to the output direction and to an output level of high; the rest are left as-is.
 
@@ -525,16 +480,16 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 
 If the WCZ effect is specified, the Z flag is set to the state of the OUT bit before modification.
 
----
+
 
 ## DRVL {#drvl}
 
 Drive pins low
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to output and output level low (0).
 
-```
-DRVL  {#}Dest  {WCZ}
-```
+**DRVL**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to the output direction and to an output level of low; the rest are left as-is.
 
@@ -561,16 +516,16 @@ If the WCZ effect is specified, the Z flag is set to the state of the OUT bit be
 
 Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state.
 
----
+
 
 ## DRVNOT {#drvnot}
 
 Drive not
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to output and toggle to the opposite output level.
 
-```
-DRVNOT  {#}Dest  {WCZ}
-```
+**DRVNOT**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to the output direction and to their opposite output level(s); the rest are left as-is.
 
@@ -599,17 +554,17 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 
 Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state.
 
----
+
 
 ## DRVZ / DRVNZ {#drvz}
 
 Drive pins if Z / not Z
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to output and output level to low/high according to Z or !Z.
 
-```
-DRVZ   {#}Dest  {WCZ}
-DRVNZ  {#}Dest  {WCZ}
-```
+**DRVZ**  *{#}Dest*  **{WCZ}**
+**DRVNZ**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to the output direction and to an output level of low/high according to Z or !Z; the rest are left as-is.
 
@@ -639,16 +594,16 @@ The range calculation (from Dest[5:0] up to Dest[5:0]+Dest[10:6]) will wrap with
 
 If the WCZ effect is specified, the Z flag is set to the state of the OUT bit before modification.
 
----
+
 
 ## DRVRND {#drvrnd}
 
 Drive random
 [I/O Pin Instruction](#io-pin-instructions) - Set pin(s) direction to output and output level to random low/high.
 
-```
-DRVRND  {#}Dest  {WCZ}
-```
+**DRVRND**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pins described by Dest are set to the output direction and each output level is set randomly low or high; the rest are left as-is.
 
@@ -679,4 +634,4 @@ If the WCZ effect is specified, the C and Z flags are updated to the original st
 
 Note that the new DIRx state is not data-forwarded; the next pipelined instruction sees the old state.
 
----
+

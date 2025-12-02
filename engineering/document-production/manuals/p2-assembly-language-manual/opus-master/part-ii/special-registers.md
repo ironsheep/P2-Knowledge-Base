@@ -53,7 +53,7 @@ Interrupt 3 call address. Stores the address where execution jumps when interrup
 
 **Related**: [IRET3](#iret3--address-1f1), SETINT3, RETI3
 
----
+
 
 ### IRET3 — Address $1F1
 
@@ -72,7 +72,7 @@ int3_handler
 
 **Related**: [IJMP3](#ijmp3--address-1f0), SETINT3, RETI3
 
----
+
 
 ### IJMP2 — Address $1F2
 
@@ -90,7 +90,7 @@ Interrupt 2 call address. Stores the address where execution jumps when interrup
 
 **Related**: [IRET2](#iret2--address-1f3), SETINT2, RETI2
 
----
+
 
 ### IRET2 — Address $1F3
 
@@ -109,7 +109,7 @@ int2_handler
 
 **Related**: [IJMP2](#ijmp2--address-1f2), SETINT2, RETI2
 
----
+
 
 ### IJMP1 — Address $1F4
 
@@ -127,7 +127,7 @@ Interrupt 1 call address. Stores the address where execution jumps when interrup
 
 **Related**: [IRET1](#iret1--address-1f5), SETINT1, RETI1
 
----
+
 
 ### IRET1 — Address $1F5
 
@@ -146,7 +146,7 @@ int1_handler
 
 **Related**: [IJMP1](#ijmp1--address-1f4), SETINT1, RETI1
 
----
+
 
 ### PA — Address $1F6
 
@@ -164,17 +164,17 @@ When these functions are not needed, PA can be used as general-purpose cog RAM.
 
 **Example**:
 ```pasm
-        calld   PA, #subroutine         ' Store return info in PA, call subroutine
-        callpa  param, #handler         ' Copy param to PA, call handler
-        loc     PA, #label              ' Store address of label in PA
+        calld   PA, #subroutine         ' Return info in PA, call
+        callpa  param, #handler         ' Copy param to PA, call
+        loc     PA, #label              ' Store label address in PA
 
         ' Using PA as general RAM
-        mov     PA, #42                 ' Just a regular register when not using special functions
+        mov     PA, #42                 ' Regular register usage
 ```
 
 **Related**: [PB](#pb--address-1f7), CALLD, CALLPA, LOC
 
----
+
 
 ### PB — Address $1F7
 
@@ -192,17 +192,17 @@ When these functions are not needed, PB can be used as general-purpose cog RAM.
 
 **Example**:
 ```pasm
-        calld   PB, #subroutine         ' Store return info in PB, call subroutine
-        callpb  param, #handler         ' Copy param to PB, call handler
-        loc     PB, #label              ' Store address of label in PB
+        calld   PB, #subroutine         ' Return info in PB, call
+        callpb  param, #handler         ' Copy param to PB, call
+        loc     PB, #label              ' Store label address in PB
 
         ' Using PB as general RAM
-        mov     PB, ##hub_addr          ' Just a regular register when not using special functions
+        mov     PB, ##hub_addr          ' Regular register usage
 ```
 
 **Related**: [PA](#pa--address-1f6), CALLD, CALLPB, LOC
 
----
+
 
 ## Fixed Special Registers
 
@@ -224,17 +224,17 @@ Pointer A to Hub RAM. Primary pointer register for Hub RAM access with automatic
 **Example**:
 ```pasm
         mov     ptra, ##hub_buffer      ' Set PTRA to Hub address
-        rdlong  data, ptra++            ' Read long from Hub at PTRA, post-increment by 4
+        rdlong  data, ptra++            ' Read long, post-increment
         wrlong  data, ptra[4]           ' Write long to Hub at PTRA+16 bytes
 
         ' Block transfer using SETQ
         setq    #15                     ' Transfer 16 longs
-        rdlong  cog_buffer, ptra++      ' Read 16 longs from Hub, auto-increment PTRA
+        rdlong  cog_buffer, ptra++      ' Read 16 longs, auto-inc
 ```
 
 **Related**: [PTRB](#ptrb--address-1f9), RDLONG, WRLONG, RDBYTE, RDWORD, SETQ
 
----
+
 
 ### PTRB — Address $1F9
 
@@ -254,7 +254,7 @@ Pointer B to Hub RAM. Secondary pointer register for Hub RAM access with automat
 **Example**:
 ```pasm
         mov     ptrb, ##hub_source      ' Set PTRB to source address
-        rdlong  data, ptrb++            ' Read long from Hub at PTRB, post-increment
+        rdlong  data, ptrb++            ' Read long, post-increment
         wrlong  data, ptrb[8]           ' Write long to Hub at PTRB+32 bytes
 
         ' COGINIT sets PTRB in launched cog
@@ -263,7 +263,7 @@ Pointer B to Hub RAM. Secondary pointer register for Hub RAM access with automat
 
 **Related**: [PTRA](#ptra--address-1f8), RDLONG, WRLONG, COGINIT
 
----
+
 
 ### DIRA — Address $1FA
 
@@ -285,12 +285,12 @@ Direction register A for pins 0-31. Controls whether each pin is an input or out
         andn    DIRA, ##$0000_00FF      ' Set pins 0-7 as inputs
 
         ' Atomic direction change
-        mov     DIRA, new_directions    ' Change all 32 pin directions atomically
+        mov     DIRA, new_directions    ' Change all 32 directions
 ```
 
 **Related**: [DIRB](#dirb--address-1fb), [OUTA](#outa--address-1fc), [INA](#ina--address-1fe), DIRC, DIRH, DIRL
 
----
+
 
 ### DIRB — Address $1FB
 
@@ -314,7 +314,7 @@ Direction register B for pins 32-63. Controls whether each pin is an input or ou
 
 **Related**: [DIRA](#dira--address-1fa), [OUTB](#outb--address-1fd), [INB](#inb--address-1ff)
 
----
+
 
 ### OUTA — Address $1FC
 
@@ -342,7 +342,7 @@ Output register A for pins 0-31. Sets the output state for pins configured as ou
 
 **Related**: [OUTB](#outb--address-1fd), [DIRA](#dira--address-1fa), [INA](#ina--address-1fe), OUTC, OUTH, OUTL
 
----
+
 
 ### OUTB — Address $1FD
 
@@ -367,7 +367,7 @@ Output register B for pins 32-63. Sets the output state for pins configured as o
 
 **Related**: [OUTA](#outa--address-1fc), [DIRB](#dirb--address-1fb), [INB](#inb--address-1ff)
 
----
+
 
 ### INA — Address $1FE
 
@@ -384,20 +384,20 @@ Input register A for pins 0-31. Reads the current state of pins regardless of di
 
 **Example**:
 ```pasm
-        mov     state, INA              ' Read all pins 0-31
-        test    INA, #1             wz  ' Test if pin 0 is high
+                mov     state, INA              ' Read all pins 0-31
+                test    INA, #1             wz  ' Test if pin 0 is high
         if_nz   jmp     #pin_high
 
-        and     inputs, INA             ' Mask input pins
+                and     inputs, INA             ' Mask input pins
 
-        ' Wait for pin high
-.wait   test    INA, pin_mask       wz
+                ' Wait for pin high
+.wait           test    INA, pin_mask       wz
         if_z    jmp     #.wait
 ```
 
 **Related**: [INB](#inb--address-1ff), [DIRA](#dira--address-1fa), [OUTA](#outa--address-1fc)
 
----
+
 
 ### INB — Address $1FF
 
@@ -414,17 +414,17 @@ Input register B for pins 32-63. Reads the current state of pins regardless of d
 
 **Example**:
 ```pasm
-        mov     state, INB              ' Read all pins 32-63
-        test    INB, ##$8000_0000   wz  ' Test if pin 63 is high
+                mov     state, INB              ' Read all pins 32-63
+                test    INB, ##$8000_0000   wz  ' Test if pin 63 is high
         if_z    jmp     #pin_low
 
-        ' Copy input pattern to output
-        mov     OUTB, INB
+                ' Copy input pattern to output
+                mov     OUTB, INB
 ```
 
 **Related**: [INA](#ina--address-1fe), [DIRB](#dirb--address-1fb), [OUTB](#outb--address-1fd)
 
----
+
 
 ## Non-Memory-Mapped Registers
 
@@ -451,7 +451,7 @@ The program counter is a 20-bit register that holds the Hub RAM address of the c
 
 **Related**: GETPC, JMP, CALL, CALLD
 
----
+
 
 ### Q Register
 
@@ -485,7 +485,7 @@ The Q register contents are volatile—CORDIC and division operations overwrite 
 
 **Related**: GETQX, GETQY, SETQ, SETQ2, QROTATE, QVECTOR, QDIV
 
----
+
 
 ### System Counter (CT)
 
@@ -499,23 +499,23 @@ The system counter is a free-running 32-bit counter that increments on every sys
 
 **Example**:
 ```pasm
-        getct   target                  ' Get current time
-        addct1  target, ##delay_cycles  ' Compute target = now + delay
-        waitct1                         ' Wait until CT reaches target
+                getct   target                  ' Get current time
+                addct1  target, ##delay_cycles  ' target = now + delay
+                waitct1                         ' Wait for CT to reach it
 
-        ' Timeout pattern
-        getct   timeout
-        add     timeout, ##max_cycles
-.loop   ' ... do work ...
-        getct   now
-        cmp     now, timeout        wc  ' Check if timeout exceeded
+                ' Timeout pattern
+                getct   timeout
+                add     timeout, ##max_cycles
+.loop           ' ... do work ...
+                getct   now
+                cmp     now, timeout        wc  ' Check if timeout exceeded
         if_nc   jmp     #timed_out
-        jmp     #.loop
+                jmp     #.loop
 ```
 
 **Related**: GETCT, ADDCT1, ADDCT2, ADDCT3, WAITCT1, WAITCT2, WAITCT3
 
----
+
 
 ### Hardware Random Number Generator (RANDOM)
 
@@ -534,7 +534,7 @@ The hardware random number generator produces true random numbers based on therm
         ' Generate random in range 0-99
         getrnd  temp
         qmul    temp, #100              ' Multiply by 100
-        getqy   random_0_99             ' Get high 32 bits = value * 100 / 2^32
+        getqy   random_0_99             ' High 32 bits = value*100/2^32
 
         ' Random bit
         getrnd  temp
@@ -543,7 +543,7 @@ The hardware random number generator produces true random numbers based on therm
 
 **Related**: GETRND, QMUL (for scaling random values)
 
----
+
 
 ### C and Z Flags
 
@@ -562,21 +562,21 @@ The carry (C) and zero (Z) flags are 1-bit condition flags that store the result
 
 **Example**:
 ```pasm
-        cmp     value, #100         wz  ' Compare, set Z if equal
+                cmp     value, #100         wz  ' Compare, set Z if equal
         if_z    jmp     #equal
 
-        test    flags, ##$8000_0000 wc  ' Test bit 31, put in C
+                test    flags, ##$8000_0000 wc  ' Test bit 31, put in C
         if_c    jmp     #bit_set
 
-        add     sum, addend         wc  ' Add, set C if overflow
+                add     sum, addend         wc  ' Add, set C if overflow
         if_c    jmp     #overflow
 
-        shr     data, #1            wc  ' Shift right, C gets shifted-out bit
+                shr     data, #1            wc  ' Shift right, C = bit out
 ```
 
 **Related**: All conditional execution (IF_xx), CMP, TEST, and ALU instructions with WC/WZ/WCZ
 
----
+
 
 ## Common Usage Patterns
 
@@ -589,7 +589,7 @@ Toggle a pin:
 
 Wait for pin high:
 ```pasm
-.wait   test    INA, pin_mask       wz
+.wait           test    INA, pin_mask       wz
         if_z    jmp     #.wait
 ```
 
@@ -603,7 +603,7 @@ Set multiple pins atomically:
         mov     OUTA, new_pattern       ' All 32 pins change simultaneously
 ```
 
----
+
 
 ### Hub RAM Access
 
@@ -624,7 +624,7 @@ Dual buffer operation:
         wrlong  temp, ptrb++            ' Write to PTRB
 ```
 
----
+
 
 ### Interrupt Setup
 
@@ -638,7 +638,7 @@ handler_addr
         reti1                           ' Return to interrupted code
 ```
 
----
+
 
 ### Timing Operations
 
@@ -651,17 +651,17 @@ Precise delay:
 
 Timeout detection:
 ```pasm
-        getct   deadline
-        add     deadline, ##max_time
-.loop   ' ... do work ...
-        getct   now
-        cmp     now, deadline       wc
+                getct   deadline
+                add     deadline, ##max_time
+.loop           ' ... do work ...
+                getct   now
+                cmp     now, deadline       wc
         if_nc   jmp     #timeout
-        ' ... continue if not timed out ...
-        jmp     #.loop
+                ' ... continue if not timed out ...
+                jmp     #.loop
 ```
 
----
+
 
 ## Important Behaviors
 

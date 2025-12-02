@@ -4,7 +4,7 @@ Assembler directives control the assembly process itself. Unlike instructions th
 
 The P2 assembler provides 13 directives organized into five functional categories: origin control, memory definition, size verification, alignment, and space management.
 
----
+
 
 ## Origin Control Directives
 
@@ -47,7 +47,7 @@ table   long    1, 2, 3         ' Data table at specific address
 - [ORGF](#orgf) — Set origin with zero-fill
 - [FIT](#fit) — Verify code fits within address limit
 
----
+
 
 ### ORGF
 
@@ -97,7 +97,7 @@ block_end
 - [FIT](#fit) — Verify code fits
 - [RES](#res) — Reserve space without initialization
 
----
+
 
 ### ORGH
 
@@ -135,7 +135,7 @@ Use ORGH when switching from cog-exec code to hub-exec code, or when defining da
 - [ORGF](#orgf) — Set origin with fill
 - HUBEXEC constant — Hub execution mode flag
 
----
+
 
 ## Memory Definition Directives
 
@@ -177,7 +177,7 @@ nums    byte    1, 2, 3, 4, 5   ' Decimal values
 - [BYTEFIT](#bytefit) — Verify value fits in byte range
 - [RES](#res) — Reserve uninitialized space
 
----
+
 
 ### LONG
 
@@ -215,7 +215,7 @@ ptrs    long    @start, @end    ' Address pointers
 - [ALIGNL](#alignl) — Force long alignment
 - [RES](#res) — Reserve uninitialized longs
 
----
+
 
 ### WORD
 
@@ -252,7 +252,7 @@ addr    word    @buffer             ' Address reference (lower 16 bits)
 - [WORDFIT](#wordfit) — Verify value fits in word range
 - [ALIGNW](#alignw) — Force word alignment
 
----
+
 
 ## Size Verification Directives
 
@@ -297,7 +297,7 @@ DAT
 - [WORDFIT](#wordfit) — Constrain to word range (0-65535)
 - [BYTE](#byte) — Declare byte data
 
----
+
 
 ### WORDFIT
 
@@ -338,7 +338,7 @@ DAT
 - [BYTEFIT](#bytefit) — Constrain to byte range (0-255)
 - [WORD](#word) — Declare word data
 
----
+
 
 ## Alignment Directives
 
@@ -373,7 +373,7 @@ mydata  long    0               ' This starts on a long-aligned address
 - [LONG](#long) — Declare long data (auto-aligned in hub)
 - [ORG](#org) — Set origin address
 
----
+
 
 ### ALIGNW
 
@@ -403,7 +403,7 @@ myword  word    0               ' This starts on a word-aligned address
 - [WORD](#word) — Declare word data (auto-aligned in hub)
 - [ORG](#org) — Set origin address
 
----
+
 
 ## Space Management Directives
 
@@ -455,7 +455,7 @@ Use DITTO to create repeated instruction sequences without copy-paste. Useful fo
 - REP instruction — Hardware-assisted instruction repeat
 - [ORG](#org) — Set origin address
 
----
+
 
 ### FIT
 
@@ -479,7 +479,7 @@ Use FIT to verify that code doesn't exceed available space. This is essential fo
 ' Cog code
         ORG     0
         ' ... code ...
-        FIT     $1F0            ' Ensure code fits before cog special registers
+        FIT     $1F0            ' Ensure fits before special regs
 
         FIT                     ' Default: ensure fits in cog RAM (< $200)
 ```
@@ -496,7 +496,7 @@ Use FIT to verify that code doesn't exceed available space. This is essential fo
 - [RES](#res) — Reserve space
 - [ORGF](#orgf) — Fill to address
 
----
+
 
 ### RES
 
@@ -533,7 +533,7 @@ temp    res     1               ' Reserve 1 long for temporary storage
 - [ORG](#org) — Set origin address
 - [FIT](#fit) — Verify space fits within limit
 
----
+
 
 ## Summary
 

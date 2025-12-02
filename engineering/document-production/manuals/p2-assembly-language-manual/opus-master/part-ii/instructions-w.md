@@ -1,965 +1,715 @@
-# W Instructions
+# Instructions: W
 
-This section documents all PASM2 instructions beginning with W, including wait operations, memory writes, FIFO operations, and Smart Pin configuration.
+This section contains all PASM2 instructions beginning with the letter W.
+
+
+
+## WAITATN {#waitatn}
+
+Wait for attention
+[Event Instruction](#event-instructions) - Wait for attention event from another cog.
+
+**WAITATN**  **{WC|WZ|WCZ}**
 
 ---
 
-## WAITATN — Event
+**Result:** Waits for an attention event to occur (unless the event flag is already set), then clears the event flag and resumes execution.
 
-Wait for attention event from another cog.
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-### Syntax
-```pasm
-        WAITATN {WC|WZ|WCZ}
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000011110}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for an attention event to occur (unless the event flag is already set), then clears the event flag and resumes execution at the next instruction. Optionally times out if the attention event doesn't occur soon enough, setting C and/or Z flags before resuming.
+**Related:** [COGATN](#cogatn), [POLLATN](#pollatn), [JATN](#jatn), [JNATN](#jnatn)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000011110 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [COGATN](#cogatn) — Send attention to another cog
-- [POLLATN](#pollatn) — Poll attention flag without waiting
-- [JATN](#jatn) — Jump if attention flag set
-- [JNATN](#jnatn) — Jump if attention flag clear
-
-### Explanation
 WAITATN waits for an attention event to occur, stalling the pipeline until the event flag is set. The attention event flag is set whenever another cog issues an attention request for this cog using COGATN. The flag is cleared upon cog start or execution of POLLATN, WAITATN, JATN, or JNATN instructions.
 
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITATN. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
+To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITATN. The WC, WZ, or WCZ effect is recommended only when timeout is specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
 
 During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
 
----
+::: pasm2
+        WAITATN                ' Wait for attention from another cog
+:::
 
-## WAITCT1 / WAITCT2 / WAITCT3 — Event {#waitct1}
 
-Wait for counter event flag (1, 2, or 3).
 
-### Syntax
-```pasm
-        WAITCT1 {WC|WZ|WCZ}
-        WAITCT2 {WC|WZ|WCZ}
-        WAITCT3 {WC|WZ|WCZ}
-```
+## WAITCT1 / WAITCT2 / WAITCT3 {#waitct1}
 
-### Result
-Waits for the specified counter event flag (CT1, CT2, or CT3) to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
+Wait for counter event {#waitct2} {#waitct3}
+[Event Instruction](#event-instructions) - Wait for counter event 1, 2, or 3 flag.
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
-
-### Encoding
-| Instruction | Encoding | Clocks |
-|-------------|----------|--------|
-| WAITCT1 | `EEEE 1101011 CZ0 000010001 000100100` | 2+ |
-| WAITCT2 | `EEEE 1101011 CZ0 000010010 000100100` | 2+ |
-| WAITCT3 | `EEEE 1101011 CZ0 000010011 000100100` | 2+ |
-
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-
-### Related Instructions
-- [ADDCT1/2/3](#addct1) — Add value to CTn event trigger
-- [POLLCT1/2/3](#pollct1) — Poll CTn flag without waiting
-- [JCT1/2/3](#jct1) — Jump if CTn event occurred
-- [JNCT1/2/3](#jnct1) — Jump if CTn event did not occur
-
-### Explanation
-WAITCT1, WAITCT2, and WAITCT3 wait for their respective counter events to occur, stalling the pipeline until the event flag is set. The P2 provides three independent counter event triggers, allowing a cog to manage multiple concurrent timing events.
-
-Each counter event flag is set whenever the System Counter (CT) passes the value in that counter's event trigger register; i.e., MSB of (CT - CTn) is 0. The event flag is cleared by execution of the corresponding ADDCTn, POLLCTn, WAITCTn, JCTn, or JNCTn instruction.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before the WAITCT instruction. The WC/WZ/WCZ effect is recommended only with timeout specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first.
-
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed until the wait ends. This provides deterministic timing for time-critical operations.
+**WAITCT1**  **{WC|WZ|WCZ}**
+**WAITCT2**  **{WC|WZ|WCZ}**
+**WAITCT3**  **{WC|WZ|WCZ}**
 
 ---
 
-## WAITFBW — Event
+**Result:** Waits for the specified counter event flag (CT1, CT2, or CT3) to be set, then clears the flag and resumes execution.
 
-Wait for FIFO-interface-block-wrap event.
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-### Syntax
-```pasm
-        WAITFBW {WC|WZ|WCZ}
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZ0}{000010001}{000100100}{---}{Timeout}{Timeout}{2+}
+\encodingrowcont{EEEE}{1101011}{CZ0}{000010010}{000100100}{---}{Timeout}{Timeout}{2+}
+\encodingrow{EEEE}{1101011}{CZ0}{000010011}{000100100}{---}{Timeout}{Timeout}{2+}
+\end{encodingtable}
 ```
 
-### Result
-Waits for a FIFO-interface-block-wrap event to occur, then clears the flag and resumes execution. Optionally times out with C/Z set if event doesn't occur soon enough.
+**Related:** [ADDCT1](#addct1), [ADDCT2](#addct2), [ADDCT3](#addct3), [POLLCT1](#pollct1), [POLLCT2](#pollct2), [POLLCT3](#pollct3), [JCT1](#jct1), [JCT2](#jct2), [JCT3](#jct3)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
+WAITCT1, WAITCT2, and WAITCT3 wait for counter events 1, 2, or 3 respectively, stalling the pipeline until the corresponding event flag is set. Each counter event flag is set whenever the System Counter (CT) passes the value in the corresponding event trigger register (CT1, CT2, or CT3).
+
+The flags are cleared by execution of ADDCT*n*, POLLCT*n*, WAITCT*n*, JCT*n*, or JNCT*n* instructions (where *n* is 1, 2, or 3).
+
+To set an optional timeout, insert a SETQ instruction immediately before the WAITCTn instruction.
+
+
+
+## WAITFBW {#waitfbw}
+
+Wait for FIFO block wrap
+[Event Instruction](#event-instructions) - Wait for FIFO-interface-block-wrap event.
+
+**WAITFBW**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Waits for a FIFO-interface-block-wrap event to occur, then clears the flag and resumes execution.
+
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000011001}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
-EEEE 1101011 CZ0 000011001 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
 
-### Related Instructions
-- [RDFAST](#rdfast) — Set up fast FIFO read
-- [WRFAST](#wrfast) — Set up fast FIFO write
-- [FBLOCK](#fblock) — Set FIFO block parameters
-- [POLLFBW](#pollfbw) — Poll FIFO block wrap flag
+**Related:** [RDFAST](#rdfast), [WRFAST](#wrfast), [FBLOCK](#fblock), [POLLFBW](#pollfbw)
 
-### Explanation
+**Explanation:**
+
 WAITFBW waits for a FIFO-interface-block-wrap event to occur, stalling the pipeline until the event flag is set. The FIFO-interface-block-wrap event flag is set whenever the Hub RAM FIFO interface exhausts its block count and reloads its block count and start address.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITFBW. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
 
 The FIFO-interface-block-wrap event flag is cleared upon execution of RDFAST, WRFAST, FBLOCK, POLLFBW, WAITFBW, JFBW, or JNFBW instructions.
 
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
+
+
+## WAITINT {#waitint}
+
+Wait for interrupt
+[Event Instruction](#event-instructions) - Wait for interrupt-occurred event.
+
+**WAITINT**  **{WC|WZ|WCZ}**
 
 ---
 
-## WAITINT — Event
+**Result:** Waits for an interrupt-occurred event, then clears the flag and resumes execution.
 
-Wait for interrupt-occurred event.
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-### Syntax
-```pasm
-        WAITINT {WC|WZ|WCZ}
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000010000}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for an interrupt-occurred event, then clears the flag and resumes execution. Optionally times out with C/Z set if event doesn't occur soon enough.
+**Related:** [POLLINT](#pollint), [JINT](#jint), [JNINT](#jnint)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000010000 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [POLLINT](#pollint) — Poll interrupt flag without waiting
-- [JINT](#jint) — Jump if interrupt occurred
-- [JNINT](#jnint) — Jump if interrupt not occurred
-
-### Explanation
 WAITINT waits for an interrupt-occurred event to occur, stalling the pipeline until the event flag is set. The interrupt-occurred event flag is set whenever interrupt 1, 2, or 3 occurs—debug interrupts are ignored.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITINT. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
 
 The interrupt-occurred event flag is cleared upon cog start or execution of POLLINT, WAITINT, JINT, or JNINT instructions.
 
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
+
+
+## WAITPAT {#waitpat}
+
+Wait for pattern
+[Event Instruction](#event-instructions) - Wait for pin-pattern-detected event.
+
+**WAITPAT**  **{WC|WZ|WCZ}**
 
 ---
 
-## WAITPAT — Event
+**Result:** Waits for a pin-pattern-detected event, then clears the flag and resumes execution.
 
-Wait for pin-pattern-detected event.
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-### Syntax
-```pasm
-        WAITPAT {WC|WZ|WCZ}
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000011000}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for a pin-pattern-detected event, then clears the flag and resumes execution. Optionally times out with C/Z set if event doesn't occur soon enough.
+**Related:** [SETPAT](#setpat), [POLLPAT](#pollpat), [JPAT](#jpat), [JNPAT](#jnpat)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000011000 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [SETPAT](#setpat) — Configure pin pattern detector
-- [POLLPAT](#pollpat) — Poll pattern flag without waiting
-- [JPAT](#jpat) — Jump if pattern detected
-- [JNPAT](#jnpat) — Jump if pattern not detected
-
-### Explanation
 WAITPAT waits for a pin-pattern-detected event to occur, stalling the pipeline until the event flag is set. The pin-pattern-detected event flag is set whenever the masked input pins match or don't match the pattern described by a previous SETPAT instruction.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITPAT. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
 
 The pin-pattern-detected event flag is cleared upon execution of SETPAT, POLLPAT, WAITPAT, JPAT, or JNPAT instructions.
 
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
+::: pasm2
+        SETPAT  mask, pattern  ' Set up pattern detector
+        WAITPAT                ' Wait for pattern match
+:::
+
+
+
+## WAITSE1 {#waitse1}
+
+Wait for selectable event 1
+[Event Instruction](#event-instructions) - Wait for selectable event 1 flag.
+
+**WAITSE1**  **{WC|WZ|WCZ}**
 
 ---
 
-## WAITSE1 / WAITSE2 / WAITSE3 / WAITSE4 — Event {#waitse1}
+**Result:** Waits for the SE1 selectable event flag to be set, then clears the flag and resumes execution.
 
-Wait for selectable event flag (1, 2, 3, or 4).
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-### Syntax
-```pasm
-        WAITSE1 {WC|WZ|WCZ}
-        WAITSE2 {WC|WZ|WCZ}
-        WAITSE3 {WC|WZ|WCZ}
-        WAITSE4 {WC|WZ|WCZ}
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000010100}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for the specified selectable event flag (SE1, SE2, SE3, or SE4) to be set, then clears the flag and resumes execution. If timeout occurs (with prior SETQ), C and/or Z are set.
+**Related:** [WAITSE2](#waitse2), [WAITSE3](#waitse3), [WAITSE4](#waitse4), [SETSE1](#setse1), [POLLSE1](#pollse1)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-| Instruction | Encoding | Clocks |
-|-------------|----------|--------|
-| WAITSE1 | `EEEE 1101011 CZ0 000010100 000100100` | 2+ |
-| WAITSE2 | `EEEE 1101011 CZ0 000010101 000100100` | 2+ |
-| WAITSE3 | `EEEE 1101011 CZ0 000010110 000100100` | 2+ |
-| WAITSE4 | `EEEE 1101011 CZ0 000010111 000100100` | 2+ |
+WAITSE1 waits for selectable event 1 to occur, stalling the pipeline until the SE1 event flag is set. The flag is cleared by execution of SETSE1, POLLSE1, WAITSE1, JSE1, or JNSE1 instructions.
 
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
 
-### Related Instructions
-- [SETSE1/2/3/4](#setse1) — Configure selectable event source
-- [POLLSE1/2/3/4](#pollse1) — Poll SEn flag without waiting
-- [JSE1/2/3/4](#jse1) — Jump if SEn event occurred
-- [JNSE1/2/3/4](#jnse1) — Jump if SEn event did not occur
 
-### Explanation
-WAITSE1, WAITSE2, WAITSE3, and WAITSE4 wait for their respective selectable events to occur, stalling the pipeline until the event flag is set. The P2 provides four independent selectable event channels, each configurable via SETSE instructions to respond to various system conditions.
+## WAITSE2 {#waitse2}
 
-Each selectable event flag is set whenever the configured event source for that channel triggers. The event flag is cleared by execution of the corresponding SETSEn, POLLSEn, WAITSEn, JSEn, or JNSEn instruction.
+Wait for selectable event 2
+[Event Instruction](#event-instructions) - Wait for selectable event 2 flag.
 
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before the WAITSE instruction. The WC/WZ/WCZ effect is recommended only with timeout specified. Flags are set (1) if timeout occurred before the event, or cleared (0) if the event occurred first.
-
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed until the wait ends.
+**WAITSE2**  **{WC|WZ|WCZ}**
 
 ---
 
-## WAITX — Miscellaneous
+**Result:** Waits for the SE2 selectable event flag to be set, then clears the flag and resumes execution.
 
-Wait for D+1 clock cycles.
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-### Syntax
-```pasm
-        WAITX   {#}D {WC/WZ/WCZ}
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000010101}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Stalls the cog for D+1 clock cycles, providing precise timing delays. Sets C and Z to 0 after completion.
+**Related:** [WAITSE1](#waitse1), [WAITSE3](#waitse3), [WAITSE4](#waitse4), [SETSE2](#setse2), [POLLSE2](#pollse2)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Number of cycles minus 1 to wait (0-511 for immediate) |
-| WC/WZ/WCZ | Optional effects; always set to 0 after completion |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZL DDDDDDDDD 000011111
-```
-**Write:** —
-**C Flag:** Set to 0 after completion
-**Z Flag:** Set to 0 after completion
-**Clocks:** 2 + D
+WAITSE2 waits for selectable event 2 to occur, stalling the pipeline until the SE2 event flag is set. The flag is cleared by execution of SETSE2, POLLSE2, WAITSE2, JSE2, or JNSE2 instructions.
 
-### Related Instructions
-- [WAITCT1/2/3](#waitct1) — Wait for specific CT value
-- [WAITPAT](#waitpat) — Wait for pin pattern
-- [WAITSE1/2/3/4](#waitse1) — Wait for selectable event
 
-### Explanation
-WAITX stalls the cog for precise timing delays. The actual wait time is D+1 cycles minimum. This instruction is critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.
 
-WAITX blocks cog execution completely—no instructions execute and no interrupts are processed during the wait period. For long delays, consider using WAITCT instructions instead. For continuous PWM generation, use Smart Pins rather than software loops with WAITX.
+## WAITSE3 {#waitse3}
 
-WAITX is essential for protocols requiring precise bit timing, such as HUB75 RGB LED panel driving, SPI bit-banging, and other time-critical I/O operations. The instruction guarantees deterministic timing regardless of other system activity.
+Wait for selectable event 3
+[Event Instruction](#event-instructions) - Wait for selectable event 3 flag.
+
+**WAITSE3**  **{WC|WZ|WCZ}**
 
 ---
 
-## WAITXFI — Event
+**Result:** Waits for the SE3 selectable event flag to be set, then clears the flag and resumes execution.
 
-Wait for streamer-finished event.
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-### Syntax
-```pasm
-        WAITXFI {WC|WZ|WCZ}
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000010110}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for a streamer-finished event to occur, then clears the flag and resumes execution. Optionally times out with C/Z set if event doesn't occur soon enough.
+**Related:** [WAITSE1](#waitse1), [WAITSE2](#waitse2), [WAITSE4](#waitse4), [SETSE3](#setse3), [POLLSE3](#pollse3)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
+WAITSE3 waits for selectable event 3 to occur, stalling the pipeline until the SE3 event flag is set. The flag is cleared by execution of SETSE3, POLLSE3, WAITSE3, JSE3, or JNSE3 instructions.
+
+
+
+## WAITSE4 {#waitse4}
+
+Wait for selectable event 4
+[Event Instruction](#event-instructions) - Wait for selectable event 4 flag.
+
+**WAITSE4**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Waits for the SE4 selectable event flag to be set, then clears the flag and resumes execution.
+
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000010111}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
-EEEE 1101011 CZ0 000011011 000100100
+
+**Related:** [WAITSE1](#waitse1), [WAITSE2](#waitse2), [WAITSE3](#waitse3), [SETSE4](#setse4), [POLLSE4](#pollse4)
+
+**Explanation:**
+
+WAITSE4 waits for selectable event 4 to occur, stalling the pipeline until the SE4 event flag is set. The flag is cleared by execution of SETSE4, POLLSE4, WAITSE4, JSE4, or JNSE4 instructions.
+
+
+
+## WAITX {#waitx}
+
+Wait cycles
+[Timing Instruction](#timing-instructions) - Wait for Dest+1 clock cycles.
+
+**WAITX**  *{#}Dest*  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Stalls the cog for Dest+1 clock cycles, providing precise timing delays. Sets C and Z to 0 after completion.
+
+- Dest is the number of cycles minus 1 to wait (0-511 for immediate).
+- WC, WZ, or WCZ are optional; always set to 0 after completion.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{000011111}{---}{0}{0}{2 + D}
 ```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
 
-### Related Instructions
-- [WAITXMT](#waitxmt) — Wait for streamer empty
-- [WAITXRL](#waitxrl) — Wait for streamer LUT rollover
-- [WAITXRO](#waitxro) — Wait for streamer NCO rollover
-- [XINIT](#xinit) — Initialize streamer
-- [XCONT](#xcont) — Continue streamer
+**Related:** [WAITCT1](#waitct1), [WAITCT2](#waitct2), [WAITCT3](#waitct3)
 
-### Explanation
+**Explanation:**
+
+WAITX stalls the cog for precise timing delays. The actual wait time is Dest+1 cycles minimum. This instruction is critical for bit-banging protocols, PWM generation, and timing-sensitive operations where precise delays are required.
+
+WAITX blocks cog execution completely—no instructions execute and no interrupts are processed during the wait period. For long delays, consider using WAITCT instructions instead.
+
+::: pasm2
+        WAITX   #99            ' Wait 100 clock cycles
+:::
+
+
+
+## WAITXFI {#waitxfi}
+
+Wait for streamer finished
+[Event Instruction](#event-instructions) - Wait for streamer-finished event.
+
+**WAITXFI**  **{WC|WZ|WCZ}**
+
+---
+
+**Result:** Waits for a streamer-finished event to occur, then clears the flag and resumes execution.
+
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
+
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000011011}{000100100}{---}{Timeout}{Timeout}{2+}
+```
+
+**Related:** [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](#xinit), [XCONT](#xcont)
+
+**Explanation:**
+
 WAITXFI waits for a streamer-finished event to occur, stalling the pipeline until the event flag is set. The streamer-finished event flag is set whenever the streamer runs out of commands to process.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITXFI. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
 
 The streamer-finished event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXFI, WAITXFI, JXFI, or JNXFI instructions.
 
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
+
+
+## WAITXMT {#waitxmt}
+
+Wait for streamer empty
+[Event Instruction](#event-instructions) - Wait for streamer-empty event.
+
+**WAITXMT**  **{WC|WZ|WCZ}**
 
 ---
 
-## WAITXMT — Event
+**Result:** Waits for a streamer-empty event to occur, then clears the flag and resumes execution.
 
-Wait for streamer-empty event.
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-### Syntax
-```pasm
-        WAITXMT {WC|WZ|WCZ}
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000011010}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for a streamer-empty event to occur, then clears the flag and resumes execution. Optionally times out with C/Z set if event doesn't occur soon enough.
+**Related:** [WAITXFI](#waitxfi), [WAITXRL](#waitxrl), [WAITXRO](#waitxro), [XINIT](#xinit), [XCONT](#xcont)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000011010 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITXFI](#waitxfi) — Wait for streamer finished
-- [WAITXRL](#waitxrl) — Wait for streamer LUT rollover
-- [WAITXRO](#waitxro) — Wait for streamer NCO rollover
-- [XINIT](#xinit) — Initialize streamer
-- [XCONT](#xcont) — Continue streamer
-
-### Explanation
 WAITXMT waits for a streamer-empty event to occur, stalling the pipeline until the event flag is set. The streamer-empty event flag is set whenever the streamer is ready for a new command.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITXMT. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
 
 The streamer-empty event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXMT, WAITXMT, JXMT, or JNXMT instructions.
 
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
+
+
+## WAITXRL {#waitxrl}
+
+Wait for streamer LUT rollover
+[Event Instruction](#event-instructions) - Wait for streamer-LUT-RAM-rollover event.
+
+**WAITXRL**  **{WC|WZ|WCZ}**
 
 ---
 
-## WAITXRL — Event
+**Result:** Waits for a streamer-LUT-RAM-rollover event to occur, then clears the flag and resumes execution.
 
-Wait for streamer-LUT-RAM-rollover event.
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-### Syntax
-```pasm
-        WAITXRL {WC|WZ|WCZ}
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000011101}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for a streamer-LUT-RAM-rollover event to occur, then clears the flag and resumes execution. Optionally times out with C/Z set if event doesn't occur soon enough.
+**Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRO](#waitxro), [POLLXRL](#pollxrl)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000011101 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITXFI](#waitxfi) — Wait for streamer finished
-- [WAITXMT](#waitxmt) — Wait for streamer empty
-- [WAITXRO](#waitxro) — Wait for streamer NCO rollover
-- [POLLXRL](#pollxrl) — Poll LUT rollover flag
-
-### Explanation
 WAITXRL waits for a streamer-LUT-RAM-rollover event to occur, stalling the pipeline until the event flag is set. The streamer-LUT-RAM-rollover event flag is set whenever location $1FF of the Lookup RAM is read by the streamer.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITXRL. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
 
 The streamer-LUT-RAM-rollover event flag is cleared upon cog start or execution of POLLXRL, WAITXRL, JXRL, or JNXRL instructions.
 
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
+
+
+## WAITXRO {#waitxro}
+
+Wait for streamer NCO rollover
+[Event Instruction](#event-instructions) - Wait for streamer-NCO-rollover event.
+
+**WAITXRO**  **{WC|WZ|WCZ}**
 
 ---
 
-## WAITXRO — Event
+**Result:** Waits for a streamer-NCO-rollover event to occur, then clears the flag and resumes execution.
 
-Wait for streamer-NCO-rollover event.
+- WC, WZ, or WCZ are optional effects to set flags on timeout.
 
-### Syntax
-```pasm
-        WAITXRO {WC|WZ|WCZ}
+```{=latex}
+\simpleencoding{EEEE}{1101011}{CZ0}{000011100}{000100100}{---}{Timeout}{Timeout}{2+}
 ```
 
-### Result
-Waits for a streamer-NCO-rollover event to occur, then clears the flag and resumes execution. Optionally times out with C/Z set if event doesn't occur soon enough.
+**Related:** [WAITXFI](#waitxfi), [WAITXMT](#waitxmt), [WAITXRL](#waitxrl), [POLLXRO](#pollxro)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| WC/WZ/WCZ | Optional effects to update flags on timeout |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 CZ0 000011100 000100100
-```
-**Write:** —
-**C Flag:** Set if timeout occurred before event
-**Z Flag:** Set if timeout occurred before event
-**Clocks:** 2+
-
-### Related Instructions
-- [WAITXFI](#waitxfi) — Wait for streamer finished
-- [WAITXMT](#waitxmt) — Wait for streamer empty
-- [WAITXRL](#waitxrl) — Wait for streamer LUT rollover
-- [POLLXRO](#pollxro) — Poll NCO rollover flag
-
-### Explanation
 WAITXRO waits for a streamer-NCO-rollover event to occur, stalling the pipeline until the event flag is set. The streamer-NCO-rollover event flag is set whenever the streamer's numerically-controlled oscillator (NCO) rolls over.
-
-To set an optional timeout, insert a SETQ instruction (with a future System Counter target value) immediately before WAITXRO. The WC, WZ, or WCZ effect is recommended only when timeout is specified. The C flag and/or Z flag is set (1) if timeout occurred before the event, or cleared (0) if the event occurred before timeout.
 
 The streamer-NCO-rollover event flag is cleared upon execution of XINIT, XZERO, XCONT, POLLXRO, WAITXRO, JXRO, or JNXRO instructions.
 
-During a wait, the pipeline is stalled—no instructions execute and no interrupts are processed in the cog until the wait condition ends.
+
+
+## WFBYTE {#wfbyte}
+
+Write FIFO byte
+[FIFO Instruction](#fifo-instructions) - Write byte to FIFO.
+
+**WFBYTE**  *{#}Dest*
 
 ---
 
-## WFBYTE — Hub FIFO
+**Result:** Writes the byte in Dest[7:0] into the FIFO. Must be used after WRFAST has configured the FIFO.
 
-Write byte to FIFO.
+- Dest is the byte value to write (bits 7:0 used).
 
-### Syntax
-```pasm
-        WFBYTE  {#}D
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000010101}{---}{---}{---}{2}
 ```
 
-### Result
-Writes the byte in D[7:0] into the FIFO. Must be used after WRFAST has configured the FIFO.
+**Related:** [WFWORD](#wfword), [WFLONG](#wflong), [WRFAST](#wrfast)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Byte value to write (bits 7:0 used) |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 00L DDDDDDDDD 000010101
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
+WFBYTE writes a byte from Dest[7:0] into the Hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast Hub memory writes.
 
-### Related Instructions
-- [WFWORD](#wfword) — Write word to FIFO
-- [WFLONG](#wflong) — Write long to FIFO
-- [WRFAST](#wrfast) — Set up fast FIFO write
+Only the lower 8 bits of Dest are written. WFBYTE executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
 
-### Explanation
-WFBYTE writes a byte from D[7:0] into the Hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast Hub memory writes. The FIFO provides high-performance streaming writes to Hub RAM.
 
-Only the lower 8 bits of D are written; the upper 24 bits are ignored. WFBYTE executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
+
+## WFLONG {#wflong}
+
+Write FIFO long
+[FIFO Instruction](#fifo-instructions) - Write long to FIFO.
+
+**WFLONG**  *{#}Dest*
 
 ---
 
-## WFLONG — Hub FIFO
+**Result:** Writes the long in Dest[31:0] into the FIFO. Must be used after WRFAST has configured the FIFO.
 
-Write long to FIFO.
+- Dest is the long value to write (all 32 bits used).
 
-### Syntax
-```pasm
-        WFLONG  {#}D
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000010111}{---}{---}{---}{2}
 ```
 
-### Result
-Writes the long in D[31:0] into the FIFO. Must be used after WRFAST has configured the FIFO.
+**Related:** [WFBYTE](#wfbyte), [WFWORD](#wfword), [WRFAST](#wrfast)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Long value to write (all 32 bits used) |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 00L DDDDDDDDD 000010111
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
+WFLONG writes a long (32-bit value) from Dest[31:0] into the Hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast Hub memory writes.
 
-### Related Instructions
-- [WFBYTE](#wfbyte) — Write byte to FIFO
-- [WFWORD](#wfword) — Write word to FIFO
-- [WRFAST](#wrfast) — Set up fast FIFO write
+All 32 bits of Dest are written. WFLONG executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
 
-### Explanation
-WFLONG writes a long (32-bit value) from D[31:0] into the Hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast Hub memory writes. The FIFO provides high-performance streaming writes to Hub RAM.
 
-All 32 bits of D are written. WFLONG executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
+
+## WFWORD {#wfword}
+
+Write FIFO word
+[FIFO Instruction](#fifo-instructions) - Write word to FIFO.
+
+**WFWORD**  *{#}Dest*
 
 ---
 
-## WFWORD — Hub FIFO
+**Result:** Writes the word in Dest[15:0] into the FIFO. Must be used after WRFAST has configured the FIFO.
 
-Write word to FIFO.
+- Dest is the word value to write (bits 15:0 used).
 
-### Syntax
-```pasm
-        WFWORD  {#}D
+```{=latex}
+\simpleencoding{EEEE}{1101011}{00L}{DDDDDDDDD}{000010110}{---}{---}{---}{2}
 ```
 
-### Result
-Writes the word in D[15:0] into the FIFO. Must be used after WRFAST has configured the FIFO.
+**Related:** [WFBYTE](#wfbyte), [WFLONG](#wflong), [WRFAST](#wrfast)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Word value to write (bits 15:0 used) |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 00L DDDDDDDDD 000010110
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
+WFWORD writes a word (16-bit value) from Dest[15:0] into the Hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast Hub memory writes.
 
-### Related Instructions
-- [WFBYTE](#wfbyte) — Write byte to FIFO
-- [WFLONG](#wflong) — Write long to FIFO
-- [WRFAST](#wrfast) — Set up fast FIFO write
+Only the lower 16 bits of Dest are written. WFWORD executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
 
-### Explanation
-WFWORD writes a word (16-bit value) from D[15:0] into the Hub FIFO interface. This instruction must be used after WRFAST has configured the FIFO for fast Hub memory writes. The FIFO provides high-performance streaming writes to Hub RAM.
 
-Only the lower 16 bits of D are written; the upper 16 bits are ignored. WFWORD executes in 2 clock cycles when the FIFO is ready. If the FIFO is full, execution stalls until space becomes available.
+
+## WMLONG {#wmlong}
+
+Write masked long
+[Hub Instruction](#hub-instructions) - Write masked long to hub RAM (non-zero bytes only).
+
+**WMLONG**  *Dest, {#}Src/P*
 
 ---
 
-## WMLONG — Hub RAM
+**Result:** Writes only non-$00 bytes in Dest[31:0] to hub address Src/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.
 
-Write masked long to hub RAM (non-zero bytes only).
+- Dest is the long value with bytes to write (non-zero bytes only).
+- Src/P is the hub address or pointer (PTRA/PTRB).
 
-### Syntax
-```pasm
-        WMLONG  D,{#}S/P
+```{=latex}
+\simpleencoding{EEEE}{1010011}{11I}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{3...10}
 ```
 
-### Result
-Writes only non-$00 bytes in D[31:0] to hub address S/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.
+**Related:** [WRLONG](#wrlong), [WRBYTE](#wrbyte), [WRWORD](#wrword)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Long value with bytes to write (non-zero bytes only) |
-| S/P | Hub address or pointer (PTRA/PTRB) |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1010011 11I DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 3...10
-
-### Related Instructions
-- [WRLONG](#wrlong) — Write long to hub RAM
-- [WRBYTE](#wrbyte) — Write byte to hub RAM
-- [WRWORD](#wrword) — Write word to hub RAM
-
-### Explanation
-WMLONG writes only non-zero bytes from D to Hub RAM at address S. Each byte in D is examined: if the byte is $00, that byte position in Hub RAM is not modified; if the byte is non-zero, it is written to Hub RAM.
+WMLONG writes only non-zero bytes from Dest to Hub RAM at address Src. Each byte in Dest is examined: if the byte is $00, that byte position in Hub RAM is not modified; if the byte is non-zero, it is written to Hub RAM.
 
 This masked write capability is useful for sprite graphics, text overlay, and other applications where selective pixel/byte updates are needed without affecting other data in the same long.
 
-Prior execution of SETQ or SETQ2 invokes cog or LUT block transfer mode, writing multiple longs with masking.
+Prior execution of SETQ or SETQ2 invokes cog or LUT block transfer mode.
+
+
+
+## WRBYTE {#wrbyte}
+
+Write byte
+[Hub Instruction](#hub-instructions) - Write byte to hub RAM.
+
+**WRBYTE**  *{#}Dest, {#}Src/P*
 
 ---
 
-## WRBYTE — Hub RAM
+**Result:** Writes the byte in Dest[7:0] to hub address Src/PTRx.
 
-Write byte to hub RAM.
+- Dest is the byte value to write (bits 7:0 used).
+- Src/P is the hub address or pointer (PTRA/PTRB).
 
-### Syntax
-```pasm
-        WRBYTE  {#}D,{#}S/P
+```{=latex}
+\simpleencoding{EEEE}{1100010}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{3...10}
 ```
 
-### Result
-Writes the byte in D[7:0] to hub address S/PTRx.
+**Related:** [WRWORD](#wrword), [WRLONG](#wrlong), [RDBYTE](#rdbyte)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Byte value to write (bits 7:0 used) |
-| S/P | Hub address or pointer (PTRA/PTRB) |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1100010 0LI DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 3...10
+WRBYTE writes the byte in Dest[7:0] to Hub RAM at address Src/PTRx. Only the lower 8 bits of Dest are written.
 
-### Related Instructions
-- [WRWORD](#wrword) — Write word to hub RAM
-- [WRLONG](#wrlong) — Write long to hub RAM
-- [RDBYTE](#rdbyte) — Read byte from hub RAM
+The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
 
-### Explanation
-WRBYTE writes the byte in D[7:0] to Hub RAM at address S/PTRx. Only the lower 8 bits of D are written; the upper 24 bits are ignored.
+::: pasm2
+        WRBYTE  value, ptra++  ' Write byte, increment pointer
+:::
 
-The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. Hub RAM uses a rotating time-slot system where each cog gets access during its assigned slot. If the instruction executes during this cog's slot, it completes in 3 cycles. Otherwise, it must wait for the next available slot.
 
-When S specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes (++ and --) can be applied for sequential access.
+
+## WRC / WRNC / WRZ / WRNZ {#wrc}
+
+Write flag to register {#wrnc} {#wrz} {#wrnz}
+[Flag Instruction](#flag-instructions) - Write C, NC, Z, or NZ flag value to register.
+
+**WRC**  *Dest*
+**WRNC**  *Dest*
+**WRZ**  *Dest*
+**WRNZ**  *Dest*
 
 ---
 
-## WRC — Math and Logic
+**Result:** Writes 0 or 1 to Dest based on the specified flag condition:
 
-Write C flag value to register.
+| Instruction | Dest value |
+|-------------|------------|
+| WRC | 1 if C=1, else 0 |
+| WRNC | 1 if C=0, else 0 |
+| WRZ | 1 if Z=1, else 0 |
+| WRNZ | 1 if Z=0, else 0 |
 
-### Syntax
-```pasm
-        WRC     D
+- Dest is the destination register. Upper 31 bits are cleared to zero.
+
+```{=latex}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{000}{DDDDDDDDD}{001101100}{D}{---}{---}{2}
+\encodingrowcont{EEEE}{1101011}{000}{DDDDDDDDD}{001101101}{D}{---}{---}{2}
+\encodingrowcont{EEEE}{1101011}{000}{DDDDDDDDD}{001101110}{D}{---}{---}{2}
+\encodingrow{EEEE}{1101011}{000}{DDDDDDDDD}{001101111}{D}{---}{---}{2}
+\end{encodingtable}
 ```
 
-### Result
-Writes 0 or 1 to D according to the C flag state. D = {31'b0, C}.
+**Explanation:**
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register |
+These instructions copy flag states to a register, providing a convenient way to convert flag conditions into numeric values for computation or storage.
 
-### Encoding
-```
-EEEE 1101011 000 DDDDDDDDD 001101100
-```
-**Write:** D
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
+WRC and WRZ write the direct flag state (C or Z), while WRNC and WRNZ write the inverted flag state. The result is always 0 or 1; the upper 31 bits of Dest are cleared.
 
-### Related Instructions
-- [WRNC](#wrnc) — Write inverted C flag to register
-- [WRZ](#wrz) — Write Z flag to register
-- [WRNZ](#wrnz) — Write inverted Z flag to register
 
-### Explanation
-WRC copies the C flag state to register D. If C is set (1), D becomes 1. If C is clear (0), D becomes 0. The upper 31 bits of D are cleared to zero.
 
-This instruction provides a convenient way to convert flag states into numeric values for computation or storage. Combined with conditional execution, WRC enables flag-based value selection without branching.
+## WRFAST {#wrfast}
+
+Write FIFO setup
+[FIFO Instruction](#fifo-instructions) - Begin new fast hub write via FIFO.
+
+**WRFAST**  *{#}Dest, {#}Src*
 
 ---
 
-## WRFAST — Hub FIFO
+**Result:** Initializes the Hub FIFO for fast writes. Dest[31] = no wait, Dest[13:0] = block size in 64-byte units (0 = max), Src[19:0] = block start address.
 
-Begin new fast hub write via FIFO.
+- Dest contains configuration: bit 31 = nowait, bits 13:0 = block size.
+- Src contains Hub RAM start address (bits 19:0).
 
-### Syntax
-```pasm
-        WRFAST  {#}D,{#}S
+```{=latex}
+\simpleencoding{EEEE}{1100100}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2 or WRFAST finish + 3}
 ```
 
-### Result
-Initializes the Hub FIFO for fast writes. D[31] = no wait, D[13:0] = block size in 64-byte units (0 = max), S[19:0] = block start address.
+**Related:** [WFBYTE](#wfbyte), [WFWORD](#wfword), [WFLONG](#wflong), [RDFAST](#rdfast)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Configuration: bit 31 = nowait, bits 13:0 = block size |
-| S | Hub RAM start address (bits 19:0) |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1100100 0LI DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2 or WRFAST finish + 3
-
-### Related Instructions
-- [WFBYTE](#wfbyte) — Write byte to FIFO
-- [WFWORD](#wfword) — Write word to FIFO
-- [WFLONG](#wflong) — Write long to FIFO
-- [RDFAST](#rdfast) — Begin fast hub read via FIFO
-
-### Explanation
 WRFAST configures the Hub FIFO interface for fast streaming writes to Hub RAM. After WRFAST executes, use WFBYTE, WFWORD, or WFLONG to write data through the FIFO.
 
-D[13:0] specifies the block size in 64-byte units. A value of 0 selects the maximum block size. D[31] controls wait behavior: if set, FIFO writes proceed without stalling even when Hub RAM is busy.
+Dest[13:0] specifies the block size in 64-byte units. A value of 0 selects the maximum block size. Dest[31] controls wait behavior: if set, FIFO writes proceed without stalling.
 
-S[19:0] specifies the starting Hub RAM address. The FIFO automatically increments the address as data is written. When the block is exhausted, the FIFO can be configured to wrap or stop.
+Src[19:0] specifies the starting Hub RAM address. The FIFO automatically increments the address as data is written.
 
-If a previous WRFAST operation is still active, this instruction may stall until the previous operation finishes, adding 3 cycles to the base 2-cycle execution time.
+::: pasm2
+        WRFAST  #0, buffer_addr  ' Set up FIFO write to buffer
+        WFLONG  data               ' Write data to FIFO
+:::
+
+
+
+## WRLONG {#wrlong}
+
+Write long
+[Hub Instruction](#hub-instructions) - Write long to hub RAM.
+
+**WRLONG**  *{#}Dest, {#}Src/P*
 
 ---
 
-## WRLONG — Hub RAM
+**Result:** Writes the long in Dest[31:0] to hub address Src/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.
 
-Write long to hub RAM.
+- Dest is the long value to write (all 32 bits used).
+- Src/P is the hub address or pointer (PTRA/PTRB).
 
-### Syntax
-```pasm
-        WRLONG  {#}D,{#}S/P
+```{=latex}
+\simpleencoding{EEEE}{1100011}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{3...10}
 ```
 
-### Result
-Writes the long in D[31:0] to hub address S/PTRx. Prior SETQ/SETQ2 invokes cog/LUT block transfer.
+**Related:** [WRBYTE](#wrbyte), [WRWORD](#wrword), [WMLONG](#wmlong), [RDLONG](#rdlong)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Long value to write (all 32 bits used) |
-| S/P | Hub address or pointer (PTRA/PTRB) |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1100011 0LI DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 3...10
+WRLONG writes the 32-bit value in Dest to Hub RAM at address Src/PTRx. All 32 bits of Dest are written.
 
-### Related Instructions
-- [WRBYTE](#wrbyte) — Write byte to hub RAM
-- [WRWORD](#wrword) — Write word to hub RAM
-- [WMLONG](#wmlong) — Write masked long to hub RAM
-- [RDLONG](#rdlong) — Read long from hub RAM
-
-### Explanation
-WRLONG writes the 32-bit value in D to Hub RAM at address S/PTRx. All 32 bits of D are written.
-
-The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. Hub RAM uses a rotating time-slot system where each cog gets access during its assigned slot. If the instruction executes during this cog's slot, it completes in 3 cycles. Otherwise, it must wait for the next available slot.
-
-When S specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes (++ and --) can be applied for sequential access.
+The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
 
 Prior execution of SETQ or SETQ2 invokes block transfer mode, writing multiple longs from cog or LUT RAM to Hub RAM in a burst transfer.
 
----
+::: pasm2
+        SETQ    #16-1          ' Set up for 16-long block transfer
+        WRLONG  buffer, ptra   ' Write 16 longs to hub
+:::
 
-## WRLUT — Lookup Table
 
-Write D to LUT address.
 
-### Syntax
-```pasm
-        WRLUT   {#}D,{#}S/P
-```
+## WRLUT {#wrlut}
 
-### Result
-Writes D to LUT address S/PTRx.
+Write LUT
+[LUT Instruction](#lut-instructions) - Write Dest to LUT address.
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Value to write |
-| S/P | LUT address or pointer (PTRA/PTRB) |
-
-### Encoding
-```
-EEEE 1100001 1LI DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
-
-### Related Instructions
-- [RDLUT](#rdlut) — Read from LUT address
-- [WRLONG](#wrlong) — Write to hub RAM
-- [SETQ](#setq) — Set up block transfer
-
-### Explanation
-WRLUT writes the value in D to the Lookup Table (LUT) at address S/PTRx. The LUT is a 512-long (2KB) fast memory space shared between cog RAM and LUT RAM in the upper 256 addresses.
-
-When S specifies PTRA or PTRB, the pointer value is used as the LUT address. Only the lower 9 bits of the address are used (0-511), selecting from the 512-long LUT space.
-
-WRLUT executes in 2 clock cycles, providing fast access to LUT RAM for lookup tables, buffers, and temporary storage. The LUT is particularly useful for data that needs faster access than Hub RAM but doesn't fit in cog registers.
+**WRLUT**  *{#}Dest, {#}Src/P*
 
 ---
 
-## WRNC — Math and Logic
+**Result:** Writes Dest to LUT address Src/PTRx.
 
-Write inverted C flag value to register.
+- Dest is the value to write.
+- Src/P is the LUT address or pointer (PTRA/PTRB).
 
-### Syntax
-```pasm
-        WRNC    D
+```{=latex}
+\simpleencoding{EEEE}{1100001}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
 ```
 
-### Result
-Writes 0 or 1 to D according to the inverted C flag state. D = {31'b0, !C}.
+**Related:** [RDLUT](#rdlut), [WRLONG](#wrlong), [SETQ](#setq)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 000 DDDDDDDDD 001101101
-```
-**Write:** D
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
+WRLUT writes the value in Dest to the Lookup Table (LUT) at address Src/PTRx. The LUT is a 512-long (2KB) fast memory space.
 
-### Related Instructions
-- [WRC](#wrc) — Write C flag to register
-- [WRZ](#wrz) — Write Z flag to register
-- [WRNZ](#wrnz) — Write inverted Z flag to register
+When Src specifies PTRA or PTRB, the pointer value is used as the LUT address. Only the lower 9 bits of the address are used (0-511).
 
-### Explanation
-WRNC copies the inverted C flag state to register D. If C is clear (0), D becomes 1. If C is set (1), D becomes 0. The upper 31 bits of D are cleared to zero.
+WRLUT executes in 2 clock cycles, providing fast access to LUT RAM for lookup tables, buffers, and temporary storage.
 
-This instruction provides a convenient way to convert inverted flag states into numeric values for computation or storage. Combined with conditional execution, WRNC enables flag-based value selection without branching.
+::: pasm2
+        WRLUT   value, #100    ' Write to LUT address 100
+:::
+
+
+
+## WRPIN {#wrpin}
+
+Write pin mode
+[Smart Pin Instruction](#smart-pin-instructions) - Configure smart pin mode.
+
+**WRPIN**  *{#}Dest, {#}Src*
 
 ---
 
-## WRNZ — Math and Logic
+**Result:** Sets the mode of smart pins Src[10:6]+Src[5:0]..Src[5:0] to Dest, acknowledges smart pins. Wraps within A/B pins. Prior SETQ overrides Src[10:6].
 
-Write inverted Z flag value to register.
+- Dest is the smart pin mode configuration.
+- Src is the pin number or pin range.
 
-### Syntax
-```pasm
-        WRNZ    D
+```{=latex}
+\simpleencoding{EEEE}{1100000}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
 ```
 
-### Result
-Writes 0 or 1 to D according to the inverted Z flag state. D = {31'b0, !Z}.
+**Related:** [WXPIN](#wxpin), [WYPIN](#wypin), [RDPIN](#rdpin), [AKPIN](#akpin)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 000 DDDDDDDDD 001101111
-```
-**Write:** D
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
-
-### Related Instructions
-- [WRC](#wrc) — Write C flag to register
-- [WRNC](#wrnc) — Write inverted C flag to register
-- [WRZ](#wrz) — Write Z flag to register
-
-### Explanation
-WRNZ copies the inverted Z flag state to register D. If Z is clear (0), D becomes 1. If Z is set (1), D becomes 0. The upper 31 bits of D are cleared to zero.
-
-This instruction provides a convenient way to convert inverted flag states into numeric values for computation or storage. Combined with conditional execution, WRNZ enables flag-based value selection without branching.
-
----
-
-## WRPIN — Smart Pin
-
-Configure smart pin mode.
-
-### Syntax
-```pasm
-        WRPIN   {#}D,{#}S
-```
-
-### Result
-Sets the mode of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledges smart pins. Wraps within A/B pins. Prior SETQ overrides S[10:6].
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Smart pin mode configuration |
-| S | Pin number or pin range |
-
-### Encoding
-```
-EEEE 1100000 0LI DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
-
-### Related Instructions
-- [WXPIN](#wxpin) — Set smart pin X parameter
-- [WYPIN](#wypin) — Set smart pin Y parameter
-- [RDPIN](#rdpin) — Read smart pin result
-- [AKPIN](#akpin) — Acknowledge smart pin
-
-### Explanation
 WRPIN configures the operating mode of one or more Smart Pins. Each of the P2's 64 pins has a dedicated Smart Pin module capable of autonomous operation for PWM, serial I/O, pulse measurement, ADC, and many other functions.
 
-**CRITICAL REQUIREMENT**: Smart pins MUST be reset (DIR=0) before configuring with WRPIN. This ensures the smart pin is in a known state and prevents configuration conflicts.
+**CRITICAL REQUIREMENT**: Smart pins MUST be reset (DIR=0) before configuring with WRPIN.
 
 The standard configuration sequence is:
 1. DIRL pin — Reset smart pin (required)
@@ -968,124 +718,67 @@ The standard configuration sequence is:
 4. WYPIN y, pin — Set Y parameter
 5. DIRH pin — Enable smart pin
 
-WRPIN #0, pin clears all smart pin configuration. The smart pin begins operation when DIR is set high after configuration.
+WRPIN #0, pin clears all smart pin configuration.
 
-When S[10:6] is non-zero, multiple pins are configured. Prior SETQ can override the pin count. Pin numbering wraps within A pins (0-31) and B pins (32-63).
+::: pasm2
+        DIRL    #10            ' Reset pin 10
+        WRPIN   pwm_mode, #10  ' Configure for PWM
+        WXPIN   period, #10    ' Set period
+        DIRH    #10            ' Enable
+:::
 
----
 
-## WRWORD — Hub RAM
 
-Write word to hub RAM.
+## WRWORD {#wrword}
 
-### Syntax
-```pasm
-        WRWORD  {#}D,{#}S/P
-```
+Write word
+[Hub Instruction](#hub-instructions) - Write word to hub RAM.
 
-### Result
-Writes the word in D[15:0] to hub address S/PTRx.
-
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Word value to write (bits 15:0 used) |
-| S/P | Hub address or pointer (PTRA/PTRB) |
-
-### Encoding
-```
-EEEE 1100010 1LI DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 3...10
-
-### Related Instructions
-- [WRBYTE](#wrbyte) — Write byte to hub RAM
-- [WRLONG](#wrlong) — Write long to hub RAM
-- [RDWORD](#rdword) — Read word from hub RAM
-
-### Explanation
-WRWORD writes the word (16-bit value) in D[15:0] to Hub RAM at address S/PTRx. Only the lower 16 bits of D are written; the upper 16 bits are ignored.
-
-The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. Hub RAM uses a rotating time-slot system where each cog gets access during its assigned slot. If the instruction executes during this cog's slot, it completes in 3 cycles. Otherwise, it must wait for the next available slot.
-
-When S specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes (++ and --) can be applied for sequential access.
+**WRWORD**  *{#}Dest, {#}Src/P*
 
 ---
 
-## WRZ — Math and Logic
+**Result:** Writes the word in Dest[15:0] to hub address Src/PTRx.
 
-Write Z flag value to register.
+- Dest is the word value to write (bits 15:0 used).
+- Src/P is the hub address or pointer (PTRA/PTRB).
 
-### Syntax
-```pasm
-        WRZ     D
+```{=latex}
+\simpleencoding{EEEE}{1100010}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{3...10}
 ```
 
-### Result
-Writes 0 or 1 to D according to the Z flag state. D = {31'b0, Z}.
+**Related:** [WRBYTE](#wrbyte), [WRLONG](#wrlong), [RDWORD](#rdword)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Destination register |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1101011 000 DDDDDDDDD 001101110
-```
-**Write:** D
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
+WRWORD writes the word (16-bit value) in Dest[15:0] to Hub RAM at address Src/PTRx. Only the lower 16 bits of Dest are written.
 
-### Related Instructions
-- [WRC](#wrc) — Write C flag to register
-- [WRNC](#wrnc) — Write inverted C flag to register
-- [WRNZ](#wrnz) — Write inverted Z flag to register
+The instruction takes 3 to 10 clock cycles depending on Hub RAM timing. When Src specifies PTRA or PTRB, the pointer value is used as the Hub address. Pointer auto-increment modes can be applied for sequential access.
 
-### Explanation
-WRZ copies the Z flag state to register D. If Z is set (1), D becomes 1. If Z is clear (0), D becomes 0. The upper 31 bits of D are cleared to zero.
 
-This instruction provides a convenient way to convert flag states into numeric values for computation or storage. Combined with conditional execution, WRZ enables flag-based value selection without branching.
+
+## WXPIN {#wxpin}
+
+Write pin X parameter
+[Smart Pin Instruction](#smart-pin-instructions) - Set smart pin X parameter.
+
+**WXPIN**  *{#}Dest, {#}Src*
 
 ---
 
-## WXPIN — Smart Pin
+**Result:** Sets the X register of smart pins Src[10:6]+Src[5:0]..Src[5:0] to Dest, acknowledges smart pins. Wraps within A/B pins. Prior SETQ overrides Src[10:6].
 
-Set smart pin X parameter.
+- Dest is the X parameter value.
+- Src is the pin number or pin range.
 
-### Syntax
-```pasm
-        WXPIN   {#}D,{#}S
+```{=latex}
+\simpleencoding{EEEE}{1100000}{1LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
 ```
 
-### Result
-Sets the X register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledges smart pins. Wraps within A/B pins. Prior SETQ overrides S[10:6].
+**Related:** [WRPIN](#wrpin), [WYPIN](#wypin), [RDPIN](#rdpin)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | X parameter value |
-| S | Pin number or pin range |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1100000 1LI DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
-
-### Related Instructions
-- [WRPIN](#wrpin) — Configure smart pin mode
-- [WYPIN](#wypin) — Set smart pin Y parameter
-- [RDPIN](#rdpin) — Read smart pin result
-
-### Explanation
 WXPIN sets the X parameter of one or more Smart Pins. The X register meaning depends on the smart pin mode:
 
 - For PWM modes: Sets frame period or duty cycle parameter
@@ -1093,43 +786,32 @@ WXPIN sets the X parameter of one or more Smart Pins. The X register meaning dep
 - For pulse measurement: Sets measurement parameters
 - For transition modes: Controls timebase
 
-Writing the X register also acknowledges the smart pin, clearing any completion flags. When S[10:6] is non-zero, multiple pins are configured. Prior SETQ can override the pin count.
+Writing the X register also acknowledges the smart pin, clearing any completion flags.
+
+
+
+## WYPIN {#wypin}
+
+Write pin Y parameter
+[Smart Pin Instruction](#smart-pin-instructions) - Set smart pin Y parameter.
+
+**WYPIN**  *{#}Dest, {#}Src*
 
 ---
 
-## WYPIN — Smart Pin
+**Result:** Sets the Y register of smart pins Src[10:6]+Src[5:0]..Src[5:0] to Dest, acknowledges smart pins. Wraps within A/B pins. Prior SETQ overrides Src[10:6].
 
-Set smart pin Y parameter.
+- Dest is the Y parameter value.
+- Src is the pin number or pin range.
 
-### Syntax
-```pasm
-        WYPIN   {#}D,{#}S
+```{=latex}
+\simpleencoding{EEEE}{1100001}{0LI}{DDDDDDDDD}{SSSSSSSSS}{---}{---}{---}{2}
 ```
 
-### Result
-Sets the Y register of smart pins S[10:6]+S[5:0]..S[5:0] to D, acknowledges smart pins. Wraps within A/B pins. Prior SETQ overrides S[10:6].
+**Related:** [WRPIN](#wrpin), [WXPIN](#wxpin), [RDPIN](#rdpin)
 
-### Parameters
-| Parameter | Description |
-|-----------|-------------|
-| D | Y parameter value |
-| S | Pin number or pin range |
+**Explanation:**
 
-### Encoding
-```
-EEEE 1100001 0LI DDDDDDDDD SSSSSSSSS
-```
-**Write:** —
-**C Flag:** No effect
-**Z Flag:** No effect
-**Clocks:** 2
-
-### Related Instructions
-- [WRPIN](#wrpin) — Configure smart pin mode
-- [WXPIN](#wxpin) — Set smart pin X parameter
-- [RDPIN](#rdpin) — Read smart pin result
-
-### Explanation
 WYPIN sets the Y parameter of one or more Smart Pins. The Y register serves multiple purposes depending on smart pin mode:
 
 - For PWM modes: Sets the base period
@@ -1139,4 +821,7 @@ WYPIN sets the Y parameter of one or more Smart Pins. The Y register serves mult
 
 Writing the Y register also acknowledges pin completion, clearing any completion flags. This dual purpose makes WYPIN essential for continuous smart pin operation—it both provides new data and signals that previous results have been processed.
 
-When S[10:6] is non-zero, multiple pins are configured. Prior SETQ can override the pin count. Pin numbering wraps within A pins (0-31) and B pins (32-63).
+::: pasm2
+        WYPIN   pwm_value, #10  ' Set PWM duty and acknowledge
+:::
+

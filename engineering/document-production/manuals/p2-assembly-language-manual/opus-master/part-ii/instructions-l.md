@@ -2,16 +2,17 @@
 
 This section contains all PASM2 instructions beginning with the letter L.
 
----
+
 
 ## LOC {#loc}
 
 Load address
 [Hub Memory Instruction](#hub-memory-instructions) - Load address into PA, PB, PTRA, or PTRB.
 
-```
-LOC  PA/PB/PTRA/PTRB, #{\}A
-```
+**LOC**  *PA/PB/PTRA/PTRB, #A*
+**LOC**  *PA/PB/PTRA/PTRB, #\A*
+
+---
 
 **Result:** Address is loaded into the specified pointer register.
 
@@ -35,16 +36,16 @@ The WW field in the encoding selects which pointer register to load: 00 for PA, 
 
 LOC is commonly used to set up pointer registers before memory operations, call sequences, or when establishing base addresses for data structures. The relative addressing mode is particularly useful for creating position-independent code blocks that can execute correctly regardless of where they are loaded in Hub memory.
 
----
+
 
 ## LOCKNEW {#locknew}
 
 Allocate new lock
 [COG Control Instruction](#cog-control-instructions) - Request a new LOCK from the hardware lock pool.
 
-```
-LOCKNEW  D  {WC}
-```
+**LOCKNEW**  *D*  **{WC}**
+
+---
 
 **Result:** D is written with an available lock number (0-15), or remains unchanged if no lock is available.
 
@@ -67,16 +68,16 @@ Once a lock is allocated with LOCKNEW, it remains assigned until explicitly retu
 
 LOCKNEW is essential for dynamic lock allocation in systems where the number of required locks is not known at compile time, or where locks are allocated and deallocated as resources are created and destroyed. The instruction completes in 4 to 11 clock cycles depending on lock availability and contention.
 
----
+
 
 ## LOCKREL {#lockrel}
 
 Release lock
 [COG Control Instruction](#cog-control-instructions) - Release a previously acquired LOCK.
 
-```
-LOCKREL  {#}D  {WC}
-```
+**LOCKREL**  *{#}D*  **{WC}**
+
+---
 
 **Result:** The lock specified by D[3:0] is released for other COGs to acquire.
 
@@ -99,16 +100,16 @@ LOCKREL is safe to call even if the lock was not held by the current COG. Releas
 
 Proper lock management requires that every LOCKTRY that successfully acquires a lock is balanced with a corresponding LOCKREL. Failure to release locks leads to deadlocks and resource starvation. The instruction completes in 2 to 9 clock cycles, with an additional 2 cycles if the result is written back to D.
 
----
+
 
 ## LOCKRET {#lockret}
 
 Return lock to pool
 [COG Control Instruction](#cog-control-instructions) - Return a LOCK to the pool for reallocation.
 
-```
-LOCKRET  {#}D
-```
+**LOCKRET**  *{#}D*
+
+---
 
 **Result:** The lock specified by D[3:0] is returned to the pool and becomes available for LOCKNEW.
 
@@ -130,16 +131,16 @@ LOCKRET should only be called on locks that are not currently held by any COG. B
 
 The proper pattern for dynamic lock usage is: LOCKNEW to allocate, LOCKTRY/LOCKREL for each critical section, and LOCKRET when the lock is no longer needed for any purpose. This ensures efficient use of the limited pool of 16 hardware locks. The instruction completes in 2 to 9 clock cycles depending on Hub access contention.
 
----
+
 
 ## LOCKTRY {#locktry}
 
 Try to acquire lock
 [COG Control Instruction](#cog-control-instructions) - Attempt to acquire a LOCK with atomic test-and-set.
 
-```
-LOCKTRY  {#}D  {WC}
-```
+**LOCKTRY**  *{#}D*  **{WC}**
+
+---
 
 **Result:** Attempts to acquire the lock specified by D[3:0]. The C flag indicates success.
 
@@ -162,4 +163,4 @@ LOCKTRY implements the critical section entry point in the standard lock pattern
 
 The instruction is non-blocking and returns immediately regardless of lock availability. For spin-lock behavior (waiting until the lock is acquired), LOCKTRY must be called repeatedly in a loop. Lock 15 is traditionally reserved for debug monitor use. The instruction completes in 2 to 9 clock cycles, with an additional 2 cycles if a result is returned.
 
----
+

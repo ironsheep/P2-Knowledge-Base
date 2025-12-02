@@ -15,7 +15,7 @@ Reserved words fall into six main categories:
 5. **Condition Keywords** (41 words) - Conditional execution prefixes
 6. **Effect Keywords** (9 words) - Flag modification suffixes
 
----
+
 
 ## Instruction Mnemonics (358 words)
 
@@ -84,7 +84,7 @@ WRZ         WXPIN       WYPIN       XCONT       XINIT       XOR
 XORO32      XSTOP       XZERO       ZEROX
 ```
 
----
+
 
 ## Assembly Directives (14 words)
 
@@ -105,7 +105,7 @@ Directives control the assembly process and code organization:
 - **WORD** - Reserve/initialize word-sized data (16 bits)
 - **WORDFIT** - Verify code fits in specified word count
 
----
+
 
 ## Predefined Constants (11 words)
 
@@ -132,7 +132,7 @@ Used with the COGINIT instruction to specify execution mode:
 
 **Note:** The `_NEW` and `_NEW_PAIR` variants are bit patterns that modify the base `COGEXEC` and `HUBEXEC` constants for use with COGINIT's automatic COG selection feature.
 
----
+
 
 ## Special Register Names (16 words)
 
@@ -164,7 +164,7 @@ Always provide special functions when accessed:
 - **INA** - Input register for pins 0-31 ($1FE, 510)
 - **INB** - Input register for pins 32-63 ($1FF, 511)
 
----
+
 
 ## Condition Keywords (41 words)
 
@@ -232,7 +232,7 @@ Additional aliases that express the same conditions in reverse order:
 
 **Note:** Many conditions have multiple valid names (aliases). For example, `IF_C`, `IF_B`, and `IF_LT` all represent the same condition code but provide semantic clarity depending on context.
 
----
+
 
 ## Effect Keywords (9 words)
 
@@ -263,7 +263,7 @@ CMP   a, b  WCZ     ' Update both C and Z flags
 TEST  val, mask  ANDZ   ' AND test result with Z flag
 ```
 
----
+
 
 ## Avoiding Reserved Words
 
@@ -295,7 +295,7 @@ choice_or:    jmp   #loop
 byte_data:    long  $0
 ```
 
----
+
 
 ## Summary
 

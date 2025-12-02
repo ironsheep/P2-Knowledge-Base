@@ -2,17 +2,17 @@
 
 This section contains all PASM2 instructions beginning with the letter O.
 
----
+
 
 ## ONES {#ones}
 
 Ones
 [Math Instruction](#math-instructions) - Count the number of high bits (1s) in a value.
 
-```
-ONES  Dest, {#}Src  {WC|WZ|WCZ}
-ONES  Dest          {WC|WZ|WCZ}
-```
+**ONES**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**ONES**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** The number of high bits (1s) in Src, or Dest, is stored in Dest.
 
@@ -41,16 +41,16 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 
 ONES is useful for analyzing bit patterns, counting enabled flags, and implementing parity checks in data transmission protocols.
 
----
+
 
 ## OR {#or}
 
 Or
 [Logic Instruction](#logic-instructions) - Perform bitwise OR operation.
 
-```
-OR  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**OR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Dest OR Src is stored in Dest.
 
@@ -84,50 +84,59 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 
 OR is commonly used for setting specific bits in a value, combining bit masks, and implementing logical operations in algorithms.
 
+
+
+## OUTC / OUTNC / OUTZ / OUTNZ {#outc}
+
+Output by flag state {#outnc} {#outz} {#outnz}
+[I/O Pin Instruction](#io-pin-instructions) - Set pin output level according to C, NC, Z, or NZ flag state.
+
+**OUTC**  *{#}Dest*  **{WCZ}**
+**OUTNC**  *{#}Dest*  **{WCZ}**
+**OUTZ**  *{#}Dest*  **{WCZ}**
+**OUTNZ**  *{#}Dest*  **{WCZ}**
+
 ---
 
-## OUTC {#outc}
+**Result:** The I/O pin output level bit(s) described by Dest are set according to the flag state:
 
-Output if C
-[I/O Pin Instruction](#io-pin-instructions) - Set pin output level according to C flag state.
+| Instruction | Drives high when |
+|-------------|------------------|
+| OUTC | C = 1 |
+| OUTNC | C = 0 |
+| OUTZ | Z = 1 |
+| OUTNZ | Z = 0 |
 
-```
-OUTC  {#}Dest  {WCZ}
-```
-
-**Result:** The I/O pin output level bit(s) described by Dest are set to low/high according to C flag state.
-
-- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) for which output levels are to be set.
-- WCZ is an optional effect to update flags.
+- Dest identifies the I/O pin(s): Dest[5:0] = base pin (0-63), Dest[10:6] = additional contiguous pins.
+- WCZ is an optional effect to set Z to the original output state.
 
 ```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001010}{OUTx}{---}{Original OUTx base bit}{2}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001010}{OUTx}{---}{orig out}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001011}{OUTx}{---}{orig out}{2}
+\encodingrowcont{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001100}{OUTx}{---}{orig out}{2}
+\encodingrow{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001101}{OUTx}{---}{orig out}{2}
+\end{encodingtable}
 ```
 
-**Related:** [OUTNC](#outnc), [OUTZ](#outz), [OUTNZ](#outnz), [OUTH](#outh), [OUTL](#outl)
+**Related:** [OUTH](#outh), [OUTL](#outl), [OUTNOT](#outnot), [OUTRND](#outrnd)
 
 **Explanation:**
 
-OUTC sets the output level of the pin(s) specified by Dest to match the state of the C flag. If C is set (1), the pin(s) are driven high. If C is clear (0), the pin(s) are driven low. All other output level bits remain unchanged.
+These instructions set pin output level(s) based on flag state. OUTC and OUTZ drive high when their flag is set; OUTNC and OUTNZ drive high when their flag is clear.
 
-Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, only these lower 6 bits matter. For controlling a range of contiguous pins, Dest[10:6] specifies how many additional pins beyond the base should be affected (0-31, where 0 means just the base pin, 1 means base plus one additional pin, etc.).
+If WCZ is specified, the Z flag is set to the original output state of the base pin before modification.
 
-A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
 
-If the WCZ effect is specified, the Z flag is set to the original state of the output level bit for the base pin, before the instruction executes. The C flag is not affected by this instruction.
-
-OUTC is useful for reflecting the result of a previous comparison or calculation directly onto an output pin, such as driving an LED to indicate a status condition.
-
----
 
 ## OUTH {#outh}
 
 Output high
 [I/O Pin Instruction](#io-pin-instructions) - Set pin output level to high.
 
-```
-OUTH  {#}Dest  {WCZ}
-```
+**OUTH**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pin output level bit(s) described by Dest are set high (1).
 
@@ -152,16 +161,16 @@ If the WCZ effect is specified, the Z flag is set to the original state of the o
 
 OUTH is commonly used to turn on LEDs, assert control signals, or drive pins high for any digital output purpose. For the output level change to affect the actual pin voltage, the pin must also be configured as an output using the direction control instructions.
 
----
+
 
 ## OUTL {#outl}
 
 Output low
 [I/O Pin Instruction](#io-pin-instructions) - Set pin output level to low.
 
-```
-OUTL  {#}Dest  {WCZ}
-```
+**OUTL**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pin output level bit(s) described by Dest are set low (0).
 
@@ -186,50 +195,16 @@ If the WCZ effect is specified, the Z flag is set to the original state of the o
 
 OUTL is commonly used to turn off LEDs, de-assert control signals, or drive pins low for any digital output purpose. For the output level change to affect the actual pin voltage, the pin must also be configured as an output using the direction control instructions.
 
----
 
-## OUTNC {#outnc}
-
-Output if not C
-[I/O Pin Instruction](#io-pin-instructions) - Set pin output level according to inverted C flag state.
-
-```
-OUTNC  {#}Dest  {WCZ}
-```
-
-**Result:** The I/O pin output level bit(s) described by Dest are set to low/high according to inverted C flag state (!C).
-
-- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) for which output levels are to be set.
-- WCZ is an optional effect to update flags.
-
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001011}{OUTx}{---}{Original OUTx base bit}{2}
-```
-
-**Related:** [OUTC](#outc), [OUTZ](#outz), [OUTNZ](#outnz), [OUTH](#outh), [OUTL](#outl)
-
-**Explanation:**
-
-OUTNC sets the output level of the pin(s) specified by Dest to match the inverse state of the C flag. If C is clear (0), the pin(s) are driven high. If C is set (1), the pin(s) are driven low. All other output level bits remain unchanged.
-
-Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, only these lower 6 bits matter. For controlling a range of contiguous pins, Dest[10:6] specifies how many additional pins beyond the base should be affected (0-31, where 0 means just the base pin, 1 means base plus one additional pin, etc.).
-
-A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
-
-If the WCZ effect is specified, the Z flag is set to the original state of the output level bit for the base pin, before the instruction executes. The C flag is not affected by this instruction.
-
-OUTNC is useful for reflecting the inverse of a comparison or calculation result onto an output pin, such as driving an active-low signal or implementing inverted logic.
-
----
 
 ## OUTNOT {#outnot}
 
 Output not (toggle)
 [I/O Pin Instruction](#io-pin-instructions) - Toggle pin output level to opposite state.
 
-```
-OUTNOT  {#}Dest  {WCZ}
-```
+**OUTNOT**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pin output level bit(s) described by Dest are toggled to their opposite state(s).
 
@@ -254,50 +229,16 @@ If the WCZ effect is specified, the Z flag is set to the original state of the o
 
 OUTNOT is commonly used for blinking LEDs, generating clock signals, or toggling any output that needs to alternate states. It is particularly efficient for creating square waves or implementing state machines that alternate between two states.
 
----
 
-## OUTNZ {#outnz}
-
-Output if not Z
-[I/O Pin Instruction](#io-pin-instructions) - Set pin output level according to inverted Z flag state.
-
-```
-OUTNZ  {#}Dest  {WCZ}
-```
-
-**Result:** The I/O pin output level bit(s) described by Dest are set to low/high according to inverted Z flag state (!Z).
-
-- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) for which output levels are to be set.
-- WCZ is an optional effect to update flags.
-
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001101}{OUTx}{---}{Original OUTx base bit}{2}
-```
-
-**Related:** [OUTZ](#outz), [OUTC](#outc), [OUTNC](#outnc), [OUTH](#outh), [OUTL](#outl)
-
-**Explanation:**
-
-OUTNZ sets the output level of the pin(s) specified by Dest to match the inverse state of the Z flag. If Z is clear (0), the pin(s) are driven high. If Z is set (1), the pin(s) are driven low. All other output level bits remain unchanged.
-
-Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, only these lower 6 bits matter. For controlling a range of contiguous pins, Dest[10:6] specifies how many additional pins beyond the base should be affected (0-31, where 0 means just the base pin, 1 means base plus one additional pin, etc.).
-
-A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
-
-If the WCZ effect is specified, the Z flag is set to the original state of the output level bit for the base pin, before the instruction executes. The C flag is not affected by this instruction.
-
-OUTNZ is useful for reflecting the non-zero result of a previous operation onto an output pin, such as indicating when a counter or accumulator holds a non-zero value, or implementing active-low logic for zero detection.
-
----
 
 ## OUTRND {#outrnd}
 
 Output random
 [I/O Pin Instruction](#io-pin-instructions) - Set pin output level(s) to random values.
 
-```
-OUTRND  {#}Dest  {WCZ}
-```
+**OUTRND**  *{#}Dest*  **{WCZ}**
+
+---
 
 **Result:** The I/O pin output level bit(s) described by Dest are each set randomly to low or high.
 
@@ -324,38 +265,5 @@ If the WCZ effect is specified, both the C and Z flags are set to the original s
 
 OUTRND is useful for generating random visual patterns on LEDs, creating noise signals for testing or audio applications, or implementing randomized control sequences. The quality of randomness depends on proper initialization of the PRNG using the SETRAND instruction.
 
----
 
-## OUTZ {#outz}
 
-Output if Z
-[I/O Pin Instruction](#io-pin-instructions) - Set pin output level according to Z flag state.
-
-```
-OUTZ  {#}Dest  {WCZ}
-```
-
-**Result:** The I/O pin output level bit(s) described by Dest are set to low/high according to Z flag state.
-
-- Dest is a register, 9-bit literal, or 11-bit augmented literal whose value identifies the I/O pin(s) for which output levels are to be set.
-- WCZ is an optional effect to update flags.
-
-```{=latex}
-\simpleencoding{EEEE}{1101011}{CZL}{DDDDDDDDD}{001001100}{OUTx}{---}{Original OUTx base bit}{2}
-```
-
-**Related:** [OUTNZ](#outnz), [OUTC](#outc), [OUTNC](#outnc), [OUTH](#outh), [OUTL](#outl)
-
-**Explanation:**
-
-OUTZ sets the output level of the pin(s) specified by Dest to match the state of the Z flag. If Z is set (1), the pin(s) are driven high. If Z is clear (0), the pin(s) are driven low. All other output level bits remain unchanged.
-
-Dest[5:0] specifies the base pin number (0-63). For controlling a single pin, only these lower 6 bits matter. For controlling a range of contiguous pins, Dest[10:6] specifies how many additional pins beyond the base should be affected (0-31, where 0 means just the base pin, 1 means base plus one additional pin, etc.).
-
-A 9-bit literal Dest can express the base pin (bits [5:0]) and up to 7 additional pins (bits [8:6]). To specify a wider range, use the augmented literal prefix (##Dest) to provide an 11-bit value, which allows controlling up to 32 contiguous pins.
-
-If the WCZ effect is specified, the Z flag is set to the original state of the output level bit for the base pin, before the instruction executes. The C flag is not affected by this instruction.
-
-OUTZ is useful for reflecting the zero result of a previous operation onto an output pin, such as indicating when a counter reaches zero, or implementing status LEDs that activate based on equality comparisons.
-
----

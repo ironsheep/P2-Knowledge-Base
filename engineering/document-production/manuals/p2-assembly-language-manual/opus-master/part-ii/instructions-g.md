@@ -2,16 +2,16 @@
 
 This section contains all PASM2 instructions beginning with the letter G.
 
----
+
 
 ## GETBRK {#getbrk}
 
 Get breakpoint status
 [Debug Instruction](#debug-instructions) - Get breakpoint/cog status into D according to WC/WZ/WCZ.
 
-```
-GETBRK  Dest  {WC|WZ|WCZ}
-```
+**GETBRK**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Breakpoint or COG status information is retrieved into Dest based on the flag effect specified.
 
@@ -38,17 +38,17 @@ When no flag effects are specified, GETBRK retrieves the 16-bit skip pattern int
 
 GETBRK is essential for implementing debug infrastructure and coordinating multi-COG debugging systems. It works in conjunction with BRK and SETBRK to provide comprehensive breakpoint support.
 
----
+
 
 ## GETBYTE {#getbyte}
 
 Get byte
 [Math Instruction](#math-instructions) - Get a byte from a value.
 
-```
-GETBYTE  Dest, {#}Src, #Num
-GETBYTE  Dest
-```
+**GETBYTE**  *Dest, {#}Src, #Num*
+**GETBYTE**  *Dest*
+
+---
 
 **Result:** Byte Num (0-3) of Src, or a byte from a source described by prior ALTGB instruction, is written to Dest.
 
@@ -73,16 +73,16 @@ Num 0 selects bits [7:0], Num 1 selects bits [15:8], Num 2 selects bits [23:16],
 
 The second syntax form (GETBYTE Dest) is intended for use after an ALTGB instruction. This form is useful in loops that iteratively read a series of byte values from contiguous long registers. The ALTGB instruction modifies the subsequent GETBYTE instruction's source register and byte index automatically, enabling efficient sequential byte extraction without explicitly specifying the source and index on each iteration.
 
----
+
 
 ## GETCT {#getct}
 
 Get system counter
 [Misc Instruction](#misc-instructions) - Get the current system counter value into D.
 
-```
-GETCT  Dest  {WC}
-```
+**GETCT**  *Dest*  **{WC}**
+
+---
 
 **Result:** The current value of the system counter CT is written to Dest.
 
@@ -105,17 +105,17 @@ If the WC effect is specified, the C flag is preserved and remains unchanged by 
 
 GETCT is commonly used with the ADDCT and WAITCT instruction families to implement precise timing, delays, and event scheduling. The retrieved counter value serves as a time reference for calculating future wait points or measuring elapsed time intervals.
 
----
+
 
 ## GETNIB {#getnib}
 
 Get nibble
 [Math Instruction](#math-instructions) - Get a nibble from a value.
 
-```
-GETNIB  Dest, {#}Src, #Num
-GETNIB  Dest
-```
+**GETNIB**  *Dest, {#}Src, #Num*
+**GETNIB**  *Dest*
+
+---
 
 **Result:** Nibble Num (0-7) of Src, or a nibble from a source described by prior ALTGN instruction, is written to Dest.
 
@@ -140,16 +140,16 @@ Num 0 selects bits [3:0], Num 1 selects bits [7:4], Num 2 selects bits [11:8], a
 
 The second syntax form (GETNIB Dest) is intended for use after an ALTGN instruction. This form is useful in loops that iteratively read a series of nibble values from contiguous long registers. The ALTGN instruction modifies the subsequent GETNIB instruction's source register and nibble index automatically, enabling efficient sequential nibble extraction without explicitly specifying the source and index on each iteration.
 
----
+
 
 ## GETPTR {#getptr}
 
 Get FIFO hub pointer
 [Hub Memory Instruction](#hub-memory-instructions) - Get current FIFO hub pointer into D.
 
-```
-GETPTR  Dest
-```
+**GETPTR**  *Dest*
+
+---
 
 **Result:** The current FIFO hub pointer is written to Dest.
 
@@ -169,16 +169,16 @@ The hub FIFO pointer advances automatically as data is read from or written to t
 
 GETPTR is useful for monitoring FIFO transfer progress, calculating how much data has been transferred, or determining the current position within a buffer. The retrieved pointer value represents the hub memory address that will be accessed by the next FIFO read or write operation.
 
----
+
 
 ## GETQX {#getqx}
 
 Get CORDIC X result
 [CORDIC Instruction](#cordic-instructions) - Retrieve CORDIC result X into D.
 
-```
-GETQX  Dest  {WC|WZ|WCZ}
-```
+**GETQX**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** The CORDIC X result is written to Dest after waiting if necessary for the computation to complete.
 
@@ -203,16 +203,16 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 
 The timing for GETQX varies from 2 to 58 clock cycles depending on whether the result is immediately available or the instruction must wait for the CORDIC computation to complete. Most CORDIC operations complete in 54 clock cycles.
 
----
+
 
 ## GETQY {#getqy}
 
 Get CORDIC Y result
 [CORDIC Instruction](#cordic-instructions) - Retrieve CORDIC result Y into D.
 
-```
-GETQY  Dest  {WC|WZ|WCZ}
-```
+**GETQY**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** The CORDIC Y result is written to Dest after waiting if necessary for the computation to complete.
 
@@ -237,17 +237,17 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 
 The timing for GETQY varies from 2 to 58 clock cycles depending on whether the result is immediately available or the instruction must wait for the CORDIC computation to complete. Most CORDIC operations complete in 54 clock cycles.
 
----
+
 
 ## GETRND {#getrnd}
 
 Get random value
 [Misc Instruction](#misc-instructions) - Get RND into D or C/Z flags.
 
-```
-GETRND  Dest  {WC|WZ|WCZ}
-GETRND        {WC|WZ|WCZ}
-```
+**GETRND**  *Dest*  **{WC|WZ|WCZ}**
+**GETRND**  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** The current pseudo-random value is written to Dest, or the random bits are stored in the C and Z flags.
 
@@ -277,16 +277,16 @@ If the WZ or WCZ effect is specified, the Z flag is set to RND[30]. Notably, RND
 
 The random number generator uses a maximal-length linear feedback shift register (LFSR) to produce a deterministic but statistically random sequence. The sequence repeats with a period of 2^32 - 1 values.
 
----
+
 
 ## GETSCP {#getscp}
 
 Get oscilloscope samples
 [Smart Pin Instruction](#smart-pin-instructions) - Get four-channel oscilloscope samples into D.
 
-```
-GETSCP  Dest
-```
+**GETSCP**  *Dest*
+
+---
 
 **Result:** Four 8-bit oscilloscope samples are written to Dest as D = {ch3[7:0], ch2[7:0], ch1[7:0], ch0[7:0]}.
 
@@ -308,17 +308,17 @@ The oscilloscope is configured using the SETSCP instruction to specify which pin
 
 This instruction is useful for real-time signal monitoring, debugging, and creating oscilloscope-like functionality for analyzing digital signals or pin states within the P2 system.
 
----
+
 
 ## GETWORD {#getword}
 
 Get word
 [Math Instruction](#math-instructions) - Get a word from a value.
 
-```
-GETWORD  Dest, {#}Src, #Num
-GETWORD  Dest
-```
+**GETWORD**  *Dest, {#}Src, #Num*
+**GETWORD**  *Dest*
+
+---
 
 **Result:** Word Num (0-1) of Src, or a word from a source described by prior ALTGW instruction, is written to Dest.
 
@@ -343,16 +343,16 @@ Num 0 selects bits [15:0] (the lower word), and Num 1 selects bits [31:16] (the 
 
 The second syntax form (GETWORD Dest) is intended for use after an ALTGW instruction. This form is useful in loops that iteratively read a series of word values from contiguous long registers. The ALTGW instruction modifies the subsequent GETWORD instruction's source register and word index automatically, enabling efficient sequential word extraction without explicitly specifying the source and index on each iteration.
 
----
+
 
 ## GETXACC {#getxacc}
 
 Get Goertzel accumulators
 [Streamer Instruction](#streamer-instructions) - Get streamer's Goertzel X/Y accumulators into D and next S.
 
-```
-GETXACC  Dest
-```
+**GETXACC**  *Dest*
+
+---
 
 **Result:** The streamer's Goertzel X accumulator is written to Dest, the Y accumulator is written to the next instruction's S field, and both accumulators are cleared.
 
@@ -374,4 +374,4 @@ This dual-retrieval mechanism allows both accumulator values to be captured in a
 
 GETXACC is used in conjunction with the streamer's Goertzel mode, configured via XINIT and controlled via XCONT. The retrieved accumulator values represent the correlation between the input signal and the reference frequency configured in the Goertzel algorithm.
 
----
+

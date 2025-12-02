@@ -2,7 +2,6 @@
 
 The P2 includes specialized hardware subsystems that extend beyond basic instruction execution. Understanding these subsystems enables advanced applications: the CORDIC coprocessor accelerates mathematical operations, Smart Pins provide programmable I/O peripherals, the Streamer enables high-speed data movement, events support responsive programming, hardware locks coordinate multi-COG applications, and debug hardware assists development. This chapter provides an overview of each subsystem; detailed instruction usage is covered in Part II, and complete subsystem documentation is available in specialized manuals.
 
----
 
 ## 5.1 CORDIC Coprocessor
 
@@ -61,7 +60,6 @@ This pattern maintains one CORDIC operation in flight while processing previous 
 
 Full instruction details, including operand formats and result interpretations, appear in Part II under each instruction's entry.
 
----
 
 ## 5.2 Smart Pins
 
@@ -134,7 +132,6 @@ Each family includes suffix variants: `L` (low/0), `H` (high/1), `C` (clear if c
 
 Smart Pin modes vary significantly in configuration and operation. The mode value, X parameter, and Y parameter have different meanings for each mode—UART mode parameters differ completely from PWM mode parameters. Complete Smart Pin mode documentation, including configuration values, timing diagrams, and usage examples, appears in the **P2 Smart Pins Tutorial** (`p2-smart-pins-tutorial`). That manual provides essential reference material for Smart Pin programming.
 
----
 
 ## 5.3 Streamer
 
@@ -178,7 +175,6 @@ The Streamer supports multiple operating modes, each optimized for specific data
 
 Mode selection appears in the XINIT instruction's mode parameter, along with configuration bits controlling data width, pin selection, and transfer direction. Each mode interprets Hub memory data differently—LUT mode uses data as lookup indices, NCO mode uses data as frequency control words, RF mode uses data as modulation patterns. Complete mode documentation, including configuration bit fields and timing parameters, appears in the P2 hardware documentation.
 
----
 
 ## 5.4 Events and Interrupts
 
@@ -261,7 +257,6 @@ Interrupts remain valuable in specific scenarios:
 
 When interrupts are necessary, the P2's three priority levels enable nested interrupt handling. A high-priority interrupt can preempt a low-priority handler, ensuring critical events receive immediate attention even during other interrupt processing.
 
----
 
 ## 5.5 Locks and Synchronization
 
@@ -285,22 +280,22 @@ The allocation model prevents lock ID conflicts. LOCKNEW returns a lock ID from 
 Typical lock usage follows a four-phase pattern: allocate, acquire-use-release loop, deallocate:
 
 ```pasm
-        locknew lock_id         wc      ' Allocate lock from pool
-        if_c    jmp     #no_locks       ' Handle pool exhaustion
+                locknew lock_id         wc      ' Allocate lock from pool
+        if_c    jmp     #no_locks               ' Handle pool exhaustion
 
 critical_section
-        locktry lock_id         wc      ' Try to acquire lock
-        if_nc   jmp     #critical_section ' Retry if another COG holds it
+                locktry lock_id         wc      ' Try to acquire lock
+        if_nc   jmp     #critical_section       ' Retry if lock held
 
-        ' ... exclusive access to shared resource ...
-        wrlong  data, hub_addr          ' Safe: we hold the lock
+                ' ... exclusive access to shared resource ...
+                wrlong  data, hub_addr          ' Safe: we hold the lock
 
-        lockrel lock_id                 ' Release for other COGs
+                lockrel lock_id                 ' Release for other COGs
 
-        ' ... additional work ...
-        jmp     #critical_section       ' Repeat access cycle
+                ' ... additional work ...
+                jmp     #critical_section       ' Repeat access cycle
 
-done    lockret lock_id                 ' Return lock to pool
+done            lockret lock_id                 ' Return lock to pool
 ```
 
 The LOCKTRY/LOCKREL pair forms the critical section boundary. Between LOCKTRY success and LOCKREL, this COG has exclusive access—all other COGs executing LOCKTRY on the same lock will fail (C=0) until LOCKREL executes. The retry loop (`if_nc jmp #critical_section`) implements busy-waiting, appropriate when lock hold times are short.
@@ -314,12 +309,12 @@ Locks solve multiple classes of multi-COG coordination problems:
 When multiple COGs read and modify Hub memory data structures (queues, buffers, linked lists), locks prevent partial updates:
 
 ```pasm
-        locktry queue_lock      wc
+                locktry queue_lock      wc
         if_nc   jmp     #retry
-        rdlong  head, queue_head        ' Read
-        add     head, #1                ' Modify
-        wrlong  head, queue_head        ' Write back
-        lockrel queue_lock              ' Complete atomic update
+                rdlong  head, queue_head        ' Read
+                add     head, #1                ' Modify
+                wrlong  head, queue_head        ' Write back
+                lockrel queue_lock              ' Complete atomic update
 ```
 
 Without the lock, two COGs might simultaneously read the same `head` value, increment independently, and write back the same result—losing one increment.
@@ -329,10 +324,10 @@ Without the lock, two COGs might simultaneously read the same `head` value, incr
 When multiple COGs share hardware resources (specific Smart Pin, display controller, audio output), locks coordinate exclusive access:
 
 ```pasm
-        locktry display_lock    wc      ' Acquire display
+                locktry display_lock    wc      ' Acquire display
         if_nc   jmp     #retry
-        ' ... draw graphics, write text ...
-        lockrel display_lock            ' Release for other COGs
+                ' ... draw graphics, write text ...
+                lockrel display_lock            ' Release for other COGs
 ```
 
 **Producer/Consumer Synchronization:**
@@ -341,7 +336,6 @@ Lock status serves as a signaling mechanism. A producer holds a lock while data 
 
 The 16-lock limit rarely constrains applications—complex systems typically need fewer than 16 distinct critical sections. Applications requiring more synchronization points often combine locks with other mechanisms (event flags, shared memory flags) for fine-grained coordination.
 
----
 
 ## 5.6 Debug Hardware
 
@@ -377,7 +371,6 @@ When the development environment supports debug windows, DEBUG output can drive 
 
 Debug window types, format specifiers, and configuration options vary by development environment. The DEBUG instruction supports dozens of format codes and window modes, each optimized for specific debugging tasks. Complete documentation of debug capabilities, including window types, format specifier syntax, and real-time plotting features, appears in the **P2 Debug Window Manual** (`p2-debug-window-manual`). That manual provides essential reference for effective debugging with the P2's built-in debug hardware.
 
----
 
 ## 5.7 XBYTE Bytecode Engine
 
@@ -427,9 +420,6 @@ Bytecode routines reside in COG or LUT RAM and must end with RET or _RET_ to ret
 
 Complete XBYTE programming details, including LUT table construction, skip pattern usage, and advanced dispatch techniques, appear in specialized virtual machine documentation.
 
----
-
-## Key Concepts
 
 ```{=latex}
 \begin{keyconcepts}
@@ -445,6 +435,5 @@ Complete XBYTE programming details, including LUT table construction, skip patte
 \end{keyconcepts}
 ```
 
----
 
 <!-- End of Chapter 5 -->

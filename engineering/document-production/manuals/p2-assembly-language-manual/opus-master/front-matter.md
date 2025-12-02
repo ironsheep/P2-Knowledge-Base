@@ -1,14 +1,80 @@
-# P2 Assembly Language (PASM2) Manual
+```{=latex}
+% Banner image at top (full width) with drop shadow for visual balance
+\begin{tcolorbox}[
+  enhanced,
+  boxrule=1.5pt,
+  colframe=gray!60,
+  colback=white,
+  drop shadow southeast,
+  shadow={3pt}{-3pt}{1mm}{black!15},
+  left=0pt, right=0pt, top=0pt, bottom=0pt,
+  width=\textwidth,
+  arc=0pt,
+  outer arc=0pt
+]
+\includegraphics[width=\linewidth]{inbox/assets/book-artwork.png}
+\end{tcolorbox}
 
-## Complete Reference for Propeller 2 Assembly Language
+\begin{center}
+\vspace{0.6cm}
+{\fontsize{36}{42}\selectfont\bfseries P2 Assembly Language Reference Manual\par}
+\vspace{0.3cm}
+{\Large\itshape Complete PASM2 Instruction Set Documentation\par}
+\vspace{0.6cm}
+{\large December 2025\par}
+\vspace{0.2cm}
+{\large\color{blue}Version 1.0 - Technical Review\par}
 
-Version 1.0
+\vfill
+\begin{tcolorbox}[
+  colback=gray!5,
+  colframe=gray!40,
+  boxrule=1pt,
+  width=0.85\textwidth,
+  center,
+  title={\bfseries\color{black} Reference Manual Organization},
+  colbacktitle=gray!15,
+  coltitle=black
+]
+\textbf{Complete P2 Assembly Language Documentation}
 
-P2 Knowledge Base Project
+\vspace{0.3cm}
+\begin{minipage}[t]{0.45\textwidth}
+\textbf{Part I: Architecture}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item P2 Architecture Overview
+\item Instruction Format \& Encoding
+\item Addressing Modes
+\item Flags \& Conditional Execution
+\item Program Flow
+\end{itemize}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.50\textwidth}
+\textbf{Part II: Language Reference}
+\begin{itemize}[leftmargin=*, itemsep=1pt, topsep=2pt]
+\item Instructions (A-Z)
+\item Directives
+\item Constants \& Special Registers
+\item Smart Pin Modes
+\item CORDIC Functions
+\end{itemize}
+\end{minipage}
+\end{tcolorbox}
+\vspace{0.5cm}
 
----
+{\small Iron Sheep Productions, LLC\par}
+{\small P2 Knowledge Base Project\par}
+\end{center}
 
-## Copyright and License
+\clearpage
+\pagestyle{fancy}
+
+\tableofcontents
+\clearpage
+```
+
+# Copyright and License
 
 Copyright 2025 P2 Knowledge Base Project
 
@@ -24,7 +90,6 @@ Under the following terms:
 
 Propeller 2, P2, and Parallax are trademarks of Parallax Inc. This manual is an independent community resource and is not officially endorsed by Parallax Inc.
 
----
 
 ## Acknowledgments
 
@@ -40,7 +105,6 @@ This manual would not exist without the contributions of many individuals and or
 
 This manual is a community-developed resource, created to make the P2's assembly language more accessible to developers at all skill levels.
 
----
 
 ## How to Use This Manual
 
@@ -59,6 +123,7 @@ This manual serves multiple audiences and use cases. The organization is designe
 ### Manual Structure
 
 **Part I: Architectural Foundation** — Five chapters explaining how the P2 works:
+
 - Chapter 1: P2 Architecture Overview
 - Chapter 2: Instruction Format and Encoding
 - Chapter 3: Addressing Modes and Register Usage
@@ -66,12 +131,14 @@ This manual serves multiple audiences and use cases. The organization is designe
 - Chapter 5: Program Flow and Subroutines
 
 **Part II: Language Reference** — Complete documentation of all PASM2 elements:
+
 - Instructions (alphabetically organized)
 - Directives (assembly-time commands)
 - Constants (predefined values)
 - Special Registers (hardware registers)
 
 **Part III: Appendices** — Quick reference materials:
+
 - Appendix A: Instruction Encoding Summary
 - Appendix B: Instructions by Category
 - Appendix C: Flag Effects Reference
@@ -97,7 +164,6 @@ This manual serves multiple audiences and use cases. The organization is designe
 
 **"I need CORDIC function codes"** → Appendix E
 
----
 
 ## Conventions Used in This Manual
 
@@ -115,7 +181,7 @@ UPPERCASE is used for instruction mnemonics, register names (PA, PTRA, DIRA), an
 
 PASM2 code examples follow standard formatting conventions:
 
-```
+```pasm
 label           instruction     D,S             ' Comment
                 instruction     D,#immediate    ' Indented code
 ```
@@ -170,7 +236,6 @@ This manual uses consistent cross-reference formats:
 
 **"Compare: OTHER_INSTRUCTION"** — Points to related or contrasting instructions
 
----
 
 ## Document Version History
 
@@ -178,7 +243,6 @@ This manual uses consistent cross-reference formats:
 |---------|------|---------|
 | 1.0 | 2025-11 | Initial release. Complete coverage of PASM2 instruction set, directives, constants, and special registers. Includes architectural foundation chapters and comprehensive appendices. |
 
----
 
 ## About This Manual
 
@@ -196,6 +260,5 @@ The manual is designed to be:
 
 We welcome feedback, corrections, and suggestions for improvement. This is a living document that will evolve with the P2 community's growing expertise.
 
----
 
 *You are now ready to explore the P2 Assembly Language. Whether you are learning for the first time or looking up specific details, this manual is designed to support your journey into P2 development.*

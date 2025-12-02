@@ -12,7 +12,7 @@ The Streamer operates in conjunction with the FIFO and can:
 
 Streamer commands are issued via XINIT, XCONT, and related instructions.
 
----
+
 
 ## Command Word Structure
 
@@ -25,7 +25,7 @@ Bits 15-0:  Additional parameters (NCO rate typically passed separately)
 
 The values shown below are the base constants that get combined with control flags using OR operations.
 
----
+
 
 ## Immediate to LUT to Pins/DACs
 
@@ -38,7 +38,7 @@ These modes stream immediate data through the LUT to output pins or DAC channels
 | X_IMM_8X4_LUT | %0010_0000_0000_0000 << 16 | 8×4: 8 bits to LUT, 4 bits per pin |
 | X_IMM_4X8_LUT | %0011_0000_0000_0000 << 16 | 4×8: 4 bits to LUT, 8 bits per pin |
 
----
+
 
 ## Immediate to Pins/DACs (Direct)
 
@@ -59,7 +59,7 @@ These modes stream immediate data directly to pins and DAC channels.
 | X_IMM_2X16_2DAC8 | %0111_0000_0000_0000 << 16 | 2×16 immediate, 2 pins, 8 DAC channels |
 | X_IMM_1X32_4DAC8 | %0111_0000_0000_0001 << 16 | 1×32 immediate, 4 pins, 8 DAC channels |
 
----
+
 
 ## RDFAST to LUT to Pins/DACs
 
@@ -72,7 +72,7 @@ These modes read data from hub RAM via RDFAST FIFO, process through LUT, and out
 | X_RFLONG_8X4_LUT | %0111_0000_0000_0110 << 16 | Read long, 8×4 to LUT to pins |
 | X_RFLONG_4X8_LUT | %0111_0000_0000_1000 << 16 | Read long, 4×8 to LUT to pins |
 
----
+
 
 ## RDFAST Byte Operations
 
@@ -90,7 +90,7 @@ These modes read bytes from hub RAM and output to pins/DACs with various configu
 | X_RFBYTE_8P_2DAC4 | %1010_0000_0000_0111 << 16 | Read byte, 2 pins, 4 DAC channels |
 | X_RFBYTE_8P_1DAC8 | %1010_0000_0000_1110 << 16 | Read byte, 1 pin, 8 DAC channels |
 
----
+
 
 ## RDFAST Word/Long Operations
 
@@ -102,7 +102,7 @@ These modes read words or longs from hub RAM for higher bandwidth applications.
 | X_RFWORD_16P_2DAC8 | %1011_0000_0000_0000 << 16 | Read word, 16 pins, 8 DAC channels |
 | X_RFLONG_32P_4DAC8 | %1011_0000_0000_0001 << 16 | Read long, 32 pins, 8 DAC channels |
 
----
+
 
 ## Video and Color Modes
 
@@ -116,7 +116,7 @@ These modes perform color space conversion for video generation.
 | X_RFWORD_RGB16 | %1011_0000_0000_0101 << 16 | Read word as RGB 5:6:5 (65536 colors) |
 | X_RFLONG_RGB24 | %1011_0000_0000_0110 << 16 | Read long as RGB 8:8:8 (16M colors) |
 
----
+
 
 ## WRFAST Operations (Capture)
 
@@ -137,7 +137,7 @@ These modes capture data from pins/ADCs and write to hub RAM via WRFAST FIFO.
 | X_16P_2DAC8_WFWORD | %1111_0000_0000_0000 << 16 | 16 pins, 8 DACs to word, write to hub |
 | X_32P_4DAC8_WFLONG | %1111_0000_0000_0001 << 16 | 32 pins, 8 DACs to long, write to hub |
 
----
+
 
 ## ADC Sampling Modes
 
@@ -151,7 +151,7 @@ These modes capture ADC samples and optionally write to hub RAM.
 | X_2ADC8_16P_4DAC8_WFLONG | %1111_0000_0000_0101 << 16 | 2 ADCs to 8-bit, 16 pins, 4 DACs, write long |
 | X_4ADC8_0P_4DAC8_WFLONG | %1111_0000_0000_0110 << 16 | 4 ADCs to 8-bit, 0 pins, 4 DACs, write long |
 
----
+
 
 ## DDS and Goertzel Modes
 
@@ -162,7 +162,7 @@ These modes perform digital signal processing operations.
 | X_DDS_GOERTZEL_SINC1 | %1111_0000_0000_0111 << 16 | DDS/Goertzel with SINC1 filter |
 | X_DDS_GOERTZEL_SINC2 | %1111_0000_1000_0111 << 16 | DDS/Goertzel with SINC2 filter |
 
----
+
 
 ## Control Flags
 
@@ -212,7 +212,7 @@ The DAC selection constants control which of the four DAC channels (3, 2, 1, 0) 
 | X_ALT_OFF | (default - no bits set) | Normal bit order |
 | X_ALT_ON | %0000_0000_0000_0001 << 16 | Alternate bit order for 1/2/4 bit modes |
 
----
+
 
 ## Usage Examples
 
@@ -253,7 +253,7 @@ The DAC selection constants control which of the four DAC channels (3, 2, 1, 0) 
         xinit   mode, nco_value
 ```
 
----
+
 
 ## Mode Naming Convention
 
@@ -274,7 +274,7 @@ X_[source][size]_[pins]P_[dacs]DAC[bits]_[dest]
 | _nDACn | Number of DAC channels, bits per channel |
 | LUT | Data passes through LUT |
 
----
+
 
 ## Combining Constants
 
@@ -286,7 +286,7 @@ Streamer mode and control flags are combined using OR:
         xinit   mode, nco_rate
 ```
 
----
+
 
 ## Data Width Modes
 
@@ -301,7 +301,7 @@ The Streamer supports various data packing/unpacking modes:
 | 2x16 | 2 16-bit (word) values per transfer |
 | 1x32 | 1 32-bit (long) value per transfer |
 
----
+
 
 ## Related Instructions
 

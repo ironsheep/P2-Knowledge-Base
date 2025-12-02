@@ -4,7 +4,6 @@
 
 The P2 provides deterministic instruction timing, enabling precise real-time control. Understanding timing characteristics is essential for time-critical applications and optimizing code performance.
 
----
 
 ## 4.1 Clock Sources and Configuration
 
@@ -66,9 +65,9 @@ Switching clock sources requires a careful sequence to ensure glitch-free transi
 4. **Optionally disable the old source**: Turn off unused oscillators to save power
 
 ```pasm
-        hubset  ##%0000_0000_0000_0000_0000_0000_0001_0010  ' Enable crystal, 15pF caps
-        waitx   ##20_000_000/100                            ' Wait ~10 ms at RCFAST
-        hubset  ##%0000_0000_0000_0000_0000_0000_0010_0010  ' Switch to crystal
+        hubset  ##%0000_0000_0000_0000_0000_0000_0001_0010  ' Enable xtal
+        waitx   ##20_000_000/100                            ' Wait ~10ms
+        hubset  ##%0000_0000_0000_0000_0000_0000_0010_0010  ' Switch
 ```
 
 The P2 provides automatic fallback to RCFAST if the selected clock source fails, preventing system lockup from clock problems.
@@ -82,7 +81,6 @@ Clock frequency directly affects power consumption. Lower frequencies reduce pow
 - Run at the lowest frequency that meets timing requirements
 - Stop unused COGs to eliminate their clock-related power consumption
 
----
 
 ## 4.2 Instruction Timing
 
@@ -139,13 +137,14 @@ The "2 / 8-23" notation distinguishes between COG execution mode and hub executi
 
 Variable range notation like "9..35" indicates that execution time depends on the instruction's parameters or the processor state. For example, REP (repeat) shows variable timing because the total time depends on how many iterations the repeat block executes.
 
----
 
 ## 4.3 Hub Access Timing
 
 ### 4.3.1 The Egg Beater Pattern
 
-<!-- DIAGRAM: Egg beater timing showing 8 COGs and hub slots -->
+```{=latex}
+\EggBeaterDiagram
+```
 
 Hub memory access uses a round-robin "egg beater" pattern that gives each COG fair access to the shared hub RAM. The name comes from the visual similarity to a rotating egg beater, with each COG's access window spinning through the rotation in sequence.
 
@@ -197,7 +196,7 @@ Each COG has access to a shared FIFO buffer that can operate in either read mode
 RDFAST configures the FIFO for reading from hub memory. The instruction takes two parameters: a block count (or 0 for continuous operation) and the starting hub address:
 
 ```pasm
-        rdfast  #0, ptr                 ' Start continuous read FIFO at address ptr
+        rdfast  #0, ptr                 ' Start continuous read FIFO
 loop
         rflong  data                    ' Read from FIFO (fast, no hub wait)
         ' ... process data ...
@@ -211,7 +210,7 @@ The RFLONG, RFWORD, and RFBYTE instructions read from the FIFO without waiting f
 WRFAST configures the FIFO for writing to hub memory:
 
 ```pasm
-        wrfast  #0, ptr                 ' Start continuous write FIFO at address ptr
+        wrfast  #0, ptr                 ' Start continuous write FIFO
 loop
         ' ... generate data ...
         wflong  data                    ' Write to FIFO (fast, no hub wait)
@@ -248,7 +247,6 @@ FIFO access provides near-instantaneous data transfer from the program's perspec
 
 The FIFO access instructions (RFLONG, RFWORD, RFBYTE, WFLONG, WFWORD, WFBYTE) complete in 2 cycles when the FIFO has data available or space available, respectively. This makes FIFO access ideal for streaming applications: video pixel generation, audio sample processing, high-speed communication protocols, and bulk data movement.
 
----
 
 ## 4.4 Deterministic Timing
 
@@ -317,7 +315,6 @@ The key insight is that conditionally-skipped instructions still consume their e
 
 Conditional execution works for simple cases where both branches are short. For longer code sequences or cases where only one branch performs work, traditional branching may be more efficient despite the timing variation. The choice depends on whether consistent timing or shorter average time is more important for the specific application.
 
----
 
 ## 4.5 Synchronization
 
@@ -391,7 +388,6 @@ Several instructions synchronize with pin state changes, enabling precise timing
 
 **POLLATE, POLLCT1, POLLCT2, POLLCT3** provide polling-based alternatives to waiting. Instead of blocking until a condition occurs, these instructions check whether an event has occurred and set flags accordingly. This allows code to perform useful work while watching for events, rather than waiting idly.
 
----
 
 ## 4.6 Timing-Critical Patterns
 
@@ -511,7 +507,6 @@ This code generates precise pulse widths using WAITX for delays and conditional 
 
 Deterministic timing eliminates the jitter and uncertainty common in systems with caches or interrupts. Each pulse width is exactly the specified duration, enabling reliable communication with timing-sensitive devices.
 
----
 
 ## 4.7 Measuring Execution Time
 
@@ -583,7 +578,6 @@ This approach provides cycle-accurate timing for each code section, enabling pre
 
 Profiling can reveal unexpected timing variations. If a loop shows inconsistent timing across iterations, the variation likely comes from hub access timing, branch behavior, or CORDIC latency. Identifying these variations guides optimization efforts toward the actual bottlenecks rather than presumed slow code.
 
----
 
 ## 4.8 COG vs Hub Execution Mode Timing
 
@@ -634,9 +628,6 @@ CORDIC operations start in 2 cycles in COG mode but take 8-23 cycles to start in
 
 The dramatic timing difference between modes—often 4× or more—makes COG mode strongly preferred for timing-critical code. Programs typically keep inner loops, interrupt handlers, and time-sensitive operations in COG RAM while using hub mode for larger, less-critical code sections.
 
----
-
-## Key Concepts
 
 ```{=latex}
 \begin{keyconcepts}
@@ -652,6 +643,5 @@ The dramatic timing difference between modes—often 4× or more—makes COG mod
 \end{keyconcepts}
 ```
 
----
 
 <!-- End of Chapter 4 -->

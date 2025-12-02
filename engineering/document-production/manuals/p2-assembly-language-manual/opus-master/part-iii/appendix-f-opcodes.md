@@ -4,13 +4,8 @@
 
 The P2 uses a fixed 32-bit instruction word with five distinct fields that encode all instruction information:
 
-```
- 31  30  29  28  27  26  25  24  23  22  21  20  19  18  17  16  15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0
-├───┴───┴───┴───┼───┴───┴───┴───┴───┴───┴───┼───┴───┴───┼───┴───┴───┴───┴───┴───┴───┴───┴───┼───┴───┴───┴───┴───┴───┴───┴───┴───┤
-│    EEEE       │       OOOOOOO             │    CZI    │         DDDDDDDDD                 │         SSSSSSSSS                 │
-│  Condition    │       Opcode              │  Effects  │         Destination               │         Source                    │
-│   (4 bits)    │       (7 bits)            │  (3 bits) │         (9 bits)                  │         (9 bits)                  │
-└───────────────┴───────────────────────────┴───────────┴───────────────────────────────────┴───────────────────────────────────┘
+```{=latex}
+\InstructionEncoding{Generic}{EEEE}{OOOOOOO}{CZI}{DDDDDDDDD}{SSSSSSSSS}
 ```
 
 This compact encoding allows:
@@ -272,39 +267,29 @@ The 7-bit opcode space (128 possible opcodes) is organized by instruction catego
 
 When immediate values exceed 9 bits, AUGS and AUGD instructions extend the next instruction's operands:
 
-**AUGS Format:**
-```
-1111_000x_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx
+| Instruction | Bit Pattern | Extended Field |
+|-------------|-------------|----------------|
+| AUGS | `1111_000x_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx` | S becomes 32 bits |
+| AUGD | `1111_100x_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx` | D becomes 32 bits |
 
-Effect: Next instruction's S field becomes 23 bits:
-  Bits 31:9 from AUGS (x bits)
-  Bits 8:0 from instruction S field
-```
+**Extension mechanism:**
 
-**AUGD Format:**
-```
-1111_100x_xxxx_xxxx_xxxx_xxxx_xxxx_xxxx
-
-Effect: Next instruction's D field becomes 23 bits:
-  Bits 31:9 from AUGD (x bits)
-  Bits 8:0 from instruction D field
-```
+- Bits 31:9 come from the AUG instruction (x bits above)
+- Bits 8:0 come from the following instruction's S or D field
+- Combined value used for that instruction only
 
 **Example:**
-```
+
+```pasm
 AUGS    #$1234      ' Bits 31:9 = $1234
 MOV     result, #$56 ' S = $1234_056 = $2468AC
 ```
 
 ### NOP Encoding
 
-NOP is encoded as all zeros, which decodes as:
-```
-0000_0000_000_000000000_000000000
-= IF_ALWAYS ROR $000, $000
-```
+NOP is encoded as all zeros: `0000_0000_000_000000000_000000000`
 
-This performs a useless rotate with no effect.
+This decodes as `IF_ALWAYS ROR $000, $000` - a useless rotate with no effect.
 
 ### Hub Instruction Extensions
 
@@ -337,9 +322,9 @@ Encoding breakdown:
 
 32-bit pattern:
   0000_0001000_001_DDDDDDDDD_000000101
-  ││││ │││││││ │││ ││││││││││ │││││││││
-  ││││ │││││││ │││ └────┬────┘ └───┬───┘
-  ││││ │││││││ │││      │          └─ S = 5
+  ││││ │││││││ │││ │││││││││ │││││││││
+  ││││ │││││││ │││ └────┬───┘ └───┬───┘
+  ││││ │││││││ │││      │         └─ S = 5
   ││││ │││││││ │││      └─ D = result address
   ││││ │││││││ └┴┴─ I=1, Z=0, C=0
   ││││ └─────┴─ ADD opcode
@@ -360,9 +345,9 @@ Encoding breakdown:
 
 32-bit pattern:
   1010_0110100_100_DDDDDDDDD_SSSSSSSSS
-  ││││ │││││││ │││ ││││││││││ │││││││││
-  ││││ │││││││ │││ └────┬────┘ └───┬───┘
-  ││││ │││││││ │││      │          └─ S = source address
+  ││││ │││││││ │││ │││││││││ │││││││││
+  ││││ │││││││ │││ └────┬───┘ └───┬───┘
+  ││││ │││││││ │││      │         └─ S = source address
   ││││ │││││││ │││      └─ D = dest address
   ││││ │││││││ └┴┴─ I=0, Z=0, C=1 (WC)
   ││││ └─────┴─ MOV opcode

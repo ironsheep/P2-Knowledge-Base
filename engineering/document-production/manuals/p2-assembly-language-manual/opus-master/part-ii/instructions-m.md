@@ -2,16 +2,16 @@
 
 This section contains all PASM2 instructions beginning with the letter M.
 
----
+
 
 ## MERGEB {#mergeb}
 
 Merge bits of bytes
 [Math and Logic Instruction](#math-and-logic-instructions) - Rearrange bits from each byte into a merged pattern.
 
-```
-MERGEB  D
-```
+**MERGEB**  *D*
+
+---
 
 **Result:** Bits from each byte in D are rearranged into a specific merged pattern.
 
@@ -31,16 +31,16 @@ This operation takes the most significant bit from each of the four bytes in D a
 
 MERGEB is useful for bit-plane conversions, graphics operations, and data transformations where bits need to be regrouped across byte boundaries. It performs the inverse operation of SPLITB, which distributes bits back into their original byte positions.
 
----
+
 
 ## MERGEW {#mergew}
 
 Merge bits of words
 [Math and Logic Instruction](#math-and-logic-instructions) - Rearrange bits from each word into a merged pattern.
 
-```
-MERGEW  D
-```
+**MERGEW**  *D*
+
+---
 
 **Result:** Bits from each word in D are rearranged into a specific merged pattern.
 
@@ -60,16 +60,16 @@ This operation interleaves the bits from the upper and lower words of D, alterna
 
 MERGEW is useful for word-level bit-plane conversions, graphics operations requiring word-aligned data transformations, and encoding operations. It performs the inverse operation of SPLITW, which de-interleaves the bits back into their original word positions.
 
----
+
 
 ## MIXPIX {#mixpix}
 
 Mix pixels
 [Pixel Mixer Instruction](#pixel-mixer-instructions) - Blend bytes of source into destination using pixel mixer configuration.
 
-```
-MIXPIX  D,{#}S
-```
+**MIXPIX**  *D,{#}S*
+
+---
 
 **Result:** Bytes of S are blended into bytes of D according to the SETPIX and SETPIV configuration.
 
@@ -92,16 +92,16 @@ This instruction executes in 7 clock cycles to perform the pixel arithmetic on a
 
 MIXPIX is essential for high-performance graphics operations, enabling real-time color mixing, transparency effects, and color space transformations without requiring multiple individual byte operations.
 
----
+
 
 ## MODC {#modc}
 
 Modify C flag
 [Flag Instruction](#flag-instructions) - Set or clear the C flag based on a modifier and current flag state.
 
-```
-MODC  c  {WC}
-```
+**MODC**  *c*  **{WC}**
+
+---
 
 **Result:** The C flag is set or cleared according to the modifier and current C and Z flag states.
 
@@ -126,16 +126,16 @@ MODC is typically used after comparison or test instructions to create complex c
 
 If the WC effect is specified, the flag modification becomes visible to subsequent instructions; otherwise, the modification may be used internally without affecting the architectural flag state.
 
----
+
 
 ## MODCZ {#modcz}
 
 Modify C and Z flags
 [Flag Instruction](#flag-instructions) - Set or clear both C and Z flags based on modifiers and current flag states.
 
-```
-MODCZ  c,z  {WC/WZ/WCZ}
-```
+**MODCZ**  *c,z*  **{WC/WZ/WCZ}**
+
+---
 
 **Result:** Both C and Z flags are set or cleared according to their modifiers and the current C and Z flag states.
 
@@ -163,16 +163,16 @@ If the WC, WZ, or WCZ effects are specified, the flag modifications become visib
 
 The simultaneous update of both flags makes MODCZ more powerful than using separate MODC and MODZ instructions, as it allows each flag's new value to be based on the same initial flag state rather than having one flag update affect the other's calculation.
 
----
+
 
 ## MODZ {#modz}
 
 Modify Z flag
 [Flag Instruction](#flag-instructions) - Set or clear the Z flag based on a modifier and current flag state.
 
-```
-MODZ  z  {WZ}
-```
+**MODZ**  *z*  **{WZ}**
+
+---
 
 **Result:** The Z flag is set or cleared according to the modifier and current C and Z flag states.
 
@@ -197,16 +197,16 @@ MODZ is typically used after comparison or test instructions to create complex c
 
 If the WZ effect is specified, the flag modification becomes visible to subsequent instructions; otherwise, the modification may be used internally without affecting the architectural flag state.
 
----
+
 
 ## MOV {#mov}
 
 Move
 [Math and Logic Instruction](#math-and-logic-instructions) - Copy a value from source to destination.
 
-```
-MOV  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**MOV**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** The Src value is stored in Dest.
 
@@ -246,22 +246,22 @@ MOV between registers is used for preserving values and working with temporary c
 When combined with flag effects, MOV enables efficient value testing:
 
 ```pasm
-        mov     data, source  wz        ' Copy and test if zero
-if_nz   call    #process                ' Process only if non-zero
-        mov     signed, value  wc       ' Copy and test sign bit
-if_c    neg     signed, signed          ' Make positive if negative
+                mov     data, source  wz        ' Copy and test if zero
+        if_nz   call    #process                ' Process only if non-zero
+                mov     signed, value  wc       ' Copy and test sign bit
+        if_c    neg     signed, signed          ' Make positive if negative
 ```
 
----
+
 
 ## MOVBYTS {#movbyts}
 
 Move bytes
 [Math and Logic Instruction](#math-and-logic-instructions) - Rearrange bytes within a register according to a control pattern.
 
-```
-MOVBYTS  D,{#}S
-```
+**MOVBYTS**  *D,{#}S*
+
+---
 
 **Result:** Bytes within D are rearranged according to the byte selection pattern in S.
 
@@ -290,16 +290,16 @@ Common patterns include:
 - S = $B1 (binary 10_11_00_01): Swap words
 - S = $4E (binary 01_00_11_10): Swap bytes within each word
 
----
+
 
 ## MUL {#mul}
 
 Multiply
 [Math and Logic Instruction](#math-and-logic-instructions) - Multiply two unsigned 16-bit values to produce a 32-bit result.
 
-```
-MUL  Dest, {#}Src  {WZ}
-```
+**MUL**  *Dest, {#}Src*  **{WZ}**
+
+---
 
 **Result:** The 32-bit unsigned product of the lower 16 bits of Dest and Src is stored in Dest.
 
@@ -340,16 +340,16 @@ For fixed-point math with 16-bit fractional parts:
 
 For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which can multiply full 32-bit values and produces a 64-bit result accessible through the upper and lower result registers. MUL's 2-clock speed makes it ideal when the operands are known to fit in 16 bits.
 
----
+
 
 ## MULPIX {#mulpix}
 
 Multiply pixels
 [Pixel Mixer Instruction](#pixel-mixer-instructions) - Multiply corresponding bytes treating them as fractional values.
 
-```
-MULPIX  D,{#}S
-```
+**MULPIX**  *D,{#}S*
+
+---
 
 **Result:** Each byte of S is multiplied with the corresponding byte of D, with results stored in D.
 
@@ -380,16 +380,16 @@ Common uses include:
 
 The instruction treats all bytes independently, so it can be used for any four-byte parallel multiply operation, not just color processing.
 
----
+
 
 ## MULS {#muls}
 
 Multiply signed
 [Math and Logic Instruction](#math-and-logic-instructions) - Multiply two signed 16-bit values to produce a signed 32-bit result.
 
-```
-MULS  Dest, {#}Src  {WZ}
-```
+**MULS**  *Dest, {#}Src*  **{WZ}**
+
+---
 
 **Result:** The 32-bit signed product of the signed lower 16 bits of Dest and Src is stored in Dest.
 
@@ -433,110 +433,72 @@ MULS differs from MUL only in that it treats the 16-bit operands as signed value
 
 For multiplications larger than 16x16 bits, use the CORDIC solver QMUL instruction, which can multiply full signed 32-bit values and produces a signed 64-bit result accessible through the upper and lower result registers.
 
+
+
+## MUXC / MUXNC / MUXZ / MUXNZ {#muxc}
+
+Multiplex flag to bits {#muxnc} {#muxz} {#muxnz}
+[Math and Logic Instruction](#math-and-logic-instructions) - Set selected bits of destination to C, NC, Z, or NZ flag value.
+
+**MUXC**  *D,{#}S*  **{WC|WZ|WCZ}**
+**MUXNC**  *D,{#}S*  **{WC|WZ|WCZ}**
+**MUXZ**  *D,{#}S*  **{WC|WZ|WCZ}**
+**MUXNZ**  *D,{#}S*  **{WC|WZ|WCZ}**
+
 ---
 
-## MUXC {#muxc}
+**Result:** Each bit position in D where S has a 1 is set to the specified flag value:
 
-Multiplex C
-[Math and Logic Instruction](#math-and-logic-instructions) - Set selected bits of destination to the C flag value.
+| Instruction | Sets bits to |
+|-------------|--------------|
+| MUXC | C flag value |
+| MUXNC | !C (inverted C) |
+| MUXZ | Z flag value |
+| MUXNZ | !Z (inverted Z) |
 
-```
-MUXC  D,{#}S  {WC|WZ|WCZ}
-```
-
-**Result:** Each bit position in D where S has a 1 is set to the current C flag value.
-
-- D is a register whose bits will be set to the C flag value where S has 1 bits.
+- D is a register whose bits will be set to the flag value where S has 1 bits.
 - S is a register, 9-bit literal, or 32-bit augmented literal that selects which bits to modify.
 - WC, WZ, or WCZ are optional effects to update flags.
 
 ```{=latex}
-\simpleencoding{EEEE}{0101100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{parity of result}{Result = 0}{2}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0101100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Result = 0}{2}
+\encodingrowcont{EEEE}{0101101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Result = 0}{2}
+\encodingrowcont{EEEE}{0101110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Result = 0}{2}
+\encodingrow{EEEE}{0101111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{Parity}{Result = 0}{2}
+\end{encodingtable}
 ```
 
-**Related:** [MUXNC](#muxnc), [MUXZ](#muxz), [MUXNZ](#muxnz), [MUXQ](#muxq), [TESTB](#testb)
+**Related:** [MUXQ](#muxq), [TESTB](#testb), [TESTBN](#testbn)
 
 **Explanation:**
 
-MUXC modifies selected bits in D based on the current C flag value. For each bit position where S contains a 1, the corresponding bit in D is replaced with the C flag value. All other bits in D remain unchanged. The operation is: D = (!S & D) | (S & {32{C}}), where {32{C}} represents the C flag value replicated across all 32 bits.
+These instructions modify selected bits in D based on a flag value. For each bit position where S contains a 1, the corresponding bit in D is replaced with the flag value (or its inverse). All other bits in D remain unchanged. The operation is: D = (!S & D) | (S & {32{flag}}).
 
-For example, if C = 1, D = $F0F0_F0F0, and S = $00FF_00FF, the result is D = $F0FF_F0FF, because the 1 bits in S (the lower byte of each word) are set to 1 (the C flag value), while the 0 bits in S leave the corresponding D bits unchanged.
+MUXC and MUXZ copy the direct flag value; MUXNC and MUXNZ copy the inverted flag value.
 
-MUXC is commonly used to conditionally set or clear specific bits based on a flag test:
-
-```pasm
-        cmp     value, limit  wc        ' Set C if value < limit
-        muxc    status, #$01            ' Set bit 0 of status to C
-```
-
-Multiple bits can be set simultaneously:
-
-```pasm
-        test    data, #$80  wc          ' Test bit 7, set C if high
-        muxc    flags, #$07             ' Set bits 0-2 to match C
-```
-
-If the WC or WCZ effect is specified, the C flag is set to the parity of the result (1 if an odd number of bits are set, 0 if even). If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero.
-
-MUXC provides an efficient alternative to conditional branches when setting bits based on test results. Instead of branching, a comparison can set the C flag, and MUXC can immediately apply that result to specific bits.
-
----
-
-## MUXNC {#muxnc}
-
-Multiplex not C
-[Math and Logic Instruction](#math-and-logic-instructions) - Set selected bits of destination to the inverted C flag value.
-
-```
-MUXNC  D,{#}S  {WC|WZ|WCZ}
-```
-
-**Result:** Each bit position in D where S has a 1 is set to the inverted C flag value.
-
-- D is a register whose bits will be set to the inverted C flag value where S has 1 bits.
-- S is a register, 9-bit literal, or 32-bit augmented literal that selects which bits to modify.
-- WC, WZ, or WCZ are optional effects to update flags.
-
-```{=latex}
-\simpleencoding{EEEE}{0101101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{parity of result}{Result = 0}{2}
-```
-
-**Related:** [MUXC](#muxc), [MUXZ](#muxz), [MUXNZ](#muxnz), [MUXQ](#muxq), [TESTBN](#testbn)
-
-**Explanation:**
-
-MUXNC modifies selected bits in D based on the inverted C flag value. For each bit position where S contains a 1, the corresponding bit in D is replaced with !C (the logical complement of the C flag). All other bits in D remain unchanged. The operation is: D = (!S & D) | (S & {32{!C}}), where {32{!C}} represents the inverted C flag value replicated across all 32 bits.
-
-For example, if C = 0, D = $F0F0_F0F0, and S = $00FF_00FF, the result is D = $F0FF_F0FF, because !C = 1, and the 1 bits in S (the lower byte of each word) are set to 1, while the 0 bits in S leave the corresponding D bits unchanged.
-
-MUXNC is commonly used to conditionally set or clear specific bits based on the inverted result of a flag test:
+Example: Conditionally set bits based on a comparison:
 
 ```pasm
         cmp     value, limit  wc        ' Set C if value < limit
-        muxnc   status, #$01            ' Set bit 0 to 1 if value >= limit
+        muxc    status, #$01            ' Set bit 0 if less than
+        muxnc   status, #$02            ' Set bit 1 if greater or equal
 ```
 
-This is particularly useful when the desired action corresponds to the opposite of the comparison result:
+If the WC or WCZ effect is specified, the C flag is set to the parity of the result. If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero.
 
-```pasm
-        test    enable, #$01  wc        ' Test enable bit
-        muxnc   control, #$80           ' Set bit 7 high if disabled
-```
+These instructions provide an efficient alternative to conditional branches when setting bits based on flag states.
 
-If the WC or WCZ effect is specified, the C flag is set to the parity of the result (1 if an odd number of bits are set, 0 if even). If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero.
 
-MUXNC provides the logical complement of MUXC, allowing both polarities of flag-based bit setting without requiring a separate instruction to invert the flag. Together, MUXC and MUXNC provide complete control over conditional bit manipulation based on comparison and test results.
-
----
 
 ## MUXNIBS {#muxnibs}
 
 Multiplex nibbles
 [Math and Logic Instruction](#math-and-logic-instructions) - Copy non-zero nibbles from source to destination.
 
-```
-MUXNIBS  Dest, {#}Src
-```
+**MUXNIBS**  *Dest, {#}Src*
+
+---
 
 **Result:** Each non-zero nibble in Src replaces the corresponding nibble in Dest.
 
@@ -567,16 +529,16 @@ MUXNIBS is commonly used in graphics operations for palette updates, bit-field m
 
 The instruction treats nibbles independently, enabling parallel conditional updates across all eight nibble positions in a single 2-clock operation.
 
----
+
 
 ## MUXNITS {#muxnits}
 
 Multiplex nits
 [Math and Logic Instruction](#math-and-logic-instructions) - Copy non-zero bit pairs from source to destination.
 
-```
-MUXNITS  Dest, {#}Src
-```
+**MUXNITS**  *Dest, {#}Src*
+
+---
 
 **Result:** Each non-zero bit pair in Src replaces the corresponding bit pair in Dest.
 
@@ -607,63 +569,16 @@ MUXNITS provides parallel conditional updates across all sixteen bit pair positi
 
 The name "nits" comes from "nibble bits" or 2-bit fields, representing the next smaller grouping after nibbles (4-bit fields). This instruction complements MUXNIBS by operating at a finer granularity.
 
----
 
-## MUXNZ {#muxnz}
-
-Multiplex not Z
-[Math and Logic Instruction](#math-and-logic-instructions) - Set selected bits of destination to the inverted Z flag value.
-
-```
-MUXNZ  D,{#}S  {WC|WZ|WCZ}
-```
-
-**Result:** Each bit position in D where S has a 1 is set to the inverted Z flag value.
-
-- D is a register whose bits will be set to the inverted Z flag value where S has 1 bits.
-- S is a register, 9-bit literal, or 32-bit augmented literal that selects which bits to modify.
-- WC, WZ, or WCZ are optional effects to update flags.
-
-```{=latex}
-\simpleencoding{EEEE}{0101111}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{parity of result}{Result = 0}{2}
-```
-
-**Related:** [MUXZ](#muxz), [MUXC](#muxc), [MUXNC](#muxnc), [MUXQ](#muxq), [CMP](#cmp)
-
-**Explanation:**
-
-MUXNZ modifies selected bits in D based on the inverted Z flag value. For each bit position where S contains a 1, the corresponding bit in D is replaced with !Z (the logical complement of the Z flag). All other bits in D remain unchanged. The operation is: D = (!S & D) | (S & {32{!Z}}), where {32{!Z}} represents the inverted Z flag value replicated across all 32 bits.
-
-The Z flag is typically set by comparison or arithmetic instructions when a result equals zero. MUXNZ therefore sets the selected bits high when the previous result was non-zero, and low when it was zero.
-
-For example, after a comparison that sets Z to indicate equality:
-
-```pasm
-        cmp     value, target  wz       ' Set Z if equal
-        muxnz   status, #$01            ' Set bit 0 if not equal
-```
-
-This is particularly useful when the desired action corresponds to the non-zero condition:
-
-```pasm
-        sub     counter, #1  wz         ' Decrement and test
-        muxnz   flags, #$80             ' Set flag if counter not exhausted
-```
-
-If the WC or WCZ effect is specified, the C flag is set to the parity of the result (1 if an odd number of bits are set, 0 if even). If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero. Note that the WZ effect updates the Z flag based on the result value, not the original Z flag state that determined which value to mux.
-
-MUXNZ provides the logical complement of MUXZ, allowing both polarities of zero-test-based bit setting without requiring a separate instruction to invert the flag. Together, MUXZ and MUXNZ provide complete control over conditional bit manipulation based on zero-detection results.
-
----
 
 ## MUXQ {#muxq}
 
 Multiplex Q
 [Math and Logic Instruction](#math-and-logic-instructions) - Copy selected bits from source to destination based on Q register mask.
 
-```
-MUXQ  Dest, {#}Src
-```
+**MUXQ**  *Dest, {#}Src*
+
+---
 
 **Result:** Bits from Src are copied to Dest at positions where Q has 1 bits.
 
@@ -720,61 +635,5 @@ MUXQ is particularly valuable for HUB75 RGB panel driving and other applications
 
 Unlike MUXC and MUXZ which replicate a single flag bit to all selected positions, MUXQ copies the actual corresponding bits from the source, enabling true parallel bit transfer operations.
 
----
 
-## MUXZ {#muxz}
 
-Multiplex Z
-[Math and Logic Instruction](#math-and-logic-instructions) - Set selected bits of destination to the Z flag value.
-
-```
-MUXZ  D,{#}S  {WC|WZ|WCZ}
-```
-
-**Result:** Each bit position in D where S has a 1 is set to the current Z flag value.
-
-- D is a register whose bits will be set to the Z flag value where S has 1 bits.
-- S is a register, 9-bit literal, or 32-bit augmented literal that selects which bits to modify.
-- WC, WZ, or WCZ are optional effects to update flags.
-
-```{=latex}
-\simpleencoding{EEEE}{0101110}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{parity of result}{Result = 0}{2}
-```
-
-**Related:** [MUXNZ](#muxnz), [MUXC](#muxc), [MUXNC](#muxnc), [MUXQ](#muxq), [CMP](#cmp)
-
-**Explanation:**
-
-MUXZ modifies selected bits in D based on the current Z flag value. For each bit position where S contains a 1, the corresponding bit in D is replaced with the Z flag value. All other bits in D remain unchanged. The operation is: D = (!S & D) | (S & {32{Z}}), where {32{Z}} represents the Z flag value replicated across all 32 bits.
-
-The Z flag is typically set by comparison or arithmetic instructions when a result equals zero. MUXZ therefore sets the selected bits high when the previous result was zero, and low when it was non-zero.
-
-For example, after a comparison that sets Z to indicate equality:
-
-```pasm
-        cmp     value, target  wz       ' Set Z if equal
-        muxz    status, #$01            ' Set bit 0 if equal
-```
-
-Multiple status bits can be updated simultaneously:
-
-```pasm
-        sub     counter, #1  wz         ' Decrement and test for zero
-        muxz    flags, #$07             ' Set bits 0-2 if counter exhausted
-```
-
-MUXZ is commonly used to record test results in status registers without branching:
-
-```pasm
-        ' Build status word from multiple tests
-        test    data, #$80  wz          ' Test bit 7
-        muxz    status, #$01            ' Record result in bit 0
-        test    data, #$40  wz          ' Test bit 6
-        muxz    status, #$02            ' Record result in bit 1
-```
-
-If the WC or WCZ effect is specified, the C flag is set to the parity of the result (1 if an odd number of bits are set, 0 if even). If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if non-zero. Note that the WZ effect updates the Z flag based on the result value, not the original Z flag state that determined which value to mux.
-
-MUXZ provides an efficient alternative to conditional branches when recording zero-test results as bits. It enables building status values from multiple tests without requiring any jumps or conditional execution.
-
----

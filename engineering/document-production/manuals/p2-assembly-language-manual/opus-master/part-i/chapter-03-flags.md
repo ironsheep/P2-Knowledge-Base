@@ -8,7 +8,6 @@ The P2's flag system differs from many processors in two important ways. First, 
 
 These two features combine to create a powerful programming model where complex decision logic can be expressed without branches, maintaining cycle-accurate timing while reducing code size and improving readability.
 
----
 
 ## 3.1 The C and Z Flags
 
@@ -41,17 +40,16 @@ The Z flag indicates **zero result** or **equality** across most instructions:
 Flags retain their values until explicitly modified by a WC, WZ, or WCZ effect. This persistence is a deliberate design feature that enables powerful programming patterns:
 
 ```pasm
-        cmp     a, b            wc wz   ' Set flags once
-        if_c    mov   min, a            ' Use C here
-        if_nc   mov   min, b            ' And here
-        if_z    mov   equal, #1         ' And use Z here
+                cmp     a, b            wc wz   ' Set flags once
+        if_c    mov     min, a                  ' Use C here
+        if_nc   mov     min, b                  ' And here
+        if_z    mov     equal, #1               ' And use Z here
 ```
 
 In this example, one comparison sets both flags, and three subsequent instructions each test the preserved flag values. No instruction between them modifies the flags, so the flag state from the comparison remains available.
 
 Each COG maintains its own C and Z flags completely independently. Flag values in COG 0 have no relationship to flag values in COG 1. This independence ensures parallel execution across COGs operates without interference.
 
----
 
 ## 3.2 Flag Modification Effects
 
@@ -98,15 +96,14 @@ When no effect is specified, the instruction executes normally but leaves both C
 This behavior enables using flag values across multiple instructions without interference:
 
 ```pasm
-        cmp     a, b            wc      ' Set C based on comparison
-        mov     temp, c                 ' Does not modify C
-        add     temp, d                 ' Does not modify C
-        if_c    mov   result, temp      ' Still tests original C value
+                cmp     a, b            wc      ' Set C based on comparison
+                mov     temp, c                 ' Does not modify C
+                add     temp, d                 ' Does not modify C
+        if_c    mov     result, temp            ' Tests original C
 ```
 
 The comparison sets C, and two subsequent operations execute without modifying it. The conditional instruction tests the comparison result even though two operations occurred in between.
 
----
 
 ## 3.3 Conditional Execution
 
@@ -117,9 +114,9 @@ The P2 allows any instruction to execute conditionally based on the current flag
 Any instruction can be made conditional by prefixing with an IF_x condition. When the condition is false, the instruction does not execute, but still consumes its normal execution time (typically one clock cycle). When the condition is true, the instruction executes normally:
 
 ```pasm
-        cmp     a, b            wc wz   ' Compare, set flags
-        if_z    mov   result, #1        ' Execute only if Z=1 (equal)
-        if_nz   mov   result, #0        ' Execute only if Z=0 (not equal)
+                cmp     a, b            wc wz   ' Compare, set flags
+        if_z    mov     result, #1              ' Only if Z=1 (equal)
+        if_nz   mov     result, #0              ' Only if Z=0 (not equal)
 ```
 
 This three-instruction sequence sets `result` to 1 if `a` equals `b`, or 0 if they differ. It takes exactly three clock cycles regardless of the comparison result. The unconditional CMP always executes, then exactly one of the two conditional MOVs executes.
@@ -133,19 +130,19 @@ When a conditional instruction's condition is false, the instruction does not ex
 Consider this example:
 
 ```pasm
-        test    flags, #BIT_READY  wz          ' Check ready bit
+                test    flags, #BIT_READY  wz   ' Check ready bit
         if_nz   rdlong  data, ptr               ' Read if ready
-        if_nz   add     ptr, #4                 ' Advance pointer if read occurred
+        if_nz   add     ptr, #4                 ' Advance if read occurred
 ```
 
 This sequence takes exactly three clock cycles whether the ready bit is set or clear. If implementing the same logic with branches:
 
 ```pasm
-        test    flags, #BIT_READY  wz
+                test    flags, #BIT_READY  wz
         if_z    jmp     #skip
-        rdlong  data, ptr
-        add     ptr, #4
-skip:
+                rdlong  data, ptr
+                add     ptr, #4
+skip
 ```
 
 The branch version takes 2 cycles when not ready (test + jump) or 4 cycles when ready (test + not-jump + rdlong + add). The timing varies by 100%. The conditional version maintains constant 3-cycle timing.
@@ -211,7 +208,6 @@ After `CMPS a, b WC WZ`, the same condition names apply but with signed interpre
 
 The conditions are identical, but the comparison instruction (CMP vs. CMPS) determines whether the interpretation is unsigned or signed. Equality (IF_Z) and inequality (IF_NZ) work identically for both—the bit patterns either match or they don't.
 
----
 
 ## 3.4 Flag Behavior by Instruction Category
 
@@ -264,7 +260,6 @@ For left operations (SHL, ROL), the most significant bit (bit 31) moves into C. 
 
 The difference between shift and rotate: shifts fill the vacated bit position with 0, while rotates fill it with the bit shifted out (creating a circular rotation). Both capture the bit that exits the register in C.
 
----
 
 ## 3.5 Common Flag Patterns
 
@@ -275,8 +270,8 @@ Understanding common flag usage patterns accelerates learning and provides templ
 Testing whether a specific bit is set uses TEST with WZ:
 
 ```pasm
-        test    value, #%00000100  wz   ' Test bit 2
-        if_nz   jmp     #bit_set        ' Jump if bit is set
+                test    value, #%00000100  wz   ' Test bit 2
+        if_nz   jmp     #bit_set                ' Jump if bit is set
 ```
 
 TEST performs a bitwise AND of its operands but writes the result nowhere—it only sets flags. The mask `%00000100` isolates bit 2. If bit 2 is set, the AND produces a non-zero result (specifically, the value 4), so Z=0. If bit 2 is clear, the AND produces zero, so Z=1.
@@ -308,9 +303,9 @@ Each ADDX uses the carry from the previous addition and generates a new carry fo
 Selecting between two values based on a comparison uses conditional moves:
 
 ```pasm
-        cmp     a, b            wc      ' Compare a and b
-        if_c    mov   result, a         ' If a < b, result = a
-        if_nc   mov   result, b         ' If a >= b, result = b
+                cmp     a, b            wc      ' Compare a and b
+        if_c    mov     result, a               ' If a < b, result = a
+        if_nc   mov     result, b               ' If a >= b, result = b
 ```
 
 This implements `result = min(a, b)` without branches. The comparison sets C if `a < b` (unsigned). Exactly one of the two conditional moves executes, storing the smaller value in result. The sequence takes exactly three clock cycles regardless of which value is smaller.
@@ -318,9 +313,9 @@ This implements `result = min(a, b)` without branches. The comparison sets C if 
 For maximum of two values, invert the conditions:
 
 ```pasm
-        cmp     a, b            wc      ' Compare a and b
-        if_c    mov   result, b         ' If a < b, result = b
-        if_nc   mov   result, a         ' If a >= b, result = a
+                cmp     a, b            wc      ' Compare a and b
+        if_c    mov     result, b               ' If a < b, result = b
+        if_nc   mov     result, a               ' If a >= b, result = a
 ```
 
 ### 3.5.4 Branchless Absolute Value
@@ -328,8 +323,8 @@ For maximum of two values, invert the conditions:
 Computing the absolute value of a signed number uses the ABS instruction with conditional negation:
 
 ```pasm
-        abs     result, value   wc      ' Get absolute value, C = was negative
-        if_c    neg   result            ' Correct if value was negative
+                abs     result, value   wc      ' Absolute value, C = negative
+        if_c    neg     result                  ' Correct if was negative
 ```
 
 Wait—this looks wrong. If ABS already computes the absolute value, why negate it afterward?
@@ -345,8 +340,8 @@ Most code doesn't care about this edge case and can simply use `ABS result, valu
 Updating a counter only when a condition is met uses conditional arithmetic:
 
 ```pasm
-        test    flags, #FLAG_READY  wz  ' Test ready flag
-        if_nz   add   count, #1         ' Increment if ready
+                test    flags, #FLAG_READY  wz  ' Test ready flag
+        if_nz   add     count, #1               ' Increment if ready
 ```
 
 This increments `count` only when the ready flag is set. No branches are needed, and timing is deterministic—two clock cycles regardless of flag state.
@@ -356,16 +351,15 @@ This increments `count` only when the ready flag is set. No branches are needed,
 Checking whether a value falls within a range combines comparison and logical conditions:
 
 ```pasm
-        cmp     value, min      wc      ' Check if value < min
-        if_c    jmp   #out_of_range     ' Too small
-        cmp     value, max      wc      ' Check if value >= max
-        if_nc   jmp   #out_of_range     ' Too large
-        ' Value is in range [min, max)
+                cmp     value, min      wc      ' Check if value < min
+        if_c    jmp     #out_of_range           ' Too small
+                cmp     value, max      wc      ' Check if value >= max
+        if_nc   jmp     #out_of_range           ' Too large
+                ' Value is in range [min, max)
 ```
 
 This checks whether `value` is in the range [min, max). The first comparison tests for too small; the second tests for too large. If either condition fails, the value is out of range.
 
----
 
 ## 3.6 Advanced Flag Usage
 
@@ -396,10 +390,10 @@ MODCZ accepts operands that specify operations: `_clr` (clear to 0), `_set` (set
 The MUX family of instructions uses flag values to conditionally modify individual bits:
 
 ```pasm
-        muxc    value, #mask    ' If C=1, OR value with mask; if C=0, AND value with NOT mask
-        muxnc   value, #mask    ' If C=0, OR value with mask; if C=1, AND value with NOT mask
-        muxz    value, #mask    ' If Z=1, OR value with mask; if Z=0, AND value with NOT mask
-        muxnz   value, #mask    ' If Z=0, OR value with mask; if Z=1, AND value with NOT mask
+        muxc    value, #mask    ' C=1: set bits; C=0: clear bits
+        muxnc   value, #mask    ' C=0: set bits; C=1: clear bits
+        muxz    value, #mask    ' Z=1: set bits; Z=0: clear bits
+        muxnz   value, #mask    ' Z=0: set bits; Z=1: clear bits
 ```
 
 These instructions conditionally set or clear bits based on flag values. For example, MUXC sets the masked bits if C=1, or clears them if C=0. This enables building up bit patterns based on multiple flag tests:
@@ -438,20 +432,17 @@ An alternative approach uses MODCZ with computed values, but the TESTB pattern i
 Flags can encode state transitions in compact state machines. Instead of comparing state variables and branching, use flags to select the next state:
 
 ```pasm
-        ' Current state determines which flags are set
-        test    state, #STATE_IDLE      wz
+                ' Current state determines which flags are set
+                test    state, #STATE_IDLE      wz
         if_z    jmp     #handle_idle
-        test    state, #STATE_ACTIVE    wz
+                test    state, #STATE_ACTIVE    wz
         if_z    jmp     #handle_active
-        test    state, #STATE_DONE      wz
+                test    state, #STATE_DONE      wz
         if_z    jmp     #handle_done
 ```
 
 This pattern tests state bits and branches to handlers. Each TEST sets Z if the state bit is set, and the conditional jump executes for that state. While this uses jumps (not purely branchless), it demonstrates using flags to encode complex state without comparison operations.
 
----
-
-## Key Concepts
 
 ```{=latex}
 \begin{keyconcepts}
@@ -468,6 +459,5 @@ This pattern tests state bits and branches to handlers. Each TEST sets Z if the 
 \end{keyconcepts}
 ```
 
----
 
 <!-- End of Chapter 3 -->

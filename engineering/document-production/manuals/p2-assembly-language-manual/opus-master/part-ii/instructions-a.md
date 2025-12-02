@@ -2,17 +2,17 @@
 
 This section contains all PASM2 instructions beginning with the letter A.
 
----
+
 
 ## ABS {#abs}
 
 Absolute
 [Math Instruction](#math-instructions) - Get the absolute value of a number.
 
-```
-ABS  Dest, {#}Src  {WC|WZ|WCZ}
-ABS  Dest          {WC|WZ|WCZ}
-```
+**ABS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**ABS**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Absolute Src (or Dest) value is stored in Dest.
 
@@ -39,16 +39,16 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result is zer
 
 Literal Src values are zero-extended, so ABS is best used with register Src (or augmented Src) values for meaningful signed operations.
 
----
+
 
 ## ADD {#add}
 
 Add
 [Math Instruction](#math-instructions) - Add two unsigned values.
 
-```
-ADD  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**ADD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Sum of unsigned Src and unsigned Dest is stored in Dest.
 
@@ -79,18 +79,18 @@ To add unsigned multi-long values (64-bit or larger), use ADD for the least sign
 
 ADD and ADDX are also used for adding signed multi-long values, with ADDSX ending the sequence to properly handle sign extension.
 
----
+
 
 ## ADDCT1 / ADDCT2 / ADDCT3 {#addct1}
 
 Add and set counter event trigger (1, 2, or 3)
 [Event Instruction](#event-instructions) - Set CTn counter event trigger time.
 
-```
-ADDCT1  Dest, {#}Src
-ADDCT2  Dest, {#}Src
-ADDCT3  Dest, {#}Src
-```
+**ADDCT1**  *Dest, {#}Src*
+**ADDCT2**  *Dest, {#}Src*
+**ADDCT3**  *Dest, {#}Src*
+
+---
 
 **Result:** The Src value is added into Dest and the result is also stored in the hidden CTn event trigger register.
 
@@ -113,16 +113,16 @@ ADDCT1, ADDCT2, and ADDCT3 set their respective hidden counter event trigger reg
 
 The P2 provides three independent counter event triggers (CT1, CT2, CT3), allowing a cog to manage multiple simultaneous time-based operations. Use the corresponding POLLCTn, WAITCTn, JCTn, and JNCTn instructions to process each counter's time-based events. This enables precise timing control for periodic operations, delays, and synchronized activities.
 
----
+
 
 ## ADDPIX {#addpix}
 
 Add pixels
 [Pixel Mixer Instruction](#pixel-mixer-instructions) - Add RGB colors with full saturation.
 
-```
-ADDPIX  Dest, {#}Src
-```
+**ADDPIX**  *Dest, {#}Src*
+
+---
 
 **Result:** Src color value bytes are added into Dest color value bytes with full saturation.
 
@@ -143,16 +143,16 @@ Saturation means that if the sum of a color channel exceeds 255, the result is c
 
 The instruction processes all three color channels (and alpha if present) in parallel, completing in 7 clock cycles.
 
----
+
 
 ## ADDS {#adds}
 
 Add signed
 [Math Instruction](#math-instructions) - Add two signed values.
 
-```
-ADDS  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**ADDS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Sum of signed Src and signed Dest is stored in Dest.
 
@@ -178,16 +178,16 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result of Des
 
 To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as the last operation to properly handle sign extension.
 
----
+
 
 ## ADDSX {#addsx}
 
 Add signed, extended
 [Math Instruction](#math-instructions) - Add two signed extended values.
 
-```
-ADDSX  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**ADDSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Sum of signed Src plus C and signed Dest is stored in Dest.
 
@@ -211,16 +211,16 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously 
 
 To add signed multi-long values, use ADD (not ADDS) followed possibly by ADDX, and finally ADDSX as the last operation. ADDSX properly handles the sign extension for the most significant portion of the multi-long value.
 
----
+
 
 ## ADDX {#addx}
 
 Add extended
 [Math Instruction](#math-instructions) - Add two unsigned extended values.
 
-```
-ADDX  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**ADDX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Sum of unsigned Src plus C and unsigned Dest is stored in Dest.
 
@@ -244,16 +244,16 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Z was previously 
 
 To add unsigned multi-long values, use ADD followed by one or more ADDX instructions. Each ADDX carries the overflow from the previous addition into the current one.
 
----
+
 
 ## AKPIN {#akpin}
 
 Acknowledge pin
 [Smart Pin Instruction](#smart-pin-instructions) - Acknowledge smart pin(s).
 
-```
-AKPIN  {#}Src
-```
+**AKPIN**  *{#}Src*
+
+---
 
 **Result:** One or more Smart Pins is acknowledged; lowering their corresponding IN signal(s).
 
@@ -277,7 +277,7 @@ When Src is a register, the register's value bits [10:0] are used as-is to form 
 
 The range calculation (from Src[5:0] up to Src[5:0]+Src[10:6]) wraps within the same 32-pin group (DIRA or DIRB); it will not cross the port boundary.
 
----
+
 
 ## ALLOWI {#allowi}
 
@@ -302,17 +302,17 @@ ALLOWI re-enables interrupt branching; the default on COG start. ALLOWI is the c
 
 When ALLOWI is executed, any interrupts that were stalled by a previous STALLI instruction are allowed to proceed, and future interrupts are also enabled. This allows the COG to respond to interrupt events normally.
 
----
+
 
 ## ALTB {#altb}
 
 Alter bit
 [Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent BITxxx instruction.
 
-```
-ALTB  Dest, {#}Src
-ALTB  Dest
-```
+**ALTB**  *Dest, {#}Src*
+**ALTB**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Dest value is altered to be (Src + Dest[13:5]) & $1FF, or just Dest[13:5] for syntax 2.
 
@@ -346,17 +346,17 @@ In syntax 2, Dest serves as the full bit address. It is the same format as in sy
 
 The instruction following ALTB is shielded from interrupt. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
----
+
 
 ## ALTD {#altd}
 
 Alter destination
 [Register Indirection Instruction](#register-indirection-instructions) - Alter D field of next instruction.
 
-```
-ALTD  Dest, {#}Src
-ALTD  Dest
-```
+**ALTD**  *Dest, {#}Src*
+**ALTD**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Dest value is altered to be (Src + Dest) & $1FF, or just Dest[8:0] in syntax 2.
 
@@ -384,17 +384,17 @@ In syntax 2, Dest serves as the full value. It is used as-is for the next instru
 
 The instruction following ALTD is shielded from interrupt. ALTD alters the next instruction regardless of its kind. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
----
+
 
 ## ALTGB {#altgb}
 
 Alter get byte
 [Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent GETBYTE / ROLBYTE instruction.
 
-```
-ALTGB  Dest, {#}Src
-ALTGB  Dest
-```
+**ALTGB**  *Dest, {#}Src*
+**ALTGB**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Src and Num fields are altered to be (Src + Dest[10:2]) & $1FF, or just Dest[10:2] for syntax 2, and Dest[1:0], respectively.
 
@@ -426,17 +426,17 @@ In syntax 2, Dest serves as the full byte address. It is the same format as in s
 
 The instruction following ALTGB is shielded from interrupt. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
----
+
 
 ## ALTGN {#altgn}
 
 Alter get nibble
 [Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent GETNIB / ROLNIB instruction.
 
-```
-ALTGN  Dest, {#}Src
-ALTGN  Dest
-```
+**ALTGN**  *Dest, {#}Src*
+**ALTGN**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Src and Num values are altered to be (Src + Dest[11:3]) & $1FF, or just Dest[11:3] for syntax 2, and Dest[2:0], respectively.
 
@@ -468,17 +468,17 @@ In syntax 2, Dest serves as the full nibble address. It is the same format as in
 
 The instruction following ALTGN is shielded from interrupt. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
----
+
 
 ## ALTGW {#altgw}
 
 Alter get word
 [Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent GETWORD / ROLWORD instruction.
 
-```
-ALTGW  Dest, {#}Src
-ALTGW  Dest
-```
+**ALTGW**  *Dest, {#}Src*
+**ALTGW**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Src and Num fields are altered to be (Src + Dest[9:1]) & $1FF, or just Dest[9:1] for syntax 2, and Dest[0], respectively.
 
@@ -510,17 +510,17 @@ In syntax 2, Dest serves as the full word address. It is the same format as in s
 
 The instruction following ALTGW is shielded from interrupt. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
----
+
 
 ## ALTI {#alti}
 
 Alter instruction
 [Register Indirection Instruction](#register-indirection-instructions) - Substitute next instruction's field values from template, per configuration.
 
-```
-ALTI  Dest, {#}Src
-ALTI  Dest
-```
+**ALTI**  *Dest, {#}Src*
+**ALTI**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined field values are substituted from the Dest template, and Dest is modified per Src configuration.
 
@@ -548,17 +548,17 @@ In syntax 2, Dest serves as the full opcode value. It is executed as-is in place
 
 The instruction following ALTI is shielded from interrupt. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
----
+
 
 ## ALTR {#altr}
 
 Alter result
 [Register Indirection Instruction](#register-indirection-instructions) - Alter Result register address of next instruction.
 
-```
-ALTR  Dest, {#}Src
-ALTR  Dest
-```
+**ALTR**  *Dest, {#}Src*
+**ALTR**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Result address (Dest address by default) is altered to be (Src + Dest) & $1FF, or just Dest[8:0] in syntax 2.
 
@@ -588,17 +588,17 @@ In syntax 2, Dest serves as the full value. It is used as-is for the next instru
 
 The instruction following ALTR is shielded from interrupt. ALTR alters the next instruction regardless of its kind. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
----
+
 
 ## ALTS {#alts}
 
 Alter source
 [Register Indirection Instruction](#register-indirection-instructions) - Alter S field of next instruction.
 
-```
-ALTS  Dest, {#}Src
-ALTS  Dest
-```
+**ALTS**  *Dest, {#}Src*
+**ALTS**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Src value is altered to be (Src + Dest) & $1FF, or just Dest[8:0] in syntax 2.
 
@@ -626,17 +626,17 @@ In syntax 2, Dest serves as the full value. It is used as-is for the next instru
 
 The instruction following ALTS is shielded from interrupt. ALTS alters the next instruction regardless of its kind. Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
----
+
 
 ## ALTSB {#altsb}
 
 Alter set byte
 [Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent SETBYTE instruction.
 
-```
-ALTSB  Dest, {#}Src
-ALTSB  Dest
-```
+**ALTSB**  *Dest, {#}Src*
+**ALTSB**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Dest and Num values are altered to be (Src + Dest[10:2]) & $1FF (syntax 1), or just Dest[10:2] (syntax 2), and Num is set to Dest[1:0]. Dest is post-adjusted by auto-indexer.
 
@@ -666,17 +666,17 @@ In syntax 1, Src contains a base address (Src[8:0]) and signed auto-indexer (Src
 
 The instruction following ALTSB is shielded from interrupt. ALTSB alters the next instruction regardless of its kind (intended for SETBYTE). Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
----
+
 
 ## ALTSN {#altsn}
 
 Alter set nibble
 [Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent SETNIB instruction.
 
-```
-ALTSN  Dest, {#}Src
-ALTSN  Dest
-```
+**ALTSN**  *Dest, {#}Src*
+**ALTSN**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Dest and Num values are altered to be (Src + Dest[11:3]) & $1FF, or just Dest[11:3] for syntax 2, and Dest[2:0], respectively.
 
@@ -708,17 +708,17 @@ In syntax 2, Dest serves as the full nibble address. It is the same format as in
 
 The instruction following ALTSN is shielded from interrupt. ALTSN alters the next instruction regardless of its kind (intended for SETNIB). Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
----
+
 
 ## ALTSW {#altsw}
 
 Alter set word
 [Register Indirection Instruction](#register-indirection-instructions) - Alter subsequent SETWORD instruction.
 
-```
-ALTSW  Dest, {#}Src
-ALTSW  Dest
-```
+**ALTSW**  *Dest, {#}Src*
+**ALTSW**  *Dest*
+
+---
 
 **Result:** The next instruction's pipelined Dest and Num fields are altered to be (Src + Dest[9:1]) & $1FF, or just Dest[9:1] for syntax 2, and Dest[0], respectively.
 
@@ -750,16 +750,16 @@ In syntax 2, Dest serves as the full word address. It is the same format as in s
 
 The instruction following ALTSW is shielded from interrupt. ALTSW alters the next instruction regardless of its kind (intended for SETWORD). Field value modification occurs in the instruction pipeline only; code is not altered, values do not persist. SETQ/SETQ2 does not affect ALTx instructions; the Q value passes through to the next instruction.
 
----
+
 
 ## AND {#and}
 
 Bitwise AND
 [Logic Instruction](#logic-instructions) - Bitwise AND a value with another, or with the NOT of another.
 
-```
-AND  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**AND**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Bitwise AND of Dest and Src is stored in Dest.
 
@@ -781,16 +781,16 @@ If the WC or WCZ effect is specified, the C flag is set (1) if the result contai
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if it is non-zero.
 
----
+
 
 ## ANDN {#andn}
 
 And not
 [Logic Instruction](#logic-instructions) - Bitwise AND a value with the NOT of another.
 
-```
-ANDN  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**ANDN**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Bitwise AND of Dest with inverse of Src is stored in Dest.
 
@@ -814,7 +814,7 @@ If the WC or WCZ effect is specified, the C flag is set (1) if the result contai
 
 If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals zero, or is cleared (0) if it is non-zero.
 
----
+
 
 ## ASMCLK {#asmclk}
 
@@ -837,16 +837,16 @@ ASMCLK
 
 ASMCLK controls assembly-time clock operations. This instruction is used during the assembly process to manage timing-related assembly directives.
 
----
+
 
 ## AUGD {#augd}
 
 Augment destination
 [Misc Instruction](#misc-instructions) - Augment next literal Dest to 32-bits.
 
-```
-AUGD  #Dest
-```
+**AUGD**  *#Dest*
+
+---
 
 **Result:** The 23-bit value formed from Dest is queued to prefix the next literal Dest occurrence (#Dest) to form a 32-bit literal for that instruction; interrupts are also temporarily disabled.
 
@@ -868,16 +868,16 @@ All instructions following AUGD are shielded from interrupt until after the inst
 
 Though AUGD may be manually entered wherever needed, the Parallax P2 compiler supports a convenient way to use this feature. In the target instruction's Dest field, use "##" followed by the desired 32-bit literal (instead of "#" followed by a 9-bit literal); the compiler will automatically invoke AUGD immediately before. When counting clock cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals.
 
----
+
 
 ## AUGS {#augs}
 
 Augment source
 [Misc Instruction](#misc-instructions) - Augment next literal Src to 32-bits.
 
-```
-AUGS  #Src
-```
+**AUGS**  *#Src*
+
+---
 
 **Result:** The 23-bit value formed from Src is queued to prefix the next literal Src occurrence (#Src) to form a 32-bit literal for that instruction; interrupts are also temporarily disabled.
 
@@ -899,4 +899,4 @@ All instructions following AUGS are shielded from interrupt until after the inst
 
 Though AUGS may be manually entered wherever needed, the Parallax P2 compiler supports a convenient way to use this feature. In the target instruction's Src field, use "##" followed by the desired 32-bit literal (instead of "#" followed by a 9-bit literal); the compiler will automatically invoke AUGS immediately before. When counting clock cycles, make sure to account for 2 extra clock cycles for instructions containing ## augmented literals.
 
----
+

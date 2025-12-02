@@ -2,49 +2,62 @@
 
 This section contains all PASM2 instructions beginning with the letter B.
 
+
+
+## BITC / BITNC / BITZ / BITNZ {#bitc}
+
+Set bit(s) to flag state {#bitnc} {#bitz} {#bitnz}
+[Math and Logic Instruction](#math-and-logic-instructions) - Set bit(s) to C, NC, Z, or NZ flag state.
+
+**BITC**  *Dest, {#}Src*  **{WCZ}**
+**BITNC**  *Dest, {#}Src*  **{WCZ}**
+**BITZ**  *Dest, {#}Src*  **{WCZ}**
+**BITNZ**  *Dest, {#}Src*  **{WCZ}**
+
 ---
 
-## BITC {#bitc}
+**Result:** Dest bit(s) designated by Src are set to the specified flag state:
 
-Bit set to C
-[Math and Logic Instruction](#math-and-logic-instructions) - Set bit(s) to the state of the C flag.
+| Instruction | Sets bits to |
+|-------------|--------------|
+| BITC | C flag value |
+| BITNC | !C (inverted C) |
+| BITZ | Z flag value |
+| BITNZ | !Z (inverted Z) |
 
-```
-BITC  Dest, {#}Src  {WCZ}
-```
-
-**Result:** Dest bit(s) designated by Src are set to the C flag state.
-
-- Dest is a register whose value will have one or more bits set to C.
-- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
-- WCZ is an optional effect to update the Z flag.
+- Dest is a register whose value will have bit(s) set to the flag state.
+- Src identifies the bit(s) to modify: Src[4:0] = bit number, Src[9:5] = additional contiguous bits.
+- WCZ is an optional effect to update the Z flag to the original bit state.
 
 ```{=latex}
-\simpleencoding{EEEE}{0100010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{original D[S[4:0]]}{2}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{0100010}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{orig bit}{2}
+\encodingrowcont{EEEE}{0100011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{orig bit}{2}
+\encodingrowcont{EEEE}{0100100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{orig bit}{2}
+\encodingrow{EEEE}{0100101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{orig bit}{2}
+\end{encodingtable}
 ```
 
-**Related:** [BITNC](#bitnc), [BITZ](#bitz), [BITNZ](#bitnz), [BITRND](#bitrnd), [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot)
+**Related:** [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot), [BITRND](#bitrnd)
 
 **Explanation:**
 
-BITC alters the Dest bit(s) designated by Src to equal the state of the C flag. Dest bit(s) described by Src are set to C; the rest are left unchanged.
+These instructions set designated bit(s) in Dest to the specified flag value. BITC and BITZ copy the direct flag state; BITNC and BITNZ copy the inverted flag state.
 
-Src[4:0] indicates the bit number (0-31). For a range of bits, Src[4:0] indicates the base bit number and Src[9:5] indicates how many contiguous bits beyond the base should be affected (1-31). A 9-bit literal Src is enough to express the base bit (Src[4:0]) and a range of up to 16 contiguous bits (Src[8:5]). If needed, use the augmented literal feature (##Src) to augment Src to a 10-bit literal value.
+Src[4:0] indicates the bit number (0-31). For a range, Src[9:5] specifies additional contiguous bits (1-31). A SETQ instruction preceding these can substitute its Dest[4:0] for Src[9:5].
 
-When Src is a register, the register's value bits [9:0] are used as-is, unless a SETQ instruction immediately precedes BITC, substituting SETQ's Dest[4:0] in place of value bits[9:5].
+If WCZ is specified, the Z flag is set (1) if the original base bit was set, or cleared (0) if it was clear.
 
-If the WCZ effect is specified, the Z flag is set (1) if the original Dest base bit (before modification) was set, or is cleared (0) if it was clear. This preserves information about the original bit state.
 
----
 
 ## BITH {#bith}
 
 Bit high
 [Math and Logic Instruction](#math-and-logic-instructions) - Set bit(s) to high (1).
 
-```
-BITH  Dest, {#}Src  {WCZ}
-```
+**BITH**  *Dest, {#}Src*  **{WCZ}**
+
+---
 
 **Result:** Dest bit(s) designated by Src are set to high (1).
 
@@ -68,16 +81,16 @@ When Src is a register, the register's value bits [9:0] are used as-is, unless a
 
 If the WCZ effect is specified, the Z flag is set (1) if the original Dest base bit (before modification) was set, or is cleared (0) if it was clear. This preserves information about the original bit state before it was set high.
 
----
+
 
 ## BITL {#bitl}
 
 Bit low
 [Math and Logic Instruction](#math-and-logic-instructions) - Set bit(s) to low (0).
 
-```
-BITL  Dest, {#}Src  {WCZ}
-```
+**BITL**  *Dest, {#}Src*  **{WCZ}**
+
+---
 
 **Result:** Dest bit(s) designated by Src are set to low (0).
 
@@ -101,49 +114,16 @@ When Src is a register, the register's value bits [9:0] are used as-is, unless a
 
 If the WCZ effect is specified, the Z flag is set (1) if the original Dest base bit (before modification) was set, or is cleared (0) if it was clear. This preserves information about the original bit state before it was cleared to low.
 
----
 
-## BITNC {#bitnc}
-
-Bit set to not C
-[Math and Logic Instruction](#math-and-logic-instructions) - Set bit(s) to the inverse state of the C flag.
-
-```
-BITNC  Dest, {#}Src  {WCZ}
-```
-
-**Result:** Dest bit(s) designated by Src are set to the inverse C flag state (!C).
-
-- Dest is a register whose value will have one or more bits set to !C.
-- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
-- WCZ is an optional effect to update the Z flag.
-
-```{=latex}
-\simpleencoding{EEEE}{0100011}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{original D[S[4:0]]}{2}
-```
-
-**Related:** [BITC](#bitc), [BITNZ](#bitnz), [BITZ](#bitz), [BITRND](#bitrnd), [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot)
-
-**Explanation:**
-
-BITNC alters the Dest bit(s) designated by Src to equal the inverse state of the C flag (!C). Dest bit(s) described by Src are set to !C; the rest are left unchanged.
-
-Src[4:0] indicates the bit number (0-31). For a range of bits, Src[4:0] indicates the base bit number and Src[9:5] indicates how many contiguous bits beyond the base should be affected (1-31). A 9-bit literal Src is enough to express the base bit (Src[4:0]) and a range of up to 16 contiguous bits (Src[8:5]). If needed, use the augmented literal feature (##Src) to augment Src to a 10-bit literal value.
-
-When Src is a register, the register's value bits [9:0] are used as-is, unless a SETQ instruction immediately precedes BITNC, substituting SETQ's Dest[4:0] in place of value bits[9:5].
-
-If the WCZ effect is specified, the Z flag is set (1) if the original Dest base bit (before modification) was set, or is cleared (0) if it was clear. This preserves information about the original bit state.
-
----
 
 ## BITNOT {#bitnot}
 
 Bit not
 [Math and Logic Instruction](#math-and-logic-instructions) - Toggle bit(s) to the opposite state.
 
-```
-BITNOT  Dest, {#}Src  {WCZ}
-```
+**BITNOT**  *Dest, {#}Src*  **{WCZ}**
+
+---
 
 **Result:** Dest bit(s) designated by Src are toggled to their opposite state(s).
 
@@ -167,49 +147,16 @@ When Src is a register, the register's value bits [9:0] are used as-is, unless a
 
 If the WCZ effect is specified, the C and Z flags are set (1) if the original Dest base bit (before modification) was set, or are cleared (0) if it was clear. This preserves information about the original bit state.
 
----
 
-## BITNZ {#bitnz}
-
-Bit set to not Z
-[Math and Logic Instruction](#math-and-logic-instructions) - Set bit(s) to the inverse state of the Z flag.
-
-```
-BITNZ  Dest, {#}Src  {WCZ}
-```
-
-**Result:** Dest bit(s) designated by Src are set to the inverse Z flag state (!Z).
-
-- Dest is a register whose value will have one or more bits set to !Z.
-- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
-- WCZ is an optional effect to update the Z flag.
-
-```{=latex}
-\simpleencoding{EEEE}{0100101}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{original D[S[4:0]]}{2}
-```
-
-**Related:** [BITZ](#bitz), [BITNC](#bitnc), [BITC](#bitc), [BITRND](#bitrnd), [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot)
-
-**Explanation:**
-
-BITNZ alters the Dest bit(s) designated by Src to equal the inverse state of the Z flag (!Z). Dest bit(s) described by Src are set to !Z; the rest are left unchanged.
-
-Src[4:0] indicates the bit number (0-31). For a range of bits, Src[4:0] indicates the base bit number and Src[9:5] indicates how many contiguous bits beyond the base should be affected (1-31). A 9-bit literal Src is enough to express the base bit (Src[4:0]) and a range of up to 16 contiguous bits (Src[8:5]). If needed, use the augmented literal feature (##Src) to augment Src to a 10-bit literal value.
-
-When Src is a register, the register's value bits [9:0] are used as-is, unless a SETQ instruction immediately precedes BITNZ, substituting SETQ's Dest[4:0] in place of value bits[9:5].
-
-If the WCZ effect is specified, the Z flag is set (1) if the original Dest base bit (before modification) was set, or is cleared (0) if it was clear. This preserves information about the original bit state.
-
----
 
 ## BITRND {#bitrnd}
 
 Bit random
 [Math and Logic Instruction](#math-and-logic-instructions) - Set bit(s) to random low or high values.
 
-```
-BITRND  Dest, {#}Src  {WCZ}
-```
+**BITRND**  *Dest, {#}Src*  **{WCZ}**
+
+---
 
 **Result:** Dest bit(s) designated by Src are each set randomly to low or high.
 
@@ -235,49 +182,16 @@ If the WCZ effect is specified, the C and Z flags are set (1) if the original De
 
 Each bit in the range is set independently from the PRNG, producing true random values suitable for cryptographic initialization vectors, random number generation, and simulation applications.
 
----
 
-## BITZ {#bitz}
-
-Bit set to Z
-[Math and Logic Instruction](#math-and-logic-instructions) - Set bit(s) to the state of the Z flag.
-
-```
-BITZ  Dest, {#}Src  {WCZ}
-```
-
-**Result:** Dest bit(s) designated by Src are set to the Z flag state.
-
-- Dest is a register whose value will have one or more bits set to Z.
-- Src is a register, 9-bit literal, or 10-bit augmented literal whose value identifies the bit(s) to modify.
-- WCZ is an optional effect to update the Z flag.
-
-```{=latex}
-\simpleencoding{EEEE}{0100100}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{---}{original D[S[4:0]]}{2}
-```
-
-**Related:** [BITNZ](#bitnz), [BITC](#bitc), [BITNC](#bitnc), [BITRND](#bitrnd), [BITH](#bith), [BITL](#bitl), [BITNOT](#bitnot)
-
-**Explanation:**
-
-BITZ alters the Dest bit(s) designated by Src to equal the state of the Z flag. Dest bit(s) described by Src are set to Z; the rest are left unchanged.
-
-Src[4:0] indicates the bit number (0-31). For a range of bits, Src[4:0] indicates the base bit number and Src[9:5] indicates how many contiguous bits beyond the base should be affected (1-31). A 9-bit literal Src is enough to express the base bit (Src[4:0]) and a range of up to 16 contiguous bits (Src[8:5]). If needed, use the augmented literal feature (##Src) to augment Src to a 10-bit literal value.
-
-When Src is a register, the register's value bits [9:0] are used as-is, unless a SETQ instruction immediately precedes BITZ, substituting SETQ's Dest[4:0] in place of value bits[9:5].
-
-If the WCZ effect is specified, the Z flag is set (1) if the original Dest base bit (before modification) was set, or is cleared (0) if it was clear. This preserves information about the original bit state.
-
----
 
 ## BLNPIX {#blnpix}
 
 Blend pixels
 [Pixel Mixer Instruction](#pixel-mixer-instructions) - Alpha-blend RGB bytes using SETPIV value.
 
-```
-BLNPIX  Dest, {#}Src
-```
+**BLNPIX**  *Dest, {#}Src*
+
+---
 
 **Result:** Src color value bytes are alpha-blended into Dest color value bytes using the SETPIV blend factor.
 
@@ -298,17 +212,17 @@ The alpha-blending operation combines the two color values based on the blend fa
 
 The instruction processes all three color channels (and alpha if present) in parallel, completing in 7 clock cycles. This enables efficient pixel manipulation for graphics applications, user interfaces, and visual effects.
 
----
+
 
 ## BMASK {#bmask}
 
 Bit mask
 [Math and Logic Instruction](#math-and-logic-instructions) - Generate an LSB-justified bit mask.
 
-```
-BMASK  Dest, {#}Src
-BMASK  Dest
-```
+**BMASK**  *Dest, {#}Src*
+**BMASK**  *Dest*
+
+---
 
 **Result:** Bit mask of size Src+1, or Dest+1 (1 to 32 bits) is stored into Dest.
 
@@ -339,16 +253,16 @@ A bit mask is often useful in bitwise operations (AND, OR, XOR) to filter out or
 
 The first syntax form uses Src to specify the size, while the second syntax form (without Src) uses the value already in Dest to determine the mask size. Both forms write the resulting mask back to Dest.
 
----
+
 
 ## BRK {#brk}
 
 Break
 [Interrupt Instruction](#interrupt-instructions) - Trigger breakpoint in current COG.
 
-```
-BRK  {#}Dest
-```
+**BRK**  *{#}Dest*
+
+---
 
 **Result:** If debug interrupts are enabled, a debug interrupt is triggered in the current COG and Dest's value becomes the debug code or the next debug condition.
 
@@ -372,4 +286,4 @@ The format of Dest for Debug ISR use is %AAAAAAAAAAAAAAAAAAAA_BCDEFGHIJKLM where
 
 BRK is essential for interactive debugging, allowing precise control over program execution and inspection of program state at specific points or conditions.
 
----
+

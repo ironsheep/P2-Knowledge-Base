@@ -2,22 +2,13 @@
 
 Every PASM2 instruction is encoded in a 32-bit word with a consistent structure. Understanding this format enables reading the encoding tables in Part II and manually encoding or decoding instructions when needed.
 
----
 
 ## 2.1 The 32-Bit Instruction Word
 
-```{=latex}
-\InstructionEncoding{Generic}{EEEE}{OOOOOOO}{CZI}{DDDDDDDDD}{SSSSSSSSS}
-```
-
 Every PASM2 instruction occupies exactly one 32-bit long with this structure:
 
-```
-Bit:  31 30 29 28 | 27 26 25 24 23 22 21 | 20 19 18 | 17 16 15 14 13 12 11 10 9 | 8 7 6 5 4 3 2 1 0
-      E  E  E  E  |  O  O  O  O  O  O  O |  C  Z  I |  D  D  D  D  D  D  D  D  D | S S S S S S S S S
-      ─────────── │ ───────────────────── │ ──────── │ ─────────────────────────── │ ─────────────────
-      Condition   │      Opcode           │  Flags   │      Destination           │      Source
-       (4 bits)   │      (7 bits)         │ (3 bits) │       (9 bits)             │     (9 bits)
+```{=latex}
+\InstructionEncoding{Generic}{EEEE}{OOOOOOO}{CZI}{DDDDDDDDD}{SSSSSSSSS}
 ```
 
 ### 2.1.1 Field Summary
@@ -42,7 +33,6 @@ The three bits at positions 20-18 control flag behavior and operand mode:
 
 When WC is specified in source code, the assembler sets bit 20 to 1. When WZ is specified, bit 19 is set. When # prefixes the source operand, bit 18 is set.
 
----
 
 ## 2.2 Condition Codes (EEEE Field)
 
@@ -90,54 +80,45 @@ Conditional execution eliminates branches, providing deterministic timing:
 
 ```pasm
 ' Instead of branching:
-        cmp     a, b            wc wz
-        if_z    jmp     #equal_handler  ' 4 cycles if taken
-        mov     result, #0
+                cmp     a, b            wc wz
+        if_z    jmp     #equal_handler          ' 4 cycles if taken
+                mov     result, #0
 
 ' Use conditional execution:
-        cmp     a, b            wc wz
-        if_z    mov     result, #1      ' Always 2 cycles
-        if_nz   mov     result, #0      ' Always 2 cycles
+                cmp     a, b            wc wz
+        if_z    mov     result, #1              ' Always 2 cycles
+        if_nz   mov     result, #0              ' Always 2 cycles
 ```
 
 Common patterns:
 
 **Minimum/Maximum:**
 ```pasm
-        cmp     a, b            wc      ' Compare unsigned
-        if_c    mov     min, a          ' min = a if a < b
-        if_nc   mov     min, b          ' min = b if a >= b
+                cmp     a, b            wc      ' Compare unsigned
+        if_c    mov     min, a                  ' min = a if a < b
+        if_nc   mov     min, b                  ' min = b if a >= b
 ```
 
 **Conditional Assignment:**
 ```pasm
-        test    flags, #MASK    wz      ' Test bit
-        if_nz   mov     mode, #1        ' Set if bit present
+                test    flags, #MASK    wz      ' Test bit
+        if_nz   mov     mode, #1                ' Set if bit present
 ```
 
 **Multi-way Selection:**
 ```pasm
-        cmp     selector, #0    wz
+                cmp     selector, #0    wz
         if_z    mov     result, value0
-        cmp     selector, #1    wz
+                cmp     selector, #1    wz
         if_z    mov     result, value1
-        cmp     selector, #2    wz
+                cmp     selector, #2    wz
         if_z    mov     result, value2
 ```
 
----
 
 ## 2.3 Reading Encoding Tables
 
-Each instruction entry in Part II includes an encoding table with nine columns:
-
-```
-┌──────┬─────────┬─────┬───────────┬───────────┬───────┬─────────┬─────────┬────────┐
-│ COND │  INSTR  │ FX  │   DEST    │    SRC    │ Write │ C Flag  │ Z Flag  │ Clocks │
-├──────┼─────────┼─────┼───────────┼───────────┼───────┼─────────┼─────────┼────────┤
-│ EEEE │ 0001000 │ CZI │ DDDDDDDDD │ SSSSSSSSS │   D   │  carry  │  D = 0  │   2    │
-└──────┴─────────┴─────┴───────────┴───────────┴───────┴─────────┴─────────┴────────┘
-```
+Each instruction entry in Part II includes an encoding table with nine columns. The table shows the instruction's binary encoding on the left and its effects on the right.
 
 ### 2.3.1 Encoding Columns (Left Five)
 
@@ -199,7 +180,6 @@ When FX shows fixed bits (like `000` or `01I`), those bits have fixed values and
 - `2 / 8-23` - COG mode cycles / Hub mode cycles
 - `9..35` - Variable range depending on operands
 
----
 
 ## 2.4 Understanding Multiple Encoding Rows
 
@@ -209,13 +189,13 @@ Some instruction entries show multiple rows in the encoding table. Each row repr
 
 When related instructions share an entry (e.g., DIRZ/DIRNZ), each instruction gets its own row:
 
-```
-DIRZ / DIRNZ
+**DIRZ / DIRNZ**
 
-┌──────┬─────────┬─────┬───────────┬───────────┬───────┬─────────────────┬────────┐
-│ EEEE │ 1101011 │ CZI │ DDDDDDDDD │ 001000100 │ DIRx  │ Orig bit        │   2    │
-│ EEEE │ 1101011 │ CZI │ DDDDDDDDD │ 001000101 │ DIRx  │ Orig bit        │   2    │
-└──────┴─────────┴─────┴───────────┴───────────┴───────┴─────────────────┴────────┘
+```{=latex}
+\begin{inlineencodingtable}
+\inlineencodingrow{EEEE}{1101011}{CZI}{DDDDDDDDD}{001000100}{DIRx}{Orig bit}{2}
+\inlineencodingrow{EEEE}{1101011}{CZI}{DDDDDDDDD}{001000101}{DIRx}{Orig bit}{2}
+\end{inlineencodingtable}
 ```
 
 The first row is DIRZ (S = 001000100), the second is DIRNZ (S = 001000101). Both share the same opcode but differ in the SRC field.
@@ -224,16 +204,17 @@ The first row is DIRZ (S = 001000100), the second is DIRNZ (S = 001000101). Both
 
 When one instruction has multiple syntax forms with different encodings:
 
-```
-GETBYTE
+**GETBYTE**
 
-Syntax 1: GETBYTE  Dest, {#}Src, #Num
-Syntax 2: GETBYTE  Dest
+Syntax 1: `GETBYTE  Dest, {#}Src, #Num`
 
-┌──────┬─────────┬─────┬───────────┬───────────┬───────┬─────────┬────────┐
-│ EEEE │ 1000111 │ NNI │ DDDDDDDDD │ SSSSSSSSS │   D   │  ...    │   2    │
-│ EEEE │ 1000111 │ 000 │ DDDDDDDDD │ 000000000 │   D   │  ...    │   2    │
-└──────┴─────────┴─────┴───────────┴───────────┴───────┴─────────┴────────┘
+Syntax 2: `GETBYTE  Dest`
+
+```{=latex}
+\begin{inlineencodingtable}
+\inlineencodingrow{EEEE}{1000111}{NNI}{DDDDDDDDD}{SSSSSSSSS}{D}{...}{2}
+\inlineencodingrow{EEEE}{1000111}{000}{DDDDDDDDD}{000000000}{D}{...}{2}
+\end{inlineencodingtable}
 ```
 
 The first row shows the standard form with Src and Num operands (NN encodes the byte number 0-3). The second row shows the ALTGB-compatible form where Dest is both read and written.
@@ -242,7 +223,6 @@ The first row shows the standard form with Src and Num operands (NN encodes the 
 
 Each unique machine code encoding = one table row. If two mnemonics produce different bit patterns, they appear as separate rows. If one mnemonic has multiple valid encodings (different syntax forms), each encoding appears as a row.
 
----
 
 ## 2.5 Destination and Source Fields
 
@@ -280,15 +260,12 @@ The 9-bit S field (bits 8-0) has two modes controlled by the I bit:
 
 Some encodings show fixed S values instead of SSSSSSSSS. These instructions use the S field to encode which specific operation to perform:
 
-```
-│ EEEE │ 1101011 │ CZI │ DDDDDDDDD │ 001000100 │   ...   │
-                                      ─────────
-                                      Fixed value selects DIRZ
+```{=latex}
+\encodingsnippetannotated{EEEE}{1101011}{CZI}{DDDDDDDDD}{001000100}{Fixed value selects DIRZ}
 ```
 
 The fixed value distinguishes this instruction from others sharing the same opcode. The programmer does not specify this value; it is implicit in the instruction mnemonic.
 
----
 
 ## 2.6 Immediate Operands
 
@@ -325,7 +302,6 @@ loop    add     counter, #1
 
 When used with `#`, it becomes an immediate representing the address.
 
----
 
 ## 2.7 Augmented Immediates
 
@@ -383,7 +359,6 @@ Augmentation is needed when:
         waitx   ##1000000               ' Delay > 511 cycles
 ```
 
----
 
 ## 2.8 How to Use This Manual
 
@@ -401,23 +376,22 @@ Augmentation is needed when:
 
 Consider the ADD instruction entry:
 
-```
-## ADD
+::: {.notebox}
+**ADD** --- Math Instruction --- Add two unsigned values.
 
-Add
-Math Instruction - Add two unsigned values.
-
-ADD  Dest, {#}Src  {WC|WZ|WCZ}
+`ADD  Dest, {#}Src  {WC|WZ|WCZ}`
 
 **Result:** Sum of unsigned Src and unsigned Dest is stored in Dest.
 
 - Dest is a register containing the value to add Src to, and is where the result is written.
 - Src is a register, 9-bit literal, or 32-bit augmented literal whose value is added into Dest.
 - WC, WZ, or WCZ are optional effects to update flags.
+:::
 
-┌──────┬─────────┬─────┬───────────┬───────────┬───────┬───────────────┬───────────┬────────┐
-│ EEEE │ 0001000 │ CZI │ DDDDDDDDD │ SSSSSSSSS │   D   │ carry of D+S  │ D = 0     │   2    │
-└──────┴─────────┴─────┴───────────┴───────────┴───────┴───────────────┴───────────┴────────┘
+```{=latex}
+\begin{inlineencodingtable}
+\inlineencodingrow{EEEE}{0001000}{CZI}{DDDDDDDDD}{SSSSSSSSS}{D}{C: carry, Z: D=0}{2}
+\end{inlineencodingtable}
 ```
 
 From this entry:
@@ -452,9 +426,6 @@ This tells you:
 - ADDSX: Signed addition with carry-in
 - SUB: The opposite operation
 
----
-
-## Key Concepts
 
 ```{=latex}
 \begin{keyconcepts}
@@ -469,6 +440,5 @@ This tells you:
 \end{keyconcepts}
 ```
 
----
 
 <!-- End of Chapter 2 -->

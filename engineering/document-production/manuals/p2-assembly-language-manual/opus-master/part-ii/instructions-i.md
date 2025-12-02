@@ -2,88 +2,57 @@
 
 This section contains all PASM2 instructions beginning with the letter I.
 
+
+
+## IJZ / IJNZ {#ijz}
+
+Increment and jump if zero / not zero {#ijnz}
+[Branch/Jump Instruction](#branch-jump-instructions) - Increment a register and jump based on zero/non-zero result.
+
+**IJZ**  *Dest, {#}Src*
+**IJNZ**  *Dest, {#}Src*
+
 ---
 
-## IJZ {#ijz}
+**Result:** Dest is incremented by 1, and conditionally jumps:
 
-Increment and jump if zero
-[Branch/Jump Instruction](#branch-jump-instructions) - Increment a register value and jump if the result equals zero.
+| Instruction | Jumps when |
+|-------------|------------|
+| IJZ | Result = 0 |
+| IJNZ | Result ≠ 0 |
 
-```
-IJZ     Dest, {#}Src
-```
-
-**Result:** Dest is incremented by 1, and if the result equals zero, PC is set to a new address.
-
-- Dest is a register whose value is incremented and tested for zero or not zero.
-- Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC to. Use # for relative addressing; omit # for absolute addressing.
+- Dest is a register whose value is incremented and tested.
+- Src is the jump address: use # for relative, omit for absolute.
 
 ```{=latex}
-\simpleencoding{EEEE}{1011100}{00I}{DDDDDDDDD}{SSSSSSSSS}{D and PC\textsuperscript{1}}{---}{---}{2 or 4}
+\begin{encodingtable}
+\encodingrowcont{EEEE}{1011100}{00I}{DDDDDDDDD}{SSSSSSSSS}{D + PC*}{---}{---}{2 or 4}
+\encodingrow{EEEE}{1011100}{01I}{DDDDDDDDD}{SSSSSSSSS}{D + PC*}{---}{---}{2 or 4}
+\end{encodingtable}
 
-\textsuperscript{1} PC is written only when the result in Dest equals zero.
+*PC is written only when the jump condition is met.
 ```
 
-**Related:** [IJNZ](#ijnz), [DJZ](#djz), [DJNZ](#djnz)
+**Related:** [DJZ](#djz), [DJNZ](#djnz), [TJZ](#tjz), [TJNZ](#tjnz)
 
 **Explanation:**
 
-IJZ increments the value in Dest, writes the result back to Dest, and jumps to the address described by Src if the result equals zero.
+IJZ and IJNZ increment Dest and conditionally jump based on whether the result is zero or non-zero.
 
-This instruction is useful for counting until overflow to zero. The typical pattern is to start with a value and increment it repeatedly until it wraps around to zero (after reaching $FFFF\_FFFF).
+IJZ is useful for counting until overflow to zero (from $FFFF_FFFF to 0). IJNZ is useful for counting up from a negative value until reaching zero.
 
-When the # prefix is used on Src, the addressing is relative—the value in Src is treated as a signed offset from the current PC address. This is the most common usage for loops. When # is omitted, the addressing is absolute—Src contains the actual COG address to jump to.
+Takes 2 clocks when not jumping, 4 clocks when jumping (pipeline flush).
 
-If the result after incrementing Dest is zero, the jump is taken and execution continues at the new address. If the result is not zero, execution continues with the next sequential instruction.
 
-IJZ always takes 2 clock cycles when the jump is not taken, and 4 clock cycles when the jump is taken (due to the pipeline flush).
-
----
-
-## IJNZ {#ijnz}
-
-Increment and jump if not zero
-[Branch/Jump Instruction](#branch-jump-instructions) - Increment a register value and jump if the result is not zero.
-
-```
-IJNZ    Dest, {#}Src
-```
-
-**Result:** Dest is incremented by 1, and if the result is not zero, PC is set to a new address.
-
-- Dest is a register whose value is incremented and tested for zero or not zero.
-- Src is a register, 9-bit literal, or 20-bit augmented literal whose value is the absolute or relative address to set PC to. Use # for relative addressing; omit # for absolute addressing.
-
-```{=latex}
-\simpleencoding{EEEE}{1011100}{01I}{DDDDDDDDD}{SSSSSSSSS}{D and PC\textsuperscript{1}}{---}{---}{2 or 4}
-
-\textsuperscript{1} PC is written only when the result in Dest is not zero.
-```
-
-**Related:** [IJZ](#ijz), [DJNZ](#djnz), [DJZ](#djz)
-
-**Explanation:**
-
-IJNZ increments the value in Dest, writes the result back to Dest, and jumps to the address described by Src if the result is not zero.
-
-This instruction is useful for counting up to a specific value. The typical pattern is to start with zero (or a negative value) and increment until reaching a target count. Since most non-zero values result in a jump, the loop continues until Dest increments to exactly zero, at which point execution falls through to the next instruction.
-
-When the # prefix is used on Src, the addressing is relative—the value in Src is treated as a signed offset from the current PC address. This is the most common usage for loops. When # is omitted, the addressing is absolute—Src contains the actual COG address to jump to.
-
-If the result after incrementing Dest is not zero, the jump is taken and execution continues at the new address. If the result equals zero, execution continues with the next sequential instruction.
-
-IJNZ always takes 2 clock cycles when the jump is not taken, and 4 clock cycles when the jump is taken (due to the pipeline flush).
-
----
 
 ## INCMOD {#incmod}
 
 Increment with modulus
 [Math Instruction](#math-instructions) - Increment a value with automatic wrap-around at a specified modulus.
 
-```
-INCMOD  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**INCMOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** If Dest was not equal to Src, it is incremented by 1; otherwise Dest is reset to 0.
 
@@ -112,28 +81,28 @@ INCMOD does not limit Dest within the specified range. If Dest begins at a value
 A common usage pattern for INCMOD is managing circular buffers:
 
 ```pasm
-        ' Increment tail index with modulo for circular buffer
-        incmod  tail_idx, #BUF_SIZE-1  wc
-if_c    jmp     #buffer_wrapped
+                ' Increment tail index with modulo for circular buffer
+                incmod  tail_idx, #BUF_SIZE-1  wc
+        if_c    jmp     #buffer_wrapped
 
-        ' Safe to add data at tail
-        add     buffer_ptr, tail_idx
-        wrbyte  new_data, buffer_ptr
+                ' Safe to add data at tail
+                add     buffer_ptr, tail_idx
+                wrbyte  new_data, buffer_ptr
 ```
 
 INCMOD is also ideal for round-robin scheduling across a fixed number of resources:
 
 ```pasm
-        ' Round-robin through 8 ports (0-7)
+                ' Round-robin through 8 ports (0-7)
 .loop
-        ' Service current port
-        ' ... port service code ...
+                ' Service current port
+                ' ... port service code ...
 
-        ' Move to next port
-        incmod  portctr, #7            wc
-if_nc   jmp     #.loop
+                ' Move to next port
+                incmod  portctr, #7            wc
+        if_nc   jmp     #.loop
 
-        ' All ports serviced, continue
+                ' All ports serviced, continue
 ```
 
----
+

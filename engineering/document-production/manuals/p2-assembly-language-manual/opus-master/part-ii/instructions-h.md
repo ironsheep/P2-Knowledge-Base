@@ -2,16 +2,16 @@
 
 This section contains all PASM2 instructions beginning with the letter H.
 
----
+
 
 ## HUBSET {#hubset}
 
 Set hub configuration
 [COG Control Instruction](#cog-control-instructions) - Configure system clock and hub parameters.
 
-```
-HUBSET  {#}D
-```
+**HUBSET**  *{#}D*
+
+---
 
 **Result:** Hub configuration is updated according to the value in D, controlling clock source, crystal settings, and PLL configuration.
 
@@ -76,4 +76,4 @@ In this PLL example, the VCO runs at 20 MHz * 16 = 320 MHz, then the post divide
 
 HUBSET takes 2 clock cycles to execute, but switching to a new clock source may take additional time for oscillator stabilization and PLL lock. Always allow appropriate wait periods when changing clock sources.
 
----
+

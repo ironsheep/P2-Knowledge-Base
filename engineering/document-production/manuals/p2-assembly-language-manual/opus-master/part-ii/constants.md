@@ -21,9 +21,9 @@ The TRUE constant represents a boolean true condition with all 32 bits set to 1.
 #### Usage
 ```pasm
 ' Using TRUE in conditional logic
-        cmp     x, #0       wz      ' Compare x with 0
-        mov     result, TRUE        ' Default to TRUE
-        if_z mov  result, FALSE     ' Set to FALSE if x was 0
+                cmp     x, #0       wz      ' Compare x with 0
+                mov     result, TRUE        ' Default to TRUE
+        if_z    mov     result, FALSE       ' Set to FALSE if x was 0
 ```
 
 #### Notes
@@ -34,7 +34,7 @@ The TRUE constant represents a boolean true condition with all 32 bits set to 1.
 #### Related Constants
 - [FALSE](#false) — Logical false constant
 
----
+
 
 ### FALSE
 
@@ -67,7 +67,7 @@ The FALSE constant represents a boolean false condition with all 32 bits cleared
 #### Related Constants
 - [TRUE](#true) — Logical true constant
 
----
+
 
 ## Numeric Limit Constants
 
@@ -88,12 +88,12 @@ NEGX represents the maximum negative integer value in 32-bit two's complement re
 #### Usage
 ```pasm
 ' Checking for negative underflow
-        cmps    value, NEGX     wc  ' Check if value is below min negative
-        if_c jmp    #underflow      ' Jump if underflow (carry set means less than)
+                cmps    value, NEGX     wc      ' Check if below min negative
+        if_c    jmp     #underflow              ' Jump if underflow
 
 ' Using NEGX as lower limit
-        mov     limit, NEGX         ' Set limit to maximum negative value
-        maxs    value, limit        ' Clamp value to not go below NEGX
+                mov     limit, NEGX             ' Set limit to max negative
+                maxs    value, limit            ' Clamp to not go below NEGX
 ```
 
 #### Notes
@@ -105,7 +105,7 @@ NEGX represents the maximum negative integer value in 32-bit two's complement re
 #### Related Constants
 - [POSX](#posx) — Maximum positive integer constant
 
----
+
 
 ### POSX
 
@@ -124,12 +124,12 @@ POSX represents the maximum positive integer value in 32-bit two's complement re
 #### Usage
 ```pasm
 ' Checking for positive overflow
-        cmp     value, POSX     wc  ' Check if value exceeds max positive
-        if_nc jmp   #overflow       ' Jump if overflow (carry not set means greater/equal)
+                cmp     value, POSX     wc      ' Check if exceeds max positive
+        if_nc   jmp     #overflow               ' Jump if overflow
 
 ' Using POSX as upper limit
-        mov     limit, POSX         ' Set limit to maximum positive value
-        mins    value, limit        ' Clamp value to not exceed POSX
+                mov     limit, POSX             ' Set limit to max positive
+                mins    value, limit            ' Clamp to not exceed POSX
 ```
 
 #### Notes
@@ -141,7 +141,7 @@ POSX represents the maximum positive integer value in 32-bit two's complement re
 #### Related Constants
 - [NEGX](#negx) — Maximum negative integer constant
 
----
+
 
 ## Mathematical Constants
 
@@ -182,7 +182,7 @@ The PI constant provides the mathematical constant π encoded in IEEE 754 single
 #### Related Constants
 None (unique mathematical constant)
 
----
+
 
 ## Execution Mode Constants
 
@@ -226,7 +226,7 @@ Where `id` specifies the target cog (0-7) and `address` points to the code in hu
 - [COGEXEC_NEW](#cogexec_new) — Auto-select available cog variant
 - [COGEXEC_NEW_PAIR](#cogexec_new_pair) — Auto-select adjacent cog pair variant
 
----
+
 
 ### HUBEXEC
 
@@ -244,10 +244,10 @@ HUBEXEC specifies hub execution mode for the COGINIT instruction. When used, COG
 #### Usage
 ```pasm
 ' Start specific cog with hub execution
-        COGINIT #HUBEXEC+1, #$400   ' Start Cog 1 executing from Hub RAM $400
+        COGINIT #HUBEXEC+1, #$400   ' Cog 1 from Hub RAM $400
 
 ' Start Cog 5 with hub execution at label
-        COGINIT #HUBEXEC+5, @code   ' Start Cog 5 executing from @code in hub
+        COGINIT #HUBEXEC+5, @code   ' Cog 5 from @code in hub
 ```
 
 #### Syntax
@@ -269,7 +269,7 @@ Where `id` specifies the target cog (0-7) and `address` points to the code in hu
 - [HUBEXEC_NEW](#hubexec_new) — Auto-select available cog variant
 - [HUBEXEC_NEW_PAIR](#hubexec_new_pair) — Auto-select adjacent cog pair variant
 
----
+
 
 ## Execution Mode Variants
 
@@ -289,7 +289,7 @@ Value: Automatically selects an adjacent pair of available cogs for HUBEXEC mode
 
 These variants simplify cog management by allowing the system to automatically assign available cogs rather than requiring explicit cog ID specification.
 
----
+
 
 ## Hardware Configuration Constants
 
@@ -307,7 +307,7 @@ The Streamer is the P2's DMA-like engine for high-bandwidth data transfer betwee
 
 **See:** [Streamer Configuration Constants](streamer-constants.md)
 
----
+
 
 ## Constants Summary
 

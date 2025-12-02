@@ -2,18 +2,18 @@
 
 This section contains all PASM2 instructions beginning with the letter C.
 
----
+
 
 ## CALL {#call}
 
 Call subroutine
 [Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context on the stack.
 
-```
-CALL  #Addr
-CALL  #\Addr
-CALL  Dest  {WC|WZ|WCZ}
-```
+**CALL**  *#Addr*
+**CALL**  *#\Addr*
+**CALL**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Current C and Z flags and address of the next instruction are pushed onto the hardware stack, PC is set to the new address, and optionally C and Z are updated to new states.
 
@@ -44,18 +44,18 @@ If the WZ or WCZ effect is specified, the Z flag is updated to match D[30], afte
 
 The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub execution.
 
----
+
 
 ## CALLA {#calla}
 
 Call subroutine via PTRA
 [Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context in the Hub long at PTRA++.
 
-```
-CALLA  #Addr
-CALLA  #\Addr
-CALLA  Dest  {WC|WZ|WCZ}
-```
+**CALLA**  *#Addr*
+**CALLA**  *#\Addr*
+**CALLA**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Current C and Z flags and address of the next instruction are written to Hub RAM at PTRA, PTRA is incremented by 4, PC is set to the new address, and optionally C and Z are updated to new states.
 
@@ -86,18 +86,18 @@ If the WZ or WCZ effect is specified, the Z flag is set to D[30] after the origi
 
 CALLA is used for subroutine calls when Hub RAM is being used as the call stack instead of the hardware stack. This is useful for deep nesting or when preserving the hardware stack for other purposes. The instruction takes 5-12 cycles depending on Hub memory timing.
 
----
+
 
 ## CALLB {#callb}
 
 Call subroutine via PTRB
 [Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context in the Hub long at PTRB++.
 
-```
-CALLB  #Addr
-CALLB  #\Addr
-CALLB  Dest  {WC|WZ|WCZ}
-```
+**CALLB**  *#Addr*
+**CALLB**  *#\Addr*
+**CALLB**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Current C and Z flags and address of the next instruction are written to Hub RAM at PTRB, PTRB is incremented by 4, PC is set to the new address, and optionally C and Z are updated to new states.
 
@@ -128,18 +128,18 @@ If the WZ or WCZ effect is specified, the Z flag is set to D[30] after the origi
 
 CALLB operates identically to CALLA except it uses PTRB as the stack pointer instead of PTRA. This allows for maintaining separate call stacks or using both pointers for different purposes. The instruction takes 5-12 cycles depending on Hub memory timing.
 
----
+
 
 ## CALLD {#calld}
 
 Call with destination register
 [Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context in PA/PB/PTRA/PTRB/D.
 
-```
-CALLD  PA|PB|PTRA|PTRB, #Addr
-CALLD  PA|PB|PTRA|PTRB, #\Addr
-CALLD  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**CALLD**  *PA|PB|PTRA|PTRB, #Addr*
+**CALLD**  *PA|PB|PTRA|PTRB, #\Addr*
+**CALLD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Current C and Z flags and address of the next instruction are written to the specified register (PA, PB, PTRA, PTRB, or Dest), PC is set to the new address, and optionally C and Z are updated to new states.
 
@@ -174,16 +174,16 @@ If the WZ or WCZ effect is specified, the Z flag is updated to match S[30], afte
 
 The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub execution.
 
----
+
 
 ## CALLPA {#callpa}
 
 Call subroutine with PA parameter
 [Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context on the stack and copy D into PA.
 
-```
-CALLPA  {#}Dest, {#}Src
-```
+**CALLPA**  *{#}Dest, {#}Src*
+
+---
 
 **Result:** Current C and Z flags and address of the next instruction are pushed onto the hardware stack, Dest is copied to PA, and PC is set to the address specified by Src.
 
@@ -206,16 +206,16 @@ The Src operand determines the target address. If Src is preceded by #, it is tr
 
 The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub execution.
 
----
+
 
 ## CALLPB {#callpb}
 
 Call subroutine with PB parameter
 [Branch/Jump Instruction](#branch-jump-instructions) - Call a subroutine; store return context on the stack and copy D into PB.
 
-```
-CALLPB  {#}Dest, {#}Src
-```
+**CALLPB**  *{#}Dest, {#}Src*
+
+---
 
 **Result:** Current C and Z flags and address of the next instruction are pushed onto the hardware stack, Dest is copied to PB, and PC is set to the address specified by Src.
 
@@ -238,16 +238,16 @@ The Src operand determines the target address. If Src is preceded by #, it is tr
 
 The instruction takes 4 cycles for COG/LUT execution, or 13-20 cycles for Hub execution.
 
----
+
 
 ## CMP {#cmp}
 
 Compare
 [Math Instruction](#math-instructions) - Compare two unsigned values.
 
-```
-CMP  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**CMP**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
@@ -272,23 +272,23 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src, 
 To compare unsigned multi-long values (64-bit or larger), use CMP for the least significant long, then CMPX for each subsequent long. For example, to compare two 64-bit values:
 
 ```pasm
-        cmp     value_lo, other_lo  wc    ' Compare low longs, C=1 if value < other
+        cmp     value_lo, other_lo  wc    ' Compare low longs
         cmpx    value_hi, other_hi  wcz   ' Compare high longs with borrow
         ' C and Z now reflect the 64-bit comparison result
 ```
 
 CMP is fundamental for implementing conditional logic and control flow based on numeric comparisons.
 
----
+
 
 ## CMPM {#cmpm}
 
 Compare most significant bit
 [Math Instruction](#math-instructions) - Compare two unsigned values, get MSB of difference.
 
-```
-CMPM  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**CMPM**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
@@ -312,16 +312,16 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src, 
 
 CMPM is useful when the most significant bit of the difference carries semantic meaning for the algorithm being implemented, such as certain mathematical operations or specialized comparison logic.
 
----
+
 
 ## CMPR {#cmpr}
 
 Compare reverse
 [Math Instruction](#math-instructions) - Compare two unsigned values (in reverse order to CMP).
 
-```
-CMPR  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**CMPR**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
@@ -345,16 +345,16 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if Dest equals Src, 
 
 CMPR is useful when the natural order of operands in your code is reversed from what CMP expects, avoiding the need to swap operands or reverse the logic. Note that for unsigned multi-long comparisons, use CMP (not CMPR) followed by CMPX.
 
----
+
 
 ## CMPS {#cmps}
 
 Compare signed
 [Math Instruction](#math-instructions) - Compare two signed values.
 
-```
-CMPS  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**CMPS**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
@@ -380,20 +380,20 @@ To compare signed multi-long values (64-bit or larger), use CMP (not CMPS) for t
 
 ```pasm
         cmp     value_lo, other_lo  wc    ' Compare low longs unsigned
-        cmpsx   value_hi, other_hi  wcz   ' Compare high longs signed with borrow
+        cmpsx   value_hi, other_hi  wcz   ' Compare high signed w/borrow
         ' C and Z now reflect the signed 64-bit comparison result
 ```
 
----
+
 
 ## CMPSUB {#cmpsub}
 
 Compare and subtract
 [Math Instruction](#math-instructions) - Compare two unsigned values and subtract the second if it is lesser or equal.
 
-```
-CMPSUB  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**CMPSUB**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Dest is decremented by Src unless it is less than Src, and the comparison results are optionally written to the C and Z flags.
 
@@ -421,16 +421,16 @@ If the WZ or WCZ effect is specified, the Z flag is set (1) if the result equals
 
 CMPSUB is particularly useful for implementing division algorithms, modulo operations, and other mathematical routines where conditional subtraction based on magnitude is needed.
 
----
+
 
 ## CMPSX {#cmpsx}
 
 Compare signed, extended
 [Math Instruction](#math-instructions) - Compare two signed values plus carry flag.
 
-```
-CMPSX  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**CMPSX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
@@ -456,20 +456,20 @@ For signed multi-long comparisons, use CMP for the least significant long, optio
 
 ```pasm
         cmp     value_lo, other_lo  wc    ' Compare low longs
-        cmpsx   value_hi, other_hi  wcz   ' Compare high longs signed with borrow
+        cmpsx   value_hi, other_hi  wcz   ' Compare high signed w/borrow
         ' C=1 if signed value < other, Z=1 if equal
 ```
 
----
+
 
 ## CMPX {#cmpx}
 
 Compare extended
 [Math Instruction](#math-instructions) - Compare two unsigned values plus carry flag.
 
-```
-CMPX  Dest, {#}Src  {WC|WZ|WCZ}
-```
+**CMPX**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** Greater/lesser and equality status is optionally written to the C and Z flags.
 
@@ -499,16 +499,16 @@ For unsigned multi-long comparisons, use CMP for the least significant long, the
         ' C=1 if unsigned value < other, Z=1 if equal
 ```
 
----
+
 
 ## COGATN {#cogatn}
 
 Cog attention
 [Event Instruction](#event-instructions) - Get the attention of one or more other cogs.
 
-```
-COGATN  {#}Dest
-```
+**COGATN**  *{#}Dest*
+
+---
 
 **Result:** The attention signal of one or more cogs is strobed.
 
@@ -540,16 +540,16 @@ To signal multiple cogs simultaneously:
 
 COGATN is useful for implementing inter-cog communication, synchronization, and event notification without requiring polling of shared memory.
 
----
+
 
 ## COGBRK {#cogbrk}
 
 Cog break
 [Debug Instruction](#debug-instructions) - Trigger breakpoint in specified cog.
 
-```
-COGBRK  {#}Dest
-```
+**COGBRK**  *{#}Dest*
+
+---
 
 **Result:** If in the Debug ISR, trigger an asynchronous breakpoint in cog identified by Dest.
 
@@ -575,16 +575,16 @@ For example, to trigger a breakpoint in cog 2:
 
 COGBRK is a specialized instruction primarily used by development and debugging tools rather than in typical application code.
 
----
+
 
 ## COGID {#cogid}
 
 Cog identification
 [COG Control Instruction](#cog-control-instructions) - Get current cog's ID or any cog's status by ID.
 
-```
-COGID  {#}Dest  {WC}
-```
+**COGID**  *{#}Dest*  **{WC}**
+
+---
 
 **Result:** Current cog's ID is written to Dest or C is set (1) or cleared (0) if the Dest cog is running or stopped.
 
@@ -617,16 +617,16 @@ To check if cog 3 is running:
         cogid   #3              wc    ' C=1 if cog 3 is running
 ```
 
----
+
 
 ## COGINIT {#coginit}
 
 Cog initialize
 [COG Control Instruction](#cog-control-instructions) - Start an available cog, or restart a cog by ID.
 
-```
-COGINIT  {#}Dest, {#}Src  {WC}
-```
+**COGINIT**  *{#}Dest, {#}Src*  **{WC}**
+
+---
 
 **Result:** Target cog is started according to Dest to execute code from Src. The code pointer (Src) is written to the target cog's PTRB, and optionally a data pointer is written to its PTRA if SETQ preceded COGINIT.
 
@@ -664,14 +664,14 @@ Load and start a specific cog from Hub RAM:
 Start a free cog:
 
 ```pasm
-        coginit #COGEXEC_NEW, addr  wc    ' Find free cog, load, start
-  if_c  jmp     #no_cog_available     ' Branch if no cog available
+                coginit #COGEXEC_NEW, addr  wc  ' Find free cog, load, start
+        if_c    jmp     #no_cog_available       ' Branch if no cog available
 ```
 
 Skip load and execute from Hub RAM:
 
 ```pasm
-        coginit #HUBEXEC+3, addr      ' Skip load, start cog 3 in Hub exec mode
+        coginit #HUBEXEC+3, addr      ' Cog 3 hub exec mode
 ```
 
 Start a cog pair for LUT sharing:
@@ -680,16 +680,16 @@ Start a cog pair for LUT sharing:
         coginit #HUBEXEC_NEW_PAIR, addr   ' Start free cog pair
 ```
 
----
+
 
 ## COGSTOP {#cogstop}
 
 Cog stop
 [COG Control Instruction](#cog-control-instructions) - Stop a cog by ID.
 
-```
-COGSTOP  {#}Dest
-```
+**COGSTOP**  *{#}Dest*
+
+---
 
 **Result:** Cog indicated by Dest is terminated (stopped).
 
@@ -722,16 +722,16 @@ To stop the current cog (terminate self):
 
 COGSTOP is useful for managing cog resources dynamically, shutting down cogs that are no longer needed, or resetting a cog before restarting it with new code. Note that stopping a cog does not free any Hub memory it may have been using.
 
----
+
 
 ## CRCBIT {#crcbit}
 
 CRC iterate bit
 [Math Instruction](#math-instructions) - Iterate CRC value in D using C and polynomial in S.
 
-```
-CRCBIT  Dest, {#}Src
-```
+**CRCBIT**  *Dest, {#}Src*
+
+---
 
 **Result:** Dest is updated with the next CRC iteration using the C flag and polynomial in Src.
 
@@ -765,16 +765,16 @@ CRCBIT is typically used in a loop to process data one bit at a time:
 
 For processing nibbles (4 bits) at a time instead, use CRCNIB.
 
----
+
 
 ## CRCNIB {#crcnib}
 
 CRC iterate nibble
 [Math Instruction](#math-instructions) - Iterate CRC value in D for a nibble using polynomial in S.
 
-```
-CRCNIB  Dest, {#}Src
-```
+**CRCNIB**  *Dest, {#}Src*
+
+---
 
 **Result:** Dest is updated with CRC iterations for a nibble, and Q is shifted left by 4 bits.
 
@@ -805,4 +805,4 @@ The typical usage pattern is:
 
 CRCNIB is more efficient than CRCBIT when processing byte-oriented data, providing a 4x speedup for CRC calculations. The automatic Q shift simplifies the loop logic for multi-nibble processing.
 
----
+

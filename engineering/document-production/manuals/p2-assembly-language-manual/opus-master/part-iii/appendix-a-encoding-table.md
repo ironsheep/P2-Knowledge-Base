@@ -14,11 +14,12 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | Z Effect | What Z flag indicates after instruction execution |
 
 **Flag Effect Notation:**
-- `—` indicates the flag is not affected by the instruction
+
+- `---` indicates the flag is not affected by the instruction
 - `Result = 0` means the flag is set if the result equals zero
 - Specific conditions are described where applicable
 
----
+
 
 ## Instruction Encodings
 
@@ -48,7 +49,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | ALTSW | `1001011` | — | 2 | — | — |
 | AND | `0101000` | CZI | 2 | parity of result | Result = 0 |
 | ANDN | `0101001` | CZI | 2 | parity of result | Result = 0 |
-| ASMCLK | `—` | — | — | — | — |
+| ASMCLK | `---` | — | — | — | — |
 | AUGD | `1111100` | — | 2 | — | — |
 | AUGS | `1111000` | — | 2 | — | — |
 | BITC | `0100010` | CZI | 2 | — | original D[S[4:0]] |
@@ -65,7 +66,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | CALL | `1101101` | — | 4 / 13-20 | — | — |
 | CALLA | `1101011` | CZ | 5...12 * | D[31] | D[30] |
 | CALLB | `1101011` | CZ | 5...12 * | D[31] | D[30] |
-| CALLD | `—` | — | 4 / 13-20 | — | — |
+| CALLD | `---` | — | 4 / 13-20 | — | — |
 | CALLPA | `1011010` | — | 4 / 13–20 | — | — |
 | CALLPB | `1011010` | — | 4 / 13–20 | — | — |
 | CMP | `0010000` | CZI | 2 | Unsigned (D < S) | D=S |
@@ -82,7 +83,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | COGSTOP | `1101011` | — | 2–9 | — | — |
 | CRCBIT | `1001110` | — | 2 | — | — |
 | CRCNIB | `1001110` | — | 2 | — | — |
-| DEBUG | `—` | — | — | — | — |
+| DEBUG | `---` | — | — | — | — |
 | DECMOD | `0111001` | CZI | 2 | Modulus triggered | Result = 0 |
 | DECOD | `1001110` | — | 2 | — | — |
 | DIRC | `1101011` | CZ | 2 | — | DIR bit |
@@ -169,7 +170,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 | JXMT | `1011110` | — | 2 or 4 | — | — |
 | JXRL | `1011110` | — | 2 or 4 | — | — |
 | JXRO | `1011110` | — | 2 or 4 | — | — |
-| LOC | `—` | — | 2 | — | — |
+| LOC | `---` | — | 2 | — | — |
 | LOCKNEW | `1101011` | C | 4...11 | 1 if no LOCK available | — |
 | LOCKREL | `1101011` | C | 2...9, +2 if result | — | — |
 | LOCKRET | `1101011` | — | 2...9 | — | — |
@@ -386,7 +387,7 @@ This appendix provides the complete encoding reference for all PASM2 instruction
 
 **Total Instructions:** 359
 
----
+
 
 **Notes:**
 

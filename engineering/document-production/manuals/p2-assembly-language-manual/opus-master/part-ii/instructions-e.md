@@ -2,17 +2,17 @@
 
 This section contains all PASM2 instructions beginning with the letter E.
 
----
+
 
 ## ENCOD {#encod}
 
 Encode
 [Math Instruction](#math-instructions) - Get bit position of top-most 1 of Src or Dest into Dest.
 
-```
-ENCOD  Dest, {#}Src  {WC|WZ|WCZ}
-ENCOD  Dest          {WC|WZ|WCZ}
-```
+**ENCOD**  *Dest, {#}Src*  **{WC|WZ|WCZ}**
+**ENCOD**  *Dest*  **{WC|WZ|WCZ}**
+
+---
 
 **Result:** The bit position value of the top-most high bit (1) in Src, or Dest, is stored in Dest.
 
@@ -47,16 +47,16 @@ If the value to encode may be 0, use the WC or WCZ effect and check the resultin
 
 ENCOD is the complement of DECOD. Where DECOD converts a bit position (0-31) into a 32-bit value with a single bit set, ENCOD performs the reverse operation, converting a 32-bit value into the position of its highest set bit.
 
----
+
 
 ## EXECF {#execf}
 
 Call and skip
 [Branch/Jump Instruction](#branch-jump-instructions) - Jump to address in COG/LUT and set SKIPF pattern.
 
-```
-EXECF  {#}Dest
-```
+**EXECF**  *{#}Dest*
+
+---
 
 **Result:** PC is set to Dest[9:0] and the SKIPF pattern is set to Dest[31:10].
 
@@ -80,4 +80,4 @@ EXECF combines the functionality of CALL (jumping to a new address) and SKIPF (s
 
 The instruction takes 4 clock cycles to execute, regardless of whether it executes from COG/LUT or Hub memory.
 
----
+
