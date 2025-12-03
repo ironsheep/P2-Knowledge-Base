@@ -204,6 +204,30 @@ This intermediate LaTeX file is useful for:
 - Debugging rendering issues when user provides visual feedback
 - Finding the exact LaTeX that produced problematic output
 
+#### 6. Interactive Testing for Component Isolation
+
+For debugging specific components (like individual TikZ diagrams), use PDF Forge's interactive testing system:
+
+```
+/engineering/pdf-forge/interactive-testing/
+├── templates/          # Drop template files here
+├── test-documents/     # Create minimal test .md files
+├── test-requests/      # JSON requests (timestamped: test-$(date +%s).json)
+└── test-results/       # Results appear here automatically
+```
+
+**Usage:**
+1. Copy templates to `interactive-testing/templates/`
+2. Create minimal test documents in `test-documents/` (e.g., one diagram per file)
+3. Create timestamped request: `test-requests/test-$(date +%s).json`
+4. Forge processes automatically; results appear in `test-results/`
+
+**Example:** To test all 18 TikZ diagrams individually, create 18 test files each containing just one `\DiagramName` macro. This isolates which specific diagram is failing.
+
+**Full documentation:** `/engineering/pdf-forge/interactive-testing/README.md`
+
+---
+
 ### Important Notes
 
 - **Outbound is FLAT** - All `.sty`, `.latex`, `.lua`, and `.json` files go at root level
@@ -374,5 +398,5 @@ Required arguments are documented in `request-requirements.json`.
 ---
 
 *Created: 2025-09-10*
-*Updated: 2025-12-02 - Corrected file names to p2kb-sp-* prefix, clarified Forge persistence model*
+*Updated: 2025-12-03 - Added interactive testing section for component isolation debugging*
 *Sprint: Smart Pins Tutorial Audit*
