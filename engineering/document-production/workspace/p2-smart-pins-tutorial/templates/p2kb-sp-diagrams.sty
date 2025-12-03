@@ -7,7 +7,7 @@
 % Excludes oscilloscope screenshots (page19, page52) which remain as images
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{p2kb-smartpins-diagrams}[2025/12/02 P2KB Smart Pins Diagrams v1.0]
+\ProvidesPackage{p2kb-sp-diagrams}[2025/12/02 P2KB Smart Pins Diagrams v1.0]
 
 \RequirePackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, decorations.pathreplacing, patterns}
@@ -44,12 +44,14 @@
     },
     sp-annotation/.style={
         font=\small,
-        sp-text
+        sp-text,
+        align=center
     },
     sp-label/.style={
         font=\small,
         sp-text,
-        anchor=east
+        anchor=east,
+        align=center
     },
     sp-bitlabel/.style={
         font=\footnotesize,
@@ -116,7 +118,7 @@
 % Shows: System Clock, DIRA, OUTA, Instruction timing for DRVH #0
 
 \newcommand{\DRVHTimingDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=1cm, y=1cm]
 
 % Clock cycle numbers
@@ -174,7 +176,7 @@
 \node[sp-annotation, anchor=west] at (5.5, 0.3) {Reg: Internal register transfers};
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -182,7 +184,7 @@
 % ============================================================================
 
 \newcommand{\TESTBINATimingDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=1cm, y=1cm]
 
 % Clock cycle numbers
@@ -228,7 +230,7 @@
 \draw[sp-signal, ->] (7.5, 0.3) -- (8.0, 0.3);
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -236,7 +238,7 @@
 % ============================================================================
 
 \newcommand{\TESTPTimingDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=1cm, y=1cm]
 
 % Clock cycle numbers
@@ -275,7 +277,7 @@
 \draw[sp-signal, ->] (5.8, 0.3) -- (6.3, 0.3);
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -283,7 +285,7 @@
 % ============================================================================
 
 \newcommand{\DACPWMPeriodDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=1cm, y=1cm]
 
 % DAC Input label
@@ -325,7 +327,7 @@
 \node[sp-annotation] at (3.65, -0.4) {256 System-clock periods};
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -333,7 +335,7 @@
 % ============================================================================
 
 \newcommand{\PulseWidthMeasurementDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=1cm, y=1cm]
 
 % Signal levels
@@ -372,7 +374,7 @@
 \node[sp-annotation] at (3.2, -1.0) {* Number of system-clock periods};
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -380,7 +382,7 @@
 % ============================================================================
 
 \newcommand{\NCOFrequencyDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=0.8cm, y=1cm]
 
 % Signal levels
@@ -434,7 +436,7 @@
 \node[sp-annotation] at (3.0, -0.8) {* Number of system-clock periods};
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -442,7 +444,7 @@
 % ============================================================================
 
 \newcommand{\NCODutyTimingDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=0.55cm, y=1cm]
 
 % IN Flag
@@ -497,7 +499,7 @@
 }
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -505,7 +507,7 @@
 % ============================================================================
 
 \newcommand{\NCODutyBlockDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=1cm, y=1cm]
 
 % System Clock input
@@ -559,7 +561,7 @@
 \draw[sp-arrow] (zreg.south) -- (8.0, 0.8) -- (6.5, 0.8) -- (6.5, 0) -- (adder.east);
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -567,7 +569,7 @@
 % ============================================================================
 
 \newcommand{\TrianglePWMDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=0.9cm, y=0.9cm]
 
 % IN signal (top)
@@ -634,7 +636,7 @@
 \node[sp-annotation, text width=8cm] at (3.5, -2.3) {\$200 Base periods = 20.5 usec Frame Period};
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -642,7 +644,7 @@
 % ============================================================================
 
 \newcommand{\SawtoothPWMDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=0.9cm, y=0.9cm]
 
 % IN signal
@@ -699,7 +701,7 @@
 \node[sp-annotation, text width=8cm] at (2.75, -1.4) {\$200 Base periods = 20.5 usec Frame Period};
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -707,7 +709,7 @@
 % ============================================================================
 
 \newcommand{\QuadEncoderDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=1cm, y=1cm]
 
 % === LEFT SIDE: Circuit schematic ===
@@ -789,7 +791,7 @@
 \node[sp-annotation] at (8.8, 0.8) {CCW};
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -797,7 +799,7 @@
 % ============================================================================
 
 \newcommand{\ComparatorDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=0.5cm, y=1cm]
 
 % System Clock (dense)
@@ -846,7 +848,7 @@
 \node[sp-annotation] at (12.0, 0.2) {Z = S Counts};
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -854,7 +856,7 @@
 % ============================================================================
 
 \newcommand{\PeriodMeasurementDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=0.7cm, y=1cm]
 
 % A Input label
@@ -890,7 +892,7 @@
 \node[sp-annotation, anchor=west] at (9.7, 1.0) {Z = Counts};
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -898,7 +900,7 @@
 % ============================================================================
 
 \newcommand{\ContinuousPeriodDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=0.6cm, y=1cm]
 
 % A Input label
@@ -943,7 +945,7 @@
 \node[sp-annotation] at (10.8, 0.0) {Z = Counts};
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -951,7 +953,7 @@
 % ============================================================================
 
 \newcommand{\TimeoutWatchdogDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=0.8cm, y=1cm]
 
 % Top signal (output pulses)
@@ -1019,7 +1021,7 @@
 \node[sp-annotation, anchor=west] at (0.2, -0.8) {= Actual time};
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -1027,7 +1029,7 @@
 % ============================================================================
 
 \newcommand{\DualInputTimeDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=1cm, y=1cm]
 
 % IN Flag
@@ -1074,7 +1076,7 @@
 \node[sp-annotation] at (3.5, -0.8) {Time};
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -1082,7 +1084,7 @@
 % ============================================================================
 
 \newcommand{\SyncSerialFallingDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=0.7cm, y=1cm]
 
 % Clock waveform with sampling arrows (falling edge)
@@ -1121,7 +1123,7 @@
 \node[sp-annotation] at (5.0, -0.5) {Time};
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================
@@ -1129,7 +1131,7 @@
 % ============================================================================
 
 \newcommand{\SyncSerialRisingDiagram}{%
-\begin{center}
+{\centering
 \begin{tikzpicture}[x=0.7cm, y=1cm]
 
 % Clock waveform with sampling arrows (rising edge)
@@ -1168,7 +1170,7 @@
 \node[sp-annotation] at (5.0, -0.5) {Time};
 
 \end{tikzpicture}
-\end{center}
+\par}
 }
 
 % ============================================================================

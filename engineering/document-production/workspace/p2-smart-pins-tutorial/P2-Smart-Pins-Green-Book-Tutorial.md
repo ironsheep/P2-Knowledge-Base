@@ -1,31 +1,83 @@
-# P2 Smart Pins & I/O Complete Tutorial
+```{=latex}
+% Banner image at top (full width) with drop shadow for visual balance
+\begin{tcolorbox}[
+  enhanced,
+  boxrule=1.5pt,
+  colframe=gray!60,
+  colback=white,
+  drop shadow southeast,
+  shadow={3pt}{-3pt}{1mm}{black!15},
+  left=0pt, right=0pt, top=0pt, bottom=0pt,
+  width=\textwidth,
+  arc=0pt,
+  outer arc=0pt
+]
+\includegraphics[width=\linewidth]{inbox/assets/book-artwork.png}
+\end{tcolorbox}
 
-## Master Every Aspect of P2 Input/Output Through Progressive Learning
+\begin{center}
+\vspace{0.6cm}
+{\fontsize{36}{42}\selectfont\bfseries P2 Smart Pins \& I/O\par}
+\vspace{0.3cm}
+{\Large\itshape Master Every Aspect of P2 Input/Output Through Progressive Learning\par}
+\vspace{0.6cm}
+{\large December 2025\par}
+\vspace{0.2cm}
+{\large\color{blue}Version 1.0 - Technical Review\par}
 
-### Green Book Edition - P2 Smart Pins Tutorial
-### Updated: 2025-01-10 | Prepared for technical review
+\vfill
+\begin{tcolorbox}[
+  colback=gray!5,
+  colframe=gray!40,
+  boxrule=1pt,
+  width=0.85\textwidth,
+  center,
+  title={\bfseries\color{black} Tutorial Guide},
+  colbacktitle=gray!15,
+  coltitle=black
+]
+\textbf{Learn by doing with color-coded examples!}
 
----
+\vspace{0.3cm}
+\begin{minipage}[t]{0.45\textwidth}
+\textbf{Code Block Colors:}
+\begin{itemize}
+\item \textcolor{green!50!black}{\textbf{Green}} -- Spin2 examples
+\item \textcolor{orange!70!black}{\textbf{Yellow}} -- PASM2 assembly
+\item \textcolor{red!60!black}{\textbf{Red}} -- Antipatterns (avoid!)
+\end{itemize}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.50\textwidth}
+\textbf{Special Sections:}
+\begin{itemize}
+\item \textcolor{blue!60!black}{\textbf{Tips}} -- helpful hints
+\item \textcolor{gray!70!black}{\textbf{Diagrams}} -- timing \& signal flow
+\end{itemize}
+\end{minipage}
+\end{tcolorbox}
+\vspace{1cm}
+\end{center}
+
+\clearpage
+\pagestyle{fancy}
+
+\tableofcontents
+
+\clearpage
+```
 
 ## Copyright and License
 
-Copyright © 2025 Parallax Inc.
+Copyright 2025 Parallax Inc. and Iron Sheep Productions LLC.
 All rights reserved.
 
 This tutorial incorporates knowledge and teaching approaches inspired by:
+
 - **Jon Titus** - Original Smart Pins documentation and tutorial approach
-- **Iron Sheep Productions LLC** - Technical expertise and P2 community contributions
 - **The Propeller Community** - Years of collective wisdom
 
 This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-
----
-
-## Version History
-
-**Initial Release (2025-01-10)**: Prepared for technical review
-
----
 
 ## Preface: Your Complete Journey into P2 I/O
 
@@ -380,7 +432,7 @@ Enter Smart Pins.
 
 Imagine if each I/O pin had its own tiny processor - not a full CPU, but dedicated hardware that could handle one specific task perfectly. That's exactly what Smart Pins are. Each of the P2's 64 I/O pins has a Smart Pin unit that can be configured to perform one of 32 different functions, from simple digital I/O to complex protocols.
 
-![Smart Pin Block Diagram](v6-assets/smart-pins-master-trimmed.png)
+![Smart Pin Block Diagram](assets/smart-pins-master-trimmed.png)
 
 Once configured, a Smart Pin runs completely independently. Set up a PWM? It generates perfect pulses forever. Configure a UART? It transmits and receives without bothering your code. Need to count encoder pulses? The Smart Pin counts them in hardware while your code does other things.
 
@@ -1474,6 +1526,7 @@ The internal architecture shows how the Z accumulator controls duty cycle:
 
 ```{=latex}
 \NCODutyBlockDiagram
+\par
 ```
 
 **When to Use:**

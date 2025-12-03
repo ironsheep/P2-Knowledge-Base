@@ -7,9 +7,7 @@
       "template": "p2kb-sp-template",
       "pandoc_args": [
         "--top-level-division=part",
-        "--pdf-engine=xelatex",
-        "--toc",
-        "--toc-depth=3"
+        "--pdf-engine=xelatex"
       ],
       "lua_filters": [
         "p2kb-sp-fix-hypertarget",
@@ -19,12 +17,7 @@
         "p2kb-sp-index-toc",
         "p2kb-sp-code-coloring",
         "p2kb-sp-semantic"
-      ],
-      "metadata": {
-        "title": "P2 Smart Pins \\& I/O Complete Tutorial",
-        "subtitle": "Master Every Aspect of P2 Input/Output Through Progressive Learning",
-        "version": "Version 7.0 - Green Book Edition"
-      }
+      ]
     }
   ]
 }
