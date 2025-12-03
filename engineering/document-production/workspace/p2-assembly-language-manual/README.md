@@ -21,6 +21,14 @@
 
 ---
 
+## Before You Begin
+
+**Read the PDF generation lessons learned:** `/engineering/operations/lessons-learned/pdf-generation-changelog.md`
+
+This changelog documents critical issues discovered during document production (font configuration, Pandoc quirks, pagination problems) that will save significant debugging time.
+
+---
+
 ## Critical File Naming Convention
 
 **The master document name is sacred and never changes:**

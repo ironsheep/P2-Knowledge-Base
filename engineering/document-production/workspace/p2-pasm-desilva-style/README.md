@@ -1,4 +1,23 @@
-# P2 PASM DeSilva Style - Workspace Guide
+# Workspace - P2 PASM DeSilva Style
+
+**Purpose:** PDF production workspace for "Discovering P2 Assembly" - a pedagogical PASM2 tutorial.
+
+**Status:** Active - Content Development Phase
+**Content Source:** `../../manuals/p2-pasm-desilva-style/opus-master/`
+
+---
+
+## Quick Reference
+
+| Resource | Location |
+|----------|----------|
+| **Content (Opus Master)** | `../../manuals/p2-pasm-desilva-style/opus-master/` |
+| **Creation Guide** | `../../manuals/p2-pasm-desilva-style/creation-guide.md` |
+| **Style Guide** | `../../manuals/p2-pasm-desilva-style/desilva-style-guide.md` |
+| **Escape Script** | `../../../tools/conversion/latex-escape-all.sh` |
+| **Outbound Folder** | `../../outbound/p2-pasm-desilva-style/` |
+
+---
 
 ## Before You Begin
 
@@ -8,12 +27,154 @@ This changelog documents critical issues discovered during document production (
 
 ---
 
-## Quick Reference
-**Canonical Name:** `p2-pasm-desilva-style`
+## Critical File Naming Convention
+
+**The master document name is sacred and never changes:**
+
+| Purpose | Filename |
+|---------|----------|
+| **Master Document** | `P2-PASM-deSilva-Style.md` |
+| **Output PDF** | `P2-PASM-deSilva-Style.pdf` |
+
+**Rules:**
+- Always use the exact document name - no suffixes like `-escaped`, `-v2`, `-final`
+- The workspace copy is unescaped (source of truth)
+- The outbound copy is escaped (ready for Forge)
+- Both use the identical filename: `P2-PASM-deSilva-Style.md`
+- Never rename files - always replace in place
+
+---
+
+## Directory Structure
+
+```
+workspace/p2-pasm-desilva-style/     ← YOU ARE HERE (unescaped source)
+├── README.md                         # This file
+├── P2-PASM-deSilva-Style.md          # Master document (UNESCAPED)
+├── templates/
+│   ├── README.md                     # Template documentation
+│   ├── p2kb-desilva.latex            # Main LaTeX template
+│   ├── p2kb-desilva-foundation.sty   # DeSilva-specific foundation
+│   └── p2kb-desilva-content.sty      # 5-color code + pedagogical environments
+├── filters/
+│   └── *.lua                         # Lua filters if needed
+├── request.json                      # PDF Forge configuration
+├── request-requirements.json         # Mandatory pandoc arguments
+└── VERSION-TRACKING.md               # Document version history
+
+outbound/p2-pasm-desilva-style/       ← FLAT structure for PDF Forge
+├── P2-PASM-deSilva-Style.md          # ESCAPED copy (same name!)
+├── p2kb-desilva.latex                # Template (FLAT - no subfolder!)
+├── p2kb-desilva-foundation.sty       # Style files at root level
+├── p2kb-desilva-content.sty
+├── *.lua                             # Filters at root level
+└── request.json
+```
+
+---
+
+## PDF Forge Workflow
+
+### CRITICAL UNDERSTANDING: PDF Forge Persistence
+
+**PDF Forge is a PERSISTENT system.** It retains ALL files from the last deployment indefinitely. This has major implications:
+
+1. **Files sent to Forge DISAPPEAR from outbound** - The user MOVES (not copies) files to the Forge
+2. **Forge keeps the last version of every file** - If you sent `p2kb-desilva-content.sty` last week, Forge still has it
+3. **Only send files that CHANGED** - Sending unchanged files is pointless; Forge already has them
+4. **Renaming requires sending the new file** - If you rename `foo.sty` to `bar.sty`, you must send `bar.sty`
+
+**Why outbound is often empty:** After user deploys to Forge, ALL files are moved out. This is NORMAL. It does NOT mean the Forge lost them.
+
+### Overview
+
+```
+WORKSPACE (unescaped)          OUTBOUND (staging)              PDF FORGE (persistent)
+        │                              │                               │
+   Edit files here            Stage ONLY changes here         Retains ALL files
+        │                              │                               │
+        └── latex-escape-all.sh ──────►│                               │
+              + copy CHANGED files     │                               │
+                                       └──── User MOVES files ────────►│
+                                             (files DISAPPEAR          │
+                                              from outbound)           │
+                                                                       │
+        ◄─────────────────── User provides feedback ───────────────────┘
+        │
+   Fix issues, repeat (only send what changed)
+```
+
+### Step-by-Step Process
+
+#### 1. Edit in Workspace
+All edits happen in the workspace folder. Files here are **unescaped** - this is your source of truth.
+
+#### 2. Stage ONLY Changed Files to Outbound
+
+**CRITICAL: Only stage files that CHANGED!**
+
+```bash
+# From the workspace folder:
+cd /workspaces/P2-Knowledge-Base/engineering/document-production/workspace/p2-pasm-desilva-style
+
+# Run escape script for markdown (content usually changes each iteration)
+../../../tools/conversion/latex-escape-all.sh \
+    P2-PASM-deSilva-Style.md \
+    ../../outbound/p2-pasm-desilva-style/P2-PASM-deSilva-Style.md
+
+# Copy ONLY templates that CHANGED (not all of them!)
+# Example: If only p2kb-desilva-content.sty changed:
+cp templates/p2kb-desilva-content.sty ../../outbound/p2-pasm-desilva-style/
+
+# Copy ONLY filters that CHANGED
+cp filters/*.lua ../../outbound/p2-pasm-desilva-style/
+
+# Copy request.json ONLY if it changed
+cp request.json ../../outbound/p2-pasm-desilva-style/
+```
+
+**Decision guide for each file type:**
+
+| File Type | When to Stage |
+|-----------|---------------|
+| `.md` (markdown) | Usually every iteration (content changes) |
+| `.latex` (template) | Only if template structure changed |
+| `.sty` (style) | Only if styling/environments changed |
+| `.lua` (filter) | Only if filter logic changed |
+| `request.json` | Only if pandoc args or metadata changed |
+
+#### 3. User Deploys to PDF Forge
+The user **MOVES** (not copies) files from outbound to PDF Forge. **After deployment, outbound will be EMPTY.** This is NORMAL.
+
+#### 4. Feedback Loop
+- If PDF Forge reports errors → Fix in workspace → Stage ONLY the fixed files → Repeat
+- If PDF generates successfully → User provides visual feedback → Fix → Repeat
+- Each iteration, only stage files you actually modified
+
+#### 5. Debugging with Generated .tex File
+After each PDF Forge run, the user will drop the generated `.tex` file into the outbound directory:
+```
+outbound/p2-pasm-desilva-style/P2-PASM-deSilva-Style.tex
+```
+This intermediate LaTeX file is useful for:
+- Correlating error line numbers to actual content
+- Understanding how Pandoc transformed the markdown
+- Debugging rendering issues when user provides visual feedback
+
+### Important Notes
+
+- **Outbound is FLAT** - No subfolders! All `.sty` and `.latex` files go at root level
+- **Same filename everywhere** - `P2-PASM-deSilva-Style.md` in workspace AND outbound
+- **Workspace is unescaped** - Never run escape script in place; always output to outbound
+- **Outbound files disappear** - This is normal; user moves them to Forge
+- **Iterative process** - Expect multiple rounds of feedback and fixes
+
+---
+
+## Document Identity
+
 **Document Title:** Discovering P2 Assembly
 **Subtitle:** Build, Experiment, and Master the Propeller 2
-**Creation Guide:** `/engineering/document-production/manuals/p2-pasm-desilva-style/creation-guide.md`
-**Outbound Deployment:** `/engineering/document-production/outbound/p2-pasm-desilva-style/`
 **Status:** In Production - Content Development Phase
 
 ## Document Purpose
@@ -22,36 +183,15 @@ Creating a pedagogical PASM2 manual that captures deSilva's teaching philosophy:
 
 **Teaching Philosophy:** "Learn by doing, celebrate progress, have fun!"
 
-## Related Folders
-
-### This Workspace
-- **Master Markdown:** `P2-PASM-deSilva-Style.md` (main working document)
-- **Templates:** `templates/` folder - See [templates/README.md](templates/README.md)
-- **Lua Filters:** `filters/` folder - Pandoc processing filters
-- **Special Requirements:** `request-requirements.json` (--top-level-division=part)
-- **Request Config:** `request.json` (PDF generation configuration)
-- **Version Tracking:** `VERSION-TRACKING.md` (document version history)
-- **Template Testing:** `TEMPLATE-STACK-TEST-SUMMARY.md` (template validation notes)
-
-### Creation and Style Guides
-- **Creation Guide:** `/engineering/document-production/manuals/p2-pasm-desilva-style/creation-guide.md`
-- **DeSilva Style:** `/engineering/document-production/manuals/p2-pasm-desilva-style/desilva-style-guide.md`
-
-### Deployment Location
-- **Outbound:** `/engineering/document-production/outbound/p2-pasm-desilva-style/`
-- **Process:** Files copied here after LaTeX escaping, ready for PDF Forge
-
 ## Template Stack
 
 **Prefix:** `p2kb-desilva-*`
 
-```
-Layer 1: p2kb-desilva-foundation.sty (deSilva-specific foundation)
-    ↓
-Layer 2: p2kb-desilva-content.sty (5-color code + pedagogical environments)
-    ↓
-Main: p2kb-desilva.latex (orchestrates both layers + custom title page)
-```
+| File | Purpose |
+|------|---------|
+| `p2kb-desilva.latex` | Main document template |
+| `p2kb-desilva-foundation.sty` | DeSilva-specific foundation |
+| `p2kb-desilva-content.sty` | 5-color code + pedagogical environments |
 
 **Full Details:** See [templates/README.md](templates/README.md)
 
@@ -100,46 +240,6 @@ This document REQUIRES special pandoc arguments:
 
 **Rationale:** Cognitive load management - Core PASM2 alone is substantial enough for one focused manual.
 
-## Workflow Quick Start
-
-### 1. Edit Content
-Edit `P2-PASM-deSilva-Style.md` in this workspace
-
-### 2. Prepare for PDF Generation
-```bash
-# From workspace directory:
-/workspaces/P2-Knowledge-Base/engineering/tools/conversion/latex-escape-all.sh \
-    P2-PASM-deSilva-Style.md \
-    /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-pasm-desilva-style/P2-PASM-deSilva-Style.md
-```
-
-### 3. Copy Supporting Files
-**CRITICAL: Outbound must be a FLAT directory - no subdirectories!**
-
-```bash
-# Copy templates if changed (flat - no subdirectory)
-cp templates/*.{latex,sty} /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-pasm-desilva-style/
-
-# Copy Lua filters if changed (flat - no subdirectory)
-cp filters/*.lua /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-pasm-desilva-style/
-
-# Ensure request.json is present
-cp request.json /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-pasm-desilva-style/
-```
-
-### 4. User Deploys to PDF Forge
-User manually moves files from outbound to PDF Forge system
-
-## Key Process Documents
-
-### Universal Methodology
-- **Format Guide:** `/engineering/document-production/methodology/pdf-generation-format-guide.md`
-- **Workflow Guide:** `/engineering/document-production/methodology/pdf-generation-workflow-guide.md`
-
-### Document-Specific
-- **Creation Guide:** `/engineering/document-production/manuals/p2-pasm-desilva-style/creation-guide.md` (comprehensive document philosophy and content strategy)
-- **DeSilva Style Guide:** `/engineering/document-production/manuals/p2-pasm-desilva-style/desilva-style-guide.md`
-- **Markdown Changes:** `desilva-markdown-changes-guide.md` (in this workspace)
 
 ## DeSilva Teaching Approach
 
@@ -156,68 +256,50 @@ The 5-color code system creates:
 - **Mistake Avoidance:** Red antipatterns highlight what not to do
 - **Confidence Building:** Color progression shows learning advancement
 
-## Current Status
+## PDF Forge Configuration
 
-**Phase:** Content Development
-**Progress:**
-- Chapters 1-6 complete from Opus master (strong foundation)
-- Chapter 7 (CORDIC) enhancement in progress
-- Chapter 8 (Basic I/O) rewrite planned
-- Chapters 9-16 development ongoing
+The `request.json` file configures PDF Forge:
 
-**Next Steps:**
-- Enhance remaining chapters using YAML sources
-- Add Medicine Cabinet sections
-- Expand "Your Turn" exercises
-- Validate all code examples with pnut_ts compiler
-- Prepare for Technical Review
+```json
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2-PASM-deSilva-Style.md",
+      "output": "P2-PASM-deSilva-Style.pdf",
+      "template": "p2kb-desilva",
+      "pandoc_args": [
+        "--top-level-division=part",
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=2"
+      ],
+      "metadata": {
+        "title": "Discovering P2 Assembly",
+        "subtitle": "Build, Experiment, and Master the Propeller 2",
+        "author": "Iron Sheep Productions, LLC"
+      }
+    }
+  ]
+}
+```
+
+Required arguments are documented in `request-requirements.json`.
+
+---
 
 ## Code Validation
 
 All code examples MUST be validated before inclusion:
 ```bash
 # Validate PASM2/Spin2 code
-/workspaces/P2-Knowledge-Base/engineering/tools/compiler/pnut_ts filename.spin2
+pnut_ts filename.spin2
 ```
 
 **Compiler Location:** `/engineering/tools/compiler/pnut_ts`
 **Usage Guide:** `/engineering/tools/compiler/pnut_ts-usage-guide.md`
 
-## PDF Forge Integration
+---
 
-### Testing (Template Development & Visual Refinement)
-**Guide:** `/engineering/pdf-forge/work-modes/automated-pdf-testing.md`
-- Rapid iteration for template fixes and visual refinement (30-60 sec cycles)
-- Test multiple scenarios in one request
-- Temporary testing - does NOT install templates permanently
-
-### Production (Final Deliverable Generation)
-**Guide:** `/engineering/pdf-forge/work-modes/production-pdf-generation.md`
-- Create deliverable PDFs for distribution
-- **CRITICAL:** Only copy CHANGED files to outbound (request.json + .md always, templates/filters only if modified)
-- Templates and filters persist on PDF Forge - don't resend unchanged files
-
-**Complete Rules:** `/engineering/pdf-forge/PRODUCTION-PROCESS-RULES.md` (🚨 "only changed files" details)
-
-## Formatting Decisions
-
-### Chapter Headings
-- **Page break only** - No extra vertical space ("chapter drop") before chapter titles
-- **Rationale:** Chapter titles use a larger font size which already differentiates them clearly from section headings. The P1 deSilva manual uses manual formatting with chapters starting at the top of new pages. Extra whitespace is unnecessary and wastes space.
-
-### Section Headings (Planned)
-- Reduce space BELOW section headings (keep heading connected to its content)
-- Maintain space ABOVE section headings (separates from previous content)
-- **Rationale:** Gestalt principle of proximity - headings should feel attached to what they introduce
-
-### Vertical Whitespace Strategy
-- Minimize unnecessary vertical whitespace throughout
-- Address object splitting (tables, code blocks) across pages as separate concern
-- Goal: Professional, compact layout without feeling cramped
-
-## Notes
-
-This workspace follows the **Technical Climbing Methodology** - each regeneration incorporates new trusted P2 sources while preserving proven pedagogical patterns.
-
-**Protection Points:** Successful pedagogy from Opus, working code examples, deSilva voice
-**Climbing Higher:** Enhanced with YAML accuracy, pattern examples, improved structure
+*Created: 2025-09-10*
+*Updated: 2025-12-03 - Restructured to match gold standard format*

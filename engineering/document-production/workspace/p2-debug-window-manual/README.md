@@ -1,4 +1,21 @@
-# P2 Debug Window Manual - Workspace Guide
+# Workspace - P2 Debug Window Manual
+
+**Purpose:** PDF production workspace for the P2 Debug Window Manual.
+
+**Status:** Active - Visual Refinement Phase
+**Content Source:** `../../manuals/p2-debug-window-manual/`
+
+---
+
+## Quick Reference
+
+| Resource | Location |
+|----------|----------|
+| **Creation Guide** | `../../manuals/p2-debug-window-manual/creation-guide.md` |
+| **Escape Script** | `../../../tools/conversion/latex-escape-all.sh` |
+| **Outbound Folder** | `../../outbound/p2-debug-window-manual/` |
+
+---
 
 ## Before You Begin
 
@@ -8,50 +25,172 @@ This changelog documents critical issues discovered during document production (
 
 ---
 
-## Quick Reference
-**Canonical Name:** `p2-debug-window-manual`
+## Critical File Naming Convention
+
+**The master document name is sacred and never changes:**
+
+| Purpose | Filename |
+|---------|----------|
+| **Master Document** | `P2-Debug-Window-Manual.md` |
+| **Output PDF** | `P2-Debug-Window-Manual.pdf` |
+
+**Rules:**
+- Always use the exact document name - no suffixes like `-escaped`, `-v2`, `-final`
+- The workspace copy is unescaped (source of truth)
+- The outbound copy is escaped (ready for Forge)
+- Both use the identical filename: `P2-Debug-Window-Manual.md`
+- Never rename files - always replace in place
+
+---
+
+## Directory Structure
+
+```
+workspace/p2-debug-window-manual/     ← YOU ARE HERE (unescaped source)
+├── README.md                          # This file
+├── P2-Debug-Window-Manual.md          # Master document (UNESCAPED)
+├── templates/
+│   ├── README.md                      # Template documentation
+│   ├── p2kb-debugwin.latex            # Main LaTeX template
+│   ├── p2kb-debugwin-foundation.sty   # Debug window-specific foundation
+│   └── p2kb-debugwin-content.sty      # Visual discovery elements
+├── filters/
+│   └── *.lua                          # Lua filters if needed
+├── assets/
+│   └── *.png                          # Screenshots (NO SPACES in filenames)
+├── request.json                       # PDF Forge configuration
+└── fix-*.py                           # Content processing scripts
+
+outbound/p2-debug-window-manual/       ← FLAT structure for PDF Forge
+├── P2-Debug-Window-Manual.md          # ESCAPED copy (same name!)
+├── p2kb-debugwin.latex                # Template (FLAT - no subfolder!)
+├── p2kb-debugwin-foundation.sty       # Style files at root level
+├── p2kb-debugwin-content.sty
+├── *.lua                              # Filters at root level
+├── *.png                              # Screenshots at root level
+└── request.json
+```
+
+---
+
+## PDF Forge Workflow
+
+### CRITICAL UNDERSTANDING: PDF Forge Persistence
+
+**PDF Forge is a PERSISTENT system.** It retains ALL files from the last deployment indefinitely. This has major implications:
+
+1. **Files sent to Forge DISAPPEAR from outbound** - The user MOVES (not copies) files to the Forge
+2. **Forge keeps the last version of every file** - If you sent `p2kb-debugwin-content.sty` last week, Forge still has it
+3. **Only send files that CHANGED** - Sending unchanged files is pointless; Forge already has them
+4. **Renaming requires sending the new file** - If you rename `foo.sty` to `bar.sty`, you must send `bar.sty`
+
+**Why outbound is often empty:** After user deploys to Forge, ALL files are moved out. This is NORMAL. It does NOT mean the Forge lost them.
+
+### Overview
+
+```
+WORKSPACE (unescaped)          OUTBOUND (staging)              PDF FORGE (persistent)
+        │                              │                               │
+   Edit files here            Stage ONLY changes here         Retains ALL files
+        │                              │                               │
+        └── latex-escape-all.sh ──────►│                               │
+              + copy CHANGED files     │                               │
+                                       └──── User MOVES files ────────►│
+                                             (files DISAPPEAR          │
+                                              from outbound)           │
+                                                                       │
+        ◄─────────────────── User provides feedback ───────────────────┘
+        │
+   Fix issues, repeat (only send what changed)
+```
+
+### Step-by-Step Process
+
+#### 1. Edit in Workspace
+All edits happen in the workspace folder. Files here are **unescaped** - this is your source of truth.
+
+#### 2. Stage ONLY Changed Files to Outbound
+
+**CRITICAL: Only stage files that CHANGED!**
+
+```bash
+# From the workspace folder:
+cd /workspaces/P2-Knowledge-Base/engineering/document-production/workspace/p2-debug-window-manual
+
+# Run escape script for markdown (content usually changes each iteration)
+../../../tools/conversion/latex-escape-all.sh \
+    P2-Debug-Window-Manual.md \
+    ../../outbound/p2-debug-window-manual/P2-Debug-Window-Manual.md
+
+# Copy ONLY templates that CHANGED (not all of them!)
+cp templates/p2kb-debugwin-content.sty ../../outbound/p2-debug-window-manual/
+
+# Copy ONLY filters that CHANGED
+cp filters/*.lua ../../outbound/p2-debug-window-manual/
+
+# Copy ONLY new or changed screenshots (FLAT - no subfolder!)
+cp assets/new-screenshot.png ../../outbound/p2-debug-window-manual/
+
+# Copy request.json ONLY if it changed
+cp request.json ../../outbound/p2-debug-window-manual/
+```
+
+**Decision guide for each file type:**
+
+| File Type | When to Stage |
+|-----------|---------------|
+| `.md` (markdown) | Usually every iteration (content changes) |
+| `.latex` (template) | Only if template structure changed |
+| `.sty` (style) | Only if styling/environments changed |
+| `.lua` (filter) | Only if filter logic changed |
+| `.png` (screenshots) | Only if new images added or replaced |
+| `request.json` | Only if pandoc args or metadata changed |
+
+#### 3. User Deploys to PDF Forge
+The user **MOVES** (not copies) files from outbound to PDF Forge. **After deployment, outbound will be EMPTY.** This is NORMAL.
+
+#### 4. Feedback Loop
+- If PDF Forge reports errors → Fix in workspace → Stage ONLY the fixed files → Repeat
+- If PDF generates successfully → User provides visual feedback → Fix → Repeat
+- Each iteration, only stage files you actually modified
+
+#### 5. Debugging with Generated .tex File
+After each PDF Forge run, the user will drop the generated `.tex` file into the outbound directory:
+```
+outbound/p2-debug-window-manual/P2-Debug-Window-Manual.tex
+```
+This intermediate LaTeX file is useful for:
+- Correlating error line numbers to actual content
+- Understanding how Pandoc transformed the markdown
+- Debugging rendering issues when user provides visual feedback
+
+### Important Notes
+
+- **Outbound is FLAT** - No subfolders! All files go at root level (including screenshots!)
+- **Same filename everywhere** - `P2-Debug-Window-Manual.md` in workspace AND outbound
+- **Workspace is unescaped** - Never run escape script in place; always output to outbound
+- **Outbound files disappear** - This is normal; user moves them to Forge
+- **Iterative process** - Expect multiple rounds of feedback and fixes
+
+---
+
+## Document Identity
+
 **Document Title:** P2 Debug Window Manual
 **Subtitle:** Visual Discovery Through Systematic Exploration
-**Creation Guide:** `/engineering/document-production/manuals/p2-debug-window-manual/creation-guide.md`
-**Outbound Deployment:** `/engineering/document-production/outbound/p2-debug-window-manual/`
-**Status:** In Production - Visual Refinement Phase
-
-## Document Purpose
-
-Comprehensive manual for P2's DEBUG() system covering all 9 window types through discovery-driven exploration with visual verification.
-
 **Philosophy:** "Show, don't just tell" - Every feature proven with screenshots
 
-## Related Folders
-
-### This Workspace
-- **Master Markdown:** `P2-Debug-Window-Manual.md` (main working document)
-- **Templates:** `templates/` folder - See [templates/README.md](templates/README.md)
-- **Lua Filters:** `filters/` folder - Pandoc processing filters
-- **Request Config:** `request.json` (PDF generation configuration)
-- **Development Notes:**
-  - `debug-window-markdown-changes-guide.md` - Change tracking
-  - `template-development-plan.md` - Template evolution notes
-  - `fix-*.py` - Content processing scripts
-
-### Creation Guide
-- **Creation Guide:** `/engineering/document-production/manuals/p2-debug-window-manual/creation-guide.md`
-
-### Deployment Location
-- **Outbound:** `/engineering/document-production/outbound/p2-debug-window-manual/`
-- **Process:** Files copied here after LaTeX escaping, ready for PDF Forge
+---
 
 ## Template Stack
 
 **Prefix:** `p2kb-debugwin-*`
 
-```
-Layer 1: p2kb-debugwin-foundation.sty (debug window-specific foundation)
-    ↓
-Layer 2: p2kb-debugwin-content.sty (5-color code + visual discovery elements)
-    ↓
-Main: p2kb-debugwin.latex (custom title page + list of figures)
-```
+| File | Purpose |
+|------|---------|
+| `p2kb-debugwin.latex` | Main template + list of figures |
+| `p2kb-debugwin-foundation.sty` | Debug window-specific foundation |
+| `p2kb-debugwin-content.sty` | Visual discovery elements |
 
 **Full Details:** See [templates/README.md](templates/README.md)
 
@@ -81,130 +220,66 @@ Main: p2kb-debugwin.latex (custom title page + list of figures)
 - **Comparison Tables:** Quick reference between window types
 - **Code Examples:** Complete DEBUG() statement examples
 
-## Workflow Quick Start
-
-### 1. Edit Content
-Edit `P2-Debug-Window-Manual.md` in this workspace
-
-### 2. Process Screenshots (If Updated)
-```bash
-# Convert/prepare screenshots if needed
-python3 convert-debug-window-images.py
-```
-
-### 3. Fix Unicode/Structure (If Needed)
-```bash
-# Fix unicode characters
-python3 fix-unicode-characters.py P2-Debug-Window-Manual.md
-
-# Fix document structure
-python3 fix-document-structure.py P2-Debug-Window-Manual.md
-```
-
-### 4. Prepare for PDF Generation
-```bash
-# From workspace directory:
-/workspaces/P2-Knowledge-Base/engineering/tools/latex-escape-all.sh \
-    P2-Debug-Window-Manual.md \
-    /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-debug-window-manual/P2-Debug-Window-Manual.md
-```
-
-### 5. Copy Supporting Files
-**CRITICAL: Outbound must be a FLAT directory - no subdirectories!**
-
-```bash
-# Copy templates if changed (flat - no subdirectory)
-cp templates/*.{latex,sty} /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-debug-window-manual/
-
-# Copy Lua filters if changed (flat - no subdirectory)
-cp filters/*.lua /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-debug-window-manual/
-
-# Copy screenshots/assets (flat - individual files, no subdirectory)
-cp assets/*.png /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-debug-window-manual/
-
-# Ensure request.json is present
-cp request.json /workspaces/P2-Knowledge-Base/engineering/document-production/outbound/p2-debug-window-manual/
-```
-
-### 6. User Deploys to PDF Forge
-User manually moves files from outbound to PDF Forge system
-
-## Key Process Documents
-
-### Universal Methodology
-- **Format Guide:** `/engineering/document-production/methodology/pdf-generation-format-guide.md`
-- **Workflow Guide:** `/engineering/document-production/methodology/pdf-generation-workflow-guide.md`
-
-### Document-Specific
-- **Creation Guide:** `/engineering/document-production/manuals/p2-debug-window-manual/creation-guide.md`
-- **Markdown Changes:** `debug-window-markdown-changes-guide.md` (in this workspace)
-- **Template Development:** `template-development-plan.md` (in this workspace)
-
-## Visual Elements
-
-### 5-Color Code System (Adapted)
-Similar to deSilva approach but optimized for debug contexts:
-- DEBUG statement highlighting
-- Window type differentiation
-- Discovery vs. reference code marking
-
-### Screenshot Requirements
-- **Location:** `assets/` folder (to be created if not present)
-- **Format:** PNG preferred for clarity
-- **Naming:** NO SPACES (use hyphens: `Terminal-Window-Example.png`)
-- **References:** Use markdown: `![Caption](assets/screenshot.png)`
-
-### List of Figures
-Template automatically generates "List of Figures" from all image references for easy navigation to specific screenshots.
-
 ## Content Processing Scripts
 
-### Available Tools
-- `convert-debug-window-images.py` - Image conversion/preparation
-- `fix-unicode-characters.py` - Unicode character normalization
-- `fix-document-structure.py` - Document structure corrections
+Scripts for preprocessing content before PDF generation:
 
-**Purpose:** These scripts handle content transformation specific to debug window documentation.
+| Script | Purpose |
+|--------|---------|
+| `convert-debug-window-images.py` | Image conversion/preparation |
+| `fix-unicode-characters.py` | Unicode character normalization |
+| `fix-document-structure.py` | Document structure corrections |
 
-## Current Status
+## Screenshot Requirements
 
-**Phase:** Visual Refinement
-**Progress:**
-- Complete content with 14 chapters + 5 appendices
-- All 9 window types documented
-- 200+ code examples included
-- Screenshot integration in progress
+- **Location:** `assets/` folder in workspace
+- **Format:** PNG preferred for clarity
+- **Naming:** NO SPACES (use hyphens: `Terminal-Window-Example.png`)
+- **Outbound:** Copy screenshots FLAT to outbound root (no subfolder!)
+- **List of Figures:** Template automatically generates from image references
 
-**Next Steps:**
-- Complete screenshot collection for all features
-- Verify all DEBUG() examples work on P2 hardware
-- Refine visual layout based on PDF output
-- Prepare for Technical Review
+---
+
+## PDF Forge Configuration
+
+The `request.json` file configures PDF Forge:
+
+```json
+{
+  "format_type": "document_generation",
+  "documents": [
+    {
+      "input": "P2-Debug-Window-Manual.md",
+      "output": "P2-Debug-Window-Manual.pdf",
+      "template": "p2kb-debugwin",
+      "pandoc_args": [
+        "--pdf-engine=xelatex",
+        "--toc",
+        "--toc-depth=2"
+      ],
+      "metadata": {
+        "title": "P2 Debug Window Manual",
+        "subtitle": "Visual Discovery Through Systematic Exploration",
+        "author": "Iron Sheep Productions, LLC"
+      }
+    }
+  ]
+}
+```
+
+---
 
 ## Document Statistics
 
-- **Total Chapters:** 14 (Complete Manual)
-- **Appendices:** 5 (Command Reference, Examples, Performance)
-- **Window Types:** 9 (Full coverage)
-- **Code Examples:** 200+ (DEBUG statements and programs)
-- **Learning Style:** Discovery-driven exploration
+| Metric | Value |
+|--------|-------|
+| **Total Chapters** | 14 |
+| **Appendices** | 5 (Command Reference, Examples, Performance) |
+| **Window Types** | 9 (Full coverage) |
+| **Code Examples** | 200+ |
+| **Learning Style** | Discovery-driven exploration |
 
-## PDF Forge Integration
+---
 
-### Testing (Template Development & Visual Refinement)
-**Guide:** `/engineering/pdf-forge/work-modes/automated-pdf-testing.md`
-- Rapid iteration for template fixes and visual refinement (30-60 sec cycles)
-- Test multiple scenarios in one request
-- Temporary testing - does NOT install templates permanently
-
-### Production (Final Deliverable Generation)
-**Guide:** `/engineering/pdf-forge/work-modes/production-pdf-generation.md`
-- Create deliverable PDFs for distribution
-- **CRITICAL:** Only copy CHANGED files to outbound (request.json + .md always, templates/filters only if modified)
-- Templates and filters persist on PDF Forge - don't resend unchanged files
-
-**Complete Rules:** `/engineering/pdf-forge/PRODUCTION-PROCESS-RULES.md` (🚨 "only changed files" details)
-
-## Notes
-
-This manual documents discoveries made through systematic exploration of P2's debug window system. Every capability shown has been (or will be) verified with actual hardware and includes visual proof via screenshots.
+*Created: 2025-09-10*
+*Updated: 2025-12-03 - Restructured to match gold standard format*
