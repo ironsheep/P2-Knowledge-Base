@@ -115,10 +115,12 @@ PUB blink_basic()
 
 Notice the `CON` section at the top of that example? Every Spin2 program needs to configure its system clock:
 
-```spin2
+::: spin2
+```
 CON
   _clkfreq = 200_000_000  ' 200 MHz system clock
 ```
+:::
 
 This tells the P2 to run at 200 MHz using your board's crystal oscillator. Without it, the chip runs at a sluggish ~20 MHz on its internal RC oscillator---and timing-dependent code (including serial communication and `waitms()` delays) won't behave as expected.
 
@@ -3454,7 +3456,7 @@ repeat 1000
 
 ### Task-Based I/O: Managing Multiple Smart Pins from One COG
 
-So far we've discussed two approaches to managing multiple Smart Pins: polling loops within a single COG, and dedicating separate COGs to different I/O functions. But there's a third approach that sits between these extremes: **Spin2 tasks**---lightweight threads that run cooperatively within a single COG.
+So far we've discussed two approaches to managing multiple Smart Pins: polling loops within a single COG, and dedicating separate COGs to different I/O functions. But there's a third approach that sits between these extremes: **Spin2 tasks** --- lightweight threads that run cooperatively within a single COG.
 
 Tasks let you structure your code as if you had multiple independent handlers, while consuming only one COG. This is particularly valuable when you have several low-to-medium bandwidth peripherals that don't justify dedicated COGs.
 
@@ -3487,7 +3489,7 @@ The P2 provides 8 COGs and up to 32 tasks per COG. Understanding when to use eac
 
 #### The Task Switching Reality
 
-Tasks use *cooperative multitasking*---a task runs until it voluntarily yields control via `TASKNEXT()`, or until it blocks on a wait operation. The task switching overhead is approximately 20-40 clock cycles.
+Tasks use *cooperative multitasking* --- a task runs until it voluntarily yields control via `TASKNEXT()`, or until it blocks on a wait operation. The task switching overhead is approximately 20-40 clock cycles.
 
 At 200 MHz, this means:
 
@@ -3534,7 +3536,7 @@ PUB uart_handler()
 
 #### Practical Example: Four-Channel UART Manager
 
-Here's a real-world example: managing four UART channels from a single COG using tasks. Each UART operates at 9600 baud---far too slow to justify a dedicated COG, but fast enough to need prompt service.
+Here's a real-world example: managing four UART channels from a single COG using tasks. Each UART operates at 9600 baud --- far too slow to justify a dedicated COG, but fast enough to need prompt service.
 
 ::: spin2
 ```
@@ -3611,41 +3613,27 @@ Tasks are unsuitable when the inter-arrival time of data approaches the task-swi
 
 **High-Speed Serial (1 Mbaud)**
 
-::: spin2
-```
-' DON'T use tasks for high-speed serial!
-'
-' At 1 Mbaud:
-'   - Bit time: 1 microsecond
-'   - Byte time: ~10 microseconds (10 bits)
-'   - Bytes per second: 100,000
-'
-' With 4 tasks averaging 50 clocks each between yields:
-'   - Round-trip: 200 clocks = 1 microsecond
-'   - This is 10% of the byte time - marginal!
-'   - Any task taking longer causes data loss
-'
-' Solution: Dedicate a COG to high-speed serial
-```
-:::
+Don't use tasks for high-speed serial! At 1 Mbaud:
+
+- Bit time: 1 microsecond
+- Byte time: ~10 microseconds (10 bits)
+- Bytes per second: 100,000
+
+With 4 tasks averaging 50 clocks each between yields:
+
+- Round-trip: 200 clocks = 1 microsecond
+- This is 10% of the byte time --- marginal!
+- Any task taking longer causes data loss
+
+**Solution:** Dedicate a COG to high-speed serial.
 
 **Time-Critical Events**
 
-::: spin2
-```
-' DON'T use tasks when timing is critical!
-'
-' If you need sub-microsecond response to a Smart Pin event,
-' tasks cannot guarantee this. Other tasks may be executing
-' when your event occurs.
-'
-' Example: Pulse measurement where you must respond within
-' 500ns of the IN flag rising.
-'
-' Solution: Use event-driven wake (WAITSE) in a dedicated COG,
-' or polling in an uninterrupted loop
-```
-:::
+Don't use tasks when timing is critical! If you need sub-microsecond response to a Smart Pin event, tasks cannot guarantee this. Other tasks may be executing when your event occurs.
+
+*Example:* Pulse measurement where you must respond within 500ns of the IN flag rising.
+
+**Solution:** Use event-driven wake (`WAITSE`) in a dedicated COG, or polling in an uninterrupted loop.
 
 #### Task-Based vs Event-Driven: Latency Comparison
 
@@ -3753,7 +3741,7 @@ PUB worker(id)
 
 2. **Yield frequently**: Every task should yield at least once per logical operation. Long computations should yield periodically.
 
-3. **Don't block in tasks**: Avoid `WAITMS()` or tight polling loops within tasks---they freeze all other tasks.
+3. **Don't block in tasks**: Avoid `WAITMS()` or tight polling loops within tasks --- they freeze all other tasks.
 
 4. **Size stacks appropriately**: Each task needs its own stack. Start with 48-64 longs and increase if you see crashes.
 
@@ -5084,40 +5072,40 @@ Bit:  31-28  27-24  23-21  20-8              7-6    5-1    0
 
 ### Smart Pin Mode Constants (SSSSS Field)
 
-| Constant | Hex | Mode | Binary | Description |
-|----------|-----|------|--------|-------------|
-| P_NORMAL | $00000000 | %00000 | 00000 | Smart Pin OFF (normal GPIO) |
-| P_REPOSITORY | $00000002 | %00001 | 00001 | Long repository / DAC noise |
-| P_DAC_DITHER_RND | $00000004 | %00010 | 00010 | DAC with 16-bit PRNG dither |
-| P_DAC_DITHER_PWM | $00000006 | %00011 | 00011 | DAC with 16-bit PWM dither |
-| P_PULSE | $00000008 | %00100 | 00100 | Pulse/cycle output |
-| P_TRANSITION | $0000000A | %00101 | 00101 | Transition output |
-| P_NCO_FREQ | $0000000C | %00110 | 00110 | NCO frequency |
-| P_NCO_DUTY | $0000000E | %00111 | 00111 | NCO duty cycle |
-| P_PWM_TRIANGLE | $00000010 | %01000 | 01000 | PWM triangle wave |
-| P_PWM_SAWTOOTH | $00000012 | %01001 | 01001 | PWM sawtooth wave |
-| P_PWM_SMPS | $00000014 | %01010 | 01010 | PWM for SMPS |
-| P_QUADRATURE | $00000016 | %01011 | 01011 | A/B quadrature encoder |
-| P_COUNT_RISES | $00000018 | %01100 | 01100 | Count A-rise when B-high |
-| P_COUNT_AB | $0000001A | %01101 | 01101 | Count A-rise, inc/dec by B |
-| P_COUNT_EDGES | $0000001C | %01110 | 01110 | Count A-edges, optional B-dec |
-| P_COUNT_HIGHS | $0000001E | %01111 | 01111 | Count A-high or A&B-high |
-| P_TIME_STATES | $00000020 | %10000 | 10000 | Time A-states |
-| P_TIME_HIGHS | $00000022 | %10001 | 10001 | Time A-high states |
-| P_TIME_X_A | $00000024 | %10010 | 10010 | Time X A-highs/rises/edges |
-| P_COUNT_TIME_X | $00000026 | %10011 | 10011 | For X periods, count time |
-| P_COUNT_STATES_X | $00000028 | %10100 | 10100 | For X periods, count states |
-| P_FREQ_COUNT | $0000002A | %10101 | 10101 | For X clocks, count periods |
-| P_STATE_COUNT | $0000002C | %10110 | 10110 | For X clocks, count states |
-| P_TIME_COUNT | $0000002E | %10111 | 10111 | For X clocks, count time |
-| P_ADC | $00000030 | %11000 | 11000 | ADC sample/filter, internal clk |
-| P_ADC_EXT | $00000032 | %11001 | 11001 | ADC sample/filter, external clk |
-| P_ADC_SCOPE | $00000034 | %11010 | 11010 | ADC scope with trigger |
-| P_USB_PAIR | $00000036 | %11011 | 11011 | USB host/device (pin pair) |
-| P_SYNC_TX | $00000038 | %11100 | 11100 | Synchronous serial transmit |
-| P_SYNC_RX | $0000003A | %11101 | 11101 | Synchronous serial receive |
-| P_ASYNC_TX | $0000003C | %11110 | 11110 | Asynchronous serial transmit |
-| P_ASYNC_RX | $0000003E | %11111 | 11111 | Asynchronous serial receive |
+| Constant | Mode | Description |
+|----------|------|-------------|
+| P_NORMAL | %00000 | Smart Pin OFF (normal GPIO) |
+| P_REPOSITORY | %00001 | Long repository / DAC noise |
+| P_DAC_DITHER_RND | %00010 | DAC with 16-bit PRNG dither |
+| P_DAC_DITHER_PWM | %00011 | DAC with 16-bit PWM dither |
+| P_PULSE | %00100 | Pulse/cycle output |
+| P_TRANSITION | %00101 | Transition output |
+| P_NCO_FREQ | %00110 | NCO frequency |
+| P_NCO_DUTY | %00111 | NCO duty cycle |
+| P_PWM_TRIANGLE | %01000 | PWM triangle wave |
+| P_PWM_SAWTOOTH | %01001 | PWM sawtooth wave |
+| P_PWM_SMPS | %01010 | PWM for SMPS |
+| P_QUADRATURE | %01011 | A/B quadrature encoder |
+| P_COUNT_RISES | %01100 | Count A-rise when B-high |
+| P_COUNT_AB | %01101 | Count A-rise, inc/dec by B |
+| P_COUNT_EDGES | %01110 | Count A-edges, optional B-dec |
+| P_COUNT_HIGHS | %01111 | Count A-high or A&B-high |
+| P_TIME_STATES | %10000 | Time A-states |
+| P_TIME_HIGHS | %10001 | Time A-high states |
+| P_TIME_X_A | %10010 | Time X A-highs/rises/edges |
+| P_COUNT_TIME_X | %10011 | For X periods, count time |
+| P_COUNT_STATES_X | %10100 | For X periods, count states |
+| P_FREQ_COUNT | %10101 | For X clocks, count periods |
+| P_STATE_COUNT | %10110 | For X clocks, count states |
+| P_TIME_COUNT | %10111 | For X clocks, count time |
+| P_ADC | %11000 | ADC sample/filter, internal clk |
+| P_ADC_EXT | %11001 | ADC sample/filter, external clk |
+| P_ADC_SCOPE | %11010 | ADC scope with trigger |
+| P_USB_PAIR | %11011 | USB host/device (pin pair) |
+| P_SYNC_TX | %11100 | Synchronous serial transmit |
+| P_SYNC_RX | %11101 | Synchronous serial receive |
+| P_ASYNC_TX | %11110 | Asynchronous serial transmit |
+| P_ASYNC_RX | %11111 | Asynchronous serial receive |
 
 ### A-Input Routing Constants (AAAA Field, bits 31:28)
 
@@ -5177,12 +5165,12 @@ Bit:  31-28  27-24  23-21  20-8              7-6    5-1    0
 
 ### Output Control Constants (TT Field, bits 7:6)
 
-| Constant | Hex | TT | Description |
-|----------|-----|----|----|
-| P_TT_00 | $00000000 | 00 | DIR/OUT not overridden (default) |
-| P_OE | $00000040 | 01 | Output enable (Smart Pin controls OUT) |
-| P_TT_10 | $00000080 | 10 | DIR overridden high, OUT not overridden |
-| P_TT_11 | $000000C0 | 11 | DIR and OUT both overridden high |
+| Constant | TT | Description |
+|----------|----|-----------------------------------------|
+| P_TT_00 | 00 | DIR/OUT not overridden (default) |
+| P_OE | 01 | Output enable (Smart Pin controls OUT) |
+| P_TT_10 | 10 | DIR overridden high, OUT not overridden |
+| P_TT_11 | 11 | DIR and OUT both overridden high |
 
 ### DAC Configuration Constants (M bits 20:16)
 
@@ -5291,15 +5279,15 @@ pinstart(ADC_PIN, mode, 0, 0)
 
 ### Quick Lookup: Common Configurations
 
-| Configuration | Constants | Combined Hex |
-|---------------|-----------|--------------|
-| Basic PWM | P_PWM_SAWTOOTH \| P_OE | $00000052 |
+| Use Case | Constants to OR Together | Result |
+|----------|--------------------------|--------|
+| PWM output | P_PWM_SAWTOOTH \| P_OE | $00000052 |
 | UART TX | P_ASYNC_TX \| P_OE | $0000007C |
 | UART RX | P_ASYNC_RX | $0000003E |
-| SPI TX (clk on pin+1) | P_SYNC_TX \| P_OE \| P_PLUS1_B | $01000078 |
-| SPI RX (clk on pin-1) | P_SYNC_RX \| P_MINUS1_B | $070000BA |
-| ADC basic | P_ADC \| P_ADC_1X | $00000030 |
-| NCO frequency | P_NCO_FREQ \| P_OE | $0000004C |
+| SPI TX | P_SYNC_TX \| P_OE \| P_PLUS1_B | $01000078 |
+| SPI RX | P_SYNC_RX \| P_MINUS1_B | $070000BA |
+| ADC | P_ADC \| P_ADC_1X | $00000030 |
+| NCO freq | P_NCO_FREQ \| P_OE | $0000004C |
 | DAC 8-bit | P_DAC_DITHER_RND \| P_DAC_124R_3V \| P_OE | $00020044 |
 
 ## Appendix C: Timing Formulas
@@ -5431,6 +5419,7 @@ This tutorial represents the collective knowledge of the Propeller 2 community, 
 *End of P2 Smart Pins Complete Tutorial - Green Book Edition with Enhanced Visual Coverage*
 ---
 
+## Index
 
 ### A
 - ADC modes: Ch 18-19, pp. 95-105
