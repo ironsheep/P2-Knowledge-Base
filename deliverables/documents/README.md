@@ -13,9 +13,9 @@
 Coming soon:
 
 - Propeller 2 Manual
-- Propeller 2 Assenbly Lanugage (PASM2) Manual 
-- Using Smart Pins with Pasm2 and Spin2
-- Programming the P2 with Assembly - intermediate level tutorial
+- Propeller 2 Assembly Language (PASM2) Manual 
+- Propeller 2 Smart Pins with Pasm2 and Spin2
+- Propeller 2 Assembly Lanuguage Programming - A Human-Centered Approach to Parallel Processing
 - Learning to use Debug Windows
 - Single-step Debugger Reference Guide
 
