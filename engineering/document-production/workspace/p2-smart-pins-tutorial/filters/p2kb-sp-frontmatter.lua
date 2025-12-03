@@ -7,9 +7,9 @@
 --   - Transition to main matter at Part I
 --   - Then STOPS processing (structure filter takes over)
 --
--- Version: 2.1
--- Date: 2025-09-05
--- Changes: Demote Copyright/Version History to level 4 (subsection) instead of 3
+-- Version: 2.2
+-- Date: 2025-12-03
+-- Changes: Preface subsections demoted to level 5 to exclude from TOC (tocdepth=2)
 
 local in_frontmatter = true
 local seen_part_one = false
@@ -66,11 +66,12 @@ function Header(header)
     -- Level 3 headers in frontmatter
     if header.level == 3 then
       if in_preface then
-        -- Subsections within Preface - demote to level 4 to avoid section page breaks
-        -- But preserve visual weight with formatting
-        header.level = 4
+        -- Subsections within Preface - demote to level 5 (subsubsection)
+        -- With tocdepth=2, level 5 is excluded from TOC
+        -- Preserve visual weight with explicit formatting
+        header.level = 5
         return {
-          pandoc.RawBlock('latex', '{\\large\\bfseries'),  -- Make it look like a section
+          pandoc.RawBlock('latex', '{\\large\\bfseries'),
           header,
           pandoc.RawBlock('latex', '}')
         }

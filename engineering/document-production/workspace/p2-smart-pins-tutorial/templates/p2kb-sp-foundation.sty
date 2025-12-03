@@ -76,9 +76,8 @@
 \RequirePackage{array}
 \RequirePackage{multirow}
 \RequirePackage{xcolor}
-\RequirePackage{hyperref}
 \RequirePackage{fancyhdr}
-% titlesec removed - using standard LaTeX for sectioning control
+\RequirePackage{titlesec}  % Explicit control over heading spacing
 \RequirePackage{tocloft}
 \RequirePackage{float}
 % Force ALL figures to use [H] placement (no floating)
@@ -96,12 +95,23 @@
 % Load tcolorbox libraries
 \tcbuselibrary{skins,breakable}
 
+% HYPERREF MUST BE LOADED LAST (or near last) for proper linking
+% This ensures TOC, index, and cross-references all get hyperlinks
+\RequirePackage{hyperref}
+\RequirePackage{bookmark}  % Better bookmark/outline support for PDF viewers
+
 % ==================== BASIC TYPOGRAPHY ====================
 % Common typography settings for all documents
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{10pt}
 \linespread{1.3}
+
+% ==================== LIST SPACING ====================
+% Reduce space before/after lists to avoid double-spacing effect
+% (parskip + topsep was creating excessive gaps)
+\setlength{\topsep}{0pt}
+\setlength{\partopsep}{0pt}
 
 
 % ==================== TABLE OF CONTENTS ====================
@@ -138,14 +148,21 @@
 \makeindex
 
 % ==================== HYPERREF SETUP ====================
-% Standard link formatting
+% Standard link formatting - enables clickable TOC, index, and cross-references
 
 \hypersetup{
   colorlinks=true,
   linkcolor=blue,
   urlcolor=blue,
   citecolor=blue,
-  hidelinks=false
+  hidelinks=false,
+  linktoc=all,          % Make both page numbers AND titles clickable in TOC
+  bookmarks=true,       % Create PDF bookmarks
+  bookmarksnumbered=false,
+  bookmarksopen=true,   % Bookmarks expanded by default
+  bookmarksopenlevel=1, % Expand to chapter level
+  pdfstartview=FitH,    % Fit width when opening
+  breaklinks=true       % Allow links to break across lines
 }
 
 % ==================== CODE ENVIRONMENTS ====================
@@ -196,129 +213,119 @@
   framesep=0pt
 }
 
-% ==================== CHAPTER FORMATTING BASE ====================
-% Basic chapter structure using standard LaTeX (no titlesec)
+% ==================== TITLESEC HEADING CONTROL ====================
+% Using titlesec for explicit, predictable spacing control
+% All dimensions are explicit - no inherited book class surprises
 
-% Redefine chapter heading to remove numbering and set formatting
-\makeatletter
-\renewcommand{\@makechapterhead}[1]{%
-  \vspace*{6pt}% Space before chapter (minimal when on same page as Part)
-  {\parindent 0pt \raggedright \normalfont\Huge\bfseries
-   #1\par\nobreak}% Chapter title - Huge (same as Part), LEFT-ALIGNED
-  \vspace{12pt}% Space after chapter (about 1 line)
-}
-% Also handle starred chapters
-\renewcommand{\@makeschapterhead}[1]{%
-  \vspace*{6pt}%
-  {\parindent 0pt \raggedright \normalfont\Huge\bfseries
-   #1\par\nobreak}% LEFT-ALIGNED
-  \vspace{12pt}%
-}
-\makeatother
+% PART: Starts new page, minimal vertical space
+% Format: [display] means label on separate line (but we show no label)
+% Args: {command}{format}{label}{sep}{before-code}[after-code]
+\titleformat{\part}[display]
+  {\normalfont\Huge\bfseries\raggedright}% format
+  {}% label (empty - headings already have numbers)
+  {0pt}% sep between label and title
+  {}% before-code
+\titlespacing*{\part}
+  {0pt}% left margin
+  {0pt}% vertical space before (after page break)
+  {18pt}% vertical space after
 
-% CONDITIONAL PAGE BREAKS: Track document structure for intelligent breaks
+% CHAPTER: No page break by default (we control this), minimal spacing
+\titleformat{\chapter}[display]
+  {\normalfont\Huge\bfseries\raggedright}% format
+  {}% label (empty)
+  {0pt}% sep
+  {}% before-code
+\titlespacing*{\chapter}
+  {0pt}% left margin
+  {0pt}% space before
+  {12pt}% space after
+
+% SECTION: Normal flow within chapters
+\titleformat{\section}
+  {\normalfont\Large\bfseries\raggedright}% format
+  {}% label (empty)
+  {0pt}% sep
+  {}% before-code
+\titlespacing*{\section}
+  {0pt}% left
+  {18pt}% before
+  {8pt}% after
+
+% SUBSECTION
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\raggedright}% format
+  {}% label
+  {0pt}% sep
+  {}% before-code
+\titlespacing*{\subsection}
+  {0pt}% left
+  {12pt}% before
+  {6pt}% after
+
+% ==================== PAGINATION CONTROL ====================
+% Track document structure for intelligent page breaks
 % NOTE: With --top-level-division=part:
 %   # (markdown) → \part{} (LaTeX)
-%   ## (markdown) → \chapter{} (LaTeX) 
+%   ## (markdown) → \chapter{} (LaTeX)
 %   ### (markdown) → \section{} (LaTeX)
 %   #### (markdown) → \subsection{} (LaTeX)
-%
-% PAGINATION RULES:
-% 1. Parts always start new page
-% 2. FIRST chapter in part stays on same page as part
-% 3. Subsequent chapters in part get own pages
-% 4. In Part II, sections (modes) behave like chapters
-% 5. In other parts, sections flow normally within chapters
-\newif\ifafterpart         % Just saw a \part
-\newif\ifafterchapter      % Just saw a \chapter  
-\newif\iffirstchapterinpart % This is the first chapter after a part
-\newif\iffirstsectioninchapter % This is the first section after a chapter
-\newcounter{currentpart}    % Track which part we're in
-\afterpartfalse
-\afterchapterfalse
+
+\newif\iffirstchapterinpart
+\newif\iffirstsectioninchapter
+\newcounter{currentpart}
 \firstchapterinpartfalse
 \firstsectioninchapterfalse
 \setcounter{currentpart}{0}
 
-% Apply pagination hooks at document begin, after all packages are loaded
-\makeatletter  % Need this for @ commands
+% Apply pagination hooks at document begin
+\makeatletter
 \AtBeginDocument{%
-  % Save original commands
+  % Save original commands (titlesec has already redefined them)
   \let\origpart\part
   \let\origchapter\chapter
   \let\origsection\section
-  
-  % Redefine \chapter to add conditional page breaks
+
+  % PART: Always starts new page, first chapter stays on same page
+  \renewcommand{\part}[1]{%
+    \clearpage%
+    \thispagestyle{plain}%
+    \stepcounter{currentpart}%
+    \origpart{##1}%
+    \firstchapterinparttrue%
+    \firstsectioninchapterfalse%
+  }
+
+  % CHAPTER: Page break except for first chapter in part
   \RenewDocumentCommand{\chapter}{s o m}{%
     \iffirstchapterinpart%
-      % First chapter in part - bypass origchapter entirely to avoid its page break
-      \firstchapterinpartfalse% Reset flag
-      % Format chapter directly without page break
-      % Add TOC entry since we're bypassing origchapter which normally does this
-      \addcontentsline{toc}{chapter}{#3}%
-      \IfBooleanTF{#1}%
-        {\@makeschapterhead{#3}}% Starred version
-        {\@makechapterhead{#3}}% Regular version (we don't number anyway)
-      \chaptermark{#3}% Update header
+      \firstchapterinpartfalse%
     \else%
-      % Subsequent chapters - use original command with its page break
-      \IfBooleanTF{#1}%
-        {\origchapter*{#3}}% Starred version
-        {\IfValueTF{#2}%
-          {\origchapter[#2]{#3}}% With optional argument
-          {\origchapter{#3}}}% No optional argument
-    \fi%
-    \afterpartfalse% No longer directly after part
-    \afterchaptertrue% Now we're after a chapter
-    \firstsectioninchaptertrue% Next section will be first in this chapter
-  }
-  
-  % Redefine \section to add conditional page breaks
-  \RenewDocumentCommand{\section}{s o m}{%
-    \ifnum\value{currentpart}=2\relax%
-      % Part II: sections (modes) behave like chapters
-      \iffirstsectioninchapter%
-        % First section/mode in chapter - NO page break
-        \firstsectioninchapterfalse% Reset flag
-      \else%
-        % Subsequent sections/modes - add page break
-        \clearpage%
-      \fi%
-    \else%
-      % Other parts: sections flow normally within chapters
-      % No page breaks between sections
+      \clearpage%
     \fi%
     \IfBooleanTF{#1}%
-      {\origsection*{#3}\markboth{#3}{}}% Starred version
-      {\IfValueTF{#2}%
-        {\origsection[#2]{#3}\markboth{#3}{}}% With optional argument
-        {\origsection{#3}\markboth{#3}{}}}% No optional argument
+      {\origchapter*{##3}}%
+      {\IfValueTF{##2}%
+        {\origchapter[##2]{##3}}%
+        {\origchapter{##3}}}%
+    \firstsectioninchaptertrue%
   }
-  
-  % Redefine \part to reset all flags and track part number  
-  % Bypass original \part entirely - go straight to formatting
-  \renewcommand{\part}[1]{%
-    \clearpage% Parts always start new page
-    \stepcounter{currentpart}% Track which part we're in
-    \@part{#1}% Call our formatting directly, skip original \part
-    \afterparttrue% Now we're directly after a part
-    \afterchapterfalse% Not in a chapter anymore  
-    \firstchapterinparttrue% Next chapter will be first in this part
-    \firstsectioninchapterfalse% Reset section flag
-  }
-}
-\makeatother  % End the makeatletter block
 
-% Part formatting - no auto-numbering, headings contain numbers already
-% Using standard LaTeX
-\makeatletter
-\renewcommand{\@part}[1]{%
-  % NO \cleardoublepage here - \clearpage already done in \part command
-  \thispagestyle{plain}%  % Show headers
-  \vspace*{12pt}%  % Modest space from top of page (about 1 line)
-  {\raggedright\normalfont\Huge\bfseries #1\par}%  % LEFT-ALIGNED, Huge font (same as chapter)
-  \vspace{18pt}%  % Space after part title before first chapter (1.5 lines)
-  % First chapter should follow on same page
+  % SECTION: In Part II, sections get page breaks (except first in chapter)
+  \RenewDocumentCommand{\section}{s o m}{%
+    \ifnum\value{currentpart}=2\relax%
+      \iffirstsectioninchapter%
+        \firstsectioninchapterfalse%
+      \else%
+        \clearpage%
+      \fi%
+    \fi%
+    \IfBooleanTF{#1}%
+      {\origsection*{##3}}%
+      {\IfValueTF{##2}%
+        {\origsection[##2]{##3}}%
+        {\origsection{##3}}}%
+  }
 }
 \makeatother
 

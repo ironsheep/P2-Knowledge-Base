@@ -1,35 +1,19 @@
--- P2KB Smart Pins - Index TOC Management
--- Purpose: Handle Index section in TOC properly
--- 1. Convert "# Index" to chapter level so it appears in TOC
--- 2. Prevent index letter sections (A, B, C...) from appearing in TOC
+-- P2KB Smart Pins - Index Letter TOC Suppression
+-- Purpose: Prevent index letter sections (A, B, C...) from appearing in TOC
+-- These are single uppercase letter headings used to organize index entries
 --
--- Version: 1.1
--- Date: 2025-09-07
-
-local in_index = false
-local index_found = false
+-- Version: 1.3
+-- Date: 2025-12-03
 
 function Header(header)
   local title = pandoc.utils.stringify(header)
-  
-  -- Check if this is the Index heading
-  if header.level == 1 and title == "Index" then
-    in_index = true
-    index_found = true
-    -- Convert to level 2 (chapter) so it appears in TOC
-    header.level = 2
-    return header
+
+  -- Check for single uppercase letter headings (A, B, C, etc.)
+  -- These are index letter dividers - keep them in document but exclude from TOC
+  if title:match("^%u$") then
+    -- Convert to unnumbered section (section* doesn't appear in TOC)
+    return pandoc.RawBlock('latex', '\\section*{' .. title .. '}')
   end
-  
-  -- If we're in the Index section
-  if in_index then
-    -- Check for single letter headings (A, B, C, etc.)
-    if header.level == 3 and title:match("^%u$") then
-      -- Convert to unnumbered section that won't appear in TOC
-      -- Use raw LaTeX to create a section* instead of section
-      return pandoc.RawBlock('latex', '\\section*{' .. title .. '}')
-    end
-  end
-  
+
   return header
 end

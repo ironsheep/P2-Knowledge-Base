@@ -1315,31 +1315,31 @@
         diamond,
         draw=black,
         fill=sp-decision,
-        text width=3.5cm,
+        text width=2.2cm,
         align=center,
-        inner sep=2pt,
-        font=\small,
-        aspect=2
+        inner sep=1pt,
+        font=\scriptsize,
+        aspect=1.8
     },
     result/.style={
         rectangle,
         rounded corners=3pt,
         draw=black,
         fill=sp-result,
-        text width=2.8cm,
+        text width=2.5cm,
         align=center,
-        minimum height=0.8cm,
-        font=\small\bfseries
+        minimum height=0.7cm,
+        font=\scriptsize\ttfamily\bfseries
     },
     start/.style={
         rectangle,
         rounded corners=5pt,
         draw=black,
         fill=sp-start,
-        text width=4cm,
+        text width=3.5cm,
         align=center,
-        minimum height=1cm,
-        font=\normalsize\bfseries
+        minimum height=0.9cm,
+        font=\small\bfseries
     },
     arrow/.style={
         ->,
@@ -1355,42 +1355,42 @@
 % Start node
 \node[start] (start) at (0, 0) {Need to generate\\an output signal?};
 
-% Decision nodes (flowing down and right)
-\node[decision] (freq) at (0, -2.5) {Need precise frequency\\(sub-Hz resolution)?};
-\node[decision] (asym) at (0, -5.5) {Need asymmetric\\pulse widths?};
-\node[decision] (clock) at (0, -8.5) {Need simple clock/\\square wave?};
-\node[decision] (pwm) at (0, -11.5) {Need PWM for\\motor/LED?};
-\node[decision] (phase) at (4, -13) {Phase-correct\\needed?};
-\node[decision] (power) at (0, -14.5) {Need power supply\\with feedback?};
+% Decision nodes - tighter vertical spacing
+\node[decision] (freq) at (0, -2.0) {Precise freq?\\(sub-Hz)};
+\node[decision] (asym) at (0, -4.2) {Asymmetric\\pulses?};
+\node[decision] (clock) at (0, -6.4) {Simple clock/\\square wave?};
+\node[decision] (pwm) at (0, -8.6) {PWM for\\motor/LED?};
+\node[decision] (phase) at (3.5, -10.0) {Phase-correct?};
+\node[decision] (power) at (0, -11.2) {Power supply\\feedback?};
 
-% Result nodes (to the right)
-\node[result] (nco) at (6, -2.5) {P\_NCO\_FREQ\\or P\_NCO\_DUTY};
-\node[result] (pulse) at (6, -5.5) {P\_PULSE};
-\node[result] (trans) at (6, -8.5) {P\_TRANSITION};
-\node[result] (tri) at (8, -13) {P\_PWM\_TRIANGLE};
-\node[result] (saw) at (4, -15.5) {P\_PWM\_SAWTOOTH};
-\node[result] (smps) at (6, -14.5) {P\_PWM\_SMPS};
+% Result nodes - wider boxes for mode names
+\node[result] (nco) at (5.5, -2.0) {P\_NCO\_FREQ\\P\_NCO\_DUTY};
+\node[result] (pulse) at (5.5, -4.2) {P\_PULSE};
+\node[result] (trans) at (5.5, -6.4) {P\_TRANSITION};
+\node[result] (tri) at (7.0, -10.0) {P\_PWM\_TRIANGLE};
+\node[result] (saw) at (3.5, -12.2) {P\_PWM\_SAWTOOTH};
+\node[result] (smps) at (5.5, -11.2) {P\_PWM\_SMPS};
 
 % Arrows from start
 \draw[arrow] (start) -- (freq);
 
 % Decision arrows with Yes/No labels
-\draw[arrow] (freq) -- node[yeslabel, right] {Yes} (nco);
+\draw[arrow] (freq) -- node[yeslabel, above] {Yes} (nco);
 \draw[arrow] (freq) -- node[yeslabel, left] {No} (asym);
 
-\draw[arrow] (asym) -- node[yeslabel, right] {Yes} (pulse);
+\draw[arrow] (asym) -- node[yeslabel, above] {Yes} (pulse);
 \draw[arrow] (asym) -- node[yeslabel, left] {No} (clock);
 
-\draw[arrow] (clock) -- node[yeslabel, right] {Yes} (trans);
+\draw[arrow] (clock) -- node[yeslabel, above] {Yes} (trans);
 \draw[arrow] (clock) -- node[yeslabel, left] {No} (pwm);
 
 \draw[arrow] (pwm) -- node[yeslabel, above] {Yes} (phase);
 \draw[arrow] (pwm) -- node[yeslabel, left] {No} (power);
 
-\draw[arrow] (phase) -- node[yeslabel, right] {Yes} (tri);
-\draw[arrow] (phase) -- node[yeslabel, below] {No} (saw);
+\draw[arrow] (phase) -- node[yeslabel, above] {Yes} (tri);
+\draw[arrow] (phase) -- node[yeslabel, left] {No} (saw);
 
-\draw[arrow] (power) -- node[yeslabel, right] {Yes} (smps);
+\draw[arrow] (power) -- node[yeslabel, above] {Yes} (smps);
 
 \end{tikzpicture}
 \par}
